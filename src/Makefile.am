@@ -4,4 +4,4 @@ include $(top_srcdir)/libtopology.am
 
 lib_LTLIBRARIES = libtopology.la
 
-libtopology_la_SOURCES = topology.c
+libtopology_la_SOURCES = topology.c allocator.c
