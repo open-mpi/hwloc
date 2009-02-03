@@ -1,0 +1,5 @@
+# Copyright 2009 INRIA, Université Bordeaux 1
+
+AM_CFLAGS   = $(GCC_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_LDFLAGS  = -L$(top_builddir)/src
