@@ -2,4 +2,4 @@
 
 include $(top_srcdir)/libtopology.am
 
-include_HEADERS = libtopology.h libtopology/allocator.h
+include_HEADERS = libtopology.h libtopology/allocator.h libtopology/configuration.h libtopology/cpuset.h

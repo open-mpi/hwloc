@@ -2,8 +2,8 @@
 
 include $(top_srcdir)/libtopology.am
 
-bin_PROGRAMS = topo-ls
+bin_PROGRAMS = lstopo
 
-topo_ls_SOURCES = topo-ls.c
+lstopo_SOURCES = lstopo.c
 
 LIBS = $(top_builddir)/src/libtopology.la
