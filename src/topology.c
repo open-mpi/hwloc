@@ -468,7 +468,7 @@ lt_procfs_meminfo_to_memsize(const char *path, lt_topo_t *topology)
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
       unsigned long size;
-      if (sscanf(string, "MemTotal: %ld kB", &size) == 2)
+      if (sscanf(string, "MemTotal: %ld kB", &size) == 1)
 	{
 	  fclose(fd);
 	  return size;
@@ -492,7 +492,7 @@ lt_procfs_meminfo_to_hugepagefree(const char *path, lt_topo_t *topology)
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
       unsigned long number;
-      if (sscanf(string, "HugePages_Free: %ld", &number) == 2)
+      if (sscanf(string, "HugePages_Free: %ld", &number) == 1)
 	{
 	  fclose(fd);
 	  return number;
