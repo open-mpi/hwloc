@@ -1176,7 +1176,7 @@ compar(const void *_l1, const void *_l2)
 static void
 topo_discover(lt_topo_t *topology)
 {
-  unsigned l,i,j;
+  unsigned l,i=0,j;
 
   assert(topology!=NULL);
 
