@@ -1,4 +1,5 @@
 $ autoreconf -vfi
-$ configure ...
-$ make install
+$ ./configure ...
+$ make
+$ sudo make install
 
