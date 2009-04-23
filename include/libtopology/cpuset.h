@@ -33,7 +33,7 @@ typedef uint64_t lt_cpuset_t;
 #    define LT_HAVE_CPUSUBSET	1 /* marker for CPUSUBSET being enabled */
 /* size and count of subsets within a set */
 #    define LT_CPUSUBSET_SIZE		(8*sizeof(long))
-#    define LT_CPUSUBSET_COUNT		((CPU_NBMAXCPUS+LT_CPUSUBSET_SIZE-1)/LT_CPUSUBSET_SIZE)
+#    define LT_CPUSUBSET_COUNT		((LIBTOPO_NBMAXCPUS+LT_CPUSUBSET_SIZE-1)/LT_CPUSUBSET_SIZE)
 typedef struct { unsigned long s[LT_CPUSUBSET_COUNT]; } lt_cpuset_t;
 /* extract a subset from a set using an index or a cpu */
 #    define LT_CPUSUBSET_SUBSET(set,x)	((set).s[x])

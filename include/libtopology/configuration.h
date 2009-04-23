@@ -7,7 +7,7 @@
 
 #include <limits.h>
 
-#define LIBTOPO_NBMAXCPUS	32
+#define LIBTOPO_NBMAXCPUS	1024
 #define LT_PER_LEVEL_ROOM	4096
 
 #ifdef LT__NUMA

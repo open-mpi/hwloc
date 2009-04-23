@@ -20,11 +20,6 @@ main (int argc, char *argv[])
   if (!err)
     return EXIT_FAILURE;
 
-  printf ("nb_processors: %d\n", topology->nb_processors);
-  printf ("nb_nodes: %d\n", topology->nb_nodes);
-  printf ("nb_levels: %d\n", topology->nb_levels);
-  printf ("discovering_level: %d\n", topology->discovering_level);
-
   while (argc >= 2)
     {
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
