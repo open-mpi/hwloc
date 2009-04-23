@@ -11,6 +11,8 @@ AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AC_CONFIG_SRCDIR([src/topology.c])
 AC_CONFIG_HEADER([include/config.h])
 
+AC_LANG([C])
+
 AC_PROG_CC_C89
 AC_PROG_LIBTOOL
 
