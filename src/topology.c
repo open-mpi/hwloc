@@ -239,7 +239,6 @@ lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsign
 
   topology->level_nbitems[topology->discovering_level]=numdies;
   ltdebug("--- die level has number %d\n", topology->discovering_level);
-  fprintf(stderr, "SETUP_DIE_LEVEL: %d\n", topology->discovering_level);
   topology->levels[topology->discovering_level++]=die_level;
   ltdebug("\n");
 }
@@ -907,15 +906,14 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
 		     topology);
     }
 
-  ltdebug("\n\n * Topology summary *\n\n");
-  ltdebug("%d processors (%d max id)\n", numprocs, procid_max);
+  printf("\n\n * Topology summary *\n\n");
+  printf("%d processors (%d max id)\n", numprocs, procid_max);
 
   if (numdies>1)
-    ltdebug("%d dies\n", numdies);
+    printf("%d dies\n", numdies);
   if (numcores>1)
-    ltdebug("%d cores\n", numcores);
+    printf("%d cores\n\n", numcores);
 
-  ltdebug("\n\n * cpusets details *\n\n");
   if (numdies>1)
     lt_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
 
@@ -1188,7 +1186,11 @@ topo_discover(lt_topo_t *topology)
   if (topology->fsys_root_fd < 0)
     {
       /* Get a file descriptor to the file system root.  */
-      if (lt_set_fsys_root("/", topology))
+      char *fsys_root_path = getenv("LT_FSYS_ROOT_PATH");
+      if (!fsys_root_path)
+	fsys_root_path= "/";	
+
+      if (lt_set_fsys_root(fsys_root_path, topology))
 	{
 	  perror ("opening file system root");
 	  assert(0);
@@ -1296,9 +1298,6 @@ topo_discover(lt_topo_t *topology)
   /* Compute arity */
   for (l=0; l+1<topology->nb_levels; l++)
     {
-      fprintf(stderr, "\t \t SORT l=%d (nblvls=%d)\n", l, topology->nb_levels);
-      fprintf(stderr, "\t \t %p l=%d i=%d\n", &topology->levels[l][i], l, i);
-
       for (i=0; !lt_cpuset_iszero(&topology->levels[l][i].cpuset); i++)
 	{
 	  topology->levels[l][i].arity=0;
@@ -1308,7 +1307,6 @@ topo_discover(lt_topo_t *topology)
 	  ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET" arity %u\n",
 		  l, i, LT_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
 	}
-      fprintf(stderr, "\t \t SORTIE %d\n", l);
     }
 
 
