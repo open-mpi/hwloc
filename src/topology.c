@@ -55,6 +55,9 @@ lt_print_level(lt_topo_t *topology, lt_level_t *l, FILE *output, int verbose_mod
   lt_print_level_description(l, output, verbose_mode);
   fprintf(output, "%s", labelseparator);
 #ifdef LT__NUMA
+  if (l->type == LT_LEVEL_MACHINE) fprintf(output, "%sMachine(%ld%s)", separator,
+				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]),
+				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]));
   if (l->os_node != -1) fprintf(output, "%sNode%s%u(%ld%s)", separator, indexprefix, l->os_node,
 				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_NODE]),
 				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_NODE]));
