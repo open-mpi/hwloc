@@ -455,7 +455,53 @@ lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, lt_cpuset_t *offl
   }
 }
 
+static unsigned long
+lt_procfs_meminfo_to_memsize(const char *path, lt_topo_t *topology)
+{
+  char string[64];
+  FILE *fd;
 
+  fd = lt_fopen(path, "r", topology->fsys_root_fd);
+  if (!fd)
+    return 0;
+
+  while (fgets(string, sizeof(string), fd) && *string != '\0')
+    {
+      unsigned long size;
+      if (sscanf(string, "MemTotal: %ld kB", &size) == 2)
+	{
+	  fclose(fd);
+	  return size;
+	}
+    }
+
+  fclose(fd);
+  return 0;
+}
+
+static unsigned long
+lt_procfs_meminfo_to_hugepagefree(const char *path, lt_topo_t *topology)
+{
+  char string[64];
+  FILE *fd;
+
+  fd = lt_fopen(path, "r", topology->fsys_root_fd);
+  if (!fd)
+    return 0;
+
+  while (fgets(string, sizeof(string), fd) && *string != '\0')
+    {
+      unsigned long number;
+      if (sscanf(string, "HugePages_Free: %ld", &number) == 2)
+	{
+	  fclose(fd);
+	  return number;
+	}
+    }
+
+  fclose(fd);
+  return 0;
+}
 
 static unsigned long
 lt_sysfs_node_meminfo_to_memsize(const char * path, lt_topo_t *topology)
@@ -506,7 +552,6 @@ lt_sysfs_node_meminfo_to_hugepagefree(const char * path, lt_topo_t *topology)
   fclose(fd);
   return 0;
 }
-
 
 static void
 look_sysfsnode(lt_topo_t *topology)
@@ -1258,6 +1303,13 @@ topo_discover(lt_topo_t *topology)
   lt_cpuset_zero(&topology->levels[0][0].cpuset);
   for (i=0; i<topology->level_nbitems[1]; i++)
     lt_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[1][i].cpuset);
+
+  /* Compute the whole machine memory and huge page */
+  /* FIXME: Only when no numa node available ? */
+  topology->levels[0][0].memory_kB[LT_LEVEL_MEMORY_MACHINE]=
+    lt_procfs_meminfo_to_memsize("/proc/meminfo", topology);
+  topology->levels[0][0].huge_page_free =
+    lt_procfs_meminfo_to_hugepagefree("/proc/meminfo", topology);
 
 #  ifdef LT__NUMA
 

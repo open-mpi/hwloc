@@ -37,6 +37,7 @@ enum lt_level_memory_type_e {
 	LT_LEVEL_MEMORY_L2 = 1,
 	LT_LEVEL_MEMORY_L3 = 2,
 	LT_LEVEL_MEMORY_NODE = 3,
+	LT_LEVEL_MEMORY_MACHINE = 4,
 	LT_LEVEL_MEMORY_TYPE_MAX
 };
 #endif /* LT__NUMA */
