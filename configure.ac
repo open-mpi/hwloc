@@ -18,13 +18,17 @@ AC_PROG_LIBTOOL
 
 TOPO_GCC_FLAGS
 
-AC_ARG_ENABLE(debug,,enable_debug=yes)
-AC_MSG_CHECKING(if debug is enabled)
+AC_ARG_ENABLE([debug],
+  AS_HELP_STRING([--enable-debug], [enable debugging messages]),
+  [enable_debug="$enableval"],
+  [enable_debug="no"])
+
+AC_MSG_CHECKING([whether debug is enabled])
 if test x$enable_debug = xyes; then
-  AC_DEFINE_UNQUOTED(LT_DEBUG, 1, Define to 1 to enable debug)
-  AC_MSG_RESULT(yes)
+  AC_DEFINE_UNQUOTED([LT_DEBUG], [1], [Define to 1 to enable debug])
+  AC_MSG_RESULT([yes])
 else
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 fi
 
 AC_CONFIG_FILES([Makefile
