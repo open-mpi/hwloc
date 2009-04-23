@@ -6,6 +6,7 @@
 #define LIBTOPOLOGY_CPUSET_H
 
 #include <stdint.h>
+#include <string.h>
 #include <strings.h>
 #include <libtopology/configuration.h>
 
@@ -256,7 +257,6 @@ static __inline__ int lt_cpuset_first(const lt_cpuset_t * cpuset);
 static __inline__ int lt_cpuset_first(const lt_cpuset_t * cpuset)
 {
 #if (!defined LT_HAVE_CPUSUBSET) && LT_BITS_PER_LONG < LIBTOPO_NBMAXCPUS
-	/* FIXME: return ma_ffs64(*cpuset)-1 */
 	int i;
 	i = ffs(((unsigned*)cpuset)[0]);
 	if (i>0)
@@ -268,7 +268,8 @@ static __inline__ int lt_cpuset_first(const lt_cpuset_t * cpuset)
 #else
 	int i;
 	for(i=0; i<LT_CPUSUBSET_COUNT; i++) {
-		int _ffs = ffs(LT_CPUSUBSET_SUBSET(*cpuset,i));
+		/* subsets are unsigned longs, use ffsl */
+		int _ffs = ffsl(LT_CPUSUBSET_SUBSET(*cpuset,i));
 		if (_ffs>0)
 			return _ffs - 1 + LT_CPUSUBSET_SIZE*i;
 	}
