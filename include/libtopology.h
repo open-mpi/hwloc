@@ -26,8 +26,7 @@ enum lt_level_e {
 	LT_LEVEL_L1,	/**< \brief L1 cache */
 	LT_LEVEL_PROC,	/**< \brief SMT Processor in a core */
 #endif /* LT__NUMA */
-	LT_LEVEL_VP,	/**< \brief Virtual Processor (\b not SMT) */ /* A passer dans marcel_topology.h */
-#define LT_LEVEL_LAST LT_LEVEL_VP /* A passer dans marcel_topology.h */
+	LT_LEVEL_MAX,
 };
 
 #ifdef LT__NUMA
@@ -140,11 +139,11 @@ struct lt_topo {
   unsigned nb_processors; 				/* Total number of physical processors */
   unsigned nb_nodes; 					/* Number of NUMA nodes */
   unsigned nb_levels;					/* Number of horizontal levels */
-  unsigned level_nbitems[2*LT_LEVEL_LAST+1]; 		/* Number of items on each horizontal level */
-  struct lt_level *levels[2*LT_LEVEL_LAST+1];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
+  unsigned level_nbitems[LT_LEVEL_MAX]; 		/* Number of items on each horizontal level */
+  struct lt_level *levels[LT_LEVEL_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
   int fsys_root_fd;					/* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int discovering_level;
-  int type_depth[LT_LEVEL_LAST + 1];
+  int type_depth[LT_LEVEL_MAX];
 };
 
 typedef struct lt_topo lt_topo_t;

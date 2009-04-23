@@ -41,7 +41,6 @@ lt_print_level_description(lt_level_t *l, FILE *output, int verbose_mode)
   lt_print_level_description_level(LT_LEVEL_L1)
   lt_print_level_description_level(LT_LEVEL_PROC)
 #  endif
-  lt_print_level_description_level(LT_LEVEL_VP)
 }
 
 #define lt_memory_size_printf_value(_size) \
@@ -212,9 +211,8 @@ lt_level_string(enum lt_level_e l)
     case LT_LEVEL_L1: return "L1Cache";
     case LT_LEVEL_PROC: return "SMTproc";
 #  endif
-    case LT_LEVEL_VP: return "VP";
+    default: return "Unknown";
     }
-  return "Unknown";
 }
 
 
@@ -1382,7 +1380,7 @@ topo_discover(lt_topo_t *topology)
 
 #  ifdef LT__NUMA
   /* intialize all depth to unknown */
-  for (l=0; l <= LT_LEVEL_LAST; l++)
+  for (l=0; l < LT_LEVEL_MAX; l++)
     topology->type_depth[l] = -1;
 
   /* walk the existing levels to set their depth */
@@ -1391,7 +1389,7 @@ topo_discover(lt_topo_t *topology)
 
   /* setup the depth of all still unknown levels (the one that got merged or never created */
   int type, prevdepth = -1;
-  for (type = 0; type <= LT_LEVEL_LAST; type++)
+  for (type = 0; type < LT_LEVEL_MAX; type++)
     {
       if (topology->type_depth[type] == -1)
 	topology->type_depth[type] = prevdepth;

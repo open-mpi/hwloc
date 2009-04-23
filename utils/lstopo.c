@@ -39,7 +39,7 @@ main (int argc, char *argv[])
   if (verbose_mode) 
     {
       int l,i;
-      for (l = 0; l <= LT_LEVEL_LAST; l++) 
+      for (l = 0; l < LT_LEVEL_MAX; l++) 
 	{
 	  int depth = topology->type_depth[l];
 	  for (i = 0; i<depth; i++)
