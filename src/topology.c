@@ -1254,6 +1254,11 @@ topo_discover(lt_topo_t *topology)
 
   assert(topology->nb_processors);
 
+  /* Compute the machine cpuset */
+  lt_cpuset_zero(&topology->levels[0][0].cpuset);
+  for (i=0; i<topology->level_nbitems[1]; i++)
+    lt_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[1][i].cpuset);
+
 #  ifdef LT__NUMA
 
   /* sort levels according to cpu sets */
