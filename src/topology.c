@@ -1,7 +1,8 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
+#include <config.h>
+
 #define _ATFILE_SOURCE
-#define _GNU_SOURCE
 #include <assert.h>
 #include <sys/types.h>
 #include <dirent.h>

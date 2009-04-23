@@ -1,5 +1,6 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
+#include <config.h>
 #include <libtopology.h>
 
 static void *

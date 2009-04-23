@@ -13,6 +13,8 @@ AC_CONFIG_HEADER([include/config.h])
 
 AC_LANG([C])
 
+AC_GNU_SOURCE # for O_DIRECTORY, fdopen, ffsl, ...
+
 AC_PROG_CC_C89
 AC_PROG_LIBTOOL
 
