@@ -1,0 +1,4 @@
+$ autoreconf -vfi
+$ configure ...
+$ make install
+
