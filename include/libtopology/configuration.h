@@ -8,13 +8,9 @@
 #include <limits.h>
 
 #define LIBTOPO_NBMAXCPUS	1024
-#define LT_PER_LEVEL_ROOM	4096
+#define LIBTOPO_NBMAXNODES	8
 
-#ifdef LT__NUMA
-#  ifndef LIBTOPO_NBMAXNODES
-#    define LIBTOPO_NBMAXNODES	8
-#  endif
-#endif
+#define LT_PER_LEVEL_ROOM	4096
 
 #define LIBTOPO_CACHE_LEVEL_MAX 3
 

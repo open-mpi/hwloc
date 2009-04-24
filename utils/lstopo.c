@@ -35,7 +35,6 @@ main (int argc, char *argv[])
 
   output_topology (topology, &topology->levels[0][0], output, 0, verbose_mode);
 
-#ifdef LT__NUMA
   if (verbose_mode) 
     {
       int l,i;
@@ -47,7 +46,6 @@ main (int argc, char *argv[])
 	  fprintf (output, "depth %d:\ttype #%d (%s)\n", depth, l, lt_level_string (l));
 	}
     }
-#endif
 
   topo_fini (topology);
 

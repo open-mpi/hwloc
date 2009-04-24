@@ -31,7 +31,6 @@ lt_print_level_description(lt_level_t *l, FILE *output, int verbose_mode)
     }
 
   lt_print_level_description_level(LT_LEVEL_MACHINE)
-#  ifdef LT__NUMA
   lt_print_level_description_level(LT_LEVEL_FAKE)
   lt_print_level_description_level(LT_LEVEL_NODE)
   lt_print_level_description_level(LT_LEVEL_DIE)
@@ -40,7 +39,6 @@ lt_print_level_description(lt_level_t *l, FILE *output, int verbose_mode)
   lt_print_level_description_level(LT_LEVEL_CORE)
   lt_print_level_description_level(LT_LEVEL_L1)
   lt_print_level_description_level(LT_LEVEL_PROC)
-#  endif
 }
 
 #define lt_memory_size_printf_value(_size) \
@@ -54,7 +52,6 @@ lt_print_level(lt_topo_t *topology, lt_level_t *l, FILE *output, int verbose_mod
 {
   lt_print_level_description(l, output, verbose_mode);
   fprintf(output, "%s", labelseparator);
-#ifdef LT__NUMA
   if (l->type == LT_LEVEL_MACHINE) fprintf(output, "%sMachine(%ld%s)", separator,
 				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]),
 				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]));
@@ -73,7 +70,6 @@ lt_print_level(lt_topo_t *topology, lt_level_t *l, FILE *output, int verbose_mod
 				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_L1]),
 				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_L1]));
   if (l->os_cpu != -1)  fprintf(output, "%sCPU%s%u", separator, indexprefix, l->os_cpu);
-#endif
   if (l->level == topology->nb_levels-1) {
     fprintf(output, "%sVP %s%u", separator, indexprefix, l->number);
   }
@@ -201,7 +197,6 @@ lt_level_string(enum lt_level_e l)
   switch (l)
     {
     case LT_LEVEL_MACHINE: return "Machine";
-#  ifdef LT__NUMA
     case LT_LEVEL_FAKE: return "Fake";
     case LT_LEVEL_NODE: return "NUMANode";
     case LT_LEVEL_DIE: return "Die";
@@ -210,7 +205,6 @@ lt_level_string(enum lt_level_e l)
     case LT_LEVEL_CORE: return "Core";
     case LT_LEVEL_L1: return "L1Cache";
     case LT_LEVEL_PROC: return "SMTproc";
-#  endif
     default: return "Unknown";
     }
 }
@@ -1205,17 +1199,12 @@ topo_connect(lt_topo_t *topology)
     }
 }
 
-
-#  ifdef LT__NUMA
 static int
 compar(const void *_l1, const void *_l2)
 {
   const struct lt_level *l1 = _l1, *l2 = _l2;
   return lt_cpuset_first(&l1->cpuset) - lt_cpuset_first(&l2->cpuset);
 }
-#  endif
-
-
 
 /* Main discovery loop */
 static void
@@ -1246,7 +1235,6 @@ topo_discover(lt_topo_t *topology)
 #endif
 
   /* Raw detection, from coarser levels to finer levels */
-#  ifdef LT__NUMA
   unsigned k;
   /*	unsigned nbsublevels; */
   /*	unsigned sublevelarity; */
@@ -1294,7 +1282,6 @@ topo_discover(lt_topo_t *topology)
   look_kstat();
 #    endif /* SOLARIS_SYS */
   look_cpu(&offline_cpus_set, topology);
-#  endif /* LT__NUMA */
 
   topology->nb_levels=topology->discovering_level;
   ltdebug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
@@ -1312,8 +1299,6 @@ topo_discover(lt_topo_t *topology)
     lt_procfs_meminfo_to_memsize("/proc/meminfo", topology);
   topology->levels[0][0].huge_page_free =
     lt_procfs_meminfo_to_hugepagefree("/proc/meminfo", topology);
-
-#  ifdef LT__NUMA
 
   /* sort levels according to cpu sets */
   for (l=0; l+1<topology->nb_levels; l++)
@@ -1339,7 +1324,6 @@ topo_discover(lt_topo_t *topology)
 	    }
 	}
     }
-#  endif /* LT__NUMA */
 
   /* Now we can put numbers on levels. */
   for (l=0; l<topology->nb_levels; l++)
@@ -1378,7 +1362,6 @@ topo_discover(lt_topo_t *topology)
   topo_connect(topology);
   ltdebug("connecting done.\n");
 
-#  ifdef LT__NUMA
   /* intialize all depth to unknown */
   for (l=0; l < LT_LEVEL_MAX; l++)
     topology->type_depth[l] = -1;
@@ -1396,7 +1379,6 @@ topo_discover(lt_topo_t *topology)
       else
 	prevdepth = topology->type_depth[type];
     }
-#  endif /* LT__NUMA */
 }
 
 int

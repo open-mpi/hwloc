@@ -3,7 +3,6 @@
 #ifndef LIBTOPOLOGY_H
 #define LIBTOPOLOGY_H
 
-#define LT__NUMA
 #define LINUX_SYS
 #include <stdio.h>
 #include <sys/types.h>
@@ -16,7 +15,6 @@
 /** \brief Type of topology level */
 enum lt_level_e {
 	LT_LEVEL_MACHINE,	/**< \brief Whole machine */
-#ifdef LT__NUMA
 	LT_LEVEL_FAKE,	/**< \brief Fake level for meeting the marcel_topo_max_arity constraint */ /* A passer dans marcel_topology.h */
 	LT_LEVEL_NODE,	/**< \brief NUMA node */
 	LT_LEVEL_DIE,	/**< \brief Physical chip */
@@ -25,11 +23,9 @@ enum lt_level_e {
 	LT_LEVEL_CORE,	/**< \brief Core */
 	LT_LEVEL_L1,	/**< \brief L1 cache */
 	LT_LEVEL_PROC,	/**< \brief SMT Processor in a core */
-#endif /* LT__NUMA */
 	LT_LEVEL_MAX,
 };
 
-#ifdef LT__NUMA
 /** \brief Type of memory attached to the topology level */
 enum lt_level_memory_type_e {
 	LT_LEVEL_MEMORY_L1 = 0,
@@ -39,8 +35,6 @@ enum lt_level_memory_type_e {
 	LT_LEVEL_MEMORY_MACHINE = 4,
 	LT_LEVEL_MEMORY_TYPE_MAX
 };
-#endif /* LT__NUMA */
-
 
 /** Structure of a topology level */
 struct lt_level {
@@ -62,11 +56,8 @@ struct lt_level {
 	struct lt_level **children;	/**< \brief Children, children[0 .. arity -1] */
 	struct lt_level *father;	/**< \brief Father, NULL if root (machine level) */
 
-
-#ifdef LT__NUMA
 	unsigned long memory_kB[LT_LEVEL_MEMORY_TYPE_MAX];
         unsigned long huge_page_free;
-#endif /* LT__NUMA */
 
 	/* allocated by ma_per_level_alloc() */
 	char data[LT_PER_LEVEL_ROOM];
@@ -178,14 +169,11 @@ lt_level_t *lt_topo_common_ancestor (lt_level_t *lvl1, lt_level_t *lvl2);
 int lt_topo_is_in_subtree (lt_level_t *subtree_root, lt_level_t *level);
 
 
-#ifdef LT__NUMA
 /** \brief Returns the depth of levels of type _type_. If no level of
     this type is present on the underlying architecture, the function
     returns the depth of the first "present" level we find uppon
     _type_. */
 extern int lt_get_topo_type_depth (enum lt_level_e type);
-#endif /* LT__NUMA */
-
 
 extern int lt_set_fsys_root(const char *path, lt_topo_t *topology);
 extern int topo_init (lt_topo_t *topology);
