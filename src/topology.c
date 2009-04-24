@@ -9,10 +9,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include <libtopology.h>
+#include <libtopology/helper.h>
 #include <libtopology/debug.h>
-
 
 static void
 lt_print_level_description(struct lt_level *l, FILE *output, int verbose_mode)
