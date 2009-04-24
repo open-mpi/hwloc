@@ -81,6 +81,9 @@ extern int lt_topo_init (lt_topo_t **topologyp, const char *fsys_root_path);
 /** \brief Terminate and free a topology context. */
 extern void lt_topo_fini (lt_topo_t *topology);
 
+/** \brief Returns the common father level to levels lvl1 and lvl2 */
+extern lt_level_t lt_find_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
+
 /** \brief Do a depth-first traversal of the topology to find and sort
     all levels that are at the same depth than _src_.
     Report in _lvls_ up to _max_ physically closest ones to _src_.
@@ -105,9 +108,6 @@ void lt_print_level(lt_topo_t *topology, struct lt_level *l,
     returns the depth of the first "present" level we find uppon
     _type_. */
 extern int lt_get_topo_type_depth (enum lt_level_e type);
-
-/** \brief Returns the common father level to levels lvl1 and lvl2 */
-extern lt_level_t lt_topo_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
 
 /** \brief Returns true if _level_ is inside the subtree beginning
     with _subtree_root_. */

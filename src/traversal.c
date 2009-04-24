@@ -5,6 +5,19 @@
 #include <libtopology.h>
 #include <libtopology/debug.h>
 
+struct lt_level * lt_find_common_ancestor (struct lt_level *lvl1, struct lt_level *lvl2)
+{
+  while (lvl1->level > lvl2->level)
+    lvl1 = lvl1->father;
+  while (lvl2->level > lvl1->level)
+    lvl2 = lvl2->father;
+  while (lvl1 != lvl2) {
+    lvl1 = lvl1->father;
+    lvl2 = lvl2->father;
+  }
+  return lvl1;
+}
+
 int lt_find_closest(lt_topo_t *topology, struct lt_level *src, struct lt_level **lvls, int max)
 {
   struct lt_level *parent, *nextparent, *src_levels;

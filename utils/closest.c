@@ -31,6 +31,12 @@ main (int argc, char *argv[])
     printf("close to type %d number %d\n",
 	   closest[i]->type, closest[i]->number);
 
+  if (found) {
+    first = lt_find_common_ancestor(first, closest[9]);
+    printf("common type %d number %d\n",
+	   first->type, first->number);
+  }
+
   lt_topo_fini (topology);
 
   return EXIT_SUCCESS;
