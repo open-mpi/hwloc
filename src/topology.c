@@ -950,13 +950,13 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
 		     topology);
     }
 
-  printf("\n\n * Topology summary *\n\n");
-  printf("%d processors (%d max id)\n", numprocs, procid_max);
+  ltdebug("\n * Topology summary *\n");
+  ltdebug("%d processors (%d max id)\n", numprocs, procid_max);
 
   if (numdies>1)
-    printf("%d dies\n", numdies);
+    ltdebug("%d dies\n", numdies);
   if (numcores>1)
-    printf("%d cores\n\n", numcores);
+    ltdebug("%d cores\n", numcores);
 
   if (numdies>1)
     lt_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
