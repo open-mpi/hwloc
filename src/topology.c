@@ -542,22 +542,14 @@ look_rset(int sdl, enum lt_level_e level, lt_topo_t *topology)
       continue;
 
     lt_setup_level(&rad_level[r], level);
-    lt_set_empty_os_numbers(&rad_level[r]);
+    lt_set_os_numbers(&rad_level[r], level, r);
     switch(level) {
       case LT_LEVEL_NODE:
-	rad_level[r].os_node = r;
-	rad_level[r].memory_kB[LT_LEVEL_MEMORY_NODE] = 0; /* unknown */
+	rad_level[r].memory_kB[LT_LEVEL_MEMORY_NODE] = 0; /* TODO */
 	rad_level[r].huge_page_free = 0;
 	break;
       case LT_LEVEL_L2:
-	rad_level[r].os_l2 = r;
-	rad_level[r].memory_kB[LT_LEVEL_MEMORY_L2] = 0; /* unknown */
-	break;
-      case LT_LEVEL_CORE:
-	rad_level[r].os_core = r;
-	break;
-      case LT_LEVEL_PROC:
-	rad_level[r].os_cpu = r;
+	rad_level[r].memory_kB[LT_LEVEL_MEMORY_L2] = 0; /* TODO */
 	break;
       default:
 	break;
