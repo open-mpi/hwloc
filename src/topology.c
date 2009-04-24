@@ -1035,7 +1035,7 @@ look_lgrp(lt_topo_t *topology)
 /* TODO: change into HAVE_KSTAT */
 #include <kstat.h>
 static void
-look_kstat(lt_topo_t *topology, lt_topo_t *topology)
+look_kstat(lt_topo_t *topology)
 {
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
