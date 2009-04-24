@@ -49,9 +49,6 @@ struct lt_level {
 
 	unsigned long memory_kB[LT_LEVEL_MEMORY_TYPE_MAX];
         unsigned long huge_page_free;
-
-	/* allocated by ma_per_level_alloc() */
-	char data[LT_PER_LEVEL_ROOM];
 };
 
 typedef struct lt_level * lt_level_t;
