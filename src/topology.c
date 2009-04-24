@@ -1238,7 +1238,14 @@ topo_discover(lt_topo_t *topology)
 #    ifdef LINUX_SYS
   look_sysfsnode(topology);
   look_sysfscpu(&offline_cpus_set, topology);
-#    endif
+  /* Compute the whole machine memory and huge page */
+  /* FIXME: Only when no numa node available ? */
+  topology->levels[0][0].memory_kB[LT_LEVEL_MEMORY_MACHINE]=
+    lt_procfs_meminfo_to_memsize("/proc/meminfo", topology);
+  topology->levels[0][0].huge_page_free =
+    lt_procfs_meminfo_to_hugepagefree("/proc/meminfo", topology);
+#    endif /* LINUX_SYS */
+
 #    ifdef  AIX_SYS
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {
@@ -1285,13 +1292,6 @@ topo_discover(lt_topo_t *topology)
   lt_cpuset_zero(&topology->levels[0][0].cpuset);
   for (i=0; i<topology->level_nbitems[1]; i++)
     lt_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[1][i].cpuset);
-
-  /* Compute the whole machine memory and huge page */
-  /* FIXME: Only when no numa node available ? */
-  topology->levels[0][0].memory_kB[LT_LEVEL_MEMORY_MACHINE]=
-    lt_procfs_meminfo_to_memsize("/proc/meminfo", topology);
-  topology->levels[0][0].huge_page_free =
-    lt_procfs_meminfo_to_hugepagefree("/proc/meminfo", topology);
 
   /* sort levels according to cpu sets */
   for (l=0; l+1<topology->nb_levels; l++)
