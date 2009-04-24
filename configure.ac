@@ -31,6 +31,13 @@ case ${target} in
     ;;
 esac
 
+AC_CHECK_HEADERS([sys/lgrp_user.h], [
+  AC_HAVE_LIBRARY([lgrp])
+])
+AC_CHECK_HEADERS([kstat.h], [
+  AC_HAVE_LIBRARY([kstat])
+])
+
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
 AC_CONFIG_SRCDIR([src/topology.c])

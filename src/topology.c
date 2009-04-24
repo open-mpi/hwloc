@@ -993,8 +993,7 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
 #endif /* LINUX_SYS */
 
 
-/* TODO: change into HAVE_LGRP */
-#    ifdef SOLARIS_SYS
+#ifdef HAVE_LIBLGRP
 #      include <sys/lgrp_user.h>
 static void
 show(lgrp_cookie_t cookie, lgrp_id_t lgrp)
@@ -1031,8 +1030,9 @@ look_lgrp(lt_topo_t *topology)
   /* TODO */
   lgrp_fini(cookie);
 }
+#endif /* LIBLGRP */
 
-/* TODO: change into HAVE_KSTAT */
+#ifdef HAVE_LIBKSTAT
 #include <kstat.h>
 static void
 look_kstat(lt_topo_t *topology)
@@ -1139,7 +1139,7 @@ look_kstat(lt_topo_t *topology)
  out:
   kstat_close(kc);
 }
-#    endif /* SOLARIS_SYS */
+#endif /* LIBKSTAT */
 
 #    ifdef AIX_SYS
 #      include <sys/rset.h>
@@ -1351,10 +1351,12 @@ topo_discover(lt_topo_t *topology)
 #    ifdef  AIX_SYS
   look_aix(topology);
 #    endif /* AIX_SYS */
-#    ifdef SOLARIS_SYS
+#    ifdef HAVE_LIBLGRP
   look_lgrp(topology);
+#    endif
+#    ifdef HAVE_LIBKSTAT
   look_kstat(topology);
-#    endif /* SOLARIS_SYS */
+#    endif
   look_cpu(&offline_cpus_set, topology);
 
   topology->nb_levels=topology->discovering_level;
