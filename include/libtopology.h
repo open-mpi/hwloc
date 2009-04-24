@@ -62,7 +62,7 @@ struct lt_level {
 	char data[LT_PER_LEVEL_ROOM];
 };
 
-typedef struct lt_level lt_level_t;
+typedef struct lt_level * lt_level_t;
 
 
 #define lt_set_empty_os_numbers(l) do { \
@@ -151,7 +151,7 @@ typedef struct lt_topo lt_topo_t;
 
 
 /** \brief indexes into ::lt_levels, but available from application */
-lt_level_t *lt_level(unsigned level, unsigned index);
+lt_level_t lt_level(unsigned level, unsigned index);
 
 /** \brief return a stringified topology level type */
 const char * lt_level_string(enum lt_level_e l);
@@ -161,11 +161,11 @@ void lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int v
 		    const char *indexprefix, const char* labelseparator, const char* levelterm);
 
 /** \brief Returns the common father level to levels lvl1 and lvl2 */
-lt_level_t *lt_topo_common_ancestor (lt_level_t *lvl1, lt_level_t *lvl2);
+lt_level_t lt_topo_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
 
 /** \brief Returns true if _level_ is inside the subtree beginning
     with _subtree_root_. */
-int lt_topo_is_in_subtree (lt_level_t *subtree_root, lt_level_t *level);
+int lt_topo_is_in_subtree (lt_level_t subtree_root, lt_level_t level);
 
 
 /** \brief Returns the depth of levels of type _type_. If no level of

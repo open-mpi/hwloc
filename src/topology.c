@@ -15,7 +15,7 @@
 
 
 static void
-lt_print_level_description(lt_level_t *l, FILE *output, int verbose_mode)
+lt_print_level_description(struct lt_level *l, FILE *output, int verbose_mode)
 {
   unsigned long type = l->type;
   const char * separator = " + ";
@@ -47,7 +47,7 @@ lt_print_level_description(lt_level_t *l, FILE *output, int verbose_mode)
   (_size)%1024 ? "kB" : (_size)%(1024*1024) ? "MB" : "GB"
 
 void
-lt_print_level(lt_topo_t *topology, lt_level_t *l, FILE *output, int verbose_mode, const char *separator,
+lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbose_mode, const char *separator,
 	       const char *indexprefix, const char* labelseparator, const char* levelterm)
 {
   lt_print_level_description(l, output, verbose_mode);

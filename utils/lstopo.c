@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static void output_topology (lt_topo_t *topology, lt_level_t *l, FILE *output, int i, int verbose_mode);
+static void output_topology (lt_topo_t *topology, lt_level_t l, FILE *output, int i, int verbose_mode);
 
 int
 main (int argc, char *argv[])
@@ -56,7 +56,7 @@ main (int argc, char *argv[])
   fprintf (output, "%*s", 2*i, "");
 
 static void 
-output_topology (lt_topo_t *topology, lt_level_t *l, FILE *output, int i, int verbose_mode) {
+output_topology (lt_topo_t *topology, lt_level_t l, FILE *output, int i, int verbose_mode) {
   int x;
   const char * separator = " ";
   const char * indexprefix = "#";
