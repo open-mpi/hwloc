@@ -32,7 +32,7 @@ show(lgrp_cookie_t cookie, lgrp_id_t lgrp)
   ltdebug("%ld children done\n", lgrp);
 }
 
-static void
+void
 look_lgrp(lt_topo_t *topology)
 {
   lgrp_cookie_t cookie = lgrp_init(LGRP_VIEW_OS);
@@ -51,7 +51,7 @@ look_lgrp(lt_topo_t *topology)
 
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
-static void
+void
 look_kstat(lt_topo_t *topology)
 {
   kstat_ctl_t *kc = kstat_open();

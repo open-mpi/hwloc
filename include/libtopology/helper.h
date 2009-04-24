@@ -13,6 +13,8 @@ extern void lt_setup_core_level(int procid_max, unsigned numcores, unsigned *osc
 #if defined(LINUX_SYS)
 extern void lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, lt_topo_t *topology);
 extern void look_linux(lt_topo_t *topology, lt_cpuset_t *offline_cpus_set);
+extern void look_lgrp(lt_topo_t *topology);
+extern void look_kstat(lt_topo_t *topology);
 #endif /* LINUX_SYS */
 
 
