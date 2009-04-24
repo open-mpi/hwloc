@@ -29,8 +29,8 @@ main (int argc, char *argv[])
   found = lt_find_closest(topology, first, closest, COUNT);
   printf("looked for %d closest entries, found %d\n", COUNT, found);
   for(i=0; i<found; i++)
-    printf("close to type %d number %d\n",
-	   closest[i]->type, closest[i]->number);
+    printf("close to type %d number %d physical number %d\n",
+	   closest[i]->type, closest[i]->number, closest[i]->physical_index[closest[i]->type]);
 
   if (found) {
     lt_level_t ancestor = lt_find_common_ancestor(first, closest[found-1]);

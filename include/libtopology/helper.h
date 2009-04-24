@@ -7,19 +7,15 @@
 
 #define lt_set_empty_os_numbers(l) do { \
 		struct lt_level *___l = (l); \
-		___l->os_node = -1; \
-		___l->os_die  = -1;  \
-		___l->os_l3   = -1;  \
-		___l->os_l2   = -1;  \
-		___l->os_core = -1; \
-		___l->os_l1   = -1;  \
-		___l->os_cpu  = -1;  \
+		int i; \
+		for(i=0; i<LT_LEVEL_MAX; i++) \
+		  ___l->physical_index[i] = -1; \
 	} while(0)
 
-#define lt_set_os_numbers(l, _field, _val) do { \
+#define lt_set_os_numbers(l, _type, _val) do { \
 		struct lt_level *__l = (l); \
 		lt_set_empty_os_numbers(l); \
-		__l->os_##_field = _val; \
+		__l->physical_index[_type] = _val; \
 	} while(0)
 
 #define lt_setup_level(l, _type) do {	       \
@@ -40,13 +36,8 @@
 		__l1->level = 0;					\
 		__l1->number = 0;					\
 		__l1->index = 0;					\
-		__l1->os_node = -1;					\
-		__l1->os_die = -1;					\
-		__l1->os_l3 = -1;					\
-		__l1->os_l2 = -1;					\
-		__l1->os_core = -1;					\
-		__l1->os_l1 = -1;					\
-		__l1->os_cpu = -1;					\
+		lt_set_empty_os_numbers(__l1);                          \
+		__l1->physical_index[LT_LEVEL_MACHINE] = 0;             \
 		lt_cpuset_fill(&__l1->cpuset);				\
 		__l1->arity = 0;					\
 		__l1->children = NULL;					\

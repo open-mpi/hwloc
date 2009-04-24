@@ -38,13 +38,8 @@ struct lt_level {
 	unsigned level;			/**< \brief Vertical index in marcel_topo_levels */
 	unsigned number;		/**< \brief Horizontal index in marcel_topo_levels[l.level] */
 	unsigned index;			/**< \brief Index in fathers' children[] array */
-	signed os_node;			/**< \brief OS-provided node number */
-	signed os_die;			/**< \brief OS-provided die number */
-	signed os_l3;			/**< \brief OS-provided L3 number */
-	signed os_l2;			/**< \brief OS-provided L2 number */
-	signed os_core;			/**< \brief OS-provided core number */
-	signed os_l1;			/**< \brief OS-provided L1 number */
-	signed os_cpu;			/**< \brief OS-provided CPU number */
+
+        signed physical_index[LT_LEVEL_MAX]; /**< \brief OS-provided physical index numbers */
 
 	lt_cpuset_t cpuset;		/**< \brief CPUs covered by this level */
 

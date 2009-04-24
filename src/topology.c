@@ -53,26 +53,38 @@ void
 lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbose_mode, const char *separator,
 	       const char *indexprefix, const char* labelseparator, const char* levelterm)
 {
+  enum lt_level_e type = l->type;
   lt_print_level_description(l, output, verbose_mode);
   fprintf(output, "%s", labelseparator);
-  if (l->type == LT_LEVEL_MACHINE) fprintf(output, "%sMachine(%ld%s)", separator,
-				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]),
-				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]));
-  if (l->os_node != -1) fprintf(output, "%sNode%s%u(%ld%s)", separator, indexprefix, l->os_node,
-				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_NODE]),
-				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_NODE]));
-  if (l->os_die != -1)  fprintf(output, "%sDie%s%u", separator, indexprefix, l->os_die);
-  if (l->os_l3 != -1)   fprintf(output, "%sL3%s%u(%ld%s)", separator, indexprefix, l->os_l3,
-				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_L3]),
-				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_L3]));
-  if (l->os_l2 != -1)   fprintf(output, "%sL2%s%u(%ld%s)", separator, indexprefix, l->os_l2,
-				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_L2]),
-				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_L2]));
-  if (l->os_core != -1) fprintf(output, "%sCore%s%u", separator, indexprefix, l->os_core);
-  if (l->os_l1 != -1)   fprintf(output, "%sL1%s%u(%ld%s)", separator, indexprefix, l->os_l1,
-				lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_L1]),
-				lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_L1]));
-  if (l->os_cpu != -1)  fprintf(output, "%sCPU%s%u", separator, indexprefix, l->os_cpu);
+  switch (type) {
+  case LT_LEVEL_DIE:
+  case LT_LEVEL_CORE:
+  case LT_LEVEL_PROC:
+    fprintf(output, "%s%s%s%u", separator, lt_level_string(type), indexprefix, l->physical_index[type]);
+    break;
+  case LT_LEVEL_MACHINE:
+    fprintf(output, "%s%s(%ld%s)", separator, lt_level_string(type),
+	    lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]),
+	    lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]));
+    break;
+  case LT_LEVEL_NODE:
+  case LT_LEVEL_L3:
+  case LT_LEVEL_L2:
+  case LT_LEVEL_L1: {
+    enum lt_level_memory_type_e mtype =
+      (type == LT_LEVEL_NODE) ? LT_LEVEL_MEMORY_NODE
+      : (type == LT_LEVEL_L3) ? LT_LEVEL_MEMORY_L3
+      : (type == LT_LEVEL_L2) ? LT_LEVEL_MEMORY_L2
+      : LT_LEVEL_MEMORY_L1;
+    unsigned long memory_kB = l->memory_kB[mtype];
+    fprintf(output, "%s%s%s%u(%ld%s)", separator, lt_level_string(type), indexprefix, l->physical_index[type],
+	    lt_memory_size_printf_value(memory_kB),
+	    lt_memory_size_printf_unit(memory_kB));
+    break;
+  }
+  default:
+    break;
+  }
   if (l->level == topology->nb_levels-1) {
     fprintf(output, "%sVP %s%u", separator, indexprefix, l->number);
   }
@@ -225,7 +237,7 @@ lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsign
   for (j = 0; j < numdies; j++)
     {
       lt_setup_level(&die_level[j], LT_LEVEL_DIE);
-      lt_set_os_numbers(&die_level[j], die, osphysids[j]);
+      lt_set_os_numbers(&die_level[j], LT_LEVEL_DIE, osphysids[j]);
       lt_level_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
       ltdebug("die %d has cpuset %"LT_PRIxCPUSET"\n",
 	      j, LT_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
@@ -253,7 +265,7 @@ lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsi
   for (j = 0; j < numcores; j++)
     {
       lt_setup_level(&core_level[j], LT_LEVEL_CORE);
-      lt_set_os_numbers(&core_level[j], core, oscoreids[j]);
+      lt_set_os_numbers(&core_level[j], LT_LEVEL_CORE, oscoreids[j]);
       lt_level_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
       ltdebug("core %d has cpuset %"LT_PRIxCPUSET"\n",
 	      j, LT_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
@@ -605,7 +617,7 @@ look_sysfsnode(lt_topo_t *topology)
       hpfree = lt_sysfs_node_meminfo_to_hugepagefree(nodepath, topology);
 
       lt_setup_level(&node_level[i], LT_LEVEL_NODE);
-      lt_set_os_numbers(&node_level[i], node, osnode);
+      lt_set_os_numbers(&node_level[i], LT_LEVEL_NODE, osnode);
       node_level[i].memory_kB[LT_LEVEL_MEMORY_NODE] = size;
       node_level[i].huge_page_free = hpfree;
       node_level[i].cpuset = cpuset;
@@ -640,9 +652,9 @@ lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
 
       switch (cachelevel)
 	{
-	case 2: lt_set_os_numbers(&level[j], l3, j); break;
-	case 1: lt_set_os_numbers(&level[j], l2, j); break;
-	case 0: lt_set_os_numbers(&level[j], l1, j); break;
+	case 2: lt_set_os_numbers(&level[j], LT_LEVEL_L3, j); break;
+	case 1: lt_set_os_numbers(&level[j], LT_LEVEL_L2, j); break;
+	case 0: lt_set_os_numbers(&level[j], LT_LEVEL_L1, j); break;
 	default: assert(!1);
 	}
 
@@ -1266,7 +1278,7 @@ look_cpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
       while (lt_cpuset_isset(offline_cpus_set, oscpu))
 	oscpu++;
       lt_setup_level(&cpu_level[cpu], LT_LEVEL_PROC);
-      lt_set_os_numbers(&cpu_level[cpu], cpu, oscpu);
+      lt_set_os_numbers(&cpu_level[cpu], LT_LEVEL_PROC, oscpu);
 
       lt_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
 
