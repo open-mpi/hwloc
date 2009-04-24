@@ -1366,6 +1366,10 @@ topo_discover(lt_topo_t *topology)
       else
 	prevdepth = topology->type_depth[type];
     }
+
+  for (l=0; l<topology->nb_levels; l++)
+    for (i=0; i<topology->level_nbitems[l]; i++)
+      topology->levels[l][i].level = l;
 }
 
 int
