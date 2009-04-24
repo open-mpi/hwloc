@@ -14,10 +14,10 @@ main (int argc, char *argv[])
 {
   int err;
   int verbose_mode = 0;
-  lt_topo_t *topology = topo_default_allocator.allocate (sizeof (lt_topo_t));
+  lt_topo_t *topology;
   FILE *output;
 
-  err = topo_init (topology);
+  err = lt_topo_init (&topology, NULL);
   if (!err)
     return EXIT_FAILURE;
 
@@ -35,10 +35,10 @@ main (int argc, char *argv[])
 
   output_topology (topology, &topology->levels[0][0], output, 0, verbose_mode);
 
-  if (verbose_mode) 
+  if (verbose_mode)
     {
       int l,i;
-      for (l = 0; l < LT_LEVEL_MAX; l++) 
+      for (l = 0; l < LT_LEVEL_MAX; l++)
 	{
 	  int depth = topology->type_depth[l];
 	  for (i = 0; i<depth; i++)
@@ -47,7 +47,7 @@ main (int argc, char *argv[])
 	}
     }
 
-  topo_fini (topology);
+  lt_topo_fini (topology);
 
   return EXIT_SUCCESS;
 }
@@ -55,7 +55,7 @@ main (int argc, char *argv[])
 #define indent(output, i) \
   fprintf (output, "%*s", 2*i, "");
 
-static void 
+static void
 output_topology (lt_topo_t *topology, lt_level_t l, FILE *output, int i, int verbose_mode) {
   int x;
   const char * separator = " ";

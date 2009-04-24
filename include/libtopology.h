@@ -99,8 +99,7 @@ int lt_topo_is_in_subtree (lt_level_t subtree_root, lt_level_t level);
     _type_. */
 extern int lt_get_topo_type_depth (enum lt_level_e type);
 
-extern int lt_set_fsys_root(const char *path, lt_topo_t *topology);
-extern int topo_init (lt_topo_t *topology);
-extern void topo_fini (lt_topo_t *topology);
+extern int lt_topo_init (lt_topo_t **topologyp, const char *fsys_root_path);
+extern void lt_topo_fini (lt_topo_t *topology);
 
 #endif /* LIBTOPOLOGY_H */

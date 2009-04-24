@@ -86,8 +86,8 @@ lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbos
 
 #ifdef HAVE_OPENAT
 
-int
-lt_set_fsys_root(const char *path, lt_topo_t *topology)
+static int
+lt_set_fsys_root(lt_topo_t *topology, const char *path)
 {
   int root;
 
@@ -153,8 +153,8 @@ lt_opendirat(const char *path, int fsys_root_fd)
 
 #else /* !HAVE_OPENAT */
 
-int
-lt_set_fsys_root(const char *path, int fsys_root_fd)
+static int
+lt_set_fsys_root(lt_topo_t *topology, const char *path)
 {
   ltdebug(stderr, "`lt_set_fsys_root ()' not implemented\n");
   errno = ENOSYS;
@@ -1221,22 +1221,6 @@ topo_discover(lt_topo_t *topology)
      obtained using sysconf(3).  */
   topology->nb_processors = lt_fallback_nbprocessors ();
 
-#ifdef HAVE_OPENAT
-  if (topology->fsys_root_fd < 0)
-    {
-      /* Get a file descriptor to the file system root.  */
-      char *fsys_root_path = getenv("LT_FSYS_ROOT_PATH");
-      if (!fsys_root_path)
-	fsys_root_path= "/";	
-
-      if (lt_set_fsys_root(fsys_root_path, topology))
-	{
-	  perror ("opening file system root");
-	  assert(0);
-	}
-    }
-#endif
-
   /* Raw detection, from coarser levels to finer levels */
   unsigned k;
   /*	unsigned nbsublevels; */
@@ -1385,19 +1369,42 @@ topo_discover(lt_topo_t *topology)
 }
 
 int
-topo_init (lt_topo_t *topology)
+lt_topo_init (struct lt_topo **topologyp, const char *fsys_root_path)
 {
+  struct lt_topo *topology;
+  char *fsys_root_path_env;
+
+  topology = topo_default_allocator.allocate (sizeof (struct lt_topo));
   if(!topology)
-    return 0;
+    return -1;
 
   lt_setup_topo(topology);
+
+#ifdef HAVE_OPENAT
+  /* Use the root path from the environment variable first,
+   * then from the given argument, then the default root.
+   */
+  fsys_root_path_env = getenv("LT_FSYS_ROOT_PATH");
+  if (fsys_root_path_env)
+    fsys_root_path = fsys_root_path_env;
+  if (!fsys_root_path)
+    fsys_root_path = "/";
+
+  /* Get a file descriptor to the file system root.  */
+  if (lt_set_fsys_root(topology, fsys_root_path)) {
+    perror ("opening file system root");
+    assert(0);
+  }
+#endif
+
   topo_discover(topology);
 
+  *topologyp = topology;
   return 1;
 }
 
 void
-topo_fini (lt_topo_t *topology)
+lt_topo_fini (struct lt_topo *topology)
 {
   unsigned l,i;
   /* Last level is not freed because we need it in various places */
