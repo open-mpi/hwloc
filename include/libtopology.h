@@ -102,4 +102,10 @@ extern int lt_get_topo_type_depth (enum lt_level_e type);
 extern int lt_topo_init (lt_topo_t **topologyp, const char *fsys_root_path);
 extern void lt_topo_fini (lt_topo_t *topology);
 
+/** \brief Do a depth-first traversal of the topology to find and sort
+    all levels that are at the same depth than _src_.
+    Report in _lvls_ up to _max_ physically closest ones to _src_.
+    Return the actual number of levels that were found. */
+extern int lt_find_closest(lt_topo_t *topology, struct lt_level *src, struct lt_level **lvls, int max);
+
 #endif /* LIBTOPOLOGY_H */
