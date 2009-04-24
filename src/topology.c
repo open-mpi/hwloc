@@ -223,7 +223,7 @@ lt_level_string(enum lt_level_e l)
 
 /* is it really useful to try to disable these two not so big static functions?
  */
-#    if defined(LINUX_SYS) || defined(SOLARIS_SYS)
+#    if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
 static void
 lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, lt_topo_t *topology)
 {
@@ -280,7 +280,7 @@ lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsi
   topology->levels[topology->discovering_level++]=core_level;
   ltdebug("\n");
 }
-#endif /* LINUX_SYS || SOLARIS_SYS */
+#endif /* LINUX_SYS || HAVE_LIBKSTAT */
 
 #ifdef LINUX_SYS
 #      define PROCESSOR	"processor"
