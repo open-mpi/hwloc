@@ -10,8 +10,10 @@ AC_CANONICAL_SYSTEM
 case ${target} in
   *-*-linux*)
     AC_DEFINE(LINUX_SYS, 1, Define to 1 on Linux)
+    linux=yes
     ;;
   *)
+    linux=no
     echo Host type \"${target}\" not yet supported.
     exit 1;
     ;;
@@ -21,6 +23,8 @@ AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
 AC_CONFIG_SRCDIR([src/topology.c])
 AC_CONFIG_HEADER([include/config.h])
+
+AM_CONDITIONAL([HAVE_LINUX], [test "x$linux" = "xyes"])
 
 AC_LANG([C])
 
