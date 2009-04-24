@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define COUNT 32
 
@@ -32,9 +33,11 @@ main (int argc, char *argv[])
 	   closest[i]->type, closest[i]->number);
 
   if (found) {
-    first = lt_find_common_ancestor(first, closest[9]);
-    printf("common type %d number %d\n",
-	   first->type, first->number);
+    lt_level_t ancestor = lt_find_common_ancestor(first, closest[found-1]);
+    assert(lt_is_in_subtree(ancestor, first));
+    assert(lt_is_in_subtree(ancestor, closest[found-1]));
+    printf("ancestor type %d number %d\n",
+	   ancestor->type, ancestor->number);
   }
 
   lt_topo_fini (topology);

@@ -84,6 +84,10 @@ extern void lt_topo_fini (lt_topo_t *topology);
 /** \brief Returns the common father level to levels lvl1 and lvl2 */
 extern lt_level_t lt_find_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
 
+/** \brief Returns true if _level_ is inside the subtree beginning
+    with _subtree_root_. */
+extern int lt_is_in_subtree (lt_level_t subtree_root, lt_level_t level);
+
 /** \brief Do a depth-first traversal of the topology to find and sort
     all levels that are at the same depth than _src_.
     Report in _lvls_ up to _max_ physically closest ones to _src_.
@@ -109,9 +113,6 @@ void lt_print_level(lt_topo_t *topology, struct lt_level *l,
     _type_. */
 extern int lt_get_topo_type_depth (enum lt_level_e type);
 
-/** \brief Returns true if _level_ is inside the subtree beginning
-    with _subtree_root_. */
-extern int lt_topo_is_in_subtree (lt_level_t subtree_root, lt_level_t level);
 #endif
 
 #endif /* LIBTOPOLOGY_H */
