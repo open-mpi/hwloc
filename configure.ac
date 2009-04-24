@@ -24,6 +24,9 @@ case ${target} in
   *-*-aix*)
     AC_DEFINE(AIX_SYS, 1, Define to 1 on AIX)
     ;;
+  *-*-osf*)
+    AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
+    ;;
   *)
     linux=no
     echo Host type \"${target}\" not yet supported.

@@ -1004,6 +1004,55 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
 
 #endif /* LINUX_SYS */
 
+#ifdef OSF_SYS
+#       include <numa.h>
+/* Ask libnuma for topology */
+static void
+look_libnuma(lt_topo_t *topology)
+{
+  cpu_cursor_t cursor;
+  unsigned i = 0;
+  unsigned nbnodes;
+  radid_t radid;
+  cpuid_t cpuid;
+  cpuset_t cpuset;
+  struct lt_level *node_level;
+
+  nbnodes=rad_get_num();
+  if (nbnodes==1)
+    return;
+
+  node_level=malloc((nbnodes+1)*sizeof(*node_level));
+
+  cpusetcreate(&cpuset);
+  for (radid = 0; radid < nbnodes; radid++) {
+    cpuemptyset(cpuset);
+    if (rad_get_cpus(radid, cpuset)==-1) {
+      fprintf(stderr,"rad_get_cpus(%d) failed: %s\n",radid,strerror(errno));
+      continue;
+    }
+
+    lt_setup_level(&node_level[i], LT_LEVEL_NODE);
+    lt_set_os_numbers(&node_level[i], node, radid);
+    node_level[i].memory_kB[LT_LEVEL_MEMORY_NODE] = 0; /* TODO */
+    node_level[i].huge_page_free = 0;
+
+    cursor = SET_CURSOR_INIT;
+    while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
+      lt_cpuset_set(&node_level[i].cpuset,cpuid);
+
+    ltdebug("node %d has cpuset %"LT_PRIxCPUSET"\n",
+	   i, LT_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
+    i++;
+  }
+
+  lt_cpuset_zero(&node_level[i].cpuset);
+
+  topology->level_nbitems[topology->discovering_level] = nbnodes;
+  topology->levels[topology->discovering_level++] = node_level;
+}
+#endif /* OSF_SYS */
+
 
 #ifdef HAVE_LIBLGRP
 #      include <sys/lgrp_user.h>
@@ -1153,7 +1202,7 @@ look_kstat(lt_topo_t *topology)
 }
 #endif /* LIBKSTAT */
 
-#    ifdef AIX_SYS
+#ifdef AIX_SYS
 #      include <sys/rset.h>
 
 /* Ask rsets for topology */
@@ -1258,7 +1307,7 @@ look_aix(lt_topo_t *topology)
 	}
     }
 }
-#    endif /* AIX_SYS */
+#endif /* AIX_SYS */
 
 
 
