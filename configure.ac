@@ -6,6 +6,17 @@ AC_INIT([libtopology], [0.0], [libtopology-commits@gforge.inria.fr])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
+AC_CANONICAL_SYSTEM
+case ${target} in
+  *-*-linux*)
+    AC_DEFINE(LINUX_SYS, 1, Define to 1 on Linux)
+    ;;
+  *)
+    echo Host type \"${target}\" not yet supported.
+    exit 1;
+    ;;
+esac
+
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
 AC_CONFIG_SRCDIR([src/topology.c])

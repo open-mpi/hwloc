@@ -3,7 +3,6 @@
 #ifndef LIBTOPOLOGY_H
 #define LIBTOPOLOGY_H
 
-#define LINUX_SYS
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
