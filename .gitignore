@@ -21,3 +21,4 @@ stamp-h*
 /m4/libtool.m4
 /m4/lt*.m4
 /include/config.h*
+/tests/linux/test-topology.sh

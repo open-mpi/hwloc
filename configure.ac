@@ -44,8 +44,15 @@ else
   AC_MSG_RESULT([no])
 fi
 
+AC_PATH_PROG([BASH], [bash])
+
 AC_CONFIG_FILES([Makefile
-                 include/Makefile src/Makefile utils/Makefile tests/Makefile
+                 include/Makefile src/Makefile utils/Makefile
+		 tests/Makefile tests/linux/Makefile
+		 tests/linux/test-topology.sh
 		 doc/Makefile])
+
+AC_CONFIG_COMMANDS([linux-test-topology],
+                   [chmod +x tests/linux/test-topology.sh])
 
 AC_OUTPUT

@@ -1,0 +1,110 @@
+#!@BASH@
+#-*-sh-*-
+
+# Copyright (C) 2009 INRIA
+#
+
+
+# Check the conformance of `lstopo' for all the Linux sysfs
+# hierarchies available here.  Return true on success.
+
+
+top_builddir="@top_builddir@"
+abs_builddir="@abs_builddir@"
+lstopo="$top_builddir/utils/lstopo"
+
+topology="$1"
+
+error()
+{
+    echo $@ 2>&1
+}
+
+# topology_cpu_count TOPOLOGY-DIR
+#
+# Print the number of CPUs listed in the sysfs hierarchy under
+# TOPOLOGY-DIR.
+topology_cpu_count()
+{
+    ( cd "$1"/sys/devices/system/cpu ; echo cpu[0-9]* | wc -w )
+}
+
+# flavor_max_cpu_count
+#
+# Print the maximum number of CPUs supported in the current flavor's
+# CPU set implementation.
+flavor_max_cpu_count()
+{
+    # Must be equal to `LIBTOPO_NBMAXCPUS'.
+    echo 1024
+}
+
+# test_topology NAME TOPOLOGY-DIR
+#
+# Test the topology under TOPOLOGY-DIR.  Return true on success.
+test_topology ()
+{
+    local name="$1"
+    local dir="$2"
+
+    local output="`mktemp`"
+
+    export LT_FSYS_ROOT_PATH="$dir"
+
+    if ! "$lstopo" -v > "$output"
+    then
+	result=1
+    else
+	diff -uBb "$dir/output" "$output"
+	result=$?
+    fi
+
+    rm "$output"
+
+    return $result
+}
+
+# test_eligible TOPOLOGY-DIR
+#
+# Return true if the topology under TOPOLOGY-DIR is eligible for
+# testing with the current flavor.
+test_eligible()
+{
+    local dir="$1"
+
+    [ -d "$dir" -a -f "$dir/output" ] &&				\
+	[ `flavor_max_cpu_count` -ge `topology_cpu_count "$dir"` ]
+}
+
+
+if [ ! -x "$lstopo" ]
+then
+    error "Could not find executable file \`$lstopo'."
+    exit 1
+fi
+
+result=1
+
+dir="`mktemp -d`"
+
+if ! ( cd "$dir" && gunzip -c "$abs_builddir/$topology" | tar xf - )
+then
+    error "failed to extract topology \`$topology'"
+else
+    actual_dir="`echo "$dir"/*`"
+
+    if test_eligible "$actual_dir"
+    then
+	test_count="`expr $test_count + 1`"
+
+	test_topology "`basename $topology`" "$actual_dir"
+	result=$?
+    else
+	# Skip this test.
+	result=77
+    fi
+fi
+
+rm -rf "$dir"
+
+exit $result
