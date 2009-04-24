@@ -83,11 +83,12 @@ AC_CHECK_FUNCS([ffsl], [
 ])
 
 AC_CONFIG_FILES([Makefile
-		 include/libtopology/config.h
                  include/Makefile src/Makefile utils/Makefile
 		 tests/Makefile tests/linux/Makefile
 		 tests/linux/test-topology.sh
 		 doc/Makefile])
+
+AC_CONFIG_HEADERS([include/libtopology/config.h])
 
 AC_CONFIG_COMMANDS([linux-test-topology],
                    [chmod +x tests/linux/test-topology.sh])
