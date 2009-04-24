@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <strings.h>
-#include <libtopology/configuration.h>
 
 /* large cpuset using an array of unsigned long subsets */
 
@@ -204,6 +203,99 @@ static __inline__ void lt_cpuset_clearset (lt_cpuset_t *set,
 		LT_CPUSUBSET_SUBSET(*set,i) &= ~LT_CPUSUBSET_SUBSET(*modifier_set,i);
 }
 
+#ifdef __GNUC__
+
+#  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)
+     /* Starting from 3.4, gcc has a long variant.  */
+#    define lt_ffsl(x) __builtin_ffsl(x)
+#  else
+#    define lt_ffs(x) __builtin_ffs(x)
+#    define LT_NEED_FFSL
+#  endif
+
+#elif defined(LT_HAVE_FFSL)
+
+#  define lt_ffsl(x) ffsl(x)
+
+#elif defined(LT_HAVE_FFS)
+
+#  ifndef LT_HAVE_DECL_FFS
+extern int ffs(int);
+#  endif
+
+#  define lt_ffs(x) ffs(x)
+#  define LT_NEED_FFSL
+
+#else /* no ffs implementation */
+
+static __inline__ int lt_ffsl(unsigned long x);
+static __inline__ int lt_ffsl(unsigned long x)
+{
+	int i;
+
+	if (!x)
+		return 0;
+
+	i = 1;
+#ifdef LT_BITS_PER_LONG >= 64
+	if (!(x & 0xfffffffful)) {
+		x >>= 32;
+		i += 32;
+	}
+#endif
+	if (!(x & 0xffffu)) {
+		x >>= 16;
+		i += 16;
+	}
+	if (!(x & 0xff)) {
+		x >>= 8;
+		i += 8;
+	}
+	if (!(x & 0xf)) {
+		x >>= 4;
+		i += 4;
+	}
+	if (!(x & 0x3)) {
+		x >>= 2;
+		i += 2;
+	}
+	if (!(x & 0x1)) {
+		x >>= 1;
+		i += 1;
+	}
+
+	return i;
+}
+
+#endif
+
+#ifdef LT_NEED_FFSL
+
+/* We only have an int ffs(int) implementation, build a long one.  */
+
+/* First make it 32 bits if it was only 16.  */
+static __inline__ int lt_ffs32(unsigned long x);
+static __inline__ int lt_ffs32(unsigned long x)
+{
+	return lt_ffs(x
+#if LT_BITS_PER_INT == 16
+			& 0xfffful) ? : (lt_ffs(x >> 16) + 16
+#endif
+		);
+}
+
+/* Then make it 64 bit if longs are.  */
+static __inline__ int lt_ffsl(unsigned long x);
+static __inline__ int lt_ffsl(unsigned long x)
+{
+	return lt_ffs32(x
+#if LT_BITS_PER_LONG == 64
+			& 0xfffffffful) ? : (lt_ffs(x >> 32) + 32
+#endif
+		);
+}
+#endif
+
 /** \brief Compute the first CPU in CPU mask */
 static __inline__ int lt_cpuset_first(const lt_cpuset_t * cpuset);
 static __inline__ int lt_cpuset_first(const lt_cpuset_t * cpuset)
@@ -211,7 +303,7 @@ static __inline__ int lt_cpuset_first(const lt_cpuset_t * cpuset)
 	int i;
 	for(i=0; i<LT_CPUSUBSET_COUNT; i++) {
 		/* subsets are unsigned longs, use ffsl */
-		int _ffs = ffsl(LT_CPUSUBSET_SUBSET(*cpuset,i));
+		int _ffs = lt_ffsl(LT_CPUSUBSET_SUBSET(*cpuset,i));
 		if (_ffs>0)
 			return _ffs - 1 + LT_CPUSUBSET_SIZE*i;
 	}

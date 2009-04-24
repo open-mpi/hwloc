@@ -6,6 +6,13 @@
 #define LIBTOPOLOGY_CONFIGURATION_H
 
 #include <limits.h>
+#include <stdint.h>
+
+#undef LT_HAVE_FFS
+
+#undef LT_HAVE_DECL_FFS
+
+#undef LT_HAVE_FFSL
 
 #define LIBTOPO_NBMAXCPUS	1024
 
@@ -21,6 +28,18 @@
 #define LT_BITS_PER_LONG 64
 #else
 #error "unknown size for unsigned long."
+#endif
+
+#if UINT_MAX == UINT8_MAX
+#define LT_BITS_PER_INT 8
+#elif UINT_MAX == UINT16_MAX
+#define LT_BITS_PER_INT 16
+#elif UINT_MAX == UINT32_MAX
+#define LT_BITS_PER_INT 32
+#elif UINT_MAX == UINT64_MAX
+#define LT_BITS_PER_INT 64
+#else
+#error "unknown size for unsigned int."
 #endif
 
 #endif /* LIBTOPOLOGY_CONFIGURATION_H */

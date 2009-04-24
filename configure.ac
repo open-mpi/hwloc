@@ -72,7 +72,18 @@ fi
 
 AC_PATH_PROG([BASH], [bash])
 
+AC_CHECK_FUNCS([ffs], [
+  AC_CHECK_DECL([ffs],[
+    AC_DEFINE([LT_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
+  ])
+  AC_DEFINE([LT_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
+])
+AC_CHECK_FUNCS([ffsl], [
+  AC_DEFINE([LT_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
+])
+
 AC_CONFIG_FILES([Makefile
+		 include/libtopology/config.h
                  include/Makefile src/Makefile utils/Makefile
 		 tests/Makefile tests/linux/Makefile
 		 tests/linux/test-topology.sh
