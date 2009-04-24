@@ -5,6 +5,33 @@
 #ifndef LIBTOPOLOGY_HELPER_H
 #define LIBTOPOLOGY_HELPER_H
 
+
+#if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
+extern void lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, lt_topo_t *topology);
+extern void lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, lt_topo_t *topology);
+#endif /* LINUX_SYS || HAVE_LIBKSTAT */
+#if defined(LINUX_SYS)
+extern void lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, lt_topo_t *topology);
+extern void look_linux(lt_topo_t *topology, lt_cpuset_t *offline_cpus_set);
+#endif /* LINUX_SYS */
+
+
+#ifdef HAVE_OPENAT
+
+/* Use our own filesystem functions.  */
+#define lt_fopen(p, m, d)   lt_fopenat(p, m, d)
+#define lt_access(p, m, d)  lt_accessat(p, m, d)
+#define lt_opendir(p, d)    lt_opendirat(p, d)
+
+#else /* !HAVE_OPENAT */
+
+#define lt_fopen(p, m, d)   fopen(p, m)
+#define lt_access(p, m, d)  access(p, m)
+#define lt_opendir(p, d)    opendir(p)
+
+#endif /* !HAVE_OPENAT */
+
+
 #define lt_set_empty_os_numbers(l) do { \
 		struct lt_level *___l = (l); \
 		int i; \
