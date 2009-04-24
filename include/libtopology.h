@@ -75,31 +75,10 @@ struct lt_topo {
 
 typedef struct lt_topo lt_topo_t;
 
-/** \brief indexes into ::lt_levels, but available from application */
-lt_level_t lt_level(unsigned level, unsigned index);
-
-/** \brief return a stringified topology level type */
-const char * lt_level_string(enum lt_level_e l);
-
-/** \brief print a human-readable form of the given topology level */
-void lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbose_mode, const char *separator,
-		    const char *indexprefix, const char* labelseparator, const char* levelterm);
-
-/** \brief Returns the common father level to levels lvl1 and lvl2 */
-lt_level_t lt_topo_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
-
-/** \brief Returns true if _level_ is inside the subtree beginning
-    with _subtree_root_. */
-int lt_topo_is_in_subtree (lt_level_t subtree_root, lt_level_t level);
-
-
-/** \brief Returns the depth of levels of type _type_. If no level of
-    this type is present on the underlying architecture, the function
-    returns the depth of the first "present" level we find uppon
-    _type_. */
-extern int lt_get_topo_type_depth (enum lt_level_e type);
-
+/** \brief Allocate and initialize a topology context,
+    using an optional file-system root if given. */
 extern int lt_topo_init (lt_topo_t **topologyp, const char *fsys_root_path);
+/** \brief Terminate and free a topology context. */
 extern void lt_topo_fini (lt_topo_t *topology);
 
 /** \brief Do a depth-first traversal of the topology to find and sort
@@ -107,5 +86,32 @@ extern void lt_topo_fini (lt_topo_t *topology);
     Report in _lvls_ up to _max_ physically closest ones to _src_.
     Return the actual number of levels that were found. */
 extern int lt_find_closest(lt_topo_t *topology, struct lt_level *src, struct lt_level **lvls, int max);
+
+/** \brief indexes into ::lt_levels, but available from application */
+lt_level_t lt_level(unsigned level, unsigned index);
+
+/** \brief return a stringified topology level type */
+const char * lt_level_string(enum lt_level_e l);
+
+/** \brief print a human-readable form of the given topology level */
+void lt_print_level(lt_topo_t *topology, struct lt_level *l,
+		    FILE *output, int verbose_mode,
+		    const char *separator, const char *indexprefix,
+		    const char* labelseparator, const char* levelterm);
+
+#if 0 /* not implemented yet */
+/** \brief Returns the depth of levels of type _type_. If no level of
+    this type is present on the underlying architecture, the function
+    returns the depth of the first "present" level we find uppon
+    _type_. */
+extern int lt_get_topo_type_depth (enum lt_level_e type);
+
+/** \brief Returns the common father level to levels lvl1 and lvl2 */
+extern lt_level_t lt_topo_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
+
+/** \brief Returns true if _level_ is inside the subtree beginning
+    with _subtree_root_. */
+extern int lt_topo_is_in_subtree (lt_level_t subtree_root, lt_level_t level);
+#endif
 
 #endif /* LIBTOPOLOGY_H */
