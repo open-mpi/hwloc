@@ -80,8 +80,10 @@ lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbos
 }
 
 
+#ifdef __GLIBC__
 #if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)
 # define HAVE_OPENAT
+#endif
 #endif
 
 #ifdef HAVE_OPENAT
@@ -152,14 +154,6 @@ lt_opendirat(const char *path, int fsys_root_fd)
 #define lt_opendir(p, d)    lt_opendirat(p, d)
 
 #else /* !HAVE_OPENAT */
-
-static int
-lt_set_fsys_root(lt_topo_t *topology, const char *path)
-{
-  ltdebug(stderr, "`lt_set_fsys_root ()' not implemented\n");
-  errno = ENOSYS;
-  return -1;
-}
 
 #define lt_fopen(p, m, d)   fopen(p, m)
 #define lt_access(p, m, d)  access(p, m)
@@ -1023,7 +1017,7 @@ show(lgrp_cookie_t cookie, lgrp_id_t lgrp)
 }
 
 static void
-look_lgrp(void)
+look_lgrp(lt_topo_t *topology)
 {
   lgrp_cookie_t cookie = lgrp_init(LGRP_VIEW_OS);
   lgrp_id_t root;
@@ -1041,7 +1035,7 @@ look_lgrp(void)
 /* TODO: change into HAVE_KSTAT */
 #include <kstat.h>
 static void
-look_kstat(lt_topo_t *topology)
+look_kstat(lt_topo_t *topology, lt_topo_t *topology)
 {
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
@@ -1147,6 +1141,114 @@ look_kstat(lt_topo_t *topology)
 }
 #    endif /* SOLARIS_SYS */
 
+#    ifdef AIX_SYS
+#      include <sys/rset.h>
+
+/* Ask rsets for topology */
+static void
+look_rset(int sdl, enum lt_level_e level, lt_topo_t *topology)
+{
+  rsethandle_t rset, rad;
+  int r,i,maxcpus,j;
+  unsigned nbnodes;
+  struct lt_level *rad_level;
+
+  rset = rs_alloc(RS_PARTITION);
+  rad = rs_alloc(RS_EMPTY);
+  nbnodes = rs_numrads(rset, sdl, 0);
+  if (nbnodes == -1) {
+    perror("rs_numrads");
+    return;
+  }
+  if (nbnodes == 1)
+    return;
+
+  rad_level=malloc((nbnodes+1)*sizeof(*rad_level));
+
+  for (r = 0, i = 0; i < nbnodes; i++) {
+    if (rs_getrad(rset, rad, sdl, i, 0)) {
+      fprintf(stderr,"rs_getrad(%d) failed: %s\n", i, strerror(errno));
+      continue;
+    }
+    if (!rs_getinfo(rad, R_NUMPROCS, 0))
+      continue;
+
+    lt_setup_level(&rad_level[r], level);
+    lt_set_empty_os_numbers(&rad_level[r]);
+    switch(level) {
+      case LT_LEVEL_NODE:
+	rad_level[r].os_node = r;
+	rad_level[r].memory_kB[LT_LEVEL_MEMORY_NODE] = 0; /* unknown */
+	rad_level[r].huge_page_free = 0;
+	break;
+      case LT_LEVEL_L2:
+	rad_level[r].os_l2 = r;
+	rad_level[r].memory_kB[LT_LEVEL_MEMORY_L2] = 0; /* unknown */
+	break;
+      case LT_LEVEL_CORE:
+	rad_level[r].os_core = r;
+	break;
+      case LT_LEVEL_PROC:
+	rad_level[r].os_cpu = r;
+	break;
+      default:
+	break;
+    }
+    maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
+    for (j = 0; j < maxcpus; j++) {
+      if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
+	lt_cpuset_set(&rad_level[r].cpuset,j);
+    }
+    ltdebug("node %d has cpuset %"LT_PRIxCPUSET"\n",
+	   r, LT_CPUSET_PRINTF_VALUE(rad_level[r].cpuset));
+    r++;
+  }
+
+  lt_cpuset_zero(&rad_level[r].cpuset);
+
+  topology->level_nbitems[topology->discovering_level] = nbnodes;
+  topology->levels[topology->discovering_level++] = rad_level;
+  rs_free(rset);
+  rs_free(rad);
+}
+
+static void
+look_aix(lt_topo_t *topology)
+{
+  unsigned i;
+  for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
+    {
+      if (i == rs_getinfo(NULL, R_MCMSDL, 0))
+	{
+	  ltdebug("looking AIX node sdl %d\n",i);
+	  look_rset(i, LT_LEVEL_NODE, topology);
+	}
+#      ifdef R_L2CSDL
+      if (i == rs_getinfo(NULL, R_L2CSDL, 0))
+	{
+	  ltdebug("looking AIX L2 sdl %d\n",i);
+	  look_rset(i, LT_LEVEL_L2, topology);
+	}
+#      endif
+#      ifdef R_PCORESDL
+      if (i == rs_getinfo(NULL, R_PCORESDL, 0))
+	{
+	  ltdebug("looking AIX core sdl %d\n",i);
+	  look_rset(i, LT_LEVEL_CORE, topology);
+	}
+#      endif
+      if (i == rs_getinfo(NULL, R_SMPSDL, 0))
+	ltdebug("not looking AIX \"SMP\" sdl %d\n",i);
+      if (i == rs_getinfo(NULL, R_MAXSDL, 0))
+	{
+	  ltdebug("looking AIX max sdl %d\n",i);
+	  look_rset(i, LT_LEVEL_PROC, topology);
+	}
+    }
+}
+#    endif /* AIX_SYS */
+
+
 
 /* Use the value stored in topology->nb_processors.  */
 static void
@@ -1247,39 +1349,11 @@ topo_discover(lt_topo_t *topology)
 #    endif /* LINUX_SYS */
 
 #    ifdef  AIX_SYS
-  for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
-    {
-      if (i == rs_getinfo(NULL, R_MCMSDL, 0))
-	{
-	  ltdebug("looking AIX node sdl %d\n",i);
-	  look_rset(i, LT_LEVEL_NODE);
-	}
-#      ifdef R_L2CSDL
-      if (i == rs_getinfo(NULL, R_L2CSDL, 0))
-	{
-	  ltdebug("looking AIX L2 sdl %d\n",i);
-	  look_rset(i, LT_LEVEL_L2);
-	}
-#      endif
-#      ifdef R_PCORESDL
-      if (i == rs_getinfo(NULL, R_PCORESDL, 0))
-	{
-	  ltdebug("looking AIX core sdl %d\n",i);
-	  look_rset(i, LT_LEVEL_CORE);
-	}
-#      endif
-      if (i == rs_getinfo(NULL, R_SMPSDL, 0))
-	ltdebug("not looking AIX \"SMP\" sdl %d\n",i);
-      if (i == rs_getinfo(NULL, R_MAXSDL, 0))
-	{
-	  ltdebug("looking AIX max sdl %d\n",i);
-	  look_rset(i, LT_LEVEL_PROC);
-	}
-    }
+  look_aix(topology);
 #    endif /* AIX_SYS */
 #    ifdef SOLARIS_SYS
-  look_lgrp();
-  look_kstat();
+  look_lgrp(topology);
+  look_kstat(topology);
 #    endif /* SOLARIS_SYS */
   look_cpu(&offline_cpus_set, topology);
 
@@ -1382,7 +1456,9 @@ int
 lt_topo_init (struct lt_topo **topologyp, const char *fsys_root_path)
 {
   struct lt_topo *topology;
+#ifdef HAVE_OPENAT
   char *fsys_root_path_env;
+#endif
 
   topology = topo_default_allocator.allocate (sizeof (struct lt_topo));
   if(!topology)
