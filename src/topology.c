@@ -315,7 +315,7 @@ lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
 #       include <numa.h>
 /* Ask libnuma for topology */
 static void
-look_libnuma(lt_topo_t *topology)
+look_osf(lt_topo_t *topology)
 {
   cpu_cursor_t cursor;
   unsigned i = 0;
@@ -560,12 +560,18 @@ topo_discover(lt_topo_t *topology)
 #    ifdef  AIX_SYS
   look_aix(topology);
 #    endif /* AIX_SYS */
+
+#    ifdef  OSF_SYS
+  look_osf(topology);
+#    endif /* OSF_SYS */
+
 #    ifdef HAVE_LIBLGRP
   look_lgrp(topology);
-#    endif
+#    endif /* HAVE_LIBLGRP */
 #    ifdef HAVE_LIBKSTAT
   look_kstat(topology);
-#    endif
+#    endif /* HAVE_LIBKSTAT */
+
   look_cpu(&offline_cpus_set, topology);
 
   topology->nb_levels=topology->discovering_level;
