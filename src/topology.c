@@ -175,12 +175,14 @@ lt_set_fsys_root(lt_topo_t *topology, const char *path)
    have the desired effect.  */
 static unsigned
 lt_fallback_nbprocessors(void) {
+	/* TODO: change into HAVE_SC_foobar, for OSes that don't provide the macro version */
 #if defined(_SC_NPROCESSORS_ONLN)
   return sysconf(_SC_NPROCESSORS_ONLN);
 #elif defined(_SC_NPROCESSORS_CONF)
   return sysconf(_SC_NPROCESSORS_CONF);
 #elif defined(_SC_NPROC_CONF) || defined(IRIX_SYS)
   return sysconf(_SC_NPROC_CONF);
+	/* TODO: change into HAVE_HOST_INFO */
 #elif defined(DARWIN_SYS)
   struct host_basic_info info;
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
@@ -213,6 +215,8 @@ lt_level_string(enum lt_level_e l)
 }
 
 
+/* is it really useful to try to disable these two not so big static functions?
+ */
 #    if defined(LINUX_SYS) || defined(SOLARIS_SYS)
 static void
 lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, lt_topo_t *topology)
@@ -995,6 +999,7 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
 #endif /* LINUX_SYS */
 
 
+/* TODO: change into HAVE_LGRP */
 #    ifdef SOLARIS_SYS
 #      include <sys/lgrp_user.h>
 static void
@@ -1033,6 +1038,7 @@ look_lgrp(void)
   lgrp_fini(cookie);
 }
 
+/* TODO: change into HAVE_KSTAT */
 #include <kstat.h>
 static void
 look_kstat(lt_topo_t *topology)

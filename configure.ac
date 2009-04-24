@@ -12,6 +12,18 @@ case ${target} in
     AC_DEFINE(LINUX_SYS, 1, Define to 1 on Linux)
     linux=yes
     ;;
+  *-*-irix*)
+    AC_DEFINE(IRIX_SYS, 1, Define to 1 on Irix)
+    ;;
+  *-*-darwin*)
+    AC_DEFINE(DARWIN_SYS, 1, Define to 1 on Darwin)
+    ;;
+  *-*-solaris*)
+    AC_DEFINE(SOLARIS_SYS, 1, Define to 1 on Solaris)
+    ;;
+  *-*-aix*)
+    AC_DEFINE(AIX_SYS, 1, Define to 1 on AIX)
+    ;;
   *)
     linux=no
     echo Host type \"${target}\" not yet supported.
