@@ -72,7 +72,8 @@
 		__t->nb_levels = 0;					\
 		__t->fsys_root_fd = -1;					\
 		__t->discovering_level = 1;				\
-		__t->levels[0] = malloc (2 * sizeof (struct lt_level));	\
+		__t->level_nbitems[0] = 1;                              \
+		__t->levels[0] = malloc (sizeof (struct lt_level));	\
 		lt_setup_machine_level (&(__t->levels[0]));		\
   } while (0)
 
