@@ -1310,6 +1310,10 @@ look_aix(lt_topo_t *topology)
 #endif /* AIX_SYS */
 
 
+#ifdef WIN_SYS
+#  warning: TODO: use GetLogicalProcessorInformation, GetNumaHighestNodeNumber, and GetNumaNodeProcessorMask
+#endif
+
 
 /* Use the value stored in topology->nb_processors.  */
 static void
