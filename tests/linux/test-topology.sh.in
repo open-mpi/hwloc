@@ -51,7 +51,7 @@ test_topology ()
 
     export LT_FSYS_ROOT_PATH="$dir"
 
-    if ! "$lstopo" -v > "$output"
+    if ! "$lstopo" - -v > "$output"
     then
 	result=1
     else

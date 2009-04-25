@@ -17,7 +17,7 @@ int
 main (int argc, char *argv[])
 {
   int err;
-  int verbose_mode = 0, x11_mode = 0;
+  int verbose_mode = 0;
   lt_topo_t *topology;
   char *filename = NULL;
   FILE *output;
@@ -30,8 +30,6 @@ main (int argc, char *argv[])
     {
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
 	verbose_mode = 1;
-      if (!strcmp (argv[1], "-x"))
-	x11_mode = 1;
       else {
 	if (filename)
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
@@ -42,7 +40,7 @@ main (int argc, char *argv[])
       argv++;
     }
 
-  if (!filename)
+  if (!filename || !strcmp(filename, "-"))
     output = stdout;
   else
     output = fopen(filename, "w");
@@ -50,13 +48,15 @@ main (int argc, char *argv[])
   if (!filename) {
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE
-    if (x11_mode)
+    if (getenv("DISPLAY"))
       output_x11(topology, output, verbose_mode);
     else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #endif /* HAVE_CAIRO */
       output_text(topology, output, verbose_mode);
-  } else if (strstr(filename, ".txt"))
+  } else if (!strcmp(filename, "-")
+	  || !strcmp(filename, "/dev/stdout")
+	  ||  strstr(filename, ".txt"))
     output_text(topology, output, verbose_mode);
   else if (strstr(filename, ".fig"))
     output_fig(topology, output, verbose_mode);
