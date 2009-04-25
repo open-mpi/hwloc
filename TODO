@@ -1,6 +1,6 @@
 * integrate marcel split quirk?
   + split for real, just explain how to split?
-* integrate synthetic topology support?
+* integrate synthetic topology support
 * backport cpuset support in topology-linux.c
 
 API:
