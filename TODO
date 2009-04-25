@@ -1,0 +1,13 @@
+* integrate marcel split quirk?
+  + split for real, just explain how to split?
+* integrate synthetic topology support?
+* backport cpuset support in topology-linux.c
+
+API:
+* add a lt_topo_merge() merging everything possible (or just a level)
+  + or add som flags to lt_topo_init
+* add lt_topo_split()? 
+* add a way to extract sched_setaffinity masks from arrays of levels (OR'ed)
+  + or bind directly?
+* add a way to extract libnuma-friendly masks of nodes from arrays of levels (OR'ed)
+* add reverse-routines converting sched_getaffinity or libnuma masks into a ancestor level
