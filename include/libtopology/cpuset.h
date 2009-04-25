@@ -5,6 +5,8 @@
 #ifndef LIBTOPOLOGY_CPUSET_H
 #define LIBTOPOLOGY_CPUSET_H
 
+#include <libtopology/config.h>
+
 #include <stdint.h>
 #include <string.h>
 #include <strings.h>

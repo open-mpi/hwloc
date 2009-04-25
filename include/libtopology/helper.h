@@ -5,6 +5,8 @@
 #ifndef LIBTOPOLOGY_HELPER_H
 #define LIBTOPOLOGY_HELPER_H
 
+#include <config.h>
+
 
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
 extern void lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, lt_topo_t *topology);
