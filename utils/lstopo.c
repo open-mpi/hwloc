@@ -37,13 +37,11 @@ main (int argc, char *argv[])
 
   if (verbose_mode)
     {
-      int l,i;
+      int l;
       for (l = 0; l < LT_LEVEL_MAX; l++)
 	{
 	  int depth = topology->type_depth[l];
-	  for (i = 0; i<depth; i++)
-	    fprintf (output, " ");
-	  fprintf (output, "depth %d:\ttype #%d (%s)\n", depth, l, lt_level_string (l));
+	  fprintf (output, "%*sdepth %d:\ttype #%d (%s)\n", depth, "", depth, l, lt_level_string (l));
 	}
     }
 
