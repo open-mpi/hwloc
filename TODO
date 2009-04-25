@@ -9,6 +9,18 @@
   + or more generic way with an array or { int type; void *obj; }
     to pass the fsys_root_path, memory_allocator, ...
 
+* conversion between strings and cpuset:
+  void lt_string_to_mask(const char *string, lt_cpuset_t *cpuset)
+  void lt_mask_to_string(lt_cpuset_t *cpuset, const char *string)
+* conversion between cpuset and the lowest ancestors covering it
+  void lt_mask_to_ancestor(lt_cpuset_t *cpuset, lt_level_t *level)
+* conversion between cpuset and an array of highest levels covering exactly it
+  int lt_mask_to_levels(lt_cpuset_t *cpuset, lt_level_t *levels, int max)
+ 
+* the depth field does not mean much for the application as long as
+  we don't merge levels. we could do a pass to detect levels that
+  could be merged, and compute the corresponding actual depth
+
 API:
 * add a lt_topo_merge() merging everything possible (or just a level)
   + or add som flags to lt_topo_init

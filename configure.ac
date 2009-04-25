@@ -57,6 +57,13 @@ AC_LANG([C])
 AC_GNU_SOURCE # for O_DIRECTORY, fdopen, ffsl, ...
 
 AC_PROG_CC_C89
+
+# disable C++, F77, Java and Windows Resource Compiler support
+# change this into LT_LANG+LT_INIT when we'll switch to libtool2
+m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
+m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
+m4_defun([_LT_AC_LANG_GCJ_CONFIG], [:])
+m4_defun([_LT_AC_LANG_RC_CONFIG], [:])
 AC_PROG_LIBTOOL
 
 TOPO_GCC_FLAGS
