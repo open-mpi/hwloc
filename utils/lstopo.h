@@ -1,0 +1,17 @@
+/* Copyright 2009 INRIA, Université Bordeaux 1  */
+
+#include <libtopology.h>
+
+typedef void output_method (lt_topo_t *topology, FILE *output, int verbose_mode);
+
+extern output_method output_text, output_x11, output_fig, output_png, output_pdf, output_svg;
+
+struct draw_methods {
+  void* (*start) (void *output, int width, int height);
+  void (*declare_color) (void *output, int r, int g, int b);
+  void (*box) (void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height);
+  void (*text) (void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text);
+};
+
+extern void *output_draw_start(struct draw_methods *draw_methods, lt_topo_t *topology, void *output);
+extern void output_draw(struct draw_methods *draw_methods, lt_topo_t *topology, void *output);

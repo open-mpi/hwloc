@@ -41,6 +41,10 @@ AC_CHECK_HEADERS([kstat.h], [
   AC_HAVE_LIBRARY([kstat])
 ])
 
+PKG_CHECK_MODULES([CAIRO], [cairo], [
+  AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
+])
+
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
 AC_CONFIG_SRCDIR([src/topology.c])

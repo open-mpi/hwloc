@@ -7,7 +7,11 @@
 #include <stdio.h>
 #include <string.h>
 
-static void output_topology (lt_topo_t *topology, lt_level_t l, FILE *output, int i, int verbose_mode);
+#ifdef HAVE_CAIRO
+#include <cairo.h>
+#endif
+
+#include "lstopo.h"
 
 int
 main (int argc, char *argv[])
@@ -15,6 +19,7 @@ main (int argc, char *argv[])
   int err;
   int verbose_mode = 0;
   lt_topo_t *topology;
+  char *filename = NULL;
   FILE *output;
 
   err = lt_topo_init (&topology, NULL);
@@ -25,47 +30,54 @@ main (int argc, char *argv[])
     {
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
 	verbose_mode = 1;
-      else
-	fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
+      else {
+	if (filename)
+	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
+	else
+	  filename = argv[1];
+      }
       argc--;
       argv++;
     }
 
-  output = stdout;
+  if (!filename)
+    output = stdout;
+  else
+    output = fopen(filename, "w");
 
-  output_topology (topology, &topology->levels[0][0], output, 0, verbose_mode);
-
-  if (verbose_mode)
-    {
-      int l;
-      for (l = 0; l < LT_LEVEL_MAX; l++)
-	{
-	  int depth = topology->type_depth[l];
-	  fprintf (output, "%*sdepth %d:\ttype #%d (%s)\n", depth, "", depth, l, lt_level_string (l));
-	}
-    }
+  if (!filename) {
+#ifdef HAVE_CAIRO
+#if CAIRO_HAS_XLIB_SURFACE
+    if (getenv("DISPLAY"))
+      output_x11(topology, output, verbose_mode);
+    else
+#endif /* CAIRO_HAS_XLIB_SURFACE */
+#endif /* HAVE_CAIRO */
+      output_text(topology, output, verbose_mode);
+  } else if (strstr(filename, ".txt"))
+    output_text(topology, output, verbose_mode);
+  else if (strstr(filename, ".fig"))
+    output_fig(topology, output, verbose_mode);
+#ifdef HAVE_CAIRO
+#if CAIRO_HAS_PNG_FUNCTIONS
+  else if (strstr(filename, ".png"))
+    output_png(topology, output, verbose_mode);
+#endif /* CAIRO_HAS_PNG_FUNCTIONS */
+#if CAIRO_HAS_PDF_SURFACE
+  else if (strstr(filename, ".pdf"))
+    output_pdf(topology, output, verbose_mode);
+#endif /* CAIRO_HAS_PDF_SURFACE */
+#if CAIRO_HAS_SVG_SURFACE
+  else if (strstr(filename, ".svg"))
+    output_svg(topology, output, verbose_mode);
+#endif /* CAIRO_HAS_SVG_SURFACE */
+#endif /* HAVE_CAIRO */
+  else {
+    fprintf(stderr, "file format not supported\n");
+    exit(EXIT_FAILURE);
+  }
 
   lt_topo_fini (topology);
 
   return EXIT_SUCCESS;
-}
-
-#define indent(output, i) \
-  fprintf (output, "%*s", 2*i, "");
-
-static void
-output_topology (lt_topo_t *topology, lt_level_t l, FILE *output, int i, int verbose_mode) {
-  int x;
-  const char * separator = " ";
-  const char * indexprefix = "#";
-  const char * labelseparator = ":";
-  const char * levelterm = "";
-
-  indent (output, i);
-  lt_print_level (topology, l, output, verbose_mode, separator, indexprefix, labelseparator, levelterm);
-  if (l->arity || (!i && !l->arity))
-    {
-      for (x=0; x<l->arity; x++)
-	output_topology (topology, l->children[x], output, i+1, verbose_mode);
-  }
 }
