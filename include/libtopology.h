@@ -62,7 +62,6 @@ struct lt_topo {
   unsigned level_nbitems[LT_LEVEL_MAX]; 		/* Number of items on each horizontal level */
   struct lt_level *levels[LT_LEVEL_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
   int fsys_root_fd;					/* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-  int discovering_level;
   int type_depth[LT_LEVEL_MAX];
   char *dmi_board_vendor;
   char *dmi_board_name;
@@ -107,7 +106,6 @@ void lt_print_level(lt_topo_t *topology, struct lt_level *l,
     returns the depth of the first "present" level we find uppon
     _type_. */
 extern int lt_get_topo_type_depth (enum lt_level_e type);
-
 #endif
 
 #endif /* LIBTOPOLOGY_H */

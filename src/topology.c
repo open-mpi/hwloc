@@ -228,9 +228,9 @@ lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsign
 
   lt_cpuset_zero(&die_level[j].cpuset);
 
-  topology->level_nbitems[topology->discovering_level]=numdies;
-  ltdebug("--- die level has number %d\n", topology->discovering_level);
-  topology->levels[topology->discovering_level++]=die_level;
+  topology->level_nbitems[topology->nb_levels]=numdies;
+  ltdebug("--- die level has number %d\n", topology->nb_levels);
+  topology->levels[topology->nb_levels++]=die_level;
   ltdebug("\n");
 }
 
@@ -257,9 +257,9 @@ lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsi
 
   lt_cpuset_zero(&core_level[j].cpuset);
 
-  topology->level_nbitems[topology->discovering_level]=numcores;
-  ltdebug("--- core level has number %d\n", topology->discovering_level);
-  topology->levels[topology->discovering_level++]=core_level;
+  topology->level_nbitems[topology->nb_levels]=numcores;
+  ltdebug("--- core level has number %d\n", topology->nb_levels);
+  topology->levels[topology->nb_levels++]=core_level;
   ltdebug("\n");
 }
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
@@ -298,9 +298,9 @@ lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
     }
   ltdebug("\n");
   lt_cpuset_zero(&level[j].cpuset);
-  topology->level_nbitems[topology->discovering_level]=numcaches[cachelevel];
-  ltdebug("--- shared L%d level has number %d\n", cachelevel+1, topology->discovering_level);
-  topology->levels[topology->discovering_level++]=level;
+  topology->level_nbitems[topology->nb_levels]=numcaches[cachelevel];
+  ltdebug("--- shared L%d level has number %d\n", cachelevel+1, topology->nb_levels);
+  topology->levels[topology->nb_levels++]=level;
   ltdebug("\n");
 }
 #endif /* LINUX_SYS */
@@ -349,8 +349,8 @@ look_osf(lt_topo_t *topology)
 
   lt_cpuset_zero(&node_level[i].cpuset);
 
-  topology->level_nbitems[topology->discovering_level] = nbnodes;
-  topology->levels[topology->discovering_level++] = node_level;
+  topology->level_nbitems[topology->nb_levels] = nbnodes;
+  topology->levels[topology->nb_levels++] = node_level;
 }
 #endif /* OSF_SYS */
 
@@ -412,8 +412,8 @@ look_rset(int sdl, enum lt_level_e level, lt_topo_t *topology)
 
   lt_cpuset_zero(&rad_level[r].cpuset);
 
-  topology->level_nbitems[topology->discovering_level] = nbnodes;
-  topology->levels[topology->discovering_level++] = rad_level;
+  topology->level_nbitems[topology->nb_levels] = nbnodes;
+  topology->levels[topology->nb_levels++] = rad_level;
   rs_free(rset);
   rs_free(rad);
 }
@@ -485,8 +485,8 @@ look_cpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
     }
   lt_cpuset_zero(&cpu_level[cpu].cpuset);
 
-  topology->level_nbitems[topology->discovering_level]=topology->nb_processors;
-  topology->levels[topology->discovering_level++]=cpu_level;
+  topology->level_nbitems[topology->nb_levels]=topology->nb_processors;
+  topology->levels[topology->nb_levels++]=cpu_level;
 }
 
 
@@ -568,7 +568,6 @@ topo_discover(lt_topo_t *topology)
 
   look_cpu(&offline_cpus_set, topology);
 
-  topology->nb_levels=topology->discovering_level;
   ltdebug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
 
   assert(topology->nb_processors);

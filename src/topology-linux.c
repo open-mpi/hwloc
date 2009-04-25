@@ -353,8 +353,8 @@ look_sysfsnode(lt_topo_t *topology)
 
   lt_cpuset_zero(&node_level[nbnodes].cpuset);
 
-  topology->level_nbitems[topology->discovering_level] = topology->nb_nodes = nbnodes;
-  topology->levels[topology->discovering_level++] = node_level;
+  topology->level_nbitems[topology->nb_levels] = topology->nb_nodes = nbnodes;
+  topology->levels[topology->nb_levels++] = node_level;
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */

@@ -108,9 +108,8 @@ extern DIR* lt_opendirat(const char *path, int fsys_root_fd);
 		struct lt_topo * __t = (t);                             \
 		__t->nb_processors = 0;					\
 		__t->nb_nodes = 0;					\
-		__t->nb_levels = 0;					\
+		__t->nb_levels = 1; /* there's at least MACHINE */	\
 		__t->fsys_root_fd = -1;					\
-		__t->discovering_level = 1;				\
 		__t->level_nbitems[0] = 1;                              \
 		__t->levels[0] = malloc (2*sizeof (struct lt_level));	\
 		lt_setup_machine_level (&(__t->levels[0]));		\
