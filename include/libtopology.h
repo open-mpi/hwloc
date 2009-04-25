@@ -64,6 +64,8 @@ struct lt_topo {
   int fsys_root_fd;					/* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int discovering_level;
   int type_depth[LT_LEVEL_MAX];
+  char *dmi_board_vendor;
+  char *dmi_board_name;
 };
 
 typedef struct lt_topo lt_topo_t;

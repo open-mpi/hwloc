@@ -663,6 +663,38 @@ topo_discover(lt_topo_t *topology)
       topology->levels[l][i].level = l;
 }
 
+static void
+lt_get_dmi_info(struct lt_topo *topology)
+{
+#ifdef LINUX_SYS
+#define DMI_BOARD_STRINGS_LEN 50
+  char dmi_line[DMI_BOARD_STRINGS_LEN];
+  FILE *fd;
+
+  dmi_line[0] = '\0';
+  fd = lt_fopen("/sys/class/dmi/id/board_vendor", "r", topology->fsys_root_fd);
+  if (fd) {
+    fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
+    fclose (fd);
+    if (dmi_line[0] != '\0') {
+      topology->dmi_board_vendor = strdup(dmi_line);
+      ltdebug("found DMI board vendor '%s'\n", topology->dmi_board_vendor);
+    }
+  }
+
+  dmi_line[0] = '\0';
+  fd = lt_fopen("/sys/class/dmi/id/board_name", "r", topology->fsys_root_fd);
+  if (fd) {
+    fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
+    fclose (fd);
+    if (dmi_line[0] != '\0') {
+      topology->dmi_board_name = strdup(dmi_line);
+      ltdebug("found DMI board name '%s'\n", topology->dmi_board_name);
+    }
+  }
+#endif /* LINUX_SYS */
+}
+
 int
 lt_topo_init (struct lt_topo **topologyp, const char *fsys_root_path)
 {
@@ -696,6 +728,9 @@ lt_topo_init (struct lt_topo **topologyp, const char *fsys_root_path)
 
   topo_discover(topology);
 
+  topology->dmi_board_vendor = topology->dmi_board_name = NULL;
+  lt_get_dmi_info(topology);
+
   *topologyp = topology;
   return 1;
 }
@@ -718,4 +753,6 @@ lt_topo_fini (struct lt_topo *topology)
 	  topology->levels[l] = NULL;
 	}
     }
+  free(topology->dmi_board_vendor);
+  free(topology->dmi_board_name);
 }
