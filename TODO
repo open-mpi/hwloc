@@ -10,6 +10,14 @@ API:
 * add a way to extract sched_setaffinity masks from arrays of levels (OR'ed)
   + or bind directly?
 * add a way to extract libnuma-friendly masks of nodes from arrays of levels (OR'ed)
+  + no level = empty mask, and we may want an easy alias for "whole machine"
 * add reverse-routines converting sched_getaffinity or libnuma masks into a ancestor level
 
-check that marcel first-cpu/stride still works
+
+Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
+* lt_taskset --ncpus 2 --near 3
+  bind process on 2 cores near physical proc id 3
+* lt_taskset --ncpus 2 --index 4
+  bind process on the 4th set of 2 physically close ids (used by ggrun when launching 4 process with 2 threads)
+* lt_taskset --on <Machine/Node/Die/L3/L2/Core/L1/Proc/<depth>>:<index>
+  bind process on object #index in level given by name or depth
