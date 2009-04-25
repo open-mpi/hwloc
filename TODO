@@ -11,3 +11,5 @@ API:
   + or bind directly?
 * add a way to extract libnuma-friendly masks of nodes from arrays of levels (OR'ed)
 * add reverse-routines converting sched_getaffinity or libnuma masks into a ancestor level
+
+check that marcel first-cpu/stride still works
