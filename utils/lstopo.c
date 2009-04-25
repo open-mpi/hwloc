@@ -17,7 +17,7 @@ int
 main (int argc, char *argv[])
 {
   int err;
-  int verbose_mode = 0;
+  int verbose_mode = 0, x11_mode = 0;
   lt_topo_t *topology;
   char *filename = NULL;
   FILE *output;
@@ -30,6 +30,8 @@ main (int argc, char *argv[])
     {
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
 	verbose_mode = 1;
+      if (!strcmp (argv[1], "-x"))
+	x11_mode = 1;
       else {
 	if (filename)
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
@@ -48,7 +50,7 @@ main (int argc, char *argv[])
   if (!filename) {
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE
-    if (getenv("DISPLAY"))
+    if (x11_mode)
       output_x11(topology, output, verbose_mode);
     else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
