@@ -92,12 +92,6 @@ lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbos
 }
 
 
-#ifdef __GLIBC__
-#if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)
-# define HAVE_OPENAT
-#endif
-#endif
-
 #ifdef HAVE_OPENAT
 
 static int
@@ -113,7 +107,7 @@ lt_set_fsys_root(lt_topo_t *topology, const char *path)
   return 0;
 }
 
-static __attribute__ ((__unused__)) FILE *
+FILE *
 lt_fopenat(const char *path, const char *mode, int fsys_root_fd)
 {
   int fd;
@@ -131,7 +125,7 @@ lt_fopenat(const char *path, const char *mode, int fsys_root_fd)
   return fdopen(fd, mode);
 }
 
-static __attribute__ ((__unused__)) int
+int
 lt_accessat(const char *path, int mode, int fsys_root_fd)
 {
   const char *relative_path;
@@ -144,7 +138,7 @@ lt_accessat(const char *path, int mode, int fsys_root_fd)
   return faccessat(fsys_root_fd, relative_path, O_RDONLY, 0);
 }
 
-static __attribute__ ((__unused__)) DIR*
+DIR*
 lt_opendirat(const char *path, int fsys_root_fd)
 {
   int dir_fd;

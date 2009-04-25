@@ -22,6 +22,11 @@ extern void look_lgrp(lt_topo_t *topology);
 extern void look_kstat(lt_topo_t *topology);
 #endif /* HAVE_LIBKSTAT */
 
+#ifdef __GLIBC__
+#if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)
+# define HAVE_OPENAT
+#endif
+#endif
 
 #ifdef HAVE_OPENAT
 
@@ -29,6 +34,15 @@ extern void look_kstat(lt_topo_t *topology);
 #define lt_fopen(p, m, d)   lt_fopenat(p, m, d)
 #define lt_access(p, m, d)  lt_accessat(p, m, d)
 #define lt_opendir(p, d)    lt_opendirat(p, d)
+
+#include <stdio.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <sys/types.h>
+
+extern FILE * lt_fopenat(const char *path, const char *mode, int fsys_root_fd);
+extern int lt_accessat(const char *path, int mode, int fsys_root_fd);
+extern DIR* lt_opendirat(const char *path, int fsys_root_fd);
 
 #else /* !HAVE_OPENAT */
 
