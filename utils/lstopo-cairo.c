@@ -94,7 +94,7 @@ x11_start(void *output, int width, int height)
   XSelectInput(dpy, win, ExposureMask);
   XMapWindow(dpy,win);
 
-  cs = cairo_xlib_surface_create(dpy, win, DefaultVisual(dpy, 0), width, height);
+  cs = cairo_xlib_surface_create(dpy, win, DefaultVisual(dpy, screen), width, height);
 
   disp = malloc(sizeof(*disp));
   disp->dpy = dpy;
