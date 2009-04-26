@@ -36,6 +36,14 @@ void output_text(lt_topo_t *topology, FILE *output, int verbose_mode)
   if (verbose_mode)
     {
       int l;
+
+      if (topology->dmi_board_vendor)
+	fprintf (output, "DMI board vendor: %s\n", topology->dmi_board_vendor);
+      if (topology->dmi_board_name)
+	fprintf (output, "DMI board name: %s\n", topology->dmi_board_name);
+      if (topology->huge_page_size_kB)
+	fprintf (output, "Huge page size: %ldkB\n", topology->huge_page_size_kB);
+
       for (l = 0; l < LT_LEVEL_MAX; l++)
 	{
 	  int depth = topology->type_depth[l];
