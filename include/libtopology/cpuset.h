@@ -107,6 +107,17 @@ static __inline__ void lt_cpuset_set(lt_cpuset_t * set,
 	LT_CPUSUBSET_CPUSUBSET(*set,cpu) |= LT_CPUSUBSET_VAL(cpu);
 }
 
+/** \brief Add CPUs from \e begincpu to \e endcpu in CPU set \e set */
+static __inline__ void lt_cpuset_set_range(lt_cpuset_t * set,
+    unsigned begincpu, unsigned endcpu);
+static __inline__ void lt_cpuset_set_range(lt_cpuset_t * set,
+    unsigned begincpu, unsigned endcpu)
+{
+	int i;
+	for (i=begincpu; i<=endcpu; i++)
+		LT_CPUSUBSET_CPUSUBSET(*set,i) |= LT_CPUSUBSET_VAL(i);
+}
+
 /** \brief Remove CPU \e cpu from CPU set \e set */
 static __inline__ void lt_cpuset_clr(lt_cpuset_t * set,
     unsigned cpu);

@@ -296,7 +296,7 @@ lt_disable_cpus_from_cpuset(struct lt_topo *topology, lt_cpuset_t *offline_cpus_
   char cpuset_mask[CPUSET_MASK_LEN];
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
-  int i, ret;
+  int ret;
 
   ret = lt_read_cpuset_mask("cpus", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
   if (!ret)
@@ -319,10 +319,10 @@ lt_disable_cpus_from_cpuset(struct lt_topo *topology, lt_cpuset_t *offline_cpus_
       nextlast = strtoul(tmp+1, NULL, 0);
     else
       nextlast = nextfirst;
-    if (prevlast+1 <= nextfirst-1)
+    if (prevlast+1 <= nextfirst-1) {
       ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-    for(i=prevlast+1; i<=nextfirst-1; i++)
-      lt_cpuset_set(offline_cpus_set, i);
+      lt_cpuset_set_range(offline_cpus_set, prevlast+1, nextfirst-1);
+    }
 
     /* switch to next enabled-segment */
     prevlast = nextlast;
@@ -333,10 +333,10 @@ lt_disable_cpus_from_cpuset(struct lt_topo *topology, lt_cpuset_t *offline_cpus_
 
   /* disable after last enabled-segment */
   nextfirst = LIBTOPO_NBMAXCPUS;
-  if (prevlast+1 <= nextfirst-1)
+  if (prevlast+1 <= nextfirst-1) {
     ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-  for(i=prevlast+1; i<=nextfirst-1; i++)
-    lt_cpuset_set(offline_cpus_set, i);
+    lt_cpuset_set_range(offline_cpus_set, prevlast+1, nextfirst-1);
+  }
 }
 
 static unsigned long

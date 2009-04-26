@@ -2,8 +2,6 @@
   + split for real, just explain how to split?
 * integrate synthetic topology support
 
-* lt_cpuset_set/clear_range
-
 * factorize all /proc/meminfo reading routines
 * factorize all /sys/.../node/meminfo reading routines
 * move DMI reading info to topology-linux.c
