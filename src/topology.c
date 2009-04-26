@@ -497,7 +497,7 @@ topo_connect(lt_topo_t *topology)
   int l, i, j, m;
   for (l=0; l<topology->nb_levels-1; l++)
     {
-      for (i=0; !lt_cpuset_iszero(&topology->levels[l][i].cpuset); i++)
+      for (i=0; i<topology->level_nbitems[l]; i++)
 	{
 	  if (topology->levels[l][i].arity)
 	    {
@@ -507,7 +507,7 @@ topo_connect(lt_topo_t *topology)
 	      assert(topology->levels[l][i].children);
 
 	      m=0;
-	      for (j=0; !lt_cpuset_iszero(&topology->levels[l+1][j].cpuset); j++)
+	      for (j=0; j<topology->level_nbitems[l+1]; j++)
 		if (lt_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
 		  {
 		    assert(!(m >= topology->levels[l][i].arity));
@@ -524,6 +524,7 @@ static int
 compar(const void *_l1, const void *_l2)
 {
   const struct lt_level *l1 = _l1, *l2 = _l2;
+  /* empty cpuset are always considered higher, so they are stored at the end, that's ok */
   return lt_cpuset_first(&l1->cpuset) - lt_cpuset_first(&l2->cpuset);
 }
 
@@ -618,10 +619,10 @@ topo_discover(lt_topo_t *topology)
   /* Compute arity */
   for (l=0; l+1<topology->nb_levels; l++)
     {
-      for (i=0; !lt_cpuset_iszero(&topology->levels[l][i].cpuset); i++)
+      for (i=0; i<topology->level_nbitems[l]; i++)
 	{
 	  topology->levels[l][i].arity=0;
-	  for (j=0; !lt_cpuset_iszero(&topology->levels[l+1][j].cpuset); j++)
+	  for (j=0; j<topology->level_nbitems[l+1]; j++)
 	    if (lt_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
 	      topology->levels[l][i].arity++;
 	  ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET" arity %u\n",
@@ -630,7 +631,7 @@ topo_discover(lt_topo_t *topology)
     }
 
 
-  for (i=0; !lt_cpuset_iszero(&topology->levels[topology->nb_levels-1][i].cpuset); i++)
+  for (i=0; i<topology->level_nbitems[topology->nb_levels-1]; i++)
     ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET" leaf\n",
 	    topology->nb_levels-1, i, LT_CPUSET_PRINTF_VALUE(topology->levels[topology->nb_levels-1][i].cpuset));
   ltdebug("arity done.\n");
@@ -748,7 +749,7 @@ lt_topo_fini (struct lt_topo *topology)
   /* Last level is not freed because we need it in various places */
   for (l=0; l<topology->nb_levels-1; l++)
     {
-      for (i=0; !lt_cpuset_iszero(&topology->levels[l][i].cpuset); i++)
+      for (i=0; i<topology->level_nbitems[l]; i++)
 	{
 	  free(topology->levels[l][i].children);
 	  topology->levels[l][i].children = NULL;
