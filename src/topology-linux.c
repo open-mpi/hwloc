@@ -188,6 +188,29 @@ lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, lt_cpuset_t *offl
 }
 
 static unsigned long
+lt_procfs_meminfo_to_hugepagesize(const char *path, lt_topo_t *topology) {
+  char string[64];
+  FILE *fd;
+
+  fd = lt_fopen(path, "r", topology->fsys_root_fd);
+  if (!fd)
+    return 0;
+
+  while (fgets(string, sizeof(string), fd) && *string != '\0')
+    {
+      unsigned long number;
+      if (sscanf(string, "Hugepagesize: %ld", &number) == 1)
+	{
+	  fclose(fd);
+	  return number;
+	}
+    }
+
+  fclose(fd);
+  return 0;
+}
+
+static unsigned long
 lt_procfs_meminfo_to_memsize(const char *path, lt_topo_t *topology)
 {
   char string[64];
@@ -701,4 +724,7 @@ look_linux(lt_topo_t *topology, lt_cpuset_t *offline_cpus_set)
     lt_procfs_meminfo_to_memsize("/proc/meminfo", topology);
   topology->levels[0][0].huge_page_free =
     lt_procfs_meminfo_to_hugepagefree("/proc/meminfo", topology);
+
+  topology->huge_page_size_kB = lt_procfs_meminfo_to_hugepagesize("/proc/meminfo", topology);
+  /* FIXME: gather page_size_kB as well? MaMI needs it */
 }

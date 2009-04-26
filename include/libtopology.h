@@ -62,6 +62,7 @@ struct lt_topo {
   struct lt_level *levels[LT_LEVEL_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
   int fsys_root_fd;					/* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int type_depth[LT_LEVEL_MAX];
+  unsigned long huge_page_size_kB;
   char *dmi_board_vendor;
   char *dmi_board_name;
 };
