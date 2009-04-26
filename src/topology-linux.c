@@ -187,6 +187,158 @@ lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, lt_cpuset_t *offl
   }
 }
 
+static int
+lt_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
+{
+  char filename[] = "/proc/self/cpuset";
+#define CPUSET_NAME_LEN 64
+  char cpuset_name[CPUSET_NAME_LEN];
+#define CPUSET_FILENAME_LEN 64
+  char cpuset_filename[CPUSET_FILENAME_LEN];
+  char *tmp;
+  FILE *fd;
+
+  /* check whether a cpuset is enabled */
+  fd = lt_fopen(filename, "r", fsys_root_fd);
+  if (!fd)
+    return 0;
+
+  fgets(cpuset_name, sizeof(cpuset_name), fd);
+  fclose(fd);
+
+  tmp = strchr(cpuset_name, '\n');
+  if (tmp)
+    *tmp = '\0';
+
+  /* read the cpuset */
+  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cpuset%s/%s", cpuset_name, type);
+  ltdebug("Trying to read cpuset file <%s>\n", cpuset_filename);
+  fd = fopen(cpuset_filename, "r");
+  if (!fd) {
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cpusets%s/%s", cpuset_name, type);
+    ltdebug("Trying to read cpuset file <%s>\n", cpuset_filename);
+    fd = fopen(cpuset_filename, "r");
+  }
+
+  if (!fd)
+    return 0;
+
+  fgets(info, infomax, fd);
+  fclose(fd);
+
+  tmp = strchr(info, '\n');
+  if (tmp)
+    *tmp = '\0';
+
+  return 1;
+}
+
+static void
+lt_disable_mems_from_cpuset(struct lt_topo *topology, int nodelevel)
+{
+  lt_level_t levels = topology->levels[nodelevel];
+  int nbitems = topology->level_nbitems[nodelevel];
+#define CPUSET_MASK_LEN 64
+  char cpuset_mask[CPUSET_MASK_LEN];
+  char *current, *comma, *tmp;
+  int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
+  int i, ret;
+
+  ret = lt_read_cpuset_mask("mems", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
+  if (!ret)
+    return;
+
+  ltdebug("Found cpuset mems: %s\n", cpuset_mask);
+
+  current = cpuset_mask;
+  prevlast = -1;
+
+  while (1) {
+    /* save a pointer to the next comma and erase it to simplify things */
+    comma = strchr(current, ',');
+    if (comma)
+      *comma = '\0';
+
+    /* find current enabled-segment bounds */
+    nextfirst = strtoul(current, &tmp, 0);
+    if (*tmp == '-')
+      nextlast = strtoul(tmp+1, NULL, 0);
+    else
+      nextlast = nextfirst;
+    if (prevlast+1 <= nextfirst-1)
+      ltdebug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
+    for(i=prevlast+1; i<=nextfirst-1; i++) {
+      levels[i].memory_kB[LT_LEVEL_MEMORY_NODE] = 0;
+      levels[i].huge_page_free = 0;
+    }
+
+    /* switch to next enabled-segment */
+    prevlast = nextlast;
+    if (!comma)
+      break;
+    current = comma+1;
+  }
+
+  /* disable after last enabled-segment */
+  nextfirst = nbitems;
+  if (prevlast+1 <= nextfirst-1)
+    ltdebug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
+  for(i=prevlast+1; i<=nextfirst-1; i++) {
+    levels[i].memory_kB[LT_LEVEL_MEMORY_NODE] = 0;
+    levels[i].huge_page_free = 0;
+  }
+}
+
+static void
+lt_disable_cpus_from_cpuset(struct lt_topo *topology, lt_cpuset_t *offline_cpus_set)
+{
+#define CPUSET_MASK_LEN 64
+  char cpuset_mask[CPUSET_MASK_LEN];
+  char *current, *comma, *tmp;
+  int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
+  int i, ret;
+
+  ret = lt_read_cpuset_mask("cpus", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
+  if (!ret)
+    return;
+
+  ltdebug("Found cpuset cpus: %s\n", cpuset_mask);
+
+  current = cpuset_mask;
+  prevlast = -1;
+
+  while (1) {
+    /* save a pointer to the next comma and erase it to simplify things */
+    comma = strchr(current, ',');
+    if (comma)
+      *comma = '\0';
+
+    /* find current enabled-segment bounds */
+    nextfirst = strtoul(current, &tmp, 0);
+    if (*tmp == '-')
+      nextlast = strtoul(tmp+1, NULL, 0);
+    else
+      nextlast = nextfirst;
+    if (prevlast+1 <= nextfirst-1)
+      ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
+    for(i=prevlast+1; i<=nextfirst-1; i++)
+      lt_cpuset_set(offline_cpus_set, i);
+
+    /* switch to next enabled-segment */
+    prevlast = nextlast;
+    if (!comma)
+      break;
+    current = comma+1;
+  }
+
+  /* disable after last enabled-segment */
+  nextfirst = LIBTOPO_NBMAXCPUS;
+  if (prevlast+1 <= nextfirst-1)
+    ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
+  for(i=prevlast+1; i<=nextfirst-1; i++)
+    lt_cpuset_set(offline_cpus_set, i);
+}
+
 static unsigned long
 lt_procfs_meminfo_to_hugepagesize(const char *path, lt_topo_t *topology) {
   char string[64];
@@ -378,6 +530,8 @@ look_sysfsnode(lt_topo_t *topology)
 
   topology->level_nbitems[topology->nb_levels] = topology->nb_nodes = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
+
+  lt_disable_mems_from_cpuset(topology, topology->nb_levels-1);
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
@@ -425,6 +579,12 @@ look__sysfscpu(unsigned *procid_max,
       unsigned mydieid, mycoreid;
       FILE *fd;
       char online[2];
+
+      /* if already disabled, skip it */
+      if (lt_cpuset_isset(offline_cpus_set, i)) {
+	nr_offline_cpus++;
+	continue;
+      }
 
       /* check whether the kernel knows another cpu */
       sprintf(string, "/sys/devices/system/cpu/cpu%d", i);
@@ -651,12 +811,15 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
   unsigned numcores=0;
   unsigned numcaches[] = { [0 ... LIBTOPO_CACHE_LEVEL_MAX-1] = 0 };
 
+  lt_disable_cpus_from_cpuset(topology, offline_cpus_set);
+
   if (lt_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->fsys_root_fd) < 0
       || lt_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->fsys_root_fd) < 0
       || lt_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->fsys_root_fd) < 0
       || lt_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->fsys_root_fd) < 0)
     {
       /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
+      /* cpuset cpus ignored */
       look_cpuinfo(&procid_max, &numprocs, &numcores, &numdies,
 		   proc_physids, osphysids,
 		   proc_coreids, oscoreids,

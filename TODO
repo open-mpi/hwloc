@@ -1,13 +1,24 @@
 * integrate marcel split quirk?
   + split for real, just explain how to split?
 * integrate synthetic topology support
-* backport cpuset support in topology-linux.c
+
+* use lt_setup_level in lt_setup_machine_level
+
+* lt_cpuset_set/clear_range
+
+* factorize all /proc/meminfo reading routines
+* factorize all /sys/.../node/meminfo reading routines
+* move DMI reading info to topology-linux.c
 
 * use topology_allocator for real, including in strdup
 * how does the application change the memory allocator?
   + another argument in lt_topo_init() ?
   + or more generic way with an array or { int type; void *obj; }
     to pass the fsys_root_path, memory_allocator, ...
+
+* add a way to keep cpuset/offline-disabled cpu? (env variable?)
+  + hard for offline cpus on linux since cache info is removed and thus removes cache parents
+    - traverse from bottom to top and add missing "disabled" parents?
 
 * conversion between strings and cpuset:
   void lt_string_to_mask(const char *string, lt_cpuset_t *cpuset)
