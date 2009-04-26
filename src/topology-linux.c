@@ -339,75 +339,30 @@ lt_disable_cpus_from_cpuset(struct lt_topo *topology, lt_cpuset_t *offline_cpus_
   }
 }
 
-static unsigned long
-lt_procfs_meminfo_to_hugepagesize(const char *path, lt_topo_t *topology) {
+static void
+lt_get_procfs_meminfo_info(lt_topo_t *topology,
+			   unsigned long *mem_size_kB,
+			   unsigned long *huge_page_size_kB,
+			   unsigned long *huge_page_free) {
   char string[64];
   FILE *fd;
 
-  fd = lt_fopen(path, "r", topology->fsys_root_fd);
+  fd = lt_fopen("/proc/meminfo", "r", topology->fsys_root_fd);
   if (!fd)
-    return 0;
+    return;
 
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
       unsigned long number;
-      if (sscanf(string, "Hugepagesize: %ld", &number) == 1)
-	{
-	  fclose(fd);
-	  return number;
-	}
+      if (sscanf(string, "MemTotal: %ld kB", &number) == 1)
+	*mem_size_kB = number;
+      else if (sscanf(string, "Hugepagesize: %ld", &number) == 1)
+	*huge_page_size_kB = number;
+      else if (sscanf(string, "HugePages_Free: %ld", &number) == 1)
+	*huge_page_free = number;
     }
 
   fclose(fd);
-  return 0;
-}
-
-static unsigned long
-lt_procfs_meminfo_to_memsize(const char *path, lt_topo_t *topology)
-{
-  char string[64];
-  FILE *fd;
-
-  fd = lt_fopen(path, "r", topology->fsys_root_fd);
-  if (!fd)
-    return 0;
-
-  while (fgets(string, sizeof(string), fd) && *string != '\0')
-    {
-      unsigned long size;
-      if (sscanf(string, "MemTotal: %ld kB", &size) == 1)
-	{
-	  fclose(fd);
-	  return size;
-	}
-    }
-
-  fclose(fd);
-  return 0;
-}
-
-static unsigned long
-lt_procfs_meminfo_to_hugepagefree(const char *path, lt_topo_t *topology)
-{
-  char string[64];
-  FILE *fd;
-
-  fd = lt_fopen(path, "r", topology->fsys_root_fd);
-  if (!fd)
-    return 0;
-
-  while (fgets(string, sizeof(string), fd) && *string != '\0')
-    {
-      unsigned long number;
-      if (sscanf(string, "HugePages_Free: %ld", &number) == 1)
-	{
-	  fclose(fd);
-	  return number;
-	}
-    }
-
-  fclose(fd);
-  return 0;
 }
 
 static unsigned long
@@ -882,12 +837,9 @@ look_linux(lt_topo_t *topology, lt_cpuset_t *offline_cpus_set)
   look_sysfscpu(offline_cpus_set, topology);
 
   /* Compute the whole machine memory and huge page */
-  /* FIXME: Only when no numa node available ? */
-  topology->levels[0][0].memory_kB[LT_LEVEL_MEMORY_MACHINE]=
-    lt_procfs_meminfo_to_memsize("/proc/meminfo", topology);
-  topology->levels[0][0].huge_page_free =
-    lt_procfs_meminfo_to_hugepagefree("/proc/meminfo", topology);
-
-  topology->huge_page_size_kB = lt_procfs_meminfo_to_hugepagesize("/proc/meminfo", topology);
-  /* FIXME: gather page_size_kB as well? MaMI needs it */
+  lt_get_procfs_meminfo_info(topology,
+			     &topology->levels[0][0].memory_kB[LT_LEVEL_MEMORY_MACHINE],
+			     &topology->huge_page_size_kB,
+			     &topology->levels[0][0].huge_page_free);
+			     /* FIXME: gather page_size_kB as well? MaMI needs it */
 }

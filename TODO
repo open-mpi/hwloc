@@ -2,7 +2,8 @@
   + split for real, just explain how to split?
 * integrate synthetic topology support
 
-* factorize all /proc/meminfo reading routines
+* LT_NOSMT
+
 * factorize all /sys/.../node/meminfo reading routines
 * move DMI reading info to topology-linux.c
 
