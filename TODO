@@ -2,8 +2,6 @@
   + split for real, just explain how to split?
 * integrate synthetic topology support
 
-* use lt_setup_level in lt_setup_machine_level
-
 * lt_cpuset_set/clear_range
 
 * factorize all /proc/meminfo reading routines

@@ -82,16 +82,13 @@ extern DIR* lt_opendirat(const char *path, int fsys_root_fd);
 		struct lt_level **__p = (l);                            \
 		struct lt_level *__l1 = &(__p[0][0]);			\
 		struct lt_level *__l2 = &(__p[0][1]);			\
-		__l1->type = LT_LEVEL_MACHINE;				\
+		lt_setup_level(__l1, LT_LEVEL_MACHINE);			\
 		__l1->level = 0;					\
 		__l1->number = 0;					\
 		__l1->index = 0;					\
 		lt_set_empty_os_numbers(__l1);                          \
 		__l1->physical_index[LT_LEVEL_MACHINE] = 0;             \
 		lt_cpuset_fill(&__l1->cpuset);				\
-		__l1->arity = 0;					\
-		__l1->children = NULL;					\
-		__l1->father = NULL;					\
 		lt_cpuset_zero(&__l2->cpuset);				\
   } while (0)
 
