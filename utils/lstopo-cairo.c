@@ -161,7 +161,9 @@ void
 output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 {
   struct display *disp = output_draw_start(&x11_draw_methods, topology, output);
-  int state = 0, x, y, lastx = disp->x, lasty = disp->y;
+  int state = 0;
+  int x = 0, y = 0; /* shut warning down */
+  int lastx = disp->x, lasty = disp->y;
 
   while (1) {
     XEvent e;
