@@ -72,6 +72,10 @@ static void null(void) {};
 struct display {
   Display *dpy;
   cairo_surface_t *cs;
+  Window win;
+  int screen_width, screen_height;	/** visible part size */
+  int width, height;			/** total size */
+  int x, y;				/** top left corner of the visible part */
 };
 
 static void *
@@ -79,26 +83,46 @@ x11_start(void *output, int width, int height)
 {
   cairo_surface_t *cs;
   Display *dpy;
-  Window root, win;
-  int screen;
+  Window root, top, win;
+  int scr;
+  Screen *screen;
+  int screen_width = width, screen_height = height;
   struct display *disp;
 
   if (!(dpy = XOpenDisplay(NULL))) {
     fprintf(stderr, "couldn't connect to X\n");
     exit(EXIT_FAILURE);
   }
-  screen = DefaultScreen(dpy);
-  root = RootWindow(dpy, screen);
-  win = XCreateSimpleWindow(dpy, root, 0, 0, width, height, 0, WhitePixel(dpy, screen), WhitePixel(dpy, screen));
+  scr = DefaultScreen(dpy);
+  screen = ScreenOfDisplay(dpy, scr);
+  if (screen_width >= screen->width)
+    screen_width = screen->width;
+  if (screen_height >= screen->height)
+    screen_height = screen->height;
+  root = RootWindow(dpy, scr);
+  top = XCreateSimpleWindow(dpy, root, 0, 0, screen_width, screen_height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
+  win = XCreateSimpleWindow(dpy, top, 0, 0, width, height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
 
-  XSelectInput(dpy, win, ExposureMask);
-  XMapWindow(dpy,win);
+  XSelectInput(dpy, win,
+      ButtonPressMask | ButtonReleaseMask |
+      PointerMotionMask |
+      ExposureMask);
+  XSelectInput(dpy,top, StructureNotifyMask);
+  XMapWindow(dpy, win);
+  XMapWindow(dpy, top);
 
-  cs = cairo_xlib_surface_create(dpy, win, DefaultVisual(dpy, screen), width, height);
+  cs = cairo_xlib_surface_create(dpy, win, DefaultVisual(dpy, scr), width, height);
 
   disp = malloc(sizeof(*disp));
   disp->dpy = dpy;
   disp->cs = cs;
+  disp->win = win;
+  disp->screen_width = screen_width;
+  disp->screen_height = screen_height;
+  disp->width = width;
+  disp->height = height;
+  disp->x = 0;
+  disp->y = 0;
 
   return disp;
 }
@@ -110,16 +134,81 @@ static struct draw_methods x11_draw_methods = {
   .text = topo_cairo_text,
 };
 
+/** Clip coordinates of the visible part. */
+static void
+move_x11(lt_topo_t *topology, struct display *disp)
+{
+  if (disp->width <= disp->screen_width) {
+    disp->x = 0;
+  } else {
+    if (disp->x < 0)
+      disp->x = 0;
+    if (disp->x >= disp->width - disp->screen_width)
+      disp->x = disp->width - disp->screen_width;
+  }
+
+  if (disp->height <= disp->screen_height) {
+    disp->y = 0;
+  } else {
+    if (disp->y < 0)
+      disp->y = 0;
+    if (disp->y >= disp->height - disp->screen_height)
+      disp->y = disp->height - disp->screen_height;
+  }
+}
+
 void
 output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 {
   struct display *disp = output_draw_start(&x11_draw_methods, topology, output);
+  int state = 0, x, y, lastx, lasty;
 
   while (1) {
     XEvent e;
     XNextEvent(disp->dpy, &e);
-    if (e.type == Expose && e.xexpose.count < 1)
-      topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
+    switch (e.type) {
+      case Expose:
+	if (e.xexpose.count < 1)
+	  topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
+	break;
+      case MotionNotify:
+	if (state) {
+	  lastx = disp->x;
+	  lasty = disp->y;
+	  disp->x -= e.xmotion.x_root - x;
+	  disp->y -= e.xmotion.y_root - y;
+	  x = e.xmotion.x_root;
+	  y = e.xmotion.y_root;
+	  move_x11(topology, disp);
+	  if (disp->x != lastx || disp->y != lasty) {
+	    XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
+	    topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
+	  }
+	}
+	break;
+      case ConfigureNotify:
+	lastx = disp->x;
+	lasty = disp->y;
+	disp->screen_width = e.xconfigure.width;
+	disp->screen_height = e.xconfigure.height;
+	move_x11(topology, disp);
+	if (disp->x != lastx || disp->y != lasty) {
+	  XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
+	  topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
+	}
+	break;
+      case ButtonPress:
+	  if (e.xbutton.button == Button1) {
+	  state = 1;
+	  x = e.xbutton.x_root;
+	  y = e.xbutton.y_root;
+	}
+	break;
+      case ButtonRelease:
+	if (e.xbutton.button == Button1)
+	  state = 0;
+	break;
+    }
   }
   cairo_surface_destroy(disp->cs);
   XCloseDisplay(disp->dpy);
