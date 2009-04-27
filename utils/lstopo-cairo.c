@@ -161,11 +161,19 @@ void
 output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 {
   struct display *disp = output_draw_start(&x11_draw_methods, topology, output);
-  int state = 0, x, y, lastx, lasty;
+  int state = 0, x, y, lastx = disp->x, lasty = disp->y;
 
   while (1) {
     XEvent e;
-    XNextEvent(disp->dpy, &e);
+    if (!XCheckMaskEvent(disp->dpy, ~0U, &e)) {
+      /* No pending event, flush moving windows and wait for next event */
+      if (disp->x != lastx || disp->y != lasty) {
+	XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
+	lastx = disp->x;
+	lasty = disp->y;
+      }
+      XNextEvent(disp->dpy, &e);
+    }
     switch (e.type) {
       case Expose:
 	if (e.xexpose.count < 1)
@@ -173,20 +181,14 @@ output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 	break;
       case MotionNotify:
 	if (state) {
-	  lastx = disp->x;
-	  lasty = disp->y;
 	  disp->x -= e.xmotion.x_root - x;
 	  disp->y -= e.xmotion.y_root - y;
 	  x = e.xmotion.x_root;
 	  y = e.xmotion.y_root;
 	  move_x11(topology, disp);
-	  if (disp->x != lastx || disp->y != lasty)
-	    XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
 	}
 	break;
       case ConfigureNotify:
-	lastx = disp->x;
-	lasty = disp->y;
 	disp->screen_width = e.xconfigure.width;
 	disp->screen_height = e.xconfigure.height;
 	move_x11(topology, disp);
