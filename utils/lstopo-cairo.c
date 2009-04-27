@@ -39,6 +39,7 @@ topo_cairo_text(void *output, int r, int g, int b, int size, unsigned depth, uns
 {
   cairo_t *c = output;
   cairo_move_to(c, x, y + size);
+  cairo_set_font_size(c, size);
   cairo_set_source_rgb(c, (float)r / 255, (float) g / 255, (float) b / 255);
   cairo_show_text(c, text);
 }
