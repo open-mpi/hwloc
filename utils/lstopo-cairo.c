@@ -9,6 +9,7 @@
 #include <cairo-xlib.h>
 #if CAIRO_HAS_XLIB_SURFACE
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 
 #include <stdio.h>
@@ -104,6 +105,7 @@ x11_start(void *output, int width, int height)
   win = XCreateSimpleWindow(dpy, top, 0, 0, width, height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
 
   XSelectInput(dpy, win,
+      KeyPressMask |
       ButtonPressMask | ButtonReleaseMask |
       PointerMotionMask |
       ExposureMask);
@@ -161,11 +163,12 @@ void
 output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 {
   struct display *disp = output_draw_start(&x11_draw_methods, topology, output);
+  int finish = 0;
   int state = 0;
   int x = 0, y = 0; /* shut warning down */
   int lastx = disp->x, lasty = disp->y;
 
-  while (1) {
+  while (!finish) {
     XEvent e;
     if (!XEventsQueued(disp->dpy, QueuedAlready)) {
       /* No pending event, flush moving windows before waiting for next event */
@@ -208,6 +211,16 @@ output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 	if (e.xbutton.button == Button1)
 	  state = 0;
 	break;
+      case MappingNotify:
+	XRefreshKeyboardMapping(&e.xmapping);
+	break;
+      case KeyPress: {
+	KeySym keysym;
+	XLookupString(&e.xkey, NULL, 0, &keysym, NULL);
+	if (keysym == XK_q || keysym == XK_Q)
+	  finish = 1;
+	break;
+      }
     }
   }
   cairo_surface_destroy(disp->cs);
