@@ -180,10 +180,8 @@ output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 	  x = e.xmotion.x_root;
 	  y = e.xmotion.y_root;
 	  move_x11(topology, disp);
-	  if (disp->x != lastx || disp->y != lasty) {
+	  if (disp->x != lastx || disp->y != lasty)
 	    XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
-	    topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
-	  }
 	}
 	break;
       case ConfigureNotify:
@@ -192,10 +190,8 @@ output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 	disp->screen_width = e.xconfigure.width;
 	disp->screen_height = e.xconfigure.height;
 	move_x11(topology, disp);
-	if (disp->x != lastx || disp->y != lasty) {
+	if (disp->x != lastx || disp->y != lasty)
 	  XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
-	  topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
-	}
 	break;
       case ButtonPress:
 	  if (e.xbutton.button == Button1) {
