@@ -30,6 +30,12 @@ main (int argc, char *argv[])
     {
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
 	verbose_mode = 1;
+      if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
+        fprintf (stderr, "By default, lstopo displays a graphical window with the topology.\n");
+        fprintf (stderr, "To produce a text output on the standard output, specify the parameter <-> or </dev/stdout>.\n");
+        fprintf (stderr, "Output can also be saved in a file. Recognised file formats are: <txt>, <fig>, <png>, <svg>\n");
+        exit(EXIT_FAILURE);
+      }
       else {
 	if (filename)
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
