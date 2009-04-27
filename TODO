@@ -1,5 +1,6 @@
 * integrate marcel split quirk?
   + split for real, just explain how to split?
+  + keep fake level type?
 * integrate synthetic topology support
 
 * LT_NOSMT
@@ -38,6 +39,10 @@ API:
 * add a way to extract libnuma-friendly masks of nodes from arrays of levels (OR'ed)
   + no level = empty mask, and we may want an easy alias for "whole machine"
 * add reverse-routines converting sched_getaffinity or libnuma masks into a ancestor level
+* provide traversal functions instead of pointers in structures?
+* LT_LEVEL_MEMORY_L*: what about L4 someday?
+* hide some things from lt_topo?
+* there could be several size for huge pages
 
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
