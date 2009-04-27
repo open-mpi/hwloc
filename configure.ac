@@ -14,25 +14,36 @@ case ${target} in
     ;;
   *-*-irix*)
     AC_DEFINE(IRIX_SYS, 1, Define to 1 on Irix)
+    irix=yes
     ;;
   *-*-darwin*)
     AC_DEFINE(DARWIN_SYS, 1, Define to 1 on Darwin)
+    darwin=yes
     ;;
   *-*-solaris*)
     AC_DEFINE(SOLARIS_SYS, 1, Define to 1 on Solaris)
+    solaris=yes
     ;;
   *-*-aix*)
     AC_DEFINE(AIX_SYS, 1, Define to 1 on AIX)
+    aix=yes
     ;;
   *-*-osf*)
     AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
+    osf=yes
     ;;
   *)
-    linux=no
     echo Host type \"${target}\" not yet supported.
     exit 1;
     ;;
 esac
+
+AM_CONDITIONAL([HAVE_LINUX], [test "x$linux" = "xyes"])
+AM_CONDITIONAL([HAVE_IRIX], [test "x$irix" = "xyes"])
+AM_CONDITIONAL([HAVE_DARWIN], [test "x$darwin" = "xyes"])
+AM_CONDITIONAL([HAVE_SOLARIS], [test "x$solaris" = "xyes"])
+AM_CONDITIONAL([HAVE_AIX], [test "x$aix" = "xyes"])
+AM_CONDITIONAL([HAVE_OSF], [test "x$osf" = "xyes"])
 
 AC_CHECK_HEADERS([sys/lgrp_user.h], [
   AC_HAVE_LIBRARY([lgrp])
@@ -49,8 +60,6 @@ AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
 AC_CONFIG_SRCDIR([src/topology.c])
 AC_CONFIG_HEADER([include/config.h])
-
-AM_CONDITIONAL([HAVE_LINUX], [test "x$linux" = "xyes"])
 
 AC_LANG([C])
 

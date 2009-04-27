@@ -24,6 +24,14 @@ extern void look_lgrp(lt_topo_t *topology);
 extern void look_kstat(lt_topo_t *topology);
 #endif /* HAVE_LIBKSTAT */
 
+#ifdef AIX_SYS
+extern void look_aix(lt_topo_t *topology);
+#endif /* AIX_SYS */
+
+#ifdef OSF_SYS
+extern void look_osf(lt_topo_t *topology);
+#endif /* OSF_SYS */
+
 #ifdef __GLIBC__
 #if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)
 # define HAVE_OPENAT

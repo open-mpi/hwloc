@@ -12,3 +12,15 @@ libtopology_la_SOURCES += topology-linux.c
 else !HAVE_LINUX
 EXTRA_DIST += topology-linux.c
 endif !HAVE_LINUX
+
+if HAVE_AIX
+libtopology_la_SOURCES += topology-aix.c
+else !HAVE_AIX
+EXTRA_DIST += topology-aix.c
+endif !HAVE_AIX
+
+if HAVE_OSF
+libtopology_la_SOURCES += topology-osf.c
+else !HAVE_OSF
+EXTRA_DIST += topology-osf.c
+endif !HAVE_OSF
