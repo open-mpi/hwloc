@@ -167,15 +167,15 @@ output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
 
   while (1) {
     XEvent e;
-    if (!XCheckMaskEvent(disp->dpy, ~0U, &e)) {
-      /* No pending event, flush moving windows and wait for next event */
+    if (!XEventsQueued(disp->dpy, QueuedAlready)) {
+      /* No pending event, flush moving windows before waiting for next event */
       if (disp->x != lastx || disp->y != lasty) {
 	XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
 	lastx = disp->x;
 	lasty = disp->y;
       }
-      XNextEvent(disp->dpy, &e);
     }
+    XNextEvent(disp->dpy, &e);
     switch (e.type) {
       case Expose:
 	if (e.xexpose.count < 1)
