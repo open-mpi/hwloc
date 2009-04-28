@@ -89,7 +89,7 @@ lt_print_level(struct topo_topology *topology, struct lt_level *l, FILE *output,
   if (l->level == topology->nb_levels-1) {
     fprintf(output, "%sVP %s%u", separator, indexprefix, l->number);
   }
-  fprintf(output,"%s\n", levelterm);
+  fprintf(output, "%s", levelterm);
 }
 
 

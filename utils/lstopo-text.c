@@ -22,6 +22,7 @@ output_topology (topo_topology_t topology, lt_level_t l, FILE *output, int i, in
 
   indent (output, 2*i);
   lt_print_level (topology, l, output, verbose_mode, separator, indexprefix, labelseparator, levelterm);
+  fprintf(output, "\n");
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
