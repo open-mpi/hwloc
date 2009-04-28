@@ -22,8 +22,8 @@ main (int argc, char *argv[])
   char *filename = NULL;
   FILE *output;
 
-  err = lt_topo_init (&topology, NULL);
-  if (!err)
+  err = topo_topology_init (&topology);
+  if (err)
     return EXIT_FAILURE;
 
   while (argc >= 2)
@@ -50,6 +50,10 @@ main (int argc, char *argv[])
     output = stdout;
   else
     output = fopen(filename, "w");
+
+  err = topo_topology_load (topology);
+  if (err)
+    return EXIT_FAILURE;
 
   if (!filename) {
 #ifdef HAVE_CAIRO
@@ -89,7 +93,7 @@ main (int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  lt_topo_fini (topology);
+  topo_topology_destroy (topology);
 
   return EXIT_SUCCESS;
 }

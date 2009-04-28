@@ -19,8 +19,11 @@ main (int argc, char *argv[])
   int found, i;
   int err;
 
-  err = lt_topo_init (&topology, NULL);
-  if (!err)
+  err = topo_topology_init (&topology);
+  if (err)
+    return EXIT_FAILURE;
+  err = topo_topology_load (topology);
+  if (err)
     return EXIT_FAILURE;
 
   /* get the last first object */
@@ -40,7 +43,7 @@ main (int argc, char *argv[])
 	   ancestor->type, ancestor->number);
   }
 
-  lt_topo_fini (topology);
+  topo_topology_destroy (topology);
 
   return EXIT_SUCCESS;
 }

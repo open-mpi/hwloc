@@ -553,20 +553,31 @@ lt_get_dmi_info(struct lt_topo *topology)
 }
 
 int
-lt_topo_init (struct lt_topo **topologyp, const char *fsys_root_path)
+topo_topology_init (struct lt_topo **topologyp)
 {
   struct lt_topo *topology;
-#ifdef HAVE_OPENAT
-  char *fsys_root_path_env;
-#endif
-
   topology = topo_default_allocator.allocate (sizeof (struct lt_topo));
   if(!topology)
     return -1;
 
   lt_setup_topo(topology);
 
+  *topologyp = topology;
+  return 0;
+}
+
+int
+topo_topology_set_fsys_root(struct lt_topo *topology, const char *fsys_root_path)
+{
 #ifdef HAVE_OPENAT
+  char *fsys_root_path_env;
+
+  /* close previous root */
+  if (topology->fsys_root_fd >= 0) {
+    close(topology->fsys_root_fd);
+    topology->fsys_root_fd = -1;
+  }
+
   /* Use the root path from the environment variable first,
    * then from the given argument, then the default root.
    */
@@ -577,10 +588,21 @@ lt_topo_init (struct lt_topo **topologyp, const char *fsys_root_path)
     fsys_root_path = "/";
 
   /* Get a file descriptor to the file system root.  */
-  if (lt_set_fsys_root(topology, fsys_root_path)) {
-    perror ("opening file system root");
-    assert(0);
-  }
+  if (lt_set_fsys_root(topology, fsys_root_path))
+    return -1;
+
+#endif
+
+  return 0;
+}
+
+int
+topo_topology_load (struct lt_topo *topology)
+{
+#ifdef HAVE_OPENAT
+  if (topology->fsys_root_fd < 0)
+    if (topo_topology_set_fsys_root(topology, "/") < 0)
+      return -1;
 #endif
 
   topo_discover(topology);
@@ -588,12 +610,11 @@ lt_topo_init (struct lt_topo **topologyp, const char *fsys_root_path)
   topology->dmi_board_vendor = topology->dmi_board_name = NULL;
   lt_get_dmi_info(topology);
 
-  *topologyp = topology;
-  return 1;
+  return 0;
 }
 
 void
-lt_topo_fini (struct lt_topo *topology)
+topo_topology_destroy (struct lt_topo *topology)
 {
   unsigned l,i;
   /* Last level is not freed because we need it in various places */
@@ -610,6 +631,9 @@ lt_topo_fini (struct lt_topo *topology)
 	  topology->levels[l] = NULL;
 	}
     }
+
+  if (topology->fsys_root_fd >= 0)
+    close(topology->fsys_root_fd);
   free(topology->dmi_board_vendor);
   free(topology->dmi_board_name);
 }

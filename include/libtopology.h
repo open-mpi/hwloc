@@ -53,7 +53,6 @@ struct lt_level {
 
 typedef struct lt_level * lt_level_t;
 
-
 struct lt_topo {
   unsigned nb_processors; 				/* Total number of physical processors */
   unsigned nb_nodes; 					/* Number of NUMA nodes */
@@ -69,11 +68,17 @@ struct lt_topo {
 
 typedef struct lt_topo lt_topo_t;
 
-/** \brief Allocate and initialize a topology context,
-    using an optional file-system root if given. */
-extern int lt_topo_init (lt_topo_t **topologyp, const char *fsys_root_path);
+/** \brief Allocate a topology context. */
+extern int topo_topology_init (lt_topo_t **topologyp);
+/** \brief Build the actual topology once initialized with _init and tuned with backends and friends */
+extern int topo_topology_load(lt_topo_t *topology);
 /** \brief Terminate and free a topology context. */
-extern void lt_topo_fini (lt_topo_t *topology);
+extern void topo_topology_destroy (lt_topo_t *topology);
+
+/* FIXME: switch to a backend interface */
+/** \brief Change the file-system root path when building the topology from sysfs/procs */
+extern int topo_topology_set_fsys_root(lt_topo_t *topology, const char *fsys_root_path);
+
 
 /** \brief Returns the common father level to levels lvl1 and lvl2 */
 extern lt_level_t lt_find_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
