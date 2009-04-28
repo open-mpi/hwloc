@@ -597,6 +597,13 @@ topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_roo
 }
 
 int
+topo_topology_set_flags (topo_topology_t topology, unsigned long flags)
+{
+  topology->flags = flags;
+  return 0;
+}
+
+int
 topo_topology_load (struct topo_topology *topology)
 {
 #ifdef HAVE_OPENAT

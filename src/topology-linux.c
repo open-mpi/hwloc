@@ -610,6 +610,15 @@ look__sysfscpu(unsigned *procid_max,
       lt_cpuset_set(&coreset, i);
       lt_cpuset_clearset(&coreset, offline_cpus_set);
 
+      /* ignore threads except the first one */
+      if (i != lt_cpuset_first(&coreset)
+	  && (topology->flags & TOPO_FLAGS_IGNORE_THREADS)) {
+	  ltdebug("os proc %d is not the first thread of core\n", i);
+	  lt_cpuset_set(offline_cpus_set, i);
+	  nr_offline_cpus++;
+	  continue;
+      }
+
       for(j=0; j<i; j++)
 	if (lt_cpuset_isset(&dieset, j))
 	  break;
@@ -801,10 +810,9 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
   if (numdies>1)
     lt_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
 
-  for(j=0; j<procid_max; j++)
-    {
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_CACHES))
+    for(j=0; j<procid_max; j++)
       lt_parse_cache_shared_cpu_maps(j, procid_max, offline_cpus_set, proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
-    }
 
   if (numcaches[2] > 0)
     {

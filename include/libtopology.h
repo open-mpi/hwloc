@@ -19,6 +19,13 @@ extern int topo_topology_load(topo_topology_t topology);
 /** \brief Terminate and free a topology context. */
 extern void topo_topology_destroy (topo_topology_t topology);
 
+enum topo_flags_e {
+  TOPO_FLAGS_IGNORE_THREADS = (1<<0),
+  TOPO_FLAGS_IGNORE_CACHES = (1<<1),
+};
+/** \brief Set OR'ed flags to non-yet-loaded topology */
+extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
+
 /* FIXME: switch to a backend interface */
 /** \brief Change the file-system root path when building the topology from sysfs/procs */
 extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);

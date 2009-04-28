@@ -5,8 +5,6 @@
   + keep fake level type?
 * integrate synthetic topology support
 
-* LT_NOSMT
-
 * factorize all /sys/.../node/meminfo reading routines
 * move DMI reading info to topology-linux.c
 
