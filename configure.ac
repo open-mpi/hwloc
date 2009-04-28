@@ -32,7 +32,7 @@ case ${target} in
     AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
     osf=yes
     ;;
-  *-*-mingw*|*-*-cywin*)
+  *-*-mingw*|*-*-cygwin*)
     AC_DEFINE(WIN_SYS, 1, Define to 1 on WINDOWS)
     windows=yes
     ;;
