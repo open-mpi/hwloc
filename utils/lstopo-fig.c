@@ -106,7 +106,7 @@ struct draw_methods fig_draw_methods = {
 };
 
 void
-output_fig (lt_topo_t *topology, FILE *output, int verbose_mode)
+output_fig (topo_topology_t topology, FILE *output, int verbose_mode)
 {
   output = output_draw_start(&fig_draw_methods, topology, output);
   output_draw(&fig_draw_methods, topology, output);

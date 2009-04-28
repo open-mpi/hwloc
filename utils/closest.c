@@ -2,6 +2,7 @@
 
 #include <config.h>
 #include <libtopology.h>
+#include <libtopology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,7 +14,7 @@
 int
 main (int argc, char *argv[])
 {
-  lt_topo_t *topology;
+  topo_topology_t topology;
   lt_level_t first;
   lt_level_t closest[COUNT];
   int found, i;

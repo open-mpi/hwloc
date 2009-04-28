@@ -2,6 +2,7 @@
 
 #include <config.h>
 #include <libtopology.h>
+#include <libtopology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -364,7 +365,7 @@ struct draw_methods getmax_draw_methods = {
 };
 
 void *
-output_draw_start(struct draw_methods *methods, lt_topo_t *topology, void *output)
+output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
   fig(&getmax_draw_methods, &topology->levels[0][0], &coords, 100, 0, 0);
@@ -379,7 +380,7 @@ output_draw_start(struct draw_methods *methods, lt_topo_t *topology, void *outpu
 }
 
 void
-output_draw(struct draw_methods *methods, lt_topo_t *topology, void *output)
+output_draw(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
   fig(methods, &topology->levels[0][0], output, 100, 0, 0);
 }

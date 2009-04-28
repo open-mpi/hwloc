@@ -18,7 +18,7 @@ main (int argc, char *argv[])
 {
   int err;
   int verbose_mode = 0;
-  lt_topo_t *topology;
+  topo_topology_t topology;
   char *filename = NULL;
   FILE *output;
 

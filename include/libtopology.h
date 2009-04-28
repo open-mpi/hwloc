@@ -8,6 +8,22 @@
 #include <libtopology/allocator.h>
 #include <libtopology/cpuset.h>
 
+/* \brief Topology context */
+struct topo_topology;
+typedef struct topo_topology * topo_topology_t;
+
+/** \brief Allocate a topology context. */
+extern int topo_topology_init (topo_topology_t *topologyp);
+/** \brief Build the actual topology once initialized with _init and tuned with backends and friends */
+extern int topo_topology_load(topo_topology_t topology);
+/** \brief Terminate and free a topology context. */
+extern void topo_topology_destroy (topo_topology_t topology);
+
+/* FIXME: switch to a backend interface */
+/** \brief Change the file-system root path when building the topology from sysfs/procs */
+extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
+
+
 /** \brief Type of topology level */
 enum lt_level_e {
 	LT_LEVEL_MACHINE,	/**< \brief Whole machine */
@@ -53,33 +69,6 @@ struct lt_level {
 
 typedef struct lt_level * lt_level_t;
 
-struct lt_topo {
-  unsigned nb_processors; 				/* Total number of physical processors */
-  unsigned nb_nodes; 					/* Number of NUMA nodes */
-  unsigned nb_levels;					/* Number of horizontal levels */
-  unsigned level_nbitems[LT_LEVEL_MAX]; 		/* Number of items on each horizontal level */
-  struct lt_level *levels[LT_LEVEL_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
-  int fsys_root_fd;					/* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-  int type_depth[LT_LEVEL_MAX];
-  unsigned long huge_page_size_kB;
-  char *dmi_board_vendor;
-  char *dmi_board_name;
-};
-
-typedef struct lt_topo lt_topo_t;
-
-/** \brief Allocate a topology context. */
-extern int topo_topology_init (lt_topo_t **topologyp);
-/** \brief Build the actual topology once initialized with _init and tuned with backends and friends */
-extern int topo_topology_load(lt_topo_t *topology);
-/** \brief Terminate and free a topology context. */
-extern void topo_topology_destroy (lt_topo_t *topology);
-
-/* FIXME: switch to a backend interface */
-/** \brief Change the file-system root path when building the topology from sysfs/procs */
-extern int topo_topology_set_fsys_root(lt_topo_t *topology, const char *fsys_root_path);
-
-
 /** \brief Returns the common father level to levels lvl1 and lvl2 */
 extern lt_level_t lt_find_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
 
@@ -91,7 +80,7 @@ extern int lt_is_in_subtree (lt_level_t subtree_root, lt_level_t level);
     all levels that are at the same depth than _src_.
     Report in _lvls_ up to _max_ physically closest ones to _src_.
     Return the actual number of levels that were found. */
-extern int lt_find_closest(lt_topo_t *topology, struct lt_level *src, struct lt_level **lvls, int max);
+extern int lt_find_closest(topo_topology_t topology, struct lt_level *src, struct lt_level **lvls, int max);
 
 /** \brief indexes into ::lt_levels, but available from application */
 lt_level_t lt_level(unsigned level, unsigned index);
@@ -100,7 +89,7 @@ lt_level_t lt_level(unsigned level, unsigned index);
 const char * lt_level_string(enum lt_level_e l);
 
 /** \brief print a human-readable form of the given topology level */
-void lt_print_level(lt_topo_t *topology, struct lt_level *l,
+void lt_print_level(topo_topology_t topology, struct lt_level *l,
 		    FILE *output, int verbose_mode,
 		    const char *separator, const char *indexprefix,
 		    const char* labelseparator, const char* levelterm);

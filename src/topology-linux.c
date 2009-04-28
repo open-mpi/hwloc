@@ -236,7 +236,7 @@ lt_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
 }
 
 static void
-lt_disable_mems_from_cpuset(struct lt_topo *topology, int nodelevel)
+lt_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
 {
   lt_level_t levels = topology->levels[nodelevel];
   int nbitems = topology->level_nbitems[nodelevel];
@@ -292,7 +292,7 @@ lt_disable_mems_from_cpuset(struct lt_topo *topology, int nodelevel)
 }
 
 static void
-lt_disable_cpus_from_cpuset(struct lt_topo *topology, lt_cpuset_t *offline_cpus_set)
+lt_disable_cpus_from_cpuset(struct topo_topology *topology, lt_cpuset_t *offline_cpus_set)
 {
 #define CPUSET_MASK_LEN 64
   char cpuset_mask[CPUSET_MASK_LEN];
@@ -342,7 +342,7 @@ lt_disable_cpus_from_cpuset(struct lt_topo *topology, lt_cpuset_t *offline_cpus_
 }
 
 static void
-lt_get_procfs_meminfo_info(lt_topo_t *topology,
+lt_get_procfs_meminfo_info(struct topo_topology *topology,
 			   unsigned long *mem_size_kB,
 			   unsigned long *huge_page_size_kB,
 			   unsigned long *huge_page_free) {
@@ -368,7 +368,7 @@ lt_get_procfs_meminfo_info(lt_topo_t *topology,
 }
 
 static unsigned long
-lt_sysfs_node_meminfo_to_memsize(const char * path, lt_topo_t *topology)
+lt_sysfs_node_meminfo_to_memsize(const char * path, struct topo_topology *topology)
 {
   char string[64];
   FILE *fd;
@@ -393,7 +393,7 @@ lt_sysfs_node_meminfo_to_memsize(const char * path, lt_topo_t *topology)
 }
 
 static unsigned long
-lt_sysfs_node_meminfo_to_hugepagefree(const char * path, lt_topo_t *topology)
+lt_sysfs_node_meminfo_to_hugepagefree(const char * path, struct topo_topology *topology)
 {
   char string[64];
   FILE *fd;
@@ -418,7 +418,7 @@ lt_sysfs_node_meminfo_to_hugepagefree(const char * path, lt_topo_t *topology)
 }
 
 static void
-look_sysfsnode(lt_topo_t *topology)
+look_sysfsnode(struct topo_topology *topology)
 {
   unsigned i, osnode;
   unsigned nbnodes = 1;
@@ -502,7 +502,7 @@ look__sysfscpu(unsigned *procid_max,
 	       unsigned *osphysids,
 	       unsigned *proc_coreids,
 	       unsigned *oscoreids,
-	       lt_topo_t *topology)
+	       struct topo_topology *topology)
 {
 #define CPU_TOPOLOGY_STR_LEN (27+9+29+1)
   char string[CPU_TOPOLOGY_STR_LEN];
@@ -658,7 +658,7 @@ look_cpuinfo(unsigned *procid_max,
 	     unsigned *osphysids,
 	     unsigned *proc_coreids,
 	     unsigned *oscoreids,
-	     lt_topo_t *topology)
+	     struct topo_topology *topology)
 {
   FILE *fd;
   char string[strlen(PHYSID)+1+9+1+1];
@@ -752,7 +752,7 @@ look_cpuinfo(unsigned *procid_max,
 
 
 static void
-look_sysfscpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
+look_sysfscpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
 {
   unsigned proc_physids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
   unsigned osphysids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
@@ -833,7 +833,7 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
 }
 
 void
-look_linux(lt_topo_t *topology, lt_cpuset_t *offline_cpus_set)
+look_linux(struct topo_topology *topology, lt_cpuset_t *offline_cpus_set)
 {
   look_sysfsnode(topology);
   look_sysfscpu(offline_cpus_set, topology);

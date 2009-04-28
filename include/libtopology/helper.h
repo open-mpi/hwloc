@@ -6,34 +6,35 @@
 #define LIBTOPOLOGY_HELPER_H
 
 #include <config.h>
+#include <libtopology/private.h>
 
 
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
-extern void lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, lt_topo_t *topology);
-extern void lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, lt_topo_t *topology);
+extern void lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, topo_topology_t topology);
+extern void lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, topo_topology_t topology);
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 #if defined(LINUX_SYS)
-extern void lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, lt_topo_t *topology);
-extern void look_linux(lt_topo_t *topology, lt_cpuset_t *offline_cpus_set);
+extern void lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
+extern void look_linux(topo_topology_t topology, lt_cpuset_t *offline_cpus_set);
 #endif /* LINUX_SYS */
 
 #ifdef HAVE_LIBLGRP
-extern void look_lgrp(lt_topo_t *topology);
+extern void look_lgrp(topo_topology_t topology);
 #endif /* HAVE_LIBLGRP */
 #ifdef HAVE_LIBKSTAT
-extern void look_kstat(lt_topo_t *topology);
+extern void look_kstat(topo_topology_t topology);
 #endif /* HAVE_LIBKSTAT */
 
 #ifdef AIX_SYS
-extern void look_aix(lt_topo_t *topology);
+extern void look_aix(struct topo_topology *topology);
 #endif /* AIX_SYS */
 
 #ifdef OSF_SYS
-extern void look_osf(lt_topo_t *topology);
+extern void look_osf(struct topo_topology *topology);
 #endif /* OSF_SYS */
 
 #ifdef WIN_SYS
-extern void look_windows(lt_topo_t *topology);
+extern void look_windows(struct topo_topology *topology);
 #endif /* WIN_SYS */
 
 #ifdef __GLIBC__
@@ -116,7 +117,7 @@ extern DIR* lt_opendirat(const char *path, int fsys_root_fd);
 
 
 #define lt_setup_topo(t) do {						\
-		struct lt_topo * __t = (t);                             \
+		struct topo_topology * __t = (t);                       \
 		__t->nb_processors = 0;					\
 		__t->nb_nodes = 0;					\
 		__t->nb_levels = 1; /* there's at least MACHINE */	\

@@ -3,6 +3,7 @@
 #include <config.h>
 
 #include <libtopology.h>
+#include <libtopology/private.h>
 #include <libtopology/debug.h>
 
 struct lt_level * lt_find_common_ancestor (struct lt_level *lvl1, struct lt_level *lvl2)
@@ -23,7 +24,7 @@ int lt_is_in_subtree (lt_level_t subtree_root, lt_level_t level)
   return lt_cpuset_isincluded(&subtree_root->cpuset, &level->cpuset);
 }
 
-int lt_find_closest(lt_topo_t *topology, struct lt_level *src, struct lt_level **lvls, int max)
+int lt_find_closest(struct topo_topology *topology, struct lt_level *src, struct lt_level **lvls, int max)
 {
   struct lt_level *parent, *nextparent, *src_levels;
   int i,src_nbitems;

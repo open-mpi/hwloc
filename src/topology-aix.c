@@ -19,7 +19,7 @@
 #include <sys/rset.h>
 
 static void
-look_rset(int sdl, enum lt_level_e level, lt_topo_t *topology)
+look_rset(int sdl, enum lt_level_e level, struct topo_topology *topology)
 {
   rsethandle_t rset, rad;
   int r,i,maxcpus,j;
@@ -78,7 +78,7 @@ look_rset(int sdl, enum lt_level_e level, lt_topo_t *topology)
 }
 
 void
-look_aix(lt_topo_t *topology)
+look_aix(struct topo_topology *topology)
 {
   unsigned i;
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)

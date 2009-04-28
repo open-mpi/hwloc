@@ -35,7 +35,7 @@ show(lgrp_cookie_t cookie, lgrp_id_t lgrp)
 }
 
 void
-look_lgrp(lt_topo_t *topology)
+look_lgrp(struct topo_topology *topology)
 {
   lgrp_cookie_t cookie = lgrp_init(LGRP_VIEW_OS);
   lgrp_id_t root;
@@ -54,7 +54,7 @@ look_lgrp(lt_topo_t *topology)
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
 void
-look_kstat(lt_topo_t *topology)
+look_kstat(struct topo_topology *topology)
 {
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;

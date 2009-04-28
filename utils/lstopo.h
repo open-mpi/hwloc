@@ -2,7 +2,7 @@
 
 #include <libtopology.h>
 
-typedef void output_method (lt_topo_t *topology, FILE *output, int verbose_mode);
+typedef void output_method (struct topo_topology *topology, FILE *output, int verbose_mode);
 
 extern output_method output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg;
 
@@ -13,5 +13,5 @@ struct draw_methods {
   void (*text) (void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text);
 };
 
-extern void *output_draw_start(struct draw_methods *draw_methods, lt_topo_t *topology, void *output);
-extern void output_draw(struct draw_methods *draw_methods, lt_topo_t *topology, void *output);
+extern void *output_draw_start(struct draw_methods *draw_methods, struct topo_topology *topology, void *output);
+extern void output_draw(struct draw_methods *draw_methods, struct topo_topology *topology, void *output);

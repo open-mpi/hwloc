@@ -7,7 +7,7 @@
 #include <libtopology/debug.h>
 
 void
-look_windows(lt_topo_t *topology)
+look_windows(struct topo_topology *topology)
 {
 #ifdef WIN_SYS
 #  warning: TODO: use GetLogicalProcessorInformation, GetNumaHighestNodeNumber, and GetNumaNodeProcessorMask

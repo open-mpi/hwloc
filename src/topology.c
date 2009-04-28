@@ -14,6 +14,7 @@
 #include <fcntl.h>
 
 #include <libtopology.h>
+#include <libtopology/private.h>
 #include <libtopology/helper.h>
 #include <libtopology/debug.h>
 
@@ -50,7 +51,7 @@ lt_print_level_description(struct lt_level *l, FILE *output, int verbose_mode)
   (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
 
 void
-lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbose_mode, const char *separator,
+lt_print_level(struct topo_topology *topology, struct lt_level *l, FILE *output, int verbose_mode, const char *separator,
 	       const char *indexprefix, const char* labelseparator, const char* levelterm)
 {
   enum lt_level_e type = l->type;
@@ -95,7 +96,7 @@ lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbos
 #ifdef HAVE_OPENAT
 
 static int
-lt_set_fsys_root(lt_topo_t *topology, const char *path)
+lt_set_fsys_root(struct topo_topology *topology, const char *path)
 {
   int root;
 
@@ -207,7 +208,7 @@ lt_level_string(enum lt_level_e l)
  */
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
 void
-lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, lt_topo_t *topology)
+lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
 {
   struct lt_level *die_level;
   int j;
@@ -235,7 +236,7 @@ lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsign
 }
 
 void
-lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, lt_topo_t *topology)
+lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, struct topo_topology *topology)
 {
   struct lt_level *core_level;
   int j;
@@ -268,7 +269,7 @@ lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsi
 void
 lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
 		     unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
-		     lt_topo_t *topology)
+		     struct topo_topology *topology)
 {
   struct lt_level *level;
   int j;
@@ -305,10 +306,9 @@ lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
 }
 #endif /* LINUX_SYS */
 
-
 /* Use the value stored in topology->nb_processors.  */
 static void
-look_cpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
+look_cpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
 {
   struct lt_level *cpu_level;
   unsigned oscpu,cpu;
@@ -338,7 +338,7 @@ look_cpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
 
 /* Connect levels */
 static void
-topo_connect(lt_topo_t *topology)
+topo_connect(struct topo_topology *topology)
 {
   int l, i, j, m;
   for (l=0; l<topology->nb_levels-1; l++)
@@ -376,7 +376,7 @@ compar(const void *_l1, const void *_l2)
 
 /* Main discovery loop */
 static void
-topo_discover(lt_topo_t *topology)
+topo_discover(struct topo_topology *topology)
 {
   unsigned l,i=0,j;
 
@@ -514,7 +514,7 @@ topo_discover(lt_topo_t *topology)
 }
 
 static void
-lt_get_dmi_info(struct lt_topo *topology)
+lt_get_dmi_info(struct topo_topology *topology)
 {
 #ifdef LINUX_SYS
 #define DMI_BOARD_STRINGS_LEN 50
@@ -553,10 +553,10 @@ lt_get_dmi_info(struct lt_topo *topology)
 }
 
 int
-topo_topology_init (struct lt_topo **topologyp)
+topo_topology_init (struct topo_topology **topologyp)
 {
-  struct lt_topo *topology;
-  topology = topo_default_allocator.allocate (sizeof (struct lt_topo));
+  struct topo_topology *topology;
+  topology = topo_default_allocator.allocate (sizeof (struct topo_topology));
   if(!topology)
     return -1;
 
@@ -567,7 +567,7 @@ topo_topology_init (struct lt_topo **topologyp)
 }
 
 int
-topo_topology_set_fsys_root(struct lt_topo *topology, const char *fsys_root_path)
+topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
 {
 #ifdef HAVE_OPENAT
   char *fsys_root_path_env;
@@ -597,7 +597,7 @@ topo_topology_set_fsys_root(struct lt_topo *topology, const char *fsys_root_path
 }
 
 int
-topo_topology_load (struct lt_topo *topology)
+topo_topology_load (struct topo_topology *topology)
 {
 #ifdef HAVE_OPENAT
   if (topology->fsys_root_fd < 0)
@@ -614,7 +614,7 @@ topo_topology_load (struct lt_topo *topology)
 }
 
 void
-topo_topology_destroy (struct lt_topo *topology)
+topo_topology_destroy (struct topo_topology *topology)
 {
   unsigned l,i;
   /* Last level is not freed because we need it in various places */

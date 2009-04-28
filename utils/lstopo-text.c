@@ -2,6 +2,7 @@
 
 #include <config.h>
 #include <libtopology.h>
+#include <libtopology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,7 +14,7 @@
   fprintf (output, "%*s", i, "");
 
 static void
-output_topology (lt_topo_t *topology, lt_level_t l, FILE *output, int i, int verbose_mode) {
+output_topology (topo_topology_t topology, lt_level_t l, FILE *output, int i, int verbose_mode) {
   int x;
   const char * separator = " ";
   const char * indexprefix = "#";
@@ -29,7 +30,7 @@ output_topology (lt_topo_t *topology, lt_level_t l, FILE *output, int i, int ver
   }
 }
 
-void output_text(lt_topo_t *topology, FILE *output, int verbose_mode)
+void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 {
   output_topology (topology, &topology->levels[0][0], output, 0, verbose_mode);
 

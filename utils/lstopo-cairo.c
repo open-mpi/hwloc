@@ -66,7 +66,7 @@ topo_cairo_write(void *closure, const unsigned char *data, unsigned int length)
 #endif /* (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 static void
-topo_cairo_paint(struct draw_methods *methods, lt_topo_t *topology, cairo_surface_t *cs)
+topo_cairo_paint(struct draw_methods *methods, topo_topology_t topology, cairo_surface_t *cs)
 {
   cairo_t *c;
   c = cairo_create(cs);
@@ -150,7 +150,7 @@ static struct draw_methods x11_draw_methods = {
 
 /** Clip coordinates of the visible part. */
 static void
-move_x11(lt_topo_t *topology, struct display *disp)
+move_x11(topo_topology_t topology, struct display *disp)
 {
   if (disp->width <= disp->screen_width) {
     disp->x = 0;
@@ -172,7 +172,7 @@ move_x11(lt_topo_t *topology, struct display *disp)
 }
 
 void
-output_x11(lt_topo_t *topology, FILE *output, int verbose_mode)
+output_x11(topo_topology_t topology, FILE *output, int verbose_mode)
 {
   struct display *disp = output_draw_start(&x11_draw_methods, topology, output);
   int finish = 0;
@@ -258,7 +258,7 @@ static struct draw_methods png_draw_methods = {
 };
 
 void
-output_png(lt_topo_t *topology, FILE *output, int verbose_mode)
+output_png(topo_topology_t topology, FILE *output, int verbose_mode)
 {
   cairo_surface_t *cs = output_draw_start(&png_draw_methods, topology, output);
 
@@ -285,7 +285,7 @@ static struct draw_methods pdf_draw_methods = {
 };
 
 void
-output_pdf(lt_topo_t *topology, FILE *output, int verbose_mode)
+output_pdf(topo_topology_t topology, FILE *output, int verbose_mode)
 {
   cairo_surface_t *cs = output_draw_start(&pdf_draw_methods, topology, output);
 
@@ -312,7 +312,7 @@ static struct draw_methods ps_draw_methods = {
 };
 
 void
-output_ps(lt_topo_t *topology, FILE *output, int verbose_mode)
+output_ps(topo_topology_t topology, FILE *output, int verbose_mode)
 {
   cairo_surface_t *cs = output_draw_start(&ps_draw_methods, topology, output);
 
@@ -339,7 +339,7 @@ static struct draw_methods svg_draw_methods = {
 };
 
 void
-output_svg(lt_topo_t *topology, FILE *output, int verbose_mode)
+output_svg(topo_topology_t topology, FILE *output, int verbose_mode)
 {
   cairo_surface_t *cs = output_draw_start(&svg_draw_methods, topology, output);
 
