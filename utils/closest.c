@@ -15,6 +15,7 @@ int
 main (int argc, char *argv[])
 {
   topo_topology_t topology;
+  struct topo_topology_info info;
   lt_level_t first;
   lt_level_t closest[COUNT];
   int found, i;
@@ -27,8 +28,10 @@ main (int argc, char *argv[])
   if (err)
     return EXIT_FAILURE;
 
+  err = topo_topology_get_info(topology, &info);
+
   /* get the last first object */
-  first = &topology->levels[topology->nb_levels-1][topology->level_nbitems[topology->nb_levels-1]-1];
+  first = &topology->levels[info.depth-1][info.nb_processors-1];
 
   found = lt_find_closest(topology, first, closest, COUNT);
   printf("looked for %d closest entries, found %d\n", COUNT, found);

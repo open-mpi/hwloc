@@ -613,6 +613,18 @@ topo_topology_load (struct topo_topology *topology)
   return 0;
 }
 
+int
+topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info)
+{
+  info->nb_processors = topology->nb_processors;
+  info->nb_nodes = topology->nb_nodes;
+  info->depth = topology->nb_levels;
+  info->dmi_board_vendor = topology->dmi_board_vendor;
+  info->dmi_board_name = topology->dmi_board_name;
+  info->huge_page_size_kB = topology->huge_page_size_kB;
+  return 0;
+}
+
 void
 topo_topology_destroy (struct topo_topology *topology)
 {

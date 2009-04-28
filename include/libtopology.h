@@ -23,6 +23,20 @@ extern void topo_topology_destroy (topo_topology_t topology);
 /** \brief Change the file-system root path when building the topology from sysfs/procs */
 extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
 
+/* \brief Global information about the topology */
+struct topo_topology_info {
+  /* topology size */
+  unsigned nb_processors;
+  unsigned nb_nodes;
+  unsigned depth;
+
+  /* machine specifics */
+  char *dmi_board_vendor;
+  char *dmi_board_name;
+  unsigned long huge_page_size_kB;
+};
+extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
+
 
 /** \brief Type of topology level */
 enum lt_level_e {

@@ -36,14 +36,17 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 
   if (verbose_mode)
     {
+      struct topo_topology_info info;
       int l;
 
-      if (topology->dmi_board_vendor)
-	fprintf (output, "DMI board vendor: %s\n", topology->dmi_board_vendor);
-      if (topology->dmi_board_name)
-	fprintf (output, "DMI board name: %s\n", topology->dmi_board_name);
-      if (topology->huge_page_size_kB)
-	fprintf (output, "Huge page size: %ldkB\n", topology->huge_page_size_kB);
+      topo_topology_get_info(topology, &info);
+
+      if (info.dmi_board_vendor)
+	fprintf (output, "DMI board vendor: %s\n", info.dmi_board_vendor);
+      if (info.dmi_board_name)
+	fprintf (output, "DMI board name: %s\n", info.dmi_board_name);
+      if (info.huge_page_size_kB)
+	fprintf (output, "Huge page size: %ldkB\n", info.huge_page_size_kB);
 
       for (l = 0; l < LT_LEVEL_MAX; l++)
 	{
