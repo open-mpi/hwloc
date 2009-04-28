@@ -2,7 +2,6 @@
 
 #include <config.h>
 #include <libtopology.h>
-#include <libtopology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,7 +30,7 @@ main (int argc, char *argv[])
   err = topo_topology_get_info(topology, &info);
 
   /* get the last first object */
-  first = &topology->levels[info.depth-1][info.nb_processors-1];
+  first = topo_topology_get_level(topology, info.depth-1, info.nb_processors-1);
 
   found = lt_find_closest(topology, first, closest, COUNT);
   printf("looked for %d closest entries, found %d\n", COUNT, found);

@@ -2,7 +2,6 @@
 
 #include <config.h>
 #include <libtopology.h>
-#include <libtopology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -368,7 +367,7 @@ void *
 output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(&getmax_draw_methods, &topology->levels[0][0], &coords, 100, 0, 0);
+  fig(&getmax_draw_methods, topo_topology_get_level(topology, 0, 0), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR);
   methods->declare_color(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR);
@@ -382,5 +381,5 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
 void
 output_draw(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
-  fig(methods, &topology->levels[0][0], output, 100, 0, 0);
+  fig(methods, topo_topology_get_level(topology, 0, 0), output, 100, 0, 0);
 }

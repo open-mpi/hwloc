@@ -6,6 +6,16 @@
 #include <libtopology/private.h>
 #include <libtopology/debug.h>
 
+struct lt_level *
+topo_topology_get_level(struct topo_topology *topology, unsigned depth, unsigned index)
+{
+  if (depth >= topology->nb_levels)
+    return NULL;
+  if (index >= topology->level_nbitems[depth])
+    return NULL;
+  return &topology->levels[depth][index];
+}
+
 struct lt_level * lt_find_common_ancestor (struct lt_level *lvl1, struct lt_level *lvl2)
 {
   while (lvl1->level > lvl2->level)

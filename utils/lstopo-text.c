@@ -32,7 +32,7 @@ output_topology (topo_topology_t topology, lt_level_t l, FILE *output, int i, in
 
 void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 {
-  output_topology (topology, &topology->levels[0][0], output, 0, verbose_mode);
+  output_topology (topology, topo_topology_get_level(topology, 0, 0), output, 0, verbose_mode);
 
   if (verbose_mode)
     {

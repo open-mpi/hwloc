@@ -83,6 +83,9 @@ struct lt_level {
 
 typedef struct lt_level * lt_level_t;
 
+/** \brief Return the topology level at index _index_ from depth _depth_ */
+extern lt_level_t topo_topology_get_level(topo_topology_t topology, unsigned depth, unsigned index);
+
 /** \brief Returns the common father level to levels lvl1 and lvl2 */
 extern lt_level_t lt_find_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
 
