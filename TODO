@@ -2,6 +2,9 @@
 
 * uniformize SMT / PROC / thread names
 
+* generalize TOPO_FLAGS_IGNORE_THREADS, TOPO_FLAGS_IGNORE_CACHES,
+  TOPO_FLAGS_IGNORE_LINUX_CPUSETS filtering
+
 * integrate marcel split quirk?
   + split for real, just explain how to split?
   + keep fake level type?
