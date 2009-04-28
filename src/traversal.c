@@ -6,6 +6,12 @@
 #include <libtopology/private.h>
 #include <libtopology/debug.h>
 
+unsigned
+topo_topology_get_type_depth (struct topo_topology *topology, enum lt_level_e type)
+{
+  return topology->type_depth[type];
+}
+
 struct lt_level *
 topo_topology_get_level(struct topo_topology *topology, unsigned depth, unsigned index)
 {

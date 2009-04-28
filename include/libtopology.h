@@ -83,6 +83,12 @@ struct lt_level {
 
 typedef struct lt_level * lt_level_t;
 
+/** \brief Returns the depth of levels of type _type_. If no level of
+    this type is present on the underlying architecture, the function
+    returns the depth of the first "present" level we find uppon
+    _type_. */
+extern unsigned topo_topology_get_type_depth (topo_topology_t topology, enum lt_level_e type);
+
 /** \brief Return the topology level at index _index_ from depth _depth_ */
 extern lt_level_t topo_topology_get_level(topo_topology_t topology, unsigned depth, unsigned index);
 
@@ -110,13 +116,5 @@ void lt_print_level(topo_topology_t topology, struct lt_level *l,
 		    FILE *output, int verbose_mode,
 		    const char *separator, const char *indexprefix,
 		    const char* labelseparator, const char* levelterm);
-
-#if 0 /* not implemented yet */
-/** \brief Returns the depth of levels of type _type_. If no level of
-    this type is present on the underlying architecture, the function
-    returns the depth of the first "present" level we find uppon
-    _type_. */
-extern int lt_get_topo_type_depth (enum lt_level_e type);
-#endif
 
 #endif /* LIBTOPOLOGY_H */

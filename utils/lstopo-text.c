@@ -2,7 +2,6 @@
 
 #include <config.h>
 #include <libtopology.h>
-#include <libtopology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,7 +49,7 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 
       for (l = 0; l < LT_LEVEL_MAX; l++)
 	{
-	  int depth = topology->type_depth[l];
+	  int depth = topo_topology_get_type_depth (topology, l);
 	  indent(output, depth);
 	  fprintf (output, "depth %d:\ttype #%d (%s)\n", depth, l, lt_level_string (l));
 	}
