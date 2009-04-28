@@ -45,9 +45,9 @@ lt_print_level_description(struct lt_level *l, FILE *output, int verbose_mode)
 }
 
 #define lt_memory_size_printf_value(_size) \
-  (_size)%1024 ? (_size) : (_size)%(1024*1024) ? (_size)>>10 : (_size)>>20
+  (_size) < (10*1024) ? (_size) : (_size) < (10*1024*1024) ? (_size)>>10 : (_size)>>20
 #define lt_memory_size_printf_unit(_size) \
-  (_size)%1024 ? "kB" : (_size)%(1024*1024) ? "MB" : "GB"
+  (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
 
 void
 lt_print_level(lt_topo_t *topology, struct lt_level *l, FILE *output, int verbose_mode, const char *separator,
