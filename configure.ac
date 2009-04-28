@@ -33,8 +33,7 @@ case ${target} in
     osf=yes
     ;;
   *)
-    echo Host type \"${target}\" not yet supported.
-    exit 1;
+    echo Warning: Host type \"${target}\" not yet supported.
     ;;
 esac
 
