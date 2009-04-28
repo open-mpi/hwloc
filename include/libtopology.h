@@ -89,6 +89,9 @@ typedef struct lt_level * lt_level_t;
     _type_. */
 extern unsigned topo_topology_get_type_depth (topo_topology_t topology, enum lt_level_e type);
 
+/** \brief Return the width of depth level _depth_ */
+extern unsigned topo_topology_get_depth_nbitems (topo_topology_t topology, unsigned depth);
+
 /** \brief Return the topology level at index _index_ from depth _depth_ */
 extern lt_level_t topo_topology_get_level(topo_topology_t topology, unsigned depth, unsigned index);
 

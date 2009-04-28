@@ -12,6 +12,14 @@ topo_topology_get_type_depth (struct topo_topology *topology, enum lt_level_e ty
   return topology->type_depth[type];
 }
 
+unsigned
+topo_topology_get_depth_nbitems (struct topo_topology *topology, unsigned depth)
+{
+  if (depth >= topology->nb_levels)
+    return 0;
+  return topology->level_nbitems[depth];
+}
+
 struct lt_level *
 topo_topology_get_level(struct topo_topology *topology, unsigned depth, unsigned index)
 {
