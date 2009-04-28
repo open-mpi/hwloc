@@ -488,7 +488,8 @@ look_sysfsnode(struct topo_topology *topology)
   topology->level_nbitems[topology->nb_levels] = topology->nb_nodes = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
 
-  lt_disable_mems_from_cpuset(topology, topology->nb_levels-1);
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_LINUX_CPUSETS))
+    lt_disable_mems_from_cpuset(topology, topology->nb_levels-1);
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
@@ -777,7 +778,8 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
   unsigned numcores=0;
   unsigned numcaches[] = { [0 ... LIBTOPO_CACHE_LEVEL_MAX-1] = 0 };
 
-  lt_disable_cpus_from_cpuset(topology, offline_cpus_set);
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_LINUX_CPUSETS))
+    lt_disable_cpus_from_cpuset(topology, offline_cpus_set);
 
   if (lt_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->fsys_root_fd) < 0
       || lt_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->fsys_root_fd) < 0

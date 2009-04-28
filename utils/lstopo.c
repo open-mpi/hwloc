@@ -41,6 +41,8 @@ main (int argc, char *argv[])
 	flags |= TOPO_FLAGS_IGNORE_CACHES;
       else if (!strcmp (argv[1], "--no-threads"))
 	flags |= TOPO_FLAGS_IGNORE_THREADS;
+      else if (!strcmp (argv[1], "--no-linux-cpusets"))
+	flags |= TOPO_FLAGS_IGNORE_LINUX_CPUSETS;
       else {
 	if (filename)
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);

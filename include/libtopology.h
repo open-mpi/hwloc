@@ -22,6 +22,7 @@ extern void topo_topology_destroy (topo_topology_t topology);
 enum topo_flags_e {
   TOPO_FLAGS_IGNORE_THREADS = (1<<0),
   TOPO_FLAGS_IGNORE_CACHES = (1<<1),
+  TOPO_FLAGS_IGNORE_LINUX_CPUSETS = (1<<2),
 };
 /** \brief Set OR'ed flags to non-yet-loaded topology */
 extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
