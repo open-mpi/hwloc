@@ -306,11 +306,6 @@ lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
 #endif /* LINUX_SYS */
 
 
-#ifdef WIN_SYS
-#  warning: TODO: use GetLogicalProcessorInformation, GetNumaHighestNodeNumber, and GetNumaNodeProcessorMask
-#endif
-
-
 /* Use the value stored in topology->nb_processors.  */
 static void
 look_cpu(lt_cpuset_t *offline_cpus_set, lt_topo_t *topology)
@@ -417,6 +412,10 @@ topo_discover(lt_topo_t *topology)
 #    ifdef HAVE_LIBKSTAT
   look_kstat(topology);
 #    endif /* HAVE_LIBKSTAT */
+
+#    ifdef  WINDOWS_SYS
+  look_windows(topology);
+#    endif /* WINDOWS_SYS */
 
   look_cpu(&offline_cpus_set, topology);
 

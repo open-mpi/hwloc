@@ -32,6 +32,10 @@ extern void look_aix(lt_topo_t *topology);
 extern void look_osf(lt_topo_t *topology);
 #endif /* OSF_SYS */
 
+#ifdef WINDOWS_SYS
+extern void look_windows(lt_topo_t *topology);
+#endif /* WINDOWS_SYS */
+
 #ifdef __GLIBC__
 #if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)
 # define HAVE_OPENAT

@@ -24,3 +24,9 @@ libtopology_la_SOURCES += topology-osf.c
 else !HAVE_OSF
 EXTRA_DIST += topology-osf.c
 endif !HAVE_OSF
+
+if HAVE_WINDOWS
+libtopology_la_SOURCES += topology-windows.c
+else !HAVE_WINDOWS
+EXTRA_DIST += topology-windows.c
+endif !HAVE_WINDOWS

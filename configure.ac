@@ -32,6 +32,10 @@ case ${target} in
     AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
     osf=yes
     ;;
+  *-*-mingw*|*-*-cywin*)
+    AC_DEFINE(WIN_SYS, 1, Define to 1 on WINDOWS)
+    windows=yes
+    ;;
   *)
     echo Warning: Host type \"${target}\" not yet supported.
     ;;
@@ -43,6 +47,7 @@ AM_CONDITIONAL([HAVE_DARWIN], [test "x$darwin" = "xyes"])
 AM_CONDITIONAL([HAVE_SOLARIS], [test "x$solaris" = "xyes"])
 AM_CONDITIONAL([HAVE_AIX], [test "x$aix" = "xyes"])
 AM_CONDITIONAL([HAVE_OSF], [test "x$osf" = "xyes"])
+AM_CONDITIONAL([HAVE_WINDOWS], [test "x$windows" = "xyes"])
 
 AC_CHECK_HEADERS([sys/lgrp_user.h], [
   AC_HAVE_LIBRARY([lgrp])
