@@ -33,7 +33,7 @@ main (int argc, char *argv[])
       if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
         fprintf (stderr, "By default, lstopo displays a graphical window with the topology.\n");
         fprintf (stderr, "To produce a text output on the standard output, specify the parameter <-> or </dev/stdout>.\n");
-        fprintf (stderr, "Output can also be saved in a file. Recognised file formats are: <txt>, <fig>, <png>, <svg>\n");
+        fprintf (stderr, "Output can also be saved in a file. Recognised file formats are: <txt>, <fig>, <pdf>, <ps>, <png>, <svg>\n");
         exit(EXIT_FAILURE);
       }
       else {
@@ -75,6 +75,10 @@ main (int argc, char *argv[])
   else if (strstr(filename, ".pdf"))
     output_pdf(topology, output, verbose_mode);
 #endif /* CAIRO_HAS_PDF_SURFACE */
+#if CAIRO_HAS_PS_SURFACE
+  else if (strstr(filename, ".ps"))
+    output_ps(topology, output, verbose_mode);
+#endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_SVG_SURFACE
   else if (strstr(filename, ".svg"))
     output_svg(topology, output, verbose_mode);

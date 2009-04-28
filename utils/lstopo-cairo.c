@@ -4,10 +4,21 @@
 
 #ifdef HAVE_CAIRO
 #include <cairo.h>
+
+#if CAIRO_HAS_PDF_SURFACE
 #include <cairo-pdf.h>
+#endif /* CAIRO_HAS_PDF_SURFACE */
+
+#if CAIRO_HAS_PS_SURFACE
+#include <cairo-ps.h>
+#endif /* CAIRO_HAS_PS_SURFACE */
+
+#if CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
-#include <cairo-xlib.h>
+#endif /* CAIRO_HAS_SVG_SURFACE */
+
 #if CAIRO_HAS_XLIB_SURFACE
+#include <cairo-xlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #endif /* CAIRO_HAS_XLIB_SURFACE */
@@ -18,7 +29,7 @@
 
 #include "lstopo.h"
 
-#if (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_SVG_SURFACE)
+#if (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE)
 /* Cairo methods */
 static void
 topo_cairo_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
@@ -44,7 +55,7 @@ topo_cairo_text(void *output, int r, int g, int b, int size, unsigned depth, uns
   cairo_show_text(c, text);
 }
 
-#if (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_SVG_SURFACE)
+#if (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE)
 static cairo_status_t
 topo_cairo_write(void *closure, const unsigned char *data, unsigned int length)
 {
@@ -52,7 +63,7 @@ topo_cairo_write(void *closure, const unsigned char *data, unsigned int length)
     return CAIRO_STATUS_WRITE_ERROR;
   return CAIRO_STATUS_SUCCESS;
 }
-#endif /* (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_SVG_SURFACE) */
+#endif /* (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 static void
 topo_cairo_paint(struct draw_methods *methods, lt_topo_t *topology, cairo_surface_t *cs)
@@ -65,7 +76,7 @@ topo_cairo_paint(struct draw_methods *methods, lt_topo_t *topology, cairo_surfac
 }
 
 static void null(void) {};
-#endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_SVG_SURFACE) */
+#endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
 #if CAIRO_HAS_XLIB_SURFACE
@@ -283,6 +294,33 @@ output_pdf(lt_topo_t *topology, FILE *output, int verbose_mode)
   cairo_surface_destroy(cs);
 }
 #endif /* CAIRO_HAS_PDF_SURFACE */
+
+
+#if CAIRO_HAS_PS_SURFACE
+/* PS back-end */
+static void *
+ps_start(void *output, int width, int height)
+{
+  return cairo_ps_surface_create_for_stream(topo_cairo_write, output, width, height);
+}
+
+static struct draw_methods ps_draw_methods = {
+  .start = ps_start,
+  .declare_color = (void*) null,
+  .box = topo_cairo_box,
+  .text = topo_cairo_text,
+};
+
+void
+output_ps(lt_topo_t *topology, FILE *output, int verbose_mode)
+{
+  cairo_surface_t *cs = output_draw_start(&ps_draw_methods, topology, output);
+
+  topo_cairo_paint(&ps_draw_methods, topology, cs);
+  cairo_surface_flush(cs);
+  cairo_surface_destroy(cs);
+}
+#endif /* CAIRO_HAS_PS_SURFACE */
 
 
 #if CAIRO_HAS_SVG_SURFACE

@@ -4,7 +4,7 @@
 
 typedef void output_method (lt_topo_t *topology, FILE *output, int verbose_mode);
 
-extern output_method output_text, output_x11, output_fig, output_png, output_pdf, output_svg;
+extern output_method output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg;
 
 struct draw_methods {
   void* (*start) (void *output, int width, int height);
