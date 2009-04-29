@@ -7,7 +7,7 @@
 
 #include <config.h>
 
-#ifdef LT_DEBUG
+#ifdef TOPO_DEBUG
 #define ltdebug(s, ...) fprintf(stderr, s, ##__VA_ARGS__) 
 #else
 #define ltdebug(s, ...) do { }while(0)

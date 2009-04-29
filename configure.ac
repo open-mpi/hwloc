@@ -88,7 +88,7 @@ AC_ARG_ENABLE([debug],
 
 AC_MSG_CHECKING([whether debug is enabled])
 if test x$enable_debug = xyes; then
-  AC_DEFINE_UNQUOTED([LT_DEBUG], [1], [Define to 1 to enable debug])
+  AC_DEFINE_UNQUOTED([TOPO_DEBUG], [1], [Define to 1 to enable debug])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
@@ -98,12 +98,12 @@ AC_PATH_PROG([BASH], [bash])
 
 AC_CHECK_FUNCS([ffs], [
   AC_CHECK_DECL([ffs],[
-    AC_DEFINE([LT_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
+    AC_DEFINE([TOPO_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
   ])
-  AC_DEFINE([LT_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
+  AC_DEFINE([TOPO_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
 ])
 AC_CHECK_FUNCS([ffsl], [
-  AC_DEFINE([LT_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
+  AC_DEFINE([TOPO_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
 
 AC_CONFIG_FILES([Makefile

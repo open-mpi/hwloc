@@ -34,12 +34,12 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 #    define TOPO_CPUSET_CPU(cpu)	({ topo_cpuset_t __set = TOPO_CPUSET_ZERO; TOPO_CPUSUBSET_CPUSUBSET(__set,cpu) = TOPO_CPUSUBSET_VAL(cpu); __set; })
 
 /* displaying cpusets */
-#if LT_BITS_PER_LONG == 32
+#if TOPO_BITS_PER_LONG == 32
 #    define TOPO_PRIxCPUSUBSET		"%08lx"
 #else
 #    define TOPO_PRIxCPUSUBSET		"%016lx"
 #endif
-#    define TOPO_CPUSUBSET_STRING_LENGTH	(LT_BITS_PER_LONG/4)
+#    define TOPO_CPUSUBSET_STRING_LENGTH	(TOPO_BITS_PER_LONG/4)
 #    define TOPO_CPUSET_STRING_LENGTH		(TOPO_CPUSUBSET_COUNT*(TOPO_CPUSUBSET_STRING_LENGTH+1))
 #    define TOPO_PRIxCPUSET		"s"
 #    define TOPO_CPUSET_PRINTF_VALUE(x)	({				\
@@ -220,29 +220,29 @@ static __inline__ void topo_cpuset_clearset (topo_cpuset_t *set,
 
 #  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)
      /* Starting from 3.4, gcc has a long variant.  */
-#    define lt_ffsl(x) __builtin_ffsl(x)
+#    define topo_ffsl(x) __builtin_ffsl(x)
 #  else
-#    define lt_ffs(x) __builtin_ffs(x)
-#    define LT_NEED_FFSL
+#    define topo_ffs(x) __builtin_ffs(x)
+#    define TOPO_NEED_FFSL
 #  endif
 
-#elif defined(LT_HAVE_FFSL)
+#elif defined(TOPO_HAVE_FFSL)
 
-#  define lt_ffsl(x) ffsl(x)
+#  define topo_ffsl(x) ffsl(x)
 
-#elif defined(LT_HAVE_FFS)
+#elif defined(TOPO_HAVE_FFS)
 
-#  ifndef LT_HAVE_DECL_FFS
+#  ifndef TOPO_HAVE_DECL_FFS
 extern int ffs(int);
 #  endif
 
-#  define lt_ffs(x) ffs(x)
-#  define LT_NEED_FFSL
+#  define topo_ffs(x) ffs(x)
+#  define TOPO_NEED_FFSL
 
 #else /* no ffs implementation */
 
-static __inline__ int lt_ffsl(unsigned long x);
-static __inline__ int lt_ffsl(unsigned long x)
+static __inline__ int topo_ffsl(unsigned long x);
+static __inline__ int topo_ffsl(unsigned long x)
 {
 	int i;
 
@@ -250,7 +250,7 @@ static __inline__ int lt_ffsl(unsigned long x)
 		return 0;
 
 	i = 1;
-#ifdef LT_BITS_PER_LONG >= 64
+#ifdef TOPO_BITS_PER_LONG >= 64
 	if (!(x & 0xfffffffful)) {
 		x >>= 32;
 		i += 32;
@@ -282,28 +282,28 @@ static __inline__ int lt_ffsl(unsigned long x)
 
 #endif
 
-#ifdef LT_NEED_FFSL
+#ifdef TOPO_NEED_FFSL
 
 /* We only have an int ffs(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline__ int lt_ffs32(unsigned long x);
-static __inline__ int lt_ffs32(unsigned long x)
+static __inline__ int topo_ffs32(unsigned long x);
+static __inline__ int topo_ffs32(unsigned long x)
 {
-	return lt_ffs(x
-#if LT_BITS_PER_INT == 16
-			& 0xfffful) ? : (lt_ffs(x >> 16) + 16
+	return topo_ffs(x
+#if TOPO_BITS_PER_INT == 16
+			& 0xfffful) ? : (topo_ffs(x >> 16) + 16
 #endif
 		);
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline__ int lt_ffsl(unsigned long x);
-static __inline__ int lt_ffsl(unsigned long x)
+static __inline__ int topo_ffsl(unsigned long x);
+static __inline__ int topo_ffsl(unsigned long x)
 {
-	return lt_ffs32(x
-#if LT_BITS_PER_LONG == 64
-			& 0xfffffffful) ? : (lt_ffs(x >> 32) + 32
+	return topo_ffs32(x
+#if TOPO_BITS_PER_LONG == 64
+			& 0xfffffffful) ? : (topo_ffs(x >> 32) + 32
 #endif
 		);
 }
@@ -316,7 +316,7 @@ static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
 	int i;
 	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++) {
 		/* subsets are unsigned longs, use ffsl */
-		int _ffs = lt_ffsl(TOPO_CPUSUBSET_SUBSET(*cpuset,i));
+		int _ffs = topo_ffsl(TOPO_CPUSUBSET_SUBSET(*cpuset,i));
 		if (_ffs>0)
 			return _ffs - 1 + TOPO_CPUSUBSET_SIZE*i;
 	}
