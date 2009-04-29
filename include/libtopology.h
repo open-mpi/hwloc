@@ -97,11 +97,14 @@ typedef struct lt_level * lt_level_t;
     _type_. */
 extern unsigned topo_topology_get_type_depth (topo_topology_t topology, enum lt_level_e type);
 
-/** \brief Return the width of depth level _depth_ */
+/** \brief Returns the width of depth level _depth_ */
 extern unsigned topo_topology_get_depth_nbitems (topo_topology_t topology, unsigned depth);
 
-/** \brief Return the topology level at index _index_ from depth _depth_ */
+/** \brief Returns the topology level at index _index_ from depth _depth_ */
 extern lt_level_t topo_topology_get_level(topo_topology_t topology, unsigned depth, unsigned index);
+
+/** \brief Returns the top-level of the topology-tree. Its type is LT_MACHINE_LEVEL. */
+static inline lt_level_t topo_topology_get_machine_level(topo_topology_t topology) { return topo_topology_get_level(topology, 0, 0); }
 
 /** \brief Returns the common father level to levels lvl1 and lvl2 */
 extern lt_level_t lt_find_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
