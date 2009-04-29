@@ -31,18 +31,18 @@ main (int argc, char *argv[])
   err = topo_topology_get_info(topology, &info);
 
   /* get the last first object */
-  first = topo_topology_get_level(topology, info.depth-1, info.nb_processors-1);
+  first = topo_get_level(topology, info.depth-1, info.nb_processors-1);
 
-  found = lt_find_closest(topology, first, closest, COUNT);
+  found = topo_find_closest_levels (topology, first, closest, COUNT);
   printf("looked for %d closest entries, found %d\n", COUNT, found);
   for(i=0; i<found; i++)
     printf("close to type %d number %d physical number %d\n",
 	   closest[i]->type, closest[i]->number, closest[i]->physical_index[closest[i]->type]);
 
   if (found) {
-    topo_level_t ancestor = lt_find_common_ancestor(first, closest[found-1]);
-    assert(lt_is_in_subtree(ancestor, first));
-    assert(lt_is_in_subtree(ancestor, closest[found-1]));
+    topo_level_t ancestor = topo_find_common_ancestor_level (first, closest[found-1]);
+    assert(topo_level_is_in_subtree(ancestor, first));
+    assert(topo_level_is_in_subtree(ancestor, closest[found-1]));
     printf("ancestor type %d number %d\n",
 	   ancestor->type, ancestor->number);
   }

@@ -22,7 +22,7 @@ output_topology (topo_topology_t topology, topo_level_t l, FILE *output, int i, 
   const char * levelterm = "";
 
   indent (output, 2*i);
-  lt_print_level (topology, l, output, verbose_mode, separator, indexprefix, labelseparator, levelterm);
+  topo_print_level (topology, l, output, verbose_mode, separator, indexprefix, labelseparator, levelterm);
   fprintf(output, "\n");
   if (l->arity || (!i && !l->arity))
     {
@@ -33,7 +33,7 @@ output_topology (topo_topology_t topology, topo_level_t l, FILE *output, int i, 
 
 void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 {
-  output_topology (topology, topo_topology_get_machine_level(topology), output, 0, verbose_mode);
+  output_topology (topology, topo_get_machine_level(topology), output, 0, verbose_mode);
 
   if (verbose_mode)
     {
@@ -51,9 +51,9 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 
       for (l = 0; l < TOPO_LEVEL_MAX; l++)
 	{
-	  int depth = topo_topology_get_type_depth (topology, l);
+	  int depth = topo_get_type_depth (topology, l);
 	  indent(output, depth);
-	  fprintf (output, "depth %d:\ttype #%d (%s)\n", depth, l, lt_level_string (l));
+	  fprintf (output, "depth %d:\ttype #%d (%s)\n", depth, l, topo_level_string (l));
 	}
     }
 }

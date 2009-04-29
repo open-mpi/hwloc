@@ -368,7 +368,7 @@ void *
 output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(&getmax_draw_methods, topo_topology_get_machine_level(topology), &coords, 100, 0, 0);
+  fig(&getmax_draw_methods, topo_get_machine_level(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR);
   methods->declare_color(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR);
@@ -382,5 +382,5 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
 void
 output_draw(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
-  fig(methods, topo_topology_get_machine_level(topology), output, 100, 0, 0);
+  fig(methods, topo_get_machine_level(topology), output, 100, 0, 0);
 }

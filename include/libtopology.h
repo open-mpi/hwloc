@@ -90,40 +90,40 @@ typedef struct topo_level * topo_level_t;
     this type is present on the underlying architecture, the function
     returns the depth of the first "present" level we find uppon
     _type_. */
-extern unsigned topo_topology_get_type_depth (topo_topology_t topology, enum topo_level_type_e type);
+extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_level_type_e type);
 
 /** \brief Returns the type of levels at depth _depth_. */
-extern enum topo_level_type_e topo_topology_get_depth_type (topo_topology_t topology, unsigned depth);
+extern enum topo_level_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);
 
 /** \brief Returns the width of depth level _depth_ */
-extern unsigned topo_topology_get_depth_nbitems (topo_topology_t topology, unsigned depth);
+extern unsigned topo_get_depth_nbitems (topo_topology_t topology, unsigned depth);
 
 /** \brief Returns the topology level at index _index_ from depth _depth_ */
-extern topo_level_t topo_topology_get_level(topo_topology_t topology, unsigned depth, unsigned index);
+extern topo_level_t topo_get_level (topo_topology_t topology, unsigned depth, unsigned index);
 
 /** \brief Returns the top-level of the topology-tree. Its type is TOPO_MACHINE_LEVEL. */
-static inline topo_level_t topo_topology_get_machine_level(topo_topology_t topology) { return topo_topology_get_level(topology, 0, 0); }
+static inline topo_level_t topo_get_machine_level (topo_topology_t topology) { return topo_get_level(topology, 0, 0); }
 
 /** \brief Returns the common father level to levels lvl1 and lvl2 */
-extern topo_level_t lt_find_common_ancestor (topo_level_t lvl1, topo_level_t lvl2);
+extern topo_level_t topo_find_common_ancestor_level (topo_level_t lvl1, topo_level_t lvl2);
 
 /** \brief Returns true if _level_ is inside the subtree beginning
     with _subtree_root_. */
-extern int lt_is_in_subtree (topo_level_t subtree_root, topo_level_t level);
+extern int topo_level_is_in_subtree (topo_level_t subtree_root, topo_level_t level);
 
 /** \brief Do a depth-first traversal of the topology to find and sort
     all levels that are at the same depth than _src_.
     Report in _lvls_ up to _max_ physically closest ones to _src_.
     Return the actual number of levels that were found. */
-extern int lt_find_closest(topo_topology_t topology, topo_level_t src, topo_level_t *lvls, int max);
+extern int topo_find_closest_levels (topo_topology_t topology, topo_level_t src, topo_level_t *lvls, int max);
 
 /** \brief return a stringified topology level type */
-const char * lt_level_string(enum topo_level_type_e l);
+extern const char * topo_level_string (enum topo_level_type_e l);
 
 /** \brief print a human-readable form of the given topology level */
-void lt_print_level(topo_topology_t topology, topo_level_t l,
-		    FILE *output, int verbose_mode,
-		    const char *separator, const char *indexprefix,
-		    const char* labelseparator, const char* levelterm);
+extern void topo_print_level (topo_topology_t topology, topo_level_t l,
+			      FILE *output, int verbose_mode,
+			      const char *separator, const char *indexprefix,
+			      const char* labelseparator, const char* levelterm);
 
 #endif /* LIBTOPOLOGY_H */

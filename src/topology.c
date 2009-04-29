@@ -18,81 +18,6 @@
 #include <libtopology/helper.h>
 #include <libtopology/debug.h>
 
-static void
-lt_print_level_description(struct topo_level *l, FILE *output, int verbose_mode)
-{
-  unsigned long type = l->type;
-  const char * separator = " + ";
-  const char * current_separator = ""; /* not prefix for the first one */
-
-#define lt_print_level_description_level(_l) \
-    {									\
-      if (type == _l) \
-	{	      \
-	  fprintf(output, "%s%s", current_separator, lt_level_string(_l)); \
-	  current_separator = separator;				\
-	}								\
-    }
-
-  lt_print_level_description_level(TOPO_LEVEL_MACHINE)
-  lt_print_level_description_level(TOPO_LEVEL_FAKE)
-  lt_print_level_description_level(TOPO_LEVEL_NODE)
-  lt_print_level_description_level(TOPO_LEVEL_DIE)
-  lt_print_level_description_level(TOPO_LEVEL_L3)
-  lt_print_level_description_level(TOPO_LEVEL_L2)
-  lt_print_level_description_level(TOPO_LEVEL_CORE)
-  lt_print_level_description_level(TOPO_LEVEL_L1)
-  lt_print_level_description_level(TOPO_LEVEL_PROC)
-}
-
-#define lt_memory_size_printf_value(_size) \
-  (_size) < (10*1024) ? (_size) : (_size) < (10*1024*1024) ? (_size)>>10 : (_size)>>20
-#define lt_memory_size_printf_unit(_size) \
-  (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
-
-void
-lt_print_level(struct topo_topology *topology, struct topo_level *l, FILE *output, int verbose_mode, const char *separator,
-	       const char *indexprefix, const char* labelseparator, const char* levelterm)
-{
-  enum topo_level_type_e type = l->type;
-  lt_print_level_description(l, output, verbose_mode);
-  fprintf(output, "%s", labelseparator);
-  switch (type) {
-  case TOPO_LEVEL_DIE:
-  case TOPO_LEVEL_CORE:
-  case TOPO_LEVEL_PROC:
-    fprintf(output, "%s%s%s%u", separator, lt_level_string(type), indexprefix, l->physical_index[type]);
-    break;
-  case TOPO_LEVEL_MACHINE:
-    fprintf(output, "%s%s(%ld%s)", separator, lt_level_string(type),
-	    lt_memory_size_printf_value(l->memory_kB[TOPO_LEVEL_MEMORY_MACHINE]),
-	    lt_memory_size_printf_unit(l->memory_kB[TOPO_LEVEL_MEMORY_MACHINE]));
-    break;
-  case TOPO_LEVEL_NODE:
-  case TOPO_LEVEL_L3:
-  case TOPO_LEVEL_L2:
-  case TOPO_LEVEL_L1: {
-    enum topo_level_memory_type_e mtype =
-      (type == TOPO_LEVEL_NODE) ? TOPO_LEVEL_MEMORY_NODE
-      : (type == TOPO_LEVEL_L3) ? TOPO_LEVEL_MEMORY_L3
-      : (type == TOPO_LEVEL_L2) ? TOPO_LEVEL_MEMORY_L2
-      : TOPO_LEVEL_MEMORY_L1;
-    unsigned long memory_kB = l->memory_kB[mtype];
-    fprintf(output, "%s%s%s%u(%ld%s)", separator, lt_level_string(type), indexprefix, l->physical_index[type],
-	    lt_memory_size_printf_value(memory_kB),
-	    lt_memory_size_printf_unit(memory_kB));
-    break;
-  }
-  default:
-    break;
-  }
-  if (l->level == topology->nb_levels-1) {
-    fprintf(output, "%sVP %s%u", separator, indexprefix, l->number);
-  }
-  fprintf(output, "%s", levelterm);
-}
-
-
 /* Return the OS-provided number of processors.  Unlike other methods such as
    reading sysfs on Linux, this method is not virtualizable; thus it's only
    used as a fall-back method, allowing `lt_set_fsys_root ()' to
@@ -117,25 +42,6 @@ lt_fallback_nbprocessors(void) {
 #warning lt_fallback_nbprocessors will default to 1
   return 1;
 #endif
-}
-
-
-const char *
-lt_level_string(enum topo_level_type_e l)
-{
-  switch (l)
-    {
-    case TOPO_LEVEL_MACHINE: return "Machine";
-    case TOPO_LEVEL_FAKE: return "Fake";
-    case TOPO_LEVEL_NODE: return "NUMANode";
-    case TOPO_LEVEL_DIE: return "Die";
-    case TOPO_LEVEL_L3: return "L3Cache";
-    case TOPO_LEVEL_L2: return "L2Cache";
-    case TOPO_LEVEL_CORE: return "Core";
-    case TOPO_LEVEL_L1: return "L1Cache";
-    case TOPO_LEVEL_PROC: return "SMTproc";
-    default: return "Unknown";
-    }
 }
 
 
