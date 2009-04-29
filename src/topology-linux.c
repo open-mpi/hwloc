@@ -331,7 +331,7 @@ lt_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
 static void
 lt_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
 {
-  lt_level_t levels = topology->levels[nodelevel];
+  struct topo_level *levels = topology->levels[nodelevel];
   int nbitems = topology->level_nbitems[nodelevel];
 #define CPUSET_MASK_LEN 64
   char cpuset_mask[CPUSET_MASK_LEN];
@@ -363,7 +363,7 @@ lt_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
     if (prevlast+1 <= nextfirst-1)
       ltdebug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
     for(i=prevlast+1; i<=nextfirst-1; i++) {
-      levels[i].memory_kB[LT_LEVEL_MEMORY_NODE] = 0;
+      levels[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0;
       levels[i].huge_page_free = 0;
     }
 
@@ -379,7 +379,7 @@ lt_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
   if (prevlast+1 <= nextfirst-1)
     ltdebug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
   for(i=prevlast+1; i<=nextfirst-1; i++) {
-    levels[i].memory_kB[LT_LEVEL_MEMORY_NODE] = 0;
+    levels[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0;
     levels[i].huge_page_free = 0;
   }
 }
@@ -515,7 +515,7 @@ look_sysfsnode(struct topo_topology *topology)
 {
   unsigned i, osnode;
   unsigned nbnodes = 1;
-  struct lt_level *node_level;
+  struct topo_level *node_level;
   DIR *dir;
   struct dirent *dirent;
 
@@ -564,9 +564,9 @@ look_sysfsnode(struct topo_topology *topology)
       size = lt_sysfs_node_meminfo_to_memsize(nodepath, topology);
       hpfree = lt_sysfs_node_meminfo_to_hugepagefree(nodepath, topology);
 
-      lt_setup_level(&node_level[i], LT_LEVEL_NODE);
-      lt_set_os_numbers(&node_level[i], LT_LEVEL_NODE, osnode);
-      node_level[i].memory_kB[LT_LEVEL_MEMORY_NODE] = size;
+      lt_setup_level(&node_level[i], TOPO_LEVEL_NODE);
+      lt_set_os_numbers(&node_level[i], TOPO_LEVEL_NODE, osnode);
+      node_level[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = size;
       node_level[i].huge_page_free = hpfree;
       node_level[i].cpuset = cpuset;
 
@@ -912,13 +912,13 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
   if (numcaches[2] > 0)
     {
       /* setup L3 caches */
-      lt_setup_cache_level(2, LT_LEVEL_L3, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      lt_setup_cache_level(2, TOPO_LEVEL_L3, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   if (numcaches[1] > 0)
     {
       /* setup L2 caches */
-      lt_setup_cache_level(1, LT_LEVEL_L2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      lt_setup_cache_level(1, TOPO_LEVEL_L2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   if (numcores>1)
@@ -927,7 +927,7 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
   if (numcaches[0] > 0)
     {
       /* setup L1 caches */
-      lt_setup_cache_level(0, LT_LEVEL_L1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      lt_setup_cache_level(0, TOPO_LEVEL_L1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   /* Override the default returned by `ma_fallback_nbprocessors ()'.  */
@@ -980,7 +980,7 @@ look_linux(struct topo_topology *topology, lt_cpuset_t *offline_cpus_set)
 
   /* Compute the whole machine memory and huge page */
   lt_get_procfs_meminfo_info(topology,
-			     &topology->levels[0][0].memory_kB[LT_LEVEL_MEMORY_MACHINE],
+			     &topology->levels[0][0].memory_kB[TOPO_LEVEL_MEMORY_MACHINE],
 			     &topology->huge_page_size_kB,
 			     &topology->levels[0][0].huge_page_free);
 			     /* FIXME: gather page_size_kB as well? MaMI needs it */

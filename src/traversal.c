@@ -7,7 +7,7 @@
 #include <libtopology/debug.h>
 
 unsigned
-topo_topology_get_type_depth (struct topo_topology *topology, enum lt_level_e type)
+topo_topology_get_type_depth (struct topo_topology *topology, enum topo_level_type_e type)
 {
   return topology->type_depth[type];
 }
@@ -20,7 +20,7 @@ topo_topology_get_depth_nbitems (struct topo_topology *topology, unsigned depth)
   return topology->level_nbitems[depth];
 }
 
-struct lt_level *
+struct topo_level *
 topo_topology_get_level(struct topo_topology *topology, unsigned depth, unsigned index)
 {
   if (depth >= topology->nb_levels)
@@ -30,15 +30,15 @@ topo_topology_get_level(struct topo_topology *topology, unsigned depth, unsigned
   return &topology->levels[depth][index];
 }
 
-enum lt_level_e
+enum topo_level_type_e
 topo_topology_get_depth_type (topo_topology_t topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
-    return LT_LEVEL_MAX;
-  return topology->levels[depth][0].type;  
+    return TOPO_LEVEL_MAX; /* FIXME: add an invalid value ? */
+  return topology->levels[depth][0].type;
 }
 
-struct lt_level * lt_find_common_ancestor (struct lt_level *lvl1, struct lt_level *lvl2)
+struct topo_level * lt_find_common_ancestor (struct topo_level *lvl1, struct topo_level *lvl2)
 {
   while (lvl1->level > lvl2->level)
     lvl1 = lvl1->father;
@@ -51,14 +51,14 @@ struct lt_level * lt_find_common_ancestor (struct lt_level *lvl1, struct lt_leve
   return lvl1;
 }
 
-int lt_is_in_subtree (lt_level_t subtree_root, lt_level_t level)
+int lt_is_in_subtree (topo_level_t subtree_root, topo_level_t level)
 {
   return lt_cpuset_isincluded(&subtree_root->cpuset, &level->cpuset);
 }
 
-int lt_find_closest(struct topo_topology *topology, struct lt_level *src, struct lt_level **lvls, int max)
+int lt_find_closest(struct topo_topology *topology, struct topo_level *src, struct topo_level **lvls, int max)
 {
-  struct lt_level *parent, *nextparent, *src_levels;
+  struct topo_level *parent, *nextparent, *src_levels;
   int i,src_nbitems;
   int stored = 0;
 

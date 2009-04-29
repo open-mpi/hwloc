@@ -19,7 +19,7 @@
 #include <libtopology/debug.h>
 
 static void
-lt_print_level_description(struct lt_level *l, FILE *output, int verbose_mode)
+lt_print_level_description(struct topo_level *l, FILE *output, int verbose_mode)
 {
   unsigned long type = l->type;
   const char * separator = " + ";
@@ -34,15 +34,15 @@ lt_print_level_description(struct lt_level *l, FILE *output, int verbose_mode)
 	}								\
     }
 
-  lt_print_level_description_level(LT_LEVEL_MACHINE)
-  lt_print_level_description_level(LT_LEVEL_FAKE)
-  lt_print_level_description_level(LT_LEVEL_NODE)
-  lt_print_level_description_level(LT_LEVEL_DIE)
-  lt_print_level_description_level(LT_LEVEL_L3)
-  lt_print_level_description_level(LT_LEVEL_L2)
-  lt_print_level_description_level(LT_LEVEL_CORE)
-  lt_print_level_description_level(LT_LEVEL_L1)
-  lt_print_level_description_level(LT_LEVEL_PROC)
+  lt_print_level_description_level(TOPO_LEVEL_MACHINE)
+  lt_print_level_description_level(TOPO_LEVEL_FAKE)
+  lt_print_level_description_level(TOPO_LEVEL_NODE)
+  lt_print_level_description_level(TOPO_LEVEL_DIE)
+  lt_print_level_description_level(TOPO_LEVEL_L3)
+  lt_print_level_description_level(TOPO_LEVEL_L2)
+  lt_print_level_description_level(TOPO_LEVEL_CORE)
+  lt_print_level_description_level(TOPO_LEVEL_L1)
+  lt_print_level_description_level(TOPO_LEVEL_PROC)
 }
 
 #define lt_memory_size_printf_value(_size) \
@@ -51,32 +51,32 @@ lt_print_level_description(struct lt_level *l, FILE *output, int verbose_mode)
   (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
 
 void
-lt_print_level(struct topo_topology *topology, struct lt_level *l, FILE *output, int verbose_mode, const char *separator,
+lt_print_level(struct topo_topology *topology, struct topo_level *l, FILE *output, int verbose_mode, const char *separator,
 	       const char *indexprefix, const char* labelseparator, const char* levelterm)
 {
-  enum lt_level_e type = l->type;
+  enum topo_level_type_e type = l->type;
   lt_print_level_description(l, output, verbose_mode);
   fprintf(output, "%s", labelseparator);
   switch (type) {
-  case LT_LEVEL_DIE:
-  case LT_LEVEL_CORE:
-  case LT_LEVEL_PROC:
+  case TOPO_LEVEL_DIE:
+  case TOPO_LEVEL_CORE:
+  case TOPO_LEVEL_PROC:
     fprintf(output, "%s%s%s%u", separator, lt_level_string(type), indexprefix, l->physical_index[type]);
     break;
-  case LT_LEVEL_MACHINE:
+  case TOPO_LEVEL_MACHINE:
     fprintf(output, "%s%s(%ld%s)", separator, lt_level_string(type),
-	    lt_memory_size_printf_value(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]),
-	    lt_memory_size_printf_unit(l->memory_kB[LT_LEVEL_MEMORY_MACHINE]));
+	    lt_memory_size_printf_value(l->memory_kB[TOPO_LEVEL_MEMORY_MACHINE]),
+	    lt_memory_size_printf_unit(l->memory_kB[TOPO_LEVEL_MEMORY_MACHINE]));
     break;
-  case LT_LEVEL_NODE:
-  case LT_LEVEL_L3:
-  case LT_LEVEL_L2:
-  case LT_LEVEL_L1: {
-    enum lt_level_memory_type_e mtype =
-      (type == LT_LEVEL_NODE) ? LT_LEVEL_MEMORY_NODE
-      : (type == LT_LEVEL_L3) ? LT_LEVEL_MEMORY_L3
-      : (type == LT_LEVEL_L2) ? LT_LEVEL_MEMORY_L2
-      : LT_LEVEL_MEMORY_L1;
+  case TOPO_LEVEL_NODE:
+  case TOPO_LEVEL_L3:
+  case TOPO_LEVEL_L2:
+  case TOPO_LEVEL_L1: {
+    enum topo_level_memory_type_e mtype =
+      (type == TOPO_LEVEL_NODE) ? TOPO_LEVEL_MEMORY_NODE
+      : (type == TOPO_LEVEL_L3) ? TOPO_LEVEL_MEMORY_L3
+      : (type == TOPO_LEVEL_L2) ? TOPO_LEVEL_MEMORY_L2
+      : TOPO_LEVEL_MEMORY_L1;
     unsigned long memory_kB = l->memory_kB[mtype];
     fprintf(output, "%s%s%s%u(%ld%s)", separator, lt_level_string(type), indexprefix, l->physical_index[type],
 	    lt_memory_size_printf_value(memory_kB),
@@ -121,19 +121,19 @@ lt_fallback_nbprocessors(void) {
 
 
 const char *
-lt_level_string(enum lt_level_e l)
+lt_level_string(enum topo_level_type_e l)
 {
   switch (l)
     {
-    case LT_LEVEL_MACHINE: return "Machine";
-    case LT_LEVEL_FAKE: return "Fake";
-    case LT_LEVEL_NODE: return "NUMANode";
-    case LT_LEVEL_DIE: return "Die";
-    case LT_LEVEL_L3: return "L3Cache";
-    case LT_LEVEL_L2: return "L2Cache";
-    case LT_LEVEL_CORE: return "Core";
-    case LT_LEVEL_L1: return "L1Cache";
-    case LT_LEVEL_PROC: return "SMTproc";
+    case TOPO_LEVEL_MACHINE: return "Machine";
+    case TOPO_LEVEL_FAKE: return "Fake";
+    case TOPO_LEVEL_NODE: return "NUMANode";
+    case TOPO_LEVEL_DIE: return "Die";
+    case TOPO_LEVEL_L3: return "L3Cache";
+    case TOPO_LEVEL_L2: return "L2Cache";
+    case TOPO_LEVEL_CORE: return "Core";
+    case TOPO_LEVEL_L1: return "L1Cache";
+    case TOPO_LEVEL_PROC: return "SMTproc";
     default: return "Unknown";
     }
 }
@@ -145,7 +145,7 @@ lt_level_string(enum lt_level_e l)
 void
 lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
 {
-  struct lt_level *die_level;
+  struct topo_level *die_level;
   int j;
 
   ltdebug("%d dies\n", numdies);
@@ -154,8 +154,8 @@ lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsign
 
   for (j = 0; j < numdies; j++)
     {
-      lt_setup_level(&die_level[j], LT_LEVEL_DIE);
-      lt_set_os_numbers(&die_level[j], LT_LEVEL_DIE, osphysids[j]);
+      lt_setup_level(&die_level[j], TOPO_LEVEL_DIE);
+      lt_set_os_numbers(&die_level[j], TOPO_LEVEL_DIE, osphysids[j]);
       lt_level_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
       ltdebug("die %d has cpuset %"LT_PRIxCPUSET"\n",
 	      j, LT_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
@@ -173,7 +173,7 @@ lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsign
 void
 lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, struct topo_topology *topology)
 {
-  struct lt_level *core_level;
+  struct topo_level *core_level;
   int j;
 
   ltdebug("%d cores\n", numcores);
@@ -182,8 +182,8 @@ lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsi
 
   for (j = 0; j < numcores; j++)
     {
-      lt_setup_level(&core_level[j], LT_LEVEL_CORE);
-      lt_set_os_numbers(&core_level[j], LT_LEVEL_CORE, oscoreids[j]);
+      lt_setup_level(&core_level[j], TOPO_LEVEL_CORE);
+      lt_set_os_numbers(&core_level[j], TOPO_LEVEL_CORE, oscoreids[j]);
       lt_level_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
       ltdebug("core %d has cpuset %"LT_PRIxCPUSET"\n",
 	      j, LT_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
@@ -202,11 +202,11 @@ lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsi
 
 #if defined(LINUX_SYS)
 void
-lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
+lt_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid_max,
 		     unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
 		     struct topo_topology *topology)
 {
-  struct lt_level *level;
+  struct topo_level *level;
   int j;
 
   ltdebug("%d L%d caches\n", numcaches[cachelevel], cachelevel+1);
@@ -219,13 +219,13 @@ lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
 
       switch (cachelevel)
 	{
-	case 2: lt_set_os_numbers(&level[j], LT_LEVEL_L3, j); break;
-	case 1: lt_set_os_numbers(&level[j], LT_LEVEL_L2, j); break;
-	case 0: lt_set_os_numbers(&level[j], LT_LEVEL_L1, j); break;
+	case 2: lt_set_os_numbers(&level[j], TOPO_LEVEL_L3, j); break;
+	case 1: lt_set_os_numbers(&level[j], TOPO_LEVEL_L2, j); break;
+	case 0: lt_set_os_numbers(&level[j], TOPO_LEVEL_L1, j); break;
 	default: assert(!1);
 	}
 
-      level[j].memory_kB[LT_LEVEL_MEMORY_L1+cachelevel] = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
+      level[j].memory_kB[TOPO_LEVEL_MEMORY_L1+cachelevel] = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
 
       lt_level_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
 
@@ -245,7 +245,7 @@ lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max,
 static void
 look_cpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
 {
-  struct lt_level *cpu_level;
+  struct topo_level *cpu_level;
   unsigned oscpu,cpu;
 
   cpu_level=malloc((topology->nb_processors+1)*sizeof(*cpu_level));
@@ -256,8 +256,8 @@ look_cpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
     {
       while (lt_cpuset_isset(offline_cpus_set, oscpu))
 	oscpu++;
-      lt_setup_level(&cpu_level[cpu], LT_LEVEL_PROC);
-      lt_set_os_numbers(&cpu_level[cpu], LT_LEVEL_PROC, oscpu);
+      lt_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC);
+      lt_set_os_numbers(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
 
       lt_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
 
@@ -304,7 +304,7 @@ topo_connect(struct topo_topology *topology)
 static int
 compar(const void *_l1, const void *_l2)
 {
-  const struct lt_level *l1 = _l1, *l2 = _l2;
+  const struct topo_level *l1 = _l1, *l2 = _l2;
   /* empty cpuset are always considered higher, so they are stored at the end, that's ok */
   return lt_cpuset_first(&l1->cpuset) - lt_cpuset_first(&l2->cpuset);
 }
@@ -380,7 +380,7 @@ topo_discover(struct topo_topology *topology)
 	      if (!lt_cpuset_iszero(&set))
 		{
 		  /* Sublevel j is part of level i, put it at k.  */
-		  struct lt_level level = topology->levels[l+1][j];
+		  struct topo_level level = topology->levels[l+1][j];
 		  memmove(&topology->levels[l+1][k+1], &topology->levels[l+1][k], (j-k)*sizeof(*topology->levels[l+1]));
 		  topology->levels[l+1][k++] = level;
 		}
@@ -426,7 +426,7 @@ topo_discover(struct topo_topology *topology)
   ltdebug("connecting done.\n");
 
   /* intialize all depth to unknown */
-  for (l=0; l < LT_LEVEL_MAX; l++)
+  for (l=0; l < TOPO_LEVEL_MAX; l++)
     topology->type_depth[l] = -1;
 
   /* walk the existing levels to set their depth */
@@ -435,7 +435,7 @@ topo_discover(struct topo_topology *topology)
 
   /* setup the depth of all still unknown levels (the one that got merged or never created */
   int type, prevdepth = -1;
-  for (type = 0; type < LT_LEVEL_MAX; type++)
+  for (type = 0; type < TOPO_LEVEL_MAX; type++)
     {
       if (topology->type_depth[type] == -1)
 	topology->type_depth[type] = prevdepth;
@@ -495,7 +495,7 @@ topo_topology_load (struct topo_topology *topology)
 }
 
 int
-topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info)
+topo_topology_get_info(struct topo_topology *topology, struct topo_topology_info *info)
 {
   info->nb_processors = topology->nb_processors;
   info->nb_nodes = topology->nb_nodes;

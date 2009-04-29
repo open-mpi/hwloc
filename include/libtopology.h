@@ -47,89 +47,81 @@ extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology
 
 
 /** \brief Type of topology level */
-enum lt_level_e {
-	LT_LEVEL_MACHINE,	/**< \brief Whole machine */
-	LT_LEVEL_FAKE,	/**< \brief Fake level for meeting the marcel_topo_max_arity constraint */ /* A passer dans marcel_topology.h */
-	LT_LEVEL_NODE,	/**< \brief NUMA node */
-	LT_LEVEL_DIE,	/**< \brief Physical chip */
-	LT_LEVEL_L3,	/**< \brief L3 cache */
-	LT_LEVEL_L2,	/**< \brief L2 cache */
-	LT_LEVEL_CORE,	/**< \brief Core */
-	LT_LEVEL_L1,	/**< \brief L1 cache */
-	LT_LEVEL_PROC,	/**< \brief SMT Processor in a core */
-	LT_LEVEL_MAX,
+enum topo_level_type_e {
+  TOPO_LEVEL_MACHINE,	/**< \brief Whole machine */
+  TOPO_LEVEL_FAKE,	/**< \brief Fake level for meeting the marcel_topo_max_arity constraint */ /* A passer dans marcel_topology.h */
+  TOPO_LEVEL_NODE,	/**< \brief NUMA node */
+  TOPO_LEVEL_DIE,	/**< \brief Physical chip */
+  TOPO_LEVEL_L3,	/**< \brief L3 cache */
+  TOPO_LEVEL_L2,	/**< \brief L2 cache */
+  TOPO_LEVEL_CORE,	/**< \brief Core */
+  TOPO_LEVEL_L1,	/**< \brief L1 cache */
+  TOPO_LEVEL_PROC,	/**< \brief SMT Processor in a core */
+  TOPO_LEVEL_MAX,
 };
 
 /** \brief Type of memory attached to the topology level */
-enum lt_level_memory_type_e {
-	LT_LEVEL_MEMORY_L1 = 0,
-	LT_LEVEL_MEMORY_L2 = 1,
-	LT_LEVEL_MEMORY_L3 = 2,
-	LT_LEVEL_MEMORY_NODE = 3,
-	LT_LEVEL_MEMORY_MACHINE = 4,
-	LT_LEVEL_MEMORY_TYPE_MAX
+enum topo_level_memory_type_e {
+  TOPO_LEVEL_MEMORY_L1 = 0,
+  TOPO_LEVEL_MEMORY_L2 = 1,
+  TOPO_LEVEL_MEMORY_L3 = 2,
+  TOPO_LEVEL_MEMORY_NODE = 3,
+  TOPO_LEVEL_MEMORY_MACHINE = 4,
+  TOPO_LEVEL_MEMORY_TYPE_MAX
 };
 
 /** Structure of a topology level */
-struct lt_level {
-        enum lt_level_e type;	        /**< \brief Type of level */
-	unsigned level;			/**< \brief Vertical index in marcel_topo_levels */
-	unsigned number;		/**< \brief Horizontal index in marcel_topo_levels[l.level] */
-	unsigned index;			/**< \brief Index in fathers' children[] array */
-
-        signed physical_index[LT_LEVEL_MAX]; /**< \brief OS-provided physical index numbers */
-
-	lt_cpuset_t cpuset;		/**< \brief CPUs covered by this level */
-
-	unsigned arity;			/**< \brief Number of children */
-	struct lt_level **children;	/**< \brief Children, children[0 .. arity -1] */
-	struct lt_level *father;	/**< \brief Father, NULL if root (machine level) */
-
-	unsigned long memory_kB[LT_LEVEL_MEMORY_TYPE_MAX];
-        unsigned long huge_page_free;
+struct topo_level {
+  enum topo_level_type_e type;		/**< \brief Type of level */
+  unsigned level;			/**< \brief Vertical index in marcel_topo_levels */
+  unsigned number;			/**< \brief Horizontal index in marcel_topo_levels[l.level] */
+  unsigned index;			/**< \brief Index in fathers' children[] array */
+  unsigned arity;			/**< \brief Number of children */
+  struct topo_level **children;		/**< \brief Children, children[0 .. arity -1] */
+  struct topo_level *father;		/**< \brief Father, NULL if root (machine level) */
+  signed physical_index[TOPO_LEVEL_MAX];	/**< \brief OS-provided physical index numbers */
+  unsigned long memory_kB[TOPO_LEVEL_MEMORY_TYPE_MAX];
+  unsigned long huge_page_free;
+  lt_cpuset_t cpuset;			/**< \brief CPUs covered by this level */
 };
-
-typedef struct lt_level * lt_level_t;
+typedef struct topo_level * topo_level_t;
 
 /** \brief Returns the depth of levels of type _type_. If no level of
     this type is present on the underlying architecture, the function
     returns the depth of the first "present" level we find uppon
     _type_. */
-extern unsigned topo_topology_get_type_depth (topo_topology_t topology, enum lt_level_e type);
+extern unsigned topo_topology_get_type_depth (topo_topology_t topology, enum topo_level_type_e type);
 
 /** \brief Returns the type of levels at depth _depth_. */
-extern enum lt_level_e topo_topology_get_depth_type (topo_topology_t topology, unsigned depth);
+extern enum topo_level_type_e topo_topology_get_depth_type (topo_topology_t topology, unsigned depth);
 
 /** \brief Returns the width of depth level _depth_ */
 extern unsigned topo_topology_get_depth_nbitems (topo_topology_t topology, unsigned depth);
 
 /** \brief Returns the topology level at index _index_ from depth _depth_ */
-extern lt_level_t topo_topology_get_level(topo_topology_t topology, unsigned depth, unsigned index);
+extern topo_level_t topo_topology_get_level(topo_topology_t topology, unsigned depth, unsigned index);
 
-/** \brief Returns the top-level of the topology-tree. Its type is LT_MACHINE_LEVEL. */
-static inline lt_level_t topo_topology_get_machine_level(topo_topology_t topology) { return topo_topology_get_level(topology, 0, 0); }
+/** \brief Returns the top-level of the topology-tree. Its type is TOPO_MACHINE_LEVEL. */
+static inline topo_level_t topo_topology_get_machine_level(topo_topology_t topology) { return topo_topology_get_level(topology, 0, 0); }
 
 /** \brief Returns the common father level to levels lvl1 and lvl2 */
-extern lt_level_t lt_find_common_ancestor (lt_level_t lvl1, lt_level_t lvl2);
+extern topo_level_t lt_find_common_ancestor (topo_level_t lvl1, topo_level_t lvl2);
 
 /** \brief Returns true if _level_ is inside the subtree beginning
     with _subtree_root_. */
-extern int lt_is_in_subtree (lt_level_t subtree_root, lt_level_t level);
+extern int lt_is_in_subtree (topo_level_t subtree_root, topo_level_t level);
 
 /** \brief Do a depth-first traversal of the topology to find and sort
     all levels that are at the same depth than _src_.
     Report in _lvls_ up to _max_ physically closest ones to _src_.
     Return the actual number of levels that were found. */
-extern int lt_find_closest(topo_topology_t topology, struct lt_level *src, struct lt_level **lvls, int max);
-
-/** \brief indexes into ::lt_levels, but available from application */
-lt_level_t lt_level(unsigned level, unsigned index);
+extern int lt_find_closest(topo_topology_t topology, topo_level_t src, topo_level_t *lvls, int max);
 
 /** \brief return a stringified topology level type */
-const char * lt_level_string(enum lt_level_e l);
+const char * lt_level_string(enum topo_level_type_e l);
 
 /** \brief print a human-readable form of the given topology level */
-void lt_print_level(topo_topology_t topology, struct lt_level *l,
+void lt_print_level(topo_topology_t topology, topo_level_t l,
 		    FILE *output, int verbose_mode,
 		    const char *separator, const char *indexprefix,
 		    const char* labelseparator, const char* levelterm);

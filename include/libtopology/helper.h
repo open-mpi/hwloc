@@ -14,7 +14,7 @@ extern void lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphy
 extern void lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, topo_topology_t topology);
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 #if defined(LINUX_SYS)
-extern void lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
+extern void lt_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
 extern void look_linux(topo_topology_t topology, lt_cpuset_t *offline_cpus_set);
 extern int lt_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path);
 #endif /* LINUX_SYS */
@@ -46,20 +46,20 @@ extern void look_windows(struct topo_topology *topology);
 
 
 #define lt_set_empty_os_numbers(l) do { \
-		struct lt_level *___l = (l); \
+		struct topo_level *___l = (l); \
 		int i; \
-		for(i=0; i<LT_LEVEL_MAX; i++) \
+		for(i=0; i<TOPO_LEVEL_MAX; i++) \
 		  ___l->physical_index[i] = -1; \
 	} while(0)
 
 #define lt_set_os_numbers(l, _type, _val) do { \
-		struct lt_level *__l = (l); \
+		struct topo_level *__l = (l); \
 		lt_set_empty_os_numbers(l); \
 		__l->physical_index[_type] = _val; \
 	} while(0)
 
 #define lt_setup_level(l, _type) do {	       \
-		struct lt_level *__l = (l);    \
+		struct topo_level *__l = (l);    \
 		__l->type = _type;		\
 		lt_cpuset_zero(&__l->cpuset);	\
 		__l->arity = 0;			\
@@ -69,22 +69,22 @@ extern void look_windows(struct topo_topology *topology);
 
 
 #define lt_setup_machine_level(l) do {					\
-		struct lt_level **__p = (l);                            \
-		struct lt_level *__l1 = &(__p[0][0]);			\
-		struct lt_level *__l2 = &(__p[0][1]);			\
-		lt_setup_level(__l1, LT_LEVEL_MACHINE);			\
+		struct topo_level **__p = (l);                          \
+		struct topo_level *__l1 = &(__p[0][0]);			\
+		struct topo_level *__l2 = &(__p[0][1]);			\
+		lt_setup_level(__l1, TOPO_LEVEL_MACHINE);			\
 		__l1->level = 0;					\
 		__l1->number = 0;					\
 		__l1->index = 0;					\
 		lt_set_empty_os_numbers(__l1);                          \
-		__l1->physical_index[LT_LEVEL_MACHINE] = 0;             \
+		__l1->physical_index[TOPO_LEVEL_MACHINE] = 0;             \
 		lt_cpuset_fill(&__l1->cpuset);				\
 		lt_cpuset_zero(&__l2->cpuset);				\
   } while (0)
 
 
 #define lt_level_cpuset_from_array(l, _value, _array, _max) do { \
-		struct lt_level *__l = (l); \
+		struct topo_level *__l = (l); \
 		unsigned int *__a = (_array); \
 		int k; \
 		for(k=0; k<_max; k++) \
@@ -103,7 +103,7 @@ extern void look_windows(struct topo_topology *topology);
 		__t->dmi_board_vendor = NULL;				\
 		__t->dmi_board_name = NULL;				\
 		__t->level_nbitems[0] = 1;                              \
-		__t->levels[0] = malloc (2*sizeof (struct lt_level));	\
+		__t->levels[0] = malloc (2*sizeof (struct topo_level));	\
 		lt_setup_machine_level (&(__t->levels[0]));		\
   } while (0)
 

@@ -27,7 +27,7 @@ look_osf(struct topo_topology *topology)
   radid_t radid;
   cpuid_t cpuid;
   cpuset_t cpuset;
-  struct lt_level *node_level;
+  struct topo_level *node_level;
 
   nbnodes=rad_get_num();
   if (nbnodes==1)
@@ -43,9 +43,9 @@ look_osf(struct topo_topology *topology)
       continue;
     }
 
-    lt_setup_level(&node_level[i], LT_LEVEL_NODE);
+    lt_setup_level(&node_level[i], TOPO_LEVEL_NODE);
     lt_set_os_numbers(&node_level[i], node, radid);
-    node_level[i].memory_kB[LT_LEVEL_MEMORY_NODE] = 0; /* TODO */
+    node_level[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0; /* TODO */
     node_level[i].huge_page_free = 0;
 
     cursor = SET_CURSOR_INIT;

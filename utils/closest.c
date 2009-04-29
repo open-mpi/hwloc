@@ -2,6 +2,7 @@
 
 #include <config.h>
 #include <libtopology.h>
+#include <libtopology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,8 +16,8 @@ main (int argc, char *argv[])
 {
   topo_topology_t topology;
   struct topo_topology_info info;
-  lt_level_t first;
-  lt_level_t closest[COUNT];
+  topo_level_t first;
+  topo_level_t closest[COUNT];
   int found, i;
   int err;
 
@@ -39,7 +40,7 @@ main (int argc, char *argv[])
 	   closest[i]->type, closest[i]->number, closest[i]->physical_index[closest[i]->type]);
 
   if (found) {
-    lt_level_t ancestor = lt_find_common_ancestor(first, closest[found-1]);
+    topo_level_t ancestor = lt_find_common_ancestor(first, closest[found-1]);
     assert(lt_is_in_subtree(ancestor, first));
     assert(lt_is_in_subtree(ancestor, closest[found-1]));
     printf("ancestor type %d number %d\n",
