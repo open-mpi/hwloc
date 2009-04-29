@@ -513,45 +513,6 @@ topo_discover(struct topo_topology *topology)
       topology->levels[l][i].level = l;
 }
 
-static void
-lt_get_dmi_info(struct topo_topology *topology)
-{
-#ifdef LINUX_SYS
-#define DMI_BOARD_STRINGS_LEN 50
-  char dmi_line[DMI_BOARD_STRINGS_LEN];
-  char *tmp;
-  FILE *fd;
-
-  dmi_line[0] = '\0';
-  fd = lt_fopen("/sys/class/dmi/id/board_vendor", "r", topology->fsys_root_fd);
-  if (fd) {
-    fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
-    fclose (fd);
-    if (dmi_line[0] != '\0') {
-      tmp = strchr(dmi_line, '\n');
-      if (tmp)
-	*tmp = '\0';
-      topology->dmi_board_vendor = strdup(dmi_line);
-      ltdebug("found DMI board vendor '%s'\n", topology->dmi_board_vendor);
-    }
-  }
-
-  dmi_line[0] = '\0';
-  fd = lt_fopen("/sys/class/dmi/id/board_name", "r", topology->fsys_root_fd);
-  if (fd) {
-    fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
-    fclose (fd);
-    if (dmi_line[0] != '\0') {
-      tmp = strchr(dmi_line, '\n');
-      if (tmp)
-	*tmp = '\0';
-      topology->dmi_board_name = strdup(dmi_line);
-      ltdebug("found DMI board name '%s'\n", topology->dmi_board_name);
-    }
-  }
-#endif /* LINUX_SYS */
-}
-
 int
 topo_topology_init (struct topo_topology **topologyp)
 {
@@ -615,7 +576,9 @@ topo_topology_load (struct topo_topology *topology)
   topo_discover(topology);
 
   topology->dmi_board_vendor = topology->dmi_board_name = NULL;
-  lt_get_dmi_info(topology);
+#ifdef LINUX_SYS
+  topo__linux_get_dmi_info(topology);
+#endif
 
   return 0;
 }

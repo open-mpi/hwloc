@@ -855,3 +855,40 @@ look_linux(struct topo_topology *topology, lt_cpuset_t *offline_cpus_set)
 			     &topology->levels[0][0].huge_page_free);
 			     /* FIXME: gather page_size_kB as well? MaMI needs it */
 }
+
+void
+topo__linux_get_dmi_info(struct topo_topology *topology)
+{
+#define DMI_BOARD_STRINGS_LEN 50
+  char dmi_line[DMI_BOARD_STRINGS_LEN];
+  char *tmp;
+  FILE *fd;
+
+  dmi_line[0] = '\0';
+  fd = lt_fopen("/sys/class/dmi/id/board_vendor", "r", topology->fsys_root_fd);
+  if (fd) {
+    fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
+    fclose (fd);
+    if (dmi_line[0] != '\0') {
+      tmp = strchr(dmi_line, '\n');
+      if (tmp)
+	*tmp = '\0';
+      topology->dmi_board_vendor = strdup(dmi_line);
+      ltdebug("found DMI board vendor '%s'\n", topology->dmi_board_vendor);
+    }
+  }
+
+  dmi_line[0] = '\0';
+  fd = lt_fopen("/sys/class/dmi/id/board_name", "r", topology->fsys_root_fd);
+  if (fd) {
+    fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
+    fclose (fd);
+    if (dmi_line[0] != '\0') {
+      tmp = strchr(dmi_line, '\n');
+      if (tmp)
+	*tmp = '\0';
+      topology->dmi_board_name = strdup(dmi_line);
+      ltdebug("found DMI board name '%s'\n", topology->dmi_board_name);
+    }
+  }
+}
