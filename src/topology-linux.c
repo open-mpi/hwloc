@@ -130,7 +130,7 @@ lt_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_fd)
 #define MAX_KERNEL_CPU_MASK ((LIBTOPO_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
 static int
-lt_parse_cpumap(const char *mappath, lt_cpuset_t *set, int fsys_root_fd)
+lt_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
 {
   char string[KERNEL_CPU_MAP_LEN]; /* enough for a shared map mask (32bits hexa) */
   unsigned long maps[MAX_KERNEL_CPU_MASK];
@@ -139,7 +139,7 @@ lt_parse_cpumap(const char *mappath, lt_cpuset_t *set, int fsys_root_fd)
   int i;
 
   /* reset to zero first */
-  lt_cpuset_zero(set);
+  topo_cpuset_zero(set);
 
   fd = lt_fopen(mappath, "r", fsys_root_fd);
   if (!fd)
@@ -167,7 +167,7 @@ lt_parse_cpumap(const char *mappath, lt_cpuset_t *set, int fsys_root_fd)
   /* convert into a set */
   for(i=0; i<nr_maps*KERNEL_CPU_MASK_BITS; i++)
     if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
-      lt_cpuset_set(set, i);
+      topo_cpuset_set(set, i);
 
   fclose(fd);
 
@@ -177,17 +177,17 @@ lt_parse_cpumap(const char *mappath, lt_cpuset_t *set, int fsys_root_fd)
 static void
 lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned long val,
 			  int procid_max, unsigned *ids, unsigned long *vals,
-			  unsigned *nr_ids, unsigned givenid, lt_cpuset_t *offline_cpus_set,
+			  unsigned *nr_ids, unsigned givenid, topo_cpuset_t *offline_cpus_set,
 			  int fsys_root_fd)
 {
-  lt_cpuset_t set;
+  topo_cpuset_t set;
   int k;
 
   lt_parse_cpumap(mappath, &set, fsys_root_fd);
-  lt_cpuset_clearset(&set, offline_cpus_set);
+  topo_cpuset_clearset(&set, offline_cpus_set);
   for(k=0; k<procid_max; k++)
     {
-      if (lt_cpuset_isset(&set, k))
+      if (topo_cpuset_isset(&set, k))
 	{
 	  /* we found a cpu in the map */
 	  unsigned newid;
@@ -202,7 +202,7 @@ lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned lo
 	  /* this cpu didn't have any such id yet, set this id for all cpus in the map */
 	  for(; k<procid_max; k++)
 	    {
-	      if (lt_cpuset_isset(&set, k))
+	      if (topo_cpuset_isset(&set, k))
 		{
 		  ltdebug("--- proc %d has %s number %d\n", k, mapname, newid);
 		  ids[k] = newid;
@@ -216,7 +216,7 @@ lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned lo
 }
 
 static void
-lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, lt_cpuset_t *offline_cpus_set,
+lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *offline_cpus_set,
 			       unsigned *cacheids, unsigned long *cachesizes, unsigned *nr_caches,
 			       int fsys_root_fd)
 {
@@ -385,7 +385,7 @@ lt_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
 }
 
 static void
-lt_disable_cpus_from_cpuset(struct topo_topology *topology, lt_cpuset_t *offline_cpus_set)
+lt_disable_cpus_from_cpuset(struct topo_topology *topology, topo_cpuset_t *offline_cpus_set)
 {
 #define CPUSET_MASK_LEN 64
   char cpuset_mask[CPUSET_MASK_LEN];
@@ -416,7 +416,7 @@ lt_disable_cpus_from_cpuset(struct topo_topology *topology, lt_cpuset_t *offline
       nextlast = nextfirst;
     if (prevlast+1 <= nextfirst-1) {
       ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-      lt_cpuset_set_range(offline_cpus_set, prevlast+1, nextfirst-1);
+      topo_cpuset_set_range(offline_cpus_set, prevlast+1, nextfirst-1);
     }
 
     /* switch to next enabled-segment */
@@ -430,7 +430,7 @@ lt_disable_cpus_from_cpuset(struct topo_topology *topology, lt_cpuset_t *offline
   nextfirst = LIBTOPO_NBMAXCPUS;
   if (prevlast+1 <= nextfirst-1) {
     ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-    lt_cpuset_set_range(offline_cpus_set, prevlast+1, nextfirst-1);
+    topo_cpuset_set_range(offline_cpus_set, prevlast+1, nextfirst-1);
   }
 }
 
@@ -547,7 +547,7 @@ look_sysfsnode(struct topo_topology *topology)
     {
 #define NUMA_NODE_STRLEN (29+9+8+1)
       char nodepath[NUMA_NODE_STRLEN];
-      lt_cpuset_t cpuset;
+      topo_cpuset_t cpuset;
       unsigned long size;
       unsigned long hpfree;
 
@@ -571,12 +571,12 @@ look_sysfsnode(struct topo_topology *topology)
       node_level[i].cpuset = cpuset;
 
       ltdebug("node %d (os %d) has cpuset %"LT_PRIxCPUSET"\n",
-	      i, osnode, LT_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
+	      i, osnode, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
       i++;
     }
   nbnodes = i;
 
-  lt_cpuset_zero(&node_level[nbnodes].cpuset);
+  topo_cpuset_zero(&node_level[nbnodes].cpuset);
 
   topology->level_nbitems[topology->nb_levels] = topology->nb_nodes = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
@@ -588,7 +588,7 @@ look_sysfsnode(struct topo_topology *topology)
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
 look__sysfscpu(unsigned *procid_max,
-	       lt_cpuset_t *offline_cpus_set,
+	       topo_cpuset_t *offline_cpus_set,
 	       unsigned *nr_procs,
 	       unsigned *nr_cores,
 	       unsigned *nr_dies,
@@ -626,13 +626,13 @@ look__sysfscpu(unsigned *procid_max,
 
   for(i=0; i<cpu_max; i++)
     {
-      lt_cpuset_t dieset, coreset;
+      topo_cpuset_t dieset, coreset;
       unsigned mydieid, mycoreid;
       FILE *fd;
       char online[2];
 
       /* if already disabled, skip it */
-      if (lt_cpuset_isset(offline_cpus_set, i)) {
+      if (topo_cpuset_isset(offline_cpus_set, i)) {
 	nr_offline_cpus++;
 	continue;
       }
@@ -643,7 +643,7 @@ look__sysfscpu(unsigned *procid_max,
 	{
 	/* this CPU does not exist */
 	  ltdebug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/\n", i, i);
-	  lt_cpuset_set(offline_cpus_set, i);
+	  topo_cpuset_set(offline_cpus_set, i);
 	  nr_offline_cpus++;
 	  continue;
 	}
@@ -663,7 +663,7 @@ look__sysfscpu(unsigned *procid_max,
 	      else
 		{
 		  ltdebug("os proc %d is offline\n", i);
-		  lt_cpuset_set(offline_cpus_set, i);
+		  topo_cpuset_set(offline_cpus_set, i);
 		  nr_offline_cpus++;
 		  continue;
 		}
@@ -679,7 +679,7 @@ look__sysfscpu(unsigned *procid_max,
       if (lt_access(string, X_OK, topology->fsys_root_fd) < 0 && errno == ENOENT)
 	{
 	  ltdebug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/topology\n", i, i);
-	  lt_cpuset_set(offline_cpus_set, i);
+	  topo_cpuset_set(offline_cpus_set, i);
 	  nr_offline_cpus++;
 	  continue;
 	}
@@ -695,49 +695,49 @@ look__sysfscpu(unsigned *procid_max,
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
       lt_parse_cpumap(string, &dieset, topology->fsys_root_fd);
       /* make sure we are in the set, in case the cpumap was crap */
-      lt_cpuset_set(&dieset, i);
-      lt_cpuset_clearset(&dieset, offline_cpus_set);
+      topo_cpuset_set(&dieset, i);
+      topo_cpuset_clearset(&dieset, offline_cpus_set);
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
       lt_parse_cpumap(string, &coreset, topology->fsys_root_fd);
       /* make sure we are in the set, in case the cpumap was crap */
-      lt_cpuset_set(&coreset, i);
-      lt_cpuset_clearset(&coreset, offline_cpus_set);
+      topo_cpuset_set(&coreset, i);
+      topo_cpuset_clearset(&coreset, offline_cpus_set);
 
       /* ignore threads except the first one */
-      if (i != lt_cpuset_first(&coreset)
+      if (i != topo_cpuset_first(&coreset)
 	  && (topology->flags & TOPO_FLAGS_IGNORE_THREADS)) {
 	  ltdebug("os proc %d is not the first thread of core\n", i);
-	  lt_cpuset_set(offline_cpus_set, i);
+	  topo_cpuset_set(offline_cpus_set, i);
 	  nr_offline_cpus++;
 	  continue;
       }
 
       for(j=0; j<i; j++)
-	if (lt_cpuset_isset(&dieset, j))
+	if (topo_cpuset_isset(&dieset, j))
 	  break;
       if (j==i)
 	{
 	  /* new die cpumap fill it */
 	  for(k=i; k<LIBTOPO_NBMAXCPUS; k++)
-	    if (lt_cpuset_isset(&dieset, k))
+	    if (topo_cpuset_isset(&dieset, k))
 	      proc_physids[k] = (*nr_dies);
 	  ltdebug("die %d (os %d) has cpuset %"LT_PRIxCPUSET"\n",
-		  (*nr_dies), mydieid, LT_CPUSET_PRINTF_VALUE(dieset));
+		  (*nr_dies), mydieid, TOPO_CPUSET_PRINTF_VALUE(dieset));
 	  osphysids[(*nr_dies)++] = mydieid;
 	}
 
       for(j=0; j<i; j++)
-	if (lt_cpuset_isset(&coreset, j))
+	if (topo_cpuset_isset(&coreset, j))
 	  break;
       if (j==i)
 	{
 	  /* new core cpumap fill it */
 	  for(k=i; k<LIBTOPO_NBMAXCPUS; k++)
-	    if (lt_cpuset_isset(&coreset, k))
+	    if (topo_cpuset_isset(&coreset, k))
 	      proc_coreids[k] = (*nr_cores);
 	  ltdebug("core %d (os %d) has cpuset %"LT_PRIxCPUSET"\n",
-		  (*nr_cores), mycoreid, LT_CPUSET_PRINTF_VALUE(coreset));
+		  (*nr_cores), mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
 	  oscoreids[(*nr_cores)++] = mycoreid;
 	}
     }
@@ -855,7 +855,7 @@ look_cpuinfo(unsigned *procid_max,
 
 
 static void
-look_sysfscpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
+look_sysfscpu(topo_cpuset_t *offline_cpus_set, struct topo_topology *topology)
 {
   unsigned proc_physids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
   unsigned osphysids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
@@ -973,7 +973,7 @@ topo__get_dmi_info(struct topo_topology *topology)
 }
 
 void
-look_linux(struct topo_topology *topology, lt_cpuset_t *offline_cpus_set)
+look_linux(struct topo_topology *topology, topo_cpuset_t *offline_cpus_set)
 {
   look_sysfsnode(topology);
   look_sysfscpu(offline_cpus_set, topology);

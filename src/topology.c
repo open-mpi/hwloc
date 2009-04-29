@@ -64,11 +64,11 @@ lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsign
       lt_set_os_numbers(&die_level[j], TOPO_LEVEL_DIE, osphysids[j]);
       lt_level_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
       ltdebug("die %d has cpuset %"LT_PRIxCPUSET"\n",
-	      j, LT_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
+	      j, TOPO_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
     }
   ltdebug("\n");
 
-  lt_cpuset_zero(&die_level[j].cpuset);
+  topo_cpuset_zero(&die_level[j].cpuset);
 
   topology->level_nbitems[topology->nb_levels]=numdies;
   ltdebug("--- die level has number %d\n", topology->nb_levels);
@@ -92,12 +92,12 @@ lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsi
       lt_set_os_numbers(&core_level[j], TOPO_LEVEL_CORE, oscoreids[j]);
       lt_level_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
       ltdebug("core %d has cpuset %"LT_PRIxCPUSET"\n",
-	      j, LT_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
+	      j, TOPO_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
     }
 
   ltdebug("\n");
 
-  lt_cpuset_zero(&core_level[j].cpuset);
+  topo_cpuset_zero(&core_level[j].cpuset);
 
   topology->level_nbitems[topology->nb_levels]=numcores;
   ltdebug("--- core level has number %d\n", topology->nb_levels);
@@ -136,10 +136,10 @@ lt_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid
       lt_level_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
 
       ltdebug("L%d cache %d has cpuset %"LT_PRIxCPUSET"\n",
-	      cachelevel+1, j, LT_CPUSET_PRINTF_VALUE(level[j].cpuset));
+	      cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(level[j].cpuset));
     }
   ltdebug("\n");
-  lt_cpuset_zero(&level[j].cpuset);
+  topo_cpuset_zero(&level[j].cpuset);
   topology->level_nbitems[topology->nb_levels]=numcaches[cachelevel];
   ltdebug("--- shared L%d level has number %d\n", cachelevel+1, topology->nb_levels);
   topology->levels[topology->nb_levels++]=level;
@@ -149,7 +149,7 @@ lt_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid
 
 /* Use the value stored in topology->nb_processors.  */
 static void
-look_cpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
+look_cpu(topo_cpuset_t *offline_cpus_set, struct topo_topology *topology)
 {
   struct topo_level *cpu_level;
   unsigned oscpu,cpu;
@@ -160,17 +160,17 @@ look_cpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
   ltdebug("\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<topology->nb_processors; cpu++,oscpu++)
     {
-      while (lt_cpuset_isset(offline_cpus_set, oscpu))
+      while (topo_cpuset_isset(offline_cpus_set, oscpu))
 	oscpu++;
       lt_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC);
       lt_set_os_numbers(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
 
-      lt_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
+      topo_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
 
       ltdebug("cpu %d (os %d) has cpuset %"LT_PRIxCPUSET"\n",
-	      cpu, oscpu, LT_CPUSET_PRINTF_VALUE(cpu_level[cpu].cpuset));
+	      cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu].cpuset));
     }
-  lt_cpuset_zero(&cpu_level[cpu].cpuset);
+  topo_cpuset_zero(&cpu_level[cpu].cpuset);
 
   topology->level_nbitems[topology->nb_levels]=topology->nb_processors;
   topology->levels[topology->nb_levels++]=cpu_level;
@@ -189,13 +189,13 @@ topo_connect(struct topo_topology *topology)
 	  if (topology->levels[l][i].arity)
 	    {
 	      ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET" arity %u\n",
-		      l, i, LT_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
+		      l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
 	      topology->levels[l][i].children=malloc(topology->levels[l][i].arity*sizeof(void *));
 	      assert(topology->levels[l][i].children);
 
 	      m=0;
 	      for (j=0; j<topology->level_nbitems[l+1]; j++)
-		if (lt_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
+		if (topo_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
 		  {
 		    assert(!(m >= topology->levels[l][i].arity));
 		    topology->levels[l][i].children[m] = &topology->levels[l+1][j];
@@ -212,7 +212,7 @@ compar(const void *_l1, const void *_l2)
 {
   const struct topo_level *l1 = _l1, *l2 = _l2;
   /* empty cpuset are always considered higher, so they are stored at the end, that's ok */
-  return lt_cpuset_first(&l1->cpuset) - lt_cpuset_first(&l2->cpuset);
+  return topo_cpuset_first(&l1->cpuset) - topo_cpuset_first(&l2->cpuset);
 }
 
 /* Main discovery loop */
@@ -231,9 +231,9 @@ topo_discover(struct topo_topology *topology)
   unsigned k;
   /*	unsigned nbsublevels; */
   /*	unsigned sublevelarity; */
-  lt_cpuset_t offline_cpus_set;
+  topo_cpuset_t offline_cpus_set;
 
-  lt_cpuset_zero(&offline_cpus_set);
+  topo_cpuset_zero(&offline_cpus_set);
 
 #    ifdef LINUX_SYS
   look_linux(topology, &offline_cpus_set);
@@ -265,9 +265,9 @@ topo_discover(struct topo_topology *topology)
   assert(topology->nb_processors);
 
   /* Compute the machine cpuset */
-  lt_cpuset_zero(&topology->levels[0][0].cpuset);
+  topo_cpuset_zero(&topology->levels[0][0].cpuset);
   for (i=0; i<topology->level_nbitems[1]; i++)
-    lt_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[1][i].cpuset);
+    topo_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[1][i].cpuset);
 
   /* sort levels according to cpu sets */
   for (l=0; l+1<topology->nb_levels; l++)
@@ -278,12 +278,12 @@ topo_discover(struct topo_topology *topology)
       /* then gather sublevels according to levels */
       for (i=0; i<topology->level_nbitems[l]; i++)
 	{
-	  lt_cpuset_t level_set = topology->levels[l][i].cpuset;
+	  topo_cpuset_t level_set = topology->levels[l][i].cpuset;
 	  for (j=k; j<topology->level_nbitems[l+1]; j++)
 	    {
-	      lt_cpuset_t set = level_set;
-	      lt_cpuset_andset(&set, &topology->levels[l+1][j].cpuset);
-	      if (!lt_cpuset_iszero(&set))
+	      topo_cpuset_t set = level_set;
+	      topo_cpuset_andset(&set, &topology->levels[l+1][j].cpuset);
+	      if (!topo_cpuset_iszero(&set))
 		{
 		  /* Sublevel j is part of level i, put it at k.  */
 		  struct topo_level level = topology->levels[l+1][j];
@@ -299,13 +299,13 @@ topo_discover(struct topo_topology *topology)
     for (i=0; i<topology->level_nbitems[l]; i++)
       {
 	topology->levels[l][i].number = i;
-	ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET"\n", l, i, LT_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
+	ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
       }
 
   /* And show debug again */
   for (l=0; l<topology->nb_levels; l++)
     for (i=0; i<topology->level_nbitems[l]; i++)
-      ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET"\n", l, i, LT_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
+      ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
 
   /* Compute arity */
   for (l=0; l+1<topology->nb_levels; l++)
@@ -314,17 +314,17 @@ topo_discover(struct topo_topology *topology)
 	{
 	  topology->levels[l][i].arity=0;
 	  for (j=0; j<topology->level_nbitems[l+1]; j++)
-	    if (lt_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
+	    if (topo_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
 	      topology->levels[l][i].arity++;
 	  ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET" arity %u\n",
-		  l, i, LT_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
+		  l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
 	}
     }
 
 
   for (i=0; i<topology->level_nbitems[topology->nb_levels-1]; i++)
     ltdebug("level %u,%u: cpuset %"LT_PRIxCPUSET" leaf\n",
-	    topology->nb_levels-1, i, LT_CPUSET_PRINTF_VALUE(topology->levels[topology->nb_levels-1][i].cpuset));
+	    topology->nb_levels-1, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[topology->nb_levels-1][i].cpuset));
   ltdebug("arity done.\n");
 
   /* and finally connect levels */

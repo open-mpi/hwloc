@@ -82,7 +82,7 @@ struct topo_level {
   signed physical_index[TOPO_LEVEL_MAX];	/**< \brief OS-provided physical index numbers */
   unsigned long memory_kB[TOPO_LEVEL_MEMORY_TYPE_MAX];
   unsigned long huge_page_free;
-  lt_cpuset_t cpuset;			/**< \brief CPUs covered by this level */
+  topo_cpuset_t cpuset;			/**< \brief CPUs covered by this level */
 };
 typedef struct topo_level * topo_level_t;
 

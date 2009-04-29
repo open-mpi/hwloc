@@ -50,14 +50,14 @@ look_osf(struct topo_topology *topology)
 
     cursor = SET_CURSOR_INIT;
     while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
-      lt_cpuset_set(&node_level[i].cpuset,cpuid);
+      topo_cpuset_set(&node_level[i].cpuset,cpuid);
 
     ltdebug("node %d has cpuset %"LT_PRIxCPUSET"\n",
-	   i, LT_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
+	   i, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
     i++;
   }
 
-  lt_cpuset_zero(&node_level[i].cpuset);
+  topo_cpuset_zero(&node_level[i].cpuset);
 
   topology->level_nbitems[topology->nb_levels] = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;

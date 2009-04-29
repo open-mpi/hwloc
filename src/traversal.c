@@ -53,7 +53,7 @@ struct topo_level * topo_find_common_ancestor_level (struct topo_level *lvl1, st
 
 int topo_level_is_in_subtree (topo_level_t subtree_root, topo_level_t level)
 {
-  return lt_cpuset_isincluded(&subtree_root->cpuset, &level->cpuset);
+  return topo_cpuset_isincluded(&subtree_root->cpuset, &level->cpuset);
 }
 
 int topo_find_closest_levels (struct topo_topology *topology, struct topo_level *src, struct topo_level **lvls, int max)
@@ -71,15 +71,15 @@ int topo_find_closest_levels (struct topo_topology *topology, struct topo_level 
       nextparent = parent->father;
       if (!nextparent)
 	goto out;
-      if (!lt_cpuset_isequal(&parent->cpuset, &nextparent->cpuset))
+      if (!topo_cpuset_isequal(&parent->cpuset, &nextparent->cpuset))
 	break;
       parent = nextparent;
     }
 
     /* traverse src's level and find objects that are in nextparent and were not in parent */
     for(i=0; i<src_nbitems; i++) {
-      if (lt_cpuset_isincluded(&nextparent->cpuset, &src_levels[i].cpuset)
-	  && !lt_cpuset_isincluded(&parent->cpuset, &src_levels[i].cpuset)) {
+      if (topo_cpuset_isincluded(&nextparent->cpuset, &src_levels[i].cpuset)
+	  && !topo_cpuset_isincluded(&parent->cpuset, &src_levels[i].cpuset)) {
 	lvls[stored++] = &src_levels[i];
 	if (stored == max)
 	  goto out;

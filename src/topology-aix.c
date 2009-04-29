@@ -62,14 +62,14 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
     maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
     for (j = 0; j < maxcpus; j++) {
       if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
-	lt_cpuset_set(&rad_level[r].cpuset,j);
+	topo_cpuset_set(&rad_level[r].cpuset,j);
     }
     ltdebug("node %d has cpuset %"LT_PRIxCPUSET"\n",
-	   r, LT_CPUSET_PRINTF_VALUE(rad_level[r].cpuset));
+	   r, TOPO_CPUSET_PRINTF_VALUE(rad_level[r].cpuset));
     r++;
   }
 
-  lt_cpuset_zero(&rad_level[r].cpuset);
+  topo_cpuset_zero(&rad_level[r].cpuset);
 
   topology->level_nbitems[topology->nb_levels] = nbnodes;
   topology->levels[topology->nb_levels++] = rad_level;
