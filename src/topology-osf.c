@@ -52,7 +52,7 @@ look_osf(struct topo_topology *topology)
     while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
       topo_cpuset_set(&node_level[i].cpuset,cpuid);
 
-    ltdebug("node %d has cpuset %"LT_PRIxCPUSET"\n",
+    ltdebug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
 	   i, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
     i++;
   }

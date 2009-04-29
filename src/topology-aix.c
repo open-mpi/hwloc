@@ -64,7 +64,7 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
       if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
 	topo_cpuset_set(&rad_level[r].cpuset,j);
     }
-    ltdebug("node %d has cpuset %"LT_PRIxCPUSET"\n",
+    ltdebug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
 	   r, TOPO_CPUSET_PRINTF_VALUE(rad_level[r].cpuset));
     r++;
   }

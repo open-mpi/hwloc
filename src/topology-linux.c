@@ -570,7 +570,7 @@ look_sysfsnode(struct topo_topology *topology)
       node_level[i].huge_page_free = hpfree;
       node_level[i].cpuset = cpuset;
 
-      ltdebug("node %d (os %d) has cpuset %"LT_PRIxCPUSET"\n",
+      ltdebug("node %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
 	      i, osnode, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
       i++;
     }
@@ -722,7 +722,7 @@ look__sysfscpu(unsigned *procid_max,
 	  for(k=i; k<LIBTOPO_NBMAXCPUS; k++)
 	    if (topo_cpuset_isset(&dieset, k))
 	      proc_physids[k] = (*nr_dies);
-	  ltdebug("die %d (os %d) has cpuset %"LT_PRIxCPUSET"\n",
+	  ltdebug("die %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
 		  (*nr_dies), mydieid, TOPO_CPUSET_PRINTF_VALUE(dieset));
 	  osphysids[(*nr_dies)++] = mydieid;
 	}
@@ -736,7 +736,7 @@ look__sysfscpu(unsigned *procid_max,
 	  for(k=i; k<LIBTOPO_NBMAXCPUS; k++)
 	    if (topo_cpuset_isset(&coreset, k))
 	      proc_coreids[k] = (*nr_cores);
-	  ltdebug("core %d (os %d) has cpuset %"LT_PRIxCPUSET"\n",
+	  ltdebug("core %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
 		  (*nr_cores), mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
 	  oscoreids[(*nr_cores)++] = mycoreid;
 	}
