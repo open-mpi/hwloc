@@ -30,6 +30,14 @@ topo_topology_get_level(struct topo_topology *topology, unsigned depth, unsigned
   return &topology->levels[depth][index];
 }
 
+enum lt_level_e
+topo_topology_get_depth_type (topo_topology_t topology, unsigned depth)
+{
+  if (depth >= topology->nb_levels)
+    return LT_LEVEL_MAX;
+  return topology->levels[depth][0].type;  
+}
+
 struct lt_level * lt_find_common_ancestor (struct lt_level *lvl1, struct lt_level *lvl2)
 {
   while (lvl1->level > lvl2->level)
