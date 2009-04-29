@@ -935,22 +935,8 @@ look_sysfscpu(lt_cpuset_t *offline_cpus_set, struct topo_topology *topology)
   ltdebug("%s: found %u procs\n", __func__, topology->nb_processors);
 }
 
-void
-look_linux(struct topo_topology *topology, lt_cpuset_t *offline_cpus_set)
-{
-  look_sysfsnode(topology);
-  look_sysfscpu(offline_cpus_set, topology);
-
-  /* Compute the whole machine memory and huge page */
-  lt_get_procfs_meminfo_info(topology,
-			     &topology->levels[0][0].memory_kB[LT_LEVEL_MEMORY_MACHINE],
-			     &topology->huge_page_size_kB,
-			     &topology->levels[0][0].huge_page_free);
-			     /* FIXME: gather page_size_kB as well? MaMI needs it */
-}
-
-void
-topo__linux_get_dmi_info(struct topo_topology *topology)
+static void
+topo__get_dmi_info(struct topo_topology *topology)
 {
 #define DMI_BOARD_STRINGS_LEN 50
   char dmi_line[DMI_BOARD_STRINGS_LEN];
@@ -984,4 +970,20 @@ topo__linux_get_dmi_info(struct topo_topology *topology)
       ltdebug("found DMI board name '%s'\n", topology->dmi_board_name);
     }
   }
+}
+
+void
+look_linux(struct topo_topology *topology, lt_cpuset_t *offline_cpus_set)
+{
+  look_sysfsnode(topology);
+  look_sysfscpu(offline_cpus_set, topology);
+
+  /* Compute the whole machine memory and huge page */
+  lt_get_procfs_meminfo_info(topology,
+			     &topology->levels[0][0].memory_kB[LT_LEVEL_MEMORY_MACHINE],
+			     &topology->huge_page_size_kB,
+			     &topology->levels[0][0].huge_page_free);
+			     /* FIXME: gather page_size_kB as well? MaMI needs it */
+
+  topo__get_dmi_info(topology);
 }

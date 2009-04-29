@@ -491,11 +491,6 @@ topo_topology_load (struct topo_topology *topology)
 
   topo_discover(topology);
 
-  topology->dmi_board_vendor = topology->dmi_board_name = NULL;
-#ifdef LINUX_SYS
-  topo__linux_get_dmi_info(topology);
-#endif
-
   return 0;
 }
 

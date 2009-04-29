@@ -16,7 +16,6 @@ extern void lt_setup_core_level(int procid_max, unsigned numcores, unsigned *osc
 #if defined(LINUX_SYS)
 extern void lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
 extern void look_linux(topo_topology_t topology, lt_cpuset_t *offline_cpus_set);
-extern void topo__linux_get_dmi_info(struct topo_topology *topology);
 extern int lt_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path);
 #endif /* LINUX_SYS */
 
