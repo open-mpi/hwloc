@@ -17,6 +17,7 @@ extern void lt_setup_core_level(int procid_max, unsigned numcores, unsigned *osc
 extern void lt_setup_cache_level(int cachelevel, enum lt_level_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
 extern void look_linux(topo_topology_t topology, lt_cpuset_t *offline_cpus_set);
 extern void topo__linux_get_dmi_info(struct topo_topology *topology);
+extern int lt_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path);
 #endif /* LINUX_SYS */
 
 #ifdef HAVE_LIBLGRP
@@ -43,30 +44,6 @@ extern void look_windows(struct topo_topology *topology);
 # define HAVE_OPENAT
 #endif
 #endif
-
-#ifdef HAVE_OPENAT
-
-/* Use our own filesystem functions.  */
-#define lt_fopen(p, m, d)   lt_fopenat(p, m, d)
-#define lt_access(p, m, d)  lt_accessat(p, m, d)
-#define lt_opendir(p, d)    lt_opendirat(p, d)
-
-#include <stdio.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <sys/types.h>
-
-extern FILE * lt_fopenat(const char *path, const char *mode, int fsys_root_fd);
-extern int lt_accessat(const char *path, int mode, int fsys_root_fd);
-extern DIR* lt_opendirat(const char *path, int fsys_root_fd);
-
-#else /* !HAVE_OPENAT */
-
-#define lt_fopen(p, m, d)   fopen(p, m)
-#define lt_access(p, m, d)  access(p, m)
-#define lt_opendir(p, d)    opendir(p)
-
-#endif /* !HAVE_OPENAT */
 
 
 #define lt_set_empty_os_numbers(l) do { \

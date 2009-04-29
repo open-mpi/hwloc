@@ -6,11 +6,104 @@
 #include <libtopology/debug.h>
 
 #include <stdio.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/types.h>
+
+#ifdef HAVE_OPENAT
+
+/* Use our own filesystem functions.  */
+#define lt_fopen(p, m, d)   lt_fopenat(p, m, d)
+#define lt_access(p, m, d)  lt_accessat(p, m, d)
+#define lt_opendir(p, d)    lt_opendirat(p, d)
+
+int
+lt_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
+{
+  char *fsys_root_path_env;
+  int root;
+
+  /* close previous root */
+  if (topology->fsys_root_fd >= 0) {
+    close(topology->fsys_root_fd);
+    topology->fsys_root_fd = -1;
+  }
+
+  /* Use the root path from the environment variable first,
+   * then from the given argument, then the default root.
+   */
+  fsys_root_path_env = getenv("LT_FSYS_ROOT_PATH");
+  if (fsys_root_path_env)
+    fsys_root_path = fsys_root_path_env;
+  if (!fsys_root_path)
+    fsys_root_path = "/";
+
+  root = open(fsys_root_path, O_RDONLY | O_DIRECTORY);
+  if (root < 0)
+    return -1;
+
+  topology->fsys_root_fd = root;
+  return 0;
+}
+
+static FILE *
+lt_fopenat(const char *path, const char *mode, int fsys_root_fd)
+{
+  int fd;
+  const char *relative_path;
+
+  assert(!(fsys_root_fd < 0));
+
+  /* Skip leading slashes.  */
+  for (relative_path = path; *relative_path == '/'; relative_path++);
+
+  fd = openat (fsys_root_fd, relative_path, O_RDONLY);
+  if (fd == -1)
+    return NULL;
+
+  return fdopen(fd, mode);
+}
+
+static int
+lt_accessat(const char *path, int mode, int fsys_root_fd)
+{
+  const char *relative_path;
+
+  assert(!(fsys_root_fd < 0));
+
+  /* Skip leading slashes.  */
+  for (relative_path = path; *relative_path == '/'; relative_path++);
+
+  return faccessat(fsys_root_fd, relative_path, O_RDONLY, 0);
+}
+
+static DIR*
+lt_opendirat(const char *path, int fsys_root_fd)
+{
+  int dir_fd;
+  const char *relative_path;
+
+  /* Skip leading slashes.  */
+  for (relative_path = path; *relative_path == '/'; relative_path++);
+
+  dir_fd = openat(fsys_root_fd, relative_path, O_RDONLY | O_DIRECTORY);
+  if (dir_fd < 0)
+    return NULL;
+
+  return fdopendir(dir_fd);
+}
+
+#else /* !HAVE_OPENAT */
+
+#define lt_fopen(p, m, d)   fopen(p, m)
+#define lt_access(p, m, d)  access(p, m)
+#define lt_opendir(p, d)    opendir(p)
+
+#endif /* !HAVE_OPENAT */
+
 
 static int
 lt_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_fd)

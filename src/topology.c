@@ -93,71 +93,6 @@ lt_print_level(struct topo_topology *topology, struct lt_level *l, FILE *output,
 }
 
 
-#ifdef HAVE_OPENAT
-
-static int
-lt_set_fsys_root(struct topo_topology *topology, const char *path)
-{
-  int root;
-
-  root = open(path, O_RDONLY | O_DIRECTORY);
-  if (root < 0)
-    return -1;
-
-  topology->fsys_root_fd = root;
-  return 0;
-}
-
-FILE *
-lt_fopenat(const char *path, const char *mode, int fsys_root_fd)
-{
-  int fd;
-  const char *relative_path;
-
-  assert(!(fsys_root_fd < 0));
-
-  /* Skip leading slashes.  */
-  for (relative_path = path; *relative_path == '/'; relative_path++);
-
-  fd = openat (fsys_root_fd, relative_path, O_RDONLY);
-  if (fd == -1)
-    return NULL;
-
-  return fdopen(fd, mode);
-}
-
-int
-lt_accessat(const char *path, int mode, int fsys_root_fd)
-{
-  const char *relative_path;
-
-  assert(!(fsys_root_fd < 0));
-
-  /* Skip leading slashes.  */
-  for (relative_path = path; *relative_path == '/'; relative_path++);
-
-  return faccessat(fsys_root_fd, relative_path, O_RDONLY, 0);
-}
-
-DIR*
-lt_opendirat(const char *path, int fsys_root_fd)
-{
-  int dir_fd;
-  const char *relative_path;
-
-  /* Skip leading slashes.  */
-  for (relative_path = path; *relative_path == '/'; relative_path++);
-
-  dir_fd = openat(fsys_root_fd, relative_path, O_RDONLY | O_DIRECTORY);
-  if (dir_fd < 0)
-    return NULL;
-
-  return fdopendir(dir_fd);
-}
-
-#endif /* !HAVE_OPENAT */
-
-
 /* Return the OS-provided number of processors.  Unlike other methods such as
    reading sysfs on Linux, this method is not virtualizable; thus it's only
    used as a fall-back method, allowing `lt_set_fsys_root ()' to
@@ -530,29 +465,10 @@ topo_topology_init (struct topo_topology **topologyp)
 int
 topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
 {
-#ifdef HAVE_OPENAT
-  char *fsys_root_path_env;
-
-  /* close previous root */
-  if (topology->fsys_root_fd >= 0) {
-    close(topology->fsys_root_fd);
-    topology->fsys_root_fd = -1;
-  }
-
-  /* Use the root path from the environment variable first,
-   * then from the given argument, then the default root.
-   */
-  fsys_root_path_env = getenv("LT_FSYS_ROOT_PATH");
-  if (fsys_root_path_env)
-    fsys_root_path = fsys_root_path_env;
-  if (!fsys_root_path)
-    fsys_root_path = "/";
-
-  /* Get a file descriptor to the file system root.  */
+#ifdef LINUX_SYS
   if (lt_set_fsys_root(topology, fsys_root_path))
     return -1;
-
-#endif
+#endif /* LINUX_SYS */
 
   return 0;
 }
