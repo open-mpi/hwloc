@@ -19,7 +19,7 @@ output_topology (topo_topology_t topology, topo_level_t l, topo_level_t parent, 
   const char * indexprefix = "#";
   const char * levelterm = "";
 
-  if (parent && topo_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
+  if (!verbose_mode && parent && topo_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
     fprintf(output, " + ");
   } else {
     if (parent)
