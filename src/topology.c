@@ -276,6 +276,26 @@ topo_discover(struct topo_topology *topology)
 
   assert(topology->nb_processors);
 
+  l=0;
+  while (l<topology->nb_levels) {
+    enum topo_level_type_e type = topology->levels[l][0].type;
+    enum topo_ignore_type_e ignore = topology->ignored_types[type];
+
+    /* ignore if ALWAYS,
+     * or ignore if KEEP_STRUCTURE and parent level is similar.
+     */
+    if (ignore == TOPO_IGNORE_LEVEL_ALWAYS
+	|| (ignore == TOPO_IGNORE_LEVEL_KEEP_STRUCTURE
+	    && l > 0
+	    && topology->level_nbitems[l-1] == topology->level_nbitems[l])) {
+      topo_remove_level(topology, l);
+      /* FIXME: restore the type of level so that we keep core instead of L2 for instance? */
+    } else {
+      l++;
+    }
+  }
+
+  /* FIXME: deprecated, drop */
   if (topology->flags & TOPO_FLAGS_IGNORE_CACHES) {
     /* Ignore caches if needed */
     l=0;
@@ -381,6 +401,8 @@ int
 topo_topology_init (struct topo_topology **topologyp)
 {
   struct topo_topology *topology;
+  int i;
+
   topology = topo_default_allocator.allocate (sizeof (struct topo_topology));
   if(!topology)
     return -1;
@@ -392,6 +414,8 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->huge_page_size_kB = 0;
   topology->dmi_board_vendor = NULL;
   topology->dmi_board_name = NULL;
+  for(i=0; i< TOPO_LEVEL_MAX; i++)
+    topology->ignored_types[i] = TOPO_IGNORE_LEVEL_NEVER;
   topology->level_nbitems[0] = 1;
   topology->levels[0] = malloc (2*sizeof (struct topo_level));
   lt_setup_machine_level (&topology->levels[0]);
@@ -412,9 +436,42 @@ topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_roo
 }
 
 int
-topo_topology_set_flags (topo_topology_t topology, unsigned long flags)
+topo_topology_set_flags (struct topo_topology *topology, unsigned long flags)
 {
   topology->flags = flags;
+  return 0;
+}
+
+int
+topo_topology_ignore_type(struct topo_topology *topology, enum topo_level_type_e type)
+{
+  if (type >= TOPO_LEVEL_MAX)
+    return -1;
+
+  if (type == TOPO_LEVEL_MACHINE)
+    /* we don't want 2 heads */
+    return -1;
+
+  topology->ignored_types[type] = TOPO_IGNORE_LEVEL_ALWAYS;
+  return 0;
+}
+
+int
+topo_topology_ignore_type_keep_structure(struct topo_topology *topology, topo_level_type_t type)
+{
+  if (type >= TOPO_LEVEL_MAX)
+    return -1;
+
+  topology->ignored_types[type] = TOPO_IGNORE_LEVEL_KEEP_STRUCTURE;
+  return 0;
+}
+
+int
+topo_topology_ignore_all_keep_structure(struct topo_topology *topology)
+{
+  unsigned type = type;
+  for(type=0; type<TOPO_LEVEL_MAX; type++)
+    topology->ignored_types[type] = TOPO_IGNORE_LEVEL_KEEP_STRUCTURE;
   return 0;
 }
 

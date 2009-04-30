@@ -22,6 +22,8 @@ main (int argc, char *argv[])
   char *filename = NULL;
   unsigned long flags = 0;
   FILE *output;
+  int merge = 0;
+  int ignorecache = 0;
 
   err = topo_topology_init (&topology);
   if (err)
@@ -38,11 +40,15 @@ main (int argc, char *argv[])
         exit(EXIT_FAILURE);
       }
       else if (!strcmp (argv[1], "--no-caches"))
-	flags |= TOPO_FLAGS_IGNORE_CACHES;
+	ignorecache = 2;
+      else if (!strcmp (argv[1], "--no-useless-caches"))
+	ignorecache = 1;
       else if (!strcmp (argv[1], "--no-threads"))
 	flags |= TOPO_FLAGS_IGNORE_THREADS;
       else if (!strcmp (argv[1], "--no-linux-cpusets"))
 	flags |= TOPO_FLAGS_IGNORE_LINUX_CPUSETS;
+      else if (!strcmp (argv[1], "--merge"))
+	merge = 1;
       else {
 	if (filename)
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
@@ -59,6 +65,18 @@ main (int argc, char *argv[])
     output = fopen(filename, "w");
 
   topo_topology_set_flags(topology, flags);
+
+  if (ignorecache > 1) {
+    topo_topology_ignore_type(topology, TOPO_LEVEL_L1);
+    topo_topology_ignore_type(topology, TOPO_LEVEL_L2);
+    topo_topology_ignore_type(topology, TOPO_LEVEL_L3);
+  } else if (ignorecache) {
+    topo_topology_ignore_type_keep_structure(topology, TOPO_LEVEL_L1);
+    topo_topology_ignore_type_keep_structure(topology, TOPO_LEVEL_L2);
+    topo_topology_ignore_type_keep_structure(topology, TOPO_LEVEL_L3);
+  }
+  if (merge)
+    topo_topology_ignore_all_keep_structure(topology);
 
   err = topo_topology_load (topology);
   if (err)

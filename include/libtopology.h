@@ -76,6 +76,15 @@ extern int topo_topology_load(topo_topology_t topology);
 /** \brief Terminate and free a topology context. */
 extern void topo_topology_destroy (topo_topology_t topology);
 
+/** \brief Ignore a level type.
+    To be called between _init and _load. */
+extern int topo_topology_ignore_type(topo_topology_t topology, topo_level_type_t type);
+/** \brief Ignore a level type if it does not bring any structure.
+    To be called between _init and _load. */
+extern int topo_topology_ignore_type_keep_structure(topo_topology_t topology, topo_level_type_t type);
+/** \brief Ignore all levels that do not bring any structure.
+    To be called between _init and _load. */
+extern int topo_topology_ignore_all_keep_structure(topo_topology_t topology);
 /** \brief Set OR'ed flags to non-yet-loaded topology.
     To be called between _init and _load.  */
 enum topo_flags_e {
