@@ -14,24 +14,31 @@
   fprintf (output, "%*s", i, "");
 
 static void
-output_topology (topo_topology_t topology, topo_level_t l, FILE *output, int i, int verbose_mode) {
+output_topology (topo_topology_t topology, topo_level_t l, topo_level_t parent, FILE *output, int i, int verbose_mode) {
   int x;
   const char * indexprefix = "#";
   const char * levelterm = "";
 
-  indent (output, 2*i);
+  if (parent && topo_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
+    fprintf(output, " + ");
+  } else {
+    if (parent)
+      fprintf(output, "\n");
+    indent (output, 2*i);
+    i++;
+  }
   topo_print_level (topology, l, output, verbose_mode, indexprefix, levelterm);
-  fprintf(output, "\n");
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
-	output_topology (topology, l->children[x], output, i+1, verbose_mode);
+	output_topology (topology, l->children[x], l, output, i, verbose_mode);
   }
 }
 
 void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 {
-  output_topology (topology, topo_get_machine_level(topology), output, 0, verbose_mode);
+  output_topology (topology, topo_get_machine_level(topology), NULL, output, 0, verbose_mode);
+  fprintf(output, "\n");
 
   if (verbose_mode)
     {
