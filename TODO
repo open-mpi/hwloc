@@ -2,9 +2,12 @@
 
 * uniformize SMT / PROC / thread names
 
-* generalize TOPO_FLAGS_IGNORE_THREADS, TOPO_FLAGS_IGNORE_CACHES,
-  TOPO_FLAGS_IGNORE_LINUX_CPUSETS filtering
-* IGNORE_CACHES -> KEEP_STRUCTURE_ONLY
+* generalize TOPO_FLAGS_IGNORE_THREADS filtering
+  + remove all thread items but the first one
+    so that we bind to a single OS cpu in the end
+  + applicable to any other level type?
+* generalize TOPO_FLAGS_IGNORE_LINUX_CPUSETS filtering
+  + add a admin-disabled field in topo-levels and filter-out later if needed?
 
 * integrate marcel split quirk?
   + split for real, just explain how to split?

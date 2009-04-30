@@ -207,6 +207,18 @@ topo_connect(struct topo_topology *topology)
     }
 }
 
+/* Remove level at depth _depth_ */
+static void
+topo_remove_level(struct topo_topology *topology, unsigned depth)
+{
+  free (topology->levels[depth]);
+  memmove (&topology->levels[depth], &topology->levels[depth+1],
+	   (topology->nb_levels-1-depth) * sizeof(topology->levels[depth]));
+  memmove (&topology->level_nbitems[depth], &topology->level_nbitems[depth+1],
+	   (topology->nb_levels-1-depth) * sizeof(topology->level_nbitems[depth]));
+  topology->nb_levels--;
+}
+
 static int
 compar(const void *_l1, const void *_l2)
 {
@@ -263,6 +275,18 @@ topo_discover(struct topo_topology *topology)
   ltdebug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
 
   assert(topology->nb_processors);
+
+  if (topology->flags & TOPO_FLAGS_IGNORE_CACHES) {
+    /* Ignore caches if needed */
+    l=0;
+    while (l<topology->nb_levels) {
+      enum topo_level_type_e type = topology->levels[l][0].type;
+      if (type == TOPO_LEVEL_L1 || type == TOPO_LEVEL_L2 || type == TOPO_LEVEL_L3)
+	topo_remove_level(topology, l);
+      else
+	l++;
+    }
+  }
 
   /* Compute the machine cpuset */
   topo_cpuset_zero(&topology->levels[0][0].cpuset);

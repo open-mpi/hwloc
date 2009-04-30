@@ -905,9 +905,8 @@ look_sysfscpu(topo_cpuset_t *offline_cpus_set, struct topo_topology *topology)
   if (numdies>1)
     lt_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
 
-  if (!(topology->flags & TOPO_FLAGS_IGNORE_CACHES))
-    for(j=0; j<procid_max; j++)
-      lt_parse_cache_shared_cpu_maps(j, procid_max, offline_cpus_set, proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
+  for(j=0; j<procid_max; j++)
+    lt_parse_cache_shared_cpu_maps(j, procid_max, offline_cpus_set, proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
 
   if (numcaches[2] > 0)
     {
