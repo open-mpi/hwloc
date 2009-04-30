@@ -150,8 +150,5 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
   default:
     break;
   }
-  if (l->level == topology->nb_levels-1) {
-    fprintf(output, "VP %s%u", indexprefix, l->number);
-  }
   fprintf(output, "%s", levelterm);
 }
