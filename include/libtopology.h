@@ -59,6 +59,7 @@ enum topo_level_type_e {
   TOPO_LEVEL_PROC,	/**< \brief SMT Processor in a core */
   TOPO_LEVEL_MAX,
 };
+typedef enum topo_level_type_e topo_level_type_t;
 
 /** \brief Type of memory attached to the topology level */
 enum topo_level_memory_type_e {
@@ -69,6 +70,7 @@ enum topo_level_memory_type_e {
   TOPO_LEVEL_MEMORY_MACHINE = 4,
   TOPO_LEVEL_MEMORY_TYPE_MAX
 };
+typedef enum topo_level_memory_type_e topo_level_memory_type_t;
 
 /** Structure of a topology level */
 struct topo_level {
