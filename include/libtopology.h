@@ -8,28 +8,10 @@
 #include <libtopology/allocator.h>
 #include <libtopology/cpuset.h>
 
+
 /* \brief Topology context */
 struct topo_topology;
 typedef struct topo_topology * topo_topology_t;
-
-/** \brief Allocate a topology context. */
-extern int topo_topology_init (topo_topology_t *topologyp);
-/** \brief Build the actual topology once initialized with _init and tuned with backends and friends */
-extern int topo_topology_load(topo_topology_t topology);
-/** \brief Terminate and free a topology context. */
-extern void topo_topology_destroy (topo_topology_t topology);
-
-enum topo_flags_e {
-  TOPO_FLAGS_IGNORE_THREADS = (1<<0),
-  TOPO_FLAGS_IGNORE_CACHES = (1<<1),
-  TOPO_FLAGS_IGNORE_LINUX_CPUSETS = (1<<2),
-};
-/** \brief Set OR'ed flags to non-yet-loaded topology */
-extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
-
-/* FIXME: switch to a backend interface */
-/** \brief Change the file-system root path when building the topology from sysfs/procs */
-extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
 
 /* \brief Global information about the topology */
 struct topo_topology_info {
@@ -43,8 +25,6 @@ struct topo_topology_info {
   char *dmi_board_name;
   unsigned long huge_page_size_kB;
 };
-extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
-
 
 /** \brief Type of topology level */
 enum topo_level_type_e {
@@ -87,6 +67,32 @@ struct topo_level {
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this level */
 };
 typedef struct topo_level * topo_level_t;
+
+
+/** \brief Allocate a topology context. */
+extern int topo_topology_init (topo_topology_t *topologyp);
+/** \brief Build the actual topology once initialized with _init and tuned with backends and friends */
+extern int topo_topology_load(topo_topology_t topology);
+/** \brief Terminate and free a topology context. */
+extern void topo_topology_destroy (topo_topology_t topology);
+
+/** \brief Set OR'ed flags to non-yet-loaded topology.
+    To be called between _init and _load.  */
+enum topo_flags_e {
+  TOPO_FLAGS_IGNORE_THREADS = (1<<0),
+  TOPO_FLAGS_IGNORE_CACHES = (1<<1),
+  TOPO_FLAGS_IGNORE_LINUX_CPUSETS = (1<<2),
+};
+extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
+/* FIXME: switch to a backend interface */
+/** \brief Change the file-system root path when building the topology from sysfs/procs.
+    To be called between _init and _load.  */
+extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
+
+/* \brief Get global information about the topology.
+    To be called between _init and _load.  */
+extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
+
 
 /** \brief Returns the depth of levels of type _type_. If no level of
     this type is present on the underlying architecture, the function
