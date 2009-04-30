@@ -361,7 +361,16 @@ topo_topology_init (struct topo_topology **topologyp)
   if(!topology)
     return -1;
 
-  lt_setup_topo(topology);
+  topology->nb_processors = 0;
+  topology->nb_nodes = 0;
+  topology->nb_levels = 1; /* there's at least MACHINE */
+  topology->fsys_root_fd = -1;
+  topology->huge_page_size_kB = 0;
+  topology->dmi_board_vendor = NULL;
+  topology->dmi_board_name = NULL;
+  topology->level_nbitems[0] = 1;
+  topology->levels[0] = malloc (2*sizeof (struct topo_level));
+  lt_setup_machine_level (&topology->levels[0]);
 
   *topologyp = topology;
   return 0;

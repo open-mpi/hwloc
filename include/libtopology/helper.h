@@ -93,18 +93,4 @@ extern void look_windows(struct topo_topology *topology);
 	} while (0)
 
 
-#define lt_setup_topo(t) do {						\
-		struct topo_topology * __t = (t);                       \
-		__t->nb_processors = 0;					\
-		__t->nb_nodes = 0;					\
-		__t->nb_levels = 1; /* there's at least MACHINE */	\
-		__t->fsys_root_fd = -1;					\
-		__t->huge_page_size_kB = 0;				\
-		__t->dmi_board_vendor = NULL;				\
-		__t->dmi_board_name = NULL;				\
-		__t->level_nbitems[0] = 1;                              \
-		__t->levels[0] = malloc (2*sizeof (struct topo_level));	\
-		lt_setup_machine_level (&(__t->levels[0]));		\
-  } while (0)
-
 #endif /* LIBTOPOLOGY_HELPER_H */
