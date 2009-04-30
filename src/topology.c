@@ -295,19 +295,6 @@ topo_discover(struct topo_topology *topology)
     }
   }
 
-  /* FIXME: deprecated, drop */
-  if (topology->flags & TOPO_FLAGS_IGNORE_CACHES) {
-    /* Ignore caches if needed */
-    l=0;
-    while (l<topology->nb_levels) {
-      enum topo_level_type_e type = topology->levels[l][0].type;
-      if (type == TOPO_LEVEL_L1 || type == TOPO_LEVEL_L2 || type == TOPO_LEVEL_L3)
-	topo_remove_level(topology, l);
-      else
-	l++;
-    }
-  }
-
   /* Compute the machine cpuset */
   topo_cpuset_zero(&topology->levels[0][0].cpuset);
   for (i=0; i<topology->level_nbitems[1]; i++)
