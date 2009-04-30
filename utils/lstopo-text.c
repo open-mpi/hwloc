@@ -16,13 +16,11 @@
 static void
 output_topology (topo_topology_t topology, topo_level_t l, FILE *output, int i, int verbose_mode) {
   int x;
-  const char * separator = " ";
   const char * indexprefix = "#";
-  const char * labelseparator = ":";
   const char * levelterm = "";
 
   indent (output, 2*i);
-  topo_print_level (topology, l, output, verbose_mode, separator, indexprefix, labelseparator, levelterm);
+  topo_print_level (topology, l, output, verbose_mode, indexprefix, levelterm);
   fprintf(output, "\n");
   if (l->arity || (!i && !l->arity))
     {

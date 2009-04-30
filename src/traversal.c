@@ -111,53 +111,24 @@ topo_level_string (enum topo_level_type_e l)
     }
 }
 
-static void
-topo_print_level_description (struct topo_level *l, FILE *output, int verbose_mode)
-{
-  unsigned long type = l->type;
-  const char * separator = " + ";
-  const char * current_separator = ""; /* not prefix for the first one */
-
-#define topo_print_level_description_level(_l) \
-    {									\
-      if (type == _l) \
-	{	      \
-	  fprintf(output, "%s%s", current_separator, topo_level_string(_l)); \
-	  current_separator = separator;				\
-	}								\
-    }
-
-  topo_print_level_description_level(TOPO_LEVEL_MACHINE)
-  topo_print_level_description_level(TOPO_LEVEL_FAKE)
-  topo_print_level_description_level(TOPO_LEVEL_NODE)
-  topo_print_level_description_level(TOPO_LEVEL_DIE)
-  topo_print_level_description_level(TOPO_LEVEL_L3)
-  topo_print_level_description_level(TOPO_LEVEL_L2)
-  topo_print_level_description_level(TOPO_LEVEL_CORE)
-  topo_print_level_description_level(TOPO_LEVEL_L1)
-  topo_print_level_description_level(TOPO_LEVEL_PROC)
-}
-
 #define topo_memory_size_printf_value(_size) \
   (_size) < (10*1024) ? (_size) : (_size) < (10*1024*1024) ? (_size)>>10 : (_size)>>20
 #define topo_memory_size_printf_unit(_size) \
   (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
 
 void
-topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *output, int verbose_mode, const char *separator,
-		  const char *indexprefix, const char* labelseparator, const char* levelterm)
+topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *output, int verbose_mode,
+		  const char *indexprefix, const char* levelterm)
 {
   enum topo_level_type_e type = l->type;
-  topo_print_level_description(l, output, verbose_mode);
-  fprintf(output, "%s", labelseparator);
   switch (type) {
   case TOPO_LEVEL_DIE:
   case TOPO_LEVEL_CORE:
   case TOPO_LEVEL_PROC:
-    fprintf(output, "%s%s%s%u", separator, topo_level_string(type), indexprefix, l->physical_index[type]);
+    fprintf(output, "%s%s%u", topo_level_string(type), indexprefix, l->physical_index[type]);
     break;
   case TOPO_LEVEL_MACHINE:
-    fprintf(output, "%s%s(%ld%s)", separator, topo_level_string(type),
+    fprintf(output, "%s(%ld%s)", topo_level_string(type),
 	    topo_memory_size_printf_value(l->memory_kB[TOPO_LEVEL_MEMORY_MACHINE]),
 	    topo_memory_size_printf_unit(l->memory_kB[TOPO_LEVEL_MEMORY_MACHINE]));
     break;
@@ -171,7 +142,7 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
       : (type == TOPO_LEVEL_L2) ? TOPO_LEVEL_MEMORY_L2
       : TOPO_LEVEL_MEMORY_L1;
     unsigned long memory_kB = l->memory_kB[mtype];
-    fprintf(output, "%s%s%s%u(%ld%s)", separator, topo_level_string(type), indexprefix, l->physical_index[type],
+    fprintf(output, "%s%s%u(%ld%s)", topo_level_string(type), indexprefix, l->physical_index[type],
 	    topo_memory_size_printf_value(memory_kB),
 	    topo_memory_size_printf_unit(memory_kB));
     break;
@@ -180,7 +151,7 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
     break;
   }
   if (l->level == topology->nb_levels-1) {
-    fprintf(output, "%sVP %s%u", separator, indexprefix, l->number);
+    fprintf(output, "VP %s%u", indexprefix, l->number);
   }
   fprintf(output, "%s", levelterm);
 }

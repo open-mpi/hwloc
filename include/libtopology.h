@@ -139,7 +139,6 @@ extern const char * topo_level_string (enum topo_level_type_e l);
 /** \brief print a human-readable form of the given topology level */
 extern void topo_print_level (topo_topology_t topology, topo_level_t l,
 			      FILE *output, int verbose_mode,
-			      const char *separator, const char *indexprefix,
-			      const char* labelseparator, const char* levelterm);
+			      const char *indexprefix, const char* levelterm);
 
 #endif /* LIBTOPOLOGY_H */
