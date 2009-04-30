@@ -18,6 +18,10 @@
 #include <libtopology/helper.h>
 #include <libtopology/debug.h>
 
+#ifdef WIN_SYS
+#include <windows.h>
+#endif
+
 /* Return the OS-provided number of processors.  Unlike other methods such as
    reading sysfs on Linux, this method is not virtualizable; thus it's only
    used as a fall-back method, allowing `lt_set_fsys_root ()' to
@@ -37,6 +41,10 @@ lt_fallback_nbprocessors(void) {
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
   return info.avail_cpus;
+#elif defined(WIN_SYS)
+  SYSTEM_INFO sysinfo;
+  GetSystemInfo(&sysinfo);
+  return sysinfo.dwNumberOfProcessors;
 #else
 #warning No known way to discover number of available processors on this system
 #warning lt_fallback_nbprocessors will default to 1

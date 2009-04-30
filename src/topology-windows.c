@@ -10,6 +10,6 @@ void
 look_windows(struct topo_topology *topology)
 {
 #ifdef WIN_SYS
-#  warning: TODO: use GetLogicalProcessorInformation, GetNumaHighestNodeNumber, and GetNumaNodeProcessorMask
+//#  warning: TODO: use GetLogicalProcessorInformation, GetNumaHighestNodeNumber, and GetNumaNodeProcessorMask
 #endif
 }
