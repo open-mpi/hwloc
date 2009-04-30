@@ -4,6 +4,7 @@
 
 * generalize TOPO_FLAGS_IGNORE_THREADS, TOPO_FLAGS_IGNORE_CACHES,
   TOPO_FLAGS_IGNORE_LINUX_CPUSETS filtering
+* IGNORE_CACHES -> KEEP_STRUCTURE_ONLY
 
 * integrate marcel split quirk?
   + split for real, just explain how to split?
@@ -45,9 +46,11 @@ API:
   + no level = empty mask, and we may want an easy alias for "whole machine"
 * add reverse-routines converting sched_getaffinity or libnuma masks into a ancestor level
 * provide traversal functions instead of pointers in structures?
-* LT_LEVEL_MEMORY_L*: what about L4 someday?
+* LT_LEVEL_MEMORY_L*: what about L4 someday? Use resource "types" instead and
+  add a depth for caches.
 * hide some things from lt_topo?
 * there could be several size for huge pages
+* rename "level" into "resource" or "object"
 
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
