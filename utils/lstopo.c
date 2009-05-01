@@ -90,7 +90,11 @@ main (int argc, char *argv[])
     else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #endif /* HAVE_CAIRO */
+#ifdef WIN_SYS
+      output_windows(topology, output, verbose_mode);
+#else
       output_text(topology, output, verbose_mode);
+#endif
   } else if (!strcmp(filename, "-")
 	  || !strcmp(filename, "/dev/stdout")
 	  ||  strstr(filename, ".txt"))

@@ -47,6 +47,7 @@ case ${target} in
 		    GROUP_RELATIONSHIP,
 		    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX],
 		    [],[],[[#include <windows.h>]])
+    AC_HAVE_LIBRARY(gdi32)
     windows=yes
     ;;
   *)
