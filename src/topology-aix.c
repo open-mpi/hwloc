@@ -33,8 +33,6 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
     perror("rs_numrads");
     return;
   }
-  if (nbnodes == 1)
-    return;
 
   rad_level=malloc((nbnodes+1)*sizeof(*rad_level));
 
