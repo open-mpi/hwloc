@@ -30,8 +30,6 @@ look_osf(struct topo_topology *topology)
   struct topo_level *node_level;
 
   nbnodes=rad_get_num();
-  if (nbnodes==1)
-    return;
 
   node_level=malloc((nbnodes+1)*sizeof(*node_level));
 
