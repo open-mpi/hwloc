@@ -4,11 +4,6 @@
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
 
-* generalize TOPO_FLAGS_IGNORE_THREADS filtering
-  + remove all thread items but the first one
-    so that we bind to a single OS cpu in the end
-  + applicable to any other level type?
-
 * change memory_kB[] and physical_index[] into scalars now that we know that we'll probably never merge level for real
   + application that want all information just have to not merge things
 

@@ -19,6 +19,7 @@ struct topo_topology {
   unsigned nb_levels;					/* Number of horizontal levels */
   topo_cpuset_t online_cpuset;				/* Available physical resource ids mask */
   topo_cpuset_t admin_disabled_cpuset;			/* Available physical resource that are disabled by the administrator */
+  topo_cpuset_t nonfirst_threads_cpuset;		/* Thread siblings that are not the first one in a cpu */
   unsigned level_nbitems[TOPO_LEVEL_MAX]; 		/* Number of items on each horizontal level */
   struct topo_level *levels[TOPO_LEVEL_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
   unsigned long flags;

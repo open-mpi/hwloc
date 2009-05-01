@@ -171,8 +171,10 @@ look_cpu(struct topo_topology *topology)
       if (!topo_cpuset_isset(&topology->online_cpuset, oscpu))
 	continue;
 
-      if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)
-	  && topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)) {
+      if ((!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)
+	   && topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu))
+	  || ((topology->flags & TOPO_FLAGS_IGNORE_THREADS)
+	      && topo_cpuset_isset(&topology->nonfirst_threads_cpuset, oscpu))) {
 	topology->nb_processors--;
 	continue;
       }
@@ -336,6 +338,8 @@ topo_discover(struct topo_topology *topology)
   topo_cpuset_t finalset = topology->online_cpuset;
   if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
     topo_cpuset_clearset(&finalset, &topology->admin_disabled_cpuset);
+  if (topology->flags & TOPO_FLAGS_IGNORE_THREADS)
+    topo_cpuset_clearset(&finalset, &topology->nonfirst_threads_cpuset);
   assert(topo_cpuset_isequal(&finalset, &topology->levels[0][0].cpuset));
 
   /* Remove disabled/offline CPUs from all cpusets, use the now correct machine cpuset to do so,
@@ -466,6 +470,7 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->nb_levels = 1; /* there's at least MACHINE */
   topo_cpuset_zero(&topology->online_cpuset);
   topo_cpuset_zero(&topology->admin_disabled_cpuset);
+  topo_cpuset_zero(&topology->nonfirst_threads_cpuset);
   topology->fsys_root_fd = -1;
   topology->huge_page_size_kB = 0;
   topology->dmi_board_vendor = NULL;

@@ -678,13 +678,9 @@ look__sysfscpu(unsigned *procid_max,
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
       lt_parse_cpumap(string, &coreset, topology->fsys_root_fd);
 
-      /* ignore threads except the first one */
-      if (i != topo_cpuset_first(&coreset)
-	  && (topology->flags & TOPO_FLAGS_IGNORE_THREADS)) {
-	  ltdebug("os proc %d is not the first thread of core\n", i);
-	  nr_offline_cpus++;
-	  continue;
-      }
+      /* add thread siblings mask except the first thread to nonfirst_threads_cpuset */
+      topo_cpuset_orset(&topology->nonfirst_threads_cpuset, &coreset);
+      topo_cpuset_clr(&topology->nonfirst_threads_cpuset, topo_cpuset_first(&coreset));
 
       for(j=0; j<i; j++)
 	if (topo_cpuset_isset(&dieset, j))
