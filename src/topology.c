@@ -335,9 +335,10 @@ topo_discover(struct topo_topology *topology)
   for (i=0; i<topology->level_nbitems[topology->nb_levels-1]; i++)
     topo_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[topology->nb_levels-1][i].cpuset);
   /* Make sure machine = online & ~admin_disabled */
-  topo_cpuset_t onlineset = topology->online_cpuset;
-  topo_cpuset_clearset(&onlineset, &topology->admin_disabled_cpuset);
-  assert(topo_cpuset_isequal(&onlineset, &topology->levels[0][0].cpuset));
+  topo_cpuset_t finalset = topology->online_cpuset;
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
+    topo_cpuset_clearset(&finalset, &topology->admin_disabled_cpuset);
+  assert(topo_cpuset_isequal(&finalset, &topology->levels[0][0].cpuset));
 
   /* Remove disabled/offline CPUs from all cpusets, use the now correct machine cpuset to do so,
    * Then sort levels according to cpu sets, removed empty levels, recount levels, ...
