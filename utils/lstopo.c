@@ -45,8 +45,8 @@ main (int argc, char *argv[])
 	ignorecache = 1;
       else if (!strcmp (argv[1], "--no-threads"))
 	flags |= TOPO_FLAGS_IGNORE_THREADS;
-      else if (!strcmp (argv[1], "--no-linux-cpusets"))
-	flags |= TOPO_FLAGS_IGNORE_LINUX_CPUSETS;
+      else if (!strcmp (argv[1], "--no-admin"))
+	flags |= TOPO_FLAGS_IGNORE_ADMIN_DISABLE;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
       else {

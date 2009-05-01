@@ -157,7 +157,7 @@ lt_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid
 
 /* Use the value stored in topology->nb_processors.  */
 static void
-look_cpu(topo_cpuset_t *offline_cpus_set, struct topo_topology *topology)
+look_cpu(struct topo_topology *topology, topo_cpuset_t *offline_cpus_set, topo_cpuset_t *admin_disabled_cpuset)
 {
   struct topo_level *cpu_level;
   unsigned oscpu,cpu;
@@ -170,10 +170,22 @@ look_cpu(topo_cpuset_t *offline_cpus_set, struct topo_topology *topology)
     {
       while (topo_cpuset_isset(offline_cpus_set, oscpu))
 	oscpu++;
+
+      if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
+	while (topo_cpuset_isset(admin_disabled_cpuset, oscpu)) {
+	  oscpu++;
+	  topology->nb_processors--;
+	  if (cpu>=topology->nb_processors)
+	    break;
+	}
+      }
+
       lt_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC);
       lt_set_os_numbers(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
 
       topo_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
+      if (!(topo_cpuset_isset(admin_disabled_cpuset, oscpu)))
+	cpu_level[cpu].admin_disabled = 1;
 
       ltdebug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
 	      cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu].cpuset));
@@ -255,12 +267,13 @@ topo_discover(struct topo_topology *topology)
   unsigned k;
   /*	unsigned nbsublevels; */
   /*	unsigned sublevelarity; */
-  topo_cpuset_t offline_cpus_set;
+  topo_cpuset_t offline_cpus_set, admin_disabled_cpuset;
 
   topo_cpuset_zero(&offline_cpus_set);
+  topo_cpuset_zero(&admin_disabled_cpuset);
 
 #    ifdef LINUX_SYS
-  look_linux(topology, &offline_cpus_set);
+  look_linux(topology, &offline_cpus_set, &admin_disabled_cpuset);
 #    endif /* LINUX_SYS */
 
 #    ifdef  AIX_SYS
@@ -282,12 +295,16 @@ topo_discover(struct topo_topology *topology)
   look_windows(topology);
 #    endif /* WINDOWS_SYS */
 
-  look_cpu(&offline_cpus_set, topology);
+  /* Create actual bottom proc resources, while dropping the offline
+   * and admin_disabled ones.
+   */
+  look_cpu(topology, &offline_cpus_set, &admin_disabled_cpuset);
 
   ltdebug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
 
   assert(topology->nb_processors);
 
+  /* Ignored some levels if requested */
   l=0;
   while (l<topology->nb_levels) {
     enum topo_level_type_e type = topology->levels[l][0].type;
@@ -301,7 +318,6 @@ topo_discover(struct topo_topology *topology)
 	    && l > 0
 	    && topology->level_nbitems[l-1] == topology->level_nbitems[l])) {
       topo_remove_level(topology, l);
-      /* FIXME: restore the type of level so that we keep core instead of L2 for instance? */
     } else {
       l++;
     }
@@ -394,6 +410,18 @@ topo_discover(struct topo_topology *topology)
   for (l=0; l<topology->nb_levels; l++)
     for (i=0; i<topology->level_nbitems[l]; i++)
       topology->levels[l][i].level = l;
+
+  /* Empty some NUMA node memory if disabled by the administrator */
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
+    l = topology->type_depth[TOPO_LEVEL_NODE];
+    for (i=0; i<topology->level_nbitems[l]; i++) {
+      /* remove memory if disabled */
+      if (topology->levels[l][i].admin_disabled) {
+	topology->levels[l][i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0;
+	topology->levels[l][i].huge_page_free = 0;
+      }
+    }
+  }
 }
 
 int

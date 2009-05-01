@@ -1,13 +1,16 @@
 * windows
 
 * uniformize SMT / PROC / thread names
+  + if we keep a "proc" level at the bottom, should we make its type
+    ignorable for real? otherwise, we could get L1 objects at the bottom
 
 * generalize TOPO_FLAGS_IGNORE_THREADS filtering
   + remove all thread items but the first one
     so that we bind to a single OS cpu in the end
   + applicable to any other level type?
-* generalize TOPO_FLAGS_IGNORE_LINUX_CPUSETS filtering
-  + add a admin-disabled field in topo-levels and filter-out later if needed?
+
+* change memory_kB[] and physical_index[] into scalars now that we know that we'll probably never merge level for real
+  + application that want all information just have to not merge things
 
 * integrate marcel split quirk?
   + split for real, just explain how to split?
@@ -51,6 +54,7 @@ API:
 * provide traversal functions instead of pointers in structures?
 * LT_LEVEL_MEMORY_L*: what about L4 someday? Use resource "types" instead and
   add a depth for caches.
+  + make cache size/depth/type, memory node size + hugepagefree a resource attribute
 * hide some things from lt_topo?
 * there could be several size for huge pages
 * rename "level" into "resource" or "object"

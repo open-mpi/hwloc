@@ -64,6 +64,7 @@ struct topo_level {
   signed physical_index[TOPO_LEVEL_MAX];	/**< \brief OS-provided physical index numbers */
   unsigned long memory_kB[TOPO_LEVEL_MEMORY_TYPE_MAX];
   unsigned long huge_page_free;
+  unsigned admin_disabled;		/**< \brief Set if disabled by the administrator (for instance Linux Cpusets) */
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this level */
 };
 typedef struct topo_level * topo_level_t;
@@ -89,7 +90,7 @@ extern int topo_topology_ignore_all_keep_structure(topo_topology_t topology);
     To be called between _init and _load.  */
 enum topo_flags_e {
   TOPO_FLAGS_IGNORE_THREADS = (1<<0),
-  TOPO_FLAGS_IGNORE_LINUX_CPUSETS = (1<<1),
+  TOPO_FLAGS_IGNORE_ADMIN_DISABLE = (1<<1), /* Linux Cpusets, ... */
 };
 extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
 /* FIXME: switch to a backend interface */
