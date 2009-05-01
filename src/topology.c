@@ -166,18 +166,15 @@ look_cpu(struct topo_topology *topology)
   assert(cpu_level);
 
   ltdebug("\n\n * CPU cpusets *\n\n");
-  for (cpu=0,oscpu=0; cpu<topology->nb_processors; cpu++,oscpu++)
+  for (cpu=0,oscpu=0; cpu<topology->nb_processors; oscpu++)
     {
-      while (!topo_cpuset_isset(&topology->online_cpuset, oscpu))
-	oscpu++;
+      if (!topo_cpuset_isset(&topology->online_cpuset, oscpu))
+	continue;
 
-      if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
-	while (topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)) {
-	  oscpu++;
-	  topology->nb_processors--;
-	  if (cpu>=topology->nb_processors)
-	    break;
-	}
+      if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)
+	  && topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)) {
+	topology->nb_processors--;
+	continue;
       }
 
       lt_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC);
@@ -189,6 +186,7 @@ look_cpu(struct topo_topology *topology)
 
       ltdebug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
 	      cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu].cpuset));
+      cpu++;
     }
   topo_cpuset_zero(&cpu_level[cpu].cpuset);
 
