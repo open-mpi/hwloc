@@ -1,8 +1,16 @@
 * windows
 
-* uniformize SMT / PROC / thread names
+* uniformize SMT / PROC / thread names => "CPU" ?
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
+
+* hide physical_index if -1 is lstopo
+
+* LT_LEVEL_MEMORY_L*: what about L4 someday? Use resource "types" instead and
+  add a depth for caches.
+  + make cache size/depth/type, memory node size + hugepagefree a resource attribute
+* there could be several size for huge pages
+* rename "level" into "resource" or "object"
 
 * change memory_kB[] and physical_index[] into scalars now that we know that we'll probably never merge level for real
   + application that want all information just have to not merge things
@@ -16,10 +24,7 @@
 * move DMI reading info to topology-linux.c
 
 * use topology_allocator for real, including in strdup
-* how does the application change the memory allocator?
-  + another argument in lt_topo_init() ?
-  + or more generic way with an array or { int type; void *obj; }
-    to pass the fsys_root_path, memory_allocator, ...
+  + add topo_set_allocator() to be called before _init()
 
 * conversion between strings and cpuset:
   void lt_string_to_mask(const char *string, lt_cpuset_t *cpuset)
@@ -30,21 +35,12 @@
   int lt_mask_to_levels(lt_cpuset_t *cpuset, lt_level_t *levels, int max)
  
 API:
-* add a lt_topo_merge() merging everything possible (or just a level)
-  + or add som flags to lt_topo_init
-* add lt_topo_split()? 
 * add a way to extract sched_setaffinity masks from arrays of levels (OR'ed)
   + or bind directly?
 * add a way to extract libnuma-friendly masks of nodes from arrays of levels (OR'ed)
   + no level = empty mask, and we may want an easy alias for "whole machine"
 * add reverse-routines converting sched_getaffinity or libnuma masks into a ancestor level
 * provide traversal functions instead of pointers in structures?
-* LT_LEVEL_MEMORY_L*: what about L4 someday? Use resource "types" instead and
-  add a depth for caches.
-  + make cache size/depth/type, memory node size + hugepagefree a resource attribute
-* hide some things from lt_topo?
-* there could be several size for huge pages
-* rename "level" into "resource" or "object"
 
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
