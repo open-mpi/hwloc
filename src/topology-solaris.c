@@ -155,6 +155,10 @@ look_kstat(struct topo_topology *topology)
 
   if (numcores > 1)
     lt_setup_core_level(numprocs, numcores, oscoreids, proc_coreids, topology);
+
+  /* we have a contigous range of online cpus */
+  topo_cpuset_set_range(&topology->online_cpuset, 0, topology->nb_processors-1);
+
  out:
   kstat_close(kc);
 }

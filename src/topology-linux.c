@@ -177,7 +177,7 @@ lt_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
 static void
 lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned long val,
 			  int procid_max, unsigned *ids, unsigned long *vals,
-			  unsigned *nr_ids, unsigned givenid, topo_cpuset_t *offline_cpus_set,
+			  unsigned *nr_ids, unsigned givenid, topo_cpuset_t *online_cpuset,
 			  int fsys_root_fd)
 {
   topo_cpuset_t set;
@@ -215,7 +215,7 @@ lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned lo
 }
 
 static void
-lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *offline_cpus_set,
+lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *online_cpuset,
 			       unsigned *cacheids, unsigned long *cachesizes, unsigned *nr_caches,
 			       int fsys_root_fd)
 {
@@ -276,7 +276,7 @@ lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *of
     lt_process_shared_cpu_map(mappath, cachename, kB,
 			      procid_max, cacheids+level*LIBTOPO_NBMAXCPUS,
 			      cachesizes+level*LIBTOPO_NBMAXCPUS,
-			      &nr_caches[level], -1, offline_cpus_set,
+			      &nr_caches[level], -1, online_cpuset,
 			      fsys_root_fd);
   }
 }
@@ -380,7 +380,7 @@ lt_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
 }
 
 static void
-lt_admin_disable_cpus_from_cpuset(struct topo_topology *topology, topo_cpuset_t *disabled_cpuset)
+lt_admin_disable_cpus_from_cpuset(struct topo_topology *topology)
 {
 #define CPUSET_MASK_LEN 64
   char cpuset_mask[CPUSET_MASK_LEN];
@@ -411,7 +411,7 @@ lt_admin_disable_cpus_from_cpuset(struct topo_topology *topology, topo_cpuset_t 
       nextlast = nextfirst;
     if (prevlast+1 <= nextfirst-1) {
       ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-      topo_cpuset_set_range(disabled_cpuset, prevlast+1, nextfirst-1);
+      topo_cpuset_set_range(&topology->admin_disabled_cpuset, prevlast+1, nextfirst-1);
     }
 
     /* switch to next enabled-segment */
@@ -425,7 +425,7 @@ lt_admin_disable_cpus_from_cpuset(struct topo_topology *topology, topo_cpuset_t 
   nextfirst = LIBTOPO_NBMAXCPUS;
   if (prevlast+1 <= nextfirst-1) {
     ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-    topo_cpuset_set_range(disabled_cpuset, prevlast+1, nextfirst-1);
+    topo_cpuset_set_range(&topology->admin_disabled_cpuset, prevlast+1, nextfirst-1);
   }
 }
 
@@ -577,7 +577,7 @@ look_sysfsnode(struct topo_topology *topology)
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
 look__sysfscpu(unsigned *procid_max,
-	       topo_cpuset_t *offline_cpus_set,
+	       topo_cpuset_t *online_cpuset,
 	       unsigned *nr_procs,
 	       unsigned *nr_cores,
 	       unsigned *nr_dies,
@@ -626,7 +626,6 @@ look__sysfscpu(unsigned *procid_max,
 	{
 	/* this CPU does not exist */
 	  ltdebug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/\n", i, i);
-	  topo_cpuset_set(offline_cpus_set, i);
 	  nr_offline_cpus++;
 	  continue;
 	}
@@ -646,7 +645,6 @@ look__sysfscpu(unsigned *procid_max,
 	      else
 		{
 		  ltdebug("os proc %d is offline\n", i);
-		  topo_cpuset_set(offline_cpus_set, i);
 		  nr_offline_cpus++;
 		  continue;
 		}
@@ -662,7 +660,6 @@ look__sysfscpu(unsigned *procid_max,
       if (lt_access(string, X_OK, topology->fsys_root_fd) < 0 && errno == ENOENT)
 	{
 	  ltdebug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/topology\n", i, i);
-	  topo_cpuset_set(offline_cpus_set, i);
 	  nr_offline_cpus++;
 	  continue;
 	}
@@ -685,7 +682,6 @@ look__sysfscpu(unsigned *procid_max,
       if (i != topo_cpuset_first(&coreset)
 	  && (topology->flags & TOPO_FLAGS_IGNORE_THREADS)) {
 	  ltdebug("os proc %d is not the first thread of core\n", i);
-	  topo_cpuset_set(offline_cpus_set, i);
 	  nr_offline_cpus++;
 	  continue;
       }
@@ -717,6 +713,8 @@ look__sysfscpu(unsigned *procid_max,
 		  (*nr_cores), mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
 	  oscoreids[(*nr_cores)++] = mycoreid;
 	}
+
+	topo_cpuset_set(online_cpuset, i);
     }
 
   *nr_procs = cpu_max - nr_offline_cpus;
@@ -832,7 +830,7 @@ look_cpuinfo(unsigned *procid_max,
 
 
 static void
-look_sysfscpu(topo_cpuset_t *offline_cpus_set, struct topo_topology *topology)
+look_sysfscpu(struct topo_topology *topology)
 {
   unsigned proc_physids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
   unsigned osphysids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
@@ -859,10 +857,12 @@ look_sysfscpu(topo_cpuset_t *offline_cpus_set, struct topo_topology *topology)
 		   proc_physids, osphysids,
 		   proc_coreids, oscoreids,
 		   topology);
+      /* we have a contigous range of online cpus */
+      topo_cpuset_set_range(&topology->online_cpuset, 0, numprocs-1);
     }
   else
     {
-      look__sysfscpu(&procid_max, offline_cpus_set, &numprocs, &numcores, &numdies,
+      look__sysfscpu(&procid_max, &topology->online_cpuset, &numprocs, &numcores, &numdies,
 		     proc_physids, osphysids,
 		     proc_coreids, oscoreids,
 		     topology);
@@ -880,7 +880,7 @@ look_sysfscpu(topo_cpuset_t *offline_cpus_set, struct topo_topology *topology)
     lt_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
 
   for(j=0; j<procid_max; j++)
-    lt_parse_cache_shared_cpu_maps(j, procid_max, offline_cpus_set, proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
+    lt_parse_cache_shared_cpu_maps(j, procid_max, &topology->online_cpuset, proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
 
   if (numcaches[2] > 0)
     {
@@ -946,11 +946,11 @@ topo__get_dmi_info(struct topo_topology *topology)
 }
 
 void
-look_linux(struct topo_topology *topology, topo_cpuset_t *offline_cpus_set, topo_cpuset_t *admin_disabled_cpuset)
+look_linux(struct topo_topology *topology)
 {
   look_sysfsnode(topology);
-  look_sysfscpu(offline_cpus_set, topology);
-  lt_admin_disable_cpus_from_cpuset(topology, admin_disabled_cpuset);
+  look_sysfscpu(topology);
+  lt_admin_disable_cpus_from_cpuset(topology);
 
   /* Compute the whole machine memory and huge page */
   lt_get_procfs_meminfo_info(topology,

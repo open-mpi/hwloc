@@ -157,7 +157,7 @@ lt_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid
 
 /* Use the value stored in topology->nb_processors.  */
 static void
-look_cpu(struct topo_topology *topology, topo_cpuset_t *offline_cpus_set, topo_cpuset_t *admin_disabled_cpuset)
+look_cpu(struct topo_topology *topology)
 {
   struct topo_level *cpu_level;
   unsigned oscpu,cpu;
@@ -168,11 +168,11 @@ look_cpu(struct topo_topology *topology, topo_cpuset_t *offline_cpus_set, topo_c
   ltdebug("\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<topology->nb_processors; cpu++,oscpu++)
     {
-      while (topo_cpuset_isset(offline_cpus_set, oscpu))
+      while (!topo_cpuset_isset(&topology->online_cpuset, oscpu))
 	oscpu++;
 
       if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
-	while (topo_cpuset_isset(admin_disabled_cpuset, oscpu)) {
+	while (topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)) {
 	  oscpu++;
 	  topology->nb_processors--;
 	  if (cpu>=topology->nb_processors)
@@ -184,7 +184,7 @@ look_cpu(struct topo_topology *topology, topo_cpuset_t *offline_cpus_set, topo_c
       lt_set_os_numbers(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
 
       topo_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
-      if (!(topo_cpuset_isset(admin_disabled_cpuset, oscpu)))
+      if (!(topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)))
 	cpu_level[cpu].admin_disabled = 1;
 
       ltdebug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
@@ -265,15 +265,9 @@ topo_discover(struct topo_topology *topology)
 
   /* Raw detection, from coarser levels to finer levels */
   unsigned k;
-  /*	unsigned nbsublevels; */
-  /*	unsigned sublevelarity; */
-  topo_cpuset_t offline_cpus_set, admin_disabled_cpuset;
-
-  topo_cpuset_zero(&offline_cpus_set);
-  topo_cpuset_zero(&admin_disabled_cpuset);
 
 #    ifdef LINUX_SYS
-  look_linux(topology, &offline_cpus_set, &admin_disabled_cpuset);
+  look_linux(topology);
 #    endif /* LINUX_SYS */
 
 #    ifdef  AIX_SYS
@@ -295,14 +289,27 @@ topo_discover(struct topo_topology *topology)
   look_windows(topology);
 #    endif /* WINDOWS_SYS */
 
+  /* From here, topology->nb_processors is set to the number of available
+   * hardware resources, and topology->online_cpuset covers them.
+   * Administrator-disabled resources (such as Linux Cpusets) are not
+   * removed yet. Disabled cpus are in topology->admin_disabled_cpuset,
+   * while disabled mems are marked as admin-disabled.
+   */
+  ltdebug("%d online processors found\n", topology->nb_processors);
+  ltdebug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
+	  TOPO_CPUSET_PRINTF_VALUE(topology->online_cpuset));
+  ltdebug("admin disabled processor cpuset: %" TOPO_PRIxCPUSET "\n",
+	  TOPO_CPUSET_PRINTF_VALUE(topology->admin_disabled_cpuset));
+  assert(topology->nb_processors == topo_cpuset_weight(&topology->online_cpuset));
+
   /* Create actual bottom proc resources, while dropping the offline
    * and admin_disabled ones.
    */
-  look_cpu(topology, &offline_cpus_set, &admin_disabled_cpuset);
+  look_cpu(topology);
+  /* topology->nb_processors now does not contain admin-disabled procs anymore. */
+  assert(topology->nb_processors);
 
   ltdebug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
-
-  assert(topology->nb_processors);
 
   /* Ignored some levels if requested */
   l=0;
@@ -437,6 +444,8 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->nb_processors = 0;
   topology->nb_nodes = 0;
   topology->nb_levels = 1; /* there's at least MACHINE */
+  topo_cpuset_zero(&topology->online_cpuset);
+  topo_cpuset_zero(&topology->admin_disabled_cpuset);
   topology->fsys_root_fd = -1;
   topology->huge_page_size_kB = 0;
   topology->dmi_board_vendor = NULL;

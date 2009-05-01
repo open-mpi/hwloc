@@ -61,4 +61,7 @@ look_osf(struct topo_topology *topology)
 
   topology->level_nbitems[topology->nb_levels] = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
+
+  /* we have a contigous range of online cpus */
+  topo_cpuset_set_range(&topology->online_cpuset, 0, topology->nb_processors-1);
 }

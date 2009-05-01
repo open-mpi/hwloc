@@ -15,7 +15,7 @@ extern void lt_setup_core_level(int procid_max, unsigned numcores, unsigned *osc
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 #if defined(LINUX_SYS)
 extern void lt_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
-extern void look_linux(topo_topology_t topology, topo_cpuset_t *offline_cpuset, topo_cpuset_t *admin_disabled_cpuset);
+extern void look_linux(struct topo_topology *topology);
 extern int lt_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path);
 #endif /* LINUX_SYS */
 
