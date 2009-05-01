@@ -285,9 +285,9 @@ topo_discover(struct topo_topology *topology)
   look_kstat(topology);
 #    endif /* HAVE_LIBKSTAT */
 
-#    ifdef  WINDOWS_SYS
+#    ifdef  WIN_SYS
   look_windows(topology);
-#    endif /* WINDOWS_SYS */
+#    endif /* WIN_SYS */
 
   /* From here, topology->nb_processors is set to the number of available
    * hardware resources, and topology->online_cpuset covers them.

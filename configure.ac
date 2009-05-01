@@ -34,6 +34,19 @@ case ${target} in
     ;;
   *-*-mingw*|*-*-cygwin*)
     AC_DEFINE(WIN_SYS, 1, Define to 1 on WINDOWS)
+    AC_CHECK_TYPES([KAFFINITY,
+    		    PROCESSOR_CACHE_TYPE,
+		    CACHE_DESCRIPTOR,
+		    LOGICAL_PROCESSOR_RELATIONSHIP,
+		    SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
+		    GROUP_AFFINITY,
+		    PROCESSOR_RELATIONSHIP,
+		    NUMA_NODE_RELATIONSHIP,
+		    CACHE_RELATIONSHIP,
+		    PROCESSOR_GROUP_INFO,
+		    GROUP_RELATIONSHIP,
+		    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX],
+		    [],[],[[#include <windows.h>]])
     windows=yes
     ;;
   *)
