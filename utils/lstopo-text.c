@@ -19,7 +19,9 @@ output_topology (topo_topology_t topology, topo_level_t l, topo_level_t parent, 
   const char * indexprefix = "#";
   const char * levelterm = "";
 
-  if (!verbose_mode && parent && topo_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
+  if (!verbose_mode
+      && parent && parent->arity == 1 && topo_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
+    /* in non-verbose mode, merge levels with their parent is they are exactly identical */
     fprintf(output, " + ");
   } else {
     if (parent)
