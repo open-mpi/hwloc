@@ -4,8 +4,6 @@
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
 
-* hide physical_index if -1 is lstopo
-
 * LT_LEVEL_MEMORY_L*: what about L4 someday? Use resource "types" instead and
   add a depth for caches.
   + make cache size/depth/type, memory node size + hugepagefree a resource attribute

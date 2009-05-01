@@ -121,11 +121,16 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
 		  const char *indexprefix, const char* levelterm)
 {
   enum topo_level_type_e type = l->type;
+  char physical_index[12] = "";
+
+  if (l->physical_index[type] != -1)
+    snprintf(physical_index, 12, "%s%d", indexprefix, l->physical_index[type]);
+
   switch (type) {
   case TOPO_LEVEL_DIE:
   case TOPO_LEVEL_CORE:
   case TOPO_LEVEL_PROC:
-    fprintf(output, "%s%s%u", topo_level_string(type), indexprefix, l->physical_index[type]);
+    fprintf(output, "%s%s", topo_level_string(type), physical_index);
     break;
   case TOPO_LEVEL_MACHINE:
     fprintf(output, "%s(%ld%s)", topo_level_string(type),
@@ -142,7 +147,7 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
       : (type == TOPO_LEVEL_L2) ? TOPO_LEVEL_MEMORY_L2
       : TOPO_LEVEL_MEMORY_L1;
     unsigned long memory_kB = l->memory_kB[mtype];
-    fprintf(output, "%s%s%u(%ld%s)", topo_level_string(type), indexprefix, l->physical_index[type],
+    fprintf(output, "%s%s(%ld%s)", topo_level_string(type), physical_index,
 	    topo_memory_size_printf_value(memory_kB),
 	    topo_memory_size_printf_unit(memory_kB));
     break;
