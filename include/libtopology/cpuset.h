@@ -78,6 +78,16 @@ static __inline__ void topo_cpuset_fill(topo_cpuset_t * set)
 		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_FULL;
 }
 
+/** \brief CPU set from an unsigned long mask */
+static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long mask);
+static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long mask)
+{
+	int i;
+	TOPO_CPUSUBSET_SUBSET(*set,0) = mask;
+	for(i=1; i<TOPO_CPUSUBSET_COUNT; i++)
+		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_ZERO;
+}
+
 /** \brief Clear CPU set and set CPU \e cpu */
 static __inline__ void topo_cpuset_cpu(topo_cpuset_t * set,
 				       unsigned cpu);
