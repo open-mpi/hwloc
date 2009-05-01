@@ -332,33 +332,54 @@ topo_discover(struct topo_topology *topology)
 
   /* Compute the machine cpuset */
   topo_cpuset_zero(&topology->levels[0][0].cpuset);
-  for (i=0; i<topology->level_nbitems[1]; i++)
-    topo_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[1][i].cpuset);
+  for (i=0; i<topology->level_nbitems[topology->nb_levels-1]; i++)
+    topo_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[topology->nb_levels-1][i].cpuset);
+  /* Make sure machine = online & ~admin_disabled */
+  topo_cpuset_t onlineset = topology->online_cpuset;
+  topo_cpuset_clearset(&onlineset, &topology->admin_disabled_cpuset);
+  assert(topo_cpuset_isequal(&onlineset, &topology->levels[0][0].cpuset));
 
-  /* sort levels according to cpu sets */
-  for (l=0; l+1<topology->nb_levels; l++)
-    {
-      /* first sort sublevels according to cpu sets */
-      qsort(&topology->levels[l+1][0], topology->level_nbitems[l+1], sizeof(*topology->levels[l+1]), compar);
-      k = 0;
-      /* then gather sublevels according to levels */
+  /* Remove disabled/offline CPUs from all cpusets, use the now correct machine cpuset to do so,
+   * Then sort levels according to cpu sets, removed empty levels, recount levels, ...
+   * No need to look at machine and CPUs, they just got generated correctly.
+   */
+  for (l=1; l<topology->nb_levels; l++) {
+    /* update cpusets */
+    for (i=0; i<topology->level_nbitems[l]; i++)
+      topo_cpuset_andset(&topology->levels[l][i].cpuset, &topology->levels[0][0].cpuset);
+
+    /* sort sublevels according to cpusets */
+    qsort(&topology->levels[l][0], topology->level_nbitems[l], sizeof(*topology->levels[l]), compar);
+
+    /* update level_nbitems by removing the empty ones (they are last), except for NUMA node since we want to keep memory information */
+    if (topology->levels[l][0].type != TOPO_LEVEL_NODE) {
       for (i=0; i<topology->level_nbitems[l]; i++)
-	{
-	  topo_cpuset_t level_set = topology->levels[l][i].cpuset;
-	  for (j=k; j<topology->level_nbitems[l+1]; j++)
-	    {
-	      topo_cpuset_t set = level_set;
-	      topo_cpuset_andset(&set, &topology->levels[l+1][j].cpuset);
-	      if (!topo_cpuset_iszero(&set))
-		{
-		  /* Sublevel j is part of level i, put it at k.  */
-		  struct topo_level level = topology->levels[l+1][j];
-		  memmove(&topology->levels[l+1][k+1], &topology->levels[l+1][k], (j-k)*sizeof(*topology->levels[l+1]));
-		  topology->levels[l+1][k++] = level;
-		}
-	    }
-	}
+	if (topo_cpuset_iszero(&topology->levels[l][i].cpuset)) {
+	  topology->level_nbitems[l] = i;
+	  break;
+        }
     }
+    ltdebug("%d levels remaining at depth %d after filtering\n",
+	    topology->level_nbitems[l], i);
+  }
+
+  /* Gather sublevels according to levels */
+  for (l=0; l+1<topology->nb_levels; l++) {
+    k = 0;
+    for (i=0; i<topology->level_nbitems[l]; i++) {
+      topo_cpuset_t level_set = topology->levels[l][i].cpuset;
+      for (j=k; j<topology->level_nbitems[l+1]; j++) {
+	topo_cpuset_t set = level_set;
+	topo_cpuset_andset(&set, &topology->levels[l+1][j].cpuset);
+	if (!topo_cpuset_iszero(&set)) {
+	  /* Sublevel j is part of level i, put it at k.  */
+	  struct topo_level level = topology->levels[l+1][j];
+	  memmove(&topology->levels[l+1][k+1], &topology->levels[l+1][k], (j-k)*sizeof(*topology->levels[l+1]));
+	  topology->levels[l+1][k++] = level;
+	}
+      }
+    }
+  }
 
   /* Now we can put numbers on levels. */
   for (l=0; l<topology->nb_levels; l++)
