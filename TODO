@@ -10,6 +10,9 @@
 * there could be several size for huge pages
 * rename "level" into "resource" or "object"
 
+* Implement topological sorting so that backends do not have to care about the
+  order in which they report resources.
+
 * change memory_kB[] and physical_index[] into scalars now that we know that we'll probably never merge level for real
   + application that want all information just have to not merge things
 
