@@ -231,8 +231,12 @@ static int
 compar(const void *_l1, const void *_l2)
 {
   const struct topo_level *l1 = _l1, *l2 = _l2;
-  /* empty cpuset are always considered higher, so they are stored at the end, that's ok */
-  return topo_cpuset_first(&l1->cpuset) - topo_cpuset_first(&l2->cpuset);
+  int first1 = topo_cpuset_first(&l1->cpuset);
+  int first2 = topo_cpuset_first(&l2->cpuset);
+  /* if empty, return a bit after the last bit of cpuset */
+  if (first1 < 0) first1 = LIBTOPO_NBMAXCPUS;
+  if (first2 < 0) first2 = LIBTOPO_NBMAXCPUS;
+  return first1 - first2;
 }
 
 /* Main discovery loop */
