@@ -184,7 +184,6 @@ lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned lo
   int k;
 
   lt_parse_cpumap(mappath, &set, fsys_root_fd);
-  topo_cpuset_clearset(&set, offline_cpus_set);
   for(k=0; k<procid_max; k++)
     {
       if (topo_cpuset_isset(&set, k))
@@ -555,11 +554,6 @@ look_sysfsnode(struct topo_topology *topology)
       if (lt_parse_cpumap(nodepath, &cpuset, topology->fsys_root_fd) < 0)
 	break;
 
-      /* FIXME: we should clearset offline_cpus_set in case the node cpumap
-       * is not uptodate wrt to offline cpus. but offline_cpus_set isn't
-       * ready yet.
-       */
-
       sprintf(nodepath, "/sys/devices/system/node/node%d/meminfo", osnode);
       size = lt_sysfs_node_meminfo_to_memsize(nodepath, topology);
       hpfree = lt_sysfs_node_meminfo_to_hugepagefree(nodepath, topology);
@@ -694,15 +688,9 @@ look__sysfscpu(unsigned *procid_max,
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
       lt_parse_cpumap(string, &dieset, topology->fsys_root_fd);
-      /* make sure we are in the set, in case the cpumap was crap */
-      topo_cpuset_set(&dieset, i);
-      topo_cpuset_clearset(&dieset, offline_cpus_set);
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
       lt_parse_cpumap(string, &coreset, topology->fsys_root_fd);
-      /* make sure we are in the set, in case the cpumap was crap */
-      topo_cpuset_set(&coreset, i);
-      topo_cpuset_clearset(&coreset, offline_cpus_set);
 
       /* ignore threads except the first one */
       if (i != topo_cpuset_first(&coreset)
