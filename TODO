@@ -21,9 +21,6 @@
   + keep fake level type?
 * integrate synthetic topology support
 
-* factorize all /sys/.../node/meminfo reading routines
-* move DMI reading info to topology-linux.c
-
 * use topology_allocator for real, including in strdup
   + add topo_set_allocator() to be called before _init()
 

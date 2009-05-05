@@ -433,7 +433,8 @@ static void
 lt_get_procfs_meminfo_info(struct topo_topology *topology,
 			   unsigned long *mem_size_kB,
 			   unsigned long *huge_page_size_kB,
-			   unsigned long *huge_page_free) {
+			   unsigned long *huge_page_free)
+{
   char string[64];
   FILE *fd;
 
@@ -455,54 +456,33 @@ lt_get_procfs_meminfo_info(struct topo_topology *topology,
   fclose(fd);
 }
 
-static unsigned long
-lt_sysfs_node_meminfo_to_memsize(const char * path, struct topo_topology *topology)
+#define SYSFS_NUMA_NODE_PATH_LEN (29+9+8+1)
+
+static void
+lt_sysfs_node_meminfo_info(struct topo_topology *topology,
+			   int node,
+			   unsigned long *mem_size_kB,
+			   unsigned long *huge_page_free)
 {
+  char path[SYSFS_NUMA_NODE_PATH_LEN];
   char string[64];
   FILE *fd;
 
+  sprintf(path, "/sys/devices/system/node/node%d/meminfo", node);
   fd = lt_fopen(path, "r", topology->fsys_root_fd);
   if (!fd)
-    return 0;
+    return;
 
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
-      int node;
-      unsigned long size;
-      if (sscanf(string, "Node %d MemTotal: %ld kB", &node, &size) == 2)
-	{
-	  fclose(fd);
-	  return size;
-	}
+      unsigned long number;
+      if (sscanf(string, "Node %d MemTotal: %ld kB", &node, &number) == 2)
+	*mem_size_kB = number;
+      else if (sscanf(string, "Node %d HugePages_Free: %ld kB", &node, &number) == 2)
+	*huge_page_free = number;
     }
 
   fclose(fd);
-  return 0;
-}
-
-static unsigned long
-lt_sysfs_node_meminfo_to_hugepagefree(const char * path, struct topo_topology *topology)
-{
-  char string[64];
-  FILE *fd;
-
-  fd = lt_fopen(path, "r", topology->fsys_root_fd);
-  if (!fd)
-    return 0;
-
-  while (fgets(string, sizeof(string), fd) && *string != '\0')
-    {
-      int node;
-      unsigned long hugepagefree;
-      if (sscanf(string, "Node %d HugePages_Free: %ld kB", &node, &hugepagefree) == 2)
-	{
-	  fclose(fd);
-	  return hugepagefree;
-	}
-    }
-
-  fclose(fd);
-  return 0;
 }
 
 static void
@@ -540,19 +520,16 @@ look_sysfsnode(struct topo_topology *topology)
 
   for (i=0, osnode=0;; osnode++)
     {
-#define NUMA_NODE_STRLEN (29+9+8+1)
-      char nodepath[NUMA_NODE_STRLEN];
+      char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
       topo_cpuset_t cpuset;
-      unsigned long size;
-      unsigned long hpfree;
+      unsigned long size = -1;
+      unsigned long hpfree = -1;
 
       sprintf(nodepath, "/sys/devices/system/node/node%d/cpumap", osnode);
       if (lt_parse_cpumap(nodepath, &cpuset, topology->fsys_root_fd) < 0)
 	break;
 
-      sprintf(nodepath, "/sys/devices/system/node/node%d/meminfo", osnode);
-      size = lt_sysfs_node_meminfo_to_memsize(nodepath, topology);
-      hpfree = lt_sysfs_node_meminfo_to_hugepagefree(nodepath, topology);
+      lt_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
       lt_setup_level(&node_level[i], TOPO_LEVEL_NODE);
       lt_set_os_numbers(&node_level[i], TOPO_LEVEL_NODE, osnode);
