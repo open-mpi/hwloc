@@ -6,8 +6,15 @@ lib_LTLIBRARIES = libtopology.la
 
 EXTRA_DIST =
 
-libtopology_la_SOURCES = topology.c topology-solaris.c allocator.c traversal.c
+libtopology_la_SOURCES = topology.c allocator.c traversal.c
 libtopology_la_LDFLAGS = -no-undefined
+
+if HAVE_SOLARIS
+libtopology_la_SOURCES += topology-solaris.c
+else !HAVE_SOLARIS
+EXTRA_DIST += topology-solaris.c
+endif !HAVE_SOLARIS
+
 if HAVE_LINUX
 libtopology_la_SOURCES += topology-linux.c
 else !HAVE_LINUX
