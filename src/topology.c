@@ -472,6 +472,7 @@ topo_topology_init (struct topo_topology **topologyp)
   topo_cpuset_zero(&topology->admin_disabled_cpuset);
   topo_cpuset_zero(&topology->nonfirst_threads_cpuset);
   topology->fsys_root_fd = -1;
+  topology->use_synthetic = 0;
   topology->huge_page_size_kB = 0;
   topology->dmi_board_vendor = NULL;
   topology->dmi_board_name = NULL;
