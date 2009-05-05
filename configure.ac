@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.60])
 AC_INIT([libtopology], [0.0], [libtopology-commits@gforge.inria.fr])
+AC_SUBST([TOPO_SOVERSION],[0])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -95,6 +96,9 @@ m4_defun([_LT_AC_LANG_RC_CONFIG], [:])
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AM_CONDITIONAL([HAVE_GCC], [test "x$GCC" = "xyes"])
+AC_PATH_PROGS([TOPO_MS_LIB], [lib])
+AC_ARG_VAR([TOPO_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
+AM_CONDITIONAL([HAVE_MS_LIB], [test "x$TOPO_MS_LIB" != "x"])
 
 TOPO_GCC_FLAGS
 

@@ -7,10 +7,25 @@ lib_LTLIBRARIES = libtopology.la
 EXTRA_DIST =
 
 libtopology_la_SOURCES = topology.c allocator.c traversal.c topology-synthetic.c
-libtopology_la_LDFLAGS =
+libtopology_la_LDFLAGS = -version-number $(TOPO_SOVERSION)
 
 if HAVE_GCC
 libtopology_la_LDFLAGS += -no-undefined
+endif
+
+if HAVE_WINDOWS
+libtopology_la_LDFLAGS += -Xlinker --output-def -Xlinker .libs/libtopology.def
+
+if HAVE_MS_LIB
+all-hook:
+	"$(TOPO_MS_LIB)" /dev:.libs/libtopology.def -D libtopology-$(TOPO_SOVERSION) -l .libs/libtopology.lib
+endif
+
+install-exec-hook:
+	$(INSTALL) .libs/libtopology.def $(DESTDIR)$(libdir)
+if HAVE_MS_LIB
+	$(INSTALL) .libs/libtopology.lib $(DESTDIR)$(libdir)
+endif
 endif
 
 if HAVE_SOLARIS
