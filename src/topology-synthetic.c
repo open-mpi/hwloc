@@ -93,13 +93,13 @@ topo__synthetic_make_children(struct topo_topology *topology,
 }
 
 /* Recursively populate the topology starting from LEVEL according to
-   LEVEL_BREADTH, and number VPs starting at FIRST_VP.  Return the total
-   number of VPs beneath LEVEL.  */
+   LEVEL_BREADTH, and number levels starting at FIRST_INDEX.
+   Return the total number of levels beneath LEVEL.  */
 static unsigned
 topo__synthetic_populate_topology(struct topo_topology *topology, struct topo_level *level,
-				  const unsigned *level_breadth, unsigned first_vp)
+				  const unsigned *level_breadth, unsigned first_index)
 {
-  unsigned i, vp_count;
+  unsigned i, count;
   enum topo_level_type_e type;
 
   /* Recursion ends when *LEVEL_BREADTH is zero, meaning that LEVEL has no
@@ -122,13 +122,13 @@ topo__synthetic_populate_topology(struct topo_topology *topology, struct topo_le
     /* Increment the total breadth for this level.  */
     topology->level_nbitems[level->level + 1] += *level_breadth;
 
-    for (i = 0, vp_count = 0; i < *level_breadth; i++)
-      vp_count += topo__synthetic_populate_topology(topology,
+    for (i = 0, count = 0; i < *level_breadth; i++)
+      count += topo__synthetic_populate_topology(topology,
 						    level->children[i],
 						    level_breadth + 1,
-						    first_vp + vp_count);
+						    first_index + count);
 
-    /* Aggregate the VP sets of our kids.  */
+    /* Aggregate the cpusets of our kids.  */
     topo_cpuset_zero(&level->cpuset);
     for (i = 0; i < *level_breadth; i++)
       topo_cpuset_orset(&level->cpuset, &level->children[i]->cpuset);
@@ -138,12 +138,12 @@ topo__synthetic_populate_topology(struct topo_topology *topology, struct topo_le
     assert(level->type == TOPO_LEVEL_PROC);
 
     topo_cpuset_zero(&level->cpuset);
-    topo_cpuset_set(&level->cpuset, first_vp);
+    topo_cpuset_set(&level->cpuset, first_index);
 
-    vp_count = 1;
+    count = 1;
   }
 
-  return vp_count;
+  return count;
 }
 
 /* Allocate an array for each topology level described by TOPOLOGY.  These
@@ -170,7 +170,7 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
 
     assert(topology->levels[level] != NULL);
 
-    /* Each level is terminated by an item with zeroed VP sets.  */
+    /* Each level is terminated by an item with zeroed cpuset.  */
     topo_cpuset_zero(&topology->levels[level][total_level_breadth].cpuset);
 
     /* Update the level type to level mapping.  */
