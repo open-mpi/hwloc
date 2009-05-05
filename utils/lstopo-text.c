@@ -48,7 +48,8 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
       int l;
 
       topo_topology_get_info(topology, &info);
-
+      if (info.is_fake)
+	fprintf (output, "Topology is fake\n");
       if (info.dmi_board_vendor)
 	fprintf (output, "DMI board vendor: %s\n", info.dmi_board_vendor);
       if (info.dmi_board_name)

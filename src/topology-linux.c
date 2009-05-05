@@ -45,6 +45,9 @@ lt_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
   if (root < 0)
     return -1;
 
+  if (strcmp(fsys_root_path, "/"))
+    topology->is_fake = 1;
+
   topology->fsys_root_fd = root;
   return 0;
 }

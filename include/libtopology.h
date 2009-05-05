@@ -24,6 +24,7 @@ struct topo_topology_info {
   char *dmi_board_vendor;
   char *dmi_board_name;
   unsigned long huge_page_size_kB;
+  int is_fake; /* set if the topology is different from the actual underlying machine */
 };
 
 /** \brief Type of topology level */

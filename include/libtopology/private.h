@@ -28,6 +28,7 @@ struct topo_topology {
   unsigned long huge_page_size_kB;
   char *dmi_board_vendor;
   char *dmi_board_name;
+  int is_fake;
 
   /* FIXME: move this to proper backend structures */
 

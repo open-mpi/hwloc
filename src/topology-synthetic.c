@@ -30,6 +30,7 @@ topo_synthetic_parse_description(struct topo_topology *topology, const char *des
   if (count > 0) {
     topology->synthetic_description[count + 1] = 0;
     topology->use_synthetic = 1;
+    topology->is_fake = 1;
   }
 
   return (count > 0) ? 0 : -1;

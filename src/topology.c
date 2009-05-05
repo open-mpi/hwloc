@@ -480,6 +480,7 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->level_nbitems[0] = 1;
   topology->levels[0] = malloc (2*sizeof (struct topo_level));
   lt_setup_machine_level (&topology->levels[0]);
+  topology->is_fake = 0;
 
   *topologyp = topology;
   return 0;
@@ -568,6 +569,7 @@ topo_topology_get_info(struct topo_topology *topology, struct topo_topology_info
   info->dmi_board_vendor = topology->dmi_board_vendor;
   info->dmi_board_name = topology->dmi_board_name;
   info->huge_page_size_kB = topology->huge_page_size_kB;
+  info->is_fake = topology->is_fake;
   return 0;
 }
 
