@@ -102,9 +102,6 @@ topo__synthetic_populate_topology(struct topo_topology *topology, struct topo_le
   unsigned i, vp_count;
   enum topo_level_type_e type;
 
-  /* Increment the total breadth for this level.  */
-  topology->level_nbitems[level->level]++;
-
   /* Recursion ends when *LEVEL_BREADTH is zero, meaning that LEVEL has no
      children.  */
   if (*level_breadth > 0) {
@@ -121,6 +118,9 @@ topo__synthetic_populate_topology(struct topo_topology *topology, struct topo_le
 
     topo__synthetic_make_children(topology, level, *level_breadth, type, siblings,
 				  &topology->levels[level->level + 1][siblings]);
+
+    /* Increment the total breadth for this level.  */
+    topology->level_nbitems[level->level + 1] += *level_breadth;
 
     for (i = 0, vp_count = 0; i < *level_breadth; i++)
       vp_count += topo__synthetic_populate_topology(topology,
