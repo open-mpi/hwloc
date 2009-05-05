@@ -2,7 +2,7 @@
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
 
-* LT_LEVEL_MEMORY_L*: what about L4 someday? Use resource "types" instead and
+* TOPO_LEVEL_MEMORY_L*: what about L4 someday? Use resource "types" instead and
   add a depth for caches.
   + make cache size/depth/type, memory node size + hugepagefree a resource attribute
 * there could be several size for huge pages
@@ -16,18 +16,22 @@
 
 * integrate marcel split quirk?
   + split for real, just explain how to split?
+    - just return an ordered array?
   + keep fake level type?
+    - needed for synthetic
+      . might be dropped once we have a generic CACHE type?
+    - needed for meta-numa-nodes?
 
 * use topology_allocator for real, including in strdup
   + add topo_set_allocator() to be called before _init()
 
 * conversion between strings and cpuset:
-  void lt_string_to_mask(const char *string, lt_cpuset_t *cpuset)
-  void lt_mask_to_string(lt_cpuset_t *cpuset, const char *string)
+  void topo_string_to_mask(const char *string, topo_cpuset_t *cpuset)
+  void topo_mask_to_string(topo_cpuset_t *cpuset, const char *string)
 * conversion between cpuset and the lowest ancestors covering it
-  void lt_mask_to_ancestor(lt_cpuset_t *cpuset, lt_level_t *level)
+  void topo_mask_to_ancestor(topo_cpuset_t *cpuset, topo_level_t *level)
 * conversion between cpuset and an array of highest levels covering exactly it
-  int lt_mask_to_levels(lt_cpuset_t *cpuset, lt_level_t *levels, int max)
+  int topo_mask_to_levels(topo_cpuset_t *cpuset, topo_level_t *levels, int max)
  
 API:
 * add a way to extract sched_setaffinity masks from arrays of levels (OR'ed)
@@ -39,12 +43,12 @@ API:
 
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
-* lt_taskset --ncpus 2 --near 3
+* topo_taskset --ncpus 2 --near 3
   bind process on 2 cores near physical proc id 3
-* lt_taskset --index 4
+* topo_taskset --index 4
   bind process on 4th processor in a topology-aware numbering
-* lt_taskset --ncpus 2 --index 4
+* topo_taskset --ncpus 2 --index 4
   bind process on the 4th set of 2 physically close ids in a topology-aware numbering (used by ggrun when launching 4 process with 2 threads)
-* lt_taskset --on <Machine/Node/Die/L3/L2/Core/L1/Proc/<depth>>:<index>
+* topo_taskset --on <Machine/Node/Die/L3/L2/Core/L1/Proc/<depth>>:<index>
   bind process on object #index in level given by name or depth
 * tools to create masks and bind using them
