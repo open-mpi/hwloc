@@ -38,6 +38,9 @@ extern void look_osf(struct topo_topology *topology);
 extern void look_windows(struct topo_topology *topology);
 #endif /* WIN_SYS */
 
+extern int topo_synthetic_parse_description(struct topo_topology *topology, const char *description);
+extern void topo_synthetic_load (struct topo_topology *topology);
+
 #ifdef __GLIBC__
 #if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)
 # define HAVE_OPENAT

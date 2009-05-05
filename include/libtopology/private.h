@@ -23,12 +23,21 @@ struct topo_topology {
   unsigned level_nbitems[TOPO_LEVEL_MAX]; 		/* Number of items on each horizontal level */
   struct topo_level *levels[TOPO_LEVEL_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
   unsigned long flags;
-  int fsys_root_fd;					/* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int type_depth[TOPO_LEVEL_MAX];
   int ignored_types[TOPO_LEVEL_MAX];
   unsigned long huge_page_size_kB;
   char *dmi_board_vendor;
   char *dmi_board_name;
+
+  /* FIXME: move this to proper backend structures */
+
+  /* sysfs backend parameters */
+  int fsys_root_fd;					/* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
+
+  /* synthetic backend parameters */
+  int use_synthetic;
+#define TOPO_SYNTHETIC_MAX_DEPTH 128
+  unsigned synthetic_description[TOPO_SYNTHETIC_MAX_DEPTH];
 };
 
 #endif /* LIBTOPOLOGY_TYPES_H */

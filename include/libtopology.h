@@ -97,6 +97,9 @@ extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flag
 /** \brief Change the file-system root path when building the topology from sysfs/procs.
     To be called between _init and _load.  */
 extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
+/** \brief Enable synthetic topology. */
+extern int topo_topology_set_synthetic(struct topo_topology *topology, const char *description);
+
 
 /* \brief Get global information about the topology.
     To be called between _init and _load.  */

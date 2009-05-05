@@ -1,5 +1,8 @@
 * windows
 
+* add a way for mami to know when the topology is fake
+  (so that it disables migration, does not trust memory sizes, ...)
+
 * uniformize SMT / PROC / thread names => "CPU" ?
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
@@ -19,7 +22,6 @@
 * integrate marcel split quirk?
   + split for real, just explain how to split?
   + keep fake level type?
-* integrate synthetic topology support
 
 * use topology_allocator for real, including in strdup
   + add topo_set_allocator() to be called before _init()

@@ -24,6 +24,8 @@ main (int argc, char *argv[])
   FILE *output;
   int merge = 0;
   int ignorecache = 0;
+  char * synthetic = NULL;
+  int opt;
 
   err = topo_topology_init (&topology);
   if (err)
@@ -31,6 +33,7 @@ main (int argc, char *argv[])
 
   while (argc >= 2)
     {
+      opt = 0;
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
 	verbose_mode = 1;
       else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
@@ -49,14 +52,16 @@ main (int argc, char *argv[])
 	flags |= TOPO_FLAGS_IGNORE_ADMIN_DISABLE;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
-      else {
+      else if (argc > 2 && !strcmp (argv[1], "--synthetic")) {
+	synthetic = argv[2]; opt = 1;
+      } else {
 	if (filename)
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
 	else
 	  filename = argv[1];
       }
-      argc--;
-      argv++;
+      argc -= opt+1;
+      argv += opt+1;
     }
 
   if (!filename || !strcmp(filename, "-"))
@@ -77,6 +82,9 @@ main (int argc, char *argv[])
   }
   if (merge)
     topo_topology_ignore_all_keep_structure(topology);
+
+  if (synthetic)
+    topo_topology_set_synthetic(topology, synthetic);
 
   err = topo_topology_load (topology);
   if (err)

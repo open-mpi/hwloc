@@ -497,6 +497,12 @@ topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_roo
 }
 
 int
+topo_topology_set_synthetic(struct topo_topology *topology, const char *description)
+{
+  return topo_synthetic_parse_description(topology, description);
+}
+
+int
 topo_topology_set_flags (struct topo_topology *topology, unsigned long flags)
 {
   topology->flags = flags;
@@ -545,7 +551,10 @@ topo_topology_load (struct topo_topology *topology)
       return -1;
 #endif
 
-  topo_discover(topology);
+  if (topology->use_synthetic)
+    topo_synthetic_load(topology);
+  else
+    topo_discover(topology);
 
   return 0;
 }
