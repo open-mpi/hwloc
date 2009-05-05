@@ -16,12 +16,12 @@
 #ifdef HAVE_OPENAT
 
 /* Use our own filesystem functions.  */
-#define lt_fopen(p, m, d)   lt_fopenat(p, m, d)
-#define lt_access(p, m, d)  lt_accessat(p, m, d)
-#define lt_opendir(p, d)    lt_opendirat(p, d)
+#define topo_fopen(p, m, d)   topo_fopenat(p, m, d)
+#define topo_access(p, m, d)  topo_accessat(p, m, d)
+#define topo_opendir(p, d)    topo_opendirat(p, d)
 
 int
-lt_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
+topo_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
 {
   char *fsys_root_path_env;
   int root;
@@ -53,7 +53,7 @@ lt_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
 }
 
 static FILE *
-lt_fopenat(const char *path, const char *mode, int fsys_root_fd)
+topo_fopenat(const char *path, const char *mode, int fsys_root_fd)
 {
   int fd;
   const char *relative_path;
@@ -71,7 +71,7 @@ lt_fopenat(const char *path, const char *mode, int fsys_root_fd)
 }
 
 static int
-lt_accessat(const char *path, int mode, int fsys_root_fd)
+topo_accessat(const char *path, int mode, int fsys_root_fd)
 {
   const char *relative_path;
 
@@ -84,7 +84,7 @@ lt_accessat(const char *path, int mode, int fsys_root_fd)
 }
 
 static DIR*
-lt_opendirat(const char *path, int fsys_root_fd)
+topo_opendirat(const char *path, int fsys_root_fd)
 {
   int dir_fd;
   const char *relative_path;
@@ -101,20 +101,20 @@ lt_opendirat(const char *path, int fsys_root_fd)
 
 #else /* !HAVE_OPENAT */
 
-#define lt_fopen(p, m, d)   fopen(p, m)
-#define lt_access(p, m, d)  access(p, m)
-#define lt_opendir(p, d)    opendir(p)
+#define topo_fopen(p, m, d)   fopen(p, m)
+#define topo_access(p, m, d)  access(p, m)
+#define topo_opendir(p, d)    opendir(p)
 
 #endif /* !HAVE_OPENAT */
 
 
 static int
-lt_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_fd)
+topo_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_fd)
 {
   char string[11];
   FILE * fd;
 
-  fd = lt_fopen(mappath, "r", fsys_root_fd);
+  fd = topo_fopen(mappath, "r", fsys_root_fd);
   if (!fd)
     return -1;
 
@@ -133,7 +133,7 @@ lt_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_fd)
 #define MAX_KERNEL_CPU_MASK ((LIBTOPO_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
 static int
-lt_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
+topo_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
 {
   char string[KERNEL_CPU_MAP_LEN]; /* enough for a shared map mask (32bits hexa) */
   unsigned long maps[MAX_KERNEL_CPU_MASK];
@@ -144,7 +144,7 @@ lt_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
   /* reset to zero first */
   topo_cpuset_zero(set);
 
-  fd = lt_fopen(mappath, "r", fsys_root_fd);
+  fd = topo_fopen(mappath, "r", fsys_root_fd);
   if (!fd)
     return -1;
 
@@ -178,15 +178,15 @@ lt_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
 }
 
 static void
-lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned long val,
-			  int procid_max, unsigned *ids, unsigned long *vals,
-			  unsigned *nr_ids, unsigned givenid, topo_cpuset_t *online_cpuset,
-			  int fsys_root_fd)
+topo_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned long val,
+			    int procid_max, unsigned *ids, unsigned long *vals,
+			    unsigned *nr_ids, unsigned givenid, topo_cpuset_t *online_cpuset,
+			    int fsys_root_fd)
 {
   topo_cpuset_t set;
   int k;
 
-  lt_parse_cpumap(mappath, &set, fsys_root_fd);
+  topo_parse_cpumap(mappath, &set, fsys_root_fd);
   for(k=0; k<procid_max; k++)
     {
       if (topo_cpuset_isset(&set, k))
@@ -206,7 +206,7 @@ lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned lo
 	    {
 	      if (topo_cpuset_isset(&set, k))
 		{
-		  ltdebug("--- proc %d has %s number %d\n", k, mapname, newid);
+		  topo_debug("--- proc %d has %s number %d\n", k, mapname, newid);
 		  ids[k] = newid;
 		  vals[newid] = val;
 		}
@@ -218,9 +218,9 @@ lt_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned lo
 }
 
 static void
-lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *online_cpuset,
-			       unsigned *cacheids, unsigned long *cachesizes, unsigned *nr_caches,
-			       int fsys_root_fd)
+topo_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *online_cpuset,
+				 unsigned *cacheids, unsigned long *cachesizes, unsigned *nr_caches,
+				 int fsys_root_fd)
 {
   int i;
 
@@ -234,7 +234,7 @@ lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *on
     FILE * fd;
 
     sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/level", proc_index, i);
-    fd = lt_fopen(mappath, "r", fsys_root_fd);
+    fd = topo_fopen(mappath, "r", fsys_root_fd);
     if (fd)
       {
 	if (fgets(string,sizeof(string), fd))
@@ -247,7 +247,7 @@ lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *on
       continue;
 
     sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/type", proc_index, i);
-    fd = lt_fopen(mappath, "r", fsys_root_fd);
+    fd = topo_fopen(mappath, "r", fsys_root_fd);
     if (fd)
       {
 	if (fgets(string,sizeof(string), fd))
@@ -266,7 +266,7 @@ lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *on
       continue;
 
     sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/size", proc_index, i);
-    fd = lt_fopen(mappath, "r", fsys_root_fd);
+    fd = topo_fopen(mappath, "r", fsys_root_fd);
     if (fd)
       {
 	if (fgets(string,sizeof(string), fd))
@@ -276,16 +276,16 @@ lt_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *on
 
     sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", proc_index, i);
     sprintf(cachename, "L%d cache", level+1);
-    lt_process_shared_cpu_map(mappath, cachename, kB,
-			      procid_max, cacheids+level*LIBTOPO_NBMAXCPUS,
-			      cachesizes+level*LIBTOPO_NBMAXCPUS,
-			      &nr_caches[level], -1, online_cpuset,
-			      fsys_root_fd);
+    topo_process_shared_cpu_map(mappath, cachename, kB,
+				procid_max, cacheids+level*LIBTOPO_NBMAXCPUS,
+				cachesizes+level*LIBTOPO_NBMAXCPUS,
+				&nr_caches[level], -1, online_cpuset,
+				fsys_root_fd);
   }
 }
 
 static int
-lt_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
+topo_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
 {
   char filename[] = "/proc/self/cpuset";
 #define CPUSET_NAME_LEN 64
@@ -296,7 +296,7 @@ lt_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
   FILE *fd;
 
   /* check whether a cpuset is enabled */
-  fd = lt_fopen(filename, "r", fsys_root_fd);
+  fd = topo_fopen(filename, "r", fsys_root_fd);
   if (!fd)
     return 0;
 
@@ -309,11 +309,11 @@ lt_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
 
   /* read the cpuset */
   snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cpuset%s/%s", cpuset_name, type);
-  ltdebug("Trying to read cpuset file <%s>\n", cpuset_filename);
+  topo_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
   fd = fopen(cpuset_filename, "r");
   if (!fd) {
     snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cpusets%s/%s", cpuset_name, type);
-    ltdebug("Trying to read cpuset file <%s>\n", cpuset_filename);
+    topo_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
     fd = fopen(cpuset_filename, "r");
   }
 
@@ -331,7 +331,7 @@ lt_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
 }
 
 static void
-lt_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
+topo_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
 {
   struct topo_level *levels = topology->levels[nodelevel];
   int nbitems = topology->level_nbitems[nodelevel];
@@ -341,11 +341,11 @@ lt_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
   int i, ret;
 
-  ret = lt_read_cpuset_mask("mems", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
+  ret = topo_read_cpuset_mask("mems", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
   if (!ret)
     return;
 
-  ltdebug("Found cpuset mems: %s\n", cpuset_mask);
+  topo_debug("found cpuset mems: %s\n", cpuset_mask);
 
   current = cpuset_mask;
   prevlast = -1;
@@ -363,7 +363,7 @@ lt_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
     else
       nextlast = nextfirst;
     if (prevlast+1 <= nextfirst-1)
-      ltdebug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
+      topo_debug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
     for(i=prevlast+1; i<=nextfirst-1; i++)
       levels[i].admin_disabled = 1;
 
@@ -377,13 +377,13 @@ lt_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
   /* disable after last enabled-segment */
   nextfirst = nbitems;
   if (prevlast+1 <= nextfirst-1)
-    ltdebug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
+    topo_debug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
   for(i=prevlast+1; i<=nextfirst-1; i++)
     levels[i].admin_disabled = 1;
 }
 
 static void
-lt_admin_disable_cpus_from_cpuset(struct topo_topology *topology)
+topo_admin_disable_cpus_from_cpuset(struct topo_topology *topology)
 {
 #define CPUSET_MASK_LEN 64
   char cpuset_mask[CPUSET_MASK_LEN];
@@ -391,11 +391,11 @@ lt_admin_disable_cpus_from_cpuset(struct topo_topology *topology)
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
   int ret;
 
-  ret = lt_read_cpuset_mask("cpus", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
+  ret = topo_read_cpuset_mask("cpus", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
   if (!ret)
     return;
 
-  ltdebug("Found cpuset cpus: %s\n", cpuset_mask);
+  topo_debug("found cpuset cpus: %s\n", cpuset_mask);
 
   current = cpuset_mask;
   prevlast = -1;
@@ -413,7 +413,7 @@ lt_admin_disable_cpus_from_cpuset(struct topo_topology *topology)
     else
       nextlast = nextfirst;
     if (prevlast+1 <= nextfirst-1) {
-      ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
+      topo_debug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
       topo_cpuset_set_range(&topology->admin_disabled_cpuset, prevlast+1, nextfirst-1);
     }
 
@@ -427,21 +427,21 @@ lt_admin_disable_cpus_from_cpuset(struct topo_topology *topology)
   /* disable after last enabled-segment */
   nextfirst = LIBTOPO_NBMAXCPUS;
   if (prevlast+1 <= nextfirst-1) {
-    ltdebug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
+    topo_debug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
     topo_cpuset_set_range(&topology->admin_disabled_cpuset, prevlast+1, nextfirst-1);
   }
 }
 
 static void
-lt_get_procfs_meminfo_info(struct topo_topology *topology,
-			   unsigned long *mem_size_kB,
-			   unsigned long *huge_page_size_kB,
-			   unsigned long *huge_page_free)
+topo_get_procfs_meminfo_info(struct topo_topology *topology,
+			     unsigned long *mem_size_kB,
+			     unsigned long *huge_page_size_kB,
+			     unsigned long *huge_page_free)
 {
   char string[64];
   FILE *fd;
 
-  fd = lt_fopen("/proc/meminfo", "r", topology->fsys_root_fd);
+  fd = topo_fopen("/proc/meminfo", "r", topology->fsys_root_fd);
   if (!fd)
     return;
 
@@ -462,17 +462,17 @@ lt_get_procfs_meminfo_info(struct topo_topology *topology,
 #define SYSFS_NUMA_NODE_PATH_LEN (29+9+8+1)
 
 static void
-lt_sysfs_node_meminfo_info(struct topo_topology *topology,
-			   int node,
-			   unsigned long *mem_size_kB,
-			   unsigned long *huge_page_free)
+topo_sysfs_node_meminfo_info(struct topo_topology *topology,
+			     int node,
+			     unsigned long *mem_size_kB,
+			     unsigned long *huge_page_free)
 {
   char path[SYSFS_NUMA_NODE_PATH_LEN];
   char string[64];
   FILE *fd;
 
   sprintf(path, "/sys/devices/system/node/node%d/meminfo", node);
-  fd = lt_fopen(path, "r", topology->fsys_root_fd);
+  fd = topo_fopen(path, "r", topology->fsys_root_fd);
   if (!fd)
     return;
 
@@ -497,7 +497,7 @@ look_sysfsnode(struct topo_topology *topology)
   DIR *dir;
   struct dirent *dirent;
 
-  dir = lt_opendir("/sys/devices/system/node", topology->fsys_root_fd);
+  dir = topo_opendir("/sys/devices/system/node", topology->fsys_root_fd);
   if (dir)
     {
       while ((dirent = readdir(dir)) != NULL)
@@ -529,19 +529,19 @@ look_sysfsnode(struct topo_topology *topology)
       unsigned long hpfree = -1;
 
       sprintf(nodepath, "/sys/devices/system/node/node%d/cpumap", osnode);
-      if (lt_parse_cpumap(nodepath, &cpuset, topology->fsys_root_fd) < 0)
+      if (topo_parse_cpumap(nodepath, &cpuset, topology->fsys_root_fd) < 0)
 	break;
 
-      lt_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
+      topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
-      lt_setup_level(&node_level[i], TOPO_LEVEL_NODE);
-      lt_set_os_numbers(&node_level[i], TOPO_LEVEL_NODE, osnode);
+      topo_setup_level(&node_level[i], TOPO_LEVEL_NODE);
+      topo_set_os_numbers(&node_level[i], TOPO_LEVEL_NODE, osnode);
       node_level[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = size;
       node_level[i].huge_page_free = hpfree;
       node_level[i].cpuset = cpuset;
 
-      ltdebug("node %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-	      i, osnode, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
+      topo_debug("node %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
+		 i, osnode, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
       i++;
     }
   nbnodes = i;
@@ -551,7 +551,7 @@ look_sysfsnode(struct topo_topology *topology)
   topology->level_nbitems[topology->nb_levels] = topology->nb_nodes = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
 
-  lt_admin_disable_mems_from_cpuset(topology, topology->nb_levels-1);
+  topo_admin_disable_mems_from_cpuset(topology, topology->nb_levels-1);
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
@@ -575,7 +575,7 @@ look__sysfscpu(unsigned *procid_max,
   DIR *dir;
   int i,j,k;
 
-  dir = lt_opendir("/sys/devices/system/cpu", topology->fsys_root_fd);
+  dir = topo_opendir("/sys/devices/system/cpu", topology->fsys_root_fd);
   if (dir)
     {
       while ((dirent = readdir(dir)) != NULL)
@@ -589,7 +589,7 @@ look__sysfscpu(unsigned *procid_max,
 	}
       closedir(dir);
     }
-  ltdebug("found os proc id max %d\n", cpu_max);
+  topo_debug("found os proc id max %d\n", cpu_max);
 
   assert(!(cpu_max > LIBTOPO_NBMAXCPUS));
 
@@ -602,17 +602,17 @@ look__sysfscpu(unsigned *procid_max,
 
       /* check whether the kernel knows another cpu */
       sprintf(string, "/sys/devices/system/cpu/cpu%d", i);
-      if (lt_access(string, X_OK, topology->fsys_root_fd) < 0 && errno == ENOENT)
+      if (topo_access(string, X_OK, topology->fsys_root_fd) < 0 && errno == ENOENT)
 	{
 	/* this CPU does not exist */
-	  ltdebug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/\n", i, i);
+	  topo_debug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/\n", i, i);
 	  nr_offline_cpus++;
 	  continue;
 	}
 
       /* check whether this processor is offline */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/online", i);
-      fd = lt_fopen(string, "r", topology->fsys_root_fd);
+      fd = topo_fopen(string, "r", topology->fsys_root_fd);
       if (fd)
 	{
 	  if (fgets(online, sizeof(online), fd))
@@ -620,11 +620,11 @@ look__sysfscpu(unsigned *procid_max,
 	      fclose(fd);
 	      if (atoi(online))
 		{
-		  ltdebug("os proc %d is online\n", i);
+		  topo_debug("os proc %d is online\n", i);
 		}
 	      else
 		{
-		  ltdebug("os proc %d is offline\n", i);
+		  topo_debug("os proc %d is offline\n", i);
 		  nr_offline_cpus++;
 		  continue;
 		}
@@ -637,26 +637,26 @@ look__sysfscpu(unsigned *procid_max,
 
       /* check whether the kernel exports topology information for this cpu */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology", i);
-      if (lt_access(string, X_OK, topology->fsys_root_fd) < 0 && errno == ENOENT)
+      if (topo_access(string, X_OK, topology->fsys_root_fd) < 0 && errno == ENOENT)
 	{
-	  ltdebug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/topology\n", i, i);
+	  topo_debug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/topology\n", i, i);
 	  nr_offline_cpus++;
 	  continue;
 	}
 
       mydieid = 0; /* shut-up the compiler */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/physical_package_id", i);
-      lt_parse_sysfs_unsigned(string, &mydieid, topology->fsys_root_fd);
+      topo_parse_sysfs_unsigned(string, &mydieid, topology->fsys_root_fd);
 
       mycoreid = 0; /* shut-up the compiler */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_id", i);
-      lt_parse_sysfs_unsigned(string, &mycoreid, topology->fsys_root_fd);
+      topo_parse_sysfs_unsigned(string, &mycoreid, topology->fsys_root_fd);
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
-      lt_parse_cpumap(string, &dieset, topology->fsys_root_fd);
+      topo_parse_cpumap(string, &dieset, topology->fsys_root_fd);
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
-      lt_parse_cpumap(string, &coreset, topology->fsys_root_fd);
+      topo_parse_cpumap(string, &coreset, topology->fsys_root_fd);
 
       /* add thread siblings mask except the first thread to nonfirst_threads_cpuset */
       topo_cpuset_orset(&topology->nonfirst_threads_cpuset, &coreset);
@@ -671,8 +671,8 @@ look__sysfscpu(unsigned *procid_max,
 	  for(k=i; k<LIBTOPO_NBMAXCPUS; k++)
 	    if (topo_cpuset_isset(&dieset, k))
 	      proc_physids[k] = (*nr_dies);
-	  ltdebug("die %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		  (*nr_dies), mydieid, TOPO_CPUSET_PRINTF_VALUE(dieset));
+	  topo_debug("die %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
+		     (*nr_dies), mydieid, TOPO_CPUSET_PRINTF_VALUE(dieset));
 	  osphysids[(*nr_dies)++] = mydieid;
 	}
 
@@ -685,8 +685,8 @@ look__sysfscpu(unsigned *procid_max,
 	  for(k=i; k<LIBTOPO_NBMAXCPUS; k++)
 	    if (topo_cpuset_isset(&coreset, k))
 	      proc_coreids[k] = (*nr_cores);
-	  ltdebug("core %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		  (*nr_cores), mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
+	  topo_debug("core %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
+		     (*nr_cores), mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
 	  oscoreids[(*nr_cores)++] = mycoreid;
 	}
 
@@ -695,7 +695,7 @@ look__sysfscpu(unsigned *procid_max,
 
   *nr_procs = cpu_max - nr_offline_cpus;
   *procid_max = cpu_max;
-  ltdebug("%s: found %u procs\n", __func__, *nr_procs);
+  topo_debug("%s: found %u procs\n", __func__, *nr_procs);
 }
 
 
@@ -730,7 +730,7 @@ look_cpuinfo(unsigned *procid_max,
   memset(proc_coreids,0,sizeof(proc_coreids));
   memset(proc_oscoreids,0,sizeof(proc_oscoreids));
 
-  if (!(fd=lt_fopen("/proc/cpuinfo","r", topology->fsys_root_fd)))
+  if (!(fd=topo_fopen("/proc/cpuinfo","r", topology->fsys_root_fd)))
     {
       fprintf(stderr,"could not open /proc/cpuinfo\n");
       return;
@@ -738,7 +738,7 @@ look_cpuinfo(unsigned *procid_max,
 
   /* Just record information and count number of dies and cores */
 
-  ltdebug("\n\n * Topology extraction from /proc/cpuinfo *\n\n");
+  topo_debug("\n\n * Topology extraction from /proc/cpuinfo *\n\n");
   while (fgets(string,sizeof(string),fd)!=NULL)
     {
 #      define getprocnb_begin(field, var)		     \
@@ -761,7 +761,7 @@ look_cpuinfo(unsigned *procid_max,
 	    fprintf(stderr,"too big "field" number in /proc/cpuinfo\n"); \
 	    break;							\
 	  }								\
-	ltdebug(field " %ld\n", var)
+	topo_debug(field " %ld\n", var)
 #      define getprocnb_end()			\
       }
       getprocnb_begin(PROCESSOR,processor);
@@ -772,7 +772,7 @@ look_cpuinfo(unsigned *procid_max,
 	if (physid == osphysids[i])
 	  break;
       proc_physids[processor]=i;
-      ltdebug("%ld on die %d (%lx)\n", processor, i, physid);
+      topo_debug("%ld on die %d (%lx)\n", processor, i, physid);
       if (i==*nr_dies)
 	osphysids[(*nr_dies)++] = physid;
       getprocnb_end() else
@@ -782,7 +782,7 @@ look_cpuinfo(unsigned *procid_max,
 	if (coreid == oscoreids[i] && proc_osphysids[processor] == core_osphysids[i])
 	  break;
       proc_coreids[processor]=i;
-      ltdebug("%ld on core %d (%lx:%x)\n", processor, i, coreid, proc_osphysids[processor]);
+      topo_debug("%ld on core %d (%lx:%x)\n", processor, i, coreid, proc_osphysids[processor]);
       if (i==*nr_cores)
 	{
 	  core_osphysids[*nr_cores] = proc_osphysids[processor];
@@ -801,7 +801,7 @@ look_cpuinfo(unsigned *procid_max,
   /* setup the final number of procs */
   *nr_procs = processor + 1;
   *procid_max = processor + 1;
-  ltdebug("%s: found %u procs\n", __func__, *nr_procs);
+  topo_debug("%s: found %u procs\n", __func__, *nr_procs);
 }
 
 
@@ -822,10 +822,10 @@ look_sysfscpu(struct topo_topology *topology)
   unsigned numcores=0;
   unsigned numcaches[] = { [0 ... LIBTOPO_CACHE_LEVEL_MAX-1] = 0 };
 
-  if (lt_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->fsys_root_fd) < 0
-      || lt_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->fsys_root_fd) < 0
-      || lt_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->fsys_root_fd) < 0
-      || lt_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->fsys_root_fd) < 0)
+  if (topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->fsys_root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->fsys_root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->fsys_root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->fsys_root_fd) < 0)
     {
       /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
       /* cpuset cpus ignored */
@@ -844,44 +844,45 @@ look_sysfscpu(struct topo_topology *topology)
 		     topology);
     }
 
-  ltdebug("\n * Topology summary *\n");
-  ltdebug("%d processors (%d max id)\n", numprocs, procid_max);
+  topo_debug("\n * Topology summary *\n");
+  topo_debug("%d processors (%d max id)\n", numprocs, procid_max);
 
   if (numdies>1)
-    ltdebug("%d dies\n", numdies);
+    topo_debug("%d dies\n", numdies);
   if (numcores>1)
-    ltdebug("%d cores\n", numcores);
+    topo_debug("%d cores\n", numcores);
 
   if (numdies>1)
-    lt_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
+    topo_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
 
   for(j=0; j<procid_max; j++)
-    lt_parse_cache_shared_cpu_maps(j, procid_max, &topology->online_cpuset, proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
+    topo_parse_cache_shared_cpu_maps(j, procid_max, &topology->online_cpuset,
+				     proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
 
   if (numcaches[2] > 0)
     {
       /* setup L3 caches */
-      lt_setup_cache_level(2, TOPO_LEVEL_L3, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      topo_setup_cache_level(2, TOPO_LEVEL_L3, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   if (numcaches[1] > 0)
     {
       /* setup L2 caches */
-      lt_setup_cache_level(1, TOPO_LEVEL_L2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      topo_setup_cache_level(1, TOPO_LEVEL_L2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   if (numcores>1)
-    lt_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
+    topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
 
   if (numcaches[0] > 0)
     {
       /* setup L1 caches */
-      lt_setup_cache_level(0, TOPO_LEVEL_L1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      topo_setup_cache_level(0, TOPO_LEVEL_L1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   /* Override the default returned by `ma_fallback_nbprocessors ()'.  */
   topology->nb_processors = numprocs;
-  ltdebug("%s: found %u procs\n", __func__, topology->nb_processors);
+  topo_debug("%s: found %u procs\n", __func__, topology->nb_processors);
 }
 
 static void
@@ -893,7 +894,7 @@ topo__get_dmi_info(struct topo_topology *topology)
   FILE *fd;
 
   dmi_line[0] = '\0';
-  fd = lt_fopen("/sys/class/dmi/id/board_vendor", "r", topology->fsys_root_fd);
+  fd = topo_fopen("/sys/class/dmi/id/board_vendor", "r", topology->fsys_root_fd);
   if (fd) {
     fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
     fclose (fd);
@@ -902,12 +903,12 @@ topo__get_dmi_info(struct topo_topology *topology)
       if (tmp)
 	*tmp = '\0';
       topology->dmi_board_vendor = strdup(dmi_line);
-      ltdebug("found DMI board vendor '%s'\n", topology->dmi_board_vendor);
+      topo_debug("found DMI board vendor '%s'\n", topology->dmi_board_vendor);
     }
   }
 
   dmi_line[0] = '\0';
-  fd = lt_fopen("/sys/class/dmi/id/board_name", "r", topology->fsys_root_fd);
+  fd = topo_fopen("/sys/class/dmi/id/board_name", "r", topology->fsys_root_fd);
   if (fd) {
     fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
     fclose (fd);
@@ -916,7 +917,7 @@ topo__get_dmi_info(struct topo_topology *topology)
       if (tmp)
 	*tmp = '\0';
       topology->dmi_board_name = strdup(dmi_line);
-      ltdebug("found DMI board name '%s'\n", topology->dmi_board_name);
+      topo_debug("found DMI board name '%s'\n", topology->dmi_board_name);
     }
   }
 }
@@ -926,14 +927,14 @@ look_linux(struct topo_topology *topology)
 {
   look_sysfsnode(topology);
   look_sysfscpu(topology);
-  lt_admin_disable_cpus_from_cpuset(topology);
+  topo_admin_disable_cpus_from_cpuset(topology);
 
   /* Compute the whole machine memory and huge page */
-  lt_get_procfs_meminfo_info(topology,
-			     &topology->levels[0][0].memory_kB[TOPO_LEVEL_MEMORY_MACHINE],
-			     &topology->huge_page_size_kB,
-			     &topology->levels[0][0].huge_page_free);
-			     /* FIXME: gather page_size_kB as well? MaMI needs it */
+  topo_get_procfs_meminfo_info(topology,
+			       &topology->levels[0][0].memory_kB[TOPO_LEVEL_MEMORY_MACHINE],
+			       &topology->huge_page_size_kB,
+			       &topology->levels[0][0].huge_page_free);
+			       /* FIXME: gather page_size_kB as well? MaMI needs it */
 
   topo__get_dmi_info(topology);
 }

@@ -23,15 +23,15 @@ show(lgrp_cookie_t cookie, lgrp_id_t lgrp)
   n = lgrp_cpus(cookie, lgrp, cpuids, 32, LGRP_CONTENT_ALL);
   for (i = 0; i < n ; i++)
     {
-      ltdebug("%ld has %d\n", lgrp, cpuids[i]);
+      topo_debug("%ld has %d\n", lgrp, cpuids[i]);
     }
   n = lgrp_children(cookie, lgrp, lgrps, 32);
-  ltdebug("%ld %d children\n", lgrp, n);
+  topo_debug("%ld %d children\n", lgrp, n);
   for (i = 0; i < n ; i++)
     {
       show(cookie, lgrps[i]);
     }
-  ltdebug("%ld children done\n", lgrp);
+  topo_debug("%ld children done\n", lgrp);
 }
 
 void
@@ -41,7 +41,7 @@ look_lgrp(struct topo_topology *topology)
   lgrp_id_t root;
   if (cookie == LGRP_COOKIE_NONE)
     {
-      ltdebug("lgrp_init failed: %s\n", strerror(errno));
+      topo_debug("lgrp_init failed: %s\n", strerror(errno));
       return;
     }
   root = lgrp_root(cookie);
@@ -74,7 +74,7 @@ look_kstat(struct topo_topology *topology)
 
   if (!kc)
     {
-      ltdebug("kstat_open failed: %s\n", strerror(errno));
+      topo_debug("kstat_open failed: %s\n", strerror(errno));
       return;
     }
   for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next)
@@ -113,7 +113,7 @@ look_kstat(struct topo_topology *topology)
 	    if (physid == osphysids[i])
 	      break;
 	  proc_physids[numprocs] = i;
-	  ltdebug("%u on die %u (%u)\n", numprocs, i, physid);
+	  topo_debug("%u on die %u (%u)\n", numprocs, i, physid);
 	  if (i == numdies)
 	    osphysids[numdies++] = physid;
 	}
@@ -139,7 +139,7 @@ look_kstat(struct topo_topology *topology)
 	    if (coreid == oscoreids[i] && proc_osphysids[numprocs] == core_osphysids[i])
 	      break;
 	  proc_coreids[numprocs] = i;
-	  ltdebug("%u on core %u (%u)\n", numprocs, i, coreid);
+	  topo_debug("%u on core %u (%u)\n", numprocs, i, coreid);
 	  if (i == numcores)
 	    {
 	      core_osphysids[numcores] = proc_osphysids[numprocs];
@@ -151,10 +151,10 @@ look_kstat(struct topo_topology *topology)
     }
 
   if (numdies > 1)
-    lt_setup_die_level(numprocs, numdies, osphysids, proc_physids, topology);
+    topo_setup_die_level(numprocs, numdies, osphysids, proc_physids, topology);
 
   if (numcores > 1)
-    lt_setup_core_level(numprocs, numcores, oscoreids, proc_coreids, topology);
+    topo_setup_core_level(numprocs, numcores, oscoreids, proc_coreids, topology);
 
   /* we have a contigous range of online cpus */
   topo_cpuset_set_range(&topology->online_cpuset, 0, topology->nb_processors-1);

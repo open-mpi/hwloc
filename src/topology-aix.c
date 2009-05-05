@@ -44,8 +44,8 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
     if (!rs_getinfo(rad, R_NUMPROCS, 0))
       continue;
 
-    lt_setup_level(&rad_level[r], level);
-    lt_set_os_numbers(&rad_level[r], level, r);
+    topo_setup_level(&rad_level[r], level);
+    topo_set_os_numbers(&rad_level[r], level, r);
     switch(level) {
       case TOPO_LEVEL_NODE:
 	rad_level[r].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0; /* TODO */
@@ -62,8 +62,8 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
       if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
 	topo_cpuset_set(&rad_level[r].cpuset,j);
     }
-    ltdebug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	   r, TOPO_CPUSET_PRINTF_VALUE(rad_level[r].cpuset));
+    topo_debug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
+	       r, TOPO_CPUSET_PRINTF_VALUE(rad_level[r].cpuset));
     r++;
   }
 
@@ -83,28 +83,28 @@ look_aix(struct topo_topology *topology)
     {
       if (i == rs_getinfo(NULL, R_MCMSDL, 0))
 	{
-	  ltdebug("looking AIX node sdl %d\n",i);
+	  topo_debug("looking AIX node sdl %d\n", i);
 	  look_rset(i, TOPO_LEVEL_NODE, topology);
 	}
 #      ifdef R_L2CSDL
       if (i == rs_getinfo(NULL, R_L2CSDL, 0))
 	{
-	  ltdebug("looking AIX L2 sdl %d\n",i);
+	  topo_debug("looking AIX L2 sdl %d\n", i);
 	  look_rset(i, TOPO_LEVEL_L2, topology);
 	}
 #      endif
 #      ifdef R_PCORESDL
       if (i == rs_getinfo(NULL, R_PCORESDL, 0))
 	{
-	  ltdebug("looking AIX core sdl %d\n",i);
+	  topo_debug("looking AIX core sdl %d\n", i);
 	  look_rset(i, TOPO_LEVEL_CORE, topology);
 	}
 #      endif
       if (i == rs_getinfo(NULL, R_SMPSDL, 0))
-	ltdebug("not looking AIX \"SMP\" sdl %d\n",i);
+	topo_debug("not looking AIX \"SMP\" sdl %d\n", i);
       if (i == rs_getinfo(NULL, R_MAXSDL, 0))
 	{
-	  ltdebug("looking AIX max sdl %d\n",i);
+	  topo_debug("looking AIX max sdl %d\n", i);
 	  look_rset(i, TOPO_LEVEL_PROC, topology);
 	}
     }

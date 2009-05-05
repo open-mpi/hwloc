@@ -73,7 +73,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
 
     level->arity = count;
 
-    lt_setup_level(level->children[i], type);
+    topo_setup_level(level->children[i], type);
     level->children[i]->father = level;
     level->children[i]->index = i;
     level->children[i]->level = level->level + 1;
@@ -84,10 +84,10 @@ topo__synthetic_make_children(struct topo_topology *topology,
     case TOPO_LEVEL_CORE:
     case TOPO_LEVEL_DIE:
     case TOPO_LEVEL_NODE:
-      lt_set_os_numbers(level->children[i], type, first_number + i);
+      topo_set_os_numbers(level->children[i], type, first_number + i);
       break;
     default:
-      lt_set_empty_os_numbers(level->children[i]);
+      topo_set_empty_os_numbers(level->children[i]);
     }
   }
 }
@@ -164,8 +164,8 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
 
     count = total_level_breadth + 1;
 
-    ltdebug("synthetic topology: creating level %u with breadth %u (%u children per father)\n",
-	    topology->nb_levels, total_level_breadth, *level_breadth);
+    topo_debug("synthetic topology: creating level %u with breadth %u (%u children per father)\n",
+	       topology->nb_levels, total_level_breadth, *level_breadth);
     topology->levels[level] = malloc(count * sizeof(struct topo_level));
 
     assert(topology->levels[level] != NULL);
@@ -181,7 +181,7 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
 
   assert(topology->nb_levels > 1);
 
-  ltdebug("synthetic topology: total number of levels: %u\n", topology->nb_levels);
+  topo_debug("synthetic topology: total number of levels: %u\n", topology->nb_levels);
 }
 
 void
@@ -213,6 +213,6 @@ topo_synthetic_load (struct topo_topology *topology)
     topology->nb_nodes = 1;
   }
 
-  ltdebug("synthetic topology: %u levels, %u processors, %u nodes\n",
-	  topology->nb_levels, topology->nb_processors, topology->nb_nodes);
+  topo_debug("synthetic topology: %u levels, %u processors, %u nodes\n",
+	     topology->nb_levels, topology->nb_processors, topology->nb_nodes);
 }

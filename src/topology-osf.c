@@ -41,8 +41,8 @@ look_osf(struct topo_topology *topology)
       continue;
     }
 
-    lt_setup_level(&node_level[i], TOPO_LEVEL_NODE);
-    lt_set_os_numbers(&node_level[i], node, radid);
+    topo_setup_level(&node_level[i], TOPO_LEVEL_NODE);
+    topo_set_os_numbers(&node_level[i], node, radid);
     node_level[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0; /* TODO */
     node_level[i].huge_page_free = 0;
 
@@ -50,8 +50,8 @@ look_osf(struct topo_topology *topology)
     while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
       topo_cpuset_set(&node_level[i].cpuset,cpuid);
 
-    ltdebug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	   i, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
+    topo_debug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
+	       i, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
     i++;
   }
 

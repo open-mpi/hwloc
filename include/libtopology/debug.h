@@ -8,9 +8,9 @@
 #include <config.h>
 
 #ifdef TOPO_DEBUG
-#define ltdebug(s, ...) fprintf(stderr, s, ##__VA_ARGS__) 
+#define topo_debug(s, ...) fprintf(stderr, s, ##__VA_ARGS__) 
 #else
-#define ltdebug(s, ...) do { }while(0)
+#define topo_debug(s, ...) do { }while(0)
 #endif
 
 #endif /* LIBTOPOLOGY_DEBUG_H */

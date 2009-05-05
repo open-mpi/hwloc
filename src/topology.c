@@ -24,10 +24,10 @@
 
 /* Return the OS-provided number of processors.  Unlike other methods such as
    reading sysfs on Linux, this method is not virtualizable; thus it's only
-   used as a fall-back method, allowing `lt_set_fsys_root ()' to
+   used as a fall-back method, allowing `topo_set_fsys_root ()' to
    have the desired effect.  */
 static unsigned
-lt_fallback_nbprocessors(void) {
+topo_fallback_nbprocessors(void) {
 	/* TODO: change into HAVE_SC_foobar, for OSes that don't provide the macro version */
 #if defined(_SC_NPROCESSORS_ONLN)
   return sysconf(_SC_NPROCESSORS_ONLN);
@@ -47,7 +47,7 @@ lt_fallback_nbprocessors(void) {
   return sysinfo.dwNumberOfProcessors;
 #else
 #warning No known way to discover number of available processors on this system
-#warning lt_fallback_nbprocessors will default to 1
+#warning topo_fallback_nbprocessors will default to 1
   return 1;
 #endif
 }
@@ -57,101 +57,101 @@ lt_fallback_nbprocessors(void) {
  */
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
 void
-lt_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
+topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
 {
   struct topo_level *die_level;
   int j;
 
-  ltdebug("%d dies\n", numdies);
+  topo_debug("%d dies\n", numdies);
   die_level=malloc((numdies+1)*sizeof(*die_level));
   assert(die_level);
 
   for (j = 0; j < numdies; j++)
     {
-      lt_setup_level(&die_level[j], TOPO_LEVEL_DIE);
-      lt_set_os_numbers(&die_level[j], TOPO_LEVEL_DIE, osphysids[j]);
-      lt_level_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
-      ltdebug("die %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	      j, TOPO_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
+      topo_setup_level(&die_level[j], TOPO_LEVEL_DIE);
+      topo_set_os_numbers(&die_level[j], TOPO_LEVEL_DIE, osphysids[j]);
+      topo_level_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
+      topo_debug("die %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		 j, TOPO_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
     }
-  ltdebug("\n");
+  topo_debug("\n");
 
   topo_cpuset_zero(&die_level[j].cpuset);
 
   topology->level_nbitems[topology->nb_levels]=numdies;
-  ltdebug("--- die level has number %d\n", topology->nb_levels);
+  topo_debug("--- die level has number %d\n", topology->nb_levels);
   topology->levels[topology->nb_levels++]=die_level;
-  ltdebug("\n");
+  topo_debug("\n");
 }
 
 void
-lt_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, struct topo_topology *topology)
+topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, struct topo_topology *topology)
 {
   struct topo_level *core_level;
   int j;
 
-  ltdebug("%d cores\n", numcores);
+  topo_debug("%d cores\n", numcores);
   core_level=malloc((numcores+1)*sizeof(*core_level));
   assert(core_level);
 
   for (j = 0; j < numcores; j++)
     {
-      lt_setup_level(&core_level[j], TOPO_LEVEL_CORE);
-      lt_set_os_numbers(&core_level[j], TOPO_LEVEL_CORE, oscoreids[j]);
-      lt_level_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
-      ltdebug("core %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	      j, TOPO_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
+      topo_setup_level(&core_level[j], TOPO_LEVEL_CORE);
+      topo_set_os_numbers(&core_level[j], TOPO_LEVEL_CORE, oscoreids[j]);
+      topo_level_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
+      topo_debug("core %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		 j, TOPO_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
     }
 
-  ltdebug("\n");
+  topo_debug("\n");
 
   topo_cpuset_zero(&core_level[j].cpuset);
 
   topology->level_nbitems[topology->nb_levels]=numcores;
-  ltdebug("--- core level has number %d\n", topology->nb_levels);
+  topo_debug("--- core level has number %d\n", topology->nb_levels);
   topology->levels[topology->nb_levels++]=core_level;
-  ltdebug("\n");
+  topo_debug("\n");
 }
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 
 #if defined(LINUX_SYS)
 void
-lt_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid_max,
-		     unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
-		     struct topo_topology *topology)
+topo_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid_max,
+		       unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
+		       struct topo_topology *topology)
 {
   struct topo_level *level;
   int j;
 
-  ltdebug("%d L%d caches\n", numcaches[cachelevel], cachelevel+1);
+  topo_debug("%d L%d caches\n", numcaches[cachelevel], cachelevel+1);
   level=malloc((numcaches[cachelevel]+1)*sizeof(*level));
   assert(level);
 
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
-      lt_setup_level(&level[j], topotype);
+      topo_setup_level(&level[j], topotype);
 
       switch (cachelevel)
 	{
-	case 2: lt_set_os_numbers(&level[j], TOPO_LEVEL_L3, j); break;
-	case 1: lt_set_os_numbers(&level[j], TOPO_LEVEL_L2, j); break;
-	case 0: lt_set_os_numbers(&level[j], TOPO_LEVEL_L1, j); break;
+	case 2: topo_set_os_numbers(&level[j], TOPO_LEVEL_L3, j); break;
+	case 1: topo_set_os_numbers(&level[j], TOPO_LEVEL_L2, j); break;
+	case 0: topo_set_os_numbers(&level[j], TOPO_LEVEL_L1, j); break;
 	default: assert(!1);
 	}
 
       level[j].memory_kB[TOPO_LEVEL_MEMORY_L1+cachelevel] = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
 
-      lt_level_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
+      topo_level_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
 
-      ltdebug("L%d cache %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	      cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(level[j].cpuset));
+      topo_debug("L%d cache %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(level[j].cpuset));
     }
-  ltdebug("\n");
+  topo_debug("\n");
   topo_cpuset_zero(&level[j].cpuset);
   topology->level_nbitems[topology->nb_levels]=numcaches[cachelevel];
-  ltdebug("--- shared L%d level has number %d\n", cachelevel+1, topology->nb_levels);
+  topo_debug("--- shared L%d level has number %d\n", cachelevel+1, topology->nb_levels);
   topology->levels[topology->nb_levels++]=level;
-  ltdebug("\n");
+  topo_debug("\n");
 }
 #endif /* LINUX_SYS */
 
@@ -165,7 +165,7 @@ look_cpu(struct topo_topology *topology)
   cpu_level=malloc((topology->nb_processors+1)*sizeof(*cpu_level));
   assert(cpu_level);
 
-  ltdebug("\n\n * CPU cpusets *\n\n");
+  topo_debug("\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<topology->nb_processors; oscpu++)
     {
       if (!topo_cpuset_isset(&topology->online_cpuset, oscpu))
@@ -179,15 +179,15 @@ look_cpu(struct topo_topology *topology)
 	continue;
       }
 
-      lt_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC);
-      lt_set_os_numbers(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
+      topo_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC);
+      topo_set_os_numbers(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
 
       topo_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
       if (!(topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)))
 	cpu_level[cpu].admin_disabled = 1;
 
-      ltdebug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-	      cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu].cpuset));
+      topo_debug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
+		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu].cpuset));
       cpu++;
     }
   topo_cpuset_zero(&cpu_level[cpu].cpuset);
@@ -208,8 +208,8 @@ topo_connect(struct topo_topology *topology)
 	{
 	  if (topology->levels[l][i].arity)
 	    {
-	      ltdebug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
-		      l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
+	      topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
+			 l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
 	      topology->levels[l][i].children=malloc(topology->levels[l][i].arity*sizeof(void *));
 	      assert(topology->levels[l][i].children);
 
@@ -261,7 +261,7 @@ topo_discover(struct topo_topology *topology)
 
   /* Initialize the number of processor to some reasonable default, e.g.,
      obtained using sysconf(3).  */
-  topology->nb_processors = lt_fallback_nbprocessors ();
+  topology->nb_processors = topo_fallback_nbprocessors ();
 
   /* Raw detection, from coarser levels to finer levels */
   unsigned k;
@@ -295,11 +295,11 @@ topo_discover(struct topo_topology *topology)
    * removed yet. Disabled cpus are in topology->admin_disabled_cpuset,
    * while disabled mems are marked as admin-disabled.
    */
-  ltdebug("%d online processors found\n", topology->nb_processors);
-  ltdebug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
-	  TOPO_CPUSET_PRINTF_VALUE(topology->online_cpuset));
-  ltdebug("admin disabled processor cpuset: %" TOPO_PRIxCPUSET "\n",
-	  TOPO_CPUSET_PRINTF_VALUE(topology->admin_disabled_cpuset));
+  topo_debug("%d online processors found\n", topology->nb_processors);
+  topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
+	     TOPO_CPUSET_PRINTF_VALUE(topology->online_cpuset));
+  topo_debug("admin disabled processor cpuset: %" TOPO_PRIxCPUSET "\n",
+	     TOPO_CPUSET_PRINTF_VALUE(topology->admin_disabled_cpuset));
   assert(topology->nb_processors == topo_cpuset_weight(&topology->online_cpuset));
 
   /* Create actual bottom proc resources, while dropping the offline
@@ -309,7 +309,7 @@ topo_discover(struct topo_topology *topology)
   /* topology->nb_processors now does not contain admin-disabled procs anymore. */
   assert(topology->nb_processors);
 
-  ltdebug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
+  topo_debug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
 
   /* Ignored some levels if requested */
   l=0;
@@ -362,8 +362,8 @@ topo_discover(struct topo_topology *topology)
 	  break;
         }
     }
-    ltdebug("%d levels remaining at depth %d after filtering\n",
-	    topology->level_nbitems[l], i);
+    topo_debug("%d levels remaining at depth %d after filtering\n",
+	       topology->level_nbitems[l], i);
   }
 
   /* Gather sublevels according to levels */
@@ -389,13 +389,13 @@ topo_discover(struct topo_topology *topology)
     for (i=0; i<topology->level_nbitems[l]; i++)
       {
 	topology->levels[l][i].number = i;
-	ltdebug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
+	topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
       }
 
   /* And show debug again */
   for (l=0; l<topology->nb_levels; l++)
     for (i=0; i<topology->level_nbitems[l]; i++)
-      ltdebug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
+      topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
 
   /* Compute arity */
   for (l=0; l+1<topology->nb_levels; l++)
@@ -406,20 +406,20 @@ topo_discover(struct topo_topology *topology)
 	  for (j=0; j<topology->level_nbitems[l+1]; j++)
 	    if (topo_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
 	      topology->levels[l][i].arity++;
-	  ltdebug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
-		  l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
+	  topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
+		     l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
 	}
     }
 
 
   for (i=0; i<topology->level_nbitems[topology->nb_levels-1]; i++)
-    ltdebug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" leaf\n",
-	    topology->nb_levels-1, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[topology->nb_levels-1][i].cpuset));
-  ltdebug("arity done.\n");
+    topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" leaf\n",
+	       topology->nb_levels-1, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[topology->nb_levels-1][i].cpuset));
+  topo_debug("arity done.\n");
 
   /* and finally connect levels */
   topo_connect(topology);
-  ltdebug("connecting done.\n");
+  topo_debug("connecting done.\n");
 
   /* intialize all depth to unknown */
   for (l=0; l < TOPO_LEVEL_MAX; l++)
@@ -480,7 +480,7 @@ topo_topology_init (struct topo_topology **topologyp)
     topology->ignored_types[i] = TOPO_IGNORE_LEVEL_NEVER;
   topology->level_nbitems[0] = 1;
   topology->levels[0] = malloc (2*sizeof (struct topo_level));
-  lt_setup_machine_level (&topology->levels[0]);
+  topo_setup_machine_level (&topology->levels[0]);
   topology->is_fake = 0;
 
   *topologyp = topology;
@@ -491,7 +491,7 @@ int
 topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
 {
 #ifdef LINUX_SYS
-  if (lt_set_fsys_root(topology, fsys_root_path))
+  if (topo_set_fsys_root(topology, fsys_root_path))
     return -1;
 #endif /* LINUX_SYS */
 
