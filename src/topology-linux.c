@@ -35,7 +35,7 @@ topo_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
   /* Use the root path from the environment variable first,
    * then from the given argument, then the default root.
    */
-  fsys_root_path_env = getenv("LT_FSYS_ROOT_PATH");
+  fsys_root_path_env = getenv("TOPO_FSYS_ROOT_PATH");
   if (fsys_root_path_env)
     fsys_root_path = fsys_root_path_env;
   if (!fsys_root_path)
