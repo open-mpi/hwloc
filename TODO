@@ -1,5 +1,3 @@
-* windows
-
 * add a way for mami to know when the topology is fake
   (so that it disables migration, does not trust memory sizes, ...)
 

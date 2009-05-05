@@ -92,7 +92,9 @@ m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
 m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
 m4_defun([_LT_AC_LANG_GCJ_CONFIG], [:])
 m4_defun([_LT_AC_LANG_RC_CONFIG], [:])
+AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+AM_CONDITIONAL([HAVE_GCC], [test "x$GCC" = "xyes"])
 
 TOPO_GCC_FLAGS
 
