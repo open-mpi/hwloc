@@ -84,7 +84,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
     case TOPO_LEVEL_CORE:
     case TOPO_LEVEL_DIE:
     case TOPO_LEVEL_NODE:
-      lt_set_os_numbers(level->children[i], type, i);
+      lt_set_os_numbers(level->children[i], type, first_number + i);
       break;
     default:
       lt_set_empty_os_numbers(level->children[i]);
