@@ -17,14 +17,15 @@ if HAVE_WINDOWS
 libtopology_la_LDFLAGS += -Xlinker --output-def -Xlinker .libs/libtopology.def
 
 if HAVE_MS_LIB
-all-hook:
-	"$(TOPO_MS_LIB)" /dev:.libs/libtopology.def -D libtopology-$(TOPO_SOVERSION) -l .libs/libtopology.lib
+all-local: libtopology.la
+	"$(TOPO_MS_LIB)" /machine:X86 /def:.libs/libtopology.def /name:libtopology-$(TOPO_SOVERSION) /out:.libs/libtopology.lib
 endif
 
 install-exec-hook:
 	$(INSTALL) .libs/libtopology.def $(DESTDIR)$(libdir)
 if HAVE_MS_LIB
 	$(INSTALL) .libs/libtopology.lib $(DESTDIR)$(libdir)
+	$(INSTALL) .libs/libtopology.exp $(DESTDIR)$(libdir)
 endif
 endif
 
