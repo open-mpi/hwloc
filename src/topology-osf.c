@@ -41,8 +41,7 @@ look_osf(struct topo_topology *topology)
       continue;
     }
 
-    topo_setup_level(&node_level[i], TOPO_LEVEL_NODE);
-    topo_set_os_numbers(&node_level[i], node, radid);
+    topo_setup_level(&node_level[i], TOPO_LEVEL_NODE, radid);
     node_level[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0; /* TODO */
     node_level[i].huge_page_free = 0;
 

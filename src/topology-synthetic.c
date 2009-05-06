@@ -63,6 +63,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
 			      struct topo_level *node_pool)
 {
   unsigned i;
+  unsigned physical_index;
 
   level->children = calloc(count, sizeof(*level->children));
   assert(level->children != NULL);
@@ -71,24 +72,26 @@ topo__synthetic_make_children(struct topo_topology *topology,
     level->children[i] = &node_pool[i];
     assert(level->children[i] != NULL);
 
-    level->arity = count;
-
-    topo_setup_level(level->children[i], type);
-    level->children[i]->father = level;
-    level->children[i]->index = i;
-    level->children[i]->level = level->level + 1;
-    level->children[i]->number = first_number + i;
-
     switch(type) {
     case TOPO_LEVEL_PROC:
     case TOPO_LEVEL_CORE:
     case TOPO_LEVEL_DIE:
     case TOPO_LEVEL_NODE:
-      topo_set_os_numbers(level->children[i], type, first_number + i);
+      physical_index = first_number + i;
       break;
     default:
-      topo_set_empty_os_numbers(level->children[i]);
+      physical_index = -1;
+      break;
     }
+
+    level->arity = count;
+
+    topo_setup_level(level->children[i], type, physical_index);
+    level->children[i]->father = level;
+    level->children[i]->index = i;
+    level->children[i]->level = level->level + 1;
+    level->children[i]->number = first_number + i;
+
   }
 }
 

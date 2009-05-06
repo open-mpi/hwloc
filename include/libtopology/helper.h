@@ -48,20 +48,7 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 #endif
 
 
-#define topo_set_empty_os_numbers(l) do {	\
-		struct topo_level *___l = (l);	\
-		int i;				\
-		for(i=0; i<TOPO_LEVEL_MAX; i++)	\
-		  ___l->physical_index[i] = -1;	\
-	} while(0)
-
-#define topo_set_os_numbers(l, _type, _val) do {	\
-		struct topo_level *__l = (l);		\
-		topo_set_empty_os_numbers(l);		\
-		__l->physical_index[_type] = _val;	\
-	} while(0)
-
-#define topo_setup_level(l, _type) do {			\
+#define topo_setup_level(l, _type, _index) do {		\
 		struct topo_level *__l = (l);		\
 		__l->type = _type;			\
 		topo_cpuset_zero(&__l->cpuset);		\
@@ -69,6 +56,7 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 		__l->children = NULL;			\
 		__l->father = NULL;			\
 		__l->admin_disabled = 0;		\
+		__l->physical_index = _index;		\
 	} while (0)
 
 
@@ -76,12 +64,10 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 		struct topo_level **__p = (l);				\
 		struct topo_level *__l1 = &(__p[0][0]);			\
 		struct topo_level *__l2 = &(__p[0][1]);			\
-		topo_setup_level(__l1, TOPO_LEVEL_MACHINE);		\
+		topo_setup_level(__l1, TOPO_LEVEL_MACHINE, 0);		\
 		__l1->level = 0;					\
 		__l1->number = 0;					\
 		__l1->index = 0;					\
-		topo_set_empty_os_numbers(__l1);			\
-		__l1->physical_index[TOPO_LEVEL_MACHINE] = 0;		\
 		topo_cpuset_fill(&__l1->cpuset);			\
 		topo_cpuset_zero(&__l2->cpuset);			\
   } while (0)

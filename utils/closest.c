@@ -37,7 +37,7 @@ main (int argc, char *argv[])
   printf("looked for %d closest entries, found %d\n", COUNT, found);
   for(i=0; i<found; i++)
     printf("close to type %d number %d physical number %d\n",
-	   closest[i]->type, closest[i]->number, closest[i]->physical_index[closest[i]->type]);
+	   closest[i]->type, closest[i]->number, closest[i]->physical_index);
 
   if (found) {
     topo_level_t ancestor = topo_find_common_ancestor_level (first, closest[found-1]);

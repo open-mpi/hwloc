@@ -123,8 +123,8 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
   enum topo_level_type_e type = l->type;
   char physical_index[12] = "";
 
-  if (l->physical_index[type] != -1)
-    snprintf(physical_index, 12, "%s%d", indexprefix, l->physical_index[type]);
+  if (l->physical_index != -1)
+    snprintf(physical_index, 12, "%s%d", indexprefix, l->physical_index);
 
   switch (type) {
   case TOPO_LEVEL_DIE:

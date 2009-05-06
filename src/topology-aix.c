@@ -44,8 +44,7 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
     if (!rs_getinfo(rad, R_NUMPROCS, 0))
       continue;
 
-    topo_setup_level(&rad_level[r], level);
-    topo_set_os_numbers(&rad_level[r], level, r);
+    topo_setup_level(&rad_level[r], level, r);
     switch(level) {
       case TOPO_LEVEL_NODE:
 	rad_level[r].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0; /* TODO */

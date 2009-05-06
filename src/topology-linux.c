@@ -534,8 +534,7 @@ look_sysfsnode(struct topo_topology *topology)
 
       topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
-      topo_setup_level(&node_level[i], TOPO_LEVEL_NODE);
-      topo_set_os_numbers(&node_level[i], TOPO_LEVEL_NODE, osnode);
+      topo_setup_level(&node_level[i], TOPO_LEVEL_NODE, osnode);
       node_level[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = size;
       node_level[i].huge_page_free = hpfree;
       node_level[i].cpuset = cpuset;

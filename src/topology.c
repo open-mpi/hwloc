@@ -68,8 +68,7 @@ topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsi
 
   for (j = 0; j < numdies; j++)
     {
-      topo_setup_level(&die_level[j], TOPO_LEVEL_DIE);
-      topo_set_os_numbers(&die_level[j], TOPO_LEVEL_DIE, osphysids[j]);
+      topo_setup_level(&die_level[j], TOPO_LEVEL_DIE, osphysids[j]);
       topo_level_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
       topo_debug("die %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 j, TOPO_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
@@ -96,8 +95,7 @@ topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, un
 
   for (j = 0; j < numcores; j++)
     {
-      topo_setup_level(&core_level[j], TOPO_LEVEL_CORE);
-      topo_set_os_numbers(&core_level[j], TOPO_LEVEL_CORE, oscoreids[j]);
+      topo_setup_level(&core_level[j], TOPO_LEVEL_CORE, oscoreids[j]);
       topo_level_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
       topo_debug("core %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 j, TOPO_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
@@ -129,16 +127,7 @@ topo_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int proc
 
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
-      topo_setup_level(&level[j], topotype);
-
-      switch (cachelevel)
-	{
-	case 2: topo_set_os_numbers(&level[j], TOPO_LEVEL_L3, j); break;
-	case 1: topo_set_os_numbers(&level[j], TOPO_LEVEL_L2, j); break;
-	case 0: topo_set_os_numbers(&level[j], TOPO_LEVEL_L1, j); break;
-	default: assert(!1);
-	}
-
+      topo_setup_level(&level[j], topotype, j);
       level[j].memory_kB[TOPO_LEVEL_MEMORY_L1+cachelevel] = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
 
       topo_level_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
@@ -179,8 +168,7 @@ look_cpu(struct topo_topology *topology)
 	continue;
       }
 
-      topo_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC);
-      topo_set_os_numbers(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
+      topo_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
 
       topo_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
       if (!(topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)))

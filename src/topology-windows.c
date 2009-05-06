@@ -164,15 +164,14 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
   j = 0;
   for (i = 0; i < n; i++) {
     if (TEST) {
-      topo_setup_level(&level[j], type);
-      topo_set_os_numbers(&level[j], type, j);
+      topo_setup_level(&level[j], type, j);
       topo_debug("%d #%d mask %lx\n", relationship, j, procInfo[i].ProcessorMask);
       topo_cpuset_from_ulong(&level[j].cpuset, procInfo[i].ProcessorMask);
       switch (type) {
 	case TOPO_LEVEL_NODE:
 	  level[j].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0; /* TODO */
 	  level[j].huge_page_free = 0; /* TODO */
-	  topo_set_os_numbers(&level[j], TOPO_LEVEL_NODE, procInfo[i].NumaNode.NodeNumber);
+	  level[j].physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_level_setup did */
 	  break;
 	case TOPO_LEVEL_L1:
 	  level[j].memory_kB[TOPO_LEVEL_MEMORY_L1] = procInfo[i].Cache.Size >> 10;

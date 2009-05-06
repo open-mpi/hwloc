@@ -62,7 +62,7 @@ struct topo_level {
   unsigned arity;			/**< \brief Number of children */
   struct topo_level **children;		/**< \brief Children, children[0 .. arity -1] */
   struct topo_level *father;		/**< \brief Father, NULL if root (machine level) */
-  signed physical_index[TOPO_LEVEL_MAX];	/**< \brief OS-provided physical index numbers */
+  signed physical_index;		/**< \brief OS-provided physical index number */
   unsigned long memory_kB[TOPO_LEVEL_MEMORY_TYPE_MAX];
   unsigned long huge_page_free;
   unsigned admin_disabled;		/**< \brief Set if disabled by the administrator (for instance Linux Cpusets) */
