@@ -535,7 +535,7 @@ look_sysfsnode(struct topo_topology *topology)
       topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
       topo_setup_level(&node_level[i], TOPO_LEVEL_NODE, osnode);
-      node_level[i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = size;
+      node_level[i].memory_kB = size;
       node_level[i].huge_page_free = hpfree;
       node_level[i].cpuset = cpuset;
 
@@ -930,7 +930,7 @@ look_linux(struct topo_topology *topology)
 
   /* Compute the whole machine memory and huge page */
   topo_get_procfs_meminfo_info(topology,
-			       &topology->levels[0][0].memory_kB[TOPO_LEVEL_MEMORY_MACHINE],
+			       &topology->levels[0][0].memory_kB,
 			       &topology->huge_page_size_kB,
 			       &topology->levels[0][0].huge_page_free);
 			       /* FIXME: gather page_size_kB as well? MaMI needs it */

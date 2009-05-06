@@ -149,8 +149,8 @@ l1_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, vo
     methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
     snprintf(text, sizeof(text), "L1 %u - %ld%s", level->physical_index,
-		    size_value(level->memory_kB[TOPO_LEVEL_MEMORY_L1]),
-		    size_unit(level->memory_kB[TOPO_LEVEL_MEMORY_L1]));
+		    size_value(level->memory_kB),
+		    size_unit(level->memory_kB));
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
   }
 
@@ -200,8 +200,8 @@ l2_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, vo
   if (level->type == TOPO_LEVEL_L2) {
     methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
     snprintf(text, sizeof(text), "L2 %u - %ld%s", level->physical_index,
-		    size_value(level->memory_kB[TOPO_LEVEL_MEMORY_L2]),
-		    size_unit(level->memory_kB[TOPO_LEVEL_MEMORY_L2]));
+		    size_value(level->memory_kB),
+		    size_unit(level->memory_kB));
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
   }
 
@@ -227,8 +227,8 @@ l3_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, vo
   if (level->type == TOPO_LEVEL_L3) {
     methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
     snprintf(text, sizeof(text), "L3 %u - %ld%s", level->physical_index,
-		    size_value(level->memory_kB[TOPO_LEVEL_MEMORY_L3]),
-		    size_unit(level->memory_kB[TOPO_LEVEL_MEMORY_L3]));
+		    size_value(level->memory_kB),
+		    size_unit(level->memory_kB));
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
   }
 
@@ -282,8 +282,8 @@ node_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
   if (level->type == TOPO_LEVEL_NODE) {
     methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
     snprintf(text, sizeof(text), "Node %u - %ld%s", level->physical_index,
-		    size_value(level->memory_kB[TOPO_LEVEL_MEMORY_NODE]),
-		    size_unit(level->memory_kB[TOPO_LEVEL_MEMORY_NODE]));
+		    size_value(level->memory_kB),
+		    size_unit(level->memory_kB));
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
   }
 

@@ -128,7 +128,7 @@ topo_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int proc
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
       topo_setup_level(&level[j], topotype, j);
-      level[j].memory_kB[TOPO_LEVEL_MEMORY_L1+cachelevel] = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
+      level[j].memory_kB = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
 
       topo_level_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
 
@@ -436,7 +436,7 @@ topo_discover(struct topo_topology *topology)
     for (i=0; i<topology->level_nbitems[l]; i++) {
       /* remove memory if disabled */
       if (topology->levels[l][i].admin_disabled) {
-	topology->levels[l][i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0;
+	topology->levels[l][i].memory_kB = 0;
 	topology->levels[l][i].huge_page_free = 0;
       }
     }

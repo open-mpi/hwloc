@@ -42,17 +42,6 @@ enum topo_level_type_e {
 };
 typedef enum topo_level_type_e topo_level_type_t;
 
-/** \brief Type of memory attached to the topology level */
-enum topo_level_memory_type_e {
-  TOPO_LEVEL_MEMORY_L1 = 0,
-  TOPO_LEVEL_MEMORY_L2 = 1,
-  TOPO_LEVEL_MEMORY_L3 = 2,
-  TOPO_LEVEL_MEMORY_NODE = 3,
-  TOPO_LEVEL_MEMORY_MACHINE = 4,
-  TOPO_LEVEL_MEMORY_TYPE_MAX
-};
-typedef enum topo_level_memory_type_e topo_level_memory_type_t;
-
 /** Structure of a topology level */
 struct topo_level {
   enum topo_level_type_e type;		/**< \brief Type of level */
@@ -63,7 +52,7 @@ struct topo_level {
   struct topo_level **children;		/**< \brief Children, children[0 .. arity -1] */
   struct topo_level *father;		/**< \brief Father, NULL if root (machine level) */
   signed physical_index;		/**< \brief OS-provided physical index number */
-  unsigned long memory_kB[TOPO_LEVEL_MEMORY_TYPE_MAX];
+  unsigned long memory_kB;		/**< \brief Size of memory bank or caches */
   unsigned long huge_page_free;
   unsigned admin_disabled;		/**< \brief Set if disabled by the administrator (for instance Linux Cpusets) */
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this level */

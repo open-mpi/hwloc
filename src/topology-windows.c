@@ -169,18 +169,18 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
       topo_cpuset_from_ulong(&level[j].cpuset, procInfo[i].ProcessorMask);
       switch (type) {
 	case TOPO_LEVEL_NODE:
-	  level[j].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0; /* TODO */
+	  level[j].memory_kB = 0; /* TODO */
 	  level[j].huge_page_free = 0; /* TODO */
 	  level[j].physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_level_setup did */
 	  break;
 	case TOPO_LEVEL_L1:
-	  level[j].memory_kB[TOPO_LEVEL_MEMORY_L1] = procInfo[i].Cache.Size >> 10;
+	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
 	  break;
 	case TOPO_LEVEL_L2:
-	  level[j].memory_kB[TOPO_LEVEL_MEMORY_L2] = procInfo[i].Cache.Size >> 10;
+	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
 	  break;
 	case TOPO_LEVEL_L3:
-	  level[j].memory_kB[TOPO_LEVEL_MEMORY_L3] = procInfo[i].Cache.Size >> 10;
+	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
 	  break;
 	default:
 	  break;

@@ -47,11 +47,11 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
     topo_setup_level(&rad_level[r], level, r);
     switch(level) {
       case TOPO_LEVEL_NODE:
-	rad_level[r].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 0; /* TODO */
+	rad_level[r].memory_kB = 0; /* TODO */
 	rad_level[r].huge_page_free = 0;
 	break;
       case TOPO_LEVEL_L2:
-	rad_level[r].memory_kB[TOPO_LEVEL_MEMORY_L2] = 0; /* TODO */
+	rad_level[r].memory_kB = 0; /* TODO */
 	break;
       default:
 	break;

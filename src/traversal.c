@@ -134,22 +134,16 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
     break;
   case TOPO_LEVEL_MACHINE:
     fprintf(output, "%s(%ld%s)", topo_level_string(type),
-	    topo_memory_size_printf_value(l->memory_kB[TOPO_LEVEL_MEMORY_MACHINE]),
-	    topo_memory_size_printf_unit(l->memory_kB[TOPO_LEVEL_MEMORY_MACHINE]));
+	    topo_memory_size_printf_value(l->memory_kB),
+	    topo_memory_size_printf_unit(l->memory_kB));
     break;
   case TOPO_LEVEL_NODE:
   case TOPO_LEVEL_L3:
   case TOPO_LEVEL_L2:
   case TOPO_LEVEL_L1: {
-    enum topo_level_memory_type_e mtype =
-      (type == TOPO_LEVEL_NODE) ? TOPO_LEVEL_MEMORY_NODE
-      : (type == TOPO_LEVEL_L3) ? TOPO_LEVEL_MEMORY_L3
-      : (type == TOPO_LEVEL_L2) ? TOPO_LEVEL_MEMORY_L2
-      : TOPO_LEVEL_MEMORY_L1;
-    unsigned long memory_kB = l->memory_kB[mtype];
     fprintf(output, "%s%s(%ld%s)", topo_level_string(type), physical_index,
-	    topo_memory_size_printf_value(memory_kB),
-	    topo_memory_size_printf_unit(memory_kB));
+	    topo_memory_size_printf_value(l->memory_kB),
+	    topo_memory_size_printf_unit(l->memory_kB));
     break;
   }
   default:

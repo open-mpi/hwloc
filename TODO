@@ -11,9 +11,6 @@
 * Implement topological sorting so that backends do not have to care about the
   order in which they report resources.
 
-* change memory_kB[] into scalar now that we know that we'll probably never merge level for real
-  + application that want all information just have to not merge things
-
 * integrate marcel split quirk?
   + split for real, just explain how to split?
     - just return an ordered array?

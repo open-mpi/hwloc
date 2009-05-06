@@ -210,7 +210,7 @@ topo_synthetic_load (struct topo_topology *topology)
     topology->nb_nodes = topology->level_nbitems[node_level];
 
     for(i=0 ; i<topology->nb_nodes ; i++)
-      topology->levels[node_level][i].memory_kB[TOPO_LEVEL_MEMORY_NODE] = 1024*1024;
+      topology->levels[node_level][i].memory_kB = 1024*1024;
 
   } else {
     topology->nb_nodes = 1;
