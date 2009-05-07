@@ -50,7 +50,7 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
 	rad_level[r].memory_kB = 0; /* TODO */
 	rad_level[r].huge_page_free = 0;
 	break;
-      case TOPO_LEVEL_L2:
+      case TOPO_LEVEL_CACHE:
 	rad_level[r].memory_kB = 0; /* TODO */
 	rad_level[r].cache_depth = 2;
 	break;
@@ -90,7 +90,7 @@ look_aix(struct topo_topology *topology)
       if (i == rs_getinfo(NULL, R_L2CSDL, 0))
 	{
 	  topo_debug("looking AIX L2 sdl %d\n", i);
-	  look_rset(i, TOPO_LEVEL_L2, topology);
+	  look_rset(i, TOPO_LEVEL_CACHE, topology);
 	}
 #      endif
 #      ifdef R_PCORESDL

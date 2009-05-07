@@ -14,7 +14,7 @@ extern void topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osp
 extern void topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, topo_topology_t topology);
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 #if defined(LINUX_SYS)
-extern void topo_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
+extern void topo_setup_cache_level(int cachelevel, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
 extern void look_linux(struct topo_topology *topology);
 extern int topo_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path);
 #endif /* LINUX_SYS */

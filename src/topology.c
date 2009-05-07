@@ -114,7 +114,7 @@ topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, un
 
 #if defined(LINUX_SYS)
 void
-topo_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int procid_max,
+topo_setup_cache_level(int cachelevel, int procid_max,
 		       unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
 		       struct topo_topology *topology)
 {
@@ -127,7 +127,7 @@ topo_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int proc
 
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
-      topo_setup_level(&level[j], topotype, j);
+      topo_setup_level(&level[j], TOPO_LEVEL_CACHE, j);
       level[j].memory_kB = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
       level[j].cache_depth = cachelevel+1;
 

@@ -102,10 +102,8 @@ topo_level_string (enum topo_level_type_e l)
     case TOPO_LEVEL_FAKE: return "Fake";
     case TOPO_LEVEL_NODE: return "NUMANode";
     case TOPO_LEVEL_DIE: return "Die";
-    case TOPO_LEVEL_L3: return "L3Cache";
-    case TOPO_LEVEL_L2: return "L2Cache";
+    case TOPO_LEVEL_CACHE: return "Cache";
     case TOPO_LEVEL_CORE: return "Core";
-    case TOPO_LEVEL_L1: return "L1Cache";
     case TOPO_LEVEL_PROC: return "SMTproc";
     default: return "Unknown";
     }
@@ -137,11 +135,14 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
 	    topo_memory_size_printf_value(l->memory_kB),
 	    topo_memory_size_printf_unit(l->memory_kB));
     break;
-  case TOPO_LEVEL_NODE:
-  case TOPO_LEVEL_L3:
-  case TOPO_LEVEL_L2:
-  case TOPO_LEVEL_L1: {
+  case TOPO_LEVEL_NODE: {
     fprintf(output, "%s%s(%ld%s)", topo_level_string(type), physical_index,
+	    topo_memory_size_printf_value(l->memory_kB),
+	    topo_memory_size_printf_unit(l->memory_kB));
+    break;
+  }
+  case TOPO_LEVEL_CACHE: {
+    fprintf(output, "L%d%s%s(%ld%s)", l->cache_depth, topo_level_string(type), physical_index,
 	    topo_memory_size_printf_value(l->memory_kB),
 	    topo_memory_size_printf_unit(l->memory_kB));
     break;

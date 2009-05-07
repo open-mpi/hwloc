@@ -72,13 +72,9 @@ main (int argc, char *argv[])
   topo_topology_set_flags(topology, flags);
 
   if (ignorecache > 1) {
-    topo_topology_ignore_type(topology, TOPO_LEVEL_L1);
-    topo_topology_ignore_type(topology, TOPO_LEVEL_L2);
-    topo_topology_ignore_type(topology, TOPO_LEVEL_L3);
+    topo_topology_ignore_type(topology, TOPO_LEVEL_CACHE);
   } else if (ignorecache) {
-    topo_topology_ignore_type_keep_structure(topology, TOPO_LEVEL_L1);
-    topo_topology_ignore_type_keep_structure(topology, TOPO_LEVEL_L2);
-    topo_topology_ignore_type_keep_structure(topology, TOPO_LEVEL_L3);
+    topo_topology_ignore_type_keep_structure(topology, TOPO_LEVEL_CACHE);
   }
   if (merge)
     topo_topology_ignore_all_keep_structure(topology);

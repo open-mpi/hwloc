@@ -2,11 +2,15 @@
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
 
-* TOPO_LEVEL_MEMORY_L*: what about L4 someday? Use resource "types" instead and
-  add a depth for caches.
-  + make cache size/depth/type, memory node size + hugepagefree a resource attribute
+* make cache size/depth/type, memory node size + hugepagefree a resource attribute
 * there could be several size for huge pages
 * rename "level" into "resource" or "object"
+
+* clarify depth
+  + keep current depth of real level Machine/Node/Die/Core/Proc
+  + clear depth of Fake and Cache if none
+  + what if multiple occurences of Fake or Cache? clear? use min?  
+  + make it clear that fake and cache are not always at the same place in the type list
 
 * Implement topological sorting so that backends do not have to care about the
   order in which they report resources.

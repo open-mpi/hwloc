@@ -131,19 +131,19 @@ l1_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, vo
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
 
-  if (level->type == TOPO_LEVEL_L1)
+  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 1)
     myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
   RECURSE(&null_draw_methods, 0);
 
-  if (level->type == TOPO_LEVEL_L1) {
+  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 1) {
     if (totwidth < 8*UNIT)
       totwidth = 8*UNIT;
   }
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
 
-  if (level->type == TOPO_LEVEL_L1) {
+  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 1) {
     if (!maxheight)
       *retheight -= UNIT;
     methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
@@ -190,14 +190,14 @@ l2_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, vo
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
 
-  if (level->type == TOPO_LEVEL_L2)
+  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 2)
     myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
   RECURSE(&null_draw_methods, UNIT);
 
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
-  if (level->type == TOPO_LEVEL_L2) {
+  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 2) {
     methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
     snprintf(text, sizeof(text), "L2 %u - %ld%s", level->physical_index,
 		    size_value(level->memory_kB),
@@ -216,7 +216,7 @@ l3_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, vo
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
 
-  if (level->type == TOPO_LEVEL_L3)
+  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 3)
     myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
   RECURSE(&null_draw_methods, UNIT);
@@ -224,7 +224,7 @@ l3_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, vo
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
 
-  if (level->type == TOPO_LEVEL_L3) {
+  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 3) {
     methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
     snprintf(text, sizeof(text), "L3 %u - %ld%s", level->physical_index,
 		    size_value(level->memory_kB),
@@ -324,10 +324,13 @@ get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsuble
     }
     DO(NODE, node_draw)
     DO(DIE, die_draw)
-    DO(L3, l3_draw)
-    DO(L2, l2_draw)
+    if (l[0]->cache_depth == 3) /* FIXME: hack? */
+      DO(CACHE, l3_draw)
+    if (l[0]->cache_depth == 2) /* FIXME: hack? */
+      DO(CACHE, l2_draw)
     DO(CORE, core_draw)
-    DO(L1, l1_draw)
+    if (l[0]->cache_depth == 1) /* FIXME: hack? */
+      DO(CACHE, l1_draw)
     DO(PROC, proc_draw)
     if ((*type) != 0 && (*type) != TOPO_LEVEL_FAKE)
       fprintf(stderr,"urgl, type %lx?! Skipping\n", *type);

@@ -861,13 +861,13 @@ look_sysfscpu(struct topo_topology *topology)
   if (numcaches[2] > 0)
     {
       /* setup L3 caches */
-      topo_setup_cache_level(2, TOPO_LEVEL_L3, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      topo_setup_cache_level(2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   if (numcaches[1] > 0)
     {
       /* setup L2 caches */
-      topo_setup_cache_level(1, TOPO_LEVEL_L2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      topo_setup_cache_level(1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   if (numcores>1)
@@ -876,7 +876,7 @@ look_sysfscpu(struct topo_topology *topology)
   if (numcaches[0] > 0)
     {
       /* setup L1 caches */
-      topo_setup_cache_level(0, TOPO_LEVEL_L1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+      topo_setup_cache_level(0, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
     }
 
   /* Override the default returned by `ma_fallback_nbprocessors ()'.  */

@@ -173,17 +173,9 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
 	  level[j].huge_page_free = 0; /* TODO */
 	  level[j].physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_level_setup did */
 	  break;
-	case TOPO_LEVEL_L1:
+	case TOPO_LEVEL_CACHE:
 	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
-	  level[j].cache_depth = 1;
-	  break;
-	case TOPO_LEVEL_L2:
-	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
-	  level[j].cache_depth = 2;
-	  break;
-	case TOPO_LEVEL_L3:
-	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
-	  level[j].cache_depth = 3;
+	  level[j].cache_depth = cacheLevel;
 	  break;
 	default:
 	  break;
@@ -229,10 +221,10 @@ look_windows(struct topo_topology *topology)
 
       look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationNumaNode, TOPO_LEVEL_NODE, 0);
       look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorPackage, TOPO_LEVEL_DIE, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_L3, 3);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_L2, 2);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_CACHE, 3);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_CACHE, 2);
       look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorCore, TOPO_LEVEL_CORE, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_L1, 1);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_CACHE, 1);
 
       free(procInfo);
     }

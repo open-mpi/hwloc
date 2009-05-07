@@ -33,10 +33,8 @@ enum topo_level_type_e {
   TOPO_LEVEL_FAKE,	/**< \brief Fake level for meeting the marcel_topo_max_arity constraint */ /* A passer dans marcel_topology.h */
   TOPO_LEVEL_NODE,	/**< \brief NUMA node */
   TOPO_LEVEL_DIE,	/**< \brief Physical chip */
-  TOPO_LEVEL_L3,	/**< \brief L3 cache */
-  TOPO_LEVEL_L2,	/**< \brief L2 cache */
+  TOPO_LEVEL_CACHE,	/**< \brief Cache */
   TOPO_LEVEL_CORE,	/**< \brief Core */
-  TOPO_LEVEL_L1,	/**< \brief L1 cache */
   TOPO_LEVEL_PROC,	/**< \brief SMT Processor in a core */
   TOPO_LEVEL_MAX,
 };
