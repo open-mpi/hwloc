@@ -13,6 +13,22 @@
 
 #include "lstopo.h"
 
+static void usage(void)
+{
+  fprintf (stderr, "Usage: lstopo [ options ]... [ filename ]\n");
+  fprintf (stderr, "\n");
+  fprintf (stderr, "By default, lstopo displays a graphical window with the topology if DISPLAY is\nset, else a text output on the standard output.\n");
+  fprintf (stderr, "To force a text output on the standard output, specify - or /dev/stdout as\nfilename.\n");
+  fprintf (stderr, "Recognised file formats are: .txt, .fig, .pdf, .ps, .png, .svg\n");
+  fprintf (stderr, "\nRecognized options:\n");
+  fprintf (stderr, "--no-caches         do not show caches\n");
+  fprintf (stderr, "--no-useless-caches do not show caches which do not have a hierarchical impact\n");
+  fprintf (stderr, "--no-threads        do not show SMT threads\n");
+  fprintf (stderr, "--no-admin          do not consider administration limitations\n");
+  fprintf (stderr, "--merge             do not show levels that do not have a hierarcical impact\n");
+  fprintf (stderr, "--synthetic \"2 2\"   simulate a fake hierarchy\n");
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -37,10 +53,8 @@ main (int argc, char *argv[])
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
 	verbose_mode = 1;
       else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
-        fprintf (stderr, "By default, lstopo displays a graphical window with the topology.\n");
-        fprintf (stderr, "To produce a text output on the standard output, specify the parameter <-> or </dev/stdout>.\n");
-        fprintf (stderr, "Output can also be saved in a file. Recognised file formats are: <txt>, <fig>, <pdf>, <ps>, <png>, <svg>\n");
-        exit(EXIT_FAILURE);
+	usage();
+        exit(EXIT_SUCCESS);
       }
       else if (!strcmp (argv[1], "--no-caches"))
 	ignorecache = 2;
@@ -52,12 +66,17 @@ main (int argc, char *argv[])
 	flags |= TOPO_FLAGS_IGNORE_ADMIN_DISABLE;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
-      else if (argc > 2 && !strcmp (argv[1], "--synthetic")) {
+      else if (!strcmp (argv[1], "--synthetic")) {
+	if (argc <= 2) {
+	  usage ();
+	  exit(EXIT_FAILURE);
+	}
 	synthetic = argv[2]; opt = 1;
       } else {
-	if (filename)
+	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
-	else
+	  usage ();
+	} else
 	  filename = argv[1];
       }
       argc -= opt+1;
@@ -125,6 +144,7 @@ main (int argc, char *argv[])
 #endif /* HAVE_CAIRO */
   else {
     fprintf(stderr, "file format not supported\n");
+    usage();
     exit(EXIT_FAILURE);
   }
 
