@@ -99,11 +99,11 @@ static int get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigne
     int i; \
     for (i = 0; i < numsublevels; i++) { \
       fun(methods, sublevels[i], type, output, depth-1, x + totwidth, &width, y + myheight, &height); \
-      totwidth += width + sep; \
+      totwidth += width + (sep); \
       if (height > maxheight) \
 	maxheight = height; \
     } \
-    totwidth -= sep; \
+    totwidth -= (sep); \
     free(sublevels); \
   } \
 }
@@ -134,7 +134,7 @@ cache_draw(struct draw_methods *methods, topo_level_t level, unsigned long type,
   if (level->type == TOPO_LEVEL_CACHE)
     myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
-  RECURSE(&null_draw_methods, UNIT);
+  RECURSE(&null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
   if (level->type == TOPO_LEVEL_CACHE) {
     if (totwidth < 8*UNIT)
@@ -155,7 +155,7 @@ cache_draw(struct draw_methods *methods, topo_level_t level, unsigned long type,
   }
 
   totwidth = 0;
-  RECURSE(methods, UNIT);
+  RECURSE(methods, level->cache_depth > 1 ? UNIT : 0);
 }
 
 static void
