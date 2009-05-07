@@ -27,6 +27,9 @@ static void usage(void)
   fprintf (stderr, "--no-admin          do not consider administration limitations\n");
   fprintf (stderr, "--merge             do not show levels that do not have a hierarcical impact\n");
   fprintf (stderr, "--synthetic \"2 2\"   simulate a fake hierarchy\n");
+#ifdef LINUX_SYS
+  fprintf (stderr, "\nThe TOPO_FSYS_ROOT_PATH environment variable can be used to specify the path to\n a chroot containing the /proc and /sys of another system\n");
+#endif
 }
 
 int
