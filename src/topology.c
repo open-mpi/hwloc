@@ -129,6 +129,7 @@ topo_setup_cache_level(int cachelevel, enum topo_level_type_e topotype, int proc
     {
       topo_setup_level(&level[j], topotype, j);
       level[j].memory_kB = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
+      level[j].cache_depth = cachelevel+1;
 
       topo_level_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
 

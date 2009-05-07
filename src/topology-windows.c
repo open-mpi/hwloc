@@ -175,12 +175,15 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
 	  break;
 	case TOPO_LEVEL_L1:
 	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
+	  level[j].cache_depth = 1;
 	  break;
 	case TOPO_LEVEL_L2:
 	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
+	  level[j].cache_depth = 2;
 	  break;
 	case TOPO_LEVEL_L3:
 	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
+	  level[j].cache_depth = 3;
 	  break;
 	default:
 	  break;

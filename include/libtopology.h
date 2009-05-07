@@ -54,6 +54,7 @@ struct topo_level {
   signed physical_index;		/**< \brief OS-provided physical index number */
   unsigned long memory_kB;		/**< \brief Size of memory bank or caches */
   unsigned long huge_page_free;
+  unsigned cache_depth;
   unsigned admin_disabled;		/**< \brief Set if disabled by the administrator (for instance Linux Cpusets) */
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this level */
 };

@@ -52,6 +52,7 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
 	break;
       case TOPO_LEVEL_L2:
 	rad_level[r].memory_kB = 0; /* TODO */
+	rad_level[r].cache_depth = 2;
 	break;
       default:
 	break;
