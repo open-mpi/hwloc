@@ -125,37 +125,37 @@ proc_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
 }
 
 static void
-l1_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+cache_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = 0;
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
 
-  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 1)
+  if (level->type == TOPO_LEVEL_CACHE)
     myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
-  RECURSE(&null_draw_methods, 0);
+  RECURSE(&null_draw_methods, UNIT);
 
-  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 1) {
+  if (level->type == TOPO_LEVEL_CACHE) {
     if (totwidth < 8*UNIT)
       totwidth = 8*UNIT;
   }
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
 
-  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 1) {
+  if (level->type == TOPO_LEVEL_CACHE) {
     if (!maxheight)
       *retheight -= UNIT;
     methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
-    snprintf(text, sizeof(text), "L1 %u - %ld%s", level->physical_index,
+    snprintf(text, sizeof(text), "L%d %u - %ld%s", level->cache_depth, level->physical_index,
 		    size_value(level->memory_kB),
 		    size_unit(level->memory_kB));
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
   }
 
   totwidth = 0;
-  RECURSE(methods, 0);
+  RECURSE(methods, UNIT);
 }
 
 static void
@@ -181,59 +181,6 @@ core_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
 
   totwidth = UNIT;
   RECURSE(methods, 0);
-}
-
-static void
-l2_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
-{
-  unsigned myheight = 0;
-  unsigned totwidth = 0, maxheight = 0;
-  char text[64];
-
-  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 2)
-    myheight += UNIT + FONT_SIZE + UNIT + UNIT;
-
-  RECURSE(&null_draw_methods, UNIT);
-
-  *retwidth = totwidth;
-  *retheight = myheight + maxheight;
-  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 2) {
-    methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
-    snprintf(text, sizeof(text), "L2 %u - %ld%s", level->physical_index,
-		    size_value(level->memory_kB),
-		    size_unit(level->memory_kB));
-    methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
-  }
-
-  totwidth = 0;
-  RECURSE(methods, UNIT);
-}
-
-static void
-l3_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
-{
-  unsigned myheight = 0;
-  unsigned totwidth = 0, maxheight = 0;
-  char text[64];
-
-  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 3)
-    myheight += UNIT + FONT_SIZE + UNIT + UNIT;
-
-  RECURSE(&null_draw_methods, UNIT);
-
-  *retwidth = totwidth;
-  *retheight = myheight + maxheight;
-
-  if (level->type == TOPO_LEVEL_CACHE && level->cache_depth == 3) {
-    methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
-    snprintf(text, sizeof(text), "L3 %u - %ld%s", level->physical_index,
-		    size_value(level->memory_kB),
-		    size_unit(level->memory_kB));
-    methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
-  }
-
-  totwidth = 0;
-  RECURSE(methods, UNIT);
 }
 
 static void
@@ -324,13 +271,8 @@ get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsuble
     }
     DO(NODE, node_draw)
     DO(DIE, die_draw)
-    if (l[0]->cache_depth == 3) /* FIXME: hack? */
-      DO(CACHE, l3_draw)
-    if (l[0]->cache_depth == 2) /* FIXME: hack? */
-      DO(CACHE, l2_draw)
+    DO(CACHE, cache_draw)
     DO(CORE, core_draw)
-    if (l[0]->cache_depth == 1) /* FIXME: hack? */
-      DO(CACHE, l1_draw)
     DO(PROC, proc_draw)
     if ((*type) != 0 && (*type) != TOPO_LEVEL_FAKE)
       fprintf(stderr,"urgl, type %lx?! Skipping\n", *type);
