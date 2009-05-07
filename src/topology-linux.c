@@ -858,26 +858,21 @@ look_sysfscpu(struct topo_topology *topology)
     topo_parse_cache_shared_cpu_maps(j, procid_max, &topology->online_cpuset,
 				     proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
 
-  if (numcaches[2] > 0)
-    {
-      /* setup L3 caches */
-      topo_setup_cache_level(2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
-    }
-
-  if (numcaches[1] > 0)
-    {
-      /* setup L2 caches */
-      topo_setup_cache_level(1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
-    }
-
   if (numcores>1)
     topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
 
+  /* process caches at the end since we don't if they exist,
+     and let the core code reorder levels
+  */
+  if (numcaches[2] > 0)
+      /* setup L3 caches */
+      topo_setup_cache_level(2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
+  if (numcaches[1] > 0)
+      /* setup L2 caches */
+      topo_setup_cache_level(1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
   if (numcaches[0] > 0)
-    {
       /* setup L1 caches */
       topo_setup_cache_level(0, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
-    }
 
   /* Override the default returned by `ma_fallback_nbprocessors ()'.  */
   topology->nb_processors = numprocs;

@@ -300,7 +300,7 @@ topo_discover(struct topo_topology *topology)
 
   topo_debug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
 
-  /* Ignored some levels if requested */
+  /* Ignore some levels if requested */
   l=0;
   while (l<topology->nb_levels) {
     enum topo_level_type_e type = topology->levels[l][0].type;
@@ -316,6 +316,34 @@ topo_discover(struct topo_topology *topology)
       topo_remove_level(topology, l);
     } else {
       l++;
+    }
+  }
+
+  /* Sort levels */
+  /* FIXME: We only sort aaccording to level_nbitems.
+     It assumes that levels are fully filled with "identical" objects.
+     In case of irregular architectures (one CPU with different cache levels),
+     we might have to break levels, ...
+  */
+  for (l=0; l<topology->nb_levels; l++) {
+    /* only CACHE maybe wrongly ordered so far */
+    if (topology->levels[l][0].type != TOPO_LEVEL_CACHE)
+      continue;
+
+    /* find how much to move backwards */
+    for (i=0; i<l; i++) {
+      if (topology->level_nbitems[i] > topology->level_nbitems[l]) {
+	/* move l before i */
+	struct topo_level *saved_levels = topology->levels[l];
+	unsigned saved_nbitems = topology->level_nbitems[l];
+	topo_debug("moving level %d (%d items) before %d (%d items)\n",
+		   l, saved_nbitems, i, topology->level_nbitems[i]);
+	memmove(&topology->level_nbitems[i+1], &topology->level_nbitems[i], (l-i)*sizeof(topology->level_nbitems[i]));
+	memmove(&topology->levels[i+1], &topology->levels[i], (l-i)*sizeof(topology->levels[i]));
+	topology->levels[i] = saved_levels;
+	topology->level_nbitems[i] = saved_nbitems;
+	break;
+      }
     }
   }
 
