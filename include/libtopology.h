@@ -104,6 +104,8 @@ extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology
     returns the depth of the first "present" level we find uppon
     _type_. */
 extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_level_type_e type);
+#define TOPO_TYPE_DEPTH_UNKNOWN -1
+#define TOPO_TYPE_DEPTH_MULTIPLE -2
 
 /** \brief Returns the type of levels at depth _depth_. */
 extern enum topo_level_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);

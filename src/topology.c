@@ -440,18 +440,26 @@ topo_discover(struct topo_topology *topology)
 
   /* intialize all depth to unknown */
   for (l=0; l < TOPO_LEVEL_MAX; l++)
-    topology->type_depth[l] = -1;
+    topology->type_depth[l] = TOPO_TYPE_DEPTH_UNKNOWN;
   /* walk the existing levels to set their depth */
-  for (l=0; l<topology->nb_levels; l++)
-    topology->type_depth[topology->levels[l][0].type] = l;
+  for (l=0; l<topology->nb_levels; l++) {
+    enum topo_level_type_e type = topology->levels[l][0].type;
+    if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
+      topology->type_depth[type] = l;
+    } else {
+      assert(type >= TOPO_LEVEL_ORDERED_MAX);
+      topology->type_depth[type] = TOPO_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
+    }
+  }
   /* setup the depth of all still unknown levels (the one that got merged or never created */
-  int type, prevdepth = -1;
-  for (type = 0; type < TOPO_LEVEL_MAX; type++)
+  int type, prevdepth = TOPO_TYPE_DEPTH_UNKNOWN;
+  for (type = 0; type < TOPO_LEVEL_ORDERED_MAX; type++)
     {
-      if (topology->type_depth[type] == -1)
+      if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
 	topology->type_depth[type] = prevdepth;
-      else
+      } else {
 	prevdepth = topology->type_depth[type];
+      }
     }
 
   /* set level depth */

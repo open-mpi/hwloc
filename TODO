@@ -6,11 +6,6 @@
 * there could be several size for huge pages
 * rename "level" into "resource" or "object"
 
-* clarify depth
-  + keep current depth of real level Machine/Node/Die/Core/Proc
-  + clear depth of Fake and Cache if none
-  + what if multiple occurences of Fake or Cache? clear? use min?  
-
 * Implement topological sorting so that backends do not have to care about the
   order in which they report resources.
 
