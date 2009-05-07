@@ -10,7 +10,6 @@
   + keep current depth of real level Machine/Node/Die/Core/Proc
   + clear depth of Fake and Cache if none
   + what if multiple occurences of Fake or Cache? clear? use min?  
-  + make it clear that fake and cache are not always at the same place in the type list
 
 * Implement topological sorting so that backends do not have to care about the
   order in which they report resources.

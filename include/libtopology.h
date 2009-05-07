@@ -29,15 +29,19 @@ struct topo_topology_info {
 
 /** \brief Type of topology level */
 enum topo_level_type_e {
+  /* levels that are always ordered the same */
   TOPO_LEVEL_MACHINE,	/**< \brief Whole machine */
-  TOPO_LEVEL_FAKE,	/**< \brief Fake level for meeting the marcel_topo_max_arity constraint */ /* A passer dans marcel_topology.h */
   TOPO_LEVEL_NODE,	/**< \brief NUMA node */
   TOPO_LEVEL_DIE,	/**< \brief Physical chip */
-  TOPO_LEVEL_CACHE,	/**< \brief Cache */
   TOPO_LEVEL_CORE,	/**< \brief Core */
   TOPO_LEVEL_PROC,	/**< \brief SMT Processor in a core */
-  TOPO_LEVEL_MAX,
+
+  /* levels that may appear at various depth among the above ones */
+  TOPO_LEVEL_FAKE,	/**< \brief Fake level for meeting the marcel_topo_max_arity constraint */ /* A passer dans marcel_topology.h */
+  TOPO_LEVEL_CACHE,	/**< \brief Cache */
 };
+#define TOPO_LEVEL_ORDERED_MAX (TOPO_LEVEL_PROC+1)
+#define TOPO_LEVEL_MAX (TOPO_LEVEL_CACHE+1)
 typedef enum topo_level_type_e topo_level_type_t;
 
 /** Structure of a topology level */
