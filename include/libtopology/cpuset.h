@@ -300,22 +300,22 @@ static __inline__ int topo_ffsl(unsigned long x)
 static __inline__ int topo_ffs32(unsigned long x);
 static __inline__ int topo_ffs32(unsigned long x)
 {
-	return topo_ffs(x
 #if TOPO_BITS_PER_INT == 16
-			& 0xfffful) ? : (topo_ffs(x >> 16) + 16
+	return topo_ffs(x & 0xfffful) ? : (topo_ffs(x >> 16) + 16);
+#else
+	return topo_ffs(x);
 #endif
-		);
 }
 
 /* Then make it 64 bit if longs are.  */
 static __inline__ int topo_ffsl(unsigned long x);
 static __inline__ int topo_ffsl(unsigned long x)
 {
-	return topo_ffs32(x
 #if TOPO_BITS_PER_LONG == 64
-			& 0xfffffffful) ? : (topo_ffs(x >> 32) + 32
+	return topo_ffs32(x& 0xfffffffful) ? : (topo_ffs(x >> 32) + 32);
+#else
+	return topo_ffs32(x);
 #endif
-		);
 }
 #endif
 
