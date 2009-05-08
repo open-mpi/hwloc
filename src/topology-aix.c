@@ -103,10 +103,15 @@ look_aix(struct topo_topology *topology)
       if (i == rs_getinfo(NULL, R_SMPSDL, 0))
 	topo_debug("not looking AIX \"SMP\" sdl %d\n", i);
       if (i == rs_getinfo(NULL, R_MAXSDL, 0))
+	topo_debug("not looking AIX max sdl %d\n", i);
+#if 0
+      /* Disabled for now until the generic code accepts it.
+       */
 	{
 	  topo_debug("looking AIX max sdl %d\n", i);
 	  look_rset(i, TOPO_LEVEL_PROC, topology);
 	}
+#endif
     }
 
     /* we have a contigous range of online cpus */
