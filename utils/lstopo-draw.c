@@ -118,6 +118,7 @@ proc_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 
   *retwidth = 5*UNIT;
   *retheight = UNIT + FONT_SIZE + UNIT;
+
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   snprintf(text, sizeof(text), "CPU%d", level->physical_index);
@@ -139,9 +140,9 @@ cache_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_typ
     totwidth = 8*UNIT;
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
-
   if (!maxheight)
     *retheight -= UNIT;
+
   methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
   snprintf(text, sizeof(text), "L%u %d - %lu%s", level->cache_depth, level->physical_index,
@@ -164,8 +165,11 @@ core_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 
   RECURSE(&null_draw_methods, 0);
 
+  if (totwidth < 6*UNIT)
+    totwidth = 6*UNIT;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight + (maxheight?UNIT:0);
+
   methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   snprintf(text, sizeof(text), "Core %d", level->physical_index);
@@ -185,10 +189,13 @@ die_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_
   myheight += FONT_SIZE + UNIT;
 
   RECURSE(&null_draw_methods, UNIT);
-  maxheight += UNIT;
 
+  maxheight += UNIT;
+  if (totwidth < 6*UNIT)
+    totwidth = 6*UNIT;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
+
   methods->box(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   snprintf(text, sizeof(text), "Die %d", level->physical_index);
@@ -209,12 +216,14 @@ node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 
   RECURSE(&null_draw_methods, UNIT);
   maxheight += UNIT;
-
+  if (totwidth < 6*UNIT)
+    totwidth = 6*UNIT;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
 
   methods->box(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, depth, x, *retwidth, y, *retheight);
   methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
+
   snprintf(text, sizeof(text), "Node %d - %lu%s", level->physical_index,
 		  size_value(level->memory_kB),
 		  size_unit(level->memory_kB));
