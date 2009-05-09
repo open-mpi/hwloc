@@ -128,11 +128,9 @@ proc_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 static void
 cache_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = 0;
+  unsigned myheight = UNIT + FONT_SIZE + UNIT + UNIT;
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
-
-  myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
   RECURSE(&null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
@@ -157,11 +155,9 @@ cache_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_typ
 static void
 core_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = UNIT;
+  unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
-
-  myheight += FONT_SIZE + UNIT;
 
   RECURSE(&null_draw_methods, 0);
 
@@ -182,11 +178,9 @@ core_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 static void
 die_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = UNIT;
+  unsigned myheight = UNIT + FONT_SIZE + UNIT;;
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
-
-  myheight += FONT_SIZE + UNIT;
 
   RECURSE(&null_draw_methods, UNIT);
 
@@ -208,11 +202,9 @@ die_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_
 static void
 node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = UNIT;
+  unsigned myheight = UNIT + UNIT + FONT_SIZE + UNIT + UNIT;;
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
-
-  myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
   RECURSE(&null_draw_methods, UNIT);
   if (totwidth < 10*UNIT)
