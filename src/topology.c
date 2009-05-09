@@ -516,8 +516,10 @@ int
 topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
 {
 #ifdef LINUX_SYS
+#ifdef HAVE_OPENAT
   if (topo_set_fsys_root(topology, fsys_root_path))
     return -1;
+#endif /* HAVE_OPENAT */
 #endif /* LINUX_SYS */
 
   return 0;
@@ -563,7 +565,7 @@ topo_topology_ignore_type_keep_structure(struct topo_topology *topology, topo_le
 int
 topo_topology_ignore_all_keep_structure(struct topo_topology *topology)
 {
-  unsigned type = type;
+  unsigned type;
   for(type=0; type<TOPO_LEVEL_MAX; type++)
     topology->ignored_types[type] = TOPO_IGNORE_LEVEL_KEEP_STRUCTURE;
   return 0;

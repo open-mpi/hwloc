@@ -95,10 +95,10 @@ fig_text(void *output_, int r, int g, int b, int size, unsigned depth, unsigned 
   x *= 20;
   y *= 20;
   size = (size * 14) / 10;
-  fprintf(output, "4 0 %d %u -1 0 %u 0.0 4 %u %u %u %u %s\\001\n", rgb_to_fig(r, g, b), depth, size, size * 10, (unsigned) strlen(text) * size * 10, x, y + size * 10, text);
+  fprintf(output, "4 0 %d %u -1 0 %d 0.0 4 %d %u %u %u %s\\001\n", rgb_to_fig(r, g, b), depth, size, size * 10, (unsigned) strlen(text) * size * 10, x, y + size * 10, text);
 }
 
-struct draw_methods fig_draw_methods = {
+static struct draw_methods fig_draw_methods = {
   .start = fig_start,
   .declare_color = fig_declare_color,
   .box = fig_box,

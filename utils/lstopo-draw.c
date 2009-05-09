@@ -40,7 +40,7 @@
 
 static void null(void) {}
 
-struct draw_methods null_draw_methods = {
+static struct draw_methods null_draw_methods = {
   .start = (void*) null,
   .declare_color = (void*) null,
   .box = (void*) null,
@@ -120,7 +120,7 @@ proc_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
   *retheight = UNIT + FONT_SIZE + UNIT;
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "CPU%u", level->physical_index);
+  snprintf(text, sizeof(text), "CPU%d", level->physical_index);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 }
 
@@ -148,7 +148,7 @@ cache_draw(struct draw_methods *methods, topo_level_t level, unsigned long type,
       *retheight -= UNIT;
     methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
-    snprintf(text, sizeof(text), "L%d %u - %ld%s", level->cache_depth, level->physical_index,
+    snprintf(text, sizeof(text), "L%u %d - %lu%s", level->cache_depth, level->physical_index,
 		    size_value(level->memory_kB),
 		    size_unit(level->memory_kB));
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
@@ -175,7 +175,7 @@ core_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
   methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   if (level->type == TOPO_LEVEL_CORE) {
-    snprintf(text, sizeof(text), "Core %u", level->physical_index);
+    snprintf(text, sizeof(text), "Core %d", level->physical_index);
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
   }
 
@@ -201,7 +201,7 @@ die_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, v
   methods->box(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   if (level->type == TOPO_LEVEL_DIE) {
-    snprintf(text, sizeof(text), "Die %u", level->physical_index);
+    snprintf(text, sizeof(text), "Die %d", level->physical_index);
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
   }
 
@@ -228,7 +228,7 @@ node_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
   methods->box(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, depth, x, *retwidth, y, *retheight);
   if (level->type == TOPO_LEVEL_NODE) {
     methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
-    snprintf(text, sizeof(text), "Node %u - %ld%s", level->physical_index,
+    snprintf(text, sizeof(text), "Node %d - %lu%s", level->physical_index,
 		    size_value(level->memory_kB),
 		    size_unit(level->memory_kB));
     methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
@@ -302,7 +302,7 @@ getmax_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsign
     coords->y = y + height;
 }
 
-struct draw_methods getmax_draw_methods = {
+static struct draw_methods getmax_draw_methods = {
   .start = (void*) null,
   .declare_color = (void*) null,
   .box = getmax_box,

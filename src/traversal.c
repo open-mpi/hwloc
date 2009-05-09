@@ -131,18 +131,18 @@ topo_print_level (struct topo_topology *topology, struct topo_level *l, FILE *ou
     fprintf(output, "%s%s", topo_level_string(type), physical_index);
     break;
   case TOPO_LEVEL_MACHINE:
-    fprintf(output, "%s(%ld%s)", topo_level_string(type),
+    fprintf(output, "%s(%lu%s)", topo_level_string(type),
 	    topo_memory_size_printf_value(l->memory_kB),
 	    topo_memory_size_printf_unit(l->memory_kB));
     break;
   case TOPO_LEVEL_NODE: {
-    fprintf(output, "%s%s(%ld%s)", topo_level_string(type), physical_index,
+    fprintf(output, "%s%s(%lu%s)", topo_level_string(type), physical_index,
 	    topo_memory_size_printf_value(l->memory_kB),
 	    topo_memory_size_printf_unit(l->memory_kB));
     break;
   }
   case TOPO_LEVEL_CACHE: {
-    fprintf(output, "L%d%s%s(%ld%s)", l->cache_depth, topo_level_string(type), physical_index,
+    fprintf(output, "L%u%s%s(%lu%s)", l->cache_depth, topo_level_string(type), physical_index,
 	    topo_memory_size_printf_value(l->memory_kB),
 	    topo_memory_size_printf_unit(l->memory_kB));
     break;

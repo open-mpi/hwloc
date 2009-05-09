@@ -55,7 +55,7 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
       if (info.dmi_board_name)
 	fprintf (output, "DMI board name: %s\n", info.dmi_board_name);
       if (info.huge_page_size_kB)
-	fprintf (output, "Huge page size: %ldkB\n", info.huge_page_size_kB);
+	fprintf (output, "Huge page size: %lukB\n", info.huge_page_size_kB);
 
       for (l = 0; l < TOPO_LEVEL_MAX; l++)
 	{

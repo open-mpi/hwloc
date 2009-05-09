@@ -24,7 +24,7 @@ struct topo_topology {
   struct topo_level *levels[TOPO_LEVEL_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
   unsigned long flags;
   int type_depth[TOPO_LEVEL_MAX];
-  int ignored_types[TOPO_LEVEL_MAX];
+  enum topo_ignore_type_e ignored_types[TOPO_LEVEL_MAX];
   unsigned long huge_page_size_kB;
   char *dmi_board_vendor;
   char *dmi_board_name;

@@ -448,11 +448,11 @@ topo_get_procfs_meminfo_info(struct topo_topology *topology,
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
       unsigned long number;
-      if (sscanf(string, "MemTotal: %ld kB", &number) == 1)
+      if (sscanf(string, "MemTotal: %lu kB", &number) == 1)
 	*mem_size_kB = number;
-      else if (sscanf(string, "Hugepagesize: %ld", &number) == 1)
+      else if (sscanf(string, "Hugepagesize: %lu", &number) == 1)
 	*huge_page_size_kB = number;
-      else if (sscanf(string, "HugePages_Free: %ld", &number) == 1)
+      else if (sscanf(string, "HugePages_Free: %lu", &number) == 1)
 	*huge_page_free = number;
     }
 
@@ -479,9 +479,9 @@ topo_sysfs_node_meminfo_info(struct topo_topology *topology,
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
       unsigned long number;
-      if (sscanf(string, "Node %d MemTotal: %ld kB", &node, &number) == 2)
+      if (sscanf(string, "Node %d MemTotal: %lu kB", &node, &number) == 2)
 	*mem_size_kB = number;
-      else if (sscanf(string, "Node %d HugePages_Free: %ld kB", &node, &number) == 2)
+      else if (sscanf(string, "Node %d HugePages_Free: %lu kB", &node, &number) == 2)
 	*huge_page_free = number;
     }
 
@@ -528,7 +528,7 @@ look_sysfsnode(struct topo_topology *topology)
       unsigned long size = -1;
       unsigned long hpfree = -1;
 
-      sprintf(nodepath, "/sys/devices/system/node/node%d/cpumap", osnode);
+      sprintf(nodepath, "/sys/devices/system/node/node%u/cpumap", osnode);
       if (topo_parse_cpumap(nodepath, &cpuset, topology->fsys_root_fd) < 0)
 	break;
 
