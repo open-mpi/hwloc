@@ -251,7 +251,6 @@ get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsuble
   while (1) {
 #define DO(thetype, _fun) \
     if (*type == TOPO_LEVEL_##thetype) { \
-      *type = 0; \
       *fun = _fun; \
       *levels = l; \
       *numsublevels = n; \

@@ -45,7 +45,7 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
   if (verbose_mode)
     {
       struct topo_topology_info info;
-      int l;
+      enum topo_level_type_e l;
 
       topo_topology_get_info(topology, &info);
       if (info.is_fake)
@@ -57,7 +57,7 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
       if (info.huge_page_size_kB)
 	fprintf (output, "Huge page size: %lukB\n", info.huge_page_size_kB);
 
-      for (l = 0; l < TOPO_LEVEL_MAX; l++)
+      for (l = TOPO_LEVEL_MACHINE; l < TOPO_LEVEL_MAX; l++)
 	{
 	  int depth = topo_get_type_depth (topology, l);
 	  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
