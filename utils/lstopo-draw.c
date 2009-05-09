@@ -216,8 +216,8 @@ node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 
   RECURSE(&null_draw_methods, UNIT);
   maxheight += UNIT;
-  if (totwidth < 6*UNIT)
-    totwidth = 6*UNIT;
+  if (totwidth < 10*UNIT)
+    totwidth = 10*UNIT;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
 
