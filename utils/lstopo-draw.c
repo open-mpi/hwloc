@@ -215,11 +215,12 @@ node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
   myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
   RECURSE(&null_draw_methods, UNIT);
-  maxheight += UNIT;
   if (totwidth < 10*UNIT)
     totwidth = 10*UNIT;
   *retwidth = totwidth + UNIT;
-  *retheight = myheight + maxheight;
+  *retheight = myheight + maxheight + UNIT;
+  if (!maxheight)
+    *retheight -= UNIT;
 
   methods->box(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, depth, x, *retwidth, y, *retheight);
   methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
