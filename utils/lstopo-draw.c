@@ -131,28 +131,23 @@ cache_draw(struct draw_methods *methods, topo_level_t level, unsigned long type,
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
 
-  if (level->type == TOPO_LEVEL_CACHE)
-    myheight += UNIT + FONT_SIZE + UNIT + UNIT;
+  myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
   RECURSE(&null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
-  if (level->type == TOPO_LEVEL_CACHE) {
-    if (totwidth < 8*UNIT)
-      totwidth = 8*UNIT;
-  }
+  if (totwidth < 8*UNIT)
+    totwidth = 8*UNIT;
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
 
-  if (level->type == TOPO_LEVEL_CACHE) {
-    if (!maxheight)
-      *retheight -= UNIT;
-    methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
+  if (!maxheight)
+    *retheight -= UNIT;
+  methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
-    snprintf(text, sizeof(text), "L%u %d - %lu%s", level->cache_depth, level->physical_index,
-		    size_value(level->memory_kB),
-		    size_unit(level->memory_kB));
-    methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
-  }
+  snprintf(text, sizeof(text), "L%u %d - %lu%s", level->cache_depth, level->physical_index,
+		  size_value(level->memory_kB),
+		  size_unit(level->memory_kB));
+  methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = 0;
   RECURSE(methods, level->cache_depth > 1 ? UNIT : 0);
@@ -165,8 +160,7 @@ core_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
 
-  if (level->type == TOPO_LEVEL_CORE)
-    myheight += FONT_SIZE + UNIT;
+  myheight += FONT_SIZE + UNIT;
 
   RECURSE(&null_draw_methods, 0);
 
@@ -174,10 +168,8 @@ core_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
   *retheight = myheight + maxheight + (maxheight?UNIT:0);
   methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  if (level->type == TOPO_LEVEL_CORE) {
-    snprintf(text, sizeof(text), "Core %d", level->physical_index);
-    methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
-  }
+  snprintf(text, sizeof(text), "Core %d", level->physical_index);
+  methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
   RECURSE(methods, 0);
@@ -190,8 +182,7 @@ die_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, v
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
 
-  if (level->type == TOPO_LEVEL_DIE)
-    myheight += FONT_SIZE + UNIT;
+  myheight += FONT_SIZE + UNIT;
 
   RECURSE(&null_draw_methods, UNIT);
   maxheight += UNIT;
@@ -200,10 +191,8 @@ die_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, v
   *retheight = myheight + maxheight;
   methods->box(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  if (level->type == TOPO_LEVEL_DIE) {
-    snprintf(text, sizeof(text), "Die %d", level->physical_index);
-    methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
-  }
+  snprintf(text, sizeof(text), "Die %d", level->physical_index);
+  methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
   RECURSE(methods, UNIT);
@@ -216,8 +205,7 @@ node_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
 
-  if (level->type == TOPO_LEVEL_NODE)
-    myheight += UNIT + FONT_SIZE + UNIT + UNIT;
+  myheight += UNIT + FONT_SIZE + UNIT + UNIT;
 
   RECURSE(&null_draw_methods, UNIT);
   maxheight += UNIT;
@@ -226,13 +214,11 @@ node_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
   *retheight = myheight + maxheight;
 
   methods->box(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, depth, x, *retwidth, y, *retheight);
-  if (level->type == TOPO_LEVEL_NODE) {
-    methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
-    snprintf(text, sizeof(text), "Node %d - %lu%s", level->physical_index,
-		    size_value(level->memory_kB),
-		    size_unit(level->memory_kB));
-    methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
-  }
+  methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
+  snprintf(text, sizeof(text), "Node %d - %lu%s", level->physical_index,
+		  size_value(level->memory_kB),
+		  size_unit(level->memory_kB));
+  methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
 
   totwidth = UNIT;
   RECURSE(methods, UNIT);
