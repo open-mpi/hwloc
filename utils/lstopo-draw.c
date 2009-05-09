@@ -260,7 +260,7 @@ get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsuble
     DO(CACHE, cache_draw)
     DO(CORE, core_draw)
     DO(PROC, proc_draw)
-    if ((*type) != 0 && (*type) != TOPO_LEVEL_FAKE)
+    if ((*type) != TOPO_LEVEL_MACHINE && (*type) != TOPO_LEVEL_FAKE)
       fprintf(stderr,"urgl, type %lx?! Skipping\n", *type);
     if (!l[0]->children)
       return 0;
