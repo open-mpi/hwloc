@@ -82,9 +82,9 @@ get_sublevels(topo_level_t *levels, unsigned numlevels, topo_level_t **sublevels
  * space that the drawing took.
  */
 
-typedef void (*foo_draw)(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
+typedef void (*foo_draw)(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
 
-static int get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsublevels, unsigned long *type, foo_draw *fun);
+static int get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsublevels, enum topo_level_type_e *type, foo_draw *fun);
 
 /*
  * Helper to recurse into sublevels
@@ -112,7 +112,7 @@ static int get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigne
 #define size_unit(size) (size < 4*1024 && size % 1024 ? "KB" : size < 4*1024*1024 && (size / 1024) % 1024 ? "MB" : "GB")
 
 static void
-proc_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+proc_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   char text[64];
 
@@ -125,7 +125,7 @@ proc_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
 }
 
 static void
-cache_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+cache_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = 0;
   unsigned totwidth = 0, maxheight = 0;
@@ -154,7 +154,7 @@ cache_draw(struct draw_methods *methods, topo_level_t level, unsigned long type,
 }
 
 static void
-core_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+core_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -176,7 +176,7 @@ core_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, 
 }
 
 static void
-die_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+die_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -199,7 +199,7 @@ die_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, v
 }
 
 static void
-node_draw(struct draw_methods *methods, topo_level_t level, unsigned long type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -229,7 +229,7 @@ fig(struct draw_methods *methods, topo_level_t level, void *output, unsigned dep
 {
   unsigned myheight = 0;
   unsigned totwidth = 0, maxheight = 0;
-  unsigned long type = level->type;
+  enum topo_level_type_e type = level->type;
 
   RECURSE(methods, UNIT);
 }
@@ -240,7 +240,7 @@ fig(struct draw_methods *methods, topo_level_t level, void *output, unsigned dep
  * and a pointer FUN to the function that draws it.
  */
 static int
-get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsublevels, unsigned long *type, foo_draw *fun)
+get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsublevels, enum topo_level_type_e *type, foo_draw *fun)
 {
   unsigned n = 1, n2;
   topo_level_t *l = malloc(sizeof(*l)), *l2;
@@ -261,7 +261,7 @@ get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsuble
     DO(CORE, core_draw)
     DO(PROC, proc_draw)
     if ((*type) != TOPO_LEVEL_MACHINE && (*type) != TOPO_LEVEL_FAKE)
-      fprintf(stderr,"urgl, type %lx?! Skipping\n", *type);
+      fprintf(stderr,"urgl, type %d?! Skipping\n", *type);
     if (!l[0]->children)
       return 0;
     get_sublevels(l, n, &l2, &n2);
