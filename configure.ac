@@ -128,6 +128,7 @@ AC_CHECK_FUNCS([ffsl], [
 ])
 
 AC_CONFIG_FILES([Makefile
+                 topology.pc
                  include/Makefile src/Makefile utils/Makefile
 		 tests/Makefile tests/linux/Makefile
 		 tests/linux/test-topology.sh
