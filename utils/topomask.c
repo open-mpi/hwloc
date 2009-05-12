@@ -12,8 +12,11 @@ static void usage(void)
 {
   fprintf(stderr, "Usage: topomask [depth:index] ...\n");
   fprintf(stderr, "  <depth> may be machine, node, die, core, proc or a numeric depth\n");
-  fprintf(stderr, "  <index> may be a single index <N>, a dash-separated range <min-max>,\n");
-  fprintf(stderr, "    or a beginning and amount of objects <begin:number> (with wrap-around)\n");
+  fprintf(stderr, "  <index> may be:\n");
+  fprintf(stderr, "   X\tone object with index X\n");
+  fprintf(stderr, "   X-Y\tall objects with index between X and Y\n");
+  fprintf(stderr, "   X-\tall objects with index at least X\n");
+  fprintf(stderr, "   X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
 }
 
 #define OBJECT_MAX LIBTOPO_NBMAXCPUS
@@ -39,9 +42,13 @@ int main(int argc, char *argv[])
     unsigned first, wrap, amount;
     unsigned i,j;
 
-    if (!strcmp(argv[1], "-v")) {
-      verbose = 1;
-      goto next;
+    if (*argv[1] == '-') {
+      if (!strcmp(argv[1], "-v")) {
+        verbose = 1;
+        goto next;
+      }
+      usage();
+      return EXIT_FAILURE;
     }
 
     colon = strchr(argv[1], ':');
