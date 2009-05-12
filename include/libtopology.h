@@ -140,4 +140,7 @@ extern void topo_print_object (topo_topology_t topology, topo_obj_t l,
 			       FILE *output, int verbose_mode,
 			       const char *indexprefix, const char* term);
 
+/** \brief stringify the cpuset containing a set of objects */
+extern int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
+
 #endif /* LIBTOPOLOGY_H */

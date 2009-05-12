@@ -153,3 +153,16 @@ topo_print_object(struct topo_topology *topology, struct topo_obj *l, FILE *outp
   }
   fprintf(output, "%s", term);
 }
+
+int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs)
+{
+  topo_cpuset_t set;
+  int i;
+
+  topo_cpuset_zero(&set);
+  for(i=0; i<nobj; i++)
+    topo_cpuset_orset(&set, &objs[i]->cpuset);
+
+  return snprintf(str, size, "%" TOPO_PRIxCPUSET, TOPO_CPUSET_PRINTF_VALUE(set));
+}
+
