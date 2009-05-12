@@ -100,12 +100,12 @@ proc_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 {
   char text[64];
 
-  *retwidth = 5*FONT_SIZE;
+  *retwidth = 6*FONT_SIZE;
   *retheight = UNIT + FONT_SIZE + UNIT;
 
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "CPU%d", level->physical_index);
+  snprintf(text, sizeof(text), "CPU#%d", level->physical_index);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 }
 
@@ -129,7 +129,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
 
   methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
-  snprintf(text, sizeof(text), "L%u %d - %lu%s", level->cache_depth, level->physical_index,
+  snprintf(text, sizeof(text), "L%u#%d (%lu%s)", level->cache_depth, level->physical_index,
 		  size_value(level->memory_kB),
 		  size_unit(level->memory_kB));
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
@@ -156,7 +156,7 @@ core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 
   methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "Core %d", level->physical_index);
+  snprintf(text, sizeof(text), "Core#%d", level->physical_index);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -181,7 +181,7 @@ die_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, v
 
   methods->box(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "Die %d", level->physical_index);
+  snprintf(text, sizeof(text), "Die#%d", level->physical_index);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -218,7 +218,7 @@ node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
 
   /* Output text */
-  snprintf(text, sizeof(text), "Node %d - %lu%s", level->physical_index,
+  snprintf(text, sizeof(text), "Node#%d (%lu%s)", level->physical_index,
 		  size_value(level->memory_kB),
 		  size_unit(level->memory_kB));
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
@@ -263,7 +263,7 @@ fake_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 
   methods->box(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "Fake %d", level->physical_index);
+  snprintf(text, sizeof(text), "Fake#%d", level->physical_index);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
