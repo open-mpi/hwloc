@@ -60,12 +60,12 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 	{
 	  int depth = topo_get_type_depth (topology, l);
 	  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
-	    fprintf (output, "absent:\t\ttype #%d (%s)\n", l, topo_object_type_string (l));
+	    fprintf (output, "absent:\t\ttype #%u (%s)\n", l, topo_object_type_string (l));
 	  } else if (depth == TOPO_TYPE_DEPTH_MULTIPLE) {
-	    fprintf (output, "multiple:\ttype #%d (%s)\n", l, topo_object_type_string (l));
+	    fprintf (output, "multiple:\ttype #%u (%s)\n", l, topo_object_type_string (l));
 	  } else {
 	    indent(output, depth);
-	    fprintf (output, "depth %d:\ttype #%d (%s)\n", depth, l, topo_object_type_string (l));
+	    fprintf (output, "depth %d:\ttype #%u (%s)\n", depth, l, topo_object_type_string (l));
 	  }
 	}
     }
