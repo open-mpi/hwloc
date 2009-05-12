@@ -2,7 +2,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src utils include doc
+SUBDIRS = src utils tests include doc
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = topology.pc
