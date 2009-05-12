@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
   while (argc >= 2) {
     topo_obj_t obj;
-    unsigned depth;
+    unsigned depth, width;
     char *colon;
     char *sep;
     unsigned first, wrap, amount;
@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "ignoring invalid depth %d\n", depth);
       goto next;
     }
+    width = topo_get_depth_nbitems(topology, depth);
 
     first = atoi(colon+1);
     amount = 1;
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
     sep = strchr(colon+1, '-');
     if (sep) {
       if (*(sep+1) == '\0')
-	amount = topo_get_depth_nbitems(topology, depth)-first;
+	amount = width-first;
       else
 	amount = atoi(sep+1)-first+1;
     } else {
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
     }
 
     for(i=first, j=0; j<amount; i++, j++) {
-      if (wrap && i==topo_get_depth_nbitems(topology, depth))
+      if (wrap && i==width)
 	i = 0;
 
       obj = topo_get_object(topology, depth, i);
