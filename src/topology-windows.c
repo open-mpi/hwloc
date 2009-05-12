@@ -136,7 +136,7 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 #endif
 
 static void
-look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo, int n, LOGICAL_PROCESSOR_RELATIONSHIP relationship, topo_object_type_t type, int cacheLevel)
+look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo, int n, LOGICAL_PROCESSOR_RELATIONSHIP relationship, topo_obj_type_t type, int cacheLevel)
 {
   int i, j;
   int numitems;
