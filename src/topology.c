@@ -503,7 +503,10 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->dmi_board_name = NULL;
   for(i=0; i< TOPO_LEVEL_MAX; i++)
     topology->ignored_types[i] = TOPO_IGNORE_LEVEL_NEVER;
+  memset(topology->level_nbitems, 0, sizeof(topology->level_nbitems));
   topology->level_nbitems[0] = 1;
+  for (i=0; i < TOPO_LEVEL_MAX; i++)
+    topology->type_depth[i] = -1;
   topology->levels[0] = malloc (2*sizeof (struct topo_level));
   topo_setup_machine_level (&topology->levels[0]);
   topology->is_fake = 0;
