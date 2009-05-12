@@ -24,7 +24,7 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
   rsethandle_t rset, rad;
   int r,i,maxcpus,j;
   unsigned nbnodes;
-  struct topo_level *rad_level;
+  struct topo_obj *rad_level;
 
   rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
