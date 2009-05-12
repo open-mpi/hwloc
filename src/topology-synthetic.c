@@ -48,8 +48,10 @@ topo__synthetic_object_type (const unsigned *level_breadth)
 	   : (*(level_breadth + 3) == 0
 	     ? TOPO_OBJ_DIE
 	     : (*(level_breadth + 4) == 0
-	       ? TOPO_OBJ_NODE
-	       : TOPO_OBJ_FAKE))));
+	       ? TOPO_OBJ_CACHE
+	       : (*(level_breadth + 5) == 0
+	         ? TOPO_OBJ_NODE
+	         : TOPO_OBJ_FAKE)))));
 }
 
 /* Allocate COUNT nodes of type TYPE as children of LEVEL, with numbers
@@ -75,6 +77,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
     switch(type) {
     case TOPO_OBJ_PROC:
     case TOPO_OBJ_CORE:
+    case TOPO_OBJ_CACHE:
     case TOPO_OBJ_DIE:
     case TOPO_OBJ_NODE:
       physical_index = first_number + i;
@@ -190,7 +193,7 @@ void
 topo_synthetic_load (struct topo_topology *topology)
 {
   struct topo_obj *root;
-  unsigned node_level;
+  int node_level, cache_level;
 
   topo__synthetic_allocate_topology_levels(topology, topology->synthetic_description);
 
@@ -213,6 +216,16 @@ topo_synthetic_load (struct topo_topology *topology)
 
   } else {
     topology->nb_nodes = 1;
+  }
+
+  cache_level = topology->type_depth[TOPO_OBJ_CACHE];
+  if (cache_level != -1) {
+    int i;
+
+    for(i=0 ; i<topology->level_nbitems[cache_level] ; i++) {
+      topology->levels[cache_level][i].memory_kB = 4*1024;
+      topology->levels[cache_level][i].cache_depth = 2;
+    }
   }
 
   topo_debug("synthetic topology: %u levels, %u processors, %u nodes\n",
