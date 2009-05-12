@@ -128,6 +128,7 @@ topo_print_object(struct topo_topology *topology, struct topo_obj *l, FILE *outp
   case TOPO_OBJ_DIE:
   case TOPO_OBJ_CORE:
   case TOPO_OBJ_PROC:
+  case TOPO_OBJ_FAKE:
     fprintf(output, "%s%s", topo_object_type_string(type), physical_index);
     break;
   case TOPO_OBJ_MACHINE:
