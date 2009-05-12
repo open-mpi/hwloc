@@ -63,6 +63,12 @@ int main(int argc, char *argv[])
     else
       depth = atoi(argv[1]);
 
+    if (depth >= topoinfo.depth) {
+      if (verbose)
+	fprintf(stderr, "ignoring invalid depth %d\n", depth);
+      goto next;
+    }
+
     first = atoi(colon+1);
     amount = 1;
     wrap = 0;
