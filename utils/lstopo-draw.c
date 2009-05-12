@@ -56,15 +56,15 @@ static struct draw_methods null_draw_methods = {
 };
 
 /*
- * foo_draw functions take a LEVEL, computes which size it needs, recurse into
+ * foo_draw functions take a OBJ, computes which size it needs, recurse into
  * sublevels with null_draw_methods to recursively compute the needed size
- * without actually drawing anything, then draw things about LEVEL (chip draw,
+ * without actually drawing anything, then draw things about OBJ (chip draw,
  * cache size information etc) at (X,Y), recurse into sublevels again to
  * actually draw things, and return in RETWIDTH and RETHEIGHT the amount of
  * space that the drawing took.
  */
 
-typedef void (*foo_draw)(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
+typedef void (*foo_draw)(struct draw_methods *methods, topo_obj_t obj, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
 
 static foo_draw get_type_fun(topo_obj_type_t type);
 
@@ -72,12 +72,12 @@ static foo_draw get_type_fun(topo_obj_type_t type);
  * Helper to recurse into sublevels
  */
 
-#define RECURSE(methods, sep) { \
-  topo_obj_t *sublevels = level->children; \
-  unsigned numsublevels = level->arity; \
+#define RECURSE(obj, methods, sep) { \
+  topo_obj_t *sublevels = obj->children; \
+  unsigned numsublevels = obj->arity; \
   unsigned width, height; \
   foo_draw fun; \
-  if (level->arity) { \
+  if (obj->arity) { \
     fun = get_type_fun(sublevels[0]->type); \
     int i; \
     for (i = 0; i < numsublevels; i++) { \
@@ -114,7 +114,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
 
-  RECURSE(&null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
+  RECURSE(level, &null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
   if (totwidth < 8*FONT_SIZE)
     totwidth = 8*FONT_SIZE;
@@ -131,7 +131,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = 0;
-  RECURSE(methods, level->cache_depth > 1 ? UNIT : 0);
+  RECURSE(level, methods, level->cache_depth > 1 ? UNIT : 0);
 }
 
 static void
@@ -141,7 +141,7 @@ core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
 
-  RECURSE(&null_draw_methods, 0);
+  RECURSE(level, &null_draw_methods, 0);
 
   if (totwidth < 6*FONT_SIZE)
     totwidth = 6*FONT_SIZE;
@@ -154,7 +154,7 @@ core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
-  RECURSE(methods, 0);
+  RECURSE(level, methods, 0);
 }
 
 static void
@@ -164,7 +164,7 @@ die_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, v
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
 
-  RECURSE(&null_draw_methods, UNIT);
+  RECURSE(level, &null_draw_methods, UNIT);
 
   maxheight += UNIT;
   if (totwidth < 6*FONT_SIZE)
@@ -178,7 +178,7 @@ die_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, v
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
-  RECURSE(methods, UNIT);
+  RECURSE(level, methods, UNIT);
 }
 
 static void
@@ -188,7 +188,7 @@ node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
 
-  RECURSE(&null_draw_methods, UNIT);
+  RECURSE(level, &null_draw_methods, UNIT);
   if (totwidth < 10*FONT_SIZE)
     totwidth = 10*FONT_SIZE;
   *retwidth = totwidth + UNIT;
@@ -205,7 +205,7 @@ node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
 
   totwidth = UNIT;
-  RECURSE(methods, UNIT);
+  RECURSE(level, methods, UNIT);
 }
 
 static void
@@ -214,7 +214,7 @@ machine_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t typ
   unsigned myheight = UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
 
-  RECURSE(&null_draw_methods, UNIT);
+  RECURSE(level, &null_draw_methods, UNIT);
 
   maxheight += UNIT;
   *retwidth = totwidth + UNIT;
@@ -223,7 +223,7 @@ machine_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t typ
   methods->box(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   totwidth = UNIT;
-  RECURSE(methods, UNIT);
+  RECURSE(level, methods, UNIT);
 }
 
 static void
@@ -233,7 +233,7 @@ fake_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
 
-  RECURSE(&null_draw_methods, UNIT);
+  RECURSE(level, &null_draw_methods, UNIT);
 
   maxheight += UNIT;
   if (totwidth < 6*FONT_SIZE)
@@ -248,7 +248,7 @@ fake_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
-  RECURSE(methods, UNIT);
+  RECURSE(level, methods, UNIT);
 }
 
 static void
