@@ -508,7 +508,7 @@ topo_topology_init (struct topo_topology **topologyp)
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = -1;
   topology->levels[0] = malloc (2*sizeof (struct topo_obj));
-  topo_setup_machine_object (&topology->levels[0]);
+  topo_setup_machine_level (&topology->levels[0]);
   topology->is_fake = 0;
 
   *topologyp = topology;

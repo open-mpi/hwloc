@@ -60,7 +60,7 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 	} while (0)
 
 
-#define topo_setup_machine_object(l) do {				\
+#define topo_setup_machine_level(l) do {				\
 		struct topo_obj **__p = (l);				\
 		struct topo_obj *__l1 = &(__p[0][0]);			\
 		struct topo_obj *__l2 = &(__p[0][1]);			\
