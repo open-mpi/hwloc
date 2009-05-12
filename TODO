@@ -43,8 +43,6 @@ Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
   bind process on 4th processor in a topology-aware numbering
 * topo_taskset --ncpus 2 --index 4
   bind process on the 4th set of 2 physically close ids in a topology-aware numbering (used by ggrun when launching 4 process with 2 threads)
-* topo_taskset --on <Machine/Node/Die/L3/L2/Core/L1/Proc/<depth>>:<index>
-  bind process on object #index in level given by name or depth
 * tools to create masks and bind using them
 
 

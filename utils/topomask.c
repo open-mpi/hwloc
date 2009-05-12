@@ -10,8 +10,10 @@
 
 static void usage(void)
 {
-  fprintf(stderr, "Usage: topomask [depth:index[-max]] ...\n");
-  fprintf(stderr, "  depth may be machine, node, die, core, proc or a numeric depth\n");
+  fprintf(stderr, "Usage: topomask [depth:index] ...\n");
+  fprintf(stderr, "  <depth> may be machine, node, die, core, proc or a numeric depth\n");
+  fprintf(stderr, "  <index> may be a single index <N>, a dash-separated range <min-max>,\n");
+  fprintf(stderr, "    or a beginning and number of objects <begin:number>\n");
 }
 
 #define OBJECT_MAX 128
@@ -38,7 +40,7 @@ int main(int argc, char *argv[])
     topo_obj_t obj;
     unsigned depth;
     char *colon;
-    char *dash;
+    char *sep;
     unsigned indexbegin, indexend, i;
 
     if (!strcmp(argv[1], "-v")) {
@@ -67,11 +69,16 @@ int main(int argc, char *argv[])
 
     indexbegin = atoi(colon+1);
 
-    dash = strchr(colon+1, '-');
-    if (dash)
-      indexend = atoi(dash+1);
-    else
-      indexend = indexbegin;
+    sep = strchr(colon+1, '-');
+    if (sep) {
+      indexend = atoi(sep+1);
+    } else {
+      sep = strchr(colon+1, ':');
+      if (sep)
+        indexend = indexbegin+atoi(sep+1)-1;
+      else
+        indexend = indexbegin;
+    }
 
     for(i=indexbegin; i<=indexend; i++) {
       obj = topo_get_object(topology, depth, i);
