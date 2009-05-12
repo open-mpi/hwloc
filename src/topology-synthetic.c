@@ -46,9 +46,9 @@ topo__synthetic_object_type (const unsigned *level_breadth)
 	 : (*(level_breadth + 2) == 0
 	   ? TOPO_OBJ_CORE
 	   : (*(level_breadth + 3) == 0
-	     ? TOPO_OBJ_DIE
+	     ? TOPO_OBJ_CACHE
 	     : (*(level_breadth + 4) == 0
-	       ? TOPO_OBJ_CACHE
+	       ? TOPO_OBJ_DIE
 	       : (*(level_breadth + 5) == 0
 	         ? TOPO_OBJ_NODE
 	         : TOPO_OBJ_FAKE)))));
