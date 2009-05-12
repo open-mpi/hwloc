@@ -42,14 +42,26 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 #    define TOPO_CPUSUBSET_STRING_LENGTH	(TOPO_BITS_PER_LONG/4)
 #    define TOPO_CPUSET_STRING_LENGTH		(TOPO_CPUSUBSET_COUNT*(TOPO_CPUSUBSET_STRING_LENGTH+1))
 #    define TOPO_PRIxCPUSET		"s"
-#    define TOPO_CPUSET_PRINTF_VALUE(x)	({				\
-	char *__buf = alloca(TOPO_CPUSET_STRING_LENGTH+1);		\
-	char *__tmp = __buf;						\
-	int __i;							\
-	for(__i=TOPO_CPUSUBSET_COUNT-1; __i>=0; __i--)			\
-	  __tmp += sprintf(__tmp, TOPO_PRIxCPUSUBSET ",", (x).s[__i]);	\
-	*(__tmp-1) = '\0';						\
-	__buf;								\
+#    define TOPO_CPUSET_PRINTF_VALUE(x)	({					\
+	char *__buf = alloca(TOPO_CPUSET_STRING_LENGTH+1);			\
+	char *__tmp = __buf;							\
+	int __i;								\
+	*__tmp = '\0';								\
+	for(__i=TOPO_CPUSUBSET_COUNT-1; __i>=0; __i--)				\
+	  if ((x).s[__i] != 0)							\
+	    /* print the whole subset if not empty */				\
+	    __tmp += sprintf(__tmp, TOPO_PRIxCPUSUBSET ",", (x).s[__i]);	\
+	  else if (__i == 0)							\
+	    /* print a single 0 to mark the last subset */			\
+	    __tmp += sprintf(__tmp, "0,");					\
+	  else if (__tmp != __buf)						\
+	    /* print nothing if we haven't printed anything yet */		\
+	    *(__tmp++) = ',';							\
+	/* remove the ending comma if we printed something */			\
+	if (__tmp != __buf)							\
+	  *(__tmp-1) = '\0';							\
+	/* return the alloca'ted buffer */					\
+	__buf;									\
      })
 
 
