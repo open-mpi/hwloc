@@ -79,6 +79,8 @@ void
 look_aix(struct topo_topology *topology)
 {
   unsigned i;
+    /* TODO: R_LGPGDEF/R_LGPGFREE */
+
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {
       if (i == rs_getinfo(NULL, R_MCMSDL, 0))
