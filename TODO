@@ -46,3 +46,7 @@ Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --on <Machine/Node/Die/L3/L2/Core/L1/Proc/<depth>>:<index>
   bind process on object #index in level given by name or depth
 * tools to create masks and bind using them
+
+
+Add an include directory to be able to compile code for non-linux platforms just
+for make checks.
