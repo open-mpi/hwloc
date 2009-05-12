@@ -16,7 +16,7 @@ static void usage(void)
   fprintf(stderr, "    or a beginning and number of objects <begin:number>\n");
 }
 
-#define OBJECT_MAX 128
+#define OBJECT_MAX LIBTOPO_NBMAXCPUS
 
 int main(int argc, char *argv[])
 {
@@ -77,8 +77,14 @@ int main(int argc, char *argv[])
 
     for(i=indexbegin; i<=indexend; i++) {
       obj = topo_get_object(topology, depth, i);
-      if (obj)
+      if (obj) {
+	if (nobj == OBJECT_MAX) {
+	  if (verbose)
+	    fprintf(stderr, "Cannot work on more than %d objects, ignoring the other ones\n", OBJECT_MAX);
+	  break;
+	}
 	objs[nobj++] = obj;
+      }
       if (verbose) {
 	if (obj)
           printf("object (%d,%d) found\n", depth, i);
