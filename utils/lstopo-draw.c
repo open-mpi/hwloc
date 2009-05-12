@@ -231,16 +231,26 @@ node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 static void
 machine_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = UNIT;
+  unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
+  char text[64];
 
   RECURSE(level, &null_draw_methods, UNIT);
 
-  maxheight += UNIT;
+  if (totwidth < 10*FONT_SIZE)
+    totwidth = 10*FONT_SIZE;
+
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
+  if (maxheight)
+    *retheight += UNIT;
 
   methods->box(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR, depth, x, *retwidth, y, *retheight);
+
+  snprintf(text, sizeof(text), "Machine (%lu%s)",
+		  size_value(level->memory_kB),
+		  size_unit(level->memory_kB));
+  methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
   RECURSE(level, methods, UNIT);
