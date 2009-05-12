@@ -64,7 +64,30 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 	__buf;									\
      })
 
+/* parsing a cpuset string */
+static __inline__ void
+topo_cpuset_from_string(const char * string, topo_cpuset_t * set)
+{
+  char * current = (char *) string;
+  int count=0, i;
 
+  while (*current != '\0') {
+    unsigned long val;
+    char *next;
+    val = strtoul(current, &next, 16);
+    /* store subset in order, starting from the end */
+    set->s[TOPO_CPUSUBSET_COUNT-1-count] = val;
+    count++;
+    if (*next != ',')
+      break;
+    current = next+1;
+  }
+
+  /* move subsets back to the beginning and clear the missing subsets */
+  memmove(&set->s[0], &set->s[TOPO_CPUSUBSET_COUNT-count], count*sizeof(set->s[0]));
+  for(i=count; i<TOPO_CPUSUBSET_COUNT; i++)
+    set->s[i] = 0;
+}
 
 /*  Primitives & macros for building "sets" of cpus. */
 
