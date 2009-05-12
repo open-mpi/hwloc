@@ -4,7 +4,6 @@
 
 * make cache size/depth/type, memory node size + hugepagefree a resource attribute
 * there could be several size for huge pages
-* rename "level" into "resource" or "object"
 
 * Implement topological sorting so that backends do not have to care about the
   order in which they report resources.

@@ -136,11 +136,11 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 #endif
 
 static void
-look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo, int n, LOGICAL_PROCESSOR_RELATIONSHIP relationship, topo_level_type_t type, int cacheLevel)
+look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo, int n, LOGICAL_PROCESSOR_RELATIONSHIP relationship, topo_object_type_t type, int cacheLevel)
 {
   int i, j;
   int numitems;
-  struct topo_level *level;
+  struct topo_obj *level;
 
   /* Ignore non-data caches and other levels */
 #define TEST \
@@ -164,16 +164,16 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
   j = 0;
   for (i = 0; i < n; i++) {
     if (TEST) {
-      topo_setup_level(&level[j], type, j);
+      topo_setup_object(&level[j], type, j);
       topo_debug("%d #%d mask %lx\n", relationship, j, procInfo[i].ProcessorMask);
       topo_cpuset_from_ulong(&level[j].cpuset, procInfo[i].ProcessorMask);
       switch (type) {
-	case TOPO_LEVEL_NODE:
+	case TOPO_OBJ_NODE:
 	  level[j].memory_kB = 0; /* TODO */
 	  level[j].huge_page_free = 0; /* TODO */
-	  level[j].physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_level_setup did */
+	  level[j].physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_setup_object did */
 	  break;
-	case TOPO_LEVEL_CACHE:
+	case TOPO_OBJ_CACHE:
 	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
 	  level[j].cache_depth = cacheLevel;
 	  break;
@@ -219,12 +219,12 @@ look_windows(struct topo_topology *topology)
 	procInfo = malloc(length);
       }
 
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationNumaNode, TOPO_LEVEL_NODE, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorPackage, TOPO_LEVEL_DIE, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_CACHE, 3);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_CACHE, 2);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorCore, TOPO_LEVEL_CORE, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_LEVEL_CACHE, 1);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationNumaNode, TOPO_OBJ_NODE, 0);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorPackage, TOPO_OBJ_DIE, 0);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_OBJ_CACHE, 3);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_OBJ_CACHE, 2);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorCore, TOPO_OBJ_CORE, 0);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_OBJ_CACHE, 1);
 
       free(procInfo);
     }

@@ -14,14 +14,13 @@
   fprintf (output, "%*s", i, "");
 
 static void
-output_topology (topo_topology_t topology, topo_level_t l, topo_level_t parent, FILE *output, int i, int verbose_mode) {
+output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE *output, int i, int verbose_mode) {
   int x;
   const char * indexprefix = "#";
-  const char * levelterm = "";
 
   if (!verbose_mode
       && parent && parent->arity == 1 && topo_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
-    /* in non-verbose mode, merge levels with their parent is they are exactly identical */
+    /* in non-verbose mode, merge objects with their parent is they are exactly identical */
     fprintf(output, " + ");
   } else {
     if (parent)
@@ -29,7 +28,7 @@ output_topology (topo_topology_t topology, topo_level_t l, topo_level_t parent, 
     indent (output, 2*i);
     i++;
   }
-  topo_print_level (topology, l, output, verbose_mode, indexprefix, levelterm);
+  topo_print_object (topology, l, output, verbose_mode, indexprefix, "");
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
@@ -39,13 +38,13 @@ output_topology (topo_topology_t topology, topo_level_t l, topo_level_t parent, 
 
 void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 {
-  output_topology (topology, topo_get_machine_level(topology), NULL, output, 0, verbose_mode);
+  output_topology (topology, topo_get_machine_object(topology), NULL, output, 0, verbose_mode);
   fprintf(output, "\n");
 
   if (verbose_mode)
     {
       struct topo_topology_info info;
-      enum topo_level_type_e l;
+      enum topo_obj_type_e l;
 
       topo_topology_get_info(topology, &info);
       if (info.is_fake)
@@ -57,16 +56,16 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
       if (info.huge_page_size_kB)
 	fprintf (output, "Huge page size: %lukB\n", info.huge_page_size_kB);
 
-      for (l = TOPO_LEVEL_MACHINE; l < TOPO_LEVEL_MAX; l++)
+      for (l = TOPO_OBJ_MACHINE; l < TOPO_OBJ_TYPE_MAX; l++)
 	{
 	  int depth = topo_get_type_depth (topology, l);
 	  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
-	    fprintf (output, "absent:\t\ttype #%d (%s)\n", l, topo_level_string (l));
+	    fprintf (output, "absent:\t\ttype #%d (%s)\n", l, topo_object_type_string (l));
 	  } else if (depth == TOPO_TYPE_DEPTH_MULTIPLE) {
-	    fprintf (output, "multiple:\ttype #%d (%s)\n", l, topo_level_string (l));
+	    fprintf (output, "multiple:\ttype #%d (%s)\n", l, topo_object_type_string (l));
 	  } else {
 	    indent(output, depth);
-	    fprintf (output, "depth %d:\ttype #%d (%s)\n", depth, l, topo_level_string (l));
+	    fprintf (output, "depth %d:\ttype #%d (%s)\n", depth, l, topo_object_type_string (l));
 	  }
 	}
     }

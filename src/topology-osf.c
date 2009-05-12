@@ -27,7 +27,7 @@ look_osf(struct topo_topology *topology)
   radid_t radid;
   cpuid_t cpuid;
   cpuset_t cpuset;
-  struct topo_level *node_level;
+  struct topo_obj *node_level;
 
   nbnodes=rad_get_num();
 
@@ -41,7 +41,7 @@ look_osf(struct topo_topology *topology)
       continue;
     }
 
-    topo_setup_level(&node_level[i], TOPO_LEVEL_NODE, radid);
+    topo_setup_object(&node_level[i], TOPO_OBJ_NODE, radid);
     node_level[i].memory_kB = 0; /* TODO */
     node_level[i].huge_page_free = 0;
 

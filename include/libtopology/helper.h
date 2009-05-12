@@ -48,8 +48,8 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 #endif
 
 
-#define topo_setup_level(l, _type, _index) do {		\
-		struct topo_level *__l = (l);		\
+#define topo_setup_object(l, _type, _index) do {	\
+		struct topo_obj *__l = (l);		\
 		__l->type = _type;			\
 		topo_cpuset_zero(&__l->cpuset);		\
 		__l->arity = 0;				\
@@ -60,11 +60,11 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 	} while (0)
 
 
-#define topo_setup_machine_level(l) do {				\
-		struct topo_level **__p = (l);				\
-		struct topo_level *__l1 = &(__p[0][0]);			\
-		struct topo_level *__l2 = &(__p[0][1]);			\
-		topo_setup_level(__l1, TOPO_LEVEL_MACHINE, 0);		\
+#define topo_setup_machine_object(l) do {				\
+		struct topo_obj **__p = (l);				\
+		struct topo_obj *__l1 = &(__p[0][0]);			\
+		struct topo_obj *__l2 = &(__p[0][1]);			\
+		topo_setup_object(__l1, TOPO_OBJ_MACHINE, 0);		\
 		__l1->level = 0;					\
 		__l1->number = 0;					\
 		__l1->index = 0;					\
@@ -73,8 +73,8 @@ extern void topo_synthetic_load (struct topo_topology *topology);
   } while (0)
 
 
-#define topo_level_cpuset_from_array(l, _value, _array, _max) do {	\
-		struct topo_level *__l = (l);				\
+#define topo_object_cpuset_from_array(l, _value, _array, _max) do {	\
+		struct topo_obj *__l = (l);				\
 		unsigned int *__a = (_array);				\
 		int k;							\
 		for(k=0; k<_max; k++)					\

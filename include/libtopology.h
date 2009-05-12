@@ -27,40 +27,40 @@ struct topo_topology_info {
   int is_fake; /* set if the topology is different from the actual underlying machine */
 };
 
-/** \brief Type of topology level */
-enum topo_level_type_e {
-  /* levels that are always ordered the same */
-  TOPO_LEVEL_MACHINE,	/**< \brief Whole machine */
-  TOPO_LEVEL_NODE,	/**< \brief NUMA node */
-  TOPO_LEVEL_DIE,	/**< \brief Physical chip */
-  TOPO_LEVEL_CORE,	/**< \brief Core */
-  TOPO_LEVEL_PROC,	/**< \brief SMT Processor in a core */
+/** \brief Type of topology object */
+enum topo_obj_type_e {
+  /* objects that are always ordered the same in the hierarchy */
+  TOPO_OBJ_MACHINE,	/**< \brief Whole machine */
+  TOPO_OBJ_NODE,	/**< \brief NUMA node */
+  TOPO_OBJ_DIE,	/**< \brief Physical chip */
+  TOPO_OBJ_CORE,	/**< \brief Core */
+  TOPO_OBJ_PROC,	/**< \brief SMT Processor in a core */
 
-  /* levels that may appear at various depth among the above ones */
-  TOPO_LEVEL_FAKE,	/**< \brief Fake level for meeting the marcel_topo_max_arity constraint */ /* A passer dans marcel_topology.h */
-  TOPO_LEVEL_CACHE,	/**< \brief Cache */
+  /* objects that may appear at various depth among the above ones */
+  TOPO_OBJ_FAKE,	/**< \brief Fake object that may be needed under special circumstances */
+  TOPO_OBJ_CACHE,	/**< \brief Cache */
 };
-#define TOPO_LEVEL_ORDERED_MAX (TOPO_LEVEL_PROC+1)
-#define TOPO_LEVEL_MAX (TOPO_LEVEL_CACHE+1)
-typedef enum topo_level_type_e topo_level_type_t;
+#define TOPO_OBJ_ORDERED_TYPE_MAX (TOPO_OBJ_PROC+1)
+#define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_CACHE+1)
+typedef enum topo_obj_type_e topo_obj_type_t;
 
-/** Structure of a topology level */
-struct topo_level {
-  enum topo_level_type_e type;		/**< \brief Type of level */
-  unsigned level;			/**< \brief Vertical index in marcel_topo_levels */
-  unsigned number;			/**< \brief Horizontal index in marcel_topo_levels[l.level] */
+/** Structure of a topology object */
+struct topo_obj {
+  enum topo_obj_type_e type;		/**< \brief Type of object */
+  unsigned level;			/**< \brief Vertical index in the hierarchy */
+  unsigned number;			/**< \brief Horizontal index in the whole list of similar objects */
   unsigned index;			/**< \brief Index in fathers' children[] array */
   unsigned arity;			/**< \brief Number of children */
-  struct topo_level **children;		/**< \brief Children, children[0 .. arity -1] */
-  struct topo_level *father;		/**< \brief Father, NULL if root (machine level) */
+  struct topo_obj **children;		/**< \brief Children, children[0 .. arity -1] */
+  struct topo_obj *father;		/**< \brief Father, NULL if root (machine object) */
   signed physical_index;		/**< \brief OS-provided physical index number */
   unsigned long memory_kB;		/**< \brief Size of memory bank or caches */
   unsigned long huge_page_free;
   unsigned cache_depth;
   unsigned admin_disabled;		/**< \brief Set if disabled by the administrator (for instance Linux Cpusets) */
-  topo_cpuset_t cpuset;			/**< \brief CPUs covered by this level */
+  topo_cpuset_t cpuset;			/**< \brief CPUs covered by this object */
 };
-typedef struct topo_level * topo_level_t;
+typedef struct topo_obj * topo_obj_t;
 
 
 /** \brief Allocate a topology context. */
@@ -70,13 +70,13 @@ extern int topo_topology_load(topo_topology_t topology);
 /** \brief Terminate and free a topology context. */
 extern void topo_topology_destroy (topo_topology_t topology);
 
-/** \brief Ignore a level type.
+/** \brief Ignore a object type.
     To be called between _init and _load. */
-extern int topo_topology_ignore_type(topo_topology_t topology, topo_level_type_t type);
-/** \brief Ignore a level type if it does not bring any structure.
+extern int topo_topology_ignore_type(topo_topology_t topology, topo_obj_type_t type);
+/** \brief Ignore a object type if it does not bring any structure.
     To be called between _init and _load. */
-extern int topo_topology_ignore_type_keep_structure(topo_topology_t topology, topo_level_type_t type);
-/** \brief Ignore all levels that do not bring any structure.
+extern int topo_topology_ignore_type_keep_structure(topo_topology_t topology, topo_obj_type_t type);
+/** \brief Ignore all objects that do not bring any structure.
     To be called between _init and _load. */
 extern int topo_topology_ignore_all_keep_structure(topo_topology_t topology);
 /** \brief Set OR'ed flags to non-yet-loaded topology.
@@ -99,45 +99,45 @@ extern int topo_topology_set_synthetic(struct topo_topology *topology, const cha
 extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
 
 
-/** \brief Returns the depth of levels of type _type_. If no level of
+/** \brief Returns the depth of objects of type _type_. If no object of
     this type is present on the underlying architecture, the function
-    returns the depth of the first "present" level we find uppon
+    returns the depth of the first "present" object we find uppon
     _type_. */
-extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_level_type_e type);
+extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_obj_type_e type);
 #define TOPO_TYPE_DEPTH_UNKNOWN -1
 #define TOPO_TYPE_DEPTH_MULTIPLE -2
 
-/** \brief Returns the type of levels at depth _depth_. */
-extern enum topo_level_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);
+/** \brief Returns the type of objects at depth _depth_. */
+extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);
 
-/** \brief Returns the width of depth level _depth_ */
+/** \brief Returns the width of level at depth _depth_ */
 extern unsigned topo_get_depth_nbitems (topo_topology_t topology, unsigned depth);
 
-/** \brief Returns the topology level at index _index_ from depth _depth_ */
-extern topo_level_t topo_get_level (topo_topology_t topology, unsigned depth, unsigned index);
+/** \brief Returns the topology object at index _index_ from depth _depth_ */
+extern topo_obj_t topo_get_object (topo_topology_t topology, unsigned depth, unsigned index);
 
-/** \brief Returns the top-level of the topology-tree. Its type is TOPO_MACHINE_LEVEL. */
-static inline topo_level_t topo_get_machine_level (topo_topology_t topology) { return topo_get_level(topology, 0, 0); }
+/** \brief Returns the top-object of the topology-tree. Its type is TOPO_OBJ_MACHINE. */
+static inline topo_obj_t topo_get_machine_object (topo_topology_t topology) { return topo_get_object(topology, 0, 0); }
 
-/** \brief Returns the common father level to levels lvl1 and lvl2 */
-extern topo_level_t topo_find_common_ancestor_level (topo_level_t lvl1, topo_level_t lvl2);
+/** \brief Returns the common father object to objects lvl1 and lvl2 */
+extern topo_obj_t topo_find_common_ancestor_object (topo_obj_t obj1, topo_obj_t obj2);
 
-/** \brief Returns true if _level_ is inside the subtree beginning
+/** \brief Returns true if _obj_ is inside the subtree beginning
     with _subtree_root_. */
-extern int topo_level_is_in_subtree (topo_level_t subtree_root, topo_level_t level);
+extern int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj);
 
 /** \brief Do a depth-first traversal of the topology to find and sort
-    all levels that are at the same depth than _src_.
+    all objects that are at the same depth than _src_.
     Report in _lvls_ up to _max_ physically closest ones to _src_.
-    Return the actual number of levels that were found. */
-extern int topo_find_closest_levels (topo_topology_t topology, topo_level_t src, topo_level_t *lvls, int max);
+    Return the actual number of objects that were found. */
+extern int topo_find_closest_objects (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
 
-/** \brief return a stringified topology level type */
-extern const char * topo_level_string (enum topo_level_type_e l);
+/** \brief return a stringified topology object type */
+extern const char * topo_object_type_string (enum topo_obj_type_e l);
 
-/** \brief print a human-readable form of the given topology level */
-extern void topo_print_level (topo_topology_t topology, topo_level_t l,
-			      FILE *output, int verbose_mode,
-			      const char *indexprefix, const char* levelterm);
+/** \brief print a human-readable form of the given topology object */
+extern void topo_print_object (topo_topology_t topology, topo_obj_t l,
+			       FILE *output, int verbose_mode,
+			       const char *indexprefix, const char* term);
 
 #endif /* LIBTOPOLOGY_H */

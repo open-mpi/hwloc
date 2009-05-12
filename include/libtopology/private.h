@@ -8,9 +8,9 @@
 #include <libtopology.h>
 
 enum topo_ignore_type_e {
-  TOPO_IGNORE_LEVEL_NEVER = 0,
-  TOPO_IGNORE_LEVEL_KEEP_STRUCTURE,
-  TOPO_IGNORE_LEVEL_ALWAYS,
+  TOPO_IGNORE_TYPE_NEVER = 0,
+  TOPO_IGNORE_TYPE_KEEP_STRUCTURE,
+  TOPO_IGNORE_TYPE_ALWAYS,
 };
 
 struct topo_topology {
@@ -20,11 +20,11 @@ struct topo_topology {
   topo_cpuset_t online_cpuset;				/* Available physical resource ids mask */
   topo_cpuset_t admin_disabled_cpuset;			/* Available physical resource that are disabled by the administrator */
   topo_cpuset_t nonfirst_threads_cpuset;		/* Thread siblings that are not the first one in a cpu */
-  unsigned level_nbitems[TOPO_LEVEL_MAX]; 		/* Number of items on each horizontal level */
-  struct topo_level *levels[TOPO_LEVEL_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
+  unsigned level_nbitems[TOPO_OBJ_TYPE_MAX]; 		/* Number of items on each horizontal level */
+  struct topo_obj *levels[TOPO_OBJ_TYPE_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbitems[l]] */
   unsigned long flags;
-  int type_depth[TOPO_LEVEL_MAX];
-  enum topo_ignore_type_e ignored_types[TOPO_LEVEL_MAX];
+  int type_depth[TOPO_OBJ_TYPE_MAX];
+  enum topo_ignore_type_e ignored_types[TOPO_OBJ_TYPE_MAX];
   unsigned long huge_page_size_kB;
   char *dmi_board_vendor;
   char *dmi_board_name;

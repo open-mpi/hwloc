@@ -64,16 +64,16 @@ static struct draw_methods null_draw_methods = {
  * space that the drawing took.
  */
 
-typedef void (*foo_draw)(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
+typedef void (*foo_draw)(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
 
-static foo_draw get_type_fun(enum topo_level_type_e type);
+static foo_draw get_type_fun(topo_obj_type_t type);
 
 /*
  * Helper to recurse into sublevels
  */
 
 #define RECURSE(methods, sep) { \
-  topo_level_t *sublevels = level->children; \
+  topo_obj_t *sublevels = level->children; \
   unsigned numsublevels = level->arity; \
   unsigned width, height; \
   foo_draw fun; \
@@ -94,7 +94,7 @@ static foo_draw get_type_fun(enum topo_level_type_e type);
 #define size_unit(size) (size < 4*1024 && size % 1024 ? "KB" : size < 4*1024*1024 && (size / 1024) % 1024 ? "MB" : "GB")
 
 static void
-proc_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+proc_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   char text[64];
 
@@ -108,7 +108,7 @@ proc_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 }
 
 static void
-cache_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT + UNIT;
   unsigned totwidth = 0, maxheight = 0;
@@ -135,7 +135,7 @@ cache_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_typ
 }
 
 static void
-core_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -158,7 +158,7 @@ core_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 }
 
 static void
-die_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+die_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -182,7 +182,7 @@ die_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_
 }
 
 static void
-node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + UNIT + FONT_SIZE + UNIT + UNIT;;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -209,7 +209,7 @@ node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 }
 
 static void
-machine_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+machine_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -227,7 +227,7 @@ machine_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_t
 }
 
 static void
-fake_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+fake_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -252,10 +252,10 @@ fake_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 }
 
 static void
-fig(struct draw_methods *methods, topo_level_t level, void *output, unsigned depth, unsigned x, unsigned y)
+fig(struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
   unsigned totwidth = 0, maxheight = 0;
-  enum topo_level_type_e type = level->type;
+  topo_obj_type_t type = level->type;
 
   machine_draw(methods, level, type, output, depth, x, &totwidth, y, &maxheight);
 }
@@ -264,16 +264,16 @@ fig(struct draw_methods *methods, topo_level_t level, void *output, unsigned dep
  * given a type, return a pointer FUN to the function that draws it.
  */
 static foo_draw
-get_type_fun(enum topo_level_type_e type)
+get_type_fun(topo_obj_type_t type)
 {
   switch (type) {
-    case TOPO_LEVEL_MACHINE: return machine_draw;
-    case TOPO_LEVEL_NODE: return node_draw;
-    case TOPO_LEVEL_DIE: return die_draw;
-    case TOPO_LEVEL_CACHE: return cache_draw;
-    case TOPO_LEVEL_CORE: return core_draw;
-    case TOPO_LEVEL_PROC: return proc_draw;
-    case TOPO_LEVEL_FAKE: return fake_draw;
+    case TOPO_OBJ_MACHINE: return machine_draw;
+    case TOPO_OBJ_NODE: return node_draw;
+    case TOPO_OBJ_DIE: return die_draw;
+    case TOPO_OBJ_CACHE: return cache_draw;
+    case TOPO_OBJ_CORE: return core_draw;
+    case TOPO_OBJ_PROC: return proc_draw;
+    case TOPO_OBJ_FAKE: return fake_draw;
   }
   return NULL;
 }
@@ -305,7 +305,7 @@ void *
 output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(&getmax_draw_methods, topo_get_machine_level(topology), &coords, 100, 0, 0);
+  fig(&getmax_draw_methods, topo_get_machine_object(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR);
   methods->declare_color(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR);
@@ -321,5 +321,5 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
 void
 output_draw(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
-  fig(methods, topo_get_machine_level(topology), output, 100, 0, 0);
+  fig(methods, topo_get_machine_object(topology), output, 100, 0, 0);
 }

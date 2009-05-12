@@ -59,7 +59,7 @@ topo_fallback_nbprocessors(void) {
 void
 topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
 {
-  struct topo_level *die_level;
+  struct topo_obj *die_level;
   int j;
 
   topo_debug("%d dies\n", numdies);
@@ -68,8 +68,8 @@ topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsi
 
   for (j = 0; j < numdies; j++)
     {
-      topo_setup_level(&die_level[j], TOPO_LEVEL_DIE, osphysids[j]);
-      topo_level_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
+      topo_setup_object(&die_level[j], TOPO_OBJ_DIE, osphysids[j]);
+      topo_object_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
       topo_debug("die %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 j, TOPO_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
     }
@@ -86,7 +86,7 @@ topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsi
 void
 topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, struct topo_topology *topology)
 {
-  struct topo_level *core_level;
+  struct topo_obj *core_level;
   int j;
 
   topo_debug("%d cores\n", numcores);
@@ -95,8 +95,8 @@ topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, un
 
   for (j = 0; j < numcores; j++)
     {
-      topo_setup_level(&core_level[j], TOPO_LEVEL_CORE, oscoreids[j]);
-      topo_level_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
+      topo_setup_object(&core_level[j], TOPO_OBJ_CORE, oscoreids[j]);
+      topo_object_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
       topo_debug("core %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 j, TOPO_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
     }
@@ -118,7 +118,7 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 		       unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
 		       struct topo_topology *topology)
 {
-  struct topo_level *level;
+  struct topo_obj *level;
   int j;
 
   topo_debug("%d L%d caches\n", numcaches[cachelevel], cachelevel+1);
@@ -127,11 +127,11 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
-      topo_setup_level(&level[j], TOPO_LEVEL_CACHE, j);
+      topo_setup_object(&level[j], TOPO_OBJ_CACHE, j);
       level[j].memory_kB = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
       level[j].cache_depth = cachelevel+1;
 
-      topo_level_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
+      topo_object_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
 
       topo_debug("L%d cache %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(level[j].cpuset));
@@ -149,7 +149,7 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 static void
 look_cpu(struct topo_topology *topology)
 {
-  struct topo_level *cpu_level;
+  struct topo_obj *cpu_level;
   unsigned oscpu,cpu;
 
   cpu_level=malloc((topology->nb_processors+1)*sizeof(*cpu_level));
@@ -169,7 +169,7 @@ look_cpu(struct topo_topology *topology)
 	continue;
       }
 
-      topo_setup_level(&cpu_level[cpu], TOPO_LEVEL_PROC, oscpu);
+      topo_setup_object(&cpu_level[cpu], TOPO_OBJ_PROC, oscpu);
 
       topo_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
       if (!(topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)))
@@ -231,7 +231,7 @@ topo_remove_level(struct topo_topology *topology, unsigned depth)
 static int
 compar(const void *_l1, const void *_l2)
 {
-  const struct topo_level *l1 = _l1, *l2 = _l2;
+  const struct topo_obj *l1 = _l1, *l2 = _l2;
   int first1 = topo_cpuset_first(&l1->cpuset);
   int first2 = topo_cpuset_first(&l2->cpuset);
   /* if empty, return a bit after the last bit of cpuset */
@@ -303,14 +303,14 @@ topo_discover(struct topo_topology *topology)
   /* Ignore some levels if requested */
   l=0;
   while (l<topology->nb_levels) {
-    enum topo_level_type_e type = topology->levels[l][0].type;
+    enum topo_obj_type_e type = topology->levels[l][0].type;
     enum topo_ignore_type_e ignore = topology->ignored_types[type];
 
     /* ignore if ALWAYS,
-     * or ignore if KEEP_STRUCTURE and parent level is similar.
+     * or ignore if KEEP_STRUCTURE and parent object is similar.
      */
-    if (ignore == TOPO_IGNORE_LEVEL_ALWAYS
-	|| (ignore == TOPO_IGNORE_LEVEL_KEEP_STRUCTURE
+    if (ignore == TOPO_IGNORE_TYPE_ALWAYS
+	|| (ignore == TOPO_IGNORE_TYPE_KEEP_STRUCTURE
 	    && l > 0
 	    && topology->level_nbitems[l-1] == topology->level_nbitems[l])) {
       topo_remove_level(topology, l);
@@ -327,20 +327,20 @@ topo_discover(struct topo_topology *topology)
   */
   for (l=0; l<topology->nb_levels; l++) {
     /* only CACHE maybe wrongly ordered so far */
-    if (topology->levels[l][0].type != TOPO_LEVEL_CACHE)
+    if (topology->levels[l][0].type != TOPO_OBJ_CACHE)
       continue;
 
     /* find how much to move backwards */
     for (i=0; i<l; i++) {
       if (topology->level_nbitems[i] > topology->level_nbitems[l]) {
 	/* move l before i */
-	struct topo_level *saved_levels = topology->levels[l];
+	struct topo_obj *saved_level = topology->levels[l];
 	unsigned saved_nbitems = topology->level_nbitems[l];
 	topo_debug("moving level %d (%d items) before %d (%d items)\n",
 		   l, saved_nbitems, i, topology->level_nbitems[i]);
 	memmove(&topology->level_nbitems[i+1], &topology->level_nbitems[i], (l-i)*sizeof(topology->level_nbitems[i]));
 	memmove(&topology->levels[i+1], &topology->levels[i], (l-i)*sizeof(topology->levels[i]));
-	topology->levels[i] = saved_levels;
+	topology->levels[i] = saved_level;
 	topology->level_nbitems[i] = saved_nbitems;
 	break;
       }
@@ -372,7 +372,7 @@ topo_discover(struct topo_topology *topology)
     qsort(&topology->levels[l][0], topology->level_nbitems[l], sizeof(*topology->levels[l]), compar);
 
     /* update level_nbitems by removing the empty ones (they are last), except for NUMA node since we want to keep memory information */
-    if (topology->levels[l][0].type != TOPO_LEVEL_NODE) {
+    if (topology->levels[l][0].type != TOPO_OBJ_NODE) {
       for (i=0; i<topology->level_nbitems[l]; i++)
 	if (topo_cpuset_iszero(&topology->levels[l][i].cpuset)) {
 	  topology->level_nbitems[l] = i;
@@ -393,9 +393,9 @@ topo_discover(struct topo_topology *topology)
 	topo_cpuset_andset(&set, &topology->levels[l+1][j].cpuset);
 	if (!topo_cpuset_iszero(&set)) {
 	  /* Sublevel j is part of level i, put it at k.  */
-	  struct topo_level level = topology->levels[l+1][j];
+	  struct topo_obj obj = topology->levels[l+1][j];
 	  memmove(&topology->levels[l+1][k+1], &topology->levels[l+1][k], (j-k)*sizeof(*topology->levels[l+1]));
-	  topology->levels[l+1][k++] = level;
+	  topology->levels[l+1][k++] = obj;
 	}
       }
     }
@@ -439,21 +439,21 @@ topo_discover(struct topo_topology *topology)
   topo_debug("connecting done.\n");
 
   /* intialize all depth to unknown */
-  for (l=0; l < TOPO_LEVEL_MAX; l++)
+  for (l=0; l < TOPO_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = TOPO_TYPE_DEPTH_UNKNOWN;
   /* walk the existing levels to set their depth */
   for (l=0; l<topology->nb_levels; l++) {
-    enum topo_level_type_e type = topology->levels[l][0].type;
+    enum topo_obj_type_e type = topology->levels[l][0].type;
     if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
       topology->type_depth[type] = l;
     } else {
-      assert(type >= TOPO_LEVEL_ORDERED_MAX);
+      assert(type >= TOPO_OBJ_ORDERED_TYPE_MAX);
       topology->type_depth[type] = TOPO_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
     }
   }
   /* setup the depth of all still unknown levels (the one that got merged or never created */
   int type, prevdepth = TOPO_TYPE_DEPTH_UNKNOWN;
-  for (type = 0; type < TOPO_LEVEL_ORDERED_MAX; type++)
+  for (type = 0; type < TOPO_OBJ_ORDERED_TYPE_MAX; type++)
     {
       if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
 	topology->type_depth[type] = prevdepth;
@@ -469,7 +469,7 @@ topo_discover(struct topo_topology *topology)
 
   /* Empty some NUMA node memory if disabled by the administrator */
   if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
-    l = topology->type_depth[TOPO_LEVEL_NODE];
+    l = topology->type_depth[TOPO_OBJ_NODE];
     for (i=0; i<topology->level_nbitems[l]; i++) {
       /* remove memory if disabled */
       if (topology->levels[l][i].admin_disabled) {
@@ -501,14 +501,14 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->huge_page_size_kB = 0;
   topology->dmi_board_vendor = NULL;
   topology->dmi_board_name = NULL;
-  for(i=0; i< TOPO_LEVEL_MAX; i++)
-    topology->ignored_types[i] = TOPO_IGNORE_LEVEL_NEVER;
+  for(i=0; i< TOPO_OBJ_TYPE_MAX; i++)
+    topology->ignored_types[i] = TOPO_IGNORE_TYPE_NEVER;
   memset(topology->level_nbitems, 0, sizeof(topology->level_nbitems));
   topology->level_nbitems[0] = 1;
-  for (i=0; i < TOPO_LEVEL_MAX; i++)
+  for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = -1;
-  topology->levels[0] = malloc (2*sizeof (struct topo_level));
-  topo_setup_machine_level (&topology->levels[0]);
+  topology->levels[0] = malloc (2*sizeof (struct topo_obj));
+  topo_setup_machine_object (&topology->levels[0]);
   topology->is_fake = 0;
 
   *topologyp = topology;
@@ -542,26 +542,26 @@ topo_topology_set_flags (struct topo_topology *topology, unsigned long flags)
 }
 
 int
-topo_topology_ignore_type(struct topo_topology *topology, enum topo_level_type_e type)
+topo_topology_ignore_type(struct topo_topology *topology, enum topo_obj_type_e type)
 {
-  if (type >= TOPO_LEVEL_MAX)
+  if (type >= TOPO_OBJ_TYPE_MAX)
     return -1;
 
-  if (type == TOPO_LEVEL_MACHINE)
+  if (type == TOPO_OBJ_MACHINE)
     /* we don't want 2 heads */
     return -1;
 
-  topology->ignored_types[type] = TOPO_IGNORE_LEVEL_ALWAYS;
+  topology->ignored_types[type] = TOPO_IGNORE_TYPE_ALWAYS;
   return 0;
 }
 
 int
-topo_topology_ignore_type_keep_structure(struct topo_topology *topology, topo_level_type_t type)
+topo_topology_ignore_type_keep_structure(struct topo_topology *topology, topo_obj_type_t type)
 {
-  if (type >= TOPO_LEVEL_MAX)
+  if (type >= TOPO_OBJ_TYPE_MAX)
     return -1;
 
-  topology->ignored_types[type] = TOPO_IGNORE_LEVEL_KEEP_STRUCTURE;
+  topology->ignored_types[type] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }
 
@@ -569,8 +569,8 @@ int
 topo_topology_ignore_all_keep_structure(struct topo_topology *topology)
 {
   unsigned type;
-  for(type=0; type<TOPO_LEVEL_MAX; type++)
-    topology->ignored_types[type] = TOPO_IGNORE_LEVEL_KEEP_STRUCTURE;
+  for(type=0; type<TOPO_OBJ_TYPE_MAX; type++)
+    topology->ignored_types[type] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }
 

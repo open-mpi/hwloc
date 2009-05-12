@@ -19,7 +19,7 @@
 #include <sys/rset.h>
 
 static void
-look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
+look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
 {
   rsethandle_t rset, rad;
   int r,i,maxcpus,j;
@@ -44,13 +44,13 @@ look_rset(int sdl, enum topo_level_type_e level, struct topo_topology *topology)
     if (!rs_getinfo(rad, R_NUMPROCS, 0))
       continue;
 
-    topo_setup_level(&rad_level[r], level, r);
-    switch(level) {
-      case TOPO_LEVEL_NODE:
+    topo_setup_object(&rad_level[r], type, r);
+    switch(type) {
+      case TOPO_OBJ_NODE:
 	rad_level[r].memory_kB = 0; /* TODO */
 	rad_level[r].huge_page_free = 0;
 	break;
-      case TOPO_LEVEL_CACHE:
+      case TOPO_OBJ_CACHE:
 	rad_level[r].memory_kB = 0; /* TODO */
 	rad_level[r].cache_depth = 2;
 	break;
@@ -84,20 +84,20 @@ look_aix(struct topo_topology *topology)
       if (i == rs_getinfo(NULL, R_MCMSDL, 0))
 	{
 	  topo_debug("looking AIX node sdl %d\n", i);
-	  look_rset(i, TOPO_LEVEL_NODE, topology);
+	  look_rset(i, TOPO_OBJ_NODE, topology);
 	}
 #      ifdef R_L2CSDL
       if (i == rs_getinfo(NULL, R_L2CSDL, 0))
 	{
 	  topo_debug("looking AIX L2 sdl %d\n", i);
-	  look_rset(i, TOPO_LEVEL_CACHE, topology);
+	  look_rset(i, TOPO_OBJ_CACHE, topology);
 	}
 #      endif
 #      ifdef R_PCORESDL
       if (i == rs_getinfo(NULL, R_PCORESDL, 0))
 	{
 	  topo_debug("looking AIX core sdl %d\n", i);
-	  look_rset(i, TOPO_LEVEL_CORE, topology);
+	  look_rset(i, TOPO_OBJ_CORE, topology);
 	}
 #      endif
       if (i == rs_getinfo(NULL, R_SMPSDL, 0))
@@ -109,7 +109,7 @@ look_aix(struct topo_topology *topology)
        */
 	{
 	  topo_debug("looking AIX max sdl %d\n", i);
-	  look_rset(i, TOPO_LEVEL_PROC, topology);
+	  look_rset(i, TOPO_OBJ_PROC, topology);
 	}
 #endif
     }
