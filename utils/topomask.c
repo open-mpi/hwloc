@@ -75,7 +75,10 @@ int main(int argc, char *argv[])
 
     sep = strchr(colon+1, '-');
     if (sep) {
-      amount = atoi(sep+1)-first+1;
+      if (*(sep+1) == '\0')
+	amount = topo_get_depth_nbitems(topology, depth)-first;
+      else
+	amount = atoi(sep+1)-first+1;
     } else {
       sep = strchr(colon+1, ':');
       if (sep) {
