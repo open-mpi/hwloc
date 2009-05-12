@@ -14,11 +14,16 @@ static void usage(void)
   fprintf(stderr, "  depth may be machine, node, die, core, proc or a numeric depth\n");
 }
 
+#define OBJECT_MAX 128
+
 int main(int argc, char *argv[])
 {
   topo_topology_t topology;
   struct topo_topology_info topoinfo;
+  topo_obj_t objs[OBJECT_MAX];
+  unsigned nobj = 0;
   int verbose = 0;
+  char string[TOPO_CPUSET_STRING_LENGTH+1];
 
   topo_topology_init(&topology);
   topo_topology_load(topology);
@@ -30,7 +35,6 @@ int main(int argc, char *argv[])
   }
 
   while (argc >= 2) {
-    char string[TOPO_CPUSET_STRING_LENGTH+1];
     topo_obj_t obj;
     unsigned depth;
     char *colon;
@@ -63,24 +67,22 @@ int main(int argc, char *argv[])
     index = atoi(colon+1);
 
     obj = topo_get_object(topology, depth, index);
-    if (obj) {
-      topo_object_cpuset_snprintf(string, sizeof(string), 1, &obj);
-    } else {
-      topo_cpuset_t empty;
-      if (verbose)
+    if (obj)
+      objs[nobj++] = obj;
+    if (verbose) {
+      if (obj)
+        printf("object (%d,%d) found\n", depth, index);
+      else
         printf("object (%d,%d) does not exist\n", depth, index);
-      topo_cpuset_zero(&empty);
-      snprintf(string, sizeof(string), "%" TOPO_PRIxCPUSET, TOPO_CPUSET_PRINTF_VALUE(empty));
     }
-    if (verbose)
-      printf("object (%d,%d) has cpuset %s\n", depth, index, string);
-    else
-      printf("%s\n", string);
 
  next:
     argc--;
     argv++;
   }
+
+  topo_object_cpuset_snprintf(string, sizeof(string), nobj, objs);
+  printf("%s\n", string);
 
   topo_topology_destroy(topology);
 
