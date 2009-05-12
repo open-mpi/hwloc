@@ -10,7 +10,7 @@
 
 static void usage(void)
 {
-  fprintf(stderr, "Usage: topomask [depth:index] ...\n");
+  fprintf(stderr, "Usage: topomask [depth:index[-max]] ...\n");
   fprintf(stderr, "  depth may be machine, node, die, core, proc or a numeric depth\n");
 }
 
@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
     topo_obj_t obj;
     unsigned depth;
     char *colon;
-    unsigned index;
+    char *dash;
+    unsigned indexbegin, indexend, i;
 
     if (!strcmp(argv[1], "-v")) {
       verbose = 1;
@@ -64,16 +65,24 @@ int main(int argc, char *argv[])
     else
       depth = atoi(argv[1]);
 
-    index = atoi(colon+1);
+    indexbegin = atoi(colon+1);
 
-    obj = topo_get_object(topology, depth, index);
-    if (obj)
-      objs[nobj++] = obj;
-    if (verbose) {
+    dash = strchr(colon+1, '-');
+    if (dash)
+      indexend = atoi(dash+1);
+    else
+      indexend = indexbegin;
+
+    for(i=indexbegin; i<=indexend; i++) {
+      obj = topo_get_object(topology, depth, i);
       if (obj)
-        printf("object (%d,%d) found\n", depth, index);
-      else
-        printf("object (%d,%d) does not exist\n", depth, index);
+	objs[nobj++] = obj;
+      if (verbose) {
+	if (obj)
+          printf("object (%d,%d) found\n", depth, i);
+	else
+          printf("object (%d,%d) does not exist\n", depth, i);
+      }
     }
 
  next:
