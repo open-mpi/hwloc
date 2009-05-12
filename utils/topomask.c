@@ -13,7 +13,7 @@ static void usage(void)
   fprintf(stderr, "Usage: topomask [depth:index] ...\n");
   fprintf(stderr, "  <depth> may be machine, node, die, core, proc or a numeric depth\n");
   fprintf(stderr, "  <index> may be a single index <N>, a dash-separated range <min-max>,\n");
-  fprintf(stderr, "    or a beginning and number of objects <begin:number>\n");
+  fprintf(stderr, "    or a beginning and amount of objects <begin:number> (with wrap-around)\n");
 }
 
 #define OBJECT_MAX LIBTOPO_NBMAXCPUS
@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
     unsigned depth;
     char *colon;
     char *sep;
-    unsigned indexbegin, indexend, i;
+    unsigned first, wrap, amount;
+    unsigned i,j;
 
     if (!strcmp(argv[1], "-v")) {
       verbose = 1;
@@ -62,20 +63,25 @@ int main(int argc, char *argv[])
     else
       depth = atoi(argv[1]);
 
-    indexbegin = atoi(colon+1);
+    first = atoi(colon+1);
+    amount = 1;
+    wrap = 0;
 
     sep = strchr(colon+1, '-');
     if (sep) {
-      indexend = atoi(sep+1);
+      amount = atoi(sep+1)-first+1;
     } else {
       sep = strchr(colon+1, ':');
-      if (sep)
-        indexend = indexbegin+atoi(sep+1)-1;
-      else
-        indexend = indexbegin;
+      if (sep) {
+        amount = atoi(sep+1);
+	wrap = 1;
+      }
     }
 
-    for(i=indexbegin; i<=indexend; i++) {
+    for(i=first, j=0; j<amount; i++, j++) {
+      if (wrap && i==topo_get_depth_nbitems(topology, depth))
+	i = 0;
+
       obj = topo_get_object(topology, depth, i);
       if (obj) {
 	if (nobj == OBJECT_MAX) {
