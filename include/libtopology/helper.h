@@ -69,7 +69,7 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 		__l1->number = 0;					\
 		__l1->index = 0;					\
 		__l1->memory_kB = 0;					\
-		__l1->huge_page_size_kB = 0;				\
+		__l1->huge_page_free = 0;				\
 		topo_cpuset_fill(&__l1->cpuset);			\
 		topo_cpuset_zero(&__l2->cpuset);			\
   } while (0)
