@@ -81,6 +81,8 @@ topo_cpuset_from_string(const char * string, topo_cpuset_t * set)
     if (*next != ',')
       break;
     current = next+1;
+    if (count == TOPO_CPUSUBSET_COUNT)
+      break;
   }
 
   /* move subsets back to the beginning and clear the missing subsets */
