@@ -98,7 +98,7 @@ proc_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 {
   char text[64];
 
-  *retwidth = 5*UNIT;
+  *retwidth = 5*FONT_SIZE;
   *retheight = UNIT + FONT_SIZE + UNIT;
 
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
@@ -116,8 +116,8 @@ cache_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_typ
 
   RECURSE(&null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
-  if (totwidth < 8*UNIT)
-    totwidth = 8*UNIT;
+  if (totwidth < 8*FONT_SIZE)
+    totwidth = 8*FONT_SIZE;
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
   if (!maxheight)
@@ -143,8 +143,8 @@ core_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 
   RECURSE(&null_draw_methods, 0);
 
-  if (totwidth < 6*UNIT)
-    totwidth = 6*UNIT;
+  if (totwidth < 6*FONT_SIZE)
+    totwidth = 6*FONT_SIZE;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight + (maxheight?UNIT:0);
 
@@ -167,8 +167,8 @@ die_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_
   RECURSE(&null_draw_methods, UNIT);
 
   maxheight += UNIT;
-  if (totwidth < 6*UNIT)
-    totwidth = 6*UNIT;
+  if (totwidth < 6*FONT_SIZE)
+    totwidth = 6*FONT_SIZE;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
 
@@ -189,8 +189,8 @@ node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
   char text[64];
 
   RECURSE(&null_draw_methods, UNIT);
-  if (totwidth < 10*UNIT)
-    totwidth = 10*UNIT;
+  if (totwidth < 10*FONT_SIZE)
+    totwidth = 10*FONT_SIZE;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight + UNIT;
   if (!maxheight)
@@ -236,8 +236,8 @@ fake_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
   RECURSE(&null_draw_methods, UNIT);
 
   maxheight += UNIT;
-  if (totwidth < 6*UNIT)
-    totwidth = 6*UNIT;
+  if (totwidth < 6*FONT_SIZE)
+    totwidth = 6*FONT_SIZE;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
 
