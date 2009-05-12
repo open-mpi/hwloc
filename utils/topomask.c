@@ -31,11 +31,6 @@ int main(int argc, char *argv[])
   topo_topology_load(topology);
   topo_topology_get_info(topology, &topoinfo);
 
-  if (argc < 2) {
-    usage();
-    return EXIT_FAILURE;
-  }
-
   while (argc >= 2) {
     topo_obj_t obj;
     unsigned depth;
