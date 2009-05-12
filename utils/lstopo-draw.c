@@ -62,6 +62,8 @@ static struct draw_methods null_draw_methods = {
  * cache size information etc) at (X,Y), recurse into sublevels again to
  * actually draw things, and return in RETWIDTH and RETHEIGHT the amount of
  * space that the drawing took.
+ *
+ * For generic detailed comments, see the node_draw function.
  */
 
 typedef void (*foo_draw)(struct draw_methods *methods, topo_obj_t obj, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
@@ -72,7 +74,7 @@ static foo_draw get_type_fun(topo_obj_type_t type);
  * Helper to recurse into sublevels
  */
 
-#define RECURSE(obj, methods, sep) { \
+#define RECURSE(obj, methods, separator) { \
   topo_obj_t *sublevels = obj->children; \
   unsigned numsublevels = obj->arity; \
   unsigned width, height; \
@@ -82,11 +84,11 @@ static foo_draw get_type_fun(topo_obj_type_t type);
     int i; \
     for (i = 0; i < numsublevels; i++) { \
       fun(methods, sublevels[i], type, output, depth-1, x + totwidth, &width, y + myheight, &height); \
-      totwidth += width + (sep); \
+      totwidth += width + (separator); \
       if (height > maxheight) \
 	maxheight = height; \
     } \
-    totwidth -= (sep); \
+    totwidth -= (separator); \
   } \
 }
 
@@ -114,6 +116,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
 
+  /* Do not separate items when in L1 (SMT) */
   RECURSE(level, &null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
   if (totwidth < 8*FONT_SIZE)
@@ -188,26 +191,39 @@ die_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, v
 static void
 node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
+  /* Reserve room for the separator, heading memory box and separator */
   unsigned myheight = UNIT + UNIT + FONT_SIZE + UNIT + UNIT;;
-  unsigned totwidth = UNIT, maxheight = 0;
+  /* Put a vertical separator on the left */
+  unsigned totwidth = UNIT;
+  unsigned maxheight = 0;
   char text[64];
 
+  /* Compute the size needed by sublevels */
   RECURSE(level, &null_draw_methods, UNIT);
+
+  /* Make sure we have room for text */
   if (totwidth < 10*FONT_SIZE)
     totwidth = 10*FONT_SIZE;
+
+  /* Add vertical separator on the right */
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
+  /* There were items, add separator at the bottom */
   if (maxheight)
     *retheight += UNIT;
 
+  /* Draw the epoxy box */
   methods->box(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, depth, x, *retwidth, y, *retheight);
+  /* Draw the memory box */
   methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
 
+  /* Output text */
   snprintf(text, sizeof(text), "Node %d - %lu%s", level->physical_index,
 		  size_value(level->memory_kB),
 		  size_unit(level->memory_kB));
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
 
+  /* Restart, now really drawing sublevels */
   totwidth = UNIT;
   RECURSE(level, methods, UNIT);
 }
@@ -280,6 +296,10 @@ get_type_fun(topo_obj_type_t type)
   }
   return NULL;
 }
+
+/*
+ * Dummy drawing methods to get the bounding box.
+ */
 
 struct coords {
   int x;
