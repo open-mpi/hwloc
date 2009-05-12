@@ -7,7 +7,7 @@ AM_LDFLAGS += $(CAIRO_LIBS)
 
 EXTRA_DIST =
 
-bin_PROGRAMS = lstopo closest
+bin_PROGRAMS = lstopo closest topomask
 
 lstopo_SOURCES = lstopo.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-cairo.c
 if HAVE_WINDOWS
@@ -17,5 +17,7 @@ EXTRA_DIST += lstopo-windows.c
 endif !HAVE_WINDOWS
 
 closest_SOURCES = closest.c
+
+topomask_SOURCES = topomask.c
 
 LIBS = $(top_builddir)/src/libtopology.la
