@@ -34,6 +34,14 @@
 #define CACHE_G_COLOR 0xff
 #define CACHE_B_COLOR 0xff
 
+#define MACHINE_R_COLOR 0xff
+#define MACHINE_G_COLOR 0xff
+#define MACHINE_B_COLOR 0xff
+
+#define FAKE_R_COLOR 0xff
+#define FAKE_G_COLOR 0xff
+#define FAKE_B_COLOR 0xff
+
 /* grid unit: 10 pixels */
 #define UNIT 10
 #define FONT_SIZE 10
@@ -48,32 +56,6 @@ static struct draw_methods null_draw_methods = {
 };
 
 /*
- * given LEVELS[0..NUMLEVELS-1], return all their direct sublevels in
- * SUBLEVELS[0..NUMSUBLEVELS-1], allocated by malloc.
- */
-
-static void
-get_sublevels(topo_level_t *levels, unsigned numlevels, topo_level_t **sublevels, unsigned *numsublevels)
-{
-  unsigned alloced = numlevels * levels[0]->arity;
-  topo_level_t *l = malloc(alloced * sizeof(*l));
-  unsigned i, j, n;
-
-  n = 0;
-  for (i = 0; i < numlevels; i++) {
-    for (j = 0; j < levels[i]->arity; j++) {
-      if (n >= alloced) {
-	alloced *= 2;
-	l = realloc(l, alloced * sizeof(*l));
-      }
-      l[n++] = levels[i]->children[j];
-    }
-  }
-  *sublevels = l;
-  *numsublevels = n;
-}
-
-/*
  * foo_draw functions take a LEVEL, computes which size it needs, recurse into
  * sublevels with null_draw_methods to recursively compute the needed size
  * without actually drawing anything, then draw things about LEVEL (chip draw,
@@ -84,18 +66,19 @@ get_sublevels(topo_level_t *levels, unsigned numlevels, topo_level_t **sublevels
 
 typedef void (*foo_draw)(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
 
-static int get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsublevels, enum topo_level_type_e *type, foo_draw *fun);
+static foo_draw get_type_fun(enum topo_level_type_e type);
 
 /*
  * Helper to recurse into sublevels
  */
 
 #define RECURSE(methods, sep) { \
-  topo_level_t *sublevels;		\
-  unsigned numsublevels; \
+  topo_level_t *sublevels = level->children; \
+  unsigned numsublevels = level->arity; \
   unsigned width, height; \
   foo_draw fun; \
-  if (get_sublevels_type(level, &sublevels, &numsublevels, &type, &fun)) { \
+  if (level->arity) { \
+    fun = get_type_fun(sublevels[0]->type); \
     int i; \
     for (i = 0; i < numsublevels; i++) { \
       fun(methods, sublevels[i], type, output, depth-1, x + totwidth, &width, y + myheight, &height); \
@@ -104,7 +87,6 @@ static int get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigne
 	maxheight = height; \
     } \
     totwidth -= (sep); \
-    free(sublevels); \
   } \
 }
 
@@ -227,50 +209,73 @@ node_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type
 }
 
 static void
-fig(struct draw_methods *methods, topo_level_t level, void *output, unsigned depth, unsigned x, unsigned y)
+machine_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = 0;
-  unsigned totwidth = 0, maxheight = 0;
-  enum topo_level_type_e type = level->type;
+  unsigned myheight = UNIT;
+  unsigned totwidth = UNIT, maxheight = 0;
 
+  RECURSE(&null_draw_methods, UNIT);
+
+  maxheight += UNIT;
+  *retwidth = totwidth + UNIT;
+  *retheight = myheight + maxheight;
+
+  methods->box(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR, depth, x, *retwidth, y, *retheight);
+
+  totwidth = UNIT;
   RECURSE(methods, UNIT);
 }
 
-/*
- * given a LEVEL and a mask of accepted level types, return all its (possibly
- * non-direct) sublevels in SUBLEVELS[0..NUMSUBLEVELS-1], allocated by malloc,
- * and a pointer FUN to the function that draws it.
- */
-static int
-get_sublevels_type(topo_level_t level, topo_level_t **levels, unsigned *numsublevels, enum topo_level_type_e *type, foo_draw *fun)
+static void
+fake_draw(struct draw_methods *methods, topo_level_t level, enum topo_level_type_e type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned n = 1, n2;
-  topo_level_t *l = malloc(sizeof(*l)), *l2;
-  l[0] = level;
+  unsigned myheight = UNIT + FONT_SIZE + UNIT;
+  unsigned totwidth = UNIT, maxheight = 0;
+  char text[64];
 
-  while (1) {
-#define DO(thetype, _fun) \
-    if (*type == TOPO_LEVEL_##thetype) { \
-      *fun = _fun; \
-      *levels = l; \
-      *numsublevels = n; \
-      return 1; \
-    }
-    DO(NODE, node_draw)
-    DO(DIE, die_draw)
-    DO(CACHE, cache_draw)
-    DO(CORE, core_draw)
-    DO(PROC, proc_draw)
-    if ((*type) != TOPO_LEVEL_MACHINE && (*type) != TOPO_LEVEL_FAKE)
-      fprintf(stderr,"urgl, type %u?! Skipping\n", *type);
-    if (!l[0]->children)
-      return 0;
-    get_sublevels(l, n, &l2, &n2);
-    free(l);
-    l = l2;
-    n = n2;
-    *type = l[0]->type;
+  RECURSE(&null_draw_methods, UNIT);
+
+  maxheight += UNIT;
+  if (totwidth < 6*UNIT)
+    totwidth = 6*UNIT;
+  *retwidth = totwidth + UNIT;
+  *retheight = myheight + maxheight;
+
+  methods->box(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR, depth, x, *retwidth, y, *retheight);
+
+
+  snprintf(text, sizeof(text), "Fake %d", level->physical_index);
+  methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + UNIT, y + UNIT, text);
+
+  totwidth = UNIT;
+  RECURSE(methods, UNIT);
+}
+
+static void
+fig(struct draw_methods *methods, topo_level_t level, void *output, unsigned depth, unsigned x, unsigned y)
+{
+  unsigned totwidth = 0, maxheight = 0;
+  enum topo_level_type_e type = level->type;
+
+  machine_draw(methods, level, type, output, depth, x, &totwidth, y, &maxheight);
+}
+
+/*
+ * given a type, return a pointer FUN to the function that draws it.
+ */
+static foo_draw
+get_type_fun(enum topo_level_type_e type)
+{
+  switch (type) {
+    case TOPO_LEVEL_MACHINE: return machine_draw;
+    case TOPO_LEVEL_NODE: return node_draw;
+    case TOPO_LEVEL_DIE: return die_draw;
+    case TOPO_LEVEL_CACHE: return cache_draw;
+    case TOPO_LEVEL_CORE: return core_draw;
+    case TOPO_LEVEL_PROC: return proc_draw;
+    case TOPO_LEVEL_FAKE: return fake_draw;
   }
+  return NULL;
 }
 
 struct coords {
@@ -308,6 +313,8 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
   methods->declare_color(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR);
   methods->declare_color(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR);
   methods->declare_color(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR);
+  methods->declare_color(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR);
+  methods->declare_color(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR);
   return output;
 }
 
