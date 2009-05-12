@@ -121,6 +121,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
   if (!maxheight)
+    /* No sublevels, remove the separator */
     *retheight -= UNIT;
 
   methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
@@ -146,7 +147,9 @@ core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   if (totwidth < 6*FONT_SIZE)
     totwidth = 6*FONT_SIZE;
   *retwidth = totwidth + UNIT;
-  *retheight = myheight + maxheight + (maxheight?UNIT:0);
+  *retheight = myheight + maxheight;
+  if (maxheight)
+    *retheight += UNIT;
 
   methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
@@ -166,11 +169,12 @@ die_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, v
 
   RECURSE(level, &null_draw_methods, UNIT);
 
-  maxheight += UNIT;
   if (totwidth < 6*FONT_SIZE)
     totwidth = 6*FONT_SIZE;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
+  if (maxheight)
+    *retheight += UNIT;
 
   methods->box(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
@@ -192,9 +196,9 @@ node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   if (totwidth < 10*FONT_SIZE)
     totwidth = 10*FONT_SIZE;
   *retwidth = totwidth + UNIT;
-  *retheight = myheight + maxheight + UNIT;
-  if (!maxheight)
-    *retheight -= UNIT;
+  *retheight = myheight + maxheight;
+  if (maxheight)
+    *retheight += UNIT;
 
   methods->box(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, depth, x, *retwidth, y, *retheight);
   methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
@@ -243,9 +247,8 @@ fake_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 
   methods->box(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-
   snprintf(text, sizeof(text), "Fake %d", level->physical_index);
-  methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + UNIT, y + UNIT, text);
+  methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
   RECURSE(level, methods, UNIT);
