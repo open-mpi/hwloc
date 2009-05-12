@@ -16,6 +16,4 @@ else !HAVE_WINDOWS
 EXTRA_DIST += lstopo-windows.c
 endif !HAVE_WINDOWS
 
-topomask_SOURCES = topomask.c
-
 LIBS = $(top_builddir)/src/libtopology.la

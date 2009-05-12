@@ -8,6 +8,4 @@ TESTS =
 
 bin_PROGRAMS = closest
 
-closest_SOURCES = closest.c
-
 LIBS = $(top_builddir)/src/libtopology.la
