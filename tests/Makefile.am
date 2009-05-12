@@ -6,6 +6,6 @@ SUBDIRS = linux
 
 TESTS =
 
-bin_PROGRAMS = closest
+bin_PROGRAMS = closest cpuset_string
 
 LIBS = $(top_builddir)/src/libtopology.la
