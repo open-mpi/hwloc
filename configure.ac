@@ -1,13 +1,23 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+#
+# Initialize autostuff
+#
+
 AC_PREREQ([2.60])
 AC_INIT([libtopology], [0.0], [libtopology-commits@gforge.inria.fr])
 AC_SUBST([TOPO_SOVERSION],[0])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
-
 AC_CANONICAL_SYSTEM
+AC_CONFIG_SRCDIR([src/topology.c])
+AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+
+#
+# Check OS support
+#
+
 case ${target} in
   *-*-linux*)
     AC_DEFINE(LINUX_SYS, 1, Define to 1 on Linux)
@@ -50,6 +60,22 @@ AM_CONDITIONAL([HAVE_AIX], [test "x$aix" = "xyes"])
 AM_CONDITIONAL([HAVE_OSF], [test "x$osf" = "xyes"])
 AM_CONDITIONAL([HAVE_WINDOWS], [test "x$windows" = "xyes"])
 
+#
+# Define C flags
+#
+
+AC_USE_SYSTEM_EXTENSIONS # for O_DIRECTORY, fdopen, ffsl, ...
+
+AC_LANG([C])
+
+AC_PROG_CC_C99
+
+TOPO_GCC_FLAGS
+
+#
+# Now detect support
+#
+
 AC_CHECK_TYPES([KAFFINITY,
     		    PROCESSOR_CACHE_TYPE,
 		    CACHE_DESCRIPTOR,
@@ -88,18 +114,6 @@ if test "x$enable_cairo" = "xyes"; then
   AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
 fi
 
-
-AM_INIT_AUTOMAKE([foreign -Wall -Werror])
-
-AC_CONFIG_SRCDIR([src/topology.c])
-AC_CONFIG_HEADER([include/config.h])
-
-AC_LANG([C])
-
-AC_GNU_SOURCE # for O_DIRECTORY, fdopen, ffsl, ...
-
-AC_PROG_CC_C99
-
 # disable C++, F77, Java and Windows Resource Compiler support
 # change this into LT_LANG+LT_INIT when we'll switch to libtool2
 m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
@@ -112,8 +126,6 @@ AM_CONDITIONAL([HAVE_GCC], [test "x$GCC" = "xyes"])
 AC_PATH_PROGS([TOPO_MS_LIB], [lib])
 AC_ARG_VAR([TOPO_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
 AM_CONDITIONAL([HAVE_MS_LIB], [test "x$TOPO_MS_LIB" != "x"])
-
-TOPO_GCC_FLAGS
 
 AC_ARG_ENABLE([debug],
   AS_HELP_STRING([--enable-debug], [enable debugging messages]),
@@ -139,6 +151,8 @@ AC_CHECK_FUNCS([ffs], [
 AC_CHECK_FUNCS([ffsl], [
   AC_DEFINE([TOPO_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
+
+AC_CONFIG_HEADER([include/config.h])
 
 AC_CONFIG_FILES([Makefile
                  topology.pc
