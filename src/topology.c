@@ -128,10 +128,10 @@ topo_setup_cache_level(int cachelevel, int procid_max,
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
       topo_setup_object(&level[j], TOPO_OBJ_CACHE, j);
-      level[j].memory_kB = cachesizes[cachelevel*LIBTOPO_NBMAXCPUS+j];
+      level[j].memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
       level[j].cache_depth = cachelevel+1;
 
-      topo_object_cpuset_from_array(&level[j], j, &cacheids[cachelevel*LIBTOPO_NBMAXCPUS], procid_max);
+      topo_object_cpuset_from_array(&level[j], j, &cacheids[cachelevel*TOPO_NBMAXCPUS], procid_max);
 
       topo_debug("L%d cache %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(level[j].cpuset));
@@ -235,8 +235,8 @@ compar(const void *_l1, const void *_l2)
   int first1 = topo_cpuset_first(&l1->cpuset);
   int first2 = topo_cpuset_first(&l2->cpuset);
   /* if empty, return a bit after the last bit of cpuset */
-  if (first1 < 0) first1 = LIBTOPO_NBMAXCPUS;
-  if (first2 < 0) first2 = LIBTOPO_NBMAXCPUS;
+  if (first1 < 0) first1 = TOPO_NBMAXCPUS;
+  if (first2 < 0) first2 = TOPO_NBMAXCPUS;
   return first1 - first2;
 }
 

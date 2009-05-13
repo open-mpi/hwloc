@@ -130,7 +130,7 @@ topo_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_fd
 /* kernel cpumaps are composed of an array of 32bits cpumasks */
 #define KERNEL_CPU_MASK_BITS 32
 #define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
-#define MAX_KERNEL_CPU_MASK ((LIBTOPO_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
+#define MAX_KERNEL_CPU_MASK ((TOPO_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
 static int
 topo_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
@@ -165,7 +165,7 @@ topo_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
     }
 
   /* check that the map can be stored in our cpuset */
-  assert(!(nr_maps*KERNEL_CPU_MASK_BITS > LIBTOPO_NBMAXCPUS));
+  assert(!(nr_maps*KERNEL_CPU_MASK_BITS > TOPO_NBMAXCPUS));
 
   /* convert into a set */
   for(i=0; i<nr_maps*KERNEL_CPU_MASK_BITS; i++)
@@ -277,8 +277,8 @@ topo_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *
     sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", proc_index, i);
     sprintf(cachename, "L%d cache", level+1);
     topo_process_shared_cpu_map(mappath, cachename, kB,
-				procid_max, cacheids+level*LIBTOPO_NBMAXCPUS,
-				cachesizes+level*LIBTOPO_NBMAXCPUS,
+				procid_max, cacheids+level*TOPO_NBMAXCPUS,
+				cachesizes+level*TOPO_NBMAXCPUS,
 				&nr_caches[level], -1, online_cpuset,
 				fsys_root_fd);
   }
@@ -425,7 +425,7 @@ topo_admin_disable_cpus_from_cpuset(struct topo_topology *topology)
   }
 
   /* disable after last enabled-segment */
-  nextfirst = LIBTOPO_NBMAXCPUS;
+  nextfirst = TOPO_NBMAXCPUS;
   if (prevlast+1 <= nextfirst-1) {
     topo_debug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
     topo_cpuset_set_range(&topology->admin_disabled_cpuset, prevlast+1, nextfirst-1);
@@ -590,7 +590,7 @@ look__sysfscpu(unsigned *procid_max,
     }
   topo_debug("found os proc id max %d\n", cpu_max);
 
-  assert(!(cpu_max > LIBTOPO_NBMAXCPUS));
+  assert(!(cpu_max > TOPO_NBMAXCPUS));
 
   for(i=0; i<cpu_max; i++)
     {
@@ -667,7 +667,7 @@ look__sysfscpu(unsigned *procid_max,
       if (j==i)
 	{
 	  /* new die cpumap fill it */
-	  for(k=i; k<LIBTOPO_NBMAXCPUS; k++)
+	  for(k=i; k<TOPO_NBMAXCPUS; k++)
 	    if (topo_cpuset_isset(&dieset, k))
 	      proc_physids[k] = (*nr_dies);
 	  topo_debug("die %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
@@ -681,7 +681,7 @@ look__sysfscpu(unsigned *procid_max,
       if (j==i)
 	{
 	  /* new core cpumap fill it */
-	  for(k=i; k<LIBTOPO_NBMAXCPUS; k++)
+	  for(k=i; k<TOPO_NBMAXCPUS; k++)
 	    if (topo_cpuset_isset(&coreset, k))
 	      proc_coreids[k] = (*nr_cores);
 	  topo_debug("core %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
@@ -716,9 +716,9 @@ look_cpuinfo(unsigned *procid_max,
   FILE *fd;
   char string[strlen(PHYSID)+1+9+1+1];
   char *endptr;
-  unsigned proc_osphysids[LIBTOPO_NBMAXCPUS];
-  unsigned proc_oscoreids[LIBTOPO_NBMAXCPUS];
-  unsigned core_osphysids[LIBTOPO_NBMAXCPUS];
+  unsigned proc_osphysids[TOPO_NBMAXCPUS];
+  unsigned proc_oscoreids[TOPO_NBMAXCPUS];
+  unsigned core_osphysids[TOPO_NBMAXCPUS];
   long physid;
   long coreid;
   long processor = -1;
@@ -807,19 +807,19 @@ look_cpuinfo(unsigned *procid_max,
 static void
 look_sysfscpu(struct topo_topology *topology)
 {
-  unsigned proc_physids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
-  unsigned osphysids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
-  unsigned proc_coreids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
-  unsigned oscoreids[] = { [0 ... LIBTOPO_NBMAXCPUS-1] = -1 };
-  unsigned proc_cacheids[] = { [0 ... LIBTOPO_CACHE_LEVEL_MAX*LIBTOPO_NBMAXCPUS-1] = -1 };
-  unsigned long cache_sizes[] = { [0 ... LIBTOPO_CACHE_LEVEL_MAX*LIBTOPO_NBMAXCPUS-1] = 0 };
+  unsigned proc_physids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned osphysids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned proc_coreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned oscoreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned proc_cacheids[] = { [0 ... TOPO_CACHE_LEVEL_MAX*TOPO_NBMAXCPUS-1] = -1 };
+  unsigned long cache_sizes[] = { [0 ... TOPO_CACHE_LEVEL_MAX*TOPO_NBMAXCPUS-1] = 0 };
   int j;
 
   unsigned procid_max=0;
   unsigned numprocs=0;
   unsigned numdies=0;
   unsigned numcores=0;
-  unsigned numcaches[] = { [0 ... LIBTOPO_CACHE_LEVEL_MAX-1] = 0 };
+  unsigned numcaches[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1] = 0 };
 
   if (topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->fsys_root_fd) < 0
       || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->fsys_root_fd) < 0

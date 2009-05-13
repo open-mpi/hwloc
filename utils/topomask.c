@@ -19,7 +19,7 @@ static void usage(void)
   fprintf(stderr, "   X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
 }
 
-#define OBJECT_MAX LIBTOPO_NBMAXCPUS
+#define OBJECT_MAX TOPO_NBMAXCPUS
 
 int main(int argc, char *argv[])
 {

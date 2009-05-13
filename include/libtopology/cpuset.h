@@ -15,7 +15,7 @@
 
 /* size and count of subsets within a set */
 #    define TOPO_CPUSUBSET_SIZE		(8*sizeof(long))
-#    define TOPO_CPUSUBSET_COUNT	((LIBTOPO_NBMAXCPUS+TOPO_CPUSUBSET_SIZE-1)/TOPO_CPUSUBSET_SIZE)
+#    define TOPO_CPUSUBSET_COUNT	((TOPO_NBMAXCPUS+TOPO_CPUSUBSET_SIZE-1)/TOPO_CPUSUBSET_SIZE)
 typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 
 /* extract a subset from a set using an index or a cpu */
