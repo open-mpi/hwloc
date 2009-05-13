@@ -1,0 +1,13 @@
+Machine(0KB)
+  SMTproc#0
+  SMTproc#1
+  SMTproc#2
+  SMTproc#3
+Topology is fake
+depth 0:	type #0 (Machine)
+depth 0:	type #1 (NUMANode)
+depth 0:	type #2 (Die)
+depth 0:	type #3 (Core)
+ depth 1:	type #4 (SMTproc)
+absent:		type #5 (Fake)
+absent:		type #6 (Cache)

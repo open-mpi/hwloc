@@ -1,0 +1,33 @@
+Machine(0KB)
+  Die
+    Core#0
+      L3Cache#0(4096KB)
+        L2Cache#0(256KB)
+          L1Cache#0(16KB)
+            SMTproc#0
+  Die
+    Core#0
+      L3Cache#1(4096KB)
+        L2Cache#1(256KB)
+          L1Cache#1(16KB)
+            SMTproc#1
+  Die
+    Core#0
+      L3Cache#2(4096KB)
+        L2Cache#2(256KB)
+          L1Cache#2(16KB)
+            SMTproc#2
+  Die
+    Core#0
+      L3Cache#3(4096KB)
+        L2Cache#3(256KB)
+          L1Cache#3(16KB)
+            SMTproc#3
+Topology is fake
+depth 0:	type #0 (Machine)
+depth 0:	type #1 (NUMANode)
+ depth 1:	type #2 (Die)
+  depth 2:	type #3 (Core)
+      depth 6:	type #4 (SMTproc)
+absent:		type #5 (Fake)
+multiple:	type #6 (Cache)
