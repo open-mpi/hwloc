@@ -46,6 +46,7 @@ test_topology ()
 {
     local name="$1"
     local dir="$2"
+    local expected_output="$3"
 
     local output="`mktemp`"
 
@@ -55,7 +56,7 @@ test_topology ()
     then
 	result=1
     else
-	diff -uBb "$dir/output" "$output"
+	diff -uBb "$expected_output" "$output"
 	result=$?
     fi
 
@@ -71,8 +72,9 @@ test_topology ()
 test_eligible()
 {
     local dir="$1"
+    local output="$2"
 
-    [ -d "$dir" -a -f "$dir/output" ] &&				\
+    [ -d "$dir" -a -f "$output" ] &&				\
 	[ `flavor_max_cpu_count` -ge `topology_cpu_count "$dir"` ]
 }
 
@@ -92,12 +94,13 @@ then
     error "failed to extract topology \`$topology'"
 else
     actual_dir="`echo "$dir"/*`"
+    actual_output="$abs_builddir/$topology".output
 
-    if test_eligible "$actual_dir"
+    if test_eligible "$actual_dir" "$actual_output"
     then
 	test_count="`expr $test_count + 1`"
 
-	test_topology "`basename $topology`" "$actual_dir"
+	test_topology "`basename $topology`" "$actual_dir" "$actual_output"
 	result=$?
     else
 	# Skip this test.
