@@ -182,6 +182,6 @@ int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t 
   for(i=0; i<nobj; i++)
     topo_cpuset_orset(&set, &objs[i]->cpuset);
 
-  return snprintf(str, size, "%" TOPO_PRIxCPUSET, TOPO_CPUSET_PRINTF_VALUE(set));
+  return topo_cpuset_snprintf(str, size, &set);
 }
 
