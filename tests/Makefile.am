@@ -4,8 +4,8 @@ include $(top_srcdir)/libtopology.am
 
 SUBDIRS = linux
 
-TESTS =
+TESTS = closest cpuset_string
 
-bin_PROGRAMS = closest cpuset_string
+check_PROGRAMS = $(TESTS)
 
 LIBS = $(top_builddir)/src/libtopology.la
