@@ -26,6 +26,7 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
   unsigned nbnodes;
   struct topo_obj *rad_level;
 
+  /* TODO: use RS_ALL to get all machine's topology, not only administration restrictions */
   rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
   nbnodes = rs_numrads(rset, sdl, 0);
