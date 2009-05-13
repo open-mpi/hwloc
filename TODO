@@ -19,20 +19,18 @@
 * use topology_allocator for real, including in strdup
   + add topo_set_allocator() to be called before _init()
 
-* conversion between strings and cpuset:
-  void topo_string_to_mask(const char *string, topo_cpuset_t *cpuset)
-  void topo_mask_to_string(topo_cpuset_t *cpuset, const char *string)
 * conversion between cpuset and an array of highest levels covering exactly it
   int topo_mask_to_levels(topo_cpuset_t *cpuset, topo_level_t *levels, int max)
- 
-API:
-* add a way to extract sched_setaffinity masks from arrays of levels (OR'ed)
-  + or bind directly?
-* add a way to extract libnuma-friendly masks of nodes from arrays of levels (OR'ed)
-  + no level = empty mask, and we may want an easy alias for "whole machine"
-* add reverse-routines converting sched_getaffinity or libnuma masks into a ancestor level
-* provide traversal functions instead of pointers in structures?
+* cache or node specific functions?
+  + get nodes covering a cpuset?
+  + get shared caches covering a cpuset?
 
+* topo_set_cpubind(pid, ...) which type for pid?
+* expose the internal conversion from cpuset to sched_setaffinity mask?
+  + reverse routine?
+* topo_set_membind()
+  + reverse routine?
+  + no level = empty mask, and we may want an easy alias for "whole machine"
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
@@ -42,7 +40,3 @@ Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --index 4
   bind process on the 4th set of 2 physically close ids in a topology-aware numbering (used by ggrun when launching 4 process with 2 threads)
 * tools to create masks and bind using them
-
-topo_set_cpubind(pid, ...) which type for pid?
-topo_set_membind()
-topo_get_cpu/membind?
