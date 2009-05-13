@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     }
 
     if (!strncmp(argv[1], "machine", 1))
-      depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
+      depth = topo_get_type_depth(topology, TOPO_OBJ_MACHINE);
     else if (!strncmp(argv[1], "node", 1))
       depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
     else if (!strncmp(argv[1], "die", 1))
