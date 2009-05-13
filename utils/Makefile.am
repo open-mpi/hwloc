@@ -5,7 +5,7 @@ include $(top_srcdir)/libtopology.am
 AM_CFLAGS += $(CAIRO_CFLAGS)
 AM_LDFLAGS += $(CAIRO_LIBS)
 
-EXTRA_DIST =
+EXTRA_DIST = lstopo.h
 
 bin_PROGRAMS = lstopo topomask topobind
 
