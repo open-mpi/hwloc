@@ -45,6 +45,9 @@ Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
   bind process on the 4th set of 2 physically close ids in a topology-aware numbering (used by ggrun when launching 4 process with 2 threads)
 * tools to create masks and bind using them
 
+topo_set_cpubind(pid, ...) which type for pid?
+topo_set_membind()
+topo_get_cpu/membind?
 
 Add an include directory to be able to compile code for non-linux platforms just
 for make checks.

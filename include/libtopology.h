@@ -143,4 +143,7 @@ extern void topo_print_object (topo_topology_t topology, topo_obj_t l,
 /** \brief stringify the cpuset containing a set of objects */
 extern int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
 
+/** \brief bind current process on cpus given in the set */
+extern int topo_set_cpubind(topo_cpuset_t *set);
+
 #endif /* LIBTOPOLOGY_H */
