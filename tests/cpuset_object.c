@@ -10,12 +10,13 @@
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
 
-#define GIVEN_CPUSET_STRING "0,0fff,f0000000"
 #if TOPO_BITS_PER_LONG == 32
+#define GIVEN_CPUSET_STRING "0,0fff,f0000000"
 #define EXPECTED_CPUSET_STRING "0000ffff,ff000000"
 #define GIVEN_LARGESPLIT_CPUSET_STRING "8000,,,,,,,,,,,,,,,,,,,,,,1" /* first and last(735th) bit set */
 #define GIVEN_TOOLARGE_CPUSET_STRING "10000,,,,,,,,,,,,,,,,,,,,,,0" /* 736th bit is too large for the 720-wide topology */
 #elif TOPO_BITS_PER_LONG == 64
+#define GIVEN_CPUSET_STRING "0,,0ffff0000000"
 #define EXPECTED_CPUSET_STRING "0000ffffff000000"
 #define GIVEN_LARGESPLIT_CPUSET_STRING "8000,,,,,,,,,,,1" /* first and last(735th) bit set */
 #define GIVEN_TOOLARGE_CPUSET_STRING "10000,,,,,,,,,,,0" /* 736th bit is too large for the 720-wide topology */
