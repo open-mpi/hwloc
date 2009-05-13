@@ -110,7 +110,7 @@ main (int argc, char *argv[])
 
   if (!filename) {
 #ifdef HAVE_CAIRO
-#if CAIRO_HAS_XLIB_SURFACE
+#if CAIRO_HAS_XLIB_SURFACE && defined HAVE_X11
     if (getenv("DISPLAY"))
       output_x11(topology, output, verbose_mode);
     else

@@ -17,6 +17,12 @@
 #include <cairo-svg.h>
 #endif /* CAIRO_HAS_SVG_SURFACE */
 
+#ifndef HAVE_X11
+/* In case X11 headers aren't availble, forcefully disable Cairo/Xlib.  */
+# undef CAIRO_HAS_XLIB_SURFACE
+# define CAIRO_HAS_XLIB_SURFACE 0
+#endif
+
 #if CAIRO_HAS_XLIB_SURFACE
 #include <cairo-xlib.h>
 #include <X11/Xlib.h>
