@@ -145,6 +145,7 @@ AC_CONFIG_FILES([Makefile
                  include/Makefile src/Makefile utils/Makefile
 		 tests/Makefile tests/linux/Makefile
 		 tests/linux/test-topology.sh
+		 tests/ports/Makefile
 		 doc/Makefile])
 
 AC_CONFIG_HEADERS([include/libtopology/config.h])
