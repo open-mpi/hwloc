@@ -2,7 +2,7 @@
 
 include $(top_srcdir)/libtopology.am
 
-SUBDIRS = linux
+SUBDIRS = linux ports
 
 TESTS = closest cpuset_string cpuset_object
 
