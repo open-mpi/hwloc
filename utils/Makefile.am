@@ -7,7 +7,7 @@ AM_LDFLAGS += $(CAIRO_LIBS)
 
 EXTRA_DIST =
 
-bin_PROGRAMS = lstopo topomask
+bin_PROGRAMS = lstopo topomask topobind
 
 lstopo_SOURCES = lstopo.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-cairo.c
 if HAVE_WINDOWS
