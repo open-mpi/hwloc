@@ -42,6 +42,8 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 #    define TOPO_CPUSUBSET_STRING_LENGTH	(TOPO_BITS_PER_LONG/4)
 #    define TOPO_CPUSET_STRING_LENGTH		(TOPO_CPUSUBSET_COUNT*(TOPO_CPUSUBSET_STRING_LENGTH+1))
 #    define TOPO_PRIxCPUSET		"s"
+
+/** \brief Return a locally-allocated stringified cpuset. */
 #    define TOPO_CPUSET_PRINTF_VALUE(x)	({					\
 	char *__buf = alloca(TOPO_CPUSET_STRING_LENGTH+1);			\
 	char *__tmp = __buf;							\
@@ -64,7 +66,9 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 	__buf;									\
      })
 
-/* parsing a cpuset string */
+/** \brief Parse a cpuset string.
+ * Must start and end with a digit.
+ */
 static __inline__ void
 topo_cpuset_from_string(const char * string, topo_cpuset_t * set)
 {

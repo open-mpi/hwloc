@@ -65,10 +65,11 @@ typedef struct topo_obj * topo_obj_t;
 
 /** \brief Allocate a topology context. */
 extern int topo_topology_init (topo_topology_t *topologyp);
-/** \brief Build the actual topology once initialized with _init and tuned with backends and friends */
+/** \brief Build the actual topology once initialized with _init and tuned with routines below */
 extern int topo_topology_load(topo_topology_t topology);
 /** \brief Terminate and free a topology context. */
 extern void topo_topology_destroy (topo_topology_t topology);
+
 
 /** \brief Ignore a object type.
     To be called between _init and _load. */
@@ -86,7 +87,6 @@ enum topo_flags_e {
   TOPO_FLAGS_IGNORE_ADMIN_DISABLE = (1<<1), /* Linux Cpusets, ... */
 };
 extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
-/* FIXME: switch to a backend interface */
 /** \brief Change the file-system root path when building the topology from sysfs/procs.
     To be called between _init and _load.  */
 extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
@@ -94,8 +94,7 @@ extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsy
 extern int topo_topology_set_synthetic(struct topo_topology *topology, const char *description);
 
 
-/* \brief Get global information about the topology.
-    To be called between _init and _load.  */
+/* \brief Get global information about the topology. */
 extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
 
 
@@ -112,6 +111,7 @@ extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsig
 
 /** \brief Returns the width of level at depth _depth_ */
 extern unsigned topo_get_depth_nbitems (topo_topology_t topology, unsigned depth);
+
 
 /** \brief Returns the topology object at index _index_ from depth _depth_ */
 extern topo_obj_t topo_get_object (topo_topology_t topology, unsigned depth, unsigned index);
@@ -135,18 +135,20 @@ extern int topo_find_closest_objects (topo_topology_t topology, topo_obj_t src, 
 /* \brief Find the lowest object covering at least the given cpu set */
 extern struct topo_obj * topo_find_cpuset_ancestor_object (struct topo_topology *topology, topo_cpuset_t *set);
 
-/** \brief return a stringified topology object type */
+
+/** \brief Return a stringified topology object type */
 extern const char * topo_object_type_string (enum topo_obj_type_e l);
 
-/** \brief print a human-readable form of the given topology object */
+/** \brief Print a human-readable form of the given topology object */
 extern void topo_print_object (topo_topology_t topology, topo_obj_t l,
 			       FILE *output, int verbose_mode,
 			       const char *indexprefix, const char* term);
 
-/** \brief stringify the cpuset containing a set of objects */
+/** \brief Stringify the cpuset containing a set of objects */
 extern int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
 
-/** \brief bind current process on cpus given in the set */
+
+/** \brief Bind current process on cpus given in the set */
 extern int topo_set_cpubind(topo_cpuset_t *set);
 
 #endif /* LIBTOPOLOGY_H */
