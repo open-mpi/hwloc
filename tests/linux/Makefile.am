@@ -14,4 +14,4 @@ endif !HAVE_LINUX
 
 EXTRA_DIST = $(sysfs_tarballs)
 
-TESTS_ENVIRONMENT = $(srcdir)/test-topology.sh
+TESTS_ENVIRONMENT = $(builddir)/test-topology.sh
