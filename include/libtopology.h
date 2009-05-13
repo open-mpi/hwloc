@@ -132,6 +132,9 @@ extern int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj);
     Return the actual number of objects that were found. */
 extern int topo_find_closest_objects (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
 
+/* \brief Find the lowest object covering at least the given cpu set */
+extern struct topo_obj * topo_find_cpuset_ancestor_object (struct topo_topology *topology, topo_cpuset_t *set);
+
 /** \brief return a stringified topology object type */
 extern const char * topo_object_type_string (enum topo_obj_type_e l);
 

@@ -92,6 +92,25 @@ int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *
   return stored;
 }
 
+struct topo_obj *
+topo_find_cpuset_ancestor_object (struct topo_topology *topology, topo_cpuset_t *set)
+{
+  struct topo_obj *current = &topology->levels[0][0];
+  int i;
+
+  if (!topo_cpuset_isincluded(&current->cpuset, set))
+    return NULL;
+
+ children:
+  for(i=0; i<current->arity; i++) {
+    if (topo_cpuset_isincluded(&current->children[i]->cpuset, set)) {
+      current = current->children[i];
+      goto children;
+    }
+  }
+
+  return current;
+}
 
 const char *
 topo_object_type_string (enum topo_obj_type_e l)

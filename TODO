@@ -22,8 +22,6 @@
 * conversion between strings and cpuset:
   void topo_string_to_mask(const char *string, topo_cpuset_t *cpuset)
   void topo_mask_to_string(topo_cpuset_t *cpuset, const char *string)
-* conversion between cpuset and the lowest ancestors covering it
-  void topo_mask_to_ancestor(topo_cpuset_t *cpuset, topo_level_t *level)
 * conversion between cpuset and an array of highest levels covering exactly it
   int topo_mask_to_levels(topo_cpuset_t *cpuset, topo_level_t *levels, int max)
  
