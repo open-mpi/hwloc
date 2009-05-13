@@ -10,7 +10,6 @@
 
 
 top_builddir="@top_builddir@"
-abs_builddir="@abs_builddir@"
 lstopo="$top_builddir/utils/lstopo"
 
 topology="$1"
@@ -89,12 +88,12 @@ result=1
 
 dir="`mktemp -d`"
 
-if ! ( cd "$dir" && gunzip -c "$abs_builddir/$topology" | tar xf - )
+if ! ( gunzip -c "$topology" | ( cd "$dir" && tar xf - ) )
 then
     error "failed to extract topology \`$topology'"
 else
     actual_dir="`echo "$dir"/*`"
-    actual_output="$abs_builddir/$topology".output
+    actual_output="$topology".output
 
     if test_eligible "$actual_dir" "$actual_output"
     then
