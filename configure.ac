@@ -72,9 +72,22 @@ AC_CHECK_HEADERS([kstat.h], [
   AC_HAVE_LIBRARY([kstat])
 ])
 
-PKG_CHECK_MODULES([CAIRO], [cairo], [
+AC_ARG_ENABLE([cairo],
+  [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
+  [enable_cairo="$enableval"],
+  [enable_cairo="yes"])
+
+if test "x$enable_cairo" = "xyes"; then
+  PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
+  AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h], [:],
+    [AC_MSG_WARN([X11 headers not found, Cairo back-end disabled.])
+     enable_cairo="no"])
+fi
+
+if test "x$enable_cairo" = "xyes"; then
   AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
-],[echo no])
+fi
+
 
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
