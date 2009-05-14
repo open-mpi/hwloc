@@ -152,6 +152,13 @@ static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long 
 		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_ZERO;
 }
 
+/** \brief unsigned long mask from CPU set */
+static __inline__ unsigned long topo_cpuset_to_ulong(const topo_cpuset_t *set);
+static __inline__ unsigned long topo_cpuset_to_ulong(const topo_cpuset_t *set)
+{
+	return TOPO_CPUSUBSET_SUBSET(*set,0);
+}
+
 /** \brief Clear CPU set and set CPU \e cpu */
 static __inline__ void topo_cpuset_cpu(topo_cpuset_t * set,
 				       unsigned cpu);
