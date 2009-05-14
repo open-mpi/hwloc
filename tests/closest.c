@@ -1,8 +1,8 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
 #include <config.h>
-#include <libtopology.h>
-#include <libtopology/private.h>
+#include <topology.h>
+#include <topology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>

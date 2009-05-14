@@ -13,10 +13,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <libtopology.h>
-#include <libtopology/private.h>
-#include <libtopology/helper.h>
-#include <libtopology/debug.h>
+#include <topology.h>
+#include <topology/private.h>
+#include <topology/helper.h>
+#include <topology/debug.h>
 
 #ifdef WIN_SYS
 #include <windows.h>

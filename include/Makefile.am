@@ -2,8 +2,8 @@
 
 include $(top_srcdir)/libtopology.am
 
-include_HEADERS = libtopology.h
-include_libtopologydir = $(includedir)/libtopology
-include_libtopology_HEADERS = libtopology/allocator.h libtopology/config.h libtopology/cpuset.h
+include_HEADERS = topology.h
+include_topologydir = $(includedir)/topology
+include_topology_HEADERS = topology/allocator.h topology/config.h topology/cpuset.h
 
-EXTRA_DIST = libtopology/private.h libtopology/helper.h libtopology/debug.h
+EXTRA_DIST = topology/private.h topology/helper.h topology/debug.h

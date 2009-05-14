@@ -1,7 +1,7 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
 #include <config.h>
-#include <libtopology.h>
+#include <topology.h>
 
 #ifdef LINUX_SYS
 #include <sched.h>

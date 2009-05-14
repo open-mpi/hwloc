@@ -2,10 +2,10 @@
 
 /* The cpuset API, for use in libtopology itself.  */
 
-#ifndef LIBTOPOLOGY_CPUSET_H
-#define LIBTOPOLOGY_CPUSET_H
+#ifndef TOPOLOGY_CPUSET_H
+#define TOPOLOGY_CPUSET_H
 
-#include <libtopology/config.h>
+#include <topology/config.h>
 
 #include <stdint.h>
 #include <string.h>
@@ -443,4 +443,4 @@ static __inline__ int topo_cpuset_weight(const topo_cpuset_t * cpuset)
 #define topo_cpuset_foreach_end() \
                 }
 
-#endif /* LIBTOPOLOGY_CPUSET_H */
+#endif /* TOPOLOGY_CPUSET_H */

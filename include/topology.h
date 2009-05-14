@@ -1,12 +1,12 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
-#ifndef LIBTOPOLOGY_H
-#define LIBTOPOLOGY_H
+#ifndef TOPOLOGY_H
+#define TOPOLOGY_H
 
 #include <stdio.h>
 
-#include <libtopology/allocator.h>
-#include <libtopology/cpuset.h>
+#include <topology/allocator.h>
+#include <topology/cpuset.h>
 
 
 /* \brief Topology context */
@@ -152,4 +152,4 @@ extern int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo
 /** \brief Bind current process on cpus given in the set */
 extern int topo_set_cpubind(topo_cpuset_t *set);
 
-#endif /* LIBTOPOLOGY_H */
+#endif /* TOPOLOGY_H */

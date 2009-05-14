@@ -2,8 +2,8 @@
 
 /* The memory allocation API, for use in libtopology itself.  */
 
-#ifndef LIBTOPOLOGY_ALLOCATOR_H
-#define LIBTOPOLOGY_ALLOCATOR_H
+#ifndef TOPOLOGY_ALLOCATOR_H
+#define TOPOLOGY_ALLOCATOR_H
 
 #include <stdlib.h>
 
@@ -23,4 +23,4 @@ extern const struct topo_allocator  topo_default_allocator;
 #define topo_realloc(p, s) (topo_allocator->reallocate ((p), (s)))
 #define topo_free(p)       (topo_allocator->free (s))
 
-#endif /* LIBTOPOLOGY_ALLOCATOR_H */
+#endif /* TOPOLOGY_ALLOCATOR_H */

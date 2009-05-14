@@ -1,9 +1,9 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
 #include <config.h>
-#include <libtopology.h>
-#include <libtopology/helper.h>
-#include <libtopology/debug.h>
+#include <topology.h>
+#include <topology/helper.h>
+#include <topology/debug.h>
 
 #include <stdio.h>
 #include <fcntl.h>

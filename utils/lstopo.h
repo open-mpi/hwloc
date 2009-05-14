@@ -1,6 +1,6 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
-#include <libtopology.h>
+#include <topology.h>
 
 typedef void output_method (struct topo_topology *topology, FILE *output, int verbose_mode);
 

@@ -162,7 +162,7 @@ AC_CONFIG_FILES([Makefile
 		 tests/ports/Makefile
 		 doc/Makefile])
 
-AC_CONFIG_HEADERS([include/libtopology/config.h])
+AC_CONFIG_HEADERS([include/topology/config.h])
 
 AC_CONFIG_COMMANDS([linux-test-topology],
                    [chmod +x tests/linux/test-topology.sh])

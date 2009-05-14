@@ -2,10 +2,10 @@
 
 /* Internal types. */
 
-#ifndef LIBTOPOLOGY_TYPES_H
-#define LIBTOPOLOGY_TYPES_H
+#ifndef TOPOLOGY_TYPES_H
+#define TOPOLOGY_TYPES_H
 
-#include <libtopology.h>
+#include <topology.h>
 
 enum topo_ignore_type_e {
   TOPO_IGNORE_TYPE_NEVER = 0,
@@ -56,4 +56,4 @@ struct topo_topology {
   } backend_params;
 };
 
-#endif /* LIBTOPOLOGY_TYPES_H */
+#endif /* TOPOLOGY_TYPES_H */

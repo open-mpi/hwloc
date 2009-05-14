@@ -1,10 +1,9 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
 #include <config.h>
-
-#include <libtopology.h>
-#include <libtopology/private.h>
-#include <libtopology/debug.h>
+#include <topology.h>
+#include <topology/private.h>
+#include <topology/debug.h>
 
 unsigned
 topo_get_type_depth (struct topo_topology *topology, enum topo_obj_type_e type)

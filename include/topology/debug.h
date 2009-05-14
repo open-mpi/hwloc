@@ -2,8 +2,8 @@
 
 /* The configuration file */
 
-#ifndef LIBTOPOLOGY_DEBUG_H
-#define LIBTOPOLOGY_DEBUG_H
+#ifndef TOPOLOGY_DEBUG_H
+#define TOPOLOGY_DEBUG_H
 
 #include <config.h>
 
@@ -13,4 +13,4 @@
 #define topo_debug(s, ...) do { }while(0)
 #endif
 
-#endif /* LIBTOPOLOGY_DEBUG_H */
+#endif /* TOPOLOGY_DEBUG_H */

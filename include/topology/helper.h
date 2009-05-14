@@ -2,11 +2,11 @@
 
 /* Miscellaneous topology helpers to be used the libtopology's core.  */
 
-#ifndef LIBTOPOLOGY_HELPER_H
-#define LIBTOPOLOGY_HELPER_H
+#ifndef TOPOLOGY_HELPER_H
+#define TOPOLOGY_HELPER_H
 
 #include <config.h>
-#include <libtopology/private.h>
+#include <topology/private.h>
 
 
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
@@ -88,4 +88,4 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 	} while (0)
 
 
-#endif /* LIBTOPOLOGY_HELPER_H */
+#endif /* TOPOLOGY_HELPER_H */

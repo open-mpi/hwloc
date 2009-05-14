@@ -1,7 +1,7 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
 #include <config.h>
-#include <libtopology.h>
+#include <topology.h>
 
 static void *
 allocate_cleared (size_t size)

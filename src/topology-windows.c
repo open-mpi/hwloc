@@ -2,9 +2,9 @@
 
 #include <config.h>
 
-#include <libtopology.h>
-#include <libtopology/helper.h>
-#include <libtopology/debug.h>
+#include <topology.h>
+#include <topology/helper.h>
+#include <topology/debug.h>
 
 #include <windows.h>
 
