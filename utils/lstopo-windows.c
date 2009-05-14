@@ -1,6 +1,5 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
-#include <config.h>
 #include <topology.h>
 
 #include <stdlib.h>
