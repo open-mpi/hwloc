@@ -2,6 +2,7 @@
 
 #include <config.h>
 #include <topology.h>
+#include <topology/allocator.h>
 
 static void *
 allocate_cleared (size_t size)

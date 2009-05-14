@@ -8,8 +8,10 @@
 #include <topology/config.h>
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <alloca.h>
 
 /* large cpuset using an array of unsigned long subsets */
 

@@ -17,6 +17,7 @@
 #include <topology/private.h>
 #include <topology/helper.h>
 #include <topology/debug.h>
+#include <topology/allocator.h>
 
 #ifdef WIN_SYS
 #include <windows.h>
