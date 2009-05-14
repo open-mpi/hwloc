@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 
-#include <topology/allocator.h>
 #include <topology/cpuset.h>
 
 
