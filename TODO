@@ -2,8 +2,6 @@
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
 
-* void *userdata in topo_obj_t
-
 * get first shared cache above for starpu
 
 * make cache size/depth/type, memory node size + hugepagefree a resource attribute

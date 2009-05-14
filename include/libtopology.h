@@ -53,6 +53,7 @@ struct topo_obj {
   unsigned arity;			/**< \brief Number of children */
   struct topo_obj **children;		/**< \brief Children, children[0 .. arity -1] */
   struct topo_obj *father;		/**< \brief Father, NULL if root (machine object) */
+  void *userdata;			/**< \brief Application-given private data pointer, initialize to NULL, use it as you wish */
   signed physical_index;		/**< \brief OS-provided physical index number */
   unsigned long memory_kB;		/**< \brief Size of memory bank or caches */
   unsigned long huge_page_free;
