@@ -82,7 +82,9 @@ static int
 topo_win_set_cpubind(topo_cpuset_t *topo_set)
 {
   DWORD mask = topo_cpuset_to_ulong(topo_set);
-  SetThreadAffinityMask(GetCurrentThread(), mask);
+  if (!SetThreadAffinityMask(GetCurrentThread(), mask))
+    return -1;
+  return 0;
 }
 #endif /* WIN_SYS */
 
