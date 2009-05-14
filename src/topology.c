@@ -497,8 +497,8 @@ topo_topology_init (struct topo_topology **topologyp)
   topo_cpuset_zero(&topology->admin_disabled_cpuset);
   topo_cpuset_zero(&topology->nonfirst_threads_cpuset);
   topology->flags = 0;
-  topology->fsys_root_fd = -1;
-  topology->use_synthetic = 0;
+  topology->is_fake = 0;
+  topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */
   topology->huge_page_size_kB = 0;
   topology->dmi_board_vendor = NULL;
   topology->dmi_board_name = NULL;
@@ -510,20 +510,39 @@ topo_topology_init (struct topo_topology **topologyp)
     topology->type_depth[i] = -1;
   topology->levels[0] = malloc (2*sizeof (struct topo_obj));
   topo_setup_machine_level (&topology->levels[0]);
-  topology->is_fake = 0;
 
   *topologyp = topology;
   return 0;
 }
 
+static void
+topo_backend_exit(struct topo_topology *topology)
+{
+  switch (topology->backend_type) {
+#ifdef LINUX_SYS
+  case TOPO_BACKEND_SYSFS:
+    topo_backend_sysfs_exit(topology);
+    break;
+#endif
+  case TOPO_BACKEND_SYNTHETIC:
+    topo_backend_synthetic_exit(topology);
+    break;
+  default:
+    break;
+  }
+
+  assert(topology->backend_type == TOPO_BACKEND_NONE);
+}
+
 int
 topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
 {
+  /* cleanup existing backend */
+  topo_backend_exit(topology);
+
 #ifdef LINUX_SYS
-#ifdef HAVE_OPENAT
-  if (topo_set_fsys_root(topology, fsys_root_path))
+  if (topo_backend_sysfs_init(topology, fsys_root_path) < 0)
     return -1;
-#endif /* HAVE_OPENAT */
 #endif /* LINUX_SYS */
 
   return 0;
@@ -532,7 +551,10 @@ topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_roo
 int
 topo_topology_set_synthetic(struct topo_topology *topology, const char *description)
 {
-  return topo_synthetic_parse_description(topology, description);
+  /* cleanup existing backend */
+  topo_backend_exit(topology);
+
+  return topo_backend_synthetic_init(topology, description);
 }
 
 int
@@ -578,13 +600,15 @@ topo_topology_ignore_all_keep_structure(struct topo_topology *topology)
 int
 topo_topology_load (struct topo_topology *topology)
 {
-#ifdef HAVE_OPENAT
-  if (topology->fsys_root_fd < 0)
-    if (topo_topology_set_fsys_root(topology, "/") < 0)
+  if (topology->backend_type == TOPO_BACKEND_NONE) {
+    /* if we haven't chosen the backend, set the OS-specific one if needed */
+#ifdef LINUX_SYS
+    if (topo_backend_sysfs_init(topology, "/") < 0)
       return -1;
 #endif
+  }
 
-  if (topology->use_synthetic)
+  if (topology->backend_type == TOPO_BACKEND_SYNTHETIC)
     topo_synthetic_load(topology);
   else
     topo_discover(topology);
@@ -624,8 +648,8 @@ topo_topology_destroy (struct topo_topology *topology)
 	}
     }
 
-  if (topology->fsys_root_fd >= 0)
-    close(topology->fsys_root_fd);
+  topo_backend_exit(topology);
+
   free(topology->dmi_board_vendor);
   free(topology->dmi_board_name);
 }

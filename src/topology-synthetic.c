@@ -11,10 +11,12 @@
    topology and update `topology->synthetic_description' accordingly.  On
    success, return zero.  */
 int
-topo_synthetic_parse_description(struct topo_topology *topology, const char *description)
+topo_backend_synthetic_init(struct topo_topology *topology, const char *description)
 {
   const char *pos, *next_pos;
   unsigned long item, count;
+
+  assert(topology->backend_type == TOPO_BACKEND_NONE);
 
   for (pos = description, count = 0; *pos; pos = next_pos) {
     item = strtoul(pos, (char **)&next_pos, 0);
@@ -24,16 +26,23 @@ topo_synthetic_parse_description(struct topo_topology *topology, const char *des
     assert(count + 1 < TOPO_SYNTHETIC_MAX_DEPTH);
     assert(item <= UINT_MAX);
 
-    topology->synthetic_description[count++] = (unsigned)item;
+    topology->backend_params.synthetic.description[count++] = (unsigned)item;
   }
 
   if (count > 0) {
-    topology->synthetic_description[count] = 0;
-    topology->use_synthetic = 1;
+    topology->backend_type = TOPO_BACKEND_SYNTHETIC;
+    topology->backend_params.synthetic.description[count] = 0;
     topology->is_fake = 1;
   }
 
   return (count > 0) ? 0 : -1;
+}
+
+void
+topo_backend_synthetic_exit(struct topo_topology *topology)
+{
+  assert(topology->backend_type == TOPO_BACKEND_SYNTHETIC);
+  topology->backend_type = TOPO_BACKEND_NONE;
 }
 
 /* Determine a level type for for the level whose description is pointed to
@@ -195,12 +204,12 @@ topo_synthetic_load (struct topo_topology *topology)
   struct topo_obj *root;
   int node_level, cache_level;
 
-  topo__synthetic_allocate_topology_levels(topology, topology->synthetic_description);
+  topo__synthetic_allocate_topology_levels(topology, topology->backend_params.synthetic.description);
 
   root = &topology->levels[0][0];
 
-  topo__synthetic_populate_topology(topology, root, topology->synthetic_description, 0);
-  assert(root->arity == *topology->synthetic_description);
+  topo__synthetic_populate_topology(topology, root, topology->backend_params.synthetic.description, 0);
+  assert(root->arity == *topology->backend_params.synthetic.description);
 
   topology->nb_processors = topology->level_nbitems[topology->nb_levels-1];
 

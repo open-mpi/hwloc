@@ -20,38 +20,6 @@
 #define topo_access(p, m, d)  topo_accessat(p, m, d)
 #define topo_opendir(p, d)    topo_opendirat(p, d)
 
-int
-topo_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
-{
-  char *fsys_root_path_env;
-  int root;
-
-  /* close previous root */
-  if (topology->fsys_root_fd >= 0) {
-    close(topology->fsys_root_fd);
-    topology->fsys_root_fd = -1;
-  }
-
-  /* Use the root path from the environment variable first,
-   * then from the given argument, then the default root.
-   */
-  fsys_root_path_env = getenv("TOPO_FSYS_ROOT_PATH");
-  if (fsys_root_path_env)
-    fsys_root_path = fsys_root_path_env;
-  if (!fsys_root_path)
-    fsys_root_path = "/";
-
-  root = open(fsys_root_path, O_RDONLY | O_DIRECTORY);
-  if (root < 0)
-    return -1;
-
-  if (strcmp(fsys_root_path, "/"))
-    topology->is_fake = 1;
-
-  topology->fsys_root_fd = root;
-  return 0;
-}
-
 static FILE *
 topo_fopenat(const char *path, const char *mode, int fsys_root_fd)
 {
@@ -107,6 +75,48 @@ topo_opendirat(const char *path, int fsys_root_fd)
 
 #endif /* !HAVE_OPENAT */
 
+int
+topo_backend_sysfs_init(struct topo_topology *topology, const char *fsys_root_path)
+{
+#ifdef HAVE_OPENAT
+  char *fsys_root_path_env;
+  int root;
+
+  assert(topology->backend_type == TOPO_BACKEND_NONE);
+
+  /* Use the root path from the environment variable first,
+   * then from the given argument, then the default root.
+   */
+  fsys_root_path_env = getenv("TOPO_FSYS_ROOT_PATH");
+  if (fsys_root_path_env)
+    fsys_root_path = fsys_root_path_env;
+  if (!fsys_root_path)
+    fsys_root_path = "/";
+
+  root = open(fsys_root_path, O_RDONLY | O_DIRECTORY);
+  if (root < 0)
+    return -1;
+
+  if (strcmp(fsys_root_path, "/"))
+    topology->is_fake = 1;
+
+  topology->backend_params.sysfs.root_fd = root;
+#else
+  topology->backend_params.sysfs.root_fd = -1;
+#endif
+  topology->backend_type = TOPO_BACKEND_SYSFS;
+  return 0;
+}
+
+void
+topo_backend_sysfs_exit(struct topo_topology *topology)
+{
+  assert(topology->backend_type == TOPO_BACKEND_SYSFS);
+#ifdef HAVE_OPENAT
+  close(topology->backend_params.sysfs.root_fd);
+#endif
+  topology->backend_type = TOPO_BACKEND_NONE;
+}
 
 static int
 topo_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_fd)
@@ -341,7 +351,7 @@ topo_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodeleve
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
   int i, ret;
 
-  ret = topo_read_cpuset_mask("mems", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
+  ret = topo_read_cpuset_mask("mems", cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
   if (!ret)
     return;
 
@@ -391,7 +401,7 @@ topo_admin_disable_cpus_from_cpuset(struct topo_topology *topology)
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
   int ret;
 
-  ret = topo_read_cpuset_mask("cpus", cpuset_mask, CPUSET_MASK_LEN, topology->fsys_root_fd);
+  ret = topo_read_cpuset_mask("cpus", cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
   if (!ret)
     return;
 
@@ -441,7 +451,7 @@ topo_get_procfs_meminfo_info(struct topo_topology *topology,
   char string[64];
   FILE *fd;
 
-  fd = topo_fopen("/proc/meminfo", "r", topology->fsys_root_fd);
+  fd = topo_fopen("/proc/meminfo", "r", topology->backend_params.sysfs.root_fd);
   if (!fd)
     return;
 
@@ -472,7 +482,7 @@ topo_sysfs_node_meminfo_info(struct topo_topology *topology,
   FILE *fd;
 
   sprintf(path, "/sys/devices/system/node/node%d/meminfo", node);
-  fd = topo_fopen(path, "r", topology->fsys_root_fd);
+  fd = topo_fopen(path, "r", topology->backend_params.sysfs.root_fd);
   if (!fd)
     return;
 
@@ -497,7 +507,7 @@ look_sysfsnode(struct topo_topology *topology)
   DIR *dir;
   struct dirent *dirent;
 
-  dir = topo_opendir("/sys/devices/system/node", topology->fsys_root_fd);
+  dir = topo_opendir("/sys/devices/system/node", topology->backend_params.sysfs.root_fd);
   if (dir)
     {
       while ((dirent = readdir(dir)) != NULL)
@@ -529,7 +539,7 @@ look_sysfsnode(struct topo_topology *topology)
       unsigned long hpfree = -1;
 
       sprintf(nodepath, "/sys/devices/system/node/node%u/cpumap", osnode);
-      if (topo_parse_cpumap(nodepath, &cpuset, topology->fsys_root_fd) < 0)
+      if (topo_parse_cpumap(nodepath, &cpuset, topology->backend_params.sysfs.root_fd) < 0)
 	break;
 
       topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
@@ -574,7 +584,7 @@ look__sysfscpu(unsigned *procid_max,
   DIR *dir;
   int i,j,k;
 
-  dir = topo_opendir("/sys/devices/system/cpu", topology->fsys_root_fd);
+  dir = topo_opendir("/sys/devices/system/cpu", topology->backend_params.sysfs.root_fd);
   if (dir)
     {
       while ((dirent = readdir(dir)) != NULL)
@@ -601,7 +611,7 @@ look__sysfscpu(unsigned *procid_max,
 
       /* check whether the kernel knows another cpu */
       sprintf(string, "/sys/devices/system/cpu/cpu%d", i);
-      if (topo_access(string, X_OK, topology->fsys_root_fd) < 0 && errno == ENOENT)
+      if (topo_access(string, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT)
 	{
 	/* this CPU does not exist */
 	  topo_debug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/\n", i, i);
@@ -611,7 +621,7 @@ look__sysfscpu(unsigned *procid_max,
 
       /* check whether this processor is offline */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/online", i);
-      fd = topo_fopen(string, "r", topology->fsys_root_fd);
+      fd = topo_fopen(string, "r", topology->backend_params.sysfs.root_fd);
       if (fd)
 	{
 	  if (fgets(online, sizeof(online), fd))
@@ -636,7 +646,7 @@ look__sysfscpu(unsigned *procid_max,
 
       /* check whether the kernel exports topology information for this cpu */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology", i);
-      if (topo_access(string, X_OK, topology->fsys_root_fd) < 0 && errno == ENOENT)
+      if (topo_access(string, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT)
 	{
 	  topo_debug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/topology\n", i, i);
 	  nr_offline_cpus++;
@@ -645,17 +655,17 @@ look__sysfscpu(unsigned *procid_max,
 
       mydieid = 0; /* shut-up the compiler */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/physical_package_id", i);
-      topo_parse_sysfs_unsigned(string, &mydieid, topology->fsys_root_fd);
+      topo_parse_sysfs_unsigned(string, &mydieid, topology->backend_params.sysfs.root_fd);
 
       mycoreid = 0; /* shut-up the compiler */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_id", i);
-      topo_parse_sysfs_unsigned(string, &mycoreid, topology->fsys_root_fd);
+      topo_parse_sysfs_unsigned(string, &mycoreid, topology->backend_params.sysfs.root_fd);
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
-      topo_parse_cpumap(string, &dieset, topology->fsys_root_fd);
+      topo_parse_cpumap(string, &dieset, topology->backend_params.sysfs.root_fd);
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
-      topo_parse_cpumap(string, &coreset, topology->fsys_root_fd);
+      topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
 
       /* add thread siblings mask except the first thread to nonfirst_threads_cpuset */
       topo_cpuset_orset(&topology->nonfirst_threads_cpuset, &coreset);
@@ -729,7 +739,7 @@ look_cpuinfo(unsigned *procid_max,
   memset(proc_coreids,0,sizeof(proc_coreids));
   memset(proc_oscoreids,0,sizeof(proc_oscoreids));
 
-  if (!(fd=topo_fopen("/proc/cpuinfo","r", topology->fsys_root_fd)))
+  if (!(fd=topo_fopen("/proc/cpuinfo","r", topology->backend_params.sysfs.root_fd)))
     {
       fprintf(stderr,"could not open /proc/cpuinfo\n");
       return;
@@ -821,10 +831,10 @@ look_sysfscpu(struct topo_topology *topology)
   unsigned numcores=0;
   unsigned numcaches[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1] = 0 };
 
-  if (topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->fsys_root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->fsys_root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->fsys_root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->fsys_root_fd) < 0)
+  if (topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0)
     {
       /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
       /* cpuset cpus ignored */
@@ -856,7 +866,7 @@ look_sysfscpu(struct topo_topology *topology)
 
   for(j=0; j<procid_max; j++)
     topo_parse_cache_shared_cpu_maps(j, procid_max, &topology->online_cpuset,
-				     proc_cacheids, cache_sizes, numcaches, topology->fsys_root_fd);
+				     proc_cacheids, cache_sizes, numcaches, topology->backend_params.sysfs.root_fd);
 
   if (numcores>1)
     topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
@@ -888,7 +898,7 @@ topo__get_dmi_info(struct topo_topology *topology)
   FILE *fd;
 
   dmi_line[0] = '\0';
-  fd = topo_fopen("/sys/class/dmi/id/board_vendor", "r", topology->fsys_root_fd);
+  fd = topo_fopen("/sys/class/dmi/id/board_vendor", "r", topology->backend_params.sysfs.root_fd);
   if (fd) {
     fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
     fclose (fd);
@@ -902,7 +912,7 @@ topo__get_dmi_info(struct topo_topology *topology)
   }
 
   dmi_line[0] = '\0';
-  fd = topo_fopen("/sys/class/dmi/id/board_name", "r", topology->fsys_root_fd);
+  fd = topo_fopen("/sys/class/dmi/id/board_name", "r", topology->backend_params.sysfs.root_fd);
   if (fd) {
     fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
     fclose (fd);

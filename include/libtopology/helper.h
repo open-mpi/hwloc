@@ -16,7 +16,8 @@ extern void topo_setup_core_level(int procid_max, unsigned numcores, unsigned *o
 #if defined(LINUX_SYS)
 extern void topo_setup_cache_level(int cachelevel, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
 extern void look_linux(struct topo_topology *topology);
-extern int topo_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path);
+extern int topo_backend_sysfs_init(struct topo_topology *topology, const char *fsys_root_path);
+extern void topo_backend_sysfs_exit(struct topo_topology *topology);
 #endif /* LINUX_SYS */
 
 #ifdef HAVE_LIBLGRP
@@ -38,7 +39,8 @@ extern void look_osf(struct topo_topology *topology);
 extern void look_windows(struct topo_topology *topology);
 #endif /* WIN_SYS */
 
-extern int topo_synthetic_parse_description(struct topo_topology *topology, const char *description);
+extern int topo_backend_synthetic_init(struct topo_topology *topology, const char *description);
+extern void topo_backend_synthetic_exit(struct topo_topology *topology);
 extern void topo_synthetic_load (struct topo_topology *topology);
 
 #ifdef __GLIBC__
