@@ -1,12 +1,11 @@
 /* Copyright 2009 INRIA, Université Bordeaux 1  */
 
+#include <config.h>
 #include <topology.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#include <config.h>
 
 #ifdef HAVE_CAIRO
 #include <cairo.h>
