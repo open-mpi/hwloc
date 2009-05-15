@@ -7,6 +7,8 @@
 #include <string.h>
 #include <assert.h>
 
+/* check topo_object_cpuset_snprintf() and topo_cpuset_from_string() */
+
 int main()
 {
   topo_topology_t topology;
