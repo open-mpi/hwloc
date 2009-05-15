@@ -67,6 +67,7 @@ main (int argc, char *argv[])
   printf("ancestor type %u depth %u number %u is machine level\n",
 	 ancestor->type, ancestor->level, ancestor->number);
 
+  free(closest);
   topo_topology_destroy (topology);
 
   return EXIT_SUCCESS;
