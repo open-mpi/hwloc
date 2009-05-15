@@ -71,7 +71,7 @@ static void
 topo__synthetic_make_children(struct topo_topology *topology,
 			      struct topo_obj *obj, unsigned count,
 			      enum topo_obj_type_e type, unsigned first_number,
-			      struct topo_obj *obj_pool)
+			      struct topo_obj **obj_pool)
 {
   unsigned i;
   unsigned physical_index;
@@ -80,7 +80,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
   assert(obj->children != NULL);
 
   for (i = 0; i < count; i++) {
-    obj->children[i] = &obj_pool[i];
+    obj->children[i] = obj_pool[i];
     assert(obj->children[i] != NULL);
 
     switch(type) {
@@ -172,21 +172,20 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
   for (level = 1, level_breadth = breadths, total_level_breadth = 1;
        *level_breadth > 0;
        level++, level_breadth++) {
-    unsigned count;
+    unsigned i;
 
     total_level_breadth *= *level_breadth;
 
-    count = total_level_breadth + 1;
-
     topo_debug("synthetic topology: creating level %u with breadth %u (%u children per father)\n",
 	       topology->nb_levels, total_level_breadth, *level_breadth);
-    topology->levels[level] = malloc(count * sizeof(struct topo_obj));
-
+    topology->levels[level] = calloc(total_level_breadth+1, sizeof(struct topo_obj *));
     assert(topology->levels[level] != NULL);
 
-    /* Each level is terminated by an item with zeroed cpuset.  */
-    topo_cpuset_zero(&topology->levels[level][total_level_breadth].cpuset);
-
+    for(i=0; i<total_level_breadth; i++) {
+      topology->levels[level][i] = malloc(sizeof(struct topo_obj));
+      assert(topology->levels[level][i]);
+    }
+    
     /* Update the level type to level mapping.  */
     topology->type_depth[topo__synthetic_object_type (level_breadth)] = level;
 
@@ -206,7 +205,7 @@ topo_synthetic_load (struct topo_topology *topology)
 
   topo__synthetic_allocate_topology_levels(topology, topology->backend_params.synthetic.description);
 
-  root = &topology->levels[0][0];
+  root = topology->levels[0][0];
 
   topo__synthetic_populate_topology(topology, root, topology->backend_params.synthetic.description, 0);
   assert(root->arity == *topology->backend_params.synthetic.description);
@@ -221,7 +220,7 @@ topo_synthetic_load (struct topo_topology *topology)
     topology->nb_nodes = topology->level_nbitems[node_level];
 
     for(i=0 ; i<topology->nb_nodes ; i++)
-      topology->levels[node_level][i].memory_kB = 1024*1024;
+      topology->levels[node_level][i]->memory_kB = 1024*1024;
 
   } else {
     topology->nb_nodes = 1;
@@ -232,8 +231,8 @@ topo_synthetic_load (struct topo_topology *topology)
     int i;
 
     for(i=0 ; i<topology->level_nbitems[cache_level] ; i++) {
-      topology->levels[cache_level][i].memory_kB = 4*1024;
-      topology->levels[cache_level][i].cache_depth = 2;
+      topology->levels[cache_level][i]->memory_kB = 4*1024;
+      topology->levels[cache_level][i]->cache_depth = 2;
     }
   }
 

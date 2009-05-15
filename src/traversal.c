@@ -18,7 +18,7 @@ topo_get_depth_type (topo_topology_t topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
     return TOPO_OBJ_TYPE_MAX; /* FIXME: add an invalid value ? */
-  return topology->levels[depth][0].type;
+  return topology->levels[depth][0]->type;
 }
 
 unsigned
@@ -36,7 +36,7 @@ topo_get_object (struct topo_topology *topology, unsigned depth, unsigned index)
     return NULL;
   if (index >= topology->level_nbitems[depth])
     return NULL;
-  return &topology->levels[depth][index];
+  return topology->levels[depth][index];
 }
 
 struct topo_obj * topo_find_common_ancestor_object (struct topo_obj *obj1, struct topo_obj *obj2)
@@ -59,7 +59,7 @@ int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj)
 
 int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *src, struct topo_obj **objs, int max)
 {
-  struct topo_obj *parent, *nextparent, *src_objs;
+  struct topo_obj *parent, *nextparent, **src_objs;
   int i,src_nbitems;
   int stored = 0;
 
@@ -79,9 +79,9 @@ int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *
 
     /* traverse src's objects and find those that are in nextparent and were not in parent */
     for(i=0; i<src_nbitems; i++) {
-      if (topo_cpuset_isincluded(&nextparent->cpuset, &src_objs[i].cpuset)
-	  && !topo_cpuset_isincluded(&parent->cpuset, &src_objs[i].cpuset)) {
-	objs[stored++] = &src_objs[i];
+      if (topo_cpuset_isincluded(&nextparent->cpuset, &src_objs[i]->cpuset)
+	  && !topo_cpuset_isincluded(&parent->cpuset, &src_objs[i]->cpuset)) {
+	objs[stored++] = src_objs[i];
 	if (stored == max)
 	  goto out;
       }
@@ -96,7 +96,7 @@ int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *
 struct topo_obj *
 topo_find_cpuset_covering_object (struct topo_topology *topology, topo_cpuset_t *set)
 {
-  struct topo_obj *current = &topology->levels[0][0];
+  struct topo_obj *current = topology->levels[0][0];
   int i;
 
   if (!topo_cpuset_isincluded(&current->cpuset, set))
@@ -154,7 +154,7 @@ int
 topo_find_cpuset_objects (struct topo_topology *topology, topo_cpuset_t *set,
 			  struct topo_obj **objs, int max)
 {
-  struct topo_obj *current = &topology->levels[0][0];
+  struct topo_obj *current = topology->levels[0][0];
 
   if (!topo_cpuset_isincluded(&current->cpuset, set))
     return -1;

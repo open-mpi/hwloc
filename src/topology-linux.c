@@ -343,7 +343,7 @@ topo_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_f
 static void
 topo_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
 {
-  struct topo_obj *level = topology->levels[nodelevel];
+  struct topo_obj **level = topology->levels[nodelevel];
   int nbitems = topology->level_nbitems[nodelevel];
 #define CPUSET_MASK_LEN 64
   char cpuset_mask[CPUSET_MASK_LEN];
@@ -375,7 +375,7 @@ topo_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodeleve
     if (prevlast+1 <= nextfirst-1)
       topo_debug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
     for(i=prevlast+1; i<=nextfirst-1; i++)
-      level[i].admin_disabled = 1;
+      level[i]->admin_disabled = 1;
 
     /* switch to next enabled-segment */
     prevlast = nextlast;
@@ -389,7 +389,7 @@ topo_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodeleve
   if (prevlast+1 <= nextfirst-1)
     topo_debug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
   for(i=prevlast+1; i<=nextfirst-1; i++)
-    level[i].admin_disabled = 1;
+    level[i]->admin_disabled = 1;
 }
 
 static void
@@ -503,7 +503,7 @@ look_sysfsnode(struct topo_topology *topology)
 {
   unsigned i, osnode;
   unsigned nbnodes = 1;
-  struct topo_obj *node_level;
+  struct topo_obj **node_level;
   DIR *dir;
   struct dirent *dirent;
 
@@ -528,7 +528,7 @@ look_sysfsnode(struct topo_topology *topology)
       return;
     }
 
-  node_level=malloc((nbnodes+1)*sizeof(*node_level));
+  node_level = calloc(nbnodes+1, sizeof(*node_level));
   assert(node_level);
 
   for (i=0, osnode=0;; osnode++)
@@ -544,18 +544,18 @@ look_sysfsnode(struct topo_topology *topology)
 
       topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
-      topo_setup_object(&node_level[i], TOPO_OBJ_NODE, osnode);
-      node_level[i].memory_kB = size;
-      node_level[i].huge_page_free = hpfree;
-      node_level[i].cpuset = cpuset;
+      node_level[i] = malloc(sizeof(struct topo_obj));
+      assert(node_level[i]);
+      topo_setup_object(node_level[i], TOPO_OBJ_NODE, osnode);
+      node_level[i]->memory_kB = size;
+      node_level[i]->huge_page_free = hpfree;
+      node_level[i]->cpuset = cpuset;
 
       topo_debug("node %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		 i, osnode, TOPO_CPUSET_PRINTF_VALUE(node_level[i].cpuset));
+		 i, osnode, TOPO_CPUSET_PRINTF_VALUE(node_level[i]->cpuset));
       i++;
     }
   nbnodes = i;
-
-  topo_cpuset_zero(&node_level[nbnodes].cpuset);
 
   topology->level_nbitems[topology->nb_levels] = topology->nb_nodes = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
@@ -935,9 +935,9 @@ look_linux(struct topo_topology *topology)
 
   /* Compute the whole machine memory and huge page */
   topo_get_procfs_meminfo_info(topology,
-			       &topology->levels[0][0].memory_kB,
+			       &topology->levels[0][0]->memory_kB,
 			       &topology->huge_page_size_kB,
-			       &topology->levels[0][0].huge_page_free);
+			       &topology->levels[0][0]->huge_page_free);
 			       /* FIXME: gather page_size_kB as well? MaMI needs it */
 
   topo__get_dmi_info(topology);

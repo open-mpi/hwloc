@@ -24,7 +24,7 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
   rsethandle_t rset, rad;
   int r,i,maxcpus,j;
   unsigned nbnodes;
-  struct topo_obj *rad_level;
+  struct topo_obj **rad_level;
 
   /* TODO: use RS_ALL to get all machine's topology, not only administration restrictions */
   rset = rs_alloc(RS_PARTITION);
@@ -35,7 +35,7 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
     return;
   }
 
-  rad_level=malloc((nbnodes+1)*sizeof(*rad_level));
+  rad_level = calloc(nbnodes+1, sizeof(*rad_level));
 
   for (r = 0, i = 0; i < nbnodes; i++) {
     if (rs_getrad(rset, rad, sdl, i, 0)) {
@@ -45,15 +45,17 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
     if (!rs_getinfo(rad, R_NUMPROCS, 0))
       continue;
 
-    topo_setup_object(&rad_level[r], type, r);
+    rad_level[r] = malloc(sizeof(struct topo_obj));
+    assert(rad_level[r]);
+    topo_setup_object(rad_level[r], type, r);
     switch(type) {
       case TOPO_OBJ_NODE:
-	rad_level[r].memory_kB = 0; /* TODO */
-	rad_level[r].huge_page_free = 0;
+	rad_level[r]->memory_kB = 0; /* TODO */
+	rad_level[r]->huge_page_free = 0;
 	break;
       case TOPO_OBJ_CACHE:
-	rad_level[r].memory_kB = 0; /* TODO */
-	rad_level[r].cache_depth = 2;
+	rad_level[r]->memory_kB = 0; /* TODO */
+	rad_level[r]->cache_depth = 2;
 	break;
       default:
 	break;
@@ -61,14 +63,12 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
     maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
     for (j = 0; j < maxcpus; j++) {
       if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
-	topo_cpuset_set(&rad_level[r].cpuset,j);
+	topo_cpuset_set(&rad_level[r]->cpuset,j);
     }
     topo_debug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	       r, TOPO_CPUSET_PRINTF_VALUE(rad_level[r].cpuset));
+	       r, TOPO_CPUSET_PRINTF_VALUE(rad_level[r]->cpuset));
     r++;
   }
-
-  topo_cpuset_zero(&rad_level[r].cpuset);
 
   topology->level_nbitems[topology->nb_levels] = nbnodes;
   topology->levels[topology->nb_levels++] = rad_level;

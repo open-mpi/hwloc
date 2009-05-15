@@ -60,23 +60,23 @@ topo_fallback_nbprocessors(void) {
 void
 topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
 {
-  struct topo_obj *die_level;
+  struct topo_obj **die_level;
   int j;
 
   topo_debug("%d dies\n", numdies);
-  die_level=malloc((numdies+1)*sizeof(*die_level));
+  die_level = calloc(numdies+1, sizeof(*die_level));
   assert(die_level);
 
   for (j = 0; j < numdies; j++)
     {
-      topo_setup_object(&die_level[j], TOPO_OBJ_DIE, osphysids[j]);
-      topo_object_cpuset_from_array(&die_level[j], j, proc_physids, procid_max);
+      die_level[j] = malloc(sizeof(struct topo_obj));
+      assert(die_level[j]);
+      topo_setup_object(die_level[j], TOPO_OBJ_DIE, osphysids[j]);
+      topo_object_cpuset_from_array(die_level[j], j, proc_physids, procid_max);
       topo_debug("die %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 j, TOPO_CPUSET_PRINTF_VALUE(die_level[j].cpuset));
+		 j, TOPO_CPUSET_PRINTF_VALUE(die_level[j]->cpuset));
     }
   topo_debug("\n");
-
-  topo_cpuset_zero(&die_level[j].cpuset);
 
   topology->level_nbitems[topology->nb_levels]=numdies;
   topo_debug("--- die level has number %d\n", topology->nb_levels);
@@ -87,24 +87,24 @@ topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsi
 void
 topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, struct topo_topology *topology)
 {
-  struct topo_obj *core_level;
+  struct topo_obj **core_level;
   int j;
 
   topo_debug("%d cores\n", numcores);
-  core_level=malloc((numcores+1)*sizeof(*core_level));
+  core_level = calloc(numcores+1, sizeof(*core_level));
   assert(core_level);
 
   for (j = 0; j < numcores; j++)
     {
-      topo_setup_object(&core_level[j], TOPO_OBJ_CORE, oscoreids[j]);
-      topo_object_cpuset_from_array(&core_level[j], j, proc_coreids, procid_max);
+      core_level[j] = malloc(sizeof(struct topo_obj));
+      assert(core_level[j]);
+      topo_setup_object(core_level[j], TOPO_OBJ_CORE, oscoreids[j]);
+      topo_object_cpuset_from_array(core_level[j], j, proc_coreids, procid_max);
       topo_debug("core %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 j, TOPO_CPUSET_PRINTF_VALUE(core_level[j].cpuset));
+		 j, TOPO_CPUSET_PRINTF_VALUE(core_level[j]->cpuset));
     }
 
   topo_debug("\n");
-
-  topo_cpuset_zero(&core_level[j].cpuset);
 
   topology->level_nbitems[topology->nb_levels]=numcores;
   topo_debug("--- core level has number %d\n", topology->nb_levels);
@@ -119,26 +119,28 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 		       unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
 		       struct topo_topology *topology)
 {
-  struct topo_obj *level;
+  struct topo_obj **level;
   int j;
 
   topo_debug("%d L%d caches\n", numcaches[cachelevel], cachelevel+1);
-  level=malloc((numcaches[cachelevel]+1)*sizeof(*level));
+  level = calloc((numcaches[cachelevel]+1), sizeof(*level));
   assert(level);
 
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
-      topo_setup_object(&level[j], TOPO_OBJ_CACHE, j);
-      level[j].memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
-      level[j].cache_depth = cachelevel+1;
+      level[j] = malloc(sizeof(struct topo_obj));
+      assert(level[j]);
+      topo_setup_object(level[j], TOPO_OBJ_CACHE, j);
+      level[j]->memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
+      level[j]->cache_depth = cachelevel+1;
 
-      topo_object_cpuset_from_array(&level[j], j, &cacheids[cachelevel*TOPO_NBMAXCPUS], procid_max);
+      topo_object_cpuset_from_array(level[j], j, &cacheids[cachelevel*TOPO_NBMAXCPUS], procid_max);
 
       topo_debug("L%d cache %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(level[j].cpuset));
+		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(level[j]->cpuset));
     }
   topo_debug("\n");
-  topo_cpuset_zero(&level[j].cpuset);
+
   topology->level_nbitems[topology->nb_levels]=numcaches[cachelevel];
   topo_debug("--- shared L%d level has number %d\n", cachelevel+1, topology->nb_levels);
   topology->levels[topology->nb_levels++]=level;
@@ -150,10 +152,10 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 static void
 look_cpu(struct topo_topology *topology)
 {
-  struct topo_obj *cpu_level;
+  struct topo_obj **cpu_level;
   unsigned oscpu,cpu;
 
-  cpu_level=malloc((topology->nb_processors+1)*sizeof(*cpu_level));
+  cpu_level = calloc(topology->nb_processors+1, sizeof(*cpu_level));
   assert(cpu_level);
 
   topo_debug("\n\n * CPU cpusets *\n\n");
@@ -170,17 +172,18 @@ look_cpu(struct topo_topology *topology)
 	continue;
       }
 
-      topo_setup_object(&cpu_level[cpu], TOPO_OBJ_PROC, oscpu);
+      cpu_level[cpu] = malloc(sizeof(struct topo_obj));
+      assert(cpu_level[cpu]);
+      topo_setup_object(cpu_level[cpu], TOPO_OBJ_PROC, oscpu);
 
-      topo_cpuset_cpu(&cpu_level[cpu].cpuset, oscpu);
+      topo_cpuset_cpu(&cpu_level[cpu]->cpuset, oscpu);
       if (!(topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)))
-	cpu_level[cpu].admin_disabled = 1;
+	cpu_level[cpu]->admin_disabled = 1;
 
       topo_debug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu].cpuset));
+		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu]->cpuset));
       cpu++;
     }
-  topo_cpuset_zero(&cpu_level[cpu].cpuset);
 
   topology->level_nbitems[topology->nb_levels]=topology->nb_processors;
   topology->levels[topology->nb_levels++]=cpu_level;
@@ -196,21 +199,21 @@ topo_connect(struct topo_topology *topology)
     {
       for (i=0; i<topology->level_nbitems[l]; i++)
 	{
-	  if (topology->levels[l][i].arity)
+	  if (topology->levels[l][i]->arity)
 	    {
 	      topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
-			 l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
-	      topology->levels[l][i].children=malloc(topology->levels[l][i].arity*sizeof(void *));
-	      assert(topology->levels[l][i].children);
+			 l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset), topology->levels[l][i]->arity);
+	      topology->levels[l][i]->children=malloc(topology->levels[l][i]->arity*sizeof(void *));
+	      assert(topology->levels[l][i]->children);
 
 	      m=0;
 	      for (j=0; j<topology->level_nbitems[l+1]; j++)
-		if (topo_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
+		if (topo_cpuset_isincluded(&topology->levels[l][i]->cpuset, &topology->levels[l+1][j]->cpuset))
 		  {
-		    assert(!(m >= topology->levels[l][i].arity));
-		    topology->levels[l][i].children[m] = &topology->levels[l+1][j];
-		    topology->levels[l+1][j].father = &topology->levels[l][i];
-		    topology->levels[l+1][j].index = m++;
+		    assert(!(m >= topology->levels[l][i]->arity));
+		    topology->levels[l][i]->children[m] = topology->levels[l+1][j];
+		    topology->levels[l+1][j]->father = topology->levels[l][i];
+		    topology->levels[l+1][j]->index = m++;
 		  }
 	    }
 	}
@@ -232,7 +235,8 @@ topo_remove_level(struct topo_topology *topology, unsigned depth)
 static int
 compar(const void *_l1, const void *_l2)
 {
-  const struct topo_obj *l1 = _l1, *l2 = _l2;
+  const struct topo_obj *l1 = *(struct topo_obj **)_l1;
+  const struct topo_obj *l2 = *(struct topo_obj **)_l2;
   int first1 = topo_cpuset_first(&l1->cpuset);
   int first2 = topo_cpuset_first(&l2->cpuset);
   /* if empty, return a bit after the last bit of cpuset */
@@ -304,7 +308,7 @@ topo_discover(struct topo_topology *topology)
   /* Ignore some levels if requested */
   l=0;
   while (l<topology->nb_levels) {
-    enum topo_obj_type_e type = topology->levels[l][0].type;
+    enum topo_obj_type_e type = topology->levels[l][0]->type;
     enum topo_ignore_type_e ignore = topology->ignored_types[type];
 
     /* ignore if ALWAYS,
@@ -321,21 +325,21 @@ topo_discover(struct topo_topology *topology)
   }
 
   /* Sort levels */
-  /* FIXME: We only sort aaccording to level_nbitems.
+  /* FIXME: We only sort according to level_nbitems.
      It assumes that levels are fully filled with "identical" objects.
      In case of irregular architectures (one CPU with different cache levels),
      we might have to break levels, ...
   */
   for (l=0; l<topology->nb_levels; l++) {
     /* only CACHE maybe wrongly ordered so far */
-    if (topology->levels[l][0].type != TOPO_OBJ_CACHE)
+    if (topology->levels[l][0]->type != TOPO_OBJ_CACHE)
       continue;
 
     /* find how much to move backwards */
     for (i=0; i<l; i++) {
       if (topology->level_nbitems[i] > topology->level_nbitems[l]) {
 	/* move l before i */
-	struct topo_obj *saved_level = topology->levels[l];
+	struct topo_obj **saved_level = topology->levels[l];
 	unsigned saved_nbitems = topology->level_nbitems[l];
 	topo_debug("moving level %d (%d items) before %d (%d items)\n",
 		   l, saved_nbitems, i, topology->level_nbitems[i]);
@@ -349,16 +353,16 @@ topo_discover(struct topo_topology *topology)
   }
 
   /* Compute the machine cpuset */
-  topo_cpuset_zero(&topology->levels[0][0].cpuset);
+  topo_cpuset_zero(&topology->levels[0][0]->cpuset);
   for (i=0; i<topology->level_nbitems[topology->nb_levels-1]; i++)
-    topo_cpuset_orset(&topology->levels[0][0].cpuset, &topology->levels[topology->nb_levels-1][i].cpuset);
+    topo_cpuset_orset(&topology->levels[0][0]->cpuset, &topology->levels[topology->nb_levels-1][i]->cpuset);
   /* Make sure machine = online & ~admin_disabled */
   topo_cpuset_t finalset = topology->online_cpuset;
   if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
     topo_cpuset_clearset(&finalset, &topology->admin_disabled_cpuset);
   if (topology->flags & TOPO_FLAGS_IGNORE_THREADS)
     topo_cpuset_clearset(&finalset, &topology->nonfirst_threads_cpuset);
-  assert(topo_cpuset_isequal(&finalset, &topology->levels[0][0].cpuset));
+  assert(topo_cpuset_isequal(&finalset, &topology->levels[0][0]->cpuset));
 
   /* Remove disabled/offline CPUs from all cpusets, use the now correct machine cpuset to do so,
    * Then sort levels according to cpu sets, removed empty levels, recount levels, ...
@@ -367,15 +371,19 @@ topo_discover(struct topo_topology *topology)
   for (l=1; l<topology->nb_levels; l++) {
     /* update cpusets */
     for (i=0; i<topology->level_nbitems[l]; i++)
-      topo_cpuset_andset(&topology->levels[l][i].cpuset, &topology->levels[0][0].cpuset);
+      topo_cpuset_andset(&topology->levels[l][i]->cpuset, &topology->levels[0][0]->cpuset);
 
     /* sort sublevels according to cpusets */
-    qsort(&topology->levels[l][0], topology->level_nbitems[l], sizeof(*topology->levels[l]), compar);
+    qsort(&topology->levels[l][0], topology->level_nbitems[l], sizeof(topology->levels[l]), compar);
 
     /* update level_nbitems by removing the empty ones (they are last), except for NUMA node since we want to keep memory information */
-    if (topology->levels[l][0].type != TOPO_OBJ_NODE) {
+    if (topology->levels[l][0]->type != TOPO_OBJ_NODE) {
       for (i=0; i<topology->level_nbitems[l]; i++)
-	if (topo_cpuset_iszero(&topology->levels[l][i].cpuset)) {
+	if (topo_cpuset_iszero(&topology->levels[l][i]->cpuset)) {
+	  /* free remaining elements, clear first freed one, and update nbitems */
+	  for(j=i; j<topology->level_nbitems[l]; j++)
+	    free(topology->levels[l][j]);
+	  topology->levels[l][i] = NULL;
 	  topology->level_nbitems[l] = i;
 	  break;
         }
@@ -388,13 +396,13 @@ topo_discover(struct topo_topology *topology)
   for (l=0; l+1<topology->nb_levels; l++) {
     k = 0;
     for (i=0; i<topology->level_nbitems[l]; i++) {
-      topo_cpuset_t level_set = topology->levels[l][i].cpuset;
+      topo_cpuset_t level_set = topology->levels[l][i]->cpuset;
       for (j=k; j<topology->level_nbitems[l+1]; j++) {
 	topo_cpuset_t set = level_set;
-	topo_cpuset_andset(&set, &topology->levels[l+1][j].cpuset);
+	topo_cpuset_andset(&set, &topology->levels[l+1][j]->cpuset);
 	if (!topo_cpuset_iszero(&set)) {
 	  /* Sublevel j is part of level i, put it at k.  */
-	  struct topo_obj obj = topology->levels[l+1][j];
+	  struct topo_obj *obj = topology->levels[l+1][j];
 	  memmove(&topology->levels[l+1][k+1], &topology->levels[l+1][k], (j-k)*sizeof(*topology->levels[l+1]));
 	  topology->levels[l+1][k++] = obj;
 	}
@@ -406,33 +414,33 @@ topo_discover(struct topo_topology *topology)
   for (l=0; l<topology->nb_levels; l++)
     for (i=0; i<topology->level_nbitems[l]; i++)
       {
-	topology->levels[l][i].number = i;
-	topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
+	topology->levels[l][i]->number = i;
+	topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset));
       }
 
   /* And show debug again */
   for (l=0; l<topology->nb_levels; l++)
     for (i=0; i<topology->level_nbitems[l]; i++)
-      topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset));
+      topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset));
 
   /* Compute arity */
   for (l=0; l+1<topology->nb_levels; l++)
     {
       for (i=0; i<topology->level_nbitems[l]; i++)
 	{
-	  topology->levels[l][i].arity=0;
+	  topology->levels[l][i]->arity=0;
 	  for (j=0; j<topology->level_nbitems[l+1]; j++)
-	    if (topo_cpuset_isincluded(&topology->levels[l][i].cpuset, &topology->levels[l+1][j].cpuset))
-	      topology->levels[l][i].arity++;
+	    if (topo_cpuset_isincluded(&topology->levels[l][i]->cpuset, &topology->levels[l+1][j]->cpuset))
+	      topology->levels[l][i]->arity++;
 	  topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
-		     l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i].cpuset), topology->levels[l][i].arity);
+		     l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset), topology->levels[l][i]->arity);
 	}
     }
 
 
   for (i=0; i<topology->level_nbitems[topology->nb_levels-1]; i++)
     topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" leaf\n",
-	       topology->nb_levels-1, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[topology->nb_levels-1][i].cpuset));
+	       topology->nb_levels-1, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[topology->nb_levels-1][i]->cpuset));
   topo_debug("arity done.\n");
 
   /* and finally connect levels */
@@ -444,7 +452,7 @@ topo_discover(struct topo_topology *topology)
     topology->type_depth[l] = TOPO_TYPE_DEPTH_UNKNOWN;
   /* walk the existing levels to set their depth */
   for (l=0; l<topology->nb_levels; l++) {
-    enum topo_obj_type_e type = topology->levels[l][0].type;
+    enum topo_obj_type_e type = topology->levels[l][0]->type;
     if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
       topology->type_depth[type] = l;
     } else {
@@ -466,16 +474,16 @@ topo_discover(struct topo_topology *topology)
   /* set level depth */
   for (l=0; l<topology->nb_levels; l++)
     for (i=0; i<topology->level_nbitems[l]; i++)
-      topology->levels[l][i].level = l;
+      topology->levels[l][i]->level = l;
 
   /* Empty some NUMA node memory if disabled by the administrator */
   if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
     l = topology->type_depth[TOPO_OBJ_NODE];
     for (i=0; i<topology->level_nbitems[l]; i++) {
       /* remove memory if disabled */
-      if (topology->levels[l][i].admin_disabled) {
-	topology->levels[l][i].memory_kB = 0;
-	topology->levels[l][i].huge_page_free = 0;
+      if (topology->levels[l][i]->admin_disabled) {
+	topology->levels[l][i]->memory_kB = 0;
+	topology->levels[l][i]->huge_page_free = 0;
       }
     }
   }
@@ -510,7 +518,7 @@ topo_topology_init (struct topo_topology **topologyp)
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = -1;
   topology->levels[0] = malloc (2*sizeof (struct topo_obj));
-  topo_setup_machine_level (&topology->levels[0]);
+  topo_setup_machine_level (topology->levels[0]);
 
   *topologyp = topology;
   return 0;
@@ -635,16 +643,13 @@ topo_topology_destroy (struct topo_topology *topology)
 {
   unsigned l,i;
 
-  for (l=0; l<topology->nb_levels; l++)
-    {
-      for (i=0; i<topology->level_nbitems[l]; i++)
-	{
-	  free(topology->levels[l][i].children);
-	  topology->levels[l][i].children = NULL;
-	}
-      free(topology->levels[l]);
-      topology->levels[l] = NULL;
+  for (l=0; l<topology->nb_levels; l++) {
+    for (i=0; i<topology->level_nbitems[l]; i++) {
+      free(topology->levels[l][i]->children);
+      free(topology->levels[l][i]);
     }
+    free(topology->levels[l]);
+  }
 
   topo_backend_exit(topology);
 

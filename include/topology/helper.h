@@ -8,6 +8,7 @@
 #include <config.h>
 #include <topology/private.h>
 
+#include <assert.h>
 
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
 extern void topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, topo_topology_t topology);
@@ -65,8 +66,9 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 
 #define topo_setup_machine_level(l) do {				\
 		struct topo_obj **__p = (l);				\
-		struct topo_obj *__l1 = &(__p[0][0]);			\
-		struct topo_obj *__l2 = &(__p[0][1]);			\
+		struct topo_obj *__l1;					\
+		__l1 = malloc(sizeof(struct topo_obj));			\
+		assert(__l1);						\
 		topo_setup_object(__l1, TOPO_OBJ_MACHINE, 0);		\
 		__l1->level = 0;					\
 		__l1->number = 0;					\
@@ -74,7 +76,8 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 		__l1->memory_kB = 0;					\
 		__l1->huge_page_free = 0;				\
 		topo_cpuset_fill(&__l1->cpuset);			\
-		topo_cpuset_zero(&__l2->cpuset);			\
+		__p[0] = __l1;						\
+		__p[1] = NULL;						\
   } while (0)
 
 

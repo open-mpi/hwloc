@@ -140,7 +140,7 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
 {
   int i, j;
   int numitems;
-  struct topo_obj *level;
+  struct topo_obj **level;
 
   /* Ignore non-data caches and other levels */
 #define TEST \
@@ -160,22 +160,24 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
   if (!numitems)
     return;
 
-  level = malloc((numitems+1) * sizeof(*level));
+  level = calloc(numitems+1, sizeof(*level));
   j = 0;
   for (i = 0; i < n; i++) {
     if (TEST) {
-      topo_setup_object(&level[j], type, j);
+      level[j] = malloc(sizeof(struct topo_obj));
+      assert(level[j]);
+      topo_setup_object(level[j], type, j);
       topo_debug("%d #%d mask %lx\n", relationship, j, procInfo[i].ProcessorMask);
-      topo_cpuset_from_ulong(&level[j].cpuset, procInfo[i].ProcessorMask);
+      topo_cpuset_from_ulong(&level[j]->cpuset, procInfo[i].ProcessorMask);
       switch (type) {
 	case TOPO_OBJ_NODE:
-	  level[j].memory_kB = 0; /* TODO */
-	  level[j].huge_page_free = 0; /* TODO */
-	  level[j].physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_setup_object did */
+	  level[j]->memory_kB = 0; /* TODO */
+	  level[j]->huge_page_free = 0; /* TODO */
+	  level[j]->physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_setup_object did */
 	  break;
 	case TOPO_OBJ_CACHE:
-	  level[j].memory_kB = procInfo[i].Cache.Size >> 10;
-	  level[j].cache_depth = cacheLevel;
+	  level[j]->memory_kB = procInfo[i].Cache.Size >> 10;
+	  level[j]->cache_depth = cacheLevel;
 	  break;
 	default:
 	  break;
@@ -183,8 +185,6 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
       j++;
     }
   }
-
-  topo_cpuset_zero(&level[j].cpuset);
 
   topology->level_nbitems[topology->nb_levels] = numitems;
   topology->levels[topology->nb_levels++] = level;
