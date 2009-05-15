@@ -138,6 +138,13 @@ extern topo_obj_t topo_find_cpuset_covering_object (topo_topology_t topology, to
 /** \brief Find objects covering exactly a given cpuset */
 extern int topo_find_cpuset_objects (topo_topology_t topology, topo_cpuset_t *set, topo_obj_t *objs, int max);
 
+/** \brief Find the first cache covering a cpuset */
+extern topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, topo_cpuset_t *set);
+
+/** \brief Find the first cache shared between an object and somebody else */
+extern topo_obj_t topo_find_shared_cache_above (topo_topology_t topology, topo_obj_t obj);
+
+
 /** \brief Return a stringified topology object type */
 extern const char * topo_object_type_string (enum topo_obj_type_e l);
 

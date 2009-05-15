@@ -165,6 +165,35 @@ topo_find_cpuset_objects (struct topo_topology *topology, topo_cpuset_t *set,
   return topo__find_cpuset_objects (current, set, &objs, &max);
 }
 
+struct topo_obj *
+topo_find_cpuset_covering_cache (struct topo_topology *topology, topo_cpuset_t *set)
+{
+  struct topo_obj *current = topo_find_cpuset_covering_object(topology, set);
+
+  while (current) {
+    if (current->type == TOPO_OBJ_CACHE)
+      return current;
+    current = current->father;
+  }
+
+  return NULL;
+}
+
+struct topo_obj *
+topo_find_shared_cache_above (struct topo_topology *topology, topo_obj_t obj)
+{
+  topo_obj_t current = obj->father;
+
+  while (current) {
+    if (!topo_cpuset_isequal(&current->cpuset, &obj->cpuset)
+	&& current->type == TOPO_OBJ_CACHE)
+      return current;
+    current = current->father;
+  }
+
+  return NULL;
+}
+
 const char *
 topo_object_type_string (enum topo_obj_type_e l)
 {

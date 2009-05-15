@@ -4,8 +4,6 @@
 
 * have an easy way to get a valid full set (alias on get_machine_object()->cpuset) ?
 
-* get first shared cache above for starpu
-
 * make cache size/depth/type, memory node size + hugepagefree a resource attribute
 * there could be several size for huge pages
 
@@ -23,11 +21,9 @@
 * use topology_allocator for real, including in strdup
   + add topo_set_allocator() to be called before _init()
 
-* conversion between cpuset and an array of highest levels covering exactly it
-  int topo_mask_to_levels(topo_cpuset_t *cpuset, topo_level_t *levels, int max)
 * cache or node specific functions?
   + get nodes covering a cpuset?
-  + get shared caches covering a cpuset?
+  + get shared cache*S* covering a cpuset?
 
 * topo_set_cpubind(pid, ...) which type for pid?
 * expose the internal conversion from cpuset to sched_setaffinity mask?
