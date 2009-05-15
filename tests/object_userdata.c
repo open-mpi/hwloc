@@ -7,7 +7,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* make sure userdata is properly initialized */
+/* check that object userdata is properly initialized */
 
 static void check(topo_topology_t topology)
 {
