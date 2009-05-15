@@ -251,6 +251,19 @@ static __inline__ int topo_cpuset_isequal (const topo_cpuset_t *set1,
 	return 1;
 }
 
+/** \brief Test whether sets \e set1 and \e set2 intersects */
+static __inline__ int topo_cpuset_intersects (const topo_cpuset_t *set1,
+					      const topo_cpuset_t *set2);
+static __inline__ int topo_cpuset_intersects (const topo_cpuset_t *set1,
+					      const topo_cpuset_t *set2)
+{
+	int i;
+	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++)
+		if (TOPO_CPUSUBSET_SUBSET(*set1,i) & TOPO_CPUSUBSET_SUBSET(*set2,i) != TOPO_CPUSUBSET_ZERO)
+			return 1;
+	return 0;
+}
+
 /** \brief Test whether set \e sub_set is part of set \e super_set */
 static __inline__ int topo_cpuset_isincluded (const topo_cpuset_t *super_set,
 					      const topo_cpuset_t *sub_set);
