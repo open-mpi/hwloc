@@ -59,5 +59,7 @@ int main()
   fprintf(stderr, "found no ancestor for too-large cpuset %s\n",
 	  GIVEN_TOOLARGE_CPUSET_STRING);
 
+  topo_topology_destroy(topology);
+
   return EXIT_SUCCESS;
 }
