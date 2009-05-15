@@ -18,7 +18,7 @@
 #elif TOPO_BITS_PER_LONG == 64
 #define GIVEN_LARGESPLIT_CPUSET_STRING "8000,,,,,,,,,,,1" /* first and last(735th) bit set */
 #define GIVEN_TOOLARGE_CPUSET_STRING "10000,,,,,,,,,,,0" /* 736th bit is too large for the 720-wide topology */
-#define GIVEN_HARD_CPUSET_STRING "0fff,fffffffff0000000"
+#define GIVEN_HARD_CPUSET_STRING "07ff,ffffffffe0000000"
 #endif
 
 #define OBJ_MAX 16
