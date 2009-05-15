@@ -14,14 +14,10 @@ static void usage(void)
 
 int main(int argc, char *argv[])
 {
-  topo_cpuset_t cpu_set;
+  topo_cpuset_t cpu_set; /* invalid until bind_cpus is set */
   int bind_cpus = 0;
   int verbose = 0;
   int ret;
-
-  /* bind everywhere by default */
-  /* FIXME bind on existing cpus only? */
-  topo_cpuset_fill(&cpu_set);
 
   /* skip argv[0], handle options */
   argv++;
