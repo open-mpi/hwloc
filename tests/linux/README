@@ -1,0 +1,18 @@
+-*- text -*-
+
+This directory contains tarballs of Linux sysfs hierarchies collected on
+various machines.  Each tarball `xyz.tar.gz' comes with the corresponding
+`xyz.tar.gz.output', which gives the expected output of "lstopo -v -" for
+that machine.
+
+Together with the `TOPO_FSYS_ROOT_PATH' environment variable, these are
+used by `test-topologies.sh' to check for any regression introduced in
+libtopology detection logic.
+
+A new topology may be added by:
+* running "gather-topology.sh" on the target machine and saving the
+  tarball  here
+* running "lstopo -v -" on the target machine (or on the extracted
+  tarball) to generate the corresponding `output' file.
+* adding the tarball and output files to Makefile.am so that they are
+  properly handled in "make check" and "make dist"
