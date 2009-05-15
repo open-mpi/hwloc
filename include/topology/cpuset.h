@@ -259,7 +259,7 @@ static __inline__ int topo_cpuset_intersects (const topo_cpuset_t *set1,
 {
 	int i;
 	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++)
-		if (TOPO_CPUSUBSET_SUBSET(*set1,i) & TOPO_CPUSUBSET_SUBSET(*set2,i) != TOPO_CPUSUBSET_ZERO)
+		if ((TOPO_CPUSUBSET_SUBSET(*set1,i) & TOPO_CPUSUBSET_SUBSET(*set2,i)) != TOPO_CPUSUBSET_ZERO)
 			return 1;
 	return 0;
 }
