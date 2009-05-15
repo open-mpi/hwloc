@@ -5,6 +5,8 @@
 #include <topology/private.h>
 #include <topology/debug.h>
 
+#include <assert.h>
+
 unsigned
 topo_get_type_depth (struct topo_topology *topology, enum topo_obj_type_e type)
 {
@@ -109,6 +111,58 @@ topo_find_cpuset_ancestor_object (struct topo_topology *topology, topo_cpuset_t 
   }
 
   return current;
+}
+
+static int
+topo__find_cpuset_objects (struct topo_obj *current, topo_cpuset_t *set,
+			   struct topo_obj ***res, int *max)
+{
+  int gotten = 0;
+  int i;
+
+  /* the caller must ensure this */
+  assert(*max > 0);
+
+  if (topo_cpuset_isequal(&current->cpuset, set)) {
+    **res = current;
+    (*res)++;
+    (*max)--;
+    return 1;
+  }
+
+  for (i=0; i<current->arity; i++) {
+    topo_cpuset_t subset = *set;
+    int ret;
+
+    /* split out the cpuset part corresponding to this child and see if there's anything to do */
+    topo_cpuset_andset(&subset, &current->children[i]->cpuset);
+    if (topo_cpuset_iszero(&subset))
+      continue;
+
+    ret = topo__find_cpuset_objects (current->children[i], &subset, res, max);
+    gotten += ret;
+
+    /* if no more room to store remaining objects, return what we got so far */
+    if (!*max)
+      break;
+  }
+
+  return gotten;
+}
+
+int
+topo_find_cpuset_objects (struct topo_topology *topology, topo_cpuset_t *set,
+			  struct topo_obj **objs, int max)
+{
+  struct topo_obj *current = &topology->levels[0][0];
+
+  if (!topo_cpuset_isincluded(&current->cpuset, set))
+    return -1;
+
+  if (max <= 0)
+    return 0;
+
+  return topo__find_cpuset_objects (current, set, &objs, &max);
 }
 
 const char *

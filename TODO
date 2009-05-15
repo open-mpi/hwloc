@@ -2,6 +2,8 @@
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
 
+* have an easy way to get a valid full set (alias on get_machine_object()->cpuset) ?
+
 * get first shared cache above for starpu
 
 * make cache size/depth/type, memory node size + hugepagefree a resource attribute
