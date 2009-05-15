@@ -381,7 +381,7 @@ topo_discover(struct topo_topology *topology)
         }
     }
     topo_debug("%d levels remaining at depth %d after filtering\n",
-	       topology->level_nbitems[l], i);
+	       topology->level_nbitems[l], l);
   }
 
   /* Gather sublevels according to levels */
