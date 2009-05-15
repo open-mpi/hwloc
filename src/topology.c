@@ -634,23 +634,22 @@ void
 topo_topology_destroy (struct topo_topology *topology)
 {
   unsigned l,i;
-  /* Last level is not freed because we need it in various places */
-  for (l=0; l<topology->nb_levels-1; l++)
+
+  for (l=0; l<topology->nb_levels; l++)
     {
       for (i=0; i<topology->level_nbitems[l]; i++)
 	{
 	  free(topology->levels[l][i].children);
 	  topology->levels[l][i].children = NULL;
 	}
-      if (l)
-	{
-	  free(topology->levels[l]);
-	  topology->levels[l] = NULL;
-	}
+      free(topology->levels[l]);
+      topology->levels[l] = NULL;
     }
 
   topo_backend_exit(topology);
 
   free(topology->dmi_board_vendor);
   free(topology->dmi_board_name);
+
+  topo_default_allocator.free(topology);
 }
