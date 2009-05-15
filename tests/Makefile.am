@@ -7,7 +7,7 @@ SUBDIRS = linux ports
 TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	topo_find_closest_objects \
 	topo_find_cpuset_objects \
-	topo_find_cpuset_ancestor_object \
+	topo_find_cpuset_covering_object \
 	object_userdata
 
 check_PROGRAMS = $(TESTS)

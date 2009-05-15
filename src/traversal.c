@@ -94,7 +94,7 @@ int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *
 }
 
 struct topo_obj *
-topo_find_cpuset_ancestor_object (struct topo_topology *topology, topo_cpuset_t *set)
+topo_find_cpuset_covering_object (struct topo_topology *topology, topo_cpuset_t *set)
 {
   struct topo_obj *current = &topology->levels[0][0];
   int i;

@@ -7,7 +7,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* check topo_find_cpuset_ancestor_object() */
+/* check topo_find_cpuset_covering_object() */
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
 
@@ -37,28 +37,28 @@ int main()
   topo_topology_get_info(topology, &topoinfo);
 
   topo_cpuset_from_string(GIVEN_CPUSET_STRING, &set);
-  obj = topo_find_cpuset_ancestor_object(topology, &set);
+  obj = topo_find_cpuset_covering_object(topology, &set);
 
   assert(obj);
-  fprintf(stderr, "found ancestor type %s covering cpuset %s\n",
+  fprintf(stderr, "found covering object type %s covering cpuset %s\n",
 	  topo_object_type_string(obj->type), GIVEN_CPUSET_STRING);
   assert(topo_cpuset_isincluded(&obj->cpuset, &set));
 
   topo_object_cpuset_snprintf(string, sizeof(string), 1, &obj);
-  fprintf(stderr, "ancestor of %s is %s, expected %s\n",
+  fprintf(stderr, "covering object of %s is %s, expected %s\n",
 	  GIVEN_CPUSET_STRING, string, EXPECTED_CPUSET_STRING);
   assert(!strcmp(EXPECTED_CPUSET_STRING, string));
 
   topo_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING, &set);
-  obj = topo_find_cpuset_ancestor_object(topology, &set);
+  obj = topo_find_cpuset_covering_object(topology, &set);
   assert(obj == topo_get_machine_object(topology));
-  fprintf(stderr, "found machine as ancestor of first+last cpus cpuset %s\n",
+  fprintf(stderr, "found machine as covering object of first+last cpus cpuset %s\n",
 	  GIVEN_LARGESPLIT_CPUSET_STRING);
 
   topo_cpuset_from_string(GIVEN_TOOLARGE_CPUSET_STRING, &set);
-  obj = topo_find_cpuset_ancestor_object(topology, &set);
+  obj = topo_find_cpuset_covering_object(topology, &set);
   assert(!obj);
-  fprintf(stderr, "found no ancestor for too-large cpuset %s\n",
+  fprintf(stderr, "found no covering object for too-large cpuset %s\n",
 	  GIVEN_TOOLARGE_CPUSET_STRING);
 
   topo_topology_destroy(topology);

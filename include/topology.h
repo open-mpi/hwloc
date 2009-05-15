@@ -133,7 +133,7 @@ extern int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj);
 extern int topo_find_closest_objects (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
 
 /** \brief Find the lowest object covering at least the given cpuset */
-extern topo_obj_t topo_find_cpuset_ancestor_object (topo_topology_t topology, topo_cpuset_t *set);
+extern topo_obj_t topo_find_cpuset_covering_object (topo_topology_t topology, topo_cpuset_t *set);
 
 /** \brief Find objects covering exactly a given cpuset */
 extern int topo_find_cpuset_objects (topo_topology_t topology, topo_cpuset_t *set, topo_obj_t *objs, int max);
