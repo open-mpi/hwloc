@@ -16,7 +16,6 @@ int main()
 {
   topo_topology_t topology;
   struct topo_topology_info topoinfo;
-  char string[TOPO_CPUSET_STRING_LENGTH+1];
   topo_obj_t obj, cache;
 
   topo_topology_init(&topology);

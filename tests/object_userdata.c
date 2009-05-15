@@ -12,7 +12,6 @@
 static void check(topo_topology_t topology)
 {
   struct topo_topology_info topoinfo;
-  topo_obj_t obj;
   unsigned i,j;
 
   topo_topology_get_info(topology, &topoinfo);
