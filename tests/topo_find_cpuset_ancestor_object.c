@@ -7,6 +7,8 @@
 #include <string.h>
 #include <assert.h>
 
+/* check topo_find_cpuset_ancestor_object() */
+
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
 
 #if TOPO_BITS_PER_LONG == 32
