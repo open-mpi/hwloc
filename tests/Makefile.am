@@ -4,7 +4,11 @@ include $(top_srcdir)/libtopology.am
 
 SUBDIRS = linux ports
 
-TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string topo_find_closest_objects topo_find_cpuset_ancestor_object object_userdata
+TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
+	topo_find_closest_objects \
+	topo_find_cpuset_objects \
+	topo_find_cpuset_ancestor_object \
+	object_userdata
 
 check_PROGRAMS = $(TESTS)
 
