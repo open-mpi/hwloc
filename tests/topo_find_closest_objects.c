@@ -8,6 +8,8 @@
 #include <assert.h>
 
 /* 
+ * check topo_find_closest_objects()
+ *
  * - get the last object of the last level
  * - get all closest objects
  * - get the common ancestor of last level and its less close object.
@@ -49,7 +51,13 @@ main (int argc, char *argv[])
   found = topo_find_closest_objects (topology, last, closest, info.nb_processors);
   printf("looked for %d closest entries, found %d\n", info.nb_processors, found);
   assert(found == info.nb_processors-1);
-  assert(found);
+
+  /* check first found is closest */
+  assert(closest[0] == topo_get_object(topology, info.depth-1, info.nb_processors-5 /* arity is 5 on last level */));
+  /* check some other expected positions */
+  assert(closest[found-1] == topo_get_object(topology, info.depth-1, 1*3*4*5-1 /* last of first half */));
+  assert(closest[found/2-1] == topo_get_object(topology, info.depth-1, 1*3*4*5+2*4*5-1 /* last of second third of second half */));
+  assert(closest[found/2/3-1] == topo_get_object(topology, info.depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
 
   /* get ancestor of last and less close object */
   topo_obj_t ancestor = topo_find_common_ancestor_object (last, closest[found-1]);
