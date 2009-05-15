@@ -125,5 +125,5 @@ int main(int argc, char *argv[])
 
   topo_topology_destroy(topology);
 
-  return 0;
+  return EXIT_SUCCESS;
 }
