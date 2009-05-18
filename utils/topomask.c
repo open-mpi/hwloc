@@ -18,6 +18,73 @@ static void usage(void)
   fprintf(stderr, "   X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
 }
 
+static int append_object(topo_topology_t topology, struct topo_topology_info *topoinfo,
+			 topo_cpuset_t *set, const char *string, const char *sep,
+			 int verbose)
+{
+  topo_obj_t obj;
+  unsigned depth, width;
+  char *sep2;
+  unsigned first, wrap, amount;
+  unsigned i,j;
+
+  if (!strncmp(string, "machine", 1))
+    depth = topo_get_type_depth(topology, TOPO_OBJ_MACHINE);
+  else if (!strncmp(string, "node", 1))
+    depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
+  else if (!strncmp(string, "die", 1))
+    depth = topo_get_type_depth(topology, TOPO_OBJ_DIE);
+  else if (!strncmp(string, "core", 1))
+    depth = topo_get_type_depth(topology, TOPO_OBJ_CORE);
+  else if (!strncmp(string, "proc", 1))
+    depth = topo_get_type_depth(topology, TOPO_OBJ_PROC);
+  else
+    depth = atoi(string);
+
+  if (depth >= topoinfo->depth) {
+    if (verbose)
+      fprintf(stderr, "ignoring invalid depth %d\n", depth);
+    return -1;
+  }
+  width = topo_get_depth_nbitems(topology, depth);
+
+  first = atoi(sep+1);
+  amount = 1;
+  wrap = 0;
+
+  sep2 = strchr(sep+1, '-');
+  if (sep2) {
+    if (*(sep2+1) == '\0')
+      amount = width-first;
+    else
+      amount = atoi(sep2+1)-first+1;
+  } else {
+    sep2 = strchr(sep+1, ':');
+    if (sep2) {
+      amount = atoi(sep2+1);
+      wrap = 1;
+    }
+  }
+
+  for(i=first, j=0; j<amount; i++, j++) {
+    if (wrap && i==width)
+      i = 0;
+
+    obj = topo_get_object(topology, depth, i);
+    if (obj) {
+      topo_cpuset_orset(set, &obj->cpuset);
+    }
+    if (verbose) {
+      if (obj)
+	printf("object (%d,%d) found\n", depth, i);
+      else
+	printf("object (%d,%d) does not exist\n", depth, i);
+    }
+  }
+
+  return 0;
+}
+
 int main(int argc, char *argv[])
 {
   topo_topology_t topology;
@@ -33,12 +100,7 @@ int main(int argc, char *argv[])
   topo_topology_get_info(topology, &topoinfo);
 
   while (argc >= 2) {
-    topo_obj_t obj;
-    unsigned depth, width;
     char *colon;
-    char *sep;
-    unsigned first, wrap, amount;
-    unsigned i,j;
 
     if (*argv[1] == '-') {
       if (!strcmp(argv[1], "-v")) {
@@ -55,59 +117,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    if (!strncmp(argv[1], "machine", 1))
-      depth = topo_get_type_depth(topology, TOPO_OBJ_MACHINE);
-    else if (!strncmp(argv[1], "node", 1))
-      depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
-    else if (!strncmp(argv[1], "die", 1))
-      depth = topo_get_type_depth(topology, TOPO_OBJ_DIE);
-    else if (!strncmp(argv[1], "core", 1))
-      depth = topo_get_type_depth(topology, TOPO_OBJ_CORE);
-    else if (!strncmp(argv[1], "proc", 1))
-      depth = topo_get_type_depth(topology, TOPO_OBJ_PROC);
-    else
-      depth = atoi(argv[1]);
-
-    if (depth >= topoinfo.depth) {
-      if (verbose)
-	fprintf(stderr, "ignoring invalid depth %d\n", depth);
-      goto next;
-    }
-    width = topo_get_depth_nbitems(topology, depth);
-
-    first = atoi(colon+1);
-    amount = 1;
-    wrap = 0;
-
-    sep = strchr(colon+1, '-');
-    if (sep) {
-      if (*(sep+1) == '\0')
-	amount = width-first;
-      else
-	amount = atoi(sep+1)-first+1;
-    } else {
-      sep = strchr(colon+1, ':');
-      if (sep) {
-        amount = atoi(sep+1);
-	wrap = 1;
-      }
-    }
-
-    for(i=first, j=0; j<amount; i++, j++) {
-      if (wrap && i==width)
-	i = 0;
-
-      obj = topo_get_object(topology, depth, i);
-      if (obj) {
-	topo_cpuset_orset(&set, &obj->cpuset);
-      }
-      if (verbose) {
-	if (obj)
-          printf("object (%d,%d) found\n", depth, i);
-	else
-          printf("object (%d,%d) does not exist\n", depth, i);
-      }
-    }
+    append_object(topology, &topoinfo, &set, argv[1], colon, verbose);
 
  next:
     argc--;
