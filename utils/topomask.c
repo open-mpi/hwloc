@@ -9,13 +9,15 @@
 
 static void usage(void)
 {
-  fprintf(stderr, "Usage: topomask [depth:index] ...\n");
-  fprintf(stderr, "  <depth> may be machine, node, die, core, proc or a numeric depth\n");
-  fprintf(stderr, "  <index> may be:\n");
-  fprintf(stderr, "   X\tone object with index X\n");
-  fprintf(stderr, "   X-Y\tall objects with index between X and Y\n");
-  fprintf(stderr, "   X-\tall objects with index at least X\n");
-  fprintf(stderr, "   X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
+  fprintf(stderr, "Usage: topomask [string] ...\n");
+  fprintf(stderr, "  <string> may be <depth:index>\n");
+  fprintf(stderr, "    <depth> may be machine, node, die, core, proc or a numeric depth\n");
+  fprintf(stderr, "    <index> may be:\n");
+  fprintf(stderr, "     X\tone object with index X\n");
+  fprintf(stderr, "     X-Y\tall objects with index between X and Y\n");
+  fprintf(stderr, "     X-\tall objects with index at least X\n");
+  fprintf(stderr, "     X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
+  fprintf(stderr, "  <string> may be a cpuset string\n");
 }
 
 static int append_object(topo_topology_t topology, struct topo_topology_info *topoinfo,
@@ -112,12 +114,14 @@ int main(int argc, char *argv[])
     }
 
     colon = strchr(argv[1], ':');
-    if (!colon) {
-      usage();
-      return EXIT_FAILURE;
+    if (colon) {
+      append_object(topology, &topoinfo, &set, argv[1], colon, verbose);
+    } else {
+      topo_cpuset_t newset;
+      topo_cpuset_zero(&newset);
+      topo_cpuset_from_string(argv[1], &newset);
+      topo_cpuset_orset(&set, &newset);
     }
-
-    append_object(topology, &topoinfo, &set, argv[1], colon, verbose);
 
  next:
     argc--;
