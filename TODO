@@ -5,8 +5,6 @@
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
-* add an example with linux cpuset
-
 * move cpuset back into linux code
 * move offline map back into linux code
 
