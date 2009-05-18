@@ -310,6 +310,17 @@ static __inline__ void topo_cpuset_clearset (topo_cpuset_t *set,
 		TOPO_CPUSUBSET_SUBSET(*set,i) &= ~TOPO_CPUSUBSET_SUBSET(*modifier_set,i);
 }
 
+/** \brief Xor set \e set with set \e modifier_set */
+static __inline__ void topo_cpuset_xorset (topo_cpuset_t *set,
+					   const topo_cpuset_t *modifier_set);
+static __inline__ void topo_cpuset_xorset (topo_cpuset_t *set,
+					   const topo_cpuset_t *modifier_set)
+{
+	int i;
+	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++)
+		TOPO_CPUSUBSET_SUBSET(*set,i) ^= TOPO_CPUSUBSET_SUBSET(*modifier_set,i);
+}
+
 #ifdef __GNUC__
 
 #  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)

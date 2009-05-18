@@ -5,8 +5,6 @@
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
-* add a cpuset xor
-
 * add an example with linux cpuset
 
 * rename nbitems into nbobjects ?
