@@ -344,7 +344,7 @@ static void
 topo_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
 {
   struct topo_obj **level = topology->levels[nodelevel];
-  int nbitems = topology->level_nbitems[nodelevel];
+  int nbobjects = topology->level_nbobjects[nodelevel];
 #define CPUSET_MASK_LEN 64
   char cpuset_mask[CPUSET_MASK_LEN];
   char *current, *comma, *tmp;
@@ -385,7 +385,7 @@ topo_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodeleve
   }
 
   /* disable after last enabled-segment */
-  nextfirst = nbitems;
+  nextfirst = nbobjects;
   if (prevlast+1 <= nextfirst-1)
     topo_debug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
   for(i=prevlast+1; i<=nextfirst-1; i++)
@@ -557,7 +557,7 @@ look_sysfsnode(struct topo_topology *topology)
     }
   nbnodes = i;
 
-  topology->level_nbitems[topology->nb_levels] = topology->nb_nodes = nbnodes;
+  topology->level_nbobjects[topology->nb_levels] = topology->nb_nodes = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
 
   topo_admin_disable_mems_from_cpuset(topology, topology->nb_levels-1);

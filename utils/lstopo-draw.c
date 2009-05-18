@@ -114,7 +114,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
 
-  /* Do not separate items when in L1 (SMT) */
+  /* Do not separate objects when in L1 (SMT) */
   RECURSE(level, &null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
   if (totwidth < 8*FONT_SIZE)
@@ -206,7 +206,7 @@ node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   /* Add vertical separator on the right */
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
-  /* There were items, add separator at the bottom */
+  /* There were objects, add separator at the bottom */
   if (maxheight)
     *retheight += UNIT;
 

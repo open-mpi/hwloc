@@ -65,7 +65,7 @@ topo__synthetic_object_type (const unsigned *level_breadth)
 
 /* Allocate COUNT nodes of type TYPE as children of LEVEL, with numbers
    starting from FIRST_NUMBER.  Individual nodes are allocated from
-   OBJ_POOL, which must point to an array of at least COUNT items (children
+   OBJ_POOL, which must point to an array of at least COUNT objects (children
    N's storage will be NODE_POOL[N]).  */
 static void
 topo__synthetic_make_children(struct topo_topology *topology,
@@ -129,13 +129,13 @@ topo__synthetic_populate_topology(struct topo_topology *topology, struct topo_ob
     type = topo__synthetic_object_type (level_breadth);
 
     /* Current number of siblings on our children's object to our left.  */
-    siblings = topology->level_nbitems[obj->level + 1];
+    siblings = topology->level_nbobjects[obj->level + 1];
 
     topo__synthetic_make_children(topology, obj, *level_breadth, type, siblings,
 				  &topology->levels[obj->level + 1][siblings]);
 
     /* Increment the total breadth for this level.  */
-    topology->level_nbitems[obj->level + 1] += *level_breadth;
+    topology->level_nbobjects[obj->level + 1] += *level_breadth;
 
     for (i = 0, count = 0; i < *level_breadth; i++)
       count += topo__synthetic_populate_topology(topology,
@@ -185,7 +185,7 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
       topology->levels[level][i] = malloc(sizeof(struct topo_obj));
       assert(topology->levels[level][i]);
     }
-    
+
     /* Update the level type to level mapping.  */
     topology->type_depth[topo__synthetic_object_type (level_breadth)] = level;
 
@@ -210,14 +210,14 @@ topo_synthetic_load (struct topo_topology *topology)
   topo__synthetic_populate_topology(topology, root, topology->backend_params.synthetic.description, 0);
   assert(root->arity == *topology->backend_params.synthetic.description);
 
-  topology->nb_processors = topology->level_nbitems[topology->nb_levels-1];
+  topology->nb_processors = topology->level_nbobjects[topology->nb_levels-1];
 
   node_level = topology->type_depth[TOPO_OBJ_NODE];
   if (node_level != -1) {
     /* Assume this level is the node level.  */
     int i;
 
-    topology->nb_nodes = topology->level_nbitems[node_level];
+    topology->nb_nodes = topology->level_nbobjects[node_level];
 
     for(i=0 ; i<topology->nb_nodes ; i++)
       topology->levels[node_level][i]->memory_kB = 1024*1024;
@@ -230,7 +230,7 @@ topo_synthetic_load (struct topo_topology *topology)
   if (cache_level != -1) {
     int i;
 
-    for(i=0 ; i<topology->level_nbitems[cache_level] ; i++) {
+    for(i=0 ; i<topology->level_nbobjects[cache_level] ; i++) {
       topology->levels[cache_level][i]->memory_kB = 4*1024;
       topology->levels[cache_level][i]->cache_depth = 2;
     }

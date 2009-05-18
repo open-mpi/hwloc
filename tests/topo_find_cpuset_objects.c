@@ -44,7 +44,7 @@ int main()
   assert(objs[0] == obj);
 
   /* just get the very last object */
-  obj = topo_get_object(topology, topoinfo.depth-1, topo_get_depth_nbitems(topology, topoinfo.depth-1)-1);
+  obj = topo_get_object(topology, topoinfo.depth-1, topo_get_depth_nbobjects(topology, topoinfo.depth-1)-1);
   ret = topo_find_cpuset_objects(topology, &obj->cpuset, objs, 1);
   assert(ret == 1);
   assert(objs[0] == obj);
@@ -68,7 +68,7 @@ int main()
   ret = topo_find_cpuset_objects(topology, &set, objs, 2);
   assert(ret == 2);
   assert(objs[0] == topo_get_object(topology, topoinfo.depth-1, 0));
-  assert(objs[1] == topo_get_object(topology, topoinfo.depth-1, topo_get_depth_nbitems(topology, topoinfo.depth-1)-1));
+  assert(objs[1] == topo_get_object(topology, topoinfo.depth-1, topo_get_depth_nbobjects(topology, topoinfo.depth-1)-1));
 
   /* try a very hard one */
   topo_cpuset_from_string(GIVEN_HARD_CPUSET_STRING, &set);

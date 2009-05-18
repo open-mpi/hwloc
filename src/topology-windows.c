@@ -139,7 +139,7 @@ static void
 look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo, int n, LOGICAL_PROCESSOR_RELATIONSHIP relationship, topo_obj_type_t type, int cacheLevel)
 {
   int i, j;
-  int numitems;
+  int numobjects;
   struct topo_obj **level;
 
   /* Ignore non-data caches and other levels */
@@ -151,16 +151,16 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
 	   && procInfo[i].Cache.Level == cacheLevel) \
 	   )
 
-  numitems = 0;
+  numobjects = 0;
   for (i = 0; i < n; i++)
     if (TEST)
-      numitems++;
+      numobjects++;
 
-  topo_debug("relation %d type %d num %d L%d\n", relationship, type, numitems, cacheLevel);
-  if (!numitems)
+  topo_debug("relation %d type %d num %d L%d\n", relationship, type, numobjects, cacheLevel);
+  if (!numobjects)
     return;
 
-  level = calloc(numitems+1, sizeof(*level));
+  level = calloc(numobjects+1, sizeof(*level));
   j = 0;
   for (i = 0; i < n; i++) {
     if (TEST) {
@@ -186,7 +186,7 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
     }
   }
 
-  topology->level_nbitems[topology->nb_levels] = numitems;
+  topology->level_nbobjects[topology->nb_levels] = numobjects;
   topology->levels[topology->nb_levels++] = level;
 
 #undef TEST

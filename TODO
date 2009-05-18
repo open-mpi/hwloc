@@ -7,8 +7,6 @@
 
 * add an example with linux cpuset
 
-* rename nbitems into nbobjects ?
-
 * move cpuset back into linux code
 * move offline map back into linux code
 

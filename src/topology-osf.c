@@ -56,7 +56,7 @@ look_osf(struct topo_topology *topology)
     i++;
   }
 
-  topology->level_nbitems[topology->nb_levels] = nbnodes;
+  topology->level_nbobjects[topology->nb_levels] = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
 
   /* we have a contigous range of online cpus */

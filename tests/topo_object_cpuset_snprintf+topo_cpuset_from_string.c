@@ -36,7 +36,7 @@ int main()
   assert(topo_cpuset_isequal(&set, &obj->cpuset));
   printf("first cpu cpuset converted back and forth, ok\n");
 
-  obj = topo_get_object(topology, topoinfo.depth-1, topo_get_depth_nbitems(topology, topoinfo.depth-1) - 1);
+  obj = topo_get_object(topology, topoinfo.depth-1, topo_get_depth_nbobjects(topology, topoinfo.depth-1) - 1);
   topo_object_cpuset_snprintf(string, sizeof(string), 1, &obj);
   printf("last cpu cpuset is %s\n", string);
   topo_cpuset_from_string(string, &set);

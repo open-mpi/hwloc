@@ -75,7 +75,7 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
       fprintf(stderr, "ignoring invalid depth %d\n", depth);
     return -1;
   }
-  width = topo_get_depth_nbitems(topology, depth);
+  width = topo_get_depth_nbobjects(topology, depth);
 
   first = atoi(sep+1);
   amount = 1;

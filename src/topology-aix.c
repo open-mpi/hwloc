@@ -70,7 +70,7 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
     r++;
   }
 
-  topology->level_nbitems[topology->nb_levels] = nbnodes;
+  topology->level_nbobjects[topology->nb_levels] = nbnodes;
   topology->levels[topology->nb_levels++] = rad_level;
   rs_free(rset);
   rs_free(rad);

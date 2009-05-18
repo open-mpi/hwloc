@@ -110,7 +110,7 @@ extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_obj_typ
 extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);
 
 /** \brief Returns the width of level at depth _depth_ */
-extern unsigned topo_get_depth_nbitems (topo_topology_t topology, unsigned depth);
+extern unsigned topo_get_depth_nbobjects (topo_topology_t topology, unsigned depth);
 
 
 /** \brief Returns the topology object at index _index_ from depth _depth_ */

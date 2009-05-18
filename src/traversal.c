@@ -22,11 +22,11 @@ topo_get_depth_type (topo_topology_t topology, unsigned depth)
 }
 
 unsigned
-topo_get_depth_nbitems (struct topo_topology *topology, unsigned depth)
+topo_get_depth_nbobjects (struct topo_topology *topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
     return 0;
-  return topology->level_nbitems[depth];
+  return topology->level_nbobjects[depth];
 }
 
 struct topo_obj *
@@ -34,7 +34,7 @@ topo_get_object (struct topo_topology *topology, unsigned depth, unsigned index)
 {
   if (depth >= topology->nb_levels)
     return NULL;
-  if (index >= topology->level_nbitems[depth])
+  if (index >= topology->level_nbobjects[depth])
     return NULL;
   return topology->levels[depth][index];
 }
@@ -60,10 +60,10 @@ int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj)
 int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *src, struct topo_obj **objs, int max)
 {
   struct topo_obj *parent, *nextparent, **src_objs;
-  int i,src_nbitems;
+  int i,src_nbobjects;
   int stored = 0;
 
-  src_nbitems = topology->level_nbitems[src->level];
+  src_nbobjects = topology->level_nbobjects[src->level];
   src_objs = topology->levels[src->level];
 
   parent = src;
@@ -78,7 +78,7 @@ int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *
     }
 
     /* traverse src's objects and find those that are in nextparent and were not in parent */
-    for(i=0; i<src_nbitems; i++) {
+    for(i=0; i<src_nbobjects; i++) {
       if (topo_cpuset_isincluded(&nextparent->cpuset, &src_objs[i]->cpuset)
 	  && !topo_cpuset_isincluded(&parent->cpuset, &src_objs[i]->cpuset)) {
 	objs[stored++] = src_objs[i];
