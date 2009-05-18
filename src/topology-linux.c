@@ -320,11 +320,11 @@ topo_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_f
   /* read the cpuset */
   snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cpuset%s/%s", cpuset_name, type);
   topo_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-  fd = fopen(cpuset_filename, "r");
+  fd = topo_fopen(cpuset_filename, "r", fsys_root_fd);
   if (!fd) {
     snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cpusets%s/%s", cpuset_name, type);
     topo_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-    fd = fopen(cpuset_filename, "r");
+    fd = topo_fopen(cpuset_filename, "r", fsys_root_fd);
   }
 
   if (!fd)
