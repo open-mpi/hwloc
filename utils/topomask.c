@@ -21,9 +21,35 @@ static void usage(void)
   fprintf(stderr, "  if prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
 }
 
+typedef enum topomask_append_mode_e {
+  TOPOMASK_APPEND_ADD,
+  TOPOMASK_APPEND_CLR,
+} topomask_append_mode_t;
+
+static void append_cpuset(topo_cpuset_t *set, topo_cpuset_t *newset,
+			  topomask_append_mode_t mode, int verbose)
+{
+  switch (mode) {
+  case TOPOMASK_APPEND_ADD:
+    if (verbose)
+      fprintf(stderr, "adding %" TOPO_PRIxCPUSET " to %" TOPO_PRIxCPUSET "\n",
+	      TOPO_CPUSET_PRINTF_VALUE(*newset), TOPO_CPUSET_PRINTF_VALUE(*set));
+    topo_cpuset_orset(set, newset);
+    break;
+  case TOPOMASK_APPEND_CLR:
+    if (verbose)
+      fprintf(stderr, "clearing %" TOPO_PRIxCPUSET " from %" TOPO_PRIxCPUSET "\n",
+	      TOPO_CPUSET_PRINTF_VALUE(*newset), TOPO_CPUSET_PRINTF_VALUE(*set));
+    topo_cpuset_clearset(set, newset);
+    break;
+  default:
+    assert(1);
+  }
+}
+
 static int append_object(topo_topology_t topology, struct topo_topology_info *topoinfo,
 			 topo_cpuset_t *set, const char *string, const char *sep,
-			 int sub, int verbose)
+			 topomask_append_mode_t mode, int verbose)
 {
   topo_obj_t obj;
   unsigned depth, width;
@@ -75,16 +101,13 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
 
     obj = topo_get_object(topology, depth, i);
     if (obj) {
-      if (sub)
-	topo_cpuset_clearset(set, &obj->cpuset);
-      else
-	topo_cpuset_orset(set, &obj->cpuset);
-    }
-    if (verbose) {
-      if (obj)
-	printf("object (%d,%d) found\n", depth, i);
-      else
-	printf("object (%d,%d) does not exist\n", depth, i);
+      if (verbose) {
+	if (obj)
+	  printf("object (%d,%d) found\n", depth, i);
+	else
+	  printf("object (%d,%d) does not exist\n", depth, i);
+      }
+      append_cpuset(set, &obj->cpuset, mode, verbose);
     }
   }
 
@@ -108,7 +131,7 @@ int main(int argc, char *argv[])
   while (argc >= 2) {
     char *arg;
     char *colon;
-    int sub = 0;
+    topomask_append_mode_t mode = TOPOMASK_APPEND_ADD;
 
     if (*argv[1] == '-') {
       if (!strcmp(argv[1], "-v")) {
@@ -121,21 +144,18 @@ int main(int argc, char *argv[])
 
     arg = argv[1];
     if (*argv[1] == '~') {
-      sub = 1;
+      mode = TOPOMASK_APPEND_CLR;
       arg++;
     }
 
     colon = strchr(arg, ':');
     if (colon) {
-      append_object(topology, &topoinfo, &set, arg, colon, sub, verbose);
+      append_object(topology, &topoinfo, &set, arg, colon, mode, verbose);
     } else {
       topo_cpuset_t newset;
       topo_cpuset_zero(&newset);
       topo_cpuset_from_string(arg, &newset);
-      if (sub)
-	topo_cpuset_clearset(&set, &newset);
-      else
-	topo_cpuset_orset(&set, &newset);
+      append_cpuset(&set, &newset, mode, verbose);
     }
 
  next:
