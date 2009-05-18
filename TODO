@@ -2,6 +2,9 @@
   + if we keep a "proc" level at the bottom, should we make its type
     ignorable for real? otherwise, we could get L1 objects at the bottom
 
+* topomask: add an option to request a cpuset containing of n close entries
+  among the generated cpuset
+
 * add a cpuset xor
 
 * add an example with linux cpuset

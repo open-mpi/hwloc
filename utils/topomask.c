@@ -18,11 +18,12 @@ static void usage(void)
   fprintf(stderr, "     X-\tall objects with index at least X\n");
   fprintf(stderr, "     X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
   fprintf(stderr, "  <string> may be a cpuset string\n");
+  fprintf(stderr, "  if prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
 }
 
 static int append_object(topo_topology_t topology, struct topo_topology_info *topoinfo,
 			 topo_cpuset_t *set, const char *string, const char *sep,
-			 int verbose)
+			 int sub, int verbose)
 {
   topo_obj_t obj;
   unsigned depth, width;
@@ -74,7 +75,10 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
 
     obj = topo_get_object(topology, depth, i);
     if (obj) {
-      topo_cpuset_orset(set, &obj->cpuset);
+      if (sub)
+	topo_cpuset_clearset(set, &obj->cpuset);
+      else
+	topo_cpuset_orset(set, &obj->cpuset);
     }
     if (verbose) {
       if (obj)
@@ -102,7 +106,9 @@ int main(int argc, char *argv[])
   topo_topology_get_info(topology, &topoinfo);
 
   while (argc >= 2) {
+    char *arg;
     char *colon;
+    int sub = 0;
 
     if (*argv[1] == '-') {
       if (!strcmp(argv[1], "-v")) {
@@ -113,14 +119,23 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    colon = strchr(argv[1], ':');
+    arg = argv[1];
+    if (*argv[1] == '~') {
+      sub = 1;
+      arg++;
+    }
+
+    colon = strchr(arg, ':');
     if (colon) {
-      append_object(topology, &topoinfo, &set, argv[1], colon, verbose);
+      append_object(topology, &topoinfo, &set, arg, colon, sub, verbose);
     } else {
       topo_cpuset_t newset;
       topo_cpuset_zero(&newset);
-      topo_cpuset_from_string(argv[1], &newset);
-      topo_cpuset_orset(&set, &newset);
+      topo_cpuset_from_string(arg, &newset);
+      if (sub)
+	topo_cpuset_clearset(&set, &newset);
+      else
+	topo_cpuset_orset(&set, &newset);
     }
 
  next:
