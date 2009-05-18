@@ -18,16 +18,15 @@ static void usage(void)
   fprintf(stderr, "   X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
 }
 
-#define OBJECT_MAX TOPO_NBMAXCPUS
-
 int main(int argc, char *argv[])
 {
   topo_topology_t topology;
   struct topo_topology_info topoinfo;
-  topo_obj_t objs[OBJECT_MAX];
-  unsigned nobj = 0;
+  topo_cpuset_t set;
   int verbose = 0;
   char string[TOPO_CPUSET_STRING_LENGTH+1];
+
+  topo_cpuset_zero(&set);
 
   topo_topology_init(&topology);
   topo_topology_load(topology);
@@ -100,12 +99,7 @@ int main(int argc, char *argv[])
 
       obj = topo_get_object(topology, depth, i);
       if (obj) {
-	if (nobj == OBJECT_MAX) {
-	  if (verbose)
-	    fprintf(stderr, "Cannot work on more than %d objects, ignoring the other ones\n", OBJECT_MAX);
-	  break;
-	}
-	objs[nobj++] = obj;
+	topo_cpuset_orset(&set, &obj->cpuset);
       }
       if (verbose) {
 	if (obj)
@@ -120,7 +114,7 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  topo_object_cpuset_snprintf(string, sizeof(string), nobj, objs);
+  topo_cpuset_snprintf(string, sizeof(string), &set);
   printf("%s\n", string);
 
   topo_topology_destroy(topology);
