@@ -564,11 +564,6 @@ look_sysfsnode(struct topo_topology *topology)
 
   topology->level_nbobjects[topology->nb_levels] = topology->nb_nodes = nbnodes;
   topology->levels[topology->nb_levels++] = node_level;
-
-  /* Now that we have gathered NUMA node information,
-   * empty the admin-disabled ones */
-  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
-    topo_admin_disable_mems_from_cpuset(topology, topology->nb_levels-1);
 }
 
 static void
@@ -611,8 +606,8 @@ topo_linux_setup_cpu_level(struct topo_topology *topology,
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
-look__sysfscpu(struct topo_topology *topology,
-	       topo_cpuset_t *admin_disabled_cpuset)
+look_sysfscpu(struct topo_topology *topology,
+	      topo_cpuset_t *admin_disabled_cpuset)
 {
   struct topo_obj **die_level = NULL;
   unsigned ndies = 0;
@@ -1048,31 +1043,6 @@ look_cpuinfo(struct topo_topology *topology,
 }
 
 static void
-look_sysfscpu(struct topo_topology *topology)
-{
-  topo_cpuset_t admin_disabled_cpuset;
-
-  /* gather the list of admin-disabled cpus */
-  topo_cpuset_zero(&admin_disabled_cpuset);
-  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
-    topo_admin_disable_cpus_from_cpuset(topology, &admin_disabled_cpuset);
-
-  if (topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0)
-    {
-      /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
-      /* cpuset cpus ignored */
-      look_cpuinfo(topology, &admin_disabled_cpuset);
-    }
-  else
-    {
-      look__sysfscpu(topology, &admin_disabled_cpuset);
-    }
-}
-
-static void
 topo__get_dmi_info(struct topo_topology *topology)
 {
 #define DMI_BOARD_STRINGS_LEN 50
@@ -1112,8 +1082,31 @@ topo__get_dmi_info(struct topo_topology *topology)
 void
 look_linux(struct topo_topology *topology)
 {
+  topo_cpuset_t admin_disabled_cpuset;
+
+  /* Gather NUMA information */
   look_sysfsnode(topology);
-  look_sysfscpu(topology);
+
+  /* Now that we have gathered NUMA node information,
+   * empty the admin-disabled ones */
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
+    topo_admin_disable_mems_from_cpuset(topology, topology->nb_levels-1);
+
+  /* Gather the list of admin-disabled cpus */
+  topo_cpuset_zero(&admin_disabled_cpuset);
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
+    topo_admin_disable_cpus_from_cpuset(topology, &admin_disabled_cpuset);
+
+  /* Gather the list of cpus now */
+  if (topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
+      /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
+    look_cpuinfo(topology, &admin_disabled_cpuset);
+  } else {
+    look_sysfscpu(topology, &admin_disabled_cpuset);
+  }
 
   /* Compute the whole machine memory and huge page */
   topo_get_procfs_meminfo_info(topology,
@@ -1122,5 +1115,6 @@ look_linux(struct topo_topology *topology)
 			       &topology->levels[0][0]->huge_page_free);
 			       /* FIXME: gather page_size_kB as well? MaMI needs it */
 
+  /* Gather DMI info */
   topo__get_dmi_info(topology);
 }
