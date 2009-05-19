@@ -187,113 +187,6 @@ topo_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
   return 0;
 }
 
-static void
-topo_process_shared_cpu_map(const char *mappath, const char * mapname, unsigned long val,
-			    int procid_max, unsigned *ids, unsigned long *vals,
-			    unsigned *nr_ids, unsigned givenid, topo_cpuset_t *online_cpuset,
-			    int fsys_root_fd)
-{
-  topo_cpuset_t set;
-  int k;
-
-  topo_parse_cpumap(mappath, &set, fsys_root_fd);
-  for(k=0; k<procid_max; k++)
-    {
-      if (topo_cpuset_isset(&set, k))
-	{
-	  /* we found a cpu in the map */
-	  unsigned newid;
-
-	  if (ids[k] != -1)
-	    /* already got this map, stop using it */
-	    break;
-
-	  /* allocate a new id, either by incrementing the global counter, or by using the given id */
-	  newid = nr_ids ? (*nr_ids)++ : givenid;
-
-	  /* this cpu didn't have any such id yet, set this id for all cpus in the map */
-	  for(; k<procid_max; k++)
-	    {
-	      if (topo_cpuset_isset(&set, k))
-		{
-		  topo_debug("--- proc %d has %s number %d\n", k, mapname, newid);
-		  ids[k] = newid;
-		  vals[newid] = val;
-		}
-	    }
-
-	  break;
-	}
-    }
-}
-
-static void
-topo_parse_cache_shared_cpu_maps(int proc_index, int procid_max, topo_cpuset_t *online_cpuset,
-				 unsigned *cacheids, unsigned long *cachesizes, unsigned *nr_caches,
-				 int fsys_root_fd)
-{
-  int i;
-
-  for(i=0; i<10; i++) {
-#define SHARED_CPU_MAP_STRLEN (27+9+12+1+15+1)
-    char mappath[SHARED_CPU_MAP_STRLEN];
-    char string[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
-    char cachename[8+1];
-    unsigned long kB = 0;
-    int level; /* 0 for L1, .... */
-    FILE * fd;
-
-    sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/level", proc_index, i);
-    fd = topo_fopen(mappath, "r", fsys_root_fd);
-    if (fd)
-      {
-	if (fgets(string,sizeof(string), fd))
-	  level = strtoul(string, NULL, 10)-1;
-	else
-	  continue;
-	fclose(fd);
-      }
-    else
-      continue;
-
-    sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/type", proc_index, i);
-    fd = topo_fopen(mappath, "r", fsys_root_fd);
-    if (fd)
-      {
-	if (fgets(string,sizeof(string), fd))
-	  {
-	    fclose(fd);
-	    if (!strncmp(string,"Instruction", 11))
-	      continue;
-	  }
-	else
-	  {
-	    fclose(fd);
-	    continue;
-	  }
-      }
-    else
-      continue;
-
-    sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/size", proc_index, i);
-    fd = topo_fopen(mappath, "r", fsys_root_fd);
-    if (fd)
-      {
-	if (fgets(string,sizeof(string), fd))
-	  kB = atol(string); /* in kB */
-	fclose(fd);
-      }
-
-    sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", proc_index, i);
-    sprintf(cachename, "L%d cache", level+1);
-    topo_process_shared_cpu_map(mappath, cachename, kB,
-				procid_max, cacheids+level*TOPO_NBMAXCPUS,
-				cachesizes+level*TOPO_NBMAXCPUS,
-				&nr_caches[level], -1, online_cpuset,
-				fsys_root_fd);
-  }
-}
-
 static int
 topo_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
 {
@@ -771,6 +664,7 @@ look_sysfscpu(struct topo_topology *topology,
 
       /* look at the caches */
       for(j=0; j<10; j++) {
+#define SHARED_CPU_MAP_STRLEN (27+9+12+1+15+1)
 	char mappath[SHARED_CPU_MAP_STRLEN];
 	char string[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
 	topo_cpuset_t cacheset;
@@ -891,8 +785,6 @@ look_cpuinfo(struct topo_topology *topology,
   unsigned osphysids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
   unsigned proc_coreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
   unsigned oscoreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
-  unsigned proc_cacheids[] = { [0 ... TOPO_CACHE_LEVEL_MAX*TOPO_NBMAXCPUS-1] = -1 };
-  unsigned long cache_sizes[] = { [0 ... TOPO_CACHE_LEVEL_MAX*TOPO_NBMAXCPUS-1] = 0 };
   unsigned proc_osphysids[TOPO_NBMAXCPUS];
   unsigned proc_oscoreids[TOPO_NBMAXCPUS];
   unsigned core_osphysids[TOPO_NBMAXCPUS];
@@ -901,11 +793,10 @@ look_cpuinfo(struct topo_topology *topology,
   unsigned numprocs=0;
   unsigned numdies=0;
   unsigned numcores=0;
-  unsigned numcaches[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1] = 0 };
   long physid;
   long coreid;
   long processor = -1;
-  int i, j;
+  int i;
 
   topo_cpuset_zero(&online_cpuset);
   topo_cpuset_zero(&nonfirst_threads_cpuset);
@@ -992,6 +883,7 @@ look_cpuinfo(struct topo_topology *topology,
   topo_debug("%s: found %u procs\n", __func__, numprocs);
 
   /* we have a contigous range of online cpus */
+  /* FIXME: what if there's a offline cpu ? */
   topo_cpuset_set_range(&online_cpuset, 0, processor);
 
   topo_debug("\n * Topology summary *\n");
@@ -1005,25 +897,8 @@ look_cpuinfo(struct topo_topology *topology,
   if (numdies>1)
     topo_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
 
-  for(j=0; j<procid_max; j++)
-    topo_parse_cache_shared_cpu_maps(j, procid_max, &online_cpuset,
-				     proc_cacheids, cache_sizes, numcaches, topology->backend_params.sysfs.root_fd);
-
   if (numcores>1)
     topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
-
-  /* process caches at the end since we don't if they exist,
-     and let the core code reorder levels
-  */
-  if (numcaches[2] > 0)
-      /* setup L3 caches */
-      topo_setup_cache_level(2, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
-  if (numcaches[1] > 0)
-      /* setup L2 caches */
-      topo_setup_cache_level(1, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
-  if (numcaches[0] > 0)
-      /* setup L1 caches */
-      topo_setup_cache_level(0, procid_max, numcaches, proc_cacheids, cache_sizes, topology);
 
   /* Override the default returned by `ma_fallback_nbprocessors ()'.  */
   topology->nb_processors = numprocs;
