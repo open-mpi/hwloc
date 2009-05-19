@@ -164,10 +164,8 @@ look_cpu(struct topo_topology *topology)
       if (!topo_cpuset_isset(&topology->online_cpuset, oscpu))
 	continue;
 
-      if ((!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)
-	   && topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu))
-	  || ((topology->flags & TOPO_FLAGS_IGNORE_THREADS)
-	      && topo_cpuset_isset(&topology->nonfirst_threads_cpuset, oscpu))) {
+      if ((topology->flags & TOPO_FLAGS_IGNORE_THREADS)
+	  && topo_cpuset_isset(&topology->nonfirst_threads_cpuset, oscpu)) {
 	topology->nb_processors--;
 	continue;
       }
@@ -177,8 +175,6 @@ look_cpu(struct topo_topology *topology)
       topo_setup_object(cpu_level[cpu], TOPO_OBJ_PROC, oscpu);
 
       topo_cpuset_cpu(&cpu_level[cpu]->cpuset, oscpu);
-      if (!(topo_cpuset_isset(&topology->admin_disabled_cpuset, oscpu)))
-	cpu_level[cpu]->admin_disabled = 1;
 
       topo_debug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
 		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu]->cpuset));
@@ -286,18 +282,14 @@ topo_discover(struct topo_topology *topology)
   /* From here, topology->nb_processors is set to the number of available
    * hardware resources, and topology->online_cpuset covers them.
    * Administrator-disabled resources (such as Linux Cpusets) are not
-   * removed yet. Disabled cpus are in topology->admin_disabled_cpuset,
-   * while disabled mems are marked as admin-disabled.
+   * removed yet.
    */
   topo_debug("%d online processors found\n", topology->nb_processors);
   topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
 	     TOPO_CPUSET_PRINTF_VALUE(topology->online_cpuset));
-  topo_debug("admin disabled processor cpuset: %" TOPO_PRIxCPUSET "\n",
-	     TOPO_CPUSET_PRINTF_VALUE(topology->admin_disabled_cpuset));
   assert(topology->nb_processors == topo_cpuset_weight(&topology->online_cpuset));
 
-  /* Create actual bottom proc resources, while dropping the offline
-   * and admin_disabled ones.
+  /* Create actual bottom proc resources, while dropping the offline ones.
    */
   look_cpu(topology);
   /* topology->nb_processors now does not contain admin-disabled procs anymore. */
@@ -356,10 +348,8 @@ topo_discover(struct topo_topology *topology)
   topo_cpuset_zero(&topology->levels[0][0]->cpuset);
   for (i=0; i<topology->level_nbobjects[topology->nb_levels-1]; i++)
     topo_cpuset_orset(&topology->levels[0][0]->cpuset, &topology->levels[topology->nb_levels-1][i]->cpuset);
-  /* Make sure machine = online & ~admin_disabled */
+  /* Make sure machine = online & ~ignored ones */
   topo_cpuset_t finalset = topology->online_cpuset;
-  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
-    topo_cpuset_clearset(&finalset, &topology->admin_disabled_cpuset);
   if (topology->flags & TOPO_FLAGS_IGNORE_THREADS)
     topo_cpuset_clearset(&finalset, &topology->nonfirst_threads_cpuset);
   assert(topo_cpuset_isequal(&finalset, &topology->levels[0][0]->cpuset));
@@ -475,18 +465,6 @@ topo_discover(struct topo_topology *topology)
   for (l=0; l<topology->nb_levels; l++)
     for (i=0; i<topology->level_nbobjects[l]; i++)
       topology->levels[l][i]->level = l;
-
-  /* Empty some NUMA node memory if disabled by the administrator */
-  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
-    l = topology->type_depth[TOPO_OBJ_NODE];
-    for (i=0; i<topology->level_nbobjects[l]; i++) {
-      /* remove memory if disabled */
-      if (topology->levels[l][i]->admin_disabled) {
-	topology->levels[l][i]->memory_kB = 0;
-	topology->levels[l][i]->huge_page_free = 0;
-      }
-    }
-  }
 }
 
 int
@@ -503,7 +481,6 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->nb_nodes = 0;
   topology->nb_levels = 1; /* there's at least MACHINE */
   topo_cpuset_zero(&topology->online_cpuset);
-  topo_cpuset_zero(&topology->admin_disabled_cpuset);
   topo_cpuset_zero(&topology->nonfirst_threads_cpuset);
   topology->flags = 0;
   topology->is_fake = 0;

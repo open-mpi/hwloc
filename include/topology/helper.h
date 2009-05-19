@@ -58,7 +58,6 @@ extern void topo_synthetic_load (struct topo_topology *topology);
 		__l->arity = 0;				\
 		__l->children = NULL;			\
 		__l->father = NULL;			\
-		__l->admin_disabled = 0;		\
 		__l->physical_index = _index;		\
 		__l->userdata = NULL;			\
 	} while (0)
