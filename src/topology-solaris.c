@@ -37,8 +37,11 @@ show(lgrp_cookie_t cookie, lgrp_id_t lgrp)
 void
 look_lgrp(struct topo_topology *topology)
 {
-  /* TODO: use LGRP_VIEW_CALLER to get admin constraints */
-  lgrp_cookie_t cookie = lgrp_init(LGRP_VIEW_OS);
+  lgrp_cookie_t cookie;
+  if ((topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
+    cookie = lgrp_init(LGRP_VIEW_OS);
+  else
+    cookie = lgrp_init(LGRP_VIEW_CALLER);
   lgrp_id_t root;
   if (cookie == LGRP_COOKIE_NONE)
     {
