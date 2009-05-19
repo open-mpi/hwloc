@@ -154,11 +154,8 @@ look_kstat(struct topo_topology *topology)
       numprocs++;
     }
 
-  if (numdies > 1)
-    topo_setup_die_level(numprocs, numdies, osphysids, proc_physids, topology);
-
-  if (numcores > 1)
-    topo_setup_core_level(numprocs, numcores, oscoreids, proc_coreids, topology);
+  topo_setup_die_level(numprocs, numdies, osphysids, proc_physids, topology);
+  topo_setup_core_level(numprocs, numcores, oscoreids, proc_coreids, topology);
 
  out:
   kstat_close(kc);
