@@ -611,155 +611,273 @@ topo_linux_setup_cpu_level(struct topo_topology *topology,
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
-look__sysfscpu(unsigned *procid_max,
-	       unsigned *nr_procs,
-	       unsigned *nr_cores,
-	       unsigned *nr_dies,
-	       unsigned *proc_physids,
-	       unsigned *osphysids,
-	       unsigned *proc_coreids,
-	       unsigned *oscoreids,
-	       struct topo_topology *topology,
-	       topo_cpuset_t *admin_disabled_cpuset,
-	       topo_cpuset_t *online_cpuset,
-	       topo_cpuset_t *nonfirst_threads_cpuset)
+look__sysfscpu(struct topo_topology *topology,
+	       topo_cpuset_t *admin_disabled_cpuset)
 {
+  struct topo_obj **die_level = NULL;
+  unsigned ndies = 0;
+  struct topo_obj **core_level = NULL;
+  unsigned ncores = 0;
+  struct topo_obj **thread_level = NULL;
+  unsigned nthreads = 0;
+  struct topo_obj **cache_level[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1 ] = NULL };
+  unsigned ncaches[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1 ] = 0 };
+  topo_cpuset_t cpuset;
+  int nbprocessors;
 #define CPU_TOPOLOGY_STR_LEN (27+9+29+1)
   char string[CPU_TOPOLOGY_STR_LEN];
-  unsigned cpu_max = 1;
-  unsigned nr_offline_cpus = 0;
-  struct dirent *dirent;
   DIR *dir;
-  int i,j,k;
+  int i,j;
+  FILE *fd;
 
+  /* fill the cpuset of interesting cpus */
+  topo_cpuset_zero(&cpuset);
   dir = topo_opendir("/sys/devices/system/cpu", topology->backend_params.sysfs.root_fd);
-  if (dir)
-    {
-      while ((dirent = readdir(dir)) != NULL)
-	{
-	  unsigned long cpu;
-	  if (strncmp(dirent->d_name, "cpu", 3))
-	    continue;
-	  cpu = strtoul(dirent->d_name+3, NULL, 0);
-	  if (cpu_max < cpu+1)
-	    cpu_max = cpu+1;
-	}
-      closedir(dir);
-    }
-  topo_debug("found os proc id max %d\n", cpu_max);
-
-  assert(!(cpu_max > TOPO_NBMAXCPUS));
-
-  for(i=0; i<cpu_max; i++)
-    {
-      topo_cpuset_t dieset, coreset;
-      unsigned mydieid, mycoreid;
-      FILE *fd;
+  if (dir) {
+    struct dirent *dirent;
+    while ((dirent = readdir(dir)) != NULL) {
+      unsigned long cpu;
       char online[2];
 
-      /* check whether the kernel knows another cpu */
-      sprintf(string, "/sys/devices/system/cpu/cpu%d", i);
-      if (topo_access(string, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT)
-	{
-	/* this CPU does not exist */
-	  topo_debug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/\n", i, i);
-	  nr_offline_cpus++;
-	  continue;
-	}
+      if (strncmp(dirent->d_name, "cpu", 3))
+	continue;
+      cpu = strtoul(dirent->d_name+3, NULL, 0);
 
-      /* check whether this processor is offline */
-      sprintf(string, "/sys/devices/system/cpu/cpu%d/online", i);
-      fd = topo_fopen(string, "r", topology->backend_params.sysfs.root_fd);
-      if (fd)
-	{
-	  if (fgets(online, sizeof(online), fd))
-	    {
-	      fclose(fd);
-	      if (atoi(online))
-		{
-		  topo_debug("os proc %d is online\n", i);
-		}
-	      else
-		{
-		  topo_debug("os proc %d is offline\n", i);
-		  nr_offline_cpus++;
-		  continue;
-		}
-	    }
-	  else
-	    {
-	      fclose(fd);
-	    }
-	}
+      assert(cpu < TOPO_NBMAXCPUS);
 
       /* check whether cpusets exclude this cpu */
-      if (topo_cpuset_isset(admin_disabled_cpuset, i)) {
-	topo_debug("os proc %d is offline\n", i);
-	nr_offline_cpus++;
+      if (topo_cpuset_isset(admin_disabled_cpuset, cpu)) {
+	topo_debug("os proc %ld is disabled by the administrator\n", cpu);
 	continue;
       }
 
       /* check whether the kernel exports topology information for this cpu */
-      sprintf(string, "/sys/devices/system/cpu/cpu%d/topology", i);
-      if (topo_access(string, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT)
-	{
-	  topo_debug("os proc %d has no accessible /sys/devices/system/cpu/cpu%d/topology\n", i, i);
-	  nr_offline_cpus++;
+      sprintf(string, "/sys/devices/system/cpu/cpu%ld/topology", cpu);
+      if (topo_access(string, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT) {
+	topo_debug("os proc %ld has no accessible /sys/devices/system/cpu/cpu%ld/topology\n",
+		   cpu, cpu);
+	continue;
+      }
+
+      /* check whether this processor is offline */
+      sprintf(string, "/sys/devices/system/cpu/cpu%ld/online", cpu);
+      fd = topo_fopen(string, "r", topology->backend_params.sysfs.root_fd);
+      if (fd) {
+	if (fgets(online, sizeof(online), fd)) {
+	  fclose(fd);
+	  if (atoi(online)) {
+	    topo_debug("os proc %ld is online\n", cpu);
+	  } else {
+	    topo_debug("os proc %ld is offline\n", cpu);
+	    continue;
+	  }
+	} else {
+	  fclose(fd);
+	}
+      }
+
+      if (topology->flags & TOPO_FLAGS_IGNORE_THREADS) {
+	/* check whether it is a non-first thread in the core */
+	topo_cpuset_t coreset;
+	sprintf(string, "/sys/devices/system/cpu/cpu%ld/topology/thread_siblings", cpu);
+	topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
+	if (topo_cpuset_first(&coreset) != cpu) {
+	  topo_debug("os proc %ld is not first thread in coreset %" TOPO_PRIxCPUSET "\n",
+		     cpu, TOPO_CPUSET_PRINTF_VALUE(coreset));
 	  continue;
 	}
+      }
 
+      topo_cpuset_set(&cpuset, cpu);
+    }
+    closedir(dir);
+  }
+
+  topology->nb_processors = nbprocessors = topo_cpuset_weight(&cpuset);;
+  topo_debug("found %d cpus, cpuset %" TOPO_PRIxCPUSET "\n",
+	     nbprocessors, TOPO_CPUSET_PRINTF_VALUE(cpuset));
+
+  topo_cpuset_foreach_begin(i, &cpuset)
+    {
+      topo_cpuset_t dieset, coreset, threadset;
+      unsigned mydieid, mycoreid;
+      int index;
+
+      /* look at the die */
       mydieid = 0; /* shut-up the compiler */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/physical_package_id", i);
       topo_parse_sysfs_unsigned(string, &mydieid, topology->backend_params.sysfs.root_fd);
 
+      sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
+      topo_parse_cpumap(string, &dieset, topology->backend_params.sysfs.root_fd);
+      topo_cpuset_clearset(&dieset, admin_disabled_cpuset);
+      assert(topo_cpuset_weight(&dieset) >= 1);
+
+      if (topo_cpuset_first(&dieset) == i) {
+	/* first cpu in this die, add the die */
+	if (!ndies) {
+	  die_level = calloc(nbprocessors+1, sizeof(*die_level));
+	  assert(die_level);
+	}
+	index = ndies;
+	die_level[index] = malloc(sizeof(struct topo_obj));
+	assert(die_level[index]);
+	topo_setup_object(die_level[index], TOPO_OBJ_DIE, mydieid);
+	die_level[index]->cpuset = dieset;
+	topo_debug("die %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		   index, mydieid, TOPO_CPUSET_PRINTF_VALUE(dieset));
+	ndies++;
+      }
+
+      /* look at the core */
       mycoreid = 0; /* shut-up the compiler */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_id", i);
       topo_parse_sysfs_unsigned(string, &mycoreid, topology->backend_params.sysfs.root_fd);
 
-      sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
-      topo_parse_cpumap(string, &dieset, topology->backend_params.sysfs.root_fd);
-
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
       topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
+      topo_cpuset_clearset(&coreset, admin_disabled_cpuset);
+      assert(topo_cpuset_weight(&coreset) >= 1);
 
-      /* add thread siblings mask except the first thread to nonfirst_threads_cpuset */
-      topo_cpuset_orset(nonfirst_threads_cpuset, &coreset);
-      topo_cpuset_clr(nonfirst_threads_cpuset, topo_cpuset_first(&coreset));
+      if (topo_cpuset_first(&coreset) == i) {
+	/* first cpu in this core, add the core */
+	if (!ncores) {
+	  core_level = calloc(nbprocessors+1, sizeof(*core_level));
+	  assert(core_level);
+	}
+	index = ncores;
+	core_level[index] = malloc(sizeof(struct topo_obj));
+	assert(core_level[index]);
+	topo_setup_object(core_level[index], TOPO_OBJ_CORE, mycoreid);
+	core_level[index]->cpuset = coreset;
+	topo_debug("core %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		   index, mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
+	ncores++;
+      }
 
-      for(j=0; j<i; j++)
-	if (topo_cpuset_isset(&dieset, j))
-	  break;
-      if (j==i)
-	{
-	  /* new die cpumap fill it */
-	  for(k=i; k<TOPO_NBMAXCPUS; k++)
-	    if (topo_cpuset_isset(&dieset, k))
-	      proc_physids[k] = (*nr_dies);
-	  topo_debug("die %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		     (*nr_dies), mydieid, TOPO_CPUSET_PRINTF_VALUE(dieset));
-	  osphysids[(*nr_dies)++] = mydieid;
+      /* look at the thread */
+      topo_cpuset_cpu(&threadset, i);
+      topo_cpuset_clearset(&threadset, admin_disabled_cpuset);
+      assert(topo_cpuset_weight(&threadset) == 1);
+
+      /* add the thread */
+      if (!nthreads) {
+	thread_level = calloc(nbprocessors+1, sizeof(*thread_level));
+	assert(thread_level);
+      }
+      index = nthreads;
+      thread_level[index] = malloc(sizeof(struct topo_obj));
+      assert(thread_level[index]);
+      topo_setup_object(thread_level[index], TOPO_OBJ_PROC, i);
+      thread_level[index]->cpuset = threadset;
+      topo_debug("thread %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		 index, TOPO_CPUSET_PRINTF_VALUE(threadset));
+      nthreads++;
+
+      /* look at the caches */
+      for(j=0; j<10; j++) {
+	char mappath[SHARED_CPU_MAP_STRLEN];
+	char string[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
+	topo_cpuset_t cacheset;
+	unsigned long kB = 0;
+	int depth; /* 0 for L1, .... */
+	FILE * fd;
+
+	/* get the cache level depth */
+	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/level", i, j);
+	fd = topo_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
+	if (fd) {
+	  if (fgets(string,sizeof(string), fd))
+	    depth = strtoul(string, NULL, 10)-1;
+	  else
+	    continue;
+	  fclose(fd);
+	} else
+	  continue;
+
+	/* ignore Instruction caches */
+	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/type", i, j);
+	fd = topo_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
+	if (fd) {
+	  if (fgets(string, sizeof(string), fd)) {
+	    fclose(fd);
+	    if (!strncmp(string, "Instruction", 11))
+	      continue;
+	  } else {
+	    fclose(fd);
+	    continue;
+	  }
+	} else
+	  continue;
+
+	/* get the cache size */
+	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/size", i, j);
+	fd = topo_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
+	if (fd) {
+	  if (fgets(string,sizeof(string), fd))
+	    kB = atol(string); /* in kB */
+	  fclose(fd);
 	}
 
-      for(j=0; j<i; j++)
-	if (topo_cpuset_isset(&coreset, j))
-	  break;
-      if (j==i)
-	{
-	  /* new core cpumap fill it */
-	  for(k=i; k<TOPO_NBMAXCPUS; k++)
-	    if (topo_cpuset_isset(&coreset, k))
-	      proc_coreids[k] = (*nr_cores);
-	  topo_debug("core %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		     (*nr_cores), mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
-	  oscoreids[(*nr_cores)++] = mycoreid;
-	}
+	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", i, j);
+	topo_parse_cpumap(mappath, &cacheset, topology->backend_params.sysfs.root_fd);
+	topo_cpuset_clearset(&cacheset, admin_disabled_cpuset);
+	if (topo_cpuset_weight(&cacheset) < 1)
+	  /* mask is wrong (happens on ia64), assumes it's not shared */
+	  topo_cpuset_cpu(&cacheset, i);
 
-	topo_cpuset_set(online_cpuset, i);
+	if (topo_cpuset_first(&cacheset) == i) {
+	  /* first cpu in this cache, add the cache */
+	  if (!ncaches[depth]) {
+	    cache_level[depth] = calloc(nbprocessors+1, sizeof(*core_level));
+	    assert(cache_level[depth]);
+	  }
+	  index = ncaches[depth];
+	  cache_level[depth][index] = malloc(sizeof(struct topo_obj));
+	  assert(cache_level[depth][index]);
+	  topo_setup_object(cache_level[depth][index], TOPO_OBJ_CACHE, -1);
+	  cache_level[depth][index]->memory_kB = kB;
+	  cache_level[depth][index]->cache_depth = depth+1;
+	  cache_level[depth][index]->cpuset = cacheset;
+	  topo_debug("cache %d depth %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		     ncaches[depth], depth, TOPO_CPUSET_PRINTF_VALUE(cacheset));
+	  ncaches[depth]++;
+	}
+      }
     }
+  topo_cpuset_foreach_end();
 
-  *nr_procs = cpu_max - nr_offline_cpus;
-  *procid_max = cpu_max;
-  topo_debug("%s: found %u procs\n", __func__, *nr_procs);
+  /* add levels to the topology */
+
+  if (die_level) {
+    topology->level_nbobjects[topology->nb_levels] = ndies;
+    topo_debug("--- die level has number %d\n", topology->nb_levels);
+    topology->levels[topology->nb_levels++] = die_level;
+    topo_debug("\n");
+  }
+
+  if (core_level) {
+    topology->level_nbobjects[topology->nb_levels] = ncores;
+    topo_debug("--- core level has number %d\n", topology->nb_levels);
+    topology->levels[topology->nb_levels++] = core_level;
+    topo_debug("\n");
+  }
+
+  for(i=TOPO_CACHE_LEVEL_MAX-1; i>=0; i--) {
+    if (cache_level[i]) {
+      topology->level_nbobjects[topology->nb_levels] = ncaches[i];
+      topo_debug("--- cache level depth %d has number %d\n", i, topology->nb_levels);
+      topology->levels[topology->nb_levels++] = cache_level[i];
+      topo_debug("\n");
+    }
+  }
+
+  if (thread_level) {
+    topology->level_nbobjects[topology->nb_levels] = nthreads;
+    topo_debug("--- thread level has number %d\n", topology->nb_levels);
+    topology->levels[topology->nb_levels++] = thread_level;
+    topo_debug("\n");
+  }
 }
 
 
@@ -768,29 +886,34 @@ look__sysfscpu(unsigned *procid_max,
 #      define PHYSID "physical id"
 #      define COREID "core id"
 static void
-look_cpuinfo(unsigned *procid_max,
-	     unsigned *nr_procs,
-	     unsigned *nr_cores,
-	     unsigned *nr_dies,
-	     unsigned *proc_physids,
-	     unsigned *osphysids,
-	     unsigned *proc_coreids,
-	     unsigned *oscoreids,
-	     struct topo_topology *topology,
-	     topo_cpuset_t *admin_disabled_cpuset,
-	     topo_cpuset_t *online_cpuset,
-	     topo_cpuset_t *nonfirst_threads_cpuset)
+look_cpuinfo(struct topo_topology *topology,
+	     topo_cpuset_t *admin_disabled_cpuset)
 {
   FILE *fd;
   char string[strlen(PHYSID)+1+9+1+1];
   char *endptr;
+  unsigned proc_physids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned osphysids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned proc_coreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned oscoreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned proc_cacheids[] = { [0 ... TOPO_CACHE_LEVEL_MAX*TOPO_NBMAXCPUS-1] = -1 };
+  unsigned long cache_sizes[] = { [0 ... TOPO_CACHE_LEVEL_MAX*TOPO_NBMAXCPUS-1] = 0 };
   unsigned proc_osphysids[TOPO_NBMAXCPUS];
   unsigned proc_oscoreids[TOPO_NBMAXCPUS];
   unsigned core_osphysids[TOPO_NBMAXCPUS];
+  topo_cpuset_t online_cpuset, nonfirst_threads_cpuset;
+  unsigned procid_max=0;
+  unsigned numprocs=0;
+  unsigned numdies=0;
+  unsigned numcores=0;
+  unsigned numcaches[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1] = 0 };
   long physid;
   long coreid;
   long processor = -1;
-  int i;
+  int i, j;
+
+  topo_cpuset_zero(&online_cpuset);
+  topo_cpuset_zero(&nonfirst_threads_cpuset);
 
   /* FIXME: support admin_disabled_cpuset here as well */
   /* FIXME: support nonfirst_threads_cpuset here as well */
@@ -838,26 +961,26 @@ look_cpuinfo(unsigned *procid_max,
       getprocnb_end() else
       getprocnb_begin(PHYSID,physid);
       proc_osphysids[processor]=physid;
-      for (i=0; i<*nr_dies; i++)
+      for (i=0; i<numdies; i++)
 	if (physid == osphysids[i])
 	  break;
       proc_physids[processor]=i;
       topo_debug("%ld on die %d (%lx)\n", processor, i, physid);
-      if (i==*nr_dies)
-	osphysids[(*nr_dies)++] = physid;
+      if (i==numdies)
+	osphysids[(numdies)++] = physid;
       getprocnb_end() else
       getprocnb_begin(COREID,coreid);
       proc_oscoreids[processor]=coreid;
-      for (i=0; i<*nr_cores; i++)
+      for (i=0; i<numcores; i++)
 	if (coreid == oscoreids[i] && proc_osphysids[processor] == core_osphysids[i])
 	  break;
       proc_coreids[processor]=i;
       topo_debug("%ld on core %d (%lx:%x)\n", processor, i, coreid, proc_osphysids[processor]);
-      if (i==*nr_cores)
+      if (i==numcores)
 	{
-	  core_osphysids[*nr_cores] = proc_osphysids[processor];
-	  oscoreids[*nr_cores] = coreid;
-	  (*nr_cores)++;
+	  core_osphysids[numcores] = proc_osphysids[processor];
+	  oscoreids[numcores] = coreid;
+	  (numcores)++;
 	}
       getprocnb_end()
 	if (string[strlen(string)-1]!='\n')
@@ -869,59 +992,12 @@ look_cpuinfo(unsigned *procid_max,
   fclose(fd);
 
   /* setup the final number of procs */
-  *nr_procs = processor + 1;
-  *procid_max = processor + 1;
-  topo_debug("%s: found %u procs\n", __func__, *nr_procs);
+  numprocs = processor + 1;
+  procid_max = processor + 1;
+  topo_debug("%s: found %u procs\n", __func__, numprocs);
 
   /* we have a contigous range of online cpus */
-  topo_cpuset_set_range(online_cpuset, 0, processor);
-}
-
-static void
-look_sysfscpu(struct topo_topology *topology)
-{
-  unsigned proc_physids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
-  unsigned osphysids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
-  unsigned proc_coreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
-  unsigned oscoreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
-  unsigned proc_cacheids[] = { [0 ... TOPO_CACHE_LEVEL_MAX*TOPO_NBMAXCPUS-1] = -1 };
-  unsigned long cache_sizes[] = { [0 ... TOPO_CACHE_LEVEL_MAX*TOPO_NBMAXCPUS-1] = 0 };
-  topo_cpuset_t admin_disabled_cpuset, online_cpuset, nonfirst_threads_cpuset;
-  int j;
-
-  unsigned procid_max=0;
-  unsigned numprocs=0;
-  unsigned numdies=0;
-  unsigned numcores=0;
-  unsigned numcaches[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1] = 0 };
-
-  topo_cpuset_zero(&admin_disabled_cpuset);
-  topo_cpuset_zero(&online_cpuset);
-  topo_cpuset_zero(&nonfirst_threads_cpuset);
-
-  /* gather the list of admin-disabled cpus */
-  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
-    topo_admin_disable_cpus_from_cpuset(topology, &admin_disabled_cpuset);
-
-  if (topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
-      || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0)
-    {
-      /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
-      /* cpuset cpus ignored */
-      look_cpuinfo(&procid_max, &numprocs, &numcores, &numdies,
-		   proc_physids, osphysids,
-		   proc_coreids, oscoreids,
-		   topology, &admin_disabled_cpuset, &online_cpuset, &nonfirst_threads_cpuset);
-    }
-  else
-    {
-      look__sysfscpu(&procid_max, &numprocs, &numcores, &numdies,
-		     proc_physids, osphysids,
-		     proc_coreids, oscoreids,
-		     topology, &admin_disabled_cpuset, &online_cpuset, &nonfirst_threads_cpuset);
-    }
+  topo_cpuset_set_range(&online_cpuset, 0, processor);
 
   topo_debug("\n * Topology summary *\n");
   topo_debug("%d processors (%d max id)\n", numprocs, procid_max);
@@ -963,11 +1039,37 @@ look_sysfscpu(struct topo_topology *topology)
    */
   topo_debug("%d online processors found\n", topology->nb_processors);
   topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
-	     TOPO_CPUSET_PRINTF_VALUE(topology->online_cpuset));
+	     TOPO_CPUSET_PRINTF_VALUE(online_cpuset));
   assert(topology->nb_processors == topo_cpuset_weight(&online_cpuset));
 
   /* setup the cpu level, removing nonfirst threads */
   topo_linux_setup_cpu_level(topology, &online_cpuset, &nonfirst_threads_cpuset);
+  /* FIXME: use the common look_cpu ? */
+}
+
+static void
+look_sysfscpu(struct topo_topology *topology)
+{
+  topo_cpuset_t admin_disabled_cpuset;
+
+  /* gather the list of admin-disabled cpus */
+  topo_cpuset_zero(&admin_disabled_cpuset);
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
+    topo_admin_disable_cpus_from_cpuset(topology, &admin_disabled_cpuset);
+
+  if (topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
+      || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0)
+    {
+      /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
+      /* cpuset cpus ignored */
+      look_cpuinfo(topology, &admin_disabled_cpuset);
+    }
+  else
+    {
+      look__sysfscpu(topology, &admin_disabled_cpuset);
+    }
 }
 
 static void
