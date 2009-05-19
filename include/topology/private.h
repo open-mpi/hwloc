@@ -27,8 +27,6 @@ struct topo_topology {
   unsigned nb_processors; 				/* Total number of physical processors */
   unsigned nb_nodes; 					/* Number of NUMA nodes */
   unsigned nb_levels;					/* Number of horizontal levels */
-  topo_cpuset_t online_cpuset;				/* Available physical resource ids mask */
-  topo_cpuset_t nonfirst_threads_cpuset;		/* Thread siblings that are not the first one in a cpu */
   unsigned level_nbobjects[TOPO_DEPTH_MAX]; 		/* Number of objects on each horizontal level */
   struct topo_obj **levels[TOPO_DEPTH_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbobjects[l]] */
   unsigned long flags;

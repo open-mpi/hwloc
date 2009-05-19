@@ -116,7 +116,4 @@ look_aix(struct topo_topology *topology)
 	}
 #endif
     }
-
-    /* we have a contigous range of online cpus */
-    topo_cpuset_set_range(&topology->online_cpuset, 0, topology->nb_processors-1);
 }

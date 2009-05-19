@@ -148,6 +148,7 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 }
 #endif /* LINUX_SYS */
 
+#ifndef LINUX_SYS
 /* Use the value stored in topology->nb_processors.  */
 static void
 look_cpu(struct topo_topology *topology)
@@ -161,15 +162,6 @@ look_cpu(struct topo_topology *topology)
   topo_debug("\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<topology->nb_processors; oscpu++)
     {
-      if (!topo_cpuset_isset(&topology->online_cpuset, oscpu))
-	continue;
-
-      if ((topology->flags & TOPO_FLAGS_IGNORE_THREADS)
-	  && topo_cpuset_isset(&topology->nonfirst_threads_cpuset, oscpu)) {
-	topology->nb_processors--;
-	continue;
-      }
-
       cpu_level[cpu] = malloc(sizeof(struct topo_obj));
       assert(cpu_level[cpu]);
       topo_setup_object(cpu_level[cpu], TOPO_OBJ_PROC, oscpu);
@@ -184,6 +176,7 @@ look_cpu(struct topo_topology *topology)
   topology->level_nbobjects[topology->nb_levels]=topology->nb_processors;
   topology->levels[topology->nb_levels++]=cpu_level;
 }
+#endif /* !LINUX_SYS */
 
 
 /* Connect levels */
@@ -279,21 +272,13 @@ topo_discover(struct topo_topology *topology)
   look_windows(topology);
 #    endif /* WIN_SYS */
 
-  /* From here, topology->nb_processors is set to the number of available
-   * hardware resources, and topology->online_cpuset covers them.
-   * Administrator-disabled resources (such as Linux Cpusets) are not
-   * removed yet.
-   */
   topo_debug("%d online processors found\n", topology->nb_processors);
-  topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
-	     TOPO_CPUSET_PRINTF_VALUE(topology->online_cpuset));
-  assert(topology->nb_processors == topo_cpuset_weight(&topology->online_cpuset));
-
-  /* Create actual bottom proc resources, while dropping the offline ones.
-   */
-  look_cpu(topology);
-  /* topology->nb_processors now does not contain admin-disabled procs anymore. */
   assert(topology->nb_processors);
+
+#ifndef LINUX_SYS
+  /* Create actual bottom proc resources */
+  look_cpu(topology);
+#endif
 
   topo_debug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
 
@@ -348,11 +333,6 @@ topo_discover(struct topo_topology *topology)
   topo_cpuset_zero(&topology->levels[0][0]->cpuset);
   for (i=0; i<topology->level_nbobjects[topology->nb_levels-1]; i++)
     topo_cpuset_orset(&topology->levels[0][0]->cpuset, &topology->levels[topology->nb_levels-1][i]->cpuset);
-  /* Make sure machine = online & ~ignored ones */
-  topo_cpuset_t finalset = topology->online_cpuset;
-  if (topology->flags & TOPO_FLAGS_IGNORE_THREADS)
-    topo_cpuset_clearset(&finalset, &topology->nonfirst_threads_cpuset);
-  assert(topo_cpuset_isequal(&finalset, &topology->levels[0][0]->cpuset));
 
   /* Remove disabled/offline CPUs from all cpusets, use the now correct machine cpuset to do so,
    * Then sort levels according to cpu sets, removed empty levels, recount levels, ...
@@ -480,8 +460,6 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->nb_processors = 0;
   topology->nb_nodes = 0;
   topology->nb_levels = 1; /* there's at least MACHINE */
-  topo_cpuset_zero(&topology->online_cpuset);
-  topo_cpuset_zero(&topology->nonfirst_threads_cpuset);
   topology->flags = 0;
   topology->is_fake = 0;
   topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */

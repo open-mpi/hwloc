@@ -229,7 +229,4 @@ look_windows(struct topo_topology *topology)
       free(procInfo);
     }
   }
-
-  /* we have a contigous range of online cpus */
-  topo_cpuset_set_range(&topology->online_cpuset, 0, topology->nb_processors-1);
 }
