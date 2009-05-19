@@ -15,6 +15,7 @@ sysfs_tarballs = \
 		16amd64-8nd2c.tar.gz \
 		16amd64-8nd2c-cpusets.tar.gz \
 		16em64t-4d2c2t.tar.gz \
+		16em64t-4d2c2t-offlines.tar.gz \
 		64fake-4n2d2$$2c2t.tar.gz
 
 # Each tarball `xyz.tar.gz' must have a corresponding `xyz.tar.gz.output'
@@ -31,6 +32,7 @@ sysfs_outputs = \
 		16amd64-8nd2c.tar.gz.output \
 		16amd64-8nd2c-cpusets.tar.gz.output \
 		16em64t-4d2c2t.tar.gz.output \
+		16em64t-4d2c2t-offlines.tar.gz.output \
 		64fake-4n2d2$$2c2t.tar.gz.output
 
 if HAVE_LINUX
