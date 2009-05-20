@@ -459,37 +459,6 @@ look_sysfsnode(struct topo_topology *topology)
   topology->levels[topology->nb_levels++] = node_level;
 }
 
-static void
-topo_linux_setup_cpu_level(struct topo_topology *topology,
-			   topo_cpuset_t *online_cpuset)
-{
-  struct topo_obj **cpu_level;
-  unsigned oscpu,cpu;
-
-  cpu_level = calloc(topology->nb_processors+1, sizeof(*cpu_level));
-  assert(cpu_level);
-
-  topo_debug("\n\n * CPU cpusets *\n\n");
-  for (cpu=0,oscpu=0; cpu<topology->nb_processors; oscpu++)
-    {
-      if (!topo_cpuset_isset(online_cpuset, oscpu))
-       continue;
-
-      cpu_level[cpu] = malloc(sizeof(struct topo_obj));
-      assert(cpu_level[cpu]);
-      topo_setup_object(cpu_level[cpu], TOPO_OBJ_PROC, oscpu);
-
-      topo_cpuset_cpu(&cpu_level[cpu]->cpuset, oscpu);
-
-      topo_debug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu]->cpuset));
-      cpu++;
-    }
-
-  topology->level_nbobjects[topology->nb_levels]=topology->nb_processors;
-  topology->levels[topology->nb_levels++]=cpu_level;
-}
-
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
 look_sysfscpu(struct topo_topology *topology,
@@ -916,7 +885,7 @@ look_cpuinfo(struct topo_topology *topology,
     topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
 
   /* setup the cpu level, removing nonfirst threads */
-  topo_linux_setup_cpu_level(topology, &online_cpuset);
+  look_cpu(topology, &online_cpuset);
 }
 
 static void

@@ -7,8 +7,11 @@
 
 #include <config.h>
 #include <topology/private.h>
+#include <topology/cpuset.h>
 
 #include <assert.h>
+
+void look_cpu(struct topo_topology *topology, topo_cpuset_t *online_cpuset);
 
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
 extern void topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, topo_topology_t topology);

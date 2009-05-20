@@ -148,10 +148,12 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 }
 #endif /* LINUX_SYS */
 
-#ifndef LINUX_SYS
-/* Use the value stored in topology->nb_processors.  */
-static void
-look_cpu(struct topo_topology *topology)
+/* Use the value stored in topology->nb_processors,
+ * and the optional online cpuset if given.
+ */
+void
+look_cpu(struct topo_topology *topology,
+	 topo_cpuset_t *online_cpuset)
 {
   struct topo_obj **cpu_level;
   unsigned oscpu,cpu;
@@ -162,6 +164,9 @@ look_cpu(struct topo_topology *topology)
   topo_debug("\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<topology->nb_processors; oscpu++)
     {
+      if (online_cpuset && !topo_cpuset_isset(online_cpuset, oscpu))
+       continue;
+
       cpu_level[cpu] = malloc(sizeof(struct topo_obj));
       assert(cpu_level[cpu]);
       topo_setup_object(cpu_level[cpu], TOPO_OBJ_PROC, oscpu);
@@ -176,7 +181,6 @@ look_cpu(struct topo_topology *topology)
   topology->level_nbobjects[topology->nb_levels]=topology->nb_processors;
   topology->levels[topology->nb_levels++]=cpu_level;
 }
-#endif /* !LINUX_SYS */
 
 
 /* Connect levels */
@@ -276,8 +280,8 @@ topo_discover(struct topo_topology *topology)
   assert(topology->nb_processors);
 
 #ifndef LINUX_SYS
-  /* Create actual bottom proc resources */
-  look_cpu(topology);
+  /* Create actual bottom proc resources if not done yet */
+  look_cpu(topology, NULL);
 #endif
 
   topo_debug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
