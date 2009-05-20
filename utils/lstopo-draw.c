@@ -113,12 +113,19 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
   unsigned myheight = UNIT + FONT_SIZE + UNIT + UNIT;
   unsigned totwidth = 0, maxheight = 0;
   char text[64];
+  int textwidth;
 
   /* Do not separate objects when in L1 (SMT) */
   RECURSE(level, &null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
-  if (totwidth < 8*FONT_SIZE)
-    totwidth = 8*FONT_SIZE;
+  if (level->physical_index == -1)
+    textwidth = 7*FONT_SIZE;
+  else
+    textwidth = 8*FONT_SIZE;
+
+  if (totwidth < textwidth)
+    totwidth = textwidth;
+
   *retwidth = totwidth;
   *retheight = myheight + maxheight;
   if (!maxheight)
@@ -127,9 +134,14 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
 
   methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
-  snprintf(text, sizeof(text), "L%u#%d (%lu%s)", level->cache_depth, level->physical_index,
-		  size_value(level->memory_kB),
-		  size_unit(level->memory_kB));
+  if (level->physical_index == -1)
+    snprintf(text, sizeof(text), "L%u (%lu%s)", level->cache_depth,
+		    size_value(level->memory_kB),
+		    size_unit(level->memory_kB));
+  else
+    snprintf(text, sizeof(text), "L%u#%d (%lu%s)", level->cache_depth, level->physical_index,
+		    size_value(level->memory_kB),
+		    size_unit(level->memory_kB));
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = 0;
