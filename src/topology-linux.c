@@ -785,9 +785,9 @@ look_cpuinfo(struct topo_topology *topology,
   unsigned osphysids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
   unsigned proc_coreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
   unsigned oscoreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
-  unsigned proc_osphysids[TOPO_NBMAXCPUS];
-  unsigned proc_oscoreids[TOPO_NBMAXCPUS];
-  unsigned core_osphysids[TOPO_NBMAXCPUS];
+  unsigned proc_osphysids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned proc_oscoreids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
+  unsigned core_osphysids[] = { [0 ... TOPO_NBMAXCPUS-1] = -1 };
   topo_cpuset_t online_cpuset, nonfirst_threads_cpuset;
   unsigned procid_max=0;
   unsigned numprocs=0;
@@ -803,11 +803,6 @@ look_cpuinfo(struct topo_topology *topology,
 
   /* FIXME: support admin_disabled_cpuset here as well */
   /* FIXME: support nonfirst_threads_cpuset here as well */
-
-  memset(proc_physids,0,sizeof(proc_physids));
-  memset(proc_osphysids,0,sizeof(proc_osphysids));
-  memset(proc_coreids,0,sizeof(proc_coreids));
-  memset(proc_oscoreids,0,sizeof(proc_oscoreids));
 
   if (!(fd=topo_fopen("/proc/cpuinfo","r", topology->backend_params.sysfs.root_fd)))
     {
@@ -844,6 +839,7 @@ look_cpuinfo(struct topo_topology *topology,
 #      define getprocnb_end()			\
       }
       getprocnb_begin(PROCESSOR,processor);
+      topo_cpuset_set(&online_cpuset, processor);
       getprocnb_end() else
       getprocnb_begin(PHYSID,physid);
       proc_osphysids[processor]=physid;
@@ -878,13 +874,15 @@ look_cpuinfo(struct topo_topology *topology,
   fclose(fd);
 
   /* setup the final number of procs */
-  numprocs = processor + 1;
   procid_max = processor + 1;
-  topo_debug("%s: found %u procs\n", __func__, numprocs);
+  topology->nb_processors = numprocs = topo_cpuset_weight(&online_cpuset);
 
-  /* we have a contigous range of online cpus */
-  /* FIXME: what if there's a offline cpu ? */
-  topo_cpuset_set_range(&online_cpuset, 0, processor);
+  /* From here, topology->nb_processors is set to the number of available
+   * hardware resources, and online_cpuset covers them.
+   */
+  topo_debug("%u online processors found, with id max %s\n", numprocs, procid_max);
+  topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
+	     TOPO_CPUSET_PRINTF_VALUE(online_cpuset));
 
   topo_debug("\n * Topology summary *\n");
   topo_debug("%d processors (%d max id)\n", numprocs, procid_max);
@@ -896,18 +894,6 @@ look_cpuinfo(struct topo_topology *topology,
   topo_debug("%d cores\n", numcores);
   if (numcores>0)
     topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
-
-  /* Override the default returned by `ma_fallback_nbprocessors ()'.  */
-  topology->nb_processors = numprocs;
-  topo_debug("%s: found %u procs\n", __func__, topology->nb_processors);
-
-  /* From here, topology->nb_processors is set to the number of available
-   * hardware resources, and online_cpuset covers them.
-   */
-  topo_debug("%d online processors found\n", topology->nb_processors);
-  topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
-	     TOPO_CPUSET_PRINTF_VALUE(online_cpuset));
-  assert(topology->nb_processors == topo_cpuset_weight(&online_cpuset));
 
   /* setup the cpu level, removing nonfirst threads */
   topo_linux_setup_cpu_level(topology, &online_cpuset, &nonfirst_threads_cpuset);
