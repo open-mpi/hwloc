@@ -35,6 +35,8 @@
   + reverse routine?
   + no level = empty mask, and we may want an easy alias for "whole machine"
 
+* topo_print_object: make it an snprintf instead?
+
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
   bind process on 2 cores near physical proc id 3

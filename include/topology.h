@@ -129,6 +129,7 @@ extern int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj);
     all objects that are at the same depth than _src_.
     Report in _lvls_ up to _max_ physically closest ones to _src_.
     Return the actual number of objects that were found. */
+/* TODO: rather provide an iterator? Provide a way to know how much should be allocated? */
 extern int topo_find_closest_objects (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
 
 /** \brief Find the lowest object covering at least the given cpuset */
