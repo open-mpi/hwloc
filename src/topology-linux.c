@@ -801,7 +801,6 @@ look_cpuinfo(struct topo_topology *topology,
   topo_cpuset_zero(&online_cpuset);
   topo_cpuset_zero(&nonfirst_threads_cpuset);
 
-  /* FIXME: support admin_disabled_cpuset here as well */
   /* FIXME: support nonfirst_threads_cpuset here as well */
 
   if (!(fd=topo_fopen("/proc/cpuinfo","r", topology->backend_params.sysfs.root_fd)))
@@ -876,6 +875,17 @@ look_cpuinfo(struct topo_topology *topology,
   /* setup the final number of procs */
   procid_max = processor + 1;
   topology->nb_processors = numprocs = topo_cpuset_weight(&online_cpuset);
+
+  /* clear admin-disabled cpus */
+  topo_cpuset_foreach_begin(i, &online_cpuset) {
+    if (topo_cpuset_isset(admin_disabled_cpuset, i)) {
+      topo_cpuset_clr(&online_cpuset, i);
+      proc_osphysids[i] = -1;
+      proc_physids[i] = -1;
+      proc_oscoreids[i] = -1;
+      proc_coreids[i] = -1;
+    }
+  } topo_cpuset_foreach_end();
 
   /* From here, topology->nb_processors is set to the number of available
    * hardware resources, and online_cpuset covers them.
