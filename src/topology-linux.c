@@ -889,15 +889,12 @@ look_cpuinfo(struct topo_topology *topology,
   topo_debug("\n * Topology summary *\n");
   topo_debug("%d processors (%d max id)\n", numprocs, procid_max);
 
-  if (numdies>1)
-    topo_debug("%d dies\n", numdies);
-  if (numcores>1)
-    topo_debug("%d cores\n", numcores);
-
-  if (numdies>1)
+  topo_debug("%d dies\n", numdies);
+  if (numdies>0)
     topo_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
 
-  if (numcores>1)
+  topo_debug("%d cores\n", numcores);
+  if (numcores>0)
     topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
 
   /* Override the default returned by `ma_fallback_nbprocessors ()'.  */
