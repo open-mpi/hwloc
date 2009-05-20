@@ -970,7 +970,7 @@ look_linux(struct topo_topology *topology)
     topo_admin_disable_cpus_from_cpuset(topology, &admin_disabled_cpuset);
 
   /* Gather the list of cpus now */
-  if (getenv("TOPO_LINUX_NOSYSFS")
+  if (getenv("TOPO_LINUX_USE_CPUINFO")
       || topo_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
       || topo_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
       || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
