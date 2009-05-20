@@ -105,9 +105,15 @@ AC_ARG_ENABLE([cairo],
 
 if test "x$enable_cairo" = "xyes"; then
   PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
-  AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h],
-    [AC_DEFINE([HAVE_X11], [1], [Define to 1 if X11 libraries are available.])],
-    [AC_MSG_WARN([X11 headers not found, Cairo/X11 back-end disabled])])
+  AC_CHECK_HEADERS([X11/Xlib.h],
+    [AC_CHECK_HEADERS([X11/Xutil.h],
+      [enable_X11=yes
+       AC_DEFINE([HAVE_X11], [1], [Define to 1 if X11 libraries are available.])],,
+      [[#include <X11/Xlib.h>]])
+    ])
+  if test "x$enable_X11" != "xyes"; then
+    AC_MSG_WARN([X11 headers not found, Cairo/X11 back-end disabled])
+  fi
 fi
 
 if test "x$enable_cairo" = "xyes"; then
