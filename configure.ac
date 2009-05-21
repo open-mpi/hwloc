@@ -122,6 +122,8 @@ if test "x$enable_cairo" = "xyes"; then
   AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
 fi
 
+PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0])
+
 # disable C++, F77, Java and Windows Resource Compiler support
 # change this into LT_LANG+LT_INIT when we'll switch to libtool2
 m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
