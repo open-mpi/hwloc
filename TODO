@@ -30,7 +30,8 @@
 
 * topo_set_cpubind(pid, ...) which type for pid? POSIX says that pid_t is a
   signed integer type
-* topo_set_cpubind for threads
+* topo_set_cpubind for threads, pb: depending on the OS, the function takes a
+  pthread_t or a kernel tid.
 * expose the internal conversion from cpuset to sched_setaffinity mask?
   + reverse routine?
 * topo_set_membind()
