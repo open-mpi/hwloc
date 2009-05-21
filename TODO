@@ -37,6 +37,9 @@
 
 * topo_print_object: make it an snprintf instead?
 
+* Kerrighed: parse only /proc/nodes/node%d/cpuinfo. Find a way to migrate to
+  another node.
+
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
   bind process on 2 cores near physical proc id 3
