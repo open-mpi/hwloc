@@ -203,6 +203,186 @@ topo_connect(struct topo_topology *topology)
     }
 }
 
+/*
+ * How to compare objects.
+ */
+
+enum topo_obj_cmp_e {
+  TOPO_OBJ_EQUAL,	/**< \brief Equal */
+  TOPO_OBJ_INCLUDED,	/**< \brief Strictly included into */
+  TOPO_OBJ_CONTAINS,	/**< \brief Strictly contains */
+  TOPO_OBJ_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
+  TOPO_OBJ_DIFFERENT,	/**< \brief No intersection */
+};
+
+static int
+topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
+{
+  if (topo_cpuset_isequal(&obj1->cpuset, &obj2->cpuset)) {
+
+    /* Same cpuset, subsort by type to have a consistent ordering.  */
+
+    /* TODO: some tweaks?  */
+    if (obj1->type > obj2->type)
+      /* OBJ1 is deeper.  */
+      return TOPO_OBJ_INCLUDED;
+    if (obj1->type < obj2->type)
+      /* OBJ1 is higher.  */
+      return TOPO_OBJ_CONTAINS;
+
+    /* Caches have the same types but can have different depths.  */
+    if (obj1->type == TOPO_OBJ_CACHE) {
+      if (obj1->cache_depth < obj2->cache_depth)
+	/* OBJ1 is deeper. */
+	return TOPO_OBJ_INCLUDED;
+      else if (obj1->cache_depth > obj2->cache_depth)
+	/* OBJ1 is higher.  */
+	return TOPO_OBJ_CONTAINS;
+    }
+
+    /* Same level cpuset and type!  Let's hope it's coherent.  */
+    return TOPO_OBJ_EQUAL;
+
+  } else {
+
+    /* Different cpusets, sort by inclusion.  */
+
+    if (topo_cpuset_isincluded(&obj1->cpuset, &obj2->cpuset))
+      return TOPO_OBJ_INCLUDED;
+
+    if (topo_cpuset_isincluded(&obj2->cpuset, &obj1->cpuset))
+      return TOPO_OBJ_CONTAINS;
+
+    if (topo_cpuset_intersects(&obj1->cpuset, &obj2->cpuset))
+      return TOPO_OBJ_INTERSECTS;
+
+    return TOPO_OBJ_DIFFERENT;
+  }
+}
+
+/*
+ * How to insert objects into the topology.
+ *
+ * Note: during detection, only the first_child and next_sibling pointers are
+ * kept up to date.  Others are computed only once topology detection is
+ * complete.
+ */
+
+/* Try to insert OBJ in CUR, recurse if needed */
+static void
+add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
+{
+  topo_obj_t child, container, *cur_children, *obj_children, next_child;
+  int put;
+
+  /* Make sure we haven't gone too deep.  */
+  assert(topo_cpuset_isincluded(&obj->cpuset, &cur->cpuset));
+
+  /* Check whether OBJ is included in some child.  */
+  container = NULL;
+  for (child = cur->first_child; child; child = child->next_sibling) {
+    switch (topo_obj_cmp(obj, child)) {
+      case TOPO_OBJ_EQUAL:
+	/* TODO: check that they are coherent, merge information.  */
+	/* Already present, no need to insert.  */
+	return;
+      case TOPO_OBJ_INCLUDED:
+	if (container) {
+	  /* TODO: how to report?  */
+	  fprintf(stderr, "object included in several different objects!\n");
+	  /* We can't handle that.  */
+	  return;
+	}
+	/* This child contains OBJ.  */
+	container = child;
+	break;
+      case TOPO_OBJ_INTERSECTS:
+	/* TODO: how to report?  */
+	fprintf(stderr, "object intersection without inclusion!\n");
+	/* We can't handle that.  */
+	return;
+      case TOPO_OBJ_CONTAINS:
+	/* OBJ will be above CHILD.  */
+	break;
+      case TOPO_OBJ_DIFFERENT:
+	/* OBJ will be alongside CHILD.  */
+	break;
+    }
+  }
+
+  if (container) {
+    /* OBJ is strictly contained is some child of CUR, go deeper.  */
+    add_object(topology, container, obj);
+    return;
+  }
+
+  /*
+   * Children of CUR are either completely different from or contained into
+   * OBJ. Take those that are contained (keeping sorting order), and sort OBJ
+   * along those that are different.
+   */
+
+  /* OBJ is not put yet.  */
+  put = 0;
+
+  /* These will always point to the pointer to their next last child. */
+  cur_children = &cur->first_child;
+  obj_children = &obj->first_child;
+
+  /* Construct CUR's and OBJ's children list.  */
+
+  /* Iteration with prefetching to be safe against removal.  */
+  for (child = cur->first_child, child ? next_child = child->next_sibling : 0;
+       child;
+       child = next_child, child ? next_child = child->next_sibling : 0) {
+
+    switch (topo_obj_cmp(obj, child)) {
+
+      case TOPO_OBJ_DIFFERENT:
+	/* Leave CHILD in CUR.  */
+	/* TODO: could have a topo_cpuset helper to perform the comparison more efficiently.  */
+	if (topo_cpuset_first(&obj->cpuset) < topo_cpuset_first(&child->cpuset)) {
+	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
+	  *cur_children = obj;
+	  cur_children = &obj->next_sibling;
+	}
+	/* Now put CHILD in CUR's children.  */
+	*cur_children = child;
+	cur_children = &child->next_sibling;
+	break;
+
+      case TOPO_OBJ_CONTAINS:
+	/* OBJ contains CHILD, put the latter in the former.  */
+	*obj_children = child;
+	obj_children = &child->next_sibling;
+	break;
+
+      case TOPO_OBJ_EQUAL:
+      case TOPO_OBJ_INCLUDED:
+      case TOPO_OBJ_INTERSECTS:
+	/* Shouldn't ever happen as we have handled them above.  */
+	abort();
+    }
+  }
+
+  /* Put OBJ last in CUR's children if not already done so.  */
+  if (!put) {
+    *cur_children = obj;
+    cur_children = &obj->next_sibling;
+  }
+
+  /* Close children lists.  */
+  *obj_children = NULL;
+  *cur_children = NULL;
+}
+
+void
+topo_add_object(struct topo_topology *topology, topo_obj_t obj)
+{
+  /* Start at the top.  */
+  add_object(topology, topology->levels[0][0], obj);
+}
+
 /* Remove level at depth _depth_ */
 static void
 topo_remove_level(struct topo_topology *topology, unsigned depth)
@@ -414,7 +594,7 @@ topo_discover(struct topo_topology *topology)
   topo_connect(topology);
   topo_debug("connecting done.\n");
 
-  /* intialize all depth to unknown */
+  /* initialize all depth to unknown */
   for (l=0; l < TOPO_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = TOPO_TYPE_DEPTH_UNKNOWN;
   /* walk the existing levels to set their depth */
