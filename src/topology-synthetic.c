@@ -180,7 +180,7 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
     topo_debug("synthetic topology: creating level %u with breadth %u (%u children per father)\n",
 	       topology->nb_levels, total_level_breadth, *level_breadth);
     objs = calloc(total_level_breadth+1, sizeof(struct topo_obj *));
-    assert(topology->levels[level] != NULL);
+    assert(objs != NULL);
 
     for(i=0; i<total_level_breadth; i++) {
       objs[i] = malloc(sizeof(struct topo_obj));
