@@ -218,6 +218,9 @@ enum topo_obj_cmp_e {
 static int
 topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
 {
+  if (topo_cpuset_iszero(&obj1->cpuset) || topo_cpuset_iszero(&obj2->cpuset))
+    return TOPO_OBJ_DIFFERENT;
+
   if (topo_cpuset_isequal(&obj1->cpuset, &obj2->cpuset)) {
 
     /* Same cpuset, subsort by type to have a consistent ordering.  */
