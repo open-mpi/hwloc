@@ -217,6 +217,9 @@ topo_connect(struct topo_topology *topology)
 static void
 topo_remove_level(struct topo_topology *topology, unsigned depth)
 {
+  int i;
+  for (i = 0; topology->levels[depth][i]; i++)
+    free(topology->levels[depth][i]);
   free (topology->levels[depth]);
   memmove (&topology->levels[depth], &topology->levels[depth+1],
 	   (topology->nb_levels-1-depth) * sizeof(topology->levels[depth]));
@@ -476,7 +479,7 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->level_nbobjects[0] = 1;
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = -1;
-  topology->levels[0] = malloc (2*sizeof (struct topo_obj));
+  topology->levels[0] = calloc (2, sizeof (struct topo_obj));
   topo_setup_machine_level (topology->levels[0]);
 
   *topologyp = topology;
