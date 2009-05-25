@@ -12,7 +12,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_SRCDIR([src/topology.c])
-AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([1.10 foreign -Wall -Werror])
 
 #
 # Check OS support
