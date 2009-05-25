@@ -119,11 +119,25 @@ extern topo_obj_t topo_get_object (topo_topology_t topology, unsigned depth, uns
 static inline topo_obj_t topo_get_machine_object (topo_topology_t topology) { return topo_get_object(topology, 0, 0); }
 
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
-extern topo_obj_t topo_find_common_ancestor_object (topo_obj_t obj1, topo_obj_t obj2);
+static inline topo_obj_t topo_find_common_ancestor_object (topo_obj_t obj1, topo_obj_t obj2)
+{
+  while (obj1->level > obj2->level)
+    obj1 = obj1->father;
+  while (obj2->level > obj1->level)
+    obj2 = obj2->father;
+  while (obj1 != obj2) {
+    obj1 = obj1->father;
+    obj2 = obj2->father;
+  }
+  return obj1;
+}
 
 /** \brief Returns true if _obj_ is inside the subtree beginning
     with _subtree_root_. */
-extern int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj);
+static inline int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj)
+{
+  return topo_cpuset_isincluded(&subtree_root->cpuset, &obj->cpuset);
+}
 
 /** \brief Do a depth-first traversal of the topology to find and sort
     all objects that are at the same depth than _src_.
@@ -139,11 +153,29 @@ extern topo_obj_t topo_find_cpuset_covering_object (topo_topology_t topology, to
 extern int topo_find_cpuset_objects (topo_topology_t topology, topo_cpuset_t *set, topo_obj_t *objs, int max);
 
 /** \brief Find the first cache covering a cpuset */
-extern topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, topo_cpuset_t *set);
+static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, topo_cpuset_t *set)
+{
+  struct topo_obj *current = topo_find_cpuset_covering_object(topology, set);
+  while (current) {
+    if (current->type == TOPO_OBJ_CACHE)
+      return current;
+    current = current->father;
+  }
+  return NULL;
+}
 
 /** \brief Find the first cache shared between an object and somebody else */
-extern topo_obj_t topo_find_shared_cache_above (topo_topology_t topology, topo_obj_t obj);
-
+static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
+{
+  topo_obj_t current = obj->father;
+  while (current) {
+    if (!topo_cpuset_isequal(&current->cpuset, &obj->cpuset)
+        && current->type == TOPO_OBJ_CACHE)
+      return current;
+    current = current->father;
+  }
+  return NULL;
+}
 
 /** \brief Return a stringified topology object type */
 extern const char * topo_object_type_string (enum topo_obj_type_e l);

@@ -39,24 +39,6 @@ topo_get_object (struct topo_topology *topology, unsigned depth, unsigned index)
   return topology->levels[depth][index];
 }
 
-struct topo_obj * topo_find_common_ancestor_object (struct topo_obj *obj1, struct topo_obj *obj2)
-{
-  while (obj1->level > obj2->level)
-    obj1 = obj1->father;
-  while (obj2->level > obj1->level)
-    obj2 = obj2->father;
-  while (obj1 != obj2) {
-    obj1 = obj1->father;
-    obj2 = obj2->father;
-  }
-  return obj1;
-}
-
-int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj)
-{
-  return topo_cpuset_isincluded(&subtree_root->cpuset, &obj->cpuset);
-}
-
 int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *src, struct topo_obj **objs, int max)
 {
   struct topo_obj *parent, *nextparent, **src_objs;
@@ -165,35 +147,6 @@ topo_find_cpuset_objects (struct topo_topology *topology, topo_cpuset_t *set,
   return topo__find_cpuset_objects (current, set, &objs, &max);
 }
 
-struct topo_obj *
-topo_find_cpuset_covering_cache (struct topo_topology *topology, topo_cpuset_t *set)
-{
-  struct topo_obj *current = topo_find_cpuset_covering_object(topology, set);
-
-  while (current) {
-    if (current->type == TOPO_OBJ_CACHE)
-      return current;
-    current = current->father;
-  }
-
-  return NULL;
-}
-
-struct topo_obj *
-topo_find_shared_cache_above (struct topo_topology *topology, topo_obj_t obj)
-{
-  topo_obj_t current = obj->father;
-
-  while (current) {
-    if (!topo_cpuset_isequal(&current->cpuset, &obj->cpuset)
-	&& current->type == TOPO_OBJ_CACHE)
-      return current;
-    current = current->father;
-  }
-
-  return NULL;
-}
-
 const char *
 topo_object_type_string (enum topo_obj_type_e l)
 {
@@ -266,4 +219,3 @@ int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t 
 
   return topo_cpuset_snprintf(str, size, &set);
 }
-
