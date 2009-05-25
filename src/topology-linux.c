@@ -869,7 +869,7 @@ look_cpuinfo(struct topo_topology *topology,
   /* From here, topology->nb_processors is set to the number of available
    * hardware resources, and online_cpuset covers them.
    */
-  topo_debug("%u online processors found, with id max %s\n", numprocs, procid_max);
+  topo_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
   topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
 	     TOPO_CPUSET_PRINTF_VALUE(online_cpuset));
 
