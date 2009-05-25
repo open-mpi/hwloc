@@ -72,7 +72,7 @@ look_kstat(struct topo_topology *topology)
   unsigned core_osphysids[TOPO_NBMAXCPUS];
   unsigned physid, coreid;
   unsigned numprocs = 0;
-  unsigned numdies = 0;
+  unsigned numsockets = 0;
   unsigned numcores = 0;
   unsigned i;
 
@@ -99,9 +99,9 @@ look_kstat(struct topo_topology *topology)
       stat = (kstat_named_t *) kstat_data_lookup(ksp, "chip_id");
       if (!stat)
 	{
-	  if (numdies)
+	  if (numsockets)
 	    {
-	      fprintf(stderr, "could not read die id for CPU%d: %s\n", numprocs, strerror(errno));
+	      fprintf(stderr, "could not read socket id for CPU%d: %s\n", numprocs, strerror(errno));
 	      goto out;
 	    }
 	}
@@ -113,13 +113,13 @@ look_kstat(struct topo_topology *topology)
 	      goto out;
 	    }
 	  proc_osphysids[numprocs] = physid = stat->value.i32;
-	  for (i = 0; i < numdies; i++)
+	  for (i = 0; i < numsockets; i++)
 	    if (physid == osphysids[i])
 	      break;
 	  proc_physids[numprocs] = i;
-	  topo_debug("%u on die %u (%u)\n", numprocs, i, physid);
-	  if (i == numdies)
-	    osphysids[numdies++] = physid;
+	  topo_debug("%u on socket %u (%u)\n", numprocs, i, physid);
+	  if (i == numsockets)
+	    osphysids[numsockets++] = physid;
 	}
 
       stat = (kstat_named_t *) kstat_data_lookup(ksp, "core_id");
@@ -154,7 +154,7 @@ look_kstat(struct topo_topology *topology)
       numprocs++;
     }
 
-  topo_setup_die_level(numprocs, numdies, osphysids, proc_physids, topology);
+  topo_setup_socket_level(numprocs, numsockets, osphysids, proc_physids, topology);
   topo_setup_core_level(numprocs, numcores, oscoreids, proc_coreids, topology);
 
  out:

@@ -463,8 +463,8 @@ static void
 look_sysfscpu(struct topo_topology *topology,
 	      topo_cpuset_t *admin_disabled_cpuset)
 {
-  struct topo_obj **die_level = NULL;
-  unsigned ndies = 0;
+  struct topo_obj **socket_level = NULL;
+  unsigned nsockets = 0;
   struct topo_obj **core_level = NULL;
   unsigned ncores = 0;
   struct topo_obj **thread_level = NULL;
@@ -548,34 +548,34 @@ look_sysfscpu(struct topo_topology *topology,
 
   topo_cpuset_foreach_begin(i, &cpuset)
     {
-      topo_cpuset_t dieset, coreset, threadset;
-      unsigned mydieid, mycoreid;
+      topo_cpuset_t socketset, coreset, threadset;
+      unsigned mysocketid, mycoreid;
       int index;
 
-      /* look at the die */
-      mydieid = 0; /* shut-up the compiler */
+      /* look at the socket */
+      mysocketid = 0; /* shut-up the compiler */
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/physical_package_id", i);
-      topo_parse_sysfs_unsigned(string, &mydieid, topology->backend_params.sysfs.root_fd);
+      topo_parse_sysfs_unsigned(string, &mysocketid, topology->backend_params.sysfs.root_fd);
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
-      topo_parse_cpumap(string, &dieset, topology->backend_params.sysfs.root_fd);
-      topo_cpuset_clearset(&dieset, admin_disabled_cpuset);
-      assert(topo_cpuset_weight(&dieset) >= 1);
+      topo_parse_cpumap(string, &socketset, topology->backend_params.sysfs.root_fd);
+      topo_cpuset_clearset(&socketset, admin_disabled_cpuset);
+      assert(topo_cpuset_weight(&socketset) >= 1);
 
-      if (topo_cpuset_first(&dieset) == i) {
-	/* first cpu in this die, add the die */
-	if (!ndies) {
-	  die_level = calloc(nbprocessors+1, sizeof(*die_level));
-	  assert(die_level);
+      if (topo_cpuset_first(&socketset) == i) {
+	/* first cpu in this socket, add the socket */
+	if (!nsockets) {
+	  socket_level = calloc(nbprocessors+1, sizeof(*socket_level));
+	  assert(socket_level);
 	}
-	index = ndies;
-	die_level[index] = malloc(sizeof(struct topo_obj));
-	assert(die_level[index]);
-	topo_setup_object(die_level[index], TOPO_OBJ_DIE, mydieid);
-	die_level[index]->cpuset = dieset;
-	topo_debug("die %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		   index, mydieid, TOPO_CPUSET_PRINTF_VALUE(dieset));
-	ndies++;
+	index = nsockets;
+	socket_level[index] = malloc(sizeof(struct topo_obj));
+	assert(socket_level[index]);
+	topo_setup_object(socket_level[index], TOPO_OBJ_SOCKET, mysocketid);
+	socket_level[index]->cpuset = socketset;
+	topo_debug("socket %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		   index, mysocketid, TOPO_CPUSET_PRINTF_VALUE(socketset));
+	nsockets++;
       }
 
       /* look at the core */
@@ -699,8 +699,8 @@ look_sysfscpu(struct topo_topology *topology,
 
   /* add levels to the topology */
 
-  if (die_level)
-    topo_add_level(topology, die_level, ndies);
+  if (socket_level)
+    topo_add_level(topology, socket_level, nsockets);
 
   if (core_level)
     topo_add_level(topology, core_level, ncores);
@@ -735,7 +735,7 @@ look_cpuinfo(struct topo_topology *topology,
   topo_cpuset_t online_cpuset;
   unsigned procid_max=0;
   unsigned numprocs=0;
-  unsigned numdies=0;
+  unsigned numsockets=0;
   unsigned numcores=0;
   long physid;
   long coreid;
@@ -750,7 +750,7 @@ look_cpuinfo(struct topo_topology *topology,
       return;
     }
 
-  /* Just record information and count number of dies and cores */
+  /* Just record information and count number of sockets and cores */
 
   topo_debug("\n\n * Topology extraction from /proc/cpuinfo *\n\n");
   while (fgets(string,sizeof(string),fd)!=NULL)
@@ -783,13 +783,13 @@ look_cpuinfo(struct topo_topology *topology,
       getprocnb_end() else
       getprocnb_begin(PHYSID,physid);
       proc_osphysids[processor]=physid;
-      for (i=0; i<numdies; i++)
+      for (i=0; i<numsockets; i++)
 	if (physid == osphysids[i])
 	  break;
       proc_physids[processor]=i;
-      topo_debug("%ld on die %d (%lx)\n", processor, i, physid);
-      if (i==numdies)
-	osphysids[(numdies)++] = physid;
+      topo_debug("%ld on socket %d (%lx)\n", processor, i, physid);
+      if (i==numsockets)
+	osphysids[(numsockets)++] = physid;
       getprocnb_end() else
       getprocnb_begin(COREID,coreid);
       proc_oscoreids[processor]=coreid;
@@ -858,9 +858,9 @@ look_cpuinfo(struct topo_topology *topology,
   topo_debug("\n * Topology summary *\n");
   topo_debug("%d processors (%d max id)\n", numprocs, procid_max);
 
-  topo_debug("%d dies\n", numdies);
-  if (numdies>0)
-    topo_setup_die_level(procid_max, numdies, osphysids, proc_physids, topology);
+  topo_debug("%d sockets\n", numsockets);
+  if (numsockets>0)
+    topo_setup_socket_level(procid_max, numsockets, osphysids, proc_physids, topology);
 
   topo_debug("%d cores\n", numcores);
   if (numcores>0)

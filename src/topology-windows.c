@@ -219,7 +219,7 @@ look_windows(struct topo_topology *topology)
       }
 
       look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationNumaNode, TOPO_OBJ_NODE, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorPackage, TOPO_OBJ_DIE, 0);
+      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorPackage, TOPO_OBJ_SOCKET, 0);
       look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_OBJ_CACHE, 3);
       look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_OBJ_CACHE, 2);
       look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorCore, TOPO_OBJ_CORE, 0);

@@ -155,7 +155,7 @@ topo_object_type_string (enum topo_obj_type_e l)
     case TOPO_OBJ_MACHINE: return "Machine";
     case TOPO_OBJ_FAKE: return "Fake";
     case TOPO_OBJ_NODE: return "NUMANode";
-    case TOPO_OBJ_DIE: return "Die";
+    case TOPO_OBJ_SOCKET: return "Socket";
     case TOPO_OBJ_CACHE: return "Cache";
     case TOPO_OBJ_CORE: return "Core";
     case TOPO_OBJ_PROC: return "SMTproc";
@@ -179,7 +179,7 @@ topo_print_object(struct topo_topology *topology, struct topo_obj *l, FILE *outp
     snprintf(physical_index, 12, "%s%d", indexprefix, l->physical_index);
 
   switch (type) {
-  case TOPO_OBJ_DIE:
+  case TOPO_OBJ_SOCKET:
   case TOPO_OBJ_CORE:
   case TOPO_OBJ_PROC:
   case TOPO_OBJ_FAKE:

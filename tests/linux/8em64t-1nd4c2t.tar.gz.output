@@ -1,5 +1,5 @@
 Machine(992MB)
-  Die#1
+  Socket#1
     L3Cache(8192KB)
       Core#0
         L2Cache(256KB)
@@ -25,7 +25,7 @@ Topology is fake
 Huge page size: 2048kB
 depth 0:	type #0 (Machine)
 depth 0:	type #1 (NUMANode)
- depth 1:	type #2 (Die)
+ depth 1:	type #2 (Socket)
    depth 3:	type #3 (Core)
       depth 6:	type #4 (SMTproc)
 absent:		type #5 (Fake)

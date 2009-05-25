@@ -15,7 +15,7 @@
 void look_cpu(struct topo_topology *topology, topo_cpuset_t *online_cpuset);
 
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
-extern void topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, topo_topology_t topology);
+extern void topo_setup_socket_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, topo_topology_t topology);
 extern void topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, topo_topology_t topology);
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 #if defined(LINUX_SYS)

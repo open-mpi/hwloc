@@ -58,27 +58,27 @@ topo_fallback_nbprocessors(void) {
  */
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
 void
-topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
+topo_setup_socket_level(int procid_max, unsigned numsockets, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
 {
-  struct topo_obj **die_level;
+  struct topo_obj **socket_level;
   int j;
 
-  topo_debug("%d dies\n", numdies);
-  die_level = calloc(numdies+1, sizeof(*die_level));
-  assert(die_level);
+  topo_debug("%d sockets\n", numsockets);
+  socket_level = calloc(numsockets+1, sizeof(*socket_level));
+  assert(socket_level);
 
-  for (j = 0; j < numdies; j++)
+  for (j = 0; j < numsockets; j++)
     {
-      die_level[j] = malloc(sizeof(struct topo_obj));
-      assert(die_level[j]);
-      topo_setup_object(die_level[j], TOPO_OBJ_DIE, osphysids[j]);
-      topo_object_cpuset_from_array(die_level[j], j, proc_physids, procid_max);
-      topo_debug("die %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 j, TOPO_CPUSET_PRINTF_VALUE(die_level[j]->cpuset));
+      socket_level[j] = malloc(sizeof(struct topo_obj));
+      assert(socket_level[j]);
+      topo_setup_object(socket_level[j], TOPO_OBJ_SOCKET, osphysids[j]);
+      topo_object_cpuset_from_array(socket_level[j], j, proc_physids, procid_max);
+      topo_debug("socket %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		 j, TOPO_CPUSET_PRINTF_VALUE(socket_level[j]->cpuset));
     }
   topo_debug("\n");
 
-  topo_add_level(topology, die_level, numdies);
+  topo_add_level(topology, socket_level, numsockets);
 }
 
 void

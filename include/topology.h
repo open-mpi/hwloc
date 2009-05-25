@@ -31,7 +31,7 @@ enum topo_obj_type_e {
   /* objects that are always ordered the same in the hierarchy */
   TOPO_OBJ_MACHINE,	/**< \brief Whole machine */
   TOPO_OBJ_NODE,	/**< \brief NUMA node */
-  TOPO_OBJ_DIE,	/**< \brief Physical chip */
+  TOPO_OBJ_SOCKET,	/**< \brief Socket, physical package, or chip */
   TOPO_OBJ_CORE,	/**< \brief Core */
   TOPO_OBJ_PROC,	/**< \brief SMT Processor in a core */
 

@@ -11,7 +11,7 @@ static void usage(void)
 {
   fprintf(stderr, "Usage: topomask [string] ...\n");
   fprintf(stderr, "  <string> may be <depth:index>\n");
-  fprintf(stderr, "    <depth> may be machine, node, die, core, proc or a numeric depth\n");
+  fprintf(stderr, "    <depth> may be machine, node, socket, core, proc or a numeric depth\n");
   fprintf(stderr, "    <index> may be:\n");
   fprintf(stderr, "     X\tone object with index X\n");
   fprintf(stderr, "     X-Y\tall objects with index between X and Y\n");
@@ -61,8 +61,8 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
     depth = topo_get_type_depth(topology, TOPO_OBJ_MACHINE);
   else if (!strncmp(string, "node", 1))
     depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
-  else if (!strncmp(string, "die", 1))
-    depth = topo_get_type_depth(topology, TOPO_OBJ_DIE);
+  else if (!strncmp(string, "socket", 1))
+    depth = topo_get_type_depth(topology, TOPO_OBJ_SOCKET);
   else if (!strncmp(string, "core", 1))
     depth = topo_get_type_depth(topology, TOPO_OBJ_CORE);
   else if (!strncmp(string, "proc", 1))

@@ -57,7 +57,7 @@ topo__synthetic_object_type (const unsigned *level_breadth)
 	   : (*(level_breadth + 3) == 0
 	     ? TOPO_OBJ_CACHE
 	     : (*(level_breadth + 4) == 0
-	       ? TOPO_OBJ_DIE
+	       ? TOPO_OBJ_SOCKET
 	       : (*(level_breadth + 5) == 0
 	         ? TOPO_OBJ_NODE
 	         : TOPO_OBJ_FAKE)))));
@@ -87,7 +87,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
     case TOPO_OBJ_PROC:
     case TOPO_OBJ_CORE:
     case TOPO_OBJ_CACHE:
-    case TOPO_OBJ_DIE:
+    case TOPO_OBJ_SOCKET:
     case TOPO_OBJ_NODE:
       physical_index = first_number + i;
       break;

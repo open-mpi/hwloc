@@ -12,9 +12,9 @@
 #define EPOXY_G_COLOR 0xff
 #define EPOXY_B_COLOR 0xb5
 
-#define DIE_R_COLOR 0xde
-#define DIE_G_COLOR 0xde
-#define DIE_B_COLOR 0xde
+#define SOCKET_R_COLOR 0xde
+#define SOCKET_G_COLOR 0xde
+#define SOCKET_B_COLOR 0xde
 
 #define MEMORY_R_COLOR 0xef
 #define MEMORY_G_COLOR 0xdf
@@ -174,7 +174,7 @@ core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 }
 
 static void
-die_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+socket_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -189,9 +189,9 @@ die_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, v
   if (maxheight)
     *retheight += UNIT;
 
-  methods->box(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "Die#%d", level->physical_index);
+  snprintf(text, sizeof(text), "Socket#%d", level->physical_index);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -308,7 +308,7 @@ get_type_fun(topo_obj_type_t type)
   switch (type) {
     case TOPO_OBJ_MACHINE: return machine_draw;
     case TOPO_OBJ_NODE: return node_draw;
-    case TOPO_OBJ_DIE: return die_draw;
+    case TOPO_OBJ_SOCKET: return socket_draw;
     case TOPO_OBJ_CACHE: return cache_draw;
     case TOPO_OBJ_CORE: return core_draw;
     case TOPO_OBJ_PROC: return proc_draw;
@@ -351,7 +351,7 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
   fig(&getmax_draw_methods, topo_get_machine_object(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR);
-  methods->declare_color(output, DIE_R_COLOR, DIE_G_COLOR, DIE_B_COLOR);
+  methods->declare_color(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR);
   methods->declare_color(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR);
   methods->declare_color(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR);
   methods->declare_color(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR);
