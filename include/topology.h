@@ -134,9 +134,9 @@ static inline topo_obj_t topo_find_common_ancestor_object (topo_obj_t obj1, topo
 
 /** \brief Returns true if _obj_ is inside the subtree beginning
     with _subtree_root_. */
-static inline int topo_object_is_in_subtree (topo_obj_t subtree_root, topo_obj_t obj)
+static inline int topo_object_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_root)
 {
-  return topo_cpuset_isincluded(&subtree_root->cpuset, &obj->cpuset);
+  return topo_cpuset_isincluded(&obj->cpuset, &subtree_root->cpuset);
 }
 
 /** \brief Do a depth-first traversal of the topology to find and sort

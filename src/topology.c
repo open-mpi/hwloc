@@ -191,7 +191,7 @@ topo_connect(struct topo_topology *topology)
 
 	      m=0;
 	      for (j=0; j<topology->level_nbobjects[l+1]; j++)
-		if (topo_cpuset_isincluded(&topology->levels[l][i]->cpuset, &topology->levels[l+1][j]->cpuset))
+		if (topo_cpuset_isincluded(&topology->levels[l+1][j]->cpuset, &topology->levels[l][i]->cpuset))
 		  {
 		    assert(!(m >= topology->levels[l][i]->arity));
 		    topology->levels[l][i]->children[m] = topology->levels[l+1][j];
@@ -397,7 +397,7 @@ topo_discover(struct topo_topology *topology)
 	{
 	  topology->levels[l][i]->arity=0;
 	  for (j=0; j<topology->level_nbobjects[l+1]; j++)
-	    if (topo_cpuset_isincluded(&topology->levels[l][i]->cpuset, &topology->levels[l+1][j]->cpuset))
+	    if (topo_cpuset_isincluded(&topology->levels[l+1][j]->cpuset, &topology->levels[l][i]->cpuset))
 	      topology->levels[l][i]->arity++;
 	  topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
 		     l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset), topology->levels[l][i]->arity);

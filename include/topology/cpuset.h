@@ -265,10 +265,10 @@ static __inline__ int topo_cpuset_intersects (const topo_cpuset_t *set1,
 }
 
 /** \brief Test whether set \e sub_set is part of set \e super_set */
-static __inline__ int topo_cpuset_isincluded (const topo_cpuset_t *super_set,
-					      const topo_cpuset_t *sub_set);
-static __inline__ int topo_cpuset_isincluded (const topo_cpuset_t *super_set,
-					      const topo_cpuset_t *sub_set)
+static __inline__ int topo_cpuset_isincluded (const topo_cpuset_t *sub_set,
+					      const topo_cpuset_t *super_set);
+static __inline__ int topo_cpuset_isincluded (const topo_cpuset_t *sub_set,
+					      const topo_cpuset_t *super_set)
 {
 	int i;
 	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++)

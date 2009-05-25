@@ -61,8 +61,8 @@ int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *
 
     /* traverse src's objects and find those that are in nextparent and were not in parent */
     for(i=0; i<src_nbobjects; i++) {
-      if (topo_cpuset_isincluded(&nextparent->cpuset, &src_objs[i]->cpuset)
-	  && !topo_cpuset_isincluded(&parent->cpuset, &src_objs[i]->cpuset)) {
+      if (topo_cpuset_isincluded(&src_objs[i]->cpuset, &nextparent->cpuset)
+	  && !topo_cpuset_isincluded(&src_objs[i]->cpuset, &parent->cpuset)) {
 	objs[stored++] = src_objs[i];
 	if (stored == max)
 	  goto out;
@@ -81,12 +81,12 @@ topo_find_cpuset_covering_object (struct topo_topology *topology, topo_cpuset_t 
   struct topo_obj *current = topology->levels[0][0];
   int i;
 
-  if (!topo_cpuset_isincluded(&current->cpuset, set))
+  if (!topo_cpuset_isincluded(set, &current->cpuset))
     return NULL;
 
  children:
   for(i=0; i<current->arity; i++) {
-    if (topo_cpuset_isincluded(&current->children[i]->cpuset, set)) {
+    if (topo_cpuset_isincluded(set, &current->children[i]->cpuset)) {
       current = current->children[i];
       goto children;
     }
@@ -138,7 +138,7 @@ topo_find_cpuset_objects (struct topo_topology *topology, topo_cpuset_t *set,
 {
   struct topo_obj *current = topology->levels[0][0];
 
-  if (!topo_cpuset_isincluded(&current->cpuset, set))
+  if (!topo_cpuset_isincluded(set, &current->cpuset))
     return -1;
 
   if (max <= 0)

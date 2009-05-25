@@ -61,8 +61,8 @@ main (int argc, char *argv[])
 
   /* get ancestor of last and less close object */
   topo_obj_t ancestor = topo_find_common_ancestor_object (last, closest[found-1]);
-  assert(topo_object_is_in_subtree(ancestor, last));
-  assert(topo_object_is_in_subtree(ancestor, closest[found-1]));
+  assert(topo_object_is_in_subtree(last, ancestor));
+  assert(topo_object_is_in_subtree(closest[found-1], ancestor));
   assert(ancestor == topo_get_machine_object (topology));
   printf("ancestor type %u depth %u number %u is machine level\n",
 	 ancestor->type, ancestor->level, ancestor->number);

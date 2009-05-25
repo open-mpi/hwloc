@@ -33,7 +33,7 @@ int main()
   assert(cache);
   assert(cache->type == TOPO_OBJ_CACHE);
   assert(cache->number == CPUINDEX/2/3);
-  assert(topo_object_is_in_subtree(cache, obj));
+  assert(topo_object_is_in_subtree(obj, cache));
 
   /* check the cache above two nearby cpus */
 #define CPUINDEX1 180
@@ -50,7 +50,7 @@ int main()
   assert(cache->type == TOPO_OBJ_CACHE);
   assert(cache->number == CPUINDEX1/2/3);
   assert(cache->number == CPUINDEX2/2/3);
-  assert(topo_object_is_in_subtree(cache, obj));
+  assert(topo_object_is_in_subtree(obj, cache));
 
   /* check no cache above two distant cpus */
 #undef CPUINDEX1 180

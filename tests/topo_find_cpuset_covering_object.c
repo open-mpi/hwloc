@@ -42,7 +42,7 @@ int main()
   assert(obj);
   fprintf(stderr, "found covering object type %s covering cpuset %s\n",
 	  topo_object_type_string(obj->type), GIVEN_CPUSET_STRING);
-  assert(topo_cpuset_isincluded(&obj->cpuset, &set));
+  assert(topo_cpuset_isincluded(&set, &obj->cpuset));
 
   topo_object_cpuset_snprintf(string, sizeof(string), 1, &obj);
   fprintf(stderr, "covering object of %s is %s, expected %s\n",
