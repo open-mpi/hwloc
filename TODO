@@ -40,6 +40,9 @@
 
 * topo_print_object: make it an snprintf instead?
 
+* topo_cpuset_isincluded: exchange arguments? A isincluded in B makes more sense
+  to me
+
 * Kerrighed: parse only /proc/nodes/node%d/cpuinfo. Use
 int migrate (pid_t pid, int destination_node);
 int migrate_self (int destination_node);
