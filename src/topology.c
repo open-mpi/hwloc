@@ -78,10 +78,7 @@ topo_setup_die_level(int procid_max, unsigned numdies, unsigned *osphysids, unsi
     }
   topo_debug("\n");
 
-  topology->level_nbobjects[topology->nb_levels]=numdies;
-  topo_debug("--- die level has number %d\n", topology->nb_levels);
-  topology->levels[topology->nb_levels++]=die_level;
-  topo_debug("\n");
+  topo_add_level(topology, die_level, numdies);
 }
 
 void
@@ -106,10 +103,7 @@ topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, un
 
   topo_debug("\n");
 
-  topology->level_nbobjects[topology->nb_levels]=numcores;
-  topo_debug("--- core level has number %d\n", topology->nb_levels);
-  topology->levels[topology->nb_levels++]=core_level;
-  topo_debug("\n");
+  topo_add_level(topology, core_level, numcores);
 }
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 
@@ -141,10 +135,7 @@ topo_setup_cache_level(int cachelevel, int procid_max,
     }
   topo_debug("\n");
 
-  topology->level_nbobjects[topology->nb_levels]=numcaches[cachelevel];
-  topo_debug("--- shared L%d level has number %d\n", cachelevel+1, topology->nb_levels);
-  topology->levels[topology->nb_levels++]=level;
-  topo_debug("\n");
+  topo_add_level(topology, level, numcaches[cachelevel]);
 }
 #endif /* LINUX_SYS */
 
@@ -178,8 +169,7 @@ look_cpu(struct topo_topology *topology,
       cpu++;
     }
 
-  topology->level_nbobjects[topology->nb_levels]=topology->nb_processors;
-  topology->levels[topology->nb_levels++]=cpu_level;
+  topo_add_level(topology, cpu_level, topology->nb_processors);
 }
 
 

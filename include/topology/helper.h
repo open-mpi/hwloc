@@ -8,6 +8,7 @@
 #include <config.h>
 #include <topology/private.h>
 #include <topology/cpuset.h>
+#include <topology/debug.h>
 
 #include <assert.h>
 
@@ -46,6 +47,21 @@ extern void look_windows(struct topo_topology *topology);
 extern int topo_backend_synthetic_init(struct topo_topology *topology, const char *description);
 extern void topo_backend_synthetic_exit(struct topo_topology *topology);
 extern void topo_synthetic_load (struct topo_topology *topology);
+
+/* Adds an array of NUM objects LEVEL to the topology.
+ * For now, the array must finish with a NULL.  */
+static __inline__ void
+topo_add_level(struct topo_topology *topology, topo_obj_t *level, unsigned num)
+{
+  if (level[0]->type == TOPO_OBJ_CACHE)
+    topo_debug("--- cache level depth %d", level[0]->cache_depth);
+  else
+    topo_debug("--- %s level", topo_object_type_string(level[0]->type));
+  topo_debug("has number %d\n\n", topology->nb_levels);
+  topology->level_nbobjects[topology->nb_levels] = num;
+  topology->levels[topology->nb_levels] = level;
+  topology->nb_levels++;
+}
 
 #ifdef __GLIBC__
 #if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)

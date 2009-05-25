@@ -56,6 +56,5 @@ look_osf(struct topo_topology *topology)
     i++;
   }
 
-  topology->level_nbobjects[topology->nb_levels] = nbnodes;
-  topology->levels[topology->nb_levels++] = node_level;
+  topo_add_level(topology, node_level, nbnodes);
 }

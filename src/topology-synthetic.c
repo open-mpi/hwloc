@@ -173,20 +173,23 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
        *level_breadth > 0;
        level++, level_breadth++) {
     unsigned i;
+    topo_obj_t *objs;
 
     total_level_breadth *= *level_breadth;
 
     topo_debug("synthetic topology: creating level %u with breadth %u (%u children per father)\n",
 	       topology->nb_levels, total_level_breadth, *level_breadth);
-    topology->levels[level] = calloc(total_level_breadth+1, sizeof(struct topo_obj *));
+    objs = calloc(total_level_breadth+1, sizeof(struct topo_obj *));
     assert(topology->levels[level] != NULL);
 
     for(i=0; i<total_level_breadth; i++) {
-      topology->levels[level][i] = malloc(sizeof(struct topo_obj));
-      assert(topology->levels[level][i]);
+      objs[i] = malloc(sizeof(struct topo_obj));
+      assert(objs[i]);
     }
 
     /* Update the level type to level mapping.  */
+    topology->levels[level] = objs;
+    /* TODO: use topo_add_level, or fix once topo_add_obj is available */
     topology->type_depth[topo__synthetic_object_type (level_breadth)] = level;
 
     topology->nb_levels++;

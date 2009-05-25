@@ -455,8 +455,7 @@ look_sysfsnode(struct topo_topology *topology)
     }
   nbnodes = i;
 
-  topology->level_nbobjects[topology->nb_levels] = topology->nb_nodes = nbnodes;
-  topology->levels[topology->nb_levels++] = node_level;
+  topo_add_level(topology, node_level, nbnodes);
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
@@ -700,35 +699,18 @@ look_sysfscpu(struct topo_topology *topology,
 
   /* add levels to the topology */
 
-  if (die_level) {
-    topology->level_nbobjects[topology->nb_levels] = ndies;
-    topo_debug("--- die level has number %d\n", topology->nb_levels);
-    topology->levels[topology->nb_levels++] = die_level;
-    topo_debug("\n");
-  }
+  if (die_level)
+    topo_add_level(topology, die_level, ndies);
 
-  if (core_level) {
-    topology->level_nbobjects[topology->nb_levels] = ncores;
-    topo_debug("--- core level has number %d\n", topology->nb_levels);
-    topology->levels[topology->nb_levels++] = core_level;
-    topo_debug("\n");
-  }
+  if (core_level)
+    topo_add_level(topology, core_level, ncores);
 
-  for(i=TOPO_CACHE_LEVEL_MAX-1; i>=0; i--) {
-    if (cache_level[i]) {
-      topology->level_nbobjects[topology->nb_levels] = ncaches[i];
-      topo_debug("--- cache level depth %d has number %d\n", i, topology->nb_levels);
-      topology->levels[topology->nb_levels++] = cache_level[i];
-      topo_debug("\n");
-    }
-  }
+  for(i=TOPO_CACHE_LEVEL_MAX-1; i>=0; i--)
+    if (cache_level[i])
+      topo_add_level(topology, cache_level[i], ncaches[i]);
 
-  if (thread_level) {
-    topology->level_nbobjects[topology->nb_levels] = nthreads;
-    topo_debug("--- thread level has number %d\n", topology->nb_levels);
-    topology->levels[topology->nb_levels++] = thread_level;
-    topo_debug("\n");
-  }
+  if (thread_level)
+    topo_add_level(topology, thread_level, nthreads);
 }
 
 

@@ -186,8 +186,7 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
     }
   }
 
-  topology->level_nbobjects[topology->nb_levels] = numobjects;
-  topology->levels[topology->nb_levels++] = level;
+  topo_add_level(topology, level, numobjects);
 
 #undef TEST
 }
