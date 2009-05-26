@@ -181,9 +181,10 @@ topo_object_snprintf(char *string, size_t size,
   switch (type) {
   case TOPO_OBJ_SOCKET:
   case TOPO_OBJ_CORE:
-  case TOPO_OBJ_PROC:
   case TOPO_OBJ_FAKE:
     return snprintf(string, size, "%s%s", topo_object_type_string(type), physical_index);
+  case TOPO_OBJ_PROC:
+    return snprintf(string, size, "P%s", physical_index);
   case TOPO_OBJ_MACHINE:
     return snprintf(string, size, "%s(%lu%s)", topo_object_type_string(type),
 		    topo_memory_size_printf_value(l->memory_kB),

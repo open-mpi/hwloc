@@ -4,57 +4,57 @@ Machine(0KB)
       Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#0
+            P#0
       Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#1
+            P#1
   NUMANode#1(8192MB)
     Socket#1
       Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#2
+            P#2
       Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#3
+            P#3
   NUMANode#2(8192MB)
     Socket#2
       Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#4
+            P#4
       Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#5
+            P#5
   NUMANode#3(8192MB)
     Socket#3
       Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#6
+            P#6
   NUMANode#6(0KB)
     Socket#6
       Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#12
+            P#12
       Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#13
+            P#13
   NUMANode#7(0KB)
     Socket#7
       Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#14
+            P#14
       Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#15
+            P#15
   NUMANode#4(8192MB)
   NUMANode#5(8192MB)
 Topology is fake

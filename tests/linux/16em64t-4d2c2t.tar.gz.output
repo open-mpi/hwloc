@@ -4,49 +4,49 @@ Machine(0KB)
       Core#0
         L2Cache(1024KB)
           L1Cache(16KB)
-            Proc#0
-            Proc#8
+            P#0
+            P#8
       Core#1
         L2Cache(1024KB)
           L1Cache(16KB)
-            Proc#4
-            Proc#12
+            P#4
+            P#12
   Socket#1
     L3Cache(4096KB)
       Core#0
         L2Cache(1024KB)
           L1Cache(16KB)
-            Proc#1
-            Proc#9
+            P#1
+            P#9
       Core#1
         L2Cache(1024KB)
           L1Cache(16KB)
-            Proc#5
-            Proc#13
+            P#5
+            P#13
   Socket#2
     L3Cache(4096KB)
       Core#0
         L2Cache(1024KB)
           L1Cache(16KB)
-            Proc#2
-            Proc#10
+            P#2
+            P#10
       Core#1
         L2Cache(1024KB)
           L1Cache(16KB)
-            Proc#6
-            Proc#14
+            P#6
+            P#14
   Socket#3
     L3Cache(4096KB)
       Core#0
         L2Cache(1024KB)
           L1Cache(16KB)
-            Proc#3
-            Proc#11
+            P#3
+            P#11
       Core#1
         L2Cache(1024KB)
           L1Cache(16KB)
-            Proc#7
-            Proc#15
+            P#7
+            P#15
 Topology is fake
 depth 0:	type #0 (Machine)
 depth 0:	type #1 (NUMANode)

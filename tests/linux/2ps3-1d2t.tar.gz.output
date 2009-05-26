@@ -1,6 +1,6 @@
 Machine(0KB)
-  Proc#0
-  Proc#1
+  P#0
+  P#1
 Topology is fake
 depth 0:	type #0 (Machine)
 depth 0:	type #1 (NUMANode)

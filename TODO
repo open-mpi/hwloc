@@ -14,7 +14,6 @@
     - just return an ordered array?
   + keep fake level type?
     - needed for synthetic
-      . might be dropped once we have a generic CACHE type?
     - needed for meta-numa-nodes?
 
 * use topology_allocator for real, including in strdup

@@ -4,13 +4,13 @@ Machine(0KB)
       Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#0
+            P#0
   NUMANode#1(2048MB)
     Socket#1
       Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
-            Proc#1
+            P#1
 Topology is fake
 depth 0:	type #0 (Machine)
  depth 1:	type #1 (NUMANode)

@@ -4,23 +4,23 @@ Machine(992MB)
       Core#0
         L2Cache(256KB)
           L1Cache(32KB)
-            Proc#0
-            Proc#4
+            P#0
+            P#4
       Core#1
         L2Cache(256KB)
           L1Cache(32KB)
-            Proc#1
-            Proc#5
+            P#1
+            P#5
       Core#2
         L2Cache(256KB)
           L1Cache(32KB)
-            Proc#2
-            Proc#6
+            P#2
+            P#6
       Core#3
         L2Cache(256KB)
           L1Cache(32KB)
-            Proc#3
-            Proc#7
+            P#3
+            P#7
 Topology is fake
 Huge page size: 2048kB
 depth 0:	type #0 (Machine)
