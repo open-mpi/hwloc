@@ -1,5 +1,5 @@
 Machine(0KB)
-  NUMANode#0(8190MB)
+  NUMANode#0(0KB)
     Socket#0
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -37,7 +37,7 @@ Machine(0KB)
             P#6
   NUMANode#4(8192MB)
   NUMANode#5(8192MB)
-  NUMANode#6(8192MB)
+  NUMANode#6(0KB)
     Socket#6
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -47,7 +47,7 @@ Machine(0KB)
           L1Cache(64KB)
           Core#1
             P#13
-  NUMANode#7(8192MB)
+  NUMANode#7(0KB)
     Socket#7
         L2Cache(1024KB)
           L1Cache(64KB)

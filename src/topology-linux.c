@@ -234,64 +234,9 @@ topo_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_f
 }
 
 static void
-topo_admin_disable_mems_from_cpuset(struct topo_topology *topology, int nodelevel)
-{
-  struct topo_obj **level = topology->levels[nodelevel];
-  int nbobjects = topology->level_nbobjects[nodelevel];
-#define CPUSET_MASK_LEN 64
-  char cpuset_mask[CPUSET_MASK_LEN];
-  char *current, *comma, *tmp;
-  int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
-  int i, ret;
-
-  ret = topo_read_cpuset_mask("mems", cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
-  if (!ret)
-    return;
-
-  topo_debug("found cpuset mems: %s\n", cpuset_mask);
-
-  current = cpuset_mask;
-  prevlast = -1;
-
-  while (1) {
-    /* save a pointer to the next comma and erase it to simplify things */
-    comma = strchr(current, ',');
-    if (comma)
-      *comma = '\0';
-
-    /* find current enabled-segment bounds */
-    nextfirst = strtoul(current, &tmp, 0);
-    if (*tmp == '-')
-      nextlast = strtoul(tmp+1, NULL, 0);
-    else
-      nextlast = nextfirst;
-    if (prevlast+1 <= nextfirst-1)
-      topo_debug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-    for(i=prevlast+1; i<=nextfirst-1; i++) {
-      level[i]->memory_kB = 0;
-      level[i]->huge_page_free = 0;
-    }
-
-    /* switch to next enabled-segment */
-    prevlast = nextlast;
-    if (!comma)
-      break;
-    current = comma+1;
-  }
-
-  /* disable after last enabled-segment */
-  nextfirst = nbobjects;
-  if (prevlast+1 <= nextfirst-1)
-    topo_debug("mems [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-  for(i=prevlast+1; i<=nextfirst-1; i++) {
-    level[i]->memory_kB = 0;
-    level[i]->huge_page_free = 0;
-  }
-}
-
-static void
-topo_admin_disable_cpus_from_cpuset(struct topo_topology *topology,
-				    topo_cpuset_t *admin_disabled_cpuset)
+topo_admin_disable_set_from_cpuset(struct topo_topology *topology,
+				   const char *name,
+				   topo_cpuset_t *admin_disabled_set)
 {
 #define CPUSET_MASK_LEN 64
   char cpuset_mask[CPUSET_MASK_LEN];
@@ -299,11 +244,11 @@ topo_admin_disable_cpus_from_cpuset(struct topo_topology *topology,
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
   int ret;
 
-  ret = topo_read_cpuset_mask("cpus", cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
+  ret = topo_read_cpuset_mask(name, cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
   if (!ret)
     return;
 
-  topo_debug("found cpuset cpus: %s\n", cpuset_mask);
+  topo_debug("found cpuset %s: %s\n", name, cpuset_mask);
 
   current = cpuset_mask;
   prevlast = -1;
@@ -321,8 +266,8 @@ topo_admin_disable_cpus_from_cpuset(struct topo_topology *topology,
     else
       nextlast = nextfirst;
     if (prevlast+1 <= nextfirst-1) {
-      topo_debug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-      topo_cpuset_set_range(admin_disabled_cpuset, prevlast+1, nextfirst-1);
+      topo_debug("%s [%d:%d] excluded by cpuset\n", name, prevlast+1, nextfirst-1);
+      topo_cpuset_set_range(admin_disabled_set, prevlast+1, nextfirst-1);
     }
 
     /* switch to next enabled-segment */
@@ -335,8 +280,8 @@ topo_admin_disable_cpus_from_cpuset(struct topo_topology *topology,
   /* disable after last enabled-segment */
   nextfirst = TOPO_NBMAXCPUS;
   if (prevlast+1 <= nextfirst-1) {
-    topo_debug("cpus [%d:%d] excluded by cpuset\n", prevlast+1, nextfirst-1);
-    topo_cpuset_set_range(admin_disabled_cpuset, prevlast+1, nextfirst-1);
+    topo_debug("%s [%d:%d] excluded by cpuset\n", name, prevlast+1, nextfirst-1);
+    topo_cpuset_set_range(admin_disabled_set, prevlast+1, nextfirst-1);
   }
 }
 
@@ -397,7 +342,8 @@ topo_sysfs_node_meminfo_info(struct topo_topology *topology,
 }
 
 static void
-look_sysfsnode(struct topo_topology *topology)
+look_sysfsnode(struct topo_topology *topology,
+	       topo_cpuset_t *admin_disabled_mems_set)
 {
   unsigned i, osnode;
   unsigned nbnodes = 1;
@@ -440,7 +386,10 @@ look_sysfsnode(struct topo_topology *topology)
       if (topo_parse_cpumap(nodepath, &cpuset, topology->backend_params.sysfs.root_fd) < 0)
 	break;
 
-      topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
+      if (topo_cpuset_isset(admin_disabled_mems_set, osnode)) {
+	size = 0; hpfree = 0;
+      } else
+	topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
       node_level[i] = malloc(sizeof(struct topo_obj));
       assert(node_level[i]);
@@ -461,7 +410,7 @@ look_sysfsnode(struct topo_topology *topology)
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
 look_sysfscpu(struct topo_topology *topology,
-	      topo_cpuset_t *admin_disabled_cpuset)
+	      topo_cpuset_t *admin_disabled_cpus_set)
 {
   struct topo_obj **socket_level = NULL;
   unsigned nsockets = 0;
@@ -495,7 +444,7 @@ look_sysfscpu(struct topo_topology *topology,
       assert(cpu < TOPO_NBMAXCPUS);
 
       /* check whether cpusets exclude this cpu */
-      if (topo_cpuset_isset(admin_disabled_cpuset, cpu)) {
+      if (topo_cpuset_isset(admin_disabled_cpus_set, cpu)) {
 	topo_debug("os proc %ld is disabled by the administrator\n", cpu);
 	continue;
       }
@@ -559,7 +508,7 @@ look_sysfscpu(struct topo_topology *topology,
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
       topo_parse_cpumap(string, &socketset, topology->backend_params.sysfs.root_fd);
-      topo_cpuset_clearset(&socketset, admin_disabled_cpuset);
+      topo_cpuset_clearset(&socketset, admin_disabled_cpus_set);
       assert(topo_cpuset_weight(&socketset) >= 1);
 
       if (topo_cpuset_first(&socketset) == i) {
@@ -585,7 +534,7 @@ look_sysfscpu(struct topo_topology *topology,
 
       sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
       topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
-      topo_cpuset_clearset(&coreset, admin_disabled_cpuset);
+      topo_cpuset_clearset(&coreset, admin_disabled_cpus_set);
       assert(topo_cpuset_weight(&coreset) >= 1);
 
       if (topo_cpuset_first(&coreset) == i) {
@@ -606,7 +555,7 @@ look_sysfscpu(struct topo_topology *topology,
 
       /* look at the thread */
       topo_cpuset_cpu(&threadset, i);
-      topo_cpuset_clearset(&threadset, admin_disabled_cpuset);
+      topo_cpuset_clearset(&threadset, admin_disabled_cpus_set);
       assert(topo_cpuset_weight(&threadset) == 1);
 
       /* add the thread */
@@ -671,7 +620,7 @@ look_sysfscpu(struct topo_topology *topology,
 
 	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", i, j);
 	topo_parse_cpumap(mappath, &cacheset, topology->backend_params.sysfs.root_fd);
-	topo_cpuset_clearset(&cacheset, admin_disabled_cpuset);
+	topo_cpuset_clearset(&cacheset, admin_disabled_cpus_set);
 	if (topo_cpuset_weight(&cacheset) < 1)
 	  /* mask is wrong (happens on ia64), assumes it's not shared */
 	  topo_cpuset_cpu(&cacheset, i);
@@ -720,7 +669,7 @@ look_sysfscpu(struct topo_topology *topology,
 #      define COREID "core id"
 static void
 look_cpuinfo(struct topo_topology *topology,
-	     topo_cpuset_t *admin_disabled_cpuset)
+	     topo_cpuset_t *admin_disabled_cpus_set)
 {
   FILE *fd;
   char string[strlen(PHYSID)+1+9+1+1];
@@ -819,7 +768,7 @@ look_cpuinfo(struct topo_topology *topology,
 
   /* clear admin-disabled cpus */
   topo_cpuset_foreach_begin(i, &online_cpuset) {
-    if (topo_cpuset_isset(admin_disabled_cpuset, i)) {
+    if (topo_cpuset_isset(admin_disabled_cpus_set, i)) {
       topo_cpuset_clr(&online_cpuset, i);
       proc_osphysids[i] = -1;
       proc_physids[i] = -1;
@@ -910,20 +859,18 @@ topo__get_dmi_info(struct topo_topology *topology)
 void
 look_linux(struct topo_topology *topology)
 {
-  topo_cpuset_t admin_disabled_cpuset;
+  topo_cpuset_t admin_disabled_cpus_set, admin_disabled_mems_set;
+
+  /* Gather the list of admin-disabled cpus and mems */
+  topo_cpuset_zero(&admin_disabled_cpus_set);
+  topo_cpuset_zero(&admin_disabled_mems_set);
+  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
+    topo_admin_disable_set_from_cpuset(topology, "cpus", &admin_disabled_cpus_set);
+    topo_admin_disable_set_from_cpuset(topology, "mems", &admin_disabled_mems_set);
+  }
 
   /* Gather NUMA information */
-  look_sysfsnode(topology);
-
-  /* Now that we have gathered NUMA node information,
-   * empty the admin-disabled ones */
-  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
-    topo_admin_disable_mems_from_cpuset(topology, topology->nb_levels-1);
-
-  /* Gather the list of admin-disabled cpus */
-  topo_cpuset_zero(&admin_disabled_cpuset);
-  if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
-    topo_admin_disable_cpus_from_cpuset(topology, &admin_disabled_cpuset);
+  look_sysfsnode(topology, &admin_disabled_mems_set);
 
   /* Gather the list of cpus now */
   if (getenv("TOPO_LINUX_USE_CPUINFO")
@@ -932,9 +879,9 @@ look_linux(struct topo_topology *topology)
       || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
       || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
       /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
-    look_cpuinfo(topology, &admin_disabled_cpuset);
+    look_cpuinfo(topology, &admin_disabled_cpus_set);
   } else {
-    look_sysfscpu(topology, &admin_disabled_cpuset);
+    look_sysfscpu(topology, &admin_disabled_cpus_set);
   }
 
   /* Compute the whole machine memory and huge page */
