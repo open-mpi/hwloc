@@ -1,5 +1,5 @@
 Machine(0KB)
-  NUMANode#0(0KB)
+  NUMANode#0(8190MB)
     Socket#0
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -35,7 +35,9 @@ Machine(0KB)
           L1Cache(64KB)
           Core#0
             P#6
-  NUMANode#6(0KB)
+  NUMANode#4(8192MB)
+  NUMANode#5(8192MB)
+  NUMANode#6(8192MB)
     Socket#6
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -45,7 +47,7 @@ Machine(0KB)
           L1Cache(64KB)
           Core#1
             P#13
-  NUMANode#7(0KB)
+  NUMANode#7(8192MB)
     Socket#7
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -55,15 +57,12 @@ Machine(0KB)
           L1Cache(64KB)
           Core#1
             P#15
-  NUMANode#4(8192MB)
-  NUMANode#5(8192MB)
 Topology is fake
 DMI board vendor: TYAN Computer Corp
 DMI board name: S4881 
 depth 0:	type #0 (Machine)
  depth 1:	type #1 (NUMANode)
   depth 2:	type #2 (Socket)
-     depth 5:	type #3 (Core)
-      depth 6:	type #4 (Proc)
-absent:		type #5 (Fake)
-multiple:	type #6 (Cache)
+multiple:	type #3 (Cache)
+     depth 5:	type #4 (Core)
+      depth 6:	type #5 (Proc)

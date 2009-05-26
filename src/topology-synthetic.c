@@ -103,6 +103,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
     obj->children[i]->index = i;
     obj->children[i]->level = obj->level + 1;
     obj->children[i]->number = first_number + i;
+    obj->children[i]->fake_depth = 0;
 
   }
 }
@@ -189,7 +190,6 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
 
     /* Update the level type to level mapping.  */
     topology->levels[level] = objs;
-    /* TODO: use topo_add_level, or fix once topo_add_obj is available */
     topology->type_depth[topo__synthetic_object_type (level_breadth)] = level;
 
     topology->nb_levels++;

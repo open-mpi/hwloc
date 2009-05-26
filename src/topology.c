@@ -172,50 +172,37 @@ look_cpu(struct topo_topology *topology,
   topo_add_level(topology, cpu_level, topology->nb_processors);
 }
 
-
-/* Connect levels */
+/* Just for debugging.  */
 static void
-topo_connect(struct topo_topology *topology)
+print_objects(struct topo_topology *topology, int indent, topo_obj_t obj)
 {
-  int l, i, j, m;
-  for (l=0; l<topology->nb_levels-1; l++)
-    {
-      for (i=0; i<topology->level_nbobjects[l]; i++)
-	{
-	  if (topology->levels[l][i]->arity)
-	    {
-	      topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
-			 l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset), topology->levels[l][i]->arity);
-	      topology->levels[l][i]->children=malloc(topology->levels[l][i]->arity*sizeof(void *));
-	      assert(topology->levels[l][i]->children);
-
-	      m=0;
-	      for (j=0; j<topology->level_nbobjects[l+1]; j++)
-		if (topo_cpuset_isincluded(&topology->levels[l+1][j]->cpuset, &topology->levels[l][i]->cpuset))
-		  {
-		    assert(!(m >= topology->levels[l][i]->arity));
-		    topology->levels[l][i]->children[m] = topology->levels[l+1][j];
-		    topology->levels[l+1][j]->father = topology->levels[l][i];
-		    topology->levels[l+1][j]->index = m++;
-		  }
-	    }
-	}
-    }
+  char line[256];
+  topo_debug("%*s", 2*indent, "");
+  topo_object_snprintf(line, sizeof(line), topology, obj, "#", 1);
+  topo_debug("%s", line);
+  topo_cpuset_snprintf(line, sizeof(line), &obj->cpuset);
+  topo_debug(" %s", line);
+  if (obj->arity)
+    topo_debug(" arity %d", obj->arity);
+  topo_debug("\n");
+  for (obj = obj->first_child; obj; obj = obj->next_sibling)
+    print_objects(topology, indent + 1, obj);
 }
 
 /*
- * How to compare objects.
+ * How to compare objects based on types.
+ *
+ * Note that HIGHER/LOWER is only a (consistent) heuristic, used to sort
+ * objects with same cpuset consistently.
+ * Only EQUAL / not EQUAL can be relied upon.
  */
 
-enum topo_obj_cmp_e {
-  TOPO_OBJ_EQUAL,	/**< \brief Equal */
-  TOPO_OBJ_INCLUDED,	/**< \brief Strictly included into */
-  TOPO_OBJ_CONTAINS,	/**< \brief Strictly contains */
-  TOPO_OBJ_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
-  TOPO_OBJ_DIFFERENT,	/**< \brief No intersection */
+enum topo_type_cmp_e {
+  TOPO_TYPE_HIGHER,
+  TOPO_TYPE_DEEPER,
+  TOPO_TYPE_EQUAL,
 };
 
-/* Order in which to sort objects with same cpuset consistently.  */
 static const int obj_type_order[] = {
   [TOPO_OBJ_MACHINE] = 0,
   [TOPO_OBJ_FAKE] = 1,
@@ -224,6 +211,45 @@ static const int obj_type_order[] = {
   [TOPO_OBJ_CACHE] = 4,
   [TOPO_OBJ_CORE] = 5,
   [TOPO_OBJ_PROC] = 6,
+};
+
+static enum topo_type_cmp_e
+topo_type_cmp(topo_obj_t obj1, topo_obj_t obj2)
+{
+  if (obj_type_order[obj1->type] > obj_type_order[obj2->type])
+    return TOPO_TYPE_DEEPER;
+  if (obj_type_order[obj1->type] < obj_type_order[obj2->type])
+    return TOPO_TYPE_HIGHER;
+
+  /* Caches have the same types but can have different depths.  */
+  if (obj1->type == TOPO_OBJ_CACHE) {
+    if (obj1->cache_depth < obj2->cache_depth)
+      return TOPO_TYPE_DEEPER;
+    else if (obj1->cache_depth > obj2->cache_depth)
+      return TOPO_TYPE_HIGHER;
+  }
+
+  /* Fake objects have the same types but can have different depths.  */
+  if (obj1->type == TOPO_OBJ_FAKE) {
+    if (obj1->fake_depth < obj2->fake_depth)
+      return TOPO_TYPE_DEEPER;
+    else if (obj1->fake_depth > obj2->fake_depth)
+      return TOPO_TYPE_HIGHER;
+  }
+
+  return TOPO_TYPE_EQUAL;
+}
+
+/*
+ * How to compare objects based on cpusets.
+ */
+
+enum topo_obj_cmp_e {
+  TOPO_OBJ_EQUAL,	/**< \brief Equal */
+  TOPO_OBJ_INCLUDED,	/**< \brief Strictly included into */
+  TOPO_OBJ_CONTAINS,	/**< \brief Strictly contains */
+  TOPO_OBJ_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
+  TOPO_OBJ_DIFFERENT,	/**< \brief No intersection */
 };
 
 static int
@@ -236,25 +262,18 @@ topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
 
     /* Same cpuset, subsort by type to have a consistent ordering.  */
 
-    if (obj_type_order[obj1->type] > obj_type_order[obj2->type])
-      /* OBJ1 is deeper.  */
-      return TOPO_OBJ_INCLUDED;
-    if (obj_type_order[obj1->type] < obj_type_order[obj2->type])
-      /* OBJ1 is higher.  */
-      return TOPO_OBJ_CONTAINS;
-
-    /* Caches have the same types but can have different depths.  */
-    if (obj1->type == TOPO_OBJ_CACHE) {
-      if (obj1->cache_depth < obj2->cache_depth)
-	/* OBJ1 is deeper. */
+    switch (topo_type_cmp(obj1, obj2)) {
+      case TOPO_TYPE_DEEPER:
 	return TOPO_OBJ_INCLUDED;
-      else if (obj1->cache_depth > obj2->cache_depth)
-	/* OBJ1 is higher.  */
+      case TOPO_TYPE_HIGHER:
 	return TOPO_OBJ_CONTAINS;
+      case TOPO_TYPE_EQUAL:
+	/* Same level cpuset and type!  Let's hope it's coherent.  */
+	return TOPO_OBJ_EQUAL;
     }
 
-    /* Same level cpuset and type!  Let's hope it's coherent.  */
-    return TOPO_OBJ_EQUAL;
+    /* For dumb compilers */
+    assert(0);
 
   } else {
 
@@ -393,43 +412,167 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 void
 topo_add_object(struct topo_topology *topology, topo_obj_t obj)
 {
+  if (topology->ignored_types[obj->type] == TOPO_IGNORE_TYPE_ALWAYS)
+    return;
+
   /* Start at the top.  */
   add_object(topology, topology->levels[0][0], obj);
 }
 
-/* Remove level at depth _depth_ */
+/*
+ * traverse the whole tree in a deletion-safe way, calling node_before at
+ * nodes, leaf at leaves, and node_after when back at nodes, passing data along
+ * the way through nodes. data returned by leaf() is ignored.
+ *
+ * Hooks can modify the pointer they're given to remove or replace themselves.
+ */
 static void
-topo_remove_level(struct topo_topology *topology, unsigned depth)
+traverse(topo_topology_t topology,
+	 topo_obj_t *father,
+	 void (*node_before)(topo_topology_t topology, topo_obj_t *obj, void *),
+	 void (*leaf)(topo_topology_t topology, topo_obj_t *obj, void *),
+	 void (*node_after)(topo_topology_t topology, topo_obj_t *obj, void *),
+	 void *data)
 {
-  int i;
-  for (i = 0; topology->levels[depth][i]; i++)
-    free(topology->levels[depth][i]);
-  free (topology->levels[depth]);
-  memmove (&topology->levels[depth], &topology->levels[depth+1],
-	   (topology->nb_levels-1-depth) * sizeof(topology->levels[depth]));
-  memmove (&topology->level_nbobjects[depth], &topology->level_nbobjects[depth+1],
-	   (topology->nb_levels-1-depth) * sizeof(topology->level_nbobjects[depth]));
-  topology->nb_levels--;
+  topo_obj_t *pobj, obj;
+
+  if (!(*father)->first_child) {
+    if (leaf)
+      leaf(topology, father, data);
+    return;
+  }
+  if (node_before)
+    node_before(topology, father, data);
+  if (!(*father))
+    return;
+  for (pobj = &(*father)->first_child, obj = *pobj;
+       obj;
+       /* Check whether the current obj was dropped.  */
+       (*pobj == obj ? pobj = &(*pobj)->next_sibling : 0),
+       /* Get pointer to next object.  */
+	obj = *pobj)
+    traverse(topology, pobj, node_before, leaf, node_after, data);
+  if (node_after)
+    node_after(topology, father, data);
 }
 
-static int
-compar(const void *_l1, const void *_l2)
+static void
+get_proc_cpuset(topo_topology_t topology, topo_obj_t *obj, void *data)
 {
-  const struct topo_obj *l1 = *(struct topo_obj **)_l1;
-  const struct topo_obj *l2 = *(struct topo_obj **)_l2;
-  int first1 = topo_cpuset_first(&l1->cpuset);
-  int first2 = topo_cpuset_first(&l2->cpuset);
-  /* if empty, return a bit after the last bit of cpuset */
-  if (first1 < 0) first1 = TOPO_NBMAXCPUS;
-  if (first2 < 0) first2 = TOPO_NBMAXCPUS;
-  return first1 - first2;
+  topo_cpuset_t *cpuset = data;
+  if ((*obj)->type != TOPO_OBJ_PROC)
+    return;
+  topo_cpuset_orset(cpuset, &(*obj)->cpuset);
+}
+
+static void
+apply_cpuset(topo_topology_t topology, topo_obj_t *obj, void *data)
+{
+  topo_cpuset_t *cpuset = data;
+  topo_cpuset_andset(&(*obj)->cpuset, cpuset);
+}
+
+static void
+free_object(topo_topology_t topology, topo_obj_t *obj, void *data)
+{
+  free(*obj);
+}
+
+/* Remove all children whose cpuset is empty, except NUMA nodes
+ * since we want to keep memory information.  */
+static void
+remove_empty(topo_topology_t topology, topo_obj_t *obj, void *data)
+{
+  if ((*obj)->type != TOPO_OBJ_NODE && topo_cpuset_iszero(&(*obj)->cpuset)) {
+    /* Remove empty children */
+    traverse(topology, obj, NULL, NULL, free_object, NULL);
+    *obj = (*obj)->next_sibling;
+  }
+}
+
+/*
+ * Merge with the only child if either the father or the child has a type to be
+ * ignored while keeping structure
+ */
+static void
+merge_useless_child(topo_topology_t topology, topo_obj_t *pfather, void *data)
+{
+  topo_obj_t father = *pfather, child = father->first_child;
+  if (child->next_sibling)
+    /* There are several children, it's useful to keep them.  */
+    return;
+
+  if (topology->ignored_types[father->type] == TOPO_IGNORE_TYPE_KEEP_STRUCTURE) {
+    /* Father can be ignored in favor of the child.  */
+    *pfather = child;
+    child->next_sibling = father->next_sibling;
+    free(father);
+  } else if (topology->ignored_types[child->type] == TOPO_IGNORE_TYPE_KEEP_STRUCTURE) {
+    /* Children can be ignored in favor of the father.  */
+    father->first_child = child->first_child;
+    free(child);
+  }
+}
+
+/*
+ * Initialize handy pointers in the whole topology
+ */
+static void
+connect(topo_obj_t father)
+{
+  unsigned n;
+  topo_obj_t child, prev_child = NULL;
+
+  for (n = 0, child = father->first_child;
+       child;
+       n++,   prev_child = child, child = child->next_sibling) {
+    child->father = father;
+    child->index = n;
+    child->prev_sibling = prev_child;
+  }
+  father->last_child = prev_child;
+
+  father->arity = n;
+  if (!n) {
+    father->children = NULL;
+    return;
+  }
+
+  father->children = malloc(n * sizeof(*father->children));
+  assert(father->children);
+  for (n = 0, child = father->first_child;
+       child;
+       n++,   child = child->next_sibling) {
+    father->children[n] = child;
+    connect(child);
+  }
+}
+
+/*
+ * Check whether there is an object below ROOT that has the same type as OBJ
+ */
+static int
+find_same_type(topo_obj_t root, topo_obj_t obj)
+{
+  topo_obj_t child;
+
+  if (topo_type_cmp(root, obj) == TOPO_TYPE_EQUAL)
+    return 1;
+
+  for (child = root->first_child; child; child = child->next_sibling)
+    if (find_same_type(child, obj))
+      return 1;
+
+  return 0;
 }
 
 /* Main discovery loop */
 static void
 topo_discover(struct topo_topology *topology)
 {
-  unsigned l,i=0,j;
+  unsigned l, i=0, taken_i, new_i, j;
+  topo_obj_t *objs, *taken_objs, *new_objs, top_obj;
+  unsigned n_objs, n_taken_objs, n_new_objs;
 
   assert(topology!=NULL);
 
@@ -437,8 +580,8 @@ topo_discover(struct topo_topology *topology)
      obtained using sysconf(3).  */
   topology->nb_processors = topo_fallback_nbprocessors ();
 
-  /* Raw detection, from coarser levels to finer levels */
-  unsigned k;
+  /* Raw detection, from coarser levels to finer levels for more efficiency.  */
+  /* There must be at least a PROC object for each logical processor.  */
 
 #    ifdef LINUX_SYS
   look_linux(topology);
@@ -471,161 +614,133 @@ topo_discover(struct topo_topology *topology)
   look_cpu(topology, NULL);
 #endif
 
-  topo_debug("\n\n--> discovered %d levels\n\n", topology->nb_levels);
+  print_objects(topology, 0, topology->levels[0][0]);
 
-  /* Ignore some levels if requested */
-  l=0;
-  while (l<topology->nb_levels) {
-    enum topo_obj_type_e type = topology->levels[l][0]->type;
-    enum topo_ignore_type_e ignore = topology->ignored_types[type];
+  /* First tweak a bit to clean the topology.  */
 
-    /* ignore if ALWAYS,
-     * or ignore if KEEP_STRUCTURE and parent object is similar.
-     */
-    if (ignore == TOPO_IGNORE_TYPE_ALWAYS
-	|| (ignore == TOPO_IGNORE_TYPE_KEEP_STRUCTURE
-	    && l > 0
-	    && topology->level_nbobjects[l-1] == topology->level_nbobjects[l])) {
-      topo_remove_level(topology, l);
-    } else {
-      l++;
-    }
-  }
-
-  /* Sort levels */
-  /* FIXME: We only sort according to level_nbobjects.
-     It assumes that levels are fully filled with "identical" objects.
-     In case of irregular architectures (one CPU with different cache levels),
-     we might have to break levels, ...
-  */
-  for (l=0; l<topology->nb_levels; l++) {
-    /* only CACHE maybe wrongly ordered so far */
-    if (topology->levels[l][0]->type != TOPO_OBJ_CACHE)
-      continue;
-
-    /* find how much to move backwards */
-    for (i=0; i<l; i++) {
-      if ((topology->level_nbobjects[i] > topology->level_nbobjects[l])
-		      || obj_type_order[topology->levels[i][0]->type] > obj_type_order[topology->levels[l][0]->type]
-		      ) {
-	/* move l before i */
-	struct topo_obj **saved_level = topology->levels[l];
-	unsigned saved_nbobjects = topology->level_nbobjects[l];
-	topo_debug("moving level %d (%d objects) before %d (%d objects)\n",
-		   l, saved_nbobjects, i, topology->level_nbobjects[i]);
-	memmove(&topology->level_nbobjects[i+1], &topology->level_nbobjects[i], (l-i)*sizeof(topology->level_nbobjects[i]));
-	memmove(&topology->levels[i+1], &topology->levels[i], (l-i)*sizeof(topology->levels[i]));
-	topology->levels[i] = saved_level;
-	topology->level_nbobjects[i] = saved_nbobjects;
-	break;
-      }
-    }
-  }
-
-  /* Compute the machine cpuset */
+  topo_debug("\nComputing the system cpuset by ORing all Proc objects\n");
   topo_cpuset_zero(&topology->levels[0][0]->cpuset);
-  for (i=0; i<topology->level_nbobjects[topology->nb_levels-1]; i++)
-    topo_cpuset_orset(&topology->levels[0][0]->cpuset, &topology->levels[topology->nb_levels-1][i]->cpuset);
+  traverse(topology, &topology->levels[0][0], NULL, get_proc_cpuset, NULL, &topology->levels[0][0]->cpuset);
 
-  /* Remove disabled/offline CPUs from all cpusets, use the now correct machine cpuset to do so,
-   * Then sort levels according to cpu sets, removed empty levels, recount levels, ...
-   * No need to look at machine and CPUs, they just got generated correctly.
-   */
-  for (l=1; l<topology->nb_levels; l++) {
-    /* update cpusets */
-    for (i=0; i<topology->level_nbobjects[l]; i++)
-      topo_cpuset_andset(&topology->levels[l][i]->cpuset, &topology->levels[0][0]->cpuset);
+  topo_debug("\nApplying the machine cpuset to all nodes\n");
+  traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, &topology->levels[0][0]->cpuset);
 
-    /* sort sublevels according to cpusets */
-    qsort(&topology->levels[l][0], topology->level_nbobjects[l], sizeof(topology->levels[l]), compar);
+  topo_debug("\nRemoving empty objects except numa nodes\n");
+  traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
 
-    /* update level_nbobjects by removing the empty ones (they are last), except for NUMA node since we want to keep memory information */
-    if (topology->levels[l][0]->type != TOPO_OBJ_NODE) {
-      for (i=0; i<topology->level_nbobjects[l]; i++)
-	if (topo_cpuset_iszero(&topology->levels[l][i]->cpuset)) {
-	  /* free remaining elements, clear first freed one, and update nbobjects */
-	  for(j=i; j<topology->level_nbobjects[l]; j++)
-	    free(topology->levels[l][j]);
-	  topology->levels[l][i] = NULL;
-	  topology->level_nbobjects[l] = i;
-	  break;
-        }
-    }
-    topo_debug("%d levels remaining at depth %d after filtering\n",
-	       topology->level_nbobjects[l], l);
-  }
+  print_objects(topology, 0, topology->levels[0][0]);
 
-  /* Gather sublevels according to levels */
-  for (l=0; l+1<topology->nb_levels; l++) {
-    k = 0;
-    for (i=0; i<topology->level_nbobjects[l]; i++) {
-      topo_cpuset_t level_set = topology->levels[l][i]->cpuset;
-      for (j=k; j<topology->level_nbobjects[l+1]; j++) {
-	topo_cpuset_t set = level_set;
-	topo_cpuset_andset(&set, &topology->levels[l+1][j]->cpuset);
-	if (!topo_cpuset_iszero(&set)) {
-	  /* Sublevel j is part of level i, put it at k.  */
-	  struct topo_obj *obj = topology->levels[l+1][j];
-	  memmove(&topology->levels[l+1][k+1], &topology->levels[l+1][k], (j-k)*sizeof(*topology->levels[l+1]));
-	  topology->levels[l+1][k++] = obj;
-	}
-      }
-    }
-  }
+  topo_debug("\nRemoving objects whose type has TOPO_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
+  traverse(topology, &topology->levels[0][0], NULL, NULL, merge_useless_child, NULL);
 
-  /* Now we can put numbers on levels. */
-  for (l=0; l<topology->nb_levels; l++)
-    for (i=0; i<topology->level_nbobjects[l]; i++)
-      {
-	topology->levels[l][i]->number = i;
-	topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset));
-      }
+  topo_debug("\nOk, finished tweaking, now connect\n");
 
-  /* And show debug again */
-  for (l=0; l<topology->nb_levels; l++)
-    for (i=0; i<topology->level_nbobjects[l]; i++)
-      topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET"\n", l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset));
+  /* Now connect handy pointers.  */
 
-  /* Compute arity */
-  for (l=0; l+1<topology->nb_levels; l++)
-    {
-      for (i=0; i<topology->level_nbobjects[l]; i++)
-	{
-	  topology->levels[l][i]->arity=0;
-	  for (j=0; j<topology->level_nbobjects[l+1]; j++)
-	    if (topo_cpuset_isincluded(&topology->levels[l+1][j]->cpuset, &topology->levels[l][i]->cpuset))
-	      topology->levels[l][i]->arity++;
-	  topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" arity %u\n",
-		     l, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[l][i]->cpuset), topology->levels[l][i]->arity);
-	}
-    }
+  connect(topology->levels[0][0]);
 
+  print_objects(topology, 0, topology->levels[0][0]);
 
-  for (i=0; i<topology->level_nbobjects[topology->nb_levels-1]; i++)
-    topo_debug("level %u,%u: cpuset %"TOPO_PRIxCPUSET" leaf\n",
-	       topology->nb_levels-1, i, TOPO_CPUSET_PRINTF_VALUE(topology->levels[topology->nb_levels-1][i]->cpuset));
-  topo_debug("arity done.\n");
-
-  /* and finally connect levels */
-  topo_connect(topology);
-  topo_debug("connecting done.\n");
+  /* Explore the resulting topology level by level.  */
 
   /* initialize all depth to unknown */
-  for (l=0; l < TOPO_OBJ_TYPE_MAX; l++)
+  for (l=1; l < TOPO_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = TOPO_TYPE_DEPTH_UNKNOWN;
-  /* walk the existing levels to set their depth */
-  for (l=0; l<topology->nb_levels; l++) {
-    enum topo_obj_type_e type = topology->levels[l][0]->type;
-    if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
-      topology->type_depth[type] = l;
-    } else {
-      assert(type >= TOPO_OBJ_ORDERED_TYPE_MAX);
-      topology->type_depth[type] = TOPO_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
+  topology->type_depth[0] = TOPO_OBJ_MACHINE;
+
+  /* Start with children of the whole system.  */
+  l = 0;
+  n_objs = topology->levels[0][0]->arity;
+  objs = malloc(n_objs * sizeof(objs[0]));
+  assert(objs);
+  memcpy(objs, topology->levels[0][0]->children, n_objs * sizeof(objs[0]));
+
+  /* Keep building levels while there are objects left in OBJS.  */
+  while (n_objs) {
+
+    /* First find which type of object is the topmost.  */
+    top_obj = objs[0];
+    for (i = 1; i < n_objs; i++) {
+      if (topo_type_cmp(top_obj, objs[i]) != TOPO_TYPE_EQUAL) {
+	if (find_same_type(top_obj, objs[i])) {
+	  /* OBJTOP is strictly above an object of the same type as OBJ, so it
+	   * is above OBJ.  */
+	  top_obj = objs[i];
+	}
+      }
     }
+
+    /* Now peek all objects of the same type, build a level with that and
+     * replace them with their children.  */
+
+    /* First count them.  */
+    n_taken_objs = 0;
+    n_new_objs = 0;
+    for (i = 0; i < n_objs; i++)
+      if (topo_type_cmp(top_obj, objs[i]) == TOPO_TYPE_EQUAL) {
+	n_taken_objs++;
+	n_new_objs += objs[i]->arity;
+      }
+
+    /* New level.  */
+    taken_objs = malloc((n_taken_objs + 1) * sizeof(taken_objs[0]));
+    /* New list of pending objects.  */
+    new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
+
+    taken_i = 0;
+    new_i = 0;
+    for (i = 0; i < n_objs; i++)
+      if (topo_type_cmp(top_obj, objs[i]) == TOPO_TYPE_EQUAL) {
+	/* Take it, add children.  */
+	taken_objs[taken_i++] = objs[i];
+	for (j = 0; j < objs[i]->arity; j++)
+	  new_objs[new_i++] = objs[i]->children[j];
+      } else
+	/* Leave it.  */
+	new_objs[new_i++] = objs[i];
+
+
+    /* Make sure we didn't mess up.  */
+    assert(taken_i == n_taken_objs);
+    assert(new_i == n_objs - n_taken_objs + n_new_objs);
+
+    /* Ok, put numbers in the level.  */
+    for (i = 0; i < n_taken_objs; i++) {
+      taken_objs[i]->level = topology->nb_levels;
+      taken_objs[i]->number = i;
+    }
+
+    /* One more level!  */
+    if (top_obj->type == TOPO_OBJ_CACHE)
+      topo_debug("--- cache level depth %d", top_obj->cache_depth);
+    else
+      topo_debug("--- %s level", topo_object_type_string(top_obj->type));
+    topo_debug(" has number %d\n\n", topology->nb_levels);
+
+    if (topology->type_depth[top_obj->type] == TOPO_TYPE_DEPTH_UNKNOWN)
+      topology->type_depth[top_obj->type] = topology->nb_levels;
+    else
+      topology->type_depth[top_obj->type] = TOPO_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
+
+    taken_objs[n_taken_objs] = NULL;
+
+    topology->level_nbobjects[topology->nb_levels] = n_taken_objs;
+    topology->levels[topology->nb_levels] = taken_objs;
+
+    topology->nb_levels++;
+
+    free(objs);
+    objs = new_objs;
+    n_objs = new_i;
   }
-  /* setup the depth of all still unknown levels (the one that got merged or never created */
+
+  /* It's empty now.  */
+  free(objs);
+
+  /* Setup the depth of all still unknown levels (the ones that got merged or
+   * never created).  */
   int type, prevdepth = TOPO_TYPE_DEPTH_UNKNOWN;
-  for (type = 0; type < TOPO_OBJ_ORDERED_TYPE_MAX; type++)
+  for (type = TOPO_OBJ_MACHINE; type < TOPO_OBJ_FAKE; type++)
     {
       if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
 	topology->type_depth[type] = prevdepth;
@@ -633,11 +748,6 @@ topo_discover(struct topo_topology *topology)
 	prevdepth = topology->type_depth[type];
       }
     }
-
-  /* set level depth */
-  for (l=0; l<topology->nb_levels; l++)
-    for (i=0; i<topology->level_nbobjects[l]; i++)
-      topology->levels[l][i]->level = l;
 }
 
 int

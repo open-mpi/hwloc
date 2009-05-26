@@ -6,9 +6,6 @@
 * make cache size/depth/type, memory node size + hugepagefree a resource attribute
 * there could be several size for huge pages
 
-* Implement topological sorting so that backends do not have to care about the
-  order in which they report resources.
-
 * integrate marcel split quirk?
   + split for real, just explain how to split?
     - just return an ordered array?

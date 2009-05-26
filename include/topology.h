@@ -26,21 +26,18 @@ struct topo_topology_info {
   int is_fake; /* set if the topology is different from the actual underlying machine */
 };
 
-/** \brief Type of topology object */
+/** \brief Type of topology object.  Do not rely on any relative ordering of the values.  */
 enum topo_obj_type_e {
-  /* objects that are always ordered the same in the hierarchy */
   TOPO_OBJ_MACHINE,	/**< \brief Whole machine */
   TOPO_OBJ_NODE,	/**< \brief NUMA node */
   TOPO_OBJ_SOCKET,	/**< \brief Socket, physical package, or chip */
+  TOPO_OBJ_CACHE,	/**< \brief Cache */
   TOPO_OBJ_CORE,	/**< \brief Core */
   TOPO_OBJ_PROC,	/**< \brief (Logical) Processor (e.g. a thread in a SMT core) */
 
-  /* objects that may appear at various depth among the above ones */
-  TOPO_OBJ_FAKE,	/**< \brief Fake object that may be needed under special circumstances */
-  TOPO_OBJ_CACHE,	/**< \brief Cache */
+  TOPO_OBJ_FAKE,	/**< \brief Fake object that may be needed under special circumstances (like arbitrary OS aggregation)  */
 };
-#define TOPO_OBJ_ORDERED_TYPE_MAX (TOPO_OBJ_PROC+1)
-#define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_CACHE+1)
+#define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_FAKE+1)
 typedef enum topo_obj_type_e topo_obj_type_t;
 
 /** Structure of a topology object */
@@ -53,6 +50,7 @@ struct topo_obj {
   struct topo_obj **children;		/**< \brief Children, children[0 .. arity -1] */
   struct topo_obj *father;		/**< \brief Father, NULL if root (machine object) */
   struct topo_obj *first_child;		/**< \brief First child */
+  struct topo_obj *last_child;		/**< \brief Last child */
   struct topo_obj *next_sibling;	/**< \brief Next object of the same type */
   struct topo_obj *prev_sibling;	/**< \brief Previous object of the same type */
   void *userdata;			/**< \brief Application-given private data pointer, initialize to NULL, use it as you wish */
@@ -60,6 +58,7 @@ struct topo_obj {
   unsigned long memory_kB;		/**< \brief Size of memory bank or caches */
   unsigned long huge_page_free;
   unsigned cache_depth;
+  unsigned fake_depth;
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this object */
 };
 typedef struct topo_obj * topo_obj_t;

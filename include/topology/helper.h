@@ -49,24 +49,13 @@ extern void topo_backend_synthetic_exit(struct topo_topology *topology);
 extern void topo_synthetic_load (struct topo_topology *topology);
 extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 
-/* Adds an array of NUM objects LEVEL to the topology.
- * For now, the array must finish with a NULL.  */
+/* Adds an array of NUM objects LEVEL to the topology.  */
 static __inline__ void
 topo_add_level(struct topo_topology *topology, topo_obj_t *level, unsigned num)
 {
   int i;
-  if (level[0]->type == TOPO_OBJ_CACHE)
-    topo_debug("--- cache level depth %d", level[0]->cache_depth);
-  else
-    topo_debug("--- %s level", topo_object_type_string(level[0]->type));
-  topo_debug("has number %d\n\n", topology->nb_levels);
-
   for (i = 0; i < num; i++)
-    /* XXX: This doesn't do anything really useful for now.  */
     topo_add_object(topology, level[i]);
-  topology->level_nbobjects[topology->nb_levels] = num;
-  topology->levels[topology->nb_levels] = level;
-  topology->nb_levels++;
 }
 
 #ifdef __GLIBC__
