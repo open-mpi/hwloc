@@ -358,6 +358,7 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
 	  *cur_children = obj;
 	  cur_children = &obj->next_sibling;
+	  put = 1;
 	}
 	/* Now put CHILD in CUR's children.  */
 	*cur_children = child;
