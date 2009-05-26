@@ -344,7 +344,7 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 
   /* Construct CUR's and OBJ's children list.  */
 
-  /* Iteration with prefetching to be safe against removal.  */
+  /* Iteration with prefetching to be completely safe against CHILD removal.  */
   for (child = cur->first_child, child ? next_child = child->next_sibling : 0;
        child;
        child = next_child, child ? next_child = child->next_sibling : 0) {
@@ -354,7 +354,7 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
       case TOPO_OBJ_DIFFERENT:
 	/* Leave CHILD in CUR.  */
 	/* TODO: could have a topo_cpuset helper to perform the comparison more efficiently.  */
-	if (topo_cpuset_first(&obj->cpuset) < topo_cpuset_first(&child->cpuset)) {
+	if (!put && topo_cpuset_first(&obj->cpuset) < topo_cpuset_first(&child->cpuset)) {
 	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
 	  *cur_children = obj;
 	  cur_children = &obj->next_sibling;
