@@ -182,11 +182,13 @@ static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology,
 /** \brief Return a stringified topology object type */
 extern const char * topo_object_type_string (enum topo_obj_type_e l);
 
-/** \brief Stringify a given topology object into a human-readable form */
+/** \brief Stringify a given topology object into a human-readable form.
+ * Returns how many characters were actually written (not including the ending \0). */
 extern int topo_object_snprintf(char *string, size_t size,
 				struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose);
 
-/** \brief Stringify the cpuset containing a set of objects */
+/** \brief Stringify the cpuset containing a set of objects.
+ * Returns how many characters were actually written (not including the ending \0). */
 extern int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
 
 

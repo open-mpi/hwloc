@@ -63,7 +63,7 @@ topo_cpuset_snprintf(char * buf, size_t _size, topo_cpuset_t * set)
     if (tmp != buf) {
       res = snprintf(tmp, size, ",");
       tmp += res; size -= res;
-      if (size <= 1) /* need to room for ending \0 */
+      if (size <= 1) /* need room for ending \0 */
 	break;
     }
 
@@ -77,7 +77,7 @@ topo_cpuset_snprintf(char * buf, size_t _size, topo_cpuset_t * set)
       res = 0;
 
     tmp += res; size -= res;
-    if (size <= 1) /* need to room for ending \0 */
+    if (size <= 1) /* need room for ending \0 */
       break;
   }
 
