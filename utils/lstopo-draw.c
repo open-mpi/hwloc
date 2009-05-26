@@ -116,9 +116,9 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
   RECURSE(level, &null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
   if (level->physical_index == -1)
-    textwidth = 6*FONT_SIZE;
+    textwidth = 7*FONT_SIZE;
   else
-    textwidth = 8*FONT_SIZE;
+    textwidth = 9*FONT_SIZE;
 
   if (totwidth < textwidth)
     totwidth = textwidth;
