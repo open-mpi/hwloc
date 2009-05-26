@@ -3,171 +3,171 @@ Machine(0KB)
     Socket#0
       L3Cache(8192KB)
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#0
               P#4
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#2
               P#6
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#1
               P#5
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#3
               P#7
     Socket#1
       L3Cache(8192KB)
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#8
               P#12
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#10
               P#14
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#9
               P#13
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#11
               P#15
   NUMANode#1(1024MB)
     Socket#2
       L3Cache(8192KB)
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#16
               P#20
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#18
               P#22
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#17
               P#21
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#19
               P#23
     Socket#3
       L3Cache(8192KB)
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#24
               P#28
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#26
               P#30
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#25
               P#29
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#27
               P#31
   NUMANode#2(1024MB)
     Socket#4
       L3Cache(8192KB)
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#32
               P#36
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#34
               P#38
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#33
               P#37
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#35
               P#39
     Socket#5
       L3Cache(8192KB)
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#40
               P#44
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#42
               P#46
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#41
               P#45
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#43
               P#47
   NUMANode#3(1024MB)
     Socket#6
       L3Cache(8192KB)
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#48
               P#52
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#50
               P#54
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#49
               P#53
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#51
               P#55
     Socket#7
       L3Cache(8192KB)
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#56
               P#60
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#58
               P#62
         L2Cache(256KB)
-          Core#0
             L1Cache(32KB)
+            Core#0
               P#57
               P#61
-          Core#1
             L1Cache(32KB)
+            Core#1
               P#59
               P#63
 Topology is fake
 depth 0:	type #0 (Machine)
  depth 1:	type #1 (NUMANode)
   depth 2:	type #2 (Socket)
-     depth 5:	type #3 (Core)
+      depth 6:	type #3 (Core)
        depth 7:	type #4 (Proc)
 absent:		type #5 (Fake)
 multiple:	type #6 (Cache)

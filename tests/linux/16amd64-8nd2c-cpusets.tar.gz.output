@@ -1,59 +1,59 @@
 Machine(0KB)
   NUMANode#0(0KB)
     Socket#0
-      Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#0
             P#0
-      Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#1
             P#1
   NUMANode#1(8192MB)
     Socket#1
-      Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#0
             P#2
-      Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#1
             P#3
   NUMANode#2(8192MB)
     Socket#2
-      Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#0
             P#4
-      Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#1
             P#5
   NUMANode#3(8192MB)
     Socket#3
-      Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#0
             P#6
   NUMANode#6(0KB)
     Socket#6
-      Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#0
             P#12
-      Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#1
             P#13
   NUMANode#7(0KB)
     Socket#7
-      Core#0
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#0
             P#14
-      Core#1
         L2Cache(1024KB)
           L1Cache(64KB)
+          Core#1
             P#15
   NUMANode#4(8192MB)
   NUMANode#5(8192MB)
@@ -63,7 +63,7 @@ DMI board name: S4881
 depth 0:	type #0 (Machine)
  depth 1:	type #1 (NUMANode)
   depth 2:	type #2 (Socket)
-   depth 3:	type #3 (Core)
+     depth 5:	type #3 (Core)
       depth 6:	type #4 (Proc)
 absent:		type #5 (Fake)
 multiple:	type #6 (Cache)

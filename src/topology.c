@@ -505,7 +505,9 @@ topo_discover(struct topo_topology *topology)
 
     /* find how much to move backwards */
     for (i=0; i<l; i++) {
-      if (topology->level_nbobjects[i] > topology->level_nbobjects[l]) {
+      if ((topology->level_nbobjects[i] > topology->level_nbobjects[l])
+		      || obj_type_order[topology->levels[i][0]->type] > obj_type_order[topology->levels[l][0]->type]
+		      ) {
 	/* move l before i */
 	struct topo_obj **saved_level = topology->levels[l];
 	unsigned saved_nbobjects = topology->level_nbobjects[l];
