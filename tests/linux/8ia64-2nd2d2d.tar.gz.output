@@ -5,51 +5,51 @@ Machine(0KB)
         L3Cache(9216KB)
           L2Cache(256KB)
             L1Cache(16KB)
-              SMTproc#0
+              Proc#0
       Core#1
         L3Cache(9216KB)
           L2Cache(256KB)
             L1Cache(16KB)
-              SMTproc#2
+              Proc#2
     Socket#196611
       Core#0
         L3Cache(9216KB)
           L2Cache(256KB)
             L1Cache(16KB)
-              SMTproc#1
+              Proc#1
       Core#1
         L3Cache(9216KB)
           L2Cache(256KB)
             L1Cache(16KB)
-              SMTproc#3
+              Proc#3
   NUMANode#1(16GB)
     Socket#256
       Core#0
         L3Cache(9216KB)
           L2Cache(256KB)
             L1Cache(16KB)
-              SMTproc#4
+              Proc#4
       Core#1
         L3Cache(9216KB)
           L2Cache(256KB)
             L1Cache(16KB)
-              SMTproc#6
+              Proc#6
     Socket#196867
       Core#0
         L3Cache(9216KB)
           L2Cache(256KB)
             L1Cache(16KB)
-              SMTproc#5
+              Proc#5
       Core#1
         L3Cache(9216KB)
           L2Cache(256KB)
             L1Cache(16KB)
-              SMTproc#7
+              Proc#7
 Topology is fake
 depth 0:	type #0 (Machine)
  depth 1:	type #1 (NUMANode)
   depth 2:	type #2 (Socket)
    depth 3:	type #3 (Core)
-      depth 7:	type #4 (SMTproc)
+      depth 7:	type #4 (Proc)
 absent:		type #5 (Fake)
 multiple:	type #6 (Cache)

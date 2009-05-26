@@ -4,29 +4,29 @@ Machine(992MB)
       Core#0
         L2Cache(256KB)
           L1Cache(32KB)
-            SMTproc#0
-            SMTproc#4
+            Proc#0
+            Proc#4
       Core#1
         L2Cache(256KB)
           L1Cache(32KB)
-            SMTproc#1
-            SMTproc#5
+            Proc#1
+            Proc#5
       Core#2
         L2Cache(256KB)
           L1Cache(32KB)
-            SMTproc#2
-            SMTproc#6
+            Proc#2
+            Proc#6
       Core#3
         L2Cache(256KB)
           L1Cache(32KB)
-            SMTproc#3
-            SMTproc#7
+            Proc#3
+            Proc#7
 Topology is fake
 Huge page size: 2048kB
 depth 0:	type #0 (Machine)
 depth 0:	type #1 (NUMANode)
  depth 1:	type #2 (Socket)
    depth 3:	type #3 (Core)
-      depth 6:	type #4 (SMTproc)
+      depth 6:	type #4 (Proc)
 absent:		type #5 (Fake)
 multiple:	type #6 (Cache)

@@ -33,7 +33,7 @@ enum topo_obj_type_e {
   TOPO_OBJ_NODE,	/**< \brief NUMA node */
   TOPO_OBJ_SOCKET,	/**< \brief Socket, physical package, or chip */
   TOPO_OBJ_CORE,	/**< \brief Core */
-  TOPO_OBJ_PROC,	/**< \brief SMT Processor in a core */
+  TOPO_OBJ_PROC,	/**< \brief (Logical) Processor (e.g. a thread in a SMT core) */
 
   /* objects that may appear at various depth among the above ones */
   TOPO_OBJ_FAKE,	/**< \brief Fake object that may be needed under special circumstances */

@@ -103,7 +103,7 @@ proc_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "CPU#%d", level->physical_index);
+  snprintf(text, sizeof(text), "Proc#%d", level->physical_index);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 }
 

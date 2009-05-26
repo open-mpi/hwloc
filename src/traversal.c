@@ -158,7 +158,7 @@ topo_object_type_string (enum topo_obj_type_e l)
     case TOPO_OBJ_SOCKET: return "Socket";
     case TOPO_OBJ_CACHE: return "Cache";
     case TOPO_OBJ_CORE: return "Core";
-    case TOPO_OBJ_PROC: return "SMTproc";
+    case TOPO_OBJ_PROC: return "Proc";
     default: return "Unknown";
     }
 }
