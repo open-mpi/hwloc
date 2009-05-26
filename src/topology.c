@@ -215,6 +215,17 @@ enum topo_obj_cmp_e {
   TOPO_OBJ_DIFFERENT,	/**< \brief No intersection */
 };
 
+/* Order in which to sort objects with same cpuset consistently.  */
+static const int obj_type_order[] = {
+  [TOPO_OBJ_MACHINE] = 0,
+  [TOPO_OBJ_FAKE] = 1,
+  [TOPO_OBJ_NODE] = 2,
+  [TOPO_OBJ_SOCKET] = 3,
+  [TOPO_OBJ_CACHE] = 4,
+  [TOPO_OBJ_CORE] = 5,
+  [TOPO_OBJ_PROC] = 6,
+};
+
 static int
 topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
 {
@@ -225,11 +236,10 @@ topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
 
     /* Same cpuset, subsort by type to have a consistent ordering.  */
 
-    /* TODO: some tweaks?  */
-    if (obj1->type > obj2->type)
+    if (obj_type_order[obj1->type] > obj_type_order[obj2->type])
       /* OBJ1 is deeper.  */
       return TOPO_OBJ_INCLUDED;
-    if (obj1->type < obj2->type)
+    if (obj_type_order[obj1->type] < obj_type_order[obj2->type])
       /* OBJ1 is higher.  */
       return TOPO_OBJ_CONTAINS;
 
