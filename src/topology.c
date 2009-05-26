@@ -176,7 +176,7 @@ look_cpu(struct topo_topology *topology,
 static void
 print_objects(struct topo_topology *topology, int indent, topo_obj_t obj)
 {
-  char line[256];
+  char line[TOPO_CPUSET_STRING_LENGTH];
   topo_debug("%*s", 2*indent, "");
   topo_object_snprintf(line, sizeof(line), topology, obj, "#", 1);
   topo_debug("%s", line);
