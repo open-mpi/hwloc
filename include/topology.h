@@ -185,7 +185,7 @@ extern const char * topo_object_type_string (enum topo_obj_type_e l);
 
 /** \brief Stringify a given topology object into a human-readable form */
 extern int topo_object_snprintf(char *string, size_t size,
-				struct topo_topology *topology, struct topo_obj *l, const char *indexprefix);
+				struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose);
 
 /** \brief Stringify the cpuset containing a set of objects */
 extern int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);

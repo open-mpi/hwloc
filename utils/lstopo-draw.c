@@ -64,7 +64,7 @@ static struct draw_methods null_draw_methods = {
  * For generic detailed comments, see the node_draw function.
  */
 
-typedef void (*foo_draw)(struct draw_methods *methods, topo_obj_t obj, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
+typedef void (*foo_draw)(topo_topology_t topology, struct draw_methods *methods, topo_obj_t obj, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
 
 static foo_draw get_type_fun(topo_obj_type_t type);
 
@@ -81,7 +81,7 @@ static foo_draw get_type_fun(topo_obj_type_t type);
     fun = get_type_fun(sublevels[0]->type); \
     int i; \
     for (i = 0; i < numsublevels; i++) { \
-      fun(methods, sublevels[i], type, output, depth-1, x + totwidth, &width, y + myheight, &height); \
+      fun(topology, methods, sublevels[i], type, output, depth-1, x + totwidth, &width, y + myheight, &height); \
       totwidth += width + (separator); \
       if (height > maxheight) \
 	maxheight = height; \
@@ -90,25 +90,22 @@ static foo_draw get_type_fun(topo_obj_type_t type);
   } \
 }
 
-#define size_value(size) (size < 4*1024 && size % 1024 ? size : size < 4*1024*1024 && (size / 1024) % 1024 ? size / 1024 : size / (1024*1024))
-#define size_unit(size) (size < 4*1024 && size % 1024 ? "KB" : size < 4*1024*1024 && (size / 1024) % 1024 ? "MB" : "GB")
-
 static void
-proc_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+proc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   char text[64];
 
-  *retwidth = 6*FONT_SIZE;
+  *retwidth = 4*FONT_SIZE;
   *retheight = UNIT + FONT_SIZE + UNIT;
 
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "P#%d", level->physical_index);
+  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 }
 
 static void
-cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT + UNIT;
   unsigned totwidth = 0, maxheight = 0;
@@ -119,7 +116,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
   RECURSE(level, &null_draw_methods, level->cache_depth > 1 ? UNIT : 0);
 
   if (level->physical_index == -1)
-    textwidth = 7*FONT_SIZE;
+    textwidth = 6*FONT_SIZE;
   else
     textwidth = 8*FONT_SIZE;
 
@@ -134,14 +131,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
 
   methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
-  if (level->physical_index == -1)
-    snprintf(text, sizeof(text), "L%u (%lu%s)", level->cache_depth,
-		    size_value(level->memory_kB),
-		    size_unit(level->memory_kB));
-  else
-    snprintf(text, sizeof(text), "L%u#%d (%lu%s)", level->cache_depth, level->physical_index,
-		    size_value(level->memory_kB),
-		    size_unit(level->memory_kB));
+  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = 0;
@@ -149,7 +139,7 @@ cache_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type,
 }
 
 static void
-core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -166,7 +156,7 @@ core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 
   methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "Core#%d", level->physical_index);
+  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -174,7 +164,7 @@ core_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 }
 
 static void
-socket_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -191,7 +181,7 @@ socket_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type
 
   methods->box(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "Socket#%d", level->physical_index);
+  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -199,7 +189,7 @@ socket_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type
 }
 
 static void
-node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   /* Reserve room for the separator, heading memory box and separator */
   unsigned myheight = UNIT + UNIT + FONT_SIZE + UNIT + UNIT;;
@@ -228,9 +218,7 @@ node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
   methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
 
   /* Output text */
-  snprintf(text, sizeof(text), "Node#%d (%lu%s)", level->physical_index,
-		  size_value(level->memory_kB),
-		  size_unit(level->memory_kB));
+  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
 
   /* Restart, now really drawing sublevels */
@@ -239,7 +227,7 @@ node_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 }
 
 static void
-machine_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -257,9 +245,7 @@ machine_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t typ
 
   methods->box(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "Machine (%lu%s)",
-		  size_value(level->memory_kB),
-		  size_unit(level->memory_kB));
+  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -267,7 +253,7 @@ machine_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t typ
 }
 
 static void
-fake_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+fake_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -283,7 +269,7 @@ fake_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 
   methods->box(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  snprintf(text, sizeof(text), "Fake#%d", level->physical_index);
+  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -291,12 +277,12 @@ fake_draw(struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, 
 }
 
 static void
-fig(struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
+fig(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
   unsigned totwidth = 0, maxheight = 0;
   topo_obj_type_t type = level->type;
 
-  machine_draw(methods, level, type, output, depth, x, &totwidth, y, &maxheight);
+  machine_draw(topology, methods, level, type, output, depth, x, &totwidth, y, &maxheight);
 }
 
 /*
@@ -348,7 +334,7 @@ void *
 output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(&getmax_draw_methods, topo_get_machine_object(topology), &coords, 100, 0, 0);
+  fig(topology, &getmax_draw_methods, topo_get_machine_object(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR);
   methods->declare_color(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR);
@@ -364,5 +350,5 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
 void
 output_draw(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
-  fig(methods, topo_get_machine_object(topology), output, 100, 0, 0);
+	fig(topology, methods, topo_get_machine_object(topology), output, 100, 0, 0);
 }

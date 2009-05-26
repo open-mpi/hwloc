@@ -27,7 +27,7 @@ output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE
     indent (output, 2*i);
     i++;
   }
-  topo_object_snprintf (line, sizeof(line), topology, l, indexprefix);
+  topo_object_snprintf (line, sizeof(line), topology, l, indexprefix, 1);
   fprintf(output, line);
   if (l->arity || (!i && !l->arity))
     {

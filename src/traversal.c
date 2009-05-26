@@ -170,7 +170,7 @@ topo_object_type_string (enum topo_obj_type_e l)
 
 int
 topo_object_snprintf(char *string, size_t size,
-		     struct topo_topology *topology, struct topo_obj *l, const char *indexprefix)
+		     struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose)
 {
   enum topo_obj_type_e type = l->type;
   char physical_index[12] = "";
@@ -194,7 +194,8 @@ topo_object_snprintf(char *string, size_t size,
 		    topo_memory_size_printf_value(l->memory_kB),
 		    topo_memory_size_printf_unit(l->memory_kB));
   case TOPO_OBJ_CACHE:
-    return snprintf(string, size, "L%u%s%s(%lu%s)", l->cache_depth, topo_object_type_string(type), physical_index,
+    return snprintf(string, size, "L%u%s%s(%lu%s)", l->cache_depth,
+		      verbose ? topo_object_type_string(type) : "", physical_index,
 		    topo_memory_size_printf_value(l->memory_kB),
 		    topo_memory_size_printf_unit(l->memory_kB));
   default:
