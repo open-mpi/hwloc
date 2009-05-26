@@ -34,8 +34,6 @@
   + reverse routine?
   + no level = empty mask, and we may want an easy alias for "whole machine"
 
-* topo_print_object: make it an snprintf instead?
-
 * Kerrighed: parse only /proc/nodes/node%d/cpuinfo. Use
 int migrate (pid_t pid, int destination_node);
 int migrate_self (int destination_node);

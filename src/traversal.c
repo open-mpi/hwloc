@@ -168,9 +168,9 @@ topo_object_type_string (enum topo_obj_type_e l)
 #define topo_memory_size_printf_unit(_size) \
   (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
 
-void
-topo_print_object(struct topo_topology *topology, struct topo_obj *l, FILE *output, int verbose_mode,
-		  const char *indexprefix, const char* term)
+int
+topo_object_snprintf(char *string, size_t size,
+		     struct topo_topology *topology, struct topo_obj *l, const char *indexprefix)
 {
   enum topo_obj_type_e type = l->type;
   char physical_index[12] = "";
@@ -183,29 +183,23 @@ topo_print_object(struct topo_topology *topology, struct topo_obj *l, FILE *outp
   case TOPO_OBJ_CORE:
   case TOPO_OBJ_PROC:
   case TOPO_OBJ_FAKE:
-    fprintf(output, "%s%s", topo_object_type_string(type), physical_index);
-    break;
+    return snprintf(string, size, "%s%s", topo_object_type_string(type), physical_index);
   case TOPO_OBJ_MACHINE:
-    fprintf(output, "%s(%lu%s)", topo_object_type_string(type),
-	    topo_memory_size_printf_value(l->memory_kB),
-	    topo_memory_size_printf_unit(l->memory_kB));
-    break;
-  case TOPO_OBJ_NODE: {
-    fprintf(output, "%s%s(%lu%s)", topo_object_type_string(type), physical_index,
-	    topo_memory_size_printf_value(l->memory_kB),
-	    topo_memory_size_printf_unit(l->memory_kB));
-    break;
-  }
-  case TOPO_OBJ_CACHE: {
-    fprintf(output, "L%u%s%s(%lu%s)", l->cache_depth, topo_object_type_string(type), physical_index,
-	    topo_memory_size_printf_value(l->memory_kB),
-	    topo_memory_size_printf_unit(l->memory_kB));
-    break;
-  }
+    return snprintf(string, size, "%s(%lu%s)", topo_object_type_string(type),
+		    topo_memory_size_printf_value(l->memory_kB),
+		    topo_memory_size_printf_unit(l->memory_kB));
+  case TOPO_OBJ_NODE:
+    return snprintf(string, size, "%s%s(%lu%s)", topo_object_type_string(type), physical_index,
+		    topo_memory_size_printf_value(l->memory_kB),
+		    topo_memory_size_printf_unit(l->memory_kB));
+  case TOPO_OBJ_CACHE:
+    return snprintf(string, size, "L%u%s%s(%lu%s)", l->cache_depth, topo_object_type_string(type), physical_index,
+		    topo_memory_size_printf_value(l->memory_kB),
+		    topo_memory_size_printf_unit(l->memory_kB));
   default:
-    break;
+    *string = '\0';
+    return 0;
   }
-  fprintf(output, "%s", term);
 }
 
 int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs)

@@ -15,6 +15,7 @@ static void
 output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE *output, int i, int verbose_mode) {
   int x;
   const char * indexprefix = "#";
+  char line[256];
 
   if (!verbose_mode
       && parent && parent->arity == 1 && topo_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
@@ -26,7 +27,8 @@ output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE
     indent (output, 2*i);
     i++;
   }
-  topo_print_object (topology, l, output, verbose_mode, indexprefix, "");
+  topo_object_snprintf (line, sizeof(line), topology, l, indexprefix);
+  fprintf(output, line);
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
