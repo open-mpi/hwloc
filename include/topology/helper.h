@@ -12,7 +12,7 @@
 
 #include <assert.h>
 
-void look_cpu(struct topo_topology *topology, topo_cpuset_t *online_cpuset);
+void topo_look_cpu(struct topo_topology *topology, topo_cpuset_t *online_cpuset);
 
 #if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
 extern void topo_setup_socket_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, topo_topology_t topology);
@@ -20,28 +20,28 @@ extern void topo_setup_core_level(int procid_max, unsigned numcores, unsigned *o
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 #if defined(LINUX_SYS)
 extern void topo_setup_cache_level(int cachelevel, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
-extern void look_linux(struct topo_topology *topology);
+extern void topo_look_linux(struct topo_topology *topology);
 extern int topo_backend_sysfs_init(struct topo_topology *topology, const char *fsys_root_path);
 extern void topo_backend_sysfs_exit(struct topo_topology *topology);
 #endif /* LINUX_SYS */
 
 #ifdef HAVE_LIBLGRP
-extern void look_lgrp(topo_topology_t topology);
+extern void topo_look_lgrp(topo_topology_t topology);
 #endif /* HAVE_LIBLGRP */
 #ifdef HAVE_LIBKSTAT
-extern void look_kstat(topo_topology_t topology);
+extern void topo_look_kstat(topo_topology_t topology);
 #endif /* HAVE_LIBKSTAT */
 
 #ifdef AIX_SYS
-extern void look_aix(struct topo_topology *topology);
+extern void topo_look_aix(struct topo_topology *topology);
 #endif /* AIX_SYS */
 
 #ifdef OSF_SYS
-extern void look_osf(struct topo_topology *topology);
+extern void topo_look_osf(struct topo_topology *topology);
 #endif /* OSF_SYS */
 
 #ifdef WIN_SYS
-extern void look_windows(struct topo_topology *topology);
+extern void topo_look_windows(struct topo_topology *topology);
 #endif /* WIN_SYS */
 
 extern int topo_backend_synthetic_init(struct topo_topology *topology, const char *description);

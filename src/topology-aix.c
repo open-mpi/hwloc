@@ -78,7 +78,7 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology)
 }
 
 void
-look_aix(struct topo_topology *topology)
+topo_look_aix(struct topo_topology *topology)
 {
   unsigned i;
     /* TODO: R_LGPGDEF/R_LGPGFREE */

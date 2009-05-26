@@ -35,7 +35,7 @@ show(lgrp_cookie_t cookie, lgrp_id_t lgrp)
 }
 
 void
-look_lgrp(struct topo_topology *topology)
+topo_look_lgrp(struct topo_topology *topology)
 {
   lgrp_cookie_t cookie;
   if ((topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
@@ -58,7 +58,7 @@ look_lgrp(struct topo_topology *topology)
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
 void
-look_kstat(struct topo_topology *topology)
+topo_look_kstat(struct topo_topology *topology)
 {
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;

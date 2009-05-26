@@ -143,7 +143,7 @@ topo_setup_cache_level(int cachelevel, int procid_max,
  * and the optional online cpuset if given.
  */
 void
-look_cpu(struct topo_topology *topology,
+topo_look_cpu(struct topo_topology *topology,
 	 topo_cpuset_t *online_cpuset)
 {
   struct topo_obj **cpu_level;
@@ -584,26 +584,26 @@ topo_discover(struct topo_topology *topology)
   /* There must be at least a PROC object for each logical processor.  */
 
 #    ifdef LINUX_SYS
-  look_linux(topology);
+  topo_look_linux(topology);
 #    endif /* LINUX_SYS */
 
 #    ifdef  AIX_SYS
-  look_aix(topology);
+  topo_look_aix(topology);
 #    endif /* AIX_SYS */
 
 #    ifdef  OSF_SYS
-  look_osf(topology);
+  topo_look_osf(topology);
 #    endif /* OSF_SYS */
 
 #    ifdef HAVE_LIBLGRP
-  look_lgrp(topology);
+  topo_look_lgrp(topology);
 #    endif /* HAVE_LIBLGRP */
 #    ifdef HAVE_LIBKSTAT
-  look_kstat(topology);
+  topo_look_kstat(topology);
 #    endif /* HAVE_LIBKSTAT */
 
 #    ifdef  WIN_SYS
-  look_windows(topology);
+  topo_look_windows(topology);
 #    endif /* WIN_SYS */
 
   topo_debug("%d online processors found\n", topology->nb_processors);
@@ -611,7 +611,7 @@ topo_discover(struct topo_topology *topology)
 
 #ifndef LINUX_SYS
   /* Create actual bottom proc resources if not done yet */
-  look_cpu(topology, NULL);
+  topo_look_cpu(topology, NULL);
 #endif
 
   print_objects(topology, 0, topology->levels[0][0]);

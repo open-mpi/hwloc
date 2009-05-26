@@ -192,7 +192,7 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
 }
 
 void
-look_windows(struct topo_topology *topology)
+topo_look_windows(struct topo_topology *topology)
 {
   BOOL WINAPI (*GetLogicalProcessorInformationProc)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
   PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;

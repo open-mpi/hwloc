@@ -19,7 +19,7 @@
 #include <numa.h>
 
 void
-look_osf(struct topo_topology *topology)
+topo_look_osf(struct topo_topology *topology)
 {
   cpu_cursor_t cursor;
   unsigned i = 0;

@@ -816,7 +816,7 @@ look_cpuinfo(struct topo_topology *topology,
     topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
 
   /* setup the cpu level, removing nonfirst threads */
-  look_cpu(topology, &online_cpuset);
+  topo_look_cpu(topology, &online_cpuset);
 }
 
 static void
@@ -857,7 +857,7 @@ topo__get_dmi_info(struct topo_topology *topology)
 }
 
 void
-look_linux(struct topo_topology *topology)
+topo_look_linux(struct topo_topology *topology)
 {
   topo_cpuset_t admin_disabled_cpus_set, admin_disabled_mems_set;
 
