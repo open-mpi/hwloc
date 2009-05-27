@@ -640,6 +640,7 @@ look_sysfscpu(struct topo_topology *topology,
 	  fclose(fd);
 	}
 
+	/* TODO we could just use the mask instead of building an array of cache levels */
 	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", i, j);
 	topo_parse_cpumap(mappath, &cacheset, topology->backend_params.sysfs.root_fd);
 	topo_cpuset_clearset(&cacheset, admin_disabled_cpus_set);
