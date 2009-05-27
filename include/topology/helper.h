@@ -87,6 +87,7 @@ topo_add_level(struct topo_topology *topology, topo_obj_t *level, unsigned num)
   int i;
   for (i = 0; i < num; i++)
     topo_add_object(topology, level[i]);
+  free(level);
 }
 
 #ifdef __GLIBC__
