@@ -756,6 +756,8 @@ topo_discover(struct topo_topology *topology)
     taken_objs[n_taken_objs] = NULL;
 
     topology->level_nbobjects[topology->nb_levels] = n_taken_objs;
+    if (top_obj->type == TOPO_OBJ_NODE)
+      topology->nb_nodes = n_taken_objs;
     topology->levels[topology->nb_levels] = taken_objs;
 
     topology->nb_levels++;
