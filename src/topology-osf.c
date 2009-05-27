@@ -81,5 +81,7 @@ topo_look_osf(struct topo_topology *topology)
 
     topo_debug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
 	       radid, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
+
+    topo_add_object(topology, obj);
   }
 }
