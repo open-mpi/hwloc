@@ -85,54 +85,8 @@ topo_fallback_nbprocessors(void) {
 }
 
 
-/* is it really useful to try to disable these two not so big static functions?
- */
-#if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
-void
-topo_setup_socket_level(int procid_max, unsigned numsockets, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
-{
-  struct topo_obj *obj;
-  int j;
-
-  topo_debug("%d sockets\n", numsockets);
-
-  for (j = 0; j < numsockets; j++)
-    {
-      obj = malloc(sizeof(struct topo_obj));
-      assert(obj);
-      topo_setup_object(obj, TOPO_OBJ_SOCKET, osphysids[j]);
-      topo_object_cpuset_from_array(obj, j, proc_physids, procid_max);
-      topo_debug("socket %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 j, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
-      topo_add_object(topology, obj);
-    }
-  topo_debug("\n");
-}
-
-void
-topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, struct topo_topology *topology)
-{
-  struct topo_obj *obj;
-  int j;
-
-  topo_debug("%d cores\n", numcores);
-
-  for (j = 0; j < numcores; j++)
-    {
-      obj = malloc(sizeof(struct topo_obj));
-      assert(obj);
-      topo_setup_object(obj, TOPO_OBJ_CORE, oscoreids[j]);
-      topo_object_cpuset_from_array(obj, j, proc_coreids, procid_max);
-      topo_debug("core %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 j, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
-      topo_add_object(topology, obj);
-    }
-
-  topo_debug("\n");
-}
-#endif /* LINUX_SYS || HAVE_LIBKSTAT */
-
-#if defined(LINUX_SYS)
+/* This is not used any more...  */
+#if 0
 void
 topo_setup_cache_level(int cachelevel, int procid_max,
 		       unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,

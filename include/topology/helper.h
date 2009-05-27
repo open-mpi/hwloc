@@ -45,12 +45,10 @@
 
 void topo_look_cpu(struct topo_topology *topology, topo_cpuset_t *online_cpuset);
 
-#if defined(LINUX_SYS) || defined(HAVE_LIBKSTAT)
-extern void topo_setup_socket_level(int procid_max, unsigned numdies, unsigned *osphysids, unsigned *proc_physids, topo_topology_t topology);
-extern void topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, topo_topology_t topology);
-#endif /* LINUX_SYS || HAVE_LIBKSTAT */
 #if defined(LINUX_SYS)
+#if 0
 extern void topo_setup_cache_level(int cachelevel, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
+#endif
 extern void topo_look_linux(struct topo_topology *topology);
 extern int topo_backend_sysfs_init(struct topo_topology *topology, const char *fsys_root_path);
 extern void topo_backend_sysfs_exit(struct topo_topology *topology);
@@ -79,16 +77,6 @@ extern int topo_backend_synthetic_init(struct topo_topology *topology, const cha
 extern void topo_backend_synthetic_exit(struct topo_topology *topology);
 extern void topo_synthetic_load (struct topo_topology *topology);
 extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
-
-/* Adds an array of NUM objects LEVEL to the topology.  */
-static __inline__ void
-topo_add_level(struct topo_topology *topology, topo_obj_t *level, unsigned num)
-{
-  int i;
-  for (i = 0; i < num; i++)
-    topo_add_object(topology, level[i]);
-  free(level);
-}
 
 #ifdef __GLIBC__
 #if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)
@@ -137,6 +125,41 @@ topo_add_level(struct topo_topology *topology, topo_obj_t *level, unsigned num)
 			if (__a[k] == _value)				\
 				topo_cpuset_set(&__l->cpuset, k);	\
 	} while (0)
+
+/* Adds an array of NUM objects LEVEL to the topology.  */
+static __inline__ void
+topo_add_level(struct topo_topology *topology, topo_obj_t *level, unsigned num)
+{
+  int i;
+  for (i = 0; i < num; i++)
+    topo_add_object(topology, level[i]);
+  free(level);
+}
+
+/* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
+ * and for which processors have ID PROC_PHYSIDS, and add them to the topology.
+ * */
+static __inline__ void
+topo_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology, enum topo_obj_type_e type)
+{
+  struct topo_obj *obj;
+  int j;
+
+  topo_debug("%d %s\n", num, topo_object_type_string(type));
+
+  for (j = 0; j < num; j++)
+    {
+      obj = malloc(sizeof(struct topo_obj));
+      assert(obj);
+      topo_setup_object(obj, type, osphysids[j]);
+      topo_object_cpuset_from_array(obj, j, proc_physids, procid_max);
+      topo_debug("%s %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		 topo_object_type_string(type),
+		 j, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
+      topo_add_object(topology, obj);
+    }
+  topo_debug("\n");
+}
 
 
 #endif /* TOPOLOGY_HELPER_H */

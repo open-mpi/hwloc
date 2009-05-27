@@ -832,11 +832,11 @@ look_cpuinfo(struct topo_topology *topology,
 
   topo_debug("%d sockets\n", numsockets);
   if (numsockets>0)
-    topo_setup_socket_level(procid_max, numsockets, osphysids, proc_physids, topology);
+    topo_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, TOPO_OBJ_SOCKET);
 
   topo_debug("%d cores\n", numcores);
   if (numcores>0)
-    topo_setup_core_level(procid_max, numcores, oscoreids, proc_coreids, topology);
+    topo_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
 
   /* setup the cpu level, removing nonfirst threads */
   topo_look_cpu(topology, &online_cpuset);
