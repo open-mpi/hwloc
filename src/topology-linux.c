@@ -376,11 +376,11 @@ static void
 look_sysfsnode(struct topo_topology *topology,
 	       topo_cpuset_t *admin_disabled_mems_set)
 {
-  unsigned i, osnode;
+  unsigned osnode;
   unsigned nbnodes = 1;
-  struct topo_obj **node_level;
   DIR *dir;
   struct dirent *dirent;
+  topo_obj_t node;
 
   dir = topo_opendir("/sys/devices/system/node", topology->backend_params.sysfs.root_fd);
   if (dir)
@@ -398,15 +398,9 @@ look_sysfsnode(struct topo_topology *topology,
     }
 
   if (nbnodes <= 1)
-    {
-      topology->nb_nodes = nbnodes;
-      return;
-    }
+    return;
 
-  node_level = calloc(nbnodes+1, sizeof(*node_level));
-  assert(node_level);
-
-  for (i=0, osnode=0;; osnode++)
+  for (osnode=0; osnode < nbnodes; osnode++)
     {
       char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
       topo_cpuset_t cpuset;
@@ -415,27 +409,24 @@ look_sysfsnode(struct topo_topology *topology,
 
       sprintf(nodepath, "/sys/devices/system/node/node%u/cpumap", osnode);
       if (topo_parse_cpumap(nodepath, &cpuset, topology->backend_params.sysfs.root_fd) < 0)
-	break;
+	continue;
 
       if (topo_cpuset_isset(admin_disabled_mems_set, osnode)) {
 	size = 0; hpfree = 0;
       } else
 	topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
-      node_level[i] = malloc(sizeof(struct topo_obj));
-      assert(node_level[i]);
-      topo_setup_object(node_level[i], TOPO_OBJ_NODE, osnode);
-      node_level[i]->memory_kB = size;
-      node_level[i]->huge_page_free = hpfree;
-      node_level[i]->cpuset = cpuset;
+      node = malloc(sizeof(struct topo_obj));
+      assert(node);
+      topo_setup_object(node, TOPO_OBJ_NODE, osnode);
+      node->memory_kB = size;
+      node->huge_page_free = hpfree;
+      node->cpuset = cpuset;
 
       topo_debug("node %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		 i, osnode, TOPO_CPUSET_PRINTF_VALUE(node_level[i]->cpuset));
-      i++;
+		 i, osnode, TOPO_CPUSET_PRINTF_VALUE(node->cpuset));
+      topo_add_object(topology, node);
     }
-  nbnodes = i;
-
-  topo_add_level(topology, node_level, nbnodes);
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
@@ -545,7 +536,7 @@ look_sysfscpu(struct topo_topology *topology,
       if (topo_cpuset_first(&socketset) == i) {
 	/* first cpu in this socket, add the socket */
 	if (!nsockets) {
-	  socket_level = calloc(nbprocessors+1, sizeof(*socket_level));
+	  socket_level = malloc(nbprocessors * sizeof(*socket_level));
 	  assert(socket_level);
 	}
 	index = nsockets;
@@ -571,7 +562,7 @@ look_sysfscpu(struct topo_topology *topology,
       if (topo_cpuset_first(&coreset) == i) {
 	/* first cpu in this core, add the core */
 	if (!ncores) {
-	  core_level = calloc(nbprocessors+1, sizeof(*core_level));
+	  core_level = malloc(nbprocessors * sizeof(*core_level));
 	  assert(core_level);
 	}
 	index = ncores;
@@ -591,7 +582,7 @@ look_sysfscpu(struct topo_topology *topology,
 
       /* add the thread */
       if (!nthreads) {
-	thread_level = calloc(nbprocessors+1, sizeof(*thread_level));
+	thread_level = malloc(nbprocessors * sizeof(*thread_level));
 	assert(thread_level);
       }
       index = nthreads;
@@ -659,7 +650,7 @@ look_sysfscpu(struct topo_topology *topology,
 	if (topo_cpuset_first(&cacheset) == i) {
 	  /* first cpu in this cache, add the cache */
 	  if (!ncaches[depth]) {
-	    cache_level[depth] = calloc(nbprocessors+1, sizeof(*core_level));
+	    cache_level[depth] = malloc(nbprocessors * sizeof(*core_level));
 	    assert(cache_level[depth]);
 	  }
 	  index = ncaches[depth];
