@@ -513,7 +513,7 @@ merge_useless_child(topo_topology_t topology, topo_obj_t *pfather, void *data)
  * Initialize handy pointers in the whole topology
  */
 static void
-connect(topo_obj_t father)
+topo_connect(topo_obj_t father)
 {
   unsigned n;
   topo_obj_t child, prev_child = NULL;
@@ -539,7 +539,7 @@ connect(topo_obj_t father)
        child;
        n++,   child = child->next_sibling) {
     father->children[n] = child;
-    connect(child);
+    topo_connect(child);
   }
 }
 
@@ -638,7 +638,7 @@ topo_discover(struct topo_topology *topology)
 
   /* Now connect handy pointers.  */
 
-  connect(topology->levels[0][0]);
+  topo_connect(topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
