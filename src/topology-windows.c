@@ -170,8 +170,7 @@ static void
 look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo, int n, LOGICAL_PROCESSOR_RELATIONSHIP relationship, topo_obj_type_t type, int cacheLevel)
 {
   int i, j;
-  int numobjects;
-  struct topo_obj **level;
+  struct topo_obj *obj;
 
   /* Ignore non-data caches and other levels */
 #define TEST \
@@ -182,42 +181,33 @@ look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMAT
 	   && procInfo[i].Cache.Level == cacheLevel) \
 	   )
 
-  numobjects = 0;
-  for (i = 0; i < n; i++)
-    if (TEST)
-      numobjects++;
+  topo_debug("relation %d type %d L%d\n", relationship, type, cacheLevel);
 
-  topo_debug("relation %d type %d num %d L%d\n", relationship, type, numobjects, cacheLevel);
-  if (!numobjects)
-    return;
-
-  level = calloc(numobjects+1, sizeof(*level));
   j = 0;
   for (i = 0; i < n; i++) {
     if (TEST) {
-      level[j] = malloc(sizeof(struct topo_obj));
-      assert(level[j]);
-      topo_setup_object(level[j], type, j);
+      obj = malloc(sizeof(struct topo_obj));
+      assert(obj);
+      topo_setup_object(obj, type, j);
       topo_debug("%d #%d mask %lx\n", relationship, j, procInfo[i].ProcessorMask);
-      topo_cpuset_from_ulong(&level[j]->cpuset, procInfo[i].ProcessorMask);
+      topo_cpuset_from_ulong(&obj->cpuset, procInfo[i].ProcessorMask);
       switch (type) {
 	case TOPO_OBJ_NODE:
-	  level[j]->memory_kB = 0; /* TODO */
-	  level[j]->huge_page_free = 0; /* TODO */
-	  level[j]->physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_setup_object did */
+	  obj->memory_kB = 0; /* TODO */
+	  obj->huge_page_free = 0; /* TODO */
+	  obj->physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_setup_object did */
 	  break;
 	case TOPO_OBJ_CACHE:
-	  level[j]->memory_kB = procInfo[i].Cache.Size >> 10;
-	  level[j]->cache_depth = cacheLevel;
+	  obj->memory_kB = procInfo[i].Cache.Size >> 10;
+	  obj->cache_depth = cacheLevel;
 	  break;
 	default:
 	  break;
       }
       j++;
+      topo_add_object(topology, obj);
     }
   }
-
-  topo_add_level(topology, level, numobjects);
 
 #undef TEST
 }
