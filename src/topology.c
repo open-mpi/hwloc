@@ -304,7 +304,7 @@ topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
     }
 
     /* For dumb compilers */
-    assert(0);
+    abort();
 
   } else {
 
