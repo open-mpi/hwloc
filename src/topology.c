@@ -91,50 +91,44 @@ topo_fallback_nbprocessors(void) {
 void
 topo_setup_socket_level(int procid_max, unsigned numsockets, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology)
 {
-  struct topo_obj **socket_level;
+  struct topo_obj *obj;
   int j;
 
   topo_debug("%d sockets\n", numsockets);
-  socket_level = calloc(numsockets+1, sizeof(*socket_level));
-  assert(socket_level);
 
   for (j = 0; j < numsockets; j++)
     {
-      socket_level[j] = malloc(sizeof(struct topo_obj));
-      assert(socket_level[j]);
-      topo_setup_object(socket_level[j], TOPO_OBJ_SOCKET, osphysids[j]);
-      topo_object_cpuset_from_array(socket_level[j], j, proc_physids, procid_max);
+      obj = malloc(sizeof(struct topo_obj));
+      assert(obj);
+      topo_setup_object(obj, TOPO_OBJ_SOCKET, osphysids[j]);
+      topo_object_cpuset_from_array(obj, j, proc_physids, procid_max);
       topo_debug("socket %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 j, TOPO_CPUSET_PRINTF_VALUE(socket_level[j]->cpuset));
+		 j, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
+      topo_add_object(topology, obj);
     }
   topo_debug("\n");
-
-  topo_add_level(topology, socket_level, numsockets);
 }
 
 void
 topo_setup_core_level(int procid_max, unsigned numcores, unsigned *oscoreids, unsigned *proc_coreids, struct topo_topology *topology)
 {
-  struct topo_obj **core_level;
+  struct topo_obj *obj;
   int j;
 
   topo_debug("%d cores\n", numcores);
-  core_level = calloc(numcores+1, sizeof(*core_level));
-  assert(core_level);
 
   for (j = 0; j < numcores; j++)
     {
-      core_level[j] = malloc(sizeof(struct topo_obj));
-      assert(core_level[j]);
-      topo_setup_object(core_level[j], TOPO_OBJ_CORE, oscoreids[j]);
-      topo_object_cpuset_from_array(core_level[j], j, proc_coreids, procid_max);
+      obj = malloc(sizeof(struct topo_obj));
+      assert(obj);
+      topo_setup_object(obj, TOPO_OBJ_CORE, oscoreids[j]);
+      topo_object_cpuset_from_array(obj, j, proc_coreids, procid_max);
       topo_debug("core %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 j, TOPO_CPUSET_PRINTF_VALUE(core_level[j]->cpuset));
+		 j, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
+      topo_add_object(topology, obj);
     }
 
   topo_debug("\n");
-
-  topo_add_level(topology, core_level, numcores);
 }
 #endif /* LINUX_SYS || HAVE_LIBKSTAT */
 
