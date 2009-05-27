@@ -283,8 +283,8 @@ topo_look_windows(struct topo_topology *topology)
       WORD group;
 
       for (procInfo = procInfoTotal;
-	   (void*) procInfo < (void*) ((unsigned) procInfoTotal + length);
-	   procInfo = (void*) ((unsigned) procInfo + procInfo->Size)) {
+	   (void*) procInfo < (void*) ((unsigned long) procInfoTotal + length);
+	   procInfo = (void*) ((unsigned long) procInfo + procInfo->Size)) {
 
         /* Ignore non-data caches */
 	if (procInfo->Relationship == RelationCache &&
