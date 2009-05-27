@@ -331,6 +331,9 @@ topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
  * complete.
  */
 
+#define check_sizes(obj1, obj2, field) \
+  assert(!(obj1)->field || !(obj1)->field || obj1->field == obj2->field)
+
 /* Try to insert OBJ in CUR, recurse if needed */
 static void
 add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
@@ -346,7 +349,20 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
   for (child = cur->first_child; child; child = child->next_sibling) {
     switch (topo_obj_cmp(obj, child)) {
       case TOPO_OBJ_EQUAL:
-	/* TODO: check that they are coherent, merge information.  */
+	assert(topo_cpuset_isequal(&obj->cpuset, &child->cpuset));
+	assert(obj->physical_index == child->physical_index);
+	switch(obj->type) {
+	  case TOPO_OBJ_NODE:
+	    // Do not check these, it may change between calls
+	    //check_sizes(obj, child, memory_kB);
+	    //check_sizes(obj, child, huge_page_free);
+	    break;
+	  case TOPO_OBJ_CACHE:
+	    check_sizes(obj, child, memory_kB);
+	    break;
+	  default:
+	    break;
+	}
 	/* Already present, no need to insert.  */
 	return;
       case TOPO_OBJ_INCLUDED:
