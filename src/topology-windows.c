@@ -166,67 +166,22 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 } SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, *PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX;
 #endif
 
-static void
-look_procInfo(struct topo_topology *topology, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo, int n, LOGICAL_PROCESSOR_RELATIONSHIP relationship, topo_obj_type_t type, int cacheLevel)
-{
-  int i, j;
-  struct topo_obj *obj;
-
-  /* Ignore non-data caches and other levels */
-#define TEST \
-    procInfo[i].Relationship == relationship \
-	&& (relationship != RelationCache || \
-	  ((procInfo[i].Cache.Type == CacheUnified \
-		|| procInfo[i].Cache.Type == CacheData) \
-	   && procInfo[i].Cache.Level == cacheLevel) \
-	   )
-
-  topo_debug("relation %d type %d L%d\n", relationship, type, cacheLevel);
-
-  j = 0;
-  for (i = 0; i < n; i++) {
-    if (TEST) {
-      obj = malloc(sizeof(struct topo_obj));
-      assert(obj);
-      topo_setup_object(obj, type, j);
-      topo_debug("%d #%d mask %lx\n", relationship, j, procInfo[i].ProcessorMask);
-      topo_cpuset_from_ulong(&obj->cpuset, procInfo[i].ProcessorMask);
-      switch (type) {
-	case TOPO_OBJ_NODE:
-	  obj->memory_kB = 0; /* TODO */
-	  obj->huge_page_free = 0; /* TODO */
-	  obj->physical_index = procInfo[i].NumaNode.NodeNumber; /* override what topo_setup_object did */
-	  break;
-	case TOPO_OBJ_CACHE:
-	  obj->memory_kB = procInfo[i].Cache.Size >> 10;
-	  obj->cache_depth = cacheLevel;
-	  break;
-	default:
-	  break;
-      }
-      j++;
-      topo_add_object(topology, obj);
-    }
-  }
-
-#undef TEST
-}
 
 void
 topo_look_windows(struct topo_topology *topology)
 {
   BOOL WINAPI (*GetLogicalProcessorInformationProc)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
-  PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;
+  BOOL WINAPI (*GetLogicalProcessorInformationExProc)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
   DWORD length;
 
   HMODULE kernel32;
 
   kernel32 = LoadLibrary("kernel32.dll");
   if (kernel32) {
-    /* TODO: GetLogicalProcessorInformationEx to go beyond 64 CPUs.  */
     GetLogicalProcessorInformationProc = GetProcAddress(kernel32, "GetLogicalProcessorInformation");
 
     if (GetLogicalProcessorInformationProc) {
+      PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;
       length = 0;
       procInfo = NULL;
 
@@ -239,14 +194,166 @@ topo_look_windows(struct topo_topology *topology)
 	procInfo = malloc(length);
       }
 
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationNumaNode, TOPO_OBJ_NODE, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorPackage, TOPO_OBJ_SOCKET, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_OBJ_CACHE, 3);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_OBJ_CACHE, 2);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationProcessorCore, TOPO_OBJ_CORE, 0);
-      look_procInfo(topology, procInfo, length / sizeof(*procInfo), RelationCache, TOPO_OBJ_CACHE, 1);
+      unsigned id;
+      int i;
+      struct topo_obj *obj;
+      enum topo_obj_type_e type;
+
+      for (i = 0; i < length / sizeof(*procInfo); i++) {
+
+        /* Ignore non-data caches */
+	if (procInfo[i].Relationship == RelationCache
+		&& procInfo[i].Cache.Type != CacheUnified
+		&& procInfo[i].Cache.Type != CacheData)
+	  continue;
+
+	obj = malloc(sizeof(struct topo_obj));
+	assert(obj);
+
+	id = -1;
+	switch (procInfo[i].Relationship) {
+	  case RelationNumaNode:
+	    type = TOPO_OBJ_NODE;
+	    id = procInfo[i].NumaNode.NodeNumber;
+	    break;
+	  case RelationProcessorPackage:
+	    type = TOPO_OBJ_SOCKET;
+	    break;
+	  case RelationCache:
+	    type = TOPO_OBJ_CACHE;
+	    break;
+	  case RelationProcessorCore:
+	    type = TOPO_OBJ_CORE;
+	    break;
+	  case RelationGroup:
+	  default:
+	    type = TOPO_OBJ_FAKE;
+	    break;
+	}
+
+	topo_setup_object(obj, type, id);
+	topo_debug("%s#%d mask %lx\n", topo_object_type_string(type), id, procInfo[i].ProcessorMask);
+	topo_cpuset_from_ulong(&obj->cpuset, procInfo[i].ProcessorMask);
+
+	switch (type) {
+	  case TOPO_OBJ_NODE:
+	    obj->memory_kB = 0; /* TODO */
+	    obj->huge_page_free = 0; /* TODO */
+	    break;
+	  case TOPO_OBJ_CACHE:
+	    obj->memory_kB = procInfo[i].Cache.Size >> 10;
+	    obj->cache_depth = procInfo[i].Cache.Level;
+	    break;
+	  case TOPO_OBJ_FAKE:
+	    obj->fake_depth = procInfo[i].Relationship == RelationGroup;
+	    break;
+	  default:
+	    break;
+	}
+	topo_add_object(topology, obj);
+      }
 
       free(procInfo);
+    }
+
+    GetLogicalProcessorInformationExProc = GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
+
+    /* Disabled for now as it wasn't tested at all.  */
+    if (0 && GetLogicalProcessorInformationExProc) {
+      PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX procInfoTotal, procInfo;
+
+      fprintf(stderr,"Note: GetLogicalProcessorInformationEx was never tested yet!\n");
+
+      length = 0;
+      procInfoTotal = NULL;
+
+      while (1) {
+	if (GetLogicalProcessorInformationExProc(RelationAll, procInfoTotal, &length))
+	  break;
+	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+	  return;
+	free(procInfoTotal);
+	procInfo = malloc(length);
+      }
+
+      unsigned next_group_id = 0, id;
+      struct topo_obj *obj;
+      enum topo_obj_type_e type;
+      KAFFINITY mask;
+      WORD group;
+
+      for (procInfo = procInfoTotal;
+	   (void*) procInfo < (void*) ((unsigned) procInfoTotal + length);
+	   procInfo = (void*) ((unsigned) procInfo + procInfo->Size)) {
+
+        /* Ignore non-data caches */
+	if (procInfo->Relationship == RelationCache &&
+		  (procInfo->Cache.Type == CacheUnified
+		|| procInfo->Cache.Type == CacheData))
+	  continue;
+
+	id = -1;
+	switch (procInfo->Relationship) {
+	  case RelationNumaNode:
+	    type = TOPO_OBJ_NODE;
+	    mask = procInfo->NumaNode.GroupMask.Mask;
+	    group = procInfo->NumaNode.GroupMask.Group;
+	    id = procInfo->NumaNode.NodeNumber;
+	    break;
+	  case RelationProcessorPackage:
+#if 0
+	    /* MSDN says `There is no additional information available.', how
+	     * can we know which processors are there?!  */
+	    type = TOPO_OBJ_SOCKET;
+	    mask = procInfo->???.GroupMask.Mask;
+	    group = procInfo->???.GroupMask.Group;
+	    id = type_id[type]++;
+	    break;
+#else
+	    continue;
+#endif
+	  case RelationCache:
+	    type = TOPO_OBJ_CACHE;
+	    mask = procInfo->Cache.GroupMask.Mask;
+	    group = procInfo->Cache.GroupMask.Group;
+	    break;
+	  case RelationProcessorCore:
+	    type = TOPO_OBJ_CORE;
+	    mask = procInfo->Processor.GroupMask.Mask;
+	    group = procInfo->Processor.GroupMask.Group;
+	    break;
+	  case RelationGroup:
+	    type = TOPO_OBJ_FAKE;
+	    /* 0 is very odd, does Windows report only one RelationGroup item?  */
+	    mask = procInfo->Group.GroupInfo[0].ActiveProcessorMask;
+	    group = id = next_group_id++;
+	    break;
+	  default:
+	    /* Don't know how to get the mask.  */
+	    continue;
+	}
+
+	obj = malloc(sizeof(struct topo_obj));
+	assert(obj);
+	topo_setup_object(obj, type, id);
+	topo_debug("%s#%d mask %d:%lx\n", topo_object_type_string(type), id, group, mask);
+	topo_cpuset_from_ith_ulong(&obj->cpuset, group, mask);
+
+	switch (type) {
+	  case TOPO_OBJ_NODE:
+	    obj->memory_kB = 0; /* TODO */
+	    obj->huge_page_free = 0; /* TODO */
+	    break;
+	  case TOPO_OBJ_CACHE:
+	    obj->memory_kB = procInfo->Cache.CacheSize >> 10;
+	    obj->cache_depth = procInfo->Cache.Level;
+	    break;
+	  default:
+	    break;
+	}
+	topo_add_object(topology, obj);
+      }
+      free(procInfoTotal);
     }
   }
 }
