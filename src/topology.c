@@ -810,6 +810,8 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->dmi_board_name = NULL;
   for(i=0; i< TOPO_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = TOPO_IGNORE_TYPE_NEVER;
+  /* Avoid useless cruft */
+  topology->ignored_types[TOPO_OBJ_FAKE] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
   topology->level_nbobjects[0] = 1;
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
