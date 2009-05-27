@@ -612,7 +612,13 @@ topo_discover(struct topo_topology *topology)
   topology->nb_processors = topo_fallback_nbprocessors ();
 
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
-  /* There must be at least a PROC object for each logical processor.  */
+  /* topo_look_* functions should use topo_obj_add to add objects initialized
+   * through topo_setup_object. For node levels, memory_Kb and huge_page_free
+   * must be initialized. For cache levels, memory_kB and cache_depth must be
+   * initialized, for fake levels, fake_depth must be initialized
+   */
+  /* There must be at least a PROC object for each logical processor, at worse
+   * produced by topo_look_cpu()  */
 
 #    ifdef LINUX_SYS
   topo_look_linux(topology);
