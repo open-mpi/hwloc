@@ -31,7 +31,7 @@ Topology is fake
 depth 0:	type #0 (Machine)
 depth 0:	type #1 (NUMANode)
  depth 1:	type #2 (Socket)
- depth 1:	type #3 (Cache)
+absent:		type #3 (Cache)
   depth 2:	type #4 (Core)
    depth 3:	type #5 (Proc)
 

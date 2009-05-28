@@ -747,10 +747,11 @@ topo_discover(struct topo_topology *topology)
   /* Setup the depth of all still unknown levels (the ones that got merged or
    * never created).  */
   int type, prevdepth = TOPO_TYPE_DEPTH_UNKNOWN;
-  for (type = TOPO_OBJ_MACHINE; type < TOPO_OBJ_FAKE; type++)
+  for (type = TOPO_OBJ_MACHINE; type < TOPO_OBJ_TYPE_MAX; type++)
     {
       if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
-	topology->type_depth[type] = prevdepth;
+	if (type != TOPO_OBJ_CACHE && type != TOPO_OBJ_FAKE)
+	  topology->type_depth[type] = prevdepth;
       } else {
 	prevdepth = topology->type_depth[type];
       }
