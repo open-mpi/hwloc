@@ -31,6 +31,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+/* To try to get all declarations duplicated below.  */
+#define _WIN32_WINNT 0x0601
+
 #include <config.h>
 
 #include <topology.h>
@@ -300,10 +303,11 @@ topo_look_windows(struct topo_topology *topology)
 	  case RelationProcessorPackage:
 #if 0
 	    /* MSDN says `There is no additional information available.', how
-	     * can we know which processors are there?!  */
+	     * can we know which processors are there?!  Some sample code on
+	     * the Internet use the Processor field.  */
 	    type = TOPO_OBJ_SOCKET;
-	    mask = procInfo->???.GroupMask.Mask;
-	    group = procInfo->???.GroupMask.Group;
+	    mask = procInfo->Processor.GroupMask.Mask;
+	    group = procInfo->Processor.GroupMask.Group;
 	    id = type_id[type]++;
 	    break;
 #else
@@ -322,6 +326,8 @@ topo_look_windows(struct topo_topology *topology)
 	  case RelationGroup:
 	    type = TOPO_OBJ_FAKE;
 	    /* 0 is very odd, does Windows report only one RelationGroup item?  */
+	    /* Some sample code on the Internet assume that
+	     * Group.ActiveGroupCount gives the size of the GroupInfo array. */
 	    mask = procInfo->Group.GroupInfo[0].ActiveProcessorMask;
 	    group = id = next_group_id++;
 	    break;
