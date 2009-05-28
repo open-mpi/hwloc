@@ -131,7 +131,7 @@ proc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
+  topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 }
 
@@ -162,7 +162,7 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
 
   methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - UNIT);
 
-  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
+  topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = 0;
@@ -187,7 +187,7 @@ core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 
   methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
+  topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -212,7 +212,7 @@ socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 
   methods->box(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
+  topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -249,7 +249,7 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
 
   /* Output text */
-  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
+  topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-2, x + 2 * UNIT, y + 2 * UNIT, text);
 
   /* Restart, now really drawing sublevels */
@@ -276,7 +276,7 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
 
   methods->box(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
+  topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -300,7 +300,7 @@ fake_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 
   methods->box(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
-  topo_object_snprintf(text, sizeof(text), topology, level, "#", 0);
+  topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
@@ -365,7 +365,7 @@ void *
 output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(topology, &getmax_draw_methods, topo_get_machine_object(topology), &coords, 100, 0, 0);
+  fig(topology, &getmax_draw_methods, topo_get_machine_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR);
   methods->declare_color(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR);
@@ -381,5 +381,5 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
 void
 output_draw(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
-	fig(topology, methods, topo_get_machine_object(topology), output, 100, 0, 0);
+	fig(topology, methods, topo_get_machine_obj(topology), output, 100, 0, 0);
 }

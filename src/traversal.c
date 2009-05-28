@@ -53,7 +53,7 @@ topo_get_depth_type (topo_topology_t topology, unsigned depth)
 }
 
 unsigned
-topo_get_depth_nbobjects (struct topo_topology *topology, unsigned depth)
+topo_get_depth_nbobjs (struct topo_topology *topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
     return 0;
@@ -61,7 +61,7 @@ topo_get_depth_nbobjects (struct topo_topology *topology, unsigned depth)
 }
 
 struct topo_obj *
-topo_get_object (struct topo_topology *topology, unsigned depth, unsigned index)
+topo_get_obj (struct topo_topology *topology, unsigned depth, unsigned index)
 {
   if (depth >= topology->nb_levels)
     return NULL;
@@ -70,7 +70,7 @@ topo_get_object (struct topo_topology *topology, unsigned depth, unsigned index)
   return topology->levels[depth][index];
 }
 
-int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *src, struct topo_obj **objs, int max)
+int topo_find_closest_objs (struct topo_topology *topology, struct topo_obj *src, struct topo_obj **objs, int max)
 {
   struct topo_obj *parent, *nextparent, **src_objs;
   int i,src_nbobjects;
@@ -107,7 +107,7 @@ int topo_find_closest_objects (struct topo_topology *topology, struct topo_obj *
 }
 
 struct topo_obj *
-topo_find_cpuset_covering_object (struct topo_topology *topology, topo_cpuset_t *set)
+topo_find_cpuset_covering_obj (struct topo_topology *topology, topo_cpuset_t *set)
 {
   struct topo_obj *current = topology->levels[0][0];
   int i;
@@ -127,8 +127,8 @@ topo_find_cpuset_covering_object (struct topo_topology *topology, topo_cpuset_t 
 }
 
 static int
-topo__find_cpuset_objects (struct topo_obj *current, topo_cpuset_t *set,
-			   struct topo_obj ***res, int *max)
+topo__find_cpuset_objs (struct topo_obj *current, topo_cpuset_t *set,
+			struct topo_obj ***res, int *max)
 {
   int gotten = 0;
   int i;
@@ -152,7 +152,7 @@ topo__find_cpuset_objects (struct topo_obj *current, topo_cpuset_t *set,
     if (topo_cpuset_iszero(&subset))
       continue;
 
-    ret = topo__find_cpuset_objects (current->children[i], &subset, res, max);
+    ret = topo__find_cpuset_objs (current->children[i], &subset, res, max);
     gotten += ret;
 
     /* if no more room to store remaining objects, return what we got so far */
@@ -164,8 +164,8 @@ topo__find_cpuset_objects (struct topo_obj *current, topo_cpuset_t *set,
 }
 
 int
-topo_find_cpuset_objects (struct topo_topology *topology, topo_cpuset_t *set,
-			  struct topo_obj **objs, int max)
+topo_find_cpuset_objs (struct topo_topology *topology, topo_cpuset_t *set,
+		       struct topo_obj **objs, int max)
 {
   struct topo_obj *current = topology->levels[0][0];
 
@@ -175,11 +175,11 @@ topo_find_cpuset_objects (struct topo_topology *topology, topo_cpuset_t *set,
   if (max <= 0)
     return 0;
 
-  return topo__find_cpuset_objects (current, set, &objs, &max);
+  return topo__find_cpuset_objs (current, set, &objs, &max);
 }
 
 const char *
-topo_object_type_string (enum topo_obj_type_e l)
+topo_obj_type_string (enum topo_obj_type_e l)
 {
   switch (l)
     {
@@ -200,8 +200,8 @@ topo_object_type_string (enum topo_obj_type_e l)
   (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
 
 int
-topo_object_snprintf(char *string, size_t size,
-		     struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose)
+topo_obj_snprintf(char *string, size_t size,
+		  struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose)
 {
   enum topo_obj_type_e type = l->type;
   char physical_index[12] = "";
@@ -212,23 +212,23 @@ topo_object_snprintf(char *string, size_t size,
   switch (type) {
   case TOPO_OBJ_SOCKET:
   case TOPO_OBJ_CORE:
-    return snprintf(string, size, "%s%s", topo_object_type_string(type), physical_index);
+    return snprintf(string, size, "%s%s", topo_obj_type_string(type), physical_index);
   case TOPO_OBJ_FAKE:
 	  /* TODO: more pretty presentation? */
-    return snprintf(string, size, "%s%d%s", topo_object_type_string(type), l->attr.fake.depth, physical_index);
+    return snprintf(string, size, "%s%d%s", topo_obj_type_string(type), l->attr.fake.depth, physical_index);
   case TOPO_OBJ_PROC:
     return snprintf(string, size, "P%s", physical_index);
   case TOPO_OBJ_MACHINE:
-    return snprintf(string, size, "%s(%lu%s)", topo_object_type_string(type),
+    return snprintf(string, size, "%s(%lu%s)", topo_obj_type_string(type),
 		    topo_memory_size_printf_value(l->attr.machine.memory_kB),
 		    topo_memory_size_printf_unit(l->attr.machine.memory_kB));
   case TOPO_OBJ_NODE:
-    return snprintf(string, size, "%s%s(%lu%s)", topo_object_type_string(type), physical_index,
+    return snprintf(string, size, "%s%s(%lu%s)", topo_obj_type_string(type), physical_index,
 		    topo_memory_size_printf_value(l->attr.node.memory_kB),
 		    topo_memory_size_printf_unit(l->attr.node.memory_kB));
   case TOPO_OBJ_CACHE:
     return snprintf(string, size, "L%u%s%s(%lu%s)", l->attr.cache.depth,
-		      verbose ? topo_object_type_string(type) : "", physical_index,
+		      verbose ? topo_obj_type_string(type) : "", physical_index,
 		    topo_memory_size_printf_value(l->attr.node.memory_kB),
 		    topo_memory_size_printf_unit(l->attr.node.memory_kB));
   default:
@@ -237,7 +237,7 @@ topo_object_snprintf(char *string, size_t size,
   }
 }
 
-int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs)
+int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs)
 {
   topo_cpuset_t set;
   int i;

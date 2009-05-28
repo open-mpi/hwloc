@@ -58,7 +58,7 @@ output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE
     indent (output, 2*i);
     i++;
   }
-  topo_object_snprintf (line, sizeof(line), topology, l, indexprefix, 1);
+  topo_obj_snprintf (line, sizeof(line), topology, l, indexprefix, 1);
   fprintf(output, line);
   if (l->arity || (!i && !l->arity))
     {
@@ -69,7 +69,7 @@ output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE
 
 void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 {
-  output_topology (topology, topo_get_machine_object(topology), NULL, output, 0, verbose_mode);
+  output_topology (topology, topo_get_machine_obj(topology), NULL, output, 0, verbose_mode);
   fprintf(output, "\n");
 
   if (verbose_mode)
@@ -91,12 +91,12 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 	{
 	  int depth = topo_get_type_depth (topology, l);
 	  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
-	    fprintf (output, "absent:\t\ttype #%u (%s)\n", l, topo_object_type_string (l));
+	    fprintf (output, "absent:\t\ttype #%u (%s)\n", l, topo_obj_type_string (l));
 	  } else if (depth == TOPO_TYPE_DEPTH_MULTIPLE) {
-	    fprintf (output, "multiple:\ttype #%u (%s)\n", l, topo_object_type_string (l));
+	    fprintf (output, "multiple:\ttype #%u (%s)\n", l, topo_obj_type_string (l));
 	  } else {
 	    indent(output, depth);
-	    fprintf (output, "depth %d:\ttype #%u (%s)\n", depth, l, topo_object_type_string (l));
+	    fprintf (output, "depth %d:\ttype #%u (%s)\n", depth, l, topo_obj_type_string (l));
 	  }
 	}
     }

@@ -57,23 +57,23 @@ int main()
   /* check the cache above a given cpu */
 #define CPUINDEX 180
   topo_cpuset_zero(&set);
-  obj = topo_get_object(topology, 5, CPUINDEX);
+  obj = topo_get_obj(topology, 5, CPUINDEX);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
   cache = topo_find_cpuset_covering_cache(topology, &set);
   assert(cache);
   assert(cache->type == TOPO_OBJ_CACHE);
   assert(cache->number == CPUINDEX/2/3);
-  assert(topo_object_is_in_subtree(obj, cache));
+  assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check the cache above two nearby cpus */
 #define CPUINDEX1 180
 #define CPUINDEX2 183
   topo_cpuset_zero(&set);
-  obj = topo_get_object(topology, 5, CPUINDEX1);
+  obj = topo_get_obj(topology, 5, CPUINDEX1);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
-  obj = topo_get_object(topology, 5, CPUINDEX2);
+  obj = topo_get_obj(topology, 5, CPUINDEX2);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
   cache = topo_find_cpuset_covering_cache(topology, &set);
@@ -81,16 +81,16 @@ int main()
   assert(cache->type == TOPO_OBJ_CACHE);
   assert(cache->number == CPUINDEX1/2/3);
   assert(cache->number == CPUINDEX2/2/3);
-  assert(topo_object_is_in_subtree(obj, cache));
+  assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check no cache above two distant cpus */
 #undef CPUINDEX1 180
 #define CPUINDEX1 300
   topo_cpuset_zero(&set);
-  obj = topo_get_object(topology, 5, CPUINDEX1);
+  obj = topo_get_obj(topology, 5, CPUINDEX1);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
-  obj = topo_get_object(topology, 5, CPUINDEX2);
+  obj = topo_get_obj(topology, 5, CPUINDEX2);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
   cache = topo_find_cpuset_covering_cache(topology, &set);
@@ -98,7 +98,7 @@ int main()
 
   /* check no cache above higher level */
   topo_cpuset_zero(&set);
-  obj = topo_get_object(topology, 2, 0);
+  obj = topo_get_obj(topology, 2, 0);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
   cache = topo_find_cpuset_covering_cache(topology, &set);

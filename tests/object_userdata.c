@@ -47,8 +47,8 @@ static void check(topo_topology_t topology)
 
   topo_topology_get_info(topology, &topoinfo);
   for(i=0; i<topoinfo.depth; i++) {
-    for(j=0; j<topo_get_depth_nbobjects(topology, i); j++) {
-      assert(topo_get_object(topology, i, j)->userdata == NULL);
+    for(j=0; j<topo_get_depth_nbobjs(topology, i); j++) {
+      assert(topo_get_obj(topology, i, j)->userdata == NULL);
     }
   }
 }

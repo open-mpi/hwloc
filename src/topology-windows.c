@@ -232,7 +232,7 @@ topo_look_windows(struct topo_topology *topology)
 	}
 
 	obj = topo_alloc_setup_object(type, id);
-	topo_debug("%s#%d mask %lx\n", topo_object_type_string(type), id, procInfo[i].ProcessorMask);
+	topo_debug("%s#%d mask %lx\n", topo_obj_type_string(type), id, procInfo[i].ProcessorMask);
 	topo_cpuset_from_ulong(&obj->cpuset, procInfo[i].ProcessorMask);
 
 	switch (type) {
@@ -331,7 +331,7 @@ topo_look_windows(struct topo_topology *topology)
 	}
 
 	obj = topo_alloc_setup_object(type, id);
-	topo_debug("%s#%d mask %d:%lx\n", topo_object_type_string(type), id, group, mask);
+	topo_debug("%s#%d mask %d:%lx\n", topo_obj_type_string(type), id, group, mask);
 	topo_cpuset_from_ith_ulong(&obj->cpuset, group, mask);
 
 	switch (type) {

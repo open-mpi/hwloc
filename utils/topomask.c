@@ -106,7 +106,7 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
       fprintf(stderr, "ignoring invalid depth %d\n", depth);
     return -1;
   }
-  width = topo_get_depth_nbobjects(topology, depth);
+  width = topo_get_depth_nbobjs(topology, depth);
 
   first = atoi(sep+1);
   amount = 1;
@@ -130,7 +130,7 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
     if (wrap && i==width)
       i = 0;
 
-    obj = topo_get_object(topology, depth, i);
+    obj = topo_get_obj(topology, depth, i);
     if (obj) {
       if (verbose) {
 	if (obj)

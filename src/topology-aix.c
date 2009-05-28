@@ -99,7 +99,7 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology, in
 	topo_cpuset_set(&obj->cpuset,j);
     }
     topo_debug("%s %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	       topo_object_type_string(type),
+	       topo_obj_type_string(type),
 	       i, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
     topo_add_object(topology, obj);
   }

@@ -153,7 +153,7 @@ print_objects(struct topo_topology *topology, int indent, topo_obj_t obj)
 {
   char line[TOPO_CPUSET_STRING_LENGTH];
   topo_debug("%*s", 2*indent, "");
-  topo_object_snprintf(line, sizeof(line), topology, obj, "#", 1);
+  topo_obj_snprintf(line, sizeof(line), topology, obj, "#", 1);
   topo_debug("%s", line);
   topo_cpuset_snprintf(line, sizeof(line), &obj->cpuset);
   topo_debug(" %s", line);
@@ -719,7 +719,7 @@ topo_discover(struct topo_topology *topology)
     if (top_obj->type == TOPO_OBJ_CACHE)
       topo_debug("--- cache level depth %d", top_obj->attr.cache.depth);
     else
-      topo_debug("--- %s level", topo_object_type_string(top_obj->type));
+      topo_debug("--- %s level", topo_obj_type_string(top_obj->type));
     topo_debug(" has number %d\n\n", topology->nb_levels);
 
     if (topology->type_depth[top_obj->type] == TOPO_TYPE_DEPTH_UNKNOWN)

@@ -166,17 +166,20 @@ extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_obj_typ
 extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);
 
 /** \brief Returns the width of level at depth _depth_ */
-extern unsigned topo_get_depth_nbobjects (topo_topology_t topology, unsigned depth);
+extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth);
 
 
 /** \brief Returns the topology object at index _index_ from depth _depth_ */
-extern topo_obj_t topo_get_object (topo_topology_t topology, unsigned depth, unsigned index);
+extern topo_obj_t topo_get_obj (topo_topology_t topology, unsigned depth, unsigned index);
 
 /** \brief Returns the top-object of the topology-tree. Its type is TOPO_OBJ_MACHINE. */
-static inline topo_obj_t topo_get_machine_object (topo_topology_t topology) { return topo_get_object(topology, 0, 0); }
+static inline topo_obj_t topo_get_machine_obj (topo_topology_t topology)
+{
+  return topo_get_obj(topology, 0, 0);
+}
 
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
-static inline topo_obj_t topo_find_common_ancestor_object (topo_obj_t obj1, topo_obj_t obj2)
+static inline topo_obj_t topo_find_common_ancestor_obj (topo_obj_t obj1, topo_obj_t obj2)
 {
   while (obj1->level > obj2->level)
     obj1 = obj1->father;
@@ -191,7 +194,7 @@ static inline topo_obj_t topo_find_common_ancestor_object (topo_obj_t obj1, topo
 
 /** \brief Returns true if _obj_ is inside the subtree beginning
     with _subtree_root_. */
-static inline int topo_object_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_root)
+static inline int topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_root)
 {
   return topo_cpuset_isincluded(&obj->cpuset, &subtree_root->cpuset);
 }
@@ -201,18 +204,18 @@ static inline int topo_object_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_
     Report in _lvls_ up to _max_ physically closest ones to _src_.
     Return the actual number of objects that were found. */
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? */
-extern int topo_find_closest_objects (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
+extern int topo_find_closest_objs (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
 
 /** \brief Find the lowest object covering at least the given cpuset */
-extern topo_obj_t topo_find_cpuset_covering_object (topo_topology_t topology, topo_cpuset_t *set);
+extern topo_obj_t topo_find_cpuset_covering_obj (topo_topology_t topology, topo_cpuset_t *set);
 
 /** \brief Find objects covering exactly a given cpuset */
-extern int topo_find_cpuset_objects (topo_topology_t topology, topo_cpuset_t *set, topo_obj_t *objs, int max);
+extern int topo_find_cpuset_objs (topo_topology_t topology, topo_cpuset_t *set, topo_obj_t *objs, int max);
 
 /** \brief Find the first cache covering a cpuset */
 static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, topo_cpuset_t *set)
 {
-  struct topo_obj *current = topo_find_cpuset_covering_object(topology, set);
+  struct topo_obj *current = topo_find_cpuset_covering_obj(topology, set);
   while (current) {
     if (current->type == TOPO_OBJ_CACHE)
       return current;
@@ -235,16 +238,16 @@ static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology,
 }
 
 /** \brief Return a stringified topology object type */
-extern const char * topo_object_type_string (enum topo_obj_type_e l);
+extern const char * topo_obj_type_string (enum topo_obj_type_e l);
 
 /** \brief Stringify a given topology object into a human-readable form.
  * Returns how many characters were actually written (not including the ending \0). */
-extern int topo_object_snprintf(char *string, size_t size,
-				struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose);
+extern int topo_obj_snprintf(char *string, size_t size,
+			     struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose);
 
 /** \brief Stringify the cpuset containing a set of objects.
  * Returns how many characters were actually written (not including the ending \0). */
-extern int topo_object_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
+extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
 
 
 /** \brief Bind current process on cpus given in the set */
