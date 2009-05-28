@@ -88,6 +88,9 @@ int main(int argc, char *argv[])
       fprintf(stderr, "topo_set_cpubind failed\n");
   }
 
+  if (!argc)
+    return EXIT_SUCCESS;
+
   ret = execvp(argv[0], argv);
   if (ret && verbose)
     perror("execvp");
