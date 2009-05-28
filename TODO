@@ -1,5 +1,4 @@
-* test ignoring of types/threads/admin-disable in make check
-  + check synthetic topo generation as well
+* check synthetic topo generation as well
 
 * add suffix to synthetic topo numbers to enforce the type
 
