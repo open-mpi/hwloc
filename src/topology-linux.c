@@ -829,7 +829,7 @@ look_cpuinfo(struct topo_topology *topology,
     topo_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
 
   /* setup the cpu level, removing nonfirst threads */
-  topo_look_cpu(topology, &online_cpuset);
+  topo_setup_proc_level(topology, &online_cpuset);
 }
 
 static void

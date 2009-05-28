@@ -188,6 +188,9 @@ topo_look_kstat(struct topo_topology *topology)
   topo_setup_level(numprocs, numsockets, osphysids, proc_physids, topology, TOPO_OBJ_SOCKET);
   topo_setup_level(numprocs, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
 
+  /* add PROC objects */
+  topo_setup_proc_level(topology, NULL);
+
  out:
   kstat_close(kc);
 }

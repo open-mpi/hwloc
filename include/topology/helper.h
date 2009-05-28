@@ -43,7 +43,7 @@
 
 #include <assert.h>
 
-void topo_look_cpu(struct topo_topology *topology, topo_cpuset_t *online_cpuset);
+extern void topo_setup_proc_level(struct topo_topology *topology, topo_cpuset_t *online_cpuset);
 
 #if defined(LINUX_SYS)
 #if 0

@@ -82,4 +82,7 @@ topo_look_osf(struct topo_topology *topology)
 
     topo_add_object(topology, obj);
   }
+
+  /* add PROC objects */
+  topo_setup_proc_level(topology, NULL);
 }

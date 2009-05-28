@@ -357,4 +357,7 @@ topo_look_windows(struct topo_topology *topology)
       free(procInfoTotal);
     }
   }
+
+  /* add PROC objects */
+  topo_setup_proc_level(topology, NULL);
 }

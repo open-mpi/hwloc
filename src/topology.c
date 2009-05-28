@@ -120,8 +120,8 @@ topo_setup_cache_level(int cachelevel, int procid_max,
  * and the optional online cpuset if given.
  */
 void
-topo_look_cpu(struct topo_topology *topology,
-	 topo_cpuset_t *online_cpuset)
+topo_setup_proc_level(struct topo_topology *topology,
+		      topo_cpuset_t *online_cpuset)
 {
   struct topo_obj **cpu_level;
   unsigned oscpu,cpu;
@@ -579,7 +579,7 @@ topo_discover(struct topo_topology *topology)
    * initialized, for fake levels, fake_depth must be initialized
    */
   /* There must be at least a PROC object for each logical processor, at worse
-   * produced by topo_look_cpu()  */
+   * produced by topo_setup_proc_level()  */
 
 #    ifdef LINUX_SYS
   topo_look_linux(topology);
@@ -606,11 +606,6 @@ topo_discover(struct topo_topology *topology)
 
   topo_debug("%d online processors found\n", topology->nb_processors);
   assert(topology->nb_processors);
-
-#ifndef LINUX_SYS
-  /* Create actual bottom proc resources if not done yet */
-  topo_look_cpu(topology, NULL);
-#endif
 
   print_objects(topology, 0, topology->levels[0][0]);
 
