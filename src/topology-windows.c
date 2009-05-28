@@ -276,7 +276,7 @@ topo_look_windows(struct topo_topology *topology)
 	procInfo = malloc(length);
       }
 
-      unsigned next_group_id = 0, id;
+      signed id;
       struct topo_obj *obj;
       enum topo_obj_type_e type;
       KAFFINITY mask;
@@ -301,18 +301,10 @@ topo_look_windows(struct topo_topology *topology)
 	    id = procInfo->NumaNode.NodeNumber;
 	    break;
 	  case RelationProcessorPackage:
-#if 0
-	    /* MSDN says `There is no additional information available.', how
-	     * can we know which processors are there?!  Some sample code on
-	     * the Internet use the Processor field.  */
 	    type = TOPO_OBJ_SOCKET;
 	    mask = procInfo->Processor.GroupMask.Mask;
 	    group = procInfo->Processor.GroupMask.Group;
-	    id = type_id[type]++;
 	    break;
-#else
-	    continue;
-#endif
 	  case RelationCache:
 	    type = TOPO_OBJ_CACHE;
 	    mask = procInfo->Cache.GroupMask.Mask;
@@ -324,13 +316,15 @@ topo_look_windows(struct topo_topology *topology)
 	    group = procInfo->Processor.GroupMask.Group;
 	    break;
 	  case RelationGroup:
-	    type = TOPO_OBJ_FAKE;
-	    /* 0 is very odd, does Windows report only one RelationGroup item?  */
-	    /* Some sample code on the Internet assume that
-	     * Group.ActiveGroupCount gives the size of the GroupInfo array. */
-	    mask = procInfo->Group.GroupInfo[0].ActiveProcessorMask;
-	    group = id = next_group_id++;
-	    break;
+	    /* So strange an interface... */
+	    for (id = 0; id < procInfo->Group.ActiveGroupCount; id++) {
+	      obj = topo_alloc_setup_object(TOPO_OBJ_FAKE, id);
+	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
+	      topo_debug("group %d mask %lx\n", id, mask);
+	      topo_cpuset_from_ith_ulong(&obj->cpuset, id, mask);
+	      topo_add_object(topology, obj);
+	    }
+	    continue;
 	  default:
 	    /* Don't know how to get the mask.  */
 	    continue;
