@@ -1,6 +1,4 @@
 * test ignoring of types/threads/admin-disable in make check
-  + find a way to specific lstopo options in the output filename?
-    . .tar.gz.options
   + check synthetic topo generation as well
 
 * add suffix to synthetic topo numbers to enforce the type

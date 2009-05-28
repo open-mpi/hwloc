@@ -76,12 +76,13 @@ test_topology ()
     local name="$1"
     local dir="$2"
     local expected_output="$3"
+    local options="$4"
 
     local output="`mktemp`"
 
     export TOPO_FSYS_ROOT_PATH="$dir"
 
-    if ! "$lstopo" - -v > "$output"
+    if ! "$lstopo" - -v `cat $options 2>/dev/null` > "$output"
     then
 	result=1
     else
@@ -124,12 +125,13 @@ then
 else
     actual_dir="`echo "$dir"/*`"
     actual_output="$topology".output
+    actual_options="$topology".options
 
     if test_eligible "$actual_dir" "$actual_output"
     then
 	test_count="`expr $test_count + 1`"
 
-	test_topology "`basename $topology`" "$actual_dir" "$actual_output"
+	test_topology "`basename $topology`" "$actual_dir" "$actual_output" "$actual_options"
 	result=$?
     else
 	# Skip this test.
