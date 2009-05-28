@@ -12,7 +12,6 @@
 
 * have an easy way to get a valid full set (alias on get_machine_object()->cpuset) ?
 
-* make cache size/depth/type, memory node size + hugepagefree a resource attribute
 * there could be several size for huge pages
 
 * integrate marcel split quirk?

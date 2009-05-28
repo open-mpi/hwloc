@@ -237,15 +237,15 @@ topo_look_windows(struct topo_topology *topology)
 
 	switch (type) {
 	  case TOPO_OBJ_NODE:
-	    obj->memory_kB = 0; /* TODO */
-	    obj->huge_page_free = 0; /* TODO */
+	    obj->attr.node.memory_kB = 0; /* TODO */
+	    obj->attr.node.huge_page_free = 0; /* TODO */
 	    break;
 	  case TOPO_OBJ_CACHE:
-	    obj->memory_kB = procInfo[i].Cache.Size >> 10;
-	    obj->cache_depth = procInfo[i].Cache.Level;
+	    obj->attr.cache.memory_kB = procInfo[i].Cache.Size >> 10;
+	    obj->attr.cache.depth = procInfo[i].Cache.Level;
 	    break;
 	  case TOPO_OBJ_FAKE:
-	    obj->fake_depth = procInfo[i].Relationship == RelationGroup;
+	    obj->attr.fake.depth = procInfo[i].Relationship == RelationGroup;
 	    break;
 	  default:
 	    break;
@@ -336,12 +336,12 @@ topo_look_windows(struct topo_topology *topology)
 
 	switch (type) {
 	  case TOPO_OBJ_NODE:
-	    obj->memory_kB = 0; /* TODO */
-	    obj->huge_page_free = 0; /* TODO */
+	    obj->attr.node.memory_kB = 0; /* TODO */
+	    obj->attr.node.huge_page_free = 0; /* TODO */
 	    break;
 	  case TOPO_OBJ_CACHE:
-	    obj->memory_kB = procInfo->Cache.CacheSize >> 10;
-	    obj->cache_depth = procInfo->Cache.Level;
+	    obj->attr.cache.memory_kB = procInfo->Cache.CacheSize >> 10;
+	    obj->attr.cache.depth = procInfo->Cache.Level;
 	    break;
 	  default:
 	    break;

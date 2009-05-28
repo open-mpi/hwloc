@@ -134,8 +134,14 @@ topo__synthetic_make_children(struct topo_topology *topology,
     obj->children[i]->index = i;
     obj->children[i]->level = obj->level + 1;
     obj->children[i]->number = first_number + i;
-    obj->children[i]->fake_depth = 0;
 
+    switch(type) {
+    case TOPO_OBJ_FAKE:
+      obj->children[i]->attr.fake.depth = 0;
+      break;
+    default:
+      break;
+    }
   }
 }
 
@@ -254,7 +260,7 @@ topo_synthetic_load (struct topo_topology *topology)
     topology->nb_nodes = topology->level_nbobjects[node_level];
 
     for(i=0 ; i<topology->nb_nodes ; i++)
-      topology->levels[node_level][i]->memory_kB = 1024*1024;
+      topology->levels[node_level][i]->attr.node.memory_kB = 1024*1024;
 
   } else {
     topology->nb_nodes = 1;
@@ -265,8 +271,8 @@ topo_synthetic_load (struct topo_topology *topology)
     int i;
 
     for(i=0 ; i<topology->level_nbobjects[cache_level] ; i++) {
-      topology->levels[cache_level][i]->memory_kB = 4*1024;
-      topology->levels[cache_level][i]->cache_depth = 2;
+      topology->levels[cache_level][i]->attr.cache.memory_kB = 4*1024;
+      topology->levels[cache_level][i]->attr.cache.depth = 2;
     }
   }
 

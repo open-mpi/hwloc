@@ -417,8 +417,8 @@ look_sysfsnode(struct topo_topology *topology,
 	topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
       node = topo_alloc_setup_object(TOPO_OBJ_NODE, osnode);
-      node->memory_kB = size;
-      node->huge_page_free = hpfree;
+      node->attr.node.memory_kB = size;
+      node->attr.node.huge_page_free = hpfree;
       node->cpuset = cpuset;
 
       topo_debug("node %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
@@ -648,8 +648,8 @@ look_sysfscpu(struct topo_topology *topology,
 	  }
 	  index = ncaches[depth];
 	  cache_level[depth][index] = topo_alloc_setup_object(TOPO_OBJ_CACHE, -1);
-	  cache_level[depth][index]->memory_kB = kB;
-	  cache_level[depth][index]->cache_depth = depth+1;
+	  cache_level[depth][index]->attr.cache.memory_kB = kB;
+	  cache_level[depth][index]->attr.cache.depth = depth+1;
 	  cache_level[depth][index]->cpuset = cacheset;
 	  topo_debug("cache %d depth %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		     ncaches[depth], depth, TOPO_CPUSET_PRINTF_VALUE(cacheset));
@@ -899,9 +899,9 @@ topo_look_linux(struct topo_topology *topology)
 
   /* Compute the whole machine memory and huge page */
   topo_get_procfs_meminfo_info(topology,
-			       &topology->levels[0][0]->memory_kB,
+			       &topology->levels[0][0]->attr.machine.memory_kB,
 			       &topology->huge_page_size_kB,
-			       &topology->levels[0][0]->huge_page_free);
+			       &topology->levels[0][0]->attr.machine.huge_page_free);
 			       /* FIXME: gather page_size_kB as well? MaMI needs it */
 
   /* Gather DMI info */

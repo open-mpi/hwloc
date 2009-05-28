@@ -81,15 +81,15 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology, in
     obj = topo_alloc_setup_object(type, i - (type == TOPO_OBJ_PROC));
     switch(type) {
       case TOPO_OBJ_NODE:
-	obj->memory_kB = 0; /* TODO */
-	obj->huge_page_free = 0;
+	obj->attr.node.memory_kB = 0; /* TODO */
+	obj->attr.node.huge_page_free = 0;
 	break;
       case TOPO_OBJ_CACHE:
-	obj->memory_kB = 0; /* TODO */
-	obj->cache_depth = 2;
+	obj->attr.cache.memory_kB = 0; /* TODO */
+	obj->attr.cache.depth = 2;
 	break;
       case TOPO_OBJ_FAKE:
-	obj->fake_depth = level;
+	obj->attr.fake.depth = level;
       default:
 	break;
     }

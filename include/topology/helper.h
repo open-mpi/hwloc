@@ -115,8 +115,8 @@ topo_alloc_setup_object(enum topo_obj_type_e type, unsigned index)
 		__l1->level = 0;					\
 		__l1->number = 0;					\
 		__l1->index = 0;					\
-		__l1->memory_kB = 0;					\
-		__l1->huge_page_free = 0;				\
+		__l1->attr.machine.memory_kB = 0;			\
+		__l1->attr.machine.huge_page_free = 0;			\
 		topo_cpuset_fill(&__l1->cpuset);			\
 		__p[0] = __l1;						\
 		__p[1] = NULL;						\

@@ -76,10 +76,21 @@ struct topo_obj {
   /* physical information */
   enum topo_obj_type_e type;		/**< \brief Type of object */
   signed physical_index;		/**< \brief OS-provided physical index number */
-  unsigned long memory_kB;		/**< \brief Size of memory bank or caches */
-  unsigned long huge_page_free;
-  unsigned cache_depth;
-  unsigned fake_depth;
+
+  union topo_obj_attr_u {
+    struct topo_cache_attr_u {		/**< \brief Cache-specific attributes */
+      unsigned long memory_kB;		  /**< \brief Size of cache */
+      unsigned depth;			  /**< \brief Depth of cache */
+    } cache;
+    struct topo_memory_attr_u {		/**< \brief Node-specific attributes */
+      unsigned long memory_kB;		  /**< \brief Size of memory node */
+      unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
+    } node;
+    struct topo_memory_attr_u machine;	/**< \brief Machine-specific attributes */
+    struct topo_fake_attr_u {		/**< \brief Fake-specific attributes */
+      unsigned depth;			  /**< \brief Depth of fake object */
+    } fake;
+  } attr;
 
   /* global position */
   unsigned level;			/**< \brief Vertical index in the hierarchy */

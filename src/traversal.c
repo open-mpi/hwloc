@@ -215,22 +215,22 @@ topo_object_snprintf(char *string, size_t size,
     return snprintf(string, size, "%s%s", topo_object_type_string(type), physical_index);
   case TOPO_OBJ_FAKE:
 	  /* TODO: more pretty presentation? */
-    return snprintf(string, size, "%s%d%s", topo_object_type_string(type), l->fake_depth, physical_index);
+    return snprintf(string, size, "%s%d%s", topo_object_type_string(type), l->attr.fake.depth, physical_index);
   case TOPO_OBJ_PROC:
     return snprintf(string, size, "P%s", physical_index);
   case TOPO_OBJ_MACHINE:
     return snprintf(string, size, "%s(%lu%s)", topo_object_type_string(type),
-		    topo_memory_size_printf_value(l->memory_kB),
-		    topo_memory_size_printf_unit(l->memory_kB));
+		    topo_memory_size_printf_value(l->attr.machine.memory_kB),
+		    topo_memory_size_printf_unit(l->attr.machine.memory_kB));
   case TOPO_OBJ_NODE:
     return snprintf(string, size, "%s%s(%lu%s)", topo_object_type_string(type), physical_index,
-		    topo_memory_size_printf_value(l->memory_kB),
-		    topo_memory_size_printf_unit(l->memory_kB));
+		    topo_memory_size_printf_value(l->attr.node.memory_kB),
+		    topo_memory_size_printf_unit(l->attr.node.memory_kB));
   case TOPO_OBJ_CACHE:
-    return snprintf(string, size, "L%u%s%s(%lu%s)", l->cache_depth,
+    return snprintf(string, size, "L%u%s%s(%lu%s)", l->attr.cache.depth,
 		      verbose ? topo_object_type_string(type) : "", physical_index,
-		    topo_memory_size_printf_value(l->memory_kB),
-		    topo_memory_size_printf_unit(l->memory_kB));
+		    topo_memory_size_printf_value(l->attr.node.memory_kB),
+		    topo_memory_size_printf_unit(l->attr.node.memory_kB));
   default:
     *string = '\0';
     return 0;

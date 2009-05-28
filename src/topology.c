@@ -102,8 +102,8 @@ topo_setup_cache_level(int cachelevel, int procid_max,
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
       level[j] = topo_setup_object(TOPO_OBJ_CACHE, j);
-      level[j]->memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
-      level[j]->cache_depth = cachelevel+1;
+      level[j]->attr.cache.memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
+      level[j]->attr.cache.depth = cachelevel+1;
 
       topo_object_cpuset_from_array(level[j], j, &cacheids[cachelevel*TOPO_NBMAXCPUS], procid_max);
 
@@ -198,17 +198,17 @@ topo_type_cmp(topo_obj_t obj1, topo_obj_t obj2)
 
   /* Caches have the same types but can have different depths.  */
   if (obj1->type == TOPO_OBJ_CACHE) {
-    if (obj1->cache_depth < obj2->cache_depth)
+    if (obj1->attr.cache.depth < obj2->attr.cache.depth)
       return TOPO_TYPE_DEEPER;
-    else if (obj1->cache_depth > obj2->cache_depth)
+    else if (obj1->attr.cache.depth > obj2->attr.cache.depth)
       return TOPO_TYPE_HIGHER;
   }
 
   /* Fake objects have the same types but can have different depths.  */
   if (obj1->type == TOPO_OBJ_FAKE) {
-    if (obj1->fake_depth < obj2->fake_depth)
+    if (obj1->attr.fake.depth < obj2->attr.fake.depth)
       return TOPO_TYPE_DEEPER;
-    else if (obj1->fake_depth > obj2->fake_depth)
+    else if (obj1->attr.fake.depth > obj2->attr.fake.depth)
       return TOPO_TYPE_HIGHER;
   }
 
@@ -298,11 +298,11 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 	switch(obj->type) {
 	  case TOPO_OBJ_NODE:
 	    // Do not check these, it may change between calls
-	    //check_sizes(obj, child, memory_kB);
-	    //check_sizes(obj, child, huge_page_free);
+	    //check_sizes(obj, child, attr.node.memory_kB);
+	    //check_sizes(obj, child, attr.node.huge_page_free);
 	    break;
 	  case TOPO_OBJ_CACHE:
-	    check_sizes(obj, child, memory_kB);
+	    check_sizes(obj, child, attr.cache.memory_kB);
 	    break;
 	  default:
 	    break;
@@ -575,8 +575,8 @@ topo_discover(struct topo_topology *topology)
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
   /* topo_look_* functions should use topo_obj_add to add objects initialized
    * through topo_setup_object. For node levels, memory_Kb and huge_page_free
-   * must be initialized. For cache levels, memory_kB and cache_depth must be
-   * initialized, for fake levels, fake_depth must be initialized
+   * must be initialized. For cache levels, memory_kB and attr.cache.depth must be
+   * initialized, for fake levels, attr.fake.depth must be initialized
    */
   /* There must be at least a PROC object for each logical processor, at worse
    * produced by topo_setup_proc_level()  */
@@ -717,7 +717,7 @@ topo_discover(struct topo_topology *topology)
 
     /* One more level!  */
     if (top_obj->type == TOPO_OBJ_CACHE)
-      topo_debug("--- cache level depth %d", top_obj->cache_depth);
+      topo_debug("--- cache level depth %d", top_obj->attr.cache.depth);
     else
       topo_debug("--- %s level", topo_object_type_string(top_obj->type));
     topo_debug(" has number %d\n\n", topology->nb_levels);
