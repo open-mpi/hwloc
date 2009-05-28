@@ -1,5 +1,15 @@
 * test ignoring of types/threads/admin-disable in make check
   + find a way to specific lstopo options in the output filename?
+  + check synthetic topo generation as well
+
+* add suffix to synthetic topo numbers to enforce the type
+
+* add a way to find the xth core below die #y so that PLPA really has no
+  advantage over us
+  + topo_get_obj_by_type(topology, type, index)
+  + topo_get_obj_below_by_type(topology, parent, type, index)
+
+* cleanup/organize comments in the topo_obj struct
 
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset

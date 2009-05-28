@@ -99,13 +99,19 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 		__l->userdata = NULL;			\
 	} while (0)
 
+static inline struct topo_obj *
+topo_alloc_setup_object(enum topo_obj_type_e type, unsigned index)
+{
+  struct topo_obj *obj = malloc(sizeof(*obj));
+  assert(obj);
+  topo_setup_object(obj, type, index);
+  return obj;
+}
 
 #define topo_setup_machine_level(l) do {				\
 		struct topo_obj **__p = (l);				\
 		struct topo_obj *__l1;					\
-		__l1 = malloc(sizeof(struct topo_obj));			\
-		assert(__l1);						\
-		topo_setup_object(__l1, TOPO_OBJ_MACHINE, 0);		\
+		__l1 = topo_alloc_setup_object(TOPO_OBJ_MACHINE, 0);	\
 		__l1->level = 0;					\
 		__l1->number = 0;					\
 		__l1->index = 0;					\
@@ -149,9 +155,7 @@ topo_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *pr
 
   for (j = 0; j < num; j++)
     {
-      obj = malloc(sizeof(struct topo_obj));
-      assert(obj);
-      topo_setup_object(obj, type, osphysids[j]);
+      obj = topo_alloc_setup_object(type, osphysids[j]);
       topo_object_cpuset_from_array(obj, j, proc_physids, procid_max);
       topo_debug("%s %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 topo_object_type_string(type),

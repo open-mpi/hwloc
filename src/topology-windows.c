@@ -207,9 +207,6 @@ topo_look_windows(struct topo_topology *topology)
 		&& procInfo[i].Cache.Type != CacheData)
 	  continue;
 
-	obj = malloc(sizeof(struct topo_obj));
-	assert(obj);
-
 	id = -1;
 	switch (procInfo[i].Relationship) {
 	  case RelationNumaNode:
@@ -231,7 +228,7 @@ topo_look_windows(struct topo_topology *topology)
 	    break;
 	}
 
-	topo_setup_object(obj, type, id);
+	obj = topo_alloc_setup_object(type, id);
 	topo_debug("%s#%d mask %lx\n", topo_object_type_string(type), id, procInfo[i].ProcessorMask);
 	topo_cpuset_from_ulong(&obj->cpuset, procInfo[i].ProcessorMask);
 
@@ -333,9 +330,7 @@ topo_look_windows(struct topo_topology *topology)
 	    continue;
 	}
 
-	obj = malloc(sizeof(struct topo_obj));
-	assert(obj);
-	topo_setup_object(obj, type, id);
+	obj = topo_alloc_setup_object(type, id);
 	topo_debug("%s#%d mask %d:%lx\n", topo_object_type_string(type), id, group, mask);
 	topo_cpuset_from_ith_ulong(&obj->cpuset, group, mask);
 

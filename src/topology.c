@@ -101,9 +101,7 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
-      level[j] = malloc(sizeof(struct topo_obj));
-      assert(level[j]);
-      topo_setup_object(level[j], TOPO_OBJ_CACHE, j);
+      level[j] = topo_setup_object(TOPO_OBJ_CACHE, j);
       level[j]->memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
       level[j]->cache_depth = cachelevel+1;
 
@@ -137,9 +135,7 @@ topo_look_cpu(struct topo_topology *topology,
       if (online_cpuset && !topo_cpuset_isset(online_cpuset, oscpu))
        continue;
 
-      cpu_level[cpu] = malloc(sizeof(struct topo_obj));
-      assert(cpu_level[cpu]);
-      topo_setup_object(cpu_level[cpu], TOPO_OBJ_PROC, oscpu);
+      cpu_level[cpu] = topo_alloc_setup_object(TOPO_OBJ_PROC, oscpu);
 
       topo_cpuset_cpu(&cpu_level[cpu]->cpuset, oscpu);
 

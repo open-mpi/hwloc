@@ -69,9 +69,7 @@ topo_look_osf(struct topo_topology *topology)
       continue;
     }
 
-    obj = malloc(sizeof(struct topo_obj));
-    assert(obj);
-    topo_setup_object(obj, TOPO_OBJ_NODE, radid);
+    obj = topo_alloc_setup_object(TOPO_OBJ_NODE, radid);
     obj->memory_kB = 0; /* TODO */
     obj->huge_page_free = 0;
 

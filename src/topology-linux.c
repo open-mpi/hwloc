@@ -416,9 +416,7 @@ look_sysfsnode(struct topo_topology *topology,
       } else
 	topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
 
-      node = malloc(sizeof(struct topo_obj));
-      assert(node);
-      topo_setup_object(node, TOPO_OBJ_NODE, osnode);
+      node = topo_alloc_setup_object(TOPO_OBJ_NODE, osnode);
       node->memory_kB = size;
       node->huge_page_free = hpfree;
       node->cpuset = cpuset;
@@ -540,9 +538,7 @@ look_sysfscpu(struct topo_topology *topology,
 	  assert(socket_level);
 	}
 	index = nsockets;
-	socket_level[index] = malloc(sizeof(struct topo_obj));
-	assert(socket_level[index]);
-	topo_setup_object(socket_level[index], TOPO_OBJ_SOCKET, mysocketid);
+	socket_level[index] = topo_alloc_setup_object(TOPO_OBJ_SOCKET, mysocketid);
 	socket_level[index]->cpuset = socketset;
 	topo_debug("socket %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		   index, mysocketid, TOPO_CPUSET_PRINTF_VALUE(socketset));
@@ -566,9 +562,7 @@ look_sysfscpu(struct topo_topology *topology,
 	  assert(core_level);
 	}
 	index = ncores;
-	core_level[index] = malloc(sizeof(struct topo_obj));
-	assert(core_level[index]);
-	topo_setup_object(core_level[index], TOPO_OBJ_CORE, mycoreid);
+	core_level[index] = topo_alloc_setup_object(TOPO_OBJ_CORE, mycoreid);
 	core_level[index]->cpuset = coreset;
 	topo_debug("core %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		   index, mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
@@ -586,9 +580,7 @@ look_sysfscpu(struct topo_topology *topology,
 	assert(thread_level);
       }
       index = nthreads;
-      thread_level[index] = malloc(sizeof(struct topo_obj));
-      assert(thread_level[index]);
-      topo_setup_object(thread_level[index], TOPO_OBJ_PROC, i);
+      thread_level[index] = topo_alloc_setup_object(TOPO_OBJ_PROC, i);
       thread_level[index]->cpuset = threadset;
       topo_debug("thread %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 index, TOPO_CPUSET_PRINTF_VALUE(threadset));
@@ -655,9 +647,7 @@ look_sysfscpu(struct topo_topology *topology,
 	    assert(cache_level[depth]);
 	  }
 	  index = ncaches[depth];
-	  cache_level[depth][index] = malloc(sizeof(struct topo_obj));
-	  assert(cache_level[depth][index]);
-	  topo_setup_object(cache_level[depth][index], TOPO_OBJ_CACHE, -1);
+	  cache_level[depth][index] = topo_alloc_setup_object(TOPO_OBJ_CACHE, -1);
 	  cache_level[depth][index]->memory_kB = kB;
 	  cache_level[depth][index]->cache_depth = depth+1;
 	  cache_level[depth][index]->cpuset = cacheset;

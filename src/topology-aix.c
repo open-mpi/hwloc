@@ -76,11 +76,9 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology, in
     if (!rs_getinfo(rad, R_NUMPROCS, 0))
       continue;
 
-    obj = malloc(sizeof(struct topo_obj));
-    assert(obj);
     /* It seems logical processors are numbered from 1 here, while the
      * bindprocessor functions numbers them from 0... */
-    topo_setup_object(obj, type, i - (type == TOPO_OBJ_PROC));
+    obj = topo_alloc_setup_object(type, i - (type == TOPO_OBJ_PROC));
     switch(type) {
       case TOPO_OBJ_NODE:
 	obj->memory_kB = 0; /* TODO */
