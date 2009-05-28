@@ -493,13 +493,14 @@ merge_useless_child(topo_topology_t topology, topo_obj_t *pfather, void *data)
     /* There are several children, it's useful to keep them.  */
     return;
 
+  /* TODO: have a preference order?  */
   if (topology->ignored_types[father->type] == TOPO_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Father can be ignored in favor of the child.  */
     *pfather = child;
     child->next_sibling = father->next_sibling;
     free(father);
   } else if (topology->ignored_types[child->type] == TOPO_IGNORE_TYPE_KEEP_STRUCTURE) {
-    /* Children can be ignored in favor of the father.  */
+    /* Child can be ignored in favor of the father.  */
     father->first_child = child->first_child;
     free(child);
   }
