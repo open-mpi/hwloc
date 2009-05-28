@@ -582,14 +582,17 @@ topo_discover(struct topo_topology *topology)
    * produced by topo_setup_proc_level()  */
 
 #    ifdef LINUX_SYS
+#      define HAVE_OS_SUPPORT
   topo_look_linux(topology);
 #    endif /* LINUX_SYS */
 
 #    ifdef  AIX_SYS
+#      define HAVE_OS_SUPPORT
   topo_look_aix(topology);
 #    endif /* AIX_SYS */
 
 #    ifdef  OSF_SYS
+#      define HAVE_OS_SUPPORT
   topo_look_osf(topology);
 #    endif /* OSF_SYS */
 
@@ -599,10 +602,19 @@ topo_discover(struct topo_topology *topology)
 #    ifdef HAVE_LIBKSTAT
   topo_look_kstat(topology);
 #    endif /* HAVE_LIBKSTAT */
+#    ifdef  SOLARIS_SYS
+#      define HAVE_OS_SUPPORT
+  topo_setup_proc_level(topology, NULL);
+#    endif /* SOLARIS_SYS */
 
 #    ifdef  WIN_SYS
+#      define HAVE_OS_SUPPORT
   topo_look_windows(topology);
 #    endif /* WIN_SYS */
+
+#    ifndef HAVE_OS_SUPPORT
+  topo_setup_proc_level(topology, NULL);
+#    endif /* Unsupported OS */
 
   topo_debug("%d online processors found\n", topology->nb_processors);
   assert(topology->nb_processors);
