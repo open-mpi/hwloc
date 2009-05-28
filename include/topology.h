@@ -73,23 +73,36 @@ typedef enum topo_obj_type_e topo_obj_type_t;
 
 /** Structure of a topology object */
 struct topo_obj {
+  /* physical information */
   enum topo_obj_type_e type;		/**< \brief Type of object */
-  unsigned level;			/**< \brief Vertical index in the hierarchy */
-  unsigned number;			/**< \brief Horizontal index in the whole list of similar objects */
-  unsigned index;			/**< \brief Index in fathers' children[] array */
-  unsigned arity;			/**< \brief Number of children */
-  struct topo_obj **children;		/**< \brief Children, children[0 .. arity -1] */
-  struct topo_obj *father;		/**< \brief Father, NULL if root (machine object) */
-  struct topo_obj *first_child;		/**< \brief First child */
-  struct topo_obj *last_child;		/**< \brief Last child */
-  struct topo_obj *next_sibling;	/**< \brief Next object of the same type */
-  struct topo_obj *prev_sibling;	/**< \brief Previous object of the same type */
-  void *userdata;			/**< \brief Application-given private data pointer, initialize to NULL, use it as you wish */
   signed physical_index;		/**< \brief OS-provided physical index number */
   unsigned long memory_kB;		/**< \brief Size of memory bank or caches */
   unsigned long huge_page_free;
   unsigned cache_depth;
   unsigned fake_depth;
+
+  /* global position */
+  unsigned level;			/**< \brief Vertical index in the hierarchy */
+  unsigned number;			/**< \brief Horizontal index in the whole list of similar objects */
+
+  /* father */
+  struct topo_obj *father;		/**< \brief Father, NULL if root (machine object) */
+  unsigned index;			/**< \brief Index in fathers' children[] array */
+
+  /* children */
+  unsigned arity;			/**< \brief Number of children */
+  struct topo_obj **children;		/**< \brief Children, children[0 .. arity -1] */
+  struct topo_obj *first_child;		/**< \brief First child */
+  struct topo_obj *last_child;		/**< \brief Last child */
+
+  /* siblings */
+  struct topo_obj *next_sibling;	/**< \brief Next object of the same type */
+  struct topo_obj *prev_sibling;	/**< \brief Previous object of the same type */
+
+  /* misc */
+  void *userdata;			/**< \brief Application-given private data pointer, initialize to NULL, use it as you wish */
+
+  /* cpuset */
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this object */
 };
 typedef struct topo_obj * topo_obj_t;

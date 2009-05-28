@@ -7,8 +7,6 @@
   + topo_get_obj_by_type(topology, type, index)
   + topo_get_obj_below_by_type(topology, parent, type, index)
 
-* cleanup/organize comments in the topo_obj struct
-
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
