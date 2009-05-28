@@ -1,5 +1,3 @@
-* check synthetic topo generation as well
-
 * add suffix to synthetic topo numbers to enforce the type
 
 * add a way to find the xth core below die #y so that PLPA really has no
