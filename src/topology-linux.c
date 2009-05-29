@@ -219,9 +219,8 @@ topo_parse_cpumap(const char *mappath, topo_cpuset_t *set, int fsys_root_fd)
 }
 
 static int
-topo_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_fd)
+topo_read_cpuset_mask(const char *filename, const char *type, char *info, int infomax, int fsys_root_fd)
 {
-  char filename[] = "/proc/self/cpuset";
 #define CPUSET_NAME_LEN 64
   char cpuset_name[CPUSET_NAME_LEN];
 #define CPUSET_FILENAME_LEN 64
@@ -266,6 +265,7 @@ topo_read_cpuset_mask(const char *type, char *info, int infomax, int fsys_root_f
 
 static void
 topo_admin_disable_set_from_cpuset(struct topo_topology *topology,
+				   const char *path,
 				   const char *name,
 				   topo_cpuset_t *admin_disabled_set)
 {
@@ -275,7 +275,7 @@ topo_admin_disable_set_from_cpuset(struct topo_topology *topology,
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
   int ret;
 
-  ret = topo_read_cpuset_mask(name, cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
+  ret = topo_read_cpuset_mask(path, name, cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
   if (!ret)
     return;
 
@@ -318,6 +318,7 @@ topo_admin_disable_set_from_cpuset(struct topo_topology *topology,
 
 static void
 topo_get_procfs_meminfo_info(struct topo_topology *topology,
+			     const char *path,
 			     unsigned long *mem_size_kB,
 			     unsigned long *huge_page_size_kB,
 			     unsigned long *huge_page_free)
@@ -325,7 +326,7 @@ topo_get_procfs_meminfo_info(struct topo_topology *topology,
   char string[64];
   FILE *fd;
 
-  fd = topo_fopen("/proc/meminfo", "r", topology->backend_params.sysfs.root_fd);
+  fd = topo_fopen(path, "r", topology->backend_params.sysfs.root_fd);
   if (!fd)
     return;
 
@@ -888,8 +889,8 @@ topo_look_linux(struct topo_topology *topology)
   topo_cpuset_zero(&admin_disabled_cpus_set);
   topo_cpuset_zero(&admin_disabled_mems_set);
   if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
-    topo_admin_disable_set_from_cpuset(topology, "cpus", &admin_disabled_cpus_set);
-    topo_admin_disable_set_from_cpuset(topology, "mems", &admin_disabled_mems_set);
+    topo_admin_disable_set_from_cpuset(topology, "/proc/self/cpuset", "cpus", &admin_disabled_cpus_set);
+    topo_admin_disable_set_from_cpuset(topology, "/proc/self/cpuset", "mems", &admin_disabled_mems_set);
   }
 
   /* Gather NUMA information */
@@ -909,6 +910,7 @@ topo_look_linux(struct topo_topology *topology)
 
   /* Compute the whole machine memory and huge page */
   topo_get_procfs_meminfo_info(topology,
+			       "/proc/meminfo",
 			       &topology->levels[0][0]->attr.machine.memory_kB,
 			       &topology->huge_page_size_kB,
 			       &topology->levels[0][0]->attr.machine.huge_page_free);
