@@ -661,18 +661,26 @@ look_sysfscpu(struct topo_topology *topology,
 
   /* add levels to the topology */
 
-  if (socket_level)
+  if (socket_level) {
     topo_add_level(topology, socket_level, nsockets);
+    free(socket_level);
+  }
 
-  if (core_level)
+  if (core_level) {
     topo_add_level(topology, core_level, ncores);
+    free(core_level);
+  }
 
   for(i=TOPO_CACHE_LEVEL_MAX-1; i>=0; i--)
-    if (cache_level[i])
+    if (cache_level[i]) {
       topo_add_level(topology, cache_level[i], ncaches[i]);
+      free(cache_level[i]);
+    }
 
-  if (thread_level)
+  if (thread_level) {
     topo_add_level(topology, thread_level, nthreads);
+    free(thread_level);
+  }
 }
 
 

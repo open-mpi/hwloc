@@ -92,27 +92,23 @@ topo_setup_cache_level(int cachelevel, int procid_max,
 		       unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
 		       struct topo_topology *topology)
 {
-  struct topo_obj **level;
+  struct topo_obj *obj;
   int j;
 
   topo_debug("%d L%d caches\n", numcaches[cachelevel], cachelevel+1);
-  level = calloc((numcaches[cachelevel]+1), sizeof(*level));
-  assert(level);
 
   for (j = 0; j < numcaches[cachelevel]; j++)
     {
-      level[j] = topo_setup_object(TOPO_OBJ_CACHE, j);
-      level[j]->attr.cache.memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
-      level[j]->attr.cache.depth = cachelevel+1;
+      obj = topo_alloc_setup_object(TOPO_OBJ_CACHE, j);
+      obj->attr.cache.memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
+      obj->attr.cache.depth = cachelevel+1;
 
-      topo_object_cpuset_from_array(level[j], j, &cacheids[cachelevel*TOPO_NBMAXCPUS], procid_max);
+      topo_object_cpuset_from_array(obj, j, &cacheids[cachelevel*TOPO_NBMAXCPUS], procid_max);
 
       topo_debug("L%d cache %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(level[j]->cpuset));
+		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
     }
   topo_debug("\n");
-
-  topo_add_level(topology, level, numcaches[cachelevel]);
 }
 #endif /* LINUX_SYS */
 
@@ -123,11 +119,8 @@ void
 topo_setup_proc_level(struct topo_topology *topology,
 		      topo_cpuset_t *online_cpuset)
 {
-  struct topo_obj **cpu_level;
+  struct topo_obj *obj;
   unsigned oscpu,cpu;
-
-  cpu_level = calloc(topology->nb_processors+1, sizeof(*cpu_level));
-  assert(cpu_level);
 
   topo_debug("\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<topology->nb_processors; oscpu++)
@@ -135,16 +128,16 @@ topo_setup_proc_level(struct topo_topology *topology,
       if (online_cpuset && !topo_cpuset_isset(online_cpuset, oscpu))
        continue;
 
-      cpu_level[cpu] = topo_alloc_setup_object(TOPO_OBJ_PROC, oscpu);
+      obj = topo_alloc_setup_object(TOPO_OBJ_PROC, oscpu);
 
-      topo_cpuset_cpu(&cpu_level[cpu]->cpuset, oscpu);
+      topo_cpuset_cpu(&obj->cpuset, oscpu);
 
       topo_debug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(cpu_level[cpu]->cpuset));
+		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
+      topo_add_object(topology, obj);
+
       cpu++;
     }
-
-  topo_add_level(topology, cpu_level, topology->nb_processors);
 }
 
 /* Just for debugging.  */
