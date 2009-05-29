@@ -340,12 +340,13 @@ topo_synthetic_load (struct topo_topology *topology)
 
     topology->nb_nodes = topology->level_nbobjects[node_level];
 
-    for(i=0 ; i<topology->nb_nodes ; i++)
+    for(i=0 ; i<topology->nb_nodes ; i++) {
       topology->levels[node_level][i]->attr.node.memory_kB = 1024*1024;
 
-    for(obj = topology->levels[node_level][i]; obj; obj = obj->father)
-      if (obj->type == TOPO_OBJ_MACHINE || obj->type == TOPO_OBJ_SYSTEM)
-	obj->attr.machine.memory_kB += topology->levels[node_level][i]->attr.node.memory_kB;
+      for(obj = topology->levels[node_level][i]; obj; obj = obj->father)
+	if (obj->type == TOPO_OBJ_MACHINE || obj->type == TOPO_OBJ_SYSTEM)
+	  obj->attr.machine.memory_kB += topology->levels[node_level][i]->attr.node.memory_kB;
+    }
 
   } else {
     topology->nb_nodes = 1;
