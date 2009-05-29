@@ -1,0 +1,41 @@
+Machine(15GB)
+  Socket#0
+    L2Cache(4096KB)
+      L1Cache(32KB)
+        Core#0
+          P#0
+      L1Cache(32KB)
+        Core#1
+          P#4
+    L2Cache(4096KB)
+      L1Cache(32KB)
+        Core#2
+          P#2
+      L1Cache(32KB)
+        Core#3
+          P#6
+  Socket#1
+    L2Cache(4096KB)
+      L1Cache(32KB)
+        Core#0
+          P#1
+      L1Cache(32KB)
+        Core#1
+          P#5
+    L2Cache(4096KB)
+      L1Cache(32KB)
+        Core#2
+          P#3
+      L1Cache(32KB)
+        Core#3
+          P#7
+Topology is fake
+DMI board vendor: Dell Inc.
+DMI board name: 0NR282
+Huge page size: 2048kB
+depth 0:	type #0 (Machine)
+depth 0:	type #1 (NUMANode)
+ depth 1:	type #2 (Socket)
+multiple:	type #3 (Cache)
+    depth 4:	type #4 (Core)
+     depth 5:	type #5 (Proc)

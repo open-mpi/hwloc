@@ -10,6 +10,7 @@ sysfs_tarballs = \
 		4ppc-1d4c.tar.gz \
 		8amd64-4nd2c.tar.gz  \
 		8em64t-1nd4c2t.tar.gz \
+		8em64t-2d2$$2c.tar.gz \
 		8ia64-2nd2d2d.tar.gz \
 		8ia64-4d2c.tar.gz \
 		16amd64-8nd2c.tar.gz \
@@ -31,6 +32,7 @@ sysfs_outputs = \
 		4ppc-1d4c.tar.gz.output \
 		8amd64-4nd2c.tar.gz.output  \
 		8em64t-1nd4c2t.tar.gz.output \
+		8em64t-2d2$$2c.tar.gz.output \
 		8ia64-2nd2d2d.tar.gz.output \
 		8ia64-4d2c.tar.gz.output \
 		16amd64-8nd2c.tar.gz.output \
