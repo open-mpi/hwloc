@@ -347,6 +347,7 @@ topo_get_procfs_meminfo_info(struct topo_topology *topology,
 
 static void
 topo_sysfs_node_meminfo_info(struct topo_topology *topology,
+			     const char *syspath,
 			     int node,
 			     unsigned long *mem_size_kB,
 			     unsigned long *huge_page_free)
@@ -355,7 +356,7 @@ topo_sysfs_node_meminfo_info(struct topo_topology *topology,
   char string[64];
   FILE *fd;
 
-  sprintf(path, "/sys/devices/system/node/node%d/meminfo", node);
+  sprintf(path, "%s/node%d/meminfo", syspath, node);
   fd = topo_fopen(path, "r", topology->backend_params.sysfs.root_fd);
   if (!fd)
     return;
@@ -374,6 +375,7 @@ topo_sysfs_node_meminfo_info(struct topo_topology *topology,
 
 static void
 look_sysfsnode(struct topo_topology *topology,
+	       const char *path,
 	       topo_cpuset_t *admin_disabled_mems_set)
 {
   unsigned osnode;
@@ -382,7 +384,7 @@ look_sysfsnode(struct topo_topology *topology,
   struct dirent *dirent;
   topo_obj_t node;
 
-  dir = topo_opendir("/sys/devices/system/node", topology->backend_params.sysfs.root_fd);
+  dir = topo_opendir(path, topology->backend_params.sysfs.root_fd);
   if (dir)
     {
       while ((dirent = readdir(dir)) != NULL)
@@ -407,14 +409,14 @@ look_sysfsnode(struct topo_topology *topology,
       unsigned long size = -1;
       unsigned long hpfree = -1;
 
-      sprintf(nodepath, "/sys/devices/system/node/node%u/cpumap", osnode);
+      sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
       if (topo_parse_cpumap(nodepath, &cpuset, topology->backend_params.sysfs.root_fd) < 0)
 	continue;
 
       if (topo_cpuset_isset(admin_disabled_mems_set, osnode)) {
 	size = 0; hpfree = 0;
       } else
-	topo_sysfs_node_meminfo_info(topology, osnode, &size, &hpfree);
+	topo_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
 
       node = topo_alloc_setup_object(TOPO_OBJ_NODE, osnode);
       node->attr.node.memory_kB = size;
@@ -429,7 +431,7 @@ look_sysfsnode(struct topo_topology *topology,
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
-look_sysfscpu(struct topo_topology *topology,
+look_sysfscpu(struct topo_topology *topology, const char *path,
 	      topo_cpuset_t *admin_disabled_cpus_set)
 {
   struct topo_obj **socket_level = NULL;
@@ -450,7 +452,7 @@ look_sysfscpu(struct topo_topology *topology,
 
   /* fill the cpuset of interesting cpus */
   topo_cpuset_zero(&cpuset);
-  dir = topo_opendir("/sys/devices/system/cpu", topology->backend_params.sysfs.root_fd);
+  dir = topo_opendir(path, topology->backend_params.sysfs.root_fd);
   if (dir) {
     struct dirent *dirent;
     while ((dirent = readdir(dir)) != NULL) {
@@ -470,15 +472,15 @@ look_sysfscpu(struct topo_topology *topology,
       }
 
       /* check whether the kernel exports topology information for this cpu */
-      sprintf(string, "/sys/devices/system/cpu/cpu%ld/topology", cpu);
+      sprintf(string, "%s/cpu%ld/topology", path, cpu);
       if (topo_access(string, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT) {
-	topo_debug("os proc %ld has no accessible /sys/devices/system/cpu/cpu%ld/topology\n",
-		   cpu, cpu);
+	topo_debug("os proc %ld has no accessible %s/cpu%ld/topology\n",
+		   cpu, path, cpu);
 	continue;
       }
 
       /* check whether this processor is offline */
-      sprintf(string, "/sys/devices/system/cpu/cpu%ld/online", cpu);
+      sprintf(string, "%s/cpu%ld/online", path, cpu);
       fd = topo_fopen(string, "r", topology->backend_params.sysfs.root_fd);
       if (fd) {
 	if (fgets(online, sizeof(online), fd)) {
@@ -497,7 +499,7 @@ look_sysfscpu(struct topo_topology *topology,
       if (topology->flags & TOPO_FLAGS_IGNORE_THREADS) {
 	/* check whether it is a non-first thread in the core */
 	topo_cpuset_t coreset;
-	sprintf(string, "/sys/devices/system/cpu/cpu%ld/topology/thread_siblings", cpu);
+	sprintf(string, "%s/cpu%ld/topology/thread_siblings", path, cpu);
 	topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
 	if (topo_cpuset_first(&coreset) != cpu) {
 	  topo_debug("os proc %ld is not first thread in coreset %" TOPO_PRIxCPUSET "\n",
@@ -523,10 +525,10 @@ look_sysfscpu(struct topo_topology *topology,
 
       /* look at the socket */
       mysocketid = 0; /* shut-up the compiler */
-      sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/physical_package_id", i);
+      sprintf(string, "%s/cpu%d/topology/physical_package_id", path, i);
       topo_parse_sysfs_unsigned(string, &mysocketid, topology->backend_params.sysfs.root_fd);
 
-      sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_siblings", i);
+      sprintf(string, "%s/cpu%d/topology/core_siblings", path, i);
       topo_parse_cpumap(string, &socketset, topology->backend_params.sysfs.root_fd);
       topo_cpuset_clearset(&socketset, admin_disabled_cpus_set);
       assert(topo_cpuset_weight(&socketset) >= 1);
@@ -547,10 +549,10 @@ look_sysfscpu(struct topo_topology *topology,
 
       /* look at the core */
       mycoreid = 0; /* shut-up the compiler */
-      sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/core_id", i);
+      sprintf(string, "%s/cpu%d/topology/core_id", path, i);
       topo_parse_sysfs_unsigned(string, &mycoreid, topology->backend_params.sysfs.root_fd);
 
-      sprintf(string, "/sys/devices/system/cpu/cpu%d/topology/thread_siblings", i);
+      sprintf(string, "%s/cpu%d/topology/thread_siblings", path, i);
       topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
       topo_cpuset_clearset(&coreset, admin_disabled_cpus_set);
       assert(topo_cpuset_weight(&coreset) >= 1);
@@ -597,7 +599,7 @@ look_sysfscpu(struct topo_topology *topology,
 	FILE * fd;
 
 	/* get the cache level depth */
-	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/level", i, j);
+	sprintf(mappath, "%s/cpu%d/cache/index%d/level", path, i, j);
 	fd = topo_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
 	if (fd) {
 	  if (fgets(string,sizeof(string), fd))
@@ -609,7 +611,7 @@ look_sysfscpu(struct topo_topology *topology,
 	  continue;
 
 	/* ignore Instruction caches */
-	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/type", i, j);
+	sprintf(mappath, "%s/cpu%d/cache/index%d/type", path, i, j);
 	fd = topo_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
 	if (fd) {
 	  if (fgets(string, sizeof(string), fd)) {
@@ -624,7 +626,7 @@ look_sysfscpu(struct topo_topology *topology,
 	  continue;
 
 	/* get the cache size */
-	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/size", i, j);
+	sprintf(mappath, "%s/cpu%d/cache/index%d/size", path, i, j);
 	fd = topo_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
 	if (fd) {
 	  if (fgets(string,sizeof(string), fd))
@@ -633,7 +635,7 @@ look_sysfscpu(struct topo_topology *topology,
 	}
 
 	/* TODO we could just use the mask instead of building an array of cache levels */
-	sprintf(mappath, "/sys/devices/system/cpu/cpu%d/cache/index%d/shared_cpu_map", i, j);
+	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	topo_parse_cpumap(mappath, &cacheset, topology->backend_params.sysfs.root_fd);
 	topo_cpuset_clearset(&cacheset, admin_disabled_cpus_set);
 	if (topo_cpuset_weight(&cacheset) < 1)
@@ -689,7 +691,7 @@ look_sysfscpu(struct topo_topology *topology,
 #      define PHYSID "physical id"
 #      define COREID "core id"
 static void
-look_cpuinfo(struct topo_topology *topology,
+look_cpuinfo(struct topo_topology *topology, const char *path,
 	     topo_cpuset_t *admin_disabled_cpus_set)
 {
   FILE *fd;
@@ -714,7 +716,7 @@ look_cpuinfo(struct topo_topology *topology,
 
   topo_cpuset_zero(&online_cpuset);
 
-  if (!(fd=topo_fopen("/proc/cpuinfo","r", topology->backend_params.sysfs.root_fd)))
+  if (!(fd=topo_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
     {
       fprintf(stderr,"could not open /proc/cpuinfo\n");
       return;
@@ -891,7 +893,7 @@ topo_look_linux(struct topo_topology *topology)
   }
 
   /* Gather NUMA information */
-  look_sysfsnode(topology, &admin_disabled_mems_set);
+  look_sysfsnode(topology, "/sys/devices/system/node", &admin_disabled_mems_set);
 
   /* Gather the list of cpus now */
   if (getenv("TOPO_LINUX_USE_CPUINFO")
@@ -900,9 +902,9 @@ topo_look_linux(struct topo_topology *topology)
       || topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
       || topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
       /* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
-    look_cpuinfo(topology, &admin_disabled_cpus_set);
+    look_cpuinfo(topology, "/proc/cpuinfo", &admin_disabled_cpus_set);
   } else {
-    look_sysfscpu(topology, &admin_disabled_cpus_set);
+    look_sysfscpu(topology, "/sys/devices/system/cpu", &admin_disabled_cpus_set);
   }
 
   /* Compute the whole machine memory and huge page */
