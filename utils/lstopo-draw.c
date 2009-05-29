@@ -182,8 +182,8 @@ core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 
   RECURSE(level, &null_draw_methods, 0);
 
-  if (totwidth < 6*FONT_SIZE)
-    totwidth = 6*FONT_SIZE;
+  if (totwidth < 5*FONT_SIZE)
+    totwidth = 5*FONT_SIZE;
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
   if (maxheight)
@@ -237,8 +237,8 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   RECURSE(level, &null_draw_methods, UNIT);
 
   /* Make sure we have room for text */
-  if (totwidth < 10*FONT_SIZE)
-    totwidth = 10*FONT_SIZE;
+  if (totwidth < 11*FONT_SIZE)
+    totwidth = 11*FONT_SIZE;
 
   /* Add vertical separator on the right */
   *retwidth = totwidth + UNIT;
@@ -270,8 +270,8 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
 
   RECURSE(level, &null_draw_methods, UNIT);
 
-  if (totwidth < 10*FONT_SIZE)
-    totwidth = 10*FONT_SIZE;
+  if (totwidth < 11*FONT_SIZE)
+    totwidth = 11*FONT_SIZE;
 
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
