@@ -69,6 +69,7 @@ enum topo_obj_type_e {
   TOPO_OBJ_FAKE,	/**< \brief Fake object that may be needed under special circumstances (like arbitrary OS aggregation)  */
 };
 #define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_FAKE+1)
+#define TOPO_OBJ_TYPE_INVALID -1
 typedef enum topo_obj_type_e topo_obj_type_t;
 
 /** Structure of a topology object */

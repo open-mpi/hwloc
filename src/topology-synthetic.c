@@ -51,6 +51,33 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
   assert(topology->backend_type == TOPO_BACKEND_NONE);
 
   for (pos = description, count = 0; *pos; pos = next_pos) {
+#define TOPO_OBJ_TYPE_UNKNOWN -1
+    unsigned type = TOPO_OBJ_TYPE_UNKNOWN;
+
+    while (*pos == ' ')
+      pos++;
+
+    if (*pos < '0' || *pos > '9') {
+      if (!strncmp(pos, "machines", 1))
+	type = TOPO_OBJ_MACHINE;
+      else if (!strncmp(pos, "nodes", 1))
+	type = TOPO_OBJ_NODE;
+      else if (!strncmp(pos, "sockets", 1))
+	type = TOPO_OBJ_SOCKET;
+      else if (!strncmp(pos, "cores", 2))
+	type = TOPO_OBJ_CORE;
+      else if (!strncmp(pos, "caches", 2))
+	type = TOPO_OBJ_CACHE;
+      else if (!strncmp(pos, "procs", 1))
+	type = TOPO_OBJ_PROC;
+      else if (!strncmp(pos, "fakes", 1))
+	type = TOPO_OBJ_FAKE;
+
+      pos = strchr(pos, ':');
+      if (!pos)
+	return -1;
+      pos++;
+    }
     item = strtoul(pos, (char **)&next_pos, 0);
     if (next_pos == pos)
       return -1;
@@ -58,7 +85,9 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     assert(count + 1 < TOPO_SYNTHETIC_MAX_DEPTH);
     assert(item <= UINT_MAX);
 
-    topology->backend_params.synthetic.arity[count++] = (unsigned)item;
+    topology->backend_params.synthetic.arity[count] = (unsigned)item;
+    topology->backend_params.synthetic.type[count] = type;
+    count++;
   }
 
   if (count <= 0)
@@ -68,18 +97,34 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
 
   for(i=0; i<count; i++) {
     enum topo_obj_type_e type;
-    switch (count-1-i) {
-    case 0: type = TOPO_OBJ_PROC; break;
-    case 1: type = TOPO_OBJ_CORE; break;
-    case 2: type = TOPO_OBJ_CACHE; break;
-    case 3: type = TOPO_OBJ_SOCKET; break;
-    case 4: type = TOPO_OBJ_NODE; break;
-    default: type = TOPO_OBJ_FAKE; break;
+
+    type = topology->backend_params.synthetic.type[i];
+
+    if (type == TOPO_OBJ_TYPE_UNKNOWN) {
+      switch (count-1-i) {
+      case 0: type = TOPO_OBJ_PROC; break;
+      case 1: type = TOPO_OBJ_CORE; break;
+      case 2: type = TOPO_OBJ_CACHE; break;
+      case 3: type = TOPO_OBJ_SOCKET; break;
+      case 4: type = TOPO_OBJ_NODE; break;
+      default: type = TOPO_OBJ_FAKE; break;
+      }
+      topology->backend_params.synthetic.type[i] = type;
     }
-    topology->backend_params.synthetic.type[i] = type;
-    topology->type_depth[type] = i+1;
+
+    if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN)
+      topology->type_depth[type] = i+1;
+    else
+      topology->type_depth[type] = TOPO_TYPE_DEPTH_MULTIPLE;
   }
 
+  /* last level must be PROC */
+  if (topology->backend_params.synthetic.type[count-1] != TOPO_OBJ_PROC)
+    return -1;
+
+  /* their cannot be multiple NODE level (or nbnodes must be fixed) */
+  if (topology->type_depth[TOPO_OBJ_NODE] == TOPO_TYPE_DEPTH_MULTIPLE)
+    return -1;
 
   topology->backend_type = TOPO_BACKEND_SYNTHETIC;
   topology->backend_params.synthetic.arity[count] = 0;
@@ -266,10 +311,11 @@ topo_synthetic_load (struct topo_topology *topology)
     topology->nb_nodes = 1;
   }
 
-  cache_level = topology->type_depth[TOPO_OBJ_CACHE];
-  assert(cache_level != TOPO_TYPE_DEPTH_MULTIPLE);
-  if (cache_level != TOPO_TYPE_DEPTH_UNKNOWN) {
+  for(cache_level=topology->nb_levels-1; cache_level>=0; cache_level--) {
     int i;
+
+    if (topology->levels[cache_level][0]->type != TOPO_OBJ_CACHE)
+      continue;
 
     for(i=0 ; i<topology->level_nbobjects[cache_level] ; i++) {
       topology->levels[cache_level][i]->attr.cache.memory_kB = 4*1024;
