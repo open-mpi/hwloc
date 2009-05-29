@@ -57,6 +57,9 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     while (*pos == ' ')
       pos++;
 
+    if (!*pos)
+      break;
+
     if (*pos < '0' || *pos > '9') {
       if (!strncmp(pos, "machines", 1))
 	type = TOPO_OBJ_MACHINE;
@@ -73,14 +76,18 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
       else if (!strncmp(pos, "fakes", 1))
 	type = TOPO_OBJ_FAKE;
 
-      pos = strchr(pos, ':');
-      if (!pos)
+      next_pos = strchr(pos, ':');
+      if (!next_pos) {
+	fprintf(stderr,"synthetic string doesn't have a `:' after object type at '%s'\n", pos);
 	return -1;
-      pos++;
+      }
+      pos = next_pos + 1;
     }
     item = strtoul(pos, (char **)&next_pos, 0);
-    if (next_pos == pos)
+    if (next_pos == pos) {
+      fprintf(stderr,"synthetic string doesn't have a number of objects at '%s'\n", pos);
       return -1;
+    }
 
     assert(count + 1 < TOPO_SYNTHETIC_MAX_DEPTH);
     assert(item <= UINT_MAX);
@@ -90,8 +97,10 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     count++;
   }
 
-  if (count <= 0)
+  if (count <= 0) {
+    fprintf(stderr,"synthetic string doesn't contain any object\n");
     return -1;
+  }
 
   topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
 
@@ -107,6 +116,7 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
       case 2: type = TOPO_OBJ_CACHE; break;
       case 3: type = TOPO_OBJ_SOCKET; break;
       case 4: type = TOPO_OBJ_NODE; break;
+      case 5: type = TOPO_OBJ_MACHINE; break;
       default: type = TOPO_OBJ_FAKE; break;
       }
       topology->backend_params.synthetic.type[i] = type;
@@ -119,12 +129,22 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
   }
 
   /* last level must be PROC */
-  if (topology->backend_params.synthetic.type[count-1] != TOPO_OBJ_PROC)
+  if (topology->backend_params.synthetic.type[count-1] != TOPO_OBJ_PROC) {
+    fprintf(stderr,"synthetic string needs to have a number of processors\n");
     return -1;
+  }
 
   /* their cannot be multiple NODE level (or nbnodes must be fixed) */
-  if (topology->type_depth[TOPO_OBJ_NODE] == TOPO_TYPE_DEPTH_MULTIPLE)
+  if (topology->type_depth[TOPO_OBJ_NODE] == TOPO_TYPE_DEPTH_MULTIPLE) {
+    fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
     return -1;
+  }
+
+  /* their cannot be multiple MACHINE level */
+  if (topology->type_depth[TOPO_OBJ_MACHINE] == TOPO_TYPE_DEPTH_MULTIPLE) {
+    fprintf(stderr,"synthetic string can not have several machine levels\n");
+    return -1;
+  }
 
   topology->backend_type = TOPO_BACKEND_SYNTHETIC;
   topology->backend_params.synthetic.arity[count] = 0;
@@ -165,6 +185,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
     case TOPO_OBJ_CACHE:
     case TOPO_OBJ_SOCKET:
     case TOPO_OBJ_NODE:
+    case TOPO_OBJ_MACHINE:
       physical_index = first_number + i;
       break;
     default:
@@ -285,7 +306,7 @@ void
 topo_synthetic_load (struct topo_topology *topology)
 {
   struct topo_obj *root;
-  int node_level, cache_level, fake_level;
+  int node_level, cache_level, fake_level, machine_level;
   int cache_depth, fake_depth;
 
   topo__synthetic_allocate_topology_levels(topology, topology->backend_params.synthetic.arity);
@@ -298,15 +319,33 @@ topo_synthetic_load (struct topo_topology *topology)
   topology->nb_processors = topology->level_nbobjects[topology->nb_levels-1];
 
   node_level = topology->type_depth[TOPO_OBJ_NODE];
+
+  machine_level = topology->type_depth[TOPO_OBJ_MACHINE];
+  if (machine_level != TOPO_TYPE_DEPTH_UNKNOWN) {
+    int i;
+
+    for(i=0 ; i<topology->level_nbobjects[machine_level] ; i++) {
+      topology->levels[machine_level][i]->attr.machine.memory_kB =
+	node_level != TOPO_TYPE_DEPTH_UNKNOWN ? 0 : 1024*1024;
+      topology->levels[0][0]->attr.system.memory_kB +=
+        topology->levels[machine_level][i]->attr.machine.memory_kB;
+    }
+  }
+
   assert(node_level != TOPO_TYPE_DEPTH_MULTIPLE);
   if (node_level != TOPO_TYPE_DEPTH_UNKNOWN) {
     /* Assume this level is the node level.  */
     int i;
+    topo_obj_t obj;
 
     topology->nb_nodes = topology->level_nbobjects[node_level];
 
     for(i=0 ; i<topology->nb_nodes ; i++)
       topology->levels[node_level][i]->attr.node.memory_kB = 1024*1024;
+
+    for(obj = topology->levels[node_level][i]; obj; obj = obj->father)
+      if (obj->type == TOPO_OBJ_MACHINE || obj->type == TOPO_OBJ_SYSTEM)
+	obj->attr.machine.memory_kB += topology->levels[node_level][i]->attr.node.memory_kB;
 
   } else {
     topology->nb_nodes = 1;
