@@ -208,6 +208,8 @@ topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
   const unsigned *level_breadth;
   unsigned level, total_level_breadth;
 
+  topology->type_depth[TOPO_OBJ_MACHINE] = 0;
+
   for (level = 1, level_breadth = breadths, total_level_breadth = 1;
        *level_breadth > 0;
        level++, level_breadth++) {
