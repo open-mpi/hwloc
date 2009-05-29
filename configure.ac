@@ -196,6 +196,8 @@ AC_CHECK_FUNCS([ffsl], [
   AC_DEFINE([TOPO_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
 
+AC_FUNC_ALLOCA
+
 AC_CONFIG_HEADER([include/config.h])
 
 AC_CONFIG_FILES([Makefile
