@@ -908,12 +908,12 @@ topo_look_linux(struct topo_topology *topology)
     look_sysfscpu(topology, "/sys/devices/system/cpu", &admin_disabled_cpus_set);
   }
 
-  /* Compute the whole machine memory and huge page */
+  /* Compute the whole system memory and huge page */
   topo_get_procfs_meminfo_info(topology,
 			       "/proc/meminfo",
-			       &topology->levels[0][0]->attr.machine.memory_kB,
+			       &topology->levels[0][0]->attr.system.memory_kB,
 			       &topology->huge_page_size_kB,
-			       &topology->levels[0][0]->attr.machine.huge_page_free);
+			       &topology->levels[0][0]->attr.system.huge_page_free);
 			       /* FIXME: gather page_size_kB as well? MaMI needs it */
 
   /* Gather DMI info */

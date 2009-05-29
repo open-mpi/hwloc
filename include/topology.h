@@ -59,7 +59,8 @@ struct topo_topology_info {
 
 /** \brief Type of topology object.  Do not rely on any relative ordering of the values.  */
 enum topo_obj_type_e {
-  TOPO_OBJ_MACHINE,	/**< \brief Whole machine */
+  TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines) */
+  TOPO_OBJ_MACHINE,	/**< \brief Machine */
   TOPO_OBJ_NODE,	/**< \brief NUMA node */
   TOPO_OBJ_SOCKET,	/**< \brief Socket, physical package, or chip */
   TOPO_OBJ_CACHE,	/**< \brief Cache */
@@ -88,6 +89,7 @@ struct topo_obj {
       unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
     } node;
     struct topo_memory_attr_u machine;	/**< \brief Machine-specific attributes */
+    struct topo_memory_attr_u system;	/**< \brief System-specific attributes */
     struct topo_fake_attr_u {		/**< \brief Fake-specific attributes */
       unsigned depth;			  /**< \brief Depth of fake object */
     } fake;
@@ -98,7 +100,7 @@ struct topo_obj {
   unsigned number;			/**< \brief Horizontal index in the whole list of similar objects */
 
   /* father */
-  struct topo_obj *father;		/**< \brief Father, NULL if root (machine object) */
+  struct topo_obj *father;		/**< \brief Father, NULL if root (system object) */
   unsigned index;			/**< \brief Index in fathers' children[] array */
 
   /* children */
@@ -173,8 +175,8 @@ extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth)
 /** \brief Returns the topology object at index _index_ from depth _depth_ */
 extern topo_obj_t topo_get_obj (topo_topology_t topology, unsigned depth, unsigned index);
 
-/** \brief Returns the top-object of the topology-tree. Its type is TOPO_OBJ_MACHINE. */
-static inline topo_obj_t topo_get_machine_obj (topo_topology_t topology)
+/** \brief Returns the top-object of the topology-tree. Its type is TOPO_OBJ_SYSTEM. */
+static inline topo_obj_t topo_get_system_obj (topo_topology_t topology)
 {
   return topo_get_obj(topology, 0, 0);
 }

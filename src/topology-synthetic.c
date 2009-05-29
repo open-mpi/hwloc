@@ -93,7 +93,7 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
   if (count <= 0)
     return -1;
 
-  topology->type_depth[TOPO_OBJ_MACHINE] = 0;
+  topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
 
   for(i=0; i<count; i++) {
     enum topo_obj_type_e type;

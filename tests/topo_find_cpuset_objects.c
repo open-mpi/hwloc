@@ -68,8 +68,8 @@ int main()
   topo_topology_load(topology);
   topo_topology_get_info(topology, &topoinfo);
 
-  /* just get the machine object */
-  obj = topo_get_machine_obj(topology);
+  /* just get the system object */
+  obj = topo_get_system_obj(topology);
   ret = topo_find_cpuset_objs(topology, &obj->cpuset, objs, 1);
   assert(ret == 1);
   assert(objs[0] == obj);

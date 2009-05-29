@@ -1,4 +1,4 @@
-Machine(0KB)
+System(0KB)
   Socket#0
     L3Cache(4096KB)
         L2Cache(1024KB)
@@ -40,9 +40,10 @@ Machine(0KB)
           Core#1
             P#7
 Topology is fake
-depth 0:	type #0 (Machine)
-depth 0:	type #1 (NUMANode)
- depth 1:	type #2 (Socket)
-multiple:	type #3 (Cache)
-     depth 5:	type #4 (Core)
-      depth 6:	type #5 (Proc)
+depth 0:	type #0 (System)
+depth 0:	type #1 (Machine)
+depth 0:	type #2 (NUMANode)
+ depth 1:	type #3 (Socket)
+multiple:	type #4 (Cache)
+     depth 5:	type #5 (Core)
+      depth 6:	type #6 (Proc)

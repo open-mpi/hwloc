@@ -4,7 +4,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: topology
-Description: Machine topology detection library
+Description: System topology detection library
 Version: @VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -ltopology

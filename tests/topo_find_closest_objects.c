@@ -44,7 +44,7 @@
  * - get the last object of the last level
  * - get all closest objects
  * - get the common ancestor of last level and its less close object.
- * - check that the ancestor is the machine level
+ * - check that the ancestor is the system level
  */
 
 int
@@ -94,8 +94,8 @@ main (int argc, char *argv[])
   topo_obj_t ancestor = topo_find_common_ancestor_obj(last, closest[found-1]);
   assert(topo_obj_is_in_subtree(last, ancestor));
   assert(topo_obj_is_in_subtree(closest[found-1], ancestor));
-  assert(ancestor == topo_get_machine_obj(topology));
-  printf("ancestor type %u depth %u number %u is machine level\n",
+  assert(ancestor == topo_get_system_obj(topology));
+  printf("ancestor type %u depth %u number %u is system level\n",
 	 ancestor->type, ancestor->level, ancestor->number);
 
   free(closest);

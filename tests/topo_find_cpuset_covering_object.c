@@ -82,8 +82,8 @@ int main()
 
   topo_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING, &set);
   obj = topo_find_cpuset_covering_obj(topology, &set);
-  assert(obj == topo_get_machine_obj(topology));
-  fprintf(stderr, "found machine as covering object of first+last cpus cpuset %s\n",
+  assert(obj == topo_get_system_obj(topology));
+  fprintf(stderr, "found system as covering object of first+last cpus cpuset %s\n",
 	  GIVEN_LARGESPLIT_CPUSET_STRING);
 
   topo_cpuset_from_string(GIVEN_TOOLARGE_CPUSET_STRING, &set);

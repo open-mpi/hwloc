@@ -1,10 +1,11 @@
-Machine(0KB)
+System(0KB)
   P#0
   P#1
 Topology is fake
-depth 0:	type #0 (Machine)
-depth 0:	type #1 (NUMANode)
-depth 0:	type #2 (Socket)
-absent:		type #3 (Cache)
-depth 0:	type #4 (Core)
- depth 1:	type #5 (Proc)
+depth 0:	type #0 (System)
+depth 0:	type #1 (Machine)
+depth 0:	type #2 (NUMANode)
+depth 0:	type #3 (Socket)
+absent:		type #4 (Cache)
+depth 0:	type #5 (Core)
+ depth 1:	type #6 (Proc)

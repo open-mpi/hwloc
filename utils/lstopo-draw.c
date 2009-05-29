@@ -67,6 +67,10 @@
 #define MACHINE_G_COLOR 0xff
 #define MACHINE_B_COLOR 0xff
 
+#define SYSTEM_R_COLOR 0xff
+#define SYSTEM_G_COLOR 0xff
+#define SYSTEM_B_COLOR 0xff
+
 #define FAKE_R_COLOR 0xff
 #define FAKE_G_COLOR 0xff
 #define FAKE_B_COLOR 0xff
@@ -284,6 +288,32 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
 }
 
 static void
+system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+{
+  unsigned myheight = UNIT + FONT_SIZE + UNIT;
+  unsigned totwidth = UNIT, maxheight = 0;
+  char text[64];
+
+  RECURSE(level, &null_draw_methods, UNIT);
+
+  if (totwidth < 10*FONT_SIZE)
+    totwidth = 10*FONT_SIZE;
+
+  *retwidth = totwidth + UNIT;
+  *retheight = myheight + maxheight;
+  if (maxheight)
+    *retheight += UNIT;
+
+  methods->box(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR, depth, x, *retwidth, y, *retheight);
+
+  topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+  methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
+
+  totwidth = UNIT;
+  RECURSE(level, methods, UNIT);
+}
+
+static void
 fake_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;
@@ -313,7 +343,7 @@ fig(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, vo
   unsigned totwidth = 0, maxheight = 0;
   topo_obj_type_t type = level->type;
 
-  machine_draw(topology, methods, level, type, output, depth, x, &totwidth, y, &maxheight);
+  system_draw(topology, methods, level, type, output, depth, x, &totwidth, y, &maxheight);
 }
 
 /*
@@ -323,6 +353,7 @@ static foo_draw
 get_type_fun(topo_obj_type_t type)
 {
   switch (type) {
+    case TOPO_OBJ_SYSTEM: return system_draw;
     case TOPO_OBJ_MACHINE: return machine_draw;
     case TOPO_OBJ_NODE: return node_draw;
     case TOPO_OBJ_SOCKET: return socket_draw;
@@ -365,7 +396,7 @@ void *
 output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(topology, &getmax_draw_methods, topo_get_machine_obj(topology), &coords, 100, 0, 0);
+  fig(topology, &getmax_draw_methods, topo_get_system_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR);
   methods->declare_color(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR);
@@ -374,6 +405,7 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
   methods->declare_color(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR);
   methods->declare_color(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR);
   methods->declare_color(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR);
+  methods->declare_color(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR);
   methods->declare_color(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR);
   return output;
 }
@@ -381,5 +413,5 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
 void
 output_draw(struct draw_methods *methods, topo_topology_t topology, void *output)
 {
-	fig(topology, methods, topo_get_machine_obj(topology), output, 100, 0, 0);
+	fig(topology, methods, topo_get_system_obj(topology), output, 100, 0, 0);
 }

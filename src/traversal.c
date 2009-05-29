@@ -183,6 +183,7 @@ topo_obj_type_string (enum topo_obj_type_e l)
 {
   switch (l)
     {
+    case TOPO_OBJ_SYSTEM: return "System";
     case TOPO_OBJ_MACHINE: return "Machine";
     case TOPO_OBJ_FAKE: return "Fake";
     case TOPO_OBJ_NODE: return "NUMANode";
@@ -218,8 +219,12 @@ topo_obj_snprintf(char *string, size_t size,
     return snprintf(string, size, "%s%d%s", topo_obj_type_string(type), l->attr.fake.depth, physical_index);
   case TOPO_OBJ_PROC:
     return snprintf(string, size, "P%s", physical_index);
-  case TOPO_OBJ_MACHINE:
+  case TOPO_OBJ_SYSTEM:
     return snprintf(string, size, "%s(%lu%s)", topo_obj_type_string(type),
+		    topo_memory_size_printf_value(l->attr.system.memory_kB),
+		    topo_memory_size_printf_unit(l->attr.system.memory_kB));
+  case TOPO_OBJ_MACHINE:
+    return snprintf(string, size, "%s%s(%lu%s)", topo_obj_type_string(type), physical_index,
 		    topo_memory_size_printf_value(l->attr.machine.memory_kB),
 		    topo_memory_size_printf_unit(l->attr.machine.memory_kB));
   case TOPO_OBJ_NODE:

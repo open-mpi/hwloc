@@ -172,7 +172,7 @@ enum topo_type_cmp_e {
 };
 
 static const int obj_type_order[] = {
-  [TOPO_OBJ_MACHINE] = 0,
+  [TOPO_OBJ_SYSTEM] = 0,
   [TOPO_OBJ_FAKE] = 1,
   [TOPO_OBJ_NODE] = 2,
   [TOPO_OBJ_SOCKET] = 3,
@@ -620,7 +620,7 @@ topo_discover(struct topo_topology *topology)
   topo_cpuset_zero(&topology->levels[0][0]->cpuset);
   traverse(topology, &topology->levels[0][0], NULL, get_proc_cpuset, NULL, &topology->levels[0][0]->cpuset);
 
-  topo_debug("\nApplying the machine cpuset to all nodes\n");
+  topo_debug("\nApplying the system cpuset to all nodes\n");
   traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, &topology->levels[0][0]->cpuset);
 
   topo_debug("\nRemoving empty objects except numa nodes\n");
@@ -644,7 +644,7 @@ topo_discover(struct topo_topology *topology)
   /* initialize all depth to unknown */
   for (l=1; l < TOPO_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = TOPO_TYPE_DEPTH_UNKNOWN;
-  topology->type_depth[0] = TOPO_OBJ_MACHINE;
+  topology->type_depth[0] = TOPO_OBJ_SYSTEM;
 
   /* Start with children of the whole system.  */
   l = 0;
@@ -740,7 +740,7 @@ topo_discover(struct topo_topology *topology)
   /* Setup the depth of all still unknown levels (the ones that got merged or
    * never created).  */
   int type, prevdepth = TOPO_TYPE_DEPTH_UNKNOWN;
-  for (type = TOPO_OBJ_MACHINE; type < TOPO_OBJ_TYPE_MAX; type++)
+  for (type = TOPO_OBJ_SYSTEM; type < TOPO_OBJ_TYPE_MAX; type++)
     {
       if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
 	if (type != TOPO_OBJ_CACHE && type != TOPO_OBJ_FAKE)
@@ -763,7 +763,7 @@ topo_topology_init (struct topo_topology **topologyp)
 
   topology->nb_processors = 0;
   topology->nb_nodes = 0;
-  topology->nb_levels = 1; /* there's at least MACHINE */
+  topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->flags = 0;
   topology->is_fake = 0;
   topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */
@@ -779,7 +779,7 @@ topo_topology_init (struct topo_topology **topologyp)
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = -1;
   topology->levels[0] = calloc (2, sizeof (struct topo_obj));
-  topo_setup_machine_level (topology->levels[0]);
+  topo_setup_system_level (topology->levels[0]);
 
   *topologyp = topology;
   return 0;
@@ -840,7 +840,7 @@ topo_topology_ignore_type(struct topo_topology *topology, enum topo_obj_type_e t
   if (type >= TOPO_OBJ_TYPE_MAX)
     return -1;
 
-  if (type == TOPO_OBJ_MACHINE)
+  if (type == TOPO_OBJ_SYSTEM)
     /* we don't want 2 heads */
     return -1;
 

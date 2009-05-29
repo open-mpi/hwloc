@@ -1,4 +1,4 @@
-Machine(0KB)
+System(0KB)
   L3Cache(4096KB)
     Core#0
       P#0
@@ -28,9 +28,10 @@ Machine(0KB)
       P#7
       P#15
 Topology is fake
-depth 0:	type #0 (Machine)
-depth 0:	type #1 (NUMANode)
-depth 0:	type #2 (Socket)
- depth 1:	type #3 (Cache)
-  depth 2:	type #4 (Core)
-   depth 3:	type #5 (Proc)
+depth 0:	type #0 (System)
+depth 0:	type #1 (Machine)
+depth 0:	type #2 (NUMANode)
+depth 0:	type #3 (Socket)
+ depth 1:	type #4 (Cache)
+  depth 2:	type #5 (Core)
+   depth 3:	type #6 (Proc)

@@ -36,6 +36,8 @@ int migrate (pid_t pid, int destination_node);
 int migrate_self (int destination_node);
 int thread_migrate (int thread_id, int destination_node);
 
+* move dmi_* to a machine object?
+
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
   bind process on 2 cores near physical proc id 3
