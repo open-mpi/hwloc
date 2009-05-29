@@ -60,13 +60,14 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     topology->backend_params.synthetic.description[count++] = (unsigned)item;
   }
 
-  if (count > 0) {
-    topology->backend_type = TOPO_BACKEND_SYNTHETIC;
-    topology->backend_params.synthetic.description[count] = 0;
-    topology->is_fake = 1;
-  }
+  if (count <= 0)
+    return -1;
 
-  return (count > 0) ? 0 : -1;
+  topology->backend_type = TOPO_BACKEND_SYNTHETIC;
+  topology->backend_params.synthetic.description[count] = 0;
+  topology->is_fake = 1;
+
+  return 0;
 }
 
 void
