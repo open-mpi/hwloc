@@ -41,6 +41,8 @@
 
 /* .fig back-end.  */
 
+#define FIG_FACTOR 20
+
 static struct color {
   int r, g, b;
 } *colors;
@@ -105,10 +107,10 @@ static void
 fig_box(void *output_, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   FILE *output = output_;
-  x *= 20;
-  y *= 20;
-  width *= 20;
-  height *= 20;
+  x *= FIG_FACTOR;
+  y *= FIG_FACTOR;
+  width *= FIG_FACTOR;
+  height *= FIG_FACTOR;
   fprintf(output, "2 2 0 1 0 %d %u -1 20 0.0 0 0 -1 0 0 5\n\t", rgb_to_fig(r, g, b), depth);
   fprintf(output, " %u %u", x, y);
   fprintf(output, " %u %u", x + width, y);
@@ -119,11 +121,25 @@ fig_box(void *output_, int r, int g, int b, unsigned depth, unsigned x, unsigned
 }
 
 static void
+fig_line(void *output_, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+{
+  FILE *output = output_;
+  x1 *= FIG_FACTOR;
+  y1 *= FIG_FACTOR;
+  x2 *= FIG_FACTOR;
+  y2 *= FIG_FACTOR;
+  fprintf(output, "2 2 0 1 0 %d %u -1 20 0.0 0 0 -1 0 0 4\n\t", rgb_to_fig(r, g, b), depth);
+  fprintf(output, " %u %u", x1, y1);
+  fprintf(output, " %u %u", x2, y2);
+  fprintf(output, "\n");
+}
+
+static void
 fig_text(void *output_, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
   FILE *output = output_;
-  x *= 20;
-  y *= 20;
+  x *= FIG_FACTOR;
+  y *= FIG_FACTOR;
   size = (size * 14) / 10;
   fprintf(output, "4 0 %d %u -1 0 %d 0.0 4 %d %u %u %u %s\\001\n", rgb_to_fig(r, g, b), depth, size, size * 10, (unsigned) strlen(text) * size * 10, x, y + size * 10, text);
 }
@@ -132,6 +148,7 @@ static struct draw_methods fig_draw_methods = {
   .start = fig_start,
   .declare_color = fig_declare_color,
   .box = fig_box,
+  .line = fig_line,
   .text = fig_text,
 };
 

@@ -141,6 +141,15 @@ windows_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsig
 }
 
 static void
+windows_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+{
+  PAINTSTRUCT *ps = output;
+  SelectObject(ps->hdc, rgb_to_brush(r, g, b));
+  MoveToEx(ps->hdc, x1, y1, NULL);
+  LineTo(ps->hdc, x2, y2);
+}
+
+static void
 windows_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
   PAINTSTRUCT *ps = output;
@@ -156,6 +165,7 @@ struct draw_methods windows_draw_methods = {
   .start = windows_start,
   .declare_color = windows_declare_color,
   .box = windows_box,
+  .line = windows_line,
   .text = windows_text,
 };
 

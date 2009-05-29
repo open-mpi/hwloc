@@ -63,9 +63,13 @@
 #define CACHE_G_COLOR 0xff
 #define CACHE_B_COLOR 0xff
 
-#define MACHINE_R_COLOR 0xff
-#define MACHINE_G_COLOR 0xff
-#define MACHINE_B_COLOR 0xff
+#define MACHINE_R_COLOR EPOXY_R_COLOR
+#define MACHINE_G_COLOR EPOXY_G_COLOR
+#define MACHINE_B_COLOR EPOXY_B_COLOR
+
+#define NODE_R_COLOR ((EPOXY_R_COLOR * 100) / 110)
+#define NODE_G_COLOR ((EPOXY_G_COLOR * 100) / 110)
+#define NODE_B_COLOR ((EPOXY_B_COLOR * 100) / 110)
 
 #define SYSTEM_R_COLOR 0xff
 #define SYSTEM_G_COLOR 0xff
@@ -85,6 +89,7 @@ static struct draw_methods null_draw_methods = {
   .start = (void*) null,
   .declare_color = (void*) null,
   .box = (void*) null,
+  .line = (void*) null,
   .text = (void*) null,
 };
 
@@ -107,7 +112,7 @@ static foo_draw get_type_fun(topo_obj_type_t type);
  * Helper to recurse into sublevels
  */
 
-#define RECURSE(obj, methods, separator) { \
+#define RECURSE_BEGIN(obj) { \
   topo_obj_t *sublevels = obj->children; \
   unsigned numsublevels = obj->arity; \
   unsigned width, height; \
@@ -116,7 +121,11 @@ static foo_draw get_type_fun(topo_obj_type_t type);
     fun = get_type_fun(sublevels[0]->type); \
     int i; \
     for (i = 0; i < numsublevels; i++) { \
-      fun(topology, methods, sublevels[i], type, output, depth-1, x + totwidth, &width, y + myheight, &height); \
+
+#define RECURSE_CALL_FUN(obj, methods) \
+      fun(topology, methods, sublevels[i], type, output, depth-1, x + totwidth, &width, y + myheight, &height) \
+
+#define RECURSE_END(obj, separator) \
       totwidth += width + (separator); \
       if (height > maxheight) \
 	maxheight = height; \
@@ -124,6 +133,11 @@ static foo_draw get_type_fun(topo_obj_type_t type);
     totwidth -= (separator); \
   } \
 }
+
+#define RECURSE(obj, methods, separator) \
+	RECURSE_BEGIN(obj) \
+	  RECURSE_CALL_FUN(obj, methods); \
+	RECURSE_END(obj, separator)
 
 static void
 proc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
@@ -248,7 +262,7 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
     *retheight += UNIT;
 
   /* Draw the epoxy box */
-  methods->box(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR, depth, x, *retwidth, y, *retheight);
   /* Draw the memory box */
   methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + UNIT, *retwidth - 2 * UNIT, y + UNIT, myheight - 2 * UNIT);
 
@@ -293,6 +307,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
   unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
   char text[64];
+  unsigned left = 0, right = 0;
 
   RECURSE(level, &null_draw_methods, UNIT);
 
@@ -310,7 +325,19 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
 
   totwidth = UNIT;
-  RECURSE(level, methods, UNIT);
+  RECURSE_BEGIN(level)
+    RECURSE_CALL_FUN(level, methods);
+    if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE) {
+      unsigned center = x + totwidth + width / 2;
+      if (!left)
+	left = center;
+      right = center;
+      methods->line(output, 0, 0, 0, depth, center, y + myheight - UNIT, center, y + myheight);
+    }
+  RECURSE_END(level, UNIT)
+
+  if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE)
+    methods->line(output, 0, 0, 0, depth, left, y + myheight - UNIT, right, y + myheight - UNIT);
 }
 
 static void
@@ -385,10 +412,22 @@ getmax_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsign
     coords->y = y + height;
 }
 
+static void
+getmax_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+{
+  struct coords *coords = output;
+
+  if (x2 > coords->x)
+    coords->x = x2;
+  if (y2 > coords->y)
+    coords->y = y2;
+}
+
 static struct draw_methods getmax_draw_methods = {
   .start = (void*) null,
   .declare_color = (void*) null,
   .box = getmax_box,
+  .line = getmax_line,
   .text = (void*) null,
 };
 
@@ -398,7 +437,7 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
   struct coords coords = { .x = 0, .y = 0};
   fig(topology, &getmax_draw_methods, topo_get_system_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
-  methods->declare_color(output, EPOXY_R_COLOR, EPOXY_G_COLOR, EPOXY_B_COLOR);
+  methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
   methods->declare_color(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR);
   methods->declare_color(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR);
   methods->declare_color(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR);

@@ -44,6 +44,7 @@ struct draw_methods {
   void* (*start) (void *output, int width, int height);
   void (*declare_color) (void *output, int r, int g, int b);
   void (*box) (void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height);
+  void (*line) (void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2);
   void (*text) (void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text);
 };
 

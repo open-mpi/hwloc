@@ -83,6 +83,16 @@ topo_cairo_box(void *output, int r, int g, int b, unsigned depth, unsigned x, un
 }
 
 static void
+topo_cairo_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+{
+  cairo_t *c = output;
+  cairo_move_to(c, x1, y1);
+  cairo_set_line_width(c, 1);
+  cairo_line_to(c, x2, y2);
+  cairo_stroke(c);
+}
+
+static void
 topo_cairo_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
   cairo_t *c = output;
@@ -182,6 +192,7 @@ static struct draw_methods x11_draw_methods = {
   .start = x11_start,
   .declare_color = (void*) null,
   .box = topo_cairo_box,
+  .line = topo_cairo_line,
   .text = topo_cairo_text,
 };
 
@@ -291,6 +302,7 @@ static struct draw_methods png_draw_methods = {
   .start = png_start,
   .declare_color = (void*) null,
   .box = topo_cairo_box,
+  .line = topo_cairo_line,
   .text = topo_cairo_text,
 };
 
@@ -318,6 +330,7 @@ static struct draw_methods pdf_draw_methods = {
   .start = pdf_start,
   .declare_color = (void*) null,
   .box = topo_cairo_box,
+  .line = topo_cairo_line,
   .text = topo_cairo_text,
 };
 
@@ -345,6 +358,7 @@ static struct draw_methods ps_draw_methods = {
   .start = ps_start,
   .declare_color = (void*) null,
   .box = topo_cairo_box,
+  .line = topo_cairo_line,
   .text = topo_cairo_text,
 };
 
@@ -372,6 +386,7 @@ static struct draw_methods svg_draw_methods = {
   .start = svg_start,
   .declare_color = (void*) null,
   .box = topo_cairo_box,
+  .line = topo_cairo_line,
   .text = topo_cairo_text,
 };
 
