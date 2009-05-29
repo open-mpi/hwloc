@@ -1,4 +1,5 @@
 * add suffix to synthetic topo numbers to enforce the type
+  or rather prefixes?  "nodes:4 sockets:2" etc.
 
 * add a way to find the xth core below die #y so that PLPA really has no
   advantage over us
