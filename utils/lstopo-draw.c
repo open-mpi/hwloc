@@ -437,6 +437,7 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
   struct coords coords = { .x = 0, .y = 0};
   fig(topology, &getmax_draw_methods, topo_get_system_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
+  methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
   methods->declare_color(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR);
   methods->declare_color(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR);
