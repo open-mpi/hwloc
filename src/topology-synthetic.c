@@ -256,7 +256,8 @@ topo_synthetic_load (struct topo_topology *topology)
   topology->nb_processors = topology->level_nbobjects[topology->nb_levels-1];
 
   node_level = topology->type_depth[TOPO_OBJ_NODE];
-  if (node_level != -1) {
+  assert(node_level != TOPO_TYPE_DEPTH_MULTIPLE);
+  if (node_level != TOPO_TYPE_DEPTH_UNKNOWN) {
     /* Assume this level is the node level.  */
     int i;
 
@@ -270,7 +271,8 @@ topo_synthetic_load (struct topo_topology *topology)
   }
 
   cache_level = topology->type_depth[TOPO_OBJ_CACHE];
-  if (cache_level != -1) {
+  assert(cache_level != TOPO_TYPE_DEPTH_MULTIPLE);
+  if (cache_level != TOPO_TYPE_DEPTH_UNKNOWN) {
     int i;
 
     for(i=0 ; i<topology->level_nbobjects[cache_level] ; i++) {
