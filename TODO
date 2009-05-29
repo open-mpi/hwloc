@@ -1,5 +1,3 @@
-* fix synthetic fake/cache depth
-
 * add a way to find the xth core below die #y so that PLPA really has no
   advantage over us
   + topo_get_obj_by_type(topology, type, index)

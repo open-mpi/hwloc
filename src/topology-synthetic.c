@@ -285,7 +285,8 @@ void
 topo_synthetic_load (struct topo_topology *topology)
 {
   struct topo_obj *root;
-  int node_level, cache_level;
+  int node_level, cache_level, fake_level;
+  int cache_depth, fake_depth;
 
   topo__synthetic_allocate_topology_levels(topology, topology->backend_params.synthetic.arity);
 
@@ -311,16 +312,35 @@ topo_synthetic_load (struct topo_topology *topology)
     topology->nb_nodes = 1;
   }
 
+  cache_depth = 0;
   for(cache_level=topology->nb_levels-1; cache_level>=0; cache_level--) {
     int i;
 
     if (topology->levels[cache_level][0]->type != TOPO_OBJ_CACHE)
       continue;
 
+    /* if there is a single cache level, make it L2 */
+    if (topology->type_depth[TOPO_OBJ_CACHE] != TOPO_TYPE_DEPTH_MULTIPLE)
+      cache_depth = 2;
+    else
+      cache_depth++;
+
     for(i=0 ; i<topology->level_nbobjects[cache_level] ; i++) {
       topology->levels[cache_level][i]->attr.cache.memory_kB = 4*1024;
-      topology->levels[cache_level][i]->attr.cache.depth = 2;
+      topology->levels[cache_level][i]->attr.cache.depth = cache_depth;
     }
+  }
+
+  fake_depth = 0;
+  for(fake_level=topology->nb_levels-1; fake_level>=0; fake_level--) {
+    int i;
+
+    if (topology->levels[fake_level][0]->type != TOPO_OBJ_FAKE)
+      continue;
+
+    fake_depth++;
+    for(i=0 ; i<topology->level_nbobjects[fake_level] ; i++)
+      topology->levels[fake_level][i]->attr.fake.depth = fake_depth;
   }
 
   topo_debug("synthetic topology: %u levels, %u processors, %u nodes\n",
