@@ -84,7 +84,7 @@ int main()
   assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check no cache above two distant cpus */
-#undef CPUINDEX1 180
+#undef CPUINDEX1
 #define CPUINDEX1 300
   topo_cpuset_zero(&set);
   obj = topo_get_obj(topology, 5, CPUINDEX1);
