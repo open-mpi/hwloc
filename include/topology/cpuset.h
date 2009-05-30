@@ -220,7 +220,7 @@ static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long 
 		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_ZERO;
 }
 
-/** \brief CPU set from an unsigned long mask */
+/** \brief CPU set from an unsigned long mask, used as ith subset */
 static __inline__ void topo_cpuset_from_ith_ulong(topo_cpuset_t *set, int i, unsigned long mask);
 static __inline__ void topo_cpuset_from_ith_ulong(topo_cpuset_t *set, int i, unsigned long mask)
 {
@@ -236,6 +236,13 @@ static __inline__ unsigned long topo_cpuset_to_ulong(const topo_cpuset_t *set);
 static __inline__ unsigned long topo_cpuset_to_ulong(const topo_cpuset_t *set)
 {
 	return TOPO_CPUSUBSET_SUBSET(*set,0);
+}
+
+/** \brief unsigned long mask as ith subset from CPU set */
+static __inline__ unsigned long topo_cpuset_to_ith_ulong(const topo_cpuset_t *set, int i);
+static __inline__ unsigned long topo_cpuset_to_ith_ulong(const topo_cpuset_t *set, int i)
+{
+	return TOPO_CPUSUBSET_SUBSET(*set,i);
 }
 
 /** \brief Clear CPU set and set CPU \e cpu */
