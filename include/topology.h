@@ -217,7 +217,7 @@ extern int topo_find_cpuset_objs (topo_topology_t topology, topo_cpuset_t *set, 
 /** \brief Find the first cache covering a cpuset */
 static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, topo_cpuset_t *set)
 {
-  struct topo_obj *current = topo_find_cpuset_covering_obj(topology, set);
+  topo_obj_t current = topo_find_cpuset_covering_obj(topology, set);
   while (current) {
     if (current->type == TOPO_OBJ_CACHE)
       return current;
@@ -245,7 +245,7 @@ extern const char * topo_obj_type_string (enum topo_obj_type_e l);
 /** \brief Stringify a given topology object into a human-readable form.
  * Returns how many characters were actually written (not including the ending \0). */
 extern int topo_obj_snprintf(char *string, size_t size,
-			     struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose);
+			     struct topo_topology *topology, topo_obj_t l, const char *indexprefix, int verbose);
 
 /** \brief Stringify the cpuset containing a set of objects.
  * Returns how many characters were actually written (not including the ending \0). */
