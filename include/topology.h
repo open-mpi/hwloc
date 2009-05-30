@@ -273,6 +273,50 @@ static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology,
   return NULL;
 }
 
+/** \brief Among objects at given depth and below a cpuset, return the nth. */
+static inline topo_obj_t
+topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, topo_cpuset_t *set,
+				    unsigned depth, unsigned index)
+{
+  int count = 0;
+  topo_obj_t obj = topo_get_obj(topology, depth, 0);
+  while (obj) {
+    if (topo_cpuset_isincluded(&obj->cpuset, set)) {
+      if (count == index)
+	return obj;
+      count++;
+    }
+    obj = obj->next_sibling;
+  }
+  return NULL;
+}
+
+/** \brief Among objects at given depth and below a root object, return the nth.
+ * If root is NULL, use the top-object (system).
+ */
+static inline topo_obj_t
+topo_get_obj_below_by_depth (topo_topology_t topology, topo_obj_t root,
+			     unsigned depth, unsigned index)
+{
+  if (!root)
+    root = topo_get_system_obj(topology);
+  return topo_get_obj_below_cpuset_by_depth(topology, &root->cpuset, depth, index);
+}
+
+/** \brief Among objects of given type and below a root object, return the nth.
+ * If root is NULL, use the top-object (system).
+ * If there are multiple depth for given type, return NULL and let the caller
+ * fallback to topo_get_obj_below_by_depth().
+ */
+static inline topo_obj_t
+topo_get_obj_below_by_type (topo_topology_t topology, topo_obj_t root,
+			    topo_obj_type_t type, unsigned index)
+{
+  unsigned depth = topo_get_type_depth (topology, type);
+  if (depth == TOPO_TYPE_DEPTH_UNKNOWN || depth == TOPO_TYPE_DEPTH_MULTIPLE)
+    return NULL;
+  return topo_get_obj_below_by_depth(topology, root, depth, index);
+}
 
 
 /**

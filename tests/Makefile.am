@@ -10,6 +10,7 @@ TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	topo_find_cpuset_covering_object \
 	topo_find_cpuset_covering_cache \
 	topo_find_shared_cache_above \
+	topo_get_obj_below_by_type \
 	object_userdata \
 	synthetic-topology
 
