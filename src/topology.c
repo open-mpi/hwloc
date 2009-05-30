@@ -106,7 +106,7 @@ topo_setup_cache_level(int cachelevel, int procid_max,
       topo_object_cpuset_from_array(obj, j, &cacheids[cachelevel*TOPO_NBMAXCPUS], procid_max);
 
       topo_debug("L%d cache %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
+		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
     }
   topo_debug("\n");
 }
@@ -133,7 +133,7 @@ topo_setup_proc_level(struct topo_topology *topology,
       topo_cpuset_cpu(&obj->cpuset, oscpu);
 
       topo_debug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
+		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
       topo_add_object(topology, obj);
 
       cpu++;

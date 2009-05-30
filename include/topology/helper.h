@@ -158,7 +158,7 @@ topo_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *pr
       topo_object_cpuset_from_array(obj, j, proc_physids, procid_max);
       topo_debug("%s %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		 topo_obj_type_string(type),
-		 j, TOPO_CPUSET_PRINTF_VALUE(obj->cpuset));
+		 j, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
       topo_add_object(topology, obj);
     }
   topo_debug("\n");

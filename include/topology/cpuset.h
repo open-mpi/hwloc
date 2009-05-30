@@ -105,7 +105,7 @@ topo_cpuset_snprintf(char * buf, size_t _size, topo_cpuset_t * set)
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 #define TOPO_CPUSET_PRINTF_VALUE(x)	({					\
 	char *__buf = alloca(TOPO_CPUSET_STRING_LENGTH+1);			\
-	topo_cpuset_snprintf(__buf, TOPO_CPUSET_STRING_LENGTH+1, &x);		\
+	topo_cpuset_snprintf(__buf, TOPO_CPUSET_STRING_LENGTH+1, x);		\
 	__buf;									\
      })
 

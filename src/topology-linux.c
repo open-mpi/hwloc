@@ -425,7 +425,7 @@ look_sysfsnode(struct topo_topology *topology,
       node->cpuset = cpuset;
 
       topo_debug("node %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		 i, osnode, TOPO_CPUSET_PRINTF_VALUE(node->cpuset));
+		 i, osnode, TOPO_CPUSET_PRINTF_VALUE(&node->cpuset));
       topo_add_object(topology, node);
     }
 }
@@ -504,7 +504,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
 	if (topo_cpuset_first(&coreset) != cpu) {
 	  topo_debug("os proc %ld is not first thread in coreset %" TOPO_PRIxCPUSET "\n",
-		     cpu, TOPO_CPUSET_PRINTF_VALUE(coreset));
+		     cpu, TOPO_CPUSET_PRINTF_VALUE(&coreset));
 	  continue;
 	}
       }
@@ -516,7 +516,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 
   topology->nb_processors = nbprocessors = topo_cpuset_weight(&cpuset);;
   topo_debug("found %d cpus, cpuset %" TOPO_PRIxCPUSET "\n",
-	     nbprocessors, TOPO_CPUSET_PRINTF_VALUE(cpuset));
+	     nbprocessors, TOPO_CPUSET_PRINTF_VALUE(&cpuset));
 
   topo_cpuset_foreach_begin(i, &cpuset)
     {
@@ -544,7 +544,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	socket_level[index] = topo_alloc_setup_object(TOPO_OBJ_SOCKET, mysocketid);
 	socket_level[index]->cpuset = socketset;
 	topo_debug("socket %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		   index, mysocketid, TOPO_CPUSET_PRINTF_VALUE(socketset));
+		   index, mysocketid, TOPO_CPUSET_PRINTF_VALUE(&socketset));
 	nsockets++;
       }
 
@@ -568,7 +568,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	core_level[index] = topo_alloc_setup_object(TOPO_OBJ_CORE, mycoreid);
 	core_level[index]->cpuset = coreset;
 	topo_debug("core %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		   index, mycoreid, TOPO_CPUSET_PRINTF_VALUE(coreset));
+		   index, mycoreid, TOPO_CPUSET_PRINTF_VALUE(&coreset));
 	ncores++;
       }
 
@@ -586,7 +586,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
       thread_level[index] = topo_alloc_setup_object(TOPO_OBJ_PROC, i);
       thread_level[index]->cpuset = threadset;
       topo_debug("thread %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 index, TOPO_CPUSET_PRINTF_VALUE(threadset));
+		 index, TOPO_CPUSET_PRINTF_VALUE(&threadset));
       nthreads++;
 
       /* look at the caches */
@@ -655,7 +655,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	  cache_level[depth][index]->attr.cache.depth = depth+1;
 	  cache_level[depth][index]->cpuset = cacheset;
 	  topo_debug("cache %d depth %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		     ncaches[depth], depth, TOPO_CPUSET_PRINTF_VALUE(cacheset));
+		     ncaches[depth], depth, TOPO_CPUSET_PRINTF_VALUE(&cacheset));
 	  ncaches[depth]++;
 	}
       }
@@ -826,7 +826,7 @@ look_cpuinfo(struct topo_topology *topology, const char *path,
    */
   topo_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
   topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
-	     TOPO_CPUSET_PRINTF_VALUE(online_cpuset));
+	     TOPO_CPUSET_PRINTF_VALUE(&online_cpuset));
 
   topo_debug("\n * Topology summary *\n");
   topo_debug("%d processors (%d max id)\n", numprocs, procid_max);

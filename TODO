@@ -1,3 +1,8 @@
+* add support for amd magny-cours "multi-node-cpu", probably by reading 
+  cpu_node_siblings/id if available (in 2.6.31+).
+  should look like multiple sockets in single numa node?
+  but looks like their L3s are hardware-merged
+
 * add a way to find the xth core below die #y so that PLPA really has no
   advantage over us
   + topo_get_obj_by_type(topology, type, index)

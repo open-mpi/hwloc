@@ -64,13 +64,13 @@ static void append_cpuset(topo_cpuset_t *set, topo_cpuset_t *newset,
   case TOPOMASK_APPEND_ADD:
     if (verbose)
       fprintf(stderr, "adding %" TOPO_PRIxCPUSET " to %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(*newset), TOPO_CPUSET_PRINTF_VALUE(*set));
+	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
     topo_cpuset_orset(set, newset);
     break;
   case TOPOMASK_APPEND_CLR:
     if (verbose)
       fprintf(stderr, "clearing %" TOPO_PRIxCPUSET " from %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(*newset), TOPO_CPUSET_PRINTF_VALUE(*set));
+	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
     topo_cpuset_clearset(set, newset);
     break;
   default:

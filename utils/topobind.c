@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     bind_cpus = 1;
     if (verbose)
       fprintf(stderr, "Will bind on cpu set %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(cpu_set));
+	      TOPO_CPUSET_PRINTF_VALUE(&cpu_set));
 
   next:
     argc--;

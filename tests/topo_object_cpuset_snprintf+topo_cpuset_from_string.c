@@ -75,7 +75,7 @@ int main()
   printf("last cpu cpuset converted back and forth, ok\n");
 
 //  topo_cpuset_from_string("1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n", &set);
-//  printf("%s\n",  TOPO_CPUSET_PRINTF_VALUE(set));
+//  printf("%s\n",  TOPO_CPUSET_PRINTF_VALUE(&set));
 //  will be truncated after ",4," since it's too large
 
   topo_topology_destroy(topology);
