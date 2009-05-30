@@ -201,6 +201,12 @@ topo__synthetic_make_children(struct topo_topology *topology,
     obj->children[i]->level = obj->level + 1;
     obj->children[i]->number = first_number + i;
 
+    /* Link siblings */
+    if (first_number+i > 0) {
+      obj->children[i]->prev_sibling = obj_pool[i-1];
+      obj_pool[i-1]->next_sibling = obj->children[i];
+    }
+
     switch(type) {
     case TOPO_OBJ_FAKE:
       obj->children[i]->attr.fake.depth = 0;
@@ -209,6 +215,9 @@ topo__synthetic_make_children(struct topo_topology *topology,
       break;
     }
   }
+
+  obj->first_child = obj->children[0];
+  obj->last_child = obj->children[count-1];
 }
 
 /* Recursively populate the topology starting from LEVEL according to
