@@ -192,10 +192,6 @@ topo_cpuset_from_string(const char * string, topo_cpuset_t * set)
  *  Primitives & macros for building, modifying and consulting "sets" of cpus.
  */
 
-/** \brief Initialize CPU set */
-void topo_cpuset_init(topo_cpuset_t * set);
-#define topo_cpuset_init(m)        topo_cpuset_zero(m)
-
 /** \brief Empty CPU set */
 static __inline__ void topo_cpuset_zero(topo_cpuset_t * set);
 static __inline__ void topo_cpuset_zero(topo_cpuset_t * set)
