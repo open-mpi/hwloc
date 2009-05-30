@@ -36,8 +36,19 @@
 
 #include <stdio.h>
 
+
+
+/**
+ * Cpuset bitmask definitions
+ */
+
 #include <topology/cpuset.h>
 
+
+
+/**
+ * Topology and Topology Info
+ */
 
 /* \brief Topology context */
 struct topo_topology;
@@ -56,6 +67,12 @@ struct topo_topology_info {
   unsigned long huge_page_size_kB;
   int is_fake; /* set if the topology is different from the actual underlying machine */
 };
+
+
+
+/**
+ * Topology Objects
+ */
 
 /** \brief Type of topology object.  Do not rely on any relative ordering of the values.  */
 enum topo_obj_type_e {
@@ -121,6 +138,11 @@ struct topo_obj {
 typedef struct topo_obj * topo_obj_t;
 
 
+
+/**
+ * Create and Destroy Topologies
+ */
+
 /** \brief Allocate a topology context. */
 extern int topo_topology_init (topo_topology_t *topologyp);
 /** \brief Build the actual topology once initialized with _init and tuned with routines below */
@@ -128,6 +150,9 @@ extern int topo_topology_load(topo_topology_t topology);
 /** \brief Terminate and free a topology context. */
 extern void topo_topology_destroy (topo_topology_t topology);
 
+/**
+ * Configure Topology (between init and load)
+ */
 
 /** \brief Ignore a object type.
     To be called between _init and _load. */
@@ -152,9 +177,13 @@ extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsy
 extern int topo_topology_set_synthetic(struct topo_topology *topology, const char *description);
 
 
+
+/**
+ * Get Some Topology Information
+ */
+
 /* \brief Get global information about the topology. */
 extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
-
 
 /** \brief Returns the depth of objects of type _type_. If no object of
     this type is present on the underlying architecture, the function
@@ -170,6 +199,11 @@ extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsig
 /** \brief Returns the width of level at depth _depth_ */
 extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth);
 
+
+
+/**
+ * Topology Traversal
+ */
 
 /** \brief Returns the topology object at index _index_ from depth _depth_ */
 extern topo_obj_t topo_get_obj (topo_topology_t topology, unsigned depth, unsigned index);
@@ -239,6 +273,12 @@ static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology,
   return NULL;
 }
 
+
+
+/**
+ * Object/String Conversion
+ */
+
 /** \brief Return a stringified topology object type */
 extern const char * topo_obj_type_string (enum topo_obj_type_e l);
 
@@ -252,7 +292,14 @@ extern int topo_obj_snprintf(char *string, size_t size,
 extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
 
 
+
+/**
+ * Binding
+ */
+
 /** \brief Bind current process on cpus given in the set */
 extern int topo_set_cpubind(topo_cpuset_t *set);
+
+
 
 #endif /* TOPOLOGY_H */
