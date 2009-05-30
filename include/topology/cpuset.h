@@ -61,27 +61,23 @@ extern "C"
 void *alloca (size_t);
 #endif
 
-/* large cpuset using an array of unsigned long subsets */
+/**
+ * Cpuset internals.
+ */
 
 /* size and count of subsets within a set */
-#    define TOPO_CPUSUBSET_SIZE		(8*sizeof(long))
-#    define TOPO_CPUSUBSET_COUNT	((TOPO_NBMAXCPUS+TOPO_CPUSUBSET_SIZE-1)/TOPO_CPUSUBSET_SIZE)
-typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
+#define TOPO_CPUSUBSET_SIZE	(8*sizeof(long))
+#define TOPO_CPUSUBSET_COUNT	((TOPO_NBMAXCPUS+TOPO_CPUSUBSET_SIZE-1)/TOPO_CPUSUBSET_SIZE)
 
 /* extract a subset from a set using an index or a cpu */
-#    define TOPO_CPUSUBSET_SUBSET(set,x)	((set).s[x])
-#    define TOPO_CPUSUBSET_INDEX(cpu)		((cpu)/(TOPO_CPUSUBSET_SIZE))
-#    define TOPO_CPUSUBSET_CPUSUBSET(set,cpu)	TOPO_CPUSUBSET_SUBSET(set,TOPO_CPUSUBSET_INDEX(cpu))
+#define TOPO_CPUSUBSET_SUBSET(set,x)		((set).s[x])
+#define TOPO_CPUSUBSET_INDEX(cpu)		((cpu)/(TOPO_CPUSUBSET_SIZE))
+#define TOPO_CPUSUBSET_CPUSUBSET(set,cpu)	TOPO_CPUSUBSET_SUBSET(set,TOPO_CPUSUBSET_INDEX(cpu))
 
 /* predefined subset values */
-#    define TOPO_CPUSUBSET_VAL(cpu)	(1UL<<((cpu)%(TOPO_CPUSUBSET_SIZE)))
-#    define TOPO_CPUSUBSET_ZERO		0UL
-#    define TOPO_CPUSUBSET_FULL		~0UL
-
-/* actual whole-cpuset values */
-#    define TOPO_CPUSET_ZERO		(topo_cpuset_t){ .s[0 ... TOPO_CPUSUBSET_COUNT-1] = TOPO_CPUSUBSET_ZERO }
-#    define TOPO_CPUSET_FULL		(topo_cpuset_t){ .s[0 ... TOPO_CPUSUBSET_COUNT-1] = TOPO_CPUSUBSET_FULL }
-#    define TOPO_CPUSET_CPU(cpu)	({ topo_cpuset_t __set = TOPO_CPUSET_ZERO; TOPO_CPUSUBSET_CPUSUBSET(__set,cpu) = TOPO_CPUSUBSET_VAL(cpu); __set; })
+#define TOPO_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(TOPO_CPUSUBSET_SIZE)))
+#define TOPO_CPUSUBSET_ZERO		0UL
+#define TOPO_CPUSUBSET_FULL		~0UL
 
 /* Constant for stringification of cpusets. */
 #if TOPO_BITS_PER_LONG == 32
@@ -89,9 +85,32 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 #else
 #    define TOPO_PRIxCPUSUBSET		"%016lx"
 #endif
-#    define TOPO_CPUSUBSET_STRING_LENGTH	(TOPO_BITS_PER_LONG/4)
-#    define TOPO_CPUSET_STRING_LENGTH		(TOPO_CPUSUBSET_COUNT*(TOPO_CPUSUBSET_STRING_LENGTH+1))
-#    define TOPO_PRIxCPUSET		"s"
+#define TOPO_CPUSUBSET_STRING_LENGTH	(TOPO_BITS_PER_LONG/4)
+
+
+
+/**
+ * Main Cpuset Type.
+ */
+
+typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
+
+
+
+/**
+ * Misc Predefined Cpuset Values.
+ */
+#define TOPO_CPUSET_ZERO	(topo_cpuset_t){ .s[0 ... TOPO_CPUSUBSET_COUNT-1] = TOPO_CPUSUBSET_ZERO }
+#define TOPO_CPUSET_FULL	(topo_cpuset_t){ .s[0 ... TOPO_CPUSUBSET_COUNT-1] = TOPO_CPUSUBSET_FULL }
+#define TOPO_CPUSET_CPU(cpu)	({ topo_cpuset_t __set = TOPO_CPUSET_ZERO; TOPO_CPUSUBSET_CPUSUBSET(__set,cpu) = TOPO_CPUSUBSET_VAL(cpu); __set; })
+
+
+/**
+ * Cpuset/String Conversion
+ */
+
+#define TOPO_CPUSET_STRING_LENGTH		(TOPO_CPUSUBSET_COUNT*(TOPO_CPUSUBSET_STRING_LENGTH+1))
+#define TOPO_PRIxCPUSET		"s"
 
 /** \brief Stringify a cpuset. */
 static __inline__ int
@@ -167,7 +186,11 @@ topo_cpuset_from_string(const char * string, topo_cpuset_t * set)
     set->s[i] = 0;
 }
 
-/*  Primitives & macros for building "sets" of cpus. */
+
+
+/**
+ *  Primitives & macros for building, modifying and consulting "sets" of cpus.
+ */
 
 /** \brief Initialize CPU set */
 void topo_cpuset_init(topo_cpuset_t * set);
