@@ -56,12 +56,23 @@ int main(void)
 
   width = 1;
   for(i=0; i<6; i++) {
+
+    /* check arities */
     assert(topo_get_depth_nbobjs(topology, i) == width);
     for(j=0; j<width; j++) {
       topo_obj_t obj = topo_get_obj(topology, i, j);
       assert(obj);
       assert(obj->arity == (i<5 ? i+2 : 0));
     }
+
+    /* check sibling lists */
+    assert(!topo_get_obj(topology, i, 0)->prev_sibling);
+    for(j=1; j<width; j++) {
+      assert(topo_get_obj(topology, i, j)->prev_sibling == topo_get_obj(topology, i, j-1));
+      assert(topo_get_obj(topology, i, j-1)->next_sibling == topo_get_obj(topology, i, j));
+    }
+    assert(!topo_get_obj(topology, i, width-1)->next_sibling);
+
     width *= i+2;
   }
 
