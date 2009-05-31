@@ -435,8 +435,6 @@ static void
 look_sysfscpu(struct topo_topology *topology, const char *path,
 	      topo_cpuset_t *admin_disabled_cpus_set)
 {
-  struct topo_obj **cache_level[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1 ] = NULL };
-  unsigned ncaches[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1 ] = 0 };
   topo_cpuset_t cpuset;
   int nbprocessors;
 #define CPU_TOPOLOGY_STR_LEN (27+9+29+1)
@@ -517,7 +515,6 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
       struct topo_obj *socket, *core, *thread;
       topo_cpuset_t socketset, coreset, threadset;
       unsigned mysocketid, mycoreid;
-      int index;
 
       /* look at the socket */
       mysocketid = 0; /* shut-up the compiler */
@@ -573,6 +570,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 #define SHARED_CPU_MAP_STRLEN (27+9+12+1+15+1)
 	char mappath[SHARED_CPU_MAP_STRLEN];
 	char string[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
+	struct topo_obj *cache;
 	topo_cpuset_t cacheset;
 	unsigned long kB = 0;
 	int depth; /* 0 for L1, .... */
@@ -614,7 +612,6 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	  fclose(fd);
 	}
 
-	/* TODO we could just use the mask instead of building an array of cache levels */
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	topo_parse_cpumap(mappath, &cacheset, topology->backend_params.sysfs.root_fd);
 	topo_cpuset_clearset(&cacheset, admin_disabled_cpus_set);
@@ -624,30 +621,17 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 
 	if (topo_cpuset_first(&cacheset) == i) {
 	  /* first cpu in this cache, add the cache */
-	  if (!ncaches[depth]) {
-	    cache_level[depth] = malloc(nbprocessors * sizeof(*cache_level));
-	    assert(cache_level[depth]);
-	  }
-	  index = ncaches[depth];
-	  cache_level[depth][index] = topo_alloc_setup_object(TOPO_OBJ_CACHE, -1);
-	  cache_level[depth][index]->attr.cache.memory_kB = kB;
-	  cache_level[depth][index]->attr.cache.depth = depth+1;
-	  cache_level[depth][index]->cpuset = cacheset;
-	  topo_debug("cache %d depth %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		     ncaches[depth], depth, TOPO_CPUSET_PRINTF_VALUE(&cacheset));
-	  ncaches[depth]++;
+	  cache = topo_alloc_setup_object(TOPO_OBJ_CACHE, -1);
+	  cache->attr.cache.memory_kB = kB;
+	  cache->attr.cache.depth = depth+1;
+	  cache->cpuset = cacheset;
+	  topo_debug("cache depth %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		     depth, TOPO_CPUSET_PRINTF_VALUE(&cacheset));
+	  topo_add_object(topology, cache);
 	}
       }
     }
   topo_cpuset_foreach_end();
-
-  /* add levels to the topology */
-
-  for(i=TOPO_CACHE_LEVEL_MAX-1; i>=0; i--)
-    if (cache_level[i]) {
-      topo_add_level(topology, cache_level[i], ncaches[i]);
-      free(cache_level[i]);
-    }
 }
 
 
