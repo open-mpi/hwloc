@@ -51,6 +51,6 @@ else !HAVE_LINUX
 TESTS =
 endif !HAVE_LINUX
 
-EXTRA_DIST = $(sysfs_tarballs) $(sysfs_outputs)
+EXTRA_DIST = $(sysfs_tarballs) $(sysfs_outputs) gather-topology.sh
 
 TESTS_ENVIRONMENT = $(builddir)/test-topology.sh
