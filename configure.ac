@@ -204,13 +204,14 @@ AC_CONFIG_FILES([Makefile
                  topology.pc
                  include/Makefile src/Makefile utils/Makefile
 		 tests/Makefile tests/linux/Makefile
+		 tests/linux/gather-topology.sh
 		 tests/linux/test-topology.sh
 		 tests/ports/Makefile
 		 doc/Makefile])
 
 AC_CONFIG_HEADERS([include/topology/config.h])
 
-AC_CONFIG_COMMANDS([linux-test-topology],
-                   [chmod +x tests/linux/test-topology.sh])
+AC_CONFIG_COMMANDS([linux-topology-scripts],
+                   [chmod +x tests/linux/test-topology.sh tests/linux/gather-topology.sh])
 
 AC_OUTPUT

@@ -11,8 +11,9 @@ libtopology detection logic.
 
 A new topology may be added by:
 * running "gather-topology.sh" on the target system and saving the
-  tarball  here
-* running "lstopo -v -" on the target system (or on the extracted
-  tarball) to generate the corresponding `output' file.
+  tarball and output files here.
+* if lstopo is not available on the target system, running "lstopo -v -"
+  on the extracted tarball to generate the corresponding `output' file
+  locally.
 * adding the tarball and output files to Makefile.am so that they are
-  properly handled in "make check" and "make dist"
+  properly handled in "make check" and "make dist".

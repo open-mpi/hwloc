@@ -34,6 +34,9 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 #
 
+top_builddir="@top_builddir@"
+lstopo="$top_builddir/utils/lstopo"
+
 name="$1"; shift
 [ -z "$name" ] && echo "Save name needed as an argument" && exit -1
 
@@ -67,5 +70,17 @@ EOF
 ( cd "$destdir/" && tar cfz "$name.tar.gz" "$name" )
 mv "$destdir/$name.tar.gz" "./$name.tar.gz"
 echo "Hierarchy gathered in ./$name.tar.gz and kept in $destdir/$name/"
+
+# Generate the output as well
+if [ ! -x "$lstopo" ]
+then
+    error "Could not find executable file \`$lstopo'."
+    exit 1
+fi
+# pass TOPO_FSYS_ROOT_PATH=// so that we get "Topology is fake"
+# in the output, making test-topology.sh happy
+export TOPO_FSYS_ROOT_PATH="//"
+"$lstopo" - -v > "./$name.tar.gz.output"
+echo "Expected topology output stored in ./$name.tar.gz.output"
 
 exit 0
