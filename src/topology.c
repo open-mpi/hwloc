@@ -85,33 +85,6 @@ topo_fallback_nbprocessors(void) {
 }
 
 
-/* This is not used any more...  */
-#if 0
-void
-topo_setup_cache_level(int cachelevel, int procid_max,
-		       unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes,
-		       struct topo_topology *topology)
-{
-  struct topo_obj *obj;
-  int j;
-
-  topo_debug("%d L%d caches\n", numcaches[cachelevel], cachelevel+1);
-
-  for (j = 0; j < numcaches[cachelevel]; j++)
-    {
-      obj = topo_alloc_setup_object(TOPO_OBJ_CACHE, j);
-      obj->attr.cache.memory_kB = cachesizes[cachelevel*TOPO_NBMAXCPUS+j];
-      obj->attr.cache.depth = cachelevel+1;
-
-      topo_object_cpuset_from_array(obj, j, &cacheids[cachelevel*TOPO_NBMAXCPUS], procid_max);
-
-      topo_debug("L%d cache %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cachelevel+1, j, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
-    }
-  topo_debug("\n");
-}
-#endif /* LINUX_SYS */
-
 /* Use the value stored in topology->nb_processors,
  * and the optional online cpuset if given.
  */

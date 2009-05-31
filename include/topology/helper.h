@@ -46,9 +46,6 @@
 extern void topo_setup_proc_level(struct topo_topology *topology, topo_cpuset_t *online_cpuset);
 
 #if defined(LINUX_SYS)
-#if 0
-extern void topo_setup_cache_level(int cachelevel, int procid_max, unsigned *numcaches, unsigned *cacheids, unsigned long *cachesizes, topo_topology_t topology);
-#endif
 extern void topo_look_linux(struct topo_topology *topology);
 extern int topo_backend_sysfs_init(struct topo_topology *topology, const char *fsys_root_path);
 extern void topo_backend_sysfs_exit(struct topo_topology *topology);
