@@ -21,7 +21,8 @@ sysfs_tarballs = \
 		16em64t-4d2c2t_nothreads.tar.gz \
 		16em64t-4d2c2t_nocaches.tar.gz \
 		16em64t-4d2c2t_merge.tar.gz \
-		64fake-4n2d2$$2c2t.tar.gz
+		64fake-4n2d2$$2c2t.tar.gz \
+		4qs22-2s2t.tar.gz
 
 # Each tarball `xyz.tar.gz' must have a corresponding `xyz.tar.gz.output'
 # file showing the expected output of `lstopo - -v'.
@@ -43,7 +44,8 @@ sysfs_outputs = \
 		16em64t-4d2c2t_nothreads.tar.gz.output 16em64t-4d2c2t_nothreads.tar.gz.options \
 		16em64t-4d2c2t_nocaches.tar.gz.output 16em64t-4d2c2t_nocaches.tar.gz.options \
 		16em64t-4d2c2t_merge.tar.gz.output 16em64t-4d2c2t_merge.tar.gz.options \
-		64fake-4n2d2$$2c2t.tar.gz.output
+		64fake-4n2d2$$2c2t.tar.gz.output \
+		4qs22-2s2t.tar.gz.output
 
 if HAVE_LINUX
 TESTS = $(sysfs_tarballs)

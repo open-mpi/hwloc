@@ -1,0 +1,16 @@
+System(15GB)
+  NUMANode#0(8192MB)
+    P#0
+    P#1
+  NUMANode#1(8192MB)
+    P#2
+    P#3
+Topology is fake
+Huge page size: 16384kB
+depth 0:	type #0 (System)
+depth 0:	type #1 (Machine)
+ depth 1:	type #2 (NUMANode)
+ depth 1:	type #3 (Socket)
+absent:		type #4 (Cache)
+ depth 1:	type #5 (Core)
+  depth 2:	type #6 (Proc)
