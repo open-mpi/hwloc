@@ -435,12 +435,6 @@ static void
 look_sysfscpu(struct topo_topology *topology, const char *path,
 	      topo_cpuset_t *admin_disabled_cpus_set)
 {
-  struct topo_obj **socket_level = NULL;
-  unsigned nsockets = 0;
-  struct topo_obj **core_level = NULL;
-  unsigned ncores = 0;
-  struct topo_obj **thread_level = NULL;
-  unsigned nthreads = 0;
   struct topo_obj **cache_level[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1 ] = NULL };
   unsigned ncaches[] = { [0 ... TOPO_CACHE_LEVEL_MAX-1 ] = 0 };
   topo_cpuset_t cpuset;
@@ -520,6 +514,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 
   topo_cpuset_foreach_begin(i, &cpuset)
     {
+      struct topo_obj *socket, *core, *thread;
       topo_cpuset_t socketset, coreset, threadset;
       unsigned mysocketid, mycoreid;
       int index;
@@ -536,16 +531,11 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 
       if (topo_cpuset_first(&socketset) == i) {
 	/* first cpu in this socket, add the socket */
-	if (!nsockets) {
-	  socket_level = malloc(nbprocessors * sizeof(*socket_level));
-	  assert(socket_level);
-	}
-	index = nsockets;
-	socket_level[index] = topo_alloc_setup_object(TOPO_OBJ_SOCKET, mysocketid);
-	socket_level[index]->cpuset = socketset;
-	topo_debug("socket %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		   index, mysocketid, TOPO_CPUSET_PRINTF_VALUE(&socketset));
-	nsockets++;
+	socket = topo_alloc_setup_object(TOPO_OBJ_SOCKET, mysocketid);
+	socket->cpuset = socketset;
+	topo_debug("socket os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		   mysocketid, TOPO_CPUSET_PRINTF_VALUE(&socketset));
+	topo_add_object(topology, socket);
       }
 
       /* look at the core */
@@ -559,17 +549,11 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
       assert(topo_cpuset_weight(&coreset) >= 1);
 
       if (topo_cpuset_first(&coreset) == i) {
-	/* first cpu in this core, add the core */
-	if (!ncores) {
-	  core_level = malloc(nbprocessors * sizeof(*core_level));
-	  assert(core_level);
-	}
-	index = ncores;
-	core_level[index] = topo_alloc_setup_object(TOPO_OBJ_CORE, mycoreid);
-	core_level[index]->cpuset = coreset;
-	topo_debug("core %d os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		   index, mycoreid, TOPO_CPUSET_PRINTF_VALUE(&coreset));
-	ncores++;
+	core = topo_alloc_setup_object(TOPO_OBJ_CORE, mycoreid);
+	core->cpuset = coreset;
+	topo_debug("core os number %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		   mycoreid, TOPO_CPUSET_PRINTF_VALUE(&coreset));
+	topo_add_object(topology, core);
       }
 
       /* look at the thread */
@@ -578,16 +562,11 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
       assert(topo_cpuset_weight(&threadset) == 1);
 
       /* add the thread */
-      if (!nthreads) {
-	thread_level = malloc(nbprocessors * sizeof(*thread_level));
-	assert(thread_level);
-      }
-      index = nthreads;
-      thread_level[index] = topo_alloc_setup_object(TOPO_OBJ_PROC, i);
-      thread_level[index]->cpuset = threadset;
+      thread = topo_alloc_setup_object(TOPO_OBJ_PROC, i);
+      thread->cpuset = threadset;
       topo_debug("thread %d has cpuset %"TOPO_PRIxCPUSET"\n",
-		 index, TOPO_CPUSET_PRINTF_VALUE(&threadset));
-      nthreads++;
+		 i, TOPO_CPUSET_PRINTF_VALUE(&threadset));
+      topo_add_object(topology, thread);
 
       /* look at the caches */
       for(j=0; j<10; j++) {
@@ -646,7 +625,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	if (topo_cpuset_first(&cacheset) == i) {
 	  /* first cpu in this cache, add the cache */
 	  if (!ncaches[depth]) {
-	    cache_level[depth] = malloc(nbprocessors * sizeof(*core_level));
+	    cache_level[depth] = malloc(nbprocessors * sizeof(*cache_level));
 	    assert(cache_level[depth]);
 	  }
 	  index = ncaches[depth];
@@ -664,26 +643,11 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 
   /* add levels to the topology */
 
-  if (socket_level) {
-    topo_add_level(topology, socket_level, nsockets);
-    free(socket_level);
-  }
-
-  if (core_level) {
-    topo_add_level(topology, core_level, ncores);
-    free(core_level);
-  }
-
   for(i=TOPO_CACHE_LEVEL_MAX-1; i>=0; i--)
     if (cache_level[i]) {
       topo_add_level(topology, cache_level[i], ncaches[i]);
       free(cache_level[i]);
     }
-
-  if (thread_level) {
-    topo_add_level(topology, thread_level, nthreads);
-    free(thread_level);
-  }
 }
 
 
