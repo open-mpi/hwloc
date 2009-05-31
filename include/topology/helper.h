@@ -132,15 +132,6 @@ topo_alloc_setup_object(enum topo_obj_type_e type, unsigned index)
 				topo_cpuset_set(&__l->cpuset, k);	\
 	} while (0)
 
-/* Adds an array of NUM objects LEVEL to the topology.  */
-static __inline__ void
-topo_add_level(struct topo_topology *topology, topo_obj_t *level, unsigned num)
-{
-  int i;
-  for (i = 0; i < num; i++)
-    topo_add_object(topology, level[i]);
-}
-
 /* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
  * and for which processors have ID PROC_PHYSIDS, and add them to the topology.
  * */
