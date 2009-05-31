@@ -359,7 +359,7 @@ static __inline__ void topo_cpuset_xorset (topo_cpuset_t *set,
 		TOPO_CPUSUBSET_SUBSET(*set,i) ^= TOPO_CPUSUBSET_SUBSET(*modifier_set,i);
 }
 
-/** \brief Compute the first CPU in CPU mask */
+/** \brief Compute the first CPU (least significant bit) in CPU mask */
 static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset);
 static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
 {
@@ -372,6 +372,48 @@ static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
 	}
 
 	return -1;
+}
+
+/** \brief Compar two cpusets using their first set bit.
+ * Smaller least significant bit is smaller.
+ * Empty cpuset are considered higher than anything.
+ */
+static __inline__ int topo_cpuset_compar_first(const topo_cpuset_t * set1,
+					       const topo_cpuset_t * set2);
+static __inline__ int topo_cpuset_compar_first(const topo_cpuset_t * set1,
+					       const topo_cpuset_t * set2)
+{
+	int i;
+	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++) {
+		int _ffs1 = topo_ffsl(TOPO_CPUSUBSET_SUBSET(*set1,i));
+		int _ffs2 = topo_ffsl(TOPO_CPUSUBSET_SUBSET(*set2,i));
+		if (!_ffs1 && !_ffs2)
+			continue;
+		/* if both have a bit set, compar for real */
+		if (_ffs1 && _ffs2)
+			return _ffs1-_ffs2;
+		/* one is empty, and it is considered higher, so reverse-compar them */
+		return _ffs2-_ffs1;
+	}
+	return 0;	
+}
+
+/** \brief Compar two cpusets using their last bits.
+ * Higher most significant bit is higher.
+ * Empty cpuset are considered lower than anything.
+ */
+static __inline__ int topo_cpuset_compar(const topo_cpuset_t * set1,
+					 const topo_cpuset_t * set2);
+static __inline__ int topo_cpuset_compar(const topo_cpuset_t * set1,
+					 const topo_cpuset_t * set2)
+{
+	int i;
+	for(i=TOPO_CPUSUBSET_COUNT-1; i>=0; i--) {
+		if (TOPO_CPUSUBSET_SUBSET(*set1,i) == TOPO_CPUSUBSET_SUBSET(*set2,i))
+			continue;
+		return TOPO_CPUSUBSET_SUBSET(*set1,i) < TOPO_CPUSUBSET_SUBSET(*set2,i) ? -1 : 1;
+	}
+	return 0;	
 }
 
 static inline int topo_weight_long(unsigned long w)
