@@ -39,8 +39,8 @@
 # hierarchies available here.  Return true on success.
 
 
-top_builddir="@top_builddir@"
-lstopo="$top_builddir/utils/lstopo"
+abs_top_builddir="@abs_top_builddir@"
+lstopo="$abs_top_builddir/utils/lstopo"
 
 topology="$1"
 

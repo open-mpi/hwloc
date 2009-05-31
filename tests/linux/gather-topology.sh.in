@@ -34,8 +34,8 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 #
 
-top_builddir="@top_builddir@"
-lstopo="$top_builddir/utils/lstopo"
+abs_top_builddir="@abs_top_builddir@"
+lstopo="$abs_top_builddir/utils/lstopo"
 
 name="$1"; shift
 [ -z "$name" ] && echo "Save name needed as an argument" && exit -1
