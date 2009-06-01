@@ -112,7 +112,7 @@ void
 topo_look_aix(struct topo_topology *topology)
 {
   unsigned i;
-    /* TODO: R_LGPGDEF/R_LGPGFREE */
+  /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
 
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {

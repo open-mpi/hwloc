@@ -164,7 +164,9 @@ topo_aix_set_cpubind(topo_cpuset_t *topo_set)
 
 int
 topo_set_cpubind(topo_cpuset_t *set)
-/* FIXME: add a pid parameter, which type is portable enough? */
+/* FIXME: add a pid parameter, which type is portable enough?  POSIX says that
+ * pid_t shall be a signed integer type, on windows that can be a handle
+ * (pointer) or an id.  */
 {
 #ifdef LINUX_SYS
   return topo_linux_set_cpubind(set);
