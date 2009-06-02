@@ -1,0 +1,38 @@
+System(1984MB)
+  Machine#2(992MB)
+    Socket#1
+      Core#0
+        P#16
+        P#20
+      Core#1
+        P#17
+        P#21
+      Core#2
+        P#18
+        P#22
+      Core#3
+        P#19
+        P#23
+  Machine#3(992MB)
+    Socket#1
+      Core#0
+        P#24
+        P#28
+      Core#1
+        P#25
+        P#29
+      Core#2
+        P#26
+        P#30
+      Core#3
+        P#27
+        P#31
+Topology is fake
+Huge page size: 2048kB
+depth 0:	type #0 (System)
+ depth 1:	type #1 (Machine)
+ depth 1:	type #2 (NUMANode)
+  depth 2:	type #3 (Socket)
+absent:		type #4 (Cache)
+   depth 3:	type #5 (Core)
+    depth 4:	type #6 (Proc)
