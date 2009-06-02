@@ -91,6 +91,8 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 		__l->first_child = NULL;		\
 		__l->next_sibling = NULL;		\
 		__l->prev_sibling = NULL;		\
+		__l->next_cousin = NULL;		\
+		__l->prev_cousin = NULL;		\
 		__l->father = NULL;			\
 		__l->physical_index = _index;		\
 		__l->userdata = NULL;			\
