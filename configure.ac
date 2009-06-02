@@ -141,6 +141,13 @@ AC_HAVE_HEADERS([mach/mach_init.h], [
   AC_CHECK_FUNCS([host_info])
 ])
 
+AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[
+#define _GNU_SOURCE
+#include <sched.h>
+static unsigned long mask;
+]], [[ sched_setaffinity(0, (void*) &mask);
+]]), AC_DEFINE([HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()]))
+
 AC_ARG_ENABLE([cairo],
   [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
   [enable_cairo="$enableval"],
