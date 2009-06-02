@@ -79,8 +79,8 @@ static void append_cpuset(topo_cpuset_t *set, topo_cpuset_t *newset,
 }
 
 static int append_object(topo_topology_t topology, struct topo_topology_info *topoinfo,
-			 topo_cpuset_t *set, const char *string,
-			 topomask_append_mode_t mode, int verbose)
+			 topo_cpuset_t *rootset, const char *string,
+			 topo_cpuset_t *set, topomask_append_mode_t mode, int verbose)
 {
   topo_obj_t obj;
   unsigned depth, width;
@@ -139,7 +139,7 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
     if (wrap && i==width)
       i = 0;
 
-    obj = topo_get_obj(topology, depth, i);
+    obj = topo_get_obj_below_cpuset_by_depth(topology, rootset, depth, i);
     if (obj) {
       if (verbose) {
 	if (obj)
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 
     colon = strchr(arg, ':');
     if (colon) {
-      append_object(topology, &topoinfo, &set, arg, mode, verbose);
+      append_object(topology, &topoinfo, &topo_get_system_obj(topology)->cpuset, arg, &set, mode, verbose);
     } else {
       topo_cpuset_t newset;
       topo_cpuset_zero(&newset);
