@@ -1,15 +1,20 @@
+* add topo_cpuset_use_single_cpu()
+  + Drop ignore_threads
+
 * clarify the API to obtain the number of nodes, procs, cores, ...
+  + add topo_get_type_nbobjs() returning -1 if multiple depth
 
 * take tests/synthetic.c and make it a topo_check() that could be invoked when debug is enabled,
   and on non-synthetic topo as well?
+
+* make doc
+  + doxygen seems ugly to integrate in automake
+  + texinfo is annoying
 
 * add support for amd magny-cours "multi-node-cpu", probably by reading 
   cpu_node_siblings/id if available (in 2.6.31+).
   should look like multiple sockets in single numa node?
   but looks like their L3s are hardware-merged
-
-* add a way to find the xth core below die #y so that PLPA really has no
-  advantage over us
 
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
@@ -17,6 +22,12 @@
 * have an easy way to get a valid full set (alias on get_machine_object()->cpuset) ?
 
 * there could be several size for huge pages
+
+* add some padding in the object attributes so that we can add new stuff
+  without breaking the ABI?
+  + for instance if we move dmi info in the machine attributes
+  + for instance if we add the cache type
+  + or make attribute a pointer?
 
 * integrate marcel split quirk?
   + split for real, just explain how to split?

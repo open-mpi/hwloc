@@ -50,11 +50,11 @@
  * Topology and Topology Info
  */
 
-/* \brief Topology context */
+/** \brief Topology context */
 struct topo_topology;
 typedef struct topo_topology * topo_topology_t;
 
-/* \brief Global information about the topology */
+/** \brief Global information about the topology */
 struct topo_topology_info {
   /* topology size */
   unsigned depth;
@@ -87,7 +87,7 @@ enum topo_obj_type_e {
 #define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_FAKE+1)
 typedef enum topo_obj_type_e topo_obj_type_t;
 
-/** Structure of a topology object */
+/** \brief Structure of a topology object */
 struct topo_obj {
   /* physical information */
   enum topo_obj_type_e type;		/**< \brief Type of object */
@@ -182,7 +182,7 @@ extern int topo_topology_set_synthetic(struct topo_topology *topology, const cha
  * Get Some Topology Information
  */
 
-/* \brief Get global information about the topology. */
+/** \brief Get global information about the topology. */
 extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
 
 /** \brief Returns the depth of objects of type _type_. If no object of
