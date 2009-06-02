@@ -84,5 +84,5 @@ topo_look_osf(struct topo_topology *topology)
   }
 
   /* add PROC objects */
-  topo_setup_proc_level(topology, NULL);
+  topo_setup_proc_level(topology, topo_fallback_nbprocessors(), NULL);
 }

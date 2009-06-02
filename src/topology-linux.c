@@ -436,7 +436,6 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	      topo_cpuset_t *admin_disabled_cpus_set)
 {
   topo_cpuset_t cpuset;
-  int nbprocessors;
 #define CPU_TOPOLOGY_STR_LEN 128
   char string[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
@@ -506,7 +505,6 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
     closedir(dir);
   }
 
-  topology->nb_processors = nbprocessors = topo_cpuset_weight(&cpuset);;
   topo_debug("found %d cpus, cpuset %" TOPO_PRIxCPUSET "\n",
 	     nbprocessors, TOPO_CPUSET_PRINTF_VALUE(&cpuset));
 
@@ -736,7 +734,7 @@ look_cpuinfo(struct topo_topology *topology, const char *path,
 
   /* setup the final number of procs */
   procid_max = processor + 1;
-  topology->nb_processors = numprocs = topo_cpuset_weight(online_cpuset);
+  numprocs = topo_cpuset_weight(online_cpuset);
 
   /* clear admin-disabled cpus */
   topo_cpuset_foreach_begin(i, online_cpuset) {
@@ -769,9 +767,6 @@ look_cpuinfo(struct topo_topology *topology, const char *path,
     } topo_cpuset_foreach_end();
   }
 
-  /* From here, topology->nb_processors is set to the number of available
-   * hardware resources, and online_cpuset covers them.
-   */
   topo_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
   topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",
 	     TOPO_CPUSET_PRINTF_VALUE(online_cpuset));
@@ -788,7 +783,7 @@ look_cpuinfo(struct topo_topology *topology, const char *path,
     topo_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
 
   /* setup the cpu level, removing nonfirst threads */
-  topo_setup_proc_level(topology, online_cpuset);
+  topo_setup_proc_level(topology, numprocs, online_cpuset);
 }
 
 static void

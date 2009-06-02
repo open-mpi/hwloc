@@ -58,7 +58,7 @@
    reading sysfs on Linux, this method is not virtualizable; thus it's only
    used as a fall-back method, allowing `topo_set_fsys_root ()' to
    have the desired effect.  */
-static unsigned
+unsigned
 topo_fallback_nbprocessors(void) {
 	/* TODO: change into HAVE_SC_foobar, for OSes that don't provide the macro version */
 #if defined(_SC_NPROCESSORS_ONLN)
@@ -85,18 +85,20 @@ topo_fallback_nbprocessors(void) {
 }
 
 
-/* Use the value stored in topology->nb_processors,
- * and the optional online cpuset if given.
+/*
+ * Use the given number of processors and the optional online cpuset if given
+ * to set a Proc level.
  */
 void
 topo_setup_proc_level(struct topo_topology *topology,
+		      unsigned nb_processors,
 		      topo_cpuset_t *online_cpuset)
 {
   struct topo_obj *obj;
   unsigned oscpu,cpu;
 
   topo_debug("\n\n * CPU cpusets *\n\n");
-  for (cpu=0,oscpu=0; cpu<topology->nb_processors; oscpu++)
+  for (cpu=0,oscpu=0; cpu<nb_processors; oscpu++)
     {
       if (online_cpuset && !topo_cpuset_isset(online_cpuset, oscpu))
        continue;
@@ -533,10 +535,6 @@ topo_discover(struct topo_topology *topology)
 
   assert(topology!=NULL);
 
-  /* Initialize the number of processor to some reasonable default, e.g.,
-     obtained using sysconf(3).  */
-  topology->nb_processors = topo_fallback_nbprocessors ();
-
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
   /* topo_look_* functions should use topo_obj_add to add objects initialized
    * through topo_setup_object. For node levels, memory_Kb and huge_page_free
@@ -569,7 +567,7 @@ topo_discover(struct topo_topology *topology)
 #    endif /* HAVE_LIBKSTAT */
 #    ifdef  SOLARIS_SYS
 #      define HAVE_OS_SUPPORT
-  topo_setup_proc_level(topology, NULL);
+  topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
 #    endif /* SOLARIS_SYS */
 
 #    ifdef  WIN_SYS
@@ -578,11 +576,8 @@ topo_discover(struct topo_topology *topology)
 #    endif /* WIN_SYS */
 
 #    ifndef HAVE_OS_SUPPORT
-  topo_setup_proc_level(topology, NULL);
+  topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
 #    endif /* Unsupported OS */
-
-  topo_debug("%d online processors found\n", topology->nb_processors);
-  assert(topology->nb_processors);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
@@ -735,7 +730,6 @@ topo_topology_init (struct topo_topology **topologyp)
   if(!topology)
     return -1;
 
-  topology->nb_processors = 0;
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->flags = 0;
   topology->is_fake = 0;
@@ -862,7 +856,6 @@ topo_topology_load (struct topo_topology *topology)
 int
 topo_topology_get_info(struct topo_topology *topology, struct topo_topology_info *info)
 {
-  info->nb_processors = topology->nb_processors;
   info->depth = topology->nb_levels;
   info->dmi_board_vendor = topology->dmi_board_vendor;
   info->dmi_board_name = topology->dmi_board_name;

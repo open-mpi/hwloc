@@ -56,6 +56,7 @@ main (int argc, char *argv[])
   topo_obj_t *closest;
   int found;
   int err;
+  unsigned numprocs;
 
   err = topo_topology_init (&topology);
   if (err)
@@ -72,19 +73,20 @@ main (int argc, char *argv[])
     return EXIT_FAILURE;
 
   /* get the last object of last level */
-  last = topo_get_obj(topology, info.depth-1, info.nb_processors-1);
+  numprocs =  topo_get_depth_nbobjs(topology, info.depth-1);
+  last = topo_get_obj(topology, info.depth-1, numprocs-1);
 
   /* allocate the array of closest objects */
-  closest = malloc(info.nb_processors * sizeof(*closest));
+  closest = malloc(numprocs * sizeof(*closest));
   assert(closest);
 
   /* get closest levels */
-  found = topo_find_closest_objs (topology, last, closest, info.nb_processors);
-  printf("looked for %d closest entries, found %d\n", info.nb_processors, found);
-  assert(found == info.nb_processors-1);
+  found = topo_find_closest_objs (topology, last, closest, numprocs);
+  printf("looked for %d closest entries, found %d\n", numprocs, found);
+  assert(found == numprocs-1);
 
   /* check first found is closest */
-  assert(closest[0] == topo_get_obj(topology, info.depth-1, info.nb_processors-5 /* arity is 5 on last level */));
+  assert(closest[0] == topo_get_obj(topology, info.depth-1, numprocs-5 /* arity is 5 on last level */));
   /* check some other expected positions */
   assert(closest[found-1] == topo_get_obj(topology, info.depth-1, 1*3*4*5-1 /* last of first half */));
   assert(closest[found/2-1] == topo_get_obj(topology, info.depth-1, 1*3*4*5+2*4*5-1 /* last of second third of second half */));

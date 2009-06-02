@@ -55,7 +55,6 @@ typedef enum topo_backend_e {
 } topo_backend_t;
 
 struct topo_topology {
-  unsigned nb_processors; 				/* Total number of physical processors */
   unsigned nb_levels;					/* Number of horizontal levels */
   unsigned level_nbobjects[TOPO_DEPTH_MAX]; 		/* Number of objects on each horizontal level */
   struct topo_obj **levels[TOPO_DEPTH_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbobjects[l]] */

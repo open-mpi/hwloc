@@ -330,8 +330,6 @@ topo_synthetic_load (struct topo_topology *topology)
   topo__synthetic_populate_topology(topology, root, topology->backend_params.synthetic.arity, 0);
   assert(root->arity == *topology->backend_params.synthetic.arity);
 
-  topology->nb_processors = topology->level_nbobjects[topology->nb_levels-1];
-
   node_level = topology->type_depth[TOPO_OBJ_NODE];
 
   machine_level = topology->type_depth[TOPO_OBJ_MACHINE];
@@ -393,6 +391,5 @@ topo_synthetic_load (struct topo_topology *topology)
       topology->levels[fake_level][i]->attr.fake.depth = fake_depth;
   }
 
-  topo_debug("synthetic topology: %u levels, %u processors\n",
-	     topology->nb_levels, topology->nb_processors);
+  topo_debug("synthetic topology: %u levels\n", topology->nb_levels);
 }
