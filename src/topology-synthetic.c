@@ -176,7 +176,7 @@ topo__synthetic_make_children(struct topo_topology *topology,
   assert(obj->children != NULL);
 
   for (i = 0; i < count; i++) {
-    obj->children[i] = obj_pool[i];
+    obj->children[i] = obj_pool[first_number + i];
     assert(obj->children[i] != NULL);
 
     switch(type) {
@@ -203,13 +203,13 @@ topo__synthetic_make_children(struct topo_topology *topology,
 
     /* Link siblings */
     if (i) {
-      obj->children[i]->prev_sibling = obj_pool[i-1];
-      obj_pool[i-1]->next_sibling = obj->children[i];
+      obj->children[i]->prev_sibling = obj_pool[first_number + i - 1];
+      obj_pool[first_number + i - 1]->next_sibling = obj->children[i];
     }
     /* Link cousins */
     if (first_number+i > 0) {
-      obj->children[i]->prev_cousin = obj_pool[i-1];
-      obj_pool[i-1]->next_cousin = obj->children[i];
+      obj->children[i]->prev_cousin = obj_pool[first_number + i - 1];
+      obj_pool[first_number + i - 1]->next_cousin = obj->children[i];
     }
 
     switch(type) {
@@ -250,7 +250,7 @@ topo__synthetic_populate_topology(struct topo_topology *topology, struct topo_ob
     siblings = topology->level_nbobjects[obj->level + 1];
 
     topo__synthetic_make_children(topology, obj, *level_breadth, type, siblings,
-				  &topology->levels[obj->level + 1][siblings]);
+				  topology->levels[obj->level + 1]);
 
     /* Increment the total breadth for this level.  */
     topology->level_nbobjects[obj->level + 1] += *level_breadth;
