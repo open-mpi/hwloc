@@ -75,11 +75,7 @@ topo_linux_set_cpubind(topo_cpuset_t *topo_set)
 #else /* CPU_SET */
   unsigned long mask = topo_cpuset_to_ulong(topo_set);
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
-  return sched_setaffinity(0, &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(0, sizeof(mask), &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
 #endif /* CPU_SET */
 }
 #endif /* LINUX_SYS */
@@ -99,6 +95,7 @@ topo_solaris_set_cpubind(topo_cpuset_t *topo_set)
 
   target = topo_cpuset_first(topo_set);
 
+  /* TODO: unbind: target should be PBIND_NONE */
   if (processor_bind(P_LWPID, P_MYID,
 		     (processorid_t) (target), NULL) != 0)
     return -1;
@@ -183,3 +180,5 @@ topo_set_cpubind(topo_cpuset_t *set)
   return -1;
 #endif
 }
+
+/* TODO: memory bind */
