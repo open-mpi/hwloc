@@ -68,8 +68,23 @@ int main(void)
     /* check sibling lists */
     assert(!topo_get_obj(topology, i, 0)->prev_sibling);
     for(j=1; j<width; j++) {
-      assert(topo_get_obj(topology, i, j)->prev_sibling == topo_get_obj(topology, i, j-1));
-      assert(topo_get_obj(topology, i, j-1)->next_sibling == topo_get_obj(topology, i, j));
+      topo_obj_t prev, next;
+
+      /* check that objects exist */
+      prev = topo_get_obj(topology, i, j-1);
+      assert(prev);
+      next = topo_get_obj(topology, i, j);
+      assert(next);
+
+      /* check cousin links */
+      assert(next->prev_cousin == prev);
+      assert(prev->next_cousin == next);
+
+      /* check sibling links */
+      assert(next->prev_sibling == (next == next->father->first_child ? NULL : prev));
+      assert(prev->next_sibling == (prev == prev->father->last_child ? NULL : next));   
+
+      /* TODO: count objects in these lists */
     }
     assert(!topo_get_obj(topology, i, width-1)->next_sibling);
 

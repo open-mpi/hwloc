@@ -678,6 +678,10 @@ topo_discover(struct topo_topology *topology)
     for (i = 0; i < n_taken_objs; i++) {
       taken_objs[i]->level = topology->nb_levels;
       taken_objs[i]->number = i;
+      if (i) {
+	taken_objs[i]->prev_cousin = taken_objs[i-1];
+	taken_objs[i-1]->next_cousin = taken_objs[i];
+      }
     }
 
     /* One more level!  */

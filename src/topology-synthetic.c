@@ -202,9 +202,14 @@ topo__synthetic_make_children(struct topo_topology *topology,
     obj->children[i]->number = first_number + i;
 
     /* Link siblings */
-    if (first_number+i > 0) {
+    if (i) {
       obj->children[i]->prev_sibling = obj_pool[i-1];
       obj_pool[i-1]->next_sibling = obj->children[i];
+    }
+    /* Link cousins */
+    if (first_number+i > 0) {
+      obj->children[i]->prev_cousin = obj_pool[i-1];
+      obj_pool[i-1]->next_cousin = obj->children[i];
     }
 
     switch(type) {

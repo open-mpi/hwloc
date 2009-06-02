@@ -118,6 +118,8 @@ struct topo_obj {
   /* father */
   struct topo_obj *father;		/**< \brief Father, NULL if root (system object) */
   unsigned index;			/**< \brief Index in fathers' children[] array */
+  struct topo_obj *next_sibling;	/**< \brief Next object below the same father*/
+  struct topo_obj *prev_sibling;	/**< \brief Previous object below the same father */
 
   /* children */
   unsigned arity;			/**< \brief Number of children */
@@ -125,9 +127,9 @@ struct topo_obj {
   struct topo_obj *first_child;		/**< \brief First child */
   struct topo_obj *last_child;		/**< \brief Last child */
 
-  /* siblings */
-  struct topo_obj *next_sibling;	/**< \brief Next object of the same type */
-  struct topo_obj *prev_sibling;	/**< \brief Previous object of the same type */
+  /* cousins */
+  struct topo_obj *next_cousin;		/**< \brief Next object of same type */
+  struct topo_obj *prev_cousin;		/**< \brief Previous object of same type */
 
   /* misc */
   void *userdata;			/**< \brief Application-given private data pointer, initialize to NULL, use it as you wish */
@@ -286,7 +288,7 @@ topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, topo_cpuset_t *set
 	return obj;
       count++;
     }
-    obj = obj->next_sibling;
+    obj = obj->next_cousin;
   }
   return NULL;
 }
