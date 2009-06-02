@@ -46,7 +46,7 @@ Support
   without breaking the ABI?
   + for instance if we move dmi info in the machine attributes
   + for instance if we add the cache type
-  + or make attribute a pointer?
+  + or make attribute a pointer?  (ST: I'd vote for that)
 
 * integrate marcel split quirk?
   + split for real, just explain how to split?
