@@ -352,9 +352,7 @@ topo_synthetic_load (struct topo_topology *topology)
     int i;
     topo_obj_t obj;
 
-    topology->nb_nodes = topology->level_nbobjects[node_level];
-
-    for(i=0 ; i<topology->nb_nodes ; i++) {
+    for(i=0 ; i<topology->level_nbobjects[node_level]; i++) {
       topology->levels[node_level][i]->attr.node.memory_kB = 1024*1024;
 
       for(obj = topology->levels[node_level][i]; obj; obj = obj->father)
@@ -362,8 +360,6 @@ topo_synthetic_load (struct topo_topology *topology)
 	  obj->attr.machine.memory_kB += topology->levels[node_level][i]->attr.node.memory_kB;
     }
 
-  } else {
-    topology->nb_nodes = 1;
   }
 
   cache_depth = 0;
@@ -397,6 +393,6 @@ topo_synthetic_load (struct topo_topology *topology)
       topology->levels[fake_level][i]->attr.fake.depth = fake_depth;
   }
 
-  topo_debug("synthetic topology: %u levels, %u processors, %u nodes\n",
-	     topology->nb_levels, topology->nb_processors, topology->nb_nodes);
+  topo_debug("synthetic topology: %u levels, %u processors\n",
+	     topology->nb_levels, topology->nb_processors);
 }

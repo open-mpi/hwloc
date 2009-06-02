@@ -58,7 +58,6 @@ typedef struct topo_topology * topo_topology_t;
 struct topo_topology_info {
   /* topology size */
   unsigned nb_processors;
-  unsigned nb_nodes;
   unsigned depth;
 
   /* machine specifics */
