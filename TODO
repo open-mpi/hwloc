@@ -1,3 +1,6 @@
+* clarify the API to obtain the number of nodes, procs, cores, ...
+  + remove nbnodes/nbprocs?
+
 * take tests/synthetic.c and make it a topo_check() that could be invoked when debug is enabled,
   and on non-synthetic topo as well?
 

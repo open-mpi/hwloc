@@ -48,6 +48,7 @@ static void usage(void)
   fprintf(stderr, "     X-Y\tall objects with index between X and Y\n");
   fprintf(stderr, "     X-\tall objects with index at least X\n");
   fprintf(stderr, "     X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
+  fprintf(stderr, "    several <depth:index> may be concatenated with `.' to select some specific children\n");
   fprintf(stderr, "  <string> may be a cpuset string\n");
   fprintf(stderr, "  if prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
 }
@@ -84,7 +85,7 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
 {
   topo_obj_t obj;
   unsigned depth, width;
-  char *sep, *sep2;
+  char *sep, *sep2, *sep3;
   unsigned first, wrap, amount;
   unsigned i,j;
 
@@ -121,15 +122,17 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
   amount = 1;
   wrap = 0;
 
+  sep3 = strchr(sep+1, '.');
+
   sep2 = strchr(sep+1, '-');
-  if (sep2) {
+  if (sep2 && (sep2 < sep3 || !sep3)) {
     if (*(sep2+1) == '\0')
       amount = width-first;
     else
       amount = atoi(sep2+1)-first+1;
   } else {
     sep2 = strchr(sep+1, ':');
-    if (sep2) {
+    if (sep2 && (sep2 < sep3 || !sep3)) {
       amount = atoi(sep2+1);
       wrap = 1;
     }
@@ -142,12 +145,18 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
     obj = topo_get_obj_below_cpuset_by_depth(topology, rootset, depth, i);
     if (verbose) {
       if (obj)
-	printf("object (%d,%d) found\n", depth, i);
+	printf("object #%d depth %d below cpuset %" TOPO_PRIxCPUSET " found\n",
+	       i, depth, TOPO_CPUSET_PRINTF_VALUE(rootset));
       else
-	printf("object (%d,%d) does not exist\n", depth, i);
+	printf("object #%d depth %d below cpuset %" TOPO_PRIxCPUSET " does not exist\n",
+	       i, depth, TOPO_CPUSET_PRINTF_VALUE(rootset));
     }
-    if (obj)
-      append_cpuset(set, &obj->cpuset, mode, verbose);
+    if (obj) {
+      if (sep3)
+	append_object(topology, topoinfo, &obj->cpuset, sep3+1, set, mode, verbose);
+      else
+        append_cpuset(set, &obj->cpuset, mode, verbose);
+    }
   }
 
   return 0;
