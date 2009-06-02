@@ -79,12 +79,12 @@ static void append_cpuset(topo_cpuset_t *set, topo_cpuset_t *newset,
 }
 
 static int append_object(topo_topology_t topology, struct topo_topology_info *topoinfo,
-			 topo_cpuset_t *set, const char *string, const char *sep,
+			 topo_cpuset_t *set, const char *string,
 			 topomask_append_mode_t mode, int verbose)
 {
   topo_obj_t obj;
   unsigned depth, width;
-  char *sep2;
+  char *sep, *sep2;
   unsigned first, wrap, amount;
   unsigned i,j;
 
@@ -109,6 +109,13 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
     return -1;
   }
   width = topo_get_depth_nbobjs(topology, depth);
+
+  sep = strchr(string, ':');
+  if (!sep) {
+    if (verbose)
+      fprintf(stderr, "missing colon separator in argument %s\n", string);
+    return -1;
+  } 
 
   first = atoi(sep+1);
   amount = 1;
@@ -183,7 +190,7 @@ int main(int argc, char *argv[])
 
     colon = strchr(arg, ':');
     if (colon) {
-      append_object(topology, &topoinfo, &set, arg, colon, mode, verbose);
+      append_object(topology, &topoinfo, &set, arg, mode, verbose);
     } else {
       topo_cpuset_t newset;
       topo_cpuset_zero(&newset);
