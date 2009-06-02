@@ -140,15 +140,14 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
       i = 0;
 
     obj = topo_get_obj_below_cpuset_by_depth(topology, rootset, depth, i);
-    if (obj) {
-      if (verbose) {
-	if (obj)
-	  printf("object (%d,%d) found\n", depth, i);
-	else
-	  printf("object (%d,%d) does not exist\n", depth, i);
-      }
-      append_cpuset(set, &obj->cpuset, mode, verbose);
+    if (verbose) {
+      if (obj)
+	printf("object (%d,%d) found\n", depth, i);
+      else
+	printf("object (%d,%d) does not exist\n", depth, i);
     }
+    if (obj)
+      append_cpuset(set, &obj->cpuset, mode, verbose);
   }
 
   return 0;
