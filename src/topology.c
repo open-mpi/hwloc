@@ -757,7 +757,7 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->level_nbobjects[0] = 1;
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = -1;
-  topology->levels[0] = calloc (2, sizeof (struct topo_obj));
+  topology->levels[0] = malloc (sizeof (struct topo_obj));
   topo_setup_system_level (topology->levels[0]);
 
   *topologyp = topology;

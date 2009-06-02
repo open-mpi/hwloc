@@ -137,7 +137,6 @@ topo_alloc_setup_object(enum topo_obj_type_e type, unsigned index)
 		__l1->attr.system.huge_page_free = 0;			\
 		topo_cpuset_fill(&__l1->cpuset);			\
 		__p[0] = __l1;						\
-		__p[1] = NULL;						\
   } while (0)
 
 
