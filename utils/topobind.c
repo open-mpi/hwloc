@@ -36,6 +36,8 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include <topology/helper.h>
+
 static void usage(void)
 {
   fprintf(stderr, "Usage: topobind [options] <cpuset> -- command ...\n");

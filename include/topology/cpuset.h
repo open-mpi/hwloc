@@ -102,13 +102,6 @@ topo_cpuset_snprintf(char * buf, size_t _size, topo_cpuset_t * set)
   return tmp-buf+1;
 }
 
-/** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
-#define TOPO_CPUSET_PRINTF_VALUE(x)	({					\
-	char *__buf = alloca(TOPO_CPUSET_STRING_LENGTH+1);			\
-	topo_cpuset_snprintf(__buf, TOPO_CPUSET_STRING_LENGTH+1, x);		\
-	__buf;									\
-     })
-
 /** \brief Parse a cpuset string.
  * Must start and end with a digit.
  */

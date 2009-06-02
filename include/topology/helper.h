@@ -43,6 +43,23 @@
 
 #include <assert.h>
 
+#ifdef HAVE_ALLOCA_H
+# include <alloca.h>
+#elif defined __GNUC__
+# define alloca __builtin_alloca
+#elif defined _AIX
+# define alloca __alloca
+#elif defined _MSC_VER
+# include <malloc.h>
+# define alloca _alloca
+#else
+# include <stddef.h>
+# ifdef  __cplusplus
+extern "C"
+# endif
+void *alloca (size_t);
+#endif
+
 extern void topo_setup_proc_level(struct topo_topology *topology, unsigned nb_processors, topo_cpuset_t *online_cpuset);
 extern unsigned topo_fallback_nbprocessors(void);
 
@@ -155,5 +172,11 @@ topo_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *pr
   topo_debug("\n");
 }
 
+/** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
+#define TOPO_CPUSET_PRINTF_VALUE(x)	({					\
+	char *__buf = alloca(TOPO_CPUSET_STRING_LENGTH+1);			\
+	topo_cpuset_snprintf(__buf, TOPO_CPUSET_STRING_LENGTH+1, x);		\
+	__buf;									\
+     })
 
 #endif /* TOPOLOGY_HELPER_H */
