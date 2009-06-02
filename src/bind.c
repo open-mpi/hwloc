@@ -90,12 +90,17 @@ topo_solaris_set_cpubind(topo_cpuset_t *topo_set)
 {
   unsigned target;
 
+  if (topo_cpuset_isfull(topo_set)) {
+    if (processor_bind(P_LWPID, P_MYID, PBIND_NONE, NULL) != 0)
+      return -1;
+    return 0;
+  }
+
   if (topo_cpuset_weight(topo_set) != 1)
     return -1;
 
   target = topo_cpuset_first(topo_set);
 
-  /* TODO: unbind: target should be PBIND_NONE */
   if (processor_bind(P_LWPID, P_MYID,
 		     (processorid_t) (target), NULL) != 0)
     return -1;
@@ -143,6 +148,10 @@ static int
 topo_aix_set_cpubind(topo_cpuset_t *topo_set)
 {
   unsigned target;
+
+  if (topo_cpuset_isfull(topo_set)) {
+#warning TODO unbind thread
+  }
 
   if (topo_cpuset_weight(topo_set) != 1)
     return -1;
