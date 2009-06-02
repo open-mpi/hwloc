@@ -1,25 +1,44 @@
-* add topo_cpuset_use_single_cpu()
-  + Drop ignore_threads
+API
+
+Split API into two levels?
+- low-level API with sort of Turing power
+- high-level API that give examples how use the low-level API. Could be only
+  static inlines.
+
 
 * clarify the API to obtain the number of nodes, procs, cores, ...
   + add topo_get_type_nbobjs() returning -1 if multiple depth
 
-* take tests/synthetic.c and make it a topo_check() that could be invoked when debug is enabled,
-  and on non-synthetic topo as well?
+* cache or node specific functions?
+  + get nodes covering a cpuset?
+  + get shared cache*S* covering a cpuset?
 
-* make doc
-  + doxygen seems ugly to integrate in automake
-  + texinfo is annoying
-
-* add support for amd magny-cours "multi-node-cpu", probably by reading 
-  cpu_node_siblings/id if available (in 2.6.31+).
-  should look like multiple sockets in single numa node?
-  but looks like their L3s are hardware-merged
+* add topo_cpuset_use_single_cpu()
+  + Drop ignore_threads
 
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
 * have an easy way to get a valid full set (alias on get_machine_object()->cpuset) ?
+
+* expose the internal conversion from cpuset to sched_setaffinity mask?
+  + reverse routine?
+
+Doc
+===
+* make doc
+  + doxygen seems ugly to integrate in automake
+  + texinfo is annoying
+
+Support
+=======
+* take tests/synthetic.c and make it a topo_check() that could be invoked when debug is enabled,
+  and on non-synthetic topo as well?
+
+* add support for amd magny-cours "multi-node-cpu", probably by reading 
+  cpu_node_siblings/id if available (in 2.6.31+).
+  should look like multiple sockets in single numa node?
+  but looks like their L3s are hardware-merged
 
 * there could be several size for huge pages
 
@@ -36,26 +55,22 @@
 * use topology_allocator for real, including in strdup
   + add topo_set_allocator() to be called before _init()
 
-* cache or node specific functions?
-  + get nodes covering a cpuset?
-  + get shared cache*S* covering a cpuset?
-
-* topo_set_cpubind(pid, ...) which type for pid? POSIX says that pid_t is a
-  signed integer type
-* topo_set_cpubind for threads, pb: depending on the OS, the function takes a
-  pthread_t or a kernel tid.
-* expose the internal conversion from cpuset to sched_setaffinity mask?
-  + reverse routine?
-* topo_set_membind()
-  + reverse routine?
-  + no level = empty mask, and we may want an easy alias for "whole machine"
-
 * Kerrighed: Use
 int migrate (pid_t pid, int destination_node);
 int migrate_self (int destination_node);
 int thread_migrate (int thread_id, int destination_node);
 
 * move dmi_* to a machine object?
+
+Binding
+=======
+* topo_set_cpubind(pid, ...) which type for pid? POSIX says that pid_t is a
+  signed integer type
+* topo_set_cpubind for threads, pb: depending on the OS, the function takes a
+  pthread_t or a kernel tid.
+* topo_set_membind()
+  + reverse routine?
+  + no level = empty mask, and we may want an easy alias for "whole machine"
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
