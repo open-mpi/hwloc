@@ -72,6 +72,9 @@ Binding
   + reverse routine?
   + no level = empty mask, and we may want an easy alias for "whole machine"
 
+* make them do nothing if passed a fake topology?
+  + so applications can just always call them and still have synthetic tests.
+
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
   bind process on 2 cores near physical proc id 3
