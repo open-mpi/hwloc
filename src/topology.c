@@ -535,6 +535,10 @@ topo_discover(struct topo_topology *topology)
 
   assert(topology!=NULL);
 
+  if (topology->backend_type == TOPO_BACKEND_SYNTHETIC) {
+    topo_look_synthetic(topology);
+  } else {
+
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
   /* topo_look_* functions should use topo_obj_add to add objects initialized
    * through topo_setup_object. For node levels, memory_Kb and huge_page_free
@@ -546,38 +550,39 @@ topo_discover(struct topo_topology *topology)
 
 #    ifdef LINUX_SYS
 #      define HAVE_OS_SUPPORT
-  topo_look_linux(topology);
+    topo_look_linux(topology);
 #    endif /* LINUX_SYS */
 
 #    ifdef  AIX_SYS
 #      define HAVE_OS_SUPPORT
-  topo_look_aix(topology);
+    topo_look_aix(topology);
 #    endif /* AIX_SYS */
 
 #    ifdef  OSF_SYS
 #      define HAVE_OS_SUPPORT
-  topo_look_osf(topology);
+    topo_look_osf(topology);
 #    endif /* OSF_SYS */
 
 #    ifdef HAVE_LIBLGRP
-  topo_look_lgrp(topology);
+    topo_look_lgrp(topology);
 #    endif /* HAVE_LIBLGRP */
 #    ifdef HAVE_LIBKSTAT
-  topo_look_kstat(topology);
+    topo_look_kstat(topology);
 #    endif /* HAVE_LIBKSTAT */
 #    ifdef  SOLARIS_SYS
 #      define HAVE_OS_SUPPORT
-  topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
+    topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
 #    endif /* SOLARIS_SYS */
 
 #    ifdef  WIN_SYS
 #      define HAVE_OS_SUPPORT
-  topo_look_windows(topology);
+    topo_look_windows(topology);
 #    endif /* WIN_SYS */
 
 #    ifndef HAVE_OS_SUPPORT
-  topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
+    topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
 #    endif /* Unsupported OS */
+  }
 
   print_objects(topology, 0, topology->levels[0][0]);
 
@@ -845,10 +850,7 @@ topo_topology_load (struct topo_topology *topology)
 #endif
   }
 
-  if (topology->backend_type == TOPO_BACKEND_SYNTHETIC)
-    topo_synthetic_load(topology);
-  else
-    topo_discover(topology);
+  topo_discover(topology);
 
   return 0;
 }

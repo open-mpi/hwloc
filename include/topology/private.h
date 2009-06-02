@@ -78,7 +78,9 @@ struct topo_topology {
       /* synthetic backend parameters */
 #define TOPO_SYNTHETIC_MAX_DEPTH 128
       unsigned arity[TOPO_SYNTHETIC_MAX_DEPTH];
-      unsigned type[TOPO_SYNTHETIC_MAX_DEPTH];
+      topo_obj_type_t type[TOPO_SYNTHETIC_MAX_DEPTH];
+      unsigned id[TOPO_SYNTHETIC_MAX_DEPTH];
+      unsigned depth[TOPO_SYNTHETIC_MAX_DEPTH]; /* For cache/fake */
     } synthetic;
   } backend_params;
 };

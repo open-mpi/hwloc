@@ -90,7 +90,8 @@ extern void topo_look_windows(struct topo_topology *topology);
 
 extern int topo_backend_synthetic_init(struct topo_topology *topology, const char *description);
 extern void topo_backend_synthetic_exit(struct topo_topology *topology);
-extern void topo_synthetic_load (struct topo_topology *topology);
+extern void topo_look_synthetic (struct topo_topology *topology);
+
 extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 
 #ifdef __GLIBC__

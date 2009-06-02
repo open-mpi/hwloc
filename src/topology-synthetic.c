@@ -50,7 +50,10 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
 
   assert(topology->backend_type == TOPO_BACKEND_NONE);
 
-  for (pos = description, count = 0; *pos; pos = next_pos) {
+  topology->backend_params.synthetic.type[0] = TOPO_OBJ_SYSTEM;
+  topology->backend_params.synthetic.id[0] = 0;
+
+  for (pos = description, count = 1; *pos; pos = next_pos) {
 #define TOPO_OBJ_TYPE_UNKNOWN -1
     unsigned type = TOPO_OBJ_TYPE_UNKNOWN;
 
@@ -92,8 +95,9 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     assert(count + 1 < TOPO_SYNTHETIC_MAX_DEPTH);
     assert(item <= UINT_MAX);
 
-    topology->backend_params.synthetic.arity[count] = (unsigned)item;
+    topology->backend_params.synthetic.arity[count-1] = (unsigned)item;
     topology->backend_params.synthetic.type[count] = type;
+    topology->backend_params.synthetic.id[count] = 0;
     count++;
   }
 
@@ -102,7 +106,8 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     return -1;
   }
 
-  topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
+  int cache_depth = 0, fake_depth = 0;
+  int nb_machine_levels = 0, nb_node_levels = 0;
 
   for(i=0; i<count; i++) {
     enum topo_obj_type_e type;
@@ -121,11 +126,43 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
       }
       topology->backend_params.synthetic.type[i] = type;
     }
+    switch (type) {
+      case TOPO_OBJ_CACHE:
+	cache_depth++;
+	break;
+      case TOPO_OBJ_FAKE:
+	fake_depth++;
+	break;
+      case TOPO_OBJ_NODE:
+	if (nb_node_levels) {
+	    fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
+	    return -1;
+	}
+	nb_node_levels++;
+	break;
+      case TOPO_OBJ_MACHINE:
+	if (nb_machine_levels) {
+	    fprintf(stderr,"synthetic string can not have several machine levels\n");
+	    return -1;
+	}
+	nb_machine_levels++;
+	break;
+      default:
+	break;
+    }
+  }
 
-    if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN)
-      topology->type_depth[type] = i+1;
-    else
-      topology->type_depth[type] = TOPO_TYPE_DEPTH_MULTIPLE;
+  if (cache_depth == 1)
+    /* if there is a single cache level, make it L2 */
+    cache_depth = 2;
+
+  for (i=0; i<count; i++) {
+    topo_obj_type_t type = topology->backend_params.synthetic.type[i];
+
+    if (type == TOPO_OBJ_FAKE)
+      topology->backend_params.synthetic.depth[i] = fake_depth--;
+    else if (type == TOPO_OBJ_CACHE)
+      topology->backend_params.synthetic.depth[i] = cache_depth--;
   }
 
   /* last level must be PROC */
@@ -134,20 +171,8 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     return -1;
   }
 
-  /* their cannot be multiple NODE level (or nbnodes must be fixed) */
-  if (topology->type_depth[TOPO_OBJ_NODE] == TOPO_TYPE_DEPTH_MULTIPLE) {
-    fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
-    return -1;
-  }
-
-  /* their cannot be multiple MACHINE level */
-  if (topology->type_depth[TOPO_OBJ_MACHINE] == TOPO_TYPE_DEPTH_MULTIPLE) {
-    fprintf(stderr,"synthetic string can not have several machine levels\n");
-    return -1;
-  }
-
   topology->backend_type = TOPO_BACKEND_SYNTHETIC;
-  topology->backend_params.synthetic.arity[count] = 0;
+  topology->backend_params.synthetic.arity[count-1] = 0;
   topology->is_fake = 1;
 
   return 0;
@@ -159,237 +184,109 @@ topo_backend_synthetic_exit(struct topo_topology *topology)
   assert(topology->backend_type == TOPO_BACKEND_SYNTHETIC);
   topology->backend_type = TOPO_BACKEND_NONE;
 }
-/* Allocate COUNT nodes of type TYPE as children of LEVEL, with numbers
-   starting from FIRST_NUMBER.  Individual nodes are allocated from
-   OBJ_POOL, which must point to an array of at least COUNT objects (children
-   N's storage will be NODE_POOL[N]).  */
-static void
-topo__synthetic_make_children(struct topo_topology *topology,
-			      struct topo_obj *obj, unsigned count,
-			      enum topo_obj_type_e type, unsigned first_number,
-			      struct topo_obj **obj_pool)
-{
-  unsigned i;
-  unsigned physical_index;
 
-  obj->children = calloc(count, sizeof(*obj->children));
-  assert(obj->children != NULL);
-
-  for (i = 0; i < count; i++) {
-    obj->children[i] = obj_pool[first_number + i];
-    assert(obj->children[i] != NULL);
-
-    switch(type) {
-    case TOPO_OBJ_PROC:
-    case TOPO_OBJ_CORE:
-    case TOPO_OBJ_CACHE:
-    case TOPO_OBJ_SOCKET:
-    case TOPO_OBJ_NODE:
-    case TOPO_OBJ_MACHINE:
-      physical_index = first_number + i;
-      break;
-    default:
-      physical_index = -1;
-      break;
-    }
-
-    obj->arity = count;
-
-    topo_setup_object(obj->children[i], type, physical_index);
-    obj->children[i]->father = obj;
-    obj->children[i]->index = i;
-    obj->children[i]->level = obj->level + 1;
-    obj->children[i]->number = first_number + i;
-
-    /* Link siblings */
-    if (i) {
-      obj->children[i]->prev_sibling = obj_pool[first_number + i - 1];
-      obj_pool[first_number + i - 1]->next_sibling = obj->children[i];
-    }
-    /* Link cousins */
-    if (first_number+i > 0) {
-      obj->children[i]->prev_cousin = obj_pool[first_number + i - 1];
-      obj_pool[first_number + i - 1]->next_cousin = obj->children[i];
-    }
-
-    switch(type) {
-    case TOPO_OBJ_FAKE:
-      obj->children[i]->attr.fake.depth = 0;
-      break;
-    default:
-      break;
-    }
-  }
-
-  obj->first_child = obj->children[0];
-  obj->last_child = obj->children[count-1];
-}
-
-/* Recursively populate the topology starting from LEVEL according to
-   LEVEL_BREADTH, and number levels starting at FIRST_INDEX.
-   Return the total number of levels beneath LEVEL.  */
+/*
+ * Recursively build objects whose cpu start at first_cpu
+ * - level gives where to look in the type, arity and id arrays
+ * - the id array is used as a variable to get unique IDs for a given level.
+ * - generated memory should be added to *memory_kB.
+ * - generated cpus should be added to parent_cpuset.
+ * - next cpu number to be used should be returned.
+ */
 static unsigned
-topo__synthetic_populate_topology(struct topo_topology *topology, struct topo_obj *obj,
-				  const unsigned *level_breadth, unsigned first_index)
+topo__look_synthetic(struct topo_topology *topology,
+    int level, unsigned first_cpu,
+    unsigned long *parent_memory_kB,
+    topo_cpuset_t *parent_cpuset)
 {
-  unsigned i, count;
-  enum topo_obj_type_e type;
+  unsigned long my_memory = 0, *pmemory = parent_memory_kB;
+  topo_obj_t obj;
+  unsigned i;
+  topo_obj_type_t type = topology->backend_params.synthetic.type[level];
 
-  /* Recursion ends when *LEVEL_BREADTH is zero, meaning that OBJ has no
-     children.  */
-  if (*level_breadth > 0) {
-    unsigned siblings;
+  /* pre-hooks */
+  switch (type) {
+    case TOPO_OBJ_FAKE:
+      break;
+    case TOPO_OBJ_SYSTEM:
+      /* Shouldn't happen.  */
+      abort();
+      break;
+    case TOPO_OBJ_MACHINE:
+      /* Gather memory size from memory nodes for this machine */
+      pmemory = &my_memory;
+      break;
+    case TOPO_OBJ_NODE:
+      break;
+    case TOPO_OBJ_SOCKET:
+      break;
+    case TOPO_OBJ_CACHE:
+      break;
+    case TOPO_OBJ_CORE:
+      break;
+    case TOPO_OBJ_PROC:
+      break;
+  }
 
-    /* Processors don't have children.  */
-    assert(obj->type != TOPO_OBJ_PROC);
+  obj = topo_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
 
-    /* Determine the children object type, either from the given string, or use a default type.  */
-    type = topology->backend_params.synthetic.type[obj->level];
-
-    /* Current number of siblings on our children's object to our left.  */
-    siblings = topology->level_nbobjects[obj->level + 1];
-
-    topo__synthetic_make_children(topology, obj, *level_breadth, type, siblings,
-				  topology->levels[obj->level + 1]);
-
-    /* Increment the total breadth for this level.  */
-    topology->level_nbobjects[obj->level + 1] += *level_breadth;
-
-    for (i = 0, count = 0; i < *level_breadth; i++)
-      count += topo__synthetic_populate_topology(topology,
-						    obj->children[i],
-						    level_breadth + 1,
-						    first_index + count);
-
-    /* Aggregate the cpusets of our kids.  */
-    topo_cpuset_zero(&obj->cpuset);
-    for (i = 0; i < *level_breadth; i++)
-      topo_cpuset_orset(&obj->cpuset, &obj->children[i]->cpuset);
-
+  if (type == TOPO_OBJ_PROC) {
+    assert(topology->backend_params.synthetic.arity[level] == 0);
+    topo_cpuset_set(&obj->cpuset, first_cpu++);
   } else {
-    /* Only processors have no children.  */
-    assert(obj->type == TOPO_OBJ_PROC);
-
-    topo_cpuset_zero(&obj->cpuset);
-    topo_cpuset_set(&obj->cpuset, first_index);
-
-    count = 1;
+    assert(topology->backend_params.synthetic.arity[level] != 0);
+    for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
+      first_cpu = topo__look_synthetic(topology, level + 1, first_cpu, pmemory, &obj->cpuset);
   }
 
-  return count;
-}
+  topo_add_object(topology, obj);
 
-/* Allocate an array for each topology level described by TOPOLOGY. */
-static void
-topo__synthetic_allocate_topology_levels(struct topo_topology *topology,
-					 const unsigned *breadths)
-{
-  const unsigned *level_breadth;
-  unsigned level, total_level_breadth;
+  topo_cpuset_orset(parent_cpuset, &obj->cpuset);
 
-  for (level = 1, level_breadth = breadths, total_level_breadth = 1;
-       *level_breadth > 0;
-       level++, level_breadth++) {
-    unsigned i;
-    topo_obj_t *objs;
-
-    total_level_breadth *= *level_breadth;
-
-    topo_debug("synthetic topology: creating level %u with breadth %u (%u children per father)\n",
-	       topology->nb_levels, total_level_breadth, *level_breadth);
-    objs = calloc(total_level_breadth+1, sizeof(struct topo_obj *));
-    assert(objs != NULL);
-
-    for(i=0; i<total_level_breadth; i++) {
-      objs[i] = malloc(sizeof(struct topo_obj));
-      assert(objs[i]);
-    }
-
-    /* Update the level type to level mapping.  */
-    topology->levels[level] = objs;
-
-    topology->nb_levels++;
+  /* post-hooks */
+  switch (type) {
+    case TOPO_OBJ_FAKE:
+      obj->attr.fake.depth = topology->backend_params.synthetic.depth[level];
+      break;
+    case TOPO_OBJ_SYSTEM:
+      abort();
+      break;
+    case TOPO_OBJ_MACHINE:
+      obj->attr.machine.memory_kB = my_memory;
+      *parent_memory_kB += obj->attr.machine.memory_kB;
+      break;
+    case TOPO_OBJ_NODE:
+      /* 1GB in memory nodes.  */
+      obj->attr.node.memory_kB = 1024*1024;
+      *parent_memory_kB += obj->attr.node.memory_kB;
+      obj->attr.node.huge_page_free = 0;
+      break;
+    case TOPO_OBJ_SOCKET:
+      break;
+    case TOPO_OBJ_CACHE:
+      obj->attr.cache.depth = topology->backend_params.synthetic.depth[level];
+      if (obj->attr.cache.depth == 1)
+	/* 32Kb in L1 */
+	obj->attr.cache.memory_kB = 32*1024;
+      else
+	/* *4 at each level, starting from 1MB for L2 */
+	obj->attr.cache.memory_kB = 256*1024 << (2*obj->attr.cache.depth);
+      break;
+    case TOPO_OBJ_CORE:
+      break;
+    case TOPO_OBJ_PROC:
+      break;
   }
 
-  assert(topology->nb_levels > 1);
-
-  topo_debug("synthetic topology: total number of levels: %u\n", topology->nb_levels);
+  return first_cpu;
 }
 
 void
-topo_synthetic_load (struct topo_topology *topology)
+topo_look_synthetic(struct topo_topology *topology)
 {
-  struct topo_obj *root;
-  int node_level, cache_level, fake_level, machine_level;
-  int cache_depth, fake_depth;
+  topo_cpuset_t cpuset;
+  unsigned first_cpu = 0, i;
 
-  topo__synthetic_allocate_topology_levels(topology, topology->backend_params.synthetic.arity);
-
-  root = topology->levels[0][0];
-
-  topo__synthetic_populate_topology(topology, root, topology->backend_params.synthetic.arity, 0);
-  assert(root->arity == *topology->backend_params.synthetic.arity);
-
-  node_level = topology->type_depth[TOPO_OBJ_NODE];
-
-  machine_level = topology->type_depth[TOPO_OBJ_MACHINE];
-  if (machine_level != TOPO_TYPE_DEPTH_UNKNOWN) {
-    int i;
-
-    for(i=0 ; i<topology->level_nbobjects[machine_level] ; i++) {
-      topology->levels[machine_level][i]->attr.machine.memory_kB =
-	node_level != TOPO_TYPE_DEPTH_UNKNOWN ? 0 : 1024*1024;
-      topology->levels[0][0]->attr.system.memory_kB +=
-        topology->levels[machine_level][i]->attr.machine.memory_kB;
-    }
-  }
-
-  assert(node_level != TOPO_TYPE_DEPTH_MULTIPLE);
-  if (node_level != TOPO_TYPE_DEPTH_UNKNOWN) {
-    /* Assume this level is the node level.  */
-    int i;
-    topo_obj_t obj;
-
-    for(i=0 ; i<topology->level_nbobjects[node_level]; i++) {
-      topology->levels[node_level][i]->attr.node.memory_kB = 1024*1024;
-
-      for(obj = topology->levels[node_level][i]; obj; obj = obj->father)
-	if (obj->type == TOPO_OBJ_MACHINE || obj->type == TOPO_OBJ_SYSTEM)
-	  obj->attr.machine.memory_kB += topology->levels[node_level][i]->attr.node.memory_kB;
-    }
-
-  }
-
-  cache_depth = 0;
-  for(cache_level=topology->nb_levels-1; cache_level>=0; cache_level--) {
-    int i;
-
-    if (topology->levels[cache_level][0]->type != TOPO_OBJ_CACHE)
-      continue;
-
-    /* if there is a single cache level, make it L2 */
-    if (topology->type_depth[TOPO_OBJ_CACHE] != TOPO_TYPE_DEPTH_MULTIPLE)
-      cache_depth = 2;
-    else
-      cache_depth++;
-
-    for(i=0 ; i<topology->level_nbobjects[cache_level] ; i++) {
-      topology->levels[cache_level][i]->attr.cache.memory_kB = 4*1024;
-      topology->levels[cache_level][i]->attr.cache.depth = cache_depth;
-    }
-  }
-
-  fake_depth = 0;
-  for(fake_level=topology->nb_levels-1; fake_level>=0; fake_level--) {
-    int i;
-
-    if (topology->levels[fake_level][0]->type != TOPO_OBJ_FAKE)
-      continue;
-
-    fake_depth++;
-    for(i=0 ; i<topology->level_nbobjects[fake_level] ; i++)
-      topology->levels[fake_level][i]->attr.fake.depth = fake_depth;
-  }
-
-  topo_debug("synthetic topology: %u levels\n", topology->nb_levels);
+  for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
+    first_cpu = topo__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr.system.memory_kB, &cpuset);
 }
