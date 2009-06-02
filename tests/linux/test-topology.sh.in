@@ -49,25 +49,6 @@ error()
     echo $@ 2>&1
 }
 
-# topology_cpu_count TOPOLOGY-DIR
-#
-# Print the number of CPUs listed in the sysfs hierarchy under
-# TOPOLOGY-DIR.
-topology_cpu_count()
-{
-    ( cd "$1"/sys/devices/system/cpu ; echo cpu[0-9]* | wc -w )
-}
-
-# flavor_max_cpu_count
-#
-# Print the maximum number of CPUs supported in the current flavor's
-# CPU set implementation.
-flavor_max_cpu_count()
-{
-    # Must be equal to `LIBTOPO_NBMAXCPUS'.
-    echo 1024
-}
-
 # test_topology NAME TOPOLOGY-DIR
 #
 # Test the topology under TOPOLOGY-DIR.  Return true on success.
@@ -104,8 +85,7 @@ test_eligible()
     local dir="$1"
     local output="$2"
 
-    [ -d "$dir" -a -f "$output" ] &&				\
-	[ `flavor_max_cpu_count` -ge `topology_cpu_count "$dir"` ]
+    [ -d "$dir" -a -f "$output" ]
 }
 
 
