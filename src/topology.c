@@ -50,6 +50,13 @@
 #include <topology/debug.h>
 #include <topology/allocator.h>
 
+#ifdef HAVE_MACH_MACH_INIT_H
+#include <mach/mach_init.h>
+#endif
+#ifdef HAVE_MACH_MACH_HOST_H
+#include <mach/mach_host.h>
+#endif
+
 #ifdef WIN_SYS
 #include <windows.h>
 #endif
@@ -60,15 +67,15 @@
    have the desired effect.  */
 unsigned
 topo_fallback_nbprocessors(void) {
-	/* TODO: change into HAVE_SC_foobar, for OSes that don't provide the macro version */
-#if defined(_SC_NPROCESSORS_ONLN)
+#if HAVE_DECL__SC_NPROCESSORS_ONLN
   return sysconf(_SC_NPROCESSORS_ONLN);
-#elif defined(_SC_NPROCESSORS_CONF)
+#elif HAVE_DECL__SC_NPROC_ONLN
+  return sysconf(_SC_NPROC_ONLN);
+#elif HAVE_DECL__SC_NPROCESSORS_CONF
   return sysconf(_SC_NPROCESSORS_CONF);
-#elif defined(_SC_NPROC_CONF) || defined(IRIX_SYS)
+#elif HAVE_DECL__SC_NPROC_CONF
   return sysconf(_SC_NPROC_CONF);
-	/* TODO: change into HAVE_HOST_INFO */
-#elif defined(DARWIN_SYS)
+#elif HAVE_HOST_INFO
   struct host_basic_info info;
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);

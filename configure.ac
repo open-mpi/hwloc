@@ -131,6 +131,16 @@ AC_CHECK_HEADERS([kstat.h], [
   AC_HAVE_LIBRARY([kstat])
 ])
 
+AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
+		_SC_NPROCESSORS_CONF,
+		_SC_NPROC_ONLN,
+		_SC_NPROC_CONF],,[:],[[#include <unistd.h>]])
+
+AC_HAVE_HEADERS([mach/mach_host.h])
+AC_HAVE_HEADERS([mach/mach_init.h], [
+  AC_CHECK_FUNCS([host_info])
+])
+
 AC_ARG_ENABLE([cairo],
   [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
   [enable_cairo="$enableval"],
