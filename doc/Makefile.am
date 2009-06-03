@@ -103,8 +103,8 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topology_info.3 \
 	@DX_DOCDIR@/man/man3/topology_information.3 \
 	@DX_DOCDIR@/man/man3/topology_objects.3 \
-	@DX_DOCDIR@/man/man3/topology_traversal.3 \
-	
+	@DX_DOCDIR@/man/man3/topology_traversal.3
+
 $(dist_man3_MANS): doxygen-doc
 
 endif
@@ -146,8 +146,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/system.3 \
 	@DX_DOCDIR@/man/man3/topology.h.3 \
 	@DX_DOCDIR@/man/man3/type.3 \
-	@DX_DOCDIR@/man/man3/userdata.3 \
-	
+	@DX_DOCDIR@/man/man3/userdata.3
 endif
 
 #info_TEXINFOS = libtopology.texi
