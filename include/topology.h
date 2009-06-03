@@ -65,8 +65,12 @@ struct topo_topology_info {
   /** \brief machine specifics */
   char *dmi_board_vendor;
   char *dmi_board_name;
+
+  /** \brief size of huge pages */
   unsigned long huge_page_size_kB;
-  int is_fake; /**< set if the topology is different from the actual underlying machine */
+
+  /** \brief set if the topology is different from the actual underlying machine */
+  int is_fake;
 };
 
 
@@ -76,7 +80,10 @@ struct topo_topology_info {
  * @{
  */
 
-/** \brief Type of topology object.  Do not rely on any relative ordering of the values.  */
+/** \brief Type of topology object.
+ *
+ * Do not rely on any relative ordering of the values.
+ */
 enum topo_obj_type_e {
   TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines) */
   TOPO_OBJ_MACHINE,	/**< \brief Machine */
@@ -84,7 +91,7 @@ enum topo_obj_type_e {
   TOPO_OBJ_SOCKET,	/**< \brief Socket, physical package, or chip */
   TOPO_OBJ_CACHE,	/**< \brief Cache */
   TOPO_OBJ_CORE,	/**< \brief Core */
-  TOPO_OBJ_PROC,	/**< \brief (Logical) Processor (e.g. a thread in a SMT core) */
+  TOPO_OBJ_PROC,	/**< \brief (Logical) Processor (e.g. a thread in an SMT core) */
 
   TOPO_OBJ_FAKE,	/**< \brief Fake object that may be needed under special circumstances (like arbitrary OS aggregation)  */
 };
@@ -115,21 +122,21 @@ struct topo_obj {
     struct topo_fake_attr_u {
       unsigned depth;			  /**< \brief Depth of fake object */
     } fake;
-  } attr;
+  } attr;				  /**< \brief Object type-specific attributes */
 
   /* global position */
   unsigned level;			/**< \brief Vertical index in the hierarchy */
   unsigned number;			/**< \brief Horizontal index in the whole list of similar objects */
 
   /* father */
-  struct topo_obj *father;		/**< \brief Father, NULL if root (system object) */
-  unsigned index;			/**< \brief Index in fathers' children[] array */
+  struct topo_obj *father;		/**< \brief Father, \c NULL if root (system object) */
+  unsigned index;			/**< \brief Index in father's \c children[] array */
   struct topo_obj *next_sibling;	/**< \brief Next object below the same father*/
   struct topo_obj *prev_sibling;	/**< \brief Previous object below the same father */
 
   /* children */
   unsigned arity;			/**< \brief Number of children */
-  struct topo_obj **children;		/**< \brief Children, children[0 .. arity -1] */
+  struct topo_obj **children;		/**< \brief Children, \c children[0 .. arity -1] */
   struct topo_obj *first_child;		/**< \brief First child */
   struct topo_obj *last_child;		/**< \brief Last child */
 
@@ -138,7 +145,7 @@ struct topo_obj {
   struct topo_obj *prev_cousin;		/**< \brief Previous object of same type */
 
   /* misc */
-  void *userdata;			/**< \brief Application-given private data pointer, initialize to NULL, use it as you wish */
+  void *userdata;			/**< \brief Application-given private data pointer, initialize to \c NULL, use it as you wish */
 
   /* cpuset */
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this object */
@@ -152,37 +159,54 @@ typedef struct topo_obj * topo_obj_t;
  * @{
  */
 
-/** \brief Allocate a topology context. */
+/** \brief Allocate a topology context.
+ *
+ * \param[out] topologyp is assigned a pointer to the new allocated context.
+ *
+ * \return 0 on success, -1 on error.
+ */
 extern int topo_topology_init (topo_topology_t *topologyp);
-/** \brief Build the actual topology once initialized with _init and tuned with routines below */
+/** \brief Build the actual topology
+ *
+ * Build the actual topology once initialized with topo_topology_init() and
+ * tuned with ::topology_configuration routine
+ *
+ * \param topology is the topology to be loaded with objects.
+ *
+ * \return 0 on success, -1 on error.
+ *
+ * \sa topology_configuration
+ */
 extern int topo_topology_load(topo_topology_t topology);
-/** \brief Terminate and free a topology context. */
+/** \brief Terminate and free a topology context
+ *
+ * \param topology is the topology to be freed
+ */
 extern void topo_topology_destroy (topo_topology_t topology);
 
 /** @} */
 
 /** \defgroup topology_configuration Configure Topology (between init and load)
+ *
+ * These functions should be called between topology_init() and topology_load()
+ * to configure how the detection should be performed.
+ *
  * @{
  */
 
-/** \brief Ignore a object type.
-    To be called between _init and _load. */
+/** \brief Ignore an object type. */
 extern int topo_topology_ignore_type(topo_topology_t topology, topo_obj_type_t type);
-/** \brief Ignore a object type if it does not bring any structure.
-    To be called between _init and _load. */
+/** \brief Ignore an object type if it does not bring any structure. */
 extern int topo_topology_ignore_type_keep_structure(topo_topology_t topology, topo_obj_type_t type);
-/** \brief Ignore all objects that do not bring any structure.
-    To be called between _init and _load. */
+/** \brief Ignore all objects that do not bring any structure. */
 extern int topo_topology_ignore_all_keep_structure(topo_topology_t topology);
-/** \brief Set OR'ed flags to non-yet-loaded topology.
-    To be called between _init and _load.  */
+/** \brief Set OR'ed flags to non-yet-loaded topology. */
 enum topo_flags_e {
   TOPO_FLAGS_IGNORE_THREADS = (1<<0),
   TOPO_FLAGS_IGNORE_ADMIN_DISABLE = (1<<1), /* Linux Cpusets, ... */
 };
 extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
-/** \brief Change the file-system root path when building the topology from sysfs/procs.
-    To be called between _init and _load.  */
+/** \brief Change the file-system root path when building the topology from sysfs/procs. */
 extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
 /** \brief Enable synthetic topology. */
 extern int topo_topology_set_synthetic(struct topo_topology *topology, const char *description);
@@ -197,18 +221,20 @@ extern int topo_topology_set_synthetic(struct topo_topology *topology, const cha
 /** \brief Get global information about the topology. */
 extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
 
-/** \brief Returns the depth of objects of type _type_. If no object of
-    this type is present on the underlying architecture, the function
-    returns the depth of the first "present" object we find uppon
-    _type_. */
+/** \brief Returns the depth of objects of type _type_.
+ *
+ * If no object of this type is present on the underlying architecture, the
+ * function returns the depth of the first "present" object we find uppon \p
+ * type.
+ */
 extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_obj_type_e type);
 #define TOPO_TYPE_DEPTH_UNKNOWN -1
 #define TOPO_TYPE_DEPTH_MULTIPLE -2
 
-/** \brief Returns the type of objects at depth _depth_. */
+/** \brief Returns the type of objects at depth \p depth. */
 extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);
 
-/** \brief Returns the width of level at depth _depth_ */
+/** \brief Returns the width of level at depth \p depth */
 extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth);
 
 /** @} */
@@ -218,10 +244,10 @@ extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth)
  * @{
  */
 
-/** \brief Returns the topology object at index _index_ from depth _depth_ */
+/** \brief Returns the topology object at index \p index from depth \p depth */
 extern topo_obj_t topo_get_obj (topo_topology_t topology, unsigned depth, unsigned index);
 
-/** \brief Returns the top-object of the topology-tree. Its type is TOPO_OBJ_SYSTEM. */
+/** \brief Returns the top-object of the topology-tree. Its type is ::TOPO_OBJ_SYSTEM. */
 static inline topo_obj_t topo_get_system_obj (topo_topology_t topology)
 {
   return topo_get_obj(topology, 0, 0);
@@ -242,26 +268,29 @@ static inline topo_obj_t topo_find_common_ancestor_obj (topo_obj_t obj1, topo_ob
 }
 
 /** \brief Returns true if _obj_ is inside the subtree beginning
-    with _subtree_root_. */
+    with \p subtree_root. */
 static inline int topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_root)
 {
   return topo_cpuset_isincluded(&obj->cpuset, &subtree_root->cpuset);
 }
 
 /** \brief Do a depth-first traversal of the topology to find and sort
-    all objects that are at the same depth than _src_.
-    Report in _lvls_ up to _max_ physically closest ones to _src_.
-    Return the actual number of objects that were found. */
+ *
+ *  all objects that are at the same depth than \p src.
+ *  Report in \p objs up to \p max physically closest ones to \p src.
+ *
+ *  \return the actual number of objects that were found.
+ */
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? */
 extern int topo_find_closest_objs (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
 
-/** \brief Find the lowest object covering at least the given cpuset */
+/** \brief Find the lowest object covering at least the given cpuset \p set */
 extern topo_obj_t topo_find_cpuset_covering_obj (topo_topology_t topology, topo_cpuset_t *set);
 
-/** \brief Find objects covering exactly a given cpuset */
+/** \brief Find objects covering exactly a given cpuset \p set */
 extern int topo_find_cpuset_objs (topo_topology_t topology, topo_cpuset_t *set, topo_obj_t *objs, int max);
 
-/** \brief Find the first cache covering a cpuset */
+/** \brief Find the first cache covering a cpuset \p set */
 static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, topo_cpuset_t *set)
 {
   topo_obj_t current = topo_find_cpuset_covering_obj(topology, set);
@@ -305,7 +334,8 @@ topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, topo_cpuset_t *set
 }
 
 /** \brief Among objects at given depth and below a root object, return the nth.
- * If root is NULL, use the top-object (system).
+ *
+ * If root is \c NULL, use the top-object (system).
  */
 static inline topo_obj_t
 topo_get_obj_below_by_depth (topo_topology_t topology, topo_obj_t root,
@@ -317,8 +347,9 @@ topo_get_obj_below_by_depth (topo_topology_t topology, topo_obj_t root,
 }
 
 /** \brief Among objects of given type and below a root object, return the nth.
- * If root is NULL, use the top-object (system).
- * If there are multiple depth for given type, return NULL and let the caller
+ *
+ * If root is \c NULL, use the top-object (system).
+ * If there are multiple depth for given type, return \c NULL and let the caller
  * fallback to topo_get_obj_below_by_depth().
  */
 static inline topo_obj_t
@@ -341,12 +372,14 @@ topo_get_obj_below_by_type (topo_topology_t topology, topo_obj_t root,
 extern const char * topo_obj_type_string (enum topo_obj_type_e l);
 
 /** \brief Stringify a given topology object into a human-readable form.
- * Returns how many characters were actually written (not including the ending \0). */
+ *
+ * \return how many characters were actually written (not including the ending \\0). */
 extern int topo_obj_snprintf(char *string, size_t size,
 			     struct topo_topology *topology, topo_obj_t l, const char *indexprefix, int verbose);
 
 /** \brief Stringify the cpuset containing a set of objects.
- * Returns how many characters were actually written (not including the ending \0). */
+ *
+ * \return how many characters were actually written (not including the ending \\0). */
 extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
 
 /** @} */
@@ -356,7 +389,7 @@ extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_ob
  * @{
  */
 
-/** \brief Bind current process on cpus given in the set */
+/** \brief Bind current process on cpus given in cpuset \p set */
 extern int topo_set_cpubind(topo_cpuset_t *set);
 
 /** @} */
