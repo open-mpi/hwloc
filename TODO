@@ -27,7 +27,8 @@ Split API into two levels?
 Doc
 ===
 * make doc
-  + doxygen seems ugly to integrate in automake
+  + doxygen seems ugly to integrate in automake (ST: ? We could just use
+  http://ben-kiki.org/oren/doxample/)
   + texinfo is annoying
 
 Support
