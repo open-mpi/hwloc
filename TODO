@@ -26,6 +26,7 @@ Split API into two levels?
 
 Doc
 ===
+* fix make dist and make distcheck
 * complete doc
 
 Support
