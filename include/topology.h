@@ -32,7 +32,6 @@
  */
 
 /** \file
- * \brief Main functions
  */
 
 #ifndef TOPOLOGY_H
@@ -54,8 +53,8 @@
  * @{
  */
 
-/** \brief Topology context */
 struct topo_topology;
+/** \brief Topology context */
 typedef struct topo_topology * topo_topology_t;
 
 /** \brief Global information about the topology */
