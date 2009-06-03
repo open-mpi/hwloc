@@ -41,7 +41,7 @@
 
 
 
-/**
+/*
  * Cpuset bitmask definitions
  */
 
@@ -98,17 +98,21 @@ struct topo_obj {
   signed physical_index;		/**< \brief OS-provided physical index number */
 
   union topo_obj_attr_u {
-    struct topo_cache_attr_u {		/**< \brief Cache-specific attributes */
+    /** \brief Cache-specific attributes */
+    struct topo_cache_attr_u {
       unsigned long memory_kB;		  /**< \brief Size of cache */
       unsigned depth;			  /**< \brief Depth of cache */
     } cache;
-    struct topo_memory_attr_u {		/**< \brief Node-specific attributes */
+
+    /** \brief Node-specific attributes */
+    struct topo_memory_attr_u {
       unsigned long memory_kB;		  /**< \brief Size of memory node */
       unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
     } node;
     struct topo_memory_attr_u machine;	/**< \brief Machine-specific attributes */
     struct topo_memory_attr_u system;	/**< \brief System-specific attributes */
-    struct topo_fake_attr_u {		/**< \brief Fake-specific attributes */
+    /** \brief Fake-specific attributes */
+    struct topo_fake_attr_u {
       unsigned depth;			  /**< \brief Depth of fake object */
     } fake;
   } attr;

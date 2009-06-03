@@ -10,6 +10,8 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_FULL.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_STRING_LENGTH.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_ZERO.3 \
+	@DX_DOCDIR@/man/man3/TOPO_FLAGS_IGNORE_ADMIN_DISABLE.3 \
+	@DX_DOCDIR@/man/man3/TOPO_FLAGS_IGNORE_THREADS.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_CACHE.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_CORE.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_FAKE.3 \
@@ -25,6 +27,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_cpuset_foreach_begin.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_foreach_end.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_t.3 \
+	@DX_DOCDIR@/man/man3/topo_flags_e.3 \
 	@DX_DOCDIR@/man/man3/topo_find_closest_objs.3 \
 	@DX_DOCDIR@/man/man3/topo_find_cpuset_covering_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_find_cpuset_objs.3 \
@@ -36,6 +39,10 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_obj_cpuset_snprintf.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_snprintf.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_t.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_cache_attr_u.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_fake_attr_u.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_memory_attr_u.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_e.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_string.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_t.3 \
@@ -74,12 +81,14 @@ if DX_COND_man
 EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/arity.3 \
 	@DX_DOCDIR@/man/man3/attr.3 \
+	@DX_DOCDIR@/man/man3/cache.3 \
 	@DX_DOCDIR@/man/man3/children.3 \
 	@DX_DOCDIR@/man/man3/cpuset.3 \
 	@DX_DOCDIR@/man/man3/cpuset.h.3 \
 	@DX_DOCDIR@/man/man3/depth.3 \
 	@DX_DOCDIR@/man/man3/dmi_board_name.3 \
 	@DX_DOCDIR@/man/man3/dmi_board_vendor.3 \
+	@DX_DOCDIR@/man/man3/fake.3 \
 	@DX_DOCDIR@/man/man3/father.3 \
 	@DX_DOCDIR@/man/man3/first_child.3 \
 	@DX_DOCDIR@/man/man3/huge_page_size_kB.3 \
@@ -87,13 +96,17 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/is_fake.3 \
 	@DX_DOCDIR@/man/man3/last_child.3 \
 	@DX_DOCDIR@/man/man3/level.3 \
+	@DX_DOCDIR@/man/man3/machine.3 \
+	@DX_DOCDIR@/man/man3/memory_kB.3 \
 	@DX_DOCDIR@/man/man3/next_cousin.3 \
 	@DX_DOCDIR@/man/man3/next_sibling.3 \
 	@DX_DOCDIR@/man/man3/number.3 \
+	@DX_DOCDIR@/man/man3/node.3 \
 	@DX_DOCDIR@/man/man3/physical_index.3 \
 	@DX_DOCDIR@/man/man3/prev_cousin.3 \
 	@DX_DOCDIR@/man/man3/prev_sibling.3 \
 	@DX_DOCDIR@/man/man3/s.3 \
+	@DX_DOCDIR@/man/man3/system.3 \
 	@DX_DOCDIR@/man/man3/topology.h.3 \
 	@DX_DOCDIR@/man/man3/type.3 \
 	@DX_DOCDIR@/man/man3/userdata.3
