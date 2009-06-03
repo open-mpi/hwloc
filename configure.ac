@@ -45,6 +45,15 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_SRCDIR([src/topology.c])
+DX_MAN_FEATURE(ON)
+DX_HTML_FEATURE(ON)
+DX_CHM_FEATURE(OFF)
+DX_CHI_FEATURE(OFF)
+DX_RTF_FEATURE(OFF)
+DX_XML_FEATURE(OFF)
+DX_PDF_FEATURE(ON)
+DX_PS_FEATURE(OFF)
+DX_INIT_DOXYGEN(libtopology, doxygen.cfg, doxygen-doc)
 AM_INIT_AUTOMAKE([1.10 foreign -Wall -Werror])
 
 #
@@ -219,6 +228,7 @@ AC_CONFIG_HEADER([include/config.h])
 
 AC_CONFIG_FILES([Makefile
                  topology.pc
+                 doc/doxygen.cfg
                  include/Makefile src/Makefile utils/Makefile
 		 tests/Makefile tests/linux/Makefile
 		 tests/linux/gather-topology.sh

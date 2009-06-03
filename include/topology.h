@@ -31,6 +31,10 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+/** \file
+ * \brief Main functions
+ */
+
 #ifndef TOPOLOGY_H
 #define TOPOLOGY_H
 
@@ -46,8 +50,8 @@
 
 
 
-/**
- * Topology and Topology Info
+/** \defgroup topology_info Topology and Topology Info
+ * @{
  */
 
 /** \brief Topology context */
@@ -56,20 +60,21 @@ typedef struct topo_topology * topo_topology_t;
 
 /** \brief Global information about the topology */
 struct topo_topology_info {
-  /* topology size */
+  /** \brief topology size */
   unsigned depth;
 
-  /* machine specifics */
+  /** \brief machine specifics */
   char *dmi_board_vendor;
   char *dmi_board_name;
   unsigned long huge_page_size_kB;
-  int is_fake; /* set if the topology is different from the actual underlying machine */
+  int is_fake; /**< set if the topology is different from the actual underlying machine */
 };
 
 
+/** @} */
 
-/**
- * Topology Objects
+/** \defgroup topology_objects Topology Objects
+ * @{
  */
 
 /** \brief Type of topology object.  Do not rely on any relative ordering of the values.  */
@@ -138,9 +143,10 @@ struct topo_obj {
 typedef struct topo_obj * topo_obj_t;
 
 
+/** @} */
 
-/**
- * Create and Destroy Topologies
+/** \defgroup topology_creation Create and Destroy Topologies
+ * @{
  */
 
 /** \brief Allocate a topology context. */
@@ -150,8 +156,10 @@ extern int topo_topology_load(topo_topology_t topology);
 /** \brief Terminate and free a topology context. */
 extern void topo_topology_destroy (topo_topology_t topology);
 
-/**
- * Configure Topology (between init and load)
+/** @} */
+
+/** \defgroup topology_configuration Configure Topology (between init and load)
+ * @{
  */
 
 /** \brief Ignore a object type.
@@ -176,10 +184,11 @@ extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsy
 /** \brief Enable synthetic topology. */
 extern int topo_topology_set_synthetic(struct topo_topology *topology, const char *description);
 
+/** @} */
 
 
-/**
- * Get Some Topology Information
+/** \defgroup topology_information Get Some Topology Information
+ * @{
  */
 
 /** \brief Get global information about the topology. */
@@ -199,10 +208,11 @@ extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsig
 /** \brief Returns the width of level at depth _depth_ */
 extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth);
 
+/** @} */
 
 
-/**
- * Topology Traversal
+/** \defgroup topology_traversal Topology Traversal
+ * @{
  */
 
 /** \brief Returns the topology object at index _index_ from depth _depth_ */
@@ -318,9 +328,10 @@ topo_get_obj_below_by_type (topo_topology_t topology, topo_obj_t root,
   return topo_get_obj_below_by_depth(topology, root, depth, index);
 }
 
+/** @} */
 
-/**
- * Object/String Conversion
+/** \defgroup topology_conversion Object/String Conversion
+ * @{
  */
 
 /** \brief Return a stringified topology object type */
@@ -335,15 +346,17 @@ extern int topo_obj_snprintf(char *string, size_t size,
  * Returns how many characters were actually written (not including the ending \0). */
 extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
 
+/** @} */
 
 
-/**
- * Binding
+/** \defgroup topology_binding Binding
+ * @{
  */
 
 /** \brief Bind current process on cpus given in the set */
 extern int topo_set_cpubind(topo_cpuset_t *set);
 
+/** @} */
 
 
 #endif /* TOPOLOGY_H */

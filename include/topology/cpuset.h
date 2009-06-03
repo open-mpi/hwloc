@@ -31,7 +31,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-/* The cpuset API, for use in libtopology itself.  */
+/** \file
+ * \brief The cpuset API, for use in libtopology itself.
+ */
 
 #ifndef TOPOLOGY_CPUSET_H
 #define TOPOLOGY_CPUSET_H
@@ -39,6 +41,10 @@
 #include <topology/config.h>
 #include <topology/cpuset-bits.h>
 
+
+/** \defgroup topology_cpuset The cpuset API, for use in libtopology itself.
+ * @{
+ */
 
 
 /**
@@ -455,5 +461,7 @@ static __inline__ int topo_cpuset_weight(const topo_cpuset_t * cpuset)
                 if (topo_cpuset_isset(cpuset, cpu)) {
 #define topo_cpuset_foreach_end() \
                 }
+
+/** @} */
 
 #endif /* TOPOLOGY_CPUSET_H */
