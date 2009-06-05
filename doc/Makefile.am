@@ -94,7 +94,6 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_topology_set_fsys_root.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_set_synthetic.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_t.3 \
-	@DX_DOCDIR@/man/man3/topo_weight_long.3 \
 	@DX_DOCDIR@/man/man3/topology_binding.3 \
 	@DX_DOCDIR@/man/man3/topology_configuration.3 \
 	@DX_DOCDIR@/man/man3/topology_conversion.3 \
