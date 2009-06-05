@@ -186,7 +186,7 @@ extern void topo_topology_destroy (topo_topology_t topology);
 
 /** @} */
 
-/** \defgroup topology_configuration Configure Topology (between init and load)
+/** \defgroup topology_configuration Configure Topology detection
  *
  * These functions should be called between topology_init() and topology_load()
  * to configure how the detection should be performed.

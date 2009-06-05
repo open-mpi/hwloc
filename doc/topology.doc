@@ -1,0 +1,207 @@
+/*
+ * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ *
+ * This software is a computer program whose purpose is to provide
+ * abstracted information about the hardware topology.
+ *
+ * This software is governed by the CeCILL-B license under French law and
+ * abiding by the rules of distribution of free software.  You can  use,
+ * modify and/ or redistribute the software under the terms of the CeCILL-B
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL-B license and that you accept its terms.
+ */
+/*! \mainpage Libtopology
+
+\section Introduction
+
+libtopology provides a portable abstraction (across OS, versions, architectures,
+...) of the hierarchical topology of modern architectures. It primarily aims at
+helping high-performance computing application with gathering information about
+the hardware so as to exploit it accordingly and efficiently.
+
+libtopology provides a hierarchical view of the machine, NUMA memory nodes,
+sockets, shared caches, cores and simultaneous multithreading. It also gathers
+various attributes such as cache and memory information.
+
+libtopology supports the following operationg systems:
+
+<ul>
+  <li> Linux (including old kernels not having sysfs topology information, with
+  knowledge of cpusets and offline cpus)
+  <li> Solaris
+  <li> AIX
+  <li> OSF/1 (aka. Tru64)
+  <li> Windows
+  <li> For other OSes, only the number of processors is available for now.
+</ul>
+
+For development and debugging purposes, libtopology also offers the ability to
+work on fake topologies:
+
+<ul>
+  <li> Symmetrical tree of resources generated from a list of level arities
+  <li> Remote machine simulation through the gathering of Linux sysfs topology files
+</ul>
+
+libtopology may also display the topology in a convenient format, either in
+graphical mode, or by exporting in PDF, PNG, FIG, ... format, or in text mode
+(see Examples below).
+
+libtopology offers a programming interface for manipulating topologies and
+objects. It also brings a powerful cpu bitmap API that is used to describe
+topology objects location on physical/logical processors. See the Interface
+below. It may also be used to binding applications onto certain cores or
+memory nodes. Several utility programs are also provided to ease command-line
+manipulation of topology objects, binding of processes, ...
+
+Section \ref installation details how to install libtopology, and section \ref
+example details an example how to use libtopology.
+
+\chapter installation Installation
+
+<a href="http://libtopology.gforge.inria.fr/">libtopology</a> is available under the CeCILL-B license (BSD-like).
+
+The current SVN snapshot may be tested with:
+
+<ul>
+ <li>svn checkout svn://scm.gforge.inria.fr/svn/libtopology/trunk libtopology
+ <li>cd libtopology
+ <li>autoreconf -ifv
+ <li>./configure --prefix=...
+ <li>make
+ <li>make install
+</ul>
+
+Note that autoconf >=2.60, automake >=1.10 and libtool >=2.2.6 are required.
+
+The project is hosted by the <a href="http://gforge.inria.fr/projects/libtopology/">INRIA Gforge</a>.
+
+\section installation Installation
+
+<a href="http://libtopology.gforge.inria.fr/">libtopology</a> is available under the CeCILL-B license (BSD-like).
+
+The current SVN snapshot may be tested with:
+
+<ul>
+ <li>svn checkout svn://scm.gforge.inria.fr/svn/libtopology/trunk libtopology
+ <li>cd libtopology
+ <li>autoreconf -ifv
+ <li>./configure --prefix=...
+ <li>make
+ <li>make install
+</ul>
+
+Note that autoconf >=2.60, automake >=1.10 and libtool >=2.2.6 are required.
+
+The project is hosted by the <a href="http://gforge.inria.fr/projects/libtopology/">INRIA Gforge</a>.
+
+\section example Example of use
+
+This section shows how to use libtopology with an small example \c topo-hello.c
+that just prints the topology and binds itself to the first processor of the
+second core of the machine.
+
+Libtopology provides a pkg-config object, so compiling the example boils down to
+
+\verbatim
+CFLAGS+=$(pkg-config --cflags topology)
+LDLIBS+=$(pkg-config --libs topology)
+cc topo-hello.c $(CFLAGS) -o topo-hello $(LDLIBS)
+\endverbatim
+
+\code
+/* topo-hello.c */
+#include <topology.h>
+
+static void print_children(topo_topology_t topology, topo_obj_t obj, int depth)
+{
+	char string[128];
+	int i;
+
+	topo_obj_snprintf(string, sizeof(string), topology, obj, "", 0);
+	printf("%*s%s\n", 2*depth, "", string);
+	for (i = 0; i < obj->arity; i++)
+		print_children(topology, obj->children[i], depth + 1);
+}
+
+int main(void)
+{
+	/* Topology object */
+	topo_topology_t topology;
+
+	/* Allocate and initialize topology object.  */
+	topo_topology_init(&topology);
+
+	/* ... Put detection configuration here...
+	   See topology_configuration.  */
+
+	/* Perform the topology detection.  */
+	topo_topology_load(topology);
+
+
+	/* Get topology information.  */
+	struct topo_topology_info topoinfo;
+	topo_topology_get_info(topology, &topoinfo);
+
+
+	/* Walk the topology with an array style.  */
+	unsigned depth, i;
+	char string[128];
+	for (depth = 0; depth < topoinfo.depth; depth++) {
+		for (i = 0; i < topo_get_depth_nbobjs(topology, depth); i++) {
+			topo_obj_snprintf(string, sizeof(string), topology,
+					topo_get_obj(topology, depth, i), "", 0);
+			printf("%s\n", string);
+		}
+	}
+
+	/* Walk the topology with a tree style.  */
+	print_children(topology, topo_get_system_obj(topology), 0);
+
+
+	/* Find out where cores are.  */
+	depth = topo_get_depth_type(topology, TOPO_OBJ_CORE);
+
+	/* Get second core.  */
+	topo_obj_t core = topo_get_obj(topology, depth, 1);
+	if (!core)
+		return 0;
+
+	/* Get its cpuset.  */
+	topo_cpuset_t cpuset = core->cpuset;
+
+	/* Get only one processor.  */
+	topo_cpuset_singlify(&cpuset);
+
+	/* And bind there.  */
+	topo_set_cpubind(&cpuset);
+
+
+	/* Destroy topology object.  */
+	topo_topology_destroy(topology);
+
+	return 0;
+}
+\endcode
+
+*/

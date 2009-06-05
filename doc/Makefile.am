@@ -148,4 +148,15 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/userdata.3
 endif
 
+TESTS = topo-hello
+
+topo-hello.c: topology.doc
+	sed -e '0,/\\code/d' -e '/\\endcode/,$$d' < $^ > $@
+
+MOSTLYCLEANFILES += topo-hello.c
+
+check_PROGRAMS = $(TESTS)
+
+LIBS = $(top_builddir)/src/libtopology.la
+
 #info_TEXINFOS = libtopology.texi
