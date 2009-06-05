@@ -228,6 +228,8 @@ output_x11(topo_topology_t topology, FILE *output, int verbose_mode)
   int x = 0, y = 0; /* shut warning down */
   int lastx = disp->x, lasty = disp->y;
 
+  topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
+
   while (!finish) {
     XEvent e;
     if (!XEventsQueued(disp->dpy, QueuedAlready)) {
