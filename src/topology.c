@@ -155,7 +155,7 @@ enum topo_type_cmp_e {
 
 static const int obj_type_order[] = {
   [TOPO_OBJ_SYSTEM] = 0,
-  [TOPO_OBJ_FAKE] = 1,
+  [TOPO_OBJ_MISC] = 1,
   [TOPO_OBJ_NODE] = 2,
   [TOPO_OBJ_SOCKET] = 3,
   [TOPO_OBJ_CACHE] = 4,
@@ -180,10 +180,10 @@ topo_type_cmp(topo_obj_t obj1, topo_obj_t obj2)
   }
 
   /* Fake objects have the same types but can have different depths.  */
-  if (obj1->type == TOPO_OBJ_FAKE) {
-    if (obj1->attr.fake.depth < obj2->attr.fake.depth)
+  if (obj1->type == TOPO_OBJ_MISC) {
+    if (obj1->attr.misc.depth < obj2->attr.misc.depth)
       return TOPO_TYPE_DEEPER;
-    else if (obj1->attr.fake.depth > obj2->attr.fake.depth)
+    else if (obj1->attr.misc.depth > obj2->attr.misc.depth)
       return TOPO_TYPE_HIGHER;
   }
 
@@ -550,7 +550,7 @@ topo_discover(struct topo_topology *topology)
   /* topo_look_* functions should use topo_obj_add to add objects initialized
    * through topo_setup_object. For node levels, memory_Kb and huge_page_free
    * must be initialized. For cache levels, memory_kB and attr.cache.depth must be
-   * initialized, for fake levels, attr.fake.depth must be initialized
+   * initialized, for misc levels, attr.misc.depth must be initialized
    */
   /* There must be at least a PROC object for each logical processor, at worse
    * produced by topo_setup_proc_level()  */
@@ -724,7 +724,7 @@ topo_discover(struct topo_topology *topology)
   for (type = TOPO_OBJ_SYSTEM; type < TOPO_OBJ_TYPE_MAX; type++)
     {
       if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
-	if (type != TOPO_OBJ_CACHE && type != TOPO_OBJ_FAKE)
+	if (type != TOPO_OBJ_CACHE && type != TOPO_OBJ_MISC)
 	  topology->type_depth[type] = prevdepth;
       } else {
 	prevdepth = topology->type_depth[type];
@@ -752,7 +752,7 @@ topo_topology_init (struct topo_topology **topologyp)
   for(i=0; i< TOPO_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = TOPO_IGNORE_TYPE_NEVER;
   /* Avoid useless cruft */
-  topology->ignored_types[TOPO_OBJ_FAKE] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
+  topology->ignored_types[TOPO_OBJ_MISC] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
   topology->level_nbobjects[0] = 1;
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)

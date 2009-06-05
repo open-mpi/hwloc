@@ -76,8 +76,8 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
 	type = TOPO_OBJ_CACHE;
       else if (!strncmp(pos, "procs", 1))
 	type = TOPO_OBJ_PROC;
-      else if (!strncmp(pos, "fakes", 1))
-	type = TOPO_OBJ_FAKE;
+      else if (!strncmp(pos, "misc", 1))
+	type = TOPO_OBJ_MISC;
 
       next_pos = strchr(pos, ':');
       if (!next_pos) {
@@ -106,7 +106,7 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     return -1;
   }
 
-  int cache_depth = 0, fake_depth = 0;
+  int cache_depth = 0, misc_depth = 0;
   int nb_machine_levels = 0, nb_node_levels = 0;
 
   for(i=0; i<count; i++) {
@@ -122,7 +122,7 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
       case 3: type = TOPO_OBJ_SOCKET; break;
       case 4: type = TOPO_OBJ_NODE; break;
       case 5: type = TOPO_OBJ_MACHINE; break;
-      default: type = TOPO_OBJ_FAKE; break;
+      default: type = TOPO_OBJ_MISC; break;
       }
       topology->backend_params.synthetic.type[i] = type;
     }
@@ -130,8 +130,8 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
       case TOPO_OBJ_CACHE:
 	cache_depth++;
 	break;
-      case TOPO_OBJ_FAKE:
-	fake_depth++;
+      case TOPO_OBJ_MISC:
+	misc_depth++;
 	break;
       case TOPO_OBJ_NODE:
 	if (nb_node_levels) {
@@ -159,8 +159,8 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
   for (i=0; i<count; i++) {
     topo_obj_type_t type = topology->backend_params.synthetic.type[i];
 
-    if (type == TOPO_OBJ_FAKE)
-      topology->backend_params.synthetic.depth[i] = fake_depth--;
+    if (type == TOPO_OBJ_MISC)
+      topology->backend_params.synthetic.depth[i] = misc_depth--;
     else if (type == TOPO_OBJ_CACHE)
       topology->backend_params.synthetic.depth[i] = cache_depth--;
   }
@@ -206,7 +206,7 @@ topo__look_synthetic(struct topo_topology *topology,
 
   /* pre-hooks */
   switch (type) {
-    case TOPO_OBJ_FAKE:
+    case TOPO_OBJ_MISC:
       break;
     case TOPO_OBJ_SYSTEM:
       /* Shouldn't happen.  */
@@ -245,8 +245,8 @@ topo__look_synthetic(struct topo_topology *topology,
 
   /* post-hooks */
   switch (type) {
-    case TOPO_OBJ_FAKE:
-      obj->attr.fake.depth = topology->backend_params.synthetic.depth[level];
+    case TOPO_OBJ_MISC:
+      obj->attr.misc.depth = topology->backend_params.synthetic.depth[level];
       break;
     case TOPO_OBJ_SYSTEM:
       abort();

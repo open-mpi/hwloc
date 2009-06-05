@@ -88,8 +88,8 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology, in
 	obj->attr.cache.memory_kB = 0; /* TODO */
 	obj->attr.cache.depth = 2;
 	break;
-      case TOPO_OBJ_FAKE:
-	obj->attr.fake.depth = level;
+      case TOPO_OBJ_MISC:
+	obj->attr.misc.depth = level;
       default:
 	break;
     }
@@ -158,11 +158,11 @@ topo_look_aix(struct topo_topology *topology)
 	  known = 1;
 	}
 
-      /* Don't know how it should be rendered, make a fake object for it.  */
+      /* Don't know how it should be rendered, make a misc object for it.  */
       if (!known)
 	{
 	  topo_debug("looking AIX unknown sdl %d\n", i);
-	  look_rset(i, TOPO_OBJ_FAKE, topology, i);
+	  look_rset(i, TOPO_OBJ_MISC, topology, i);
 	}
     }
 }

@@ -93,9 +93,9 @@ enum topo_obj_type_e {
   TOPO_OBJ_CORE,	/**< \brief Core */
   TOPO_OBJ_PROC,	/**< \brief (Logical) Processor (e.g. a thread in an SMT core) */
 
-  TOPO_OBJ_FAKE,	/**< \brief Fake object that may be needed under special circumstances (like arbitrary OS aggregation)  */
+  TOPO_OBJ_MISC,	/**< \brief Miscellaneous object that may be needed under special circumstances (like arbitrary OS aggregation)  */
 };
-#define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_FAKE+1)
+#define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_MISC+1)
 typedef enum topo_obj_type_e topo_obj_type_t;
 
 /** \brief Structure of a topology object */
@@ -118,10 +118,10 @@ struct topo_obj {
     } node;
     struct topo_memory_attr_u machine;	/**< \brief Machine-specific attributes */
     struct topo_memory_attr_u system;	/**< \brief System-specific attributes */
-    /** \brief Fake-specific attributes */
-    struct topo_fake_attr_u {
-      unsigned depth;			  /**< \brief Depth of fake object */
-    } fake;
+    /** \brief Misc-specific attributes */
+    struct topo_misc_attr_u {
+      unsigned depth;			  /**< \brief Depth of misc object */
+    } misc;
   } attr;				  /**< \brief Object type-specific attributes */
 
   /* global position */

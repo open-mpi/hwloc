@@ -227,7 +227,7 @@ topo_look_windows(struct topo_topology *topology)
 	    break;
 	  case RelationGroup:
 	  default:
-	    type = TOPO_OBJ_FAKE;
+	    type = TOPO_OBJ_MISC;
 	    break;
 	}
 
@@ -244,8 +244,8 @@ topo_look_windows(struct topo_topology *topology)
 	    obj->attr.cache.memory_kB = procInfo[i].Cache.Size >> 10;
 	    obj->attr.cache.depth = procInfo[i].Cache.Level;
 	    break;
-	  case TOPO_OBJ_FAKE:
-	    obj->attr.fake.depth = procInfo[i].Relationship == RelationGroup;
+	  case TOPO_OBJ_MISC:
+	    obj->attr.misc.depth = procInfo[i].Relationship == RelationGroup;
 	    break;
 	  default:
 	    break;
@@ -318,7 +318,7 @@ topo_look_windows(struct topo_topology *topology)
 	  case RelationGroup:
 	    /* So strange an interface... */
 	    for (id = 0; id < procInfo->Group.ActiveGroupCount; id++) {
-	      obj = topo_alloc_setup_object(TOPO_OBJ_FAKE, id);
+	      obj = topo_alloc_setup_object(TOPO_OBJ_MISC, id);
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
 	      topo_debug("group %d mask %lx\n", id, mask);
 	      topo_cpuset_from_ith_ulong(&obj->cpuset, id, mask);

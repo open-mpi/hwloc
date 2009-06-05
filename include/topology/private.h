@@ -80,7 +80,7 @@ struct topo_topology {
       unsigned arity[TOPO_SYNTHETIC_MAX_DEPTH];
       topo_obj_type_t type[TOPO_SYNTHETIC_MAX_DEPTH];
       unsigned id[TOPO_SYNTHETIC_MAX_DEPTH];
-      unsigned depth[TOPO_SYNTHETIC_MAX_DEPTH]; /* For cache/fake */
+      unsigned depth[TOPO_SYNTHETIC_MAX_DEPTH]; /* For cache/misc */
     } synthetic;
   } backend_params;
 };

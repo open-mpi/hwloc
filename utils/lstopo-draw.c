@@ -75,9 +75,9 @@
 #define SYSTEM_G_COLOR 0xff
 #define SYSTEM_B_COLOR 0xff
 
-#define FAKE_R_COLOR 0xff
-#define FAKE_G_COLOR 0xff
-#define FAKE_B_COLOR 0xff
+#define MISC_R_COLOR 0xff
+#define MISC_G_COLOR 0xff
+#define MISC_B_COLOR 0xff
 
 /* grid unit: 10 pixels */
 #define UNIT 10
@@ -341,7 +341,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 }
 
 static void
-fake_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = UNIT + FONT_SIZE + UNIT;
   unsigned totwidth = UNIT, maxheight = 0;
@@ -355,7 +355,7 @@ fake_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   *retwidth = totwidth + UNIT;
   *retheight = myheight + maxheight;
 
-  methods->box(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
   methods->text(output, 0, 0, 0, FONT_SIZE, depth-1, x + UNIT, y + UNIT, text);
@@ -387,7 +387,7 @@ get_type_fun(topo_obj_type_t type)
     case TOPO_OBJ_CACHE: return cache_draw;
     case TOPO_OBJ_CORE: return core_draw;
     case TOPO_OBJ_PROC: return proc_draw;
-    case TOPO_OBJ_FAKE: return fake_draw;
+    case TOPO_OBJ_MISC: return misc_draw;
   }
   return NULL;
 }
@@ -446,7 +446,7 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
   methods->declare_color(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR);
   methods->declare_color(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR);
   methods->declare_color(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR);
-  methods->declare_color(output, FAKE_R_COLOR, FAKE_G_COLOR, FAKE_B_COLOR);
+  methods->declare_color(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR);
   return output;
 }
 

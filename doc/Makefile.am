@@ -14,7 +14,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/TOPO_FLAGS_IGNORE_THREADS.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_CACHE.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_CORE.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_FAKE.3 \
+	@DX_DOCDIR@/man/man3/TOPO_OBJ_MISC.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_MACHINE.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_NODE.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_PROC.3 \
@@ -76,7 +76,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_obj_t.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_cache_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_fake_attr_u.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_misc_attr_u.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_memory_attr_u.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_e.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_string.3 \
@@ -123,7 +123,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/depth.3 \
 	@DX_DOCDIR@/man/man3/dmi_board_name.3 \
 	@DX_DOCDIR@/man/man3/dmi_board_vendor.3 \
-	@DX_DOCDIR@/man/man3/fake.3 \
+	@DX_DOCDIR@/man/man3/misc.3 \
 	@DX_DOCDIR@/man/man3/father.3 \
 	@DX_DOCDIR@/man/man3/first_child.3 \
 	@DX_DOCDIR@/man/man3/huge_page_free.3 \

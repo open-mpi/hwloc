@@ -87,7 +87,7 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
       if (info.huge_page_size_kB)
 	fprintf (output, "Huge page size: %lukB\n", info.huge_page_size_kB);
 
-      for (l = TOPO_OBJ_SYSTEM; l < TOPO_OBJ_FAKE; l++)
+      for (l = TOPO_OBJ_SYSTEM; l < TOPO_OBJ_MISC; l++)
 	{
 	  int depth = topo_get_type_depth (topology, l);
 	  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
