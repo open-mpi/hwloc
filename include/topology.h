@@ -389,7 +389,12 @@ extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_ob
  * @{
  */
 
-/** \brief Bind current process on cpus given in cpuset \p set */
+/** \brief Bind current process on cpus given in cpuset \p set
+ *
+ * You might want to call topo_cpuset_singlify() first so that
+ * a single CPU remains in the set. This way, the process has no
+ * of migrating between different CPUs.
+ */
 extern int topo_set_cpubind(topo_cpuset_t *set);
 
 /** @} */

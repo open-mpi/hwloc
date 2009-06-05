@@ -383,6 +383,31 @@ static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
 	return -1;
 }
 
+/** \brief Keep a single CPU among those set in CPU mask
+ *
+ * Might be used before binding so that the process does not
+ * have a chance of migrating between multiple logical CPUs
+ * in the original mask.
+ */
+static __inline__ void topo_cpuset_singlify(topo_cpuset_t * cpuset);
+static __inline__ void topo_cpuset_singlify(topo_cpuset_t * cpuset)
+{
+	int i,set = 0;
+	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++) {
+		if (set) {
+			TOPO_CPUSUBSET_SUBSET(*cpuset,i) = TOPO_CPUSUBSET_ZERO;
+			continue;
+		} else {
+			/* subsets are unsigned longs, use ffsl */
+			int _ffs = topo_ffsl(TOPO_CPUSUBSET_SUBSET(*cpuset,i));
+			if (_ffs>0) {
+				TOPO_CPUSUBSET_SUBSET(*cpuset,i) = TOPO_CPUSUBSET_VAL(_ffs-1);
+				set = 1;
+			}
+		}
+	}
+}
+
 /** \brief Compar two cpusets using their first set bit.
  *
  * Smaller least significant bit is smaller.
