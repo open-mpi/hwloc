@@ -185,13 +185,10 @@ fi
 PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [:])
 
 # disable C++, F77, Java and Windows Resource Compiler support
-# change this into LT_LANG+LT_INIT when we'll switch to libtool2
-m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
-m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
-m4_defun([_LT_AC_LANG_GCJ_CONFIG], [:])
-m4_defun([_LT_AC_LANG_RC_CONFIG], [:])
+LT_PREREQ([2.2.6])
+LT_INIT
+LT_LANG([C])
 AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
 AM_CONDITIONAL([HAVE_GCC], [test "x$GCC" = "xyes"])
 AC_PATH_PROGS([TOPO_MS_LIB], [lib])
 AC_ARG_VAR([TOPO_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])

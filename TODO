@@ -21,6 +21,8 @@ Split API into two levels?
 * expose the internal conversion from cpuset to sched_setaffinity mask?
   + reverse routine?
 
+* remove duplicated static inline prototypes (mostly in the cpuset API)
+
 Doc
 ===
 * complete doc
@@ -56,6 +58,9 @@ int migrate_self (int destination_node);
 int thread_migrate (int thread_id, int destination_node);
 
 * move dmi_* to a machine object?
+
+* add a xml backend and a way to export in xml
+* add a lstopo-output-reading backend
 
 Binding
 =======
