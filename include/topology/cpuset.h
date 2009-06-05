@@ -153,7 +153,6 @@ topo_cpuset_from_string(const char * string, topo_cpuset_t * set)
  */
 
 /** \brief Empty CPU set */
-static __inline__ void topo_cpuset_zero(topo_cpuset_t * set);
 static __inline__ void topo_cpuset_zero(topo_cpuset_t * set)
 {
 	int i;
@@ -162,7 +161,6 @@ static __inline__ void topo_cpuset_zero(topo_cpuset_t * set)
 }
 
 /** \brief Fill CPU set */
-static __inline__ void topo_cpuset_fill(topo_cpuset_t * set);
 static __inline__ void topo_cpuset_fill(topo_cpuset_t * set)
 {
 	int i;
@@ -171,7 +169,6 @@ static __inline__ void topo_cpuset_fill(topo_cpuset_t * set)
 }
 
 /** \brief CPU set from an unsigned long mask */
-static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long mask);
 static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long mask)
 {
 	int i;
@@ -181,7 +178,6 @@ static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long 
 }
 
 /** \brief CPU set from an unsigned long mask, used as ith subset */
-static __inline__ void topo_cpuset_from_ith_ulong(topo_cpuset_t *set, int i, unsigned long mask);
 static __inline__ void topo_cpuset_from_ith_ulong(topo_cpuset_t *set, int i, unsigned long mask)
 {
 	int j;
@@ -192,22 +188,18 @@ static __inline__ void topo_cpuset_from_ith_ulong(topo_cpuset_t *set, int i, uns
 }
 
 /** \brief unsigned long mask from CPU set */
-static __inline__ unsigned long topo_cpuset_to_ulong(const topo_cpuset_t *set);
 static __inline__ unsigned long topo_cpuset_to_ulong(const topo_cpuset_t *set)
 {
 	return TOPO_CPUSUBSET_SUBSET(*set,0);
 }
 
 /** \brief unsigned long mask as ith subset from CPU set */
-static __inline__ unsigned long topo_cpuset_to_ith_ulong(const topo_cpuset_t *set, int i);
 static __inline__ unsigned long topo_cpuset_to_ith_ulong(const topo_cpuset_t *set, int i)
 {
 	return TOPO_CPUSUBSET_SUBSET(*set,i);
 }
 
 /** \brief Clear CPU set and set CPU \p cpu */
-static __inline__ void topo_cpuset_cpu(topo_cpuset_t * set,
-				       unsigned cpu);
 static __inline__ void topo_cpuset_cpu(topo_cpuset_t * set,
 				       unsigned cpu)
 {
@@ -217,8 +209,6 @@ static __inline__ void topo_cpuset_cpu(topo_cpuset_t * set,
 
 /** \brief Clear CPU set and set all but the CPU \p cpu */
 static __inline__ void topo_cpuset_all_but_cpu(topo_cpuset_t * set,
-					       unsigned cpu);
-static __inline__ void topo_cpuset_all_but_cpu(topo_cpuset_t * set,
 					       unsigned cpu)
 {
 	topo_cpuset_fill(set);
@@ -227,16 +217,12 @@ static __inline__ void topo_cpuset_all_but_cpu(topo_cpuset_t * set,
 
 /** \brief Add CPU \p cpu in CPU set \p set */
 static __inline__ void topo_cpuset_set(topo_cpuset_t * set,
-				       unsigned cpu);
-static __inline__ void topo_cpuset_set(topo_cpuset_t * set,
 				       unsigned cpu)
 {
 	TOPO_CPUSUBSET_CPUSUBSET(*set,cpu) |= TOPO_CPUSUBSET_VAL(cpu);
 }
 
 /** \brief Add CPUs from \p begincpu to \p endcpu in CPU set \p set */
-static __inline__ void topo_cpuset_set_range(topo_cpuset_t * set,
-					     unsigned begincpu, unsigned endcpu);
 static __inline__ void topo_cpuset_set_range(topo_cpuset_t * set,
 					     unsigned begincpu, unsigned endcpu)
 {
@@ -247,8 +233,6 @@ static __inline__ void topo_cpuset_set_range(topo_cpuset_t * set,
 
 /** \brief Remove CPU \p cpu from CPU set \p set */
 static __inline__ void topo_cpuset_clr(topo_cpuset_t * set,
-				       unsigned cpu);
-static __inline__ void topo_cpuset_clr(topo_cpuset_t * set,
 				       unsigned cpu)
 {
 	TOPO_CPUSUBSET_CPUSUBSET(*set,cpu) &= ~TOPO_CPUSUBSET_VAL(cpu);
@@ -256,15 +240,12 @@ static __inline__ void topo_cpuset_clr(topo_cpuset_t * set,
 
 /** \brief Test whether CPU \p cpu is part of set \p set */
 static __inline__ int topo_cpuset_isset(const topo_cpuset_t * set,
-					unsigned cpu);
-static __inline__ int topo_cpuset_isset(const topo_cpuset_t * set,
 					unsigned cpu)
 {
 	return (TOPO_CPUSUBSET_CPUSUBSET(*set,cpu) & TOPO_CPUSUBSET_VAL(cpu)) != 0;
 }
 
 /** \brief Test whether set \p set is zero */
-static __inline__ int topo_cpuset_iszero(const topo_cpuset_t *set);
 static __inline__ int topo_cpuset_iszero(const topo_cpuset_t *set)
 {
 	int i;
@@ -275,7 +256,6 @@ static __inline__ int topo_cpuset_iszero(const topo_cpuset_t *set)
 }
 
 /** \brief Test whether set \p set is full */
-static __inline__ int topo_cpuset_isfull(const topo_cpuset_t *set);
 static __inline__ int topo_cpuset_isfull(const topo_cpuset_t *set)
 {
 	int i;
@@ -287,9 +267,7 @@ static __inline__ int topo_cpuset_isfull(const topo_cpuset_t *set)
 
 /** \brief Test whether set \p set1 is equal to set \p set2 */
 static __inline__ int topo_cpuset_isequal (const topo_cpuset_t *set1,
-					 const topo_cpuset_t *set2);
-static __inline__ int topo_cpuset_isequal (const topo_cpuset_t *set1,
-					 const topo_cpuset_t *set2)
+					   const topo_cpuset_t *set2)
 {
 	int i;
 	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++)
@@ -299,8 +277,6 @@ static __inline__ int topo_cpuset_isequal (const topo_cpuset_t *set1,
 }
 
 /** \brief Test whether sets \p set1 and \p set2 intersects */
-static __inline__ int topo_cpuset_intersects (const topo_cpuset_t *set1,
-					      const topo_cpuset_t *set2);
 static __inline__ int topo_cpuset_intersects (const topo_cpuset_t *set1,
 					      const topo_cpuset_t *set2)
 {
@@ -313,8 +289,6 @@ static __inline__ int topo_cpuset_intersects (const topo_cpuset_t *set1,
 
 /** \brief Test whether set \p sub_set is part of set \p super_set */
 static __inline__ int topo_cpuset_isincluded (const topo_cpuset_t *sub_set,
-					      const topo_cpuset_t *super_set);
-static __inline__ int topo_cpuset_isincluded (const topo_cpuset_t *sub_set,
 					      const topo_cpuset_t *super_set)
 {
 	int i;
@@ -326,8 +300,6 @@ static __inline__ int topo_cpuset_isincluded (const topo_cpuset_t *sub_set,
 
 /** \brief Or set \p modifier_set into set \p set */
 static __inline__ void topo_cpuset_orset (topo_cpuset_t *set,
-					  const topo_cpuset_t *modifier_set);
-static __inline__ void topo_cpuset_orset (topo_cpuset_t *set,
 					  const topo_cpuset_t *modifier_set)
 {
 	int i;
@@ -336,8 +308,6 @@ static __inline__ void topo_cpuset_orset (topo_cpuset_t *set,
 }
 
 /** \brief And set \p modifier_set into set \p set */
-static __inline__ void topo_cpuset_andset (topo_cpuset_t *set,
-					   const topo_cpuset_t *modifier_set);
 static __inline__ void topo_cpuset_andset (topo_cpuset_t *set,
 					   const topo_cpuset_t *modifier_set)
 {
@@ -348,8 +318,6 @@ static __inline__ void topo_cpuset_andset (topo_cpuset_t *set,
 
 /** \brief Clear set \p modifier_set out of set \p set */
 static __inline__ void topo_cpuset_clearset (topo_cpuset_t *set,
-					     const topo_cpuset_t *modifier_set);
-static __inline__ void topo_cpuset_clearset (topo_cpuset_t *set,
 					     const topo_cpuset_t *modifier_set)
 {
 	int i;
@@ -359,8 +327,6 @@ static __inline__ void topo_cpuset_clearset (topo_cpuset_t *set,
 
 /** \brief Xor set \p set with set \p modifier_set */
 static __inline__ void topo_cpuset_xorset (topo_cpuset_t *set,
-					   const topo_cpuset_t *modifier_set);
-static __inline__ void topo_cpuset_xorset (topo_cpuset_t *set,
 					   const topo_cpuset_t *modifier_set)
 {
 	int i;
@@ -369,7 +335,6 @@ static __inline__ void topo_cpuset_xorset (topo_cpuset_t *set,
 }
 
 /** \brief Compute the first CPU (least significant bit) in CPU mask */
-static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset);
 static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
 {
 	int i;
@@ -389,7 +354,6 @@ static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
  * have a chance of migrating between multiple logical CPUs
  * in the original mask.
  */
-static __inline__ void topo_cpuset_singlify(topo_cpuset_t * cpuset);
 static __inline__ void topo_cpuset_singlify(topo_cpuset_t * cpuset)
 {
 	int i,set = 0;
@@ -414,8 +378,6 @@ static __inline__ void topo_cpuset_singlify(topo_cpuset_t * cpuset)
  * Empty cpuset are considered higher than anything.
  */
 static __inline__ int topo_cpuset_compar_first(const topo_cpuset_t * set1,
-					       const topo_cpuset_t * set2);
-static __inline__ int topo_cpuset_compar_first(const topo_cpuset_t * set1,
 					       const topo_cpuset_t * set2)
 {
 	int i;
@@ -438,8 +400,6 @@ static __inline__ int topo_cpuset_compar_first(const topo_cpuset_t * set1,
  * Higher most significant bit is higher.
  * Empty cpuset are considered lower than anything.
  */
-static __inline__ int topo_cpuset_compar(const topo_cpuset_t * set1,
-					 const topo_cpuset_t * set2);
 static __inline__ int topo_cpuset_compar(const topo_cpuset_t * set1,
 					 const topo_cpuset_t * set2)
 {
@@ -480,7 +440,6 @@ static __inline__ int topo_weight_long(unsigned long w)
 }
 
 /** \brief Compute the weight of a CPU mask */
-static __inline__ int topo_cpuset_weight(const topo_cpuset_t * cpuset);
 static __inline__ int topo_cpuset_weight(const topo_cpuset_t * cpuset)
 {
 	int weight = 0;
