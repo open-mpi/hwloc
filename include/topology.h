@@ -237,6 +237,17 @@ extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsig
 /** \brief Returns the width of level at depth \p depth */
 extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth);
 
+/** \brief Returns the width of level type \p type */
+static inline unsigned topo_get_type_nbobjs (topo_topology_t topology, enum topo_obj_type_e type)
+{
+	unsigned depth = topo_get_type_depth(topology, type);
+	if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
+		return 0;
+	if (depth == TOPO_TYPE_DEPTH_MULTIPLE)
+		return -1; /* FIXME: agregate nbobjs from different levels? */
+	return topo_get_depth_nbobjs(topology, depth);
+}
+
 /** @} */
 
 

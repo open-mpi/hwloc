@@ -7,13 +7,11 @@ Split API into two levels?
 
 
 * clarify the API to obtain the number of nodes, procs, cores, ...
-  + add topo_get_type_nbobjs() returning -1 if multiple depth
+* Drop ignore_threads and explain how to deal with cores/sockets with singlify
 
 * cache or node specific functions?
   + get nodes covering a cpuset?
   + get shared cache*S* covering a cpuset?
-
-* Drop ignore_threads and explain how to deal with cores/sockets with singlify
 
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
