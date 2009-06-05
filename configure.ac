@@ -181,6 +181,19 @@ if test "x$enable_cairo" = "xyes"; then
   AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
 fi
 
+AC_ARG_ENABLE([xml],
+  [AS_HELP_STRING([--disable-xml], [disable the XML back-end of `lstopo'])],
+  [enable_xml="$enableval"],
+  [enable_xml="yes"])
+
+if test "x$enable_xml" = "xyes"; then
+  PKG_CHECK_MODULES([XML], [libxml-2.0], [:], [enable_xml="no"])
+fi
+
+if test "x$enable_xml" = "xyes"; then
+  AC_DEFINE([HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
+fi
+
 # check for kerrighed, but don't abort if not found
 PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [:])
 

@@ -40,6 +40,8 @@ typedef void output_method (struct topo_topology *topology, FILE *output, int ve
 
 extern output_method output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows;
 
+void output_xml (struct topo_topology *topology, const char *filename, int verbose_mode);
+
 struct draw_methods {
   void* (*start) (void *output, int width, int height);
   void (*declare_color) (void *output, int r, int g, int b);

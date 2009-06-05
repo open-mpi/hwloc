@@ -65,6 +65,9 @@ static void usage(void)
 		  ", .svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HAVE_CAIRO */
+#if HAVE_XML
+		  ", .xml"
+#endif /* HAVE_XML */
 		  "\n");
   fprintf (stderr, "\nRecognized options:\n");
   fprintf (stderr, "--no-caches         do not show caches\n");
@@ -191,6 +194,10 @@ main (int argc, char *argv[])
     output_svg(topology, output, verbose_mode);
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HAVE_CAIRO */
+#ifdef HAVE_XML
+  else if (strstr(filename, ".xml"))
+    output_xml(topology, filename, verbose_mode);
+#endif
   else {
     fprintf(stderr, "file format not supported\n");
     usage();

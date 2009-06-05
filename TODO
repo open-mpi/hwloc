@@ -62,6 +62,9 @@ int thread_migrate (int thread_id, int destination_node);
 * add a xml backend and a way to export in xml
 * add a lstopo-output-reading backend
 
+* fclose in lstopo
+* fopen/fclose in the backend, since libxml2 only offers routine to write in a filename, not in a FILE
+
 Binding
 =======
 * topo_set_cpubind(pid, ...) which type for pid? POSIX says that pid_t is a
