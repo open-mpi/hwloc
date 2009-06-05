@@ -50,7 +50,22 @@ static void usage(void)
   fprintf (stderr, "\n");
   fprintf (stderr, "By default, lstopo displays a graphical window with the topology if DISPLAY is\nset, else a text output on the standard output.\n");
   fprintf (stderr, "To force a text output on the standard output, specify - or /dev/stdout as\nfilename.\n");
-  fprintf (stderr, "Recognised file formats are: .txt, .fig, .pdf, .ps, .png, .svg\n");
+  fprintf (stderr, "Recognised file formats are: .txt, .fig"
+#ifdef HAVE_CAIRO
+#if CAIRO_HAS_PDF_SURFACE
+		  ", .pdf"
+#endif /* CAIRO_HAS_PDF_SURFACE */
+#if CAIRO_HAS_PS_SURFACE
+		  ", .ps"
+#endif /* CAIRO_HAS_PS_SURFACE */
+#if CAIRO_HAS_PNG_FUNCTIONS
+		  ", .png"
+#endif /* CAIRO_HAS_PNG_FUNCTIONS */
+#if CAIRO_HAS_SVG_SURFACE
+		  ", .svg"
+#endif /* CAIRO_HAS_SVG_SURFACE */
+#endif /* HAVE_CAIRO */
+		  "\n");
   fprintf (stderr, "\nRecognized options:\n");
   fprintf (stderr, "--no-caches         do not show caches\n");
   fprintf (stderr, "--no-useless-caches do not show caches which do not have a hierarchical impact\n");
