@@ -80,6 +80,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_memory_attr_u.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_e.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_string.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_type_of_string.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_t.3 \
 	@DX_DOCDIR@/man/man3/topo_set_cpubind.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_destroy.3 \

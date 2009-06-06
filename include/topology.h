@@ -385,6 +385,9 @@ topo_get_obj_below_by_type (topo_topology_t topology, topo_obj_t root,
 /** \brief Return a stringified topology object type */
 extern const char * topo_obj_type_string (enum topo_obj_type_e l);
 
+/** \brief Return an object type from the string */
+extern topo_obj_type_t topo_obj_type_of_string (const char * string);
+
 /** \brief Stringify a given topology object into a human-readable form.
  *
  * \return how many characters were actually written (not including the ending \\0). */

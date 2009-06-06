@@ -96,23 +96,8 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
   const char *value = (const char *) _value;
 
   if (!strcmp(name, "type")) {
-    if (!strcmp(value, "System"))
-      obj->type = TOPO_OBJ_SYSTEM;
-    else if (!strcmp(value, "Machine"))
-      obj->type = TOPO_OBJ_MACHINE;
-    else if (!strcmp(value, "Misc"))
-      obj->type = TOPO_OBJ_MISC;
-    else if (!strcmp(value, "NUMANode"))
-      obj->type = TOPO_OBJ_NODE;
-    else if (!strcmp(value, "Socket"))
-      obj->type = TOPO_OBJ_SOCKET;
-    else if (!strcmp(value, "Cache"))
-      obj->type = TOPO_OBJ_CACHE;
-    else if (!strcmp(value, "Core"))
-      obj->type = TOPO_OBJ_CORE;
-    else if (!strcmp(value, "Proc"))
-      obj->type = TOPO_OBJ_PROC;
-    else
+    obj->type = topo_obj_type_of_string(value);
+    if (obj->type == TOPO_OBJ_TYPE_MAX)
       fprintf(stderr, "ignoring unknown object type %s\n", value);
   }
 

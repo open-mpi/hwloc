@@ -195,6 +195,20 @@ topo_obj_type_string (enum topo_obj_type_e l)
     }
 }
 
+enum topo_obj_type_e
+topo_obj_type_of_string (const char * string)
+{
+  if (!strcmp(string, "System")) return TOPO_OBJ_SYSTEM;
+  if (!strcmp(string, "Machine")) return TOPO_OBJ_MACHINE;
+  if (!strcmp(string, "Misc")) return TOPO_OBJ_MISC;
+  if (!strcmp(string, "NUMANode")) return TOPO_OBJ_NODE;
+  if (!strcmp(string, "Socket")) return TOPO_OBJ_SOCKET;
+  if (!strcmp(string, "Cache")) return TOPO_OBJ_CACHE;
+  if (!strcmp(string, "Core")) return TOPO_OBJ_CORE;
+  if (!strcmp(string, "Proc")) return TOPO_OBJ_PROC;
+  return TOPO_OBJ_TYPE_MAX;
+}
+
 #define topo_memory_size_printf_value(_size) \
   (_size) < (10*1024) ? (_size) : (_size) < (10*1024*1024) ? (_size)>>10 : (_size)>>20
 #define topo_memory_size_printf_unit(_size) \
