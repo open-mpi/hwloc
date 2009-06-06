@@ -220,9 +220,9 @@ move_x11(topo_topology_t topology, struct display *disp)
 }
 
 void
-output_x11(topo_topology_t topology, FILE *output, int verbose_mode)
+output_x11(topo_topology_t topology, const char *filename, int verbose_mode)
 {
-  struct display *disp = output_draw_start(&x11_draw_methods, topology, output);
+  struct display *disp = output_draw_start(&x11_draw_methods, topology, NULL);
   int finish = 0;
   int state = 0;
   int x = 0, y = 0; /* shut warning down */
@@ -309,13 +309,20 @@ static struct draw_methods png_draw_methods = {
 };
 
 void
-output_png(topo_topology_t topology, FILE *output, int verbose_mode)
+output_png(topo_topology_t topology, const char *filename, int verbose_mode)
 {
+  FILE *output = fopen(filename, "w");
+  if (!output) {
+    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    return;
+  }
+
   cairo_surface_t *cs = output_draw_start(&png_draw_methods, topology, output);
 
   topo_cairo_paint(&png_draw_methods, topology, cs);
   cairo_surface_write_to_png_stream(cs, topo_cairo_write, output);
   cairo_surface_destroy(cs);
+  fclose(output);
 }
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 
@@ -337,13 +344,20 @@ static struct draw_methods pdf_draw_methods = {
 };
 
 void
-output_pdf(topo_topology_t topology, FILE *output, int verbose_mode)
+output_pdf(topo_topology_t topology, const char *filename, int verbose_mode)
 {
+  FILE *output = fopen(filename, "w");
+  if (!output) {
+    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    return;
+  }
+
   cairo_surface_t *cs = output_draw_start(&pdf_draw_methods, topology, output);
 
   topo_cairo_paint(&pdf_draw_methods, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
+  fclose(output);
 }
 #endif /* CAIRO_HAS_PDF_SURFACE */
 
@@ -365,13 +379,20 @@ static struct draw_methods ps_draw_methods = {
 };
 
 void
-output_ps(topo_topology_t topology, FILE *output, int verbose_mode)
+output_ps(topo_topology_t topology, const char *filename, int verbose_mode)
 {
+  FILE *output = fopen(filename, "w");
+  if (!output) {
+    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    return;
+  }
+
   cairo_surface_t *cs = output_draw_start(&ps_draw_methods, topology, output);
 
   topo_cairo_paint(&ps_draw_methods, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
+  fclose(output);
 }
 #endif /* CAIRO_HAS_PS_SURFACE */
 
@@ -393,13 +414,20 @@ static struct draw_methods svg_draw_methods = {
 };
 
 void
-output_svg(topo_topology_t topology, FILE *output, int verbose_mode)
+output_svg(topo_topology_t topology, const char *filename, int verbose_mode)
 {
+  FILE *output = fopen(filename, "w");
+  if (!output) {
+    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    return;
+  }
+
   cairo_surface_t *cs = output_draw_start(&svg_draw_methods, topology, output);
 
   topo_cairo_paint(&svg_draw_methods, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
+  fclose(output);
 }
 #endif /* CAIRO_HAS_SVG_SURFACE */
 

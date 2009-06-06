@@ -170,11 +170,11 @@ struct draw_methods windows_draw_methods = {
 };
 
 void
-output_windows (topo_topology_t topology, FILE *output, int verbose_mode)
+output_windows (topo_topology_t topology, const char *filename, int verbose_mode)
 {
   HWND toplevel;
   the_topology = topology;
-  toplevel = output_draw_start(&windows_draw_methods, topology, output);
+  toplevel = output_draw_start(&windows_draw_methods, topology, NULL);
   UpdateWindow(toplevel);
   MSG msg;
   while (GetMessage(&msg, NULL, 0, 0)) {

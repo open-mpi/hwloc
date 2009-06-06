@@ -153,8 +153,15 @@ static struct draw_methods fig_draw_methods = {
 };
 
 void
-output_fig (topo_topology_t topology, FILE *output, int verbose_mode)
+output_fig (topo_topology_t topology, const char *filename, int verbose_mode)
 {
+  FILE *output = fopen(filename, "w");
+  if (!output) {
+    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    return;
+  }
+
   output = output_draw_start(&fig_draw_methods, topology, output);
   output_draw(&fig_draw_methods, topology, output);
+  fclose(output);
 }

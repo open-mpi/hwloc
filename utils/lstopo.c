@@ -92,7 +92,6 @@ main (int argc, char *argv[])
   topo_topology_t topology;
   char *filename = NULL;
   unsigned long flags = 0;
-  FILE *output;
   int merge = 0;
   int ignorecache = 0;
   char * synthetic = NULL;
@@ -147,11 +146,6 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
-  if (!filename || !strcmp(filename, "-"))
-    output = stdout;
-  else
-    output = fopen(filename, "w");
-
   topo_topology_set_flags(topology, flags);
 
   if (ignorecache > 1) {
@@ -175,37 +169,37 @@ main (int argc, char *argv[])
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HAVE_X11
     if (getenv("DISPLAY"))
-      output_x11(topology, output, verbose_mode);
+      output_x11(topology, NULL, verbose_mode);
     else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #endif /* HAVE_CAIRO */
 #ifdef WIN_SYS
-      output_windows(topology, output, verbose_mode);
+      output_windows(topology, NULL, verbose_mode);
 #else
-      output_text(topology, output, verbose_mode);
+      output_text(topology, NULL, verbose_mode);
 #endif
   } else if (!strcmp(filename, "-")
 	  || !strcmp(filename, "/dev/stdout")
 	  ||  strstr(filename, ".txt"))
-    output_text(topology, output, verbose_mode);
+    output_text(topology, filename, verbose_mode);
   else if (strstr(filename, ".fig"))
-    output_fig(topology, output, verbose_mode);
+    output_fig(topology, filename, verbose_mode);
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_PNG_FUNCTIONS
   else if (strstr(filename, ".png"))
-    output_png(topology, output, verbose_mode);
+    output_png(topology, filename, verbose_mode);
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 #if CAIRO_HAS_PDF_SURFACE
   else if (strstr(filename, ".pdf"))
-    output_pdf(topology, output, verbose_mode);
+    output_pdf(topology, filename, verbose_mode);
 #endif /* CAIRO_HAS_PDF_SURFACE */
 #if CAIRO_HAS_PS_SURFACE
   else if (strstr(filename, ".ps"))
-    output_ps(topology, output, verbose_mode);
+    output_ps(topology, filename, verbose_mode);
 #endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_SVG_SURFACE
   else if (strstr(filename, ".svg"))
-    output_svg(topology, output, verbose_mode);
+    output_svg(topology, filename, verbose_mode);
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HAVE_CAIRO */
 #ifdef HAVE_XML

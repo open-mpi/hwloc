@@ -67,8 +67,20 @@ output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE
   }
 }
 
-void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
+void output_text(topo_topology_t topology, const char *filename, int verbose_mode)
 {
+  FILE *output;
+
+  if (!filename || !strcmp(filename, "-"))
+    output = stdout;
+  else {
+    output = fopen(filename, "w"); 
+    if (!output) {
+      fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+      return;
+    }
+  }
+
   output_topology (topology, topo_get_system_obj(topology), NULL, output, 0, verbose_mode);
   fprintf(output, "\n");
 
@@ -100,4 +112,6 @@ void output_text(topo_topology_t topology, FILE *output, int verbose_mode)
 	  }
 	}
     }
+
+  fclose(output);
 }

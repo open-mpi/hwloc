@@ -63,9 +63,6 @@ int thread_migrate (int thread_id, int destination_node);
 
 * add a lstopo-output-reading backend
 
-* fclose in lstopo
-* fopen/fclose in the backend, since libxml2 only offers routine to write in a filename, not in a FILE
-
 * lstopo-nox
   + disable xml as well?
 
