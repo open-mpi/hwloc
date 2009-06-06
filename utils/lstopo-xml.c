@@ -46,17 +46,12 @@ static void
 output_topology (topo_topology_t topology, topo_obj_t obj, xmlNodePtr root_node, int verbose_mode)
 {
   xmlNodePtr node = NULL;
-  char name[255];
   char cpuset[TOPO_CPUSET_STRING_LENGTH+1];
   char tmp[255];
 
-  sprintf(name, "%s", topo_obj_type_string(obj->type));
-
   /* xmlNewChild() creates a new node, which is "attached" as child node
    * of root_node node. */
-  node = xmlNewChild(root_node, NULL,
-		     BAD_CAST name,
-		     NULL);
+  node = xmlNewChild(root_node, NULL, BAD_CAST "object", NULL);
   xmlNewProp(node, BAD_CAST "type", BAD_CAST topo_obj_type_string(obj->type));
   sprintf(tmp, "%d", obj->physical_index);
   xmlNewProp(node, BAD_CAST "physical_index", BAD_CAST tmp);
