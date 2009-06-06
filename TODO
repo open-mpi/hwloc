@@ -31,9 +31,6 @@ Doc
 
 Support
 =======
-* add TOPO_XML_PATH, to be handled in the core
-  + handle TOPO_FSYS_ROOT_PATH in the core instead of the backend as well
-
 * take tests/synthetic.c and make it a topo_check() that could be invoked when debug is enabled,
   and on non-synthetic topo as well?
 

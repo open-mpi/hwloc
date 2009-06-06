@@ -871,6 +871,21 @@ topo_topology_ignore_all_keep_structure(struct topo_topology *topology)
 int
 topo_topology_load (struct topo_topology *topology)
 {
+#ifdef LINUX_SYS
+  char *fsys_root_path_env = getenv("TOPO_FSYS_ROOT_PATH");
+  if (fsys_root_path_env) {
+    topo_backend_exit(topology);
+    topo_backend_sysfs_init(topology, fsys_root_path_env);
+  }
+#endif
+#ifdef HAVE_XML
+  char *xmlpath_env = getenv("TOPO_XML_PATH");
+  if (xmlpath_env) {
+    topo_backend_exit(topology);
+    topo_backend_xml_init(topology, xmlpath_env);
+  }
+#endif
+
   if (topology->backend_type == TOPO_BACKEND_NONE) {
     /* if we haven't chosen the backend, set the OS-specific one if needed */
 #ifdef LINUX_SYS

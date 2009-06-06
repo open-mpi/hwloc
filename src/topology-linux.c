@@ -110,17 +110,10 @@ int
 topo_backend_sysfs_init(struct topo_topology *topology, const char *fsys_root_path)
 {
 #ifdef HAVE_OPENAT
-  char *fsys_root_path_env;
   int root;
 
   assert(topology->backend_type == TOPO_BACKEND_NONE);
 
-  /* Use the root path from the environment variable first,
-   * then from the given argument, then the default root.
-   */
-  fsys_root_path_env = getenv("TOPO_FSYS_ROOT_PATH");
-  if (fsys_root_path_env)
-    fsys_root_path = fsys_root_path_env;
   if (!fsys_root_path)
     fsys_root_path = "/";
 
