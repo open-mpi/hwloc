@@ -205,7 +205,12 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
 	  fprintf(stderr, "ignoring system object at invalid depth %d\n", depth);
 	  free(obj);
 	} else {
-	  topo_add_object(topology, obj);
+	  if (!topo_cpuset_isincluded(&obj->cpuset, &topology->levels[0][0]->cpuset))
+	    fprintf(stderr, "ignoring object (cpuset %s) not covered by system (cpuset %s)\n",
+		    TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset),
+		    TOPO_CPUSET_PRINTF_VALUE(&topology->levels[0][0]->cpuset));
+	  else
+	    topo_add_object(topology, obj);
 	}
       }
 
