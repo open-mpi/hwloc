@@ -2,6 +2,8 @@
 
 include $(top_srcdir)/libtopology.am
 
+AM_LDFLAGS += $(XML_LIBS)
+
 SUBDIRS = linux ports
 
 TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \

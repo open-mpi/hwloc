@@ -3,6 +3,8 @@
 include $(top_srcdir)/libtopology.am
 include $(top_srcdir)/doxample.am
 
+AM_LDFLAGS += $(XML_LIBS)
+
 if DX_COND_man
 
 dist_man3_MANS = \
