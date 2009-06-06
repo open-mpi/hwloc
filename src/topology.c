@@ -544,6 +544,10 @@ topo_discover(struct topo_topology *topology)
 
   if (topology->backend_type == TOPO_BACKEND_SYNTHETIC) {
     topo_look_synthetic(topology);
+#ifdef HAVE_XML
+  } else if (topology->backend_type == TOPO_BACKEND_XML) {
+    topo_look_xml(topology);
+#endif
   } else {
 
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
@@ -773,6 +777,11 @@ topo_backend_exit(struct topo_topology *topology)
     topo_backend_sysfs_exit(topology);
     break;
 #endif
+#ifdef HAVE_XML
+  case TOPO_BACKEND_XML:
+    topo_backend_xml_exit(topology);
+    break;
+#endif
   case TOPO_BACKEND_SYNTHETIC:
     topo_backend_synthetic_exit(topology);
     break;
@@ -804,6 +813,19 @@ topo_topology_set_synthetic(struct topo_topology *topology, const char *descript
   topo_backend_exit(topology);
 
   return topo_backend_synthetic_init(topology, description);
+}
+
+int
+topo_topology_set_xml(struct topo_topology *topology, const char *xmlpath)
+{
+#ifdef HAVE_XML
+  /* cleanup existing backend */
+  topo_backend_exit(topology);
+
+  return topo_backend_xml_init(topology, xmlpath);
+#else /* HAVE_XML */
+  return -1;
+#endif /* !HAVE_XML */
 }
 
 int

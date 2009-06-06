@@ -69,6 +69,12 @@ extern int topo_backend_sysfs_init(struct topo_topology *topology, const char *f
 extern void topo_backend_sysfs_exit(struct topo_topology *topology);
 #endif /* LINUX_SYS */
 
+#ifdef HAVE_XML
+extern int topo_backend_xml_init(struct topo_topology *topology, const char *xmlpath);
+extern void topo_look_xml(struct topo_topology *topology);
+extern void topo_backend_xml_exit(struct topo_topology *topology);
+#endif /* HAVE_XML */
+
 #ifdef HAVE_LIBLGRP
 extern void topo_look_lgrp(topo_topology_t topology);
 #endif /* HAVE_LIBLGRP */

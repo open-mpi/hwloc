@@ -76,6 +76,9 @@ static void usage(void)
   fprintf (stderr, "--no-admin          do not consider administration limitations\n");
   fprintf (stderr, "--merge             do not show levels that do not have a hierarcical impact\n");
   fprintf (stderr, "--synthetic \"2 2\"   simulate a fake hierarchy\n");
+#ifdef HAVE_XML
+  fprintf (stderr, "--xml <path>        read topology from XML file <path>\n");
+#endif
 #ifdef LINUX_SYS
   fprintf (stderr, "\nThe TOPO_FSYS_ROOT_PATH environment variable can be used to specify the path to\n a chroot containing the /proc and /sys of another system\n");
 #endif
@@ -93,6 +96,7 @@ main (int argc, char *argv[])
   int merge = 0;
   int ignorecache = 0;
   char * synthetic = NULL;
+  char * xmlpath = NULL;
   int opt;
 
   err = topo_topology_init (&topology);
@@ -124,6 +128,14 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	synthetic = argv[2]; opt = 1;
+#ifdef HAVE_XML
+      } else if (!strcmp (argv[1], "--xml")) {
+	if (argc <= 2) {
+	  usage ();
+	  exit(EXIT_FAILURE);
+	}
+	xmlpath = argv[2]; opt = 1;
+#endif /* HAVE_XML */
       } else {
 	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
@@ -152,6 +164,8 @@ main (int argc, char *argv[])
 
   if (synthetic)
     topo_topology_set_synthetic(topology, synthetic);
+  if (xmlpath)
+    topo_topology_set_xml(topology, xmlpath);
 
   err = topo_topology_load (topology);
   if (err)

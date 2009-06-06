@@ -210,6 +210,9 @@ extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flag
 extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
 /** \brief Enable synthetic topology. */
 extern int topo_topology_set_synthetic(struct topo_topology *topology, const char *description);
+/** \brief Enable XML-file based topology. */
+extern int topo_topology_set_xml(struct topo_topology *topology, const char *xmlpath);
+
 
 /** @} */
 

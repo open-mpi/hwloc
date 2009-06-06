@@ -31,6 +31,13 @@ Doc
 
 Support
 =======
+* string to object type function for xml?
+
+* add TOPO_XML_PATH, to be handled in the core
+  + handle TOPO_FSYS_ROOT_PATH in the core instead of the backend as well
+
+* tests/ports/ should change CPPFLAGS instead of CFLAGS?
+
 * take tests/synthetic.c and make it a topo_check() that could be invoked when debug is enabled,
   and on non-synthetic topo as well?
 
@@ -61,11 +68,13 @@ int thread_migrate (int thread_id, int destination_node);
 
 * move dmi_* to a machine object?
 
-* add a xml backend and a way to export in xml
 * add a lstopo-output-reading backend
 
 * fclose in lstopo
 * fopen/fclose in the backend, since libxml2 only offers routine to write in a filename, not in a FILE
+
+* lstopo-nox
+  + disable xml as well?
 
 Binding
 =======

@@ -52,6 +52,9 @@ typedef enum topo_backend_e {
 #ifdef LINUX_SYS
   TOPO_BACKEND_SYSFS,
 #endif
+#ifdef HAVE_XML
+  TOPO_BACKEND_XML,
+#endif
 } topo_backend_t;
 
 struct topo_topology {
@@ -74,6 +77,12 @@ struct topo_topology {
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
     } sysfs;
 #endif /* LINUX_SYS */
+#ifdef HAVE_XML
+    struct topo_backend_params_xml_s {
+      /* xml backend parameters */
+      void *doc;
+    } xml;
+#endif /* HAVE_XML */
     struct topo_backend_params_synthetic_s {
       /* synthetic backend parameters */
 #define TOPO_SYNTHETIC_MAX_DEPTH 128
