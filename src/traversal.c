@@ -185,7 +185,7 @@ topo_obj_type_string (enum topo_obj_type_e l)
     {
     case TOPO_OBJ_SYSTEM: return "System";
     case TOPO_OBJ_MACHINE: return "Machine";
-    case TOPO_OBJ_MISC: return "Fake";
+    case TOPO_OBJ_MISC: return "Misc";
     case TOPO_OBJ_NODE: return "NUMANode";
     case TOPO_OBJ_SOCKET: return "Socket";
     case TOPO_OBJ_CACHE: return "Cache";

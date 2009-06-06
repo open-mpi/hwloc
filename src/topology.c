@@ -179,7 +179,7 @@ topo_type_cmp(topo_obj_t obj1, topo_obj_t obj2)
       return TOPO_TYPE_HIGHER;
   }
 
-  /* Fake objects have the same types but can have different depths.  */
+  /* Misc objects have the same types but can have different depths.  */
   if (obj1->type == TOPO_OBJ_MISC) {
     if (obj1->attr.misc.depth < obj2->attr.misc.depth)
       return TOPO_TYPE_DEEPER;
