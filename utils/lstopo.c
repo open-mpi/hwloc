@@ -65,7 +65,7 @@ static void usage(void)
 		  ", .svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HAVE_CAIRO */
-#if HAVE_XML
+#ifdef HAVE_XML
 		  ", .xml"
 #endif /* HAVE_XML */
 		  "\n");
