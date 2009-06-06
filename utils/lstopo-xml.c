@@ -70,8 +70,19 @@ output_topology (topo_topology_t topology, topo_obj_t obj, xmlNodePtr root_node,
     sprintf(tmp, "%u", obj->attr.cache.depth);
     xmlNewProp(node, BAD_CAST "cache_depth", BAD_CAST tmp);
     break;
-  case TOPO_OBJ_NODE:
+  case TOPO_OBJ_SYSTEM:
+    sprintf(tmp, "%lu", obj->attr.system.memory_kB);
+    xmlNewProp(node, BAD_CAST "system_memory_kB", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr.system.huge_page_free);
+    xmlNewProp(node, BAD_CAST "system_huge_page_free", BAD_CAST tmp);
+    break;
   case TOPO_OBJ_MACHINE:
+    sprintf(tmp, "%lu", obj->attr.machine.memory_kB);
+    xmlNewProp(node, BAD_CAST "machine_memory_kB", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr.machine.huge_page_free);
+    xmlNewProp(node, BAD_CAST "machine_huge_page_free", BAD_CAST tmp);
+    break;
+  case TOPO_OBJ_NODE:
     sprintf(tmp, "%lu", obj->attr.node.memory_kB);
     xmlNewProp(node, BAD_CAST "node_memory_kB", BAD_CAST tmp);
     sprintf(tmp, "%lu", obj->attr.node.huge_page_free);
