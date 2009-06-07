@@ -107,6 +107,13 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 #endif
 
 
+/** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
+#define TOPO_CPUSET_PRINTF_VALUE(x)	({					\
+	char *__buf = alloca(TOPO_CPUSET_STRING_LENGTH+1);			\
+	topo_cpuset_snprintf(__buf, TOPO_CPUSET_STRING_LENGTH+1, x);		\
+	__buf;									\
+     })
+
 #define topo_setup_object(l, _type, _index) do {	\
 		struct topo_obj *__l = (l);		\
 		__l->type = _type;			\
@@ -177,12 +184,5 @@ topo_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *pr
     }
   topo_debug("\n");
 }
-
-/** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
-#define TOPO_CPUSET_PRINTF_VALUE(x)	({					\
-	char *__buf = alloca(TOPO_CPUSET_STRING_LENGTH+1);			\
-	topo_cpuset_snprintf(__buf, TOPO_CPUSET_STRING_LENGTH+1, x);		\
-	__buf;									\
-     })
 
 #endif /* TOPOLOGY_HELPER_H */
