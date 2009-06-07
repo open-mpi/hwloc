@@ -107,7 +107,7 @@ int topo_find_closest_objs (struct topo_topology *topology, struct topo_obj *src
 }
 
 struct topo_obj *
-topo_find_cpuset_covering_obj (struct topo_topology *topology, topo_cpuset_t *set)
+topo_find_cpuset_covering_obj (struct topo_topology *topology, const topo_cpuset_t *set)
 {
   struct topo_obj *current = topology->levels[0][0];
   int i;
@@ -127,7 +127,7 @@ topo_find_cpuset_covering_obj (struct topo_topology *topology, topo_cpuset_t *se
 }
 
 static int
-topo__find_cpuset_objs (struct topo_obj *current, topo_cpuset_t *set,
+topo__find_cpuset_objs (struct topo_obj *current, const topo_cpuset_t *set,
 			struct topo_obj ***res, int *max)
 {
   int gotten = 0;
@@ -164,7 +164,7 @@ topo__find_cpuset_objs (struct topo_obj *current, topo_cpuset_t *set,
 }
 
 int
-topo_find_cpuset_objs (struct topo_topology *topology, topo_cpuset_t *set,
+topo_find_cpuset_objs (struct topo_topology *topology, const topo_cpuset_t *set,
 		       struct topo_obj **objs, int max)
 {
   struct topo_obj *current = topology->levels[0][0];
@@ -257,7 +257,7 @@ topo_obj_snprintf(char *string, size_t size,
   }
 }
 
-int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs)
+int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, const topo_obj_t const *objs)
 {
   topo_cpuset_t set;
   int i;

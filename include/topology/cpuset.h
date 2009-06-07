@@ -80,7 +80,7 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 
 /** \brief Stringify a cpuset. */
 static __inline__ int
-topo_cpuset_snprintf(char * buf, size_t _size, topo_cpuset_t * set)
+topo_cpuset_snprintf(char * buf, size_t _size, const topo_cpuset_t * set)
 {
   ssize_t size = _size;
   char *tmp = buf;

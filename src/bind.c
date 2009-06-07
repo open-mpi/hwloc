@@ -56,7 +56,7 @@ _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *,
 #  endif
 
 static int
-topo_linux_set_cpubind(topo_cpuset_t *topo_set)
+topo_linux_set_cpubind(const topo_cpuset_t *topo_set)
 {
 #ifdef CPU_SET
   cpu_set_t linux_set;
@@ -86,7 +86,7 @@ topo_linux_set_cpubind(topo_cpuset_t *topo_set)
 #include <sys/procset.h>
 
 static int
-topo_solaris_set_cpubind(topo_cpuset_t *topo_set)
+topo_solaris_set_cpubind(const topo_cpuset_t *topo_set)
 {
   unsigned target;
 
@@ -112,7 +112,7 @@ topo_solaris_set_cpubind(topo_cpuset_t *topo_set)
 #ifdef WIN_SYS
 #include <windows.h>
 static int
-topo_win_set_cpubind(topo_cpuset_t *topo_set)
+topo_win_set_cpubind(const topo_cpuset_t *topo_set)
 {
   DWORD mask = topo_cpuset_to_ulong(topo_set);
   if (!SetThreadAffinityMask(GetCurrentThread(), mask))
@@ -125,7 +125,7 @@ topo_win_set_cpubind(topo_cpuset_t *topo_set)
 #include <radset.h>
 #include <numa.h>
 static int
-topo_osf_set_cpubind(topo_cpuset_t *topo_set)
+topo_osf_set_cpubind(const topo_cpuset_t *topo_set)
 {
   radset_t radset;
   unsigned cpu;
@@ -145,7 +145,7 @@ topo_osf_set_cpubind(topo_cpuset_t *topo_set)
 #ifdef AIX_SYS
 #include <sys/processor.h>
 static int
-topo_aix_set_cpubind(topo_cpuset_t *topo_set)
+topo_aix_set_cpubind(const topo_cpuset_t *topo_set)
 {
   unsigned target;
 
@@ -169,7 +169,7 @@ topo_aix_set_cpubind(topo_cpuset_t *topo_set)
  * IRIX: see _DSM_MUSTRUN */
 
 int
-topo_set_cpubind(topo_cpuset_t *set)
+topo_set_cpubind(const topo_cpuset_t *set)
 /* FIXME: add a pid parameter, which type is portable enough?  POSIX says that
  * pid_t shall be a signed integer type, on windows that can be a handle
  * (pointer) or an id.  */

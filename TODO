@@ -1,5 +1,3 @@
-Constify
-
 API
 
 Split API into two levels?
@@ -22,8 +20,6 @@ Split API into two levels?
 
 * expose the internal conversion from cpuset to sched_setaffinity mask?
   + reverse routine?
-
-* remove duplicated static inline prototypes (mostly in the cpuset API)
 
 Doc
 ===

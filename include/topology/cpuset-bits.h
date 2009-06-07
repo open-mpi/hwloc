@@ -103,7 +103,6 @@ extern int ffs(int);
 
 #else /* no ffs implementation */
 
-static __inline__ int topo_ffsl(unsigned long x);
 static __inline__ int topo_ffsl(unsigned long x)
 {
 	int i;
@@ -149,7 +148,6 @@ static __inline__ int topo_ffsl(unsigned long x)
 /* We only have an int ffs(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline__ int topo_ffs32(unsigned long x);
 static __inline__ int topo_ffs32(unsigned long x)
 {
 #if TOPO_BITS_PER_INT == 16
@@ -160,7 +158,6 @@ static __inline__ int topo_ffs32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline__ int topo_ffsl(unsigned long x);
 static __inline__ int topo_ffsl(unsigned long x)
 {
 #if TOPO_BITS_PER_LONG == 64

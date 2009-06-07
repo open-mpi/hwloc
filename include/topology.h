@@ -268,22 +268,23 @@ static inline topo_obj_t topo_get_system_obj (topo_topology_t topology)
 }
 
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
-static inline topo_obj_t topo_find_common_ancestor_obj (topo_obj_t obj1, topo_obj_t obj2)
+static inline topo_obj_t topo_find_common_ancestor_obj (const topo_obj_t obj1, const topo_obj_t obj2)
 {
-  while (obj1->level > obj2->level)
-    obj1 = obj1->father;
-  while (obj2->level > obj1->level)
-    obj2 = obj2->father;
-  while (obj1 != obj2) {
-    obj1 = obj1->father;
-    obj2 = obj2->father;
+  topo_obj_t o1 = obj1, o2 = obj2;
+  while (o1->level > o2->level)
+    o1 = o1->father;
+  while (o2->level > o1->level)
+    o2 = o2->father;
+  while (o1 != o2) {
+    o1 = o1->father;
+    o2 = o2->father;
   }
-  return obj1;
+  return o1;
 }
 
 /** \brief Returns true if _obj_ is inside the subtree beginning
     with \p subtree_root. */
-static inline int topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_root)
+static inline int topo_obj_is_in_subtree (const topo_obj_t obj, const topo_obj_t subtree_root)
 {
   return topo_cpuset_isincluded(&obj->cpuset, &subtree_root->cpuset);
 }
@@ -296,16 +297,18 @@ static inline int topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_roo
  *  \return the actual number of objects that were found.
  */
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? */
-extern int topo_find_closest_objs (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
+extern int topo_find_closest_objs (topo_topology_t topology, const topo_obj_t src,
+				   topo_obj_t *objs, int max);
 
 /** \brief Find the lowest object covering at least the given cpuset \p set */
-extern topo_obj_t topo_find_cpuset_covering_obj (topo_topology_t topology, topo_cpuset_t *set);
+extern topo_obj_t topo_find_cpuset_covering_obj (topo_topology_t topology, const topo_cpuset_t *set);
 
 /** \brief Find objects covering exactly a given cpuset \p set */
-extern int topo_find_cpuset_objs (topo_topology_t topology, topo_cpuset_t *set, topo_obj_t *objs, int max);
+extern int topo_find_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *set,
+				  topo_obj_t *objs, int max);
 
 /** \brief Find the first cache covering a cpuset \p set */
-static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, topo_cpuset_t *set)
+static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *set)
 {
   topo_obj_t current = topo_find_cpuset_covering_obj(topology, set);
   while (current) {
@@ -317,7 +320,7 @@ static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topolo
 }
 
 /** \brief Find the first cache shared between an object and somebody else */
-static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
+static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology, const topo_obj_t obj)
 {
   topo_obj_t current = obj->father;
   while (current) {
@@ -331,7 +334,7 @@ static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology,
 
 /** \brief Among objects at given depth and below a cpuset, return the nth. */
 static inline topo_obj_t
-topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, topo_cpuset_t *set,
+topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
 				    unsigned depth, unsigned index)
 {
   int count = 0;
@@ -352,12 +355,13 @@ topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, topo_cpuset_t *set
  * If root is \c NULL, use the top-object (system).
  */
 static inline topo_obj_t
-topo_get_obj_below_by_depth (topo_topology_t topology, topo_obj_t root,
+topo_get_obj_below_by_depth (topo_topology_t topology, const topo_obj_t root,
 			     unsigned depth, unsigned index)
 {
-  if (!root)
-    root = topo_get_system_obj(topology);
-  return topo_get_obj_below_cpuset_by_depth(topology, &root->cpuset, depth, index);
+  topo_obj_t r = root;
+  if (!r)
+    r = topo_get_system_obj(topology);
+  return topo_get_obj_below_cpuset_by_depth(topology, &r->cpuset, depth, index);
 }
 
 /** \brief Among objects of given type and below a root object, return the nth.
@@ -367,7 +371,7 @@ topo_get_obj_below_by_depth (topo_topology_t topology, topo_obj_t root,
  * fallback to topo_get_obj_below_by_depth().
  */
 static inline topo_obj_t
-topo_get_obj_below_by_type (topo_topology_t topology, topo_obj_t root,
+topo_get_obj_below_by_type (topo_topology_t topology, const topo_obj_t root,
 			    topo_obj_type_t type, unsigned index)
 {
   unsigned depth = topo_get_type_depth (topology, type);
@@ -392,12 +396,14 @@ extern topo_obj_type_t topo_obj_type_of_string (const char * string);
  *
  * \return how many characters were actually written (not including the ending \\0). */
 extern int topo_obj_snprintf(char *string, size_t size,
-			     struct topo_topology *topology, topo_obj_t l, const char *indexprefix, int verbose);
+			     topo_topology_t topology, const topo_obj_t l,
+			     const char *indexprefix, int verbose);
 
 /** \brief Stringify the cpuset containing a set of objects.
  *
  * \return how many characters were actually written (not including the ending \\0). */
-extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
+extern int topo_obj_cpuset_snprintf(char *str, size_t size,
+				    size_t nobj, const topo_obj_t const *objs);
 
 /** @} */
 
@@ -412,7 +418,7 @@ extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_ob
  * a single CPU remains in the set. This way, the process has no
  * of migrating between different CPUs.
  */
-extern int topo_set_cpubind(topo_cpuset_t *set);
+extern int topo_set_cpubind(const topo_cpuset_t *set);
 
 /** @} */
 
