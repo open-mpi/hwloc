@@ -57,9 +57,6 @@ int thread_migrate (int thread_id, int destination_node);
 
 * move dmi_* to a machine object?
 
-* add a lstopo-output-reading backend
-  + really useful now that we have XML?
-
 * lstopo-nox
   + disable xml as well?  It only depends on zlib
 
