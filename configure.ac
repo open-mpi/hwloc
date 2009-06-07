@@ -191,6 +191,7 @@ if test "x$enable_xml" = "xyes"; then
 fi
 
 if test "x$enable_xml" = "xyes"; then
+  LIBTOPOLOGY_REQUIRES="libxml-2.0 $LIBTOPOLOGY_REQUIRES"
   AC_DEFINE([HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
 fi
 
@@ -233,6 +234,8 @@ AC_CHECK_FUNCS([ffsl], [
 ])
 
 AC_FUNC_ALLOCA
+
+AC_SUBST(LIBTOPOLOGY_REQUIRES)
 
 AC_CONFIG_HEADER([include/config.h])
 
