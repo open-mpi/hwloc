@@ -51,12 +51,16 @@ int main(void)
   topo_topology_set_synthetic(topology, "2 3 4 5 6");
   topo_topology_load(topology);
 
+  /* internal checks */
+
+  topo_topology_check(topology);
+
+  /* local checks */
   topo_topology_get_info(topology, &info);
   assert(info.depth == 6);
 
   width = 1;
   for(i=0; i<6; i++) {
-
     /* check arities */
     assert(topo_get_depth_nbobjs(topology, i) == width);
     for(j=0; j<width; j++) {
@@ -64,30 +68,6 @@ int main(void)
       assert(obj);
       assert(obj->arity == (i<5 ? i+2 : 0));
     }
-
-    /* check sibling lists */
-    assert(!topo_get_obj(topology, i, 0)->prev_sibling);
-    for(j=1; j<width; j++) {
-      topo_obj_t prev, next;
-
-      /* check that objects exist */
-      prev = topo_get_obj(topology, i, j-1);
-      assert(prev);
-      next = topo_get_obj(topology, i, j);
-      assert(next);
-
-      /* check cousin links */
-      assert(next->prev_cousin == prev);
-      assert(prev->next_cousin == next);
-
-      /* check sibling links */
-      assert(next->prev_sibling == (next == next->father->first_child ? NULL : prev));
-      assert(prev->next_sibling == (prev == prev->father->last_child ? NULL : next));   
-
-      /* TODO: count objects in these lists */
-    }
-    assert(!topo_get_obj(topology, i, width-1)->next_sibling);
-
     width *= i+2;
   }
 

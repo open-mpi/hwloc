@@ -896,6 +896,11 @@ topo_topology_load (struct topo_topology *topology)
 
   topo_discover(topology);
 
+#ifndef TOPO_DEBUG
+  if (getenv("TOPO_DEBUG_CHECK"))
+#endif
+    topo_topology_check(topology);
+
   return 0;
 }
 
@@ -929,4 +934,104 @@ topo_topology_destroy (struct topo_topology *topology)
   free(topology->dmi_board_name);
 
   topo_default_allocator.free(topology);
+}
+
+
+/* check children between a father object */
+static void
+topo__check_children(struct topo_topology *topology, struct topo_obj *father)
+{
+  int j;
+
+  if (!father->arity) {
+    assert(!father->children);
+    return;
+  }
+
+  /* first child specific checks */
+  assert(father->first_child->index == 0);
+  assert(father->first_child == father->children[0]);
+  assert(father->first_child->prev_sibling == NULL);
+
+  /* last child specific checks */
+  assert(father->last_child->index == father->arity-1);
+  assert(father->last_child == father->children[father->arity-1]);
+  assert(father->last_child->next_sibling == NULL);
+
+  /* checks for all children */
+  for(j=1; j<father->arity; j++) {
+    assert(father->children[j]->index == j);
+    assert(father->children[j-1]->next_sibling == father->children[j]);
+    assert(father->children[j]->prev_sibling == father->children[j-1]);
+    assert(father->children[j-1]->next_cousin == father->children[j]);
+    assert(father->children[j]->prev_cousin == father->children[j-1]);
+    /* don't check that types are equal, in case of asymmetric topologies? */
+  }
+}
+
+/* check a whole topology structure */
+void
+topo_topology_check(struct topo_topology *topology)
+{
+  struct topo_topology_info info;
+  struct topo_obj *obj;
+  int i,j;
+
+  assert(topo_topology_get_info(topology, &info) >= 0);
+
+  /* top-level specific checks */
+  assert(topo_get_depth_nbobjs(topology, 0) == 1);
+  obj = topo_get_system_obj(topology);
+  assert(obj);
+  assert(obj->type == TOPO_OBJ_SYSTEM);
+
+  /* check each level */
+  for(i=0; i<info.depth; i++) {
+    unsigned width = topo_get_depth_nbobjs(topology, i);
+    struct topo_obj *prev = NULL;
+
+    /* check that each object is equal to the previous one */
+    for(j=0; j<width; j++) {
+      obj = topo_get_obj(topology, i, j);
+      assert(obj);
+      assert(obj->level == i);
+      assert(obj->number == j);
+      if (prev) {
+	assert(topo_type_cmp(obj, prev) == TOPO_TYPE_EQUAL);
+	assert(prev->next_cousin == obj);
+	assert(obj->prev_cousin == prev);
+      }
+      topo__check_children(topology, obj);
+      prev = obj;
+    }
+
+    /* check first object of the level */
+    obj = topo_get_obj(topology, i, 0);
+    assert(obj);
+    assert(!obj->prev_cousin);
+
+    /* check type */
+    assert(topo_get_depth_type(topology, i) == obj->type);
+    assert(topo_get_type_depth(topology, obj->type) == i
+	   || topo_get_type_depth(topology, obj->type) == TOPO_TYPE_DEPTH_MULTIPLE);
+
+    /* check last object */
+    obj = topo_get_obj(topology, i, width-1);
+    assert(obj);
+    assert(!obj->next_cousin);
+
+    /* check last+1 object */
+    obj = topo_get_obj(topology, i, width);
+    assert(!obj);
+  }
+
+  /* check bottom objects */
+  assert(topo_get_depth_nbobjs(topology, info.depth-1) > 0);
+  for(j=0; j<topo_get_depth_nbobjs(topology, info.depth-1); j++) {
+    obj = topo_get_obj(topology, info.depth-1, j);
+    assert(obj);
+    assert(obj->type == TOPO_OBJ_PROC);
+    assert(obj->arity == 0);
+    assert(obj->children == NULL);
+  }
 }

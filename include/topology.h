@@ -183,6 +183,11 @@ extern int topo_topology_load(topo_topology_t topology);
  * \param topology is the topology to be freed
  */
 extern void topo_topology_destroy (topo_topology_t topology);
+/** \brief Run internal checks on a topology structure
+ *
+ * \param topology is the topology to be checked
+ */
+extern void topo_topology_check(topo_topology_t topology);
 
 /** @} */
 

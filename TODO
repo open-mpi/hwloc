@@ -27,9 +27,6 @@ Doc
 
 Support
 =======
-* take tests/synthetic.c and make it a topo_check() that could be invoked when debug is enabled,
-  and on non-synthetic topo as well?
-
 * add support for amd magny-cours "multi-node-cpu", probably by reading 
   cpu_node_siblings/id if available (in 2.6.31+).
   should look like multiple sockets in single numa node?
