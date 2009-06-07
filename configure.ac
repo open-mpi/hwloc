@@ -39,7 +39,7 @@
 #
 
 AC_PREREQ([2.60])
-AC_INIT([libtopology], [0.0], [libtopology-commits@gforge.inria.fr])
+AC_INIT([libtopology], [0.0], [libtopology-devel@gforge.inria.fr])
 AC_SUBST([TOPO_SOVERSION],[0])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
