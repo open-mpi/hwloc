@@ -42,13 +42,15 @@ static void usage(void)
 {
   fprintf(stderr, "Usage: topobind [options] <cpuset> -- command ...\n");
   fprintf(stderr, "  Options are:\n");
-  fprintf(stderr, "   -v\tverbose messages\n");
+  fprintf(stderr, "   --single\tbind on a single CPU to prevent migration\n");
+  fprintf(stderr, "   -v\t\tverbose messages\n");
 }
 
 int main(int argc, char *argv[])
 {
   topo_cpuset_t cpu_set; /* invalid until bind_cpus is set */
   int bind_cpus = 0;
+  int single = 0;
   int verbose = 0;
   int ret;
 
@@ -68,6 +70,10 @@ int main(int argc, char *argv[])
 	verbose = 1;
 	goto next;
       }
+      else if (!strcmp(argv[0], "--single")) {
+	single = 1;
+	goto next;
+      }
 
       usage();
       return EXIT_FAILURE;
@@ -85,6 +91,8 @@ int main(int argc, char *argv[])
   }
 
   if (bind_cpus) {
+    if (single)
+      topo_cpuset_singlify(&cpu_set);
     ret = topo_set_cpubind(&cpu_set);
     if (ret && verbose)
       fprintf(stderr, "topo_set_cpubind failed\n");
