@@ -138,7 +138,7 @@ static void print_children(topo_topology_t topology, topo_obj_t obj, int depth)
 	char string[128];
 	int i;
 
-	topo_obj_snprintf(string, sizeof(string), topology, obj, "", 0);
+	topo_obj_snprintf(string, sizeof(string), topology, obj, "#", 0);
 	printf("%*s%s\n", 2*depth, "", string);
 	for (i = 0; i < obj->arity; i++)
 		print_children(topology, obj->children[i], depth + 1);
@@ -170,7 +170,7 @@ int main(void)
 	for (depth = 0; depth < topoinfo.depth; depth++) {
 		for (i = 0; i < topo_get_depth_nbobjs(topology, depth); i++) {
 			topo_obj_snprintf(string, sizeof(string), topology,
-					topo_get_obj(topology, depth, i), "", 0);
+					topo_get_obj(topology, depth, i), "#", 0);
 			printf("%s\n", string);
 		}
 	}
