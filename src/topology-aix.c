@@ -31,6 +31,8 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+/* TODO: use SIGRECONFIG & dr_reconfig for state change */
+
 #include <config.h>
 
 #include <assert.h>

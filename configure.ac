@@ -143,7 +143,8 @@ AC_CHECK_HEADERS([kstat.h], [
 AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
 		_SC_NPROCESSORS_CONF,
 		_SC_NPROC_ONLN,
-		_SC_NPROC_CONF],,[:],[[#include <unistd.h>]])
+		_SC_NPROC_CONF,
+		_SC_LARGE_PAGESIZE],,[:],[[#include <unistd.h>]])
 
 AC_HAVE_HEADERS([mach/mach_host.h])
 AC_HAVE_HEADERS([mach/mach_init.h], [
@@ -232,6 +233,9 @@ AC_CHECK_FUNCS([ffs], [
 AC_CHECK_FUNCS([ffsl], [
   AC_DEFINE([TOPO_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
+
+AC_CHECK_FUNCS([openat], [have_openat=yes])
+AM_CONDITIONAL([HAVE_OPENAT], [test "x$have_openat" = "xyes"])
 
 AC_FUNC_ALLOCA
 

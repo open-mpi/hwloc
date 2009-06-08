@@ -13,7 +13,7 @@ various attributes such as cache and memory information.
 libtopology supports the following operationg systems:
 
   * Linux (including old kernels not having sysfs topology information, with
-  knowledge of cpusets and offline cpus)
+  knowledge of cpusets and offline cpus, and Kerrighed support)
   * Solaris
   * AIX
   * OSF/1 (aka. Tru64)

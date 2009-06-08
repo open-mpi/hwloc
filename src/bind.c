@@ -140,6 +140,11 @@ topo_osf_set_cpubind(const topo_cpuset_t *topo_set)
 
   return 0;
 }
+
+/* TODO: process: bind_to_cpu(), bind_to_cpu_id(), rad_bind_pid(),
+ * nsg_init(), nsg_attach_pid()
+ * assign_pid_to_pset()
+ * */
 #endif /* OSF_SYS */
 
 #ifdef AIX_SYS
@@ -159,6 +164,10 @@ topo_aix_set_cpubind(const topo_cpuset_t *topo_set)
 
   target = topo_cpuset_first(topo_set);
 
+  /* TODO: pthread/thread: pthdb_pthread_tid / pthdb_tid_pthread */
+
+  /* TODO: NUMA: ra_attachrset / rs_setpartition */
+
   if (bindprocessor(BINDTHREAD, thread_self(), target))
     return -1;
 
@@ -166,7 +175,7 @@ topo_aix_set_cpubind(const topo_cpuset_t *topo_set)
 }
 #endif /* AIX_SYS */
 
-/* TODO: GNU_SYS, FREEBSD_SYS, DARWIN_SYS, IRIX_SYS
+/* TODO: GNU_SYS, FREEBSD_SYS, DARWIN_SYS, IRIX_SYS, HPUX_SYS
  * IRIX: see _DSM_MUSTRUN */
 
 int
