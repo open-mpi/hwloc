@@ -119,12 +119,12 @@ topo_look_kstat(struct topo_topology *topology)
 
       if (ksp->ks_instance != numprocs)
 	{
-	  fprintf(stderr, "kstat instances not in CPU order: %d comes %d\n", ksp->ks_instance, numprocs);
+	  fprintf(stderr, "kstat instances not in CPU order: %d comes %u\n", ksp->ks_instance, numprocs);
 	  goto out;
 	}
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
-	  fprintf(stderr, "kstat_read failed for CPU%d: %s\n", numprocs, strerror(errno));
+	  fprintf(stderr, "kstat_read failed for CPU%u: %s\n", numprocs, strerror(errno));
 	  goto out;
 	}
       stat = (kstat_named_t *) kstat_data_lookup(ksp, "chip_id");
@@ -132,7 +132,7 @@ topo_look_kstat(struct topo_topology *topology)
 	{
 	  if (numsockets)
 	    {
-	      fprintf(stderr, "could not read socket id for CPU%d: %s\n", numprocs, strerror(errno));
+	      fprintf(stderr, "could not read socket id for CPU%u: %s\n", numprocs, strerror(errno));
 	      goto out;
 	    }
 	}
@@ -158,7 +158,7 @@ topo_look_kstat(struct topo_topology *topology)
 	{
 	  if (numcores)
 	    {
-	      fprintf(stderr, "could not read core id for CPU%d: %s\n", numprocs, strerror(errno));
+	      fprintf(stderr, "could not read core id for CPU%u: %s\n", numprocs, strerror(errno));
 	      goto out;
 	    }
 	}

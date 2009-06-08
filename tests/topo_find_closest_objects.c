@@ -82,7 +82,7 @@ main (int argc, char *argv[])
 
   /* get closest levels */
   found = topo_find_closest_objs (topology, last, closest, numprocs);
-  printf("looked for %d closest entries, found %d\n", numprocs, found);
+  printf("looked for %u closest entries, found %d\n", numprocs, found);
   assert(found == numprocs-1);
 
   /* check first found is closest */
