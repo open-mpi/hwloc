@@ -16,6 +16,7 @@ libtopology supports the following operationg systems:
   knowledge of cpusets and offline cpus, and Kerrighed support)
   * Solaris
   * AIX
+  * Darwin
   * OSF/1 (aka. Tru64)
   * Windows
   * For other OSes, only the number of processors is available for now.
