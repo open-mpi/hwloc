@@ -787,6 +787,7 @@ topo_topology_init (struct topo_topology **topologyp)
     return -1;
 
   /* Setup topology context */
+  topology->is_loaded = 0;
   topology->flags = 0;
   topology->is_fake = 0;
   topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */
@@ -928,6 +929,12 @@ topo_topology_destroy (struct topo_topology *topology)
 int
 topo_topology_load (struct topo_topology *topology)
 {
+  if (topology->is_loaded) {
+    topo_topology_clear(topology);
+    topo_topology_setup_defaults(topology);
+    topology->is_loaded = 0;
+  }
+
 #ifdef LINUX_SYS
   char *fsys_root_path_env = getenv("TOPO_FSYS_ROOT_PATH");
   if (fsys_root_path_env) {
@@ -958,6 +965,7 @@ topo_topology_load (struct topo_topology *topology)
 #endif
     topo_topology_check(topology);
 
+  topology->is_loaded = 1;
   return 0;
 }
 

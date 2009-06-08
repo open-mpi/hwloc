@@ -68,6 +68,7 @@ struct topo_topology {
   char *dmi_board_vendor;
   char *dmi_board_name;
   int is_fake;
+  int is_loaded;
 
   topo_backend_t backend_type;
   union topo_backend_params_u {
