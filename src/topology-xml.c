@@ -143,7 +143,7 @@ topo__look_xml_attr(struct topo_topology *topology, struct topo_obj *obj,
 	break;
       }
     } else {
-	fprintf(stderr, "ignoring unexpected xml attr node type %d name %s\n", node->type, node->name);
+	fprintf(stderr, "ignoring unexpected xml attr node type %u name %s\n", node->type, node->name);
     }
   }
 }
@@ -180,7 +180,7 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
 	  if (attr->children)
 	    topo__look_xml_attr(topology, obj, attr->name, attr->children);
 	} else {
-	  fprintf(stderr, "ignoring unexpected xml attr type %d\n", node->type);
+	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", node->type);
 	}
       }
 
@@ -199,7 +199,7 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
       } else {
 	/* add object */
 	if (obj->type == TOPO_OBJ_TYPE_MAX) {
-	  fprintf(stderr, "ignoring object with invalid type %d\n", obj->type);
+	  fprintf(stderr, "ignoring object with invalid type %u\n", obj->type);
 	  free(obj);
 	} else if (obj->type == TOPO_OBJ_SYSTEM) {
 	  fprintf(stderr, "ignoring system object at invalid depth %d\n", depth);
@@ -222,7 +222,7 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
       if (node->content && node->content[0] != '\0' && node->content[0] != '\n')
 	fprintf(stderr, "ignoring object text content %s\n", node->content);      
     } else {
-      fprintf(stderr, "ignoring unexpected xml node type %d\n", node->type);
+      fprintf(stderr, "ignoring unexpected xml node type %u\n", node->type);
     }
   }
 }

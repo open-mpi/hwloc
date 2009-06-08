@@ -108,7 +108,7 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
 
   if (depth >= topoinfo->depth) {
     if (verbose)
-      fprintf(stderr, "ignoring invalid depth %d\n", depth);
+      fprintf(stderr, "ignoring invalid depth %u\n", depth);
     return -1;
   }
   width = topo_get_depth_nbobjs(topology, depth);
@@ -147,10 +147,10 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
     obj = topo_get_obj_below_cpuset_by_depth(topology, rootset, depth, i);
     if (verbose) {
       if (obj)
-	printf("object #%d depth %d below cpuset %" TOPO_PRIxCPUSET " found\n",
+	printf("object #%u depth %u below cpuset %" TOPO_PRIxCPUSET " found\n",
 	       i, depth, TOPO_CPUSET_PRINTF_VALUE(rootset));
       else
-	printf("object #%d depth %d below cpuset %" TOPO_PRIxCPUSET " does not exist\n",
+	printf("object #%u depth %u below cpuset %" TOPO_PRIxCPUSET " does not exist\n",
 	       i, depth, TOPO_CPUSET_PRINTF_VALUE(rootset));
     }
     if (obj) {

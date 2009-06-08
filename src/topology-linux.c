@@ -383,12 +383,12 @@ look_sysfsnode(struct topo_topology *topology,
     {
       while ((dirent = readdir(dir)) != NULL)
 	{
-	  unsigned long node;
+	  unsigned long numnode;
 	  if (strncmp(dirent->d_name, "node", 4))
 	    continue;
-	  node = strtoul(dirent->d_name+4, NULL, 0);
-	  if (nbnodes < node+1)
-	    nbnodes = node+1;
+	  numnode = strtoul(dirent->d_name+4, NULL, 0);
+	  if (nbnodes < numnode+1)
+	    nbnodes = numnode+1;
 	}
       closedir(dir);
     }
@@ -457,7 +457,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
       }
 
       /* check whether the kernel exports topology information for this cpu */
-      sprintf(string, "%s/cpu%ld/topology", path, cpu);
+      sprintf(string, "%s/cpu%lu/topology", path, cpu);
       if (topo_access(string, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT) {
 	topo_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
 		   cpu, path, cpu);
@@ -465,7 +465,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
       }
 
       /* check whether this processor is offline */
-      sprintf(string, "%s/cpu%ld/online", path, cpu);
+      sprintf(string, "%s/cpu%lu/online", path, cpu);
       fd = topo_fopen(string, "r", topology->backend_params.sysfs.root_fd);
       if (fd) {
 	if (fgets(online, sizeof(online), fd)) {
@@ -484,7 +484,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
       if (topology->flags & TOPO_FLAGS_IGNORE_THREADS) {
 	/* check whether it is a non-first thread in the core */
 	topo_cpuset_t coreset;
-	sprintf(string, "%s/cpu%ld/topology/thread_siblings", path, cpu);
+	sprintf(string, "%s/cpu%lu/topology/thread_siblings", path, cpu);
 	topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
 	if (topo_cpuset_first(&coreset) != cpu) {
 	  topo_debug("os proc %lu is not first thread in coreset %" TOPO_PRIxCPUSET "\n",

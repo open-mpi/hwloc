@@ -230,7 +230,7 @@ topo_obj_snprintf(char *string, size_t size,
     return snprintf(string, size, "%s%s", topo_obj_type_string(type), physical_index);
   case TOPO_OBJ_MISC:
 	  /* TODO: more pretty presentation? */
-    return snprintf(string, size, "%s%d%s", topo_obj_type_string(type), l->attr.misc.depth, physical_index);
+    return snprintf(string, size, "%s%u%s", topo_obj_type_string(type), l->attr.misc.depth, physical_index);
   case TOPO_OBJ_PROC:
     return snprintf(string, size, "P%s", physical_index);
   case TOPO_OBJ_SYSTEM:

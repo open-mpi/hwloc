@@ -55,7 +55,7 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
 #define TOPO_OBJ_TYPE_UNKNOWN -1
-    unsigned type = TOPO_OBJ_TYPE_UNKNOWN;
+    topo_obj_type_t type = TOPO_OBJ_TYPE_UNKNOWN;
 
     while (*pos == ' ')
       pos++;
