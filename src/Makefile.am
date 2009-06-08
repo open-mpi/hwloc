@@ -60,3 +60,9 @@ libtopology_la_SOURCES += topology-windows.c
 else !HAVE_WINDOWS
 EXTRA_DIST += topology-windows.c
 endif !HAVE_WINDOWS
+
+if HAVE_DARWIN
+libtopology_la_SOURCES += topology-darwin.c
+else !HAVE_DARWIN
+EXTRA_DIST += topology-darwin.c
+endif !HAVE_DARWIN

@@ -128,7 +128,5 @@ QNX:
    _syspage_ptr() SYSPAGE_ENTRY(entry)
    ThreadCtl/Thread_ctl_r(_NTO_TCTL_RUNMASK)
 
-Darwin: sys/sysctl.h: hw.packages. Not really usable...
-
 BSD:
    sys/sched.h: sched_bind/sched_unbind, but that's in-kernel only for now.
