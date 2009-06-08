@@ -67,6 +67,7 @@ Binding
 * topo_set_membind()
   + reverse routine?
   + no level = empty mask, and we may want an easy alias for "whole machine"
+* Some OSes do not provide strict binding, only relaxed binding.
 
 * make them do nothing if passed a fake topology?
   + so applications can just always call them and still have synthetic tests.
