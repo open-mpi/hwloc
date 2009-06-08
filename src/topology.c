@@ -741,6 +741,41 @@ topo_discover(struct topo_topology *topology)
     }
 }
 
+static void
+topo_topology_setup_defaults(struct topo_topology *topology)
+{
+  struct topo_obj *system_obj;
+  int i;
+
+  /* Reset global values */
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  topology->huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+#else /* HAVE__SC_LARGE_PAGESIZE */
+  topology->huge_page_size_kB = 0;
+#endif /* HAVE__SC_LARGE_PAGESIZE */
+  topology->dmi_board_vendor = NULL;
+  topology->dmi_board_name = NULL;
+
+  /* No objects by default but System on top by default */
+  memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
+  for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
+    topology->type_depth[i] = -1;
+  topology->nb_levels = 1; /* there's at least SYSTEM */
+  topology->levels[0] = malloc (sizeof (struct topo_obj));
+  topology->level_nbobjects[0] = 1;
+  topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
+
+  /* Create the actual System object */
+  system_obj = topo_alloc_setup_object(TOPO_OBJ_SYSTEM, 0);
+  system_obj->level = 0;
+  system_obj->number = 0;
+  system_obj->index = 0;
+  system_obj->attr.system.memory_kB = 0;
+  system_obj->attr.system.huge_page_free = 0;
+  topo_cpuset_fill(&system_obj->cpuset);
+  topology->levels[0][0] = system_obj;
+}
+
 int
 topo_topology_init (struct topo_topology **topologyp)
 {
@@ -751,31 +786,17 @@ topo_topology_init (struct topo_topology **topologyp)
   if(!topology)
     return -1;
 
+  /* Setup topology context */
   topology->flags = 0;
   topology->is_fake = 0;
   topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  topology->huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#else /* HAVE__SC_LARGE_PAGESIZE */
-  topology->huge_page_size_kB = 0;
-#endif /* HAVE__SC_LARGE_PAGESIZE */
-  topology->dmi_board_vendor = NULL;
-  topology->dmi_board_name = NULL;
-
   /* Only ignore useless cruft by default */
   for(i=0; i< TOPO_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = TOPO_IGNORE_TYPE_NEVER;
   topology->ignored_types[TOPO_OBJ_MISC] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
 
-  /* No objects by default but System on top by default */
-  memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
-  for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
-    topology->type_depth[i] = -1;
-  topology->nb_levels = 1; /* there's at least SYSTEM */
-  topology->levels[0] = malloc (sizeof (struct topo_obj));
-  topology->level_nbobjects[0] = 1;
-  topo_setup_system_level (topology->levels[0]);
-  topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
+  /* Make the topology look like something coherent but empty */
+  topo_topology_setup_defaults(topology);
 
   *topologyp = topology;
   return 0;

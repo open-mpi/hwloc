@@ -137,20 +137,6 @@ topo_alloc_setup_object(enum topo_obj_type_e type, unsigned index)
   return obj;
 }
 
-#define topo_setup_system_level(l) do {					\
-		struct topo_obj **__p = (l);				\
-		struct topo_obj *__l1;					\
-		__l1 = topo_alloc_setup_object(TOPO_OBJ_SYSTEM, 0);	\
-		__l1->level = 0;					\
-		__l1->number = 0;					\
-		__l1->index = 0;					\
-		__l1->attr.system.memory_kB = 0;			\
-		__l1->attr.system.huge_page_free = 0;			\
-		topo_cpuset_fill(&__l1->cpuset);			\
-		__p[0] = __l1;						\
-  } while (0)
-
-
 #define topo_object_cpuset_from_array(l, _value, _array, _max) do {	\
 		struct topo_obj *__l = (l);				\
 		unsigned int *__a = (_array);				\
