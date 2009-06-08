@@ -404,7 +404,7 @@ extern int topo_obj_snprintf(char *string, size_t size,
 /** \brief Stringify the cpuset containing a set of objects.
  *
  * \return how many characters were actually written (not including the ending \\0). */
-extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, topo_obj_t *objs);
+extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, const topo_obj_t *objs);
 
 /** @} */
 

@@ -257,7 +257,7 @@ topo_obj_snprintf(char *string, size_t size,
   }
 }
 
-int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct topo_obj **objs)
+int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct topo_obj * const *objs)
 {
   topo_cpuset_t set;
   int i;
