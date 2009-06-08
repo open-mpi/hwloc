@@ -902,6 +902,29 @@ topo_topology_ignore_all_keep_structure(struct topo_topology *topology)
   return 0;
 }
 
+static void
+topo_topology_clear (struct topo_topology *topology)
+{
+  unsigned l,i;
+  for (l=0; l<topology->nb_levels; l++) {
+    for (i=0; i<topology->level_nbobjects[l]; i++) {
+      free(topology->levels[l][i]->children);
+      free(topology->levels[l][i]);
+    }
+    free(topology->levels[l]);
+  }
+  free(topology->dmi_board_vendor);
+  free(topology->dmi_board_name);
+}
+
+void
+topo_topology_destroy (struct topo_topology *topology)
+{
+  topo_topology_clear(topology);
+  topo_backend_exit(topology);
+  topo_default_allocator.free(topology);
+}
+
 int
 topo_topology_load (struct topo_topology *topology)
 {
@@ -947,27 +970,6 @@ topo_topology_get_info(struct topo_topology *topology, struct topo_topology_info
   info->huge_page_size_kB = topology->huge_page_size_kB;
   info->is_fake = topology->is_fake;
   return 0;
-}
-
-void
-topo_topology_destroy (struct topo_topology *topology)
-{
-  unsigned l,i;
-
-  for (l=0; l<topology->nb_levels; l++) {
-    for (i=0; i<topology->level_nbobjects[l]; i++) {
-      free(topology->levels[l][i]->children);
-      free(topology->levels[l][i]);
-    }
-    free(topology->levels[l]);
-  }
-
-  topo_backend_exit(topology);
-
-  free(topology->dmi_board_vendor);
-  free(topology->dmi_board_name);
-
-  topo_default_allocator.free(topology);
 }
 
 
