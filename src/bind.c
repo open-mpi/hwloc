@@ -144,6 +144,7 @@ topo_osf_set_cpubind(const topo_cpuset_t *topo_set)
 
 #ifdef AIX_SYS
 #include <sys/processor.h>
+#include <sys/thread.h>
 static int
 topo_aix_set_cpubind(const topo_cpuset_t *topo_set)
 {
