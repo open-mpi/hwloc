@@ -70,6 +70,8 @@ static void usage(void)
 #endif /* HAVE_XML */
 		  "\n");
   fprintf (stderr, "\nRecognized options:\n");
+  fprintf (stderr, "-v                  enable the verbose mode (disabled by default)\n");
+  fprintf (stderr, "--verbose           enable the verbose mode (disabled by default)\n");
   fprintf (stderr, "--no-caches         do not show caches\n");
   fprintf (stderr, "--no-useless-caches do not show caches which do not have a hierarchical impact\n");
   fprintf (stderr, "--no-threads        do not show SMT threads\n");
