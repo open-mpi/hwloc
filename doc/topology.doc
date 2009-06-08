@@ -50,6 +50,7 @@ libtopology supports the following operationg systems:
   knowledge of cpusets and offline cpus)
   <li> Solaris
   <li> AIX
+  <li> Darwin
   <li> OSF/1 (aka. Tru64)
   <li> Windows
   <li> For other OSes, only the number of processors is available for now.
