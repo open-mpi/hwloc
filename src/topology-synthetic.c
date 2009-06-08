@@ -64,19 +64,19 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
       break;
 
     if (*pos < '0' || *pos > '9') {
-      if (!strncmp(pos, "machines", 1))
+      if (!strncasecmp(pos, "machines", 1))
 	type = TOPO_OBJ_MACHINE;
-      else if (!strncmp(pos, "nodes", 1))
+      else if (!strncasecmp(pos, "nodes", 1))
 	type = TOPO_OBJ_NODE;
-      else if (!strncmp(pos, "sockets", 1))
+      else if (!strncasecmp(pos, "sockets", 1))
 	type = TOPO_OBJ_SOCKET;
-      else if (!strncmp(pos, "cores", 2))
+      else if (!strncasecmp(pos, "cores", 2))
 	type = TOPO_OBJ_CORE;
-      else if (!strncmp(pos, "caches", 2))
+      else if (!strncasecmp(pos, "caches", 2))
 	type = TOPO_OBJ_CACHE;
-      else if (!strncmp(pos, "procs", 1))
+      else if (!strncasecmp(pos, "procs", 1))
 	type = TOPO_OBJ_PROC;
-      else if (!strncmp(pos, "misc", 1))
+      else if (!strncasecmp(pos, "misc", 1))
 	type = TOPO_OBJ_MISC;
 
       next_pos = strchr(pos, ':');
