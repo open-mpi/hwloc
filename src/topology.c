@@ -751,7 +751,6 @@ topo_topology_init (struct topo_topology **topologyp)
   if(!topology)
     return -1;
 
-  topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->flags = 0;
   topology->is_fake = 0;
   topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */
@@ -762,16 +761,21 @@ topo_topology_init (struct topo_topology **topologyp)
 #endif /* HAVE__SC_LARGE_PAGESIZE */
   topology->dmi_board_vendor = NULL;
   topology->dmi_board_name = NULL;
+
+  /* Only ignore useless cruft by default */
   for(i=0; i< TOPO_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = TOPO_IGNORE_TYPE_NEVER;
-  /* Avoid useless cruft */
   topology->ignored_types[TOPO_OBJ_MISC] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
+
+  /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
-  topology->level_nbobjects[0] = 1;
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = -1;
+  topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct topo_obj));
+  topology->level_nbobjects[0] = 1;
   topo_setup_system_level (topology->levels[0]);
+  topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
 
   *topologyp = topology;
   return 0;
