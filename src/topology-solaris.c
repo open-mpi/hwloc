@@ -46,23 +46,54 @@
 #ifdef HAVE_LIBLGRP
 #      include <sys/lgrp_user.h>
 static void
-show(lgrp_cookie_t cookie, lgrp_id_t lgrp)
+browse(struct topo_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp)
 {
-  processorid_t cpuids[32];
-  lgrp_id_t lgrps[32];
-  int i, n;
-  n = lgrp_cpus(cookie, lgrp, cpuids, 32, LGRP_CONTENT_ALL);
-  for (i = 0; i < n ; i++)
-    {
-      topo_debug("%ld has %d\n", lgrp, cpuids[i]);
+  int n;
+  topo_obj_t obj;
+
+  n = lgrp_cpus(cookie, lgrp, NULL, 0, LGRP_CONTENT_ALL);
+  if (n == -1)
+    return;
+
+  {
+    int i;
+    processorid_t cpuids[n];
+    lgrp_mem_size_t mem_size;
+
+    obj = topo_alloc_setup_object(TOPO_OBJ_NODE, lgrp);
+
+    lgrp_cpus(cookie, lgrp, cpuids, n, LGRP_CONTENT_ALL);
+    for (i = 0; i < n ; i++) {
+      topo_cpuset_set(&obj->cpuset, i);
     }
-  n = lgrp_children(cookie, lgrp, lgrps, 32);
-  topo_debug("%ld %d children\n", lgrp, n);
-  for (i = 0; i < n ; i++)
-    {
-      show(cookie, lgrps[i]);
+    topo_debug("node %ld has cpuset %"TOPO_PRIxCPUSET"\n",
+	lgrp, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
+
+    /* or LGRP_MEM_SZ_FREE */
+    mem_size = lgrp_mem_size(cookie, lgrp, LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT);
+    obj->attr.node.huge_page_free = 0; /* TODO */
+    if (mem_size == -1) {
+      obj->attr.node.memory_kB = 0;
+    } else {
+      topo_debug("node %ld has %lldkB\n", lgrp, mem_size/1024);
+      obj->attr.node.memory_kB = mem_size / 1024;
     }
-  topo_debug("%ld children done\n", lgrp);
+    topo_add_object(topology, obj);
+  }
+
+  n = lgrp_children(cookie, lgrp, NULL, 0);
+  {
+    lgrp_id_t lgrps[n];
+    int i;
+
+    lgrp_children(cookie, lgrp, lgrps, n);
+    topo_debug("lgrp %ld has %d children\n", lgrp, n);
+    for (i = 0; i < n ; i++)
+      {
+	browse(topology, cookie, lgrps[i]);
+      }
+    topo_debug("lgrp %ld's children done\n", lgrp);
+  }
 }
 
 void
@@ -80,8 +111,7 @@ topo_look_lgrp(struct topo_topology *topology)
       return;
     }
   root = lgrp_root(cookie);
-  show(cookie, root);
-  /* TODO */
+  browse(topology, cookie, root);
   lgrp_fini(cookie);
 }
 #endif /* LIBLGRP */
