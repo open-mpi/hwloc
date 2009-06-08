@@ -15,6 +15,13 @@ libtopology_ports_la_SOURCES += $(SRC)/topology-solaris.c
 libtopology_ports_la_SOURCES += $(SRC)/topology-aix.c
 libtopology_ports_la_SOURCES += $(SRC)/topology-osf.c
 libtopology_ports_la_SOURCES += $(SRC)/topology-windows.c
+libtopology_ports_la_SOURCES += $(SRC)/topology-darwin.c
 
-EXTRA_DIST = include/windows.h include/kstat.h include/sys/rset.h include/sys/lgrp_user.h include/numa.h
+EXTRA_DIST = \
+		include/windows.h \
+		include/kstat.h \
+		include/sys/rset.h \
+		include/sys/lgrp_user.h \
+		include/sys/sysctl.h \
+		include/numa.h
 
