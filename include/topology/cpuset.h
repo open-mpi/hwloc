@@ -32,7 +32,7 @@
  */
 
 /** \file
- * \brief The cpuset API, for use in libtopology itself.
+ * \brief The Cpuset API, for use in libtopology itself.
  */
 
 #ifndef TOPOLOGY_CPUSET_H
@@ -42,7 +42,7 @@
 #include <topology/cpuset-bits.h>
 
 
-/** \defgroup topology_cpuset The cpuset API
+/** \defgroup topology_cpuset The Cpuset API
  *
  * for use in libtopology itself.
  * @{
@@ -50,7 +50,7 @@
 
 
 /** \brief
- * Main Cpuset Type.
+ * Set of CPUs represented as a bitmask.
  */
 
 typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;

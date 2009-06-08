@@ -32,6 +32,7 @@
  */
 
 /** \file
+ * \brief The libtopology API.
  */
 
 #ifndef TOPOLOGY_H
@@ -53,10 +54,16 @@
  */
 
 struct topo_topology;
-/** \brief Topology context */
+/** \brief Topology context
+ *
+ * To be initialized with topo_topology_init() and built with topo_topology_load().
+ */
 typedef struct topo_topology * topo_topology_t;
 
-/** \brief Global information about the topology */
+/** \brief Global information about a Topology context,
+ *
+ * To be filled with topo_topology_get_info().
+ */
 struct topo_topology_info {
   /** \brief topology size */
   unsigned depth;
@@ -79,7 +86,7 @@ struct topo_topology_info {
  * @{
  */
 
-/** \brief Type of topology object.
+/** \brief Type of topology Object.
  *
  * Do not rely on any relative ordering of the values.
  */
@@ -94,30 +101,32 @@ enum topo_obj_type_e {
 
   TOPO_OBJ_MISC,	/**< \brief Miscellaneous object that may be needed under special circumstances (like arbitrary OS aggregation)  */
 };
-#define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_MISC+1)
 typedef enum topo_obj_type_e topo_obj_type_t;
+/** \brief Maximal value of an Object Type */
+#define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_MISC+1)
 
-/** \brief Structure of a topology object */
+/** \brief Structure of a topology Object */
 struct topo_obj {
   /* physical information */
   enum topo_obj_type_e type;		/**< \brief Type of object */
   signed physical_index;		/**< \brief OS-provided physical index number */
 
+  /** \brief Object-specific Attributes */
   union topo_obj_attr_u {
-    /** \brief Cache-specific attributes */
+    /** \brief Cache-specific Object Attributes */
     struct topo_cache_attr_u {
       unsigned long memory_kB;		  /**< \brief Size of cache */
       unsigned depth;			  /**< \brief Depth of cache */
     } cache;
 
-    /** \brief Node-specific attributes */
+    /** \brief Node-specific Object Attributes */
     struct topo_memory_attr_u {
       unsigned long memory_kB;		  /**< \brief Size of memory node */
       unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
     } node;
-    struct topo_memory_attr_u machine;	/**< \brief Machine-specific attributes */
-    struct topo_memory_attr_u system;	/**< \brief System-specific attributes */
-    /** \brief Misc-specific attributes */
+    struct topo_memory_attr_u machine;	/**< \brief Machine-specific Object Attributes */
+    struct topo_memory_attr_u system;	/**< \brief System-specific Object Attributes */
+    /** \brief Misc-specific Object Attributes */
     struct topo_misc_attr_u {
       unsigned depth;			  /**< \brief Depth of misc object */
     } misc;
@@ -168,7 +177,8 @@ extern int topo_topology_init (topo_topology_t *topologyp);
 /** \brief Build the actual topology
  *
  * Build the actual topology once initialized with topo_topology_init() and
- * tuned with ::topology_configuration routine
+ * tuned with ::topology_configuration routine.
+ * No other routine may be called earlier using this topology context.
  *
  * \param topology is the topology to be loaded with objects.
  *
@@ -190,7 +200,7 @@ extern void topo_topology_check(topo_topology_t topology);
 
 /** @} */
 
-/** \defgroup topology_configuration Configure Topology detection
+/** \defgroup topology_configuration Configure Topology Detection
  *
  * These functions should be called between topology_init() and topology_load()
  * to configure how the detection should be performed.
@@ -198,34 +208,80 @@ extern void topo_topology_check(topo_topology_t topology);
  * @{
  */
 
-/** \brief Ignore an object type. */
+/** \brief Ignore an object type.
+ *
+ * Ignore all objects from the given type.
+ * The top-level type TOPO_OBJ_SYSTEM may not be ignored.
+ */
 extern int topo_topology_ignore_type(topo_topology_t topology, topo_obj_type_t type);
-/** \brief Ignore an object type if it does not bring any structure. */
+/** \brief Ignore an object type if it does not bring any structure.
+ *
+ * Ignore all objects from the given type as long as they do not bring any structure:
+ * Each ignored object should have a single children or be the only child of its father.
+ * The top-level type TOPO_OBJ_SYSTEM may not be ignored.
+ */
 extern int topo_topology_ignore_type_keep_structure(topo_topology_t topology, topo_obj_type_t type);
-/** \brief Ignore all objects that do not bring any structure. */
+/** \brief Ignore all objects that do not bring any structure.
+ *
+ * Ignore all objects that do not bring any structure: 
+ * Each ignored object should have a single children or be the only child of its father.
+ */
 extern int topo_topology_ignore_all_keep_structure(topo_topology_t topology);
-/** \brief Set OR'ed flags to non-yet-loaded topology. */
+/** \brief Flags to be set onto a topology context before load.
+ *
+ * Flags should be given to topo_topology_set_flags().
+ */
 enum topo_flags_e {
+  /* \brief Ignore symmetric multithreading processor abilities. */
   TOPO_FLAGS_IGNORE_THREADS = (1<<0),
-  TOPO_FLAGS_IGNORE_ADMIN_DISABLE = (1<<1), /* Linux Cpusets, ... */
+  /* \brief Ignore reservations that may have been setup by the administrator.
+   *
+   * Gather all resources, even if they were disabled by the administrator.
+   * For instance, ignore Linux Cpusets and gather all processors and memory nodes.
+   */
+  TOPO_FLAGS_IGNORE_ADMIN_DISABLE = (1<<1),
 };
+/** \brief Set OR'ed flags to non-yet-loaded topology.
+ *
+ * Set a OR'ed set of topo_flags_e onto a topology that was not yet loaded.
+ */
 extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
-/** \brief Change the file-system root path when building the topology from sysfs/procs. */
+/** \brief Change the file-system root path when building the topology from sysfs/procfs.
+ *
+ * On Linux system, use sysfs and procfs files as if they were mounted on the given
+ * \p fsys_root_path instead of the main file-system root.
+ * Not using the main file-system root causes the is_fake field of the topo_topology_info
+ * structure to be set.
+ */
 extern int topo_topology_set_fsys_root(topo_topology_t __topo_restrict topology, const char * __topo_restrict fsys_root_path);
-/** \brief Enable synthetic topology. */
+/** \brief Enable synthetic topology.
+ *
+ * Gather topology information from the given \p description
+ * which should be a comma separated string of numbers describing
+ * the arity of each level.
+ * Each number may be prefixed with a type and a colon to enforce the type
+ * of a level.
+ */
 extern int topo_topology_set_synthetic(topo_topology_t __topo_restrict topology, const char * __topo_restrict description);
-/** \brief Enable XML-file based topology. */
+/** \brief Enable XML-file based topology.
+ *
+ * Gather topology information the XML file given at \p xmlpath.
+ * This file may have been generated earlier with lstopo file.xml.
+ */
 extern int topo_topology_set_xml(topo_topology_t __topo_restrict topology, const char * __topo_restrict xmlpath);
 
 
 /** @} */
 
 
-/** \defgroup topology_information Get Some Topology Information
+/** \defgroup topology_information Get some Topology Information
  * @{
  */
 
-/** \brief Get global information about the topology. */
+/** \brief Get global information about the topology.
+ *
+ * Retrieve global information about a loaded topology context.
+ */
 extern int topo_topology_get_info(topo_topology_t  __topo_restrict topology, struct topo_topology_info * __topo_restrict info);
 
 /** \brief Returns the depth of objects of type _type_.
@@ -235,8 +291,8 @@ extern int topo_topology_get_info(topo_topology_t  __topo_restrict topology, str
  * type.
  */
 extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_obj_type_e type);
-#define TOPO_TYPE_DEPTH_UNKNOWN -1
-#define TOPO_TYPE_DEPTH_MULTIPLE -2
+#define TOPO_TYPE_DEPTH_UNKNOWN -1 /** \brief No object of given type exists in the topology. */
+#define TOPO_TYPE_DEPTH_MULTIPLE -2 /** \brief Objects of given type exist at different depth in the topology. */
 
 /** \brief Returns the type of objects at depth \p depth. */
 extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);

@@ -58,6 +58,8 @@ int thread_migrate (int thread_id, int destination_node);
 * lstopo-nox
   + disable xml as well?  It only depends on zlib
 
+* make test-topologies even more flexible so that we may export to xml files or so (i.e. not to stdout)
+
 Binding
 =======
 * topo_set_cpubind(pid, ...) which type for pid? POSIX says that pid_t is a
