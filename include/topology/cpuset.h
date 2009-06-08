@@ -52,7 +52,6 @@
 /** \brief
  * Set of CPUs represented as a bitmask.
  */
-
 typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 
 
@@ -73,16 +72,24 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
  * Cpuset/String Conversion
  */
 
-/** \brief length of a string for printing a CPU set */
+/** \brief Maximal required length of a string for printing a CPU set.
+ *
+ * Fewer characters may be needed if part of the CPU set is empty.
+ */
 #define TOPO_CPUSET_STRING_LENGTH		(TOPO_CPUSUBSET_COUNT*(TOPO_CPUSUBSET_STRING_LENGTH+1))
-/** \brief printf format for printing a CPU set */
+/** \brief Printf format for printing a CPU set */
 #define TOPO_PRIxCPUSET		"s"
 
-/** \brief Stringify a cpuset. */
+/** \brief Stringify a cpuset.
+ *
+ * Up to \p buflen characters may be written in buffer \p buf.
+ * 
+ * \return the number of character that were actually written (not including the ending \\0).
+ */
 static __inline__ int
-topo_cpuset_snprintf(char * __topo_restrict buf, size_t _size, const topo_cpuset_t * __topo_restrict set)
+topo_cpuset_snprintf(char * __topo_restrict buf, size_t buflen, const topo_cpuset_t * __topo_restrict set)
 {
-  ssize_t size = _size;
+  ssize_t size = buflen;
   char *tmp = buf;
   int res;
   int i;
@@ -152,7 +159,7 @@ topo_cpuset_from_string(const char * __topo_restrict string, topo_cpuset_t * __t
  *  Primitives & macros for building, modifying and consulting "sets" of cpus.
  */
 
-/** \brief Empty CPU set */
+/** \brief Empty CPU set \p set */
 static __inline__ void topo_cpuset_zero(topo_cpuset_t * set)
 {
 	int i;
@@ -160,7 +167,7 @@ static __inline__ void topo_cpuset_zero(topo_cpuset_t * set)
 		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_ZERO;
 }
 
-/** \brief Fill CPU set */
+/** \brief Fill CPU set \p set */
 static __inline__ void topo_cpuset_fill(topo_cpuset_t * set)
 {
 	int i;
@@ -168,7 +175,7 @@ static __inline__ void topo_cpuset_fill(topo_cpuset_t * set)
 		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_FULL;
 }
 
-/** \brief CPU set from an unsigned long mask */
+/** \brief Setup CPU set \p set from unsigned long \p mask */
 static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long mask)
 {
 	int i;
@@ -177,7 +184,7 @@ static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long 
 		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_ZERO;
 }
 
-/** \brief CPU set from an unsigned long mask, used as ith subset */
+/** \brief Setup CPU set \p set from unsigned long \p mask used as \p i -th subset */
 static __inline__ void topo_cpuset_from_ith_ulong(topo_cpuset_t *set, int i, unsigned long mask)
 {
 	int j;
@@ -187,19 +194,19 @@ static __inline__ void topo_cpuset_from_ith_ulong(topo_cpuset_t *set, int i, uns
 			TOPO_CPUSUBSET_SUBSET(*set,j) = TOPO_CPUSUBSET_ZERO;
 }
 
-/** \brief unsigned long mask from CPU set */
+/** \brief Convert the beginning part of CPU set \p set into unsigned long \p mask */
 static __inline__ unsigned long topo_cpuset_to_ulong(const topo_cpuset_t *set)
 {
 	return TOPO_CPUSUBSET_SUBSET(*set,0);
 }
 
-/** \brief unsigned long mask as ith subset from CPU set */
+/** \brief Convert the \p i -th subset of CPU set \set into unsigned long mask */
 static __inline__ unsigned long topo_cpuset_to_ith_ulong(const topo_cpuset_t *set, int i)
 {
 	return TOPO_CPUSUBSET_SUBSET(*set,i);
 }
 
-/** \brief Clear CPU set and set CPU \p cpu */
+/** \brief Clear CPU set \p set and set CPU \p cpu */
 static __inline__ void topo_cpuset_cpu(topo_cpuset_t * set,
 				       unsigned cpu)
 {
@@ -207,7 +214,7 @@ static __inline__ void topo_cpuset_cpu(topo_cpuset_t * set,
 	TOPO_CPUSUBSET_CPUSUBSET(*set,cpu) |= TOPO_CPUSUBSET_VAL(cpu);
 }
 
-/** \brief Clear CPU set and set all but the CPU \p cpu */
+/** \brief Clear CPU set \set and set all but the CPU \p cpu */
 static __inline__ void topo_cpuset_all_but_cpu(topo_cpuset_t * set,
 					       unsigned cpu)
 {
@@ -334,7 +341,7 @@ static __inline__ void topo_cpuset_xorset (topo_cpuset_t *set,
 		TOPO_CPUSUBSET_SUBSET(*set,i) ^= TOPO_CPUSUBSET_SUBSET(*modifier_set,i);
 }
 
-/** \brief Compute the first CPU (least significant bit) in CPU mask */
+/** \brief Compute the first CPU (least significant bit) in CPU set \p set */
 static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
 {
 	int i;
@@ -348,34 +355,34 @@ static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
 	return -1;
 }
 
-/** \brief Keep a single CPU among those set in CPU mask
+/** \brief Keep a single CPU among those set in CPU set \p set
  *
  * Might be used before binding so that the process does not
  * have a chance of migrating between multiple logical CPUs
  * in the original mask.
  */
-static __inline__ void topo_cpuset_singlify(topo_cpuset_t * cpuset)
+static __inline__ void topo_cpuset_singlify(topo_cpuset_t * set)
 {
-	int i,set = 0;
+	int i,found = 0;
 	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++) {
-		if (set) {
-			TOPO_CPUSUBSET_SUBSET(*cpuset,i) = TOPO_CPUSUBSET_ZERO;
+		if (found) {
+			TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_ZERO;
 			continue;
 		} else {
 			/* subsets are unsigned longs, use ffsl */
-			int _ffs = topo_ffsl(TOPO_CPUSUBSET_SUBSET(*cpuset,i));
+			int _ffs = topo_ffsl(TOPO_CPUSUBSET_SUBSET(*set,i));
 			if (_ffs>0) {
-				TOPO_CPUSUBSET_SUBSET(*cpuset,i) = TOPO_CPUSUBSET_VAL(_ffs-1);
-				set = 1;
+				TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_VAL(_ffs-1);
+				found = 1;
 			}
 		}
 	}
 }
 
-/** \brief Compar two cpusets using their first set bit.
+/** \brief Compar CPU sets \p set1 and \p set2 using their first set bit.
  *
  * Smaller least significant bit is smaller.
- * Empty cpuset are considered higher than anything.
+ * The empty CPU set is considered higher than anything.
  */
 static __inline__ int topo_cpuset_compar_first(const topo_cpuset_t * set1,
 					       const topo_cpuset_t * set2)
@@ -395,10 +402,10 @@ static __inline__ int topo_cpuset_compar_first(const topo_cpuset_t * set1,
 	return 0;	
 }
 
-/** \brief Compar two cpusets using their last bits.
+/** \brief Compar CPU sets \p set1 and \p set2 using their last bits.
  *
  * Higher most significant bit is higher.
- * Empty cpuset are considered lower than anything.
+ * The empty CPU set is considered lower than anything.
  */
 static __inline__ int topo_cpuset_compar(const topo_cpuset_t * set1,
 					 const topo_cpuset_t * set2)
@@ -412,23 +419,24 @@ static __inline__ int topo_cpuset_compar(const topo_cpuset_t * set1,
 	return 0;	
 }
 
-/** \brief Compute the weight of a CPU mask */
-static __inline__ int topo_cpuset_weight(const topo_cpuset_t * cpuset)
+/** \brief Compute the weight of CPU set \p set */
+static __inline__ int topo_cpuset_weight(const topo_cpuset_t * set)
 {
 	int weight = 0;
 	int i;
 	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++)
-		weight += topo_weight_long(TOPO_CPUSUBSET_SUBSET(*cpuset,i));
+		weight += topo_weight_long(TOPO_CPUSUBSET_SUBSET(*set,i));
 	return weight;
 }
 
-/** \brief Loop macro iterating on a cpuset
+/** \brief Loop macro iterating on CPU set \p set
  *
  * It yields on each cpu that is member of the set. It uses variables \p set
- * (the cpu set) and \p cpu (the loop variable) */
-#define topo_cpuset_foreach_begin(cpu, cpuset) \
+ * (the cpu set) and \p cpu (the loop variable)
+ */
+#define topo_cpuset_foreach_begin(cpu, set) \
         for (cpu = 0; cpu < TOPO_NBMAXCPUS; cpu++) \
-                if (topo_cpuset_isset(cpuset, cpu)) {
+                if (topo_cpuset_isset(set, cpu)) {
 /** \brief End of loop
  *
  * \sa topo_cpuset_foreach_begin */
