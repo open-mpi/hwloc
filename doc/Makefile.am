@@ -155,7 +155,7 @@ endif
 TESTS = topo-hello
 
 topo-hello.c: $(srcdir)/topology.doc
-	sed -e '0,/\\code/d' -e '/\\endcode/,$$d' < $^ > $@
+	sed -e '1,/\\code/d' -e '/\\endcode/,$$d' < $^ > $@
 
 MOSTLYCLEANFILES += topo-hello.c
 
