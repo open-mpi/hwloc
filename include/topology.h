@@ -40,7 +40,6 @@
 #include <stdio.h>
 
 
-
 /*
  * Cpuset bitmask definitions
  */
@@ -212,11 +211,11 @@ enum topo_flags_e {
 };
 extern int topo_topology_set_flags (topo_topology_t topology, unsigned long flags);
 /** \brief Change the file-system root path when building the topology from sysfs/procs. */
-extern int topo_topology_set_fsys_root(topo_topology_t topology, const char *fsys_root_path);
+extern int topo_topology_set_fsys_root(topo_topology_t __topo_restrict topology, const char * __topo_restrict fsys_root_path);
 /** \brief Enable synthetic topology. */
-extern int topo_topology_set_synthetic(topo_topology_t topology, const char *description);
+extern int topo_topology_set_synthetic(topo_topology_t __topo_restrict topology, const char * __topo_restrict description);
 /** \brief Enable XML-file based topology. */
-extern int topo_topology_set_xml(topo_topology_t topology, const char *xmlpath);
+extern int topo_topology_set_xml(topo_topology_t __topo_restrict topology, const char * __topo_restrict xmlpath);
 
 
 /** @} */
@@ -227,7 +226,7 @@ extern int topo_topology_set_xml(topo_topology_t topology, const char *xmlpath);
  */
 
 /** \brief Get global information about the topology. */
-extern int topo_topology_get_info(topo_topology_t topology, struct topo_topology_info *info);
+extern int topo_topology_get_info(topo_topology_t  __topo_restrict topology, struct topo_topology_info * __topo_restrict info);
 
 /** \brief Returns the depth of objects of type _type_.
  *
@@ -301,14 +300,14 @@ static inline int topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_roo
  *  \return the actual number of objects that were found.
  */
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? */
-extern int topo_find_closest_objs (topo_topology_t topology, topo_obj_t src, topo_obj_t *objs, int max);
+extern int topo_find_closest_objs (topo_topology_t topology, topo_obj_t src, topo_obj_t * __topo_restrict objs, int max);
 
 /** \brief Find the lowest object covering at least the given cpuset \p set */
 extern topo_obj_t topo_find_cpuset_covering_obj (topo_topology_t topology, const topo_cpuset_t *set);
 
 /** \brief Find objects covering exactly a given cpuset \p set */
 extern int topo_find_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *set,
-				  topo_obj_t *objs, int max);
+				  topo_obj_t * __topo_restrict objs, int max);
 
 /** \brief Find the first cache covering a cpuset \p set */
 static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *set)
@@ -397,14 +396,14 @@ extern topo_obj_type_t topo_obj_type_of_string (const char * string);
 /** \brief Stringify a given topology object into a human-readable form.
  *
  * \return how many characters were actually written (not including the ending \\0). */
-extern int topo_obj_snprintf(char *string, size_t size,
+extern int topo_obj_snprintf(char * __topo_restrict string, size_t size,
 			     topo_topology_t topology, topo_obj_t obj,
-			     const char *indexprefix, int verbose);
+			     const char * __topo_restrict indexprefix, int verbose);
 
 /** \brief Stringify the cpuset containing a set of objects.
  *
  * \return how many characters were actually written (not including the ending \\0). */
-extern int topo_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, const topo_obj_t *objs);
+extern int topo_obj_cpuset_snprintf(char * __topo_restrict str, size_t size, size_t nobj, const topo_obj_t * __topo_restrict objs);
 
 /** @} */
 

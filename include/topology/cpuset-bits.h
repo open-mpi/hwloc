@@ -44,6 +44,15 @@
 #include <string.h>
 #include <strings.h>
 
+#if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+# define __topo_restrict __restrict
+#else
+# if defined restrict || __STDC_VERSION__ >= 199901L
+#  define __topo_restrict restrict
+# else
+#  define __topo_restrict
+# endif
+#endif
 
 
 /**
