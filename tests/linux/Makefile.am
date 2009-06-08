@@ -50,7 +50,9 @@ sysfs_outputs = \
 		4qs22-2s2t.tar.gz.output
 
 if HAVE_LINUX
+if HAVE_OPENAT
 TESTS = $(sysfs_tarballs)
+endif HAVE_OPENAT
 else !HAVE_LINUX
 TESTS =
 endif !HAVE_LINUX

@@ -100,12 +100,6 @@ extern void topo_look_synthetic (struct topo_topology *topology);
 
 extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 
-#ifdef __GLIBC__
-#if (__GLIBC__ > 2) || (__GLIBC_MINOR__ >= 4)
-# define HAVE_OPENAT
-#endif
-#endif
-
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 #define TOPO_CPUSET_PRINTF_VALUE(x)	({					\

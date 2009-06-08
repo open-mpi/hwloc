@@ -750,7 +750,11 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->flags = 0;
   topology->is_fake = 0;
   topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  topology->huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+#else /* HAVE__SC_LARGE_PAGESIZE */
   topology->huge_page_size_kB = 0;
+#endif /* HAVE__SC_LARGE_PAGESIZE */
   topology->dmi_board_vendor = NULL;
   topology->dmi_board_name = NULL;
   for(i=0; i< TOPO_OBJ_TYPE_MAX; i++)
