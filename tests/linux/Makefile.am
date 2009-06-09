@@ -20,6 +20,7 @@ sysfs_tarballs = \
 		16em64t-4d2c2t-offlines.tar.gz \
 		16em64t-4d2c2t_nocaches.tar.gz \
 		16em64t-4d2c2t_merge.tar.gz \
+		16em64t-4d2c2t.xml.tar.gz \
 		16em64t-2m1nd4c2t.tar.gz \
 		64fake-4n2d2$$2c2t.tar.gz \
 		4qs22-2s2t.tar.gz
@@ -43,6 +44,7 @@ sysfs_outputs = \
 		16em64t-4d2c2t-offlines.tar.gz.output \
 		16em64t-4d2c2t_nocaches.tar.gz.output 16em64t-4d2c2t_nocaches.tar.gz.options \
 		16em64t-4d2c2t_merge.tar.gz.output 16em64t-4d2c2t_merge.tar.gz.options \
+		16em64t-4d2c2t.xml.tar.gz.output 16em64t-4d2c2t.xml.tar.gz.options \
 		16em64t-2m1nd4c2t.tar.gz.output \
 		64fake-4n2d2$$2c2t.tar.gz.output \
 		4qs22-2s2t.tar.gz.output
