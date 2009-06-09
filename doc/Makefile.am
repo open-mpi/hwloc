@@ -117,7 +117,7 @@ endif
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
-EXTRA_DIST = $(DX_CONFIG) topology.doc
+EXTRA_DIST = $(DX_CONFIG) topology.doc images/dudley.png images/emmett.png images/hagrid.png
 
 if DX_COND_man
 EXTRA_DIST += \
