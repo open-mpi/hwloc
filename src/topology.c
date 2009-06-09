@@ -155,20 +155,42 @@ enum topo_type_cmp_e {
 
 static const int obj_type_order[] = {
   [TOPO_OBJ_SYSTEM] = 0,
-  [TOPO_OBJ_MISC] = 1,
-  [TOPO_OBJ_NODE] = 2,
-  [TOPO_OBJ_SOCKET] = 3,
-  [TOPO_OBJ_CACHE] = 4,
-  [TOPO_OBJ_CORE] = 5,
-  [TOPO_OBJ_PROC] = 6,
+  [TOPO_OBJ_MACHINE] = 1,
+  [TOPO_OBJ_MISC] = 2,
+  [TOPO_OBJ_NODE] = 3,
+  [TOPO_OBJ_SOCKET] = 4,
+  [TOPO_OBJ_CACHE] = 5,
+  [TOPO_OBJ_CORE] = 6,
+  [TOPO_OBJ_PROC] = 7,
 };
+
+static const topo_obj_type_t obj_order_type[] = {
+  [0] = TOPO_OBJ_SYSTEM,
+  [1] = TOPO_OBJ_MACHINE,
+  [2] = TOPO_OBJ_MISC,
+  [3] = TOPO_OBJ_NODE,
+  [4] = TOPO_OBJ_SOCKET,
+  [5] = TOPO_OBJ_CACHE,
+  [6] = TOPO_OBJ_CORE,
+  [7] = TOPO_OBJ_PROC,
+};
+
+int topo_get_obj_type_order(topo_obj_type_t type)
+{
+  return obj_type_order[type];
+}
+
+topo_obj_type_t topo_get_obj_order_type(int order)
+{
+  return obj_order_type[order];
+}
 
 static enum topo_type_cmp_e
 topo_type_cmp(topo_obj_t obj1, topo_obj_t obj2)
 {
-  if (obj_type_order[obj1->type] > obj_type_order[obj2->type])
+  if (topo_get_obj_type_order(obj1->type) > topo_get_obj_type_order(obj2->type))
     return TOPO_TYPE_DEEPER;
-  if (obj_type_order[obj1->type] < obj_type_order[obj2->type])
+  if (topo_get_obj_type_order(obj1->type) < topo_get_obj_type_order(obj2->type))
     return TOPO_TYPE_HIGHER;
 
   /* Caches have the same types but can have different depths.  */
@@ -1020,6 +1042,12 @@ topo_topology_check(struct topo_topology *topology)
   struct topo_topology_info info;
   struct topo_obj *obj;
   int i,j;
+  topo_obj_type_t type;
+
+  for (type = TOPO_OBJ_SYSTEM; type < TOPO_OBJ_TYPE_MAX; type++)
+    assert(topo_get_obj_order_type(topo_get_obj_type_order(type)) == type);
+  for (i = topo_get_obj_order_type(TOPO_OBJ_SYSTEM); i <= topo_get_obj_order_type(TOPO_OBJ_CORE); i++)
+    assert(topo_get_obj_type_order(topo_get_obj_order_type(i)) == i);
 
   assert(topo_topology_get_info(topology, &info) >= 0);
 

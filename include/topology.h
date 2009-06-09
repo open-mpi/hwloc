@@ -89,7 +89,7 @@ struct topo_topology_info {
 /** \brief Type of topology Object.
  *
  * Do not rely on the ordering of the values as new ones may be defined in the
- * future!
+ * future!  Use the value returned by topo_get_obj_type_order() instead.
  */
 enum topo_obj_type_e {
   TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines) */
@@ -105,6 +105,24 @@ enum topo_obj_type_e {
 typedef enum topo_obj_type_e topo_obj_type_t;
 /** \brief Maximal value of an Object Type */
 #define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_MISC+1)
+
+/** \brief Convert an object type into a number that permits to compare them
+ *
+ * Types shouldn't be compared as they are, since newer ones may be added in
+ * the future.  This function returns an integer value that can be used
+ * instead.
+ *
+ * \note topo_get_obj_type_order(TOPO_OBJ_SYSTEM) will always be the lowest
+ * value, and topo_get_obj_type_order(TOPO_OBJ_PROC) will always be the highest
+ * value.
+ */
+int topo_get_obj_type_order(topo_obj_type_t type);
+
+/** \brief converse of topo_get_obj_type_oder()
+ *
+ * This is the converse of topo_get_obj_type_order().
+ */
+topo_obj_type_t topo_get_obj_order_type(int order);
 
 /** \brief Structure of a topology Object */
 struct topo_obj {
