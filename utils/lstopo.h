@@ -38,6 +38,8 @@
 
 typedef void output_method (struct topo_topology *topology, const char *output, int verbose_mode);
 
+FILE *open_file(const char *filename, const char *mode);
+
 extern output_method output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
 
 struct draw_methods {

@@ -44,12 +44,22 @@
 
 #include "lstopo.h"
 
+FILE *open_file(const char *filename, const char *mode)
+{
+  const char *extn = strrchr(filename, '.');
+
+  if (filename[0] == '-' && extn == filename + 1)
+    return stdout;
+
+  return fopen(filename, mode);
+}
+
 static void usage(void)
 {
   fprintf (stderr, "Usage: lstopo [ options ]... [ filename ]\n");
   fprintf (stderr, "\n");
   fprintf (stderr, "By default, lstopo displays a graphical window with the topology if DISPLAY is\nset, else a text output on the standard output.\n");
-  fprintf (stderr, "To force a text output on the standard output, specify - or /dev/stdout as\nfilename.\n");
+  fprintf (stderr, "To force a text output on the standard output, specify -, -.extn, or /dev/stdout as\nfilename.\n");
   fprintf (stderr, "Recognised file formats are: .txt, .fig"
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_PDF_SURFACE

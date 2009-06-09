@@ -74,7 +74,7 @@ void output_text(topo_topology_t topology, const char *filename, int verbose_mod
   if (!filename || !strcmp(filename, "-"))
     output = stdout;
   else {
-    output = fopen(filename, "w"); 
+    output = open_file(filename, "w"); 
     if (!output) {
       fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
       return;
