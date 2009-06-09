@@ -70,20 +70,16 @@ graphical mode, or by exporting in PDF, PNG, FIG, ... format, or in text mode
 
 libtopology offers a programming interface for manipulating topologies and
 objects. It also brings a powerful cpu bitmap API that is used to describe
-topology objects location on physical/logical processors. See the Interface
+topology objects location on physical/logical processors. See the \ref interface interface
 below. It may also be used to binding applications onto certain cores or
 memory nodes. Several utility programs are also provided to ease command-line
 manipulation of topology objects, binding of processes, ...
 
-Section \ref installation details how to install libtopology, and section \ref
-example details an example how to use libtopology.
-
-\chapter installation Installation
+\section installation Installation
 
 <a href="http://libtopology.gforge.inria.fr/">libtopology</a> is available under the CeCILL-B license (BSD-like).
-
+It is hosted by the <a href="http://gforge.inria.fr/projects/libtopology/">INRIA Gforge</a>.
 The current SVN snapshot can be fetched with:
-
 
 <ul>
  <li>svn checkout svn://scm.gforge.inria.fr/svn/libtopology/trunk libtopology
@@ -104,9 +100,104 @@ Installation by itself is as usual:
 Lstopo's fig support is always available. To get support for pdf, ps and png
 support, cairo is needed. To get support for xml, libxml2 is needed.
 
-The project is hosted by the <a href="http://gforge.inria.fr/projects/libtopology/">INRIA Gforge</a>.
+\section examples Examples
 
-\section example Example of use
+ On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool may
+ show the following outputs:
+
+\image html dudley.png
+\image latex dudley.png width=\textwidth
+
+\code
+Machine(15GB)
+  Socket#0 + L3Cache(4096KB)
+    L2Cache(1024KB) + L1Cache(16KB) + Core#0
+      P#0
+      P#8
+    L2Cache(1024KB) + L1Cache(16KB) + Core#1
+      P#4
+      P#12
+  Socket#1 + L3Cache(4096KB)
+    L2Cache(1024KB) + L1Cache(16KB) + Core#0
+      P#1
+      P#9
+    L2Cache(1024KB) + L1Cache(16KB) + Core#1
+      P#5
+      P#13
+  Socket#2 + L3Cache(4096KB)
+    L2Cache(1024KB) + L1Cache(16KB) + Core#0
+      P#2
+      P#10
+    L2Cache(1024KB) + L1Cache(16KB) + Core#1
+      P#6
+      P#14
+  Socket#3 + L3Cache(4096KB)
+    L2Cache(1024KB) + L1Cache(16KB) + Core#0
+      P#3
+      P#11
+    L2Cache(1024KB) + L1Cache(16KB) + Core#1
+      P#7
+      P#15
+\endcode
+
+ On a 8-socket 2-core Opteron NUMA machine, the <tt>lstopo</tt> tool may
+ show the following outputs:
+
+\image html hagrid.png
+\image latex hagrid.png width=\textwidth
+
+\code
+Machine(62GB)
+  NUMANode#0(8190MB) + Socket#0
+    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#0
+    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#1
+  NUMANode#1(8192MB) + Socket#1
+    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#2
+    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#3
+  NUMANode#2(8192MB) + Socket#2
+    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#4
+    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#5
+  NUMANode#3(8192MB) + Socket#3
+    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#6
+    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#7
+  NUMANode#4(8192MB) + Socket#4
+    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#8
+    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#9
+  NUMANode#5(8192MB) + Socket#5
+    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#10
+    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#11
+  NUMANode#6(8192MB) + Socket#6
+    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#12
+    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#13
+  NUMANode#7(8192MB) + Socket#7
+    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#14
+    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#15
+\endcode
+
+ On a 2-socket quad-core Xeon (pre-Nehalem ones assembling 2 dual-core dies into each socket):
+
+\image html emmett.png
+\image latex emmett.png width=\textwidth
+
+\code
+Machine(15GB)
+  Socket#0
+    L2Cache(4096KB)
+      L1Cache(32KB) + Core#0 + P#0
+      L1Cache(32KB) + Core#1 + P#4
+    L2Cache(4096KB)
+      L1Cache(32KB) + Core#2 + P#2
+      L1Cache(32KB) + Core#3 + P#6
+  Socket#1
+    L2Cache(4096KB)
+      L1Cache(32KB) + Core#0 + P#1
+      L1Cache(32KB) + Core#1 + P#5
+    L2Cache(4096KB)
+      L1Cache(32KB) + Core#2 + P#3
+      L1Cache(32KB) + Core#3 + P#7
+\endcode
+
+\section interface Interface example
 
 This section shows how to use libtopology with an small example \c topo-hello.c
 that just prints the topology and binds itself to the first processor of the
@@ -198,5 +289,13 @@ int main(void)
 	return 0;
 }
 \endcode
+
+\section bugs Bugs and questions
+
+Bug reports and questions should be sent to the <a href="http://lists.gforge.inria.fr/cgi-bin/mailman/listinfo/libtopology-devel">devel mailing list</a>.
+
+\section Credits
+
+\c libtopology is developed by the <a href="http://runtime.bordeaux.inria.fr/">INRIA Runtime Team-Project</a> (headed by <a href="http://dept-info.labri.fr/~namyst/">Raymond Namyst</a>).
 
 */
