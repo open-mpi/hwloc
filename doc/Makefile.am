@@ -166,4 +166,9 @@ check_PROGRAMS = $(TESTS)
 
 LIBS = $(top_builddir)/src/libtopology.la
 
+install-data-local:
+	$(mkinstalldirs) $(pdfdir) $(htmldir)/topology
+	$(INSTALL_DATA) doxygen-doc/libtopology.pdf $(pdfdir)
+	$(INSTALL_DATA) doxygen-doc/html/* $(htmldir)/topology
+
 #info_TEXINFOS = libtopology.texi
