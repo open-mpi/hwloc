@@ -100,7 +100,7 @@ void
 topo_look_lgrp(struct topo_topology *topology)
 {
   lgrp_cookie_t cookie;
-  if ((topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
+  if ((topology->flags & TOPO_FLAGS_WHOLE_SYSTEM))
     cookie = lgrp_init(LGRP_VIEW_OS);
   else
     cookie = lgrp_init(LGRP_VIEW_CALLER);

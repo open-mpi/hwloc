@@ -117,8 +117,8 @@ main (int argc, char *argv[])
 	ignorecache = 2;
       else if (!strcmp (argv[1], "--no-useless-caches"))
 	ignorecache = 1;
-      else if (!strcmp (argv[1], "--no-admin"))
-	flags |= TOPO_FLAGS_IGNORE_ADMIN_DISABLE;
+      else if (!strcmp (argv[1], "--whole-system"))
+	flags |= TOPO_FLAGS_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
       else if (!strcmp (argv[1], "--synthetic")) {

@@ -59,7 +59,7 @@ look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology, in
   unsigned nbnodes;
   struct topo_obj *obj;
 
-  if ((topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE))
+  if ((topology->flags & TOPO_FLAGS_WHOLE_SYSTEM))
     rset = rs_alloc(RS_ALL);
   else
     rset = rs_alloc(RS_PARTITION);

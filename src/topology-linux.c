@@ -831,7 +831,7 @@ topo_look_linux(struct topo_topology *topology)
     closedir(nodes_dir);
   } else {
     /* Gather the list of admin-disabled cpus and mems */
-    if (!(topology->flags & TOPO_FLAGS_IGNORE_ADMIN_DISABLE)) {
+    if (!(topology->flags & TOPO_FLAGS_WHOLE_SYSTEM)) {
       topo_admin_disable_set_from_cpuset(topology, "/proc/self/cpuset", "cpus", &admin_disabled_cpus_set);
       topo_admin_disable_set_from_cpuset(topology, "/proc/self/cpuset", "mems", &admin_disabled_mems_set);
     }

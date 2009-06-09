@@ -234,12 +234,12 @@ extern int topo_topology_ignore_all_keep_structure(topo_topology_t topology);
  * Flags should be given to topo_topology_set_flags().
  */
 enum topo_flags_e {
-  /* \brief Ignore reservations that may have been setup by the administrator.
+  /* \brief Detect the whole system, ignore reservations that may have been setup by the administrator.
    *
-   * Gather all resources, even if they were disabled by the administrator.
+   * Gather all resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cpusets and gather all processors and memory nodes.
    */
-  TOPO_FLAGS_IGNORE_ADMIN_DISABLE = (1<<1),
+  TOPO_FLAGS_WHOLE_SYSTEM = (1<<1),
 };
 /** \brief Set OR'ed flags to non-yet-loaded topology.
  *
