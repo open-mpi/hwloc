@@ -211,7 +211,7 @@ LDLIBS+=$(pkg-config --libs topology)
 cc topo-hello.c $(CFLAGS) -o topo-hello $(LDLIBS)
 \endverbatim
 
-\code
+   \code
 /* topo-hello.c */
 #include <topology.h>
 
@@ -288,7 +288,7 @@ int main(void)
 
 	return 0;
 }
-\endcode
+   \endcode
 
 \section bugs Bugs and questions
 
