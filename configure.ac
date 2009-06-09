@@ -194,6 +194,9 @@ fi
 if test "x$enable_xml" = "xyes"; then
   LIBTOPOLOGY_REQUIRES="libxml-2.0 $LIBTOPOLOGY_REQUIRES"
   AC_DEFINE([HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
+  AC_SUBST([HAVE_XML], [1])
+else
+  AC_SUBST([HAVE_XML], [0])
 fi
 
 # check for kerrighed, but don't abort if not found
