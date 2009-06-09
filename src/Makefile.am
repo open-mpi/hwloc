@@ -67,5 +67,6 @@ else !HAVE_DARWIN
 EXTRA_DIST += topology-darwin.c
 endif !HAVE_DARWIN
 
-xml_DATA = lstopo.dtd
+xml_DATA = $(srcdir)/lstopo.dtd
 xmldir = $(datadir)
+EXTRA_DIST += lstopo.dtd
