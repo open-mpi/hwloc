@@ -66,3 +66,6 @@ libtopology_la_SOURCES += topology-darwin.c
 else !HAVE_DARWIN
 EXTRA_DIST += topology-darwin.c
 endif !HAVE_DARWIN
+
+xml_DATA = lstopo.dtd
+xmldir = $(datadir)
