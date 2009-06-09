@@ -82,37 +82,27 @@ example details an example how to use libtopology.
 
 <a href="http://libtopology.gforge.inria.fr/">libtopology</a> is available under the CeCILL-B license (BSD-like).
 
-The current SVN snapshot may be tested with:
+The current SVN snapshot can be fetched with:
+
 
 <ul>
  <li>svn checkout svn://scm.gforge.inria.fr/svn/libtopology/trunk libtopology
  <li>cd libtopology
  <li>autoreconf -ifv
- <li>./configure --prefix=...
- <li>make
- <li>make install
 </ul>
 
-Note that autoconf >=2.60, automake >=1.10 and libtool >=2.2.6 are required.
+Note that autoconf >=2.60, automake >=1.10 and libtool >=2.2.6 are required in that case.
 
-The project is hosted by the <a href="http://gforge.inria.fr/projects/libtopology/">INRIA Gforge</a>.
-
-\section installation Installation
-
-<a href="http://libtopology.gforge.inria.fr/">libtopology</a> is available under the CeCILL-B license (BSD-like).
-
-The current SVN snapshot may be tested with:
+Installation by itself is as usual:
 
 <ul>
- <li>svn checkout svn://scm.gforge.inria.fr/svn/libtopology/trunk libtopology
- <li>cd libtopology
- <li>autoreconf -ifv
  <li>./configure --prefix=...
  <li>make
  <li>make install
 </ul>
 
-Note that autoconf >=2.60, automake >=1.10 and libtool >=2.2.6 are required.
+Lstopo's fig support is always available. To get support for pdf, ps and png
+support, cairo is needed. To get support for xml, libxml2 is needed.
 
 The project is hosted by the <a href="http://gforge.inria.fr/projects/libtopology/">INRIA Gforge</a>.
 
