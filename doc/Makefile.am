@@ -115,7 +115,7 @@ $(dist_man3_MANS): doxygen-doc
 
 endif
 
-MOSTLYCLEANFILES = $(DX_CLEANFILES)
+MAINTAINERCLEANFILES = $(DX_CLEANFILES)
 
 EXTRA_DIST = $(DX_CONFIG) topology.doc images/dudley.png images/emmett.png images/hagrid.png
 
@@ -160,7 +160,7 @@ TESTS = topo-hello
 topo-hello.c: $(srcdir)/topology.doc
 	sed -e '1,/   \\code/d' -e '/   \\endcode/,$$d' < $^ > $@
 
-MOSTLYCLEANFILES += topo-hello.c
+MOSTLYCLEANFILES = topo-hello.c
 
 check_PROGRAMS = $(TESTS)
 
