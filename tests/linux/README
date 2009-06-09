@@ -17,3 +17,6 @@ A new topology may be added by:
   locally.
 * adding the tarball and output files to Makefile.am so that they are
   properly handled in "make check" and "make dist".
+
+Note that when adding a XML-based output, the cpusets should be stored
+with 32bits subsets.

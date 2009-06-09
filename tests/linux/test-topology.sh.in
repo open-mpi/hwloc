@@ -70,6 +70,15 @@ test_topology ()
     then
 	result=1
     else
+        if grep -E 'cpuset=\"[0-f]{16}\"' "$output" >/dev/null ; then
+	    # convert cpusets from 64 to 32bits
+	    sed -r -e 's/,,/,,,/g' \
+			-e 's/,00000000([0-f]{8})/,,\1/g' \
+			-e 's/00000000([0-f]{8})/\1/g' \
+			-e 's/([0-f]{8})00000000/\1,/g' \
+			-e 's/([0-f]{8})([0-f]{8})/\1,\2/g' \
+			-i "$output"
+	fi
 	diff -uBb "$expected_output" "$output"
 	result=$?
     fi

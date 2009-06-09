@@ -58,7 +58,9 @@ int thread_migrate (int thread_id, int destination_node);
 * lstopo-nox
   + disable xml as well?  It only depends on zlib
 
-* make test-topologies even more flexible so that we may export to xml files or so (i.e. not to stdout)
+* do we want to support ptrsize-independent cpuset-strings?
+  e.g. reading a 32bits XML output on a 64bits will fail
+  + add a cpusubset_size in the XML output and abort if != TOPO_BITS_PER_LONG?
 
 Binding
 =======
