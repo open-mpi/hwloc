@@ -183,8 +183,8 @@ int main(void)
 	/* Find out where cores are.  */
 	depth = topo_get_depth_type(topology, TOPO_OBJ_CORE);
 
-	/* Get second core.  */
-	topo_obj_t core = topo_get_obj(topology, depth, 1);
+	/* Get last core.  */
+	topo_obj_t core = topo_get_obj(topology, depth, topo_get_depth_nbobjs(topology, depth) - 1);
 	if (!core)
 		return 0;
 
@@ -195,7 +195,11 @@ int main(void)
 	topo_cpuset_singlify(&cpuset);
 
 	/* And bind there.  */
-	topo_set_cpubind(&cpuset);
+	if (topo_set_cpubind(&cpuset)) {
+		char s[TOPO_CPUSET_STRING_LENGTH + 1];
+		topo_cpuset_snprintf(s, sizeof(s), &core->cpuset);
+		printf("Couldn't bind to cpuset %s\n", s);
+	}
 
 
 	/* Destroy topology object.  */

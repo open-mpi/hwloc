@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     if (single)
       topo_cpuset_singlify(&cpu_set);
     ret = topo_set_cpubind(&cpu_set);
-    if (ret && verbose)
+    if (ret)
       fprintf(stderr, "topo_set_cpubind failed\n");
   }
 
