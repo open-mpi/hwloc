@@ -880,6 +880,10 @@ topo_topology_ignore_type(struct topo_topology *topology, enum topo_obj_type_e t
     /* we don't want 2 heads */
     return -1;
 
+  if (type == TOPO_OBJ_PROC)
+    /* we need the proc level */
+    return -1;
+
   topology->ignored_types[type] = TOPO_IGNORE_TYPE_ALWAYS;
   return 0;
 }
@@ -888,6 +892,14 @@ int
 topo_topology_ignore_type_keep_structure(struct topo_topology *topology, topo_obj_type_t type)
 {
   if (type >= TOPO_OBJ_TYPE_MAX)
+    return -1;
+
+  if (type == TOPO_OBJ_SYSTEM)
+    /* we don't want 2 heads */
+    return -1;
+
+  if (type == TOPO_OBJ_PROC)
+    /* we need the proc level */
     return -1;
 
   topology->ignored_types[type] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
@@ -899,7 +911,8 @@ topo_topology_ignore_all_keep_structure(struct topo_topology *topology)
 {
   unsigned type;
   for(type=0; type<TOPO_OBJ_TYPE_MAX; type++)
-    topology->ignored_types[type] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
+    if (type != TOPO_OBJ_SYSTEM && type != TOPO_OBJ_PROC)
+      topology->ignored_types[type] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }
 

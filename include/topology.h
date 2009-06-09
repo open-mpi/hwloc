@@ -211,14 +211,16 @@ extern void topo_topology_check(topo_topology_t topology);
 /** \brief Ignore an object type.
  *
  * Ignore all objects from the given type.
- * The top-level type TOPO_OBJ_SYSTEM may not be ignored.
+ * The top-level type TOPO_OBJ_SYSTEM and bottom-level type TOPO_OBJ_PROC may
+ * not be ignored.
  */
 extern int topo_topology_ignore_type(topo_topology_t topology, topo_obj_type_t type);
 /** \brief Ignore an object type if it does not bring any structure.
  *
  * Ignore all objects from the given type as long as they do not bring any structure:
  * Each ignored object should have a single children or be the only child of its father.
- * The top-level type TOPO_OBJ_SYSTEM may not be ignored.
+ * The top-level type TOPO_OBJ_SYSTEM and bottom-level type TOPO_OBJ_PROC may
+ * not be ignored.
  */
 extern int topo_topology_ignore_type_keep_structure(topo_topology_t topology, topo_obj_type_t type);
 /** \brief Ignore all objects that do not bring any structure.
