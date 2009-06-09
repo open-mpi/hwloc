@@ -63,7 +63,10 @@ test_topology ()
 
     export TOPO_FSYS_ROOT_PATH="$dir"
 
-    if ! "$lstopo" - -v `cat $options 2>/dev/null` > "$output"
+    opts="-v -"
+    [ -r "$options" ] && opts=`cat $options`
+
+    if ! "$lstopo" $opts > "$output"
     then
 	result=1
     else
