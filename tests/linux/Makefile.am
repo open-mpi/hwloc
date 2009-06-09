@@ -18,7 +18,6 @@ sysfs_tarballs = \
 		16amd64-8nd2c-cpusets_noadmin.tar.gz \
 		16em64t-4d2c2t.tar.gz \
 		16em64t-4d2c2t-offlines.tar.gz \
-		16em64t-4d2c2t_nothreads.tar.gz \
 		16em64t-4d2c2t_nocaches.tar.gz \
 		16em64t-4d2c2t_merge.tar.gz \
 		16em64t-2m1nd4c2t.tar.gz \
@@ -42,7 +41,6 @@ sysfs_outputs = \
 		16amd64-8nd2c-cpusets_noadmin.tar.gz.output 16amd64-8nd2c-cpusets_noadmin.tar.gz.options \
 		16em64t-4d2c2t.tar.gz.output \
 		16em64t-4d2c2t-offlines.tar.gz.output \
-		16em64t-4d2c2t_nothreads.tar.gz.output 16em64t-4d2c2t_nothreads.tar.gz.options \
 		16em64t-4d2c2t_nocaches.tar.gz.output 16em64t-4d2c2t_nocaches.tar.gz.options \
 		16em64t-4d2c2t_merge.tar.gz.output 16em64t-4d2c2t_merge.tar.gz.options \
 		16em64t-2m1nd4c2t.tar.gz.output \

@@ -481,18 +481,6 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	}
       }
 
-      if (topology->flags & TOPO_FLAGS_IGNORE_THREADS) {
-	/* check whether it is a non-first thread in the core */
-	topo_cpuset_t coreset;
-	sprintf(string, "%s/cpu%lu/topology/thread_siblings", path, cpu);
-	topo_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
-	if (topo_cpuset_first(&coreset) != cpu) {
-	  topo_debug("os proc %lu is not first thread in coreset %" TOPO_PRIxCPUSET "\n",
-		     cpu, TOPO_CPUSET_PRINTF_VALUE(&coreset));
-	  continue;
-	}
-      }
-
       topo_cpuset_set(&cpuset, cpu);
     }
     closedir(dir);
@@ -739,26 +727,6 @@ look_cpuinfo(struct topo_topology *topology, const char *path,
       proc_coreids[i] = -1;
     }
   } topo_cpuset_foreach_end();
-
-  /* clear nonfirst threads.
-   * we could fill a dedicated cpuset in the above parsing loop but
-   * we'd have to check whether the first thread is admin-disabled.
-   * so just do a final loop here looking for same core ids
-   * now that admin-disabled cpus have been removed.
-   */
-  if (topology->flags & TOPO_FLAGS_IGNORE_THREADS) {
-    topo_cpuset_foreach_begin(i, online_cpuset) {
-      int j;
-      for(j=i+1; j<procid_max; j++)
-	if (proc_coreids[j] == proc_coreids[i]) {
-	  topo_cpuset_clr(online_cpuset, j);
-	  proc_osphysids[j] = -1;
-	  proc_physids[j] = -1;
-	  proc_oscoreids[j] = -1;
-	  proc_coreids[j] = -1;
-	}
-    } topo_cpuset_foreach_end();
-  }
 
   topo_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
   topo_debug("online processor cpuset: %" TOPO_PRIxCPUSET "\n",

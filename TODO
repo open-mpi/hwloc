@@ -7,7 +7,6 @@ Split API into two levels?
 
 
 * clarify the API to obtain the number of nodes, procs, cores, ...
-* Drop ignore_threads and explain how to deal with cores/sockets with singlify
 
 * cache or node specific functions?
   + get nodes covering a cpuset?

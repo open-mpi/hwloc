@@ -234,8 +234,6 @@ extern int topo_topology_ignore_all_keep_structure(topo_topology_t topology);
  * Flags should be given to topo_topology_set_flags().
  */
 enum topo_flags_e {
-  /* \brief Ignore symmetric multithreading processor abilities. */
-  TOPO_FLAGS_IGNORE_THREADS = (1<<0),
   /* \brief Ignore reservations that may have been setup by the administrator.
    *
    * Gather all resources, even if they were disabled by the administrator.

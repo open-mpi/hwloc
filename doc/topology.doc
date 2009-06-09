@@ -191,7 +191,7 @@ int main(void)
 	/* Get its cpuset.  */
 	topo_cpuset_t cpuset = core->cpuset;
 
-	/* Get only one processor.  */
+	/* Get only one logical processor (in case the core is SMT/hyperthreaded).  */
 	topo_cpuset_singlify(&cpuset);
 
 	/* And bind there.  */
