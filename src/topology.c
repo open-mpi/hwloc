@@ -632,7 +632,7 @@ topo_discover(struct topo_topology *topology)
   /* initialize all depth to unknown */
   for (l=1; l < TOPO_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = TOPO_TYPE_DEPTH_UNKNOWN;
-  topology->type_depth[0] = TOPO_OBJ_SYSTEM;
+  topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
 
   /* Start with children of the whole system.  */
   l = 0;
@@ -726,19 +726,6 @@ topo_discover(struct topo_topology *topology)
 
   /* It's empty now.  */
   free(objs);
-
-  /* Setup the depth of all still unknown levels (the ones that got merged or
-   * never created).  */
-  int type, prevdepth = TOPO_TYPE_DEPTH_UNKNOWN;
-  for (type = TOPO_OBJ_SYSTEM; type < TOPO_OBJ_TYPE_MAX; type++)
-    {
-      if (topology->type_depth[type] == TOPO_TYPE_DEPTH_UNKNOWN) {
-	if (type != TOPO_OBJ_CACHE && type != TOPO_OBJ_MISC)
-	  topology->type_depth[type] = prevdepth;
-      } else {
-	prevdepth = topology->type_depth[type];
-      }
-    }
 }
 
 static void
@@ -759,7 +746,7 @@ topo_topology_setup_defaults(struct topo_topology *topology)
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
   for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
-    topology->type_depth[i] = -1;
+    topology->type_depth[i] = TOPO_TYPE_DEPTH_UNKNOWN;
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct topo_obj));
   topology->level_nbobjects[0] = 1;

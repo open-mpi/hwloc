@@ -88,7 +88,8 @@ struct topo_topology_info {
 
 /** \brief Type of topology Object.
  *
- * Do not rely on any relative ordering of the values.
+ * Do not rely on the ordering of the values as new ones may be defined in the
+ * future!
  */
 enum topo_obj_type_e {
   TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines) */

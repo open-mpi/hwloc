@@ -24,8 +24,8 @@ System(992MB)
 Topology is fake
 Huge page size: 2048kB
 depth 0:	type #0 (System)
-depth 0:	type #1 (Machine)
-depth 0:	type #2 (NUMANode)
+absent:		type #1 (Machine)
+absent:		type #2 (NUMANode)
  depth 1:	type #3 (Socket)
 multiple:	type #4 (Cache)
      depth 5:	type #5 (Core)
