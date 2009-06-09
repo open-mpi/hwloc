@@ -180,16 +180,16 @@ int main(void)
 	print_children(topology, topo_get_system_obj(topology), 0);
 
 
-	/* Find out where cores are.  */
-	depth = topo_get_depth_type(topology, TOPO_OBJ_CORE);
+	/* Find out where cores are, or else smaller sets of CPUs.  */
+	depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_CORE);
 
-	/* Get last core.  */
-	topo_obj_t core = topo_get_obj(topology, depth, topo_get_depth_nbobjs(topology, depth) - 1);
-	if (!core)
+	/* Get last one.  */
+	topo_obj_t obj = topo_get_obj(topology, depth, topo_get_depth_nbobjs(topology, depth) - 1);
+	if (!obj)
 		return 0;
 
 	/* Get its cpuset.  */
-	topo_cpuset_t cpuset = core->cpuset;
+	topo_cpuset_t cpuset = obj->cpuset;
 
 	/* Get only one logical processor (in case the core is SMT/hyperthreaded).  */
 	topo_cpuset_singlify(&cpuset);
@@ -197,7 +197,7 @@ int main(void)
 	/* And bind there.  */
 	if (topo_set_cpubind(&cpuset)) {
 		char s[TOPO_CPUSET_STRING_LENGTH + 1];
-		topo_cpuset_snprintf(s, sizeof(s), &core->cpuset);
+		topo_cpuset_snprintf(s, sizeof(s), &obj->cpuset);
 		printf("Couldn't bind to cpuset %s\n", s);
 	}
 

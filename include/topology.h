@@ -303,15 +303,66 @@ extern int topo_topology_set_xml(topo_topology_t __topo_restrict topology, const
  */
 extern int topo_topology_get_info(topo_topology_t  __topo_restrict topology, struct topo_topology_info * __topo_restrict info);
 
-/** \brief Returns the depth of objects of type _type_.
+/** \brief Returns the depth of objects of type \p type.
  *
  * If no object of this type is present on the underlying architecture, the
- * function returns the depth of the first "present" object we find uppon \p
- * type.
+ * function returns TOPO_TYPE_DEPTH_UNKNOWN.
  */
 extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_obj_type_e type);
 #define TOPO_TYPE_DEPTH_UNKNOWN -1 /**< \brief No object of given type exists in the topology. */
 #define TOPO_TYPE_DEPTH_MULTIPLE -2 /**< \brief Objects of given type exist at different depth in the topology. */
+
+/** \brief Returns the depth of objects of type \p type or below
+ *
+ * If no object of this type is present on the underlying architecture, the
+ * function returns the depth of the first "present" object typically found
+ * inside \p type.
+ */
+static __inline__ unsigned topo_get_type_or_below_depth (topo_topology_t topology, enum topo_obj_type_e type)
+{
+  unsigned depth = topo_get_type_depth(topology, type);
+
+  if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
+    return depth;
+
+  int order = topo_get_obj_type_order(type);
+  int max_order = topo_get_obj_type_order(TOPO_OBJ_PROC);
+
+  while (++order <= max_order) {
+    type = topo_get_obj_order_type(order);
+    depth = topo_get_type_depth(topology, type);
+    if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
+      return depth;
+  }
+  /* Shouldn't ever happen, as there is always a PROC level.  */
+  abort();
+}
+
+/** \brief Returns the depth of objects of type \p type or above
+ *
+ * If no object of this type is present on the underlying architecture, the
+ * function returns the depth of the first "present" object typically
+ * containing \p type.
+ */
+static __inline__ unsigned topo_get_type_or_above_depth (topo_topology_t topology, enum topo_obj_type_e type)
+{
+  unsigned depth = topo_get_type_depth(topology, type);
+
+  if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
+    return depth;
+
+  int order = topo_get_obj_type_order(type);
+  int min_order = topo_get_obj_type_order(TOPO_OBJ_SYSTEM);
+
+  while (++order >= min_order) {
+    type = topo_get_obj_order_type(order);
+    depth = topo_get_type_depth(topology, type);
+    if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
+      return depth;
+  }
+  /* Shouldn't ever happen, as there is always a SYSTEM level.  */
+  abort();
+}
 
 /** \brief Returns the type of objects at depth \p depth. */
 extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);
