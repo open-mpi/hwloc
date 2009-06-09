@@ -44,7 +44,7 @@
 #include <fcntl.h>
 
 #include <topology.h>
-#include <topology/helper.h>
+#include <topology/private.h>
 #include <topology/debug.h>
 
 #include <numa.h>

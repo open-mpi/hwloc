@@ -32,13 +32,12 @@
  */
 
 #include <topology.h>
+#include <topology/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
-#include <topology/helper.h>
 
 static void usage(void)
 {

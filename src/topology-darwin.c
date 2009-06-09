@@ -40,7 +40,7 @@
 #include <inttypes.h>
 
 #include <topology.h>
-#include <topology/helper.h>
+#include <topology/private.h>
 #include <topology/debug.h>
 
 static int get_sysctl(const char *name, int *res)

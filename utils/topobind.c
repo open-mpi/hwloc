@@ -32,11 +32,10 @@
  */
 
 #include <topology.h>
+#include <topology/private.h>
 
 #include <unistd.h>
 #include <assert.h>
-
-#include <topology/helper.h>
 
 static void usage(void)
 {
