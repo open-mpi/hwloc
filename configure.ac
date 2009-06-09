@@ -226,6 +226,7 @@ else
 fi
 
 AC_PATH_PROG([BASH], [bash])
+AC_PATH_PROG([W3M], [w3m])
 
 AC_CHECK_FUNCS([ffs], [
   AC_CHECK_DECL([ffs],[

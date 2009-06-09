@@ -171,4 +171,11 @@ install-data-local:
 	$(INSTALL_DATA) doxygen-doc/libtopology.pdf $(pdfdir)
 	$(INSTALL_DATA) doxygen-doc/html/* $(htmldir)/topology
 
-#info_TEXINFOS = libtopology.texi
+if DX_COND_html
+  ifneq ($(W3M),)
+all-local: $(top_srcdir)/README
+$(top_srcdir)/README: doxygen-doc
+	LC_ALL=C $(W3M) doxygen-doc/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
+  endif
+endif
+

@@ -77,8 +77,8 @@ manipulation of topology objects, binding of processes, ...
 
 \section installation Installation
 
-<a href="http://libtopology.gforge.inria.fr/">libtopology</a> is available under the CeCILL-B license (BSD-like).
-It is hosted by the <a href="http://gforge.inria.fr/projects/libtopology/">INRIA Gforge</a>.
+libtopology (http://libtopology.gforge.inria.fr/) is available under the CeCILL-B license (BSD-like).
+It is hosted by the INRIA Gforge (http://gforge.inria.fr/projects/libtopology/).
 The current SVN snapshot can be fetched with:
 
 <ul>
@@ -292,10 +292,10 @@ int main(void)
 
 \section bugs Bugs and questions
 
-Bug reports and questions should be sent to the <a href="http://lists.gforge.inria.fr/cgi-bin/mailman/listinfo/libtopology-devel">devel mailing list</a>.
+Bug reports and questions should be sent to the devel mailing list (http://lists.gforge.inria.fr/cgi-bin/mailman/listinfo/libtopology-devel).
 
 \section Credits
 
-\c libtopology is developed by the <a href="http://runtime.bordeaux.inria.fr/">INRIA Runtime Team-Project</a> (headed by <a href="http://dept-info.labri.fr/~namyst/">Raymond Namyst</a>).
+\c libtopology is developed by the INRIA Runtime Team-Project (http://runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr/~namyst/).
 
 */

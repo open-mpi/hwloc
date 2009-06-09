@@ -6,5 +6,3 @@ SUBDIRS = src utils tests include doc
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = topology.pc
-
-EXTRA_DITS = topology.pc
