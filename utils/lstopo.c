@@ -84,8 +84,7 @@ static void usage(void)
   fprintf (stderr, "--verbose           enable the verbose mode (disabled by default)\n");
   fprintf (stderr, "--no-caches         do not show caches\n");
   fprintf (stderr, "--no-useless-caches do not show caches which do not have a hierarchical impact\n");
-  fprintf (stderr, "--no-threads        do not show SMT threads\n");
-  fprintf (stderr, "--no-admin          do not consider administration limitations\n");
+  fprintf (stderr, "--whole-system      do not consider administration limitations\n");
   fprintf (stderr, "--merge             do not show levels that do not have a hierarcical impact\n");
   fprintf (stderr, "--synthetic \"2 2\"   simulate a fake hierarchy\n");
 #ifdef HAVE_XML
