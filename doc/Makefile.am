@@ -153,9 +153,6 @@ EXTRA_DIST = $(DX_CONFIG) \
 	@DX_DOCDIR@/html/modules.html \
 	@DX_DOCDIR@/html/structtopo__cpuset__t.html \
 	@DX_DOCDIR@/html/structtopo__obj.html \
-	@DX_DOCDIR@/html/structtopo__obj_1_1topo__obj__attr__u_1_1topo__cache__attr__u.html \
-	@DX_DOCDIR@/html/structtopo__obj_1_1topo__obj__attr__u_1_1topo__memory__attr__u.html \
-	@DX_DOCDIR@/html/structtopo__obj_1_1topo__obj__attr__u_1_1topo__misc__attr__u.html \
 	@DX_DOCDIR@/html/structtopo__topology__info.html \
 	@DX_DOCDIR@/html/tab_b.gif \
 	@DX_DOCDIR@/html/tab_l.gif \
@@ -166,6 +163,7 @@ EXTRA_DIST = $(DX_CONFIG) \
 	@DX_DOCDIR@/html/topology_8h_source.html \
 	@DX_DOCDIR@/html/uniontopo__obj_1_1topo__obj__attr__u.html \
 	@DX_DOCDIR@/libtopology.pdf \
+	@DX_DOCDIR@/libtopology.tag \
 	@DX_DOCDIR@/man/man3/arity.3 \
 	@DX_DOCDIR@/man/man3/attr.3 \
 	@DX_DOCDIR@/man/man3/cache.3 \
@@ -276,8 +274,7 @@ CLEANFILES += \
 	@DX_DOCDIR@/latex/structtopo__topology__info.tex \
 	@DX_DOCDIR@/latex/topology_8doc.tex \
 	@DX_DOCDIR@/latex/topology_8h.tex \
-	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex \
-	@DX_DOCDIR@/libtopology.tag
+	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex
 
 doc: $(top_srcdir)/README
 $(top_srcdir)/README: @DX_DOCDIR@/libtopology.tag
