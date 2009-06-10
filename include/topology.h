@@ -318,7 +318,8 @@ extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_obj_typ
  * function returns the depth of the first "present" object typically found
  * inside \p type.
  */
-static __inline__ unsigned topo_get_type_or_below_depth (topo_topology_t topology, enum topo_obj_type_e type)
+static __inline__ unsigned
+topo_get_type_or_below_depth (topo_topology_t topology, enum topo_obj_type_e type)
 {
   unsigned depth = topo_get_type_depth(topology, type);
 
@@ -344,7 +345,8 @@ static __inline__ unsigned topo_get_type_or_below_depth (topo_topology_t topolog
  * function returns the depth of the first "present" object typically
  * containing \p type.
  */
-static __inline__ unsigned topo_get_type_or_above_depth (topo_topology_t topology, enum topo_obj_type_e type)
+static __inline__ unsigned
+topo_get_type_or_above_depth (topo_topology_t topology, enum topo_obj_type_e type)
 {
   unsigned depth = topo_get_type_depth(topology, type);
 
@@ -371,7 +373,8 @@ extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsig
 extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth);
 
 /** \brief Returns the width of level type \p type */
-static inline unsigned topo_get_type_nbobjs (topo_topology_t topology, enum topo_obj_type_e type)
+static __inline__ unsigned
+topo_get_type_nbobjs (topo_topology_t topology, enum topo_obj_type_e type)
 {
 	unsigned depth = topo_get_type_depth(topology, type);
 	if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
@@ -392,13 +395,15 @@ static inline unsigned topo_get_type_nbobjs (topo_topology_t topology, enum topo
 extern topo_obj_t topo_get_obj (topo_topology_t topology, unsigned depth, unsigned index);
 
 /** \brief Returns the top-object of the topology-tree. Its type is ::TOPO_OBJ_SYSTEM. */
-static inline topo_obj_t topo_get_system_obj (topo_topology_t topology)
+static __inline__ topo_obj_t
+topo_get_system_obj (topo_topology_t topology)
 {
   return topo_get_obj(topology, 0, 0);
 }
 
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
-static inline topo_obj_t topo_get_common_ancestor_obj (topo_obj_t obj1, topo_obj_t obj2)
+static __inline__ topo_obj_t
+topo_get_common_ancestor_obj (topo_obj_t obj1, topo_obj_t obj2)
 {
   while (obj1->level > obj2->level)
     obj1 = obj1->father;
@@ -413,7 +418,8 @@ static inline topo_obj_t topo_get_common_ancestor_obj (topo_obj_t obj1, topo_obj
 
 /** \brief Returns true if _obj_ is inside the subtree beginning
     with \p subtree_root. */
-static inline int topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_root)
+static __inline__ int 
+topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_root)
 {
   return topo_cpuset_isincluded(&obj->cpuset, &subtree_root->cpuset);
 }
@@ -436,7 +442,8 @@ extern int topo_get_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *
 				 topo_obj_t * __topo_restrict objs, int max);
 
 /** \brief Get the first cache covering a cpuset \p set */
-static inline topo_obj_t topo_get_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *set)
+static __inline__ topo_obj_t
+topo_get_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *set)
 {
   topo_obj_t current = topo_get_cpuset_covering_obj(topology, set);
   while (current) {
@@ -448,7 +455,8 @@ static inline topo_obj_t topo_get_cpuset_covering_cache (topo_topology_t topolog
 }
 
 /** \brief Get the first cache shared between an object and somebody else */
-static inline topo_obj_t topo_get_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
+static __inline__ topo_obj_t
+topo_get_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
 {
   topo_obj_t current = obj->father;
   while (current) {
@@ -467,10 +475,9 @@ static inline topo_obj_t topo_get_shared_cache_above (topo_topology_t topology, 
  * The next invokation should pass the previous return value in \p prev so as
  * to obtain the next object covering another part of \p set.
  */
-static inline topo_obj_t topo_get_next_obj_above_cpuset_by_depth(topo_topology_t topology,
-								 const topo_cpuset_t *set,
-								 unsigned depth,
-								 topo_obj_t prev)
+static __inline__ topo_obj_t
+topo_get_next_obj_above_cpuset_by_depth(topo_topology_t topology, const topo_cpuset_t *set,
+					unsigned depth, topo_obj_t prev)
 {
   topo_obj_t next;
   if (prev) {
@@ -497,10 +504,9 @@ static inline topo_obj_t topo_get_next_obj_above_cpuset_by_depth(topo_topology_t
  * The caller may fallback to topo_get_next_obj_above_cpuset_by_depth()
  * for each depth.
  */
-static inline topo_obj_t topo_get_next_obj_above_cpuset(topo_topology_t topology,
-							const topo_cpuset_t *set,
-							topo_obj_type_t type,
-							topo_obj_t prev)
+static __inline__ topo_obj_t
+topo_get_next_obj_above_cpuset(topo_topology_t topology, const topo_cpuset_t *set,
+			       topo_obj_type_t type, topo_obj_t prev)
 {
   unsigned depth = topo_get_type_depth(topology, type);
   if (depth == TOPO_TYPE_DEPTH_UNKNOWN || depth == TOPO_TYPE_DEPTH_MULTIPLE)
@@ -514,7 +520,7 @@ static inline topo_obj_t topo_get_next_obj_above_cpuset(topo_topology_t topology
  * The next invokation should pass the previous return value in \p prev so as
  * to obtain the next object below \p set.
  */
-static inline topo_obj_t
+static __inline__ topo_obj_t
 topo_get_next_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
 					 unsigned depth, topo_obj_t prev)
 {
@@ -537,7 +543,7 @@ topo_get_next_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cp
  * If there are multiple or no depth for given type, return \c NULL and let the caller
  * fallback to topo_get_next_obj_below_cpuset_by_depth().
  */
-static inline topo_obj_t
+static __inline__ topo_obj_t
 topo_get_next_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
 				topo_obj_type_t type, topo_obj_t prev)
 {
@@ -549,7 +555,7 @@ topo_get_next_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *s
 
 /** \brief Return the \p index -th object at depth \p depth below CPU set \p set.
  */
-static inline topo_obj_t
+static __inline__ topo_obj_t
 topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
 				    unsigned depth, unsigned index)
 {
@@ -571,7 +577,7 @@ topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_
  * If there are multiple or no depth for given type, return \c NULL and let the caller
  * fallback to topo_get_obj_below_cpuset_by_depth().
  */
-static inline topo_obj_t
+static __inline__ topo_obj_t
 topo_get_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
 			   topo_obj_type_t type, unsigned index)
 {
