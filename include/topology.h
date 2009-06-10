@@ -460,6 +460,54 @@ static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology,
   return NULL;
 }
 
+/** \brief Iterate through objects above CPU set \p set
+ *
+ * If object \p prev is \c NULL, return the first object at depth \depth
+ * covering part of CPU set \p set.
+ * The next invokation should pass the previous return value in \p prev so as
+ * to obtain the next object covering another part of \p set.
+ */
+static inline topo_obj_t topo_get_next_obj_above_cpuset_by_depth(topo_topology_t topology,
+								 const topo_cpuset_t *set,
+								 unsigned depth,
+								 topo_obj_t prev)
+{
+  topo_obj_t next;
+  if (prev) {
+    if (prev->level != depth)
+      return NULL;
+    next = prev->next_cousin;
+  } else {
+    next = topo_get_obj (topology, depth, 0);
+  }
+
+  while (next && !topo_cpuset_intersects(set, &next->cpuset))
+    next = next->next_cousin;
+  return next;
+}
+
+/** \brief Iterate through same-type objects covering CPU set \p set
+ *
+ * If object \p prev is \c NULL, return the first object of type \p type
+ * covering part of CPU set \p set.
+ * The next invokation should pass the previous return value in \p prev so as
+ * to obtain the next object of type \p type covering another part of \p set.
+ *
+ * If there are no or multiple depths for type \p type, \c NULL is returned.
+ * The caller may fallback to topo_get_next_obj_above_cpuset_by_depth()
+ * for each depth.
+ */
+static inline topo_obj_t topo_get_next_obj_above_cpuset(topo_topology_t topology,
+							const topo_cpuset_t *set,
+							topo_obj_type_t type,
+							topo_obj_t prev)
+{
+  unsigned depth = topo_get_type_depth(topology, type);
+  if (depth == TOPO_TYPE_DEPTH_UNKNOWN || depth == TOPO_TYPE_DEPTH_MULTIPLE)
+    return NULL;
+  return topo_get_next_obj_above_cpuset_by_depth(topology, set, depth, prev);
+}
+
 /** \brief Among objects at given depth and below a cpuset, return the nth. */
 static inline topo_obj_t
 topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
