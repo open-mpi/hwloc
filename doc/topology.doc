@@ -43,7 +43,7 @@ libtopology provides a hierarchical view of the machine, NUMA memory nodes,
 sockets, shared caches, cores and simultaneous multithreading. It also gathers
 various attributes such as cache and memory information.
 
-libtopology supports the following operationg systems:
+libtopology supports the following operating systems:
 
 <ul>
   <li> Linux (including old kernels not having sysfs topology information, with
@@ -140,7 +140,7 @@ Machine(15GB)
       P#15
 \endcode
 
- On a 8-socket 2-core Opteron NUMA machine, the <tt>lstopo</tt> tool may
+ On a 8-socket 2-core Opteron NUMA machine, the \c lstopo tool may
  show the following outputs:
 
 \image html hagrid.png
