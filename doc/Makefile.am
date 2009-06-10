@@ -4,12 +4,13 @@ include $(top_srcdir)/libtopology.am
 include $(top_srcdir)/doxample.am
 
 MOSTLYCLEANFILES =
+CLEANFILES =
 
 #
 # Documentation is already available in release tarballs.
 #
 
-if TOPO_HAVE_DOC
+if TOPO_INSTALL_DOC
 dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_CPU.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_FULL.3 \
@@ -165,7 +166,6 @@ EXTRA_DIST = $(DX_CONFIG) \
 	@DX_DOCDIR@/html/topology_8h_source.html \
 	@DX_DOCDIR@/html/uniontopo__obj_1_1topo__obj__attr__u.html \
 	@DX_DOCDIR@/libtopology.pdf \
-	@DX_DOCDIR@/libtopology.tag \
 	@DX_DOCDIR@/man/man3/arity.3 \
 	@DX_DOCDIR@/man/man3/attr.3 \
 	@DX_DOCDIR@/man/man3/cache.3 \
@@ -202,8 +202,8 @@ EXTRA_DIST = $(DX_CONFIG) \
 
 install-data-local:
 	$(mkinstalldirs) $(pdfdir) $(htmldir)/topology
-	$(INSTALL_DATA) $(srcdir)/doxygen-doc/libtopology.pdf $(pdfdir)
-	$(INSTALL_DATA) $(srcdir)/doxygen-doc/html/* $(htmldir)/topology
+	$(INSTALL_DATA) @DX_DOCDIR@/libtopology.pdf $(pdfdir)
+	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(htmldir)/topology
 
 uninstall-local:
 	$(RM) $(pdfdir)/libtopology.pdf
@@ -231,7 +231,15 @@ MOSTLYCLEANFILES += topo-hello.c
 
 if DX_COND_man
 if DX_COND_html
-if DX_COND_latex
+if DX_COND_pdf
+if TOPO_HAVE_DOC
+# Documentation already available, do not force documentation generation
+else
+# Documentation not available, tell how to generate it
+all-local: @DX_DOCDIR@/libtopology.pdf
+$(dist_man3_MANS) @DX_DOCDIR@/libtopology.pdf: @DX_DOCDIR@/libtopology.tag
+endif
+
 pkginclude_HEADERS = \
 	$(srcdir)/topology.doc \
 	$(top_srcdir)/include/topology.h \
@@ -239,7 +247,7 @@ pkginclude_HEADERS = \
 
 MAINTAINERCLEANFILES = $(DX_CLEANFILES)
 
-MOSTLYCLEANFILES += \
+CLEANFILES += \
 	@DX_DOCDIR@/latex/Makefile \
 	@DX_DOCDIR@/latex/annotated.tex \
 	@DX_DOCDIR@/latex/cpuset_8h.tex \
@@ -270,8 +278,6 @@ MOSTLYCLEANFILES += \
 	@DX_DOCDIR@/latex/topology_8h.tex \
 	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex \
 	@DX_DOCDIR@/libtopology.tag
-
-$(dist_man3_MANS): @DX_DOCDIR@/libtopology.tag
 
 doc: $(top_srcdir)/README
 $(top_srcdir)/README: @DX_DOCDIR@/libtopology.tag
