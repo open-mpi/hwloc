@@ -239,13 +239,22 @@ all-local: @DX_DOCDIR@/libtopology.pdf
 $(dist_man3_MANS) @DX_DOCDIR@/libtopology.pdf: @DX_DOCDIR@/libtopology.tag
 endif
 
+#
+# What doxygen depends on
+#
 pkginclude_HEADERS = \
 	$(srcdir)/topology.doc \
 	$(top_srcdir)/include/topology.h \
 	$(top_srcdir)/include/topology/cpuset.h
 
+#
+# Only remove the documentation for maintainers
+#
 MAINTAINERCLEANFILES = $(DX_CLEANFILES)
 
+#
+# But remove the LaTeX files for the tarball
+#
 CLEANFILES += \
 	@DX_DOCDIR@/latex/Makefile \
 	@DX_DOCDIR@/latex/annotated.tex \
@@ -279,7 +288,10 @@ CLEANFILES += \
 
 doc: $(top_srcdir)/README
 $(top_srcdir)/README: @DX_DOCDIR@/libtopology.tag
-	LC_ALL=C $(W3M) doxygen-doc/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
+	LC_ALL=C $(W3M) @DX_DOCDIR@/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
+
+doc-upload: @DX_DOCDIR@/libtopology.tag
+	scp @DX_DOCDIR@/html/* sync.bordeaux.inria.fr:/web/runtime/libtopology/
 endif
 endif
 endif
