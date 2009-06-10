@@ -32,6 +32,13 @@
  */
 /*! \mainpage Libtopology
 
+<h1 class="sub">Portable abstraction of hierachical architectures for high-performance computing</h1>
+
+<hr>
+
+\htmlonly
+<div class="section" id="introduction">
+\endhtmlonly
 \section Introduction
 
 libtopology provides a portable abstraction (across OS, versions, architectures,
@@ -75,6 +82,9 @@ below. It may also be used to binding applications onto certain cores or
 memory nodes. Several utility programs are also provided to ease command-line
 manipulation of topology objects, binding of processes, ...
 
+\htmlonly
+</div><div class="section" id="installation">
+\endhtmlonly
 \section installation Installation
 
 libtopology (http://libtopology.gforge.inria.fr/) is available under the CeCILL-B license (BSD-like).
@@ -100,6 +110,9 @@ Installation by itself is as usual:
 Lstopo's fig support is always available. To get support for pdf, ps and png
 support, cairo is needed. To get support for xml, libxml2 is needed.
 
+\htmlonly
+</div><div class="section" id="examples">
+\endhtmlonly
 \section examples Examples
 
  On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool may
@@ -197,6 +210,9 @@ Machine(15GB)
       L1Cache(32KB) + Core#3 + P#7
 \endcode
 
+\htmlonly
+</div><div class="section" id="interface">
+\endhtmlonly
 \section interface Interface example
 
 This section shows how to use libtopology with an small example \c topo-hello.c
@@ -290,12 +306,21 @@ int main(void)
 }
    \endcode
 
+\htmlonly
+</div><div class="section" id="bugs">
+\endhtmlonly
 \section bugs Bugs and questions
 
 Bug reports and questions should be sent to the devel mailing list (http://lists.gforge.inria.fr/cgi-bin/mailman/listinfo/libtopology-devel).
 
+\htmlonly
+</div><div class="section" id="credits">
+\endhtmlonly
 \section Credits
 
 \c libtopology is developed by the INRIA Runtime Team-Project (http://runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr/~namyst/).
 
+\htmlonly
+</div>
+\endhtmlonly
 */

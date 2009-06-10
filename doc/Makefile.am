@@ -235,6 +235,7 @@ if TOPO_HAVE_DOC
 else
 # Documentation not available, tell how to generate it
 all-local: @DX_DOCDIR@/libtopology.pdf
+	cp $(srcdir)/doxygen.css @DX_DOCDIR@/html/
 $(dist_man3_MANS) @DX_DOCDIR@/libtopology.pdf: @DX_DOCDIR@/libtopology.tag
 endif
 
