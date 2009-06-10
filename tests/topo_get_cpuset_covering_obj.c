@@ -38,15 +38,28 @@
 #include <string.h>
 #include <assert.h>
 
-/* check topo_find_cpuset_covering_cache() */
+/* check topo_get_cpuset_covering_obj() */
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
+
+#if TOPO_BITS_PER_LONG == 32
+#define GIVEN_CPUSET_STRING "0,0fff,f0000000"
+#define EXPECTED_CPUSET_STRING "0000ffff,ff000000"
+#define GIVEN_LARGESPLIT_CPUSET_STRING "8000,,,,,,,,,,,,,,,,,,,,,,1" /* first and last(735th) bit set */
+#define GIVEN_TOOLARGE_CPUSET_STRING "10000,,,,,,,,,,,,,,,,,,,,,,0" /* 736th bit is too large for the 720-wide topology */
+#elif TOPO_BITS_PER_LONG == 64
+#define GIVEN_CPUSET_STRING "0,,0ffff0000000"
+#define EXPECTED_CPUSET_STRING "0000ffffff000000"
+#define GIVEN_LARGESPLIT_CPUSET_STRING "8000,,,,,,,,,,,1" /* first and last(735th) bit set */
+#define GIVEN_TOOLARGE_CPUSET_STRING "10000,,,,,,,,,,,0" /* 736th bit is too large for the 720-wide topology */
+#endif
 
 int main()
 {
   topo_topology_t topology;
   struct topo_topology_info topoinfo;
-  topo_obj_t obj, cache;
+  char string[TOPO_CPUSET_STRING_LENGTH+1];
+  topo_obj_t obj;
   topo_cpuset_t set;
 
   topo_topology_init(&topology);
@@ -54,55 +67,30 @@ int main()
   topo_topology_load(topology);
   topo_topology_get_info(topology, &topoinfo);
 
-  /* check the cache above a given cpu */
-#define CPUINDEX 180
-  topo_cpuset_zero(&set);
-  obj = topo_get_obj(topology, 5, CPUINDEX);
-  assert(obj);
-  topo_cpuset_orset(&set, &obj->cpuset);
-  cache = topo_find_cpuset_covering_cache(topology, &set);
-  assert(cache);
-  assert(cache->type == TOPO_OBJ_CACHE);
-  assert(cache->number == CPUINDEX/2/3);
-  assert(topo_obj_is_in_subtree(obj, cache));
+  topo_cpuset_from_string(GIVEN_CPUSET_STRING, &set);
+  obj = topo_get_cpuset_covering_obj(topology, &set);
 
-  /* check the cache above two nearby cpus */
-#define CPUINDEX1 180
-#define CPUINDEX2 183
-  topo_cpuset_zero(&set);
-  obj = topo_get_obj(topology, 5, CPUINDEX1);
   assert(obj);
-  topo_cpuset_orset(&set, &obj->cpuset);
-  obj = topo_get_obj(topology, 5, CPUINDEX2);
-  assert(obj);
-  topo_cpuset_orset(&set, &obj->cpuset);
-  cache = topo_find_cpuset_covering_cache(topology, &set);
-  assert(cache);
-  assert(cache->type == TOPO_OBJ_CACHE);
-  assert(cache->number == CPUINDEX1/2/3);
-  assert(cache->number == CPUINDEX2/2/3);
-  assert(topo_obj_is_in_subtree(obj, cache));
+  fprintf(stderr, "found covering object type %s covering cpuset %s\n",
+	  topo_obj_type_string(obj->type), GIVEN_CPUSET_STRING);
+  assert(topo_cpuset_isincluded(&set, &obj->cpuset));
 
-  /* check no cache above two distant cpus */
-#undef CPUINDEX1
-#define CPUINDEX1 300
-  topo_cpuset_zero(&set);
-  obj = topo_get_obj(topology, 5, CPUINDEX1);
-  assert(obj);
-  topo_cpuset_orset(&set, &obj->cpuset);
-  obj = topo_get_obj(topology, 5, CPUINDEX2);
-  assert(obj);
-  topo_cpuset_orset(&set, &obj->cpuset);
-  cache = topo_find_cpuset_covering_cache(topology, &set);
-  assert(!cache);
+  topo_obj_cpuset_snprintf(string, sizeof(string), 1, &obj);
+  fprintf(stderr, "covering object of %s is %s, expected %s\n",
+	  GIVEN_CPUSET_STRING, string, EXPECTED_CPUSET_STRING);
+  assert(!strcmp(EXPECTED_CPUSET_STRING, string));
 
-  /* check no cache above higher level */
-  topo_cpuset_zero(&set);
-  obj = topo_get_obj(topology, 2, 0);
-  assert(obj);
-  topo_cpuset_orset(&set, &obj->cpuset);
-  cache = topo_find_cpuset_covering_cache(topology, &set);
-  assert(!cache);
+  topo_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING, &set);
+  obj = topo_get_cpuset_covering_obj(topology, &set);
+  assert(obj == topo_get_system_obj(topology));
+  fprintf(stderr, "found system as covering object of first+last cpus cpuset %s\n",
+	  GIVEN_LARGESPLIT_CPUSET_STRING);
+
+  topo_cpuset_from_string(GIVEN_TOOLARGE_CPUSET_STRING, &set);
+  obj = topo_get_cpuset_covering_obj(topology, &set);
+  assert(!obj);
+  fprintf(stderr, "found no covering object for too-large cpuset %s\n",
+	  GIVEN_TOOLARGE_CPUSET_STRING);
 
   topo_topology_destroy(topology);
 

@@ -55,13 +55,12 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_cpuset_weight.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_xorset.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_zero.3 \
-	@DX_DOCDIR@/man/man3/topo_find_closest_objs.3 \
-	@DX_DOCDIR@/man/man3/topo_find_common_ancestor_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_find_cpuset_covering_cache.3 \
-	@DX_DOCDIR@/man/man3/topo_find_cpuset_covering_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_find_cpuset_objs.3 \
-	@DX_DOCDIR@/man/man3/topo_find_shared_cache_above.3 \
 	@DX_DOCDIR@/man/man3/topo_flags_e.3 \
+	@DX_DOCDIR@/man/man3/topo_get_closest_objs.3 \
+	@DX_DOCDIR@/man/man3/topo_get_common_ancestor_obj.3 \
+	@DX_DOCDIR@/man/man3/topo_get_cpuset_covering_cache.3 \
+	@DX_DOCDIR@/man/man3/topo_get_cpuset_covering_obj.3 \
+	@DX_DOCDIR@/man/man3/topo_get_cpuset_objs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_depth_nbobjs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_depth_type.3 \
 	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset.3 \
@@ -72,6 +71,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_get_obj_below_cpuset_by_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj_order_type.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj_type_order.3 \
+	@DX_DOCDIR@/man/man3/topo_get_shared_cache_above.3 \
 	@DX_DOCDIR@/man/man3/topo_get_system_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_or_above_depth.3 \

@@ -398,7 +398,7 @@ static inline topo_obj_t topo_get_system_obj (topo_topology_t topology)
 }
 
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
-static inline topo_obj_t topo_find_common_ancestor_obj (topo_obj_t obj1, topo_obj_t obj2)
+static inline topo_obj_t topo_get_common_ancestor_obj (topo_obj_t obj1, topo_obj_t obj2)
 {
   while (obj1->level > obj2->level)
     obj1 = obj1->father;
@@ -426,19 +426,19 @@ static inline int topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_roo
  *  \return the actual number of objects that were found.
  */
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? */
-extern int topo_find_closest_objs (topo_topology_t topology, topo_obj_t src, topo_obj_t * __topo_restrict objs, int max);
+extern int topo_get_closest_objs (topo_topology_t topology, topo_obj_t src, topo_obj_t * __topo_restrict objs, int max);
 
-/** \brief Find the lowest object covering at least the given cpuset \p set */
-extern topo_obj_t topo_find_cpuset_covering_obj (topo_topology_t topology, const topo_cpuset_t *set);
+/** \brief Get the lowest object covering at least the given cpuset \p set */
+extern topo_obj_t topo_get_cpuset_covering_obj (topo_topology_t topology, const topo_cpuset_t *set);
 
-/** \brief Find objects covering exactly a given cpuset \p set */
-extern int topo_find_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *set,
-				  topo_obj_t * __topo_restrict objs, int max);
+/** \brief Get objects covering exactly a given cpuset \p set */
+extern int topo_get_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *set,
+				 topo_obj_t * __topo_restrict objs, int max);
 
-/** \brief Find the first cache covering a cpuset \p set */
-static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *set)
+/** \brief Get the first cache covering a cpuset \p set */
+static inline topo_obj_t topo_get_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *set)
 {
-  topo_obj_t current = topo_find_cpuset_covering_obj(topology, set);
+  topo_obj_t current = topo_get_cpuset_covering_obj(topology, set);
   while (current) {
     if (current->type == TOPO_OBJ_CACHE)
       return current;
@@ -447,8 +447,8 @@ static inline topo_obj_t topo_find_cpuset_covering_cache (topo_topology_t topolo
   return NULL;
 }
 
-/** \brief Find the first cache shared between an object and somebody else */
-static inline topo_obj_t topo_find_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
+/** \brief Get the first cache shared between an object and somebody else */
+static inline topo_obj_t topo_get_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
 {
   topo_obj_t current = obj->father;
   while (current) {

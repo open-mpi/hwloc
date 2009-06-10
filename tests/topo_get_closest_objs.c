@@ -39,7 +39,7 @@
 #include <assert.h>
 
 /* 
- * check topo_find_closest_objs()
+ * check topo_get_closest_objs()
  *
  * - get the last object of the last level
  * - get all closest objects
@@ -81,7 +81,7 @@ main (int argc, char *argv[])
   assert(closest);
 
   /* get closest levels */
-  found = topo_find_closest_objs (topology, last, closest, numprocs);
+  found = topo_get_closest_objs (topology, last, closest, numprocs);
   printf("looked for %u closest entries, found %d\n", numprocs, found);
   assert(found == numprocs-1);
 
@@ -93,7 +93,7 @@ main (int argc, char *argv[])
   assert(closest[found/2/3-1] == topo_get_obj(topology, info.depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
 
   /* get ancestor of last and less close object */
-  topo_obj_t ancestor = topo_find_common_ancestor_obj(last, closest[found-1]);
+  topo_obj_t ancestor = topo_get_common_ancestor_obj(last, closest[found-1]);
   assert(topo_obj_is_in_subtree(last, ancestor));
   assert(topo_obj_is_in_subtree(closest[found-1], ancestor));
   assert(ancestor == topo_get_system_obj(topology));

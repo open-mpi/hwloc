@@ -38,7 +38,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* check topo_find_shared_cache_above() */
+/* check topo_get_shared_cache_above() */
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION_SHARED "6 5 4 3 2" /* 736bits wide topology */
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION_NONSHARED "6 5 4 1 2" /* 736bits wide topology */
@@ -58,7 +58,7 @@ int main()
 #define CPUINDEX 180
   obj = topo_get_obj(topology, 5, CPUINDEX);
   assert(obj);
-  cache = topo_find_shared_cache_above(topology, obj);
+  cache = topo_get_shared_cache_above(topology, obj);
   assert(cache);
   assert(cache->type == TOPO_OBJ_CACHE);
   assert(cache->number == CPUINDEX/2/3);
@@ -67,13 +67,13 @@ int main()
   /* check no shared cache above the L2 cache */
   obj = topo_get_obj(topology, 3, 0);
   assert(obj);
-  cache = topo_find_shared_cache_above(topology, obj);
+  cache = topo_get_shared_cache_above(topology, obj);
   assert(!cache);
 
   /* check no shared cache above the node */
   obj = topo_get_obj(topology, 1, 0);
   assert(obj);
-  cache = topo_find_shared_cache_above(topology, obj);
+  cache = topo_get_shared_cache_above(topology, obj);
   assert(!cache);
 
   topo_topology_destroy(topology);
@@ -88,7 +88,7 @@ int main()
 #define CPUINDEX 180
   obj = topo_get_obj(topology, 5, CPUINDEX);
   assert(obj);
-  cache = topo_find_shared_cache_above(topology, obj);
+  cache = topo_get_shared_cache_above(topology, obj);
   assert(cache);
   assert(cache->type == TOPO_OBJ_CACHE);
   assert(cache->number == CPUINDEX/2/1);
@@ -97,7 +97,7 @@ int main()
   /* check no shared-cache above the core */
   obj = topo_get_obj(topology, 4, CPUINDEX/2);
   assert(obj);
-  cache = topo_find_shared_cache_above(topology, obj);
+  cache = topo_get_shared_cache_above(topology, obj);
   assert(!cache);
 
   topo_topology_destroy(topology);

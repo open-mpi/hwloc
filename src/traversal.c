@@ -70,7 +70,7 @@ topo_get_obj (struct topo_topology *topology, unsigned depth, unsigned index)
   return topology->levels[depth][index];
 }
 
-int topo_find_closest_objs (struct topo_topology *topology, struct topo_obj *src, struct topo_obj **objs, int max)
+int topo_get_closest_objs (struct topo_topology *topology, struct topo_obj *src, struct topo_obj **objs, int max)
 {
   struct topo_obj *parent, *nextparent, **src_objs;
   int i,src_nbobjects;
@@ -107,7 +107,7 @@ int topo_find_closest_objs (struct topo_topology *topology, struct topo_obj *src
 }
 
 struct topo_obj *
-topo_find_cpuset_covering_obj (struct topo_topology *topology, const topo_cpuset_t *set)
+topo_get_cpuset_covering_obj (struct topo_topology *topology, const topo_cpuset_t *set)
 {
   struct topo_obj *current = topology->levels[0][0];
   int i;
@@ -127,8 +127,8 @@ topo_find_cpuset_covering_obj (struct topo_topology *topology, const topo_cpuset
 }
 
 static int
-topo__find_cpuset_objs (struct topo_obj *current, const topo_cpuset_t *set,
-			struct topo_obj ***res, int *max)
+topo__get_cpuset_objs (struct topo_obj *current, const topo_cpuset_t *set,
+		       struct topo_obj ***res, int *max)
 {
   int gotten = 0;
   int i;
@@ -152,7 +152,7 @@ topo__find_cpuset_objs (struct topo_obj *current, const topo_cpuset_t *set,
     if (topo_cpuset_iszero(&subset))
       continue;
 
-    ret = topo__find_cpuset_objs (current->children[i], &subset, res, max);
+    ret = topo__get_cpuset_objs (current->children[i], &subset, res, max);
     gotten += ret;
 
     /* if no more room to store remaining objects, return what we got so far */
@@ -164,8 +164,8 @@ topo__find_cpuset_objs (struct topo_obj *current, const topo_cpuset_t *set,
 }
 
 int
-topo_find_cpuset_objs (struct topo_topology *topology, const topo_cpuset_t *set,
-		       struct topo_obj **objs, int max)
+topo_get_cpuset_objs (struct topo_topology *topology, const topo_cpuset_t *set,
+		      struct topo_obj **objs, int max)
 {
   struct topo_obj *current = topology->levels[0][0];
 
@@ -175,7 +175,7 @@ topo_find_cpuset_objs (struct topo_topology *topology, const topo_cpuset_t *set,
   if (max <= 0)
     return 0;
 
-  return topo__find_cpuset_objs (current, set, &objs, &max);
+  return topo__get_cpuset_objs (current, set, &objs, &max);
 }
 
 const char *
