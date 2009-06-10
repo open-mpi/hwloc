@@ -3,10 +3,13 @@
 include $(top_srcdir)/libtopology.am
 include $(top_srcdir)/doxample.am
 
-AM_LDFLAGS += $(XML_LIBS)
+MOSTLYCLEANFILES =
 
-if DX_COND_man
+#
+# Documentation is already available in release tarballs.
+#
 
+if TOPO_HAVE_DOC
 dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_CPU.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_FULL.3 \
@@ -69,7 +72,6 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_obj_below.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj_order_type.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj_type_order.3 \
 	@DX_DOCDIR@/man/man3/topo_get_shared_cache_above.3 \
@@ -114,16 +116,56 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topology_objects.3 \
 	@DX_DOCDIR@/man/man3/topology_traversal.3
 
-$(dist_man3_MANS): doxygen-doc
-
-endif
-
-MAINTAINERCLEANFILES = $(DX_CLEANFILES)
-
-EXTRA_DIST = $(DX_CONFIG) topology.doc images/dudley.png images/emmett.png images/hagrid.png
-
-if DX_COND_man
-EXTRA_DIST += \
+EXTRA_DIST = $(DX_CONFIG) \
+	topology.doc \
+	images/dudley.png \
+	images/emmett.png \
+	images/hagrid.png \
+	@DX_DOCDIR@/html/annotated.html \
+	@DX_DOCDIR@/html/classes.html \
+	@DX_DOCDIR@/html/cpuset_8h.html \
+	@DX_DOCDIR@/html/cpuset_8h_source.html \
+	@DX_DOCDIR@/html/doxygen.css \
+	@DX_DOCDIR@/html/doxygen.png \
+	@DX_DOCDIR@/html/dudley.png \
+	@DX_DOCDIR@/html/emmett.png \
+	@DX_DOCDIR@/html/files.html \
+	@DX_DOCDIR@/html/functions.html \
+	@DX_DOCDIR@/html/functions_vars.html \
+	@DX_DOCDIR@/html/globals.html \
+	@DX_DOCDIR@/html/globals_defs.html \
+	@DX_DOCDIR@/html/globals_enum.html \
+	@DX_DOCDIR@/html/globals_eval.html \
+	@DX_DOCDIR@/html/globals_func.html \
+	@DX_DOCDIR@/html/globals_type.html \
+	@DX_DOCDIR@/html/group__topology__binding.html \
+	@DX_DOCDIR@/html/group__topology__configuration.html \
+	@DX_DOCDIR@/html/group__topology__conversion.html \
+	@DX_DOCDIR@/html/group__topology__cpuset.html \
+	@DX_DOCDIR@/html/group__topology__creation.html \
+	@DX_DOCDIR@/html/group__topology__info.html \
+	@DX_DOCDIR@/html/group__topology__information.html \
+	@DX_DOCDIR@/html/group__topology__objects.html \
+	@DX_DOCDIR@/html/group__topology__traversal.html \
+	@DX_DOCDIR@/html/hagrid.png \
+	@DX_DOCDIR@/html/index.html \
+	@DX_DOCDIR@/html/modules.html \
+	@DX_DOCDIR@/html/structtopo__cpuset__t.html \
+	@DX_DOCDIR@/html/structtopo__obj.html \
+	@DX_DOCDIR@/html/structtopo__obj_1_1topo__obj__attr__u_1_1topo__cache__attr__u.html \
+	@DX_DOCDIR@/html/structtopo__obj_1_1topo__obj__attr__u_1_1topo__memory__attr__u.html \
+	@DX_DOCDIR@/html/structtopo__obj_1_1topo__obj__attr__u_1_1topo__misc__attr__u.html \
+	@DX_DOCDIR@/html/structtopo__topology__info.html \
+	@DX_DOCDIR@/html/tab_b.gif \
+	@DX_DOCDIR@/html/tab_l.gif \
+	@DX_DOCDIR@/html/tab_r.gif \
+	@DX_DOCDIR@/html/tabs.css \
+	@DX_DOCDIR@/html/topology_8doc.html \
+	@DX_DOCDIR@/html/topology_8h.html \
+	@DX_DOCDIR@/html/topology_8h_source.html \
+	@DX_DOCDIR@/html/uniontopo__obj_1_1topo__obj__attr__u.html \
+	@DX_DOCDIR@/libtopology.pdf \
+	@DX_DOCDIR@/libtopology.tag \
 	@DX_DOCDIR@/man/man3/arity.3 \
 	@DX_DOCDIR@/man/man3/attr.3 \
 	@DX_DOCDIR@/man/man3/cache.3 \
@@ -133,7 +175,6 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/depth.3 \
 	@DX_DOCDIR@/man/man3/dmi_board_name.3 \
 	@DX_DOCDIR@/man/man3/dmi_board_vendor.3 \
-	@DX_DOCDIR@/man/man3/misc.3 \
 	@DX_DOCDIR@/man/man3/father.3 \
 	@DX_DOCDIR@/man/man3/first_child.3 \
 	@DX_DOCDIR@/man/man3/huge_page_free.3 \
@@ -144,6 +185,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/level.3 \
 	@DX_DOCDIR@/man/man3/machine.3 \
 	@DX_DOCDIR@/man/man3/memory_kB.3 \
+	@DX_DOCDIR@/man/man3/misc.3 \
 	@DX_DOCDIR@/man/man3/next_cousin.3 \
 	@DX_DOCDIR@/man/man3/next_sibling.3 \
 	@DX_DOCDIR@/man/man3/node.3 \
@@ -153,36 +195,87 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/prev_sibling.3 \
 	@DX_DOCDIR@/man/man3/s.3 \
 	@DX_DOCDIR@/man/man3/system.3 \
+	@DX_DOCDIR@/man/man3/topology.doc.3 \
 	@DX_DOCDIR@/man/man3/topology.h.3 \
 	@DX_DOCDIR@/man/man3/type.3 \
 	@DX_DOCDIR@/man/man3/userdata.3
+
+install-data-local:
+	$(mkinstalldirs) $(pdfdir) $(htmldir)/topology
+	$(INSTALL_DATA) $(srcdir)/doxygen-doc/libtopology.pdf $(pdfdir)
+	$(INSTALL_DATA) $(srcdir)/doxygen-doc/html/* $(htmldir)/topology
+
+uninstall-local:
+	$(RM) $(pdfdir)/libtopology.pdf
+	$(RM) $(htmldir)/topology/*
 endif
 
+#
+# Make sure that the documentation example works
+#
+
 TESTS = topo-hello
-
-topo-hello.c: $(srcdir)/topology.doc
-	sed -e '1,/   \\code/d' -e '/   \\endcode/,$$d' < $^ > $@
-
-MOSTLYCLEANFILES = topo-hello.c
 
 check_PROGRAMS = $(TESTS)
 
 LIBS = $(top_builddir)/src/libtopology.la
 
-install-data-local:
-	$(mkinstalldirs) $(pdfdir) $(htmldir)/topology
-	$(INSTALL_DATA) doxygen-doc/libtopology.pdf $(pdfdir)
-	$(INSTALL_DATA) doxygen-doc/html/* $(htmldir)/topology
+topo-hello.c: $(srcdir)/topology.doc
+	sed -e '1,/   \\code/d' -e '/   \\endcode/,$$d' < $^ > $@
 
-uninstall-local:
-	$(RM) $(pdfdir)/libtopology.pdf
-	$(RM) $(htmldir)/topology/*
+MOSTLYCLEANFILES += topo-hello.c
 
+#
+# Rules to regenerate the documentation
+#
+
+if DX_COND_man
 if DX_COND_html
-  ifneq ($(W3M),)
-all-local: $(top_srcdir)/README
-$(top_srcdir)/README: doxygen-doc
-	LC_ALL=C $(W3M) doxygen-doc/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
-  endif
-endif
+if DX_COND_latex
+pkginclude_HEADERS = \
+	$(srcdir)/topology.doc \
+	$(top_srcdir)/include/topology.h \
+	$(top_srcdir)/include/topology/cpuset.h
 
+MAINTAINERCLEANFILES = $(DX_CLEANFILES)
+
+MOSTLYCLEANFILES += \
+	@DX_DOCDIR@/latex/Makefile \
+	@DX_DOCDIR@/latex/annotated.tex \
+	@DX_DOCDIR@/latex/cpuset_8h.tex \
+	@DX_DOCDIR@/latex/doxygen.sty \
+	@DX_DOCDIR@/latex/dudley.png \
+	@DX_DOCDIR@/latex/emmett.png \
+	@DX_DOCDIR@/latex/files.tex \
+	@DX_DOCDIR@/latex/group__topology__binding.tex \
+	@DX_DOCDIR@/latex/group__topology__configuration.tex \
+	@DX_DOCDIR@/latex/group__topology__conversion.tex \
+	@DX_DOCDIR@/latex/group__topology__cpuset.tex \
+	@DX_DOCDIR@/latex/group__topology__creation.tex \
+	@DX_DOCDIR@/latex/group__topology__info.tex \
+	@DX_DOCDIR@/latex/group__topology__information.tex \
+	@DX_DOCDIR@/latex/group__topology__objects.tex \
+	@DX_DOCDIR@/latex/group__topology__traversal.tex \
+	@DX_DOCDIR@/latex/hagrid.png \
+	@DX_DOCDIR@/latex/index.tex \
+	@DX_DOCDIR@/latex/modules.tex \
+	@DX_DOCDIR@/latex/refman.tex \
+	@DX_DOCDIR@/latex/structtopo__cpuset__t.tex \
+	@DX_DOCDIR@/latex/structtopo__obj.tex \
+	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__cache__attr__u.tex \
+	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__memory__attr__u.tex \
+	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__misc__attr__u.tex \
+	@DX_DOCDIR@/latex/structtopo__topology__info.tex \
+	@DX_DOCDIR@/latex/topology_8doc.tex \
+	@DX_DOCDIR@/latex/topology_8h.tex \
+	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex \
+	@DX_DOCDIR@/libtopology.tag
+
+$(dist_man3_MANS): @DX_DOCDIR@/libtopology.tag
+
+doc: $(top_srcdir)/README
+$(top_srcdir)/README: @DX_DOCDIR@/libtopology.tag
+	LC_ALL=C $(W3M) doxygen-doc/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
+endif
+endif
+endif

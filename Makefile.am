@@ -6,3 +6,7 @@ SUBDIRS = src utils tests include doc
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = topology.pc
+
+.PHONY: doc
+doc:
+	$(MAKE) -C doc doc

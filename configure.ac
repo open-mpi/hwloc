@@ -53,7 +53,9 @@ DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(ON)
 DX_PS_FEATURE(OFF)
-DX_INIT_DOXYGEN(libtopology, doxygen.cfg, doxygen-doc)
+DX_INIT_DOXYGEN(libtopology, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
+AC_CHECK_FILE(doc/doxygen-doc/man, [topo_have_doc=yes], [:])
+AM_CONDITIONAL([TOPO_HAVE_DOC], [test "x$topo_have_doc" = "xyes"])
 AM_INIT_AUTOMAKE([1.10 foreign -Wall -Werror])
 
 #

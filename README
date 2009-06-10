@@ -9,7 +9,7 @@ libtopology provides a hierarchical view of the machine, NUMA memory nodes,
 sockets, shared caches, cores and simultaneous multithreading. It also gathers
 various attributes such as cache and memory information.
 
-libtopology supports the following operationg systems:
+libtopology supports the following operating systems:
 
   * Linux (including old kernels not having sysfs topology information, with
     knowledge of cpusets and offline cpus)
@@ -252,4 +252,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 /~namyst/).
 -------------------------------------------------------------------------------
 
-Generated on Wed Jun 10 14:31:09 2009 for libtopology by  doxygen 1.5.9
+Generated on Wed Jun 10 16:23:04 2009 for libtopology by  doxygen 1.5.9
