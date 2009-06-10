@@ -201,13 +201,13 @@ EXTRA_DIST = $(DX_CONFIG) \
 	@DX_DOCDIR@/man/man3/userdata.3
 
 install-data-local:
-	$(mkinstalldirs) $(pdfdir) $(htmldir)/topology
-	$(INSTALL_DATA) @DX_DOCDIR@/libtopology.pdf $(pdfdir)
-	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(htmldir)/topology
+	$(mkinstalldirs) $(DESTDIR)$(pdfdir) $(DESTDIR)$(htmldir)/topology
+	$(INSTALL_DATA) @DX_DOCDIR@/libtopology.pdf $(DESTDIR)$(pdfdir)
+	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(DESTDIR)$(htmldir)/topology
 
 uninstall-local:
-	$(RM) $(pdfdir)/libtopology.pdf
-	$(RM) $(htmldir)/topology/*
+	$(RM) $(DESTDIR)$(pdfdir)/libtopology.pdf
+	$(RM) $(DESTDIR)$(htmldir)/topology/*
 endif
 
 #
