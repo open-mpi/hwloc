@@ -462,7 +462,7 @@ static inline topo_obj_t topo_get_shared_cache_above (topo_topology_t topology, 
 
 /** \brief Iterate through objects above CPU set \p set
  *
- * If object \p prev is \c NULL, return the first object at depth \depth
+ * If object \p prev is \c NULL, return the first object at depth \p depth
  * covering part of CPU set \p set.
  * The next invokation should pass the previous return value in \p prev so as
  * to obtain the next object covering another part of \p set.
