@@ -171,6 +171,10 @@ install-data-local:
 	$(INSTALL_DATA) doxygen-doc/libtopology.pdf $(pdfdir)
 	$(INSTALL_DATA) doxygen-doc/html/* $(htmldir)/topology
 
+uninstall-local:
+	$(RM) $(pdfdir)/libtopology.pdf
+	$(RM) $(htmldir)/topology/*
+
 if DX_COND_html
   ifneq ($(W3M),)
 all-local: $(top_srcdir)/README
