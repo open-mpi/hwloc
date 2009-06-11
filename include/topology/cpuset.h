@@ -128,8 +128,13 @@ topo_cpuset_snprintf(char * __topo_restrict buf, size_t buflen, const topo_cpuse
       res = snprintf(tmp, size, "0");
     else
       res = 0;
+#if TOPO_BITS_PER_LONG == TOPO_CPUSET_SUBSTRING_SIZE
+    accum = 0;
+    accumed = 0;
+#else
     accum <<= TOPO_CPUSET_SUBSTRING_SIZE;
     accumed -= TOPO_CPUSET_SUBSTRING_SIZE;
+#endif
 
     tmp += res; size -= res;
     if (size <= 1) /* need room for ending \0 */
@@ -156,7 +161,11 @@ topo_cpuset_from_string(const char * __topo_restrict string, topo_cpuset_t * __t
     char *next;
     val = strtoul(current, &next, 16);
     /* store subset in order, starting from the end */
+#if TOPO_BITS_PER_LONG == TOPO_CPUSET_SUBSTRING_SIZE
+    accum = val;
+#else
     accum = (accum << TOPO_CPUSET_SUBSTRING_SIZE) | val;
+#endif
     accumed += TOPO_CPUSET_SUBSTRING_SIZE;
     if (accumed == TOPO_BITS_PER_LONG) {
       set->s[TOPO_CPUSUBSET_COUNT-1-count] = accum;
