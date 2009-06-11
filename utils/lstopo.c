@@ -148,6 +148,7 @@ main (int argc, char *argv[])
 	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
 	  usage ();
+	  exit(EXIT_FAILURE);
 	} else
 	  filename = argv[1];
       }
