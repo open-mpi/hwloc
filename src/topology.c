@@ -1010,6 +1010,8 @@ topo__check_children(struct topo_topology *topology, struct topo_obj *father)
 
   if (!father->arity) {
     assert(!father->children);
+    assert(!father->first_child);
+    assert(!father->last_child);
     return;
   }
 
