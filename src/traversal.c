@@ -106,26 +106,6 @@ int topo_get_closest_objs (struct topo_topology *topology, struct topo_obj *src,
   return stored;
 }
 
-struct topo_obj *
-topo_get_cpuset_covering_obj (struct topo_topology *topology, const topo_cpuset_t *set)
-{
-  struct topo_obj *current = topology->levels[0][0];
-  int i;
-
-  if (!topo_cpuset_isincluded(set, &current->cpuset))
-    return NULL;
-
- children:
-  for(i=0; i<current->arity; i++) {
-    if (topo_cpuset_isincluded(set, &current->children[i]->cpuset)) {
-      current = current->children[i];
-      goto children;
-    }
-  }
-
-  return current;
-}
-
 static int
 topo__get_cpuset_objs (struct topo_obj *current, const topo_cpuset_t *set,
 		       struct topo_obj ***res, int *max)

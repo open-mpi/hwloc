@@ -63,6 +63,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_get_closest_objs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_common_ancestor_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_get_cpuset_covering_cache.3 \
+	@DX_DOCDIR@/man/man3/topo_get_cpuset_covering_child.3 \
 	@DX_DOCDIR@/man/man3/topo_get_cpuset_covering_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_get_cpuset_objs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_depth_nbobjs.3 \

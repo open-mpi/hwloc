@@ -241,12 +241,49 @@ topo_get_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
 
 
 
-/** \defgroup topology_helper_find_above Find Objects Above a CPU set
+/** \defgroup topology_helper_find_covering Find an Object covering a CPU set
  * @{
  */
 
-/** \brief Get the lowest object covering at least the given cpuset \p set */
-extern topo_obj_t topo_get_cpuset_covering_obj (topo_topology_t topology, const topo_cpuset_t *set);
+/** \brief Get the child covering entirely CPU set \p set. */
+static inline topo_obj_t
+topo_get_cpuset_covering_child (topo_topology_t topology, const topo_cpuset_t *set,
+				topo_obj_t father)
+{
+  topo_obj_t child = father->first_child;
+  while (child) {
+    if (topo_cpuset_isincluded(set, &child->cpuset))
+      return child;
+    child = child->next_sibling;
+  }
+  return NULL;
+}
+
+/** \brief Get the lowest object covering at least CPU set \p set */
+static inline topo_obj_t
+topo_get_cpuset_covering_obj (topo_topology_t topology, const topo_cpuset_t *set)
+{
+  struct topo_obj *current = topo_get_system_obj(topology);
+
+  if (!topo_cpuset_isincluded(set, &current->cpuset))
+    return NULL;
+
+  while (1) {
+    topo_obj_t child = topo_get_cpuset_covering_child(topology, set, current);
+    if (!child)
+      return current;
+    current = child;
+  }
+}
+
+
+/** @} */
+
+
+
+/** \defgroup topology_helper_find_above Find a set Objects Above a CPU set
+ * @{
+ */
 
 /** \brief Iterate through objects above CPU set \p set
  *
