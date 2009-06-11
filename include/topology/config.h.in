@@ -18,11 +18,7 @@
 
 #define TOPO_CACHE_LEVEL_MAX 3
 
-#if ULONG_MAX == UINT8_MAX
-#define TOPO_BITS_PER_LONG 8
-#elif ULONG_MAX == UINT16_MAX
-#define TOPO_BITS_PER_LONG 16
-#elif ULONG_MAX == UINT32_MAX
+#if ULONG_MAX == UINT32_MAX
 #define TOPO_BITS_PER_LONG 32
 #elif ULONG_MAX == UINT64_MAX
 #define TOPO_BITS_PER_LONG 64
@@ -30,9 +26,7 @@
 #error "unknown size for unsigned long."
 #endif
 
-#if UINT_MAX == UINT8_MAX
-#define TOPO_BITS_PER_INT 8
-#elif UINT_MAX == UINT16_MAX
+#if UINT_MAX == UINT16_MAX
 #define TOPO_BITS_PER_INT 16
 #elif UINT_MAX == UINT32_MAX
 #define TOPO_BITS_PER_INT 32
