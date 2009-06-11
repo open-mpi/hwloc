@@ -98,7 +98,7 @@ main (int argc, char *argv[])
   assert(topo_obj_is_in_subtree(closest[found-1], ancestor));
   assert(ancestor == topo_get_system_obj(topology));
   printf("ancestor type %u depth %u number %u is system level\n",
-	 ancestor->type, ancestor->level, ancestor->logical_index);
+	 ancestor->type, ancestor->depth, ancestor->logical_index);
 
   free(closest);
   topo_topology_destroy (topology);

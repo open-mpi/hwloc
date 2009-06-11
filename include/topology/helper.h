@@ -142,7 +142,7 @@ topo_get_next_obj_by_depth (topo_topology_t topology, unsigned depth, topo_obj_t
 {
   if (!prev)
     return topo_get_obj (topology, depth, 0);
-  if (prev->level != depth)
+  if (prev->depth != depth)
     return NULL;
   return prev->next_cousin;
 }
@@ -181,9 +181,9 @@ topo_get_next_child (topo_topology_t topology, topo_obj_t father, topo_obj_t pre
 static __inline__ topo_obj_t
 topo_get_common_ancestor_obj (topo_obj_t obj1, topo_obj_t obj2)
 {
-  while (obj1->level > obj2->level)
+  while (obj1->depth > obj2->depth)
     obj1 = obj1->father;
-  while (obj2->level > obj1->level)
+  while (obj2->depth > obj1->depth)
     obj2 = obj2->father;
   while (obj1 != obj2) {
     obj1 = obj1->father;

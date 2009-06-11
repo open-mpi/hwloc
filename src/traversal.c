@@ -76,8 +76,8 @@ int topo_get_closest_objs (struct topo_topology *topology, struct topo_obj *src,
   int i,src_nbobjects;
   int stored = 0;
 
-  src_nbobjects = topology->level_nbobjects[src->level];
-  src_objs = topology->levels[src->level];
+  src_nbobjects = topology->level_nbobjects[src->depth];
+  src_objs = topology->levels[src->depth];
 
   parent = src;
   while (stored < max) {

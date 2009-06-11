@@ -144,7 +144,6 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/sibling_rank.3 \
 	@DX_DOCDIR@/man/man3/is_fake.3 \
 	@DX_DOCDIR@/man/man3/last_child.3 \
-	@DX_DOCDIR@/man/man3/level.3 \
 	@DX_DOCDIR@/man/man3/machine.3 \
 	@DX_DOCDIR@/man/man3/memory_kB.3 \
 	@DX_DOCDIR@/man/man3/misc.3 \

@@ -162,7 +162,7 @@ struct topo_obj {
   } attr;				  /**< \brief Object type-specific attributes */
 
   /* global position */
-  unsigned level;			/**< \brief Vertical index in the hierarchy */
+  unsigned depth;			/**< \brief Vertical index in the hierarchy */
   unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects */
 
   /* father */
