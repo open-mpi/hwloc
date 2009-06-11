@@ -58,7 +58,7 @@ Support
 Binding
 =======
 * Add the topology parameter to be able to distinguish a cpuset with all cpus
-  (-> unbind), and distinguish between simple linux and kerrighed.
+  (-> unbind), and distinguish between simple linux, kerrighed, fake, ....
 
 * topo_set_cpubind(pid, ...) which type for pid? POSIX says that pid_t is a
   signed integer type
