@@ -375,7 +375,7 @@ topo_get_next_obj_above_cpuset(topo_topology_t topology, const topo_cpuset_t *se
 
 /** \brief Get the first cache covering a cpuset \p set
  *
- * \return \c NULL if not cache matches
+ * \return \c NULL if no cache matches
  */
 static __inline__ topo_obj_t
 topo_get_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *set)
@@ -391,7 +391,7 @@ topo_get_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *s
 
 /** \brief Get the first cache shared between an object and somebody else
  *
- * \return \c NULL if not cache matches
+ * \return \c NULL if no cache matches
  */
 static __inline__ topo_obj_t
 topo_get_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
