@@ -58,6 +58,13 @@ _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *,
 static int
 topo_linux_set_cpubind(const topo_cpuset_t *topo_set)
 {
+
+  /* TODO Kerrighed: Use
+   * int migrate (pid_t pid, int destination_node);
+   * int migrate_self (int destination_node);
+   * int thread_migrate (int thread_id, int destination_node);
+   */
+
 #ifdef CPU_SET
   cpu_set_t linux_set;
   unsigned cpu;
