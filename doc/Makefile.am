@@ -175,6 +175,7 @@ EXTRA_DIST = $(DX_CONFIG) \
 	@DX_DOCDIR@/man/man3/dmi_board_vendor.3 \
 	@DX_DOCDIR@/man/man3/father.3 \
 	@DX_DOCDIR@/man/man3/first_child.3 \
+	@DX_DOCDIR@/man/man3/helper.h.3 \
 	@DX_DOCDIR@/man/man3/huge_page_free.3 \
 	@DX_DOCDIR@/man/man3/huge_page_size_kB.3 \
 	@DX_DOCDIR@/man/man3/index.3 \
@@ -245,6 +246,7 @@ endif
 pkginclude_HEADERS = \
 	$(srcdir)/topology.doc \
 	$(top_srcdir)/include/topology.h \
+	$(top_srcdir)/include/topology/helper.h \
 	$(top_srcdir)/include/topology/cpuset.h
 
 #

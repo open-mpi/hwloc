@@ -1,10 +1,6 @@
 API
 
-Split API into two levels?
-- low-level API with sort of Turing power
-- high-level API that give examples how use the low-level API. Could be only
-  static inlines.
-
+* anchor/ref between topology.h and cpuset/helper.h
 
 * clarify the API to obtain the number of nodes, procs, cores, ...
 
