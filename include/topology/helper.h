@@ -102,7 +102,11 @@ topo_get_type_or_above_depth (topo_topology_t topology, enum topo_obj_type_e typ
   abort();
 }
 
-/** \brief Returns the width of level type \p type */
+/** \brief Returns the width of level type \p type
+ *
+ * If no object for that type exists, 0 is returned.
+ * If there are several levels with objects of that type, -1 is returned.
+ */
 static __inline__ unsigned
 topo_get_type_nbobjs (topo_topology_t topology, enum topo_obj_type_e type)
 {
@@ -277,7 +281,10 @@ topo_get_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
  * @{
  */
 
-/** \brief Get the child covering at least CPU set \p set. */
+/** \brief Get the child covering at least CPU set \p set.
+ *
+ * \return \c NULL if no child matches.
+ */
 static inline topo_obj_t
 topo_get_cpuset_covering_child (topo_topology_t topology, const topo_cpuset_t *set,
 				topo_obj_t father)
@@ -291,7 +298,10 @@ topo_get_cpuset_covering_child (topo_topology_t topology, const topo_cpuset_t *s
   return NULL;
 }
 
-/** \brief Get the lowest object covering at least CPU set \p set */
+/** \brief Get the lowest object covering at least CPU set \p set
+ *
+ * \return \c NULL if no object matches.
+ */
 static inline topo_obj_t
 topo_get_cpuset_covering_obj (topo_topology_t topology, const topo_cpuset_t *set)
 {
@@ -363,7 +373,10 @@ topo_get_next_obj_above_cpuset(topo_topology_t topology, const topo_cpuset_t *se
  * @{
  */
 
-/** \brief Get the first cache covering a cpuset \p set */
+/** \brief Get the first cache covering a cpuset \p set
+ *
+ * \return \c NULL if not cache matches
+ */
 static __inline__ topo_obj_t
 topo_get_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *set)
 {
@@ -376,7 +389,10 @@ topo_get_cpuset_covering_cache (topo_topology_t topology, const topo_cpuset_t *s
   return NULL;
 }
 
-/** \brief Get the first cache shared between an object and somebody else */
+/** \brief Get the first cache shared between an object and somebody else
+ *
+ * \return \c NULL if not cache matches
+ */
 static __inline__ topo_obj_t
 topo_get_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
 {
@@ -398,7 +414,10 @@ topo_get_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
  * @{
  */
 
-/** \brief Get the set of highest objects covering exactly a given cpuset \p set */
+/** \brief Get the set of highest objects covering exactly a given cpuset \p set
+ *
+ * \return the number of objects returned in \p objs.
+ */
 extern int topo_get_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *set,
 				 topo_obj_t * __topo_restrict objs, int max);
 
@@ -407,9 +426,9 @@ extern int topo_get_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *
  *  all objects that are at the same depth than \p src.
  *  Report in \p objs up to \p max physically closest ones to \p src.
  *
- *  \return the actual number of objects that were found.
+ *  \return the number of objects returned in \p objs.
  */
-/* TODO: rather provide an iterator? Provide a way to know how much should be allocated? */
+/* TODO: rather provide an iterator? Provide a way to know how much should be allocated? By returning the total number of objects instead? */
 extern int topo_get_closest_objs (topo_topology_t topology, topo_obj_t src, topo_obj_t * __topo_restrict objs, int max);
 
 /** @} */
