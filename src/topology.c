@@ -514,7 +514,7 @@ topo_connect(topo_obj_t father)
        child;
        n++,   prev_child = child, child = child->next_sibling) {
     child->father = father;
-    child->index = n;
+    child->sibling_rank = n;
     child->prev_sibling = prev_child;
   }
   father->last_child = prev_child;
@@ -777,7 +777,7 @@ topo_topology_setup_defaults(struct topo_topology *topology)
   system_obj = topo_alloc_setup_object(TOPO_OBJ_SYSTEM, 0);
   system_obj->level = 0;
   system_obj->number = 0;
-  system_obj->index = 0;
+  system_obj->sibling_rank = 0;
   system_obj->attr.system.memory_kB = 0;
   system_obj->attr.system.huge_page_free = 0;
   topo_cpuset_fill(&system_obj->cpuset);
@@ -1016,18 +1016,18 @@ topo__check_children(struct topo_topology *topology, struct topo_obj *father)
   }
 
   /* first child specific checks */
-  assert(father->first_child->index == 0);
+  assert(father->first_child->sibling_rank == 0);
   assert(father->first_child == father->children[0]);
   assert(father->first_child->prev_sibling == NULL);
 
   /* last child specific checks */
-  assert(father->last_child->index == father->arity-1);
+  assert(father->last_child->sibling_rank == father->arity-1);
   assert(father->last_child == father->children[father->arity-1]);
   assert(father->last_child->next_sibling == NULL);
 
   /* checks for all children */
   for(j=1; j<father->arity; j++) {
-    assert(father->children[j]->index == j);
+    assert(father->children[j]->sibling_rank == j);
     assert(father->children[j-1]->next_sibling == father->children[j]);
     assert(father->children[j]->prev_sibling == father->children[j-1]);
     assert(father->children[j-1]->next_cousin == father->children[j]);

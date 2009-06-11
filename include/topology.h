@@ -167,7 +167,7 @@ struct topo_obj {
 
   /* father */
   struct topo_obj *father;		/**< \brief Father, \c NULL if root (system object) */
-  unsigned index;			/**< \brief Index in father's \c children[] array */
+  unsigned sibling_rank;		/**< \brief Index in father's \c children[] array */
   struct topo_obj *next_sibling;	/**< \brief Next object below the same father*/
   struct topo_obj *prev_sibling;	/**< \brief Previous object below the same father */
 
