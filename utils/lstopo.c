@@ -143,6 +143,8 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	xmlpath = argv[2]; opt = 1;
+	if (!strcmp(xmlpath, "-"))
+	  xmlpath = "/dev/stdin";
 #endif /* HAVE_XML */
       } else {
 	if (filename) {
