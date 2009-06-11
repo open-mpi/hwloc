@@ -182,7 +182,7 @@ struct topo_obj {
   struct topo_obj *prev_cousin;		/**< \brief Previous object of same type */
 
   /* misc */
-  void *userdata;			/**< \brief Application-given private data pointer, initialize to \c NULL, use it as you wish */
+  void *userdata;			/**< \brief Application-given private data pointer, initialized to \c NULL, use it as you wish */
 
   /* cpuset */
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this object */
