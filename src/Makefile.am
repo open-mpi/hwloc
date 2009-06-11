@@ -8,7 +8,7 @@ lib_LTLIBRARIES = libtopology.la
 
 EXTRA_DIST =
 
-libtopology_la_SOURCES = topology.c allocator.c traversal.c topology-synthetic.c topology-xml.c bind.c
+libtopology_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c bind.c
 libtopology_la_LDFLAGS = -version-number $(TOPO_SOVERSION) $(XML_LIBS)
 
 if HAVE_GCC

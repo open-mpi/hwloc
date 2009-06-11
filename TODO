@@ -38,9 +38,6 @@ Support
   + split for real, just explain how to split?
     - just return an ordered array?
 
-* use topology_allocator for real, including in strdup
-  + add topo_set_allocator() to be called before _init()
-
 * move dmi_* to a machine object?
 
 * lstopo-nox
