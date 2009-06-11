@@ -156,19 +156,15 @@ topo_obj_is_in_subtree (topo_obj_t obj, topo_obj_t subtree_root)
 
 
 
-/** \defgroup topology_helper_find_below Finding Objects Below a CPU set
+/** \defgroup topology_helper_find_includeds Finding similar Objects Included in a CPU set
  * @{
  */
 
-/** \brief Get objects covering exactly a given cpuset \p set */
-extern int topo_get_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *set,
-				 topo_obj_t * __topo_restrict objs, int max);
-
-/** \brief Return the next object at depth \p depth below CPU set \p set.
+/** \brief Return the next object at depth \p depth included in CPU set \p set.
  *
- * If \p prev is \c NULL, return the first object at depth \p depth below \p cpuset.
+ * If \p prev is \c NULL, return the first object at depth \p depth included in \p set.
  * The next invokation should pass the previous return value in \p prev so as
- * to obtain the next object below \p set.
+ * to obtain the next object in \p set.
  */
 static __inline__ topo_obj_t
 topo_get_next_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
@@ -183,12 +179,12 @@ topo_get_next_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cp
     next = topo_get_obj (topology, depth, 0);
   }
 
-  while (next && !topo_cpuset_intersects(set, &next->cpuset))
+  while (next && !topo_cpuset_isincluded(&next->cpuset, set))
     next = next->next_cousin;
   return next;
 }
 
-/** \brief Return the next object of type \p type below CPU set \p set.
+/** \brief Return the next object of type \p type included in CPU set \p set.
  *
  * If there are multiple or no depth for given type, return \c NULL and let the caller
  * fallback to topo_get_next_obj_below_cpuset_by_depth().
@@ -203,7 +199,7 @@ topo_get_next_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *s
   return topo_get_next_obj_below_cpuset_by_depth(topology, set, depth, prev);
 }
 
-/** \brief Return the \p index -th object at depth \p depth below CPU set \p set.
+/** \brief Return the \p index -th object at depth \p depth included in CPU set \p set.
  */
 static __inline__ topo_obj_t
 topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
@@ -222,7 +218,7 @@ topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_
   return NULL;
 }
 
-/** \brief Return the \p index -th object of type \p type below CPU set \p set.
+/** \brief Return the \p index -th object of type \p type included in CPU set \p set.
  *
  * If there are multiple or no depth for given type, return \c NULL and let the caller
  * fallback to topo_get_obj_below_cpuset_by_depth().
@@ -241,11 +237,11 @@ topo_get_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
 
 
 
-/** \defgroup topology_helper_find_covering Find an Object covering a CPU set
+/** \defgroup topology_helper_find_covering Finding a single Object covering at least CPU set
  * @{
  */
 
-/** \brief Get the child covering entirely CPU set \p set. */
+/** \brief Get the child covering at least CPU set \p set. */
 static inline topo_obj_t
 topo_get_cpuset_covering_child (topo_topology_t topology, const topo_cpuset_t *set,
 				topo_obj_t father)
@@ -281,16 +277,16 @@ topo_get_cpuset_covering_obj (topo_topology_t topology, const topo_cpuset_t *set
 
 
 
-/** \defgroup topology_helper_find_above Find a set Objects Above a CPU set
+/** \defgroup topology_helper_find_coverings Finding a set of similar Objects covering at least a CPU set
  * @{
  */
 
-/** \brief Iterate through objects above CPU set \p set
+/** \brief Iterate through same-depth objects covering at least CPU set \p set
  *
  * If object \p prev is \c NULL, return the first object at depth \p depth
- * covering part of CPU set \p set.
+ * covering at least part of CPU set \p set.
  * The next invokation should pass the previous return value in \p prev so as
- * to obtain the next object covering another part of \p set.
+ * to obtain the next object covering at least another part of \p set.
  */
 static __inline__ topo_obj_t
 topo_get_next_obj_above_cpuset_by_depth(topo_topology_t topology, const topo_cpuset_t *set,
@@ -310,12 +306,12 @@ topo_get_next_obj_above_cpuset_by_depth(topo_topology_t topology, const topo_cpu
   return next;
 }
 
-/** \brief Iterate through same-type objects covering CPU set \p set
+/** \brief Iterate through same-type objects covering at least CPU set \p set
  *
  * If object \p prev is \c NULL, return the first object of type \p type
- * covering part of CPU set \p set.
+ * covering at least part of CPU set \p set.
  * The next invokation should pass the previous return value in \p prev so as
- * to obtain the next object of type \p type covering another part of \p set.
+ * to obtain the next object of type \p type covering at least another part of \p set.
  *
  * If there are no or multiple depths for type \p type, \c NULL is returned.
  * The caller may fallback to topo_get_next_obj_above_cpuset_by_depth()
@@ -373,6 +369,10 @@ topo_get_shared_cache_above (topo_topology_t topology, topo_obj_t obj)
 /** \defgroup topology_helper_traversal Advanced Traversal Helpers
  * @{
  */
+
+/** \brief Get the set of highest objects covering exactly a given cpuset \p set */
+extern int topo_get_cpuset_objs (topo_topology_t topology, const topo_cpuset_t *set,
+				 topo_obj_t * __topo_restrict objs, int max);
 
 /** \brief Do a depth-first traversal of the topology to find and sort
  *
