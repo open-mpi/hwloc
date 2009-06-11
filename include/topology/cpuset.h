@@ -182,14 +182,12 @@ topo_cpuset_from_string(const char * __topo_restrict string, topo_cpuset_t * __t
 
   /* move subsets back to the beginning and clear the missing subsets */
   for (i = 0; i < count; i++) {
-#if TOPO_BITS_PER_LONG == TOPO_CPUSET_SUBSTRING_SIZE
-    set->s[i] = set->s[TOPO_CPUSUBSET_COUNT-count+i];
-#else
     set->s[i] = accum;
     set->s[i] |= set->s[TOPO_CPUSUBSET_COUNT-count+i] << accumed;
-    accum = set->s[TOPO_CPUSUBSET_COUNT-count+i] >> accumed;
-#endif
+    if (accumed)
+      accum = set->s[TOPO_CPUSUBSET_COUNT-count+i] >> (TOPO_BITS_PER_LONG - accumed);
   }
+  /* Remaining bit from last iteration */
   if (accumed && count < TOPO_CPUSUBSET_COUNT)
     set->s[i++] = accum;
   for( ; i<TOPO_CPUSUBSET_COUNT; i++)
