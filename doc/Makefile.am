@@ -290,8 +290,10 @@ doc: $(top_srcdir)/README
 $(top_srcdir)/README: @DX_DOCDIR@/libtopology.tag
 	LC_ALL=C $(W3M) @DX_DOCDIR@/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
 
+DOCUPLOADHOST=sync.bordeaux.inria.fr
+DOCUPLOADOPTS=
 doc-upload: @DX_DOCDIR@/libtopology.tag
-	scp @DX_DOCDIR@/html/* sync.bordeaux.inria.fr:/web/runtime/libtopology/
+	rsync -avz --delete --chmod=ug+rwX,o+rX $(DOCUPLOADOPTS) @DX_DOCDIR@/html/ $(DOCUPLOADHOST):/web/runtime/libtopology2/doc/
 endif
 endif
 endif
