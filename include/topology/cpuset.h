@@ -76,7 +76,7 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
  *
  * Fewer characters may be needed if part of the CPU set is empty.
  */
-#define TOPO_CPUSET_STRING_LENGTH		(TOPO_CPUSUBSET_COUNT*(TOPO_CPUSUBSET_STRING_LENGTH+1))
+#define TOPO_CPUSET_STRING_LENGTH		(TOPO_CPUSET_SUBSTRING_COUNT*(TOPO_CPUSET_SUBSTRING_LENGTH+1))
 /** \brief Printf format for printing a CPU set */
 #define TOPO_PRIxCPUSET		"s"
 
@@ -93,11 +93,19 @@ topo_cpuset_snprintf(char * __topo_restrict buf, size_t buflen, const topo_cpuse
   char *tmp = buf;
   int res;
   int i;
+  unsigned long accum;
+  int accumed = 0;
+#if TOPO_BITS_PER_LONG == TOPO_CPUSET_SUBSTRING_SIZE
+  const unsigned long accum_mask = ~0UL;
+#else /* TOPO_BITS_PER_LONG != TOPO_CPUSET_SUBSTRING_SIZE */
+  const unsigned long accum_mask = ((1UL << TOPO_CPUSET_SUBSTRING_SIZE) - 1) << (TOPO_BITS_PER_LONG - TOPO_CPUSET_SUBSTRING_SIZE);
+#endif /* TOPO_BITS_PER_LONG != TOPO_CPUSET_SUBSTRING_SIZE */
 
   /* mark the end in case we do nothing later */
   *tmp = '\0';
 
-  for(i=TOPO_CPUSUBSET_COUNT-1; i>=0; i--) {
+  i=TOPO_CPUSUBSET_COUNT-1;
+  while (i>=0 || accumed) {
     /* add a comma first, if we already wrote something  */
     if (tmp != buf) {
       res = snprintf(tmp, size, ",");
@@ -106,14 +114,22 @@ topo_cpuset_snprintf(char * __topo_restrict buf, size_t buflen, const topo_cpuse
 	break;
     }
 
-    if (set->s[i] != 0)
+    /* Refill accumulator */
+    if (!accumed) {
+      accum = set->s[i--];
+      accumed = TOPO_BITS_PER_LONG;
+    }
+
+    if (accum & accum_mask) {
       /* print the whole subset if not empty */
-      res = snprintf(tmp, size, TOPO_PRIxCPUSUBSET, set->s[i]);
-    else if (i == 0)
+      res = snprintf(tmp, size, TOPO_PRIxCPUSUBSET, (accum & accum_mask) >> (TOPO_BITS_PER_LONG - TOPO_CPUSET_SUBSTRING_SIZE));
+    } else if (i == -1 && accumed == TOPO_CPUSET_SUBSTRING_SIZE)
       /* print a single 0 to mark the last subset */
       res = snprintf(tmp, size, "0");
     else
       res = 0;
+    accum <<= TOPO_CPUSET_SUBSTRING_SIZE;
+    accumed -= TOPO_CPUSET_SUBSTRING_SIZE;
 
     tmp += res; size -= res;
     if (size <= 1) /* need room for ending \0 */
@@ -132,14 +148,22 @@ topo_cpuset_from_string(const char * __topo_restrict string, topo_cpuset_t * __t
 {
   char * current = (char *) string;
   int count=0, i;
+  unsigned long accum = 0;
+  int accumed = 0;
 
   while (*current != '\0') {
     unsigned long val;
     char *next;
     val = strtoul(current, &next, 16);
     /* store subset in order, starting from the end */
-    set->s[TOPO_CPUSUBSET_COUNT-1-count] = val;
-    count++;
+    accum = (accum << TOPO_CPUSET_SUBSTRING_SIZE) | val;
+    accumed += TOPO_CPUSET_SUBSTRING_SIZE;
+    if (accumed == TOPO_BITS_PER_LONG) {
+      set->s[TOPO_CPUSUBSET_COUNT-1-count] = accum;
+      count++;
+      accum = 0;
+      accumed = 0;
+    }
     if (*next != ',')
       break;
     current = next+1;
@@ -148,8 +172,14 @@ topo_cpuset_from_string(const char * __topo_restrict string, topo_cpuset_t * __t
   }
 
   /* move subsets back to the beginning and clear the missing subsets */
-  memmove(&set->s[0], &set->s[TOPO_CPUSUBSET_COUNT-count], count*sizeof(set->s[0]));
-  for(i=count; i<TOPO_CPUSUBSET_COUNT; i++)
+  for (i = 0; i < count; i++) {
+    set->s[i] = accum;
+    set->s[i] |= set->s[TOPO_CPUSUBSET_COUNT-count+i] << accumed;
+    accum = set->s[TOPO_CPUSUBSET_COUNT-count+i] >> accumed;
+  }
+  if (accumed && count < TOPO_CPUSUBSET_COUNT)
+    set->s[i++] = accum;
+  for( ; i<TOPO_CPUSUBSET_COUNT; i++)
     set->s[i] = 0;
 }
 

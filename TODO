@@ -47,10 +47,6 @@ Support
 * lstopo-nox
   + disable xml as well?  It only depends on zlib
 
-* do we want to support ptrsize-independent cpuset-strings?
-  e.g. reading a 32bits XML output on a 64bits will fail
-  + add a cpusubset_size in the XML output and abort if != TOPO_BITS_PER_LONG?
-
 Binding
 =======
 * Add the topology parameter to be able to distinguish a cpuset with all cpus
