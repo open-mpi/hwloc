@@ -93,7 +93,7 @@ topo_cpuset_snprintf(char * __topo_restrict buf, size_t buflen, const topo_cpuse
   char *tmp = buf;
   int res;
   int i;
-  unsigned long accum;
+  unsigned long accum = 0;
   int accumed = 0;
 #if TOPO_BITS_PER_LONG == TOPO_CPUSET_SUBSTRING_SIZE
   const unsigned long accum_mask = ~0UL;
