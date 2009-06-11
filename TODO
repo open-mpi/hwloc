@@ -1,7 +1,5 @@
 API
 
-* anchor/ref between topology.h and cpuset/helper.h
-
 * clarify the API to obtain the number of nodes, procs, cores, ...
 
 * iterate through caches above an object?
