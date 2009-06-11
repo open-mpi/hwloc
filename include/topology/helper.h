@@ -129,6 +129,50 @@ topo_get_system_obj (topo_topology_t topology)
   return topo_get_obj(topology, 0, 0);
 }
 
+/** \brief Returns the next object at depth \p depth.
+ *
+ * If \p prev is \c NULL, return the first object at depth \p depth.
+ */
+static __inline__ topo_obj_t
+topo_get_next_obj_by_depth (topo_topology_t topology, unsigned depth, topo_obj_t prev)
+{
+  if (!prev)
+    return topo_get_obj (topology, depth, 0);
+  if (prev->level != depth)
+    return NULL;
+  return prev->next_cousin;
+}
+
+/** \brief Returns the next object of type \p type.
+ *
+ * If \p prev is \c NULL, return the first object at type \p type.
+ * If there are multiple or no depth for given type, return \c NULL and let the caller
+ * fallback to topo_get_next_obj_by_depth().
+ */
+static __inline__ topo_obj_t
+topo_get_next_obj (topo_topology_t topology, enum topo_obj_type_e type,
+		   topo_obj_t prev)
+{
+  unsigned depth = topo_get_type_depth(topology, type);
+  if (depth == TOPO_TYPE_DEPTH_UNKNOWN || depth == TOPO_TYPE_DEPTH_MULTIPLE)
+    return NULL;
+  return topo_get_next_obj_by_depth (topology, depth, prev);
+}
+
+/** \brief Return the next child.
+ *
+ * If \p prev is \c NULL, return the first child.
+ */
+static __inline__ topo_obj_t
+topo_get_next_child (topo_topology_t topology, topo_obj_t father, topo_obj_t prev)
+{
+  if (!prev)
+    return father->first_child;
+  if (prev->father != father)
+    return NULL;
+  return prev->next_sibling;
+}
+
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
 static __inline__ topo_obj_t
 topo_get_common_ancestor_obj (topo_obj_t obj1, topo_obj_t obj2)
@@ -170,15 +214,7 @@ static __inline__ topo_obj_t
 topo_get_next_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
 					 unsigned depth, topo_obj_t prev)
 {
-  topo_obj_t next;
-  if (prev) {
-    if (prev->level != depth)
-      return NULL;
-    next = prev->next_cousin;
-  } else {
-    next = topo_get_obj (topology, depth, 0);
-  }
-
+  topo_obj_t next = topo_get_next_obj_by_depth(topology, depth, prev);
   while (next && !topo_cpuset_isincluded(&next->cpuset, set))
     next = next->next_cousin;
   return next;
@@ -292,15 +328,7 @@ static __inline__ topo_obj_t
 topo_get_next_obj_above_cpuset_by_depth(topo_topology_t topology, const topo_cpuset_t *set,
 					unsigned depth, topo_obj_t prev)
 {
-  topo_obj_t next;
-  if (prev) {
-    if (prev->level != depth)
-      return NULL;
-    next = prev->next_cousin;
-  } else {
-    next = topo_get_obj (topology, depth, 0);
-  }
-
+  topo_obj_t next = topo_get_next_obj_by_depth(topology, depth, prev);
   while (next && !topo_cpuset_intersects(set, &next->cpuset))
     next = next->next_cousin;
   return next;

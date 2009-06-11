@@ -73,6 +73,9 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_get_cpuset_objs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_depth_nbobjs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_depth_type.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_child.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_obj.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_obj_by_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset.3 \
 	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset_by_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset_by_depth.3 \
