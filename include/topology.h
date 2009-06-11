@@ -163,7 +163,10 @@ struct topo_obj {
 
   /* global position */
   unsigned depth;			/**< \brief Vertical index in the hierarchy */
-  unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects */
+  unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects,
+					 * could be a "cousin_rank" since it's the rank within the "cousin" list below */
+  struct topo_obj *next_cousin;		/**< \brief Next object of same type */
+  struct topo_obj *prev_cousin;		/**< \brief Previous object of same type */
 
   /* father */
   struct topo_obj *father;		/**< \brief Father, \c NULL if root (system object) */
@@ -176,10 +179,6 @@ struct topo_obj {
   struct topo_obj **children;		/**< \brief Children, \c children[0 .. arity -1] */
   struct topo_obj *first_child;		/**< \brief First child */
   struct topo_obj *last_child;		/**< \brief Last child */
-
-  /* cousins */
-  struct topo_obj *next_cousin;		/**< \brief Next object of same type */
-  struct topo_obj *prev_cousin;		/**< \brief Previous object of same type */
 
   /* misc */
   void *userdata;			/**< \brief Application-given private data pointer, initialized to \c NULL, use it as you wish */
