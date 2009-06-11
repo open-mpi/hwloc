@@ -53,8 +53,8 @@ output_topology (topo_topology_t topology, topo_obj_t obj, xmlNodePtr root_node,
    * of root_node node. */
   node = xmlNewChild(root_node, NULL, BAD_CAST "object", NULL);
   xmlNewProp(node, BAD_CAST "type", BAD_CAST topo_obj_type_string(obj->type));
-  sprintf(tmp, "%d", obj->physical_index);
-  xmlNewProp(node, BAD_CAST "physical_index", BAD_CAST tmp);
+  sprintf(tmp, "%d", obj->os_index);
+  xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
   topo_cpuset_snprintf(cpuset, sizeof(cpuset), &obj->cpuset);
   xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
 

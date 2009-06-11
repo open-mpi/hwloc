@@ -164,7 +164,7 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
   /* Do not separate objects when in L1 (SMT) */
   RECURSE(level, &null_draw_methods, level->attr.cache.depth > 1 ? UNIT : 0);
 
-  if (level->physical_index == -1)
+  if (level->os_index == -1)
     textwidth = 7*FONT_SIZE;
   else
     textwidth = 9*FONT_SIZE;

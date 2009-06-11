@@ -290,7 +290,7 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
     switch (topo_obj_cmp(obj, child)) {
       case TOPO_OBJ_EQUAL:
 	assert(topo_cpuset_isequal(&obj->cpuset, &child->cpuset));
-	assert(obj->physical_index == child->physical_index);
+	assert(obj->os_index == child->os_index);
 	switch(obj->type) {
 	  case TOPO_OBJ_NODE:
 	    // Do not check these, it may change between calls

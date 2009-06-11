@@ -5,7 +5,7 @@
 
 <!ELEMENT object (object +)>
 <!ATTLIST object type (System | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
-<!ATTLIST object physical_index CDATA #REQUIRED >
+<!ATTLIST object os_index CDATA #REQUIRED >
 <!ATTLIST object cpuset CDATA #REQUIRED >
 <!ATTLIST object system_memory_kB CDATA #REQUIRED >
 <!ATTLIST object system_huge_page_free CDATA #REQUIRED >

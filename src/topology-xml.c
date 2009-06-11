@@ -101,8 +101,8 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
       fprintf(stderr, "ignoring unknown object type %s\n", value);
   }
 
-  else if (!strcmp(name, "physical_index"))
-    obj->physical_index = strtoul(value, NULL, 10);
+  else if (!strcmp(name, "os_index"))
+    obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cpuset"))
     topo_cpuset_from_string(value, &obj->cpuset);
   else if (!strcmp(name, "cache_memory_kB"))

@@ -138,7 +138,7 @@ topo_obj_type_t topo_get_obj_order_type(int order);
 struct topo_obj {
   /* physical information */
   enum topo_obj_type_e type;		/**< \brief Type of object */
-  signed physical_index;		/**< \brief OS-provided physical index number */
+  signed os_index;		/**< \brief OS-provided physical index number */
 
   /** \brief Object-specific Attributes */
   union topo_obj_attr_u {
