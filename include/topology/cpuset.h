@@ -83,7 +83,7 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
 /** \brief Stringify a cpuset.
  *
  * Up to \p buflen characters may be written in buffer \p buf.
- * 
+ *
  * \return the number of character that were actually written (not including the ending \\0).
  */
 static __inline__ int
@@ -182,9 +182,13 @@ topo_cpuset_from_string(const char * __topo_restrict string, topo_cpuset_t * __t
 
   /* move subsets back to the beginning and clear the missing subsets */
   for (i = 0; i < count; i++) {
+#if TOPO_BITS_PER_LONG == TOPO_CPUSET_SUBSTRING_SIZE
+    set->s[i] = set->s[TOPO_CPUSUBSET_COUNT-count+i];
+#else
     set->s[i] = accum;
     set->s[i] |= set->s[TOPO_CPUSUBSET_COUNT-count+i] << accumed;
     accum = set->s[TOPO_CPUSUBSET_COUNT-count+i] >> accumed;
+#endif
   }
   if (accumed && count < TOPO_CPUSUBSET_COUNT)
     set->s[i++] = accum;
