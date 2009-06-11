@@ -714,7 +714,7 @@ topo_discover(struct topo_topology *topology)
     /* Ok, put numbers in the level.  */
     for (i = 0; i < n_taken_objs; i++) {
       taken_objs[i]->level = topology->nb_levels;
-      taken_objs[i]->number = i;
+      taken_objs[i]->logical_index = i;
       if (i) {
 	taken_objs[i]->prev_cousin = taken_objs[i-1];
 	taken_objs[i-1]->next_cousin = taken_objs[i];
@@ -776,7 +776,7 @@ topo_topology_setup_defaults(struct topo_topology *topology)
   /* Create the actual System object */
   system_obj = topo_alloc_setup_object(TOPO_OBJ_SYSTEM, 0);
   system_obj->level = 0;
-  system_obj->number = 0;
+  system_obj->logical_index = 0;
   system_obj->sibling_rank = 0;
   system_obj->attr.system.memory_kB = 0;
   system_obj->attr.system.huge_page_free = 0;
@@ -1068,7 +1068,7 @@ topo_topology_check(struct topo_topology *topology)
       obj = topo_get_obj(topology, i, j);
       assert(obj);
       assert(obj->level == i);
-      assert(obj->number == j);
+      assert(obj->logical_index == j);
       if (prev) {
 	assert(topo_type_cmp(obj, prev) == TOPO_TYPE_EQUAL);
 	assert(prev->next_cousin == obj);

@@ -151,7 +151,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/next_cousin.3 \
 	@DX_DOCDIR@/man/man3/next_sibling.3 \
 	@DX_DOCDIR@/man/man3/node.3 \
-	@DX_DOCDIR@/man/man3/number.3 \
+	@DX_DOCDIR@/man/man3/logical_index.3 \
 	@DX_DOCDIR@/man/man3/physical_index.3 \
 	@DX_DOCDIR@/man/man3/prev_cousin.3 \
 	@DX_DOCDIR@/man/man3/prev_sibling.3 \

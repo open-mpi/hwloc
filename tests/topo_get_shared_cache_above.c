@@ -61,7 +61,7 @@ int main()
   cache = topo_get_shared_cache_above(topology, obj);
   assert(cache);
   assert(cache->type == TOPO_OBJ_CACHE);
-  assert(cache->number == CPUINDEX/2/3);
+  assert(cache->logical_index == CPUINDEX/2/3);
   assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check no shared cache above the L2 cache */
@@ -91,7 +91,7 @@ int main()
   cache = topo_get_shared_cache_above(topology, obj);
   assert(cache);
   assert(cache->type == TOPO_OBJ_CACHE);
-  assert(cache->number == CPUINDEX/2/1);
+  assert(cache->logical_index == CPUINDEX/2/1);
   assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check no shared-cache above the core */

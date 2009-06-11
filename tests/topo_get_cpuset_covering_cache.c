@@ -63,7 +63,7 @@ int main()
   cache = topo_get_cpuset_covering_cache(topology, &set);
   assert(cache);
   assert(cache->type == TOPO_OBJ_CACHE);
-  assert(cache->number == CPUINDEX/2/3);
+  assert(cache->logical_index == CPUINDEX/2/3);
   assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check the cache above two nearby cpus */
@@ -79,8 +79,8 @@ int main()
   cache = topo_get_cpuset_covering_cache(topology, &set);
   assert(cache);
   assert(cache->type == TOPO_OBJ_CACHE);
-  assert(cache->number == CPUINDEX1/2/3);
-  assert(cache->number == CPUINDEX2/2/3);
+  assert(cache->logical_index == CPUINDEX1/2/3);
+  assert(cache->logical_index == CPUINDEX2/2/3);
   assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check no cache above two distant cpus */

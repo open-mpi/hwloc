@@ -163,7 +163,7 @@ struct topo_obj {
 
   /* global position */
   unsigned level;			/**< \brief Vertical index in the hierarchy */
-  unsigned number;			/**< \brief Horizontal index in the whole list of similar objects */
+  unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects */
 
   /* father */
   struct topo_obj *father;		/**< \brief Father, \c NULL if root (system object) */
