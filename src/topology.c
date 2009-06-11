@@ -47,7 +47,6 @@
 #include <topology.h>
 #include <topology/private.h>
 #include <topology/debug.h>
-#include <topology/allocator.h>
 
 #ifdef HAVE_MACH_MACH_INIT_H
 #include <mach/mach_init.h>
@@ -790,7 +789,7 @@ topo_topology_init (struct topo_topology **topologyp)
   struct topo_topology *topology;
   int i;
 
-  topology = topo_default_allocator.allocate (sizeof (struct topo_topology));
+  topology = malloc (sizeof (struct topo_topology));
   if(!topology)
     return -1;
 
@@ -944,7 +943,7 @@ topo_topology_destroy (struct topo_topology *topology)
 {
   topo_topology_clear(topology);
   topo_backend_exit(topology);
-  topo_default_allocator.free(topology);
+  free(topology);
 }
 
 int
