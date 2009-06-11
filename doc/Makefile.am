@@ -5,12 +5,17 @@ include $(top_srcdir)/doxample.am
 
 MOSTLYCLEANFILES =
 CLEANFILES =
+EXTRA_DIST = $(DX_CONFIG) \
+	topology.doc \
+	images/dudley.png \
+	images/emmett.png \
+	images/hagrid.png
 
 #
 # Documentation is already available in release tarballs.
 #
 
-if TOPO_INSTALL_DOC
+if TOPO_INSTALL_MAN
 dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_CPU.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_FULL.3 \
@@ -118,11 +123,45 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topology_objects.3 \
 	@DX_DOCDIR@/man/man3/topology_traversal.3
 
-EXTRA_DIST = $(DX_CONFIG) \
-	topology.doc \
-	images/dudley.png \
-	images/emmett.png \
-	images/hagrid.png \
+EXTRA_DIST += \
+	@DX_DOCDIR@/man/man3/arity.3 \
+	@DX_DOCDIR@/man/man3/attr.3 \
+	@DX_DOCDIR@/man/man3/cache.3 \
+	@DX_DOCDIR@/man/man3/children.3 \
+	@DX_DOCDIR@/man/man3/cpuset.3 \
+	@DX_DOCDIR@/man/man3/cpuset.h.3 \
+	@DX_DOCDIR@/man/man3/depth.3 \
+	@DX_DOCDIR@/man/man3/dmi_board_name.3 \
+	@DX_DOCDIR@/man/man3/dmi_board_vendor.3 \
+	@DX_DOCDIR@/man/man3/father.3 \
+	@DX_DOCDIR@/man/man3/first_child.3 \
+	@DX_DOCDIR@/man/man3/helper.h.3 \
+	@DX_DOCDIR@/man/man3/huge_page_free.3 \
+	@DX_DOCDIR@/man/man3/huge_page_size_kB.3 \
+	@DX_DOCDIR@/man/man3/index.3 \
+	@DX_DOCDIR@/man/man3/is_fake.3 \
+	@DX_DOCDIR@/man/man3/last_child.3 \
+	@DX_DOCDIR@/man/man3/level.3 \
+	@DX_DOCDIR@/man/man3/machine.3 \
+	@DX_DOCDIR@/man/man3/memory_kB.3 \
+	@DX_DOCDIR@/man/man3/misc.3 \
+	@DX_DOCDIR@/man/man3/next_cousin.3 \
+	@DX_DOCDIR@/man/man3/next_sibling.3 \
+	@DX_DOCDIR@/man/man3/node.3 \
+	@DX_DOCDIR@/man/man3/number.3 \
+	@DX_DOCDIR@/man/man3/physical_index.3 \
+	@DX_DOCDIR@/man/man3/prev_cousin.3 \
+	@DX_DOCDIR@/man/man3/prev_sibling.3 \
+	@DX_DOCDIR@/man/man3/s.3 \
+	@DX_DOCDIR@/man/man3/system.3 \
+	@DX_DOCDIR@/man/man3/topology.doc.3 \
+	@DX_DOCDIR@/man/man3/topology.h.3 \
+	@DX_DOCDIR@/man/man3/type.3 \
+	@DX_DOCDIR@/man/man3/userdata.3
+endif
+
+if TOPO_INSTALL_HTML
+EXTRA_DIST += \
 	@DX_DOCDIR@/html/annotated.html \
 	@DX_DOCDIR@/html/classes.html \
 	@DX_DOCDIR@/html/cpuset_8h.html \
@@ -162,51 +201,34 @@ EXTRA_DIST = $(DX_CONFIG) \
 	@DX_DOCDIR@/html/topology_8doc.html \
 	@DX_DOCDIR@/html/topology_8h.html \
 	@DX_DOCDIR@/html/topology_8h_source.html \
-	@DX_DOCDIR@/html/uniontopo__obj_1_1topo__obj__attr__u.html \
-	@DX_DOCDIR@/libtopology.pdf \
-	@DX_DOCDIR@/libtopology.tag \
-	@DX_DOCDIR@/man/man3/arity.3 \
-	@DX_DOCDIR@/man/man3/attr.3 \
-	@DX_DOCDIR@/man/man3/cache.3 \
-	@DX_DOCDIR@/man/man3/children.3 \
-	@DX_DOCDIR@/man/man3/cpuset.3 \
-	@DX_DOCDIR@/man/man3/cpuset.h.3 \
-	@DX_DOCDIR@/man/man3/depth.3 \
-	@DX_DOCDIR@/man/man3/dmi_board_name.3 \
-	@DX_DOCDIR@/man/man3/dmi_board_vendor.3 \
-	@DX_DOCDIR@/man/man3/father.3 \
-	@DX_DOCDIR@/man/man3/first_child.3 \
-	@DX_DOCDIR@/man/man3/helper.h.3 \
-	@DX_DOCDIR@/man/man3/huge_page_free.3 \
-	@DX_DOCDIR@/man/man3/huge_page_size_kB.3 \
-	@DX_DOCDIR@/man/man3/index.3 \
-	@DX_DOCDIR@/man/man3/is_fake.3 \
-	@DX_DOCDIR@/man/man3/last_child.3 \
-	@DX_DOCDIR@/man/man3/level.3 \
-	@DX_DOCDIR@/man/man3/machine.3 \
-	@DX_DOCDIR@/man/man3/memory_kB.3 \
-	@DX_DOCDIR@/man/man3/misc.3 \
-	@DX_DOCDIR@/man/man3/next_cousin.3 \
-	@DX_DOCDIR@/man/man3/next_sibling.3 \
-	@DX_DOCDIR@/man/man3/node.3 \
-	@DX_DOCDIR@/man/man3/number.3 \
-	@DX_DOCDIR@/man/man3/physical_index.3 \
-	@DX_DOCDIR@/man/man3/prev_cousin.3 \
-	@DX_DOCDIR@/man/man3/prev_sibling.3 \
-	@DX_DOCDIR@/man/man3/s.3 \
-	@DX_DOCDIR@/man/man3/system.3 \
-	@DX_DOCDIR@/man/man3/topology.doc.3 \
-	@DX_DOCDIR@/man/man3/topology.h.3 \
-	@DX_DOCDIR@/man/man3/type.3 \
-	@DX_DOCDIR@/man/man3/userdata.3
+	@DX_DOCDIR@/html/uniontopo__obj_1_1topo__obj__attr__u.html
+endif
+
+if TOPO_INSTALL_PDF
+EXTRA_DIST += \
+	@DX_DOCDIR@/libtopology.pdf
+endif
+
+if TOPO_WILLHAVE_TAG
+EXTRA_DIST += \
+	@DX_DOCDIR@/libtopology.tag
+endif
 
 install-data-local:
-	$(mkinstalldirs) $(DESTDIR)$(pdfdir) $(DESTDIR)$(htmldir)/topology
+if TOPO_INSTALL_PDF
+	$(mkinstalldirs) $(DESTDIR)$(pdfdir)
 	$(INSTALL_DATA) @DX_DOCDIR@/libtopology.pdf $(DESTDIR)$(pdfdir)
+endif
+if TOPO_INSTALL_HTML
+	$(mkinstalldirs) $(DESTDIR)$(htmldir)/topology
 	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(DESTDIR)$(htmldir)/topology
+endif
 
 uninstall-local:
+if TOPO_INSTALL_PDF
 	$(RM) $(DESTDIR)$(pdfdir)/libtopology.pdf
+endif
+if TOPO_INSTALL_HTML
 	$(RM) $(DESTDIR)$(htmldir)/topology/*
 endif
 
@@ -229,16 +251,30 @@ MOSTLYCLEANFILES += topo-hello.c
 # Rules to regenerate the documentation
 #
 
-if DX_COND_man
-if DX_COND_html
-if DX_COND_pdf
-if TOPO_HAVE_DOC
+if TOPO_HAVE_MAN
 # Documentation already available, do not force documentation generation
 else
+if DX_COND_man
 # Documentation not available, tell how to generate it
+$(dist_man3_MANS): @DX_DOCDIR@/libtopology.tag
+endif
+endif
+
+if TOPO_HAVE_PDF
+else
+if DX_COND_pdf
 all-local: @DX_DOCDIR@/libtopology.pdf
+@DX_DOCDIR@/libtopology.pdf: @DX_DOCDIR@/libtopology.tag
+endif
+endif
+
+if TOPO_HAVE_HTML
+else
+if DX_COND_html
+all-local: @DX_DOCDIR@/html
 	cp $(srcdir)/doxygen.css @DX_DOCDIR@/html/
-$(dist_man3_MANS) @DX_DOCDIR@/libtopology.pdf: @DX_DOCDIR@/libtopology.tag
+@DX_DOCDIR@/html: @DX_DOCDIR@/libtopology.tag
+endif
 endif
 
 #
@@ -290,13 +326,10 @@ CLEANFILES += \
 	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex
 
 doc: $(top_srcdir)/README
-$(top_srcdir)/README: @DX_DOCDIR@/libtopology.tag
+$(top_srcdir)/README: @DX_DOCDIR@/html
 	LC_ALL=C $(W3M) @DX_DOCDIR@/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
 
 DOCUPLOADHOST=sync.bordeaux.inria.fr
 DOCUPLOADOPTS=
-doc-upload: @DX_DOCDIR@/libtopology.tag
+doc-upload: @DX_DOCDIR@/html
 	rsync -avz --delete --chmod=ug+rwX,o+rX $(DOCUPLOADOPTS) @DX_DOCDIR@/html/ $(DOCUPLOADHOST):/web/runtime/libtopology2/doc/
-endif
-endif
-endif
