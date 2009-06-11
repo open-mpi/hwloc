@@ -4,7 +4,7 @@
 <!ATTLIST root huge_page_size   CDATA #REQUIRED >
 
 <!ELEMENT object (object +)>
-<!ATTLIST object type (System | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
+<!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
 <!ATTLIST object os_index CDATA #REQUIRED >
 <!ATTLIST object cpuset CDATA #REQUIRED >
 <!ATTLIST object system_memory_kB CDATA #REQUIRED >
