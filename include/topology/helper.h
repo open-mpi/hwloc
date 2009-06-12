@@ -427,5 +427,54 @@ extern int topo_get_closest_objs (topo_topology_t topology, topo_obj_t src, topo
 
 /** @} */
 
+/** \defgroup topology_helper_binding Binding Helpers
+ * @{
+ */
+
+/** \brief Distribute \p n items over the topology under \p root
+ *
+ * \p cpuset will be filled with \p n cpusets distributed linearly over the
+ * topology under \p root .
+ *
+ * This is typically useful when an application wants to distribute \p n
+ * threads over a machine, giving each of them as much private cache as
+ * possible and keeping them locally in number order.
+ *
+ * The caller may typicall want to additionally call topo_cpuset_singlify()
+ * before binding a thread, so that it doesn't move at all.
+ */
+static __inline__ void
+topo_distribute(topo_topology_t topology, topo_obj_t root, topo_cpuset_t *cpuset, int n)
+{
+  int i;
+  int chunk_size, complete_chunks;
+  topo_cpuset_t *cpusetp;
+
+  if (!root->arity || n == 1) {
+    /* Got to the bottom, we can't split any more, put everything there.  */
+    for (i=0; i<n; i++)
+      cpuset[i] = root->cpuset;
+    return;
+  }
+
+  /* Divide n in root->arity chunks.  */
+  chunk_size = (n + root->arity - 1) / root->arity;
+  complete_chunks = n % root->arity;
+  if (!complete_chunks)
+    complete_chunks = root->arity;
+
+  /* Allocate complete chunks first.  */
+  for (cpusetp = cpuset, i = 0;
+       i < complete_chunks;
+       i ++, cpusetp += chunk_size)
+    topo_distribute(topology, root->children[i], cpusetp, chunk_size);
+
+  /* Now allocate not-so-complete chunks.  */
+  for ( ;
+       i < root->arity;
+       i++, cpusetp += chunk_size-1)
+    topo_distribute(topology, root->children[i], cpusetp, chunk_size-1);
+}
+
 
 #endif /* TOPOLOGY_HELPER_H */

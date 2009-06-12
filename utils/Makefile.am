@@ -4,7 +4,7 @@ include $(top_srcdir)/libtopology.am
 
 EXTRA_DIST = lstopo.h
 
-bin_PROGRAMS = lstopo lstopo-nox topomask topobind
+bin_PROGRAMS = lstopo lstopo-nox topomask topobind topodistrib
 
 lstopo_SOURCES = lstopo.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-cairo.c lstopo-xml.c
 if HAVE_WINDOWS
