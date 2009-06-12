@@ -8,6 +8,7 @@ doc-upload.
 documentations:
   - doxygen with man, pdf and html support
   - help2man
+  - fig2dev
 
 - make maintainer-clean can be used to properly remove the generated
 documentations.

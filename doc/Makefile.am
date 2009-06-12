@@ -9,7 +9,8 @@ EXTRA_DIST = $(DX_CONFIG) \
 	topology.doxy \
 	images/dudley.png \
 	images/emmett.png \
-	images/hagrid.png
+	images/hagrid.png \
+	images/diagram.fig
 
 #
 # Documentation is already available in release tarballs.
@@ -126,7 +127,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topology_objects.3 \
 	@DX_DOCDIR@/man/man3/topology_traversal.3
 
-EXTRA_DIST += \
+CLEANFILES += \
 	@DX_DOCDIR@/man/man3/arity.3 \
 	@DX_DOCDIR@/man/man3/attr.3 \
 	@DX_DOCDIR@/man/man3/cache.3 \
@@ -287,6 +288,20 @@ pkginclude_HEADERS = \
 	$(top_srcdir)/include/topology.h \
 	$(top_srcdir)/include/topology/helper.h \
 	$(top_srcdir)/include/topology/cpuset.h
+
+if DX_COND_html
+CLEANFILES += images/diagram.png
+pkginclude_HEADERS += images/diagram.png
+images/diagram.png: $(srcdir)/images/diagram.fig
+	$(FIG2DEV) -L png $< $@
+endif
+if DX_COND_pdf
+CLEANFILES += images/diagram.eps
+pkginclude_HEADERS += images/diagram.eps
+images/diagram.eps: $(srcdir)/images/diagram.fig
+	$(FIG2DEV) -L eps $< $@
+endif
+
 
 #
 # Only remove the documentation for maintainers

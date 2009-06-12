@@ -314,6 +314,8 @@ in the source tarball in doc/doxygen-doc/, after doxygen compilation
 for svn checkouts, and are installed in the usual manual repository and
 $prefix/share/doc/topology/.
 
+To precisely define the vocabulary used by libtopology, a \ref glossary is available.
+
 \htmlonly
 </div><div class="section" id="bugs">
 \endhtmlonly
@@ -331,4 +333,10 @@ Bug reports and questions should be sent to the devel mailing list (http://lists
 \htmlonly
 </div>
 \endhtmlonly
+
+\page glossary Glossary
+
+\image html diagram.png
+\image latex diagram.eps width=\textwidth
+
 */
