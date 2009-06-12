@@ -13,6 +13,7 @@ TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	topo_get_obj_below_cpuset \
 	topo_get_shared_cache_above \
 	topo_cpuset_singlify \
+	topo_type_depth \
 	object_userdata \
 	synthetic-topology
 
