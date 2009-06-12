@@ -45,6 +45,8 @@
 /** \defgroup topology_cpuset The Cpuset API
  *
  * for use in libtopology itself.
+ *
+ * \note cpusets are indexed by OS logical processor number.
  * @{
  */
 
