@@ -293,12 +293,14 @@ if DX_COND_html
 CLEANFILES += images/diagram.png
 pkginclude_HEADERS += images/diagram.png
 images/diagram.png: $(srcdir)/images/diagram.fig
+	mkdir -p images
 	$(FIG2DEV) -L png $< $@
 endif
 if DX_COND_pdf
 CLEANFILES += images/diagram.eps
 pkginclude_HEADERS += images/diagram.eps
 images/diagram.eps: $(srcdir)/images/diagram.fig
+	mkdir -p images
 	$(FIG2DEV) -L eps $< $@
 endif
 
