@@ -54,7 +54,8 @@ static void usage(FILE *where)
   fprintf(where, "\nIf prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
   fprintf(where, "\nOptions:\n");
   fprintf(where, "  -v\tverbose\n");
-  fprintf(where, "  --nodes\treport a list of memory nodes near the CPU set\n");
+  fprintf(where, "  --proclist\treport the list of processors in the CPU set\n");
+  fprintf(where, "  --nodelist\treport the list of memory nodes near the CPU set\n");
 }
 
 typedef enum topomask_append_mode_e {
@@ -172,7 +173,8 @@ int main(int argc, char *argv[])
   struct topo_topology_info topoinfo;
   topo_cpuset_t set;
   int verbose = 0;
-  int reportnodes = 0;
+  int nodelist = 0;
+  int proclist = 0;
 
   topo_cpuset_zero(&set);
 
@@ -194,8 +196,12 @@ int main(int argc, char *argv[])
 	usage(stdout);
 	return EXIT_SUCCESS;
       }
-      if (!strcmp(argv[1], "--nodes")) {
-	reportnodes = 1;
+      if (!strcmp(argv[1], "--proclist")) {
+	proclist = 1;
+        goto next;
+      }
+      if (!strcmp(argv[1], "--nodelist")) {
+	nodelist = 1;
         goto next;
       }
       usage(stderr);
@@ -223,7 +229,16 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  if (reportnodes) {
+  if (proclist) {
+    topo_obj_t proc, prev = NULL;
+    while ((proc = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_PROC, prev)) != NULL) {
+      if (prev)
+	printf(",");
+      printf("%u", proc->os_index);
+      prev = proc;
+    }
+    printf("\n");
+  } else if (nodelist) {
     topo_obj_t node, prev = NULL;
     while ((node = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, prev)) != NULL) {
       if (prev)
