@@ -1,5 +1,5 @@
-System(1984MB)
-  Machine#2(992MB)
+System(1984MB HP=0*0kB  )
+  Machine(992MB HP=0*2048kB  )
     Socket#1
       Core#0
         P#16
@@ -13,7 +13,7 @@ System(1984MB)
       Core#3
         P#19
         P#23
-  Machine#3(992MB)
+  Machine(992MB HP=0*2048kB  )
     Socket#1
       Core#0
         P#24
