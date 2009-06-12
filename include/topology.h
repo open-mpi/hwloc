@@ -103,7 +103,7 @@ enum topo_obj_type_e {
   TOPO_OBJ_CORE,	/**< \brief Core */
   TOPO_OBJ_PROC,	/**< \brief (Logical) Processor (e.g. a thread in an SMT core) */
 
-  TOPO_OBJ_MISC,	/**< \brief Miscellaneous object that may be needed under special circumstances (like arbitrary OS aggregation)  */
+  TOPO_OBJ_MISC,	/**< \brief Miscellaneous objects which do not fit in the above but are still useful to take into account for affinity. For instance, some OSes expose their arbitrary processors aggregation this way.  */
 };
 typedef enum topo_obj_type_e topo_obj_type_t;
 /** \brief Maximal value of an Object Type */
