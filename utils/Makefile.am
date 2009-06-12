@@ -2,7 +2,7 @@
 
 include $(top_srcdir)/libtopology.am
 
-EXTRA_DIST = lstopo.h
+EXTRA_DIST = lstopo.h test-topodistrib.sh test-topodistrib.output
 
 bin_PROGRAMS = lstopo lstopo-nox topomask topobind topodistrib
 
@@ -23,3 +23,5 @@ lstopo_LDFLAGS = $(AM_LDFLAGS) $(CAIRO_LIBS)
 lstopo_nox_CPPFLAGS = $(AM_CPPFLAGS) -DTOPO_DISABLE_GRAPHIC_LIBS
 
 LIBS = $(top_builddir)/src/libtopology.la
+
+TESTS = $(srcdir)/test-topodistrib.sh
