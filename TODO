@@ -1,9 +1,5 @@
 API
 
-* reverse type_order?
-  + it currently increases with depth
-  + but it's used as if it decreased with depth in get_type_or_order_depth
-
 * Rename topo_get_obj_type_order into topo_get_type_order?
 
 * topomask: add an option to request a cpuset containing of n close entries
@@ -24,6 +20,7 @@ Doc
   + obtain the number of nodes, procs, cores, ...
   + iterate through caches above an object?
   + get a valid full set (alias on get_machine_object()->cpuset) ?
+  + difference between machine and system
 
 Support
 =======
