@@ -46,9 +46,6 @@ Support
 
 * move dmi_* to a machine object?
 
-* lstopo-nox
-  + disable xml as well?  It only depends on zlib
-
 Binding
 =======
 * Add the topology parameter to be able to distinguish a cpuset with all cpus
