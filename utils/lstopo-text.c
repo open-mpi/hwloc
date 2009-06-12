@@ -92,12 +92,6 @@ void output_text(topo_topology_t topology, const char *filename, int verbose_mod
       topo_topology_get_info(topology, &info);
       if (info.is_fake)
 	fprintf (output, "Topology is fake\n");
-      if (info.dmi_board_vendor)
-	fprintf (output, "DMI board vendor: %s\n", info.dmi_board_vendor);
-      if (info.dmi_board_name)
-	fprintf (output, "DMI board name: %s\n", info.dmi_board_name);
-      if (info.huge_page_size_kB)
-	fprintf (output, "Huge page size: %lukB\n", info.huge_page_size_kB);
 
       for (l = TOPO_OBJ_SYSTEM; l < TOPO_OBJ_MISC; l++)
 	{

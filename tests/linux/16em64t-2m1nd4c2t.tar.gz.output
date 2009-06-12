@@ -28,7 +28,6 @@ System(1984MB)
         P#27
         P#31
 Topology is fake
-Huge page size: 2048kB
 depth 0:	type #0 (System)
  depth 1:	type #1 (Machine)
 absent:		type #2 (NUMANode)

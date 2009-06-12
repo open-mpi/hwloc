@@ -80,8 +80,6 @@ System(0KB)
           Core#1
             P#15
 Topology is fake
-DMI board vendor: TYAN Computer Corp
-DMI board name: S4881 
 depth 0:	type #0 (System)
 absent:		type #1 (Machine)
  depth 1:	type #2 (NUMANode)

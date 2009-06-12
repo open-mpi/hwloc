@@ -754,14 +754,6 @@ topo_topology_setup_defaults(struct topo_topology *topology)
   struct topo_obj *system_obj;
   int i;
 
-  /* Reset global values */
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  topology->huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#else /* HAVE__SC_LARGE_PAGESIZE */
-  topology->huge_page_size_kB = 0;
-#endif /* HAVE__SC_LARGE_PAGESIZE */
-  topology->dmi_board_vendor = NULL;
-  topology->dmi_board_name = NULL;
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
@@ -779,6 +771,13 @@ topo_topology_setup_defaults(struct topo_topology *topology)
   system_obj->sibling_rank = 0;
   system_obj->attr.system.memory_kB = 0;
   system_obj->attr.system.huge_page_free = 0;
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  system_obj->attr.system.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+#else /* HAVE__SC_LARGE_PAGESIZE */
+  system_obj->attr.system.huge_page_size_kB = 0;
+#endif /* HAVE__SC_LARGE_PAGESIZE */
+  system_obj->attr.system.dmi_board_vendor = NULL;
+  system_obj->attr.system.dmi_board_name = NULL;
   topo_cpuset_fill(&system_obj->cpuset);
   topology->levels[0][0] = system_obj;
 }
@@ -929,13 +928,24 @@ topo_topology_clear (struct topo_topology *topology)
   unsigned l,i;
   for (l=0; l<topology->nb_levels; l++) {
     for (i=0; i<topology->level_nbobjects[l]; i++) {
-      free(topology->levels[l][i]->children);
-      free(topology->levels[l][i]);
+      struct topo_obj *obj = topology->levels[l][i];
+      switch (obj->type) {
+      case TOPO_OBJ_SYSTEM:
+	free(obj->attr.system.dmi_board_vendor);
+	free(obj->attr.system.dmi_board_name);
+	break;
+      case TOPO_OBJ_MACHINE:
+	free(obj->attr.machine.dmi_board_vendor);
+	free(obj->attr.machine.dmi_board_name);
+	break;
+      default:
+	break;
+      }
+      free(obj->children);
+      free(obj);
     }
     free(topology->levels[l]);
   }
-  free(topology->dmi_board_vendor);
-  free(topology->dmi_board_name);
 }
 
 void
@@ -993,9 +1003,6 @@ int
 topo_topology_get_info(struct topo_topology *topology, struct topo_topology_info *info)
 {
   info->depth = topology->nb_levels;
-  info->dmi_board_vendor = topology->dmi_board_vendor;
-  info->dmi_board_name = topology->dmi_board_name;
-  info->huge_page_size_kB = topology->huge_page_size_kB;
   info->is_fake = topology->is_fake;
   return 0;
 }

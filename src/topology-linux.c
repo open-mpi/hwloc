@@ -748,7 +748,8 @@ look_cpuinfo(struct topo_topology *topology, const char *path,
 }
 
 static void
-topo__get_dmi_info(struct topo_topology *topology)
+topo__get_dmi_info(struct topo_topology *topology,
+		   char **dmi_board_vendor, char **dmi_board_name)
 {
 #define DMI_BOARD_STRINGS_LEN 50
   char dmi_line[DMI_BOARD_STRINGS_LEN];
@@ -764,7 +765,7 @@ topo__get_dmi_info(struct topo_topology *topology)
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      topology->dmi_board_vendor = strdup(dmi_line);
+      *dmi_board_vendor = strdup(dmi_line);
       topo_debug("found DMI board vendor '%s'\n", topology->dmi_board_vendor);
     }
   }
@@ -778,7 +779,7 @@ topo__get_dmi_info(struct topo_topology *topology)
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      topology->dmi_board_name = strdup(dmi_line);
+      *dmi_board_name = strdup(dmi_line);
       topo_debug("found DMI board name '%s'\n", topology->dmi_board_name);
     }
   }
@@ -822,11 +823,17 @@ topo_look_linux(struct topo_topology *topology)
       topo_get_procfs_meminfo_info(topology,
 				   path,
 				   &machine->attr.machine.memory_kB,
-				   &topology->huge_page_size_kB,
+				   &machine->attr.machine.huge_page_size_kB,
 				   &machine->attr.machine.huge_page_free);
 				   /* FIXME: gather page_size_kB as well? MaMI needs it */
       topology->levels[0][0]->attr.system.memory_kB += machine->attr.machine.memory_kB;
       topology->levels[0][0]->attr.system.huge_page_free += machine->attr.machine.huge_page_free;
+
+      /* Gather DMI info */
+      /* FIXME: get the right DMI info of each machine */
+      topo__get_dmi_info(topology,
+			 &machine->attr.machine.dmi_board_vendor,
+			 &machine->attr.machine.dmi_board_name);
     }
     closedir(nodes_dir);
   } else {
@@ -855,11 +862,13 @@ topo_look_linux(struct topo_topology *topology)
     topo_get_procfs_meminfo_info(topology,
 				 "/proc/meminfo",
 				 &topology->levels[0][0]->attr.system.memory_kB,
-				 &topology->huge_page_size_kB,
+				 &topology->levels[0][0]->attr.system.huge_page_size_kB,
 				 &topology->levels[0][0]->attr.system.huge_page_free);
 				 /* FIXME: gather page_size_kB as well? MaMI needs it */
 
     /* Gather DMI info */
-    topo__get_dmi_info(topology);
+    topo__get_dmi_info(topology,
+		       &topology->levels[0][0]->attr.system.dmi_board_vendor,
+		       &topology->levels[0][0]->attr.system.dmi_board_name);
   }
 }

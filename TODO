@@ -16,6 +16,7 @@ Doc
 * add examples for (example dir?)
   + finding all nodes near a cpuset
   + obtain the number of nodes, procs, cores, ...
+    * if no numa node, do we get 0 or 1 with which function?
   + iterate through caches above an object?
   + get a valid full set (alias on get_machine_object()->cpuset) ?
   + difference between machine and system
@@ -38,8 +39,6 @@ Support
 * integrate marcel split quirk?
   + split for real, just explain how to split?
     - just return an ordered array?
-
-* move dmi_* to a machine object?
 
 Binding
 =======

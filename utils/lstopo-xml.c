@@ -66,16 +66,24 @@ output_topology (topo_topology_t topology, topo_obj_t obj, xmlNodePtr root_node,
     xmlNewProp(node, BAD_CAST "cache_depth", BAD_CAST tmp);
     break;
   case TOPO_OBJ_SYSTEM:
+    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr.machine.dmi_board_vendor);
+    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr.machine.dmi_board_name);
     sprintf(tmp, "%lu", obj->attr.system.memory_kB);
     xmlNewProp(node, BAD_CAST "system_memory_kB", BAD_CAST tmp);
     sprintf(tmp, "%lu", obj->attr.system.huge_page_free);
     xmlNewProp(node, BAD_CAST "system_huge_page_free", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr.machine.huge_page_size_kB);
+    xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
     break;
   case TOPO_OBJ_MACHINE:
+    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr.machine.dmi_board_vendor);
+    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr.machine.dmi_board_name);
     sprintf(tmp, "%lu", obj->attr.machine.memory_kB);
     xmlNewProp(node, BAD_CAST "machine_memory_kB", BAD_CAST tmp);
     sprintf(tmp, "%lu", obj->attr.machine.huge_page_free);
     xmlNewProp(node, BAD_CAST "machine_huge_page_free", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr.machine.huge_page_size_kB);
+    xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
     break;
   case TOPO_OBJ_NODE:
     sprintf(tmp, "%lu", obj->attr.node.memory_kB);
@@ -103,7 +111,6 @@ void output_xml(topo_topology_t topology, const char *filename, int verbose_mode
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
   xmlDtdPtr dtd = NULL;       /* DTD pointer */
-  char tmp[255];
   struct topo_topology_info info;
 
   if (!strcasecmp(filename, "-.xml"))
@@ -122,11 +129,6 @@ void output_xml(topo_topology_t topology, const char *filename, int verbose_mode
   dtd = xmlCreateIntSubset(doc, BAD_CAST "root", NULL, BAD_CAST "lstopo.dtd");
 
   output_topology (topology, topo_get_system_obj(topology), root_node, verbose_mode);
-
-  xmlNewProp(root_node, BAD_CAST "dmi_board_vendor", BAD_CAST info.dmi_board_vendor);
-  xmlNewProp(root_node, BAD_CAST "dmi_board_name", BAD_CAST info.dmi_board_name);
-  sprintf(tmp, "%lu", info.huge_page_size_kB);
-  xmlNewProp(root_node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
 
   /* Dumping document to stdio or file. */
   xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);

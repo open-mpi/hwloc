@@ -30,9 +30,6 @@ System(15GB)
         Core#3
           P#7
 Topology is fake
-DMI board vendor: Dell Inc.
-DMI board name: 0NR282
-Huge page size: 2048kB
 depth 0:	type #0 (System)
 absent:		type #1 (Machine)
 absent:		type #2 (NUMANode)

@@ -70,9 +70,6 @@ struct topo_topology {
   unsigned long flags;
   int type_depth[TOPO_OBJ_TYPE_MAX];
   enum topo_ignore_type_e ignored_types[TOPO_OBJ_TYPE_MAX];
-  unsigned long huge_page_size_kB;
-  char *dmi_board_vendor;
-  char *dmi_board_name;
   int is_fake;
   int is_loaded;
 

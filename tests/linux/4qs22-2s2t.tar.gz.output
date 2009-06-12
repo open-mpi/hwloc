@@ -6,7 +6,6 @@ System(15GB)
     P#2
     P#3
 Topology is fake
-Huge page size: 16384kB
 depth 0:	type #0 (System)
 absent:		type #1 (Machine)
  depth 1:	type #2 (NUMANode)

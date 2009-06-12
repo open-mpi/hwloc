@@ -253,6 +253,10 @@ topo__look_synthetic(struct topo_topology *topology,
       break;
     case TOPO_OBJ_MACHINE:
       obj->attr.machine.memory_kB = my_memory;
+      obj->attr.machine.dmi_board_vendor = NULL;
+      obj->attr.machine.dmi_board_name = NULL;
+      obj->attr.machine.huge_page_size_kB = 0;
+      obj->attr.machine.huge_page_free = 0;
       *parent_memory_kB += obj->attr.machine.memory_kB;
       break;
     case TOPO_OBJ_NODE:

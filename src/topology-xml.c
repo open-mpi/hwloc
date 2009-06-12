@@ -76,16 +76,9 @@ topo__process_root_attr(struct topo_topology *topology,
 			const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
-  const char *value = (const char *) _value;
+/* unused for now   const char *value = (const char *) _value; */
 
-  if (!strcmp(name, "dmi_board_vendor"))
-    topology->dmi_board_vendor = strdup(value);
-  else if (!strcmp(name, "dmi_board_name"))
-    topology->dmi_board_name = strdup(value);
-  else if (!strcmp(name, "huge_page_size_kB"))
-    topology->huge_page_size_kB = strtoul(value, NULL, 10);
-  else
-    fprintf(stderr, "ignoring unknown root attribute %s\n", name);
+  fprintf(stderr, "ignoring unknown root attribute %s\n", name);
 }
 
 static void
@@ -105,22 +98,39 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cpuset"))
     topo_cpuset_from_string(value, &obj->cpuset);
+
   else if (!strcmp(name, "cache_memory_kB"))
     obj->attr.cache.memory_kB = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cache_depth"))
     obj->attr.cache.depth = strtoul(value, NULL, 10);
+
   else if (!strcmp(name, "node_memory_kB"))
     obj->attr.node.memory_kB = strtoul(value, NULL, 10);
   else if (!strcmp(name, "node_huge_page_free"))
     obj->attr.node.huge_page_free = strtoul(value, NULL, 10);
+
+  else if (!strcmp(name, "machine_dmi_board_vendor"))
+    obj->attr.machine.dmi_board_vendor = strdup(value);
+  else if (!strcmp(name, "machine_dmi_board_name"))
+    obj->attr.machine.dmi_board_name = strdup(value);
   else if (!strcmp(name, "machine_memory_kB"))
     obj->attr.machine.memory_kB = strtoul(value, NULL, 10);
   else if (!strcmp(name, "machine_huge_page_free"))
     obj->attr.machine.huge_page_free = strtoul(value, NULL, 10);
+  else if (!strcmp(name, "huge_page_size_kB"))
+    obj->attr.machine.huge_page_size_kB = strtoul(value, NULL, 10);
+
+  else if (!strcmp(name, "system_dmi_board_vendor"))
+    obj->attr.system.dmi_board_vendor = strdup(value);
+  else if (!strcmp(name, "system_dmi_board_name"))
+    obj->attr.system.dmi_board_name = strdup(value);
   else if (!strcmp(name, "system_memory_kB"))
     obj->attr.system.memory_kB = strtoul(value, NULL, 10);
   else if (!strcmp(name, "system_huge_page_free"))
     obj->attr.system.huge_page_free = strtoul(value, NULL, 10);
+  else if (!strcmp(name, "huge_page_size_kB"))
+    obj->attr.system.huge_page_size_kB = strtoul(value, NULL, 10);
+
   else if (!strcmp(name, "misc_depth"))
     obj->attr.misc.depth = strtoul(value, NULL, 10);
 
