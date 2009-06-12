@@ -71,6 +71,10 @@ int main(int argc, char *argv[])
 	verbose = 1;
 	goto next;
       }
+      if (!strcmp(argv[0], "--help")) {
+	usage();
+	return EXIT_SUCCESS;
+      }
       if (!strcmp (argv[0], "--synthetic")) {
 	if (argc <= 2) {
 	  usage ();

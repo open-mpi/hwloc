@@ -69,6 +69,10 @@ int main(int argc, char *argv[])
 	verbose = 1;
 	goto next;
       }
+      else if (!strcmp(argv[0], "--help")) {
+	usage();
+	return EXIT_SUCCESS;
+      }
       else if (!strcmp(argv[0], "--single")) {
 	single = 1;
 	goto next;
