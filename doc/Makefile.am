@@ -200,7 +200,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/tab_l.gif \
 	@DX_DOCDIR@/html/tab_r.gif \
 	@DX_DOCDIR@/html/tabs.css \
-	@DX_DOCDIR@/html/topology_8doc.html \
+	@DX_DOCDIR@/html/topology_8doxy.html \
 	@DX_DOCDIR@/html/topology_8h.html \
 	@DX_DOCDIR@/html/topology_8h_source.html \
 	@DX_DOCDIR@/html/uniontopo__obj_1_1topo__obj__attr__u.html
@@ -323,7 +323,7 @@ CLEANFILES += \
 	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__memory__attr__u.tex \
 	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__misc__attr__u.tex \
 	@DX_DOCDIR@/latex/structtopo__topology__info.tex \
-	@DX_DOCDIR@/latex/topology_8doc.tex \
+	@DX_DOCDIR@/latex/topology_8doxy.tex \
 	@DX_DOCDIR@/latex/topology_8h.tex \
 	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex
 
