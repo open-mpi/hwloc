@@ -6,14 +6,8 @@ API
 
 * Rename topo_get_obj_type_order into topo_get_type_order?
 
-* clarify the API to obtain the number of nodes, procs, cores, ...
-
-* iterate through caches above an object?
-
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
-
-* have an easy way to get a valid full set (alias on get_machine_object()->cpuset) ?
 
 * expose the internal conversion from cpuset to sched_setaffinity mask?
   + reverse routine?
@@ -27,6 +21,9 @@ Doc
 
 * add examples for (example dir?)
   + finding all nodes near a cpuset
+  + obtain the number of nodes, procs, cores, ...
+  + iterate through caches above an object?
+  + get a valid full set (alias on get_machine_object()->cpuset) ?
 
 Support
 =======
@@ -71,13 +68,7 @@ Binding
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
-  bind process on 2 cores near physical proc id 3
-* topo_taskset --index 4
-  bind process on 4th processor in a topology-aware numbering
-* topo_taskset --ncpus 2 --index 4
-  bind process on the 4th set of 2 physically close ids in a topology-aware numbering (used by ggrun when launching 4 process with 2 threads)
-* tools to create masks and bind using them
-
+  bind process on 2 cores "near" physical proc id 3
 
 Ports
 =====

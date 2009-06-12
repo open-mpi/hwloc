@@ -43,7 +43,7 @@
 
 libtopology provides a portable abstraction (across OS, versions, architectures,
 ...) of the hierarchical topology of modern architectures. It primarily aims at
-helping high-performance computing application with gathering information about
+helping high-performance computing applications with gathering information about
 the hardware so as to exploit it accordingly and efficiently.
 
 libtopology provides a hierarchical view of the machine, NUMA memory nodes,
