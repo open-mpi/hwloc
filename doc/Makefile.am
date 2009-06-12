@@ -6,7 +6,7 @@ include $(top_srcdir)/doxample.am
 MOSTLYCLEANFILES =
 CLEANFILES =
 EXTRA_DIST = $(DX_CONFIG) \
-	topology.doc \
+	topology.doxy \
 	images/dudley.png \
 	images/emmett.png \
 	images/hagrid.png
@@ -156,7 +156,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/man/man3/prev_sibling.3 \
 	@DX_DOCDIR@/man/man3/s.3 \
 	@DX_DOCDIR@/man/man3/system.3 \
-	@DX_DOCDIR@/man/man3/topology.doc.3 \
+	@DX_DOCDIR@/man/man3/topology.doxy.3 \
 	@DX_DOCDIR@/man/man3/topology.h.3 \
 	@DX_DOCDIR@/man/man3/type.3 \
 	@DX_DOCDIR@/man/man3/userdata.3
@@ -244,7 +244,7 @@ check_PROGRAMS = $(TESTS)
 
 LIBS = $(top_builddir)/src/libtopology.la
 
-topo-hello.c: $(srcdir)/topology.doc
+topo-hello.c: $(srcdir)/topology.doxy
 	sed -e '1,/   \\code/d' -e '/   \\endcode/,$$d' < $^ > $@
 
 MOSTLYCLEANFILES += topo-hello.c
@@ -283,7 +283,7 @@ endif
 # What doxygen depends on
 #
 pkginclude_HEADERS = \
-	$(srcdir)/topology.doc \
+	$(srcdir)/topology.doxy \
 	$(top_srcdir)/include/topology.h \
 	$(top_srcdir)/include/topology/helper.h \
 	$(top_srcdir)/include/topology/cpuset.h

@@ -565,7 +565,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = \
-			@top_srcdir@/doc/topology.doc \
+			@top_srcdir@/doc/topology.doxy \
 			@top_srcdir@/include/topology.h \
 			@top_srcdir@/include/topology/helper.h \
 			@top_srcdir@/include/topology/cpuset.h
