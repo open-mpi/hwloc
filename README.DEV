@@ -1,0 +1,7 @@
+Notes to developers:
+
+- README is automatically generated from the main page of the doxygen
+documentation by running make doc . The website is update by running make
+doc-upload.
+- To release a tarball, doxygen should be available with man, pdf and html
+support, as well as help2man, in order to generate all documentations.
