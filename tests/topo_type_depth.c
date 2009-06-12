@@ -69,10 +69,10 @@ int main()
 
   assert(topo_get_type_depth(topology, TOPO_OBJ_NODE) == TOPO_TYPE_DEPTH_UNKNOWN);
   assert(topo_get_type_or_above_depth(topology, TOPO_OBJ_NODE) == 2);
-  assert(topo_get_type_or_below_depth(topology, TOPO_OBJ_NODE) == TOPO_TYPE_DEPTH_MULTIPLE);
+  assert(topo_get_type_or_below_depth(topology, TOPO_OBJ_NODE) == 3);
   assert(topo_get_type_depth(topology, TOPO_OBJ_SOCKET) == TOPO_TYPE_DEPTH_UNKNOWN);
   assert(topo_get_type_or_above_depth(topology, TOPO_OBJ_SOCKET) == 2);
-  assert(topo_get_type_or_below_depth(topology, TOPO_OBJ_SOCKET) == TOPO_TYPE_DEPTH_MULTIPLE);
+  assert(topo_get_type_or_below_depth(topology, TOPO_OBJ_SOCKET) == 3);
   assert(topo_get_type_depth(topology, TOPO_OBJ_CACHE) == TOPO_TYPE_DEPTH_MULTIPLE);
   assert(topo_get_type_or_above_depth(topology, TOPO_OBJ_CACHE) == TOPO_TYPE_DEPTH_MULTIPLE);
   assert(topo_get_type_or_below_depth(topology, TOPO_OBJ_CACHE) == TOPO_TYPE_DEPTH_MULTIPLE);

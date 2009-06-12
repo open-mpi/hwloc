@@ -58,20 +58,17 @@ static __inline__ unsigned
 topo_get_type_or_below_depth (topo_topology_t topology, enum topo_obj_type_e type)
 {
   unsigned depth = topo_get_type_depth(topology, type);
+  unsigned minorder = topo_get_obj_type_order(type);
 
   if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
     return depth;
 
-  int order = topo_get_obj_type_order(type);
-  int max_order = topo_get_obj_type_order(TOPO_OBJ_PROC);
+  /* find the highest existing level with type order >= */
+  for(depth = topo_get_type_depth(topology, TOPO_OBJ_PROC); ; depth--)
+    if (topo_get_obj_type_order(topo_get_depth_type(topology, depth)) < minorder)
+      return depth+1;
 
-  while (++order <= max_order) {
-    type = topo_get_obj_order_type(order);
-    depth = topo_get_type_depth(topology, type);
-    if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
-      return depth;
-  }
-  /* Shouldn't ever happen, as there is always a PROC level.  */
+  /* Shouldn't ever happen, as there is always a SYSTEM level with lower order and known depth.  */
   abort();
 }
 
@@ -85,20 +82,17 @@ static __inline__ unsigned
 topo_get_type_or_above_depth (topo_topology_t topology, enum topo_obj_type_e type)
 {
   unsigned depth = topo_get_type_depth(topology, type);
+  unsigned maxorder = topo_get_obj_type_order(type);
 
   if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
     return depth;
 
-  int order = topo_get_obj_type_order(type);
-  int min_order = topo_get_obj_type_order(TOPO_OBJ_SYSTEM);
+  /* find the lowest existing level with type order <= */
+  for(depth = 0; ; depth++)
+    if (topo_get_obj_type_order(topo_get_depth_type(topology, depth)) > maxorder)
+      return depth-1;
 
-  while (--order >= min_order) {
-    type = topo_get_obj_order_type(order);
-    depth = topo_get_type_depth(topology, type);
-    if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
-      return depth;
-  }
-  /* Shouldn't ever happen, as there is always a SYSTEM level.  */
+  /* Shouldn't ever happen, as there is always a PROC level with higher order and known depth.  */
   abort();
 }
 
