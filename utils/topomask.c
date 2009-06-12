@@ -41,17 +41,19 @@
 
 static void usage(void)
 {
-  fprintf(stderr, "Usage: topomask [string] ...\n");
+  fprintf(stderr, "Usage: topomask [options] [string] ...\n");
   fprintf(stderr, "  <string> may be <depth:index>\n");
   fprintf(stderr, "    <depth> may be system, machine, node, socket, core, proc or a numeric depth\n");
   fprintf(stderr, "    <index> may be:\n");
-  fprintf(stderr, "     X\tone object with index X\n");
-  fprintf(stderr, "     X-Y\tall objects with index between X and Y\n");
-  fprintf(stderr, "     X-\tall objects with index at least X\n");
-  fprintf(stderr, "     X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
+  fprintf(stderr, "      X\tone object with index X\n");
+  fprintf(stderr, "      X-Y\tall objects with index between X and Y\n");
+  fprintf(stderr, "      X-\tall objects with index at least X\n");
+  fprintf(stderr, "      X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
   fprintf(stderr, "    several <depth:index> may be concatenated with `.' to select some specific children\n");
-  fprintf(stderr, "  <string> may be a cpuset string\n");
-  fprintf(stderr, "  if prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
+  fprintf(stderr, "    <string> may also be a cpuset string\n");
+  fprintf(stderr, "    if prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
+  fprintf(stderr, "  Options may be\n");
+  fprintf(stderr, "    -v\tverbose\n");
 }
 
 typedef enum topomask_append_mode_e {
