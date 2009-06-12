@@ -250,7 +250,8 @@ int main(void)
 	/* Allocate and initialize topology object.  */
 	topo_topology_init(&topology);
 
-	/* ... Put detection configuration here...
+        /* ... Put detection configuration here to e.g. ignore some objects
+           types, define a synthetic topology, etc....
 	   See topology_configuration.  */
 
 	/* Perform the topology detection.  */
@@ -305,6 +306,8 @@ int main(void)
 	return 0;
 }
    \endcode
+
+A lot of traversal examples are available in topology/helper.h .
 
 \htmlonly
 </div><div class="section" id="bugs">
