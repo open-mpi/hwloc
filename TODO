@@ -1,7 +1,5 @@
 API
 
-* Rename topo_get_obj_type_order into topo_get_type_order?
-
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 

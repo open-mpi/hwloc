@@ -82,11 +82,11 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_obj_order_type.3 \
-	@DX_DOCDIR@/man/man3/topo_get_obj_type_order.3 \
+	@DX_DOCDIR@/man/man3/topo_get_order_type.3 \
 	@DX_DOCDIR@/man/man3/topo_get_shared_cache_above.3 \
 	@DX_DOCDIR@/man/man3/topo_get_system_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_depth.3 \
+	@DX_DOCDIR@/man/man3/topo_get_type_order.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_or_above_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_or_below_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_obj.3 \

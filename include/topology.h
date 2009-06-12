@@ -92,7 +92,7 @@ struct topo_topology_info {
 /** \brief Type of topology Object.
  *
  * Do not rely on the ordering of the values as new ones may be defined in the
- * future!  Use the value returned by topo_get_obj_type_order() instead.
+ * future!  Use the value returned by topo_get_type_order() instead.
  */
 enum topo_obj_type_e {
   TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines) */
@@ -115,17 +115,17 @@ typedef enum topo_obj_type_e topo_obj_type_t;
  * the future.  This function returns an integer value that can be used
  * instead.
  *
- * \note topo_get_obj_type_order(TOPO_OBJ_SYSTEM) will always be the lowest
- * value, and topo_get_obj_type_order(TOPO_OBJ_PROC) will always be the highest
+ * \note topo_get_type_order(TOPO_OBJ_SYSTEM) will always be the lowest
+ * value, and topo_get_type_order(TOPO_OBJ_PROC) will always be the highest
  * value.
  */
-int topo_get_obj_type_order(topo_obj_type_t type);
+int topo_get_type_order(topo_obj_type_t type);
 
 /** \brief converse of topo_get_obj_type_oder()
  *
- * This is the converse of topo_get_obj_type_order().
+ * This is the converse of topo_get_type_order().
  */
-topo_obj_type_t topo_get_obj_order_type(int order);
+topo_obj_type_t topo_get_order_type(int order);
 
 
 /** @} */
