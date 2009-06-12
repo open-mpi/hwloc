@@ -54,6 +54,7 @@ static void usage(void)
   fprintf(stderr, "    if prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
   fprintf(stderr, "  Options may be\n");
   fprintf(stderr, "    -v\tverbose\n");
+  fprintf(stderr, "    --nodes\treport a list of memory nodes near the CPU set\n");
 }
 
 typedef enum topomask_append_mode_e {
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
   struct topo_topology_info topoinfo;
   topo_cpuset_t set;
   int verbose = 0;
-  char string[TOPO_CPUSET_STRING_LENGTH+1];
+  int reportnodes = 0;
 
   topo_cpuset_zero(&set);
 
@@ -187,6 +188,10 @@ int main(int argc, char *argv[])
     if (*argv[1] == '-') {
       if (!strcmp(argv[1], "-v")) {
         verbose = 1;
+        goto next;
+      }
+      if (!strcmp(argv[1], "--nodes")) {
+	reportnodes = 1;
         goto next;
       }
       usage();
@@ -214,8 +219,20 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  topo_cpuset_snprintf(string, sizeof(string), &set);
-  printf("%s\n", string);
+  if (reportnodes) {
+    topo_obj_t node, prev = NULL;
+    while ((node = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, prev)) != NULL) {
+      if (prev)
+	printf(",");
+      printf("%u", node->logical_index);
+      prev = node;
+    }
+    printf("\n");
+  } else {
+    char string[TOPO_CPUSET_STRING_LENGTH+1];
+    topo_cpuset_snprintf(string, sizeof(string), &set);
+    printf("%s\n", string);
+  }
 
   topo_topology_destroy(topology);
 
