@@ -336,6 +336,25 @@ Bug reports and questions should be sent to the devel mailing list (http://lists
 
 \page glossary Glossary
 
+<dl>
+<dt>System</dt>
+  <dd>The whole system that is accessible to libtopology. That may comprise
+  several machines in SSI systems like Kerrighed</dd>
+<dt>Machine</dt>
+  <dd>A set of processors and memory which cache coherency.</dd>
+<dt>NUMA Node</dt>
+  <dd>A set of processors a memory which processors can directly access.</dd>
+<dt>Socket or package</dt>
+  <dd>A processor in the physical meaning, i.e. that you can add/remove
+  physically.</dd>
+<dt>Core</dt>
+  <dd>A computation unit, (may be shared by several logical processors).</dd>
+<dt>(Logical) processor</dt>
+  <dd>An execution unit, (may share a core with other logical processors).</dd>
+</dl>
+
+To be continued...
+
 \image html diagram.png
 \image latex diagram.eps width=\textwidth
 
