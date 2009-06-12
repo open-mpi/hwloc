@@ -92,7 +92,7 @@ topo_get_type_or_above_depth (topo_topology_t topology, enum topo_obj_type_e typ
   int order = topo_get_obj_type_order(type);
   int min_order = topo_get_obj_type_order(TOPO_OBJ_SYSTEM);
 
-  while (++order >= min_order) {
+  while (--order >= min_order) {
     type = topo_get_obj_order_type(order);
     depth = topo_get_type_depth(topology, type);
     if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
