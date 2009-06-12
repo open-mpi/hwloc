@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
     while ((node = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%u", node->logical_index);
+      printf("%u", node->os_index);
       prev = node;
     }
     printf("\n");
