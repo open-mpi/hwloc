@@ -94,17 +94,17 @@ static int append_object(topo_topology_t topology, struct topo_topology_info *to
   unsigned i,j;
 
   if (!strncasecmp(string, "system", 2))
-    depth = topo_get_type_depth(topology, TOPO_OBJ_SYSTEM);
+    depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_SYSTEM);
   else if (!strncasecmp(string, "machine", 1))
-    depth = topo_get_type_depth(topology, TOPO_OBJ_MACHINE);
+    depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_MACHINE);
   else if (!strncasecmp(string, "node", 1))
-    depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
+    depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_NODE);
   else if (!strncasecmp(string, "socket", 2))
-    depth = topo_get_type_depth(topology, TOPO_OBJ_SOCKET);
+    depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_SOCKET);
   else if (!strncasecmp(string, "core", 1))
-    depth = topo_get_type_depth(topology, TOPO_OBJ_CORE);
+    depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_CORE);
   else if (!strncasecmp(string, "proc", 1))
-    depth = topo_get_type_depth(topology, TOPO_OBJ_PROC);
+    depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_PROC);
   else
     depth = atoi(string);
 

@@ -1,5 +1,11 @@
 API
 
+* reverse type_order?
+  + it currently increases with depth
+  + but it's used as if it decreased with depth in get_type_or_order_depth
+
+* Rename topo_get_obj_type_order into topo_get_type_order?
+
 * clarify the API to obtain the number of nodes, procs, cores, ...
 
 * iterate through caches above an object?
@@ -18,6 +24,9 @@ Doc
 * draw relations between objects (tree/levels/pointers)
 * automatically generate the pngs?
 * Glossary?
+
+* add examples for (example dir?)
+  + finding all nodes near a cpuset
 
 Support
 =======
