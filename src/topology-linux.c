@@ -814,6 +814,8 @@ topo_look_linux(struct topo_topology *topology)
       look_cpuinfo(topology, path, &online_set, &admin_disabled_cpus_set);
       machine = topo_alloc_setup_object(TOPO_OBJ_MACHINE, node);
       machine->cpuset = online_set;
+      machine->attr.machine.dmi_board_name = NULL;
+      machine->attr.machine.dmi_board_vendor = NULL;
       topo_debug("machine number %lu has cpuset %"TOPO_PRIxCPUSET"\n",
 		 node, TOPO_CPUSET_PRINTF_VALUE(&online_set));
       topo_add_object(topology, machine);
