@@ -37,12 +37,12 @@
 #include <unistd.h>
 #include <assert.h>
 
-static void usage(void)
+static void usage(FILE *where)
 {
-  fprintf(stderr, "Usage: topobind [options] <cpuset> -- command ...\n");
-  fprintf(stderr, "  Options are:\n");
-  fprintf(stderr, "   --single\tbind on a single CPU to prevent migration\n");
-  fprintf(stderr, "   -v\t\tverbose messages\n");
+  fprintf(where, "Usage: topobind [options] <cpuset> -- command ...\n");
+  fprintf(where, "Options:\n");
+  fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
+  fprintf(where, "   -v\t\tverbose messages\n");
 }
 
 int main(int argc, char *argv[])
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp(argv[0], "--help")) {
-	usage();
+	usage(stdout);
 	return EXIT_SUCCESS;
       }
       else if (!strcmp(argv[0], "--single")) {
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
 
-      usage();
+      usage(stderr);
       return EXIT_FAILURE;
     }
 

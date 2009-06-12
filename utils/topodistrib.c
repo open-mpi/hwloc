@@ -37,14 +37,14 @@
 #include <unistd.h>
 #include <assert.h>
 
-static void usage(void)
+static void usage(FILE *where)
 {
-  fprintf(stderr, "Usage: topodistrib [options] number\n");
-  fprintf(stderr, "  Options are:\n");
-  fprintf(stderr, "   -v\t\t\tverbose messages\n");
-  fprintf(stderr, "   --synthetic \"2 2\"\tsimulate a fake hierarchy\n");
+  fprintf(where, "Usage: topodistrib [options] number\n");
+  fprintf(where, "Options:\n");
+  fprintf(where, "   -v\t\t\tverbose messages\n");
+  fprintf(where, "   --synthetic \"2 2\"\tsimulate a fake hierarchy\n");
 #ifdef HAVE_XML
-  fprintf(stderr, "   --xml <path>\t\tread topology from XML file <path>\n");
+  fprintf(where, "   --xml <path>\t\tread topology from XML file <path>\n");
 #endif
 }
 
@@ -72,12 +72,12 @@ int main(int argc, char *argv[])
 	goto next;
       }
       if (!strcmp(argv[0], "--help")) {
-	usage();
+	usage(stdout);
 	return EXIT_SUCCESS;
       }
       if (!strcmp (argv[0], "--synthetic")) {
 	if (argc <= 2) {
-	  usage ();
+	  usage(stdout);
 	  exit(EXIT_FAILURE);
 	}
 	synthetic = argv[1];
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_XML
       if (!strcmp (argv[0], "--xml")) {
 	if (argc <= 2) {
-	  usage ();
+	  usage(stdout);
 	  exit(EXIT_FAILURE);
 	}
 	xmlpath = argv[1];
@@ -100,13 +100,13 @@ int main(int argc, char *argv[])
       }
 #endif /* HAVE_XML */
 
-      usage();
+      usage(stderr);
       return EXIT_FAILURE;
     }
 
     if (n != -1) {
       fprintf(stderr,"duplicate number\n");
-      usage();
+      usage(stderr);
       return EXIT_FAILURE;
     }
     n = atol(argv[0]);
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
   if (n == -1) {
     fprintf(stderr,"need a number\n");
-    usage();
+    usage(stderr);
     return EXIT_FAILURE;
   }
 

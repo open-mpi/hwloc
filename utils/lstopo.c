@@ -54,13 +54,13 @@ FILE *open_file(const char *filename, const char *mode)
   return fopen(filename, mode);
 }
 
-static void usage(void)
+static void usage(FILE *where)
 {
-  fprintf (stderr, "Usage: lstopo [ options ]... [ filename ]\n");
-  fprintf (stderr, "\n");
-  fprintf (stderr, "By default, lstopo displays a graphical window with the topology if DISPLAY is\nset, else a text output on the standard output.\n");
-  fprintf (stderr, "To force a text output on the standard output, specify -, -.extn, or /dev/stdout as\nfilename.\n");
-  fprintf (stderr, "Recognised file formats are: .txt, .fig"
+  fprintf (where, "Usage: lstopo [ options ]... [ filename ]\n");
+  fprintf (where, "\n");
+  fprintf (where, "By default, lstopo displays a graphical window with the topology if DISPLAY is\nset, else a text output on the standard output.\n");
+  fprintf (where, "To force a text output on the standard output, specify -, -.extn, or /dev/stdout as\nfilename.\n");
+  fprintf (where, "Recognised file formats are: .txt, .fig"
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_PDF_SURFACE
 		  ", .pdf"
@@ -79,19 +79,19 @@ static void usage(void)
 		  ", .xml"
 #endif /* HAVE_XML */
 		  "\n");
-  fprintf (stderr, "\nRecognized options:\n");
-  fprintf (stderr, "-v                  enable the verbose mode (disabled by default)\n");
-  fprintf (stderr, "--verbose           enable the verbose mode (disabled by default)\n");
-  fprintf (stderr, "--no-caches         do not show caches\n");
-  fprintf (stderr, "--no-useless-caches do not show caches which do not have a hierarchical impact\n");
-  fprintf (stderr, "--whole-system      do not consider administration limitations\n");
-  fprintf (stderr, "--merge             do not show levels that do not have a hierarcical impact\n");
-  fprintf (stderr, "--synthetic \"2 2\"   simulate a fake hierarchy\n");
+  fprintf (where, "\nOptions:\n");
+  fprintf (where, "   -v                  enable the verbose mode (disabled by default)\n");
+  fprintf (where, "   --verbose           enable the verbose mode (disabled by default)\n");
+  fprintf (where, "   --no-caches         do not show caches\n");
+  fprintf (where, "   --no-useless-caches do not show caches which do not have a hierarchical impact\n");
+  fprintf (where, "   --whole-system      do not consider administration limitations\n");
+  fprintf (where, "   --merge             do not show levels that do not have a hierarcical impact\n");
+  fprintf (where, "   --synthetic \"2 2\"   simulate a fake hierarchy\n");
 #ifdef HAVE_XML
-  fprintf (stderr, "--xml <path>        read topology from XML file <path>\n");
+  fprintf (where, "   --xml <path>        read topology from XML file <path>\n");
 #endif
 #ifdef LINUX_SYS
-  fprintf (stderr, "\nThe TOPO_FSYS_ROOT_PATH environment variable can be used to specify the path to\n a chroot containing the /proc and /sys of another system\n");
+  fprintf (where, "\nThe TOPO_FSYS_ROOT_PATH environment variable can be used to specify the path to\n a chroot containing the /proc and /sys of another system\n");
 #endif
 }
 
@@ -119,7 +119,7 @@ main (int argc, char *argv[])
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
 	verbose_mode = 1;
       else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
-	usage();
+	usage(stdout);
         exit(EXIT_SUCCESS);
       }
       else if (!strcmp (argv[1], "--no-caches"))
@@ -132,14 +132,14 @@ main (int argc, char *argv[])
 	merge = 1;
       else if (!strcmp (argv[1], "--synthetic")) {
 	if (argc <= 2) {
-	  usage ();
+	  usage (stderr);
 	  exit(EXIT_FAILURE);
 	}
 	synthetic = argv[2]; opt = 1;
 #ifdef HAVE_XML
       } else if (!strcmp (argv[1], "--xml")) {
 	if (argc <= 2) {
-	  usage ();
+	  usage (stderr);
 	  exit(EXIT_FAILURE);
 	}
 	xmlpath = argv[2]; opt = 1;
@@ -149,7 +149,7 @@ main (int argc, char *argv[])
       } else {
 	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
-	  usage ();
+	  usage (stderr);
 	  exit(EXIT_FAILURE);
 	} else
 	  filename = argv[1];
@@ -220,7 +220,7 @@ main (int argc, char *argv[])
 #endif
   else {
     fprintf(stderr, "file format not supported\n");
-    usage();
+    usage(stderr);
     exit(EXIT_FAILURE);
   }
 

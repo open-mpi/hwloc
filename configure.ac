@@ -250,6 +250,11 @@ fi
 AC_PATH_PROG([BASH], [bash])
 AC_PATH_PROG([W3M], [w3m])
 
+AC_PATH_PROG([HELP2MAN], [help2man])
+AC_CHECK_FILE(${srcdir}/utils/lstopo.1, [topo_have_utils_man=yes], [:])
+AM_CONDITIONAL([TOPO_HAVE_UTILS_MAN], [test "x$topo_have_utils_man" = "xyes"])
+AM_CONDITIONAL([TOPO_INSTALL_UTILS_MAN], [test "x$topo_have_utils_man" = "xyes" -o "x$HELP2MAN" != "x"])
+
 AC_CHECK_FUNCS([ffs], [
   AC_CHECK_DECL([ffs],[
     AC_DEFINE([TOPO_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])

@@ -39,22 +39,22 @@
 #include <string.h>
 #include <assert.h>
 
-static void usage(void)
+static void usage(FILE *where)
 {
-  fprintf(stderr, "Usage: topomask [options] [string] ...\n");
-  fprintf(stderr, "  <string> may be <depth:index>\n");
-  fprintf(stderr, "    <depth> may be system, machine, node, socket, core, proc or a numeric depth\n");
-  fprintf(stderr, "    <index> may be:\n");
-  fprintf(stderr, "      X\tone object with index X\n");
-  fprintf(stderr, "      X-Y\tall objects with index between X and Y\n");
-  fprintf(stderr, "      X-\tall objects with index at least X\n");
-  fprintf(stderr, "      X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
-  fprintf(stderr, "    several <depth:index> may be concatenated with `.' to select some specific children\n");
-  fprintf(stderr, "    <string> may also be a cpuset string\n");
-  fprintf(stderr, "    if prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
-  fprintf(stderr, "  Options may be\n");
-  fprintf(stderr, "    -v\tverbose\n");
-  fprintf(stderr, "    --nodes\treport a list of memory nodes near the CPU set\n");
+  fprintf(where, "Usage: topomask [options] [string] ...\n");
+  fprintf(where, "\n<string> may be <depth:index>\n");
+  fprintf(where, "  -  <depth> may be system, machine, node, socket, core, proc or a numeric depth\n");
+  fprintf(where, "  -  <index> may be\n");
+  fprintf(where, "    .  X\tone object with index X\n");
+  fprintf(where, "    .  X-Y\tall objects with index between X and Y\n");
+  fprintf(where, "    .  X-\tall objects with index at least X\n");
+  fprintf(where, "    .  X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
+  fprintf(where, "  -  several <depth:index> may be concatenated with `.' to select some specific children\n");
+  fprintf(where, "\n<string> may also be a cpuset string\n");
+  fprintf(where, "\nIf prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
+  fprintf(where, "\nOptions:\n");
+  fprintf(where, "  -v\tverbose\n");
+  fprintf(where, "  --nodes\treport a list of memory nodes near the CPU set\n");
 }
 
 typedef enum topomask_append_mode_e {
@@ -190,15 +190,15 @@ int main(int argc, char *argv[])
         verbose = 1;
         goto next;
       }
-      if (!strcmp(argv[0], "--help")) {
-	usage();
+      if (!strcmp(argv[1], "--help")) {
+	usage(stdout);
 	return EXIT_SUCCESS;
       }
       if (!strcmp(argv[1], "--nodes")) {
 	reportnodes = 1;
         goto next;
       }
-      usage();
+      usage(stderr);
       return EXIT_FAILURE;
     }
 
