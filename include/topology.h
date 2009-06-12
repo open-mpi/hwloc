@@ -127,7 +127,10 @@ topo_obj_type_t topo_get_order_type(int order);
  * @{
  */
 
-/** \brief Structure of a topology Object */
+/** \brief Structure of a topology Object
+ *
+ * Applications mustn't modify any field except ::userdata .
+ */
 struct topo_obj {
   /* physical information */
   enum topo_obj_type_e type;		/**< \brief Type of object */
