@@ -309,6 +309,11 @@ int main(void)
 
 A lot of traversal examples are available in topology/helper.h .
 
+Further documentation is available in manual pages, pdf, and html format
+in the source tarball in doc/doxygen-doc/, after doxygen compilation
+for svn checkouts, and are installed in the usual manual repository and
+$prefix/share/doc/topology/.
+
 \htmlonly
 </div><div class="section" id="bugs">
 \endhtmlonly
