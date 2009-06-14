@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "lstopo.h"
 
@@ -76,7 +77,7 @@ void output_text(topo_topology_t topology, const char *filename, int verbose_mod
   else {
     output = open_file(filename, "w"); 
     if (!output) {
-      fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+      fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
       return;
     }
   }

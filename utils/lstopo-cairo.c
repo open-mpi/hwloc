@@ -63,6 +63,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "lstopo.h"
 
@@ -122,7 +123,7 @@ topo_cairo_paint(struct draw_methods *methods, topo_topology_t topology, cairo_s
   cairo_destroy(c);
 }
 
-static void null(void) {};
+static void null(void) {}
 #endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
@@ -313,7 +314,7 @@ output_png(topo_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
-    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
@@ -348,7 +349,7 @@ output_pdf(topo_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
-    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
@@ -383,7 +384,7 @@ output_ps(topo_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
-    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
@@ -418,7 +419,7 @@ output_svg(topo_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
-    fprintf(stderr, "Failed to open %s for writing (%m)\n", filename);
+    fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
