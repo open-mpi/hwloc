@@ -73,7 +73,7 @@ topo_fallback_nbprocessors(void) {
   return sysconf(_SC_NPROCESSORS_CONF);
 #elif HAVE_DECL__SC_NPROC_CONF
   return sysconf(_SC_NPROC_CONF);
-#elif HAVE_HOST_INFO
+#elif defined(HAVE_HOST_INFO) && HAVE_HOST_INFO
   struct host_basic_info info;
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
