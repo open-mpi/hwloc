@@ -121,7 +121,7 @@ browse(struct topo_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp)
   }
 }
 
-void
+static void
 topo_look_lgrp(struct topo_topology *topology)
 {
   lgrp_cookie_t cookie;
@@ -143,7 +143,7 @@ topo_look_lgrp(struct topo_topology *topology)
 
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
-void
+static void
 topo_look_kstat(struct topo_topology *topology)
 {
   kstat_ctl_t *kc = kstat_open();
