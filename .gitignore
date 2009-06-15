@@ -25,3 +25,6 @@ cscope.*
 /tests/linux/test-topology.sh
 /utils/lstopo
 /utils/closest
+/doc/doxygen-doc
+/doc/images/diagram.eps
+/doc/images/diagram,png
