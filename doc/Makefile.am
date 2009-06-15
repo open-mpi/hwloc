@@ -104,6 +104,10 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_obj_type_of_string.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_t.3 \
 	@DX_DOCDIR@/man/man3/topo_set_cpubind.3 \
+	@DX_DOCDIR@/man/man3/topo_set_thisproc_cpubind.3 \
+	@DX_DOCDIR@/man/man3/topo_set_thisthread_cpubind.3 \
+	@DX_DOCDIR@/man/man3/topo_set_proc_cpubind.3 \
+	@DX_DOCDIR@/man/man3/topo_set_thread_cpubind.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_destroy.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_get_info.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_ignore_all_keep_structure.3 \
