@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
   long n = -1;
   char * synthetic = NULL;
   char * xmlpath = NULL;
-  int verbose;
+  int verbose = 0;
 
   /* skip argv[0], handle options */
   argv++;
