@@ -379,7 +379,7 @@ extern int topo_obj_cpuset_snprintf(char * __topo_restrict str, size_t size, siz
  * a single CPU remains in the set. This way, the process has no
  * of migrating between different CPUs.
  */
-extern int topo_set_cpubind(const topo_cpuset_t *set);
+extern int topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set);
 
 /** @} */
 

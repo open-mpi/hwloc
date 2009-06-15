@@ -293,7 +293,7 @@ int main(void)
 	topo_cpuset_singlify(&cpuset);
 
 	/* And bind there.  */
-	if (topo_set_cpubind(&cpuset)) {
+	if (topo_set_cpubind(topology, &cpuset)) {
 		char s[TOPO_CPUSET_STRING_LENGTH + 1];
 		topo_cpuset_snprintf(s, sizeof(s), &obj->cpuset);
 		printf("Couldn't bind to cpuset %s\n", s);

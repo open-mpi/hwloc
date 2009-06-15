@@ -35,6 +35,7 @@
 #include <topology/private.h>
 
 #include <unistd.h>
+#include <errno.h>
 #include <assert.h>
 
 static void usage(FILE *where)
@@ -82,6 +83,12 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
+    if (bind_cpus) {
+      fprintf(stderr, "more than one cpuset\n");
+      usage(stderr);
+      return EXIT_FAILURE;
+    }
+
     topo_cpuset_from_string(argv[0], &cpu_set);
     bind_cpus = 1;
     if (verbose)
@@ -94,11 +101,17 @@ int main(int argc, char *argv[])
   }
 
   if (bind_cpus) {
+    topo_topology_t topology;
+    topo_topology_init(&topology);
+    topo_topology_load(topology);
+
     if (single)
       topo_cpuset_singlify(&cpu_set);
-    ret = topo_set_cpubind(&cpu_set);
+    ret = topo_set_cpubind(topology, &cpu_set);
     if (ret)
-      fprintf(stderr, "topo_set_cpubind failed\n");
+      fprintf(stderr, "topo_set_cpubind %"TOPO_PRIxCPUSET" failed (errno %d %s)\n", TOPO_CPUSET_PRINTF_VALUE(&cpu_set), errno, strerror(errno));
+
+    topo_topology_destroy(topology);
   }
 
   if (!argc)
