@@ -44,6 +44,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sched.h>
+#include <pthread.h>
 
 #  ifndef CPU_SET
 /* libc doesn't have support for sched_setaffinity, build system call
@@ -126,7 +127,7 @@ topo_opendirat(const char *path, int fsys_root_fd)
 #endif /* !HAVE_OPENAT */
 
 static int
-topo_linux_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_linux_set_tid_cpubind(topo_topology_t topology, pid_t tid, const topo_cpuset_t *topo_set, int strict)
 {
 
   /* TODO Kerrighed: Use
@@ -145,14 +146,72 @@ topo_linux_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, 
   topo_cpuset_foreach_end();
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-  return sched_setaffinity(0, &linux_set);
+  return sched_setaffinity(tid, &linux_set);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-  return sched_setaffinity(0, sizeof(linux_set), &linux_set);
+  return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
 #else /* CPU_SET */
   unsigned long mask = topo_cpuset_to_ulong(topo_set);
 
-  return sched_setaffinity(0, sizeof(mask), &mask);
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+  return sched_setaffinity(tid, &mask);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+  return sched_setaffinity(tid, sizeof(mask), &mask);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* CPU_SET */
+}
+
+static int
+topo_linux_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_linux_set_tid_cpubind(topology, 0, topo_set, strict);
+}
+
+static int
+topo_linux_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_linux_set_tid_cpubind(topology, 0, topo_set, strict);
+}
+
+static int
+topo_linux_set_proc_cpubind(topo_topology_t topology, pid_t pid, const topo_cpuset_t *topo_set, int strict)
+{
+  /* XXX: doesn't bind all threads of the processus !! */
+  /* Same problem for thisproc */
+  return topo_linux_set_tid_cpubind(topology, pid, topo_set, strict);
+}
+
+static int
+topo_linux_set_thread_cpubind(topo_topology_t topology, pthread_t tid, const topo_cpuset_t *topo_set, int strict)
+{
+  /* TODO Kerrighed: Use
+   * int migrate (pid_t pid, int destination_node);
+   * int migrate_self (int destination_node);
+   * int thread_migrate (int thread_id, int destination_node);
+   */
+
+#ifdef CPU_SET
+  cpu_set_t linux_set;
+  unsigned cpu;
+
+  CPU_ZERO(&linux_set);
+  topo_cpuset_foreach_begin(cpu, topo_set)
+    CPU_SET(cpu, &linux_set);
+  topo_cpuset_foreach_end();
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+  return pthread_setaffinity_np(tid, &linux_set);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+  return pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* CPU_SET */
+  unsigned long mask = topo_cpuset_to_ulong(topo_set);
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+  return pthread_setaffinity_np(tid, &mask);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+  return pthread_setaffinity_np(tid, sizeof(mask), &mask);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
 #endif /* CPU_SET */
 }
 
@@ -845,6 +904,8 @@ topo_look_linux(struct topo_topology *topology)
   topo_cpuset_zero(&admin_disabled_mems_set);
 
   topology->set_cpubind = topo_linux_set_cpubind;
+  topology->set_thread_cpubind = topo_linux_set_thread_cpubind;
+  topology->set_thisthread_cpubind = topo_linux_set_thisthread_cpubind;
 
   nodes_dir = topo_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);
   if (nodes_dir) {
