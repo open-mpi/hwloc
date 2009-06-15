@@ -51,28 +51,85 @@
 #include <radset.h>
 
 static int
-topo_osf_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_osf_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, const topo_cpuset_t *topo_set, int strict)
 {
   radset_t radset;
   unsigned cpu;
+
+  if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset)) {
+    if (pthread_rad_detach(thread))
+      return -1;
+    return 0;
+  }
 
   radsetcreate(&radset);
   rademptyset(radset);
   topo_cpuset_foreach_begin(cpu, topo_set)
     radaddset(radset, cpu);
   topo_cpuset_foreach_end()
-  if (pthread_rad_bind(pthread_self(), radset, RAD_INSIST))
-    return -1;
+  if (strict) {
+    if (pthread_rad_bind(thread, radset, RAD_INSIST))
+      return -1;
+  } else {
+    if (pthread_rad_attach(thread, radset, 0))
+      return -1;
+  }
   radsetdestroy(&radset);
 
   return 0;
 }
 
+static int
+topo_osf_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *topo_set, int strict)
+{
+  radset_t radset;
+  unsigned cpu;
 
-/* TODO: process: bind_to_cpu(), bind_to_cpu_id(), rad_bind_pid(),
+  if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset)) {
+    if (rad_detach_pid(pid))
+      return -1;
+    return 0;
+  }
+
+  radsetcreate(&radset);
+  rademptyset(radset);
+  topo_cpuset_foreach_begin(cpu, topo_set)
+    radaddset(radset, cpu);
+  topo_cpuset_foreach_end()
+  if (strict) {
+    if (rad_bind_pid(pid, radset, RAD_INSIST))
+      return -1;
+  } else {
+    if (rad_attach_pid(pid, radset, 0))
+      return -1;
+  }
+  radsetdestroy(&radset);
+
+  return 0;
+}
+
+static int
+topo_osf_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_osf_set_thread_cpubind(topology, pthread_self(), topo_set, strict);
+}
+
+static int
+topo_osf_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_osf_set_proc_cpubind(topology, getpid(), topo_set, strict);
+}
+
+static int
+topo_osf_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_osf_set_thisproc_cpubind(topology, topo_set, strict);
+}
+
+/* TODO: memory
  * nsg_init(), nsg_attach_pid()
  * assign_pid_to_pset()
- * */
+ */
 
 void
 topo_look_osf(struct topo_topology *topology)
@@ -85,6 +142,10 @@ topo_look_osf(struct topo_topology *topology)
   struct topo_obj *obj;
 
   topology->set_cpubind = topo_osf_set_cpubind;
+  topology->set_thread_cpubind = topo_osf_set_thread_cpubind;
+  topology->set_thisthread_cpubind = topo_osf_set_thisthread_cpubind;
+  topology->set_proc_cpubind = topo_osf_set_proc_cpubind;
+  topology->set_thisproc_cpubind = topo_osf_set_thisproc_cpubind;
 
   nbnodes=rad_get_num();
 

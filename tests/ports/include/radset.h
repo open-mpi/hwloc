@@ -15,11 +15,17 @@ extern int radaddset(radset_t set, radid_t radid);
 extern int radsetdestroy(radset_t *set);
 
 
+int rad_attach_pid(pid_t pid, radset_t radset, unsigned long flags);
 int pthread_rad_attach(pthread_t thread, radset_t radset, unsigned long flags);
+int rad_detach_pid(pid_t pid);
+int pthread_rad_detach(pthread_t thread);
+
 
 /* (strict) */
 #define RAD_INSIST 1
+int rad_bind_pid(pid_t pid, radset_t radset, unsigned long flags);
 int pthread_rad_bind(pthread_t thread, radset_t radset, unsigned long flags);
+
 
 
 #endif /* LIBTOPOLOGY_RADSET_H */

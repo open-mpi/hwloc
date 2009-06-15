@@ -98,6 +98,7 @@ case ${target} in
     ;;
   *-*-osf*)
     AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
+    LIBS="$LIBS -lpthread"
     osf=yes
     ;;
   *-*-mingw*|*-*-cygwin*)
