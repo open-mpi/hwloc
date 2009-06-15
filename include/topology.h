@@ -372,9 +372,9 @@ extern int topo_obj_cpuset_snprintf(char * __topo_restrict str, size_t size, siz
 
 /** \defgroup topology_binding Binding
  *
- * It is often useful to call topo_cpuset_singlify() first so that
- * a single CPU remains in the set. This way, the process will not
- * even migrate between different CPUs.
+ * It is often useful to call topo_cpuset_singlify() first so that a single CPU
+ * remains in the set. This way, the process will not even migrate between
+ * different CPUs. Some OSes also only support that kind of binding.
  *
  * \note Depending on OSes and implementations, strict binding may not be
  * possible, not be allowed, only used as a hint, etc. If strict binding is
