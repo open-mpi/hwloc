@@ -270,17 +270,21 @@ endif
 if TOPO_HAVE_PDF
 else
 if DX_COND_pdf
+if TOPO_INSTALL_PDF
 all-local: @DX_DOCDIR@/libtopology.pdf
 @DX_DOCDIR@/libtopology.pdf: @DX_DOCDIR@/libtopology.tag
+endif
 endif
 endif
 
 if TOPO_HAVE_HTML
 else
 if DX_COND_html
+if TOPO_INSTALL_HTML
 all-local: @DX_DOCDIR@/html
 	cp $(srcdir)/doxygen.css @DX_DOCDIR@/html/
 @DX_DOCDIR@/html: @DX_DOCDIR@/libtopology.tag
+endif
 endif
 endif
 
@@ -294,18 +298,22 @@ pkginclude_HEADERS = \
 	$(top_srcdir)/include/topology/cpuset.h
 
 if DX_COND_html
+if TOPO_INSTALL_HTML
 CLEANFILES += images/diagram.png
 pkginclude_HEADERS += images/diagram.png
 images/diagram.png: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) -p images
 	$(FIG2DEV) -L png $< $@
 endif
+endif
 if DX_COND_pdf
+if TOPO_INSTALL_PDF
 CLEANFILES += images/diagram.eps
 pkginclude_HEADERS += images/diagram.eps
 images/diagram.eps: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) -p images
 	$(FIG2DEV) -L eps $< $@
+endif
 endif
 
 
