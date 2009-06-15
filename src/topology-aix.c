@@ -78,12 +78,6 @@ topo_aix_set_sth_cpubind(topo_topology_t topology, int what, int who, const topo
 }
 
 static int
-topo_aix_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
-{
-  return topo_aix_set_sth_cpubind(topology, BINDPROCESS, getpid(), topo_set, strict);
-}
-
-static int
 topo_aix_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
 {
   return topo_aix_set_sth_cpubind(topology, BINDPROCESS, getpid(), topo_set, strict);
@@ -109,6 +103,12 @@ topo_aix_set_thread_cpubind(topo_topology_t topology, topo_thread_t pthread, con
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
   return topo_aix_set_sth_cpubind(topology, BINDTHREAD, info.__pi_tid, topo_set, strict);
+}
+
+static int
+topo_aix_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_aix_set_thisproc_cpubind(topology, topo_set, strict);
 }
 
 static void
