@@ -12,7 +12,7 @@ extern int processor_bind(idtype_t idtype, id_t id, processorid_t processorid, p
 
 /* AIX */
 typedef short cpu_t;
-#define BINDPROCESSOR 1
+#define BINDPROCESS 1
 #define BINDTHREAD 2
 #define PROCESSOR_CLASS_ANY ((cpu_t)(-1))
 extern int bindprocessor(int What, int Who, cpu_t Where); 

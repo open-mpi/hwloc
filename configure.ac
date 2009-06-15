@@ -93,6 +93,7 @@ case ${target} in
     ;;
   *-*-aix*)
     AC_DEFINE(AIX_SYS, 1, Define to 1 on AIX)
+    LIBS="$LIBS -lpthread"
     aix=yes
     ;;
   *-*-osf*)
