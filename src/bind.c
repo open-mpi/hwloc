@@ -34,6 +34,7 @@
 #include <config.h>
 #include <topology.h>
 #include <topology/private.h>
+#include <topology/helper.h>
 
 #include <errno.h>
 
@@ -43,6 +44,8 @@
 int
 topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
 {
+  if (topo_cpuset_isfull(set))
+    set = &topo_get_system_obj(topology)->cpuset;
   if (topology->set_cpubind)
     return topology->set_cpubind(topology, set, strict);
   errno = ENOTSUP;
@@ -52,6 +55,8 @@ topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
 int
 topo_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
 {
+  if (topo_cpuset_isfull(set))
+    set = &topo_get_system_obj(topology)->cpuset;
   if (topology->set_cpubind)
     return topology->set_thisproc_cpubind(topology, set, strict);
   errno = ENOTSUP;
@@ -61,6 +66,8 @@ topo_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *set, in
 int
 topo_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
 {
+  if (topo_cpuset_isfull(set))
+    set = &topo_get_system_obj(topology)->cpuset;
   if (topology->set_cpubind)
     return topology->set_thisthread_cpubind(topology, set, strict);
   errno = ENOTSUP;
@@ -70,6 +77,8 @@ topo_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *set, 
 int
 topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int strict)
 {
+  if (topo_cpuset_isfull(set))
+    set = &topo_get_system_obj(topology)->cpuset;
   if (topology->set_cpubind)
     return topology->set_proc_cpubind(topology, pid, set, strict);
   errno = ENOTSUP;
@@ -79,6 +88,8 @@ topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuse
 int
 topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int strict)
 {
+  if (topo_cpuset_isfull(set))
+    set = &topo_get_system_obj(topology)->cpuset;
   if (topology->set_cpubind)
     return topology->set_thread_cpubind(topology, tid, set, strict);
   errno = ENOTSUP;
