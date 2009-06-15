@@ -223,3 +223,13 @@ topo_look_kstat(struct topo_topology *topology)
 }
 #endif /* LIBKSTAT */
 
+void topo_look_solaris(struct topo_topology *topology)
+{
+#ifdef HAVE_LIBLGRP
+  topo_look_lgrp(topology);
+#endif /* HAVE_LIBLGRP */
+#ifdef HAVE_LIBKSTAT
+  topo_look_kstat(topology);
+#endif /* HAVE_LIBKSTAT */
+  topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
+}

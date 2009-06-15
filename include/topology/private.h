@@ -132,12 +132,9 @@ extern void topo_look_xml(struct topo_topology *topology);
 extern void topo_backend_xml_exit(struct topo_topology *topology);
 #endif /* HAVE_XML */
 
-#ifdef HAVE_LIBLGRP
-extern void topo_look_lgrp(topo_topology_t topology);
-#endif /* HAVE_LIBLGRP */
-#ifdef HAVE_LIBKSTAT
-extern void topo_look_kstat(topo_topology_t topology);
-#endif /* HAVE_LIBKSTAT */
+#ifdef SOLARIS_SYS
+extern void topo_look_solaris(struct topo_topology *topology);
+#endif /* SOLARIS_SYS */
 
 #ifdef AIX_SYS
 extern void topo_look_aix(struct topo_topology *topology);

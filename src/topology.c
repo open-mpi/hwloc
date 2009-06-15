@@ -594,15 +594,9 @@ topo_discover(struct topo_topology *topology)
     topo_look_osf(topology);
 #    endif /* OSF_SYS */
 
-#    ifdef HAVE_LIBLGRP
-    topo_look_lgrp(topology);
-#    endif /* HAVE_LIBLGRP */
-#    ifdef HAVE_LIBKSTAT
-    topo_look_kstat(topology);
-#    endif /* HAVE_LIBKSTAT */
 #    ifdef  SOLARIS_SYS
 #      define HAVE_OS_SUPPORT
-    topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
+    topo_look_solaris(topology);
 #    endif /* SOLARIS_SYS */
 
 #    ifdef  WIN_SYS
