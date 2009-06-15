@@ -43,8 +43,6 @@
 int
 topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
 {
-  if (topology->is_fake || topology->is_loaded)
-    return 0;
   if (topology->set_cpubind)
     return topology->set_cpubind(topology, set, strict);
   errno = ENOTSUP;
