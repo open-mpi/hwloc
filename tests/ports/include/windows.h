@@ -14,7 +14,10 @@ typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)();
 typedef void *PVOID;
-typedef PVOID HANDLE;
+
+// This is to cope with linux using integers for topo_pid_t and topo_thread_t
+//typedef PVOID HANDLE;
+typedef int HANDLE;
 
 #ifdef __GNUC__
 #define _ANONYMOUS_UNION __extension__
