@@ -181,9 +181,16 @@ topo_linux_set_proc_cpubind(topo_topology_t topology, pid_t pid, const topo_cpus
   return topo_linux_set_tid_cpubind(topology, pid, topo_set, strict);
 }
 
+#pragma weak pthread_setaffinity_np
+
 static int
 topo_linux_set_thread_cpubind(topo_topology_t topology, pthread_t tid, const topo_cpuset_t *topo_set, int strict)
 {
+  if (!pthread_setaffinity_np) {
+    /* ?! Application uses set_thread_cpubind, but doesn't link against libpthread ?! */
+    errno = ENOTSUP;
+    return -1;
+  }
   /* TODO Kerrighed: Use
    * int migrate (pid_t pid, int destination_node);
    * int migrate_self (int destination_node);
