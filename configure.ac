@@ -124,7 +124,6 @@ AC_USE_SYSTEM_EXTENSIONS # for O_DIRECTORY, fdopen, ffsl, ...
 
 AC_LANG([C])
 
-AM_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_PROG_MKDIR_P
 
@@ -197,14 +196,6 @@ fi
 if test "x$enable_cairo" = "xyes"; then
   AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
 fi
-
-# override the autoheader code from AC_DEFINE
-AH_VERBATIM([HAVE_CAIRO], [
-#ifndef TOPO_DISABLE_GRAPHIC_LIBS
-/* Define to 1 if you have the `cairo' library. */
-#undef HAVE_CAIRO
-#endif
-])
 
 AC_ARG_ENABLE([xml],
   [AS_HELP_STRING([--disable-xml], [disable the XML back-end of `lstopo'])],
