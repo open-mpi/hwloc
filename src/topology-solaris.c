@@ -46,12 +46,12 @@
 #include <sys/procset.h>
 
 static int
-topo_solaris_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_solaris_set_sth_cpubind(topo_topology_t topology, idtype_t idtype, id_t id, const topo_cpuset_t *topo_set, int strict)
 {
   unsigned target;
 
-  if (topo_cpuset_isfull(topo_set)) {
-    if (processor_bind(P_LWPID, P_MYID, PBIND_NONE, NULL) != 0)
+  if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset)) {
+    if (processor_bind(idtype, id, PBIND_NONE, NULL) != 0)
       return -1;
     return 0;
   }
@@ -61,12 +61,38 @@ topo_solaris_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set
 
   target = topo_cpuset_first(topo_set);
 
-  if (processor_bind(P_LWPID, P_MYID,
+  if (processor_bind(idtype, id,
 		     (processorid_t) (target), NULL) != 0)
     return -1;
 
   return 0;
 }
+
+static int
+topo_solaris_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_solaris_set_sth_cpubind(topology, P_PID, pid, topo_set, strict);
+}
+
+static int
+topo_solaris_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_solaris_set_sth_cpubind(topology, P_PID, P_MYID, topo_set, strict);
+}
+
+static int
+topo_solaris_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_solaris_set_thisproc_cpubind(topology, topo_set, strict);
+}
+
+static int
+topo_solaris_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  return topo_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, topo_set, strict);
+}
+
+/* TODO: thread, maybe not easy because of the historical n:m implementation */
 
 #ifdef HAVE_LIBLGRP
 #      include <sys/lgrp_user.h>
@@ -251,6 +277,9 @@ topo_look_kstat(struct topo_topology *topology)
 void topo_look_solaris(struct topo_topology *topology)
 {
   topology->set_cpubind = topo_solaris_set_cpubind;
+  topology->set_proc_cpubind = topo_solaris_set_proc_cpubind;
+  topology->set_thisproc_cpubind = topo_solaris_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = topo_solaris_set_thisthread_cpubind;
 #ifdef HAVE_LIBLGRP
   topo_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */
