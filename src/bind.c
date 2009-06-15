@@ -57,7 +57,7 @@ topo_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *set, in
 {
   if (topo_cpuset_isfull(set))
     set = &topo_get_system_obj(topology)->cpuset;
-  if (topology->set_cpubind)
+  if (topology->set_thisproc_cpubind)
     return topology->set_thisproc_cpubind(topology, set, strict);
   errno = ENOTSUP;
   return -1;
@@ -68,7 +68,7 @@ topo_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *set, 
 {
   if (topo_cpuset_isfull(set))
     set = &topo_get_system_obj(topology)->cpuset;
-  if (topology->set_cpubind)
+  if (topology->set_thisthread_cpubind)
     return topology->set_thisthread_cpubind(topology, set, strict);
   errno = ENOTSUP;
   return -1;
@@ -79,7 +79,7 @@ topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuse
 {
   if (topo_cpuset_isfull(set))
     set = &topo_get_system_obj(topology)->cpuset;
-  if (topology->set_cpubind)
+  if (topology->set_proc_cpubind)
     return topology->set_proc_cpubind(topology, pid, set, strict);
   errno = ENOTSUP;
   return -1;
@@ -90,7 +90,7 @@ topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_
 {
   if (topo_cpuset_isfull(set))
     set = &topo_get_system_obj(topology)->cpuset;
-  if (topology->set_cpubind)
+  if (topology->set_thread_cpubind)
     return topology->set_thread_cpubind(topology, tid, set, strict);
   errno = ENOTSUP;
   return -1;
