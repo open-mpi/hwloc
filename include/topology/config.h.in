@@ -38,8 +38,10 @@
 #endif
 
 #undef topo_pid_t
-#if (_POSIX_THREADS > 0)
-#include <pthread.h>
+#ifdef _POSIX_THREADS
+#  if (_POSIX_THREADS > 0)
+#    include <pthread.h>
+#  endif
 #endif
 
 #undef topo_thread_t
