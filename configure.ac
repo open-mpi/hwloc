@@ -166,6 +166,21 @@ AC_HAVE_HEADERS([mach/mach_init.h], [
   AC_CHECK_FUNCS([host_info])
 ])
 
+case ${target} in
+  *-*-mingw*)
+    topo_pid_t=HANDLE
+    topo_thread_t=HANDLE
+    ;;
+  *)
+    topo_pid_t=pid_t
+    AC_CHECK_TYPES([pthread_t], [topo_thread_t=pthread_t], [:], [[#include <pthread.h>]])
+    ;;
+esac
+AC_DEFINE_UNQUOTED(topo_pid_t, $topo_pid_t, [Define this to the process ID type])
+if test "x$topo_thread_t" != "x" ; then
+  AC_DEFINE_UNQUOTED(topo_thread_t, $topo_thread_t, [Define this to the thread ID type])
+fi
+
 AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[
 #define _GNU_SOURCE
 #include <sched.h>

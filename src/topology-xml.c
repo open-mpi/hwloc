@@ -237,10 +237,22 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
   }
 }
 
+static int
+topo_xml_set_cpubind(void) {
+  /* TODO: check cpuset validity */
+  return 0;
+}
+
 void
 topo_look_xml(struct topo_topology *topology)
 {
   xmlNode* root_node;
+
+  topology->set_cpubind = (void*) topo_xml_set_cpubind;
+  topology->set_thisproc_cpubind = (void*) topo_xml_set_cpubind;
+  topology->set_thisthread_cpubind = (void*) topo_xml_set_cpubind;
+  topology->set_proc_cpubind = (void*) topo_xml_set_cpubind;
+  topology->set_thread_cpubind = (void*) topo_xml_set_cpubind;
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 

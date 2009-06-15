@@ -50,6 +50,32 @@
 #include <topology/debug.h>
 
 #include <sys/rset.h>
+#include <sys/processor.h>
+#include <sys/thread.h>
+
+static int
+topo_aix_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  unsigned target;
+
+  if (topo_cpuset_isfull(topo_set)) {
+#warning TODO unbind thread with PROCESSOR_CLASS_ANY
+  }
+
+  if (topo_cpuset_weight(topo_set) != 1)
+    return -1;
+
+  target = topo_cpuset_first(topo_set);
+
+  /* TODO: pthread/thread: pthdb_pthread_tid / pthdb_tid_pthread */
+
+  /* TODO: NUMA: ra_attachrset / rs_setpartition */
+
+  if (bindprocessor(BINDTHREAD, thread_self(), target))
+    return -1;
+
+  return 0;
+}
 
 static void
 look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology, int level)
@@ -115,6 +141,8 @@ topo_look_aix(struct topo_topology *topology)
 {
   unsigned i;
   /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
+
+  topology->set_cpubind = topo_aix_set_cpubind;
 
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {

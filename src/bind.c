@@ -35,179 +35,56 @@
 #include <topology.h>
 #include <topology/private.h>
 
-#ifdef LINUX_SYS
-#include <sched.h>
-
-#  ifndef CPU_SET
-/* libc doesn't have support for sched_setaffinity, build system call
- * ourselves: */
-#    include <linux/unistd.h>
-#    ifndef __NR_sched_setaffinity
-#       ifdef __i386__
-#         define __NR_sched_setaffinity 241
-#       elif defined(__x86_64__)
-#         define __NR_sched_setaffinity 203
-#       elif defined(__ia64__)
-#         define __NR_sched_setaffinity 1231
-#       else
-#         error "don't know the syscall number for sched_setaffinity on this architecture"
-#       endif
-_syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *, mask);
-#    endif
-#  endif
-
-static int
-topo_linux_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set)
-{
-
-  /* TODO Kerrighed: Use
-   * int migrate (pid_t pid, int destination_node);
-   * int migrate_self (int destination_node);
-   * int thread_migrate (int thread_id, int destination_node);
-   */
-
-#ifdef CPU_SET
-  cpu_set_t linux_set;
-  unsigned cpu;
-
-  CPU_ZERO(&linux_set);
-  topo_cpuset_foreach_begin(cpu, topo_set)
-    CPU_SET(cpu, &linux_set);
-  topo_cpuset_foreach_end();
-
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
-  return sched_setaffinity(0, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
-  return sched_setaffinity(0, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
-#else /* CPU_SET */
-  unsigned long mask = topo_cpuset_to_ulong(topo_set);
-
-  return sched_setaffinity(0, sizeof(mask), &mask);
-#endif /* CPU_SET */
-}
-#endif /* LINUX_SYS */
-
-#ifdef SOLARIS_SYS
-#include <sys/types.h>
-#include <sys/processor.h>
-#include <sys/procset.h>
-
-static int
-topo_solaris_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set)
-{
-  unsigned target;
-
-  if (topo_cpuset_isfull(topo_set)) {
-    if (processor_bind(P_LWPID, P_MYID, PBIND_NONE, NULL) != 0)
-      return -1;
-    return 0;
-  }
-
-  if (topo_cpuset_weight(topo_set) != 1)
-    return -1;
-
-  target = topo_cpuset_first(topo_set);
-
-  if (processor_bind(P_LWPID, P_MYID,
-		     (processorid_t) (target), NULL) != 0)
-    return -1;
-
-  return 0;
-}
-#endif /* SOLARIS_SYS */
-
-#ifdef WIN_SYS
-#include <windows.h>
-static int
-topo_win_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set)
-{
-  DWORD mask = topo_cpuset_to_ulong(topo_set);
-  if (!SetThreadAffinityMask(GetCurrentThread(), mask))
-    return -1;
-  return 0;
-}
-#endif /* WIN_SYS */
-
-#ifdef OSF_SYS
-#include <radset.h>
-#include <numa.h>
-static int
-topo_osf_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set)
-{
-  radset_t radset;
-  unsigned cpu;
-
-  radsetcreate(&radset);
-  rademptyset(radset);
-  topo_cpuset_foreach_begin(cpu, topo_set)
-    radaddset(radset, cpu);
-  if (pthread_rad_bind(pthread_self(), radset, RAD_INSIST))
-    return -1;
-  radsetdestroy(&radset);
-
-  return 0;
-}
-
-/* TODO: process: bind_to_cpu(), bind_to_cpu_id(), rad_bind_pid(),
- * nsg_init(), nsg_attach_pid()
- * assign_pid_to_pset()
- * */
-#endif /* OSF_SYS */
-
-#ifdef AIX_SYS
-#include <sys/processor.h>
-#include <sys/thread.h>
-static int
-topo_aix_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set)
-{
-  unsigned target;
-
-  if (topo_cpuset_isfull(topo_set)) {
-#warning TODO unbind thread
-  }
-
-  if (topo_cpuset_weight(topo_set) != 1)
-    return -1;
-
-  target = topo_cpuset_first(topo_set);
-
-  /* TODO: pthread/thread: pthdb_pthread_tid / pthdb_tid_pthread */
-
-  /* TODO: NUMA: ra_attachrset / rs_setpartition */
-
-  if (bindprocessor(BINDTHREAD, thread_self(), target))
-    return -1;
-
-  return 0;
-}
-#endif /* AIX_SYS */
+#include <errno.h>
 
 /* TODO: GNU_SYS, FREEBSD_SYS, DARWIN_SYS, IRIX_SYS, HPUX_SYS
  * IRIX: see _DSM_MUSTRUN */
 
 int
-topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set)
-/* FIXME: add a pid parameter, which type is portable enough?  POSIX says that
- * pid_t shall be a signed integer type, on windows that can be a handle
- * (pointer) or an id.  */
+topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
 {
-  if (topology->is_fake)
+  if (topology->is_fake || topology->is_loaded)
     return 0;
-#ifdef LINUX_SYS
-  return topo_linux_set_cpubind(topology, set);
-#elif defined(SOLARIS_SYS)
-  return topo_solaris_set_cpubind(topology, set);
-#elif defined(WIN_SYS)
-  return topo_win_set_cpubind(topology, set);
-#elif defined(OSF_SYS)
-  return topo_osf_set_cpubind(topology, set);
-#elif defined(AIX_SYS)
-  return topo_aix_set_cpubind(topology, set);
-#else
-#warning "don't know how to bind on processors on this system"
+  if (topology->set_cpubind)
+    return topology->set_cpubind(topology, set, strict);
+  errno = ENOTSUP;
   return -1;
-#endif
+}
+
+int
+topo_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
+{
+  if (topology->set_cpubind)
+    return topology->set_thisproc_cpubind(topology, set, strict);
+  errno = ENOTSUP;
+  return -1;
+}
+
+int
+topo_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
+{
+  if (topology->set_cpubind)
+    return topology->set_thisthread_cpubind(topology, set, strict);
+  errno = ENOTSUP;
+  return -1;
+}
+
+int
+topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int strict)
+{
+  if (topology->set_cpubind)
+    return topology->set_proc_cpubind(topology, pid, set, strict);
+  errno = ENOTSUP;
+  return -1;
+}
+
+int
+topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int strict)
+{
+  if (topology->set_cpubind)
+    return topology->set_thread_cpubind(topology, tid, set, strict);
+  errno = ENOTSUP;
+  return -1;
 }
 
 /* TODO: memory bind */

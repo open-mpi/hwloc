@@ -3,9 +3,9 @@
 #ifndef LIBTOPOLOGY_NUMA_H
 #define LIBTOPOLOGY_NUMA_H
 
+#include <radset.h>
 typedef int cpu_cursor_t;
 #define SET_CURSOR_INIT -1
-typedef int radid_t;
 typedef int cpuid_t;
 #define CPU_NONE -1
 typedef int cpuset_t;

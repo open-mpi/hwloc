@@ -7,6 +7,7 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #undef TOPO_HAVE_FFS
 
@@ -35,5 +36,12 @@
 #else
 #error "unknown size for unsigned int."
 #endif
+
+#undef topo_pid_t
+#if (_POSIX_THREADS > 0)
+#include <pthread.h>
+#endif
+
+#undef topo_thread_t
 
 #endif /* LIBTOPOLOGY_CONFIGURATION_H */

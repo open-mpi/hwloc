@@ -43,6 +43,7 @@ static void usage(FILE *where)
   fprintf(where, "Usage: topobind [options] <cpuset> -- command ...\n");
   fprintf(where, "Options:\n");
   fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
+  fprintf(where, "   --strict\trequire strict binding\n");
   fprintf(where, "   -v\t\tverbose messages\n");
 }
 
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
   int bind_cpus = 0;
   int single = 0;
   int verbose = 0;
+  int strict = 0;
   int ret;
 
   /* skip argv[0], handle options */
@@ -76,6 +78,10 @@ int main(int argc, char *argv[])
       }
       else if (!strcmp(argv[0], "--single")) {
 	single = 1;
+	goto next;
+      }
+      else if (!strcmp(argv[0], "--strict")) {
+	strict = 1;
 	goto next;
       }
 
@@ -107,7 +113,7 @@ int main(int argc, char *argv[])
 
     if (single)
       topo_cpuset_singlify(&cpu_set);
-    ret = topo_set_cpubind(topology, &cpu_set);
+    ret = topo_set_cpubind(topology, &cpu_set, strict);
     if (ret)
       fprintf(stderr, "topo_set_cpubind %"TOPO_PRIxCPUSET" failed (errno %d %s)\n", TOPO_CPUSET_PRINTF_VALUE(&cpu_set), errno, strerror(errno));
 

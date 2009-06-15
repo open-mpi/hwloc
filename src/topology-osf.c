@@ -48,6 +48,31 @@
 #include <topology/debug.h>
 
 #include <numa.h>
+#include <radset.h>
+
+static int
+topo_osf_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  radset_t radset;
+  unsigned cpu;
+
+  radsetcreate(&radset);
+  rademptyset(radset);
+  topo_cpuset_foreach_begin(cpu, topo_set)
+    radaddset(radset, cpu);
+  topo_cpuset_foreach_end()
+  if (pthread_rad_bind(pthread_self(), radset, RAD_INSIST))
+    return -1;
+  radsetdestroy(&radset);
+
+  return 0;
+}
+
+
+/* TODO: process: bind_to_cpu(), bind_to_cpu_id(), rad_bind_pid(),
+ * nsg_init(), nsg_attach_pid()
+ * assign_pid_to_pset()
+ * */
 
 void
 topo_look_osf(struct topo_topology *topology)
@@ -58,6 +83,8 @@ topo_look_osf(struct topo_topology *topology)
   cpuid_t cpuid;
   cpuset_t cpuset;
   struct topo_obj *obj;
+
+  topology->set_cpubind = topo_osf_set_cpubind;
 
   nbnodes=rad_get_num();
 

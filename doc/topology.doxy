@@ -292,8 +292,8 @@ int main(void)
 	/* Get only one logical processor (in case the core is SMT/hyperthreaded).  */
 	topo_cpuset_singlify(&cpuset);
 
-	/* And bind there.  */
-	if (topo_set_cpubind(topology, &cpuset)) {
+	/* And try to bind ourself there.  */
+	if (topo_set_cpubind(topology, &cpuset, 0)) {
 		char s[TOPO_CPUSET_STRING_LENGTH + 1];
 		topo_cpuset_snprintf(s, sizeof(s), &obj->cpuset);
 		printf("Couldn't bind to cpuset %s\n", s);

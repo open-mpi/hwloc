@@ -23,5 +23,9 @@ EXTRA_DIST = \
 		include/sys/rset.h \
 		include/sys/lgrp_user.h \
 		include/sys/sysctl.h \
+		include/sys/procset.h \
+		include/sys/processor.h \
+		include/sys/thread.h \
+		include/radset.h \
 		include/numa.h
 

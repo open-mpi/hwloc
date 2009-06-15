@@ -43,6 +43,25 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sched.h>
+
+#  ifndef CPU_SET
+/* libc doesn't have support for sched_setaffinity, build system call
+ * ourselves: */
+#    include <linux/unistd.h>
+#    ifndef __NR_sched_setaffinity
+#       ifdef __i386__
+#         define __NR_sched_setaffinity 241
+#       elif defined(__x86_64__)
+#         define __NR_sched_setaffinity 203
+#       elif defined(__ia64__)
+#         define __NR_sched_setaffinity 1231
+#       else
+#         error "don't know the syscall number for sched_setaffinity on this architecture"
+#       endif
+_syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *, mask);
+#    endif
+#  endif
 
 #ifdef HAVE_OPENAT
 
@@ -105,6 +124,37 @@ topo_opendirat(const char *path, int fsys_root_fd)
 #define topo_opendir(p, d)    opendir(p)
 
 #endif /* !HAVE_OPENAT */
+
+static int
+topo_linux_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+
+  /* TODO Kerrighed: Use
+   * int migrate (pid_t pid, int destination_node);
+   * int migrate_self (int destination_node);
+   * int thread_migrate (int thread_id, int destination_node);
+   */
+
+#ifdef CPU_SET
+  cpu_set_t linux_set;
+  unsigned cpu;
+
+  CPU_ZERO(&linux_set);
+  topo_cpuset_foreach_begin(cpu, topo_set)
+    CPU_SET(cpu, &linux_set);
+  topo_cpuset_foreach_end();
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+  return sched_setaffinity(0, &linux_set);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+  return sched_setaffinity(0, sizeof(linux_set), &linux_set);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* CPU_SET */
+  unsigned long mask = topo_cpuset_to_ulong(topo_set);
+
+  return sched_setaffinity(0, sizeof(mask), &mask);
+#endif /* CPU_SET */
+}
 
 int
 topo_backend_sysfs_init(struct topo_topology *topology, const char *fsys_root_path)
@@ -793,6 +843,8 @@ topo_look_linux(struct topo_topology *topology)
 
   topo_cpuset_zero(&admin_disabled_cpus_set);
   topo_cpuset_zero(&admin_disabled_mems_set);
+
+  topology->set_cpubind = topo_linux_set_cpubind;
 
   nodes_dir = topo_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);
   if (nodes_dir) {

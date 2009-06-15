@@ -571,13 +571,20 @@ topo_discover(struct topo_topology *topology)
   } else {
 
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
+
   /* topo_look_* functions should use topo_obj_add to add objects initialized
    * through topo_setup_object. For node levels, memory_Kb and huge_page_free
    * must be initialized. For cache levels, memory_kB and attr.cache.depth must be
    * initialized, for misc levels, attr.misc.depth must be initialized
    */
+
   /* There must be at least a PROC object for each logical processor, at worse
-   * produced by topo_setup_proc_level()  */
+   * produced by topo_setup_proc_level()
+   */
+
+  /* Each OS type should also fill the bind functions pointers, at least the
+   * set_cpubind one
+   */
 
 #    ifdef LINUX_SYS
 #      define HAVE_OS_SUPPORT

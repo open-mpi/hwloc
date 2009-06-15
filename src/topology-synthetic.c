@@ -285,11 +285,23 @@ topo__look_synthetic(struct topo_topology *topology,
   return first_cpu;
 }
 
+static int
+topo_synthetic_set_cpubind(void) {
+  /* TODO: check cpuset validity */
+  return 0;
+}
+
 void
 topo_look_synthetic(struct topo_topology *topology)
 {
   topo_cpuset_t cpuset;
   unsigned first_cpu = 0, i;
+
+  topology->set_cpubind = (void*) topo_synthetic_set_cpubind;
+  topology->set_thisproc_cpubind = (void*) topo_synthetic_set_cpubind;
+  topology->set_thisthread_cpubind = (void*) topo_synthetic_set_cpubind;
+  topology->set_proc_cpubind = (void*) topo_synthetic_set_cpubind;
+  topology->set_thread_cpubind = (void*) topo_synthetic_set_cpubind;
 
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
     first_cpu = topo__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr.system.memory_kB, &cpuset);

@@ -228,8 +228,8 @@ int main(void)
         /* Get only one logical processor (in case the core is SMT/hyperthreaded).  */
         topo_cpuset_singlify(&cpuset);
 
-        /* And bind there.  */
-        if (topo_set_cpubind(&cpuset)) {
+        /* And try to bind ourself there.  */
+        if (topo_set_cpubind(topology, &cpuset, 0)) {
                 char s[TOPO_CPUSET_STRING_LENGTH + 1];
                 topo_cpuset_snprintf(s, sizeof(s), &obj->cpuset);
                 printf("Couldn't bind to cpuset %s\n", s);
@@ -249,6 +249,9 @@ source tarball in doc/doxygen-doc/, after doxygen compilation for svn
 checkouts, and are installed in the usual manual repository and $prefix/share/
 doc/topology/.
 
+To precisely define the vocabulary used by libtopology, a Glossary is
+available.
+
 Bugs and questions
 
 Bug reports and questions should be sent to the devel mailing list (http://
@@ -262,4 +265,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Fri Jun 12 13:53:31 2009 for libtopology by  doxygen 1.5.9
+Generated on Mon Jun 15 16:08:52 2009 for libtopology by  doxygen 1.5.9

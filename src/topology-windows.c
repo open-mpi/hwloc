@@ -169,6 +169,14 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 } SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, *PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX;
 #endif
 
+static int
+topo_win_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  DWORD mask = topo_cpuset_to_ulong(topo_set);
+  if (!SetThreadAffinityMask(GetCurrentThread(), mask))
+    return -1;
+  return 0;
+}
 
 void
 topo_look_windows(struct topo_topology *topology)
@@ -178,6 +186,8 @@ topo_look_windows(struct topo_topology *topology)
   DWORD length;
 
   HMODULE kernel32;
+
+  topology->set_cpubind = topo_win_set_cpubind;
 
   kernel32 = LoadLibrary("kernel32.dll");
   if (kernel32) {

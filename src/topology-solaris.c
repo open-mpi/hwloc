@@ -42,6 +42,31 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/processor.h>
+#include <sys/procset.h>
+
+static int
+topo_solaris_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+{
+  unsigned target;
+
+  if (topo_cpuset_isfull(topo_set)) {
+    if (processor_bind(P_LWPID, P_MYID, PBIND_NONE, NULL) != 0)
+      return -1;
+    return 0;
+  }
+
+  if (topo_cpuset_weight(topo_set) != 1)
+    return -1;
+
+  target = topo_cpuset_first(topo_set);
+
+  if (processor_bind(P_LWPID, P_MYID,
+		     (processorid_t) (target), NULL) != 0)
+    return -1;
+
+  return 0;
+}
 
 #ifdef HAVE_LIBLGRP
 #      include <sys/lgrp_user.h>
@@ -225,6 +250,7 @@ topo_look_kstat(struct topo_topology *topology)
 
 void topo_look_solaris(struct topo_topology *topology)
 {
+  topology->set_cpubind = topo_solaris_set_cpubind;
 #ifdef HAVE_LIBLGRP
   topo_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */

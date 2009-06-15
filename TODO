@@ -42,14 +42,11 @@ Support
 
 Binding
 =======
-* topo_set_cpubind(pid, ...) which type for pid? POSIX says that pid_t is a
-  signed integer type
-* topo_set_cpubind for threads, pb: depending on the OS, the function takes a
-  pthread_t or a kernel tid.
 * topo_set_membind()
   + reverse routine?
   + no level = empty mask, and we may want an easy alias for "whole machine"
-* Some OSes do not provide strict binding, only relaxed binding.
+
+* complete OS functions
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3

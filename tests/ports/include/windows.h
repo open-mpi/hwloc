@@ -10,9 +10,11 @@ typedef int WINBOOL, BOOL;
 typedef double LONGLONG, DWORDLONG, ULONGLONG;
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
-typedef unsigned long ULONG_PTR, DWORD, *PDWORD;
+typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)();
+typedef void *PVOID;
+typedef PVOID HANDLE;
 
 #ifdef __GNUC__
 #define _ANONYMOUS_UNION __extension__
@@ -31,5 +33,11 @@ typedef int (*FARPROC)();
 WINAPI HINSTANCE LoadLibrary(LPCSTR);
 WINAPI FARPROC GetProcAddress(HINSTANCE, LPCSTR);
 WINAPI DWORD GetLastError(void);
+
+DWORD_PTR WINAPI SetThreadAffinityMask(HANDLE hThread, DWORD_PTR dwThreadAffinityMask);
+BOOL WINAPI SetProcessAffinityMask(HANDLE hProcess, DWORD_PTR dwProcessAffinityMask);
+
+HANDLE WINAPI GetCurrentThread(void);
+HANDLE WINAPI GetCurrentProcess(void);
 
 #endif /* LIBTOPOLOGY_WINDOWS_H */

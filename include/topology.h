@@ -41,6 +41,7 @@
 #ifndef TOPOLOGY_H
 #define TOPOLOGY_H
 
+#include <sys/types.h>
 #include <stdio.h>
 
 
@@ -370,16 +371,58 @@ extern int topo_obj_cpuset_snprintf(char * __topo_restrict str, size_t size, siz
 
 
 /** \defgroup topology_binding Binding
+ *
+ * It is often useful to call topo_cpuset_singlify() first so that
+ * a single CPU remains in the set. This way, the process will not
+ * even migrate between different CPUs.
+ *
+ * \note Depending on OSes and implementations, strict binding may not be
+ * possible, not be allowed, only used as a hint, etc. If strict binding is
+ * required, the strict parameter of the binding functions should be set to 1,
+ * and the function will fail if strict binding is not possible or allowed.
+ *
+ * \note Some OSes do not provide all ways to bind processes, threads, etc and
+ * the corresponding binding functions may fail. The most portable version that
+ * should be preferred over the others, whenever possible, is
+ * topo_set_cpubind(topology, set, 0),
+ * as it just binds the current program.
+ *
+ * \note To unbind, just call the binding function with either a full cpuset or
+ * a cpuset equal to the system cpuset.
  * @{
  */
 
 /** \brief Bind current process on cpus given in cpuset \p set
  *
- * You might want to call topo_cpuset_singlify() first so that
- * a single CPU remains in the set. This way, the process has no
- * of migrating between different CPUs.
+ * This assumes that the process is mono-threaded.
  */
-extern int topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set);
+extern int topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict);
+
+/** \brief Bind current process on cpus given in cpuset \p set
+ *
+ * This may be used in multithread processes, all threads will be bound.
+ */
+extern int topo_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict);
+
+/** \brief Bind current thread on cpus given in cpuset \p set
+ *
+ * This may be used in multithread processes, only the curren thread will be
+ * bound.
+ */
+extern int topo_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict);
+
+/** \brief Bind a process \p pid on cpus given in cpuset \p set
+ *
+ * \note topo_pid_t is pid_t on unix platforms, and HANDLE on native Windows
+ * platforms
+ */
+extern int topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int strict);
+
+/** \brief Bind a thread \p tid on cpus given in cpuset \p set
+ */
+#ifdef topo_thread_t
+extern int topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int strict);
+#endif
 
 /** @} */
 

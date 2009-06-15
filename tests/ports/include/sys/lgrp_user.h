@@ -3,10 +3,11 @@
 #ifndef LIBTOPOLOGY_SYS_LGRP_USER_H
 #define LIBTOPOLOGY_SYS_LGRP_USER_H
 
+#include <sys/processor.h>
+
 typedef int lgrp_cookie_t;
 #define LGRP_COOKIE_NONE 0
 typedef int lgrp_id_t;
-typedef int processorid_t;
 typedef long long lgrp_mem_size_t;
 
 typedef enum lgrp_content {
