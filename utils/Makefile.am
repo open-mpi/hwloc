@@ -2,9 +2,6 @@
 
 include $(top_srcdir)/libtopology.am
 
-AM_CFLAGS += $(CAIRO_CFLAGS) $(XML_CFLAGS)
-AM_LDFLAGS += $(CAIRO_LIBS) $(XML_LIBS)
-
 EXTRA_DIST = lstopo.h test-topodistrib.sh test-topodistrib.output
 
 bin_PROGRAMS = lstopo topomask topobind topodistrib
@@ -15,6 +12,8 @@ lstopo_SOURCES += lstopo-windows.c
 else !HAVE_WINDOWS
 EXTRA_DIST += lstopo-windows.c
 endif !HAVE_WINDOWS
+lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS)
+lstopo_LDFLAGS = $(CAIRO_LIBS) $(XML_LIBS)
 
 LIBS = $(top_builddir)/src/libtopology.la
 
