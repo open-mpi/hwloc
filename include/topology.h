@@ -89,15 +89,43 @@ struct topo_topology_info {
  * future!  Use the value returned by topo_get_type_order() instead.
  */
 enum topo_obj_type_e {
-  TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines) */
-  TOPO_OBJ_MACHINE,	/**< \brief Machine */
-  TOPO_OBJ_NODE,	/**< \brief NUMA node */
-  TOPO_OBJ_SOCKET,	/**< \brief Socket, physical package, or chip */
-  TOPO_OBJ_CACHE,	/**< \brief Cache */
-  TOPO_OBJ_CORE,	/**< \brief Core */
-  TOPO_OBJ_PROC,	/**< \brief (Logical) Processor (e.g. a thread in an SMT core) */
+  TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
+  			  * The whole system that is accessible to libtopology.
+			  * That may comprise several machines in SSI systems
+			  * like Kerrighed.
+			  */
+  TOPO_OBJ_MACHINE,	/**< \brief Machine.
+			  * A set of processors and memory with cache
+			  * coherency.
+			  */
+  TOPO_OBJ_NODE,	/**< \brief NUMA node.
+			  * A set of processors around memory which the
+			  * processors can directly access.
+			  */
+  TOPO_OBJ_SOCKET,	/**< \brief Socket, physical package, or chip.
+			  * In the physical meaning, i.e. that you can add
+			  * or remove physically.
+			  */
+  TOPO_OBJ_CACHE,	/**< \brief Data cache.
+			  * Can be L1, L2, L3, ...
+			  */
+  TOPO_OBJ_CORE,	/**< \brief Core.
+			  * A computation unit (may be shared by several
+			  * logical processors).
+			  */
+  TOPO_OBJ_PROC,	/**< \brief (Logical) Processor.
+			  * An execution unit (may share a core with some
+			  * other logical processors, e.g. in the case of
+			  * an SMT core).
+			  */
 
-  TOPO_OBJ_MISC,	/**< \brief Miscellaneous objects which do not fit in the above but are still useful to take into account for affinity. For instance, some OSes expose their arbitrary processors aggregation this way.  */
+  TOPO_OBJ_MISC,	/**< \brief Miscellaneous objects.
+			  * Objects which do not fit in the above but are
+			  * detected by libtopology and are useful to take into
+			  * account for affinity. For instance, some OSes
+			  * expose their arbitrary processors aggregation this
+			  * way.
+			  */
 };
 typedef enum topo_obj_type_e topo_obj_type_t;
 /** \brief Maximal value of an Object Type */

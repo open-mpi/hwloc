@@ -337,25 +337,61 @@ Bug reports and questions should be sent to the devel mailing list (http://lists
 \page glossary Glossary
 
 <dl>
-<dt>System</dt>
-  <dd>The whole system that is accessible to libtopology. That may comprise
-  several machines in SSI systems like Kerrighed</dd>
-<dt>Machine</dt>
-  <dd>A set of processors and memory which cache coherency.</dd>
-<dt>NUMA Node</dt>
-  <dd>A set of processors a memory which processors can directly access.</dd>
-<dt>Socket or package</dt>
-  <dd>A processor in the physical meaning, i.e. that you can add/remove
-  physically.</dd>
-<dt>Core</dt>
-  <dd>A computation unit, (may be shared by several logical processors).</dd>
-<dt>(Logical) processor</dt>
-  <dd>An execution unit, (may share a core with other logical processors).</dd>
+
+<dt>Object</dt>
+  <dd>Interesting kind of part of the system, such as a Core, a Cache, a Memory
+  node, etc. The different types detected by libtopology are detailed in the
+  ::topo_obj_type_e enumeration.
+  
+  They are topologically sorted by CPU set into a tree whose root is the System object which always exists.
+  </dd>
+
+<dt>CPU set</dt>
+  <dd>The set of logical processors logically included in an object, if any</dd>
+
+<dt>Father object</dt>
+  <dd>The object logically containing the current object, for instance because
+  its CPU set includes the CPU set of the current object.
+  </dd>
+
+<dt>Children objects</dt>
+  <dd>The object contained in the current object because their CPU set is
+  included in the CPU set of the current object.</dd>
+
+<dt>Arity</dt>
+  <dd>The number of children of an object</dd>
+
+<dt>Sibling objects</dt>
+  <dd>Objects of the same type which have the same father</dd>
+
+<dt>Sibling rank</dt>
+  <dd>Index to uniquely identify objecst of the same type which have the same
+  father, numbered from 0 to the arity of the father minus one.</dd>
+
+<dt>Cousin objects</dt>
+  <dd>Objects of the same type as the curren object</dd>
+
+<dt>OS index</dt>
+  <dd>The index that the OS uses to identify the object. This may sometimes be
+  completely arbitrary or depend on the BIOS configuration.</dd>
+
+<dt>Depth</dt>
+  <dd>Nesting level in the object tree, starting from the System object.</dd>
+
+<dt>Logical index</dt>
+  <dd>Index to uniquely identify objects of the same type. This index is always
+  linear to express proximity.  It could also be called cousin rank.</dd>
+
 </dl>
 
-To be continued...
+A diagram can help understanding the vocabulary:
 
 \image html diagram.png
 \image latex diagram.eps width=\textwidth
+
+It can be noticed that for Processor objects, the logical index, computed
+linearly by libtopology, is not the same as the OS index.
+
+TODO: add level pointers.
 
 */
