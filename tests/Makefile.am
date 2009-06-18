@@ -17,6 +17,16 @@ TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	object_userdata \
 	synthetic-topology
 
+EXTRA_DIST =
+
+if HAVE_LINUX_LIBNUMA
+TESTS += linux-libnuma
+else !HAVE_LINUX_LIBNUMA
+EXTRA_DIST += linux-libnuma
+endif !HAVE_LINUX_LIBNUMA
+
 check_PROGRAMS = $(TESTS)
 
 LIBS = $(top_builddir)/src/libtopology.la
+
+linux_libnuma_LDFLAGS = -lnuma

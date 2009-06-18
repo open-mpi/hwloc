@@ -7,3 +7,10 @@ include_topologydir = $(includedir)/topology
 include_topology_HEADERS = topology/config.h topology/cpuset.h topology/cpuset-bits.h topology/helper.h
 
 EXTRA_DIST = topology/private.h topology/debug.h
+
+if HAVE_LINUX
+include_topology_HEADERS += topology/linux-libnuma.h
+else !HAVE_LINUX
+EXTRA_DIST += topology/linux-libnuma.h
+endif !HAVE_LINUX
+
