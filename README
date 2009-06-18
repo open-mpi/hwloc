@@ -186,9 +186,11 @@ int main(void)
         /* Allocate and initialize topology object.  */
         topo_topology_init(&topology);
 
-        /* ... Put detection configuration here to e.g. ignore some objects
-           types, define a synthetic topology, etc....
-           See topology_configuration.  */
+        /* ... Optionally, put detection configuration here to e.g. ignore some
+           objects types, define a synthetic topology, etc....  The default is
+           to detect all the objects of the machine that the caller is allowed
+           to access.
+           See Configure Topology Detection.  */
 
         /* Perform the topology detection.  */
         topo_topology_load(topology);
@@ -199,7 +201,8 @@ int main(void)
         topo_topology_get_info(topology, &topoinfo);
 
 
-        /* Walk the topology with an array style.  */
+        /* Walk the topology with an array style, from level 0 (always the
+ system level) to the lowest level (always the proc level). */
         unsigned depth, i;
         char string[128];
         for (depth = 0; depth < topoinfo.depth; depth++) {
@@ -214,7 +217,16 @@ int main(void)
         print_children(topology, topo_get_system_obj(topology), 0);
 
 
-        /* Find out where cores are, or else smaller sets of CPUs.  */
+        /* Print the number of sockets.  */
+        depth = topo_get_type_depth(topology, TOPO_OBJ_SOCKET);
+        if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
+                printf("The number of sockets is unknown\n");
+        else
+                printf("%d socket(s)\n", topo_get_depth_nbobjs(topology, depth));
+
+
+        /* Find out where cores are, or else smaller sets of CPUs if the OS
+ doesn't have the notion of core. */
         depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_CORE);
 
         /* Get last one.  */
@@ -265,4 +277,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Mon Jun 15 16:08:52 2009 for libtopology by  doxygen 1.5.9
+Generated on Thu Jun 18 12:37:55 2009 for libtopology by  doxygen 1.5.9
