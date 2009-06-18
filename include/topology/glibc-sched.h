@@ -68,11 +68,20 @@ static __inline__ void
 topo_cpuset_to_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *toposet,
 				    cpu_set_t *schedset, size_t schedsetsize)
 {
+#ifdef CPU_ZERO_S
   unsigned cpu;
   CPU_ZERO_S(schedsetsize, schedset);
   topo_cpuset_foreach_begin(cpu, toposet)
     CPU_SET_S(cpu, schedsetsize, schedset);
   topo_cpuset_foreach_end();
+#else /* !CPU_ZERO_S */
+  unsigned cpu;
+  CPU_ZERO(schedset);
+  assert(schedsetsize == sizeof(cpu_set_t));
+  topo_cpuset_foreach_begin(cpu, toposet)
+    CPU_SET(cpu, schedset);
+  topo_cpuset_foreach_end();
+#endif /* !CPU_ZERO_S */
 }
 
 /** \brief Convert libtopology CPU set \p toposet into glibc sched affinity CPU set \p schedset
@@ -86,6 +95,7 @@ static __inline__ void
 topo_cpuset_from_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *toposet,
 				      cpu_set_t *schedset, size_t schedsetsize)
 {
+#ifdef CPU_ZERO_S
   int cpu, count;
   topo_cpuset_zero(toposet);
   count = CPU_COUNT_S(schedsetsize, schedset);
@@ -99,6 +109,16 @@ topo_cpuset_from_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *t
     if (cpu > TOPO_NBMAXCPUS)
       break;
   }
+#else /* !CPU_ZERO_S */
+  /* sched.h does not support dynamic cpu_set_t (introduced in glibc 2.7),
+   * assume we have a very old interface without CPU_COUNT (added in 2.6)
+   */
+  int cpu;
+  assert(schedsetsize == sizeof(cpu_set_t));
+  for(cpu=0; cpu<CPU_SETSIZE && cpu<TOPO_NBMAXCPUS; cpu++)
+    if (CPU_ISSET(cpu, schedset))
+      topo_cpuset_set(toposet, cpu);
+#endif /* !CPU_ZERO_S */
 }
 
 /** @} */
