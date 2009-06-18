@@ -281,7 +281,16 @@ int main(void)
 	print_children(topology, topo_get_system_obj(topology), 0);
 
 
-	/* Find out where cores are, or else smaller sets of CPUs.  */
+	/* Print the number of sockets.  */
+	depth = topo_get_type_depth(topology, TOPO_OBJ_SOCKET);
+	if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
+		printf("The number of sockets is unknown\n");
+	else
+		printf("%d socket(s)\n", topo_get_depth_nbobjs(topology, depth));
+
+
+        /* Find out where cores are, or else smaller sets of CPUs if the OS
+         * doesn't have the notion of core. */
 	depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_CORE);
 
 	/* Get last one.  */

@@ -350,8 +350,10 @@ extern int topo_topology_get_info(topo_topology_t  __topo_restrict topology, str
 
 /** \brief Returns the depth of objects of type \p type.
  *
- * If no object of this type is present on the underlying architecture, the
- * function returns TOPO_TYPE_DEPTH_UNKNOWN.
+ * If no object of this type is present on the underlying architecture, or if
+ * the OS doesn't provide this kind of information, the function returns
+ * TOPO_TYPE_DEPTH_UNKNOWN.
+ *
  * If type is absent but a similar type is acceptable, see also
  * topo_get_type_or_below_depth() and topo_get_type_or_above_depth().
  */
