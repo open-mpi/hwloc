@@ -265,7 +265,8 @@ int main(void)
 	topo_topology_get_info(topology, &topoinfo);
 
 
-	/* Walk the topology with an array style.  */
+        /* Walk the topology with an array style, from level 0 (always the
+         * system level) to the lowest level (always the proc level). */
 	unsigned depth, i;
 	char string[128];
 	for (depth = 0; depth < topoinfo.depth; depth++) {
