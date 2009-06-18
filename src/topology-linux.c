@@ -222,6 +222,12 @@ topo_linux_set_thread_cpubind(topo_topology_t topology, pthread_t tid, const top
 #endif /* CPU_SET */
 }
 
+static int
+topo_linux_fsys_root_set_cpubind(void) {
+  /* TODO: check cpuset validity */
+  return 0;
+}
+
 int
 topo_backend_sysfs_init(struct topo_topology *topology, const char *fsys_root_path)
 {
@@ -910,9 +916,15 @@ topo_look_linux(struct topo_topology *topology)
   topo_cpuset_zero(&admin_disabled_cpus_set);
   topo_cpuset_zero(&admin_disabled_mems_set);
 
-  topology->set_cpubind = topo_linux_set_cpubind;
-  topology->set_thread_cpubind = topo_linux_set_thread_cpubind;
-  topology->set_thisthread_cpubind = topo_linux_set_thisthread_cpubind;
+  if (!topology->is_fake) {
+    topology->set_cpubind = topo_linux_set_cpubind;
+    topology->set_thread_cpubind = topo_linux_set_thread_cpubind;
+    topology->set_thisthread_cpubind = topo_linux_set_thisthread_cpubind;
+  } else {
+    topology->set_cpubind = (void*) topo_linux_fsys_root_set_cpubind;
+    topology->set_thread_cpubind = (void*) topo_linux_fsys_root_set_cpubind;
+    topology->set_thisthread_cpubind = (void*) topo_linux_fsys_root_set_cpubind;
+  }
 
   nodes_dir = topo_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);
   if (nodes_dir) {
