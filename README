@@ -261,8 +261,8 @@ source tarball in doc/doxygen-doc/, after doxygen compilation for svn
 checkouts, and are installed in the usual manual repository and $prefix/share/
 doc/topology/.
 
-To precisely define the vocabulary used by libtopology, a Glossary is
-available.
+To precisely define the vocabulary used by libtopology, a Glossary is available
+and should probably be read first.
 
 Bugs and questions
 
@@ -277,4 +277,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Jun 18 12:37:55 2009 for libtopology by  doxygen 1.5.9
+Generated on Thu Jun 18 13:47:26 2009 for libtopology by  doxygen 1.5.9

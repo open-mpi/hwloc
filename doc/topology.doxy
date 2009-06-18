@@ -326,7 +326,7 @@ in the source tarball in doc/doxygen-doc/, after doxygen compilation
 for svn checkouts, and are installed in the usual manual repository and
 $prefix/share/doc/topology/.
 
-To precisely define the vocabulary used by libtopology, a \ref glossary is available.
+To precisely define the vocabulary used by libtopology, a \ref glossary is available and should probably be read first.
 
 \htmlonly
 </div><div class="section" id="bugs">
@@ -381,7 +381,10 @@ Bug reports and questions should be sent to the devel mailing list (http://lists
   father, numbered from 0 to the arity of the father minus one.</dd>
 
 <dt>Cousin objects</dt>
-  <dd>Objects of the same type as the curren object</dd>
+  <dd>Objects of the same type as the current object</dd>
+
+<dt>Level</dt>
+  <dd>Set of objects of the same type</dd>
 
 <dt>OS index</dt>
   <dd>The index that the OS uses to identify the object. This may sometimes be
@@ -392,11 +395,14 @@ Bug reports and questions should be sent to the devel mailing list (http://lists
 
 <dt>Logical index</dt>
   <dd>Index to uniquely identify objects of the same type. This index is always
-  linear to express proximity.  It could also be called cousin rank.</dd>
+  linear from 0 to the number of objects of the level for that type, to express
+  proximity.  It could also be called cousin rank.</dd>
 
 </dl>
 
-A diagram can help understanding the vocabulary:
+The following diagram can help to understand the vocabulary of the relationships
+by showing the example of a machine with two dual core non-SMT sockets, thus a
+topology with 4 levels.
 
 \image html diagram.png
 \image latex diagram.eps width=\textwidth

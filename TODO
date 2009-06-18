@@ -9,9 +9,7 @@ API
 Doc
 ===
 * complete doc
-* draw relations between objects (tree/levels/pointers)
 * automatically generate the pngs?
-* Finish Glossary
 
 * add examples for (example dir?)
   + finding all nodes near a cpuset
@@ -45,8 +43,8 @@ Binding
 * topo_set_membind()
   + reverse routine?
   + no level = empty mask, and we may want an easy alias for "whole machine"
-
-* complete OS functions
+* allocation with a given policy
+* apply a policy to a given area (not all OSes support that).
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
