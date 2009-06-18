@@ -61,7 +61,7 @@
  * or any other function that takes an array of unsigned long and a maximal
  * node number as input parameter.
  */
-static inline void
+static __inline__ void
 topo_cpuset_to_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *cpuset,
 				    unsigned long *mask, unsigned long *maxnode)
 {
@@ -91,7 +91,7 @@ topo_cpuset_to_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *cpu
  * that takes an array of unsigned long as output parameter (and possibly
  * a maximal node number as input parameter).
  */
-static inline void
+static __inline__ void
 topo_cpuset_from_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *cpuset,
 				      unsigned long *mask, unsigned long maxnode)
 {
@@ -130,7 +130,7 @@ topo_cpuset_from_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *c
  * This function may be used before calling many numa_ functions
  * that use a struct bitmask as an input parameter.
  */
-static inline struct bitmask *
+static __inline__ struct bitmask *
 topo_cpuset_to_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *cpuset)
 {
   struct bitmask *bitmask;
@@ -151,7 +151,7 @@ topo_cpuset_to_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *cp
  * This function may be used after calling many numa_ functions
  * that use a struct bitmask as an output parameter.
  */
-static inline void
+static __inline__ void
 topo_cpuset_from_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *cpuset,
 				       struct bitmask *bitmask)
 {
@@ -189,7 +189,7 @@ topo_cpuset_from_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *
  * This function may be used before calling some old libnuma functions
  * that use a nodemask_t as an input parameter.
  */
-static inline void
+static __inline__ void
 topo_cpuset_to_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t *cpuset,
 				      nodemask_t *nodemask)
 {
@@ -204,7 +204,7 @@ topo_cpuset_to_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t *c
  * This function may be used before calling some old libnuma functions
  * that use a nodemask_t as an output parameter.
  */
-static inline void
+static __inline__ void
 topo_cpuset_from_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t *cpuset,
 					nodemask_t *nodemask)
 {
