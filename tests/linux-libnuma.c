@@ -50,15 +50,16 @@ int main(void)
   topo_topology_init(&topology);
   topo_topology_load(topology);
 
-  if (!topo_get_next_obj(topology, TOPO_OBJ_NODE, NULL))
-    /* no node object, do nothing for now */
-    return 0;
-
   /* convert full nodemask/bitmask to cpuset */
   topo_cpuset_zero(&set);
-  node = NULL;
-  while ((node = topo_get_next_obj(topology, TOPO_OBJ_NODE, node)) != NULL)
-    topo_cpuset_orset(&set, &node->cpuset);
+  /* gather all nodes if any, or the whole system if no nodes */
+  if (topo_get_type_nbobjs(topology, TOPO_OBJ_NODE)) {
+    node = NULL;
+    while ((node = topo_get_next_obj(topology, TOPO_OBJ_NODE, node)) != NULL)
+      topo_cpuset_orset(&set, &node->cpuset);
+  } else {
+    topo_cpuset_orset(&set, &topo_get_system_obj(topology)->cpuset);
+  }
 
   topo_cpuset_from_linux_libnuma_bitmask(topology, &set2, numa_all_nodes_ptr);
   assert(topo_cpuset_isequal(&set, &set2));

@@ -67,16 +67,26 @@ topo_cpuset_to_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *cpu
 {
   unsigned long outmaxnode = -1;
   topo_obj_t node = NULL;
+  unsigned nbnodes = topo_get_type_nbobjs(topology, TOPO_OBJ_NODE);
   int i;
 
   for(i=0; i<*maxnode/TOPO_BITS_PER_LONG; i++)
     mask[i] = 0;
 
-  while ((node = topo_get_next_obj_above_cpuset(topology, cpuset, TOPO_OBJ_NODE, node)) != NULL) {
-    if (node->os_index >= *maxnode)
-      break;
-    mask[node->os_index/TOPO_BITS_PER_LONG] |= 1 << (node->os_index % TOPO_BITS_PER_LONG);
-    outmaxnode = node->os_index;
+  if (nbnodes) {
+    while ((node = topo_get_next_obj_above_cpuset_by_depth(topology, cpuset, TOPO_OBJ_NODE, node)) != NULL) {
+      if (node->os_index >= *maxnode)
+	break;
+      mask[node->os_index/TOPO_BITS_PER_LONG] |= 1 << (node->os_index % TOPO_BITS_PER_LONG);
+      outmaxnode = node->os_index;
+    }
+
+  } else {
+    /* if no numa, libnuma assumes we have a single node */
+    if (!topo_cpuset_iszero(cpuset)) {
+      mask[0] = 1;
+      outmaxnode = 0;
+    }
   }
 
   *maxnode = outmaxnode+1;
@@ -102,16 +112,21 @@ topo_cpuset_from_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *c
   topo_cpuset_zero(cpuset);
 
   depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
-  if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
-    return;
   assert(depth != TOPO_TYPE_DEPTH_MULTIPLE);
 
-  for(i=0; i<maxnode; i++)
-    if (mask[i/TOPO_BITS_PER_LONG] & (1 << (i% TOPO_BITS_PER_LONG))) {
-      node = topo_get_obj(topology, depth, i);
-      if (node)
-        topo_cpuset_orset(cpuset, &node->cpuset);
-    }
+  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
+    /* if no numa, libnuma assumes we have a single node */
+    if (mask[0] & 1)
+      *cpuset = topo_get_system_obj(topology)->cpuset;
+
+  } else {
+    for(i=0; i<maxnode; i++)
+      if (mask[i/TOPO_BITS_PER_LONG] & (1 << (i% TOPO_BITS_PER_LONG))) {
+	node = topo_get_obj(topology, depth, i);
+	if (node)
+	  topo_cpuset_orset(cpuset, &node->cpuset);
+      }
+  }
 }
 
 /** @} */
@@ -135,13 +150,23 @@ topo_cpuset_to_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *cp
 {
   struct bitmask *bitmask;
   topo_obj_t node = NULL;
+  unsigned nbnodes = topo_get_type_nbobjs(topology, TOPO_OBJ_NODE);
 
-  bitmask = numa_bitmask_alloc(topo_get_type_nbobjs(topology, TOPO_OBJ_NODE));
-  if (!bitmask)
-    return NULL;
+  if (nbnodes) {
+    bitmask = numa_bitmask_alloc(nbnodes);
+    if (!bitmask)
+      return NULL;
+    while ((node = topo_get_next_obj_above_cpuset(topology, cpuset, TOPO_OBJ_NODE, node)) != NULL)
+      numa_bitmask_setbit(bitmask, node->os_index);
 
-  while ((node = topo_get_next_obj_above_cpuset(topology, cpuset, TOPO_OBJ_NODE, node)) != NULL)
-    numa_bitmask_setbit(bitmask, node->os_index);
+  } else {
+    /* if no numa, libnuma assumes we have a single node */
+    bitmask = numa_bitmask_alloc(1);
+    if (!bitmask)
+      return NULL;
+    if (!topo_cpuset_iszero(cpuset))
+      numa_bitmask_setbit(bitmask, 0);
+  }
 
   return bitmask;
 }
@@ -162,16 +187,21 @@ topo_cpuset_from_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *
   topo_cpuset_zero(cpuset);
 
   depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
-  if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
-    return;
   assert(depth != TOPO_TYPE_DEPTH_MULTIPLE);
 
-  for(i=0; i<NUMA_NUM_NODES; i++)
-    if (numa_bitmask_isbitset(bitmask, i)) {
-      node = topo_get_obj(topology, depth, i);
-      if (node)
-        topo_cpuset_orset(cpuset, &node->cpuset);
-    }
+  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
+    /* if no numa, libnuma assumes we have a single node */
+    if (numa_bitmask_isbitset(bitmask, 0))
+      *cpuset = topo_get_system_obj(topology)->cpuset;
+
+  } else {
+    for(i=0; i<NUMA_NUM_NODES; i++)
+      if (numa_bitmask_isbitset(bitmask, i)) {
+	node = topo_get_obj(topology, depth, i);
+	if (node)
+	  topo_cpuset_orset(cpuset, &node->cpuset);
+      }
+  }
 }
 
 /** @} */
@@ -194,9 +224,18 @@ topo_cpuset_to_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t *c
 				      nodemask_t *nodemask)
 {
   topo_obj_t node = NULL;
+  unsigned nbnodes = topo_get_type_nbobjs(topology, TOPO_OBJ_NODE);
+
   nodemask_zero(nodemask);
-  while ((node = topo_get_next_obj_above_cpuset(topology, cpuset, TOPO_OBJ_NODE, node)) != NULL)
-    nodemask_set(nodemask, node->os_index);
+  if (nbnodes) {
+    while ((node = topo_get_next_obj_above_cpuset(topology, cpuset, TOPO_OBJ_NODE, node)) != NULL)
+      nodemask_set(nodemask, node->os_index);
+
+  } else {
+    /* if no numa, libnuma assumes we have a single node */
+    if (!topo_cpuset_iszero(cpuset))
+      nodemask_set(nodemask, 0);
+  }
 }
 
 /** \brief Convert libnuma nodemask \p nodemask into libtopology CPU set \p cpuset
@@ -215,16 +254,21 @@ topo_cpuset_from_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t 
   topo_cpuset_zero(cpuset);
 
   depth = topo_get_type_depth(topology, TOPO_OBJ_NODE);
-  if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
-    return;
   assert(depth != TOPO_TYPE_DEPTH_MULTIPLE);
 
-  for(i=0; i<NUMA_NUM_NODES; i++)
-    if (nodemask_isset_compat(nodemask, i)) {
-      node = topo_get_obj(topology, depth, i);
-      if (node)
-        topo_cpuset_orset(cpuset, &node->cpuset);
-    }
+  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
+    /* if no numa, libnuma assumes we have a single node */
+    if (nodemask_isset(nodemask, 0))
+      *cpuset = topo_get_system_obj(topology)->cpuset;
+
+  } else {
+    for(i=0; i<NUMA_NUM_NODES; i++)
+      if (nodemask_isset(nodemask, i)) {
+	node = topo_get_obj(topology, depth, i);
+	if (node)
+	  topo_cpuset_orset(cpuset, &node->cpuset);
+      }
+  }
 }
 
 /** @} */
