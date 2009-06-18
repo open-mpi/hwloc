@@ -302,7 +302,7 @@ if TOPO_INSTALL_HTML
 CLEANFILES += images/diagram.png
 pkginclude_HEADERS += images/diagram.png
 images/diagram.png: $(srcdir)/images/diagram.fig
-	$(MKDIR_P) -p images
+	$(MKDIR_P) images
 	$(FIG2DEV) -L png $< $@
 endif
 endif
@@ -311,7 +311,7 @@ if TOPO_INSTALL_PDF
 CLEANFILES += images/diagram.eps
 pkginclude_HEADERS += images/diagram.eps
 images/diagram.eps: $(srcdir)/images/diagram.fig
-	$(MKDIR_P) -p images
+	$(MKDIR_P) images
 	$(FIG2DEV) -L eps $< $@
 endif
 endif
