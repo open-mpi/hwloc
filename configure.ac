@@ -200,7 +200,7 @@ if test "x$enable_cairo" = "xyes"; then
   PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
   if test "x$enable_cairo" = "xyes"; then
     AC_CHECK_HEADERS([X11/Xlib.h],
-      [AC_CHECK_HEADERS([X11/Xutil.h],
+      [AC_CHECK_HEADERS([X11/Xutil.h X11/keysymdef.h],
         [enable_X11=yes
          AC_DEFINE([HAVE_X11], [1], [Define to 1 if X11 libraries are available.])],,
         [[#include <X11/Xlib.h>]])
