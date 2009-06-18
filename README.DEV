@@ -11,7 +11,7 @@ documentations:
   - fig2dev
 and the following should be performed to prepare the tarball:
 
-autoreconf -fi && ./configure && make && make maintainer-clean && ./configure && make && make distclean
+autoreconf -fi && ./configure && make && make maintainer-clean && ./configure && make doc && make distclean
 
 - make maintainer-clean can be used to properly remove the generated
 documentations.
