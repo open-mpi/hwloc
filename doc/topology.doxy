@@ -250,9 +250,11 @@ int main(void)
 	/* Allocate and initialize topology object.  */
 	topo_topology_init(&topology);
 
-        /* ... Put detection configuration here to e.g. ignore some objects
-           types, define a synthetic topology, etc....
-	   See topology_configuration.  */
+        /* ... Optionally, put detection configuration here to e.g. ignore some
+           objects types, define a synthetic topology, etc....  The default is
+           to detect all the objects of the machine that the caller is allowed
+           to access.
+	   See Configure Topology Detection.  */
 
 	/* Perform the topology detection.  */
 	topo_topology_load(topology);

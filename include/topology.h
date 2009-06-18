@@ -262,8 +262,12 @@ extern void topo_topology_check(topo_topology_t topology);
 
 /** \defgroup topology_configuration Configure Topology Detection
  *
- * These functions should be called between topology_init() and topology_load()
- * to configure how the detection should be performed.
+ * These functions can optionally be called between topology_init() and
+ * topology_load() to configure how the detection should be performed, e.g. to
+ * ignore some objects types, define a synthetic topology, etc.
+ *
+ * If none of them is called, the default is to detect all the objects of the
+ * machine that the caller is allowed to access.
  *
  * @{
  */
