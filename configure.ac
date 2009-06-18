@@ -285,6 +285,9 @@ AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
 	      [#include <numa.h>])
 AM_CONDITIONAL([HAVE_LINUX_LIBNUMA], [test "x$have_linux_libnuma" = "xyes"])
 
+AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
+AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xyes"])
+
 AC_SUBST(LIBTOPOLOGY_REQUIRES)
 
 AC_CONFIG_HEADER([include/config.h])

@@ -25,6 +25,12 @@ else !HAVE_LINUX_LIBNUMA
 EXTRA_DIST += linux-libnuma
 endif !HAVE_LINUX_LIBNUMA
 
+if HAVE_SCHED_SETAFFINITY
+TESTS += glibc-sched
+else !HAVE_SCHED_SETAFFINITY
+EXTRA_DIST += glibc-sched
+endif !HAVE_SCHED_SETAFFINITY
+
 check_PROGRAMS = $(TESTS)
 
 LIBS = $(top_builddir)/src/libtopology.la

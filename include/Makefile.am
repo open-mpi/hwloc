@@ -14,3 +14,8 @@ else !HAVE_LINUX
 EXTRA_DIST += topology/linux-libnuma.h
 endif !HAVE_LINUX
 
+if HAVE_SCHED_SETAFFINITY
+include_topology_HEADERS += topology/glibc-sched.h
+else !HAVE_SCHED_SETAFFINITY
+EXTRA_DIST += topology/glibc-sched.h
+endif !HAVE_SCHED_SETAFFINITY
