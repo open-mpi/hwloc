@@ -50,6 +50,9 @@ int main(void)
   topo_topology_init(&topology);
   topo_topology_load(topology);
 
+  if (!topo_get_next_obj(topology, TOPO_OBJ_NODE, NULL))
+    /* no node object, do nothing for now */
+    return 0;
 
   /* convert full nodemask/bitmask to cpuset */
   topo_cpuset_zero(&set);
