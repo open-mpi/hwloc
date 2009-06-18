@@ -994,3 +994,5 @@ topo_look_linux(struct topo_topology *topology)
 		       &topology->levels[0][0]->attr.system.dmi_board_name);
   }
 }
+
+/* TODO mbind, setpolicy */

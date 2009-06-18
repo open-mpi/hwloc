@@ -280,7 +280,7 @@ topo_look_windows(struct topo_topology *topology)
 
 	switch (type) {
 	  case TOPO_OBJ_NODE:
-	    obj->attr.node.memory_kB = 0; /* TODO */
+	    obj->attr.node.memory_kB = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
 	    obj->attr.node.huge_page_free = 0; /* TODO */
 	    break;
 	  case TOPO_OBJ_CACHE:
@@ -379,7 +379,7 @@ topo_look_windows(struct topo_topology *topology)
 
 	switch (type) {
 	  case TOPO_OBJ_NODE:
-	    obj->attr.node.memory_kB = 0; /* TODO */
+	    obj->attr.node.memory_kB = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
 	    obj->attr.node.huge_page_free = 0; /* TODO */
 	    break;
 	  case TOPO_OBJ_CACHE:
@@ -398,3 +398,5 @@ topo_look_windows(struct topo_topology *topology)
   /* add PROC objects */
   topo_setup_proc_level(topology, topo_fallback_nbprocessors(), NULL);
 }
+
+/* TODO memory binding: VirtualAllocExNuma */

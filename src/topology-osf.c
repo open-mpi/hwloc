@@ -127,7 +127,13 @@ topo_osf_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, in
 }
 
 /* TODO: memory
- * nsg_init(), nsg_attach_pid()
+ *
+ * nloc to get distances
+ *
+ * nmadvise(addr,len), nmmap()
+ * policies: DIRECTED, STRIPPED, first_touch(REPLICATED)
+ *
+ * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
  * assign_pid_to_pset()
  */
 
@@ -158,7 +164,7 @@ topo_look_osf(struct topo_topology *topology)
     }
 
     obj = topo_alloc_setup_object(TOPO_OBJ_NODE, radid);
-    obj->attr.node.memory_kB = 0; /* TODO */
+    obj->attr.node.memory_kB = rad_get_physmem(radid) / 1024;
     obj->attr.node.huge_page_free = 0;
 
     cursor = SET_CURSOR_INIT;
