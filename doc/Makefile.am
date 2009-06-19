@@ -91,6 +91,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_get_shared_cache_above.3 \
 	@DX_DOCDIR@/man/man3/topo_get_system_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_depth.3 \
+	@DX_DOCDIR@/man/man3/topo_get_type_nbobjs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_order.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_or_above_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_or_below_depth.3 \

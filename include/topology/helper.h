@@ -101,7 +101,7 @@ topo_get_type_or_above_depth (topo_topology_t topology, topo_obj_type_t type)
  * If no object for that type exists, 0 is returned.
  * If there are several levels with objects of that type, -1 is returned.
  */
-static __inline__ unsigned
+static __inline__ int
 topo_get_type_nbobjs (topo_topology_t topology, topo_obj_type_t type)
 {
 	unsigned depth = topo_get_type_depth(topology, type);
