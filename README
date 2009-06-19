@@ -196,7 +196,9 @@ int main(void)
         topo_topology_load(topology);
 
 
-        /* Get topology information.  */
+        /* Optionally, get some additional topology information
+ in case we need the topology depth later.
+         */
         struct topo_topology_info topoinfo;
         topo_topology_get_info(topology, &topoinfo);
 
@@ -277,4 +279,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Jun 18 13:47:26 2009 for libtopology by  doxygen 1.5.9
+Generated on Fri Jun 19 11:27:52 2009 for libtopology by  doxygen 1.5.9

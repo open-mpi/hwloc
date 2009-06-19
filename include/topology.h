@@ -411,48 +411,78 @@ extern int topo_obj_cpuset_snprintf(char * __topo_restrict str, size_t size, siz
  * remains in the set. This way, the process will not even migrate between
  * different CPUs. Some OSes also only support that kind of binding.
  *
- * \note Depending on OSes and implementations, strict binding may not be
- * possible, not be allowed, only used as a hint, etc. If strict binding is
- * required, the strict parameter of the binding functions should be set to 1,
- * and the function will fail if strict binding is not possible or allowed.
- *
  * \note Some OSes do not provide all ways to bind processes, threads, etc and
  * the corresponding binding functions may fail. The most portable version that
  * should be preferred over the others, whenever possible, is
+ *
+ * \code
  * topo_set_cpubind(topology, set, 0),
- * as it just binds the current program.
+ * \endcode
+ *
+ * as it just binds the current program, assuming it is monothread, or
+ *
+ * \code
+ * topo_set_cpubind(topology, set, TOPO_CPUBIND_THREAD),
+ * \endcode
+ *
+ * which binds the current thread of the current program (which may be
+ * multithreaded).
  *
  * \note To unbind, just call the binding function with either a full cpuset or
  * a cpuset equal to the system cpuset.
  * @{
  */
 
-/** \brief Process/Thread binding policy */
+/** \brief Process/Thread binding policy.
+ *
+ * These flags can be used to refine the binding policy.
+ *
+ * The default (0) is to bind the current process, assumed to be mono-thread,
+ * in a non-strict way.  This is the most portable way to bind as all OSes
+ * usually provide it.
+ *
+ * \note Depending on OSes and implementations, strict binding (i.e. the
+ * thread/process will really never be scheduled outside of the cpuset) may not
+ * be possible, not be allowed, only used as a hint when no load balancing is
+ * needed, etc.  If strict binding is required, the strict flag should be set,
+ * and the function will fail if strict binding is not possible or allowed.
+ *
+ */
 typedef enum {
-  TOPO_CPUBIND_BASIC = 0,	/**< \brief Bind current process assuming it's mono-threaded */
-  TOPO_CPUBIND_PROCESS = 1,	/**< \brief Bind all threads of current process */
-  TOPO_CPUBIND_THREAD = 2,	/**< \brief Bind current thread of current process */
+  TOPO_CPUBIND_PROCESS = (1<<0),	/**< \brief Bind all threads of the current multithreaded process.
+					  * This may not be supported by some OSes (e.g. Linux). */
+  TOPO_CPUBIND_THREAD = (1<<1),		/**< \brief Bind current thread of current process */
+  TOPO_CPUBIND_STRICT = (1<<2),		/**< \brief Request for strict binding from the OS
+					 * Note that strict binding may not be
+					 * allowed for administrative reasons,
+					 * and the binding function will fail
+					 * in that case.
+					 */
 } topo_cpubind_policy_t;
 
 /** \brief Bind current process or thread on cpus given in cpuset \p set
- *
- * If \p strict is set and the OS cannot bind strictly, the call will fail
- * with a negative return value.
  */
 extern int topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
-			    topo_cpubind_policy_t policy, int strict);
+			    int policy);
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
  *
  * \note topo_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
+ *
+ * \note TOPO_CPUBIND_THREAD can not be used in \p policy.
  */
-extern int topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int strict);
+extern int topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int policy);
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
+ *
+ * \note topo_pthread_t is pthread_t on unix platforms, and HANDLE on native
+ * Windows platforms
+ *
+ * \note TOPO_CPUBIND_PROCESS can not be used in \p policy.
  */
 #ifdef topo_thread_t
-extern int topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int strict);
+extern int topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int policy);
 #endif
 
 /** @} */

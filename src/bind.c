@@ -43,27 +43,22 @@
 
 int
 topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
-		 topo_cpubind_policy_t policy, int strict)
+		 int policy)
 {
+  int strict = !!(policy & TOPO_CPUBIND_STRICT);
+
   if (topo_cpuset_isfull(set))
     set = &topo_get_system_obj(topology)->cpuset;
 
-  switch (policy) {
-  case TOPO_CPUBIND_BASIC:
-    if (topology->set_cpubind)
-      return topology->set_cpubind(topology, set, strict);
-    break;
-  case TOPO_CPUBIND_PROCESS:
+  if (policy & TOPO_CPUBIND_PROCESS) {
     if (topology->set_thisproc_cpubind)
       return topology->set_thisproc_cpubind(topology, set, strict);
-    break;
-  case TOPO_CPUBIND_THREAD:
+  } else if (policy & TOPO_CPUBIND_THREAD) {
     if (topology->set_thisthread_cpubind)
       return topology->set_thisthread_cpubind(topology, set, strict);
-    break;
-  default:
-    errno = EINVAL;
-    return -1;
+  } else {
+    if (topology->set_cpubind)
+      return topology->set_cpubind(topology, set, strict);
   }
 
   errno = ENOTSUP;
@@ -71,8 +66,9 @@ topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
 }
 
 int
-topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int strict)
+topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int policy)
 {
+  int strict = !!(policy & TOPO_CPUBIND_STRICT);
   if (topo_cpuset_isfull(set))
     set = &topo_get_system_obj(topology)->cpuset;
   if (topology->set_proc_cpubind)
@@ -82,8 +78,9 @@ topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuse
 }
 
 int
-topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int strict)
+topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int policy)
 {
+  int strict = !!(policy & TOPO_CPUBIND_STRICT);
   if (topo_cpuset_isfull(set))
     set = &topo_get_system_obj(topology)->cpuset;
   if (topology->set_thread_cpubind)
