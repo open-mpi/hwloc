@@ -465,8 +465,8 @@ extern int topo_get_closest_objs (topo_topology_t topology, topo_obj_t src, topo
 
 /** \brief Distribute \p n items over the topology under \p root
  *
- * \p cpuset will be filled with \p n cpusets distributed linearly over the
- * topology under \p root .
+ * Array \p cpuset will be filled with \p n cpusets distributed linearly over
+ * the topology under \p root .
  *
  * This is typically useful when an application wants to distribute \p n
  * threads over a machine, giving each of them as much private cache as
