@@ -42,34 +42,30 @@
  * IRIX: see _DSM_MUSTRUN */
 
 int
-topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
+topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
+		 topo_cpubind_policy_t policy, int strict)
 {
   if (topo_cpuset_isfull(set))
     set = &topo_get_system_obj(topology)->cpuset;
-  if (topology->set_cpubind)
-    return topology->set_cpubind(topology, set, strict);
-  errno = ENOTSUP;
-  return -1;
-}
 
-int
-topo_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
-{
-  if (topo_cpuset_isfull(set))
-    set = &topo_get_system_obj(topology)->cpuset;
-  if (topology->set_thisproc_cpubind)
-    return topology->set_thisproc_cpubind(topology, set, strict);
-  errno = ENOTSUP;
-  return -1;
-}
+  switch (policy) {
+  case TOPO_CPUBIND_BASIC:
+    if (topology->set_cpubind)
+      return topology->set_cpubind(topology, set, strict);
+    break;
+  case TOPO_CPUBIND_PROCESS:
+    if (topology->set_thisproc_cpubind)
+      return topology->set_thisproc_cpubind(topology, set, strict);
+    break;
+  case TOPO_CPUBIND_THREAD:
+    if (topology->set_thisthread_cpubind)
+      return topology->set_thisthread_cpubind(topology, set, strict);
+    break;
+  default:
+    errno = EINVAL;
+    return -1;
+  }
 
-int
-topo_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict)
-{
-  if (topo_cpuset_isfull(set))
-    set = &topo_get_system_obj(topology)->cpuset;
-  if (topology->set_thisthread_cpubind)
-    return topology->set_thisthread_cpubind(topology, set, strict);
   errno = ENOTSUP;
   return -1;
 }

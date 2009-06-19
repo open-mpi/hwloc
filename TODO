@@ -3,8 +3,13 @@ API
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
-* expose the internal conversion from cpuset to sched_setaffinity mask?
-  + reverse routine?
+* rename TOPO_CPUBIND_BASIC in something better?
+* change topo_cpubind(strict) into a TOPO_CPUBIND_STRICT or'ed with TOPO_CPUBIND_BASIC/PROCESS/THREAD?
+
+* add topo_get_cpubind ? and the other cpubind variants ?
+
+* add topo_set_membind(topology, beginaddr, endaddr, TOPO_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, topo_cpuset_t)
+  + if beginaddr=endaddr=NULL, setmempolicy?
 
 Doc
 ===

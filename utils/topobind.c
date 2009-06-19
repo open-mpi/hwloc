@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
     if (single)
       topo_cpuset_singlify(&cpu_set);
-    ret = topo_set_cpubind(topology, &cpu_set, strict);
+    ret = topo_set_cpubind(topology, &cpu_set, TOPO_CPUBIND_BASIC, strict);
     if (ret)
       fprintf(stderr, "topo_set_cpubind %"TOPO_PRIxCPUSET" failed (errno %d %s)\n", TOPO_CPUSET_PRINTF_VALUE(&cpu_set), errno, strerror(errno));
 

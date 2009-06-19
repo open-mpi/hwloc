@@ -426,24 +426,20 @@ extern int topo_obj_cpuset_snprintf(char * __topo_restrict str, size_t size, siz
  * @{
  */
 
-/** \brief Bind current process on cpus given in cpuset \p set
- *
- * This assumes that the process is mono-threaded.
- */
-extern int topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict);
+/** \brief Process/Thread binding policy */
+typedef enum {
+  TOPO_CPUBIND_BASIC = 0,	/**< \brief Bind current process assuming it's mono-threaded */
+  TOPO_CPUBIND_PROCESS = 1,	/**< \brief Bind all threads of current process */
+  TOPO_CPUBIND_THREAD = 2,	/**< \brief Bind current thread of current process */
+} topo_cpubind_policy_t;
 
-/** \brief Bind current process on cpus given in cpuset \p set
+/** \brief Bind current process or thread on cpus given in cpuset \p set
  *
- * This may be used in multithread processes, all threads will be bound.
+ * If \p strict is set and the OS cannot bind strictly, the call will fail
+ * with a negative return value.
  */
-extern int topo_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict);
-
-/** \brief Bind current thread on cpus given in cpuset \p set
- *
- * This may be used in multithread processes, only the curren thread will be
- * bound.
- */
-extern int topo_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *set, int strict);
+extern int topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
+			    topo_cpubind_policy_t policy, int strict);
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
  *

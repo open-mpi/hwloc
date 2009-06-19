@@ -18,6 +18,9 @@ EXTRA_DIST = $(DX_CONFIG) \
 
 if TOPO_INSTALL_MAN
 dist_man3_MANS = \
+	@DX_DOCDIR@/man/man3/TOPO_CPUBIND_BASIC.3 \
+	@DX_DOCDIR@/man/man3/TOPO_CPUBIND_PROCESS.3 \
+	@DX_DOCDIR@/man/man3/TOPO_CPUBIND_THREAD.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_CPU.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_FULL.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUSET_STRING_LENGTH.3 \
@@ -35,6 +38,7 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/TOPO_PRIxCPUSET.3 \
 	@DX_DOCDIR@/man/man3/TOPO_TYPE_DEPTH_MULTIPLE.3 \
 	@DX_DOCDIR@/man/man3/TOPO_TYPE_DEPTH_UNKNOWN.3 \
+	@DX_DOCDIR@/man/man3/topo_cpubind_policy_t.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_all_but_cpu.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_andset.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_clearset.3 \
@@ -104,8 +108,6 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_obj_type_of_string.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_t.3 \
 	@DX_DOCDIR@/man/man3/topo_set_cpubind.3 \
-	@DX_DOCDIR@/man/man3/topo_set_thisproc_cpubind.3 \
-	@DX_DOCDIR@/man/man3/topo_set_thisthread_cpubind.3 \
 	@DX_DOCDIR@/man/man3/topo_set_proc_cpubind.3 \
 	@DX_DOCDIR@/man/man3/topo_set_thread_cpubind.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_destroy.3 \
