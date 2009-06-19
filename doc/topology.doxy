@@ -260,7 +260,9 @@ int main(void)
 	topo_topology_load(topology);
 
 
-	/* Get topology information.  */
+	/* Optionally, get some additional topology information
+	 * in case we need the topology depth later.
+	 */
 	struct topo_topology_info topoinfo;
 	topo_topology_get_info(topology, &topoinfo);
 

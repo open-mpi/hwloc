@@ -342,9 +342,10 @@ extern int topo_topology_set_xml(topo_topology_t __topo_restrict topology, const
  * @{
  */
 
-/** \brief Get global information about the topology.
+/** \brief Get additional global information about the topology.
  *
- * Retrieve global information about a loaded topology context.
+ * Retrieve additional global information about a loaded topology context.
+ * Might be useful if the whole topology depth is needed for instance.
  */
 extern int topo_topology_get_info(topo_topology_t  __topo_restrict topology, struct topo_topology_info * __topo_restrict info);
 
