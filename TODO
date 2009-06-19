@@ -11,6 +11,7 @@ API
   for a process when its threads are bound here and there.
 
 * add topo_set_membind(topology, beginaddr, endaddr, TOPO_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, topo_cpuset_t)
+  + size instead of endaddr?
   + if beginaddr=endaddr=NULL, setmempolicy?
 
 Doc
