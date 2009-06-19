@@ -14,6 +14,7 @@ TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	topo_get_shared_cache_above \
 	topo_cpuset_singlify \
 	topo_type_depth \
+	topo_bind \
 	object_userdata \
 	synthetic-topology
 
@@ -36,3 +37,4 @@ check_PROGRAMS = $(TESTS)
 LIBS = $(top_builddir)/src/libtopology.la
 
 linux_libnuma_LDFLAGS = -lnuma
+topo_bind_LDFLAGS = -lpthread
