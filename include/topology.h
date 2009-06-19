@@ -86,7 +86,8 @@ struct topo_topology_info {
 /** \brief Type of topology Object.
  *
  * Do not rely on the ordering of the values as new ones may be defined in the
- * future!  Use the value returned by topo_get_type_order() instead.
+ * future!  If you need to compare types, use the value returned by
+ * topo_get_type_order() instead.
  */
 typedef enum {
   TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
