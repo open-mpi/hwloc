@@ -1,5 +1,4 @@
 #!/bin/sh
-printenv > /tmp/foo
 set -e
 file="`mktemp`"
 (
