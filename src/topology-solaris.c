@@ -56,8 +56,10 @@ topo_solaris_set_sth_cpubind(topo_topology_t topology, idtype_t idtype, id_t id,
     return 0;
   }
 
-  if (topo_cpuset_weight(topo_set) != 1)
+  if (topo_cpuset_weight(topo_set) != 1) {
+    errno = ENOTSUP;
     return -1;
+  }
 
   target = topo_cpuset_first(topo_set);
 

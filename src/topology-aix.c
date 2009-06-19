@@ -67,8 +67,10 @@ topo_aix_set_sth_cpubind(topo_topology_t topology, int what, int who, const topo
   /* TODO: use ra_attachrset instead to overcome this limitation, also provides
    * SHM memory binding and policy (P_FIRST_TOUCH / P_BALANCED)
    */
-  if (topo_cpuset_weight(topo_set) != 1)
+  if (topo_cpuset_weight(topo_set) != 1) {
+    errno = ENOTSUP;
     return -1;
+  }
 
   target = topo_cpuset_first(topo_set);
 
