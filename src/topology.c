@@ -798,6 +798,11 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->flags = 0;
   topology->is_fake = 0;
   topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */
+  topology->set_cpubind = NULL;
+  topology->set_proc_cpubind = NULL;
+  topology->set_thread_cpubind = NULL;
+  topology->set_thisproc_cpubind = NULL;
+  topology->set_thisthread_cpubind = NULL;
   /* Only ignore useless cruft by default */
   for(i=0; i< TOPO_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = TOPO_IGNORE_TYPE_NEVER;
