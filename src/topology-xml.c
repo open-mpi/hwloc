@@ -239,7 +239,6 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
 
 static int
 topo_xml_set_cpubind(void) {
-  /* TODO: check cpuset validity */
   return 0;
 }
 

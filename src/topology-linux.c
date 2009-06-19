@@ -226,7 +226,6 @@ topo_linux_set_thread_cpubind(topo_topology_t topology, pthread_t tid, const top
 
 static int
 topo_linux_fsys_root_set_cpubind(void) {
-  /* TODO: check cpuset validity */
   return 0;
 }
 

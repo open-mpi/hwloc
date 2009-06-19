@@ -287,7 +287,6 @@ topo__look_synthetic(struct topo_topology *topology,
 
 static int
 topo_synthetic_set_cpubind(void) {
-  /* TODO: check cpuset validity */
   return 0;
 }
 
