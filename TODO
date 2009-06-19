@@ -7,6 +7,8 @@ API
 * change topo_cpubind(strict) into a TOPO_CPUBIND_STRICT or'ed with TOPO_CPUBIND_BASIC/PROCESS/THREAD?
 
 * add topo_get_cpubind ? and the other cpubind variants ?
+  + A few OSes don't provide it (e.g. AIX, OSF, solaris), it does not make sense
+  for a process when its threads are bound here and there.
 
 * add topo_set_membind(topology, beginaddr, endaddr, TOPO_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, topo_cpuset_t)
   + if beginaddr=endaddr=NULL, setmempolicy?
