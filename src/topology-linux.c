@@ -181,7 +181,7 @@ topo_linux_set_proc_cpubind(topo_topology_t topology, pid_t pid, const topo_cpus
   return topo_linux_set_tid_cpubind(topology, pid, topo_set, strict);
 }
 
-#ifdef HAVE_PTHREAD_SETAFFINITY_NP
+#ifdef HAVE_DECL_PTHREAD_SETAFFINITY_NP
 #pragma weak pthread_setaffinity_np
 
 static int
@@ -222,7 +222,7 @@ topo_linux_set_thread_cpubind(topo_topology_t topology, pthread_t tid, const top
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
 #endif /* CPU_SET */
 }
-#endif
+#endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
 
 static int
 topo_linux_fsys_root_set_cpubind(void) {
@@ -920,9 +920,9 @@ topo_look_linux(struct topo_topology *topology)
 
   if (!topology->is_fake) {
     topology->set_cpubind = topo_linux_set_cpubind;
-#ifdef HAVE_PTHREAD_SETAFFINITY_NP
+#ifdef HAVE_DECL_PTHREAD_SETAFFINITY_NP
     topology->set_thread_cpubind = topo_linux_set_thread_cpubind;
-#endif
+#endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
     topology->set_thisthread_cpubind = topo_linux_set_thisthread_cpubind;
   } else {
     topology->set_cpubind = (void*) topo_linux_fsys_root_set_cpubind;
