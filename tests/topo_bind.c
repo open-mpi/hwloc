@@ -33,7 +33,9 @@
 
 #include <stdio.h>
 #include <errno.h>
+
 #include <topology.h>
+#include <config.h>
 
 /* check the binding functions */
 topo_topology_t topology;
@@ -52,8 +54,13 @@ static void test(topo_cpuset_t *cpuset, int flags)
   result("Bind this thread", topo_set_cpubind(topology, cpuset, flags | TOPO_CPUBIND_THREAD));
   result("Bind this whole process", topo_set_cpubind(topology, cpuset, flags | TOPO_CPUBIND_PROCESS));
 
+#ifdef WIN_SYS
+  result("Bind process", topo_set_proc_cpubind(topology, GetCurrentProcess(), cpuset, flags | TOPO_CPUBIND_PROCESS));
+  result("Bind thread", topo_set_thread_cpubind(topology, GetCurrentThread(), cpuset, flags | TOPO_CPUBIND_THREAD));
+#else /* !WIN_SYS */
   result("Bind process", topo_set_proc_cpubind(topology, getpid(), cpuset, flags | TOPO_CPUBIND_PROCESS));
   result("Bind thread", topo_set_thread_cpubind(topology, pthread_self(), cpuset, flags | TOPO_CPUBIND_THREAD));
+#endif /* !WIN_SYS */
   printf("\n");
 }
 

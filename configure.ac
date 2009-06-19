@@ -151,6 +151,10 @@ AC_CHECK_TYPES([KAFFINITY,
 		    [],[],[[#include <windows.h>]])
 AC_HAVE_LIBRARY(gdi32)
 
+AC_CHECK_HEADER([windows.h], [
+  AC_DEFINE([TOPO_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
+])
+
 AC_CHECK_HEADERS([sys/lgrp_user.h], [
   AC_HAVE_LIBRARY([lgrp])
 ])
@@ -170,7 +174,7 @@ AC_HAVE_HEADERS([mach/mach_init.h], [
 ])
 
 case ${target} in
-  *-*-mingw*)
+  *-*-mingw*|*-*-cygwin*)
     topo_pid_t=HANDLE
     topo_thread_t=HANDLE
     ;;

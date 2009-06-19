@@ -15,6 +15,11 @@
 
 #undef TOPO_HAVE_FFSL
 
+#undef TOPO_HAVE_WINDOWS_H
+#ifdef TOPO_HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+
 #define TOPO_NBMAXCPUS	1024
 
 #define TOPO_CACHE_LEVEL_MAX 3
