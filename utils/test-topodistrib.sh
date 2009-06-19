@@ -1,6 +1,14 @@
 #!/bin/sh
-set -e
 file="`mktemp`"
+if ! [ -d "$file" ]
+then
+	file=/tmp/topodistrib-$$
+	old_umask=`umask`
+	umask 0077
+	touch "$file"
+	umask $old_umask
+fi
+set -e
 (
   ./topodistrib --synthetic "2 2 2" 2
   echo
