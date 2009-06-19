@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
  *
  * This software is a computer program whose purpose is to provide
@@ -86,6 +86,12 @@ main (int argc, char *argv[])
   /* there is no next proc after the last one */
   obj = topo_get_next_obj_below_cpuset(topology, &root->cpuset, TOPO_OBJ_PROC, obj);
   assert(!obj);
+
+
+  /* check there are 20 cores below first socket */
+  root = topo_get_obj(topology, 2, 0);
+  assert(topo_get_nbobjs_below_cpuset(topology, &root->cpuset, TOPO_OBJ_CORE) == 20);
+
 
   /* check first proc of second socket */
   root = topo_get_obj(topology, 2, 1);

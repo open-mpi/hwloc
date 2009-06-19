@@ -267,6 +267,37 @@ topo_get_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
   return topo_get_obj_below_cpuset_by_depth(topology, set, depth, index);
 }
 
+/** \brief Return the number of objects at depth \p depth included in CPU set \p set. */
+static __inline__ unsigned
+topo_get_nbobjs_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
+				       unsigned depth)
+{
+  topo_obj_t next = topo_get_obj(topology, depth, 0);
+  int count = 0;
+  while (next && topo_cpuset_isincluded(&next->cpuset, set)) {
+    next = next->next_cousin;
+    count++;
+  }
+  return count;
+}
+
+/** \brief Return the number of objects of type \p type included in CPU set \p set.
+ *
+ * If no object for that type exists below CPU set \p set, 0 is returned.
+ * If there are several levels with objects of that type below CPU set \p set, -1 is returned.
+ */
+static __inline__ int
+topo_get_nbobjs_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
+			      topo_obj_type_t type)
+{
+  unsigned depth = topo_get_type_depth(topology, type);
+  if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
+    return 0;
+  if (depth == TOPO_TYPE_DEPTH_MULTIPLE)
+    return -1; /* FIXME: agregate nbobjs from different levels? */
+  return topo_get_nbobjs_below_cpuset_by_depth(topology, set, depth);
+}
+
 /** @} */
 
 
