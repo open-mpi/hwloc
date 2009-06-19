@@ -39,12 +39,12 @@
 #include <assert.h>
 
 unsigned
-topo_get_type_depth (struct topo_topology *topology, enum topo_obj_type_e type)
+topo_get_type_depth (struct topo_topology *topology, topo_obj_type_t type)
 {
   return topology->type_depth[type];
 }
 
-enum topo_obj_type_e
+topo_obj_type_t
 topo_get_depth_type (topo_topology_t topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
@@ -159,9 +159,9 @@ topo_get_cpuset_objs (struct topo_topology *topology, const topo_cpuset_t *set,
 }
 
 const char *
-topo_obj_type_string (enum topo_obj_type_e l)
+topo_obj_type_string (topo_obj_type_t obj)
 {
-  switch (l)
+  switch (obj)
     {
     case TOPO_OBJ_SYSTEM: return "System";
     case TOPO_OBJ_MACHINE: return "Machine";
@@ -175,7 +175,7 @@ topo_obj_type_string (enum topo_obj_type_e l)
     }
 }
 
-enum topo_obj_type_e
+topo_obj_type_t
 topo_obj_type_of_string (const char * string)
 {
   if (!strcmp(string, "System")) return TOPO_OBJ_SYSTEM;
@@ -198,7 +198,7 @@ int
 topo_obj_snprintf(char *string, size_t size,
 		  struct topo_topology *topology, struct topo_obj *l, const char *indexprefix, int verbose)
 {
-  enum topo_obj_type_e type = l->type;
+  topo_obj_type_t type = l->type;
   char os_index[12] = "";
 
   if (l->os_index != -1)

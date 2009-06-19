@@ -110,7 +110,7 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
   int nb_machine_levels = 0, nb_node_levels = 0;
 
   for(i=0; i<count; i++) {
-    enum topo_obj_type_e type;
+    topo_obj_type_t type;
 
     type = topology->backend_params.synthetic.type[i];
 

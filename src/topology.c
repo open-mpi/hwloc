@@ -878,7 +878,7 @@ topo_topology_set_flags (struct topo_topology *topology, unsigned long flags)
 }
 
 int
-topo_topology_ignore_type(struct topo_topology *topology, enum topo_obj_type_e type)
+topo_topology_ignore_type(struct topo_topology *topology, topo_obj_type_t type)
 {
   if (type >= TOPO_OBJ_TYPE_MAX)
     return -1;

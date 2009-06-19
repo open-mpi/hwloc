@@ -88,7 +88,7 @@ struct topo_topology_info {
  * Do not rely on the ordering of the values as new ones may be defined in the
  * future!  Use the value returned by topo_get_type_order() instead.
  */
-enum topo_obj_type_e {
+typedef enum {
   TOPO_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
   			  * The whole system that is accessible to libtopology.
 			  * That may comprise several machines in SSI systems
@@ -126,8 +126,7 @@ enum topo_obj_type_e {
 			  * expose their arbitrary processors aggregation this
 			  * way.
 			  */
-};
-typedef enum topo_obj_type_e topo_obj_type_t;
+} topo_obj_type_t;
 /** \brief Maximal value of an Object Type */
 #define TOPO_OBJ_TYPE_MAX (TOPO_OBJ_MISC+1)
 
@@ -162,7 +161,7 @@ topo_obj_type_t topo_get_order_type(int order);
  */
 struct topo_obj {
   /* physical information */
-  enum topo_obj_type_e type;		/**< \brief Type of object */
+  topo_obj_type_t type;		/**< \brief Type of object */
   signed os_index;		/**< \brief OS-provided physical index number */
 
   /** \brief Object-specific Attributes */
@@ -357,12 +356,12 @@ extern int topo_topology_get_info(topo_topology_t  __topo_restrict topology, str
  * If type is absent but a similar type is acceptable, see also
  * topo_get_type_or_below_depth() and topo_get_type_or_above_depth().
  */
-extern unsigned topo_get_type_depth (topo_topology_t topology, enum topo_obj_type_e type);
+extern unsigned topo_get_type_depth (topo_topology_t topology, topo_obj_type_t type);
 #define TOPO_TYPE_DEPTH_UNKNOWN -1 /**< \brief No object of given type exists in the topology. */
 #define TOPO_TYPE_DEPTH_MULTIPLE -2 /**< \brief Objects of given type exist at different depth in the topology. */
 
 /** \brief Returns the type of objects at depth \p depth. */
-extern enum topo_obj_type_e topo_get_depth_type (topo_topology_t topology, unsigned depth);
+extern topo_obj_type_t topo_get_depth_type (topo_topology_t topology, unsigned depth);
 
 /** \brief Returns the width of level at depth \p depth */
 extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth);
@@ -384,7 +383,7 @@ extern topo_obj_t topo_get_obj (topo_topology_t topology, unsigned depth, unsign
  */
 
 /** \brief Return a stringified topology object type */
-extern const char * topo_obj_type_string (enum topo_obj_type_e l);
+extern const char * topo_obj_type_string (topo_obj_type_t type);
 
 /** \brief Return an object type from the string */
 extern topo_obj_type_t topo_obj_type_of_string (const char * string);

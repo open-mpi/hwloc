@@ -243,7 +243,7 @@ topo_look_windows(struct topo_topology *topology)
       unsigned id;
       int i;
       struct topo_obj *obj;
-      enum topo_obj_type_e type;
+      topo_obj_type_t type;
 
       for (i = 0; i < length / sizeof(*procInfo); i++) {
 
@@ -321,7 +321,7 @@ topo_look_windows(struct topo_topology *topology)
 
       signed id;
       struct topo_obj *obj;
-      enum topo_obj_type_e type;
+      topo_obj_type_t type;
       KAFFINITY mask;
       WORD group;
 

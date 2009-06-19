@@ -88,7 +88,7 @@ void output_text(topo_topology_t topology, const char *filename, int verbose_mod
   if (verbose_mode)
     {
       struct topo_topology_info info;
-      enum topo_obj_type_e l;
+      topo_obj_type_t l;
 
       topo_topology_get_info(topology, &info);
       if (info.is_fake)

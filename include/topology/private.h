@@ -191,7 +191,7 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 	} while (0)
 
 static inline struct topo_obj *
-topo_alloc_setup_object(enum topo_obj_type_e type, unsigned index)
+topo_alloc_setup_object(topo_obj_type_t type, unsigned index)
 {
   struct topo_obj *obj = malloc(sizeof(*obj));
   assert(obj);
@@ -212,7 +212,7 @@ topo_alloc_setup_object(enum topo_obj_type_e type, unsigned index)
  * and for which processors have ID PROC_PHYSIDS, and add them to the topology.
  * */
 static __inline__ void
-topo_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology, enum topo_obj_type_e type)
+topo_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct topo_topology *topology, topo_obj_type_t type)
 {
   struct topo_obj *obj;
   int j;

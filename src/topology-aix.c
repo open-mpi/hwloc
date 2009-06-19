@@ -113,7 +113,7 @@ topo_aix_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, in
 }
 
 static void
-look_rset(int sdl, enum topo_obj_type_e type, struct topo_topology *topology, int level)
+look_rset(int sdl, topo_obj_type_t type, struct topo_topology *topology, int level)
 {
   rsethandle_t rset, rad;
   int i,maxcpus,j;

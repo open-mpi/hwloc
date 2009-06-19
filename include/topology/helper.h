@@ -55,7 +55,7 @@
  * inside \p type.
  */
 static __inline__ unsigned
-topo_get_type_or_below_depth (topo_topology_t topology, enum topo_obj_type_e type)
+topo_get_type_or_below_depth (topo_topology_t topology, topo_obj_type_t type)
 {
   unsigned depth = topo_get_type_depth(topology, type);
   unsigned minorder = topo_get_type_order(type);
@@ -79,7 +79,7 @@ topo_get_type_or_below_depth (topo_topology_t topology, enum topo_obj_type_e typ
  * containing \p type.
  */
 static __inline__ unsigned
-topo_get_type_or_above_depth (topo_topology_t topology, enum topo_obj_type_e type)
+topo_get_type_or_above_depth (topo_topology_t topology, topo_obj_type_t type)
 {
   unsigned depth = topo_get_type_depth(topology, type);
   unsigned maxorder = topo_get_type_order(type);
@@ -102,7 +102,7 @@ topo_get_type_or_above_depth (topo_topology_t topology, enum topo_obj_type_e typ
  * If there are several levels with objects of that type, -1 is returned.
  */
 static __inline__ unsigned
-topo_get_type_nbobjs (topo_topology_t topology, enum topo_obj_type_e type)
+topo_get_type_nbobjs (topo_topology_t topology, topo_obj_type_t type)
 {
 	unsigned depth = topo_get_type_depth(topology, type);
 	if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
@@ -148,7 +148,7 @@ topo_get_next_obj_by_depth (topo_topology_t topology, unsigned depth, topo_obj_t
  * fallback to topo_get_next_obj_by_depth().
  */
 static __inline__ topo_obj_t
-topo_get_next_obj (topo_topology_t topology, enum topo_obj_type_e type,
+topo_get_next_obj (topo_topology_t topology, topo_obj_type_t type,
 		   topo_obj_t prev)
 {
   unsigned depth = topo_get_type_depth(topology, type);
