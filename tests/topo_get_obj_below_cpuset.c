@@ -92,6 +92,10 @@ main (int argc, char *argv[])
   root = topo_get_obj(topology, 2, 0);
   assert(topo_get_nbobjs_below_cpuset(topology, &root->cpuset, TOPO_OBJ_CORE) == 20);
 
+  /* check there are 12 caches below last node */
+  root = topo_get_obj(topology, 1, 1);
+  assert(topo_get_nbobjs_below_cpuset(topology, &root->cpuset, TOPO_OBJ_CACHE) == 12);
+
 
   /* check first proc of second socket */
   root = topo_get_obj(topology, 2, 1);

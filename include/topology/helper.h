@@ -272,11 +272,12 @@ static __inline__ unsigned
 topo_get_nbobjs_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
 				       unsigned depth)
 {
-  topo_obj_t next = topo_get_obj(topology, depth, 0);
+  topo_obj_t obj = topo_get_obj(topology, depth, 0);
   int count = 0;
-  while (next && topo_cpuset_isincluded(&next->cpuset, set)) {
-    next = next->next_cousin;
-    count++;
+  while (obj) {
+    if (topo_cpuset_isincluded(&obj->cpuset, set))
+      count++;
+    obj = obj->next_cousin;
   }
   return count;
 }
