@@ -210,6 +210,8 @@ topo_look_kstat(struct topo_topology *topology)
 	  fprintf(stderr, "kstat_read failed for CPU%u: %s\n", numprocs, strerror(errno));
 	  goto out;
 	}
+
+      /* Get Chip ID */
       stat = (kstat_named_t *) kstat_data_lookup(ksp, "chip_id");
       if (!stat)
 	{
@@ -236,6 +238,7 @@ topo_look_kstat(struct topo_topology *topology)
 	    osphysids[numsockets++] = physid;
 	}
 
+      /* Get Core ID */
       stat = (kstat_named_t *) kstat_data_lookup(ksp, "core_id");
       if (!stat)
 	{
@@ -264,6 +267,10 @@ topo_look_kstat(struct topo_topology *topology)
 	      oscoreids[numcores++] = coreid;
 	    }
 	}
+
+      /* Note: there is also clog_id for the Thread ID (not unique) and
+       * pkg_core_id for the core ID (not unique).  They are not useful to us
+       * however. */
 
       numprocs++;
     }
