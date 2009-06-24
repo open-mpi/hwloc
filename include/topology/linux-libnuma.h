@@ -62,7 +62,7 @@
  * node number as input parameter.
  */
 static __inline__ void
-topo_cpuset_to_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *cpuset,
+topo_cpuset_to_linux_libnuma_ulongs(topo_topology_t topology, const topo_cpuset_t *cpuset,
 				    unsigned long *mask, unsigned long *maxnode)
 {
   unsigned long outmaxnode = -1;
@@ -103,7 +103,7 @@ topo_cpuset_to_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *cpu
  */
 static __inline__ void
 topo_cpuset_from_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *cpuset,
-				      unsigned long *mask, unsigned long maxnode)
+				      const unsigned long *mask, unsigned long maxnode)
 {
   topo_obj_t node;
   unsigned depth;
@@ -146,7 +146,7 @@ topo_cpuset_from_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *c
  * that use a struct bitmask as an input parameter.
  */
 static __inline__ struct bitmask *
-topo_cpuset_to_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *cpuset)
+topo_cpuset_to_linux_libnuma_bitmask(topo_topology_t topology, const topo_cpuset_t *cpuset)
 {
   struct bitmask *bitmask;
   topo_obj_t node = NULL;
@@ -178,7 +178,7 @@ topo_cpuset_to_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *cp
  */
 static __inline__ void
 topo_cpuset_from_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *cpuset,
-				       struct bitmask *bitmask)
+				       const struct bitmask *bitmask)
 {
   topo_obj_t node;
   unsigned depth;
@@ -220,7 +220,7 @@ topo_cpuset_from_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *
  * that use a nodemask_t as an input parameter.
  */
 static __inline__ void
-topo_cpuset_to_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t *cpuset,
+topo_cpuset_to_linux_libnuma_nodemask(topo_topology_t topology, const topo_cpuset_t *cpuset,
 				      nodemask_t *nodemask)
 {
   topo_obj_t node = NULL;
@@ -245,7 +245,7 @@ topo_cpuset_to_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t *c
  */
 static __inline__ void
 topo_cpuset_from_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t *cpuset,
-					nodemask_t *nodemask)
+					const nodemask_t *nodemask)
 {
   topo_obj_t node;
   unsigned depth;

@@ -65,7 +65,7 @@
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
 static __inline__ void
-topo_cpuset_to_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *toposet,
+topo_cpuset_to_glibc_sched_affinity(topo_topology_t topology, const topo_cpuset_t *toposet,
 				    cpu_set_t *schedset, size_t schedsetsize)
 {
 #ifdef CPU_ZERO_S
@@ -93,7 +93,7 @@ topo_cpuset_to_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *top
  */
 static __inline__ void
 topo_cpuset_from_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *toposet,
-				      cpu_set_t *schedset, size_t schedsetsize)
+				      const cpu_set_t *schedset, size_t schedsetsize)
 {
 #ifdef CPU_ZERO_S
   int cpu, count;
