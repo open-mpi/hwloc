@@ -143,7 +143,7 @@ typedef enum {
  */
 int topo_get_type_order(topo_obj_type_t type);
 
-/** \brief converse of topo_get_obj_type_oder()
+/** \brief Converse of topo_get_type_oder()
  *
  * This is the converse of topo_get_type_order().
  */
