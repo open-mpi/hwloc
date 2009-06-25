@@ -69,7 +69,7 @@ int main()
   assert(objs[0] == obj);
 
   /* just get the very last object */
-  obj = topo_get_obj(topology, topoinfo.depth-1, topo_get_depth_nbobjs(topology, topoinfo.depth-1)-1);
+  obj = topo_get_obj_by_depth(topology, topoinfo.depth-1, topo_get_depth_nbobjs(topology, topoinfo.depth-1)-1);
   ret = topo_get_cpuset_objs(topology, &obj->cpuset, objs, 1);
   assert(ret == 1);
   assert(objs[0] == obj);
@@ -88,23 +88,23 @@ int main()
   topo_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING, &set);
   ret = topo_get_cpuset_objs(topology, &set, objs, 1);
   assert(ret == 1);
-  assert(objs[0] == topo_get_obj(topology, topoinfo.depth-1, 0));
+  assert(objs[0] == topo_get_obj_by_depth(topology, topoinfo.depth-1, 0));
   /* try a harder one with lots of objs instead of 2 needed */
   ret = topo_get_cpuset_objs(topology, &set, objs, 2);
   assert(ret == 2);
-  assert(objs[0] == topo_get_obj(topology, topoinfo.depth-1, 0));
-  assert(objs[1] == topo_get_obj(topology, topoinfo.depth-1, topo_get_depth_nbobjs(topology, topoinfo.depth-1)-1));
+  assert(objs[0] == topo_get_obj_by_depth(topology, topoinfo.depth-1, 0));
+  assert(objs[1] == topo_get_obj_by_depth(topology, topoinfo.depth-1, topo_get_depth_nbobjs(topology, topoinfo.depth-1)-1));
 
   /* try a very hard one */
   topo_cpuset_from_string(GIVEN_HARD_CPUSET_STRING, &set);
   ret = topo_get_cpuset_objs(topology, &set, objs, OBJ_MAX);
-  assert(objs[0] == topo_get_obj(topology, 5, 29));
-  assert(objs[1] == topo_get_obj(topology, 3, 5));
-  assert(objs[2] == topo_get_obj(topology, 3, 6));
-  assert(objs[3] == topo_get_obj(topology, 3, 7));
-  assert(objs[4] == topo_get_obj(topology, 2, 2));
-  assert(objs[5] == topo_get_obj(topology, 4, 36));
-  assert(objs[6] == topo_get_obj(topology, 5, 74));
+  assert(objs[0] == topo_get_obj_by_depth(topology, 5, 29));
+  assert(objs[1] == topo_get_obj_by_depth(topology, 3, 5));
+  assert(objs[2] == topo_get_obj_by_depth(topology, 3, 6));
+  assert(objs[3] == topo_get_obj_by_depth(topology, 3, 7));
+  assert(objs[4] == topo_get_obj_by_depth(topology, 2, 2));
+  assert(objs[5] == topo_get_obj_by_depth(topology, 4, 36));
+  assert(objs[6] == topo_get_obj_by_depth(topology, 5, 74));
 
   topo_topology_destroy(topology);
 

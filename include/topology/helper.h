@@ -124,7 +124,7 @@ topo_get_type_nbobjs (topo_topology_t topology, topo_obj_type_t type)
 static __inline__ topo_obj_t
 topo_get_system_obj (topo_topology_t topology)
 {
-  return topo_get_obj(topology, 0, 0);
+  return topo_get_obj_by_depth (topology, 0, 0);
 }
 
 /** \brief Returns the next object at depth \p depth.
@@ -135,7 +135,7 @@ static __inline__ topo_obj_t
 topo_get_next_obj_by_depth (topo_topology_t topology, unsigned depth, topo_obj_t prev)
 {
   if (!prev)
-    return topo_get_obj (topology, depth, 0);
+    return topo_get_obj_by_depth (topology, depth, 0);
   if (prev->depth != depth)
     return NULL;
   return prev->next_cousin;
@@ -240,7 +240,7 @@ topo_get_obj_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_
 				    unsigned depth, unsigned index)
 {
   int count = 0;
-  topo_obj_t obj = topo_get_obj(topology, depth, 0);
+  topo_obj_t obj = topo_get_obj_by_depth (topology, depth, 0);
   while (obj) {
     if (topo_cpuset_isincluded(&obj->cpuset, set)) {
       if (count == index)
@@ -272,7 +272,7 @@ static __inline__ unsigned
 topo_get_nbobjs_below_cpuset_by_depth (topo_topology_t topology, const topo_cpuset_t *set,
 				       unsigned depth)
 {
-  topo_obj_t obj = topo_get_obj(topology, depth, 0);
+  topo_obj_t obj = topo_get_obj_by_depth (topology, depth, 0);
   int count = 0;
   while (obj) {
     if (topo_cpuset_isincluded(&obj->cpuset, set))

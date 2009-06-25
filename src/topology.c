@@ -1077,7 +1077,7 @@ topo_topology_check(struct topo_topology *topology)
 
     /* check that each object is equal to the previous one */
     for(j=0; j<width; j++) {
-      obj = topo_get_obj(topology, i, j);
+      obj = topo_get_obj_by_depth(topology, i, j);
       assert(obj);
       assert(obj->depth == i);
       assert(obj->logical_index == j);
@@ -1091,7 +1091,7 @@ topo_topology_check(struct topo_topology *topology)
     }
 
     /* check first object of the level */
-    obj = topo_get_obj(topology, i, 0);
+    obj = topo_get_obj_by_depth(topology, i, 0);
     assert(obj);
     assert(!obj->prev_cousin);
 
@@ -1101,19 +1101,19 @@ topo_topology_check(struct topo_topology *topology)
 	   || topo_get_type_depth(topology, obj->type) == TOPO_TYPE_DEPTH_MULTIPLE);
 
     /* check last object */
-    obj = topo_get_obj(topology, i, width-1);
+    obj = topo_get_obj_by_depth(topology, i, width-1);
     assert(obj);
     assert(!obj->next_cousin);
 
     /* check last+1 object */
-    obj = topo_get_obj(topology, i, width);
+    obj = topo_get_obj_by_depth(topology, i, width);
     assert(!obj);
   }
 
   /* check bottom objects */
   assert(topo_get_depth_nbobjs(topology, info.depth-1) > 0);
   for(j=0; j<topo_get_depth_nbobjs(topology, info.depth-1); j++) {
-    obj = topo_get_obj(topology, info.depth-1, j);
+    obj = topo_get_obj_by_depth(topology, info.depth-1, j);
     assert(obj);
     assert(obj->type == TOPO_OBJ_PROC);
     assert(obj->arity == 0);

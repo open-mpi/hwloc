@@ -60,14 +60,14 @@ int main()
   assert(topo_cpuset_isequal(&set, &obj->cpuset));
   printf("system cpuset converted back and forth, ok\n");
 
-  obj = topo_get_obj(topology, topoinfo.depth-1, 0);
+  obj = topo_get_obj_by_depth(topology, topoinfo.depth-1, 0);
   topo_obj_cpuset_snprintf(string, sizeof(string), 1, &obj);
   printf("first cpu cpuset is %s\n", string);
   topo_cpuset_from_string(string, &set);
   assert(topo_cpuset_isequal(&set, &obj->cpuset));
   printf("first cpu cpuset converted back and forth, ok\n");
 
-  obj = topo_get_obj(topology, topoinfo.depth-1, topo_get_depth_nbobjs(topology, topoinfo.depth-1) - 1);
+  obj = topo_get_obj_by_depth(topology, topoinfo.depth-1, topo_get_depth_nbobjs(topology, topoinfo.depth-1) - 1);
   topo_obj_cpuset_snprintf(string, sizeof(string), 1, &obj);
   printf("last cpu cpuset is %s\n", string);
   topo_cpuset_from_string(string, &set);

@@ -56,7 +56,7 @@ int main()
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
-  obj = topo_get_obj(topology, 5, CPUINDEX);
+  obj = topo_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
   cache = topo_get_shared_cache_above(topology, obj);
   assert(cache);
@@ -65,13 +65,13 @@ int main()
   assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check no shared cache above the L2 cache */
-  obj = topo_get_obj(topology, 3, 0);
+  obj = topo_get_obj_by_depth(topology, 3, 0);
   assert(obj);
   cache = topo_get_shared_cache_above(topology, obj);
   assert(!cache);
 
   /* check no shared cache above the node */
-  obj = topo_get_obj(topology, 1, 0);
+  obj = topo_get_obj_by_depth(topology, 1, 0);
   assert(obj);
   cache = topo_get_shared_cache_above(topology, obj);
   assert(!cache);
@@ -86,7 +86,7 @@ int main()
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
-  obj = topo_get_obj(topology, 5, CPUINDEX);
+  obj = topo_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
   cache = topo_get_shared_cache_above(topology, obj);
   assert(cache);
@@ -95,7 +95,7 @@ int main()
   assert(topo_obj_is_in_subtree(obj, cache));
 
   /* check no shared-cache above the core */
-  obj = topo_get_obj(topology, 4, CPUINDEX/2);
+  obj = topo_get_obj_by_depth(topology, 4, CPUINDEX/2);
   assert(obj);
   cache = topo_get_shared_cache_above(topology, obj);
   assert(!cache);

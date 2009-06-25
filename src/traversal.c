@@ -61,7 +61,7 @@ topo_get_depth_nbobjs (struct topo_topology *topology, unsigned depth)
 }
 
 struct topo_obj *
-topo_get_obj (struct topo_topology *topology, unsigned depth, unsigned index)
+topo_get_obj_by_depth (struct topo_topology *topology, unsigned depth, unsigned index)
 {
   if (depth >= topology->nb_levels)
     return NULL;

@@ -122,7 +122,7 @@ topo_cpuset_from_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *c
   } else {
     for(i=0; i<maxnode; i++)
       if (mask[i/TOPO_BITS_PER_LONG] & (1 << (i% TOPO_BITS_PER_LONG))) {
-	node = topo_get_obj(topology, depth, i);
+	node = topo_get_obj_by_depth(topology, depth, i);
 	if (node)
 	  topo_cpuset_orset(cpuset, &node->cpuset);
       }
@@ -197,7 +197,7 @@ topo_cpuset_from_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *
   } else {
     for(i=0; i<NUMA_NUM_NODES; i++)
       if (numa_bitmask_isbitset(bitmask, i)) {
-	node = topo_get_obj(topology, depth, i);
+	node = topo_get_obj_by_depth(topology, depth, i);
 	if (node)
 	  topo_cpuset_orset(cpuset, &node->cpuset);
       }
@@ -264,7 +264,7 @@ topo_cpuset_from_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t 
   } else {
     for(i=0; i<NUMA_NUM_NODES; i++)
       if (nodemask_isset(nodemask, i)) {
-	node = topo_get_obj(topology, depth, i);
+	node = topo_get_obj_by_depth(topology, depth, i);
 	if (node)
 	  topo_cpuset_orset(cpuset, &node->cpuset);
       }

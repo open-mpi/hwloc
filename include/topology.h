@@ -376,7 +376,7 @@ extern unsigned topo_get_depth_nbobjs (topo_topology_t topology, unsigned depth)
  */
 
 /** \brief Returns the topology object at index \p index from depth \p depth */
-extern topo_obj_t topo_get_obj (topo_topology_t topology, unsigned depth, unsigned index);
+extern topo_obj_t topo_get_obj_by_depth (topo_topology_t topology, unsigned depth, unsigned index);
 
 /** @} */
 

@@ -64,7 +64,7 @@ int main(void)
     /* check arities */
     assert(topo_get_depth_nbobjs(topology, i) == width);
     for(j=0; j<width; j++) {
-      topo_obj_t obj = topo_get_obj(topology, i, j);
+      topo_obj_t obj = topo_get_obj_by_depth(topology, i, j);
       assert(obj);
       assert(obj->arity == (i<5 ? i+2 : 0));
     }

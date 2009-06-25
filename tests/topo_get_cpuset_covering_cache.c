@@ -57,7 +57,7 @@ int main()
   /* check the cache above a given cpu */
 #define CPUINDEX 180
   topo_cpuset_zero(&set);
-  obj = topo_get_obj(topology, 5, CPUINDEX);
+  obj = topo_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
   cache = topo_get_cpuset_covering_cache(topology, &set);
@@ -70,10 +70,10 @@ int main()
 #define CPUINDEX1 180
 #define CPUINDEX2 183
   topo_cpuset_zero(&set);
-  obj = topo_get_obj(topology, 5, CPUINDEX1);
+  obj = topo_get_obj_by_depth(topology, 5, CPUINDEX1);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
-  obj = topo_get_obj(topology, 5, CPUINDEX2);
+  obj = topo_get_obj_by_depth(topology, 5, CPUINDEX2);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
   cache = topo_get_cpuset_covering_cache(topology, &set);
@@ -87,10 +87,10 @@ int main()
 #undef CPUINDEX1
 #define CPUINDEX1 300
   topo_cpuset_zero(&set);
-  obj = topo_get_obj(topology, 5, CPUINDEX1);
+  obj = topo_get_obj_by_depth(topology, 5, CPUINDEX1);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
-  obj = topo_get_obj(topology, 5, CPUINDEX2);
+  obj = topo_get_obj_by_depth(topology, 5, CPUINDEX2);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
   cache = topo_get_cpuset_covering_cache(topology, &set);
@@ -98,7 +98,7 @@ int main()
 
   /* check no cache above higher level */
   topo_cpuset_zero(&set);
-  obj = topo_get_obj(topology, 2, 0);
+  obj = topo_get_obj_by_depth(topology, 2, 0);
   assert(obj);
   topo_cpuset_orset(&set, &obj->cpuset);
   cache = topo_get_cpuset_covering_cache(topology, &set);

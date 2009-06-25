@@ -71,7 +71,7 @@ int main(void)
   topo_cpuset_from_glibc_sched_affinity(topology, &toposet, &schedset, sizeof(schedset));
   assert(topo_cpuset_isequal(&toposet, &topo_get_system_obj(topology)->cpuset));
 
-  obj = topo_get_obj(topology, topoinfo.depth-1, topo_get_depth_nbobjs(topology, topoinfo.depth-1) - 1);
+  obj = topo_get_obj_by_depth(topology, topoinfo.depth-1, topo_get_depth_nbobjs(topology, topoinfo.depth-1) - 1);
   assert(obj);
   assert(obj->type == TOPO_OBJ_PROC);
 

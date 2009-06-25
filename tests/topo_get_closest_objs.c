@@ -74,7 +74,7 @@ main (int argc, char *argv[])
 
   /* get the last object of last level */
   numprocs =  topo_get_depth_nbobjs(topology, info.depth-1);
-  last = topo_get_obj(topology, info.depth-1, numprocs-1);
+  last = topo_get_obj_by_depth(topology, info.depth-1, numprocs-1);
 
   /* allocate the array of closest objects */
   closest = malloc(numprocs * sizeof(*closest));
@@ -86,11 +86,11 @@ main (int argc, char *argv[])
   assert(found == numprocs-1);
 
   /* check first found is closest */
-  assert(closest[0] == topo_get_obj(topology, info.depth-1, numprocs-5 /* arity is 5 on last level */));
+  assert(closest[0] == topo_get_obj_by_depth(topology, info.depth-1, numprocs-5 /* arity is 5 on last level */));
   /* check some other expected positions */
-  assert(closest[found-1] == topo_get_obj(topology, info.depth-1, 1*3*4*5-1 /* last of first half */));
-  assert(closest[found/2-1] == topo_get_obj(topology, info.depth-1, 1*3*4*5+2*4*5-1 /* last of second third of second half */));
-  assert(closest[found/2/3-1] == topo_get_obj(topology, info.depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
+  assert(closest[found-1] == topo_get_obj_by_depth(topology, info.depth-1, 1*3*4*5-1 /* last of first half */));
+  assert(closest[found/2-1] == topo_get_obj_by_depth(topology, info.depth-1, 1*3*4*5+2*4*5-1 /* last of second third of second half */));
+  assert(closest[found/2/3-1] == topo_get_obj_by_depth(topology, info.depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
 
   /* get ancestor of last and less close object */
   topo_obj_t ancestor = topo_get_common_ancestor_obj(last, closest[found-1]);

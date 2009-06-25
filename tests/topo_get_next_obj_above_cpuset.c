@@ -67,15 +67,15 @@ main (int argc, char *argv[])
   topo_cpuset_from_string("00008f18", &set);
 
   obj = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, NULL);
-  assert(obj == topo_get_obj(topology, 1, 1));
+  assert(obj == topo_get_obj_by_depth(topology, 1, 1));
   obj = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, obj);
-  assert(obj == topo_get_obj(topology, 1, 2));
+  assert(obj == topo_get_obj_by_depth(topology, 1, 2));
   obj = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, obj);
-  assert(obj == topo_get_obj(topology, 1, 4));
+  assert(obj == topo_get_obj_by_depth(topology, 1, 4));
   obj = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, obj);
-  assert(obj == topo_get_obj(topology, 1, 5));
+  assert(obj == topo_get_obj_by_depth(topology, 1, 5));
   obj = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, obj);
-  assert(obj == topo_get_obj(topology, 1, 7));
+  assert(obj == topo_get_obj_by_depth(topology, 1, 7));
   obj = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, obj);
   assert(!obj);
 
@@ -93,9 +93,9 @@ main (int argc, char *argv[])
   depth = topo_get_type_depth(topology, TOPO_OBJ_SOCKET);
   assert(depth == 2);
   obj = topo_get_next_obj_above_cpuset_by_depth(topology, &set, depth, NULL);
-  assert(obj == topo_get_obj(topology, depth, 1));
+  assert(obj == topo_get_obj_by_depth(topology, depth, 1));
   obj = topo_get_next_obj_above_cpuset_by_depth(topology, &set, depth, obj);
-  assert(obj == topo_get_obj(topology, depth, 2));
+  assert(obj == topo_get_obj_by_depth(topology, depth, 2));
   obj = topo_get_next_obj_above_cpuset_by_depth(topology, &set, depth, obj);
   assert(!obj);
 
