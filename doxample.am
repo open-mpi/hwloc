@@ -166,7 +166,7 @@ doxygen-run: @DX_DOCDIR@/@PACKAGE@.tag
 
 doxygen-doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
-@DX_DOCDIR@/@PACKAGE@.tag: $(pkginclude_HEADERS)
+@DX_DOCDIR@/@PACKAGE@.tag: $(DX_INPUTS)
 	rm -rf @DX_DOCDIR@
 	$(DX_ENV) $(DX_DOXYGEN) $(builddir)/$(DX_CONFIG)
 

@@ -291,7 +291,7 @@ endif
 #
 # What doxygen depends on
 #
-pkginclude_HEADERS = \
+DX_INPUTS = \
 	$(srcdir)/topology.doxy \
 	$(top_srcdir)/include/topology.h \
 	$(top_srcdir)/include/topology/helper.h \
@@ -302,7 +302,8 @@ pkginclude_HEADERS = \
 if DX_COND_html
 if TOPO_INSTALL_HTML
 CLEANFILES += images/diagram.png
-pkginclude_HEADERS += images/diagram.png
+DX_INPUTS += images/diagram.png
+EXTRA_DIST += images/diagram.png
 images/diagram.png: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
 	$(FIG2DEV) -L png $< $@
@@ -311,7 +312,8 @@ endif
 if DX_COND_pdf
 if TOPO_INSTALL_PDF
 CLEANFILES += images/diagram.eps
-pkginclude_HEADERS += images/diagram.eps
+DX_INPUTS += images/diagram.eps
+EXTRA_DIST += images/diagram.eps
 images/diagram.eps: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
 	$(FIG2DEV) -L eps $< $@
