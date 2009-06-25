@@ -127,6 +127,23 @@ topo_get_system_obj (topo_topology_t topology)
   return topo_get_obj_by_depth (topology, 0, 0);
 }
 
+/** \brief Returns the topology object at index \p index with type \p type
+ *
+ * If no object for that type exists, \c NULL is returned.
+ * If there are several levels with objects of that type, \c NULL is returned
+ * and ther caller may fallback to topo_get_obj_by_depth().
+ */
+static __inline__ topo_obj_t
+topo_get_obj (topo_topology_t topology, topo_obj_type_t type, unsigned index)
+{
+  unsigned depth = topo_get_type_depth(topology, type);
+  if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
+    return NULL;
+  if (depth == TOPO_TYPE_DEPTH_MULTIPLE)
+    return NULL;
+  return topo_get_obj_by_depth(topology, depth, index);
+}
+
 /** \brief Returns the next object at depth \p depth.
  *
  * If \p prev is \c NULL, return the first object at depth \p depth.
