@@ -295,7 +295,9 @@ pkginclude_HEADERS = \
 	$(srcdir)/topology.doxy \
 	$(top_srcdir)/include/topology.h \
 	$(top_srcdir)/include/topology/helper.h \
-	$(top_srcdir)/include/topology/cpuset.h
+	$(top_srcdir)/include/topology/cpuset.h \
+	$(top_srcdir)/include/topology/linux-libnuma.h \
+	$(top_srcdir)/include/topology/glibc-sched.h
 
 if DX_COND_html
 if TOPO_INSTALL_HTML
