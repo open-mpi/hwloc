@@ -197,20 +197,20 @@ int main(void)
 
 
         /* Optionally, get some additional topology information
- in case we need the topology depth later.
+         * in case we need the topology depth later.
          */
         struct topo_topology_info topoinfo;
         topo_topology_get_info(topology, &topoinfo);
 
 
         /* Walk the topology with an array style, from level 0 (always the
- system level) to the lowest level (always the proc level). */
+         * system level) to the lowest level (always the proc level). */
         unsigned depth, i;
         char string[128];
         for (depth = 0; depth < topoinfo.depth; depth++) {
                 for (i = 0; i < topo_get_depth_nbobjs(topology, depth); i++) {
                         topo_obj_snprintf(string, sizeof(string), topology,
-                                        topo_get_obj(topology, depth, i), "#", 0);
+                                        topo_get_obj_by_depth(topology, depth, i), "#", 0);
                         printf("%s\n", string);
                 }
         }
@@ -228,11 +228,11 @@ int main(void)
 
 
         /* Find out where cores are, or else smaller sets of CPUs if the OS
- doesn't have the notion of core. */
+         * doesn't have the notion of core. */
         depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_CORE);
 
         /* Get last one.  */
-        topo_obj_t obj = topo_get_obj(topology, depth, topo_get_depth_nbobjs(topology, depth) - 1);
+        topo_obj_t obj = topo_get_obj_by_depth(topology, depth, topo_get_depth_nbobjs(topology, depth) - 1);
         if (!obj)
                 return 0;
 
@@ -279,4 +279,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Fri Jun 19 11:27:52 2009 for libtopology by  doxygen 1.5.9
+Generated on Thu Jun 25 16:42:38 2009 for libtopology by  doxygen 1.5.9

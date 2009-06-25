@@ -254,11 +254,6 @@ check_PROGRAMS = $(TESTS)
 
 LIBS = $(top_builddir)/src/libtopology.la
 
-topo-hello.c: $(srcdir)/topology.doxy
-	sed -e '1,/   \\code/d' -e '/   \\endcode/,$$d' < $^ > $@
-
-MOSTLYCLEANFILES += topo-hello.c
-
 #
 # Rules to regenerate the documentation
 #
