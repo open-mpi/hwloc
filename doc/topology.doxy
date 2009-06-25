@@ -229,12 +229,15 @@ cc topo-hello.c $(CFLAGS) -o topo-hello $(LDLIBS)
 
 \include topo-hello.c
 
-A lot of traversal examples are available in topology/helper.h .
+Further documentation is available in html, manual pages, and pdf format
+in the source tarball in doc/doxygen-doc/ (after doxygen compilation
+for svn checkouts) and are installed in $prefix/share/doc/topology/ and
+the usual manual repository.
 
-Further documentation is available in manual pages, pdf, and html format
-in the source tarball in doc/doxygen-doc/, after doxygen compilation
-for svn checkouts, and are installed in the usual manual repository and
-$prefix/share/doc/topology/.
+The basic interface is available in topology.h, a lot of traversal examples are
+available as inlines in topology/helper.h . On Linux, additional helpers are
+available in topology/linux-libnuma.h and on glibc-based systems, additional
+helpers are available in topology/glibc-sched.h
 
 To precisely define the vocabulary used by libtopology, a \ref glossary is available and should probably be read first.
 
