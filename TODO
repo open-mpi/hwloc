@@ -1,3 +1,7 @@
+* clarify the license of doxample.am and friends
+  doxample.am is GPL? it needs proper copyright modification
+  and an exception on top of COPYING?
+
 API
 
 * topomask: add an option to request a cpuset containing of n close entries
