@@ -58,7 +58,7 @@ int main(void)
 	if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
 		printf("The number of sockets is unknown\n");
 	else
-		printf("%d socket(s)\n", topo_get_depth_nbobjs(topology, depth));
+		printf("%u socket(s)\n", topo_get_depth_nbobjs(topology, depth));
 
 
         /* Find out where cores are, or else smaller sets of CPUs if the OS
