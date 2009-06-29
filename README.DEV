@@ -18,7 +18,7 @@ autoreconf -fi && ./configure && make && make maintainer-clean && ./configure &&
 
 and check it by
 
-cd .. && mkdir build && cd build && ../libtopology/configure && make && make distcheck
+cd .. && rm -fr build && mkdir build && cd build && ../libtopology/configure && make && make distcheck
 
 - make maintainer-clean can be used to properly remove the generated
 documentations.
