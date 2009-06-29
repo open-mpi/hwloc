@@ -109,9 +109,9 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
   else if (!strcmp(name, "node_huge_page_free"))
     obj->attr->node.huge_page_free = strtoul(value, NULL, 10);
 
-  else if (!strcmp(name, "machine_dmi_board_vendor"))
+  else if (!strcmp(name, "dmi_board_vendor"))
     obj->attr->machine.dmi_board_vendor = strdup(value);
-  else if (!strcmp(name, "machine_dmi_board_name"))
+  else if (!strcmp(name, "dmi_board_name"))
     obj->attr->machine.dmi_board_name = strdup(value);
   else if (!strcmp(name, "machine_memory_kB"))
     obj->attr->machine.memory_kB = strtoul(value, NULL, 10);

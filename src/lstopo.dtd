@@ -1,12 +1,12 @@
 <!ELEMENT root (object +)>
-<!ATTLIST root dmi_board_vendor CDATA #REQUIRED >
-<!ATTLIST root dmi_board_name   CDATA #REQUIRED >
-<!ATTLIST root huge_page_size   CDATA #REQUIRED >
 
 <!ELEMENT object (object +)>
 <!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
 <!ATTLIST object os_index CDATA #REQUIRED >
 <!ATTLIST object cpuset CDATA #REQUIRED >
+<!ATTLIST object dmi_board_vendor CDATA #REQUIRED >
+<!ATTLIST object dmi_board_name   CDATA #REQUIRED >
+<!ATTLIST object huge_page_size   CDATA #REQUIRED >
 <!ATTLIST object system_memory_kB CDATA #REQUIRED >
 <!ATTLIST object system_huge_page_free CDATA #REQUIRED >
 <!ATTLIST object node_memory_kB CDATA #REQUIRED >

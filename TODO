@@ -1,4 +1,5 @@
-valgrind pass.
+XML: do we really need to prefix attributes with machine_ / node_ / cache_ /
+etc. while there is no ambiguity since the type is given already?
 
 API
 
