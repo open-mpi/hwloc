@@ -158,7 +158,17 @@ static __inline__ int topo_ffsl(unsigned long x)
 static __inline__ int topo_ffs32(unsigned long x)
 {
 #if TOPO_BITS_PER_INT == 16
-	return topo_ffs(x & 0xfffful) ? : (topo_ffs(x >> 16) + 16);
+	int low_ffs, hi_ffs;
+
+	low_ffs = topo_ffs(x & 0xfffful);
+	if (low_ffs)
+		return low_ffs;
+
+	hi_ffs = topo_ffs(x >> 16);
+	if (hi_ffs)
+		return hi_ffs + 16;
+
+	return 0;
 #else
 	return topo_ffs(x);
 #endif
@@ -168,7 +178,17 @@ static __inline__ int topo_ffs32(unsigned long x)
 static __inline__ int topo_ffsl(unsigned long x)
 {
 #if TOPO_BITS_PER_LONG == 64
-	return topo_ffs32(x& 0xfffffffful) ? : (topo_ffs(x >> 32) + 32);
+	int low_ffs, hi_ffs;
+
+	low_ffs = topo_ffs32(x & 0xfffffffful);
+	if (low_ffs)
+		return low_ffs;
+
+	hi_ffs = topo_ffs32(x >> 32);
+	if (hi_ffs)
+		return hi_ffs + 32;
+
+	return 0;
 #else
 	return topo_ffs32(x);
 #endif
