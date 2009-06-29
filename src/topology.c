@@ -193,17 +193,17 @@ topo_type_cmp(topo_obj_t obj1, topo_obj_t obj2)
 
   /* Caches have the same types but can have different depths.  */
   if (obj1->type == TOPO_OBJ_CACHE) {
-    if (obj1->attr.cache.depth < obj2->attr.cache.depth)
+    if (obj1->attr->cache.depth < obj2->attr->cache.depth)
       return TOPO_TYPE_DEEPER;
-    else if (obj1->attr.cache.depth > obj2->attr.cache.depth)
+    else if (obj1->attr->cache.depth > obj2->attr->cache.depth)
       return TOPO_TYPE_HIGHER;
   }
 
   /* Misc objects have the same types but can have different depths.  */
   if (obj1->type == TOPO_OBJ_MISC) {
-    if (obj1->attr.misc.depth < obj2->attr.misc.depth)
+    if (obj1->attr->misc.depth < obj2->attr->misc.depth)
       return TOPO_TYPE_DEEPER;
-    else if (obj1->attr.misc.depth > obj2->attr.misc.depth)
+    else if (obj1->attr->misc.depth > obj2->attr->misc.depth)
       return TOPO_TYPE_HIGHER;
   }
 
@@ -293,11 +293,11 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 	switch(obj->type) {
 	  case TOPO_OBJ_NODE:
 	    // Do not check these, it may change between calls
-	    //check_sizes(obj, child, attr.node.memory_kB);
-	    //check_sizes(obj, child, attr.node.huge_page_free);
+	    //check_sizes(obj, child, attr->node.memory_kB);
+	    //check_sizes(obj, child, attr->node.huge_page_free);
 	    break;
 	  case TOPO_OBJ_CACHE:
-	    check_sizes(obj, child, attr.cache.memory_kB);
+	    check_sizes(obj, child, attr->cache.memory_kB);
 	    break;
 	  default:
 	    break;
@@ -574,8 +574,8 @@ topo_discover(struct topo_topology *topology)
 
   /* topo_look_* functions should use topo_obj_add to add objects initialized
    * through topo_setup_object. For node levels, memory_Kb and huge_page_free
-   * must be initialized. For cache levels, memory_kB and attr.cache.depth must be
-   * initialized, for misc levels, attr.misc.depth must be initialized
+   * must be initialized. For cache levels, memory_kB and attr->cache.depth must be
+   * initialized, for misc levels, attr->misc.depth must be initialized
    */
 
   /* There must be at least a PROC object for each logical processor, at worse
@@ -723,7 +723,7 @@ topo_discover(struct topo_topology *topology)
 
     /* One more level!  */
     if (top_obj->type == TOPO_OBJ_CACHE)
-      topo_debug("--- cache level depth %d", top_obj->attr.cache.depth);
+      topo_debug("--- cache level depth %d", top_obj->attr->cache.depth);
     else
       topo_debug("--- %s level", topo_obj_type_string(top_obj->type));
     topo_debug(" has number %d\n\n", topology->nb_levels);
@@ -770,15 +770,15 @@ topo_topology_setup_defaults(struct topo_topology *topology)
   system_obj->depth = 0;
   system_obj->logical_index = 0;
   system_obj->sibling_rank = 0;
-  system_obj->attr.system.memory_kB = 0;
-  system_obj->attr.system.huge_page_free = 0;
+  system_obj->attr->system.memory_kB = 0;
+  system_obj->attr->system.huge_page_free = 0;
 #ifdef HAVE__SC_LARGE_PAGESIZE
-  system_obj->attr.system.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+  system_obj->attr->system.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
 #else /* HAVE__SC_LARGE_PAGESIZE */
-  system_obj->attr.system.huge_page_size_kB = 0;
+  system_obj->attr->system.huge_page_size_kB = 0;
 #endif /* HAVE__SC_LARGE_PAGESIZE */
-  system_obj->attr.system.dmi_board_vendor = NULL;
-  system_obj->attr.system.dmi_board_name = NULL;
+  system_obj->attr->system.dmi_board_vendor = NULL;
+  system_obj->attr->system.dmi_board_name = NULL;
   topo_cpuset_fill(&system_obj->cpuset);
   topology->levels[0][0] = system_obj;
 }
@@ -937,12 +937,12 @@ topo_topology_clear (struct topo_topology *topology)
       struct topo_obj *obj = topology->levels[l][i];
       switch (obj->type) {
       case TOPO_OBJ_SYSTEM:
-	free(obj->attr.system.dmi_board_vendor);
-	free(obj->attr.system.dmi_board_name);
+	free(obj->attr->system.dmi_board_vendor);
+	free(obj->attr->system.dmi_board_name);
 	break;
       case TOPO_OBJ_MACHINE:
-	free(obj->attr.machine.dmi_board_vendor);
-	free(obj->attr.machine.dmi_board_name);
+	free(obj->attr->machine.dmi_board_vendor);
+	free(obj->attr->machine.dmi_board_name);
 	break;
       default:
 	break;

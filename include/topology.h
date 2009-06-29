@@ -156,6 +156,8 @@ topo_obj_type_t topo_get_order_type(int order);
  * @{
  */
 
+union topo_obj_attr_u;
+
 /** \brief Structure of a topology Object
  *
  * Applications mustn't modify any field except ::userdata .
@@ -165,33 +167,8 @@ struct topo_obj {
   topo_obj_type_t type;		/**< \brief Type of object */
   signed os_index;		/**< \brief OS-provided physical index number */
 
-  /** \brief Object-specific Attributes */
-  union topo_obj_attr_u {
-    /** \brief Cache-specific Object Attributes */
-    struct topo_cache_attr_u {
-      unsigned long memory_kB;		  /**< \brief Size of cache */
-      unsigned depth;			  /**< \brief Depth of cache */
-    } cache;
-    /** \brief Node-specific Object Attributes */
-    struct topo_memory_attr_u {
-      unsigned long memory_kB;		  /**< \brief Size of memory node */
-      unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
-    } node;
-    /**< \brief Machine-specific Object Attributes */
-    struct topo_machine_attr_u {
-      char *dmi_board_vendor;		  /**< \brief DMI Board Vendor name */
-      char *dmi_board_name;		  /**< \brief DMI Board Model name */
-      unsigned long memory_kB;		  /**< \brief Size of memory node */
-      unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
-      unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
-    } machine;
-    /**< \brief System-specific Object Attributes */
-    struct topo_machine_attr_u system;
-    /** \brief Misc-specific Object Attributes */
-    struct topo_misc_attr_u {
-      unsigned depth;			  /**< \brief Depth of misc object */
-    } misc;
-  } attr;				  /**< \brief Object type-specific attributes */
+  /** \brief Object type-specific Attributes */
+  union topo_obj_attr_u *attr;
 
   /* global position */
   unsigned depth;			/**< \brief Vertical index in the hierarchy */
@@ -220,6 +197,33 @@ struct topo_obj {
 };
 typedef struct topo_obj * topo_obj_t;
 
+/** \brief Object type-specific Attributes */
+union topo_obj_attr_u {
+  /** \brief Cache-specific Object Attributes */
+  struct topo_cache_attr_u {
+    unsigned long memory_kB;		  /**< \brief Size of cache */
+    unsigned depth;			  /**< \brief Depth of cache */
+  } cache;
+  /** \brief Node-specific Object Attributes */
+  struct topo_memory_attr_u {
+    unsigned long memory_kB;		  /**< \brief Size of memory node */
+    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
+  } node;
+  /**< \brief Machine-specific Object Attributes */
+  struct topo_machine_attr_u {
+    char *dmi_board_vendor;		  /**< \brief DMI Board Vendor name */
+    char *dmi_board_name;		  /**< \brief DMI Board Model name */
+    unsigned long memory_kB;		  /**< \brief Size of memory node */
+    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
+    unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
+  } machine;
+  /**< \brief System-specific Object Attributes */
+  struct topo_machine_attr_u system;
+  /** \brief Misc-specific Object Attributes */
+  struct topo_misc_attr_u {
+    unsigned depth;			  /**< \brief Depth of misc object */
+  } misc;
+};
 
 /** @} */
 

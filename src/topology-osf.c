@@ -164,8 +164,8 @@ topo_look_osf(struct topo_topology *topology)
     }
 
     obj = topo_alloc_setup_object(TOPO_OBJ_NODE, radid);
-    obj->attr.node.memory_kB = rad_get_physmem(radid) / 1024;
-    obj->attr.node.huge_page_free = 0;
+    obj->attr->node.memory_kB = rad_get_physmem(radid) / 1024;
+    obj->attr->node.huge_page_free = 0;
 
     cursor = SET_CURSOR_INIT;
     while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)

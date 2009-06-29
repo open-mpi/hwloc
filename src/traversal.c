@@ -210,41 +210,41 @@ topo_obj_snprintf(char *string, size_t size,
     return snprintf(string, size, "%s%s", topo_obj_type_string(type), os_index);
   case TOPO_OBJ_MISC:
 	  /* TODO: more pretty presentation? */
-    return snprintf(string, size, "%s%u%s", topo_obj_type_string(type), l->attr.misc.depth, os_index);
+    return snprintf(string, size, "%s%u%s", topo_obj_type_string(type), l->attr->misc.depth, os_index);
   case TOPO_OBJ_PROC:
     return snprintf(string, size, "P%s", os_index);
   case TOPO_OBJ_SYSTEM:
     if (verbose)
       return snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", topo_obj_type_string(type),
-		      topo_memory_size_printf_value(l->attr.system.memory_kB),
-		      topo_memory_size_printf_unit(l->attr.system.memory_kB),
-		      l->attr.system.huge_page_free, l->attr.system.huge_page_size_kB,
-		      l->attr.system.dmi_board_vendor?:"", l->attr.system.dmi_board_name?:"");
+		      topo_memory_size_printf_value(l->attr->system.memory_kB),
+		      topo_memory_size_printf_unit(l->attr->system.memory_kB),
+		      l->attr->system.huge_page_free, l->attr->system.huge_page_size_kB,
+		      l->attr->system.dmi_board_vendor?:"", l->attr->system.dmi_board_name?:"");
     else
       return snprintf(string, size, "%s(%lu%s)", topo_obj_type_string(type),
-		      topo_memory_size_printf_value(l->attr.system.memory_kB),
-		      topo_memory_size_printf_unit(l->attr.system.memory_kB));
+		      topo_memory_size_printf_value(l->attr->system.memory_kB),
+		      topo_memory_size_printf_unit(l->attr->system.memory_kB));
   case TOPO_OBJ_MACHINE:
     if (verbose)
       return snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", topo_obj_type_string(type),
-		      topo_memory_size_printf_value(l->attr.machine.memory_kB),
-		      topo_memory_size_printf_unit(l->attr.machine.memory_kB),
-		      l->attr.machine.huge_page_free, l->attr.machine.huge_page_size_kB,
-		      l->attr.machine.dmi_board_vendor?:"", l->attr.machine.dmi_board_name?:"");
+		      topo_memory_size_printf_value(l->attr->machine.memory_kB),
+		      topo_memory_size_printf_unit(l->attr->machine.memory_kB),
+		      l->attr->machine.huge_page_free, l->attr->machine.huge_page_size_kB,
+		      l->attr->machine.dmi_board_vendor?:"", l->attr->machine.dmi_board_name?:"");
     else
       return snprintf(string, size, "%s%s(%lu%s)", topo_obj_type_string(type), os_index,
-		      topo_memory_size_printf_value(l->attr.machine.memory_kB),
-		      topo_memory_size_printf_unit(l->attr.machine.memory_kB));
+		      topo_memory_size_printf_value(l->attr->machine.memory_kB),
+		      topo_memory_size_printf_unit(l->attr->machine.memory_kB));
   case TOPO_OBJ_NODE:
     return snprintf(string, size, "%s%s(%lu%s)",
 		    verbose ? topo_obj_type_string(type) : "node", os_index,
-		    topo_memory_size_printf_value(l->attr.node.memory_kB),
-		    topo_memory_size_printf_unit(l->attr.node.memory_kB));
+		    topo_memory_size_printf_value(l->attr->node.memory_kB),
+		    topo_memory_size_printf_unit(l->attr->node.memory_kB));
   case TOPO_OBJ_CACHE:
-    return snprintf(string, size, "L%u%s%s(%lu%s)", l->attr.cache.depth,
+    return snprintf(string, size, "L%u%s%s(%lu%s)", l->attr->cache.depth,
 		      verbose ? topo_obj_type_string(type) : "", os_index,
-		    topo_memory_size_printf_value(l->attr.node.memory_kB),
-		    topo_memory_size_printf_unit(l->attr.node.memory_kB));
+		    topo_memory_size_printf_value(l->attr->node.memory_kB),
+		    topo_memory_size_printf_unit(l->attr->node.memory_kB));
   default:
     *string = '\0';
     return 0;

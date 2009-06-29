@@ -124,12 +124,12 @@ browse(struct topo_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp)
 
     /* or LGRP_MEM_SZ_FREE */
     mem_size = lgrp_mem_size(cookie, lgrp, LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT);
-    obj->attr.node.huge_page_free = 0; /* TODO */
+    obj->attr->node.huge_page_free = 0; /* TODO */
     if (mem_size == -1) {
-      obj->attr.node.memory_kB = 0;
+      obj->attr->node.memory_kB = 0;
     } else {
       topo_debug("node %ld has %lldkB\n", lgrp, mem_size/1024);
-      obj->attr.node.memory_kB = mem_size / 1024;
+      obj->attr->node.memory_kB = mem_size / 1024;
     }
     topo_add_object(topology, obj);
   }

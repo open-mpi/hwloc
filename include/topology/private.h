@@ -174,6 +174,7 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 	__buf;									\
      })
 
+/* TODO: just move into topo_alloc_setup_object? */
 #define topo_setup_object(l, _type, _index) do {	\
 		struct topo_obj *__l = (l);		\
 		__l->type = _type;			\
@@ -188,6 +189,7 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 		__l->father = NULL;			\
 		__l->os_index = _index;		\
 		__l->userdata = NULL;			\
+		__l->attr = malloc(sizeof(*__l->attr));	\
 	} while (0)
 
 static inline struct topo_obj *

@@ -246,35 +246,35 @@ topo__look_synthetic(struct topo_topology *topology,
   /* post-hooks */
   switch (type) {
     case TOPO_OBJ_MISC:
-      obj->attr.misc.depth = topology->backend_params.synthetic.depth[level];
+      obj->attr->misc.depth = topology->backend_params.synthetic.depth[level];
       break;
     case TOPO_OBJ_SYSTEM:
       abort();
       break;
     case TOPO_OBJ_MACHINE:
-      obj->attr.machine.memory_kB = my_memory;
-      obj->attr.machine.dmi_board_vendor = NULL;
-      obj->attr.machine.dmi_board_name = NULL;
-      obj->attr.machine.huge_page_size_kB = 0;
-      obj->attr.machine.huge_page_free = 0;
-      *parent_memory_kB += obj->attr.machine.memory_kB;
+      obj->attr->machine.memory_kB = my_memory;
+      obj->attr->machine.dmi_board_vendor = NULL;
+      obj->attr->machine.dmi_board_name = NULL;
+      obj->attr->machine.huge_page_size_kB = 0;
+      obj->attr->machine.huge_page_free = 0;
+      *parent_memory_kB += obj->attr->machine.memory_kB;
       break;
     case TOPO_OBJ_NODE:
       /* 1GB in memory nodes.  */
-      obj->attr.node.memory_kB = 1024*1024;
-      *parent_memory_kB += obj->attr.node.memory_kB;
-      obj->attr.node.huge_page_free = 0;
+      obj->attr->node.memory_kB = 1024*1024;
+      *parent_memory_kB += obj->attr->node.memory_kB;
+      obj->attr->node.huge_page_free = 0;
       break;
     case TOPO_OBJ_SOCKET:
       break;
     case TOPO_OBJ_CACHE:
-      obj->attr.cache.depth = topology->backend_params.synthetic.depth[level];
-      if (obj->attr.cache.depth == 1)
+      obj->attr->cache.depth = topology->backend_params.synthetic.depth[level];
+      if (obj->attr->cache.depth == 1)
 	/* 32Kb in L1 */
-	obj->attr.cache.memory_kB = 32*1024;
+	obj->attr->cache.memory_kB = 32*1024;
       else
 	/* *4 at each level, starting from 1MB for L2 */
-	obj->attr.cache.memory_kB = 256*1024 << (2*obj->attr.cache.depth);
+	obj->attr->cache.memory_kB = 256*1024 << (2*obj->attr->cache.depth);
       break;
     case TOPO_OBJ_CORE:
       break;
@@ -303,5 +303,5 @@ topo_look_synthetic(struct topo_topology *topology)
   topology->set_thread_cpubind = (void*) topo_synthetic_set_cpubind;
 
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
-    first_cpu = topo__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr.system.memory_kB, &cpuset);
+    first_cpu = topo__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, &cpuset);
 }

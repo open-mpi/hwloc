@@ -536,8 +536,8 @@ look_sysfsnode(struct topo_topology *topology,
 	topo_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
 
       node = topo_alloc_setup_object(TOPO_OBJ_NODE, osnode);
-      node->attr.node.memory_kB = size;
-      node->attr.node.huge_page_free = hpfree;
+      node->attr->node.memory_kB = size;
+      node->attr->node.huge_page_free = hpfree;
       node->cpuset = cpuset;
 
       topo_debug("os node %u has cpuset %"TOPO_PRIxCPUSET"\n",
@@ -724,8 +724,8 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 	if (topo_cpuset_first(&cacheset) == i) {
 	  /* first cpu in this cache, add the cache */
 	  cache = topo_alloc_setup_object(TOPO_OBJ_CACHE, -1);
-	  cache->attr.cache.memory_kB = kB;
-	  cache->attr.cache.depth = depth+1;
+	  cache->attr->cache.memory_kB = kB;
+	  cache->attr->cache.depth = depth+1;
 	  cache->cpuset = cacheset;
 	  topo_debug("cache depth %d has cpuset %"TOPO_PRIxCPUSET"\n",
 		     depth, TOPO_CPUSET_PRINTF_VALUE(&cacheset));
@@ -936,8 +936,8 @@ topo_look_linux(struct topo_topology *topology)
     char path[128];
     topo_obj_t machine;
 
-    topology->levels[0][0]->attr.system.memory_kB = 0;
-    topology->levels[0][0]->attr.system.huge_page_free = 0;
+    topology->levels[0][0]->attr->system.memory_kB = 0;
+    topology->levels[0][0]->attr->system.huge_page_free = 0;
     /* No cpuset support for now.  */
     /* No sys support for now.  */
     while ((dirent = readdir(nodes_dir)) != NULL) {
@@ -949,8 +949,8 @@ topo_look_linux(struct topo_topology *topology)
       look_cpuinfo(topology, path, &online_set, &admin_disabled_cpus_set);
       machine = topo_alloc_setup_object(TOPO_OBJ_MACHINE, node);
       machine->cpuset = online_set;
-      machine->attr.machine.dmi_board_name = NULL;
-      machine->attr.machine.dmi_board_vendor = NULL;
+      machine->attr->machine.dmi_board_name = NULL;
+      machine->attr->machine.dmi_board_vendor = NULL;
       topo_debug("machine number %lu has cpuset %"TOPO_PRIxCPUSET"\n",
 		 node, TOPO_CPUSET_PRINTF_VALUE(&online_set));
       topo_add_object(topology, machine);
@@ -959,18 +959,18 @@ topo_look_linux(struct topo_topology *topology)
       /* Compute the machine memory and huge page */
       topo_get_procfs_meminfo_info(topology,
 				   path,
-				   &machine->attr.machine.memory_kB,
-				   &machine->attr.machine.huge_page_size_kB,
-				   &machine->attr.machine.huge_page_free);
+				   &machine->attr->machine.memory_kB,
+				   &machine->attr->machine.huge_page_size_kB,
+				   &machine->attr->machine.huge_page_free);
 				   /* FIXME: gather page_size_kB as well? MaMI needs it */
-      topology->levels[0][0]->attr.system.memory_kB += machine->attr.machine.memory_kB;
-      topology->levels[0][0]->attr.system.huge_page_free += machine->attr.machine.huge_page_free;
+      topology->levels[0][0]->attr->system.memory_kB += machine->attr->machine.memory_kB;
+      topology->levels[0][0]->attr->system.huge_page_free += machine->attr->machine.huge_page_free;
 
       /* Gather DMI info */
       /* FIXME: get the right DMI info of each machine */
       topo__get_dmi_info(topology,
-			 &machine->attr.machine.dmi_board_vendor,
-			 &machine->attr.machine.dmi_board_name);
+			 &machine->attr->machine.dmi_board_vendor,
+			 &machine->attr->machine.dmi_board_name);
     }
     closedir(nodes_dir);
   } else {
@@ -998,15 +998,15 @@ topo_look_linux(struct topo_topology *topology)
     /* Compute the whole system memory and huge page */
     topo_get_procfs_meminfo_info(topology,
 				 "/proc/meminfo",
-				 &topology->levels[0][0]->attr.system.memory_kB,
-				 &topology->levels[0][0]->attr.system.huge_page_size_kB,
-				 &topology->levels[0][0]->attr.system.huge_page_free);
+				 &topology->levels[0][0]->attr->system.memory_kB,
+				 &topology->levels[0][0]->attr->system.huge_page_size_kB,
+				 &topology->levels[0][0]->attr->system.huge_page_free);
 				 /* FIXME: gather page_size_kB as well? MaMI needs it */
 
     /* Gather DMI info */
     topo__get_dmi_info(topology,
-		       &topology->levels[0][0]->attr.system.dmi_board_vendor,
-		       &topology->levels[0][0]->attr.system.dmi_board_name);
+		       &topology->levels[0][0]->attr->system.dmi_board_vendor,
+		       &topology->levels[0][0]->attr->system.dmi_board_name);
   }
 }
 

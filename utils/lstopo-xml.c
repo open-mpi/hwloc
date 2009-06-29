@@ -60,39 +60,39 @@ output_topology (topo_topology_t topology, topo_obj_t obj, xmlNodePtr root_node,
 
   switch (obj->type) {
   case TOPO_OBJ_CACHE:
-    sprintf(tmp, "%lu", obj->attr.cache.memory_kB);
+    sprintf(tmp, "%lu", obj->attr->cache.memory_kB);
     xmlNewProp(node, BAD_CAST "cache_memory_kB", BAD_CAST tmp);
-    sprintf(tmp, "%u", obj->attr.cache.depth);
+    sprintf(tmp, "%u", obj->attr->cache.depth);
     xmlNewProp(node, BAD_CAST "cache_depth", BAD_CAST tmp);
     break;
   case TOPO_OBJ_SYSTEM:
-    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr.machine.dmi_board_vendor);
-    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr.machine.dmi_board_name);
-    sprintf(tmp, "%lu", obj->attr.system.memory_kB);
+    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
+    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
+    sprintf(tmp, "%lu", obj->attr->system.memory_kB);
     xmlNewProp(node, BAD_CAST "system_memory_kB", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr.system.huge_page_free);
+    sprintf(tmp, "%lu", obj->attr->system.huge_page_free);
     xmlNewProp(node, BAD_CAST "system_huge_page_free", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr.machine.huge_page_size_kB);
+    sprintf(tmp, "%lu", obj->attr->machine.huge_page_size_kB);
     xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
     break;
   case TOPO_OBJ_MACHINE:
-    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr.machine.dmi_board_vendor);
-    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr.machine.dmi_board_name);
-    sprintf(tmp, "%lu", obj->attr.machine.memory_kB);
+    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
+    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
+    sprintf(tmp, "%lu", obj->attr->machine.memory_kB);
     xmlNewProp(node, BAD_CAST "machine_memory_kB", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr.machine.huge_page_free);
+    sprintf(tmp, "%lu", obj->attr->machine.huge_page_free);
     xmlNewProp(node, BAD_CAST "machine_huge_page_free", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr.machine.huge_page_size_kB);
+    sprintf(tmp, "%lu", obj->attr->machine.huge_page_size_kB);
     xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
     break;
   case TOPO_OBJ_NODE:
-    sprintf(tmp, "%lu", obj->attr.node.memory_kB);
+    sprintf(tmp, "%lu", obj->attr->node.memory_kB);
     xmlNewProp(node, BAD_CAST "node_memory_kB", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr.node.huge_page_free);
+    sprintf(tmp, "%lu", obj->attr->node.huge_page_free);
     xmlNewProp(node, BAD_CAST "node_huge_page_free", BAD_CAST tmp);
     break;
   case TOPO_OBJ_MISC:
-    sprintf(tmp, "%u", obj->attr.misc.depth);
+    sprintf(tmp, "%u", obj->attr->misc.depth);
     xmlNewProp(node, BAD_CAST "misc_depth", BAD_CAST tmp);
     break;
   default:

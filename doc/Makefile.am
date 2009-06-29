@@ -28,8 +28,8 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/TOPO_FLAGS_WHOLE_SYSTEM.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_CACHE.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_CORE.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_MISC.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_MACHINE.3 \
+	@DX_DOCDIR@/man/man3/TOPO_OBJ_MISC.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_NODE.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_PROC.3 \
 	@DX_DOCDIR@/man/man3/TOPO_OBJ_SOCKET.3 \
@@ -50,7 +50,11 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_cpuset_first.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_foreach_begin.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_foreach_end.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_from_glibc_sched_affinity.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_from_ith_ulong.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_from_linux_libnuma_bitmask.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_from_linux_libnuma_nodemask.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_from_linux_libnuma_ulongs.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_from_string.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_from_ulong.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_intersects.3 \
@@ -62,13 +66,19 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_cpuset_orset.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_set.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_set_range.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_singlify.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_snprintf.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_t.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_to_glibc_sched_affinity.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_to_ith_ulong.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_to_linux_libnuma_bitmask.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_to_linux_libnuma_nodemask.3 \
+	@DX_DOCDIR@/man/man3/topo_cpuset_to_linux_libnuma_ulongs.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_to_ulong.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_weight.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_xorset.3 \
 	@DX_DOCDIR@/man/man3/topo_cpuset_zero.3 \
+	@DX_DOCDIR@/man/man3/topo_distribute.3 \
 	@DX_DOCDIR@/man/man3/topo_flags_e.3 \
 	@DX_DOCDIR@/man/man3/topo_get_closest_objs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_common_ancestor_obj.3 \
@@ -78,41 +88,44 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topo_get_cpuset_objs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_depth_nbobjs.3 \
 	@DX_DOCDIR@/man/man3/topo_get_depth_type.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_child.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset.3 \
 	@DX_DOCDIR@/man/man3/topo_get_nbobjs_below_cpuset.3 \
 	@DX_DOCDIR@/man/man3/topo_get_nbobjs_below_cpuset_by_depth.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_child.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_obj.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset_by_depth.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset_by_depth.3 \
+	@DX_DOCDIR@/man/man3/topo_get_next_obj_by_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_get_obj_by_depth.3 \
+	@DX_DOCDIR@/man/man3/topo_get_obj_below_cpuset.3 \
 	@DX_DOCDIR@/man/man3/topo_get_obj_below_cpuset_by_depth.3 \
+	@DX_DOCDIR@/man/man3/topo_get_obj_by_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_order_type.3 \
 	@DX_DOCDIR@/man/man3/topo_get_shared_cache_above.3 \
 	@DX_DOCDIR@/man/man3/topo_get_system_obj.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_nbobjs.3 \
-	@DX_DOCDIR@/man/man3/topo_get_type_order.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_or_above_depth.3 \
 	@DX_DOCDIR@/man/man3/topo_get_type_or_below_depth.3 \
+	@DX_DOCDIR@/man/man3/topo_get_type_order.3 \
 	@DX_DOCDIR@/man/man3/topo_obj.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_attr_u.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_attr_u_topo_cache_attr_u.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_attr_u_topo_machine_attr_u.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_attr_u_topo_memory_attr_u.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_attr_u_topo_misc_attr_u.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_cpuset_snprintf.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_is_in_subtree.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_snprintf.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_t.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_cache_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_misc_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_topo_obj_attr_u_topo_memory_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_type_string.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_of_string.3 \
+	@DX_DOCDIR@/man/man3/topo_obj_type_string.3 \
 	@DX_DOCDIR@/man/man3/topo_obj_type_t.3 \
 	@DX_DOCDIR@/man/man3/topo_set_cpubind.3 \
 	@DX_DOCDIR@/man/man3/topo_set_proc_cpubind.3 \
 	@DX_DOCDIR@/man/man3/topo_set_thread_cpubind.3 \
+	@DX_DOCDIR@/man/man3/topo_topology_check.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_destroy.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_get_info.3 \
 	@DX_DOCDIR@/man/man3/topo_topology_ignore_all_keep_structure.3 \
@@ -131,10 +144,19 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/topology_conversion.3 \
 	@DX_DOCDIR@/man/man3/topology_cpuset.3 \
 	@DX_DOCDIR@/man/man3/topology_creation.3 \
+	@DX_DOCDIR@/man/man3/topology_helper_binding.3 \
+	@DX_DOCDIR@/man/man3/topology_helper_find_cache.3 \
+	@DX_DOCDIR@/man/man3/topology_helper_find_covering.3 \
+	@DX_DOCDIR@/man/man3/topology_helper_find_coverings.3 \
+	@DX_DOCDIR@/man/man3/topology_helper_find_includeds.3 \
+	@DX_DOCDIR@/man/man3/topology_helper_traversal.3 \
+	@DX_DOCDIR@/man/man3/topology_helper_traversal_basic.3 \
+	@DX_DOCDIR@/man/man3/topology_helper_types.3 \
 	@DX_DOCDIR@/man/man3/topology_info.3 \
 	@DX_DOCDIR@/man/man3/topology_information.3 \
 	@DX_DOCDIR@/man/man3/topology_objects.3 \
-	@DX_DOCDIR@/man/man3/topology_traversal.3
+	@DX_DOCDIR@/man/man3/topology_traversal.3 \
+	@DX_DOCDIR@/man/man3/topology_types.3
 
 CLEANFILES += \
 	@DX_DOCDIR@/man/man3/arity.3 \
@@ -148,23 +170,30 @@ CLEANFILES += \
 	@DX_DOCDIR@/man/man3/dmi_board_vendor.3 \
 	@DX_DOCDIR@/man/man3/father.3 \
 	@DX_DOCDIR@/man/man3/first_child.3 \
+	@DX_DOCDIR@/man/man3/glibc-sched.h.3 \
+	@DX_DOCDIR@/man/man3/glossary.3 \
 	@DX_DOCDIR@/man/man3/helper.h.3 \
 	@DX_DOCDIR@/man/man3/huge_page_free.3 \
 	@DX_DOCDIR@/man/man3/huge_page_size_kB.3 \
-	@DX_DOCDIR@/man/man3/sibling_rank.3 \
 	@DX_DOCDIR@/man/man3/is_fake.3 \
 	@DX_DOCDIR@/man/man3/last_child.3 \
+	@DX_DOCDIR@/man/man3/linux-libnuma.h.3 \
+	@DX_DOCDIR@/man/man3/linux_glibc_sched.3 \
+	@DX_DOCDIR@/man/man3/linux_libnuma_bitmask.3 \
+	@DX_DOCDIR@/man/man3/linux_libnuma_nodemask.3 \
+	@DX_DOCDIR@/man/man3/linux_libnuma_ulongs.3 \
+	@DX_DOCDIR@/man/man3/logical_index.3 \
 	@DX_DOCDIR@/man/man3/machine.3 \
 	@DX_DOCDIR@/man/man3/memory_kB.3 \
 	@DX_DOCDIR@/man/man3/misc.3 \
 	@DX_DOCDIR@/man/man3/next_cousin.3 \
 	@DX_DOCDIR@/man/man3/next_sibling.3 \
 	@DX_DOCDIR@/man/man3/node.3 \
-	@DX_DOCDIR@/man/man3/logical_index.3 \
 	@DX_DOCDIR@/man/man3/os_index.3 \
 	@DX_DOCDIR@/man/man3/prev_cousin.3 \
 	@DX_DOCDIR@/man/man3/prev_sibling.3 \
 	@DX_DOCDIR@/man/man3/s.3 \
+	@DX_DOCDIR@/man/man3/sibling_rank.3 \
 	@DX_DOCDIR@/man/man3/system.3 \
 	@DX_DOCDIR@/man/man3/topology.doxy.3 \
 	@DX_DOCDIR@/man/man3/topology.h.3 \
@@ -178,6 +207,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/classes.html \
 	@DX_DOCDIR@/html/cpuset_8h.html \
 	@DX_DOCDIR@/html/cpuset_8h_source.html \
+	@DX_DOCDIR@/html/diagram.png \
 	@DX_DOCDIR@/html/doxygen.css \
 	@DX_DOCDIR@/html/doxygen.png \
 	@DX_DOCDIR@/html/dudley.png \
@@ -185,26 +215,51 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/files.html \
 	@DX_DOCDIR@/html/functions.html \
 	@DX_DOCDIR@/html/functions_vars.html \
+	@DX_DOCDIR@/html/glibc-sched_8h.html \
+	@DX_DOCDIR@/html/glibc-sched_8h_source.html \
 	@DX_DOCDIR@/html/globals.html \
 	@DX_DOCDIR@/html/globals_defs.html \
 	@DX_DOCDIR@/html/globals_enum.html \
 	@DX_DOCDIR@/html/globals_eval.html \
 	@DX_DOCDIR@/html/globals_func.html \
 	@DX_DOCDIR@/html/globals_type.html \
+	@DX_DOCDIR@/html/glossary.html \
+	@DX_DOCDIR@/html/group__linux__glibc__sched.html \
+	@DX_DOCDIR@/html/group__linux__libnuma__bitmask.html \
+	@DX_DOCDIR@/html/group__linux__libnuma__nodemask.html \
+	@DX_DOCDIR@/html/group__linux__libnuma__ulongs.html \
 	@DX_DOCDIR@/html/group__topology__binding.html \
 	@DX_DOCDIR@/html/group__topology__configuration.html \
 	@DX_DOCDIR@/html/group__topology__conversion.html \
 	@DX_DOCDIR@/html/group__topology__cpuset.html \
 	@DX_DOCDIR@/html/group__topology__creation.html \
+	@DX_DOCDIR@/html/group__topology__helper__binding.html \
+	@DX_DOCDIR@/html/group__topology__helper__find__cache.html \
+	@DX_DOCDIR@/html/group__topology__helper__find__covering.html \
+	@DX_DOCDIR@/html/group__topology__helper__find__coverings.html \
+	@DX_DOCDIR@/html/group__topology__helper__find__includeds.html \
+	@DX_DOCDIR@/html/group__topology__helper__traversal.html \
+	@DX_DOCDIR@/html/group__topology__helper__traversal__basic.html \
+	@DX_DOCDIR@/html/group__topology__helper__types.html \
 	@DX_DOCDIR@/html/group__topology__info.html \
 	@DX_DOCDIR@/html/group__topology__information.html \
 	@DX_DOCDIR@/html/group__topology__objects.html \
 	@DX_DOCDIR@/html/group__topology__traversal.html \
+	@DX_DOCDIR@/html/group__topology__types.html \
 	@DX_DOCDIR@/html/hagrid.png \
+	@DX_DOCDIR@/html/helper_8h.html \
+	@DX_DOCDIR@/html/helper_8h_source.html \
 	@DX_DOCDIR@/html/index.html \
+	@DX_DOCDIR@/html/linux-libnuma_8h.html \
+	@DX_DOCDIR@/html/linux-libnuma_8h_source.html \
 	@DX_DOCDIR@/html/modules.html \
+	@DX_DOCDIR@/html/pages.html \
 	@DX_DOCDIR@/html/structtopo__cpuset__t.html \
 	@DX_DOCDIR@/html/structtopo__obj.html \
+	@DX_DOCDIR@/html/structtopo__obj__attr__u_1_1topo__cache__attr__u.html \
+	@DX_DOCDIR@/html/structtopo__obj__attr__u_1_1topo__machine__attr__u.html \
+	@DX_DOCDIR@/html/structtopo__obj__attr__u_1_1topo__memory__attr__u.html \
+	@DX_DOCDIR@/html/structtopo__obj__attr__u_1_1topo__misc__attr__u.html \
 	@DX_DOCDIR@/html/structtopo__topology__info.html \
 	@DX_DOCDIR@/html/tab_b.gif \
 	@DX_DOCDIR@/html/tab_l.gif \
@@ -213,7 +268,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/topology_8doxy.html \
 	@DX_DOCDIR@/html/topology_8h.html \
 	@DX_DOCDIR@/html/topology_8h_source.html \
-	@DX_DOCDIR@/html/uniontopo__obj_1_1topo__obj__attr__u.html
+	@DX_DOCDIR@/html/uniontopo__obj__attr__u.html
 endif
 
 if TOPO_INSTALL_PDF

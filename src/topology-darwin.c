@@ -142,13 +142,13 @@ topo_look_darwin(struct topo_topology *topology)
 	if (i) {
 	  topo_debug("L%dcache %d has cpuset %"TOPO_PRIxCPUSET"\n",
 	      i, j, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
-	  obj->attr.cache.depth = i;
-	  obj->attr.cache.memory_kB = cachesize[i] / 1024;
+	  obj->attr->cache.depth = i;
+	  obj->attr->cache.memory_kB = cachesize[i] / 1024;
 	} else {
 	  topo_debug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
 	      j, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
-	  obj->attr.node.memory_kB = cachesize[i] / 1024;
-	  obj->attr.node.huge_page_free = 0; /* TODO */
+	  obj->attr->node.memory_kB = cachesize[i] / 1024;
+	  obj->attr->node.huge_page_free = 0; /* TODO */
 	}
 
 	topo_add_object(topology, obj);

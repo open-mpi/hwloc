@@ -146,15 +146,15 @@ look_rset(int sdl, topo_obj_type_t type, struct topo_topology *topology, int lev
     obj = topo_alloc_setup_object(type, i - (type == TOPO_OBJ_PROC));
     switch(type) {
       case TOPO_OBJ_NODE:
-	obj->attr.node.memory_kB = 0; /* TODO */
-	obj->attr.node.huge_page_free = 0;
+	obj->attr->node.memory_kB = 0; /* TODO */
+	obj->attr->node.huge_page_free = 0;
 	break;
       case TOPO_OBJ_CACHE:
-	obj->attr.cache.memory_kB = 0; /* TODO */
-	obj->attr.cache.depth = 2;
+	obj->attr->cache.memory_kB = 0; /* TODO */
+	obj->attr->cache.depth = 2;
 	break;
       case TOPO_OBJ_MISC:
-	obj->attr.misc.depth = level;
+	obj->attr->misc.depth = level;
       default:
 	break;
     }
