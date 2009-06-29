@@ -9,9 +9,14 @@ documentations:
   - doxygen with man, pdf and html support
   - help2man
   - fig2dev
-and the following should be performed to prepare the tarball:
+and the following should be performed to prepare the tarball (yes, from inside
+the source, to put the documentation inside the source):
 
 autoreconf -fi && ./configure && make && make maintainer-clean && ./configure && make doc && make distclean
+
+and check it by
+
+cd .. && mkdir build && cd build && ../libtopology/configure && make && make distcheck
 
 - make maintainer-clean can be used to properly remove the generated
 documentations.
