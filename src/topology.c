@@ -137,6 +137,27 @@ print_objects(struct topo_topology *topology, int indent, topo_obj_t obj)
     print_objects(topology, indent + 1, obj);
 }
 
+/* Free an object and all its content.  */
+static void
+free_object(topo_obj_t obj)
+{
+  switch (obj->type) {
+  case TOPO_OBJ_SYSTEM:
+    free(obj->attr->system.dmi_board_vendor);
+    free(obj->attr->system.dmi_board_name);
+    break;
+  case TOPO_OBJ_MACHINE:
+    free(obj->attr->machine.dmi_board_vendor);
+    free(obj->attr->machine.dmi_board_name);
+    break;
+  default:
+    break;
+  }
+  free(obj->attr);
+  free(obj->children);
+  free(obj);
+}
+
 /*
  * How to compare objects based on types.
  *
@@ -458,9 +479,9 @@ apply_cpuset(topo_topology_t topology, topo_obj_t *obj, void *data)
 }
 
 static void
-free_object(topo_topology_t topology, topo_obj_t *obj, void *data)
+do_free_object(topo_topology_t topology, topo_obj_t *obj, void *data)
 {
-  free(*obj);
+  free_object(*obj);
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
@@ -470,7 +491,7 @@ remove_empty(topo_topology_t topology, topo_obj_t *obj, void *data)
 {
   if ((*obj)->type != TOPO_OBJ_NODE && topo_cpuset_iszero(&(*obj)->cpuset)) {
     /* Remove empty children */
-    traverse(topology, obj, NULL, NULL, free_object, NULL);
+    traverse(topology, obj, NULL, NULL, do_free_object, NULL);
     *obj = (*obj)->next_sibling;
   }
 }
@@ -933,23 +954,8 @@ topo_topology_clear (struct topo_topology *topology)
 {
   unsigned l,i;
   for (l=0; l<topology->nb_levels; l++) {
-    for (i=0; i<topology->level_nbobjects[l]; i++) {
-      struct topo_obj *obj = topology->levels[l][i];
-      switch (obj->type) {
-      case TOPO_OBJ_SYSTEM:
-	free(obj->attr->system.dmi_board_vendor);
-	free(obj->attr->system.dmi_board_name);
-	break;
-      case TOPO_OBJ_MACHINE:
-	free(obj->attr->machine.dmi_board_vendor);
-	free(obj->attr->machine.dmi_board_name);
-	break;
-      default:
-	break;
-      }
-      free(obj->children);
-      free(obj);
-    }
+    for (i=0; i<topology->level_nbobjects[l]; i++)
+      free_object(topology->levels[l][i]);
     free(topology->levels[l]);
   }
 }
