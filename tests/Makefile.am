@@ -4,7 +4,7 @@ include $(top_srcdir)/libtopology.am
 
 SUBDIRS = linux ports
 
-TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
+check_PROGRAMS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	topo_get_closest_objs \
 	topo_get_cpuset_covering_obj \
 	topo_get_cpuset_covering_cache \
@@ -18,21 +18,22 @@ TESTS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	object_userdata \
 	synthetic-topology
 
-EXTRA_DIST =
+EXTRA_DIST = lstopo_xml.sh
 
 if HAVE_LINUX_LIBNUMA
-TESTS += linux-libnuma
+check_PROGRAMS += linux-libnuma
 else !HAVE_LINUX_LIBNUMA
 EXTRA_DIST += linux-libnuma
 endif !HAVE_LINUX_LIBNUMA
 
 if HAVE_SCHED_SETAFFINITY
-TESTS += glibc-sched
+check_PROGRAMS += glibc-sched
 else !HAVE_SCHED_SETAFFINITY
 EXTRA_DIST += glibc-sched
 endif !HAVE_SCHED_SETAFFINITY
 
-check_PROGRAMS = $(TESTS)
+TESTS = $(check_PROGRAMS) \
+	$(srcdir)/lstopo_xml.sh
 
 LIBS = $(top_builddir)/src/libtopology.la
 

@@ -4,6 +4,11 @@ Notes to developers:
 documentation by running make doc . The website is update by running make
 doc-upload.
 
+- To check:
+make check
+make distcheck
+try with srcdir and objdir containing spaces
+
 - To release a tarball, the following is necessary to generate all
 documentations:
   - doxygen with man, pdf and html support
