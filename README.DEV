@@ -24,7 +24,8 @@ and check it by
 
 cd .. && rm -fr build && mkdir build && cd build && ../libtopology/configure && make && make distcheck
 
-For the windows zipball, remember to copy README at the root of the zip.
+For the windows zipball, remember to copy README at the root of the zip into a
+README.txt file with CRLF.
 
 - make maintainer-clean can be used to properly remove the generated
 documentations.
