@@ -1,5 +1,3 @@
-FIXME: ~/libtopology/configure && make
-
 API
 
 * topomask: add an option to request a cpuset containing of n close entries

@@ -53,7 +53,13 @@ DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(ON)
 DX_PS_FEATURE(OFF)
-DX_INIT_DOXYGEN(libtopology, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
+if echo "${srcdir}" | grep '^/' > /dev/null
+then
+  # absolute path, no need for ../
+  DX_INIT_DOXYGEN(libtopology, doxygen.cfg, ${srcdir}/doc/doxygen-doc)
+else
+  DX_INIT_DOXYGEN(libtopology, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
+fi
 AC_PATH_PROG([FIG2DEV], [fig2dev])
 AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/man, [topo_have_man=yes], [:])
 AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/libtopology.pdf, [topo_have_pdf=yes], [:])
