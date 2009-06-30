@@ -189,7 +189,7 @@ topo_linux_set_thread_cpubind(topo_topology_t topology, pthread_t tid, const top
 {
   if (!pthread_setaffinity_np) {
     /* ?! Application uses set_thread_cpubind, but doesn't link against libpthread ?! */
-    errno = ENOTSUP;
+    errno = ENOSYS;
     return -1;
   }
   /* TODO Kerrighed: Use

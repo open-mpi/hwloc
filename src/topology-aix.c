@@ -68,7 +68,7 @@ topo_aix_set_sth_cpubind(topo_topology_t topology, int what, int who, const topo
    * SHM memory binding and policy (P_FIRST_TOUCH / P_BALANCED)
    */
   if (topo_cpuset_weight(topo_set) != 1) {
-    errno = ENOTSUP;
+    errno = ENOSYS;
     return -1;
   }
 

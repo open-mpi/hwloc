@@ -67,7 +67,7 @@ topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
       return topology->set_cpubind(topology, set, strict);
   }
 
-  errno = ENOTSUP;
+  errno = ENOSYS;
   return -1;
 }
 
@@ -88,7 +88,7 @@ topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuse
   if (topology->set_proc_cpubind)
     return topology->set_proc_cpubind(topology, pid, set, strict);
 
-  errno = ENOTSUP;
+  errno = ENOSYS;
   return -1;
 }
 
@@ -109,7 +109,7 @@ topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_
   if (topology->set_thread_cpubind)
     return topology->set_thread_cpubind(topology, tid, set, strict);
 
-  errno = ENOTSUP;
+  errno = ENOSYS;
   return -1;
 }
 
