@@ -13,7 +13,7 @@ various attributes such as cache and memory information.
 libtopology supports the following operating systems:
 
   * Linux (including old kernels not having sysfs topology information, with
-    knowledge of cpusets and offline cpus)
+    knowledge of cpusets, offline cpus, and Kerrighed support)
   * Solaris
   * AIX
   * Darwin
@@ -69,33 +69,33 @@ following outputs:
 
                                   dudley.png
 
-Machine(15GB)
-  Socket#0 + L3Cache(4096KB)
-    L2Cache(1024KB) + L1Cache(16KB) + Core#0
+System(15GB)
+  Socket#0 + L3(4096KB)
+    L2(1024KB) + L1(16KB) + Core#0
       P#0
       P#8
-    L2Cache(1024KB) + L1Cache(16KB) + Core#1
+    L2(1024KB) + L1(16KB) + Core#1
       P#4
       P#12
-  Socket#1 + L3Cache(4096KB)
-    L2Cache(1024KB) + L1Cache(16KB) + Core#0
+  Socket#1 + L3(4096KB)
+    L2(1024KB) + L1(16KB) + Core#0
       P#1
       P#9
-    L2Cache(1024KB) + L1Cache(16KB) + Core#1
+    L2(1024KB) + L1(16KB) + Core#1
       P#5
       P#13
-  Socket#2 + L3Cache(4096KB)
-    L2Cache(1024KB) + L1Cache(16KB) + Core#0
+  Socket#2 + L3(4096KB)
+    L2(1024KB) + L1(16KB) + Core#0
       P#2
       P#10
-    L2Cache(1024KB) + L1Cache(16KB) + Core#1
+    L2(1024KB) + L1(16KB) + Core#1
       P#6
       P#14
-  Socket#3 + L3Cache(4096KB)
-    L2Cache(1024KB) + L1Cache(16KB) + Core#0
+  Socket#3 + L3(4096KB)
+    L2(1024KB) + L1(16KB) + Core#0
       P#3
       P#11
-    L2Cache(1024KB) + L1Cache(16KB) + Core#1
+    L2(1024KB) + L1(16KB) + Core#1
       P#7
       P#15
 
@@ -104,52 +104,52 @@ following outputs:
 
                                   hagrid.png
 
-Machine(62GB)
-  NUMANode#0(8190MB) + Socket#0
-    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#0
-    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#1
-  NUMANode#1(8192MB) + Socket#1
-    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#2
-    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#3
-  NUMANode#2(8192MB) + Socket#2
-    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#4
-    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#5
-  NUMANode#3(8192MB) + Socket#3
-    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#6
-    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#7
-  NUMANode#4(8192MB) + Socket#4
-    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#8
-    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#9
-  NUMANode#5(8192MB) + Socket#5
-    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#10
-    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#11
-  NUMANode#6(8192MB) + Socket#6
-    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#12
-    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#13
-  NUMANode#7(8192MB) + Socket#7
-    L2Cache(1024KB) + L1Cache(64KB) + Core#0 + P#14
-    L2Cache(1024KB) + L1Cache(64KB) + Core#1 + P#15
+System(62GB)
+  node#0(8190MB) + Socket#0
+    L2(1024KB) + L1(64KB) + Core#0 + P#0
+    L2(1024KB) + L1(64KB) + Core#1 + P#1
+  node#1(8192MB) + Socket#1
+    L2(1024KB) + L1(64KB) + Core#0 + P#2
+    L2(1024KB) + L1(64KB) + Core#1 + P#3
+  node#2(8192MB) + Socket#2
+    L2(1024KB) + L1(64KB) + Core#0 + P#4
+    L2(1024KB) + L1(64KB) + Core#1 + P#5
+  node#3(8192MB) + Socket#3
+    L2(1024KB) + L1(64KB) + Core#0 + P#6
+    L2(1024KB) + L1(64KB) + Core#1 + P#7
+  node#4(8192MB) + Socket#4
+    L2(1024KB) + L1(64KB) + Core#0 + P#8
+    L2(1024KB) + L1(64KB) + Core#1 + P#9
+  node#5(8192MB) + Socket#5
+    L2(1024KB) + L1(64KB) + Core#0 + P#10
+    L2(1024KB) + L1(64KB) + Core#1 + P#11
+  node#6(8192MB) + Socket#6
+    L2(1024KB) + L1(64KB) + Core#0 + P#12
+    L2(1024KB) + L1(64KB) + Core#1 + P#13
+  node#7(8192MB) + Socket#7
+    L2(1024KB) + L1(64KB) + Core#0 + P#14
+    L2(1024KB) + L1(64KB) + Core#1 + P#15
 
 On a 2-socket quad-core Xeon (pre-Nehalem ones assembling 2 dual-core dies into
 each socket):
 
                                   emmett.png
 
-Machine(15GB)
+System(15GB)
   Socket#0
-    L2Cache(4096KB)
-      L1Cache(32KB) + Core#0 + P#0
-      L1Cache(32KB) + Core#1 + P#4
-    L2Cache(4096KB)
-      L1Cache(32KB) + Core#2 + P#2
-      L1Cache(32KB) + Core#3 + P#6
+    L2(4096KB)
+      L1(32KB) + Core#0 + P#0
+      L1(32KB) + Core#1 + P#4
+    L2(4096KB)
+      L1(32KB) + Core#2 + P#2
+      L1(32KB) + Core#3 + P#6
   Socket#1
-    L2Cache(4096KB)
-      L1Cache(32KB) + Core#0 + P#1
-      L1Cache(32KB) + Core#1 + P#5
-    L2Cache(4096KB)
-      L1Cache(32KB) + Core#2 + P#3
-      L1Cache(32KB) + Core#3 + P#7
+    L2(4096KB)
+      L1(32KB) + Core#0 + P#1
+      L1(32KB) + Core#1 + P#5
+    L2(4096KB)
+      L1(32KB) + Core#2 + P#3
+      L1(32KB) + Core#3 + P#7
 
 Interface example
 
@@ -224,7 +224,7 @@ int main(void)
         if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
                 printf("The number of sockets is unknown\n");
         else
-                printf("%d socket(s)\n", topo_get_depth_nbobjs(topology, depth));
+                printf("%u socket(s)\n", topo_get_depth_nbobjs(topology, depth));
 
 
         /* Find out where cores are, or else smaller sets of CPUs if the OS
@@ -282,4 +282,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Jun 25 16:56:11 2009 for libtopology by  doxygen 1.5.9
+Generated on Tue Jun 30 21:08:39 2009 for libtopology by  doxygen 1.5.9
