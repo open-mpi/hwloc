@@ -117,6 +117,7 @@ AM_CONDITIONAL([HAVE_SOLARIS], [test "x$solaris" = "xyes"])
 AM_CONDITIONAL([HAVE_AIX], [test "x$aix" = "xyes"])
 AM_CONDITIONAL([HAVE_OSF], [test "x$osf" = "xyes"])
 AM_CONDITIONAL([HAVE_WINDOWS], [test "x$windows" = "xyes"])
+AM_CONDITIONAL([HAVE_MINGW32], [test "x$target_os" = "xmingw32"])
 
 #
 # Define C flags
