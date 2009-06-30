@@ -236,6 +236,7 @@ if test "x$enable_xml" = "xyes"; then
 else
   AC_SUBST([HAVE_XML], [0])
 fi
+AM_CONDITIONAL([HAVE_XML], [test "x$enable_xml" = "xyes"])
 
 # check for kerrighed, but don't abort if not found
 PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [:])

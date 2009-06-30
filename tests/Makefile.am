@@ -18,7 +18,7 @@ check_PROGRAMS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	object_userdata \
 	synthetic-topology
 
-EXTRA_DIST = lstopo_xml.sh
+EXTRA_DIST = 
 
 if HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma
@@ -32,8 +32,12 @@ else !HAVE_SCHED_SETAFFINITY
 EXTRA_DIST += glibc-sched
 endif !HAVE_SCHED_SETAFFINITY
 
-TESTS = $(check_PROGRAMS) \
-	$(srcdir)/lstopo_xml.sh
+TESTS = $(check_PROGRAMS)
+
+if HAVE_XML
+TESTS += $(srcdir)/lstopo_xml.sh
+EXTRA_DIST += lstopo_xml.sh
+endif
 
 LIBS = $(top_builddir)/src/libtopology.la
 
