@@ -38,4 +38,7 @@ TESTS = $(check_PROGRAMS) \
 LIBS = $(top_builddir)/src/libtopology.la
 
 linux_libnuma_LDFLAGS = -lnuma
+if HAVE_WINDOWS
+else
 topo_bind_LDFLAGS = -lpthread
+endif
