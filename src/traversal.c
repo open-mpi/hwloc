@@ -237,7 +237,7 @@ topo_obj_snprintf(char *string, size_t size,
 		      topo_memory_size_printf_unit(l->attr->machine.memory_kB));
   case TOPO_OBJ_NODE:
     return snprintf(string, size, "%s%s(%lu%s)",
-		    verbose ? topo_obj_type_string(type) : "node", os_index,
+		    verbose ? topo_obj_type_string(type) : "Node", os_index,
 		    topo_memory_size_printf_value(l->attr->node.memory_kB),
 		    topo_memory_size_printf_unit(l->attr->node.memory_kB));
   case TOPO_OBJ_CACHE:

@@ -161,28 +161,28 @@ System(15GB)
 
 \code
 System(62GB)
-  node#0(8190MB) + Socket#0
+  Node#0(8190MB) + Socket#0
     L2(1024KB) + L1(64KB) + Core#0 + P#0
     L2(1024KB) + L1(64KB) + Core#1 + P#1
-  node#1(8192MB) + Socket#1
+  Node#1(8192MB) + Socket#1
     L2(1024KB) + L1(64KB) + Core#0 + P#2
     L2(1024KB) + L1(64KB) + Core#1 + P#3
-  node#2(8192MB) + Socket#2
+  Node#2(8192MB) + Socket#2
     L2(1024KB) + L1(64KB) + Core#0 + P#4
     L2(1024KB) + L1(64KB) + Core#1 + P#5
-  node#3(8192MB) + Socket#3
+  Node#3(8192MB) + Socket#3
     L2(1024KB) + L1(64KB) + Core#0 + P#6
     L2(1024KB) + L1(64KB) + Core#1 + P#7
-  node#4(8192MB) + Socket#4
+  Node#4(8192MB) + Socket#4
     L2(1024KB) + L1(64KB) + Core#0 + P#8
     L2(1024KB) + L1(64KB) + Core#1 + P#9
-  node#5(8192MB) + Socket#5
+  Node#5(8192MB) + Socket#5
     L2(1024KB) + L1(64KB) + Core#0 + P#10
     L2(1024KB) + L1(64KB) + Core#1 + P#11
-  node#6(8192MB) + Socket#6
+  Node#6(8192MB) + Socket#6
     L2(1024KB) + L1(64KB) + Core#0 + P#12
     L2(1024KB) + L1(64KB) + Core#1 + P#13
-  node#7(8192MB) + Socket#7
+  Node#7(8192MB) + Socket#7
     L2(1024KB) + L1(64KB) + Core#0 + P#14
     L2(1024KB) + L1(64KB) + Core#1 + P#15
 \endcode
