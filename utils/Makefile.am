@@ -17,7 +17,10 @@ lstopo_LDFLAGS = $(CAIRO_LIBS) $(XML_LIBS)
 
 LIBS = $(top_builddir)/src/libtopology.la
 
+if HAVE_MINGW32
+else
 TESTS = $(srcdir)/test-topodistrib.sh
+endif
 
 if TOPO_INSTALL_UTILS_MAN
 dist_man1_MANS = lstopo.1 topobind.1 topodistrib.1 topomask.1
