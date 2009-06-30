@@ -6,7 +6,7 @@ AM_CFLAGS += $(XML_CFLAGS)
 
 lib_LTLIBRARIES = libtopology.la
 
-EXTRA_DIST =
+EXTRA_DIST = dolib.c
 
 libtopology_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c bind.c
 libtopology_la_LDFLAGS = -version-number $(TOPO_SOVERSION) $(XML_LIBS)
@@ -19,8 +19,9 @@ if HAVE_WINDOWS
 libtopology_la_LDFLAGS += -Xlinker --output-def -Xlinker .libs/libtopology.def
 
 if HAVE_MS_LIB
-all-local: libtopology.la
-	"$(TOPO_MS_LIB)" /machine:X86 /def:.libs/libtopology.def /name:libtopology-$(TOPO_SOVERSION) /out:.libs/libtopology.lib
+.libs/libtopology.lib: libtopology.la dolib
+	./dolib "$(TOPO_MS_LIB)" X86 .libs/libtopology.def libtopology-$(TOPO_SOVERSION) .libs/libtopology.lib
+all-local: .libs/libtopology.lib
 endif
 
 install-exec-hook:
