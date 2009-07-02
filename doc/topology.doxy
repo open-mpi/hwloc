@@ -244,9 +244,13 @@ To precisely define the vocabulary used by libtopology, a \ref glossary is avail
 \htmlonly
 </div><div class="section" id="bugs">
 \endhtmlonly
-\section bugs Bugs and questions
+\section bugs Questions and bugs
 
-Bug reports and questions should be sent to the devel mailing list (http://lists.gforge.inria.fr/cgi-bin/mailman/listinfo/libtopology-devel).
+Questions should be sent to the devel mailing
+list (libtopology-devel@lists.gforge.inria.fr,
+http://lists.gforge.inria.fr/cgi-bin/mailman/listinfo/libtopology-devel).
+Bug reports should be reported in the tracker
+(http://gforge.inria.fr/tracker/?group_id=1758).
 
 \htmlonly
 </div><div class="section" id="credits">
@@ -322,7 +326,5 @@ topology with 4 levels.
 
 It can be noticed that for Processor objects, the logical index, computed
 linearly by libtopology, is not the same as the OS index.
-
-TODO: add level pointers.
 
 */

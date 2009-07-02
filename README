@@ -269,10 +269,12 @@ helpers are available in topology/glibc-sched.h
 To precisely define the vocabulary used by libtopology, a Glossary is available
 and should probably be read first.
 
-Bugs and questions
+Questions and bugs
 
-Bug reports and questions should be sent to the devel mailing list (http://
-lists.gforge.inria.fr/cgi-bin/mailman/listinfo/libtopology-devel).
+Questions should be sent to the devel mailing list (
+libtopology-devel@lists.gforge.inria.fr, http://lists.gforge.inria.fr/cgi-bin/
+mailman/listinfo/libtopology-devel). Bug reports should be reported in the
+tracker (http://gforge.inria.fr/tracker/?group_id=1758).
 
 Credits
 
@@ -282,4 +284,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Tue Jun 30 21:56:22 2009 for libtopology by  doxygen 1.5.9
+Generated on Thu Jul 2 13:38:28 2009 for libtopology by  doxygen 1.5.9
