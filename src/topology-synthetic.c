@@ -36,6 +36,7 @@
 #include <topology/private.h>
 #include <topology/debug.h>
 
+#include <limits.h>
 #include <assert.h>
 
 /* Read from DESCRIPTION a series of integers describing a symmetrical

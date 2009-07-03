@@ -36,6 +36,7 @@
 #include <topology/private.h>
 #include <topology/debug.h>
 
+#include <limits.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
