@@ -37,7 +37,7 @@
 #define LIBTOPOLOGY_CONFIGURATION_H
 
 #include <limits.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include <unistd.h>
 
 #undef TOPO_HAVE_FFS

@@ -34,7 +34,7 @@
 #ifndef LIBTOPOLOGY_KSTAT_H
 #define LIBTOPOLOGY_KSTAT_H
 
-#include <stdint.h>
+#include <inttypes.h>
 
 typedef int kid_t;
 
