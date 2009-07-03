@@ -50,7 +50,8 @@ Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 Misc
 ====
 
-Rename files with $ in names: they pose problem with some non-GNU makes.
+Rename files with $ in names: they pose problem with some non-GNU makes (e.g.
+solaris' make).
 
 Ports
 =====
