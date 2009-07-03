@@ -46,12 +46,14 @@ endif !HAVE_LINUX
 
 if HAVE_AIX
 libtopology_la_SOURCES += topology-aix.c
+libtopology_la_LDFLAGS += -lpthread
 else !HAVE_AIX
 EXTRA_DIST += topology-aix.c
 endif !HAVE_AIX
 
 if HAVE_OSF
 libtopology_la_SOURCES += topology-osf.c
+libtopology_la_LDFLAGS += -lnuma -lpthread
 else !HAVE_OSF
 EXTRA_DIST += topology-osf.c
 endif !HAVE_OSF

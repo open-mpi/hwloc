@@ -44,6 +44,18 @@ then
 	umask $old_umask
 fi
 set -e
-../utils/lstopo --xml "$srcdir"/linux/16em64t-4d2c2t.xml.tar.gz.output -.xml > "$file"
-diff -u "$srcdir"/linux/16em64t-4d2c2t.xml.tar.gz.output "$file"
+(
+  ./topodistrib --synthetic "2 2 2" 2
+  echo
+  ./topodistrib --synthetic "2 2 2" 4
+  echo
+  ./topodistrib --synthetic "2 2 2" 8
+  echo
+  ./topodistrib --synthetic "2 2 2" 13
+  echo
+  ./topodistrib --synthetic "2 2 2" 16
+  echo
+  ./topodistrib --synthetic "3 3 3" 4
+) > "$file"
+diff @TOPO_DIFF_U@ $srcdir/test-topodistrib.output "$file"
 rm -f "$file"

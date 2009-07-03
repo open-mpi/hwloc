@@ -16,3 +16,13 @@ AC_DEFUN([TOPO_GCC_FLAGS], [
   fi
   AC_SUBST([GCC_CFLAGS])
 ])
+
+AC_DEFUN([TOPO_CHECK_DIFF_U], [
+  if diff -u /dev/null /dev/null
+  then
+    TOPO_DIFF_U="-u"
+  else
+    TOPO_DIFF_U=""
+  fi
+  AC_SUBST([TOPO_DIFF_U])
+])

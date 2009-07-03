@@ -99,12 +99,10 @@ case ${target} in
     ;;
   *-*-aix*)
     AC_DEFINE(AIX_SYS, 1, Define to 1 on AIX)
-    LIBS="$LIBS -lpthread"
     aix=yes
     ;;
   *-*-osf*)
     AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
-    LIBS="$LIBS -lpthread"
     osf=yes
     ;;
   *-*-mingw*|*-*-cygwin*)
@@ -138,6 +136,7 @@ AC_PROG_CC_C99
 AC_PROG_MKDIR_P
 
 TOPO_GCC_FLAGS
+TOPO_CHECK_DIFF_U
 
 #
 # Now detect support
@@ -312,12 +311,14 @@ AC_CONFIG_FILES([Makefile
 		 tests/Makefile tests/linux/Makefile
 		 tests/linux/gather-topology.sh
 		 tests/linux/test-topology.sh
+		 tests/lstopo_xml.sh
+		 utils/test-topodistrib.sh
 		 tests/ports/Makefile
 		 doc/Makefile])
 
 AC_CONFIG_HEADERS([include/topology/config.h])
 
 AC_CONFIG_COMMANDS([linux-topology-scripts],
-                   [chmod +x tests/linux/test-topology.sh tests/linux/gather-topology.sh])
+                   [chmod +x tests/linux/test-topology.sh tests/lstopo_xml.sh tests/linux/gather-topology.sh utils/test-topodistrib.sh])
 
 AC_OUTPUT
