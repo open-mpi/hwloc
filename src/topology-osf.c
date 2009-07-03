@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <pthread.h>
 
 #include <topology.h>
 #include <topology/private.h>
