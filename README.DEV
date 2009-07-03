@@ -24,8 +24,8 @@ and check it by
 
 cd .. && rm -fr build && mkdir build && cd build && ../libtopology/configure && make && make distcheck
 
-For the windows zipball, remember to copy README at the root of the zip into a
-README.txt file with CRLF:
+For the windows zipball, make sure you have Microsoft's lib tool in PATH, and
+remember to copy README at the root of the zip into a README.txt file with CRLF:
 
 sed -e 's/$/'$'\015'/ < README > $prefix/README.txt
 
