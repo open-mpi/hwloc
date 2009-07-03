@@ -415,7 +415,7 @@ CLEANFILES += \
 	@DX_DOCDIR@/latex/topology_8h.tex \
 	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex
 
-doc: $(top_srcdir)/README
+doc: all $(top_srcdir)/README
 $(top_srcdir)/README: @DX_DOCDIR@/html
 	LC_ALL=C $(W3M) @DX_DOCDIR@/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
 
