@@ -34,16 +34,19 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 #
 
-file="`mktemp`"
-if [ ! -d "$file" ]
-then
-	file=/tmp/topodistrib-$$
-	old_umask=`umask`
-	umask 0077
-	touch "$file"
-	umask $old_umask
-fi
+: ${TMPDIR=/tmp}
+{
+  tmp=`
+    (umask 077 && mktemp -d "$TMPDIR/fooXXXXXX") 2>/dev/null
+  ` &&
+  test -n "$tmp" && test -d "$tmp"
+} || {
+  tmp=$TMPDIR/foo$$-$RANDOM
+  (umask 077 && mkdir "$tmp")
+} || exit $?
+file="$tmp/lstopo_xml.output.xml"
+
 set -e
-../utils/lstopo --xml "$srcdir"/linux/16em64t-4d2c2t.xml.tar.gz.output -.xml > "$file"
+../utils/lstopo --xml "$srcdir"/linux/16em64t-4d2c2t.xml.tar.gz.output "$file"
 diff @TOPO_DIFF_U@ "$srcdir"/linux/16em64t-4d2c2t.xml.tar.gz.output "$file"
-rm -f "$file"
+rm -rf "$tmp"

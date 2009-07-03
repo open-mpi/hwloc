@@ -34,15 +34,18 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 #
 
-file="`mktemp`"
-if [ ! -d "$file" ]
-then
-	file=/tmp/topodistrib-$$
-	old_umask=`umask`
-	umask 0077
-	touch "$file"
-	umask $old_umask
-fi
+: ${TMPDIR=/tmp}
+{
+  tmp=`
+    (umask 077 && mktemp -d "$TMPDIR/fooXXXXXX") 2>/dev/null
+  ` &&
+  test -n "$tmp" && test -d "$tmp"
+} || {
+  tmp=$TMPDIR/foo$$-$RANDOM
+  (umask 077 && mkdir "$tmp")
+} || exit $?
+file="$tmp/test-topodistrib.output"
+
 set -e
 (
   ./topodistrib --synthetic "2 2 2" 2
@@ -58,4 +61,4 @@ set -e
   ./topodistrib --synthetic "3 3 3" 4
 ) > "$file"
 diff @TOPO_DIFF_U@ $srcdir/test-topodistrib.output "$file"
-rm -f "$file"
+rm -rf "$tmp"
