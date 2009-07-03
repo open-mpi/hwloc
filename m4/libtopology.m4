@@ -18,11 +18,13 @@ AC_DEFUN([TOPO_GCC_FLAGS], [
 ])
 
 AC_DEFUN([TOPO_CHECK_DIFF_U], [
-  if diff -u /dev/null /dev/null
+  AC_MSG_CHECKING([whether diff accepts -u])
+  if diff -u /dev/null /dev/null 2> /dev/null
   then
     TOPO_DIFF_U="-u"
   else
     TOPO_DIFF_U=""
   fi
   AC_SUBST([TOPO_DIFF_U])
+  AC_MSG_RESULT([$TOPO_DIFF_U])
 ])
