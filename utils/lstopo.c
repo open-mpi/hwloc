@@ -80,18 +80,21 @@ static void usage(FILE *where)
 #endif /* HAVE_XML */
 		  "\n");
   fprintf (where, "\nOptions:\n");
-  fprintf (where, "   -v                  enable the verbose mode (disabled by default)\n");
-  fprintf (where, "   --verbose           enable the verbose mode (disabled by default)\n");
-  fprintf (where, "   --no-caches         do not show caches\n");
-  fprintf (where, "   --no-useless-caches do not show caches which do not have a hierarchical impact\n");
-  fprintf (where, "   --whole-system      do not consider administration limitations\n");
-  fprintf (where, "   --merge             do not show levels that do not have a hierarcical impact\n");
-  fprintf (where, "   --synthetic \"2 2\"   simulate a fake hierarchy\n");
+  fprintf (where, "   -v                    enable the verbose mode (disabled by default)\n");
+  fprintf (where, "   --verbose             enable the verbose mode (disabled by default)\n");
+  fprintf (where, "   --no-caches           do not show caches\n");
+  fprintf (where, "   --no-useless-caches   do not show caches which do not have a hierarchical\n"
+                  "                         impact\n");
+  fprintf (where, "   --whole-system        do not consider administration limitations\n");
+  fprintf (where, "   --merge               do not show levels that do not have a hierarcical\n"
+                  "                         impact\n");
+  fprintf (where, "   --synthetic \"n:2 2\"   simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
+                  "                         processors\n");
 #ifdef HAVE_XML
-  fprintf (where, "   --xml <path>        read topology from XML file <path>\n");
+  fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
 #endif
 #ifdef LINUX_SYS
-  fprintf (where, "\nThe TOPO_FSYS_ROOT_PATH environment variable can be used to specify the path to\n a chroot containing the /proc and /sys of another system\n");
+  fprintf (where, "\nThe TOPO_FSYS_ROOT_PATH environment variable can be used to specify the path to\na chroot containing the /proc and /sys of another system\n");
 #endif
 }
 
