@@ -114,7 +114,7 @@ void output_xml(topo_topology_t topology, const char *filename, int verbose_mode
   struct topo_topology_info info;
 
   if (!strcasecmp(filename, "-.xml"))
-    filename = "/dev/stdout";
+    filename = "-";
 
   topo_topology_get_info(topology, &info);
 
