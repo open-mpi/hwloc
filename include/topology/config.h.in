@@ -42,11 +42,6 @@
 
 #undef TOPO_HAVE_FFSL
 
-#undef TOPO_HAVE_WINDOWS_H
-#ifdef TOPO_HAVE_WINDOWS_H
-#include <windows.h>
-#endif
-
 #define TOPO_NBMAXCPUS	1024
 
 #define TOPO_CACHE_LEVEL_MAX 3
@@ -68,11 +63,16 @@
 
 #include <unistd.h>
 
+#undef TOPO_HAVE_WINDOWS_H
 #undef topo_pid_t
-
 #undef topo_thread_t
-#ifdef topo_thread_t
-#  include <pthread.h>
-#endif
+
+#ifdef TOPO_HAVE_WINDOWS_H
+#  include <windows.h>
+#else /* TOPO_HAVE_WINDOWS_H */
+#  ifdef topo_thread_t
+#    include <pthread.h>
+#  endif /* topo_thread_t */
+#endif /* TOPO_HAVE_WINDOWS_H */
 
 #endif /* LIBTOPOLOGY_CONFIGURATION_H */
