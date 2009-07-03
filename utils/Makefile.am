@@ -19,7 +19,7 @@ LIBS = $(top_builddir)/src/libtopology.la
 
 if HAVE_MINGW32
 else
-TESTS = $(srcdir)/test-topodistrib.sh
+TESTS = test-topodistrib.sh
 endif
 
 if TOPO_INSTALL_UTILS_MAN
