@@ -35,7 +35,7 @@ endif !HAVE_SCHED_SETAFFINITY
 TESTS = $(check_PROGRAMS)
 
 if HAVE_XML
-TESTS += $(srcdir)/lstopo_xml.sh
+TESTS += lstopo_xml.sh
 EXTRA_DIST += lstopo_xml.sh
 endif
 
