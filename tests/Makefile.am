@@ -23,13 +23,13 @@ EXTRA_DIST =
 if HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma
 else !HAVE_LINUX_LIBNUMA
-EXTRA_DIST += linux-libnuma
+EXTRA_DIST += linux-libnuma.c
 endif !HAVE_LINUX_LIBNUMA
 
 if HAVE_SCHED_SETAFFINITY
 check_PROGRAMS += glibc-sched
 else !HAVE_SCHED_SETAFFINITY
-EXTRA_DIST += glibc-sched
+EXTRA_DIST += glibc-sched.c
 endif !HAVE_SCHED_SETAFFINITY
 
 TESTS = $(check_PROGRAMS)
