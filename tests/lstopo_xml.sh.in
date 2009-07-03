@@ -35,7 +35,7 @@
 #
 
 file="`mktemp`"
-if ! [ -d "$file" ]
+if [ ! -d "$file" ]
 then
 	file=/tmp/topodistrib-$$
 	old_umask=`umask`
