@@ -480,7 +480,7 @@ extern int topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
- * \note topo_pthread_t is pthread_t on unix platforms, and HANDLE on native
+ * \note topo_thread_t is pthread_t on unix platforms, and HANDLE on native
  * Windows platforms
  *
  * \note TOPO_CPUBIND_PROCESS can not be used in \p policy.

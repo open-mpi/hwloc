@@ -69,12 +69,10 @@
 #include <unistd.h>
 
 #undef topo_pid_t
-#ifdef _POSIX_THREADS
-#  if (_POSIX_THREADS > 0)
-#    include <pthread.h>
-#  endif
-#endif
 
 #undef topo_thread_t
+#ifdef topo_thread_t
+#  include <pthread.h>
+#endif
 
 #endif /* LIBTOPOLOGY_CONFIGURATION_H */
