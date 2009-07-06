@@ -7,6 +7,7 @@ MOSTLYCLEANFILES =
 CLEANFILES =
 EXTRA_DIST = $(DX_CONFIG) \
 	topology.doxy \
+	doxygen.css \
 	images/dudley.png \
 	images/emmett.png \
 	images/hagrid.png \
