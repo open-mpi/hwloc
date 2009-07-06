@@ -36,7 +36,6 @@ TESTS = $(check_PROGRAMS)
 
 if HAVE_XML
 TESTS += lstopo_xml.sh
-EXTRA_DIST += lstopo_xml.sh
 endif
 
 LIBS = $(top_builddir)/src/libtopology.la

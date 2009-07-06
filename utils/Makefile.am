@@ -2,7 +2,7 @@
 
 include $(top_srcdir)/libtopology.am
 
-EXTRA_DIST = lstopo.h test-topodistrib.sh test-topodistrib.output
+EXTRA_DIST = lstopo.h test-topodistrib.output
 
 bin_PROGRAMS = lstopo topomask topobind topodistrib
 
