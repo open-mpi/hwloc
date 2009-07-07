@@ -59,7 +59,8 @@ static void usage(FILE *where)
   fprintf (where, "Usage: lstopo [ options ]... [ filename ]\n");
   fprintf (where, "\n");
   fprintf (where, "By default, lstopo displays a graphical window with the topology if DISPLAY is\nset, else a text output on the standard output.\n");
-  fprintf (where, "To force a text output on the standard output, specify -, -.extn, or /dev/stdout as\nfilename.\n");
+  fprintf (where, "To force a text output on the standard output, specify - or /dev/stdout as\nfilename.\n");
+  fprintf (where, "To specify a semi-graphical text output on the standard output, specify -.txt\nas filename.\n");
   fprintf (where, "Recognised file formats are: .txt, .fig"
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_PDF_SURFACE
@@ -191,11 +192,12 @@ main (int argc, char *argv[])
 #ifdef WIN_SYS
       output_windows(topology, NULL, verbose_mode);
 #else
-      output_text(topology, NULL, verbose_mode);
+    output_console(topology, NULL, verbose_mode);
 #endif
   } else if (!strcmp(filename, "-")
-	  || !strcmp(filename, "/dev/stdout")
-	  ||  strstr(filename, ".txt"))
+	  || !strcmp(filename, "/dev/stdout"))
+    output_console(topology, filename, verbose_mode);
+  else if (strstr(filename, ".txt"))
     output_text(topology, filename, verbose_mode);
   else if (strstr(filename, ".fig"))
     output_fig(topology, filename, verbose_mode);

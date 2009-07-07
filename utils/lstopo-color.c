@@ -31,33 +31,54 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef UTILS_LSTOPO_H
-#define UTILS_LSTOPO_H
+#include <stdlib.h>
+#include <stdio.h>
 
-#include <topology.h>
+#include "lstopo.h"
 
-typedef void output_method (struct topo_topology *topology, const char *output, int verbose_mode);
+static struct color {
+  int r, g, b;
+} *colors;
 
-FILE *open_file(const char *filename, const char *mode);
+static int numcolors;
 
-extern output_method output_console, output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
+static int
+find_color(int r, int g, int b)
+{
+  int i;
 
-struct draw_methods {
-  void* (*start) (void *output, int width, int height);
-  void (*declare_color) (void *output, int r, int g, int b);
-  void (*box) (void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height);
-  void (*line) (void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2);
-  void (*text) (void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text);
-};
+  for (i = 0; i < numcolors; i++)
+    if (colors[i].r == r && colors[i].g == g && colors[i].b == b)
+      return i;
 
-/* grid unit: 10 pixels */
-#define UNIT 10
-#define FONT_SIZE 10
+  return -1;
+}
 
-extern void *output_draw_start(struct draw_methods *draw_methods, struct topo_topology *topology, void *output);
-extern void output_draw(struct draw_methods *draw_methods, struct topo_topology *topology, void *output);
+int
+rgb_to_color(int r, int g, int b)
+{
+  int color = find_color(r, g, b);
 
-int rgb_to_color(int r, int g, int b);
-int declare_color(int r, int g, int b);
+  if (color != -1)
+    return color;
 
-#endif /* UTILS_LSTOPO_H */
+  fprintf(stderr, "color #%02x%02x%02x not declared\n", r, g, b);
+  exit(EXIT_FAILURE);
+}
+
+int
+declare_color(int r, int g, int b)
+{
+  int color = find_color(r, g, b);
+
+  if (color != -1)
+    return color;
+
+  color = numcolors++;
+  colors = realloc(colors, sizeof(*colors) * (numcolors));
+  colors[color].r = r;
+  colors[color].g = g;
+  colors[color].b = b;
+
+  return color;
+}

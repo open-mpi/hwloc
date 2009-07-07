@@ -79,10 +79,6 @@
 #define MISC_G_COLOR 0xff
 #define MISC_B_COLOR 0xff
 
-/* grid unit: 10 pixels */
-#define UNIT 10
-#define FONT_SIZE 10
-
 static void null(void) {}
 
 static struct draw_methods null_draw_methods = {

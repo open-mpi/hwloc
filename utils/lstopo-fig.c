@@ -44,31 +44,6 @@
 
 #define FIG_FACTOR 20
 
-static struct color {
-  int r, g, b;
-} *colors;
-
-static int numcolors;
-
-static int
-rgb_to_fig(int r, int g, int b)
-{
-  int i;
-
-  if (r == 0xff && g == 0xff && b == 0xff)
-    return 7;
-
-  if (!r && !g && !b)
-    return 0;
-
-  for (i = 0; i < numcolors; i++)
-    if (colors[i].r == r && colors[i].g == g && colors[i].b == b)
-      return 32+i;
-
-  fprintf(stderr, "color #%02x%02x%02x not declared\n", r, g, b);
-  exit(EXIT_FAILURE);
-}
-
 static void *
 fig_start(void *output_, int width, int height)
 {
@@ -85,10 +60,23 @@ fig_start(void *output_, int width, int height)
   return output;
 }
 
+static int
+rgb_to_fig(int r, int g, int b)
+{
+  if (r == 0xff && g == 0xff && b == 0xff)
+    return 7;
+
+  if (!r && !g && !b)
+    return 0;
+
+  return 32 + rgb_to_color(r, g, b);
+}
+
 static void
 fig_declare_color(void *output_, int r, int g, int b)
 {
   FILE *output = output_;
+  int color;
 
   if (r == 0xff && g == 0xff && b == 0xff)
     return;
@@ -96,12 +84,9 @@ fig_declare_color(void *output_, int r, int g, int b)
   if (!r && !g && !b)
     return;
 
-  colors = realloc(colors, sizeof(*colors) * (numcolors + 1));
-  fprintf(output, "0 %d #%02x%02x%02x\n", 32 + numcolors, r, g, b);
-  colors[numcolors].r = r;
-  colors[numcolors].g = g;
-  colors[numcolors].b = b;
-  numcolors++;
+  color = declare_color(r, g, b);
+
+  fprintf(output, "0 %d #%02x%02x%02x\n", 32 + color, r, g, b);
 }
 
 static void
@@ -129,7 +114,7 @@ fig_line(void *output_, int r, int g, int b, unsigned depth, unsigned x1, unsign
   y1 *= FIG_FACTOR;
   x2 *= FIG_FACTOR;
   y2 *= FIG_FACTOR;
-  fprintf(output, "2 2 0 1 0 %d %u -1 20 0.0 0 0 -1 0 0 4\n\t", rgb_to_fig(r, g, b), depth);
+  fprintf(output, "2 1 0 1 0 %d %u -1 -1 0.0 0 0 -1 0 0 2\n\t", rgb_to_fig(r, g, b), depth);
   fprintf(output, " %u %u", x1, y1);
   fprintf(output, " %u %u", x2, y2);
   fprintf(output, "\n");

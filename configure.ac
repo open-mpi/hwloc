@@ -147,6 +147,17 @@ AC_DEFINE_UNQUOTED([TOPO_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The 
 # Now detect support
 #
 
+AC_CHECK_TYPES([wchar_t], [], [], [[#include <wchar.h>]])
+AC_CHECK_HEADERS([locale.h], [
+  AC_CHECK_FUNCS([setlocale])
+])
+AC_CHECK_HEADERS([langinfo.h], [
+  AC_CHECK_FUNCS([nl_langinfo])
+])
+AC_CHECK_HEADERS([term.h], [
+  AC_CHECK_LIB([termcap], [tparm])
+])
+
 AC_CHECK_TYPES([KAFFINITY,
     		    PROCESSOR_CACHE_TYPE,
 		    CACHE_DESCRIPTOR,

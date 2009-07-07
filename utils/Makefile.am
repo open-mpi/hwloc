@@ -6,7 +6,7 @@ EXTRA_DIST = lstopo.h test-topodistrib.output
 
 bin_PROGRAMS = lstopo topomask topobind topodistrib
 
-lstopo_SOURCES = lstopo.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-cairo.c lstopo-xml.c
+lstopo_SOURCES = lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-cairo.c lstopo-xml.c
 if HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
 else !HAVE_WINDOWS
