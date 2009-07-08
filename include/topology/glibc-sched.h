@@ -52,7 +52,7 @@
 #ifdef CPU_SET
 
 
-/** \defgroup linux_glibc_sched Helpers for manipulating glibc sched affinity
+/** \defgroup topology_linux_glibc_sched Helpers for manipulating glibc sched affinity
  * @{
  */
 

@@ -46,7 +46,7 @@
 #include <assert.h>
 
 
-/** \defgroup linux_libnuma_ulongs Helpers for manipulating Linux libnuma unsigned long masks
+/** \defgroup topology_linux_libnuma_ulongs Helpers for manipulating Linux libnuma unsigned long masks
  * @{
  */
 
@@ -133,7 +133,7 @@ topo_cpuset_from_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *c
 
 
 
-/** \defgroup linux_libnuma_bitmask Helpers for manipulating Linux libnuma bitmask
+/** \defgroup topology_linux_libnuma_bitmask Helpers for manipulating Linux libnuma bitmask
  * @{
  */
 
@@ -209,7 +209,7 @@ topo_cpuset_from_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *
 
 
 #ifdef NUMA_VERSION1_COMPATIBILITY
-/** \defgroup linux_libnuma_nodemask Helpers for manipulating Linux libnuma nodemask_t
+/** \defgroup topology_linux_libnuma_nodemask Helpers for manipulating Linux libnuma nodemask_t
  * @{
  */
 
