@@ -1,0 +1,11 @@
+To build the debian package:
+
+$ svn co svn+ssh://<login>@scm.gforge.inria.fr/svn/libtopology/debian
+$ debuild
+
+The packages are built in the parent directory
+
+$ cd ../
+$ sudo dpkg -i libtopology0_0.9-1_i386.deb
+$ sudo dpkg -i libtopology-dev_0.9-1_i386.deb
+
