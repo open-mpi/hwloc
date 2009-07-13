@@ -314,21 +314,21 @@ to_directions(struct display *disp, character c)
 #ifdef HAVE_WCHAR_T
   if (disp->utf8) {
     switch (c) {
-      case L'┌': return down|right;
-      case L'┐': return down|left;
-      case L'└': return up|right;
-      case L'┘': return up|left;
-      case L'─': return left|right;
-      case L'│': return down|up;
-      case L'╷': return down;
-      case L'╵': return up;
-      case L'╶': return right;
-      case L'╴': return left;
-      case L'├': return down|up|right;
-      case L'┤': return down|up|left;
-      case L'┬': return down|left|right;
-      case L'┴': return up|left|right;
-      case L'┼': return down|up|left|right;
+      case L'\x250c': return down|right;
+      case L'\x2510': return down|left;
+      case L'\x2514': return up|right;
+      case L'\x2518': return up|left;
+      case L'\x2500': return left|right;
+      case L'\x2502': return down|up;
+      case L'\x2577': return down;
+      case L'\x2575': return up;
+      case L'\x2576': return right;
+      case L'\x2574': return left;
+      case L'\x251c': return down|up|right;
+      case L'\x2524': return down|up|left;
+      case L'\x252c': return down|left|right;
+      case L'\x2534': return up|left|right;
+      case L'\x253c': return down|up|left|right;
       default: return 0;
     }
   } else
@@ -352,21 +352,21 @@ from_directions(struct display *disp, int direction)
 #ifdef HAVE_WCHAR_T
   if (disp->utf8) {
     static const wchar_t chars[] = {
-      [down|right]	= L'┌',
-      [down|left]	= L'┐',
-      [up|right]	= L'└',
-      [up|left]		= L'┘',
-      [left|right]	= L'─',
-      [down|up]		= L'│',
-      [down]		= L'╷',
-      [up]		= L'╵',
-      [right]		= L'╶',
-      [left]		= L'╴',
-      [down|up|right]	= L'├',
-      [down|up|left]	= L'┤',
-      [down|left|right]	= L'┬',
-      [up|left|right]	= L'┴',
-      [down|up|left|right]	= L'┼',
+      [down|right]	= L'\x250c',
+      [down|left]	= L'\x2510',
+      [up|right]	= L'\x2514',
+      [up|left]		= L'\x2518',
+      [left|right]	= L'\x2500',
+      [down|up]		= L'\x2502',
+      [down]		= L'\x2577',
+      [up]		= L'\x2575',
+      [right]		= L'\x2576',
+      [left]		= L'\x2574',
+      [down|up|right]	= L'\x251c',
+      [down|up|left]	= L'\x2524',
+      [down|left|right]	= L'\x252c',
+      [up|left|right]	= L'\x2534',
+      [down|up|left|right]	= L'\x253c',
       [0]		= L' ',
     };
     return chars[direction];
