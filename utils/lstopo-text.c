@@ -283,7 +283,7 @@ text_declare_color(void *output, int r, int g, int b)
 
 /* output text, erasing any previous content */
 static void
-put(struct display *disp, int x, int y, wchar_t c, int r, int g, int b)
+put(struct display *disp, int x, int y, character c, int r, int g, int b)
 {
   if (x >= disp->width || y >= disp->height) {
     /* fprintf(stderr, "%"PRIchar" overflowed to (%d,%d)\n", c, x, y); */
