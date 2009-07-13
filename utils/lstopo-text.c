@@ -47,9 +47,9 @@
 #include <langinfo.h>
 #endif /* HAVE_NL_LANGINFO */
 
-#ifdef HAVE_WCHAR_T
+#ifdef HAVE_PUTWC
 #include <wchar.h>
-#endif /* HAVE_WCHAR_T */
+#endif /* HAVE_PUTWC */
 
 #ifdef HAVE_LIBTERMCAP
 #include <curses.h>
@@ -139,15 +139,15 @@ void output_console(topo_topology_t topology, const char *filename, int verbose_
  */
 
 /* Uses unicode bars if available */
-#ifdef HAVE_WCHAR_T
+#ifdef HAVE_PUTWC
 typedef wchar_t character;
 #define PRIchar "lc"
 #define putcharacter(c,f) putwc(c,f)
-#else /* HAVE_WCHAR_T */
+#else /* HAVE_PUTWC */
 typedef unsigned char character;
 #define PRIchar "c"
 #define putcharacter(c,f) putc(c,f)
-#endif /* HAVE_WCHAR_T */
+#endif /* HAVE_PUTWC */
 
 #ifdef HAVE_LIBTERMCAP
 static int myputchar(int c) {
@@ -311,7 +311,7 @@ enum {
 static int
 to_directions(struct display *disp, character c)
 {
-#ifdef HAVE_WCHAR_T
+#ifdef HAVE_PUTWC
   if (disp->utf8) {
     switch (c) {
       case L'\x250c': return down|right;
@@ -332,7 +332,7 @@ to_directions(struct display *disp, character c)
       default: return 0;
     }
   } else
-#endif /* HAVE_WCHAR_T */
+#endif /* HAVE_PUTWC */
   {
     switch (c) {
       case L'-': return left|right;
@@ -349,7 +349,7 @@ to_directions(struct display *disp, character c)
 static character
 from_directions(struct display *disp, int direction)
 {
-#ifdef HAVE_WCHAR_T
+#ifdef HAVE_PUTWC
   if (disp->utf8) {
     static const wchar_t chars[] = {
       [down|right]	= L'\x250c',
@@ -371,7 +371,7 @@ from_directions(struct display *disp, int direction)
     };
     return chars[direction];
   } else
-#endif /* HAVE_WCHAR_T */
+#endif /* HAVE_PUTWC */
   {
     static const char chars[] = {
       [down|right]	= '/',
