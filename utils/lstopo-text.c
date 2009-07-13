@@ -52,6 +52,7 @@
 #endif /* HAVE_WCHAR_T */
 
 #ifdef HAVE_LIBTERMCAP
+#include <curses.h>
 #include <term.h>
 #endif /* HAVE_LIBTERMCAP */
 
@@ -194,7 +195,7 @@ text_start(void *output, int width, int height)
 
 #ifdef HAVE_LIBTERMCAP
 /* Standard terminfo strings */
-static const char *oc, *initc = NULL, *initp = NULL, *bold, *normal, *setaf, *setab, *setf, *setb, *scp;
+static char *oc, *initc = NULL, *initp = NULL, *bold, *normal, *setaf, *setab, *setf, *setb, *scp;
 
 /* Set text color to bright white or black according to the background */
 static int set_textcolor(int rr, int gg, int bb)
@@ -213,7 +214,7 @@ static int set_textcolor(int rr, int gg, int bb)
 static void
 set_color(int r, int g, int b)
 {
-  const char *toput;
+  char *toput;
   int color, textcolor;
 
   if (initc || initp) {

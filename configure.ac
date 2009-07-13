@@ -155,8 +155,10 @@ AC_CHECK_HEADERS([locale.h], [
 AC_CHECK_HEADERS([langinfo.h], [
   AC_CHECK_FUNCS([nl_langinfo])
 ])
-AC_CHECK_HEADERS([term.h], [
-  AC_CHECK_LIB([termcap], [tparm])
+AC_CHECK_HEADERS([curses.h], [
+  AC_CHECK_HEADERS([term.h], [
+    AC_CHECK_LIB([termcap], [tparm])
+  ], [], [[#include <curses.h>]])
 ])
 
 AC_CHECK_TYPES([KAFFINITY,
