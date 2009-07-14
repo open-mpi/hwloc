@@ -48,12 +48,6 @@ Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
 * topo_taskset --ncpus 2 --near 3
   bind process on 2 cores "near" physical proc id 3
 
-Misc
-====
-
-Rename files with $ in names: they pose problem with some non-GNU makes (e.g.
-solaris' make).
-
 Ports
 =====
 

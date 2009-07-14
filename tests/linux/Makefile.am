@@ -4,49 +4,49 @@ include $(top_srcdir)/libtopology.am
 
 # XXX: Add your sysfs tarballs here.
 sysfs_tarballs = \
-		2amd64-2nd.tar.gz \
-		2ps3-1d2t.tar.gz \
-		4ia64-4d.tar.gz \
-		4ppc-1d4c.tar.gz \
-		8amd64-4nd2c.tar.gz  \
-		8em64t-1nd4c2t.tar.gz \
-		8em64t-2d2$$2c.tar.gz \
-		8ia64-2nd2d2d.tar.gz \
-		8ia64-4d2c.tar.gz \
-		16amd64-8nd2c.tar.gz \
-		16amd64-8nd2c-cpusets.tar.gz \
-		16amd64-8nd2c-cpusets_noadmin.tar.gz \
-		16em64t-4d2c2t.tar.gz \
-		16em64t-4d2c2t-offlines.tar.gz \
-		16em64t-4d2c2t_nocaches.tar.gz \
-		16em64t-4d2c2t_merge.tar.gz \
-		16em64t-4d2c2t.xml.tar.gz \
-		16em64t-2m1nd4c2t.tar.gz \
-		64fake-4n2d2$$2c2t.tar.gz \
+		2amd64-2n.tar.gz \
+		2ps3-2t.tar.gz \
+		4ia64-4s.tar.gz \
+		4ppc-4c.tar.gz \
+		8amd64-4n2c.tar.gz  \
+		8em64t-4c2t.tar.gz \
+		8em64t-2s2ca2c.tar.gz \
+		8ia64-2n2s2d.tar.gz \
+		8ia64-4s2c.tar.gz \
+		16amd64-8n2c.tar.gz \
+		16amd64-8n2c-cpusets.tar.gz \
+		16amd64-8n2c-cpusets_noadmin.tar.gz \
+		16em64t-4s2c2t.tar.gz \
+		16em64t-4s2c2t-offlines.tar.gz \
+		16em64t-4s2c2t_ncaches.tar.gz \
+		16em64t-4s2c2t_merge.tar.gz \
+		16em64t-4s2c2t.xml.tar.gz \
+		16em64t-2m4c2t.tar.gz \
+		64fake-4n2s2ca2c2t.tar.gz \
 		4qs22-2s2t.tar.gz
 
-# Each tarball `xyz.tar.gz' must have a corresponding `xyz.tar.gz.output'
+# Each tarball `xyz.tar.gz' must have a corresponoing `xyz.tar.gz.output'
 # file showing the expected output of `lstopo - -v'.
 sysfs_outputs = \
-		2amd64-2nd.tar.gz.output \
-		2ps3-1d2t.tar.gz.output \
-		4ia64-4d.tar.gz.output \
-		4ppc-1d4c.tar.gz.output \
-		8amd64-4nd2c.tar.gz.output  \
-		8em64t-1nd4c2t.tar.gz.output \
-		8em64t-2d2$$2c.tar.gz.output \
-		8ia64-2nd2d2d.tar.gz.output \
-		8ia64-4d2c.tar.gz.output \
-		16amd64-8nd2c.tar.gz.output \
-		16amd64-8nd2c-cpusets.tar.gz.output \
-		16amd64-8nd2c-cpusets_noadmin.tar.gz.output 16amd64-8nd2c-cpusets_noadmin.tar.gz.options \
-		16em64t-4d2c2t.tar.gz.output \
-		16em64t-4d2c2t-offlines.tar.gz.output \
-		16em64t-4d2c2t_nocaches.tar.gz.output 16em64t-4d2c2t_nocaches.tar.gz.options \
-		16em64t-4d2c2t_merge.tar.gz.output 16em64t-4d2c2t_merge.tar.gz.options \
-		16em64t-4d2c2t.xml.tar.gz.output 16em64t-4d2c2t.xml.tar.gz.options \
-		16em64t-2m1nd4c2t.tar.gz.output \
-		64fake-4n2d2$$2c2t.tar.gz.output \
+		2amd64-2n.tar.gz.output \
+		2ps3-2t.tar.gz.output \
+		4ia64-4s.tar.gz.output \
+		4ppc-4c.tar.gz.output \
+		8amd64-4n2c.tar.gz.output  \
+		8em64t-4c2t.tar.gz.output \
+		8em64t-2s2ca2c.tar.gz.output \
+		8ia64-2n2s2d.tar.gz.output \
+		8ia64-4s2c.tar.gz.output \
+		16amd64-8n2c.tar.gz.output \
+		16amd64-8n2c-cpusets.tar.gz.output \
+		16amd64-8n2c-cpusets_noadmin.tar.gz.output 16amd64-8nd2c-cpusets_nadmin.tar.gz.options \
+		16em64t-4s2c2t.tar.gz.output \
+		16em64t-4s2c2t-offlines.tar.gz.output \
+		16em64t-4s2c2t_ncaches.tar.gz.output 16em64t-4d2c2t_ncaches.tar.gz.options \
+		16em64t-4s2c2t_merge.tar.gz.output 16em64t-4d2c2t_merge.tar.gz.options \
+		16em64t-4s2c2t.xml.tar.gz.output 16em64t-4d2c2t.xml.tar.gz.options \
+		16em64t-2m4c2t.tar.gz.output \
+		64fake-4n2s2ca2c2t.tar.gz.output \
 		4qs22-2s2t.tar.gz.output
 
 if HAVE_LINUX
