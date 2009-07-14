@@ -41,6 +41,7 @@ Binding
   + reverse routine?
   + no level = empty mask, and we may want an easy alias for "whole machine"
 * allocation with a given policy
+  + get Samuel's code from pm2's marcel_sysdep.c
 * apply a policy to a given area (not all OSes support that).
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
