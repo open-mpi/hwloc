@@ -742,7 +742,7 @@ look_sysfscpu(struct topo_topology *topology, const char *path,
 #      define PROCESSOR	"processor"
 #      define PHYSID "physical id"
 #      define COREID "core id"
-static void
+static int
 look_cpuinfo(struct topo_topology *topology, const char *path,
 	     topo_cpuset_t *online_cpuset,
 	     topo_cpuset_t *admin_disabled_cpus_set)
@@ -770,8 +770,8 @@ look_cpuinfo(struct topo_topology *topology, const char *path,
 
   if (!(fd=topo_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
     {
-      fprintf(stderr,"could not open /proc/cpuinfo\n");
-      return;
+      topo_debug("could not open /proc/cpuinfo\n");
+      return -1;
     }
 
   /* Just record information and count number of sockets and cores */
@@ -869,6 +869,8 @@ look_cpuinfo(struct topo_topology *topology, const char *path,
 
   /* setup the cpu level, removing nonfirst threads */
   topo_setup_proc_level(topology, numprocs, online_cpuset);
+
+  return 0;
 }
 
 static void
@@ -914,6 +916,7 @@ topo_look_linux(struct topo_topology *topology)
 {
   topo_cpuset_t admin_disabled_cpus_set, admin_disabled_mems_set, online_set;
   DIR *nodes_dir;
+  int err;
 
   topo_cpuset_zero(&admin_disabled_cpus_set);
   topo_cpuset_zero(&admin_disabled_mems_set);
@@ -947,7 +950,11 @@ topo_look_linux(struct topo_topology *topology)
 	continue;
       node = strtoul(dirent->d_name+4, NULL, 0);
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/cpuinfo", node);
-      look_cpuinfo(topology, path, &online_set, &admin_disabled_cpus_set);
+      err = look_cpuinfo(topology, path, &online_set, &admin_disabled_cpus_set);
+      if (err < 0) {
+	fprintf(stderr, "/proc/cpuinfo missing, required for kerrighed support\n");
+	abort();
+      }
       machine = topo_alloc_setup_object(TOPO_OBJ_MACHINE, node);
       machine->cpuset = online_set;
       machine->attr->machine.dmi_board_name = NULL;
@@ -991,7 +998,11 @@ topo_look_linux(struct topo_topology *topology)
 	|| topo_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
 	|| topo_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
-      look_cpuinfo(topology, "/proc/cpuinfo", &online_set, &admin_disabled_cpus_set);
+      err = look_cpuinfo(topology, "/proc/cpuinfo", &online_set, &admin_disabled_cpus_set);
+      if (err < 0) {
+	fprintf(stderr, "sysfs topology not found, and /proc/cpuinfo missing\n");
+	abort();
+      }
     } else {
       look_sysfscpu(topology, "/sys/devices/system/cpu", &admin_disabled_cpus_set);
     }
