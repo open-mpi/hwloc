@@ -492,6 +492,36 @@ topo_sysfs_node_meminfo_info(struct topo_topology *topology,
 }
 
 static void
+topo_parse_node_distance(const char *distancepath, unsigned *distances, unsigned nbnodes, int fsys_root_fd)
+{
+  char string[4096]; /* enough for hundreds of nodes */
+  char *tmp, *next;
+  FILE * fd;
+
+  fd = topo_fopen(distancepath, "r", fsys_root_fd);
+  if (!fd)
+    return;
+
+  if (!fgets(string, sizeof(string), fd))
+    return;
+
+  tmp = string;
+  while (tmp) {
+    unsigned distance = strtoul(tmp, &next, 0);
+    if (next == tmp)
+      break;
+    *distances = distance;
+    distances++;
+    nbnodes--;
+    if (!nbnodes)
+      break;
+    tmp = next+1;
+  }
+
+  fclose(fd);
+}
+
+static void
 look_sysfsnode(struct topo_topology *topology,
 	       const char *path,
 	       topo_cpuset_t *admin_disabled_mems_set)
@@ -501,6 +531,7 @@ look_sysfsnode(struct topo_topology *topology,
   DIR *dir;
   struct dirent *dirent;
   topo_obj_t node;
+  unsigned *distances;
 
   dir = topo_opendir(path, topology->backend_params.sysfs.root_fd);
   if (dir)
@@ -518,6 +549,10 @@ look_sysfsnode(struct topo_topology *topology,
     }
 
   if (nbnodes <= 1)
+    return;
+
+  distances = calloc(nbnodes*nbnodes, sizeof(*distances));
+  if (!distances)
     return;
 
   for (osnode=0; osnode < nbnodes; osnode++)
@@ -544,7 +579,26 @@ look_sysfsnode(struct topo_topology *topology,
       topo_debug("os node %u has cpuset %"TOPO_PRIxCPUSET"\n",
 		 osnode, TOPO_CPUSET_PRINTF_VALUE(&node->cpuset));
       topo_add_object(topology, node);
+
+      sprintf(nodepath, "%s/node%u/distance", path, osnode);
+      topo_parse_node_distance(nodepath, &distances[osnode*nbnodes], nbnodes, topology->backend_params.sysfs.root_fd);
     }
+
+#ifdef TOPO_DEBUG
+  {
+    int i,j;
+    printf("node distance matrix:\n");
+    for(i=0; i<nbnodes; i++) {
+      for(j=0; j<nbnodes; j++)
+        printf("%d ", distances[i*nbnodes+j]);
+      printf("\n");
+    }
+  }
+#endif
+
+  /* TODO: group numa nodes according to the distance matrix */
+
+  free(distances);
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
