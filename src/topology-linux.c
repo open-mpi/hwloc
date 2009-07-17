@@ -892,7 +892,7 @@ topo__get_dmi_info(struct topo_topology *topology,
       if (tmp)
 	*tmp = '\0';
       *dmi_board_vendor = strdup(dmi_line);
-      topo_debug("found DMI board vendor '%s'\n", topology->dmi_board_vendor);
+      topo_debug("found DMI board vendor '%s'\n", *dmi_board_vendor);
     }
   }
 
@@ -906,7 +906,7 @@ topo__get_dmi_info(struct topo_topology *topology,
       if (tmp)
 	*tmp = '\0';
       *dmi_board_name = strdup(dmi_line);
-      topo_debug("found DMI board name '%s'\n", topology->dmi_board_name);
+      topo_debug("found DMI board name '%s'\n", *dmi_board_name);
     }
   }
 }
