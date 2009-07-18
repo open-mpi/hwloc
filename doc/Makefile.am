@@ -179,10 +179,6 @@ CLEANFILES += \
 	@DX_DOCDIR@/man/man3/is_fake.3 \
 	@DX_DOCDIR@/man/man3/last_child.3 \
 	@DX_DOCDIR@/man/man3/linux-libnuma.h.3 \
-	@DX_DOCDIR@/man/man3/linux_glibc_sched.3 \
-	@DX_DOCDIR@/man/man3/linux_libnuma_bitmask.3 \
-	@DX_DOCDIR@/man/man3/linux_libnuma_nodemask.3 \
-	@DX_DOCDIR@/man/man3/linux_libnuma_ulongs.3 \
 	@DX_DOCDIR@/man/man3/logical_index.3 \
 	@DX_DOCDIR@/man/man3/machine.3 \
 	@DX_DOCDIR@/man/man3/memory_kB.3 \
@@ -225,10 +221,10 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/globals_func.html \
 	@DX_DOCDIR@/html/globals_type.html \
 	@DX_DOCDIR@/html/glossary.html \
-	@DX_DOCDIR@/html/group__linux__glibc__sched.html \
-	@DX_DOCDIR@/html/group__linux__libnuma__bitmask.html \
-	@DX_DOCDIR@/html/group__linux__libnuma__nodemask.html \
-	@DX_DOCDIR@/html/group__linux__libnuma__ulongs.html \
+	@DX_DOCDIR@/html/group__topology__glibc__sched.html \
+	@DX_DOCDIR@/html/group__topology__linux__libnuma__bitmask.html \
+	@DX_DOCDIR@/html/group__topology__linux__libnuma__nodemask.html \
+	@DX_DOCDIR@/html/group__topology__linux__libnuma__ulongs.html \
 	@DX_DOCDIR@/html/group__topology__binding.html \
 	@DX_DOCDIR@/html/group__topology__configuration.html \
 	@DX_DOCDIR@/html/group__topology__conversion.html \
