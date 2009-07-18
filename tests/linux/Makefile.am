@@ -24,6 +24,7 @@ sysfs_tarballs = \
 		16em64t-2m4c2t.tar.gz \
 		16ia64-8n2s.tar.gz \
 		64fake-4n2s2ca2c2t.tar.gz \
+		256ia64-64n2s2c.tar.gz \
 		4qs22-2s2t.tar.gz
 
 # Each tarball `xyz.tar.gz' must have a corresponoing `xyz.tar.gz.output'
@@ -49,6 +50,7 @@ sysfs_outputs = \
 		16em64t-2m4c2t.tar.gz.output \
 		16ia64-8n2s.tar.gz.output \
 		64fake-4n2s2ca2c2t.tar.gz.output \
+		256ia64-64n2s2c.tar.gz.output \
 		4qs22-2s2t.tar.gz.output
 
 if HAVE_LINUX
