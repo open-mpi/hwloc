@@ -18,8 +18,6 @@ A new topology may be added by:
 * adding the tarball and output files to Makefile.am so that they are
   properly handled in "make check" and "make dist".
 
-When adding a XML-based output, make sure that:
-* the filename of the tarball ends with .xml.tar.gz
-  (so that test-topology may skip it if XML support is disabled)
-* the XML output is 32bit-friendly
-  (so that test-topology does not compare 32bits subsets with 64bits ones)
+When adding a XML-based output, make sure that the filename of the
+tarball ends with .xml.tar.gz (so that test-topology may skip it
+if XML support is disabled).
