@@ -8,6 +8,10 @@ Doc
 * complete doc
 * automatically generate the pngs?
 
+* document all environment variables properly
+* explain how to switch to a XML-saved topology to improve startup time
+  without enabling the fake flag
+
 * add examples for (example dir?)
   + finding all nodes near a cpuset
   + obtain the number of nodes, procs, cores, ...

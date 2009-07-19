@@ -1136,6 +1136,10 @@ topo_topology_load (struct topo_topology *topology)
 
   topo_discover(topology);
 
+  char *fake_env = getenv("TOPO_FAKE");
+  if (fake_env)
+    topology->is_fake = atoi(fake_env);
+
 #ifndef TOPO_DEBUG
   if (getenv("TOPO_DEBUG_CHECK"))
 #endif

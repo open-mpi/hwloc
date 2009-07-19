@@ -77,9 +77,8 @@ then
     error "Could not find executable file \`$lstopo'."
     exit 1
 fi
-# pass TOPO_FSYS_ROOT_PATH=// so that we get "Topology is fake"
-# in the output, making test-topology.sh happy
-export TOPO_FSYS_ROOT_PATH="//"
+# we need "Topology is fake" in the output so as to make test-topology.sh happy
+export TOPO_FAKE="1"
 "$lstopo" - -v > "./$name.tar.gz.output"
 echo "Expected topology output stored in ./$name.tar.gz.output"
 
