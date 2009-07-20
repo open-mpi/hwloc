@@ -126,7 +126,7 @@ fig_text(void *output_, int r, int g, int b, int size, unsigned depth, unsigned 
   FILE *output = output_;
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
-  size = (size * 14) / 10;
+  size = (size * 16) / 10;
   fprintf(output, "4 0 %d %u -1 0 %d 0.0 4 %d %u %u %u %s\\001\n", rgb_to_fig(r, g, b), depth, size, size * 10, (unsigned) strlen(text) * size * 10, x, y + size * 10, text);
 }
 
