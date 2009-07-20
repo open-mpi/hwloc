@@ -153,6 +153,74 @@ topo_setup_group_from_min_distance_clique(struct topo_obj **objs,
 }
 
 /*
+ * Place objects in groups if they are in a transitive graph of minimal distances.
+ * Return how many groups were created, or 0 if some incomplete distance graphs were found.
+ */
+static unsigned
+topo_setup_group_from_min_distance_transitivity(struct topo_obj **objs,
+						unsigned nbobjs,
+						unsigned *distances,
+						unsigned *groupids)
+{
+  unsigned groupid = 0;
+  unsigned i,j,k;
+
+  memset(groupids, 0, nbobjs*sizeof(*groupids));
+
+  /* try to find complete graphs */
+  for(i=0; i<nbobjs; i++) {
+    topo_cpuset_t closest_objs_set = TOPO_CPUSET_ZERO;
+    unsigned min_distance = -1;
+    unsigned size = 1; /* current object i */
+
+    /* if already grouped, skip */
+    if (groupids[i])
+      continue;
+
+    /* find closest nodes */
+    for(j=i+1; j<nbobjs; j++) {
+      if (distances[i*nbobjs+j] < min_distance) {
+	/* reset the closest set and use new min_distance */
+	topo_cpuset_cpu(&closest_objs_set, j);
+	min_distance = distances[i*nbobjs+j];
+	size = 2; /* current objects i and j */
+      } else if (distances[i*nbobjs+j] == min_distance) {
+	/* add object to current closest set */
+	topo_cpuset_set(&closest_objs_set, j);
+	size++;
+      }
+    }
+    /* find close objs by transitivity */
+    while (1) {
+      unsigned found = 0;
+      for(j=i+1; j<nbobjs; j++)
+	for(k=j+1; k<nbobjs; k++)
+	  if (distances[j*nbobjs+k] <= min_distance
+	      && topo_cpuset_isset(&closest_objs_set, j)
+	      && !topo_cpuset_isset(&closest_objs_set, k)) {
+	    topo_cpuset_set(&closest_objs_set, k);
+	    size++;
+	    found = 1;
+	  }
+      if (!found)
+	break;
+    }
+
+    /* fill a new group */
+    groupid++;
+    groupids[i] = groupid;
+    for(j=i+1; j<nbobjs; j++)
+      if (topo_cpuset_isset(&closest_objs_set, j))
+	groupids[j] = groupid;
+    topo_debug("found transitive graph with %u objects with minimal distance %u\n",
+	       size, min_distance);
+  }
+
+  /* return the last id, since it's also the number of used group ids */
+  return groupid;
+}
+
+/*
  * Look at object physical distances to group them.
  */
 void
@@ -195,8 +263,9 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
 
   nbgroups = topo_setup_group_from_min_distance_clique(objs, nbobjs, distances, groupids);
   if (!nbgroups) {
-    /* FIXME: try relaxed strategies such as minimal-distance with transitivity instead of complete graph */
-    goto out_with_groupids;
+    nbgroups = topo_setup_group_from_min_distance_transitivity(objs, nbobjs, distances, groupids);
+    if (!nbgroups)
+      goto out_with_groupids;
   }
 
   if (nbgroups == 1) {
