@@ -300,7 +300,7 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   }
 #endif
 
-  /* FIXME: invoke recursively? */
+  topo__setup_misc_level_from_distances(topology, groupobjs, nbgroups, groupdistances);
 
   free(groupdistances);
  out_with_groupsizes:
