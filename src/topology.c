@@ -237,6 +237,9 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   topo_debug("trying to group %s objects into misc objects according to physical distances\n",
 	     topo_obj_type_string(objs[0]->type));
 
+  if (nbobjs <= 2)
+    goto out;
+
   groupids = malloc(nbobjs*sizeof(*groupids));
   if (!groupids)
     goto out;
