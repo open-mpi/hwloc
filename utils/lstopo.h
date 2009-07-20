@@ -50,9 +50,7 @@ struct draw_methods {
   void (*text) (void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text);
 };
 
-/* grid unit: 10 pixels */
-#define UNIT 10
-#define FONT_SIZE 10
+extern unsigned int gridsize, fontsize;
 
 extern void *output_draw_start(struct draw_methods *draw_methods, struct topo_topology *topology, void *output);
 extern void output_draw(struct draw_methods *draw_methods, struct topo_topology *topology, void *output);

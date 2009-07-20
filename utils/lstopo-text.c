@@ -177,8 +177,8 @@ text_start(void *output, int width, int height)
   int j, i;
   struct display *disp = malloc(sizeof(*disp));
   /* terminals usually have narrow characters, so let's make them wider */
-  width /= (UNIT/2);
-  height /= UNIT;
+  width /= (gridsize/2);
+  height /= gridsize;
   disp->cells = malloc(height * sizeof(*disp->cells));
   disp->width = width;
   disp->height = height;
@@ -410,10 +410,10 @@ text_box(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigne
 {
   struct display *disp = output;
   int x2, y2, i, j;
-  x1 /= (UNIT/2);
-  width /= (UNIT/2);
-  y1 /= UNIT;
-  height /= UNIT;
+  x1 /= (gridsize/2);
+  width /= (gridsize/2);
+  y1 /= gridsize;
+  height /= gridsize;
   x2 = x1 + width - 1;
   y2 = y1 + height - 1;
 
@@ -448,10 +448,10 @@ text_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsign
   struct display *disp = output;
   int i, j;
   int z;
-  x1 /= (UNIT/2);
-  y1 /= UNIT;
-  x2 /= (UNIT/2);
-  y2 /= UNIT;
+  x1 /= (gridsize/2);
+  y1 /= gridsize;
+  x2 /= (gridsize/2);
+  y2 /= gridsize;
 
   /* Canonicalize coordinates */
   if (x1 > x2) {
@@ -497,8 +497,8 @@ static void
 text_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
   struct display *disp = output;
-  x /= (UNIT/2);
-  y /= UNIT;
+  x /= (gridsize/2);
+  y /= gridsize;
   for ( ; *text; text++)
     put(disp, x++, y, *text, -1, -1, -1);
 }

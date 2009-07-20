@@ -44,6 +44,9 @@
 
 #include "lstopo.h"
 
+unsigned int fontsize = 10;
+unsigned int gridsize = 10;
+
 FILE *open_file(const char *filename, const char *mode)
 {
   const char *extn = strrchr(filename, '.');
@@ -91,6 +94,8 @@ static void usage(FILE *where)
                   "                         impact\n");
   fprintf (where, "   --synthetic \"n:2 2\"   simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
                   "                         processors\n");
+  fprintf (where, "   --fontsize 10         set size of text font\n");
+  fprintf (where, "   --gridsize 10         set size of margin between elements\n");
 #ifdef HAVE_XML
   fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
 #endif
@@ -134,6 +139,22 @@ main (int argc, char *argv[])
 	flags |= TOPO_FLAGS_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
+      else if (!strcmp (argv[1], "--fontsize")) {
+	if (argc <= 2) {
+	  usage (stderr);
+	  exit(EXIT_FAILURE);
+	}
+	fontsize = atoi(argv[2]);
+	opt = 1;
+      }
+      else if (!strcmp (argv[1], "--gridsize")) {
+	if (argc <= 2) {
+	  usage (stderr);
+	  exit(EXIT_FAILURE);
+	}
+	gridsize = atoi(argv[2]);
+	opt = 1;
+      }
       else if (!strcmp (argv[1], "--synthetic")) {
 	if (argc <= 2) {
 	  usage (stderr);
