@@ -233,6 +233,7 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   unsigned *groupids;
   unsigned *groupsizes;
   topo_obj_t *groupobjs;
+  unsigned *groupdistances;
   int nbgroups;
   unsigned i,j;
 
@@ -264,6 +265,9 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   groupsizes = calloc(nbgroups, sizeof(unsigned));
   if (!groupsizes)
     goto out_with_groupobjs;
+  groupdistances = calloc(nbgroups*nbgroups, sizeof(unsigned));
+  if (!groupdistances)
+    goto out_with_groupsizes;
 
   for(i=0; i<nbgroups; i++) {
     /* create the misc object */
@@ -280,8 +284,26 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
     groupobjs[i] = misc_obj;
   }
 
-  /* FIXME: factorize distances and invoke recursively? */
+  /* factorize distances */
+  for(i=0; i<nbobjs; i++)
+    for(j=0; j<nbobjs; j++)
+      groupdistances[(groupids[i]-1)*nbgroups+(groupids[j]-1)]+=distances[i*nbobjs+j];
+  for(i=0; i<nbgroups; i++)
+    for(j=0; j<nbgroups; j++)
+      groupdistances[i*nbgroups+j] /= groupsizes[i]*groupsizes[j];
+#ifdef TOPO_DEBUG
+  topo_debug("group distances:\n");
+  for(i=0; i<nbgroups; i++) {
+    for(j=0; j<nbgroups; j++)
+      printf("%u ", groupdistances[i*nbgroups+j]);
+    printf("\n");
+  }
+#endif
 
+  /* FIXME: invoke recursively? */
+
+  free(groupdistances);
+ out_with_groupsizes:
   free(groupsizes);
  out_with_groupobjs:
   free(groupobjs);
