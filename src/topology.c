@@ -221,41 +221,21 @@ topo_setup_group_from_min_distance_transitivity(struct topo_obj **objs,
 }
 
 /*
- * Look at object physical distances to group them.
+ * Look at object physical distances to group them,
+ * after having done some basic sanity checks.
  */
-void
-topo_setup_misc_level_from_distances(struct topo_topology *topology,
-				     struct topo_obj **objs,
-				     unsigned nbobjs,
-				     unsigned *distances)
+static void
+topo__setup_misc_level_from_distances(struct topo_topology *topology,
+				      struct topo_obj **objs,
+				      unsigned nbobjs,
+				      unsigned *distances)
 {
   unsigned *groupids;
   int nbgroups;
   unsigned i,j;
 
-  if (getenv("TOPO_IGNORE_DISTANCES"))
-    return;
-
   topo_debug("trying to group %s objects into misc objects according to physical distances\n",
 	     topo_obj_type_string(objs[0]->type));
-
-  /* check that the matrix is ok */
-  for(i=0; i<nbobjs; i++) {
-    for(j=i+1; j<nbobjs; j++) {
-      /* should be symmetric */
-      if (distances[i*nbobjs+j] != distances[j*nbobjs+i]) {
-	topo_debug("distance matrix asymmetric ([%u,%u]=%u != [%u,%u]=%u), aborting\n",
-		   i, j, distances[i*nbobjs+j], j, i, distances[j*nbobjs+i]);
-	return;
-      }
-      /* diagonal is smaller than everything else */
-      if (distances[i*nbobjs+j] <= distances[i*nbobjs+i]) {
-	topo_debug("distance to self not strictly minimal ([%u,%u]=%u <= [%u,%u]=%u), aborting\n",
-		   i, j, distances[i*nbobjs+j], i, i, distances[i*nbobjs+i]);
-	return;
-      }
-    }
-  }
 
   groupids = malloc(nbobjs*sizeof(*groupids));
   if (!groupids)
@@ -291,6 +271,41 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
   free(groupids);
  out:
   return;
+}
+
+/*
+ * Look at object physical distances to group them.
+ */
+void
+topo_setup_misc_level_from_distances(struct topo_topology *topology,
+				     struct topo_obj **objs,
+				     unsigned nbobjs,
+				     unsigned *distances)
+{
+  unsigned i,j;
+
+  if (getenv("TOPO_IGNORE_DISTANCES"))
+    return;
+
+  /* check that the matrix is ok */
+  for(i=0; i<nbobjs; i++) {
+    for(j=i+1; j<nbobjs; j++) {
+      /* should be symmetric */
+      if (distances[i*nbobjs+j] != distances[j*nbobjs+i]) {
+	topo_debug("distance matrix asymmetric ([%u,%u]=%u != [%u,%u]=%u), aborting\n",
+		   i, j, distances[i*nbobjs+j], j, i, distances[j*nbobjs+i]);
+	return;
+      }
+      /* diagonal is smaller than everything else */
+      if (distances[i*nbobjs+j] <= distances[i*nbobjs+i]) {
+	topo_debug("distance to self not strictly minimal ([%u,%u]=%u <= [%u,%u]=%u), aborting\n",
+		   i, j, distances[i*nbobjs+j], i, i, distances[i*nbobjs+i]);
+	return;
+      }
+    }
+  }
+
+  topo__setup_misc_level_from_distances(topology, objs, nbobjs, distances);
 }
 
 /*
