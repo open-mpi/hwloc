@@ -231,6 +231,8 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
 				      unsigned *distances)
 {
   unsigned *groupids;
+  unsigned *groupsizes;
+  topo_obj_t *groupobjs;
   int nbgroups;
   unsigned i,j;
 
@@ -256,20 +258,33 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
     goto out_with_groupids;
   }
 
+  groupobjs = malloc(nbgroups * sizeof(*groupobjs));
+  if (!groupobjs)
+    goto out_with_groupids;
+  groupsizes = calloc(nbgroups, sizeof(unsigned));
+  if (!groupsizes)
+    goto out_with_groupobjs;
+
   for(i=0; i<nbgroups; i++) {
     /* create the misc object */
     topo_obj_t misc_obj;
     misc_obj = topo_alloc_setup_object(TOPO_OBJ_MISC, -1);
     for (j=0; j<nbobjs; j++)
-      if (groupids[j] == i+1)
+      if (groupids[j] == i+1) {
 	topo_cpuset_orset(&misc_obj->cpuset, &objs[j]->cpuset);
+	groupsizes[i]++;
+      }
     topo_debug("adding misc object with cpuset %"TOPO_PRIxCPUSET"\n",
 	       TOPO_CPUSET_PRINTF_VALUE(&misc_obj->cpuset));
     topo_add_object(topology, misc_obj);
+    groupobjs[i] = misc_obj;
   }
 
   /* FIXME: factorize distances and invoke recursively? */
 
+  free(groupsizes);
+ out_with_groupobjs:
+  free(groupobjs);
  out_with_groupids:
   free(groupids);
  out:
