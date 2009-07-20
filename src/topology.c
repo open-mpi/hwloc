@@ -228,7 +228,8 @@ static void
 topo__setup_misc_level_from_distances(struct topo_topology *topology,
 				      struct topo_obj **objs,
 				      unsigned nbobjs,
-				      unsigned *distances)
+				      unsigned *distances,
+				      int depth)
 {
   unsigned *groupids;
   unsigned *groupsizes;
@@ -273,6 +274,7 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
     /* create the misc object */
     topo_obj_t misc_obj;
     misc_obj = topo_alloc_setup_object(TOPO_OBJ_MISC, -1);
+    misc_obj->attr->misc.depth = depth;
     for (j=0; j<nbobjs; j++)
       if (groupids[j] == i+1) {
 	topo_cpuset_orset(&misc_obj->cpuset, &objs[j]->cpuset);
@@ -300,7 +302,7 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   }
 #endif
 
-  topo__setup_misc_level_from_distances(topology, groupobjs, nbgroups, groupdistances);
+  topo__setup_misc_level_from_distances(topology, groupobjs, nbgroups, groupdistances, depth + 1);
 
   free(groupdistances);
  out_with_groupsizes:
@@ -345,7 +347,7 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
     }
   }
 
-  topo__setup_misc_level_from_distances(topology, objs, nbobjs, distances);
+  topo__setup_misc_level_from_distances(topology, objs, nbobjs, distances, 0);
 }
 
 /*
