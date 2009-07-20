@@ -140,7 +140,7 @@ proc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 {
 
   *retwidth = fontsize?4*fontsize:gridsize;
-  *retheight = gridsize + fontsize?(fontsize + gridsize):0;
+  *retheight = gridsize + (fontsize?(fontsize + gridsize):0);
 
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
@@ -193,7 +193,7 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
 static void
 core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + fontsize?(fontsize + gridsize):0;
+  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0);
   unsigned totwidth = gridsize, maxheight = 0;
 
   RECURSE(level, &null_draw_methods, 0);
@@ -220,7 +220,7 @@ core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 static void
 socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + fontsize?(fontsize + gridsize):0;
+  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0);
   unsigned totwidth = gridsize, maxheight = 0;
 
   RECURSE(level, &null_draw_methods, gridsize);
@@ -287,7 +287,7 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 static void
 machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + fontsize?(fontsize + gridsize):0;
+  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0);
   unsigned totwidth = gridsize, maxheight = 0;
 
   RECURSE(level, &null_draw_methods, gridsize);
@@ -315,7 +315,7 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
 static void
 system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + fontsize?(fontsize + gridsize):0;
+  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0);
   unsigned totwidth = gridsize, maxheight = 0;
   unsigned left = 0, right = 0;
 
@@ -356,7 +356,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 static void
 misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, topo_obj_type_t type, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + fontsize?(fontsize + gridsize):0;
+  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0);
   unsigned totwidth = gridsize, maxheight = 0;
 
   RECURSE(level, &null_draw_methods, gridsize);
