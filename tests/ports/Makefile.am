@@ -27,5 +27,6 @@ EXTRA_DIST = \
 		include/sys/processor.h \
 		include/sys/thread.h \
 		include/radset.h \
+		include/cpuset.h \
 		include/numa.h
 
