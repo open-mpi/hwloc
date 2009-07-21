@@ -34,7 +34,9 @@
 #ifndef LIBTOPOLOGY_RADSET_H
 #define LIBTOPOLOGY_RADSET_H
 
+typedef int radset_cursor_t;
 typedef int radid_t;
+#define RAD_NONE -1
 typedef struct {
 } radset_t;
 
@@ -42,6 +44,9 @@ extern int radsetcreate(radset_t *set);
 
 extern int rademptyset(radset_t set);
 extern int radaddset(radset_t set, radid_t radid);
+extern int radismember(radset_t set, radid_t radid);
+extern int rad_foreach(radset_t radset, int flags, radset_cursor_t *cursor);
+
 
 extern int radsetdestroy(radset_t *set);
 
@@ -62,7 +67,7 @@ typedef struct numa_attr {
   unsigned nattr_type;
 #define R_RAD 0
 
-  radset_t *nattr_descr;
+  radset_t nattr_descr;
 
   unsigned nattr_distance;
 /* FIXME: arbitrary */

@@ -181,10 +181,12 @@ topo_look_osf(struct topo_topology *topology)
 {
   cpu_cursor_t cursor;
   unsigned nbnodes;
-  radid_t radid;
+  radid_t radid, radid2;
+  radset_t radset, radset2;
   cpuid_t cpuid;
   cpuset_t cpuset;
   struct topo_obj *obj;
+  unsigned distance;
 
   topology->set_cpubind = topo_osf_set_cpubind;
   topology->set_thread_cpubind = topo_osf_set_thread_cpubind;
@@ -195,26 +197,65 @@ topo_look_osf(struct topo_topology *topology)
   topology->backend_params.osf.nbnodes = nbnodes = rad_get_num();
 
   cpusetcreate(&cpuset);
-  for (radid = 0; radid < nbnodes; radid++) {
-    cpuemptyset(cpuset);
-    if (rad_get_cpus(radid, cpuset)==-1) {
-      fprintf(stderr,"rad_get_cpus(%d) failed: %s\n",radid,strerror(errno));
-      continue;
+  radsetcreate(&radset);
+  {
+    topo_obj_t nodes[nbnodes];
+    unsigned distances[nbnodes][nbnodes];
+    unsigned nfound;
+    numa_attr_t attr = {
+      .nattr_type = R_RAD,
+      .nattr_descr = radset,
+      .nattr_flags = 0,
+    };
+
+    for (radid = 0; radid < nbnodes; radid++) {
+      rademptyset(radset);
+      radaddset(radset, radid);
+      cpuemptyset(cpuset);
+      if (rad_get_cpus(radid, cpuset)==-1) {
+	fprintf(stderr,"rad_get_cpus(%d) failed: %s\n",radid,strerror(errno));
+	continue;
+      }
+
+      nodes[radid] = obj = topo_alloc_setup_object(TOPO_OBJ_NODE, radid);
+      obj->attr->node.memory_kB = rad_get_physmem(radid) / 1024;
+      obj->attr->node.huge_page_free = 0;
+
+      cursor = SET_CURSOR_INIT;
+      while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
+	topo_cpuset_set(&obj->cpuset,cpuid);
+
+      topo_debug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
+		 radid, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
+
+      topo_add_object(topology, obj);
+
+      nfound = 0;
+      for (radid2 = 0; radid2 < nbnodes; radid2++)
+	distances[radid][radid2] = RAD_DIST_REMOTE;
+      for (distance = RAD_DIST_LOCAL; distance < RAD_DIST_REMOTE; distance++) {
+	attr.nattr_distance = distance;
+	/* get set of NUMA nodes at distance <= DISTANCE */
+	if (nloc(&attr, radset2)) {
+	  fprintf(stderr,"nloc failed: %s\n", strerror(errno));
+	  continue;
+	}
+	cursor = SET_CURSOR_INIT;
+	while ((radid2 = rad_foreach(radset2, 0, &cursor)) != RAD_NONE) {
+	  if (distances[radid][radid2] == RAD_DIST_REMOTE) {
+	    distances[radid][radid2] = distance;
+	    nfound++;
+	  }
+	}
+	if (nfound == nbnodes)
+	  /* Finished finding distances, no need to go up to RAD_DIST_REMOTE */
+	  break;
+      }
     }
-
-    obj = topo_alloc_setup_object(TOPO_OBJ_NODE, radid);
-    obj->attr->node.memory_kB = rad_get_physmem(radid) / 1024;
-    obj->attr->node.huge_page_free = 0;
-
-    cursor = SET_CURSOR_INIT;
-    while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
-      topo_cpuset_set(&obj->cpuset,cpuid);
-
-    topo_debug("node %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	       radid, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
-
-    topo_add_object(topology, obj);
+    topo_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
   }
+  radsetdestroy(&radset);
+  cpusetdestroy(&cpuset);
 
   /* add PROC objects */
   topo_setup_proc_level(topology, topo_fallback_nbprocessors(), NULL);
