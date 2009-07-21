@@ -126,7 +126,7 @@ void *alloca (size_t);
 
 
 extern void topo_setup_proc_level(struct topo_topology *topology, unsigned nb_processors, topo_cpuset_t *online_cpuset);
-extern void topo_setup_misc_level_from_distances(struct topo_topology *topology, struct topo_obj **objs, unsigned nbobjs, unsigned *distances);
+extern void topo_setup_misc_level_from_distances(struct topo_topology *topology, unsigned nbobjs, struct topo_obj *objs[nbobjs], unsigned distances[nbobjs][nbobjs]);
 extern unsigned topo_fallback_nbprocessors(void);
 
 #if defined(LINUX_SYS)

@@ -94,10 +94,10 @@ topo_fallback_nbprocessors(void) {
  * Return how many groups were created, or 0 if some incomplete distance graphs were found.
  */
 static unsigned
-topo_setup_group_from_min_distance_clique(struct topo_obj **objs,
-					  unsigned nbobjs,
-					  unsigned *distances,
-					  unsigned *groupids)
+topo_setup_group_from_min_distance_clique(unsigned nbobjs,
+					  struct topo_obj *objs[nbobjs],
+					  unsigned distances[nbobjs][nbobjs],
+					  unsigned groupids[nbobjs])
 {
   unsigned groupid = 0;
   unsigned i,j,k;
@@ -116,12 +116,12 @@ topo_setup_group_from_min_distance_clique(struct topo_obj **objs,
 
     /* find closest nodes */
     for(j=i+1; j<nbobjs; j++) {
-      if (distances[i*nbobjs+j] < min_distance) {
+      if (distances[i][j] < min_distance) {
 	/* reset the closest set and use new min_distance */
 	topo_cpuset_cpu(&closest_objs_set, j);
-	min_distance = distances[i*nbobjs+j];
+	min_distance = distances[i][j];
 	size = 2; /* current objects i and j */
-      } else if (distances[i*nbobjs+j] == min_distance) {
+      } else if (distances[i][j] == min_distance) {
 	/* add object to current closest set */
 	topo_cpuset_set(&closest_objs_set, j);
 	size++;
@@ -132,7 +132,7 @@ topo_setup_group_from_min_distance_clique(struct topo_obj **objs,
       for (k=j+1; k<nbobjs; k++)
 	if (topo_cpuset_isset(&closest_objs_set, j) &&
 	    topo_cpuset_isset(&closest_objs_set, k) &&
-	    distances[j*nbobjs+k] != min_distance) {
+	    distances[j][k] != min_distance) {
 	  /* the minimal-distance graph is not complete. abort */
 	  topo_debug("found incomplete minimal-distance graph, aborting\n");
 	  return 0;
@@ -157,10 +157,10 @@ topo_setup_group_from_min_distance_clique(struct topo_obj **objs,
  * Return how many groups were created, or 0 if some incomplete distance graphs were found.
  */
 static unsigned
-topo_setup_group_from_min_distance_transitivity(struct topo_obj **objs,
-						unsigned nbobjs,
-						unsigned *distances,
-						unsigned *groupids)
+topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
+						struct topo_obj *objs[nbobjs],
+						unsigned distances[nbobjs][nbobjs],
+						unsigned groupids[nbobjs])
 {
   unsigned groupid = 0;
   unsigned i,j,k;
@@ -179,12 +179,12 @@ topo_setup_group_from_min_distance_transitivity(struct topo_obj **objs,
 
     /* find closest nodes */
     for(j=i+1; j<nbobjs; j++) {
-      if (distances[i*nbobjs+j] < min_distance) {
+      if (distances[i][j] < min_distance) {
 	/* reset the closest set and use new min_distance */
 	topo_cpuset_cpu(&closest_objs_set, j);
-	min_distance = distances[i*nbobjs+j];
+	min_distance = distances[i][j];
 	size = 2; /* current objects i and j */
-      } else if (distances[i*nbobjs+j] == min_distance) {
+      } else if (distances[i][j] == min_distance) {
 	/* add object to current closest set */
 	topo_cpuset_set(&closest_objs_set, j);
 	size++;
@@ -195,7 +195,7 @@ topo_setup_group_from_min_distance_transitivity(struct topo_obj **objs,
       unsigned found = 0;
       for(j=i+1; j<nbobjs; j++)
 	for(k=j+1; k<nbobjs; k++)
-	  if (distances[j*nbobjs+k] <= min_distance
+	  if (distances[j][k] <= min_distance
 	      && topo_cpuset_isset(&closest_objs_set, j)
 	      && !topo_cpuset_isset(&closest_objs_set, k)) {
 	    topo_cpuset_set(&closest_objs_set, k);
@@ -226,15 +226,12 @@ topo_setup_group_from_min_distance_transitivity(struct topo_obj **objs,
  */
 static void
 topo__setup_misc_level_from_distances(struct topo_topology *topology,
-				      struct topo_obj **objs,
 				      unsigned nbobjs,
-				      unsigned *distances,
+				      struct topo_obj *objs[nbobjs],
+				      unsigned distances[nbobjs][nbobjs],
 				      int depth)
 {
-  unsigned *groupids;
-  unsigned *groupsizes;
-  topo_obj_t *groupobjs;
-  unsigned *groupdistances;
+  unsigned groupids[nbobjs];
   int nbgroups;
   unsigned i,j;
 
@@ -242,34 +239,24 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
 	     topo_obj_type_string(objs[0]->type));
 
   if (nbobjs <= 2)
-    goto out;
+    return;
 
-  groupids = malloc(nbobjs*sizeof(*groupids));
-  if (!groupids)
-    goto out;
-
-  nbgroups = topo_setup_group_from_min_distance_clique(objs, nbobjs, distances, groupids);
+  nbgroups = topo_setup_group_from_min_distance_clique(nbobjs, objs, distances, groupids);
   if (!nbgroups) {
-    nbgroups = topo_setup_group_from_min_distance_transitivity(objs, nbobjs, distances, groupids);
+    nbgroups = topo_setup_group_from_min_distance_transitivity(nbobjs, objs, distances, groupids);
     if (!nbgroups)
-      goto out_with_groupids;
+      return;
   }
 
   if (nbgroups == 1) {
     topo_debug("ignoring misc object with all objects\n");
-    goto out_with_groupids;
+    return;
   }
 
-  groupobjs = malloc(nbgroups * sizeof(*groupobjs));
-  if (!groupobjs)
-    goto out_with_groupids;
-  groupsizes = calloc(nbgroups, sizeof(unsigned));
-  if (!groupsizes)
-    goto out_with_groupobjs;
-  groupdistances = calloc(nbgroups*nbgroups, sizeof(unsigned));
-  if (!groupdistances)
-    goto out_with_groupsizes;
-
+  /* create new misc objects and record their size */
+  topo_obj_t groupobjs[nbgroups];
+  unsigned groupsizes[nbgroups];
+  memset(groupsizes, 0, sizeof(groupsizes));
   for(i=0; i<nbgroups; i++) {
     /* create the misc object */
     topo_obj_t misc_obj;
@@ -280,39 +267,31 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
 	topo_cpuset_orset(&misc_obj->cpuset, &objs[j]->cpuset);
 	groupsizes[i]++;
       }
-    topo_debug("adding misc object with cpuset %"TOPO_PRIxCPUSET"\n",
-	       TOPO_CPUSET_PRINTF_VALUE(&misc_obj->cpuset));
+    topo_debug("adding misc object with %u objects and cpuset %"TOPO_PRIxCPUSET"\n",
+	       groupsizes[i], TOPO_CPUSET_PRINTF_VALUE(&misc_obj->cpuset));
     topo_add_object(topology, misc_obj);
     groupobjs[i] = misc_obj;
   }
 
   /* factorize distances */
+  unsigned groupdistances[nbgroups][nbgroups];
+  memset(groupdistances, 0, sizeof(groupdistances));
   for(i=0; i<nbobjs; i++)
     for(j=0; j<nbobjs; j++)
-      groupdistances[(groupids[i]-1)*nbgroups+(groupids[j]-1)]+=distances[i*nbobjs+j];
+      groupdistances[groupids[i]-1][groupids[j]-1] += distances[i][j];
   for(i=0; i<nbgroups; i++)
     for(j=0; j<nbgroups; j++)
-      groupdistances[i*nbgroups+j] /= groupsizes[i]*groupsizes[j];
+      groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
 #ifdef TOPO_DEBUG
   topo_debug("group distances:\n");
   for(i=0; i<nbgroups; i++) {
     for(j=0; j<nbgroups; j++)
-      printf("%u ", groupdistances[i*nbgroups+j]);
+      printf("%u ", groupdistances[i][j]);
     printf("\n");
   }
 #endif
 
-  topo__setup_misc_level_from_distances(topology, groupobjs, nbgroups, groupdistances, depth + 1);
-
-  free(groupdistances);
- out_with_groupsizes:
-  free(groupsizes);
- out_with_groupobjs:
-  free(groupobjs);
- out_with_groupids:
-  free(groupids);
- out:
-  return;
+  topo__setup_misc_level_from_distances(topology, nbgroups, groupobjs, groupdistances, depth + 1);
 }
 
 /*
@@ -320,9 +299,9 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
  */
 void
 topo_setup_misc_level_from_distances(struct topo_topology *topology,
-				     struct topo_obj **objs,
 				     unsigned nbobjs,
-				     unsigned *distances)
+				     struct topo_obj *objs[nbobjs],
+				     unsigned distances[nbobjs][nbobjs])
 {
   unsigned i,j;
 
@@ -333,21 +312,21 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
   for(i=0; i<nbobjs; i++) {
     for(j=i+1; j<nbobjs; j++) {
       /* should be symmetric */
-      if (distances[i*nbobjs+j] != distances[j*nbobjs+i]) {
+      if (distances[i][j] != distances[j][i]) {
 	topo_debug("distance matrix asymmetric ([%u,%u]=%u != [%u,%u]=%u), aborting\n",
-		   i, j, distances[i*nbobjs+j], j, i, distances[j*nbobjs+i]);
+		   i, j, distances[i][j], j, i, distances[j][i]);
 	return;
       }
       /* diagonal is smaller than everything else */
-      if (distances[i*nbobjs+j] <= distances[i*nbobjs+i]) {
+      if (distances[i][j] <= distances[i][i]) {
 	topo_debug("distance to self not strictly minimal ([%u,%u]=%u <= [%u,%u]=%u), aborting\n",
-		   i, j, distances[i*nbobjs+j], i, i, distances[i*nbobjs+i]);
+		   i, j, distances[i][j], i, i, distances[i][i]);
 	return;
       }
     }
   }
 
-  topo__setup_misc_level_from_distances(topology, objs, nbobjs, distances, 0);
+  topo__setup_misc_level_from_distances(topology, nbobjs, objs, distances, 0);
 }
 
 /*
