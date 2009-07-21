@@ -842,6 +842,11 @@ topo_discover(struct topo_topology *topology)
    * produced by topo_setup_proc_level()
    */
 
+  /* If the OS can provide NUMA distances, it should call
+   * topo_setup_misc_level_from_distances() to automatically group NUMA nodes
+   * into misc objects.
+   */
+
   /* Each OS type should also fill the bind functions pointers, at least the
    * set_cpubind one
    */
