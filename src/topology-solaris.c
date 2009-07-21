@@ -156,7 +156,6 @@ topo_look_lgrp(struct topo_topology *topology)
   lgrp_cookie_t cookie;
   unsigned curlgrp = 0;
   int nlgrps;
-  topo_obj_t *glob_lgrps;
 
   if ((topology->flags & TOPO_FLAGS_WHOLE_SYSTEM))
     cookie = lgrp_init(LGRP_VIEW_OS);
@@ -169,16 +168,18 @@ topo_look_lgrp(struct topo_topology *topology)
       return;
     }
   nlgrps = lgrp_nlgrps(cookie);
-  glob_lgrps = malloc(nlgrps * sizeof(*glob_lgrps));
   root = lgrp_root(cookie);
-  browse(topology, cookie, root, glob_lgrps, &curlgrp);
   {
-    unsigned distances[nlgrps][nlgrps];
-    unsigned i, j;
-    for (i = 0; i < nlgrps; i++)
-      for (j = 0; j < nlgrps; j++)
-	distances[i][j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
-    topo_setup_misc_level_from_distances(topology, nlgrps, glob_lgrps, distances);
+    topo_obj_t glob_lgrps[nlgrps];
+    browse(topology, cookie, root, glob_lgrps, &curlgrp);
+    {
+      unsigned distances[nlgrps][nlgrps];
+      unsigned i, j;
+      for (i = 0; i < nlgrps; i++)
+	for (j = 0; j < nlgrps; j++)
+	  distances[i][j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
+      topo_setup_misc_level_from_distances(topology, nlgrps, glob_lgrps, distances);
+    }
   }
   lgrp_fini(cookie);
 }
