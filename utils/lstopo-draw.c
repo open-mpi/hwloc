@@ -110,74 +110,110 @@ static foo_draw get_type_fun(topo_obj_type_t type);
 /*
  * Helper to recurse into sublevels, either horizontally or vertically
  * Updates caller's totwidth/myheight and maxwidth/maxheight
- * Needs topology, output, depth, x and y
+ * Needs textwidth, border, topology, output, depth, x and y
  */
 
-#define RECURSE_BEGIN(obj) { \
+#define RECURSE_BEGIN(obj, border) do { \
   topo_obj_t *sublevels = obj->children; \
   unsigned numsublevels = obj->arity; \
   unsigned width, height; \
+  unsigned maxwidth, maxheight; \
+  maxwidth = maxheight = 0; \
+  totwidth = (border) + mywidth; \
+  totheight = (border) + myheight; \
   foo_draw fun; \
   if (obj->arity) { \
     fun = get_type_fun(sublevels[0]->type); \
     int i; \
+    /* Iterate over subobjects */ \
     for (i = 0; i < numsublevels; i++) { \
 
+      /* Recursive call */
 #define RECURSE_CALL_FUN(obj, methods) \
       fun(topology, methods, sublevels[i], output, depth-1, x + totwidth, &width, y + totheight, &height) \
 
-#define RECURSE_END_HORIZ(obj, separator) \
+#define RECURSE_END_HORIZ(obj, separator, border) \
+      /* Add the subobject's width and separator */ \
       totwidth += width + (separator); \
+      /* Update maximum height */ \
       if (height > maxheight) \
 	maxheight = height; \
     } \
+    \
+    /* Remove spurious separator on the right */ \
     totwidth -= (separator); \
+    \
+    /* Make sure there is width for the heading text */ \
+    if (totwidth < textwidth) \
+      totwidth = textwidth; \
+    /* Add border on the right */ \
+    totwidth += (border); \
+    /* Add subobjects height */ \
+    totheight += maxheight; \
+    /* And add border below if there are subobjects */ \
+    if (maxheight) \
+      totheight += (border); \
+    /* Update returned values */ \
+    *retwidth = totwidth; \
+    *retheight = totheight; \
   } \
-}
+} while(0)
 
-#define RECURSE_END_VERT(obj, separator) \
+#define RECURSE_END_VERT(obj, separator, border) \
+      /* Add the subobject's height and separator */ \
       totheight += height + (separator); \
       if (width > maxwidth) \
+      /* Update maximum width */ \
 	maxwidth = width; \
     } \
+    /* Remove spurious separator at the bottom */ \
     totheight -= (separator); \
+    \
+    /* Make sure there is width for the heading text */ \
+    if (maxwidth < textwidth) \
+      maxwidth = textwidth; \
+    /* Add subobjects width */ \
+    totwidth += maxwidth; \
+    /* And add border below if there are subobjects */ \
+    if (maxwidth) \
+      totwidth += (border); \
+    /* Add border at the bottom */ \
+    totheight = totheight + (border); \
+    /* Update returned values */ \
+    *retwidth = totwidth; \
+    *retheight = totheight; \
   } \
-}
+} while(0)
 
-#define RECURSE_HORIZ(obj, methods, separator) \
-	RECURSE_BEGIN(obj) \
+#define RECURSE_HORIZ(obj, methods, separator, border) \
+	RECURSE_BEGIN(obj, border) \
 	  RECURSE_CALL_FUN(obj, methods); \
-	RECURSE_END_HORIZ(obj, separator)
+	RECURSE_END_HORIZ(obj, separator, border)
 
-#define RECURSE_VERT(obj, methods, separator) \
-	RECURSE_BEGIN(obj) \
+#define RECURSE_VERT(obj, methods, separator, border) \
+	RECURSE_BEGIN(obj, border) \
 	  RECURSE_CALL_FUN(obj, methods); \
-	RECURSE_END_VERT(obj, separator)
+	RECURSE_END_VERT(obj, separator, border)
 
 static int
 prefer_vert(topo_topology_t topology, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned y, int separator)
 {
   float horiz_ratio, vert_ratio;
-  {
-    unsigned totwidth = 0, totheight = 0;
-    unsigned maxheight = 0;
-    RECURSE_HORIZ(level, &null_draw_methods, separator);
-    horiz_ratio = (float)totwidth / maxheight;
-  }
-  {
-    unsigned totwidth = 0, totheight = 0;
-    unsigned maxwidth = 0;
-    RECURSE_VERT(level, &null_draw_methods, separator);
-    vert_ratio = (float)maxwidth / totheight;
-  }
+  unsigned textwidth = 0;
+  unsigned mywidth = 0, myheight = 0;
+  unsigned totwidth, *retwidth = &totwidth, totheight, *retheight = &totheight;
+  RECURSE_HORIZ(level, &null_draw_methods, separator, 0);
+  horiz_ratio = (float)totwidth / totheight;
+  RECURSE_VERT(level, &null_draw_methods, separator, 0);
+  vert_ratio = (float)totwidth / totheight;
   return ((RATIO / vert_ratio) < (horiz_ratio / RATIO));
 }
 
 static void
 proc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  *retwidth = fontsize?4*fontsize:gridsize;
-  *retheight = gridsize + (fontsize?(fontsize + gridsize):0);
+  *retwidth = fontsize ? 4*fontsize : gridsize;
+  *retheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
 
   methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
@@ -191,30 +227,15 @@ proc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 static void
 cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0) + gridsize, totheight = myheight, maxheight = 0;
-  unsigned mywidth = 0, totwidth = mywidth;
-  int textwidth = 0;
+  unsigned myheight = gridsize + (fontsize ? (fontsize + gridsize) : 0) + gridsize, totheight;
+  unsigned mywidth = 0, totwidth;
+  unsigned textwidth = fontsize ? (level->os_index == -1 ? 7*fontsize : 9*fontsize) : 0;
+  unsigned separator = level->attr->cache.depth > 1 ? gridsize : 0;
 
   /* Do not separate objects when in L1 (SMT) */
-  RECURSE_HORIZ(level, &null_draw_methods, level->attr->cache.depth > 1 ? gridsize : 0);
+  RECURSE_HORIZ(level, &null_draw_methods, separator, 0);
 
-  if (fontsize) {
-    if (level->os_index == -1)
-      textwidth = 7*fontsize;
-    else
-      textwidth = 9*fontsize;
-  }
-
-  if (totwidth < textwidth)
-    totwidth = textwidth;
-
-  *retwidth = totwidth;
-  *retheight = myheight + maxheight;
-  if (!maxheight)
-    /* No sublevels, remove the separator */
-    *retheight -= gridsize;
-
-  methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, *retwidth, y, myheight - gridsize);
+  methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, totwidth, y, myheight - gridsize);
 
   if (fontsize) {
     char text[64];
@@ -223,26 +244,19 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  totwidth = mywidth;
-  RECURSE_HORIZ(level, methods, level->attr->cache.depth > 1 ? gridsize : 0);
+  RECURSE_HORIZ(level, methods, separator, 0);
 }
 
 static void
 core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0), totheight = myheight, maxheight = 0;
-  unsigned mywidth = gridsize, totwidth = mywidth;
+  unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
+  unsigned mywidth = 0, totwidth;
+  unsigned textwidth = 5*fontsize;
 
-  RECURSE_HORIZ(level, &null_draw_methods, 0);
+  RECURSE_HORIZ(level, &null_draw_methods, 0, gridsize);
 
-  if (totwidth < 5*fontsize)
-    totwidth = 5*fontsize;
-  *retwidth = totwidth + gridsize;
-  *retheight = myheight + maxheight;
-  if (maxheight)
-    *retheight += gridsize;
-
-  methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
@@ -250,38 +264,23 @@ core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  totwidth = mywidth;
-  RECURSE_HORIZ(level, methods, 0);
+  RECURSE_HORIZ(level, methods, 0, gridsize);
 }
 
 static void
 socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0), totheight = myheight, maxheight = 0;
-  unsigned mywidth = gridsize, totwidth = mywidth, maxwidth = 0;
+  unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
+  unsigned mywidth = 0, totwidth;
+  unsigned textwidth = 6*fontsize;
   int vert = prefer_vert(topology, level, output, depth, x, y, gridsize);
 
-  if (vert) {
-    RECURSE_VERT(level, &null_draw_methods, gridsize);
+  if (vert)
+    RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
+  else
+    RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
 
-    if (maxwidth < 6*fontsize)
-      maxwidth = 6*fontsize;
-    *retwidth = totwidth + maxwidth;
-    if (maxwidth)
-      *retwidth += gridsize;
-    *retheight = totheight + gridsize;
-  } else {
-    RECURSE_HORIZ(level, &null_draw_methods, gridsize);
-
-    if (totwidth < 6*fontsize)
-      totwidth = 6*fontsize;
-    *retwidth = totwidth + gridsize;
-    *retheight = myheight + maxheight;
-    if (maxheight)
-      *retheight += gridsize;
-  }
-
-  methods->box(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
@@ -289,46 +288,33 @@ socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  if (vert) {
-    totheight = myheight;
-    RECURSE_VERT(level, methods, gridsize);
-  } else {
-    totwidth = mywidth;
-    RECURSE_HORIZ(level, methods, gridsize);
-  }
+  if (vert)
+    RECURSE_VERT(level, methods, gridsize, gridsize);
+  else
+    RECURSE_HORIZ(level, methods, gridsize, gridsize);
 }
 
 static void
 node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  /* Reserve room for the separator, heading memory box and separator */
-  unsigned myheight = gridsize + (fontsize?(gridsize + fontsize):0) + gridsize + gridsize;
-  /* currently filled height is our own height for now */
-  unsigned totheight = myheight;
-  unsigned maxheight = 0;
-  /* Put a vertical separator on the left */
-  unsigned mywidth = gridsize;
-  /* currently filled width is our own separator for now */
-  unsigned totwidth = mywidth;
+  /* Reserve room for the heading memory box and separator */
+  unsigned myheight = (fontsize ? (gridsize + fontsize) : 0) + gridsize + gridsize;
+  /* Currently filled height */
+  unsigned totheight;
+  /* Nothing on the left */
+  unsigned mywidth = 0;
+  /* Currently filled width */
+  unsigned totwidth;
+  /* Width of the heading text, thus minimal width */
+  unsigned textwidth = 11*fontsize;
 
   /* Compute the size needed by sublevels */
-  RECURSE_HORIZ(level, &null_draw_methods, gridsize);
-
-  /* Make sure we have room for text */
-  if (totwidth < 11*fontsize)
-    totwidth = 11*fontsize;
-
-  /* Add vertical separator on the right */
-  *retwidth = totwidth + gridsize;
-  *retheight = myheight + maxheight;
-  /* There were objects, add separator at the bottom */
-  if (maxheight)
-    *retheight += gridsize;
+  RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
 
   /* Draw the epoxy box */
-  methods->box(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR, depth, x, totwidth, y, totheight);
   /* Draw the memory box */
-  methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + gridsize, *retwidth - 2 * gridsize, y + gridsize, myheight - 2 * gridsize);
+  methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + gridsize, totwidth - 2 * gridsize, y + gridsize, myheight - gridsize);
 
   if (fontsize) {
     char text[64];
@@ -338,39 +324,23 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   }
 
   /* Restart, now really drawing sublevels */
-  totwidth = mywidth;
-  RECURSE_HORIZ(level, methods, gridsize);
+  RECURSE_HORIZ(level, methods, gridsize, gridsize);
 }
 
 static void
 machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0), totheight = myheight, maxheight = 0;
-  unsigned mywidth = gridsize, totwidth = mywidth, maxwidth = 0;
+  unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
+  unsigned mywidth = 0, totwidth;
+  unsigned textwidth = 11*fontsize;
   int vert = prefer_vert(topology, level, output, depth, x, y, gridsize);
 
-  if (vert) {
-    RECURSE_VERT(level, &null_draw_methods, gridsize);
+  if (vert)
+    RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
+  else
+    RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
 
-    if (maxwidth < 11*fontsize)
-      maxwidth = 11*fontsize;
-    *retwidth = totwidth + maxwidth;
-    if (maxwidth)
-      *retwidth += gridsize;
-    *retheight = totheight + gridsize;
-  } else {
-    RECURSE_HORIZ(level, &null_draw_methods, gridsize);
-
-    if (totwidth < 11*fontsize)
-      totwidth = 11*fontsize;
-
-    *retwidth = totwidth + gridsize;
-    *retheight = myheight + maxheight;
-    if (maxheight)
-      *retheight += gridsize;
-  }
-
-  methods->box(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
@@ -378,20 +348,18 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  if (vert) {
-    totheight = myheight;
-    RECURSE_VERT(level, methods, gridsize);
-  } else {
-    totwidth = mywidth;
-    RECURSE_HORIZ(level, methods, gridsize);
-  }
+  if (vert)
+    RECURSE_VERT(level, methods, gridsize, gridsize);
+  else
+    RECURSE_HORIZ(level, methods, gridsize, gridsize);
 }
 
 static void
 system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0), totheight = myheight, maxheight = 0;
-  unsigned mywidth = gridsize, totwidth = mywidth, maxwidth = 0;
+  unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
+  unsigned mywidth = 0, totwidth;
+  unsigned textwidth = 10*fontsize;
   int vert = prefer_vert(topology, level, output, depth, x, y, gridsize);
 
   if (vert) {
@@ -399,27 +367,11 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
       mywidth += gridsize;
       totwidth = mywidth;
     }
-    RECURSE_VERT(level, &null_draw_methods, gridsize);
+    RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
+  } else
+    RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
 
-    if (maxwidth < 10*fontsize)
-      maxwidth = 10*fontsize;
-    *retwidth = totwidth + maxwidth;
-    if (maxwidth)
-      *retwidth += gridsize;
-    *retheight = totheight + gridsize;
-  } else {
-    RECURSE_HORIZ(level, &null_draw_methods, gridsize);
-
-    if (totwidth < 10*fontsize)
-      totwidth = 10*fontsize;
-
-    *retwidth = totwidth + gridsize;
-    *retheight = myheight + maxheight;
-    if (maxheight)
-      *retheight += gridsize;
-  }
-
-  methods->box(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
@@ -429,8 +381,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 
   if (vert) {
     unsigned top = 0, bottom = 0;
-    totheight = myheight;
-    RECURSE_BEGIN(level)
+    RECURSE_BEGIN(level, gridsize)
       RECURSE_CALL_FUN(level, methods);
       if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE) {
 	unsigned center = y + totheight + height / 2;
@@ -439,14 +390,13 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 	bottom = center;
 	methods->line(output, 0, 0, 0, depth, x + mywidth - gridsize, center, x + mywidth, center);
       }
-    RECURSE_END_VERT(level, gridsize)
+    RECURSE_END_VERT(level, gridsize, gridsize);
 
     if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE)
       methods->line(output, 0, 0, 0, depth, x + mywidth - gridsize, top, x + mywidth - gridsize, bottom);
   } else {
     unsigned left = 0, right = 0;
-    totwidth = mywidth;
-    RECURSE_BEGIN(level)
+    RECURSE_BEGIN(level, gridsize)
       RECURSE_CALL_FUN(level, methods);
       if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE) {
 	unsigned center = x + totwidth + width / 2;
@@ -455,7 +405,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 	right = center;
 	methods->line(output, 0, 0, 0, depth, center, y + myheight - gridsize, center, y + myheight);
       }
-    RECURSE_END_HORIZ(level, gridsize)
+    RECURSE_END_HORIZ(level, gridsize, gridsize);
 
     if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE)
       methods->line(output, 0, 0, 0, depth, left, y + myheight - gridsize, right, y + myheight - gridsize);
@@ -465,31 +415,17 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 static void
 misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned myheight = gridsize + (fontsize?(fontsize + gridsize):0), totheight = myheight, maxheight = 0;
-  unsigned mywidth = gridsize, totwidth = mywidth, maxwidth = 0;
+  unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
+  unsigned mywidth = 0, totwidth;
+  unsigned textwidth = 6*fontsize;
   int vert = prefer_vert(topology, level, output, depth, x, y, gridsize);
 
-  if (vert) {
-    RECURSE_VERT(level, &null_draw_methods, gridsize);
+  if (vert)
+    RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
+  else
+    RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
 
-    if (maxwidth < 6*fontsize)
-      maxwidth = 6*fontsize;
-    *retwidth = totwidth + maxwidth;
-    if (maxwidth)
-      *retwidth += gridsize;
-    *retheight = totheight + gridsize;
-  } else {
-    RECURSE_HORIZ(level, &null_draw_methods, gridsize);
-
-    if (totwidth < 6*fontsize)
-      totwidth = 6*fontsize;
-    *retwidth = totwidth + gridsize;
-    *retheight = myheight + maxheight;
-    if (maxheight)
-      *retheight += gridsize;
-  }
-
-  methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, *retwidth, y, *retheight);
+  methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
@@ -497,21 +433,18 @@ misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  if (vert) {
-    totheight = myheight;
-    RECURSE_VERT(level, methods, gridsize);
-  } else {
-    totwidth = mywidth;
-    RECURSE_HORIZ(level, methods, gridsize);
-  }
+  if (vert)
+    RECURSE_VERT(level, methods, gridsize, gridsize);
+  else
+    RECURSE_HORIZ(level, methods, gridsize, gridsize);
 }
 
 static void
 fig(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
-  unsigned maxwidth = 0, maxheight = 0;
+  unsigned totwidth, totheight;
 
-  system_draw(topology, methods, level, output, depth, x, &maxwidth, y, &maxheight);
+  system_draw(topology, methods, level, output, depth, x, &totwidth, y, &totheight);
 }
 
 /*
