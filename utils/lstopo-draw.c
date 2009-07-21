@@ -197,12 +197,14 @@ static foo_draw get_type_fun(topo_obj_type_t type);
   *retheight = totheight; \
 } while(0)
 
+/* Pack objects horizontally */
 #define RECURSE_HORIZ(obj, methods, separator, border) \
   RECURSE_BEGIN(obj, border) \
   RECURSE_FOR() \
     RECURSE_CALL_FUN(methods); \
   RECURSE_END_HORIZ(separator, border)
 
+/* Pack objects vertically */
 #define RECURSE_VERT(obj, methods, separator, border) \
   RECURSE_BEGIN(obj, border) \
   RECURSE_FOR() \
@@ -269,6 +271,7 @@ RECURSE_BEGIN(obj, border) \
   } \
 } while(0)
 
+/* Pack objects in a grid */
 #define RECURSE_RECT(obj, methods, separator, border) do {\
   if (obj->arity && obj->children[0]->type == TOPO_OBJ_NODE) { \
     /* Nodes shouldn't be put with an arbitrary geometry, as NUMA distances may not be that way */ \
