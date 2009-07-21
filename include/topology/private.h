@@ -193,7 +193,8 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 		__l->next_cousin = NULL;		\
 		__l->prev_cousin = NULL;		\
 		__l->father = NULL;			\
-		__l->os_index = _index;		\
+		__l->os_index = _index;			\
+		__l->os_level = -1;			\
 		__l->userdata = NULL;			\
 		__l->attr = malloc(sizeof(*__l->attr));	\
 	} while (0)

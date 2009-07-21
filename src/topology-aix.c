@@ -54,48 +54,70 @@
 #include <sys/thread.h>
 
 static int
-topo_aix_set_sth_cpubind(topo_topology_t topology, int what, int who, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_sth_cpubind(topo_topology_t topology, rstype_t what, rsid_t who, const topo_cpuset_t *topo_set, int strict)
 {
   unsigned target;
+  rsethandle_t rset, rad;
+  topo_obj_t objs[2];
+  int n;
+  int res = -1;
 
   if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset)) {
-    if (bindprocessor(what, who, PROCESSOR_CLASS_ANY))
+    if (ra_detachrset(what, who, 0))
       return -1;
     return 0;
   }
 
-  /* TODO: use ra_attachrset instead to overcome this limitation, also provides
-   * SHM memory binding and policy (P_FIRST_TOUCH / P_BALANCED)
-   */
-  if (topo_cpuset_weight(topo_set) != 1) {
+  n = topo_get_cpuset_objs(topology, topo_set, objs, 2);
+  if (n > 1 || objs[0]->os_level == -1) {
+    /* Does not correspond to a radset, not possible */
     errno = ENOSYS;
     return -1;
   }
 
-  target = topo_cpuset_first(topo_set);
+  rset = rs_alloc(RS_PARTITION);
+  rad = rs_alloc(RS_EMPTY);
+  if (rs_getrad(rset, rad, objs[0]->os_level, objs[0]->os_index, 0)) {
+    fprintf(stderr,"rs_getrad(%d,%d) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
+    errno = EIO;
+    goto out;
+  }
 
-  if (bindprocessor(what, who, target))
-    return -1;
+  /* TODO: memory binding and policy (P_DEFAULT / P_FIRST_TOUCH / P_BALANCED)
+   */
 
-  return 0;
+  if (ra_attachrset(what, who, rset, 0)) {
+    res = -1;
+    goto out;
+  }
+
+  res = 0;
+
+out:
+  rs_free(rset);
+  rs_free(rad);
+  return res;
 }
 
 static int
 topo_aix_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
 {
-  return topo_aix_set_sth_cpubind(topology, BINDPROCESS, getpid(), topo_set, strict);
+  rsid_t who = { .at_pid = getpid() };
+  return topo_aix_set_sth_cpubind(topology, R_PROCESS, who, topo_set, strict);
 }
 
 static int
 topo_aix_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
 {
-  return topo_aix_set_sth_cpubind(topology, BINDTHREAD, thread_self(), topo_set, strict);
+  rsid_t who = { .at_tid = thread_self() };
+  return topo_aix_set_sth_cpubind(topology, R_THREAD, who, topo_set, strict);
 }
 
 static int
 topo_aix_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *topo_set, int strict)
 {
-  return topo_aix_set_sth_cpubind(topology, BINDPROCESS, pid, topo_set, strict);
+  rsid_t who = { .at_pid = pid };
+  return topo_aix_set_sth_cpubind(topology, R_PROCESS, who, topo_set, strict);
 }
 
 static int
@@ -105,7 +127,8 @@ topo_aix_set_thread_cpubind(topo_topology_t topology, topo_thread_t pthread, con
   int size;
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
-  return topo_aix_set_sth_cpubind(topology, BINDTHREAD, info.__pi_tid, topo_set, strict);
+  rsid_t who = { .at_tid = info.__pi_tid };
+  return topo_aix_set_sth_cpubind(topology, R_THREAD, who, topo_set, strict);
 }
 
 static int
@@ -144,6 +167,7 @@ look_rset(int sdl, topo_obj_type_t type, struct topo_topology *topology, int lev
     /* It seems logical processors are numbered from 1 here, while the
      * bindprocessor functions numbers them from 0... */
     obj = topo_alloc_setup_object(type, i - (type == TOPO_OBJ_PROC));
+    obj->os_level = sdl;
     switch(type) {
       case TOPO_OBJ_NODE:
 	obj->attr->node.memory_kB = 0; /* TODO */

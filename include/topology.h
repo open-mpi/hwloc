@@ -194,6 +194,8 @@ struct topo_obj {
 
   /* cpuset */
   topo_cpuset_t cpuset;			/**< \brief CPUs covered by this object */
+
+  signed os_level;			/**< \brief OS-provided physical level */
 };
 typedef struct topo_obj * topo_obj_t;
 
