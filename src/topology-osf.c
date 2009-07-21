@@ -167,8 +167,6 @@ topo_osf_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, in
 
 /* TODO: memory
  *
- * nloc to get distances
- *
  * nmadvise(addr,len), nmmap()
  * policies: DIRECTED, STRIPPED, first_touch(REPLICATED)
  *
