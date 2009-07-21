@@ -1,5 +1,5 @@
 System(491GB HP=0*262144kB  )
-  Misc0
+  Misc1
     Misc0
       NUMANode#0(7875MB)
         Socket#0
@@ -180,7 +180,7 @@ System(491GB HP=0*262144kB  )
             P#62
           Core#1
             P#63
-  Misc0
+  Misc1
     Misc0
       NUMANode#16(7888MB)
         Socket#8192
@@ -361,7 +361,7 @@ System(491GB HP=0*262144kB  )
             P#126
           Core#1
             P#127
-  Misc0
+  Misc1
     Misc0
       NUMANode#32(7888MB)
         Socket#16384
@@ -542,7 +542,7 @@ System(491GB HP=0*262144kB  )
             P#190
           Core#1
             P#191
-  Misc0
+  Misc1
     Misc0
       NUMANode#48(7888MB)
         Socket#24576
