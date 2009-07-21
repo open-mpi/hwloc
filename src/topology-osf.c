@@ -50,16 +50,48 @@
 
 #include <numa.h>
 #include <radset.h>
+#include <cpuset.h>
 
-static void prepare_radset(topo_topology_t topology, radset_t *radset, const topo_cpuset_t *topo_set)
+static int
+prepare_radset(topo_topology_t topology, radset_t *radset, const topo_cpuset_t *topo_set)
 {
   unsigned cpu;
+  cpuset_t target_cpuset;
+  cpuset_t cpuset, xor_cpuset;
+  radid_t radid;
+  int ret = 0;
 
-  radsetcreate(radset);
-  rademptyset(*radset);
+  cpusetcreate(&target_cpuset);
+  cpuemptyset(target_cpuset);
   topo_cpuset_foreach_begin(cpu, topo_set)
-    radaddset(*radset, cpu);
+    cpuaddset(target_cpuset, cpu);
   topo_cpuset_foreach_end()
+
+  cpusetcreate(&cpuset);
+  cpusetcreate(&xor_cpuset);
+  for (radid = 0; radid < topology->backend_params.osf.nbnodes; radid++) {
+    cpuemptyset(cpuset);
+    if (rad_get_cpus(radid, cpuset)==-1) {
+      fprintf(stderr,"rad_get_cpus(%d) failed: %s\n",radid,strerror(errno));
+      continue;
+    }
+    cpuxorset(target_cpuset, cpuset, xor_cpuset);
+    if (cpucountset(xor_cpuset) == 0) {
+      /* Found it */
+      radsetcreate(radset);
+      rademptyset(*radset);
+      radaddset(*radset, radid);
+      ret = 1;
+      goto out;
+    }
+  }
+  /* radset containing exactly this set of CPUs not found */
+
+out:
+  cpusetdestroy(&target_cpuset);
+  cpusetdestroy(&cpuset);
+  cpusetdestroy(&xor_cpuset);
+  return ret;
 }
 
 static int
@@ -74,7 +106,8 @@ topo_osf_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, cons
     return 0;
   }
 
-  prepare_radset(topology, &radset, topo_set);
+  if (!prepare_radset(topology, &radset, topo_set))
+    return -1;
 
   if (strict) {
     if (pthread_rad_bind(thread, radset, RAD_INSIST))
@@ -99,7 +132,8 @@ topo_osf_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_c
     return 0;
   }
 
-  prepare_radset(topology, &radset, topo_set);
+  if (!prepare_radset(topology, &radset, topo_set))
+    return -1;
 
   if (strict) {
     if (rad_bind_pid(pid, radset, RAD_INSIST))
@@ -158,7 +192,7 @@ topo_look_osf(struct topo_topology *topology)
   topology->set_proc_cpubind = topo_osf_set_proc_cpubind;
   topology->set_thisproc_cpubind = topo_osf_set_thisproc_cpubind;
 
-  nbnodes=rad_get_num();
+  topology->backend_params.osf.nbnodes = nbnodes = rad_get_num();
 
   cpusetcreate(&cpuset);
   for (radid = 0; radid < nbnodes; radid++) {

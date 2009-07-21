@@ -31,48 +31,21 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#ifndef LIBTOPOLOGY_RADSET_H
-#define LIBTOPOLOGY_RADSET_H
+#ifndef LIBTOPOLOGY_CPUSET_H
+#define LIBTOPOLOGY_CPUSET_H
 
-typedef int radid_t;
-typedef struct {
-} radset_t;
+typedef int cpu_cursor_t;
+#define SET_CURSOR_INIT -1
+typedef int cpuid_t;
+#define CPU_NONE -1
+typedef int cpuset_t;
 
-extern int radsetcreate(radset_t *set);
+int cpusetcreate(cpuset_t *set);
+int cpuemptyset(cpuset_t set);
+int cpuxorset(cpuset_t set1, cpuset_t set2, cpuset_t res);
+int cpucountset(cpuset_t set);
+int cpuaddset(cpuset_t set, cpuid_t cpuid );
+cpuid_t cpu_foreach(cpuset_t cpuset, int flags, cpu_cursor_t *cursor);
+int cpusetdestroy(cpuset_t *set);
 
-extern int rademptyset(radset_t set);
-extern int radaddset(radset_t set, radid_t radid);
-
-extern int radsetdestroy(radset_t *set);
-
-
-int rad_attach_pid(pid_t pid, radset_t radset, unsigned long flags);
-int pthread_rad_attach(pthread_t thread, radset_t radset, unsigned long flags);
-int rad_detach_pid(pid_t pid);
-int pthread_rad_detach(pthread_t thread);
-
-
-/* (strict) */
-#define RAD_INSIST 1
-int rad_bind_pid(pid_t pid, radset_t radset, unsigned long flags);
-int pthread_rad_bind(pthread_t thread, radset_t radset, unsigned long flags);
-
-
-typedef struct numa_attr {
-  unsigned nattr_type;
-#define R_RAD 0
-
-  radset_t *nattr_descr;
-
-  unsigned nattr_distance;
-/* FIXME: arbitrary */
-#define RAD_DIST_LOCAL 0
-#define RAD_DIST_REMOTE 127
-
-  unsigned nattr_flags;
-} numa_attr_t;
-
-
-int nloc(numa_attr_t *numa_attr, radset_t radset);
-
-#endif /* LIBTOPOLOGY_RADSET_H */
+#endif /* LIBTOPOLOGY_CPUSET_H */

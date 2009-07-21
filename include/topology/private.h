@@ -89,6 +89,11 @@ struct topo_topology {
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
     } sysfs;
 #endif /* LINUX_SYS */
+#if defined(OSF_SYS) || defined(TOPO_COMPILE_PORTS)
+    struct topo_backend_params_osf {
+      int nbnodes;
+    } osf;
+#endif /* OSF_SYS */
 #ifdef HAVE_XML
     struct topo_backend_params_xml_s {
       /* xml backend parameters */
