@@ -315,6 +315,5 @@ void topo_look_solaris(struct topo_topology *topology)
 
 /* TODO:
  * memory binding: lgrp_affinity_set
- * memory distance: lgrp_latency_cookie
  * madvise(MADV_ACCESS_LWP / ACCESS_MANY)
  */
