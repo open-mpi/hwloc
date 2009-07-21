@@ -195,6 +195,34 @@ static foo_draw get_type_fun(topo_obj_type_t type);
 	  RECURSE_CALL_FUN(obj, methods); \
 	RECURSE_END_VERT(obj, separator, border)
 
+/* Dynamic programming */
+
+/* Per-object data: width and height of drawing for this object and sub-objects */
+struct dyna_save {
+  unsigned width;
+  unsigned height;
+};
+
+/* Save the computed size */
+#define DYNA_SAVE() do { \
+  if (!level->userdata) { \
+    struct dyna_save *save = malloc(sizeof(*save)); \
+    save->width = *retwidth; \
+    save->height = *retheight; \
+    level->userdata = save; \
+  } \
+} while (0)
+
+/* Check whether we already computed the size and we are not actually drawing, in that case return it */
+#define DYNA_CHECK() do { \
+  if (level->userdata && methods == &null_draw_methods) { \
+    struct dyna_save *save = level->userdata; \
+    *retwidth = save->width; \
+    *retheight = save->height; \
+    return; \
+  } \
+} while (0)
+
 static int
 prefer_vert(topo_topology_t topology, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned y, int separator)
 {
@@ -232,6 +260,8 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
   unsigned textwidth = fontsize ? (level->os_index == -1 ? 7*fontsize : 9*fontsize) : 0;
   unsigned separator = level->attr->cache.depth > 1 ? gridsize : 0;
 
+  DYNA_CHECK();
+
   /* Do not separate objects when in L1 (SMT) */
   RECURSE_HORIZ(level, &null_draw_methods, separator, 0);
 
@@ -245,6 +275,8 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
   }
 
   RECURSE_HORIZ(level, methods, separator, 0);
+
+  DYNA_SAVE();
 }
 
 static void
@@ -253,6 +285,8 @@ core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = 5*fontsize;
+
+  DYNA_CHECK();
 
   RECURSE_HORIZ(level, &null_draw_methods, 0, gridsize);
 
@@ -265,6 +299,8 @@ core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   }
 
   RECURSE_HORIZ(level, methods, 0, gridsize);
+
+  DYNA_SAVE();
 }
 
 static void
@@ -274,6 +310,8 @@ socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = 6*fontsize;
   int vert = prefer_vert(topology, level, output, depth, x, y, gridsize);
+
+  DYNA_CHECK();
 
   if (vert)
     RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
@@ -292,6 +330,8 @@ socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
     RECURSE_VERT(level, methods, gridsize, gridsize);
   else
     RECURSE_HORIZ(level, methods, gridsize, gridsize);
+
+  DYNA_SAVE();
 }
 
 static void
@@ -307,6 +347,9 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   unsigned totwidth;
   /* Width of the heading text, thus minimal width */
   unsigned textwidth = 11*fontsize;
+
+  /* Check whether dynamic programming can save us time */
+  DYNA_CHECK();
 
   /* Compute the size needed by sublevels */
   RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
@@ -325,6 +368,9 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 
   /* Restart, now really drawing sublevels */
   RECURSE_HORIZ(level, methods, gridsize, gridsize);
+
+  /* Save result for dynamic programming */
+  DYNA_SAVE();
 }
 
 static void
@@ -334,6 +380,8 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = 11*fontsize;
   int vert = prefer_vert(topology, level, output, depth, x, y, gridsize);
+
+  DYNA_CHECK();
 
   if (vert)
     RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
@@ -352,6 +400,8 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
     RECURSE_VERT(level, methods, gridsize, gridsize);
   else
     RECURSE_HORIZ(level, methods, gridsize, gridsize);
+
+  DYNA_SAVE();
 }
 
 static void
@@ -361,6 +411,8 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = 10*fontsize;
   int vert = prefer_vert(topology, level, output, depth, x, y, gridsize);
+
+  DYNA_CHECK();
 
   if (vert) {
     if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE) {
@@ -410,6 +462,8 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
     if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE)
       methods->line(output, 0, 0, 0, depth, left, y + myheight - gridsize, right, y + myheight - gridsize);
   }
+
+  DYNA_SAVE();
 }
 
 static void
@@ -419,6 +473,8 @@ misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = 6*fontsize;
   int vert = prefer_vert(topology, level, output, depth, x, y, gridsize);
+
+  DYNA_CHECK();
 
   if (vert)
     RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
@@ -437,6 +493,8 @@ misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
     RECURSE_VERT(level, methods, gridsize, gridsize);
   else
     RECURSE_HORIZ(level, methods, gridsize, gridsize);
+
+  DYNA_SAVE();
 }
 
 static void
