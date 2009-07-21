@@ -34,13 +34,17 @@
 #ifndef LIBTOPOLOGY_WINDOWS_H
 #define LIBTOPOLOGY_WINDOWS_H
 
+#include <inttypes.h>
+
 #define DECLARE_HANDLE(n) typedef struct n##__ {int i;} *n
 DECLARE_HANDLE(HINSTANCE);
 typedef HINSTANCE HMODULE;
 typedef int WINBOOL, BOOL;
-typedef double LONGLONG, DWORDLONG, ULONGLONG;
-typedef unsigned char BYTE;
-typedef unsigned short WORD;
+typedef int64_t LONGLONG;
+typedef uint64_t DWORDLONG;
+typedef DWORDLONG ULONGLONG, *PULONGLONG;
+typedef unsigned char BYTE, UCHAR;
+typedef unsigned short WORD, USHORT;
 typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)();
@@ -73,5 +77,8 @@ BOOL WINAPI SetProcessAffinityMask(HANDLE hProcess, DWORD_PTR dwProcessAffinityM
 
 HANDLE WINAPI GetCurrentThread(void);
 HANDLE WINAPI GetCurrentProcess(void);
+
+BOOL GetNumaAvailableMemoryNode(UCHAR Node, PULONGLONG AvailableBytes);
+
 
 #endif /* LIBTOPOLOGY_WINDOWS_H */

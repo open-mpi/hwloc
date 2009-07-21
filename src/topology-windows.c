@@ -280,9 +280,15 @@ topo_look_windows(struct topo_topology *topology)
 
 	switch (type) {
 	  case TOPO_OBJ_NODE:
-	    obj->attr->node.memory_kB = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
-	    obj->attr->node.huge_page_free = 0; /* TODO */
-	    break;
+	    {
+	      ULONGLONG avail;
+	      if (GetNumaAvailableMemoryNode(id, &avail))
+		obj->attr->node.memory_kB = avail >> 10;
+	      else
+		obj->attr->node.memory_kB = 0;
+	      obj->attr->node.huge_page_free = 0; /* TODO */
+	      break;
+	    }
 	  case TOPO_OBJ_CACHE:
 	    obj->attr->cache.memory_kB = procInfo[i].Cache.Size >> 10;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
