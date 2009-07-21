@@ -56,7 +56,6 @@
 static int
 topo_aix_set_sth_cpubind(topo_topology_t topology, rstype_t what, rsid_t who, const topo_cpuset_t *topo_set, int strict)
 {
-  unsigned target;
   rsethandle_t rset, rad;
   topo_obj_t objs[2];
   int n;
@@ -83,7 +82,9 @@ topo_aix_set_sth_cpubind(topo_topology_t topology, rstype_t what, rsid_t who, co
     goto out;
   }
 
+  /* TODO: ra_getrset to get binding information */
   /* TODO: memory binding and policy (P_DEFAULT / P_FIRST_TOUCH / P_BALANCED)
+   * ra_mmap to allocation on an rset
    */
 
   if (ra_attachrset(what, who, rset, 0)) {
@@ -170,11 +171,11 @@ look_rset(int sdl, topo_obj_type_t type, struct topo_topology *topology, int lev
     obj->os_level = sdl;
     switch(type) {
       case TOPO_OBJ_NODE:
-	obj->attr->node.memory_kB = 0; /* TODO */
-	obj->attr->node.huge_page_free = 0;
+	obj->attr->node.memory_kB = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
+	obj->attr->node.huge_page_free = 0; /* TODO: rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
 	break;
       case TOPO_OBJ_CACHE:
-	obj->attr->cache.memory_kB = 0; /* TODO */
+	obj->attr->cache.memory_kB = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
       case TOPO_OBJ_MISC:
