@@ -51,6 +51,17 @@
 #include <numa.h>
 #include <radset.h>
 
+static void prepare_radset(topo_topology_t topology, radset_t *radset, const topo_cpuset_t *topo_set)
+{
+  unsigned cpu;
+
+  radsetcreate(radset);
+  rademptyset(*radset);
+  topo_cpuset_foreach_begin(cpu, topo_set)
+    radaddset(*radset, cpu);
+  topo_cpuset_foreach_end()
+}
+
 static int
 topo_osf_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, const topo_cpuset_t *topo_set, int strict)
 {
@@ -63,11 +74,8 @@ topo_osf_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, cons
     return 0;
   }
 
-  radsetcreate(&radset);
-  rademptyset(radset);
-  topo_cpuset_foreach_begin(cpu, topo_set)
-    radaddset(radset, cpu);
-  topo_cpuset_foreach_end()
+  prepare_radset(topology, &radset, topo_set);
+
   if (strict) {
     if (pthread_rad_bind(thread, radset, RAD_INSIST))
       return -1;
@@ -84,7 +92,6 @@ static int
 topo_osf_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *topo_set, int strict)
 {
   radset_t radset;
-  unsigned cpu;
 
   if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset)) {
     if (rad_detach_pid(pid))
@@ -92,11 +99,8 @@ topo_osf_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_c
     return 0;
   }
 
-  radsetcreate(&radset);
-  rademptyset(radset);
-  topo_cpuset_foreach_begin(cpu, topo_set)
-    radaddset(radset, cpu);
-  topo_cpuset_foreach_end()
+  prepare_radset(topology, &radset, topo_set);
+
   if (strict) {
     if (rad_bind_pid(pid, radset, RAD_INSIST))
       return -1;
