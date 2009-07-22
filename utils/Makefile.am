@@ -13,7 +13,7 @@ else !HAVE_WINDOWS
 EXTRA_DIST += lstopo-windows.c
 endif !HAVE_WINDOWS
 lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS)
-lstopo_LDFLAGS = $(CAIRO_LIBS) $(XML_LIBS)
+lstopo_LDFLAGS = $(CAIRO_LIBS) $(XML_LIBS) -lm
 
 LIBS = $(top_builddir)/src/libtopology.la
 
