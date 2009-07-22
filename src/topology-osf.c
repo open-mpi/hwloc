@@ -98,7 +98,6 @@ static int
 topo_osf_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, const topo_cpuset_t *topo_set, int strict)
 {
   radset_t radset;
-  unsigned cpu;
 
   if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset)) {
     if (pthread_rad_detach(thread))
@@ -196,6 +195,7 @@ topo_look_osf(struct topo_topology *topology)
 
   cpusetcreate(&cpuset);
   radsetcreate(&radset);
+  radsetcreate(&radset2);
   {
     topo_obj_t nodes[nbnodes];
     unsigned distances[nbnodes][nbnodes];
@@ -252,6 +252,7 @@ topo_look_osf(struct topo_topology *topology)
     }
     topo_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
   }
+  radsetdestroy(&radset2);
   radsetdestroy(&radset);
   cpusetdestroy(&cpuset);
 
