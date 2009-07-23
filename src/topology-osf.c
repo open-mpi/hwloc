@@ -86,6 +86,7 @@ prepare_radset(topo_topology_t topology, radset_t *radset, const topo_cpuset_t *
     }
   }
   /* radset containing exactly this set of CPUs not found */
+  errno = ENOSYS;
 
 out:
   cpusetdestroy(&target_cpuset);
@@ -216,7 +217,7 @@ topo_look_osf(struct topo_topology *topology)
       }
 
       nodes[radid] = obj = topo_alloc_setup_object(TOPO_OBJ_NODE, radid);
-      obj->attr->node.memory_kB = rad_get_physmem(radid) / 1024;
+      obj->attr->node.memory_kB = rad_get_physmem(radid) * getpagesize() / 1024;
       obj->attr->node.huge_page_free = 0;
 
       cursor = SET_CURSOR_INIT;
