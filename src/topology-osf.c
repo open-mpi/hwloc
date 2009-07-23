@@ -109,10 +109,10 @@ topo_osf_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, cons
     return -1;
 
   if (strict) {
-    if (pthread_rad_bind(thread, radset, RAD_INSIST))
+    if (pthread_rad_bind(thread, radset, RAD_INSIST | RAD_WAIT))
       return -1;
   } else {
-    if (pthread_rad_attach(thread, radset, 0))
+    if (pthread_rad_attach(thread, radset, RAD_WAIT))
       return -1;
   }
   radsetdestroy(&radset);
@@ -135,10 +135,10 @@ topo_osf_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_c
     return -1;
 
   if (strict) {
-    if (rad_bind_pid(pid, radset, RAD_INSIST))
+    if (rad_bind_pid(pid, radset, RAD_INSIST | RAD_WAIT))
       return -1;
   } else {
-    if (rad_attach_pid(pid, radset, 0))
+    if (rad_attach_pid(pid, radset, RAD_WAIT))
       return -1;
   }
   radsetdestroy(&radset);
@@ -202,7 +202,7 @@ topo_look_osf(struct topo_topology *topology)
     unsigned nfound;
     numa_attr_t attr = {
       .nattr_type = R_RAD,
-      .nattr_descr = radset,
+      .nattr_descr = { .rd_radset = radset },
       .nattr_flags = 0,
     };
 

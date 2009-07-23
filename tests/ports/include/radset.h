@@ -34,11 +34,15 @@
 #ifndef LIBTOPOLOGY_RADSET_H
 #define LIBTOPOLOGY_RADSET_H
 
+#include <limits.h>
+
 typedef int radset_cursor_t;
 typedef int radid_t;
 #define RAD_NONE -1
 typedef struct {
 } radset_t;
+typedef unsigned int nsgid_t;
+#define NSG_NONE -1
 
 extern int radsetcreate(radset_t *set);
 
@@ -58,25 +62,42 @@ int pthread_rad_detach(pthread_t thread);
 
 
 /* (strict) */
-#define RAD_INSIST 1
+#define RAD_INSIST 0x01
+#define RAD_WAIT 0x08
 int rad_bind_pid(pid_t pid, radset_t radset, unsigned long flags);
 int pthread_rad_bind(pthread_t thread, radset_t radset, unsigned long flags);
 
+typedef union rsrcdescr {
+  radset_t rd_radset;
+  int rd_fd;
+  char *rd_pathname;
+  int rd_shmid;
+  pid_t rd_pid;
+  void *rd_addr;
+  nsgid_t rd_nsg;
+} rsrcdescr_t;
 
 typedef struct numa_attr {
   unsigned nattr_type;
 #define R_RAD 0
 
-  radset_t nattr_descr;
+  rsrcdescr_t nattr_descr;
 
-  unsigned nattr_distance;
-/* FIXME: arbitrary */
-#define RAD_DIST_LOCAL 0
-#define RAD_DIST_REMOTE 127
+  unsigned long nattr_distance;
+#define RAD_DIST_LOCAL 100
+#define RAD_DIST_REMOTE INT_MAX
 
-  unsigned nattr_flags;
+  unsigned long nattr_flags;
 } numa_attr_t;
 
+typedef enum memalloc_policy {
+  MPOL_DIRECTED,
+  MPOL_THREAD,
+  MPOL_REPLICATED,
+  MPOL_STRIPPED,
+  MPOL_INVALID
+} memalloc_policy_t;
+#define MPOL_NO_MIGRATE 0x100
 
 int nloc(numa_attr_t *numa_attr, radset_t radset);
 
