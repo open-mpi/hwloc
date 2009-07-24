@@ -26,7 +26,8 @@ Support
 =======
 * add linux cgroup support
   (seems to be cpuset-exclusive?)
-  if /proc/self/cgroup exists, take the path at the path at the end of its contents
+  if /proc/self/cgroup exists and is not empty, take the path from the 3rd
+  ':'-separated field
   read cpuset cpulist in /dev/cgroup/<path>/cpuset.cpus
   read cpuset memlist in /dev/cgroup/<path>/cpuset.mems
 
