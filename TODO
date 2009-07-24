@@ -5,6 +5,10 @@ API
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
+* have a topo_topology_t in all topology-traversal functions to uniformize things?
+  topo_get_common_ancestor_obj() and topo_obj_is_in_subtree() don't have one
+  because it's useless for now, but maybe it'll be used for debugging one day?
+
 Doc
 ===
 * complete doc
@@ -39,6 +43,17 @@ Support
 * there could be several size for huge pages
 
 * solaris' cc doesn't seem to support array range ([0 ... n]) initialization.
+
+* split configure in two parts
+  + main configure checks for packaging things
+    (documentation, building tools, cairo, tests, ...)
+  + sub configure in library checks for library-only things
+    (OS-specific topology features, XML, ...)
+  so that we can build the lib without anything else
+  (MPICH2/Hydra or OpenMPI will directly call the library configure
+   as they do with PLPA).
+
+* parallelize the discovery ? :)
 
 Binding
 =======
