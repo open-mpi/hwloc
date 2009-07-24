@@ -86,7 +86,7 @@ prepare_radset(topo_topology_t topology, radset_t *radset, const topo_cpuset_t *
     }
   }
   /* radset containing exactly this set of CPUs not found */
-  errno = ENOSYS;
+  errno = EXDEV;
 
 out:
   cpusetdestroy(&target_cpuset);

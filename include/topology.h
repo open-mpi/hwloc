@@ -418,7 +418,12 @@ extern int topo_obj_cpuset_snprintf(char * __topo_restrict str, size_t size, siz
  * different CPUs. Some OSes also only support that kind of binding.
  *
  * \note Some OSes do not provide all ways to bind processes, threads, etc and
- * the corresponding binding functions may fail. The most portable version that
+ * the corresponding binding functions may fail. ENOSYS is returned when it is
+ * not possible to bind the requested kind of object processes/threads). EXDEV
+ * is returned when the requested cpuset can not be enforced (e.g. some systems
+ * only allow one CPU, and some other systems only allow one NUMA node)
+ *
+ * The most portable version that
  * should be preferred over the others, whenever possible, is
  *
  * \code

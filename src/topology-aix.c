@@ -69,8 +69,8 @@ topo_aix_set_sth_cpubind(topo_topology_t topology, rstype_t what, rsid_t who, co
 
   n = topo_get_cpuset_objs(topology, topo_set, objs, 2);
   if (n > 1 || objs[0]->os_level == -1) {
-    /* Does not correspond to a radset, not possible */
-    errno = ENOSYS;
+    /* Does not correspond to exactly one radset, not possible */
+    errno = EXDEV;
     return -1;
   }
 
@@ -78,7 +78,6 @@ topo_aix_set_sth_cpubind(topo_topology_t topology, rstype_t what, rsid_t who, co
   rad = rs_alloc(RS_EMPTY);
   if (rs_getrad(rset, rad, objs[0]->os_level, objs[0]->os_index, 0)) {
     fprintf(stderr,"rs_getrad(%d,%d) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
-    errno = EIO;
     goto out;
   }
 
