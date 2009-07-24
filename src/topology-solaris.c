@@ -193,14 +193,21 @@ topo_look_kstat(struct topo_topology *topology)
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
   kstat_named_t *stat;
+  unsigned look_cores = 1, look_chips = 1;
+
+  unsigned proc_hasphysid[TOPO_NBMAXCPUS] = {};
   unsigned proc_physids[TOPO_NBMAXCPUS];
   unsigned proc_osphysids[TOPO_NBMAXCPUS];
   unsigned osphysids[TOPO_NBMAXCPUS];
+
+  unsigned proc_hascoreid[TOPO_NBMAXCPUS] = {};
   unsigned proc_coreids[TOPO_NBMAXCPUS];
   unsigned proc_oscoreids[TOPO_NBMAXCPUS];
   unsigned oscoreids[TOPO_NBMAXCPUS];
+
   unsigned core_osphysids[TOPO_NBMAXCPUS];
-  unsigned physid, coreid;
+
+  unsigned physid, coreid, cpuid;
   unsigned numprocs = 0;
   unsigned numsockets = 0;
   unsigned numcores = 0;
@@ -216,73 +223,79 @@ topo_look_kstat(struct topo_topology *topology)
       if (strncmp("cpu_info", ksp->ks_module, 8))
 	continue;
 
-      if (ksp->ks_instance != numprocs)
+      cpuid = ksp->ks_instance;
+      if (cpuid > TOPO_NBMAXCPUS)
 	{
-	  fprintf(stderr, "kstat instances not in CPU order: %d comes %u\n", ksp->ks_instance, numprocs);
-	  goto out;
+	  fprintf(stderr,"CPU id too big: %d\n", cpuid);
+	  continue;
 	}
+
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
-	  fprintf(stderr, "kstat_read failed for CPU%u: %s\n", numprocs, strerror(errno));
+	  fprintf(stderr, "kstat_read failed for CPU%u: %s\n", cpuid, strerror(errno));
 	  goto out;
 	}
 
-      /* Get Chip ID */
-      stat = (kstat_named_t *) kstat_data_lookup(ksp, "chip_id");
-      if (!stat)
-	{
-	  if (numsockets)
-	    {
-	      fprintf(stderr, "could not read socket id for CPU%u: %s\n", numprocs, strerror(errno));
-	      goto out;
-	    }
-	}
-      else
-	{
-	  if (stat->data_type != KSTAT_DATA_INT32)
-	    {
-	      fprintf(stderr, "chip_id is not an INT32\n");
-	      goto out;
-	    }
-	  proc_osphysids[numprocs] = physid = stat->value.i32;
-	  for (i = 0; i < numsockets; i++)
-	    if (physid == osphysids[i])
-	      break;
-	  proc_physids[numprocs] = i;
-	  topo_debug("%u on socket %u (%u)\n", numprocs, i, physid);
-	  if (i == numsockets)
-	    osphysids[numsockets++] = physid;
-	}
+      if (look_chips) do {
+	/* Get Chip ID */
+	stat = (kstat_named_t *) kstat_data_lookup(ksp, "chip_id");
+	if (!stat)
+	  {
+	    if (numsockets)
+	      fprintf(stderr, "could not read socket id for CPU%u: %s\n", cpuid, strerror(errno));
+	    else
+	      topo_debug("could not read socket id for CPU%u: %s\n", cpuid, strerror(errno));
+	    look_chips = 0;
+	    continue;
+	  }
+	if (stat->data_type != KSTAT_DATA_INT32)
+	  {
+	    fprintf(stderr, "chip_id is not an INT32\n");
+	    look_chips = 0;
+	    continue;
+	  }
+	proc_osphysids[cpuid] = physid = stat->value.i32;
+	for (i = 0; i < numsockets; i++)
+	  if (physid == osphysids[i])
+	    break;
+	proc_physids[cpuid] = i;
+	topo_debug("%u on socket %u (%u)\n", cpuid, i, physid);
+	if (i == numsockets)
+	  osphysids[numsockets++] = physid;
+	proc_hasphysid[cpuid] = 1;
+      } while(0);
 
-      /* Get Core ID */
-      stat = (kstat_named_t *) kstat_data_lookup(ksp, "core_id");
-      if (!stat)
-	{
-	  if (numcores)
-	    {
-	      fprintf(stderr, "could not read core id for CPU%u: %s\n", numprocs, strerror(errno));
-	      goto out;
-	    }
-	}
-      else
-	{
-	  if (stat->data_type != KSTAT_DATA_INT32)
-	    {
-	      fprintf(stderr, "core_id is not an INT32\n");
-	      goto out;
-	    }
-	  proc_oscoreids[numprocs] = coreid = stat->value.i32;
-	  for (i = 0; i < numcores; i++)
-	    if (coreid == oscoreids[i] && proc_osphysids[numprocs] == core_osphysids[i])
-	      break;
-	  proc_coreids[numprocs] = i;
-	  topo_debug("%u on core %u (%u)\n", numprocs, i, coreid);
-	  if (i == numcores)
-	    {
-	      core_osphysids[numcores] = proc_osphysids[numprocs];
-	      oscoreids[numcores++] = coreid;
-	    }
-	}
+      if (look_cores) do {
+	/* Get Core ID */
+	stat = (kstat_named_t *) kstat_data_lookup(ksp, "core_id");
+	if (!stat)
+	  {
+	    if (numcores)
+	      fprintf(stderr, "could not read core id for CPU%u: %s\n", cpuid, strerror(errno));
+	    else
+	      topo_debug("could not read core id for CPU%u: %s\n", cpuid, strerror(errno));
+	    look_cores = 0;
+	    continue;
+	  }
+	if (stat->data_type != KSTAT_DATA_INT32)
+	  {
+	    fprintf(stderr, "core_id is not an INT32\n");
+	    look_cores = 0;
+	    continue;
+	  }
+	proc_oscoreids[cpuid] = coreid = stat->value.i32;
+	for (i = 0; i < numcores; i++)
+	  if (coreid == oscoreids[i] && proc_osphysids[cpuid] == core_osphysids[i])
+	    break;
+	proc_coreids[cpuid] = i;
+	topo_debug("%u on core %u (%u)\n", cpuid, i, coreid);
+	if (i == numcores)
+	  {
+	    core_osphysids[numcores] = proc_osphysids[cpuid];
+	    oscoreids[numcores++] = coreid;
+	  }
+	proc_hascoreid[cpuid] = 1;
+      } while(0);
 
       /* Note: there is also clog_id for the Thread ID (not unique) and
        * pkg_core_id for the core ID (not unique).  They are not useful to us
@@ -291,8 +304,25 @@ topo_look_kstat(struct topo_topology *topology)
       numprocs++;
     }
 
-  topo_setup_level(numprocs, numsockets, osphysids, proc_physids, topology, TOPO_OBJ_SOCKET);
-  topo_setup_level(numprocs, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
+  if (look_chips) {
+    for (i = 0; i < numprocs; i++)
+      if (!proc_hasphysid[i])
+	break;
+    if (i < numprocs)
+      fprintf(stderr,"Sparse instance space, not supported (yet)\n");
+    else
+      topo_setup_level(numprocs, numsockets, osphysids, proc_physids, topology, TOPO_OBJ_SOCKET);
+  }
+
+  if (look_cores) {
+    for (i = 0; i < numprocs; i++)
+      if (!proc_hascoreid[i])
+	break;
+    if (i < numprocs)
+      fprintf(stderr,"Sparse instance space, not supported (yet)\n");
+    else
+      topo_setup_level(numprocs, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
+  }
 
  out:
   kstat_close(kc);
