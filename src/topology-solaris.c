@@ -103,15 +103,16 @@ browse(struct topo_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, top
 {
   int n;
   topo_obj_t obj;
+  lgrp_mem_size_t mem_size;
 
   n = lgrp_cpus(cookie, lgrp, NULL, 0, LGRP_CONTENT_ALL);
   if (n == -1)
     return;
 
+  if ((mem_size = lgrp_mem_size(cookie, lgrp, LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT)) > 0)
   {
     int i;
     processorid_t cpuids[n];
-    lgrp_mem_size_t mem_size;
 
     obj = topo_alloc_setup_object(TOPO_OBJ_NODE, lgrp);
     glob_lgrps[(*curlgrp)++] = obj;
@@ -124,14 +125,9 @@ browse(struct topo_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, top
 	lgrp, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
 
     /* or LGRP_MEM_SZ_FREE */
-    mem_size = lgrp_mem_size(cookie, lgrp, LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT);
     obj->attr->node.huge_page_free = 0; /* TODO */
-    if (mem_size == -1) {
-      obj->attr->node.memory_kB = 0;
-    } else {
-      topo_debug("node %ld has %lldkB\n", lgrp, mem_size/1024);
-      obj->attr->node.memory_kB = mem_size / 1024;
-    }
+    topo_debug("node %ld has %lldkB\n", lgrp, mem_size/1024);
+    obj->attr->node.memory_kB = mem_size / 1024;
     topo_add_object(topology, obj);
   }
 
