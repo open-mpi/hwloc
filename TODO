@@ -37,10 +37,6 @@ Support
 
 * there could be several size for huge pages
 
-* integrate marcel split quirk?
-  + split for real, just explain how to split?
-    - just return an ordered array?
-
 Binding
 =======
 * add topo_get_cpubind ? and the other cpubind variants ?
