@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <limits.h>
 
 #include <topology.h>
 #include <topology/private.h>
@@ -106,9 +107,11 @@ topo_setup_group_from_min_distance_clique(unsigned nbobjs,
 
   /* try to find complete graphs */
   for(i=0; i<nbobjs; i++) {
-    topo_cpuset_t closest_objs_set = TOPO_CPUSET_ZERO;
-    unsigned min_distance = -1;
+    topo_cpuset_t closest_objs_set;
+    unsigned min_distance = UINT_MAX;
     unsigned size = 1; /* current object i */
+
+    topo_cpuset_zero(&closest_objs_set);
 
     /* if already grouped, skip */
     if (groupids[i])
@@ -169,9 +172,11 @@ topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
 
   /* try to find complete graphs */
   for(i=0; i<nbobjs; i++) {
-    topo_cpuset_t closest_objs_set = TOPO_CPUSET_ZERO;
-    unsigned min_distance = -1;
+    topo_cpuset_t closest_objs_set;
+    unsigned min_distance = UINT_MAX;
     unsigned size = 1; /* current object i */
+
+    topo_cpuset_zero(&closest_objs_set);
 
     /* if already grouped, skip */
     if (groupids[i])
