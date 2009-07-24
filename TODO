@@ -38,6 +38,8 @@ Support
 
 * there could be several size for huge pages
 
+* solaris' cc doesn't seem to support array range ([0 ... n]) initialization.
+
 Binding
 =======
 * add topo_get_cpubind ? and the other cpubind variants ?
