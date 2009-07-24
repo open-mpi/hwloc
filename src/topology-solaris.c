@@ -169,12 +169,12 @@ topo_look_lgrp(struct topo_topology *topology)
     topo_obj_t glob_lgrps[nlgrps];
     browse(topology, cookie, root, glob_lgrps, &curlgrp);
     {
-      unsigned distances[nlgrps][nlgrps];
+      unsigned distances[curlgrp][curlgrp];
       unsigned i, j;
-      for (i = 0; i < nlgrps; i++)
-	for (j = 0; j < nlgrps; j++)
+      for (i = 0; i < curlgrp; i++)
+	for (j = 0; j < curlgrp; j++)
 	  distances[i][j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
-      topo_setup_misc_level_from_distances(topology, nlgrps, glob_lgrps, distances);
+      topo_setup_misc_level_from_distances(topology, curlgrp, glob_lgrps, distances);
     }
   }
   lgrp_fini(cookie);
