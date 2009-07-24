@@ -118,7 +118,7 @@ browse(struct topo_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, top
 
     lgrp_cpus(cookie, lgrp, cpuids, n, LGRP_CONTENT_ALL);
     for (i = 0; i < n ; i++) {
-      topo_cpuset_set(&obj->cpuset, i);
+      topo_cpuset_set(&obj->cpuset, cpuids[i]);
     }
     topo_debug("node %ld has cpuset %"TOPO_PRIxCPUSET"\n",
 	lgrp, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
