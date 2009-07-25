@@ -31,6 +31,7 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
+#include <topomask.h>
 #include <topology.h>
 #include <topology/private.h>
 
@@ -40,7 +41,9 @@
 
 static void usage(FILE *where)
 {
-  fprintf(where, "Usage: topobind [options] <cpuset> -- command ...\n");
+  fprintf(where, "Usage: topobind [options] <location> -- command ...\n");
+  fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
+  fprintf(where, "            as supported by the topomask utility.\n");
   fprintf(where, "Options:\n");
   fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
   fprintf(where, "   --strict\trequire strict binding\n");
@@ -49,12 +52,20 @@ static void usage(FILE *where)
 
 int main(int argc, char *argv[])
 {
+  topo_topology_t topology;
+  struct topo_topology_info topoinfo;
   topo_cpuset_t cpu_set; /* invalid until bind_cpus is set */
   int bind_cpus = 0;
   int single = 0;
   int verbose = 0;
   int flags = 0;
   int ret;
+
+  topo_cpuset_zero(&cpu_set);
+
+  topo_topology_init(&topology);
+  topo_topology_load(topology);
+  topo_topology_get_info(topology, &topoinfo);
 
   /* skip argv[0], handle options */
   argv++;
@@ -89,17 +100,8 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    if (bind_cpus) {
-      fprintf(stderr, "more than one cpuset\n");
-      usage(stderr);
-      return EXIT_FAILURE;
-    }
-
-    topo_cpuset_from_string(argv[0], &cpu_set);
+    topomask_process_arg(topology, &topoinfo, argv[0], &cpu_set, verbose);
     bind_cpus = 1;
-    if (verbose)
-      fprintf(stderr, "Will bind on cpu set %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(&cpu_set));
 
   next:
     argc--;
@@ -107,18 +109,17 @@ int main(int argc, char *argv[])
   }
 
   if (bind_cpus) {
-    topo_topology_t topology;
-    topo_topology_init(&topology);
-    topo_topology_load(topology);
-
+    if (verbose)
+      fprintf(stderr, "binding on cpu set %" TOPO_PRIxCPUSET "\n",
+	      TOPO_CPUSET_PRINTF_VALUE(&cpu_set));
     if (single)
       topo_cpuset_singlify(&cpu_set);
     ret = topo_set_cpubind(topology, &cpu_set, flags);
     if (ret)
       fprintf(stderr, "topo_set_cpubind %"TOPO_PRIxCPUSET" failed (errno %d %s)\n", TOPO_CPUSET_PRINTF_VALUE(&cpu_set), errno, strerror(errno));
-
-    topo_topology_destroy(topology);
   }
+
+  topo_topology_destroy(topology);
 
   if (!argc)
     return EXIT_SUCCESS;

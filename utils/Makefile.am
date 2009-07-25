@@ -34,7 +34,7 @@ TOPO_HELP2MAN=$(HELP2MAN) -m "Topology commands" -S "INRIA" -N --version-string 
 lstopo.1: lstopo
 	$(TOPO_HELP2MAN) -n "Show the topology of the system" ./$^ -o $@
 topobind.1: topobind
-	$(TOPO_HELP2MAN) -n "Bind a command to a given cpu mask" ./$^ -o $@
+	$(TOPO_HELP2MAN) -n "Bind a command to given objects or cpu masks" ./$^ -o $@
 topodistrib.1: topodistrib
 	$(TOPO_HELP2MAN) -n "Build a number of cpu masks distributed on the system" ./$^ -o $@
 topomask.1: topomask
