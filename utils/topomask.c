@@ -52,6 +52,8 @@ static void usage(FILE *where)
   fprintf(where, "  -  several <depth:index> may be concatenated with `.' to select some specific children\n");
   fprintf(where, "\n<string> may also be a cpuset string\n");
   fprintf(where, "\nIf prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
+  fprintf(where, "If prefixed with `x', the given string will be and'ed instead of added to the current cpuset\n");
+  fprintf(where, "If prefixed with `^', the given string will be xor'ed instead of added to the current cpuset\n");
   fprintf(where, "\nOptions:\n");
   fprintf(where, "  -v\tverbose\n");
   fprintf(where, "  --proclist\treport the list of processors in the CPU set\n");
@@ -61,6 +63,8 @@ static void usage(FILE *where)
 typedef enum topomask_append_mode_e {
   TOPOMASK_APPEND_ADD,
   TOPOMASK_APPEND_CLR,
+  TOPOMASK_APPEND_AND,
+  TOPOMASK_APPEND_XOR,
 } topomask_append_mode_t;
 
 static void append_cpuset(topo_cpuset_t *set, topo_cpuset_t *newset,
@@ -78,6 +82,18 @@ static void append_cpuset(topo_cpuset_t *set, topo_cpuset_t *newset,
       fprintf(stderr, "clearing %" TOPO_PRIxCPUSET " from %" TOPO_PRIxCPUSET "\n",
 	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
     topo_cpuset_clearset(set, newset);
+    break;
+  case TOPOMASK_APPEND_AND:
+    if (verbose)
+      fprintf(stderr, "and'ing %" TOPO_PRIxCPUSET " from %" TOPO_PRIxCPUSET "\n",
+	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
+    topo_cpuset_andset(set, newset);
+    break;
+  case TOPOMASK_APPEND_XOR:
+    if (verbose)
+      fprintf(stderr, "xor'ing %" TOPO_PRIxCPUSET " from %" TOPO_PRIxCPUSET "\n",
+	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
+    topo_cpuset_xorset(set, newset);
     break;
   default:
     assert(1);
@@ -211,6 +227,12 @@ int main(int argc, char *argv[])
     arg = argv[1];
     if (*argv[1] == '~') {
       mode = TOPOMASK_APPEND_CLR;
+      arg++;
+    } else if (*argv[1] == 'x') {
+      mode = TOPOMASK_APPEND_AND;
+      arg++;
+    } else if (*argv[1] == '^') {
+      mode = TOPOMASK_APPEND_XOR;
       arg++;
     }
 
