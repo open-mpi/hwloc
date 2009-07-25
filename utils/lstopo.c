@@ -100,7 +100,7 @@ static void usage(FILE *where)
   fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
 #endif
 #ifdef LINUX_SYS
-  fprintf (where, "\nThe TOPO_FSYS_ROOT_PATH environment variable can be used to specify the path to\na chroot containing the /proc and /sys of another system\n");
+  fprintf (where, "   --fsys-root <path>    chroot containing the /proc and /sys of another system\n");
 #endif
 }
 
@@ -116,6 +116,7 @@ main (int argc, char *argv[])
   int ignorecache = 0;
   char * synthetic = NULL;
   char * xmlpath = NULL;
+  char * fsysroot = NULL;
   int opt;
 
   err = topo_topology_init (&topology);
@@ -171,6 +172,14 @@ main (int argc, char *argv[])
 	if (!strcmp(xmlpath, "-"))
 	  xmlpath = "/dev/stdin";
 #endif /* HAVE_XML */
+#ifdef LINUX_SYS
+      } else if (!strcmp (argv[1], "--fsys-root")) {
+	if (argc <= 2) {
+	  usage (stderr);
+	  exit(EXIT_FAILURE);
+	}
+	fsysroot = argv[2]; opt = 1;
+#endif
       } else {
 	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
@@ -197,6 +206,8 @@ main (int argc, char *argv[])
     topo_topology_set_synthetic(topology, synthetic);
   if (xmlpath)
     topo_topology_set_xml(topology, xmlpath);
+  if (fsysroot)
+    topo_topology_set_fsys_root(topology, fsysroot);
 
   err = topo_topology_load (topology);
   if (err)
