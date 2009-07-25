@@ -84,24 +84,23 @@ static void usage(FILE *where)
 #endif /* HAVE_XML */
 		  "\n");
   fprintf (where, "\nOptions:\n");
-  fprintf (where, "   -v                    enable the verbose mode (disabled by default)\n");
-  fprintf (where, "   --verbose             enable the verbose mode (disabled by default)\n");
+  fprintf (where, "   -v --verbose        enable the verbose mode (disabled by default)\n");
   fprintf (where, "   --no-caches           do not show caches\n");
   fprintf (where, "   --no-useless-caches   do not show caches which do not have a hierarchical\n"
                   "                         impact\n");
   fprintf (where, "   --whole-system        do not consider administration limitations\n");
   fprintf (where, "   --merge               do not show levels that do not have a hierarcical\n"
                   "                         impact\n");
-  fprintf (where, "   --synthetic \"n:2 2\"   simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
-                  "                         processors\n");
-  fprintf (where, "   --fontsize 10         set size of text font\n");
-  fprintf (where, "   --gridsize 10         set size of margin between elements\n");
 #ifdef HAVE_XML
   fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
 #endif
 #ifdef LINUX_SYS
   fprintf (where, "   --fsys-root <path>    chroot containing the /proc and /sys of another system\n");
 #endif
+  fprintf (where, "   --synthetic \"n:2 2\"   simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
+                  "                         processors\n");
+  fprintf (where, "   --fontsize 10         set size of text font\n");
+  fprintf (where, "   --gridsize 10         set size of margin between elements\n");
 }
 
 int
