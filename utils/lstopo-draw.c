@@ -241,6 +241,10 @@ RECURSE_BEGIN(obj, border) \
       rows--; \
       columns = (numsubobjs + rows - 1) / rows; \
     } \
+    if (force_horiz) { \
+      rows =  1; \
+      columns = (numsubobjs + rows - 1) / rows; \
+    } \
     \
     RECURSE_FOR() \
       /* Newline? */ \
@@ -326,7 +330,7 @@ prefer_vert(topo_topology_t topology, topo_obj_t level, void *output, unsigned d
   horiz_ratio = (float)totwidth / totheight;
   RECURSE_VERT(level, &null_draw_methods, separator, 0);
   vert_ratio = (float)totwidth / totheight;
-  return prefer_ratio(vert_ratio, horiz_ratio);
+  return !force_horiz && prefer_ratio(vert_ratio, horiz_ratio);
 }
 
 static void

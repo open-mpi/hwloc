@@ -46,6 +46,7 @@
 
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
+unsigned int force_horiz = 0;
 
 FILE *open_file(const char *filename, const char *mode)
 {
@@ -101,6 +102,7 @@ static void usage(FILE *where)
                   "                         processors\n");
   fprintf (where, "   --fontsize 10         set size of text font\n");
   fprintf (where, "   --gridsize 10         set size of margin between elements\n");
+  fprintf (where, "   --horiz               horizontal graphic layout instead of nearly 4/3 ratio\n");
 }
 
 int
@@ -139,6 +141,8 @@ main (int argc, char *argv[])
 	flags |= TOPO_FLAGS_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
+      else if (!strcmp (argv[1], "--horiz"))
+        force_horiz = 1;
       else if (!strcmp (argv[1], "--fontsize")) {
 	if (argc <= 2) {
 	  usage (stderr);
