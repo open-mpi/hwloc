@@ -54,6 +54,9 @@ static void usage(FILE *where)
   fprintf(where, "\nIf prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
   fprintf(where, "If prefixed with `x', the given string will be and'ed instead of added to the current cpuset\n");
   fprintf(where, "If prefixed with `^', the given string will be xor'ed instead of added to the current cpuset\n");
+  fprintf(where, "\nString are processed in order, without priorities.\n");
+  fprintf(where, "Compose multiple invokations for complex operations.\n");
+  fprintf(where, "e.g. for (A|B)^(C|D), use: topomask A B ^$(topomask C D)\n");
   fprintf(where, "\nOptions:\n");
   fprintf(where, "  -v\tverbose\n");
   fprintf(where, "  --proclist\treport the list of processors in the CPU set\n");
