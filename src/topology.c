@@ -291,8 +291,8 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   topo_debug("group distances:\n");
   for(i=0; i<nbgroups; i++) {
     for(j=0; j<nbgroups; j++)
-      printf("%u ", groupdistances[i][j]);
-    printf("\n");
+      topo_debug("%u ", groupdistances[i][j]);
+    topo_debug("\n");
   }
 #endif
 
