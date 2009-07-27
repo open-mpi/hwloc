@@ -314,6 +314,7 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
     return;
 
 #ifdef TOPO_DEBUG
+  topo_debug("node distance matrix:\n");
   topo_debug("   ");
   for(j=0; j<nbobjs; j++)
     topo_debug(" %3d", j);
