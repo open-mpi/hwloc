@@ -33,8 +33,8 @@
 
 /* The configuration file */
 
-#ifndef LIBTOPOLOGY_CONFIGURATION_H
-#define LIBTOPOLOGY_CONFIGURATION_H
+#ifndef TOPOLOGY_CONFIG_H
+#define TOPOLOGY_CONFIG_H
 
 #undef TOPO_HAVE_FFS
 
@@ -75,4 +75,4 @@
 #  endif /* topo_thread_t */
 #endif /* TOPO_HAVE_WINDOWS_H */
 
-#endif /* LIBTOPOLOGY_CONFIGURATION_H */
+#endif /* TOPOLOGY_CONFIG_H */
