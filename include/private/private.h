@@ -179,31 +179,16 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
 	__buf;									\
      })
 
-/* TODO: just move into topo_alloc_setup_object? */
-#define topo_setup_object(l, _type, _index) do {	\
-		struct topo_obj *__l = (l);		\
-		__l->type = _type;			\
-		topo_cpuset_zero(&__l->cpuset);		\
-		__l->arity = 0;				\
-		__l->children = NULL;			\
-		__l->first_child = NULL;		\
-		__l->next_sibling = NULL;		\
-		__l->prev_sibling = NULL;		\
-		__l->next_cousin = NULL;		\
-		__l->prev_cousin = NULL;		\
-		__l->father = NULL;			\
-		__l->os_index = _index;			\
-		__l->os_level = -1;			\
-		__l->userdata = NULL;			\
-		__l->attr = malloc(sizeof(*__l->attr));	\
-	} while (0)
-
 static inline struct topo_obj *
 topo_alloc_setup_object(topo_obj_type_t type, unsigned index)
 {
   struct topo_obj *obj = malloc(sizeof(*obj));
   assert(obj);
-  topo_setup_object(obj, type, index);
+  memset(obj, 0, sizeof(*obj));
+  obj->type = type;
+  obj->os_index = index;
+  obj->os_level = -1;
+  obj->attr = malloc(sizeof(*obj->attr));
   return obj;
 }
 

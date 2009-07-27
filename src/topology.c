@@ -853,7 +853,7 @@ topo_discover(struct topo_topology *topology)
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
 
   /* topo_look_* functions should use topo_obj_add to add objects initialized
-   * through topo_setup_object. For node levels, memory_Kb and huge_page_free
+   * through topo_alloc_setup_object. For node levels, memory_Kb and huge_page_free
    * must be initialized. For cache levels, memory_kB and attr->cache.depth must be
    * initialized, for misc levels, attr->misc.depth must be initialized
    */
