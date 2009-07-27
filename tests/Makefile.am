@@ -12,6 +12,7 @@ check_PROGRAMS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
 	topo_get_next_obj_above_cpuset \
 	topo_get_obj_below_cpuset \
 	topo_get_shared_cache_above \
+	topo_cpuset_first_last_weight \
 	topo_cpuset_singlify \
 	topo_type_depth \
 	topo_bind \
