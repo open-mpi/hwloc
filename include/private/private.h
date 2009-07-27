@@ -36,11 +36,10 @@
 #ifndef TOPOLOGY_PRIVATE_H
 #define TOPOLOGY_PRIVATE_H
 
-#include <config.h>
+#include <private/config.h>
 #include <topology.h>
-#include <topology/private.h>
 #include <topology/cpuset.h>
-#include <topology/debug.h>
+#include <private/debug.h>
 
 #include <assert.h>
 

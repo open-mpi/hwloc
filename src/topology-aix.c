@@ -33,7 +33,7 @@
 
 /* TODO: use SIGRECONFIG & dr_reconfig for state change */
 
-#include <config.h>
+#include <private/config.h>
 
 #include <assert.h>
 #include <sys/types.h>
@@ -46,8 +46,8 @@
 #include <fcntl.h>
 
 #include <topology.h>
-#include <topology/private.h>
-#include <topology/debug.h>
+#include <private/private.h>
+#include <private/debug.h>
 
 #include <sys/rset.h>
 #include <sys/processor.h>

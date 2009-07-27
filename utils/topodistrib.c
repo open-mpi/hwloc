@@ -32,7 +32,7 @@
  */
 
 #include <topology.h>
-#include <topology/private.h>
+#include <private/private.h>
 
 #include <unistd.h>
 #include <assert.h>

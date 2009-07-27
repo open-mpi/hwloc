@@ -34,11 +34,10 @@
 /* To try to get all declarations duplicated below.  */
 #define _WIN32_WINNT 0x0601
 
-#include <config.h>
-
+#include <private/config.h>
 #include <topology.h>
-#include <topology/private.h>
-#include <topology/debug.h>
+#include <private/private.h>
+#include <private/debug.h>
 
 #include <windows.h>
 

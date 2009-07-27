@@ -31,9 +31,9 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <config.h>
+#include <private/config.h>
 #include <topology.h>
-#include <topology/private.h>
+#include <private/private.h>
 #include <topology/helper.h>
 
 #include <errno.h>

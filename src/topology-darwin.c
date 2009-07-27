@@ -31,7 +31,7 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <config.h>
+#include <private/config.h>
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -40,8 +40,8 @@
 #include <inttypes.h>
 
 #include <topology.h>
-#include <topology/private.h>
-#include <topology/debug.h>
+#include <private/private.h>
+#include <private/debug.h>
 
 static int get_sysctl(const char *name, int *res)
 {

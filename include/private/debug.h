@@ -36,7 +36,7 @@
 #ifndef TOPOLOGY_DEBUG_H
 #define TOPOLOGY_DEBUG_H
 
-#include <config.h>
+#include <private/config.h>
 
 #ifdef TOPO_DEBUG
 #define topo_debug(s, ...) fprintf(stderr, s, ##__VA_ARGS__) 

@@ -344,7 +344,7 @@ AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xye
 
 AC_SUBST(LIBTOPOLOGY_REQUIRES)
 
-AC_CONFIG_HEADER([include/config.h])
+AC_CONFIG_HEADER([include/private/config.h])
 
 AC_CONFIG_FILES([Makefile
                  topology.pc

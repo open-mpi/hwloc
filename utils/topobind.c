@@ -33,7 +33,7 @@
 
 #include <topomask.h>
 #include <topology.h>
-#include <topology/private.h>
+#include <private/private.h>
 
 #include <unistd.h>
 #include <errno.h>

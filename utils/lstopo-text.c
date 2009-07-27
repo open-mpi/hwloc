@@ -32,7 +32,7 @@
  */
 
 #include <topology.h>
-#include <config.h>
+#include <private/config.h>
 
 #include <stdlib.h>
 #include <stdio.h>

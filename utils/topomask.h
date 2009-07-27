@@ -35,7 +35,7 @@
 #define TOPOMASK_H
 
 #include <topology.h>
-#include <topology/private.h>
+#include <private/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>

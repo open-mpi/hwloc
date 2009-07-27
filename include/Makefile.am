@@ -6,7 +6,7 @@ include_HEADERS = topology.h
 include_topologydir = $(includedir)/topology
 include_topology_HEADERS = topology/config.h topology/cpuset.h topology/cpuset-bits.h topology/helper.h
 
-noinst_HEADERS = topology/private.h topology/debug.h
+noinst_HEADERS = private/private.h private/debug.h
 
 if HAVE_LINUX
 include_topology_HEADERS += topology/linux-libnuma.h

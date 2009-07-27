@@ -31,7 +31,7 @@
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
 
-#include <config.h>
+#include <private/config.h>
 
 #define _ATFILE_SOURCE
 #include <assert.h>
@@ -46,8 +46,8 @@
 #include <limits.h>
 
 #include <topology.h>
-#include <topology/private.h>
-#include <topology/debug.h>
+#include <private/private.h>
+#include <private/debug.h>
 
 #ifdef HAVE_MACH_MACH_INIT_H
 #include <mach/mach_init.h>

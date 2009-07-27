@@ -55,6 +55,8 @@ Support
 
 * parallelize the discovery ? :)
 
+* why make dist needs make first?
+
 Binding
 =======
 * add topo_get_cpubind ? and the other cpubind variants ?

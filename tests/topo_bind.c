@@ -35,7 +35,7 @@
 #include <errno.h>
 
 #include <topology.h>
-#include <config.h>
+#include <private/config.h>
 
 /* check the binding functions */
 topo_topology_t topology;
