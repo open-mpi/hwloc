@@ -185,7 +185,7 @@ topo_look_lgrp(struct topo_topology *topology)
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
 static void
-topo_look_kstat(struct topo_topology *topology, topo_cpuset_t *online_cpuset)
+topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t *online_cpuset)
 {
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
@@ -351,6 +351,8 @@ topo_look_kstat(struct topo_topology *topology, topo_cpuset_t *online_cpuset)
       numprocs++;
     }
 
+  *nbprocs = topo_cpuset_weight(&online_cpuset);
+
   if (look_chips) {
     for (i = 0; i < numprocs; i++)
       if (!proc_hasphysid[i])
@@ -379,6 +381,7 @@ topo_look_kstat(struct topo_topology *topology, topo_cpuset_t *online_cpuset)
 void topo_look_solaris(struct topo_topology *topology)
 {
   topo_cpuset_t online_cpuset;
+  unsigned nbprocs = topo_fallback_nbprocessors ();
   topology->set_cpubind = topo_solaris_set_cpubind;
   topology->set_proc_cpubind = topo_solaris_set_proc_cpubind;
   topology->set_thisproc_cpubind = topo_solaris_set_thisproc_cpubind;
@@ -388,9 +391,9 @@ void topo_look_solaris(struct topo_topology *topology)
 #endif /* HAVE_LIBLGRP */
   topo_cpuset_fill(&online_cpuset);
 #ifdef HAVE_LIBKSTAT
-  topo_look_kstat(topology, &online_cpuset);
+  topo_look_kstat(topology, &nbprocs, &online_cpuset);
 #endif /* HAVE_LIBKSTAT */
-  topo_setup_proc_level(topology, topo_fallback_nbprocessors (), &online_cpuset);
+  topo_setup_proc_level(topology, nbprocs, &online_cpuset);
 }
 
 /* TODO:
