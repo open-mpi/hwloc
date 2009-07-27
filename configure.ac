@@ -309,6 +309,26 @@ AC_CHECK_FUNCS([ffsl], [
   AC_DEFINE([TOPO_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
 
+AC_CHECK_FUNCS([fls], [
+  AC_CHECK_DECL([fls],[
+    AC_DEFINE([TOPO_HAVE_DECL_FLS], [1], [Define to 1 if function `fls' is declared by system headers])
+  ])
+  AC_DEFINE([TOPO_HAVE_FLS], [1], [Define to 1 if you have the `fls' function.])
+])
+AC_CHECK_FUNCS([flsl], [
+  AC_DEFINE([TOPO_HAVE_FLSL], [1], [Define to 1 if you have the `flsl' function.])
+])
+
+AC_CHECK_FUNCS([clz], [
+  AC_CHECK_DECL([clz],[
+    AC_DEFINE([TOPO_HAVE_DECL_CLZ], [1], [Define to 1 if function `clz' is declared by system headers])
+  ])
+  AC_DEFINE([TOPO_HAVE_CLZ], [1], [Define to 1 if you have the `clz' function.])
+])
+AC_CHECK_FUNCS([clzl], [
+  AC_DEFINE([TOPO_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
+])
+
 AC_CHECK_FUNCS([openat], [have_openat=yes])
 AM_CONDITIONAL([HAVE_OPENAT], [test "x$have_openat" = "xyes"])
 

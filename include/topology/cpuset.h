@@ -399,6 +399,20 @@ static __inline__ int topo_cpuset_first(const topo_cpuset_t * cpuset)
 	return -1;
 }
 
+/** \brief Compute the last CPU (most significant bit) in CPU set \p set */
+static __inline__ int topo_cpuset_last(const topo_cpuset_t * cpuset)
+{
+	int i;
+	for(i=TOPO_CPUSUBSET_COUNT-1; i>=0; i--) {
+		/* subsets are unsigned longs, use flsl */
+		int _fls = topo_flsl(TOPO_CPUSUBSET_SUBSET(*cpuset,i));
+		if (_fls>0)
+			return _fls - 1 + TOPO_CPUSUBSET_SIZE*i;
+	}
+
+	return -1;
+}
+
 /** \brief Keep a single CPU among those set in CPU set \p set
  *
  * Might be used before binding so that the process does not

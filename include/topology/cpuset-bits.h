@@ -87,7 +87,7 @@
 
 #ifdef __GNUC__
 
-#  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)
+#  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 4))
      /* Starting from 3.4, gcc has a long variant.  */
 #    define topo_ffsl(x) __builtin_ffsl(x)
 #  else
@@ -118,7 +118,7 @@ static __inline__ int topo_ffsl(unsigned long x)
 		return 0;
 
 	i = 1;
-#ifdef TOPO_BITS_PER_LONG >= 64
+#if TOPO_BITS_PER_LONG >= 64
 	if (!(x & 0xfffffffful)) {
 		x >>= 32;
 		i += 32;
@@ -195,6 +195,130 @@ static __inline__ int topo_ffsl(unsigned long x)
 }
 #endif
 
+/**
+ * fls helpers.
+ */
+#ifdef __GNUC_____
+
+#  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 4))
+#    define topo_flsl(x) (x ? 8*sizeof(long) - __builtin_clzl(x) : 0)
+#  else
+#    define topo_fls(x) (x ? 8*sizeof(int) - __builtin_clz(x) : 0)
+#    define TOPO_NEED_FLSL
+#  endif
+
+#elif defined(TOPO_HAVE_FLSL)
+
+#  define topo_flsl(x) flsl(x)
+
+#elif defined(TOPO_HAVE_CLZL)
+
+#  define topo_flsl(x) (x ? 8*sizeof(long) - clzl(x) : 0)
+
+#elif defined(TOPO_HAVE_FLS)
+
+#  ifndef TOPO_HAVE_DECL_FLS
+extern int fsl(int);
+#  endif
+
+#  define topo_fls(x) fls(x)
+#  define TOPO_NEED_FLSL
+
+#elif defined(TOPO_HAVE_CLZ)
+
+#  ifndef TOPO_HAVE_DECL_CLZ
+extern int clz(int);
+#  endif
+
+#  define topo_fls(x) (x ? 8*sizeof(int) - clz(x) : 0)
+#  define TOPO_NEED_FLSL
+
+#else /* no fls implementation */
+
+static __inline__ int topo_flsl(unsigned long x)
+{
+	int i = 0;
+
+	if (!x)
+		return 0;
+
+	i = 1;
+#if TOPO_BITS_PER_LONG >= 64
+	if ((x & 0xffffffff00000000ul)) {
+		x >>= 32;
+		i += 32;
+	}
+#endif
+	if ((x & 0xffff0000u)) {
+		x >>= 16;
+		i += 16;
+	}
+	if ((x & 0xff00)) {
+		x >>= 8;
+		i += 8;
+	}
+	if ((x & 0xf0)) {
+		x >>= 4;
+		i += 4;
+	}
+	if ((x & 0xc)) {
+		x >>= 2;
+		i += 2;
+	}
+	if ((x & 0x2)) {
+		x >>= 1;
+		i += 1;
+	}
+
+	return i;
+}
+
+#endif
+
+#ifdef TOPO_NEED_FLSL
+
+/* We only have an int fls(int) implementation, build a long one.  */
+
+/* First make it 32 bits if it was only 16.  */
+static __inline__ int topo_fls32(unsigned long x)
+{
+#if TOPO_BITS_PER_INT == 16
+	int low_fls, hi_fls;
+
+	hi_fls = topo_fls(x >> 16);
+	if (hi_fls)
+		return hi_fls + 16;
+
+	low_fls = topo_fls(x & 0xfffful);
+	if (low_fls)
+		return low_fls;
+
+	return 0;
+#else
+	return topo_fls(x);
+#endif
+}
+
+/* Then make it 64 bit if longs are.  */
+static __inline__ int topo_flsl(unsigned long x)
+{
+#if TOPO_BITS_PER_LONG == 64
+	int low_fls, hi_fls;
+
+	hi_fls = topo_fls32(x >> 32);
+	if (hi_fls)
+		return hi_fls + 32;
+
+	low_fls = topo_fls32(x & 0xfffffffful);
+	if (low_fls)
+		return low_fls;
+
+	return 0;
+#else
+	return topo_fls32(x);
+#endif
+}
+#endif
 
 static __inline__ int topo_weight_long(unsigned long w)
 {
