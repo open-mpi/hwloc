@@ -1,0 +1,16 @@
+libtopology NEWS -- history of user-visible changes.
+
+
+Version
+
+* Group NUMA nodes into Misc objects according to their physical distance
+  that may be reported by the OS/BIOS.
+  May be ignored by setting TOPO_IGNORE_DISTANCES=1 in the environment.
+* Ignore offline CPUs on Solaris.
+* Add command line options to tune the lstopo graphic output.
+* Extend topobind to support multiple cpusets or objects on the command
+  line as topomask does.
+
+Version 0.9
+
+* First release.
