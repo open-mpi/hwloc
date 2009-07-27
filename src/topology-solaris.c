@@ -245,13 +245,27 @@ topo_look_kstat(struct topo_topology *topology)
 	    look_chips = 0;
 	    continue;
 	  }
-	if (stat->data_type != KSTAT_DATA_INT32)
-	  {
-	    fprintf(stderr, "chip_id is not an INT32\n");
+	switch (stat->data_type) {
+	  case KSTAT_DATA_INT32:
+	    physid = stat->value.i32;
+	    break;
+	  case KSTAT_DATA_UINT32:
+	    physid = stat->value.ui32;
+	    break;
+#ifdef _INT64_TYPE
+	  case KSTAT_DATA_UINT64:
+	    physid = stat->value.ui64;
+	    break;
+	  case KSTAT_DATA_INT64:
+	    physid = stat->value.i64;
+	    break;
+#endif
+	  default:
+	    fprintf(stderr, "chip_id type %d unknown\n", stat->data_type);
 	    look_chips = 0;
 	    continue;
-	  }
-	proc_osphysids[cpuid] = physid = stat->value.i32;
+	}
+	proc_osphysids[cpuid] = physid;
 	for (i = 0; i < numsockets; i++)
 	  if (physid == osphysids[i])
 	    break;
@@ -274,13 +288,27 @@ topo_look_kstat(struct topo_topology *topology)
 	    look_cores = 0;
 	    continue;
 	  }
-	if (stat->data_type != KSTAT_DATA_INT32)
-	  {
-	    fprintf(stderr, "core_id is not an INT32\n");
+	switch (stat->data_type) {
+	  case KSTAT_DATA_INT32:
+	    coreid = stat->value.i32;
+	    break;
+	  case KSTAT_DATA_UINT32:
+	    coreid = stat->value.ui32;
+	    break;
+#ifdef _INT64_TYPE
+	  case KSTAT_DATA_UINT64:
+	    coreid = stat->value.ui64;
+	    break;
+	  case KSTAT_DATA_INT64:
+	    coreid = stat->value.i64;
+	    break;
+#endif
+	  default:
+	    fprintf(stderr, "core_id type %d unknown\n", stat->data_type);
 	    look_cores = 0;
 	    continue;
-	  }
-	proc_oscoreids[cpuid] = coreid = stat->value.i32;
+	}
+	proc_oscoreids[cpuid] = coreid;
 	for (i = 0; i < numcores; i++)
 	  if (coreid == oscoreids[i] && proc_osphysids[cpuid] == core_osphysids[i])
 	    break;
