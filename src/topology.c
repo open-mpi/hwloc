@@ -313,6 +313,20 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
   if (getenv("TOPO_IGNORE_DISTANCES"))
     return;
 
+#ifdef TOPO_DEBUG
+  topo_debug("   ");
+  for(j=0; j<nbobjs; j++)
+    topo_debug(" %3d", j);
+  topo_debug("\n");
+
+  for(i=0; i<nbobjs; i++) {
+    topo_debug("%3d", i);
+    for(j=0; j<nbobjs; j++)
+      topo_debug(" %3d", distances[i][j]);
+    topo_debug("\n");
+  }
+#endif
+
   /* check that the matrix is ok */
   for(i=0; i<nbobjs; i++) {
     for(j=i+1; j<nbobjs; j++) {

@@ -583,18 +583,6 @@ look_sysfsnode(struct topo_topology *topology,
       topo_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
     }
 
-#ifdef TOPO_DEBUG
-  {
-    int i,j;
-    printf("node distance matrix:\n");
-    for(i=0; i<nbnodes; i++) {
-      for(j=0; j<nbnodes; j++)
-	printf("%d ", distances[i][j]);
-      printf("\n");
-    }
-  }
-#endif
-
   topo_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
 }
 
