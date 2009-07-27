@@ -185,7 +185,7 @@ topo_look_lgrp(struct topo_topology *topology)
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
 static void
-topo_look_kstat(struct topo_topology *topology)
+topo_look_kstat(struct topo_topology *topology, topo_cpuset_t *online_cpuset)
 {
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
@@ -215,6 +215,8 @@ topo_look_kstat(struct topo_topology *topology)
       topo_debug("kstat_open failed: %s\n", strerror(errno));
       return;
     }
+
+  topo_cpuset_zero(online_cpuset);
   for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next)
     {
       if (strncmp("cpu_info", ksp->ks_module, 8))
@@ -232,6 +234,26 @@ topo_look_kstat(struct topo_topology *topology)
 	  fprintf(stderr, "kstat_read failed for CPU%u: %s\n", cpuid, strerror(errno));
 	  goto out;
 	}
+
+      stat = (kstat_named_t *) kstat_data_lookup(ksp, "state");
+      if (!stat)
+	{
+	  topo_debug("could not read state for CPU%u: %s\n", cpuid, strerror(errno));
+	  continue;
+	}
+      if (stat->data_type != KSTAT_DATA_CHAR)
+	{
+	  topo_debug("unknown kstat type %d for cpu state\n", stat->data_type);
+	  continue;
+	}
+      else
+	{
+	  topo_debug("cpu%d's state is %s\n", cpuid, stat->value.c);
+	  if (strcmp(stat->value.c, "on-line"))
+	    /* Not online, ignore */
+	    continue;
+	}
+      topo_cpuset_set(online_cpuset, cpuid);
 
       if (look_chips) do {
 	/* Get Chip ID */
@@ -356,6 +378,7 @@ topo_look_kstat(struct topo_topology *topology)
 
 void topo_look_solaris(struct topo_topology *topology)
 {
+  topo_cpuset_t online_cpuset;
   topology->set_cpubind = topo_solaris_set_cpubind;
   topology->set_proc_cpubind = topo_solaris_set_proc_cpubind;
   topology->set_thisproc_cpubind = topo_solaris_set_thisproc_cpubind;
@@ -363,10 +386,11 @@ void topo_look_solaris(struct topo_topology *topology)
 #ifdef HAVE_LIBLGRP
   topo_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */
+  topo_cpuset_fill(&online_cpuset);
 #ifdef HAVE_LIBKSTAT
-  topo_look_kstat(topology);
+  topo_look_kstat(topology, &online_cpuset);
 #endif /* HAVE_LIBKSTAT */
-  topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
+  topo_setup_proc_level(topology, topo_fallback_nbprocessors (), &online_cpuset);
 }
 
 /* TODO:
