@@ -192,12 +192,10 @@ topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t
   kstat_named_t *stat;
   unsigned look_cores = 1, look_chips = 1;
 
-  unsigned proc_hasphysid[TOPO_NBMAXCPUS] = {};
   unsigned proc_physids[TOPO_NBMAXCPUS];
   unsigned proc_osphysids[TOPO_NBMAXCPUS];
   unsigned osphysids[TOPO_NBMAXCPUS];
 
-  unsigned proc_hascoreid[TOPO_NBMAXCPUS] = {};
   unsigned proc_coreids[TOPO_NBMAXCPUS];
   unsigned proc_oscoreids[TOPO_NBMAXCPUS];
   unsigned oscoreids[TOPO_NBMAXCPUS];
@@ -229,6 +227,11 @@ topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t
 	  continue;
 	}
 
+      proc_physids[cpuid] = -1;
+      proc_osphysids[cpuid] = -1;
+      proc_coreids[cpuid] = -1;
+      proc_oscoreids[cpuid] = -1;
+
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
 	  fprintf(stderr, "kstat_read failed for CPU%u: %s\n", cpuid, strerror(errno));
@@ -246,12 +249,14 @@ topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t
 	  topo_debug("unknown kstat type %d for cpu state\n", stat->data_type);
 	  continue;
 	}
-      else
-	{
-	  topo_debug("cpu%d's state is %s\n", cpuid, stat->value.c);
-	  if (!strcmp(stat->value.c, "on-line"))
-	    topo_cpuset_set(online_cpuset, cpuid);
-	}
+
+      procid_max++;
+      topo_debug("cpu%d's state is %s\n", cpuid, stat->value.c);
+      if (strcmp(stat->value.c, "on-line"))
+	/* not online, ignore for chip and core ids */
+	continue;
+
+      topo_cpuset_set(online_cpuset, cpuid);
 
       if (look_chips) do {
 	/* Get Chip ID */
@@ -293,7 +298,6 @@ topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t
 	topo_debug("%u on socket %u (%u)\n", cpuid, i, physid);
 	if (i == numsockets)
 	  osphysids[numsockets++] = physid;
-	proc_hasphysid[cpuid] = 1;
       } while(0);
 
       if (look_cores) do {
@@ -339,37 +343,20 @@ topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t
 	    core_osphysids[numcores] = proc_osphysids[cpuid];
 	    oscoreids[numcores++] = coreid;
 	  }
-	proc_hascoreid[cpuid] = 1;
       } while(0);
 
       /* Note: there is also clog_id for the Thread ID (not unique) and
        * pkg_core_id for the core ID (not unique).  They are not useful to us
        * however. */
-
-      procid_max++;
     }
 
   *nbprocs = topo_cpuset_weight(online_cpuset);
 
-  if (look_chips) {
-    for (i = 0; i < procid_max; i++)
-      if (!proc_hasphysid[i])
-	break;
-    if (i < procid_max)
-      fprintf(stderr,"Sparse instance space, not supported (yet)\n");
-    else
-      topo_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, TOPO_OBJ_SOCKET);
-  }
+  if (look_chips)
+    topo_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, TOPO_OBJ_SOCKET);
 
-  if (look_cores) {
-    for (i = 0; i < procid_max; i++)
-      if (!proc_hascoreid[i])
-	break;
-    if (i < procid_max)
-      fprintf(stderr,"Sparse instance space, not supported (yet)\n");
-    else
-      topo_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
-  }
+  if (look_cores)
+    topo_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
 
  out:
   kstat_close(kc);
