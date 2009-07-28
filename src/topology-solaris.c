@@ -205,7 +205,7 @@ topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t
   unsigned core_osphysids[TOPO_NBMAXCPUS];
 
   unsigned physid, coreid, cpuid;
-  unsigned numprocs = 0;
+  unsigned procid_max = 0;
   unsigned numsockets = 0;
   unsigned numcores = 0;
   unsigned i;
@@ -249,11 +249,9 @@ topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t
       else
 	{
 	  topo_debug("cpu%d's state is %s\n", cpuid, stat->value.c);
-	  if (strcmp(stat->value.c, "on-line"))
-	    /* Not online, ignore */
-	    continue;
+	  if (!strcmp(stat->value.c, "on-line"))
+	    topo_cpuset_set(online_cpuset, cpuid);
 	}
-      topo_cpuset_set(online_cpuset, cpuid);
 
       if (look_chips) do {
 	/* Get Chip ID */
@@ -348,29 +346,29 @@ topo_look_kstat(struct topo_topology *topology, unsigned *nbprocs, topo_cpuset_t
        * pkg_core_id for the core ID (not unique).  They are not useful to us
        * however. */
 
-      numprocs++;
+      procid_max++;
     }
 
-  *nbprocs = topo_cpuset_weight(&online_cpuset);
+  *nbprocs = topo_cpuset_weight(online_cpuset);
 
   if (look_chips) {
-    for (i = 0; i < numprocs; i++)
+    for (i = 0; i < procid_max; i++)
       if (!proc_hasphysid[i])
 	break;
-    if (i < numprocs)
+    if (i < procid_max)
       fprintf(stderr,"Sparse instance space, not supported (yet)\n");
     else
-      topo_setup_level(numprocs, numsockets, osphysids, proc_physids, topology, TOPO_OBJ_SOCKET);
+      topo_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, TOPO_OBJ_SOCKET);
   }
 
   if (look_cores) {
-    for (i = 0; i < numprocs; i++)
+    for (i = 0; i < procid_max; i++)
       if (!proc_hascoreid[i])
 	break;
-    if (i < numprocs)
+    if (i < procid_max)
       fprintf(stderr,"Sparse instance space, not supported (yet)\n");
     else
-      topo_setup_level(numprocs, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
+      topo_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, TOPO_OBJ_CORE);
   }
 
  out:
