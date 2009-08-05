@@ -9,6 +9,8 @@ API
   topo_get_common_ancestor_obj() and topo_obj_is_in_subtree() don't have one
   because it's useless for now, but maybe it'll be used for debugging one day?
 
+* internationalize the output of lstopo? object types and memory size units
+
 Doc
 ===
 * complete doc
