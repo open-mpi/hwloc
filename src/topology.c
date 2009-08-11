@@ -901,6 +901,11 @@ topo_discover(struct topo_topology *topology)
     topo_look_darwin(topology);
 #    endif /* DARWIN_SYS */
 
+#    ifdef  HPUX_SYS
+#      define HAVE_OS_SUPPORT
+    topo_look_hpux(topology);
+#    endif /* HPUX_SYS */
+
 #    ifndef HAVE_OS_SUPPORT
     topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
 #    endif /* Unsupported OS */

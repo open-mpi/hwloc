@@ -16,6 +16,7 @@ libtopology_ports_la_SOURCES += $(SRC)/topology-aix.c
 libtopology_ports_la_SOURCES += $(SRC)/topology-osf.c
 libtopology_ports_la_SOURCES += $(SRC)/topology-windows.c
 libtopology_ports_la_SOURCES += $(SRC)/topology-darwin.c
+libtopology_ports_la_SOURCES += $(SRC)/topology-hpux.c
 
 EXTRA_DIST = \
 		include/windows.h \
@@ -26,6 +27,7 @@ EXTRA_DIST = \
 		include/sys/procset.h \
 		include/sys/processor.h \
 		include/sys/thread.h \
+		include/sys/mpctl.h \
 		include/radset.h \
 		include/cpuset.h \
 		include/numa.h

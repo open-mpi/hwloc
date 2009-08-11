@@ -58,6 +58,13 @@ else !HAVE_OSF
 EXTRA_DIST += topology-osf.c
 endif !HAVE_OSF
 
+if HAVE_HPUX
+libtopology_la_SOURCES += topology-hpux.c
+libtopology_la_LDFLAGS += -lpthread
+else !HAVE_HPUX
+EXTRA_DIST += topology-hpux.c
+endif !HAVE_HPUX
+
 if HAVE_WINDOWS
 libtopology_la_SOURCES += topology-windows.c
 else !HAVE_WINDOWS

@@ -84,35 +84,6 @@ Ports
 XML:
    NUMA distances
 
-HP-UX:
-   mpctl(MPC_GETNUMSPUS_SYS/MPC_GETFIRSTSPU_SYS/MPC_GETNEXTSPU_SYS)
-   mpctl(MPC_GETNUMSPUS/MPC_GETFIRSTSPU/MPC_GETNEXTSPU)
-   pthread_processor_bind_np(PTHREAD_GETFIRSTSPU_NP/PTHREAD_GETNEXTSPU_NP)
-   sysconf(_SC_CCNUMA_SUPPORT)
-   mpctl(MPC_GETNUMLDOMS_SYS/MPC_GETFIRSTLDOM_SYS/MPC_GETNEXTLDOM_SYS/MPC_LDOMSSPUS_SYS/MPC_SPUTOLDOM)
-   + -_SYS
-
-   pthread_num_ldoms_np() / mpctl(MPC_GETNUMLDOMS)
-   pthread_ldom_id_np(PTHREAD_GETFIRSTLDOM_NP/PTHREAD_GETNEXTLDOM_NP)
-   mpctl(MPC_GETFIRSTLDOM/MPC_GETNEXTLDOM)
-   pthread_num_ldomprocs_np()
-   mpctl(MPC_LDOMSPUS)
-
-   mpctl(MPC_SETPROCESS_FORCE)
-   mpctl(MPC_SETLDOM)
-   pthread_processor_bind_np(PTHREAD_BIND_FORCED_NP)
-   pthread_ldom_bind_np()
-
-  since 11i 1.6:
-   _SC_PSET_SUPPORT
-   pset_create/destroy/assign/setattr
-   pset_ctl/getattr
-   pset_bind()
-   pthread_pset_bind_np()
-
-   mmap/shmget: +MAP/IPC_MEM_INTERLEAVED, MAP/IPC_MEM_LOCAL,
-   MAP_IPC/MEM_FIRST_TOUCH
-
 Irix:
    sysmp(MP_NPROCS/MP_NAPROCS/MP_STAT)
    NUMA: /hw : /hw/nodenum/0 -> /hw/module/1/slot/n1/node

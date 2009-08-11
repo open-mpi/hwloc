@@ -165,6 +165,10 @@ extern void topo_look_windows(struct topo_topology *topology);
 extern void topo_look_darwin(struct topo_topology *topology);
 #endif /* DARWIN_SYS */
 
+#ifdef HPUX_SYS
+extern void topo_look_hpux(struct topo_topology *topology);
+#endif /* HPUX_SYS */
+
 extern int topo_backend_synthetic_init(struct topo_topology *topology, const char *description);
 extern void topo_backend_synthetic_exit(struct topo_topology *topology);
 extern void topo_look_synthetic (struct topo_topology *topology);

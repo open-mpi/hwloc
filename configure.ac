@@ -105,6 +105,10 @@ case ${target} in
     AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
     osf=yes
     ;;
+  *-*-hpux*)
+    AC_DEFINE(HPUX_SYS, 1, Define to 1 on HP-UX)
+    hpux=yes
+    ;;
   *-*-mingw*|*-*-cygwin*)
     AC_DEFINE(WIN_SYS, 1, Define to 1 on WINDOWS)
     windows=yes
@@ -120,6 +124,7 @@ AM_CONDITIONAL([HAVE_DARWIN], [test "x$darwin" = "xyes"])
 AM_CONDITIONAL([HAVE_SOLARIS], [test "x$solaris" = "xyes"])
 AM_CONDITIONAL([HAVE_AIX], [test "x$aix" = "xyes"])
 AM_CONDITIONAL([HAVE_OSF], [test "x$osf" = "xyes"])
+AM_CONDITIONAL([HAVE_HPUX], [test "x$hpux" = "xyes"])
 AM_CONDITIONAL([HAVE_WINDOWS], [test "x$windows" = "xyes"])
 AM_CONDITIONAL([HAVE_MINGW32], [test "x$target_os" = "xmingw32"])
 

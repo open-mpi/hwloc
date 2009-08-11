@@ -59,6 +59,7 @@ libtopology supports the following operating systems:
   <li> AIX
   <li> Darwin
   <li> OSF/1 (aka. Tru64)
+  <li> HP-UX
   <li> Windows
   <li> For other OSes, only the number of processors is available for now.
 </ul>
