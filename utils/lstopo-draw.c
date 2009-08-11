@@ -84,15 +84,15 @@
 #define RATIO (4./3.)
 
 /* do we prefer ratio1 over ratio2? */
-#define prefer_ratio(ratio1, ratio2) ({ \
-  float _ratio1 = (ratio1) / RATIO; \
-  float _ratio2 = (ratio2) / RATIO; \
-  if (_ratio1 < 1) \
-    _ratio1 = 1/_ratio1; \
-  if (_ratio2 < 1) \
-    _ratio2 = 1/_ratio2; \
-  _ratio1 < _ratio2; \
-})
+static int prefer_ratio(float ratio1, float ratio2) {
+  float _ratio1 = (ratio1) / RATIO;
+  float _ratio2 = (ratio2) / RATIO;
+  if (_ratio1 < 1)
+    _ratio1 = 1/_ratio1;
+  if (_ratio2 < 1)
+    _ratio2 = 1/_ratio2;
+  return _ratio1 < _ratio2;
+}
 
 static void null(void) {}
 

@@ -64,11 +64,23 @@ typedef struct { unsigned long s[TOPO_CPUSUBSET_COUNT]; } topo_cpuset_t;
  */
 
 /** \brief Predefined cpuset with no CPU set */
+#ifdef __GNUC__
 #define TOPO_CPUSET_ZERO	(topo_cpuset_t){ .s[0 ... TOPO_CPUSUBSET_COUNT-1] = TOPO_CPUSUBSET_ZERO }
+#else
+#define TOPO_CPUSET_ZERO	TOPO__CPUSET_ZERO()
+#endif
 /** \brief Predefined cpuset with all CPUs set */
+#ifdef __GNUC__
 #define TOPO_CPUSET_FULL	(topo_cpuset_t){ .s[0 ... TOPO_CPUSUBSET_COUNT-1] = TOPO_CPUSUBSET_FULL }
+#else
+#define TOPO_CPUSET_FULL	TOPO__CPUSET_FULL()
+#endif
 /** \brief Predefined cpuset with CPU \c cpu set */
+#ifdef __GNUC__
 #define TOPO_CPUSET_CPU(cpu)	({ topo_cpuset_t __set = TOPO_CPUSET_ZERO; TOPO_CPUSUBSET_CPUSUBSET(__set,cpu) = TOPO_CPUSUBSET_VAL(cpu); __set; })
+#else
+#define TOPO_CPUSET_CPU(cpu)	TOPO__CPUSET_CPU(cpu)
+#endif
 
 
 /*
@@ -210,6 +222,14 @@ static __inline__ void topo_cpuset_zero(topo_cpuset_t * set)
 	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++)
 		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_ZERO;
 }
+#ifndef __GNUC__
+static __inline__ topo_cpuset_t TOPO__CPUSET_ZERO(void)
+{
+	topo_cpuset_t cpuset;
+	topo_cpuset_zero(&cpuset);
+	return cpuset;
+}
+#endif
 
 /** \brief Fill CPU set \p set */
 static __inline__ void topo_cpuset_fill(topo_cpuset_t * set)
@@ -218,6 +238,14 @@ static __inline__ void topo_cpuset_fill(topo_cpuset_t * set)
 	for(i=0; i<TOPO_CPUSUBSET_COUNT; i++)
 		TOPO_CPUSUBSET_SUBSET(*set,i) = TOPO_CPUSUBSET_FULL;
 }
+#ifndef __GNUC__
+static __inline__ topo_cpuset_t TOPO__CPUSET_FULL(void)
+{
+	topo_cpuset_t cpuset;
+	topo_cpuset_fill(&cpuset);
+	return cpuset;
+}
+#endif
 
 /** \brief Setup CPU set \p set from unsigned long \p mask */
 static __inline__ void topo_cpuset_from_ulong(topo_cpuset_t *set, unsigned long mask)
@@ -257,6 +285,14 @@ static __inline__ void topo_cpuset_cpu(topo_cpuset_t * set,
 	topo_cpuset_zero(set);
 	TOPO_CPUSUBSET_CPUSUBSET(*set,cpu) |= TOPO_CPUSUBSET_VAL(cpu);
 }
+#ifndef __GNUC__
+static __inline__ topo_cpuset_t TOPO__CPUSET_CPU(unsigned cpu)
+{
+	topo_cpuset_t cpuset;
+	topo_cpuset_cpu(&cpuset, cpu);
+	return cpuset;
+}
+#endif
 
 /** \brief Clear CPU set \p set and set all but the CPU \p cpu */
 static __inline__ void topo_cpuset_all_but_cpu(topo_cpuset_t * set,
