@@ -180,7 +180,7 @@ extern void topo_add_object(struct topo_topology *topology, topo_obj_t obj);
      })
 
 static inline struct topo_obj *
-topo_alloc_setup_object(topo_obj_type_t type, unsigned index)
+topo_alloc_setup_object(topo_obj_type_t type, signed index)
 {
   struct topo_obj *obj = malloc(sizeof(*obj));
   assert(obj);
