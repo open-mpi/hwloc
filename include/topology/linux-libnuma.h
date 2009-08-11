@@ -106,7 +106,7 @@ topo_cpuset_from_linux_libnuma_ulongs(topo_topology_t topology, topo_cpuset_t *c
 				      const unsigned long *mask, unsigned long maxnode)
 {
   topo_obj_t node;
-  unsigned depth;
+  int depth;
   int i;
 
   topo_cpuset_zero(cpuset);
@@ -181,7 +181,7 @@ topo_cpuset_from_linux_libnuma_bitmask(topo_topology_t topology, topo_cpuset_t *
 				       const struct bitmask *bitmask)
 {
   topo_obj_t node;
-  unsigned depth;
+  int depth;
   int i;
 
   topo_cpuset_zero(cpuset);
@@ -248,7 +248,7 @@ topo_cpuset_from_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t 
 					const nodemask_t *nodemask)
 {
   topo_obj_t node;
-  unsigned depth;
+  int depth;
   int i;
 
   topo_cpuset_zero(cpuset);

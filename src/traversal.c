@@ -38,7 +38,7 @@
 
 #include <assert.h>
 
-unsigned
+int
 topo_get_type_depth (struct topo_topology *topology, topo_obj_type_t type)
 {
   return topology->type_depth[type];

@@ -57,7 +57,7 @@
 static __inline__ unsigned
 topo_get_type_or_below_depth (topo_topology_t topology, topo_obj_type_t type)
 {
-  unsigned depth = topo_get_type_depth(topology, type);
+  int depth = topo_get_type_depth(topology, type);
   unsigned minorder = topo_get_type_order(type);
 
   if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
@@ -81,7 +81,7 @@ topo_get_type_or_below_depth (topo_topology_t topology, topo_obj_type_t type)
 static __inline__ unsigned
 topo_get_type_or_above_depth (topo_topology_t topology, topo_obj_type_t type)
 {
-  unsigned depth = topo_get_type_depth(topology, type);
+  int depth = topo_get_type_depth(topology, type);
   unsigned maxorder = topo_get_type_order(type);
 
   if (depth != TOPO_TYPE_DEPTH_UNKNOWN)
@@ -104,7 +104,7 @@ topo_get_type_or_above_depth (topo_topology_t topology, topo_obj_type_t type)
 static __inline__ int
 topo_get_type_nbobjs (topo_topology_t topology, topo_obj_type_t type)
 {
-	unsigned depth = topo_get_type_depth(topology, type);
+	int depth = topo_get_type_depth(topology, type);
 	if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
 		return 0;
 	if (depth == TOPO_TYPE_DEPTH_MULTIPLE)
@@ -136,7 +136,7 @@ topo_get_system_obj (topo_topology_t topology)
 static __inline__ topo_obj_t
 topo_get_obj (topo_topology_t topology, topo_obj_type_t type, unsigned index)
 {
-  unsigned depth = topo_get_type_depth(topology, type);
+  int depth = topo_get_type_depth(topology, type);
   if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
     return NULL;
   if (depth == TOPO_TYPE_DEPTH_MULTIPLE)
@@ -168,7 +168,7 @@ static __inline__ topo_obj_t
 topo_get_next_obj (topo_topology_t topology, topo_obj_type_t type,
 		   topo_obj_t prev)
 {
-  unsigned depth = topo_get_type_depth(topology, type);
+  int depth = topo_get_type_depth(topology, type);
   if (depth == TOPO_TYPE_DEPTH_UNKNOWN || depth == TOPO_TYPE_DEPTH_MULTIPLE)
     return NULL;
   return topo_get_next_obj_by_depth (topology, depth, prev);
@@ -244,7 +244,7 @@ static __inline__ topo_obj_t
 topo_get_next_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
 				topo_obj_type_t type, topo_obj_t prev)
 {
-  unsigned depth = topo_get_type_depth(topology, type);
+  int depth = topo_get_type_depth(topology, type);
   if (depth == TOPO_TYPE_DEPTH_UNKNOWN || depth == TOPO_TYPE_DEPTH_MULTIPLE)
     return NULL;
   return topo_get_next_obj_below_cpuset_by_depth(topology, set, depth, prev);
@@ -278,7 +278,7 @@ static __inline__ topo_obj_t
 topo_get_obj_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
 			   topo_obj_type_t type, unsigned index)
 {
-  unsigned depth = topo_get_type_depth(topology, type);
+  int depth = topo_get_type_depth(topology, type);
   if (depth == TOPO_TYPE_DEPTH_UNKNOWN || depth == TOPO_TYPE_DEPTH_MULTIPLE)
     return NULL;
   return topo_get_obj_below_cpuset_by_depth(topology, set, depth, index);
@@ -308,7 +308,7 @@ static __inline__ int
 topo_get_nbobjs_below_cpuset (topo_topology_t topology, const topo_cpuset_t *set,
 			      topo_obj_type_t type)
 {
-  unsigned depth = topo_get_type_depth(topology, type);
+  int depth = topo_get_type_depth(topology, type);
   if (depth == TOPO_TYPE_DEPTH_UNKNOWN)
     return 0;
   if (depth == TOPO_TYPE_DEPTH_MULTIPLE)
@@ -402,7 +402,7 @@ static __inline__ topo_obj_t
 topo_get_next_obj_above_cpuset(topo_topology_t topology, const topo_cpuset_t *set,
 			       topo_obj_type_t type, topo_obj_t prev)
 {
-  unsigned depth = topo_get_type_depth(topology, type);
+  int depth = topo_get_type_depth(topology, type);
   if (depth == TOPO_TYPE_DEPTH_UNKNOWN || depth == TOPO_TYPE_DEPTH_MULTIPLE)
     return NULL;
   return topo_get_next_obj_above_cpuset_by_depth(topology, set, depth, prev);

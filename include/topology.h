@@ -364,7 +364,7 @@ extern int topo_topology_get_info(topo_topology_t  __topo_restrict topology, str
  * If type is absent but a similar type is acceptable, see also
  * topo_get_type_or_below_depth() and topo_get_type_or_above_depth().
  */
-extern unsigned topo_get_type_depth (topo_topology_t topology, topo_obj_type_t type);
+extern int topo_get_type_depth (topo_topology_t topology, topo_obj_type_t type);
 #define TOPO_TYPE_DEPTH_UNKNOWN -1 /**< \brief No object of given type exists in the topology. */
 #define TOPO_TYPE_DEPTH_MULTIPLE -2 /**< \brief Objects of given type exist at different depth in the topology. */
 

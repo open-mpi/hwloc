@@ -49,7 +49,7 @@ main (int argc, char *argv[])
   topo_topology_t topology;
   topo_cpuset_t set;
   topo_obj_t obj;
-  unsigned depth;
+  int depth;
   int err;
 
   err = topo_topology_init (&topology);

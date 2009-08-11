@@ -205,7 +205,7 @@ int main(void)
 
         /* Walk the topology with an array style, from level 0 (always the
          * system level) to the lowest level (always the proc level). */
-        unsigned depth, i;
+        int depth, i;
         char string[128];
         for (depth = 0; depth < topoinfo.depth; depth++) {
                 for (i = 0; i < topo_get_depth_nbobjs(topology, depth); i++) {
