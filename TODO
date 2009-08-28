@@ -59,6 +59,8 @@ Support
 
 * why make dist needs make first?
 
+* Add measurement-based backend
+
 Binding
 =======
 * add topo_get_cpubind ? and the other cpubind variants ?
