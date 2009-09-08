@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -20,6 +21,7 @@ static void usage(FILE *where)
   fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
   fprintf(where, "   --strict\trequire strict binding\n");
   fprintf(where, "   -v\t\tverbose messages\n");
+  fprintf(where, "   --version\treport version and exit\n");
 }
 
 int main(int argc, char *argv[])
@@ -32,6 +34,7 @@ int main(int argc, char *argv[])
   int verbose = 0;
   int flags = 0;
   int ret;
+  char **orig_argv = argv;
 
   topo_cpuset_zero(&cpu_set);
 
@@ -66,6 +69,10 @@ int main(int argc, char *argv[])
       else if (!strcmp(argv[0], "--strict")) {
 	flags |= TOPO_CPUBIND_STRICT;
 	goto next;
+      }
+      else if (!strcmp (argv[0], "--version")) {
+          printf("%s %s\n", orig_argv[0], VERSION);
+          exit(EXIT_SUCCESS);
       }
 
       usage(stderr);

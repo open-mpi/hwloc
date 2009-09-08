@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -75,6 +76,7 @@ static void usage(FILE *where)
   fprintf (where, "   --fontsize 10         set size of text font\n");
   fprintf (where, "   --gridsize 10         set size of margin between elements\n");
   fprintf (where, "   --horiz               horizontal graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "   --version             report version and exit\n");
 }
 
 int
@@ -155,6 +157,9 @@ main (int argc, char *argv[])
 	}
 	fsysroot = argv[2]; opt = 1;
 #endif
+      } else if (!strcmp (argv[1], "--version")) {
+          printf("%s %s\n", argv[0], VERSION);
+          exit(EXIT_SUCCESS);
       } else {
 	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);

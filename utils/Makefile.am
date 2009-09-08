@@ -29,7 +29,7 @@ MAINTAINERCLEANFILES = $(dist_man1_MANS)
 if TOPO_HAVE_UTILS_MAN
 else
   ifneq ($(HELP2MAN),)
-TOPO_HELP2MAN=$(HELP2MAN) -m "Topology commands" -S "INRIA" -N --version-string @VERSION@
+TOPO_HELP2MAN=$(HELP2MAN) -m "Topology commands" -S "INRIA" -N 
 
 lstopo.1: lstopo
 	$(TOPO_HELP2MAN) -n "Show the topology of the system" ./$^ -o $@

@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -18,6 +19,7 @@ static void usage(FILE *where)
 #ifdef HAVE_XML
   fprintf(where, "   --xml <path>\t\tread topology from XML file <path>\n");
 #endif
+  fprintf(where, "   --version\t\treport version and exit\n");
 }
 
 int main(int argc, char *argv[])
@@ -26,6 +28,7 @@ int main(int argc, char *argv[])
   char * synthetic = NULL;
   char * xmlpath = NULL;
   int verbose = 0;
+  char **orig_argv = argv;
 
   /* skip argv[0], handle options */
   argv++;
@@ -56,6 +59,10 @@ int main(int argc, char *argv[])
 	argv++;
 	argc--;
 	goto next;
+      }
+      else if (!strcmp (argv[0], "--version")) {
+          printf("%s %s\n", orig_argv[0], VERSION);
+          exit(EXIT_SUCCESS);
       }
 #ifdef HAVE_XML
       if (!strcmp (argv[0], "--xml")) {
