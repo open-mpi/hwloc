@@ -3,7 +3,7 @@
  * See COPYING in top-level directory.
  */
 
-/*! \mainpage Libtopology
+/*! \mainpage Hardware Location
 
 <h1 class="sub">Portable abstraction of hierarchical architectures for high-performance computing</h1>
 
@@ -193,7 +193,7 @@ This section shows how to use libtopology with an small example \c hwloc-hello.c
 that just prints the topology and binds itself to the first processor of the
 second core of the machine.
 
-Libtopology provides a pkg-config object, so compiling the example boils down to
+Hardware Location provides a pkg-config object, so compiling the example boils down to
 
 \verbatim
 CFLAGS+=$(pkg-config --cflags hwloc)
