@@ -4,20 +4,20 @@ include $(top_srcdir)/hwloc.am
 
 SUBDIRS = linux ports
 
-check_PROGRAMS = topo_object_cpuset_snprintf+topo_cpuset_from_string \
-	topo_get_closest_objs \
-	topo_get_cpuset_covering_obj \
-	topo_get_cpuset_covering_cache \
-	topo_get_cpuset_objs \
-	topo_get_next_obj_above_cpuset \
-	topo_get_obj_below_cpuset \
-	topo_get_shared_cache_above \
-	topo_cpuset_first_last_weight \
-	topo_cpuset_singlify \
-	topo_type_depth \
-	topo_bind \
-	object_userdata \
-	synthetic-topology
+check_PROGRAMS = hwloc_cpuset_string \
+	hwloc_get_closest_objs \
+	hwloc_get_cpuset_covering_obj \
+	hwloc_get_cpuset_covering_cache \
+	hwloc_get_cpuset_objs \
+	hwloc_get_next_obj_above_cpuset \
+	hwloc_get_obj_below_cpuset \
+	hwloc_get_shared_cache_above \
+	hwloc_cpuset_first_last_weight \
+	hwloc_cpuset_singlify \
+	hwloc_type_depth \
+	hwloc_bind \
+	hwloc_object_userdata \
+	hwloc_synthetic
 
 EXTRA_DIST = 
 
@@ -44,5 +44,5 @@ LIBS = $(top_builddir)/src/libhwloc.la
 linux_libnuma_LDFLAGS = -lnuma
 if HAVE_WINDOWS
 else
-topo_bind_LDFLAGS = -lpthread
+hwloc_bind_LDFLAGS = -lpthread
 endif
