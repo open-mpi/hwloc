@@ -17,7 +17,7 @@ EXTRA_DIST = $(DX_CONFIG) \
 # Documentation is already available in release tarballs.
 #
 
-if TOPO_INSTALL_MAN
+if HWLOC_INSTALL_MAN
 dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/TOPO_CPUBIND_PROCESS.3 \
 	@DX_DOCDIR@/man/man3/TOPO_CPUBIND_STRICT.3 \
@@ -198,7 +198,7 @@ CLEANFILES += \
 	@DX_DOCDIR@/man/man3/userdata.3
 endif
 
-if TOPO_INSTALL_HTML
+if HWLOC_INSTALL_HTML
 EXTRA_DIST += \
 	@DX_DOCDIR@/html/annotated.html \
 	@DX_DOCDIR@/html/classes.html \
@@ -268,31 +268,31 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/uniontopo__obj__attr__u.html
 endif
 
-if TOPO_INSTALL_PDF
+if HWLOC_INSTALL_PDF
 EXTRA_DIST += \
 	@DX_DOCDIR@/hwloc.pdf
 endif
 
-if TOPO_WILLHAVE_TAG
+if HWLOC_WILLHAVE_TAG
 EXTRA_DIST += \
 	@DX_DOCDIR@/hwloc.tag
 endif
 
 install-data-local:
-if TOPO_INSTALL_PDF
+if HWLOC_INSTALL_PDF
 	$(mkinstalldirs) $(DESTDIR)$(pdfdir)
 	$(INSTALL_DATA) @DX_DOCDIR@/hwloc.pdf $(DESTDIR)$(pdfdir)
 endif
-if TOPO_INSTALL_HTML
+if HWLOC_INSTALL_HTML
 	$(mkinstalldirs) $(DESTDIR)$(htmldir)/hwloc
 	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(DESTDIR)$(htmldir)/hwloc
 endif
 
 uninstall-local:
-if TOPO_INSTALL_PDF
+if HWLOC_INSTALL_PDF
 	$(RM) $(DESTDIR)$(pdfdir)/hwloc.pdf
 endif
-if TOPO_INSTALL_HTML
+if HWLOC_INSTALL_HTML
 	$(RM) $(DESTDIR)$(htmldir)/hwloc/*
 endif
 
@@ -310,7 +310,7 @@ LIBS = $(top_builddir)/src/libhwloc.la
 # Rules to regenerate the documentation
 #
 
-if TOPO_HAVE_MAN
+if HWLOC_HAVE_MAN
 # Documentation already available, do not force documentation generation
 else
 if DX_COND_man
@@ -319,20 +319,20 @@ $(dist_man3_MANS): @DX_DOCDIR@/hwloc.tag
 endif
 endif
 
-if TOPO_HAVE_PDF
+if HWLOC_HAVE_PDF
 else
 if DX_COND_pdf
-if TOPO_INSTALL_PDF
+if HWLOC_INSTALL_PDF
 all-local: @DX_DOCDIR@/hwloc.pdf
 @DX_DOCDIR@/hwloc.pdf: @DX_DOCDIR@/hwloc.tag
 endif
 endif
 endif
 
-if TOPO_HAVE_HTML
+if HWLOC_HAVE_HTML
 else
 if DX_COND_html
-if TOPO_INSTALL_HTML
+if HWLOC_INSTALL_HTML
 all-local: @DX_DOCDIR@/html
 	cp $(srcdir)/doxygen.css @DX_DOCDIR@/html/
 @DX_DOCDIR@/html: @DX_DOCDIR@/hwloc.tag
@@ -352,7 +352,7 @@ DX_INPUTS = \
 	$(top_srcdir)/include/hwloc/glibc-sched.h
 
 if DX_COND_html
-if TOPO_INSTALL_HTML
+if HWLOC_INSTALL_HTML
 CLEANFILES += images/diagram.png
 DX_INPUTS += images/diagram.png
 EXTRA_DIST += images/diagram.png
@@ -362,7 +362,7 @@ images/diagram.png: $(srcdir)/images/diagram.fig
 endif
 endif
 if DX_COND_pdf
-if TOPO_INSTALL_PDF
+if HWLOC_INSTALL_PDF
 CLEANFILES += images/diagram.eps
 DX_INPUTS += images/diagram.eps
 EXTRA_DIST += images/diagram.eps

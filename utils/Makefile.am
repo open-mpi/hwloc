@@ -22,11 +22,11 @@ else
 TESTS = test-topodistrib.sh
 endif
 
-if TOPO_INSTALL_UTILS_MAN
+if HWLOC_INSTALL_UTILS_MAN
 dist_man1_MANS = lstopo.1 topobind.1 topodistrib.1 topomask.1
 MAINTAINERCLEANFILES = $(dist_man1_MANS)
 
-if TOPO_HAVE_UTILS_MAN
+if HWLOC_HAVE_UTILS_MAN
 else
   ifneq ($(HELP2MAN),)
 TOPO_HELP2MAN=$(HELP2MAN) -m "Topology commands" -S "INRIA" -N 

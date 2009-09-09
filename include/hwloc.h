@@ -450,22 +450,22 @@ extern int topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
  *
- * \note topo_pid_t is pid_t on unix platforms, and HANDLE on native Windows
+ * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
  *
  * \note TOPO_CPUBIND_THREAD can not be used in \p policy.
  */
-extern int topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int policy);
+extern int topo_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *set, int policy);
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
- * \note topo_thread_t is pthread_t on unix platforms, and HANDLE on native
+ * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
  * Windows platforms
  *
  * \note TOPO_CPUBIND_PROCESS can not be used in \p policy.
  */
-#ifdef topo_thread_t
-extern int topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int policy);
+#ifdef hwloc_thread_t
+extern int topo_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t tid, const topo_cpuset_t *set, int policy);
 #endif
 
 /** @} */

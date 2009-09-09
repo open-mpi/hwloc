@@ -44,7 +44,7 @@ topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
 }
 
 int
-topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int policy)
+topo_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *set, int policy)
 {
   int strict = !!(policy & TOPO_CPUBIND_STRICT);
   topo_cpuset_t *system_set = &topo_get_system_obj(topology)->cpuset;
@@ -65,7 +65,7 @@ topo_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuse
 }
 
 int
-topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int policy)
+topo_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t tid, const topo_cpuset_t *set, int policy)
 {
   int strict = !!(policy & TOPO_CPUBIND_STRICT);
   topo_cpuset_t *system_set = &topo_get_system_obj(topology)->cpuset;

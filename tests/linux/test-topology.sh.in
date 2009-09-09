@@ -33,7 +33,7 @@ test_topology ()
     local output="`mktemp`"
 
     export TOPO_FSYS_ROOT_PATH="$dir"
-    export TOPO_DEBUG_CHECK=1
+    export HWLOC_DEBUG_CHECK=1
 
     opts="-v -"
     [ -r "$options" ] && opts=`cat $options`

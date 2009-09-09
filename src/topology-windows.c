@@ -141,7 +141,7 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 #endif
 
 static int
-topo_win_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, const topo_cpuset_t *topo_set, int strict)
+topo_win_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t thread, const topo_cpuset_t *topo_set, int strict)
 {
   /* TODO: groups */
   DWORD mask = topo_cpuset_to_ulong(topo_set);
@@ -157,7 +157,7 @@ topo_win_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *t
 }
 
 static int
-topo_win_set_proc_cpubind(topo_topology_t topology, topo_pid_t proc, const topo_cpuset_t *topo_set, int strict)
+topo_win_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t proc, const topo_cpuset_t *topo_set, int strict)
 {
   /* TODO: groups */
   DWORD mask = topo_cpuset_to_ulong(topo_set);

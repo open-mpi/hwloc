@@ -22,7 +22,7 @@ typedef const char *LPCSTR;
 typedef int (*FARPROC)();
 typedef void *PVOID;
 
-// This is to cope with linux using integers for topo_pid_t and topo_thread_t
+// This is to cope with linux using integers for hwloc_pid_t and hwloc_thread_t
 //typedef PVOID HANDLE;
 typedef int HANDLE;
 

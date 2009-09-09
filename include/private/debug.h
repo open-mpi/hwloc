@@ -10,7 +10,7 @@
 
 #include <private/config.h>
 
-#ifdef TOPO_DEBUG
+#ifdef HWLOC_DEBUG
 #define topo_debug(s, ...) fprintf(stderr, s, ##__VA_ARGS__) 
 #else
 #define topo_debug(s, ...) do { }while(0)

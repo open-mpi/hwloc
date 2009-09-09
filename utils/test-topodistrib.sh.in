@@ -32,5 +32,5 @@ set -e
   echo
   ./topodistrib --synthetic "3 3 3" 4
 ) > "$file"
-diff @TOPO_DIFF_U@ $srcdir/test-topodistrib.output "$file"
+diff @HWLOC_DIFF_U@ $srcdir/test-topodistrib.output "$file"
 rm -rf "$tmp"

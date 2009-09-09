@@ -67,13 +67,13 @@
 #    define TOPO_NEED_FFSL
 #  endif
 
-#elif defined(TOPO_HAVE_FFSL)
+#elif defined(HWLOC_HAVE_FFSL)
 
 #  define topo_ffsl(x) ffsl(x)
 
-#elif defined(TOPO_HAVE_FFS)
+#elif defined(HWLOC_HAVE_FFS)
 
-#  ifndef TOPO_HAVE_DECL_FFS
+#  ifndef HWLOC_HAVE_DECL_FFS
 extern int ffs(int);
 #  endif
 
@@ -179,26 +179,26 @@ static __inline__ int topo_ffsl(unsigned long x)
 #    define TOPO_NEED_FLSL
 #  endif
 
-#elif defined(TOPO_HAVE_FLSL)
+#elif defined(HWLOC_HAVE_FLSL)
 
 #  define topo_flsl(x) flsl(x)
 
-#elif defined(TOPO_HAVE_CLZL)
+#elif defined(HWLOC_HAVE_CLZL)
 
 #  define topo_flsl(x) (x ? 8*sizeof(long) - clzl(x) : 0)
 
-#elif defined(TOPO_HAVE_FLS)
+#elif defined(HWLOC_HAVE_FLS)
 
-#  ifndef TOPO_HAVE_DECL_FLS
+#  ifndef HWLOC_HAVE_DECL_FLS
 extern int fsl(int);
 #  endif
 
 #  define topo_fls(x) fls(x)
 #  define TOPO_NEED_FLSL
 
-#elif defined(TOPO_HAVE_CLZ)
+#elif defined(HWLOC_HAVE_CLZ)
 
-#  ifndef TOPO_HAVE_DECL_CLZ
+#  ifndef HWLOC_HAVE_DECL_CLZ
 extern int clz(int);
 #  endif
 

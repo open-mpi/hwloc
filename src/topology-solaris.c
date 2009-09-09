@@ -43,7 +43,7 @@ topo_solaris_set_sth_cpubind(topo_topology_t topology, idtype_t idtype, id_t id,
 }
 
 static int
-topo_solaris_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *topo_set, int strict)
+topo_solaris_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *topo_set, int strict)
 {
   return topo_solaris_set_sth_cpubind(topology, P_PID, pid, topo_set, strict);
 }

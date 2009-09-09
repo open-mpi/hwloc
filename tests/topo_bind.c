@@ -31,7 +31,7 @@ static void test(topo_cpuset_t *cpuset, int flags)
   result("Bind thread", topo_set_thread_cpubind(topology, GetCurrentThread(), cpuset, flags | TOPO_CPUBIND_THREAD));
 #else /* !WIN_SYS */
   result("Bind process", topo_set_proc_cpubind(topology, getpid(), cpuset, flags | TOPO_CPUBIND_PROCESS));
-#ifdef topo_thread_t
+#ifdef hwloc_thread_t
   result("Bind thread", topo_set_thread_cpubind(topology, pthread_self(), cpuset, flags | TOPO_CPUBIND_THREAD));
 #endif
 #endif /* !WIN_SYS */

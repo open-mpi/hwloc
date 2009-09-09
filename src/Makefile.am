@@ -9,7 +9,7 @@ lib_LTLIBRARIES = libhwloc.la
 EXTRA_DIST = dolib.c
 
 libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c bind.c
-libhwloc_la_LDFLAGS = -version-number $(TOPO_SOVERSION) $(XML_LIBS)
+libhwloc_la_LDFLAGS = -version-number $(HWLOC_SOVERSION) $(XML_LIBS)
 
 if HAVE_GCC
 libhwloc_la_LDFLAGS += -no-undefined
@@ -20,7 +20,7 @@ libhwloc_la_LDFLAGS += -Xlinker --output-def -Xlinker .libs/libhwloc.def
 
 if HAVE_MS_LIB
 .libs/libhwloc.lib: libhwloc.la dolib
-	./dolib "$(TOPO_MS_LIB)" X86 .libs/libhwloc.def libhwloc-$(TOPO_SOVERSION) .libs/libhwloc.lib
+	./dolib "$(HWLOC_MS_LIB)" X86 .libs/libhwloc.def libhwloc-$(HWLOC_SOVERSION) .libs/libhwloc.lib
 all-local: .libs/libhwloc.lib
 endif
 

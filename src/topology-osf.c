@@ -68,7 +68,7 @@ out:
 }
 
 static int
-topo_osf_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, const topo_cpuset_t *topo_set, int strict)
+topo_osf_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t thread, const topo_cpuset_t *topo_set, int strict)
 {
   radset_t radset;
 
@@ -94,7 +94,7 @@ topo_osf_set_thread_cpubind(topo_topology_t topology, topo_thread_t thread, cons
 }
 
 static int
-topo_osf_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *topo_set, int strict)
+topo_osf_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *topo_set, int strict)
 {
   radset_t radset;
 

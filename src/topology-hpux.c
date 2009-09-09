@@ -63,7 +63,7 @@ topo_hpux_find_spu(topo_topology_t topology, const topo_cpuset_t *topo_set)
 }
 
 static int
-topo_hpux_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *topo_set, int strict)
+topo_hpux_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *topo_set, int strict)
 {
   ldom_t ldom;
   spu_t cpu;
@@ -100,7 +100,7 @@ topo_hpux_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, i
 }
 
 static int
-topo_hpux_set_thread_cpubind(topo_topology_t topology, topo_thread_t pthread, const topo_cpuset_t *topo_set, int strict)
+topo_hpux_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t pthread, const topo_cpuset_t *topo_set, int strict)
 {
   ldom_t ldom, ldom2;
   spu_t cpu, cpu2;

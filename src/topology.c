@@ -259,7 +259,7 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   for(i=0; i<nbgroups; i++)
     for(j=0; j<nbgroups; j++)
       groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
-#ifdef TOPO_DEBUG
+#ifdef HWLOC_DEBUG
   topo_debug("group distances:\n");
   for(i=0; i<nbgroups; i++) {
     for(j=0; j<nbgroups; j++)
@@ -285,7 +285,7 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
   if (getenv("TOPO_IGNORE_DISTANCES"))
     return;
 
-#ifdef TOPO_DEBUG
+#ifdef HWLOC_DEBUG
   topo_debug("node distance matrix:\n");
   topo_debug("   ");
   for(j=0; j<nbobjs; j++)
@@ -1247,8 +1247,8 @@ topo_topology_load (struct topo_topology *topology)
   if (fake_env)
     topology->is_fake = atoi(fake_env);
 
-#ifndef TOPO_DEBUG
-  if (getenv("TOPO_DEBUG_CHECK"))
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
 #endif
     topo_topology_check(topology);
 

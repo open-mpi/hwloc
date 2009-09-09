@@ -12,7 +12,7 @@
 
 AC_PREREQ([2.60])
 AC_INIT([hwloc], [0.9], [hwloc-devel@open-mpi.org])
-AC_SUBST([TOPO_SOVERSION],[0])
+AC_SUBST([HWLOC_SOVERSION],[0])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_SYSTEM
@@ -33,19 +33,19 @@ else
   DX_INIT_DOXYGEN(Hardware Locality, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
 fi
 AC_PATH_PROG([FIG2DEV], [fig2dev])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/man, [topo_have_man=yes], [:])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/hwloc.pdf, [topo_have_pdf=yes], [:])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/html, [topo_have_html=yes], [:])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/hwloc.tag, [topo_have_tag=yes], [:])
-AM_CONDITIONAL([TOPO_HAVE_MAN], [test "x$topo_have_man" = "xyes"])
-AM_CONDITIONAL([TOPO_HAVE_PDF], [test "x$topo_have_pdf" = "xyes"])
-AM_CONDITIONAL([TOPO_HAVE_HTML], [test "x$topo_have_html" = "xyes"])
-AM_CONDITIONAL([TOPO_HAVE_DOC], [test "x$topo_have_html" = "xyes"])
-AM_CONDITIONAL([TOPO_HAVE_TAG], [test "x$topo_have_tag" = "xyes"])
-AM_CONDITIONAL([TOPO_INSTALL_MAN], [test "x$topo_have_man" = "xyes" -o "x$DX_FLAG_man" = "x1" ])
-AM_CONDITIONAL([TOPO_INSTALL_PDF], [test "x$topo_have_pdf" = "xyes" -o \( "x$DX_FLAG_pdf" = "x1" -a "x$FIG2DEV" != "x" \) ])
-AM_CONDITIONAL([TOPO_INSTALL_HTML], [test "x$topo_have_html" = "xyes" -o \( "x$DX_FLAG_html" = "x1" -a "x$FIG2DEV" != "x" \) ])
-AM_CONDITIONAL([TOPO_WILLHAVE_TAG], [test "x$topo_have_tag" = "xyes" -o \( "x$DX_DOXYGEN" != "x" -a "x$FIG2DEV" != "x" \) ])
+AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/man, [hwloc_have_man=yes], [:])
+AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/hwloc.pdf, [hwloc_have_pdf=yes], [:])
+AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/html, [hwloc_have_html=yes], [:])
+AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/hwloc.tag, [hwloc_have_tag=yes], [:])
+AM_CONDITIONAL([HWLOC_HAVE_MAN], [test "x$hwloc_have_man" = "xyes"])
+AM_CONDITIONAL([HWLOC_HAVE_PDF], [test "x$hwloc_have_pdf" = "xyes"])
+AM_CONDITIONAL([HWLOC_HAVE_HTML], [test "x$hwloc_have_html" = "xyes"])
+AM_CONDITIONAL([HWLOC_HAVE_DOC], [test "x$hwloc_have_html" = "xyes"])
+AM_CONDITIONAL([HWLOC_HAVE_TAG], [test "x$hwloc_have_tag" = "xyes"])
+AM_CONDITIONAL([HWLOC_INSTALL_MAN], [test "x$hwloc_have_man" = "xyes" -o "x$DX_FLAG_man" = "x1" ])
+AM_CONDITIONAL([HWLOC_INSTALL_PDF], [test "x$hwloc_have_pdf" = "xyes" -o \( "x$DX_FLAG_pdf" = "x1" -a "x$FIG2DEV" != "x" \) ])
+AM_CONDITIONAL([HWLOC_INSTALL_HTML], [test "x$hwloc_have_html" = "xyes" -o \( "x$DX_FLAG_html" = "x1" -a "x$FIG2DEV" != "x" \) ])
+AM_CONDITIONAL([HWLOC_WILLHAVE_TAG], [test "x$hwloc_have_tag" = "xyes" -o \( "x$DX_DOXYGEN" != "x" -a "x$FIG2DEV" != "x" \) ])
 AM_INIT_AUTOMAKE([1.10 foreign -Wall -Werror])
 
 #
@@ -113,13 +113,13 @@ AC_PROG_CC_C99
 AC_PROG_MKDIR_P
 PKG_CHECK_EXISTS
 
-TOPO_GCC_FLAGS
-TOPO_CHECK_DIFF_U
+HWLOC_GCC_FLAGS
+HWLOC_CHECK_DIFF_U
 
 AC_CHECK_SIZEOF([unsigned long])
-AC_DEFINE_UNQUOTED([TOPO_SIZEOF_UNSIGNED_LONG], $ac_cv_sizeof_unsigned_long, [The size of `unsigned long', as computed by sizeof])
+AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_LONG], $ac_cv_sizeof_unsigned_long, [The size of `unsigned long', as computed by sizeof])
 AC_CHECK_SIZEOF([unsigned int])
-AC_DEFINE_UNQUOTED([TOPO_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The size of `unsigned int', as computed by sizeof])
+AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The size of `unsigned int', as computed by sizeof])
 
 #
 # Now detect support
@@ -157,7 +157,7 @@ AC_CHECK_TYPES([KAFFINITY,
 AC_HAVE_LIBRARY(gdi32)
 
 AC_CHECK_HEADER([windows.h], [
-  AC_DEFINE([TOPO_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
+  AC_DEFINE([HWLOC_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
 ])
 
 AC_CHECK_HEADERS([sys/lgrp_user.h], [
@@ -180,17 +180,17 @@ AC_HAVE_HEADERS([mach/mach_init.h], [
 
 case ${target} in
   *-*-mingw*|*-*-cygwin*)
-    topo_pid_t=HANDLE
-    topo_thread_t=HANDLE
+    hwloc_pid_t=HANDLE
+    hwloc_thread_t=HANDLE
     ;;
   *)
-    topo_pid_t=pid_t
-    AC_CHECK_TYPES([pthread_t], [topo_thread_t=pthread_t], [:], [[#include <pthread.h>]])
+    hwloc_pid_t=pid_t
+    AC_CHECK_TYPES([pthread_t], [hwloc_thread_t=pthread_t], [:], [[#include <pthread.h>]])
     ;;
 esac
-AC_DEFINE_UNQUOTED(topo_pid_t, $topo_pid_t, [Define this to the process ID type])
-if test "x$topo_thread_t" != "x" ; then
-  AC_DEFINE_UNQUOTED(topo_thread_t, $topo_thread_t, [Define this to the thread ID type])
+AC_DEFINE_UNQUOTED(hwloc_pid_t, $hwloc_pid_t, [Define this to the process ID type])
+if test "x$hwloc_thread_t" != "x" ; then
+  AC_DEFINE_UNQUOTED(hwloc_thread_t, $hwloc_thread_t, [Define this to the thread ID type])
 fi
 
 AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[
@@ -234,7 +234,7 @@ if test "x$enable_xml" = "xyes"; then
 fi
 
 if test "x$enable_xml" = "xyes"; then
-  LIBTOPOLOGY_REQUIRES="libxml-2.0 $LIBTOPOLOGY_REQUIRES"
+  HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
   AC_DEFINE([HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
   AC_SUBST([HAVE_XML], [1])
 else
@@ -251,9 +251,9 @@ LT_INIT
 LT_LANG([C])
 AC_LIBTOOL_WIN32_DLL
 AM_CONDITIONAL([HAVE_GCC], [test "x$GCC" = "xyes"])
-AC_PATH_PROGS([TOPO_MS_LIB], [lib])
-AC_ARG_VAR([TOPO_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
-AM_CONDITIONAL([HAVE_MS_LIB], [test "x$TOPO_MS_LIB" != "x"])
+AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
+AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
+AM_CONDITIONAL([HAVE_MS_LIB], [test "x$HWLOC_MS_LIB" != "x"])
 
 AC_ARG_ENABLE([debug],
   AS_HELP_STRING([--enable-debug], [enable debugging messages]),
@@ -262,7 +262,7 @@ AC_ARG_ENABLE([debug],
 
 AC_MSG_CHECKING([whether debug is enabled])
 if test x$enable_debug = xyes; then
-  AC_DEFINE_UNQUOTED([TOPO_DEBUG], [1], [Define to 1 to enable debug])
+  AC_DEFINE_UNQUOTED([HWLOC_DEBUG], [1], [Define to 1 to enable debug])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
@@ -272,38 +272,38 @@ AC_PATH_PROG([BASH], [bash])
 AC_PATH_PROG([W3M], [w3m])
 
 AC_PATH_PROG([HELP2MAN], [help2man])
-AC_CHECK_FILE(${srcdir}/utils/lstopo.1, [topo_have_utils_man=yes], [:])
-AM_CONDITIONAL([TOPO_HAVE_UTILS_MAN], [test "x$topo_have_utils_man" = "xyes"])
-AM_CONDITIONAL([TOPO_INSTALL_UTILS_MAN], [test "x$topo_have_utils_man" = "xyes" -o "x$HELP2MAN" != "x"])
+AC_CHECK_FILE(${srcdir}/utils/lstopo.1, [hwloc_have_utils_man=yes], [:])
+AM_CONDITIONAL([HWLOC_HAVE_UTILS_MAN], [test "x$hwloc_have_utils_man" = "xyes"])
+AM_CONDITIONAL([HWLOC_INSTALL_UTILS_MAN], [test "x$hwloc_have_utils_man" = "xyes" -o "x$HELP2MAN" != "x"])
 
 AC_CHECK_FUNCS([ffs], [
   AC_CHECK_DECL([ffs],[
-    AC_DEFINE([TOPO_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
+    AC_DEFINE([HWLOC_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
   ])
-  AC_DEFINE([TOPO_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
+  AC_DEFINE([HWLOC_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
 ])
 AC_CHECK_FUNCS([ffsl], [
-  AC_DEFINE([TOPO_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
+  AC_DEFINE([HWLOC_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
 
 AC_CHECK_FUNCS([fls], [
   AC_CHECK_DECL([fls],[
-    AC_DEFINE([TOPO_HAVE_DECL_FLS], [1], [Define to 1 if function `fls' is declared by system headers])
+    AC_DEFINE([HWLOC_HAVE_DECL_FLS], [1], [Define to 1 if function `fls' is declared by system headers])
   ])
-  AC_DEFINE([TOPO_HAVE_FLS], [1], [Define to 1 if you have the `fls' function.])
+  AC_DEFINE([HWLOC_HAVE_FLS], [1], [Define to 1 if you have the `fls' function.])
 ])
 AC_CHECK_FUNCS([flsl], [
-  AC_DEFINE([TOPO_HAVE_FLSL], [1], [Define to 1 if you have the `flsl' function.])
+  AC_DEFINE([HWLOC_HAVE_FLSL], [1], [Define to 1 if you have the `flsl' function.])
 ])
 
 AC_CHECK_FUNCS([clz], [
   AC_CHECK_DECL([clz],[
-    AC_DEFINE([TOPO_HAVE_DECL_CLZ], [1], [Define to 1 if function `clz' is declared by system headers])
+    AC_DEFINE([HWLOC_HAVE_DECL_CLZ], [1], [Define to 1 if function `clz' is declared by system headers])
   ])
-  AC_DEFINE([TOPO_HAVE_CLZ], [1], [Define to 1 if you have the `clz' function.])
+  AC_DEFINE([HWLOC_HAVE_CLZ], [1], [Define to 1 if you have the `clz' function.])
 ])
 AC_CHECK_FUNCS([clzl], [
-  AC_DEFINE([TOPO_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
+  AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
 ])
 
 AC_CHECK_FUNCS([openat], [have_openat=yes])
@@ -319,7 +319,7 @@ AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
 AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
 AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xyes"])
 
-AC_SUBST(LIBTOPOLOGY_REQUIRES)
+AC_SUBST(HWLOC_REQUIRES)
 
 AC_CONFIG_HEADER([include/private/config.h])
 

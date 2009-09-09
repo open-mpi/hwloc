@@ -47,9 +47,9 @@ struct topo_topology {
   int (*set_cpubind)(topo_topology_t topology, const topo_cpuset_t *set, int strict);
   int (*set_thisproc_cpubind)(topo_topology_t topology, const topo_cpuset_t *set, int strict);
   int (*set_thisthread_cpubind)(topo_topology_t topology, const topo_cpuset_t *set, int strict);
-  int (*set_proc_cpubind)(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *set, int strict);
-#ifdef topo_thread_t
-  int (*set_thread_cpubind)(topo_topology_t topology, topo_thread_t tid, const topo_cpuset_t *set, int strict);
+  int (*set_proc_cpubind)(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *set, int strict);
+#ifdef hwloc_thread_t
+  int (*set_thread_cpubind)(topo_topology_t topology, hwloc_thread_t tid, const topo_cpuset_t *set, int strict);
 #endif
 
   topo_backend_t backend_type;

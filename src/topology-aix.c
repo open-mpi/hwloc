@@ -86,14 +86,14 @@ topo_aix_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *t
 }
 
 static int
-topo_aix_set_proc_cpubind(topo_topology_t topology, topo_pid_t pid, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *topo_set, int strict)
 {
   rsid_t who = { .at_pid = pid };
   return topo_aix_set_sth_cpubind(topology, R_PROCESS, who, topo_set, strict);
 }
 
 static int
-topo_aix_set_thread_cpubind(topo_topology_t topology, topo_thread_t pthread, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t pthread, const topo_cpuset_t *topo_set, int strict)
 {
   struct __pthrdsinfo info;
   int size;
