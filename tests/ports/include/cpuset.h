@@ -5,7 +5,6 @@
 
 #ifndef HWLOC_PORT_CPUSET_H
 #define HWLOC_PORT_CPUSET_H
-#warning ok
 
 typedef int cpu_cursor_t;
 #define SET_CURSOR_INIT -1
