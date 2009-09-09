@@ -28,9 +28,9 @@ DX_PS_FEATURE(OFF)
 if echo "${srcdir}" | grep '^/' > /dev/null
 then
   # absolute path, no need for ../
-  DX_INIT_DOXYGEN(Hardware Locality, doxygen.cfg, ${srcdir}/doc/doxygen-doc)
+  DX_INIT_DOXYGEN(hwloc, doxygen.cfg, ${srcdir}/doc/doxygen-doc)
 else
-  DX_INIT_DOXYGEN(Hardware Locality, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
+  DX_INIT_DOXYGEN(hwloc, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
 fi
 AC_PATH_PROG([FIG2DEV], [fig2dev])
 AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/man, [hwloc_have_man=yes], [:])
