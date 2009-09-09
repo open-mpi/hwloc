@@ -6,12 +6,12 @@
 /** \file
  * \brief The libtopology API.
  *
- * See topology/cpuset.h for CPU set specific macros
- * See topology/helper.h for high-level topology traversal helpers
+ * See hwloc/cpuset.h for CPU set specific macros
+ * See hwloc/helper.h for high-level topology traversal helpers
  */
 
-#ifndef TOPOLOGY_H
-#define TOPOLOGY_H
+#ifndef HWLOC_H
+#define HWLOC_H
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -21,7 +21,7 @@
  * Cpuset bitmask definitions
  */
 
-#include <topology/cpuset.h>
+#include <hwloc/cpuset.h>
 
 
 
@@ -472,7 +472,7 @@ extern int topo_set_thread_cpubind(topo_topology_t topology, topo_thread_t tid, 
 
 
 /* high-level helpers */
-#include <topology/helper.h>
+#include <hwloc/helper.h>
 
 
-#endif /* TOPOLOGY_H */
+#endif /* HWLOC_H */

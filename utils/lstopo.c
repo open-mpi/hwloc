@@ -5,7 +5,7 @@
  */
 
 #include <private/config.h>
-#include <topology.h>
+#include <hwloc.h>
 
 #include <stdlib.h>
 #include <stdio.h>

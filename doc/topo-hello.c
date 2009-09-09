@@ -1,5 +1,5 @@
 /* topo-hello.c */
-#include <topology.h>
+#include <hwloc.h>
 
 static void print_children(topo_topology_t topology, topo_obj_t obj, int depth)
 {

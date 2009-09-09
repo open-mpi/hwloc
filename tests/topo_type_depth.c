@@ -3,7 +3,7 @@
  * See COPYING in top-level directory.
  */
 
-#include <topology.h>
+#include <hwloc.h>
 
 #include <stdio.h>
 #include <assert.h>

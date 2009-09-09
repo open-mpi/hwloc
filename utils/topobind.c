@@ -5,7 +5,7 @@
  */
 
 #include <topomask.h>
-#include <topology.h>
+#include <hwloc.h>
 #include <private/private.h>
 
 #include <unistd.h>

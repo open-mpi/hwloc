@@ -5,8 +5,8 @@
 
 /* The configuration file */
 
-#ifndef TOPOLOGY_DEBUG_H
-#define TOPOLOGY_DEBUG_H
+#ifndef HWLOC_DEBUG_H
+#define HWLOC_DEBUG_H
 
 #include <private/config.h>
 
@@ -16,4 +16,4 @@
 #define topo_debug(s, ...) do { }while(0)
 #endif
 
-#endif /* TOPOLOGY_DEBUG_H */
+#endif /* HWLOC_DEBUG_H */

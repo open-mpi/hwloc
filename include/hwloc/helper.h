@@ -7,11 +7,11 @@
  * \brief High-level libtopology traversal helpers.
  */
 
-#ifndef TOPOLOGY_HELPER_H
-#define TOPOLOGY_HELPER_H
+#ifndef HWLOC_HELPER_H
+#define HWLOC_HELPER_H
 
-#ifndef TOPOLOGY_H
-#error Please include the main topology.h instead
+#ifndef HWLOC_H
+#error Please include the main hwloc.h instead
 #endif
 
 
@@ -498,4 +498,4 @@ topo_distribute(topo_topology_t topology, topo_obj_t root, topo_cpuset_t *cpuset
 }
 
 
-#endif /* TOPOLOGY_HELPER_H */
+#endif /* HWLOC_HELPER_H */

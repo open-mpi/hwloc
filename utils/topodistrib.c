@@ -4,7 +4,7 @@
  * See COPYING in top-level directory.
  */
 
-#include <topology.h>
+#include <hwloc.h>
 #include <private/private.h>
 
 #include <unistd.h>

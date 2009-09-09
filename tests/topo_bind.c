@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <topology.h>
+#include <hwloc.h>
 #include <private/config.h>
 
 /* check the binding functions */

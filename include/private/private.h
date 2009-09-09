@@ -5,12 +5,12 @@
 
 /* Internal types and helpers. */
 
-#ifndef TOPOLOGY_PRIVATE_H
-#define TOPOLOGY_PRIVATE_H
+#ifndef HWLOC_PRIVATE_H
+#define HWLOC_PRIVATE_H
 
 #include <private/config.h>
-#include <topology.h>
-#include <topology/cpuset.h>
+#include <hwloc.h>
+#include <hwloc/cpuset.h>
 #include <private/debug.h>
 
 #include <assert.h>
@@ -200,4 +200,4 @@ topo_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *pr
   topo_debug("\n");
 }
 
-#endif /* TOPOLOGY_PRIVATE_H */
+#endif /* HWLOC_PRIVATE_H */

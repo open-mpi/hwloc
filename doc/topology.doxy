@@ -208,10 +208,10 @@ in the source tarball in doc/doxygen-doc/ (after doxygen compilation
 for svn checkouts) and are installed in $prefix/share/doc/topology/ and
 the usual manual repository.
 
-The basic interface is available in topology.h, a lot of traversal examples are
-available as inlines in topology/helper.h . On Linux, additional helpers are
-available in topology/linux-libnuma.h and on glibc-based systems, additional
-helpers are available in topology/glibc-sched.h
+The basic interface is available in hwloc.h, a lot of traversal examples are
+available as inlines in hwloc/helper.h . On Linux, additional helpers are
+available in hwloc/linux-libnuma.h and on glibc-based systems, additional
+helpers are available in hwloc/glibc-sched.h
 
 To precisely define the vocabulary used by libtopology, a \ref glossary is available and should probably be read first.
 

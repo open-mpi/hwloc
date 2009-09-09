@@ -193,7 +193,7 @@ CLEANFILES += \
 	@DX_DOCDIR@/man/man3/sibling_rank.3 \
 	@DX_DOCDIR@/man/man3/system.3 \
 	@DX_DOCDIR@/man/man3/topology.doxy.3 \
-	@DX_DOCDIR@/man/man3/topology.h.3 \
+	@DX_DOCDIR@/man/man3/hwloc.h.3 \
 	@DX_DOCDIR@/man/man3/type.3 \
 	@DX_DOCDIR@/man/man3/userdata.3
 endif
@@ -263,8 +263,8 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/tab_r.gif \
 	@DX_DOCDIR@/html/tabs.css \
 	@DX_DOCDIR@/html/topology_8doxy.html \
-	@DX_DOCDIR@/html/topology_8h.html \
-	@DX_DOCDIR@/html/topology_8h_source.html \
+	@DX_DOCDIR@/html/hwloc_8h.html \
+	@DX_DOCDIR@/html/hwloc_8h_source.html \
 	@DX_DOCDIR@/html/uniontopo__obj__attr__u.html
 endif
 
@@ -345,11 +345,11 @@ endif
 #
 DX_INPUTS = \
 	$(srcdir)/topology.doxy \
-	$(top_srcdir)/include/topology.h \
-	$(top_srcdir)/include/topology/helper.h \
-	$(top_srcdir)/include/topology/cpuset.h \
-	$(top_srcdir)/include/topology/linux-libnuma.h \
-	$(top_srcdir)/include/topology/glibc-sched.h
+	$(top_srcdir)/include/hwloc.h \
+	$(top_srcdir)/include/hwloc/helper.h \
+	$(top_srcdir)/include/hwloc/cpuset.h \
+	$(top_srcdir)/include/hwloc/linux-libnuma.h \
+	$(top_srcdir)/include/hwloc/glibc-sched.h
 
 if DX_COND_html
 if TOPO_INSTALL_HTML
@@ -409,7 +409,7 @@ CLEANFILES += \
 	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__misc__attr__u.tex \
 	@DX_DOCDIR@/latex/structtopo__topology__info.tex \
 	@DX_DOCDIR@/latex/topology_8doxy.tex \
-	@DX_DOCDIR@/latex/topology_8h.tex \
+	@DX_DOCDIR@/latex/hwloc_8h.tex \
 	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex
 
 doc: all $(top_srcdir)/README

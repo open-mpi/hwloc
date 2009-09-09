@@ -4,9 +4,9 @@
  */
 
 #include <private/config.h>
-#include <topology.h>
+#include <hwloc.h>
 #include <private/private.h>
-#include <topology/helper.h>
+#include <hwloc/helper.h>
 
 #include <errno.h>
 

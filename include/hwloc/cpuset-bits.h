@@ -5,10 +5,10 @@
 
 /* Internals for cpuset API.  */
 
-#ifndef TOPOLOGY_CPUSET_BITS_H
-#define TOPOLOGY_CPUSET_BITS_H
+#ifndef HWLOC_CPUSET_BITS_H
+#define HWLOC_CPUSET_BITS_H
 
-#include <topology/config.h>
+#include <hwloc/config.h>
 
 #include <sys/types.h>
 #include <inttypes.h>
@@ -320,4 +320,4 @@ static __inline__ int topo_weight_long(unsigned long w)
 }
 
 
-#endif /* TOPOLOGY_CPUSET_BITS_H */
+#endif /* HWLOC_CPUSET_BITS_H */

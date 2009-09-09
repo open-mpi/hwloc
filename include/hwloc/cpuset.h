@@ -7,11 +7,11 @@
  * \brief The Cpuset API, for use in libtopology itself.
  */
 
-#ifndef TOPOLOGY_CPUSET_H
-#define TOPOLOGY_CPUSET_H
+#ifndef HWLOC_CPUSET_H
+#define HWLOC_CPUSET_H
 
-#include <topology/config.h>
-#include <topology/cpuset-bits.h>
+#include <hwloc/config.h>
+#include <hwloc/cpuset-bits.h>
 
 
 /** \defgroup topology_cpuset The Cpuset API
@@ -511,4 +511,4 @@ static __inline__ int topo_cpuset_weight(const topo_cpuset_t * set)
 
 /** @} */
 
-#endif /* TOPOLOGY_CPUSET_H */
+#endif /* HWLOC_CPUSET_H */

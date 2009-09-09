@@ -2,20 +2,20 @@
 
 include $(top_srcdir)/libtopology.am
 
-include_HEADERS = topology.h
-include_topologydir = $(includedir)/topology
-include_topology_HEADERS = topology/config.h topology/cpuset.h topology/cpuset-bits.h topology/helper.h
+include_HEADERS = hwloc.h
+include_hwlocdir = $(includedir)/hwloc
+include_hwloc_HEADERS = hwloc/config.h hwloc/cpuset.h hwloc/cpuset-bits.h hwloc/helper.h
 
 noinst_HEADERS = private/private.h private/debug.h
 
 if HAVE_LINUX
-include_topology_HEADERS += topology/linux-libnuma.h
+include_hwloc_HEADERS += hwloc/linux-libnuma.h
 else !HAVE_LINUX
-noinst_HEADERS += topology/linux-libnuma.h
+noinst_HEADERS += hwloc/linux-libnuma.h
 endif !HAVE_LINUX
 
 if HAVE_SCHED_SETAFFINITY
-include_topology_HEADERS += topology/glibc-sched.h
+include_hwloc_HEADERS += hwloc/glibc-sched.h
 else !HAVE_SCHED_SETAFFINITY
-noinst_HEADERS += topology/glibc-sched.h
+noinst_HEADERS += hwloc/glibc-sched.h
 endif !HAVE_SCHED_SETAFFINITY

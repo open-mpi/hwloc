@@ -6,7 +6,7 @@
 #ifndef UTILS_LSTOPO_H
 #define UTILS_LSTOPO_H
 
-#include <topology.h>
+#include <hwloc.h>
 
 typedef void output_method (struct topo_topology *topology, const char *output, int verbose_mode);
 

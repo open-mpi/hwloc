@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-#include <topology.h>
+#include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
 

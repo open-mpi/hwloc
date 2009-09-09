@@ -10,10 +10,10 @@
  * include this file so as to ease conversion between their respective types.
  */
 
-#ifndef TOPOLOGY_LINUX_LIBNUMA_H
-#define TOPOLOGY_LINUX_LIBNUMA_H
+#ifndef HWLOC_LINUX_LIBNUMA_H
+#define HWLOC_LINUX_LIBNUMA_H
 
-#include <topology.h>
+#include <hwloc.h>
 #include <numa.h>
 #include <assert.h>
 
@@ -247,4 +247,4 @@ topo_cpuset_from_linux_libnuma_nodemask(topo_topology_t topology, topo_cpuset_t 
 #endif /* NUMA_VERSION1_COMPATIBILITY */
 
 
-#endif /* TOPOLOGY_LINUX_NUMA_H */
+#endif /* HWLOC_LINUX_NUMA_H */

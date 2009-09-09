@@ -7,7 +7,7 @@
 
 #ifdef HAVE_XML
 
-#include <topology.h>
+#include <hwloc.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>

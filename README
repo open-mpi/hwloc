@@ -42,10 +42,9 @@ ease command-line manipulation of topology objects, binding of processes, ...
 
 Installation
 
-libtopology (http://libtopology.gforge.inria.fr/) is available under the
-BSD license.
-It is hosted by the INRIA Gforge (http://gforge.inria.fr/projects/libtopology/).
-The current SVN snapshot can be fetched with:
+libtopology (http://libtopology.gforge.inria.fr/) is available under the BSD
+license. It is hosted by the INRIA Gforge (http://gforge.inria.fr/projects/
+libtopology/). The current SVN snapshot can be fetched with:
 
   * svn checkout svn://scm.gforge.inria.fr/svn/libtopology/trunk libtopology
   * cd libtopology
@@ -166,7 +165,7 @@ LDLIBS+=$(pkg-config --libs topology)
 cc topo-hello.c $(CFLAGS) -o topo-hello $(LDLIBS)
 
 /* topo-hello.c */
-#include <topology.h>
+#include <hwloc.h>
 
 static void print_children(topo_topology_t topology, topo_obj_t obj, int depth)
 {
@@ -229,7 +228,7 @@ int main(void)
 
 
         /* Find out where cores are, or else smaller sets of CPUs if the OS
-         * doesn't have the notion of core. */
+         * doesn&apos;t have the notion of core. */
         depth = topo_get_type_or_below_depth(topology, TOPO_OBJ_CORE);
 
         /* Get last one.  */
@@ -247,7 +246,7 @@ int main(void)
         if (topo_set_cpubind(topology, &cpuset, 0)) {
                 char s[TOPO_CPUSET_STRING_LENGTH + 1];
                 topo_cpuset_snprintf(s, sizeof(s), &obj->cpuset);
-                printf("Couldn't bind to cpuset %s\n", s);
+                printf("Couldn&apos;t bind to cpuset %s\n", s);
         }
 
 
@@ -262,10 +261,10 @@ source tarball in doc/doxygen-doc/ (after doxygen compilation for svn
 checkouts) and are installed in $prefix/share/doc/topology/ and the usual
 manual repository.
 
-The basic interface is available in topology.h, a lot of traversal examples are
-available as inlines in topology/helper.h . On Linux, additional helpers are
-available in topology/linux-libnuma.h and on glibc-based systems, additional
-helpers are available in topology/glibc-sched.h
+The basic interface is available in hwloc.h, a lot of traversal examples are
+available as inlines in hwloc/helper.h . On Linux, additional helpers are
+available in hwloc/linux-libnuma.h and on glibc-based systems, additional
+helpers are available in hwloc/glibc-sched.h
 
 To precisely define the vocabulary used by libtopology, a Glossary is available
 and should probably be read first.
@@ -285,4 +284,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Wed Jul 15 20:10:13 2009 for libtopology by  doxygen 1.5.9
+Generated on Wed Sep 9 17:10:04 2009 for libtopology by  doxygen 1.6.1

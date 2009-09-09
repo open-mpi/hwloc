@@ -3,9 +3,9 @@
  * See COPYING in top-level directory.
  */
 
-#include <topology.h>
+#include <hwloc.h>
 #define NUMA_VERSION1_COMPATIBILITY
-#include <topology/linux-libnuma.h>
+#include <hwloc/linux-libnuma.h>
 
 /* check the linux libnuma helpers */
 

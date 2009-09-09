@@ -11,11 +11,11 @@
  * between their respective types.
  */
 
-#ifndef TOPOLOGY_GLIBC_SCHED_H
-#define TOPOLOGY_GLIBC_SCHED_H
+#ifndef HWLOC_GLIBC_SCHED_H
+#define HWLOC_GLIBC_SCHED_H
 
-#include <topology.h>
-#include <topology/helper.h>
+#include <hwloc.h>
+#include <hwloc/helper.h>
 
 #if !defined _GNU_SOURCE || !defined _SCHED_H
 #error sched.h must be included with _GNU_SOURCE defined
@@ -98,4 +98,4 @@ topo_cpuset_from_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *t
 
 #endif /* CPU_SET */
 
-#endif /* TOPOLOGY_GLIBC_SCHED_H */
+#endif /* HWLOC_GLIBC_SCHED_H */

@@ -6,7 +6,7 @@
 #ifndef TOPOMASK_H
 #define TOPOMASK_H
 
-#include <topology.h>
+#include <hwloc.h>
 #include <private/private.h>
 
 #include <stdlib.h>

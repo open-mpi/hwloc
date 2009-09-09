@@ -6,8 +6,8 @@
 #define _GNU_SOURCE
 #include <sched.h>
 #include <assert.h>
-#include <topology.h>
-#include <topology/glibc-sched.h>
+#include <hwloc.h>
+#include <hwloc/glibc-sched.h>
 
 /* check the linux libnuma helpers */
 

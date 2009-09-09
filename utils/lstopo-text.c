@@ -3,7 +3,7 @@
  * See COPYING in top-level directory.
  */
 
-#include <topology.h>
+#include <hwloc.h>
 #include <private/config.h>
 
 #include <stdlib.h>

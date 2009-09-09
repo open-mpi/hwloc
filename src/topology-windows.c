@@ -7,7 +7,7 @@
 #define _WIN32_WINNT 0x0601
 
 #include <private/config.h>
-#include <topology.h>
+#include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
 

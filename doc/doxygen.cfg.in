@@ -566,11 +566,11 @@ WARN_LOGFILE           =
 
 INPUT                  = \
 			@top_srcdir@/doc/topology.doxy \
-			@top_srcdir@/include/topology.h \
-			@top_srcdir@/include/topology/helper.h \
-			@top_srcdir@/include/topology/cpuset.h \
-			@top_srcdir@/include/topology/glibc-sched.h \
-			@top_srcdir@/include/topology/linux-libnuma.h
+			@top_srcdir@/include/hwloc.h \
+			@top_srcdir@/include/hwloc/helper.h \
+			@top_srcdir@/include/hwloc/cpuset.h \
+			@top_srcdir@/include/hwloc/glibc-sched.h \
+			@top_srcdir@/include/hwloc/linux-libnuma.h
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
