@@ -4,7 +4,7 @@
  */
 
 /** \file
- * \brief High-level libtopology traversal helpers.
+ * \brief High-level hwloc traversal helpers.
  */
 
 #ifndef HWLOC_HELPER_H

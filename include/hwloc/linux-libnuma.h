@@ -4,9 +4,9 @@
  */
 
 /** \file
- * \brief Macros to help interaction between libtopology and Linux libnuma.
+ * \brief Macros to help interaction between hwloc and Linux libnuma.
  *
- * Applications that use both Linux libnuma and libtopology may want to
+ * Applications that use both Linux libnuma and hwloc may want to
  * include this file so as to ease conversion between their respective types.
  */
 
@@ -23,7 +23,7 @@
  */
 
 
-/** \brief Convert libtopology CPU set \p cpuset into the array of unsigned long \p mask
+/** \brief Convert hwloc CPU set \p cpuset into the array of unsigned long \p mask
  *
  * \p mask is the array of unsigned long that will be filled.
  * \p maxnode contains the maximal node number that may be stored in \p mask.
@@ -64,7 +64,7 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, const hwloc_cpus
   *maxnode = outmaxnode+1;
 }
 
-/** \brief Convert the array of unsigned long \p mask into libtopology CPU set \p cpuset
+/** \brief Convert the array of unsigned long \p mask into hwloc CPU set \p cpuset
  *
  * \p mask is a array of unsigned long that will be read.
  * \p maxnode contains the maximal node number that may be read in \p mask.
@@ -110,7 +110,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
  */
 
 
-/** \brief Convert libtopology CPU set \p cpuset into the returned libnuma bitmask
+/** \brief Convert hwloc CPU set \p cpuset into the returned libnuma bitmask
  *
  * The returned bitmask should later be freed with numa_bitmask_free.
  *
@@ -143,7 +143,7 @@ hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, const hwloc_cpu
   return bitmask;
 }
 
-/** \brief Convert libnuma bitmask \p bitmask into libtopology CPU set \p cpuset
+/** \brief Convert libnuma bitmask \p bitmask into hwloc CPU set \p cpuset
  *
  * This function may be used after calling many numa_ functions
  * that use a struct bitmask as an output parameter.
@@ -186,7 +186,7 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_
  */
 
 
-/** \brief Convert libtopology CPU set \p cpuset into libnuma nodemask \p nodemask
+/** \brief Convert hwloc CPU set \p cpuset into libnuma nodemask \p nodemask
  *
  * This function may be used before calling some old libnuma functions
  * that use a nodemask_t as an input parameter.
@@ -210,7 +210,7 @@ hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, const hwloc_cp
   }
 }
 
-/** \brief Convert libnuma nodemask \p nodemask into libtopology CPU set \p cpuset
+/** \brief Convert libnuma nodemask \p nodemask into hwloc CPU set \p cpuset
  *
  * This function may be used before calling some old libnuma functions
  * that use a nodemask_t as an output parameter.

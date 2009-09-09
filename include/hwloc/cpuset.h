@@ -4,7 +4,7 @@
  */
 
 /** \file
- * \brief The Cpuset API, for use in libtopology itself.
+ * \brief The Cpuset API, for use in hwloc itself.
  */
 
 #ifndef HWLOC_CPUSET_H
@@ -16,7 +16,7 @@
 
 /** \defgroup hwlocality_cpuset The Cpuset API
  *
- * For use in libtopology itself, a hwloc_cpuset_t represents a set of logical
+ * For use in hwloc itself, a hwloc_cpuset_t represents a set of logical
  * processors.
  *
  * \note cpusets are indexed by OS logical processor number.

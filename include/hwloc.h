@@ -4,7 +4,7 @@
  */
 
 /** \file
- * \brief The libtopology API.
+ * \brief The hwloc API.
  *
  * See hwloc/cpuset.h for CPU set specific macros
  * See hwloc/helper.h for high-level topology traversal helpers
@@ -63,7 +63,7 @@ struct hwloc_topology_info {
  */
 typedef enum {
   HWLOC_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
-  			  * The whole system that is accessible to libtopology.
+  			  * The whole system that is accessible to hwloc.
 			  * That may comprise several machines in SSI systems
 			  * like Kerrighed.
 			  */
@@ -94,7 +94,7 @@ typedef enum {
 
   HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
 			  * Objects which do not fit in the above but are
-			  * detected by libtopology and are useful to take into
+			  * detected by hwloc and are useful to take into
 			  * account for affinity. For instance, some OSes
 			  * expose their arbitrary processors aggregation this
 			  * way.

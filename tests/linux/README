@@ -7,7 +7,7 @@ that system.
 
 Together with the `TOPO_FSYS_ROOT_PATH' environment variable, these are
 used by `test-topologies.sh' to check for any regression introduced in
-libtopology detection logic.
+hwloc detection logic.
 
 A new topology may be added by:
 * running "gather-topology.sh" on the target system and saving the

@@ -4,9 +4,9 @@
  */
 
 /** \file
- * \brief Macros to help interaction between libtopolopy and glibc scheduling routines.
+ * \brief Macros to help interaction between hwloc and glibc scheduling routines.
  *
- * Applications that use both libtopology and glibc scheduling routines such as
+ * Applications that use both hwloc and glibc scheduling routines such as
  * sched_getaffinity may want to include this file so as to ease conversion
  * between their respective types.
  */
@@ -29,7 +29,7 @@
  */
 
 
-/** \brief Convert libtopology CPU set \p toposet into glibc sched affinity CPU set \p schedset
+/** \brief Convert hwloc CPU set \p toposet into glibc sched affinity CPU set \p schedset
  *
  * This function may be used before calling sched_setaffinity or any other function
  * that takes a cpu_set_t as input parameter.
@@ -56,7 +56,7 @@ hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, const hwloc_cpus
 #endif /* !CPU_ZERO_S */
 }
 
-/** \brief Convert libtopology CPU set \p toposet into glibc sched affinity CPU set \p schedset
+/** \brief Convert hwloc CPU set \p toposet into glibc sched affinity CPU set \p schedset
  *
  * This function may be used before calling sched_setaffinity  or any other function
  * that takes a cpu_set_t  as input parameter.

@@ -20,7 +20,7 @@ static void *
 fig_start(void *output_, int width, int height)
 {
   FILE *output = output_;
-  fprintf(output, "#FIG 3.2  Produced by libtopology's lstopo\n");
+  fprintf(output, "#FIG 3.2  Produced by hwloc's lstopo\n");
   fprintf(output, "Landscape\n");
   fprintf(output, "Center\n");
   fprintf(output, "Inches\n");
