@@ -1,11 +1,14 @@
 To build the debian package:
 
-$ svn co svn+ssh://<login>@scm.gforge.inria.fr/svn/libtopology/debian
+$ svn co http://svn.open-mpi.org/svn/hwloc/debian
 $ debuild
 
 The packages are built in the parent directory
 
 $ cd ../
-$ sudo dpkg -i libtopology0_0.9-1_i386.deb
-$ sudo dpkg -i libtopology-dev_0.9-1_i386.deb
+$ sudo dpkg -i libhwloc0_0.9-1_i386.deb libhwloc-dev_0.9-1_i386.deb libhwloc-common_0.9-1_i386.deb libhwloc-doc_0.9-1_i386.deb
+
+$ sudo dpkg -i hwloc-bin_0.9-1_i386.deb
+or
+$ sudo dpkg -i hwloc-bin-nox_0.9-1_i386.deb
 

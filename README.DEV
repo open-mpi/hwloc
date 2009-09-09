@@ -17,13 +17,13 @@ documentations:
 and the following should be performed to prepare the tarball (yes, from inside
 the source, to put the documentation inside the source):
 
-svn export . /tmp/libtopology
-cd /tmp/libtopology
+svn export . /tmp/hwloc
+cd /tmp/hwloc
 autoreconf -fi && ./configure && make && make maintainer-clean && ./configure && make doc && make distclean
 
 and check it by
 
-cd .. && rm -fr build && mkdir build && cd build && ../libtopology/configure && make && make distcheck
+cd .. && rm -fr build && mkdir build && cd build && ../hwloc/configure && make && make distcheck
 
 For the windows zipball, make sure you have Microsoft's lib tool in PATH, and
 remember to copy README at the root of the zip into a README.txt file with CRLF:
