@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef LIBTOPOLOGY_SYS_MPCTL_H
-#define LIBTOPOLOGY_SYS_MPCTL_H
+#ifndef HWLOC_SYS_MPCTL_H
+#define HWLOC_SYS_MPCTL_H
 
 typedef int spu_t, ldom_t, pthread_spu_t, pthread_ldom_t;
 
@@ -63,4 +63,4 @@ int pthread_ldom_bind_np(pthread_ldom_t *answer, pthread_ldom_t ldom, pthread_t 
 #define PTHREAD_BIND_ADVISORY_NP 0
 #define PTHREAD_BIND_FORCED_NP 1
 
-#endif /* LIBTOPOLOGY_SYS_MPCTL_H */
+#endif /* HWLOC_SYS_MPCTL_H */

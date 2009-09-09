@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef LIBTOPOLOGY_NUMA_H
-#define LIBTOPOLOGY_NUMA_H
+#ifndef HWLOC_NUMA_H
+#define HWLOC_NUMA_H
 
 #include "sys/types.h"
 #include "radset.h"
@@ -14,4 +14,4 @@ int rad_get_num(void);
 int rad_get_cpus(radid_t rad, cpuset_t cpuset);
 ssize_t rad_get_physmem(radid_t rad);
 
-#endif /* LIBTOPOLOGY_NUMA_H */
+#endif /* HWLOC_NUMA_H */

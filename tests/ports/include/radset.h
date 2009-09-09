@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef LIBTOPOLOGY_RADSET_H
-#define LIBTOPOLOGY_RADSET_H
+#ifndef HWLOC_RADSET_H
+#define HWLOC_RADSET_H
 
 #include <limits.h>
 
@@ -73,4 +73,4 @@ typedef enum memalloc_policy {
 
 int nloc(numa_attr_t *numa_attr, radset_t radset);
 
-#endif /* LIBTOPOLOGY_RADSET_H */
+#endif /* HWLOC_RADSET_H */

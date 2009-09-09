@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef LIBTOPOLOGY_SYS_PROCESSOR_H
-#define LIBTOPOLOGY_SYS_PROCESSOR_H
+#ifndef HWLOC_SYS_PROCESSOR_H
+#define HWLOC_SYS_PROCESSOR_H
 
 /* Solaris */
 #include <sys/procset.h>
@@ -20,4 +20,4 @@ typedef short cpu_t;
 #define PROCESSOR_CLASS_ANY ((cpu_t)(-1))
 extern int bindprocessor(int What, int Who, cpu_t Where); 
 
-#endif /* LIBTOPOLOGY_SYS_PROCESSOR_H */
+#endif /* HWLOC_SYS_PROCESSOR_H */

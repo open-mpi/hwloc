@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef LIBTOPOLOGY_WINDOWS_H
-#define LIBTOPOLOGY_WINDOWS_H
+#ifndef HWLOC_WINDOWS_H
+#define HWLOC_WINDOWS_H
 
 #include <inttypes.h>
 
@@ -53,4 +53,4 @@ HANDLE WINAPI GetCurrentProcess(void);
 BOOL GetNumaAvailableMemoryNode(UCHAR Node, PULONGLONG AvailableBytes);
 
 
-#endif /* LIBTOPOLOGY_WINDOWS_H */
+#endif /* HWLOC_WINDOWS_H */

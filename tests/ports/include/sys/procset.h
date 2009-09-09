@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef LIBTOPOLOGY_SYS_PROCSET_H
-#define LIBTOPOLOGY_SYS_PROCSET_H
+#ifndef HWLOC_SYS_PROCSET_H
+#define HWLOC_SYS_PROCSET_H
 
 typedef enum idtype {
   P_PID,
@@ -12,4 +12,4 @@ typedef enum idtype {
   P_MYID
 } idtype_t;
 
-#endif /* LIBTOPOLOGY_SYS_PROCSET_H */
+#endif /* HWLOC_SYS_PROCSET_H */

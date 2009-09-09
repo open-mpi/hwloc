@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef LIBTOPOLOGY_CPUSET_H
-#define LIBTOPOLOGY_CPUSET_H
+#ifndef HWLOC_CPUSET_H
+#define HWLOC_CPUSET_H
 
 typedef int cpu_cursor_t;
 #define SET_CURSOR_INIT -1
@@ -20,4 +20,4 @@ int cpuaddset(cpuset_t set, cpuid_t cpuid );
 cpuid_t cpu_foreach(cpuset_t cpuset, int flags, cpu_cursor_t *cursor);
 int cpusetdestroy(cpuset_t *set);
 
-#endif /* LIBTOPOLOGY_CPUSET_H */
+#endif /* HWLOC_CPUSET_H */
