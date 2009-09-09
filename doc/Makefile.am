@@ -419,4 +419,6 @@ $(top_srcdir)/README: @DX_DOCDIR@/html
 DOCUPLOADHOST=sync.bordeaux.inria.fr
 DOCUPLOADOPTS=
 doc-upload: @DX_DOCDIR@/html
+	echo FIXME
+	false
 	rsync -avz --delete --chmod=ug+rwX,o+rX $(DOCUPLOADOPTS) @DX_DOCDIR@/html/ $(DOCUPLOADHOST):/web/runtime/libtopology/doc/
