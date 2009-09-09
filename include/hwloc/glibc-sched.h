@@ -24,7 +24,7 @@
 #ifdef CPU_SET
 
 
-/** \defgroup topology_glibc_sched Helpers for manipulating glibc sched affinity
+/** \defgroup hwlocality_glibc_sched Helpers for manipulating glibc sched affinity
  * @{
  */
 

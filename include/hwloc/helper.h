@@ -16,7 +16,7 @@
 
 
 
-/** \defgroup topology_helper_types Object Type Helpers
+/** \defgroup hwlocality_helper_types Object Type Helpers
  * @{
  */
 
@@ -88,7 +88,7 @@ hwloc_get_type_nbobjss (hwloc_topology_t topology, hwloc_obj_type_t type)
 
 
 
-/** \defgroup topology_helper_traversal_basic Basic Traversal Helpers
+/** \defgroup hwlocality_helper_traversal_basic Basic Traversal Helpers
  * @{
  */
 
@@ -187,7 +187,7 @@ hwloc_obj_is_in_subtree (hwloc_obj_t obj, hwloc_obj_t subtree_root)
 
 
 
-/** \defgroup topology_helper_find_includeds Finding similar Objects Included in a CPU set
+/** \defgroup hwlocality_helper_find_includeds Finding similar Objects Included in a CPU set
  * @{
  */
 
@@ -292,7 +292,7 @@ hwloc_get_nbobjs_below_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *
 
 
 
-/** \defgroup topology_helper_find_covering Finding a single Object covering at least CPU set
+/** \defgroup hwlocality_helper_find_covering Finding a single Object covering at least CPU set
  * @{
  */
 
@@ -338,7 +338,7 @@ hwloc_get_cpuset_covering_obj (hwloc_topology_t topology, const hwloc_cpuset_t *
 
 
 
-/** \defgroup topology_helper_find_coverings Finding a set of similar Objects covering at least a CPU set
+/** \defgroup hwlocality_helper_find_coverings Finding a set of similar Objects covering at least a CPU set
  * @{
  */
 
@@ -384,7 +384,7 @@ hwloc_get_next_obj_above_cpuset(hwloc_topology_t topology, const hwloc_cpuset_t 
 
 
 
-/** \defgroup topology_helper_find_cache Cache-specific Finding Helpers
+/** \defgroup hwlocality_helper_find_cache Cache-specific Finding Helpers
  * @{
  */
 
@@ -425,7 +425,7 @@ hwloc_get_shared_cache_above (hwloc_topology_t topology, hwloc_obj_t obj)
 
 
 
-/** \defgroup topology_helper_traversal Advanced Traversal Helpers
+/** \defgroup hwlocality_helper_traversal Advanced Traversal Helpers
  * @{
  */
 
@@ -448,7 +448,7 @@ extern int hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, h
 
 /** @} */
 
-/** \defgroup topology_helper_binding Binding Helpers
+/** \defgroup hwlocality_helper_binding Binding Helpers
  * @{
  */
 

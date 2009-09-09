@@ -14,7 +14,7 @@
 #include <hwloc/cpuset-bits.h>
 
 
-/** \defgroup topology_cpuset The Cpuset API
+/** \defgroup hwlocality_cpuset The Cpuset API
  *
  * For use in libtopology itself, a hwloc_cpuset_t represents a set of logical
  * processors.

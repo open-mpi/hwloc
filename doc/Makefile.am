@@ -140,24 +140,24 @@ dist_man3_MANS = \
 	@DX_DOCDIR@/man/man3/hwloc_topology_set_synthetic.3 \
 	@DX_DOCDIR@/man/man3/hwloc_topology_set_xml.3 \
 	@DX_DOCDIR@/man/man3/hwloc_topology_t.3 \
-	@DX_DOCDIR@/man/man3/topology_binding.3 \
-	@DX_DOCDIR@/man/man3/topology_configuration.3 \
-	@DX_DOCDIR@/man/man3/topology_conversion.3 \
-	@DX_DOCDIR@/man/man3/topology_cpuset.3 \
-	@DX_DOCDIR@/man/man3/topology_creation.3 \
-	@DX_DOCDIR@/man/man3/topology_helper_binding.3 \
-	@DX_DOCDIR@/man/man3/topology_helper_find_cache.3 \
-	@DX_DOCDIR@/man/man3/topology_helper_find_covering.3 \
-	@DX_DOCDIR@/man/man3/topology_helper_find_coverings.3 \
-	@DX_DOCDIR@/man/man3/topology_helper_find_includeds.3 \
-	@DX_DOCDIR@/man/man3/topology_helper_traversal.3 \
-	@DX_DOCDIR@/man/man3/topology_helper_traversal_basic.3 \
-	@DX_DOCDIR@/man/man3/topology_helper_types.3 \
-	@DX_DOCDIR@/man/man3/topology_info.3 \
-	@DX_DOCDIR@/man/man3/topology_information.3 \
-	@DX_DOCDIR@/man/man3/topology_objects.3 \
-	@DX_DOCDIR@/man/man3/topology_traversal.3 \
-	@DX_DOCDIR@/man/man3/topology_types.3
+	@DX_DOCDIR@/man/man3/hwlocality_binding.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_configuration.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_conversion.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_cpuset.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_creation.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_helper_binding.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_helper_find_cache.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_helper_find_covering.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_helper_find_coverings.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_helper_find_includeds.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_helper_traversal.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_helper_traversal_basic.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_helper_types.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_topology_info.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_information.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_objects.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_traversal.3 \
+	@DX_DOCDIR@/man/man3/hwlocality_types.3
 
 CLEANFILES += \
 	@DX_DOCDIR@/man/man3/arity.3 \
@@ -221,28 +221,28 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/globals_func.html \
 	@DX_DOCDIR@/html/globals_type.html \
 	@DX_DOCDIR@/html/glossary.html \
-	@DX_DOCDIR@/html/group__topology__glibc__sched.html \
-	@DX_DOCDIR@/html/group__topology__linux__libnuma__bitmask.html \
-	@DX_DOCDIR@/html/group__topology__linux__libnuma__nodemask.html \
-	@DX_DOCDIR@/html/group__topology__linux__libnuma__ulongs.html \
-	@DX_DOCDIR@/html/group__topology__binding.html \
-	@DX_DOCDIR@/html/group__topology__configuration.html \
-	@DX_DOCDIR@/html/group__topology__conversion.html \
-	@DX_DOCDIR@/html/group__topology__cpuset.html \
-	@DX_DOCDIR@/html/group__topology__creation.html \
-	@DX_DOCDIR@/html/group__topology__helper__binding.html \
-	@DX_DOCDIR@/html/group__topology__helper__find__cache.html \
-	@DX_DOCDIR@/html/group__topology__helper__find__covering.html \
-	@DX_DOCDIR@/html/group__topology__helper__find__coverings.html \
-	@DX_DOCDIR@/html/group__topology__helper__find__includeds.html \
-	@DX_DOCDIR@/html/group__topology__helper__traversal.html \
-	@DX_DOCDIR@/html/group__topology__helper__traversal__basic.html \
-	@DX_DOCDIR@/html/group__topology__helper__types.html \
-	@DX_DOCDIR@/html/group__topology__info.html \
-	@DX_DOCDIR@/html/group__topology__information.html \
-	@DX_DOCDIR@/html/group__topology__objects.html \
-	@DX_DOCDIR@/html/group__topology__traversal.html \
-	@DX_DOCDIR@/html/group__topology__types.html \
+	@DX_DOCDIR@/html/group__hwlocality__glibc__sched.html \
+	@DX_DOCDIR@/html/group__hwlocality__linux__libnuma__bitmask.html \
+	@DX_DOCDIR@/html/group__hwlocality__linux__libnuma__nodemask.html \
+	@DX_DOCDIR@/html/group__hwlocality__linux__libnuma__ulongs.html \
+	@DX_DOCDIR@/html/group__hwlocality__binding.html \
+	@DX_DOCDIR@/html/group__hwlocality__configuration.html \
+	@DX_DOCDIR@/html/group__hwlocality__conversion.html \
+	@DX_DOCDIR@/html/group__hwlocality__cpuset.html \
+	@DX_DOCDIR@/html/group__hwlocality__creation.html \
+	@DX_DOCDIR@/html/group__hwlocality__helper__binding.html \
+	@DX_DOCDIR@/html/group__hwlocality__helper__find__cache.html \
+	@DX_DOCDIR@/html/group__hwlocality__helper__find__covering.html \
+	@DX_DOCDIR@/html/group__hwlocality__helper__find__coverings.html \
+	@DX_DOCDIR@/html/group__hwlocality__helper__find__includeds.html \
+	@DX_DOCDIR@/html/group__hwlocality__helper__traversal.html \
+	@DX_DOCDIR@/html/group__hwlocality__helper__traversal__basic.html \
+	@DX_DOCDIR@/html/group__hwlocality__helper__types.html \
+	@DX_DOCDIR@/html/group__hwlocality__information.html \
+	@DX_DOCDIR@/html/group__hwlocality__objects.html \
+	@DX_DOCDIR@/html/group__hwlocality__topology__info.html \
+	@DX_DOCDIR@/html/group__hwlocality__traversal.html \
+	@DX_DOCDIR@/html/group__hwlocality__types.html \
 	@DX_DOCDIR@/html/hagrid.png \
 	@DX_DOCDIR@/html/helper_8h.html \
 	@DX_DOCDIR@/html/helper_8h_source.html \
@@ -389,15 +389,15 @@ CLEANFILES += \
 	@DX_DOCDIR@/latex/dudley.png \
 	@DX_DOCDIR@/latex/emmett.png \
 	@DX_DOCDIR@/latex/files.tex \
-	@DX_DOCDIR@/latex/group__topology__binding.tex \
-	@DX_DOCDIR@/latex/group__topology__configuration.tex \
-	@DX_DOCDIR@/latex/group__topology__conversion.tex \
-	@DX_DOCDIR@/latex/group__topology__cpuset.tex \
-	@DX_DOCDIR@/latex/group__topology__creation.tex \
-	@DX_DOCDIR@/latex/group__topology__info.tex \
-	@DX_DOCDIR@/latex/group__topology__information.tex \
-	@DX_DOCDIR@/latex/group__topology__objects.tex \
-	@DX_DOCDIR@/latex/group__topology__traversal.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__binding.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__configuration.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__conversion.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__cpuset.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__creation.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__information.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__objects.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__topology__info.tex \
+	@DX_DOCDIR@/latex/group__hwlocality__traversal.tex \
 	@DX_DOCDIR@/latex/hagrid.png \
 	@DX_DOCDIR@/latex/index.tex \
 	@DX_DOCDIR@/latex/modules.tex \

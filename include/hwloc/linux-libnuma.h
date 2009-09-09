@@ -18,7 +18,7 @@
 #include <assert.h>
 
 
-/** \defgroup topology_linux_libnuma_ulongs Helpers for manipulating Linux libnuma unsigned long masks
+/** \defgroup hwlocality_linux_libnuma_ulongs Helpers for manipulating Linux libnuma unsigned long masks
  * @{
  */
 
@@ -105,7 +105,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
 
 
 
-/** \defgroup topology_linux_libnuma_bitmask Helpers for manipulating Linux libnuma bitmask
+/** \defgroup hwlocality_linux_libnuma_bitmask Helpers for manipulating Linux libnuma bitmask
  * @{
  */
 
@@ -181,7 +181,7 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_
 
 
 #ifdef NUMA_VERSION1_COMPATIBILITY
-/** \defgroup topology_linux_libnuma_nodemask Helpers for manipulating Linux libnuma nodemask_t
+/** \defgroup hwlocality_linux_libnuma_nodemask Helpers for manipulating Linux libnuma nodemask_t
  * @{
  */
 

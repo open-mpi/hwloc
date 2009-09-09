@@ -25,7 +25,7 @@
 
 
 
-/** \defgroup topology_info Topology and Topology Info
+/** \defgroup hwlocality_topology_info Topology and Topology Info
  * @{
  */
 
@@ -51,7 +51,7 @@ struct hwloc_topology_info {
 
 /** @} */
 
-/** \defgroup topology_types Topology Object Types
+/** \defgroup hwlocality_types Topology Object Types
  * @{
  */
 
@@ -124,7 +124,7 @@ hwloc_obj_type_t hwloc_get_order_type(int order);
 
 /** @} */
 
-/** \defgroup topology_objects Topology Objects
+/** \defgroup hwlocality_objects Topology Objects
  * @{
  */
 
@@ -201,7 +201,7 @@ union hwloc_obj_attr_u {
 
 /** @} */
 
-/** \defgroup topology_creation Create and Destroy Topologies
+/** \defgroup hwlocality_creation Create and Destroy Topologies
  * @{
  */
 
@@ -238,7 +238,7 @@ extern void hwloc_topology_check(hwloc_topology_t topology);
 
 /** @} */
 
-/** \defgroup topology_configuration Configure Topology Detection
+/** \defgroup hwlocality_configuration Configure Topology Detection
  *
  * These functions can optionally be called between topology_init() and
  * topology_load() to configure how the detection should be performed, e.g. to
@@ -316,7 +316,7 @@ extern int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, co
 /** @} */
 
 
-/** \defgroup topology_information Get some Topology Information
+/** \defgroup hwlocality_information Get some Topology Information
  * @{
  */
 
@@ -349,7 +349,7 @@ extern unsigned hwloc_get_depth_nbobjs (hwloc_topology_t topology, unsigned dept
 /** @} */
 
 
-/** \defgroup topology_traversal Retrieve Objects
+/** \defgroup hwlocality_traversal Retrieve Objects
  * @{
  */
 
@@ -358,7 +358,7 @@ extern hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned d
 
 /** @} */
 
-/** \defgroup topology_conversion Object/String Conversion
+/** \defgroup hwlocality_conversion Object/String Conversion
  * @{
  */
 
@@ -383,7 +383,7 @@ extern int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, s
 /** @} */
 
 
-/** \defgroup topology_binding Binding
+/** \defgroup hwlocality_binding Binding
  *
  * It is often useful to call hwloc_cpuset_singlify() first so that a single CPU
  * remains in the set. This way, the process will not even migrate between
