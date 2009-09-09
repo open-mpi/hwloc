@@ -33,17 +33,17 @@
 #include <pthread.h>
 
 static ldom_t
-topo_hpux_find_ldom(topo_topology_t topology, const topo_cpuset_t *topo_set)
+topo_hpux_find_ldom(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set)
 {
   int has_numa = sysconf(_SC_CCNUMA_SUPPORT) == 1;
   int n;
-  topo_obj_t objs[2];
+  hwloc_obj_t objs[2];
 
   if (!has_numa)
     return -1;
 
-  n = topo_get_cpuset_objs(topology, topo_set, objs, 2);
-  if (n > 1 || objs[0]->type != TOPO_OBJ_NODE) {
+  n = hwloc_get_cpuset_objs(topology, topo_set, objs, 2);
+  if (n > 1 || objs[0]->type != HWLOC_OBJ_NODE) {
     /* Does not correspond to exactly one node */
     return -1;
   }
@@ -52,18 +52,18 @@ topo_hpux_find_ldom(topo_topology_t topology, const topo_cpuset_t *topo_set)
 }
 
 static spu_t
-topo_hpux_find_spu(topo_topology_t topology, const topo_cpuset_t *topo_set)
+topo_hpux_find_spu(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set)
 {
   spu_t cpu;
 
-  cpu = topo_cpuset_first(topo_set);
-  if (cpu != -1 && topo_cpuset_weight(topo_set) == 1)
+  cpu = hwloc_cpuset_first(topo_set);
+  if (cpu != -1 && hwloc_cpuset_weight(topo_set) == 1)
     return cpu;
   return -1;
 }
 
 static int
-topo_hpux_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *topo_set, int strict)
+topo_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *topo_set, int strict)
 {
   ldom_t ldom;
   spu_t cpu;
@@ -72,7 +72,7 @@ topo_hpux_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo
   mpctl(MPC_SETLDOM, MPC_LDOMFLOAT, pid);
   mpctl(MPC_SETPROCESS, MPC_SPUFLOAT, pid);
 
-  if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset))
+  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset))
     return 0;
 
   ldom = topo_hpux_find_ldom(topology, topo_set);
@@ -88,19 +88,19 @@ topo_hpux_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo
 }
 
 static int
-topo_hpux_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_hpux_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   return topo_hpux_set_proc_cpubind(topology, MPC_SELFPID, topo_set, strict);
 }
 
 static int
-topo_hpux_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_hpux_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   return topo_hpux_set_thisproc_cpubind(topology, topo_set, strict);
 }
 
 static int
-topo_hpux_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t pthread, const topo_cpuset_t *topo_set, int strict)
+topo_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, const hwloc_cpuset_t *topo_set, int strict)
 {
   ldom_t ldom, ldom2;
   spu_t cpu, cpu2;
@@ -109,7 +109,7 @@ topo_hpux_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t pthread, c
   pthread_ldom_bind_np(&ldom2, PTHREAD_LDOMFLOAT_NP, pthread);
   pthread_processor_bind_np(PTHREAD_BIND_ADVISORY_NP, &cpu2, PTHREAD_SPUFLOAT_NP, pthread);
 
-  if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset))
+  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset))
     return 0;
 
   ldom = topo_hpux_find_ldom(topology, topo_set);
@@ -125,16 +125,16 @@ topo_hpux_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t pthread, c
 }
 
 static int
-topo_hpux_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_hpux_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   return topo_hpux_set_thread_cpubind(topology, PTHREAD_SELFTID_NP, topo_set, strict);
 }
 
 void
-topo_look_hpux(struct topo_topology *topology)
+hwloc_look_hpux(struct hwloc_topology *topology)
 {
   int has_numa = sysconf(_SC_CCNUMA_SUPPORT) == 1;
-  topo_obj_t *nodes = NULL, obj;
+  hwloc_obj_t *nodes = NULL, obj;
   spu_t currentcpu;
   ldom_t currentnode;
   int i, nbnodes;
@@ -146,36 +146,36 @@ topo_look_hpux(struct topo_topology *topology)
   topology->set_thisthread_cpubind = topo_hpux_set_thisthread_cpubind;
 
   if (has_numa) {
-    nbnodes = mpctl(topology->flags & TOPO_FLAGS_WHOLE_SYSTEM ?
+    nbnodes = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETNUMLDOMS_SYS : MPC_GETNUMLDOMS, 0, 0);
 
-    topo_debug("%d nodes\n", nbnodes);
+    hwloc_debug("%d nodes\n", nbnodes);
 
     nodes = malloc(nbnodes * sizeof(*nodes));
 
     i = 0;
-    currentnode = mpctl(topology->flags & TOPO_FLAGS_WHOLE_SYSTEM ?
+    currentnode = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETFIRSTLDOM_SYS : MPC_GETFIRSTLDOM, 0, 0);
     while (currentnode != -1 && i < nbnodes) {
-      topo_debug("node %d is %d\n", i, currentnode);
-      nodes[i] = obj = topo_alloc_setup_object(TOPO_OBJ_NODE, currentnode);
+      hwloc_debug("node %d is %d\n", i, currentnode);
+      nodes[i] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, currentnode);
       /* TODO: obj->attr->node.memory_kB */
       /* TODO: obj->attr->node.huge_page_free */
 
-      currentnode = mpctl(topology->flags & TOPO_FLAGS_WHOLE_SYSTEM ?
+      currentnode = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
         MPC_GETNEXTLDOM_SYS : MPC_GETNEXTLDOM, currentnode, 0);
       i++;
     }
   }
 
   i = 0;
-  currentcpu = mpctl(topology->flags & TOPO_FLAGS_WHOLE_SYSTEM ?
+  currentcpu = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETFIRSTSPU_SYS : MPC_GETFIRSTSPU, 0,0);
   while (currentcpu != -1) {
-    obj = topo_alloc_setup_object(TOPO_OBJ_PROC, currentcpu);
-    topo_cpuset_set(&obj->cpuset, currentcpu);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, currentcpu);
+    hwloc_cpuset_set(&obj->cpuset, currentcpu);
 
-    topo_debug("cpu %d\n", currentcpu);
+    hwloc_debug("cpu %d\n", currentcpu);
 
     if (nodes) {
       /* Add this cpu to its node */
@@ -185,21 +185,21 @@ topo_look_hpux(struct topo_topology *topology)
           if (nodes[i]->os_index == currentnode)
             break;
       assert(i < nbnodes);
-      topo_cpuset_set(&nodes[i]->cpuset, currentcpu);
-      topo_debug("is in node %d\n", i);
+      hwloc_cpuset_set(&nodes[i]->cpuset, currentcpu);
+      hwloc_debug("is in node %d\n", i);
     }
 
     /* Add cpu */
-    topo_add_object(topology, obj);
+    hwloc_add_object(topology, obj);
 
-    currentcpu = mpctl(topology->flags & TOPO_FLAGS_WHOLE_SYSTEM ?
+    currentcpu = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETNEXTSPU_SYS : MPC_GETNEXTSPU, currentcpu, 0);
   }
 
   if (nodes) {
     /* Add nodes */
     for (i = 0 ; i < nbnodes ; i++)
-      topo_add_object(topology, nodes[i]);
+      hwloc_add_object(topology, nodes[i]);
     free(nodes);
   }
 }

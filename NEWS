@@ -22,7 +22,7 @@ Version 0.9.1
   BSD license.
 * Group NUMA nodes into Misc objects according to their physical distance
   that may be reported by the OS/BIOS.
-  May be ignored by setting TOPO_IGNORE_DISTANCES=1 in the environment.
+  May be ignored by setting HWLOC_IGNORE_DISTANCES=1 in the environment.
 * Ignore offline CPUs on Solaris.
 * Improved binding support on AIX.
 * Add HP-UX support.

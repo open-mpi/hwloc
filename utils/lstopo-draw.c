@@ -87,9 +87,9 @@ static struct draw_methods null_draw_methods = {
  * For generic detailed comments, see the node_draw function.
  */
 
-typedef void (*foo_draw)(topo_topology_t topology, struct draw_methods *methods, topo_obj_t obj, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
+typedef void (*foo_draw)(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t obj, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
 
-static foo_draw get_type_fun(topo_obj_type_t type);
+static foo_draw get_type_fun(hwloc_obj_type_t type);
 
 /*
  * Helper to recurse into sublevels, either horizontally or vertically
@@ -98,7 +98,7 @@ static foo_draw get_type_fun(topo_obj_type_t type);
  */
 
 #define RECURSE_BEGIN(obj, border) do { \
-  topo_obj_t *subobjs = obj->children; \
+  hwloc_obj_t *subobjs = obj->children; \
   unsigned numsubobjs = obj->arity; \
   unsigned width, height; \
   unsigned maxwidth, maxheight; \
@@ -249,7 +249,7 @@ RECURSE_BEGIN(obj, border) \
 
 /* Pack objects in a grid */
 #define RECURSE_RECT(obj, methods, separator, border) do {\
-  if (obj->arity && obj->children[0]->type == TOPO_OBJ_NODE) { \
+  if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NODE) { \
     /* Nodes shouldn't be put with an arbitrary geometry, as NUMA distances may not be that way */ \
     int vert = prefer_vert(topology, level, output, depth, x, y, separator); \
     if (vert) \
@@ -292,7 +292,7 @@ struct dyna_save {
 } while (0)
 
 static int
-prefer_vert(topo_topology_t topology, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned y, int separator)
+prefer_vert(hwloc_topology_t topology, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y, int separator)
 {
   float horiz_ratio, vert_ratio;
   unsigned textwidth = 0;
@@ -306,7 +306,7 @@ prefer_vert(topo_topology_t topology, topo_obj_t level, void *output, unsigned d
 }
 
 static void
-proc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+proc_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   *retwidth = fontsize ? 4*fontsize : gridsize;
   *retheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
@@ -315,13 +315,13 @@ proc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 
   if (fontsize) {
     char text[64];
-    topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 }
 
 static void
-cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+cache_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = gridsize + (fontsize ? (fontsize + gridsize) : 0) + gridsize, totheight;
   unsigned mywidth = 0, totwidth;
@@ -338,7 +338,7 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
   if (fontsize) {
     char text[64];
 
-    topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
@@ -348,7 +348,7 @@ cache_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t le
 }
 
 static void
-core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+core_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
@@ -362,7 +362,7 @@ core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 
   if (fontsize) {
     char text[64];
-    topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
@@ -372,7 +372,7 @@ core_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 }
 
 static void
-socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+socket_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
@@ -386,7 +386,7 @@ socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 
   if (fontsize) {
     char text[64];
-    topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
@@ -396,7 +396,7 @@ socket_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 }
 
 static void
-node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+node_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   /* Reserve room for the heading memory box and separator */
   unsigned myheight = (fontsize ? (gridsize + fontsize) : 0) + gridsize + gridsize;
@@ -423,7 +423,7 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
   if (fontsize) {
     char text[64];
     /* Output text */
-    topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
     methods->text(output, 0, 0, 0, fontsize, depth-2, x + 2 * gridsize, y + 2 * gridsize, text);
   }
 
@@ -435,7 +435,7 @@ node_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 }
 
 static void
-machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+machine_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
@@ -449,7 +449,7 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
 
   if (fontsize) {
     char text[64];
-    topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
@@ -459,7 +459,7 @@ machine_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t 
 }
 
 static void
-system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+system_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
@@ -468,7 +468,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 
   DYNA_CHECK();
 
-  if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE) {
+  if (level->arity > 1 && level->children[0]->type == HWLOC_OBJ_MACHINE) {
     /* network of machines, either horizontal or vertical */
     if (vert) {
       mywidth += gridsize;
@@ -482,11 +482,11 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 
   if (fontsize) {
     char text[64];
-    topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE) {
+  if (level->arity > 1 && level->children[0]->type == HWLOC_OBJ_MACHINE) {
     if (vert) {
       unsigned top = 0, bottom = 0;
       RECURSE_BEGIN(level, gridsize)
@@ -499,7 +499,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 	methods->line(output, 0, 0, 0, depth, x + mywidth, center, x + mywidth + gridsize, center);
       RECURSE_END_VERT(gridsize, gridsize);
 
-      if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE)
+      if (level->arity > 1 && level->children[0]->type == HWLOC_OBJ_MACHINE)
 	methods->line(output, 0, 0, 0, depth, x + mywidth, top, x + mywidth, bottom);
     } else {
       unsigned left = 0, right = 0;
@@ -513,7 +513,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 	methods->line(output, 0, 0, 0, depth, center, y + myheight, center, y + myheight + gridsize);
       RECURSE_END_HORIZ(gridsize, gridsize);
 
-      if (level->arity > 1 && level->children[0]->type == TOPO_OBJ_MACHINE)
+      if (level->arity > 1 && level->children[0]->type == HWLOC_OBJ_MACHINE)
 	methods->line(output, 0, 0, 0, depth, left, y + myheight, right, y + myheight);
     }
   } else
@@ -523,7 +523,7 @@ system_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t l
 }
 
 static void
-misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+misc_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
@@ -537,7 +537,7 @@ misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 
   if (fontsize) {
     char text[64];
-    topo_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
@@ -547,7 +547,7 @@ misc_draw(topo_topology_t topology, struct draw_methods *methods, topo_obj_t lev
 }
 
 static void
-fig(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
+fig(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
   unsigned totwidth, totheight;
 
@@ -558,17 +558,17 @@ fig(topo_topology_t topology, struct draw_methods *methods, topo_obj_t level, vo
  * given a type, return a pointer FUN to the function that draws it.
  */
 static foo_draw
-get_type_fun(topo_obj_type_t type)
+get_type_fun(hwloc_obj_type_t type)
 {
   switch (type) {
-    case TOPO_OBJ_SYSTEM: return system_draw;
-    case TOPO_OBJ_MACHINE: return machine_draw;
-    case TOPO_OBJ_NODE: return node_draw;
-    case TOPO_OBJ_SOCKET: return socket_draw;
-    case TOPO_OBJ_CACHE: return cache_draw;
-    case TOPO_OBJ_CORE: return core_draw;
-    case TOPO_OBJ_PROC: return proc_draw;
-    case TOPO_OBJ_MISC: return misc_draw;
+    case HWLOC_OBJ_SYSTEM: return system_draw;
+    case HWLOC_OBJ_MACHINE: return machine_draw;
+    case HWLOC_OBJ_NODE: return node_draw;
+    case HWLOC_OBJ_SOCKET: return socket_draw;
+    case HWLOC_OBJ_CACHE: return cache_draw;
+    case HWLOC_OBJ_CORE: return core_draw;
+    case HWLOC_OBJ_PROC: return proc_draw;
+    case HWLOC_OBJ_MISC: return misc_draw;
   }
   return NULL;
 }
@@ -613,10 +613,10 @@ static struct draw_methods getmax_draw_methods = {
 };
 
 void *
-output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *output)
+output_draw_start(struct draw_methods *methods, hwloc_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(topology, &getmax_draw_methods, topo_get_system_obj(topology), &coords, 100, 0, 0);
+  fig(topology, &getmax_draw_methods, hwloc_get_system_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
@@ -632,7 +632,7 @@ output_draw_start(struct draw_methods *methods, topo_topology_t topology, void *
 }
 
 void
-output_draw(struct draw_methods *methods, topo_topology_t topology, void *output)
+output_draw(struct draw_methods *methods, hwloc_topology_t topology, void *output)
 {
-	fig(topology, methods, topo_get_system_obj(topology), output, 100, 0, 0);
+	fig(topology, methods, hwloc_get_system_obj(topology), output, 100, 0, 0);
 }

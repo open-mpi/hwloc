@@ -39,19 +39,19 @@ static void usage(FILE *where)
 
 int main(int argc, char *argv[])
 {
-  topo_topology_t topology;
-  struct topo_topology_info topoinfo;
-  topo_cpuset_t set;
+  hwloc_topology_t topology;
+  struct hwloc_topology_info topoinfo;
+  hwloc_cpuset_t set;
   int verbose = 0;
   int nodelist = 0;
   int proclist = 0;
   char **orig_argv = argv;
 
-  topo_cpuset_zero(&set);
+  hwloc_cpuset_zero(&set);
 
-  topo_topology_init(&topology);
-  topo_topology_load(topology);
-  topo_topology_get_info(topology, &topoinfo);
+  hwloc_topology_init(&topology);
+  hwloc_topology_load(topology);
+  hwloc_topology_get_info(topology, &topoinfo);
 
   while (argc >= 2) {
     if (*argv[1] == '-') {
@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
   }
 
   if (proclist) {
-    topo_obj_t proc, prev = NULL;
-    while ((proc = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_PROC, prev)) != NULL) {
+    hwloc_obj_t proc, prev = NULL;
+    while ((proc = hwloc_get_next_obj_above_cpuset(topology, &set, HWLOC_OBJ_PROC, prev)) != NULL) {
       if (prev)
 	printf(",");
       printf("%u", proc->os_index);
@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
     }
     printf("\n");
   } else if (nodelist) {
-    topo_obj_t node, prev = NULL;
-    while ((node = topo_get_next_obj_above_cpuset(topology, &set, TOPO_OBJ_NODE, prev)) != NULL) {
+    hwloc_obj_t node, prev = NULL;
+    while ((node = hwloc_get_next_obj_above_cpuset(topology, &set, HWLOC_OBJ_NODE, prev)) != NULL) {
       if (prev)
 	printf(",");
       printf("%u", node->os_index);
@@ -105,12 +105,12 @@ int main(int argc, char *argv[])
     }
     printf("\n");
   } else {
-    char string[TOPO_CPUSET_STRING_LENGTH+1];
-    topo_cpuset_snprintf(string, sizeof(string), &set);
+    char string[HWLOC_CPUSET_STRING_LENGTH+1];
+    hwloc_cpuset_snprintf(string, sizeof(string), &set);
     printf("%s\n", string);
   }
 
-  topo_topology_destroy(topology);
+  hwloc_topology_destroy(topology);
 
   return EXIT_SUCCESS;
 }

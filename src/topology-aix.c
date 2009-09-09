@@ -26,20 +26,20 @@
 #include <sys/thread.h>
 
 static int
-topo_aix_set_sth_cpubind(topo_topology_t topology, rstype_t what, rsid_t who, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, const hwloc_cpuset_t *topo_set, int strict)
 {
   rsethandle_t rset, rad;
-  topo_obj_t objs[2];
+  hwloc_obj_t objs[2];
   int n;
   int res = -1;
 
-  if (topo_cpuset_isequal(topo_set, &topo_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset)) {
     if (ra_detachrset(what, who, 0))
       return -1;
     return 0;
   }
 
-  n = topo_get_cpuset_objs(topology, topo_set, objs, 2);
+  n = hwloc_get_cpuset_objs(topology, topo_set, objs, 2);
   if (n > 1 || objs[0]->os_level == -1) {
     /* Does not correspond to exactly one radset, not possible */
     errno = EXDEV;
@@ -72,28 +72,28 @@ out:
 }
 
 static int
-topo_aix_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   rsid_t who = { .at_pid = getpid() };
   return topo_aix_set_sth_cpubind(topology, R_PROCESS, who, topo_set, strict);
 }
 
 static int
-topo_aix_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   rsid_t who = { .at_tid = thread_self() };
   return topo_aix_set_sth_cpubind(topology, R_THREAD, who, topo_set, strict);
 }
 
 static int
-topo_aix_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *topo_set, int strict)
 {
   rsid_t who = { .at_pid = pid };
   return topo_aix_set_sth_cpubind(topology, R_PROCESS, who, topo_set, strict);
 }
 
 static int
-topo_aix_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t pthread, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, const hwloc_cpuset_t *topo_set, int strict)
 {
   struct __pthrdsinfo info;
   int size;
@@ -104,20 +104,20 @@ topo_aix_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t pthread, co
 }
 
 static int
-topo_aix_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_aix_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   return topo_aix_set_thisproc_cpubind(topology, topo_set, strict);
 }
 
 static void
-look_rset(int sdl, topo_obj_type_t type, struct topo_topology *topology, int level)
+look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int level)
 {
   rsethandle_t rset, rad;
   int i,maxcpus,j;
   unsigned nbnodes;
-  struct topo_obj *obj;
+  struct hwloc_obj *obj;
 
-  if ((topology->flags & TOPO_FLAGS_WHOLE_SYSTEM))
+  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
     rset = rs_alloc(RS_ALL);
   else
     rset = rs_alloc(RS_PARTITION);
@@ -138,18 +138,18 @@ look_rset(int sdl, topo_obj_type_t type, struct topo_topology *topology, int lev
 
     /* It seems logical processors are numbered from 1 here, while the
      * bindprocessor functions numbers them from 0... */
-    obj = topo_alloc_setup_object(type, i - (type == TOPO_OBJ_PROC));
+    obj = hwloc_alloc_setup_object(type, i - (type == HWLOC_OBJ_PROC));
     obj->os_level = sdl;
     switch(type) {
-      case TOPO_OBJ_NODE:
+      case HWLOC_OBJ_NODE:
 	obj->attr->node.memory_kB = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
 	obj->attr->node.huge_page_free = 0; /* TODO: rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
 	break;
-      case TOPO_OBJ_CACHE:
+      case HWLOC_OBJ_CACHE:
 	obj->attr->cache.memory_kB = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
-      case TOPO_OBJ_MISC:
+      case HWLOC_OBJ_MISC:
 	obj->attr->misc.depth = level;
       default:
 	break;
@@ -157,12 +157,12 @@ look_rset(int sdl, topo_obj_type_t type, struct topo_topology *topology, int lev
     maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
     for (j = 0; j < maxcpus; j++) {
       if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
-	topo_cpuset_set(&obj->cpuset,j);
+	hwloc_cpuset_set(&obj->cpuset,j);
     }
-    topo_debug("%s %d has cpuset %"TOPO_PRIxCPUSET"\n",
-	       topo_obj_type_string(type),
-	       i, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
-    topo_add_object(topology, obj);
+    hwloc_debug("%s %d has cpuset %"HWLOC_PRIxCPUSET"\n",
+	       hwloc_obj_type_string(type),
+	       i, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
+    hwloc_add_object(topology, obj);
   }
 
   rs_free(rset);
@@ -170,7 +170,7 @@ look_rset(int sdl, topo_obj_type_t type, struct topo_topology *topology, int lev
 }
 
 void
-topo_look_aix(struct topo_topology *topology)
+hwloc_look_aix(struct hwloc_topology *topology)
 {
   unsigned i;
   /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
@@ -191,45 +191,45 @@ topo_look_aix(struct topo_topology *topology)
 	 * level ?
 	 */
 	{
-	  topo_debug("looking AIX \"SMP\" sdl %d\n", i);
-	  look_rset(i, TOPO_OBJ_MACHINE, topology, i);
+	  hwloc_debug("looking AIX \"SMP\" sdl %d\n", i);
+	  look_rset(i, HWLOC_OBJ_MACHINE, topology, i);
 	  known = 1;
 	}
 #endif
       if (i == rs_getinfo(NULL, R_MCMSDL, 0))
 	{
-	  topo_debug("looking AIX node sdl %d\n", i);
-	  look_rset(i, TOPO_OBJ_NODE, topology, i);
+	  hwloc_debug("looking AIX node sdl %d\n", i);
+	  look_rset(i, HWLOC_OBJ_NODE, topology, i);
 	  known = 1;
 	}
 #      ifdef R_L2CSDL
       if (i == rs_getinfo(NULL, R_L2CSDL, 0))
 	{
-	  topo_debug("looking AIX L2 sdl %d\n", i);
-	  look_rset(i, TOPO_OBJ_CACHE, topology, i);
+	  hwloc_debug("looking AIX L2 sdl %d\n", i);
+	  look_rset(i, HWLOC_OBJ_CACHE, topology, i);
 	  known = 1;
 	}
 #      endif
 #      ifdef R_PCORESDL
       if (i == rs_getinfo(NULL, R_PCORESDL, 0))
 	{
-	  topo_debug("looking AIX core sdl %d\n", i);
-	  look_rset(i, TOPO_OBJ_CORE, topology, i);
+	  hwloc_debug("looking AIX core sdl %d\n", i);
+	  look_rset(i, HWLOC_OBJ_CORE, topology, i);
 	  known = 1;
 	}
 #      endif
       if (i == rs_getinfo(NULL, R_MAXSDL, 0))
 	{
-	  topo_debug("looking AIX max sdl %d\n", i);
-	  look_rset(i, TOPO_OBJ_PROC, topology, i);
+	  hwloc_debug("looking AIX max sdl %d\n", i);
+	  look_rset(i, HWLOC_OBJ_PROC, topology, i);
 	  known = 1;
 	}
 
       /* Don't know how it should be rendered, make a misc object for it.  */
       if (!known)
 	{
-	  topo_debug("looking AIX unknown sdl %d\n", i);
-	  look_rset(i, TOPO_OBJ_MISC, topology, i);
+	  hwloc_debug("looking AIX unknown sdl %d\n", i);
+	  look_rset(i, HWLOC_OBJ_MISC, topology, i);
 	}
     }
 }

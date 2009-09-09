@@ -15,20 +15,20 @@
    topology and update `topology->synthetic_description' accordingly.  On
    success, return zero.  */
 int
-topo_backend_synthetic_init(struct topo_topology *topology, const char *description)
+hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *description)
 {
   const char *pos, *next_pos;
   unsigned long item, count;
   int i;
 
-  assert(topology->backend_type == TOPO_BACKEND_NONE);
+  assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
-  topology->backend_params.synthetic.type[0] = TOPO_OBJ_SYSTEM;
+  topology->backend_params.synthetic.type[0] = HWLOC_OBJ_SYSTEM;
   topology->backend_params.synthetic.id[0] = 0;
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
-#define TOPO_OBJ_TYPE_UNKNOWN -1
-    topo_obj_type_t type = TOPO_OBJ_TYPE_UNKNOWN;
+#define HWLOC_OBJ_TYPE_UNKNOWN -1
+    hwloc_obj_type_t type = HWLOC_OBJ_TYPE_UNKNOWN;
 
     while (*pos == ' ')
       pos++;
@@ -38,19 +38,19 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
 
     if (*pos < '0' || *pos > '9') {
       if (!strncasecmp(pos, "machines", 2))
-	type = TOPO_OBJ_MACHINE;
+	type = HWLOC_OBJ_MACHINE;
       else if (!strncasecmp(pos, "nodes", 1))
-	type = TOPO_OBJ_NODE;
+	type = HWLOC_OBJ_NODE;
       else if (!strncasecmp(pos, "sockets", 1))
-	type = TOPO_OBJ_SOCKET;
+	type = HWLOC_OBJ_SOCKET;
       else if (!strncasecmp(pos, "cores", 2))
-	type = TOPO_OBJ_CORE;
+	type = HWLOC_OBJ_CORE;
       else if (!strncasecmp(pos, "caches", 2))
-	type = TOPO_OBJ_CACHE;
+	type = HWLOC_OBJ_CACHE;
       else if (!strncasecmp(pos, "procs", 1))
-	type = TOPO_OBJ_PROC;
+	type = HWLOC_OBJ_PROC;
       else if (!strncasecmp(pos, "misc", 2))
-	type = TOPO_OBJ_MISC;
+	type = HWLOC_OBJ_MISC;
 
       next_pos = strchr(pos, ':');
       if (!next_pos) {
@@ -65,7 +65,7 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
       return -1;
     }
 
-    assert(count + 1 < TOPO_SYNTHETIC_MAX_DEPTH);
+    assert(count + 1 < HWLOC_SYNTHETIC_MAX_DEPTH);
     assert(item <= UINT_MAX);
 
     topology->backend_params.synthetic.arity[count-1] = (unsigned)item;
@@ -83,37 +83,37 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
   int nb_machine_levels = 0, nb_node_levels = 0;
 
   for(i=0; i<count; i++) {
-    topo_obj_type_t type;
+    hwloc_obj_type_t type;
 
     type = topology->backend_params.synthetic.type[i];
 
-    if (type == TOPO_OBJ_TYPE_UNKNOWN) {
+    if (type == HWLOC_OBJ_TYPE_UNKNOWN) {
       switch (count-1-i) {
-      case 0: type = TOPO_OBJ_PROC; break;
-      case 1: type = TOPO_OBJ_CORE; break;
-      case 2: type = TOPO_OBJ_CACHE; break;
-      case 3: type = TOPO_OBJ_SOCKET; break;
-      case 4: type = TOPO_OBJ_NODE; break;
-      case 5: type = TOPO_OBJ_MACHINE; break;
-      default: type = TOPO_OBJ_MISC; break;
+      case 0: type = HWLOC_OBJ_PROC; break;
+      case 1: type = HWLOC_OBJ_CORE; break;
+      case 2: type = HWLOC_OBJ_CACHE; break;
+      case 3: type = HWLOC_OBJ_SOCKET; break;
+      case 4: type = HWLOC_OBJ_NODE; break;
+      case 5: type = HWLOC_OBJ_MACHINE; break;
+      default: type = HWLOC_OBJ_MISC; break;
       }
       topology->backend_params.synthetic.type[i] = type;
     }
     switch (type) {
-      case TOPO_OBJ_CACHE:
+      case HWLOC_OBJ_CACHE:
 	cache_depth++;
 	break;
-      case TOPO_OBJ_MISC:
+      case HWLOC_OBJ_MISC:
 	misc_depth++;
 	break;
-      case TOPO_OBJ_NODE:
+      case HWLOC_OBJ_NODE:
 	if (nb_node_levels) {
 	    fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
 	    return -1;
 	}
 	nb_node_levels++;
 	break;
-      case TOPO_OBJ_MACHINE:
+      case HWLOC_OBJ_MACHINE:
 	if (nb_machine_levels) {
 	    fprintf(stderr,"synthetic string can not have several machine levels\n");
 	    return -1;
@@ -130,21 +130,21 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
     cache_depth = 2;
 
   for (i=0; i<count; i++) {
-    topo_obj_type_t type = topology->backend_params.synthetic.type[i];
+    hwloc_obj_type_t type = topology->backend_params.synthetic.type[i];
 
-    if (type == TOPO_OBJ_MISC)
+    if (type == HWLOC_OBJ_MISC)
       topology->backend_params.synthetic.depth[i] = misc_depth--;
-    else if (type == TOPO_OBJ_CACHE)
+    else if (type == HWLOC_OBJ_CACHE)
       topology->backend_params.synthetic.depth[i] = cache_depth--;
   }
 
   /* last level must be PROC */
-  if (topology->backend_params.synthetic.type[count-1] != TOPO_OBJ_PROC) {
+  if (topology->backend_params.synthetic.type[count-1] != HWLOC_OBJ_PROC) {
     fprintf(stderr,"synthetic string needs to have a number of processors\n");
     return -1;
   }
 
-  topology->backend_type = TOPO_BACKEND_SYNTHETIC;
+  topology->backend_type = HWLOC_BACKEND_SYNTHETIC;
   topology->backend_params.synthetic.arity[count-1] = 0;
   topology->is_fake = 1;
 
@@ -152,10 +152,10 @@ topo_backend_synthetic_init(struct topo_topology *topology, const char *descript
 }
 
 void
-topo_backend_synthetic_exit(struct topo_topology *topology)
+hwloc_backend_synthetic_exit(struct hwloc_topology *topology)
 {
-  assert(topology->backend_type == TOPO_BACKEND_SYNTHETIC);
-  topology->backend_type = TOPO_BACKEND_NONE;
+  assert(topology->backend_type == HWLOC_BACKEND_SYNTHETIC);
+  topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
 /*
@@ -167,64 +167,64 @@ topo_backend_synthetic_exit(struct topo_topology *topology)
  * - next cpu number to be used should be returned.
  */
 static unsigned
-topo__look_synthetic(struct topo_topology *topology,
+topo__look_synthetic(struct hwloc_topology *topology,
     int level, unsigned first_cpu,
     unsigned long *parent_memory_kB,
-    topo_cpuset_t *parent_cpuset)
+    hwloc_cpuset_t *parent_cpuset)
 {
   unsigned long my_memory = 0, *pmemory = parent_memory_kB;
-  topo_obj_t obj;
+  hwloc_obj_t obj;
   unsigned i;
-  topo_obj_type_t type = topology->backend_params.synthetic.type[level];
+  hwloc_obj_type_t type = topology->backend_params.synthetic.type[level];
 
   /* pre-hooks */
   switch (type) {
-    case TOPO_OBJ_MISC:
+    case HWLOC_OBJ_MISC:
       break;
-    case TOPO_OBJ_SYSTEM:
+    case HWLOC_OBJ_SYSTEM:
       /* Shouldn't happen.  */
       abort();
       break;
-    case TOPO_OBJ_MACHINE:
+    case HWLOC_OBJ_MACHINE:
       /* Gather memory size from memory nodes for this machine */
       pmemory = &my_memory;
       break;
-    case TOPO_OBJ_NODE:
+    case HWLOC_OBJ_NODE:
       break;
-    case TOPO_OBJ_SOCKET:
+    case HWLOC_OBJ_SOCKET:
       break;
-    case TOPO_OBJ_CACHE:
+    case HWLOC_OBJ_CACHE:
       break;
-    case TOPO_OBJ_CORE:
+    case HWLOC_OBJ_CORE:
       break;
-    case TOPO_OBJ_PROC:
+    case HWLOC_OBJ_PROC:
       break;
   }
 
-  obj = topo_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
+  obj = hwloc_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
 
-  if (type == TOPO_OBJ_PROC) {
+  if (type == HWLOC_OBJ_PROC) {
     assert(topology->backend_params.synthetic.arity[level] == 0);
-    topo_cpuset_set(&obj->cpuset, first_cpu++);
+    hwloc_cpuset_set(&obj->cpuset, first_cpu++);
   } else {
     assert(topology->backend_params.synthetic.arity[level] != 0);
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
       first_cpu = topo__look_synthetic(topology, level + 1, first_cpu, pmemory, &obj->cpuset);
   }
 
-  topo_add_object(topology, obj);
+  hwloc_add_object(topology, obj);
 
-  topo_cpuset_orset(parent_cpuset, &obj->cpuset);
+  hwloc_cpuset_orset(parent_cpuset, &obj->cpuset);
 
   /* post-hooks */
   switch (type) {
-    case TOPO_OBJ_MISC:
+    case HWLOC_OBJ_MISC:
       obj->attr->misc.depth = topology->backend_params.synthetic.depth[level];
       break;
-    case TOPO_OBJ_SYSTEM:
+    case HWLOC_OBJ_SYSTEM:
       abort();
       break;
-    case TOPO_OBJ_MACHINE:
+    case HWLOC_OBJ_MACHINE:
       obj->attr->machine.memory_kB = my_memory;
       obj->attr->machine.dmi_board_vendor = NULL;
       obj->attr->machine.dmi_board_name = NULL;
@@ -232,15 +232,15 @@ topo__look_synthetic(struct topo_topology *topology,
       obj->attr->machine.huge_page_free = 0;
       *parent_memory_kB += obj->attr->machine.memory_kB;
       break;
-    case TOPO_OBJ_NODE:
+    case HWLOC_OBJ_NODE:
       /* 1GB in memory nodes.  */
       obj->attr->node.memory_kB = 1024*1024;
       *parent_memory_kB += obj->attr->node.memory_kB;
       obj->attr->node.huge_page_free = 0;
       break;
-    case TOPO_OBJ_SOCKET:
+    case HWLOC_OBJ_SOCKET:
       break;
-    case TOPO_OBJ_CACHE:
+    case HWLOC_OBJ_CACHE:
       obj->attr->cache.depth = topology->backend_params.synthetic.depth[level];
       if (obj->attr->cache.depth == 1)
 	/* 32Kb in L1 */
@@ -249,9 +249,9 @@ topo__look_synthetic(struct topo_topology *topology,
 	/* *4 at each level, starting from 1MB for L2 */
 	obj->attr->cache.memory_kB = 256*1024 << (2*obj->attr->cache.depth);
       break;
-    case TOPO_OBJ_CORE:
+    case HWLOC_OBJ_CORE:
       break;
-    case TOPO_OBJ_PROC:
+    case HWLOC_OBJ_PROC:
       break;
   }
 
@@ -264,9 +264,9 @@ topo_synthetic_set_cpubind(void) {
 }
 
 void
-topo_look_synthetic(struct topo_topology *topology)
+hwloc_look_synthetic(struct hwloc_topology *topology)
 {
-  topo_cpuset_t cpuset;
+  hwloc_cpuset_t cpuset;
   unsigned first_cpu = 0, i;
 
   topology->set_cpubind = (void*) topo_synthetic_set_cpubind;

@@ -37,7 +37,7 @@
    used as a fall-back method, allowing `topo_set_fsys_root ()' to
    have the desired effect.  */
 unsigned
-topo_fallback_nbprocessors(void) {
+hwloc_fallback_nbprocessors(void) {
 #if HAVE_DECL__SC_NPROCESSORS_ONLN
   return sysconf(_SC_NPROCESSORS_ONLN);
 #elif HAVE_DECL__SC_NPROC_ONLN
@@ -57,7 +57,7 @@ topo_fallback_nbprocessors(void) {
   return sysinfo.dwNumberOfProcessors;
 #else
 #warning No known way to discover number of available processors on this system
-#warning topo_fallback_nbprocessors will default to 1
+#warning hwloc_fallback_nbprocessors will default to 1
   return 1;
 #endif
 }
@@ -68,7 +68,7 @@ topo_fallback_nbprocessors(void) {
  */
 static unsigned
 topo_setup_group_from_min_distance_clique(unsigned nbobjs,
-					  struct topo_obj *objs[nbobjs],
+					  struct hwloc_obj *objs[nbobjs],
 					  unsigned distances[nbobjs][nbobjs],
 					  unsigned groupids[nbobjs])
 {
@@ -79,11 +79,11 @@ topo_setup_group_from_min_distance_clique(unsigned nbobjs,
 
   /* try to find complete graphs */
   for(i=0; i<nbobjs; i++) {
-    topo_cpuset_t closest_objs_set;
+    hwloc_cpuset_t closest_objs_set;
     unsigned min_distance = UINT_MAX;
     unsigned size = 1; /* current object i */
 
-    topo_cpuset_zero(&closest_objs_set);
+    hwloc_cpuset_zero(&closest_objs_set);
 
     /* if already grouped, skip */
     if (groupids[i])
@@ -93,23 +93,23 @@ topo_setup_group_from_min_distance_clique(unsigned nbobjs,
     for(j=i+1; j<nbobjs; j++) {
       if (distances[i][j] < min_distance) {
 	/* reset the closest set and use new min_distance */
-	topo_cpuset_cpu(&closest_objs_set, j);
+	hwloc_cpuset_cpu(&closest_objs_set, j);
 	min_distance = distances[i][j];
 	size = 2; /* current objects i and j */
       } else if (distances[i][j] == min_distance) {
 	/* add object to current closest set */
-	topo_cpuset_set(&closest_objs_set, j);
+	hwloc_cpuset_set(&closest_objs_set, j);
 	size++;
       }
     }
     /* check that we actually have a complete graph between these closest objects */
     for (j=i+1; j<nbobjs; j++)
       for (k=j+1; k<nbobjs; k++)
-	if (topo_cpuset_isset(&closest_objs_set, j) &&
-	    topo_cpuset_isset(&closest_objs_set, k) &&
+	if (hwloc_cpuset_isset(&closest_objs_set, j) &&
+	    hwloc_cpuset_isset(&closest_objs_set, k) &&
 	    distances[j][k] != min_distance) {
 	  /* the minimal-distance graph is not complete. abort */
-	  topo_debug("found incomplete minimal-distance graph, aborting\n");
+	  hwloc_debug("found incomplete minimal-distance graph, aborting\n");
 	  return 0;
 	}
 
@@ -117,9 +117,9 @@ topo_setup_group_from_min_distance_clique(unsigned nbobjs,
     groupid++;
     groupids[i] = groupid;
     for(j=i+1; j<nbobjs; j++)
-      if (topo_cpuset_isset(&closest_objs_set, j))
+      if (hwloc_cpuset_isset(&closest_objs_set, j))
 	groupids[j] = groupid;
-    topo_debug("found complete graph with %u objects with minimal distance %u\n",
+    hwloc_debug("found complete graph with %u objects with minimal distance %u\n",
 	       size, min_distance);
   }
 
@@ -133,7 +133,7 @@ topo_setup_group_from_min_distance_clique(unsigned nbobjs,
  */
 static unsigned
 topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
-						struct topo_obj *objs[nbobjs],
+						struct hwloc_obj *objs[nbobjs],
 						unsigned distances[nbobjs][nbobjs],
 						unsigned groupids[nbobjs])
 {
@@ -144,11 +144,11 @@ topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
 
   /* try to find complete graphs */
   for(i=0; i<nbobjs; i++) {
-    topo_cpuset_t closest_objs_set;
+    hwloc_cpuset_t closest_objs_set;
     unsigned min_distance = UINT_MAX;
     unsigned size = 1; /* current object i */
 
-    topo_cpuset_zero(&closest_objs_set);
+    hwloc_cpuset_zero(&closest_objs_set);
 
     /* if already grouped, skip */
     if (groupids[i])
@@ -158,12 +158,12 @@ topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
     for(j=i+1; j<nbobjs; j++) {
       if (distances[i][j] < min_distance) {
 	/* reset the closest set and use new min_distance */
-	topo_cpuset_cpu(&closest_objs_set, j);
+	hwloc_cpuset_cpu(&closest_objs_set, j);
 	min_distance = distances[i][j];
 	size = 2; /* current objects i and j */
       } else if (distances[i][j] == min_distance) {
 	/* add object to current closest set */
-	topo_cpuset_set(&closest_objs_set, j);
+	hwloc_cpuset_set(&closest_objs_set, j);
 	size++;
       }
     }
@@ -173,9 +173,9 @@ topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
       for(j=i+1; j<nbobjs; j++)
 	for(k=j+1; k<nbobjs; k++)
 	  if (distances[j][k] <= min_distance
-	      && topo_cpuset_isset(&closest_objs_set, j)
-	      && !topo_cpuset_isset(&closest_objs_set, k)) {
-	    topo_cpuset_set(&closest_objs_set, k);
+	      && hwloc_cpuset_isset(&closest_objs_set, j)
+	      && !hwloc_cpuset_isset(&closest_objs_set, k)) {
+	    hwloc_cpuset_set(&closest_objs_set, k);
 	    size++;
 	    found = 1;
 	  }
@@ -187,9 +187,9 @@ topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
     groupid++;
     groupids[i] = groupid;
     for(j=i+1; j<nbobjs; j++)
-      if (topo_cpuset_isset(&closest_objs_set, j))
+      if (hwloc_cpuset_isset(&closest_objs_set, j))
 	groupids[j] = groupid;
-    topo_debug("found transitive graph with %u objects with minimal distance %u\n",
+    hwloc_debug("found transitive graph with %u objects with minimal distance %u\n",
 	       size, min_distance);
   }
 
@@ -202,9 +202,9 @@ topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
  * after having done some basic sanity checks.
  */
 static void
-topo__setup_misc_level_from_distances(struct topo_topology *topology,
+topo__setup_misc_level_from_distances(struct hwloc_topology *topology,
 				      unsigned nbobjs,
-				      struct topo_obj *objs[nbobjs],
+				      struct hwloc_obj *objs[nbobjs],
 				      unsigned distances[nbobjs][nbobjs],
 				      int depth)
 {
@@ -212,8 +212,8 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   int nbgroups;
   unsigned i,j;
 
-  topo_debug("trying to group %s objects into misc objects according to physical distances\n",
-	     topo_obj_type_string(objs[0]->type));
+  hwloc_debug("trying to group %s objects into misc objects according to physical distances\n",
+	     hwloc_obj_type_string(objs[0]->type));
 
   if (nbobjs <= 2)
     return;
@@ -226,27 +226,27 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
   }
 
   if (nbgroups == 1) {
-    topo_debug("ignoring misc object with all objects\n");
+    hwloc_debug("ignoring misc object with all objects\n");
     return;
   }
 
   /* create new misc objects and record their size */
-  topo_obj_t groupobjs[nbgroups];
+  hwloc_obj_t groupobjs[nbgroups];
   unsigned groupsizes[nbgroups];
   memset(groupsizes, 0, sizeof(groupsizes));
   for(i=0; i<nbgroups; i++) {
     /* create the misc object */
-    topo_obj_t misc_obj;
-    misc_obj = topo_alloc_setup_object(TOPO_OBJ_MISC, -1);
+    hwloc_obj_t misc_obj;
+    misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
     misc_obj->attr->misc.depth = depth;
     for (j=0; j<nbobjs; j++)
       if (groupids[j] == i+1) {
-	topo_cpuset_orset(&misc_obj->cpuset, &objs[j]->cpuset);
+	hwloc_cpuset_orset(&misc_obj->cpuset, &objs[j]->cpuset);
 	groupsizes[i]++;
       }
-    topo_debug("adding misc object with %u objects and cpuset %"TOPO_PRIxCPUSET"\n",
-	       groupsizes[i], TOPO_CPUSET_PRINTF_VALUE(&misc_obj->cpuset));
-    topo_add_object(topology, misc_obj);
+    hwloc_debug("adding misc object with %u objects and cpuset %"HWLOC_PRIxCPUSET"\n",
+	       groupsizes[i], HWLOC_CPUSET_PRINTF_VALUE(&misc_obj->cpuset));
+    hwloc_add_object(topology, misc_obj);
     groupobjs[i] = misc_obj;
   }
 
@@ -260,11 +260,11 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
     for(j=0; j<nbgroups; j++)
       groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
 #ifdef HWLOC_DEBUG
-  topo_debug("group distances:\n");
+  hwloc_debug("group distances:\n");
   for(i=0; i<nbgroups; i++) {
     for(j=0; j<nbgroups; j++)
-      topo_debug("%u ", groupdistances[i][j]);
-    topo_debug("\n");
+      hwloc_debug("%u ", groupdistances[i][j]);
+    hwloc_debug("\n");
   }
 #endif
 
@@ -275,28 +275,28 @@ topo__setup_misc_level_from_distances(struct topo_topology *topology,
  * Look at object physical distances to group them.
  */
 void
-topo_setup_misc_level_from_distances(struct topo_topology *topology,
+hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
 				     unsigned nbobjs,
-				     struct topo_obj *objs[nbobjs],
+				     struct hwloc_obj *objs[nbobjs],
 				     unsigned distances[nbobjs][nbobjs])
 {
   unsigned i,j;
 
-  if (getenv("TOPO_IGNORE_DISTANCES"))
+  if (getenv("HWLOC_IGNORE_DISTANCES"))
     return;
 
 #ifdef HWLOC_DEBUG
-  topo_debug("node distance matrix:\n");
-  topo_debug("   ");
+  hwloc_debug("node distance matrix:\n");
+  hwloc_debug("   ");
   for(j=0; j<nbobjs; j++)
-    topo_debug(" %3d", j);
-  topo_debug("\n");
+    hwloc_debug(" %3d", j);
+  hwloc_debug("\n");
 
   for(i=0; i<nbobjs; i++) {
-    topo_debug("%3d", i);
+    hwloc_debug("%3d", i);
     for(j=0; j<nbobjs; j++)
-      topo_debug(" %3d", distances[i][j]);
-    topo_debug("\n");
+      hwloc_debug(" %3d", distances[i][j]);
+    hwloc_debug("\n");
   }
 #endif
 
@@ -305,13 +305,13 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
     for(j=i+1; j<nbobjs; j++) {
       /* should be symmetric */
       if (distances[i][j] != distances[j][i]) {
-	topo_debug("distance matrix asymmetric ([%u,%u]=%u != [%u,%u]=%u), aborting\n",
+	hwloc_debug("distance matrix asymmetric ([%u,%u]=%u != [%u,%u]=%u), aborting\n",
 		   i, j, distances[i][j], j, i, distances[j][i]);
 	return;
       }
       /* diagonal is smaller than everything else */
       if (distances[i][j] <= distances[i][i]) {
-	topo_debug("distance to self not strictly minimal ([%u,%u]=%u <= [%u,%u]=%u), aborting\n",
+	hwloc_debug("distance to self not strictly minimal ([%u,%u]=%u <= [%u,%u]=%u), aborting\n",
 		   i, j, distances[i][j], i, i, distances[i][i]);
 	return;
       }
@@ -326,26 +326,26 @@ topo_setup_misc_level_from_distances(struct topo_topology *topology,
  * to set a Proc level.
  */
 void
-topo_setup_proc_level(struct topo_topology *topology,
+hwloc_setup_proc_level(struct hwloc_topology *topology,
 		      unsigned nb_processors,
-		      topo_cpuset_t *online_cpuset)
+		      hwloc_cpuset_t *online_cpuset)
 {
-  struct topo_obj *obj;
+  struct hwloc_obj *obj;
   unsigned oscpu,cpu;
 
-  topo_debug("\n\n * CPU cpusets *\n\n");
+  hwloc_debug("\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<nb_processors; oscpu++)
     {
-      if (online_cpuset && !topo_cpuset_isset(online_cpuset, oscpu))
+      if (online_cpuset && !hwloc_cpuset_isset(online_cpuset, oscpu))
        continue;
 
-      obj = topo_alloc_setup_object(TOPO_OBJ_PROC, oscpu);
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, oscpu);
 
-      topo_cpuset_cpu(&obj->cpuset, oscpu);
+      hwloc_cpuset_cpu(&obj->cpuset, oscpu);
 
-      topo_debug("cpu %d (os %d) has cpuset %"TOPO_PRIxCPUSET"\n",
-		 cpu, oscpu, TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset));
-      topo_add_object(topology, obj);
+      hwloc_debug("cpu %d (os %d) has cpuset %"HWLOC_PRIxCPUSET"\n",
+		 cpu, oscpu, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
+      hwloc_add_object(topology, obj);
 
       cpu++;
     }
@@ -353,31 +353,31 @@ topo_setup_proc_level(struct topo_topology *topology,
 
 /* Just for debugging.  */
 static void
-print_objects(struct topo_topology *topology, int indent, topo_obj_t obj)
+print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
 {
-  char line[TOPO_CPUSET_STRING_LENGTH+1];
-  topo_debug("%*s", 2*indent, "");
-  topo_obj_snprintf(line, sizeof(line), topology, obj, "#", 1);
-  topo_debug("%s", line);
-  topo_cpuset_snprintf(line, sizeof(line), &obj->cpuset);
-  topo_debug(" %s", line);
+  char line[HWLOC_CPUSET_STRING_LENGTH+1];
+  hwloc_debug("%*s", 2*indent, "");
+  hwloc_obj_snprintf(line, sizeof(line), topology, obj, "#", 1);
+  hwloc_debug("%s", line);
+  hwloc_cpuset_snprintf(line, sizeof(line), &obj->cpuset);
+  hwloc_debug(" %s", line);
   if (obj->arity)
-    topo_debug(" arity %d", obj->arity);
-  topo_debug("\n");
+    hwloc_debug(" arity %d", obj->arity);
+  hwloc_debug("\n");
   for (obj = obj->first_child; obj; obj = obj->next_sibling)
     print_objects(topology, indent + 1, obj);
 }
 
 /* Free an object and all its content.  */
 static void
-free_object(topo_obj_t obj)
+free_object(hwloc_obj_t obj)
 {
   switch (obj->type) {
-  case TOPO_OBJ_SYSTEM:
+  case HWLOC_OBJ_SYSTEM:
     free(obj->attr->system.dmi_board_vendor);
     free(obj->attr->system.dmi_board_name);
     break;
-  case TOPO_OBJ_MACHINE:
+  case HWLOC_OBJ_MACHINE:
     free(obj->attr->machine.dmi_board_vendor);
     free(obj->attr->machine.dmi_board_name);
     break;
@@ -398,100 +398,100 @@ free_object(topo_obj_t obj)
  */
 
 enum topo_type_cmp_e {
-  TOPO_TYPE_HIGHER,
-  TOPO_TYPE_DEEPER,
-  TOPO_TYPE_EQUAL,
+  HWLOC_TYPE_HIGHER,
+  HWLOC_TYPE_DEEPER,
+  HWLOC_TYPE_EQUAL,
 };
 
 static const int obj_type_order[] = {
-  [TOPO_OBJ_SYSTEM] = 0,
-  [TOPO_OBJ_MACHINE] = 1,
-  [TOPO_OBJ_MISC] = 2,
-  [TOPO_OBJ_NODE] = 3,
-  [TOPO_OBJ_SOCKET] = 4,
-  [TOPO_OBJ_CACHE] = 5,
-  [TOPO_OBJ_CORE] = 6,
-  [TOPO_OBJ_PROC] = 7,
+  [HWLOC_OBJ_SYSTEM] = 0,
+  [HWLOC_OBJ_MACHINE] = 1,
+  [HWLOC_OBJ_MISC] = 2,
+  [HWLOC_OBJ_NODE] = 3,
+  [HWLOC_OBJ_SOCKET] = 4,
+  [HWLOC_OBJ_CACHE] = 5,
+  [HWLOC_OBJ_CORE] = 6,
+  [HWLOC_OBJ_PROC] = 7,
 };
 
-static const topo_obj_type_t obj_order_type[] = {
-  [0] = TOPO_OBJ_SYSTEM,
-  [1] = TOPO_OBJ_MACHINE,
-  [2] = TOPO_OBJ_MISC,
-  [3] = TOPO_OBJ_NODE,
-  [4] = TOPO_OBJ_SOCKET,
-  [5] = TOPO_OBJ_CACHE,
-  [6] = TOPO_OBJ_CORE,
-  [7] = TOPO_OBJ_PROC,
+static const hwloc_obj_type_t obj_order_type[] = {
+  [0] = HWLOC_OBJ_SYSTEM,
+  [1] = HWLOC_OBJ_MACHINE,
+  [2] = HWLOC_OBJ_MISC,
+  [3] = HWLOC_OBJ_NODE,
+  [4] = HWLOC_OBJ_SOCKET,
+  [5] = HWLOC_OBJ_CACHE,
+  [6] = HWLOC_OBJ_CORE,
+  [7] = HWLOC_OBJ_PROC,
 };
 
-int topo_get_type_order(topo_obj_type_t type)
+int hwloc_get_type_order(hwloc_obj_type_t type)
 {
   return obj_type_order[type];
 }
 
-topo_obj_type_t topo_get_order_type(int order)
+hwloc_obj_type_t hwloc_get_order_type(int order)
 {
   return obj_order_type[order];
 }
 
 static enum topo_type_cmp_e
-topo_type_cmp(topo_obj_t obj1, topo_obj_t obj2)
+topo_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (topo_get_type_order(obj1->type) > topo_get_type_order(obj2->type))
-    return TOPO_TYPE_DEEPER;
-  if (topo_get_type_order(obj1->type) < topo_get_type_order(obj2->type))
-    return TOPO_TYPE_HIGHER;
+  if (hwloc_get_type_order(obj1->type) > hwloc_get_type_order(obj2->type))
+    return HWLOC_TYPE_DEEPER;
+  if (hwloc_get_type_order(obj1->type) < hwloc_get_type_order(obj2->type))
+    return HWLOC_TYPE_HIGHER;
 
   /* Caches have the same types but can have different depths.  */
-  if (obj1->type == TOPO_OBJ_CACHE) {
+  if (obj1->type == HWLOC_OBJ_CACHE) {
     if (obj1->attr->cache.depth < obj2->attr->cache.depth)
-      return TOPO_TYPE_DEEPER;
+      return HWLOC_TYPE_DEEPER;
     else if (obj1->attr->cache.depth > obj2->attr->cache.depth)
-      return TOPO_TYPE_HIGHER;
+      return HWLOC_TYPE_HIGHER;
   }
 
   /* Misc objects have the same types but can have different depths.  */
-  if (obj1->type == TOPO_OBJ_MISC) {
+  if (obj1->type == HWLOC_OBJ_MISC) {
     if (obj1->attr->misc.depth < obj2->attr->misc.depth)
-      return TOPO_TYPE_DEEPER;
+      return HWLOC_TYPE_DEEPER;
     else if (obj1->attr->misc.depth > obj2->attr->misc.depth)
-      return TOPO_TYPE_HIGHER;
+      return HWLOC_TYPE_HIGHER;
   }
 
-  return TOPO_TYPE_EQUAL;
+  return HWLOC_TYPE_EQUAL;
 }
 
 /*
  * How to compare objects based on cpusets.
  */
 
-enum topo_obj_cmp_e {
-  TOPO_OBJ_EQUAL,	/**< \brief Equal */
-  TOPO_OBJ_INCLUDED,	/**< \brief Strictly included into */
-  TOPO_OBJ_CONTAINS,	/**< \brief Strictly contains */
-  TOPO_OBJ_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
-  TOPO_OBJ_DIFFERENT,	/**< \brief No intersection */
+enum hwloc_obj_cmp_e {
+  HWLOC_OBJ_EQUAL,	/**< \brief Equal */
+  HWLOC_OBJ_INCLUDED,	/**< \brief Strictly included into */
+  HWLOC_OBJ_CONTAINS,	/**< \brief Strictly contains */
+  HWLOC_OBJ_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
+  HWLOC_OBJ_DIFFERENT,	/**< \brief No intersection */
 };
 
 static int
-topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
+hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (topo_cpuset_iszero(&obj1->cpuset) || topo_cpuset_iszero(&obj2->cpuset))
-    return TOPO_OBJ_DIFFERENT;
+  if (hwloc_cpuset_iszero(&obj1->cpuset) || hwloc_cpuset_iszero(&obj2->cpuset))
+    return HWLOC_OBJ_DIFFERENT;
 
-  if (topo_cpuset_isequal(&obj1->cpuset, &obj2->cpuset)) {
+  if (hwloc_cpuset_isequal(&obj1->cpuset, &obj2->cpuset)) {
 
     /* Same cpuset, subsort by type to have a consistent ordering.  */
 
     switch (topo_type_cmp(obj1, obj2)) {
-      case TOPO_TYPE_DEEPER:
-	return TOPO_OBJ_INCLUDED;
-      case TOPO_TYPE_HIGHER:
-	return TOPO_OBJ_CONTAINS;
-      case TOPO_TYPE_EQUAL:
+      case HWLOC_TYPE_DEEPER:
+	return HWLOC_OBJ_INCLUDED;
+      case HWLOC_TYPE_HIGHER:
+	return HWLOC_OBJ_CONTAINS;
+      case HWLOC_TYPE_EQUAL:
 	/* Same level cpuset and type!  Let's hope it's coherent.  */
-	return TOPO_OBJ_EQUAL;
+	return HWLOC_OBJ_EQUAL;
     }
 
     /* For dumb compilers */
@@ -501,16 +501,16 @@ topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
 
     /* Different cpusets, sort by inclusion.  */
 
-    if (topo_cpuset_isincluded(&obj1->cpuset, &obj2->cpuset))
-      return TOPO_OBJ_INCLUDED;
+    if (hwloc_cpuset_isincluded(&obj1->cpuset, &obj2->cpuset))
+      return HWLOC_OBJ_INCLUDED;
 
-    if (topo_cpuset_isincluded(&obj2->cpuset, &obj1->cpuset))
-      return TOPO_OBJ_CONTAINS;
+    if (hwloc_cpuset_isincluded(&obj2->cpuset, &obj1->cpuset))
+      return HWLOC_OBJ_CONTAINS;
 
-    if (topo_cpuset_intersects(&obj1->cpuset, &obj2->cpuset))
-      return TOPO_OBJ_INTERSECTS;
+    if (hwloc_cpuset_intersects(&obj1->cpuset, &obj2->cpuset))
+      return HWLOC_OBJ_INTERSECTS;
 
-    return TOPO_OBJ_DIFFERENT;
+    return HWLOC_OBJ_DIFFERENT;
   }
 }
 
@@ -527,28 +527,28 @@ topo_obj_cmp(topo_obj_t obj1, topo_obj_t obj2)
 
 /* Try to insert OBJ in CUR, recurse if needed */
 static void
-add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
+add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 {
-  topo_obj_t child, container, *cur_children, *obj_children, next_child;
+  hwloc_obj_t child, container, *cur_children, *obj_children, next_child;
   int put;
 
   /* Make sure we haven't gone too deep.  */
-  assert(topo_cpuset_isincluded(&obj->cpuset, &cur->cpuset));
+  assert(hwloc_cpuset_isincluded(&obj->cpuset, &cur->cpuset));
 
   /* Check whether OBJ is included in some child.  */
   container = NULL;
   for (child = cur->first_child; child; child = child->next_sibling) {
-    switch (topo_obj_cmp(obj, child)) {
-      case TOPO_OBJ_EQUAL:
-	assert(topo_cpuset_isequal(&obj->cpuset, &child->cpuset));
+    switch (hwloc_obj_cmp(obj, child)) {
+      case HWLOC_OBJ_EQUAL:
+	assert(hwloc_cpuset_isequal(&obj->cpuset, &child->cpuset));
 	assert(obj->os_index == child->os_index);
 	switch(obj->type) {
-	  case TOPO_OBJ_NODE:
+	  case HWLOC_OBJ_NODE:
 	    // Do not check these, it may change between calls
 	    //check_sizes(obj, child, attr->node.memory_kB);
 	    //check_sizes(obj, child, attr->node.huge_page_free);
 	    break;
-	  case TOPO_OBJ_CACHE:
+	  case HWLOC_OBJ_CACHE:
 	    check_sizes(obj, child, attr->cache.memory_kB);
 	    break;
 	  default:
@@ -556,7 +556,7 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 	}
 	/* Already present, no need to insert.  */
 	return;
-      case TOPO_OBJ_INCLUDED:
+      case HWLOC_OBJ_INCLUDED:
 	if (container) {
 	  /* TODO: how to report?  */
 	  fprintf(stderr, "object included in several different objects!\n");
@@ -566,15 +566,15 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 	/* This child contains OBJ.  */
 	container = child;
 	break;
-      case TOPO_OBJ_INTERSECTS:
+      case HWLOC_OBJ_INTERSECTS:
 	/* TODO: how to report?  */
 	fprintf(stderr, "object intersection without inclusion!\n");
 	/* We can't handle that.  */
 	return;
-      case TOPO_OBJ_CONTAINS:
+      case HWLOC_OBJ_CONTAINS:
 	/* OBJ will be above CHILD.  */
 	break;
-      case TOPO_OBJ_DIFFERENT:
+      case HWLOC_OBJ_DIFFERENT:
 	/* OBJ will be alongside CHILD.  */
 	break;
     }
@@ -606,11 +606,11 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
        child;
        child = next_child, child ? next_child = child->next_sibling : 0) {
 
-    switch (topo_obj_cmp(obj, child)) {
+    switch (hwloc_obj_cmp(obj, child)) {
 
-      case TOPO_OBJ_DIFFERENT:
+      case HWLOC_OBJ_DIFFERENT:
 	/* Leave CHILD in CUR.  */
-	if (!put && topo_cpuset_compar_first(&obj->cpuset, &child->cpuset) < 0) {
+	if (!put && hwloc_cpuset_compar_first(&obj->cpuset, &child->cpuset) < 0) {
 	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
 	  *cur_children = obj;
 	  cur_children = &obj->next_sibling;
@@ -621,15 +621,15 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 	cur_children = &child->next_sibling;
 	break;
 
-      case TOPO_OBJ_CONTAINS:
+      case HWLOC_OBJ_CONTAINS:
 	/* OBJ contains CHILD, put the latter in the former.  */
 	*obj_children = child;
 	obj_children = &child->next_sibling;
 	break;
 
-      case TOPO_OBJ_EQUAL:
-      case TOPO_OBJ_INCLUDED:
-      case TOPO_OBJ_INTERSECTS:
+      case HWLOC_OBJ_EQUAL:
+      case HWLOC_OBJ_INCLUDED:
+      case HWLOC_OBJ_INTERSECTS:
 	/* Shouldn't ever happen as we have handled them above.  */
 	abort();
     }
@@ -647,9 +647,9 @@ add_object(struct topo_topology *topology, topo_obj_t cur, topo_obj_t obj)
 }
 
 void
-topo_add_object(struct topo_topology *topology, topo_obj_t obj)
+hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
-  if (topology->ignored_types[obj->type] == TOPO_IGNORE_TYPE_ALWAYS)
+  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS)
     return;
 
   /* Start at the top.  */
@@ -664,14 +664,14 @@ topo_add_object(struct topo_topology *topology, topo_obj_t obj)
  * Hooks can modify the pointer they're given to remove or replace themselves.
  */
 static void
-traverse(topo_topology_t topology,
-	 topo_obj_t *father,
-	 void (*node_before)(topo_topology_t topology, topo_obj_t *obj, void *),
-	 void (*leaf)(topo_topology_t topology, topo_obj_t *obj, void *),
-	 void (*node_after)(topo_topology_t topology, topo_obj_t *obj, void *),
+traverse(hwloc_topology_t topology,
+	 hwloc_obj_t *father,
+	 void (*node_before)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
+	 void (*leaf)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
+	 void (*node_after)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
 	 void *data)
 {
-  topo_obj_t *pobj, obj;
+  hwloc_obj_t *pobj, obj;
 
   if (!(*father)->first_child) {
     if (leaf)
@@ -694,23 +694,23 @@ traverse(topo_topology_t topology,
 }
 
 static void
-get_proc_cpuset(topo_topology_t topology, topo_obj_t *obj, void *data)
+get_proc_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
-  topo_cpuset_t *cpuset = data;
-  if ((*obj)->type != TOPO_OBJ_PROC)
+  hwloc_cpuset_t *cpuset = data;
+  if ((*obj)->type != HWLOC_OBJ_PROC)
     return;
-  topo_cpuset_orset(cpuset, &(*obj)->cpuset);
+  hwloc_cpuset_orset(cpuset, &(*obj)->cpuset);
 }
 
 static void
-apply_cpuset(topo_topology_t topology, topo_obj_t *obj, void *data)
+apply_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
-  topo_cpuset_t *cpuset = data;
-  topo_cpuset_andset(&(*obj)->cpuset, cpuset);
+  hwloc_cpuset_t *cpuset = data;
+  hwloc_cpuset_andset(&(*obj)->cpuset, cpuset);
 }
 
 static void
-do_free_object(topo_topology_t topology, topo_obj_t *obj, void *data)
+do_free_object(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
   free_object(*obj);
 }
@@ -718,9 +718,9 @@ do_free_object(topo_topology_t topology, topo_obj_t *obj, void *data)
 /* Remove all children whose cpuset is empty, except NUMA nodes
  * since we want to keep memory information.  */
 static void
-remove_empty(topo_topology_t topology, topo_obj_t *obj, void *data)
+remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
-  if ((*obj)->type != TOPO_OBJ_NODE && topo_cpuset_iszero(&(*obj)->cpuset)) {
+  if ((*obj)->type != HWLOC_OBJ_NODE && hwloc_cpuset_iszero(&(*obj)->cpuset)) {
     /* Remove empty children */
     traverse(topology, obj, NULL, NULL, do_free_object, NULL);
     *obj = (*obj)->next_sibling;
@@ -732,20 +732,20 @@ remove_empty(topo_topology_t topology, topo_obj_t *obj, void *data)
  * ignored while keeping structure
  */
 static void
-merge_useless_child(topo_topology_t topology, topo_obj_t *pfather, void *data)
+merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
 {
-  topo_obj_t father = *pfather, child = father->first_child;
+  hwloc_obj_t father = *pfather, child = father->first_child;
   if (child->next_sibling)
     /* There are several children, it's useful to keep them.  */
     return;
 
   /* TODO: have a preference order?  */
-  if (topology->ignored_types[father->type] == TOPO_IGNORE_TYPE_KEEP_STRUCTURE) {
+  if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Father can be ignored in favor of the child.  */
     *pfather = child;
     child->next_sibling = father->next_sibling;
     free(father);
-  } else if (topology->ignored_types[child->type] == TOPO_IGNORE_TYPE_KEEP_STRUCTURE) {
+  } else if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Child can be ignored in favor of the father.  */
     father->first_child = child->first_child;
     free(child);
@@ -756,10 +756,10 @@ merge_useless_child(topo_topology_t topology, topo_obj_t *pfather, void *data)
  * Initialize handy pointers in the whole topology
  */
 static void
-topo_connect(topo_obj_t father)
+topo_connect(hwloc_obj_t father)
 {
   unsigned n;
-  topo_obj_t child, prev_child = NULL;
+  hwloc_obj_t child, prev_child = NULL;
 
   for (n = 0, child = father->first_child;
        child;
@@ -790,11 +790,11 @@ topo_connect(topo_obj_t father)
  * Check whether there is an object below ROOT that has the same type as OBJ
  */
 static int
-find_same_type(topo_obj_t root, topo_obj_t obj)
+find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
 {
-  topo_obj_t child;
+  hwloc_obj_t child;
 
-  if (topo_type_cmp(root, obj) == TOPO_TYPE_EQUAL)
+  if (topo_type_cmp(root, obj) == HWLOC_TYPE_EQUAL)
     return 1;
 
   for (child = root->first_child; child; child = child->next_sibling)
@@ -806,36 +806,36 @@ find_same_type(topo_obj_t root, topo_obj_t obj)
 
 /* Main discovery loop */
 static void
-topo_discover(struct topo_topology *topology)
+topo_discover(struct hwloc_topology *topology)
 {
   unsigned l, i=0, taken_i, new_i, j;
-  topo_obj_t *objs, *taken_objs, *new_objs, top_obj;
+  hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
   unsigned n_objs, n_taken_objs, n_new_objs;
 
   assert(topology!=NULL);
 
-  if (topology->backend_type == TOPO_BACKEND_SYNTHETIC) {
-    topo_look_synthetic(topology);
+  if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
+    hwloc_look_synthetic(topology);
 #ifdef HAVE_XML
-  } else if (topology->backend_type == TOPO_BACKEND_XML) {
-    topo_look_xml(topology);
+  } else if (topology->backend_type == HWLOC_BACKEND_XML) {
+    hwloc_look_xml(topology);
 #endif
   } else {
 
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
 
-  /* topo_look_* functions should use topo_obj_add to add objects initialized
-   * through topo_alloc_setup_object. For node levels, memory_Kb and huge_page_free
+  /* hwloc_look_* functions should use hwloc_obj_add to add objects initialized
+   * through hwloc_alloc_setup_object. For node levels, memory_Kb and huge_page_free
    * must be initialized. For cache levels, memory_kB and attr->cache.depth must be
    * initialized, for misc levels, attr->misc.depth must be initialized
    */
 
   /* There must be at least a PROC object for each logical processor, at worse
-   * produced by topo_setup_proc_level()
+   * produced by hwloc_setup_proc_level()
    */
 
   /* If the OS can provide NUMA distances, it should call
-   * topo_setup_misc_level_from_distances() to automatically group NUMA nodes
+   * hwloc_setup_misc_level_from_distances() to automatically group NUMA nodes
    * into misc objects.
    */
 
@@ -845,41 +845,41 @@ topo_discover(struct topo_topology *topology)
 
 #    ifdef LINUX_SYS
 #      define HAVE_OS_SUPPORT
-    topo_look_linux(topology);
+    hwloc_look_linux(topology);
 #    endif /* LINUX_SYS */
 
 #    ifdef  AIX_SYS
 #      define HAVE_OS_SUPPORT
-    topo_look_aix(topology);
+    hwloc_look_aix(topology);
 #    endif /* AIX_SYS */
 
 #    ifdef  OSF_SYS
 #      define HAVE_OS_SUPPORT
-    topo_look_osf(topology);
+    hwloc_look_osf(topology);
 #    endif /* OSF_SYS */
 
 #    ifdef  SOLARIS_SYS
 #      define HAVE_OS_SUPPORT
-    topo_look_solaris(topology);
+    hwloc_look_solaris(topology);
 #    endif /* SOLARIS_SYS */
 
 #    ifdef  WIN_SYS
 #      define HAVE_OS_SUPPORT
-    topo_look_windows(topology);
+    hwloc_look_windows(topology);
 #    endif /* WIN_SYS */
 
 #    ifdef  DARWIN_SYS
 #      define HAVE_OS_SUPPORT
-    topo_look_darwin(topology);
+    hwloc_look_darwin(topology);
 #    endif /* DARWIN_SYS */
 
 #    ifdef  HPUX_SYS
 #      define HAVE_OS_SUPPORT
-    topo_look_hpux(topology);
+    hwloc_look_hpux(topology);
 #    endif /* HPUX_SYS */
 
 #    ifndef HAVE_OS_SUPPORT
-    topo_setup_proc_level(topology, topo_fallback_nbprocessors (), NULL);
+    hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors (), NULL);
 #    endif /* Unsupported OS */
   }
 
@@ -887,22 +887,22 @@ topo_discover(struct topo_topology *topology)
 
   /* First tweak a bit to clean the topology.  */
 
-  topo_debug("\nComputing the system cpuset by ORing all Proc objects\n");
-  topo_cpuset_zero(&topology->levels[0][0]->cpuset);
+  hwloc_debug("\nComputing the system cpuset by ORing all Proc objects\n");
+  hwloc_cpuset_zero(&topology->levels[0][0]->cpuset);
   traverse(topology, &topology->levels[0][0], NULL, get_proc_cpuset, NULL, &topology->levels[0][0]->cpuset);
 
-  topo_debug("\nApplying the system cpuset to all nodes\n");
+  hwloc_debug("\nApplying the system cpuset to all nodes\n");
   traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, &topology->levels[0][0]->cpuset);
 
-  topo_debug("\nRemoving empty objects except numa nodes\n");
+  hwloc_debug("\nRemoving empty objects except numa nodes\n");
   traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
-  topo_debug("\nRemoving objects whose type has TOPO_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
+  hwloc_debug("\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
   traverse(topology, &topology->levels[0][0], NULL, NULL, merge_useless_child, NULL);
 
-  topo_debug("\nOk, finished tweaking, now connect\n");
+  hwloc_debug("\nOk, finished tweaking, now connect\n");
 
   /* Now connect handy pointers.  */
 
@@ -913,9 +913,9 @@ topo_discover(struct topo_topology *topology)
   /* Explore the resulting topology level by level.  */
 
   /* initialize all depth to unknown */
-  for (l=1; l < TOPO_OBJ_TYPE_MAX; l++)
-    topology->type_depth[l] = TOPO_TYPE_DEPTH_UNKNOWN;
-  topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
+  for (l=1; l < HWLOC_OBJ_TYPE_MAX; l++)
+    topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  topology->type_depth[HWLOC_OBJ_SYSTEM] = 0;
 
   /* Start with children of the whole system.  */
   l = 0;
@@ -930,7 +930,7 @@ topo_discover(struct topo_topology *topology)
     /* First find which type of object is the topmost.  */
     top_obj = objs[0];
     for (i = 1; i < n_objs; i++) {
-      if (topo_type_cmp(top_obj, objs[i]) != TOPO_TYPE_EQUAL) {
+      if (topo_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
 	if (find_same_type(top_obj, objs[i])) {
 	  /* OBJTOP is strictly above an object of the same type as OBJ, so it
 	   * is above OBJ.  */
@@ -946,7 +946,7 @@ topo_discover(struct topo_topology *topology)
     n_taken_objs = 0;
     n_new_objs = 0;
     for (i = 0; i < n_objs; i++)
-      if (topo_type_cmp(top_obj, objs[i]) == TOPO_TYPE_EQUAL) {
+      if (topo_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
 	n_taken_objs++;
 	n_new_objs += objs[i]->arity;
       }
@@ -959,7 +959,7 @@ topo_discover(struct topo_topology *topology)
     taken_i = 0;
     new_i = 0;
     for (i = 0; i < n_objs; i++)
-      if (topo_type_cmp(top_obj, objs[i]) == TOPO_TYPE_EQUAL) {
+      if (topo_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
 	/* Take it, add children.  */
 	taken_objs[taken_i++] = objs[i];
 	for (j = 0; j < objs[i]->arity; j++)
@@ -984,16 +984,16 @@ topo_discover(struct topo_topology *topology)
     }
 
     /* One more level!  */
-    if (top_obj->type == TOPO_OBJ_CACHE)
-      topo_debug("--- cache level depth %d", top_obj->attr->cache.depth);
+    if (top_obj->type == HWLOC_OBJ_CACHE)
+      hwloc_debug("--- cache level depth %d", top_obj->attr->cache.depth);
     else
-      topo_debug("--- %s level", topo_obj_type_string(top_obj->type));
-    topo_debug(" has number %d\n\n", topology->nb_levels);
+      hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
+    hwloc_debug(" has number %d\n\n", topology->nb_levels);
 
-    if (topology->type_depth[top_obj->type] == TOPO_TYPE_DEPTH_UNKNOWN)
+    if (topology->type_depth[top_obj->type] == HWLOC_TYPE_DEPTH_UNKNOWN)
       topology->type_depth[top_obj->type] = topology->nb_levels;
     else
-      topology->type_depth[top_obj->type] = TOPO_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
+      topology->type_depth[top_obj->type] = HWLOC_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
 
     taken_objs[n_taken_objs] = NULL;
 
@@ -1012,23 +1012,23 @@ topo_discover(struct topo_topology *topology)
 }
 
 static void
-topo_topology_setup_defaults(struct topo_topology *topology)
+hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
-  struct topo_obj *system_obj;
+  struct hwloc_obj *system_obj;
   int i;
 
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
-  for (i=0; i < TOPO_OBJ_TYPE_MAX; i++)
-    topology->type_depth[i] = TOPO_TYPE_DEPTH_UNKNOWN;
+  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++)
+    topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
   topology->nb_levels = 1; /* there's at least SYSTEM */
-  topology->levels[0] = malloc (sizeof (struct topo_obj));
+  topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
-  topology->type_depth[TOPO_OBJ_SYSTEM] = 0;
+  topology->type_depth[HWLOC_OBJ_SYSTEM] = 0;
 
   /* Create the actual System object */
-  system_obj = topo_alloc_setup_object(TOPO_OBJ_SYSTEM, 0);
+  system_obj = hwloc_alloc_setup_object(HWLOC_OBJ_SYSTEM, 0);
   system_obj->depth = 0;
   system_obj->logical_index = 0;
   system_obj->sibling_rank = 0;
@@ -1041,17 +1041,17 @@ topo_topology_setup_defaults(struct topo_topology *topology)
 #endif /* HAVE__SC_LARGE_PAGESIZE */
   system_obj->attr->system.dmi_board_vendor = NULL;
   system_obj->attr->system.dmi_board_name = NULL;
-  topo_cpuset_fill(&system_obj->cpuset);
+  hwloc_cpuset_fill(&system_obj->cpuset);
   topology->levels[0][0] = system_obj;
 }
 
 int
-topo_topology_init (struct topo_topology **topologyp)
+hwloc_topology_init (struct hwloc_topology **topologyp)
 {
-  struct topo_topology *topology;
+  struct hwloc_topology *topology;
   int i;
 
-  topology = malloc (sizeof (struct topo_topology));
+  topology = malloc (sizeof (struct hwloc_topology));
   if(!topology)
     return -1;
 
@@ -1059,56 +1059,56 @@ topo_topology_init (struct topo_topology **topologyp)
   topology->is_loaded = 0;
   topology->flags = 0;
   topology->is_fake = 0;
-  topology->backend_type = TOPO_BACKEND_NONE; /* backend not specified by default */
+  topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
   topology->set_cpubind = NULL;
   topology->set_proc_cpubind = NULL;
   topology->set_thread_cpubind = NULL;
   topology->set_thisproc_cpubind = NULL;
   topology->set_thisthread_cpubind = NULL;
   /* Only ignore useless cruft by default */
-  for(i=0; i< TOPO_OBJ_TYPE_MAX; i++)
-    topology->ignored_types[i] = TOPO_IGNORE_TYPE_NEVER;
-  topology->ignored_types[TOPO_OBJ_MISC] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
+  for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
+    topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
+  topology->ignored_types[HWLOC_OBJ_MISC] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
   /* Make the topology look like something coherent but empty */
-  topo_topology_setup_defaults(topology);
+  hwloc_topology_setup_defaults(topology);
 
   *topologyp = topology;
   return 0;
 }
 
 static void
-topo_backend_exit(struct topo_topology *topology)
+hwloc_backend_exit(struct hwloc_topology *topology)
 {
   switch (topology->backend_type) {
 #ifdef LINUX_SYS
-  case TOPO_BACKEND_SYSFS:
-    topo_backend_sysfs_exit(topology);
+  case HWLOC_BACKEND_SYSFS:
+    hwloc_backend_sysfs_exit(topology);
     break;
 #endif
 #ifdef HAVE_XML
-  case TOPO_BACKEND_XML:
-    topo_backend_xml_exit(topology);
+  case HWLOC_BACKEND_XML:
+    hwloc_backend_xml_exit(topology);
     break;
 #endif
-  case TOPO_BACKEND_SYNTHETIC:
-    topo_backend_synthetic_exit(topology);
+  case HWLOC_BACKEND_SYNTHETIC:
+    hwloc_backend_synthetic_exit(topology);
     break;
   default:
     break;
   }
 
-  assert(topology->backend_type == TOPO_BACKEND_NONE);
+  assert(topology->backend_type == HWLOC_BACKEND_NONE);
 }
 
 int
-topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_root_path)
+hwloc_topology_set_fsys_root(struct hwloc_topology *topology, const char *fsys_root_path)
 {
   /* cleanup existing backend */
-  topo_backend_exit(topology);
+  hwloc_backend_exit(topology);
 
 #ifdef LINUX_SYS
-  if (topo_backend_sysfs_init(topology, fsys_root_path) < 0)
+  if (hwloc_backend_sysfs_init(topology, fsys_root_path) < 0)
     return -1;
 #endif /* LINUX_SYS */
 
@@ -1116,82 +1116,82 @@ topo_topology_set_fsys_root(struct topo_topology *topology, const char *fsys_roo
 }
 
 int
-topo_topology_set_synthetic(struct topo_topology *topology, const char *description)
+hwloc_topology_set_synthetic(struct hwloc_topology *topology, const char *description)
 {
   /* cleanup existing backend */
-  topo_backend_exit(topology);
+  hwloc_backend_exit(topology);
 
-  return topo_backend_synthetic_init(topology, description);
+  return hwloc_backend_synthetic_init(topology, description);
 }
 
 int
-topo_topology_set_xml(struct topo_topology *topology, const char *xmlpath)
+hwloc_topology_set_xml(struct hwloc_topology *topology, const char *xmlpath)
 {
 #ifdef HAVE_XML
   /* cleanup existing backend */
-  topo_backend_exit(topology);
+  hwloc_backend_exit(topology);
 
-  return topo_backend_xml_init(topology, xmlpath);
+  return hwloc_backend_xml_init(topology, xmlpath);
 #else /* HAVE_XML */
   return -1;
 #endif /* !HAVE_XML */
 }
 
 int
-topo_topology_set_flags (struct topo_topology *topology, unsigned long flags)
+hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
 {
   topology->flags = flags;
   return 0;
 }
 
 int
-topo_topology_ignore_type(struct topo_topology *topology, topo_obj_type_t type)
+hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
-  if (type >= TOPO_OBJ_TYPE_MAX)
+  if (type >= HWLOC_OBJ_TYPE_MAX)
     return -1;
 
-  if (type == TOPO_OBJ_SYSTEM)
+  if (type == HWLOC_OBJ_SYSTEM)
     /* we don't want 2 heads */
     return -1;
 
-  if (type == TOPO_OBJ_PROC)
+  if (type == HWLOC_OBJ_PROC)
     /* we need the proc level */
     return -1;
 
-  topology->ignored_types[type] = TOPO_IGNORE_TYPE_ALWAYS;
+  topology->ignored_types[type] = HWLOC_IGNORE_TYPE_ALWAYS;
   return 0;
 }
 
 int
-topo_topology_ignore_type_keep_structure(struct topo_topology *topology, topo_obj_type_t type)
+hwloc_topology_ignore_type_keep_structure(struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
-  if (type >= TOPO_OBJ_TYPE_MAX)
+  if (type >= HWLOC_OBJ_TYPE_MAX)
     return -1;
 
-  if (type == TOPO_OBJ_SYSTEM)
+  if (type == HWLOC_OBJ_SYSTEM)
     /* we don't want 2 heads */
     return -1;
 
-  if (type == TOPO_OBJ_PROC)
+  if (type == HWLOC_OBJ_PROC)
     /* we need the proc level */
     return -1;
 
-  topology->ignored_types[type] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
+  topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }
 
 int
-topo_topology_ignore_all_keep_structure(struct topo_topology *topology)
+hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
 {
   unsigned type;
-  for(type=0; type<TOPO_OBJ_TYPE_MAX; type++)
-    if (type != TOPO_OBJ_SYSTEM && type != TOPO_OBJ_PROC)
-      topology->ignored_types[type] = TOPO_IGNORE_TYPE_KEEP_STRUCTURE;
+  for(type=0; type<HWLOC_OBJ_TYPE_MAX; type++)
+    if (type != HWLOC_OBJ_SYSTEM && type != HWLOC_OBJ_PROC)
+      topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }
 
 static void
-topo_topology_clear (struct topo_topology *topology)
+hwloc_topology_clear (struct hwloc_topology *topology)
 {
   unsigned l,i;
   for (l=0; l<topology->nb_levels; l++) {
@@ -1202,41 +1202,41 @@ topo_topology_clear (struct topo_topology *topology)
 }
 
 void
-topo_topology_destroy (struct topo_topology *topology)
+hwloc_topology_destroy (struct hwloc_topology *topology)
 {
-  topo_topology_clear(topology);
-  topo_backend_exit(topology);
+  hwloc_topology_clear(topology);
+  hwloc_backend_exit(topology);
   free(topology);
 }
 
 int
-topo_topology_load (struct topo_topology *topology)
+hwloc_topology_load (struct hwloc_topology *topology)
 {
   if (topology->is_loaded) {
-    topo_topology_clear(topology);
-    topo_topology_setup_defaults(topology);
+    hwloc_topology_clear(topology);
+    hwloc_topology_setup_defaults(topology);
     topology->is_loaded = 0;
   }
 
 #ifdef LINUX_SYS
   char *fsys_root_path_env = getenv("TOPO_FSYS_ROOT_PATH");
   if (fsys_root_path_env) {
-    topo_backend_exit(topology);
-    topo_backend_sysfs_init(topology, fsys_root_path_env);
+    hwloc_backend_exit(topology);
+    hwloc_backend_sysfs_init(topology, fsys_root_path_env);
   }
 #endif
 #ifdef HAVE_XML
   char *xmlpath_env = getenv("TOPO_XML_PATH");
   if (xmlpath_env) {
-    topo_backend_exit(topology);
-    topo_backend_xml_init(topology, xmlpath_env);
+    hwloc_backend_exit(topology);
+    hwloc_backend_xml_init(topology, xmlpath_env);
   }
 #endif
 
-  if (topology->backend_type == TOPO_BACKEND_NONE) {
+  if (topology->backend_type == HWLOC_BACKEND_NONE) {
     /* if we haven't chosen the backend, set the OS-specific one if needed */
 #ifdef LINUX_SYS
-    if (topo_backend_sysfs_init(topology, "/") < 0)
+    if (hwloc_backend_sysfs_init(topology, "/") < 0)
       return -1;
 #endif
   }
@@ -1250,14 +1250,14 @@ topo_topology_load (struct topo_topology *topology)
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
 #endif
-    topo_topology_check(topology);
+    hwloc_topology_check(topology);
 
   topology->is_loaded = 1;
   return 0;
 }
 
 int
-topo_topology_get_info(struct topo_topology *topology, struct topo_topology_info *info)
+hwloc_topology_get_info(struct hwloc_topology *topology, struct hwloc_topology_info *info)
 {
   info->depth = topology->nb_levels;
   info->is_fake = topology->is_fake;
@@ -1267,7 +1267,7 @@ topo_topology_get_info(struct topo_topology *topology, struct topo_topology_info
 
 /* check children between a father object */
 static void
-topo__check_children(struct topo_topology *topology, struct topo_obj *father)
+topo__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
 {
   int j;
 
@@ -1301,39 +1301,39 @@ topo__check_children(struct topo_topology *topology, struct topo_obj *father)
 
 /* check a whole topology structure */
 void
-topo_topology_check(struct topo_topology *topology)
+hwloc_topology_check(struct hwloc_topology *topology)
 {
-  struct topo_topology_info info;
-  struct topo_obj *obj;
+  struct hwloc_topology_info info;
+  struct hwloc_obj *obj;
   int i,j;
-  topo_obj_type_t type;
+  hwloc_obj_type_t type;
 
-  for (type = TOPO_OBJ_SYSTEM; type < TOPO_OBJ_TYPE_MAX; type++)
-    assert(topo_get_order_type(topo_get_type_order(type)) == type);
-  for (i = topo_get_order_type(TOPO_OBJ_SYSTEM); i <= topo_get_order_type(TOPO_OBJ_CORE); i++)
-    assert(topo_get_type_order(topo_get_order_type(i)) == i);
+  for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
+    assert(hwloc_get_order_type(hwloc_get_type_order(type)) == type);
+  for (i = hwloc_get_order_type(HWLOC_OBJ_SYSTEM); i <= hwloc_get_order_type(HWLOC_OBJ_CORE); i++)
+    assert(hwloc_get_type_order(hwloc_get_order_type(i)) == i);
 
-  assert(topo_topology_get_info(topology, &info) >= 0);
+  assert(hwloc_topology_get_info(topology, &info) >= 0);
 
   /* top-level specific checks */
-  assert(topo_get_depth_nbobjs(topology, 0) == 1);
-  obj = topo_get_system_obj(topology);
+  assert(hwloc_get_depth_nbobjs(topology, 0) == 1);
+  obj = hwloc_get_system_obj(topology);
   assert(obj);
-  assert(obj->type == TOPO_OBJ_SYSTEM);
+  assert(obj->type == HWLOC_OBJ_SYSTEM);
 
   /* check each level */
   for(i=0; i<info.depth; i++) {
-    unsigned width = topo_get_depth_nbobjs(topology, i);
-    struct topo_obj *prev = NULL;
+    unsigned width = hwloc_get_depth_nbobjs(topology, i);
+    struct hwloc_obj *prev = NULL;
 
     /* check that each object is equal to the previous one */
     for(j=0; j<width; j++) {
-      obj = topo_get_obj_by_depth(topology, i, j);
+      obj = hwloc_get_obj_by_depth(topology, i, j);
       assert(obj);
       assert(obj->depth == i);
       assert(obj->logical_index == j);
       if (prev) {
-	assert(topo_type_cmp(obj, prev) == TOPO_TYPE_EQUAL);
+	assert(topo_type_cmp(obj, prev) == HWLOC_TYPE_EQUAL);
 	assert(prev->next_cousin == obj);
 	assert(obj->prev_cousin == prev);
       }
@@ -1342,31 +1342,31 @@ topo_topology_check(struct topo_topology *topology)
     }
 
     /* check first object of the level */
-    obj = topo_get_obj_by_depth(topology, i, 0);
+    obj = hwloc_get_obj_by_depth(topology, i, 0);
     assert(obj);
     assert(!obj->prev_cousin);
 
     /* check type */
-    assert(topo_get_depth_type(topology, i) == obj->type);
-    assert(topo_get_type_depth(topology, obj->type) == i
-	   || topo_get_type_depth(topology, obj->type) == TOPO_TYPE_DEPTH_MULTIPLE);
+    assert(hwloc_get_depth_type(topology, i) == obj->type);
+    assert(hwloc_get_type_depth(topology, obj->type) == i
+	   || hwloc_get_type_depth(topology, obj->type) == HWLOC_TYPE_DEPTH_MULTIPLE);
 
     /* check last object */
-    obj = topo_get_obj_by_depth(topology, i, width-1);
+    obj = hwloc_get_obj_by_depth(topology, i, width-1);
     assert(obj);
     assert(!obj->next_cousin);
 
     /* check last+1 object */
-    obj = topo_get_obj_by_depth(topology, i, width);
+    obj = hwloc_get_obj_by_depth(topology, i, width);
     assert(!obj);
   }
 
   /* check bottom objects */
-  assert(topo_get_depth_nbobjs(topology, info.depth-1) > 0);
-  for(j=0; j<topo_get_depth_nbobjs(topology, info.depth-1); j++) {
-    obj = topo_get_obj_by_depth(topology, info.depth-1, j);
+  assert(hwloc_get_depth_nbobjs(topology, info.depth-1) > 0);
+  for(j=0; j<hwloc_get_depth_nbobjs(topology, info.depth-1); j++) {
+    obj = hwloc_get_obj_by_depth(topology, info.depth-1, j);
     assert(obj);
-    assert(obj->type == TOPO_OBJ_PROC);
+    assert(obj->type == HWLOC_OBJ_PROC);
     assert(obj->arity == 0);
     assert(obj->children == NULL);
   }

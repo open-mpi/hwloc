@@ -17,12 +17,12 @@
 #include <strings.h>
 
 #if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
-# define __topo_restrict __restrict
+# define __hwloc_restrict __restrict
 #else
 # if defined restrict || __STDC_VERSION__ >= 199901L
-#  define __topo_restrict restrict
+#  define __hwloc_restrict restrict
 # else
-#  define __topo_restrict
+#  define __hwloc_restrict
 # endif
 #endif
 
@@ -32,24 +32,24 @@
  */
 
 /* size and count of subsets within a set */
-#define TOPO_CPUSUBSET_SIZE	TOPO_BITS_PER_LONG
-#define TOPO_CPUSUBSET_COUNT	((TOPO_NBMAXCPUS+TOPO_CPUSUBSET_SIZE-1)/TOPO_CPUSUBSET_SIZE)
+#define HWLOC_CPUSUBSET_SIZE	HWLOC_BITS_PER_LONG
+#define HWLOC_CPUSUBSET_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSUBSET_SIZE-1)/HWLOC_CPUSUBSET_SIZE)
 
 /* extract a subset from a set using an index or a cpu */
-#define TOPO_CPUSUBSET_SUBSET(set,x)		((set).s[x])
-#define TOPO_CPUSUBSET_INDEX(cpu)		((cpu)/(TOPO_CPUSUBSET_SIZE))
-#define TOPO_CPUSUBSET_CPUSUBSET(set,cpu)	TOPO_CPUSUBSET_SUBSET(set,TOPO_CPUSUBSET_INDEX(cpu))
+#define HWLOC_CPUSUBSET_SUBSET(set,x)		((set).s[x])
+#define HWLOC_CPUSUBSET_INDEX(cpu)		((cpu)/(HWLOC_CPUSUBSET_SIZE))
+#define HWLOC_CPUSUBSET_CPUSUBSET(set,cpu)	HWLOC_CPUSUBSET_SUBSET(set,HWLOC_CPUSUBSET_INDEX(cpu))
 
 /* predefined subset values */
-#define TOPO_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(TOPO_CPUSUBSET_SIZE)))
-#define TOPO_CPUSUBSET_ZERO		0UL
-#define TOPO_CPUSUBSET_FULL		~0UL
+#define HWLOC_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(HWLOC_CPUSUBSET_SIZE)))
+#define HWLOC_CPUSUBSET_ZERO		0UL
+#define HWLOC_CPUSUBSET_FULL		~0UL
 
 /* Strings always use 32bit groups */
-#define TOPO_PRIxCPUSUBSET		"%08lx"
-#define TOPO_CPUSET_SUBSTRING_SIZE	32
-#define TOPO_CPUSET_SUBSTRING_COUNT	((TOPO_NBMAXCPUS+TOPO_CPUSET_SUBSTRING_SIZE-1)/TOPO_CPUSET_SUBSTRING_SIZE)
-#define TOPO_CPUSET_SUBSTRING_LENGTH	(TOPO_CPUSET_SUBSTRING_SIZE/4)
+#define HWLOC_PRIxCPUSUBSET		"%08lx"
+#define HWLOC_CPUSET_SUBSTRING_SIZE	32
+#define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
+#define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
 
 
 
@@ -61,15 +61,15 @@
 
 #  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 4))
      /* Starting from 3.4, gcc has a long variant.  */
-#    define topo_ffsl(x) __builtin_ffsl(x)
+#    define hwloc_ffsl(x) __builtin_ffsl(x)
 #  else
-#    define topo_ffs(x) __builtin_ffs(x)
-#    define TOPO_NEED_FFSL
+#    define hwloc_ffs(x) __builtin_ffs(x)
+#    define HWLOC_NEED_FFSL
 #  endif
 
 #elif defined(HWLOC_HAVE_FFSL)
 
-#  define topo_ffsl(x) ffsl(x)
+#  define hwloc_ffsl(x) ffsl(x)
 
 #elif defined(HWLOC_HAVE_FFS)
 
@@ -77,12 +77,12 @@
 extern int ffs(int);
 #  endif
 
-#  define topo_ffs(x) ffs(x)
-#  define TOPO_NEED_FFSL
+#  define hwloc_ffs(x) ffs(x)
+#  define HWLOC_NEED_FFSL
 
 #else /* no ffs implementation */
 
-static __inline__ int topo_ffsl(unsigned long x)
+static __inline__ int hwloc_ffsl(unsigned long x)
 {
 	int i;
 
@@ -90,7 +90,7 @@ static __inline__ int topo_ffsl(unsigned long x)
 		return 0;
 
 	i = 1;
-#if TOPO_BITS_PER_LONG >= 64
+#if HWLOC_BITS_PER_LONG >= 64
 	if (!(x & 0xfffffffful)) {
 		x >>= 32;
 		i += 32;
@@ -122,47 +122,47 @@ static __inline__ int topo_ffsl(unsigned long x)
 
 #endif
 
-#ifdef TOPO_NEED_FFSL
+#ifdef HWLOC_NEED_FFSL
 
 /* We only have an int ffs(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline__ int topo_ffs32(unsigned long x)
+static __inline__ int hwloc_ffs32(unsigned long x)
 {
-#if TOPO_BITS_PER_INT == 16
+#if HWLOC_BITS_PER_INT == 16
 	int low_ffs, hi_ffs;
 
-	low_ffs = topo_ffs(x & 0xfffful);
+	low_ffs = hwloc_ffs(x & 0xfffful);
 	if (low_ffs)
 		return low_ffs;
 
-	hi_ffs = topo_ffs(x >> 16);
+	hi_ffs = hwloc_ffs(x >> 16);
 	if (hi_ffs)
 		return hi_ffs + 16;
 
 	return 0;
 #else
-	return topo_ffs(x);
+	return hwloc_ffs(x);
 #endif
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline__ int topo_ffsl(unsigned long x)
+static __inline__ int hwloc_ffsl(unsigned long x)
 {
-#if TOPO_BITS_PER_LONG == 64
+#if HWLOC_BITS_PER_LONG == 64
 	int low_ffs, hi_ffs;
 
-	low_ffs = topo_ffs32(x & 0xfffffffful);
+	low_ffs = hwloc_ffs32(x & 0xfffffffful);
 	if (low_ffs)
 		return low_ffs;
 
-	hi_ffs = topo_ffs32(x >> 32);
+	hi_ffs = hwloc_ffs32(x >> 32);
 	if (hi_ffs)
 		return hi_ffs + 32;
 
 	return 0;
 #else
-	return topo_ffs32(x);
+	return hwloc_ffs32(x);
 #endif
 }
 #endif
@@ -173,19 +173,19 @@ static __inline__ int topo_ffsl(unsigned long x)
 #ifdef __GNUC_____
 
 #  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 4))
-#    define topo_flsl(x) (x ? 8*sizeof(long) - __builtin_clzl(x) : 0)
+#    define hwloc_flsl(x) (x ? 8*sizeof(long) - __builtin_clzl(x) : 0)
 #  else
-#    define topo_fls(x) (x ? 8*sizeof(int) - __builtin_clz(x) : 0)
-#    define TOPO_NEED_FLSL
+#    define hwloc_fls(x) (x ? 8*sizeof(int) - __builtin_clz(x) : 0)
+#    define HWLOC_NEED_FLSL
 #  endif
 
 #elif defined(HWLOC_HAVE_FLSL)
 
-#  define topo_flsl(x) flsl(x)
+#  define hwloc_flsl(x) flsl(x)
 
 #elif defined(HWLOC_HAVE_CLZL)
 
-#  define topo_flsl(x) (x ? 8*sizeof(long) - clzl(x) : 0)
+#  define hwloc_flsl(x) (x ? 8*sizeof(long) - clzl(x) : 0)
 
 #elif defined(HWLOC_HAVE_FLS)
 
@@ -193,8 +193,8 @@ static __inline__ int topo_ffsl(unsigned long x)
 extern int fsl(int);
 #  endif
 
-#  define topo_fls(x) fls(x)
-#  define TOPO_NEED_FLSL
+#  define hwloc_fls(x) fls(x)
+#  define HWLOC_NEED_FLSL
 
 #elif defined(HWLOC_HAVE_CLZ)
 
@@ -202,12 +202,12 @@ extern int fsl(int);
 extern int clz(int);
 #  endif
 
-#  define topo_fls(x) (x ? 8*sizeof(int) - clz(x) : 0)
-#  define TOPO_NEED_FLSL
+#  define hwloc_fls(x) (x ? 8*sizeof(int) - clz(x) : 0)
+#  define HWLOC_NEED_FLSL
 
 #else /* no fls implementation */
 
-static __inline__ int topo_flsl(unsigned long x)
+static __inline__ int hwloc_flsl(unsigned long x)
 {
 	int i = 0;
 
@@ -215,7 +215,7 @@ static __inline__ int topo_flsl(unsigned long x)
 		return 0;
 
 	i = 1;
-#if TOPO_BITS_PER_LONG >= 64
+#if HWLOC_BITS_PER_LONG >= 64
 	if ((x & 0xffffffff00000000ul)) {
 		x >>= 32;
 		i += 32;
@@ -247,54 +247,54 @@ static __inline__ int topo_flsl(unsigned long x)
 
 #endif
 
-#ifdef TOPO_NEED_FLSL
+#ifdef HWLOC_NEED_FLSL
 
 /* We only have an int fls(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline__ int topo_fls32(unsigned long x)
+static __inline__ int hwloc_fls32(unsigned long x)
 {
-#if TOPO_BITS_PER_INT == 16
+#if HWLOC_BITS_PER_INT == 16
 	int low_fls, hi_fls;
 
-	hi_fls = topo_fls(x >> 16);
+	hi_fls = hwloc_fls(x >> 16);
 	if (hi_fls)
 		return hi_fls + 16;
 
-	low_fls = topo_fls(x & 0xfffful);
+	low_fls = hwloc_fls(x & 0xfffful);
 	if (low_fls)
 		return low_fls;
 
 	return 0;
 #else
-	return topo_fls(x);
+	return hwloc_fls(x);
 #endif
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline__ int topo_flsl(unsigned long x)
+static __inline__ int hwloc_flsl(unsigned long x)
 {
-#if TOPO_BITS_PER_LONG == 64
+#if HWLOC_BITS_PER_LONG == 64
 	int low_fls, hi_fls;
 
-	hi_fls = topo_fls32(x >> 32);
+	hi_fls = hwloc_fls32(x >> 32);
 	if (hi_fls)
 		return hi_fls + 32;
 
-	low_fls = topo_fls32(x & 0xfffffffful);
+	low_fls = hwloc_fls32(x & 0xfffffffful);
 	if (low_fls)
 		return low_fls;
 
 	return 0;
 #else
-	return topo_fls32(x);
+	return hwloc_fls32(x);
 #endif
 }
 #endif
 
-static __inline__ int topo_weight_long(unsigned long w)
+static __inline__ int hwloc_weight_long(unsigned long w)
 {
-#if TOPO_BITS_PER_LONG == 32
+#if HWLOC_BITS_PER_LONG == 32
 #if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)
 	return __builtin_popcount(w);
 #else
@@ -304,7 +304,7 @@ static __inline__ int topo_weight_long(unsigned long w)
 	res = (res & 0x00FF00FF) + ((res >> 8) & 0x00FF00FF);
 	return (res & 0x0000FFFF) + ((res >> 16) & 0x0000FFFF);
 #endif
-#else /* TOPO_BITS_PER_LONG == 32 */
+#else /* HWLOC_BITS_PER_LONG == 32 */
 #if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)
 	return __builtin_popcountll(w);
 #else
@@ -316,7 +316,7 @@ static __inline__ int topo_weight_long(unsigned long w)
 	res = (res & 0x0000FFFF0000FFFFul) + ((res >> 16) & 0x0000FFFF0000FFFFul);
 	return (res & 0x00000000FFFFFFFFul) + ((res >> 32) & 0x00000000FFFFFFFFul);
 #endif
-#endif /* TOPO_BITS_PER_LONG == 64 */
+#endif /* HWLOC_BITS_PER_LONG == 64 */
 }
 
 

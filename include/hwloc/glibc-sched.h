@@ -37,22 +37,22 @@
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
 static __inline__ void
-topo_cpuset_to_glibc_sched_affinity(topo_topology_t topology, const topo_cpuset_t *toposet,
+hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, const hwloc_cpuset_t *toposet,
 				    cpu_set_t *schedset, size_t schedsetsize)
 {
 #ifdef CPU_ZERO_S
   unsigned cpu;
   CPU_ZERO_S(schedsetsize, schedset);
-  topo_cpuset_foreach_begin(cpu, toposet)
+  hwloc_cpuset_foreach_begin(cpu, toposet)
     CPU_SET_S(cpu, schedsetsize, schedset);
-  topo_cpuset_foreach_end();
+  hwloc_cpuset_foreach_end();
 #else /* !CPU_ZERO_S */
   unsigned cpu;
   CPU_ZERO(schedset);
   assert(schedsetsize == sizeof(cpu_set_t));
-  topo_cpuset_foreach_begin(cpu, toposet)
+  hwloc_cpuset_foreach_begin(cpu, toposet)
     CPU_SET(cpu, schedset);
-  topo_cpuset_foreach_end();
+  hwloc_cpuset_foreach_end();
 #endif /* !CPU_ZERO_S */
 }
 
@@ -64,21 +64,21 @@ topo_cpuset_to_glibc_sched_affinity(topo_topology_t topology, const topo_cpuset_
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
 static __inline__ void
-topo_cpuset_from_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *toposet,
+hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology, hwloc_cpuset_t *toposet,
 				      const cpu_set_t *schedset, size_t schedsetsize)
 {
 #ifdef CPU_ZERO_S
   int cpu, count;
-  topo_cpuset_zero(toposet);
+  hwloc_cpuset_zero(toposet);
   count = CPU_COUNT_S(schedsetsize, schedset);
   cpu = 0;
   while (count) {
     if (CPU_ISSET_S(cpu, schedsetsize, schedset)) {
-      topo_cpuset_set(toposet, cpu);
+      hwloc_cpuset_set(toposet, cpu);
       count--;
     }
     cpu++;
-    if (cpu > TOPO_NBMAXCPUS)
+    if (cpu > HWLOC_NBMAXCPUS)
       break;
   }
 #else /* !CPU_ZERO_S */
@@ -87,9 +87,9 @@ topo_cpuset_from_glibc_sched_affinity(topo_topology_t topology, topo_cpuset_t *t
    */
   int cpu;
   assert(schedsetsize == sizeof(cpu_set_t));
-  for(cpu=0; cpu<CPU_SETSIZE && cpu<TOPO_NBMAXCPUS; cpu++)
+  for(cpu=0; cpu<CPU_SETSIZE && cpu<HWLOC_NBMAXCPUS; cpu++)
     if (CPU_ISSET(cpu, schedset))
-      topo_cpuset_set(toposet, cpu);
+      hwloc_cpuset_set(toposet, cpu);
 #endif /* !CPU_ZERO_S */
 }
 

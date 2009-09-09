@@ -141,45 +141,45 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 #endif
 
 static int
-topo_win_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t thread, const topo_cpuset_t *topo_set, int strict)
+topo_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, const hwloc_cpuset_t *topo_set, int strict)
 {
   /* TODO: groups */
-  DWORD mask = topo_cpuset_to_ulong(topo_set);
+  DWORD mask = hwloc_cpuset_to_ulong(topo_set);
   if (!SetThreadAffinityMask(thread, mask))
     return -1;
   return 0;
 }
 
 static int
-topo_win_set_thisthread_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_win_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   return topo_win_set_thread_cpubind(topology, GetCurrentThread(), topo_set, strict);
 }
 
 static int
-topo_win_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t proc, const topo_cpuset_t *topo_set, int strict)
+topo_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, const hwloc_cpuset_t *topo_set, int strict)
 {
   /* TODO: groups */
-  DWORD mask = topo_cpuset_to_ulong(topo_set);
+  DWORD mask = hwloc_cpuset_to_ulong(topo_set);
   if (!SetProcessAffinityMask(proc, mask))
     return -1;
   return 0;
 }
 
 static int
-topo_win_set_thisproc_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_win_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   return topo_win_set_proc_cpubind(topology, GetCurrentProcess(), topo_set, strict);
 }
 
 static int
-topo_win_set_cpubind(topo_topology_t topology, const topo_cpuset_t *topo_set, int strict)
+topo_win_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
 {
   return topo_win_set_thisproc_cpubind(topology, topo_set, strict);
 }
 
 void
-topo_look_windows(struct topo_topology *topology)
+hwloc_look_windows(struct hwloc_topology *topology)
 {
   BOOL WINAPI (*GetLogicalProcessorInformationProc)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
   BOOL WINAPI (*GetLogicalProcessorInformationExProc)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
@@ -213,8 +213,8 @@ topo_look_windows(struct topo_topology *topology)
 
       unsigned id;
       int i;
-      struct topo_obj *obj;
-      topo_obj_type_t type;
+      struct hwloc_obj *obj;
+      hwloc_obj_type_t type;
 
       for (i = 0; i < length / sizeof(*procInfo); i++) {
 
@@ -227,30 +227,30 @@ topo_look_windows(struct topo_topology *topology)
 	id = -1;
 	switch (procInfo[i].Relationship) {
 	  case RelationNumaNode:
-	    type = TOPO_OBJ_NODE;
+	    type = HWLOC_OBJ_NODE;
 	    id = procInfo[i].NumaNode.NodeNumber;
 	    break;
 	  case RelationProcessorPackage:
-	    type = TOPO_OBJ_SOCKET;
+	    type = HWLOC_OBJ_SOCKET;
 	    break;
 	  case RelationCache:
-	    type = TOPO_OBJ_CACHE;
+	    type = HWLOC_OBJ_CACHE;
 	    break;
 	  case RelationProcessorCore:
-	    type = TOPO_OBJ_CORE;
+	    type = HWLOC_OBJ_CORE;
 	    break;
 	  case RelationGroup:
 	  default:
-	    type = TOPO_OBJ_MISC;
+	    type = HWLOC_OBJ_MISC;
 	    break;
 	}
 
-	obj = topo_alloc_setup_object(type, id);
-	topo_debug("%s#%d mask %lx\n", topo_obj_type_string(type), id, procInfo[i].ProcessorMask);
-	topo_cpuset_from_ulong(&obj->cpuset, procInfo[i].ProcessorMask);
+	obj = hwloc_alloc_setup_object(type, id);
+	hwloc_debug("%s#%d mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
+	hwloc_cpuset_from_ulong(&obj->cpuset, procInfo[i].ProcessorMask);
 
 	switch (type) {
-	  case TOPO_OBJ_NODE:
+	  case HWLOC_OBJ_NODE:
 	    {
 	      ULONGLONG avail;
 	      if (GetNumaAvailableMemoryNode(id, &avail))
@@ -260,17 +260,17 @@ topo_look_windows(struct topo_topology *topology)
 	      obj->attr->node.huge_page_free = 0; /* TODO */
 	      break;
 	    }
-	  case TOPO_OBJ_CACHE:
+	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.memory_kB = procInfo[i].Cache.Size >> 10;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
 	    break;
-	  case TOPO_OBJ_MISC:
+	  case HWLOC_OBJ_MISC:
 	    obj->attr->misc.depth = procInfo[i].Relationship == RelationGroup;
 	    break;
 	  default:
 	    break;
 	}
-	topo_add_object(topology, obj);
+	hwloc_add_object(topology, obj);
       }
 
       free(procInfo);
@@ -297,8 +297,8 @@ topo_look_windows(struct topo_topology *topology)
       }
 
       signed id;
-      struct topo_obj *obj;
-      topo_obj_type_t type;
+      struct hwloc_obj *obj;
+      hwloc_obj_type_t type;
       KAFFINITY mask;
       WORD group;
 
@@ -315,34 +315,34 @@ topo_look_windows(struct topo_topology *topology)
 	id = -1;
 	switch (procInfo->Relationship) {
 	  case RelationNumaNode:
-	    type = TOPO_OBJ_NODE;
+	    type = HWLOC_OBJ_NODE;
 	    mask = procInfo->NumaNode.GroupMask.Mask;
 	    group = procInfo->NumaNode.GroupMask.Group;
 	    id = procInfo->NumaNode.NodeNumber;
 	    break;
 	  case RelationProcessorPackage:
-	    type = TOPO_OBJ_SOCKET;
+	    type = HWLOC_OBJ_SOCKET;
 	    mask = procInfo->Processor.GroupMask.Mask;
 	    group = procInfo->Processor.GroupMask.Group;
 	    break;
 	  case RelationCache:
-	    type = TOPO_OBJ_CACHE;
+	    type = HWLOC_OBJ_CACHE;
 	    mask = procInfo->Cache.GroupMask.Mask;
 	    group = procInfo->Cache.GroupMask.Group;
 	    break;
 	  case RelationProcessorCore:
-	    type = TOPO_OBJ_CORE;
+	    type = HWLOC_OBJ_CORE;
 	    mask = procInfo->Processor.GroupMask.Mask;
 	    group = procInfo->Processor.GroupMask.Group;
 	    break;
 	  case RelationGroup:
 	    /* So strange an interface... */
 	    for (id = 0; id < procInfo->Group.ActiveGroupCount; id++) {
-	      obj = topo_alloc_setup_object(TOPO_OBJ_MISC, id);
+	      obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, id);
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
-	      topo_debug("group %d mask %lx\n", id, mask);
-	      topo_cpuset_from_ith_ulong(&obj->cpuset, id, mask);
-	      topo_add_object(topology, obj);
+	      hwloc_debug("group %d mask %lx\n", id, mask);
+	      hwloc_cpuset_from_ith_ulong(&obj->cpuset, id, mask);
+	      hwloc_add_object(topology, obj);
 	    }
 	    continue;
 	  default:
@@ -350,30 +350,30 @@ topo_look_windows(struct topo_topology *topology)
 	    continue;
 	}
 
-	obj = topo_alloc_setup_object(type, id);
-	topo_debug("%s#%d mask %d:%lx\n", topo_obj_type_string(type), id, group, mask);
-	topo_cpuset_from_ith_ulong(&obj->cpuset, group, mask);
+	obj = hwloc_alloc_setup_object(type, id);
+	hwloc_debug("%s#%d mask %d:%lx\n", hwloc_obj_type_string(type), id, group, mask);
+	hwloc_cpuset_from_ith_ulong(&obj->cpuset, group, mask);
 
 	switch (type) {
-	  case TOPO_OBJ_NODE:
+	  case HWLOC_OBJ_NODE:
 	    obj->attr->node.memory_kB = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
 	    obj->attr->node.huge_page_free = 0; /* TODO */
 	    break;
-	  case TOPO_OBJ_CACHE:
+	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.memory_kB = procInfo->Cache.CacheSize >> 10;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
 	    break;
 	  default:
 	    break;
 	}
-	topo_add_object(topology, obj);
+	hwloc_add_object(topology, obj);
       }
       free(procInfoTotal);
     }
   }
 
   /* add PROC objects */
-  topo_setup_proc_level(topology, topo_fallback_nbprocessors(), NULL);
+  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(), NULL);
 }
 
 /* TODO memory binding: VirtualAllocExNuma */

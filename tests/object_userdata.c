@@ -12,35 +12,35 @@
 
 /* check that object userdata is properly initialized */
 
-static void check(topo_topology_t topology)
+static void check(hwloc_topology_t topology)
 {
-  struct topo_topology_info topoinfo;
+  struct hwloc_topology_info topoinfo;
   unsigned i,j;
 
-  topo_topology_get_info(topology, &topoinfo);
+  hwloc_topology_get_info(topology, &topoinfo);
   for(i=0; i<topoinfo.depth; i++) {
-    for(j=0; j<topo_get_depth_nbobjs(topology, i); j++) {
-      assert(topo_get_obj_by_depth(topology, i, j)->userdata == NULL);
+    for(j=0; j<hwloc_get_depth_nbobjs(topology, i); j++) {
+      assert(hwloc_get_obj_by_depth(topology, i, j)->userdata == NULL);
     }
   }
 }
 
 int main(void)
 {
-  topo_topology_t topology;
+  hwloc_topology_t topology;
 
   /* check the real topology */
-  topo_topology_init(&topology);
-  topo_topology_load(topology);
+  hwloc_topology_init(&topology);
+  hwloc_topology_load(topology);
   check(topology);
-  topo_topology_destroy(topology);
+  hwloc_topology_destroy(topology);
 
   /* check a synthetic topology */
-  topo_topology_init(&topology);
-  topo_topology_set_synthetic(topology, "6 5 4 3 2");
-  topo_topology_load(topology);
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "6 5 4 3 2");
+  hwloc_topology_load(topology);
   check(topology);
-  topo_topology_destroy(topology);
+  hwloc_topology_destroy(topology);
 
   return 0;
 }

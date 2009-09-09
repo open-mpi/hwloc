@@ -16,11 +16,11 @@
 #include <assert.h>
 
 int
-topo_backend_xml_init(struct topo_topology *topology, const char *xmlpath)
+hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
 {
   xmlDoc *doc = NULL;
 
-  assert(topology->backend_type == TOPO_BACKEND_NONE);
+  assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
   LIBXML_TEST_VERSION;
 
@@ -30,21 +30,21 @@ topo_backend_xml_init(struct topo_topology *topology, const char *xmlpath)
 
   topology->backend_params.xml.doc = doc;
   topology->is_fake = 1;
-  topology->backend_type = TOPO_BACKEND_XML;
+  topology->backend_type = HWLOC_BACKEND_XML;
   return 0;
 }
 
 void
-topo_backend_xml_exit(struct topo_topology *topology)
+hwloc_backend_xml_exit(struct hwloc_topology *topology)
 {
-  assert(topology->backend_type == TOPO_BACKEND_XML);
+  assert(topology->backend_type == HWLOC_BACKEND_XML);
   xmlFreeDoc((xmlDoc*)topology->backend_params.xml.doc);
   xmlCleanupParser();
-  topology->backend_type = TOPO_BACKEND_NONE;
+  topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
 static void
-topo__process_root_attr(struct topo_topology *topology,
+topo__process_root_attr(struct hwloc_topology *topology,
 			const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
@@ -54,7 +54,7 @@ topo__process_root_attr(struct topo_topology *topology,
 }
 
 static void
-topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
+topo__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
 			  const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
@@ -68,21 +68,21 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
   else if (!strcmp(name, "os_index"))
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cpuset"))
-    topo_cpuset_from_string(value, &obj->cpuset);
+    hwloc_cpuset_from_string(value, &obj->cpuset);
 
   else if (!strcmp(name, "memory_kB")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     switch (obj->type) {
-      case TOPO_OBJ_CACHE:
+      case HWLOC_OBJ_CACHE:
 	obj->attr->cache.memory_kB = lvalue;
 	break;
-      case TOPO_OBJ_NODE:
+      case HWLOC_OBJ_NODE:
 	obj->attr->node.memory_kB = lvalue;
 	break;
-      case TOPO_OBJ_MACHINE:
+      case HWLOC_OBJ_MACHINE:
 	obj->attr->machine.memory_kB = lvalue;
 	break;
-      case TOPO_OBJ_SYSTEM:
+      case HWLOC_OBJ_SYSTEM:
 	obj->attr->system.memory_kB = lvalue;
 	break;
       default:
@@ -94,10 +94,10 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
   else if (!strcmp(name, "depth")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     switch (obj->type) {
-      case TOPO_OBJ_CACHE:
+      case HWLOC_OBJ_CACHE:
 	obj->attr->cache.depth = lvalue;
 	break;
-      case TOPO_OBJ_MISC:
+      case HWLOC_OBJ_MISC:
 	obj->attr->misc.depth = lvalue;
 	break;
       default:
@@ -109,13 +109,13 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
   else if (!strcmp(name, "huge_page_free")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     switch (obj->type) {
-      case TOPO_OBJ_NODE:
+      case HWLOC_OBJ_NODE:
 	obj->attr->node.huge_page_free = lvalue;
 	break;
-      case TOPO_OBJ_MACHINE:
+      case HWLOC_OBJ_MACHINE:
 	obj->attr->machine.huge_page_free = lvalue;
 	break;
-      case TOPO_OBJ_SYSTEM:
+      case HWLOC_OBJ_SYSTEM:
 	obj->attr->system.huge_page_free = lvalue;
 	break;
       default:
@@ -127,10 +127,10 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
   else if (!strcmp(name, "huge_page_size_kB")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     switch (obj->type) {
-      case TOPO_OBJ_MACHINE:
+      case HWLOC_OBJ_MACHINE:
 	obj->attr->machine.huge_page_size_kB = lvalue;
 	break;
-      case TOPO_OBJ_SYSTEM:
+      case HWLOC_OBJ_SYSTEM:
 	obj->attr->system.huge_page_size_kB = strtoul(value, NULL, 10);
 	break;
       default:
@@ -141,10 +141,10 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
 
   else if (!strcmp(name, "dmi_board_vendor")) {
     switch (obj->type) {
-      case TOPO_OBJ_MACHINE:
+      case HWLOC_OBJ_MACHINE:
 	obj->attr->machine.dmi_board_vendor = strdup(value);
 	break;
-      case TOPO_OBJ_SYSTEM:
+      case HWLOC_OBJ_SYSTEM:
 	obj->attr->system.dmi_board_vendor = strdup(value);
 	break;
       default:
@@ -155,10 +155,10 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
 
   else if (!strcmp(name, "dmi_board_name")) {
     switch (obj->type) {
-      case TOPO_OBJ_MACHINE:
+      case HWLOC_OBJ_MACHINE:
 	obj->attr->machine.dmi_board_name = strdup(value);
 	break;
-      case TOPO_OBJ_SYSTEM:
+      case HWLOC_OBJ_SYSTEM:
 	obj->attr->system.dmi_board_name = strdup(value);
 	break;
       default:
@@ -172,7 +172,7 @@ topo__process_object_attr(struct topo_topology *topology, struct topo_obj *obj,
 }
 
 static void
-topo__look_xml_attr(struct topo_topology *topology, struct topo_obj *obj,
+topo__look_xml_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
 		    const xmlChar *attrname, xmlNode *node)
 {
   /* use the first valid attribute content */
@@ -192,12 +192,12 @@ topo__look_xml_attr(struct topo_topology *topology, struct topo_obj *obj,
 }
 
 static void
-topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
+topo__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 {
   for (; node; node = node->next) {
     if (node->type == XML_ELEMENT_NODE) {
       xmlAttr *attr = NULL;
-      struct topo_obj *obj = NULL;
+      struct hwloc_obj *obj = NULL;
 
       if (depth == 0) {
 	/* root node should be in root class */
@@ -212,7 +212,7 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
 	  fprintf(stderr, "object node of class `%s' instead of `object'\n", (const char*) node->name);
 
 	if (depth > 1)
-	  obj = topo_alloc_setup_object(TOPO_OBJ_TYPE_MAX, -1);
+	  obj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
 	else
 	  obj = topology->levels[0][0];
       }
@@ -225,8 +225,8 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
 	    if (node->type == XML_TEXT_NODE) {
 	      if (node->content && node->content[0] != '\0' && node->content[0] != '\n') {
 		if (!strcmp((const char*) attr->name, "type")) {
-		  obj->type = topo_obj_type_of_string((const char*) node->content);
-		  if (obj->type == TOPO_OBJ_TYPE_MAX)
+		  obj->type = hwloc_obj_type_of_string((const char*) node->content);
+		  if (obj->type == HWLOC_OBJ_TYPE_MAX)
 		    fprintf(stderr, "ignoring unknown object type %s\n", (const char*) node->content);
 		  else
 		    break;
@@ -236,7 +236,7 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
 		fprintf(stderr, "ignoring unexpected xml attr node type %u name %s\n", node->type, (const char*) node->name);
 	    }
 	  }
-	  if (obj->type == TOPO_OBJ_TYPE_MAX) {
+	  if (obj->type == HWLOC_OBJ_TYPE_MAX) {
 	    fprintf(stderr, "ignoring attributes of object without type\n");
 	    return;
 	  }
@@ -261,27 +261,27 @@ topo__look_xml_node(struct topo_topology *topology, xmlNode *node, int depth)
 
       } else if (depth == 1) {
 	/* system object is already there */
-	if (obj->type != TOPO_OBJ_SYSTEM) {
+	if (obj->type != HWLOC_OBJ_SYSTEM) {
 	  fprintf(stderr, "enforcing System type in top level instead of %s\n",
-		  topo_obj_type_string(obj->type));
-	  obj->type = TOPO_OBJ_SYSTEM;
+		  hwloc_obj_type_string(obj->type));
+	  obj->type = HWLOC_OBJ_SYSTEM;
 	}
 
       } else {
 	/* add object */
-	if (obj->type == TOPO_OBJ_TYPE_MAX) {
+	if (obj->type == HWLOC_OBJ_TYPE_MAX) {
 	  fprintf(stderr, "ignoring object with invalid type %u\n", obj->type);
 	  free(obj);
-	} else if (obj->type == TOPO_OBJ_SYSTEM) {
+	} else if (obj->type == HWLOC_OBJ_SYSTEM) {
 	  fprintf(stderr, "ignoring system object at invalid depth %d\n", depth);
 	  free(obj);
 	} else {
-	  if (!topo_cpuset_isincluded(&obj->cpuset, &topology->levels[0][0]->cpuset))
+	  if (!hwloc_cpuset_isincluded(&obj->cpuset, &topology->levels[0][0]->cpuset))
 	    fprintf(stderr, "ignoring object (cpuset %s) not covered by system (cpuset %s)\n",
-		    TOPO_CPUSET_PRINTF_VALUE(&obj->cpuset),
-		    TOPO_CPUSET_PRINTF_VALUE(&topology->levels[0][0]->cpuset));
+		    HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset),
+		    HWLOC_CPUSET_PRINTF_VALUE(&topology->levels[0][0]->cpuset));
 	  else
-	    topo_add_object(topology, obj);
+	    hwloc_add_object(topology, obj);
 	}
       }
 
@@ -304,7 +304,7 @@ topo_xml_set_cpubind(void) {
 }
 
 void
-topo_look_xml(struct topo_topology *topology)
+hwloc_look_xml(struct hwloc_topology *topology)
 {
   xmlNode* root_node;
 

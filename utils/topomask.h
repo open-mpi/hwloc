@@ -22,33 +22,33 @@ typedef enum topomask_append_mode_e {
 } topomask_append_mode_t;
 
 static __inline__ void
-topomask_append_cpuset(topo_cpuset_t *set, topo_cpuset_t *newset,
+topomask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
 		       topomask_append_mode_t mode, int verbose)
 {
   switch (mode) {
   case TOPOMASK_APPEND_ADD:
     if (verbose)
-      fprintf(stderr, "adding %" TOPO_PRIxCPUSET " to %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
-    topo_cpuset_orset(set, newset);
+      fprintf(stderr, "adding %" HWLOC_PRIxCPUSET " to %" HWLOC_PRIxCPUSET "\n",
+	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
+    hwloc_cpuset_orset(set, newset);
     break;
   case TOPOMASK_APPEND_CLR:
     if (verbose)
-      fprintf(stderr, "clearing %" TOPO_PRIxCPUSET " from %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
-    topo_cpuset_clearset(set, newset);
+      fprintf(stderr, "clearing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
+	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
+    hwloc_cpuset_clearset(set, newset);
     break;
   case TOPOMASK_APPEND_AND:
     if (verbose)
-      fprintf(stderr, "and'ing %" TOPO_PRIxCPUSET " from %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
-    topo_cpuset_andset(set, newset);
+      fprintf(stderr, "and'ing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
+	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
+    hwloc_cpuset_andset(set, newset);
     break;
   case TOPOMASK_APPEND_XOR:
     if (verbose)
-      fprintf(stderr, "xor'ing %" TOPO_PRIxCPUSET " from %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(newset), TOPO_CPUSET_PRINTF_VALUE(set));
-    topo_cpuset_xorset(set, newset);
+      fprintf(stderr, "xor'ing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
+	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
+    hwloc_cpuset_xorset(set, newset);
     break;
   default:
     assert(1);
@@ -56,28 +56,28 @@ topomask_append_cpuset(topo_cpuset_t *set, topo_cpuset_t *newset,
 }
 
 static __inline__ int
-topomask_append_object(topo_topology_t topology, struct topo_topology_info *topoinfo,
-		       topo_cpuset_t *rootset, const char *string,
-		       topo_cpuset_t *set, topomask_append_mode_t mode, int verbose)
+topomask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *topoinfo,
+		       hwloc_cpuset_t *rootset, const char *string,
+		       hwloc_cpuset_t *set, topomask_append_mode_t mode, int verbose)
 {
-  topo_obj_t obj;
+  hwloc_obj_t obj;
   unsigned depth, width;
   char *sep, *sep2, *sep3;
   unsigned first, wrap, amount;
   unsigned i,j;
 
   if (!strncasecmp(string, "system", 2))
-    depth = topo_get_type_or_above_depth(topology, TOPO_OBJ_SYSTEM);
+    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SYSTEM);
   else if (!strncasecmp(string, "machine", 1))
-    depth = topo_get_type_or_above_depth(topology, TOPO_OBJ_MACHINE);
+    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_MACHINE);
   else if (!strncasecmp(string, "node", 1))
-    depth = topo_get_type_or_above_depth(topology, TOPO_OBJ_NODE);
+    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_NODE);
   else if (!strncasecmp(string, "socket", 2))
-    depth = topo_get_type_or_above_depth(topology, TOPO_OBJ_SOCKET);
+    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SOCKET);
   else if (!strncasecmp(string, "core", 1))
-    depth = topo_get_type_or_above_depth(topology, TOPO_OBJ_CORE);
+    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_CORE);
   else if (!strncasecmp(string, "proc", 1))
-    depth = topo_get_type_or_above_depth(topology, TOPO_OBJ_PROC);
+    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PROC);
   else
     depth = atoi(string);
 
@@ -86,7 +86,7 @@ topomask_append_object(topo_topology_t topology, struct topo_topology_info *topo
       fprintf(stderr, "ignoring invalid depth %u\n", depth);
     return -1;
   }
-  width = topo_get_depth_nbobjs(topology, depth);
+  width = hwloc_get_depth_nbobjs(topology, depth);
 
   sep = strchr(string, ':');
   if (!sep) {
@@ -119,14 +119,14 @@ topomask_append_object(topo_topology_t topology, struct topo_topology_info *topo
     if (wrap && i==width)
       i = 0;
 
-    obj = topo_get_obj_below_cpuset_by_depth(topology, rootset, depth, i);
+    obj = hwloc_get_obj_below_cpuset_by_depth(topology, rootset, depth, i);
     if (verbose) {
       if (obj)
-	printf("object #%u depth %u below cpuset %" TOPO_PRIxCPUSET " found\n",
-	       i, depth, TOPO_CPUSET_PRINTF_VALUE(rootset));
+	printf("object #%u depth %u below cpuset %" HWLOC_PRIxCPUSET " found\n",
+	       i, depth, HWLOC_CPUSET_PRINTF_VALUE(rootset));
       else
-	printf("object #%u depth %u below cpuset %" TOPO_PRIxCPUSET " does not exist\n",
-	       i, depth, TOPO_CPUSET_PRINTF_VALUE(rootset));
+	printf("object #%u depth %u below cpuset %" HWLOC_PRIxCPUSET " does not exist\n",
+	       i, depth, HWLOC_CPUSET_PRINTF_VALUE(rootset));
     }
     if (obj) {
       if (sep3)
@@ -140,8 +140,8 @@ topomask_append_object(topo_topology_t topology, struct topo_topology_info *topo
 }
 
 static __inline__ void
-topomask_process_arg(topo_topology_t topology, struct topo_topology_info *topoinfo,
-		     const char *arg, topo_cpuset_t *set,
+topomask_process_arg(hwloc_topology_t topology, struct hwloc_topology_info *topoinfo,
+		     const char *arg, hwloc_cpuset_t *set,
 		     int verbose)
 {
   char *colon;
@@ -160,11 +160,11 @@ topomask_process_arg(topo_topology_t topology, struct topo_topology_info *topoin
 
   colon = strchr(arg, ':');
   if (colon) {
-    topomask_append_object(topology, topoinfo, &topo_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
+    topomask_append_object(topology, topoinfo, &hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
   } else {
-    topo_cpuset_t newset;
-    topo_cpuset_zero(&newset);
-    topo_cpuset_from_string(arg, &newset);
+    hwloc_cpuset_t newset;
+    hwloc_cpuset_zero(&newset);
+    hwloc_cpuset_from_string(arg, &newset);
     topomask_append_cpuset(set, &newset, mode, verbose);
   }
 }

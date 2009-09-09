@@ -244,7 +244,7 @@ Bug reports should be reported in the tracker
 <dt>Object</dt>
   <dd>Interesting kind of part of the system, such as a Core, a Cache, a Memory
   node, etc. The different types detected by libtopology are detailed in the
-  ::topo_obj_type_e enumeration.
+  ::hwloc_obj_type_e enumeration.
   
   They are topologically sorted by CPU set into a tree whose root is the System object which always exists.
   </dd>

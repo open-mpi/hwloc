@@ -11,9 +11,9 @@
 #include <private/config.h>
 
 #ifdef HWLOC_DEBUG
-#define topo_debug(s, ...) fprintf(stderr, s, ##__VA_ARGS__) 
+#define hwloc_debug(s, ...) fprintf(stderr, s, ##__VA_ARGS__)
 #else
-#define topo_debug(s, ...) do { }while(0)
+#define hwloc_debug(s, ...) do { }while(0)
 #endif
 
 #endif /* HWLOC_DEBUG_H */

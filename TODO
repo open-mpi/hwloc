@@ -5,8 +5,8 @@ API
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
-* have a topo_topology_t in all topology-traversal functions to uniformize things?
-  topo_get_common_ancestor_obj() and topo_obj_is_in_subtree() don't have one
+* have a hwloc_topology_t in all topology-traversal functions to uniformize things?
+  hwloc_get_common_ancestor_obj() and hwloc_obj_is_in_subtree() don't have one
   because it's useless for now, but maybe it'll be used for debugging one day?
 
 * internationalize the output of lstopo? object types and memory size units
@@ -67,7 +67,7 @@ Binding
   + A few OSes don't provide it (e.g. AIX, OSF, solaris), it does not make sense
   for a process when its threads are bound here and there.
 
-* add topo_set_membind(topology, beginaddr, endaddr, TOPO_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, topo_cpuset_t)
+* add topo_set_membind(topology, beginaddr, endaddr, TOPO_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, hwloc_cpuset_t)
   + size instead of endaddr?
   + if beginaddr=endaddr=NULL, setmempolicy?
   + reverse routine?

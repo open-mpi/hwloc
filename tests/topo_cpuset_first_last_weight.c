@@ -7,38 +7,38 @@
 
 #include <assert.h>
 
-/* check topo_cpuset_first(), _last() and _weight() */
+/* check hwloc_cpuset_first(), _last() and _weight() */
 
 int main()
 {
-  topo_cpuset_t set;
+  hwloc_cpuset_t set;
 
   /* empty set */
-  topo_cpuset_zero(&set);
-  assert(topo_cpuset_first(&set) == -1);
-  assert(topo_cpuset_last(&set) == -1);
-  assert(topo_cpuset_weight(&set) == 0);
+  hwloc_cpuset_zero(&set);
+  assert(hwloc_cpuset_first(&set) == -1);
+  assert(hwloc_cpuset_last(&set) == -1);
+  assert(hwloc_cpuset_weight(&set) == 0);
 
   /* full set */
-  topo_cpuset_fill(&set);
-  assert(topo_cpuset_first(&set) == 0);
-  assert(topo_cpuset_last(&set) == TOPO_NBMAXCPUS-1);
-  assert(topo_cpuset_weight(&set) == TOPO_NBMAXCPUS);
+  hwloc_cpuset_fill(&set);
+  assert(hwloc_cpuset_first(&set) == 0);
+  assert(hwloc_cpuset_last(&set) == HWLOC_NBMAXCPUS-1);
+  assert(hwloc_cpuset_weight(&set) == HWLOC_NBMAXCPUS);
 
   /* custom sets */
-  topo_cpuset_zero(&set);
-  topo_cpuset_set_range(&set, 36, 59);
-  assert(topo_cpuset_first(&set) == 36);
-  assert(topo_cpuset_last(&set) == 59);
-  assert(topo_cpuset_weight(&set) == 24);
-  topo_cpuset_set_range(&set, 136, 259);
-  assert(topo_cpuset_first(&set) == 36);
-  assert(topo_cpuset_last(&set) == 259);
-  assert(topo_cpuset_weight(&set) == 148);
-  topo_cpuset_clr(&set, 199);
-  assert(topo_cpuset_first(&set) == 36);
-  assert(topo_cpuset_last(&set) == 259);
-  assert(topo_cpuset_weight(&set) == 147);
+  hwloc_cpuset_zero(&set);
+  hwloc_cpuset_set_range(&set, 36, 59);
+  assert(hwloc_cpuset_first(&set) == 36);
+  assert(hwloc_cpuset_last(&set) == 59);
+  assert(hwloc_cpuset_weight(&set) == 24);
+  hwloc_cpuset_set_range(&set, 136, 259);
+  assert(hwloc_cpuset_first(&set) == 36);
+  assert(hwloc_cpuset_last(&set) == 259);
+  assert(hwloc_cpuset_weight(&set) == 148);
+  hwloc_cpuset_clr(&set, 199);
+  assert(hwloc_cpuset_first(&set) == 36);
+  assert(hwloc_cpuset_last(&set) == 259);
+  assert(hwloc_cpuset_weight(&set) == 147);
 
   return 0;
 }

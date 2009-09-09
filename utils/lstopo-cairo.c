@@ -87,7 +87,7 @@ topo_cairo_write(void *closure, const unsigned char *data, unsigned int length)
 #endif /* (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 static void
-topo_cairo_paint(struct draw_methods *methods, topo_topology_t topology, cairo_surface_t *cs)
+topo_cairo_paint(struct draw_methods *methods, hwloc_topology_t topology, cairo_surface_t *cs)
 {
   cairo_t *c;
   c = cairo_create(cs);
@@ -172,7 +172,7 @@ static struct draw_methods x11_draw_methods = {
 
 /** Clip coordinates of the visible part. */
 static void
-move_x11(topo_topology_t topology, struct display *disp)
+move_x11(hwloc_topology_t topology, struct display *disp)
 {
   if (disp->width <= disp->screen_width) {
     disp->x = 0;
@@ -194,7 +194,7 @@ move_x11(topo_topology_t topology, struct display *disp)
 }
 
 void
-output_x11(topo_topology_t topology, const char *filename, int verbose_mode)
+output_x11(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
   struct display *disp = output_draw_start(&x11_draw_methods, topology, NULL);
   int finish = 0;
@@ -283,7 +283,7 @@ static struct draw_methods png_draw_methods = {
 };
 
 void
-output_png(topo_topology_t topology, const char *filename, int verbose_mode)
+output_png(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
@@ -318,7 +318,7 @@ static struct draw_methods pdf_draw_methods = {
 };
 
 void
-output_pdf(topo_topology_t topology, const char *filename, int verbose_mode)
+output_pdf(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
@@ -353,7 +353,7 @@ static struct draw_methods ps_draw_methods = {
 };
 
 void
-output_ps(topo_topology_t topology, const char *filename, int verbose_mode)
+output_ps(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
@@ -388,7 +388,7 @@ static struct draw_methods svg_draw_methods = {
 };
 
 void
-output_svg(topo_topology_t topology, const char *filename, int verbose_mode)
+output_svg(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {

@@ -106,23 +106,23 @@ int main(int argc, char *argv[])
 
   {
     long i;
-    topo_cpuset_t cpuset[n];
-    char str[TOPO_CPUSET_STRING_LENGTH + 1];
-    topo_topology_t topology;
+    hwloc_cpuset_t cpuset[n];
+    char str[HWLOC_CPUSET_STRING_LENGTH + 1];
+    hwloc_topology_t topology;
 
-    topo_topology_init(&topology);
+    hwloc_topology_init(&topology);
     if (synthetic)
-      topo_topology_set_synthetic(topology, synthetic);
+      hwloc_topology_set_synthetic(topology, synthetic);
     if (xmlpath)
-      topo_topology_set_xml(topology, xmlpath);
-    topo_topology_load(topology);
+      hwloc_topology_set_xml(topology, xmlpath);
+    hwloc_topology_load(topology);
 
-    topo_distribute(topology, topo_get_system_obj(topology), cpuset, n);
+    hwloc_distribute(topology, hwloc_get_system_obj(topology), cpuset, n);
     for (i = 0; i < n; i++) {
-      topo_cpuset_snprintf(str, sizeof(str), &cpuset[i]);
+      hwloc_cpuset_snprintf(str, sizeof(str), &cpuset[i]);
       printf("%s\n", str);
     }
-    topo_topology_destroy(topology);
+    hwloc_topology_destroy(topology);
   }
 
   return EXIT_SUCCESS;

@@ -8,7 +8,7 @@
 
 #include <hwloc.h>
 
-typedef void output_method (struct topo_topology *topology, const char *output, int verbose_mode);
+typedef void output_method (struct hwloc_topology *topology, const char *output, int verbose_mode);
 
 FILE *open_file(const char *filename, const char *mode);
 
@@ -24,8 +24,8 @@ struct draw_methods {
 
 extern unsigned int gridsize, fontsize, force_horiz;
 
-extern void *output_draw_start(struct draw_methods *draw_methods, struct topo_topology *topology, void *output);
-extern void output_draw(struct draw_methods *draw_methods, struct topo_topology *topology, void *output);
+extern void *output_draw_start(struct draw_methods *draw_methods, struct hwloc_topology *topology, void *output);
+extern void output_draw(struct draw_methods *draw_methods, struct hwloc_topology *topology, void *output);
 
 int rgb_to_color(int r, int g, int b);
 int declare_color(int r, int g, int b);

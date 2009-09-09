@@ -14,24 +14,24 @@
  * IRIX: see _DSM_MUSTRUN */
 
 int
-topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
+hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set,
 		 int policy)
 {
-  int strict = !!(policy & TOPO_CPUBIND_STRICT);
-  topo_cpuset_t *system_set = &topo_get_system_obj(topology)->cpuset;
+  int strict = !!(policy & HWLOC_CPUBIND_STRICT);
+  hwloc_cpuset_t *system_set = &hwloc_get_system_obj(topology)->cpuset;
 
-  if (topo_cpuset_isfull(set))
+  if (hwloc_cpuset_isfull(set))
     set = system_set;
 
-  if (!topo_cpuset_isincluded(set, system_set)) {
+  if (!hwloc_cpuset_isincluded(set, system_set)) {
     errno = EINVAL;
     return -1;
   }
 
-  if (policy & TOPO_CPUBIND_PROCESS) {
+  if (policy & HWLOC_CPUBIND_PROCESS) {
     if (topology->set_thisproc_cpubind)
       return topology->set_thisproc_cpubind(topology, set, strict);
-  } else if (policy & TOPO_CPUBIND_THREAD) {
+  } else if (policy & HWLOC_CPUBIND_THREAD) {
     if (topology->set_thisthread_cpubind)
       return topology->set_thisthread_cpubind(topology, set, strict);
   } else {
@@ -44,15 +44,15 @@ topo_set_cpubind(topo_topology_t topology, const topo_cpuset_t *set,
 }
 
 int
-topo_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpuset_t *set, int policy)
+hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *set, int policy)
 {
-  int strict = !!(policy & TOPO_CPUBIND_STRICT);
-  topo_cpuset_t *system_set = &topo_get_system_obj(topology)->cpuset;
+  int strict = !!(policy & HWLOC_CPUBIND_STRICT);
+  hwloc_cpuset_t *system_set = &hwloc_get_system_obj(topology)->cpuset;
 
-  if (topo_cpuset_isfull(set))
-    set = &topo_get_system_obj(topology)->cpuset;
+  if (hwloc_cpuset_isfull(set))
+    set = &hwloc_get_system_obj(topology)->cpuset;
 
-  if (!topo_cpuset_isincluded(set, system_set)) {
+  if (!hwloc_cpuset_isincluded(set, system_set)) {
     errno = EINVAL;
     return -1;
   }
@@ -65,15 +65,15 @@ topo_set_proc_cpubind(topo_topology_t topology, hwloc_pid_t pid, const topo_cpus
 }
 
 int
-topo_set_thread_cpubind(topo_topology_t topology, hwloc_thread_t tid, const topo_cpuset_t *set, int policy)
+hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t *set, int policy)
 {
-  int strict = !!(policy & TOPO_CPUBIND_STRICT);
-  topo_cpuset_t *system_set = &topo_get_system_obj(topology)->cpuset;
+  int strict = !!(policy & HWLOC_CPUBIND_STRICT);
+  hwloc_cpuset_t *system_set = &hwloc_get_system_obj(topology)->cpuset;
 
-  if (topo_cpuset_isfull(set))
-    set = &topo_get_system_obj(topology)->cpuset;
+  if (hwloc_cpuset_isfull(set))
+    set = &hwloc_get_system_obj(topology)->cpuset;
 
-  if (!topo_cpuset_isincluded(set, system_set)) {
+  if (!hwloc_cpuset_isincluded(set, system_set)) {
     errno = EINVAL;
     return -1;
   }

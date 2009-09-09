@@ -11,89 +11,89 @@
 
 int main(void)
 {
-  topo_topology_t topology;
-  topo_cpuset_t set, set2;
-  topo_obj_t node;
+  hwloc_topology_t topology;
+  hwloc_cpuset_t set, set2;
+  hwloc_obj_t node;
   struct bitmask *bitmask, *bitmask2;
   nodemask_t nodemask, nodemask2;
   unsigned long mask;
   unsigned long maxnode;
 
-  topo_topology_init(&topology);
-  topo_topology_load(topology);
+  hwloc_topology_init(&topology);
+  hwloc_topology_load(topology);
 
   /* convert full nodemask/bitmask to cpuset */
-  topo_cpuset_zero(&set);
+  hwloc_cpuset_zero(&set);
   /* gather all nodes if any, or the whole system if no nodes */
-  if (topo_get_type_nbobjs(topology, TOPO_OBJ_NODE)) {
+  if (hwloc_get_type_nbobjss(topology, HWLOC_OBJ_NODE)) {
     node = NULL;
-    while ((node = topo_get_next_obj(topology, TOPO_OBJ_NODE, node)) != NULL)
-      topo_cpuset_orset(&set, &node->cpuset);
+    while ((node = hwloc_get_next_obj(topology, HWLOC_OBJ_NODE, node)) != NULL)
+      hwloc_cpuset_orset(&set, &node->cpuset);
   } else {
-    topo_cpuset_orset(&set, &topo_get_system_obj(topology)->cpuset);
+    hwloc_cpuset_orset(&set, &hwloc_get_system_obj(topology)->cpuset);
   }
 
-  topo_cpuset_from_linux_libnuma_bitmask(topology, &set2, numa_all_nodes_ptr);
-  assert(topo_cpuset_isequal(&set, &set2));
+  hwloc_cpuset_from_linux_libnuma_bitmask(topology, &set2, numa_all_nodes_ptr);
+  assert(hwloc_cpuset_isequal(&set, &set2));
 
-  topo_cpuset_from_linux_libnuma_nodemask(topology, &set2, &numa_all_nodes);
-  assert(topo_cpuset_isequal(&set, &set2));
+  hwloc_cpuset_from_linux_libnuma_nodemask(topology, &set2, &numa_all_nodes);
+  assert(hwloc_cpuset_isequal(&set, &set2));
 
 
   /* convert full cpuset to nodemask/bitmask */
-  bitmask = topo_cpuset_to_linux_libnuma_bitmask(topology, &set);
+  bitmask = hwloc_cpuset_to_linux_libnuma_bitmask(topology, &set);
   assert(numa_bitmask_equal(bitmask, numa_all_nodes_ptr));
   numa_bitmask_free(bitmask);
 
-  topo_cpuset_to_linux_libnuma_nodemask(topology, &set, &nodemask);
+  hwloc_cpuset_to_linux_libnuma_nodemask(topology, &set, &nodemask);
   assert(!memcmp(&nodemask, &numa_all_nodes, sizeof(nodemask_t)));
 
 
   /* convert empty nodemask/bitmask to cpuset */
   nodemask_zero(&nodemask);
-  topo_cpuset_from_linux_libnuma_nodemask(topology, &set, &nodemask);
-  assert(topo_cpuset_iszero(&set));
+  hwloc_cpuset_from_linux_libnuma_nodemask(topology, &set, &nodemask);
+  assert(hwloc_cpuset_iszero(&set));
 
   bitmask = numa_bitmask_alloc(1);
-  topo_cpuset_from_linux_libnuma_bitmask(topology, &set, bitmask);
+  hwloc_cpuset_from_linux_libnuma_bitmask(topology, &set, bitmask);
   numa_bitmask_free(bitmask);
-  assert(topo_cpuset_iszero(&set));
+  assert(hwloc_cpuset_iszero(&set));
 
   mask=0;
-  topo_cpuset_from_linux_libnuma_ulongs(topology, &set, &mask, TOPO_BITS_PER_LONG);
-  assert(topo_cpuset_iszero(&set));
+  hwloc_cpuset_from_linux_libnuma_ulongs(topology, &set, &mask, HWLOC_BITS_PER_LONG);
+  assert(hwloc_cpuset_iszero(&set));
 
 
   /* convert empty nodemask/bitmask from cpuset */
-  topo_cpuset_zero(&set);
-  bitmask = topo_cpuset_to_linux_libnuma_bitmask(topology, &set);
+  hwloc_cpuset_zero(&set);
+  bitmask = hwloc_cpuset_to_linux_libnuma_bitmask(topology, &set);
   bitmask2 = numa_bitmask_alloc(1);
   assert(numa_bitmask_equal(bitmask, bitmask2));
   numa_bitmask_free(bitmask);
   numa_bitmask_free(bitmask2);
 
-  topo_cpuset_zero(&set);
-  topo_cpuset_to_linux_libnuma_nodemask(topology, &set, &nodemask);
+  hwloc_cpuset_zero(&set);
+  hwloc_cpuset_to_linux_libnuma_nodemask(topology, &set, &nodemask);
   nodemask_zero(&nodemask2);
   assert(nodemask_equal(&nodemask, &nodemask2));
 
-  topo_cpuset_zero(&set);
-  maxnode = TOPO_BITS_PER_LONG;
-  topo_cpuset_to_linux_libnuma_ulongs(topology, &set, &mask, &maxnode);
+  hwloc_cpuset_zero(&set);
+  maxnode = HWLOC_BITS_PER_LONG;
+  hwloc_cpuset_to_linux_libnuma_ulongs(topology, &set, &mask, &maxnode);
   assert(!mask);
   assert(!maxnode);
 
 
   /* convert last node nodemask/bitmask from/to cpuset */
-  node = topo_get_next_obj(topology, TOPO_OBJ_NODE, NULL);
+  node = hwloc_get_next_obj(topology, HWLOC_OBJ_NODE, NULL);
   if (node) {
-    topo_cpuset_to_linux_libnuma_nodemask(topology, &node->cpuset, &nodemask);
+    hwloc_cpuset_to_linux_libnuma_nodemask(topology, &node->cpuset, &nodemask);
     assert(nodemask_isset(&nodemask, node->os_index));
     nodemask_clr(&nodemask, node->os_index);
     nodemask_zero(&nodemask2);
     assert(nodemask_equal(&nodemask, &nodemask2));
 
-    bitmask = topo_cpuset_to_linux_libnuma_bitmask(topology, &node->cpuset);
+    bitmask = hwloc_cpuset_to_linux_libnuma_bitmask(topology, &node->cpuset);
     assert(numa_bitmask_isbitset(bitmask, node->os_index));
     numa_bitmask_clearbit(bitmask, node->os_index);
     bitmask2 = numa_bitmask_alloc(1);
@@ -101,9 +101,9 @@ int main(void)
     numa_bitmask_free(bitmask);
     numa_bitmask_free(bitmask2);
 
-    maxnode = TOPO_BITS_PER_LONG;
-    topo_cpuset_to_linux_libnuma_ulongs(topology, &node->cpuset, &mask, &maxnode);
-    if (node->os_index >= TOPO_BITS_PER_LONG) {
+    maxnode = HWLOC_BITS_PER_LONG;
+    hwloc_cpuset_to_linux_libnuma_ulongs(topology, &node->cpuset, &mask, &maxnode);
+    if (node->os_index >= HWLOC_BITS_PER_LONG) {
       assert(!maxnode);
       assert(!mask);
     } else {
@@ -113,6 +113,6 @@ int main(void)
   }
 
 
-  topo_topology_destroy(topology);
+  hwloc_topology_destroy(topology);
   return 0;
 }

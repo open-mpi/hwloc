@@ -111,7 +111,7 @@ static struct draw_methods fig_draw_methods = {
 };
 
 void
-output_fig (topo_topology_t topology, const char *filename, int verbose_mode)
+output_fig (hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {

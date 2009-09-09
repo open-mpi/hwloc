@@ -9,7 +9,7 @@ check_LTLIBRARIES = libhwloc-ports.la
 endif
 
 libhwloc_ports_la_SOURCES = $(SRC)/topology.c $(SRC)/traversal.c $(SRC)/topology-synthetic.c
-libhwloc_ports_la_CFLAGS = -I$(top_srcdir)/tests/ports/include -DTOPO_COMPILE_PORTS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT
+libhwloc_ports_la_CFLAGS = -I$(top_srcdir)/tests/ports/include -DHWLOC_COMPILE_PORTS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT
 
 libhwloc_ports_la_SOURCES += $(SRC)/topology-solaris.c
 libhwloc_ports_la_SOURCES += $(SRC)/topology-aix.c

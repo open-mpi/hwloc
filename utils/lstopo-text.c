@@ -39,13 +39,13 @@
 
 /* Recursively output topology in a console fashion */
 static void
-output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE *output, int i, int verbose_mode) {
+output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int verbose_mode) {
   int x;
   const char * indexprefix = "#";
   char line[256];
 
   if (!verbose_mode
-      && parent && parent->arity == 1 && topo_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
+      && parent && parent->arity == 1 && hwloc_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
     /* in non-verbose mode, merge objects with their parent is they are exactly identical */
     fprintf(output, " + ");
   } else {
@@ -54,7 +54,7 @@ output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE
     indent (output, 2*i);
     i++;
   }
-  topo_obj_snprintf (line, sizeof(line), topology, l, indexprefix, verbose_mode);
+  hwloc_obj_snprintf (line, sizeof(line), topology, l, indexprefix, verbose_mode);
   fprintf(output, line);
   if (l->arity || (!i && !l->arity))
     {
@@ -63,7 +63,7 @@ output_topology (topo_topology_t topology, topo_obj_t l, topo_obj_t parent, FILE
   }
 }
 
-void output_console(topo_topology_t topology, const char *filename, int verbose_mode)
+void output_console(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output;
 
@@ -77,28 +77,28 @@ void output_console(topo_topology_t topology, const char *filename, int verbose_
     }
   }
 
-  output_topology (topology, topo_get_system_obj(topology), NULL, output, 0, verbose_mode);
+  output_topology (topology, hwloc_get_system_obj(topology), NULL, output, 0, verbose_mode);
   fprintf(output, "\n");
 
   if (verbose_mode)
     {
-      struct topo_topology_info info;
-      topo_obj_type_t l;
+      struct hwloc_topology_info info;
+      hwloc_obj_type_t l;
 
-      topo_topology_get_info(topology, &info);
+      hwloc_topology_get_info(topology, &info);
       if (info.is_fake)
 	fprintf (output, "Topology is fake\n");
 
-      for (l = TOPO_OBJ_SYSTEM; l < TOPO_OBJ_MISC; l++)
+      for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_MISC; l++)
 	{
-	  int depth = topo_get_type_depth (topology, l);
-	  if (depth == TOPO_TYPE_DEPTH_UNKNOWN) {
-	    fprintf (output, "absent:\t\ttype #%u (%s)\n", l, topo_obj_type_string (l));
-	  } else if (depth == TOPO_TYPE_DEPTH_MULTIPLE) {
-	    fprintf (output, "multiple:\ttype #%u (%s)\n", l, topo_obj_type_string (l));
+	  int depth = hwloc_get_type_depth (topology, l);
+	  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+	    fprintf (output, "absent:\t\ttype #%u (%s)\n", l, hwloc_obj_type_string (l));
+	  } else if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+	    fprintf (output, "multiple:\ttype #%u (%s)\n", l, hwloc_obj_type_string (l));
 	  } else {
 	    indent(output, depth);
-	    fprintf (output, "depth %d:\ttype #%u (%s)\n", depth, l, topo_obj_type_string (l));
+	    fprintf (output, "depth %d:\ttype #%u (%s)\n", depth, l, hwloc_obj_type_string (l));
 	  }
 	}
     }
@@ -483,7 +483,7 @@ static struct draw_methods text_draw_methods = {
   .text = text_text,
 };
 
-void output_text(topo_topology_t topology, const char *filename, int verbose_mode)
+void output_text(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
   FILE *output;
   struct display *disp;

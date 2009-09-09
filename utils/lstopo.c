@@ -84,7 +84,7 @@ main (int argc, char *argv[])
 {
   int err;
   int verbose_mode = 0;
-  topo_topology_t topology;
+  hwloc_topology_t topology;
   char *filename = NULL;
   unsigned long flags = 0;
   int merge = 0;
@@ -94,7 +94,7 @@ main (int argc, char *argv[])
   char * fsysroot = NULL;
   int opt;
 
-  err = topo_topology_init (&topology);
+  err = hwloc_topology_init (&topology);
   if (err)
     return EXIT_FAILURE;
 
@@ -112,7 +112,7 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[1], "--no-useless-caches"))
 	ignorecache = 1;
       else if (!strcmp (argv[1], "--whole-system"))
-	flags |= TOPO_FLAGS_WHOLE_SYSTEM;
+	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
       else if (!strcmp (argv[1], "--horiz"))
@@ -172,24 +172,24 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
-  topo_topology_set_flags(topology, flags);
+  hwloc_topology_set_flags(topology, flags);
 
   if (ignorecache > 1) {
-    topo_topology_ignore_type(topology, TOPO_OBJ_CACHE);
+    hwloc_topology_ignore_type(topology, HWLOC_OBJ_CACHE);
   } else if (ignorecache) {
-    topo_topology_ignore_type_keep_structure(topology, TOPO_OBJ_CACHE);
+    hwloc_topology_ignore_type_keep_structure(topology, HWLOC_OBJ_CACHE);
   }
   if (merge)
-    topo_topology_ignore_all_keep_structure(topology);
+    hwloc_topology_ignore_all_keep_structure(topology);
 
   if (synthetic)
-    topo_topology_set_synthetic(topology, synthetic);
+    hwloc_topology_set_synthetic(topology, synthetic);
   if (xmlpath)
-    topo_topology_set_xml(topology, xmlpath);
+    hwloc_topology_set_xml(topology, xmlpath);
   if (fsysroot)
-    topo_topology_set_fsys_root(topology, fsysroot);
+    hwloc_topology_set_fsys_root(topology, fsysroot);
 
-  err = topo_topology_load (topology);
+  err = hwloc_topology_load (topology);
   if (err)
     return EXIT_FAILURE;
 
@@ -241,7 +241,7 @@ main (int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  topo_topology_destroy (topology);
+  hwloc_topology_destroy (topology);
 
   return EXIT_SUCCESS;
 }

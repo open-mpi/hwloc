@@ -26,9 +26,9 @@ static void usage(FILE *where)
 
 int main(int argc, char *argv[])
 {
-  topo_topology_t topology;
-  struct topo_topology_info topoinfo;
-  topo_cpuset_t cpu_set; /* invalid until bind_cpus is set */
+  hwloc_topology_t topology;
+  struct hwloc_topology_info topoinfo;
+  hwloc_cpuset_t cpu_set; /* invalid until bind_cpus is set */
   int bind_cpus = 0;
   int single = 0;
   int verbose = 0;
@@ -36,11 +36,11 @@ int main(int argc, char *argv[])
   int ret;
   char **orig_argv = argv;
 
-  topo_cpuset_zero(&cpu_set);
+  hwloc_cpuset_zero(&cpu_set);
 
-  topo_topology_init(&topology);
-  topo_topology_load(topology);
-  topo_topology_get_info(topology, &topoinfo);
+  hwloc_topology_init(&topology);
+  hwloc_topology_load(topology);
+  hwloc_topology_get_info(topology, &topoinfo);
 
   /* skip argv[0], handle options */
   argv++;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp(argv[0], "--strict")) {
-	flags |= TOPO_CPUBIND_STRICT;
+	flags |= HWLOC_CPUBIND_STRICT;
 	goto next;
       }
       else if (!strcmp (argv[0], "--version")) {
@@ -89,16 +89,16 @@ int main(int argc, char *argv[])
 
   if (bind_cpus) {
     if (verbose)
-      fprintf(stderr, "binding on cpu set %" TOPO_PRIxCPUSET "\n",
-	      TOPO_CPUSET_PRINTF_VALUE(&cpu_set));
+      fprintf(stderr, "binding on cpu set %" HWLOC_PRIxCPUSET "\n",
+	      HWLOC_CPUSET_PRINTF_VALUE(&cpu_set));
     if (single)
-      topo_cpuset_singlify(&cpu_set);
-    ret = topo_set_cpubind(topology, &cpu_set, flags);
+      hwloc_cpuset_singlify(&cpu_set);
+    ret = hwloc_set_cpubind(topology, &cpu_set, flags);
     if (ret)
-      fprintf(stderr, "topo_set_cpubind %"TOPO_PRIxCPUSET" failed (errno %d %s)\n", TOPO_CPUSET_PRINTF_VALUE(&cpu_set), errno, strerror(errno));
+      fprintf(stderr, "hwloc_set_cpubind %"HWLOC_PRIxCPUSET" failed (errno %d %s)\n", HWLOC_CPUSET_PRINTF_VALUE(&cpu_set), errno, strerror(errno));
   }
 
-  topo_topology_destroy(topology);
+  hwloc_topology_destroy(topology);
 
   if (!argc)
     return EXIT_SUCCESS;

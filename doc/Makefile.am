@@ -19,127 +19,127 @@ EXTRA_DIST = $(DX_CONFIG) \
 
 if HWLOC_INSTALL_MAN
 dist_man3_MANS = \
-	@DX_DOCDIR@/man/man3/TOPO_CPUBIND_PROCESS.3 \
-	@DX_DOCDIR@/man/man3/TOPO_CPUBIND_STRICT.3 \
-	@DX_DOCDIR@/man/man3/TOPO_CPUBIND_THREAD.3 \
-	@DX_DOCDIR@/man/man3/TOPO_CPUSET_CPU.3 \
-	@DX_DOCDIR@/man/man3/TOPO_CPUSET_FULL.3 \
-	@DX_DOCDIR@/man/man3/TOPO_CPUSET_STRING_LENGTH.3 \
-	@DX_DOCDIR@/man/man3/TOPO_CPUSET_ZERO.3 \
-	@DX_DOCDIR@/man/man3/TOPO_FLAGS_WHOLE_SYSTEM.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_CACHE.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_CORE.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_MACHINE.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_MISC.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_NODE.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_PROC.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_SOCKET.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_SYSTEM.3 \
-	@DX_DOCDIR@/man/man3/TOPO_OBJ_TYPE_MAX.3 \
-	@DX_DOCDIR@/man/man3/TOPO_PRIxCPUSET.3 \
-	@DX_DOCDIR@/man/man3/TOPO_TYPE_DEPTH_MULTIPLE.3 \
-	@DX_DOCDIR@/man/man3/TOPO_TYPE_DEPTH_UNKNOWN.3 \
-	@DX_DOCDIR@/man/man3/topo_cpubind_policy_t.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_all_but_cpu.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_andset.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_clearset.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_clr.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_compar.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_compar_first.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_cpu.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_fill.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_first.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_foreach_begin.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_foreach_end.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_from_glibc_sched_affinity.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_from_ith_ulong.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_from_linux_libnuma_bitmask.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_from_linux_libnuma_nodemask.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_from_linux_libnuma_ulongs.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_from_string.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_from_ulong.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_intersects.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_isequal.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_isfull.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_isincluded.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_isset.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_iszero.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_orset.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_set.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_set_range.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_singlify.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_snprintf.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_t.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_to_glibc_sched_affinity.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_to_ith_ulong.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_to_linux_libnuma_bitmask.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_to_linux_libnuma_nodemask.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_to_linux_libnuma_ulongs.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_to_ulong.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_weight.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_xorset.3 \
-	@DX_DOCDIR@/man/man3/topo_cpuset_zero.3 \
-	@DX_DOCDIR@/man/man3/topo_distribute.3 \
-	@DX_DOCDIR@/man/man3/topo_flags_e.3 \
-	@DX_DOCDIR@/man/man3/topo_get_closest_objs.3 \
-	@DX_DOCDIR@/man/man3/topo_get_common_ancestor_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_get_cpuset_covering_cache.3 \
-	@DX_DOCDIR@/man/man3/topo_get_cpuset_covering_child.3 \
-	@DX_DOCDIR@/man/man3/topo_get_cpuset_covering_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_get_cpuset_objs.3 \
-	@DX_DOCDIR@/man/man3/topo_get_depth_nbobjs.3 \
-	@DX_DOCDIR@/man/man3/topo_get_depth_type.3 \
-	@DX_DOCDIR@/man/man3/topo_get_nbobjs_below_cpuset.3 \
-	@DX_DOCDIR@/man/man3/topo_get_nbobjs_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_child.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_above_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_next_obj_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_get_obj_below_cpuset.3 \
-	@DX_DOCDIR@/man/man3/topo_get_obj_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_obj_by_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_order_type.3 \
-	@DX_DOCDIR@/man/man3/topo_get_shared_cache_above.3 \
-	@DX_DOCDIR@/man/man3/topo_get_system_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_get_type_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_type_nbobjs.3 \
-	@DX_DOCDIR@/man/man3/topo_get_type_or_above_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_type_or_below_depth.3 \
-	@DX_DOCDIR@/man/man3/topo_get_type_order.3 \
-	@DX_DOCDIR@/man/man3/topo_obj.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_attr_u_topo_cache_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_attr_u_topo_machine_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_attr_u_topo_memory_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_attr_u_topo_misc_attr_u.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_cpuset_snprintf.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_is_in_subtree.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_snprintf.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_t.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_type_of_string.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_type_string.3 \
-	@DX_DOCDIR@/man/man3/topo_obj_type_t.3 \
-	@DX_DOCDIR@/man/man3/topo_set_cpubind.3 \
-	@DX_DOCDIR@/man/man3/topo_set_proc_cpubind.3 \
-	@DX_DOCDIR@/man/man3/topo_set_thread_cpubind.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_check.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_destroy.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_get_info.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_ignore_all_keep_structure.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_ignore_type.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_ignore_type_keep_structure.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_info.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_init.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_load.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_set_flags.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_set_fsys_root.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_set_synthetic.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_set_xml.3 \
-	@DX_DOCDIR@/man/man3/topo_topology_t.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_CPUBIND_PROCESS.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_CPUBIND_STRICT.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_CPUBIND_THREAD.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_CPUSET_CPU.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_CPUSET_FULL.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_CPUSET_STRING_LENGTH.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_CPUSET_ZERO.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_CACHE.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_CORE.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_MACHINE.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_MISC.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_NODE.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_PROC.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_SOCKET.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_SYSTEM.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_OBJ_TYPE_MAX.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_PRIxCPUSET.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
+	@DX_DOCDIR@/man/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpubind_policy_t.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_all_but_cpu.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_andset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_clearset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_clr.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_compar.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_compar_first.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_cpu.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_fill.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_first.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_foreach_begin.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_foreach_end.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_glibc_sched_affinity.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_ith_ulong.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_linux_libnuma_nodemask.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_linux_libnuma_ulongs.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_string.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_ulong.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_intersects.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_isequal.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_isfull.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_isincluded.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_isset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_iszero.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_orset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_set.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_set_range.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_singlify.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_snprintf.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_t.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_ith_ulong.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_linux_libnuma_bitmask.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_linux_libnuma_nodemask.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_ulong.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_weight.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_xorset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_cpuset_zero.3 \
+	@DX_DOCDIR@/man/man3/hwloc_distribute.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_flags_e.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_closest_objs.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_common_ancestor_obj.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_cpuset_covering_cache.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_cpuset_covering_child.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_cpuset_covering_obj.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_cpuset_objs.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_depth_nbobjs.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_depth_type.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_nbobjs_below_cpuset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_nbobjs_below_cpuset_by_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_next_child.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_next_obj.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_above_cpuset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_above_cpuset_by_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_below_cpuset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_below_cpuset_by_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_by_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_obj.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_obj_below_cpuset.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_obj_below_cpuset_by_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_obj_by_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_order_type.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_shared_cache_above.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_system_obj.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_type_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_type_nbobjss.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_type_or_above_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_type_or_below_depth.3 \
+	@DX_DOCDIR@/man/man3/hwloc_get_type_order.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u_hwloc_cache_attr_u.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u_hwloc_machine_attr_u.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u_hwloc_memory_attr_u.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u_hwloc_misc_attr_u.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_cpuset_snprintf.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_is_in_subtree.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_snprintf.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_t.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_type_of_string.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_type_string.3 \
+	@DX_DOCDIR@/man/man3/hwloc_obj_type_t.3 \
+	@DX_DOCDIR@/man/man3/hwloc_set_cpubind.3 \
+	@DX_DOCDIR@/man/man3/hwloc_set_proc_cpubind.3 \
+	@DX_DOCDIR@/man/man3/hwloc_set_thread_cpubind.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_check.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_destroy.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_get_info.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_ignore_all_keep_structure.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_ignore_type.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_ignore_type_keep_structure.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_info.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_init.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_load.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_set_flags.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_set_fsys_root.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_set_synthetic.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_set_xml.3 \
+	@DX_DOCDIR@/man/man3/hwloc_topology_t.3 \
 	@DX_DOCDIR@/man/man3/topology_binding.3 \
 	@DX_DOCDIR@/man/man3/topology_configuration.3 \
 	@DX_DOCDIR@/man/man3/topology_conversion.3 \
@@ -251,13 +251,13 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/linux-libnuma_8h_source.html \
 	@DX_DOCDIR@/html/modules.html \
 	@DX_DOCDIR@/html/pages.html \
-	@DX_DOCDIR@/html/structtopo__cpuset__t.html \
-	@DX_DOCDIR@/html/structtopo__obj.html \
-	@DX_DOCDIR@/html/structtopo__obj__attr__u_1_1topo__cache__attr__u.html \
-	@DX_DOCDIR@/html/structtopo__obj__attr__u_1_1topo__machine__attr__u.html \
-	@DX_DOCDIR@/html/structtopo__obj__attr__u_1_1topo__memory__attr__u.html \
-	@DX_DOCDIR@/html/structtopo__obj__attr__u_1_1topo__misc__attr__u.html \
-	@DX_DOCDIR@/html/structtopo__topology__info.html \
+	@DX_DOCDIR@/html/structhwloc__cpuset__t.html \
+	@DX_DOCDIR@/html/structhwloc__obj.html \
+	@DX_DOCDIR@/html/structhwloc__obj__attr__u_1_1hwloc__cache__attr__u.html \
+	@DX_DOCDIR@/html/structhwloc__obj__attr__u_1_1hwloc__machine__attr__u.html \
+	@DX_DOCDIR@/html/structhwloc__obj__attr__u_1_1hwloc__memory__attr__u.html \
+	@DX_DOCDIR@/html/structhwloc__obj__attr__u_1_1hwloc__misc__attr__u.html \
+	@DX_DOCDIR@/html/structhwloc__topology__info.html \
 	@DX_DOCDIR@/html/tab_b.gif \
 	@DX_DOCDIR@/html/tab_l.gif \
 	@DX_DOCDIR@/html/tab_r.gif \
@@ -265,7 +265,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/hwloc_8doxy.html \
 	@DX_DOCDIR@/html/hwloc_8h.html \
 	@DX_DOCDIR@/html/hwloc_8h_source.html \
-	@DX_DOCDIR@/html/uniontopo__obj__attr__u.html
+	@DX_DOCDIR@/html/unionhwloc__obj__attr__u.html
 endif
 
 if HWLOC_INSTALL_PDF
@@ -402,15 +402,15 @@ CLEANFILES += \
 	@DX_DOCDIR@/latex/index.tex \
 	@DX_DOCDIR@/latex/modules.tex \
 	@DX_DOCDIR@/latex/refman.tex \
-	@DX_DOCDIR@/latex/structtopo__cpuset__t.tex \
-	@DX_DOCDIR@/latex/structtopo__obj.tex \
-	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__cache__attr__u.tex \
-	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__memory__attr__u.tex \
-	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__misc__attr__u.tex \
-	@DX_DOCDIR@/latex/structtopo__topology__info.tex \
+	@DX_DOCDIR@/latex/structhwloc__cpuset__t.tex \
+	@DX_DOCDIR@/latex/structhwloc__obj.tex \
+	@DX_DOCDIR@/latex/structhwloc__obj_1_1hwloc__obj__attr__u_1_1hwloc__cache__attr__u.tex \
+	@DX_DOCDIR@/latex/structhwloc__obj_1_1hwloc__obj__attr__u_1_1hwloc__memory__attr__u.tex \
+	@DX_DOCDIR@/latex/structhwloc__obj_1_1hwloc__obj__attr__u_1_1hwloc__misc__attr__u.tex \
+	@DX_DOCDIR@/latex/structhwloc__topology__info.tex \
 	@DX_DOCDIR@/latex/hwloc_8doxy.tex \
 	@DX_DOCDIR@/latex/hwloc_8h.tex \
-	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex
+	@DX_DOCDIR@/latex/unionhwloc__obj_1_1hwloc__obj__attr__u.tex
 
 doc: all $(top_srcdir)/README
 $(top_srcdir)/README: @DX_DOCDIR@/html
