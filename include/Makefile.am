@@ -1,6 +1,6 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 
-include $(top_srcdir)/libtopology.am
+include $(top_srcdir)/hwloc.am
 
 include_HEADERS = hwloc.h
 include_hwlocdir = $(includedir)/hwloc

@@ -160,8 +160,8 @@ second core of the machine.
 Libtopology provides a pkg-config object, so compiling the example boils down
 to
 
-CFLAGS+=$(pkg-config --cflags topology)
-LDLIBS+=$(pkg-config --libs topology)
+CFLAGS+=$(pkg-config --cflags hwloc)
+LDLIBS+=$(pkg-config --libs hwloc)
 cc topo-hello.c $(CFLAGS) -o topo-hello $(LDLIBS)
 
 /* topo-hello.c */

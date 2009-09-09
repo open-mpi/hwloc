@@ -1,6 +1,6 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 
-include $(top_srcdir)/libtopology.am
+include $(top_srcdir)/hwloc.am
 include $(top_srcdir)/doxample.am
 
 MOSTLYCLEANFILES =
@@ -304,7 +304,7 @@ TESTS = topo-hello
 
 check_PROGRAMS = $(TESTS)
 
-LIBS = $(top_builddir)/src/libtopology.la
+LIBS = $(top_builddir)/src/libhwloc.la
 
 #
 # Rules to regenerate the documentation

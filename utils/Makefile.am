@@ -1,6 +1,6 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 
-include $(top_srcdir)/libtopology.am
+include $(top_srcdir)/hwloc.am
 
 EXTRA_DIST = lstopo.h topomask.h test-topodistrib.output
 
@@ -15,7 +15,7 @@ endif !HAVE_WINDOWS
 lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS)
 lstopo_LDFLAGS = $(CAIRO_LIBS) $(XML_LIBS) -lm
 
-LIBS = $(top_builddir)/src/libtopology.la
+LIBS = $(top_builddir)/src/libhwloc.la
 
 if HAVE_MINGW32
 else

@@ -5,7 +5,7 @@ ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src utils tests include doc
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = topology.pc
+pkgconfig_DATA = hwloc.pc
 
 .PHONY: doc doc-upload
 doc doc-upload:

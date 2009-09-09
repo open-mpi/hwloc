@@ -11,7 +11,7 @@
 #
 
 AC_PREREQ([2.60])
-AC_INIT([libtopology], [0.9], [libtopology-devel@gforge.inria.fr])
+AC_INIT([hwloc], [0.9], [hwloc-devel@open-mpi.org])
 AC_SUBST([TOPO_SOVERSION],[0])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -324,7 +324,7 @@ AC_SUBST(LIBTOPOLOGY_REQUIRES)
 AC_CONFIG_HEADER([include/private/config.h])
 
 AC_CONFIG_FILES([Makefile
-                 topology.pc
+                 hwloc.pc
                  doc/doxygen.cfg
                  include/Makefile src/Makefile utils/Makefile
 		 tests/Makefile tests/linux/Makefile

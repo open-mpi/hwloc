@@ -3,10 +3,10 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: topology
-Description: System topology detection library
+Name: hwloc
+Description: Hardware locality detection and management library
 Version: @VERSION@
 Requires.private: @LIBTOPOLOGY_REQUIRES@
 Cflags: -I${includedir}
-Libs: -L${libdir} -ltopology
+Libs: -L${libdir} -lhwloc
 Libs.private: @LIBS@

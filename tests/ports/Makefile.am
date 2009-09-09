@@ -1,22 +1,22 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 
-include $(top_srcdir)/libtopology.am
+include $(top_srcdir)/hwloc.am
 
 SRC=$(top_srcdir)/src
 
 if HAVE_LINUX
-check_LTLIBRARIES = libtopology-ports.la
+check_LTLIBRARIES = libhwloc-ports.la
 endif
 
-libtopology_ports_la_SOURCES = $(SRC)/topology.c $(SRC)/traversal.c $(SRC)/topology-synthetic.c
-libtopology_ports_la_CFLAGS = -I$(top_srcdir)/tests/ports/include -DTOPO_COMPILE_PORTS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT
+libhwloc_ports_la_SOURCES = $(SRC)/topology.c $(SRC)/traversal.c $(SRC)/topology-synthetic.c
+libhwloc_ports_la_CFLAGS = -I$(top_srcdir)/tests/ports/include -DTOPO_COMPILE_PORTS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT
 
-libtopology_ports_la_SOURCES += $(SRC)/topology-solaris.c
-libtopology_ports_la_SOURCES += $(SRC)/topology-aix.c
-libtopology_ports_la_SOURCES += $(SRC)/topology-osf.c
-libtopology_ports_la_SOURCES += $(SRC)/topology-windows.c
-libtopology_ports_la_SOURCES += $(SRC)/topology-darwin.c
-libtopology_ports_la_SOURCES += $(SRC)/topology-hpux.c
+libhwloc_ports_la_SOURCES += $(SRC)/topology-solaris.c
+libhwloc_ports_la_SOURCES += $(SRC)/topology-aix.c
+libhwloc_ports_la_SOURCES += $(SRC)/topology-osf.c
+libhwloc_ports_la_SOURCES += $(SRC)/topology-windows.c
+libhwloc_ports_la_SOURCES += $(SRC)/topology-darwin.c
+libhwloc_ports_la_SOURCES += $(SRC)/topology-hpux.c
 
 EXTRA_DIST = \
 		include/windows.h \

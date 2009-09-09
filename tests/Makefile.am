@@ -1,6 +1,6 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 
-include $(top_srcdir)/libtopology.am
+include $(top_srcdir)/hwloc.am
 
 SUBDIRS = linux ports
 
@@ -39,7 +39,7 @@ if HAVE_XML
 TESTS += lstopo_xml.sh
 endif
 
-LIBS = $(top_builddir)/src/libtopology.la
+LIBS = $(top_builddir)/src/libhwloc.la
 
 linux_libnuma_LDFLAGS = -lnuma
 if HAVE_WINDOWS

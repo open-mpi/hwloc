@@ -1,78 +1,78 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 
-include $(top_srcdir)/libtopology.am
+include $(top_srcdir)/hwloc.am
 
 AM_CFLAGS += $(XML_CFLAGS)
 
-lib_LTLIBRARIES = libtopology.la
+lib_LTLIBRARIES = libhwloc.la
 
 EXTRA_DIST = dolib.c
 
-libtopology_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c bind.c
-libtopology_la_LDFLAGS = -version-number $(TOPO_SOVERSION) $(XML_LIBS)
+libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c bind.c
+libhwloc_la_LDFLAGS = -version-number $(TOPO_SOVERSION) $(XML_LIBS)
 
 if HAVE_GCC
-libtopology_la_LDFLAGS += -no-undefined
+libhwloc_la_LDFLAGS += -no-undefined
 endif
 
 if HAVE_WINDOWS
-libtopology_la_LDFLAGS += -Xlinker --output-def -Xlinker .libs/libtopology.def
+libhwloc_la_LDFLAGS += -Xlinker --output-def -Xlinker .libs/libhwloc.def
 
 if HAVE_MS_LIB
-.libs/libtopology.lib: libtopology.la dolib
-	./dolib "$(TOPO_MS_LIB)" X86 .libs/libtopology.def libtopology-$(TOPO_SOVERSION) .libs/libtopology.lib
-all-local: .libs/libtopology.lib
+.libs/libhwloc.lib: libhwloc.la dolib
+	./dolib "$(TOPO_MS_LIB)" X86 .libs/libhwloc.def libhwloc-$(TOPO_SOVERSION) .libs/libhwloc.lib
+all-local: .libs/libhwloc.lib
 endif
 
 install-exec-hook:
-	$(INSTALL) .libs/libtopology.def $(DESTDIR)$(libdir)
+	$(INSTALL) .libs/libhwloc.def $(DESTDIR)$(libdir)
 if HAVE_MS_LIB
-	$(INSTALL) .libs/libtopology.lib $(DESTDIR)$(libdir)
-	$(INSTALL) .libs/libtopology.exp $(DESTDIR)$(libdir)
+	$(INSTALL) .libs/libhwloc.lib $(DESTDIR)$(libdir)
+	$(INSTALL) .libs/libhwloc.exp $(DESTDIR)$(libdir)
 endif
 endif
 
 if HAVE_SOLARIS
-libtopology_la_SOURCES += topology-solaris.c
+libhwloc_la_SOURCES += topology-solaris.c
 else !HAVE_SOLARIS
 EXTRA_DIST += topology-solaris.c
 endif !HAVE_SOLARIS
 
 if HAVE_LINUX
-libtopology_la_SOURCES += topology-linux.c
+libhwloc_la_SOURCES += topology-linux.c
 else !HAVE_LINUX
 EXTRA_DIST += topology-linux.c
 endif !HAVE_LINUX
 
 if HAVE_AIX
-libtopology_la_SOURCES += topology-aix.c
-libtopology_la_LDFLAGS += -lpthread
+libhwloc_la_SOURCES += topology-aix.c
+libhwloc_la_LDFLAGS += -lpthread
 else !HAVE_AIX
 EXTRA_DIST += topology-aix.c
 endif !HAVE_AIX
 
 if HAVE_OSF
-libtopology_la_SOURCES += topology-osf.c
-libtopology_la_LDFLAGS += -lnuma -lpthread
+libhwloc_la_SOURCES += topology-osf.c
+libhwloc_la_LDFLAGS += -lnuma -lpthread
 else !HAVE_OSF
 EXTRA_DIST += topology-osf.c
 endif !HAVE_OSF
 
 if HAVE_HPUX
-libtopology_la_SOURCES += topology-hpux.c
-libtopology_la_LDFLAGS += -lpthread
+libhwloc_la_SOURCES += topology-hpux.c
+libhwloc_la_LDFLAGS += -lpthread
 else !HAVE_HPUX
 EXTRA_DIST += topology-hpux.c
 endif !HAVE_HPUX
 
 if HAVE_WINDOWS
-libtopology_la_SOURCES += topology-windows.c
+libhwloc_la_SOURCES += topology-windows.c
 else !HAVE_WINDOWS
 EXTRA_DIST += topology-windows.c
 endif !HAVE_WINDOWS
 
 if HAVE_DARWIN
-libtopology_la_SOURCES += topology-darwin.c
+libhwloc_la_SOURCES += topology-darwin.c
 else !HAVE_DARWIN
 EXTRA_DIST += topology-darwin.c
 endif !HAVE_DARWIN
