@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_SYS_RSET_H
-#define HWLOC_SYS_RSET_H
+#ifndef HWLOC_PORT_SYS_RSET_H
+#define HWLOC_PORT_SYS_RSET_H
 
 #include "thread.h"
 
@@ -65,4 +65,4 @@ struct subrange {
 int ra_attachrset (rstype_t rstype, rsid_t rsid, rsethandle_t rset, unsigned int flags);
 int ra_detachrset (rstype_t rstype, rsid_t rsid, unsigned int flags);
 
-#endif /* HWLOC_SYS_RSET_H */
+#endif /* HWLOC_PORT_SYS_RSET_H */

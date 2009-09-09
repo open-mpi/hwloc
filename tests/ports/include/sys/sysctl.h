@@ -3,9 +3,9 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_SYS_SYSCTL_H
-#define HWLOC_SYS_SYSCTL_H
+#ifndef HWLOC_PORT_SYS_SYSCTL_H
+#define HWLOC_PORT_SYS_SYSCTL_H
 
 extern int sysctlbyname(const char *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen);
 
-#endif /* HWLOC_SYS_SYSCTL_H */
+#endif /* HWLOC_PORT_SYS_SYSCTL_H */

@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_SYS_LGRP_USER_H
-#define HWLOC_SYS_LGRP_USER_H
+#ifndef HWLOC_PORT_SYS_LGRP_USER_H
+#define HWLOC_PORT_SYS_LGRP_USER_H
 
 #include <sys/processor.h>
 
@@ -44,4 +44,4 @@ int lgrp_latency_cookie(lgrp_cookie_t cookie, lgrp_id_t from, lgrp_id_t to, lgrp
 
 int lgrp_fini();
 
-#endif /* HWLOC_SYS_LGRP_USER_H */
+#endif /* HWLOC_PORT_SYS_LGRP_USER_H */

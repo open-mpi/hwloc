@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_WINDOWS_H
-#define HWLOC_WINDOWS_H
+#ifndef HWLOC_PORT_WINDOWS_H
+#define HWLOC_PORT_WINDOWS_H
 
 #include <inttypes.h>
 
@@ -53,4 +53,4 @@ HANDLE WINAPI GetCurrentProcess(void);
 BOOL GetNumaAvailableMemoryNode(UCHAR Node, PULONGLONG AvailableBytes);
 
 
-#endif /* HWLOC_WINDOWS_H */
+#endif /* HWLOC_PORT_WINDOWS_H */
