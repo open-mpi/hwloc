@@ -215,14 +215,14 @@ extern int hwloc_topology_init (hwloc_topology_t *topologyp);
 /** \brief Build the actual topology
  *
  * Build the actual topology once initialized with hwloc_topology_init() and
- * tuned with ::topology_configuration routine.
+ * tuned with ::hwlocality_configuration routine.
  * No other routine may be called earlier using this topology context.
  *
  * \param topology is the topology to be loaded with objects.
  *
  * \return 0 on success, -1 on error.
  *
- * \sa topology_configuration
+ * \sa hwlocality_configuration
  */
 extern int hwloc_topology_load(hwloc_topology_t topology);
 /** \brief Terminate and free a topology context
@@ -240,8 +240,8 @@ extern void hwloc_topology_check(hwloc_topology_t topology);
 
 /** \defgroup hwlocality_configuration Configure Topology Detection
  *
- * These functions can optionally be called between topology_init() and
- * topology_load() to configure how the detection should be performed, e.g. to
+ * These functions can optionally be called between hwloc_topology_init() and
+ * hwloc_topology_load() to configure how the detection should be performed, e.g. to
  * ignore some objects types, define a synthetic topology, etc.
  *
  * If none of them is called, the default is to detect all the objects of the
