@@ -67,7 +67,7 @@ Binding
   + A few OSes don't provide it (e.g. AIX, OSF, solaris), it does not make sense
   for a process when its threads are bound here and there.
 
-* add hwloc_set_membind(topology, beginaddr, endaddr, TOPO_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, hwloc_cpuset_t)
+* add hwloc_set_membind(topology, beginaddr, endaddr, HWLOC_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, hwloc_cpuset_t)
   + size instead of endaddr?
   + if beginaddr=endaddr=NULL, setmempolicy?
   + reverse routine?
