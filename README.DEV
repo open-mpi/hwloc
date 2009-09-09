@@ -9,6 +9,8 @@ make check
 make distcheck
 make check with --enable-debug
 
+Do this both from inside and outside sources.
+
 - To release a tarball, the following is necessary to generate all
 documentations:
   - doxygen with man, pdf and html support
