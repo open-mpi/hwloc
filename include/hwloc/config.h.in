@@ -5,8 +5,8 @@
 
 /* The configuration file */
 
-#ifndef TOPOLOGY_CONFIG_H
-#define TOPOLOGY_CONFIG_H
+#ifndef HWLOC_CONFIG_H
+#define HWLOC_CONFIG_H
 
 #undef HWLOC_HAVE_FFS
 
@@ -47,4 +47,4 @@
 #  endif /* hwloc_thread_t */
 #endif /* HWLOC_HAVE_WINDOWS_H */
 
-#endif /* TOPOLOGY_CONFIG_H */
+#endif /* HWLOC_CONFIG_H */
