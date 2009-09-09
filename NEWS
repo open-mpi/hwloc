@@ -11,7 +11,7 @@ $HEADER$
 
 This file contains the main features as well as overviews of specific
 bug fixes (and other actions) for each version of hwloc since version
-0.9 (as initially released as "libtoplogy", then re-branded to "hwloc"
+0.9 (as initially released as "libtopology", then re-branded to "hwloc"
 in v0.9.1).
 
 
