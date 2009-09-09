@@ -29,16 +29,16 @@ MAINTAINERCLEANFILES = $(dist_man1_MANS)
 if HWLOC_HAVE_UTILS_MAN
 else
   ifneq ($(HELP2MAN),)
-TOPO_HELP2MAN=$(HELP2MAN) -m "Topology commands" -S "INRIA" -N 
+HWLOC_HELP2MAN=$(HELP2MAN) -m "Topology commands" -S "INRIA" -N 
 
 lstopo.1: lstopo
-	$(TOPO_HELP2MAN) -n "Show the topology of the system" ./$^ -o $@
+	$(HWLOC_HELP2MAN) -n "Show the topology of the system" ./$^ -o $@
 topobind.1: topobind
-	$(TOPO_HELP2MAN) -n "Bind a command to given objects or cpu masks" ./$^ -o $@
+	$(HWLOC_HELP2MAN) -n "Bind a command to given objects or cpu masks" ./$^ -o $@
 topodistrib.1: topodistrib
-	$(TOPO_HELP2MAN) -n "Build a number of cpu masks distributed on the system" ./$^ -o $@
+	$(HWLOC_HELP2MAN) -n "Build a number of cpu masks distributed on the system" ./$^ -o $@
 topomask.1: topomask
-	$(TOPO_HELP2MAN) -n "Build a cpu mask" ./$^ -o $@
+	$(HWLOC_HELP2MAN) -n "Build a cpu mask" ./$^ -o $@
   endif
 endif
 endif
