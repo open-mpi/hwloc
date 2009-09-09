@@ -28,15 +28,15 @@ DX_PS_FEATURE(OFF)
 if echo "${srcdir}" | grep '^/' > /dev/null
 then
   # absolute path, no need for ../
-  DX_INIT_DOXYGEN(libtopology, doxygen.cfg, ${srcdir}/doc/doxygen-doc)
+  DX_INIT_DOXYGEN(Hardware Locality, doxygen.cfg, ${srcdir}/doc/doxygen-doc)
 else
-  DX_INIT_DOXYGEN(libtopology, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
+  DX_INIT_DOXYGEN(Hardware Locality, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
 fi
 AC_PATH_PROG([FIG2DEV], [fig2dev])
 AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/man, [topo_have_man=yes], [:])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/libtopology.pdf, [topo_have_pdf=yes], [:])
+AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/hwloc.pdf, [topo_have_pdf=yes], [:])
 AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/html, [topo_have_html=yes], [:])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/libtopology.tag, [topo_have_tag=yes], [:])
+AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/hwloc.tag, [topo_have_tag=yes], [:])
 AM_CONDITIONAL([TOPO_HAVE_MAN], [test "x$topo_have_man" = "xyes"])
 AM_CONDITIONAL([TOPO_HAVE_PDF], [test "x$topo_have_pdf" = "xyes"])
 AM_CONDITIONAL([TOPO_HAVE_HTML], [test "x$topo_have_html" = "xyes"])

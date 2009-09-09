@@ -6,7 +6,7 @@ include $(top_srcdir)/doxample.am
 MOSTLYCLEANFILES =
 CLEANFILES =
 EXTRA_DIST = $(DX_CONFIG) \
-	topology.doxy \
+	hwloc.doxy \
 	doxygen.css \
 	images/dudley.png \
 	images/emmett.png \
@@ -192,7 +192,7 @@ CLEANFILES += \
 	@DX_DOCDIR@/man/man3/s.3 \
 	@DX_DOCDIR@/man/man3/sibling_rank.3 \
 	@DX_DOCDIR@/man/man3/system.3 \
-	@DX_DOCDIR@/man/man3/topology.doxy.3 \
+	@DX_DOCDIR@/man/man3/hwloc.doxy.3 \
 	@DX_DOCDIR@/man/man3/hwloc.h.3 \
 	@DX_DOCDIR@/man/man3/type.3 \
 	@DX_DOCDIR@/man/man3/userdata.3
@@ -262,7 +262,7 @@ EXTRA_DIST += \
 	@DX_DOCDIR@/html/tab_l.gif \
 	@DX_DOCDIR@/html/tab_r.gif \
 	@DX_DOCDIR@/html/tabs.css \
-	@DX_DOCDIR@/html/topology_8doxy.html \
+	@DX_DOCDIR@/html/hwloc_8doxy.html \
 	@DX_DOCDIR@/html/hwloc_8h.html \
 	@DX_DOCDIR@/html/hwloc_8h_source.html \
 	@DX_DOCDIR@/html/uniontopo__obj__attr__u.html
@@ -270,37 +270,37 @@ endif
 
 if TOPO_INSTALL_PDF
 EXTRA_DIST += \
-	@DX_DOCDIR@/libtopology.pdf
+	@DX_DOCDIR@/hwloc.pdf
 endif
 
 if TOPO_WILLHAVE_TAG
 EXTRA_DIST += \
-	@DX_DOCDIR@/libtopology.tag
+	@DX_DOCDIR@/hwloc.tag
 endif
 
 install-data-local:
 if TOPO_INSTALL_PDF
 	$(mkinstalldirs) $(DESTDIR)$(pdfdir)
-	$(INSTALL_DATA) @DX_DOCDIR@/libtopology.pdf $(DESTDIR)$(pdfdir)
+	$(INSTALL_DATA) @DX_DOCDIR@/hwloc.pdf $(DESTDIR)$(pdfdir)
 endif
 if TOPO_INSTALL_HTML
-	$(mkinstalldirs) $(DESTDIR)$(htmldir)/topology
-	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(DESTDIR)$(htmldir)/topology
+	$(mkinstalldirs) $(DESTDIR)$(htmldir)/hwloc
+	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(DESTDIR)$(htmldir)/hwloc
 endif
 
 uninstall-local:
 if TOPO_INSTALL_PDF
-	$(RM) $(DESTDIR)$(pdfdir)/libtopology.pdf
+	$(RM) $(DESTDIR)$(pdfdir)/hwloc.pdf
 endif
 if TOPO_INSTALL_HTML
-	$(RM) $(DESTDIR)$(htmldir)/topology/*
+	$(RM) $(DESTDIR)$(htmldir)/hwloc/*
 endif
 
 #
 # Make sure that the documentation example works
 #
 
-TESTS = topo-hello
+TESTS = hwloc-hello
 
 check_PROGRAMS = $(TESTS)
 
@@ -315,7 +315,7 @@ if TOPO_HAVE_MAN
 else
 if DX_COND_man
 # Documentation not available, tell how to generate it
-$(dist_man3_MANS): @DX_DOCDIR@/libtopology.tag
+$(dist_man3_MANS): @DX_DOCDIR@/hwloc.tag
 endif
 endif
 
@@ -323,8 +323,8 @@ if TOPO_HAVE_PDF
 else
 if DX_COND_pdf
 if TOPO_INSTALL_PDF
-all-local: @DX_DOCDIR@/libtopology.pdf
-@DX_DOCDIR@/libtopology.pdf: @DX_DOCDIR@/libtopology.tag
+all-local: @DX_DOCDIR@/hwloc.pdf
+@DX_DOCDIR@/hwloc.pdf: @DX_DOCDIR@/hwloc.tag
 endif
 endif
 endif
@@ -335,7 +335,7 @@ if DX_COND_html
 if TOPO_INSTALL_HTML
 all-local: @DX_DOCDIR@/html
 	cp $(srcdir)/doxygen.css @DX_DOCDIR@/html/
-@DX_DOCDIR@/html: @DX_DOCDIR@/libtopology.tag
+@DX_DOCDIR@/html: @DX_DOCDIR@/hwloc.tag
 endif
 endif
 endif
@@ -344,7 +344,7 @@ endif
 # What doxygen depends on
 #
 DX_INPUTS = \
-	$(srcdir)/topology.doxy \
+	$(srcdir)/hwloc.doxy \
 	$(top_srcdir)/include/hwloc.h \
 	$(top_srcdir)/include/hwloc/helper.h \
 	$(top_srcdir)/include/hwloc/cpuset.h \
@@ -408,7 +408,7 @@ CLEANFILES += \
 	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__memory__attr__u.tex \
 	@DX_DOCDIR@/latex/structtopo__obj_1_1topo__obj__attr__u_1_1topo__misc__attr__u.tex \
 	@DX_DOCDIR@/latex/structtopo__topology__info.tex \
-	@DX_DOCDIR@/latex/topology_8doxy.tex \
+	@DX_DOCDIR@/latex/hwloc_8doxy.tex \
 	@DX_DOCDIR@/latex/hwloc_8h.tex \
 	@DX_DOCDIR@/latex/uniontopo__obj_1_1topo__obj__attr__u.tex
 

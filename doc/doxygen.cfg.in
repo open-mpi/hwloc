@@ -565,7 +565,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = \
-			@top_srcdir@/doc/topology.doxy \
+			@top_srcdir@/doc/hwloc.doxy \
 			@top_srcdir@/include/hwloc.h \
 			@top_srcdir@/include/hwloc/helper.h \
 			@top_srcdir@/include/hwloc/cpuset.h \
@@ -1297,7 +1297,7 @@ TAGFILES               =
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create 
 # a tag file that is based on the input files it reads.
 
-GENERATE_TAGFILE       = @DX_DOCDIR@/libtopology.tag
+GENERATE_TAGFILE       = @DX_DOCDIR@/hwloc.tag
 
 # If the ALLEXTERNALS tag is set to YES all external classes will be listed 
 # in the class index. If set to NO only the inherited external classes 

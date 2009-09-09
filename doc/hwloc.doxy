@@ -189,7 +189,7 @@ System(15GB)
 \endhtmlonly
 \section interface Interface example
 
-This section shows how to use libtopology with an small example \c topo-hello.c
+This section shows how to use libtopology with an small example \c hwloc-hello.c
 that just prints the topology and binds itself to the first processor of the
 second core of the machine.
 
@@ -198,10 +198,10 @@ Libtopology provides a pkg-config object, so compiling the example boils down to
 \verbatim
 CFLAGS+=$(pkg-config --cflags hwloc)
 LDLIBS+=$(pkg-config --libs hwloc)
-cc topo-hello.c $(CFLAGS) -o topo-hello $(LDLIBS)
+cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 \endverbatim
 
-\include topo-hello.c
+\include hwloc-hello.c
 
 Further documentation is available in html, manual pages, and pdf format
 in the source tarball in doc/doxygen-doc/ (after doxygen compilation

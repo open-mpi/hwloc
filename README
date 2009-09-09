@@ -153,7 +153,7 @@ System(15GB)
 
 Interface example
 
-This section shows how to use libtopology with an small example topo-hello.c
+This section shows how to use libtopology with an small example hwloc-hello.c
 that just prints the topology and binds itself to the first processor of the
 second core of the machine.
 
@@ -162,7 +162,7 @@ to
 
 CFLAGS+=$(pkg-config --cflags hwloc)
 LDLIBS+=$(pkg-config --libs hwloc)
-cc topo-hello.c $(CFLAGS) -o topo-hello $(LDLIBS)
+cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 
 /* topo-hello.c */
 #include <hwloc.h>
@@ -284,4 +284,4 @@ runtime.bordeaux.inria.fr/) (headed by Raymond Namyst http://dept-info.labri.fr
 
 -------------------------------------------------------------------------------
 
-Generated on Wed Sep 9 17:10:04 2009 for libtopology by  doxygen 1.6.1
+Generated on Wed Sep 9 17:52:55 2009 for libtopology by  doxygen 1.6.1
