@@ -18,7 +18,8 @@ in v0.9.1).
 Version 0.9.1
 -------------
 
-* Re-branded to "hwloc" and moved to the Open MPI project.
+* Re-branded to "hwloc" and moved to the Open MPI project, relicensed under the
+  BSD license.
 * Group NUMA nodes into Misc objects according to their physical distance
   that may be reported by the OS/BIOS.
   May be ignored by setting TOPO_IGNORE_DISTANCES=1 in the environment.
