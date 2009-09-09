@@ -63,11 +63,11 @@ Support
 
 Binding
 =======
-* add topo_get_cpubind ? and the other cpubind variants ?
+* add hwloc_get_cpubind ? and the other cpubind variants ?
   + A few OSes don't provide it (e.g. AIX, OSF, solaris), it does not make sense
   for a process when its threads are bound here and there.
 
-* add topo_set_membind(topology, beginaddr, endaddr, TOPO_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, hwloc_cpuset_t)
+* add hwloc_set_membind(topology, beginaddr, endaddr, TOPO_MEMBIND_BIND/FIRSTTOUCH/INTERLEAVE, hwloc_cpuset_t)
   + size instead of endaddr?
   + if beginaddr=endaddr=NULL, setmempolicy?
   + reverse routine?
@@ -77,7 +77,7 @@ Binding
 * apply a policy to a given area (not all OSes support that).
 
 Binding tool for OAR, MPI, Hydra, MPI+OpenMP:
-* topo_taskset --ncpus 2 --near 3
+* hwloc_taskset --ncpus 2 --near 3
   bind process on 2 cores "near" physical proc id 3
 
 Ports
