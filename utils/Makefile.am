@@ -2,9 +2,9 @@
 
 include $(top_srcdir)/hwloc.am
 
-EXTRA_DIST = lstopo.h topomask.h test-topodistrib.output
+EXTRA_DIST = lstopo.h hwloc-mask.h test-hwloc-distrib.output
 
-bin_PROGRAMS = lstopo topomask topobind topodistrib
+bin_PROGRAMS = lstopo hwloc-mask hwloc-bind hwloc-distrib
 
 lstopo_SOURCES = lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-cairo.c lstopo-xml.c
 if HAVE_WINDOWS
@@ -19,25 +19,25 @@ LIBS = $(top_builddir)/src/libhwloc.la
 
 if HAVE_MINGW32
 else
-TESTS = test-topodistrib.sh
+TESTS = test-hwloc-distrib.sh
 endif
 
 if HWLOC_INSTALL_UTILS_MAN
-dist_man1_MANS = lstopo.1 topobind.1 topodistrib.1 topomask.1
+dist_man1_MANS = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-mask.1
 MAINTAINERCLEANFILES = $(dist_man1_MANS)
 
 if HWLOC_HAVE_UTILS_MAN
 else
   ifneq ($(HELP2MAN),)
-HWLOC_HELP2MAN=$(HELP2MAN) -m "Topology commands" -S "INRIA" -N 
+HWLOC_HELP2MAN=$(HELP2MAN) -m "Hardware Locality commands" -S "INRIA" -N 
 
 lstopo.1: lstopo
 	$(HWLOC_HELP2MAN) -n "Show the topology of the system" ./$^ -o $@
-topobind.1: topobind
+hwloc-bind.1: hwloc-bind
 	$(HWLOC_HELP2MAN) -n "Bind a command to given objects or cpu masks" ./$^ -o $@
-topodistrib.1: topodistrib
+hwloc-distrib.1: hwloc-distrib
 	$(HWLOC_HELP2MAN) -n "Build a number of cpu masks distributed on the system" ./$^ -o $@
-topomask.1: topomask
+hwloc-mask.1: hwloc-mask
 	$(HWLOC_HELP2MAN) -n "Build a cpu mask" ./$^ -o $@
   endif
 endif

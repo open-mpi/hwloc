@@ -4,7 +4,7 @@
  * See COPYING in top-level directory.
  */
 
-#include <topomask.h>
+#include <hwloc-mask.h>
 #include <hwloc.h>
 #include <private/private.h>
 
