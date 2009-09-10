@@ -31,9 +31,9 @@ FILE *open_file(const char *filename, const char *mode)
   return fopen(filename, mode);
 }
 
-static void usage(FILE *where)
+static void usage(char *name, FILE *where)
 {
-  fprintf (where, "Usage: lstopo [ options ]... [ filename ]\n");
+  fprintf (where, "Usage: %s [ options ]... [ filename ]\n", name);
   fprintf (where, "\n");
   fprintf (where, "By default, lstopo displays a graphical window with the topology if DISPLAY is\nset, else a text output on the standard output.\n");
   fprintf (where, "To force a text output on the standard output, specify - or /dev/stdout as\nfilename.\n");
@@ -89,10 +89,17 @@ main (int argc, char *argv[])
   unsigned long flags = 0;
   int merge = 0;
   int ignorecache = 0;
+  char * callname;
   char * synthetic = NULL;
   char * xmlpath = NULL;
   char * fsysroot = NULL;
   int opt;
+
+  callname = strrchr(argv[0], '/');
+  if (!callname)
+    callname = argv[0];
+  else
+    callname++;
 
   err = hwloc_topology_init (&topology);
   if (err)
@@ -104,7 +111,7 @@ main (int argc, char *argv[])
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
 	verbose_mode = 1;
       else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
-	usage(stdout);
+	usage(callname, stdout);
         exit(EXIT_SUCCESS);
       }
       else if (!strcmp (argv[1], "--no-caches"))
@@ -119,7 +126,7 @@ main (int argc, char *argv[])
         force_horiz = 1;
       else if (!strcmp (argv[1], "--fontsize")) {
 	if (argc <= 2) {
-	  usage (stderr);
+	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
 	fontsize = atoi(argv[2]);
@@ -127,7 +134,7 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[1], "--gridsize")) {
 	if (argc <= 2) {
-	  usage (stderr);
+	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
 	gridsize = atoi(argv[2]);
@@ -135,14 +142,14 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[1], "--synthetic")) {
 	if (argc <= 2) {
-	  usage (stderr);
+	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
 	synthetic = argv[2]; opt = 1;
 #ifdef HAVE_XML
       } else if (!strcmp (argv[1], "--xml")) {
 	if (argc <= 2) {
-	  usage (stderr);
+	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
 	xmlpath = argv[2]; opt = 1;
@@ -152,18 +159,18 @@ main (int argc, char *argv[])
 #ifdef LINUX_SYS
       } else if (!strcmp (argv[1], "--fsys-root")) {
 	if (argc <= 2) {
-	  usage (stderr);
+	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
 	fsysroot = argv[2]; opt = 1;
 #endif
       } else if (!strcmp (argv[1], "--version")) {
-          printf("%s %s\n", argv[0], VERSION);
+          printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
       } else {
 	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
-	  usage (stderr);
+	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	} else
 	  filename = argv[1];
@@ -237,7 +244,7 @@ main (int argc, char *argv[])
 #endif
   else {
     fprintf(stderr, "file format not supported\n");
-    usage(stderr);
+    usage(callname, stderr);
     exit(EXIT_FAILURE);
   }
 
