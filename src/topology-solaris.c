@@ -18,22 +18,22 @@
 #include <sys/procset.h>
 
 static int
-topo_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   unsigned target;
 
-  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset)) {
     if (processor_bind(idtype, id, PBIND_NONE, NULL) != 0)
       return -1;
     return 0;
   }
 
-  if (hwloc_cpuset_weight(topo_set) != 1) {
+  if (hwloc_cpuset_weight(hwloc_set) != 1) {
     errno = EXDEV;
     return -1;
   }
 
-  target = hwloc_cpuset_first(topo_set);
+  target = hwloc_cpuset_first(hwloc_set);
 
   if (processor_bind(idtype, id,
 		     (processorid_t) (target), NULL) != 0)
@@ -43,27 +43,27 @@ topo_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id
 }
 
 static int
-topo_solaris_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_solaris_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_solaris_set_sth_cpubind(topology, P_PID, pid, topo_set, strict);
+  return hwloc_solaris_set_sth_cpubind(topology, P_PID, pid, hwloc_set, strict);
 }
 
 static int
-topo_solaris_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_solaris_set_sth_cpubind(topology, P_PID, P_MYID, topo_set, strict);
+  return hwloc_solaris_set_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, strict);
 }
 
 static int
-topo_solaris_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_solaris_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_solaris_set_thisproc_cpubind(topology, topo_set, strict);
+  return hwloc_solaris_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
 
 static int
-topo_solaris_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, topo_set, strict);
+  return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, strict);
 }
 
 /* TODO: thread, maybe not easy because of the historical n:m implementation */
@@ -339,10 +339,10 @@ void hwloc_look_solaris(struct hwloc_topology *topology)
 {
   hwloc_cpuset_t online_cpuset;
   unsigned nbprocs = hwloc_fallback_nbprocessors ();
-  topology->set_cpubind = topo_solaris_set_cpubind;
-  topology->set_proc_cpubind = topo_solaris_set_proc_cpubind;
-  topology->set_thisproc_cpubind = topo_solaris_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = topo_solaris_set_thisthread_cpubind;
+  topology->set_cpubind = hwloc_solaris_set_cpubind;
+  topology->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
+  topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
 #ifdef HAVE_LIBLGRP
   hwloc_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */

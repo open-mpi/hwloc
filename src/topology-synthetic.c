@@ -167,7 +167,7 @@ hwloc_backend_synthetic_exit(struct hwloc_topology *topology)
  * - next cpu number to be used should be returned.
  */
 static unsigned
-topo__look_synthetic(struct hwloc_topology *topology,
+hwloc__look_synthetic(struct hwloc_topology *topology,
     int level, unsigned first_cpu,
     unsigned long *parent_memory_kB,
     hwloc_cpuset_t *parent_cpuset)
@@ -209,7 +209,7 @@ topo__look_synthetic(struct hwloc_topology *topology,
   } else {
     assert(topology->backend_params.synthetic.arity[level] != 0);
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
-      first_cpu = topo__look_synthetic(topology, level + 1, first_cpu, pmemory, &obj->cpuset);
+      first_cpu = hwloc__look_synthetic(topology, level + 1, first_cpu, pmemory, &obj->cpuset);
   }
 
   hwloc_add_object(topology, obj);
@@ -259,7 +259,7 @@ topo__look_synthetic(struct hwloc_topology *topology,
 }
 
 static int
-topo_synthetic_set_cpubind(void) {
+hwloc_synthetic_set_cpubind(void) {
   return 0;
 }
 
@@ -269,12 +269,12 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
   hwloc_cpuset_t cpuset;
   unsigned first_cpu = 0, i;
 
-  topology->set_cpubind = (void*) topo_synthetic_set_cpubind;
-  topology->set_thisproc_cpubind = (void*) topo_synthetic_set_cpubind;
-  topology->set_thisthread_cpubind = (void*) topo_synthetic_set_cpubind;
-  topology->set_proc_cpubind = (void*) topo_synthetic_set_cpubind;
-  topology->set_thread_cpubind = (void*) topo_synthetic_set_cpubind;
+  topology->set_cpubind = (void*) hwloc_synthetic_set_cpubind;
+  topology->set_thisproc_cpubind = (void*) hwloc_synthetic_set_cpubind;
+  topology->set_thisthread_cpubind = (void*) hwloc_synthetic_set_cpubind;
+  topology->set_proc_cpubind = (void*) hwloc_synthetic_set_cpubind;
+  topology->set_thread_cpubind = (void*) hwloc_synthetic_set_cpubind;
 
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
-    first_cpu = topo__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, &cpuset);
+    first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, &cpuset);
 }

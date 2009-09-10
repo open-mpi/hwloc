@@ -26,20 +26,20 @@
 #include <sys/thread.h>
 
 static int
-topo_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   rsethandle_t rset, rad;
   hwloc_obj_t objs[2];
   int n;
   int res = -1;
 
-  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset)) {
     if (ra_detachrset(what, who, 0))
       return -1;
     return 0;
   }
 
-  n = hwloc_get_cpuset_objs(topology, topo_set, objs, 2);
+  n = hwloc_get_cpuset_objs(topology, hwloc_set, objs, 2);
   if (n > 1 || objs[0]->os_level == -1) {
     /* Does not correspond to exactly one radset, not possible */
     errno = EXDEV;
@@ -72,41 +72,41 @@ out:
 }
 
 static int
-topo_aix_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   rsid_t who = { .at_pid = getpid() };
-  return topo_aix_set_sth_cpubind(topology, R_PROCESS, who, topo_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, strict);
 }
 
 static int
-topo_aix_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   rsid_t who = { .at_tid = thread_self() };
-  return topo_aix_set_sth_cpubind(topology, R_THREAD, who, topo_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, strict);
 }
 
 static int
-topo_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   rsid_t who = { .at_pid = pid };
-  return topo_aix_set_sth_cpubind(topology, R_PROCESS, who, topo_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, strict);
 }
 
 static int
-topo_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   struct __pthrdsinfo info;
   int size;
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
   rsid_t who = { .at_tid = info.__pi_tid };
-  return topo_aix_set_sth_cpubind(topology, R_THREAD, who, topo_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, strict);
 }
 
 static int
-topo_aix_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_aix_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_aix_set_thisproc_cpubind(topology, topo_set, strict);
+  return hwloc_aix_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
 
 static void
@@ -175,11 +175,11 @@ hwloc_look_aix(struct hwloc_topology *topology)
   unsigned i;
   /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
 
-  topology->set_cpubind = topo_aix_set_cpubind;
-  topology->set_proc_cpubind = topo_aix_set_proc_cpubind;
-  topology->set_thread_cpubind = topo_aix_set_thread_cpubind;
-  topology->set_thisproc_cpubind = topo_aix_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = topo_aix_set_thisthread_cpubind;
+  topology->set_cpubind = hwloc_aix_set_cpubind;
+  topology->set_proc_cpubind = hwloc_aix_set_proc_cpubind;
+  topology->set_thread_cpubind = hwloc_aix_set_thread_cpubind;
+  topology->set_thisproc_cpubind = hwloc_aix_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
 
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {

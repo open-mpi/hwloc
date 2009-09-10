@@ -79,7 +79,7 @@ int hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *s
 }
 
 static int
-topo__get_cpuset_objs (struct hwloc_obj *current, const hwloc_cpuset_t *set,
+hwloc__get_cpuset_objs (struct hwloc_obj *current, const hwloc_cpuset_t *set,
 		       struct hwloc_obj ***res, int *max)
 {
   int gotten = 0;
@@ -104,7 +104,7 @@ topo__get_cpuset_objs (struct hwloc_obj *current, const hwloc_cpuset_t *set,
     if (hwloc_cpuset_iszero(&subset))
       continue;
 
-    ret = topo__get_cpuset_objs (current->children[i], &subset, res, max);
+    ret = hwloc__get_cpuset_objs (current->children[i], &subset, res, max);
     gotten += ret;
 
     /* if no more room to store remaining objects, return what we got so far */
@@ -127,7 +127,7 @@ hwloc_get_cpuset_objs (struct hwloc_topology *topology, const hwloc_cpuset_t *se
   if (max <= 0)
     return 0;
 
-  return topo__get_cpuset_objs (current, set, &objs, &max);
+  return hwloc__get_cpuset_objs (current, set, &objs, &max);
 }
 
 const char *
@@ -161,9 +161,9 @@ hwloc_obj_type_of_string (const char * string)
   return HWLOC_OBJ_TYPE_MAX;
 }
 
-#define topo_memory_size_printf_value(_size) \
+#define hwloc_memory_size_printf_value(_size) \
   (_size) < (10*1024) ? (_size) : (_size) < (10*1024*1024) ? (_size)>>10 : (_size)>>20
-#define topo_memory_size_printf_unit(_size) \
+#define hwloc_memory_size_printf_unit(_size) \
   (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
 
 int
@@ -188,35 +188,35 @@ hwloc_obj_snprintf(char *string, size_t size,
   case HWLOC_OBJ_SYSTEM:
     if (verbose)
       return snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
-		      topo_memory_size_printf_value(l->attr->system.memory_kB),
-		      topo_memory_size_printf_unit(l->attr->system.memory_kB),
+		      hwloc_memory_size_printf_value(l->attr->system.memory_kB),
+		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB),
 		      l->attr->system.huge_page_free, l->attr->system.huge_page_size_kB,
 		      l->attr->system.dmi_board_vendor?:"", l->attr->system.dmi_board_name?:"");
     else
       return snprintf(string, size, "%s(%lu%s)", hwloc_obj_type_string(type),
-		      topo_memory_size_printf_value(l->attr->system.memory_kB),
-		      topo_memory_size_printf_unit(l->attr->system.memory_kB));
+		      hwloc_memory_size_printf_value(l->attr->system.memory_kB),
+		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB));
   case HWLOC_OBJ_MACHINE:
     if (verbose)
       return snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
-		      topo_memory_size_printf_value(l->attr->machine.memory_kB),
-		      topo_memory_size_printf_unit(l->attr->machine.memory_kB),
+		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB),
+		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB),
 		      l->attr->machine.huge_page_free, l->attr->machine.huge_page_size_kB,
 		      l->attr->machine.dmi_board_vendor?:"", l->attr->machine.dmi_board_name?:"");
     else
       return snprintf(string, size, "%s%s(%lu%s)", hwloc_obj_type_string(type), os_index,
-		      topo_memory_size_printf_value(l->attr->machine.memory_kB),
-		      topo_memory_size_printf_unit(l->attr->machine.memory_kB));
+		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB),
+		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB));
   case HWLOC_OBJ_NODE:
     return snprintf(string, size, "%s%s(%lu%s)",
 		    verbose ? hwloc_obj_type_string(type) : "Node", os_index,
-		    topo_memory_size_printf_value(l->attr->node.memory_kB),
-		    topo_memory_size_printf_unit(l->attr->node.memory_kB));
+		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
+		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));
   case HWLOC_OBJ_CACHE:
     return snprintf(string, size, "L%u%s%s(%lu%s)", l->attr->cache.depth,
 		      verbose ? hwloc_obj_type_string(type) : "", os_index,
-		    topo_memory_size_printf_value(l->attr->node.memory_kB),
-		    topo_memory_size_printf_unit(l->attr->node.memory_kB));
+		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
+		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));
   default:
     *string = '\0';
     return 0;

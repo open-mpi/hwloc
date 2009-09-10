@@ -33,7 +33,7 @@
 #include <pthread.h>
 
 static ldom_t
-topo_hpux_find_ldom(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set)
+hwloc_hpux_find_ldom(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set)
 {
   int has_numa = sysconf(_SC_CCNUMA_SUPPORT) == 1;
   int n;
@@ -42,7 +42,7 @@ topo_hpux_find_ldom(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set)
   if (!has_numa)
     return -1;
 
-  n = hwloc_get_cpuset_objs(topology, topo_set, objs, 2);
+  n = hwloc_get_cpuset_objs(topology, hwloc_set, objs, 2);
   if (n > 1 || objs[0]->type != HWLOC_OBJ_NODE) {
     /* Does not correspond to exactly one node */
     return -1;
@@ -52,18 +52,18 @@ topo_hpux_find_ldom(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set)
 }
 
 static spu_t
-topo_hpux_find_spu(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set)
+hwloc_hpux_find_spu(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set)
 {
   spu_t cpu;
 
-  cpu = hwloc_cpuset_first(topo_set);
-  if (cpu != -1 && hwloc_cpuset_weight(topo_set) == 1)
+  cpu = hwloc_cpuset_first(hwloc_set);
+  if (cpu != -1 && hwloc_cpuset_weight(hwloc_set) == 1)
     return cpu;
   return -1;
 }
 
 static int
-topo_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   ldom_t ldom;
   spu_t cpu;
@@ -72,14 +72,14 @@ topo_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwl
   mpctl(MPC_SETLDOM, MPC_LDOMFLOAT, pid);
   mpctl(MPC_SETPROCESS, MPC_SPUFLOAT, pid);
 
-  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset))
+  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset))
     return 0;
 
-  ldom = topo_hpux_find_ldom(topology, topo_set);
+  ldom = hwloc_hpux_find_ldom(topology, hwloc_set);
   if (ldom != -1)
     return mpctl(MPC_SETLDOM, ldom, pid);
 
-  cpu = topo_hpux_find_spu(topology, topo_set);
+  cpu = hwloc_hpux_find_spu(topology, hwloc_set);
   if (cpu != -1)
     return mpctl(strict ? MPC_SETPROCESS_FORCE : MPC_SETPROCESS, cpu, pid);
 
@@ -88,19 +88,19 @@ topo_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwl
 }
 
 static int
-topo_hpux_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_hpux_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_hpux_set_proc_cpubind(topology, MPC_SELFPID, topo_set, strict);
+  return hwloc_hpux_set_proc_cpubind(topology, MPC_SELFPID, hwloc_set, strict);
 }
 
 static int
-topo_hpux_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_hpux_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_hpux_set_thisproc_cpubind(topology, topo_set, strict);
+  return hwloc_hpux_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
 
 static int
-topo_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   ldom_t ldom, ldom2;
   spu_t cpu, cpu2;
@@ -109,14 +109,14 @@ topo_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   pthread_ldom_bind_np(&ldom2, PTHREAD_LDOMFLOAT_NP, pthread);
   pthread_processor_bind_np(PTHREAD_BIND_ADVISORY_NP, &cpu2, PTHREAD_SPUFLOAT_NP, pthread);
 
-  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset))
+  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset))
     return 0;
 
-  ldom = topo_hpux_find_ldom(topology, topo_set);
+  ldom = hwloc_hpux_find_ldom(topology, hwloc_set);
   if (ldom != -1)
     return pthread_ldom_bind_np(&ldom2, ldom, pthread);
 
-  cpu = topo_hpux_find_spu(topology, topo_set);
+  cpu = hwloc_hpux_find_spu(topology, hwloc_set);
   if (cpu != -1)
     return pthread_processor_bind_np(strict ? PTHREAD_BIND_FORCED_NP : PTHREAD_BIND_ADVISORY_NP, &cpu2, cpu, pthread);
 
@@ -125,9 +125,9 @@ topo_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 }
 
 static int
-topo_hpux_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_hpux_set_thread_cpubind(topology, PTHREAD_SELFTID_NP, topo_set, strict);
+  return hwloc_hpux_set_thread_cpubind(topology, PTHREAD_SELFTID_NP, hwloc_set, strict);
 }
 
 void
@@ -139,11 +139,11 @@ hwloc_look_hpux(struct hwloc_topology *topology)
   ldom_t currentnode;
   int i, nbnodes;
 
-  topology->set_cpubind = topo_hpux_set_cpubind;
-  topology->set_proc_cpubind = topo_hpux_set_proc_cpubind;
-  topology->set_thread_cpubind = topo_hpux_set_thread_cpubind;
-  topology->set_thisproc_cpubind = topo_hpux_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = topo_hpux_set_thisthread_cpubind;
+  topology->set_cpubind = hwloc_hpux_set_cpubind;
+  topology->set_proc_cpubind = hwloc_hpux_set_proc_cpubind;
+  topology->set_thread_cpubind = hwloc_hpux_set_thread_cpubind;
+  topology->set_thisproc_cpubind = hwloc_hpux_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = hwloc_hpux_set_thisthread_cpubind;
 
   if (has_numa) {
     nbnodes = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?

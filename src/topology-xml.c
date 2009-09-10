@@ -44,7 +44,7 @@ hwloc_backend_xml_exit(struct hwloc_topology *topology)
 }
 
 static void
-topo__process_root_attr(struct hwloc_topology *topology,
+hwloc__process_root_attr(struct hwloc_topology *topology,
 			const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
@@ -54,7 +54,7 @@ topo__process_root_attr(struct hwloc_topology *topology,
 }
 
 static void
-topo__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
+hwloc__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
 			  const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
@@ -172,7 +172,7 @@ topo__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj
 }
 
 static void
-topo__look_xml_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
+hwloc__look_xml_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
 		    const xmlChar *attrname, xmlNode *node)
 {
   /* use the first valid attribute content */
@@ -180,9 +180,9 @@ topo__look_xml_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
     if (node->type == XML_TEXT_NODE) {
       if (node->content && node->content[0] != '\0' && node->content[0] != '\n') {
 	if (obj)
-	  topo__process_object_attr(topology, obj, attrname, node->content);
+	  hwloc__process_object_attr(topology, obj, attrname, node->content);
 	else
-	  topo__process_root_attr(topology, attrname, node->content);
+	  hwloc__process_root_attr(topology, attrname, node->content);
 	break;
       }
     } else {
@@ -192,7 +192,7 @@ topo__look_xml_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
 }
 
 static void
-topo__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
+hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 {
   for (; node; node = node->next) {
     if (node->type == XML_ELEMENT_NODE) {
@@ -249,7 +249,7 @@ topo__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
       for (attr = node->properties; attr; attr = attr->next) {
 	if (attr->type == XML_ATTRIBUTE_NODE) {
 	  if (attr->children)
-	    topo__look_xml_attr(topology, obj, attr->name, attr->children);
+	    hwloc__look_xml_attr(topology, obj, attr->name, attr->children);
 	} else {
 	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", node->type);
 	}
@@ -287,7 +287,7 @@ topo__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 
       /* process children */
       if (node->children)
-	topo__look_xml_node(topology, node->children, depth+1);
+	hwloc__look_xml_node(topology, node->children, depth+1);
 
     } else if (node->type == XML_TEXT_NODE) {
       if (node->content && node->content[0] != '\0' && node->content[0] != '\n')
@@ -299,7 +299,7 @@ topo__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 }
 
 static int
-topo_xml_set_cpubind(void) {
+hwloc_xml_set_cpubind(void) {
   return 0;
 }
 
@@ -308,15 +308,15 @@ hwloc_look_xml(struct hwloc_topology *topology)
 {
   xmlNode* root_node;
 
-  topology->set_cpubind = (void*) topo_xml_set_cpubind;
-  topology->set_thisproc_cpubind = (void*) topo_xml_set_cpubind;
-  topology->set_thisthread_cpubind = (void*) topo_xml_set_cpubind;
-  topology->set_proc_cpubind = (void*) topo_xml_set_cpubind;
-  topology->set_thread_cpubind = (void*) topo_xml_set_cpubind;
+  topology->set_cpubind = (void*) hwloc_xml_set_cpubind;
+  topology->set_thisproc_cpubind = (void*) hwloc_xml_set_cpubind;
+  topology->set_thisthread_cpubind = (void*) hwloc_xml_set_cpubind;
+  topology->set_proc_cpubind = (void*) hwloc_xml_set_cpubind;
+  topology->set_thread_cpubind = (void*) hwloc_xml_set_cpubind;
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 
-  topo__look_xml_node(topology, root_node, 0);
+  hwloc__look_xml_node(topology, root_node, 0);
 }
 
 #endif /* HAVE_XML */

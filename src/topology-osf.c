@@ -25,7 +25,7 @@
 #include <cpuset.h>
 
 static int
-prepare_radset(hwloc_topology_t topology, radset_t *radset, const hwloc_cpuset_t *topo_set)
+prepare_radset(hwloc_topology_t topology, radset_t *radset, const hwloc_cpuset_t *hwloc_set)
 {
   unsigned cpu;
   cpuset_t target_cpuset;
@@ -35,7 +35,7 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, const hwloc_cpuset_t
 
   cpusetcreate(&target_cpuset);
   cpuemptyset(target_cpuset);
-  hwloc_cpuset_foreach_begin(cpu, topo_set)
+  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
     cpuaddset(target_cpuset, cpu);
   hwloc_cpuset_foreach_end()
 
@@ -68,17 +68,17 @@ out:
 }
 
 static int
-topo_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   radset_t radset;
 
-  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset)) {
     if (pthread_rad_detach(thread))
       return -1;
     return 0;
   }
 
-  if (!prepare_radset(topology, &radset, topo_set))
+  if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
   if (strict) {
@@ -94,17 +94,17 @@ topo_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, co
 }
 
 static int
-topo_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   radset_t radset;
 
-  if (hwloc_cpuset_isequal(topo_set, &hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset)) {
     if (rad_detach_pid(pid))
       return -1;
     return 0;
   }
 
-  if (!prepare_radset(topology, &radset, topo_set))
+  if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
   if (strict) {
@@ -120,21 +120,21 @@ topo_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwlo
 }
 
 static int
-topo_osf_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_osf_set_thread_cpubind(topology, pthread_self(), topo_set, strict);
+  return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, strict);
 }
 
 static int
-topo_osf_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_osf_set_proc_cpubind(topology, getpid(), topo_set, strict);
+  return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, strict);
 }
 
 static int
-topo_osf_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_osf_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_osf_set_thisproc_cpubind(topology, topo_set, strict);
+  return hwloc_osf_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
 
 /* TODO: memory
@@ -158,11 +158,11 @@ hwloc_look_osf(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   unsigned distance;
 
-  topology->set_cpubind = topo_osf_set_cpubind;
-  topology->set_thread_cpubind = topo_osf_set_thread_cpubind;
-  topology->set_thisthread_cpubind = topo_osf_set_thisthread_cpubind;
-  topology->set_proc_cpubind = topo_osf_set_proc_cpubind;
-  topology->set_thisproc_cpubind = topo_osf_set_thisproc_cpubind;
+  topology->set_cpubind = hwloc_osf_set_cpubind;
+  topology->set_thread_cpubind = hwloc_osf_set_thread_cpubind;
+  topology->set_thisthread_cpubind = hwloc_osf_set_thisthread_cpubind;
+  topology->set_proc_cpubind = hwloc_osf_set_proc_cpubind;
+  topology->set_thisproc_cpubind = hwloc_osf_set_thisproc_cpubind;
 
   topology->backend_params.osf.nbnodes = nbnodes = rad_get_num();
 

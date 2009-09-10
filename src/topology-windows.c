@@ -141,41 +141,41 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 #endif
 
 static int
-topo_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   /* TODO: groups */
-  DWORD mask = hwloc_cpuset_to_ulong(topo_set);
+  DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
   if (!SetThreadAffinityMask(thread, mask))
     return -1;
   return 0;
 }
 
 static int
-topo_win_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_win_set_thread_cpubind(topology, GetCurrentThread(), topo_set, strict);
+  return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, strict);
 }
 
 static int
-topo_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, const hwloc_cpuset_t *hwloc_set, int strict)
 {
   /* TODO: groups */
-  DWORD mask = hwloc_cpuset_to_ulong(topo_set);
+  DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
   if (!SetProcessAffinityMask(proc, mask))
     return -1;
   return 0;
 }
 
 static int
-topo_win_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_win_set_proc_cpubind(topology, GetCurrentProcess(), topo_set, strict);
+  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, strict);
 }
 
 static int
-topo_win_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *topo_set, int strict)
+hwloc_win_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
 {
-  return topo_win_set_thisproc_cpubind(topology, topo_set, strict);
+  return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
 
 void
@@ -187,11 +187,11 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
   HMODULE kernel32;
 
-  topology->set_cpubind = topo_win_set_cpubind;
-  topology->set_proc_cpubind = topo_win_set_proc_cpubind;
-  topology->set_thread_cpubind = topo_win_set_thread_cpubind;
-  topology->set_thisproc_cpubind = topo_win_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = topo_win_set_thisthread_cpubind;
+  topology->set_cpubind = hwloc_win_set_cpubind;
+  topology->set_proc_cpubind = hwloc_win_set_proc_cpubind;
+  topology->set_thread_cpubind = hwloc_win_set_thread_cpubind;
+  topology->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
 
   kernel32 = LoadLibrary("kernel32.dll");
   if (kernel32) {

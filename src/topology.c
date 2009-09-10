@@ -34,7 +34,7 @@
 
 /* Return the OS-provided number of processors.  Unlike other methods such as
    reading sysfs on Linux, this method is not virtualizable; thus it's only
-   used as a fall-back method, allowing `topo_set_fsys_root ()' to
+   used as a fall-back method, allowing `hwloc_set_fsys_root ()' to
    have the desired effect.  */
 unsigned
 hwloc_fallback_nbprocessors(void) {
@@ -67,7 +67,7 @@ hwloc_fallback_nbprocessors(void) {
  * Return how many groups were created, or 0 if some incomplete distance graphs were found.
  */
 static unsigned
-topo_setup_group_from_min_distance_clique(unsigned nbobjs,
+hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
 					  struct hwloc_obj *objs[nbobjs],
 					  unsigned distances[nbobjs][nbobjs],
 					  unsigned groupids[nbobjs])
@@ -132,7 +132,7 @@ topo_setup_group_from_min_distance_clique(unsigned nbobjs,
  * Return how many groups were created, or 0 if some incomplete distance graphs were found.
  */
 static unsigned
-topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
+hwloc_setup_group_from_min_distance_transitivity(unsigned nbobjs,
 						struct hwloc_obj *objs[nbobjs],
 						unsigned distances[nbobjs][nbobjs],
 						unsigned groupids[nbobjs])
@@ -202,7 +202,7 @@ topo_setup_group_from_min_distance_transitivity(unsigned nbobjs,
  * after having done some basic sanity checks.
  */
 static void
-topo__setup_misc_level_from_distances(struct hwloc_topology *topology,
+hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
 				      unsigned nbobjs,
 				      struct hwloc_obj *objs[nbobjs],
 				      unsigned distances[nbobjs][nbobjs],
@@ -218,9 +218,9 @@ topo__setup_misc_level_from_distances(struct hwloc_topology *topology,
   if (nbobjs <= 2)
     return;
 
-  nbgroups = topo_setup_group_from_min_distance_clique(nbobjs, objs, distances, groupids);
+  nbgroups = hwloc_setup_group_from_min_distance_clique(nbobjs, objs, distances, groupids);
   if (!nbgroups) {
-    nbgroups = topo_setup_group_from_min_distance_transitivity(nbobjs, objs, distances, groupids);
+    nbgroups = hwloc_setup_group_from_min_distance_transitivity(nbobjs, objs, distances, groupids);
     if (!nbgroups)
       return;
   }
@@ -268,7 +268,7 @@ topo__setup_misc_level_from_distances(struct hwloc_topology *topology,
   }
 #endif
 
-  topo__setup_misc_level_from_distances(topology, nbgroups, groupobjs, groupdistances, depth + 1);
+  hwloc__setup_misc_level_from_distances(topology, nbgroups, groupobjs, groupdistances, depth + 1);
 }
 
 /*
@@ -318,7 +318,7 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
     }
   }
 
-  topo__setup_misc_level_from_distances(topology, nbobjs, objs, distances, 0);
+  hwloc__setup_misc_level_from_distances(topology, nbobjs, objs, distances, 0);
 }
 
 /*
@@ -397,7 +397,7 @@ free_object(hwloc_obj_t obj)
  * Only EQUAL / not EQUAL can be relied upon.
  */
 
-enum topo_type_cmp_e {
+enum hwloc_type_cmp_e {
   HWLOC_TYPE_HIGHER,
   HWLOC_TYPE_DEEPER,
   HWLOC_TYPE_EQUAL,
@@ -435,8 +435,8 @@ hwloc_obj_type_t hwloc_get_order_type(int order)
   return obj_order_type[order];
 }
 
-static enum topo_type_cmp_e
-topo_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
+static enum hwloc_type_cmp_e
+hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   if (hwloc_get_type_order(obj1->type) > hwloc_get_type_order(obj2->type))
     return HWLOC_TYPE_DEEPER;
@@ -484,7 +484,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
     /* Same cpuset, subsort by type to have a consistent ordering.  */
 
-    switch (topo_type_cmp(obj1, obj2)) {
+    switch (hwloc_type_cmp(obj1, obj2)) {
       case HWLOC_TYPE_DEEPER:
 	return HWLOC_OBJ_INCLUDED;
       case HWLOC_TYPE_HIGHER:
@@ -756,7 +756,7 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
  * Initialize handy pointers in the whole topology
  */
 static void
-topo_connect(hwloc_obj_t father)
+hwloc_connect(hwloc_obj_t father)
 {
   unsigned n;
   hwloc_obj_t child, prev_child = NULL;
@@ -782,7 +782,7 @@ topo_connect(hwloc_obj_t father)
        child;
        n++,   child = child->next_sibling) {
     father->children[n] = child;
-    topo_connect(child);
+    hwloc_connect(child);
   }
 }
 
@@ -794,7 +794,7 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
 {
   hwloc_obj_t child;
 
-  if (topo_type_cmp(root, obj) == HWLOC_TYPE_EQUAL)
+  if (hwloc_type_cmp(root, obj) == HWLOC_TYPE_EQUAL)
     return 1;
 
   for (child = root->first_child; child; child = child->next_sibling)
@@ -806,7 +806,7 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
 
 /* Main discovery loop */
 static void
-topo_discover(struct hwloc_topology *topology)
+hwloc_discover(struct hwloc_topology *topology)
 {
   unsigned l, i=0, taken_i, new_i, j;
   hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
@@ -906,7 +906,7 @@ topo_discover(struct hwloc_topology *topology)
 
   /* Now connect handy pointers.  */
 
-  topo_connect(topology->levels[0][0]);
+  hwloc_connect(topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
@@ -930,7 +930,7 @@ topo_discover(struct hwloc_topology *topology)
     /* First find which type of object is the topmost.  */
     top_obj = objs[0];
     for (i = 1; i < n_objs; i++) {
-      if (topo_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
+      if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
 	if (find_same_type(top_obj, objs[i])) {
 	  /* OBJTOP is strictly above an object of the same type as OBJ, so it
 	   * is above OBJ.  */
@@ -946,7 +946,7 @@ topo_discover(struct hwloc_topology *topology)
     n_taken_objs = 0;
     n_new_objs = 0;
     for (i = 0; i < n_objs; i++)
-      if (topo_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
+      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
 	n_taken_objs++;
 	n_new_objs += objs[i]->arity;
       }
@@ -959,7 +959,7 @@ topo_discover(struct hwloc_topology *topology)
     taken_i = 0;
     new_i = 0;
     for (i = 0; i < n_objs; i++)
-      if (topo_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
+      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
 	/* Take it, add children.  */
 	taken_objs[taken_i++] = objs[i];
 	for (j = 0; j < objs[i]->arity; j++)
@@ -1241,7 +1241,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 #endif
   }
 
-  topo_discover(topology);
+  hwloc_discover(topology);
 
   char *fake_env = getenv("TOPO_FAKE");
   if (fake_env)
@@ -1267,7 +1267,7 @@ hwloc_topology_get_info(struct hwloc_topology *topology, struct hwloc_topology_i
 
 /* check children between a father object */
 static void
-topo__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
+hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
 {
   int j;
 
@@ -1333,11 +1333,11 @@ hwloc_topology_check(struct hwloc_topology *topology)
       assert(obj->depth == i);
       assert(obj->logical_index == j);
       if (prev) {
-	assert(topo_type_cmp(obj, prev) == HWLOC_TYPE_EQUAL);
+	assert(hwloc_type_cmp(obj, prev) == HWLOC_TYPE_EQUAL);
 	assert(prev->next_cousin == obj);
 	assert(obj->prev_cousin == prev);
       }
-      topo__check_children(topology, obj);
+      hwloc__check_children(topology, obj);
       prev = obj;
     }
 
