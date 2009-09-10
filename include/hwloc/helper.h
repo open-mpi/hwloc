@@ -497,5 +497,6 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
     hwloc_distribute(topology, root->children[i], cpusetp, chunk_size-1);
 }
 
+/** @} */
 
 #endif /* HWLOC_HELPER_H */
