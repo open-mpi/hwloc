@@ -1219,14 +1219,14 @@ hwloc_topology_load (struct hwloc_topology *topology)
   }
 
 #ifdef LINUX_SYS
-  char *fsys_root_path_env = getenv("TOPO_FSYS_ROOT_PATH");
+  char *fsys_root_path_env = getenv("HWLOC_FSROOT");
   if (fsys_root_path_env) {
     hwloc_backend_exit(topology);
     hwloc_backend_sysfs_init(topology, fsys_root_path_env);
   }
 #endif
 #ifdef HAVE_XML
-  char *xmlpath_env = getenv("TOPO_XML_PATH");
+  char *xmlpath_env = getenv("HWLOC_XMLFILE");
   if (xmlpath_env) {
     hwloc_backend_exit(topology);
     hwloc_backend_xml_init(topology, xmlpath_env);
@@ -1243,7 +1243,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
   hwloc_discover(topology);
 
-  char *fake_env = getenv("TOPO_FAKE");
+  char *fake_env = getenv("HWLOC_FAKE");
   if (fake_env)
     topology->is_fake = atoi(fake_env);
 

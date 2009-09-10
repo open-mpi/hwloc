@@ -5,7 +5,7 @@ various systems.  Each tarball `xyz.tar.gz' comes with the corresponding
 `xyz.tar.gz.output', which gives the expected output of "lstopo -v -" for
 that system.
 
-Together with the `TOPO_FSYS_ROOT_PATH' environment variable, these are
+Together with the `HWLOC_FSROOT' environment variable, these are
 used by `test-topologies.sh' to check for any regression introduced in
 hwloc detection logic.
 

@@ -1003,7 +1003,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     look_sysfsnode(topology, "/sys/devices/system/node", &admin_disabled_mems_set);
 
     /* Gather the list of cpus now */
-    if (getenv("TOPO_LINUX_USE_CPUINFO")
+    if (getenv("HWLOC_LINUX_USE_CPUINFO")
 	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
 	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
 	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0

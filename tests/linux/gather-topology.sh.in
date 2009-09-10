@@ -50,7 +50,7 @@ then
     exit 1
 fi
 # we need "Topology is fake" in the output so as to make test-topology.sh happy
-export TOPO_FAKE="1"
+export HWLOC_FAKE="1"
 "$lstopo" - -v > "./$name.tar.gz.output"
 echo "Expected topology output stored in ./$name.tar.gz.output"
 
