@@ -42,3 +42,8 @@ hwloc-mask.1: hwloc-mask
   endif
 endif
 endif
+
+install-exec-hook:
+	$(RM) $(DESTDIR)$(bindir)/hwloc-ls $(DESTDIR)$(bindir)/hwloc-info
+	$(LN_S) lstopo $(DESTDIR)$(bindir)/hwloc-ls
+	$(LN_S) lstopo $(DESTDIR)$(bindir)/hwloc-info
