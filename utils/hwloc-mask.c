@@ -22,6 +22,9 @@ static void usage(FILE *where)
   fprintf(where, "    .  X-Y\tall objects with index between X and Y\n");
   fprintf(where, "    .  X-\tall objects with index at least X\n");
   fprintf(where, "    .  X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
+  fprintf(where, "    .  all\tall objects\n");
+  fprintf(where, "    .  odd\tall objects with odd index\n");
+  fprintf(where, "    .  even\tall objects with even index\n");
   fprintf(where, "  -  several <depth:index> may be concatenated with `.' to select some specific children\n");
   fprintf(where, "\n<string> may also be a cpuset string\n");
   fprintf(where, "\nIf prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");

@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 
 typedef enum hwloc_mask_append_mode_e {
@@ -63,7 +64,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *
   hwloc_obj_t obj;
   unsigned depth, width;
   char *sep, *sep2, *sep3;
-  unsigned first, wrap, amount;
+  unsigned first, wrap, amount, step;
   unsigned i,j;
 
   if (!strncasecmp(string, "system", 2))
@@ -97,7 +98,22 @@ hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *
 
   first = atoi(sep+1);
   amount = 1;
+  step = 1;
   wrap = 0;
+  if (!isdigit(*(sep+1))) {
+    if (!strncmp(sep+1, "all", 3)) {
+      first = 0;
+      amount = width;
+    } else if (!strncmp(sep+1, "odd", 3)) {
+      first = 1;
+      step = 2;
+      amount = (width+1)/2;
+    } else if (!strncmp(sep+1, "even", 4)) {
+      first = 0;
+      step = 2;
+      amount = (width+1)/2;
+    }
+  }
 
   sep3 = strchr(sep+1, '.');
 
@@ -115,7 +131,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *
     }
   }
 
-  for(i=first, j=0; j<amount; i++, j++) {
+  for(i=first, j=0; j<amount; i+=step, j++) {
     if (wrap && i==width)
       i = 0;
 
