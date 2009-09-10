@@ -16,7 +16,7 @@ static void usage(FILE *where)
 {
   fprintf(where, "Usage: topobind [options] <location> -- command ...\n");
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
-  fprintf(where, "            as supported by the topomask utility.\n");
+  fprintf(where, "            as supported by the hwloc-mask utility.\n");
   fprintf(where, "Options:\n");
   fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
   fprintf(where, "   --strict\trequire strict binding\n");
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    topomask_process_arg(topology, &topoinfo, argv[0], &cpu_set, verbose);
+    hwloc_mask_process_arg(topology, &topoinfo, argv[0], &cpu_set, verbose);
     bind_cpus = 1;
 
   next:

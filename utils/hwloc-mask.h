@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef TOPOMASK_H
-#define TOPOMASK_H
+#ifndef HWLOC_MASK_H
+#define HWLOC_MASK_H
 
 #include <hwloc.h>
 #include <private/private.h>
@@ -14,37 +14,37 @@
 #include <string.h>
 #include <assert.h>
 
-typedef enum topomask_append_mode_e {
-  TOPOMASK_APPEND_ADD,
-  TOPOMASK_APPEND_CLR,
-  TOPOMASK_APPEND_AND,
-  TOPOMASK_APPEND_XOR,
-} topomask_append_mode_t;
+typedef enum hwloc_mask_append_mode_e {
+  HWLOC_MASK_APPEND_ADD,
+  HWLOC_MASK_APPEND_CLR,
+  HWLOC_MASK_APPEND_AND,
+  HWLOC_MASK_APPEND_XOR,
+} hwloc_mask_append_mode_t;
 
 static __inline__ void
-topomask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
-		       topomask_append_mode_t mode, int verbose)
+hwloc_mask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
+		       hwloc_mask_append_mode_t mode, int verbose)
 {
   switch (mode) {
-  case TOPOMASK_APPEND_ADD:
+  case HWLOC_MASK_APPEND_ADD:
     if (verbose)
       fprintf(stderr, "adding %" HWLOC_PRIxCPUSET " to %" HWLOC_PRIxCPUSET "\n",
 	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
     hwloc_cpuset_orset(set, newset);
     break;
-  case TOPOMASK_APPEND_CLR:
+  case HWLOC_MASK_APPEND_CLR:
     if (verbose)
       fprintf(stderr, "clearing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
 	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
     hwloc_cpuset_clearset(set, newset);
     break;
-  case TOPOMASK_APPEND_AND:
+  case HWLOC_MASK_APPEND_AND:
     if (verbose)
       fprintf(stderr, "and'ing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
 	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
     hwloc_cpuset_andset(set, newset);
     break;
-  case TOPOMASK_APPEND_XOR:
+  case HWLOC_MASK_APPEND_XOR:
     if (verbose)
       fprintf(stderr, "xor'ing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
 	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
@@ -56,9 +56,9 @@ topomask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
 }
 
 static __inline__ int
-topomask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *topoinfo,
+hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *topoinfo,
 		       hwloc_cpuset_t *rootset, const char *string,
-		       hwloc_cpuset_t *set, topomask_append_mode_t mode, int verbose)
+		       hwloc_cpuset_t *set, hwloc_mask_append_mode_t mode, int verbose)
 {
   hwloc_obj_t obj;
   unsigned depth, width;
@@ -130,9 +130,9 @@ topomask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *to
     }
     if (obj) {
       if (sep3)
-	topomask_append_object(topology, topoinfo, &obj->cpuset, sep3+1, set, mode, verbose);
+	hwloc_mask_append_object(topology, topoinfo, &obj->cpuset, sep3+1, set, mode, verbose);
       else
-        topomask_append_cpuset(set, &obj->cpuset, mode, verbose);
+        hwloc_mask_append_cpuset(set, &obj->cpuset, mode, verbose);
     }
   }
 
@@ -140,33 +140,33 @@ topomask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *to
 }
 
 static __inline__ void
-topomask_process_arg(hwloc_topology_t topology, struct hwloc_topology_info *topoinfo,
+hwloc_mask_process_arg(hwloc_topology_t topology, struct hwloc_topology_info *topoinfo,
 		     const char *arg, hwloc_cpuset_t *set,
 		     int verbose)
 {
   char *colon;
-  topomask_append_mode_t mode = TOPOMASK_APPEND_ADD;
+  hwloc_mask_append_mode_t mode = HWLOC_MASK_APPEND_ADD;
 
   if (*arg == '~') {
-    mode = TOPOMASK_APPEND_CLR;
+    mode = HWLOC_MASK_APPEND_CLR;
     arg++;
   } else if (*arg == 'x') {
-    mode = TOPOMASK_APPEND_AND;
+    mode = HWLOC_MASK_APPEND_AND;
     arg++;
   } else if (*arg == '^') {
-    mode = TOPOMASK_APPEND_XOR;
+    mode = HWLOC_MASK_APPEND_XOR;
     arg++;
   }
 
   colon = strchr(arg, ':');
   if (colon) {
-    topomask_append_object(topology, topoinfo, &hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
+    hwloc_mask_append_object(topology, topoinfo, &hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
   } else {
     hwloc_cpuset_t newset;
     hwloc_cpuset_zero(&newset);
     hwloc_cpuset_from_string(arg, &newset);
-    topomask_append_cpuset(set, &newset, mode, verbose);
+    hwloc_mask_append_cpuset(set, &newset, mode, verbose);
   }
 }
 
-#endif /* TOPOMASK_H */
+#endif /* HWLOC_MASK_H */

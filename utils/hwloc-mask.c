@@ -14,7 +14,7 @@
 
 static void usage(FILE *where)
 {
-  fprintf(where, "Usage: topomask [options] [string] ...\n");
+  fprintf(where, "Usage: hwloc-mask [options] [string] ...\n");
   fprintf(where, "\n<string> may be <depth:index>\n");
   fprintf(where, "  -  <depth> may be system, machine, node, socket, core, proc or a numeric depth\n");
   fprintf(where, "  -  <index> may be\n");
@@ -29,7 +29,7 @@ static void usage(FILE *where)
   fprintf(where, "If prefixed with `^', the given string will be xor'ed instead of added to the current cpuset\n");
   fprintf(where, "\nString are processed in order, without priorities.\n");
   fprintf(where, "Compose multiple invokations for complex operations.\n");
-  fprintf(where, "e.g. for (A|B)^(C|D), use: topomask A B ^$(topomask C D)\n");
+  fprintf(where, "e.g. for (A|B)^(C|D), use: hwloc-mask A B ^$(hwloc-mask C D)\n");
   fprintf(where, "\nOptions:\n");
   fprintf(where, "  -v\tverbose\n");
   fprintf(where, "  --proclist\treport the list of processors in the CPU set\n");
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    topomask_process_arg(topology, &topoinfo, argv[1], &set, verbose);
+    hwloc_mask_process_arg(topology, &topoinfo, argv[1], &set, verbose);
 
  next:
     argc--;
