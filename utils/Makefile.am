@@ -1,4 +1,5 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
 include $(top_srcdir)/hwloc.am
 
@@ -47,3 +48,7 @@ install-exec-hook:
 	$(RM) $(DESTDIR)$(bindir)/hwloc-ls $(DESTDIR)$(bindir)/hwloc-info
 	$(LN_S) lstopo $(DESTDIR)$(bindir)/hwloc-ls
 	$(LN_S) lstopo $(DESTDIR)$(bindir)/hwloc-info
+
+uninstall-local:
+	$(RM) $(DESTDIR)$(bindir)/hwloc-ls 
+	$(RM) $(DESTDIR)$(bindir)/hwloc-info
