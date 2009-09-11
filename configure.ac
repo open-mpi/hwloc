@@ -1,10 +1,10 @@
+# -*- autoconf -*-
 #
 # Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+#
 # See COPYING in top-level directory.
 #
-
-#                                               -*- Autoconf -*-
-# Process this file with autoconf to produce a configure script.
 
 #
 # Initialize autostuff
@@ -17,36 +17,69 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_SRCDIR([src/topology.c])
-DX_MAN_FEATURE(ON)
-DX_HTML_FEATURE(ON)
-DX_CHM_FEATURE(OFF)
-DX_CHI_FEATURE(OFF)
-DX_RTF_FEATURE(OFF)
-DX_XML_FEATURE(OFF)
-DX_PDF_FEATURE(ON)
-DX_PS_FEATURE(OFF)
-if echo "${srcdir}" | grep '^/' > /dev/null
-then
-  # absolute path, no need for ../
-  DX_INIT_DOXYGEN(hwloc, doxygen.cfg, ${srcdir}/doc/doxygen-doc)
-else
-  DX_INIT_DOXYGEN(hwloc, doxygen.cfg, ../${srcdir}/doc/doxygen-doc)
-fi
-AC_PATH_PROG([FIG2DEV], [fig2dev])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/man, [hwloc_have_man=yes], [:])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/hwloc.pdf, [hwloc_have_pdf=yes], [:])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/html, [hwloc_have_html=yes], [:])
-AC_CHECK_FILE(${srcdir}/doc/doxygen-doc/hwloc.tag, [hwloc_have_tag=yes], [:])
-AM_CONDITIONAL([HWLOC_HAVE_MAN], [test "x$hwloc_have_man" = "xyes"])
-AM_CONDITIONAL([HWLOC_HAVE_PDF], [test "x$hwloc_have_pdf" = "xyes"])
-AM_CONDITIONAL([HWLOC_HAVE_HTML], [test "x$hwloc_have_html" = "xyes"])
-AM_CONDITIONAL([HWLOC_HAVE_DOC], [test "x$hwloc_have_html" = "xyes"])
-AM_CONDITIONAL([HWLOC_HAVE_TAG], [test "x$hwloc_have_tag" = "xyes"])
-AM_CONDITIONAL([HWLOC_INSTALL_MAN], [test "x$hwloc_have_man" = "xyes" -o "x$DX_FLAG_man" = "x1" ])
-AM_CONDITIONAL([HWLOC_INSTALL_PDF], [test "x$hwloc_have_pdf" = "xyes" -o \( "x$DX_FLAG_pdf" = "x1" -a "x$FIG2DEV" != "x" \) ])
-AM_CONDITIONAL([HWLOC_INSTALL_HTML], [test "x$hwloc_have_html" = "xyes" -o \( "x$DX_FLAG_html" = "x1" -a "x$FIG2DEV" != "x" \) ])
-AM_CONDITIONAL([HWLOC_WILLHAVE_TAG], [test "x$hwloc_have_tag" = "xyes" -o \( "x$DX_DOXYGEN" != "x" -a "x$FIG2DEV" != "x" \) ])
+
 AM_INIT_AUTOMAKE([1.10 foreign -Wall -Werror])
+
+# We only build documentation if this is a developer checkout.
+# Distribution tarballs just install pre-built docuemntation that was
+# included in the tarball.
+
+AC_MSG_CHECKING([if this is a developer build])
+AS_IF([test ! -d "$srcdir/.svn" -a ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
+      [AC_MSG_RESULT([no (skipping doxygen generation)])],
+      [AC_MSG_RESULT([yes])
+
+       # Generating the doxygen output requires a few tools.  If we
+       # don't have all of them, refuse the build the docs.
+       AC_ARG_VAR([DOXYGEN], [Location of the doxygen program (required for building the hwloc doxygen documentation)])
+       AC_PATH_TOOL([DOXYGEN], [doxygen])
+
+       AC_ARG_VAR([PDFLATEX], [Location of the pdflatex program (required for building the hwloc doxygen documentation)])
+       AC_PATH_TOOL([PDFLATEX], [pdflatex])
+
+       AC_ARG_VAR([MAKEINDEX], [Location of the makeindex program (required for building the hwloc doxygen documentation)])
+       AC_PATH_TOOL([MAKEINDEX], [makeindex])
+
+       AC_ARG_VAR([FIG2DEV], [Location of the fig2dev program (required for building the hwloc doxygen documentation)])
+       AC_PATH_TOOL([FIG2DEV], [fig2dev])
+
+       AC_MSG_CHECKING([if can build doxygen docs])
+       AS_IF([test "x$DOXYGEN" != "x" -a "x$PDFLATEX" != "x" -a "x$MAKEINDEX" != "x" -a "x$FIG2DEV" != "x"],
+             [generate_doxs=yes], [generate_doxs=no])
+       AC_MSG_RESULT([$generate_doxs])
+
+       # Making the top-level README requires w3m.
+       AC_ARG_VAR([W3M], [Location of the w3m program (required to building the top-level hwloc README file)])
+       AC_PATH_TOOL([W3M], [w3m])
+
+       AC_MSG_CHECKING([if can build top-level README])
+       AS_IF([test "x$W3M" = "x"],
+             [generate_readme=no], [generate_readme=yes])
+       AC_MSG_RESULT([$generate_readme])
+
+       # If any one of the above tools is missing, we will refuse to make dist.
+])
+
+AC_ARG_ENABLE([doxygen],
+    [AC_HELP_STRING([--enable-doxygen],
+                    [enable support for building Doxygen documentation (note that this option is ONLY relevant in developer builds; Doxygen documentation is pre-built for tarball builds and this option is therefore ignored)])])
+AC_MSG_CHECKING([if will build doxygen docs])
+AS_IF([test "x$generate_doxs" = "xyes" -a "x$enable_doxygen" != "xno"],
+      [], [generate_doxs=no])
+AC_MSG_RESULT([$generate_doxs])
+
+# See if we want to install the doxygen docs
+AC_MSG_CHECKING([if will install doxygen docs])
+AS_IF([test "x$generate_doxs" = "xyes" -o \
+	    -f "$srcdir/doc/doxygen-doc/man/man3/hwloc_distribute.3" -a \
+	    -f "$srcdir/doc/doxygen-doc/hwloc.pdf"],
+      [install_doxs=yes],
+      [install_doxs=no])
+AC_MSG_RESULT([$install_doxs])
+
+AM_CONDITIONAL([BUILD_DOXYGEN], [test "x$generate_doxs" = "xyes"])
+AM_CONDITIONAL([BUILD_README], [test "x$generate_readme" = "xyes" -a \( "x$install_doxs" = "xyes" -o "x$generate_doxs" = "xyes" \) ])
+AM_CONDITIONAL([INSTALL_DOXYGEN], [test "x$install_doxs" = "xyes"])
 
 #
 # Check OS support
@@ -112,6 +145,7 @@ AM_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_PROG_LN_S
 AC_PROG_MKDIR_P
+AC_PROG_EGREP
 PKG_CHECK_EXISTS
 
 HWLOC_GCC_FLAGS
@@ -270,7 +304,6 @@ else
 fi
 
 AC_PATH_PROG([BASH], [bash])
-AC_PATH_PROG([W3M], [w3m])
 
 AC_PATH_PROG([HELP2MAN], [help2man])
 AC_CHECK_FILE(${srcdir}/utils/lstopo.1, [hwloc_have_utils_man=yes], [:])
@@ -324,17 +357,23 @@ AC_SUBST(HWLOC_REQUIRES)
 
 AC_CONFIG_HEADER([include/private/config.h])
 
-AC_CONFIG_FILES([Makefile
-                 hwloc.pc
-                 doc/doxygen.cfg
-                 include/Makefile src/Makefile utils/Makefile
-		 tests/Makefile tests/linux/Makefile
+AC_CONFIG_FILES([hwloc.pc
+		 doc/doxygen-config.cfg
+		 doc/www.open-mpi.org.cfg
+
+		 Makefile
+		 doc/Makefile
+                 include/Makefile
+		 src/Makefile 
+		 tests/Makefile 
+		 tests/linux/Makefile
 		 tests/linux/gather-topology.sh
 		 tests/linux/test-topology.sh
 		 tests/lstopo_xml.sh
-		 utils/test-hwloc-distrib.sh
 		 tests/ports/Makefile
-		 doc/Makefile])
+		 utils/Makefile
+		 utils/test-hwloc-distrib.sh
+])
 
 AC_CONFIG_HEADERS([include/hwloc/config.h])
 

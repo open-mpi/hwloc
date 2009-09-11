@@ -1,349 +1,50 @@
-# Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright © 2009 INRIA, Université Bordeaux 1
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
 include $(top_srcdir)/hwloc.am
-include $(top_srcdir)/doxample.am
 
-MOSTLYCLEANFILES =
-CLEANFILES =
-EXTRA_DIST = $(DX_CONFIG) \
+DOCDIR = $(top_builddir)/doc
+DOX_CONFIG = $(top_srcdir)/doc/doxygen.cfg
+
+DOX_DIR = $(DOCDIR)/doxygen-doc
+DOX_HTML_DIR = $(DOX_DIR)/html
+DOX_MAN_DIR = $(DOX_DIR)/man
+DOX_LATEX_DIR = $(DOX_DIR)/latex
+DOX_PDF = $(DOX_DIR)/$(PACKAGE).pdf
+DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
+
+#
+# The goal is that Doxygen output (i.e., the documentation) is
+# included in release tarballs; there is no need to build anything
+# from tarballs.  Developers will need to build the docs the first
+# time they build after a checkout (or if something in the docs
+# changes, etc.).
+#
+# Note that by listing directories in EXTRA_DIST, we pick up the whole
+# tree (e.g., everything in the man and latex directories).
+#
+
+image_built_sources = images/diagram.png images/diagram.eps
+
+EXTRA_DIST = \
 	hwloc.doxy \
 	doxygen.css \
+	doxygen.cfg \
 	images/dudley.png \
 	images/emmett.png \
 	images/hagrid.png \
-	images/diagram.fig
+	images/diagram.fig \
+        $(image_built_sources) \
+        $(DOX_HTML_DIR) $(DOX_MAN_DIR) $(DOX_LATEX_DIR) $(DOX_TAG)
 
 #
-# Documentation is already available in release tarballs.
+# Files where the doxygen inputs live (i.e., dependencies).  Make the
+# generated tagfile depend on these files, which will force them to be
+# regenerated (i.e., re-run doxygen) whenever any of these files
+# change.
 #
 
-if HWLOC_INSTALL_MAN
-dist_man3_MANS = \
-	@DX_DOCDIR@/man/man3/HWLOC_CPUBIND_PROCESS.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_CPUBIND_STRICT.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_CPUBIND_THREAD.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_CPUSET_CPU.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_CPUSET_FULL.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_CPUSET_STRING_LENGTH.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_CPUSET_ZERO.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_CACHE.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_CORE.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_MACHINE.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_MISC.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_NODE.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_PROC.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_SOCKET.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_SYSTEM.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_OBJ_TYPE_MAX.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_PRIxCPUSET.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
-	@DX_DOCDIR@/man/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpubind_policy_t.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_all_but_cpu.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_andset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_clearset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_clr.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_compar.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_compar_first.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_cpu.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_fill.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_first.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_foreach_begin.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_foreach_end.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_glibc_sched_affinity.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_ith_ulong.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_linux_libnuma_nodemask.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_linux_libnuma_ulongs.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_string.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_from_ulong.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_intersects.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_isequal.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_isfull.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_isincluded.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_isset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_iszero.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_orset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_set.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_set_range.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_singlify.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_snprintf.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_t.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_ith_ulong.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_linux_libnuma_bitmask.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_linux_libnuma_nodemask.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_to_ulong.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_weight.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_xorset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_cpuset_zero.3 \
-	@DX_DOCDIR@/man/man3/hwloc_distribute.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_flags_e.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_closest_objs.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_common_ancestor_obj.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_cpuset_covering_cache.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_cpuset_covering_child.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_cpuset_covering_obj.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_cpuset_objs.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_depth_nbobjs.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_depth_type.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_nbobjs_below_cpuset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_nbobjs_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_next_child.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_next_obj.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_above_cpuset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_above_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_below_cpuset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_next_obj_by_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_obj.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_obj_below_cpuset.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_obj_below_cpuset_by_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_obj_by_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_order_type.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_shared_cache_above.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_system_obj.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_type_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_type_nbobjss.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_type_or_above_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_type_or_below_depth.3 \
-	@DX_DOCDIR@/man/man3/hwloc_get_type_order.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u_hwloc_cache_attr_u.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u_hwloc_machine_attr_u.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u_hwloc_memory_attr_u.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_attr_u_hwloc_misc_attr_u.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_cpuset_snprintf.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_is_in_subtree.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_snprintf.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_t.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_type_of_string.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_type_string.3 \
-	@DX_DOCDIR@/man/man3/hwloc_obj_type_t.3 \
-	@DX_DOCDIR@/man/man3/hwloc_set_cpubind.3 \
-	@DX_DOCDIR@/man/man3/hwloc_set_proc_cpubind.3 \
-	@DX_DOCDIR@/man/man3/hwloc_set_thread_cpubind.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_check.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_destroy.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_get_info.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_ignore_all_keep_structure.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_ignore_type.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_ignore_type_keep_structure.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_info.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_init.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_load.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_set_flags.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_set_fsys_root.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_set_synthetic.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_set_xml.3 \
-	@DX_DOCDIR@/man/man3/hwloc_topology_t.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_binding.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_configuration.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_conversion.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_cpuset.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_creation.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_helper_binding.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_helper_find_cache.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_helper_find_covering.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_helper_find_coverings.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_helper_find_includeds.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_helper_traversal.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_helper_traversal_basic.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_helper_types.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_topology_info.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_information.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_objects.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_traversal.3 \
-	@DX_DOCDIR@/man/man3/hwlocality_types.3
-
-CLEANFILES += \
-	@DX_DOCDIR@/man/man3/arity.3 \
-	@DX_DOCDIR@/man/man3/attr.3 \
-	@DX_DOCDIR@/man/man3/cache.3 \
-	@DX_DOCDIR@/man/man3/children.3 \
-	@DX_DOCDIR@/man/man3/cpuset.3 \
-	@DX_DOCDIR@/man/man3/cpuset.h.3 \
-	@DX_DOCDIR@/man/man3/depth.3 \
-	@DX_DOCDIR@/man/man3/dmi_board_name.3 \
-	@DX_DOCDIR@/man/man3/dmi_board_vendor.3 \
-	@DX_DOCDIR@/man/man3/father.3 \
-	@DX_DOCDIR@/man/man3/first_child.3 \
-	@DX_DOCDIR@/man/man3/glibc-sched.h.3 \
-	@DX_DOCDIR@/man/man3/glossary.3 \
-	@DX_DOCDIR@/man/man3/helper.h.3 \
-	@DX_DOCDIR@/man/man3/huge_page_free.3 \
-	@DX_DOCDIR@/man/man3/huge_page_size_kB.3 \
-	@DX_DOCDIR@/man/man3/is_fake.3 \
-	@DX_DOCDIR@/man/man3/last_child.3 \
-	@DX_DOCDIR@/man/man3/linux-libnuma.h.3 \
-	@DX_DOCDIR@/man/man3/logical_index.3 \
-	@DX_DOCDIR@/man/man3/machine.3 \
-	@DX_DOCDIR@/man/man3/memory_kB.3 \
-	@DX_DOCDIR@/man/man3/misc.3 \
-	@DX_DOCDIR@/man/man3/next_cousin.3 \
-	@DX_DOCDIR@/man/man3/next_sibling.3 \
-	@DX_DOCDIR@/man/man3/node.3 \
-	@DX_DOCDIR@/man/man3/os_index.3 \
-	@DX_DOCDIR@/man/man3/prev_cousin.3 \
-	@DX_DOCDIR@/man/man3/prev_sibling.3 \
-	@DX_DOCDIR@/man/man3/s.3 \
-	@DX_DOCDIR@/man/man3/sibling_rank.3 \
-	@DX_DOCDIR@/man/man3/system.3 \
-	@DX_DOCDIR@/man/man3/hwloc.doxy.3 \
-	@DX_DOCDIR@/man/man3/hwloc.h.3 \
-	@DX_DOCDIR@/man/man3/type.3 \
-	@DX_DOCDIR@/man/man3/userdata.3
-endif
-
-if HWLOC_INSTALL_HTML
-EXTRA_DIST += \
-	@DX_DOCDIR@/html/annotated.html \
-	@DX_DOCDIR@/html/classes.html \
-	@DX_DOCDIR@/html/cpuset_8h.html \
-	@DX_DOCDIR@/html/cpuset_8h_source.html \
-	@DX_DOCDIR@/html/diagram.png \
-	@DX_DOCDIR@/html/doxygen.css \
-	@DX_DOCDIR@/html/doxygen.png \
-	@DX_DOCDIR@/html/dudley.png \
-	@DX_DOCDIR@/html/emmett.png \
-	@DX_DOCDIR@/html/files.html \
-	@DX_DOCDIR@/html/functions.html \
-	@DX_DOCDIR@/html/functions_vars.html \
-	@DX_DOCDIR@/html/glibc-sched_8h.html \
-	@DX_DOCDIR@/html/glibc-sched_8h_source.html \
-	@DX_DOCDIR@/html/globals.html \
-	@DX_DOCDIR@/html/globals_defs.html \
-	@DX_DOCDIR@/html/globals_enum.html \
-	@DX_DOCDIR@/html/globals_eval.html \
-	@DX_DOCDIR@/html/globals_func.html \
-	@DX_DOCDIR@/html/globals_type.html \
-	@DX_DOCDIR@/html/glossary.html \
-	@DX_DOCDIR@/html/group__hwlocality__glibc__sched.html \
-	@DX_DOCDIR@/html/group__hwlocality__linux__libnuma__bitmask.html \
-	@DX_DOCDIR@/html/group__hwlocality__linux__libnuma__nodemask.html \
-	@DX_DOCDIR@/html/group__hwlocality__linux__libnuma__ulongs.html \
-	@DX_DOCDIR@/html/group__hwlocality__binding.html \
-	@DX_DOCDIR@/html/group__hwlocality__configuration.html \
-	@DX_DOCDIR@/html/group__hwlocality__conversion.html \
-	@DX_DOCDIR@/html/group__hwlocality__cpuset.html \
-	@DX_DOCDIR@/html/group__hwlocality__creation.html \
-	@DX_DOCDIR@/html/group__hwlocality__helper__binding.html \
-	@DX_DOCDIR@/html/group__hwlocality__helper__find__cache.html \
-	@DX_DOCDIR@/html/group__hwlocality__helper__find__covering.html \
-	@DX_DOCDIR@/html/group__hwlocality__helper__find__coverings.html \
-	@DX_DOCDIR@/html/group__hwlocality__helper__find__includeds.html \
-	@DX_DOCDIR@/html/group__hwlocality__helper__traversal.html \
-	@DX_DOCDIR@/html/group__hwlocality__helper__traversal__basic.html \
-	@DX_DOCDIR@/html/group__hwlocality__helper__types.html \
-	@DX_DOCDIR@/html/group__hwlocality__information.html \
-	@DX_DOCDIR@/html/group__hwlocality__objects.html \
-	@DX_DOCDIR@/html/group__hwlocality__topology__info.html \
-	@DX_DOCDIR@/html/group__hwlocality__traversal.html \
-	@DX_DOCDIR@/html/group__hwlocality__types.html \
-	@DX_DOCDIR@/html/hagrid.png \
-	@DX_DOCDIR@/html/helper_8h.html \
-	@DX_DOCDIR@/html/helper_8h_source.html \
-	@DX_DOCDIR@/html/index.html \
-	@DX_DOCDIR@/html/linux-libnuma_8h.html \
-	@DX_DOCDIR@/html/linux-libnuma_8h_source.html \
-	@DX_DOCDIR@/html/modules.html \
-	@DX_DOCDIR@/html/pages.html \
-	@DX_DOCDIR@/html/structhwloc__cpuset__t.html \
-	@DX_DOCDIR@/html/structhwloc__obj.html \
-	@DX_DOCDIR@/html/structhwloc__obj__attr__u_1_1hwloc__cache__attr__u.html \
-	@DX_DOCDIR@/html/structhwloc__obj__attr__u_1_1hwloc__machine__attr__u.html \
-	@DX_DOCDIR@/html/structhwloc__obj__attr__u_1_1hwloc__memory__attr__u.html \
-	@DX_DOCDIR@/html/structhwloc__obj__attr__u_1_1hwloc__misc__attr__u.html \
-	@DX_DOCDIR@/html/structhwloc__topology__info.html \
-	@DX_DOCDIR@/html/tab_b.gif \
-	@DX_DOCDIR@/html/tab_l.gif \
-	@DX_DOCDIR@/html/tab_r.gif \
-	@DX_DOCDIR@/html/tabs.css \
-	@DX_DOCDIR@/html/hwloc_8doxy.html \
-	@DX_DOCDIR@/html/hwloc_8h.html \
-	@DX_DOCDIR@/html/hwloc_8h_source.html \
-	@DX_DOCDIR@/html/unionhwloc__obj__attr__u.html
-endif
-
-if HWLOC_INSTALL_PDF
-EXTRA_DIST += \
-	@DX_DOCDIR@/hwloc.pdf
-endif
-
-if HWLOC_WILLHAVE_TAG
-EXTRA_DIST += \
-	@DX_DOCDIR@/hwloc.tag
-endif
-
-install-data-local:
-if HWLOC_INSTALL_PDF
-	$(mkinstalldirs) $(DESTDIR)$(pdfdir)
-	$(INSTALL_DATA) @DX_DOCDIR@/hwloc.pdf $(DESTDIR)$(pdfdir)
-endif
-if HWLOC_INSTALL_HTML
-	$(mkinstalldirs) $(DESTDIR)$(htmldir)/hwloc
-	$(INSTALL_DATA) @DX_DOCDIR@/html/* $(DESTDIR)$(htmldir)/hwloc
-endif
-
-uninstall-local:
-if HWLOC_INSTALL_PDF
-	$(RM) $(DESTDIR)$(pdfdir)/hwloc.pdf
-endif
-if HWLOC_INSTALL_HTML
-	$(RM) $(DESTDIR)$(htmldir)/hwloc/*
-endif
-
-#
-# Make sure that the documentation example works
-#
-
-TESTS = hwloc-hello
-
-check_PROGRAMS = $(TESTS)
-
-LIBS = $(top_builddir)/src/libhwloc.la
-
-#
-# Rules to regenerate the documentation
-#
-
-if HWLOC_HAVE_MAN
-# Documentation already available, do not force documentation generation
-else
-if DX_COND_man
-# Documentation not available, tell how to generate it
-$(dist_man3_MANS): @DX_DOCDIR@/hwloc.tag
-endif
-endif
-
-if HWLOC_HAVE_PDF
-else
-if DX_COND_pdf
-if HWLOC_INSTALL_PDF
-all-local: @DX_DOCDIR@/hwloc.pdf
-@DX_DOCDIR@/hwloc.pdf: @DX_DOCDIR@/hwloc.tag
-endif
-endif
-endif
-
-if HWLOC_HAVE_HTML
-else
-if DX_COND_html
-if HWLOC_INSTALL_HTML
-all-local: @DX_DOCDIR@/html
-	cp $(srcdir)/doxygen.css @DX_DOCDIR@/html/
-@DX_DOCDIR@/html: @DX_DOCDIR@/hwloc.tag
-endif
-endif
-endif
-
-#
-# What doxygen depends on
-#
-DX_INPUTS = \
+dox_inputs = $(DOX_CONFIG) \
 	$(srcdir)/hwloc.doxy \
 	$(top_srcdir)/include/hwloc.h \
 	$(top_srcdir)/include/hwloc/helper.h \
@@ -351,74 +52,302 @@ DX_INPUTS = \
 	$(top_srcdir)/include/hwloc/linux-libnuma.h \
 	$(top_srcdir)/include/hwloc/glibc-sched.h
 
-if DX_COND_html
-if HWLOC_INSTALL_HTML
-CLEANFILES += images/diagram.png
-DX_INPUTS += images/diagram.png
-EXTRA_DIST += images/diagram.png
+#
+# Create the images that we need for the PDF output and the HTML
+# output.  There is not an easy way to check if the output of
+# AC_PATH_PROG found something in configure.ac (!), so we have to put
+# a run-time check here to see if fig2dev was found.  :-(
+#
+
+if BUILD_DOXYGEN
+BUILT_SOURCES = $(image_built_sources)
+
 images/diagram.png: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
+	@if test "x$(FIG2DEV)" = "x"; then \
+	    echo "ERROR: Cannot find the 'fig2dev' exectuable -- cannot make $@"; \
+	    exit 1; \
+	fi
 	$(FIG2DEV) -L png $< $@
-endif
-endif
-if DX_COND_pdf
-if HWLOC_INSTALL_PDF
-CLEANFILES += images/diagram.eps
-DX_INPUTS += images/diagram.eps
-EXTRA_DIST += images/diagram.eps
+
 images/diagram.eps: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
+	@if test "x$(FIG2DEV)" = "x"; then \
+	    echo "ERROR: Cannot find the 'fig2dev' exectuable -- cannot make $@"; \
+	    exit 1; \
+	fi
 	$(FIG2DEV) -L eps $< $@
 endif
+
+#
+# Rules for running doxygen.  It depends on the built images and the
+# dox_inputs.
+#
+
+if BUILD_DOXYGEN
+$(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
+	$(RM) $(DOX_DIR)
+	$(DOXYGEN) $(DOX_CONFIG)
 endif
 
+#
+# Rules for building the PDF
+#
+
+if BUILD_DOXYGEN
+$(DOX_PDF): $(DOX_TAG)
+	cd $(DOX_LATEX_DIR); \
+	$(RM)*.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+	$(PDFLATEX) refman.tex; \
+	$(MAKEINDEX) refman.idx; \
+	$(PDFLATEX) refman.tex; \
+	done=0; repeat=5; \
+	while test $$done = 0 -a $$repeat -gt 0; do \
+           if $(EGREP) 'Rerun (LaTeX|to get cross-references right)' refman.log > /dev/null 2>&1; then \
+	       $(PDFLATEX) refman.tex; \
+	       repeat=`expr $$repeat - 1`; \
+	   else \
+	       done=1; \
+	   fi; \
+	done; \
+	mv refman.pdf ../$(PACKAGE).pdf
+endif
 
 #
-# Only remove the documentation for maintainers
+# Note that we want to use our own doxygen.css file; not the one that
+# doxygen installs in the HTML directory.  So manually copy it over.
 #
-MAINTAINERCLEANFILES = $(DX_CLEANFILES)
+
+if BUILD_DOXYGEN
+all-local: $(DOX_TAG)
+	$(MKDIR_P) $(DOX_HTML_DIR)
+	cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR)
+endif
 
 #
-# But remove the LaTeX files for the tarball
+# Un/install the generated PDF and man pages
 #
-CLEANFILES += \
-	@DX_DOCDIR@/latex/Makefile \
-	@DX_DOCDIR@/latex/annotated.tex \
-	@DX_DOCDIR@/latex/cpuset_8h.tex \
-	@DX_DOCDIR@/latex/doxygen.sty \
-	@DX_DOCDIR@/latex/dudley.png \
-	@DX_DOCDIR@/latex/emmett.png \
-	@DX_DOCDIR@/latex/files.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__binding.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__configuration.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__conversion.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__cpuset.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__creation.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__information.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__objects.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__topology__info.tex \
-	@DX_DOCDIR@/latex/group__hwlocality__traversal.tex \
-	@DX_DOCDIR@/latex/hagrid.png \
-	@DX_DOCDIR@/latex/index.tex \
-	@DX_DOCDIR@/latex/modules.tex \
-	@DX_DOCDIR@/latex/refman.tex \
-	@DX_DOCDIR@/latex/structhwloc__cpuset__t.tex \
-	@DX_DOCDIR@/latex/structhwloc__obj.tex \
-	@DX_DOCDIR@/latex/structhwloc__obj_1_1hwloc__obj__attr__u_1_1hwloc__cache__attr__u.tex \
-	@DX_DOCDIR@/latex/structhwloc__obj_1_1hwloc__obj__attr__u_1_1hwloc__memory__attr__u.tex \
-	@DX_DOCDIR@/latex/structhwloc__obj_1_1hwloc__obj__attr__u_1_1hwloc__misc__attr__u.tex \
-	@DX_DOCDIR@/latex/structhwloc__topology__info.tex \
-	@DX_DOCDIR@/latex/hwloc_8doxy.tex \
-	@DX_DOCDIR@/latex/hwloc_8h.tex \
-	@DX_DOCDIR@/latex/unionhwloc__obj_1_1hwloc__obj__attr__u.tex
 
-doc: all $(top_srcdir)/README
-$(top_srcdir)/README: @DX_DOCDIR@/html
-	LC_ALL=C $(W3M) @DX_DOCDIR@/html/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
+if INSTALL_DOXYGEN
+dist_pdf_DATA = $(DOX_PDF)
+endif
 
-DOCUPLOADHOST=sync.bordeaux.inria.fr
-DOCUPLOADOPTS=
-doc-upload: @DX_DOCDIR@/html
-	echo FIXME
-	false
-	rsync -avz --delete --chmod=ug+rwX,o+rX $(DOCUPLOADOPTS) @DX_DOCDIR@/html/ $(DOCUPLOADHOST):/web/runtime/libtopology/doc/
+#
+# Install the HWLOC_* and hwloc_* man pages.  It would be great to
+# figure out how to not have to list every installable man page here
+# in the Makefile.am...  :-(
+#
+
+if INSTALL_DOXYGEN
+man3_MANS = \
+        $(DOX_MAN_DIR)/man3/HWLOC_CPUBIND_PROCESS.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_CPUBIND_STRICT.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_CPUBIND_THREAD.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_CPUSET_CPU.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_CPUSET_FULL.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_CPUSET_STRING_LENGTH.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_CPUSET_ZERO.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CACHE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CORE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MACHINE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MISC.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_NODE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PROC.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_TYPE_MAX.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_PRIxCPUSET.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
+        $(DOX_MAN_DIR)/man3/hwloc.doxy.3 \
+        $(DOX_MAN_DIR)/man3/hwloc.h.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpubind_policy_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_all_but_cpu.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_andset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_clearset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compar.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compar_first.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_fill.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_first.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_begin.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_end.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_glibc_sched_affinity.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_ith_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_nodemask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_ulongs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_string.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_intersects.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_isequal.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_isfull.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_isincluded.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_isset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_iszero.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_last.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_orset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ith_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_bitmask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_nodemask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_weight.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_xorset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_cache.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_child.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_objs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_depth_nbobjs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_child.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_above_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_above_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_below_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_below_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_order_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_above.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_type_nbobjss.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_type_order.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_machine_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_memory_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_misc_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_cpuset_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_of_string.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_string.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_proc_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_info.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_all_keep_structure.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type_keep_structure.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_info.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_init.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsys_root.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_binding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_conversion.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_creation.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_glibc_sched.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_binding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_find_covering.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_find_coverings.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_find_includeds.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal_basic.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_types.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_information.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_bitmask.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_nodemask.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_ulongs.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_objects.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_topology_info.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_traversal.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_types.3
+endif
+
+#
+# Put in these rules to force the generation of the man pages and get
+# all the dependencies right.  Additionally, this forces a
+# serialization during parallel builds (e.g., "make -j X") to ensure
+# that we don't get partial target errors.
+#
+
+if BUILD_DOXYGEN
+$(man3_MANS): $(DOX_TAG)
+$(DOX_PDF): $(DOX_TAG)
+$(DOX_HTML_DIR): $(DOX_TAG)
+$(DOX_LATEX_DIR): $(DOX_TAG)
+$(DOX_MAN_DIR): $(DOX_TAG)
+endif
+
+#
+# Make sure that the documentation example works
+#
+
+if BUILD_DOXYGEN
+TESTS = hwloc-hello
+check_PROGRAMS = $(TESTS)
+
+hwloc_hello_LDADD = $(top_builddir)/src/libhwloc.la
+hwloc_hello_DEPENDENCIES = $(hwloc_hello_LDADD)
+endif
+
+#
+# Only remove the actual generated documentation files for maintainers
+#
+
+MAINTAINERCLEANFILES = $(DOX_TAG) \
+    -r \
+    $(DOX_HTML_DIR) \
+    $(DOX_MAN_DIR) \
+    $(DOX_LATEX_DIR) \
+    $(DOX_PDF)
+
+#
+# Rules for creating the top-level README file.  There does not appear
+# to be an easy way to know if AC_PATH_PROG found something in
+# configure.ac (!), so put a run-time check here to see if we have
+# w3c.
+#
+
+if BUILD_README
+doc readme: all $(top_srcdir)/README
+$(top_srcdir)/README: $(DOX_HTML_DIR)
+	LC_ALL=C $(W3M) $(DOX_HTML_DIR)/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
+else
+doc readme: no-build-readme
+$(top_srcdir)/README: no-build-readme
+
+no-build-readme:
+	@echo "ERROR: Do not have the 'w3m' executable or doxygen docs to build the README."
+	@echo "ERROR: Cannot continue."
+	@exit 1
+endif
+
+#DOCUPLOADHOST=sync.bordeaux.inria.fr
+#DOCUPLOADOPTS=
+#doc-upload: @DX_DOCDIR@/html
+#	echo FIXME
+#	false
+#	rsync -avz --delete --chmod=ug+rwX,o+rX $(DOCUPLOADOPTS) @DX_DOCDIR@/html/ $(DOCUPLOADHOST):/web/runtime/libtopology/doc/

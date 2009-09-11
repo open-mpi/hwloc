@@ -10,6 +10,10 @@
 #       TAG += value [value, ...]
 # Values that contain spaces should be placed between quotes (" ")
 
+###############################################################
+# Customized for output onto the www.open-mpi.org web site.
+###############################################################
+
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
@@ -38,7 +42,7 @@ PROJECT_NUMBER         = @VERSION@
 # If a relative path is entered, it will be relative to the location 
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = @DX_DOCDIR@
+OUTPUT_DIRECTORY       = www.open-mpi.org
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 
 # 4096 sub-directories (in 2 levels) under the output directory of each output 
@@ -565,12 +569,12 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = \
-			@top_srcdir@/doc/hwloc.doxy \
-			@top_srcdir@/include/hwloc.h \
-			@top_srcdir@/include/hwloc/helper.h \
-			@top_srcdir@/include/hwloc/cpuset.h \
-			@top_srcdir@/include/hwloc/glibc-sched.h \
-			@top_srcdir@/include/hwloc/linux-libnuma.h
+			@top_srcdir@/doc/topology.doxy \
+			@top_srcdir@/include/topology.h \
+			@top_srcdir@/include/topology/helper.h \
+			@top_srcdir@/include/topology/cpuset.h \
+			@top_srcdir@/include/topology/glibc-sched.h \
+			@top_srcdir@/include/topology/linux-libnuma.h
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
@@ -769,25 +773,25 @@ GENERATE_HTML          = YES
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
 # put in front of it. If left blank `html' will be used as the default path.
 
-HTML_OUTPUT            = html
+HTML_OUTPUT            = www.open-mpi.org
 
 # The HTML_FILE_EXTENSION tag can be used to specify the file extension for 
 # each generated HTML page (for example: .htm,.php,.asp). If it is left blank 
 # doxygen will generate files with .html extension.
 
-HTML_FILE_EXTENSION    = .html
+HTML_FILE_EXTENSION    = .php
 
 # The HTML_HEADER tag can be used to specify a personal HTML header for 
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard header.
 
-HTML_HEADER            = 
+HTML_HEADER            = www.open-mpi.org-header.php
 
 # The HTML_FOOTER tag can be used to specify a personal HTML footer for 
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard footer.
 
-HTML_FOOTER            = 
+HTML_FOOTER            = www.open-mpi.org-footer.php
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading 
 # style sheet that is used by each HTML page. It can be used to 
@@ -1009,7 +1013,7 @@ COMPACT_LATEX          = NO
 # by the printer. Possible values are: a4, a4wide, letter, legal and 
 # executive. If left blank a4wide will be used.
 
-PAPER_TYPE             = a4wide
+PAPER_TYPE             = letter
 
 # The EXTRA_PACKAGES tag can be to specify one or more names of LaTeX 
 # packages that should be included in the LaTeX output.
@@ -1102,7 +1106,7 @@ RTF_EXTENSIONS_FILE    =
 # If the GENERATE_MAN tag is set to YES (the default) Doxygen will 
 # generate man pages
 
-GENERATE_MAN           = YES
+GENERATE_MAN           = NO
 
 # The MAN_OUTPUT tag is used to specify where the man pages will be put. 
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be 
@@ -1254,7 +1258,7 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator 
 # instead of the = operator.
 
-PREDEFINED             = hwloc_thread_t=pthread_t CPU_SET=1 NUMA_VERSION1_COMPATIBILITY=1 __GNUC__=1
+PREDEFINED             = topo_thread_t=pthread_t CPU_SET=1 NUMA_VERSION1_COMPATIBILITY=1 __GNUC__=1
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
@@ -1297,7 +1301,7 @@ TAGFILES               =
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create 
 # a tag file that is based on the input files it reads.
 
-GENERATE_TAGFILE       = @DX_DOCDIR@/hwloc.tag
+GENERATE_TAGFILE       = @DX_DOCDIR@/libtopology.tag
 
 # If the ALLEXTERNALS tag is set to YES all external classes will be listed 
 # in the class index. If set to NO only the inherited external classes 
