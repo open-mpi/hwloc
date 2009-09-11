@@ -10,15 +10,85 @@
 # Initialize autostuff
 #
 
-AC_PREREQ([2.60])
-AC_INIT([hwloc], [0.9], [hwloc-devel@open-mpi.org])
-AC_SUBST([HWLOC_SOVERSION],[0])
-AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIR([m4])
+AC_PREREQ([2.63])
+AC_INIT([hwloc], 
+        [m4_normalize(esyscmd([config/hwloc_get_version.sh VERSION --base]))],
+        [http://www.open-mpi.org/community/help/], [hwloc])
+AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([config])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_SRCDIR([src/topology.c])
 
 AM_INIT_AUTOMAKE([1.10 foreign -Wall -Werror])
+
+#
+# Make configure depend on the VERSION file, since it's used in AC_INIT
+#
+
+AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
+
+#
+# Get the version of hwloc that we are installing
+#
+
+AC_MSG_CHECKING([for hwloc version])
+HWLOC_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION`"
+HWLOC_MAJOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --major`"
+HWLOC_MINOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --minor`"
+HWLOC_RELEASE_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release`"
+HWLOC_SVN_R="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --svn`"
+AC_SUBST(HWLOC_VERSION)
+AC_SUBST(HWLOC_SVN_R)
+AC_DEFINE_UNQUOTED([HWLOC_MAJOR_VERSION], [$HWLOC_MAJOR_VERSION],
+    [Major version of hwloc])
+AC_DEFINE_UNQUOTED([HWLOC_MINOR_VERSION], [$HWLOC_MINOR_VERSION],
+    [Minor version of hwloc])
+AC_DEFINE_UNQUOTED([HWLOC_RELEASE_VERSION], [$HWLOC_RELEASE_VERSION],
+    [Release version of hwloc])
+AC_MSG_RESULT([$HWLOC_VERSION])
+
+#
+# Override/fixup the version numbers set by AC_INIT, since on
+# developer builds, there's no good way to know what the version is
+# before running configure :(.  We only use the base version number
+# (ie, no svn r numbers) for the version set in AC_INIT.  This will
+# always match reality because we add the VERSION file (the only way
+# to change the major.minor.release{greek}) into the configure
+# dependencies.
+#
+
+PACKAGE_VERSION="$HWLOC_VERSION"
+PACKAGE_STRING="${PACKAGE_NAME} ${PACKAGE_VERSION}"
+VERSION="${PACKAGE_VERSION}"
+
+#
+# For standalone configurations, we also include a .so version number.
+#
+
+. $srcdir/VERSION
+AC_SUBST([libhwloc_so_version])
+
+#
+# Setup the header file
+#
+
+AH_TOP([/* -*- c -*-
+ *
+ * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * $COPYRIGHT$
+ * 
+ * Additional copyrights may follow
+ * 
+ * $HEADER$
+ */
+
+#ifndef HWLOC_CONFIGURE_H
+#define HWLOC_CONFIGURE_H
+])
+AH_BOTTOM([
+#endif /* HWLOC_CONFIGURE_H */
+])
 
 # We only build documentation if this is a developer checkout.
 # Distribution tarballs just install pre-built docuemntation that was

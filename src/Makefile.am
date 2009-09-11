@@ -9,7 +9,7 @@ lib_LTLIBRARIES = libhwloc.la
 EXTRA_DIST = dolib.c
 
 libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c bind.c
-libhwloc_la_LDFLAGS = -version-number $(HWLOC_SOVERSION) $(XML_LIBS)
+libhwloc_la_LDFLAGS = -version-number $(libhwloc_so_version) $(XML_LIBS)
 
 if HAVE_GCC
 libhwloc_la_LDFLAGS += -no-undefined

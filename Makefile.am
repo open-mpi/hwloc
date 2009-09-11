@@ -1,12 +1,14 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I config
 
 SUBDIRS = src utils tests include doc
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hwloc.pc
+
+EXTRA_DIST = README VERSION COPYING AUTHORS config/hwloc_get_version.sh
 
 #
 # Double check that we generated both the doxygen docs and a new copy
@@ -24,6 +26,9 @@ dist-hook: cannot-dist
 else
 if !BUILD_README
 dist-hook: cannot-dist
+else
+dist-hook:
+	csh "$(top_srcdir)/config/distscript.csh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)" "$(HWLOC_SVN_R)"
 endif
 endif
 
