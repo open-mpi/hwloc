@@ -32,7 +32,7 @@ elif ("$HWLOC_VERSION" == "") then
     exit 1
 endif
 
-# we can catch some hard (but possible) to do mistakes by looking at
+# We can catch some hard (but possible) to do mistakes by looking at
 # our tree's revision number, but only if we are in the source tree.
 # Otherwise, use what configure told us, at the cost of allowing one
 # or two corner cases in (but otherwise VPATH builds won't work)
@@ -44,7 +44,7 @@ endif
 set start=`date`
 cat <<EOF
  
-Creating HWLOC distribution
+Creating hwloc distribution
 In directory: `pwd`
 Version: $HWLOC_VERSION
 Started: $start
@@ -76,6 +76,30 @@ if ("$cur_svn_r" == "-1") then
 else
     echo "*** Did NOT updated VERSION file with SVN r number"
 endif
+
+#
+# Force the generation of new doxygen documentation
+#
+
+cd doc
+rm -rf doxygen-doc
+make
+if ($status != 0) then
+    echo ERROR: generating doxygen docs failed
+    ecoh ERROR: cannot continue
+    exit 1
+endif
+cp -rpf doxygen-doc ../$distdir/doc
+
+make readme
+if ($status != 0) then
+    echo ERROR: generating new README failed
+    ecoh ERROR: cannot continue
+    exit 1
+endif
+cd ..
+cp -pf README $distdir
+
 
 #########################################################
 # VERY IMPORTANT: Now go into the new distribution tree #
@@ -144,7 +168,7 @@ cd ..
 #
 
 cat <<EOF
-*** HWLOC version $HWLOC_VERSION distribution created
+*** hwloc version $HWLOC_VERSION distribution created
  
 Started: $start
 Ended:   `date`
