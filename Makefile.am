@@ -8,7 +8,15 @@ SUBDIRS = src utils tests include doc
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hwloc.pc
 
-EXTRA_DIST = README VERSION COPYING AUTHORS config/hwloc_get_version.sh
+#
+# "make distcheck" requires that tarballs are able to be able to "make
+# dist", so we have to include config/distscript.csh.
+#
+
+EXTRA_DIST = \
+        README VERSION COPYING AUTHORS \
+        config/hwloc_get_version.sh \
+        config/distscript.csh
 
 #
 # Double check that we generated both the doxygen docs and a new copy
