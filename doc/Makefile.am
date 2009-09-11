@@ -116,12 +116,19 @@ endif
 #
 # Note that we want to use our own doxygen.css file; not the one that
 # doxygen installs in the HTML directory.  So manually copy it over.
+# Be a little clever: only copy the doxygen.css file over if it exists
+# in DOX_HTML_DIR (which is in the build tree).  If the html tree
+# doesn't exist in the build tree, then we're using an html tree in
+# the source tree, and we don't need to copy over the doxygen.css
+# because we didn't build the html tree (e.g., the html tree came
+# pre-bundled in a tarball).
 #
 
 if BUILD_DOXYGEN
 all-local: $(DOX_TAG)
-	$(MKDIR_P) $(DOX_HTML_DIR)
-	cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR)
+	if test -d $(DOX_HTML_DIR) -a -f $(DOX_HTML_DIR)/doxygen.css; then \
+	    cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR); \
+	fi
 endif
 
 #
