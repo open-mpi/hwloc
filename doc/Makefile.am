@@ -86,7 +86,7 @@ endif
 
 if BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
-	$(RM) $(DOX_DIR)
+	$(RM) -r $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
 endif
 
@@ -97,7 +97,7 @@ endif
 if BUILD_DOXYGEN
 $(DOX_PDF): $(DOX_TAG)
 	cd $(DOX_LATEX_DIR); \
-	$(RM)*.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+	$(RM) *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
 	$(PDFLATEX) refman.tex; \
 	$(MAKEINDEX) refman.idx; \
 	$(PDFLATEX) refman.tex; \
