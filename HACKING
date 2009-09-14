@@ -1,36 +1,53 @@
+-*- text -*-
+
 Notes to developers:
 
-- README is automatically generated from the main page of the doxygen
-documentation by running make doc . The website is update by running make
-doc-upload.
+- Note that the README file is automatically generated from the main
+  page of the doxygen documentation by running "make doc" (or "make
+  readme").
 
-- To check:
-make check
-make distcheck
-make check with --enable-debug
+- To check that all the code is working:
 
-Do this both from inside and outside sources.
+  make check
+  make distcheck
+  make check with --enable-debug
 
-- To release a tarball, the following is necessary to generate all
-documentations:
+  Do this both from inside and outside sources.
+
+- The following tools are necessary to generate all documentation (any
+  flavor of "make dist" will fail if these tools are not available):
+
   - doxygen with man, pdf and html support
   - help2man
   - fig2dev
-and the following should be performed to prepare the tarball (yes, from inside
-the source, to put the documentation inside the source):
+  - w3m
 
-svn export . /tmp/hwloc
-cd /tmp/hwloc
-./autogen.sh && ./configure && make && make maintainer-clean && ./configure && make doc && make distclean
+- Create a distribution tarball by running the following (from the
+  top-level source directory):
 
-and check it by
+  shell$ ./contrib/dist/make_dist_tarball
 
-cd .. && rm -fr build && mkdir build && cd build && ../hwloc/configure && make && make distcheck
+  It will take a few minutes because it runs "make distcheck" and it
+  builds two tarballs (an official release and a greek release).  For
+  example, after "make_dist_tarball" completes, you'll have two
+  tarballs, like this:
 
-For the windows zipball, make sure you have Microsoft's lib tool in PATH, and
-remember to copy README at the root of the zip into a README.txt file with CRLF:
+  hwloc-0.9.1.tar.gz
+  hwloc-0.9.1rc1.tar.gz
 
-sed -e 's/$/'$'\015'/ < README > $prefix/README.txt
+  The "rc1" tarball (or whatever the greek version is) can be
+  distributed for testing and validation.  If it passes, then the
+  non-rc1 tarball can be released (it's identical to the rc1 tarball
+  except for its version).
+
+- Check tarballs by configuring and building them and then running
+  "make check".
+
+- For the windows zipball, make sure you have Microsoft's lib tool in
+  PATH, and remember to copy README at the root of the zip into a
+  README.txt file with CRLF:
+
+  sed -e 's/$/'$'\015'/ < README > $prefix/README.txt
 
 - make maintainer-clean can be used to properly remove the generated
-documentations.
+  documentations.
