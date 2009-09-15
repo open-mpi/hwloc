@@ -86,7 +86,7 @@ rm -rf doxygen-doc
 make
 if ($status != 0) then
     echo ERROR: generating doxygen docs failed
-    ecoh ERROR: cannot continue
+    echo ERROR: cannot continue
     exit 1
 endif
 cp -rpf doxygen-doc ../$distdir/doc
@@ -94,7 +94,7 @@ cp -rpf doxygen-doc ../$distdir/doc
 make readme
 if ($status != 0) then
     echo ERROR: generating new README failed
-    ecoh ERROR: cannot continue
+    echo ERROR: cannot continue
     exit 1
 endif
 cd ..
