@@ -215,26 +215,26 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_child.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_objs.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_child.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_above_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_above_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_above_cpuset_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_below_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_below_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_below_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_obj.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_order_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_above.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_order.3 \

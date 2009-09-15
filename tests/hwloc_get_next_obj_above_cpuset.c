@@ -11,8 +11,7 @@
 #include <assert.h>
 
 /*
- * check hwloc_get_next_obj_above_cpuset_by_depth()
- * and hwloc_get_next_obj_above_cpuset()
+ * check hwloc_get_next_obj_above_cpuset*()
  */
 
 int
@@ -38,17 +37,17 @@ main (int argc, char *argv[])
 
   hwloc_cpuset_from_string("00008f18", &set);
 
-  obj = hwloc_get_next_obj_above_cpuset(topology, &set, HWLOC_OBJ_NODE, NULL);
+  obj = hwloc_get_next_obj_above_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, NULL);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 1));
-  obj = hwloc_get_next_obj_above_cpuset(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_above_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 2));
-  obj = hwloc_get_next_obj_above_cpuset(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_above_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 4));
-  obj = hwloc_get_next_obj_above_cpuset(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_above_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 5));
-  obj = hwloc_get_next_obj_above_cpuset(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_above_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 7));
-  obj = hwloc_get_next_obj_above_cpuset(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_above_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
   assert(!obj);
 
   hwloc_topology_set_synthetic (topology, "nodes:8 cores:2 1");

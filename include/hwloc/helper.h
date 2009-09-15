@@ -74,7 +74,7 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * If there are several levels with objects of that type, -1 is returned.
  */
 static __inline__ int
-hwloc_get_nbobjs (hwloc_topology_t topology, hwloc_obj_type_t type)
+hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
 	int depth = hwloc_get_type_depth(topology, type);
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
@@ -106,7 +106,7 @@ hwloc_get_system_obj (hwloc_topology_t topology)
  * and ther caller may fallback to hwloc_get_obj_by_depth().
  */
 static __inline__ hwloc_obj_t
-hwloc_get_obj (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned index)
+hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned index)
 {
   int depth = hwloc_get_type_depth(topology, type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
@@ -137,7 +137,7 @@ hwloc_get_next_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_ob
  * fallback to hwloc_get_next_obj_by_depth().
  */
 static __inline__ hwloc_obj_t
-hwloc_get_next_obj (hwloc_topology_t topology, hwloc_obj_type_t type,
+hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
 		   hwloc_obj_t prev)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -213,7 +213,7 @@ hwloc_get_next_obj_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc
  * fallback to hwloc_get_next_obj_below_cpuset_by_depth().
  */
 static __inline__ hwloc_obj_t
-hwloc_get_next_obj_below_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+hwloc_get_next_obj_below_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
 				hwloc_obj_type_t type, hwloc_obj_t prev)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -247,7 +247,7 @@ hwloc_get_obj_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc_cpus
  * fallback to hwloc_get_obj_below_cpuset_by_depth().
  */
 static __inline__ hwloc_obj_t
-hwloc_get_obj_below_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+hwloc_get_obj_below_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
 			   hwloc_obj_type_t type, unsigned index)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -277,7 +277,7 @@ hwloc_get_nbobjs_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc_c
  * If there are several levels with objects of that type below CPU set \p set, -1 is returned.
  */
 static __inline__ int
-hwloc_get_nbobjs_below_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+hwloc_get_nbobjs_below_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
 			      hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -371,7 +371,7 @@ hwloc_get_next_obj_above_cpuset_by_depth(hwloc_topology_t topology, const hwloc_
  * for each depth.
  */
 static __inline__ hwloc_obj_t
-hwloc_get_next_obj_above_cpuset(hwloc_topology_t topology, const hwloc_cpuset_t *set,
+hwloc_get_next_obj_above_cpuset_by_type(hwloc_topology_t topology, const hwloc_cpuset_t *set,
 			       hwloc_obj_type_t type, hwloc_obj_t prev)
 {
   int depth = hwloc_get_type_depth(topology, type);

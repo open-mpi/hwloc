@@ -25,9 +25,9 @@ int main(void)
   /* convert full nodemask/bitmask to cpuset */
   hwloc_cpuset_zero(&set);
   /* gather all nodes if any, or the whole system if no nodes */
-  if (hwloc_get_nbobjs(topology, HWLOC_OBJ_NODE)) {
+  if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE)) {
     node = NULL;
-    while ((node = hwloc_get_next_obj(topology, HWLOC_OBJ_NODE, node)) != NULL)
+    while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, node)) != NULL)
       hwloc_cpuset_orset(&set, &node->cpuset);
   } else {
     hwloc_cpuset_orset(&set, &hwloc_get_system_obj(topology)->cpuset);
@@ -85,7 +85,7 @@ int main(void)
 
 
   /* convert last node nodemask/bitmask from/to cpuset */
-  node = hwloc_get_next_obj(topology, HWLOC_OBJ_NODE, NULL);
+  node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, NULL);
   if (node) {
     hwloc_cpuset_to_linux_libnuma_nodemask(topology, &node->cpuset, &nodemask);
     assert(nodemask_isset(&nodemask, node->os_index));
