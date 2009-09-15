@@ -448,6 +448,8 @@ extern int hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, h
 
 /** @} */
 
+
+
 /** \defgroup hwlocality_helper_binding Binding Helpers
  * @{
  */
