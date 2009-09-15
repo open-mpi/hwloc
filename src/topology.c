@@ -1316,14 +1316,14 @@ hwloc_topology_check(struct hwloc_topology *topology)
   assert(hwloc_topology_get_info(topology, &info) >= 0);
 
   /* top-level specific checks */
-  assert(hwloc_get_depth_nbobjs(topology, 0) == 1);
+  assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
   obj = hwloc_get_system_obj(topology);
   assert(obj);
   assert(obj->type == HWLOC_OBJ_SYSTEM);
 
   /* check each level */
   for(i=0; i<info.depth; i++) {
-    unsigned width = hwloc_get_depth_nbobjs(topology, i);
+    unsigned width = hwloc_get_nbobjs_by_depth(topology, i);
     struct hwloc_obj *prev = NULL;
 
     /* check that each object is equal to the previous one */
@@ -1362,8 +1362,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
   }
 
   /* check bottom objects */
-  assert(hwloc_get_depth_nbobjs(topology, info.depth-1) > 0);
-  for(j=0; j<hwloc_get_depth_nbobjs(topology, info.depth-1); j++) {
+  assert(hwloc_get_nbobjs_by_depth(topology, info.depth-1) > 0);
+  for(j=0; j<hwloc_get_nbobjs_by_depth(topology, info.depth-1); j++) {
     obj = hwloc_get_obj_by_depth(topology, info.depth-1, j);
     assert(obj);
     assert(obj->type == HWLOC_OBJ_PROC);

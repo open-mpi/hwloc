@@ -43,7 +43,7 @@ int main(void)
   hwloc_cpuset_from_glibc_sched_affinity(topology, &toposet, &schedset, sizeof(schedset));
   assert(hwloc_cpuset_isequal(&toposet, &hwloc_get_system_obj(topology)->cpuset));
 
-  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_depth_nbobjs(topology, topoinfo.depth-1) - 1);
+  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_nbobjs_by_depth(topology, topoinfo.depth-1) - 1);
   assert(obj);
   assert(obj->type == HWLOC_OBJ_PROC);
 

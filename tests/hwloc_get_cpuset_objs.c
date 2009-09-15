@@ -41,7 +41,7 @@ int main()
   assert(objs[0] == obj);
 
   /* just get the very last object */
-  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_depth_nbobjs(topology, topoinfo.depth-1)-1);
+  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_nbobjs_by_depth(topology, topoinfo.depth-1)-1);
   ret = hwloc_get_cpuset_objs(topology, &obj->cpuset, objs, 1);
   assert(ret == 1);
   assert(objs[0] == obj);
@@ -65,7 +65,7 @@ int main()
   ret = hwloc_get_cpuset_objs(topology, &set, objs, 2);
   assert(ret == 2);
   assert(objs[0] == hwloc_get_obj_by_depth(topology, topoinfo.depth-1, 0));
-  assert(objs[1] == hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_depth_nbobjs(topology, topoinfo.depth-1)-1));
+  assert(objs[1] == hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_nbobjs_by_depth(topology, topoinfo.depth-1)-1));
 
   /* try a very hard one */
   hwloc_cpuset_from_string(GIVEN_HARD_CPUSET_STRING, &set);

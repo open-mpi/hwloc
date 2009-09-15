@@ -34,7 +34,7 @@ int main(void)
   width = 1;
   for(i=0; i<6; i++) {
     /* check arities */
-    assert(hwloc_get_depth_nbobjs(topology, i) == width);
+    assert(hwloc_get_nbobjs_by_depth(topology, i) == width);
     for(j=0; j<width; j++) {
       hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, j);
       assert(obj);

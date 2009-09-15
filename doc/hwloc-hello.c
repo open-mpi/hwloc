@@ -42,7 +42,7 @@ int main(void)
 	int depth, i;
 	char string[128];
 	for (depth = 0; depth < topoinfo.depth; depth++) {
-		for (i = 0; i < hwloc_get_depth_nbobjs(topology, depth); i++) {
+		for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); i++) {
 			hwloc_obj_snprintf(string, sizeof(string), topology,
 					hwloc_get_obj_by_depth(topology, depth, i), "#", 0);
 			printf("%s\n", string);
@@ -58,7 +58,7 @@ int main(void)
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
 		printf("The number of sockets is unknown\n");
 	else
-		printf("%u socket(s)\n", hwloc_get_depth_nbobjs(topology, depth));
+		printf("%u socket(s)\n", hwloc_get_nbobjs_by_depth(topology, depth));
 
 
         /* Find out where cores are, or else smaller sets of CPUs if the OS
@@ -66,7 +66,7 @@ int main(void)
 	depth = hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_CORE);
 
 	/* Get last one.  */
-	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, hwloc_get_depth_nbobjs(topology, depth) - 1);
+	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth) - 1);
 	if (!obj)
 		return 0;
 

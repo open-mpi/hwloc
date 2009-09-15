@@ -344,7 +344,7 @@ extern int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t typ
 extern hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth);
 
 /** \brief Returns the width of level at depth \p depth */
-extern unsigned hwloc_get_depth_nbobjs (hwloc_topology_t topology, unsigned depth);
+extern unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, unsigned depth);
 
 /** @} */
 

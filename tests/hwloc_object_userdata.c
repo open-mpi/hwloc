@@ -19,7 +19,7 @@ static void check(hwloc_topology_t topology)
 
   hwloc_topology_get_info(topology, &topoinfo);
   for(i=0; i<topoinfo.depth; i++) {
-    for(j=0; j<hwloc_get_depth_nbobjs(topology, i); j++) {
+    for(j=0; j<hwloc_get_nbobjs_by_depth(topology, i); j++) {
       assert(hwloc_get_obj_by_depth(topology, i, j)->userdata == NULL);
     }
   }

@@ -25,7 +25,7 @@ hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
 }
 
 unsigned
-hwloc_get_depth_nbobjs (struct hwloc_topology *topology, unsigned depth)
+hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
     return 0;

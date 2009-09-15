@@ -39,7 +39,7 @@ int main()
   assert(hwloc_cpuset_isequal(&set, &obj->cpuset));
   printf("first cpu cpuset converted back and forth, ok\n");
 
-  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_depth_nbobjs(topology, topoinfo.depth-1) - 1);
+  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_nbobjs_by_depth(topology, topoinfo.depth-1) - 1);
   hwloc_obj_cpuset_snprintf(string, sizeof(string), 1, &obj);
   printf("last cpu cpuset is %s\n", string);
   hwloc_cpuset_from_string(string, &set);

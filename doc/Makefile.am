@@ -215,7 +215,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_child.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_objs.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_depth_nbobjs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset_by_depth.3 \

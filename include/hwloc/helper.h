@@ -81,7 +81,7 @@ hwloc_get_type_nbobjss (hwloc_topology_t topology, hwloc_obj_type_t type)
 		return 0;
 	if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
 		return -1; /* FIXME: agregate nbobjs from different levels? */
-	return hwloc_get_depth_nbobjs(topology, depth);
+	return hwloc_get_nbobjs_by_depth(topology, depth);
 }
 
 /** @} */

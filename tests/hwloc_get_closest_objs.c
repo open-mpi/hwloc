@@ -45,7 +45,7 @@ main (int argc, char *argv[])
     return EXIT_FAILURE;
 
   /* get the last object of last level */
-  numprocs =  hwloc_get_depth_nbobjs(topology, info.depth-1);
+  numprocs =  hwloc_get_nbobjs_by_depth(topology, info.depth-1);
   last = hwloc_get_obj_by_depth(topology, info.depth-1, numprocs-1);
 
   /* allocate the array of closest objects */

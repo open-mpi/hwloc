@@ -87,7 +87,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *
       fprintf(stderr, "ignoring invalid depth %u\n", depth);
     return -1;
   }
-  width = hwloc_get_depth_nbobjs(topology, depth);
+  width = hwloc_get_nbobjs_by_depth(topology, depth);
 
   sep = strchr(string, ':');
   if (!sep) {
