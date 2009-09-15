@@ -25,7 +25,7 @@ int main(void)
   /* convert full nodemask/bitmask to cpuset */
   hwloc_cpuset_zero(&set);
   /* gather all nodes if any, or the whole system if no nodes */
-  if (hwloc_get_type_nbobjss(topology, HWLOC_OBJ_NODE)) {
+  if (hwloc_get_nbobjs(topology, HWLOC_OBJ_NODE)) {
     node = NULL;
     while ((node = hwloc_get_next_obj(topology, HWLOC_OBJ_NODE, node)) != NULL)
       hwloc_cpuset_orset(&set, &node->cpuset);

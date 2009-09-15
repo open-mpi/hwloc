@@ -39,7 +39,7 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, const hwloc_cpus
 {
   unsigned long outmaxnode = -1;
   hwloc_obj_t node = NULL;
-  unsigned nbnodes = hwloc_get_type_nbobjss(topology, HWLOC_OBJ_NODE);
+  unsigned nbnodes = hwloc_get_nbobjs(topology, HWLOC_OBJ_NODE);
   int i;
 
   for(i=0; i<*maxnode/HWLOC_BITS_PER_LONG; i++)
@@ -122,7 +122,7 @@ hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, const hwloc_cpu
 {
   struct bitmask *bitmask;
   hwloc_obj_t node = NULL;
-  unsigned nbnodes = hwloc_get_type_nbobjss(topology, HWLOC_OBJ_NODE);
+  unsigned nbnodes = hwloc_get_nbobjs(topology, HWLOC_OBJ_NODE);
 
   if (nbnodes) {
     bitmask = numa_bitmask_alloc(nbnodes);
@@ -196,7 +196,7 @@ hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, const hwloc_cp
 				      nodemask_t *nodemask)
 {
   hwloc_obj_t node = NULL;
-  unsigned nbnodes = hwloc_get_type_nbobjss(topology, HWLOC_OBJ_NODE);
+  unsigned nbnodes = hwloc_get_nbobjs(topology, HWLOC_OBJ_NODE);
 
   nodemask_zero(nodemask);
   if (nbnodes) {

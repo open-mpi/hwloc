@@ -234,7 +234,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_above.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_type_nbobjss.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_order.3 \

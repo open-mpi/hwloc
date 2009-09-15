@@ -74,7 +74,7 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * If there are several levels with objects of that type, -1 is returned.
  */
 static __inline__ int
-hwloc_get_type_nbobjss (hwloc_topology_t topology, hwloc_obj_type_t type)
+hwloc_get_nbobjs (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
 	int depth = hwloc_get_type_depth(topology, type);
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
