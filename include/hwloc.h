@@ -305,11 +305,11 @@ extern int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long fl
 /** \brief Change the file-system root path when building the topology from sysfs/procfs.
  *
  * On Linux system, use sysfs and procfs files as if they were mounted on the given
- * \p fsys_root_path instead of the main file-system root.
+ * \p fsroot_path instead of the main file-system root.
  * Not using the main file-system root causes the is_fake field of the hwloc_topology_info
  * structure to be set.
  */
-extern int hwloc_topology_set_fsys_root(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsys_root_path);
+extern int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
 
 /** \brief Enable synthetic topology.
  *

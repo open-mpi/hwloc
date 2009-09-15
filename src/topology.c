@@ -34,7 +34,7 @@
 
 /* Return the OS-provided number of processors.  Unlike other methods such as
    reading sysfs on Linux, this method is not virtualizable; thus it's only
-   used as a fall-back method, allowing `hwloc_set_fsys_root ()' to
+   used as a fall-back method, allowing `hwloc_set_fsroot ()' to
    have the desired effect.  */
 unsigned
 hwloc_fallback_nbprocessors(void) {
@@ -1102,13 +1102,13 @@ hwloc_backend_exit(struct hwloc_topology *topology)
 }
 
 int
-hwloc_topology_set_fsys_root(struct hwloc_topology *topology, const char *fsys_root_path)
+hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_path)
 {
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
 #ifdef LINUX_SYS
-  if (hwloc_backend_sysfs_init(topology, fsys_root_path) < 0)
+  if (hwloc_backend_sysfs_init(topology, fsroot_path) < 0)
     return -1;
 #endif /* LINUX_SYS */
 
@@ -1219,10 +1219,10 @@ hwloc_topology_load (struct hwloc_topology *topology)
   }
 
 #ifdef LINUX_SYS
-  char *fsys_root_path_env = getenv("HWLOC_FSROOT");
-  if (fsys_root_path_env) {
+  char *fsroot_path_env = getenv("HWLOC_FSROOT");
+  if (fsroot_path_env) {
     hwloc_backend_exit(topology);
-    hwloc_backend_sysfs_init(topology, fsys_root_path_env);
+    hwloc_backend_sysfs_init(topology, fsroot_path_env);
   }
 #endif
 #ifdef HAVE_XML

@@ -194,7 +194,7 @@ main (int argc, char *argv[])
   if (xmlpath)
     hwloc_topology_set_xml(topology, xmlpath);
   if (fsysroot)
-    hwloc_topology_set_fsys_root(topology, fsysroot);
+    hwloc_topology_set_fsroot(topology, fsysroot);
 
   err = hwloc_topology_load (topology);
   if (err)

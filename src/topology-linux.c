@@ -45,17 +45,17 @@ _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *,
 #define hwloc_opendir(p, d)    hwloc_opendirat(p, d)
 
 static FILE *
-hwloc_fopenat(const char *path, const char *mode, int fsys_root_fd)
+hwloc_fopenat(const char *path, const char *mode, int fsroot_fd)
 {
   int fd;
   const char *relative_path;
 
-  assert(!(fsys_root_fd < 0));
+  assert(!(fsroot_fd < 0));
 
   /* Skip leading slashes.  */
   for (relative_path = path; *relative_path == '/'; relative_path++);
 
-  fd = openat (fsys_root_fd, relative_path, O_RDONLY);
+  fd = openat (fsroot_fd, relative_path, O_RDONLY);
   if (fd == -1)
     return NULL;
 
@@ -63,20 +63,20 @@ hwloc_fopenat(const char *path, const char *mode, int fsys_root_fd)
 }
 
 static int
-hwloc_accessat(const char *path, int mode, int fsys_root_fd)
+hwloc_accessat(const char *path, int mode, int fsroot_fd)
 {
   const char *relative_path;
 
-  assert(!(fsys_root_fd < 0));
+  assert(!(fsroot_fd < 0));
 
   /* Skip leading slashes.  */
   for (relative_path = path; *relative_path == '/'; relative_path++);
 
-  return faccessat(fsys_root_fd, relative_path, O_RDONLY, 0);
+  return faccessat(fsroot_fd, relative_path, O_RDONLY, 0);
 }
 
 static DIR*
-hwloc_opendirat(const char *path, int fsys_root_fd)
+hwloc_opendirat(const char *path, int fsroot_fd)
 {
   int dir_fd;
   const char *relative_path;
@@ -84,7 +84,7 @@ hwloc_opendirat(const char *path, int fsys_root_fd)
   /* Skip leading slashes.  */
   for (relative_path = path; *relative_path == '/'; relative_path++);
 
-  dir_fd = openat(fsys_root_fd, relative_path, O_RDONLY | O_DIRECTORY);
+  dir_fd = openat(fsroot_fd, relative_path, O_RDONLY | O_DIRECTORY);
   if (dir_fd < 0)
     return NULL;
 
@@ -198,26 +198,26 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, const h
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
 
 static int
-hwloc_linux_fsys_root_set_cpubind(void) {
+hwloc_linux_fsroot_set_cpubind(void) {
   return 0;
 }
 
 int
-hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsys_root_path)
+hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path)
 {
 #ifdef HAVE_OPENAT
   int root;
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
-  if (!fsys_root_path)
-    fsys_root_path = "/";
+  if (!fsroot_path)
+    fsroot_path = "/";
 
-  root = open(fsys_root_path, O_RDONLY | O_DIRECTORY);
+  root = open(fsroot_path, O_RDONLY | O_DIRECTORY);
   if (root < 0)
     return -1;
 
-  if (strcmp(fsys_root_path, "/"))
+  if (strcmp(fsroot_path, "/"))
     topology->is_fake = 1;
 
   topology->backend_params.sysfs.root_fd = root;
@@ -239,12 +239,12 @@ hwloc_backend_sysfs_exit(struct hwloc_topology *topology)
 }
 
 static int
-hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_fd)
+hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 {
   char string[11];
   FILE * fd;
 
-  fd = hwloc_fopen(mappath, "r", fsys_root_fd);
+  fd = hwloc_fopen(mappath, "r", fsroot_fd);
   if (!fd)
     return -1;
 
@@ -263,7 +263,7 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsys_root_f
 #define MAX_KERNEL_CPU_MASK ((HWLOC_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
 static int
-hwloc_parse_cpumap(const char *mappath, hwloc_cpuset_t *set, int fsys_root_fd)
+hwloc_parse_cpumap(const char *mappath, hwloc_cpuset_t *set, int fsroot_fd)
 {
   char string[KERNEL_CPU_MAP_LEN]; /* enough for a shared map mask (32bits hexa) */
   unsigned long maps[MAX_KERNEL_CPU_MASK];
@@ -274,7 +274,7 @@ hwloc_parse_cpumap(const char *mappath, hwloc_cpuset_t *set, int fsys_root_fd)
   /* reset to zero first */
   hwloc_cpuset_zero(set);
 
-  fd = hwloc_fopen(mappath, "r", fsys_root_fd);
+  fd = hwloc_fopen(mappath, "r", fsroot_fd);
   if (!fd)
     return -1;
 
@@ -308,7 +308,7 @@ hwloc_parse_cpumap(const char *mappath, hwloc_cpuset_t *set, int fsys_root_fd)
 }
 
 static int
-hwloc_read_cpuset_mask(const char *filename, const char *type, char *info, int infomax, int fsys_root_fd)
+hwloc_read_cpuset_mask(const char *filename, const char *type, char *info, int infomax, int fsroot_fd)
 {
 #define CPUSET_NAME_LEN 64
   char cpuset_name[CPUSET_NAME_LEN];
@@ -318,7 +318,7 @@ hwloc_read_cpuset_mask(const char *filename, const char *type, char *info, int i
   FILE *fd;
 
   /* check whether a cpuset is enabled */
-  fd = hwloc_fopen(filename, "r", fsys_root_fd);
+  fd = hwloc_fopen(filename, "r", fsroot_fd);
   if (!fd)
     return 0;
 
@@ -332,11 +332,11 @@ hwloc_read_cpuset_mask(const char *filename, const char *type, char *info, int i
   /* read the cpuset */
   snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cpuset%s/%s", cpuset_name, type);
   hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsys_root_fd);
+  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
   if (!fd) {
     snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cpusets%s/%s", cpuset_name, type);
     hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-    fd = hwloc_fopen(cpuset_filename, "r", fsys_root_fd);
+    fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
   }
 
   if (!fd)
@@ -464,13 +464,13 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned distances[nbnodes], int fsys_root_fd)
+hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned distances[nbnodes], int fsroot_fd)
 {
   char string[4096]; /* enough for hundreds of nodes */
   char *tmp, *next;
   FILE * fd;
 
-  fd = hwloc_fopen(distancepath, "r", fsys_root_fd);
+  fd = hwloc_fopen(distancepath, "r", fsroot_fd);
   if (!fd)
     return;
 
@@ -939,9 +939,9 @@ hwloc_look_linux(struct hwloc_topology *topology)
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
     topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
   } else {
-    topology->set_cpubind = (void*) hwloc_linux_fsys_root_set_cpubind;
-    topology->set_thread_cpubind = (void*) hwloc_linux_fsys_root_set_cpubind;
-    topology->set_thisthread_cpubind = (void*) hwloc_linux_fsys_root_set_cpubind;
+    topology->set_cpubind = (void*) hwloc_linux_fsroot_set_cpubind;
+    topology->set_thread_cpubind = (void*) hwloc_linux_fsroot_set_cpubind;
+    topology->set_thisthread_cpubind = (void*) hwloc_linux_fsroot_set_cpubind;
   }
 
   nodes_dir = hwloc_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);

@@ -107,7 +107,7 @@ extern unsigned hwloc_fallback_nbprocessors(void);
 
 #if defined(LINUX_SYS)
 extern void hwloc_look_linux(struct hwloc_topology *topology);
-extern int hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsys_root_path);
+extern int hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path);
 extern void hwloc_backend_sysfs_exit(struct hwloc_topology *topology);
 #endif /* LINUX_SYS */
 
