@@ -183,6 +183,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 {
   BOOL WINAPI (*GetLogicalProcessorInformationProc)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
   BOOL WINAPI (*GetLogicalProcessorInformationExProc)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
+  BOOL WINAPI (*GetNumaAvailableMemoryNodeProc)(UCHAR Node, PULONGLONG AvailableBytes);
   DWORD length;
 
   HMODULE kernel32;
@@ -196,6 +197,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
   kernel32 = LoadLibrary("kernel32.dll");
   if (kernel32) {
     GetLogicalProcessorInformationProc = GetProcAddress(kernel32, "GetLogicalProcessorInformation");
+    GetNumaAvailableMemoryNodeProc = GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
 
     if (GetLogicalProcessorInformationProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;
@@ -253,7 +255,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	  case HWLOC_OBJ_NODE:
 	    {
 	      ULONGLONG avail;
-	      if (GetNumaAvailableMemoryNode(id, &avail))
+	      if (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail))
 		obj->attr->node.memory_kB = avail >> 10;
 	      else
 		obj->attr->node.memory_kB = 0;
