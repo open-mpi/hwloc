@@ -4,10 +4,8 @@ include $(top_srcdir)/hwloc.am
 
 include_HEADERS = hwloc.h
 include_hwlocdir = $(includedir)/hwloc
-include_hwloc_HEADERS = hwloc/config.h hwloc/cpuset.h hwloc/cpuset-bits.h hwloc/helper.h
-
-dist-hook:
-	rm -f $(distdir)/hwloc/config.h
+include_hwloc_HEADERS = hwloc/cpuset.h hwloc/cpuset-bits.h hwloc/helper.h
+nodist_include_hwloc_HEADERS = hwloc/config.h 
 
 noinst_HEADERS = private/private.h private/debug.h
 
