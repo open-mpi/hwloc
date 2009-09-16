@@ -27,13 +27,14 @@ DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 image_built_sources = images/diagram.png images/diagram.eps
 
 EXTRA_DIST = \
-	hwloc.doxy \
-	doxygen.css \
-	doxygen.cfg \
-	images/dudley.png \
-	images/emmett.png \
-	images/hagrid.png \
-	images/diagram.fig \
+        hwloc.doxy \
+        doxygen.css \
+        doxygen.cfg \
+        images/dudley.png \
+        images/emmett.png \
+        images/hagrid.png \
+        images/diagram.fig \
+        www.open-mpi.org.cfg \
         $(image_built_sources) \
         $(DOX_HTML_DIR) $(DOX_MAN_DIR) $(DOX_LATEX_DIR) $(DOX_TAG)
 
@@ -45,12 +46,12 @@ EXTRA_DIST = \
 #
 
 dox_inputs = $(DOX_CONFIG) \
-	$(srcdir)/hwloc.doxy \
-	$(top_srcdir)/include/hwloc.h \
-	$(top_srcdir)/include/hwloc/helper.h \
-	$(top_srcdir)/include/hwloc/cpuset.h \
-	$(top_srcdir)/include/hwloc/linux-libnuma.h \
-	$(top_srcdir)/include/hwloc/glibc-sched.h
+       $(srcdir)/hwloc.doxy \
+       $(top_srcdir)/include/hwloc.h \
+       $(top_srcdir)/include/hwloc/helper.h \
+       $(top_srcdir)/include/hwloc/cpuset.h \
+       $(top_srcdir)/include/hwloc/linux-libnuma.h \
+       $(top_srcdir)/include/hwloc/glibc-sched.h
 
 #
 # Create the images that we need for the PDF output and the HTML

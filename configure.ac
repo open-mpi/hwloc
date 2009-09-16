@@ -421,7 +421,6 @@ AC_CONFIG_HEADER([include/private/config.h])
 
 AC_CONFIG_FILES([hwloc.pc
 		 doc/doxygen-config.cfg
-		 doc/www.open-mpi.org.cfg
 
 		 Makefile
 		 doc/Makefile
