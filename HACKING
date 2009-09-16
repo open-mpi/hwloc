@@ -45,7 +45,9 @@ Notes to developers:
 
 - For the windows zipball, make sure you have Microsoft's lib tool in
   PATH, and remember to copy README at the root of the zip into a
-  README.txt file.
+  README.txt file with CRLF:
+
+  sed -e 's/$/'$'\015'/ < README > $prefix/README.txt
 
 - make maintainer-clean can be used to properly remove the generated
   documentations.
