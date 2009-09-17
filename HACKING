@@ -22,8 +22,17 @@ Notes to developers:
   - fig2dev
   - w3m
 
-- Create a distribution tarball by running the following (from the
-  top-level source directory):
+- *** BEFORE MAKING AN OFFICIAL RELEASE TARBALL: the release manager
+  MUST update the VERSION file:
+
+  - ensure that the major, minor, and release version numbers are
+    correct.  The greek/svn numbers will automatically be stripped by
+    make_dist_tarball (see below).
+  - ensure that increment the so_version number as appropriate (see
+    the GNU Libtool documentation for a description of what to do).
+
+- Create a distribution tarball by running the following from the
+  top-level source directory:
 
   shell$ ./contrib/dist/make_dist_tarball
 
