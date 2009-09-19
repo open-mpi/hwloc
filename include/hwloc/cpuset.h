@@ -465,7 +465,7 @@ static __inline__ int hwloc_cpuset_compar_first(const hwloc_cpuset_t * set1,
 		/* one is empty, and it is considered higher, so reverse-compar them */
 		return _ffs2-_ffs1;
 	}
-	return 0;	
+	return 0;
 }
 
 /** \brief Compar CPU sets \p set1 and \p set2 using their last bits.
@@ -482,7 +482,7 @@ static __inline__ int hwloc_cpuset_compar(const hwloc_cpuset_t * set1,
 			continue;
 		return HWLOC_CPUSUBSET_SUBSET(*set1,i) < HWLOC_CPUSUBSET_SUBSET(*set2,i) ? -1 : 1;
 	}
-	return 0;	
+	return 0;
 }
 
 /** \brief Compute the weight of CPU set \p set */
