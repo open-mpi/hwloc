@@ -68,22 +68,6 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
   abort();
 }
 
-/** \brief Returns the width of level type \p type
- *
- * If no object for that type exists, 0 is returned.
- * If there are several levels with objects of that type, -1 is returned.
- */
-static __inline__ int
-hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
-{
-	int depth = hwloc_get_type_depth(topology, type);
-	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-		return 0;
-	if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
-		return -1; /* FIXME: agregate nbobjs from different levels? */
-	return hwloc_get_nbobjs_by_depth(topology, depth);
-}
-
 /** @} */
 
 
@@ -97,23 +81,6 @@ static __inline__ hwloc_obj_t
 hwloc_get_system_obj (hwloc_topology_t topology)
 {
   return hwloc_get_obj_by_depth (topology, 0, 0);
-}
-
-/** \brief Returns the topology object at index \p index with type \p type
- *
- * If no object for that type exists, \c NULL is returned.
- * If there are several levels with objects of that type, \c NULL is returned
- * and ther caller may fallback to hwloc_get_obj_by_depth().
- */
-static __inline__ hwloc_obj_t
-hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned index)
-{
-  int depth = hwloc_get_type_depth(topology, type);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-    return NULL;
-  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
-    return NULL;
-  return hwloc_get_obj_by_depth(topology, depth, index);
 }
 
 /** \brief Returns the next object at depth \p depth.
