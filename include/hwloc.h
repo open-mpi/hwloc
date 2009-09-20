@@ -91,6 +91,9 @@ typedef enum {
 			  * An execution unit (may share a core with some
 			  * other logical processors, e.g. in the case of
 			  * an SMT core).
+			  *
+			  * Objects of this kind are always reported and can
+			  * thus be used as fallback when others are not.
 			  */
 
   HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
