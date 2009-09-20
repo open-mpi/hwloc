@@ -57,11 +57,12 @@ System(0KB HP=0*0kB TYAN Computer Corp S4881 )
           L1Cache(64KB)
           Core#1
             P#15
-Topology is fake
-depth 0:	type #0 (System)
-absent:		type #1 (Machine)
- depth 1:	type #2 (NUMANode)
-  depth 2:	type #3 (Socket)
-multiple:	type #4 (Cache)
-     depth 5:	type #5 (Core)
-      depth 6:	type #6 (Proc)
+depth 0:	1 System (type #0)
+ depth 1:	8 NUMANodes (type #2)
+  depth 2:	6 Sockets (type #3)
+   depth 3:	11 Caches (type #4)
+    depth 4:	11 Caches (type #4)
+     depth 5:	11 Cores (type #5)
+      depth 6:	11 Procs (type #6)
+Topology not from local machine
+

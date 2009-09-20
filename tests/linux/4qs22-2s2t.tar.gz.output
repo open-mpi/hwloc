@@ -5,11 +5,7 @@ System(15GB HP=0*16384kB  )
   NUMANode#1(8192MB)
     P#2
     P#3
-Topology is fake
-depth 0:	type #0 (System)
-absent:		type #1 (Machine)
- depth 1:	type #2 (NUMANode)
-absent:		type #3 (Socket)
-absent:		type #4 (Cache)
-absent:		type #5 (Core)
-  depth 2:	type #6 (Proc)
+depth 0:	1 System (type #0)
+ depth 1:	2 NUMANodes (type #2)
+  depth 2:	4 Procs (type #6)
+Topology not from local machine

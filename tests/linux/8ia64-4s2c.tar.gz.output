@@ -43,11 +43,11 @@ System(0KB HP=0*0kB  )
           L1Cache(16KB)
           Core#0
             P#7
-Topology is fake
-depth 0:	type #0 (System)
-absent:		type #1 (Machine)
-absent:		type #2 (NUMANode)
- depth 1:	type #3 (Socket)
-multiple:	type #4 (Cache)
-     depth 5:	type #5 (Core)
-      depth 6:	type #6 (Proc)
+depth 0:	1 System (type #0)
+ depth 1:	4 Sockets (type #3)
+  depth 2:	8 Caches (type #4)
+   depth 3:	8 Caches (type #4)
+    depth 4:	8 Caches (type #4)
+     depth 5:	8 Cores (type #5)
+      depth 6:	8 Procs (type #6)
+Topology not from local machine

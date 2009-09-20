@@ -27,12 +27,8 @@ System(0KB HP=0*0kB  )
     Core#1
       P#7
       P#15
-Topology is fake
-depth 0:	type #0 (System)
-absent:		type #1 (Machine)
-absent:		type #2 (NUMANode)
- depth 1:	type #3 (Socket)
-absent:		type #4 (Cache)
-  depth 2:	type #5 (Core)
-   depth 3:	type #6 (Proc)
-
+depth 0:	1 System (type #0)
+ depth 1:	4 Sockets (type #3)
+  depth 2:	8 Cores (type #5)
+   depth 3:	16 Procs (type #6)
+Topology not from local machine
