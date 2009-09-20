@@ -83,24 +83,19 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
   if (verbose_mode)
     {
       struct hwloc_topology_info info;
-      hwloc_obj_type_t l;
+      unsigned depth;
 
       hwloc_topology_get_info(topology, &info);
       if (info.is_fake)
 	fprintf (output, "Topology is fake\n");
 
-      for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_MISC; l++)
-	{
-	  int depth = hwloc_get_type_depth (topology, l);
-	  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-	    fprintf (output, "absent:\t\ttype #%u (%s)\n", l, hwloc_obj_type_string (l));
-	  } else if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-	    fprintf (output, "multiple:\ttype #%u (%s)\n", l, hwloc_obj_type_string (l));
-	  } else {
-	    indent(output, depth);
-	    fprintf (output, "depth %d:\ttype #%u (%s)\n", depth, l, hwloc_obj_type_string (l));
-	  }
-	}
+      for (depth = 0; depth < info.depth; depth++) {
+	hwloc_obj_type_t type = hwloc_get_depth_type (topology, depth);
+	unsigned nbobjs = hwloc_get_nbobjs_by_depth (topology, depth);
+	indent(output, depth);
+	fprintf (output, "depth %d:\t%u %s%s (type #%u)\n",
+		 depth, nbobjs, hwloc_obj_type_string (type), nbobjs>1?"s":"", type);
+      }
     }
 
   fclose(output);

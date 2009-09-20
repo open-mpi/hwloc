@@ -5,6 +5,7 @@ API
 * in hwloc_topology_info, rename "is_fake" into something else
   (it means "this topology does not come from the local machine"
    but it's not necessarily "fake")
+  + rename TOPO_FAKE as well
 
 * Do we actually need hwloc_get_type_order() or would hwloc_compare_types() be enough?
 
@@ -22,6 +23,9 @@ API
   because it's useless for now, but maybe it'll be used for debugging one day?
 
 * internationalize the output of lstopo? object types and memory size units
+
+* support plpa core@socket syntax in hwloc-bind
+* add a plpa-info like lstopo output, -s for summary?
 
 Doc
 ===
