@@ -34,7 +34,7 @@ int main()
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX/2/3);
-  assert(hwloc_obj_is_in_subtree(obj, cache));
+  assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
   /* check no shared cache above the L2 cache */
   obj = hwloc_get_obj_by_depth(topology, 3, 0);
@@ -64,7 +64,7 @@ int main()
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX/2/1);
-  assert(hwloc_obj_is_in_subtree(obj, cache));
+  assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
   /* check no shared-cache above the core */
   obj = hwloc_get_obj_by_depth(topology, 4, CPUINDEX/2);

@@ -129,7 +129,7 @@ hwloc_get_next_child (hwloc_topology_t topology, hwloc_obj_t father, hwloc_obj_t
 
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
 static __inline__ hwloc_obj_t
-hwloc_get_common_ancestor_obj (hwloc_obj_t obj1, hwloc_obj_t obj2)
+hwloc_get_common_ancestor_obj (hwloc_topology_t topology, hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   while (obj1->depth > obj2->depth)
     obj1 = obj1->father;
@@ -145,7 +145,7 @@ hwloc_get_common_ancestor_obj (hwloc_obj_t obj1, hwloc_obj_t obj2)
 /** \brief Returns true if _obj_ is inside the subtree beginning
     with \p subtree_root. */
 static __inline__ int
-hwloc_obj_is_in_subtree (hwloc_obj_t obj, hwloc_obj_t subtree_root)
+hwloc_obj_is_in_subtree (hwloc_topology_t topology, hwloc_obj_t obj, hwloc_obj_t subtree_root)
 {
   return hwloc_cpuset_isincluded(&obj->cpuset, &subtree_root->cpuset);
 }

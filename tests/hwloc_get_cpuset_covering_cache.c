@@ -36,7 +36,7 @@ int main()
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX/2/3);
-  assert(hwloc_obj_is_in_subtree(obj, cache));
+  assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
   /* check the cache above two nearby cpus */
 #define CPUINDEX1 180
@@ -53,7 +53,7 @@ int main()
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX1/2/3);
   assert(cache->logical_index == CPUINDEX2/2/3);
-  assert(hwloc_obj_is_in_subtree(obj, cache));
+  assert(hwloc_obj_is_in_subtree(topology, obj, cache));
 
   /* check no cache above two distant cpus */
 #undef CPUINDEX1

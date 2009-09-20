@@ -65,9 +65,9 @@ main (int argc, char *argv[])
   assert(closest[found/2/3-1] == hwloc_get_obj_by_depth(topology, info.depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
 
   /* get ancestor of last and less close object */
-  hwloc_obj_t ancestor = hwloc_get_common_ancestor_obj(last, closest[found-1]);
-  assert(hwloc_obj_is_in_subtree(last, ancestor));
-  assert(hwloc_obj_is_in_subtree(closest[found-1], ancestor));
+  hwloc_obj_t ancestor = hwloc_get_common_ancestor_obj(topology, last, closest[found-1]);
+  assert(hwloc_obj_is_in_subtree(topology, last, ancestor));
+  assert(hwloc_obj_is_in_subtree(topology, closest[found-1], ancestor));
   assert(ancestor == hwloc_get_system_obj(topology));
   printf("ancestor type %u depth %u number %u is system level\n",
 	 ancestor->type, ancestor->depth, ancestor->logical_index);
