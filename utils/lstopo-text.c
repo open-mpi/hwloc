@@ -103,8 +103,8 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
   }
 
   if (verbose_mode > 1)
-    if (!info.is_local)
-      fprintf (output, "Topology not from local machine\n");
+    if (!info.is_thissystem)
+      fprintf (output, "Topology not from this system\n");
 
   fclose(output);
 }

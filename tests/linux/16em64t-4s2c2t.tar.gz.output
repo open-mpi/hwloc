@@ -54,4 +54,4 @@ depth 0:	1 System (type #0)
     depth 4:	8 Caches (type #4)
      depth 5:	8 Cores (type #5)
       depth 6:	16 Procs (type #6)
-Topology not from local machine
+Topology not from this system

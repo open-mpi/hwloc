@@ -30,4 +30,4 @@ depth 0:	1 System (type #0)
     depth 4:	4 Caches (type #4)
      depth 5:	4 Cores (type #5)
       depth 6:	4 Procs (type #6)
-Topology not from local machine
+Topology not from this system

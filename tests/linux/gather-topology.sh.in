@@ -49,8 +49,8 @@ then
     error "Could not find executable file \`$lstopo'."
     exit 1
 fi
-# we need "Topology not from local machine" in the output so as to make test-topology.sh happy
-export HWLOC_LOCAL=0
+# we need "Topology not from this system" in the output so as to make test-topology.sh happy
+export HWLOC_THISSYSTEM=0
 "$lstopo" - -v > "./$name.tar.gz.output"
 echo "Expected topology output stored in ./$name.tar.gz.output"
 

@@ -1058,7 +1058,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   /* Setup topology context */
   topology->is_loaded = 0;
   topology->flags = 0;
-  topology->is_local = 1;
+  topology->is_thissystem = 1;
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
   topology->set_cpubind = NULL;
   topology->set_proc_cpubind = NULL;
@@ -1243,9 +1243,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
   hwloc_discover(topology);
 
-  char *local_env = getenv("HWLOC_LOCAL");
+  char *local_env = getenv("HWLOC_THISSYSTEM");
   if (local_env)
-    topology->is_local = atoi(local_env);
+    topology->is_thissystem = atoi(local_env);
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))
@@ -1260,7 +1260,7 @@ int
 hwloc_topology_get_info(struct hwloc_topology *topology, struct hwloc_topology_info *info)
 {
   info->depth = topology->nb_levels;
-  info->is_local = topology->is_local;
+  info->is_thissystem = topology->is_thissystem;
   return 0;
 }
 

@@ -26,7 +26,7 @@ Doc
 
 * document all environment variables properly
 * explain how to switch to a XML-saved topology to improve startup time
-  without disabling the is_local flag
+  without disabling the is_thissystem flag
 
 * add examples for (example dir?)
   + finding all nodes near a cpuset

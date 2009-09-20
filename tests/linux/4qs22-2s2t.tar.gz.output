@@ -8,4 +8,4 @@ System(15GB HP=0*16384kB  )
 depth 0:	1 System (type #0)
  depth 1:	2 NUMANodes (type #2)
   depth 2:	4 Procs (type #6)
-Topology not from local machine
+Topology not from this system
