@@ -218,7 +218,7 @@ hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_pat
     return -1;
 
   if (strcmp(fsroot_path, "/"))
-    topology->is_fake = 1;
+    topology->is_local = 0;
 
   topology->backend_params.sysfs.root_fd = root;
 #else
@@ -932,7 +932,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
   hwloc_cpuset_zero(&admin_disabled_cpus_set);
   hwloc_cpuset_zero(&admin_disabled_mems_set);
 
-  if (!topology->is_fake) {
+  if (topology->is_local) {
     topology->set_cpubind = hwloc_linux_set_cpubind;
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
     topology->set_thread_cpubind = hwloc_linux_set_thread_cpubind;

@@ -146,7 +146,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 
   topology->backend_type = HWLOC_BACKEND_SYNTHETIC;
   topology->backend_params.synthetic.arity[count-1] = 0;
-  topology->is_fake = 1;
+  topology->is_local = 0;
 
   return 0;
 }

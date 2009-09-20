@@ -41,7 +41,7 @@ struct hwloc_topology {
   unsigned long flags;
   int type_depth[HWLOC_OBJ_TYPE_MAX];
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
-  int is_fake;
+  int is_local;
   int is_loaded;
 
   int (*set_cpubind)(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict);

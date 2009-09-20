@@ -29,7 +29,7 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
     return -1;
 
   topology->backend_params.xml.doc = doc;
-  topology->is_fake = 1;
+  topology->is_local = 0;
   topology->backend_type = HWLOC_BACKEND_XML;
   return 0;
 }

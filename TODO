@@ -2,11 +2,6 @@ advertise how to change the max numb of cpus
 
 API
 
-* in hwloc_topology_info, rename "is_fake" into something else
-  (it means "this topology does not come from the local machine"
-   but it's not necessarily "fake")
-  + rename TOPO_FAKE as well
-
 * Do we actually need hwloc_get_type_order() or would hwloc_compare_types() be enough?
 
 * _above_cpuset() and _below_cpuset() function names are not very clear.
@@ -35,7 +30,7 @@ Doc
 
 * document all environment variables properly
 * explain how to switch to a XML-saved topology to improve startup time
-  without enabling the fake flag
+  without disabling the is_local flag
 
 * add examples for (example dir?)
   + finding all nodes near a cpuset

@@ -44,8 +44,8 @@ struct hwloc_topology_info {
   /** \brief topology size */
   unsigned depth;
 
-  /** \brief set if the topology is different from the actual underlying machine */
-  int is_fake;
+  /** \brief set if the topology comes from the actual underlying machine */
+  int is_local;
 };
 
 /** @} */
@@ -306,8 +306,8 @@ extern int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long fl
  *
  * On Linux system, use sysfs and procfs files as if they were mounted on the given
  * \p fsroot_path instead of the main file-system root.
- * Not using the main file-system root causes the is_fake field of the hwloc_topology_info
- * structure to be set.
+ * Not using the main file-system root causes the is_local field of the hwloc_topology_info
+ * structure to be unset.
  */
 extern int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
 
