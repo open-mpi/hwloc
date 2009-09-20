@@ -58,7 +58,8 @@ static void usage(char *name, FILE *where)
 #endif /* HAVE_XML */
 		  "\n");
   fprintf (where, "\nOptions:\n");
-  fprintf (where, "   -v --verbose        enable the verbose mode (disabled by default)\n");
+  fprintf (where, "   -v --verbose          increase verbosity (disabled by default)\n");
+  fprintf (where, "   -s --silent           decrease verbosity\n");
   fprintf (where, "   --no-caches           do not show caches\n");
   fprintf (where, "   --no-useless-caches   do not show caches which do not have a hierarchical\n"
                   "                         impact\n");
@@ -83,7 +84,7 @@ int
 main (int argc, char *argv[])
 {
   int err;
-  int verbose_mode = 0;
+  int verbose_mode = 1;
   hwloc_topology_t topology;
   char *filename = NULL;
   unsigned long flags = 0;
@@ -109,7 +110,9 @@ main (int argc, char *argv[])
     {
       opt = 0;
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
-	verbose_mode = 1;
+	verbose_mode++;
+      else if (!strcmp (argv[1], "-s") || !strcmp (argv[1], "--silent"))
+	verbose_mode--;
       else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);

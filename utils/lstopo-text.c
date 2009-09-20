@@ -44,7 +44,7 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
   const char * indexprefix = "#";
   char line[256];
 
-  if (!verbose_mode
+  if (verbose_mode <= 1
       && parent && parent->arity == 1 && hwloc_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
     /* in non-verbose mode, merge objects with their parent is they are exactly identical */
     fprintf(output, " + ");
@@ -54,7 +54,7 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
     indent (output, 2*i);
     i++;
   }
-  hwloc_obj_snprintf (line, sizeof(line), topology, l, indexprefix, verbose_mode);
+  hwloc_obj_snprintf (line, sizeof(line), topology, l, indexprefix, verbose_mode-1);
   fprintf(output, line);
   if (l->arity || (!i && !l->arity))
     {
@@ -65,6 +65,7 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
 
 void output_console(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
+  struct hwloc_topology_info info;
   FILE *output;
 
   if (!filename || !strcmp(filename, "-"))
@@ -77,26 +78,33 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
     }
   }
 
-  output_topology (topology, hwloc_get_system_obj(topology), NULL, output, 0, verbose_mode);
-  fprintf(output, "\n");
+  hwloc_topology_get_info(topology, &info);
 
-  if (verbose_mode)
-    {
-      struct hwloc_topology_info info;
-      unsigned depth;
+  /*
+   * if verbose_mode == 0, only print the summary.
+   * if verbose_mode == 1, only print the topology tree.
+   * if verbose_mode > 1, print both.
+   */
 
-      hwloc_topology_get_info(topology, &info);
-      if (info.is_fake)
-	fprintf (output, "Topology is fake\n");
+  if (verbose_mode >= 1) {
+    output_topology (topology, hwloc_get_system_obj(topology), NULL, output, 0, verbose_mode);
+    fprintf(output, "\n");
+  }
 
-      for (depth = 0; depth < info.depth; depth++) {
-	hwloc_obj_type_t type = hwloc_get_depth_type (topology, depth);
-	unsigned nbobjs = hwloc_get_nbobjs_by_depth (topology, depth);
-	indent(output, depth);
-	fprintf (output, "depth %d:\t%u %s%s (type #%u)\n",
-		 depth, nbobjs, hwloc_obj_type_string (type), nbobjs>1?"s":"", type);
-      }
+  if (verbose_mode > 1 || !verbose_mode) {
+    unsigned depth;
+    for (depth = 0; depth < info.depth; depth++) {
+      hwloc_obj_type_t type = hwloc_get_depth_type (topology, depth);
+      unsigned nbobjs = hwloc_get_nbobjs_by_depth (topology, depth);
+      indent(output, depth);
+      fprintf (output, "depth %d:\t%u %s%s (type #%u)\n",
+	       depth, nbobjs, hwloc_obj_type_string (type), nbobjs>1?"s":"", type);
     }
+  }
+
+  if (verbose_mode > 1)
+    if (info.is_fake)
+      fprintf (output, "Topology is fake\n");
 
   fclose(output);
 }
