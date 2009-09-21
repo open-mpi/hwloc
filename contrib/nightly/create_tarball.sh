@@ -237,12 +237,12 @@ if test -n "$desired_r"; then
 else
     # we don't have a desired r number, so get the last r number of a
     # commit
-    svn co -N "$svnroot" ompi > /dev/null 2>&1
-    cd ompi
+    svn co -N "$svnroot" hwloc > /dev/null 2>&1
+    cd hwloc
     # $svnr will be rXXXXX
     svnr="r`svn info . | egrep '^Last Changed Rev: [0-9]+' | awk '{ print $4 }'`"
     cd ..
-    rm -rf ompi
+    rm -rf hwloc
 fi
 if test -n "$debug"; then
     echo "** making snapshot for r: $svnr"
@@ -258,10 +258,10 @@ mkdir "$logdir"
 
 # checkout a clean version
 r=`echo $svnr | cut -c2-`
-do_command "svn co $svnroot -r $r ompi"
+do_command "svn co $svnroot -r $r hwloc"
 
 # ensure that we append the SVN number on the official version number
-cd ompi
+cd hwloc
 svnversion="r`svnversion .`"
 version_files="`find . -name VERSION`"
 for file in $version_files; do
@@ -271,21 +271,15 @@ for file in $version_files; do
     rm -f $file.new
 done
 
-# lie about our username in $USER so that autogen will skip all
-# .ompi_ignore'ed directories (i.e., so that we won't get 
-# .ompi_unignore'ed)
-USER="ompibuilder"
-export USER
-
 # autogen is our friend
 do_command "./autogen.sh"
 
 # do config
-do_command "./configure --enable-dist"
+do_command "./configure"
 
 # do make dist
 # distcheck does many things; we need to ensure it doesn't pick up any 
-# other OMPI installs via LD_LIBRARY_PATH.  It may be a bit Draconian
+# other installs via LD_LIBRARY_PATH.  It may be a bit Draconian
 # to totally clean LD_LIBRARY_PATH (i.e., we may need something in there),
 # but at least in the current building setup, we don't.  But be advised
 # that this may need to change in the future...
@@ -296,22 +290,22 @@ LD_LIBRARY_PATH=$save
 save=
 
 # move the resulting tarballs to the destdir
-gz="`/bin/ls openmpi*tar.gz`"
-bz2="`/bin/ls openmpi*tar.bz2`"
+gz="`/bin/ls hwloc*tar.gz`"
+bz2="`/bin/ls hwloc*tar.bz2`"
 mv $gz $bz2 $destdir
 cd $destdir
 
 # make the latest_snapshot.txt file containing the last version
-version="`echo $gz | sed -e 's/openmpi-\(.*\)\.tar\.gz/\1/g'`"
+version="`echo $gz | sed -e 's/hwloc-\(.*\)\.tar\.gz/\1/g'`"
 rm -f latest_snapshot.txt
 echo $version > latest_snapshot.txt
 
 # trim the destdir to $max_snapshots
 for ext in gz bz2; do
-    count="`ls openmpi*.tar.$ext | wc -l | awk '{ print $1 }'`"
+    count="`ls hwloc*.tar.$ext | wc -l | awk '{ print $1 }'`"
     if test "`expr $count \> $max_snapshots`" = "1"; then
         num_old="`expr $count - $max_snapshots`"
-        old="`ls -rt openmpi*.tar.$ext | head -n $num_old`"
+        old="`ls -rt hwloc*.tar.$ext | head -n $num_old`"
         rm -f $old
     fi
 done
