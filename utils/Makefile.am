@@ -10,11 +10,9 @@ bin_PROGRAMS = lstopo hwloc-mask hwloc-bind hwloc-distrib
 lstopo_SOURCES = lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-cairo.c lstopo-xml.c
 if HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
-else !HAVE_WINDOWS
-EXTRA_DIST += lstopo-windows.c
-endif !HAVE_WINDOWS
+endif
 lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS)
-lstopo_LDFLAGS = $(CAIRO_LIBS) $(XML_LIBS) -lm
+lstopo_LDADD = $(CAIRO_LIBS) $(XML_LIBS) -lm
 
 LIBS = $(top_builddir)/src/libhwloc.la
 
