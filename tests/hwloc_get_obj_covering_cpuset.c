@@ -10,7 +10,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* check hwloc_get_cpuset_covering_obj() */
+/* check hwloc_get_obj_covering_cpuset() */
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
 
@@ -33,7 +33,7 @@ int main()
   hwloc_topology_get_info(topology, &topoinfo);
 
   hwloc_cpuset_from_string(GIVEN_CPUSET_STRING, &set);
-  obj = hwloc_get_cpuset_covering_obj(topology, &set);
+  obj = hwloc_get_obj_covering_cpuset(topology, &set);
 
   assert(obj);
   fprintf(stderr, "found covering object type %s covering cpuset %s\n",
@@ -46,13 +46,13 @@ int main()
   assert(!strcmp(EXPECTED_CPUSET_STRING, string));
 
   hwloc_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING, &set);
-  obj = hwloc_get_cpuset_covering_obj(topology, &set);
+  obj = hwloc_get_obj_covering_cpuset(topology, &set);
   assert(obj == hwloc_get_system_obj(topology));
   fprintf(stderr, "found system as covering object of first+last cpus cpuset %s\n",
 	  GIVEN_LARGESPLIT_CPUSET_STRING);
 
   hwloc_cpuset_from_string(GIVEN_TOOLARGE_CPUSET_STRING, &set);
-  obj = hwloc_get_cpuset_covering_obj(topology, &set);
+  obj = hwloc_get_obj_covering_cpuset(topology, &set);
   assert(!obj);
   fprintf(stderr, "found no covering object for too-large cpuset %s\n",
 	  GIVEN_TOOLARGE_CPUSET_STRING);

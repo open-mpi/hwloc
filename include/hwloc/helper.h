@@ -275,7 +275,7 @@ hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, const hwloc_c
  * \return \c NULL if no child matches.
  */
 static inline hwloc_obj_t
-hwloc_get_cpuset_covering_child (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+hwloc_get_child_covering_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set,
 				hwloc_obj_t father)
 {
   hwloc_obj_t child = father->first_child;
@@ -292,7 +292,7 @@ hwloc_get_cpuset_covering_child (hwloc_topology_t topology, const hwloc_cpuset_t
  * \return \c NULL if no object matches.
  */
 static inline hwloc_obj_t
-hwloc_get_cpuset_covering_obj (hwloc_topology_t topology, const hwloc_cpuset_t *set)
+hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set)
 {
   struct hwloc_obj *current = hwloc_get_system_obj(topology);
 
@@ -300,7 +300,7 @@ hwloc_get_cpuset_covering_obj (hwloc_topology_t topology, const hwloc_cpuset_t *
     return NULL;
 
   while (1) {
-    hwloc_obj_t child = hwloc_get_cpuset_covering_child(topology, set, current);
+    hwloc_obj_t child = hwloc_get_child_covering_cpuset(topology, set, current);
     if (!child)
       return current;
     current = child;
@@ -367,9 +367,9 @@ hwloc_get_next_obj_covering_cpuset_by_type(hwloc_topology_t topology, const hwlo
  * \return \c NULL if no cache matches
  */
 static __inline__ hwloc_obj_t
-hwloc_get_cpuset_covering_cache (hwloc_topology_t topology, const hwloc_cpuset_t *set)
+hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set)
 {
-  hwloc_obj_t current = hwloc_get_cpuset_covering_obj(topology, set);
+  hwloc_obj_t current = hwloc_get_obj_covering_cpuset(topology, set);
   while (current) {
     if (current->type == HWLOC_OBJ_CACHE)
       return current;
@@ -383,7 +383,7 @@ hwloc_get_cpuset_covering_cache (hwloc_topology_t topology, const hwloc_cpuset_t
  * \return \c NULL if no cache matches
  */
 static __inline__ hwloc_obj_t
-hwloc_get_shared_cache_above (hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc_get_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t current = obj->father;
   while (current) {

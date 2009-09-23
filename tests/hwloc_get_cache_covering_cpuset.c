@@ -10,7 +10,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* check hwloc_get_cpuset_covering_cache() */
+/* check hwloc_get_cache_covering_cpuset() */
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
 
@@ -32,7 +32,7 @@ int main()
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
   hwloc_cpuset_orset(&set, &obj->cpuset);
-  cache = hwloc_get_cpuset_covering_cache(topology, &set);
+  cache = hwloc_get_cache_covering_cpuset(topology, &set);
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX/2/3);
@@ -48,7 +48,7 @@ int main()
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX2);
   assert(obj);
   hwloc_cpuset_orset(&set, &obj->cpuset);
-  cache = hwloc_get_cpuset_covering_cache(topology, &set);
+  cache = hwloc_get_cache_covering_cpuset(topology, &set);
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX1/2/3);
@@ -65,7 +65,7 @@ int main()
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX2);
   assert(obj);
   hwloc_cpuset_orset(&set, &obj->cpuset);
-  cache = hwloc_get_cpuset_covering_cache(topology, &set);
+  cache = hwloc_get_cache_covering_cpuset(topology, &set);
   assert(!cache);
 
   /* check no cache above higher level */
@@ -73,7 +73,7 @@ int main()
   obj = hwloc_get_obj_by_depth(topology, 2, 0);
   assert(obj);
   hwloc_cpuset_orset(&set, &obj->cpuset);
-  cache = hwloc_get_cpuset_covering_cache(topology, &set);
+  cache = hwloc_get_cache_covering_cpuset(topology, &set);
   assert(!cache);
 
   hwloc_topology_destroy(topology);

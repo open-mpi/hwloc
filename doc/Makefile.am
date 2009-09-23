@@ -213,9 +213,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_cache.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_child.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_child_covering_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_type.3 \
@@ -232,7 +232,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_order_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_above.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_type.3 \
