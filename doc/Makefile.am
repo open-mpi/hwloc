@@ -218,17 +218,17 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpuset_covering_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset_by_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_below_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_child.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_above_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_above_cpuset_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_below_cpuset_by_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_below_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_inside_cpuset_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_cpuset_by_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_cpuset_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_order_type.3 \
@@ -281,7 +281,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_covering.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_coverings.3 \
-        $(DOX_MAN_DIR)/man3/hwlocality_helper_find_includeds.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_find_inside.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal_basic.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_types.3 \

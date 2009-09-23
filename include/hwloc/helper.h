@@ -154,9 +154,16 @@ hwloc_obj_is_in_subtree (hwloc_topology_t topology, hwloc_obj_t obj, hwloc_obj_t
 
 
 
-/** \defgroup hwlocality_helper_find_includeds Finding similar Objects Included in a CPU set
+/** \defgroup hwlocality_helper_find_inside Finding Objects Inside a CPU set
  * @{
  */
+
+/** \brief Get the set of largest objects covering exactly a given cpuset \p set
+ *
+ * \return the number of objects returned in \p objs.
+ */
+extern int hwloc_get_largest_objs_inside_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+						 hwloc_obj_t * __hwloc_restrict objs, int max);
 
 /** \brief Return the next object at depth \p depth included in CPU set \p set.
  *
@@ -165,8 +172,8 @@ hwloc_obj_is_in_subtree (hwloc_topology_t topology, hwloc_obj_t obj, hwloc_obj_t
  * to obtain the next object in \p set.
  */
 static __inline__ hwloc_obj_t
-hwloc_get_next_obj_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc_cpuset_t *set,
-					 unsigned depth, hwloc_obj_t prev)
+hwloc_get_next_obj_inside_cpuset_by_depth (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+					   unsigned depth, hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
   while (next && !hwloc_cpuset_isincluded(&next->cpuset, set))
@@ -177,23 +184,23 @@ hwloc_get_next_obj_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc
 /** \brief Return the next object of type \p type included in CPU set \p set.
  *
  * If there are multiple or no depth for given type, return \c NULL and let the caller
- * fallback to hwloc_get_next_obj_below_cpuset_by_depth().
+ * fallback to hwloc_get_next_obj_inside_cpuset_by_depth().
  */
 static __inline__ hwloc_obj_t
-hwloc_get_next_obj_below_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
-				hwloc_obj_type_t type, hwloc_obj_t prev)
+hwloc_get_next_obj_inside_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+					  hwloc_obj_type_t type, hwloc_obj_t prev)
 {
   int depth = hwloc_get_type_depth(topology, type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return NULL;
-  return hwloc_get_next_obj_below_cpuset_by_depth(topology, set, depth, prev);
+  return hwloc_get_next_obj_inside_cpuset_by_depth(topology, set, depth, prev);
 }
 
 /** \brief Return the \p index -th object at depth \p depth included in CPU set \p set.
  */
 static __inline__ hwloc_obj_t
-hwloc_get_obj_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc_cpuset_t *set,
-				    unsigned depth, unsigned index)
+hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+				      unsigned depth, unsigned index)
 {
   int count = 0;
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
@@ -211,22 +218,22 @@ hwloc_get_obj_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc_cpus
 /** \brief Return the \p index -th object of type \p type included in CPU set \p set.
  *
  * If there are multiple or no depth for given type, return \c NULL and let the caller
- * fallback to hwloc_get_obj_below_cpuset_by_depth().
+ * fallback to hwloc_get_obj_inside_cpuset_by_depth().
  */
 static __inline__ hwloc_obj_t
-hwloc_get_obj_below_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
-			   hwloc_obj_type_t type, unsigned index)
+hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+				     hwloc_obj_type_t type, unsigned index)
 {
   int depth = hwloc_get_type_depth(topology, type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return NULL;
-  return hwloc_get_obj_below_cpuset_by_depth(topology, set, depth, index);
+  return hwloc_get_obj_inside_cpuset_by_depth(topology, set, depth, index);
 }
 
 /** \brief Return the number of objects at depth \p depth included in CPU set \p set. */
 static __inline__ unsigned
-hwloc_get_nbobjs_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc_cpuset_t *set,
-				       unsigned depth)
+hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+					 unsigned depth)
 {
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   int count = 0;
@@ -240,19 +247,19 @@ hwloc_get_nbobjs_below_cpuset_by_depth (hwloc_topology_t topology, const hwloc_c
 
 /** \brief Return the number of objects of type \p type included in CPU set \p set.
  *
- * If no object for that type exists below CPU set \p set, 0 is returned.
- * If there are several levels with objects of that type below CPU set \p set, -1 is returned.
+ * If no object for that type exists inside CPU set \p set, 0 is returned.
+ * If there are several levels with objects of that type inside CPU set \p set, -1 is returned.
  */
 static __inline__ int
-hwloc_get_nbobjs_below_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
-			      hwloc_obj_type_t type)
+hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+					hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
     return 0;
   if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return -1; /* FIXME: agregate nbobjs from different levels? */
-  return hwloc_get_nbobjs_below_cpuset_by_depth(topology, set, depth);
+  return hwloc_get_nbobjs_inside_cpuset_by_depth(topology, set, depth);
 }
 
 /** @} */
@@ -395,13 +402,6 @@ hwloc_get_shared_cache_above (hwloc_topology_t topology, hwloc_obj_t obj)
 /** \defgroup hwlocality_helper_traversal Advanced Traversal Helpers
  * @{
  */
-
-/** \brief Get the set of largest objects covering exactly a given cpuset \p set
- *
- * \return the number of objects returned in \p objs.
- */
-extern int hwloc_get_largest_objs_inside_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set,
-						 hwloc_obj_t * __hwloc_restrict objs, int max);
 
 /** \brief Do a depth-first traversal of the topology to find and sort
  *

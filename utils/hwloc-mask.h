@@ -135,7 +135,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *
     if (wrap && i==width)
       i = 0;
 
-    obj = hwloc_get_obj_below_cpuset_by_depth(topology, rootset, depth, i);
+    obj = hwloc_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i);
     if (verbose) {
       if (obj)
 	printf("object #%u depth %u below cpuset %" HWLOC_PRIxCPUSET " found\n",

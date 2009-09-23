@@ -30,7 +30,7 @@ Makefile
 /tests/hwloc_synthetic
 /tests/hwloc_get_largest_objs_inside_cpuset
 /tests/hwloc_get_cpuset_covering_cache
-/tests/hwloc_get_obj_below_cpuset
+/tests/hwloc_get_obj_inside_cpuset
 /tests/hwloc_get_closest_objs
 /tests/hwloc_cpuset_string
 /tests/hwloc_object_userdata
