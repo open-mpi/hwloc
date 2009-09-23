@@ -42,7 +42,7 @@ hwloc_hpux_find_ldom(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set)
   if (!has_numa)
     return -1;
 
-  n = hwloc_get_cpuset_objs(topology, hwloc_set, objs, 2);
+  n = hwloc_get_largest_objs_inside_cpuset(topology, hwloc_set, objs, 2);
   if (n > 1 || objs[0]->type != HWLOC_OBJ_NODE) {
     /* Does not correspond to exactly one node */
     return -1;

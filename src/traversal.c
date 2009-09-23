@@ -79,8 +79,8 @@ int hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *s
 }
 
 static int
-hwloc__get_cpuset_objs (struct hwloc_obj *current, const hwloc_cpuset_t *set,
-		       struct hwloc_obj ***res, int *max)
+hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, const hwloc_cpuset_t *set,
+				       struct hwloc_obj ***res, int *max)
 {
   int gotten = 0;
   int i;
@@ -104,7 +104,7 @@ hwloc__get_cpuset_objs (struct hwloc_obj *current, const hwloc_cpuset_t *set,
     if (hwloc_cpuset_iszero(&subset))
       continue;
 
-    ret = hwloc__get_cpuset_objs (current->children[i], &subset, res, max);
+    ret = hwloc__get_largest_objs_inside_cpuset (current->children[i], &subset, res, max);
     gotten += ret;
 
     /* if no more room to store remaining objects, return what we got so far */
@@ -116,8 +116,8 @@ hwloc__get_cpuset_objs (struct hwloc_obj *current, const hwloc_cpuset_t *set,
 }
 
 int
-hwloc_get_cpuset_objs (struct hwloc_topology *topology, const hwloc_cpuset_t *set,
-		      struct hwloc_obj **objs, int max)
+hwloc_get_largest_objs_inside_cpuset (struct hwloc_topology *topology, const hwloc_cpuset_t *set,
+				      struct hwloc_obj **objs, int max)
 {
   struct hwloc_obj *current = topology->levels[0][0];
 
@@ -127,7 +127,7 @@ hwloc_get_cpuset_objs (struct hwloc_topology *topology, const hwloc_cpuset_t *se
   if (max <= 0)
     return 0;
 
-  return hwloc__get_cpuset_objs (current, set, &objs, &max);
+  return hwloc__get_largest_objs_inside_cpuset (current, set, &objs, &max);
 }
 
 const char *

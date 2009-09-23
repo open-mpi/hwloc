@@ -39,7 +39,7 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     return 0;
   }
 
-  n = hwloc_get_cpuset_objs(topology, hwloc_set, objs, 2);
+  n = hwloc_get_largest_objs_inside_cpuset(topology, hwloc_set, objs, 2);
   if (n > 1 || objs[0]->os_level == -1) {
     /* Does not correspond to exactly one radset, not possible */
     errno = EXDEV;

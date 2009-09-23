@@ -396,12 +396,12 @@ hwloc_get_shared_cache_above (hwloc_topology_t topology, hwloc_obj_t obj)
  * @{
  */
 
-/** \brief Get the set of highest objects covering exactly a given cpuset \p set
+/** \brief Get the set of largest objects covering exactly a given cpuset \p set
  *
  * \return the number of objects returned in \p objs.
  */
-extern int hwloc_get_cpuset_objs (hwloc_topology_t topology, const hwloc_cpuset_t *set,
-				 hwloc_obj_t * __hwloc_restrict objs, int max);
+extern int hwloc_get_largest_objs_inside_cpuset (hwloc_topology_t topology, const hwloc_cpuset_t *set,
+						 hwloc_obj_t * __hwloc_restrict objs, int max);
 
 /** \brief Do a depth-first traversal of the topology to find and sort
  *
