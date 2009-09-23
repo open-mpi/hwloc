@@ -59,8 +59,7 @@ struct hwloc_topology_info {
 /** \brief Type of topology object.
  *
  * Do not rely on the ordering of the values as new ones may be defined in the
- * future!  If you need to compare types, use the value returned by
- * hwloc_get_type_order() instead.
+ * future!  If you need to compare types, use hwloc_compare_types() instead.
  */
 typedef enum {
   HWLOC_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
@@ -107,23 +106,17 @@ typedef enum {
 /** \brief Maximal value of an object type */
 #define HWLOC_OBJ_TYPE_MAX (HWLOC_OBJ_MISC+1)
 
-/** \brief Convert an object type into a number that permits to compare them
+/** \brief Compare the depth of two object types
  *
  * Types shouldn't be compared as they are, since newer ones may be added in
- * the future.  This function returns an integer value that can be used
- * instead.
+ * the future.  This function returns less than, equal to, or greater than zero
+ * if \p type1 is considered to be respectively higher than, equal to, or deeper
+ * than \p type2 in the hierarchy.
  *
- * \note hwloc_get_type_order(HWLOC_OBJ_SYSTEM) will always be the lowest
- * value, and hwloc_get_type_order(HWLOC_OBJ_PROC) will always be the highest
- * value.
+ * \note that HWLOC_OBJ_SYSTEM will always be the highest, and
+ * HWLOC_OBJ_PROC will always be the deepest.
  */
-int hwloc_get_type_order(hwloc_obj_type_t type);
-
-/** \brief Converse of hwloc_get_type_oder()
- *
- * This is the converse of hwloc_get_type_order().
- */
-hwloc_obj_type_t hwloc_get_order_type(int order);
+int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2);
 
 /** @} */
 

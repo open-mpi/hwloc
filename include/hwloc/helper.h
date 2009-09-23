@@ -30,14 +30,13 @@ static __inline__ unsigned
 hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
-  unsigned minorder = hwloc_get_type_order(type);
 
   if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
     return depth;
 
   /* find the highest existing level with type order >= */
   for(depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PROC); ; depth--)
-    if (hwloc_get_type_order(hwloc_get_depth_type(topology, depth)) < minorder)
+    if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) < 0)
       return depth+1;
 
   /* Shouldn't ever happen, as there is always a SYSTEM level with lower order and known depth.  */
@@ -54,14 +53,13 @@ static __inline__ unsigned
 hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
-  unsigned maxorder = hwloc_get_type_order(type);
 
   if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
     return depth;
 
   /* find the lowest existing level with type order <= */
   for(depth = 0; ; depth++)
-    if (hwloc_get_type_order(hwloc_get_depth_type(topology, depth)) > maxorder)
+    if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) > 0)
       return depth-1;
 
   /* Shouldn't ever happen, as there is always a PROC level with higher order and known depth.  */

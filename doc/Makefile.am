@@ -171,6 +171,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
         $(DOX_MAN_DIR)/man3/hwloc.doxy.3 \
         $(DOX_MAN_DIR)/man3/hwloc.h.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpubind_policy_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_all_but_cpu.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_andset.3 \
@@ -231,7 +232,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_order_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
@@ -239,7 +239,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_type_order.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_u.3 \

@@ -425,22 +425,27 @@ static const hwloc_obj_type_t obj_order_type[] = {
   [7] = HWLOC_OBJ_PROC,
 };
 
-int hwloc_get_type_order(hwloc_obj_type_t type)
+static int hwloc_get_type_order(hwloc_obj_type_t type)
 {
   return obj_type_order[type];
 }
 
-hwloc_obj_type_t hwloc_get_order_type(int order)
+static hwloc_obj_type_t hwloc_get_order_type(int order)
 {
   return obj_order_type[order];
+}
+
+int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
+{
+  return hwloc_get_type_order(type1) - hwloc_get_type_order(type2);
 }
 
 static enum hwloc_type_cmp_e
 hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (hwloc_get_type_order(obj1->type) > hwloc_get_type_order(obj2->type))
+  if (hwloc_compare_types(obj1->type, obj2->type) > 0)
     return HWLOC_TYPE_DEEPER;
-  if (hwloc_get_type_order(obj1->type) < hwloc_get_type_order(obj2->type))
+  if (hwloc_compare_types(obj1->type, obj2->type) < 0)
     return HWLOC_TYPE_HIGHER;
 
   /* Caches have the same types but can have different depths.  */

@@ -2,8 +2,6 @@ advertise how to change the max numb of cpus
 
 API
 
-* Do we actually need hwloc_get_type_order() or would hwloc_compare_types() be enough?
-
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
