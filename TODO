@@ -4,12 +4,6 @@ API
 
 * Do we actually need hwloc_get_type_order() or would hwloc_compare_types() be enough?
 
-* _above_cpuset() and _below_cpuset() function names are not very clear.
-  "inside" may be better that "below" (and rename get_cpuset_objs into
-  get_objs_inside_cpuset as well and move it nearby).
-  maybe use "covering" instead of "above" since we already have
-  "covering" somewhere else?
-
 * topomask: add an option to request a cpuset containing of n close entries
   among the generated cpuset
 
@@ -21,8 +15,6 @@ Doc
 ===
 * complete doc
 * automatically generate the pngs?
-
-* replace __hwloc_restrict everywhere in the manpages?
 
 * document all environment variables properly
 * explain how to switch to a XML-saved topology to improve startup time
@@ -65,9 +57,8 @@ Support
 
 * parallelize the discovery ? :)
 
-* why make dist needs make first?
-
 * Add measurement-based backend
+* Add (x86) cpuid backend to quickly workaround kernel bugs?
 
 Binding
 =======
@@ -111,3 +102,6 @@ QNX:
 
 BSD:
    sys/sched.h: sched_bind/sched_unbind, but that's in-kernel only for now.
+
+Cray Catamount?
+
