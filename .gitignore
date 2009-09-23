@@ -35,7 +35,7 @@ Makefile
 /tests/hwloc_cpuset_string
 /tests/hwloc_object_userdata
 /tests/hwloc_cpuset_first_last_weight
-/tests/hwloc_get_next_obj_above_cpuset
+/tests/hwloc_get_next_obj_covering_cpuset
 /tests/hwloc_cpuset_singlify
 /tests/hwloc_bind
 /tests/linux-libnuma

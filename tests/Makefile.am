@@ -9,7 +9,7 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_get_cpuset_covering_obj \
 	hwloc_get_cpuset_covering_cache \
 	hwloc_get_largest_objs_inside_cpuset \
-	hwloc_get_next_obj_above_cpuset \
+	hwloc_get_next_obj_covering_cpuset \
 	hwloc_get_obj_inside_cpuset \
 	hwloc_get_shared_cache_above \
 	hwloc_cpuset_first_last_weight \

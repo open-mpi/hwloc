@@ -324,8 +324,8 @@ hwloc_get_cpuset_covering_obj (hwloc_topology_t topology, const hwloc_cpuset_t *
  * to obtain the next object covering at least another part of \p set.
  */
 static __inline__ hwloc_obj_t
-hwloc_get_next_obj_above_cpuset_by_depth(hwloc_topology_t topology, const hwloc_cpuset_t *set,
-					unsigned depth, hwloc_obj_t prev)
+hwloc_get_next_obj_covering_cpuset_by_depth(hwloc_topology_t topology, const hwloc_cpuset_t *set,
+					    unsigned depth, hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
   while (next && !hwloc_cpuset_intersects(set, &next->cpuset))
@@ -341,17 +341,17 @@ hwloc_get_next_obj_above_cpuset_by_depth(hwloc_topology_t topology, const hwloc_
  * to obtain the next object of type \p type covering at least another part of \p set.
  *
  * If there are no or multiple depths for type \p type, \c NULL is returned.
- * The caller may fallback to hwloc_get_next_obj_above_cpuset_by_depth()
+ * The caller may fallback to hwloc_get_next_obj_covering_cpuset_by_depth()
  * for each depth.
  */
 static __inline__ hwloc_obj_t
-hwloc_get_next_obj_above_cpuset_by_type(hwloc_topology_t topology, const hwloc_cpuset_t *set,
-			       hwloc_obj_type_t type, hwloc_obj_t prev)
+hwloc_get_next_obj_covering_cpuset_by_type(hwloc_topology_t topology, const hwloc_cpuset_t *set,
+					   hwloc_obj_type_t type, hwloc_obj_t prev)
 {
   int depth = hwloc_get_type_depth(topology, type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return NULL;
-  return hwloc_get_next_obj_above_cpuset_by_depth(topology, set, depth, prev);
+  return hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, prev);
 }
 
 /** @} */

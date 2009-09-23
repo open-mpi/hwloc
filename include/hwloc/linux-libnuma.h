@@ -46,7 +46,7 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, const hwloc_cpus
     mask[i] = 0;
 
   if (nbnodes) {
-    while ((node = hwloc_get_next_obj_above_cpuset_by_depth(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL) {
+    while ((node = hwloc_get_next_obj_covering_cpuset_by_depth(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL) {
       if (node->os_index >= *maxnode)
 	break;
       mask[node->os_index/HWLOC_BITS_PER_LONG] |= 1 << (node->os_index % HWLOC_BITS_PER_LONG);
@@ -128,7 +128,7 @@ hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, const hwloc_cpu
     bitmask = numa_bitmask_alloc(nbnodes);
     if (!bitmask)
       return NULL;
-    while ((node = hwloc_get_next_obj_above_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL)
+    while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL)
       numa_bitmask_setbit(bitmask, node->os_index);
 
   } else {
@@ -200,7 +200,7 @@ hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, const hwloc_cp
 
   nodemask_zero(nodemask);
   if (nbnodes) {
-    while ((node = hwloc_get_next_obj_above_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL)
+    while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL)
       nodemask_set(nodemask, node->os_index);
 
   } else {
