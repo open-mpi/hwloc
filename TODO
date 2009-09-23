@@ -58,7 +58,8 @@ Support
 * parallelize the discovery ? :)
 
 * Add measurement-based backend
-* Add (x86) cpuid backend to quickly workaround kernel bugs?
+* Add (x86) cpuid backend to quickly workaround kernel bugs and enhance support
+  of OSes which don't provide many details?
 
 Binding
 =======
