@@ -136,6 +136,7 @@ struct hwloc_obj {
   /* physical information */
   hwloc_obj_type_t type;		/**< \brief Type of object */
   signed os_index;			/**< \brief OS-provided physical index number */
+  char *name;				/**< \brief Object description if any */
 
   /** \brief Object type-specific Attributes */
   union hwloc_obj_attr_u *attr;
