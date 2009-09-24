@@ -191,7 +191,8 @@ hwloc_obj_snprintf(char *string, size_t size,
 		      hwloc_memory_size_printf_value(l->attr->system.memory_kB),
 		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB),
 		      l->attr->system.huge_page_free, l->attr->system.huge_page_size_kB,
-		      l->attr->system.dmi_board_vendor?:"", l->attr->system.dmi_board_name?:"");
+		      l->attr->system.dmi_board_vendor?l->attr->system.dmi_board_vendor:"",
+		      l->attr->system.dmi_board_name?l->attr->system.dmi_board_name:"");
     else
       return snprintf(string, size, "%s(%lu%s)", hwloc_obj_type_string(type),
 		      hwloc_memory_size_printf_value(l->attr->system.memory_kB),
@@ -202,7 +203,8 @@ hwloc_obj_snprintf(char *string, size_t size,
 		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB),
 		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB),
 		      l->attr->machine.huge_page_free, l->attr->machine.huge_page_size_kB,
-		      l->attr->machine.dmi_board_vendor?:"", l->attr->machine.dmi_board_name?:"");
+		      l->attr->machine.dmi_board_vendor?l->attr->machine.dmi_board_vendor:"",
+		      l->attr->machine.dmi_board_name?l->attr->machine.dmi_board_name:"");
     else
       return snprintf(string, size, "%s%s(%lu%s)", hwloc_obj_type_string(type), os_index,
 		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB),
