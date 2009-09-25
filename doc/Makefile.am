@@ -290,7 +290,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_nodemask.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_objects.3 \
-        $(DOX_MAN_DIR)/man3/hwlocality_topology_info.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_traversal.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_types.3
 endif
