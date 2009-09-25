@@ -127,7 +127,7 @@ System(15GB)
       P#15
 \endcode
 
- On a 8-socket 2-core Opteron NUMA machine, the \c lstopo tool may
+ On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may
  show the following outputs:
 
 \image html hagrid.png
