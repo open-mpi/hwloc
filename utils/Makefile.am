@@ -2,6 +2,7 @@
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
 include $(top_srcdir)/hwloc.am
+include $(top_srcdir)/Makefile.man-page-rules
 
 EXTRA_DIST = lstopo.h hwloc-mask.h test-hwloc-distrib.output
 
@@ -21,26 +22,9 @@ else
 TESTS = test-hwloc-distrib.sh
 endif
 
-if HWLOC_INSTALL_UTILS_MAN
-dist_man1_MANS = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-mask.1
-MAINTAINERCLEANFILES = $(dist_man1_MANS)
-
-if HWLOC_HAVE_UTILS_MAN
-else
-  ifneq ($(HELP2MAN),)
-HWLOC_HELP2MAN=$(HELP2MAN) -m "Hardware Locality commands" -S "INRIA" -N 
-
-lstopo.1: lstopo
-	$(HWLOC_HELP2MAN) -n "Show the topology of the system" ./$^ -o $@
-hwloc-bind.1: hwloc-bind
-	$(HWLOC_HELP2MAN) -n "Bind a command to given objects or cpu masks" ./$^ -o $@
-hwloc-distrib.1: hwloc-distrib
-	$(HWLOC_HELP2MAN) -n "Build a number of cpu masks distributed on the system" ./$^ -o $@
-hwloc-mask.1: hwloc-mask
-	$(HWLOC_HELP2MAN) -n "Build a cpu mask" ./$^ -o $@
-  endif
-endif
-endif
+man_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-mask.1
+EXTRA_DIST += $(man_pages:.1=.1in)
+nodist_man_MANS = $(man_pages)
 
 install-exec-hook:
 	$(RM) $(DESTDIR)$(bindir)/hwloc-ls $(DESTDIR)$(bindir)/hwloc-info
@@ -50,3 +34,6 @@ install-exec-hook:
 uninstall-local:
 	$(RM) $(DESTDIR)$(bindir)/hwloc-ls 
 	$(RM) $(DESTDIR)$(bindir)/hwloc-info
+
+distclean-local:
+	rm -f $(man_pages)

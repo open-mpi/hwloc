@@ -1,0 +1,25 @@
+.\" -*- nroff -*-
+.TH HWLOC-BIND "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
+.SH NAME
+hwloc-bind \- Bind a command to given objects or cpu masks
+.SH SYNOPSIS
+.B topobind
+[\fIoptions\fR] \fI<location> -- command \fR...
+.SH DESCRIPTION
+.IP
+<location> may be a space\-separated list of cpusets or objects
+.IP
+as supported by the hwloc\-mask utility.
+.SH OPTIONS
+.TP
+\fB\-\-single\fR
+bind on a single CPU to prevent migration
+.TP
+\fB\-\-strict\fR
+require strict binding
+.TP
+\fB\-v\fR
+verbose messages
+.TP
+\fB\-\-version\fR
+report version and exit

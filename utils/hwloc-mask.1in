@@ -1,0 +1,62 @@
+.\" -*- nroff -*-
+.TH HWLOC-MASK "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
+.SH NAME
+hwloc-mask \- Build a cpu mask
+.SH SYNOPSIS
+.B hwloc-mask
+[\fIoptions\fR] [\fIstring\fR] ...
+.SH DESCRIPTION
+<string> may be <depth:index>
+.TP
+\-
+<depth> may be system, machine, node, socket, core, proc or a numeric depth
+.TP
+\-
+<index> may be
+.TP
+\&.
+X        one object with index X
+.TP
+\&.
+X\-Y      all objects with index between X and Y
+.TP
+\&.
+X\-       all objects with index at least X
+.TP
+\&.
+X:N      N objects starting with index X, possibly wrapping\-around the end of the level
+.TP
+\&.
+all      all objects
+.TP
+\&.
+odd      all objects with odd index
+.TP
+\&.
+even     all objects with even index
+.TP
+\-
+several <depth:index> may be concatenated with `.' to select some specific children
+.PP
+<string> may also be a cpuset string
+.PP
+If prefixed with `~', the given string will be cleared instead of added to the current cpuset
+If prefixed with `x', the given string will be and'ed instead of added to the current cpuset
+If prefixed with `^', the given string will be xor'ed instead of added to the current cpuset
+.PP
+String are processed in order, without priorities.
+Compose multiple invokations for complex operations.
+e.g. for (A|B)^(C|D), use: hwloc\-mask A B ^$(hwloc\-mask C D)
+.SH OPTIONS
+.TP
+\fB\-v\fR
+verbose
+.TP
+\fB\-\-proclist\fR
+report the list of processors in the CPU set
+.TP
+\fB\-\-nodelist\fR
+report the list of memory nodes near the CPU set
+.TP
+\fB\-\-version\fR
+report version and exit

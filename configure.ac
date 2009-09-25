@@ -33,8 +33,10 @@ HWLOC_MAJOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --majo
 HWLOC_MINOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --minor`"
 HWLOC_RELEASE_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release`"
 HWLOC_SVN_R="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --svn`"
+HWLOC_RELEASE_DATE="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release-date`"
 AC_SUBST(HWLOC_VERSION)
 AC_SUBST(HWLOC_SVN_R)
+AC_SUBST(HWLOC_RELEASE_DATE)
 AC_DEFINE_UNQUOTED([HWLOC_MAJOR_VERSION], [$HWLOC_MAJOR_VERSION],
     [Major version of hwloc])
 AC_DEFINE_UNQUOTED([HWLOC_MINOR_VERSION], [$HWLOC_MINOR_VERSION],
@@ -366,11 +368,6 @@ else
 fi
 
 AC_PATH_PROG([BASH], [bash])
-
-AC_PATH_PROG([HELP2MAN], [help2man])
-AC_CHECK_FILE(${srcdir}/utils/lstopo.1, [hwloc_have_utils_man=yes], [:])
-AM_CONDITIONAL([HWLOC_HAVE_UTILS_MAN], [test "x$hwloc_have_utils_man" = "xyes"])
-AM_CONDITIONAL([HWLOC_INSTALL_UTILS_MAN], [test "x$hwloc_have_utils_man" = "xyes" -o "x$HELP2MAN" != "x"])
 
 AC_CHECK_FUNCS([ffs], [
   AC_CHECK_DECL([ffs],[

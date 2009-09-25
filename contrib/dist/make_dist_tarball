@@ -87,6 +87,32 @@ make_tarball() {
     fi
 
     #
+    # Explicitly create the doxygen docs
+    #
+    echo "*** Making doxygen docs..."
+    cd doc
+    rm -rf doxygen-doc
+    rm -f success
+    (make doc 2>&1 && touch success) | tee config.out
+    if test ! -f success; then 
+        echo "Making doxygen docs failed.  Aborting"
+        exit 1
+    fi
+
+    #
+    # Explicitly create the README file
+    #
+    echo "*** Making README..."
+    rm -rf ../README
+    rm -f success
+    (make readme 2>&1 && touch success) | tee config.out
+    if test ! -f success; then 
+        echo "Making README failed.  Aborting"
+        exit 1
+    fi
+    cd ..
+
+    #
     # make tarball
     #
     echo "*** Running make distcheck..."
@@ -143,9 +169,11 @@ fi
 echo "*** Removing svn version numbers..."
 svn_r="r`svnversion .`"
 version_files="`find . -name VERSION`"
+release_date=`date '+%b %d, %Y'`
 for file in $version_files; do
     echo " - $file"
     sed -e 's/^want_svn=.*/want_svn=0/' \
+        -e "s/^date=.*/date=\"$release_date\"/" \
         -e 's/^svn_r=.*/'svn_r=$svn_r/ $file > $file.new
     cp -f $file.new $file
     rm $file.new
