@@ -1262,11 +1262,15 @@ hwloc_topology_load (struct hwloc_topology *topology)
 }
 
 int
-hwloc_topology_get_info(struct hwloc_topology *topology, struct hwloc_topology_info *info)
+hwloc_topology_is_thissystem(struct hwloc_topology *topology)
 {
-  info->depth = topology->nb_levels;
-  info->is_thissystem = topology->is_thissystem;
-  return 0;
+  return topology->is_thissystem;
+}
+
+unsigned
+hwloc_topology_get_depth(struct hwloc_topology *topology) 
+{
+  return topology->nb_levels;
 }
 
 
@@ -1308,17 +1312,15 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
 void
 hwloc_topology_check(struct hwloc_topology *topology)
 {
-  struct hwloc_topology_info info;
   struct hwloc_obj *obj;
   int i,j;
   hwloc_obj_type_t type;
+  unsigned depth;
 
   for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
     assert(hwloc_get_order_type(hwloc_get_type_order(type)) == type);
   for (i = hwloc_get_order_type(HWLOC_OBJ_SYSTEM); i <= hwloc_get_order_type(HWLOC_OBJ_CORE); i++)
     assert(hwloc_get_type_order(hwloc_get_order_type(i)) == i);
-
-  assert(hwloc_topology_get_info(topology, &info) >= 0);
 
   /* top-level specific checks */
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
@@ -1326,8 +1328,10 @@ hwloc_topology_check(struct hwloc_topology *topology)
   assert(obj);
   assert(obj->type == HWLOC_OBJ_SYSTEM);
 
+  depth = hwloc_topology_get_depth(topology);
+
   /* check each level */
-  for(i=0; i<info.depth; i++) {
+  for(i=0; i<depth; i++) {
     unsigned width = hwloc_get_nbobjs_by_depth(topology, i);
     struct hwloc_obj *prev = NULL;
 
@@ -1367,9 +1371,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
   }
 
   /* check bottom objects */
-  assert(hwloc_get_nbobjs_by_depth(topology, info.depth-1) > 0);
-  for(j=0; j<hwloc_get_nbobjs_by_depth(topology, info.depth-1); j++) {
-    obj = hwloc_get_obj_by_depth(topology, info.depth-1, j);
+  assert(hwloc_get_nbobjs_by_depth(topology, depth-1) > 0);
+  for(j=0; j<hwloc_get_nbobjs_by_depth(topology, depth-1); j++) {
+    obj = hwloc_get_obj_by_depth(topology, depth-1, j);
     assert(obj);
     assert(obj->type == HWLOC_OBJ_PROC);
     assert(obj->arity == 0);

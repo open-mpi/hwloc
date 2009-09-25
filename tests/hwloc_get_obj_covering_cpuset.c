@@ -22,7 +22,6 @@
 int main()
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info topoinfo;
   char string[HWLOC_CPUSET_STRING_LENGTH+1];
   hwloc_obj_t obj;
   hwloc_cpuset_t set;
@@ -30,7 +29,6 @@ int main()
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION);
   hwloc_topology_load(topology);
-  hwloc_topology_get_info(topology, &topoinfo);
 
   hwloc_cpuset_from_string(GIVEN_CPUSET_STRING, &set);
   obj = hwloc_get_obj_covering_cpuset(topology, &set);

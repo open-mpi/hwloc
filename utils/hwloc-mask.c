@@ -43,7 +43,7 @@ static void usage(FILE *where)
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info topoinfo;
+  unsigned depth;
   hwloc_cpuset_t set;
   int verbose = 0;
   int nodelist = 0;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
-  hwloc_topology_get_info(topology, &topoinfo);
+  depth = hwloc_topology_get_depth(topology);
 
   while (argc >= 2) {
     if (*argv[1] == '-') {
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    hwloc_mask_process_arg(topology, &topoinfo, argv[1], &set, verbose);
+    hwloc_mask_process_arg(topology, depth, argv[1], &set, verbose);
 
  next:
     argc--;

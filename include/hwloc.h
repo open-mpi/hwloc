@@ -25,7 +25,7 @@
 
 
 
-/** \defgroup hwlocality_topology_info Topology and Topology Info
+/** \defgroup hwlocality_topology Topology context
  * @{
  */
 
@@ -35,18 +35,6 @@ struct hwloc_topology;
  * To be initialized with hwloc_topology_init() and built with hwloc_topology_load().
  */
 typedef struct hwloc_topology * hwloc_topology_t;
-
-/** \brief Global information about a topology context,
- *
- * To be filled with hwloc_topology_get_info().
- */
-struct hwloc_topology_info {
-  /** \brief topology size */
-  unsigned depth;
-
-  /** \brief set if the topology comes from the actual underlying system */
-  int is_thissystem;
-};
 
 /** @} */
 
@@ -303,8 +291,8 @@ extern int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long fl
  *
  * On Linux system, use sysfs and procfs files as if they were mounted on the given
  * \p fsroot_path instead of the main file-system root.
- * Not using the main file-system root causes the is_thissystem field of the hwloc_topology_info
- * structure to be cleared.
+ * Not using the main file-system root causes hwloc_topology_is_thissystem field
+ * to return 0.
  */
 extern int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
 
@@ -333,12 +321,11 @@ extern int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, co
  * @{
  */
 
-/** \brief Get additional global information about the topology.
+/** \brief Get the depth of the hierachical tree of objects.
  *
- * Retrieve additional global information about a loaded topology context.
- * Might be useful if the whole topology depth is needed for instance.
+ * This is the depth of HWLOC_OBJ_PROC objects plus one.
  */
-extern int hwloc_topology_get_info(hwloc_topology_t  __hwloc_restrict topology, struct hwloc_topology_info * __hwloc_restrict info);
+extern unsigned hwloc_topology_get_depth(hwloc_topology_t  __hwloc_restrict topology);
 
 /** \brief Returns the depth of objects of type \p type.
  *
@@ -374,6 +361,15 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
 		return -1; /* FIXME: agregate nbobjs from different levels? */
 	return hwloc_get_nbobjs_by_depth(topology, depth);
 }
+
+/** \brief Does the topology context come from this system?
+ *
+ * \return 1 if this topology context was built using the system
+ * running this program.
+ * \return 0 instead (for instance if using another file-system root,
+ * a XML topology file, or a synthetic topology).
+ */
+extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology);
 
 /** @} */
 

@@ -23,7 +23,7 @@ int
 main (int argc, char *argv[])
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info info;
+  unsigned depth;
   hwloc_obj_t last;
   hwloc_obj_t *closest;
   int found;
@@ -40,13 +40,11 @@ main (int argc, char *argv[])
   if (err)
     return EXIT_FAILURE;
 
-  err = hwloc_topology_get_info(topology, &info);
-  if (err)
-    return EXIT_FAILURE;
+  depth = hwloc_topology_get_depth(topology);
 
   /* get the last object of last level */
-  numprocs =  hwloc_get_nbobjs_by_depth(topology, info.depth-1);
-  last = hwloc_get_obj_by_depth(topology, info.depth-1, numprocs-1);
+  numprocs =  hwloc_get_nbobjs_by_depth(topology, depth-1);
+  last = hwloc_get_obj_by_depth(topology, depth-1, numprocs-1);
 
   /* allocate the array of closest objects */
   closest = malloc(numprocs * sizeof(*closest));
@@ -58,11 +56,11 @@ main (int argc, char *argv[])
   assert(found == numprocs-1);
 
   /* check first found is closest */
-  assert(closest[0] == hwloc_get_obj_by_depth(topology, info.depth-1, numprocs-5 /* arity is 5 on last level */));
+  assert(closest[0] == hwloc_get_obj_by_depth(topology, depth-1, numprocs-5 /* arity is 5 on last level */));
   /* check some other expected positions */
-  assert(closest[found-1] == hwloc_get_obj_by_depth(topology, info.depth-1, 1*3*4*5-1 /* last of first half */));
-  assert(closest[found/2-1] == hwloc_get_obj_by_depth(topology, info.depth-1, 1*3*4*5+2*4*5-1 /* last of second third of second half */));
-  assert(closest[found/2/3-1] == hwloc_get_obj_by_depth(topology, info.depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
+  assert(closest[found-1] == hwloc_get_obj_by_depth(topology, depth-1, 1*3*4*5-1 /* last of first half */));
+  assert(closest[found/2-1] == hwloc_get_obj_by_depth(topology, depth-1, 1*3*4*5+2*4*5-1 /* last of second third of second half */));
+  assert(closest[found/2/3-1] == hwloc_get_obj_by_depth(topology, depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
 
   /* get ancestor of last and less close object */
   hwloc_obj_t ancestor = hwloc_get_common_ancestor_obj(topology, last, closest[found-1]);

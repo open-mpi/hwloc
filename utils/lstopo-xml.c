@@ -83,12 +83,9 @@ void output_xml(hwloc_topology_t topology, const char *filename, int verbose_mod
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
   xmlDtdPtr dtd = NULL;       /* DTD pointer */
-  struct hwloc_topology_info info;
 
   if (!strcasecmp(filename, "-.xml"))
     filename = "-";
-
-  hwloc_topology_get_info(topology, &info);
 
   LIBXML_TEST_VERSION;
 

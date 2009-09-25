@@ -15,7 +15,7 @@
 int main()
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info topoinfo;
+  unsigned depth;
   char string[HWLOC_CPUSET_STRING_LENGTH+1];
   hwloc_obj_t obj;
   hwloc_cpuset_t set;
@@ -23,7 +23,7 @@ int main()
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "6 5 4 3 2");
   hwloc_topology_load(topology);
-  hwloc_topology_get_info(topology, &topoinfo);
+  depth = hwloc_topology_get_depth(topology);
 
   obj = hwloc_get_system_obj(topology);
   hwloc_obj_cpuset_snprintf(string, sizeof(string), 1, &obj);
@@ -32,14 +32,14 @@ int main()
   assert(hwloc_cpuset_isequal(&set, &obj->cpuset));
   printf("system cpuset converted back and forth, ok\n");
 
-  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, 0);
+  obj = hwloc_get_obj_by_depth(topology, depth-1, 0);
   hwloc_obj_cpuset_snprintf(string, sizeof(string), 1, &obj);
   printf("first cpu cpuset is %s\n", string);
   hwloc_cpuset_from_string(string, &set);
   assert(hwloc_cpuset_isequal(&set, &obj->cpuset));
   printf("first cpu cpuset converted back and forth, ok\n");
 
-  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_nbobjs_by_depth(topology, topoinfo.depth-1) - 1);
+  obj = hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1) - 1);
   hwloc_obj_cpuset_snprintf(string, sizeof(string), 1, &obj);
   printf("last cpu cpuset is %s\n", string);
   hwloc_cpuset_from_string(string, &set);

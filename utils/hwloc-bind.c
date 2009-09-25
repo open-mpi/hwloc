@@ -27,7 +27,7 @@ static void usage(FILE *where)
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info topoinfo;
+  unsigned depth;
   hwloc_cpuset_t cpu_set; /* invalid until bind_cpus is set */
   int bind_cpus = 0;
   int single = 0;
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
-  hwloc_topology_get_info(topology, &topoinfo);
+  depth = hwloc_topology_get_depth(topology);
 
   /* skip argv[0], handle options */
   argv++;
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    hwloc_mask_process_arg(topology, &topoinfo, argv[0], &cpu_set, verbose);
+    hwloc_mask_process_arg(topology, depth, argv[0], &cpu_set, verbose);
     bind_cpus = 1;
 
   next:

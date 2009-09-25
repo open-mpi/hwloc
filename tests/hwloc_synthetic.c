@@ -15,7 +15,7 @@
 int main(void)
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info info;
+  unsigned depth;
   int i,j, width;
 
   /* check a synthetic topology */
@@ -28,8 +28,8 @@ int main(void)
   hwloc_topology_check(topology);
 
   /* local checks */
-  hwloc_topology_get_info(topology, &info);
-  assert(info.depth == 6);
+  depth = hwloc_topology_get_depth(topology);
+  assert(depth == 6);
 
   width = 1;
   for(i=0; i<6; i++) {

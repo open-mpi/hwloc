@@ -57,7 +57,7 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
 }
 
 static __inline__ int
-hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *topoinfo,
+hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 		       hwloc_cpuset_t *rootset, const char *string,
 		       hwloc_cpuset_t *set, hwloc_mask_append_mode_t mode, int verbose)
 {
@@ -82,7 +82,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *
   else
     depth = atoi(string);
 
-  if (depth >= topoinfo->depth) {
+  if (depth >= topodepth) {
     if (verbose)
       fprintf(stderr, "ignoring invalid depth %u\n", depth);
     return -1;
@@ -146,7 +146,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *
     }
     if (obj) {
       if (sep3)
-	hwloc_mask_append_object(topology, topoinfo, &obj->cpuset, sep3+1, set, mode, verbose);
+	hwloc_mask_append_object(topology, topodepth, &obj->cpuset, sep3+1, set, mode, verbose);
       else
         hwloc_mask_append_cpuset(set, &obj->cpuset, mode, verbose);
     }
@@ -156,7 +156,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, struct hwloc_topology_info *
 }
 
 static __inline__ void
-hwloc_mask_process_arg(hwloc_topology_t topology, struct hwloc_topology_info *topoinfo,
+hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		     const char *arg, hwloc_cpuset_t *set,
 		     int verbose)
 {
@@ -176,7 +176,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, struct hwloc_topology_info *to
 
   colon = strchr(arg, ':');
   if (colon) {
-    hwloc_mask_append_object(topology, topoinfo, &hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
+    hwloc_mask_append_object(topology, topodepth, &hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
   } else {
     hwloc_cpuset_t newset;
     hwloc_cpuset_zero(&newset);

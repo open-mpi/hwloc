@@ -33,15 +33,14 @@ int main(void)
 	/* Optionally, get some additional topology information
 	 * in case we need the topology depth later.
 	 */
-	struct hwloc_topology_info topoinfo;
-	hwloc_topology_get_info(topology, &topoinfo);
+	unsigned topodepth = hwloc_topology_get_depth(topology);
 
 
         /* Walk the topology with an array style, from level 0 (always the
          * system level) to the lowest level (always the proc level). */
 	int depth, i;
 	char string[128];
-	for (depth = 0; depth < topoinfo.depth; depth++) {
+	for (depth = 0; depth < topodepth; depth++) {
 		for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); i++) {
 			hwloc_obj_snprintf(string, sizeof(string), topology,
 					hwloc_get_obj_by_depth(topology, depth, i), "#", 0);

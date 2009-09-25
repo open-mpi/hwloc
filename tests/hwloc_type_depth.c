@@ -17,14 +17,12 @@
 int main()
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info topoinfo;
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION);
   hwloc_topology_load(topology);
-  hwloc_topology_get_info(topology, &topoinfo);
 
-  assert(topoinfo.depth == 7);
+  assert(hwloc_topology_get_depth(topology) == 7);
 
   assert(hwloc_get_depth_type(topology, 0) == HWLOC_OBJ_SYSTEM);
   assert(hwloc_get_depth_type(topology, 1) == HWLOC_OBJ_MACHINE);

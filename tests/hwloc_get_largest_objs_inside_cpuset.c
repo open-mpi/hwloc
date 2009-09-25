@@ -23,7 +23,7 @@
 int main()
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info topoinfo;
+  unsigned depth;
   hwloc_obj_t objs[OBJ_MAX];
   hwloc_obj_t obj;
   hwloc_cpuset_t set;
@@ -32,7 +32,7 @@ int main()
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION);
   hwloc_topology_load(topology);
-  hwloc_topology_get_info(topology, &topoinfo);
+  depth = hwloc_topology_get_depth(topology);
 
   /* just get the system object */
   obj = hwloc_get_system_obj(topology);
@@ -41,7 +41,7 @@ int main()
   assert(objs[0] == obj);
 
   /* just get the very last object */
-  obj = hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_nbobjs_by_depth(topology, topoinfo.depth-1)-1);
+  obj = hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1)-1);
   ret = hwloc_get_largest_objs_inside_cpuset(topology, &obj->cpuset, objs, 1);
   assert(ret == 1);
   assert(objs[0] == obj);
@@ -60,12 +60,12 @@ int main()
   hwloc_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING, &set);
   ret = hwloc_get_largest_objs_inside_cpuset(topology, &set, objs, 1);
   assert(ret == 1);
-  assert(objs[0] == hwloc_get_obj_by_depth(topology, topoinfo.depth-1, 0));
+  assert(objs[0] == hwloc_get_obj_by_depth(topology, depth-1, 0));
   /* try a harder one with lots of objs instead of 2 needed */
   ret = hwloc_get_largest_objs_inside_cpuset(topology, &set, objs, 2);
   assert(ret == 2);
-  assert(objs[0] == hwloc_get_obj_by_depth(topology, topoinfo.depth-1, 0));
-  assert(objs[1] == hwloc_get_obj_by_depth(topology, topoinfo.depth-1, hwloc_get_nbobjs_by_depth(topology, topoinfo.depth-1)-1));
+  assert(objs[0] == hwloc_get_obj_by_depth(topology, depth-1, 0));
+  assert(objs[1] == hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1)-1));
 
   /* try a very hard one */
   hwloc_cpuset_from_string(GIVEN_HARD_CPUSET_STRING, &set);

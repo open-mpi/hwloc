@@ -65,7 +65,7 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
 
 void output_console(hwloc_topology_t topology, const char *filename, int verbose_mode)
 {
-  struct hwloc_topology_info info;
+  unsigned topodepth;
   FILE *output;
 
   if (!filename || !strcmp(filename, "-"))
@@ -78,7 +78,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
     }
   }
 
-  hwloc_topology_get_info(topology, &info);
+  topodepth = hwloc_topology_get_depth(topology);
 
   /*
    * if verbose_mode == 0, only print the summary.
@@ -93,7 +93,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
 
   if (verbose_mode > 1 || !verbose_mode) {
     unsigned depth;
-    for (depth = 0; depth < info.depth; depth++) {
+    for (depth = 0; depth < topodepth; depth++) {
       hwloc_obj_type_t type = hwloc_get_depth_type (topology, depth);
       unsigned nbobjs = hwloc_get_nbobjs_by_depth (topology, depth);
       indent(output, depth);
@@ -103,7 +103,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
   }
 
   if (verbose_mode > 1)
-    if (!info.is_thissystem)
+    if (!hwloc_topology_is_thissystem(topology))
       fprintf (output, "Topology not from this system\n");
 
   fclose(output);

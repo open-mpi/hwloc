@@ -18,7 +18,6 @@ int
 main (int argc, char *argv[])
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info info;
   hwloc_obj_t obj, root;
   int err;
 
@@ -29,10 +28,6 @@ main (int argc, char *argv[])
   hwloc_topology_set_synthetic (topology, "nodes:2 sockets:3 caches:4 cores:5 6");
 
   err = hwloc_topology_load (topology);
-  if (err)
-    return EXIT_FAILURE;
-
-  err = hwloc_topology_get_info(topology, &info);
   if (err)
     return EXIT_FAILURE;
 

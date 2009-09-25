@@ -258,12 +258,13 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_get_info.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_all_keep_structure.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type_keep_structure.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_info.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_init.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_is_thissystem.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \

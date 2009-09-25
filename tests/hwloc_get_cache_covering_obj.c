@@ -18,13 +18,11 @@
 int main()
 {
   hwloc_topology_t topology;
-  struct hwloc_topology_info topoinfo;
   hwloc_obj_t obj, cache;
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION_SHARED);
   hwloc_topology_load(topology);
-  hwloc_topology_get_info(topology, &topoinfo);
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
@@ -54,7 +52,6 @@ int main()
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION_NONSHARED);
   hwloc_topology_load(topology);
-  hwloc_topology_get_info(topology, &topoinfo);
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
