@@ -113,13 +113,21 @@ AS_IF([test "x$DOXYGEN" != "x" -a "x$PDFLATEX" != "x" -a "x$MAKEINDEX" != "x" -a
              [generate_doxs=yes], [generate_doxs=no])
 AC_MSG_RESULT([$generate_doxs])
 
-# Making the top-level README requires w3m.
+# Making the top-level README requires w3m or lynx.
 AC_ARG_VAR([W3M], [Location of the w3m program (required to building the top-level hwloc README file)])
 AC_PATH_TOOL([W3M], [w3m])
+AC_ARG_VAR([LYNX], [Location of the lynx program (required to building the top-level hwloc README file)])
+AC_PATH_TOOL([LYNX], [lynx])
 
 AC_MSG_CHECKING([if can build top-level README])
-AS_IF([test "x$W3M" = "x"],
-      [generate_readme=no], [generate_readme=yes])
+AS_IF([test "x$W3M" != "x"],
+      [generate_readme=yes
+       W3_GENERATOR=$W3M],
+      [AS_IF([test "x$LYNX" != "x"],
+             [generate_readme=yes
+              W3_GENERATOR="$LYNX -dump -nolist"],
+             [generate_readme=no])])
+AC_SUBST(W3_GENERATOR)
 AC_MSG_RESULT([$generate_readme])
 
 # If any one of the above tools is missing, we will refuse to make dist.

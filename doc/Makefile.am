@@ -342,7 +342,7 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
 if BUILD_README
 doc readme: all $(top_srcdir)/README
 $(top_srcdir)/README: $(DOX_HTML_DIR)
-	LC_ALL=C $(W3M) $(DOX_HTML_DIR)/index.html | sed -n -e '/^Introduction$$/,$$p' > $@
+	LC_ALL=C $(W3_GENERATOR) $(DOX_HTML_DIR)/index.html | sed -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
 else
 doc readme: no-build-readme
 $(top_srcdir)/README: no-build-readme
