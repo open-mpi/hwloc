@@ -139,12 +139,6 @@ hwloc_look_hpux(struct hwloc_topology *topology)
   ldom_t currentnode;
   int i, nbnodes;
 
-  topology->set_cpubind = hwloc_hpux_set_cpubind;
-  topology->set_proc_cpubind = hwloc_hpux_set_proc_cpubind;
-  topology->set_thread_cpubind = hwloc_hpux_set_thread_cpubind;
-  topology->set_thisproc_cpubind = hwloc_hpux_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = hwloc_hpux_set_thisthread_cpubind;
-
   if (has_numa) {
     nbnodes = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETNUMLDOMS_SYS : MPC_GETNUMLDOMS, 0, 0);
@@ -202,4 +196,14 @@ hwloc_look_hpux(struct hwloc_topology *topology)
       hwloc_add_object(topology, nodes[i]);
     free(nodes);
   }
+}
+
+void
+hwloc_set_hpux_hooks(struct hwloc_topology *topology)
+{
+  topology->set_cpubind = hwloc_hpux_set_cpubind;
+  topology->set_proc_cpubind = hwloc_hpux_set_proc_cpubind;
+  topology->set_thread_cpubind = hwloc_hpux_set_thread_cpubind;
+  topology->set_thisproc_cpubind = hwloc_hpux_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = hwloc_hpux_set_thisthread_cpubind;
 }

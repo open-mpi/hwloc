@@ -198,11 +198,6 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, const h
 }
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
 
-static int
-hwloc_linux_fsroot_set_cpubind(void) {
-  return 0;
-}
-
 int
 hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path)
 {
@@ -933,18 +928,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
   hwloc_cpuset_zero(&admin_disabled_cpus_set);
   hwloc_cpuset_zero(&admin_disabled_mems_set);
 
-  if (topology->is_thissystem) {
-    topology->set_cpubind = hwloc_linux_set_cpubind;
-#if HAVE_DECL_PTHREAD_SETAFFINITY_NP
-    topology->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
-#endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
-    topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
-  } else {
-    topology->set_cpubind = (void*) hwloc_linux_fsroot_set_cpubind;
-    topology->set_thread_cpubind = (void*) hwloc_linux_fsroot_set_cpubind;
-    topology->set_thisthread_cpubind = (void*) hwloc_linux_fsroot_set_cpubind;
-  }
-
   nodes_dir = hwloc_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);
   if (nodes_dir) {
     /* Kerrighed */
@@ -1032,6 +1015,16 @@ hwloc_look_linux(struct hwloc_topology *topology)
 		       &topology->levels[0][0]->attr->system.dmi_board_vendor,
 		       &topology->levels[0][0]->attr->system.dmi_board_name);
   }
+}
+
+void
+hwloc_set_linux_hooks(struct hwloc_topology *topology)
+{
+  topology->set_cpubind = hwloc_linux_set_cpubind;
+#if HAVE_DECL_PTHREAD_SETAFFINITY_NP
+  topology->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
+#endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
+  topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
 }
 
 /* TODO mbind, setpolicy */

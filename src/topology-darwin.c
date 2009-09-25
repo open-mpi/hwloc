@@ -131,3 +131,8 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   /* add PROC objects */
   hwloc_setup_proc_level(topology, nprocs, NULL);
 }
+
+void
+hwloc_set_darwin_hooks(struct hwloc_topology *topology)
+{
+}

@@ -175,12 +175,6 @@ hwloc_look_aix(struct hwloc_topology *topology)
   unsigned i;
   /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
 
-  topology->set_cpubind = hwloc_aix_set_cpubind;
-  topology->set_proc_cpubind = hwloc_aix_set_proc_cpubind;
-  topology->set_thread_cpubind = hwloc_aix_set_thread_cpubind;
-  topology->set_thisproc_cpubind = hwloc_aix_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
-
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {
       int known = 0;
@@ -232,4 +226,14 @@ hwloc_look_aix(struct hwloc_topology *topology)
 	  look_rset(i, HWLOC_OBJ_MISC, topology, i);
 	}
     }
+}
+
+void
+hwloc_set_aix_hooks(struct hwloc_topology *topology)
+{
+  topology->set_cpubind = hwloc_aix_set_cpubind;
+  topology->set_proc_cpubind = hwloc_aix_set_proc_cpubind;
+  topology->set_thread_cpubind = hwloc_aix_set_thread_cpubind;
+  topology->set_thisproc_cpubind = hwloc_aix_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
 }

@@ -335,14 +335,11 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuse
 }
 #endif /* LIBKSTAT */
 
-void hwloc_look_solaris(struct hwloc_topology *topology)
+void
+hwloc_look_solaris(struct hwloc_topology *topology)
 {
   hwloc_cpuset_t online_cpuset;
   unsigned nbprocs = hwloc_fallback_nbprocessors ();
-  topology->set_cpubind = hwloc_solaris_set_cpubind;
-  topology->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
-  topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
 #ifdef HAVE_LIBLGRP
   hwloc_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */
@@ -351,6 +348,15 @@ void hwloc_look_solaris(struct hwloc_topology *topology)
   hwloc_look_kstat(topology, &nbprocs, &online_cpuset);
 #endif /* HAVE_LIBKSTAT */
   hwloc_setup_proc_level(topology, nbprocs, &online_cpuset);
+}
+
+void
+hwloc_set_solaris_hooks(struct hwloc_topology *topology)
+{
+  topology->set_cpubind = hwloc_solaris_set_cpubind;
+  topology->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
+  topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
 }
 
 /* TODO:

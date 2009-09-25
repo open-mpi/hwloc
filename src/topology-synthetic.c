@@ -258,22 +258,11 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   return first_cpu;
 }
 
-static int
-hwloc_synthetic_set_cpubind(void) {
-  return 0;
-}
-
 void
 hwloc_look_synthetic(struct hwloc_topology *topology)
 {
   hwloc_cpuset_t cpuset;
   unsigned first_cpu = 0, i;
-
-  topology->set_cpubind = (void*) hwloc_synthetic_set_cpubind;
-  topology->set_thisproc_cpubind = (void*) hwloc_synthetic_set_cpubind;
-  topology->set_thisthread_cpubind = (void*) hwloc_synthetic_set_cpubind;
-  topology->set_proc_cpubind = (void*) hwloc_synthetic_set_cpubind;
-  topology->set_thread_cpubind = (void*) hwloc_synthetic_set_cpubind;
 
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
     first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, &cpuset);

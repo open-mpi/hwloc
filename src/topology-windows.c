@@ -188,12 +188,6 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
   HMODULE kernel32;
 
-  topology->set_cpubind = hwloc_win_set_cpubind;
-  topology->set_proc_cpubind = hwloc_win_set_proc_cpubind;
-  topology->set_thread_cpubind = hwloc_win_set_thread_cpubind;
-  topology->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
-
   kernel32 = LoadLibrary("kernel32.dll");
   if (kernel32) {
     GetLogicalProcessorInformationProc = GetProcAddress(kernel32, "GetLogicalProcessorInformation");
@@ -376,6 +370,16 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
   /* add PROC objects */
   hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(), NULL);
+}
+
+void
+hwloc_set_windows_hooks(struct hwloc_topology *topology)
+{
+  topology->set_cpubind = hwloc_win_set_cpubind;
+  topology->set_proc_cpubind = hwloc_win_set_proc_cpubind;
+  topology->set_thread_cpubind = hwloc_win_set_thread_cpubind;
+  topology->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
+  topology->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
 }
 
 /* TODO memory binding: VirtualAllocExNuma */

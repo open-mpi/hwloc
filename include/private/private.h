@@ -107,6 +107,7 @@ extern unsigned hwloc_fallback_nbprocessors(void);
 
 #if defined(LINUX_SYS)
 extern void hwloc_look_linux(struct hwloc_topology *topology);
+extern void hwloc_set_linux_hooks(struct hwloc_topology *topology);
 extern int hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path);
 extern void hwloc_backend_sysfs_exit(struct hwloc_topology *topology);
 #endif /* LINUX_SYS */
@@ -119,26 +120,32 @@ extern void hwloc_backend_xml_exit(struct hwloc_topology *topology);
 
 #ifdef SOLARIS_SYS
 extern void hwloc_look_solaris(struct hwloc_topology *topology);
+extern void hwloc_set_solaris_hooks(struct hwloc_topology *topology);
 #endif /* SOLARIS_SYS */
 
 #ifdef AIX_SYS
 extern void hwloc_look_aix(struct hwloc_topology *topology);
+extern void hwloc_set_aix_hooks(struct hwloc_topology *topology);
 #endif /* AIX_SYS */
 
 #ifdef OSF_SYS
 extern void hwloc_look_osf(struct hwloc_topology *topology);
+extern void hwloc_set_osf_hooks(struct hwloc_topology *topology);
 #endif /* OSF_SYS */
 
 #ifdef WIN_SYS
 extern void hwloc_look_windows(struct hwloc_topology *topology);
+extern void hwloc_set_windows_hooks(struct hwloc_topology *topology);
 #endif /* WIN_SYS */
 
 #ifdef DARWIN_SYS
 extern void hwloc_look_darwin(struct hwloc_topology *topology);
+extern void hwloc_set_darwin_hooks(struct hwloc_topology *topology);
 #endif /* DARWIN_SYS */
 
 #ifdef HPUX_SYS
 extern void hwloc_look_hpux(struct hwloc_topology *topology);
+extern void hwloc_set_hpux_hooks(struct hwloc_topology *topology);
 #endif /* HPUX_SYS */
 
 extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *description);

@@ -298,21 +298,10 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
   }
 }
 
-static int
-hwloc_xml_set_cpubind(void) {
-  return 0;
-}
-
 void
 hwloc_look_xml(struct hwloc_topology *topology)
 {
   xmlNode* root_node;
-
-  topology->set_cpubind = (void*) hwloc_xml_set_cpubind;
-  topology->set_thisproc_cpubind = (void*) hwloc_xml_set_cpubind;
-  topology->set_thisthread_cpubind = (void*) hwloc_xml_set_cpubind;
-  topology->set_proc_cpubind = (void*) hwloc_xml_set_cpubind;
-  topology->set_thread_cpubind = (void*) hwloc_xml_set_cpubind;
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 

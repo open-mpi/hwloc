@@ -158,12 +158,6 @@ hwloc_look_osf(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   unsigned distance;
 
-  topology->set_cpubind = hwloc_osf_set_cpubind;
-  topology->set_thread_cpubind = hwloc_osf_set_thread_cpubind;
-  topology->set_thisthread_cpubind = hwloc_osf_set_thisthread_cpubind;
-  topology->set_proc_cpubind = hwloc_osf_set_proc_cpubind;
-  topology->set_thisproc_cpubind = hwloc_osf_set_thisproc_cpubind;
-
   topology->backend_params.osf.nbnodes = nbnodes = rad_get_num();
 
   cpusetcreate(&cpuset);
@@ -231,4 +225,14 @@ hwloc_look_osf(struct hwloc_topology *topology)
 
   /* add PROC objects */
   hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(), NULL);
+}
+
+void
+hwloc_set_osf_hooks(struct hwloc_topology *topology)
+{
+  topology->set_cpubind = hwloc_osf_set_cpubind;
+  topology->set_thread_cpubind = hwloc_osf_set_thread_cpubind;
+  topology->set_thisthread_cpubind = hwloc_osf_set_thisthread_cpubind;
+  topology->set_proc_cpubind = hwloc_osf_set_proc_cpubind;
+  topology->set_thisproc_cpubind = hwloc_osf_set_thisproc_cpubind;
 }

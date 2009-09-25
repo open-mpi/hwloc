@@ -809,6 +809,34 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
   return 0;
 }
 
+/*
+ * Empty binding hooks always returning success
+ */
+
+static int dontset_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict)
+{
+  return 0;
+}
+static int dontset_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict)
+{
+  return 0;
+}
+static int dontset_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict)
+{
+  return 0;
+}
+static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *set, int strict)
+{
+  return 0;
+}
+#ifdef hwloc_thread_t
+static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t *set, int strict)
+{
+  return 0;
+}
+#endif
+
+
 /* Main discovery loop */
 static void
 hwloc_discover(struct hwloc_topology *topology)
@@ -1014,6 +1042,47 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* It's empty now.  */
   free(objs);
+
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
+    topology->is_thissystem = 1;
+
+  if (topology->is_thissystem) {
+#    ifdef LINUX_SYS
+    hwloc_set_linux_hooks(topology);
+#    endif /* LINUX_SYS */
+
+#    ifdef  AIX_SYS
+    hwloc_set_aix_hooks(topology);
+#    endif /* AIX_SYS */
+
+#    ifdef  OSF_SYS
+    hwloc_set_osf_hooks(topology);
+#    endif /* OSF_SYS */
+
+#    ifdef  SOLARIS_SYS
+    hwloc_set_solaris_hooks(topology);
+#    endif /* SOLARIS_SYS */
+
+#    ifdef  WIN_SYS
+    hwloc_set_windows_hooks(topology);
+#    endif /* WIN_SYS */
+
+#    ifdef  DARWIN_SYS
+    hwloc_set_darwin_hooks(topology);
+#    endif /* DARWIN_SYS */
+
+#    ifdef  HPUX_SYS
+    hwloc_set_hpux_hooks(topology);
+#    endif /* HPUX_SYS */
+  } else {
+    topology->set_cpubind = dontset_cpubind;
+    topology->set_proc_cpubind = dontset_proc_cpubind;
+    topology->set_thread_cpubind = dontset_thread_cpubind;
+    topology->set_thisproc_cpubind = dontset_thisproc_cpubind;
+#ifdef hwloc_thread_t
+    topology->set_thisthread_cpubind = dontset_thisthread_cpubind;
+#endif
+  }
 }
 
 static void

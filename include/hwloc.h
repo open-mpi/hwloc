@@ -278,7 +278,23 @@ enum hwloc_topology_flags_e {
    * Gather all resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cpusets and gather all processors and memory nodes.
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<1),
+  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
+
+  /* \brief Assume that the selected backend provides the topology for the
+   * system on which we are running.
+   *
+   * This forces is_thissystem to 1, i.e. makes hwloc assume that the selected
+   * backend provides the topology for the system on which we are running, even
+   * if it is not the OS-specific backend but the XML backend for instance.
+   * This means making the binding functions actually call the OS-specific
+   * system calls and really do binding, while the XML backend would otherwise
+   * provide empty hooks just returning success.
+   *
+   * This can be used for efficiency reasons to first detect the topology once,
+   * save it to an XML file, and quickly reload it later through the XML
+   * backend, but still having binding functions actually do bind.
+   */
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
@@ -293,6 +309,11 @@ extern int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long fl
  * \p fsroot_path instead of the main file-system root.
  * Not using the main file-system root causes hwloc_topology_is_thissystem field
  * to return 0.
+ *
+ * \note For conveniency, this backend provides empty binding hooks which just
+ * return success.  To have hwloc still actually call OS-specific hooks, the
+ * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
+ * file is really the underlying system.
  */
 extern int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
 
@@ -303,6 +324,9 @@ extern int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology,
  * the arity of each level.
  * Each number may be prefixed with a type and a colon to enforce the type
  * of a level.
+ *
+ * \note For conveniency, this backend provides empty binding hooks which just
+ * return success.
  */
 extern int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict description);
 
@@ -310,6 +334,11 @@ extern int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topolo
  *
  * Gather topology information the XML file given at \p xmlpath.
  * This file may have been generated earlier with lstopo file.xml.
+ *
+ * \note For conveniency, this backend provides empty binding hooks which just
+ * return success.  To have hwloc still actually call OS-specific hooks, the
+ * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
+ * file is really the underlying system.
  */
 extern int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
