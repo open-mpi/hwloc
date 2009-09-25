@@ -228,7 +228,7 @@ Bug reports should be reported in the tracker
 \htmlonly
 </div><div class="section" id="credits">
 \endhtmlonly
-\section History / credits
+\section history History / credits
 
 hwloc is the evolution and merger of the libtopology
 (http://runtime.bordeaux.inria.fr/libtopology/) project and the Portable
