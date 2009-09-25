@@ -109,6 +109,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, const hwloc_cp
    * int thread_migrate (int thread_id, int destination_node);
    */
 
+/* TODO: use dynamic size cpusets */
 #ifdef CPU_SET
   cpu_set_t linux_set;
   unsigned cpu;
