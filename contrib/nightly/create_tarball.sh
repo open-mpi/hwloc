@@ -89,7 +89,7 @@ send_error_mail() {
 die() {
     msg="$*"
     cat > "$logdir/00_announce.txt" <<EOF
-Creating the nightly tarball ended in error:
+Creating the nightly hwloc tarball ended in error:
 
 $msg
 EOF
@@ -324,10 +324,10 @@ rm -rf "$root"
 
 # send success mail
 if test "$want_success_mail" = "1"; then
-    Mail -s "Create success (r$version)" "$email" <<EOF
-Creating nightly snapshot SVN tarball was a success.
+    Mail -s "Create success (hwloc r$version)" "$email" <<EOF
+Creating nightly hwloc snapshot SVN tarball was a success.
 
-Snapshot:   $version
+Snapshot:   hwloc $version
 Start time: $start_time
 End time:   `date`
 
