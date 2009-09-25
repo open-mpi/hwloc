@@ -348,7 +348,7 @@ doc readme: no-build-readme
 $(top_srcdir)/README: no-build-readme
 
 no-build-readme:
-	@echo "ERROR: Do not have the 'w3m' executable or doxygen docs to build the README."
+	@echo "ERROR: You do not have the 'w3m' or 'lynx' executables to build the README, or do not have the 'doxygen' executable to build the docs."
 	@echo "ERROR: Cannot continue."
 	@exit 1
 endif
