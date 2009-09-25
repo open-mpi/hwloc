@@ -35,6 +35,10 @@ want_svn=1
 
 svn_r=-1
 
+# The date when this release was created
+
+date="Unreleased developer copy"
+
 # The shared library version of hwloc's public library.  This version
 # is maintained in accordance with the "Library Interface Versions"
 # chapter from the GNU Libtool documentation.  Notes:
