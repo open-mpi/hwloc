@@ -492,7 +492,9 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   struct display *disp;
   int i, j;
   int lr, lg, lb;
+#ifdef HAVE_LIBTERMCAP
   int term = 0;
+#endif
 
   if (!filename || !strcmp(filename, "-"))
     output = stdout;
