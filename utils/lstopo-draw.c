@@ -66,14 +66,18 @@ static int prefer_ratio(float ratio1, float ratio2) {
   return _ratio1 < _ratio2;
 }
 
-static void null(void) {}
+static void* null_start(void *output, int width, int height) { return output; }
+static void null_declare_color(void *output, int r, int g, int b) { }
+static void null_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height) { }
+static void null_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2) { }
+static void null_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text) { }
 
 static struct draw_methods null_draw_methods = {
-  .start = (void*) null,
-  .declare_color = (void*) null,
-  .box = (void*) null,
-  .line = (void*) null,
-  .text = (void*) null,
+  .start = null_start,
+  .declare_color = null_declare_color,
+  .box = null_box,
+  .line = null_line,
+  .text = null_text,
 };
 
 /*
@@ -605,11 +609,11 @@ getmax_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsi
 }
 
 static struct draw_methods getmax_draw_methods = {
-  .start = (void*) null,
-  .declare_color = (void*) null,
+  .start = null_start,
+  .declare_color = null_declare_color,
   .box = getmax_box,
   .line = getmax_line,
-  .text = (void*) null,
+  .text = null_text,
 };
 
 void *
