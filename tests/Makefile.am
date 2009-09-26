@@ -34,6 +34,12 @@ else !HAVE_SCHED_SETAFFINITY
 EXTRA_DIST += glibc-sched.c
 endif !HAVE_SCHED_SETAFFINITY
 
+if HAVE_LIBIBVERBS
+check_PROGRAMS += ibverbs
+else !HAVE_LIBIBVERBS
+EXTRA_DIST += ibverbs.c
+endif !HAVE_LIBIBVERBS
+
 TESTS = $(check_PROGRAMS)
 
 if HAVE_XML
@@ -43,6 +49,7 @@ endif
 LIBS = $(top_builddir)/src/libhwloc.la
 
 linux_libnuma_LDFLAGS = -lnuma
+ibverbs_LDFLAGS = -libverbs
 if HAVE_WINDOWS
 else
 hwloc_bind_LDFLAGS = -lpthread

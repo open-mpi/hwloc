@@ -274,6 +274,11 @@ AC_CHECK_HEADERS([kstat.h], [
   AC_HAVE_LIBRARY([kstat])
 ])
 
+AC_CHECK_HEADERS([infiniband/verbs.h], [
+  AC_HAVE_LIBRARY([ibverbs], [have_libibverbs=yes])
+])
+AM_CONDITIONAL([HAVE_LIBIBVERBS], [test "x$have_libibverbs" = "xyes"])
+
 AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
 		_SC_NPROCESSORS_CONF,
 		_SC_NPROC_ONLN,
