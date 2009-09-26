@@ -10,9 +10,9 @@ nodist_include_hwloc_HEADERS = hwloc/config.h
 noinst_HEADERS = private/private.h private/debug.h
 
 if HAVE_LINUX
-include_hwloc_HEADERS += hwloc/linux-libnuma.h
+include_hwloc_HEADERS += hwloc/linux.h hwloc/linux-libnuma.h
 else !HAVE_LINUX
-noinst_HEADERS += hwloc/linux-libnuma.h
+noinst_HEADERS += hwloc/linux.h hwloc/linux-libnuma.h
 endif !HAVE_LINUX
 
 if HAVE_SCHED_SETAFFINITY

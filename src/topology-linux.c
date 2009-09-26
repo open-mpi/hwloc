@@ -5,6 +5,7 @@
 
 #include <private/config.h>
 #include <hwloc.h>
+#include <hwloc/linux.h>
 #include <private/private.h>
 #include <private/debug.h>
 
@@ -258,24 +259,20 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 #define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
 #define MAX_KERNEL_CPU_MASK ((HWLOC_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
-static int
-hwloc_parse_cpumap(const char *mappath, hwloc_cpuset_t *set, int fsroot_fd)
+void
+hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t *set)
 {
   char string[KERNEL_CPU_MAP_LEN]; /* enough for a shared map mask (32bits hexa) */
   unsigned long maps[MAX_KERNEL_CPU_MASK];
   int nr_maps = 0;
-  FILE * fd;
+
   int i;
 
   /* reset to zero first */
   hwloc_cpuset_zero(set);
 
-  fd = hwloc_fopen(mappath, "r", fsroot_fd);
-  if (!fd)
-    return -1;
-
   /* parse the whole mask */
-  while (fgets(string, KERNEL_CPU_MAP_LEN, fd) && *string != '\0') /* read one kernel cpu mask and the ending comma */
+  while (fgets(string, KERNEL_CPU_MAP_LEN, file) && *string != '\0') /* read one kernel cpu mask and the ending comma */
     {
       unsigned long map;
       assert(!(nr_maps == MAX_KERNEL_CPU_MASK)); /* too many cpumasks in this cpumap */
@@ -297,9 +294,20 @@ hwloc_parse_cpumap(const char *mappath, hwloc_cpuset_t *set, int fsroot_fd)
   for(i=0; i<nr_maps*KERNEL_CPU_MASK_BITS; i++)
     if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
       hwloc_cpuset_set(set, i);
+}
 
-  fclose(fd);
+static int
+hwloc_parse_cpumap(const char *mappath, hwloc_cpuset_t *set, int fsroot_fd)
+{
+  FILE * file;
 
+  file = hwloc_fopen(mappath, "r", fsroot_fd);
+  if (!file)
+    return -1;
+
+  hwloc_linux_parse_cpumap_file(file, set);
+
+  fclose(file);
   return 0;
 }
 
