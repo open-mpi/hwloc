@@ -212,6 +212,8 @@ The basic interface is available in hwloc.h, a lot of traversal examples are
 available as inlines in hwloc/helper.h . On Linux, additional helpers are
 available in hwloc/linux.h, and hwloc/linux-libnuma.h if using libnuma.
 On glibc-based systems, additional helpers are available in hwloc/glibc-sched.h.
+On system with the Infiniband Verbs library, some helpers are provided in
+hwloc/ibverbs.h.
 
 To precisely define the vocabulary used by hwloc, a \ref glossary is available and should probably be read first.
 
