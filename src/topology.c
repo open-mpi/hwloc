@@ -527,8 +527,13 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
  * complete.
  */
 
-#define check_sizes(obj1, obj2, field) \
-  assert(!(obj1)->field || !(obj1)->field || obj1->field == obj2->field)
+#define merge_sizes(new, old, field) \
+  if (!(old)->field) \
+    (old)->field = (new)->field;
+#define check_sizes(new, old, field) \
+  merge_sizes(new, old, field) \
+  if ((new)->field) \
+    assert((old)->field == (new)->field)
 
 /* Try to insert OBJ in CUR, recurse if needed */
 static void
@@ -549,9 +554,9 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 	assert(obj->os_index == child->os_index);
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
-	    // Do not check these, it may change between calls
-	    //check_sizes(obj, child, attr->node.memory_kB);
-	    //check_sizes(obj, child, attr->node.huge_page_free);
+	    /* Do not check these, it may change between calls */
+	    merge_sizes(obj, child, attr->node.memory_kB);
+	    merge_sizes(obj, child, attr->node.huge_page_free);
 	    break;
 	  case HWLOC_OBJ_CACHE:
 	    check_sizes(obj, child, attr->cache.memory_kB);
