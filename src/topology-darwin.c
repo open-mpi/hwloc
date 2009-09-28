@@ -3,6 +3,9 @@
  * See COPYING in top-level directory.
  */
 
+/* Detect topology change: registering for power management changes and check
+ * if for example hw.activecpu changed */
+
 #include <private/config.h>
 
 #include <sys/types.h>
