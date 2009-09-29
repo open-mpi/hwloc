@@ -36,15 +36,23 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     char localcpus[4096];
     u8 config_space_cache[CONFIG_SPACE_CACHESIZE];
     unsigned char headertype;
+    unsigned char revision, subvendor_id, subdevice_id;
     hwloc_obj_type_t type;
     int fd;
 
+    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE);
+
+    assert(PCI_REVISION_ID < CONFIG_SPACE_CACHESIZE);
+    revision = config_space_cache[PCI_REVISION_ID];
+    assert(PCI_SUBSYSTEM_VENDOR_ID < CONFIG_SPACE_CACHESIZE);
+    subvendor_id = config_space_cache[PCI_SUBSYSTEM_VENDOR_ID];
+    assert(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
+    subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
+
     snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
              pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func);
-    printf("%s [%04x:%04x] class=%04x\n",
-           busid, pcidev->vendor_id, pcidev->device_id, pcidev->device_class);
-
-    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE);
+    printf("%s [%04x:%04x (%04x:%04x)] rev=%02x class=%04x\n",
+           busid, pcidev->vendor_id, pcidev->device_id, subvendor_id, subdevice_id, revision, pcidev->device_class);
 
     assert(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
     headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
