@@ -16,6 +16,8 @@
 #include <string.h>
 #include <assert.h>
 
+#define CONFIG_SPACE_CACHESIZE 64
+
 void
 hwloc_look_libpci(struct hwloc_topology *topology)
 {
@@ -32,6 +34,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     char name[128];
     char path[256];
     char localcpus[4096];
+    u8 config_space_cache[CONFIG_SPACE_CACHESIZE];
     unsigned char headertype;
     int fd;
 
@@ -40,17 +43,22 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     printf("%s [%04x:%04x] class=%04x\n",
            busid, pcidev->vendor_id, pcidev->device_id, pcidev->device_class);
 
-    pci_read_block(pcidev, PCI_HEADER_TYPE, &headertype, 1);
-    headertype &= 0x7f;
+    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE);
+
+    assert(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
+    headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
       printf("  type %d\n", headertype);
 
     switch (pcidev->device_class) {
     case PCI_CLASS_BRIDGE_PCI:
       if (headertype == PCI_HEADER_TYPE_BRIDGE) {
 	unsigned char prim,sec,subor;
-	pci_read_block(pcidev, PCI_PRIMARY_BUS, &prim, 1);
-	pci_read_block(pcidev, PCI_SECONDARY_BUS, &sec, 1);
-	pci_read_block(pcidev, PCI_SUBORDINATE_BUS, &subor, 1);
+	assert(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
+	assert(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
+	assert(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
+	prim = config_space_cache[PCI_PRIMARY_BUS];
+	sec = config_space_cache[PCI_SECONDARY_BUS];
+	subor = config_space_cache[PCI_SUBORDINATE_BUS];
 	printf("  PCIBridge, buses: primary %hhx secondary %hhx subordinate %hhx\n",
 	       prim, sec, subor);
       }
