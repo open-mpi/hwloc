@@ -142,6 +142,10 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_SOCKET: return "Socket";
     case HWLOC_OBJ_CACHE: return "Cache";
     case HWLOC_OBJ_CORE: return "Core";
+    case HWLOC_OBJ_PCI_BRIDGE: return "PCIBridge";
+    case HWLOC_OBJ_GPU: return "GPU";
+    case HWLOC_OBJ_NIC: return "NIC";
+    case HWLOC_OBJ_INFINIBAND: return "InfiniBand";
     case HWLOC_OBJ_PROC: return "Proc";
     default: return "Unknown";
     }
@@ -157,6 +161,10 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
   if (!strcmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcmp(string, "Core")) return HWLOC_OBJ_CORE;
+  if (!strcmp(string, "PCIBridge")) return HWLOC_OBJ_PCI_BRIDGE;
+  if (!strcmp(string, "GPU")) return HWLOC_OBJ_GPU;
+  if (!strcmp(string, "NIC")) return HWLOC_OBJ_NIC;
+  if (!strcmp(string, "InfiniBand")) return HWLOC_OBJ_INFINIBAND;
   if (!strcmp(string, "Proc")) return HWLOC_OBJ_PROC;
   return HWLOC_OBJ_TYPE_MAX;
 }

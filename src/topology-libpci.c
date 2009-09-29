@@ -36,6 +36,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     char localcpus[4096];
     u8 config_space_cache[CONFIG_SPACE_CACHESIZE];
     unsigned char headertype;
+    hwloc_obj_type_t type;
     int fd;
 
     snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
@@ -61,21 +62,29 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 	subor = config_space_cache[PCI_SUBORDINATE_BUS];
 	printf("  PCIBridge, buses: primary %hhx secondary %hhx subordinate %hhx\n",
 	       prim, sec, subor);
+	type = HWLOC_OBJ_PCI_BRIDGE;
       }
       break;
     case PCI_CLASS_DISPLAY_VGA:
+    /* case PCI_CLASS_DISPLAY_3D: for Tesla? */
       printf("  GPU\n");
+      type = HWLOC_OBJ_GPU;
       break;   
     case PCI_CLASS_NETWORK_ETHERNET:
       printf("  NIC\n");
+      type = HWLOC_OBJ_NIC;
       break;
     case PCI_CLASS_SERIAL_INFINIBAND:
       printf("  InfiniBand\n");
+      type = HWLOC_OBJ_INFINIBAND;
       break;
     case PCI_CLASS_SYSTEM_OTHER:
       printf("  Could be DMA Engine\n");
+      /* TODO */
       break;
     }
+
+
 
     strcpy(name, "??");
     pci_lookup_name(pciaccess, name, sizeof(name),

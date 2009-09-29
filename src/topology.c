@@ -411,8 +411,13 @@ static const int obj_type_order[] = {
   [HWLOC_OBJ_SOCKET] = 4,
   [HWLOC_OBJ_CACHE] = 5,
   [HWLOC_OBJ_CORE] = 6,
-  [HWLOC_OBJ_PROC] = 7,
+  [HWLOC_OBJ_PCI_BRIDGE] = 7,
+  [HWLOC_OBJ_GPU] = 8,
+  [HWLOC_OBJ_NIC] = 9,
+  [HWLOC_OBJ_INFINIBAND] = 10,
+  [HWLOC_OBJ_PROC] = 11,
 };
+/* FIXME: add DMA engine class or so */
 
 static const hwloc_obj_type_t obj_order_type[] = {
   [0] = HWLOC_OBJ_SYSTEM,
@@ -422,7 +427,11 @@ static const hwloc_obj_type_t obj_order_type[] = {
   [4] = HWLOC_OBJ_SOCKET,
   [5] = HWLOC_OBJ_CACHE,
   [6] = HWLOC_OBJ_CORE,
-  [7] = HWLOC_OBJ_PROC,
+  [7] = HWLOC_OBJ_PCI_BRIDGE,
+  [8] = HWLOC_OBJ_GPU,
+  [9] = HWLOC_OBJ_NIC,
+  [10] = HWLOC_OBJ_INFINIBAND,
+  [11] = HWLOC_OBJ_PROC,
 };
 
 static int hwloc_get_type_order(hwloc_obj_type_t type)

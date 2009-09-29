@@ -90,6 +90,18 @@ typedef enum {
 			  * expose their arbitrary processors aggregation this
 			  * way.
 			  */
+
+  HWLOC_OBJ_PCI_BRIDGE,	/**< \brief PCI bridge.
+			  * I/O devices and connected to the main topology
+			  * through one (or several) bridges and their
+			  * associated buses.
+			  */
+  HWLOC_OBJ_GPU,	/**< \brief GPU.
+			  */
+  HWLOC_OBJ_NIC,	/**< \brief Network interface card.
+			  */
+  HWLOC_OBJ_INFINIBAND,	/**< \brief InfiniBand HCA.
+			  */
 } hwloc_obj_type_t;
 /** \brief Maximal value of an object type */
 #define HWLOC_OBJ_TYPE_MAX (HWLOC_OBJ_MISC+1)
