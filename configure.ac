@@ -354,6 +354,24 @@ else
 fi
 AM_CONDITIONAL([HAVE_XML], [test "x$enable_xml" = "xyes"])
 
+AC_ARG_ENABLE([pci],
+  [AS_HELP_STRING([--disable-pci], [disable the PCI device discovery using libpci])],
+  [enable_pci="$enableval"],
+  [enable_pci="yes"])
+
+if test "x$enable_pci" = "xyes"; then
+  PKG_CHECK_MODULES([PCI], [libpci], [:], [enable_pci="no"])
+fi
+
+if test "x$enable_pci" = "xyes"; then
+  HWLOC_REQUIRES="libpci $HWLOC_REQUIRES"
+  AC_DEFINE([HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
+  AC_SUBST([HAVE_LIBPCI], [1])
+else
+  AC_SUBST([HAVE_LIBPCI], [0])
+fi
+AM_CONDITIONAL([HAVE_LIBPCI], [test "x$enable_pci" = "xyes"])
+
 # check for kerrighed, but don't abort if not found
 PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [:])
 
