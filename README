@@ -12,7 +12,7 @@ attributes such as cache and memory information.
 hwloc supports the following operating systems:
 
   * Linux (including old kernels not having sysfs topology information, with
-    knowledge of cpusets, offline cpus, and Kerrighed support)
+ knowledge of cpusets, offline cpus, and Kerrighed support)
   * Solaris
   * AIX
   * Darwin
@@ -26,7 +26,7 @@ on fake topologies:
 
   * Symmetrical tree of resources generated from a list of level arities
   * Remote machine simulation through the gathering of Linux sysfs topology
-    files
+ files
 
 hwloc may also display the topology in a convenient format, either in graphical
 mode, or by exporting in PDF, PNG, FIG, ... format, or in text mode (see
@@ -66,89 +66,89 @@ Examples
 On a 4-socket 2-core machine with hyperthreading, the lstopo tool may show the
 following outputs:
 
-                                  dudley.png
+                               dudley.png
 
 System(15GB)
   Socket#0 + L3(4096KB)
-    L2(1024KB) + L1(16KB) + Core#0
-      P#0
-      P#8
-    L2(1024KB) + L1(16KB) + Core#1
-      P#4
-      P#12
+ L2(1024KB) + L1(16KB) + Core#0
+   P#0
+   P#8
+ L2(1024KB) + L1(16KB) + Core#1
+   P#4
+   P#12
   Socket#1 + L3(4096KB)
-    L2(1024KB) + L1(16KB) + Core#0
-      P#1
-      P#9
-    L2(1024KB) + L1(16KB) + Core#1
-      P#5
-      P#13
+ L2(1024KB) + L1(16KB) + Core#0
+   P#1
+   P#9
+ L2(1024KB) + L1(16KB) + Core#1
+   P#5
+   P#13
   Socket#2 + L3(4096KB)
-    L2(1024KB) + L1(16KB) + Core#0
-      P#2
-      P#10
-    L2(1024KB) + L1(16KB) + Core#1
-      P#6
-      P#14
+ L2(1024KB) + L1(16KB) + Core#0
+   P#2
+   P#10
+ L2(1024KB) + L1(16KB) + Core#1
+   P#6
+   P#14
   Socket#3 + L3(4096KB)
-    L2(1024KB) + L1(16KB) + Core#0
-      P#3
-      P#11
-    L2(1024KB) + L1(16KB) + Core#1
-      P#7
-      P#15
+ L2(1024KB) + L1(16KB) + Core#0
+   P#3
+   P#11
+ L2(1024KB) + L1(16KB) + Core#1
+   P#7
+   P#15
 
-On a 8-socket 2-core Opteron NUMA machine, the lstopo tool may show the
+On a 4-socket 2-core Opteron NUMA machine, the lstopo tool may show the
 following outputs:
 
-                                  hagrid.png
+                               hagrid.png
 
 System(62GB)
   Node#0(8190MB) + Socket#0
-    L2(1024KB) + L1(64KB) + Core#0 + P#0
-    L2(1024KB) + L1(64KB) + Core#1 + P#1
+ L2(1024KB) + L1(64KB) + Core#0 + P#0
+ L2(1024KB) + L1(64KB) + Core#1 + P#1
   Node#1(8192MB) + Socket#1
-    L2(1024KB) + L1(64KB) + Core#0 + P#2
-    L2(1024KB) + L1(64KB) + Core#1 + P#3
+ L2(1024KB) + L1(64KB) + Core#0 + P#2
+ L2(1024KB) + L1(64KB) + Core#1 + P#3
   Node#2(8192MB) + Socket#2
-    L2(1024KB) + L1(64KB) + Core#0 + P#4
-    L2(1024KB) + L1(64KB) + Core#1 + P#5
+ L2(1024KB) + L1(64KB) + Core#0 + P#4
+ L2(1024KB) + L1(64KB) + Core#1 + P#5
   Node#3(8192MB) + Socket#3
-    L2(1024KB) + L1(64KB) + Core#0 + P#6
-    L2(1024KB) + L1(64KB) + Core#1 + P#7
+ L2(1024KB) + L1(64KB) + Core#0 + P#6
+ L2(1024KB) + L1(64KB) + Core#1 + P#7
   Node#4(8192MB) + Socket#4
-    L2(1024KB) + L1(64KB) + Core#0 + P#8
-    L2(1024KB) + L1(64KB) + Core#1 + P#9
+ L2(1024KB) + L1(64KB) + Core#0 + P#8
+ L2(1024KB) + L1(64KB) + Core#1 + P#9
   Node#5(8192MB) + Socket#5
-    L2(1024KB) + L1(64KB) + Core#0 + P#10
-    L2(1024KB) + L1(64KB) + Core#1 + P#11
+ L2(1024KB) + L1(64KB) + Core#0 + P#10
+ L2(1024KB) + L1(64KB) + Core#1 + P#11
   Node#6(8192MB) + Socket#6
-    L2(1024KB) + L1(64KB) + Core#0 + P#12
-    L2(1024KB) + L1(64KB) + Core#1 + P#13
+ L2(1024KB) + L1(64KB) + Core#0 + P#12
+ L2(1024KB) + L1(64KB) + Core#1 + P#13
   Node#7(8192MB) + Socket#7
-    L2(1024KB) + L1(64KB) + Core#0 + P#14
-    L2(1024KB) + L1(64KB) + Core#1 + P#15
+ L2(1024KB) + L1(64KB) + Core#0 + P#14
+ L2(1024KB) + L1(64KB) + Core#1 + P#15
 
 On a 2-socket quad-core Xeon (pre-Nehalem ones assembling 2 dual-core dies into
 each socket):
 
-                                  emmett.png
+                               emmett.png
 
 System(15GB)
   Socket#0
-    L2(4096KB)
-      L1(32KB) + Core#0 + P#0
-      L1(32KB) + Core#1 + P#4
-    L2(4096KB)
-      L1(32KB) + Core#2 + P#2
-      L1(32KB) + Core#3 + P#6
+ L2(4096KB)
+   L1(32KB) + Core#0 + P#0
+   L1(32KB) + Core#1 + P#4
+ L2(4096KB)
+   L1(32KB) + Core#2 + P#2
+   L1(32KB) + Core#3 + P#6
   Socket#1
-    L2(4096KB)
-      L1(32KB) + Core#0 + P#1
-      L1(32KB) + Core#1 + P#5
-    L2(4096KB)
-      L1(32KB) + Core#2 + P#3
-      L1(32KB) + Core#3 + P#7
+ L2(4096KB)
+   L1(32KB) + Core#0 + P#1
+   L1(32KB) + Core#1 + P#5
+ L2(4096KB)
+   L1(32KB) + Core#2 + P#3
+   L1(32KB) + Core#3 + P#7
 
 Interface example
 
@@ -168,91 +168,90 @@ cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 
 static void print_children(hwloc_topology_t topology, hwloc_obj_t obj, int depth)
 {
-        char string[128];
-        int i;
+     char string[128];
+     int i;
 
-        hwloc_obj_snprintf(string, sizeof(string), topology, obj, "#", 0);
-        printf("%*s%s\n", 2*depth, "", string);
-        for (i = 0; i < obj->arity; i++)
-                print_children(topology, obj->children[i], depth + 1);
+     hwloc_obj_snprintf(string, sizeof(string), topology, obj, "#", 0);
+     printf("%*s%s\n", 2*depth, "", string);
+     for (i = 0; i < obj->arity; i++)
+             print_children(topology, obj->children[i], depth + 1);
 }
 
 int main(void)
 {
-        /* Topology object */
-        hwloc_topology_t topology;
+     /* Topology object */
+     hwloc_topology_t topology;
 
-        /* Allocate and initialize topology object.  */
-        hwloc_topology_init(&topology);
+     /* Allocate and initialize topology object.  */
+     hwloc_topology_init(&topology);
 
-        /* ... Optionally, put detection configuration here to e.g. ignore some
-           objects types, define a synthetic topology, etc....  The default is
-           to detect all the objects of the machine that the caller is allowed
-           to access.
-           See Configure Topology Detection.  */
+     /* ... Optionally, put detection configuration here to e.g. ignore some
+        objects types, define a synthetic topology, etc....  The default is
+        to detect all the objects of the machine that the caller is allowed
+        to access.
+        See Configure Topology Detection.  */
 
-        /* Perform the topology detection.  */
-        hwloc_topology_load(topology);
-
-
-        /* Optionally, get some additional topology information
-         * in case we need the topology depth later.
-         */
-        struct hwloc_topology_info topoinfo;
-        hwloc_topology_get_info(topology, &topoinfo);
+     /* Perform the topology detection.  */
+     hwloc_topology_load(topology);
 
 
-        /* Walk the topology with an array style, from level 0 (always the
-         * system level) to the lowest level (always the proc level). */
-        int depth, i;
-        char string[128];
-        for (depth = 0; depth < topoinfo.depth; depth++) {
-                for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); i++) {
-                        hwloc_obj_snprintf(string, sizeof(string), topology,
-                                        hwloc_get_obj_by_depth(topology, depth, i), "#", 0);
-                        printf("%s\n", string);
-                }
-        }
-
-        /* Walk the topology with a tree style.  */
-        print_children(topology, hwloc_get_system_obj(topology), 0);
+     /* Optionally, get some additional topology information
+      * in case we need the topology depth later.
+      */
+     unsigned topodepth = hwloc_topology_get_depth(topology);
 
 
-        /* Print the number of sockets.  */
-        depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
-        if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-                printf("The number of sockets is unknown\n");
-        else
-                printf("%u socket(s)\n", hwloc_get_nbobjs_by_depth(topology, depth));
+     /* Walk the topology with an array style, from level 0 (always the
+      * system level) to the lowest level (always the proc level). */
+     int depth, i;
+     char string[128];
+     for (depth = 0; depth < topodepth; depth++) {
+             for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); i++) {
+                     hwloc_obj_snprintf(string, sizeof(string), topology,
+                                     hwloc_get_obj_by_depth(topology, depth, i), "#", 0);
+                     printf("%s\n", string);
+             }
+     }
+
+     /* Walk the topology with a tree style.  */
+     print_children(topology, hwloc_get_system_obj(topology), 0);
 
 
-        /* Find out where cores are, or else smaller sets of CPUs if the OS
-         * doesn&apos;t have the notion of core. */
-        depth = hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_CORE);
-
-        /* Get last one.  */
-        hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth) - 1);
-        if (!obj)
-                return 0;
-
-        /* Get its cpuset.  */
-        hwloc_cpuset_t cpuset = obj->cpuset;
-
-        /* Get only one logical processor (in case the core is SMT/hyperthreaded).  */
-        hwloc_cpuset_singlify(&cpuset);
-
-        /* And try to bind ourself there.  */
-        if (hwloc_set_cpubind(topology, &cpuset, 0)) {
-                char s[HWLOC_CPUSET_STRING_LENGTH + 1];
-                hwloc_cpuset_snprintf(s, sizeof(s), &obj->cpuset);
-                printf("Couldn&apos;t bind to cpuset %s\n", s);
-        }
+     /* Print the number of sockets.  */
+     depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
+     if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+             printf("The number of sockets is unknown\n");
+     else
+             printf("%u socket(s)\n", hwloc_get_nbobjs_by_depth(topology, depth));
 
 
-        /* Destroy topology object.  */
-        hwloc_topology_destroy(topology);
+     /* Find out where cores are, or else smaller sets of CPUs if the OS
+      * doesn&apos;t have the notion of core. */
+     depth = hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_CORE);
 
-        return 0;
+     /* Get last one.  */
+     hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, hwloc_get_nbobjs_by_depth(topology, depth) - 1);
+     if (!obj)
+             return 0;
+
+     /* Get its cpuset.  */
+     hwloc_cpuset_t cpuset = obj->cpuset;
+
+     /* Get only one logical processor (in case the core is SMT/hyperthreaded).  */
+     hwloc_cpuset_singlify(&cpuset);
+
+     /* And try to bind ourself there.  */
+     if (hwloc_set_cpubind(topology, &cpuset, 0)) {
+             char s[HWLOC_CPUSET_STRING_LENGTH + 1];
+             hwloc_cpuset_snprintf(s, sizeof(s), &obj->cpuset);
+             printf("Couldn&apos;t bind to cpuset %s\n", s);
+     }
+
+
+     /* Destroy topology object.  */
+     hwloc_topology_destroy(topology);
+
+     return 0;
 }
 
 Further documentation is available in html, manual pages, and pdf format in the
@@ -262,8 +261,10 @@ repository.
 
 The basic interface is available in hwloc.h, a lot of traversal examples are
 available as inlines in hwloc/helper.h . On Linux, additional helpers are
-available in hwloc/linux-libnuma.h and on glibc-based systems, additional
-helpers are available in hwloc/glibc-sched.h
+available in hwloc/linux.h, and hwloc/linux-libnuma.h if using libnuma. On
+glibc-based systems, additional helpers are available in hwloc/glibc-sched.h.
+On system with the Infiniband Verbs library, some helpers are provided in hwloc
+/ibverbs.h.
 
 To precisely define the vocabulary used by hwloc, a Glossary is available and
 should probably be read first.
@@ -274,7 +275,7 @@ Questions should be sent to the devel mailing list (http://www.open-mpi.org/
 community/lists/hwloc.php). Bug reports should be reported in the tracker (
 https://svn.open-mpi.org/trac/hwloc/).
 
-/ credits
+History / credits
 
 hwloc is the evolution and merger of the libtopology (http://
 runtime.bordeaux.inria.fr/libtopology/) project and the Portable Linux
@@ -290,5 +291,5 @@ Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Sun Sep 20 14:23:07 2009 for Hardware Locality (hwloc) by  doxygen
+Generated on Sat Sep 26 16:53:26 2009 for Hardware Locality (hwloc) by  doxygen
 1.6.1
