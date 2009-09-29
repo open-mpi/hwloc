@@ -1395,8 +1395,6 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
     assert(father->children[j]->sibling_rank == j);
     assert(father->children[j-1]->next_sibling == father->children[j]);
     assert(father->children[j]->prev_sibling == father->children[j-1]);
-    assert(father->children[j-1]->next_cousin == father->children[j]);
-    assert(father->children[j]->prev_cousin == father->children[j-1]);
   }
 }
 
