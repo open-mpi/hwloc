@@ -1413,6 +1413,16 @@ hwloc_topology_check(struct hwloc_topology *topology)
   for (i = hwloc_get_order_type(HWLOC_OBJ_SYSTEM); i <= hwloc_get_order_type(HWLOC_OBJ_CORE); i++)
     assert(hwloc_get_type_order(hwloc_get_order_type(i)) == i);
 
+  /* check that first level is SYSTEM */
+  assert(hwloc_get_depth_type(topology, 0) == HWLOC_OBJ_SYSTEM);
+  /* check that last level is PROC */
+  assert(hwloc_get_depth_type(topology, hwloc_topology_get_depth(topology)-1) == HWLOC_OBJ_PROC);
+  /* check that other levels are neither PROC nor SYSTEM */
+  for(i=1; i<hwloc_topology_get_depth(topology)-1; i++) {
+    assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_SYSTEM);
+    assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_PROC);
+  }
+
   /* top-level specific checks */
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
   obj = hwloc_get_system_obj(topology);
