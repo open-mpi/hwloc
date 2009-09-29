@@ -1352,14 +1352,20 @@ hwloc_topology_get_depth(struct hwloc_topology *topology)
 static void
 hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
 {
+  hwloc_cpuset_t remaining_father_set;
   int j;
 
   if (!father->arity) {
+    /* check whether that father has no children for real */
     assert(!father->children);
     assert(!father->first_child);
     assert(!father->last_child);
     return;
   }
+  /* check whether that father has children for real */
+  assert(father->children);
+  assert(father->first_child);
+  assert(father->last_child);
 
   /* first child specific checks */
   assert(father->first_child->sibling_rank == 0);
@@ -1371,6 +1377,19 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
   assert(father->last_child == father->children[father->arity-1]);
   assert(father->last_child->next_sibling == NULL);
 
+  remaining_father_set = father->cpuset;
+  for(j=0; j<father->arity; j++) {
+    /* check that child cpuset is included in the father */
+    assert(hwloc_cpuset_isincluded(&father->children[j]->cpuset, &remaining_father_set));
+    /* check that children are correctly ordered (see below) */
+    assert(hwloc_cpuset_first(&father->children[j]->cpuset) == hwloc_cpuset_first(&remaining_father_set));
+    /* clear previously used father cpuset bits so that we actually checked above
+     * that children cpusets do not intersect and are ordered properly
+     */
+    hwloc_cpuset_clearset(&remaining_father_set, &father->children[j]->cpuset);
+  }
+  assert(hwloc_cpuset_iszero(&remaining_father_set));
+
   /* checks for all children */
   for(j=1; j<father->arity; j++) {
     assert(father->children[j]->sibling_rank == j);
@@ -1378,7 +1397,6 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
     assert(father->children[j]->prev_sibling == father->children[j-1]);
     assert(father->children[j-1]->next_cousin == father->children[j]);
     assert(father->children[j]->prev_cousin == father->children[j-1]);
-    /* don't check that types are equal, in case of asymmetric topologies? */
   }
 }
 
@@ -1391,6 +1409,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
   hwloc_obj_type_t type;
   unsigned depth;
 
+  /* check type orders */
   for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
     assert(hwloc_get_order_type(hwloc_get_type_order(type)) == type);
   for (i = hwloc_get_order_type(HWLOC_OBJ_SYSTEM); i <= hwloc_get_order_type(HWLOC_OBJ_CORE); i++)
@@ -1400,6 +1419,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
   obj = hwloc_get_system_obj(topology);
   assert(obj);
+  /* top-level object must be SYSTEM */
   assert(obj->type == HWLOC_OBJ_SYSTEM);
 
   depth = hwloc_topology_get_depth(topology);
@@ -1409,17 +1429,20 @@ hwloc_topology_check(struct hwloc_topology *topology)
     unsigned width = hwloc_get_nbobjs_by_depth(topology, i);
     struct hwloc_obj *prev = NULL;
 
-    /* check that each object is equal to the previous one */
+    /* check each object of the level */
     for(j=0; j<width; j++) {
       obj = hwloc_get_obj_by_depth(topology, i, j);
+      /* check that the object is corrected placed horizontally and vertically */
       assert(obj);
       assert(obj->depth == i);
       assert(obj->logical_index == j);
+      /* check that all objects in the level have the same type */
       if (prev) {
 	assert(hwloc_type_cmp(obj, prev) == HWLOC_TYPE_EQUAL);
 	assert(prev->next_cousin == obj);
 	assert(obj->prev_cousin == prev);
       }
+      /* check children */
       hwloc__check_children(topology, obj);
       prev = obj;
     }
@@ -1434,12 +1457,12 @@ hwloc_topology_check(struct hwloc_topology *topology)
     assert(hwloc_get_type_depth(topology, obj->type) == i
 	   || hwloc_get_type_depth(topology, obj->type) == HWLOC_TYPE_DEPTH_MULTIPLE);
 
-    /* check last object */
+    /* check last object of the level */
     obj = hwloc_get_obj_by_depth(topology, i, width-1);
     assert(obj);
     assert(!obj->next_cousin);
 
-    /* check last+1 object */
+    /* check last+1 object of the level */
     obj = hwloc_get_obj_by_depth(topology, i, width);
     assert(!obj);
   }
@@ -1449,8 +1472,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
   for(j=0; j<hwloc_get_nbobjs_by_depth(topology, depth-1); j++) {
     obj = hwloc_get_obj_by_depth(topology, depth-1, j);
     assert(obj);
-    assert(obj->type == HWLOC_OBJ_PROC);
     assert(obj->arity == 0);
     assert(obj->children == NULL);
+    /* bottom-level object must always be PROC */
+    assert(obj->type == HWLOC_OBJ_PROC);
   }
 }
