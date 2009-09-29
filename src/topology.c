@@ -969,9 +969,9 @@ hwloc_discover(struct hwloc_topology *topology)
     top_obj = objs[0];
     for (i = 1; i < n_objs; i++) {
       if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
-	if (find_same_type(top_obj, objs[i])) {
-	  /* OBJTOP is strictly above an object of the same type as OBJ, so it
-	   * is above OBJ.  */
+	if (find_same_type(objs[i], top_obj)) {
+	  /* OBJS[i] is strictly above an object of the same type as TOP_OBJ, so it
+	   * is above TOP_OBJ.  */
 	  top_obj = objs[i];
 	}
       }
