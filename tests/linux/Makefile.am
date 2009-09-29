@@ -11,6 +11,7 @@ sysfs_tarballs = \
 		8amd64-4n2c.tar.gz  \
 		8em64t-4c2t.tar.gz \
 		8em64t-2s2ca2c.tar.gz \
+		8em64t-2s4c-heterogeneous.tar.gz \
 		8ia64-2n2s2d.tar.gz \
 		8ia64-4s2c.tar.gz \
 		16amd64-8n2c.tar.gz \
@@ -38,6 +39,7 @@ sysfs_outputs = \
 		8amd64-4n2c.tar.gz.output  \
 		8em64t-4c2t.tar.gz.output \
 		8em64t-2s2ca2c.tar.gz.output \
+		8em64t-2s4c-heterogeneous.tar.gz.output \
 		8ia64-2n2s2d.tar.gz.output \
 		8ia64-4s2c.tar.gz.output \
 		16amd64-8n2c.tar.gz.output \
