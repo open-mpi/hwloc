@@ -919,6 +919,10 @@ hwloc_discover(struct hwloc_topology *topology)
 #    ifndef HAVE_OS_SUPPORT
     hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors (), NULL);
 #    endif /* Unsupported OS */
+
+#    ifdef HAVE_LIBPCI
+    hwloc_look_libpci(topology);
+#    endif
   }
 
   print_objects(topology, 0, topology->levels[0][0]);

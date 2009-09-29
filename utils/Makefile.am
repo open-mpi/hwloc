@@ -12,8 +12,8 @@ lstopo_SOURCES = lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.
 if HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
 endif
-lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS)
-lstopo_LDADD = $(CAIRO_LIBS) $(XML_LIBS) -lm
+lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS) $(PCI_CFLAGS)
+lstopo_LDADD = $(CAIRO_LIBS) $(XML_LIBS) $(PCI_LIBS) -lm
 
 LIBS = $(top_builddir)/src/libhwloc.la
 

@@ -2,14 +2,14 @@
 
 include $(top_srcdir)/hwloc.am
 
-AM_CFLAGS += $(XML_CFLAGS)
+AM_CFLAGS += $(XML_CFLAGS) $(PCI_CFLAGS)
 
 lib_LTLIBRARIES = libhwloc.la
 
 EXTRA_DIST = dolib.c
 
-libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c bind.c
-libhwloc_la_LDFLAGS = -version-number $(libhwloc_so_version) $(XML_LIBS)
+libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c topology-libpci.c bind.c
+libhwloc_la_LDFLAGS = -version-number $(libhwloc_so_version) $(XML_LIBS) $(PCI_LIBS)
 
 if HAVE_GCC
 libhwloc_la_LDFLAGS += -no-undefined

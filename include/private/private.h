@@ -148,6 +148,10 @@ extern void hwloc_look_hpux(struct hwloc_topology *topology);
 extern void hwloc_set_hpux_hooks(struct hwloc_topology *topology);
 #endif /* HPUX_SYS */
 
+#ifdef HAVE_LIBPCI
+extern void hwloc_look_libpci(struct hwloc_topology *topology);
+#endif /* HAVE_LIBPCI */
+
 extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *description);
 extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);
 extern void hwloc_look_synthetic (struct hwloc_topology *topology);
