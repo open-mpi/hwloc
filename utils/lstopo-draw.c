@@ -109,9 +109,7 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
   maxwidth = maxheight = 0; \
   totwidth = (border) + mywidth; \
   totheight = (border) + myheight; \
-  foo_draw fun; \
   if (numsubobjs) { \
-    fun = get_type_fun(subobjs[0]->type); \
     int i; \
 
 #define RECURSE_FOR() \
@@ -120,7 +118,7 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 
       /* Recursive call */
 #define RECURSE_CALL_FUN(methods) \
-      fun(topology, methods, subobjs[i], output, depth-1, x + totwidth, &width, y + totheight, &height) \
+      get_type_fun(subobjs[i]->type)(topology, methods, subobjs[i], output, depth-1, x + totwidth, &width, y + totheight, &height) \
 
 #define RECURSE_END_HORIZ(separator, border) \
       /* Add the subobject's width and separator */ \
