@@ -44,14 +44,29 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     headertype &= 0x7f;
       printf("  type %d\n", headertype);
 
-    if (pcidev->device_class == PCI_CLASS_BRIDGE_PCI
-        && headertype == PCI_HEADER_TYPE_BRIDGE) {
-      unsigned char prim,sec,subor;
-      pci_read_block(pcidev, PCI_PRIMARY_BUS, &prim, 1);
-      pci_read_block(pcidev, PCI_SECONDARY_BUS, &sec, 1);
-      pci_read_block(pcidev, PCI_SUBORDINATE_BUS, &subor, 1);
-      printf("pci bridge with buses: primary %hhx secondary %hhx subordinate %hhx\n",
-	     prim, sec, subor);
+    switch (pcidev->device_class) {
+    case PCI_CLASS_BRIDGE_PCI:
+      if (headertype == PCI_HEADER_TYPE_BRIDGE) {
+	unsigned char prim,sec,subor;
+	pci_read_block(pcidev, PCI_PRIMARY_BUS, &prim, 1);
+	pci_read_block(pcidev, PCI_SECONDARY_BUS, &sec, 1);
+	pci_read_block(pcidev, PCI_SUBORDINATE_BUS, &subor, 1);
+	printf("  PCIBridge, buses: primary %hhx secondary %hhx subordinate %hhx\n",
+	       prim, sec, subor);
+      }
+      break;
+    case PCI_CLASS_DISPLAY_VGA:
+      printf("  GPU\n");
+      break;   
+    case PCI_CLASS_NETWORK_ETHERNET:
+      printf("  NIC\n");
+      break;
+    case PCI_CLASS_SERIAL_INFINIBAND:
+      printf("  InfiniBand\n");
+      break;
+    case PCI_CLASS_SYSTEM_OTHER:
+      printf("  Could be DMA Engine\n");
+      break;
     }
 
     strcpy(name, "??");
