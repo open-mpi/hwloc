@@ -500,6 +500,7 @@ hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned d
 static void
 look_sysfsnode(struct hwloc_topology *topology,
 	       const char *path,
+	       hwloc_cpuset_t *admin_disabled_cpus_set,
 	       hwloc_cpuset_t *admin_disabled_mems_set)
 {
   unsigned osnode;
@@ -539,6 +540,8 @@ look_sysfsnode(struct hwloc_topology *topology,
       sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
       if (hwloc_parse_cpumap(nodepath, &cpuset, topology->backend_params.sysfs.root_fd) < 0)
 	continue;
+      /* clear disabled cpus */
+      hwloc_cpuset_clearset(&cpuset, admin_disabled_cpus_set);
 
       if (hwloc_cpuset_isset(admin_disabled_mems_set, osnode)) {
 	size = 0; hpfree = 0;
@@ -992,7 +995,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     }
 
     /* Gather NUMA information */
-    look_sysfsnode(topology, "/sys/devices/system/node", &admin_disabled_mems_set);
+    look_sysfsnode(topology, "/sys/devices/system/node", &admin_disabled_cpus_set, &admin_disabled_mems_set);
 
     /* Gather the list of cpus now */
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
