@@ -223,6 +223,9 @@ hwloc_obj_snprintf(char *string, size_t size,
 		      verbose ? hwloc_obj_type_string(type) : "", os_index,
 		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
 		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));
+  case HWLOC_OBJ_PCI_DEVICE:
+  case HWLOC_OBJ_PCI_BRIDGE:
+    return snprintf(string, size, "%s%x", hwloc_obj_type_string(type), l->os_index);
   default:
     *string = '\0';
     return 0;

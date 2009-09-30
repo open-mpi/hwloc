@@ -671,6 +671,21 @@ hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj)
   add_object(topology, topology->levels[0][0], obj);
 }
 
+void
+hwloc_insert_object(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj)
+{
+  hwloc_obj_t *child;
+  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS)
+    return;
+
+  /* Append to the end of the list */
+  for (child = &father->first_child; *child; child = &(*child)->next_sibling)
+    ;
+
+  *child = obj;
+  obj->next_sibling = NULL;
+}
+
 /*
  * traverse the whole tree in a deletion-safe way, calling node_before at
  * nodes, leaf at leaves, and node_after when back at nodes, passing data along
@@ -735,7 +750,10 @@ do_free_object(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 static void
 remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
-  if ((*obj)->type != HWLOC_OBJ_NODE && hwloc_cpuset_iszero(&(*obj)->cpuset)) {
+  if ((*obj)->type != HWLOC_OBJ_NODE
+      && (*obj)->type != HWLOC_OBJ_PCI_DEVICE
+      && (*obj)->type != HWLOC_OBJ_PCI_BRIDGE
+      && hwloc_cpuset_iszero(&(*obj)->cpuset)) {
     /* Remove empty children */
     traverse(topology, obj, NULL, NULL, do_free_object, NULL);
     *obj = (*obj)->next_sibling;
@@ -941,7 +959,7 @@ hwloc_discover(struct hwloc_topology *topology)
   hwloc_debug("\nApplying the system cpuset to all nodes\n");
   traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, &topology->levels[0][0]->cpuset);
 
-  hwloc_debug("\nRemoving empty objects except numa nodes\n");
+  hwloc_debug("\nRemoving empty objects except numa nodes and PCI devices\n");
   traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
 
   print_objects(topology, 0, topology->levels[0][0]);

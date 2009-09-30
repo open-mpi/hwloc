@@ -181,12 +181,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 {
   struct pci_access *pciaccess;
   struct pci_dev *pcidev;
-  struct hwloc_obj hostbridge;
-
-  hostbridge.first_child = NULL;
-  hostbridge.last_child = NULL;
-  hostbridge.arity = 0;
-  hostbridge.children = NULL;
+  struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_BRIDGE, 0);
 
   pciaccess = pci_alloc();
   pci_init(pciaccess);
@@ -255,15 +250,17 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     printf("  Cpuset %s\n", localcpus);
 #endif
 
-    hwloc_pci_add_object(&hostbridge, obj);
+    hwloc_pci_add_object(hostbridge, obj);
 
     pcidev = pcidev->next;
   }
 
+  hwloc_insert_object(topology, topology->levels[0][0], hostbridge);
+
   pci_cleanup(pciaccess);
 
   /* just print the hierarchy for now */
-  hwloc_pci_traverse(&hostbridge, 0);
+  hwloc_pci_traverse(hostbridge, 0);
 }
 
 #endif /* HAVE_LIBPCI */
