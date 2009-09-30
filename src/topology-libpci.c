@@ -208,6 +208,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     unsigned char headertype;
     unsigned os_index;
     int fd;
+    int n;
 
     /* might be useful for debugging (note that domain might be truncated) */
     os_index = (pcidev->domain << 24) + (pcidev->bus << 16) + (pcidev->dev << 8) + pcidev->func;
@@ -255,8 +256,12 @@ hwloc_look_libpci(struct hwloc_topology *topology)
              pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func);
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/local_cpus", busid);
     fd = open(path, O_RDONLY);
-    read(fd, localcpus, sizeof(localcpus));
+    n = read(fd, localcpus, sizeof(localcpus) - 1);
     close(fd);
+    if (localcpus[n-1] == '\n')
+      localcpus[n-1] = 0;
+    else
+      localcpus[n] = 0;
     printf("  Cpuset %s\n", localcpus);
 #endif
 
