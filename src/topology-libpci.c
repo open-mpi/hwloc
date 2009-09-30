@@ -21,6 +21,7 @@
 
 #define CONFIG_SPACE_CACHESIZE 64
 
+#if 0
 static void
 hwloc_pci_traverse(struct hwloc_obj *root, int depth)
 {
@@ -46,6 +47,7 @@ hwloc_pci_traverse(struct hwloc_obj *root, int depth)
     child = child->next_sibling;
   }
 }
+#endif
 
 static void
 hwloc_pci_set_bridge_depths(struct hwloc_obj *root, int depth)
@@ -266,9 +268,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   /* walk the hierarchy and set bridge depth */
   hwloc_pci_set_bridge_depths(&fakehostbridge, 0);
 
-  /* just print the hierarchy for now */
-  hwloc_pci_traverse(&fakehostbridge, 0);
-
   /*
    * fakehostbridge lists all objects connected to any upstream bus in the machine.
    * We now create one real hostbridge object per upstream bus.
@@ -321,8 +320,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     hostbridge->attr->pcidev.domain = current_domain;
     hostbridge->attr->pcibridge.secondary_bus = current_bus;
     hostbridge->attr->pcibridge.subordinate_bus = current_subordinate;
-    printf("new hostbridge for upstream domain %04x bus %02x subordinate %02x with cpuset %" HWLOC_PRIxCPUSET "\n",
-	   current_domain, current_bus, current_subordinate, HWLOC_CPUSET_PRINTF_VALUE(&cpuset));
 
     /* attach the hostbridge now that it contains the right objects */
     hwloc_insert_object(topology, topology->levels[0][0], hostbridge);
