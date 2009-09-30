@@ -16,6 +16,10 @@
 #define EPOXY_G_COLOR 0xff
 #define EPOXY_B_COLOR 0xb5
 
+#define DARK_EPOXY_R_COLOR ((EPOXY_R_COLOR * 100) / 110)
+#define DARK_EPOXY_G_COLOR ((EPOXY_G_COLOR * 100) / 110)
+#define DARK_EPOXY_B_COLOR ((EPOXY_B_COLOR * 100) / 110)
+
 #define SOCKET_R_COLOR 0xde
 #define SOCKET_G_COLOR 0xde
 #define SOCKET_B_COLOR 0xde
@@ -40,9 +44,13 @@
 #define MACHINE_G_COLOR EPOXY_G_COLOR
 #define MACHINE_B_COLOR EPOXY_B_COLOR
 
-#define NODE_R_COLOR ((EPOXY_R_COLOR * 100) / 110)
-#define NODE_G_COLOR ((EPOXY_G_COLOR * 100) / 110)
-#define NODE_B_COLOR ((EPOXY_B_COLOR * 100) / 110)
+#define PCI_DEVICE_R_COLOR DARK_EPOXY_R_COLOR
+#define PCI_DEVICE_G_COLOR DARK_EPOXY_G_COLOR
+#define PCI_DEVICE_B_COLOR DARK_EPOXY_B_COLOR
+
+#define NODE_R_COLOR DARK_EPOXY_R_COLOR
+#define NODE_G_COLOR DARK_EPOXY_G_COLOR
+#define NODE_B_COLOR DARK_EPOXY_B_COLOR
 
 #define SYSTEM_R_COLOR 0xff
 #define SYSTEM_G_COLOR 0xff
@@ -315,6 +323,27 @@ prefer_vert(hwloc_topology_t topology, hwloc_obj_t level, void *output, unsigned
 }
 
 static void
+pci_device_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+{
+  unsigned textwidth = 0;
+  char text[64];
+  int n;
+
+  if (fontsize) {
+    n = hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    textwidth = (n * fontsize * 3) / 4;
+  }
+
+  *retwidth = textwidth;
+  *retheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
+
+  methods->box(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR, depth, x, *retwidth, y, *retheight);
+
+  if (fontsize)
+    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+}
+
+static void
 proc_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   *retwidth = fontsize ? 4*fontsize : gridsize;
@@ -536,7 +565,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t l
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth;
+  unsigned textwidth = 0;
   char text[64];
   int n;
 
@@ -581,6 +610,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_CACHE: return cache_draw;
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PROC: return proc_draw;
+    case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
     default:
     case HWLOC_OBJ_MISC: return misc_draw;
   }
