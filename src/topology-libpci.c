@@ -382,6 +382,11 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
     /* attach the hostbridge now that it contains the right objects */
     struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, &cpuset);
+    /* do not attach to the lowest object since it could be a cache or so,
+     * go up as long as the cpuset is the same
+     */
+    while (parent->father && hwloc_cpuset_isequal(&parent->cpuset, &parent->father->cpuset))
+      parent = parent->father;
     hwloc_insert_object(topology, parent, hostbridge);
   }
 }
