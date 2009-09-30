@@ -366,7 +366,7 @@ pci_bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_o
   DYNA_CHECK();
 
   /* separate text from devices */
-  if (level->arity > 1)
+  if (level->arity > 0)
     myheight += gridsize;
 
   RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
@@ -379,7 +379,7 @@ pci_bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_o
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  if (level->arity > 1) {
+  if (level->arity > 0) {
     unsigned bottom = 0;
     RECURSE_BEGIN(level, 0);
     RECURSE_FOR()
