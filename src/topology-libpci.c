@@ -115,8 +115,6 @@ hwloc_pci_add_child_before(struct hwloc_obj *root, struct hwloc_obj *child, stru
   else
     root->first_child = new;
   new->next_sibling = child;
-
-  root->arity++;
 }
 
 static void
@@ -132,7 +130,6 @@ hwloc_pci_remove_child(struct hwloc_obj *root, struct hwloc_obj *child)
     root->first_child = child->next_sibling;
   child->prev_sibling = NULL;
   child->next_sibling = NULL;
-  root->arity--;
 }
 
 static void hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new);
@@ -268,15 +265,15 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     pcidev = pcidev->next;
   }
 
-  hwloc_insert_object(topology, topology->levels[0][0], hostbridge);
-
   pci_cleanup(pciaccess);
 
   /* walk the hierarchy and set bridge depth */
-  hwloc_pci_set_bridge_depths(&hostbridge, 0);
+  hwloc_pci_set_bridge_depths(hostbridge, 0);
 
   /* just print the hierarchy for now */
   hwloc_pci_traverse(hostbridge, 0);
+
+  hwloc_insert_object(topology, topology->levels[0][0], hostbridge);
 }
 
 #endif /* HAVE_LIBPCI */
