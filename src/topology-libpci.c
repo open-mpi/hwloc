@@ -277,11 +277,15 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       obj->attr->pcibridge.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
     }
 
+    /* FIXME: store in obj->name */
     strcpy(name, "??");
     pci_lookup_name(pciaccess, name, sizeof(name),
                     PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
                     pcidev->vendor_id, pcidev->device_id);
-    hwloc_debug("  %s\n", name);
+    hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s\n",
+		pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func,
+		pcidev->device_class, pcidev->vendor_id, pcidev->device_id,
+		name);
 
     hwloc_pci_add_object(&fakehostbridge, obj);
 
@@ -340,8 +344,10 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     char envname[256];
     snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS", child->attr->pcidev.domain, child->attr->pcidev.bus);
     char *env = getenv(envname);
-    if (env)
+    if (env) {
+      hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
       hwloc_cpuset_from_string(env, &cpuset);
+    }
 
     /*
      * attach all objects from the same upstream domain/bus
