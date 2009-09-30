@@ -230,7 +230,7 @@ hwloc_obj_snprintf(char *string, size_t size,
 		      l->attr->pcidev.domain, l->attr->pcidev.bus, l->attr->pcidev.dev, l->attr->pcidev.func,
 		      l->attr->pcidev.device_id, l->attr->pcidev.vendor_id, l->attr->pcidev.class);
     else {
-      return snprintf(string, size, "PCI %04x:%04x", l->attr->pcidev.device_id, l->attr->pcidev.vendor_id);
+      return snprintf(string, size, "PCI %04x:%04x", l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
     }
   default:
     *string = '\0';
