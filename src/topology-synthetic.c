@@ -182,6 +182,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_MISC:
       break;
     case HWLOC_OBJ_SYSTEM:
+    case HWLOC_OBJ_PCI_BRIDGE:
+    case HWLOC_OBJ_PCI_DEVICE:
       /* Shouldn't happen.  */
       abort();
       break;
@@ -222,6 +224,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       obj->attr->misc.depth = topology->backend_params.synthetic.depth[level];
       break;
     case HWLOC_OBJ_SYSTEM:
+    case HWLOC_OBJ_PCI_BRIDGE:
+    case HWLOC_OBJ_PCI_DEVICE:
       abort();
       break;
     case HWLOC_OBJ_MACHINE:

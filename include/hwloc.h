@@ -92,15 +92,8 @@ typedef enum {
 			  */
 
   HWLOC_OBJ_PCI_BRIDGE,	/**< \brief PCI bridge.
-			  * I/O devices and connected to the main topology
-			  * through one (or several) bridges and their
-			  * associated buses.
 			  */
-  HWLOC_OBJ_GPU,	/**< \brief GPU.
-			  */
-  HWLOC_OBJ_NIC,	/**< \brief Network interface card.
-			  */
-  HWLOC_OBJ_INFINIBAND,	/**< \brief InfiniBand HCA.
+  HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
 			  */
 } hwloc_obj_type_t;
 /** \brief Maximal value of an object type */
@@ -196,6 +189,19 @@ union hwloc_obj_attr_u {
   struct hwloc_misc_attr_u {
     unsigned depth;			  /**< \brief Depth of misc object */
   } misc;
+  /** \brief PCI Device specific Object Attributes */
+  struct hwloc_pcidev_attr_u {
+    unsigned short domain;
+    unsigned char bus, dev, func;
+    unsigned short class;
+    unsigned short vendor_id, device_id, subvendor_id, subdevice_id;
+    unsigned char revision;
+  } pcidev;
+  /** \brief PCI Bridge specific Object Attribues */
+  struct hwloc_pcibridge_attr_u {
+    struct hwloc_pcidev_attr_u dev;
+    unsigned char secondary_bus, subordinate_bus;
+  } pcibridge;
 };
 
 /** @} */

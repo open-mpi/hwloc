@@ -35,64 +35,52 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     char path[256];
     char localcpus[4096];
     u8 config_space_cache[CONFIG_SPACE_CACHESIZE];
+    struct hwloc_obj *obj;
     unsigned char headertype;
-    unsigned char revision, subvendor_id, subdevice_id;
-    hwloc_obj_type_t type;
+    unsigned os_index;
     int fd;
+
+    /* might be useful for debugging (note that domain might be truncated) */
+    os_index = (pcidev->domain << 24) + (pcidev->bus << 16) + (pcidev->dev << 8) + pcidev->func;
+
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
 
     pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE);
 
+    obj->attr->pcidev.domain = pcidev->domain;
+    obj->attr->pcidev.bus = pcidev->bus;
+    obj->attr->pcidev.dev = pcidev->dev;
+    obj->attr->pcidev.func = pcidev->func;
+    obj->attr->pcidev.vendor_id = pcidev->vendor_id;
+    obj->attr->pcidev.device_id = pcidev->device_id;
+    obj->attr->pcidev.class = pcidev->device_class;
     assert(PCI_REVISION_ID < CONFIG_SPACE_CACHESIZE);
-    revision = config_space_cache[PCI_REVISION_ID];
+    obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
     assert(PCI_SUBSYSTEM_VENDOR_ID < CONFIG_SPACE_CACHESIZE);
-    subvendor_id = config_space_cache[PCI_SUBSYSTEM_VENDOR_ID];
+    obj->attr->pcidev.subvendor_id = config_space_cache[PCI_SUBSYSTEM_VENDOR_ID];
     assert(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
-    subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
+    obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
 
     snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
              pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func);
     printf("%s [%04x:%04x (%04x:%04x)] rev=%02x class=%04x\n",
-           busid, pcidev->vendor_id, pcidev->device_id, subvendor_id, subdevice_id, revision, pcidev->device_class);
+           busid, pcidev->vendor_id, pcidev->device_id, obj->attr->pcidev.subvendor_id, obj->attr->pcidev.subdevice_id, obj->attr->pcidev.revision, pcidev->device_class);
 
     assert(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
     headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
-      printf("  type %d\n", headertype);
 
-    switch (pcidev->device_class) {
-    case PCI_CLASS_BRIDGE_PCI:
-      if (headertype == PCI_HEADER_TYPE_BRIDGE) {
-	unsigned char prim,sec,subor;
-	assert(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
-	assert(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
-	assert(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
-	prim = config_space_cache[PCI_PRIMARY_BUS];
-	sec = config_space_cache[PCI_SECONDARY_BUS];
-	subor = config_space_cache[PCI_SUBORDINATE_BUS];
-	printf("  PCIBridge, buses: primary %hhx secondary %hhx subordinate %hhx\n",
-	       prim, sec, subor);
-	type = HWLOC_OBJ_PCI_BRIDGE;
-      }
-      break;
-    case PCI_CLASS_DISPLAY_VGA:
-    /* case PCI_CLASS_DISPLAY_3D: for Tesla? */
-      printf("  GPU\n");
-      type = HWLOC_OBJ_GPU;
-      break;   
-    case PCI_CLASS_NETWORK_ETHERNET:
-      printf("  NIC\n");
-      type = HWLOC_OBJ_NIC;
-      break;
-    case PCI_CLASS_SERIAL_INFINIBAND:
-      printf("  InfiniBand\n");
-      type = HWLOC_OBJ_INFINIBAND;
-      break;
-    case PCI_CLASS_SYSTEM_OTHER:
-      printf("  Could be DMA Engine\n");
-      /* TODO */
-      break;
+    if (pcidev->device_class == PCI_CLASS_BRIDGE_PCI
+      && headertype == PCI_HEADER_TYPE_BRIDGE) {
+      assert(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
+      assert(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
+      assert(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
+      assert(config_space_cache[PCI_PRIMARY_BUS] == pcidev->bus);
+      obj->type = HWLOC_OBJ_PCI_BRIDGE;
+      obj->attr->pcibridge.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];
+      obj->attr->pcibridge.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
+      printf("  PCIBridge, buses: primary %hhx secondary %hhx subordinate %hhx\n",
+	     pcidev->bus, obj->attr->pcibridge.secondary_bus, obj->attr->pcibridge.subordinate_bus);
     }
-
-
 
     strcpy(name, "??");
     pci_lookup_name(pciaccess, name, sizeof(name),
@@ -107,6 +95,10 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     close(fd);
     printf("  Cpuset %s\n", localcpus);
 #endif
+
+    /* do nothing for now */
+    free(obj->attr);
+    free(obj);
 
     pcidev = pcidev->next;
   }
