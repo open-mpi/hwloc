@@ -44,10 +44,6 @@
 #define MACHINE_G_COLOR EPOXY_G_COLOR
 #define MACHINE_B_COLOR EPOXY_B_COLOR
 
-#define PCI_DEVICE_R_COLOR DARK_EPOXY_R_COLOR
-#define PCI_DEVICE_G_COLOR DARK_EPOXY_G_COLOR
-#define PCI_DEVICE_B_COLOR DARK_EPOXY_B_COLOR
-
 #define NODE_R_COLOR DARK_EPOXY_R_COLOR
 #define NODE_G_COLOR DARK_EPOXY_G_COLOR
 #define NODE_B_COLOR DARK_EPOXY_B_COLOR
@@ -60,8 +56,19 @@
 #define MISC_G_COLOR 0xff
 #define MISC_B_COLOR 0xff
 
+#define PCI_DEVICE_R_COLOR DARK_EPOXY_R_COLOR
+#define PCI_DEVICE_G_COLOR DARK_EPOXY_G_COLOR
+#define PCI_DEVICE_B_COLOR DARK_EPOXY_B_COLOR
+
+#define PCI_BRIDGE_R_COLOR 0xff
+#define PCI_BRIDGE_G_COLOR 0xff
+#define PCI_BRIDGE_B_COLOR 0xff
+
 /* preferred width/height compromise */
 #define RATIO (4./3.)
+
+/* PCI object height: just a box */
+#define PCI_HEIGHT (fontsize ? gridsize + fontsize + gridsize : gridsize)
 
 /* do we prefer ratio1 over ratio2? */
 static int prefer_ratio(float ratio1, float ratio2) {
@@ -97,6 +104,9 @@ static struct draw_methods null_draw_methods = {
  * space that the drawing took.
  *
  * For generic detailed comments, see the node_draw function.
+ *
+ * border is added around the objects
+ * separator is added between objects
  */
 
 typedef void (*foo_draw)(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t obj, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight);
@@ -106,7 +116,7 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 /*
  * Helper to recurse into sublevels, either horizontally or vertically
  * Updates caller's totwidth/myheight and maxwidth/maxheight
- * Needs textwidth, border, topology, output, depth, x and y
+ * Needs textwidth, topology, output, depth, x and y
  */
 
 #define RECURSE_BEGIN(obj, border) do { \
@@ -144,11 +154,11 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
     totheight += maxheight; \
     /* And add border below */ \
     totheight += (border); \
+    /* Add border on the right */ \
+    totwidth += (border); \
   } \
   if (totwidth < textwidth) \
     totwidth = textwidth; \
-  /* Add border on the right */ \
-  totwidth += (border); \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
@@ -163,17 +173,17 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
     } \
     /* Remove spurious separator at the bottom */ \
     totheight -= (separator); \
+    /* Add subobjects width */ \
+    totwidth += maxwidth; \
+    /* And add border on the right */ \
+    totwidth += (border); \
+    /* Add border at the bottom */ \
+    totheight = totheight + (border); \
   } \
   \
   /* Make sure there is width for the heading text */ \
   if (maxwidth < textwidth) \
     maxwidth = textwidth; \
-  /* Add subobjects width */ \
-  totwidth += maxwidth; \
-  /* And add border on the right */ \
-  totwidth += (border); \
-  /* Add border at the bottom */ \
-  totheight = totheight + (border); \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
@@ -335,12 +345,54 @@ pci_device_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_o
   }
 
   *retwidth = textwidth;
-  *retheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
+  *retheight = PCI_HEIGHT;
 
   methods->box(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   if (fontsize)
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+}
+
+static void
+pci_bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+{
+  /* Room for the box and separation from cards */
+  unsigned textwidth = 12*fontsize;
+  unsigned textheight = PCI_HEIGHT;
+  unsigned myheight = textheight;
+  unsigned mywidth = gridsize + gridsize;
+  unsigned totwidth, totheight;
+
+  DYNA_CHECK();
+
+  /* separate text from devices */
+  if (level->arity > 1)
+    myheight += gridsize;
+
+  RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
+
+  methods->box(output, PCI_BRIDGE_R_COLOR, PCI_BRIDGE_G_COLOR, PCI_BRIDGE_B_COLOR, depth, x, textwidth, y, textheight);
+
+  if (fontsize) {
+    char text[64];
+    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+  }
+
+  if (level->arity > 1) {
+    unsigned bottom = 0;
+    RECURSE_BEGIN(level, 0);
+    RECURSE_FOR()
+      RECURSE_CALL_FUN(methods);
+      unsigned center = y + totheight + PCI_HEIGHT / 2;
+      bottom = center;
+      methods->line(output, 0, 0, 0, depth, x + gridsize, center, x + gridsize + gridsize, center);
+    RECURSE_END_VERT(gridsize, 0);
+    methods->line(output, 0, 0, 0, depth, x + gridsize, y + textheight, x + gridsize, bottom);
+  } else
+    RECURSE_VERT(level, methods, gridsize, 0);
+
+  DYNA_SAVE();
 }
 
 static void
@@ -611,6 +663,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PROC: return proc_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
+    case HWLOC_OBJ_PCI_BRIDGE: return pci_bridge_draw;
     default:
     case HWLOC_OBJ_MISC: return misc_draw;
   }
