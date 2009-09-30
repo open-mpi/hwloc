@@ -308,6 +308,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   /* walk the hierarchy and set bridge depth */
   hwloc_pci_set_bridge_depths(&fakehostbridge, 0);
 
+  /* FIXME: lspci seems to find these hostbridge devices for real, need to be reworked */
+
   /*
    * fakehostbridge lists all objects connected to any upstream bus in the machine.
    * We now create one real hostbridge object per upstream bus.
@@ -361,6 +363,9 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 	&& child->attr->pcidev.bus == current_bus)
       goto next_child;
 
+    /* default values that mean nothing */
+    memset(hostbridge->attr, 0, sizeof(*hostbridge->attr));
+    hostbridge->attr->pcidev.bus = current_bus;
     /* finish setting up this hostbridge */
     hostbridge->attr->pcidev.domain = current_domain;
     hostbridge->attr->pcibridge.secondary_bus = current_bus;
