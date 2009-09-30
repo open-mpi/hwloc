@@ -191,6 +191,22 @@ hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
   hwloc_pci_add_child_before(root, NULL, new);
 }
 
+static void
+hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
+{
+  struct hwloc_obj *child, *next_child;
+  next_child = root->first_child;
+  while (next_child) {
+    child = next_child;
+    next_child = child->next_sibling;
+    if (child->type != HWLOC_OBJ_PCI_BRIDGE)
+      continue;
+    hwloc_pci_drop_useless_bridges(child);
+    if (!child->first_child)
+      hwloc_pci_remove_child(root, child);
+  }
+}
+
 void
 hwloc_look_libpci(struct hwloc_topology *topology)
 {
@@ -212,13 +228,31 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     struct hwloc_obj *obj;
     unsigned char headertype;
     unsigned os_index;
+    unsigned baseclass;
+    unsigned isbridge;
+
+    /* cache what we need of the config space */
+    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE);
+
+    /* is this a bridge? */
+    HWLOC_BUILD_ASSERT(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
+    headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
+    isbridge = (pcidev->device_class == PCI_CLASS_BRIDGE_PCI
+		&& headertype == PCI_HEADER_TYPE_BRIDGE);
+
+    /* is this device interesting? */
+    baseclass = pcidev->device_class >> 8;
+    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI)
+	&& !isbridge
+	&& baseclass != PCI_BASE_CLASS_DISPLAY
+	&& baseclass != PCI_BASE_CLASS_NETWORK
+	&& pcidev->device_class != PCI_CLASS_SERIAL_INFINIBAND)
+      goto nextdev;
 
     /* might be useful for debugging (note that domain might be truncated) */
     os_index = (pcidev->domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
 
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
-
-    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE);
+    obj = hwloc_alloc_setup_object(isbridge ? HWLOC_OBJ_PCI_BRIDGE : HWLOC_OBJ_PCI_DEVICE, os_index);
 
     obj->attr->pcidev.domain = pcidev->domain;
     obj->attr->pcidev.bus = pcidev->bus;
@@ -234,16 +268,11 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
 
-    HWLOC_BUILD_ASSERT(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
-    headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
-
-    if (pcidev->device_class == PCI_CLASS_BRIDGE_PCI
-      && headertype == PCI_HEADER_TYPE_BRIDGE) {
+    if (isbridge) {
       HWLOC_BUILD_ASSERT(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
       HWLOC_BUILD_ASSERT(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
       HWLOC_BUILD_ASSERT(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
       assert(config_space_cache[PCI_PRIMARY_BUS] == pcidev->bus);
-      obj->type = HWLOC_OBJ_PCI_BRIDGE;
       obj->attr->pcibridge.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];
       obj->attr->pcibridge.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
     }
@@ -256,10 +285,15 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
     hwloc_pci_add_object(&fakehostbridge, obj);
 
+  nextdev:
     pcidev = pcidev->next;
   }
 
   pci_cleanup(pciaccess);
+
+  /* drop useless bridges if needed */
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI))
+    hwloc_pci_drop_useless_bridges(&fakehostbridge);
 
   if (!fakehostbridge.first_child)
     /* found nothing, exit */

@@ -66,6 +66,9 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --whole-system        do not consider administration limitations\n");
   fprintf (where, "   --merge               do not show levels that do not have a hierarcical\n"
                   "                         impact\n");
+#ifdef HAVE_LIBPCI
+  fprintf (where, "   --whole-pci           show all PCI devices and bridges\n");
+#endif
 #ifdef HAVE_XML
   fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
 #endif
@@ -123,6 +126,8 @@ main (int argc, char *argv[])
 	ignorecache = 1;
       else if (!strcmp (argv[1], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+      else if (!strcmp (argv[1], "--whole-pci"))
+	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_PCI;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
       else if (!strcmp (argv[1], "--horiz"))

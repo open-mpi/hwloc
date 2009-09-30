@@ -314,6 +314,15 @@ enum hwloc_topology_flags_e {
    * backend, but still having binding functions actually do bind.
    */
   HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
+
+  /* \brief Detect the whole PCI hierarchy.
+   *
+   * By default, only interesting PCI objects are added to the topology,
+   * especially GPUs and NICs, and all bridges that do not lead to such
+   * objects are ignored.
+   * This flag enables the loading of the actual whole PCI hierarchy.
+   */
+  HWLOC_TOPOLOGY_FLAG_WHOLE_PCI = (1<<2),
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
