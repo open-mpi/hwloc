@@ -23,13 +23,22 @@ hwloc_pci_traverse(struct hwloc_obj *root, int depth)
 {
   struct hwloc_obj *child = root->first_child;
   while (child) {
+    char busid[14];
+    snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
+             child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func);
+
     if (child->type == HWLOC_OBJ_PCI_BRIDGE)
-      printf("%*s %04x:%02x:%02x.%01x Bridge to [%02x:%02x]\n", depth, "",
-	     child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func,
+      printf("%*s %s Bridge [%04x:%04x (%04x:%04x) rev=%02x class=%04x] to [%02x:%02x]\n", depth, "", busid,
+	     child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
+	     child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
+	     child->attr->pcidev.revision, child->attr->pcidev.class,
 	     child->attr->pcibridge.secondary_bus, child->attr->pcibridge.subordinate_bus);
     else
-      printf("%*s %04x:%02x:%02x.%01x Device\n", depth, "",
-	     child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func);
+      printf("%*s %s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", depth, "", busid,
+	     child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
+	     child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
+	     child->attr->pcidev.revision, child->attr->pcidev.class);
+
     hwloc_pci_traverse(child, depth+2);
     child = child->next_sibling;
   }
@@ -216,11 +225,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
 
-    snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
-             pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func);
-    printf("%s [%04x:%04x (%04x:%04x)] rev=%02x class=%04x\n",
-           busid, pcidev->vendor_id, pcidev->device_id, obj->attr->pcidev.subvendor_id, obj->attr->pcidev.subdevice_id, obj->attr->pcidev.revision, pcidev->device_class);
-
     HWLOC_BUILD_ASSERT(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
     headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
 
@@ -233,8 +237,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       obj->type = HWLOC_OBJ_PCI_BRIDGE;
       obj->attr->pcibridge.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];
       obj->attr->pcibridge.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
-      printf("  PCIBridge, buses: primary %hhx secondary %hhx subordinate %hhx\n",
-	     pcidev->bus, obj->attr->pcibridge.secondary_bus, obj->attr->pcibridge.subordinate_bus);
     }
 
     strcpy(name, "??");
@@ -244,6 +246,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     printf("  %s\n", name);
 
 #ifdef LINUX_SYS
+    snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
+             pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func);
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/local_cpus", busid);
     fd = open(path, O_RDONLY);
     read(fd, localcpus, sizeof(localcpus));
