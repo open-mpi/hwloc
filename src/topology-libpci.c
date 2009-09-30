@@ -5,6 +5,7 @@
 
 #include <private/config.h>
 #include <hwloc.h>
+#include <hwloc/helper.h>
 #include <private/private.h>
 #include <private/debug.h>
 
@@ -380,7 +381,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 		current_domain, current_bus, current_subordinate, HWLOC_CPUSET_PRINTF_VALUE(&cpuset));
 
     /* attach the hostbridge now that it contains the right objects */
-    hwloc_insert_object(topology, topology->levels[0][0], hostbridge);
+    struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, &cpuset);
+    hwloc_insert_object(topology, parent, hostbridge);
   }
 }
 
