@@ -206,6 +206,42 @@ hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
   }
 }
 
+static struct hwloc_obj *
+hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
+{
+  hwloc_cpuset_t cpuset = HWLOC_CPUSET_FULL; /* FIXME: should be the system cpuset? */
+
+  /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
+#ifdef LINUX_SYS
+  char path[256];
+  FILE *file;
+  snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
+	   hostbridge->first_child->attr->pcidev.domain, hostbridge->first_child->attr->pcidev.bus,
+	   hostbridge->first_child->attr->pcidev.dev, hostbridge->first_child->attr->pcidev.func);
+  file = fopen(path, "r"); /* FIXME: use fsroot */
+  hwloc_linux_parse_cpumap_file(file, &cpuset);
+  fclose(file);
+#endif
+
+  char envname[256];
+  snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS",
+	   hostbridge->first_child->attr->pcidev.domain, hostbridge->first_child->attr->pcidev.bus);
+  char *env = getenv(envname);
+  if (env) {
+    hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
+    hwloc_cpuset_from_string(env, &cpuset);
+  }
+
+  /* attach the hostbridge now that it contains the right objects */
+  struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, &cpuset);
+  /* do not attach to the lowest object since it could be a cache or so,
+   * go up as long as the cpuset is the same
+   */
+  while (parent->father && hwloc_cpuset_isequal(&parent->cpuset, &parent->father->cpuset))
+    parent = parent->father;
+  return parent;
+}
+
 void
 hwloc_look_libpci(struct hwloc_topology *topology)
 {
@@ -313,8 +349,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   /* walk the hierarchy and set bridge depth */
   hwloc_pci_set_bridge_depths(&fakehostbridge, 0);
 
-  /* FIXME: lspci seems to find these hostbridge devices for real, need to be reworked */
-
   /*
    * fakehostbridge lists all objects connected to any upstream bus in the machine.
    * We now create one real hostbridge object per upstream bus.
@@ -330,25 +364,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     unsigned char current_bus = child->attr->pcidev.bus;
     unsigned char current_subordinate = current_bus;
     hwloc_debug("Starting new PCI hostbridge %04x:%02x\n", current_domain, current_bus);
-
-    /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
-    hwloc_cpuset_t cpuset = HWLOC_CPUSET_FULL; /* FIXME: should be the system cpuset? */
-#ifdef LINUX_SYS
-    char path[256];
-    FILE *file;
-    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
-             child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func);
-    file = fopen(path, "r"); /* FIXME: use fsroot */
-    hwloc_linux_parse_cpumap_file(file, &cpuset);
-    fclose(file);
-#endif
-    char envname[256];
-    snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS", child->attr->pcidev.domain, child->attr->pcidev.bus);
-    char *env = getenv(envname);
-    if (env) {
-      hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
-      hwloc_cpuset_from_string(env, &cpuset);
-    }
 
     /*
      * attach all objects from the same upstream domain/bus
@@ -380,13 +395,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     hwloc_debug("New PCI hostbridge %04x:[%02x-%02x] with cpuset %" HWLOC_PRIxCPUSET "\n",
 		current_domain, current_bus, current_subordinate, HWLOC_CPUSET_PRINTF_VALUE(&cpuset));
 
-    /* attach the hostbridge now that it contains the right objects */
-    struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, &cpuset);
-    /* do not attach to the lowest object since it could be a cache or so,
-     * go up as long as the cpuset is the same
-     */
-    while (parent->father && hwloc_cpuset_isequal(&parent->cpuset, &parent->father->cpuset))
-      parent = parent->father;
+    /* attach the hostbridge where it belongs */
+    struct hwloc_obj *parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge);
     hwloc_insert_object(topology, parent, hostbridge);
   }
 }
