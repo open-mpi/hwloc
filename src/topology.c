@@ -1381,8 +1381,9 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
   for(j=0; j<father->arity; j++) {
     /* check that child cpuset is included in the father */
     assert(hwloc_cpuset_isincluded(&father->children[j]->cpuset, &remaining_father_set));
-    /* check that children are correctly ordered (see below) */
-    assert(hwloc_cpuset_first(&father->children[j]->cpuset) == hwloc_cpuset_first(&remaining_father_set));
+    /* check that children are correctly ordered (see below), empty ones may be anywhere */
+    if (!hwloc_cpuset_iszero(&father->children[j]->cpuset))
+      assert(hwloc_cpuset_first(&father->children[j]->cpuset) == hwloc_cpuset_first(&remaining_father_set));
     /* clear previously used father cpuset bits so that we actually checked above
      * that children cpusets do not intersect and are ordered properly
      */
