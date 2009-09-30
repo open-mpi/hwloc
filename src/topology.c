@@ -953,7 +953,8 @@ hwloc_discover(struct hwloc_topology *topology)
 #    endif /* Unsupported OS */
 
 #    ifdef HAVE_LIBPCI
-    hwloc_look_libpci(topology);
+    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_PCI))
+      hwloc_look_libpci(topology);
 #    endif
   }
 

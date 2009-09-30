@@ -68,6 +68,7 @@ static void usage(char *name, FILE *where)
                   "                         impact\n");
 #ifdef HAVE_LIBPCI
   fprintf (where, "   --whole-pci           show all PCI devices and bridges\n");
+  fprintf (where, "   --no-pci              do not show any PCI device or bridge\n");
 #endif
 #ifdef HAVE_XML
   fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
@@ -128,6 +129,8 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--whole-pci"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_PCI;
+      else if (!strcmp (argv[1], "--no-pci"))
+	flags |= HWLOC_TOPOLOGY_FLAG_NO_PCI;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
       else if (!strcmp (argv[1], "--horiz"))

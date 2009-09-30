@@ -323,6 +323,15 @@ enum hwloc_topology_flags_e {
    * This flag enables the loading of the actual whole PCI hierarchy.
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_PCI = (1<<2),
+
+  /* \brief Do not detect the PCI hierarchy.
+   *
+   * By default, only interesting PCI objects are added to the topology,
+   * especially GPUs and NICs, and all bridges that do not lead to such
+   * objects are ignored.
+   * This flag disables all PCI objects.
+   */
+  HWLOC_TOPOLOGY_FLAG_NO_PCI = (1<<3),
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
