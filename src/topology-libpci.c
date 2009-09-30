@@ -54,11 +54,11 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     obj->attr->pcidev.vendor_id = pcidev->vendor_id;
     obj->attr->pcidev.device_id = pcidev->device_id;
     obj->attr->pcidev.class = pcidev->device_class;
-    assert(PCI_REVISION_ID < CONFIG_SPACE_CACHESIZE);
+    HWLOC_BUILD_ASSERT(PCI_REVISION_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
-    assert(PCI_SUBSYSTEM_VENDOR_ID < CONFIG_SPACE_CACHESIZE);
+    HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_VENDOR_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.subvendor_id = config_space_cache[PCI_SUBSYSTEM_VENDOR_ID];
-    assert(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
+    HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
 
     snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
@@ -66,14 +66,14 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     printf("%s [%04x:%04x (%04x:%04x)] rev=%02x class=%04x\n",
            busid, pcidev->vendor_id, pcidev->device_id, obj->attr->pcidev.subvendor_id, obj->attr->pcidev.subdevice_id, obj->attr->pcidev.revision, pcidev->device_class);
 
-    assert(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
+    HWLOC_BUILD_ASSERT(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
     headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
 
     if (pcidev->device_class == PCI_CLASS_BRIDGE_PCI
       && headertype == PCI_HEADER_TYPE_BRIDGE) {
-      assert(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
-      assert(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
-      assert(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
+      HWLOC_BUILD_ASSERT(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
+      HWLOC_BUILD_ASSERT(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
+      HWLOC_BUILD_ASSERT(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
       assert(config_space_cache[PCI_PRIMARY_BUS] == pcidev->bus);
       obj->type = HWLOC_OBJ_PCI_BRIDGE;
       obj->attr->pcibridge.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];

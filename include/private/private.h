@@ -211,4 +211,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
   hwloc_debug("\n");
 }
 
+/* Compile-time assertion */
+#define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
+
 #endif /* HWLOC_PRIVATE_H */
