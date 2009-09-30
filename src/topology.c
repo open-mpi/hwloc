@@ -952,11 +952,6 @@ hwloc_discover(struct hwloc_topology *topology)
 #    ifndef HAVE_OS_SUPPORT
     hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors (), NULL);
 #    endif /* Unsupported OS */
-
-#    ifdef HAVE_LIBPCI
-    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_PCI))
-      hwloc_look_libpci(topology);
-#    endif
   }
 
   print_objects(topology, 0, topology->levels[0][0]);
@@ -1085,6 +1080,38 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* It's empty now.  */
   free(objs);
+
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_PCI)) {
+    int gotsome = 0;
+    hwloc_debug("\nLooking for PCI devices\n");
+
+    if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
+      /* TODO */
+    }
+#ifdef HAVE_XML
+    else if (topology->backend_type == HWLOC_BACKEND_XML) {
+      /* TODO */
+    }
+#endif
+#ifdef HAVE_LIBPCI
+    else {
+        hwloc_look_libpci(topology);
+        gotsome = 1;
+    }
+#endif
+
+    if (gotsome) {
+      print_objects(topology, 0, topology->levels[0][0]);
+
+      hwloc_debug("\nNow reconnecting\n");
+
+      hwloc_connect(topology->levels[0][0]);
+
+      print_objects(topology, 0, topology->levels[0][0]);
+    } else {
+      hwloc_debug("\nno PCI detection\n");
+    }
+  }
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;
