@@ -214,7 +214,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     unsigned os_index;
 
     /* might be useful for debugging (note that domain might be truncated) */
-    os_index = (pcidev->domain << 24) + (pcidev->bus << 16) + (pcidev->dev << 8) + pcidev->func;
+    os_index = (pcidev->domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
 
     obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
 
