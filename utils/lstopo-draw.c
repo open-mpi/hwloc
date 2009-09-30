@@ -197,10 +197,10 @@ RECURSE_BEGIN(obj, border) \
     } \
     /* Total area for subobjects */ \
     unsigned area = (obj_maxwidth + (separator)) * (obj_maxheight + (separator)) * numsubobjs; \
-    /* Ideal total width for spreading that area with RATIO */ \
-    float idealtotwidth = sqrt(area/RATIO); \
+    /* Ideal total height for spreading that area with RATIO */ \
+    float idealtotheight = sqrt(area/RATIO); \
     /* Underestimated number of rows */ \
-    unsigned rows = idealtotwidth / (obj_maxheight + (separator)); \
+    unsigned rows = idealtotheight / (obj_maxheight + (separator)); \
     unsigned columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
     /* Ratio obtained by underestimation */ \
     float under_ratio = (float) (columns * (obj_maxwidth + (separator))) / (rows * (obj_maxheight + (separator))); \
