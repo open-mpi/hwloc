@@ -813,6 +813,7 @@ hwloc_connect(hwloc_obj_t father)
   father->last_child = prev_child;
 
   father->arity = n;
+  free(father->children);
   if (!n) {
     father->children = NULL;
     return;
