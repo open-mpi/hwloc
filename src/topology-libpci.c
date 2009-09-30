@@ -335,6 +335,11 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     hwloc_linux_parse_cpumap_file(file, &cpuset);
     fclose(file);
 #endif
+    char envname[256];
+    snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS", child->attr->pcidev.domain, child->attr->pcidev.bus);
+    char *env = getenv(envname);
+    if (env)
+      hwloc_cpuset_from_string(env, &cpuset);
 
     /*
      * attach all objects from the same upstream domain/bus
