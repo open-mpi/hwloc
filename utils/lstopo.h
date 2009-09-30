@@ -22,7 +22,7 @@ struct draw_methods {
   void (*text) (void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text);
 };
 
-extern unsigned int gridsize, fontsize, force_horiz;
+extern unsigned int gridsize, fontsize, force_horiz, force_vert;
 
 extern void *output_draw_start(struct draw_methods *draw_methods, struct hwloc_topology *topology, void *output);
 extern void output_draw(struct draw_methods *draw_methods, struct hwloc_topology *topology, void *output);

@@ -20,6 +20,7 @@
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 unsigned int force_horiz = 0;
+unsigned int force_vert = 0;
 
 FILE *open_file(const char *filename, const char *mode)
 {
@@ -77,6 +78,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --fontsize 10         set size of text font\n");
   fprintf (where, "   --gridsize 10         set size of margin between elements\n");
   fprintf (where, "   --horiz               horizontal graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "   --vert                vertical graphic layout instead of nearly 4/3 ratio\n");
   fprintf (where, "   --version             report version and exit\n");
 }
 
@@ -127,6 +129,8 @@ main (int argc, char *argv[])
 	merge = 1;
       else if (!strcmp (argv[1], "--horiz"))
         force_horiz = 1;
+      else if (!strcmp (argv[1], "--vert"))
+        force_vert = 1;
       else if (!strcmp (argv[1], "--fontsize")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
