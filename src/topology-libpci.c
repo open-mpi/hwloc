@@ -21,7 +21,6 @@
 
 #define CONFIG_SPACE_CACHESIZE 64
 
-#if 0
 static void
 hwloc_pci_traverse(struct hwloc_obj *root, int depth)
 {
@@ -32,22 +31,21 @@ hwloc_pci_traverse(struct hwloc_obj *root, int depth)
              child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func);
 
     if (child->type == HWLOC_OBJ_PCI_BRIDGE)
-      printf("%*s %s Bridge [%04x:%04x (%04x:%04x) rev=%02x class=%04x] to [%02x:%02x]\n", depth, "", busid,
-	     child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
-	     child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
-	     child->attr->pcidev.revision, child->attr->pcidev.class,
-	     child->attr->pcibridge.secondary_bus, child->attr->pcibridge.subordinate_bus);
+      hwloc_debug("%*s %s Bridge [%04x:%04x (%04x:%04x) rev=%02x class=%04x] to [%02x:%02x]\n", depth, "", busid,
+		  child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
+		  child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
+		  child->attr->pcidev.revision, child->attr->pcidev.class,
+		  child->attr->pcibridge.secondary_bus, child->attr->pcibridge.subordinate_bus);
     else
-      printf("%*s %s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", depth, "", busid,
-	     child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
-	     child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
-	     child->attr->pcidev.revision, child->attr->pcidev.class);
+      hwloc_debug("%*s %s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", depth, "", busid,
+		  child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
+		  child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
+		  child->attr->pcidev.revision, child->attr->pcidev.class);
 
     hwloc_pci_traverse(child, depth+2);
     child = child->next_sibling;
   }
 }
-#endif
 
 static void
 hwloc_pci_set_bridge_depths(struct hwloc_obj *root, int depth)
@@ -217,6 +215,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   fakehostbridge.first_child = NULL;
   fakehostbridge.last_child = NULL;
 
+  hwloc_debug("\nScanning PCI buses...\n");
+
   pciaccess = pci_alloc();
   pci_init(pciaccess);
   pci_scan_bus(pciaccess);
@@ -281,7 +281,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     pci_lookup_name(pciaccess, name, sizeof(name),
                     PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
                     pcidev->vendor_id, pcidev->device_id);
-    printf("  %s\n", name);
+    hwloc_debug("  %s\n", name);
 
     hwloc_pci_add_object(&fakehostbridge, obj);
 
@@ -291,9 +291,15 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   pci_cleanup(pciaccess);
 
+  hwloc_debug("\nPCI hierarchy after basic scan:\n");
+  hwloc_pci_traverse(&fakehostbridge, 0);
+
   /* drop useless bridges if needed */
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI))
     hwloc_pci_drop_useless_bridges(&fakehostbridge);
+
+  hwloc_debug("\nPCI hierarchy removing useless objects:\n");
+  hwloc_pci_traverse(&fakehostbridge, 0);
 
   if (!fakehostbridge.first_child)
     /* found nothing, exit */
@@ -316,7 +322,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     unsigned short current_domain = child->attr->pcidev.domain;
     unsigned char current_bus = child->attr->pcidev.bus;
     unsigned char current_subordinate = current_bus;
-    printf("starting new bridge %04x:%02x\n", current_domain, current_bus);
+    hwloc_debug("Starting new PCI hostbridge %04x:%02x\n", current_domain, current_bus);
 
     /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
     hwloc_cpuset_t cpuset = HWLOC_CPUSET_FULL; /* FIXME: should be the system cpuset? */
@@ -354,6 +360,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     hostbridge->attr->pcidev.domain = current_domain;
     hostbridge->attr->pcibridge.secondary_bus = current_bus;
     hostbridge->attr->pcibridge.subordinate_bus = current_subordinate;
+    hwloc_debug("New PCI hostbridge %04x:[%02x-%02x] with cpuset %" HWLOC_PRIxCPUSET "\n",
+		current_domain, current_bus, current_subordinate, HWLOC_CPUSET_PRINTF_VALUE(&cpuset));
 
     /* attach the hostbridge now that it contains the right objects */
     hwloc_insert_object(topology, topology->levels[0][0], hostbridge);
