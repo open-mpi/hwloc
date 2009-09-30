@@ -182,8 +182,8 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
   } \
   \
   /* Make sure there is width for the heading text */ \
-  if (maxwidth < textwidth) \
-    maxwidth = textwidth; \
+  if (totwidth < textwidth) \
+    totwidth = textwidth; \
   /* Update returned values */ \
   *retwidth = totwidth; \
   *retheight = totheight; \
