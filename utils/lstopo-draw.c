@@ -187,29 +187,32 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 
 #define RECURSE_RECT_BEGIN(obj, methods, separator, border) \
 RECURSE_BEGIN(obj, border) \
-    unsigned obj_maxwidth = 0, obj_maxheight = 0; \
+    /* Total width for subobjects */ \
+    unsigned obj_totwidth = 0, obj_totheight = 0; \
+    /* Total area for subobjects */ \
+    unsigned area = 0; \
     RECURSE_FOR() \
       RECURSE_CALL_FUN(&null_draw_methods); \
-      if (height > obj_maxheight) \
-        obj_maxheight = height; \
-      if (width > obj_maxwidth) \
-        obj_maxwidth = width; \
+      obj_totwidth += width + (separator); \
+      obj_totheight += height + (separator); \
+      area += (width + (separator)) * (height + (separator)); \
     } \
-    /* Total area for subobjects */ \
-    unsigned area = (obj_maxwidth + (separator)) * (obj_maxheight + (separator)) * numsubobjs; \
-    /* Ideal total width for spreading that area with RATIO */ \
-    float idealtotwidth = sqrt(area/RATIO); \
-    /* Underestimated number of rows */ \
-    unsigned rows = idealtotwidth / (obj_maxheight + (separator)); \
+    /* Average object size */ \
+    unsigned obj_avgwidth = obj_totwidth / numsubobjs; \
+    unsigned obj_avgheight = obj_totheight / numsubobjs; \
+    /* Ideal total height for spreading that area with RATIO */ \
+    float idealtotheight = sqrt(area/RATIO); \
+    /* approximation of number of rows */ \
+    unsigned rows = idealtotheight / obj_avgheight; \
     unsigned columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
     /* Ratio obtained by underestimation */ \
-    float under_ratio = (float) (columns * (obj_maxwidth + (separator))) / (rows * (obj_maxheight + (separator))); \
+    float under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
     \
     /* try to overestimate too */ \
     rows++; \
     columns = (numsubobjs + rows - 1) / rows; \
     /* Ratio obtained by overestimation */ \
-    float over_ratio = (float) (columns * (obj_maxwidth + (separator))) / (rows * (obj_maxheight + (separator))); \
+    float over_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
     /* Did we actually preferred underestimation? (good row/column fit or good ratio) */ \
     if (rows > 1 && prefer_ratio(under_ratio, over_ratio)) { \
       rows--; \
@@ -220,26 +223,30 @@ RECURSE_BEGIN(obj, border) \
       columns = (numsubobjs + rows - 1) / rows; \
     } \
     \
+    maxheight = 0; \
     RECURSE_FOR() \
       /* Newline? */ \
       if (i && i%columns == 0) { \
         totwidth = (border) + mywidth; \
         /* Add the same height to all rows */ \
-        totheight += obj_maxheight + (separator); \
+        totheight += maxheight + (separator); \
+        maxheight = 0; \
       } \
 
 #define RECURSE_RECT_END(obj, methods, separator, border) \
       if (totwidth + width + (separator) > maxwidth) \
         maxwidth = totwidth + width + (separator); \
-      /* Add the same width to all columns */ \
-      totwidth += obj_maxwidth + (separator); \
+      totwidth += width + (separator); \
+      /* Update maximum height */ \
+      if (height > maxheight) \
+	maxheight = height; \
     } \
     /* Remove spurious separator on the right */ \
     maxwidth -= (separator); \
     /* Compute total width */ \
     totwidth = maxwidth + (border); \
     /* Add the last row's height and border at the bottom */ \
-    totheight += obj_maxheight + (border); \
+    totheight += maxheight + (border); \
   } \
   /* Make sure there is width for the heading text */ \
   if (totwidth < textwidth) \
