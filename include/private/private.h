@@ -156,20 +156,22 @@ extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const c
 extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);
 extern void hwloc_look_synthetic (struct hwloc_topology *topology);
 
-/* Add an object to the topology.
+/*
+ * Add an object to the topology.
  * It is sorted along the tree of other objects according to the inclusion of
  * cpusets, to eventually be added as a child of the smallest object including
  * this object.
  *
- * This shall only be called before hwloc_connect() is achieved.
+ * This shall only be called before levels are built.
  */
 extern void hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj);
 
-/* Insert an object somewhere in the topology.
+/*
+ * Insert an object somewhere in the topology.
  *
  * It is added as a child of the given father.
  *
- * This shall only be called before hwloc_connect() is achieved.
+ * Remember to call topology_connect() afterwards to fix handy pointers.
  */
 extern void hwloc_insert_object(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj);
 

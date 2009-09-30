@@ -1081,6 +1081,12 @@ hwloc_discover(struct hwloc_topology *topology)
   /* It's empty now.  */
   free(objs);
 
+  /*
+   * Additional detection, using hwloc_insert_object to add a few objects here
+   * and there.
+   */
+
+  /* PCI */
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_PCI)) {
     int gotsome = 0;
     hwloc_debug("\nLooking for PCI devices\n");
@@ -1113,6 +1119,10 @@ hwloc_discover(struct hwloc_topology *topology)
       hwloc_debug("\nno PCI detection\n");
     }
   }
+
+  /*
+   * Eventually, register OS-specific binding functions
+   */
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;
