@@ -18,11 +18,166 @@
 
 #define CONFIG_SPACE_CACHESIZE 64
 
+static void
+hwloc_pci_traverse(struct hwloc_obj *root, int depth)
+{
+  struct hwloc_obj *child = root->first_child;
+  while (child) {
+    if (child->type == HWLOC_OBJ_PCI_BRIDGE)
+      printf("%*s %04x:%02x:%02x.%01x Bridge to [%02x:%02x]\n", depth, "",
+	     child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func,
+	     child->attr->pcibridge.secondary_bus, child->attr->pcibridge.subordinate_bus);
+    else
+      printf("%*s %04x:%02x:%02x.%01x Device\n", depth, "",
+	     child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func);
+    hwloc_pci_traverse(child, depth+2);
+    child = child->next_sibling;
+  }
+}
+
+enum hwloc_pci_busid_comparison_e {
+  HWLOC_PCI_BUSID_LOWER,
+  HWLOC_PCI_BUSID_HIGHER,
+  HWLOC_PCI_BUSID_INCLUDED,
+  HWLOC_PCI_BUSID_SUPERSET,
+};
+
+static int
+hwloc_pci_compare_busids(struct hwloc_obj *a, struct hwloc_obj *b)
+{
+  if (a->attr->pcidev.domain < b->attr->pcidev.domain)
+    return HWLOC_PCI_BUSID_LOWER;
+  if (a->attr->pcidev.domain > b->attr->pcidev.domain)
+    return HWLOC_PCI_BUSID_HIGHER;
+
+  if (a->type == HWLOC_OBJ_PCI_BRIDGE
+      && b->attr->pcidev.bus >= a->attr->pcibridge.secondary_bus
+      && b->attr->pcidev.bus <= a->attr->pcibridge.subordinate_bus)
+    return HWLOC_PCI_BUSID_SUPERSET;
+  if (b->type == HWLOC_OBJ_PCI_BRIDGE
+      && a->attr->pcidev.bus >= b->attr->pcibridge.secondary_bus
+      && a->attr->pcidev.bus <= b->attr->pcibridge.subordinate_bus)
+    return HWLOC_PCI_BUSID_INCLUDED;
+
+  if (a->attr->pcidev.bus < b->attr->pcidev.bus)
+    return HWLOC_PCI_BUSID_LOWER;
+  if (a->attr->pcidev.bus > b->attr->pcidev.bus)
+    return HWLOC_PCI_BUSID_HIGHER;
+
+  if (a->attr->pcidev.dev < b->attr->pcidev.dev)
+    return HWLOC_PCI_BUSID_LOWER;
+  if (a->attr->pcidev.dev > b->attr->pcidev.dev)
+    return HWLOC_PCI_BUSID_HIGHER;
+
+  if (a->attr->pcidev.func < b->attr->pcidev.func)
+    return HWLOC_PCI_BUSID_LOWER;
+  if (a->attr->pcidev.func > b->attr->pcidev.func)
+    return HWLOC_PCI_BUSID_HIGHER;
+
+  assert(0);
+}
+
+static void
+hwloc_pci_add_child_before(struct hwloc_obj *root, struct hwloc_obj *child, struct hwloc_obj *new)
+{
+  if (child) {
+    new->prev_sibling = child->prev_sibling;
+    child->prev_sibling = new;
+  } else {
+    new->prev_sibling = root->last_child;
+    root->last_child = new;
+  }
+
+  if (new->prev_sibling)
+    new->prev_sibling->next_sibling = new;
+  else
+    root->first_child = new;
+  new->next_sibling = child;
+
+  root->arity++;
+}
+
+static void
+hwloc_pci_remove_child(struct hwloc_obj *root, struct hwloc_obj *child)
+{
+  if (child->next_sibling)
+    child->next_sibling->prev_sibling = child->prev_sibling;
+  else
+    root->last_child = child->prev_sibling;
+  if (child->prev_sibling)
+    child->prev_sibling->next_sibling = child->next_sibling;
+  else
+    root->first_child = child->next_sibling;
+  child->prev_sibling = NULL;
+  child->next_sibling = NULL;
+  root->arity--;
+}
+
+static void hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new);
+
+static void
+hwloc_pci_try_insert_siblings_below_new_bridge(struct hwloc_obj *root, struct hwloc_obj *new)
+{
+  struct hwloc_obj *current, *next;
+
+  next = new->next_sibling;
+  while (next) {
+    current = next;
+    next = current->next_sibling;
+
+    enum hwloc_pci_busid_comparison_e comp = hwloc_pci_compare_busids(current, new);
+    assert(comp != HWLOC_PCI_BUSID_SUPERSET);
+    if (comp == HWLOC_PCI_BUSID_HIGHER)
+      continue;
+    assert(comp == HWLOC_PCI_BUSID_INCLUDED);
+
+    /* move this object below the new bridge */
+    hwloc_pci_remove_child(root, current);
+    hwloc_pci_add_object(new, current);
+  }
+}
+
+static void
+hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
+{
+  struct hwloc_obj *current;
+
+  current = root->first_child;
+  while (current) {
+    enum hwloc_pci_busid_comparison_e comp = hwloc_pci_compare_busids(new, current);
+    switch (comp) {
+    case HWLOC_PCI_BUSID_HIGHER:
+      /* go further */
+      current = current->next_sibling;
+      continue;
+    case HWLOC_PCI_BUSID_INCLUDED:
+      /* insert below current bridge */
+      hwloc_pci_add_object(current, new);
+      return;
+    case HWLOC_PCI_BUSID_LOWER:
+    case HWLOC_PCI_BUSID_SUPERSET:
+      /* insert before current object */
+      hwloc_pci_add_child_before(root, current, new);
+      /* walk next siblings and move them below new bridge if needed */
+      hwloc_pci_try_insert_siblings_below_new_bridge(root, new);
+      return;
+    }
+  }
+  /* add to the end of the list if higher than everybody */
+  hwloc_pci_add_child_before(root, NULL, new);
+}
+
 void
 hwloc_look_libpci(struct hwloc_topology *topology)
 {
   struct pci_access *pciaccess;
   struct pci_dev *pcidev;
+  struct hwloc_obj hostbridge;
+
+  hostbridge.first_child = NULL;
+  hostbridge.last_child = NULL;
+  hostbridge.arity = 0;
+  hostbridge.children = NULL;
 
   pciaccess = pci_alloc();
   pci_init(pciaccess);
@@ -96,14 +251,15 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     printf("  Cpuset %s\n", localcpus);
 #endif
 
-    /* do nothing for now */
-    free(obj->attr);
-    free(obj);
+    hwloc_pci_add_object(&hostbridge, obj);
 
     pcidev = pcidev->next;
   }
 
   pci_cleanup(pciaccess);
+
+  /* just print the hierarchy for now */
+  hwloc_pci_traverse(&hostbridge, 0);
 }
 
 #endif /* HAVE_LIBPCI */
