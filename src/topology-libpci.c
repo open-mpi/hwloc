@@ -44,6 +44,19 @@ hwloc_pci_traverse(struct hwloc_obj *root, int depth)
   }
 }
 
+static void
+hwloc_pci_set_bridge_depths(struct hwloc_obj *root, int depth)
+{
+  struct hwloc_obj *child = root->first_child;
+  while (child) {
+    if (child->type == HWLOC_OBJ_PCI_BRIDGE) {
+      child->attr->pcibridge.depth = depth;
+      hwloc_pci_set_bridge_depths(child, depth+1);
+    }
+    child = child->next_sibling;
+  }
+}
+
 enum hwloc_pci_busid_comparison_e {
   HWLOC_PCI_BUSID_LOWER,
   HWLOC_PCI_BUSID_HIGHER,
@@ -258,6 +271,9 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   hwloc_insert_object(topology, topology->levels[0][0], hostbridge);
 
   pci_cleanup(pciaccess);
+
+  /* walk the hierarchy and set bridge depth */
+  hwloc_pci_set_bridge_depths(&hostbridge, 0);
 
   /* just print the hierarchy for now */
   hwloc_pci_traverse(hostbridge, 0);

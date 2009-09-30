@@ -201,6 +201,7 @@ union hwloc_obj_attr_u {
   struct hwloc_pcibridge_attr_u {
     struct hwloc_pcidev_attr_u dev;
     unsigned char secondary_bus, subordinate_bus;
+    unsigned depth;
   } pcibridge;
 };
 

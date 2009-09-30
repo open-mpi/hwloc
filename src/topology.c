@@ -469,6 +469,14 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
       return HWLOC_TYPE_HIGHER;
   }
 
+  /* PCI Bridges objects have the same types but can have different depths.  */
+  if (obj1->type == HWLOC_OBJ_PCI_BRIDGE) {
+    if (obj1->attr->pcibridge.depth < obj2->attr->pcibridge.depth)
+      return HWLOC_TYPE_DEEPER;
+    else if (obj1->attr->pcibridge.depth > obj2->attr->pcibridge.depth)
+      return HWLOC_TYPE_HIGHER;
+  }
+
   return HWLOC_TYPE_EQUAL;
 }
 
