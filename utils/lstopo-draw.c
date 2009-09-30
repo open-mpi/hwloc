@@ -236,17 +236,17 @@ RECURSE_BEGIN(obj, border) \
     } \
     /* Remove spurious separator on the right */ \
     maxwidth -= (separator); \
-    /* Make sure there is width for the heading text */ \
-    if (maxwidth < textwidth) \
-      maxwidth = textwidth; \
     /* Compute total width */ \
     totwidth = maxwidth + (border); \
     /* Add the last row's height and border at the bottom */ \
     totheight += obj_maxheight + (border); \
-    /* Update returned values */ \
-    *retwidth = totwidth; \
-    *retheight = totheight; \
   } \
+  /* Make sure there is width for the heading text */ \
+  if (totwidth < textwidth) \
+    totwidth = textwidth; \
+  /* Update returned values */ \
+  *retwidth = totwidth; \
+  *retheight = totheight; \
 } while(0)
 
 /* Pack objects in a grid */
@@ -529,19 +529,23 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t l
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = 6*fontsize;
+  unsigned textwidth;
+  char text[64];
+  int n;
 
   DYNA_CHECK();
+
+  if (fontsize) {
+    n = hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+    textwidth = (n * fontsize * 3) / 4;
+  }
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
   methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, totwidth, y, totheight);
 
-  if (fontsize) {
-    char text[64];
-    hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
+  if (fontsize)
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
 
   RECURSE_RECT(level, methods, gridsize, gridsize);
 
@@ -570,9 +574,9 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_CACHE: return cache_draw;
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PROC: return proc_draw;
+    default:
     case HWLOC_OBJ_MISC: return misc_draw;
   }
-  return NULL;
 }
 
 /*
