@@ -746,7 +746,8 @@ do_free_object(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
- * since we want to keep memory information.  */
+ * since we want to keep memory information, and except PCI bridges and devices.
+ */
 static void
 remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
