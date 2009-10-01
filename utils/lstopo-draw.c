@@ -242,7 +242,11 @@ RECURSE_BEGIN(obj, border) \
     } \
     if (force_horiz) { \
       rows =  1; \
-      columns = (numsubobjs + rows - 1) / rows; \
+      columns = numsubobjs; \
+    } \
+    if (force_vert) { \
+      columns =  1; \
+      rows = numsubobjs; \
     } \
     \
     maxheight = 0; \
@@ -333,7 +337,7 @@ prefer_vert(hwloc_topology_t topology, hwloc_obj_t level, void *output, unsigned
   horiz_ratio = (float)totwidth / totheight;
   RECURSE_VERT(level, &null_draw_methods, separator, 0);
   vert_ratio = (float)totwidth / totheight;
-  return !force_horiz && prefer_ratio(vert_ratio, horiz_ratio);
+  return force_vert || (!force_horiz && prefer_ratio(vert_ratio, horiz_ratio));
 }
 
 static void

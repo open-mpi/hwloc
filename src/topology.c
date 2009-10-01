@@ -386,6 +386,7 @@ free_object(hwloc_obj_t obj)
   }
   free(obj->attr);
   free(obj->children);
+  free(obj->name);
   free(obj);
 }
 
@@ -786,11 +787,11 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
     /* Father can be ignored in favor of the child.  */
     *pfather = child;
     child->next_sibling = father->next_sibling;
-    free(father);
+    free_object(father);
   } else if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Child can be ignored in favor of the father.  */
     father->first_child = child->first_child;
-    free(child);
+    free_object(child);
   }
 }
 
