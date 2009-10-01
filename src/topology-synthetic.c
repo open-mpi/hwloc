@@ -37,19 +37,19 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       break;
 
     if (*pos < '0' || *pos > '9') {
-      if (!hwloc_hwloc_strncasecmp(pos, "machines", 2))
+      if (!hwloc_strncasecmp(pos, "machines", 2))
 	type = HWLOC_OBJ_MACHINE;
-      else if (!hwloc_hwloc_strncasecmp(pos, "nodes", 1))
+      else if (!hwloc_strncasecmp(pos, "nodes", 1))
 	type = HWLOC_OBJ_NODE;
-      else if (!hwloc_hwloc_strncasecmp(pos, "sockets", 1))
+      else if (!hwloc_strncasecmp(pos, "sockets", 1))
 	type = HWLOC_OBJ_SOCKET;
-      else if (!hwloc_hwloc_strncasecmp(pos, "cores", 2))
+      else if (!hwloc_strncasecmp(pos, "cores", 2))
 	type = HWLOC_OBJ_CORE;
-      else if (!hwloc_hwloc_strncasecmp(pos, "caches", 2))
+      else if (!hwloc_strncasecmp(pos, "caches", 2))
 	type = HWLOC_OBJ_CACHE;
-      else if (!hwloc_hwloc_strncasecmp(pos, "procs", 1))
+      else if (!hwloc_strncasecmp(pos, "procs", 1))
 	type = HWLOC_OBJ_PROC;
-      else if (!hwloc_hwloc_strncasecmp(pos, "misc", 2))
+      else if (!hwloc_strncasecmp(pos, "misc", 2))
 	type = HWLOC_OBJ_MISC;
 
       next_pos = strchr(pos, ':');
