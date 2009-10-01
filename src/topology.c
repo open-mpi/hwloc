@@ -660,8 +660,10 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 void
 hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
-  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS)
+  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
+    free_object(obj);
     return;
+  }
 
   /* Start at the top.  */
   add_object(topology, topology->levels[0][0], obj);
