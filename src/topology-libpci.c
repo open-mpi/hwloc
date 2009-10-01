@@ -332,11 +332,11 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       obj->attr->bridge.downstream.pci.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
     }
 
-    /* FIXME: store in obj->name */
     strcpy(name, "??");
-    pci_lookup_name(pciaccess, name, sizeof(name),
-                    PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
-                    pcidev->vendor_id, pcidev->device_id);
+    if (pci_lookup_name(pciaccess, name, sizeof(name),
+			PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
+			pcidev->vendor_id, pcidev->device_id))
+      obj->name = strdup(name);
     hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s\n",
 		pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func,
 		pcidev->device_class, pcidev->vendor_id, pcidev->device_id,
