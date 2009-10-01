@@ -210,6 +210,13 @@ AM_CONDITIONAL([HAVE_MINGW32], [test "x$target_os" = "xmingw32"])
 #
 
 AC_USE_SYSTEM_EXTENSIONS # for O_DIRECTORY, fdopen, ffsl, ...
+AH_VERBATIM([USE_HPUX_SYSTEM_EXTENSIONS],
+[/* Enable extensions on HP-UX. */
+#ifndef _HPUX_SOURCE
+# undef _HPUX_SOURCE
+#endif
+])
+AC_DEFINE([_HPUX_SOURCE])
 
 AC_LANG([C])
 
