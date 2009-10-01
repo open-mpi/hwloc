@@ -56,8 +56,10 @@ hwloc_fallback_nbprocessors(void) {
   GetSystemInfo(&sysinfo);
   return sysinfo.dwNumberOfProcessors;
 #else
+#ifdef __GNUC__
 #warning No known way to discover number of available processors on this system
 #warning hwloc_fallback_nbprocessors will default to 1
+#endif
   return 1;
 #endif
 }
@@ -1085,11 +1087,11 @@ hwloc_discover(struct hwloc_topology *topology)
   } else {
     topology->set_cpubind = dontset_cpubind;
     topology->set_proc_cpubind = dontset_proc_cpubind;
-    topology->set_thread_cpubind = dontset_thread_cpubind;
-    topology->set_thisproc_cpubind = dontset_thisproc_cpubind;
 #ifdef hwloc_thread_t
-    topology->set_thisthread_cpubind = dontset_thisthread_cpubind;
+    topology->set_thread_cpubind = dontset_thread_cpubind;
 #endif
+    topology->set_thisproc_cpubind = dontset_thisproc_cpubind;
+    topology->set_thisthread_cpubind = dontset_thisthread_cpubind;
   }
 }
 
@@ -1144,7 +1146,9 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
   topology->set_cpubind = NULL;
   topology->set_proc_cpubind = NULL;
+#ifdef hwloc_thread_t
   topology->set_thread_cpubind = NULL;
+#endif
   topology->set_thisproc_cpubind = NULL;
   topology->set_thisthread_cpubind = NULL;
   /* Only ignore useless cruft by default */

@@ -232,6 +232,14 @@ AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The
 # Now detect support
 #
 
+hwloc_strncasecmp=strncmp
+AC_CHECK_FUNCS([strncasecmp], [
+  AC_CHECK_DECL([strncasecmp], [
+    hwloc_strncasecmp=strncasecmp
+  ])
+])
+AC_DEFINE_UNQUOTED(hwloc_strncasecmp, $hwloc_strncasecmp, [Define this to either strncasecmp or strncmp])
+
 AC_CHECK_TYPES([wchar_t], [
   AC_CHECK_FUNCS([putwc])
 ], [], [[#include <wchar.h>]])

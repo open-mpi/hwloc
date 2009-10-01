@@ -73,7 +73,7 @@ typedef struct { unsigned long s[HWLOC_CPUSUBSET_COUNT]; } hwloc_cpuset_t;
  *
  * \return the number of character that were actually written (not including the ending \\0).
  */
-static __inline__ int
+static __inline int
 hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cpuset_t * __hwloc_restrict set)
 {
   ssize_t size = buflen;
@@ -135,7 +135,7 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
  *
  * Must start and end with a digit.
  */
-static __inline__ void
+static __inline void
 hwloc_cpuset_from_string(const char * __hwloc_restrict string, hwloc_cpuset_t * __hwloc_restrict set)
 {
   char * current = (char *) string;
@@ -188,14 +188,14 @@ hwloc_cpuset_from_string(const char * __hwloc_restrict string, hwloc_cpuset_t * 
  */
 
 /** \brief Empty CPU set \p set */
-static __inline__ void hwloc_cpuset_zero(hwloc_cpuset_t * set)
+static __inline void hwloc_cpuset_zero(hwloc_cpuset_t * set)
 {
 	int i;
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
 		HWLOC_CPUSUBSET_SUBSET(*set,i) = HWLOC_CPUSUBSET_ZERO;
 }
 #ifndef __GNUC__
-static __inline__ hwloc_cpuset_t HWLOC__CPUSET_ZERO(void)
+static __inline hwloc_cpuset_t HWLOC__CPUSET_ZERO(void)
 {
 	hwloc_cpuset_t cpuset;
 	hwloc_cpuset_zero(&cpuset);
@@ -204,14 +204,14 @@ static __inline__ hwloc_cpuset_t HWLOC__CPUSET_ZERO(void)
 #endif
 
 /** \brief Fill CPU set \p set */
-static __inline__ void hwloc_cpuset_fill(hwloc_cpuset_t * set)
+static __inline void hwloc_cpuset_fill(hwloc_cpuset_t * set)
 {
 	int i;
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
 		HWLOC_CPUSUBSET_SUBSET(*set,i) = HWLOC_CPUSUBSET_FULL;
 }
 #ifndef __GNUC__
-static __inline__ hwloc_cpuset_t HWLOC__CPUSET_FULL(void)
+static __inline hwloc_cpuset_t HWLOC__CPUSET_FULL(void)
 {
 	hwloc_cpuset_t cpuset;
 	hwloc_cpuset_fill(&cpuset);
@@ -220,7 +220,7 @@ static __inline__ hwloc_cpuset_t HWLOC__CPUSET_FULL(void)
 #endif
 
 /** \brief Setup CPU set \p set from unsigned long \p mask */
-static __inline__ void hwloc_cpuset_from_ulong(hwloc_cpuset_t *set, unsigned long mask)
+static __inline void hwloc_cpuset_from_ulong(hwloc_cpuset_t *set, unsigned long mask)
 {
 	int i;
 	HWLOC_CPUSUBSET_SUBSET(*set,0) = mask;
@@ -229,7 +229,7 @@ static __inline__ void hwloc_cpuset_from_ulong(hwloc_cpuset_t *set, unsigned lon
 }
 
 /** \brief Setup CPU set \p set from unsigned long \p mask used as \p i -th subset */
-static __inline__ void hwloc_cpuset_from_ith_ulong(hwloc_cpuset_t *set, int i, unsigned long mask)
+static __inline void hwloc_cpuset_from_ith_ulong(hwloc_cpuset_t *set, int i, unsigned long mask)
 {
 	int j;
 	HWLOC_CPUSUBSET_SUBSET(*set,i) = mask;
@@ -239,26 +239,26 @@ static __inline__ void hwloc_cpuset_from_ith_ulong(hwloc_cpuset_t *set, int i, u
 }
 
 /** \brief Convert the beginning part of CPU set \p set into unsigned long \p mask */
-static __inline__ unsigned long hwloc_cpuset_to_ulong(const hwloc_cpuset_t *set)
+static __inline unsigned long hwloc_cpuset_to_ulong(const hwloc_cpuset_t *set)
 {
 	return HWLOC_CPUSUBSET_SUBSET(*set,0);
 }
 
 /** \brief Convert the \p i -th subset of CPU set \p set into unsigned long mask */
-static __inline__ unsigned long hwloc_cpuset_to_ith_ulong(const hwloc_cpuset_t *set, int i)
+static __inline unsigned long hwloc_cpuset_to_ith_ulong(const hwloc_cpuset_t *set, int i)
 {
 	return HWLOC_CPUSUBSET_SUBSET(*set,i);
 }
 
 /** \brief Clear CPU set \p set and set CPU \p cpu */
-static __inline__ void hwloc_cpuset_cpu(hwloc_cpuset_t * set,
+static __inline void hwloc_cpuset_cpu(hwloc_cpuset_t * set,
 				       unsigned cpu)
 {
 	hwloc_cpuset_zero(set);
 	HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) |= HWLOC_CPUSUBSET_VAL(cpu);
 }
 #ifndef __GNUC__
-static __inline__ hwloc_cpuset_t HWLOC__CPUSET_CPU(unsigned cpu)
+static __inline hwloc_cpuset_t HWLOC__CPUSET_CPU(unsigned cpu)
 {
 	hwloc_cpuset_t cpuset;
 	hwloc_cpuset_cpu(&cpuset, cpu);
@@ -267,7 +267,7 @@ static __inline__ hwloc_cpuset_t HWLOC__CPUSET_CPU(unsigned cpu)
 #endif
 
 /** \brief Clear CPU set \p set and set all but the CPU \p cpu */
-static __inline__ void hwloc_cpuset_all_but_cpu(hwloc_cpuset_t * set,
+static __inline void hwloc_cpuset_all_but_cpu(hwloc_cpuset_t * set,
 					       unsigned cpu)
 {
 	hwloc_cpuset_fill(set);
@@ -275,14 +275,14 @@ static __inline__ void hwloc_cpuset_all_but_cpu(hwloc_cpuset_t * set,
 }
 
 /** \brief Add CPU \p cpu in CPU set \p set */
-static __inline__ void hwloc_cpuset_set(hwloc_cpuset_t * set,
+static __inline void hwloc_cpuset_set(hwloc_cpuset_t * set,
 				       unsigned cpu)
 {
 	HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) |= HWLOC_CPUSUBSET_VAL(cpu);
 }
 
 /** \brief Add CPUs from \p begincpu to \p endcpu in CPU set \p set */
-static __inline__ void hwloc_cpuset_set_range(hwloc_cpuset_t * set,
+static __inline void hwloc_cpuset_set_range(hwloc_cpuset_t * set,
 					     unsigned begincpu, unsigned endcpu)
 {
 	int i;
@@ -291,21 +291,21 @@ static __inline__ void hwloc_cpuset_set_range(hwloc_cpuset_t * set,
 }
 
 /** \brief Remove CPU \p cpu from CPU set \p set */
-static __inline__ void hwloc_cpuset_clr(hwloc_cpuset_t * set,
+static __inline void hwloc_cpuset_clr(hwloc_cpuset_t * set,
 				       unsigned cpu)
 {
 	HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) &= ~HWLOC_CPUSUBSET_VAL(cpu);
 }
 
 /** \brief Test whether CPU \p cpu is part of set \p set */
-static __inline__ int hwloc_cpuset_isset(const hwloc_cpuset_t * set,
+static __inline int hwloc_cpuset_isset(const hwloc_cpuset_t * set,
 					unsigned cpu)
 {
 	return (HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) & HWLOC_CPUSUBSET_VAL(cpu)) != 0;
 }
 
 /** \brief Test whether set \p set is zero */
-static __inline__ int hwloc_cpuset_iszero(const hwloc_cpuset_t *set)
+static __inline int hwloc_cpuset_iszero(const hwloc_cpuset_t *set)
 {
 	int i;
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
@@ -315,7 +315,7 @@ static __inline__ int hwloc_cpuset_iszero(const hwloc_cpuset_t *set)
 }
 
 /** \brief Test whether set \p set is full */
-static __inline__ int hwloc_cpuset_isfull(const hwloc_cpuset_t *set)
+static __inline int hwloc_cpuset_isfull(const hwloc_cpuset_t *set)
 {
 	int i;
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
@@ -325,7 +325,7 @@ static __inline__ int hwloc_cpuset_isfull(const hwloc_cpuset_t *set)
 }
 
 /** \brief Test whether set \p set1 is equal to set \p set2 */
-static __inline__ int hwloc_cpuset_isequal (const hwloc_cpuset_t *set1,
+static __inline int hwloc_cpuset_isequal (const hwloc_cpuset_t *set1,
 					   const hwloc_cpuset_t *set2)
 {
 	int i;
@@ -336,7 +336,7 @@ static __inline__ int hwloc_cpuset_isequal (const hwloc_cpuset_t *set1,
 }
 
 /** \brief Test whether sets \p set1 and \p set2 intersects */
-static __inline__ int hwloc_cpuset_intersects (const hwloc_cpuset_t *set1,
+static __inline int hwloc_cpuset_intersects (const hwloc_cpuset_t *set1,
 					      const hwloc_cpuset_t *set2)
 {
 	int i;
@@ -347,7 +347,7 @@ static __inline__ int hwloc_cpuset_intersects (const hwloc_cpuset_t *set1,
 }
 
 /** \brief Test whether set \p sub_set is part of set \p super_set */
-static __inline__ int hwloc_cpuset_isincluded (const hwloc_cpuset_t *sub_set,
+static __inline int hwloc_cpuset_isincluded (const hwloc_cpuset_t *sub_set,
 					      const hwloc_cpuset_t *super_set)
 {
 	int i;
@@ -358,7 +358,7 @@ static __inline__ int hwloc_cpuset_isincluded (const hwloc_cpuset_t *sub_set,
 }
 
 /** \brief Or set \p modifier_set into set \p set */
-static __inline__ void hwloc_cpuset_orset (hwloc_cpuset_t *set,
+static __inline void hwloc_cpuset_orset (hwloc_cpuset_t *set,
 					  const hwloc_cpuset_t *modifier_set)
 {
 	int i;
@@ -367,7 +367,7 @@ static __inline__ void hwloc_cpuset_orset (hwloc_cpuset_t *set,
 }
 
 /** \brief And set \p modifier_set into set \p set */
-static __inline__ void hwloc_cpuset_andset (hwloc_cpuset_t *set,
+static __inline void hwloc_cpuset_andset (hwloc_cpuset_t *set,
 					   const hwloc_cpuset_t *modifier_set)
 {
 	int i;
@@ -376,7 +376,7 @@ static __inline__ void hwloc_cpuset_andset (hwloc_cpuset_t *set,
 }
 
 /** \brief Clear set \p modifier_set out of set \p set */
-static __inline__ void hwloc_cpuset_clearset (hwloc_cpuset_t *set,
+static __inline void hwloc_cpuset_clearset (hwloc_cpuset_t *set,
 					     const hwloc_cpuset_t *modifier_set)
 {
 	int i;
@@ -385,7 +385,7 @@ static __inline__ void hwloc_cpuset_clearset (hwloc_cpuset_t *set,
 }
 
 /** \brief Xor set \p set with set \p modifier_set */
-static __inline__ void hwloc_cpuset_xorset (hwloc_cpuset_t *set,
+static __inline void hwloc_cpuset_xorset (hwloc_cpuset_t *set,
 					   const hwloc_cpuset_t *modifier_set)
 {
 	int i;
@@ -394,7 +394,7 @@ static __inline__ void hwloc_cpuset_xorset (hwloc_cpuset_t *set,
 }
 
 /** \brief Compute the first CPU (least significant bit) in CPU set \p set */
-static __inline__ int hwloc_cpuset_first(const hwloc_cpuset_t * cpuset)
+static __inline int hwloc_cpuset_first(const hwloc_cpuset_t * cpuset)
 {
 	int i;
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++) {
@@ -408,7 +408,7 @@ static __inline__ int hwloc_cpuset_first(const hwloc_cpuset_t * cpuset)
 }
 
 /** \brief Compute the last CPU (most significant bit) in CPU set \p set */
-static __inline__ int hwloc_cpuset_last(const hwloc_cpuset_t * cpuset)
+static __inline int hwloc_cpuset_last(const hwloc_cpuset_t * cpuset)
 {
 	int i;
 	for(i=HWLOC_CPUSUBSET_COUNT-1; i>=0; i--) {
@@ -427,7 +427,7 @@ static __inline__ int hwloc_cpuset_last(const hwloc_cpuset_t * cpuset)
  * have a chance of migrating between multiple logical CPUs
  * in the original mask.
  */
-static __inline__ void hwloc_cpuset_singlify(hwloc_cpuset_t * set)
+static __inline void hwloc_cpuset_singlify(hwloc_cpuset_t * set)
 {
 	int i,found = 0;
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++) {
@@ -450,7 +450,7 @@ static __inline__ void hwloc_cpuset_singlify(hwloc_cpuset_t * set)
  * Smaller least significant bit is smaller.
  * The empty CPU set is considered higher than anything.
  */
-static __inline__ int hwloc_cpuset_compar_first(const hwloc_cpuset_t * set1,
+static __inline int hwloc_cpuset_compar_first(const hwloc_cpuset_t * set1,
 					       const hwloc_cpuset_t * set2)
 {
 	int i;
@@ -473,7 +473,7 @@ static __inline__ int hwloc_cpuset_compar_first(const hwloc_cpuset_t * set1,
  * Higher most significant bit is higher.
  * The empty CPU set is considered lower than anything.
  */
-static __inline__ int hwloc_cpuset_compar(const hwloc_cpuset_t * set1,
+static __inline int hwloc_cpuset_compar(const hwloc_cpuset_t * set1,
 					 const hwloc_cpuset_t * set2)
 {
 	int i;
@@ -486,7 +486,7 @@ static __inline__ int hwloc_cpuset_compar(const hwloc_cpuset_t * set1,
 }
 
 /** \brief Compute the weight of CPU set \p set */
-static __inline__ int hwloc_cpuset_weight(const hwloc_cpuset_t * set)
+static __inline int hwloc_cpuset_weight(const hwloc_cpuset_t * set)
 {
 	int weight = 0;
 	int i;

@@ -23,7 +23,7 @@ typedef enum hwloc_mask_append_mode_e {
   HWLOC_MASK_APPEND_XOR,
 } hwloc_mask_append_mode_t;
 
-static __inline__ void
+static __inline void
 hwloc_mask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
@@ -57,7 +57,7 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
   }
 }
 
-static __inline__ int
+static __inline int
 hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 		       hwloc_cpuset_t *rootset, const char *string,
 		       hwloc_cpuset_t *set, hwloc_mask_append_mode_t mode, int verbose)
@@ -68,17 +68,17 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   unsigned first, wrap, amount, step;
   unsigned i,j;
 
-  if (!strncasecmp(string, "system", 2))
+  if (!hwloc_strncasecmp(string, "system", 2))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SYSTEM);
-  else if (!strncasecmp(string, "machine", 1))
+  else if (!hwloc_strncasecmp(string, "machine", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_MACHINE);
-  else if (!strncasecmp(string, "node", 1))
+  else if (!hwloc_strncasecmp(string, "node", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_NODE);
-  else if (!strncasecmp(string, "socket", 2))
+  else if (!hwloc_strncasecmp(string, "socket", 2))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SOCKET);
-  else if (!strncasecmp(string, "core", 1))
+  else if (!hwloc_strncasecmp(string, "core", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_CORE);
-  else if (!strncasecmp(string, "proc", 1))
+  else if (!hwloc_strncasecmp(string, "proc", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PROC);
   else
     depth = atoi(string);
@@ -156,7 +156,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   return 0;
 }
 
-static __inline__ void
+static __inline void
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		     const char *arg, hwloc_cpuset_t *set,
 		     int verbose)

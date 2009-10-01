@@ -187,7 +187,7 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed index)
 /* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
  * and for which processors have ID PROC_PHYSIDS, and add them to the topology.
  * */
-static __inline__ void
+static __inline void
 hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
   struct hwloc_obj *obj;

@@ -89,7 +89,7 @@ if BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	$(RM) -r $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
-	-sed -i -e 's/__hwloc_restrict/restrict/g;s/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g;s/__inline__/inline/g;s/\\_\\-\\_\\-inline\\_\\-\\_\\-/inline/g' $(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
+	-sed -i -e 's/__hwloc_restrict/restrict/g;s/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g;s/__inline/inline/g;s/\\_\\-\\_\\-inline/inline/g' $(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
 endif
 
 #

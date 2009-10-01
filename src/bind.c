@@ -64,6 +64,7 @@ hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_c
   return -1;
 }
 
+#ifdef hwloc_thread_t
 int
 hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t *set, int policy)
 {
@@ -84,5 +85,6 @@ hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hw
   errno = ENOSYS;
   return -1;
 }
+#endif
 
 /* TODO: memory bind */

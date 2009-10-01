@@ -99,6 +99,7 @@ hwloc_hpux_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_se
   return hwloc_hpux_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
 
+#ifdef hwloc_thread_t
 static int
 hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, const hwloc_cpuset_t *hwloc_set, int strict)
 {
@@ -129,6 +130,7 @@ hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_
 {
   return hwloc_hpux_set_thread_cpubind(topology, PTHREAD_SELFTID_NP, hwloc_set, strict);
 }
+#endif
 
 void
 hwloc_look_hpux(struct hwloc_topology *topology)
@@ -203,7 +205,9 @@ hwloc_set_hpux_hooks(struct hwloc_topology *topology)
 {
   topology->set_cpubind = hwloc_hpux_set_cpubind;
   topology->set_proc_cpubind = hwloc_hpux_set_proc_cpubind;
-  topology->set_thread_cpubind = hwloc_hpux_set_thread_cpubind;
   topology->set_thisproc_cpubind = hwloc_hpux_set_thisproc_cpubind;
+#ifdef hwloc_thread_t
+  topology->set_thread_cpubind = hwloc_hpux_set_thread_cpubind;
   topology->set_thisthread_cpubind = hwloc_hpux_set_thisthread_cpubind;
+#endif
 }
