@@ -137,7 +137,7 @@ hwloc_look_hpux(struct hwloc_topology *topology)
   hwloc_obj_t *nodes = NULL, obj;
   spu_t currentcpu;
   ldom_t currentnode;
-  int i, nbnodes;
+  int i, nbnodes = 0;
 
   if (has_numa) {
     nbnodes = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
