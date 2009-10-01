@@ -209,7 +209,7 @@ hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
 static struct hwloc_obj *
 hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
 {
-  hwloc_cpuset_t cpuset = HWLOC_CPUSET_FULL; /* FIXME: should be the system cpuset? */
+  hwloc_cpuset_t cpuset = HWLOC_CPUSET_FULL;
 
   /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
 #ifdef LINUX_SYS
@@ -237,6 +237,9 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
 
   /* attach the hostbridge now that it contains the right objects */
   struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, &cpuset);
+  /* if found nothing, attach to top */
+  if (!parent)
+    parent = topology->levels[0][0];
   /* do not attach to the lowest object since it could be a cache or so,
    * go up as long as the cpuset is the same
    */
