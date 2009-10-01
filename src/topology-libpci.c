@@ -232,6 +232,9 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
     hwloc_cpuset_from_string(env, &cpuset);
   }
 
+  hwloc_debug("Attaching hostbridge to cpuset %" HWLOC_PRIxCPUSET "\n",
+	      HWLOC_CPUSET_PRINTF_VALUE(&cpuset));
+
   /* attach the hostbridge now that it contains the right objects */
   struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, &cpuset);
   /* do not attach to the lowest object since it could be a cache or so,
@@ -392,8 +395,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     hostbridge->attr->pcidev.domain = current_domain;
     hostbridge->attr->pcibridge.secondary_bus = current_bus;
     hostbridge->attr->pcibridge.subordinate_bus = current_subordinate;
-    hwloc_debug("New PCI hostbridge %04x:[%02x-%02x] with cpuset %" HWLOC_PRIxCPUSET "\n",
-		current_domain, current_bus, current_subordinate, HWLOC_CPUSET_PRINTF_VALUE(&cpuset));
+    hwloc_debug("New PCI hostbridge %04x:[%02x-%02x]\n",
+		current_domain, current_bus, current_subordinate);
 
     /* attach the hostbridge where it belongs */
     struct hwloc_obj *parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge);
