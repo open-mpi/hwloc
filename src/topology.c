@@ -369,7 +369,7 @@ print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
 }
 
 /* Free an object and all its content.  */
-static void
+void
 free_object(hwloc_obj_t obj)
 {
   switch (obj->type) {

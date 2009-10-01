@@ -195,6 +195,8 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed index)
   return obj;
 }
 
+extern void free_object(hwloc_obj_t obj);
+
 #define hwloc_object_cpuset_from_array(l, _value, _array, _max) do {	\
 		struct hwloc_obj *__l = (l);				\
 		unsigned int *__a = (_array);				\

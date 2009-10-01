@@ -201,8 +201,10 @@ hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
     if (child->type != HWLOC_OBJ_PCI_BRIDGE)
       continue;
     hwloc_pci_drop_useless_bridges(child);
-    if (!child->first_child)
+    if (!child->first_child) {
       hwloc_pci_remove_child(root, child);
+      free_object(child);
+    }
   }
 }
 
