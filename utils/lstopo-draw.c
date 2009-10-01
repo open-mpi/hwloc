@@ -64,9 +64,9 @@
 #define PCI_DEVICE_G_COLOR DARKER_EPOXY_G_COLOR
 #define PCI_DEVICE_B_COLOR DARKER_EPOXY_B_COLOR
 
-#define PCI_BRIDGE_R_COLOR 0xff
-#define PCI_BRIDGE_G_COLOR 0xff
-#define PCI_BRIDGE_B_COLOR 0xff
+#define BRIDGE_R_COLOR 0xff
+#define BRIDGE_G_COLOR 0xff
+#define BRIDGE_B_COLOR 0xff
 
 /* preferred width/height compromise */
 #define RATIO (4./3.)
@@ -362,7 +362,7 @@ pci_device_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_o
 }
 
 static void
-pci_bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   /* Room for the box and separation from cards */
   unsigned textwidth = 12*fontsize;
@@ -379,7 +379,7 @@ pci_bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_o
 
   RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
 
-  methods->box(output, PCI_BRIDGE_R_COLOR, PCI_BRIDGE_G_COLOR, PCI_BRIDGE_B_COLOR, depth, x, textwidth, y, textheight);
+  methods->box(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR, depth, x, textwidth, y, textheight);
 
   if (fontsize) {
     char text[64];
@@ -671,7 +671,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PROC: return proc_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
-    case HWLOC_OBJ_PCI_BRIDGE: return pci_bridge_draw;
+    case HWLOC_OBJ_BRIDGE: return bridge_draw;
     default:
     case HWLOC_OBJ_MISC: return misc_draw;
   }
@@ -733,7 +733,7 @@ output_draw_start(struct draw_methods *methods, hwloc_topology_t topology, void 
   methods->declare_color(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR);
   methods->declare_color(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR);
   methods->declare_color(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR);
-  methods->declare_color(output, PCI_BRIDGE_R_COLOR, PCI_BRIDGE_G_COLOR, PCI_BRIDGE_B_COLOR);
+  methods->declare_color(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR);
   return output;
 }
 

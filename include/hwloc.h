@@ -91,7 +91,9 @@ typedef enum {
 			  * way.
 			  */
 
-  HWLOC_OBJ_PCI_BRIDGE,	/**< \brief PCI bridge.
+  HWLOC_OBJ_BRIDGE,	/**< \brief Bridge.
+			  * Any bridge that connects the host or an I/O bus,
+			  * to another I/O bus.
 			  */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
 			  */
@@ -110,6 +112,11 @@ typedef enum {
  * HWLOC_OBJ_PROC will always be the deepest.
  */
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2);
+
+typedef enum hwloc_obj_bridge_e {
+  HWLOC_OBJ_BRIDGE_HOST,	/**< \brief Host-side of a bridge, only possible upstream. */
+  HWLOC_OBJ_BRIDGE_PCI,		/**< \brief PCI-side of a bridge. */
+} hwloc_obj_bridge_type_t;
 
 /** @} */
 
@@ -197,12 +204,21 @@ union hwloc_obj_attr_u {
     unsigned short vendor_id, device_id, subvendor_id, subdevice_id;
     unsigned char revision;
   } pcidev;
-  /** \brief PCI Bridge specific Object Attribues */
-  struct hwloc_pcibridge_attr_u {
-    struct hwloc_pcidev_attr_u dev;
-    unsigned char secondary_bus, subordinate_bus;
+  /** \brief Bridge specific Object Attribues */
+  struct hwloc_bridge_attr_u {
+    union hwloc_bridge_upstream_attr_u {
+      struct hwloc_pcidev_attr_u pci;
+    } upstream;
+    hwloc_obj_bridge_type_t upstream_type;
+    union hwloc_bridge_downstream_attr_u {
+      struct hwloc_bridge_downstream_pci_attr_u {
+	unsigned short domain;
+	unsigned char secondary_bus, subordinate_bus;
+      } pci;
+    } downstream;
+    hwloc_obj_bridge_type_t downstream_type;
     unsigned depth;
-  } pcibridge;
+  } bridge;
 };
 
 /** @} */

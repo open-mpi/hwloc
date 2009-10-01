@@ -31,13 +31,15 @@ hwloc_pci_traverse(struct hwloc_obj *root, int depth)
     snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
              child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func);
 
-    if (child->type == HWLOC_OBJ_PCI_BRIDGE)
-      hwloc_debug("%*s %s Bridge [%04x:%04x (%04x:%04x) rev=%02x class=%04x] to [%02x:%02x]\n", depth, "", busid,
-		  child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
-		  child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
-		  child->attr->pcidev.revision, child->attr->pcidev.class,
-		  child->attr->pcibridge.secondary_bus, child->attr->pcibridge.subordinate_bus);
-    else
+    if (child->type == HWLOC_OBJ_BRIDGE) {
+      if (child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST)
+	hwloc_debug("%*s HostBridge", depth, "");
+      else
+	hwloc_debug("%*s %s Bridge [%04x:%04x]", depth, "", busid,
+		    child->attr->pcidev.vendor_id, child->attr->pcidev.device_id);
+      hwloc_debug(" to %04x:[%02x:%02x]\n",
+		  child->attr->bridge.downstream.pci.domain, child->attr->bridge.downstream.pci.secondary_bus, child->attr->bridge.downstream.pci.subordinate_bus);
+    } else
       hwloc_debug("%*s %s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", depth, "", busid,
 		  child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
 		  child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
@@ -53,8 +55,8 @@ hwloc_pci_set_bridge_depths(struct hwloc_obj *root, int depth)
 {
   struct hwloc_obj *child = root->first_child;
   while (child) {
-    if (child->type == HWLOC_OBJ_PCI_BRIDGE) {
-      child->attr->pcibridge.depth = depth;
+    if (child->type == HWLOC_OBJ_BRIDGE) {
+      child->attr->bridge.depth = depth;
       hwloc_pci_set_bridge_depths(child, depth+1);
     }
     child = child->next_sibling;
@@ -71,18 +73,23 @@ enum hwloc_pci_busid_comparison_e {
 static int
 hwloc_pci_compare_busids(struct hwloc_obj *a, struct hwloc_obj *b)
 {
+  if (a->type == HWLOC_OBJ_BRIDGE)
+    assert(a->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI);
+  if (b->type == HWLOC_OBJ_BRIDGE)
+    assert(b->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI);
+
   if (a->attr->pcidev.domain < b->attr->pcidev.domain)
     return HWLOC_PCI_BUSID_LOWER;
   if (a->attr->pcidev.domain > b->attr->pcidev.domain)
     return HWLOC_PCI_BUSID_HIGHER;
 
-  if (a->type == HWLOC_OBJ_PCI_BRIDGE
-      && b->attr->pcidev.bus >= a->attr->pcibridge.secondary_bus
-      && b->attr->pcidev.bus <= a->attr->pcibridge.subordinate_bus)
+  if (a->type == HWLOC_OBJ_BRIDGE
+      && b->attr->pcidev.bus >= a->attr->bridge.downstream.pci.secondary_bus
+      && b->attr->pcidev.bus <= a->attr->bridge.downstream.pci.subordinate_bus)
     return HWLOC_PCI_BUSID_SUPERSET;
-  if (b->type == HWLOC_OBJ_PCI_BRIDGE
-      && a->attr->pcidev.bus >= b->attr->pcibridge.secondary_bus
-      && a->attr->pcidev.bus <= b->attr->pcibridge.subordinate_bus)
+  if (b->type == HWLOC_OBJ_BRIDGE
+      && a->attr->pcidev.bus >= b->attr->bridge.downstream.pci.secondary_bus
+      && a->attr->pcidev.bus <= b->attr->bridge.downstream.pci.subordinate_bus)
     return HWLOC_PCI_BUSID_INCLUDED;
 
   if (a->attr->pcidev.bus < b->attr->pcidev.bus)
@@ -198,7 +205,7 @@ hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
   while (next_child) {
     child = next_child;
     next_child = child->next_sibling;
-    if (child->type != HWLOC_OBJ_PCI_BRIDGE)
+    if (child->type != HWLOC_OBJ_BRIDGE)
       continue;
     hwloc_pci_drop_useless_bridges(child);
     if (!child->first_child) {
@@ -297,7 +304,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     /* might be useful for debugging (note that domain might be truncated) */
     os_index = (pcidev->domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
 
-    obj = hwloc_alloc_setup_object(isbridge ? HWLOC_OBJ_PCI_BRIDGE : HWLOC_OBJ_PCI_DEVICE, os_index);
+    obj = hwloc_alloc_setup_object(isbridge ? HWLOC_OBJ_BRIDGE : HWLOC_OBJ_PCI_DEVICE, os_index);
 
     obj->attr->pcidev.domain = pcidev->domain;
     obj->attr->pcidev.bus = pcidev->bus;
@@ -318,8 +325,11 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       HWLOC_BUILD_ASSERT(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
       HWLOC_BUILD_ASSERT(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
       assert(config_space_cache[PCI_PRIMARY_BUS] == pcidev->bus);
-      obj->attr->pcibridge.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];
-      obj->attr->pcibridge.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
+      obj->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_PCI;
+      obj->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
+      obj->attr->bridge.downstream.pci.domain = pcidev->domain;
+      obj->attr->bridge.downstream.pci.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];
+      obj->attr->bridge.downstream.pci.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
     }
 
     /* FIXME: store in obj->name */
@@ -365,7 +375,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   unsigned current_hostbridge = 0;
   while (fakehostbridge.first_child) {
     /* start a new host bridge */
-    struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_BRIDGE, current_hostbridge++);
+    struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, current_hostbridge++);
     struct hwloc_obj *child = fakehostbridge.first_child;
     struct hwloc_obj *next_child;
     unsigned short current_domain = child->attr->pcidev.domain;
@@ -382,9 +392,9 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     hwloc_pci_add_child_before(hostbridge, NULL, child);
 
     /* compute hostbrigde secondary/subordinate buses */
-    if (child->type == HWLOC_OBJ_PCI_BRIDGE
-	&& child->attr->pcibridge.subordinate_bus > current_subordinate)
-      current_subordinate = child->attr->pcibridge.subordinate_bus;
+    if (child->type == HWLOC_OBJ_BRIDGE
+	&& child->attr->bridge.downstream.pci.subordinate_bus > current_subordinate)
+      current_subordinate = child->attr->bridge.downstream.pci.subordinate_bus;
 
     /* use next child if it has the same domains/bus */
     child = next_child;
@@ -393,13 +403,12 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 	&& child->attr->pcidev.bus == current_bus)
       goto next_child;
 
-    /* default values that mean nothing */
-    memset(hostbridge->attr, 0, sizeof(*hostbridge->attr));
-    hostbridge->attr->pcidev.bus = current_bus;
     /* finish setting up this hostbridge */
-    hostbridge->attr->pcidev.domain = current_domain;
-    hostbridge->attr->pcibridge.secondary_bus = current_bus;
-    hostbridge->attr->pcibridge.subordinate_bus = current_subordinate;
+    hostbridge->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_HOST;
+    hostbridge->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
+    hostbridge->attr->bridge.downstream.pci.domain = current_domain;
+    hostbridge->attr->bridge.downstream.pci.secondary_bus = current_bus;
+    hostbridge->attr->bridge.downstream.pci.subordinate_bus = current_subordinate;
     hwloc_debug("New PCI hostbridge %04x:[%02x-%02x]\n",
 		current_domain, current_bus, current_subordinate);
 

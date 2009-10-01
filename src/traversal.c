@@ -142,7 +142,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_SOCKET: return "Socket";
     case HWLOC_OBJ_CACHE: return "Cache";
     case HWLOC_OBJ_CORE: return "Core";
-    case HWLOC_OBJ_PCI_BRIDGE: return "PCIBridge";
+    case HWLOC_OBJ_BRIDGE: return "Bridge";
     case HWLOC_OBJ_PCI_DEVICE: return "PCIDev";
     case HWLOC_OBJ_PROC: return "Proc";
     default: return "Unknown";
@@ -159,7 +159,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
   if (!strcmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcmp(string, "Core")) return HWLOC_OBJ_CORE;
-  if (!strcmp(string, "PCIBridge")) return HWLOC_OBJ_PCI_BRIDGE;
+  if (!strcmp(string, "Bridge")) return HWLOC_OBJ_BRIDGE;
   if (!strcmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
   if (!strcmp(string, "Proc")) return HWLOC_OBJ_PROC;
   return HWLOC_OBJ_TYPE_MAX;
@@ -223,15 +223,32 @@ hwloc_obj_snprintf(char *string, size_t size,
 		      verbose ? hwloc_obj_type_string(type) : "", os_index,
 		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
 		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));
+  case HWLOC_OBJ_BRIDGE:
+    if (verbose) {
+      char up[32], down[32];
+      /* upstream is PCI or HOST */
+      if (l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
+	snprintf(up, sizeof(up), "PCI%04x:%02x:%02x.%01x",
+		 l->attr->pcidev.domain, l->attr->pcidev.bus, l->attr->pcidev.dev, l->attr->pcidev.func);
+      else /* HWLOC_OBJ_BRIDGE_HOST */
+	snprintf(up, sizeof(up), "Host");
+      /* downstream is_PCI */
+      snprintf(down, sizeof(down), "PCI%04x:[%02x-%02x]",
+	       l->attr->bridge.downstream.pci.domain, l->attr->bridge.downstream.pci.secondary_bus, l->attr->bridge.downstream.pci.subordinate_bus);
+      return snprintf(string, size, "Bridge %s->%s", up, down);
+    } else {
+      if (l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
+        return snprintf(string, size, "PCI %04x:%04x", l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
+      else if (l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST)
+	return snprintf(string, size, "HostBridge");
+    }
   case HWLOC_OBJ_PCI_DEVICE:
-  case HWLOC_OBJ_PCI_BRIDGE:
     if (verbose)
       return snprintf(string, size, "%s%04x:%02x:%02x.%01x(%04x:%04x,class=%04x)", hwloc_obj_type_string(type),
 		      l->attr->pcidev.domain, l->attr->pcidev.bus, l->attr->pcidev.dev, l->attr->pcidev.func,
 		      l->attr->pcidev.device_id, l->attr->pcidev.vendor_id, l->attr->pcidev.class);
-    else {
+    else
       return snprintf(string, size, "PCI %04x:%04x", l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
-    }
   default:
     *string = '\0';
     return 0;

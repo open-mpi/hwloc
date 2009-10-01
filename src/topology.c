@@ -412,7 +412,7 @@ static const int obj_type_order[] = {
   [HWLOC_OBJ_SOCKET] = 4,
   [HWLOC_OBJ_CACHE] = 5,
   [HWLOC_OBJ_CORE] = 6,
-  [HWLOC_OBJ_PCI_BRIDGE] = 7,
+  [HWLOC_OBJ_BRIDGE] = 7,
   [HWLOC_OBJ_PCI_DEVICE] = 8,
   [HWLOC_OBJ_PROC] = 9,
 };
@@ -426,7 +426,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   [4] = HWLOC_OBJ_SOCKET,
   [5] = HWLOC_OBJ_CACHE,
   [6] = HWLOC_OBJ_CORE,
-  [7] = HWLOC_OBJ_PCI_BRIDGE,
+  [7] = HWLOC_OBJ_BRIDGE,
   [8] = HWLOC_OBJ_PCI_DEVICE,
   [9] = HWLOC_OBJ_PROC,
 };
@@ -470,11 +470,11 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
       return HWLOC_TYPE_HIGHER;
   }
 
-  /* PCI Bridges objects have the same types but can have different depths.  */
-  if (obj1->type == HWLOC_OBJ_PCI_BRIDGE) {
-    if (obj1->attr->pcibridge.depth < obj2->attr->pcibridge.depth)
+  /* Bridges objects have the same types but can have different depths.  */
+  if (obj1->type == HWLOC_OBJ_BRIDGE) {
+    if (obj1->attr->bridge.depth < obj2->attr->bridge.depth)
       return HWLOC_TYPE_DEEPER;
-    else if (obj1->attr->pcibridge.depth > obj2->attr->pcibridge.depth)
+    else if (obj1->attr->bridge.depth > obj2->attr->bridge.depth)
       return HWLOC_TYPE_HIGHER;
   }
 
@@ -767,7 +767,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
   if ((*obj)->type != HWLOC_OBJ_NODE
       && (*obj)->type != HWLOC_OBJ_PCI_DEVICE
-      && (*obj)->type != HWLOC_OBJ_PCI_BRIDGE
+      && (*obj)->type != HWLOC_OBJ_BRIDGE
       && hwloc_cpuset_iszero(&(*obj)->cpuset)) {
     /* Remove empty children */
     traverse(topology, obj, NULL, NULL, do_free_object, NULL);
