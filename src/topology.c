@@ -673,6 +673,8 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 void
 hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
+  assert(!obj->first_child);
+
   if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     free_object(obj);
     return;
@@ -685,19 +687,30 @@ hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 void
 hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj)
 {
-  hwloc_obj_t *child;
+  hwloc_obj_t child, next_child = obj->first_child;
+  hwloc_obj_t *current;
 
-  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS)
-    /* FIXME: look at children before ignoring everything */
-    /* FIXME: free objects */
-    return;
+  /* FIXME: mark KEEP_STRUCTURE as unsupported for I/O devices ? */
+  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
+    /* Just drop the object and use father to insert children */
+    free_object(obj);
+  } else {
+    /* Append to the end of the list */
+    for (current = &father->first_child; *current; current = &(*current)->next_sibling)
+      ;
+    *current = obj;
+    obj->next_sibling = NULL;
+    obj->first_child = NULL;
+    /* Use the new object to insert children */
+    father = obj;
+  }
 
-  /* Append to the end of the list */
-  for (child = &father->first_child; *child; child = &(*child)->next_sibling)
-    ;
-
-  *child = obj;
-  obj->next_sibling = NULL;
+  /* Recursively insert children below */
+  while (next_child) {
+    child = next_child;
+    next_child = child->next_sibling;
+    hwloc_insert_object_by_parent(topology, father, child);
+  }
 }
 
 /*

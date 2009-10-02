@@ -166,6 +166,8 @@ extern void hwloc_look_synthetic (struct hwloc_topology *topology);
  * must be enough to find where to insert the object. This is especially true
  * for NUMA nodes with memory and no CPUs.
  *
+ * The given object should not have children.
+ *
  * This shall only be called before levels are built.
  */
 extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
@@ -176,6 +178,8 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
  * It is added as the last child of the given father.
  * The cpuset is completely ignored, so strange objects such as I/O devices should
  * preferably be inserted with this.
+ *
+ * The given object may have children.
  *
  * Remember to call topology_connect() afterwards to fix handy pointers.
  */
