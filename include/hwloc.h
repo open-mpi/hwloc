@@ -99,7 +99,7 @@ typedef enum {
 			  */
 } hwloc_obj_type_t;
 /** \brief Maximal value of an object type */
-#define HWLOC_OBJ_TYPE_MAX (HWLOC_OBJ_MISC+1)
+#define HWLOC_OBJ_TYPE_MAX (HWLOC_OBJ_PCI_DEVICE+1)
 
 /** \brief Compare the depth of two object types
  *
