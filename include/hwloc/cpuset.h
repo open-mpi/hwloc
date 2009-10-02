@@ -30,30 +30,9 @@
 typedef struct { unsigned long s[HWLOC_CPUSUBSET_COUNT]; } hwloc_cpuset_t;
 
 
-
 /*
  * Misc Predefined Cpuset Values.
  */
-
-/** \brief Predefined cpuset with no CPU set */
-#ifdef __GNUC__
-#define HWLOC_CPUSET_ZERO	(hwloc_cpuset_t){ .s[0 ... HWLOC_CPUSUBSET_COUNT-1] = HWLOC_CPUSUBSET_ZERO }
-#else
-#define HWLOC_CPUSET_ZERO	HWLOC__CPUSET_ZERO()
-#endif
-/** \brief Predefined cpuset with all CPUs set */
-#ifdef __GNUC__
-#define HWLOC_CPUSET_FULL	(hwloc_cpuset_t){ .s[0 ... HWLOC_CPUSUBSET_COUNT-1] = HWLOC_CPUSUBSET_FULL }
-#else
-#define HWLOC_CPUSET_FULL	HWLOC__CPUSET_FULL()
-#endif
-/** \brief Predefined cpuset with CPU \c cpu set */
-#ifdef __GNUC__
-#define HWLOC_CPUSET_CPU(cpu)	({ hwloc_cpuset_t __set = HWLOC_CPUSET_ZERO; HWLOC_CPUSUBSET_CPUSUBSET(__set,cpu) = HWLOC_CPUSUBSET_VAL(cpu); __set; })
-#else
-#define HWLOC_CPUSET_CPU(cpu)	HWLOC__CPUSET_CPU(cpu)
-#endif
-
 
 /*
  * Cpuset/String Conversion
