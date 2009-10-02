@@ -246,8 +246,8 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
 	hwloc_cpuset_orset(&misc_obj->cpuset, &objs[j]->cpuset);
 	groupsizes[i]++;
       }
-    hwloc_debug("adding misc object with %u objects and cpuset %"HWLOC_PRIxCPUSET"\n",
-	       groupsizes[i], HWLOC_CPUSET_PRINTF_VALUE(&misc_obj->cpuset));
+    hwloc_debug_1arg_cpuset("adding misc object with %u objects and cpuset %"HWLOC_PRIxCPUSET"\n",
+	       groupsizes[i], &misc_obj->cpuset);
     hwloc_add_object(topology, misc_obj);
     groupobjs[i] = misc_obj;
   }
@@ -345,8 +345,8 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
 
       hwloc_cpuset_cpu(&obj->cpuset, oscpu);
 
-      hwloc_debug("cpu %d (os %d) has cpuset %"HWLOC_PRIxCPUSET"\n",
-		 cpu, oscpu, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
+      hwloc_debug_2args_cpuset("cpu %d (os %d) has cpuset %"HWLOC_PRIxCPUSET"\n",
+		 cpu, oscpu, &obj->cpuset);
       hwloc_add_object(topology, obj);
 
       cpu++;

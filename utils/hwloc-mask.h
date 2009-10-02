@@ -27,34 +27,38 @@ static __inline void
 hwloc_mask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
+  char *s1 = hwloc_cpuset_printf_value(newset);
+  char *s2 = hwloc_cpuset_printf_value(set);
   switch (mode) {
   case HWLOC_MASK_APPEND_ADD:
     if (verbose)
       fprintf(stderr, "adding %" HWLOC_PRIxCPUSET " to %" HWLOC_PRIxCPUSET "\n",
-	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
+          s1, s2);
     hwloc_cpuset_orset(set, newset);
     break;
   case HWLOC_MASK_APPEND_CLR:
     if (verbose)
       fprintf(stderr, "clearing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
-	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
+          s1, s2);
     hwloc_cpuset_clearset(set, newset);
     break;
   case HWLOC_MASK_APPEND_AND:
     if (verbose)
       fprintf(stderr, "and'ing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
-	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
+          s1, s2);
     hwloc_cpuset_andset(set, newset);
     break;
   case HWLOC_MASK_APPEND_XOR:
     if (verbose)
       fprintf(stderr, "xor'ing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
-	      HWLOC_CPUSET_PRINTF_VALUE(newset), HWLOC_CPUSET_PRINTF_VALUE(set));
+          s1, s2);
     hwloc_cpuset_xorset(set, newset);
     break;
   default:
     assert(1);
   }
+  free(s1);
+  free(s2);
 }
 
 static __inline int
@@ -138,12 +142,14 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 
     obj = hwloc_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i);
     if (verbose) {
+      char * s = hwloc_cpuset_printf_value(rootset);
       if (obj)
 	printf("object #%u depth %u below cpuset %" HWLOC_PRIxCPUSET " found\n",
-	       i, depth, HWLOC_CPUSET_PRINTF_VALUE(rootset));
+	       i, depth, s);
       else
 	printf("object #%u depth %u below cpuset %" HWLOC_PRIxCPUSET " does not exist\n",
-	       i, depth, HWLOC_CPUSET_PRINTF_VALUE(rootset));
+	       i, depth, s);
+      free(s);
     }
     if (obj) {
       if (sep3)

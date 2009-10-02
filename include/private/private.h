@@ -83,24 +83,6 @@ struct hwloc_topology {
 };
 
 
-#ifdef HAVE_ALLOCA_H
-# include <alloca.h>
-#elif defined __GNUC__
-# define alloca __builtin_alloca
-#elif defined _AIX
-# define alloca __alloca
-#elif defined _MSC_VER
-# include <malloc.h>
-# define alloca _alloca
-#else
-# include <stddef.h>
-# ifdef  __cplusplus
-extern "C"
-# endif
-void *alloca (size_t);
-#endif
-
-
 extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors, hwloc_cpuset_t *online_cpuset);
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj *objs[nbobjs], unsigned distances[nbobjs][nbobjs]);
 extern unsigned hwloc_fallback_nbprocessors(void);
@@ -156,11 +138,13 @@ extern void hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj);
 
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
-#define HWLOC_CPUSET_PRINTF_VALUE(x)	({					\
-	char *__buf = alloca(HWLOC_CPUSET_STRING_LENGTH+1);			\
-	hwloc_cpuset_snprintf(__buf, HWLOC_CPUSET_STRING_LENGTH+1, x);		\
-	__buf;									\
-     })
+static inline char *
+hwloc_cpuset_printf_value(hwloc_cpuset_t *cpuset)
+{
+  char *buf = malloc(HWLOC_CPUSET_STRING_LENGTH+1);
+  hwloc_cpuset_snprintf(buf, HWLOC_CPUSET_STRING_LENGTH+1, cpuset);
+  return buf;
+}
 
 static inline struct hwloc_obj *
 hwloc_alloc_setup_object(hwloc_obj_type_t type, signed index)
@@ -199,9 +183,9 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
     {
       obj = hwloc_alloc_setup_object(type, osphysids[j]);
       hwloc_object_cpuset_from_array(obj, j, proc_physids, procid_max);
-      hwloc_debug("%s %d has cpuset %"HWLOC_PRIxCPUSET"\n",
+      hwloc_debug_2args_cpuset("%s %d has cpuset %"HWLOC_PRIxCPUSET"\n",
 		 hwloc_obj_type_string(type),
-		 j, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
+		 j, &obj->cpuset);
       hwloc_add_object(topology, obj);
     }
   hwloc_debug("\n");

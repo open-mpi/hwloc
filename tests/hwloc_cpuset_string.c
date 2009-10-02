@@ -47,7 +47,9 @@ int main()
   printf("last cpu cpuset converted back and forth, ok\n");
 
 //  hwloc_cpuset_from_string("1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n", &set);
-//  printf("%s\n",  HWLOC_CPUSET_PRINTF_VALUE(&set));
+//  char *s = hwloc_cpuset_printf_value(&set);
+//  printf("%s\n", s);
+//  free(s);
 //  will be truncated after ",4," since it's too large
 
   hwloc_topology_destroy(topology);

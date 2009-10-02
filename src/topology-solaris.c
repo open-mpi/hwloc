@@ -94,8 +94,8 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
       hwloc_debug("node %ld's cpu %d is %d\n", lgrp, i, cpuids[i]);
       hwloc_cpuset_set(&obj->cpuset, cpuids[i]);
     }
-    hwloc_debug("node %ld has cpuset %"HWLOC_PRIxCPUSET"\n",
-	lgrp, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
+    hwloc_debug_1arg_cpuset("node %ld has cpuset %"HWLOC_PRIxCPUSET"\n",
+	lgrp, &obj->cpuset);
 
     /* or LGRP_MEM_SZ_FREE */
     obj->attr->node.huge_page_free = 0; /* TODO */

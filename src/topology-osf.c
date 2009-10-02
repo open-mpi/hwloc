@@ -190,8 +190,8 @@ hwloc_look_osf(struct hwloc_topology *topology)
       while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
 	hwloc_cpuset_set(&obj->cpuset,cpuid);
 
-      hwloc_debug("node %d has cpuset %"HWLOC_PRIxCPUSET"\n",
-		 radid, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
+      hwloc_debug_1arg_cpuset("node %d has cpuset %"HWLOC_PRIxCPUSET"\n",
+		 radid, &obj->cpuset);
 
       hwloc_add_object(topology, obj);
 
