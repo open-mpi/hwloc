@@ -95,6 +95,7 @@ typedef enum {
 			  * Any bridge that connects the host or an I/O bus,
 			  * to another I/O bus.
 			  */
+  /* FIXME: rename into device with a type attribute ? */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
 			  */
 } hwloc_obj_type_t;
@@ -340,6 +341,7 @@ enum hwloc_topology_flags_e {
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_PCI = (1<<2),
 
+  /* FIXME: disable by default for "backward compatibility" ? */
   /* \brief Do not detect the PCI hierarchy.
    *
    * By default, only interesting PCI objects are added to the topology,
