@@ -414,7 +414,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
     /* attach the hostbridge where it belongs */
     struct hwloc_obj *parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge);
-    hwloc_insert_object(topology, parent, hostbridge);
+    hwloc_insert_object_by_parent(topology, parent, hostbridge);
   }
 }
 

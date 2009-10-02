@@ -266,7 +266,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	  default:
 	    break;
 	}
-	hwloc_add_object(topology, obj);
+	hwloc_insert_object_by_cpuset(topology, obj);
       }
 
       free(procInfo);
@@ -338,7 +338,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
 	      hwloc_debug("group %d mask %lx\n", id, mask);
 	      hwloc_cpuset_from_ith_ulong(&obj->cpuset, id, mask);
-	      hwloc_add_object(topology, obj);
+	      hwloc_insert_object_by_cpuset(topology, obj);
 	    }
 	    continue;
 	  default:
@@ -362,7 +362,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	  default:
 	    break;
 	}
-	hwloc_add_object(topology, obj);
+	hwloc_insert_object_by_cpuset(topology, obj);
       }
       free(procInfoTotal);
     }

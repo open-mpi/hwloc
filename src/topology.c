@@ -246,7 +246,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
       }
     hwloc_debug("adding misc object with %u objects and cpuset %"HWLOC_PRIxCPUSET"\n",
 	       groupsizes[i], HWLOC_CPUSET_PRINTF_VALUE(&misc_obj->cpuset));
-    hwloc_add_object(topology, misc_obj);
+    hwloc_insert_object_by_cpuset(topology, misc_obj);
     groupobjs[i] = misc_obj;
   }
 
@@ -345,7 +345,7 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
 
       hwloc_debug("cpu %d (os %d) has cpuset %"HWLOC_PRIxCPUSET"\n",
 		 cpu, oscpu, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
-      hwloc_add_object(topology, obj);
+      hwloc_insert_object_by_cpuset(topology, obj);
 
       cpu++;
     }
@@ -551,7 +551,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
 /* Try to insert OBJ in CUR, recurse if needed */
 static void
-add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
+hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 {
   hwloc_obj_t child, container, *cur_children, *obj_children, next_child;
   int put;
@@ -606,7 +606,7 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 
   if (container) {
     /* OBJ is strictly contained is some child of CUR, go deeper.  */
-    add_object(topology, container, obj);
+    hwloc__insert_object_by_cpuset(topology, container, obj);
     return;
   }
 
@@ -671,7 +671,7 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 }
 
 void
-hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj)
+hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
   if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     free_object(obj);
@@ -679,11 +679,11 @@ hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj)
   }
 
   /* Start at the top.  */
-  add_object(topology, topology->levels[0][0], obj);
+  hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
 }
 
 void
-hwloc_insert_object(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj)
+hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj)
 {
   hwloc_obj_t *child;
 

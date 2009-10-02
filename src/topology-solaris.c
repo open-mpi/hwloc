@@ -101,7 +101,7 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
     obj->attr->node.huge_page_free = 0; /* TODO */
     hwloc_debug("node %ld has %lldkB\n", lgrp, mem_size/1024);
     obj->attr->node.memory_kB = mem_size / 1024;
-    hwloc_add_object(topology, obj);
+    hwloc_insert_object_by_cpuset(topology, obj);
   }
 
   n = lgrp_children(cookie, lgrp, NULL, 0);

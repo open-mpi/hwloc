@@ -193,7 +193,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
       hwloc_debug("node %d has cpuset %"HWLOC_PRIxCPUSET"\n",
 		 radid, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
 
-      hwloc_add_object(topology, obj);
+      hwloc_insert_object_by_cpuset(topology, obj);
 
       nfound = 0;
       for (radid2 = 0; radid2 < nbnodes; radid2++)

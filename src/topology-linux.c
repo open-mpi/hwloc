@@ -555,7 +555,7 @@ look_sysfsnode(struct hwloc_topology *topology,
 
       hwloc_debug("os node %u has cpuset %"HWLOC_PRIxCPUSET"\n",
 		 osnode, HWLOC_CPUSET_PRINTF_VALUE(&node->cpuset));
-      hwloc_add_object(topology, node);
+      hwloc_insert_object_by_cpuset(topology, node);
       nodes[osnode] = node;
 
       sprintf(nodepath, "%s/node%u/distance", path, osnode);
@@ -653,7 +653,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	socket->cpuset = socketset;
 	hwloc_debug("os socket %u has cpuset %"HWLOC_PRIxCPUSET"\n",
 		   mysocketid, HWLOC_CPUSET_PRINTF_VALUE(&socketset));
-	hwloc_add_object(topology, socket);
+	hwloc_insert_object_by_cpuset(topology, socket);
       }
 
       /* look at the core */
@@ -671,7 +671,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	core->cpuset = coreset;
 	hwloc_debug("os core %u has cpuset %"HWLOC_PRIxCPUSET"\n",
 		   mycoreid, HWLOC_CPUSET_PRINTF_VALUE(&coreset));
-	hwloc_add_object(topology, core);
+	hwloc_insert_object_by_cpuset(topology, core);
       }
 
       /* look at the thread */
@@ -684,7 +684,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
       thread->cpuset = threadset;
       hwloc_debug("thread %d has cpuset %"HWLOC_PRIxCPUSET"\n",
 		 i, HWLOC_CPUSET_PRINTF_VALUE(&threadset));
-      hwloc_add_object(topology, thread);
+      hwloc_insert_object_by_cpuset(topology, thread);
 
       /* look at the caches */
       for(j=0; j<10; j++) {
@@ -748,7 +748,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	  cache->cpuset = cacheset;
 	  hwloc_debug("cache depth %d has cpuset %"HWLOC_PRIxCPUSET"\n",
 		     depth, HWLOC_CPUSET_PRINTF_VALUE(&cacheset));
-	  hwloc_add_object(topology, cache);
+	  hwloc_insert_object_by_cpuset(topology, cache);
 	}
       }
     }
@@ -967,7 +967,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
       machine->attr->machine.dmi_board_vendor = NULL;
       hwloc_debug("machine number %lu has cpuset %"HWLOC_PRIxCPUSET"\n",
 		 node, HWLOC_CPUSET_PRINTF_VALUE(&online_set));
-      hwloc_add_object(topology, machine);
+      hwloc_insert_object_by_cpuset(topology, machine);
 
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/meminfo", node);
       /* Compute the machine memory and huge page */

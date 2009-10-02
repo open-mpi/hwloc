@@ -281,7 +281,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 		    HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset),
 		    HWLOC_CPUSET_PRINTF_VALUE(&topology->levels[0][0]->cpuset));
 	  else
-	    hwloc_add_object(topology, obj);
+	    hwloc_insert_object_by_cpuset(topology, obj);
 	}
       }
 
