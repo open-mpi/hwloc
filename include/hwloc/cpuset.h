@@ -173,14 +173,6 @@ static __inline void hwloc_cpuset_zero(hwloc_cpuset_t * set)
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
 		HWLOC_CPUSUBSET_SUBSET(*set,i) = HWLOC_CPUSUBSET_ZERO;
 }
-#ifndef __GNUC__
-static __inline hwloc_cpuset_t HWLOC__CPUSET_ZERO(void)
-{
-	hwloc_cpuset_t cpuset;
-	hwloc_cpuset_zero(&cpuset);
-	return cpuset;
-}
-#endif
 
 /** \brief Fill CPU set \p set */
 static __inline void hwloc_cpuset_fill(hwloc_cpuset_t * set)
@@ -189,14 +181,6 @@ static __inline void hwloc_cpuset_fill(hwloc_cpuset_t * set)
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
 		HWLOC_CPUSUBSET_SUBSET(*set,i) = HWLOC_CPUSUBSET_FULL;
 }
-#ifndef __GNUC__
-static __inline hwloc_cpuset_t HWLOC__CPUSET_FULL(void)
-{
-	hwloc_cpuset_t cpuset;
-	hwloc_cpuset_fill(&cpuset);
-	return cpuset;
-}
-#endif
 
 /** \brief Setup CPU set \p set from unsigned long \p mask */
 static __inline void hwloc_cpuset_from_ulong(hwloc_cpuset_t *set, unsigned long mask)
@@ -236,14 +220,6 @@ static __inline void hwloc_cpuset_cpu(hwloc_cpuset_t * set,
 	hwloc_cpuset_zero(set);
 	HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) |= HWLOC_CPUSUBSET_VAL(cpu);
 }
-#ifndef __GNUC__
-static __inline hwloc_cpuset_t HWLOC__CPUSET_CPU(unsigned cpu)
-{
-	hwloc_cpuset_t cpuset;
-	hwloc_cpuset_cpu(&cpuset, cpu);
-	return cpuset;
-}
-#endif
 
 /** \brief Clear CPU set \p set and set all but the CPU \p cpu */
 static __inline void hwloc_cpuset_all_but_cpu(hwloc_cpuset_t * set,
