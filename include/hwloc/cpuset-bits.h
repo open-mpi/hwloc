@@ -16,16 +16,6 @@
 #include <string.h>
 #include <strings.h>
 
-#if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
-# define __hwloc_restrict __restrict
-#else
-# if __STDC_VERSION__ >= 199901L
-#  define __hwloc_restrict restrict
-# else
-#  define __hwloc_restrict
-# endif
-#endif
-
 
 /**
  * Cpuset internals.

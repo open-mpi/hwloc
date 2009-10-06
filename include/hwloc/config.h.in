@@ -8,6 +8,16 @@
 #ifndef HWLOC_CONFIG_H
 #define HWLOC_CONFIG_H
 
+#if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+# define __hwloc_restrict __restrict
+#else
+# if __STDC_VERSION__ >= 199901L
+#  define __hwloc_restrict restrict
+# else
+#  define __hwloc_restrict
+# endif
+#endif
+
 #undef HWLOC_HAVE_FFS
 
 #undef HWLOC_HAVE_DECL_FFS
