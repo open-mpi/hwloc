@@ -58,6 +58,7 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
   ssize_t size = buflen;
   char *tmp = buf;
   int res;
+  int needcomma = 0;
   int i;
   unsigned long accum = 0;
   int accumed = 0;
@@ -72,8 +73,7 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
 
   i=HWLOC_CPUSUBSET_COUNT-1;
   while (i>=0 || accumed) {
-    /* add a comma first, if we already wrote something  */
-    if (tmp != buf) {
+    if (needcomma) {
       res = snprintf(tmp, size, ",");
       tmp += res; size -= res;
       if (size <= 1) /* need room for ending \0 */
@@ -89,6 +89,7 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
     if (accum & accum_mask) {
       /* print the whole subset if not empty */
       res = snprintf(tmp, size, HWLOC_PRIxCPUSUBSET, (accum & accum_mask) >> (HWLOC_BITS_PER_LONG - HWLOC_CPUSET_SUBSTRING_SIZE));
+      needcomma = 1;
     } else if (i == -1 && accumed == HWLOC_CPUSET_SUBSTRING_SIZE)
       /* print a single 0 to mark the last subset */
       res = snprintf(tmp, size, "0");
