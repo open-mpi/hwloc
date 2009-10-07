@@ -980,7 +980,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
 	abort();
       }
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
-      machine->cpuset = hwloc_cpuset_copy(online_set);
+      machine->cpuset = hwloc_cpuset_dup(online_set);
       machine->attr->machine.dmi_board_name = NULL;
       machine->attr->machine.dmi_board_vendor = NULL;
       hwloc_debug_1arg_cpuset("machine number %lu has cpuset %s\n",

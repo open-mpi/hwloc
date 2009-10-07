@@ -70,7 +70,7 @@ int main(void)
 		return 0;
 
 	/* Get a copy of its cpuset that we may modify.  */
-	hwloc_cpuset_t cpuset = hwloc_cpuset_copy(obj->cpuset);
+	hwloc_cpuset_t cpuset = hwloc_cpuset_dup(obj->cpuset);
 
 	/* Get only one logical processor (in case the core is SMT/hyperthreaded).  */
 	hwloc_cpuset_singlify(cpuset);

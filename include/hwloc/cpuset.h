@@ -39,8 +39,8 @@ hwloc_cpuset_t hwloc_cpuset_alloc(void);
 /** \brief Free CPU set \p set */
 void hwloc_cpuset_free(hwloc_cpuset_t set);
 
-/** \brief Allocate a new copy of CPU set \p set that may be modified */
-hwloc_cpuset_t hwloc_cpuset_copy(hwloc_cpuset_t set);
+/** \brief Duplicate CPU set \p set by allocating a new CPU set and copying its contents */
+hwloc_cpuset_t hwloc_cpuset_dup(hwloc_cpuset_t set);
 
 
 /*

@@ -443,7 +443,7 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
   if (!root->arity || n == 1) {
     /* Got to the bottom, we can't split any more, put everything there.  */
     for (i=0; i<n; i++)
-      cpuset[i] = hwloc_cpuset_copy(root->cpuset);
+      cpuset[i] = hwloc_cpuset_dup(root->cpuset);
     return;
   }
 

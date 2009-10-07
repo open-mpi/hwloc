@@ -24,7 +24,7 @@ int main(void)
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
 
-  hwlocset = hwloc_cpuset_copy(hwloc_get_system_obj(topology)->cpuset);
+  hwlocset = hwloc_cpuset_dup(hwloc_get_system_obj(topology)->cpuset);
   hwloc_cpuset_to_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
   err = sched_setaffinity(0, sizeof(schedset));
@@ -48,7 +48,7 @@ int main(void)
   assert(obj);
   assert(obj->type == HWLOC_OBJ_PROC);
 
-  hwlocset = hwloc_cpuset_copy(obj->cpuset);
+  hwlocset = hwloc_cpuset_dup(obj->cpuset);
   hwloc_cpuset_to_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
   err = sched_setaffinity(0, sizeof(schedset));

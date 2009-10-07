@@ -96,7 +96,7 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_cpuset_t
   }
 
   for (i=0; i<current->arity; i++) {
-    hwloc_cpuset_t subset = hwloc_cpuset_copy(set);
+    hwloc_cpuset_t subset = hwloc_cpuset_dup(set);
     int ret;
 
     /* split out the cpuset part corresponding to this child and see if there's anything to do */

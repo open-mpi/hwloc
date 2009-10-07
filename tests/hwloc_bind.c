@@ -49,7 +49,7 @@ int main(void)
   hwloc_topology_load(topology);
 
   obj = hwloc_get_system_obj(topology);
-  set = hwloc_cpuset_copy(obj->cpuset);
+  set = hwloc_cpuset_dup(obj->cpuset);
 
   while (hwloc_cpuset_isequal(obj->cpuset, set)) {
     if (!obj->arity)
@@ -67,7 +67,7 @@ int main(void)
   test(set, HWLOC_CPUBIND_STRICT);
 
   hwloc_cpuset_free(set);
-  set = hwloc_cpuset_copy(obj->cpuset);
+  set = hwloc_cpuset_dup(obj->cpuset);
   hwloc_cpuset_asprintf(&str, set);
   printf("obj set is %s\n", str);
   free(str);

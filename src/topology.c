@@ -1389,7 +1389,7 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
   assert(father->last_child == father->children[father->arity-1]);
   assert(father->last_child->next_sibling == NULL);
 
-  remaining_father_set = hwloc_cpuset_copy(father->cpuset);
+  remaining_father_set = hwloc_cpuset_dup(father->cpuset);
   for(j=0; j<father->arity; j++) {
     /* check that child cpuset is included in the father */
     assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));

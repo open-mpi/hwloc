@@ -88,7 +88,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
     if (mask[0] & 1)
-      cpuset = hwloc_cpuset_copy(hwloc_get_system_obj(topology)->cpuset);
+      cpuset = hwloc_cpuset_dup(hwloc_get_system_obj(topology)->cpuset);
     else
       cpuset = hwloc_cpuset_alloc();
 
@@ -167,7 +167,7 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
     if (numa_bitmask_isbitset(bitmask, 0))
-      cpuset = hwloc_cpuset_copy(hwloc_get_system_obj(topology)->cpuset);
+      cpuset = hwloc_cpuset_dup(hwloc_get_system_obj(topology)->cpuset);
     else
       cpuset = hwloc_cpuset_alloc();
 
@@ -238,7 +238,7 @@ hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology,
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
     if (nodemask_isset(nodemask, 0))
-      cpuset = hwloc_cpuset_copy(hwloc_get_system_obj(topology)->cpuset);
+      cpuset = hwloc_cpuset_dup(hwloc_get_system_obj(topology)->cpuset);
     else
       cpuset = hwloc_cpuset_alloc();
 
