@@ -9,6 +9,7 @@
 #define HWLOC_PRIVATE_CPUSET_H
 
 #include <hwloc/config.h>
+#include <private/config.h>
 
 #include <sys/types.h>
 #include <inttypes.h>
@@ -25,9 +26,15 @@
 #define HWLOC_CPUSUBSET_SIZE	HWLOC_BITS_PER_LONG
 #define HWLOC_CPUSUBSET_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSUBSET_SIZE-1)/HWLOC_CPUSUBSET_SIZE)
 
+/* magic number */
+#define HWLOC_CPUSET_MAGIC 0x20091007
+
 /* actual opaque type internals */
 struct hwloc_cpuset_s {
 	unsigned long s[HWLOC_CPUSUBSET_COUNT];
+#ifdef HWLOC_DEBUG
+	int magic;
+#endif
 };
 
 /* extract a subset from a set using an index or a cpu */
