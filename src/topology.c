@@ -1032,7 +1032,7 @@ hwloc_discover(struct hwloc_topology *topology)
 
     /* One more level!  */
     if (top_obj->type == HWLOC_OBJ_CACHE)
-      hwloc_debug("--- cache level depth %d", top_obj->attr->cache.depth);
+      hwloc_debug("--- Cache level depth %d", top_obj->attr->cache.depth);
     else
       hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
     hwloc_debug(" has number %d\n\n", topology->nb_levels);
