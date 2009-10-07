@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
   int proclist = 0;
   char **orig_argv = argv;
 
-  hwloc_cpuset_zero(&set);
+  set = hwloc_cpuset_alloc();
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    hwloc_mask_process_arg(topology, depth, argv[1], &set, verbose);
+    hwloc_mask_process_arg(topology, depth, argv[1], set, verbose);
 
  next:
     argc--;
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 
   if (proclist) {
     hwloc_obj_t proc, prev = NULL;
-    while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, &set, HWLOC_OBJ_PROC, prev)) != NULL) {
+    while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PROC, prev)) != NULL) {
       if (prev)
 	printf(",");
       printf("%u", proc->os_index);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     printf("\n");
   } else if (nodelist) {
     hwloc_obj_t node, prev = NULL;
-    while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, prev)) != NULL) {
+    while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, prev)) != NULL) {
       if (prev)
 	printf(",");
       printf("%u", node->os_index);
@@ -109,12 +109,14 @@ int main(int argc, char *argv[])
     printf("\n");
   } else {
     char *string = NULL;
-    hwloc_cpuset_asprintf(&string, &set);
+    hwloc_cpuset_asprintf(&string, set);
     printf("%s\n", string);
     free(string);
   }
 
   hwloc_topology_destroy(topology);
+
+  free(set);
 
   return EXIT_SUCCESS;
 }

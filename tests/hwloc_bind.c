@@ -21,7 +21,7 @@ static void result(const char *msg, int err)
     printf("%-30s: OK\n", msg);
 }
 
-static void test(hwloc_cpuset_t *cpuset, int flags)
+static void test(hwloc_cpuset_t cpuset, int flags)
 {
   result("Bind singlethreaded process", hwloc_set_cpubind(topology, cpuset, flags));
   result("Bind this thread", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_THREAD));
@@ -49,43 +49,45 @@ int main(void)
   hwloc_topology_load(topology);
 
   obj = hwloc_get_system_obj(topology);
-  set = obj->cpuset;
+  set = hwloc_cpuset_copy(obj->cpuset);
 
-  while (hwloc_cpuset_isequal(&obj->cpuset, &set)) {
+  while (hwloc_cpuset_isequal(obj->cpuset, set)) {
     if (!obj->arity)
       break;
     obj = obj->children[0];
   }
 
-  hwloc_cpuset_asprintf(&str, &set);
+  hwloc_cpuset_asprintf(&str, set);
   printf("system set is %s\n", str);
   free(str);
 
-  test(&set, 0);
+  test(set, 0);
 
   printf("now strict\n");
-  test(&set, HWLOC_CPUBIND_STRICT);
+  test(set, HWLOC_CPUBIND_STRICT);
 
-  set = obj->cpuset;
-  hwloc_cpuset_asprintf(&str, &set);
+  hwloc_cpuset_free(set);
+  set = hwloc_cpuset_copy(obj->cpuset);
+  hwloc_cpuset_asprintf(&str, set);
   printf("obj set is %s\n", str);
   free(str);
 
-  test(&set, 0);
+  test(set, 0);
 
   printf("now strict\n");
-  test(&set, HWLOC_CPUBIND_STRICT);
+  test(set, HWLOC_CPUBIND_STRICT);
 
-  hwloc_cpuset_singlify(&set);
-  hwloc_cpuset_asprintf(&str, &set);
+  hwloc_cpuset_singlify(set);
+  hwloc_cpuset_asprintf(&str, set);
   printf("singlified to %s\n", str);
   free(str);
 
-  test(&set, 0);
+  test(set, 0);
 
   printf("now strict\n");
-  test(&set, HWLOC_CPUBIND_STRICT);
+  test(set, HWLOC_CPUBIND_STRICT);
 
+  hwloc_cpuset_free(set);
   hwloc_topology_destroy(topology);
   return 0;
 }

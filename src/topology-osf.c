@@ -25,7 +25,7 @@
 #include <cpuset.h>
 
 static int
-prepare_radset(hwloc_topology_t topology, radset_t *radset, const hwloc_cpuset_t *hwloc_set)
+prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_cpuset_t hwloc_set)
 {
   unsigned cpu;
   cpuset_t target_cpuset;
@@ -68,11 +68,11 @@ out:
 }
 
 static int
-hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int strict)
 {
   radset_t radset;
 
-  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
     if (pthread_rad_detach(thread))
       return -1;
     return 0;
@@ -94,11 +94,11 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, c
 }
 
 static int
-hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int strict)
 {
   radset_t radset;
 
-  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
     if (rad_detach_pid(pid))
       return -1;
     return 0;
@@ -120,19 +120,19 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwl
 }
 
 static int
-hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, strict);
 }
 
 static int
-hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, strict);
 }
 
 static int
-hwloc_osf_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_osf_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_osf_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
@@ -183,15 +183,16 @@ hwloc_look_osf(struct hwloc_topology *topology)
       }
 
       nodes[radid] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, radid);
+      obj->cpuset = hwloc_cpuset_alloc();
       obj->attr->node.memory_kB = rad_get_physmem(radid) * getpagesize() / 1024;
       obj->attr->node.huge_page_free = 0;
 
       cursor = SET_CURSOR_INIT;
       while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
-	hwloc_cpuset_set(&obj->cpuset,cpuid);
+	hwloc_cpuset_set(obj->cpuset, cpuid);
 
       hwloc_debug_1arg_cpuset("node %d has cpuset %s\n",
-		 radid, &obj->cpuset);
+		 radid, obj->cpuset);
 
       hwloc_add_object(topology, obj);
 

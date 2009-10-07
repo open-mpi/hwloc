@@ -45,7 +45,7 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
   char line[256];
 
   if (verbose_mode <= 1
-      && parent && parent->arity == 1 && hwloc_cpuset_isequal(&l->cpuset, &parent->cpuset)) {
+      && parent && parent->arity == 1 && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
     /* in non-verbose mode, merge objects with their parent is they are exactly identical */
     fprintf(output, " + ");
   } else {

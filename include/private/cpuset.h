@@ -5,8 +5,8 @@
 
 /* Internals for cpuset API.  */
 
-#ifndef HWLOC_CPUSET_BITS_H
-#define HWLOC_CPUSET_BITS_H
+#ifndef HWLOC_PRIVATE_CPUSET_H
+#define HWLOC_PRIVATE_CPUSET_H
 
 #include <hwloc/config.h>
 
@@ -25,6 +25,11 @@
 #define HWLOC_CPUSUBSET_SIZE	HWLOC_BITS_PER_LONG
 #define HWLOC_CPUSUBSET_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSUBSET_SIZE-1)/HWLOC_CPUSUBSET_SIZE)
 
+/* actual opaque type internals */
+struct hwloc_cpuset_s {
+	unsigned long s[HWLOC_CPUSUBSET_COUNT];
+};
+
 /* extract a subset from a set using an index or a cpu */
 #define HWLOC_CPUSUBSET_SUBSET(set,x)		((set).s[x])
 #define HWLOC_CPUSUBSET_INDEX(cpu)		((cpu)/(HWLOC_CPUSUBSET_SIZE))
@@ -40,7 +45,6 @@
 #define HWLOC_CPUSET_SUBSTRING_SIZE	32
 #define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
 #define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
-
 
 
 /**
@@ -310,4 +314,4 @@ static __inline int hwloc_weight_long(unsigned long w)
 }
 
 
-#endif /* HWLOC_CPUSET_BITS_H */
+#endif /* HWLOC_PRIVATE_CPUSET_H */

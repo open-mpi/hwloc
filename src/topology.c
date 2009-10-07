@@ -81,11 +81,9 @@ hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
 
   /* try to find complete graphs */
   for(i=0; i<nbobjs; i++) {
-    hwloc_cpuset_t closest_objs_set;
+    hwloc_cpuset_t closest_objs_set = hwloc_cpuset_alloc();
     unsigned min_distance = UINT_MAX;
     unsigned size = 1; /* current object i */
-
-    hwloc_cpuset_zero(&closest_objs_set);
 
     /* if already grouped, skip */
     if (groupids[i])
@@ -95,20 +93,20 @@ hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
     for(j=i+1; j<nbobjs; j++) {
       if (distances[i][j] < min_distance) {
 	/* reset the closest set and use new min_distance */
-	hwloc_cpuset_cpu(&closest_objs_set, j);
+	hwloc_cpuset_cpu(closest_objs_set, j);
 	min_distance = distances[i][j];
 	size = 2; /* current objects i and j */
       } else if (distances[i][j] == min_distance) {
 	/* add object to current closest set */
-	hwloc_cpuset_set(&closest_objs_set, j);
+	hwloc_cpuset_set(closest_objs_set, j);
 	size++;
       }
     }
     /* check that we actually have a complete graph between these closest objects */
     for (j=i+1; j<nbobjs; j++)
       for (k=j+1; k<nbobjs; k++)
-	if (hwloc_cpuset_isset(&closest_objs_set, j) &&
-	    hwloc_cpuset_isset(&closest_objs_set, k) &&
+	if (hwloc_cpuset_isset(closest_objs_set, j) &&
+	    hwloc_cpuset_isset(closest_objs_set, k) &&
 	    distances[j][k] != min_distance) {
 	  /* the minimal-distance graph is not complete. abort */
 	  hwloc_debug("found incomplete minimal-distance graph, aborting\n");
@@ -119,10 +117,11 @@ hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
     groupid++;
     groupids[i] = groupid;
     for(j=i+1; j<nbobjs; j++)
-      if (hwloc_cpuset_isset(&closest_objs_set, j))
+      if (hwloc_cpuset_isset(closest_objs_set, j))
 	groupids[j] = groupid;
     hwloc_debug("found complete graph with %u objects with minimal distance %u\n",
 	       size, min_distance);
+    free(closest_objs_set);
   }
 
   /* return the last id, since it's also the number of used group ids */
@@ -146,11 +145,11 @@ hwloc_setup_group_from_min_distance_transitivity(unsigned nbobjs,
 
   /* try to find complete graphs */
   for(i=0; i<nbobjs; i++) {
-    hwloc_cpuset_t closest_objs_set;
+    hwloc_cpuset_t closest_objs_set = hwloc_cpuset_alloc();
     unsigned min_distance = UINT_MAX;
     unsigned size = 1; /* current object i */
 
-    hwloc_cpuset_zero(&closest_objs_set);
+    hwloc_cpuset_zero(closest_objs_set);
 
     /* if already grouped, skip */
     if (groupids[i])
@@ -160,12 +159,12 @@ hwloc_setup_group_from_min_distance_transitivity(unsigned nbobjs,
     for(j=i+1; j<nbobjs; j++) {
       if (distances[i][j] < min_distance) {
 	/* reset the closest set and use new min_distance */
-	hwloc_cpuset_cpu(&closest_objs_set, j);
+	hwloc_cpuset_cpu(closest_objs_set, j);
 	min_distance = distances[i][j];
 	size = 2; /* current objects i and j */
       } else if (distances[i][j] == min_distance) {
 	/* add object to current closest set */
-	hwloc_cpuset_set(&closest_objs_set, j);
+	hwloc_cpuset_set(closest_objs_set, j);
 	size++;
       }
     }
@@ -175,9 +174,9 @@ hwloc_setup_group_from_min_distance_transitivity(unsigned nbobjs,
       for(j=i+1; j<nbobjs; j++)
 	for(k=j+1; k<nbobjs; k++)
 	  if (distances[j][k] <= min_distance
-	      && hwloc_cpuset_isset(&closest_objs_set, j)
-	      && !hwloc_cpuset_isset(&closest_objs_set, k)) {
-	    hwloc_cpuset_set(&closest_objs_set, k);
+	      && hwloc_cpuset_isset(closest_objs_set, j)
+	      && !hwloc_cpuset_isset(closest_objs_set, k)) {
+	    hwloc_cpuset_set(closest_objs_set, k);
 	    size++;
 	    found = 1;
 	  }
@@ -189,10 +188,11 @@ hwloc_setup_group_from_min_distance_transitivity(unsigned nbobjs,
     groupid++;
     groupids[i] = groupid;
     for(j=i+1; j<nbobjs; j++)
-      if (hwloc_cpuset_isset(&closest_objs_set, j))
+      if (hwloc_cpuset_isset(closest_objs_set, j))
 	groupids[j] = groupid;
     hwloc_debug("found transitive graph with %u objects with minimal distance %u\n",
 	       size, min_distance);
+    free(closest_objs_set);
   }
 
   /* return the last id, since it's also the number of used group ids */
@@ -240,14 +240,16 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
     /* create the misc object */
     hwloc_obj_t misc_obj;
     misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+    misc_obj->cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_zero(misc_obj->cpuset);
     misc_obj->attr->misc.depth = depth;
     for (j=0; j<nbobjs; j++)
       if (groupids[j] == i+1) {
-	hwloc_cpuset_orset(&misc_obj->cpuset, &objs[j]->cpuset);
+	hwloc_cpuset_orset(misc_obj->cpuset, objs[j]->cpuset);
 	groupsizes[i]++;
       }
     hwloc_debug_1arg_cpuset("adding misc object with %u objects and cpuset %s\n",
-	       groupsizes[i], &misc_obj->cpuset);
+	       groupsizes[i], misc_obj->cpuset);
     hwloc_add_object(topology, misc_obj);
     groupobjs[i] = misc_obj;
   }
@@ -330,7 +332,7 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
 void
 hwloc_setup_proc_level(struct hwloc_topology *topology,
 		      unsigned nb_processors,
-		      hwloc_cpuset_t *online_cpuset)
+		      hwloc_cpuset_t online_cpuset)
 {
   struct hwloc_obj *obj;
   unsigned oscpu,cpu;
@@ -342,11 +344,11 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
        continue;
 
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, oscpu);
-
-      hwloc_cpuset_cpu(&obj->cpuset, oscpu);
+      obj->cpuset = hwloc_cpuset_alloc();
+      hwloc_cpuset_cpu(obj->cpuset, oscpu);
 
       hwloc_debug_2args_cpuset("cpu %d (os %d) has cpuset %s\n",
-		 cpu, oscpu, &obj->cpuset);
+		 cpu, oscpu, obj->cpuset);
       hwloc_add_object(topology, obj);
 
       cpu++;
@@ -361,7 +363,7 @@ print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
   hwloc_debug("%*s", 2*indent, "");
   hwloc_obj_snprintf(line, sizeof(line), topology, obj, "#", 1);
   hwloc_debug("%s", line);
-  hwloc_cpuset_asprintf(&cpuset, &obj->cpuset);
+  hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
   hwloc_debug(" %s", cpuset);
   free(cpuset);
   if (obj->arity)
@@ -390,6 +392,7 @@ free_object(hwloc_obj_t obj)
   free(obj->attr);
   free(obj->children);
   free(obj->name);
+  free(obj->cpuset);
   free(obj);
 }
 
@@ -486,10 +489,10 @@ enum hwloc_obj_cmp_e {
 static int
 hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (hwloc_cpuset_iszero(&obj1->cpuset) || hwloc_cpuset_iszero(&obj2->cpuset))
+  if (hwloc_cpuset_iszero(obj1->cpuset) || hwloc_cpuset_iszero(obj2->cpuset))
     return HWLOC_OBJ_DIFFERENT;
 
-  if (hwloc_cpuset_isequal(&obj1->cpuset, &obj2->cpuset)) {
+  if (hwloc_cpuset_isequal(obj1->cpuset, obj2->cpuset)) {
 
     /* Same cpuset, subsort by type to have a consistent ordering.  */
 
@@ -510,13 +513,13 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
     /* Different cpusets, sort by inclusion.  */
 
-    if (hwloc_cpuset_isincluded(&obj1->cpuset, &obj2->cpuset))
+    if (hwloc_cpuset_isincluded(obj1->cpuset, obj2->cpuset))
       return HWLOC_OBJ_INCLUDED;
 
-    if (hwloc_cpuset_isincluded(&obj2->cpuset, &obj1->cpuset))
+    if (hwloc_cpuset_isincluded(obj2->cpuset, obj1->cpuset))
       return HWLOC_OBJ_CONTAINS;
 
-    if (hwloc_cpuset_intersects(&obj1->cpuset, &obj2->cpuset))
+    if (hwloc_cpuset_intersects(obj1->cpuset, obj2->cpuset))
       return HWLOC_OBJ_INTERSECTS;
 
     return HWLOC_OBJ_DIFFERENT;
@@ -547,14 +550,14 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
   int put;
 
   /* Make sure we haven't gone too deep.  */
-  assert(hwloc_cpuset_isincluded(&obj->cpuset, &cur->cpuset));
+  assert(hwloc_cpuset_isincluded(obj->cpuset, cur->cpuset));
 
   /* Check whether OBJ is included in some child.  */
   container = NULL;
   for (child = cur->first_child; child; child = child->next_sibling) {
     switch (hwloc_obj_cmp(obj, child)) {
       case HWLOC_OBJ_EQUAL:
-	assert(hwloc_cpuset_isequal(&obj->cpuset, &child->cpuset));
+	assert(hwloc_cpuset_isequal(obj->cpuset, child->cpuset));
 	assert(obj->os_index == child->os_index);
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
@@ -624,7 +627,7 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 
       case HWLOC_OBJ_DIFFERENT:
 	/* Leave CHILD in CUR.  */
-	if (!put && hwloc_cpuset_compar_first(&obj->cpuset, &child->cpuset) < 0) {
+	if (!put && hwloc_cpuset_compar_first(obj->cpuset, child->cpuset) < 0) {
 	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
 	  *cur_children = obj;
 	  cur_children = &obj->next_sibling;
@@ -712,17 +715,17 @@ traverse(hwloc_topology_t topology,
 static void
 get_proc_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
-  hwloc_cpuset_t *cpuset = data;
+  hwloc_cpuset_t cpuset = data;
   if ((*obj)->type != HWLOC_OBJ_PROC)
     return;
-  hwloc_cpuset_orset(cpuset, &(*obj)->cpuset);
+  hwloc_cpuset_orset(cpuset, (*obj)->cpuset);
 }
 
 static void
 apply_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
-  hwloc_cpuset_t *cpuset = data;
-  hwloc_cpuset_andset(&(*obj)->cpuset, cpuset);
+  hwloc_cpuset_t cpuset = data;
+  hwloc_cpuset_andset((*obj)->cpuset, cpuset);
 }
 
 static void
@@ -736,7 +739,7 @@ do_free_object(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 static void
 remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
-  if ((*obj)->type != HWLOC_OBJ_NODE && hwloc_cpuset_iszero(&(*obj)->cpuset)) {
+  if ((*obj)->type != HWLOC_OBJ_NODE && hwloc_cpuset_iszero((*obj)->cpuset)) {
     /* Remove empty children */
     traverse(topology, obj, NULL, NULL, do_free_object, NULL);
     *obj = (*obj)->next_sibling;
@@ -824,24 +827,24 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
  * Empty binding hooks always returning success
  */
 
-static int dontset_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict)
+static int dontset_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
 {
   return 0;
 }
-static int dontset_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict)
+static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
 {
   return 0;
 }
-static int dontset_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict)
+static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
 {
   return 0;
 }
-static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *set, int strict)
+static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int strict)
 {
   return 0;
 }
 #ifdef hwloc_thread_t
-static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t *set, int strict)
+static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int strict)
 {
   return 0;
 }
@@ -932,11 +935,11 @@ hwloc_discover(struct hwloc_topology *topology)
   /* First tweak a bit to clean the topology.  */
 
   hwloc_debug("\nComputing the system cpuset by ORing all Proc objects\n");
-  hwloc_cpuset_zero(&topology->levels[0][0]->cpuset);
-  traverse(topology, &topology->levels[0][0], NULL, get_proc_cpuset, NULL, &topology->levels[0][0]->cpuset);
+  hwloc_cpuset_zero(topology->levels[0][0]->cpuset);
+  traverse(topology, &topology->levels[0][0], NULL, get_proc_cpuset, NULL, topology->levels[0][0]->cpuset);
 
   hwloc_debug("\nApplying the system cpuset to all nodes\n");
-  traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, &topology->levels[0][0]->cpuset);
+  traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, topology->levels[0][0]->cpuset);
 
   hwloc_debug("\nRemoving empty objects except numa nodes\n");
   traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
@@ -1114,6 +1117,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 
   /* Create the actual System object */
   system_obj = hwloc_alloc_setup_object(HWLOC_OBJ_SYSTEM, 0);
+  system_obj->cpuset = hwloc_cpuset_alloc();
   system_obj->depth = 0;
   system_obj->logical_index = 0;
   system_obj->sibling_rank = 0;
@@ -1126,7 +1130,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 #endif /* HAVE__SC_LARGE_PAGESIZE */
   system_obj->attr->system.dmi_board_vendor = NULL;
   system_obj->attr->system.dmi_board_name = NULL;
-  hwloc_cpuset_fill(&system_obj->cpuset);
+  hwloc_cpuset_fill(system_obj->cpuset);
   topology->levels[0][0] = system_obj;
 }
 
@@ -1385,19 +1389,20 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
   assert(father->last_child == father->children[father->arity-1]);
   assert(father->last_child->next_sibling == NULL);
 
-  remaining_father_set = father->cpuset;
+  remaining_father_set = hwloc_cpuset_copy(father->cpuset);
   for(j=0; j<father->arity; j++) {
     /* check that child cpuset is included in the father */
-    assert(hwloc_cpuset_isincluded(&father->children[j]->cpuset, &remaining_father_set));
+    assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
     /* check that children are correctly ordered (see below), empty ones may be anywhere */
-    if (!hwloc_cpuset_iszero(&father->children[j]->cpuset))
-      assert(hwloc_cpuset_first(&father->children[j]->cpuset) == hwloc_cpuset_first(&remaining_father_set));
+    if (!hwloc_cpuset_iszero(father->children[j]->cpuset))
+      assert(hwloc_cpuset_first(father->children[j]->cpuset) == hwloc_cpuset_first(remaining_father_set));
     /* clear previously used father cpuset bits so that we actually checked above
      * that children cpusets do not intersect and are ordered properly
      */
-    hwloc_cpuset_clearset(&remaining_father_set, &father->children[j]->cpuset);
+    hwloc_cpuset_clearset(remaining_father_set, father->children[j]->cpuset);
   }
-  assert(hwloc_cpuset_iszero(&remaining_father_set));
+  assert(hwloc_cpuset_iszero(remaining_father_set));
+  free(remaining_father_set);
 
   /* checks for all children */
   for(j=1; j<father->arity; j++) {

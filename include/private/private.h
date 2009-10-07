@@ -45,12 +45,12 @@ struct hwloc_topology {
   int is_thissystem;
   int is_loaded;
 
-  int (*set_cpubind)(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict);
-  int (*set_thisproc_cpubind)(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict);
-  int (*set_thisthread_cpubind)(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict);
-  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *set, int strict);
+  int (*set_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int strict);
 #ifdef hwloc_thread_t
-  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t *set, int strict);
+  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int strict);
 #endif
 
   hwloc_backend_t backend_type;
@@ -84,7 +84,7 @@ struct hwloc_topology {
 };
 
 
-extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors, hwloc_cpuset_t *online_cpuset);
+extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors, hwloc_cpuset_t online_cpuset);
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj *objs[nbobjs], unsigned distances[nbobjs][nbobjs]);
 extern unsigned hwloc_fallback_nbprocessors(void);
 
@@ -140,7 +140,7 @@ extern void hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj);
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 static inline char *
-hwloc_cpuset_printf_value(hwloc_cpuset_t *cpuset)
+hwloc_cpuset_printf_value(hwloc_cpuset_t cpuset)
 {
   char *buf;
   hwloc_cpuset_asprintf(&buf, cpuset);
@@ -157,6 +157,7 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed index)
   obj->os_index = index;
   obj->os_level = -1;
   obj->attr = malloc(sizeof(*obj->attr));
+  /* do not allocate the cpuset here, let the caller do it */
   return obj;
 }
 
@@ -164,9 +165,10 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed index)
 		struct hwloc_obj *__l = (l);				\
 		unsigned int *__a = (_array);				\
 		int k;							\
+		__l->cpuset = hwloc_cpuset_alloc();			\
 		for(k=0; k<_max; k++)					\
 			if (__a[k] == _value)				\
-				hwloc_cpuset_set(&__l->cpuset, k);	\
+				hwloc_cpuset_set(__l->cpuset, k);	\
 	} while (0)
 
 /* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
@@ -186,7 +188,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
       hwloc_object_cpuset_from_array(obj, j, proc_physids, procid_max);
       hwloc_debug_2args_cpuset("%s %d has cpuset %s\n",
 		 hwloc_obj_type_string(type),
-		 j, &obj->cpuset);
+		 j, obj->cpuset);
       hwloc_add_object(topology, obj);
     }
   hwloc_debug("\n");

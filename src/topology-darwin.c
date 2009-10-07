@@ -60,11 +60,12 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 
     for (i = 0; i < npackages; i++) {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, i);
+      obj->cpuset = hwloc_cpuset_alloc();
       for (cpu = i*logical_per_package; cpu < (i+1)*logical_per_package; cpu++)
-	hwloc_cpuset_set(&obj->cpuset, cpu);
+	hwloc_cpuset_set(obj->cpuset, cpu);
 
       hwloc_debug_1arg_cpuset("package %d has cpuset %s\n",
-		 i, &obj->cpuset);
+		 i, obj->cpuset);
       hwloc_add_object(topology, obj);
     }
 
@@ -75,13 +76,14 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 
       for (i = 0; i < npackages * cores_per_package; i++) {
 	obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, i);
+	obj->cpuset = hwloc_cpuset_alloc();
 	for (cpu = i*(logical_per_package/cores_per_package);
 	     cpu < (i+1)*(logical_per_package/cores_per_package);
 	     cpu++)
-	  hwloc_cpuset_set(&obj->cpuset, cpu);
+	  hwloc_cpuset_set(obj->cpuset, cpu);
 
         hwloc_debug_1arg_cpuset("core %d has cpuset %s\n",
-		   i, &obj->cpuset);
+		   i, obj->cpuset);
 	hwloc_add_object(topology, obj);
       }
     }
@@ -109,19 +111,20 @@ hwloc_look_darwin(struct hwloc_topology *topology)
     for (i = 0; i < n; i++) {
       for (j = 0; j < nprocs / cacheconfig[i]; j++) {
 	obj = hwloc_alloc_setup_object(i?HWLOC_OBJ_CACHE:HWLOC_OBJ_NODE, j);
+	obj->cpuset = hwloc_cpuset_alloc();
 	for (cpu = j*cacheconfig[i];
 	     cpu < (j+1)*cacheconfig[i];
 	     cpu++)
-	  hwloc_cpuset_set(&obj->cpuset, cpu);
+	  hwloc_cpuset_set(obj->cpuset, cpu);
 
 	if (i) {
           hwloc_debug_2args_cpuset("L%dcache %d has cpuset %s\n",
-	      i, j, &obj->cpuset);
+	      i, j, obj->cpuset);
 	  obj->attr->cache.depth = i;
 	  obj->attr->cache.memory_kB = cachesize[i] / 1024;
 	} else {
           hwloc_debug_1arg_cpuset("node %d has cpuset %s\n",
-	      j, &obj->cpuset);
+	      j, obj->cpuset);
 	  obj->attr->node.memory_kB = cachesize[i] / 1024;
 	  obj->attr->node.huge_page_free = 0; /* TODO */
 	}

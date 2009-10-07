@@ -20,12 +20,12 @@
  * @{
  */
 
-/** \brief Convert a linux kernel cpumap file \p file into hwloc CPU set \p set.
+/** \brief Convert a linux kernel cpumap file \p file into hwloc CPU set.
  *
  * Might be used when reading CPU set from sysfs attributes such as topology
  * and caches for processors, or local_cpus for devices.
  */
-extern void hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t *set);
+extern hwloc_cpuset_t hwloc_linux_parse_cpumap_file(FILE *file);
 
 /** @} */
 

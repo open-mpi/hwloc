@@ -27,30 +27,29 @@ main (int argc, char *argv[])
   if (err)
     return EXIT_FAILURE;
 
+
+
   hwloc_topology_set_synthetic (topology, "nodes:8 cores:2 1");
-
-
-
   err = hwloc_topology_load (topology);
   if (err)
     return EXIT_FAILURE;
 
-  hwloc_cpuset_from_string("00008f18", &set);
+  set = hwloc_cpuset_from_string("00008f18");
 
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, NULL);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, NULL);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 1));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 2));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 4));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 5));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 7));
-  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, &set, HWLOC_OBJ_NODE, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
   assert(!obj);
 
-  hwloc_topology_set_synthetic (topology, "nodes:8 cores:2 1");
+  free(set);
 
 
 
@@ -59,18 +58,18 @@ main (int argc, char *argv[])
   if (err)
     return EXIT_FAILURE;
 
-  hwloc_cpuset_from_string("0ff08000", &set);
+  set = hwloc_cpuset_from_string("0ff08000");
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
   assert(depth == 2);
-  obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, &set, depth, NULL);
+  obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, NULL);
   assert(obj == hwloc_get_obj_by_depth(topology, depth, 1));
-  obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, &set, depth, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, obj);
   assert(obj == hwloc_get_obj_by_depth(topology, depth, 2));
-  obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, &set, depth, obj);
+  obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, obj);
   assert(!obj);
 
-  hwloc_topology_set_synthetic (topology, "nodes:8 cores:2 1");
+  free(set);
 
 
 

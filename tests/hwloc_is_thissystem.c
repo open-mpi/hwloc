@@ -32,14 +32,14 @@ int main(void)
   hwloc_topology_load(topology);
   assert(hwloc_topology_is_thissystem(topology));
 
-  cpuset = hwloc_get_system_obj(topology)->cpuset;
-  result("Binding with OS backend", hwloc_set_cpubind(topology, &cpuset, 0));
+  cpuset = hwloc_cpuset_copy(hwloc_get_system_obj(topology)->cpuset);
+  result("Binding with OS backend", hwloc_set_cpubind(topology, cpuset, 0));
 
   hwloc_topology_destroy(topology);
 
   /* We're assume there is a real processor numbered 0 */
-  hwloc_cpuset_zero(&cpuset);
-  hwloc_cpuset_set(&cpuset, 0);
+  hwloc_cpuset_zero(cpuset);
+  hwloc_cpuset_set(cpuset, 0);
 
   /* check a synthetic topology */
   hwloc_topology_init(&topology);
@@ -47,7 +47,7 @@ int main(void)
   hwloc_topology_load(topology);
   assert(!hwloc_topology_is_thissystem(topology));
 
-  err = hwloc_set_cpubind(topology, &cpuset, 0);
+  err = hwloc_set_cpubind(topology, cpuset, 0);
   result("Binding with synthetic backend", err);
   assert(!err);
 
@@ -60,9 +60,11 @@ int main(void)
   hwloc_topology_load(topology);
   assert(hwloc_topology_is_thissystem(topology));
 
-  result("Binding with synthetic backend faking is_thissystem", hwloc_set_cpubind(topology, &cpuset, 0));
+  result("Binding with synthetic backend faking is_thissystem", hwloc_set_cpubind(topology, cpuset, 0));
 
   hwloc_topology_destroy(topology);
+
+  free(cpuset);
 
   return 0;
 }

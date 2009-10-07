@@ -520,7 +520,7 @@ typedef enum {
 
 /** \brief Bind current process or thread on cpus given in cpuset \p set
  */
-extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set,
+extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t set,
 			    int policy);
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
@@ -530,7 +530,7 @@ extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *se
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
  */
-extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *set, int policy);
+extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t set, int policy);
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
@@ -540,7 +540,7 @@ extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, co
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
  */
 #ifdef hwloc_thread_t
-extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t *set, int policy);
+extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t set, int policy);
 #endif
 
 /** @} */

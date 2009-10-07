@@ -24,7 +24,7 @@ typedef enum hwloc_mask_append_mode_e {
 } hwloc_mask_append_mode_t;
 
 static __inline void
-hwloc_mask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
+hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_cpuset_t newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
   char *s1 = hwloc_cpuset_printf_value(newset);
@@ -63,8 +63,8 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
 
 static __inline int
 hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
-		       hwloc_cpuset_t *rootset, const char *string,
-		       hwloc_cpuset_t *set, hwloc_mask_append_mode_t mode, int verbose)
+		       hwloc_cpuset_t rootset, const char *string,
+		       hwloc_cpuset_t set, hwloc_mask_append_mode_t mode, int verbose)
 {
   hwloc_obj_t obj;
   unsigned depth, width;
@@ -153,9 +153,9 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     }
     if (obj) {
       if (sep3)
-	hwloc_mask_append_object(topology, topodepth, &obj->cpuset, sep3+1, set, mode, verbose);
+	hwloc_mask_append_object(topology, topodepth, obj->cpuset, sep3+1, set, mode, verbose);
       else
-        hwloc_mask_append_cpuset(set, &obj->cpuset, mode, verbose);
+        hwloc_mask_append_cpuset(set, obj->cpuset, mode, verbose);
     }
   }
 
@@ -164,7 +164,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 
 static __inline void
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
-		     const char *arg, hwloc_cpuset_t *set,
+		     const char *arg, hwloc_cpuset_t set,
 		     int verbose)
 {
   char *colon;
@@ -183,12 +183,11 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 
   colon = strchr(arg, ':');
   if (colon) {
-    hwloc_mask_append_object(topology, topodepth, &hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
+    hwloc_mask_append_object(topology, topodepth, hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
   } else {
-    hwloc_cpuset_t newset;
-    hwloc_cpuset_zero(&newset);
-    hwloc_cpuset_from_string(arg, &newset);
-    hwloc_mask_append_cpuset(set, &newset, mode, verbose);
+    hwloc_cpuset_t newset = hwloc_cpuset_from_string(arg);
+    hwloc_mask_append_cpuset(set, newset, mode, verbose);
+    free(newset);
   }
 }
 

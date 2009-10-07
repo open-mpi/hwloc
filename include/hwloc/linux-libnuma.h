@@ -34,7 +34,7 @@
  * node number as input parameter.
  */
 static __inline void
-hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, const hwloc_cpuset_t *cpuset,
+hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 				    unsigned long *mask, unsigned long *maxnode)
 {
   unsigned long outmaxnode = -1;
@@ -64,7 +64,7 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, const hwloc_cpus
   *maxnode = outmaxnode+1;
 }
 
-/** \brief Convert the array of unsigned long \p mask into hwloc CPU set \p cpuset
+/** \brief Convert the array of unsigned long \p mask into hwloc CPU set
  *
  * \p mask is a array of unsigned long that will be read.
  * \p maxnode contains the maximal node number that may be read in \p mask.
@@ -73,15 +73,14 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, const hwloc_cpus
  * that takes an array of unsigned long as output parameter (and possibly
  * a maximal node number as input parameter).
  */
-static __inline void
-hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t *cpuset,
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
 				      const unsigned long *mask, unsigned long maxnode)
 {
+  hwloc_cpuset_t cpuset;
   hwloc_obj_t node;
   int depth;
   int i;
-
-  hwloc_cpuset_zero(cpuset);
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
@@ -89,16 +88,21 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
     if (mask[0] & 1)
-      *cpuset = hwloc_get_system_obj(topology)->cpuset;
+      cpuset = hwloc_cpuset_copy(hwloc_get_system_obj(topology)->cpuset);
+    else
+      cpuset = hwloc_cpuset_alloc();
 
   } else {
+    cpuset = hwloc_cpuset_alloc();
     for(i=0; i<maxnode; i++)
       if (mask[i/HWLOC_BITS_PER_LONG] & (1 << (i% HWLOC_BITS_PER_LONG))) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
-	  hwloc_cpuset_orset(cpuset, &node->cpuset);
+	  hwloc_cpuset_orset(cpuset, node->cpuset);
       }
   }
+
+  return cpuset;
 }
 
 /** @} */
@@ -118,7 +122,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
  * that use a struct bitmask as an input parameter.
  */
 static __inline struct bitmask *
-hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, const hwloc_cpuset_t *cpuset)
+hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_t cpuset)
 {
   struct bitmask *bitmask;
   hwloc_obj_t node = NULL;
@@ -148,15 +152,14 @@ hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, const hwloc_cpu
  * This function may be used after calling many numa_ functions
  * that use a struct bitmask as an output parameter.
  */
-static __inline void
-hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_t *cpuset,
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
 				       const struct bitmask *bitmask)
 {
+  hwloc_cpuset_t cpuset;
   hwloc_obj_t node;
   int depth;
   int i;
-
-  hwloc_cpuset_zero(cpuset);
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
@@ -164,16 +167,21 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
     if (numa_bitmask_isbitset(bitmask, 0))
-      *cpuset = hwloc_get_system_obj(topology)->cpuset;
+      cpuset = hwloc_cpuset_copy(hwloc_get_system_obj(topology)->cpuset);
+    else
+      cpuset = hwloc_cpuset_alloc();
 
   } else {
+    cpuset = hwloc_cpuset_alloc();
     for(i=0; i<NUMA_NUM_NODES; i++)
       if (numa_bitmask_isbitset(bitmask, i)) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
-	  hwloc_cpuset_orset(cpuset, &node->cpuset);
+	  hwloc_cpuset_orset(cpuset, node->cpuset);
       }
   }
+
+  return cpuset;
 }
 
 /** @} */
@@ -192,7 +200,7 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_
  * that use a nodemask_t as an input parameter.
  */
 static __inline void
-hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, const hwloc_cpuset_t *cpuset,
+hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 				      nodemask_t *nodemask)
 {
   hwloc_obj_t node = NULL;
@@ -215,15 +223,14 @@ hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, const hwloc_cp
  * This function may be used before calling some old libnuma functions
  * that use a nodemask_t as an output parameter.
  */
-static __inline void
-hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset_t *cpuset,
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology,
 					const nodemask_t *nodemask)
 {
+  hwloc_cpuset_t cpuset;
   hwloc_obj_t node;
   int depth;
   int i;
-
-  hwloc_cpuset_zero(cpuset);
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
@@ -231,16 +238,21 @@ hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
     if (nodemask_isset(nodemask, 0))
-      *cpuset = hwloc_get_system_obj(topology)->cpuset;
+      cpuset = hwloc_cpuset_copy(hwloc_get_system_obj(topology)->cpuset);
+    else
+      cpuset = hwloc_cpuset_alloc();
 
   } else {
+    cpuset = hwloc_cpuset_alloc();
     for(i=0; i<NUMA_NUM_NODES; i++)
       if (nodemask_isset(nodemask, i)) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
-	  hwloc_cpuset_orset(cpuset, &node->cpuset);
+	  hwloc_cpuset_orset(cpuset, node->cpuset);
       }
   }
+
+  return cpuset;
 }
 
 /** @} */

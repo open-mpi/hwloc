@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     hwloc_distribute(topology, hwloc_get_system_obj(topology), cpuset, n);
     for (i = 0; i < n; i++) {
       char *str = NULL;
-      hwloc_cpuset_asprintf(&str, &cpuset[i]);
+      hwloc_cpuset_asprintf(&str, cpuset[i]);
       printf("%s\n", str);
       free(str);
     }

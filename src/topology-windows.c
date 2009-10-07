@@ -141,7 +141,7 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 #endif
 
 static int
-hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int strict)
 {
   /* TODO: groups */
   DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
@@ -151,13 +151,13 @@ hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, c
 }
 
 static int
-hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, strict);
 }
 
 static int
-hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_cpuset_t hwloc_set, int strict)
 {
   /* TODO: groups */
   DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
@@ -167,13 +167,13 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, const hw
 }
 
 static int
-hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, strict);
 }
 
 static int
-hwloc_win_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
@@ -242,8 +242,9 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	}
 
 	obj = hwloc_alloc_setup_object(type, id);
+        obj->cpuset = hwloc_cpuset_alloc();
 	hwloc_debug("%s#%d mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
-	hwloc_cpuset_from_ulong(&obj->cpuset, procInfo[i].ProcessorMask);
+	hwloc_cpuset_from_ulong(obj->cpuset, procInfo[i].ProcessorMask);
 
 	switch (type) {
 	  case HWLOC_OBJ_NODE:
@@ -335,9 +336,10 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    /* So strange an interface... */
 	    for (id = 0; id < procInfo->Group.ActiveGroupCount; id++) {
 	      obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, id);
+	      obj->cpuset = hwloc_cpuset_alloc();
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
 	      hwloc_debug("group %d mask %lx\n", id, mask);
-	      hwloc_cpuset_from_ith_ulong(&obj->cpuset, id, mask);
+	      hwloc_cpuset_from_ith_ulong(obj->cpuset, id, mask);
 	      hwloc_add_object(topology, obj);
 	    }
 	    continue;
@@ -347,8 +349,9 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	}
 
 	obj = hwloc_alloc_setup_object(type, id);
+        obj->cpuset = hwloc_cpuset_alloc();
 	hwloc_debug("%s#%d mask %d:%lx\n", hwloc_obj_type_string(type), id, group, mask);
-	hwloc_cpuset_from_ith_ulong(&obj->cpuset, group, mask);
+	hwloc_cpuset_from_ith_ulong(obj->cpuset, group, mask);
 
 	switch (type) {
 	  case HWLOC_OBJ_NODE:
