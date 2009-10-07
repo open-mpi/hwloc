@@ -14,6 +14,7 @@
 #include <private/debug.h>
 
 #include <assert.h>
+#include <string.h>
 
 enum hwloc_ignore_type_e {
   HWLOC_IGNORE_TYPE_NEVER = 0,

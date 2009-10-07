@@ -14,6 +14,7 @@
 #error Please include the main hwloc.h instead
 #endif
 
+#include <stdlib.h>
 #include <errno.h>
 
 

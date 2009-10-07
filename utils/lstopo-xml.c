@@ -9,6 +9,8 @@
 
 #include <hwloc.h>
 
+#include <strings.h>
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
