@@ -56,6 +56,15 @@ struct hwloc_cpuset_s * hwloc_cpuset_dup(struct hwloc_cpuset_s * old)
   return new;
 }
 
+void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, struct hwloc_cpuset_s * src);
+void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, struct hwloc_cpuset_s * src)
+{
+  HWLOC__CPUSET_CHECK(dst);
+  HWLOC__CPUSET_CHECK(src);
+
+  memcpy(dst, src, sizeof(*dst));
+}
+
 int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_cpuset_s * __hwloc_restrict set);
 int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_cpuset_s * __hwloc_restrict set)
 {
