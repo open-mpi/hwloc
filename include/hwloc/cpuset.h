@@ -50,7 +50,8 @@ typedef struct { unsigned long s[HWLOC_CPUSUBSET_COUNT]; } hwloc_cpuset_t;
  *
  * Up to \p buflen characters may be written in buffer \p buf.
  *
- * \return the number of character that were actually written (not including the ending \\0).
+ * \return the number of character that were actually written if not truncating,
+ * or that would have been written  (not including the ending \\0).
  */
 static __inline int
 hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cpuset_t * __hwloc_restrict set)
@@ -59,6 +60,7 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
   char *tmp = buf;
   int res;
   int needcomma = 0;
+  int missed = 0;
   int i;
   unsigned long accum = 0;
   int accumed = 0;
@@ -69,7 +71,8 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
 #endif /* HWLOC_BITS_PER_LONG != HWLOC_CPUSET_SUBSTRING_SIZE */
 
   /* mark the end in case we do nothing later */
-  *tmp = '\0';
+  if (buflen > 0)
+    tmp[0] = '\0';
 
   i=HWLOC_CPUSUBSET_COUNT-1;
   while (i>=0 || accumed) {
@@ -84,13 +87,15 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
       res = snprintf(tmp, size, needcomma ? "," HWLOC_PRIxCPUSUBSET : HWLOC_PRIxCPUSUBSET,
 		     (accum & accum_mask) >> (HWLOC_BITS_PER_LONG - HWLOC_CPUSET_SUBSTRING_SIZE));
       needcomma = 1;
-    } else if (i == -1 && accumed == HWLOC_CPUSET_SUBSTRING_SIZE)
+    } else if (i == -1 && accumed == HWLOC_CPUSET_SUBSTRING_SIZE) {
       /* print a single 0 to mark the last subset */
       res = snprintf(tmp, size, needcomma ? ",0" : "0");
-    else if (needcomma)
+    } else if (needcomma) {
       res = snprintf(tmp, size, ",");
-    else
+    } else {
       res = 0;
+    }
+
 #if HWLOC_BITS_PER_LONG == HWLOC_CPUSET_SUBSTRING_SIZE
     accum = 0;
     accumed = 0;
@@ -99,12 +104,16 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
     accumed -= HWLOC_CPUSET_SUBSTRING_SIZE;
 #endif
 
-    tmp += res; size -= res;
-    if (size <= 1) /* need room for ending \0 */
-      break;
+    if (res >= size) {
+      int written = size>0 ? size-1 : 0;
+      missed += res - written;
+      res = written;
+    }
+    tmp += res;
+    size -= res;
   }
 
-  return tmp-buf+1;
+  return tmp-buf+missed;
 }
 
 /** \brief Parse a cpuset string.
