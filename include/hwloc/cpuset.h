@@ -114,6 +114,20 @@ hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const hwloc_cp
   return tmp-buf+missed;
 }
 
+/** \brief Stringify a cpuset into a newly allocated string.
+ *
+ * \return the number of character that were actually written
+ * (not including the ending \\0).
+ */
+static __inline int
+hwloc_cpuset_asprintf(char ** strp, hwloc_cpuset_t *set)
+{
+  int len = hwloc_cpuset_snprintf(NULL, 0, set);
+  char *buf = malloc(len+1);
+  *strp = buf;
+  return hwloc_cpuset_snprintf(buf, len+1, set);
+}
+
 /** \brief Parse a cpuset string.
  *
  * Must start and end with a digit.

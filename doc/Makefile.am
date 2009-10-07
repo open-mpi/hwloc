@@ -199,6 +199,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_asprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ith_ulong.3 \

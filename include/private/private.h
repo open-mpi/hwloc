@@ -141,8 +141,8 @@ extern void hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj);
 static inline char *
 hwloc_cpuset_printf_value(hwloc_cpuset_t *cpuset)
 {
-  char *buf = malloc(HWLOC_CPUSET_STRING_LENGTH+1);
-  hwloc_cpuset_snprintf(buf, HWLOC_CPUSET_STRING_LENGTH+1, cpuset);
+  char *buf;
+  hwloc_cpuset_asprintf(&buf, cpuset);
   return buf;
 }
 
