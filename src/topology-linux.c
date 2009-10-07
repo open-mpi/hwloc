@@ -299,19 +299,20 @@ hwloc_linux_parse_cpumap_file(FILE *file)
   return set;
 }
 
-static int
-hwloc_parse_cpumap(const char *mappath, hwloc_cpuset_t *setp, int fsroot_fd)
+static hwloc_cpuset_t
+hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
 {
+  hwloc_cpuset_t set;
   FILE * file;
 
   file = hwloc_fopen(mappath, "r", fsroot_fd);
   if (!file)
-    return -1;
+    return NULL;
 
-  *setp = hwloc_linux_parse_cpumap_file(file);
+  set = hwloc_linux_parse_cpumap_file(file);
 
   fclose(file);
-  return 0;
+  return set;
 }
 
 static int
@@ -541,10 +542,10 @@ look_sysfsnode(struct hwloc_topology *topology,
       unsigned long hpfree = -1;
 
       sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
-      if (hwloc_parse_cpumap(nodepath, &cpuset, topology->backend_params.sysfs.root_fd) < 0) {
+      cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
+      if (!cpuset)
 	continue;
-	free(cpuset);
-      }
+
       /* clear disabled cpus */
       hwloc_cpuset_clearset(cpuset, admin_disabled_cpus_set);
 
@@ -650,7 +651,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
       hwloc_parse_sysfs_unsigned(string, &mysocketid, topology->backend_params.sysfs.root_fd);
 
       sprintf(string, "%s/cpu%d/topology/core_siblings", path, i);
-      hwloc_parse_cpumap(string, &socketset, topology->backend_params.sysfs.root_fd);
+      socketset = hwloc_parse_cpumap(string, topology->backend_params.sysfs.root_fd);
+      assert(socketset);
       hwloc_cpuset_clearset(socketset, admin_disabled_cpus_set);
       assert(hwloc_cpuset_weight(socketset) >= 1);
 
@@ -670,7 +672,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
       hwloc_parse_sysfs_unsigned(string, &mycoreid, topology->backend_params.sysfs.root_fd);
 
       sprintf(string, "%s/cpu%d/topology/thread_siblings", path, i);
-      hwloc_parse_cpumap(string, &coreset, topology->backend_params.sysfs.root_fd);
+      coreset = hwloc_parse_cpumap(string, topology->backend_params.sysfs.root_fd);
+      assert(coreset);
       hwloc_cpuset_clearset(coreset, admin_disabled_cpus_set);
       assert(hwloc_cpuset_weight(coreset) >= 1);
 
@@ -744,7 +747,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	}
 
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
-	hwloc_parse_cpumap(mappath, &cacheset, topology->backend_params.sysfs.root_fd);
+	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
+	assert(cacheset);
 	hwloc_cpuset_clearset(cacheset, admin_disabled_cpus_set);
 	if (hwloc_cpuset_weight(cacheset) < 1)
 	  /* mask is wrong (happens on ia64), assumes it's not shared */
