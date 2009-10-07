@@ -43,8 +43,6 @@ typedef struct { unsigned long s[HWLOC_CPUSUBSET_COUNT]; } hwloc_cpuset_t;
  * Fewer characters may be needed if part of the CPU set is empty.
  */
 #define HWLOC_CPUSET_STRING_LENGTH		(HWLOC_CPUSET_SUBSTRING_COUNT*(HWLOC_CPUSET_SUBSTRING_LENGTH+1))
-/** \brief Printf format for printing a CPU set */
-#define HWLOC_PRIxCPUSET		"s"
 
 /** \brief Stringify a cpuset.
  *

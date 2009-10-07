@@ -183,7 +183,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
     {
       obj = hwloc_alloc_setup_object(type, osphysids[j]);
       hwloc_object_cpuset_from_array(obj, j, proc_physids, procid_max);
-      hwloc_debug_2args_cpuset("%s %d has cpuset %"HWLOC_PRIxCPUSET"\n",
+      hwloc_debug_2args_cpuset("%s %d has cpuset %s\n",
 		 hwloc_obj_type_string(type),
 		 j, &obj->cpuset);
       hwloc_add_object(topology, obj);

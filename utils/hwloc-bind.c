@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
   if (bind_cpus) {
     if (verbose) {
       char *s = hwloc_cpuset_printf_value(&cpu_set);
-      fprintf(stderr, "binding on cpu set %" HWLOC_PRIxCPUSET "\n", s);
+      fprintf(stderr, "binding on cpu set %s\n", s);
       free(s);
     }
     if (single)
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     ret = hwloc_set_cpubind(topology, &cpu_set, flags);
     if (ret) {
       char *s = hwloc_cpuset_printf_value(&cpu_set);
-      fprintf(stderr, "hwloc_set_cpubind %"HWLOC_PRIxCPUSET" failed (errno %d %s)\n", s, errno, strerror(errno));
+      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, errno, strerror(errno));
       free(s);
     }
   }

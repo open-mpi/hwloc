@@ -32,25 +32,25 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t *set, hwloc_cpuset_t *newset,
   switch (mode) {
   case HWLOC_MASK_APPEND_ADD:
     if (verbose)
-      fprintf(stderr, "adding %" HWLOC_PRIxCPUSET " to %" HWLOC_PRIxCPUSET "\n",
+      fprintf(stderr, "adding %s to %s\n",
           s1, s2);
     hwloc_cpuset_orset(set, newset);
     break;
   case HWLOC_MASK_APPEND_CLR:
     if (verbose)
-      fprintf(stderr, "clearing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
+      fprintf(stderr, "clearing %s from %s\n",
           s1, s2);
     hwloc_cpuset_clearset(set, newset);
     break;
   case HWLOC_MASK_APPEND_AND:
     if (verbose)
-      fprintf(stderr, "and'ing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
+      fprintf(stderr, "and'ing %s from %s\n",
           s1, s2);
     hwloc_cpuset_andset(set, newset);
     break;
   case HWLOC_MASK_APPEND_XOR:
     if (verbose)
-      fprintf(stderr, "xor'ing %" HWLOC_PRIxCPUSET " from %" HWLOC_PRIxCPUSET "\n",
+      fprintf(stderr, "xor'ing %s from %s\n",
           s1, s2);
     hwloc_cpuset_xorset(set, newset);
     break;
@@ -144,10 +144,10 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     if (verbose) {
       char * s = hwloc_cpuset_printf_value(rootset);
       if (obj)
-	printf("object #%u depth %u below cpuset %" HWLOC_PRIxCPUSET " found\n",
+	printf("object #%u depth %u below cpuset %s found\n",
 	       i, depth, s);
       else
-	printf("object #%u depth %u below cpuset %" HWLOC_PRIxCPUSET " does not exist\n",
+	printf("object #%u depth %u below cpuset %s does not exist\n",
 	       i, depth, s);
       free(s);
     }

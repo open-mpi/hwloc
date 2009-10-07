@@ -553,7 +553,7 @@ look_sysfsnode(struct hwloc_topology *topology,
       node->attr->node.huge_page_free = hpfree;
       node->cpuset = cpuset;
 
-      hwloc_debug_1arg_cpuset("os node %u has cpuset %"HWLOC_PRIxCPUSET"\n",
+      hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
 		 osnode, &node->cpuset);
       hwloc_add_object(topology, node);
       nodes[osnode] = node;
@@ -628,7 +628,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
     closedir(dir);
   }
 
-  hwloc_debug_1arg_cpuset("found %d cpus, cpuset %" HWLOC_PRIxCPUSET "\n",
+  hwloc_debug_1arg_cpuset("found %d cpus, cpuset %s\n",
 	     hwloc_cpuset_weight(&cpuset), &cpuset);
 
   hwloc_cpuset_foreach_begin(i, &cpuset)
@@ -651,7 +651,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	/* first cpu in this socket, add the socket */
 	socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
 	socket->cpuset = socketset;
-        hwloc_debug_1arg_cpuset("os socket %u has cpuset %"HWLOC_PRIxCPUSET"\n",
+        hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
 		   mysocketid, &socketset);
 	hwloc_add_object(topology, socket);
       }
@@ -669,7 +669,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
       if (hwloc_cpuset_first(&coreset) == i) {
 	core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
 	core->cpuset = coreset;
-        hwloc_debug_1arg_cpuset("os core %u has cpuset %"HWLOC_PRIxCPUSET"\n",
+        hwloc_debug_1arg_cpuset("os core %u has cpuset %s\n",
 		   mycoreid, &coreset);
 	hwloc_add_object(topology, core);
       }
@@ -682,7 +682,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
       /* add the thread */
       thread = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, i);
       thread->cpuset = threadset;
-      hwloc_debug_1arg_cpuset("thread %d has cpuset %"HWLOC_PRIxCPUSET"\n",
+      hwloc_debug_1arg_cpuset("thread %d has cpuset %s\n",
 		 i, &threadset);
       hwloc_add_object(topology, thread);
 
@@ -746,7 +746,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	  cache->attr->cache.memory_kB = kB;
 	  cache->attr->cache.depth = depth+1;
 	  cache->cpuset = cacheset;
-          hwloc_debug_1arg_cpuset("cache depth %d has cpuset %"HWLOC_PRIxCPUSET"\n",
+          hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n",
 		     depth, &cacheset);
 	  hwloc_add_object(topology, cache);
 	}
@@ -871,7 +871,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   } hwloc_cpuset_foreach_end();
 
   hwloc_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
-  hwloc_debug_cpuset("online processor cpuset: %" HWLOC_PRIxCPUSET "\n",
+  hwloc_debug_cpuset("online processor cpuset: %s\n",
 	     online_cpuset);
 
   hwloc_debug("\n * Topology summary *\n");
@@ -965,7 +965,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
       machine->cpuset = online_set;
       machine->attr->machine.dmi_board_name = NULL;
       machine->attr->machine.dmi_board_vendor = NULL;
-      hwloc_debug_1arg_cpuset("machine number %lu has cpuset %"HWLOC_PRIxCPUSET"\n",
+      hwloc_debug_1arg_cpuset("machine number %lu has cpuset %s\n",
 		 node, &online_set);
       hwloc_add_object(topology, machine);
 
