@@ -38,12 +38,6 @@ typedef struct { unsigned long s[HWLOC_CPUSUBSET_COUNT]; } hwloc_cpuset_t;
  * Cpuset/String Conversion
  */
 
-/** \brief Maximal required length of a string for printing a CPU set.
- *
- * Fewer characters may be needed if part of the CPU set is empty.
- */
-#define HWLOC_CPUSET_STRING_LENGTH		(HWLOC_CPUSET_SUBSTRING_COUNT*(HWLOC_CPUSET_SUBSTRING_LENGTH+1))
-
 /** \brief Stringify a cpuset.
  *
  * Up to \p buflen characters may be written in buffer \p buf.

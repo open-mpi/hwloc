@@ -108,9 +108,10 @@ int main(int argc, char *argv[])
     }
     printf("\n");
   } else {
-    char string[HWLOC_CPUSET_STRING_LENGTH+1];
-    hwloc_cpuset_snprintf(string, sizeof(string), &set);
+    char *string = NULL;
+    hwloc_cpuset_asprintf(&string, &set);
     printf("%s\n", string);
+    free(string);
   }
 
   hwloc_topology_destroy(topology);

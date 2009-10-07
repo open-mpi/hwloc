@@ -22,7 +22,7 @@
 int main()
 {
   hwloc_topology_t topology;
-  char string[HWLOC_CPUSET_STRING_LENGTH+1];
+  char *string = NULL;
   hwloc_obj_t obj;
   hwloc_cpuset_t set;
 
@@ -38,10 +38,11 @@ int main()
 	  hwloc_obj_type_string(obj->type), GIVEN_CPUSET_STRING);
   assert(hwloc_cpuset_isincluded(&set, &obj->cpuset));
 
-  hwloc_obj_cpuset_snprintf(string, sizeof(string), 1, &obj);
+  hwloc_cpuset_asprintf(&string, &obj->cpuset);
   fprintf(stderr, "covering object of %s is %s, expected %s\n",
 	  GIVEN_CPUSET_STRING, string, EXPECTED_CPUSET_STRING);
   assert(!strcmp(EXPECTED_CPUSET_STRING, string));
+  free(string);
 
   hwloc_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING, &set);
   obj = hwloc_get_obj_covering_cpuset(topology, &set);

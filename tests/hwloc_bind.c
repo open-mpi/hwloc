@@ -42,7 +42,7 @@ int main(void)
 {
   hwloc_cpuset_t set;
   hwloc_obj_t obj;
-  char s[HWLOC_CPUSET_STRING_LENGTH + 1];
+  char *str = NULL;
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
@@ -56,8 +56,9 @@ int main(void)
     obj = obj->children[0];
   }
 
-  hwloc_cpuset_snprintf(s, sizeof(s), &set);
-  printf("system set is %s\n", s);
+  hwloc_cpuset_asprintf(&str, &set);
+  printf("system set is %s\n", str);
+  free(str);
 
   test(&set, 0);
 
@@ -65,8 +66,9 @@ int main(void)
   test(&set, HWLOC_CPUBIND_STRICT);
 
   set = obj->cpuset;
-  hwloc_cpuset_snprintf(s, sizeof(s), &set);
-  printf("obj set is %s\n", s);
+  hwloc_cpuset_asprintf(&str, &set);
+  printf("obj set is %s\n", str);
+  free(str);
 
   test(&set, 0);
 
@@ -74,8 +76,9 @@ int main(void)
   test(&set, HWLOC_CPUBIND_STRICT);
 
   hwloc_cpuset_singlify(&set);
-  hwloc_cpuset_snprintf(s, sizeof(s), &set);
-  printf("singlified to %s\n", s);
+  hwloc_cpuset_asprintf(&str, &set);
+  printf("singlified to %s\n", str);
+  free(str);
 
   test(&set, 0);
 

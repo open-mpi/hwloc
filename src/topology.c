@@ -357,12 +357,13 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
 static void
 print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
 {
-  char line[HWLOC_CPUSET_STRING_LENGTH+1];
+  char line[256], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
   hwloc_obj_snprintf(line, sizeof(line), topology, obj, "#", 1);
   hwloc_debug("%s", line);
-  hwloc_cpuset_snprintf(line, sizeof(line), &obj->cpuset);
-  hwloc_debug(" %s", line);
+  hwloc_cpuset_asprintf(&cpuset, &obj->cpuset);
+  hwloc_debug(" %s", cpuset);
+  free(cpuset);
   if (obj->arity)
     hwloc_debug(" arity %d", obj->arity);
   hwloc_debug("\n");

@@ -18,7 +18,7 @@ static void
 output_topology (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr root_node, int verbose_mode)
 {
   xmlNodePtr node = NULL;
-  char cpuset[HWLOC_CPUSET_STRING_LENGTH+1];
+  char *cpuset = NULL;
   char tmp[255];
 
   /* xmlNewChild() creates a new node, which is "attached" as child node
@@ -27,8 +27,9 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr root_nod
   xmlNewProp(node, BAD_CAST "type", BAD_CAST hwloc_obj_type_string(obj->type));
   sprintf(tmp, "%d", obj->os_index);
   xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
-  hwloc_cpuset_snprintf(cpuset, sizeof(cpuset), &obj->cpuset);
+  hwloc_cpuset_asprintf(&cpuset, &obj->cpuset);
   xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
+  free(cpuset);
 
   switch (obj->type) {
   case HWLOC_OBJ_CACHE:

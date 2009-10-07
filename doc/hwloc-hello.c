@@ -77,9 +77,10 @@ int main(void)
 
 	/* And try to bind ourself there.  */
 	if (hwloc_set_cpubind(topology, &cpuset, 0)) {
-		char s[HWLOC_CPUSET_STRING_LENGTH + 1];
-		hwloc_cpuset_snprintf(s, sizeof(s), &obj->cpuset);
-		printf("Couldn't bind to cpuset %s\n", s);
+		char *str = NULL;
+		hwloc_cpuset_asprintf(&str, &obj->cpuset);
+		printf("Couldn't bind to cpuset %s\n", str);
+		free(str);
 	}
 
 
