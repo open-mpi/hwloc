@@ -69,20 +69,22 @@ int main(void)
 	if (!obj)
 		return 0;
 
-	/* Get its cpuset.  */
-	hwloc_cpuset_t cpuset = obj->cpuset;
+	/* Get a copy of its cpuset that we may modify.  */
+	hwloc_cpuset_t cpuset = hwloc_cpuset_copy(obj->cpuset);
 
 	/* Get only one logical processor (in case the core is SMT/hyperthreaded).  */
-	hwloc_cpuset_singlify(&cpuset);
+	hwloc_cpuset_singlify(cpuset);
 
 	/* And try to bind ourself there.  */
-	if (hwloc_set_cpubind(topology, &cpuset, 0)) {
+	if (hwloc_set_cpubind(topology, cpuset, 0)) {
 		char *str = NULL;
-		hwloc_cpuset_asprintf(&str, &obj->cpuset);
+		hwloc_cpuset_asprintf(&str, obj->cpuset);
 		printf("Couldn't bind to cpuset %s\n", str);
 		free(str);
 	}
 
+	/* Free our cpuset copy */
+	hwloc_cpuset_free(cpuset);
 
 	/* Destroy topology object.  */
 	hwloc_topology_destroy(topology);
