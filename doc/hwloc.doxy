@@ -51,7 +51,7 @@ graphical mode, or by exporting in PDF, PNG, FIG, ... format, or in text mode
 
 hwloc offers a programming interface for manipulating topologies and
 objects. It also brings a powerful cpu bitmap API that is used to describe
-topology objects location on physical/logical processors. See the \ref interface interface
+topology objects location on physical/logical processors. See the \ref interface
 below. It may also be used to binding applications onto certain cores or
 memory nodes. Several utility programs are also provided to ease command-line
 manipulation of topology objects, binding of processes, ...
