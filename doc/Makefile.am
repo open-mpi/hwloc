@@ -242,10 +242,10 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_u.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_machine_attr_u.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_memory_attr_u.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_misc_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_machine_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_memory_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_misc_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_snprintf.3 \

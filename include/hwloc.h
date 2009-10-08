@@ -161,27 +161,27 @@ typedef struct hwloc_obj * hwloc_obj_t;
 /** \brief Object type-specific Attributes */
 union hwloc_obj_attr_u {
   /** \brief Cache-specific Object Attributes */
-  struct hwloc_cache_attr_u {
+  struct hwloc_cache_attr_s {
     unsigned long memory_kB;		  /**< \brief Size of cache */
     unsigned depth;			  /**< \brief Depth of cache */
   } cache;
   /** \brief Node-specific Object Attributes */
-  struct hwloc_memory_attr_u {
+  struct hwloc_memory_attr_s {
     unsigned long memory_kB;		  /**< \brief Size of memory node */
     unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
   } node;
-  /**< \brief Machine-specific Object Attributes */
-  struct hwloc_machine_attr_u {
+  /** \brief Machine-specific Object Attributes */
+  struct hwloc_machine_attr_s {
     char *dmi_board_vendor;		  /**< \brief DMI board vendor name */
     char *dmi_board_name;		  /**< \brief DMI board model name */
     unsigned long memory_kB;		  /**< \brief Size of memory node */
     unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
     unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
   } machine;
-  /**< \brief System-specific Object Attributes */
-  struct hwloc_machine_attr_u system;
+  /** \brief System-specific Object Attributes */
+  struct hwloc_machine_attr_s system;
   /** \brief Misc-specific Object Attributes */
-  struct hwloc_misc_attr_u {
+  struct hwloc_misc_attr_s {
     unsigned depth;			  /**< \brief Depth of misc object */
   } misc;
 };
