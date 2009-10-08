@@ -26,14 +26,14 @@
 #include <sys/thread.h>
 
 static int
-hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_cpuset_t hwloc_set, int strict)
 {
   rsethandle_t rset, rad;
   hwloc_obj_t objs[2];
   int n;
   int res = -1;
 
-  if (hwloc_cpuset_isequal(hwloc_set, &hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
     if (ra_detachrset(what, who, 0))
       return -1;
     return 0;
@@ -72,28 +72,28 @@ out:
 }
 
 static int
-hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   rsid_t who = { .at_pid = getpid() };
   return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, strict);
 }
 
 static int
-hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   rsid_t who = { .at_tid = thread_self() };
   return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, strict);
 }
 
 static int
-hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int strict)
 {
   rsid_t who = { .at_pid = pid };
   return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, strict);
 }
 
 static int
-hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_cpuset_t hwloc_set, int strict)
 {
   struct __pthrdsinfo info;
   int size;
@@ -104,7 +104,7 @@ hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 }
 
 static int
-hwloc_aix_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *hwloc_set, int strict)
+hwloc_aix_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_aix_set_thisproc_cpubind(topology, hwloc_set, strict);
 }
@@ -139,6 +139,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     /* It seems logical processors are numbered from 1 here, while the
      * bindprocessor functions numbers them from 0... */
     obj = hwloc_alloc_setup_object(type, i - (type == HWLOC_OBJ_PROC));
+    obj->cpuset = hwloc_cpuset_alloc();
     obj->os_level = sdl;
     switch(type) {
       case HWLOC_OBJ_NODE:
@@ -157,11 +158,11 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
     for (j = 0; j < maxcpus; j++) {
       if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
-	hwloc_cpuset_set(&obj->cpuset,j);
+	hwloc_cpuset_set(obj->cpuset, j);
     }
-    hwloc_debug("%s %d has cpuset %"HWLOC_PRIxCPUSET"\n",
+    hwloc_debug_2args_cpuset("%s %d has cpuset %s\n",
 	       hwloc_obj_type_string(type),
-	       i, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
+	       i, obj->cpuset);
     hwloc_insert_object_by_cpuset(topology, obj);
   }
 

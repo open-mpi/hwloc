@@ -6,6 +6,8 @@
 #ifndef HWLOC_PORT_SYS_RSET_H
 #define HWLOC_PORT_SYS_RSET_H
 
+#include <stdint.h>
+
 #include "thread.h"
 
 typedef void *rsethandle_t;

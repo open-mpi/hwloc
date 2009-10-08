@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
   int ret;
   char **orig_argv = argv;
 
-  hwloc_cpuset_zero(&cpu_set);
+  cpu_set = hwloc_cpuset_alloc();
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    hwloc_mask_process_arg(topology, depth, argv[0], &cpu_set, verbose);
+    hwloc_mask_process_arg(topology, depth, argv[0], cpu_set, verbose);
     bind_cpus = 1;
 
   next:
@@ -88,15 +88,22 @@ int main(int argc, char *argv[])
   }
 
   if (bind_cpus) {
-    if (verbose)
-      fprintf(stderr, "binding on cpu set %" HWLOC_PRIxCPUSET "\n",
-	      HWLOC_CPUSET_PRINTF_VALUE(&cpu_set));
+    if (verbose) {
+      char *s = hwloc_cpuset_printf_value(cpu_set);
+      fprintf(stderr, "binding on cpu set %s\n", s);
+      free(s);
+    }
     if (single)
-      hwloc_cpuset_singlify(&cpu_set);
-    ret = hwloc_set_cpubind(topology, &cpu_set, flags);
-    if (ret)
-      fprintf(stderr, "hwloc_set_cpubind %"HWLOC_PRIxCPUSET" failed (errno %d %s)\n", HWLOC_CPUSET_PRINTF_VALUE(&cpu_set), errno, strerror(errno));
+      hwloc_cpuset_singlify(cpu_set);
+    ret = hwloc_set_cpubind(topology, cpu_set, flags);
+    if (ret) {
+      char *s = hwloc_cpuset_printf_value(cpu_set);
+      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, errno, strerror(errno));
+      free(s);
+    }
   }
+
+  free(cpu_set);
 
   hwloc_topology_destroy(topology);
 

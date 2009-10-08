@@ -210,6 +210,13 @@ AM_CONDITIONAL([HAVE_MINGW32], [test "x$target_os" = "xmingw32"])
 #
 
 AC_USE_SYSTEM_EXTENSIONS # for O_DIRECTORY, fdopen, ffsl, ...
+AH_VERBATIM([USE_HPUX_SYSTEM_EXTENSIONS],
+[/* Enable extensions on HP-UX. */
+#ifndef _HPUX_SOURCE
+# undef _HPUX_SOURCE
+#endif
+])
+AC_DEFINE([_HPUX_SOURCE])
 
 AC_LANG([C])
 
@@ -231,6 +238,14 @@ AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The
 #
 # Now detect support
 #
+
+hwloc_strncasecmp=strncmp
+AC_CHECK_FUNCS([strncasecmp], [
+  AC_CHECK_DECL([strncasecmp], [
+    hwloc_strncasecmp=strncasecmp
+  ])
+])
+AC_DEFINE_UNQUOTED(hwloc_strncasecmp, $hwloc_strncasecmp, [Define this to either strncasecmp or strncmp])
 
 AC_CHECK_TYPES([wchar_t], [
   AC_CHECK_FUNCS([putwc])

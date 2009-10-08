@@ -14,6 +14,7 @@
 #include <private/debug.h>
 
 #include <assert.h>
+#include <string.h>
 
 enum hwloc_ignore_type_e {
   HWLOC_IGNORE_TYPE_NEVER = 0,
@@ -44,12 +45,12 @@ struct hwloc_topology {
   int is_thissystem;
   int is_loaded;
 
-  int (*set_cpubind)(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict);
-  int (*set_thisproc_cpubind)(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict);
-  int (*set_thisthread_cpubind)(hwloc_topology_t topology, const hwloc_cpuset_t *set, int strict);
-  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *set, int strict);
+  int (*set_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int strict);
 #ifdef hwloc_thread_t
-  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t *set, int strict);
+  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int strict);
 #endif
 
   hwloc_backend_t backend_type;
@@ -83,25 +84,7 @@ struct hwloc_topology {
 };
 
 
-#ifdef HAVE_ALLOCA_H
-# include <alloca.h>
-#elif defined __GNUC__
-# define alloca __builtin_alloca
-#elif defined _AIX
-# define alloca __alloca
-#elif defined _MSC_VER
-# include <malloc.h>
-# define alloca _alloca
-#else
-# include <stddef.h>
-# ifdef  __cplusplus
-extern "C"
-# endif
-void *alloca (size_t);
-#endif
-
-
-extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors, hwloc_cpuset_t *online_cpuset);
+extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors, hwloc_cpuset_t online_cpuset);
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj *objs[nbobjs], unsigned distances[nbobjs][nbobjs]);
 extern unsigned hwloc_fallback_nbprocessors(void);
 
@@ -186,11 +169,13 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
 extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj);
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
-#define HWLOC_CPUSET_PRINTF_VALUE(x)	({					\
-	char *__buf = alloca(HWLOC_CPUSET_STRING_LENGTH+1);			\
-	hwloc_cpuset_snprintf(__buf, HWLOC_CPUSET_STRING_LENGTH+1, x);		\
-	__buf;									\
-     })
+static inline char *
+hwloc_cpuset_printf_value(hwloc_cpuset_t cpuset)
+{
+  char *buf;
+  hwloc_cpuset_asprintf(&buf, cpuset);
+  return buf;
+}
 
 static inline struct hwloc_obj *
 hwloc_alloc_setup_object(hwloc_obj_type_t type, signed index)
@@ -202,6 +187,7 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed index)
   obj->os_index = index;
   obj->os_level = -1;
   obj->attr = malloc(sizeof(*obj->attr));
+  /* do not allocate the cpuset here, let the caller do it */
   return obj;
 }
 
@@ -211,15 +197,16 @@ extern void free_object(hwloc_obj_t obj);
 		struct hwloc_obj *__l = (l);				\
 		unsigned int *__a = (_array);				\
 		int k;							\
+		__l->cpuset = hwloc_cpuset_alloc();			\
 		for(k=0; k<_max; k++)					\
 			if (__a[k] == _value)				\
-				hwloc_cpuset_set(&__l->cpuset, k);	\
+				hwloc_cpuset_set(__l->cpuset, k);	\
 	} while (0)
 
 /* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
  * and for which processors have ID PROC_PHYSIDS, and add them to the topology.
  * */
-static __inline__ void
+static __inline void
 hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
   struct hwloc_obj *obj;
@@ -231,9 +218,9 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
     {
       obj = hwloc_alloc_setup_object(type, osphysids[j]);
       hwloc_object_cpuset_from_array(obj, j, proc_physids, procid_max);
-      hwloc_debug("%s %d has cpuset %"HWLOC_PRIxCPUSET"\n",
+      hwloc_debug_2args_cpuset("%s %d has cpuset %s\n",
 		 hwloc_obj_type_string(type),
-		 j, HWLOC_CPUSET_PRINTF_VALUE(&obj->cpuset));
+		 j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
   hwloc_debug("\n");

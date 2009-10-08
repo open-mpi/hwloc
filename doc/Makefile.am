@@ -89,7 +89,7 @@ if BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	$(RM) -r $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
-	-sed -i -e 's/__hwloc_restrict/restrict/g;s/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g;s/__inline__/inline/g;s/\\_\\-\\_\\-inline\\_\\-\\_\\-/inline/g' $(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
+	-sed -i -e 's/__hwloc_restrict/restrict/g;s/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g;s/__inline/inline/g;s/\\_\\-\\_\\-inline/inline/g' $(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
 endif
 
 #
@@ -152,10 +152,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_CPUBIND_PROCESS.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_CPUBIND_STRICT.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_CPUBIND_THREAD.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_CPUSET_CPU.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_CPUSET_FULL.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_CPUSET_STRING_LENGTH.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_CPUSET_ZERO.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CACHE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CORE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MACHINE.3 \
@@ -165,7 +161,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_TYPE_MAX.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_PRIxCPUSET.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
@@ -174,6 +169,10 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc.h.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpubind_policy_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_alloc.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_free.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_dup.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_copy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_all_but_cpu.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_andset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clearset.3 \
@@ -203,6 +202,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_asprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ith_ulong.3 \

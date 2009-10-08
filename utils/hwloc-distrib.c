@@ -107,7 +107,6 @@ int main(int argc, char *argv[])
   {
     long i;
     hwloc_cpuset_t cpuset[n];
-    char str[HWLOC_CPUSET_STRING_LENGTH + 1];
     hwloc_topology_t topology;
 
     hwloc_topology_init(&topology);
@@ -119,8 +118,10 @@ int main(int argc, char *argv[])
 
     hwloc_distribute(topology, hwloc_get_system_obj(topology), cpuset, n);
     for (i = 0; i < n; i++) {
-      hwloc_cpuset_snprintf(str, sizeof(str), &cpuset[i]);
+      char *str = NULL;
+      hwloc_cpuset_asprintf(&str, cpuset[i]);
       printf("%s\n", str);
+      free(str);
     }
     hwloc_topology_destroy(topology);
   }

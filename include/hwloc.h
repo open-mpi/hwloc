@@ -435,7 +435,7 @@ extern unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, unsigned d
  * If no object for that type exists, 0 is returned.
  * If there are several levels with objects of that type, -1 is returned.
  */
-static __inline__ int
+static __inline int
 hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
 	int depth = hwloc_get_type_depth(topology, type);
@@ -472,7 +472,7 @@ extern hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned d
  * If there are several levels with objects of that type, \c NULL is returned
  * and ther caller may fallback to hwloc_get_obj_by_depth().
  */
-static __inline__ hwloc_obj_t
+static __inline hwloc_obj_t
 hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned index)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -575,7 +575,7 @@ typedef enum {
 
 /** \brief Bind current process or thread on cpus given in cpuset \p set
  */
-extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *set,
+extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t set,
 			    int policy);
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
@@ -585,7 +585,7 @@ extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t *se
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
  */
-extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t *set, int policy);
+extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t set, int policy);
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
@@ -595,7 +595,7 @@ extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, co
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
  */
 #ifdef hwloc_thread_t
-extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t *set, int policy);
+extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t set, int policy);
 #endif
 
 /** @} */

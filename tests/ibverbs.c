@@ -23,7 +23,6 @@ int main() {
   printf("ibv_get_device_list found %d devices\n", count);
 
   for(i=0; i<count; i++) {
-    char cpuset_string[HWLOC_CPUSET_STRING_LENGTH];
     hwloc_cpuset_t set;
     dev = dev_list[i];
 
@@ -31,9 +30,11 @@ int main() {
       printf("failed to get cpuset for device %d (%s)\n",
 	     i, ibv_get_device_name(dev));
     } else {
-      hwloc_cpuset_snprintf(cpuset_string, sizeof(cpuset_string), &set);
+      char *cpuset_string = NULL;
+      hwloc_cpuset_asprintf(&cpuset_string, &set);
       printf("got cpuset %s for device %d (%s)\n",
 	     cpuset_string, i, ibv_get_device_name(dev));
+      free(cpuset_string);
     }
   }
 

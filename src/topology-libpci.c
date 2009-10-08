@@ -218,7 +218,7 @@ hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
 static struct hwloc_obj *
 hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
 {
-  hwloc_cpuset_t cpuset = HWLOC_CPUSET_FULL;
+  hwloc_cpuset_t cpuset;
 
   /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
 #ifdef LINUX_SYS
@@ -228,7 +228,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
 	   hostbridge->first_child->attr->pcidev.domain, hostbridge->first_child->attr->pcidev.bus,
 	   hostbridge->first_child->attr->pcidev.dev, hostbridge->first_child->attr->pcidev.func);
   file = fopen(path, "r"); /* FIXME: use fsroot */
-  hwloc_linux_parse_cpumap_file(file, &cpuset);
+  cpuset = hwloc_linux_parse_cpumap_file(file);
   fclose(file);
 #endif
 
@@ -238,21 +238,24 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   char *env = getenv(envname);
   if (env) {
     hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
-    hwloc_cpuset_from_string(env, &cpuset);
+    hwloc_cpuset_free(cpuset);
+    cpuset = hwloc_cpuset_from_string(env);
   }
 
-  hwloc_debug("Attaching hostbridge to cpuset %" HWLOC_PRIxCPUSET "\n",
-	      HWLOC_CPUSET_PRINTF_VALUE(&cpuset));
+  if (!cpuset)
+    cpuset = hwloc_cpuset_alloc();
+
+  hwloc_debug_cpuset("Attaching hostbridge to cpuset %s\n", cpuset);
 
   /* attach the hostbridge now that it contains the right objects */
-  struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, &cpuset);
+  struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
   /* if found nothing, attach to top */
   if (!parent)
     parent = topology->levels[0][0];
   /* do not attach to the lowest object since it could be a cache or so,
    * go up as long as the cpuset is the same
    */
-  while (parent->father && hwloc_cpuset_isequal(&parent->cpuset, &parent->father->cpuset))
+  while (parent->father && hwloc_cpuset_isequal(parent->cpuset, parent->father->cpuset))
     parent = parent->father;
   return parent;
 }
@@ -305,7 +308,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     os_index = (pcidev->domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
 
     obj = hwloc_alloc_setup_object(isbridge ? HWLOC_OBJ_BRIDGE : HWLOC_OBJ_PCI_DEVICE, os_index);
-
+    obj->cpuset = hwloc_cpuset_alloc();
     obj->attr->pcidev.domain = pcidev->domain;
     obj->attr->pcidev.bus = pcidev->bus;
     obj->attr->pcidev.dev = pcidev->dev;
@@ -404,6 +407,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       goto next_child;
 
     /* finish setting up this hostbridge */
+    hostbridge->cpuset = hwloc_cpuset_alloc();
     hostbridge->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_HOST;
     hostbridge->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
     hostbridge->attr->bridge.downstream.pci.domain = current_domain;

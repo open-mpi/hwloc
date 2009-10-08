@@ -5,26 +5,17 @@
 
 /* Internals for cpuset API.  */
 
-#ifndef HWLOC_CPUSET_BITS_H
-#define HWLOC_CPUSET_BITS_H
+#ifndef HWLOC_PRIVATE_CPUSET_H
+#define HWLOC_PRIVATE_CPUSET_H
 
 #include <hwloc/config.h>
+#include <private/config.h>
 
 #include <sys/types.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-
-#if (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
-# define __hwloc_restrict __restrict
-#else
-# if __STDC_VERSION__ >= 199901L
-#  define __hwloc_restrict restrict
-# else
-#  define __hwloc_restrict
-# endif
-#endif
 
 
 /**
@@ -34,6 +25,17 @@
 /* size and count of subsets within a set */
 #define HWLOC_CPUSUBSET_SIZE	HWLOC_BITS_PER_LONG
 #define HWLOC_CPUSUBSET_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSUBSET_SIZE-1)/HWLOC_CPUSUBSET_SIZE)
+
+/* magic number */
+#define HWLOC_CPUSET_MAGIC 0x20091007
+
+/* actual opaque type internals */
+struct hwloc_cpuset_s {
+	unsigned long s[HWLOC_CPUSUBSET_COUNT];
+#ifdef HWLOC_DEBUG
+	int magic;
+#endif
+};
 
 /* extract a subset from a set using an index or a cpu */
 #define HWLOC_CPUSUBSET_SUBSET(set,x)		((set).s[x])
@@ -50,7 +52,6 @@
 #define HWLOC_CPUSET_SUBSTRING_SIZE	32
 #define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
 #define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
-
 
 
 /**
@@ -82,7 +83,7 @@ extern int ffs(int);
 
 #else /* no ffs implementation */
 
-static __inline__ int hwloc_ffsl(unsigned long x)
+static __inline int hwloc_ffsl(unsigned long x)
 {
 	int i;
 
@@ -127,7 +128,7 @@ static __inline__ int hwloc_ffsl(unsigned long x)
 /* We only have an int ffs(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline__ int hwloc_ffs32(unsigned long x)
+static __inline int hwloc_ffs32(unsigned long x)
 {
 #if HWLOC_BITS_PER_INT == 16
 	int low_ffs, hi_ffs;
@@ -147,7 +148,7 @@ static __inline__ int hwloc_ffs32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline__ int hwloc_ffsl(unsigned long x)
+static __inline int hwloc_ffsl(unsigned long x)
 {
 #if HWLOC_BITS_PER_LONG == 64
 	int low_ffs, hi_ffs;
@@ -207,7 +208,7 @@ extern int clz(int);
 
 #else /* no fls implementation */
 
-static __inline__ int hwloc_flsl(unsigned long x)
+static __inline int hwloc_flsl(unsigned long x)
 {
 	int i = 0;
 
@@ -252,7 +253,7 @@ static __inline__ int hwloc_flsl(unsigned long x)
 /* We only have an int fls(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline__ int hwloc_fls32(unsigned long x)
+static __inline int hwloc_fls32(unsigned long x)
 {
 #if HWLOC_BITS_PER_INT == 16
 	int low_fls, hi_fls;
@@ -272,7 +273,7 @@ static __inline__ int hwloc_fls32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline__ int hwloc_flsl(unsigned long x)
+static __inline int hwloc_flsl(unsigned long x)
 {
 #if HWLOC_BITS_PER_LONG == 64
 	int low_fls, hi_fls;
@@ -292,7 +293,7 @@ static __inline__ int hwloc_flsl(unsigned long x)
 }
 #endif
 
-static __inline__ int hwloc_weight_long(unsigned long w)
+static __inline int hwloc_weight_long(unsigned long w)
 {
 #if HWLOC_BITS_PER_LONG == 32
 #if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)
@@ -320,4 +321,4 @@ static __inline__ int hwloc_weight_long(unsigned long w)
 }
 
 
-#endif /* HWLOC_CPUSET_BITS_H */
+#endif /* HWLOC_PRIVATE_CPUSET_H */

@@ -36,45 +36,45 @@
  *
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
-static __inline__ void
-hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, const hwloc_cpuset_t *toposet,
+static __inline void
+hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, hwloc_cpuset_t hwlocset,
 				    cpu_set_t *schedset, size_t schedsetsize)
 {
 #ifdef CPU_ZERO_S
   unsigned cpu;
   CPU_ZERO_S(schedsetsize, schedset);
-  hwloc_cpuset_foreach_begin(cpu, toposet)
+  hwloc_cpuset_foreach_begin(cpu, hwlocset)
     CPU_SET_S(cpu, schedsetsize, schedset);
   hwloc_cpuset_foreach_end();
 #else /* !CPU_ZERO_S */
   unsigned cpu;
   CPU_ZERO(schedset);
   assert(schedsetsize == sizeof(cpu_set_t));
-  hwloc_cpuset_foreach_begin(cpu, toposet)
+  hwloc_cpuset_foreach_begin(cpu, hwlocset)
     CPU_SET(cpu, schedset);
   hwloc_cpuset_foreach_end();
 #endif /* !CPU_ZERO_S */
 }
 
-/** \brief Convert hwloc CPU set \p toposet into glibc sched affinity CPU set \p schedset
+/** \brief Convert glibc sched affinity CPU set \p schedset into hwloc CPU set
  *
  * This function may be used before calling sched_setaffinity  or any other function
  * that takes a cpu_set_t  as input parameter.
  *
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
-static __inline__ void
-hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology, hwloc_cpuset_t *toposet,
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology,
 				      const cpu_set_t *schedset, size_t schedsetsize)
 {
+  hwloc_cpuset_t hwlocset = hwloc_cpuset_alloc();
 #ifdef CPU_ZERO_S
   int cpu, count;
-  hwloc_cpuset_zero(toposet);
   count = CPU_COUNT_S(schedsetsize, schedset);
   cpu = 0;
   while (count) {
     if (CPU_ISSET_S(cpu, schedsetsize, schedset)) {
-      hwloc_cpuset_set(toposet, cpu);
+      hwloc_cpuset_set(hwlocset, cpu);
       count--;
     }
     cpu++;
@@ -89,8 +89,9 @@ hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology, hwloc_cpuset_t
   assert(schedsetsize == sizeof(cpu_set_t));
   for(cpu=0; cpu<CPU_SETSIZE && cpu<HWLOC_NBMAXCPUS; cpu++)
     if (CPU_ISSET(cpu, schedset))
-      hwloc_cpuset_set(toposet, cpu);
+      hwloc_cpuset_set(hwlocset, cpu);
 #endif /* !CPU_ZERO_S */
+  return hwlocset;
 }
 
 /** @} */

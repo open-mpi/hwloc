@@ -26,53 +26,57 @@ int main()
 
   /* check the cache above a given cpu */
 #define CPUINDEX 180
-  hwloc_cpuset_zero(&set);
+  set = hwloc_cpuset_alloc();
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
-  hwloc_cpuset_orset(&set, &obj->cpuset);
-  cache = hwloc_get_cache_covering_cpuset(topology, &set);
+  hwloc_cpuset_orset(set, obj->cpuset);
+  cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX/2/3);
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
+  free(set);
 
   /* check the cache above two nearby cpus */
 #define CPUINDEX1 180
 #define CPUINDEX2 183
-  hwloc_cpuset_zero(&set);
+  set = hwloc_cpuset_alloc();
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX1);
   assert(obj);
-  hwloc_cpuset_orset(&set, &obj->cpuset);
+  hwloc_cpuset_orset(set, obj->cpuset);
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX2);
   assert(obj);
-  hwloc_cpuset_orset(&set, &obj->cpuset);
-  cache = hwloc_get_cache_covering_cpuset(topology, &set);
+  hwloc_cpuset_orset(set, obj->cpuset);
+  cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX1/2/3);
   assert(cache->logical_index == CPUINDEX2/2/3);
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
+  free(set);
 
   /* check no cache above two distant cpus */
 #undef CPUINDEX1
 #define CPUINDEX1 300
-  hwloc_cpuset_zero(&set);
+  set = hwloc_cpuset_alloc();
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX1);
   assert(obj);
-  hwloc_cpuset_orset(&set, &obj->cpuset);
+  hwloc_cpuset_orset(set, obj->cpuset);
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX2);
   assert(obj);
-  hwloc_cpuset_orset(&set, &obj->cpuset);
-  cache = hwloc_get_cache_covering_cpuset(topology, &set);
+  hwloc_cpuset_orset(set, obj->cpuset);
+  cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(!cache);
+  free(set);
 
   /* check no cache above higher level */
-  hwloc_cpuset_zero(&set);
+  set = hwloc_cpuset_alloc();
   obj = hwloc_get_obj_by_depth(topology, 2, 0);
   assert(obj);
-  hwloc_cpuset_orset(&set, &obj->cpuset);
-  cache = hwloc_get_cache_covering_cpuset(topology, &set);
+  hwloc_cpuset_orset(set, obj->cpuset);
+  cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(!cache);
+  free(set);
 
   hwloc_topology_destroy(topology);
 

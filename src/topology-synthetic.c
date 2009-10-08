@@ -37,19 +37,19 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       break;
 
     if (*pos < '0' || *pos > '9') {
-      if (!strncasecmp(pos, "machines", 2))
+      if (!hwloc_strncasecmp(pos, "machines", 2))
 	type = HWLOC_OBJ_MACHINE;
-      else if (!strncasecmp(pos, "nodes", 1))
+      else if (!hwloc_strncasecmp(pos, "nodes", 1))
 	type = HWLOC_OBJ_NODE;
-      else if (!strncasecmp(pos, "sockets", 1))
+      else if (!hwloc_strncasecmp(pos, "sockets", 1))
 	type = HWLOC_OBJ_SOCKET;
-      else if (!strncasecmp(pos, "cores", 2))
+      else if (!hwloc_strncasecmp(pos, "cores", 2))
 	type = HWLOC_OBJ_CORE;
-      else if (!strncasecmp(pos, "caches", 2))
+      else if (!hwloc_strncasecmp(pos, "caches", 2))
 	type = HWLOC_OBJ_CACHE;
-      else if (!strncasecmp(pos, "procs", 1))
+      else if (!hwloc_strncasecmp(pos, "procs", 1))
 	type = HWLOC_OBJ_PROC;
-      else if (!strncasecmp(pos, "misc", 2))
+      else if (!hwloc_strncasecmp(pos, "misc", 2))
 	type = HWLOC_OBJ_MISC;
 
       next_pos = strchr(pos, ':');
@@ -170,7 +170,7 @@ static unsigned
 hwloc__look_synthetic(struct hwloc_topology *topology,
     int level, unsigned first_cpu,
     unsigned long *parent_memory_kB,
-    hwloc_cpuset_t *parent_cpuset)
+    hwloc_cpuset_t parent_cpuset)
 {
   unsigned long my_memory = 0, *pmemory = parent_memory_kB;
   hwloc_obj_t obj;
@@ -204,19 +204,20 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   }
 
   obj = hwloc_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
+  obj->cpuset = hwloc_cpuset_alloc();
 
   if (type == HWLOC_OBJ_PROC) {
     assert(topology->backend_params.synthetic.arity[level] == 0);
-    hwloc_cpuset_set(&obj->cpuset, first_cpu++);
+    hwloc_cpuset_set(obj->cpuset, first_cpu++);
   } else {
     assert(topology->backend_params.synthetic.arity[level] != 0);
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
-      first_cpu = hwloc__look_synthetic(topology, level + 1, first_cpu, pmemory, &obj->cpuset);
+      first_cpu = hwloc__look_synthetic(topology, level + 1, first_cpu, pmemory, obj->cpuset);
   }
 
   hwloc_insert_object_by_cpuset(topology, obj);
 
-  hwloc_cpuset_orset(parent_cpuset, &obj->cpuset);
+  hwloc_cpuset_orset(parent_cpuset, obj->cpuset);
 
   /* post-hooks */
   switch (type) {
@@ -265,9 +266,11 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 void
 hwloc_look_synthetic(struct hwloc_topology *topology)
 {
-  hwloc_cpuset_t cpuset;
+  hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
   unsigned first_cpu = 0, i;
 
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
-    first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, &cpuset);
+    first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, cpuset);
+
+  free(cpuset);
 }
