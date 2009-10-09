@@ -165,7 +165,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
-        $(DOX_MAN_DIR)/man3/hwloc.h.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpubind_policy_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_alloc.3 \
