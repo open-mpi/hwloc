@@ -220,20 +220,20 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
       /* first determine the object type */
       for (attr = node->properties; attr; attr = attr->next) {
 	if (attr->type == XML_ATTRIBUTE_NODE) {
-	  xmlNode *node;
-	  for (node = attr->children; node; node = node->next) {
-	    if (node->type == XML_TEXT_NODE) {
-	      if (node->content && node->content[0] != '\0' && node->content[0] != '\n') {
+	  xmlNode *subnode;
+	  for (subnode = attr->children; subnode; subnode = subnode->next) {
+	    if (subnode->type == XML_TEXT_NODE) {
+	      if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
 		if (!strcmp((const char*) attr->name, "type")) {
-		  obj->type = hwloc_obj_type_of_string((const char*) node->content);
+		  obj->type = hwloc_obj_type_of_string((const char*) subnode->content);
 		  if (obj->type == HWLOC_OBJ_TYPE_MAX)
-		    fprintf(stderr, "ignoring unknown object type %s\n", (const char*) node->content);
+		    fprintf(stderr, "ignoring unknown object type %s\n", (const char*) subnode->content);
 		  else
 		    break;
 		}
 	      }
 	    } else {
-		fprintf(stderr, "ignoring unexpected xml attr node type %u name %s\n", node->type, (const char*) node->name);
+		fprintf(stderr, "ignoring unexpected xml attr subnode type %u name %s\n", subnode->type, (const char*) subnode->name);
 	    }
 	  }
 	  if (obj->type == HWLOC_OBJ_TYPE_MAX) {
