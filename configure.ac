@@ -440,6 +440,8 @@ AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
 AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
 AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xyes"])
 
+AC_CHECK_PROGS(XMLLINT, [xmllint])
+
 AC_SUBST(HWLOC_REQUIRES)
 
 AC_CONFIG_HEADER([include/private/config.h])
