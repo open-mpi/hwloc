@@ -29,10 +29,11 @@ nodist_man_MANS = $(man_pages)
 install-exec-hook:
 	$(RM) $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
 	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT)
+	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1 && $(LN_S) lstopo.1 hwloc-info.1
 
 uninstall-local:
-	$(RM) $(DESTDIR)$(bindir)/hwloc-ls 
-	$(RM) $(DESTDIR)$(bindir)/hwloc-info
+	$(RM) $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
+	$(RM) $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1
 
 distclean-local:
 	rm -f $(man_pages)
