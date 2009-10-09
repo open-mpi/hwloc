@@ -26,7 +26,7 @@ man_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-mask.1
 EXTRA_DIST += $(man_pages:.1=.1in)
 nodist_man_MANS = $(man_pages)
 
-install-exec-hook:
+install-exec-hook: install-man
 	$(RM) $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
 	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT)
 	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1 && $(LN_S) lstopo.1 hwloc-info.1
