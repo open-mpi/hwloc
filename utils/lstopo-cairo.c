@@ -96,7 +96,7 @@ topo_cairo_paint(struct draw_methods *methods, hwloc_topology_t topology, cairo_
   cairo_destroy(c);
 }
 
-static void null(void) {}
+static void null_declare_color (void *output, int r, int g, int b) {}
 #endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
@@ -164,7 +164,7 @@ x11_start(void *output, int width, int height)
 
 static struct draw_methods x11_draw_methods = {
   .start = x11_start,
-  .declare_color = (void*) null,
+  .declare_color = null_declare_color,
   .box = topo_cairo_box,
   .line = topo_cairo_line,
   .text = topo_cairo_text,
@@ -276,7 +276,7 @@ png_start(void *output, int width, int height)
 
 static struct draw_methods png_draw_methods = {
   .start = png_start,
-  .declare_color = (void*) null,
+  .declare_color = null_declare_color,
   .box = topo_cairo_box,
   .line = topo_cairo_line,
   .text = topo_cairo_text,
@@ -311,7 +311,7 @@ pdf_start(void *output, int width, int height)
 
 static struct draw_methods pdf_draw_methods = {
   .start = pdf_start,
-  .declare_color = (void*) null,
+  .declare_color = null_declare_color,
   .box = topo_cairo_box,
   .line = topo_cairo_line,
   .text = topo_cairo_text,
@@ -346,7 +346,7 @@ ps_start(void *output, int width, int height)
 
 static struct draw_methods ps_draw_methods = {
   .start = ps_start,
-  .declare_color = (void*) null,
+  .declare_color = null_declare_color,
   .box = topo_cairo_box,
   .line = topo_cairo_line,
   .text = topo_cairo_text,
@@ -381,7 +381,7 @@ svg_start(void *output, int width, int height)
 
 static struct draw_methods svg_draw_methods = {
   .start = svg_start,
-  .declare_color = (void*) null,
+  .declare_color = null_declare_color,
   .box = topo_cairo_box,
   .line = topo_cairo_line,
   .text = topo_cairo_text,

@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PROC, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%u", proc->os_index);
+      printf("%d", proc->os_index);
       prev = proc;
     }
     printf("\n");
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%u", node->os_index);
+      printf("%d", node->os_index);
       prev = node;
     }
     printf("\n");
