@@ -74,13 +74,15 @@ if ("$cur_svn_r" == "-1") then
     touch -r "${srcdir}/VERSION" "${distdir}/VERSION"
     echo "*** Updated VERSION file with SVN r number"
 else
-    echo "*** Did NOT updated VERSION file with SVN r number"
+    echo "*** Did NOT update VERSION file with SVN r number"
 endif
 
 #
 # Force the generation of new doxygen documentation
 #
 
+echo "*** Making new doxygen documentation (doxygen-doc tree)"
+echo "*** Directory: `pwd`"
 cd doc
 rm -rf doxygen-doc
 make
@@ -89,8 +91,19 @@ if ($status != 0) then
     echo ERROR: cannot continue
     exit 1
 endif
-cp -rpf doxygen-doc ../$distdir/doc
 
+# Remove latex kruft; no need to ship that
+cd doxygen-doc/latex
+echo "*** REMOVE LATEX KRUFT: `pwd`"
+rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out
+cd ../..
+
+echo "*** Copying doxygen-doc tree to dist..."
+echo "*** Directory: `pwd` -> $distdir"
+rm -rf $distdir/doc/doxygen-doc
+cp -rpf doxygen-doc $distdir/doc
+
+echo "*** Making new README"
 make readme
 if ($status != 0) then
     echo ERROR: generating new README failed
