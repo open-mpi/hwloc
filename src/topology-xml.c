@@ -28,8 +28,6 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
   if (!doc)
     return -1;
 
-  /* TODO: warn if dtd is not hwloc.dtd? */
-
   topology->backend_params.xml.doc = doc;
   topology->is_thissystem = 0;
   topology->backend_type = HWLOC_BACKEND_XML;
@@ -306,10 +304,20 @@ void
 hwloc_look_xml(struct hwloc_topology *topology)
 {
   xmlNode* root_node;
+  xmlDtd *dtd;
+
+  dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
+  if (!dtd)
+    fprintf(stderr, "Loading XML topology without DTD\n");
+  else if (strcmp(dtd->SystemID, "hwloc.dtd"))
+    fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
+	    dtd->SystemID, "hwloc.dtd");
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 
   hwloc__look_xml_node(topology, root_node, 0);
+
+  /* TODO: abort if we got an invalid topology or so */
 }
 
 #endif /* HAVE_XML */
