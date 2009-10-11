@@ -350,6 +350,20 @@ extern int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, co
 
 
 
+/** \defgroup hwlocality_export Export the Topology
+ * @{
+ */
+
+/** \brief Export the topology into a XML file.
+ *
+ * This file may be loaded later through hwloc_topology_set_xml().
+ */
+extern void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
+
+/** @} */
+
+
+
 /** \defgroup hwlocality_information Get some Topology Information
  * @{
  */
