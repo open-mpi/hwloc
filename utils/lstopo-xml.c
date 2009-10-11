@@ -100,7 +100,7 @@ void output_xml(hwloc_topology_t topology, const char *filename, int verbose_mod
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */
-  dtd = xmlCreateIntSubset(doc, BAD_CAST "root", NULL, BAD_CAST "lstopo.dtd");
+  dtd = xmlCreateIntSubset(doc, BAD_CAST "root", NULL, BAD_CAST "hwloc.dtd");
 
   output_topology (topology, hwloc_get_system_obj(topology), root_node, verbose_mode);
 

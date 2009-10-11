@@ -23,7 +23,7 @@ set -e
 diff @HWLOC_DIFF_U@ "$srcdir"/linux/16em64t-4s2c2t.xml.tar.gz.output "$file"
 if [ -n "@XMLLINT@" ]
 then
-  cp "$srcdir"/../src/lstopo.dtd "$tmp/"
+  cp "$srcdir"/../src/hwloc.dtd "$tmp/"
   @XMLLINT@ --valid "$file" > /dev/null
 fi
 rm -rf "$tmp"

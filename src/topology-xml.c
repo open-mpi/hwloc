@@ -28,6 +28,8 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
   if (!doc)
     return -1;
 
+  /* TODO: warn if dtd is not hwloc.dtd? */
+
   topology->backend_params.xml.doc = doc;
   topology->is_thissystem = 0;
   topology->backend_type = HWLOC_BACKEND_XML;
@@ -241,7 +243,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 	    return;
 	  }
 	} else {
-	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", node->type);
+	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
 	}
       }
 
@@ -251,7 +253,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 	  if (attr->children)
 	    hwloc__look_xml_attr(topology, obj, attr->name, attr->children);
 	} else {
-	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", node->type);
+	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
 	}
       }
 
@@ -269,7 +271,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 
       } else {
 	/* add object */
-	if (obj->type == HWLOC_OBJ_TYPE_MAX) {
+	if (obj->type >= HWLOC_OBJ_TYPE_MAX) {
 	  fprintf(stderr, "ignoring object with invalid type %u\n", obj->type);
 	  free(obj);
 	} else if (obj->type == HWLOC_OBJ_SYSTEM) {
