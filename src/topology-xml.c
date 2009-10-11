@@ -28,6 +28,8 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
   if (!doc)
     return -1;
 
+  /* TODO: warn if dtd is not hwloc.dtd? */
+
   topology->backend_params.xml.doc = doc;
   topology->is_thissystem = 0;
   topology->backend_type = HWLOC_BACKEND_XML;
