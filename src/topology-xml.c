@@ -310,7 +310,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
   dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
   if (!dtd)
     fprintf(stderr, "Loading XML topology without DTD\n");
-  else if (strcmp(dtd->SystemID, "hwloc.dtd"))
+  else if (strcmp((char *) dtd->SystemID, "hwloc.dtd"))
     fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
 	    dtd->SystemID, "hwloc.dtd");
 
