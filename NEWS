@@ -18,6 +18,8 @@ Version 1.0.0
 -------------
 
 * Add hwloc_topology_export_xml() to export the topology in a XML file.
+* Add Linux cgroup support to the Linux cpuset code.
+
 
 
 Version 0.9.1

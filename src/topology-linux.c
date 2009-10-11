@@ -315,54 +315,120 @@ hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
   return set;
 }
 
-static int
-hwloc_read_cpuset_mask(const char *filename, const char *type, char *info, int infomax, int fsroot_fd)
+static char *
+hwloc_read_linux_cpuset_name(int fsroot_fd)
 {
-#define CPUSET_NAME_LEN 64
+#define CPUSET_NAME_LEN 128
   char cpuset_name[CPUSET_NAME_LEN];
-#define CPUSET_FILENAME_LEN 64
-  char cpuset_filename[CPUSET_FILENAME_LEN];
-  char *tmp;
   FILE *fd;
 
-  /* check whether a cpuset is enabled */
-  fd = hwloc_fopen(filename, "r", fsroot_fd);
-  if (!fd)
-    return 0;
+  /* check whether a cgroup-cpuset is enabled */
+  fd = hwloc_fopen("proc/self/cgroup", "r", fsroot_fd);
+  if (fd) {
+    /* find a cpuset line */
+#define CGROUP_LINE_LEN 256
+    char line[CGROUP_LINE_LEN];    
+    while (fgets(line, sizeof(line), fd)) {
+      char *colon = strchr(line, ':');
+      if (!colon)
+	continue;
+      if (strncmp(colon, ":cpuset:", 8))
+	continue;
 
+      /* found a cgroup-cpuset line, return the name */
+      fclose(fd);
+      char *end = strchr(colon, '\n');
+      if (end)
+	*end = '\0';
+      hwloc_debug("Found cgroup-cpuset %s\n", colon+8);
+      return strdup(colon+8);
+    }
+    fclose(fd);
+  }
+
+  /* check whether a cpuset is enabled */
+  fd = hwloc_fopen("proc/self/cpuset", "r", fsroot_fd);
+  if (!fd) {
+    /* found nothing */
+    hwloc_debug("No cgroup or cpuset found\n");
+    return NULL;
+  }
+
+  /* found a cpuset, return the name */
   fgets(cpuset_name, sizeof(cpuset_name), fd);
   fclose(fd);
-
-  tmp = strchr(cpuset_name, '\n');
+  char *tmp = strchr(cpuset_name, '\n');
   if (tmp)
     *tmp = '\0';
+  hwloc_debug("Found cpuset %s\n", cpuset_name);
+  return strdup(cpuset_name);
+}
 
-  /* read the cpuset */
+/*
+ * Linux cpusets may be managed directly or through cgroup.
+ * If cgroup is used, tasks get a /proc/self/cgroup which may contain a
+ * single line %d:cpuset:<name>. If cpuset are used they get /proc/self/cpuset
+ * containing <name>.
+ *
+ * Then, the cpuset description is available from either the cgroup or
+ * the cpuset filesystem (usually mounted in / or /dev) where there
+ * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
+ */
+static int
+hwloc_read_linux_cpuset_mask(const char *type, char *info, int infomax, int fsroot_fd)
+{
+  char *cpuset_name;
+#define CPUSET_FILENAME_LEN 256
+  char cpuset_filename[CPUSET_FILENAME_LEN];
+  FILE *fd;
+
+  cpuset_name = hwloc_read_linux_cpuset_name(fsroot_fd);
+  if (!cpuset_name)
+    return 0;
+
+  /* try to read the cpuset from cgroup */
+  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cgroup%s/cpuset.%s", cpuset_name, type);
+  hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
+  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
+  if (fd)
+    goto gotfile;
+  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cgroup%s/cpuset.%s", cpuset_name, type);
+  hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
+  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
+  if (fd)
+    goto gotfile;
+
+  /* try to read the cpuset directly */
   snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cpuset%s/%s", cpuset_name, type);
   hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
   fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (!fd) {
-    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cpusets%s/%s", cpuset_name, type);
-    hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-    fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  }
+  if (fd)
+    goto gotfile;
+  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cpusets%s/%s", cpuset_name, type);
+  hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
+  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
+  if (fd)
+    goto gotfile;
 
-  if (!fd)
-    return 0;
+  /* found no cpuset description, ignore it */
+  hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
+  free(cpuset_name);
+  return 0;
 
+ gotfile:
   fgets(info, infomax, fd);
   fclose(fd);
 
-  tmp = strchr(info, '\n');
+  char *tmp = strchr(info, '\n');
   if (tmp)
     *tmp = '\0';
 
+  free(cpuset_name);
   return 1;
 }
 
 static void
 hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
-				   const char *path,
 				   const char *name,
 				   hwloc_cpuset_t admin_disabled_set)
 {
@@ -372,7 +438,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
   int ret;
 
-  ret = hwloc_read_cpuset_mask(path, name, cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
+  ret = hwloc_read_linux_cpuset_mask(name, cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
   if (!ret)
     return;
 
@@ -1008,8 +1074,8 @@ hwloc_look_linux(struct hwloc_topology *topology)
   } else {
     /* Gather the list of admin-disabled cpus and mems */
     if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
-      hwloc_admin_disable_set_from_cpuset(topology, "/proc/self/cpuset", "cpus", admin_disabled_cpus_set);
-      hwloc_admin_disable_set_from_cpuset(topology, "/proc/self/cpuset", "mems", admin_disabled_mems_set);
+      hwloc_admin_disable_set_from_cpuset(topology, "cpus", admin_disabled_cpus_set);
+      hwloc_admin_disable_set_from_cpuset(topology, "mems", admin_disabled_mems_set);
     }
 
     /* Gather NUMA information */
