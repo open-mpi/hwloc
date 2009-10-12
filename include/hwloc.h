@@ -619,6 +619,18 @@ extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t ti
 /** @} */
 
 
+
+/** \defgroup hwlocality_iodevice Basic I/O Device Management
+ * @{
+ */
+
+/** \brief Get the next I/O device in the system */
+extern struct hwloc_obj * hwloc_get_next_iodevice(struct hwloc_topology *topology, struct hwloc_obj *prev);
+
+/** @} */
+
+
+
 /* high-level helpers */
 #include <hwloc/helper.h>
 

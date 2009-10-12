@@ -42,6 +42,17 @@ hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigne
   return topology->levels[depth][index];
 }
 
+struct hwloc_obj *
+hwloc_get_next_iodevice(struct hwloc_topology *topology, struct hwloc_obj *prev)
+{
+  if (prev) {
+    assert(prev->type == HWLOC_OBJ_PCI_DEVICE);
+    return prev->next_cousin;
+  } else {
+    return topology->first_device;
+  }
+}
+
 int hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, int max)
 {
   struct hwloc_obj *parent, *nextparent, **src_objs;

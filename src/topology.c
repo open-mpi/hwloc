@@ -717,6 +717,18 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t fathe
     *current = obj;
     obj->next_sibling = NULL;
     obj->first_child = NULL;
+
+    if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
+      /* Insert in the main device list */
+      if (topology->first_device) {
+	obj->prev_cousin = topology->last_device;
+	obj->prev_cousin->next_cousin = obj;
+	topology->last_device = obj;
+      } else {
+	topology->first_device = topology->last_device = obj;
+      }
+    }
+
     /* Use the new object to insert children */
     father = obj;
   }
