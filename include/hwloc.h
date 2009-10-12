@@ -448,7 +448,17 @@ extern hwloc_obj_type_t hwloc_obj_type_of_string (const char * string);
 
 /** \brief Stringify a given topology object into a human-readable form.
  *
- * \return how many characters were actually written (not including the ending \\0). */
+ * Fill string \p string up to \p size characters with the description
+ * of topology object \p obj in topology \p topology.
+ *
+ * If \p verbose is set, a longer description is used. Otherwise a
+ * short description is used.
+ *
+ * \p indexprefix is used to prefix the \p os_index attribute number of
+ * the object in the description. If \c NULL, the \c # character is used.
+ *
+ * \return how many characters were actually written (not including the ending \\0).
+ */
 extern int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t size,
 			     hwloc_topology_t topology, hwloc_obj_t obj,
 			     const char * __hwloc_restrict indexprefix, int verbose);
