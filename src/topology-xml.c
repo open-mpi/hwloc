@@ -14,6 +14,7 @@
 #include <libxml/tree.h>
 
 #include <assert.h>
+#include <strings.h>
 
 int
 hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
@@ -220,20 +221,20 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
       /* first determine the object type */
       for (attr = node->properties; attr; attr = attr->next) {
 	if (attr->type == XML_ATTRIBUTE_NODE) {
-	  xmlNode *node;
-	  for (node = attr->children; node; node = node->next) {
-	    if (node->type == XML_TEXT_NODE) {
-	      if (node->content && node->content[0] != '\0' && node->content[0] != '\n') {
+	  xmlNode *subnode;
+	  for (subnode = attr->children; subnode; subnode = subnode->next) {
+	    if (subnode->type == XML_TEXT_NODE) {
+	      if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
 		if (!strcmp((const char*) attr->name, "type")) {
-		  obj->type = hwloc_obj_type_of_string((const char*) node->content);
+		  obj->type = hwloc_obj_type_of_string((const char*) subnode->content);
 		  if (obj->type == HWLOC_OBJ_TYPE_MAX)
-		    fprintf(stderr, "ignoring unknown object type %s\n", (const char*) node->content);
+		    fprintf(stderr, "ignoring unknown object type %s\n", (const char*) subnode->content);
 		  else
 		    break;
 		}
 	      }
 	    } else {
-		fprintf(stderr, "ignoring unexpected xml attr node type %u name %s\n", node->type, (const char*) node->name);
+		fprintf(stderr, "ignoring unexpected xml attr subnode type %u name %s\n", subnode->type, (const char*) subnode->name);
 	    }
 	  }
 	  if (obj->type == HWLOC_OBJ_TYPE_MAX) {
@@ -241,7 +242,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 	    return;
 	  }
 	} else {
-	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", node->type);
+	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
 	}
       }
 
@@ -251,7 +252,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 	  if (attr->children)
 	    hwloc__look_xml_attr(topology, obj, attr->name, attr->children);
 	} else {
-	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", node->type);
+	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
 	}
       }
 
@@ -269,7 +270,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 
       } else {
 	/* add object */
-	if (obj->type == HWLOC_OBJ_TYPE_MAX) {
+	if (obj->type >= HWLOC_OBJ_TYPE_MAX) {
 	  fprintf(stderr, "ignoring object with invalid type %u\n", obj->type);
 	  free(obj);
 	} else if (obj->type == HWLOC_OBJ_SYSTEM) {
@@ -304,10 +305,113 @@ void
 hwloc_look_xml(struct hwloc_topology *topology)
 {
   xmlNode* root_node;
+  xmlDtd *dtd;
+
+  dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
+  if (!dtd)
+    fprintf(stderr, "Loading XML topology without DTD\n");
+  else if (strcmp((char *) dtd->SystemID, "hwloc.dtd"))
+    fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
+	    dtd->SystemID, "hwloc.dtd");
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 
   hwloc__look_xml_node(topology, root_node, 0);
+
+  /* TODO: abort if we got an invalid topology or so */
+}
+
+static void
+hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr root_node)
+{
+  xmlNodePtr node = NULL;
+  char *cpuset = NULL;
+  char tmp[255];
+
+  /* xmlNewChild() creates a new node, which is "attached" as child node
+   * of root_node node. */
+  node = xmlNewChild(root_node, NULL, BAD_CAST "object", NULL);
+  xmlNewProp(node, BAD_CAST "type", BAD_CAST hwloc_obj_type_string(obj->type));
+  sprintf(tmp, "%d", obj->os_index);
+  xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
+  hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
+  xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
+  free(cpuset);
+
+  switch (obj->type) {
+  case HWLOC_OBJ_CACHE:
+    sprintf(tmp, "%lu", obj->attr->cache.memory_kB);
+    xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
+    sprintf(tmp, "%u", obj->attr->cache.depth);
+    xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
+    break;
+  case HWLOC_OBJ_SYSTEM:
+    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
+    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
+    sprintf(tmp, "%lu", obj->attr->system.memory_kB);
+    xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr->system.huge_page_free);
+    xmlNewProp(node, BAD_CAST "huge_page_free", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr->machine.huge_page_size_kB);
+    xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
+    break;
+  case HWLOC_OBJ_MACHINE:
+    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
+    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
+    sprintf(tmp, "%lu", obj->attr->machine.memory_kB);
+    xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr->machine.huge_page_free);
+    xmlNewProp(node, BAD_CAST "huge_page_free", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr->machine.huge_page_size_kB);
+    xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
+    break;
+  case HWLOC_OBJ_NODE:
+    sprintf(tmp, "%lu", obj->attr->node.memory_kB);
+    xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
+    sprintf(tmp, "%lu", obj->attr->node.huge_page_free);
+    xmlNewProp(node, BAD_CAST "huge_page_free", BAD_CAST tmp);
+    break;
+  case HWLOC_OBJ_MISC:
+    sprintf(tmp, "%u", obj->attr->misc.depth);
+    xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
+    break;
+  default:
+    break;
+  }
+
+  if (obj->arity) {
+    int x;
+    for (x=0; x<obj->arity; x++)
+      hwloc__topology_export_xml_object (topology, obj->children[x], node);
+  }
+}
+
+void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+{
+  xmlDocPtr doc = NULL;       /* document pointer */
+  xmlNodePtr root_node = NULL; /* root pointer */
+  xmlDtdPtr dtd = NULL;       /* DTD pointer */
+
+  LIBXML_TEST_VERSION;
+
+  /* Creates a new document, a node and set it as a root node. */
+  doc = xmlNewDoc(BAD_CAST "1.0");
+  root_node = xmlNewNode(NULL, BAD_CAST "root");
+  xmlDocSetRootElement(doc, root_node);
+
+  /* Creates a DTD declaration. Isn't mandatory. */
+  dtd = xmlCreateIntSubset(doc, BAD_CAST "root", NULL, BAD_CAST "hwloc.dtd");
+
+  hwloc__topology_export_xml_object (topology, hwloc_get_system_obj(topology), root_node);
+
+  /* Dumping document to stdio or file. */
+  xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+
+  /* Free the document. */
+  xmlFreeDoc(doc);
+
+  /* Free the global variables that may have been allocated by the parser. */
+  xmlCleanupParser();
 }
 
 #endif /* HAVE_XML */

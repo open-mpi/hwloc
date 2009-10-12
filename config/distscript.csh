@@ -18,8 +18,13 @@
 # $HEADER$
 #
 
-set srcdir="$1"
 set builddir="`pwd`"
+
+set srcdir="$1"
+cd "$srcdir"
+set srcdir=`pwd`
+cd "$builddir"
+
 set distdir="$builddir/$2"
 set HWLOC_VERSION="$3"
 set HWLOC_SVN_VERSION="$4"
@@ -32,10 +37,20 @@ elif ("$HWLOC_VERSION" == "") then
     exit 1
 endif
 
+#========================================================================
+
+if ("$srcdir" != "$builddir") then
+    set vpath=1
+    set vpath_msg=yes
+else
+    set vpath=0
+    set vpath_msg=no
+endif
+
 # We can catch some hard (but possible) to do mistakes by looking at
 # our tree's revision number, but only if we are in the source tree.
 # Otherwise, use what configure told us, at the cost of allowing one
-# or two corner cases in (but otherwise VPATH builds won't work)
+# or two corner cases in (but otherwise VPATH builds won't work).
 set svn_r=$HWLOC_SVN_VERSION
 if (-d .svn) then
     set svn_r="r`svnversion .`"
@@ -46,6 +61,9 @@ cat <<EOF
  
 Creating hwloc distribution
 In directory: `pwd`
+Srcdir: $srcdir
+Builddir: $builddir
+VPATH: $vpath_msg
 Version: $HWLOC_VERSION
 Started: $start
  
@@ -74,32 +92,72 @@ if ("$cur_svn_r" == "-1") then
     touch -r "${srcdir}/VERSION" "${distdir}/VERSION"
     echo "*** Updated VERSION file with SVN r number"
 else
-    echo "*** Did NOT updated VERSION file with SVN r number"
+    echo "*** Did NOT update VERSION file with SVN r number"
 endif
 
 #
-# Force the generation of new doxygen documentation
+# VPATH builds only work if the srcdir has valid docs already built.
+# If we're VPATH and the srcdir doesn't have valid docs, then fail.
 #
 
-cd doc
-rm -rf doxygen-doc
-make
-if ($status != 0) then
-    echo ERROR: generating doxygen docs failed
-    echo ERROR: cannot continue
+if ($vpath == 1 && ! -d $srcdir/doc/doxygen-doc) then
+    echo "*** This is a VPATH 'make dist', but the srcdir does not already"
+    echo "*** have a doxygen-doc tree built.  hwloc's config/distscript.csh"
+    echo "*** the docs to be built in the srcdir before executing 'make"
+    echo "*** dist' in a VPATH build."
     exit 1
 endif
-cp -rpf doxygen-doc ../$distdir/doc
 
-make readme
-if ($status != 0) then
-    echo ERROR: generating new README failed
-    echo ERROR: cannot continue
-    exit 1
+#
+# If we're not VPATH, force the generation of new doxygen documentation
+#
+
+if ($vpath == 0) then
+    # Not VPATH
+    echo "*** Making new doxygen documentation (doxygen-doc tree)"
+    echo "*** Directory: srcdir: $srcdir, distdir: $distdir, pwd: `pwd`"
+    cd doc
+    # We're still in the src tree, so kill any previous doxygen-docs
+    # tree and make a new one.
+    chmod -R a=rwx doxygen-doc
+    rm -rf doxygen-doc
+    make
+    if ($status != 0) then
+        echo ERROR: generating doxygen docs failed
+        echo ERROR: cannot continue
+        exit 1
+    endif
+
+    # Remove generate latex kruft; no need to ship that.  
+    echo "*** Remove generated latex kruft: `pwd`"
+    cd doxygen-doc/latex
+    rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out
+    cd ../..
+
+    # Make new README file
+    echo "*** Making new README"
+    make readme
+    if ($status != 0) then
+        echo ERROR: generating new README failed
+        echo ERROR: cannot continue
+        exit 1
+    endif
+else
+    echo "*** This is a VPATH build; assuming that the doxygen docs and REAME"
+    echo "*** are current in the srcdir (i.e., we'll just copy those)"
 endif
-cd ..
-cp -pf README $distdir
 
+echo "*** Copying doxygen-doc tree to dist..."
+echo "*** Directory: srcdir: $srcdir, distdir: $distdir, pwd: `pwd`"
+chmod -R a=rwx $distdir/doc/doxygen-doc
+echo rm -rf $distdir/doc/doxygen-doc
+rm -rf $distdir/doc/doxygen-doc
+echo cp -rpf $srcdir/doc/doxygen-doc $distdir/doc
+cp -rpf $srcdir/doc/doxygen-doc $distdir/doc
+
+echo "*** Copying new README"
+ls -lf $distdir/README
+cp -pf $srcdir/README $distdir
 
 #########################################################
 # VERY IMPORTANT: Now go into the new distribution tree #
@@ -149,6 +207,7 @@ else
                 echo " - WARNING: Got bad config.sub from ftp.gnu.org (not executable)"
             else
                 echo " - Got good config.guess and config.sub from ftp.gnu.org"
+                chmod +w ../config.sub ../config.guess
                 cp config.sub config.guess ..
                 set happy=1
             endif

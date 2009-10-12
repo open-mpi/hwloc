@@ -19,7 +19,7 @@ AC_CONFIG_MACRO_DIR([config])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_SRCDIR([src/topology.c])
 
-AM_INIT_AUTOMAKE([1.10 foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([1.10 dist-bzip2 foreign tar-ustar -Wall -Werror])
 
 # Make configure depend on the VERSION file, since it's used in AC_INIT
 
@@ -457,6 +457,8 @@ AM_CONDITIONAL([HAVE_LINUX_LIBNUMA], [test "x$have_linux_libnuma" = "xyes"])
 AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
 AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
 AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xyes"])
+
+AC_CHECK_PROGS(XMLLINT, [xmllint])
 
 AC_SUBST(HWLOC_REQUIRES)
 

@@ -1,0 +1,12 @@
+<!ELEMENT root (object)+>
+
+<!ELEMENT object (object)*>
+<!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
+<!ATTLIST object os_index CDATA "-1" >
+<!ATTLIST object cpuset CDATA "0" >
+<!ATTLIST object dmi_board_vendor CDATA "" >
+<!ATTLIST object dmi_board_name CDATA "" >
+<!ATTLIST object memory_kB CDATA "0" >
+<!ATTLIST object huge_page_size_kB CDATA "0" >
+<!ATTLIST object huge_page_free CDATA "0" >
+<!ATTLIST object depth CDATA "-1" >

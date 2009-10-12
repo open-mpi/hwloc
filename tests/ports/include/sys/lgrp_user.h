@@ -42,6 +42,6 @@ int lgrp_children(lgrp_cookie_t cookie, lgrp_id_t parent, lgrp_id_t *lgrp_array,
 lgrp_mem_size_t lgrp_mem_size(lgrp_cookie_t cookie, lgrp_id_t lgrp, lgrp_mem_size_flag_t type, lgrp_content_t content);
 int lgrp_latency_cookie(lgrp_cookie_t cookie, lgrp_id_t from, lgrp_id_t to, lgrp_lat_between_t between);
 
-int lgrp_fini();
+int lgrp_fini(lgrp_cookie_t cookie);
 
 #endif /* HWLOC_PORT_SYS_LGRP_USER_H */

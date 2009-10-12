@@ -10,7 +10,8 @@ DOX_DIR = $(DOCDIR)/doxygen-doc
 DOX_HTML_DIR = $(DOX_DIR)/html
 DOX_MAN_DIR = $(DOX_DIR)/man
 DOX_LATEX_DIR = $(DOX_DIR)/latex
-DOX_PDF = $(DOX_DIR)/$(PACKAGE).pdf
+DOX_A4PDF = $(DOX_DIR)/$(PACKAGE)-a4.pdf
+DOX_LETTERPDF = $(DOX_DIR)/$(PACKAGE)-letter.pdf
 DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 
 #
@@ -97,22 +98,48 @@ endif
 #
 
 if BUILD_DOXYGEN
+# Make both an A4wide PDF and a US letter PDF
 $(DOX_PDF): $(DOX_TAG)
+
+# The Doxygen config is set to generate a4 latex -- no transformation
+# is necessary.
+$(DOX_A4PDF): $(DOX_TAG)
 	cd $(DOX_LATEX_DIR); \
 	$(RM) *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
-	$(PDFLATEX) refman.tex; \
-	$(MAKEINDEX) refman.idx; \
-	$(PDFLATEX) refman.tex; \
+	cp refman.tex a4-refman.tex; \
+	$(PDFLATEX) a4-refman.tex; \
+	$(MAKEINDEX) a4-refman.idx; \
+	$(PDFLATEX) a4-refman.tex; \
 	done=0; repeat=5; \
 	while test $$done = 0 -a $$repeat -gt 0; do \
-           if $(EGREP) 'Rerun (LaTeX|to get cross-references right)' refman.log > /dev/null 2>&1; then \
-	       $(PDFLATEX) refman.tex; \
+           if $(EGREP) 'Rerun (LaTeX|to get cross-references right)' a4-refman.log > /dev/null 2>&1; then \
+	       $(PDFLATEX) a4-refman.tex; \
 	       repeat=`expr $$repeat - 1`; \
 	   else \
 	       done=1; \
 	   fi; \
 	done; \
-	mv refman.pdf ../$(PACKAGE).pdf
+	mv a4-refman.pdf ../../$(DOX_A4PDF)
+
+# The Doxygen config is set to generate a4 latex -- slightly transform
+# to make suitable for US letter.
+$(DOX_LETTERPDF): $(DOX_TAG)
+	cd $(DOX_LATEX_DIR); \
+	$(RM) *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+	sed -e 's/a4paper/letterpaper/g' -e 's/\\usepackage{a4wide}//' refman.tex > letter-refman.tex; \
+	$(PDFLATEX) letter-refman.tex; \
+	$(MAKEINDEX) letter-refman.idx; \
+	$(PDFLATEX) letter-refman.tex; \
+	done=0; repeat=5; \
+	while test $$done = 0 -a $$repeat -gt 0; do \
+           if $(EGREP) 'Rerun (LaTeX|to get cross-references right)' letter-refman.log > /dev/null 2>&1; then \
+	       $(PDFLATEX) letter-refman.tex; \
+	       repeat=`expr $$repeat - 1`; \
+	   else \
+	       done=1; \
+	   fi; \
+	done; \
+	mv letter-refman.pdf ../../$(DOX_LETTERPDF)
 endif
 
 #
@@ -138,7 +165,7 @@ endif
 #
 
 if INSTALL_DOXYGEN
-dist_pdf_DATA = $(DOX_PDF)
+dist_pdf_DATA = $(DOX_A4PDF) $(DOX_LETTERPDF)
 endif
 
 #
@@ -160,13 +187,10 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PROC.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_TYPE_MAX.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
-        $(DOX_MAN_DIR)/man3/hwloc.doxy.3 \
-        $(DOX_MAN_DIR)/man3/hwloc.h.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpubind_policy_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_alloc.3 \
@@ -258,6 +282,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
+	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_all_keep_structure.3 \
@@ -303,7 +328,8 @@ endif
 
 if BUILD_DOXYGEN
 $(man3_MANS): $(DOX_TAG)
-$(DOX_PDF): $(DOX_TAG)
+$(DOX_A4PDF): $(DOX_TAG)
+$(DOX_LETTERPDF): $(DOX_TAG)
 $(DOX_HTML_DIR): $(DOX_TAG)
 $(DOX_LATEX_DIR): $(DOX_TAG)
 $(DOX_MAN_DIR): $(DOX_TAG)
@@ -330,7 +356,8 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
     $(DOX_HTML_DIR) \
     $(DOX_MAN_DIR) \
     $(DOX_LATEX_DIR) \
-    $(DOX_PDF)
+    $(DOX_A4PDF) \
+    $(DOX_LETTERPDF)
 
 #
 # Rules for creating the top-level README file.  There does not appear

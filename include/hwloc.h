@@ -15,7 +15,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
-
+#include <limits.h>
 
 /*
  * Cpuset bitmask definitions
@@ -46,8 +46,9 @@ typedef struct hwloc_topology * hwloc_topology_t;
 
 /** \brief Type of topology object.
  *
- * Do not rely on the ordering of the values as new ones may be defined in the
- * future!  If you need to compare types, use hwloc_compare_types() instead.
+ * \note Do not rely on the ordering or completeness of the values as new ones
+ * may be defined in the future!  If you need to compare types, use
+ * hwloc_compare_types() instead.
  */
 typedef enum {
   HWLOC_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
@@ -99,17 +100,17 @@ typedef enum {
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
 			  */
 } hwloc_obj_type_t;
-/** \brief Maximal value of an object type */
-#define HWLOC_OBJ_TYPE_MAX (HWLOC_OBJ_PCI_DEVICE+1)
 
 /** \brief Compare the depth of two object types
  *
  * Types shouldn't be compared as they are, since newer ones may be added in
  * the future.  This function returns less than, equal to, or greater than zero
  * if \p type1 is considered to be respectively higher than, equal to, or deeper
- * than \p type2 in the hierarchy.
+ * than \p type2 in the hierarchy.  If the types can not be compared (because
+ * it does not make sense), HWLOC_TYPE_UNORDERED is returned.  Object types
+ * containing CPUs can always be compared.
  *
- * \note that HWLOC_OBJ_SYSTEM will always be the highest, and
+ * \note HWLOC_OBJ_SYSTEM will always be the highest, and
  * HWLOC_OBJ_PROC will always be the deepest.
  */
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2);
@@ -118,6 +119,9 @@ typedef enum hwloc_obj_bridge_e {
   HWLOC_OBJ_BRIDGE_HOST,	/**< \brief Host-side of a bridge, only possible upstream. */
   HWLOC_OBJ_BRIDGE_PCI,		/**< \brief PCI-side of a bridge. */
 } hwloc_obj_bridge_type_t;
+
+/** \brief Value returned by hwloc_compare_types when types can not be compared. */
+#define HWLOC_TYPE_UNORDERED INT_MAX
 
 /** @} */
 
@@ -396,6 +400,20 @@ extern int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topolo
  * file is really the underlying system.
  */
 extern int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
+
+/** @} */
+
+
+
+/** \defgroup hwlocality_export Export the Topology
+ * @{
+ */
+
+/** \brief Export the topology into a XML file.
+ *
+ * This file may be loaded later through hwloc_topology_set_xml().
+ */
+extern void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
 
 /** @} */
 

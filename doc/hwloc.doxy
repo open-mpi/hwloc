@@ -51,7 +51,7 @@ graphical mode, or by exporting in PDF, PNG, FIG, ... format, or in text mode
 
 hwloc offers a programming interface for manipulating topologies and
 objects. It also brings a powerful cpu bitmap API that is used to describe
-topology objects location on physical/logical processors. See the \ref interface interface
+topology objects location on physical/logical processors. See the \ref interface
 below. It may also be used to binding applications onto certain cores or
 memory nodes. Several utility programs are also provided to ease command-line
 manipulation of topology objects, binding of processes, ...
@@ -187,7 +187,36 @@ System(15GB)
 \htmlonly
 </div><div class="section" id="interface">
 \endhtmlonly
-\section interface Interface example
+
+\section interface Programming interface
+
+The basic interface is available in hwloc.h . It mostly offers low-level
+routines for advanced programmers that want to manually manipulate objects
+and follow links between them. Most users should look at hwloc/helper.h
+which provides a lot of interesting higher-level traversal examples.
+
+Each object contains a cpuset which describes the list of processors
+that it contains. These cpusets may be used for \ref hwlocality_binding.
+hwloc offers an extensive cpuset manipulation interface in hwloc/cpuset.h .
+
+Moreover, hwloc also comes with additional helpers for interoperability
+with several commonly used environments. For Linux, some specific helpers
+are available in hwloc/linux.h , and hwloc/linux-libnuma.h if using libnuma.
+On glibc-based systems, additional helpers are available in hwloc/glibc-sched.h .
+For systems with the Infiniband Verbs library, some dedicated helpers are
+provided in hwloc/ibverbs.h .
+
+To precisely define the vocabulary used by hwloc, a \ref glossary is
+available and should probably be read first.
+
+Further documentation is available in html, manual pages, and pdf format
+in the source tarball in doc/doxygen-doc/ (after doxygen compilation
+for svn checkouts) and are installed in $prefix/share/doc/hwloc/ and
+the usual manual repository.
+
+The following section presents an example of API usage.
+
+\section interface_example Interface example
 
 This section shows how to use hwloc with an small example \c hwloc-hello.c
 that just prints the topology and binds itself to the first processor of the
@@ -202,20 +231,6 @@ cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 \endverbatim
 
 \include hwloc-hello.c
-
-Further documentation is available in html, manual pages, and pdf format
-in the source tarball in doc/doxygen-doc/ (after doxygen compilation
-for svn checkouts) and are installed in $prefix/share/doc/hwloc/ and
-the usual manual repository.
-
-The basic interface is available in hwloc.h, a lot of traversal examples are
-available as inlines in hwloc/helper.h . On Linux, additional helpers are
-available in hwloc/linux.h, and hwloc/linux-libnuma.h if using libnuma.
-On glibc-based systems, additional helpers are available in hwloc/glibc-sched.h.
-On system with the Infiniband Verbs library, some helpers are provided in
-hwloc/ibverbs.h.
-
-To precisely define the vocabulary used by hwloc, a \ref glossary is available and should probably be read first.
 
 \htmlonly
 </div><div class="section" id="bugs">
