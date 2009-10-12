@@ -1135,8 +1135,7 @@ hwloc_discover(struct hwloc_topology *topology)
     }
 #endif
 #ifdef HAVE_LIBPCI
-    else {
-      /* FIXME: shouldn't do it on Linux if using fsysroot != / */
+    else if (topology->is_thissystem) {
       hwloc_look_libpci(topology);
       gotsome = 1;
     }
