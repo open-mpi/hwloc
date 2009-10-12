@@ -1383,14 +1383,21 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
 }
 
 static void
+hwloc_topology_clear_tree (struct hwloc_topology *topology, struct hwloc_obj *root)
+{
+  unsigned i;
+  for(i=0; i<root->arity; i++)
+    hwloc_topology_clear_tree (topology, root->children[i]);
+  free_object (root);
+}
+
+static void
 hwloc_topology_clear (struct hwloc_topology *topology)
 {
-  unsigned l,i;
-  for (l=0; l<topology->nb_levels; l++) {
-    for (i=0; i<topology->level_nbobjects[l]; i++)
-      free_object(topology->levels[l][i]);
+  unsigned l;
+  hwloc_topology_clear_tree (topology, topology->levels[0][0]);
+  for (l=0; l<topology->nb_levels; l++)
     free(topology->levels[l]);
-  }
 }
 
 void
