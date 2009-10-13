@@ -174,7 +174,7 @@ hwloc_obj_snprintf(char *string, size_t size,
 		  struct hwloc_topology *topology, struct hwloc_obj *l, const char *_indexprefix, int verbose)
 {
   hwloc_obj_type_t type = l->type;
-  char *indexprefix = _indexprefix ? _indexprefix : "#";
+  const char *indexprefix = _indexprefix ? _indexprefix : "#";
   char os_index[12] = "";
 
   if (l->os_index != -1)
@@ -183,43 +183,43 @@ hwloc_obj_snprintf(char *string, size_t size,
   switch (type) {
   case HWLOC_OBJ_SOCKET:
   case HWLOC_OBJ_CORE:
-    return snprintf(string, size, "%s%s", hwloc_obj_type_string(type), os_index);
+    return hwloc_snprintf(string, size, "%s%s", hwloc_obj_type_string(type), os_index);
   case HWLOC_OBJ_MISC:
 	  /* TODO: more pretty presentation? */
-    return snprintf(string, size, "%s%u%s", hwloc_obj_type_string(type), l->attr->misc.depth, os_index);
+    return hwloc_snprintf(string, size, "%s%u%s", hwloc_obj_type_string(type), l->attr->misc.depth, os_index);
   case HWLOC_OBJ_PROC:
-    return snprintf(string, size, "P%s", os_index);
+    return hwloc_snprintf(string, size, "P%s", os_index);
   case HWLOC_OBJ_SYSTEM:
     if (verbose)
-      return snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
+      return hwloc_snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
 		      hwloc_memory_size_printf_value(l->attr->system.memory_kB),
 		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB),
 		      l->attr->system.huge_page_free, l->attr->system.huge_page_size_kB,
 		      l->attr->system.dmi_board_vendor?l->attr->system.dmi_board_vendor:"",
 		      l->attr->system.dmi_board_name?l->attr->system.dmi_board_name:"");
     else
-      return snprintf(string, size, "%s(%lu%s)", hwloc_obj_type_string(type),
+      return hwloc_snprintf(string, size, "%s(%lu%s)", hwloc_obj_type_string(type),
 		      hwloc_memory_size_printf_value(l->attr->system.memory_kB),
 		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB));
   case HWLOC_OBJ_MACHINE:
     if (verbose)
-      return snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
+      return hwloc_snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
 		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB),
 		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB),
 		      l->attr->machine.huge_page_free, l->attr->machine.huge_page_size_kB,
 		      l->attr->machine.dmi_board_vendor?l->attr->machine.dmi_board_vendor:"",
 		      l->attr->machine.dmi_board_name?l->attr->machine.dmi_board_name:"");
     else
-      return snprintf(string, size, "%s%s(%lu%s)", hwloc_obj_type_string(type), os_index,
+      return hwloc_snprintf(string, size, "%s%s(%lu%s)", hwloc_obj_type_string(type), os_index,
 		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB),
 		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB));
   case HWLOC_OBJ_NODE:
-    return snprintf(string, size, "%s%s(%lu%s)",
+    return hwloc_snprintf(string, size, "%s%s(%lu%s)",
 		    verbose ? hwloc_obj_type_string(type) : "Node", os_index,
 		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
 		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));
   case HWLOC_OBJ_CACHE:
-    return snprintf(string, size, "L%u%s%s(%lu%s)", l->attr->cache.depth,
+    return hwloc_snprintf(string, size, "L%u%s%s(%lu%s)", l->attr->cache.depth,
 		      verbose ? hwloc_obj_type_string(type) : "", os_index,
 		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
 		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));

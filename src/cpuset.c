@@ -4,10 +4,12 @@
  */
 
 #include <private/cpuset.h>
+#include <private/private.h>
 #include <hwloc/cpuset.h>
 
 #include <stdio.h>
 #include <assert.h>
+#include <stdarg.h>
 
 
 /* overzealous check in debug-mode, not as powerful as valgrind but still useful */
@@ -17,6 +19,40 @@
 #define HWLOC__CPUSET_CHECK(set)
 #endif
 
+int hwloc_snprintf(char *str, size_t size, const char *format, ...)
+{
+  int ret;
+  va_list ap;
+  static char bin;
+
+  /* Some systems crash on str == NULL */
+  if (!size) {
+    str = &bin;
+    size = 1;
+  }
+
+  va_start(ap, format);
+  ret = vsnprintf(str, size, format, ap);
+  va_end(ap);
+
+  if (ret != size-1)
+    return ret;
+
+  /* vsnprintf returned size-1. That could be a system which reports the written
+   * data and not the actually required room. Try increasing buffer size to get
+   * the latter. */
+
+  do {
+    size *= 2;
+    str = malloc(size);
+    va_start(ap, format);
+    ret = vsnprintf(str, size, format, ap);
+    va_end(ap);
+    free(str);
+  } while (ret == size-1);
+
+  return ret;
+}
 
 struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 {
@@ -68,9 +104,8 @@ int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
 
   ssize_t size = buflen;
   char *tmp = buf;
-  int res;
+  int res, ret = 0;
   int needcomma = 0;
-  int missed = 0;
   int i;
   unsigned long accum = 0;
   int accumed = 0;
@@ -94,17 +129,18 @@ int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
 
     if (accum & accum_mask) {
       /* print the whole subset if not empty */
-      res = snprintf(tmp, size, needcomma ? "," HWLOC_PRIxCPUSUBSET : HWLOC_PRIxCPUSUBSET,
+      res = hwloc_snprintf(tmp, size, needcomma ? "," HWLOC_PRIxCPUSUBSET : HWLOC_PRIxCPUSUBSET,
 		     (accum & accum_mask) >> (HWLOC_BITS_PER_LONG - HWLOC_CPUSET_SUBSTRING_SIZE));
       needcomma = 1;
     } else if (i == -1 && accumed == HWLOC_CPUSET_SUBSTRING_SIZE) {
       /* print a single 0 to mark the last subset */
-      res = snprintf(tmp, size, needcomma ? ",0" : "0");
+      res = hwloc_snprintf(tmp, size, needcomma ? ",0" : "0");
     } else if (needcomma) {
-      res = snprintf(tmp, size, ",");
+      res = hwloc_snprintf(tmp, size, ",");
     } else {
       res = 0;
     }
+    ret += res;
 
 #if HWLOC_BITS_PER_LONG == HWLOC_CPUSET_SUBSTRING_SIZE
     accum = 0;
@@ -114,16 +150,14 @@ int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
     accumed -= HWLOC_CPUSET_SUBSTRING_SIZE;
 #endif
 
-    if (res >= size) {
-      int written = size>0 ? size-1 : 0;
-      missed += res - written;
-      res = written;
-    }
+    if (res >= size)
+      res = size>0 ? size - 1 : 0;
+
     tmp += res;
     size -= res;
   }
 
-  return tmp-buf+missed;
+  return ret;
 }
 
 int hwloc_cpuset_asprintf(char ** strp, const struct hwloc_cpuset_s * __hwloc_restrict set)
