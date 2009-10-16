@@ -47,6 +47,7 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
     size *= 2;
     str = malloc(size);
     va_start(ap, format);
+    errno = 0;
     ret = vsnprintf(str, size, format, ap);
     va_end(ap);
     free(str);
