@@ -183,6 +183,11 @@ static const char *
 hwloc_pci_class_string(unsigned short class_id)
 {
   switch ((class_id & 0xff00) >> 8) {
+    case 0x00:
+      switch (class_id) {
+	case 0x0001: return "VGA";
+      }
+      return "PCI";
     case 0x01:
       switch (class_id) {
 	case 0x0100: return "SCSI";
@@ -202,6 +207,8 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0202: return "FDDI";
 	case 0x0203: return "ATM";
 	case 0x0204: return "ISDN";
+	case 0x0205: return "WrdFip";
+	case 0x0206: return "PICMG";
       }
       return "Net";
     case 0x03:
@@ -234,9 +241,9 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0604: return "PCI_B";
 	case 0x0605: return "PCMCIA";
 	case 0x0606: return "Nubus";
-	case 0x0607: return "Cardbus";
-	case 0x0608: return "Raceway";
-	case 0x0609: return "PCISemi";
+	case 0x0607: return "CardBus";
+	case 0x0608: return "RACEway";
+	case 0x0609: return "PCI_SB";
 	case 0x060a: return "IB_B";
       }
       return "Bridg";
@@ -246,6 +253,8 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0701: return "Para";
 	case 0x0702: return "MSer";
 	case 0x0703: return "Modm";
+	case 0x0704: return "GPIB";
+	case 0x0705: return "SmrtCrd";
       }
       return "Comm";
     case 0x08:
@@ -255,6 +264,7 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0802: return "Time";
 	case 0x0803: return "RTC";
 	case 0x0804: return "HtPl";
+	case 0x0805: return "SD-HtPl";
       }
       return "Syst";
     case 0x09:
@@ -276,18 +286,21 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0b10: return "Alpha";
 	case 0x0b20: return "PPC";
 	case 0x0b30: return "MIPS";
-	case 0x0b40: return "CO";
+	case 0x0b40: return "CoProc";
       }
       return "Proc";
     case 0x0c:
       switch (class_id) {
 	case 0x0c00: return "Firw";
-	case 0x0c01: return "Acces";
+	case 0x0c01: return "ACCES";
 	case 0x0c02: return "SSA";
 	case 0x0c03: return "USB";
 	case 0x0c04: return "Fiber";
 	case 0x0c05: return "SMBus";
 	case 0x0c06: return "IB";
+	case 0x0c07: return "IPMI";
+	case 0x0c08: return "SERCOS";
+	case 0x0c09: return "CANBUS";
       }
       return "Ser";
     case 0x0d:
@@ -295,6 +308,10 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0d00: return "IRDA";
 	case 0x0d01: return "IR";
 	case 0x0d10: return "RF";
+	case 0x0d11: return "Blueth";
+	case 0x0d12: return "BroadB";
+	case 0x0d20: return "802.1a";
+	case 0x0d21: return "802.1b";
       }
       return "Wifi";
     case 0x0e:
@@ -304,10 +321,10 @@ hwloc_pci_class_string(unsigned short class_id)
       return "Intll";
     case 0x0f:
       switch (class_id) {
-	case 0x0f00: return "STV";
-	case 0x0f01: return "SAud";
-	case 0x0f02: return "SVoic";
-	case 0x0f03: return "SData";
+	case 0x0f00: return "S-TV";
+	case 0x0f01: return "S-Aud";
+	case 0x0f02: return "S-Voice";
+	case 0x0f03: return "S-Data";
       }
       return "Satel";
     case 0x10:
