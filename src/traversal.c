@@ -261,7 +261,7 @@ hwloc_obj_snprintf(char *string, size_t size,
     if (verbose)
       return snprintf(string, size, "%s%04x:%02x:%02x.%01x(%04x:%04x,class=%04x)", hwloc_obj_type_string(type),
 		      l->attr->pcidev.domain, l->attr->pcidev.bus, l->attr->pcidev.dev, l->attr->pcidev.func,
-		      l->attr->pcidev.device_id, l->attr->pcidev.vendor_id, l->attr->pcidev.class);
+		      l->attr->pcidev.device_id, l->attr->pcidev.vendor_id, l->attr->pcidev.class_id);
     else
       return snprintf(string, size, "PCI %04x:%04x", l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
   default:

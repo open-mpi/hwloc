@@ -43,7 +43,7 @@ hwloc_pci_traverse(struct hwloc_obj *root, int depth)
       hwloc_debug("%*s %s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", depth, "", busid,
 		  child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
 		  child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
-		  child->attr->pcidev.revision, child->attr->pcidev.class);
+		  child->attr->pcidev.revision, child->attr->pcidev.class_id);
 
     hwloc_pci_traverse(child, depth+2);
     child = child->next_sibling;
@@ -324,7 +324,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     obj->attr->pcidev.func = pcidev->func;
     obj->attr->pcidev.vendor_id = pcidev->vendor_id;
     obj->attr->pcidev.device_id = pcidev->device_id;
-    obj->attr->pcidev.class = pcidev->device_class;
+    obj->attr->pcidev.class_id = pcidev->device_class;
     HWLOC_BUILD_ASSERT(PCI_REVISION_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
     HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_VENDOR_ID < CONFIG_SPACE_CACHESIZE);

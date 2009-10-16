@@ -205,7 +205,7 @@ union hwloc_obj_attr_u {
   struct hwloc_pcidev_attr_u {
     unsigned short domain;
     unsigned char bus, dev, func;
-    unsigned short class;
+    unsigned short class_id;
     unsigned short vendor_id, device_id, subvendor_id, subdevice_id;
     unsigned char revision;
   } pcidev;
