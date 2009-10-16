@@ -1269,6 +1269,8 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
 #endif
   topology->set_thisproc_cpubind = NULL;
   topology->set_thisthread_cpubind = NULL;
+  topology->first_device = NULL;
+  topology->last_device = NULL;
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
