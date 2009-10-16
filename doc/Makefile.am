@@ -88,7 +88,7 @@ endif
 
 if BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
-	$(RM) -r $(DOX_DIR)
+	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
 	-sed -i -e 's/__hwloc_restrict/restrict/g;s/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g;s/__inline/inline/g;s/\\_\\-\\_\\-inline/inline/g' $(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
 endif
@@ -105,7 +105,7 @@ $(DOX_PDF): $(DOX_TAG)
 # is necessary.
 $(DOX_A4PDF): $(DOX_TAG)
 	cd $(DOX_LATEX_DIR); \
-	$(RM) *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
 	cp refman.tex a4-refman.tex; \
 	$(PDFLATEX) a4-refman.tex; \
 	$(MAKEINDEX) a4-refman.idx; \
@@ -125,7 +125,7 @@ $(DOX_A4PDF): $(DOX_TAG)
 # to make suitable for US letter.
 $(DOX_LETTERPDF): $(DOX_TAG)
 	cd $(DOX_LATEX_DIR); \
-	$(RM) *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
 	sed -e 's/a4paper/letterpaper/g' -e 's/\\usepackage{a4wide}//' refman.tex > letter-refman.tex; \
 	$(PDFLATEX) letter-refman.tex; \
 	$(MAKEINDEX) letter-refman.idx; \
