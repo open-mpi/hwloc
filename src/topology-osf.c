@@ -32,6 +32,7 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_cpuset_t hwloc
   cpuset_t cpuset, xor_cpuset;
   radid_t radid;
   int ret = 0;
+  int ret_errno = 0;
 
   cpusetcreate(&target_cpuset);
   cpuemptyset(target_cpuset);
@@ -58,12 +59,13 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_cpuset_t hwloc
     }
   }
   /* radset containing exactly this set of CPUs not found */
-  errno = EXDEV;
+  ret_errno = EXDEV;
 
 out:
   cpusetdestroy(&target_cpuset);
   cpusetdestroy(&cpuset);
   cpusetdestroy(&xor_cpuset);
+  errno = ret_errno;
   return ret;
 }
 
@@ -73,7 +75,7 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
   radset_t radset;
 
   if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
-    if (pthread_rad_detach(thread))
+    if ((errno = pthread_rad_detach(thread)))
       return -1;
     return 0;
   }
@@ -82,10 +84,10 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
     return -1;
 
   if (strict) {
-    if (pthread_rad_bind(thread, radset, RAD_INSIST | RAD_WAIT))
+    if ((errno = pthread_rad_bind(thread, radset, RAD_INSIST | RAD_WAIT)))
       return -1;
   } else {
-    if (pthread_rad_attach(thread, radset, RAD_WAIT))
+    if ((errno = pthread_rad_attach(thread, radset, RAD_WAIT)))
       return -1;
   }
   radsetdestroy(&radset);
