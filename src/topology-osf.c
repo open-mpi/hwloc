@@ -32,6 +32,7 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_cpuset_t hwloc
   cpuset_t cpuset, xor_cpuset;
   radid_t radid;
   int ret = 0;
+  int ret_errno = 0;
 
   cpusetcreate(&target_cpuset);
   cpuemptyset(target_cpuset);
@@ -58,12 +59,13 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_cpuset_t hwloc
     }
   }
   /* radset containing exactly this set of CPUs not found */
-  errno = EXDEV;
+  ret_errno = EXDEV;
 
 out:
   cpusetdestroy(&target_cpuset);
   cpusetdestroy(&cpuset);
   cpusetdestroy(&xor_cpuset);
+  errno = ret_errno;
   return ret;
 }
 
