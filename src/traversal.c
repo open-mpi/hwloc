@@ -179,6 +179,147 @@ hwloc_obj_type_of_string (const char * string)
   return HWLOC_OBJ_TYPE_MAX;
 }
 
+static const char *
+hwloc_pci_class_string(unsigned short class_id)
+{
+  switch ((class_id & 0xff00) >> 8) {
+    case 0x01:
+      switch (class_id) {
+	case 0x0100: return "SCSI";
+	case 0x0101: return "IDE";
+	case 0x0102: return "Flop";
+	case 0x0103: return "IPI";
+	case 0x0104: return "RAID";
+	case 0x0105: return "ATA";
+	case 0x0106: return "SATA";
+	case 0x0107: return "SAS";
+      }
+      return "Stor";
+    case 0x02:
+      switch (class_id) {
+	case 0x0200: return "Ether";
+	case 0x0201: return "TokRn";
+	case 0x0202: return "FDDI";
+	case 0x0203: return "ATM";
+	case 0x0204: return "ISDN";
+      }
+      return "Net";
+    case 0x03:
+      switch (class_id) {
+	case 0x0300: return "VGA";
+	case 0x0301: return "XGA";
+	case 0x0302: return "3D";
+      }
+      return "Disp";
+    case 0x04:
+      switch (class_id) {
+	case 0x0400: return "Video";
+	case 0x0401: return "Audio";
+	case 0x0402: return "Phone";
+	case 0x0403: return "Auddv";
+      }
+      return "MM";
+    case 0x05:
+      switch (class_id) {
+	case 0x0500: return "RAM";
+	case 0x0501: return "Flash";
+      }
+      return "Mem";
+    case 0x06:
+      switch (class_id) {
+	case 0x0600: return "Host";
+	case 0x0601: return "ISA";
+	case 0x0602: return "EISA";
+	case 0x0603: return "MC";
+	case 0x0604: return "PCI_B";
+	case 0x0605: return "PCMCIA";
+	case 0x0606: return "Nubus";
+	case 0x0607: return "Cardbus";
+	case 0x0608: return "Raceway";
+	case 0x0609: return "PCISemi";
+	case 0x060a: return "IB_B";
+      }
+      return "Bridg";
+    case 0x07:
+      switch (class_id) {
+	case 0x0700: return "Ser";
+	case 0x0701: return "Para";
+	case 0x0702: return "MSer";
+	case 0x0703: return "Modm";
+      }
+      return "Comm";
+    case 0x08:
+      switch (class_id) {
+	case 0x0800: return "PIC";
+	case 0x0801: return "DMA";
+	case 0x0802: return "Time";
+	case 0x0803: return "RTC";
+	case 0x0804: return "HtPl";
+      }
+      return "Syst";
+    case 0x09:
+      switch (class_id) {
+	case 0x0900: return "Kbd";
+	case 0x0901: return "Pen";
+	case 0x0902: return "Mouse";
+	case 0x0903: return "Scan";
+	case 0x0904: return "Game";
+      }
+      return "In";
+    case 0x0a:
+      return "Dock";
+    case 0x0b:
+      switch (class_id) {
+	case 0x0b00: return "386";
+	case 0x0b01: return "486";
+	case 0x0b02: return "Pent";
+	case 0x0b10: return "Alpha";
+	case 0x0b20: return "PPC";
+	case 0x0b30: return "MIPS";
+	case 0x0b40: return "CO";
+      }
+      return "Proc";
+    case 0x0c:
+      return "Ser";
+      switch (class_id) {
+	case 0x0c00: return "Firw";
+	case 0x0c01: return "Acces";
+	case 0x0c02: return "SSA";
+	case 0x0c03: return "USB";
+	case 0x0c04: return "Fiber";
+	case 0x0c05: return "SMBus";
+	case 0x0c06: return "IB";
+      }
+    case 0x0d:
+      switch (class_id) {
+	case 0x0d00: return "IRDA";
+	case 0x0d01: return "IR";
+	case 0x0d10: return "RF";
+      }
+      return "Wifi";
+    case 0x0e:
+      switch (class_id) {
+	case 0x0e00: return "I2O";
+      }
+      return "Intll";
+    case 0x0f:
+      switch (class_id) {
+	case 0x0f00: return "STV";
+	case 0x0f01: return "SAud";
+	case 0x0f02: return "SVoic";
+	case 0x0f03: return "SData";
+      }
+      return "Satel";
+    case 0x10:
+      return "Crypt";
+    case 0x11:
+      return "Signl";
+    case 0xff:
+      return "Oth";
+  }
+  return "PCI";
+}
+
 #define hwloc_memory_size_printf_value(_size) \
   (_size) < (10*1024) ? (_size) : (_size) < (10*1024*1024) ? (_size)>>10 : (_size)>>20
 #define hwloc_memory_size_printf_unit(_size) \
@@ -259,11 +400,12 @@ hwloc_obj_snprintf(char *string, size_t size,
     }
   case HWLOC_OBJ_PCI_DEVICE:
     if (verbose)
-      return snprintf(string, size, "%s%04x:%02x:%02x.%01x(%04x:%04x,class=%04x)", hwloc_obj_type_string(type),
+      return snprintf(string, size, "%s%04x:%02x:%02x.%01x(%04x:%04x,class=%04x(%s))", hwloc_obj_type_string(type),
 		      l->attr->pcidev.domain, l->attr->pcidev.bus, l->attr->pcidev.dev, l->attr->pcidev.func,
-		      l->attr->pcidev.device_id, l->attr->pcidev.vendor_id, l->attr->pcidev.class_id);
-    else
-      return snprintf(string, size, "PCI %04x:%04x", l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
+		      l->attr->pcidev.device_id, l->attr->pcidev.vendor_id, l->attr->pcidev.class_id, hwloc_pci_class_string(l->attr->pcidev.class_id));
+    else {
+      return snprintf(string, size, "%s %04x:%04x", hwloc_pci_class_string(l->attr->pcidev.class_id), l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
+    }
   default:
     *string = '\0';
     return 0;
