@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <errno.h>
 
 
 /* overzealous check in debug-mode, not as powerful as valgrind but still useful */
@@ -35,12 +36,12 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
   ret = vsnprintf(str, size, format, ap);
   va_end(ap);
 
-  if (ret != size-1)
+  if (ret >= 0 && ret != size-1)
     return ret;
 
-  /* vsnprintf returned size-1. That could be a system which reports the written
-   * data and not the actually required room. Try increasing buffer size to get
-   * the latter. */
+  /* vsnprintf returned size-1 or -1. That could be a system which reports the
+   * written data and not the actually required room. Try increasing buffer
+   * size to get the latter. */
 
   do {
     size *= 2;
@@ -49,7 +50,7 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
     ret = vsnprintf(str, size, format, ap);
     va_end(ap);
     free(str);
-  } while (ret == size-1);
+  } while (ret == size-1 || (ret < 0 && !errno));
 
   return ret;
 }
@@ -140,6 +141,8 @@ int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
     } else {
       res = 0;
     }
+    if (res < 0)
+      return -1;
     ret += res;
 
 #if HWLOC_BITS_PER_LONG == HWLOC_CPUSET_SUBSTRING_SIZE
