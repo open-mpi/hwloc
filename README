@@ -34,10 +34,10 @@ Examples below).
 
 hwloc offers a programming interface for manipulating topologies and objects.
 It also brings a powerful cpu bitmap API that is used to describe topology
-objects location on physical/logical processors. See the Programming Interface
-interface below. It may also be used to binding applications onto certain cores
-or memory nodes. Several utility programs are also provided to ease
-command-line manipulation of topology objects, binding of processes, ...
+objects location on physical/logical processors. See the Programming interface
+below. It may also be used to binding applications onto certain cores or memory
+nodes. Several utility programs are also provided to ease command-line
+manipulation of topology objects, binding of processes, ...
 
 Installation
 
@@ -150,7 +150,7 @@ System(15GB)
    L1(32KB) + Core#2 + P#3
    L1(32KB) + Core#3 + P#7
 
-Programming Interface
+Programming interface
 
 The basic interface is available in hwloc.h . It mostly offers low-level
 routines for advanced programmers that want to manually manipulate objects and
@@ -307,5 +307,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Oct 8 16:51:28 2009 for Hardware Locality (hwloc) by  doxygen
+Generated on Thu Oct 15 13:59:17 2009 for Hardware Locality (hwloc) by  doxygen
 1.6.1
