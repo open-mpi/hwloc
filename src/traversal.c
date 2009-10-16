@@ -280,7 +280,6 @@ hwloc_pci_class_string(unsigned short class_id)
       }
       return "Proc";
     case 0x0c:
-      return "Ser";
       switch (class_id) {
 	case 0x0c00: return "Firw";
 	case 0x0c01: return "Acces";
@@ -290,6 +289,7 @@ hwloc_pci_class_string(unsigned short class_id)
 	case 0x0c05: return "SMBus";
 	case 0x0c06: return "IB";
       }
+      return "Ser";
     case 0x0d:
       switch (class_id) {
 	case 0x0d00: return "IRDA";
