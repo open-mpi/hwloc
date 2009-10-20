@@ -383,7 +383,7 @@ hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_cpuset_t set)
  * \return \c NULL if no cache matches
  */
 static __inline hwloc_obj_t
-hwloc_get_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t current = obj->father;
   while (current) {
