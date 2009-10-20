@@ -26,7 +26,8 @@ int main() {
     hwloc_cpuset_t set;
     dev = dev_list[i];
 
-    if (hwloc_ibverbs_get_device_cpuset(dev, &set) < 0) {
+    set = hwloc_ibverbs_get_device_cpuset(dev);
+    if (!set) {
       printf("failed to get cpuset for device %d (%s)\n",
 	     i, ibv_get_device_name(dev));
     } else {
@@ -35,6 +36,7 @@ int main() {
       printf("got cpuset %s for device %d (%s)\n",
 	     cpuset_string, i, ibv_get_device_name(dev));
       free(cpuset_string);
+      hwloc_cpuset_free(set);
     }
   }
 

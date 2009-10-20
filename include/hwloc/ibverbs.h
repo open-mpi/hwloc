@@ -18,29 +18,30 @@
 
 #include <infiniband/verbs.h>
 
-/** \brief Get the CPU set \p set of logical processors that are physicall close to device \p ibdev.
+/** \brief Get the CPU set of logical processors that are physicall close to device \p ibdev.
  *
  * For the given infiniband device \p ibdev, read the corresponding kernel-provided cpumap file
- * and store it inside the given CPU set \p set.
+ * and return the corresponding CPU set.
  */
 
-static inline int
-hwloc_ibverbs_get_device_cpuset(struct ibv_device *ibdev, hwloc_cpuset_t *set)
+static inline hwloc_cpuset_t
+hwloc_ibverbs_get_device_cpuset(struct ibv_device *ibdev)
 {
 #define HWLOC_IBVERBS_SYSFS_PATH_MAX 128
   char path[HWLOC_IBVERBS_SYSFS_PATH_MAX];
   FILE *sysfile = NULL;
+  hwloc_cpuset_t set;
 
   sprintf(path, "/sys/class/infiniband/%s/device/local_cpus",
 	  ibv_get_device_name(ibdev));
   sysfile = fopen(path, "r");
   if (!sysfile)
-    return -1;
+    return NULL;
 
-  *set = hwloc_linux_parse_cpumap_file(sysfile);
+  set = hwloc_linux_parse_cpumap_file(sysfile);
 
   fclose(sysfile);
-  return 0;
+  return set;
 }
 
 #endif /* HWLOC_IBVERBS_H */
