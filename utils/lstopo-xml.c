@@ -8,6 +8,7 @@
 #ifdef HAVE_XML
 
 #include <hwloc.h>
+#include <string.h>
 
 #include <strings.h>
 

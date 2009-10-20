@@ -37,7 +37,7 @@ hwloc_ibverbs_get_device_cpuset(struct ibv_device *ibdev, hwloc_cpuset_t *set)
   if (!sysfile)
     return -1;
 
-  hwloc_linux_parse_cpumap_file(sysfile, set);
+  *set = hwloc_linux_parse_cpumap_file(sysfile);
 
   fclose(sysfile);
   return 0;
