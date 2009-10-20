@@ -11,7 +11,7 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_get_largest_objs_inside_cpuset \
 	hwloc_get_next_obj_covering_cpuset \
 	hwloc_get_obj_inside_cpuset \
-	hwloc_get_cache_covering_obj \
+	hwloc_get_shared_cache_covering_obj \
 	hwloc_cpuset_first_last_weight \
 	hwloc_cpuset_singlify \
 	hwloc_type_depth \

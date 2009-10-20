@@ -257,7 +257,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_covering_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_type.3 \
