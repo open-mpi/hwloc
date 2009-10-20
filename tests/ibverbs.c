@@ -31,7 +31,7 @@ int main() {
 	     i, ibv_get_device_name(dev));
     } else {
       char *cpuset_string = NULL;
-      hwloc_cpuset_asprintf(&cpuset_string, &set);
+      hwloc_cpuset_asprintf(&cpuset_string, set);
       printf("got cpuset %s for device %d (%s)\n",
 	     cpuset_string, i, ibv_get_device_name(dev));
       free(cpuset_string);
