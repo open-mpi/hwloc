@@ -94,7 +94,7 @@ main (int argc, char *argv[])
   int ignorecache = 0;
   char * callname;
   char * synthetic = NULL;
-  char * xmlpath = NULL;
+  const char * xmlpath = NULL;
   char * fsysroot = NULL;
   int opt;
 

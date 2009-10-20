@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -213,6 +214,9 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
   unsigned groupids[nbobjs];
   int nbgroups;
   unsigned i,j;
+  hwloc_obj_t groupobjs[nbgroups];
+  unsigned groupsizes[nbgroups];
+  unsigned groupdistances[nbgroups][nbgroups];
 
   hwloc_debug("trying to group %s objects into misc objects according to physical distances\n",
 	     hwloc_obj_type_string(objs[0]->type));
@@ -233,8 +237,6 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
   }
 
   /* create new misc objects and record their size */
-  hwloc_obj_t groupobjs[nbgroups];
-  unsigned groupsizes[nbgroups];
   memset(groupsizes, 0, sizeof(groupsizes));
   for(i=0; i<nbgroups; i++) {
     /* create the misc object */
@@ -255,7 +257,6 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
   }
 
   /* factorize distances */
-  unsigned groupdistances[nbgroups][nbgroups];
   memset(groupdistances, 0, sizeof(groupdistances));
   for(i=0; i<nbobjs; i++)
     for(j=0; j<nbobjs; j++)
@@ -1303,6 +1304,8 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 int
 hwloc_topology_load (struct hwloc_topology *topology)
 {
+  char *local_env;
+
   if (topology->is_loaded) {
     hwloc_topology_clear(topology);
     hwloc_topology_setup_defaults(topology);
@@ -1310,17 +1313,21 @@ hwloc_topology_load (struct hwloc_topology *topology)
   }
 
 #ifdef LINUX_SYS
-  char *fsroot_path_env = getenv("HWLOC_FSROOT");
-  if (fsroot_path_env) {
-    hwloc_backend_exit(topology);
-    hwloc_backend_sysfs_init(topology, fsroot_path_env);
+  {
+    char *fsroot_path_env = getenv("HWLOC_FSROOT");
+    if (fsroot_path_env) {
+      hwloc_backend_exit(topology);
+      hwloc_backend_sysfs_init(topology, fsroot_path_env);
+    }
   }
 #endif
 #ifdef HAVE_XML
-  char *xmlpath_env = getenv("HWLOC_XMLFILE");
-  if (xmlpath_env) {
-    hwloc_backend_exit(topology);
-    hwloc_backend_xml_init(topology, xmlpath_env);
+  {
+    char *xmlpath_env = getenv("HWLOC_XMLFILE");
+    if (xmlpath_env) {
+      hwloc_backend_exit(topology);
+      hwloc_backend_xml_init(topology, xmlpath_env);
+    }
   }
 #endif
 
@@ -1334,7 +1341,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
   hwloc_discover(topology);
 
-  char *local_env = getenv("HWLOC_THISSYSTEM");
+  local_env = getenv("HWLOC_THISSYSTEM");
   if (local_env)
     topology->is_thissystem = atoi(local_env);
 
