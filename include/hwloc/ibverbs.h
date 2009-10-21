@@ -1,13 +1,14 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 /** \file
- * \brief Macros to help interaction between hwloc and infiniband verbs.
+ * \brief Macros to help interaction between hwloc and OpenFabrics verbs.
  *
- * Applications that use both hwloc and infiniband verbs may want to include
- * this file so as to get topology information for infiniband hardware.
+ * Applications that use both hwloc and OpenFabrics verbs may want to include
+ * this file so as to get topology information for OpenFabrics hardware.
  */
 
 #ifndef HWLOC_IBVERBS_H
@@ -20,8 +21,8 @@
 
 /** \brief Get the CPU set of logical processors that are physicall close to device \p ibdev.
  *
- * For the given infiniband device \p ibdev, read the corresponding kernel-provided cpumap file
- * and return the corresponding CPU set.
+ * For the given OpenFabrics device \p ibdev, read the corresponding
+ * kernel-provided cpumap file and return the corresponding CPU set.
  */
 
 static inline hwloc_cpuset_t

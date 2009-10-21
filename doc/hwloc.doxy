@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -199,11 +200,12 @@ Each object contains a cpuset which describes the list of processors
 that it contains. These cpusets may be used for \ref hwlocality_binding.
 hwloc offers an extensive cpuset manipulation interface in hwloc/cpuset.h .
 
-Moreover, hwloc also comes with additional helpers for interoperability
-with several commonly used environments. For Linux, some specific helpers
-are available in hwloc/linux.h , and hwloc/linux-libnuma.h if using libnuma.
-On glibc-based systems, additional helpers are available in hwloc/glibc-sched.h .
-For systems with the Infiniband Verbs library, some dedicated helpers are
+Moreover, hwloc also comes with additional helpers for
+interoperability with several commonly used environments.  For Linux,
+some specific helpers are available in hwloc/linux.h , and
+hwloc/linux-libnuma.h if using libnuma.  On glibc-based systems,
+additional helpers are available in hwloc/glibc-sched.h .  For systems
+with the OpenFabrics Verbs library, some dedicated helpers are
 provided in hwloc/ibverbs.h .
 
 To precisely define the vocabulary used by hwloc, a \ref glossary is
