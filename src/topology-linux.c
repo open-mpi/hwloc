@@ -167,27 +167,35 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
    */
 
 #ifdef CPU_SET
-  cpu_set_t linux_set;
-  unsigned cpu;
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+     cpu_set_t linux_set;
+     unsigned cpu;
 
-  CPU_ZERO(&linux_set);
-  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
-    CPU_SET(cpu, &linux_set);
-  hwloc_cpuset_foreach_end();
+     CPU_ZERO(&linux_set);
+     hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+         CPU_SET(cpu, &linux_set);
+     hwloc_cpuset_foreach_end();
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-  return pthread_setaffinity_np(tid, &linux_set);
+     return pthread_setaffinity_np(tid, &linux_set);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-  return pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
+     return pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
+  }
 #else /* CPU_SET */
-  unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+      unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-  return pthread_setaffinity_np(tid, &mask);
+      return pthread_setaffinity_np(tid, &mask);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-  return pthread_setaffinity_np(tid, sizeof(mask), &mask);
+      return pthread_setaffinity_np(tid, sizeof(mask), &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
+  }
 #endif /* CPU_SET */
 }
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
