@@ -36,6 +36,9 @@ EXTRA_DIST = \
         images/hagrid.png \
         images/diagram.fig \
         www.open-mpi.org.cfg \
+        www.open-mpi.org-css.inc \
+        www.open-mpi.org-footer.inc \
+        www.open-mpi.org-header.inc \
         $(image_built_sources) \
         $(DOX_HTML_DIR) $(DOX_MAN_DIR) $(DOX_LATEX_DIR) $(DOX_TAG)
 
