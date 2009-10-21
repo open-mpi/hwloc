@@ -214,9 +214,6 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
   unsigned groupids[nbobjs];
   int nbgroups;
   unsigned i,j;
-  hwloc_obj_t groupobjs[nbgroups];
-  unsigned groupsizes[nbgroups];
-  unsigned groupdistances[nbgroups][nbgroups];
 
   hwloc_debug("trying to group %s objects into misc objects according to physical distances\n",
 	     hwloc_obj_type_string(objs[0]->type));
@@ -236,44 +233,51 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
     return;
   }
 
-  /* create new misc objects and record their size */
-  memset(groupsizes, 0, sizeof(groupsizes));
-  for(i=0; i<nbgroups; i++) {
-    /* create the misc object */
-    hwloc_obj_t misc_obj;
-    misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
-    misc_obj->cpuset = hwloc_cpuset_alloc();
-    hwloc_cpuset_zero(misc_obj->cpuset);
-    misc_obj->attr->misc.depth = depth;
-    for (j=0; j<nbobjs; j++)
-      if (groupids[j] == i+1) {
-	hwloc_cpuset_orset(misc_obj->cpuset, objs[j]->cpuset);
-	groupsizes[i]++;
+  /* For convenience, put these declarations inside a block.  Saves us
+     from a bunch of mallocs, particularly with the 2D array. */
+  {
+      hwloc_obj_t groupobjs[nbgroups];
+      unsigned groupsizes[nbgroups];
+      unsigned groupdistances[nbgroups][nbgroups];
+      /* create new misc objects and record their size */
+      memset(groupsizes, 0, sizeof(groupsizes));
+      for(i=0; i<nbgroups; i++) {
+          /* create the misc object */
+          hwloc_obj_t misc_obj;
+          misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+          misc_obj->cpuset = hwloc_cpuset_alloc();
+          hwloc_cpuset_zero(misc_obj->cpuset);
+          misc_obj->attr->misc.depth = depth;
+          for (j=0; j<nbobjs; j++)
+              if (groupids[j] == i+1) {
+                  hwloc_cpuset_orset(misc_obj->cpuset, objs[j]->cpuset);
+                  groupsizes[i]++;
+              }
+          hwloc_debug_1arg_cpuset("adding misc object with %u objects and cpuset %s\n",
+                                  groupsizes[i], misc_obj->cpuset);
+          hwloc_add_object(topology, misc_obj);
+          groupobjs[i] = misc_obj;
       }
-    hwloc_debug_1arg_cpuset("adding misc object with %u objects and cpuset %s\n",
-	       groupsizes[i], misc_obj->cpuset);
-    hwloc_add_object(topology, misc_obj);
-    groupobjs[i] = misc_obj;
-  }
-
-  /* factorize distances */
-  memset(groupdistances, 0, sizeof(groupdistances));
-  for(i=0; i<nbobjs; i++)
-    for(j=0; j<nbobjs; j++)
-      groupdistances[groupids[i]-1][groupids[j]-1] += distances[i][j];
-  for(i=0; i<nbgroups; i++)
-    for(j=0; j<nbgroups; j++)
-      groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
+      
+      /* factorize distances */
+      memset(groupdistances, 0, sizeof(groupdistances));
+      for(i=0; i<nbobjs; i++)
+          for(j=0; j<nbobjs; j++)
+              groupdistances[groupids[i]-1][groupids[j]-1] += distances[i][j];
+      for(i=0; i<nbgroups; i++)
+          for(j=0; j<nbgroups; j++)
+              groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
 #ifdef HWLOC_DEBUG
-  hwloc_debug("group distances:\n");
-  for(i=0; i<nbgroups; i++) {
-    for(j=0; j<nbgroups; j++)
-      hwloc_debug("%u ", groupdistances[i][j]);
-    hwloc_debug("\n");
-  }
+      hwloc_debug("group distances:\n");
+      for(i=0; i<nbgroups; i++) {
+          for(j=0; j<nbgroups; j++)
+              hwloc_debug("%u ", groupdistances[i][j]);
+          hwloc_debug("\n");
+      }
 #endif
-
-  hwloc__setup_misc_level_from_distances(topology, nbgroups, groupobjs, groupdistances, depth + 1);
+      
+      hwloc__setup_misc_level_from_distances(topology, nbgroups, groupobjs, groupdistances, depth + 1);
+  }
 }
 
 /*
