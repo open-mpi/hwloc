@@ -1,4 +1,5 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright 2009 Cisco Systems, Inc.  All rights reserved.
 
 include $(top_srcdir)/hwloc.am
 
@@ -35,9 +36,9 @@ EXTRA_DIST += glibc-sched.c
 endif !HAVE_SCHED_SETAFFINITY
 
 if HAVE_LIBIBVERBS
-check_PROGRAMS += ibverbs
+check_PROGRAMS += openfabrics-verbs
 else !HAVE_LIBIBVERBS
-EXTRA_DIST += ibverbs.c
+EXTRA_DIST += openfabrics-verbs.c
 endif !HAVE_LIBIBVERBS
 
 TESTS = $(check_PROGRAMS)
@@ -49,7 +50,7 @@ endif
 LIBS = $(top_builddir)/src/libhwloc.la
 
 linux_libnuma_LDFLAGS = -lnuma
-ibverbs_LDFLAGS = -libverbs
+openfabrics_verbs_LDFLAGS = -libverbs
 if HAVE_WINDOWS
 else
 hwloc_bind_LDFLAGS = -lpthread
