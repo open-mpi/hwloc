@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -413,7 +414,7 @@ extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topol
  */
 
 /** \brief Returns the topology object at index \p index from depth \p depth */
-extern hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned depth, unsigned index);
+extern hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned depth, unsigned idx);
 
 /** \brief Returns the topology object at index \p index with type \p type
  *
@@ -422,14 +423,14 @@ extern hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned d
  * and ther caller may fallback to hwloc_get_obj_by_depth().
  */
 static __inline hwloc_obj_t
-hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned index)
+hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned idx)
 {
   int depth = hwloc_get_type_depth(topology, type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
     return NULL;
   if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return NULL;
-  return hwloc_get_obj_by_depth(topology, depth, index);
+  return hwloc_get_obj_by_depth(topology, depth, idx);
 }
 
 /** @} */

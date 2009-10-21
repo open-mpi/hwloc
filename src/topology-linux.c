@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -146,14 +147,6 @@ static int
 hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
-}
-
-static int
-hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int strict)
-{
-  /* XXX: doesn't bind all threads of the processus !! */
-  /* Same problem for thisproc */
-  return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set, strict);
 }
 
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
@@ -531,45 +524,47 @@ look_sysfsnode(struct hwloc_topology *topology,
   if (nbnodes <= 1)
     return;
 
-  hwloc_obj_t nodes[nbnodes];
-  unsigned distances[nbnodes][nbnodes];
-
-  for (osnode=0; osnode < nbnodes; osnode++)
-    {
-      char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
-      hwloc_cpuset_t cpuset;
-      unsigned long size = -1;
-      unsigned long hpfree = -1;
-
-      sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
-      cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
-      if (!cpuset)
-	continue;
-
-      /* clear disabled cpus */
-      hwloc_cpuset_clearset(cpuset, admin_disabled_cpus_set);
-
-      if (hwloc_cpuset_isset(admin_disabled_mems_set, osnode)) {
-	size = 0; hpfree = 0;
-      } else
-	hwloc_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
-
-      node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
-      node->cpuset = cpuset;
-      node->attr->node.memory_kB = size;
-      node->attr->node.huge_page_free = hpfree;
-      node->cpuset = cpuset;
-
-      hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
-		 osnode, node->cpuset);
-      hwloc_add_object(topology, node);
-      nodes[osnode] = node;
-
-      sprintf(nodepath, "%s/node%u/distance", path, osnode);
-      hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
-    }
-
-  hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
+  /* For convenience, put these declarations inside a block.  Saves us
+     from a bunch of mallocs, particularly with the 2D array. */
+  {
+      hwloc_obj_t nodes[nbnodes];
+      unsigned distances[nbnodes][nbnodes];
+      for (osnode=0; osnode < nbnodes; osnode++) {
+          char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
+          hwloc_cpuset_t cpuset;
+          unsigned long size = -1;
+          unsigned long hpfree = -1;
+          
+          sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
+          cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
+          if (!cpuset)
+              continue;
+          
+          /* clear disabled cpus */
+          hwloc_cpuset_clearset(cpuset, admin_disabled_cpus_set);
+          
+          if (hwloc_cpuset_isset(admin_disabled_mems_set, osnode)) {
+              size = 0; hpfree = 0;
+          } else
+              hwloc_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
+          
+          node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
+          node->cpuset = cpuset;
+          node->attr->node.memory_kB = size;
+          node->attr->node.huge_page_free = hpfree;
+          node->cpuset = cpuset;
+          
+          hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
+                                  osnode, node->cpuset);
+          hwloc_add_object(topology, node);
+          nodes[osnode] = node;
+          
+          sprintf(nodepath, "%s/node%u/distance", path, osnode);
+          hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
+      }
+      
+      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
+  }
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
@@ -579,7 +574,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 {
   hwloc_cpuset_t cpuset;
 #define CPU_TOPOLOGY_STR_LEN 128
-  char string[CPU_TOPOLOGY_STR_LEN];
+  char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
   int i,j;
   FILE *fd;
@@ -607,16 +602,16 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
       }
 
       /* check whether the kernel exports topology information for this cpu */
-      sprintf(string, "%s/cpu%lu/topology", path, cpu);
-      if (hwloc_access(string, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT) {
+      sprintf(str, "%s/cpu%lu/topology", path, cpu);
+      if (hwloc_access(str, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT) {
 	hwloc_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
 		   cpu, path, cpu);
 	continue;
       }
 
       /* check whether this processor is offline */
-      sprintf(string, "%s/cpu%lu/online", path, cpu);
-      fd = hwloc_fopen(string, "r", topology->backend_params.sysfs.root_fd);
+      sprintf(str, "%s/cpu%lu/online", path, cpu);
+      fd = hwloc_fopen(str, "r", topology->backend_params.sysfs.root_fd);
       if (fd) {
 	if (fgets(online, sizeof(online), fd)) {
 	  fclose(fd);
@@ -647,11 +642,11 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 
       /* look at the socket */
       mysocketid = 0; /* shut-up the compiler */
-      sprintf(string, "%s/cpu%d/topology/physical_package_id", path, i);
-      hwloc_parse_sysfs_unsigned(string, &mysocketid, topology->backend_params.sysfs.root_fd);
+      sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i);
+      hwloc_parse_sysfs_unsigned(str, &mysocketid, topology->backend_params.sysfs.root_fd);
 
-      sprintf(string, "%s/cpu%d/topology/core_siblings", path, i);
-      socketset = hwloc_parse_cpumap(string, topology->backend_params.sysfs.root_fd);
+      sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
+      socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
       assert(socketset);
       hwloc_cpuset_clearset(socketset, admin_disabled_cpus_set);
       assert(hwloc_cpuset_weight(socketset) >= 1);
@@ -668,11 +663,11 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 
       /* look at the core */
       mycoreid = 0; /* shut-up the compiler */
-      sprintf(string, "%s/cpu%d/topology/core_id", path, i);
-      hwloc_parse_sysfs_unsigned(string, &mycoreid, topology->backend_params.sysfs.root_fd);
+      sprintf(str, "%s/cpu%d/topology/core_id", path, i);
+      hwloc_parse_sysfs_unsigned(str, &mycoreid, topology->backend_params.sysfs.root_fd);
 
-      sprintf(string, "%s/cpu%d/topology/thread_siblings", path, i);
-      coreset = hwloc_parse_cpumap(string, topology->backend_params.sysfs.root_fd);
+      sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
+      coreset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
       assert(coreset);
       hwloc_cpuset_clearset(coreset, admin_disabled_cpus_set);
       assert(hwloc_cpuset_weight(coreset) >= 1);
@@ -703,19 +698,18 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
       for(j=0; j<10; j++) {
 #define SHARED_CPU_MAP_STRLEN 128
 	char mappath[SHARED_CPU_MAP_STRLEN];
-	char string[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
+	char str2[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
 	struct hwloc_obj *cache;
 	hwloc_cpuset_t cacheset;
 	unsigned long kB = 0;
 	int depth; /* 0 for L1, .... */
-	FILE * fd;
 
 	/* get the cache level depth */
 	sprintf(mappath, "%s/cpu%d/cache/index%d/level", path, i, j);
 	fd = hwloc_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
 	if (fd) {
-	  if (fgets(string,sizeof(string), fd))
-	    depth = strtoul(string, NULL, 10)-1;
+	  if (fgets(str2,sizeof(str2), fd))
+	    depth = strtoul(str2, NULL, 10)-1;
 	  else
 	    continue;
 	  fclose(fd);
@@ -726,9 +720,9 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	sprintf(mappath, "%s/cpu%d/cache/index%d/type", path, i, j);
 	fd = hwloc_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
 	if (fd) {
-	  if (fgets(string, sizeof(string), fd)) {
+	  if (fgets(str2, sizeof(str2), fd)) {
 	    fclose(fd);
-	    if (!strncmp(string, "Instruction", 11))
+	    if (!strncmp(str2, "Instruction", 11))
 	      continue;
 	  } else {
 	    fclose(fd);
@@ -741,8 +735,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	sprintf(mappath, "%s/cpu%d/cache/index%d/size", path, i, j);
 	fd = hwloc_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
 	if (fd) {
-	  if (fgets(string,sizeof(string), fd))
-	    kB = atol(string); /* in kB */
+	  if (fgets(str2,sizeof(str2), fd))
+	    kB = atol(str2); /* in kB */
 	  fclose(fd);
 	}
 
@@ -783,7 +777,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	     hwloc_cpuset_t admin_disabled_cpus_set)
 {
   FILE *fd;
-  char string[strlen(PHYSID)+1+9+1+1];
+  char str[strlen(PHYSID)+1+9+1+1];
   char *endptr;
   unsigned proc_physids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
   unsigned osphysids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
@@ -812,12 +806,12 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   /* Just record information and count number of sockets and cores */
 
   hwloc_debug("\n\n * Topology extraction from /proc/cpuinfo *\n\n");
-  while (fgets(string,sizeof(string),fd)!=NULL)
+  while (fgets(str,sizeof(str),fd)!=NULL)
     {
 #      define getprocnb_begin(field, var)		     \
-      if ( !strncmp(field,string,strlen(field)))	     \
+      if ( !strncmp(field,str,strlen(field)))	     \
 	{						     \
-	char *c = strchr(string, ':')+1;		     \
+	char *c = strchr(str, ':')+1;		     \
 	var = strtoul(c,&endptr,0);			     \
 	if (endptr==c)							\
 	  {								\
@@ -864,7 +858,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	  (numcores)++;
 	}
       getprocnb_end()
-	if (string[strlen(string)-1]!='\n')
+	if (str[strlen(str)-1]!='\n')
 	  {
 	    fscanf(fd,"%*[^\n]");
 	    getc(fd);

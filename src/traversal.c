@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -33,13 +34,13 @@ hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, unsigned depth)
 }
 
 struct hwloc_obj *
-hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigned index)
+hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigned idx)
 {
   if (depth >= topology->nb_levels)
     return NULL;
-  if (index >= topology->level_nbobjects[depth])
+  if (idx >= topology->level_nbobjects[depth])
     return NULL;
-  return topology->levels[depth][index];
+  return topology->levels[depth][idx];
 }
 
 int hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, int max)
