@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -7,11 +8,13 @@
 #include <assert.h>
 #include <infiniband/verbs.h>
 #include <hwloc.h>
-#include <hwloc/ibverbs.h>
+#include <private/config.h>
+#include <hwloc/openfabrics-verbs.h>
 
 /* check the ibverbs helpers */
 
-int main() {
+int main(int argc, char **argv)
+{
   struct ibv_device **dev_list, *dev;
   int count, i;
 
@@ -26,7 +29,7 @@ int main() {
     hwloc_cpuset_t set;
     dev = dev_list[i];
 
-    set = hwloc_ibverbs_get_device_cpuset(dev);
+    set = hwloc_ibv_get_device_cpuset(dev);
     if (!set) {
       printf("failed to get cpuset for device %d (%s)\n",
 	     i, ibv_get_device_name(dev));

@@ -54,7 +54,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(top_srcdir)/include/hwloc/glibc-sched.h \
        $(top_srcdir)/include/hwloc/linux.h \
        $(top_srcdir)/include/hwloc/linux-libnuma.h \
-       $(top_srcdir)/include/hwloc/ibverbs.h
+       $(top_srcdir)/include/hwloc/openfabrics-verbs.h
 
 #
 # Create the images that we need for the PDF output and the HTML
@@ -266,7 +266,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_ibverbs_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_linux_parse_cpumap_file.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
