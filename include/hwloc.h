@@ -7,8 +7,8 @@
 /** \file
  * \brief The hwloc API.
  *
- * See hwloc/cpuset.h for CPU set specific macros
- * See hwloc/helper.h for high-level topology traversal helpers
+ * See hwloc/cpuset.h for CPU set specific macros.
+ * See hwloc/helper.h for high-level topology traversal helpers.
  */
 
 #ifndef HWLOC_H
