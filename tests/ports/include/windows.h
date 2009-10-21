@@ -41,7 +41,7 @@ typedef int HANDLE;
 #define ERROR_INSUFFICIENT_BUFFER 122L
 
 WINAPI HINSTANCE LoadLibrary(LPCSTR);
-WINAPI FARPROC GetProcAddress(HINSTANCE, LPCSTR);
+WINAPI void *GetProcAddress(HINSTANCE, LPCSTR);
 WINAPI DWORD GetLastError(void);
 
 DWORD_PTR WINAPI SetThreadAffinityMask(HANDLE hThread, DWORD_PTR dwThreadAffinityMask);
