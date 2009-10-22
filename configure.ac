@@ -170,7 +170,7 @@ case ${target} in
     irix=yes
     AC_MSG_RESULT([IRIX])
     ;;
-  *-*-darwinxxx*)
+  *-*-darwin*)
     AC_DEFINE(DARWIN_SYS, 1, [Define to 1 on Darwin])
     darwin=yes
     AC_MSG_RESULT([Darwin])
