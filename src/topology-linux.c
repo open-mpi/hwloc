@@ -855,13 +855,13 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   FILE *fd;
   char str[strlen(PHYSID)+1+9+1+1];
   char *endptr;
-  unsigned proc_physids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
-  unsigned osphysids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
-  unsigned proc_coreids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
-  unsigned oscoreids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
-  unsigned proc_osphysids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
-  unsigned proc_oscoreids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
-  unsigned core_osphysids[] = { [0 ... HWLOC_NBMAXCPUS-1] = -1 };
+  unsigned proc_physids[HWLOC_NBMAXCPUS];
+  unsigned osphysids[HWLOC_NBMAXCPUS];
+  unsigned proc_coreids[HWLOC_NBMAXCPUS];
+  unsigned oscoreids[HWLOC_NBMAXCPUS];
+  unsigned proc_osphysids[HWLOC_NBMAXCPUS];
+  unsigned proc_oscoreids[HWLOC_NBMAXCPUS];
+  unsigned core_osphysids[HWLOC_NBMAXCPUS];
   unsigned procid_max=0;
   unsigned numprocs=0;
   unsigned numsockets=0;
@@ -870,6 +870,16 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   long coreid;
   long processor = -1;
   int i;
+
+  for (i = 0; i < HWLOC_NBMAXCPUS; i++) {
+    proc_physids[i] = -1;
+    osphysids[i] = -1;
+    proc_coreids[i] = -1;
+    oscoreids[i] = -1;
+    proc_osphysids[i] = -1;
+    proc_oscoreids[i] = -1;
+    core_osphysids[i] = -1;
+  }
 
   hwloc_cpuset_zero(online_cpuset);
 
