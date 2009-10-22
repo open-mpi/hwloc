@@ -8,7 +8,6 @@
 #include <assert.h>
 #include <infiniband/verbs.h>
 #include <hwloc.h>
-#include <private/config.h>
 #include <hwloc/openfabrics-verbs.h>
 
 /* check the ibverbs helpers */

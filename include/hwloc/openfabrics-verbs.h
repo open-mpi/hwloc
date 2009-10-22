@@ -18,6 +18,7 @@
 #define HWLOC_OPENFABRICS_VERBS_H
 
 #include <hwloc.h>
+#include <hwloc/config.h>
 #include <hwloc/linux.h>
 
 #include <infiniband/verbs.h>
@@ -37,7 +38,7 @@
 static __inline hwloc_cpuset_t
 hwloc_ibv_get_device_cpuset(struct ibv_device *ibdev)
 {
-#if defined(LINUX_SYS)
+#if defined(HWLOC_LINUX_SYS)
   /* If we're on Linux, use the verbs-provided sysfs mechanism to
      get the local cpus */
 #define HWLOC_OPENFABRICS_VERBS_SYSFS_PATH_MAX 128

@@ -160,6 +160,7 @@ AM_CONDITIONAL([INSTALL_DOXYGEN], [test "x$install_doxs" = "xyes"])
 case ${target} in
   *-*-linux*)
     AC_DEFINE(LINUX_SYS, 1, Define to 1 on Linux)
+    AC_DEFINE(HWLOC_LINUX_SYS, 1)
     linux=yes
     ;;
   *-*-irix*)
