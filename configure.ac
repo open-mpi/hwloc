@@ -157,42 +157,59 @@ AM_CONDITIONAL([INSTALL_DOXYGEN], [test "x$install_doxs" = "xyes"])
 # Check OS support
 #
 
+AC_MSG_CHECKING([which OS support to include])
 case ${target} in
   *-*-linux*)
-    AC_DEFINE(LINUX_SYS, 1, Define to 1 on Linux)
-    AC_DEFINE(HWLOC_LINUX_SYS, 1)
+    AC_DEFINE(LINUX_SYS, 1, [Define to 1 on Linux])
+    AC_DEFINE(HWLOC_LINUX_SYS, 1, [Define to 1 on Linux])
     linux=yes
+    AC_MSG_RESULT([Linux])
     ;;
   *-*-irix*)
-    AC_DEFINE(IRIX_SYS, 1, Define to 1 on Irix)
+    AC_DEFINE(IRIX_SYS, 1, [Define to 1 on Irix])
     irix=yes
+    AC_MSG_RESULT([IRIX])
     ;;
   *-*-darwin*)
-    AC_DEFINE(DARWIN_SYS, 1, Define to 1 on Darwin)
+    AC_DEFINE(DARWIN_SYS, 1, [Define to 1 on Darwin])
     darwin=yes
+    AC_MSG_RESULT([Darwin])
     ;;
   *-*-solaris*)
-    AC_DEFINE(SOLARIS_SYS, 1, Define to 1 on Solaris)
+    AC_DEFINE(SOLARIS_SYS, 1, [Define to 1 on Solaris])
     solaris=yes
+    AC_MSG_RESULT([Solaris])
     ;;
   *-*-aix*)
-    AC_DEFINE(AIX_SYS, 1, Define to 1 on AIX)
+    AC_DEFINE(AIX_SYS, 1, [Define to 1 on AIX])
     aix=yes
+    AC_MSG_RESULT([AIX])
     ;;
   *-*-osf*)
-    AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
+    AC_DEFINE(OSF_SYS, 1, [Define to 1 on OSF])
     osf=yes
+    AC_MSG_RESULT([OSF])
     ;;
   *-*-hpux*)
-    AC_DEFINE(HPUX_SYS, 1, Define to 1 on HP-UX)
+    AC_DEFINE(HPUX_SYS, 1, [Define to 1 on HP-UX])
     hpux=yes
+    AC_MSG_RESULT([HP-UX])
     ;;
   *-*-mingw*|*-*-cygwin*)
-    AC_DEFINE(WIN_SYS, 1, Define to 1 on WINDOWS)
+    AC_DEFINE(WIN_SYS, 1, [Define to 1 on WINDOWS])
     windows=yes
+    AC_MSG_RESULT([Windows])
     ;;
   *)
-    echo Warning: Host type \"${target}\" not yet supported.
+    AC_MSG_RESULT([Unsupported! ($target)])
+    AC_MSG_WARN([***********************************************************])
+    AC_MSG_WARN([*** hwloc does not support this system.])
+    AC_MSG_WARN([*** hwloc will *attempt* to build (but it may not work).])
+    AC_MSG_WARN([*** hwloc's run-time results may be undefined.])
+    AC_MSG_WARN([*** You have been warned.])
+    AC_MSG_WARN([*** Pausing to give you time to read this message...])
+    AC_MSG_WARN([***********************************************************])
+    sleep 10
     ;;
 esac
 
