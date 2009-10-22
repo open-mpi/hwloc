@@ -205,7 +205,7 @@ case ${target} in
     AC_MSG_WARN([***********************************************************])
     AC_MSG_WARN([*** hwloc does not support this system.])
     AC_MSG_WARN([*** hwloc will *attempt* to build (but it may not work).])
-    AC_MSG_WARN([*** hwloc's run-time results may be undefined.])
+    AC_MSG_WARN([*** hwloc's run-time results may be reduced to showing just one processor.])
     AC_MSG_WARN([*** You have been warned.])
     AC_MSG_WARN([*** Pausing to give you time to read this message...])
     AC_MSG_WARN([***********************************************************])
