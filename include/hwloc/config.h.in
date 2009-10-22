@@ -18,6 +18,9 @@
 # endif
 #endif
 
+/* Define to 1 on Linux */
+#undef HWLOC_LINUX_SYS
+
 #undef HWLOC_HAVE_FFS
 
 #undef HWLOC_HAVE_DECL_FFS
