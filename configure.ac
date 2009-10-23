@@ -20,6 +20,7 @@ AC_CANONICAL_SYSTEM
 AC_CONFIG_SRCDIR([src/topology.c])
 
 AM_INIT_AUTOMAKE([1.10 dist-bzip2 foreign tar-ustar -Wall -Werror])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Make configure depend on the VERSION file, since it's used in AC_INIT
 
