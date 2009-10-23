@@ -624,9 +624,9 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
   /* Construct CUR's and OBJ's children list.  */
 
   /* Iteration with prefetching to be completely safe against CHILD removal.  */
-  for (child = cur->first_child, child ? next_child = child->next_sibling : 0;
+  for (child = cur->first_child, child ? next_child = child->next_sibling : NULL;
        child;
-       child = next_child, child ? next_child = child->next_sibling : 0) {
+       child = next_child, child ? next_child = child->next_sibling : NULL) {
 
     switch (hwloc_obj_cmp(obj, child)) {
 
@@ -709,7 +709,7 @@ traverse(hwloc_topology_t topology,
   for (pobj = &(*father)->first_child, obj = *pobj;
        obj;
        /* Check whether the current obj was dropped.  */
-       (*pobj == obj ? pobj = &(*pobj)->next_sibling : 0),
+       (*pobj == obj ? pobj = &(*pobj)->next_sibling : NULL),
        /* Get pointer to next object.  */
 	obj = *pobj)
     traverse(topology, pobj, node_before, leaf, node_after, data);
