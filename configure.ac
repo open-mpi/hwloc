@@ -423,6 +423,9 @@ AC_CHECK_FUNCS([ffs], [
   AC_DEFINE([HWLOC_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
 ])
 AC_CHECK_FUNCS([ffsl], [
+  AC_CHECK_DECL([ffsl],[
+    AC_DEFINE([HWLOC_HAVE_DECL_FFSL], [1], [Define to 1 if function `ffsl' is declared by system headers])
+  ])
   AC_DEFINE([HWLOC_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
 
@@ -433,6 +436,9 @@ AC_CHECK_FUNCS([fls], [
   AC_DEFINE([HWLOC_HAVE_FLS], [1], [Define to 1 if you have the `fls' function.])
 ])
 AC_CHECK_FUNCS([flsl], [
+  AC_CHECK_DECL([flsl],[
+    AC_DEFINE([HWLOC_HAVE_DECL_FLSL], [1], [Define to 1 if function `flsl' is declared by system headers])
+  ])
   AC_DEFINE([HWLOC_HAVE_FLSL], [1], [Define to 1 if you have the `flsl' function.])
 ])
 
@@ -443,6 +449,9 @@ AC_CHECK_FUNCS([clz], [
   AC_DEFINE([HWLOC_HAVE_CLZ], [1], [Define to 1 if you have the `clz' function.])
 ])
 AC_CHECK_FUNCS([clzl], [
+  AC_CHECK_DECL([clzl],[
+    AC_DEFINE([HWLOC_HAVE_DECL_CLZL], [1], [Define to 1 if function `clzl' is declared by system headers])
+  ])
   AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
 ])
 
