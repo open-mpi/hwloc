@@ -235,10 +235,15 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
   FILE * fd;
 
   fd = hwloc_fopen(mappath, "r", fsroot_fd);
-  if (!fd)
+  if (!fd) {
+    *value = -1;
     return -1;
+  }
 
-  fgets(string, 11, fd);
+  if (!fgets(string, 11, fd)) {
+    *value = -1;
+    return -1;
+  }
   *value = strtoul(string, NULL, 10);
 
   fclose(fd);
@@ -323,8 +328,10 @@ hwloc_read_cpuset_mask(const char *filename, const char *type, char *info, int i
   if (!fd)
     return 0;
 
-  fgets(cpuset_name, sizeof(cpuset_name), fd);
+  tmp = fgets(cpuset_name, sizeof(cpuset_name), fd);
   fclose(fd);
+  if (!tmp)
+    return 0;
 
   tmp = strchr(cpuset_name, '\n');
   if (tmp)
@@ -343,8 +350,10 @@ hwloc_read_cpuset_mask(const char *filename, const char *type, char *info, int i
   if (!fd)
     return 0;
 
-  fgets(info, infomax, fd);
+  tmp = fgets(info, infomax, fd);
   fclose(fd);
+  if (!tmp)
+    return 0;
 
   tmp = strchr(info, '\n');
   if (tmp)
@@ -870,7 +879,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       getprocnb_end()
 	if (str[strlen(str)-1]!='\n')
 	  {
-	    fscanf(fd,"%*[^\n]");
+            /* ignore end of line */
+	    (void) fscanf(fd,"%*[^\n]");
 	    getc(fd);
 	  }
     }
@@ -924,9 +934,9 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
   dmi_line[0] = '\0';
   fd = hwloc_fopen("/sys/class/dmi/id/board_vendor", "r", topology->backend_params.sysfs.root_fd);
   if (fd) {
-    fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
+    tmp = fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
     fclose (fd);
-    if (dmi_line[0] != '\0') {
+    if (tmp && dmi_line[0] != '\0') {
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
@@ -938,9 +948,9 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
   dmi_line[0] = '\0';
   fd = hwloc_fopen("/sys/class/dmi/id/board_name", "r", topology->backend_params.sysfs.root_fd);
   if (fd) {
-    fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
+    tmp = fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
     fclose (fd);
-    if (dmi_line[0] != '\0') {
+    if (tmp && dmi_line[0] != '\0') {
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
