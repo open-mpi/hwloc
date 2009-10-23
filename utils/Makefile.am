@@ -4,18 +4,26 @@
 include $(top_srcdir)/hwloc.am
 include $(top_srcdir)/Makefile.man-page-rules
 
-EXTRA_DIST = lstopo.h hwloc-mask.h test-hwloc-distrib.output
+LIBS = $(top_builddir)/src/libhwloc.la
+
+EXTRA_DIST = test-hwloc-distrib.output
 
 bin_PROGRAMS = lstopo hwloc-mask hwloc-bind hwloc-distrib
 
-lstopo_SOURCES = lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-cairo.c lstopo-xml.c
+lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c
+if HAVE_CAIRO
+lstopo_SOURCES += lstopo-cairo.c
+endif
+if HAVE_XML
+lstopo_SOURCES += lstopo-xml.c
+endif
 if HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
 endif
 lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS)
 lstopo_LDADD = $(CAIRO_LIBS) $(XML_LIBS) -lm
 
-LIBS = $(top_builddir)/src/libhwloc.la
+hwloc_mask_SOURCES = hwloc-mask.c hwloc-mask.h
 
 if HAVE_MINGW32
 else

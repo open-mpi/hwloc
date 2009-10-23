@@ -369,6 +369,7 @@ fi
 if test "x$enable_cairo" = "xyes"; then
   AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
 fi
+AM_CONDITIONAL([HAVE_CAIRO], [test "x$enable_cairo" = "xyes"])
 
 AC_ARG_ENABLE([xml],
   [AS_HELP_STRING([--disable-xml], [disable the XML back-end of `lstopo'])],
