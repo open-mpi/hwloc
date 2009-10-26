@@ -31,7 +31,7 @@
 #include "lstopo.h"
 
 #define indent(output, i) \
-  fprintf (output, "%*s", i, "");
+  fprintf (output, "%*s", (int) i, "");
 
 /*
  * Console fashion text output
@@ -97,7 +97,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
       hwloc_obj_type_t type = hwloc_get_depth_type (topology, depth);
       unsigned nbobjs = hwloc_get_nbobjs_by_depth (topology, depth);
       indent(output, depth);
-      fprintf (output, "depth %d:\t%u %s%s (type #%u)\n",
+      fprintf (output, "depth %u:\t%u %s%s (type #%u)\n",
 	       depth, nbobjs, hwloc_obj_type_string (type), nbobjs>1?"s":"", type);
     }
   }
