@@ -8,7 +8,7 @@ lib_LTLIBRARIES = libhwloc.la
 
 EXTRA_DIST = dolib.c
 
-libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c topology-xml.c bind.c cpuset.c
+libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c bind.c cpuset.c
 libhwloc_la_LDFLAGS = -version-number $(libhwloc_so_version) $(XML_LIBS)
 
 if HAVE_GCC
@@ -31,6 +31,12 @@ if HAVE_MS_LIB
 	$(INSTALL) .libs/libhwloc.exp $(DESTDIR)$(libdir)
 endif
 endif
+
+if HAVE_XML
+libhwloc_la_SOURCES += topology-xml.c
+else !HAVE_XML
+EXTRA_DIST += topology-xml.c
+endif !HAVE_XML
 
 if HAVE_SOLARIS
 libhwloc_la_SOURCES += topology-solaris.c
