@@ -877,7 +877,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (str[strlen(str)-1]!='\n')
 	  {
             /* ignore end of line */
-	    (void) fscanf(fd,"%*[^\n]");
+	    if (fscanf(fd,"%*[^\n]") == EOF)
+	      break;
 	    getc(fd);
 	  }
     }
