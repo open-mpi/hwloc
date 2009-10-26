@@ -196,7 +196,7 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuse
       cpuid = ksp->ks_instance;
       if (cpuid > HWLOC_NBMAXCPUS)
 	{
-	  fprintf(stderr,"CPU id too big: %d\n", cpuid);
+	  fprintf(stderr,"CPU id too big: %u\n", cpuid);
 	  continue;
 	}
 

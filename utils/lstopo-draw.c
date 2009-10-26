@@ -54,7 +54,7 @@
 #define MISC_B_COLOR 0xff
 
 /* preferred width/height compromise */
-#define RATIO (4./3.)
+#define RATIO (4.f/3.f)
 
 /* do we prefer ratio1 over ratio2? */
 static int prefer_ratio(float ratio1, float ratio2) {
@@ -203,7 +203,7 @@ RECURSE_BEGIN(obj, border) \
     /* Total area for subobjects */ \
     area = (obj_maxwidth + (separator)) * (obj_maxheight + (separator)) * numsubobjs; \
     /* Ideal total height for spreading that area with RATIO */ \
-    idealtotheight = sqrt(area/RATIO); \
+    idealtotheight = sqrtf(area/RATIO); \
     /* Underestimated number of rows */ \
     rows = idealtotheight / (obj_maxheight + (separator)); \
     columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
