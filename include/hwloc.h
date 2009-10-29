@@ -246,6 +246,14 @@ extern void hwloc_topology_check(hwloc_topology_t topology);
  * If none of them is called, the default is to detect all the objects of the
  * machine that the caller is allowed to access.
  *
+ * This default behavior may also be modified through environment variables
+ * if the application did not modify it already.
+ * Setting HWLOC_XMLFILE in the environment enforces the discovery from a XML
+ * file as if hwloc_topology_set_xml() had been called.
+ * HWLOC_FSROOT switches to reading the topology from the specified Linux
+ * filesystem root as if hwloc_topology_set_fsroot() had been called.
+ * Finally, HWLOC_THISSYSTEM enforces the value of the is_thissystem field.
+ *
  * @{
  */
 
@@ -295,6 +303,9 @@ enum hwloc_topology_flags_e {
    * system calls and really do binding, while the XML backend would otherwise
    * provide empty hooks just returning success.
    *
+   * Setting the environment variable HWLOC_THISSYSTEM may also result in the
+   * same behavior.
+   *
    * This can be used for efficiency reasons to first detect the topology once,
    * save it to an XML file, and quickly reload it later through the XML
    * backend, but still having binding functions actually do bind.
@@ -311,7 +322,8 @@ extern int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long fl
 /** \brief Change the file-system root path when building the topology from sysfs/procfs.
  *
  * On Linux system, use sysfs and procfs files as if they were mounted on the given
- * \p fsroot_path instead of the main file-system root.
+ * \p fsroot_path instead of the main file-system root. Setting the environment
+ * variable HWLOC_FSROOT may also result in this behavior.
  * Not using the main file-system root causes hwloc_topology_is_thissystem field
  * to return 0.
  *
@@ -338,6 +350,7 @@ extern int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topolo
 /** \brief Enable XML-file based topology.
  *
  * Gather topology information the XML file given at \p xmlpath.
+ * Setting the environment variable HWLOC_XMLFILE may also result in this behavior.
  * This file may have been generated earlier with lstopo file.xml.
  *
  * \note For conveniency, this backend provides empty binding hooks which just

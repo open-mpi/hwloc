@@ -1316,9 +1316,10 @@ hwloc_topology_load (struct hwloc_topology *topology)
     topology->is_loaded = 0;
   }
 
+  /* enforce backend anyway if a FORCE variable was given */
 #ifdef LINUX_SYS
   {
-    char *fsroot_path_env = getenv("HWLOC_FSROOT");
+    char *fsroot_path_env = getenv("HWLOC_FORCE_FSROOT");
     if (fsroot_path_env) {
       hwloc_backend_exit(topology);
       hwloc_backend_sysfs_init(topology, fsroot_path_env);
@@ -1327,7 +1328,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 #endif
 #ifdef HAVE_XML
   {
-    char *xmlpath_env = getenv("HWLOC_XMLFILE");
+    char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
     if (xmlpath_env) {
       hwloc_backend_exit(topology);
       hwloc_backend_xml_init(topology, xmlpath_env);
@@ -1335,17 +1336,40 @@ hwloc_topology_load (struct hwloc_topology *topology)
   }
 #endif
 
+  /* only apply non-FORCE variables if we have not changed the backend yet */
+#ifdef LINUX_SYS
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
-    /* if we haven't chosen the backend, set the OS-specific one if needed */
+    char *fsroot_path_env = getenv("HWLOC_FSROOT");
+    if (fsroot_path_env)
+      hwloc_backend_sysfs_init(topology, fsroot_path_env);
+  }
+#endif
+#ifdef HAVE_XML
+  if (topology->backend_type == HWLOC_BACKEND_NONE) {
+    char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
+    if (xmlpath_env)
+      hwloc_backend_xml_init(topology, xmlpath_env);
+  }
+#endif
+  if (topology->backend_type == HWLOC_BACKEND_NONE) {
+    local_env = getenv("HWLOC_THISSYSTEM");
+    if (local_env)
+      topology->is_thissystem = atoi(local_env);
+  }
+
+  /* if we haven't chosen the backend, set the OS-specific one if needed */
+  if (topology->backend_type == HWLOC_BACKEND_NONE) {
 #ifdef LINUX_SYS
     if (hwloc_backend_sysfs_init(topology, "/") < 0)
       return -1;
 #endif
   }
 
+  /* actual topology discovery */
   hwloc_discover(topology);
 
-  local_env = getenv("HWLOC_THISSYSTEM");
+  /* enforce THISSYSTEM if given in a FORCE variable */
+  local_env = getenv("HWLOC_FORCE_THISSYSTEM");
   if (local_env)
     topology->is_thissystem = atoi(local_env);
 
