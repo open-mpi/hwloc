@@ -1,4 +1,10 @@
-/* topo-hello.c */
+/* Example hwloc API program.
+ *
+ * Copyright © 2009 INRIA, Université Bordeaux 1
+ *
+ * topo-hello.c 
+ */
+
 #include <hwloc.h>
 
 static void print_children(hwloc_topology_t topology, hwloc_obj_t obj, int depth)
