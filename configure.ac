@@ -375,17 +375,15 @@ AC_ARG_ENABLE([pci],
   [enable_pci="yes"])
 
 if test "x$enable_pci" = "xyes"; then
-  PKG_CHECK_MODULES([PCI], [libpci], [:], [enable_pci="no"])
-  # manually check pciutils in case a old one without .pc is installed
-  if test "x$enable_pci" = "xno"; then
+  PKG_CHECK_MODULES([PCI], [libpci], [:], [
+    # manually check pciutils in case a old one without .pc is installed
     AC_CHECK_HEADERS([pci/pci.h], [
-      AC_CHECK_LIB([pci], [pci_cleanup], [enable_pci=yes])
-    ])
-    if test "x$enable_pci" = "xyes"; then
-      PCI_LIBS="-lpci"
-      AC_SUBST(PCI_LIBS)
-    fi
-  fi
+      AC_CHECK_LIB([pci], [pci_cleanup], [
+        PCI_LIBS="-lpci"
+        AC_SUBST(PCI_LIBS)
+      ], [enable_pci=no])
+    ], [enable_pci=no])
+  ])
 fi
 
 if test "x$enable_pci" = "xyes"; then
