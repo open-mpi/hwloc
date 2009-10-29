@@ -36,6 +36,9 @@ EXTRA_DIST = \
         images/hagrid.png \
         images/diagram.fig \
         www.open-mpi.org.cfg \
+        www.open-mpi.org-css.inc \
+        www.open-mpi.org-footer.inc \
+        www.open-mpi.org-header.inc \
         $(image_built_sources) \
         $(DOX_HTML_DIR) $(DOX_MAN_DIR) $(DOX_LATEX_DIR) $(DOX_TAG)
 
@@ -51,8 +54,10 @@ dox_inputs = $(DOX_CONFIG) \
        $(top_srcdir)/include/hwloc.h \
        $(top_srcdir)/include/hwloc/helper.h \
        $(top_srcdir)/include/hwloc/cpuset.h \
+       $(top_srcdir)/include/hwloc/glibc-sched.h \
+       $(top_srcdir)/include/hwloc/linux.h \
        $(top_srcdir)/include/hwloc/linux-libnuma.h \
-       $(top_srcdir)/include/hwloc/glibc-sched.h
+       $(top_srcdir)/include/hwloc/openfabrics-verbs.h
 
 #
 # Create the images that we need for the PDF output and the HTML
@@ -258,19 +263,21 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_covering_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_linux_parse_cpumap_file.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_u.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_machine_attr_u.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_memory_attr_u.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_misc_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_machine_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_memory_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_misc_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_snprintf.3 \

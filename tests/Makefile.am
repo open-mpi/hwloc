@@ -1,4 +1,5 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright 2009 Cisco Systems, Inc.  All rights reserved.
 
 include $(top_srcdir)/hwloc.am
 
@@ -11,7 +12,7 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_get_largest_objs_inside_cpuset \
 	hwloc_get_next_obj_covering_cpuset \
 	hwloc_get_obj_inside_cpuset \
-	hwloc_get_cache_covering_obj \
+	hwloc_get_shared_cache_covering_obj \
 	hwloc_cpuset_first_last_weight \
 	hwloc_cpuset_singlify \
 	hwloc_type_depth \
@@ -36,9 +37,9 @@ EXTRA_DIST += glibc-sched.c
 endif !HAVE_SCHED_SETAFFINITY
 
 if HAVE_LIBIBVERBS
-check_PROGRAMS += ibverbs
+check_PROGRAMS += openfabrics-verbs
 else !HAVE_LIBIBVERBS
-EXTRA_DIST += ibverbs.c
+EXTRA_DIST += openfabrics-verbs.c
 endif !HAVE_LIBIBVERBS
 
 TESTS = $(check_PROGRAMS)
@@ -50,7 +51,7 @@ endif
 LIBS = $(top_builddir)/src/libhwloc.la
 
 linux_libnuma_LDFLAGS = -lnuma
-ibverbs_LDFLAGS = -libverbs
+openfabrics_verbs_LDFLAGS = -libverbs
 if HAVE_WINDOWS
 else
 hwloc_bind_LDFLAGS = -lpthread

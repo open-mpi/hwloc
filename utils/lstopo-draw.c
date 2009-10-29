@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -69,7 +70,7 @@
 #define BRIDGE_B_COLOR 0xff
 
 /* preferred width/height compromise */
-#define RATIO (4./3.)
+#define RATIO (4.f/3.f)
 
 /* PCI object height: just a box */
 #define PCI_HEIGHT (fontsize ? gridsize + fontsize + gridsize : gridsize)
@@ -211,8 +212,12 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 RECURSE_BEGIN(obj, border) \
     /* Total width for subobjects */ \
     unsigned obj_totwidth = 0, obj_totheight = 0; \
+    unsigned obj_avgwidth, obj_avgheight; \
     /* Total area for subobjects */ \
     unsigned area = 0; \
+    float idealtotheight; \
+    unsigned rows, columns; \
+    float under_ratio, over_ratio; \
     RECURSE_FOR() \
       RECURSE_CALL_FUN(&null_draw_methods); \
       obj_totwidth += width + (separator); \
@@ -220,21 +225,21 @@ RECURSE_BEGIN(obj, border) \
       area += (width + (separator)) * (height + (separator)); \
     } \
     /* Average object size */ \
-    unsigned obj_avgwidth = obj_totwidth / numsubobjs; \
-    unsigned obj_avgheight = obj_totheight / numsubobjs; \
+    obj_avgwidth = obj_totwidth / numsubobjs; \
+    obj_avgheight = obj_totheight / numsubobjs; \
     /* Ideal total height for spreading that area with RATIO */ \
-    float idealtotheight = sqrt(area/RATIO); \
+    idealtotheight = sqrtf(area/RATIO); \
     /* approximation of number of rows */ \
-    unsigned rows = idealtotheight / obj_avgheight; \
-    unsigned columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
+    rows = idealtotheight / obj_avgheight; \
+    columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
     /* Ratio obtained by underestimation */ \
-    float under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
+    under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
     \
     /* try to overestimate too */ \
     rows++; \
     columns = (numsubobjs + rows - 1) / rows; \
     /* Ratio obtained by overestimation */ \
-    float over_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
+    over_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
     /* Did we actually preferred underestimation? (good row/column fit or good ratio) */ \
     if (rows > 1 && prefer_ratio(under_ratio, over_ratio)) { \
       rows--; \
@@ -286,14 +291,14 @@ RECURSE_BEGIN(obj, border) \
 #define RECURSE_RECT(obj, methods, separator, border) do {\
   if (obj->arity && obj->children[0]->type == HWLOC_OBJ_NODE) { \
     /* Nodes shouldn't be put with an arbitrary geometry, as NUMA distances may not be that way */ \
-    int vert = prefer_vert(topology, level, output, depth, x, y, separator); \
-    if (vert) \
+    int pvert = prefer_vert(topology, level, output, depth, x, y, separator); \
+    if (pvert) \
       RECURSE_VERT(level, methods, separator, border); \
     else \
       RECURSE_HORIZ(level, methods, separator, border); \
   } else {\
     RECURSE_RECT_BEGIN(obj, methods, separator, border) \
-        RECURSE_CALL_FUN(methods); \
+    RECURSE_CALL_FUN(methods); \
     RECURSE_RECT_END(obj, methods, separator, border); \
   } \
 } while (0)
@@ -587,10 +592,11 @@ system_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t
   if (level->arity > 1 && level->children[0]->type == HWLOC_OBJ_MACHINE) {
     if (vert) {
       unsigned top = 0, bottom = 0;
+      unsigned center;
       RECURSE_BEGIN(level, gridsize)
       RECURSE_FOR()
 	RECURSE_CALL_FUN(methods);
-	unsigned center = y + totheight + height / 2;
+        center = y + totheight + height / 2;
 	if (!top)
 	  top = center;
 	bottom = center;
@@ -601,10 +607,11 @@ system_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t
 	methods->line(output, 0, 0, 0, depth, x + mywidth, top, x + mywidth, bottom);
     } else {
       unsigned left = 0, right = 0;
+      unsigned center;
       RECURSE_BEGIN(level, gridsize)
       RECURSE_FOR()
 	RECURSE_CALL_FUN(methods);
-	unsigned center = x + totwidth + width / 2;
+        center = x + totwidth + width / 2;
 	if (!left)
 	  left = center;
 	right = center;

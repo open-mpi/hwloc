@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -232,47 +233,51 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
     return;
   }
 
-  /* create new misc objects and record their size */
-  hwloc_obj_t groupobjs[nbgroups];
-  unsigned groupsizes[nbgroups];
-  memset(groupsizes, 0, sizeof(groupsizes));
-  for(i=0; i<nbgroups; i++) {
-    /* create the misc object */
-    hwloc_obj_t misc_obj;
-    misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
-    misc_obj->cpuset = hwloc_cpuset_alloc();
-    hwloc_cpuset_zero(misc_obj->cpuset);
-    misc_obj->attr->misc.depth = depth;
-    for (j=0; j<nbobjs; j++)
-      if (groupids[j] == i+1) {
-	hwloc_cpuset_orset(misc_obj->cpuset, objs[j]->cpuset);
-	groupsizes[i]++;
+  /* For convenience, put these declarations inside a block.  Saves us
+     from a bunch of mallocs, particularly with the 2D array. */
+  {
+      hwloc_obj_t groupobjs[nbgroups];
+      unsigned groupsizes[nbgroups];
+      unsigned groupdistances[nbgroups][nbgroups];
+      /* create new misc objects and record their size */
+      memset(groupsizes, 0, sizeof(groupsizes));
+      for(i=0; i<nbgroups; i++) {
+          /* create the misc object */
+          hwloc_obj_t misc_obj;
+          misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+          misc_obj->cpuset = hwloc_cpuset_alloc();
+          hwloc_cpuset_zero(misc_obj->cpuset);
+          misc_obj->attr->misc.depth = depth;
+          for (j=0; j<nbobjs; j++)
+              if (groupids[j] == i+1) {
+                  hwloc_cpuset_orset(misc_obj->cpuset, objs[j]->cpuset);
+                  groupsizes[i]++;
+              }
+          hwloc_debug_1arg_cpuset("adding misc object with %u objects and cpuset %s\n",
+                                  groupsizes[i], misc_obj->cpuset);
+          hwloc_insert_object_by_cpuset(topology, misc_obj);
+          groupobjs[i] = misc_obj;
       }
-    hwloc_debug_1arg_cpuset("adding misc object with %u objects and cpuset %s\n",
-	       groupsizes[i], misc_obj->cpuset);
-    hwloc_insert_object_by_cpuset(topology, misc_obj);
-    groupobjs[i] = misc_obj;
-  }
-
-  /* factorize distances */
-  unsigned groupdistances[nbgroups][nbgroups];
-  memset(groupdistances, 0, sizeof(groupdistances));
-  for(i=0; i<nbobjs; i++)
-    for(j=0; j<nbobjs; j++)
-      groupdistances[groupids[i]-1][groupids[j]-1] += distances[i][j];
-  for(i=0; i<nbgroups; i++)
-    for(j=0; j<nbgroups; j++)
-      groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
+      
+      /* factorize distances */
+      memset(groupdistances, 0, sizeof(groupdistances));
+      for(i=0; i<nbobjs; i++)
+          for(j=0; j<nbobjs; j++)
+              groupdistances[groupids[i]-1][groupids[j]-1] += distances[i][j];
+      for(i=0; i<nbgroups; i++)
+          for(j=0; j<nbgroups; j++)
+              groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
 #ifdef HWLOC_DEBUG
-  hwloc_debug("group distances:\n");
-  for(i=0; i<nbgroups; i++) {
-    for(j=0; j<nbgroups; j++)
-      hwloc_debug("%u ", groupdistances[i][j]);
-    hwloc_debug("\n");
-  }
+      hwloc_debug("group distances:\n");
+      for(i=0; i<nbgroups; i++) {
+          for(j=0; j<nbgroups; j++)
+              hwloc_debug("%u ", groupdistances[i][j]);
+          hwloc_debug("\n");
+      }
 #endif
-
-  hwloc__setup_misc_level_from_distances(topology, nbgroups, groupobjs, groupdistances, depth + 1);
+      
+      hwloc__setup_misc_level_from_distances(topology, nbgroups, groupobjs, groupdistances, depth + 1);
+  }
 }
 
 /*
@@ -642,9 +647,9 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
   /* Construct CUR's and OBJ's children list.  */
 
   /* Iteration with prefetching to be completely safe against CHILD removal.  */
-  for (child = cur->first_child, child ? next_child = child->next_sibling : 0;
+  for (child = cur->first_child, child ? next_child = child->next_sibling : NULL;
        child;
-       child = next_child, child ? next_child = child->next_sibling : 0) {
+       child = next_child, child ? next_child = child->next_sibling : NULL) {
 
     switch (hwloc_obj_cmp(obj, child)) {
 
@@ -770,7 +775,7 @@ traverse(hwloc_topology_t topology,
   for (pobj = &(*father)->first_child, obj = *pobj;
        obj;
        /* Check whether the current obj was dropped.  */
-       (*pobj == obj ? pobj = &(*pobj)->next_sibling : 0),
+       (*pobj == obj ? pobj = &(*pobj)->next_sibling : NULL),
        /* Get pointer to next object.  */
 	obj = *pobj)
     traverse(topology, pobj, node_before, leaf, node_after, data);
@@ -1425,38 +1430,68 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 int
 hwloc_topology_load (struct hwloc_topology *topology)
 {
+  char *local_env;
+
   if (topology->is_loaded) {
     hwloc_topology_clear(topology);
     hwloc_topology_setup_defaults(topology);
     topology->is_loaded = 0;
   }
 
+  /* enforce backend anyway if a FORCE variable was given */
 #ifdef LINUX_SYS
-  char *fsroot_path_env = getenv("HWLOC_FSROOT");
-  if (fsroot_path_env) {
-    hwloc_backend_exit(topology);
-    hwloc_backend_sysfs_init(topology, fsroot_path_env);
+  {
+    char *fsroot_path_env = getenv("HWLOC_FORCE_FSROOT");
+    if (fsroot_path_env) {
+      hwloc_backend_exit(topology);
+      hwloc_backend_sysfs_init(topology, fsroot_path_env);
+    }
   }
 #endif
 #ifdef HAVE_XML
-  char *xmlpath_env = getenv("HWLOC_XMLFILE");
-  if (xmlpath_env) {
-    hwloc_backend_exit(topology);
-    hwloc_backend_xml_init(topology, xmlpath_env);
+  {
+    char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
+    if (xmlpath_env) {
+      hwloc_backend_exit(topology);
+      hwloc_backend_xml_init(topology, xmlpath_env);
+    }
   }
 #endif
 
+  /* only apply non-FORCE variables if we have not changed the backend yet */
+#ifdef LINUX_SYS
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
-    /* if we haven't chosen the backend, set the OS-specific one if needed */
+    char *fsroot_path_env = getenv("HWLOC_FSROOT");
+    if (fsroot_path_env)
+      hwloc_backend_sysfs_init(topology, fsroot_path_env);
+  }
+#endif
+#ifdef HAVE_XML
+  if (topology->backend_type == HWLOC_BACKEND_NONE) {
+    char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
+    if (xmlpath_env)
+      hwloc_backend_xml_init(topology, xmlpath_env);
+  }
+#endif
+  if (topology->backend_type == HWLOC_BACKEND_NONE) {
+    local_env = getenv("HWLOC_THISSYSTEM");
+    if (local_env)
+      topology->is_thissystem = atoi(local_env);
+  }
+
+  /* if we haven't chosen the backend, set the OS-specific one if needed */
+  if (topology->backend_type == HWLOC_BACKEND_NONE) {
 #ifdef LINUX_SYS
     if (hwloc_backend_sysfs_init(topology, "/") < 0)
       return -1;
 #endif
   }
 
+  /* actual topology discovery */
   hwloc_discover(topology);
 
-  char *local_env = getenv("HWLOC_THISSYSTEM");
+  /* enforce THISSYSTEM if given in a FORCE variable */
+  local_env = getenv("HWLOC_FORCE_THISSYSTEM");
   if (local_env)
     topology->is_thissystem = atoi(local_env);
 

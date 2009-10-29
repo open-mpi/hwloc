@@ -97,8 +97,9 @@ int main(int argc, char *argv[])
       hwloc_cpuset_singlify(cpu_set);
     ret = hwloc_set_cpubind(topology, cpu_set, flags);
     if (ret) {
+      int bind_errno = errno;
       char *s = hwloc_cpuset_printf_value(cpu_set);
-      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, errno, strerror(errno));
+      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, strerror(bind_errno));
       free(s);
     }
   }

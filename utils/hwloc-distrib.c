@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 {
   long n = -1;
   char * synthetic = NULL;
-  char * xmlpath = NULL;
+  const char * xmlpath = NULL;
   int verbose = 0;
   char **orig_argv = argv;
 

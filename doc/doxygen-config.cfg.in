@@ -10,7 +10,9 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/helper.h \
 		@top_srcdir@/include/hwloc/cpuset.h \
 		@top_srcdir@/include/hwloc/glibc-sched.h \
-		@top_srcdir@/include/hwloc/linux-libnuma.h
+		@top_srcdir@/include/hwloc/linux.h \
+		@top_srcdir@/include/hwloc/linux-libnuma.h \
+		@top_srcdir@/include/hwloc/openfabrics-verbs.h
 
 EXAMPLE_PATH   = @top_srcdir@/doc
 

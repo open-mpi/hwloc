@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -200,13 +201,13 @@ hwloc_get_next_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_cpuse
  */
 static __inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_cpuset_t set,
-				      unsigned depth, unsigned index)
+				      unsigned depth, unsigned idx)
 {
   int count = 0;
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   while (obj) {
     if (hwloc_cpuset_isincluded(obj->cpuset, set)) {
-      if (count == index)
+      if (count == idx)
 	return obj;
       count++;
     }
@@ -215,19 +216,19 @@ hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_cpuset_t 
   return NULL;
 }
 
-/** \brief Return the \p index -th object of type \p type included in CPU set \p set.
+/** \brief Return the \p idx -th object of type \p type included in CPU set \p set.
  *
  * If there are multiple or no depth for given type, return \c NULL and let the caller
  * fallback to hwloc_get_obj_inside_cpuset_by_depth().
  */
 static __inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_cpuset_t set,
-				     hwloc_obj_type_t type, unsigned index)
+				     hwloc_obj_type_t type, unsigned idx)
 {
   int depth = hwloc_get_type_depth(topology, type);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return NULL;
-  return hwloc_get_obj_inside_cpuset_by_depth(topology, set, depth, index);
+  return hwloc_get_obj_inside_cpuset_by_depth(topology, set, depth, idx);
 }
 
 /** \brief Return the number of objects at depth \p depth included in CPU set \p set. */
@@ -274,7 +275,7 @@ hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_cpuset_
  *
  * \return \c NULL if no child matches.
  */
-static inline hwloc_obj_t
+static __inline hwloc_obj_t
 hwloc_get_child_covering_cpuset (hwloc_topology_t topology, hwloc_cpuset_t set,
 				hwloc_obj_t father)
 {
@@ -291,7 +292,7 @@ hwloc_get_child_covering_cpuset (hwloc_topology_t topology, hwloc_cpuset_t set,
  *
  * \return \c NULL if no object matches.
  */
-static inline hwloc_obj_t
+static __inline hwloc_obj_t
 hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_cpuset_t set)
 {
   struct hwloc_obj *current = hwloc_get_system_obj(topology);
@@ -383,7 +384,7 @@ hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_cpuset_t set)
  * \return \c NULL if no cache matches
  */
 static __inline hwloc_obj_t
-hwloc_get_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t current = obj->father;
   while (current) {

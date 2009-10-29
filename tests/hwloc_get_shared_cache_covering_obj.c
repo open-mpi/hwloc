@@ -10,7 +10,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* check hwloc_get_cache_covering_obj() */
+/* check hwloc_get_shared_cache_covering_obj() */
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION_SHARED "6 5 4 3 2" /* 736bits wide topology */
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION_NONSHARED "6 5 4 1 2" /* 736bits wide topology */
@@ -28,7 +28,7 @@ int main()
 #define CPUINDEX 180
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
-  cache = hwloc_get_cache_covering_obj(topology, obj);
+  cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX/2/3);
@@ -37,13 +37,13 @@ int main()
   /* check no shared cache above the L2 cache */
   obj = hwloc_get_obj_by_depth(topology, 3, 0);
   assert(obj);
-  cache = hwloc_get_cache_covering_obj(topology, obj);
+  cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(!cache);
 
   /* check no shared cache above the node */
   obj = hwloc_get_obj_by_depth(topology, 1, 0);
   assert(obj);
-  cache = hwloc_get_cache_covering_obj(topology, obj);
+  cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(!cache);
 
   hwloc_topology_destroy(topology);
@@ -57,7 +57,7 @@ int main()
 #define CPUINDEX 180
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
-  cache = hwloc_get_cache_covering_obj(topology, obj);
+  cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX/2/1);
@@ -66,7 +66,7 @@ int main()
   /* check no shared-cache above the core */
   obj = hwloc_get_obj_by_depth(topology, 4, CPUINDEX/2);
   assert(obj);
-  cache = hwloc_get_cache_covering_obj(topology, obj);
+  cache = hwloc_get_shared_cache_covering_obj(topology, obj);
   assert(!cache);
 
   hwloc_topology_destroy(topology);

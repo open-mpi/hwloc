@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -10,6 +11,7 @@
 
 #include <limits.h>
 #include <assert.h>
+#include <strings.h>
 
 /* Read from DESCRIPTION a series of integers describing a symmetrical
    topology and update `topology->synthetic_description' accordingly.  On
@@ -20,6 +22,8 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
   const char *pos, *next_pos;
   unsigned long item, count;
   int i;
+  int cache_depth = 0, misc_depth = 0;
+  int nb_machine_levels = 0, nb_node_levels = 0;
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
@@ -78,9 +82,6 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
     fprintf(stderr,"synthetic string doesn't contain any object\n");
     return -1;
   }
-
-  int cache_depth = 0, misc_depth = 0;
-  int nb_machine_levels = 0, nb_node_levels = 0;
 
   for(i=0; i<count; i++) {
     hwloc_obj_type_t type;

@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -173,7 +174,7 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
 extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj);
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
-static inline char *
+static __inline char *
 hwloc_cpuset_printf_value(hwloc_cpuset_t cpuset)
 {
   char *buf;
@@ -181,14 +182,14 @@ hwloc_cpuset_printf_value(hwloc_cpuset_t cpuset)
   return buf;
 }
 
-static inline struct hwloc_obj *
-hwloc_alloc_setup_object(hwloc_obj_type_t type, signed index)
+static __inline struct hwloc_obj *
+hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
 {
   struct hwloc_obj *obj = malloc(sizeof(*obj));
   assert(obj);
   memset(obj, 0, sizeof(*obj));
   obj->type = type;
-  obj->os_index = index;
+  obj->os_index = idx;
   obj->os_level = -1;
   obj->attr = malloc(sizeof(*obj->attr));
   /* do not allocate the cpuset here, let the caller do it */

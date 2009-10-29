@@ -20,6 +20,7 @@ AC_CANONICAL_SYSTEM
 AC_CONFIG_SRCDIR([src/topology.c])
 
 AM_INIT_AUTOMAKE([1.10 dist-bzip2 foreign tar-ustar -Wall -Werror])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Make configure depend on the VERSION file, since it's used in AC_INIT
 
@@ -157,41 +158,59 @@ AM_CONDITIONAL([INSTALL_DOXYGEN], [test "x$install_doxs" = "xyes"])
 # Check OS support
 #
 
+AC_MSG_CHECKING([which OS support to include])
 case ${target} in
   *-*-linux*)
-    AC_DEFINE(LINUX_SYS, 1, Define to 1 on Linux)
+    AC_DEFINE(LINUX_SYS, 1, [Define to 1 on Linux])
+    AC_DEFINE(HWLOC_LINUX_SYS, 1, [Define to 1 on Linux])
     linux=yes
+    AC_MSG_RESULT([Linux])
     ;;
   *-*-irix*)
-    AC_DEFINE(IRIX_SYS, 1, Define to 1 on Irix)
+    AC_DEFINE(IRIX_SYS, 1, [Define to 1 on Irix])
     irix=yes
+    AC_MSG_RESULT([IRIX])
     ;;
   *-*-darwin*)
-    AC_DEFINE(DARWIN_SYS, 1, Define to 1 on Darwin)
+    AC_DEFINE(DARWIN_SYS, 1, [Define to 1 on Darwin])
     darwin=yes
+    AC_MSG_RESULT([Darwin])
     ;;
   *-*-solaris*)
-    AC_DEFINE(SOLARIS_SYS, 1, Define to 1 on Solaris)
+    AC_DEFINE(SOLARIS_SYS, 1, [Define to 1 on Solaris])
     solaris=yes
+    AC_MSG_RESULT([Solaris])
     ;;
   *-*-aix*)
-    AC_DEFINE(AIX_SYS, 1, Define to 1 on AIX)
+    AC_DEFINE(AIX_SYS, 1, [Define to 1 on AIX])
     aix=yes
+    AC_MSG_RESULT([AIX])
     ;;
   *-*-osf*)
-    AC_DEFINE(OSF_SYS, 1, Define to 1 on OSF)
+    AC_DEFINE(OSF_SYS, 1, [Define to 1 on OSF])
     osf=yes
+    AC_MSG_RESULT([OSF])
     ;;
   *-*-hpux*)
-    AC_DEFINE(HPUX_SYS, 1, Define to 1 on HP-UX)
+    AC_DEFINE(HPUX_SYS, 1, [Define to 1 on HP-UX])
     hpux=yes
+    AC_MSG_RESULT([HP-UX])
     ;;
   *-*-mingw*|*-*-cygwin*)
-    AC_DEFINE(WIN_SYS, 1, Define to 1 on WINDOWS)
+    AC_DEFINE(WIN_SYS, 1, [Define to 1 on WINDOWS])
     windows=yes
+    AC_MSG_RESULT([Windows])
     ;;
   *)
-    echo Warning: Host type \"${target}\" not yet supported.
+    AC_MSG_RESULT([Unsupported! ($target)])
+    AC_MSG_WARN([***********************************************************])
+    AC_MSG_WARN([*** hwloc does not support this system.])
+    AC_MSG_WARN([*** hwloc will *attempt* to build (but it may not work).])
+    AC_MSG_WARN([*** hwloc's run-time results may be reduced to showing just one processor.])
+    AC_MSG_WARN([*** You have been warned.])
+    AC_MSG_WARN([*** Pausing to give you time to read this message...])
+    AC_MSG_WARN([***********************************************************])
+    sleep 10
     ;;
 esac
 
@@ -223,7 +242,9 @@ AC_LANG([C])
 AM_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_PROG_LN_S
+AC_PROG_INSTALL
 AC_PROG_MKDIR_P
+# FIXME: may fail:
 AC_PROG_EGREP
 PKG_CHECK_EXISTS
 
@@ -350,6 +371,7 @@ fi
 if test "x$enable_cairo" = "xyes"; then
   AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
 fi
+AM_CONDITIONAL([HAVE_CAIRO], [test "x$enable_cairo" = "xyes"])
 
 AC_ARG_ENABLE([xml],
   [AS_HELP_STRING([--disable-xml], [disable the XML back-end of `lstopo'])],
@@ -385,6 +407,7 @@ if test "x$enable_pci" = "xyes"; then
     ], [enable_pci=no])
   ])
 fi
+AM_CONDITIONAL([HAVE_LIBPCI], [test "x$enable_pci" = "xyes"])
 
 if test "x$enable_pci" = "xyes"; then
   HWLOC_REQUIRES="libpci $HWLOC_REQUIRES"
@@ -430,6 +453,9 @@ AC_CHECK_FUNCS([ffs], [
   AC_DEFINE([HWLOC_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
 ])
 AC_CHECK_FUNCS([ffsl], [
+  AC_CHECK_DECL([ffsl],[
+    AC_DEFINE([HWLOC_HAVE_DECL_FFSL], [1], [Define to 1 if function `ffsl' is declared by system headers])
+  ])
   AC_DEFINE([HWLOC_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
 
@@ -440,6 +466,9 @@ AC_CHECK_FUNCS([fls], [
   AC_DEFINE([HWLOC_HAVE_FLS], [1], [Define to 1 if you have the `fls' function.])
 ])
 AC_CHECK_FUNCS([flsl], [
+  AC_CHECK_DECL([flsl],[
+    AC_DEFINE([HWLOC_HAVE_DECL_FLSL], [1], [Define to 1 if function `flsl' is declared by system headers])
+  ])
   AC_DEFINE([HWLOC_HAVE_FLSL], [1], [Define to 1 if you have the `flsl' function.])
 ])
 
@@ -450,13 +479,14 @@ AC_CHECK_FUNCS([clz], [
   AC_DEFINE([HWLOC_HAVE_CLZ], [1], [Define to 1 if you have the `clz' function.])
 ])
 AC_CHECK_FUNCS([clzl], [
+  AC_CHECK_DECL([clzl],[
+    AC_DEFINE([HWLOC_HAVE_DECL_CLZL], [1], [Define to 1 if function `clzl' is declared by system headers])
+  ])
   AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
 ])
 
 AC_CHECK_FUNCS([openat], [have_openat=yes])
 AM_CONDITIONAL([HAVE_OPENAT], [test "x$have_openat" = "xyes"])
-
-AC_FUNC_ALLOCA
 
 AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
 	      [#include <numa.h>])

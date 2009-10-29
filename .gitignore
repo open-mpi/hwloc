@@ -25,7 +25,7 @@ Makefile
 /utils/hwloc-distrib.1
 /utils/test-hwloc-distrib.sh
 /tests/hwloc_get_obj_covering_cpuset
-/tests/hwloc_get_cache_covering_obj
+/tests/hwloc_get_shared_cache_covering_obj
 /tests/hwloc_type_depth
 /tests/hwloc_synthetic
 /tests/hwloc_get_largest_objs_inside_cpuset

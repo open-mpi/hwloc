@@ -55,7 +55,7 @@ struct hwloc_cpuset_s {
 
 
 /**
- * ffs helpers.
+ * ffsl helpers.
  */
 
 #ifdef __GNUC__
@@ -69,6 +69,10 @@ struct hwloc_cpuset_s {
 #  endif
 
 #elif defined(HWLOC_HAVE_FFSL)
+
+#  ifndef HWLOC_HAVE_DECL_FFSL
+extern int ffsl(long);
+#  endif
 
 #  define hwloc_ffsl(x) ffsl(x)
 
@@ -169,7 +173,7 @@ static __inline int hwloc_ffsl(unsigned long x)
 #endif
 
 /**
- * fls helpers.
+ * flsl helpers.
  */
 #ifdef __GNUC_____
 
@@ -182,16 +186,24 @@ static __inline int hwloc_ffsl(unsigned long x)
 
 #elif defined(HWLOC_HAVE_FLSL)
 
+#  ifndef HWLOC_HAVE_DECL_FLSL
+extern int flsl(long);
+#  endif
+
 #  define hwloc_flsl(x) flsl(x)
 
 #elif defined(HWLOC_HAVE_CLZL)
+
+#  ifndef HWLOC_HAVE_DECL_CLZL
+extern int clzl(long);
+#  endif
 
 #  define hwloc_flsl(x) (x ? 8*sizeof(long) - clzl(x) : 0)
 
 #elif defined(HWLOC_HAVE_FLS)
 
 #  ifndef HWLOC_HAVE_DECL_FLS
-extern int fsl(int);
+extern int fls(int);
 #  endif
 
 #  define hwloc_fls(x) fls(x)

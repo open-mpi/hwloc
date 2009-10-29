@@ -165,8 +165,9 @@ Moreover, hwloc also comes with additional helpers for interoperability with
 several commonly used environments. For Linux, some specific helpers are
 available in hwloc/linux.h , and hwloc/linux-libnuma.h if using libnuma. On
 glibc-based systems, additional helpers are available in hwloc/glibc-sched.h .
-For systems with the Infiniband Verbs library, some dedicated helpers are
-provided in hwloc/ibverbs.h .
+For Linux systems with the OpenFabrics verbs library, some dedicated helpers
+are provided in hwloc/openfabrics-verbs.h (this helper file is not yet useful
+on non-Linux systems with the OpenFabrics verbs library).
 
 To precisely define the vocabulary used by hwloc, a Glossary is available and
 should probably be read first.
@@ -299,13 +300,13 @@ Processor Affinity (PLPA) (http://www.open-mpi.org/projects/plpa/) project.
 Because of functional and ideological overlap, these two code bases and ideas
 were merged and released under the name "hwloc" as an Open MPI sub-project.
 
-PLPA was initially developed by the Open MPI development team as a sub-project.
 libtopology was initially developed by the INRIA Runtime Team-Project (http://
 runtime.bordeaux.inria.fr/) (headed by Raymond Namyst (http://
-dept-info.labri.fr/~namyst/)). Both are now deprecated in favor of the hwloc
-Open MPI sub-project.
+dept-info.labri.fr/~namyst/)). PLPA was initially developed by the Open MPI
+development team as a sub-project. Both are now deprecated in favor of hwloc,
+which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Fri Oct 16 17:02:28 2009 for Hardware Locality (hwloc) by  doxygen
+Generated on Thu Oct 29 14:53:03 2009 for Hardware Locality (hwloc) by  doxygen
 1.6.1
