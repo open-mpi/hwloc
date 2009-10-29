@@ -89,22 +89,22 @@ of the overall Open MPI project.
 Nightly development snapshots are available on the web site.
 Additionally, the code can be directly checked out of Subversion:
 
-<pre>
+\code
 shell$ svn checkout http://svn.open-mpi.org/svn/hwloc/trunk hwloc-trunk
 shell$ cd hwloc-trunk
 shell$ ./autogen.sh
-</pre>
+\endcode
 
 Note that GNU Autoconf >=2.60, Automake >=1.10 and Libtool >=2.2.6 are
 required when building from a Subversion checkout.
 
 Installation by itself is the fairly common GNU-based process:
 
-<pre>
+\code
 shell$ ./configure --prefix=...
 shell$ make
 shell$ make install
-</pre>
+\endcode
 
 The hwloc command-line tool "lstopo" produces human-readable topology
 maps, as mentioned above.  It can also export maps to the "fig" file
