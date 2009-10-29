@@ -339,7 +339,9 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       HWLOC_BUILD_ASSERT(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
       HWLOC_BUILD_ASSERT(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
       HWLOC_BUILD_ASSERT(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
-      assert(config_space_cache[PCI_PRIMARY_BUS] == pcidev->bus);
+      if (config_space_cache[PCI_PRIMARY_BUS] == pcidev->bus)
+	hwloc_debug("  %04x:%02x:%02x.%01x bridge with (ignored) invalid PCI_PRIMARY_BUS %02x\n",
+		    pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func, config_space_cache[PCI_PRIMARY_BUS]);
       obj->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_PCI;
       obj->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
       obj->attr->bridge.downstream.pci.domain = pcidev->domain;
