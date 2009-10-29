@@ -310,6 +310,9 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 	&& baseclass != PCI_BASE_CLASS_DISPLAY
 	&& baseclass != PCI_BASE_CLASS_NETWORK
 	&& baseclass != PCI_BASE_CLASS_STORAGE
+#ifndef PCI_CLASS_SERIAL_INFINIBAND
+#define PCI_CLASS_SERIAL_INFINIBAND     0x0c06
+#endif
 	&& pcidev->device_class != PCI_CLASS_SERIAL_INFINIBAND)
       goto nextdev;
 
