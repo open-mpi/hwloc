@@ -21,7 +21,7 @@
 #include <sched.h>
 #include <pthread.h>
 
-#  ifndef CPU_SET
+#ifndef HWLOC_HAVE_CPU_SET
 /* libc doesn't have support for sched_setaffinity, build system call
  * ourselves: */
 #    include <linux/unistd.h>
@@ -37,7 +37,7 @@
 #       endif
 _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *, mask);
 #    endif
-#  endif
+#endif
 
 #ifdef HAVE_OPENAT
 
@@ -112,7 +112,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
    */
 
 /* TODO: use dynamic size cpusets */
-#ifdef CPU_SET
+#ifdef HWLOC_HAVE_CPU_SET
   cpu_set_t linux_set;
   unsigned cpu;
 
@@ -130,9 +130,9 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-  return sched_setaffinity(tid, &mask);
+  return sched_setaffinity(tid, (void*) &mask);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-  return sched_setaffinity(tid, sizeof(mask), &mask);
+  return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
 #endif /* CPU_SET */
 }
@@ -166,7 +166,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
    * int thread_migrate (int thread_id, int destination_node);
    */
 
-#ifdef CPU_SET
+#ifdef HWLOC_HAVE_CPU_SET
   cpu_set_t linux_set;
   unsigned cpu;
 
@@ -184,9 +184,9 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-  return pthread_setaffinity_np(tid, &mask);
+  return pthread_setaffinity_np(tid, (void*) &mask);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-  return pthread_setaffinity_np(tid, sizeof(mask), &mask);
+  return pthread_setaffinity_np(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
 #endif /* CPU_SET */
 }

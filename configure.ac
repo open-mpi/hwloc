@@ -339,12 +339,30 @@ if test "x$hwloc_thread_t" != "x" ; then
   AC_DEFINE_UNQUOTED(hwloc_thread_t, $hwloc_thread_t, [Define this to the thread ID type])
 fi
 
-AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[
-#define _GNU_SOURCE
-#include <sched.h>
-static unsigned long mask;
-]], [[ sched_setaffinity(0, (void*) &mask);
-]]), AC_DEFINE([HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()]))
+AC_MSG_CHECKING([for old prototype of sched_setaffinity])
+AC_COMPILE_IFELSE(
+  AC_LANG_PROGRAM([[
+    #define _GNU_SOURCE
+    #include <sched.h>
+    static unsigned long mask;
+    ]], [[ sched_setaffinity(0, (void*) &mask);
+    ]]),
+  AC_DEFINE([HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
+  AC_MSG_RESULT([yes]),
+  AC_MSG_RESULT([no])
+)
+
+AC_MSG_CHECKING([for working CPU_SET])
+AC_LINK_IFELSE(
+  AC_LANG_PROGRAM([[
+    #include <sched.h>
+    cpu_set_t set;
+    ]], [[ CPU_ZERO(&set); CPU_SET(0, &set);
+    ]]),
+    AC_DEFINE([HWLOC_HAVE_CPU_SET], [1], [Define to 1 if the CPU_SET macro works])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+)
 
 AC_ARG_ENABLE([cairo],
   [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
