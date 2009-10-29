@@ -28,8 +28,8 @@ code and/or data locality on modern computing platforms.
 
 *** Note that the hwloc project represents the merger of the
 libtopology project from INRIA and the Portable Linux Processor
-Affinity (PLPA) sub-project from Open MPI.  *Both of these prior
-projects are now deprecated.* The first hwloc release is essentially a
+Affinity (PLPA) sub-project from Open MPI.  <em>Both of these prior
+projects are now deprecated.</em> The first hwloc release is essentially a
 "re-branding" of the libtopology code base, but with both a few
 genuinely new features and a few PLPA-like features added in.  More
 new features and more PLPA-like features will be added to hwloc over
