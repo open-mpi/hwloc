@@ -21,7 +21,7 @@
 #error sched.h must be included with _GNU_SOURCE defined
 #endif
 
-#ifdef CPU_SET
+#ifdef HWLOC_HAVE_CPU_SET
 
 
 /** \defgroup hwlocality_glibc_sched Helpers for manipulating glibc sched affinity
