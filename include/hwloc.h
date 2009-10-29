@@ -540,24 +540,29 @@ extern int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, s
  * The default (0) is to bind the current process, assumed to be mono-thread,
  * in a non-strict way.  This is the most portable way to bind as all OSes
  * usually provide it.
- *
- * \note Depending on OSes and implementations, strict binding (i.e. the
- * thread/process will really never be scheduled outside of the cpuset) may not
- * be possible, not be allowed, only used as a hint when no load balancing is
- * needed, etc.  If strict binding is required, the strict flag should be set,
- * and the function will fail if strict binding is not possible or allowed.
- *
  */
 typedef enum {
-  HWLOC_CPUBIND_PROCESS = (1<<0),	/**< \brief Bind all threads of the current multithreaded process.
-					  * This may not be supported by some OSes (e.g. Linux). */
-  HWLOC_CPUBIND_THREAD = (1<<1),		/**< \brief Bind current thread of current process */
-  HWLOC_CPUBIND_STRICT = (1<<2),		/**< \brief Request for strict binding from the OS
-					 * Note that strict binding may not be
-					 * allowed for administrative reasons,
-					 * and the binding function will fail
-					 * in that case.
-					 */
+  HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
+                                   * This may not be supported by some OSes (e.g. Linux). */
+  HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process */
+  HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS
+                                   *
+                                   * By default, when the designated CPUs are
+                                   * all busy while other CPUs are idle, OSes
+                                   * may execute the thread/process on those
+                                   * other CPUs instead of the designated CPUs,
+                                   * to let them progress anyway.  Strict
+                                   * binding means that the thread/process will
+                                   * _never_ execute on other cpus than the
+                                   * designated CPUs, even when those are busy
+                                   * with other tasks and other CPUs are idle.
+                                   *
+                                   * \note Depending on OSes and
+                                   * implementations, strict binding may not be
+                                   * possible (implementation reason) or not
+                                   * allowed (administrative reasons), and the
+                                   * function will fail in that case.
+                                   */
 } hwloc_cpubind_policy_t;
 
 /** \brief Bind current process or thread on cpus given in cpuset \p set
