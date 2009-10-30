@@ -551,7 +551,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 static void
 add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 {
-  hwloc_obj_t child, container, *cur_children, *obj_children, next_child;
+  hwloc_obj_t child, container, *cur_children, *obj_children, next_child = NULL;
   int put;
 
   /* Make sure we haven't gone too deep.  */
