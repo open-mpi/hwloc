@@ -474,7 +474,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned distances[nbnodes], int fsroot_fd)
+hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned *distances, int fsroot_fd)
 {
   char string[4096]; /* enough for hundreds of nodes */
   char *tmp, *next;
@@ -572,7 +572,7 @@ look_sysfsnode(struct hwloc_topology *topology,
           hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
       }
       
-      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
+      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances);
   }
 }
 
