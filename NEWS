@@ -33,8 +33,8 @@ Version 0.9.1
   semi-graphical text output
 * Extend topobind to support multiple cpusets or objects on the command
   line as topomask does.
-* Add an Infiniband-specific helper hwloc/ibverbs.h to retrieve the physical
-  location of IB devices.
+* Add an Infiniband-specific helper hwloc/openfabrics-verbs.h to retrieve
+  the physical location of IB devices.
 
 
 Version 0.9 (libtopology)
