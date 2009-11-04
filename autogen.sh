@@ -1,2 +1,2 @@
 :
-autoreconf -ivf
+autoreconf -ivf -I m4

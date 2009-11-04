@@ -21,11 +21,8 @@
 /* Define to 1 on Linux */
 #undef HWLOC_LINUX_SYS
 
-#undef HWLOC_HAVE_FFS
-
-#undef HWLOC_HAVE_DECL_FFS
-
-#undef HWLOC_HAVE_FFSL
+/* Define to 1 if the CPU_SET macro works */
+#undef HWLOC_HAVE_CPU_SET
 
 #define HWLOC_NBMAXCPUS	1024
 

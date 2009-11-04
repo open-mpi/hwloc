@@ -7,6 +7,7 @@
 #define HWLOC_MASK_H
 
 #include <hwloc.h>
+#include <private/config.h>
 #include <private/private.h>
 
 #include <stdlib.h>

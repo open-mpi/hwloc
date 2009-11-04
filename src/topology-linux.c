@@ -21,7 +21,7 @@
 #include <sched.h>
 #include <pthread.h>
 
-#  ifndef CPU_SET
+#ifndef HWLOC_HAVE_CPU_SET
 /* libc doesn't have support for sched_setaffinity, build system call
  * ourselves: */
 #    include <linux/unistd.h>
@@ -32,12 +32,33 @@
 #         define __NR_sched_setaffinity 203
 #       elif defined(__ia64__)
 #         define __NR_sched_setaffinity 1231
+#       elif defined(__hppa__)
+#         define __NR_sched_setaffinity 211
+#       elif defined(__alpha__)
+#         define __NR_sched_setaffinity 395
+#       elif defined(__s390__)
+#         define __NR_sched_setaffinity 239
+#       elif defined(__sparc__)
+#         define __NR_sched_setaffinity 261
+#       elif defined(__m68k__)
+#         define __NR_sched_setaffinity 311
+#       elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
+#         define __NR_sched_setaffinity 222
+#       elif defined(__arm__)
+#         define __NR_sched_setaffinity 241
+#       elif defined(__cris__)
+#         define __NR_sched_setaffinity 241
+/*#       elif defined(__mips__)
+  #         define __NR_sched_setaffinity TODO (32/64/nabi) */
 #       else
-#         error "don't know the syscall number for sched_setaffinity on this architecture"
+#         warning "don't know the syscall number for sched_setaffinity on this architecture, will not support binding"
+#         define sched_setaffinity(pid, lg, mask) (errno = ENOSYS, -1)
 #       endif
-_syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *, mask);
+#       ifndef sched_setaffinity
+          _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *, mask);
+#       endif
 #    endif
-#  endif
+#endif
 
 #ifdef HAVE_OPENAT
 
@@ -112,7 +133,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
    */
 
 /* TODO: use dynamic size cpusets */
-#ifdef CPU_SET
+#ifdef HWLOC_HAVE_CPU_SET
   cpu_set_t linux_set;
   unsigned cpu;
 
@@ -130,9 +151,9 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-  return sched_setaffinity(tid, &mask);
+  return sched_setaffinity(tid, (void*) &mask);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-  return sched_setaffinity(tid, sizeof(mask), &mask);
+  return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
 #endif /* CPU_SET */
 }
@@ -166,7 +187,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
    * int thread_migrate (int thread_id, int destination_node);
    */
 
-#ifdef CPU_SET
+#ifdef HWLOC_HAVE_CPU_SET
   /* Use a separate block so that we can define specific variable
      types here */
   {
@@ -191,9 +212,9 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
       unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-      return pthread_setaffinity_np(tid, &mask);
+      return pthread_setaffinity_np(tid, (void*) &mask);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-      return pthread_setaffinity_np(tid, sizeof(mask), &mask);
+      return pthread_setaffinity_np(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
   }
 #endif /* CPU_SET */
@@ -552,7 +573,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned distances[nbnodes], int fsroot_fd)
+hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned *distances, int fsroot_fd)
 {
   char string[4096]; /* enough for hundreds of nodes */
   char *tmp, *next;
@@ -651,8 +672,8 @@ look_sysfsnode(struct hwloc_topology *topology,
         sprintf(nodepath, "%s/node%u/distance", path, osnode);
         hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
       }
-
-    hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
+      
+      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances);
   }
 }
 

@@ -15,83 +15,111 @@
 \endhtmlonly
 \section Introduction
 
-hwloc provides a portable abstraction (across OS, versions, architectures,
-...) of the hierarchical topology of modern architectures. It primarily aims at
-helping high-performance computing applications with gathering information about
-the hardware so as to exploit it accordingly and efficiently.
+hwloc provides command line tools and a C API to obtain the
+hierarchical map of key computing elements, such as: NUMA memory
+nodes, shared caches, processor sockets, processor cores, and
+processor "threads".  hwloc also gathers various attributes such as
+cache and memory information, and is portable across a variety of
+different operating systems and platforms.
 
-hwloc provides a hierarchical view of the machine, NUMA memory nodes,
-sockets, shared caches, cores and simultaneous multithreading. It also gathers
-various attributes such as cache and memory information.
+hwloc primarily aims at helping high-performance computing (HPC)
+applications, but is also applicable to any project seeking to exploit
+code and/or data locality on modern computing platforms.
+
+*** Note that the hwloc project represents the merger of the
+libtopology project from INRIA and the Portable Linux Processor
+Affinity (PLPA) sub-project from Open MPI.  <em>Both of these prior
+projects are now deprecated.</em> The first hwloc release is essentially a
+"re-branding" of the libtopology code base, but with both a few
+genuinely new features and a few PLPA-like features added in.  More
+new features and more PLPA-like features will be added to hwloc over
+time.
 
 hwloc supports the following operating systems:
 
 <ul>
-  <li> Linux (including old kernels not having sysfs topology information, with
-  knowledge of cpusets, offline cpus, and Kerrighed support)
-  <li> Solaris
-  <li> AIX
-  <li> Darwin
-  <li> OSF/1 (aka. Tru64)
-  <li> HP-UX
-  <li> Windows
-  <li> For other OSes, only the number of processors is available for now.
+<li>Linux (including old kernels not having sysfs topology
+information, with knowledge of cpusets, offline cpus, and Kerrighed
+support)</li>
+<li>Solaris</li>
+<li>AIX</li>
+<li>Darwin / OS X</li>
+<li>OSF/1 (a.k.a., Tru64)</li>
+<li>HP-UX</li>
+<li>Microsoft Windows</li>
 </ul>
+
+hwloc only reports the number of processors on unsupported operating
+systems; no topology information is available.
 
 For development and debugging purposes, hwloc also offers the ability to
-work on fake topologies:
+work on "fake" topologies:
 
 <ul>
-  <li> Symmetrical tree of resources generated from a list of level arities
-  <li> Remote machine simulation through the gathering of Linux sysfs topology files
+  <li> Symmetrical tree of resources generated from a list of level arities</li>
+  <li> Remote machine simulation through the gathering of Linux sysfs topology files</li>
 </ul>
 
-hwloc may also display the topology in a convenient format, either in
-graphical mode, or by exporting in PDF, PNG, FIG, ... format, or in text mode
-(see Examples below).
+hwloc can display the topology in a human-readable format, either in
+graphical mode (X11), or by exporting in one of several different
+formats, including: plain text, PDF, PNG, and FIG (see Examples
+below).  Note that some of the export formats require additional
+support libraries.
 
 hwloc offers a programming interface for manipulating topologies and
-objects. It also brings a powerful cpu bitmap API that is used to describe
-topology objects location on physical/logical processors. See the \ref interface
-below. It may also be used to binding applications onto certain cores or
-memory nodes. Several utility programs are also provided to ease command-line
-manipulation of topology objects, binding of processes, ...
+objects. It also brings a powerful CPU bitmap API that is used to
+describe topology objects location on physical/logical processors. See
+the \ref interface below. It may also be used to binding applications
+onto certain cores or memory nodes. Several utility programs are also
+provided to ease command-line manipulation of topology objects,
+binding of processes, and so on.
 
 \htmlonly
 </div><div class="section" id="installation">
 \endhtmlonly
 \section installation Installation
 
-hwloc (http://www.open-mpi.org/projects/hwloc/) is available under the BSD license.
-It is hosted by Open MPI (http://www.open-mpi.org/).
-The current SVN snapshot can be fetched with:
+hwloc (http://www.open-mpi.org/projects/hwloc/) is available under the
+BSD license.  It is hosted as a sub-project of the overall Open MPI
+project (http://www.open-mpi.org/).  Note that hwloc does not require
+any functionality from Open MPI -- it is a wholly separate (and much
+smaller!) project and code base.  It just happens to be hosted as part
+of the overall Open MPI project.
 
-<ul>
- <li>svn checkout http://svn.open-mpi.org/svn/hwloc/trunk hwloc-trunk
- <li>cd hwloc-trunk
- <li>./autogen.sh
-</ul>
+Nightly development snapshots are available on the web site.
+Additionally, the code can be directly checked out of Subversion:
 
-Note that autoconf >=2.60, automake >=1.10 and libtool >=2.2.6 are required in that case.
+\code
+shell$ svn checkout http://svn.open-mpi.org/svn/hwloc/trunk hwloc-trunk
+shell$ cd hwloc-trunk
+shell$ ./autogen.sh
+\endcode
 
-Installation by itself is as usual:
+Note that GNU Autoconf >=2.60, Automake >=1.10 and Libtool >=2.2.6 are
+required when building from a Subversion checkout.
 
-<ul>
- <li>./configure --prefix=...
- <li>make
- <li>make install
-</ul>
+Installation by itself is the fairly common GNU-based process:
 
-Lstopo's fig support is always available. To get support for pdf, ps and png
-support, cairo is needed. To get support for xml, libxml2 is needed.
+\code
+shell$ ./configure --prefix=...
+shell$ make
+shell$ make install
+\endcode
+
+The hwloc command-line tool "lstopo" produces human-readable topology
+maps, as mentioned above.  It can also export maps to the "fig" file
+format.  Support for PDF, Postscript, and PNG exporting is provided if
+the "Cairo" development package can be found when hwloc is configured
+and build.  Similarly, lstopo's XML support requires the libxml2
+development package.
 
 \htmlonly
 </div><div class="section" id="examples">
 \endhtmlonly
 \section examples Examples
 
- On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool may
- show the following outputs:
+On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool
+may show the following outputs:
 
 \image html dudley.png
 \image latex dudley.png width=\textwidth
@@ -162,7 +190,8 @@ System(62GB)
     L2(1024KB) + L1(64KB) + Core#1 + P#15
 \endcode
 
- On a 2-socket quad-core Xeon (pre-Nehalem ones assembling 2 dual-core dies into each socket):
+ On a 2-socket quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
+ each socket):
 
 \image html emmett.png
 \image latex emmett.png width=\textwidth
@@ -191,20 +220,22 @@ System(15GB)
 
 \section interface Programming interface
 
-The basic interface is available in hwloc.h . It mostly offers low-level
-routines for advanced programmers that want to manually manipulate objects
-and follow links between them. Most users should look at hwloc/helper.h
-which provides a lot of interesting higher-level traversal examples.
+The basic interface is available in hwloc.h. It mostly offers
+low-level routines for advanced programmers that want to manually
+manipulate objects and follow links between them.  Developers should
+look at hwloc/helper.h, which provides good higher-level topology
+traversal examples.
 
-Each object contains a cpuset which describes the list of processors
-that it contains. These cpusets may be used for \ref hwlocality_binding.
-hwloc offers an extensive cpuset manipulation interface in hwloc/cpuset.h .
+Each object contains a cpuset describing the list of processors that
+it contains.  These cpusets may be used for \ref hwlocality_binding.
+hwloc offers an extensive cpuset manipulation interface in
+hwloc/cpuset.h.
 
 Moreover, hwloc also comes with additional helpers for
 interoperability with several commonly used environments.  For Linux,
-some specific helpers are available in hwloc/linux.h , and
+some specific helpers are available in hwloc/linux.h, and
 hwloc/linux-libnuma.h if using libnuma.  On glibc-based systems,
-additional helpers are available in hwloc/glibc-sched.h .  For Linux
+additional helpers are available in hwloc/glibc-sched.h.  For Linux
 systems with the OpenFabrics verbs library, some dedicated helpers are
 provided in hwloc/openfabrics-verbs.h (this helper file is not yet
 useful on non-Linux systems with the OpenFabrics verbs library).
@@ -212,10 +243,14 @@ useful on non-Linux systems with the OpenFabrics verbs library).
 To precisely define the vocabulary used by hwloc, a \ref glossary is
 available and should probably be read first.
 
-Further documentation is available in html, manual pages, and pdf format
-in the source tarball in doc/doxygen-doc/ (after doxygen compilation
-for svn checkouts) and are installed in $prefix/share/doc/hwloc/ and
-the usual manual repository.
+Further documentation is available in a full set of HTML pages, man
+pages, and self-contained PDF files (formatted for both both US letter
+and A4 formats) in the source tarball in doc/doxygen-doc/.  If you are
+building from a Subversion checkout, you will need to have Doxygen and
+pdflatex installed -- the documentation will be built during the
+normal "make" process.  The documentation is installed during "make
+install" to $prefix/share/doc/hwloc/ and your systems default man page
+tree (under $prefix, of course).
 
 The following section presents an example of API usage.
 
@@ -225,11 +260,12 @@ This section shows how to use hwloc with an small example \c hwloc-hello.c
 that just prints the topology and binds itself to the first processor of the
 second core of the machine.
 
-Hardware Location provides a pkg-config object, so compiling the example boils down to
+Hardware Location provides a pkg-config object, so compiling the
+example boils down to
 
 \verbatim
-CFLAGS+=$(pkg-config --cflags hwloc)
-LDLIBS+=$(pkg-config --libs hwloc)
+CFLAGS += $(pkg-config --cflags hwloc)
+LDLIBS += $(pkg-config --libs hwloc)
 cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 \endverbatim
 
@@ -259,7 +295,7 @@ sub-project.
 
 libtopology was initially developed by the INRIA Runtime Team-Project
 (http://runtime.bordeaux.inria.fr/) (headed by Raymond Namyst
-(http://dept-info.labri.fr/~namyst/)). PLPA was initially developed by
+(http://dept-info.labri.fr/~namyst/). PLPA was initially developed by
 the Open MPI development team as a sub-project. Both are now deprecated
 in favor of hwloc, which is distributed as an Open MPI sub-project.
 
@@ -328,7 +364,7 @@ topology with 4 levels.
 \image html diagram.png
 \image latex diagram.eps width=\textwidth
 
-It can be noticed that for Processor objects, the logical index, computed
+It should be noted that for Processor objects, the logical index, computed
 linearly by hwloc, is not the same as the OS index.
 
 */

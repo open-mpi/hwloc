@@ -220,7 +220,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
 	  break;
       }
     }
-    hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
+    hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances);
   }
   radsetdestroy(&radset2);
   radsetdestroy(&radset);
