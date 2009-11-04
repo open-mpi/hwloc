@@ -4,6 +4,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/config.h>
 #include <private/cpuset.h>
 #include <private/private.h>
 #include <hwloc/cpuset.h>
