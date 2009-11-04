@@ -262,7 +262,7 @@ AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The
 
 hwloc_strncasecmp=strncmp
 AC_CHECK_FUNCS([strncasecmp], [
-  AC_CHECK_DECL([strncasecmp], [
+  HWLOC_CHECK_DECL([strncasecmp], [
     hwloc_strncasecmp=strncasecmp
   ])
 ])
@@ -438,39 +438,39 @@ fi
 AC_PATH_PROG([BASH], [bash])
 
 AC_CHECK_FUNCS([ffs], [
-  AC_CHECK_DECL([ffs],[
+  HWLOC_CHECK_DECL([ffs],[
     AC_DEFINE([HWLOC_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
   ])
   AC_DEFINE([HWLOC_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
 ])
 AC_CHECK_FUNCS([ffsl], [
-  AC_CHECK_DECL([ffsl],[
+  HWLOC_CHECK_DECL([ffsl],[
     AC_DEFINE([HWLOC_HAVE_DECL_FFSL], [1], [Define to 1 if function `ffsl' is declared by system headers])
   ])
   AC_DEFINE([HWLOC_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
 ])
 
 AC_CHECK_FUNCS([fls], [
-  AC_CHECK_DECL([fls],[
+  HWLOC_CHECK_DECL([fls],[
     AC_DEFINE([HWLOC_HAVE_DECL_FLS], [1], [Define to 1 if function `fls' is declared by system headers])
   ])
   AC_DEFINE([HWLOC_HAVE_FLS], [1], [Define to 1 if you have the `fls' function.])
 ])
 AC_CHECK_FUNCS([flsl], [
-  AC_CHECK_DECL([flsl],[
+  HWLOC_CHECK_DECL([flsl],[
     AC_DEFINE([HWLOC_HAVE_DECL_FLSL], [1], [Define to 1 if function `flsl' is declared by system headers])
   ])
   AC_DEFINE([HWLOC_HAVE_FLSL], [1], [Define to 1 if you have the `flsl' function.])
 ])
 
 AC_CHECK_FUNCS([clz], [
-  AC_CHECK_DECL([clz],[
+  HWLOC_CHECK_DECL([clz],[
     AC_DEFINE([HWLOC_HAVE_DECL_CLZ], [1], [Define to 1 if function `clz' is declared by system headers])
   ])
   AC_DEFINE([HWLOC_HAVE_CLZ], [1], [Define to 1 if you have the `clz' function.])
 ])
 AC_CHECK_FUNCS([clzl], [
-  AC_CHECK_DECL([clzl],[
+  HWLOC_CHECK_DECL([clzl],[
     AC_DEFINE([HWLOC_HAVE_DECL_CLZL], [1], [Define to 1 if function `clzl' is declared by system headers])
   ])
   AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
@@ -479,11 +479,11 @@ AC_CHECK_FUNCS([clzl], [
 AC_CHECK_FUNCS([openat], [have_openat=yes])
 AM_CONDITIONAL([HAVE_OPENAT], [test "x$have_openat" = "xyes"])
 
-AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
+HWLOC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
 	      [#include <numa.h>])
 AM_CONDITIONAL([HAVE_LINUX_LIBNUMA], [test "x$have_linux_libnuma" = "xyes"])
 
-AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
+HWLOC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
 AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
 AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xyes"])
 
