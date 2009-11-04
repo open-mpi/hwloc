@@ -479,11 +479,11 @@ AC_CHECK_FUNCS([clzl], [
 AC_CHECK_FUNCS([openat], [have_openat=yes])
 AM_CONDITIONAL([HAVE_OPENAT], [test "x$have_openat" = "xyes"])
 
-HWLOC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
+AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
 	      [#include <numa.h>])
 AM_CONDITIONAL([HAVE_LINUX_LIBNUMA], [test "x$have_linux_libnuma" = "xyes"])
 
-HWLOC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
+AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
 AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
 AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xyes"])
 
