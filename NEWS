@@ -21,6 +21,11 @@ Version 1.0.0
 * Add Linux cgroup support to the Linux cpuset code.
 
 
+Version 0.9.2
+-------------
+
+* Trivial documentation changes.
+
 
 Version 0.9.1
 -------------
