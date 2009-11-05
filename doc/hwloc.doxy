@@ -194,7 +194,7 @@ System(62GB)
  each socket):
 
 \image html emmett.png
-\image latex emmett.png width=\textwidth
+\image latex emmett.png "" width=8cm
 
 \code
 System(15GB)
