@@ -258,7 +258,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
               }
           hwloc_debug_1arg_cpuset("adding misc object with %u objects and cpuset %s\n",
                                   groupsizes[i], misc_obj->cpuset);
-          hwloc_add_object(topology, misc_obj);
+          hwloc_insert_object_by_cpuset(topology, misc_obj);
           groupobjs[i] = misc_obj;
       }
       
@@ -358,7 +358,7 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
 
       hwloc_debug_2args_cpuset("cpu %d (os %d) has cpuset %s\n",
 		 cpu, oscpu, obj->cpuset);
-      hwloc_add_object(topology, obj);
+      hwloc_insert_object_by_cpuset(topology, obj);
 
       cpu++;
     }
@@ -553,7 +553,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
 /* Try to insert OBJ in CUR, recurse if needed */
 static void
-add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
+hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 {
   hwloc_obj_t child, container, *cur_children, *obj_children, next_child = NULL;
   int put;
@@ -608,7 +608,7 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 
   if (container) {
     /* OBJ is strictly contained is some child of CUR, go deeper.  */
-    add_object(topology, container, obj);
+    hwloc__insert_object_by_cpuset(topology, container, obj);
     return;
   }
 
@@ -673,15 +673,48 @@ add_object(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 }
 
 void
-hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj)
+hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
+  assert(!obj->first_child);
+
   if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     free_object(obj);
     return;
   }
 
   /* Start at the top.  */
-  add_object(topology, topology->levels[0][0], obj);
+  hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
+}
+
+void
+hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj)
+{
+  hwloc_obj_t child, next_child = obj->first_child;
+  hwloc_obj_t *current;
+  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS)
+    return;
+
+  /* FIXME: mark KEEP_STRUCTURE as unsupported for I/O devices ? */
+  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
+    /* Just drop the object and use father to insert children */
+    free_object(obj);
+  } else {
+    /* Append to the end of the list */
+    for (current = &father->first_child; *current; current = &(*current)->next_sibling)
+      ;
+    *current = obj;
+    obj->next_sibling = NULL;
+    obj->first_child = NULL;
+    /* Use the new object to insert children */
+    father = obj;
+  }
+
+  /* Recursively insert children below */
+  while (next_child) {
+    child = next_child;
+    next_child = child->next_sibling;
+    hwloc_insert_object_by_parent(topology, father, child);
+  }
 }
 
 /*
@@ -950,7 +983,7 @@ hwloc_discover(struct hwloc_topology *topology)
   hwloc_debug("\nApplying the system cpuset to all nodes\n");
   traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, topology->levels[0][0]->cpuset);
 
-  hwloc_debug("\nRemoving empty objects except numa nodes\n");
+  hwloc_debug("\nRemoving empty objects except numa nodes and PCI devices\n");
   traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
 
   print_objects(topology, 0, topology->levels[0][0]);

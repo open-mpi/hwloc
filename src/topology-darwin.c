@@ -66,7 +66,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 
       hwloc_debug_1arg_cpuset("package %d has cpuset %s\n",
 		 i, obj->cpuset);
-      hwloc_add_object(topology, obj);
+      hwloc_insert_object_by_cpuset(topology, obj);
     }
 
     if (!get_sysctl("machdep.cpu.cores_per_package", &cores_per_package)) {
@@ -84,7 +84,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 
         hwloc_debug_1arg_cpuset("core %d has cpuset %s\n",
 		   i, obj->cpuset);
-	hwloc_add_object(topology, obj);
+	hwloc_insert_object_by_cpuset(topology, obj);
       }
     }
   }
@@ -129,7 +129,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 	  obj->attr->node.huge_page_free = 0; /* TODO */
 	}
 
-	hwloc_add_object(topology, obj);
+	hwloc_insert_object_by_cpuset(topology, obj);
       }
     }
   }

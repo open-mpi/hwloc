@@ -138,8 +138,34 @@ extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const c
 extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);
 extern void hwloc_look_synthetic (struct hwloc_topology *topology);
 
-extern void hwloc_add_object(struct hwloc_topology *topology, hwloc_obj_t obj);
+/*
+ * Add an object to the topology.
+ * It is sorted along the tree of other objects according to the inclusion of
+ * cpusets, to eventually be added as a child of the smallest object including
+ * this object.
+ *
+ * If the cpuset is empty, the type of the object (and maybe some attributes)
+ * must be enough to find where to insert the object. This is especially true
+ * for NUMA nodes with memory and no CPUs.
+ *
+ * The given object should not have children.
+ *
+ * This shall only be called before levels are built.
+ */
+extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
 
+/*
+ * Insert an object somewhere in the topology.
+ *
+ * It is added as the last child of the given father.
+ * The cpuset is completely ignored, so strange objects such as I/O devices should
+ * preferably be inserted with this.
+ *
+ * The given object may have children.
+ *
+ * Remember to call topology_connect() afterwards to fix handy pointers.
+ */
+extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj);
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 static __inline char *
@@ -192,7 +218,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
       hwloc_debug_2args_cpuset("%s %d has cpuset %s\n",
 		 hwloc_obj_type_string(type),
 		 j, obj->cpuset);
-      hwloc_add_object(topology, obj);
+      hwloc_insert_object_by_cpuset(topology, obj);
     }
   hwloc_debug("\n");
 }

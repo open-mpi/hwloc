@@ -188,7 +188,7 @@ hwloc_look_hpux(struct hwloc_topology *topology)
     }
 
     /* Add cpu */
-    hwloc_add_object(topology, obj);
+    hwloc_insert_object_by_cpuset(topology, obj);
 
     currentcpu = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETNEXTSPU_SYS : MPC_GETNEXTSPU, currentcpu, 0);
@@ -197,7 +197,7 @@ hwloc_look_hpux(struct hwloc_topology *topology)
   if (nodes) {
     /* Add nodes */
     for (i = 0 ; i < nbnodes ; i++)
-      hwloc_add_object(topology, nodes[i]);
+      hwloc_insert_object_by_cpuset(topology, nodes[i]);
     free(nodes);
   }
 }

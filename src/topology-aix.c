@@ -163,7 +163,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     hwloc_debug_2args_cpuset("%s %d has cpuset %s\n",
 	       hwloc_obj_type_string(type),
 	       i, obj->cpuset);
-    hwloc_add_object(topology, obj);
+    hwloc_insert_object_by_cpuset(topology, obj);
   }
 
   rs_free(rset);

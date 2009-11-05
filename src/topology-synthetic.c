@@ -214,7 +214,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       first_cpu = hwloc__look_synthetic(topology, level + 1, first_cpu, pmemory, obj->cpuset);
   }
 
-  hwloc_add_object(topology, obj);
+  hwloc_insert_object_by_cpuset(topology, obj);
 
   hwloc_cpuset_orset(parent_cpuset, obj->cpuset);
 
