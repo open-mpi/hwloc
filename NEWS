@@ -15,6 +15,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 0.9.3 (unreleased)
+--------------------------
+
+* Fix autogen.sh to work with Autoconf 2.63.
+
+
 Version 0.9.2
 -------------
 
