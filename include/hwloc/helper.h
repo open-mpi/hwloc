@@ -273,13 +273,18 @@ hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_cpuset_
 
 /** \brief Get the child covering at least CPU set \p set.
  *
- * \return \c NULL if no child matches.
+ * \return \c NULL if no child matches or if \p set is empty.
  */
 static __inline hwloc_obj_t
 hwloc_get_child_covering_cpuset (hwloc_topology_t topology, hwloc_cpuset_t set,
 				hwloc_obj_t father)
 {
-  hwloc_obj_t child = father->first_child;
+  hwloc_obj_t child;
+
+  if (hwloc_cpuset_iszero(set))
+    return NULL;
+
+  child = father->first_child;
   while (child) {
     if (hwloc_cpuset_isincluded(set, child->cpuset))
       return child;
@@ -290,12 +295,15 @@ hwloc_get_child_covering_cpuset (hwloc_topology_t topology, hwloc_cpuset_t set,
 
 /** \brief Get the lowest object covering at least CPU set \p set
  *
- * \return \c NULL if no object matches.
+ * \return \c NULL if no object matches or if \p set is empty.
  */
 static __inline hwloc_obj_t
 hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_cpuset_t set)
 {
   struct hwloc_obj *current = hwloc_get_system_obj(topology);
+
+  if (hwloc_cpuset_iszero(set))
+    return NULL;
 
   if (!hwloc_cpuset_isincluded(set, current->cpuset))
     return NULL;
