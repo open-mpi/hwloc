@@ -124,7 +124,7 @@ may show the following outputs:
 \image html dudley.png
 \image latex dudley.png width=\textwidth
 
-\code
+\verbatim
 System(15GB)
   Socket#0 + L3(4096KB)
     L2(1024KB) + L1(16KB) + Core#0
@@ -154,7 +154,7 @@ System(15GB)
     L2(1024KB) + L1(16KB) + Core#1
       P#7
       P#15
-\endcode
+\endverbatim
 
  On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may
  show the following outputs:
@@ -162,7 +162,7 @@ System(15GB)
 \image html hagrid.png
 \image latex hagrid.png width=\textwidth
 
-\code
+\verbatim
 System(62GB)
   Node#0(8190MB) + Socket#0
     L2(1024KB) + L1(64KB) + Core#0 + P#0
@@ -188,15 +188,15 @@ System(62GB)
   Node#7(8192MB) + Socket#7
     L2(1024KB) + L1(64KB) + Core#0 + P#14
     L2(1024KB) + L1(64KB) + Core#1 + P#15
-\endcode
+\endverbatim
 
  On a 2-socket quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
  each socket):
 
 \image html emmett.png
-\image latex emmett.png width=\textwidth
+\image latex emmett.png "" width=8cm
 
-\code
+\verbatim
 System(15GB)
   Socket#0
     L2(4096KB)
@@ -212,7 +212,7 @@ System(15GB)
     L2(4096KB)
       L1(32KB) + Core#2 + P#3
       L1(32KB) + Core#3 + P#7
-\endcode
+\endverbatim
 
 \htmlonly
 </div><div class="section" id="interface">

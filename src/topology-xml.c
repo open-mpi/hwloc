@@ -193,7 +193,7 @@ hwloc__look_xml_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
 }
 
 static void
-hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
+hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, xmlNode *node, int depth)
 {
   for (; node; node = node->next) {
     if (node->type == XML_ELEMENT_NODE) {
@@ -284,13 +284,13 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
             free(s2);
           }
 	  else
-	    hwloc_insert_object_by_cpuset(topology, obj);
+	    hwloc_insert_object_by_parent(topology, father, obj);
 	}
       }
 
       /* process children */
       if (node->children)
-	hwloc__look_xml_node(topology, node->children, depth+1);
+	hwloc__look_xml_node(topology, obj, node->children, depth+1);
 
     } else if (node->type == XML_TEXT_NODE) {
       if (node->content && node->content[0] != '\0' && node->content[0] != '\n')
@@ -316,7 +316,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 
-  hwloc__look_xml_node(topology, root_node, 0);
+  hwloc__look_xml_node(topology, NULL, root_node, 0);
 
   /* TODO: abort if we got an invalid topology or so */
 }

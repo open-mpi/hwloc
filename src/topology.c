@@ -714,6 +714,8 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t fathe
 {
   hwloc_obj_t child, next_child = obj->first_child;
   hwloc_obj_t *current;
+  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS)
+    return;
 
   /* FIXME: mark KEEP_STRUCTURE as unsupported for I/O devices ? */
   if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {

@@ -635,42 +635,40 @@ look_sysfsnode(struct hwloc_topology *topology,
   /* For convenience, put these declarations inside a block.  Saves us
      from a bunch of mallocs, particularly with the 2D array. */
   {
-    hwloc_obj_t nodes[nbnodes];
-    unsigned distances[nbnodes][nbnodes];
-
-    for (osnode=0; osnode < nbnodes; osnode++)
-      {
-        char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
-        hwloc_cpuset_t cpuset;
-        unsigned long size = -1;
-        unsigned long hpfree = -1;
-
-        sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
-        cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
-        if (!cpuset)
-          continue;
-
-        /* clear disabled cpus */
-        hwloc_cpuset_clearset(cpuset, admin_disabled_cpus_set);
-
-        if (hwloc_cpuset_isset(admin_disabled_mems_set, osnode)) {
-          size = 0; hpfree = 0;
-        } else
-          hwloc_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
-
-        node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
-        node->cpuset = cpuset;
-        node->attr->node.memory_kB = size;
-        node->attr->node.huge_page_free = hpfree;
-        node->cpuset = cpuset;
-
-        hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
-          	 osnode, node->cpuset);
-        hwloc_insert_object_by_cpuset(topology, node);
-        nodes[osnode] = node;
-
-        sprintf(nodepath, "%s/node%u/distance", path, osnode);
-        hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
+      hwloc_obj_t nodes[nbnodes];
+      unsigned distances[nbnodes][nbnodes];
+      for (osnode=0; osnode < nbnodes; osnode++) {
+          char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
+          hwloc_cpuset_t cpuset;
+          unsigned long size = -1;
+          unsigned long hpfree = -1;
+          
+          sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
+          cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
+          if (!cpuset)
+              continue;
+          
+          /* clear disabled cpus */
+          hwloc_cpuset_clearset(cpuset, admin_disabled_cpus_set);
+          
+          if (hwloc_cpuset_isset(admin_disabled_mems_set, osnode)) {
+              size = 0; hpfree = 0;
+          } else
+              hwloc_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
+          
+          node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
+          node->cpuset = cpuset;
+          node->attr->node.memory_kB = size;
+          node->attr->node.huge_page_free = hpfree;
+          node->cpuset = cpuset;
+          
+          hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
+                                  osnode, node->cpuset);
+          hwloc_insert_object_by_cpuset(topology, node);
+          nodes[osnode] = node;
+          
+          sprintf(nodepath, "%s/node%u/distance", path, osnode);
+          hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
       }
       
       hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances);

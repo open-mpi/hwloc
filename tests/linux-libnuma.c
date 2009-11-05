@@ -92,7 +92,7 @@ int main(void)
   hwloc_cpuset_free(set);
 
 
-  /* convert last node nodemask/bitmask from/to cpuset */
+  /* convert first node nodemask/bitmask from/to cpuset */
   node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, NULL);
   if (node) {
     hwloc_cpuset_to_linux_libnuma_nodemask(topology, node->cpuset, &nodemask);
