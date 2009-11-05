@@ -1,7 +1,7 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-ACLOCAL_AMFLAGS = -I config
+ACLOCAL_AMFLAGS = -I config -I m4
 
 SUBDIRS = src utils tests include doc
 
