@@ -1,7 +1,7 @@
 <!ELEMENT root (object)+>
 
 <!ELEMENT object (object)*>
-<!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
+<!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc | Bridge | PCIDev) #REQUIRED>
 <!ATTLIST object os_index CDATA "-1" >
 <!ATTLIST object cpuset CDATA "0" >
 <!ATTLIST object name CDATA "" >
