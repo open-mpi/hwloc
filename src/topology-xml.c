@@ -70,6 +70,8 @@ hwloc__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *ob
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cpuset"))
     obj->cpuset = hwloc_cpuset_from_string(value);
+  else if (!strcmp(name, "name"))
+    obj->name = strdup(value);
 
   else if (!strcmp(name, "memory_kB")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
@@ -337,6 +339,9 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
   hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
   xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
   free(cpuset);
+
+  if (obj->name)
+    xmlNewProp(node, BAD_CAST "name", BAD_CAST obj->name);
 
   switch (obj->type) {
   case HWLOC_OBJ_CACHE:

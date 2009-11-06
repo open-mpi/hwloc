@@ -531,7 +531,8 @@ AC_CONFIG_FILES([hwloc.pc
 		 tests/linux/Makefile
 		 tests/linux/gather-topology.sh
 		 tests/linux/test-topology.sh
-		 tests/lstopo_xml.sh
+		 tests/xml/Makefile
+		 tests/xml/test-topology.sh
 		 tests/ports/Makefile
 		 utils/Makefile
 		 utils/test-hwloc-distrib.sh
@@ -540,6 +541,6 @@ AC_CONFIG_FILES([hwloc.pc
 AC_CONFIG_HEADERS([include/hwloc/config.h])
 
 AC_CONFIG_COMMANDS([linux-topology-scripts],
-                   [chmod +x tests/linux/test-topology.sh tests/lstopo_xml.sh tests/linux/gather-topology.sh utils/test-hwloc-distrib.sh])
+                   [chmod +x tests/linux/test-topology.sh tests/xml/test-topology.sh tests/linux/gather-topology.sh utils/test-hwloc-distrib.sh])
 
 AC_OUTPUT

@@ -4,6 +4,7 @@
 <!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
 <!ATTLIST object os_index CDATA "-1" >
 <!ATTLIST object cpuset CDATA "0" >
+<!ATTLIST object name CDATA "" >
 <!ATTLIST object dmi_board_vendor CDATA "" >
 <!ATTLIST object dmi_board_name CDATA "" >
 <!ATTLIST object memory_kB CDATA "0" >

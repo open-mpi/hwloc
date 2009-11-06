@@ -215,6 +215,12 @@ main (int argc, char *argv[])
   if (err)
     return EXIT_FAILURE;
 
+  if (!filename && !strcmp(callname,"hwloc-info")) {
+    /* behave kind-of plpa-info */
+    filename = "-";
+    verbose_mode--;
+  }
+
   if (!filename) {
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HAVE_X11

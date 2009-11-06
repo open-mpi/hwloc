@@ -4,6 +4,9 @@
 include $(top_srcdir)/hwloc.am
 
 SUBDIRS = linux ports
+if HAVE_XML
+SUBDIRS += xml
+endif
 
 check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_get_closest_objs \
@@ -43,10 +46,6 @@ EXTRA_DIST += openfabrics-verbs.c
 endif !HAVE_LIBIBVERBS
 
 TESTS = $(check_PROGRAMS)
-
-if HAVE_XML
-TESTS += lstopo_xml.sh
-endif
 
 LIBS = $(top_builddir)/src/libhwloc.la
 
