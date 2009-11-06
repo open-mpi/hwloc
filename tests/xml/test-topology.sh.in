@@ -6,6 +6,20 @@
 # See COPYING in top-level directory.
 #
 
+# Check the conformance of `lstopo' for all the XML
+# hierarchies available here.  Return true on success.
+
+abs_top_builddir="@abs_top_builddir@"
+abs_top_srcdir="@abs_top_srcdir@"
+lstopo="$abs_top_builddir/utils/lstopo"
+
+if [ ! -x "$lstopo" ]
+then
+    error "Could not find executable file \`$lstopo'."
+    exit 1
+fi
+
+
 : ${TMPDIR=/tmp}
 {
   tmp=`
@@ -19,11 +33,11 @@
 file="$tmp/lstopo_xml.output.xml"
 
 set -e
-../utils/lstopo --xml "$srcdir"/linux/16em64t-4s2c2t.xml.tar.gz.output "$file"
-diff @HWLOC_DIFF_U@ "$srcdir"/linux/16em64t-4s2c2t.xml.tar.gz.output "$file"
+$lstopo --xml "$srcdir"/"$1" "$file"
+diff @HWLOC_DIFF_U@ "$srcdir"/"$1" "$file"
 if [ -n "@XMLLINT@" ]
 then
-  cp "$srcdir"/../src/hwloc.dtd "$tmp/"
+  cp "$abs_top_srcdir"/src/hwloc.dtd "$tmp/"
   @XMLLINT@ --valid "$file" > /dev/null
 fi
 rm -rf "$tmp"
