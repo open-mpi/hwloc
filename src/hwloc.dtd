@@ -11,3 +11,7 @@
 <!ATTLIST object huge_page_size_kB CDATA "0" >
 <!ATTLIST object huge_page_free CDATA "0" >
 <!ATTLIST object depth CDATA "-1" >
+<!ATTLIST object bridge_type CDATA "" >
+<!ATTLIST object bridge_pci CDATA "" >
+<!ATTLIST object pci_busid CDATA "" >
+<!ATTLIST object pci_type CDATA "" >
