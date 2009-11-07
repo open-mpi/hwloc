@@ -238,7 +238,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, xmlNode *node, int depth)
 		fprintf(stderr, "ignoring unexpected xml attr node type %u name %s\n", node->type, (const char*) node->name);
 	    }
 	  }
-	  if (obj->type == HWLOC_OBJ_TYPE_MAX) {
+	  if (obj && obj->type == HWLOC_OBJ_TYPE_MAX) {
 	    fprintf(stderr, "ignoring attributes of object without type\n");
 	    return;
 	  }
