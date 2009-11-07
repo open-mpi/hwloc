@@ -709,14 +709,6 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	continue;
       }
 
-      /* check whether the kernel exports topology information for this cpu */
-      sprintf(str, "%s/cpu%lu/topology", path, cpu);
-      if (hwloc_access(str, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT) {
-	hwloc_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
-		   cpu, path, cpu);
-	continue;
-      }
-
       /* check whether this processor is offline */
       sprintf(str, "%s/cpu%lu/online", path, cpu);
       fd = hwloc_fopen(str, "r", topology->backend_params.sysfs.root_fd);
@@ -732,6 +724,14 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	} else {
 	  fclose(fd);
 	}
+      }
+
+      /* check whether the kernel exports topology information for this cpu */
+      sprintf(str, "%s/cpu%lu/topology", path, cpu);
+      if (hwloc_access(str, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT) {
+	hwloc_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
+		   cpu, path, cpu);
+	continue;
       }
 
       hwloc_cpuset_set(cpuset, cpu);
