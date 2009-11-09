@@ -179,7 +179,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
     return NULL;
 
   hwloc_set = hwloc_cpuset_alloc();
-  for(cpu=0; cpu<__CPU_SETSIZE; cpu++)
+  for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, &linux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
 #else /* CPU_SET */
@@ -307,7 +307,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid)
 	return NULL;
 
      hwloc_set = hwloc_cpuset_alloc();
-     for(cpu=0; cpu<__CPU_SETSIZE; cpu++)
+     for(cpu=0; cpu<CPU_SETSIZE; cpu++)
        if (CPU_ISSET(cpu, &linux_set))
 	 hwloc_cpuset_set(hwloc_set, cpu);
   }
