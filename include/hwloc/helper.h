@@ -136,6 +136,24 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
   return hwloc_get_next_obj_by_depth (topology, depth, prev);
 }
 
+/** \brief Returns the object of type ::HWLOC_OBJ_PROC with \p os_index.
+ *
+ * \note The \p os_index field of object should most of the times only be
+ * used for pretty-printing purpose. Type ::HWLOC_OBJ_PROC is the only case
+ * where \p os_index could actually be useful, when manually binding to
+ * processors.
+ * However, using CPU sets to hide this complexity should often be preferred.
+ */
+static __inline hwloc_obj_t
+hwloc_get_proc_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
+{
+  hwloc_obj_t obj = NULL;
+  while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PROC, obj)) != NULL)
+    if (obj->os_index == os_index)
+      return obj;
+  return NULL;
+}
+
 /** \brief Return the next child.
  *
  * If \p prev is \c NULL, return the first child.
