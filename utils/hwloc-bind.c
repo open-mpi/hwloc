@@ -20,6 +20,7 @@ static void usage(FILE *where)
   fprintf(where, "Options:\n");
   fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
   fprintf(where, "   --strict\trequire strict binding\n");
+  fprintf(where, "   --get\tretrieve current process binding\n")
   fprintf(where, "   -v\t\tverbose messages\n");
   fprintf(where, "   --version\treport version and exit\n");
 }
@@ -29,6 +30,7 @@ int main(int argc, char *argv[])
   hwloc_topology_t topology;
   unsigned depth;
   hwloc_cpuset_t cpu_set; /* invalid until bind_cpus is set */
+  int get_binding = 0;
   int bind_cpus = 0;
   int single = 0;
   int verbose = 0;
@@ -74,6 +76,10 @@ int main(int argc, char *argv[])
           printf("%s %s\n", orig_argv[0], VERSION);
           exit(EXIT_SUCCESS);
       }
+      else if (!strcmp (argv[0], "--get")) {
+	  get_binding = 1;
+	  goto next;
+      }
 
       usage(stderr);
       return EXIT_FAILURE;
@@ -85,6 +91,20 @@ int main(int argc, char *argv[])
   next:
     argc--;
     argv++;
+  }
+
+  if (get_binding) {
+    char *s;
+    hwloc_cpuset_free(cpu_set);
+    cpu_set = hwloc_get_cpubind(topology, 0);
+    if (!cpu_set) {
+      fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, strerror(errno));
+      return EXIT_FAILURE;
+    }
+    s = hwloc_cpuset_printf_value(cpu_set);
+    printf("%s\n", s);
+    free(s);  
+    return EXIT_SUCCESS;
   }
 
   if (bind_cpus) {
