@@ -562,6 +562,9 @@ typedef enum {
                                    * possible (implementation reason) or not
                                    * allowed (administrative reasons), and the
                                    * function will fail in that case.
+				   *
+				   * \note This flag is meaningless when retrieving
+				   * the binding of a process or thread.
                                    */
 } hwloc_cpubind_policy_t;
 
@@ -569,6 +572,10 @@ typedef enum {
  */
 extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t set,
 			    int policy);
+
+/** \brief Get current process or thread binding
+ */
+extern hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int policy);
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
  *
@@ -579,6 +586,15 @@ extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t set
  */
 extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t set, int policy);
 
+/** \brief Get the current binding of process \p pid on
+ *
+ * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
+ * platforms
+ *
+ * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
+ */
+extern hwloc_cpuset_t hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy);
+
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
  * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
@@ -588,6 +604,17 @@ extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, co
  */
 #ifdef hwloc_thread_t
 extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t set, int policy);
+#endif
+
+/** \brief Get the current binding of thread \p tid
+ *
+ * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
+ * Windows platforms
+ *
+ * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
+ */
+#ifdef hwloc_thread_t
+extern hwloc_cpuset_t hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy);
 #endif
 
 /** @} */

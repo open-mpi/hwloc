@@ -158,16 +158,70 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
 #endif /* CPU_SET */
 }
 
+static hwloc_cpuset_t
+hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
+{
+  hwloc_cpuset_t hwloc_set;
+  int err;
+  /* TODO Kerrighed */
+
+/* TODO: use dynamic size cpusets */
+#ifdef HWLOC_HAVE_CPU_SET
+  cpu_set_t linux_set;
+  unsigned cpu;
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+  err = sched_getaffinity(tid, &linux_set);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+  err = sched_getaffinity(tid, sizeof(linux_set), &linux_set);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+  if (err < 0)
+    return NULL;
+
+  hwloc_set = hwloc_cpuset_alloc();
+  for(cpu=0; cpu<__CPU_SETSIZE; cpu++)
+    if (CPU_ISSET(cpu, &linux_set))
+      hwloc_cpuset_set(hwloc_set, cpu);
+#else /* CPU_SET */
+  unsigned long mask;
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+  err = sched_getaffinity(tid, (void*) &mask);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+  err = sched_getaffinity(tid, sizeof(mask), (void*) &mask);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+  if (err < 0)
+    return NULL;
+
+  hwloc_set = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_ulong(hwloc_set, mask);
+#endif /* CPU_SET */
+
+  return hwloc_set;
+}
+
 static int
 hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
 }
 
+static hwloc_cpuset_t
+hwloc_linux_get_cpubind(hwloc_topology_t topology)
+{
+  return hwloc_linux_get_tid_cpubind(topology, 0);
+}
+
 static int
 hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
+}
+
+static hwloc_cpuset_t
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology)
+{
+  return hwloc_linux_get_tid_cpubind(topology, 0);
 }
 
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
@@ -220,6 +274,65 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #endif /* CPU_SET */
 }
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
+
+#if HAVE_DECL_PTHREAD_GETAFFINITY_NP
+#pragma weak pthread_getaffinity_np
+
+static hwloc_cpuset_t
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid)
+{
+  hwloc_cpuset_t hwloc_set;
+  int err;
+
+  if (!pthread_getaffinity_np) {
+    /* ?! Application uses get_thread_cpubind, but doesn't link against libpthread ?! */
+    errno = ENOSYS;
+    return NULL;
+  }
+  /* TODO Kerrighed */
+
+#ifdef HWLOC_HAVE_CPU_SET
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+     cpu_set_t linux_set;
+     unsigned cpu;
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+     err = pthread_getaffinity_np(tid, &linux_set);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+     err = pthread_getaffinity_np(tid, sizeof(linux_set), &linux_set);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+     if (err < 0)
+	return NULL;
+
+     hwloc_set = hwloc_cpuset_alloc();
+     for(cpu=0; cpu<__CPU_SETSIZE; cpu++)
+       if (CPU_ISSET(cpu, &linux_set))
+	 hwloc_cpuset_set(hwloc_set, cpu);
+  }
+#else /* CPU_SET */
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+      unsigned long mask;
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+      err = pthread_getaffinity_np(tid, (void*) &mask);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+      err = pthread_getaffinity_np(tid, sizeof(mask), (void*) &mask);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+      if (err < 0)
+	return NULL;
+
+     hwloc_set = hwoc_cpuset_alloc();
+     hwloc_cpuset_from_ulong(hwloc_set, mask);
+  }
+#endif /* CPU_SET */
+
+  return hwloc_set;
+}
+#endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
 int
 hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path)
@@ -1164,10 +1277,15 @@ void
 hwloc_set_linux_hooks(struct hwloc_topology *topology)
 {
   topology->set_cpubind = hwloc_linux_set_cpubind;
+  topology->get_cpubind = hwloc_linux_get_cpubind;
+  topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
+  topology->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
   topology->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
-  topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
+#if HAVE_DECL_PTHREAD_GETAFFINITY_NP
+  topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
+#endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 }
 
 /* TODO mbind, setpolicy */

@@ -49,11 +49,16 @@ struct hwloc_topology {
   int is_loaded;
 
   int (*set_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  hwloc_cpuset_t (*get_cpubind)(hwloc_topology_t topology);
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology);
   int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
+  hwloc_cpuset_t (*get_thisthread_cpubind)(hwloc_topology_t topology);
   int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int strict);
+  hwloc_cpuset_t (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid);
 #ifdef hwloc_thread_t
   int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int strict);
+  hwloc_cpuset_t (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid);
 #endif
 
   hwloc_backend_t backend_type;

@@ -873,22 +873,42 @@ static int dontset_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int st
 {
   return 0;
 }
-static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
+static hwloc_cpuset_t dontget_cpubind(hwloc_topology_t topology)
 {
-  return 0;
+  return hwloc_get_system_obj(topology)->cpuset;
 }
 static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
 {
   return 0;
 }
+static hwloc_cpuset_t dontget_thisthread_cpubind(hwloc_topology_t topology)
+{
+  return hwloc_get_system_obj(topology)->cpuset;
+}
+static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
+{
+  return 0;
+}
+static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology)
+{
+  return hwloc_get_system_obj(topology)->cpuset;
+}
 static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int strict)
 {
   return 0;
+}
+static hwloc_cpuset_t dontget_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid)
+{
+  return hwloc_get_system_obj(topology)->cpuset;
 }
 #ifdef hwloc_thread_t
 static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int strict)
 {
   return 0;
+}
+static hwloc_cpuset_t dontget_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid)
+{
+  return hwloc_get_system_obj(topology)->cpuset;
 }
 #endif
 
@@ -1132,12 +1152,17 @@ hwloc_discover(struct hwloc_topology *topology)
 #    endif /* HPUX_SYS */
   } else {
     topology->set_cpubind = dontset_cpubind;
+    topology->get_cpubind = dontget_cpubind;
+    topology->set_thisproc_cpubind = dontset_thisproc_cpubind;
+    topology->get_thisproc_cpubind = dontget_thisproc_cpubind;
+    topology->set_thisthread_cpubind = dontset_thisthread_cpubind;
+    topology->get_thisthread_cpubind = dontget_thisthread_cpubind;
     topology->set_proc_cpubind = dontset_proc_cpubind;
+    topology->get_proc_cpubind = dontget_proc_cpubind;
 #ifdef hwloc_thread_t
     topology->set_thread_cpubind = dontset_thread_cpubind;
+    topology->get_thread_cpubind = dontget_thread_cpubind;
 #endif
-    topology->set_thisproc_cpubind = dontset_thisproc_cpubind;
-    topology->set_thisthread_cpubind = dontset_thisthread_cpubind;
   }
 }
 
@@ -1192,12 +1217,17 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->is_thissystem = 1;
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
   topology->set_cpubind = NULL;
+  topology->get_cpubind = NULL;
+  topology->set_thisproc_cpubind = NULL;
+  topology->get_thisproc_cpubind = NULL;
+  topology->set_thisthread_cpubind = NULL;
+  topology->get_thisthread_cpubind = NULL;
   topology->set_proc_cpubind = NULL;
+  topology->get_proc_cpubind = NULL;
 #ifdef hwloc_thread_t
   topology->set_thread_cpubind = NULL;
+  topology->get_thread_cpubind = NULL;
 #endif
-  topology->set_thisproc_cpubind = NULL;
-  topology->set_thisthread_cpubind = NULL;
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
