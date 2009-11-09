@@ -49,14 +49,20 @@ hwloc__process_root_attr(struct hwloc_topology *topology,
 			const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
-/* unused for now   const char *value = (const char *) _value; */
+  const char *value = (const char *) _value;
 
-  fprintf(stderr, "ignoring unknown root attribute %s\n", name);
+  if (!strcmp(name, "offline_cpuset")) {
+    hwloc_cpuset_free(topology->offline_cpuset);
+    topology->offline_cpuset = hwloc_cpuset_from_string(value);
+  }
+
+  else
+    fprintf(stderr, "ignoring unknown root attribute %s\n", name);
 }
 
 static void
 hwloc__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
-			  const xmlChar *_name, const xmlChar *_value)
+			   const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
   const char *value = (const char *) _value;
@@ -391,6 +397,19 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
   }
 }
 
+static void
+hwloc__topology_export_info (hwloc_topology_t topology, xmlNodePtr root_node)
+{
+  hwloc_cpuset_t offline = hwloc_topology_get_offline_cpuset(topology);
+  char *offlinestr = NULL;
+
+  hwloc_cpuset_asprintf(&offlinestr, offline);
+  xmlNewProp(root_node, BAD_CAST "offline_cpuset", BAD_CAST offlinestr);
+
+  free(offlinestr);
+  hwloc_cpuset_free(offline);
+}
+
 void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
   xmlDocPtr doc = NULL;       /* document pointer */
@@ -408,6 +427,8 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
   dtd = xmlCreateIntSubset(doc, BAD_CAST "root", NULL, BAD_CAST "hwloc.dtd");
 
   hwloc__topology_export_xml_object (topology, hwloc_get_system_obj(topology), root_node);
+
+  hwloc__topology_export_info (topology, root_node);
 
   /* Dumping document to stdio or file. */
   xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);

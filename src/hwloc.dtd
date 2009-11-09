@@ -1,4 +1,5 @@
 <!ELEMENT root (object)+>
+<!ATTLIST root offline_cpuset CDATA "0" >
 
 <!ELEMENT object (object)*>
 <!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
