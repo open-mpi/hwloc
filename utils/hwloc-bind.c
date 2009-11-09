@@ -20,7 +20,7 @@ static void usage(FILE *where)
   fprintf(where, "Options:\n");
   fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
   fprintf(where, "   --strict\trequire strict binding\n");
-  fprintf(where, "   --get\tretrieve current process binding\n")
+  fprintf(where, "   --get\tretrieve current process binding\n");
   fprintf(where, "   -v\t\tverbose messages\n");
   fprintf(where, "   --version\treport version and exit\n");
 }
