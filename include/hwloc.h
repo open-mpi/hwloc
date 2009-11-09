@@ -437,7 +437,7 @@ extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topol
  * \return the CPU set of offline logical processors, or processors
  * that are disabled by the administrator.
  */
-extern hwloc_cpuset_t hwloc_topology_get_offline_cpuset(struct hwloc_topology *topology);
+extern hwloc_cpuset_t hwloc_topology_get_offline_cpuset(hwloc_topology_t topology);
 
 /** @} */
 
