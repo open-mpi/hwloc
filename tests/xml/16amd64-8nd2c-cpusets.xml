@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root SYSTEM "hwloc.dtd">
-<root>
+<root offline_cpuset="0">
   <object type="System" os_index="0" cpuset="0000f07f" dmi_board_vendor="TYAN Computer Corp" dmi_board_name="S4881 " memory_kB="0" huge_page_free="0" huge_page_size_kB="0">
     <object type="NUMANode" os_index="0" cpuset="00000003" memory_kB="0" huge_page_free="0">
       <object type="Socket" os_index="0" cpuset="00000003">
