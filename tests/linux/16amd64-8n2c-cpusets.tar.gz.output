@@ -64,5 +64,5 @@ depth 0:	1 System (type #0)
     depth 4:	11 Caches (type #4)
      depth 5:	11 Cores (type #5)
       depth 6:	11 Procs (type #6)
+5 processors offline: 00000f80
 Topology not from this system
-
