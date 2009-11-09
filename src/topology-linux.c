@@ -832,6 +832,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	    hwloc_debug("os proc %lu is online\n", cpu);
 	  } else {
 	    hwloc_debug("os proc %lu is offline\n", cpu);
+	    hwloc_cpuset_set(topology->offline_cpuset, cpu);
 	    continue;
 	  }
 	} else {
@@ -844,6 +845,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
       if (hwloc_access(str, X_OK, topology->backend_params.sysfs.root_fd) < 0 && errno == ENOENT) {
 	hwloc_debug("os proc %lu has no accessible %s/cpu%lu/topology\n",
 		   cpu, path, cpu);
+	hwloc_cpuset_set(topology->offline_cpuset, cpu);
 	continue;
       }
 
@@ -1233,6 +1235,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
       hwloc_admin_disable_set_from_cpuset(topology, "cpus", admin_disabled_cpus_set);
       hwloc_admin_disable_set_from_cpuset(topology, "mems", admin_disabled_mems_set);
+      hwloc_cpuset_orset(topology->offline_cpuset, admin_disabled_cpus_set);
     }
 
     /* Gather NUMA information */

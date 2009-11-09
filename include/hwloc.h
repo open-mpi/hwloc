@@ -432,6 +432,13 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
  */
 extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology);
 
+/** \brief Are their existing logical processors that are disabled?
+ *
+ * \return the CPU set of offline logical processors, or processors
+ * that are disabled by the administrator.
+ */
+extern hwloc_cpuset_t hwloc_topology_get_offline_cpuset(struct hwloc_topology *topology);
+
 /** @} */
 
 

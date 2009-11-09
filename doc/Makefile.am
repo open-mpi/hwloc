@@ -248,6 +248,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_child_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_offline_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_depth.3 \

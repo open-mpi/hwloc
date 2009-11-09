@@ -102,9 +102,18 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
     }
   }
 
-  if (verbose_mode > 1)
+  if (verbose_mode > 1) {
+    hwloc_cpuset_t offline = hwloc_topology_get_offline_cpuset(topology);
+    if (!hwloc_cpuset_iszero(offline)) {
+      char *offlinestr;
+      hwloc_cpuset_asprintf(&offlinestr, offline);
+      fprintf (output, "%d processors offline: %s\n", hwloc_cpuset_weight(offline), offlinestr);
+      free(offlinestr);
+    }
+    hwloc_cpuset_free(offline);
     if (!hwloc_topology_is_thissystem(topology))
       fprintf (output, "Topology not from this system\n");
+  }
 
   fclose(output);
 }

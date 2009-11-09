@@ -1181,6 +1181,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
   topology->type_depth[HWLOC_OBJ_SYSTEM] = 0;
+  hwloc_cpuset_zero(topology->offline_cpuset);
 
   /* Create the actual System object */
   system_obj = hwloc_alloc_setup_object(HWLOC_OBJ_SYSTEM, 0);
@@ -1216,6 +1217,8 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->flags = 0;
   topology->is_thissystem = 1;
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
+  topology->offline_cpuset = hwloc_cpuset_alloc();
+
   topology->set_cpubind = NULL;
   topology->get_cpubind = NULL;
   topology->set_thisproc_cpubind = NULL;
@@ -1459,6 +1462,12 @@ unsigned
 hwloc_topology_get_depth(struct hwloc_topology *topology) 
 {
   return topology->nb_levels;
+}
+
+hwloc_cpuset_t
+hwloc_topology_get_offline_cpuset(struct hwloc_topology *topology)
+{
+  return hwloc_cpuset_dup(topology->offline_cpuset);
 }
 
 

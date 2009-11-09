@@ -47,6 +47,7 @@ struct hwloc_topology {
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
   int is_thissystem;
   int is_loaded;
+  hwloc_cpuset_t offline_cpuset;
 
   int (*set_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
   hwloc_cpuset_t (*get_cpubind)(hwloc_topology_t topology);

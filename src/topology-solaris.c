@@ -225,9 +225,11 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuse
 
       procid_max++;
       hwloc_debug("cpu%d's state is %s\n", cpuid, stat->value.c);
-      if (strcmp(stat->value.c, "on-line"))
+      if (strcmp(stat->value.c, "on-line")) {
 	/* not online, ignore for chip and core ids */
+	hwloc_cpuset_set(topology->offline_cpuset, cpuid);
 	continue;
+      }
 
       hwloc_cpuset_set(online_cpuset, cpuid);
 
