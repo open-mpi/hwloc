@@ -29,7 +29,7 @@
 #include <mach/mach_host.h>
 #endif
 
-#ifdef WIN_SYS
+#ifdef HWLOC_WIN_SYS
 #include <windows.h>
 #endif
 
@@ -52,7 +52,7 @@ hwloc_fallback_nbprocessors(void) {
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
   return info.avail_cpus;
-#elif defined(WIN_SYS)
+#elif defined(HWLOC_WIN_SYS)
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);
   return sysinfo.dwNumberOfProcessors;
@@ -952,40 +952,40 @@ hwloc_discover(struct hwloc_topology *topology)
    * set_cpubind one
    */
 
-#    ifdef LINUX_SYS
+#    ifdef HWLOC_LINUX_SYS
 #      define HAVE_OS_SUPPORT
     hwloc_look_linux(topology);
-#    endif /* LINUX_SYS */
+#    endif /* HWLOC_LINUX_SYS */
 
-#    ifdef  AIX_SYS
+#    ifdef HWLOC_AIX_SYS
 #      define HAVE_OS_SUPPORT
     hwloc_look_aix(topology);
-#    endif /* AIX_SYS */
+#    endif /* HWLOC_AIX_SYS */
 
-#    ifdef  OSF_SYS
+#    ifdef HWLOC_OSF_SYS
 #      define HAVE_OS_SUPPORT
     hwloc_look_osf(topology);
-#    endif /* OSF_SYS */
+#    endif /* HWLOC_OSF_SYS */
 
-#    ifdef  SOLARIS_SYS
+#    ifdef HWLOC_SOLARIS_SYS
 #      define HAVE_OS_SUPPORT
     hwloc_look_solaris(topology);
-#    endif /* SOLARIS_SYS */
+#    endif /* HWLOC_SOLARIS_SYS */
 
-#    ifdef  WIN_SYS
+#    ifdef HWLOC_WIN_SYS
 #      define HAVE_OS_SUPPORT
     hwloc_look_windows(topology);
-#    endif /* WIN_SYS */
+#    endif /* HWLOC_WIN_SYS */
 
-#    ifdef  DARWIN_SYS
+#    ifdef HWLOC_DARWIN_SYS
 #      define HAVE_OS_SUPPORT
     hwloc_look_darwin(topology);
-#    endif /* DARWIN_SYS */
+#    endif /* HWLOC_DARWIN_SYS */
 
-#    ifdef  HPUX_SYS
+#    ifdef HWLOC_HPUX_SYS
 #      define HAVE_OS_SUPPORT
     hwloc_look_hpux(topology);
-#    endif /* HPUX_SYS */
+#    endif /* HWLOC_HPUX_SYS */
 
 #    ifndef HAVE_OS_SUPPORT
     hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors (), NULL);
@@ -1123,33 +1123,33 @@ hwloc_discover(struct hwloc_topology *topology)
     topology->is_thissystem = 1;
 
   if (topology->is_thissystem) {
-#    ifdef LINUX_SYS
+#    ifdef HWLOC_LINUX_SYS
     hwloc_set_linux_hooks(topology);
-#    endif /* LINUX_SYS */
+#    endif /* HWLOC_LINUX_SYS */
 
-#    ifdef  AIX_SYS
+#    ifdef HWLOC_AIX_SYS
     hwloc_set_aix_hooks(topology);
-#    endif /* AIX_SYS */
+#    endif /* HWLOC_AIX_SYS */
 
-#    ifdef  OSF_SYS
+#    ifdef HWLOC_OSF_SYS
     hwloc_set_osf_hooks(topology);
-#    endif /* OSF_SYS */
+#    endif /* HWLOC_OSF_SYS */
 
-#    ifdef  SOLARIS_SYS
+#    ifdef HWLOC_SOLARIS_SYS
     hwloc_set_solaris_hooks(topology);
-#    endif /* SOLARIS_SYS */
+#    endif /* HWLOC_SOLARIS_SYS */
 
-#    ifdef  WIN_SYS
+#    ifdef HWLOC_WIN_SYS
     hwloc_set_windows_hooks(topology);
-#    endif /* WIN_SYS */
+#    endif /* HWLOC_WIN_SYS */
 
-#    ifdef  DARWIN_SYS
+#    ifdef HWLOC_DARWIN_SYS
     hwloc_set_darwin_hooks(topology);
-#    endif /* DARWIN_SYS */
+#    endif /* HWLOC_DARWIN_SYS */
 
-#    ifdef  HPUX_SYS
+#    ifdef HWLOC_HPUX_SYS
     hwloc_set_hpux_hooks(topology);
-#    endif /* HPUX_SYS */
+#    endif /* HWLOC_HPUX_SYS */
   } else {
     topology->set_cpubind = dontset_cpubind;
     topology->get_cpubind = dontget_cpubind;
@@ -1247,7 +1247,7 @@ static void
 hwloc_backend_exit(struct hwloc_topology *topology)
 {
   switch (topology->backend_type) {
-#ifdef LINUX_SYS
+#ifdef HWLOC_LINUX_SYS
   case HWLOC_BACKEND_SYSFS:
     hwloc_backend_sysfs_exit(topology);
     break;
@@ -1273,10 +1273,10 @@ hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_pa
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
-#ifdef LINUX_SYS
+#ifdef HWLOC_LINUX_SYS
   if (hwloc_backend_sysfs_init(topology, fsroot_path) < 0)
     return -1;
-#endif /* LINUX_SYS */
+#endif /* HWLOC_LINUX_SYS */
 
   return 0;
 }
@@ -1387,7 +1387,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   }
 
   /* enforce backend anyway if a FORCE variable was given */
-#ifdef LINUX_SYS
+#ifdef HWLOC_LINUX_SYS
   {
     char *fsroot_path_env = getenv("HWLOC_FORCE_FSROOT");
     if (fsroot_path_env) {
@@ -1407,7 +1407,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 #endif
 
   /* only apply non-FORCE variables if we have not changed the backend yet */
-#ifdef LINUX_SYS
+#ifdef HWLOC_LINUX_SYS
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
     char *fsroot_path_env = getenv("HWLOC_FSROOT");
     if (fsroot_path_env)
@@ -1429,7 +1429,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
   /* if we haven't chosen the backend, set the OS-specific one if needed */
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
-#ifdef LINUX_SYS
+#ifdef HWLOC_LINUX_SYS
     if (hwloc_backend_sysfs_init(topology, "/") < 0)
       return -1;
 #endif
@@ -1616,7 +1616,7 @@ int
 hwloc_topology_get_support(struct hwloc_topology * topology, unsigned long *flagsp)
 {
   unsigned long flags = 0;
-#ifndef UNSUPPORTED_SYS
+#ifndef HWLOC_UNSUPPORTED_SYS
   flags |= HWLOC_SUPPORT_DISCOVERY;
 #endif
 
