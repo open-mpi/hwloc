@@ -57,7 +57,8 @@ dox_inputs = $(DOX_CONFIG) \
        $(top_srcdir)/include/hwloc/glibc-sched.h \
        $(top_srcdir)/include/hwloc/linux.h \
        $(top_srcdir)/include/hwloc/linux-libnuma.h \
-       $(top_srcdir)/include/hwloc/openfabrics-verbs.h
+       $(top_srcdir)/include/hwloc/openfabrics-verbs.h \
+       $(top_srcdir)/include/hwloc/plpa.h
 
 #
 # Create the images that we need for the PDF output and the HTML

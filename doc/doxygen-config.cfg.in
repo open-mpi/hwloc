@@ -12,7 +12,8 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/glibc-sched.h \
 		@top_srcdir@/include/hwloc/linux.h \
 		@top_srcdir@/include/hwloc/linux-libnuma.h \
-		@top_srcdir@/include/hwloc/openfabrics-verbs.h
+		@top_srcdir@/include/hwloc/openfabrics-verbs.h \
+		@top_srcdir@/include/hwloc/plpa.h
 
 EXAMPLE_PATH   = @top_srcdir@/doc
 
