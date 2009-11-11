@@ -360,6 +360,26 @@ extern int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topolo
  */
 extern int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
+/** \brief Flags describing the actual OS support for this topology.
+ *
+ * Flags are retrieved with hwloc_topology_get_support().
+ */
+enum hwloc_topology_support_flags_e {
+  /* \brief Topology discovery is supported. */
+  HWLOC_SUPPORT_DISCOVERY = (1<<0),
+  /* \brief Binding a process is supported. */
+  HWLOC_SUPPORT_SET_PROC_CPUBIND = (1<<1),
+  /* \brief Binding a thread is supported. */
+  HWLOC_SUPPORT_SET_THREAD_CPUBIND = (1<<2),
+  /* \brief Getting the binding of a process is supported. */
+  HWLOC_SUPPORT_GET_PROC_CPUBIND = (1<<3),
+  /* \brief Getting the binding of a thread is supported. */
+  HWLOC_SUPPORT_GET_THREAD_CPUBIND = (1<<4),
+};
+
+/** \brief Retrieve the OR'ed flags of topology support. */
+extern int hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology, unsigned long *flags);
+
 /** @} */
 
 

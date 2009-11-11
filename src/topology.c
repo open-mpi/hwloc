@@ -1611,3 +1611,30 @@ hwloc_topology_check(struct hwloc_topology *topology)
     assert(obj->type == HWLOC_OBJ_PROC);
   }
 }
+
+int
+hwloc_topology_get_support(struct hwloc_topology * topology, unsigned long *flagsp)
+{
+  unsigned long flags = 0;
+#ifndef UNSUPPORTED_SYS
+  flags |= HWLOC_SUPPORT_DISCOVERY;
+#endif
+
+  /* if not is_thissystem, set_cpubind is fake
+   * and get_cpubind returns the whole system cpuset,
+   * so don't report that set/get_cpubind as supported
+   */
+  if (topology->is_thissystem) {
+    if (topology->set_proc_cpubind)
+      flags |= HWLOC_SUPPORT_SET_PROC_CPUBIND;
+    if (topology->set_thread_cpubind)
+      flags |= HWLOC_SUPPORT_SET_THREAD_CPUBIND;
+    if (topology->get_proc_cpubind)
+      flags |= HWLOC_SUPPORT_GET_PROC_CPUBIND;
+    if (topology->get_thread_cpubind)
+      flags |= HWLOC_SUPPORT_GET_THREAD_CPUBIND;
+  }
+
+  *flagsp = flags;
+  return 0;
+}

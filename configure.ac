@@ -203,6 +203,7 @@ case ${target} in
     ;;
   *)
     AC_MSG_RESULT([Unsupported! ($target)])
+    AC_DEFINE(UNSUPPORTED_SYS, 1, [Define to 1 on unsupported systems])
     AC_MSG_WARN([***********************************************************])
     AC_MSG_WARN([*** hwloc does not support this system.])
     AC_MSG_WARN([*** hwloc will *attempt* to build (but it may not work).])
