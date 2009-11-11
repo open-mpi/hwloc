@@ -18,7 +18,18 @@ Version 1.0.0
 -------------
 
 * Add hwloc_topology_export_xml() to export the topology in a XML file.
+* Add hwloc_topology_get_support() to retrieve the supported features
+  for the current topologt context.
+* Add hwloc_set_*cpubind() routines to retrieve the current binding
+  of processes and threads.
+  + Only implemented for Linux so far.
+* Add hwloc_topology_get_offline_cpuset() to retrieve the list of
+  currently offline or disabled CPUs.
+* Add several new helpers:
+  + hwloc_get_proc_obj_by_os_index()
+  + hwloc_get_parent_by_depth/type()
 * Add Linux cgroup support to the Linux cpuset code.
+
 
 
 Version 0.9.3 (unreleased)
