@@ -54,9 +54,42 @@
 #         warning "don't know the syscall number for sched_setaffinity on this architecture, will not support binding"
 #         define sched_setaffinity(pid, lg, mask) (errno = ENOSYS, -1)
 #       endif
-#       ifndef sched_setaffinity
-          _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *, mask);
+#    endif
+#    ifndef sched_setaffinity
+       _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, const void *, mask);
+#    endif
+#    ifndef __NR_sched_getaffinity
+#       ifdef __i386__
+#         define __NR_sched_getaffinity 242
+#       elif defined(__x86_64__)
+#         define __NR_sched_getaffinity 204
+#       elif defined(__ia64__)
+#         define __NR_sched_getaffinity 1232
+#       elif defined(__hppa__)
+#         define __NR_sched_getaffinity 212
+#       elif defined(__alpha__)
+#         define __NR_sched_getaffinity 396
+#       elif defined(__s390__)
+#         define __NR_sched_getaffinity 240
+#       elif defined(__sparc__)
+#         define __NR_sched_getaffinity 260
+#       elif defined(__m68k__)
+#         define __NR_sched_getaffinity 312
+#       elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
+#         define __NR_sched_getaffinity 223
+#       elif defined(__arm__)
+#         define __NR_sched_getaffinity 242
+#       elif defined(__cris__)
+#         define __NR_sched_getaffinity 242
+/*#       elif defined(__mips__)
+  #         define __NR_sched_getaffinity TODO (32/64/nabi) */
+#       else
+#         warning "don't know the syscall number for sched_getaffinity on this architecture, will not support getting binding"
+#         define sched_getaffinity(pid, lg, mask) (errno = ENOSYS, -1)
 #       endif
+#    endif
+#    ifndef sched_getaffinity
+       _syscall3(int, sched_getaffinity, pid_t, pid, unsigned int, lg, void *, mask);
 #    endif
 #endif
 
