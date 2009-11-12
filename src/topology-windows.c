@@ -141,7 +141,7 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 #endif
 
 static int
-hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int policy)
 {
   /* TODO: groups */
   DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
@@ -151,13 +151,13 @@ hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
 }
 
 static int
-hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, strict);
+  return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, policy);
 }
 
 static int
-hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_cpuset_t hwloc_set, int policy)
 {
   /* TODO: groups */
   DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
@@ -167,15 +167,15 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_cp
 }
 
 static int
-hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, strict);
+  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, policy);
 }
 
 static int
-hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, strict);
+  return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, policy);
 }
 
 void

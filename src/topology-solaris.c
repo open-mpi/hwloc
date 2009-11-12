@@ -18,7 +18,7 @@
 #include <sys/procset.h>
 
 static int
-hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_cpuset_t hwloc_set, int policy)
 {
   unsigned target;
 
@@ -43,27 +43,27 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 }
 
 static int
-hwloc_solaris_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_solaris_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_solaris_set_sth_cpubind(topology, P_PID, pid, hwloc_set, strict);
+  return hwloc_solaris_set_sth_cpubind(topology, P_PID, pid, hwloc_set, policy);
 }
 
 static int
-hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_solaris_set_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, strict);
+  return hwloc_solaris_set_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, policy);
 }
 
 static int
-hwloc_solaris_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_solaris_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_solaris_set_thisproc_cpubind(topology, hwloc_set, strict);
+  return hwloc_solaris_set_thisproc_cpubind(topology, hwloc_set, policy);
 }
 
 static int
-hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, strict);
+  return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
 }
 
 /* TODO: thread, maybe not easy because of the historical n:m implementation */

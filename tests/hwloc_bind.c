@@ -31,9 +31,10 @@ static void test(hwloc_cpuset_t cpuset, int flags)
   result("Bind process", hwloc_set_proc_cpubind(topology, GetCurrentProcess(), cpuset, flags | HWLOC_CPUBIND_PROCESS));
   result("Bind thread", hwloc_set_thread_cpubind(topology, GetCurrentThread(), cpuset, flags | HWLOC_CPUBIND_THREAD));
 #else /* !HWLOC_WIN_SYS */
-  result("Bind process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags | HWLOC_CPUBIND_PROCESS));
+  result("Bind whole process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags | HWLOC_CPUBIND_PROCESS));
+  result("Bind process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags));
 #ifdef hwloc_thread_t
-  result("Bind thread", hwloc_set_thread_cpubind(topology, pthread_self(), cpuset, flags | HWLOC_CPUBIND_THREAD));
+  result("Bind thread", hwloc_set_thread_cpubind(topology, pthread_self(), cpuset, flags));
 #endif
 #endif /* !HWLOC_WIN_SYS */
   printf("\n");

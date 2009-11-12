@@ -234,25 +234,45 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
 }
 
 static int
-hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
 static hwloc_cpuset_t
-hwloc_linux_get_cpubind(hwloc_topology_t topology)
+hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy)
 {
   return hwloc_linux_get_tid_cpubind(topology, 0);
 }
 
 static int
-hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+{
+  if (policy & HWLOC_CPUBIND_PROCESS) {
+    errno = ENOSYS;
+    return -1;
+  }
+  return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
+}
+
+static hwloc_cpuset_t
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
+{
+  if (policy & HWLOC_CPUBIND_PROCESS) {
+    errno = ENOSYS;
+    return NULL;
+  }
+  return hwloc_linux_get_tid_cpubind(topology, pid);
+}
+
+static int
+hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
 static hwloc_cpuset_t
-hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology)
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
 {
   return hwloc_linux_get_tid_cpubind(topology, 0);
 }
@@ -261,7 +281,7 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology)
 #pragma weak pthread_setaffinity_np
 
 static int
-hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int policy)
 {
   if (tid == pthread_self())
     return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
@@ -315,7 +335,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #pragma weak pthread_getaffinity_np
 
 static hwloc_cpuset_t
-hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid)
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int policy)
 {
   hwloc_cpuset_t hwloc_set;
   int err;
@@ -1322,6 +1342,8 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
   topology->get_cpubind = hwloc_linux_get_cpubind;
   topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
   topology->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
+  topology->set_proc_cpubind = hwloc_linux_set_proc_cpubind;
+  topology->get_proc_cpubind = hwloc_linux_get_proc_cpubind;
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
   topology->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */

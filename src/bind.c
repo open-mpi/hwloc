@@ -16,7 +16,6 @@
 int
 hwloc_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
 {
-  int strict = !!(policy & HWLOC_CPUBIND_STRICT);
   hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
 
   if (hwloc_cpuset_isfull(set))
@@ -29,13 +28,13 @@ hwloc_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
 
   if (policy & HWLOC_CPUBIND_PROCESS) {
     if (topology->set_thisproc_cpubind)
-      return topology->set_thisproc_cpubind(topology, set, strict);
+      return topology->set_thisproc_cpubind(topology, set, policy);
   } else if (policy & HWLOC_CPUBIND_THREAD) {
     if (topology->set_thisthread_cpubind)
-      return topology->set_thisthread_cpubind(topology, set, strict);
+      return topology->set_thisthread_cpubind(topology, set, policy);
   } else {
     if (topology->set_cpubind)
-      return topology->set_cpubind(topology, set, strict);
+      return topology->set_cpubind(topology, set, policy);
   }
 
   errno = ENOSYS;
@@ -47,13 +46,13 @@ hwloc_get_cpubind(hwloc_topology_t topology, int policy)
 {
   if (policy & HWLOC_CPUBIND_PROCESS) {
     if (topology->get_thisproc_cpubind)
-      return topology->get_thisproc_cpubind(topology);
+      return topology->get_thisproc_cpubind(topology, policy);
   } else if (policy & HWLOC_CPUBIND_THREAD) {
     if (topology->get_thisthread_cpubind)
-      return topology->get_thisthread_cpubind(topology);
+      return topology->get_thisthread_cpubind(topology, policy);
   } else {
     if (topology->get_cpubind)
-      return topology->get_cpubind(topology);
+      return topology->get_cpubind(topology, policy);
   }
 
   errno = ENOSYS;
@@ -63,7 +62,6 @@ hwloc_get_cpubind(hwloc_topology_t topology, int policy)
 int
 hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy)
 {
-  int strict = !!(policy & HWLOC_CPUBIND_STRICT);
   hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
 
   if (hwloc_cpuset_isfull(set))
@@ -75,7 +73,7 @@ hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_
   }
 
   if (topology->set_proc_cpubind)
-    return topology->set_proc_cpubind(topology, pid, set, strict);
+    return topology->set_proc_cpubind(topology, pid, set, policy);
 
   errno = ENOSYS;
   return -1;
@@ -85,7 +83,7 @@ hwloc_cpuset_t
 hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
 {
   if (topology->get_proc_cpubind)
-    return topology->get_proc_cpubind(topology, pid);
+    return topology->get_proc_cpubind(topology, pid, policy);
 
   errno = ENOSYS;
   return NULL;
@@ -95,7 +93,6 @@ hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
 int
 hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy)
 {
-  int strict = !!(policy & HWLOC_CPUBIND_STRICT);
   hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
 
   if (hwloc_cpuset_isfull(set))
@@ -107,7 +104,7 @@ hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cp
   }
 
   if (topology->set_thread_cpubind)
-    return topology->set_thread_cpubind(topology, tid, set, strict);
+    return topology->set_thread_cpubind(topology, tid, set, policy);
 
   errno = ENOSYS;
   return -1;
@@ -117,7 +114,7 @@ hwloc_cpuset_t
 hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy)
 {
   if (topology->get_thread_cpubind)
-    return topology->get_thread_cpubind(topology, tid);
+    return topology->get_thread_cpubind(topology, tid, policy);
 
   errno = ENOSYS;
   return NULL;

@@ -26,7 +26,7 @@
 #include <sys/thread.h>
 
 static int
-hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_cpuset_t hwloc_set, int policy)
 {
   rsethandle_t rset, rad;
   hwloc_obj_t objs[2];
@@ -72,41 +72,41 @@ out:
 }
 
 static int
-hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
   rsid_t who = { .at_pid = getpid() };
-  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
   rsid_t who = { .at_tid = thread_self() };
-  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
 {
   rsid_t who = { .at_pid = pid };
-  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_cpuset_t hwloc_set, int policy)
 {
   struct __pthrdsinfo info;
   int size;
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
   rsid_t who = { .at_tid = info.__pi_tid };
-  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_aix_set_thisproc_cpubind(topology, hwloc_set, strict);
+  return hwloc_aix_set_thisproc_cpubind(topology, hwloc_set, policy);
 }
 
 static void

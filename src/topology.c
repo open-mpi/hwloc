@@ -869,44 +869,44 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
  * Empty binding hooks always returning success
  */
 
-static int dontset_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
+static int dontset_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_cpubind(hwloc_topology_t topology)
+static hwloc_cpuset_t dontget_cpubind(hwloc_topology_t topology, int policy)
 {
   return hwloc_get_system_obj(topology)->cpuset;
 }
-static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
+static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thisthread_cpubind(hwloc_topology_t topology)
+static hwloc_cpuset_t dontget_thisthread_cpubind(hwloc_topology_t topology, int policy)
 {
   return hwloc_get_system_obj(topology)->cpuset;
 }
-static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int strict)
+static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology)
+static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology, int policy)
 {
   return hwloc_get_system_obj(topology)->cpuset;
 }
-static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int strict)
+static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid)
+static hwloc_cpuset_t dontget_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
 {
   return hwloc_get_system_obj(topology)->cpuset;
 }
 #ifdef hwloc_thread_t
-static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int strict)
+static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid)
+static hwloc_cpuset_t dontget_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy)
 {
   return hwloc_get_system_obj(topology)->cpuset;
 }

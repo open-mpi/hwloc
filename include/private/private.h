@@ -49,17 +49,17 @@ struct hwloc_topology {
   int is_loaded;
   hwloc_cpuset_t offline_cpuset;
 
-  int (*set_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
-  hwloc_cpuset_t (*get_cpubind)(hwloc_topology_t topology);
-  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
-  hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology);
-  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int strict);
-  hwloc_cpuset_t (*get_thisthread_cpubind)(hwloc_topology_t topology);
-  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int strict);
-  hwloc_cpuset_t (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid);
+  int (*set_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
+  hwloc_cpuset_t (*get_cpubind)(hwloc_topology_t topology, int policy);
+  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
+  hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology, int policy);
+  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
+  hwloc_cpuset_t (*get_thisthread_cpubind)(hwloc_topology_t topology, int policy);
+  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
+  hwloc_cpuset_t (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, int policy);
 #ifdef hwloc_thread_t
-  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int strict);
-  hwloc_cpuset_t (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid);
+  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
+  hwloc_cpuset_t (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, int policy);
 #endif
 
   hwloc_backend_t backend_type;
