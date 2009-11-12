@@ -16,7 +16,11 @@
 #include <hwloc.h>
 #include <stdio.h>
 
-/** \defgroup hwlocality_linux_cpumap Helpers for manipulating linux kernel cpumap files
+/** \defgroup hwlocality_linux Linux-only helpers
+ *
+ * This includes helpers for manipulating linux kernel cpumap files, and hwloc
+ * equivalents of the Linux sched_setaffinity and sched_getaffinity system calls.
+ *
  * @{
  */
 
@@ -26,6 +30,20 @@
  * and caches for processors, or local_cpus for devices.
  */
 extern hwloc_cpuset_t hwloc_linux_parse_cpumap_file(FILE *file);
+
+/** \brief Bind a thread \p tid on cpus given in cpuset \p set
+ *
+ * The behavior is exactly the same as the Linux sched_setaffinity system call,
+ * but uses a hwloc cpuset.
+ */
+extern int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t set);
+
+/** \brief Get the current binding of thread \p tid
+ *
+ * The behavior is exactly the same as the Linux sched_setaffinity system call,
+ * but uses a hwloc cpuset.
+ */
+extern hwloc_cpuset_t hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid);
 
 /** @} */
 

@@ -155,8 +155,8 @@ hwloc_opendirat(const char *path, int fsroot_fd)
 
 #endif /* !HAVE_OPENAT */
 
-static int
-hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t hwloc_set, int strict)
+int
+hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t hwloc_set)
 {
 
   /* TODO Kerrighed: Use
@@ -191,7 +191,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
 #endif /* CPU_SET */
 }
 
-static hwloc_cpuset_t
+hwloc_cpuset_t
 hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
 {
   hwloc_cpuset_t hwloc_set;
@@ -236,7 +236,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
 static int
 hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
-  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
+  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
 static hwloc_cpuset_t
@@ -248,7 +248,7 @@ hwloc_linux_get_cpubind(hwloc_topology_t topology)
 static int
 hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
 {
-  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
+  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
 static hwloc_cpuset_t
@@ -264,7 +264,7 @@ static int
 hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int strict)
 {
   if (tid == pthread_self())
-    return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
+    return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 
   if (!pthread_setaffinity_np) {
     /* ?! Application uses set_thread_cpubind, but doesn't link against libpthread ?! */

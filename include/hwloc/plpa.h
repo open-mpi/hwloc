@@ -41,6 +41,10 @@
 #include <hwloc.h>
 #include <private/config.h>
 
+#ifdef HWLOC_LINUX_SYS
+#include <hwloc/linux.h>
+#endif
+
 /** \defgroup hwlocality_plpa PLPA-like interface
  * @{
  */
@@ -107,27 +111,37 @@ hwloc_plpa_have_topology_information(hwloc_topology_t topology, int *supported)
   return 0;
 }
 
-/** \brief Bind thread given by \p pid to CPU set \p cpuset.
+/** \brief Bind process given by \p pid to CPU set \p cpuset.
  *
  * \note This function now manipulates hwloc cpusets.
+ * \note In the case of Linux (and Linux only), a thread can be designated by
+ * its tid instead of a pid.
  */
 static __inline int
 hwloc_plpa_sched_setaffinity(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset)
 {
-  /* FIXME: should be set_thread_cpubind with a pid */
+#ifdef HWLOC_LINUX_SYS
+  return hwloc_linux_set_tid_cpubind(topology, pid, cpuset);
+#else /* HWLOC_LINUX_SYS */
   return hwloc_set_proc_cpubind(topology, pid, cpuset, 0);
+#endif /* HWLOC_LINUX_SYS */
 }
 
-/** \brief Retrieve the binding CPU set of thread given by \p pid.
+/** \brief Retrieve the binding CPU set of process given by \p pid.
  *
  * \note This function now manipulates hwloc cpusets.
+ * \note In the case of Linux (and Linux only), a thread can be designated by
+ * its tid instead of a pid.
  */
 static __inline int
 hwloc_plpa_sched_getaffinity(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset)
 {
   hwloc_cpuset_t tmp;
-  /* FIXME: should be get_thread_cpubind with a pid */
+#ifdef HWLOC_LINUX_SYS
+  tmp = hwloc_linux_get_tid_cpubind(topology, pid);
+#else /* HWLOC_LINUX_SYS */
   tmp = hwloc_get_proc_cpubind(topology, pid, 0);
+#endif /* HWLOC_LINUX_SYS */
   if (!tmp)
     return -1;
   hwloc_cpuset_copy(cpuset, tmp);
