@@ -366,6 +366,22 @@ AC_LINK_IFELSE(
     AC_MSG_RESULT([no])
 )
 
+AC_MSG_CHECKING([for working CPU_SET_S])
+AC_LINK_IFELSE(
+  AC_LANG_PROGRAM([[
+      #include <sched.h>
+      cpu_set_t *set;
+    ]], [[
+      set = CPU_ALLOC(1024);
+      CPU_ZERO_S(CPU_ALLOC_SIZE(1024), set);
+      CPU_SET_S(CPU_ALLOC_SIZE(1024), 0, set);
+      CPU_FREE(set);
+    ]]),
+    AC_DEFINE([HWLOC_HAVE_CPU_SET_S], [1], [Define to 1 if the CPU_SET_S macro works])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+)
+
 AC_ARG_ENABLE([cairo],
   [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
   [enable_cairo="$enableval"],

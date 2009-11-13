@@ -158,15 +158,30 @@ hwloc_opendirat(const char *path, int fsroot_fd)
 int
 hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t hwloc_set)
 {
-
   /* TODO Kerrighed: Use
    * int migrate (pid_t pid, int destination_node);
    * int migrate_self (int destination_node);
    * int thread_migrate (int thread_id, int destination_node);
    */
 
-/* TODO: use dynamic size cpusets */
-#ifdef HWLOC_HAVE_CPU_SET
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+  cpu_set_t *plinux_set;
+  unsigned cpu;
+  size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
+  int err;
+
+  plinux_set = CPU_ALLOC(HWLOC_NBMAXCPUS);
+
+  CPU_ZERO_S(setsize, plinux_set);
+  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+    CPU_SET_S(cpu, setsize, plinux_set);
+  hwloc_cpuset_foreach_end();
+
+  err = sched_setaffinity(tid, setsize, plinux_set);
+
+  CPU_FREE(plinux_set);
+  return err;
+#elif defined(HWLOC_HAVE_CPU_SET)
   cpu_set_t linux_set;
   unsigned cpu;
 
@@ -180,7 +195,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
-#else /* CPU_SET */
+#else /* !CPU_SET */
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
@@ -188,7 +203,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
-#endif /* CPU_SET */
+#endif /* !CPU_SET */
 }
 
 hwloc_cpuset_t
@@ -198,8 +213,27 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
   int err;
   /* TODO Kerrighed */
 
-/* TODO: use dynamic size cpusets */
-#ifdef HWLOC_HAVE_CPU_SET
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+  cpu_set_t *plinux_set;
+  unsigned cpu;
+  size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
+
+  plinux_set = CPU_ALLOC(HWLOC_NBMAXCPUS);
+
+  err = sched_getaffinity(tid, setsize, plinux_set);
+
+  if (err < 0) {
+    CPU_FREE(plinux_set);
+    return NULL;
+  }
+
+  hwloc_set = hwloc_cpuset_alloc();
+  for(cpu=0; cpu<HWLOC_NBMAXCPUS; cpu++)
+    if (CPU_ISSET_S(cpu, setsize, plinux_set))
+      hwloc_cpuset_set(hwloc_set, cpu);
+
+  CPU_FREE(plinux_set);
+#elif defined(HWLOC_HAVE_CPU_SET)
   cpu_set_t linux_set;
   unsigned cpu;
 
@@ -215,7 +249,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, &linux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
-#else /* CPU_SET */
+#else /* !CPU_SET */
   unsigned long mask;
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
@@ -228,7 +262,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
 
   hwloc_set = hwloc_cpuset_alloc();
   hwloc_cpuset_from_ulong(hwloc_set, mask);
-#endif /* CPU_SET */
+#endif /* !CPU_SET */
 
   return hwloc_set;
 }
