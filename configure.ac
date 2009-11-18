@@ -280,7 +280,11 @@ AC_CHECK_HEADERS([langinfo.h], [
 ])
 AC_CHECK_HEADERS([curses.h], [
   AC_CHECK_HEADERS([term.h], [
-    AC_CHECK_LIB([termcap], [tparm])
+    AC_CHECK_LIB([termcap], [tparm], [
+        AC_SUBST([HWLOC_TERMCAP_LIBS], ["-ltermcap"])
+        AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
+                  [Define to 1 if you have `termcap' library (-ltermcap)])
+      ])
   ], [], [[#include <curses.h>]])
 ])
 
