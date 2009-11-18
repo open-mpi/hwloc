@@ -56,7 +56,7 @@ static void test(hwloc_cpuset_t cpuset, int flags)
   result_get("Get  process", cpuset, hwloc_get_proc_cpubind(topology, getpid(), flags));
 #ifdef hwloc_thread_t
   result_set("Bind thread", hwloc_set_thread_cpubind(topology, pthread_self(), cpuset, flags));
-  result_get("Get thread", cpuset, hwloc_get_thread_cpubind(topology, pthread_self(), flags));
+  result_get("Get  thread", cpuset, hwloc_get_thread_cpubind(topology, pthread_self(), flags));
 #endif
 #endif /* !HWLOC_WIN_SYS */
   printf("\n");
