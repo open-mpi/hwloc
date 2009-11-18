@@ -22,7 +22,7 @@ if HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
 endif
 lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS)
-lstopo_LDADD = $(CAIRO_LIBS) $(XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS)
+lstopo_LDADD = $(CAIRO_LIBS) $(XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS)
 
 hwloc_mask_SOURCES = hwloc-mask.c hwloc-mask.h
 
