@@ -60,7 +60,7 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
    * ra_mmap to allocation on an rset
    */
 
-  if (ra_attachrset(what, who, rset, 0)) {
+  if (ra_attachrset(what, who, rad, 0)) {
     res = -1;
     goto out;
   }
@@ -91,6 +91,7 @@ hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   for (cpu = 0; cpu < maxcpus; cpu++)
     if (rs_op(RS_TESTRESOURCE, rset, NULL, R_PROCS, cpu) == 1)
       hwloc_cpuset_set(hwloc_set, cpu);
+  hwloc_cpuset_andset(hwloc_set, hwloc_get_system_obj(topology)->cpuset);
 
 out:
   rs_free(rset);
