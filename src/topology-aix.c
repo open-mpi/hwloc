@@ -46,7 +46,10 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     return -1;
   }
 
-  rset = rs_alloc(RS_PARTITION);
+  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
+    rset = rs_alloc(RS_ALL);
+  else
+    rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
   if (rs_getrad(rset, rad, objs[0]->os_level, objs[0]->os_index, 0)) {
     fprintf(stderr,"rs_getrad(%d,%d) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
