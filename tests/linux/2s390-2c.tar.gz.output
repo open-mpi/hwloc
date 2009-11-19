@@ -1,8 +1,8 @@
-System(0KB HP=0*0kB  )
-  Core
+System(1001MB HP=0*1024kB  )
+  Socket
     P#0
     P#1
 depth 0:	1 System (type #0)
- depth 1:	1 Core (type #5)
+ depth 1:	1 Socket (type #3)
   depth 2:	2 Procs (type #6)
 Topology not from this system
