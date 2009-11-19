@@ -28,7 +28,8 @@ sysfs_tarballs = \
 		96em64t-4n4d3ca2co.tar.gz \
 		256ia64-64n2s2c.tar.gz \
 		4qs22-2s2t.tar.gz \
-		2s390-2c.tar.gz
+		2s390-2c.tar.gz \
+		1alpha.tar.gz
 
 # Each tarball `xyz.tar.gz' must have a corresponoing `xyz.tar.gz.output'
 # file showing the expected output of `lstopo - -v'.
@@ -57,7 +58,8 @@ sysfs_outputs = \
 		96em64t-4n4d3ca2co.tar.gz.output \
 		256ia64-64n2s2c.tar.gz.output \
 		4qs22-2s2t.tar.gz.output \
-		2s390-2c.tar.gz.output
+		2s390-2c.tar.gz.output \
+		1alpha.tar.gz.output
 
 if HAVE_LINUX
 if HAVE_OPENAT
