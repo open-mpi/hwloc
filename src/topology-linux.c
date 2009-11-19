@@ -610,19 +610,20 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
  * the cpuset filesystem (usually mounted in / or /dev) where there
  * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
  */
-static int
-hwloc_read_linux_cpuset_mask(const char *type, char *info, int infomax, int fsroot_fd)
+static char *
+hwloc_read_linux_cpuset_mask(const char *type, int fsroot_fd)
 {
   char *cpuset_name;
 #define CPUSET_FILENAME_LEN 256
   char cpuset_filename[CPUSET_FILENAME_LEN];
   FILE *fd;
-  char *tmp;
-  int ret = 0;
+  char *info = NULL, *tmp;
+  ssize_t ssize;
+  size_t size;
 
   cpuset_name = hwloc_read_linux_cpuset_name(fsroot_fd);
   if (!cpuset_name)
-    return 0;
+    return NULL;
 
   /* try to read the cpuset from cgroup */
   snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cgroup%s/cpuset.%s", cpuset_name, type);
@@ -652,20 +653,19 @@ hwloc_read_linux_cpuset_mask(const char *type, char *info, int infomax, int fsro
   hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
   goto out;
 
- gotfile:
-  tmp = fgets(info, infomax, fd);
+gotfile:
+  ssize = getline(&info, &size, fd);
   fclose(fd);
-  if (!tmp)
+  if (!info)
     goto out;
 
   tmp = strchr(info, '\n');
   if (tmp)
     *tmp = '\0';
 
-  ret = 1;
 out:
   free(cpuset_name);
-  return ret;
+  return info;
 }
 
 static void
@@ -673,14 +673,12 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
 				   const char *name,
 				   hwloc_cpuset_t admin_disabled_set)
 {
-#define CPUSET_MASK_LEN 64
-  char cpuset_mask[CPUSET_MASK_LEN];
+  char *cpuset_mask;
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
-  int ret;
 
-  ret = hwloc_read_linux_cpuset_mask(name, cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
-  if (!ret)
+  cpuset_mask = hwloc_read_linux_cpuset_mask(name, topology->backend_params.sysfs.root_fd);
+  if (!cpuset_mask)
     return;
 
   hwloc_debug("found cpuset %s: %s\n", name, cpuset_mask);
@@ -718,6 +716,8 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
     hwloc_debug("%s [%d:%d] excluded by cpuset\n", name, prevlast+1, nextfirst-1);
     hwloc_cpuset_set_range(admin_disabled_set, prevlast+1, nextfirst-1);
   }
+
+  free(cpuset_mask);
 }
 
 static void
