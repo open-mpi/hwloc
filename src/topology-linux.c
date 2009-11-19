@@ -1345,8 +1345,14 @@ hwloc_look_linux(struct hwloc_topology *topology)
 	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
       err = look_cpuinfo(topology, "/proc/cpuinfo", online_set, admin_disabled_cpus_set);
-      if (err < 0)
-        hwloc_setup_proc_level(topology,  hwloc_fallback_nbprocessors(), NULL);
+      if (err < 0) {
+        if (topology->is_thissystem)
+          hwloc_setup_proc_level(topology,  hwloc_fallback_nbprocessors(), NULL);
+        else
+          /* fsys-root but not this system, no way, assume there's just 1
+           * processor :/ */
+          hwloc_setup_proc_level(topology, 1, NULL);
+      }
     } else {
       look_sysfscpu(topology, "/sys/devices/system/cpu", admin_disabled_cpus_set);
     }
