@@ -1195,6 +1195,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     }
   fclose(fd);
 
+  if (processor == -1)
+    return -1;
+
   /* setup the final number of procs */
   procid_max = processor + 1;
   numprocs = hwloc_cpuset_weight(online_cpuset);
