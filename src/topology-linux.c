@@ -164,6 +164,8 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
    * int thread_migrate (int thread_id, int destination_node);
    */
 
+  /* The resulting binding is always strict */
+
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
   cpu_set_t *plinux_set;
   unsigned cpu;

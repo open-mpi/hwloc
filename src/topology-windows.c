@@ -140,10 +140,14 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 } SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, *PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX;
 #endif
 
+/* TODO: GetProcessAffinityMask */
+/* TODO: SetThreadIdealProcessor */
+
 static int
 hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int policy)
 {
-  /* TODO: groups */
+  /* TODO: groups SetThreadGroupAffinity */
+  /* The resulting binding is always strict */
   DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
   if (!SetThreadAffinityMask(thread, mask))
     return -1;
@@ -160,6 +164,7 @@ static int
 hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_cpuset_t hwloc_set, int policy)
 {
   /* TODO: groups */
+  /* The resulting binding is always strict */
   DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
   if (!SetProcessAffinityMask(proc, mask))
     return -1;

@@ -22,6 +22,8 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 {
   unsigned target;
 
+  /* The resulting binding is always strict */
+
   if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
     if (processor_bind(idtype, id, PBIND_NONE, NULL) != 0)
       return -1;

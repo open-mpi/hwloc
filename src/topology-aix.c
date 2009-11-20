@@ -33,6 +33,8 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   int n;
   int res = -1;
 
+  /* The resulting binding is always strict */
+
   if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
     if (ra_detachrset(what, who, 0))
       return -1;
