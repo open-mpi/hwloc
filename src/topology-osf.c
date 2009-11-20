@@ -69,6 +69,8 @@ out:
   return ret;
 }
 
+/* Note: get_cpubind not available on OSF */
+
 static int
 hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int policy)
 {
