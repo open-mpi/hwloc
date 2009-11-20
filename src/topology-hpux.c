@@ -62,6 +62,7 @@ hwloc_hpux_find_spu(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set)
   return -1;
 }
 
+/* Note: get_cpubind not available on HP-UX */
 static int
 hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
 {
