@@ -203,7 +203,8 @@ set_color(int r, int g, int b)
   if (initc || initp) {
     /* Can set rgb color, easy */
     color = rgb_to_color(r, g, b) + 16;
-    textcolor = 0;
+    if (r + g + b >= 2)
+      textcolor = 0;
   } else {
     /* Magic trigger: it seems to separate colors quite well */
     int rr = r >= 0xe0;
