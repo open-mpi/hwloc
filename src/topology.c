@@ -567,6 +567,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
     switch (hwloc_obj_cmp(obj, child)) {
       case HWLOC_OBJ_EQUAL:
 	assert(hwloc_cpuset_isequal(obj->cpuset, child->cpuset));
+	assert(obj->os_level == child->os_level);
 	assert(obj->os_index == child->os_index);
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:

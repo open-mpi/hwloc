@@ -72,6 +72,8 @@ hwloc__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *ob
     return;
   }
 
+  else if (!strcmp(name, "os_level"))
+    obj->os_level = strtoul(value, NULL, 10);
   else if (!strcmp(name, "os_index"))
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cpuset"))
@@ -340,6 +342,8 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
    * of root_node node. */
   node = xmlNewChild(root_node, NULL, BAD_CAST "object", NULL);
   xmlNewProp(node, BAD_CAST "type", BAD_CAST hwloc_obj_type_string(obj->type));
+  sprintf(tmp, "%d", obj->os_level);
+  xmlNewProp(node, BAD_CAST "os_level", BAD_CAST tmp);
   sprintf(tmp, "%d", obj->os_index);
   xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
   hwloc_cpuset_asprintf(&cpuset, obj->cpuset);

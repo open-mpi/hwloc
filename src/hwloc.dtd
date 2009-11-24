@@ -3,6 +3,7 @@
 
 <!ELEMENT object (object)*>
 <!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
+<!ATTLIST object os_level CDATA "-1" >
 <!ATTLIST object os_index CDATA "-1" >
 <!ATTLIST object cpuset CDATA "0" >
 <!ATTLIST object name CDATA "" >
