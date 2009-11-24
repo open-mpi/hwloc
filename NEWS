@@ -32,8 +32,8 @@ Version 1.0.0
 
 
 
-Version 0.9.3 (unreleased)
---------------------------
+Version 0.9.3
+-------------
 
 * Fix autogen.sh to work with Autoconf 2.63.
 * Fix various crashes in particular conditions:
