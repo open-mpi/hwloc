@@ -14,9 +14,8 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9 (as initially released as "libtopology", then re-branded to "hwloc"
 in v0.9.1).
 
-
-Version 0.9.3 (unreleased)
---------------------------
+Version 0.9.3
+-------------
 
 * Fix autogen.sh to work with Autoconf 2.63.
 * Fix various crashes in particular conditions:
