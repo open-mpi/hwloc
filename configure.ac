@@ -278,7 +278,11 @@ AC_CHECK_HEADERS([langinfo.h], [
 ])
 AC_CHECK_HEADERS([curses.h], [
   AC_CHECK_HEADERS([term.h], [
-    AC_CHECK_LIB([termcap], [tparm])
+    AC_CHECK_LIB([termcap], [tparm], [
+        AC_SUBST([HWLOC_TERMCAP_LIBS], ["-ltermcap"])
+        AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
+                  [Define to 1 if you have `termcap' library (-ltermcap)])
+      ])
   ], [], [[#include <curses.h>]])
 ])
 
@@ -374,12 +378,17 @@ AC_ARG_ENABLE([cairo],
 if test "x$enable_cairo" = "xyes"; then
   PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
   if test "x$enable_cairo" = "xyes"; then
-    AC_CHECK_HEADERS([X11/Xlib.h],
-      [AC_CHECK_HEADERS([X11/Xutil.h X11/keysym.h],
-        [enable_X11=yes
-         AC_DEFINE([HAVE_X11], [1], [Define to 1 if X11 libraries are available.])],,
-        [[#include <X11/Xlib.h>]])
-      ])
+    AC_PATH_X
+    AC_CHECK_HEADERS([X11/Xlib.h], [
+      AC_CHECK_HEADERS([X11/Xutil.h X11/keysym.h], [
+        AC_CHECK_LIB([X11], [XOpenDisplay], [
+          enable_X11=yes
+          AC_SUBST([HWLOC_X11_LIBS], ["-lX11"])
+          AC_DEFINE([HAVE_X11], [1], [Define to 1 if X11 libraries are available.])
+        ])]
+      )],,
+      [[#include <X11/Xlib.h>]]
+    )
     if test "x$enable_X11" != "xyes"; then
       AC_MSG_WARN([X11 headers not found, Cairo/X11 back-end disabled])
     fi

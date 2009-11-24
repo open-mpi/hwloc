@@ -23,10 +23,10 @@
 #include <wchar.h>
 #endif /* HAVE_PUTWC */
 
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
 #include <curses.h>
 #include <term.h>
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 
 #include "lstopo.h"
 
@@ -124,18 +124,18 @@ typedef unsigned char character;
 #define putcharacter(c,f) putc(c,f)
 #endif /* HAVE_PUTWC */
 
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
 static int myputchar(int c) {
   return putcharacter(c, stdout);
 }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 
 /* Off-screen rendering buffer */
 struct cell {
   character c;
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
   int r, g, b;
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 };
 
 struct display {
@@ -168,7 +168,7 @@ text_start(void *output, int width, int height)
   return disp;
 }
 
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
 /* Standard terminfo strings */
 static char *oc, *initc = NULL, *initp = NULL, *bold, *normal, *setaf, *setab, *setf, *setb, *scp;
 
@@ -232,13 +232,13 @@ set_color(int r, int g, int b)
       tputs(toput, 1, myputchar);
   }
 }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 
 /* We we can, allocate rgb colors */
 static void
 text_declare_color(void *output, int r, int g, int b)
 {
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
   int color = declare_color(r, g, b);
   /* Yes, values seem to range from 0 to 1000 inclusive */
   int rr = (r * 1001) / 256;
@@ -253,7 +253,7 @@ text_declare_color(void *output, int r, int g, int b)
     if ((toput = tparm(initp, color + 16, 0, 0, 0, rr, gg, bb)))
       tputs(toput, 1, myputchar);
   }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 }
 
 /* output text, erasing any previous content */
@@ -265,13 +265,13 @@ put(struct display *disp, int x, int y, character c, int r, int g, int b)
     return;
   }
   disp->cells[y][x].c = c;
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
   if (r != -1) {
     disp->cells[y][x].r = r;
     disp->cells[y][x].g = g;
     disp->cells[y][x].b = b;
   }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 }
 
 /* Where bars of a character go to */
@@ -492,7 +492,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   struct display *disp;
   int i, j;
   int lr, lg, lb;
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
   int term = 0;
 #endif
 
@@ -511,7 +511,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   setlocale(LC_ALL, "");
 #endif /* HAVE_SETLOCALE */
 
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
   /* If we are outputing to a tty, use colors */
   if (output == stdout && isatty(STDOUT_FILENO)) {
     term = !setupterm(NULL, STDOUT_FILENO, NULL);
@@ -548,7 +548,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
       normal = tgetstr("me", NULL);
     }
   }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 
   disp = output_draw_start(&text_draw_methods, topology, output);
   output_draw(&text_draw_methods, topology, disp);
@@ -556,7 +556,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   lr = lg = lb = -1;
   for (j = 0; j < disp->height; j++) {
     for (i = 0; i < disp->width; i++) {
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
       if (term) {
 	/* TTY output, use colors */
 	int r = disp->cells[j][i].r;
@@ -571,16 +571,16 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
 	  lb = b;
 	}
       }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
       putcharacter(disp->cells[j][i].c, output);
     }
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
     /* Keep the rest of the line black */
     if (term) {
       lr = lg = lb = 0;
       set_color(lr, lg, lb);
     }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
     putcharacter('\n', output);
   }
 }
