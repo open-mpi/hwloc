@@ -176,6 +176,9 @@ hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwl
 static int
 hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int strict)
 {
+  if (tid == pthread_self())
+    return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
+
   if (!pthread_setaffinity_np) {
     /* ?! Application uses set_thread_cpubind, but doesn't link against libpthread ?! */
     errno = ENOSYS;
