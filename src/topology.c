@@ -677,11 +677,6 @@ hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
   assert(!obj->first_child);
 
-  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
-    free_object(obj);
-    return;
-  }
-
   /* Start at the top.  */
   hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
 }
@@ -691,23 +686,16 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t fathe
 {
   hwloc_obj_t child, next_child = obj->first_child;
   hwloc_obj_t *current;
-  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS)
-    return;
 
   /* FIXME: mark KEEP_STRUCTURE as unsupported for I/O devices ? */
-  if (topology->ignored_types[obj->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
-    /* Just drop the object and use father to insert children */
-    free_object(obj);
-  } else {
-    /* Append to the end of the list */
-    for (current = &father->first_child; *current; current = &(*current)->next_sibling)
-      ;
-    *current = obj;
-    obj->next_sibling = NULL;
-    obj->first_child = NULL;
-    /* Use the new object to insert children */
-    father = obj;
-  }
+  /* Append to the end of the list */
+  for (current = &father->first_child; *current; current = &(*current)->next_sibling)
+    ;
+  *current = obj;
+  obj->next_sibling = NULL;
+  obj->first_child = NULL;
+  /* Use the new object to insert children */
+  father = obj;
 
   /* Recursively insert children below */
   while (next_child) {
@@ -774,6 +762,23 @@ static void
 do_free_object(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
   free_object(*obj);
+}
+
+/* Remove all ignored objects.  */
+static void
+remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
+{
+  hwloc_obj_t father = *pfather;
+  if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
+    hwloc_obj_t child = father->first_child;
+    /* Replace object with its list of children */
+    *pfather = child;
+    while (child->next_sibling)
+      child = child->next_sibling;
+    child->next_sibling = father->next_sibling;
+    /* Remove ignored object */
+    free_object(father);
+  }
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
@@ -1002,6 +1007,9 @@ hwloc_discover(struct hwloc_topology *topology)
 
   hwloc_debug("\nApplying the system cpuset to all nodes\n");
   traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, topology->levels[0][0]->cpuset);
+
+  hwloc_debug("\nRemoving ignored objects\n");
+  traverse(topology, &topology->levels[0][0], remove_ignored, remove_ignored, NULL, NULL);
 
   hwloc_debug("\nRemoving empty objects except numa nodes and PCI devices\n");
   traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
