@@ -144,7 +144,8 @@ AC_MSG_RESULT([$generate_doxs])
 AC_MSG_CHECKING([if will install doxygen docs])
 AS_IF([test "x$generate_doxs" = "xyes" -o \
 	    -f "$srcdir/doc/doxygen-doc/man/man3/hwloc_distribute.3" -a \
-	    -f "$srcdir/doc/doxygen-doc/hwloc.pdf"],
+	    -f "$srcdir/doc/doxygen-doc/hwloc-a4.pdf" -a \
+	    -f "$srcdir/doc/doxygen-doc/hwloc-letter.pdf"],
       [install_doxs=yes],
       [install_doxs=no])
 AC_MSG_RESULT([$install_doxs])
