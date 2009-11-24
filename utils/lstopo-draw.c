@@ -322,12 +322,18 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t l
   *retwidth = fontsize ? 4*fontsize : gridsize;
   *retheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
 
-  methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
+  if (hwloc_cpuset_isset(hwloc_topology_get_offline_cpuset(topology), level->os_index))
+    methods->box(output, 0, 0, 0, depth, x, *retwidth, y, *retheight);
+  else
+    methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   if (fontsize) {
     char text[64];
     hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    if (hwloc_cpuset_isset(hwloc_topology_get_offline_cpuset(topology), level->os_index))
+      methods->text(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    else
+      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 }
 
