@@ -680,19 +680,21 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      assert(socketset);
-      hwloc_cpuset_clearset(socketset, admin_disabled_cpus_set);
-      assert(hwloc_cpuset_weight(socketset) >= 1);
+      if (socketset) {
+        assert(socketset);
+        hwloc_cpuset_clearset(socketset, admin_disabled_cpus_set);
+        assert(hwloc_cpuset_weight(socketset) >= 1);
 
-      if (hwloc_cpuset_first(socketset) == i) {
-	/* first cpu in this socket, add the socket */
-	socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
-	socket->cpuset = socketset;
-        hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
-		   mysocketid, socketset);
-	hwloc_add_object(topology, socket);
-      } else
-	free(socketset);
+	if (hwloc_cpuset_first(socketset) == i) {
+	  /* first cpu in this socket, add the socket */
+	  socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
+	  socket->cpuset = socketset;
+	  hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
+		     mysocketid, socketset);
+	  hwloc_add_object(topology, socket);
+	} else
+	  free(socketset);
+      }
 
       /* look at the core */
       mycoreid = 0; /* shut-up the compiler */
@@ -701,18 +703,19 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      assert(coreset);
-      hwloc_cpuset_clearset(coreset, admin_disabled_cpus_set);
-      assert(hwloc_cpuset_weight(coreset) >= 1);
+      if (coreset) {
+        hwloc_cpuset_clearset(coreset, admin_disabled_cpus_set);
+        assert(hwloc_cpuset_weight(coreset) >= 1);
 
-      if (hwloc_cpuset_first(coreset) == i) {
-	core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
-	core->cpuset = coreset;
-        hwloc_debug_1arg_cpuset("os core %u has cpuset %s\n",
-		   mycoreid, coreset);
-	hwloc_add_object(topology, core);
-      } else
-	free(coreset);
+	if (hwloc_cpuset_first(coreset) == i) {
+	  core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
+	  core->cpuset = coreset;
+	  hwloc_debug_1arg_cpuset("os core %u has cpuset %s\n",
+		     mycoreid, coreset);
+	  hwloc_add_object(topology, core);
+	} else
+	  free(coreset);
+      }
 
       /* look at the thread */
       threadset = hwloc_cpuset_alloc();
@@ -856,18 +859,18 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	var = strtoul(c,&endptr,0);			     \
 	if (endptr==c)							\
 	  {								\
-	    fprintf(stderr,"no number in "field" field of /proc/cpuinfo\n"); \
-	    break;							\
+            hwloc_debug("no number in "field" field of /proc/cpuinfo\n"); \
+            return -1;							\
 	  }								\
 	else if (var==LONG_MIN)						\
 	  {								\
-	    fprintf(stderr,"too small "field" number in /proc/cpuinfo\n"); \
-	    break;							\
+            hwloc_debug("too small "field" number in /proc/cpuinfo\n"); \
+            return -1;							\
 	  }								\
 	else if (var==LONG_MAX)						\
 	  {								\
-	    fprintf(stderr,"too big "field" number in /proc/cpuinfo\n"); \
-	    break;							\
+            hwloc_debug("too big "field" number in /proc/cpuinfo\n"); \
+            return -1;							\
 	  }								\
 	hwloc_debug(field " %ld\n", var)
 #      define getprocnb_end()			\
@@ -907,6 +910,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	  }
     }
   fclose(fd);
+
+  if (processor == -1)
+    return -1;
 
   /* setup the final number of procs */
   procid_max = processor + 1;
@@ -1052,15 +1058,16 @@ hwloc_look_linux(struct hwloc_topology *topology)
 
     /* Gather the list of cpus now */
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
+	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
       err = look_cpuinfo(topology, "/proc/cpuinfo", online_set, admin_disabled_cpus_set);
       if (err < 0) {
-	fprintf(stderr, "sysfs topology not found, and /proc/cpuinfo missing\n");
-	abort();
+        if (topology->is_thissystem)
+          hwloc_setup_proc_level(topology,  hwloc_fallback_nbprocessors(), NULL);
+        else
+          /* fsys-root but not this system, no way, assume there's just 1
+           * processor :/ */
+          hwloc_setup_proc_level(topology, 1, NULL);
       }
     } else {
       look_sysfscpu(topology, "/sys/devices/system/cpu", admin_disabled_cpus_set);
