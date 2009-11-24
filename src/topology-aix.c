@@ -61,7 +61,7 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
    * ra_mmap to allocation on an rset
    */
 
-  if (ra_attachrset(what, who, rset, 0)) {
+  if (ra_attachrset(what, who, rad, 0)) {
     res = -1;
     goto out;
   }
