@@ -339,18 +339,20 @@ if test "x$hwloc_thread_t" != "x" ; then
   AC_DEFINE_UNQUOTED(hwloc_thread_t, $hwloc_thread_t, [Define this to the thread ID type])
 fi
 
-AC_MSG_CHECKING([for old prototype of sched_setaffinity])
-AC_COMPILE_IFELSE(
-  AC_LANG_PROGRAM([[
-    #define _GNU_SOURCE
-    #include <sched.h>
-    static unsigned long mask;
-    ]], [[ sched_setaffinity(0, (void*) &mask);
-    ]]),
-  AC_DEFINE([HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
-  AC_MSG_RESULT([yes]),
-  AC_MSG_RESULT([no])
-)
+HWLOC_CHECK_DECL([sched_setaffinity], [
+  AC_MSG_CHECKING([for old prototype of sched_setaffinity])
+  AC_COMPILE_IFELSE(
+    AC_LANG_PROGRAM([[
+      #define _GNU_SOURCE
+      #include <sched.h>
+      static unsigned long mask;
+      ]], [[ sched_setaffinity(0, (void*) &mask);
+      ]]),
+    AC_DEFINE([HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+  )
+])
 
 AC_MSG_CHECKING([for working CPU_SET])
 AC_LINK_IFELSE(
