@@ -6,6 +6,8 @@
 /* Detect topology change: registering for power management changes and check
  * if for example hw.activecpu changed */
 
+/* Apparently, Darwin people do not _want_ to provide binding functions.  */
+
 #include <private/config.h>
 
 #include <sys/types.h>
