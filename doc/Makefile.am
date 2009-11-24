@@ -345,13 +345,11 @@ endif
 # Make sure that the documentation example works
 #
 
-if BUILD_DOXYGEN
 TESTS = hwloc-hello
 check_PROGRAMS = $(TESTS)
 
 hwloc_hello_LDADD = $(top_builddir)/src/libhwloc.la
 hwloc_hello_DEPENDENCIES = $(hwloc_hello_LDADD)
-endif
 
 #
 # Only remove the actual generated documentation files for maintainers
