@@ -9,7 +9,7 @@ dnl Substitute in `GCC_CFLAGS' GCC-specific flags.
 AC_DEFUN([HWLOC_GCC_FLAGS], [
   # GCC specifics.
   if test "x$GCC" = "xyes"; then
-    GCC_CFLAGS="-std=c99 -Wall -Wmissing-prototypes -Wundef"
+    GCC_CFLAGS="-std=gnu99 -Wall -Wmissing-prototypes -Wundef"
     GCC_CFLAGS="$GCC_CFLAGS -Wpointer-arith -Wcast-align"
   else
     GCC_CFLAGS=""
