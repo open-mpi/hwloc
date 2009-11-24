@@ -36,6 +36,23 @@ Version 0.9.3 (unreleased)
 --------------------------
 
 * Fix autogen.sh to work with Autoconf 2.63.
+* Fix various crashes in particular conditions:
+  - xml files with root attributes
+  - offline CPUs
+  - partial sysfs support
+  - unparseable /proc/cpuinfo
+  - ignoring NUMA level while Misc level have been generated
+* Tweak documentation a bit
+* Do not require the pthread library for binding the current thread on Linux
+* Do not erroneously consider the sched_setaffinity prototype is the old version
+  when there is actually none.
+* Fix _syscall3 compilation on archs for which we do not have the
+  sched_setaffinity system call number.
+* Fix AIX binding.
+* Fix libraries dependencies: now only lstopo depends on libtermcap, fix
+  binutils-gold link
+* Have make check always build and run hwloc-hello.c
+* Do not limit size of a cpuset.
 
 
 Version 0.9.2
