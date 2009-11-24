@@ -404,14 +404,13 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
 static void
 hwloc__topology_export_info (hwloc_topology_t topology, xmlNodePtr root_node)
 {
-  hwloc_cpuset_t offline = hwloc_topology_get_offline_cpuset(topology);
+  hwloc_const_cpuset_t offline = hwloc_topology_get_offline_cpuset(topology);
   char *offlinestr = NULL;
 
   hwloc_cpuset_asprintf(&offlinestr, offline);
   xmlNewProp(root_node, BAD_CAST "offline_cpuset", BAD_CAST offlinestr);
 
   free(offlinestr);
-  hwloc_cpuset_free(offline);
 }
 
 void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)

@@ -62,6 +62,8 @@ hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, hwloc_cpuset_t h
  * that takes a cpu_set_t  as input parameter.
  *
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
+ *
+ * \return newly-allocated cpuset
  */
 static __inline hwloc_cpuset_t
 hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology,

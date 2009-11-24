@@ -21,7 +21,7 @@
 int main(int argc, char *argv[]) 
 {
     hwloc_topology_t topology;
-    hwloc_cpuset_t offline_processors;
+    hwloc_const_cpuset_t offline_processors;
     int i;
     int ret = 0;
     int need_help = 0;
@@ -106,7 +106,6 @@ int main(int argc, char *argv[])
 	    num_processors_offline = hwloc_cpuset_weight(offline_processors);
 	    num_processors_total = num_processors_offline+num_processors_online;
 	    max_processor_id_offline = hwloc_cpuset_last(offline_processors);
-	    hwloc_cpuset_free(offline_processors);
 
             printf("Number of processors online: %d\n", num_processors_online);
             printf("Number of processors offline: %d (no topology information available)\n", 

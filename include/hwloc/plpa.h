@@ -255,9 +255,8 @@ hwloc_plpa_get_processor_flags(hwloc_topology_t topology, int processor_id, int 
     *online = 1;
   } else {
     /* if not found, check whether it is in the offline cpuset */
-    hwloc_cpuset_t cpuset = hwloc_topology_get_offline_cpuset(topology);
+    hwloc_const_cpuset_t cpuset = hwloc_topology_get_offline_cpuset(topology);
     *exists = (hwloc_cpuset_isset(cpuset, processor_id) != 0);
-    hwloc_cpuset_free(cpuset);
     *online = 0;
   }
   return 0;

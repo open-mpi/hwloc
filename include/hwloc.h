@@ -157,7 +157,10 @@ struct hwloc_obj {
   void *userdata;			/**< \brief Application-given private data pointer, initialized to \c NULL, use it as you wish */
 
   /* cpuset */
-  hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object */
+  hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
+                                          *
+                                          * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
+                                          */
 
   signed os_level;			/**< \brief OS-provided physical level */
 };
@@ -456,8 +459,11 @@ extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topol
  *
  * \return the CPU set of offline logical processors, or processors
  * that are disabled by the administrator.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
  */
-extern hwloc_cpuset_t hwloc_topology_get_offline_cpuset(hwloc_topology_t topology);
+extern hwloc_const_cpuset_t hwloc_topology_get_offline_cpuset(hwloc_topology_t topology);
 
 /** @} */
 
@@ -601,6 +607,8 @@ extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t set
 			    int policy);
 
 /** \brief Get current process or thread binding
+ *
+ * \return newly-allocated cpuset
  */
 extern hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int policy);
 
@@ -619,6 +627,8 @@ extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, co
  * platforms
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
+ *
+ * \return newly-allocated cpuset
  */
 extern hwloc_cpuset_t hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy);
 
@@ -639,6 +649,8 @@ extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t ti
  * Windows platforms
  *
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
+ *
+ * \return newly-allocated cpuset
  */
 #ifdef hwloc_thread_t
 extern hwloc_cpuset_t hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy);

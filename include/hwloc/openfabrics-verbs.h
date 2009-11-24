@@ -34,6 +34,8 @@
  * kernel-provided cpumap file and return the corresponding CPU set.
  * This function is currently only implemented in a meaningful way for
  * Linux; other systems will simply get a full cpuset.
+ *
+ * \return newly-allocated cpuset.
  */
 static __inline hwloc_cpuset_t
 hwloc_ibv_get_device_cpuset(struct ibv_device *ibdev)

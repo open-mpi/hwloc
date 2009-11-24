@@ -28,6 +28,8 @@
  *
  * Might be used when reading CPU set from sysfs attributes such as topology
  * and caches for processors, or local_cpus for devices.
+ *
+ * \return newly-allocated cpuset.
  */
 extern hwloc_cpuset_t hwloc_linux_parse_cpumap_file(FILE *file);
 
@@ -42,6 +44,8 @@ extern int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwl
  *
  * The behavior is exactly the same as the Linux sched_setaffinity system call,
  * but uses a hwloc cpuset.
+ *
+ * \return newly-allocated cpuset.
  */
 extern hwloc_cpuset_t hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid);
 

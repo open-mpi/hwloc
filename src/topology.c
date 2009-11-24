@@ -1473,10 +1473,10 @@ hwloc_topology_get_depth(struct hwloc_topology *topology)
   return topology->nb_levels;
 }
 
-hwloc_cpuset_t
+hwloc_const_cpuset_t
 hwloc_topology_get_offline_cpuset(struct hwloc_topology *topology)
 {
-  return hwloc_cpuset_dup(topology->offline_cpuset);
+  return topology->offline_cpuset;
 }
 
 
