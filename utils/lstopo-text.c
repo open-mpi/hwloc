@@ -142,7 +142,8 @@ static int myputchar(int c) {
 struct cell {
   character c;
 #ifdef HWLOC_HAVE_LIBTERMCAP
-  int r, g, b;
+  int fr, fg, fb;
+  int br, bg, bb;
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 };
 
@@ -195,29 +196,28 @@ static int set_textcolor(int rr, int gg, int bb)
 }
 
 static void
-set_color(int r, int g, int b)
+set_color(int fr, int fg, int fb, int br, int bg, int bb)
 {
   char *toput;
   int color, textcolor;
 
   if (initc || initp) {
     /* Can set rgb color, easy */
-    color = rgb_to_color(r, g, b) + 16;
-    if (r + g + b >= 2*0x100)
-      textcolor = 0;
+    textcolor = rgb_to_color(fr, fg, fb) + 16;
+    color = rgb_to_color(br, bg, bb) + 16;
   } else {
     /* Magic trigger: it seems to separate colors quite well */
-    int rr = r >= 0xe0;
-    int gg = g >= 0xe0;
-    int bb = b >= 0xe0;
+    int brr = br >= 0xe0;
+    int bgg = bg >= 0xe0;
+    int bbb = bb >= 0xe0;
 
     if (setab)
       /* ANSI colors */
-      color = (rr << 0) | (gg << 1) | (bb << 2);
+      color = (brr << 0) | (bgg << 1) | (bbb << 2);
     else
       /* Legacy colors */
-      color = (rr << 2) | (gg << 1) | (bb << 0);
-    textcolor = set_textcolor(rr, gg, bb);
+      color = (brr << 2) | (bgg << 1) | (bbb << 0);
+    textcolor = set_textcolor(brr, bgg, bbb);
   }
 
   /* And now output magic string to TTY */
@@ -267,7 +267,7 @@ text_declare_color(void *output, int r, int g, int b)
 
 /* output text, erasing any previous content */
 static void
-put(struct display *disp, int x, int y, character c, int r, int g, int b)
+put(struct display *disp, int x, int y, character c, int fr, int fg, int fb, int br, int bg, int bb)
 {
   if (x >= disp->width || y >= disp->height) {
     /* fprintf(stderr, "%"PRIchar" overflowed to (%d,%d)\n", c, x, y); */
@@ -275,10 +275,15 @@ put(struct display *disp, int x, int y, character c, int r, int g, int b)
   }
   disp->cells[y][x].c = c;
 #ifdef HWLOC_HAVE_LIBTERMCAP
-  if (r != -1) {
-    disp->cells[y][x].r = r;
-    disp->cells[y][x].g = g;
-    disp->cells[y][x].b = b;
+  if (fr != -1) {
+    disp->cells[y][x].fr = fr;
+    disp->cells[y][x].fg = fg;
+    disp->cells[y][x].fb = fb;
+  }
+  if (br != -1) {
+    disp->cells[y][x].br = br;
+    disp->cells[y][x].bg = bg;
+    disp->cells[y][x].bb = bb;
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 }
@@ -385,7 +390,7 @@ merge(struct display *disp, int x, int y, int or, int andnot, int r, int g, int 
 {
   character current = disp->cells[y][x].c;
   int directions = (to_directions(disp, current) & ~andnot) | or;
-  put(disp, x, y, from_directions(disp, directions), r, g, b);
+  put(disp, x, y, from_directions(disp, directions), -1, -1, -1, r, g, b);
 }
 
 /* Now we can implement the standard drawing helpers */
@@ -421,7 +426,7 @@ text_box(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigne
   }
   for (j = y1 + 1; j < y2; j++) {
     for (i = x1 + 1; i < x2; i++) {
-      put(disp, i, j, ' ', r, g, b);
+      put(disp, i, j, ' ', -1, -1, -1, r, g, b);
     }
   }
 }
@@ -484,7 +489,7 @@ text_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned 
   x /= (gridsize/2);
   y /= gridsize;
   for ( ; *text; text++)
-    put(disp, x++, y, *text, -1, -1, -1);
+    put(disp, x++, y, *text, r, g, b, -1, -1, -1);
 }
 
 static struct draw_methods text_draw_methods = {
@@ -500,7 +505,8 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   FILE *output;
   struct display *disp;
   int i, j;
-  int lr, lg, lb;
+  int lfr, lfg, lfb; /* Last foreground color */
+  int lbr, lbg, lbb; /* Last background color */
 #ifdef HWLOC_HAVE_LIBTERMCAP
   int term = 0;
 #endif
@@ -562,22 +568,30 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   disp = output_draw_start(&text_draw_methods, topology, output);
   output_draw(&text_draw_methods, topology, disp);
 
-  lr = lg = lb = -1;
+  lfr = lfg = lfb = -1;
+  lbr = lbg = lbb = -1;
   for (j = 0; j < disp->height; j++) {
     for (i = 0; i < disp->width; i++) {
 #ifdef HWLOC_HAVE_LIBTERMCAP
       if (term) {
 	/* TTY output, use colors */
-	int r = disp->cells[j][i].r;
-	int g = disp->cells[j][i].g;
-	int b = disp->cells[j][i].b;
+	int fr = disp->cells[j][i].fr;
+	int fg = disp->cells[j][i].fg;
+	int fb = disp->cells[j][i].fb;
+	int br = disp->cells[j][i].br;
+	int bg = disp->cells[j][i].bg;
+	int bb = disp->cells[j][i].bb;
 
 	/* Avoid too much work for the TTY */
-	if (r != lr || g != lg || b != lb) {
-	  set_color(r, g, b);
-	  lr = r;
-	  lg = g;
-	  lb = b;
+	if (fr != lfr || fg != lfg || fb != lfb
+	 || br != lbr || bg != lbg || bb != lbb) {
+	  set_color(fr, fg, fb, br, bg, bb);
+	  lfr = fr;
+	  lfg = fg;
+	  lfb = fb;
+	  lbr = br;
+	  lbg = bg;
+	  lbb = bb;
 	}
       }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
@@ -586,8 +600,9 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
 #ifdef HWLOC_HAVE_LIBTERMCAP
     /* Keep the rest of the line black */
     if (term) {
-      lr = lg = lb = 0;
-      set_color(lr, lg, lb);
+      lfr = lfg = lfb = 0xff;
+      lbr = lbg = lbb = 0;
+      set_color(lfr, lfg, lfb, lbr, lbg, lbb);
     }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
     putcharacter('\n', output);
