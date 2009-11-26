@@ -746,10 +746,13 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
   if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     hwloc_obj_t child = father->first_child;
     /* Replace object with its list of children */
-    *pfather = child;
-    while (child->next_sibling)
-      child = child->next_sibling;
-    child->next_sibling = father->next_sibling;
+    if (child) {
+      *pfather = child;
+      while (child->next_sibling)
+        child = child->next_sibling;
+      child->next_sibling = father->next_sibling;
+    } else
+      *pfather = father->next_sibling;
     /* Remove ignored object */
     free_object(father);
   }
