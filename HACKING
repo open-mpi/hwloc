@@ -61,3 +61,14 @@ Notes to developers:
 
 - make maintainer-clean can be used to properly remove the generated
   documentations.
+
+- Silent rules are used by default to reduce the build verbosity:
+
+  shell$ make
+  CC	src/topology.lo
+
+  To revert to the old verbose rules, pass V=1 to make:
+
+  shell$ make V=1
+  /bin/sh ../libtool  --tag=CC   --mode=compile gcc [...] -c -o topology.lo topology.c
+
