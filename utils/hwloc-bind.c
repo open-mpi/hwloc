@@ -85,7 +85,14 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    hwloc_mask_process_arg(topology, depth, argv[0], cpu_set, verbose);
+    ret = hwloc_mask_process_arg(topology, depth, argv[0], cpu_set, verbose);
+    if (ret < 0) {
+      if (verbose)
+	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
+      break;
+    }
+
+    /* we found at least one binding argument */
     bind_cpus = 1;
 
   next:
@@ -103,7 +110,7 @@ int main(int argc, char *argv[])
     }
     s = hwloc_cpuset_printf_value(cpu_set);
     printf("%s\n", s);
-    free(s);  
+    free(s);
     return EXIT_SUCCESS;
   }
 
