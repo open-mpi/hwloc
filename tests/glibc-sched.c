@@ -24,7 +24,7 @@ int main(void)
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
 
-  hwlocset = hwloc_cpuset_dup(hwloc_get_system_obj(topology)->cpuset);
+  hwlocset = hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
   hwloc_cpuset_to_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
   err = sched_setaffinity(0, sizeof(schedset));
@@ -41,7 +41,10 @@ int main(void)
 #endif
   assert(!err);
   hwlocset = hwloc_cpuset_from_glibc_sched_affinity(topology, &schedset, sizeof(schedset));
-  assert(hwloc_cpuset_isequal(hwlocset, hwloc_get_system_obj(topology)->cpuset));
+  assert(hwloc_cpuset_isincluded(hwlocset, hwloc_topology_get_complete_cpuset(topology)));
+  hwloc_cpuset_clearset(hwlocset, hwloc_topology_get_online_cpuset(topology));
+  hwloc_cpuset_clearset(hwlocset, hwloc_topology_get_allowed_cpuset(topology));
+  assert(hwloc_cpuset_iszero(hwlocset));
   hwloc_cpuset_free(hwlocset);
 
   obj = hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1) - 1);

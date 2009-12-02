@@ -35,7 +35,7 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
 
   /* The resulting binding is always strict */
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if (ra_detachrset(what, who, 0))
       return -1;
     return 0;
@@ -93,7 +93,7 @@ hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   for (cpu = 0; cpu < maxcpus; cpu++)
     if (rs_op(RS_TESTRESOURCE, rset, NULL, R_PROCS, cpu) == 1)
       hwloc_cpuset_set(hwloc_set, cpu);
-  hwloc_cpuset_andset(hwloc_set, hwloc_get_system_obj(topology)->cpuset);
+  hwloc_cpuset_andset(hwloc_set, hwloc_topology_get_complete_cpuset(topology));
 
 out:
   rs_free(rset);

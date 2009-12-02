@@ -364,9 +364,8 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
     }
 }
 
-/* Just for debugging.  */
 static void
-print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
+print_object(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
 {
   char line[256], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
@@ -378,6 +377,13 @@ print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
   if (obj->arity)
     hwloc_debug(" arity %d", obj->arity);
   hwloc_debug("\n");
+}
+
+/* Just for debugging.  */
+static void
+print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
+{
+  print_object(topology, indent, obj);
   for (obj = obj->first_child; obj; obj = obj->next_sibling)
     print_objects(topology, indent + 1, obj);
 }
@@ -753,6 +759,19 @@ get_proc_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 }
 
 static void
+apply_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data)
+{
+  hwloc_cpuset_t nodeset = data;
+  hwloc_obj_t obj = *pobj;
+  if (obj->type == HWLOC_OBJ_NODE && obj->os_index != -1 &&
+      !hwloc_cpuset_isset(nodeset, obj->os_index)) {
+    hwloc_debug("Dropping memory from disallowed node %d\n", obj->os_index);
+    obj->attr->node.memory_kB = 0;
+    obj->attr->node.huge_page_free = 0;
+  }
+}
+
+static void
 apply_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
   hwloc_cpuset_t cpuset = data;
@@ -760,9 +779,20 @@ apply_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 }
 
 static void
-do_free_object(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
+drop_object(hwloc_obj_t *pfather)
 {
-  free_object(*obj);
+  hwloc_obj_t father = *pfather;
+  hwloc_obj_t child = father->first_child;
+  /* Replace object with its list of children */
+  if (child) {
+    *pfather = child;
+    while (child->next_sibling)
+      child = child->next_sibling;
+    child->next_sibling = father->next_sibling;
+  } else
+    *pfather = father->next_sibling;
+  /* Remove ignored object */
+  free_object(father);
 }
 
 /* Remove all ignored objects.  */
@@ -771,18 +801,18 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
 {
   hwloc_obj_t father = *pfather;
   if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
-    hwloc_obj_t child = father->first_child;
-    /* Replace object with its list of children */
-    if (child) {
-      *pfather = child;
-      while (child->next_sibling)
-        child = child->next_sibling;
-      child->next_sibling = father->next_sibling;
-    } else
-      *pfather = father->next_sibling;
-    /* Remove ignored object */
-    free_object(father);
+    hwloc_debug("\nDropping ignored object ");
+    print_object(topology, 0, father);
+    drop_object(pfather);
   }
+}
+
+static void
+do_free_object(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data)
+{
+  hwloc_obj_t obj = *pobj;
+  *pobj = obj->next_sibling;
+  free_object(obj);
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
@@ -792,8 +822,9 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
   if ((*obj)->type != HWLOC_OBJ_NODE && hwloc_cpuset_iszero((*obj)->cpuset)) {
     /* Remove empty children */
-    traverse(topology, obj, NULL, NULL, do_free_object, NULL);
-    *obj = (*obj)->next_sibling;
+    hwloc_debug("\nRemoving empty object ");
+    print_object(topology, 0, *obj);
+    traverse(topology, obj, NULL, do_free_object, do_free_object, NULL);
   }
 }
 
@@ -812,11 +843,15 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
   /* TODO: have a preference order?  */
   if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Father can be ignored in favor of the child.  */
+    hwloc_debug("\nIgnoring father ");
+    print_object(topology, 0, father);
     *pfather = child;
     child->next_sibling = father->next_sibling;
     free_object(father);
   } else if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Child can be ignored in favor of the father.  */
+    hwloc_debug("\nIgnoring child ");
+    print_object(topology, 0, child);
     father->first_child = child->first_child;
     free_object(child);
   }
@@ -884,7 +919,7 @@ static int dontset_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, 
 }
 static hwloc_cpuset_t dontget_cpubind(hwloc_topology_t topology, int policy)
 {
-  return hwloc_get_system_obj(topology)->cpuset;
+  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
 static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
 {
@@ -892,7 +927,7 @@ static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpu
 }
 static hwloc_cpuset_t dontget_thisthread_cpubind(hwloc_topology_t topology, int policy)
 {
-  return hwloc_get_system_obj(topology)->cpuset;
+  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
 static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
 {
@@ -900,7 +935,7 @@ static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuse
 }
 static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology, int policy)
 {
-  return hwloc_get_system_obj(topology)->cpuset;
+  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
 static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy)
 {
@@ -908,7 +943,7 @@ static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwlo
 }
 static hwloc_cpuset_t dontget_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
 {
-  return hwloc_get_system_obj(topology)->cpuset;
+  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
 #ifdef hwloc_thread_t
 static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy)
@@ -917,7 +952,7 @@ static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid,
 }
 static hwloc_cpuset_t dontget_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy)
 {
-  return hwloc_get_system_obj(topology)->cpuset;
+  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
 #endif
 
@@ -943,9 +978,10 @@ hwloc_discover(struct hwloc_topology *topology)
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
 
   /* hwloc_look_* functions should use hwloc_obj_add to add objects initialized
-   * through hwloc_alloc_setup_object. For node levels, memory_Kb and huge_page_free
-   * must be initialized. For cache levels, memory_kB and attr->cache.depth must be
-   * initialized, for misc levels, attr->misc.depth must be initialized
+   * through hwloc_alloc_setup_object. For node levels, memory_Kb and
+   * huge_page_free must be initialized. For cache levels, memory_kB and
+   * attr->cache.depth must be initialized, for misc levels, attr->misc.depth
+   * must be initialized
    */
 
   /* There must be at least a PROC object for each logical processor, at worse
@@ -955,6 +991,21 @@ hwloc_discover(struct hwloc_topology *topology)
   /* If the OS can provide NUMA distances, it should call
    * hwloc_setup_misc_level_from_distances() to automatically group NUMA nodes
    * into misc objects.
+   */
+
+  /* A priori, All processors are visible in the topology, online, and allowed
+   * for the application.
+   *
+   * - If some processors exist but topology information is unknown for them
+   *   (and thus the backend couldn't create objects for them), they should be
+   *   added to topology->complete_cpuset.
+   *
+   * - If some processors are not online, they should be dropped from
+   *   topology->online_cpuset.
+   *
+   * - If some processors are not allowed for the application (e.g. for
+   *   administration reasons), they should be dropped from
+   *   topology->allowed_cpuset.
    */
 
   /* Each OS type should also fill the bind functions pointers, at least the
@@ -1008,12 +1059,47 @@ hwloc_discover(struct hwloc_topology *topology)
   hwloc_debug("\nComputing the system cpuset by ORing all Proc objects\n");
   hwloc_cpuset_zero(topology->levels[0][0]->cpuset);
   traverse(topology, &topology->levels[0][0], NULL, get_proc_cpuset, NULL, topology->levels[0][0]->cpuset);
+  hwloc_debug_cpuset("-> %s\n", topology->levels[0][0]->cpuset);
 
-  hwloc_debug("\nApplying the system cpuset to all nodes\n");
+  hwloc_debug("\nAdding it to the complete cpuset\n");
+  hwloc_debug_cpuset("%s", topology->complete_cpuset);
+  hwloc_cpuset_orset(topology->complete_cpuset, topology->levels[0][0]->cpuset);
+  hwloc_debug_cpuset(" -> %s\n", topology->complete_cpuset);
+
+  hwloc_debug("\nLimiting online cpuset to the complete cpuset\n");
+  hwloc_debug_cpuset("%s", topology->online_cpuset);
+  hwloc_cpuset_andset(topology->online_cpuset, topology->complete_cpuset);
+  hwloc_debug_cpuset(" -> %s\n", topology->online_cpuset);
+
+  hwloc_debug("\nLimiting allowed cpuset to the complete cpuset\n");
+  hwloc_debug_cpuset("%s", topology->allowed_cpuset);
+  hwloc_cpuset_andset(topology->allowed_cpuset, topology->complete_cpuset);
+  hwloc_debug_cpuset(" -> %s\n", topology->allowed_cpuset);
+
+  if (!topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
+    hwloc_debug("\nRemoving unauthorized cpuset from system cpuset\n");
+    hwloc_debug_cpuset("%s", topology->levels[0][0]->cpuset);
+    hwloc_cpuset_andset(topology->levels[0][0]->cpuset, topology->allowed_cpuset);
+    hwloc_debug_cpuset(" -> %s\n", topology->levels[0][0]->cpuset);
+
+    hwloc_debug("\nRemoving offline cpuset from system cpuset\n");
+    hwloc_debug_cpuset("%s", topology->levels[0][0]->cpuset);
+    hwloc_cpuset_andset(topology->levels[0][0]->cpuset, topology->online_cpuset);
+    hwloc_debug_cpuset(" -> %s\n", topology->levels[0][0]->cpuset);
+
+    hwloc_debug_cpuset("\nRemoving disallowed memory according to nodeset %s\n", topology->allowed_nodeset);
+    traverse(topology, &topology->levels[0][0], apply_nodeset, apply_nodeset, NULL, topology->allowed_nodeset);
+  }
+
+  hwloc_debug("\nApplying the system cpuset to all objects\n");
   traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, topology->levels[0][0]->cpuset);
+
+  print_objects(topology, 0, topology->levels[0][0]);
 
   hwloc_debug("\nRemoving ignored objects\n");
   traverse(topology, &topology->levels[0][0], remove_ignored, remove_ignored, NULL, NULL);
+
+  print_objects(topology, 0, topology->levels[0][0]);
 
   hwloc_debug("\nRemoving empty objects except numa nodes and PCI devices\n");
   traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
@@ -1022,6 +1108,8 @@ hwloc_discover(struct hwloc_topology *topology)
 
   hwloc_debug("\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
   traverse(topology, &topology->levels[0][0], NULL, NULL, merge_useless_child, NULL);
+
+  print_objects(topology, 0, topology->levels[0][0]);
 
   hwloc_debug("\nOk, finished tweaking, now connect\n");
 
@@ -1193,7 +1281,10 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
   topology->type_depth[HWLOC_OBJ_SYSTEM] = 0;
-  hwloc_cpuset_zero(topology->offline_cpuset);
+  hwloc_cpuset_zero(topology->complete_cpuset);
+  hwloc_cpuset_fill(topology->online_cpuset);
+  hwloc_cpuset_fill(topology->allowed_cpuset);
+  hwloc_cpuset_fill(topology->allowed_nodeset);
 
   /* Create the actual System object */
   system_obj = hwloc_alloc_setup_object(HWLOC_OBJ_SYSTEM, 0);
@@ -1229,7 +1320,10 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->flags = 0;
   topology->is_thissystem = 1;
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
-  topology->offline_cpuset = hwloc_cpuset_alloc();
+  topology->complete_cpuset = hwloc_cpuset_alloc();
+  topology->online_cpuset = hwloc_cpuset_alloc();
+  topology->allowed_cpuset = hwloc_cpuset_alloc();
+  topology->allowed_nodeset = hwloc_cpuset_alloc();
 
   topology->set_cpubind = NULL;
   topology->get_cpubind = NULL;
@@ -1384,6 +1478,10 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 {
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
+  hwloc_cpuset_free(topology->complete_cpuset);
+  hwloc_cpuset_free(topology->online_cpuset);
+  hwloc_cpuset_free(topology->allowed_cpuset);
+  hwloc_cpuset_free(topology->allowed_nodeset);
   free(topology);
 }
 
@@ -1477,9 +1575,27 @@ hwloc_topology_get_depth(struct hwloc_topology *topology)
 }
 
 hwloc_const_cpuset_t
-hwloc_topology_get_offline_cpuset(struct hwloc_topology *topology)
+hwloc_topology_get_complete_cpuset(struct hwloc_topology *topology)
 {
-  return topology->offline_cpuset;
+  return topology->complete_cpuset;
+}
+
+hwloc_const_cpuset_t
+hwloc_topology_get_topology_cpuset(struct hwloc_topology *topology)
+{
+  return hwloc_get_system_obj(topology)->cpuset;
+}
+
+hwloc_const_cpuset_t
+hwloc_topology_get_online_cpuset(struct hwloc_topology *topology)
+{
+  return topology->online_cpuset;
+}
+
+hwloc_const_cpuset_t
+hwloc_topology_get_allowed_cpuset(struct hwloc_topology *topology)
+{
+  return topology->allowed_cpuset;
 }
 
 

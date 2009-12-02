@@ -60,7 +60,7 @@ hwloc_ibv_get_device_cpuset(struct ibv_device *ibdev)
   return set;
 #else
   /* Non-Linux systems simply get a full cpuset */
-  return hwloc_cpuset_dup(hwloc_get_system_obj(topology)->cpuset);
+  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 #endif
 }
 

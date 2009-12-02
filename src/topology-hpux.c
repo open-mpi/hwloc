@@ -73,7 +73,7 @@ hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_co
   mpctl(MPC_SETLDOM, MPC_LDOMFLOAT, pid);
   mpctl(MPC_SETPROCESS, MPC_SPUFLOAT, pid);
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset))
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology)))
     return 0;
 
   ldom = hwloc_hpux_find_ldom(topology, hwloc_set);
@@ -111,7 +111,7 @@ hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread,
   pthread_ldom_bind_np(&ldom2, PTHREAD_LDOMFLOAT_NP, pthread);
   pthread_processor_bind_np(PTHREAD_BIND_ADVISORY_NP, &cpu2, PTHREAD_SPUFLOAT_NP, pthread);
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset))
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology)))
     return 0;
 
   ldom = hwloc_hpux_find_ldom(topology, hwloc_set);

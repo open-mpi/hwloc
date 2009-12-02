@@ -186,7 +186,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 
   colon = strchr(arg, ':');
   if (colon) {
-    err = hwloc_mask_append_object(topology, topodepth, hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
+    err = hwloc_mask_append_object(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), arg, set, mode, verbose);
   } else if (strlen(arg) == strspn(arg, "0123456789abcdefABCDEF,")) {
     hwloc_cpuset_t newset = hwloc_cpuset_from_string(arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);

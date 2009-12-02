@@ -30,8 +30,8 @@
  *   for details about manipulating those.
  * + All countspec parameters were removed. Only online CPUs are
  *   manipulated here. Offlines CPUs are now handled separately since
- *   they have no topology information. The list of offline processors
- *   may be obtained with hwloc_topology_get_offline_cpuset().
+ *   they have no topology information. The list of online processors
+ *   may be obtained with hwloc_topology_get_online_cpuset().
  * + The deprecated get_processor_info() function was not reimplemented.
  */
 
@@ -254,8 +254,9 @@ hwloc_plpa_get_processor_flags(hwloc_topology_t topology, int processor_id, int 
     *exists = 1;
     *online = 1;
   } else {
-    /* if not found, check whether it is in the offline cpuset */
-    hwloc_const_cpuset_t cpuset = hwloc_topology_get_offline_cpuset(topology);
+    /* if not found, check whether it is in the online cpuset */
+    /* FIXME exists / online */
+    hwloc_const_cpuset_t cpuset = hwloc_topology_get_online_cpuset(topology);
     *exists = (hwloc_cpuset_isset(cpuset, processor_id) != 0);
     *online = 0;
   }

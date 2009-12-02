@@ -21,15 +21,14 @@
 int main(int argc, char *argv[]) 
 {
     hwloc_topology_t topology;
-    hwloc_const_cpuset_t offline_processors;
+    hwloc_const_cpuset_t processors;
     int i;
     int ret = 0;
     int need_help = 0;
     int show_topo = 0;
     int have_topo, num_sockets, max_socket_num, num_cores, max_core_id;
     int num_processors_online, max_processor_id_online;
-    int num_processors_offline, max_processor_id_offline;
-    int num_processors_total;
+    int num_processors_offline;
     int socket_id;
     hwloc_plpa_api_type_t api_probe;
 
@@ -102,10 +101,8 @@ int main(int argc, char *argv[])
                 exit(1);
             }
 
-	    offline_processors = hwloc_topology_get_offline_cpuset(topology);
-	    num_processors_offline = hwloc_cpuset_weight(offline_processors);
-	    num_processors_total = num_processors_offline+num_processors_online;
-	    max_processor_id_offline = hwloc_cpuset_last(offline_processors);
+            processors = hwloc_topology_get_complete_cpuset(topology);
+            num_processors_offline = hwloc_cpuset_weight(processors) - num_processors_online;
 
             printf("Number of processors online: %d\n", num_processors_online);
             printf("Number of processors offline: %d (no topology information available)\n", 

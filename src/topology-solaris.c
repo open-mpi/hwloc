@@ -26,7 +26,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 
   /* The resulting binding is always strict */
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if (processor_bind(idtype, id, PBIND_NONE, NULL) != 0)
       return -1;
     return 0;
@@ -229,11 +229,9 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuse
 
       procid_max++;
       hwloc_debug("cpu%d's state is %s\n", cpuid, stat->value.c);
-      if (strcmp(stat->value.c, "on-line")) {
-	/* not online, ignore for chip and core ids */
-	hwloc_cpuset_set(topology->offline_cpuset, cpuid);
-	continue;
-      }
+      if (strcmp(stat->value.c, "on-line"))
+	/* not online */
+        hwloc_cpuset_clr(topology->online_cpuset, cpuid);
 
       hwloc_cpuset_set(online_cpuset, cpuid);
 

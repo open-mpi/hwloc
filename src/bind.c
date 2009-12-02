@@ -13,18 +13,29 @@
 /* TODO: HWLOC_GNU_SYS, HWLOC_FREEBSD_SYS, HWLOC_DARWIN_SYS, HWLOC_IRIX_SYS, HWLOC_HPUX_SYS
  * IRIX: see _DSM_MUSTRUN */
 
+static hwloc_const_cpuset_t
+hwloc_fix_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set)
+{
+  hwloc_const_cpuset_t topology_set = hwloc_topology_get_topology_cpuset(topology);
+  hwloc_const_cpuset_t complete_set = hwloc_topology_get_complete_cpuset(topology);
+
+  if (!hwloc_cpuset_isincluded(set, complete_set)) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  if (hwloc_cpuset_isincluded(topology_set, set))
+    set = complete_set;
+
+  return set;
+}
+
 int
 hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
 {
-  hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
-
-  if (hwloc_cpuset_isfull(set))
-    set = system_set;
-
-  if (!hwloc_cpuset_isincluded(set, system_set)) {
-    errno = EINVAL;
+  set = hwloc_fix_cpubind(topology, set);
+  if (!set)
     return -1;
-  }
 
   if (policy & HWLOC_CPUBIND_PROCESS) {
     if (topology->set_thisproc_cpubind)
@@ -62,15 +73,9 @@ hwloc_get_cpubind(hwloc_topology_t topology, int policy)
 int
 hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy)
 {
-  hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
-
-  if (hwloc_cpuset_isfull(set))
-    set = hwloc_get_system_obj(topology)->cpuset;
-
-  if (!hwloc_cpuset_isincluded(set, system_set)) {
-    errno = EINVAL;
+  set = hwloc_fix_cpubind(topology, set);
+  if (!set)
     return -1;
-  }
 
   if (topology->set_proc_cpubind)
     return topology->set_proc_cpubind(topology, pid, set, policy);
@@ -93,15 +98,9 @@ hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
 int
 hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy)
 {
-  hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
-
-  if (hwloc_cpuset_isfull(set))
-    set = hwloc_get_system_obj(topology)->cpuset;
-
-  if (!hwloc_cpuset_isincluded(set, system_set)) {
-    errno = EINVAL;
+  set = hwloc_fix_cpubind(topology, set);
+  if (!set)
     return -1;
-  }
 
   if (topology->set_thread_cpubind)
     return topology->set_thread_cpubind(topology, tid, set, policy);

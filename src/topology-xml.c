@@ -51,9 +51,19 @@ hwloc__process_root_attr(struct hwloc_topology *topology,
   const char *name = (const char *) _name;
   const char *value = (const char *) _value;
 
-  if (!strcmp(name, "offline_cpuset")) {
-    hwloc_cpuset_free(topology->offline_cpuset);
-    topology->offline_cpuset = hwloc_cpuset_from_string(value);
+  if (!strcmp(name, "complete_cpuset")) {
+    hwloc_cpuset_free(topology->complete_cpuset);
+    topology->complete_cpuset = hwloc_cpuset_from_string(value);
+  }
+
+  if (!strcmp(name, "online_cpuset")) {
+    hwloc_cpuset_free(topology->online_cpuset);
+    topology->online_cpuset = hwloc_cpuset_from_string(value);
+  }
+
+  if (!strcmp(name, "allowed_cpuset")) {
+    hwloc_cpuset_free(topology->allowed_cpuset);
+    topology->allowed_cpuset = hwloc_cpuset_from_string(value);
   }
 
   else
@@ -404,13 +414,19 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
 static void
 hwloc__topology_export_info (hwloc_topology_t topology, xmlNodePtr root_node)
 {
-  hwloc_const_cpuset_t offline = hwloc_topology_get_offline_cpuset(topology);
-  char *offlinestr = NULL;
+  char *str = NULL;
 
-  hwloc_cpuset_asprintf(&offlinestr, offline);
-  xmlNewProp(root_node, BAD_CAST "offline_cpuset", BAD_CAST offlinestr);
+  hwloc_cpuset_asprintf(&str, hwloc_topology_get_complete_cpuset(topology));
+  xmlNewProp(root_node, BAD_CAST "complete_cpuset", BAD_CAST str);
+  free(str);
 
-  free(offlinestr);
+  hwloc_cpuset_asprintf(&str, hwloc_topology_get_online_cpuset(topology));
+  xmlNewProp(root_node, BAD_CAST "online_cpuset", BAD_CAST str);
+  free(str);
+
+  hwloc_cpuset_asprintf(&str, hwloc_topology_get_allowed_cpuset(topology));
+  xmlNewProp(root_node, BAD_CAST "allowed_cpuset", BAD_CAST str);
+  free(str);
 }
 
 void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)

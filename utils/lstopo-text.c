@@ -103,12 +103,52 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
   }
 
   if (verbose_mode > 1) {
-    hwloc_const_cpuset_t offline = hwloc_topology_get_offline_cpuset(topology);
-    if (!hwloc_cpuset_iszero(offline)) {
+    hwloc_const_cpuset_t complete = hwloc_topology_get_complete_cpuset(topology);
+    hwloc_const_cpuset_t topo = hwloc_topology_get_topology_cpuset(topology);
+    hwloc_const_cpuset_t online = hwloc_topology_get_online_cpuset(topology);
+    hwloc_const_cpuset_t allowed = hwloc_topology_get_allowed_cpuset(topology);
+
+    if (!hwloc_cpuset_isequal(topo, complete)) {
+      hwloc_cpuset_t unknown = hwloc_cpuset_alloc();
+      char *unknownstr;
+      hwloc_cpuset_copy(unknown, complete);
+      hwloc_cpuset_clearset(unknown, topo);
+      hwloc_cpuset_asprintf(&unknownstr, unknown);
+      fprintf (output, "%d processors not represented in topology: %s\n", hwloc_cpuset_weight(unknown), unknownstr);
+      free(unknownstr);
+      hwloc_cpuset_free(unknown);
+    }
+    if (!hwloc_cpuset_isequal(online, complete)) {
+      hwloc_cpuset_t offline = hwloc_cpuset_alloc();
       char *offlinestr;
+      hwloc_cpuset_copy(offline, complete);
+      hwloc_cpuset_clearset(offline, online);
       hwloc_cpuset_asprintf(&offlinestr, offline);
       fprintf (output, "%d processors offline: %s\n", hwloc_cpuset_weight(offline), offlinestr);
       free(offlinestr);
+      hwloc_cpuset_free(offline);
+    }
+    if (!hwloc_cpuset_isequal(allowed, online)) {
+      if (!hwloc_cpuset_isincluded(online, allowed)) {
+        hwloc_cpuset_t forbidden = hwloc_cpuset_alloc();
+        char *forbiddenstr;
+        hwloc_cpuset_copy(forbidden, online);
+        hwloc_cpuset_clearset(forbidden, allowed);
+        hwloc_cpuset_asprintf(&forbiddenstr, forbidden);
+        fprintf(output, "%d processors online but not allowed: %s\n", hwloc_cpuset_weight(forbidden), forbiddenstr);
+        free(forbiddenstr);
+        hwloc_cpuset_free(forbidden);
+      }
+      if (!hwloc_cpuset_isincluded(allowed, online)) {
+        hwloc_cpuset_t potential = hwloc_cpuset_alloc();
+        char *potentialstr;
+        hwloc_cpuset_copy(potential, allowed);
+        hwloc_cpuset_clearset(potential, online);
+        hwloc_cpuset_asprintf(&potentialstr, potential);
+        fprintf(output, "%d processors allowed but not online: %s\n", hwloc_cpuset_weight(potential), potentialstr);
+        free(potentialstr);
+        hwloc_cpuset_free(potential);
+      }
     }
     if (!hwloc_topology_is_thissystem(topology))
       fprintf (output, "Topology not from this system\n");

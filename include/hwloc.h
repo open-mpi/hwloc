@@ -455,15 +455,47 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
  */
 extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology);
 
-/** \brief Are their existing logical processors that are disabled?
+/* \brief Get complete CPU set
  *
- * \return the CPU set of offline logical processors, or processors
- * that are disabled by the administrator.
+ * \return the complete CPU set of logical processors of the system, i.e.
+ * including logical processors for which no topology information is know and
+ * thus no PROC object is provided.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed, hwloc_cpuset_dup must be used instead.
  */
-extern hwloc_const_cpuset_t hwloc_topology_get_offline_cpuset(hwloc_topology_t topology);
+extern hwloc_const_cpuset_t hwloc_topology_get_complete_cpuset(hwloc_topology_t topology);
+
+/* \brief Get topology CPU set
+ *
+ * \return the CPU set of logical processors of the system for which hwloc
+ * provides topology information. This is equivalent to the cpuset of the
+ * system object.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+extern hwloc_const_cpuset_t hwloc_topology_get_topology_cpuset(hwloc_topology_t topology);
+
+/** \brief Get online CPU set
+ *
+ * \return the CPU set of online logical processors, i.e. that can execute
+ * threads (but are not necessarily allowed for the application).
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+extern hwloc_const_cpuset_t hwloc_topology_get_online_cpuset(hwloc_topology_t topology);
+
+/** \brief Get allowed CPU set
+ *
+ * \return the CPU set of allowed logical processors, i.e. processors which the
+ * application is allowed to run on according to administration rules.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+extern hwloc_const_cpuset_t hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology);
 
 /** @} */
 
