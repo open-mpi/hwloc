@@ -353,7 +353,7 @@ hwloc_look_solaris(struct hwloc_topology *topology)
   hwloc_look_kstat(topology, &nbprocs, online_cpuset);
 #endif /* HAVE_LIBKSTAT */
   hwloc_setup_proc_level(topology, nbprocs, online_cpuset);
-  free(online_cpuset);
+  hwloc_cpuset_free(online_cpuset);
 }
 
 void
