@@ -113,6 +113,9 @@ void hwloc_cpuset_set_range(hwloc_cpuset_t set, unsigned begincpu, unsigned endc
 /** \brief Remove CPU \p cpu from CPU set \p set */
 void hwloc_cpuset_clr(hwloc_cpuset_t set, unsigned cpu);
 
+/** \brief Remove CPUs from \p begincpu to \p endcpu in CPU set \p set */
+void hwloc_cpuset_clr_range(hwloc_cpuset_t set, unsigned begincpu, unsigned endcpu);
+
 /** \brief Test whether CPU \p cpu is part of set \p set */
 int hwloc_cpuset_isset(hwloc_const_cpuset_t set, unsigned cpu);
 
@@ -142,6 +145,9 @@ void hwloc_cpuset_clearset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_se
 
 /** \brief Xor set \p set with set \p modifier_set */
 void hwloc_cpuset_xorset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+
+/** \brief Negate set \p set */
+void hwloc_cpuset_notset (hwloc_cpuset_t set);
 
 /** \brief Compute the first CPU (least significant bit) in CPU set \p set */
 int hwloc_cpuset_first(hwloc_const_cpuset_t set);

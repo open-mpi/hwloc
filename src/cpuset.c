@@ -329,6 +329,16 @@ void hwloc_cpuset_clr(struct hwloc_cpuset_s * set, unsigned cpu)
 	HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) &= ~HWLOC_CPUSUBSET_VAL(cpu);
 }
 
+void hwloc_cpuset_clr_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsigned endcpu)
+{
+	int i;
+
+	HWLOC__CPUSET_CHECK(set);
+
+	for (i=begincpu; i<=endcpu; i++)
+		HWLOC_CPUSUBSET_CPUSUBSET(*set,i) &= ~HWLOC_CPUSUBSET_VAL(i);
+}
+
 int hwloc_cpuset_isset(const struct hwloc_cpuset_s * set, unsigned cpu)
 {
 	HWLOC__CPUSET_CHECK(set);
@@ -441,6 +451,16 @@ void hwloc_cpuset_xorset (struct hwloc_cpuset_s *set, const struct hwloc_cpuset_
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
 		HWLOC_CPUSUBSET_SUBSET(*set,i) ^= HWLOC_CPUSUBSET_SUBSET(*modifier_set,i);
+}
+
+void hwloc_cpuset_notset (struct hwloc_cpuset_s *set)
+{
+	int i;
+
+	HWLOC__CPUSET_CHECK(set);
+
+	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
+		HWLOC_CPUSUBSET_SUBSET(*set,i) = !HWLOC_CPUSUBSET_SUBSET(*set,i);
 }
 
 int hwloc_cpuset_first(const struct hwloc_cpuset_s * set)
