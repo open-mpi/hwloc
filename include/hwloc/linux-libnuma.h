@@ -34,7 +34,7 @@
  * node number as input parameter.
  */
 static __inline void
-hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
+hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset,
 				    unsigned long *mask, unsigned long *maxnode)
 {
   unsigned long outmaxnode = -1;
@@ -124,7 +124,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
  * that use a struct bitmask as an input parameter.
  */
 static __inline struct bitmask *
-hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_t cpuset)
+hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset)
 {
   struct bitmask *bitmask;
   hwloc_obj_t node = NULL;
@@ -204,7 +204,7 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
  * that use a nodemask_t as an input parameter.
  */
 static __inline void
-hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
+hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset,
 				      nodemask_t *nodemask)
 {
   hwloc_obj_t node = NULL;

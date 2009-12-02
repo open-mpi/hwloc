@@ -156,7 +156,7 @@ hwloc_opendirat(const char *path, int fsroot_fd)
 #endif /* !HAVE_OPENAT */
 
 int
-hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t hwloc_set)
+hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cpuset_t hwloc_set)
 {
   /* TODO Kerrighed: Use
    * int migrate (pid_t pid, int destination_node);
@@ -270,7 +270,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
 }
 
 static int
-hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
@@ -282,7 +282,7 @@ hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy)
 }
 
 static int
-hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   if (policy & HWLOC_CPUBIND_PROCESS) {
     errno = ENOSYS;
@@ -302,7 +302,7 @@ hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 }
 
 static int
-hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
@@ -317,7 +317,7 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
 #pragma weak pthread_setaffinity_np
 
 static int
-hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   if (tid == pthread_self())
     return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);

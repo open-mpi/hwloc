@@ -80,7 +80,7 @@ int hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *s
 }
 
 static int
-hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_cpuset_t set,
+hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_cpuset_t set,
 				       struct hwloc_obj ***res, int *max)
 {
   int gotten = 0;
@@ -120,7 +120,7 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_cpuset_t
 }
 
 int
-hwloc_get_largest_objs_inside_cpuset (struct hwloc_topology *topology, hwloc_cpuset_t set,
+hwloc_get_largest_objs_inside_cpuset (struct hwloc_topology *topology, hwloc_const_cpuset_t set,
 				      struct hwloc_obj **objs, int max)
 {
   struct hwloc_obj *current = topology->levels[0][0];

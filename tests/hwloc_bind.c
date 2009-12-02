@@ -21,7 +21,7 @@ static void result_set(const char *msg, int err)
     printf("%-30s: OK\n", msg);
 }
 
-static void result_get(const char *msg, hwloc_cpuset_t expected, hwloc_cpuset_t result)
+static void result_get(const char *msg, hwloc_const_cpuset_t expected, hwloc_const_cpuset_t result)
 {
   if (!result)
     printf("%-30s: FAILED (%d, %s)\n", msg, errno, strerror(errno));
@@ -35,7 +35,7 @@ static void result_get(const char *msg, hwloc_cpuset_t expected, hwloc_cpuset_t 
   }
 }
 
-static void test(hwloc_cpuset_t cpuset, int flags)
+static void test(hwloc_const_cpuset_t cpuset, int flags)
 {
   result_set("Bind singlethreaded process", hwloc_set_cpubind(topology, cpuset, flags));
   result_get("Get  singlethreaded process", cpuset, hwloc_get_cpubind(topology, flags));

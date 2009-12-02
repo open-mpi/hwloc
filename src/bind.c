@@ -14,7 +14,7 @@
  * IRIX: see _DSM_MUSTRUN */
 
 int
-hwloc_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
+hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
 {
   hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
 
@@ -60,7 +60,7 @@ hwloc_get_cpubind(hwloc_topology_t topology, int policy)
 }
 
 int
-hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy)
+hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy)
 {
   hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
 
@@ -91,7 +91,7 @@ hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
 
 #ifdef hwloc_thread_t
 int
-hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy)
+hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy)
 {
   hwloc_cpuset_t system_set = hwloc_get_system_obj(topology)->cpuset;
 

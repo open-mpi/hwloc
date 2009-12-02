@@ -143,7 +143,7 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 /* TODO: SetThreadIdealProcessor */
 
 static int
-hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   /* TODO: groups SetThreadGroupAffinity */
   /* The resulting binding is always strict */
@@ -154,13 +154,13 @@ hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
 }
 
 static int
-hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, policy);
 }
 
 static int
-hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   /* TODO: groups */
   /* The resulting binding is always strict */
@@ -184,7 +184,7 @@ hwloc_win_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, int poli
 }
 
 static int
-hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, policy);
 }
@@ -196,7 +196,7 @@ hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
 }
 
 static int
-hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, policy);
 }

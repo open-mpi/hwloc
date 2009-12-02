@@ -25,7 +25,7 @@ typedef enum hwloc_mask_append_mode_e {
 } hwloc_mask_append_mode_t;
 
 static __inline int
-hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_cpuset_t newset,
+hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
   char *s1 = hwloc_cpuset_printf_value(newset);
@@ -65,7 +65,7 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_cpuset_t newset,
 
 static __inline int
 hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
-		       hwloc_cpuset_t rootset, const char *string,
+		       hwloc_const_cpuset_t rootset, const char *string,
 		       hwloc_cpuset_t set, hwloc_mask_append_mode_t mode, int verbose)
 {
   hwloc_obj_t obj;

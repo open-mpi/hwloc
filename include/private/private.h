@@ -49,16 +49,16 @@ struct hwloc_topology {
   int is_loaded;
   hwloc_cpuset_t offline_cpuset;
 
-  int (*set_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
+  int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_cpubind)(hwloc_topology_t topology, int policy);
-  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
+  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology, int policy);
-  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
+  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thisthread_cpubind)(hwloc_topology_t topology, int policy);
-  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
+  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, int policy);
 #ifdef hwloc_thread_t
-  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
+  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, int policy);
 #endif
 
@@ -93,7 +93,7 @@ struct hwloc_topology {
 };
 
 
-extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors, hwloc_cpuset_t online_cpuset);
+extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors, hwloc_const_cpuset_t online_cpuset);
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/);
 extern unsigned hwloc_fallback_nbprocessors(void);
 
@@ -175,7 +175,7 @@ extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 static __inline char *
-hwloc_cpuset_printf_value(hwloc_cpuset_t cpuset)
+hwloc_cpuset_printf_value(hwloc_const_cpuset_t cpuset)
 {
   char *buf;
   hwloc_cpuset_asprintf(&buf, cpuset);

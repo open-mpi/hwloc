@@ -341,7 +341,7 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
 void
 hwloc_setup_proc_level(struct hwloc_topology *topology,
 		      unsigned nb_processors,
-		      hwloc_cpuset_t online_cpuset)
+		      hwloc_const_cpuset_t online_cpuset)
 {
   struct hwloc_obj *obj;
   unsigned oscpu,cpu;
@@ -878,7 +878,7 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
  * Empty binding hooks always returning success
  */
 
-static int dontset_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
+static int dontset_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
 {
   return 0;
 }
@@ -886,7 +886,7 @@ static hwloc_cpuset_t dontget_cpubind(hwloc_topology_t topology, int policy)
 {
   return hwloc_get_system_obj(topology)->cpuset;
 }
-static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
+static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
 {
   return 0;
 }
@@ -894,7 +894,7 @@ static hwloc_cpuset_t dontget_thisthread_cpubind(hwloc_topology_t topology, int 
 {
   return hwloc_get_system_obj(topology)->cpuset;
 }
-static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
+static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
 {
   return 0;
 }
@@ -902,7 +902,7 @@ static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology, int po
 {
   return hwloc_get_system_obj(topology)->cpuset;
 }
-static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy)
+static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy)
 {
   return 0;
 }
@@ -911,7 +911,7 @@ static hwloc_cpuset_t dontget_proc_cpubind(hwloc_topology_t topology, hwloc_pid_
   return hwloc_get_system_obj(topology)->cpuset;
 }
 #ifdef hwloc_thread_t
-static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy)
+static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy)
 {
   return 0;
 }

@@ -25,7 +25,7 @@
 #include <cpuset.h>
 
 static int
-prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_cpuset_t hwloc_set)
+prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_cpuset_t hwloc_set)
 {
   unsigned cpu;
   cpuset_t target_cpuset;
@@ -72,7 +72,7 @@ out:
 /* Note: get_cpubind not available on OSF */
 
 static int
-hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   radset_t radset;
 
@@ -98,7 +98,7 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
 }
 
 static int
-hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   radset_t radset;
 
@@ -124,19 +124,19 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpu
 }
 
 static int
-hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, policy);
 }
 
 static int
-hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
 }
 
 static int
-hwloc_osf_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_osf_set_thisproc_cpubind(topology, hwloc_set, policy);
 }

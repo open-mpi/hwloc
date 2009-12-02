@@ -118,7 +118,7 @@ hwloc_plpa_have_topology_information(hwloc_topology_t topology, int *supported)
  * its tid instead of a pid.
  */
 static __inline int
-hwloc_plpa_sched_setaffinity(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset)
+hwloc_plpa_sched_setaffinity(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset)
 {
 #ifdef HWLOC_LINUX_SYS
   return hwloc_linux_set_tid_cpubind(topology, pid, cpuset);

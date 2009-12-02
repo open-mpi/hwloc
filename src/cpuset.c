@@ -79,7 +79,7 @@ void hwloc_cpuset_free(struct hwloc_cpuset_s * set)
   free(set);
 }
 
-struct hwloc_cpuset_s * hwloc_cpuset_dup(struct hwloc_cpuset_s * old)
+struct hwloc_cpuset_s * hwloc_cpuset_dup(const struct hwloc_cpuset_s * old)
 {
   struct hwloc_cpuset_s * new;
 
@@ -95,7 +95,7 @@ struct hwloc_cpuset_s * hwloc_cpuset_dup(struct hwloc_cpuset_s * old)
   return new;
 }
 
-void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, struct hwloc_cpuset_s * src)
+void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, const struct hwloc_cpuset_s * src)
 {
   HWLOC__CPUSET_CHECK(dst);
   HWLOC__CPUSET_CHECK(src);

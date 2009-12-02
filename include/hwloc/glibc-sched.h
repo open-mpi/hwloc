@@ -37,7 +37,7 @@
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
 static __inline void
-hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, hwloc_cpuset_t hwlocset,
+hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, hwloc_const_cpuset_t hwlocset,
 				    cpu_set_t *schedset, size_t schedsetsize)
 {
 #ifdef CPU_ZERO_S

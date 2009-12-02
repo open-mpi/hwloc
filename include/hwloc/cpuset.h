@@ -41,10 +41,10 @@ hwloc_cpuset_t hwloc_cpuset_alloc(void);
 void hwloc_cpuset_free(hwloc_cpuset_t set);
 
 /** \brief Duplicate CPU set \p set by allocating a new CPU set and copying its contents */
-hwloc_cpuset_t hwloc_cpuset_dup(hwloc_cpuset_t set);
+hwloc_cpuset_t hwloc_cpuset_dup(hwloc_const_cpuset_t set);
 
 /** \brief Copy the contents of CPU set \p src into the already allocated CPU set \p dst */
-void hwloc_cpuset_copy(hwloc_cpuset_t dst, hwloc_cpuset_t src);
+void hwloc_cpuset_copy(hwloc_cpuset_t dst, hwloc_const_cpuset_t src);
 
 
 /*
@@ -70,6 +70,8 @@ int hwloc_cpuset_asprintf(char ** strp, hwloc_const_cpuset_t set);
 /** \brief Parse a cpuset string.
  *
  * Must start and end with a digit.
+ *
+ * \return newly-allocated cpuset.
  */
 hwloc_cpuset_t hwloc_cpuset_from_string(const char * __hwloc_restrict string);
 

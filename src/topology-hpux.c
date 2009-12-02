@@ -33,7 +33,7 @@
 #include <pthread.h>
 
 static ldom_t
-hwloc_hpux_find_ldom(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set)
+hwloc_hpux_find_ldom(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set)
 {
   int has_numa = sysconf(_SC_CCNUMA_SUPPORT) == 1;
   int n;
@@ -52,7 +52,7 @@ hwloc_hpux_find_ldom(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set)
 }
 
 static spu_t
-hwloc_hpux_find_spu(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set)
+hwloc_hpux_find_spu(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set)
 {
   spu_t cpu;
 
@@ -64,7 +64,7 @@ hwloc_hpux_find_spu(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set)
 
 /* Note: get_cpubind not available on HP-UX */
 static int
-hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   ldom_t ldom;
   spu_t cpu;
@@ -89,20 +89,20 @@ hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cp
 }
 
 static int
-hwloc_hpux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_hpux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_hpux_set_proc_cpubind(topology, MPC_SELFPID, hwloc_set, policy);
 }
 
 static int
-hwloc_hpux_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_hpux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_hpux_set_thisproc_cpubind(topology, hwloc_set, policy);
 }
 
 #ifdef hwloc_thread_t
 static int
-hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   ldom_t ldom, ldom2;
   spu_t cpu, cpu2;
@@ -127,7 +127,7 @@ hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread,
 }
 
 static int
-hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_hpux_set_thread_cpubind(topology, PTHREAD_SELFTID_NP, hwloc_set, policy);
 }
