@@ -962,7 +962,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
                      mysocketid, socketset);
           hwloc_insert_object_by_cpuset(topology, socket);
         } else
-          free(socketset);
+          hwloc_cpuset_free(socketset);
       }
 
       /* look at the core */
@@ -982,7 +982,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
                      mycoreid, coreset);
           hwloc_insert_object_by_cpuset(topology, core);
         } else
-          free(coreset);
+          hwloc_cpuset_free(coreset);
       }
 
       /* look at the thread */
@@ -1060,7 +1060,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 		     depth, cacheset);
 	  hwloc_insert_object_by_cpuset(topology, cache);
 	} else
-	  free(cacheset);
+          hwloc_cpuset_free(cacheset);
       }
     }
   hwloc_cpuset_foreach_end();
