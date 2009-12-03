@@ -10,7 +10,7 @@
 
 typedef int lgrp_cookie_t;
 #define LGRP_COOKIE_NONE 0
-typedef int lgrp_id_t;
+typedef long lgrp_id_t;
 typedef long long lgrp_mem_size_t;
 
 typedef enum lgrp_content {
