@@ -1095,6 +1095,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   long processor = -1;
   int i;
   hwloc_cpuset_t cpuset;
+  hwloc_obj_t obj;
 
   for (i = 0; i < HWLOC_NBMAXCPUS; i++) {
     proc_physids[i] = -1;
@@ -1145,6 +1146,16 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       }
       getprocnb_begin(PROCESSOR,processor);
       hwloc_cpuset_set(cpuset, processor);
+
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, processor);
+      obj->cpuset = hwloc_cpuset_alloc();
+      hwloc_cpuset_cpu(obj->cpuset, processor);
+
+      hwloc_debug_2args_cpuset("cpu %d (os %ld) has cpuset %s\n",
+		 numprocs, processor, obj->cpuset);
+      numprocs++;
+      hwloc_insert_object_by_cpuset(topology, obj);
+
       getprocnb_end() else
       getprocnb_begin(PHYSID,physid);
       proc_osphysids[processor]=physid;
@@ -1188,7 +1199,6 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   procid_max = processor + 1;
   hwloc_cpuset_copy(online_cpuset, cpuset);
   hwloc_cpuset_free(cpuset);
-  numprocs = hwloc_cpuset_weight(online_cpuset);
 
   hwloc_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
   hwloc_debug_cpuset("online processor cpuset: %s\n", online_cpuset);
@@ -1203,9 +1213,6 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug("%d cores\n", numcores);
   if (numcores>0)
     hwloc_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, HWLOC_OBJ_CORE);
-
-  /* setup the cpu level, removing nonfirst threads */
-  hwloc_setup_proc_level(topology, numprocs, online_cpuset);
 
   return 0;
 }
@@ -1320,11 +1327,11 @@ hwloc_look_linux(struct hwloc_topology *topology)
       err = look_cpuinfo(topology, "/proc/cpuinfo", topology->online_cpuset);
       if (err < 0) {
         if (topology->is_thissystem)
-          hwloc_setup_proc_level(topology,  hwloc_fallback_nbprocessors(), NULL);
+          hwloc_setup_proc_level(topology,  hwloc_fallback_nbprocessors());
         else
           /* fsys-root but not this system, no way, assume there's just 1
            * processor :/ */
-          hwloc_setup_proc_level(topology, 1, NULL);
+          hwloc_setup_proc_level(topology, 1);
       }
     } else {
       look_sysfscpu(topology, "/sys/devices/system/cpu");

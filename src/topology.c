@@ -340,8 +340,7 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
  */
 void
 hwloc_setup_proc_level(struct hwloc_topology *topology,
-		      unsigned nb_processors,
-		      hwloc_const_cpuset_t online_cpuset)
+		      unsigned nb_processors)
 {
   struct hwloc_obj *obj;
   unsigned oscpu,cpu;
@@ -349,9 +348,6 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
   hwloc_debug("\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<nb_processors; oscpu++)
     {
-      if (online_cpuset && !hwloc_cpuset_isset(online_cpuset, oscpu))
-       continue;
-
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, oscpu);
       obj->cpuset = hwloc_cpuset_alloc();
       hwloc_cpuset_cpu(obj->cpuset, oscpu);

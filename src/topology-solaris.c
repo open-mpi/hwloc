@@ -162,7 +162,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
 static void
-hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuset_t online_cpuset)
+hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 {
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
@@ -191,7 +191,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuse
       return;
     }
 
-  hwloc_cpuset_zero(online_cpuset);
   for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next)
     {
       if (strncmp("cpu_info", ksp->ks_module, 8))
@@ -233,7 +232,8 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuse
 	/* not online */
         hwloc_cpuset_clr(topology->online_cpuset, cpuid);
 
-      hwloc_cpuset_set(online_cpuset, cpuid);
+      (*nbprocs)++;
+
 
       if (look_chips) do {
 	/* Get Chip ID */
@@ -327,8 +327,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuse
        * however. */
     }
 
-  *nbprocs = hwloc_cpuset_weight(online_cpuset);
-
   if (look_chips)
     hwloc_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, HWLOC_OBJ_SOCKET);
 
@@ -343,17 +341,15 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs, hwloc_cpuse
 void
 hwloc_look_solaris(struct hwloc_topology *topology)
 {
-  hwloc_cpuset_t online_cpuset = hwloc_cpuset_alloc();
   unsigned nbprocs = hwloc_fallback_nbprocessors ();
 #ifdef HAVE_LIBLGRP
   hwloc_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */
-  hwloc_cpuset_fill(online_cpuset);
 #ifdef HAVE_LIBKSTAT
-  hwloc_look_kstat(topology, &nbprocs, online_cpuset);
+  nbprocs = 0;
+  hwloc_look_kstat(topology, &nbprocs);
 #endif /* HAVE_LIBKSTAT */
-  hwloc_setup_proc_level(topology, nbprocs, online_cpuset);
-  hwloc_cpuset_free(online_cpuset);
+  hwloc_setup_proc_level(topology, nbprocs);
 }
 
 void

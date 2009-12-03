@@ -229,7 +229,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
   cpusetdestroy(&cpuset);
 
   /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(), NULL);
+  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors());
 }
 
 void

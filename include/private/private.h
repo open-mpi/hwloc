@@ -96,7 +96,7 @@ struct hwloc_topology {
 };
 
 
-extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors, hwloc_const_cpuset_t online_cpuset);
+extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors);
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/);
 extern unsigned hwloc_fallback_nbprocessors(void);
 
