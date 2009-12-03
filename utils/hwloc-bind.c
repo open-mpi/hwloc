@@ -14,7 +14,7 @@
 
 static void usage(FILE *where)
 {
-  fprintf(where, "Usage: topobind [options] <location> -- command ...\n");
+  fprintf(where, "Usage: hwloc-bind [options] <location> -- command ...\n");
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-mask utility.\n");
   fprintf(where, "Options:\n");
