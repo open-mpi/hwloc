@@ -9,7 +9,6 @@ LIBS += $(top_builddir)/src/libhwloc.la
 EXTRA_DIST = test-hwloc-distrib.output
 
 bin_PROGRAMS = lstopo hwloc-mask hwloc-bind hwloc-distrib
-noinst_PROGRAMS = plpa-info
 
 lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c
 if HAVE_CAIRO
