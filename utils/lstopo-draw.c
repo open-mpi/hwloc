@@ -41,6 +41,18 @@
 #define THREAD_G_COLOR 0xff
 #define THREAD_B_COLOR 0xff
 
+#define RUNNING_R_COLOR 0
+#define RUNNING_G_COLOR 0xff
+#define RUNNING_B_COLOR 0
+
+#define FORBIDDEN_R_COLOR 0xff
+#define FORBIDDEN_G_COLOR 0
+#define FORBIDDEN_B_COLOR 0
+
+#define OFFLINE_R_COLOR 0
+#define OFFLINE_G_COLOR 0
+#define OFFLINE_B_COLOR 0
+
 #define CACHE_R_COLOR 0xff
 #define CACHE_G_COLOR 0xff
 #define CACHE_B_COLOR 0xff
@@ -414,13 +426,30 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t l
   *retwidth = fontsize ? 4*fontsize : gridsize;
   *retheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
 
-  methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
+  DYNA_CHECK();
+
+  /* TODO: current: green */
+  if (hwloc_cpuset_isset(hwloc_topology_get_online_cpuset(topology), level->os_index))
+    if (!hwloc_cpuset_isset(hwloc_topology_get_allowed_cpuset(topology), level->os_index))
+      methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
+    else
+      if (hwloc_cpuset_isset(hwloc_get_cpubind(topology, 0), level->os_index))
+        methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);
+      else
+        methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
+  else
+    methods->box(output, OFFLINE_R_COLOR, OFFLINE_G_COLOR, OFFLINE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   if (fontsize) {
     char text[64];
     hwloc_obj_snprintf(text, sizeof(text), topology, level, "#", 0);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    if (hwloc_cpuset_isset(hwloc_topology_get_online_cpuset(topology), level->os_index))
+      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    else
+      methods->text(output, 0xff, 0xff, 0xff, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
+
+  DYNA_SAVE();
 }
 
 static void
@@ -735,6 +764,9 @@ output_draw_start(struct draw_methods *methods, hwloc_topology_t topology, void 
   methods->declare_color(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR);
   methods->declare_color(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR);
   methods->declare_color(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR);
+  methods->declare_color(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR);
+  methods->declare_color(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR);
+  methods->declare_color(output, OFFLINE_R_COLOR, OFFLINE_G_COLOR, OFFLINE_B_COLOR);
   methods->declare_color(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR);
   methods->declare_color(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR);
   methods->declare_color(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR);

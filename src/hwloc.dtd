@@ -1,7 +1,11 @@
 <!ELEMENT root (object)+>
+<!ATTLIST root complete_cpuset CDATA "" >
+<!ATTLIST root online_cpuset CDATA "" >
+<!ATTLIST root allowed_cpuset CDATA "" >
 
 <!ELEMENT object (object)*>
 <!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc | Bridge | PCIDev) #REQUIRED>
+<!ATTLIST object os_level CDATA "-1" >
 <!ATTLIST object os_index CDATA "-1" >
 <!ATTLIST object cpuset CDATA "0" >
 <!ATTLIST object name CDATA "" >

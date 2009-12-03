@@ -26,14 +26,16 @@
 #include <sys/thread.h>
 
 static int
-hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   rsethandle_t rset, rad;
   hwloc_obj_t objs[2];
   int n;
   int res = -1;
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
+  /* The resulting binding is always strict */
+
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if (ra_detachrset(what, who, 0))
       return -1;
     return 0;
@@ -46,19 +48,21 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     return -1;
   }
 
-  rset = rs_alloc(RS_PARTITION);
+  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
+    rset = rs_alloc(RS_ALL);
+  else
+    rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
   if (rs_getrad(rset, rad, objs[0]->os_level, objs[0]->os_index, 0)) {
     fprintf(stderr,"rs_getrad(%d,%d) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
     goto out;
   }
 
-  /* TODO: ra_getrset to get binding information */
   /* TODO: memory binding and policy (P_DEFAULT / P_FIRST_TOUCH / P_BALANCED)
    * ra_mmap to allocation on an rset
    */
 
-  if (ra_attachrset(what, who, rset, 0)) {
+  if (ra_attachrset(what, who, rad, 0)) {
     res = -1;
     goto out;
   }
@@ -71,42 +75,105 @@ out:
   return res;
 }
 
+static hwloc_cpuset_t
+hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, int policy)
+{
+  hwloc_cpuset_t hwloc_set = NULL;
+  rsethandle_t rset;
+  unsigned cpu, maxcpus;
+  int result;
+
+  rset = rs_alloc(RS_EMPTY);
+
+  if ((result = ra_getrset(what, who, 0, rset)) == -1)
+    goto out;
+
+  hwloc_set = hwloc_cpuset_alloc();
+  maxcpus = rs_getinfo(rset, R_MAXPROCS, 0);
+  for (cpu = 0; cpu < maxcpus; cpu++)
+    if (rs_op(RS_TESTRESOURCE, rset, NULL, R_PROCS, cpu) == 1)
+      hwloc_cpuset_set(hwloc_set, cpu);
+  hwloc_cpuset_andset(hwloc_set, hwloc_topology_get_complete_cpuset(topology));
+
+out:
+  rs_free(rset);
+  return hwloc_set;
+}
+
 static int
-hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   rsid_t who = { .at_pid = getpid() };
-  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, policy);
+}
+
+static hwloc_cpuset_t
+hwloc_aix_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
+{
+  rsid_t who = { .at_pid = getpid() };
+  return hwloc_aix_get_sth_cpubind(topology, R_PROCESS, who, policy);
 }
 
 static int
-hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   rsid_t who = { .at_tid = thread_self() };
-  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
+}
+
+static hwloc_cpuset_t
+hwloc_aix_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
+{
+  rsid_t who = { .at_tid = thread_self() };
+  return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, policy);
 }
 
 static int
-hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   rsid_t who = { .at_pid = pid };
-  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, policy);
+}
+
+static hwloc_cpuset_t
+hwloc_aix_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
+{
+  rsid_t who = { .at_pid = pid };
+  return hwloc_aix_get_sth_cpubind(topology, R_PROCESS, who, policy);
 }
 
 static int
-hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   struct __pthrdsinfo info;
   int size;
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
   rsid_t who = { .at_tid = info.__pi_tid };
-  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, strict);
+  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
+}
+
+static hwloc_cpuset_t
+hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, int policy)
+{
+  struct __pthrdsinfo info;
+  int size;
+  if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
+    return NULL;
+  rsid_t who = { .at_tid = info.__pi_tid };
+  return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, policy);
 }
 
 static int
-hwloc_aix_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_aix_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_aix_set_thisproc_cpubind(topology, hwloc_set, strict);
+  return hwloc_aix_set_thisproc_cpubind(topology, hwloc_set, policy);
+}
+
+static hwloc_cpuset_t
+hwloc_aix_get_cpubind(hwloc_topology_t topology, int policy)
+{
+  return hwloc_aix_get_thisproc_cpubind(topology, policy);
 }
 
 static void
@@ -233,8 +300,13 @@ void
 hwloc_set_aix_hooks(struct hwloc_topology *topology)
 {
   topology->set_cpubind = hwloc_aix_set_cpubind;
+  topology->get_cpubind = hwloc_aix_get_cpubind;
   topology->set_proc_cpubind = hwloc_aix_set_proc_cpubind;
+  topology->get_proc_cpubind = hwloc_aix_get_proc_cpubind;
   topology->set_thread_cpubind = hwloc_aix_set_thread_cpubind;
+  topology->get_thread_cpubind = hwloc_aix_get_thread_cpubind;
   topology->set_thisproc_cpubind = hwloc_aix_set_thisproc_cpubind;
+  topology->get_thisproc_cpubind = hwloc_aix_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
+  topology->get_thisthread_cpubind = hwloc_aix_get_thisthread_cpubind;
 }

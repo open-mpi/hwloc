@@ -6,6 +6,8 @@
 /* Detect topology change: registering for power management changes and check
  * if for example hw.activecpu changed */
 
+/* Apparently, Darwin people do not _want_ to provide binding functions.  */
+
 #include <private/config.h>
 
 #include <sys/types.h>
@@ -135,7 +137,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   }
 
   /* add PROC objects */
-  hwloc_setup_proc_level(topology, nprocs, NULL);
+  hwloc_setup_proc_level(topology, nprocs);
 }
 
 void

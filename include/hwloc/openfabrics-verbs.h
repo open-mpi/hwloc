@@ -34,11 +34,13 @@
  * kernel-provided cpumap file and return the corresponding CPU set.
  * This function is currently only implemented in a meaningful way for
  * Linux; other systems will simply get a full cpuset.
+ *
+ * \return newly-allocated cpuset.
  */
 static __inline hwloc_cpuset_t
 hwloc_ibv_get_device_cpuset(struct ibv_device *ibdev)
 {
-#if defined(HWLOC_LINUX_SYS)
+#ifdef HWLOC_LINUX_SYS
   /* If we're on Linux, use the verbs-provided sysfs mechanism to
      get the local cpus */
 #define HWLOC_OPENFABRICS_VERBS_SYSFS_PATH_MAX 128
@@ -58,7 +60,7 @@ hwloc_ibv_get_device_cpuset(struct ibv_device *ibdev)
   return set;
 #else
   /* Non-Linux systems simply get a full cpuset */
-  return hwloc_cpuset_dup(hwloc_get_system_obj(topology)->cpuset);
+  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 #endif
 }
 

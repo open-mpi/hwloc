@@ -24,8 +24,8 @@ typedef enum hwloc_mask_append_mode_e {
   HWLOC_MASK_APPEND_XOR,
 } hwloc_mask_append_mode_t;
 
-static __inline void
-hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_cpuset_t newset,
+static __inline int
+hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
   char *s1 = hwloc_cpuset_printf_value(newset);
@@ -60,11 +60,12 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_cpuset_t newset,
   }
   free(s1);
   free(s2);
+  return 0;
 }
 
 static __inline int
 hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
-		       hwloc_cpuset_t rootset, const char *string,
+		       hwloc_const_cpuset_t rootset, const char *string,
 		       hwloc_cpuset_t set, hwloc_mask_append_mode_t mode, int verbose)
 {
   hwloc_obj_t obj;
@@ -163,13 +164,14 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   return 0;
 }
 
-static __inline void
+static __inline int
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		     const char *arg, hwloc_cpuset_t set,
 		     int verbose)
 {
   char *colon;
   hwloc_mask_append_mode_t mode = HWLOC_MASK_APPEND_ADD;
+  int err;
 
   if (*arg == '~') {
     mode = HWLOC_MASK_APPEND_CLR;
@@ -184,12 +186,15 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 
   colon = strchr(arg, ':');
   if (colon) {
-    hwloc_mask_append_object(topology, topodepth, hwloc_get_system_obj(topology)->cpuset, arg, set, mode, verbose);
-  } else {
+    err = hwloc_mask_append_object(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), arg, set, mode, verbose);
+  } else if (strlen(arg) == strspn(arg, "0123456789abcdefABCDEF,")) {
     hwloc_cpuset_t newset = hwloc_cpuset_from_string(arg);
-    hwloc_mask_append_cpuset(set, newset, mode, verbose);
+    err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     free(newset);
-  }
+  } else
+    err = -1;
+
+  return err;
 }
 
 #endif /* HWLOC_MASK_H */

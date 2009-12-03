@@ -23,10 +23,10 @@
 #include <wchar.h>
 #endif /* HAVE_PUTWC */
 
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
 #include <curses.h>
 #include <term.h>
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 
 #include "lstopo.h"
 
@@ -104,9 +104,57 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
     }
   }
 
-  if (verbose_mode > 1)
+  if (verbose_mode > 1) {
+    hwloc_const_cpuset_t complete = hwloc_topology_get_complete_cpuset(topology);
+    hwloc_const_cpuset_t topo = hwloc_topology_get_topology_cpuset(topology);
+    hwloc_const_cpuset_t online = hwloc_topology_get_online_cpuset(topology);
+    hwloc_const_cpuset_t allowed = hwloc_topology_get_allowed_cpuset(topology);
+
+    if (!hwloc_cpuset_isequal(topo, complete)) {
+      hwloc_cpuset_t unknown = hwloc_cpuset_alloc();
+      char *unknownstr;
+      hwloc_cpuset_copy(unknown, complete);
+      hwloc_cpuset_clearset(unknown, topo);
+      hwloc_cpuset_asprintf(&unknownstr, unknown);
+      fprintf (output, "%d processors not represented in topology: %s\n", hwloc_cpuset_weight(unknown), unknownstr);
+      free(unknownstr);
+      hwloc_cpuset_free(unknown);
+    }
+    if (!hwloc_cpuset_isequal(online, complete)) {
+      hwloc_cpuset_t offline = hwloc_cpuset_alloc();
+      char *offlinestr;
+      hwloc_cpuset_copy(offline, complete);
+      hwloc_cpuset_clearset(offline, online);
+      hwloc_cpuset_asprintf(&offlinestr, offline);
+      fprintf (output, "%d processors offline: %s\n", hwloc_cpuset_weight(offline), offlinestr);
+      free(offlinestr);
+      hwloc_cpuset_free(offline);
+    }
+    if (!hwloc_cpuset_isequal(allowed, online)) {
+      if (!hwloc_cpuset_isincluded(online, allowed)) {
+        hwloc_cpuset_t forbidden = hwloc_cpuset_alloc();
+        char *forbiddenstr;
+        hwloc_cpuset_copy(forbidden, online);
+        hwloc_cpuset_clearset(forbidden, allowed);
+        hwloc_cpuset_asprintf(&forbiddenstr, forbidden);
+        fprintf(output, "%d processors online but not allowed: %s\n", hwloc_cpuset_weight(forbidden), forbiddenstr);
+        free(forbiddenstr);
+        hwloc_cpuset_free(forbidden);
+      }
+      if (!hwloc_cpuset_isincluded(allowed, online)) {
+        hwloc_cpuset_t potential = hwloc_cpuset_alloc();
+        char *potentialstr;
+        hwloc_cpuset_copy(potential, allowed);
+        hwloc_cpuset_clearset(potential, online);
+        hwloc_cpuset_asprintf(&potentialstr, potential);
+        fprintf(output, "%d processors allowed but not online: %s\n", hwloc_cpuset_weight(potential), potentialstr);
+        free(potentialstr);
+        hwloc_cpuset_free(potential);
+      }
+    }
     if (!hwloc_topology_is_thissystem(topology))
       fprintf (output, "Topology not from this system\n");
+  }
 
   fclose(output);
 }
@@ -126,18 +174,19 @@ typedef unsigned char character;
 #define putcharacter(c,f) putc(c,f)
 #endif /* HAVE_PUTWC */
 
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
 static int myputchar(int c) {
   return putcharacter(c, stdout);
 }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 
 /* Off-screen rendering buffer */
 struct cell {
   character c;
-#ifdef HAVE_LIBTERMCAP
-  int r, g, b;
-#endif /* HAVE_LIBTERMCAP */
+#ifdef HWLOC_HAVE_LIBTERMCAP
+  int fr, fg, fb;
+  int br, bg, bb;
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 };
 
 struct display {
@@ -170,7 +219,7 @@ text_start(void *output, int width, int height)
   return disp;
 }
 
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
 /* Standard terminfo strings */
 static char *oc, *initc = NULL, *initp = NULL, *bold, *normal, *setaf, *setab, *setf, *setb, *scp;
 
@@ -189,28 +238,28 @@ static int set_textcolor(int rr, int gg, int bb)
 }
 
 static void
-set_color(int r, int g, int b)
+set_color(int fr, int fg, int fb, int br, int bg, int bb)
 {
   char *toput;
   int color, textcolor;
 
   if (initc || initp) {
     /* Can set rgb color, easy */
-    color = rgb_to_color(r, g, b) + 16;
-    textcolor = 0;
+    textcolor = rgb_to_color(fr, fg, fb) + 16;
+    color = rgb_to_color(br, bg, bb) + 16;
   } else {
     /* Magic trigger: it seems to separate colors quite well */
-    int rr = r >= 0xe0;
-    int gg = g >= 0xe0;
-    int bb = b >= 0xe0;
+    int brr = br >= 0xe0;
+    int bgg = bg >= 0xe0;
+    int bbb = bb >= 0xe0;
 
     if (setab)
       /* ANSI colors */
-      color = (rr << 0) | (gg << 1) | (bb << 2);
+      color = (brr << 0) | (bgg << 1) | (bbb << 2);
     else
       /* Legacy colors */
-      color = (rr << 2) | (gg << 1) | (bb << 0);
-    textcolor = set_textcolor(rr, gg, bb);
+      color = (brr << 2) | (bgg << 1) | (bbb << 0);
+    textcolor = set_textcolor(brr, bgg, bbb);
   }
 
   /* And now output magic string to TTY */
@@ -234,13 +283,13 @@ set_color(int r, int g, int b)
       tputs(toput, 1, myputchar);
   }
 }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 
 /* We we can, allocate rgb colors */
 static void
 text_declare_color(void *output, int r, int g, int b)
 {
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
   int color = declare_color(r, g, b);
   /* Yes, values seem to range from 0 to 1000 inclusive */
   int rr = (r * 1001) / 256;
@@ -255,25 +304,30 @@ text_declare_color(void *output, int r, int g, int b)
     if ((toput = tparm(initp, color + 16, 0, 0, 0, rr, gg, bb)))
       tputs(toput, 1, myputchar);
   }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 }
 
 /* output text, erasing any previous content */
 static void
-put(struct display *disp, int x, int y, character c, int r, int g, int b)
+put(struct display *disp, int x, int y, character c, int fr, int fg, int fb, int br, int bg, int bb)
 {
   if (x >= disp->width || y >= disp->height) {
     /* fprintf(stderr, "%"PRIchar" overflowed to (%d,%d)\n", c, x, y); */
     return;
   }
   disp->cells[y][x].c = c;
-#ifdef HAVE_LIBTERMCAP
-  if (r != -1) {
-    disp->cells[y][x].r = r;
-    disp->cells[y][x].g = g;
-    disp->cells[y][x].b = b;
+#ifdef HWLOC_HAVE_LIBTERMCAP
+  if (fr != -1) {
+    disp->cells[y][x].fr = fr;
+    disp->cells[y][x].fg = fg;
+    disp->cells[y][x].fb = fb;
   }
-#endif /* HAVE_LIBTERMCAP */
+  if (br != -1) {
+    disp->cells[y][x].br = br;
+    disp->cells[y][x].bg = bg;
+    disp->cells[y][x].bb = bb;
+  }
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 }
 
 /* Where bars of a character go to */
@@ -378,7 +432,7 @@ merge(struct display *disp, int x, int y, int or, int andnot, int r, int g, int 
 {
   character current = disp->cells[y][x].c;
   int directions = (to_directions(disp, current) & ~andnot) | or;
-  put(disp, x, y, from_directions(disp, directions), r, g, b);
+  put(disp, x, y, from_directions(disp, directions), -1, -1, -1, r, g, b);
 }
 
 /* Now we can implement the standard drawing helpers */
@@ -414,7 +468,7 @@ text_box(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigne
   }
   for (j = y1 + 1; j < y2; j++) {
     for (i = x1 + 1; i < x2; i++) {
-      put(disp, i, j, ' ', r, g, b);
+      put(disp, i, j, ' ', -1, -1, -1, r, g, b);
     }
   }
 }
@@ -477,7 +531,7 @@ text_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned 
   x /= (gridsize/2);
   y /= gridsize;
   for ( ; *text; text++)
-    put(disp, x++, y, *text, -1, -1, -1);
+    put(disp, x++, y, *text, r, g, b, -1, -1, -1);
 }
 
 static struct draw_methods text_draw_methods = {
@@ -493,8 +547,9 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   FILE *output;
   struct display *disp;
   int i, j;
-  int lr, lg, lb;
-#ifdef HAVE_LIBTERMCAP
+  int lfr, lfg, lfb; /* Last foreground color */
+  int lbr, lbg, lbb; /* Last background color */
+#ifdef HWLOC_HAVE_LIBTERMCAP
   int term = 0;
 #endif
 
@@ -513,7 +568,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   setlocale(LC_ALL, "");
 #endif /* HAVE_SETLOCALE */
 
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
   /* If we are outputing to a tty, use colors */
   if (output == stdout && isatty(STDOUT_FILENO)) {
     term = !setupterm(NULL, STDOUT_FILENO, NULL);
@@ -550,39 +605,48 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
       normal = tgetstr("me", NULL);
     }
   }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
 
   disp = output_draw_start(&text_draw_methods, topology, output);
   output_draw(&text_draw_methods, topology, disp);
 
-  lr = lg = lb = -1;
+  lfr = lfg = lfb = -1;
+  lbr = lbg = lbb = -1;
   for (j = 0; j < disp->height; j++) {
     for (i = 0; i < disp->width; i++) {
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
       if (term) {
 	/* TTY output, use colors */
-	int r = disp->cells[j][i].r;
-	int g = disp->cells[j][i].g;
-	int b = disp->cells[j][i].b;
+	int fr = disp->cells[j][i].fr;
+	int fg = disp->cells[j][i].fg;
+	int fb = disp->cells[j][i].fb;
+	int br = disp->cells[j][i].br;
+	int bg = disp->cells[j][i].bg;
+	int bb = disp->cells[j][i].bb;
 
 	/* Avoid too much work for the TTY */
-	if (r != lr || g != lg || b != lb) {
-	  set_color(r, g, b);
-	  lr = r;
-	  lg = g;
-	  lb = b;
+	if (fr != lfr || fg != lfg || fb != lfb
+	 || br != lbr || bg != lbg || bb != lbb) {
+	  set_color(fr, fg, fb, br, bg, bb);
+	  lfr = fr;
+	  lfg = fg;
+	  lfb = fb;
+	  lbr = br;
+	  lbg = bg;
+	  lbb = bb;
 	}
       }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
       putcharacter(disp->cells[j][i].c, output);
     }
-#ifdef HAVE_LIBTERMCAP
+#ifdef HWLOC_HAVE_LIBTERMCAP
     /* Keep the rest of the line black */
     if (term) {
-      lr = lg = lb = 0;
-      set_color(lr, lg, lb);
+      lfr = lfg = lfb = 0xff;
+      lbr = lbg = lbb = 0;
+      set_color(lfr, lfg, lfb, lbr, lbg, lbb);
     }
-#endif /* HAVE_LIBTERMCAP */
+#endif /* HWLOC_HAVE_LIBTERMCAP */
     putcharacter('\n', output);
   }
 }

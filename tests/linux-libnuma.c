@@ -30,7 +30,7 @@ int main(void)
     while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, node)) != NULL)
       hwloc_cpuset_orset(set, node->cpuset);
   } else {
-    hwloc_cpuset_orset(set, hwloc_get_system_obj(topology)->cpuset);
+    hwloc_cpuset_orset(set, hwloc_topology_get_complete_cpuset(topology));
   }
 
   set2 = hwloc_cpuset_from_linux_libnuma_bitmask(topology, numa_all_nodes_ptr);

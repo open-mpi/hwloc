@@ -254,14 +254,17 @@ tree (under $prefix, of course).
 
 The following section presents an example of API usage.
 
-\section interface_example Interface example
+\section interface_example API example
 
-This section shows how to use hwloc with an small example \c hwloc-hello.c
-that just prints the topology and binds itself to the first processor of the
-second core of the machine.
+The following small C example (named ``hwloc-hello.c'') prints the
+topology of the machine and bring the process to the first processor
+of the second core of the machine.
 
-Hardware Location provides a pkg-config object, so compiling the
-example boils down to
+\include hwloc-hello.c
+
+hwloc provides a \c pkg-config executable to obtain relevant compiler
+and linker flags.  For example, it can be used thusly to compile
+applications that utilize the hwloc library (assuming GNU Make):
 
 \verbatim
 CFLAGS += $(pkg-config --cflags hwloc)
@@ -269,7 +272,42 @@ LDLIBS += $(pkg-config --libs hwloc)
 cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 \endverbatim
 
-\include hwloc-hello.c
+On a machine with 4GB of RAM and 2 processor sockets -- each socket of
+which has two processor cores -- the output from running \c
+hwloc-hello could be something like the following:
+
+\verbatim
+shell$ ./hwloc-hello
+*** Objects at level 0
+Index 0: System(3938MB)
+*** Objects at level 1
+Index 0: Socket#0
+Index 1: Socket#1
+*** Objects at level 2
+Index 0: Core#0
+Index 1: Core#1
+Index 2: Core#3
+Index 3: Core#2
+*** Objects at level 3
+Index 0: P#0
+Index 1: P#1
+Index 2: P#2
+Index 3: P#3
+*** Printing overall tree
+System(3938MB)
+  Socket#0
+    Core#0
+      P#0
+    Core#1
+      P#1
+  Socket#1
+    Core#3
+      P#2
+    Core#2
+      P#3
+*** 2 socket(s)
+shell$ 
+\endverbatim
 
 \htmlonly
 </div><div class="section" id="bugs">
@@ -303,68 +341,73 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
 </div>
 \endhtmlonly
 
-\page glossary Glossary
+\section glossary Glossary
 
 <dl>
 
 <dt>Object</dt>
-  <dd>Interesting kind of part of the system, such as a Core, a Cache, a Memory
-  node, etc. The different types detected by hwloc are detailed in the
-  ::hwloc_obj_type_e enumeration.
+  <dd>Interesting kind of part of the system, such as a Core, a Cache,
+  a Memory node, etc. The different types detected by hwloc are
+  detailed in the ::hwloc_obj_type_t enumeration.
   
-  They are topologically sorted by CPU set into a tree whose root is the System object which always exists.
+  They are topologically sorted by CPU set into a tree whose root is
+  the System object (which always exists).
   </dd>
 
 <dt>CPU set</dt>
-  <dd>The set of logical processors logically included in an object, if any</dd>
+  <dd>The set of logical processors logically included in an object
+  (if any).  This term does \em not have any relation to an operating
+  system ``CPU set.''</dd>
 
 <dt>Father object</dt>
-  <dd>The object logically containing the current object, for instance because
-  its CPU set includes the CPU set of the current object.
-  </dd>
+  <dd>The object logically containing the current object, for example
+  because its CPU set includes the CPU set of the current object.</dd>
 
-<dt>Children objects</dt>
-  <dd>The object contained in the current object because their CPU set is
-  included in the CPU set of the current object.</dd>
+<dt>Children object(s)</dt>
+  <dd>The object (or objects) contained in the current object because
+  their CPU set is included in the CPU set of the current object.</dd>
 
 <dt>Arity</dt>
-  <dd>The number of children of an object</dd>
+  <dd>The number of children of an object.</dd>
 
 <dt>Sibling objects</dt>
-  <dd>Objects of the same type which have the same father</dd>
+  <dd>Objects of the same type which have the same father.</dd>
 
 <dt>Sibling rank</dt>
-  <dd>Index to uniquely identify objecst of the same type which have the same
-  father, numbered from 0 to the arity of the father minus one.</dd>
+  <dd>Index to uniquely identify objects of the same type which have
+  the same father, and is always in the range [0, fathers_arity).</dd>
 
 <dt>Cousin objects</dt>
-  <dd>Objects of the same type as the current object</dd>
+  <dd>Objects of the same type as the current object.</dd>
 
 <dt>Level</dt>
-  <dd>Set of objects of the same type</dd>
+  <dd>Set of objects of the same type.</dd>
 
 <dt>OS index</dt>
-  <dd>The index that the OS uses to identify the object. This may sometimes be
-  completely arbitrary or depend on the BIOS configuration.</dd>
+  <dd>The index that the operating system (OS) uses to identify the
+  object.  This may be completely arbitrary, or it may depend on the
+  BIOS configuration.</dd>
 
 <dt>Depth</dt>
-  <dd>Nesting level in the object tree, starting from the System object.</dd>
+  <dd>Nesting level in the object tree, starting from the 0th object
+  (i.e., the System object).</dd>
 
 <dt>Logical index</dt>
-  <dd>Index to uniquely identify objects of the same type. This index is always
-  linear from 0 to the number of objects of the level for that type, to express
-  proximity.  It could also be called cousin rank.</dd>
+  <dd>Index to uniquely identify objects of the same type.  It is
+  generally used to express proximity.  This index is always linear
+  and in the range [0, num_objs_same_type_same_level).  Think of it as
+  ``cousin rank.''</dd>
 
 </dl>
 
-The following diagram can help to understand the vocabulary of the relationships
-by showing the example of a machine with two dual core non-SMT sockets, thus a
-topology with 4 levels.
+The following diagram can help to understand the vocabulary of the
+relationships by showing the example of a machine with two dual core
+sockets (with no hardware threads); thus, a topology with 4 levels.
 
 \image html diagram.png
 \image latex diagram.eps width=\textwidth
 
-It should be noted that for Processor objects, the logical index, computed
-linearly by hwloc, is not the same as the OS index.
+It should be noted that for Processor objects, the logical index -- as
+computed linearly by hwloc -- is not the same as the OS index.
 
 */

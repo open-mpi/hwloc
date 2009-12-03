@@ -5,7 +5,7 @@ include $(top_srcdir)/hwloc.am
 
 include_HEADERS = hwloc.h
 include_hwlocdir = $(includedir)/hwloc
-include_hwloc_HEADERS = hwloc/cpuset.h hwloc/helper.h hwloc/openfabrics-verbs.h
+include_hwloc_HEADERS = hwloc/cpuset.h hwloc/helper.h hwloc/openfabrics-verbs.h hwloc/plpa.h
 nodist_include_hwloc_HEADERS = hwloc/config.h 
 
 noinst_HEADERS = private/private.h private/debug.h private/cpuset.h

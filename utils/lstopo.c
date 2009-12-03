@@ -74,7 +74,7 @@ static void usage(char *name, FILE *where)
 #ifdef HAVE_XML
   fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
 #endif
-#ifdef LINUX_SYS
+#ifdef HWLOC_LINUX_SYS
   fprintf (where, "   --fsys-root <path>    chroot containing the /proc and /sys of another system\n");
 #endif
   fprintf (where, "   --synthetic \"n:2 2\"   simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
@@ -171,7 +171,7 @@ main (int argc, char *argv[])
 	if (!strcmp(xmlpath, "-"))
 	  xmlpath = "/dev/stdin";
 #endif /* HAVE_XML */
-#ifdef LINUX_SYS
+#ifdef HWLOC_LINUX_SYS
       } else if (!strcmp (argv[1], "--fsys-root")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
@@ -229,7 +229,7 @@ main (int argc, char *argv[])
     else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #endif /* HAVE_CAIRO */
-#ifdef WIN_SYS
+#ifdef HWLOC_WIN_SYS
       output_windows(topology, NULL, verbose_mode);
 #else
     output_console(topology, NULL, verbose_mode);

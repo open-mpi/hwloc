@@ -145,7 +145,8 @@ AC_MSG_RESULT([$generate_doxs])
 AC_MSG_CHECKING([if will install doxygen docs])
 AS_IF([test "x$generate_doxs" = "xyes" -o \
 	    -f "$srcdir/doc/doxygen-doc/man/man3/hwloc_distribute.3" -a \
-	    -f "$srcdir/doc/doxygen-doc/hwloc.pdf"],
+	    -f "$srcdir/doc/doxygen-doc/hwloc-a4.pdf" -a \
+	    -f "$srcdir/doc/doxygen-doc/hwloc-letter.pdf"],
       [install_doxs=yes],
       [install_doxs=no])
 AC_MSG_RESULT([$install_doxs])
@@ -161,48 +162,48 @@ AM_CONDITIONAL([INSTALL_DOXYGEN], [test "x$install_doxs" = "xyes"])
 AC_MSG_CHECKING([which OS support to include])
 case ${target} in
   *-*-linux*)
-    AC_DEFINE(LINUX_SYS, 1, [Define to 1 on Linux])
     AC_DEFINE(HWLOC_LINUX_SYS, 1, [Define to 1 on Linux])
     linux=yes
     AC_MSG_RESULT([Linux])
     ;;
   *-*-irix*)
-    AC_DEFINE(IRIX_SYS, 1, [Define to 1 on Irix])
+    AC_DEFINE(HWLOC_IRIX_SYS, 1, [Define to 1 on Irix])
     irix=yes
     AC_MSG_RESULT([IRIX])
     ;;
   *-*-darwin*)
-    AC_DEFINE(DARWIN_SYS, 1, [Define to 1 on Darwin])
+    AC_DEFINE(HWLOC_DARWIN_SYS, 1, [Define to 1 on Darwin])
     darwin=yes
     AC_MSG_RESULT([Darwin])
     ;;
   *-*-solaris*)
-    AC_DEFINE(SOLARIS_SYS, 1, [Define to 1 on Solaris])
+    AC_DEFINE(HWLOC_SOLARIS_SYS, 1, [Define to 1 on Solaris])
     solaris=yes
     AC_MSG_RESULT([Solaris])
     ;;
   *-*-aix*)
-    AC_DEFINE(AIX_SYS, 1, [Define to 1 on AIX])
+    AC_DEFINE(HWLOC_AIX_SYS, 1, [Define to 1 on AIX])
     aix=yes
     AC_MSG_RESULT([AIX])
     ;;
   *-*-osf*)
-    AC_DEFINE(OSF_SYS, 1, [Define to 1 on OSF])
+    AC_DEFINE(HWLOC_OSF_SYS, 1, [Define to 1 on OSF])
     osf=yes
     AC_MSG_RESULT([OSF])
     ;;
   *-*-hpux*)
-    AC_DEFINE(HPUX_SYS, 1, [Define to 1 on HP-UX])
+    AC_DEFINE(HWLOC_HPUX_SYS, 1, [Define to 1 on HP-UX])
     hpux=yes
     AC_MSG_RESULT([HP-UX])
     ;;
   *-*-mingw*|*-*-cygwin*)
-    AC_DEFINE(WIN_SYS, 1, [Define to 1 on WINDOWS])
+    AC_DEFINE(HWLOC_WIN_SYS, 1, [Define to 1 on WINDOWS])
     windows=yes
     AC_MSG_RESULT([Windows])
     ;;
   *)
     AC_MSG_RESULT([Unsupported! ($target)])
+    AC_DEFINE(HWLOC_UNSUPPORTED_SYS, 1, [Define to 1 on unsupported systems])
     AC_MSG_WARN([***********************************************************])
     AC_MSG_WARN([*** hwloc does not support this system.])
     AC_MSG_WARN([*** hwloc will *attempt* to build (but it may not work).])
@@ -280,7 +281,11 @@ AC_CHECK_HEADERS([langinfo.h], [
 ])
 AC_CHECK_HEADERS([curses.h], [
   AC_CHECK_HEADERS([term.h], [
-    AC_CHECK_LIB([termcap], [tparm])
+    AC_CHECK_LIB([termcap], [tparm], [
+        AC_SUBST([HWLOC_TERMCAP_LIBS], ["-ltermcap"])
+        AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
+                  [Define to 1 if you have `termcap' library (-ltermcap)])
+      ])
   ], [], [[#include <curses.h>]])
 ])
 
@@ -341,18 +346,20 @@ if test "x$hwloc_thread_t" != "x" ; then
   AC_DEFINE_UNQUOTED(hwloc_thread_t, $hwloc_thread_t, [Define this to the thread ID type])
 fi
 
-AC_MSG_CHECKING([for old prototype of sched_setaffinity])
-AC_COMPILE_IFELSE(
-  AC_LANG_PROGRAM([[
-    #define _GNU_SOURCE
-    #include <sched.h>
-    static unsigned long mask;
-    ]], [[ sched_setaffinity(0, (void*) &mask);
-    ]]),
-  AC_DEFINE([HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
-  AC_MSG_RESULT([yes]),
-  AC_MSG_RESULT([no])
-)
+HWLOC_CHECK_DECL([sched_setaffinity], [
+  AC_MSG_CHECKING([for old prototype of sched_setaffinity])
+  AC_COMPILE_IFELSE(
+    AC_LANG_PROGRAM([[
+      #define _GNU_SOURCE
+      #include <sched.h>
+      static unsigned long mask;
+      ]], [[ sched_setaffinity(0, (void*) &mask);
+      ]]),
+    AC_DEFINE([HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+  )
+])
 
 AC_MSG_CHECKING([for working CPU_SET])
 AC_LINK_IFELSE(
@@ -366,6 +373,22 @@ AC_LINK_IFELSE(
     AC_MSG_RESULT([no])
 )
 
+AC_MSG_CHECKING([for working CPU_SET_S])
+AC_LINK_IFELSE(
+  AC_LANG_PROGRAM([[
+      #include <sched.h>
+      cpu_set_t *set;
+    ]], [[
+      set = CPU_ALLOC(1024);
+      CPU_ZERO_S(CPU_ALLOC_SIZE(1024), set);
+      CPU_SET_S(CPU_ALLOC_SIZE(1024), 0, set);
+      CPU_FREE(set);
+    ]]),
+    AC_DEFINE([HWLOC_HAVE_CPU_SET_S], [1], [Define to 1 if the CPU_SET_S macro works])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+)
+
 AC_ARG_ENABLE([cairo],
   [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
   [enable_cairo="$enableval"],
@@ -374,12 +397,17 @@ AC_ARG_ENABLE([cairo],
 if test "x$enable_cairo" = "xyes"; then
   PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
   if test "x$enable_cairo" = "xyes"; then
-    AC_CHECK_HEADERS([X11/Xlib.h],
-      [AC_CHECK_HEADERS([X11/Xutil.h X11/keysym.h],
-        [enable_X11=yes
-         AC_DEFINE([HAVE_X11], [1], [Define to 1 if X11 libraries are available.])],,
-        [[#include <X11/Xlib.h>]])
-      ])
+    AC_PATH_X
+    AC_CHECK_HEADERS([X11/Xlib.h], [
+      AC_CHECK_HEADERS([X11/Xutil.h X11/keysym.h], [
+        AC_CHECK_LIB([X11], [XOpenDisplay], [
+          enable_X11=yes
+          AC_SUBST([HWLOC_X11_LIBS], ["-lX11"])
+          AC_DEFINE([HAVE_X11], [1], [Define to 1 if X11 libraries are available.])
+        ])]
+      )],,
+      [[#include <X11/Xlib.h>]]
+    )
     if test "x$enable_X11" != "xyes"; then
       AC_MSG_WARN([X11 headers not found, Cairo/X11 back-end disabled])
     fi
@@ -511,6 +539,7 @@ AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
 AM_CONDITIONAL([HAVE_LINUX_LIBNUMA], [test "x$have_linux_libnuma" = "xyes"])
 
 AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
+AC_CHECK_DECLS([pthread_getaffinity_np],,[:],[[#include <pthread.h>]])
 AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
 AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xyes"])
 

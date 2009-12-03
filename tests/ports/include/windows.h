@@ -17,7 +17,7 @@ typedef uint64_t DWORDLONG;
 typedef DWORDLONG ULONGLONG, *PULONGLONG;
 typedef unsigned char BYTE, UCHAR;
 typedef unsigned short WORD, USHORT;
-typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD;
+typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD, *PDWORD_PTR;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)();
 typedef void *PVOID;
@@ -46,6 +46,7 @@ WINAPI DWORD GetLastError(void);
 
 DWORD_PTR WINAPI SetThreadAffinityMask(HANDLE hThread, DWORD_PTR dwThreadAffinityMask);
 BOOL WINAPI SetProcessAffinityMask(HANDLE hProcess, DWORD_PTR dwProcessAffinityMask);
+BOOL WINAPI GetProcessAffinityMask(HANDLE hProcess, PDWORD_PTR lpProcessAffinityMask, PDWORD_PTR lpSystemAffinityMask);
 
 HANDLE WINAPI GetCurrentThread(void);
 HANDLE WINAPI GetCurrentProcess(void);

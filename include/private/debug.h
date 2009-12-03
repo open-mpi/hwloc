@@ -14,17 +14,17 @@
 #define hwloc_debug(s, ...) fprintf(stderr, s, ##__VA_ARGS__)
 #define hwloc_debug_cpuset(fmt, cpuset) do { \
   char *s= hwloc_cpuset_printf_value(cpuset); \
-  fprintf(stderr, s, cpuset); \
+  fprintf(stderr, fmt, s); \
   free(s); \
 } while (0)
 #define hwloc_debug_1arg_cpuset(fmt, arg1, cpuset) do { \
   char *s= hwloc_cpuset_printf_value(cpuset); \
-  fprintf(stderr, s, arg1, cpuset); \
+  fprintf(stderr, fmt, arg1, s); \
   free(s); \
 } while (0)
 #define hwloc_debug_2args_cpuset(fmt, arg1, arg2, cpuset) do { \
   char *s= hwloc_cpuset_printf_value(cpuset); \
-  fprintf(stderr, s, arg1, arg2, cpuset); \
+  fprintf(stderr, fmt, arg1, arg2, s); \
   free(s); \
 } while (0)
 #else

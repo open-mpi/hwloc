@@ -170,7 +170,10 @@ struct hwloc_obj {
   void *userdata;			/**< \brief Application-given private data pointer, initialized to \c NULL, use it as you wish */
 
   /* cpuset */
-  hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object */
+  hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
+                                          *
+                                          * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
+                                          */
 
   signed os_level;			/**< \brief OS-provided physical level */
 };
@@ -415,6 +418,26 @@ extern int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topolo
  */
 extern int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
+/** \brief Flags describing the actual OS support for this topology.
+ *
+ * Flags are retrieved with hwloc_topology_get_support().
+ */
+enum hwloc_topology_support_flags_e {
+  /* \brief Topology discovery is supported. */
+  HWLOC_SUPPORT_DISCOVERY = (1<<0),
+  /* \brief Binding a process is supported. */
+  HWLOC_SUPPORT_SET_PROC_CPUBIND = (1<<1),
+  /* \brief Binding a thread is supported. */
+  HWLOC_SUPPORT_SET_THREAD_CPUBIND = (1<<2),
+  /* \brief Getting the binding of a process is supported. */
+  HWLOC_SUPPORT_GET_PROC_CPUBIND = (1<<3),
+  /* \brief Getting the binding of a thread is supported. */
+  HWLOC_SUPPORT_GET_THREAD_CPUBIND = (1<<4),
+};
+
+/** \brief Retrieve the OR'ed flags of topology support. */
+extern int hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology, unsigned long *flags);
+
 /** @} */
 
 
@@ -486,6 +509,48 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
  * a XML topology file, or a synthetic topology).
  */
 extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology);
+
+/* \brief Get complete CPU set
+ *
+ * \return the complete CPU set of logical processors of the system, i.e.
+ * including logical processors for which no topology information is know and
+ * thus no PROC object is provided.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+extern hwloc_const_cpuset_t hwloc_topology_get_complete_cpuset(hwloc_topology_t topology);
+
+/* \brief Get topology CPU set
+ *
+ * \return the CPU set of logical processors of the system for which hwloc
+ * provides topology information. This is equivalent to the cpuset of the
+ * system object.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+extern hwloc_const_cpuset_t hwloc_topology_get_topology_cpuset(hwloc_topology_t topology);
+
+/** \brief Get online CPU set
+ *
+ * \return the CPU set of online logical processors, i.e. that can execute
+ * threads (but are not necessarily allowed for the application).
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+extern hwloc_const_cpuset_t hwloc_topology_get_online_cpuset(hwloc_topology_t topology);
+
+/** \brief Get allowed CPU set
+ *
+ * \return the CPU set of allowed logical processors, i.e. processors which the
+ * application is allowed to run on according to administration rules.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+extern hwloc_const_cpuset_t hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology);
 
 /** @} */
 
@@ -617,13 +682,22 @@ typedef enum {
                                    * possible (implementation reason) or not
                                    * allowed (administrative reasons), and the
                                    * function will fail in that case.
+				   *
+				   * \note This flag is meaningless when retrieving
+				   * the binding of a process or thread.
                                    */
 } hwloc_cpubind_policy_t;
 
 /** \brief Bind current process or thread on cpus given in cpuset \p set
  */
-extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t set,
+extern int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set,
 			    int policy);
+
+/** \brief Get current process or thread binding
+ *
+ * \return newly-allocated cpuset
+ */
+extern hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int policy);
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
  *
@@ -632,7 +706,18 @@ extern int hwloc_set_cpubind(hwloc_topology_t topology, const hwloc_cpuset_t set
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
  */
-extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, const hwloc_cpuset_t set, int policy);
+extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
+
+/** \brief Get the current binding of process \p pid on
+ *
+ * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
+ * platforms
+ *
+ * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
+ *
+ * \return newly-allocated cpuset
+ */
+extern hwloc_cpuset_t hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy);
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
@@ -642,7 +727,20 @@ extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, co
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
  */
 #ifdef hwloc_thread_t
-extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, const hwloc_cpuset_t set, int policy);
+extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
+#endif
+
+/** \brief Get the current binding of thread \p tid
+ *
+ * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
+ * Windows platforms
+ *
+ * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
+ *
+ * \return newly-allocated cpuset
+ */
+#ifdef hwloc_thread_t
+extern hwloc_cpuset_t hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy);
 #endif
 
 /** @} */

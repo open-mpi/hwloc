@@ -140,10 +140,13 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 } SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX, *PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX;
 #endif
 
+/* TODO: SetThreadIdealProcessor */
+
 static int
-hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  /* TODO: groups */
+  /* TODO: groups SetThreadGroupAffinity */
+  /* The resulting binding is always strict */
   DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
   if (!SetThreadAffinityMask(thread, mask))
     return -1;
@@ -151,31 +154,57 @@ hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
 }
 
 static int
-hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, strict);
+  return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, policy);
 }
 
 static int
-hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   /* TODO: groups */
+  /* The resulting binding is always strict */
   DWORD mask = hwloc_cpuset_to_ulong(hwloc_set);
   if (!SetProcessAffinityMask(proc, mask))
     return -1;
   return 0;
 }
 
-static int
-hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+static hwloc_cpuset_t
+hwloc_win_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, int policy)
 {
-  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, strict);
+  hwloc_cpuset_t ret;
+  DWORD proc_mask, sys_mask;
+  /* TODO: groups */
+  if (!GetProcessAffinityMask(proc, &proc_mask, &sys_mask))
+    return NULL;
+  ret = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_ulong(ret, proc_mask);
+  return ret;
 }
 
 static int
-hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, strict);
+  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, policy);
+}
+
+static hwloc_cpuset_t
+hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
+{
+  return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), policy);
+}
+
+static int
+hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+{
+  return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, policy);
+}
+
+static hwloc_cpuset_t
+hwloc_win_get_cpubind(hwloc_topology_t topology, int policy)
+{
+  return hwloc_win_get_thisproc_cpubind(topology, policy);
 }
 
 void
@@ -372,16 +401,19 @@ hwloc_look_windows(struct hwloc_topology *topology)
   }
 
   /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(), NULL);
+  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors());
 }
 
 void
 hwloc_set_windows_hooks(struct hwloc_topology *topology)
 {
   topology->set_cpubind = hwloc_win_set_cpubind;
+  topology->get_cpubind = hwloc_win_get_cpubind;
   topology->set_proc_cpubind = hwloc_win_set_proc_cpubind;
+  topology->get_proc_cpubind = hwloc_win_get_proc_cpubind;
   topology->set_thread_cpubind = hwloc_win_set_thread_cpubind;
   topology->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
+  topology->get_thisproc_cpubind = hwloc_win_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
 }
 

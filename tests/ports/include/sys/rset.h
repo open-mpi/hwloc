@@ -66,5 +66,6 @@ struct subrange {
 
 int ra_attachrset (rstype_t rstype, rsid_t rsid, rsethandle_t rset, unsigned int flags);
 int ra_detachrset (rstype_t rstype, rsid_t rsid, unsigned int flags);
+int ra_getrset (rstype_t rstype, rsid_t rsid, unsigned int flags, rsethandle_t rset);
 
 #endif /* HWLOC_PORT_SYS_RSET_H */

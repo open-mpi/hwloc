@@ -54,9 +54,42 @@
 #         warning "don't know the syscall number for sched_setaffinity on this architecture, will not support binding"
 #         define sched_setaffinity(pid, lg, mask) (errno = ENOSYS, -1)
 #       endif
-#       ifndef sched_setaffinity
-          _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, unsigned long *, mask);
+#    endif
+#    ifndef sched_setaffinity
+       _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, const void *, mask);
+#    endif
+#    ifndef __NR_sched_getaffinity
+#       ifdef __i386__
+#         define __NR_sched_getaffinity 242
+#       elif defined(__x86_64__)
+#         define __NR_sched_getaffinity 204
+#       elif defined(__ia64__)
+#         define __NR_sched_getaffinity 1232
+#       elif defined(__hppa__)
+#         define __NR_sched_getaffinity 212
+#       elif defined(__alpha__)
+#         define __NR_sched_getaffinity 396
+#       elif defined(__s390__)
+#         define __NR_sched_getaffinity 240
+#       elif defined(__sparc__)
+#         define __NR_sched_getaffinity 260
+#       elif defined(__m68k__)
+#         define __NR_sched_getaffinity 312
+#       elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined(__powerpc64__) || defined(__ppc64__)
+#         define __NR_sched_getaffinity 223
+#       elif defined(__arm__)
+#         define __NR_sched_getaffinity 242
+#       elif defined(__cris__)
+#         define __NR_sched_getaffinity 242
+/*#       elif defined(__mips__)
+  #         define __NR_sched_getaffinity TODO (32/64/nabi) */
+#       else
+#         warning "don't know the syscall number for sched_getaffinity on this architecture, will not support getting binding"
+#         define sched_getaffinity(pid, lg, mask) (errno = ENOSYS, -1)
 #       endif
+#    endif
+#    ifndef sched_getaffinity
+       _syscall3(int, sched_getaffinity, pid_t, pid, unsigned int, lg, void *, mask);
 #    endif
 #endif
 
@@ -122,18 +155,35 @@ hwloc_opendirat(const char *path, int fsroot_fd)
 
 #endif /* !HAVE_OPENAT */
 
-static int
-hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t hwloc_set, int strict)
+int
+hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cpuset_t hwloc_set)
 {
-
   /* TODO Kerrighed: Use
    * int migrate (pid_t pid, int destination_node);
    * int migrate_self (int destination_node);
    * int thread_migrate (int thread_id, int destination_node);
    */
 
-/* TODO: use dynamic size cpusets */
-#ifdef HWLOC_HAVE_CPU_SET
+  /* The resulting binding is always strict */
+
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+  cpu_set_t *plinux_set;
+  unsigned cpu;
+  size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
+  int err;
+
+  plinux_set = CPU_ALLOC(HWLOC_NBMAXCPUS);
+
+  CPU_ZERO_S(setsize, plinux_set);
+  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+    CPU_SET_S(cpu, setsize, plinux_set);
+  hwloc_cpuset_foreach_end();
+
+  err = sched_setaffinity(tid, setsize, plinux_set);
+
+  CPU_FREE(plinux_set);
+  return err;
+#elif defined(HWLOC_HAVE_CPU_SET)
   cpu_set_t linux_set;
   unsigned cpu;
 
@@ -147,7 +197,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
-#else /* CPU_SET */
+#else /* !CPU_SET */
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
@@ -155,27 +205,123 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
-#endif /* CPU_SET */
+#endif /* !CPU_SET */
+}
+
+hwloc_cpuset_t
+hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
+{
+  hwloc_cpuset_t hwloc_set;
+  int err;
+  /* TODO Kerrighed */
+
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+  cpu_set_t *plinux_set;
+  unsigned cpu;
+  size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
+
+  plinux_set = CPU_ALLOC(HWLOC_NBMAXCPUS);
+
+  err = sched_getaffinity(tid, setsize, plinux_set);
+
+  if (err < 0) {
+    CPU_FREE(plinux_set);
+    return NULL;
+  }
+
+  hwloc_set = hwloc_cpuset_alloc();
+  for(cpu=0; cpu<HWLOC_NBMAXCPUS; cpu++)
+    if (CPU_ISSET_S(cpu, setsize, plinux_set))
+      hwloc_cpuset_set(hwloc_set, cpu);
+
+  CPU_FREE(plinux_set);
+#elif defined(HWLOC_HAVE_CPU_SET)
+  cpu_set_t linux_set;
+  unsigned cpu;
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+  err = sched_getaffinity(tid, &linux_set);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+  err = sched_getaffinity(tid, sizeof(linux_set), &linux_set);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+  if (err < 0)
+    return NULL;
+
+  hwloc_set = hwloc_cpuset_alloc();
+  for(cpu=0; cpu<CPU_SETSIZE; cpu++)
+    if (CPU_ISSET(cpu, &linux_set))
+      hwloc_cpuset_set(hwloc_set, cpu);
+#else /* !CPU_SET */
+  unsigned long mask;
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+  err = sched_getaffinity(tid, (void*) &mask);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+  err = sched_getaffinity(tid, sizeof(mask), (void*) &mask);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+  if (err < 0)
+    return NULL;
+
+  hwloc_set = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_ulong(hwloc_set, mask);
+#endif /* !CPU_SET */
+
+  return hwloc_set;
 }
 
 static int
-hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
+  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
+}
+
+static hwloc_cpuset_t
+hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy)
+{
+  return hwloc_linux_get_tid_cpubind(topology, 0);
 }
 
 static int
-hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set, strict);
+  if (policy & HWLOC_CPUBIND_PROCESS) {
+    errno = ENOSYS;
+    return -1;
+  }
+  return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
+}
+
+static hwloc_cpuset_t
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
+{
+  if (policy & HWLOC_CPUBIND_PROCESS) {
+    errno = ENOSYS;
+    return NULL;
+  }
+  return hwloc_linux_get_tid_cpubind(topology, pid);
+}
+
+static int
+hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+{
+  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
+}
+
+static hwloc_cpuset_t
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
+{
+  return hwloc_linux_get_tid_cpubind(topology, 0);
 }
 
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
 #pragma weak pthread_setaffinity_np
 
 static int
-hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
+  if (tid == pthread_self())
+    return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
+
   if (!pthread_setaffinity_np) {
     /* ?! Application uses set_thread_cpubind, but doesn't link against libpthread ?! */
     errno = ENOSYS;
@@ -220,6 +366,68 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #endif /* CPU_SET */
 }
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
+
+#if HAVE_DECL_PTHREAD_GETAFFINITY_NP
+#pragma weak pthread_getaffinity_np
+
+static hwloc_cpuset_t
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int policy)
+{
+  hwloc_cpuset_t hwloc_set;
+  int err;
+
+  if (tid == pthread_self())
+    return hwloc_linux_get_tid_cpubind(topology, 0);
+
+  if (!pthread_getaffinity_np) {
+    /* ?! Application uses get_thread_cpubind, but doesn't link against libpthread ?! */
+    errno = ENOSYS;
+    return NULL;
+  }
+  /* TODO Kerrighed */
+
+#ifdef HWLOC_HAVE_CPU_SET
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+     cpu_set_t linux_set;
+     unsigned cpu;
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+     err = pthread_getaffinity_np(tid, &linux_set);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+     err = pthread_getaffinity_np(tid, sizeof(linux_set), &linux_set);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+     if (err < 0)
+	return NULL;
+
+     hwloc_set = hwloc_cpuset_alloc();
+     for(cpu=0; cpu<CPU_SETSIZE; cpu++)
+       if (CPU_ISSET(cpu, &linux_set))
+	 hwloc_cpuset_set(hwloc_set, cpu);
+  }
+#else /* CPU_SET */
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+      unsigned long mask;
+
+#ifdef HAVE_OLD_SCHED_SETAFFINITY
+      err = pthread_getaffinity_np(tid, (void*) &mask);
+#else /* HAVE_OLD_SCHED_SETAFFINITY */
+      err = pthread_getaffinity_np(tid, sizeof(mask), (void*) &mask);
+#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+      if (err < 0)
+	return NULL;
+
+     hwloc_set = hwoc_cpuset_alloc();
+     hwloc_cpuset_from_ulong(hwloc_set, mask);
+  }
+#endif /* CPU_SET */
+
+  return hwloc_set;
+}
+#endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
 int
 hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path)
@@ -404,19 +612,20 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
  * the cpuset filesystem (usually mounted in / or /dev) where there
  * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
  */
-static int
-hwloc_read_linux_cpuset_mask(const char *type, char *info, int infomax, int fsroot_fd)
+static char *
+hwloc_read_linux_cpuset_mask(const char *type, int fsroot_fd)
 {
   char *cpuset_name;
 #define CPUSET_FILENAME_LEN 256
   char cpuset_filename[CPUSET_FILENAME_LEN];
   FILE *fd;
-  char *tmp;
-  int ret = 0;
+  char *info = NULL, *tmp;
+  ssize_t ssize;
+  size_t size;
 
   cpuset_name = hwloc_read_linux_cpuset_name(fsroot_fd);
   if (!cpuset_name)
-    return 0;
+    return NULL;
 
   /* try to read the cpuset from cgroup */
   snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cgroup%s/cpuset.%s", cpuset_name, type);
@@ -446,35 +655,32 @@ hwloc_read_linux_cpuset_mask(const char *type, char *info, int infomax, int fsro
   hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
   goto out;
 
- gotfile:
-  tmp = fgets(info, infomax, fd);
+gotfile:
+  ssize = getline(&info, &size, fd);
   fclose(fd);
-  if (!tmp)
+  if (!info)
     goto out;
 
   tmp = strchr(info, '\n');
   if (tmp)
     *tmp = '\0';
 
-  ret = 1;
 out:
   free(cpuset_name);
-  return ret;
+  return info;
 }
 
 static void
 hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
 				   const char *name,
-				   hwloc_cpuset_t admin_disabled_set)
+				   hwloc_cpuset_t admin_enabled_cpus_set)
 {
-#define CPUSET_MASK_LEN 64
-  char cpuset_mask[CPUSET_MASK_LEN];
+  char *cpuset_mask;
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
-  int ret;
 
-  ret = hwloc_read_linux_cpuset_mask(name, cpuset_mask, CPUSET_MASK_LEN, topology->backend_params.sysfs.root_fd);
-  if (!ret)
+  cpuset_mask = hwloc_read_linux_cpuset_mask(name, topology->backend_params.sysfs.root_fd);
+  if (!cpuset_mask)
     return;
 
   hwloc_debug("found cpuset %s: %s\n", name, cpuset_mask);
@@ -496,7 +702,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
       nextlast = nextfirst;
     if (prevlast+1 <= nextfirst-1) {
       hwloc_debug("%s [%d:%d] excluded by cpuset\n", name, prevlast+1, nextfirst-1);
-      hwloc_cpuset_set_range(admin_disabled_set, prevlast+1, nextfirst-1);
+      hwloc_cpuset_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
     }
 
     /* switch to next enabled-segment */
@@ -510,8 +716,10 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
   nextfirst = HWLOC_NBMAXCPUS;
   if (prevlast+1 <= nextfirst-1) {
     hwloc_debug("%s [%d:%d] excluded by cpuset\n", name, prevlast+1, nextfirst-1);
-    hwloc_cpuset_set_range(admin_disabled_set, prevlast+1, nextfirst-1);
+    hwloc_cpuset_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
   }
+
+  free(cpuset_mask);
 }
 
 static void
@@ -603,10 +811,7 @@ hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned *
 }
 
 static void
-look_sysfsnode(struct hwloc_topology *topology,
-	       const char *path,
-	       hwloc_cpuset_t admin_disabled_cpus_set,
-	       hwloc_cpuset_t admin_disabled_mems_set)
+look_sysfsnode(struct hwloc_topology *topology, const char *path)
 {
   unsigned osnode;
   unsigned nbnodes = 1;
@@ -648,13 +853,7 @@ look_sysfsnode(struct hwloc_topology *topology,
           if (!cpuset)
               continue;
           
-          /* clear disabled cpus */
-          hwloc_cpuset_clearset(cpuset, admin_disabled_cpus_set);
-          
-          if (hwloc_cpuset_isset(admin_disabled_mems_set, osnode)) {
-              size = 0; hpfree = 0;
-          } else
-              hwloc_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
+          hwloc_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
           
           node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
           node->cpuset = cpuset;
@@ -677,10 +876,9 @@ look_sysfsnode(struct hwloc_topology *topology,
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
-look_sysfscpu(struct hwloc_topology *topology, const char *path,
-	      hwloc_cpuset_t admin_disabled_cpus_set)
+look_sysfscpu(struct hwloc_topology *topology, const char *path)
 {
-  hwloc_cpuset_t cpuset;
+  hwloc_cpuset_t cpuset; /* Set of cpus for which we have topology information */
 #define CPU_TOPOLOGY_STR_LEN 128
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
@@ -703,10 +901,24 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 
       assert(cpu < HWLOC_NBMAXCPUS);
 
-      /* check whether cpusets exclude this cpu */
-      if (hwloc_cpuset_isset(admin_disabled_cpus_set, cpu)) {
-	hwloc_debug("os proc %lu is disabled by the administrator\n", cpu);
-	continue;
+      /* Maybe we don't have topology information but at least it exists */
+      hwloc_cpuset_set(topology->complete_cpuset, cpu);
+
+      /* check whether this processor is online */
+      sprintf(str, "%s/cpu%lu/online", path, cpu);
+      fd = hwloc_fopen(str, "r", topology->backend_params.sysfs.root_fd);
+      if (fd) {
+	if (fgets(online, sizeof(online), fd)) {
+	  fclose(fd);
+	  if (atoi(online)) {
+	    hwloc_debug("os proc %lu is online\n", cpu);
+	  } else {
+	    hwloc_debug("os proc %lu is offline\n", cpu);
+            hwloc_cpuset_clr(topology->online_cpuset, cpu);
+	  }
+	} else {
+	  fclose(fd);
+	}
       }
 
       /* check whether the kernel exports topology information for this cpu */
@@ -717,29 +929,12 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	continue;
       }
 
-      /* check whether this processor is offline */
-      sprintf(str, "%s/cpu%lu/online", path, cpu);
-      fd = hwloc_fopen(str, "r", topology->backend_params.sysfs.root_fd);
-      if (fd) {
-	if (fgets(online, sizeof(online), fd)) {
-	  fclose(fd);
-	  if (atoi(online)) {
-	    hwloc_debug("os proc %lu is online\n", cpu);
-	  } else {
-	    hwloc_debug("os proc %lu is offline\n", cpu);
-	    continue;
-	  }
-	} else {
-	  fclose(fd);
-	}
-      }
-
       hwloc_cpuset_set(cpuset, cpu);
     }
     closedir(dir);
   }
 
-  hwloc_debug_1arg_cpuset("found %d cpus, cpuset %s\n",
+  hwloc_debug_1arg_cpuset("found %d cpu topologies, cpuset %s\n",
 	     hwloc_cpuset_weight(cpuset), cpuset);
 
   hwloc_cpuset_foreach_begin(i, cpuset)
@@ -755,19 +950,20 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      assert(socketset);
-      hwloc_cpuset_clearset(socketset, admin_disabled_cpus_set);
-      assert(hwloc_cpuset_weight(socketset) >= 1);
+      if (socketset) {
+        assert(socketset);
+        assert(hwloc_cpuset_weight(socketset) >= 1);
 
-      if (hwloc_cpuset_first(socketset) == i) {
-	/* first cpu in this socket, add the socket */
-	socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
-	socket->cpuset = socketset;
-        hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
-		   mysocketid, socketset);
-	hwloc_insert_object_by_cpuset(topology, socket);
-      } else
-	free(socketset);
+        if (hwloc_cpuset_first(socketset) == i) {
+          /* first cpu in this socket, add the socket */
+          socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
+          socket->cpuset = socketset;
+          hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
+                     mysocketid, socketset);
+          hwloc_insert_object_by_cpuset(topology, socket);
+        } else
+          hwloc_cpuset_free(socketset);
+      }
 
       /* look at the core */
       mycoreid = 0; /* shut-up the compiler */
@@ -776,23 +972,22 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      assert(coreset);
-      hwloc_cpuset_clearset(coreset, admin_disabled_cpus_set);
-      assert(hwloc_cpuset_weight(coreset) >= 1);
+      if (coreset) {
+        assert(hwloc_cpuset_weight(coreset) >= 1);
 
-      if (hwloc_cpuset_first(coreset) == i) {
-	core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
-	core->cpuset = coreset;
-        hwloc_debug_1arg_cpuset("os core %u has cpuset %s\n",
-		   mycoreid, coreset);
-	hwloc_insert_object_by_cpuset(topology, core);
-      } else
-	free(coreset);
+        if (hwloc_cpuset_first(coreset) == i) {
+          core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
+          core->cpuset = coreset;
+          hwloc_debug_1arg_cpuset("os core %u has cpuset %s\n",
+                     mycoreid, coreset);
+          hwloc_insert_object_by_cpuset(topology, core);
+        } else
+          hwloc_cpuset_free(coreset);
+      }
 
       /* look at the thread */
       threadset = hwloc_cpuset_alloc();
       hwloc_cpuset_cpu(threadset, i);
-      hwloc_cpuset_clearset(threadset, admin_disabled_cpus_set);
       assert(hwloc_cpuset_weight(threadset) == 1);
 
       /* add the thread */
@@ -851,7 +1046,6 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
 	assert(cacheset);
-	hwloc_cpuset_clearset(cacheset, admin_disabled_cpus_set);
 	if (hwloc_cpuset_weight(cacheset) < 1)
 	  /* mask is wrong (happens on ia64), assumes it's not shared */
 	  hwloc_cpuset_cpu(cacheset, i);
@@ -866,7 +1060,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 		     depth, cacheset);
 	  hwloc_insert_object_by_cpuset(topology, cache);
 	} else
-	  free(cacheset);
+          hwloc_cpuset_free(cacheset);
       }
     }
   hwloc_cpuset_foreach_end();
@@ -881,8 +1075,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 #      define COREID "core id"
 static int
 look_cpuinfo(struct hwloc_topology *topology, const char *path,
-	     hwloc_cpuset_t online_cpuset,
-	     hwloc_cpuset_t admin_disabled_cpus_set)
+	     hwloc_cpuset_t online_cpuset)
 {
   FILE *fd;
   char str[strlen(PHYSID)+1+9+1+1];
@@ -901,6 +1094,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   long coreid;
   long processor = -1;
   int i;
+  hwloc_cpuset_t cpuset;
+  hwloc_obj_t obj;
 
   for (i = 0; i < HWLOC_NBMAXCPUS; i++) {
     proc_physids[i] = -1;
@@ -911,14 +1106,13 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     core_osphysids[i] = -1;
   }
 
-  hwloc_cpuset_zero(online_cpuset);
-
   if (!(fd=hwloc_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
     {
       hwloc_debug("could not open /proc/cpuinfo\n");
       return -1;
     }
 
+  cpuset = hwloc_cpuset_alloc();
   /* Just record information and count number of sockets and cores */
 
   hwloc_debug("\n\n * Topology extraction from /proc/cpuinfo *\n\n");
@@ -931,24 +1125,37 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	var = strtoul(c,&endptr,0);			     \
 	if (endptr==c)							\
 	  {								\
-	    fprintf(stderr,"no number in "field" field of /proc/cpuinfo\n"); \
-	    break;							\
+            hwloc_debug("no number in "field" field of /proc/cpuinfo\n"); \
+            hwloc_cpuset_free(cpuset);					\
+            return -1;							\
 	  }								\
 	else if (var==LONG_MIN)						\
 	  {								\
-	    fprintf(stderr,"too small "field" number in /proc/cpuinfo\n"); \
-	    break;							\
+            hwloc_debug("too small "field" number in /proc/cpuinfo\n"); \
+            hwloc_cpuset_free(cpuset);					\
+            return -1;							\
 	  }								\
 	else if (var==LONG_MAX)						\
 	  {								\
-	    fprintf(stderr,"too big "field" number in /proc/cpuinfo\n"); \
-	    break;							\
+            hwloc_debug("too big "field" number in /proc/cpuinfo\n"); \
+            hwloc_cpuset_free(cpuset);					\
+            return -1;							\
 	  }								\
 	hwloc_debug(field " %ld\n", var)
 #      define getprocnb_end()			\
       }
       getprocnb_begin(PROCESSOR,processor);
-      hwloc_cpuset_set(online_cpuset, processor);
+      hwloc_cpuset_set(cpuset, processor);
+
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, processor);
+      obj->cpuset = hwloc_cpuset_alloc();
+      hwloc_cpuset_cpu(obj->cpuset, processor);
+
+      hwloc_debug_2args_cpuset("cpu %d (os %ld) has cpuset %s\n",
+		 numprocs, processor, obj->cpuset);
+      numprocs++;
+      hwloc_insert_object_by_cpuset(topology, obj);
+
       getprocnb_end() else
       getprocnb_begin(PHYSID,physid);
       proc_osphysids[processor]=physid;
@@ -983,23 +1190,18 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     }
   fclose(fd);
 
+  if (processor == -1) {
+    hwloc_cpuset_free(cpuset);
+    return -1;
+  }
+
   /* setup the final number of procs */
   procid_max = processor + 1;
-  numprocs = hwloc_cpuset_weight(online_cpuset);
-
-  /* clear admin-disabled cpus */
-  hwloc_cpuset_foreach_begin(i, online_cpuset) {
-    if (hwloc_cpuset_isset(admin_disabled_cpus_set, i)) {
-      hwloc_cpuset_clr(online_cpuset, i);
-      proc_osphysids[i] = -1;
-      proc_physids[i] = -1;
-      proc_coreids[i] = -1;
-    }
-  } hwloc_cpuset_foreach_end();
+  hwloc_cpuset_copy(online_cpuset, cpuset);
+  hwloc_cpuset_free(cpuset);
 
   hwloc_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
-  hwloc_debug_cpuset("online processor cpuset: %s\n",
-	     online_cpuset);
+  hwloc_debug_cpuset("online processor cpuset: %s\n", online_cpuset);
 
   hwloc_debug("\n * Topology summary *\n");
   hwloc_debug("%d processors (%d max id)\n", numprocs, procid_max);
@@ -1011,9 +1213,6 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug("%d cores\n", numcores);
   if (numcores>0)
     hwloc_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, HWLOC_OBJ_CORE);
-
-  /* setup the cpu level, removing nonfirst threads */
-  hwloc_setup_proc_level(topology, numprocs, online_cpuset);
 
   return 0;
 }
@@ -1059,13 +1258,12 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
 void
 hwloc_look_linux(struct hwloc_topology *topology)
 {
-  hwloc_cpuset_t admin_disabled_cpus_set, admin_disabled_mems_set, online_set;
   DIR *nodes_dir;
   int err;
 
-  admin_disabled_cpus_set = hwloc_cpuset_alloc();
-  admin_disabled_mems_set = hwloc_cpuset_alloc();
-  online_set = hwloc_cpuset_alloc();
+  /* Gather the list of admin-disabled cpus and mems */
+  hwloc_admin_disable_set_from_cpuset(topology, "cpus", topology->allowed_cpuset);
+  hwloc_admin_disable_set_from_cpuset(topology, "mems", topology->allowed_nodeset);
 
   nodes_dir = hwloc_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);
   if (nodes_dir) {
@@ -1073,6 +1271,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     struct dirent *dirent;
     char path[128];
     hwloc_obj_t machine;
+    hwloc_cpuset_t machine_online_set;
 
     topology->levels[0][0]->attr->system.memory_kB = 0;
     topology->levels[0][0]->attr->system.huge_page_free = 0;
@@ -1082,19 +1281,21 @@ hwloc_look_linux(struct hwloc_topology *topology)
       unsigned long node;
       if (strncmp(dirent->d_name, "node", 4))
 	continue;
+      machine_online_set = hwloc_cpuset_alloc();
       node = strtoul(dirent->d_name+4, NULL, 0);
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/cpuinfo", node);
-      err = look_cpuinfo(topology, path, online_set, admin_disabled_cpus_set);
+      err = look_cpuinfo(topology, path, machine_online_set);
       if (err < 0) {
 	fprintf(stderr, "/proc/cpuinfo missing, required for kerrighed support\n");
 	abort();
       }
+      hwloc_cpuset_orset(topology->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
-      machine->cpuset = hwloc_cpuset_dup(online_set);
+      machine->cpuset = machine_online_set;
       machine->attr->machine.dmi_board_name = NULL;
       machine->attr->machine.dmi_board_vendor = NULL;
       hwloc_debug_1arg_cpuset("machine number %lu has cpuset %s\n",
-		 node, online_set);
+		 node, machine_online_set);
       hwloc_insert_object_by_cpuset(topology, machine);
 
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/meminfo", node);
@@ -1116,29 +1317,24 @@ hwloc_look_linux(struct hwloc_topology *topology)
     }
     closedir(nodes_dir);
   } else {
-    /* Gather the list of admin-disabled cpus and mems */
-    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
-      hwloc_admin_disable_set_from_cpuset(topology, "cpus", admin_disabled_cpus_set);
-      hwloc_admin_disable_set_from_cpuset(topology, "mems", admin_disabled_mems_set);
-    }
-
     /* Gather NUMA information */
-    look_sysfsnode(topology, "/sys/devices/system/node", admin_disabled_cpus_set, admin_disabled_mems_set);
+    look_sysfsnode(topology, "/sys/devices/system/node");
 
     /* Gather the list of cpus now */
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/physical_package_id", R_OK, topology->backend_params.sysfs.root_fd) < 0
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
+	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
-      err = look_cpuinfo(topology, "/proc/cpuinfo", online_set, admin_disabled_cpus_set);
+      err = look_cpuinfo(topology, "/proc/cpuinfo", topology->online_cpuset);
       if (err < 0) {
-	fprintf(stderr, "sysfs topology not found, and /proc/cpuinfo missing\n");
-	abort();
+        if (topology->is_thissystem)
+          hwloc_setup_proc_level(topology,  hwloc_fallback_nbprocessors());
+        else
+          /* fsys-root but not this system, no way, assume there's just 1
+           * processor :/ */
+          hwloc_setup_proc_level(topology, 1);
       }
     } else {
-      look_sysfscpu(topology, "/sys/devices/system/cpu", admin_disabled_cpus_set);
+      look_sysfscpu(topology, "/sys/devices/system/cpu");
     }
 
     /* Compute the whole system memory and huge page */
@@ -1154,20 +1350,23 @@ hwloc_look_linux(struct hwloc_topology *topology)
 		       &topology->levels[0][0]->attr->system.dmi_board_vendor,
 		       &topology->levels[0][0]->attr->system.dmi_board_name);
   }
-
-  hwloc_cpuset_free(admin_disabled_cpus_set);
-  hwloc_cpuset_free(admin_disabled_mems_set);
-  hwloc_cpuset_free(online_set);
 }
 
 void
 hwloc_set_linux_hooks(struct hwloc_topology *topology)
 {
   topology->set_cpubind = hwloc_linux_set_cpubind;
+  topology->get_cpubind = hwloc_linux_get_cpubind;
+  topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
+  topology->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
+  topology->set_proc_cpubind = hwloc_linux_set_proc_cpubind;
+  topology->get_proc_cpubind = hwloc_linux_get_proc_cpubind;
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
   topology->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
-  topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
+#if HAVE_DECL_PTHREAD_GETAFFINITY_NP
+  topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
+#endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 }
 
 /* TODO mbind, setpolicy */

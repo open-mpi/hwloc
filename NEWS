@@ -18,13 +18,46 @@ Version 1.0.0
 -------------
 
 * Add hwloc_topology_export_xml() to export the topology in a XML file.
+* Add hwloc_topology_get_support() to retrieve the supported features
+  for the current topologt context.
+* Add hwloc_set_*cpubind() routines to retrieve the current binding
+  of processes and threads.
+  + Only implemented for Linux so far.
+* Add hwloc_topology_get_offline_cpuset() to retrieve the list of
+  currently offline or disabled CPUs.
+* Add several new helpers:
+  + hwloc_get_proc_obj_by_os_index()
+  + hwloc_get_parent_by_depth/type()
 * Add Linux cgroup support to the Linux cpuset code.
 
 
-Version 0.9.3 (unreleased)
+Version 0.9.4 (unreleased)
 --------------------------
 
+* Nothing yet
+
+
+Version 0.9.3
+-------------
+
 * Fix autogen.sh to work with Autoconf 2.63.
+* Fix various crashes in particular conditions:
+  - xml files with root attributes
+  - offline CPUs
+  - partial sysfs support
+  - unparseable /proc/cpuinfo
+  - ignoring NUMA level while Misc level have been generated
+* Tweak documentation a bit
+* Do not require the pthread library for binding the current thread on Linux
+* Do not erroneously consider the sched_setaffinity prototype is the old version
+  when there is actually none.
+* Fix _syscall3 compilation on archs for which we do not have the
+  sched_setaffinity system call number.
+* Fix AIX binding.
+* Fix libraries dependencies: now only lstopo depends on libtermcap, fix
+  binutils-gold link
+* Have make check always build and run hwloc-hello.c
+* Do not limit size of a cpuset.
 
 
 Version 0.9.2

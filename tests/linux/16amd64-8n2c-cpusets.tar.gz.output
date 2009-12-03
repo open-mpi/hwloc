@@ -23,10 +23,6 @@ System(0KB HP=0*0kB TYAN Computer Corp S4881 )
     Socket#2
         L2Cache(1024KB)
           L1Cache(64KB)
-          Core#0
-            P#4
-        L2Cache(1024KB)
-          L1Cache(64KB)
           Core#1
             P#5
   NUMANode#3(8192MB)
@@ -35,6 +31,8 @@ System(0KB HP=0*0kB TYAN Computer Corp S4881 )
           L1Cache(64KB)
           Core#0
             P#6
+  NUMANode#4(8192MB)
+  NUMANode#5(8192MB)
   NUMANode#6(0KB)
     Socket#6
         L2Cache(1024KB)
@@ -55,14 +53,15 @@ System(0KB HP=0*0kB TYAN Computer Corp S4881 )
           L1Cache(64KB)
           Core#1
             P#15
-  NUMANode#4(8192MB)
-  NUMANode#5(8192MB)
 depth 0:	1 System (type #0)
  depth 1:	8 NUMANodes (type #2)
   depth 2:	6 Sockets (type #3)
-   depth 3:	11 Caches (type #4)
-    depth 4:	11 Caches (type #4)
-     depth 5:	11 Cores (type #5)
-      depth 6:	11 Procs (type #6)
+   depth 3:	10 Caches (type #4)
+    depth 4:	10 Caches (type #4)
+     depth 5:	10 Cores (type #5)
+      depth 6:	10 Procs (type #6)
+6 processors not represented in topology: 00000f90
+1 processors offline: 00000010
+5 processors online but not allowed: 00000f80
+1 processors allowed but not online: 00000010
 Topology not from this system
-

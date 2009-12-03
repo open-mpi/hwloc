@@ -57,7 +57,8 @@ dox_inputs = $(DOX_CONFIG) \
        $(top_srcdir)/include/hwloc/glibc-sched.h \
        $(top_srcdir)/include/hwloc/linux.h \
        $(top_srcdir)/include/hwloc/linux-libnuma.h \
-       $(top_srcdir)/include/hwloc/openfabrics-verbs.h
+       $(top_srcdir)/include/hwloc/openfabrics-verbs.h \
+       $(top_srcdir)/include/hwloc/plpa.h
 
 #
 # Create the images that we need for the PDF output and the HTML
@@ -248,6 +249,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_child_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_offline_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_depth.3 \
@@ -259,10 +261,13 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_iodevice.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_proc_obj_by_os_index.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_parent_obj_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_parent_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_covering_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
@@ -285,6 +290,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_of_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_proc_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_thread_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
@@ -293,6 +301,7 @@ man3_MANS = \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_all_keep_structure.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_ignore_type_keep_structure.3 \
@@ -347,13 +356,11 @@ endif
 # Make sure that the documentation example works
 #
 
-if BUILD_DOXYGEN
 TESTS = hwloc-hello
 check_PROGRAMS = $(TESTS)
 
 hwloc_hello_LDADD = $(top_builddir)/src/libhwloc.la
 hwloc_hello_DEPENDENCIES = $(hwloc_hello_LDADD)
-endif
 
 #
 # Only remove the actual generated documentation files for maintainers

@@ -25,7 +25,7 @@
 #include <cpuset.h>
 
 static int
-prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_cpuset_t hwloc_set)
+prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_cpuset_t hwloc_set)
 {
   unsigned cpu;
   cpuset_t target_cpuset;
@@ -69,12 +69,14 @@ out:
   return ret;
 }
 
+/* Note: get_cpubind not available on OSF */
+
 static int
-hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   radset_t radset;
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if ((errno = pthread_rad_detach(thread)))
       return -1;
     return 0;
@@ -83,7 +85,7 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
   if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
-  if (strict) {
+  if (policy & HWLOC_CPUBIND_STRICT) {
     if ((errno = pthread_rad_bind(thread, radset, RAD_INSIST | RAD_WAIT)))
       return -1;
   } else {
@@ -96,11 +98,11 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
 }
 
 static int
-hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   radset_t radset;
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_get_system_obj(topology)->cpuset)) {
+  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if (rad_detach_pid(pid))
       return -1;
     return 0;
@@ -109,7 +111,7 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpu
   if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
-  if (strict) {
+  if (policy & HWLOC_CPUBIND_STRICT) {
     if (rad_bind_pid(pid, radset, RAD_INSIST | RAD_WAIT))
       return -1;
   } else {
@@ -122,21 +124,21 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpu
 }
 
 static int
-hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, strict);
+  return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, policy);
 }
 
 static int
-hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, strict);
+  return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
 }
 
 static int
-hwloc_osf_set_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int strict)
+hwloc_osf_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_osf_set_thisproc_cpubind(topology, hwloc_set, strict);
+  return hwloc_osf_set_thisproc_cpubind(topology, hwloc_set, policy);
 }
 
 /* TODO: memory
@@ -227,7 +229,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
   cpusetdestroy(&cpuset);
 
   /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(), NULL);
+  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors());
 }
 
 void
