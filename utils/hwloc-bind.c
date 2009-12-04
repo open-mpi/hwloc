@@ -141,7 +141,10 @@ int main(int argc, char *argv[])
   }
 
   ret = execvp(argv[0], argv);
-  if (ret && verbose)
-    perror("execvp");
+  if (ret) {
+      fprintf(stderr, "%s: Failed to launch executable \"%s\"\n", 
+              orig_argv[0], argv[0]);
+      perror("execvp");
+  }
   return EXIT_FAILURE;
 }
