@@ -191,6 +191,7 @@ A special index value indicating all valid odd index values.
 A special index value indicating all valid even index values.
 .
 .PP
+.IR REMEMBER :
 hwloc-bind accepts 
 .I logical 
 indexes for location values.
@@ -210,10 +211,9 @@ The return value is therefore whatever the return value of the command
 is.
 .
 .PP
-hwloc-bind will return 0 if there was no command to execute.
 hwloc-bind will return nonzero if any kind of error occurs, such as
-failure to parse the command line, failure to retrieve process
-bindings, etc.
+(but not limited to): failure to parse the command line, failure to
+retrieve process bindings, lack of a specified command to execute, etc.
 .
 .\" **************************
 .\"    See also section

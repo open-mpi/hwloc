@@ -135,8 +135,10 @@ int main(int argc, char *argv[])
 
   hwloc_topology_destroy(topology);
 
-  if (!argc)
-    return EXIT_SUCCESS;
+  if (0 == argc) {
+    fprintf(stderr, "%s: nothing to do!\n", orig_argv[0]);
+    return EXIT_FAILURE;
+  }
 
   ret = execvp(argv[0], argv);
   if (ret && verbose)
