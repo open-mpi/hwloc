@@ -134,14 +134,14 @@ int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
 
     if (accum & accum_mask) {
       /* print the whole subset if not empty */
-      res = hwloc_snprintf(tmp, size, needcomma ? "," HWLOC_PRIxCPUSUBSET : HWLOC_PRIxCPUSUBSET,
+        res = hwloc_snprintf(tmp, size, needcomma ? ",0x" HWLOC_PRIxCPUSUBSET : "0x" HWLOC_PRIxCPUSUBSET,
 		     (accum & accum_mask) >> (HWLOC_BITS_PER_LONG - HWLOC_CPUSET_SUBSTRING_SIZE));
       needcomma = 1;
     } else if (i == -1 && accumed == HWLOC_CPUSET_SUBSTRING_SIZE) {
       /* print a single 0 to mark the last subset */
-      res = hwloc_snprintf(tmp, size, needcomma ? ",0" : "0");
+      res = hwloc_snprintf(tmp, size, needcomma ? ",0x0" : "0x0");
     } else if (needcomma) {
-      res = hwloc_snprintf(tmp, size, ",");
+      res = hwloc_snprintf(tmp, size, ",0x");
     } else {
       res = 0;
     }
