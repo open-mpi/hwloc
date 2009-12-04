@@ -141,7 +141,7 @@ int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
       /* print a single 0 to mark the last subset */
       res = hwloc_snprintf(tmp, size, needcomma ? ",0x0" : "0x0");
     } else if (needcomma) {
-      res = hwloc_snprintf(tmp, size, ",0x");
+      res = hwloc_snprintf(tmp, size, ",");
     } else {
       res = 0;
     }
