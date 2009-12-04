@@ -200,7 +200,37 @@ indexes for location values.
 .\"    Examples Section
 .\" **************************
 .SH EXAMPLES
-Need to fill in some examples here...
+.PP
+To run the echo command on the first logical processor of the second socket:
+.
+
+  hwloc-bind socket:1.proc:0 -- echo hello
+
+To run on either the first core of the second socket or the second core of the first socket:
+.
+
+  hwloc-bind socket:1.core:0 socket:0.core:1 -- echo hello
+
+To run on the three first sockets on the second and third nodes:
+.
+
+  hwloc-bind node:1-2.socket:1:3 -- echo hello
+
+To run on odd cores within even sockets:
+.
+
+  hwloc-bind socket:even.core:odd -- echo hello
+
+To run on the first socket, except on its second and fifth cores:
+.
+
+  hwloc-bind socket:0 ~socket:0.core:1 ~socket:0.core:4 -- echo hello
+
+To run on a specific cpuset (that may be generated with hwloc-mask):
+.
+
+  hwloc-bind fffc10 -- echo hello
+
 .
 .\" **************************
 .\"    Return value section
