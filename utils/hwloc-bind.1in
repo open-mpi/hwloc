@@ -1,25 +1,225 @@
 .\" -*- nroff -*-
+.\" Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 .TH HWLOC-BIND "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
-hwloc-bind \- Bind a command to given objects or cpu masks
+hwloc-bind \- Launch a command that is bound to specific processors
+and/or memory.
+.
+.\" **************************
+.\"    Synopsis Section
+.\" **************************
 .SH SYNOPSIS
-.B topobind
-[\fIoptions\fR] \fI<location> -- command \fR...
-.SH DESCRIPTION
-.IP
-<location> may be a space\-separated list of cpusets or objects
-.IP
-as supported by the hwloc\-mask utility.
+.
+.B hwloc-bind
+[\fIoptions\fR] \fI<location1> [<location2> [...]] [--] <command> \fR...
+.
+.\" **************************
+.\"    Options Section
+.\" **************************
 .SH OPTIONS
+.
+See below for a description of valid <location> formats.
+.TP 10
+\fB\-\-get\fR
+Report the current bindings.
 .TP
 \fB\-\-single\fR
-bind on a single CPU to prevent migration
+Bind on a single CPU to prevent migration.
 .TP
 \fB\-\-strict\fR
-require strict binding
+Require strict binding.
 .TP
 \fB\-v\fR
-verbose messages
+Verbose output.
 .TP
 \fB\-\-version\fR
-report version and exit
+Report version and exit.
+.
+.\" **************************
+.\"    Description Section
+.\" **************************
+.SH DESCRIPTION
+.
+hwloc-bind execs an executable (with optional command line arguments)
+that is bound to the specified location (or list of locations).  Upon
+successful execution, hwloc-bind simply sets bindings and then execs
+the executable over itself.
+.
+.SS Location Specification
+.
+Locations are specified as tuples of hwloc "objects" and an associated
+index, specified in the general form:
+.IR object:index .
+Multiple locations can be specified on the hwloc-bind command line
+(delimited by whitespace); the first token of the execution command is
+assumed to either follow "--" (if specified) or the first token that
+is unrecognized as a location.
+.
+.SS Objects
+.
+.PP
+Objects can be any of the following strings (listed from "biggest" to "smallest"):
+.
+.TP 10
+.B system
+The entire system that hwloc can see.  This is usually a single
+computer / server (and is therefore usually a synonym for
+.BR machine ), 
+but it can also be a cluster of machines that comprise an overall
+single system image (SSI), such as Kerrighed.
+.
+.TP
+.B machine
+A set of processors and memory.
+.
+.TP
+.B node
+A NUMA node; a set of processors around memory which the processors
+can directly access.
+.
+.TP
+.B socket
+Typically a physical package or chip, it is a grouping of one or more
+processors.
+.
+.TP
+.B cache
+.B JMS This probably should not be listed...?
+Memory that is immediately local to a processor, such as the L1, L2,
+and L3 caches.
+.
+.TP
+.B core
+A single, physical processing unit which may still contain multiple
+logical processors, such as hardware threads.
+.
+.TP
+.B proc
+Short for 
+.I processor 
+(not 
+.IR process !).  
+The smallest physical execution unit that hwloc recognizes.  For
+example, there may be multiple procs on a core (e.g.,
+hardware threads).
+.
+.PP
+Finally, note that an object can be denoted by its numeric "depth" in
+the topology graph.  See the Examples section for more information.
+.
+.SS Indexes
+Indexes are integer values that uniquely specify a given object of a
+specific type.  Indexes can be expressed either as
+.I logical
+values or
+.I physical 
+values.  
+While
+.B hwloc-bind only accepts logical indexes as
+.BR input ,
+both logical and physical indexes are described on this man page for
+completeness.
+.
+.PP
+.I Logical
+indexes are relative to the object order in the output from the
+lstopo command.  They always start with 0 and increment by 1 for each
+successive object.
+.
+.PP
+.I Physical 
+indexes are how the operating system refers to objects.  Note that
+while physical indexes are non-negative integer values, the hardware
+and/or operating system may choose arbitrary values -- they need not
+start with 0, and successive objects may not have consecutive values.
+.
+.PP
+For example, if the first few lines of lstopo output are the
+following:
+.
+
+  System(32GB)
+    Node#0(16GB) + Socket#0 + L3(16MB)
+      L2(128KB) + L1(32KB) + Core#0
+        P#3
+        P#7
+      L2(128KB) + L1(32KB) + Core#1
+        P#3
+        P#7
+
+The first processor on the second core is logically number 2 (i.e.,
+logically the 3rd processor, starting from 0).  Its physical index is
+3, but note that another processor
+.I also 
+has a physical index of 3.  Hence, physical indexes may only be
+relevant within the scope of their parent (or set of grandparents).
+In this example, to uniquely identify logical processor 2 with
+physical indexes, you must specify (at a minimum) both a core and a
+processor: core 1, processor 3.
+.PP
+Index values, regardless of whether they are logical or physical, can
+be expressed in several different forms (where X, Y, and N are
+positive integers):
+.
+.TP 10
+.B X
+The object with index value X.
+.
+.TP
+.B X-Y
+All the objects with index values >= X and <= Y.
+.
+.TP
+.B X-
+All the objects with index values >= X.
+.
+.TP
+.B X:N
+N objects starting with index X, possibly wrapping around the end of
+the level.
+.
+.TP
+.B all
+A special index value indicating all valid index values.
+.
+.TP
+.B odd
+A special index value indicating all valid odd index values.
+.
+.TP
+.B even
+A special index value indicating all valid even index values.
+.
+.PP
+hwloc-bind accepts 
+.I logical 
+indexes for location values.
+.
+.\" **************************
+.\"    Examples Section
+.\" **************************
+.SH EXAMPLES
+Need to fill in some examples here...
+.
+.\" **************************
+.\"    Return value section
+.\" **************************
+.SH RETURN VALUE
+Upon successful execution, hwloc-bind execs the command over itself.
+The return value is therefore whatever the return value of the command
+is.
+.
+.PP
+hwloc-bind will return 0 if there was no command to execute.
+hwloc-bind will return nonzero if any kind of error occurs, such as
+failure to parse the command line, failure to retrieve process
+bindings, etc.
+.
+.\" **************************
+.\"    See also section
+.\" **************************
+.SH SEE ALSO
+.
+.ft R
+lstopo(1), hwloc-mask(1), hwloc-distrib(1)
+.sp
