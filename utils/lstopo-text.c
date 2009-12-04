@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#define _TPARM_COMPAT
 #include <hwloc.h>
 #include <private/config.h>
 
