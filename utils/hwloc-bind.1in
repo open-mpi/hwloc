@@ -45,13 +45,56 @@ that is bound to the specified location (or list of locations).  Upon
 successful execution, hwloc-bind simply sets bindings and then execs
 the executable over itself.
 .
+.
+.SS Definitions
+Hwloc has some specific definitions for terms that are used in this
+man page and other hwloc documentation.
+.
+.TP 5
+.B Hwloc CPU set:
+A set of processors included in an hwloc object.  The hwloc definition
+of "CPU set" does not carry any the same connotations as Linux's "CPU
+set" (e.g., process affinity, etc.).
+.
+.TP
+.B Linux CPU set:
+See http://www.mjmwired.net/kernel/Documentation/cpusets.txt for a
+discussion of Linux CPU sets.  A
+super-short-ignoring-many-details description (taken from that page)
+is:
+.
+.\" Force a paragraph break, but keep the indentation
+.TP
+\ 
+.
+ "Cpusets provide a mechanism for assigning a set of CPUs and Memory
+Nodes to a set of tasks."
+.
+.TP
+.B Linux Cgroup:
+See http://www.mjmwired.net/kernel/Documentation/cgroups.txt for a
+discussion of Linux control groups.  A
+super-short-ignoring-many-details description (taken from that page)
+is:
+.
+.\" Force a paragraph break, but keep the indentation
+.TP
+\ 
+ "Control Groups provide a mechanism for aggregating/partitioning sets
+of tasks, and all their future children, into hierarchical groups
+with specialized behaviour."
+.
+.PP
+To be clear, hwloc supports all of the above concepts.  It is simply
+worth noting that they are 3 different things.
+.
 .SS Location Specification
 .
 Locations refer to specific regions within a topology.  Before reading
 the rest of this man page, it may be useful to read lstopo(1) and/or
 run lstopo on your machine to see the reported topology tree.  Seeing
 and understanding a topology tree will definitely help in
-understanding the concepts below.
+understanding the concepts that are discussed below.
 .
 .PP
 Locations can be specified in multiple ways:
@@ -234,7 +277,6 @@ A special index value indicating all valid even index values.
 hwloc-bind accepts 
 .I logical 
 indexes for location values.
-.
 .\" **************************
 .\"    Examples Section
 .\" **************************
@@ -256,7 +298,7 @@ the second core of the first socket:
 
 Note that binding the "echo" command to multiple processors is
 probably meaningless (because "echo" is likely implemented as a
-single-threaded application); this example just serves to show what
+single-threaded application); these examples just serve to show what
 hwloc-bind can do.
 .
 .PP
@@ -277,7 +319,10 @@ nesting hwloc-bind invocations to set a binding and then report it:
 
     hwloc-bind node:1.socket:2 hwloc-bind --get
 
-will return "0x00004444,0x44000000".
+On one of the hwloc developer's machines, this example
+.
+reports "0x00004444,0x44000000".  The mask reported on your machine
+may be different.
 .
 .PP
 Locations may also be specified as a hex bit mask (typically generated
