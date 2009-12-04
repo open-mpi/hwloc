@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #ifdef HAVE_SETLOCALE
 #include <locale.h>
@@ -219,7 +220,7 @@ text_start(void *output, int width, int height)
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
 /* Standard terminfo strings */
-static char *oc, *initc = NULL, *initp = NULL, *bold, *normal, *setaf, *setab, *setf, *setb, *scp;
+static char *oc, *initc = NULL, *initp = NULL, *bold, *normal, *setaf, *setab, *setf, *setb, *scp, *iprog, *is1, *is2, *ifile, *is3;
 
 /* Set text color to bright white or black according to the background */
 static int set_textcolor(int rr, int gg, int bb)
@@ -573,6 +574,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
 
     if (term) {
       int colors, pairs;
+def_shell_mode();
 
       /* reset colors */
       if ((oc = tgetstr("oc", NULL)))
@@ -582,6 +584,11 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
       pairs = tgetnum("pa");
       initp = tgetstr("Ip", NULL);
       scp = tgetstr("sp", NULL);
+      iprog = tgetstr("ip", NULL);
+      is1 = tgetstr("i1", NULL);
+      is2 = tgetstr("is", NULL);
+      ifile = tgetstr("if", NULL);
+      is3 = tgetstr("i3", NULL);
       if (pairs <= 16 || !initp || !scp) {
 	/* Can't use pairs to define our own colors */
 	initp = NULL;
@@ -638,11 +645,25 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
       putcharacter(disp->cells[j][i].c, output);
     }
 #ifdef HWLOC_HAVE_LIBTERMCAP
-    /* Keep the rest of the line black */
+    /* Keep the rest of the line as usual */
     if (term) {
-      lfr = lfg = lfb = 0xff;
-      lbr = lbg = lbb = 0;
-      set_color(lfr, lfg, lfb, lbr, lbg, lbb);
+      if (iprog)
+        system(iprog);
+      if (is1)
+        tputs(is1, 1, myputchar);
+      if (is2)
+        tputs(is2, 1, myputchar);
+      if (ifile) {
+        int fd = open(ifile, O_RDONLY);
+        unsigned char c;
+        while (read(fd, &c, 1) == 1)
+          myputchar(c);
+        close(fd);
+      }
+      if (is3)
+        tputs(is3, 1, myputchar);
+      lfr = lfg = lfb = -1;
+      lbr = lbg = lbb = -1;
     }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
     putcharacter('\n', output);
