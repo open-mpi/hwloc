@@ -340,11 +340,14 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t l
   if (hwloc_cpuset_isset(hwloc_topology_get_online_cpuset(topology), level->os_index))
     if (!hwloc_cpuset_isset(hwloc_topology_get_allowed_cpuset(topology), level->os_index))
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
-    else
-      if (hwloc_cpuset_isset(hwloc_get_cpubind(topology, 0), level->os_index))
+    else {
+      hwloc_cpuset_t bind = hwloc_get_cpubind(topology, 0);
+      if (bind && hwloc_cpuset_isset(bind, level->os_index))
         methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);
       else
         methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
+      hwloc_cpuset_free(bind);
+    }
   else
     methods->box(output, OFFLINE_R_COLOR, OFFLINE_G_COLOR, OFFLINE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
