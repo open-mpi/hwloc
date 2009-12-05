@@ -33,7 +33,8 @@ projects are now deprecated.</em> The first hwloc release is essentially a
 "re-branding" of the libtopology code base, but with both a few
 genuinely new features and a few PLPA-like features added in.  More
 new features and more PLPA-like features will be added to hwloc over
-time.
+time. See \ref switchfromplpa for more details about converting
+your application from PLPA to hwloc.
 
 hwloc supports the following operating systems:
 
@@ -341,7 +342,9 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
 </div>
 \endhtmlonly
 
-\section glossary Glossary
+
+
+\page glossary Glossary
 
 <dl>
 
@@ -409,5 +412,86 @@ sockets (with no hardware threads); thus, a topology with 4 levels.
 
 It should be noted that for Processor objects, the logical index -- as
 computed linearly by hwloc -- is not the same as the OS index.
+
+
+
+\page tools Command-line tools 
+
+hwloc comes with an extensive C programming interface and several
+command line utilities. Each of them is fully documented in its
+own manual page.
+
+<dt>lstopo (also known as hwloc-info and hwloc-ls)</dt>
+  <dd>displays the hierarchical topology of the current system
+  in a graphic or textual outputs. It may also display other system
+  topologies thanks to XML input files for instance.
+  </dd>
+
+<dt>hwloc-bind</dt>
+  <dd>lets you bind processes to specific hardware objects
+  through a flexible syntax. It may also retrieve the current binding.
+  </dd>
+
+<dt>hwloc-mask</dt>
+  <dd>generates cpuset strings from given hardware objects
+  with the ability to aggregate them, intersect them, and more.
+  These cpuset strings may for instance be passed to hwloc-bind for binding.
+  hwloc-mask may also generate list of logical processors or NUMA nodes
+  that are convenient to pass to some external tools such as taskset or
+  numactl.
+  </dd>
+
+<dt>hwloc-distrib</dt>
+  <dd>hwloc-distrib generates a set of cpuset strings that are uniformly
+  distributed across the machine for the given number of processes.
+  These strings may be used with hwloc-bind to run processes so as to
+  maximize their memory bandwidth.
+  </dd>
+
+
+
+\page envvar Environment variables
+
+The behavior of the hwloc library and tools may be tuned thanks to the
+following environment variables.
+
+<dt>HWLOC_XMLFILE=/path/to/file.xml</dt>
+  <dd>enforces the discovery from the given XML file as if
+  hwloc_topology_set_xml() had been called.
+  This file may have been generated earlier with lstopo file.xml.
+  For conveniency, this backend provides empty binding hooks which just
+  return success.  To have hwloc still actually call OS-specific hooks,
+  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
+  the loaded file is really the underlying system.
+  </dd>
+
+<dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
+  <dd>switches to reading the topology from the specified
+  Linux filesystem root instead of the main file-system root, as if
+  hwloc_topology_set_fsroot() had been called.
+  Not using the main file-system root causes hwloc_topology_is_thissystem()
+  to return 0.
+  For conveniency, this backend provides empty binding hooks which just
+  return success.  To have hwloc still actually call OS-specific hooks,
+  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
+  the loaded file is really the underlying system.
+  </dd>
+
+<dt>HWLOC_THISSYSTEM=1</dt>
+  <dd>enforces the return value of hwloc_topology_is_thissystem().
+  It means that it makes hwloc assume that the selected backend provides the
+  topology for the system on which we are running, even if it is not the
+  OS-specific backend but the XML backend for instance.
+  This means making the binding functions actually call the OS-specific
+  system calls and really do binding, while the XML backend would otherwise
+  provide empty hooks just returning success.
+  This can be used for efficiency reasons to first detect the topology once,
+  save it to an XML file, and quickly reload it later through the XML
+  backend, but still having binding functions actually do bind.
+
+
+\page switchfromplpa How to switch from PLPA to hwloc?
+
+to do
 
 */
