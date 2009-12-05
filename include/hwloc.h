@@ -255,7 +255,8 @@ extern void hwloc_topology_check(hwloc_topology_t topology);
  * file as if hwloc_topology_set_xml() had been called.
  * HWLOC_FSROOT switches to reading the topology from the specified Linux
  * filesystem root as if hwloc_topology_set_fsroot() had been called.
- * Finally, HWLOC_THISSYSTEM enforces the value of the is_thissystem field.
+ * Finally, HWLOC_THISSYSTEM enforces the return value of
+ * hwloc_topology_is_thissystem().
  *
  * @{
  */
@@ -299,9 +300,9 @@ enum hwloc_topology_flags_e {
   /* \brief Assume that the selected backend provides the topology for the
    * system on which we are running.
    *
-   * This forces is_thissystem to 1, i.e. makes hwloc assume that the selected
-   * backend provides the topology for the system on which we are running, even
-   * if it is not the OS-specific backend but the XML backend for instance.
+   * This forces hwloc_topology_is_thissystem to return 1, i.e. makes hwloc assume that
+   * the selected backend provides the topology for the system on which we are running,
+   * even if it is not the OS-specific backend but the XML backend for instance.
    * This means making the binding functions actually call the OS-specific
    * system calls and really do binding, while the XML backend would otherwise
    * provide empty hooks just returning success.
@@ -327,7 +328,7 @@ extern int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long fl
  * On Linux system, use sysfs and procfs files as if they were mounted on the given
  * \p fsroot_path instead of the main file-system root. Setting the environment
  * variable HWLOC_FSROOT may also result in this behavior.
- * Not using the main file-system root causes hwloc_topology_is_thissystem field
+ * Not using the main file-system root causes hwloc_topology_is_thissystem()
  * to return 0.
  *
  * \note For conveniency, this backend provides empty binding hooks which just
