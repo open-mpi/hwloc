@@ -3,7 +3,6 @@
  * See COPYING in top-level directory.
  */
 
-#define _TPARM_COMPAT
 #include <hwloc.h>
 #include <private/config.h>
 
@@ -264,21 +263,21 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
   /* And now output magic string to TTY */
   if (set_a_foreground) {
     /* foreground */
-    if ((toput = tparm(set_a_foreground, textcolor)))
+    if ((toput = tparm(set_a_foreground, textcolor, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
     /* background */
-    if ((toput = tparm(set_a_background, color)))
+    if ((toput = tparm(set_a_background, color, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   } else if (set_foreground) {
     /* foreground */
-    if ((toput = tparm(set_foreground, textcolor)))
+    if ((toput = tparm(set_foreground, textcolor, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
     /* background */
-    if ((toput = tparm(set_background, color)))
+    if ((toput = tparm(set_background, color, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   } else if (set_color_pair) {
     /* pair */
-    if ((toput = tparm(set_color_pair, color)))
+    if ((toput = tparm(set_color_pair, color, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   }
 }
@@ -297,10 +296,10 @@ text_declare_color(void *output, int r, int g, int b)
   char *toput;
 
   if (initc) {
-    if ((toput = tparm(initc, color + 16, rr, gg, bb)))
+    if ((toput = tparm(initc, color + 16, rr, gg, bb, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   } else if (initp) {
-    if ((toput = tparm(initp, color + 16, 0, 0, 0, rr, gg, bb)))
+    if ((toput = tparm(initp, color + 16, 0, 0, 0, rr, gg, bb, 0, 0)))
       tputs(toput, 1, myputchar);
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
