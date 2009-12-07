@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#define _TPARM_COMPAT
 #include <hwloc.h>
 #include <private/config.h>
 
@@ -221,18 +222,18 @@ text_start(void *output, int width, int height)
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
 /* Standard terminfo strings */
-static char *oc, *initc = NULL, *initp = NULL, *bold, *normal, *setaf, *setab, *setf, *setb, *scp;
+static char *initc = NULL, *initp = NULL;
 
 /* Set text color to bright white or black according to the background */
 static int set_textcolor(int rr, int gg, int bb)
 {
   if (!initc && !initp && rr + gg + bb < 2) {
-    if (bold)
-      tputs(bold, 1, myputchar);
+    if (enter_bold_mode)
+      tputs(enter_bold_mode, 1, myputchar);
     return 7;
   } else {
-    if (normal)
-      tputs(normal, 1, myputchar);
+    if (exit_attribute_mode)
+      tputs(exit_attribute_mode, 1, myputchar);
     return 0;
   }
 }
@@ -253,7 +254,7 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
     int bgg = bg >= 0xe0;
     int bbb = bb >= 0xe0;
 
-    if (setab)
+    if (set_a_background)
       /* ANSI colors */
       color = (brr << 0) | (bgg << 1) | (bbb << 2);
     else
@@ -263,23 +264,23 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
   }
 
   /* And now output magic string to TTY */
-  if (setaf) {
+  if (set_a_foreground) {
     /* foreground */
-    if ((toput = tparm(setaf, textcolor)))
+    if ((toput = tparm(set_a_foreground, textcolor)))
       tputs(toput, 1, myputchar);
     /* background */
-    if ((toput = tparm(setab, color)))
+    if ((toput = tparm(set_a_background, color)))
       tputs(toput, 1, myputchar);
-  } else if (setf) {
+  } else if (set_foreground) {
     /* foreground */
-    if ((toput = tparm(setf, textcolor)))
+    if ((toput = tparm(set_foreground, textcolor)))
       tputs(toput, 1, myputchar);
     /* background */
-    if ((toput = tparm(setb, color)))
+    if ((toput = tparm(set_background, color)))
       tputs(toput, 1, myputchar);
-  } else if (scp) {
+  } else if (set_color_pair) {
     /* pair */
-    if ((toput = tparm(scp, color)))
+    if ((toput = tparm(set_color_pair, color)))
       tputs(toput, 1, myputchar);
   }
 }
@@ -574,35 +575,23 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
     term = !setupterm(NULL, STDOUT_FILENO, NULL);
 
     if (term) {
-      int colors, pairs;
-
       /* reset colors */
-      if ((oc = tgetstr("oc", NULL)))
-	tputs(oc, 1, myputchar);
+      if (orig_colors)
+        tputs(orig_colors, 1, myputchar);
 
       /* Get terminfo(5) strings */
-      pairs = tgetnum("pa");
-      initp = tgetstr("Ip", NULL);
-      scp = tgetstr("sp", NULL);
-      if (pairs <= 16 || !initp || !scp) {
-	/* Can't use pairs to define our own colors */
+      initp = initialize_pair;
+      if (max_pairs <= 16 || !initp || !set_color_pair) {
+	/* Can't use max_pairs to define our own colors */
 	initp = NULL;
-	colors = tgetnum("Co");
-	if (colors > 16) {
-	  if (tgetflag("cc"))
-	    initc = tgetstr("Ic", NULL);
-	}
-	setaf = tgetstr("AF", NULL);
-	setab = tgetstr("AB", NULL);
-	setf = tgetstr("Sf", NULL);
-	setb = tgetstr("Sb", NULL);
+	if (max_colors > 16)
+	  if (can_change)
+            initc = initialize_color;
       }
       if (tgetflag("lhs"))
 	/* Sorry, I'm lazy to convert colors and I don't know any terminal
 	 * using LHS anyway */
 	initc = initp = 0;
-      bold = tgetstr("md", NULL);
-      normal = tgetstr("me", NULL);
     }
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */

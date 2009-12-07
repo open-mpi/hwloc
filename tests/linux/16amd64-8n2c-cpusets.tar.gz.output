@@ -60,8 +60,8 @@ depth 0:	1 System (type #0)
     depth 4:	10 Caches (type #4)
      depth 5:	10 Cores (type #5)
       depth 6:	10 Procs (type #6)
-6 processors not represented in topology: 00000f90
-1 processors offline: 00000010
-5 processors online but not allowed: 00000f80
-1 processors allowed but not online: 00000010
+6 processors not represented in topology: 0x00000f90
+1 processors offline: 0x00000010
+5 processors online but not allowed: 0x00000f80
+1 processors allowed but not online: 0x00000010
 Topology not from this system

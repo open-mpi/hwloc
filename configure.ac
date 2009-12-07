@@ -279,15 +279,18 @@ AC_CHECK_HEADERS([locale.h], [
 AC_CHECK_HEADERS([langinfo.h], [
   AC_CHECK_FUNCS([nl_langinfo])
 ])
+old_LIBS="$LIBS"
+LIBS=
 AC_CHECK_HEADERS([curses.h], [
   AC_CHECK_HEADERS([term.h], [
-    AC_CHECK_LIB([termcap], [tparm], [
-        AC_SUBST([HWLOC_TERMCAP_LIBS], ["-ltermcap"])
+    AC_SEARCH_LIBS([tparm], [termcap curses], [
+        AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
         AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
-                  [Define to 1 if you have `termcap' library (-ltermcap)])
+                  [Define to 1 if you have a library providing the termcap interface])
       ])
   ], [], [[#include <curses.h>]])
 ])
+LIBS="$old_LIBS"
 
 AC_CHECK_TYPES([KAFFINITY,
     		    PROCESSOR_CACHE_TYPE,
@@ -330,6 +333,22 @@ AC_HAVE_HEADERS([mach/mach_host.h])
 AC_HAVE_HEADERS([mach/mach_init.h], [
   AC_CHECK_FUNCS([host_info])
 ])
+
+AC_CHECK_HEADERS([sys/param.h])
+AC_CHECK_HEADERS([sys/sysctl.h], [
+  AC_CHECK_DECLS([CTL_HW, HW_NCPU],,,[[
+  #if HAVE_SYS_PARAM_H
+  #include <sys/param.h>
+  #endif
+  #include <sys/sysctl.h>
+  ]])
+],,[
+  AC_INCLUDES_DEFAULT
+  #if HAVE_SYS_PARAM_H
+  #include <sys/param.h>
+  #endif
+])
+AC_CHECK_FUNCS([sysctl sysctlbyname])
 
 case ${target} in
   *-*-mingw*|*-*-cygwin*)

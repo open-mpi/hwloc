@@ -29,8 +29,44 @@
 #include <mach/mach_host.h>
 #endif
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+
 #ifdef HWLOC_WIN_SYS
 #include <windows.h>
+#endif
+
+#ifdef HAVE_SYSCTLBYNAME
+int hwloc_get_sysctlbyname(const char *name, int *ret)
+{
+  int n;
+  size_t size = sizeof(n);
+  if (sysctlbyname(name, &n, &size, NULL, 0))
+    return -1;
+  if (size != sizeof(n))
+    return -1;
+  *ret = n;
+  return 0;
+}
+#endif
+
+#ifdef HAVE_SYSCTL
+int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
+{
+  int n;
+  size_t size = sizeof(n);
+  if (sysctl(name, namelen, &n, &size, NULL, 0))
+    return -1;
+  if (size != sizeof(n))
+    return -1;
+  *ret = n;
+  return 0;
+}
 #endif
 
 /* Return the OS-provided number of processors.  Unlike other methods such as
@@ -52,6 +88,17 @@ hwloc_fallback_nbprocessors(void) {
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
   return info.avail_cpus;
+#elif HAVE_SYSCTLBYNAME
+  int n;
+  if (hwloc_get_sysctlbyname("hw.ncpu", &n))
+    return 1;
+  return n;
+#elif HAVE_SYSCTL && HAVE_DECL__CTL_HW && HAVE_DECL__HW_NCPU
+  static int name[2] = {CTL_HW, HW_NPCU};
+  int n;
+  if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name)), &n)
+    return 1;
+  return n;
 #elif defined(HWLOC_WIN_SYS)
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);

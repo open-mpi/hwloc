@@ -135,11 +135,16 @@ int main(int argc, char *argv[])
 
   hwloc_topology_destroy(topology);
 
-  if (!argc)
-    return EXIT_SUCCESS;
+  if (0 == argc) {
+    fprintf(stderr, "%s: nothing to do!\n", orig_argv[0]);
+    return EXIT_FAILURE;
+  }
 
   ret = execvp(argv[0], argv);
-  if (ret && verbose)
-    perror("execvp");
+  if (ret) {
+      fprintf(stderr, "%s: Failed to launch executable \"%s\"\n", 
+              orig_argv[0], argv[0]);
+      perror("execvp");
+  }
   return EXIT_FAILURE;
 }

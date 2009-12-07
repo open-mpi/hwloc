@@ -207,6 +207,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_andset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clearset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_compar.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_compar_first.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_fill.3 \
@@ -227,6 +228,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_isset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_iszero.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_last.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_notset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_orset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
@@ -249,7 +251,10 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_child_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_get_offline_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_allowed_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_complete_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_online_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_topology_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_depth.3 \

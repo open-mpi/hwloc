@@ -20,18 +20,6 @@
 #include <private/private.h>
 #include <private/debug.h>
 
-static int get_sysctl(const char *name, int *res)
-{
-  int n;
-  size_t size = sizeof(n);
-  if (sysctlbyname(name, &n, &size, NULL, 0))
-    return -1;
-  if (size != sizeof(n))
-    return -1;
-  *res = n;
-  return 0;
-}
-
 void
 hwloc_look_darwin(struct hwloc_topology *topology)
 {
@@ -41,18 +29,18 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   size_t size;
 
-  if (get_sysctl("hw.ncpu", &nprocs))
+  if (hwloc_get_sysctlbyname("hw.ncpu", &nprocs))
     return;
 
   hwloc_debug("%d procs\n", nprocs);
 
-  if (!get_sysctl("hw.packages", &npackages)) {
+  if (!hwloc_get_sysctlbyname("hw.packages", &npackages)) {
     int cores_per_package;
     int logical_per_package;
 
     hwloc_debug("%d packages\n", npackages);
 
-    if (get_sysctl("machdep.cpu.logical_per_package", &logical_per_package))
+    if (hwloc_get_sysctlbyname("machdep.cpu.logical_per_package", &logical_per_package))
       /* Assume the trivia.  */
       logical_per_package = nprocs / npackages;
 
@@ -71,7 +59,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, obj);
     }
 
-    if (!get_sysctl("machdep.cpu.cores_per_package", &cores_per_package)) {
+    if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package)) {
       hwloc_debug("%d cores per package\n", cores_per_package);
 
       assert(!(logical_per_package % cores_per_package));
