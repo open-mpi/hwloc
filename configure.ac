@@ -334,6 +334,22 @@ AC_HAVE_HEADERS([mach/mach_init.h], [
   AC_CHECK_FUNCS([host_info])
 ])
 
+AC_CHECK_HEADERS([sys/param.h])
+AC_CHECK_HEADERS([sys/sysctl.h], [
+  AC_CHECK_DECLS([CTL_HW, HW_NCPU],,,[[
+  #if HAVE_SYS_PARAM_H
+  #include <sys/param.h>
+  #endif
+  #include <sys/sysctl.h>
+  ]])
+],,[
+  AC_INCLUDES_DEFAULT
+  #if HAVE_SYS_PARAM_H
+  #include <sys/param.h>
+  #endif
+])
+AC_CHECK_FUNCS([sysctl sysctlbyname])
+
 case ${target} in
   *-*-mingw*|*-*-cygwin*)
     hwloc_pid_t=HANDLE
