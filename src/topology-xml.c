@@ -54,19 +54,13 @@ hwloc__process_root_attr(struct hwloc_topology *topology,
   if (!strcmp(name, "complete_cpuset")) {
     hwloc_cpuset_free(topology->complete_cpuset);
     topology->complete_cpuset = hwloc_cpuset_from_string(value);
-  }
-
-  if (!strcmp(name, "online_cpuset")) {
+  } else if (!strcmp(name, "online_cpuset")) {
     hwloc_cpuset_free(topology->online_cpuset);
     topology->online_cpuset = hwloc_cpuset_from_string(value);
-  }
-
-  if (!strcmp(name, "allowed_cpuset")) {
+  } else if (!strcmp(name, "allowed_cpuset")) {
     hwloc_cpuset_free(topology->allowed_cpuset);
     topology->allowed_cpuset = hwloc_cpuset_from_string(value);
-  }
-
-  else
+  } else
     fprintf(stderr, "ignoring unknown root attribute %s\n", name);
 }
 
