@@ -575,10 +575,10 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
       putcharacter(disp->cells[j][i].c, output);
     }
 #ifdef HWLOC_HAVE_LIBTERMCAP
-    /* Keep the rest of the line black */
-    if (term) {
-      lr = lg = lb = 0;
-      set_color(lr, lg, lb);
+    /* Keep the rest of the line as default */
+    if (term && orig_pair) {
+      lr = lg = lb = -1;
+      tputs(orig_pair, 1, myputchar);
     }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
     putcharacter('\n', output);
