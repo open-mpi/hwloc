@@ -460,6 +460,9 @@ AM_CONDITIONAL([HAVE_XML], [test "x$enable_xml" = "xyes"])
 PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [:])
 
 # disable C++, F77, Java and Windows Resource Compiler support
+m4_ifdef([LT_PREREQ], [], [
+errprint([error: you must have Libtool 2.2.6 or a more recent version
+])])
 LT_PREREQ([2.2.6])
 LT_INIT
 LT_LANG([C])
