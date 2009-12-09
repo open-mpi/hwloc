@@ -14,6 +14,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9 (as initially released as "libtopology", then re-branded to "hwloc"
 in v0.9.1).
 
+Version 0.9.4 (unreleased)
+--------------------------
+
+* Fix reseting colors to normal in lstopo -.txt output
+
+
 Version 0.9.3
 -------------
 
