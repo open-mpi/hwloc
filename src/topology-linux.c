@@ -559,7 +559,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
   char *tmp;
 
   /* check whether a cgroup-cpuset is enabled */
-  fd = hwloc_fopen("proc/self/cgroup", "r", fsroot_fd);
+  fd = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
   if (fd) {
     /* find a cpuset line */
 #define CGROUP_LINE_LEN 256
@@ -583,7 +583,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
   }
 
   /* check whether a cpuset is enabled */
-  fd = hwloc_fopen("proc/self/cpuset", "r", fsroot_fd);
+  fd = hwloc_fopen("/proc/self/cpuset", "r", fsroot_fd);
   if (!fd) {
     /* found nothing */
     hwloc_debug("No cgroup or cpuset found\n");
