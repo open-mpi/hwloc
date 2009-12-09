@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
       hwloc_cpuset_asprintf(&str, cpuset[i]);
       printf("%s\n", str);
       free(str);
+      hwloc_cpuset_free(cpuset[i]);
     }
     hwloc_topology_destroy(topology);
   }
