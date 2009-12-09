@@ -22,8 +22,7 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_bind \
 	hwloc_object_userdata \
 	hwloc_synthetic \
-	hwloc_is_thissystem \
-	plpa
+	hwloc_is_thissystem
 
 EXTRA_DIST = 
 
