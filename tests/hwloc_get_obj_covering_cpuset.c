@@ -43,21 +43,21 @@ int main()
 	  GIVEN_CPUSET_STRING, string, EXPECTED_CPUSET_STRING);
   assert(!strcmp(EXPECTED_CPUSET_STRING, string));
   free(string);
-  free(set);
+  hwloc_cpuset_free(set);
 
   set = hwloc_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
   assert(obj == hwloc_get_system_obj(topology));
   fprintf(stderr, "found system as covering object of first+last cpus cpuset %s\n",
 	  GIVEN_LARGESPLIT_CPUSET_STRING);
-  free(set);
+  hwloc_cpuset_free(set);
 
   set = hwloc_cpuset_from_string(GIVEN_TOOLARGE_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
   assert(!obj);
   fprintf(stderr, "found no covering object for too-large cpuset %s\n",
 	  GIVEN_TOOLARGE_CPUSET_STRING);
-  free(set);
+  hwloc_cpuset_free(set);
 
   hwloc_topology_destroy(topology);
 

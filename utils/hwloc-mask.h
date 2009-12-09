@@ -192,7 +192,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
              strlen(arg + 2) == strspn(arg + 2, "0123456789abcdefABCDEF,")) {
     hwloc_cpuset_t newset = hwloc_cpuset_from_string(arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
-    free(newset);
+    hwloc_cpuset_free(newset);
   } else
     err = -1;
 

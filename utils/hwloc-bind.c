@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  free(cpu_set);
+  hwloc_cpuset_free(cpu_set);
 
   hwloc_topology_destroy(topology);
 

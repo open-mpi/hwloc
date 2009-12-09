@@ -170,7 +170,7 @@ hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
 	groupids[j] = groupid;
     hwloc_debug("found complete graph with %u objects with minimal distance %u\n",
 	       size, min_distance);
-    free(closest_objs_set);
+    hwloc_cpuset_free(closest_objs_set);
   }
 
   /* return the last id, since it's also the number of used group ids */
@@ -242,7 +242,7 @@ hwloc_setup_group_from_min_distance_transitivity(unsigned nbobjs,
 	groupids[j] = groupid;
     hwloc_debug("found transitive graph with %u objects with minimal distance %u\n",
 	       size, min_distance);
-    free(closest_objs_set);
+    hwloc_cpuset_free(closest_objs_set);
   }
 
   /* return the last id, since it's also the number of used group ids */
@@ -450,7 +450,7 @@ free_object(hwloc_obj_t obj)
   free(obj->attr);
   free(obj->children);
   free(obj->name);
-  free(obj->cpuset);
+  hwloc_cpuset_free(obj->cpuset);
   free(obj);
 }
 
@@ -1684,7 +1684,7 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
     hwloc_cpuset_clearset(remaining_father_set, father->children[j]->cpuset);
   }
   assert(hwloc_cpuset_iszero(remaining_father_set));
-  free(remaining_father_set);
+  hwloc_cpuset_free(remaining_father_set);
 
   /* checks for all children */
   for(j=1; j<father->arity; j++) {

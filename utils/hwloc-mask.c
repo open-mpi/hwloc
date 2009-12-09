@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
   hwloc_topology_destroy(topology);
 
-  free(set);
+  hwloc_cpuset_free(set);
 
   return EXIT_SUCCESS;
 }

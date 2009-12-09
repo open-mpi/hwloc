@@ -49,7 +49,7 @@ main (int argc, char *argv[])
   obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
   assert(!obj);
 
-  free(set);
+  hwloc_cpuset_free(set);
 
 
 
@@ -69,7 +69,7 @@ main (int argc, char *argv[])
   obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, obj);
   assert(!obj);
 
-  free(set);
+  hwloc_cpuset_free(set);
 
 
 
