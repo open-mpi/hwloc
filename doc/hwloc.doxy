@@ -396,10 +396,12 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
   (i.e., the System object).</dd>
 
 <dt>Logical index</dt>
-  <dd>Index to uniquely identify objects of the same type.  It is
-  generally used to express proximity.  This index is always linear
-  and in the range [0, num_objs_same_type_same_level).  Think of it as
-  ``cousin rank.''</dd>
+  <dd>Index to uniquely identify objects of the same type.  It
+  expresses proximity in a generic way.  This index is always linear
+  and in the range [0, num_objs_same_type_same_level).  Think of it
+  as ``cousin rank.'' The ordering is based on topology first, and
+  then on OS CPU numbers, so it is stable across everything except
+  firmware CPU renumbering.</dd>
 
 </dl>
 
