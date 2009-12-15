@@ -96,6 +96,7 @@ main (int argc, char *argv[])
   char * synthetic = NULL;
   const char * xmlpath = NULL;
   char * fsysroot = NULL;
+  int force_console = 0;
   int opt;
 
   callname = strrchr(argv[0], '/');
@@ -111,11 +112,13 @@ main (int argc, char *argv[])
   while (argc >= 2)
     {
       opt = 0;
-      if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
+      if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose")) {
 	verbose_mode++;
-      else if (!strcmp (argv[1], "-s") || !strcmp (argv[1], "--silent"))
+	force_console = 1;
+      } else if (!strcmp (argv[1], "-s") || !strcmp (argv[1], "--silent")) {
 	verbose_mode--;
-      else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
+	force_console = 1;
+      } else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
       }
@@ -216,7 +219,7 @@ main (int argc, char *argv[])
   if (!filename) {
 #ifdef HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HAVE_X11
-    if (getenv("DISPLAY"))
+    if (!force_console && getenv("DISPLAY"))
       output_x11(topology, NULL, verbose_mode);
     else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
