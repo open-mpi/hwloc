@@ -506,6 +506,10 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
   if ((type1 == HWLOC_OBJ_CACHE && type2 == HWLOC_OBJ_CORE)
       || (type2 == HWLOC_OBJ_CACHE && type1 == HWLOC_OBJ_CORE))
     return HWLOC_TYPE_UNORDERED;
+  /* numa node may be inside socket (AMD Magny-Cours) */
+  if ((type1 == HWLOC_OBJ_NODE && type2 == HWLOC_OBJ_SOCKET)
+      || (type2 == HWLOC_OBJ_SOCKET && type1 == HWLOC_OBJ_NODE))
+    return HWLOC_TYPE_UNORDERED;
 
   return hwloc_get_type_order(type1) - hwloc_get_type_order(type2);
 }
