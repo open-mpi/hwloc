@@ -502,6 +502,11 @@ static hwloc_obj_type_t hwloc_get_order_type(int order)
 
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
+  /* caches may be below cores */
+  if ((type1 == HWLOC_OBJ_CACHE && type2 == HWLOC_OBJ_CORE)
+      || (type2 == HWLOC_OBJ_CACHE && type1 == HWLOC_OBJ_CORE))
+    return HWLOC_TYPE_UNORDERED;
+
   return hwloc_get_type_order(type1) - hwloc_get_type_order(type2);
 }
 
