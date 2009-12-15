@@ -100,8 +100,7 @@ typedef enum {
  * the future.  This function returns less than, equal to, or greater than zero
  * if \p type1 is considered to be respectively higher than, equal to, or deeper
  * than \p type2 in the hierarchy.  If the types can not be compared (because
- * it does not make sense), HWLOC_TYPE_UNORDERED is returned.  Object types
- * containing CPUs can always be compared.
+ * it does not make sense), HWLOC_TYPE_UNORDERED is returned.
  *
  * \note HWLOC_OBJ_SYSTEM will always be the highest, and
  * HWLOC_OBJ_PROC will always be the deepest.
