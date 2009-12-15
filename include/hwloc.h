@@ -98,12 +98,19 @@ typedef enum {
  *
  * Types shouldn't be compared as they are, since newer ones may be added in
  * the future.  This function returns less than, equal to, or greater than zero
- * if \p type1 is considered to be respectively higher than, equal to, or deeper
- * than \p type2 in the hierarchy.  If the types can not be compared (because
- * it does not make sense), HWLOC_TYPE_UNORDERED is returned.
+ * respectively if \p type1 objects usually include \p type2 objects, are the
+ * same as \p type2 objects, or are included in \p type2 objects. If the types
+ * can not be compared (because neither is usually contained in the other),
+ * HWLOC_TYPE_UNORDERED is returned.  Object types containing CPUs can always
+ * be compared (usually, a system contains machines which contain nodes which
+ * contain sockets which contain caches, which contain cores, which contain
+ * processors).
  *
  * \note HWLOC_OBJ_SYSTEM will always be the highest, and
  * HWLOC_OBJ_PROC will always be the deepest.
+ * \note This does not mean that the actual topology will respect that order:
+ * e.g. as of today cores may also contain caches, and sockets may also contain
+ * nodes. This is thus just to be seen as a fallback comparison method.
  */
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2);
 

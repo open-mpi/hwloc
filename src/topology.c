@@ -500,33 +500,17 @@ static hwloc_obj_type_t hwloc_get_order_type(int order)
   return obj_order_type[order];
 }
 
-/* Always try to provide a default comparison */
-static int hwloc_compare_types_default (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
-{
-  return hwloc_get_type_order(type1) - hwloc_get_type_order(type2);
-}
-
-/* Provide a safe comparison */
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
-  /* caches may be below cores */
-  if ((type1 == HWLOC_OBJ_CACHE && type2 == HWLOC_OBJ_CORE)
-      || (type2 == HWLOC_OBJ_CACHE && type1 == HWLOC_OBJ_CORE))
-    return HWLOC_TYPE_UNORDERED;
-  /* numa node may be inside socket (AMD Magny-Cours) */
-  if ((type1 == HWLOC_OBJ_NODE && type2 == HWLOC_OBJ_SOCKET)
-      || (type2 == HWLOC_OBJ_SOCKET && type1 == HWLOC_OBJ_NODE))
-    return HWLOC_TYPE_UNORDERED;
-
-  return hwloc_compare_types_default(type1, type2);
+  return hwloc_get_type_order(type1) - hwloc_get_type_order(type2);
 }
 
 static enum hwloc_type_cmp_e
 hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (hwloc_compare_types_default(obj1->type, obj2->type) > 0)
+  if (hwloc_compare_types(obj1->type, obj2->type) > 0)
     return HWLOC_TYPE_DEEPER;
-  if (hwloc_compare_types_default(obj1->type, obj2->type) < 0)
+  if (hwloc_compare_types(obj1->type, obj2->type) < 0)
     return HWLOC_TYPE_HIGHER;
 
   /* Caches have the same types but can have different depths.  */
@@ -1689,9 +1673,6 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
 
   remaining_father_set = hwloc_cpuset_dup(father->cpuset);
   for(j=0; j<father->arity; j++) {
-    /* check that child type is deeper or equal or uncomparable */
-    int type_order = hwloc_compare_types(father->children[j]->type, father->type);
-    assert(!type_order || type_order > 0 || type_order == HWLOC_TYPE_UNORDERED);
     /* check that child cpuset is included in the father */
     assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
     /* check that children are correctly ordered (see below), empty ones may be anywhere */
