@@ -1673,6 +1673,9 @@ hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
 
   remaining_father_set = hwloc_cpuset_dup(father->cpuset);
   for(j=0; j<father->arity; j++) {
+    /* check that child type is deeper or equal or uncomparable */
+    int type_order = hwloc_compare_types(father->children[j]->type, father->type);
+    assert(!type_order || type_order > 0 || type_order == HWLOC_TYPE_UNORDERED);
     /* check that child cpuset is included in the father */
     assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
     /* check that children are correctly ordered (see below), empty ones may be anywhere */
