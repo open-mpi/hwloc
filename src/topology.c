@@ -500,6 +500,13 @@ static hwloc_obj_type_t hwloc_get_order_type(int order)
   return obj_order_type[order];
 }
 
+/* Always try to provide a default comparison */
+static int hwloc_compare_types_default (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
+{
+  return hwloc_get_type_order(type1) - hwloc_get_type_order(type2);
+}
+
+/* Provide a safe comparison */
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
   /* caches may be below cores */
@@ -511,15 +518,15 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
       || (type2 == HWLOC_OBJ_SOCKET && type1 == HWLOC_OBJ_NODE))
     return HWLOC_TYPE_UNORDERED;
 
-  return hwloc_get_type_order(type1) - hwloc_get_type_order(type2);
+  return hwloc_compare_types_default(type1, type2);
 }
 
 static enum hwloc_type_cmp_e
 hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (hwloc_compare_types(obj1->type, obj2->type) > 0)
+  if (hwloc_compare_types_default(obj1->type, obj2->type) > 0)
     return HWLOC_TYPE_DEEPER;
-  if (hwloc_compare_types(obj1->type, obj2->type) < 0)
+  if (hwloc_compare_types_default(obj1->type, obj2->type) < 0)
     return HWLOC_TYPE_HIGHER;
 
   /* Caches have the same types but can have different depths.  */
