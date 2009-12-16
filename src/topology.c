@@ -686,7 +686,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 
       case HWLOC_OBJ_DIFFERENT:
 	/* Leave CHILD in CUR.  */
-	if (!put && hwloc_cpuset_compar_first(obj->cpuset, child->cpuset) < 0) {
+	if (!put && hwloc_cpuset_compare_first(obj->cpuset, child->cpuset) < 0) {
 	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
 	  *cur_children = obj;
 	  cur_children = &obj->next_sibling;

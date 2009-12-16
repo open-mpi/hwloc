@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -163,19 +164,19 @@ int hwloc_cpuset_last(hwloc_const_cpuset_t set);
  */
 void hwloc_cpuset_singlify(hwloc_cpuset_t set);
 
-/** \brief Compar CPU sets \p set1 and \p set2 using their first set bit.
+/** \brief Compare CPU sets \p set1 and \p set2 using their first set bit.
  *
  * Smaller least significant bit is smaller.
  * The empty CPU set is considered higher than anything.
  */
-int hwloc_cpuset_compar_first(hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
+int hwloc_cpuset_compare_first(hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief Compar CPU sets \p set1 and \p set2 using their last bits.
+/** \brief Compare CPU sets \p set1 and \p set2 using their last bits.
  *
  * Higher most significant bit is higher.
  * The empty CPU set is considered lower than anything.
  */
-int hwloc_cpuset_compar(hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
+int hwloc_cpuset_compare(hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
 /** \brief Compute the weight of CPU set \p set */
 int hwloc_cpuset_weight(hwloc_const_cpuset_t set);

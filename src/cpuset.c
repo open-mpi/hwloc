@@ -516,7 +516,7 @@ void hwloc_cpuset_singlify(struct hwloc_cpuset_s * set)
 	}
 }
 
-int hwloc_cpuset_compar_first(const struct hwloc_cpuset_s * set1, const struct hwloc_cpuset_s * set2)
+int hwloc_cpuset_compare_first(const struct hwloc_cpuset_s * set1, const struct hwloc_cpuset_s * set2)
 {
 	int i;
 
@@ -528,16 +528,16 @@ int hwloc_cpuset_compar_first(const struct hwloc_cpuset_s * set1, const struct h
 		int _ffs2 = hwloc_ffsl(HWLOC_CPUSUBSET_SUBSET(*set2,i));
 		if (!_ffs1 && !_ffs2)
 			continue;
-		/* if both have a bit set, compar for real */
+		/* if both have a bit set, compare for real */
 		if (_ffs1 && _ffs2)
 			return _ffs1-_ffs2;
-		/* one is empty, and it is considered higher, so reverse-compar them */
+		/* one is empty, and it is considered higher, so reverse-compare them */
 		return _ffs2-_ffs1;
 	}
 	return 0;
 }
 
-int hwloc_cpuset_compar(const struct hwloc_cpuset_s * set1, const struct hwloc_cpuset_s * set2)
+int hwloc_cpuset_compare(const struct hwloc_cpuset_s * set1, const struct hwloc_cpuset_s * set2)
 {
 	int i;
 
