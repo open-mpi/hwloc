@@ -208,8 +208,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clearset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr_range.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compar.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compar_first.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare_first.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_fill.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_first.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_begin.3 \
