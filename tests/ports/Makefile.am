@@ -1,10 +1,13 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-include $(top_srcdir)/hwloc.am
+AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
+AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 SRC=$(top_srcdir)/src
 
-if HAVE_LINUX
+if HWLOC_HAVE_LINUX
 check_LTLIBRARIES = libhwloc-ports.la
 endif
 

@@ -33,7 +33,7 @@ typedef enum hwloc_backend_e {
 #ifdef HWLOC_LINUX_SYS
   HWLOC_BACKEND_SYSFS,
 #endif
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
   HWLOC_BACKEND_XML,
 #endif
 } hwloc_backend_t;
@@ -78,12 +78,12 @@ struct hwloc_topology {
       int nbnodes;
     } osf;
 #endif /* HWLOC_OSF_SYS */
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
     struct hwloc_backend_params_xml_s {
       /* xml backend parameters */
       void *doc;
     } xml;
-#endif /* HAVE_XML */
+#endif /* HWLOC_HAVE_XML */
     struct hwloc_backend_params_synthetic_s {
       /* synthetic backend parameters */
 #define HWLOC_SYNTHETIC_MAX_DEPTH 128
@@ -109,11 +109,11 @@ extern int hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char 
 extern void hwloc_backend_sysfs_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_LINUX_SYS */
 
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
 extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath);
 extern void hwloc_look_xml(struct hwloc_topology *topology);
 extern void hwloc_backend_xml_exit(struct hwloc_topology *topology);
-#endif /* HAVE_XML */
+#endif /* HWLOC_HAVE_XML */
 
 #ifdef HWLOC_SOLARIS_SYS
 extern void hwloc_look_solaris(struct hwloc_topology *topology);

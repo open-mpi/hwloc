@@ -166,7 +166,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cp
 
   /* The resulting binding is always strict */
 
-#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
   cpu_set_t *plinux_set;
   unsigned cpu;
   size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
@@ -192,19 +192,19 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cp
     CPU_SET(cpu, &linux_set);
   hwloc_cpuset_foreach_end();
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   return sched_setaffinity(tid, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
 #else /* !CPU_SET */
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   return sched_setaffinity(tid, (void*) &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
 #endif /* !CPU_SET */
 }
 
@@ -215,7 +215,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
   int err;
   /* TODO Kerrighed */
 
-#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
   cpu_set_t *plinux_set;
   unsigned cpu;
   size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
@@ -239,11 +239,11 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
   cpu_set_t linux_set;
   unsigned cpu;
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   err = sched_getaffinity(tid, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   err = sched_getaffinity(tid, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   if (err < 0)
     return NULL;
 
@@ -254,11 +254,11 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
 #else /* !CPU_SET */
   unsigned long mask;
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   err = sched_getaffinity(tid, (void*) &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   err = sched_getaffinity(tid, sizeof(mask), (void*) &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   if (err < 0)
     return NULL;
 
@@ -347,11 +347,11 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
          CPU_SET(cpu, &linux_set);
      hwloc_cpuset_foreach_end();
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
      err = pthread_setaffinity_np(tid, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
      err = pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   }
 #else /* CPU_SET */
   /* Use a separate block so that we can define specific variable
@@ -359,11 +359,11 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
   {
       unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
       err = pthread_setaffinity_np(tid, (void*) &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
       err = pthread_setaffinity_np(tid, sizeof(mask), (void*) &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   }
 #endif /* CPU_SET */
 
@@ -401,11 +401,11 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
      cpu_set_t linux_set;
      unsigned cpu;
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
      err = pthread_getaffinity_np(tid, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
      err = pthread_getaffinity_np(tid, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
      if (err) {
         errno = err;
 	return NULL;
@@ -422,11 +422,11 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
   {
       unsigned long mask;
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
       err = pthread_getaffinity_np(tid, (void*) &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
       err = pthread_getaffinity_np(tid, sizeof(mask), (void*) &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
       if (err) {
         errno = err;
 	return NULL;

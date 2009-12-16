@@ -9,6 +9,7 @@
 #define HWLOC_PRIVATE_CPUSET_H
 
 #include <hwloc/config.h>
+#include <hwloc/rename.h>
 #include <private/config.h>
 
 #include <sys/types.h>

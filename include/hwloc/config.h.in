@@ -1,5 +1,6 @@
-/*
+/* -*- c -*-
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -54,5 +55,12 @@
 #    include <pthread.h>
 #  endif /* hwloc_thread_t */
 #endif /* HWLOC_HAVE_WINDOWS_H */
+
+/* Do we need to transform all the hwloc public symbol names? */
+#undef HWLOC_SYM_TRANSFORM
+
+/* If we are transforming, what are the prefixes? */
+#undef HWLOC_SYM_PREFIX
+#undef HWLOC_SYM_PREFIX_CAPS
 
 #endif /* HWLOC_CONFIG_H */

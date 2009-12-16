@@ -1,11 +1,12 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 #include <private/config.h>
 
-#ifdef HAVE_CAIRO
+#ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
 
 #if CAIRO_HAS_PDF_SURFACE
@@ -20,7 +21,7 @@
 #include <cairo-svg.h>
 #endif /* CAIRO_HAS_SVG_SURFACE */
 
-#ifndef HAVE_X11
+#ifndef HWLOC_HAVE_X11
 /* In case X11 headers aren't availble, forcefully disable Cairo/Xlib.  */
 # undef CAIRO_HAS_XLIB_SURFACE
 # define CAIRO_HAS_XLIB_SURFACE 0

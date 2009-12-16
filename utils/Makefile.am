@@ -1,38 +1,65 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-include $(top_srcdir)/hwloc.am
-include $(top_srcdir)/Makefile.man-page-rules
+AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
+AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-LIBS += $(top_builddir)/src/libhwloc.la
+LIBS += $(HWLOC_top_builddir)/src/libhwloc.la
 
 EXTRA_DIST = test-hwloc-distrib.output
 
+# Only build the utilities if we're building in standalone mode
+if HWLOC_BUILD_STANDALONE
 bin_PROGRAMS = lstopo hwloc-mask hwloc-bind hwloc-distrib
+endif
 
 lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c
-if HAVE_CAIRO
+if HWLOC_HAVE_CAIRO
 lstopo_SOURCES += lstopo-cairo.c
 endif
-if HAVE_XML
+if HWLOC_HAVE_XML
 lstopo_SOURCES += lstopo-xml.c
 endif
-if HAVE_WINDOWS
+if HWLOC_HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
 endif
-lstopo_CFLAGS = $(CAIRO_CFLAGS) $(XML_CFLAGS)
-lstopo_LDADD = $(CAIRO_LIBS) $(XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS)
+lstopo_CFLAGS = $(HWLOC_CAIRO_CFLAGS) $(HWLOC_XML_CFLAGS)
+lstopo_LDADD = $(HWLOC_CAIRO_LIBS) $(HWLOC_XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS)
 
 hwloc_mask_SOURCES = hwloc-mask.c hwloc-mask.h
 
-if HAVE_MINGW32
+if HWLOC_HAVE_MINGW32
 else
 TESTS = test-hwloc-distrib.sh
 endif
 
+# Only install man pages if we're building in standalone mode
+if HWLOC_BUILD_STANDALONE
 man_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-mask.1
 EXTRA_DIST += $(man_pages:.1=.1in)
 nodist_man_MANS = $(man_pages)
+
+.1in.1:
+	@ echo Creating $@ man page...
+	@ sed -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
+	  -e 's/#PACKAGE_VERSION#/@PACKAGE_VERSION@/g' \
+	  -e 's/#HWLOC_DATE#/@HWLOC_RELEASE_DATE@/g' \
+	  > $@ < $<
+
+.3in.3:
+	@ echo Creating $@ man page...
+	@ sed -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
+	  -e 's/#PACKAGE_VERSION#/@PACKAGE_VERSION@/g' \
+	  -e 's/#HWLOC_DATE#/@HWLOC_RELEASE_DATE@/g' \
+	  > $@ < $<
+
+.7in.7:
+	@ echo Creating $@ man page...
+	@ sed -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
+	  -e 's/#PACKAGE_VERSION#/@PACKAGE_VERSION@/g' \
+	  -e 's/#HWLOC_DATE#/@HWLOC_RELEASE_DATE@/g' \
+	  > $@ < $<
 
 install-exec-hook: install-man
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
@@ -46,3 +73,4 @@ uninstall-local:
 
 distclean-local:
 	rm -f $(man_pages)
+endif

@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -8,7 +9,7 @@
 #include <private/private.h>
 #include <private/debug.h>
 
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -453,4 +454,4 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
   xmlCleanupParser();
 }
 
-#endif /* HAVE_XML */
+#endif /* HWLOC_HAVE_XML */

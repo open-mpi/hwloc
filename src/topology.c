@@ -1012,7 +1012,7 @@ hwloc_discover(struct hwloc_topology *topology)
 
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     hwloc_look_synthetic(topology);
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
   } else if (topology->backend_type == HWLOC_BACKEND_XML) {
     hwloc_look_xml(topology);
 #endif
@@ -1401,7 +1401,7 @@ hwloc_backend_exit(struct hwloc_topology *topology)
     hwloc_backend_sysfs_exit(topology);
     break;
 #endif
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
   case HWLOC_BACKEND_XML:
     hwloc_backend_xml_exit(topology);
     break;
@@ -1442,14 +1442,14 @@ hwloc_topology_set_synthetic(struct hwloc_topology *topology, const char *descri
 int
 hwloc_topology_set_xml(struct hwloc_topology *topology, const char *xmlpath)
 {
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
   return hwloc_backend_xml_init(topology, xmlpath);
-#else /* HAVE_XML */
+#else /* HWLOC_HAVE_XML */
   return -1;
-#endif /* !HAVE_XML */
+#endif /* !HWLOC_HAVE_XML */
 }
 
 int
@@ -1549,7 +1549,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
     }
   }
 #endif
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
   {
     char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
     if (xmlpath_env) {
@@ -1567,7 +1567,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_sysfs_init(topology, fsroot_path_env);
   }
 #endif
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
     char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
     if (xmlpath_env)

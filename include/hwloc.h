@@ -19,6 +19,11 @@
 #include <limits.h>
 
 /*
+ * Symbol transforms
+ */
+#include <hwloc/rename.h>
+
+/*
  * Cpuset bitmask definitions
  */
 
@@ -115,7 +120,9 @@ typedef enum {
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2);
 
 /** \brief Value returned by hwloc_compare_types when types can not be compared. */
-#define HWLOC_TYPE_UNORDERED INT_MAX
+enum {
+    HWLOC_TYPE_UNORDERED = INT_MAX
+};
 
 /** @} */
 
@@ -428,8 +435,10 @@ extern unsigned hwloc_topology_get_depth(hwloc_topology_t  __hwloc_restrict topo
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  */
 extern int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
-#define HWLOC_TYPE_DEPTH_UNKNOWN -1 /**< \brief No object of given type exists in the topology. */
-#define HWLOC_TYPE_DEPTH_MULTIPLE -2 /**< \brief Objects of given type exist at different depth in the topology. */
+enum {
+    HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. */
+    HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. */
+};
 
 /** \brief Returns the type of objects at depth \p depth. */
 extern hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth);

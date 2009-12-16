@@ -1,6 +1,9 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-include $(top_srcdir)/hwloc.am
+AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
+AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 # XXX: Add your XML input files here.
 xml_inputs = \
@@ -8,11 +11,11 @@ xml_inputs = \
 	16em64t-4s2c2t.xml \
 	16em64t-4s2c2t-offlines.xml 
 
-if HAVE_XML
+if HWLOC_HAVE_XML
 TESTS = $(xml_inputs)
-else !HAVE_XML
+else !HWLOC_HAVE_XML
 TESTS =
-endif !HAVE_XML
+endif !HWLOC_HAVE_XML
 
 EXTRA_DIST = $(xml_inputs)
 

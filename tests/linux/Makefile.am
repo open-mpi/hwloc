@@ -1,6 +1,9 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-include $(top_srcdir)/hwloc.am
+AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
+AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 # XXX: Add your sysfs tarballs here.
 sysfs_tarballs = \
@@ -61,13 +64,13 @@ sysfs_outputs = \
 		2s390-2c.tar.gz.output \
 		1alpha.tar.gz.output
 
-if HAVE_LINUX
-if HAVE_OPENAT
+if HWLOC_HAVE_LINUX
+if HWLOC_HAVE_OPENAT
 TESTS = $(sysfs_tarballs)
-endif HAVE_OPENAT
-else !HAVE_LINUX
+endif HWLOC_HAVE_OPENAT
+else !HWLOC_HAVE_LINUX
 TESTS =
-endif !HAVE_LINUX
+endif !HWLOC_HAVE_LINUX
 
 EXTRA_DIST = $(sysfs_tarballs) $(sysfs_outputs)
 
