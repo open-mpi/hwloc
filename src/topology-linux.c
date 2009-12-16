@@ -319,6 +319,8 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
 static int
 hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
+  int err;
+
   if (tid == pthread_self())
     return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 
@@ -346,10 +348,15 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
      hwloc_cpuset_foreach_end();
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-     return pthread_setaffinity_np(tid, &linux_set);
+     err = pthread_setaffinity_np(tid, &linux_set);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-     return pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
+     err = pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
+     if (err) {
+       errno = err;
+       return -1;
+     }
+     return 0;
   }
 #else /* CPU_SET */
   /* Use a separate block so that we can define specific variable
@@ -358,10 +365,15 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
       unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HAVE_OLD_SCHED_SETAFFINITY
-      return pthread_setaffinity_np(tid, (void*) &mask);
+      err = pthread_setaffinity_np(tid, (void*) &mask);
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
-      return pthread_setaffinity_np(tid, sizeof(mask), (void*) &mask);
+      err = pthread_setaffinity_np(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
+      if (err) {
+        errno = err;
+        return -1;
+      }
+      return 0;
   }
 #endif /* CPU_SET */
 }
@@ -398,8 +410,10 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
      err = pthread_getaffinity_np(tid, sizeof(linux_set), &linux_set);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
-     if (err < 0)
+     if (err) {
+        errno = err;
 	return NULL;
+     }
 
      hwloc_set = hwloc_cpuset_alloc();
      for(cpu=0; cpu<CPU_SETSIZE; cpu++)
@@ -417,8 +431,10 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
       err = pthread_getaffinity_np(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
-      if (err < 0)
+      if (err) {
+        errno = err;
 	return NULL;
+      }
 
      hwloc_set = hwoc_cpuset_alloc();
      hwloc_cpuset_from_ulong(hwloc_set, mask);
