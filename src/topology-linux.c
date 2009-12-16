@@ -352,11 +352,6 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
      err = pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
-     if (err) {
-       errno = err;
-       return -1;
-     }
-     return 0;
   }
 #else /* CPU_SET */
   /* Use a separate block so that we can define specific variable
@@ -369,13 +364,14 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #else /* HAVE_OLD_SCHED_SETAFFINITY */
       err = pthread_setaffinity_np(tid, sizeof(mask), (void*) &mask);
 #endif /* HAVE_OLD_SCHED_SETAFFINITY */
-      if (err) {
-        errno = err;
-        return -1;
-      }
-      return 0;
   }
 #endif /* CPU_SET */
+
+  if (err) {
+    errno = err;
+    return -1;
+  }
+  return 0;
 }
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
 
