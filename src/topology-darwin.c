@@ -12,7 +12,6 @@
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#include <sys/types.h>
 #include <stdlib.h>
 #include <inttypes.h>
 
