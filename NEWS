@@ -17,7 +17,8 @@ in v0.9.1).
 Version 0.9.4 (unreleased)
 --------------------------
 
-* Fix reseting colors to normal in lstopo -.txt output
+* Fix reseting colors to normal in lstopo -.txt output.
+* Fix Linux pthread_t binding error report.
 
 
 Version 0.9.3
