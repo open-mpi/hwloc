@@ -1091,7 +1091,7 @@ hwloc_discover(struct hwloc_topology *topology)
 #    endif /* HWLOC_HPUX_SYS */
 
 #    ifndef HAVE_OS_SUPPORT
-    hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors (), NULL);
+    hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors ());
 #    endif /* Unsupported OS */
   }
 
