@@ -41,7 +41,7 @@
 #include <windows.h>
 #endif
 
-#ifdef HAVE_SYSCTLBYNAME
+#if defined(HAVE_SYSCTLBYNAME)
 int hwloc_get_sysctlbyname(const char *name, int *ret)
 {
   int n;
@@ -55,7 +55,7 @@ int hwloc_get_sysctlbyname(const char *name, int *ret)
 }
 #endif
 
-#ifdef HAVE_SYSCTL
+#if defined(HAVE_SYSCTL)
 int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
 {
   int n;
@@ -88,12 +88,12 @@ hwloc_fallback_nbprocessors(void) {
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
   return info.avail_cpus;
-#elif HAVE_SYSCTLBYNAME
+#elif defined(HAVE_SYSCTLBYNAME)
   int n;
   if (hwloc_get_sysctlbyname("hw.ncpu", &n))
     return 1;
   return n;
-#elif HAVE_SYSCTL && HAVE_DECL__CTL_HW && HAVE_DECL__HW_NCPU
+#elif defined(HAVE_SYSCTL) && HAVE_DECL_CTL_HW && HAVE_DECL_HW_NCPU
   static int name[2] = {CTL_HW, HW_NPCU};
   int n;
   if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name)), &n)
