@@ -123,7 +123,7 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
   totwidth = (border) + mywidth; \
   totheight = (border) + myheight; \
   if (numsubobjs) { \
-    int i; \
+    unsigned i; \
 
 #define RECURSE_FOR() \
     /* Iterate over subobjects */ \
@@ -315,7 +315,7 @@ struct dyna_save {
 } while (0)
 
 static int
-prefer_vert(hwloc_topology_t topology, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y, int separator)
+prefer_vert(hwloc_topology_t topology, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y, unsigned separator)
 {
   float horiz_ratio, vert_ratio;
   unsigned textwidth = 0;
@@ -368,7 +368,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, hwloc_obj_t 
 {
   unsigned myheight = gridsize + (fontsize ? (fontsize + gridsize) : 0) + gridsize, totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = fontsize ? (level->os_index == -1 ? 7*fontsize : 9*fontsize) : 0;
+  unsigned textwidth = fontsize ? (level->os_index == (unsigned) -1 ? 7*fontsize : 9*fontsize) : 0;
   unsigned separator = level->attr->cache.depth > 1 ? gridsize : 0;
 
   DYNA_CHECK();
@@ -623,8 +623,8 @@ get_type_fun(hwloc_obj_type_t type)
  */
 
 struct coords {
-  int x;
-  int y;
+  unsigned x;
+  unsigned y;
 };
 
 static void
