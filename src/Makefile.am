@@ -5,84 +5,97 @@ AM_CFLAGS = $(HWLOC_GCC_CFLAGS) $(HWLOC_XML_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-lib_LTLIBRARIES = libhwloc.la
-
 EXTRA_DIST = dolib.c
 
-libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c bind.c cpuset.c
-libhwloc_la_LDFLAGS = -version-number $(libhwloc_so_version) $(HWLOC_XML_LIBS)
+# If we're in standalone mode, build the installable library.
+# Otherwise, build the embedded library.
 
-if HWLOC_HAVE_GCC
-libhwloc_la_LDFLAGS += -no-undefined
+if HWLOC_BUILD_STANDALONE
+lib_LTLIBRARIES = libhwloc.la
+else
+noinst_LTLIBRARIES = libhwloc_embedded.la
 endif
 
+# Sources and ldflags
+
+sources = \
+        topology.c \
+        traversal.c \
+        topology-synthetic.c \
+        bind.c \
+        cpuset.c
+ldflags =
+
+# Conditionally add to the sources and ldflags
+
+if HWLOC_HAVE_XML
+sources += topology-xml.c
+endif HWLOC_HAVE_XML
+
+if HWLOC_HAVE_SOLARIS
+sources += topology-solaris.c
+endif HWLOC_HAVE_SOLARIS
+
+if HWLOC_HAVE_LINUX
+sources += topology-linux.c
+endif HWLOC_HAVE_LINUX
+
+if HWLOC_HAVE_AIX
+sources += topology-aix.c
+ldflags += -lpthread
+endif HWLOC_HAVE_AIX
+
+if HWLOC_HAVE_OSF
+sources += topology-osf.c
+ldflags += -lnuma -lpthread
+endif HWLOC_HAVE_OSF
+
+if HWLOC_HAVE_HPUX
+sources += topology-hpux.c
+ldflags += -lpthread
+endif HWLOC_HAVE_HPUX
+
 if HWLOC_HAVE_WINDOWS
-libhwloc_la_LDFLAGS += -Xlinker --output-def -Xlinker .libs/libhwloc.def
+sources += topology-windows.c
+endif HWLOC_HAVE_WINDOWS
+
+if HWLOC_HAVE_DARWIN
+sources += topology-darwin.c
+endif HWLOC_HAVE_DARWIN
+
+if HWLOC_HAVE_GCC
+ldflags += -no-undefined
+endif HWLOC_HAVE_GCC
+
+if HWLOC_HAVE_WINDOWS
+ldflags += -Xlinker --output-def -Xlinker .libs/libhwloc.def
 
 if HWLOC_HAVE_MS_LIB
 .libs/libhwloc.lib: libhwloc.la dolib
 	./dolib "$(HWLOC_MS_LIB)" X86 .libs/libhwloc.def libhwloc-$(HWLOC_SOVERSION) .libs/libhwloc.lib
 all-local: .libs/libhwloc.lib
-endif
+endif HWLOC_HAVE_MS_LIB
 
 install-exec-hook:
 	$(INSTALL) .libs/libhwloc.def $(DESTDIR)$(libdir)
 if HWLOC_HAVE_MS_LIB
 	$(INSTALL) .libs/libhwloc.lib $(DESTDIR)$(libdir)
 	$(INSTALL) .libs/libhwloc.exp $(DESTDIR)$(libdir)
-endif
-endif
+endif HWLOC_HAVE_MS_LIB
+endif HWLOC_HAVE_WINDOWS
 
-if HWLOC_HAVE_XML
-libhwloc_la_SOURCES += topology-xml.c
-else !HWLOC_HAVE_XML
-EXTRA_DIST += topology-xml.c
-endif !HWLOC_HAVE_XML
+# Installable library
 
-if HWLOC_HAVE_SOLARIS
-libhwloc_la_SOURCES += topology-solaris.c
-else !HWLOC_HAVE_SOLARIS
-EXTRA_DIST += topology-solaris.c
-endif !HWLOC_HAVE_SOLARIS
+libhwloc_la_SOURCES = $(sources)
+libhwloc_la_LDFLAGS = $(ldflags) -version-number $(libhwloc_so_version) $(HWLOC_XML_LIBS)
 
-if HWLOC_HAVE_LINUX
-libhwloc_la_SOURCES += topology-linux.c
-else !HWLOC_HAVE_LINUX
-EXTRA_DIST += topology-linux.c
-endif !HWLOC_HAVE_LINUX
+# Embedded library (note the lack of a .so version number -- that
+# intentionally only appears in the installable library)
 
-if HWLOC_HAVE_AIX
-libhwloc_la_SOURCES += topology-aix.c
-libhwloc_la_LDFLAGS += -lpthread
-else !HWLOC_HAVE_AIX
-EXTRA_DIST += topology-aix.c
-endif !HWLOC_HAVE_AIX
+libhwloc_embedded_la_SOURCES = $(sources)
+libhwloc_embedded_la_LDFLAGS = $(ldflags) $(HWLOC_XML_LIBS)
 
-if HWLOC_HAVE_OSF
-libhwloc_la_SOURCES += topology-osf.c
-libhwloc_la_LDFLAGS += -lnuma -lpthread
-else !HWLOC_HAVE_OSF
-EXTRA_DIST += topology-osf.c
-endif !HWLOC_HAVE_OSF
-
-if HWLOC_HAVE_HPUX
-libhwloc_la_SOURCES += topology-hpux.c
-libhwloc_la_LDFLAGS += -lpthread
-else !HWLOC_HAVE_HPUX
-EXTRA_DIST += topology-hpux.c
-endif !HWLOC_HAVE_HPUX
-
-if HWLOC_HAVE_WINDOWS
-libhwloc_la_SOURCES += topology-windows.c
-else !HWLOC_HAVE_WINDOWS
-EXTRA_DIST += topology-windows.c
-endif !HWLOC_HAVE_WINDOWS
-
-if HWLOC_HAVE_DARWIN
-libhwloc_la_SOURCES += topology-darwin.c
-else !HWLOC_HAVE_DARWIN
-EXTRA_DIST += topology-darwin.c
-endif !HWLOC_HAVE_DARWIN
+# XML data
 
 xml_DATA = $(srcdir)/hwloc.dtd
 xmldir = $(pkgdatadir)
