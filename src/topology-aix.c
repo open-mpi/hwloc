@@ -181,7 +181,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 {
   rsethandle_t rset, rad;
   int i,maxcpus,j;
-  unsigned nbnodes;
+  int nbnodes;
   struct hwloc_obj *obj;
 
   if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
@@ -240,7 +240,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 void
 hwloc_look_aix(struct hwloc_topology *topology)
 {
-  unsigned i;
+  int i;
   /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
 
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
