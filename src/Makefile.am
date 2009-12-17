@@ -95,8 +95,10 @@ libhwloc_la_LDFLAGS = $(ldflags) -version-number $(libhwloc_so_version) $(HWLOC_
 libhwloc_embedded_la_SOURCES = $(sources)
 libhwloc_embedded_la_LDFLAGS = $(ldflags) $(HWLOC_XML_LIBS)
 
-# XML data
+# XML data (only install if we're building in standalone mode)
 
+if HWLOC_BUILD_STANDALONE
 xml_DATA = $(srcdir)/hwloc.dtd
 xmldir = $(pkgdatadir)
 EXTRA_DIST += hwloc.dtd
+endif
