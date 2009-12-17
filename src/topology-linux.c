@@ -1105,7 +1105,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   long physid;
   long coreid;
   long processor = -1;
-  int i;
+  unsigned i;
   hwloc_cpuset_t cpuset;
   hwloc_obj_t obj;
 
