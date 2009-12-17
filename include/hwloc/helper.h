@@ -483,11 +483,11 @@ extern int hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, h
  * before binding a thread, so that it doesn't move at all.
  */
 static __inline void
-hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, int n)
+hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, unsigned n)
 {
-  int i;
+  unsigned i;
   unsigned u;
-  int chunk_size, complete_chunks;
+  unsigned chunk_size, complete_chunks;
   hwloc_cpuset_t *cpusetp;
 
   if (!root->arity || n == 1) {
@@ -510,7 +510,7 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
     hwloc_distribute(topology, root->children[i], cpusetp, chunk_size);
 
   /* Now allocate not-so-complete chunks.  */
-  for (u = (unsigned) i;
+  for (u = i;
        u < root->arity;
        u++, cpusetp += chunk_size-1)
     hwloc_distribute(topology, root->children[u], cpusetp, chunk_size-1);
