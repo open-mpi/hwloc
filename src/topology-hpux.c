@@ -179,9 +179,9 @@ hwloc_look_hpux(struct hwloc_topology *topology)
     if (nodes) {
       /* Add this cpu to its node */
       currentnode = mpctl(MPC_SPUTOLDOM, currentcpu, 0);
-      if (nodes[i]->os_index != currentnode)
+      if ((ldom_t) nodes[i]->os_index != currentnode)
         for (i = 0; i < nbnodes; i++)
-          if (nodes[i]->os_index == currentnode)
+          if ((ldom_t) nodes[i]->os_index == currentnode)
             break;
       assert(i < nbnodes);
       hwloc_cpuset_set(nodes[i]->cpuset, currentcpu);
