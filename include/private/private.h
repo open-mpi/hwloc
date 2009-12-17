@@ -231,7 +231,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
 		 j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
-  hwloc_debug("\n");
+  hwloc_debug("%s", "\n");
 }
 
 /* On some systems, snprintf returns the size of written data, not the actually

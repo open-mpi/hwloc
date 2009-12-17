@@ -158,7 +158,7 @@ hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
 	    hwloc_cpuset_isset(closest_objs_set, k) &&
 	    (*distances)[j][k] != min_distance) {
 	  /* the minimal-distance graph is not complete. abort */
-	  hwloc_debug("found incomplete minimal-distance graph, aborting\n");
+	  hwloc_debug("%s", "found incomplete minimal-distance graph, aborting\n");
 	  return 0;
 	}
 
@@ -279,7 +279,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
   }
 
   if (nbgroups == 1) {
-    hwloc_debug("ignoring misc object with all objects\n");
+    hwloc_debug("%s", "ignoring misc object with all objects\n");
     return;
   }
 
@@ -318,11 +318,11 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
           for(j=0; j<nbgroups; j++)
               groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
 #ifdef HWLOC_DEBUG
-      hwloc_debug("group distances:\n");
+      hwloc_debug("%s", "group distances:\n");
       for(i=0; i<nbgroups; i++) {
           for(j=0; j<nbgroups; j++)
               hwloc_debug("%u ", groupdistances[i][j]);
-          hwloc_debug("\n");
+          hwloc_debug("%s", "\n");
       }
 #endif
       
@@ -346,17 +346,17 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
     return;
 
 #ifdef HWLOC_DEBUG
-  hwloc_debug("node distance matrix:\n");
-  hwloc_debug("   ");
+  hwloc_debug("%s", "node distance matrix:\n");
+  hwloc_debug("%s", "   ");
   for(j=0; j<nbobjs; j++)
     hwloc_debug(" %3d", j);
-  hwloc_debug("\n");
+  hwloc_debug("%s", "\n");
 
   for(i=0; i<nbobjs; i++) {
     hwloc_debug("%3d", i);
     for(j=0; j<nbobjs; j++)
       hwloc_debug(" %3d", (*distances)[i][j]);
-    hwloc_debug("\n");
+    hwloc_debug("%s", "\n");
   }
 #endif
 
@@ -392,7 +392,7 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
   struct hwloc_obj *obj;
   unsigned oscpu,cpu;
 
-  hwloc_debug("\n\n * CPU cpusets *\n\n");
+  hwloc_debug("%s", "\n\n * CPU cpusets *\n\n");
   for (cpu=0,oscpu=0; cpu<nb_processors; oscpu++)
     {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, oscpu);
@@ -419,7 +419,7 @@ print_object(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
   free(cpuset);
   if (obj->arity)
     hwloc_debug(" arity %d", obj->arity);
-  hwloc_debug("\n");
+  hwloc_debug("%s", "\n");
 }
 
 /* Just for debugging.  */
@@ -844,7 +844,7 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
 {
   hwloc_obj_t father = *pfather;
   if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
-    hwloc_debug("\nDropping ignored object ");
+    hwloc_debug("%s", "\nDropping ignored object ");
     print_object(topology, 0, father);
     drop_object(pfather);
   }
@@ -865,7 +865,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 {
   if ((*obj)->type != HWLOC_OBJ_NODE && hwloc_cpuset_iszero((*obj)->cpuset)) {
     /* Remove empty children */
-    hwloc_debug("\nRemoving empty object ");
+    hwloc_debug("%s", "\nRemoving empty object ");
     print_object(topology, 0, *obj);
     traverse(topology, obj, NULL, do_free_object, do_free_object, NULL);
   }
@@ -886,14 +886,14 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
   /* TODO: have a preference order?  */
   if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Father can be ignored in favor of the child.  */
-    hwloc_debug("\nIgnoring father ");
+    hwloc_debug("%s", "\nIgnoring father ");
     print_object(topology, 0, father);
     *pfather = child;
     child->next_sibling = father->next_sibling;
     free_object(father);
   } else if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Child can be ignored in favor of the father.  */
-    hwloc_debug("\nIgnoring child ");
+    hwloc_debug("%s", "\nIgnoring child ");
     print_object(topology, 0, child);
     father->first_child = child->first_child;
     free_object(child);
@@ -1099,33 +1099,33 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* First tweak a bit to clean the topology.  */
 
-  hwloc_debug("\nComputing the system cpuset by ORing all Proc objects\n");
+  hwloc_debug("%s", "\nComputing the system cpuset by ORing all Proc objects\n");
   hwloc_cpuset_zero(topology->levels[0][0]->cpuset);
   traverse(topology, &topology->levels[0][0], NULL, get_proc_cpuset, NULL, topology->levels[0][0]->cpuset);
   hwloc_debug_cpuset("-> %s\n", topology->levels[0][0]->cpuset);
 
-  hwloc_debug("\nAdding it to the complete cpuset\n");
+  hwloc_debug("%s", "\nAdding it to the complete cpuset\n");
   hwloc_debug_cpuset("%s", topology->complete_cpuset);
   hwloc_cpuset_orset(topology->complete_cpuset, topology->levels[0][0]->cpuset);
   hwloc_debug_cpuset(" -> %s\n", topology->complete_cpuset);
 
-  hwloc_debug("\nLimiting online cpuset to the complete cpuset\n");
+  hwloc_debug("%s", "\nLimiting online cpuset to the complete cpuset\n");
   hwloc_debug_cpuset("%s", topology->online_cpuset);
   hwloc_cpuset_andset(topology->online_cpuset, topology->complete_cpuset);
   hwloc_debug_cpuset(" -> %s\n", topology->online_cpuset);
 
-  hwloc_debug("\nLimiting allowed cpuset to the complete cpuset\n");
+  hwloc_debug("%s", "\nLimiting allowed cpuset to the complete cpuset\n");
   hwloc_debug_cpuset("%s", topology->allowed_cpuset);
   hwloc_cpuset_andset(topology->allowed_cpuset, topology->complete_cpuset);
   hwloc_debug_cpuset(" -> %s\n", topology->allowed_cpuset);
 
   if (!topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
-    hwloc_debug("\nRemoving unauthorized cpuset from system cpuset\n");
+    hwloc_debug("%s", "\nRemoving unauthorized cpuset from system cpuset\n");
     hwloc_debug_cpuset("%s", topology->levels[0][0]->cpuset);
     hwloc_cpuset_andset(topology->levels[0][0]->cpuset, topology->allowed_cpuset);
     hwloc_debug_cpuset(" -> %s\n", topology->levels[0][0]->cpuset);
 
-    hwloc_debug("\nRemoving offline cpuset from system cpuset\n");
+    hwloc_debug("%s", "\nRemoving offline cpuset from system cpuset\n");
     hwloc_debug_cpuset("%s", topology->levels[0][0]->cpuset);
     hwloc_cpuset_andset(topology->levels[0][0]->cpuset, topology->online_cpuset);
     hwloc_debug_cpuset(" -> %s\n", topology->levels[0][0]->cpuset);
@@ -1134,27 +1134,27 @@ hwloc_discover(struct hwloc_topology *topology)
     traverse(topology, &topology->levels[0][0], apply_nodeset, apply_nodeset, NULL, topology->allowed_nodeset);
   }
 
-  hwloc_debug("\nApplying the system cpuset to all objects\n");
+  hwloc_debug("%s", "\nApplying the system cpuset to all objects\n");
   traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, topology->levels[0][0]->cpuset);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
-  hwloc_debug("\nRemoving ignored objects\n");
+  hwloc_debug("%s", "\nRemoving ignored objects\n");
   traverse(topology, &topology->levels[0][0], remove_ignored, remove_ignored, NULL, NULL);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
-  hwloc_debug("\nRemoving empty objects except numa nodes and PCI devices\n");
+  hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
   traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
-  hwloc_debug("\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
+  hwloc_debug("%s", "\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
   traverse(topology, &topology->levels[0][0], NULL, NULL, merge_useless_child, NULL);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
-  hwloc_debug("\nOk, finished tweaking, now connect\n");
+  hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
 
   /* Now connect handy pointers.  */
 

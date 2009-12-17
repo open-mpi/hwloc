@@ -598,7 +598,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
   fd = hwloc_fopen("/proc/self/cpuset", "r", fsroot_fd);
   if (!fd) {
     /* found nothing */
-    hwloc_debug("No cgroup or cpuset found\n");
+    hwloc_debug("%s", "No cgroup or cpuset found\n");
     return NULL;
   }
 
@@ -1120,14 +1120,14 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 
   if (!(fd=hwloc_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
     {
-      hwloc_debug("could not open /proc/cpuinfo\n");
+      hwloc_debug("%s", "could not open /proc/cpuinfo\n");
       return -1;
     }
 
   cpuset = hwloc_cpuset_alloc();
   /* Just record information and count number of sockets and cores */
 
-  hwloc_debug("\n\n * Topology extraction from /proc/cpuinfo *\n\n");
+  hwloc_debug("%s", "\n\n * Topology extraction from /proc/cpuinfo *\n\n");
   while (fgets(str,sizeof(str),fd)!=NULL)
     {
 #      define getprocnb_begin(field, var)		     \
@@ -1137,19 +1137,19 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	var = strtoul(c,&endptr,0);			     \
 	if (endptr==c)							\
 	  {								\
-            hwloc_debug("no number in "field" field of /proc/cpuinfo\n"); \
+            hwloc_debug("%s", "no number in "field" field of /proc/cpuinfo\n"); \
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
 	else if (var==LONG_MIN)						\
 	  {								\
-            hwloc_debug("too small "field" number in /proc/cpuinfo\n"); \
+            hwloc_debug("%s", "too small "field" number in /proc/cpuinfo\n"); \
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
 	else if (var==LONG_MAX)						\
 	  {								\
-            hwloc_debug("too big "field" number in /proc/cpuinfo\n"); \
+            hwloc_debug("%s", "too big "field" number in /proc/cpuinfo\n"); \
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
@@ -1215,7 +1215,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
   hwloc_debug_cpuset("online processor cpuset: %s\n", online_cpuset);
 
-  hwloc_debug("\n * Topology summary *\n");
+  hwloc_debug("%s", "\n * Topology summary *\n");
   hwloc_debug("%d processors (%d max id)\n", numprocs, procid_max);
 
   hwloc_debug("%d sockets\n", numsockets);
