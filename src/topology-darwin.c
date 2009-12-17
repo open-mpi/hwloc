@@ -23,24 +23,30 @@
 void
 hwloc_look_darwin(struct hwloc_topology *topology)
 {
-  int nprocs;
-  int npackages;
-  int i, j, cpu;
+  int _nprocs;
+  unsigned nprocs;
+  int _npackages;
+  unsigned i, j, cpu;
   struct hwloc_obj *obj;
   size_t size;
 
-  if (hwloc_get_sysctlbyname("hw.ncpu", &nprocs))
+  if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
     return;
+  nprocs = _nprocs;
 
   hwloc_debug("%d procs\n", nprocs);
 
-  if (!hwloc_get_sysctlbyname("hw.packages", &npackages)) {
-    int cores_per_package;
-    int logical_per_package;
+  if (!hwloc_get_sysctlbyname("hw.packages", &_npackages) && _npackages > 0) {
+    unsigned npackages = _npackages;
+    int _cores_per_package;
+    int _logical_per_package;
+    unsigned logical_per_package;
 
     hwloc_debug("%d packages\n", npackages);
 
-    if (hwloc_get_sysctlbyname("machdep.cpu.logical_per_package", &logical_per_package))
+    if (!hwloc_get_sysctlbyname("machdep.cpu.logical_per_package", &_logical_per_package) && _logical_per_package > 0)
+      logical_per_package = _logical_per_package;
+    else
       /* Assume the trivia.  */
       logical_per_package = nprocs / npackages;
 
@@ -59,7 +65,8 @@ hwloc_look_darwin(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, obj);
     }
 
-    if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package)) {
+    if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &_cores_per_package) && _cores_per_package > 0) {
+      unsigned cores_per_package = _cores_per_package;
       hwloc_debug("%d cores per package\n", cores_per_package);
 
       assert(!(logical_per_package % cores_per_package));
@@ -80,7 +87,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   }
 
   if (!sysctlbyname("hw.cacheconfig", NULL, &size, NULL, 0)) {
-    int n = size / sizeof(uint64_t);
+    unsigned n = size / sizeof(uint64_t);
     uint64_t cacheconfig[n];
     uint64_t cachesize[n];
 
@@ -99,11 +106,11 @@ hwloc_look_darwin(struct hwloc_topology *topology)
     hwloc_debug("\n%d cache levels\n", n - 1);
 
     for (i = 0; i < n; i++) {
-      for (j = 0; j < (int) (nprocs / cacheconfig[i]); j++) {
+      for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
 	obj = hwloc_alloc_setup_object(i?HWLOC_OBJ_CACHE:HWLOC_OBJ_NODE, j);
 	obj->cpuset = hwloc_cpuset_alloc();
 	for (cpu = j*cacheconfig[i];
-	     cpu < (int) ((j+1)*cacheconfig[i]);
+	     cpu < ((j+1)*cacheconfig[i]);
 	     cpu++)
 	  hwloc_cpuset_set(obj->cpuset, cpu);
 
