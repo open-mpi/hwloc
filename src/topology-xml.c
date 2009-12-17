@@ -400,7 +400,7 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
   }
 
   if (obj->arity) {
-    int x;
+    unsigned x;
     for (x=0; x<obj->arity; x++)
       hwloc__topology_export_xml_object (topology, obj->children[x], node);
   }
