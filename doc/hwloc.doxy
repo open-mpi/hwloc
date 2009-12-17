@@ -430,8 +430,9 @@ own manual page.
   </dd>
 
 <dt>hwloc-bind</dt>
-  <dd>lets you bind processes to specific hardware objects
-  through a flexible syntax. It may also retrieve the current binding.
+  <dd>lets you bind processes to specific hardware objects through a
+  flexible syntax. It may also retrieve the current binding.  See the
+  hwloc-bind(1) man page for more details.
   </dd>
 
 <dt>hwloc-mask</dt>
@@ -449,6 +450,109 @@ own manual page.
   These strings may be used with hwloc-bind to run processes so as to
   maximize their memory bandwidth.
   </dd>
+
+
+
+\page embed Embedding hwloc in other software
+
+It can be desirable to include hwloc in a larger software package (be
+sure to check out the LICENSE file) so that users don't have to
+separately download and install it before installing your software
+(after all, hwloc is a tiny little project -- why make users bother
+with it?).
+
+When used in "embedded" mode, hwloc will:
+
+- not install any header files
+- not build or install any executables
+- not build libhwloc.* -- instead, it will build libhwloc_embedded.*
+
+There are two ways to put hwloc into "embedded" mode.  From the
+configure command line:
+
+\verbatim
+shell$ ./configure --enable-included-mode ...
+\endverbatim
+
+Or by directly integrating hwloc's m4 configure macro in your
+configure script and invoking a specific macro to enable the embedded
+mode.
+
+Every project is different, and there are many different ways of
+integrating hwloc into yours.  What follows is <em>one</em> example of
+how to do it.
+
+Copy the hwloc directory in your source tree and include the hwloc.m4
+file in your configure script -- perhaps with the following line in
+acinclude.m4 (assuming the use of Automake):
+
+\verbatim
+m4_include(path/to/hwloc.m4)
+\endverbatim
+
+The following macros can then be used from your configure script (only
+HWLOC_INIT <em>must</em> be invoked if using the m4 macros):
+
+- HWLOC_SET_SYMBOL_PREFIX(foo_): Tells the hwloc to prefix all of
+  hwloc's types and public symbols with "foo"; meaning that function
+  hwloc_init() becomes foo_hwloc_init().  This is recommended behavior
+  if you are including hwloc in a larger project -- it is possible
+  that your software will be combined with other software that also
+  includes hwloc.  If you both use different symbol prefixes, there
+  will be no type/symbol clashes, and everything will compile and link
+  successfully.  If you both include hwloc and do not change the
+  symbol prefix, it is likely that you will get multiple symbol
+  definitions when linking if an external hwloc is linked against your
+  library / application.  Enum values are prefixed with an upper-case
+  translation if the prefix supplied.  For example,
+  HWLOC_SET_SYMBOL_PREFIX(foo_) will result in both foo_hwloc_init()
+  and FOO_HWLOC_OBJ_SYSTEM.
+
+- HWLOC_INIT(config-dir-prefix, action-upon-success, action-upon-failure):
+  Invoke the hwloc tests and setup the hwloc tree to build.  A
+  traversal of "make" into the hwloc directory should build everything
+  (it is safe to list the hwloc directory in the SUBDIRS of a
+  higher-level Makefile.am, for example).  ***hwloc_INIT must be
+  invoked after the SET_SYMBOL_PREFIX macro.*** The first argument is
+  the prefix to use for AC_OUTPUT files -- it's where the hwloc tree
+  is located relative to $top_srcdir.  Hence, if your embedded hwloc
+  is located in the source tree at contrib/hwloc, you should pass
+  [contrib/hwloc] as the first argument.
+
+- HWLOC_DO_AM_CONDITIONALS: If you embed hwloc in a larger project and
+  build it conditionally (e.g., if HWLOC_INIT is invoked
+  conditionally), you must unconditionally invoke
+  HWLOC_DO_AM_CONDITIONALS to avoid warnings from Automake (for the
+  cases where hwloc is not selected to be built).  This macro is
+  necessary because hwloc uses some AM_CONDITIONALs to build itself,
+  and AM_CONDITIONALs cannot be defined conditionally.  Note that it
+  is safe (but unnecessary) to call HWLOC_DO_AM_CONDITIONALS even if
+  HWLOC_INIT is invoked unconditionally.
+
+Here's an example of integrating with a larger project named sandbox:
+
+\verbatim
+shell$ cd sandbox
+shell$ cp -r /somewhere/else/hwloc-<version> my-embedded-hwloc
+shell$ echo 'm4_include(my-embedded-hwloc/config/hwloc.m4)' >> acinclude.m4
+shell$ edit Makefile.am
+...add "my-embedded-hwloc" to SUBDIRS...
+...add "$(top_builddir)/my-embedded-hwloc/src/libhwloc_included.la" to
+   sandbox's executable's LDADD line...
+...add "-I$(top_builddir)/my-embedded-hwloc/include" to AM_CPPFLAGS
+shell$ edit configure.ac
+...add "HWLOC_SET_SYMBOL_PREFIX(sandbox_hwloc_)" line...
+...add "HWLOC_INIT([my-embedded-hwloc], [happy=yes], [happy=no])" line...
+...add error checking for happy=no case...
+shell$ edit src/my_program.c
+...add #include <hwloc.h>...
+...add calls to sandbox_hwloc_init()...
+\endverbatim
+
+Now you can bootstrap, configure, build, and run the sandbox as normal
+-- all calls to "sandbox_hwloc_*" will use the embedded hwloc rather
+than any system-provided copy of hwloc.
+
 
 
 
@@ -495,5 +599,6 @@ following environment variables.
 \page switchfromplpa How to switch from PLPA to hwloc?
 
 to do
+
 
 */
