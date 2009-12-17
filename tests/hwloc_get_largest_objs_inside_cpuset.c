@@ -20,7 +20,7 @@
 
 #define OBJ_MAX 16
 
-int main()
+int main(void)
 {
   hwloc_topology_t topology;
   unsigned depth;

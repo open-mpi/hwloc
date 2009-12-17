@@ -14,7 +14,7 @@
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
 
-int main()
+int main(void)
 {
   hwloc_topology_t topology;
   hwloc_obj_t obj, cache;

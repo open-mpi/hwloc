@@ -13,7 +13,7 @@
 
 /* check hwloc_cpuset_singlify() */
 
-int main()
+int main(void)
 {
   hwloc_cpuset_t orig, expected;
 

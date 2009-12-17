@@ -19,7 +19,7 @@
 #define GIVEN_LARGESPLIT_CPUSET_STRING "0x8000,,,,,,,,,,,,,,,,,,,,,,0x1" /* first and last(735th) bit set */
 #define GIVEN_TOOLARGE_CPUSET_STRING "0x10000,,,,,,,,,,,,,,,,,,,,,,0x0" /* 736th bit is too large for the 720-wide topology */
 
-int main()
+int main(void)
 {
   hwloc_topology_t topology;
   char *string = NULL;

@@ -14,7 +14,7 @@
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "machine:3 misc:2 core:3 cache:2 cache:2 2"
 
-int main()
+int main(void)
 {
   hwloc_topology_t topology;
 

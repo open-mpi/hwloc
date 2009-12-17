@@ -12,7 +12,7 @@
 
 /* check hwloc_cpuset_asprintf(), hwloc_obj_cpuset_snprintf() and hwloc_cpuset_from_string() */
 
-int main()
+int main(void)
 {
   hwloc_topology_t topology;
   unsigned depth;
