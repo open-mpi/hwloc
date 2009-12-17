@@ -43,11 +43,11 @@ hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigne
   return topology->levels[depth][idx];
 }
 
-int hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, int max)
+unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, unsigned max)
 {
   struct hwloc_obj *parent, *nextparent, **src_objs;
   int i,src_nbobjects;
-  int stored = 0;
+  unsigned stored = 0;
 
   src_nbobjects = topology->level_nbobjects[src->depth];
   src_objs = topology->levels[src->depth];

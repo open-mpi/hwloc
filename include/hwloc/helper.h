@@ -460,7 +460,7 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
  *  \return the number of objects returned in \p objs.
  */
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? By returning the total number of objects instead? */
-extern int hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, hwloc_obj_t * __hwloc_restrict objs, int max);
+extern unsigned hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, hwloc_obj_t * __hwloc_restrict objs, unsigned max);
 
 /** @} */
 
