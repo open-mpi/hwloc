@@ -468,7 +468,7 @@ enum hwloc_type_cmp_e {
   HWLOC_TYPE_EQUAL,
 };
 
-static const int obj_type_order[] = {
+static const unsigned obj_type_order[] = {
   [HWLOC_OBJ_SYSTEM] = 0,
   [HWLOC_OBJ_MACHINE] = 1,
   [HWLOC_OBJ_MISC] = 2,
@@ -490,7 +490,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   [7] = HWLOC_OBJ_PROC,
 };
 
-static int hwloc_get_type_order(hwloc_obj_type_t type)
+static unsigned hwloc_get_type_order(hwloc_obj_type_t type)
 {
   return obj_type_order[type];
 }
@@ -1706,9 +1706,9 @@ hwloc_topology_check(struct hwloc_topology *topology)
   for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
     assert(hwloc_get_order_type(hwloc_get_type_order(type)) == type);
   }
-  for (i = (unsigned) hwloc_get_order_type(HWLOC_OBJ_SYSTEM); 
-       i <= (unsigned) hwloc_get_order_type(HWLOC_OBJ_CORE); i++) {
-    assert(i == (unsigned) hwloc_get_type_order(hwloc_get_order_type(i)));
+  for (i = hwloc_get_type_order(HWLOC_OBJ_SYSTEM); 
+       i <= hwloc_get_type_order(HWLOC_OBJ_CORE); i++) {
+    assert(i == hwloc_get_type_order(hwloc_get_order_type(i)));
   }
 
   /* check that first level is SYSTEM */
