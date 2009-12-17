@@ -24,7 +24,7 @@
 
 int hwloc_snprintf(char *str, size_t size, const char *format, ...)
 {
-  unsigned ret;
+  int ret;
   va_list ap;
   static char bin;
 
@@ -38,7 +38,7 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
   ret = vsnprintf(str, size, format, ap);
   va_end(ap);
 
-  if (ret >= 0 && ret != size-1)
+  if (ret >= 0 && (size_t) ret != size-1)
     return ret;
 
   /* vsnprintf returned size-1 or -1. That could be a system which reports the
@@ -53,7 +53,7 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
     ret = vsnprintf(str, size, format, ap);
     va_end(ap);
     free(str);
-  } while (ret == size-1 || (ret < 0 && !errno));
+  } while ((size_t) ret == size-1 || (ret < 0 && !errno));
 
   return ret;
 }
