@@ -1085,6 +1085,11 @@ hwloc_discover(struct hwloc_topology *topology)
     hwloc_look_darwin(topology);
 #    endif /* HWLOC_DARWIN_SYS */
 
+#    ifdef HWLOC_FREEBSD_SYS
+#      define HAVE_OS_SUPPORT
+    hwloc_look_freebsd(topology);
+#    endif /* HWLOC_FREEBSD_SYS */
+
 #    ifdef HWLOC_HPUX_SYS
 #      define HAVE_OS_SUPPORT
     hwloc_look_hpux(topology);
@@ -1289,6 +1294,10 @@ hwloc_discover(struct hwloc_topology *topology)
 #    ifdef HWLOC_DARWIN_SYS
     hwloc_set_darwin_hooks(topology);
 #    endif /* HWLOC_DARWIN_SYS */
+
+#    ifdef HWLOC_FREEBSD_SYS
+    hwloc_set_freebsd_hooks(topology);
+#    endif /* HWLOC_FREEBSD_SYS */
 
 #    ifdef HWLOC_HPUX_SYS
     hwloc_set_hpux_hooks(topology);

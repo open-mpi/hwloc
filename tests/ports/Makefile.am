@@ -24,6 +24,8 @@ libhwloc_ports_la_SOURCES += $(SRC)/topology-windows.c
 libhwloc_ports_la_CFLAGS  += -DHWLOC_WIN_SYS
 libhwloc_ports_la_SOURCES += $(SRC)/topology-darwin.c
 libhwloc_ports_la_CFLAGS  += -DHWLOC_DARWIN_SYS
+libhwloc_ports_la_SOURCES += $(SRC)/topology-freebsd.c
+libhwloc_ports_la_CFLAGS  += -DHWLOC_FREEBSD_SYS -DHAVE_SYS_CPUSET_H
 libhwloc_ports_la_SOURCES += $(SRC)/topology-hpux.c
 libhwloc_ports_la_CFLAGS  += -DHWLOC_HPUX_SYS
 
@@ -37,7 +39,9 @@ EXTRA_DIST = \
 		include/sys/processor.h \
 		include/sys/thread.h \
 		include/sys/mpctl.h \
+		include/sys/cpuset.h \
 		include/radset.h \
 		include/cpuset.h \
-		include/numa.h
+		include/numa.h \
+		include/pthread_np.h
 

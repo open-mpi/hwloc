@@ -143,6 +143,11 @@ AC_DEFUN([HWLOC_INIT],[
         hwloc_windows=yes
         AC_MSG_RESULT([Windows])
         ;;
+      *-*-*freebsd*)
+        AC_DEFINE(HWLOC_FREEBSD_SYS, 1, [Define to 1 on *FREEBSD])
+        hwloc_freebsd=yes
+        AC_MSG_RESULT([FreeBSD])
+        ;;
       *)
         AC_MSG_RESULT([Unsupported! ($target)])
         AC_DEFINE(HWLOC_UNSUPPORTED_SYS, 1, [Define to 1 on unsupported systems])
@@ -448,9 +453,21 @@ AC_DEFUN([HWLOC_INIT],[
     AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
     	      [#include <numa.h>])
     
-    AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
-    AC_CHECK_DECLS([pthread_getaffinity_np],,[:],[[#include <pthread.h>]])
+    AC_CHECK_HEADERS([pthread_np.h])
+    AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
+      #include <pthread.h>
+      #ifdef HAVE_PTHREAD_NP_H
+      #  include <pthread_np.h>
+      #endif
+    ]])
+    AC_CHECK_DECLS([pthread_getaffinity_np],,[:],[[
+      #include <pthread.h>
+      #ifdef HAVE_PTHREAD_NP_H
+      #  include <pthread_np.h>
+      #endif
+    ]])
     AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
+    AC_CHECK_HEADERS([sys/cpuset.h],,,[[#include <sys/param.h>]])
     
     AC_CHECK_PROGS(XMLLINT, [xmllint])
     
@@ -590,6 +607,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_LINUX], [test "x$hwloc_linux" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_IRIX], [test "x$hwloc_irix" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_DARWIN], [test "x$hwloc_darwin" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_FREEBSD], [test "x$hwloc_freebsd" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_SOLARIS], [test "x$hwloc_solaris" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_AIX], [test "x$hwloc_aix" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_OSF], [test "x$hwloc_osf" = "xyes"])

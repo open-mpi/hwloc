@@ -140,6 +140,11 @@ extern void hwloc_look_darwin(struct hwloc_topology *topology);
 extern void hwloc_set_darwin_hooks(struct hwloc_topology *topology);
 #endif /* HWLOC_DARWIN_SYS */
 
+#ifdef HWLOC_FREEBSD_SYS
+extern void hwloc_look_freebsd(struct hwloc_topology *topology);
+extern void hwloc_set_freebsd_hooks(struct hwloc_topology *topology);
+#endif /* HWLOC_FREEBSD_SYS */
+
 #ifdef HWLOC_HPUX_SYS
 extern void hwloc_look_hpux(struct hwloc_topology *topology);
 extern void hwloc_set_hpux_hooks(struct hwloc_topology *topology);

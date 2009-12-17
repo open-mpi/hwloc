@@ -10,8 +10,13 @@
 
 #include <errno.h>
 
-/* TODO: HWLOC_GNU_SYS, HWLOC_FREEBSD_SYS, HWLOC_DARWIN_SYS, HWLOC_IRIX_SYS, HWLOC_HPUX_SYS
- * IRIX: see _DSM_MUSTRUN */
+/* TODO: HWLOC_GNU_SYS, HWLOC_IRIX_SYS,
+ * IRIX: see _DSM_MUSTRUN
+ *
+ * We could use glibc's sched_setaffinity generically when it is available
+ *
+ * Darwin and OpenBSD don't seem to have binding facilities.
+ */
 
 static hwloc_const_cpuset_t
 hwloc_fix_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set)
