@@ -1760,7 +1760,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
     /* check type */
     assert(hwloc_get_depth_type(topology, i) == obj->type);
-    assert(i = (unsigned) hwloc_get_type_depth(topology, obj->type) ||
+    assert(i == (unsigned) hwloc_get_type_depth(topology, obj->type) ||
            HWLOC_TYPE_DEPTH_MULTIPLE == hwloc_get_type_depth(topology, obj->type));
 
     /* check last object of the level */
