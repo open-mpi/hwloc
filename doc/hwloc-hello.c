@@ -12,7 +12,7 @@ static void print_children(hwloc_topology_t topology, hwloc_obj_t obj,
                            int depth)
 {
     char string[128];
-    int i;
+    unsigned i;
 
     hwloc_obj_snprintf(string, sizeof(string), topology, obj, "#", 0);
     printf("%*s%s\n", 2*depth, "", string);
@@ -23,9 +23,10 @@ static void print_children(hwloc_topology_t topology, hwloc_obj_t obj,
 
 int main(int argc, char **argv)
 {
-    int depth, i;
+    int depth;
+    unsigned i;
     char string[128];
-    unsigned int topodepth;
+    int topodepth;
     hwloc_topology_t topology;
     hwloc_cpuset_t cpuset;
     hwloc_obj_t obj;
