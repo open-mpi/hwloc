@@ -641,10 +641,10 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
     AC_MSG_CHECKING([if can build top-level README])
     AS_IF([test "x$W3M" != "x"],
           [hwloc_generate_readme=yes
-           W3_GENERATOR=$W3M],
+           HWLOC_W3_GENERATOR=$W3M],
           [AS_IF([test "x$LYNX" != "x"],
                  [hwloc_generate_readme=yes
-                  W3_GENERATOR="$LYNX -dump -nolist"],
+                  HWLOC_W3_GENERATOR="$LYNX -dump -nolist"],
                  [hwloc_generate_readme=no])])
     AC_SUBST(HWLOC_W3_GENERATOR)
     AC_MSG_RESULT([$hwloc_generate_readme])
