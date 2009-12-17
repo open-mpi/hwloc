@@ -141,7 +141,7 @@ union hwloc_obj_attr_u;
 struct hwloc_obj {
   /* physical information */
   hwloc_obj_type_t type;		/**< \brief Type of object */
-  signed os_index;			/**< \brief OS-provided physical index number */
+  unsigned os_index;			/**< \brief OS-provided physical index number */
   char *name;				/**< \brief Object description if any */
 
   /** \brief Object type-specific Attributes */
@@ -177,6 +177,9 @@ struct hwloc_obj {
 
   signed os_level;			/**< \brief OS-provided physical level */
 };
+/**
+ * \brief Convenience typedef; a pointer to a struct hwloc_obj.
+ */
 typedef struct hwloc_obj * hwloc_obj_t;
 
 /** \brief Object type-specific Attributes */

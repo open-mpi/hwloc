@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -40,7 +41,7 @@
 /* Recursively output topology in a console fashion */
 static void
 output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int verbose_mode) {
-  int x;
+  unsigned x;
   const char * indexprefix = "#";
   char line[256];
 
@@ -438,7 +439,8 @@ static void
 text_box(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned width, unsigned y1, unsigned height)
 {
   struct display *disp = output;
-  int x2, y2, i, j;
+  unsigned i, j;
+  unsigned x2, y2;
   x1 /= (gridsize/2);
   width /= (gridsize/2);
   y1 /= gridsize;
@@ -475,8 +477,7 @@ static void
 text_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct display *disp = output;
-  int i, j;
-  int z;
+  unsigned i, j, z;
   x1 /= (gridsize/2);
   y1 /= gridsize;
   x2 /= (gridsize/2);

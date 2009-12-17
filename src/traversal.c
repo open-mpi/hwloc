@@ -84,7 +84,7 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_cp
 				       struct hwloc_obj ***res, int *max)
 {
   int gotten = 0;
-  int i;
+  unsigned i;
 
   /* the caller must ensure this */
   assert(*max > 0);
@@ -178,8 +178,9 @@ hwloc_obj_snprintf(char *string, size_t size,
   const char *indexprefix = _indexprefix ? _indexprefix : "#";
   char os_index[12] = "";
 
-  if (l->os_index != -1)
-    snprintf(os_index, 12, "%s%d", indexprefix, l->os_index);
+  if (l->os_index != (unsigned) -1) {
+      snprintf(os_index, 12, "%s%d", indexprefix, (int) l->os_index);
+  }
 
   switch (type) {
   case HWLOC_OBJ_SOCKET:
@@ -234,7 +235,7 @@ int hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_
 {
   hwloc_cpuset_t set = hwloc_cpuset_alloc();
   int res;
-  int i;
+  unsigned i;
 
   hwloc_cpuset_zero(set);
   for(i=0; i<nobj; i++)

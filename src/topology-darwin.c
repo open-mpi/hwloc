@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -98,11 +99,11 @@ hwloc_look_darwin(struct hwloc_topology *topology)
     hwloc_debug("\n%d cache levels\n", n - 1);
 
     for (i = 0; i < n; i++) {
-      for (j = 0; j < nprocs / cacheconfig[i]; j++) {
+      for (j = 0; j < (int) (nprocs / cacheconfig[i]); j++) {
 	obj = hwloc_alloc_setup_object(i?HWLOC_OBJ_CACHE:HWLOC_OBJ_NODE, j);
 	obj->cpuset = hwloc_cpuset_alloc();
 	for (cpu = j*cacheconfig[i];
-	     cpu < (j+1)*cacheconfig[i];
+	     cpu < (int) ((j+1)*cacheconfig[i]);
 	     cpu++)
 	  hwloc_cpuset_set(obj->cpuset, cpu);
 

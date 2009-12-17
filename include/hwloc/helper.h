@@ -243,7 +243,7 @@ static __inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
 				      unsigned depth, unsigned idx)
 {
-  int count = 0;
+  unsigned count = 0;
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   while (obj) {
     if (hwloc_cpuset_isincluded(obj->cpuset, set)) {
@@ -486,6 +486,7 @@ static __inline void
 hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, int n)
 {
   int i;
+  unsigned u;
   int chunk_size, complete_chunks;
   hwloc_cpuset_t *cpusetp;
 
@@ -509,10 +510,10 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
     hwloc_distribute(topology, root->children[i], cpusetp, chunk_size);
 
   /* Now allocate not-so-complete chunks.  */
-  for ( ;
-       i < root->arity;
-       i++, cpusetp += chunk_size-1)
-    hwloc_distribute(topology, root->children[i], cpusetp, chunk_size-1);
+  for (u = (unsigned) i;
+       u < root->arity;
+       u++, cpusetp += chunk_size-1)
+    hwloc_distribute(topology, root->children[u], cpusetp, chunk_size-1);
 }
 
 /** @} */

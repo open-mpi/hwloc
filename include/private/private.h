@@ -218,7 +218,7 @@ static __inline void
 hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
   struct hwloc_obj *obj;
-  int j;
+  unsigned j;
 
   hwloc_debug("%d %s\n", num, hwloc_obj_type_string(type));
 

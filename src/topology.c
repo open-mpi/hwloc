@@ -262,7 +262,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
   unsigned groupids[nbobjs];
-  int nbgroups;
+  unsigned nbgroups;
   unsigned i,j;
 
   hwloc_debug("trying to group %s objects into misc objects according to physical distances\n",
@@ -806,9 +806,9 @@ apply_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data)
 {
   hwloc_cpuset_t nodeset = data;
   hwloc_obj_t obj = *pobj;
-  if (obj->type == HWLOC_OBJ_NODE && obj->os_index != -1 &&
+  if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
       !hwloc_cpuset_isset(nodeset, obj->os_index)) {
-    hwloc_debug("Dropping memory from disallowed node %d\n", obj->os_index);
+    hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
     obj->attr->node.memory_kB = 0;
     obj->attr->node.huge_page_free = 0;
   }
@@ -1647,7 +1647,7 @@ static void
 hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
 {
   hwloc_cpuset_t remaining_father_set;
-  int j;
+  unsigned j;
 
   if (!father->arity) {
     /* check whether that father has no children for real */
@@ -1699,15 +1699,17 @@ void
 hwloc_topology_check(struct hwloc_topology *topology)
 {
   struct hwloc_obj *obj;
-  int i,j;
   hwloc_obj_type_t type;
-  unsigned depth;
+  unsigned i, j, depth;
 
   /* check type orders */
-  for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
+  for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
     assert(hwloc_get_order_type(hwloc_get_type_order(type)) == type);
-  for (i = hwloc_get_order_type(HWLOC_OBJ_SYSTEM); i <= hwloc_get_order_type(HWLOC_OBJ_CORE); i++)
-    assert(hwloc_get_type_order(hwloc_get_order_type(i)) == i);
+  }
+  for (i = (unsigned) hwloc_get_order_type(HWLOC_OBJ_SYSTEM); 
+       i <= (unsigned) hwloc_get_order_type(HWLOC_OBJ_CORE); i++) {
+    assert(i == (unsigned) hwloc_get_type_order(hwloc_get_order_type(i)));
+  }
 
   /* check that first level is SYSTEM */
   assert(hwloc_get_depth_type(topology, 0) == HWLOC_OBJ_SYSTEM);
@@ -1758,8 +1760,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
     /* check type */
     assert(hwloc_get_depth_type(topology, i) == obj->type);
-    assert(hwloc_get_type_depth(topology, obj->type) == i
-	   || hwloc_get_type_depth(topology, obj->type) == HWLOC_TYPE_DEPTH_MULTIPLE);
+    assert(i = (unsigned) hwloc_get_type_depth(topology, obj->type) ||
+           HWLOC_TYPE_DEPTH_MULTIPLE == hwloc_get_type_depth(topology, obj->type));
 
     /* check last object of the level */
     obj = hwloc_get_obj_by_depth(topology, i, width-1);

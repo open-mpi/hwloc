@@ -21,7 +21,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 {
   const char *pos, *next_pos;
   unsigned long item, count;
-  int i;
+  unsigned i;
   int cache_depth = 0, misc_depth = 0;
   int nb_machine_levels = 0, nb_node_levels = 0;
 
@@ -31,7 +31,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
   topology->backend_params.synthetic.id[0] = 0;
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
-#define HWLOC_OBJ_TYPE_UNKNOWN -1
+#define HWLOC_OBJ_TYPE_UNKNOWN ((unsigned) -1)
     hwloc_obj_type_t type = HWLOC_OBJ_TYPE_UNKNOWN;
 
     while (*pos == ' ')

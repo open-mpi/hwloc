@@ -24,7 +24,7 @@
 
 int hwloc_snprintf(char *str, size_t size, const char *format, ...)
 {
-  int ret;
+  unsigned ret;
   va_list ap;
   static char bin;
 
@@ -314,7 +314,7 @@ void hwloc_cpuset_set(struct hwloc_cpuset_s * set, unsigned cpu)
 
 void hwloc_cpuset_set_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsigned endcpu)
 {
-	int i;
+	unsigned i;
 
 	HWLOC__CPUSET_CHECK(set);
 
@@ -331,7 +331,7 @@ void hwloc_cpuset_clr(struct hwloc_cpuset_s * set, unsigned cpu)
 
 void hwloc_cpuset_clr_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsigned endcpu)
 {
-	int i;
+	unsigned i;
 
 	HWLOC__CPUSET_CHECK(set);
 
