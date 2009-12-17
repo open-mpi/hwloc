@@ -179,7 +179,7 @@ hwloc_obj_snprintf(char *string, size_t size,
   char os_index[12] = "";
 
   if (l->os_index != (unsigned) -1) {
-      snprintf(os_index, 12, "%s%d", indexprefix, (int) l->os_index);
+      snprintf(os_index, 12, "%s%u", indexprefix, l->os_index);
   }
 
   switch (type) {
