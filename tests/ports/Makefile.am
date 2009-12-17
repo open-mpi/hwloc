@@ -12,14 +12,20 @@ check_LTLIBRARIES = libhwloc-ports.la
 endif
 
 libhwloc_ports_la_SOURCES = $(SRC)/topology.c $(SRC)/traversal.c $(SRC)/topology-synthetic.c
-libhwloc_ports_la_CFLAGS = -I$(top_srcdir)/tests/ports/include -DHWLOC_COMPILE_PORTS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT
+libhwloc_ports_la_CFLAGS = -I$(top_srcdir)/tests/ports/include -DHWLOC_COMPILE_PORTS
 
 libhwloc_ports_la_SOURCES += $(SRC)/topology-solaris.c
+libhwloc_ports_la_CFLAGS  += -DHWLOC_SOLARIS_SYS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT 
 libhwloc_ports_la_SOURCES += $(SRC)/topology-aix.c
+libhwloc_ports_la_CFLAGS  += -DHWLOC_AIX_SYS
 libhwloc_ports_la_SOURCES += $(SRC)/topology-osf.c
+libhwloc_ports_la_CFLAGS  += -DHWLOC_OSF_SYS
 libhwloc_ports_la_SOURCES += $(SRC)/topology-windows.c
+libhwloc_ports_la_CFLAGS  += -DHWLOC_WIN_SYS
 libhwloc_ports_la_SOURCES += $(SRC)/topology-darwin.c
+libhwloc_ports_la_CFLAGS  += -DHWLOC_DARWIN_SYS
 libhwloc_ports_la_SOURCES += $(SRC)/topology-hpux.c
+libhwloc_ports_la_CFLAGS  += -DHWLOC_HPUX_SYS
 
 EXTRA_DIST = \
 		include/windows.h \
