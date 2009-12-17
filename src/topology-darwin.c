@@ -97,7 +97,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
     size = sizeof(cachesize);
     sysctlbyname("hw.cachesize", cachesize, &size, NULL, 0);
 
-    hwloc_debug("caches");
+    hwloc_debug("%s", "caches");
     for (i = 0; i < n && cacheconfig[i]; i++)
       hwloc_debug(" %"PRId64"(%"PRId64"kB)", cacheconfig[i], cachesize[i] / 1024);
 
