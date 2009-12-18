@@ -107,7 +107,7 @@ hwloc_freebsd_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int p
 
 #ifdef hwloc_thread_t
 
-#ifdef HAVE_DECL_PTHREAD_SETAFFINITY_NP
+#if HAVE_DECL_PTHREAD_SETAFFINITY_NP
 #pragma weak pthread_setaffinity_np
 static int
 hwloc_freebsd_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t hwloc_cpuset, int policy)
@@ -133,7 +133,7 @@ hwloc_freebsd_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, 
 }
 #endif
 
-#ifdef HAVE_DECL_PTHREAD_GETAFFINITY_NP
+#if HAVE_DECL_PTHREAD_GETAFFINITY_NP
 #pragma weak pthread_getaffinity_np
 static hwloc_cpuset_t
 hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy)
@@ -194,10 +194,10 @@ hwloc_set_freebsd_hooks(struct hwloc_topology *topology)
   topology->set_proc_cpubind = hwloc_freebsd_set_proc_cpubind;
   topology->get_proc_cpubind = hwloc_freebsd_get_proc_cpubind;
 #ifdef hwloc_thread_t
-#ifdef HAVE_DECL_PTHREAD_SETAFFINITY_NP
+#if HAVE_DECL_PTHREAD_SETAFFINITY_NP
   topology->set_thread_cpubind = hwloc_freebsd_set_thread_cpubind;
 #endif
-#ifdef HAVE_DECL_PTHREAD_GETAFFINITY_NP
+#if HAVE_DECL_PTHREAD_GETAFFINITY_NP
   topology->get_thread_cpubind = hwloc_freebsd_get_thread_cpubind;
 #endif
 #endif
