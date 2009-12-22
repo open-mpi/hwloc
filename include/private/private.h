@@ -247,11 +247,11 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
   hwloc_debug("%s", "\n");
 }
 
-/* Compile-time assertion */
-#define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
-
 /* On some systems, snprintf returns the size of written data, not the actually
  * required size.  hwloc_snprintf always report the actually required size. */
 int hwloc_snprintf(char *str, size_t size, const char *format, ...);
+
+/* Compile-time assertion */
+#define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
 
 #endif /* HWLOC_PRIVATE_H */
