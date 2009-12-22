@@ -54,11 +54,11 @@ hwloc_get_next_iodevice(struct hwloc_topology *topology, struct hwloc_obj *prev)
   }
 }
 
-int hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, int max)
+unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, unsigned max)
 {
   struct hwloc_obj *parent, *nextparent, **src_objs;
   int i,src_nbobjects;
-  int stored = 0;
+  unsigned stored = 0;
 
   src_nbobjects = topology->level_nbobjects[src->depth];
   src_objs = topology->levels[src->depth];
@@ -95,7 +95,7 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_cp
 				       struct hwloc_obj ***res, int *max)
 {
   int gotten = 0;
-  int i;
+  unsigned i;
 
   /* the caller must ensure this */
   assert(*max > 0);
@@ -114,13 +114,13 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_cp
     /* split out the cpuset part corresponding to this child and see if there's anything to do */
     hwloc_cpuset_andset(subset, current->children[i]->cpuset);
     if (hwloc_cpuset_iszero(subset)) {
-      free(subset);
+      hwloc_cpuset_free(subset);
       continue;
     }
 
     ret = hwloc__get_largest_objs_inside_cpuset (current->children[i], subset, res, max);
     gotten += ret;
-    free(subset);
+    hwloc_cpuset_free(subset);
 
     /* if no more room to store remaining objects, return what we got so far */
     if (!*max)
@@ -351,8 +351,9 @@ hwloc_obj_snprintf(char *string, size_t size,
   const char *indexprefix = _indexprefix ? _indexprefix : "#";
   char os_index[12] = "";
 
-  if (l->os_index != -1)
-    snprintf(os_index, 12, "%s%d", indexprefix, l->os_index);
+  if (l->os_index != (unsigned) -1) {
+      snprintf(os_index, 12, "%s%u", indexprefix, l->os_index);
+  }
 
   switch (type) {
   case HWLOC_OBJ_SOCKET:
@@ -434,13 +435,13 @@ int hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_
 {
   hwloc_cpuset_t set = hwloc_cpuset_alloc();
   int res;
-  int i;
+  unsigned i;
 
   hwloc_cpuset_zero(set);
   for(i=0; i<nobj; i++)
     hwloc_cpuset_orset(set, objs[i]->cpuset);
 
   res = hwloc_cpuset_snprintf(str, size, set);
-  free(set);
+  hwloc_cpuset_free(set);
   return res;
 }

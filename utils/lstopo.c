@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef HAVE_CAIRO
+#ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
 #endif
 
@@ -40,7 +40,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "To force a text output on the standard output, specify - or /dev/stdout as\nfilename.\n");
   fprintf (where, "To specify a semi-graphical text output on the standard output, specify -.txt\nas filename.\n");
   fprintf (where, "Recognised file formats are: .txt, .fig"
-#ifdef HAVE_CAIRO
+#ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_PDF_SURFACE
 		  ", .pdf"
 #endif /* CAIRO_HAS_PDF_SURFACE */
@@ -53,10 +53,10 @@ static void usage(char *name, FILE *where)
 #if CAIRO_HAS_SVG_SURFACE
 		  ", .svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
-#endif /* HAVE_CAIRO */
-#ifdef HAVE_XML
+#endif /* HWLOC_HAVE_CAIRO */
+#ifdef HWLOC_HAVE_XML
 		  ", .xml"
-#endif /* HAVE_XML */
+#endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nOptions:\n");
   fprintf (where, "   -v --verbose          increase verbosity (disabled by default)\n");
@@ -67,11 +67,11 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --whole-system        do not consider administration limitations\n");
   fprintf (where, "   --merge               do not show levels that do not have a hierarcical\n"
                   "                         impact\n");
-#ifdef HAVE_LIBPCI
+#ifdef HWLOC_HAVE_LIBPCI
   fprintf (where, "   --whole-pci           show all PCI devices and bridges\n");
   fprintf (where, "   --no-pci              do not show any PCI device or bridge\n");
 #endif
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
   fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
 #endif
 #ifdef HWLOC_LINUX_SYS
@@ -100,6 +100,7 @@ main (int argc, char *argv[])
   char * synthetic = NULL;
   const char * xmlpath = NULL;
   char * fsysroot = NULL;
+  int force_console = 0;
   int opt;
 
   callname = strrchr(argv[0], '/');
@@ -115,11 +116,13 @@ main (int argc, char *argv[])
   while (argc >= 2)
     {
       opt = 0;
-      if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose"))
+      if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose")) {
 	verbose_mode++;
-      else if (!strcmp (argv[1], "-s") || !strcmp (argv[1], "--silent"))
+	force_console = 1;
+      } else if (!strcmp (argv[1], "-s") || !strcmp (argv[1], "--silent")) {
 	verbose_mode--;
-      else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
+	force_console = 1;
+      } else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
       }
@@ -161,7 +164,7 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	synthetic = argv[2]; opt = 1;
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
       } else if (!strcmp (argv[1], "--xml")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
@@ -170,7 +173,7 @@ main (int argc, char *argv[])
 	xmlpath = argv[2]; opt = 1;
 	if (!strcmp(xmlpath, "-"))
 	  xmlpath = "/dev/stdin";
-#endif /* HAVE_XML */
+#endif /* HWLOC_HAVE_XML */
 #ifdef HWLOC_LINUX_SYS
       } else if (!strcmp (argv[1], "--fsys-root")) {
 	if (argc <= 2) {
@@ -222,13 +225,13 @@ main (int argc, char *argv[])
   }
 
   if (!filename) {
-#ifdef HAVE_CAIRO
-#if CAIRO_HAS_XLIB_SURFACE && defined HAVE_X11
-    if (getenv("DISPLAY"))
+#ifdef HWLOC_HWLOC_HAVE_CAIRO
+#if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
+    if (!force_console && getenv("DISPLAY"))
       output_x11(topology, NULL, verbose_mode);
     else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
-#endif /* HAVE_CAIRO */
+#endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_WIN_SYS
       output_windows(topology, NULL, verbose_mode);
 #else
@@ -241,7 +244,7 @@ main (int argc, char *argv[])
     output_text(topology, filename, verbose_mode);
   else if (strstr(filename, ".fig"))
     output_fig(topology, filename, verbose_mode);
-#ifdef HAVE_CAIRO
+#ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_PNG_FUNCTIONS
   else if (strstr(filename, ".png"))
     output_png(topology, filename, verbose_mode);
@@ -258,8 +261,8 @@ main (int argc, char *argv[])
   else if (strstr(filename, ".svg"))
     output_svg(topology, filename, verbose_mode);
 #endif /* CAIRO_HAS_SVG_SURFACE */
-#endif /* HAVE_CAIRO */
-#ifdef HAVE_XML
+#endif /* HWLOC_HAVE_CAIRO */
+#ifdef HWLOC_HAVE_XML
   else if (strstr(filename, ".xml"))
     output_xml(topology, filename, verbose_mode);
 #endif

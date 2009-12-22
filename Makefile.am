@@ -1,12 +1,17 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-ACLOCAL_AMFLAGS = -I config -I m4
+# Note that the -I directory must *exactly* match what was specified
+# via AC_CONFIG_MACRO_DIR in configure.ac.
+ACLOCAL_AMFLAGS = -I ./config
 
 SUBDIRS = src utils tests include doc
 
+# Only install the pkg file if we're building standalone
+if HWLOC_BUILD_STANDALONE
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hwloc.pc
+endif
 
 #
 # "make distcheck" requires that tarballs are able to be able to "make
@@ -29,10 +34,13 @@ cannot-dist:
 	@echo "ERROR: Cowardly refusing to complete successfully..."
 	@exit 1
 
-if !BUILD_DOXYGEN
+# Refuse to make dist if we can't make the doxygen stuff (note that
+# BUILD_DOXYGEN will automatically be false if we're not building
+# standalone).
+if !HWLOC_BUILD_DOXYGEN
 dist-hook: cannot-dist
 else
-if !BUILD_README
+if !HWLOC_BUILD_README
 dist-hook: cannot-dist
 else
 dist-hook:
@@ -41,9 +49,11 @@ endif
 endif
 
 #
-# Build the top-level README file
+# Build the top-level README file -- only in standalone mode
 #
 
+if HWLOC_BUILD_STANDALONE
 .PHONY: doc readme
 doc readme:
 	$(MAKE) -C doc readme
+endif

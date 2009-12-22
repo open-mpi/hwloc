@@ -20,7 +20,7 @@
 
 #define OBJ_MAX 16
 
-int main()
+int main(void)
 {
   hwloc_topology_t topology;
   unsigned depth;
@@ -50,13 +50,13 @@ int main()
   set = hwloc_cpuset_alloc();
   ret = hwloc_get_largest_objs_inside_cpuset(topology, set, objs, 1);
   assert(ret == 0);
-  free(set);
+  hwloc_cpuset_free(set);
 
   /* try an impossible one */
   set = hwloc_cpuset_from_string(GIVEN_TOOLARGE_CPUSET_STRING);
   ret = hwloc_get_largest_objs_inside_cpuset(topology, set, objs, 1);
   assert(ret == -1);
-  free(set);
+  hwloc_cpuset_free(set);
 
   /* try a harder one with 1 obj instead of 2 needed */
   set = hwloc_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING);
@@ -68,7 +68,7 @@ int main()
   assert(ret == 2);
   assert(objs[0] == hwloc_get_obj_by_depth(topology, depth-1, 0));
   assert(objs[1] == hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1)-1));
-  free(set);
+  hwloc_cpuset_free(set);
 
   /* try a very hard one */
   set = hwloc_cpuset_from_string(GIVEN_HARD_CPUSET_STRING);
@@ -80,7 +80,7 @@ int main()
   assert(objs[4] == hwloc_get_obj_by_depth(topology, 2, 2));
   assert(objs[5] == hwloc_get_obj_by_depth(topology, 4, 36));
   assert(objs[6] == hwloc_get_obj_by_depth(topology, 5, 74));
-  free(set);
+  hwloc_cpuset_free(set);
 
   hwloc_topology_destroy(topology);
 

@@ -177,7 +177,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
       .nattr_flags = 0,
     };
 
-    for (radid = 0; radid < nbnodes; radid++) {
+    for (radid = 0; radid < (radid_t) nbnodes; radid++) {
       rademptyset(radset);
       radaddset(radset, radid);
       cpuemptyset(cpuset);
@@ -201,7 +201,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, obj);
 
       nfound = 0;
-      for (radid2 = 0; radid2 < nbnodes; radid2++)
+      for (radid2 = 0; radid2 < (radid_t) nbnodes; radid2++)
 	distances[radid][radid2] = RAD_DIST_REMOTE;
       for (distance = RAD_DIST_LOCAL; distance < RAD_DIST_REMOTE; distance++) {
 	attr.nattr_distance = distance;

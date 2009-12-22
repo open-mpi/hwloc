@@ -1,17 +1,17 @@
 # Copyright © 2009 INRIA, Université Bordeaux 1
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-include $(top_srcdir)/hwloc.am
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 
-DOCDIR = $(top_builddir)/doc
-DOX_CONFIG = $(top_srcdir)/doc/doxygen.cfg
+DOCDIR = $(HWLOC_top_builddir)/doc
+DOX_CONFIG = $(HWLOC_top_srcdir)/doc/doxygen.cfg
 
-DOX_DIR = $(DOCDIR)/doxygen-doc
+DOX_DIR = doxygen-doc
 DOX_HTML_DIR = $(DOX_DIR)/html
 DOX_MAN_DIR = $(DOX_DIR)/man
 DOX_LATEX_DIR = $(DOX_DIR)/latex
-DOX_A4PDF = $(DOX_DIR)/$(PACKAGE)-a4.pdf
-DOX_LETTERPDF = $(DOX_DIR)/$(PACKAGE)-letter.pdf
+DOX_A4PDF = doxygen-doc/$(PACKAGE)-a4.pdf
+DOX_LETTERPDF = doxygen-doc/$(PACKAGE)-letter.pdf
 DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 
 #
@@ -51,14 +51,14 @@ EXTRA_DIST = \
 
 dox_inputs = $(DOX_CONFIG) \
        $(srcdir)/hwloc.doxy \
-       $(top_srcdir)/include/hwloc.h \
-       $(top_srcdir)/include/hwloc/helper.h \
-       $(top_srcdir)/include/hwloc/cpuset.h \
-       $(top_srcdir)/include/hwloc/glibc-sched.h \
-       $(top_srcdir)/include/hwloc/linux.h \
-       $(top_srcdir)/include/hwloc/linux-libnuma.h \
-       $(top_srcdir)/include/hwloc/openfabrics-verbs.h \
-       $(top_srcdir)/include/hwloc/plpa.h
+       $(HWLOC_top_srcdir)/include/hwloc.h \
+       $(HWLOC_top_srcdir)/include/hwloc/helper.h \
+       $(HWLOC_top_srcdir)/include/hwloc/cpuset.h \
+       $(HWLOC_top_srcdir)/include/hwloc/glibc-sched.h \
+       $(HWLOC_top_srcdir)/include/hwloc/linux.h \
+       $(HWLOC_top_srcdir)/include/hwloc/linux-libnuma.h \
+       $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h \
+       $(HWLOC_top_srcdir)/include/hwloc/plpa.h
 
 #
 # Create the images that we need for the PDF output and the HTML
@@ -66,8 +66,11 @@ dox_inputs = $(DOX_CONFIG) \
 # AC_PATH_PROG found something in configure.ac (!), so we have to put
 # a run-time check here to see if fig2dev was found.  :-(
 #
+# Note that BUILD_DOXYGEN will automatically be false if we're not
+# building standalone.
+#
 
-if BUILD_DOXYGEN
+if HWLOC_BUILD_DOXYGEN
 BUILT_SOURCES = $(image_built_sources)
 
 images/diagram.png: $(srcdir)/images/diagram.fig
@@ -92,7 +95,7 @@ endif
 # dox_inputs.
 #
 
-if BUILD_DOXYGEN
+if HWLOC_BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
@@ -103,9 +106,7 @@ endif
 # Rules for building the PDF
 #
 
-if BUILD_DOXYGEN
-# Make both an A4wide PDF and a US letter PDF
-$(DOX_PDF): $(DOX_TAG)
+if HWLOC_BUILD_DOXYGEN
 
 # The Doxygen config is set to generate a4 latex -- no transformation
 # is necessary.
@@ -125,7 +126,7 @@ $(DOX_A4PDF): $(DOX_TAG)
 	       done=1; \
 	   fi; \
 	done; \
-	mv a4-refman.pdf ../../$(DOX_A4PDF)
+	mv a4-refman.pdf $(DOCDIR)/$(DOX_A4PDF)
 
 # The Doxygen config is set to generate a4 latex -- slightly transform
 # to make suitable for US letter.
@@ -145,7 +146,7 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 	       done=1; \
 	   fi; \
 	done; \
-	mv letter-refman.pdf ../../$(DOX_LETTERPDF)
+	mv letter-refman.pdf $(DOCDIR)/$(DOX_LETTERPDF)
 endif
 
 #
@@ -159,7 +160,7 @@ endif
 # pre-bundled in a tarball).
 #
 
-if BUILD_DOXYGEN
+if HWLOC_BUILD_DOXYGEN
 all-local: $(DOX_TAG)
 	if test -d $(DOX_HTML_DIR) -a -f $(DOX_HTML_DIR)/doxygen.css; then \
 	    cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR); \
@@ -167,10 +168,12 @@ all-local: $(DOX_TAG)
 endif
 
 #
-# Un/install the generated PDF and man pages
+# Un/install the generated PDF and man pages (just like BUILD_DOXYGEN,
+# INSTALL_DOXYGEN will automatically be false if we're not building in
+# standalone mode).
 #
 
-if INSTALL_DOXYGEN
+if HWLOC_INSTALL_DOXYGEN
 dist_pdf_DATA = $(DOX_A4PDF) $(DOX_LETTERPDF)
 endif
 
@@ -180,7 +183,7 @@ endif
 # in the Makefile.am...  :-(
 #
 
-if INSTALL_DOXYGEN
+if HWLOC_INSTALL_DOXYGEN
 man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_CPUBIND_PROCESS.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_CPUBIND_STRICT.3 \
@@ -208,8 +211,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clearset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr_range.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compar.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compar_first.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare_first.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_fill.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_first.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_begin.3 \
@@ -348,7 +351,7 @@ endif
 # that we don't get partial target errors.
 #
 
-if BUILD_DOXYGEN
+if HWLOC_BUILD_DOXYGEN
 $(man3_MANS): $(DOX_TAG)
 $(DOX_A4PDF): $(DOX_TAG)
 $(DOX_LETTERPDF): $(DOX_TAG)
@@ -361,10 +364,12 @@ endif
 # Make sure that the documentation example works
 #
 
+if HWLOC_BUILD_STANDALONE
 TESTS = hwloc-hello
 check_PROGRAMS = $(TESTS)
+endif
 
-hwloc_hello_LDADD = $(top_builddir)/src/libhwloc.la
+hwloc_hello_LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 hwloc_hello_DEPENDENCIES = $(hwloc_hello_LDADD)
 
 #
@@ -383,16 +388,19 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
 # Rules for creating the top-level README file.  There does not appear
 # to be an easy way to know if AC_PATH_PROG found something in
 # configure.ac (!), so put a run-time check here to see if we have
-# w3c.
+# w3c.  
+#
+# Just like BUILD_DOXYGEN, BUILD_README will automatically be false if
+# we're not building standalone.
 #
 
-if BUILD_README
-doc readme: all $(top_srcdir)/README
-$(top_srcdir)/README: $(DOX_HTML_DIR)
-	LC_ALL=C $(W3_GENERATOR) $(DOX_HTML_DIR)/index.html | sed -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
+if HWLOC_BUILD_README
+doc readme: all $(HWLOC_top_srcdir)/README
+$(HWLOC_top_srcdir)/README: $(DOX_HTML_DIR)
+	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_DIR)/index.html | sed -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
 else
 doc readme: no-build-readme
-$(top_srcdir)/README: no-build-readme
+$(HWLOC_top_srcdir)/README: no-build-readme
 
 no-build-readme:
 	@echo "ERROR: You do not have the 'w3m' or 'lynx' executables to build the README, or do not have the 'doxygen' executable to build the docs."

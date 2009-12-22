@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -12,7 +13,7 @@
 
 /* check hwloc_cpuset_singlify() */
 
-int main()
+int main(void)
 {
   hwloc_cpuset_t orig, expected;
 
@@ -28,7 +29,7 @@ int main()
   hwloc_cpuset_singlify(orig);
   hwloc_cpuset_zero(expected);
   hwloc_cpuset_set(expected, 0);
-  assert(!hwloc_cpuset_compar(orig, expected));
+  assert(!hwloc_cpuset_compare(orig, expected));
 
   /* actual non-trivial set */
   hwloc_cpuset_zero(orig);
@@ -38,7 +39,7 @@ int main()
   hwloc_cpuset_singlify(orig);
   hwloc_cpuset_zero(expected);
   hwloc_cpuset_set(expected, 45);
-  assert(!hwloc_cpuset_compar(orig, expected));
+  assert(!hwloc_cpuset_compare(orig, expected));
 
   hwloc_cpuset_free(orig);
   hwloc_cpuset_free(expected);

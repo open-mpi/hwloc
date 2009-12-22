@@ -12,6 +12,7 @@ typedef int radset_cursor_t;
 typedef int radid_t;
 #define RAD_NONE -1
 typedef struct {
+  int foo;
 } radset_t;
 typedef unsigned int nsgid_t;
 #define NSG_NONE -1

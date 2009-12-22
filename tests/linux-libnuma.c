@@ -116,7 +116,7 @@ int main(void)
       assert(!mask);
     } else {
       assert(maxnode = node->os_index + 1);
-      assert(mask == (1<<node->os_index));
+      assert(mask == (1U<<node->os_index));
     }
   }
 

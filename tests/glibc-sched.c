@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -26,7 +27,7 @@ int main(void)
 
   hwlocset = hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
   hwloc_cpuset_to_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   err = sched_setaffinity(0, sizeof(schedset));
 #else
   err = sched_setaffinity(0, sizeof(schedset), &schedset);
@@ -34,7 +35,7 @@ int main(void)
   assert(!err);
   hwloc_cpuset_free(hwlocset);
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   err = sched_getaffinity(0, sizeof(schedset));
 #else
   err = sched_getaffinity(0, sizeof(schedset), &schedset);
@@ -53,7 +54,7 @@ int main(void)
 
   hwlocset = hwloc_cpuset_dup(obj->cpuset);
   hwloc_cpuset_to_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   err = sched_setaffinity(0, sizeof(schedset));
 #else
   err = sched_setaffinity(0, sizeof(schedset), &schedset);
@@ -61,7 +62,7 @@ int main(void)
   assert(!err);
   hwloc_cpuset_free(hwlocset);
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   err = sched_getaffinity(0, sizeof(schedset));
 #else
   err = sched_getaffinity(0, sizeof(schedset), &schedset);

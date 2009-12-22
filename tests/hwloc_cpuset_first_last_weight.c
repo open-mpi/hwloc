@@ -9,7 +9,7 @@
 
 /* check hwloc_cpuset_first(), _last() and _weight() */
 
-int main()
+int main(void)
 {
   hwloc_cpuset_t set;
 

@@ -24,6 +24,8 @@ typedef int rsinfo_t;
 #define R_SMPSDL 4
 #define R_MCMSDL 5
 #define R_MAXPROCS 6
+#define R_L2CSDL 11
+#define R_CORESDL 12
 
 #define R_PROCS 6
 

@@ -166,7 +166,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cp
 
   /* The resulting binding is always strict */
 
-#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
   cpu_set_t *plinux_set;
   unsigned cpu;
   size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
@@ -192,19 +192,19 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cp
     CPU_SET(cpu, &linux_set);
   hwloc_cpuset_foreach_end();
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   return sched_setaffinity(tid, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
 #else /* !CPU_SET */
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   return sched_setaffinity(tid, (void*) &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
 #endif /* !CPU_SET */
 }
 
@@ -215,7 +215,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
   int err;
   /* TODO Kerrighed */
 
-#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
   cpu_set_t *plinux_set;
   unsigned cpu;
   size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
@@ -239,11 +239,11 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
   cpu_set_t linux_set;
   unsigned cpu;
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   err = sched_getaffinity(tid, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   err = sched_getaffinity(tid, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   if (err < 0)
     return NULL;
 
@@ -254,11 +254,11 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
 #else /* !CPU_SET */
   unsigned long mask;
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   err = sched_getaffinity(tid, (void*) &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   err = sched_getaffinity(tid, sizeof(mask), (void*) &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   if (err < 0)
     return NULL;
 
@@ -319,6 +319,8 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
 static int
 hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
+  int err;
+
   if (tid == pthread_self())
     return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 
@@ -345,11 +347,11 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
          CPU_SET(cpu, &linux_set);
      hwloc_cpuset_foreach_end();
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
-     return pthread_setaffinity_np(tid, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
-     return pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
+     err = pthread_setaffinity_np(tid, &linux_set);
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
+     err = pthread_setaffinity_np(tid, sizeof(linux_set), &linux_set);
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   }
 #else /* CPU_SET */
   /* Use a separate block so that we can define specific variable
@@ -357,13 +359,19 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
   {
       unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
-      return pthread_setaffinity_np(tid, (void*) &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
-      return pthread_setaffinity_np(tid, sizeof(mask), (void*) &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
+      err = pthread_setaffinity_np(tid, (void*) &mask);
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
+      err = pthread_setaffinity_np(tid, sizeof(mask), (void*) &mask);
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   }
 #endif /* CPU_SET */
+
+  if (err) {
+    errno = err;
+    return -1;
+  }
+  return 0;
 }
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
 
@@ -393,13 +401,15 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
      cpu_set_t linux_set;
      unsigned cpu;
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
      err = pthread_getaffinity_np(tid, &linux_set);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
      err = pthread_getaffinity_np(tid, sizeof(linux_set), &linux_set);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
-     if (err < 0)
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
+     if (err) {
+        errno = err;
 	return NULL;
+     }
 
      hwloc_set = hwloc_cpuset_alloc();
      for(cpu=0; cpu<CPU_SETSIZE; cpu++)
@@ -412,13 +422,15 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
   {
       unsigned long mask;
 
-#ifdef HAVE_OLD_SCHED_SETAFFINITY
+#ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
       err = pthread_getaffinity_np(tid, (void*) &mask);
-#else /* HAVE_OLD_SCHED_SETAFFINITY */
+#else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
       err = pthread_getaffinity_np(tid, sizeof(mask), (void*) &mask);
-#endif /* HAVE_OLD_SCHED_SETAFFINITY */
-      if (err < 0)
+#endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
+      if (err) {
+        errno = err;
 	return NULL;
+      }
 
      hwloc_set = hwoc_cpuset_alloc();
      hwloc_cpuset_from_ulong(hwloc_set, mask);
@@ -559,7 +571,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
   char *tmp;
 
   /* check whether a cgroup-cpuset is enabled */
-  fd = hwloc_fopen("proc/self/cgroup", "r", fsroot_fd);
+  fd = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
   if (fd) {
     /* find a cpuset line */
 #define CGROUP_LINE_LEN 256
@@ -583,10 +595,10 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
   }
 
   /* check whether a cpuset is enabled */
-  fd = hwloc_fopen("proc/self/cpuset", "r", fsroot_fd);
+  fd = hwloc_fopen("/proc/self/cpuset", "r", fsroot_fd);
   if (!fd) {
     /* found nothing */
-    hwloc_debug("No cgroup or cpuset found\n");
+    hwloc_debug("%s", "No cgroup or cpuset found\n");
     return NULL;
   }
 
@@ -1093,7 +1105,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   long physid;
   long coreid;
   long processor = -1;
-  int i;
+  unsigned i;
   hwloc_cpuset_t cpuset;
   hwloc_obj_t obj;
 
@@ -1108,14 +1120,14 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 
   if (!(fd=hwloc_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
     {
-      hwloc_debug("could not open /proc/cpuinfo\n");
+      hwloc_debug("%s", "could not open /proc/cpuinfo\n");
       return -1;
     }
 
   cpuset = hwloc_cpuset_alloc();
   /* Just record information and count number of sockets and cores */
 
-  hwloc_debug("\n\n * Topology extraction from /proc/cpuinfo *\n\n");
+  hwloc_debug("%s", "\n\n * Topology extraction from /proc/cpuinfo *\n\n");
   while (fgets(str,sizeof(str),fd)!=NULL)
     {
 #      define getprocnb_begin(field, var)		     \
@@ -1125,19 +1137,19 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	var = strtoul(c,&endptr,0);			     \
 	if (endptr==c)							\
 	  {								\
-            hwloc_debug("no number in "field" field of /proc/cpuinfo\n"); \
+            hwloc_debug("%s", "no number in "field" field of /proc/cpuinfo\n"); \
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
 	else if (var==LONG_MIN)						\
 	  {								\
-            hwloc_debug("too small "field" number in /proc/cpuinfo\n"); \
+            hwloc_debug("%s", "too small "field" number in /proc/cpuinfo\n"); \
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
 	else if (var==LONG_MAX)						\
 	  {								\
-            hwloc_debug("too big "field" number in /proc/cpuinfo\n"); \
+            hwloc_debug("%s", "too big "field" number in /proc/cpuinfo\n"); \
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
@@ -1203,7 +1215,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
   hwloc_debug_cpuset("online processor cpuset: %s\n", online_cpuset);
 
-  hwloc_debug("\n * Topology summary *\n");
+  hwloc_debug("%s", "\n * Topology summary *\n");
   hwloc_debug("%d processors (%d max id)\n", numprocs, procid_max);
 
   hwloc_debug("%d sockets\n", numsockets);

@@ -9,7 +9,7 @@
 #include <private/private.h>
 #include <private/debug.h>
 
-#ifdef HAVE_LIBPCI
+#ifdef HWLOC_HAVE_LIBPCI
 
 #include <pci/pci.h>
 #include <stdio.h>
@@ -436,4 +436,4 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   }
 }
 
-#endif /* HAVE_LIBPCI */
+#endif /* HWLOC_HAVE_LIBPCI */

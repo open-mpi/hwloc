@@ -29,7 +29,7 @@
  * function returns the depth of the first "present" object typically found
  * inside \p type.
  */
-static __inline unsigned
+static __inline int
 hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -52,7 +52,7 @@ hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * function returns the depth of the first "present" object typically
  * containing \p type.
  */
-static __inline unsigned
+static __inline int
 hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -243,7 +243,7 @@ static __inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
 				      unsigned depth, unsigned idx)
 {
-  int count = 0;
+  unsigned count = 0;
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   while (obj) {
     if (hwloc_cpuset_isincluded(obj->cpuset, set)) {
@@ -460,7 +460,7 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
  *  \return the number of objects returned in \p objs.
  */
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? By returning the total number of objects instead? */
-extern int hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, hwloc_obj_t * __hwloc_restrict objs, int max);
+extern unsigned hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, hwloc_obj_t * __hwloc_restrict objs, unsigned max);
 
 /** @} */
 
@@ -483,10 +483,11 @@ extern int hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, h
  * before binding a thread, so that it doesn't move at all.
  */
 static __inline void
-hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, int n)
+hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, unsigned n)
 {
-  int i;
-  int chunk_size, complete_chunks;
+  unsigned i;
+  unsigned u;
+  unsigned chunk_size, complete_chunks;
   hwloc_cpuset_t *cpusetp;
 
   if (!root->arity || n == 1) {
@@ -509,10 +510,10 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
     hwloc_distribute(topology, root->children[i], cpusetp, chunk_size);
 
   /* Now allocate not-so-complete chunks.  */
-  for ( ;
-       i < root->arity;
-       i++, cpusetp += chunk_size-1)
-    hwloc_distribute(topology, root->children[i], cpusetp, chunk_size-1);
+  for (u = i;
+       u < root->arity;
+       u++, cpusetp += chunk_size-1)
+    hwloc_distribute(topology, root->children[u], cpusetp, chunk_size-1);
 }
 
 /** @} */

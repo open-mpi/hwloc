@@ -64,7 +64,7 @@ int main(void)
 
   hwloc_topology_destroy(topology);
 
-  free(cpuset);
+  hwloc_cpuset_free(cpuset);
 
   return 0;
 }

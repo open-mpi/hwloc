@@ -40,7 +40,7 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpus
   unsigned long outmaxnode = -1;
   hwloc_obj_t node = NULL;
   unsigned nbnodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
-  int i;
+  unsigned i;
 
   for(i=0; i<*maxnode/HWLOC_BITS_PER_LONG; i++)
     mask[i] = 0;
@@ -82,7 +82,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
   hwloc_cpuset_t cpuset;
   hwloc_obj_t node;
   int depth;
-  int i;
+  unsigned i;
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);

@@ -16,7 +16,7 @@ static void usage(FILE *where)
   fprintf(where, "Options:\n");
   fprintf(where, "   -v\t\t\tverbose messages\n");
   fprintf(where, "   --synthetic \"2 2\"\tsimulate a fake hierarchy\n");
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
   fprintf(where, "   --xml <path>\t\tread topology from XML file <path>\n");
 #endif
   fprintf(where, "   --version\t\treport version and exit\n");
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
           printf("%s %s\n", orig_argv[0], VERSION);
           exit(EXIT_SUCCESS);
       }
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
       if (!strcmp (argv[0], "--xml")) {
 	if (argc <= 2) {
 	  usage(stdout);
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	  xmlpath = "/dev/stdin";
 	goto next;
       }
-#endif /* HAVE_XML */
+#endif /* HWLOC_HAVE_XML */
 
       usage(stderr);
       return EXIT_FAILURE;
@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
       hwloc_cpuset_asprintf(&str, cpuset[i]);
       printf("%s\n", str);
       free(str);
+      hwloc_cpuset_free(cpuset[i]);
     }
     hwloc_topology_destroy(topology);
   }

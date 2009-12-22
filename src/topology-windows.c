@@ -237,7 +237,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
       }
 
       unsigned id;
-      int i;
+      unsigned i;
       struct hwloc_obj *obj;
       hwloc_obj_type_t type;
 

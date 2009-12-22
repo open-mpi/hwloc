@@ -1,94 +1,112 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-include $(top_srcdir)/hwloc.am
-
-AM_CFLAGS += $(XML_CFLAGS) $(PCI_CFLAGS)
-
-lib_LTLIBRARIES = libhwloc.la
+AM_CFLAGS = $(HWLOC_GCC_CFLAGS) $(HWLOC_XML_CFLAGS) $(HWLOC_PCI_CFLAGS)
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
+AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 EXTRA_DIST = dolib.c
 
-libhwloc_la_SOURCES = topology.c traversal.c topology-synthetic.c bind.c cpuset.c
-libhwloc_la_LDFLAGS = -version-number $(libhwloc_so_version) $(XML_LIBS) $(PCI_LIBS)
+# If we're in standalone mode, build the installable library.
+# Otherwise, build the embedded library.
 
-if HAVE_GCC
-libhwloc_la_LDFLAGS += -no-undefined
+if HWLOC_BUILD_STANDALONE
+lib_LTLIBRARIES = libhwloc.la
+else
+noinst_LTLIBRARIES = libhwloc_embedded.la
 endif
 
-if HAVE_WINDOWS
-libhwloc_la_LDFLAGS += -Xlinker --output-def -Xlinker .libs/libhwloc.def
+# Sources and ldflags
 
-if HAVE_MS_LIB
+sources = \
+        topology.c \
+        traversal.c \
+        topology-synthetic.c \
+        bind.c \
+        cpuset.c
+ldflags =
+
+# Conditionally add to the sources and ldflags
+
+if HWLOC_HAVE_XML
+sources += topology-xml.c
+endif HWLOC_HAVE_XML
+
+if HWLOC_HAVE_LIBPCI
+sources += topology-libpci.c
+endif HWLOC_HAVE_LIBPCI
+
+if HWLOC_HAVE_SOLARIS
+sources += topology-solaris.c
+endif HWLOC_HAVE_SOLARIS
+
+if HWLOC_HAVE_LINUX
+sources += topology-linux.c
+endif HWLOC_HAVE_LINUX
+
+if HWLOC_HAVE_AIX
+sources += topology-aix.c
+ldflags += -lpthread
+endif HWLOC_HAVE_AIX
+
+if HWLOC_HAVE_OSF
+sources += topology-osf.c
+ldflags += -lnuma -lpthread
+endif HWLOC_HAVE_OSF
+
+if HWLOC_HAVE_HPUX
+sources += topology-hpux.c
+ldflags += -lpthread
+endif HWLOC_HAVE_HPUX
+
+if HWLOC_HAVE_WINDOWS
+sources += topology-windows.c
+endif HWLOC_HAVE_WINDOWS
+
+if HWLOC_HAVE_DARWIN
+sources += topology-darwin.c
+endif HWLOC_HAVE_DARWIN
+
+if HWLOC_HAVE_FREEBSD
+sources += topology-freebsd.c
+endif HWLOC_HAVE_FREEBSD
+
+if HWLOC_HAVE_GCC
+ldflags += -no-undefined
+endif HWLOC_HAVE_GCC
+
+if HWLOC_HAVE_WINDOWS
+ldflags += -Xlinker --output-def -Xlinker .libs/libhwloc.def
+
+if HWLOC_HAVE_MS_LIB
 .libs/libhwloc.lib: libhwloc.la dolib
 	./dolib "$(HWLOC_MS_LIB)" X86 .libs/libhwloc.def libhwloc-$(HWLOC_SOVERSION) .libs/libhwloc.lib
 all-local: .libs/libhwloc.lib
-endif
+endif HWLOC_HAVE_MS_LIB
 
 install-exec-hook:
 	$(INSTALL) .libs/libhwloc.def $(DESTDIR)$(libdir)
-if HAVE_MS_LIB
+if HWLOC_HAVE_MS_LIB
 	$(INSTALL) .libs/libhwloc.lib $(DESTDIR)$(libdir)
 	$(INSTALL) .libs/libhwloc.exp $(DESTDIR)$(libdir)
-endif
-endif
+endif HWLOC_HAVE_MS_LIB
+endif HWLOC_HAVE_WINDOWS
 
-if HAVE_XML
-libhwloc_la_SOURCES += topology-xml.c
-else !HAVE_XML
-EXTRA_DIST += topology-xml.c
-endif !HAVE_XML
+# Installable library
 
-if HAVE_LIBPCI
-libhwloc_la_SOURCES += topology-libpci.c
-else !HAVE_LIBPCI
-EXTRA_DIST += topology-libpci.c
-endif !HAVE_LIBPCI
+libhwloc_la_SOURCES = $(sources)
+libhwloc_la_LDFLAGS = $(ldflags) -version-number $(libhwloc_so_version) $(HWLOC_XML_LIBS) $(HWLOC_PCI_LIBS)
 
-if HAVE_SOLARIS
-libhwloc_la_SOURCES += topology-solaris.c
-else !HAVE_SOLARIS
-EXTRA_DIST += topology-solaris.c
-endif !HAVE_SOLARIS
+# Embedded library (note the lack of a .so version number -- that
+# intentionally only appears in the installable library)
 
-if HAVE_LINUX
-libhwloc_la_SOURCES += topology-linux.c
-else !HAVE_LINUX
-EXTRA_DIST += topology-linux.c
-endif !HAVE_LINUX
+libhwloc_embedded_la_SOURCES = $(sources)
+libhwloc_embedded_la_LDFLAGS = $(ldflags) $(HWLOC_XML_LIBS)
 
-if HAVE_AIX
-libhwloc_la_SOURCES += topology-aix.c
-libhwloc_la_LDFLAGS += -lpthread
-else !HAVE_AIX
-EXTRA_DIST += topology-aix.c
-endif !HAVE_AIX
+# XML data (only install if we're building in standalone mode)
 
-if HAVE_OSF
-libhwloc_la_SOURCES += topology-osf.c
-libhwloc_la_LDFLAGS += -lnuma -lpthread
-else !HAVE_OSF
-EXTRA_DIST += topology-osf.c
-endif !HAVE_OSF
-
-if HAVE_HPUX
-libhwloc_la_SOURCES += topology-hpux.c
-libhwloc_la_LDFLAGS += -lpthread
-else !HAVE_HPUX
-EXTRA_DIST += topology-hpux.c
-endif !HAVE_HPUX
-
-if HAVE_WINDOWS
-libhwloc_la_SOURCES += topology-windows.c
-else !HAVE_WINDOWS
-EXTRA_DIST += topology-windows.c
-endif !HAVE_WINDOWS
-
-if HAVE_DARWIN
-libhwloc_la_SOURCES += topology-darwin.c
-else !HAVE_DARWIN
-EXTRA_DIST += topology-darwin.c
-endif !HAVE_DARWIN
-
+if HWLOC_BUILD_STANDALONE
 xml_DATA = $(srcdir)/hwloc.dtd
 xmldir = $(pkgdatadir)
 EXTRA_DIST += hwloc.dtd
+endif

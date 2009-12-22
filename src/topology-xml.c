@@ -1,5 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -8,7 +9,7 @@
 #include <private/private.h>
 #include <private/debug.h>
 
-#ifdef HAVE_XML
+#ifdef HWLOC_HAVE_XML
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -54,19 +55,13 @@ hwloc__process_root_attr(struct hwloc_topology *topology,
   if (!strcmp(name, "complete_cpuset")) {
     hwloc_cpuset_free(topology->complete_cpuset);
     topology->complete_cpuset = hwloc_cpuset_from_string(value);
-  }
-
-  if (!strcmp(name, "online_cpuset")) {
+  } else if (!strcmp(name, "online_cpuset")) {
     hwloc_cpuset_free(topology->online_cpuset);
     topology->online_cpuset = hwloc_cpuset_from_string(value);
-  }
-
-  if (!strcmp(name, "allowed_cpuset")) {
+  } else if (!strcmp(name, "allowed_cpuset")) {
     hwloc_cpuset_free(topology->allowed_cpuset);
     topology->allowed_cpuset = hwloc_cpuset_from_string(value);
-  }
-
-  else
+  } else
     fprintf(stderr, "ignoring unknown root attribute %s\n", name);
 }
 
@@ -507,7 +502,7 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
   }
 
   if (obj->arity) {
-    int x;
+    unsigned x;
     for (x=0; x<obj->arity; x++)
       hwloc__topology_export_xml_object (topology, obj->children[x], node);
   }
@@ -561,4 +556,4 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
   xmlCleanupParser();
 }
 
-#endif /* HAVE_XML */
+#endif /* HWLOC_HAVE_XML */

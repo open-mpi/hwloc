@@ -26,7 +26,7 @@ main (int argc, char *argv[])
   unsigned depth;
   hwloc_obj_t last;
   hwloc_obj_t *closest;
-  int found;
+  unsigned found;
   int err;
   unsigned numprocs;
 

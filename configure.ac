@@ -1,33 +1,35 @@
-# -*- autoconf -*-
+# -*- shell-script -*-
 #
 # Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 #
 # See COPYING in top-level directory.
+# 
+# Additional copyrights may follow
+# 
+# $HEADER$
 #
 
-#
-# Initialize autostuff
-#
-
-AC_PREREQ([2.63])
 AC_INIT([hwloc], 
         [m4_normalize(esyscmd([config/hwloc_get_version.sh VERSION --base]))],
         [http://www.open-mpi.org/community/help/], [hwloc])
-AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_MACRO_DIR([config])
-AC_CANONICAL_SYSTEM
-AC_CONFIG_SRCDIR([src/topology.c])
+AC_PREREQ(2.63)
+AC_CONFIG_AUX_DIR(./config)
+# Note that this directory must *exactly* match what was specified via
+# -I in ACLOCAL_AMFLAGS in the top-level Makefile.am.
+AC_CONFIG_MACRO_DIR(./config)
 
+# This must be before AM_INIT_AUTOMAKE
+AC_CANONICAL_TARGET
+
+# Init automake
 AM_INIT_AUTOMAKE([1.10 dist-bzip2 foreign tar-ustar -Wall -Werror])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Make configure depend on the VERSION file, since it's used in AC_INIT
-
 AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
 
 # Get the version of hwloc that we are installing
-
 AC_MSG_CHECKING([for hwloc version])
 HWLOC_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION`"
 HWLOC_MAJOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --major`"
@@ -64,7 +66,6 @@ VERSION="${PACKAGE_VERSION}"
 AC_SUBST([libhwloc_so_version])
 
 # Setup the header file
-
 AH_TOP([/* -*- c -*-
  *
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
@@ -86,509 +87,26 @@ AH_BOTTOM([
 #endif /* HWLOC_CONFIGURE_H */
 ])
 
-# We only build documentation if this is a developer checkout.
-# Distribution tarballs just install pre-built docuemntation that was
-# included in the tarball.
+# Setup C compiler
 
-AC_MSG_CHECKING([if this is a developer build])
-AS_IF([test ! -d "$srcdir/.svn" -a ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
-      [AC_MSG_RESULT([no (doxygen generation is optional)])],
-      [AC_MSG_RESULT([yes])])
-
-# Generating the doxygen output requires a few tools.  If we
-# don't have all of them, refuse the build the docs.
-AC_ARG_VAR([DOXYGEN], [Location of the doxygen program (required for building the hwloc doxygen documentation)])
-AC_PATH_TOOL([DOXYGEN], [doxygen])
-
-AC_ARG_VAR([PDFLATEX], [Location of the pdflatex program (required for building the hwloc doxygen documentation)])
-AC_PATH_TOOL([PDFLATEX], [pdflatex])
-
-AC_ARG_VAR([MAKEINDEX], [Location of the makeindex program (required for building the hwloc doxygen documentation)])
-AC_PATH_TOOL([MAKEINDEX], [makeindex])
-
-AC_ARG_VAR([FIG2DEV], [Location of the fig2dev program (required for building the hwloc doxygen documentation)])
-AC_PATH_TOOL([FIG2DEV], [fig2dev])
-
-AC_MSG_CHECKING([if can build doxygen docs])
-AS_IF([test "x$DOXYGEN" != "x" -a "x$PDFLATEX" != "x" -a "x$MAKEINDEX" != "x" -a "x$FIG2DEV" != "x"],
-             [generate_doxs=yes], [generate_doxs=no])
-AC_MSG_RESULT([$generate_doxs])
-
-# Making the top-level README requires w3m or lynx.
-AC_ARG_VAR([W3M], [Location of the w3m program (required to building the top-level hwloc README file)])
-AC_PATH_TOOL([W3M], [w3m])
-AC_ARG_VAR([LYNX], [Location of the lynx program (required to building the top-level hwloc README file)])
-AC_PATH_TOOL([LYNX], [lynx])
-
-AC_MSG_CHECKING([if can build top-level README])
-AS_IF([test "x$W3M" != "x"],
-      [generate_readme=yes
-       W3_GENERATOR=$W3M],
-      [AS_IF([test "x$LYNX" != "x"],
-             [generate_readme=yes
-              W3_GENERATOR="$LYNX -dump -nolist"],
-             [generate_readme=no])])
-AC_SUBST(W3_GENERATOR)
-AC_MSG_RESULT([$generate_readme])
-
-# If any one of the above tools is missing, we will refuse to make dist.
-
-AC_ARG_ENABLE([doxygen],
-    [AC_HELP_STRING([--enable-doxygen],
-                    [enable support for building Doxygen documentation (note that this option is ONLY relevant in developer builds; Doxygen documentation is pre-built for tarball builds and this option is therefore ignored)])])
-AC_MSG_CHECKING([if will build doxygen docs])
-AS_IF([test "x$generate_doxs" = "xyes" -a "x$enable_doxygen" != "xno"],
-      [], [generate_doxs=no])
-AC_MSG_RESULT([$generate_doxs])
-
-# See if we want to install the doxygen docs
-AC_MSG_CHECKING([if will install doxygen docs])
-AS_IF([test "x$generate_doxs" = "xyes" -o \
-	    -f "$srcdir/doc/doxygen-doc/man/man3/hwloc_distribute.3" -a \
-	    -f "$srcdir/doc/doxygen-doc/hwloc-a4.pdf" -a \
-	    -f "$srcdir/doc/doxygen-doc/hwloc-letter.pdf"],
-      [install_doxs=yes],
-      [install_doxs=no])
-AC_MSG_RESULT([$install_doxs])
-
-AM_CONDITIONAL([BUILD_DOXYGEN], [test "x$generate_doxs" = "xyes"])
-AM_CONDITIONAL([BUILD_README], [test "x$generate_readme" = "xyes" -a \( "x$install_doxs" = "xyes" -o "x$generate_doxs" = "xyes" \) ])
-AM_CONDITIONAL([INSTALL_DOXYGEN], [test "x$install_doxs" = "xyes"])
-
-#
-# Check OS support
-#
-
-AC_MSG_CHECKING([which OS support to include])
-case ${target} in
-  *-*-linux*)
-    AC_DEFINE(HWLOC_LINUX_SYS, 1, [Define to 1 on Linux])
-    linux=yes
-    AC_MSG_RESULT([Linux])
-    ;;
-  *-*-irix*)
-    AC_DEFINE(HWLOC_IRIX_SYS, 1, [Define to 1 on Irix])
-    irix=yes
-    AC_MSG_RESULT([IRIX])
-    ;;
-  *-*-darwin*)
-    AC_DEFINE(HWLOC_DARWIN_SYS, 1, [Define to 1 on Darwin])
-    darwin=yes
-    AC_MSG_RESULT([Darwin])
-    ;;
-  *-*-solaris*)
-    AC_DEFINE(HWLOC_SOLARIS_SYS, 1, [Define to 1 on Solaris])
-    solaris=yes
-    AC_MSG_RESULT([Solaris])
-    ;;
-  *-*-aix*)
-    AC_DEFINE(HWLOC_AIX_SYS, 1, [Define to 1 on AIX])
-    aix=yes
-    AC_MSG_RESULT([AIX])
-    ;;
-  *-*-osf*)
-    AC_DEFINE(HWLOC_OSF_SYS, 1, [Define to 1 on OSF])
-    osf=yes
-    AC_MSG_RESULT([OSF])
-    ;;
-  *-*-hpux*)
-    AC_DEFINE(HWLOC_HPUX_SYS, 1, [Define to 1 on HP-UX])
-    hpux=yes
-    AC_MSG_RESULT([HP-UX])
-    ;;
-  *-*-mingw*|*-*-cygwin*)
-    AC_DEFINE(HWLOC_WIN_SYS, 1, [Define to 1 on WINDOWS])
-    windows=yes
-    AC_MSG_RESULT([Windows])
-    ;;
-  *)
-    AC_MSG_RESULT([Unsupported! ($target)])
-    AC_DEFINE(HWLOC_UNSUPPORTED_SYS, 1, [Define to 1 on unsupported systems])
-    AC_MSG_WARN([***********************************************************])
-    AC_MSG_WARN([*** hwloc does not support this system.])
-    AC_MSG_WARN([*** hwloc will *attempt* to build (but it may not work).])
-    AC_MSG_WARN([*** hwloc's run-time results may be reduced to showing just one processor.])
-    AC_MSG_WARN([*** You have been warned.])
-    AC_MSG_WARN([*** Pausing to give you time to read this message...])
-    AC_MSG_WARN([***********************************************************])
-    sleep 10
-    ;;
-esac
-
-AM_CONDITIONAL([HAVE_LINUX], [test "x$linux" = "xyes"])
-AM_CONDITIONAL([HAVE_IRIX], [test "x$irix" = "xyes"])
-AM_CONDITIONAL([HAVE_DARWIN], [test "x$darwin" = "xyes"])
-AM_CONDITIONAL([HAVE_SOLARIS], [test "x$solaris" = "xyes"])
-AM_CONDITIONAL([HAVE_AIX], [test "x$aix" = "xyes"])
-AM_CONDITIONAL([HAVE_OSF], [test "x$osf" = "xyes"])
-AM_CONDITIONAL([HAVE_HPUX], [test "x$hpux" = "xyes"])
-AM_CONDITIONAL([HAVE_WINDOWS], [test "x$windows" = "xyes"])
-AM_CONDITIONAL([HAVE_MINGW32], [test "x$target_os" = "xmingw32"])
-
-#
-# Define C flags
-#
-
-AC_USE_SYSTEM_EXTENSIONS # for O_DIRECTORY, fdopen, ffsl, ...
-AH_VERBATIM([USE_HPUX_SYSTEM_EXTENSIONS],
-[/* Enable extensions on HP-UX. */
-#ifndef _HPUX_SOURCE
-# undef _HPUX_SOURCE
-#endif
-])
-AC_DEFINE([_HPUX_SOURCE])
-
-AC_LANG([C])
-
+CFLAGS_save="$CFLAGS"
+AC_PROG_CC
 AM_PROG_CC_C_O
-AC_PROG_CC_C99
-AC_PROG_LN_S
-AC_PROG_INSTALL
-AC_PROG_MKDIR_P
-# FIXME: may fail:
-AC_PROG_EGREP
-PKG_CHECK_EXISTS
+CFLAGS="$CFLAGS_save"
 
-HWLOC_GCC_FLAGS
-HWLOC_CHECK_DIFF_U
+# Setup hwloc (taking all defaults)
+HWLOC_INIT([], [hwloc_setup=happy], [hwloc_setup=unhappy])
+AS_IF([test "$hwloc_setup" = "unhappy"],
+      [AC_MSG_ERROR([Cannot continue])])
 
-AC_CHECK_SIZEOF([unsigned long])
-AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_LONG], $ac_cv_sizeof_unsigned_long, [The size of `unsigned long', as computed by sizeof])
-AC_CHECK_SIZEOF([unsigned int])
-AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The size of `unsigned int', as computed by sizeof])
-
-#
-# Now detect support
-#
-
-hwloc_strncasecmp=strncmp
-AC_CHECK_FUNCS([strncasecmp], [
-  HWLOC_CHECK_DECL([strncasecmp], [
-    hwloc_strncasecmp=strncasecmp
-  ])
-])
-AC_DEFINE_UNQUOTED(hwloc_strncasecmp, $hwloc_strncasecmp, [Define this to either strncasecmp or strncmp])
-
-AC_CHECK_TYPES([wchar_t], [
-  AC_CHECK_FUNCS([putwc])
-], [], [[#include <wchar.h>]])
-
-AC_CHECK_HEADERS([locale.h], [
-  AC_CHECK_FUNCS([setlocale])
-])
-AC_CHECK_HEADERS([langinfo.h], [
-  AC_CHECK_FUNCS([nl_langinfo])
-])
-old_LIBS="$LIBS"
-LIBS=
-AC_CHECK_HEADERS([curses.h], [
-  AC_CHECK_HEADERS([term.h], [
-    AC_SEARCH_LIBS([tparm], [termcap curses], [
-        AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
-        AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
-                  [Define to 1 if you have a library providing the termcap interface])
-      ])
-  ], [], [[#include <curses.h>]])
-])
-LIBS="$old_LIBS"
-
-AC_CHECK_TYPES([KAFFINITY,
-    		    PROCESSOR_CACHE_TYPE,
-		    CACHE_DESCRIPTOR,
-		    LOGICAL_PROCESSOR_RELATIONSHIP,
-		    SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
-		    GROUP_AFFINITY,
-		    PROCESSOR_RELATIONSHIP,
-		    NUMA_NODE_RELATIONSHIP,
-		    CACHE_RELATIONSHIP,
-		    PROCESSOR_GROUP_INFO,
-		    GROUP_RELATIONSHIP,
-		    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX],
-		    [],[],[[#include <windows.h>]])
-AC_HAVE_LIBRARY(gdi32)
-
-AC_CHECK_HEADER([windows.h], [
-  AC_DEFINE([HWLOC_HAVE_WINDOWS_H], [1], [Define to 1 if you have the `windows.h' header.])
-])
-
-AC_CHECK_HEADERS([sys/lgrp_user.h], [
-  AC_HAVE_LIBRARY([lgrp])
-])
-AC_CHECK_HEADERS([kstat.h], [
-  AC_HAVE_LIBRARY([kstat])
-])
-
-AC_CHECK_HEADERS([infiniband/verbs.h], [
-  AC_HAVE_LIBRARY([ibverbs], [have_libibverbs=yes])
-])
-AM_CONDITIONAL([HAVE_LIBIBVERBS], [test "x$have_libibverbs" = "xyes"])
-
-AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
-		_SC_NPROCESSORS_CONF,
-		_SC_NPROC_ONLN,
-		_SC_NPROC_CONF,
-		_SC_LARGE_PAGESIZE],,[:],[[#include <unistd.h>]])
-
-AC_HAVE_HEADERS([mach/mach_host.h])
-AC_HAVE_HEADERS([mach/mach_init.h], [
-  AC_CHECK_FUNCS([host_info])
-])
-
-AC_CHECK_HEADERS([sys/param.h])
-AC_CHECK_HEADERS([sys/sysctl.h], [
-  AC_CHECK_DECLS([CTL_HW, HW_NCPU],,,[[
-  #if HAVE_SYS_PARAM_H
-  #include <sys/param.h>
-  #endif
-  #include <sys/sysctl.h>
-  ]])
-],,[
-  AC_INCLUDES_DEFAULT
-  #if HAVE_SYS_PARAM_H
-  #include <sys/param.h>
-  #endif
-])
-AC_CHECK_FUNCS([sysctl sysctlbyname])
-
-case ${target} in
-  *-*-mingw*|*-*-cygwin*)
-    hwloc_pid_t=HANDLE
-    hwloc_thread_t=HANDLE
-    ;;
-  *)
-    hwloc_pid_t=pid_t
-    AC_CHECK_TYPES([pthread_t], [hwloc_thread_t=pthread_t], [:], [[#include <pthread.h>]])
-    ;;
-esac
-AC_DEFINE_UNQUOTED(hwloc_pid_t, $hwloc_pid_t, [Define this to the process ID type])
-if test "x$hwloc_thread_t" != "x" ; then
-  AC_DEFINE_UNQUOTED(hwloc_thread_t, $hwloc_thread_t, [Define this to the thread ID type])
+if test "$hwloc_debug" = "1"; then
+    CFLAGS="$CFLAGS -g"
 fi
 
-HWLOC_CHECK_DECL([sched_setaffinity], [
-  AC_MSG_CHECKING([for old prototype of sched_setaffinity])
-  AC_COMPILE_IFELSE(
-    AC_LANG_PROGRAM([[
-      #define _GNU_SOURCE
-      #include <sched.h>
-      static unsigned long mask;
-      ]], [[ sched_setaffinity(0, (void*) &mask);
-      ]]),
-    AC_DEFINE([HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
-    AC_MSG_RESULT([yes]),
-    AC_MSG_RESULT([no])
-  )
-])
+# Setup libtool
+AM_ENABLE_SHARED
+AM_DISABLE_STATIC
+AM_PROG_LIBTOOL
 
-AC_MSG_CHECKING([for working CPU_SET])
-AC_LINK_IFELSE(
-  AC_LANG_PROGRAM([[
-    #include <sched.h>
-    cpu_set_t set;
-    ]], [[ CPU_ZERO(&set); CPU_SET(0, &set);
-    ]]),
-    AC_DEFINE([HWLOC_HAVE_CPU_SET], [1], [Define to 1 if the CPU_SET macro works])
-    AC_MSG_RESULT([yes]),
-    AC_MSG_RESULT([no])
-)
-
-AC_MSG_CHECKING([for working CPU_SET_S])
-AC_LINK_IFELSE(
-  AC_LANG_PROGRAM([[
-      #include <sched.h>
-      cpu_set_t *set;
-    ]], [[
-      set = CPU_ALLOC(1024);
-      CPU_ZERO_S(CPU_ALLOC_SIZE(1024), set);
-      CPU_SET_S(CPU_ALLOC_SIZE(1024), 0, set);
-      CPU_FREE(set);
-    ]]),
-    AC_DEFINE([HWLOC_HAVE_CPU_SET_S], [1], [Define to 1 if the CPU_SET_S macro works])
-    AC_MSG_RESULT([yes]),
-    AC_MSG_RESULT([no])
-)
-
-AC_ARG_ENABLE([cairo],
-  [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
-  [enable_cairo="$enableval"],
-  [enable_cairo="yes"])
-
-if test "x$enable_cairo" = "xyes"; then
-  PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
-  if test "x$enable_cairo" = "xyes"; then
-    AC_PATH_X
-    AC_CHECK_HEADERS([X11/Xlib.h], [
-      AC_CHECK_HEADERS([X11/Xutil.h X11/keysym.h], [
-        AC_CHECK_LIB([X11], [XOpenDisplay], [
-          enable_X11=yes
-          AC_SUBST([HWLOC_X11_LIBS], ["-lX11"])
-          AC_DEFINE([HAVE_X11], [1], [Define to 1 if X11 libraries are available.])
-        ])]
-      )],,
-      [[#include <X11/Xlib.h>]]
-    )
-    if test "x$enable_X11" != "xyes"; then
-      AC_MSG_WARN([X11 headers not found, Cairo/X11 back-end disabled])
-    fi
-  fi
-fi
-
-if test "x$enable_cairo" = "xyes"; then
-  AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
-fi
-AM_CONDITIONAL([HAVE_CAIRO], [test "x$enable_cairo" = "xyes"])
-
-AC_ARG_ENABLE([xml],
-  [AS_HELP_STRING([--disable-xml], [disable the XML back-end of `lstopo'])],
-  [enable_xml="$enableval"],
-  [enable_xml="yes"])
-
-if test "x$enable_xml" = "xyes"; then
-  PKG_CHECK_MODULES([XML], [libxml-2.0], [:], [enable_xml="no"])
-fi
-
-if test "x$enable_xml" = "xyes"; then
-  HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
-  AC_DEFINE([HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
-  AC_SUBST([HAVE_XML], [1])
-else
-  AC_SUBST([HAVE_XML], [0])
-fi
-AM_CONDITIONAL([HAVE_XML], [test "x$enable_xml" = "xyes"])
-
-AC_ARG_ENABLE([pci],
-  [AS_HELP_STRING([--disable-pci], [disable the PCI device discovery using libpci])],
-  [enable_pci="$enableval"],
-  [enable_pci="yes"])
-
-if test "x$enable_pci" = "xyes"; then
-  PKG_CHECK_MODULES([PCI], [libpci], [:], [
-    # manually check pciutils in case a old one without .pc is installed
-    AC_CHECK_HEADERS([pci/pci.h], [
-      AC_CHECK_LIB([pci], [pci_cleanup], [
-        PCI_LIBS="-lpci"
-        AC_SUBST(PCI_LIBS)
-      ], [enable_pci=no])
-    ], [enable_pci=no])
-  ])
-fi
-AM_CONDITIONAL([HAVE_LIBPCI], [test "x$enable_pci" = "xyes"])
-
-if test "x$enable_pci" = "xyes"; then
-  HWLOC_REQUIRES="libpci $HWLOC_REQUIRES"
-  AC_DEFINE([HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
-  AC_SUBST([HAVE_LIBPCI], [1])
-else
-  AC_SUBST([HAVE_LIBPCI], [0])
-fi
-AM_CONDITIONAL([HAVE_LIBPCI], [test "x$enable_pci" = "xyes"])
-
-# check for kerrighed, but don't abort if not found
-PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [:])
-
-# disable C++, F77, Java and Windows Resource Compiler support
-LT_PREREQ([2.2.6])
-LT_INIT
-LT_LANG([C])
-AC_LIBTOOL_WIN32_DLL
-AM_CONDITIONAL([HAVE_GCC], [test "x$GCC" = "xyes"])
-AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
-AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
-AM_CONDITIONAL([HAVE_MS_LIB], [test "x$HWLOC_MS_LIB" != "x"])
-
-AC_ARG_ENABLE([debug],
-  AS_HELP_STRING([--enable-debug], [enable debugging messages]),
-  [enable_debug="$enableval"],
-  [enable_debug="no"])
-
-AC_MSG_CHECKING([whether debug is enabled])
-if test x$enable_debug = xyes; then
-  AC_DEFINE_UNQUOTED([HWLOC_DEBUG], [1], [Define to 1 to enable debug])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_PATH_PROG([BASH], [bash])
-
-AC_CHECK_FUNCS([ffs], [
-  HWLOC_CHECK_DECL([ffs],[
-    AC_DEFINE([HWLOC_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
-  ])
-  AC_DEFINE([HWLOC_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
-])
-AC_CHECK_FUNCS([ffsl], [
-  HWLOC_CHECK_DECL([ffsl],[
-    AC_DEFINE([HWLOC_HAVE_DECL_FFSL], [1], [Define to 1 if function `ffsl' is declared by system headers])
-  ])
-  AC_DEFINE([HWLOC_HAVE_FFSL], [1], [Define to 1 if you have the `ffsl' function.])
-])
-
-AC_CHECK_FUNCS([fls], [
-  HWLOC_CHECK_DECL([fls],[
-    AC_DEFINE([HWLOC_HAVE_DECL_FLS], [1], [Define to 1 if function `fls' is declared by system headers])
-  ])
-  AC_DEFINE([HWLOC_HAVE_FLS], [1], [Define to 1 if you have the `fls' function.])
-])
-AC_CHECK_FUNCS([flsl], [
-  HWLOC_CHECK_DECL([flsl],[
-    AC_DEFINE([HWLOC_HAVE_DECL_FLSL], [1], [Define to 1 if function `flsl' is declared by system headers])
-  ])
-  AC_DEFINE([HWLOC_HAVE_FLSL], [1], [Define to 1 if you have the `flsl' function.])
-])
-
-AC_CHECK_FUNCS([clz], [
-  HWLOC_CHECK_DECL([clz],[
-    AC_DEFINE([HWLOC_HAVE_DECL_CLZ], [1], [Define to 1 if function `clz' is declared by system headers])
-  ])
-  AC_DEFINE([HWLOC_HAVE_CLZ], [1], [Define to 1 if you have the `clz' function.])
-])
-AC_CHECK_FUNCS([clzl], [
-  HWLOC_CHECK_DECL([clzl],[
-    AC_DEFINE([HWLOC_HAVE_DECL_CLZL], [1], [Define to 1 if function `clzl' is declared by system headers])
-  ])
-  AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
-])
-
-AC_CHECK_FUNCS([openat], [have_openat=yes])
-AM_CONDITIONAL([HAVE_OPENAT], [test "x$have_openat" = "xyes"])
-
-AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
-	      [#include <numa.h>])
-AM_CONDITIONAL([HAVE_LINUX_LIBNUMA], [test "x$have_linux_libnuma" = "xyes"])
-
-AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[#include <pthread.h>]])
-AC_CHECK_DECLS([pthread_getaffinity_np],,[:],[[#include <pthread.h>]])
-AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
-AM_CONDITIONAL([HAVE_SCHED_SETAFFINITY], [test "x$have_sched_setaffinity" = "xyes"])
-
-AC_CHECK_PROGS(XMLLINT, [xmllint])
-
-AC_SUBST(HWLOC_REQUIRES)
-
-AC_CONFIG_HEADER([include/private/config.h])
-
-AC_CONFIG_FILES([hwloc.pc
-		 doc/doxygen-config.cfg
-
-		 Makefile
-		 doc/Makefile
-                 include/Makefile
-		 src/Makefile 
-		 tests/Makefile 
-		 tests/linux/Makefile
-		 tests/linux/gather-topology.sh
-		 tests/linux/test-topology.sh
-		 tests/xml/Makefile
-		 tests/xml/test-topology.sh
-		 tests/ports/Makefile
-		 utils/Makefile
-		 utils/test-hwloc-distrib.sh
-])
-
-AC_CONFIG_HEADERS([include/hwloc/config.h])
-
-AC_CONFIG_COMMANDS([linux-topology-scripts],
-                   [chmod +x tests/linux/test-topology.sh tests/xml/test-topology.sh tests/linux/gather-topology.sh utils/test-hwloc-distrib.sh])
-
+# Party on
 AC_OUTPUT

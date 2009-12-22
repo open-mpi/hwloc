@@ -14,7 +14,7 @@
 
 #define SYNTHETIC_TOPOLOGY_DESCRIPTION "6 5 4 3 2" /* 736bits wide topology */
 
-int main()
+int main(void)
 {
   hwloc_topology_t topology;
   hwloc_obj_t obj, cache;
@@ -35,7 +35,7 @@ int main()
   assert(cache->type == HWLOC_OBJ_CACHE);
   assert(cache->logical_index == CPUINDEX/2/3);
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
-  free(set);
+  hwloc_cpuset_free(set);
 
   /* check the cache above two nearby cpus */
 #define CPUINDEX1 180
@@ -53,7 +53,7 @@ int main()
   assert(cache->logical_index == CPUINDEX1/2/3);
   assert(cache->logical_index == CPUINDEX2/2/3);
   assert(hwloc_obj_is_in_subtree(topology, obj, cache));
-  free(set);
+  hwloc_cpuset_free(set);
 
   /* check no cache above two distant cpus */
 #undef CPUINDEX1
@@ -67,7 +67,7 @@ int main()
   hwloc_cpuset_orset(set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(!cache);
-  free(set);
+  hwloc_cpuset_free(set);
 
   /* check no cache above higher level */
   set = hwloc_cpuset_alloc();
@@ -76,7 +76,7 @@ int main()
   hwloc_cpuset_orset(set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(!cache);
-  free(set);
+  hwloc_cpuset_free(set);
 
   hwloc_topology_destroy(topology);
 

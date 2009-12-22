@@ -19,6 +19,11 @@
 #include <limits.h>
 
 /*
+ * Symbol transforms
+ */
+#include <hwloc/rename.h>
+
+/*
  * Cpuset bitmask definitions
  */
 
@@ -106,13 +111,19 @@ typedef enum {
  *
  * Types shouldn't be compared as they are, since newer ones may be added in
  * the future.  This function returns less than, equal to, or greater than zero
- * if \p type1 is considered to be respectively higher than, equal to, or deeper
- * than \p type2 in the hierarchy.  If the types can not be compared (because
- * it does not make sense), HWLOC_TYPE_UNORDERED is returned.  Object types
- * containing CPUs can always be compared.
+ * respectively if \p type1 objects usually include \p type2 objects, are the
+ * same as \p type2 objects, or are included in \p type2 objects. If the types
+ * can not be compared (because neither is usually contained in the other),
+ * HWLOC_TYPE_UNORDERED is returned.  Object types containing CPUs can always
+ * be compared (usually, a system contains machines which contain nodes which
+ * contain sockets which contain caches, which contain cores, which contain
+ * processors).
  *
  * \note HWLOC_OBJ_SYSTEM will always be the highest, and
  * HWLOC_OBJ_PROC will always be the deepest.
+ * \note This does not mean that the actual topology will respect that order:
+ * e.g. as of today cores may also contain caches, and sockets may also contain
+ * nodes. This is thus just to be seen as a fallback comparison method.
  */
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2);
 
@@ -122,7 +133,9 @@ typedef enum hwloc_obj_bridge_e {
 } hwloc_obj_bridge_type_t;
 
 /** \brief Value returned by hwloc_compare_types when types can not be compared. */
-#define HWLOC_TYPE_UNORDERED INT_MAX
+enum {
+    HWLOC_TYPE_UNORDERED = INT_MAX
+};
 
 /** @} */
 
@@ -141,7 +154,7 @@ union hwloc_obj_attr_u;
 struct hwloc_obj {
   /* physical information */
   hwloc_obj_type_t type;		/**< \brief Type of object */
-  signed os_index;			/**< \brief OS-provided physical index number */
+  unsigned os_index;			/**< \brief OS-provided physical index number */
   char *name;				/**< \brief Object description if any */
 
   /** \brief Object type-specific Attributes */
@@ -177,6 +190,9 @@ struct hwloc_obj {
 
   signed os_level;			/**< \brief OS-provided physical level */
 };
+/**
+ * \brief Convenience typedef; a pointer to a struct hwloc_obj.
+ */
 typedef struct hwloc_obj * hwloc_obj_t;
 
 /** \brief Object type-specific Attributes */
@@ -477,8 +493,10 @@ extern unsigned hwloc_topology_get_depth(hwloc_topology_t  __hwloc_restrict topo
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  */
 extern int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
-#define HWLOC_TYPE_DEPTH_UNKNOWN -1 /**< \brief No object of given type exists in the topology. */
-#define HWLOC_TYPE_DEPTH_MULTIPLE -2 /**< \brief Objects of given type exist at different depth in the topology. */
+enum {
+    HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. */
+    HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. */
+};
 
 /** \brief Returns the type of objects at depth \p depth. */
 extern hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth);

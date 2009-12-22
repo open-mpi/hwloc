@@ -1,9 +1,9 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#define _TPARM_COMPAT
 #include <hwloc.h>
 #include <private/config.h>
 
@@ -41,7 +41,7 @@
 /* Recursively output topology in a console fashion */
 static void
 output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int verbose_mode) {
-  int x;
+  unsigned x;
   const char * indexprefix = "#";
   char line[256];
 
@@ -266,21 +266,21 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
   /* And now output magic string to TTY */
   if (set_a_foreground) {
     /* foreground */
-    if ((toput = tparm(set_a_foreground, textcolor)))
+    if ((toput = tparm(set_a_foreground, textcolor, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
     /* background */
-    if ((toput = tparm(set_a_background, color)))
+    if ((toput = tparm(set_a_background, color, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   } else if (set_foreground) {
     /* foreground */
-    if ((toput = tparm(set_foreground, textcolor)))
+    if ((toput = tparm(set_foreground, textcolor, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
     /* background */
-    if ((toput = tparm(set_background, color)))
+    if ((toput = tparm(set_background, color, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   } else if (set_color_pair) {
     /* pair */
-    if ((toput = tparm(set_color_pair, color)))
+    if ((toput = tparm(set_color_pair, color, 0, 0, 0, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   }
 }
@@ -299,10 +299,10 @@ text_declare_color(void *output, int r, int g, int b)
   char *toput;
 
   if (initc) {
-    if ((toput = tparm(initc, color + 16, rr, gg, bb)))
+    if ((toput = tparm(initc, color + 16, rr, gg, bb, 0, 0, 0, 0, 0)))
       tputs(toput, 1, myputchar);
   } else if (initp) {
-    if ((toput = tparm(initp, color + 16, 0, 0, 0, rr, gg, bb)))
+    if ((toput = tparm(initp, color + 16, 0, 0, 0, rr, gg, bb, 0, 0)))
       tputs(toput, 1, myputchar);
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
@@ -441,7 +441,8 @@ static void
 text_box(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned width, unsigned y1, unsigned height)
 {
   struct display *disp = output;
-  int x2, y2, i, j;
+  unsigned i, j;
+  unsigned x2, y2;
   x1 /= (gridsize/2);
   width /= (gridsize/2);
   y1 /= gridsize;
@@ -478,8 +479,7 @@ static void
 text_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct display *disp = output;
-  int i, j;
-  int z;
+  unsigned i, j, z;
   x1 /= (gridsize/2);
   y1 /= gridsize;
   x2 /= (gridsize/2);
@@ -629,11 +629,11 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
       putcharacter(disp->cells[j][i].c, output);
     }
 #ifdef HWLOC_HAVE_LIBTERMCAP
-    /* Keep the rest of the line black */
-    if (term) {
-      lfr = lfg = lfb = 0xff;
-      lbr = lbg = lbb = 0;
-      set_color(lfr, lfg, lfb, lbr, lbg, lbb);
+    /* Keep the rest of the line as default */
+    if (term && orig_pair) {
+      lfr = lfg = lfb = -1;
+      lbr = lbg = lbb = -1;
+      tputs(orig_pair, 1, myputchar);
     }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
     putcharacter('\n', output);

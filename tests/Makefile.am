@@ -1,12 +1,11 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
-# Copyright 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-include $(top_srcdir)/hwloc.am
+AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
+AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
+AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-SUBDIRS = linux ports
-if HAVE_XML
-SUBDIRS += xml
-endif
+SUBDIRS = linux ports xml
 
 check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_get_closest_objs \
@@ -23,36 +22,34 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_object_userdata \
 	hwloc_synthetic \
 	hwloc_is_thissystem \
-	hwloc_get_next_iodevice \
-	plpa
+	hwloc_get_next_iodevice
 
 EXTRA_DIST = 
 
-if HAVE_LINUX_LIBNUMA
+if HWLOC_HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma
-else !HAVE_LINUX_LIBNUMA
+else !HWLOC_HAVE_LINUX_LIBNUMA
 EXTRA_DIST += linux-libnuma.c
-endif !HAVE_LINUX_LIBNUMA
+endif !HWLOC_HAVE_LINUX_LIBNUMA
 
-if HAVE_SCHED_SETAFFINITY
+if HWLOC_HAVE_SCHED_SETAFFINITY
 check_PROGRAMS += glibc-sched
-else !HAVE_SCHED_SETAFFINITY
+else !HWLOC_HAVE_SCHED_SETAFFINITY
 EXTRA_DIST += glibc-sched.c
-endif !HAVE_SCHED_SETAFFINITY
+endif !HWLOC_HAVE_SCHED_SETAFFINITY
 
-if HAVE_LIBIBVERBS
+if HWLOC_HAVE_LIBIBVERBS
 check_PROGRAMS += openfabrics-verbs
-else !HAVE_LIBIBVERBS
+else !HWLOC_HAVE_LIBIBVERBS
 EXTRA_DIST += openfabrics-verbs.c
-endif !HAVE_LIBIBVERBS
+endif !HWLOC_HAVE_LIBIBVERBS
 
 TESTS = $(check_PROGRAMS)
 
-LIBS = $(top_builddir)/src/libhwloc.la
+LIBS = $(HWLOC_top_builddir)/src/libhwloc.la
 
 linux_libnuma_LDFLAGS = -lnuma
 openfabrics_verbs_LDFLAGS = -libverbs
-if HAVE_WINDOWS
-else
+if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
 endif
