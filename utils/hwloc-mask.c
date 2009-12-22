@@ -14,29 +14,13 @@
 
 static void usage(FILE *where)
 {
-  fprintf(where, "Usage: hwloc-mask [options] [string] ...\n");
-  fprintf(where, "\n<string> may be <depth:index>\n");
-  fprintf(where, "  -  <depth> may be system, machine, node, socket, core, proc or a numeric depth\n");
-  fprintf(where, "  -  <index> may be\n");
-  fprintf(where, "    .  X\tone object with index X\n");
-  fprintf(where, "    .  X-Y\tall objects with index between X and Y\n");
-  fprintf(where, "    .  X-\tall objects with index at least X\n");
-  fprintf(where, "    .  X:N\tN objects starting with index X, possibly wrapping-around the end of the level\n");
-  fprintf(where, "    .  all\tall objects\n");
-  fprintf(where, "    .  odd\tall objects with odd index\n");
-  fprintf(where, "    .  even\tall objects with even index\n");
-  fprintf(where, "  -  several <depth:index> may be concatenated with `.' to select some specific children\n");
-  fprintf(where, "\n<string> may also be a cpuset string\n");
-  fprintf(where, "\nIf prefixed with `~', the given string will be cleared instead of added to the current cpuset\n");
-  fprintf(where, "If prefixed with `x', the given string will be and'ed instead of added to the current cpuset\n");
-  fprintf(where, "If prefixed with `^', the given string will be xor'ed instead of added to the current cpuset\n");
-  fprintf(where, "\nString are processed in order, without priorities.\n");
-  fprintf(where, "Compose multiple invokations for complex operations.\n");
-  fprintf(where, "e.g. for (A|B)^(C|D), use: hwloc-mask A B ^$(hwloc-mask C D)\n");
-  fprintf(where, "\nOptions:\n");
-  fprintf(where, "  -v\tverbose\n");
-  fprintf(where, "  --proclist\treport the list of processors in the CPU set\n");
-  fprintf(where, "  --nodelist\treport the list of memory nodes near the CPU set\n");
+  fprintf(where, "Usage: hwloc-mask [options] <location> ...\n");
+  fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
+  fprintf(where, "            as supported by the hwloc-bind utility.\n");
+  fprintf(where, "Options:\n");
+  fprintf(where, "  --proclist\treport the list of processors' OS indexes in the CPU set\n");
+  fprintf(where, "  --nodelist\treport the list of memory nodes' OS indexes near the CPU set\n");
+  fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
 }
 
