@@ -57,6 +57,8 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
   }
   hwloc_obj_snprintf (line, sizeof(line), topology, l, indexprefix, verbose_mode-1);
   fprintf(output, "%s", line);
+  if (verbose_mode >= 2 && l->name)
+    fprintf(output, " \"%s\"", l->name);
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
