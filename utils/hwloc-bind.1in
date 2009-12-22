@@ -141,6 +141,18 @@ Multiple locations can be specified on the hwloc-bind command line
 assumed to either follow "--" (if specified) or the first token that
 is unrecognized as a location.
 .
+By default, multiple locations are added, meaning that the binding
+will be wider in the sense that the process may run on more objects.
+If prefixed with "~", the given location will be cleared instead of
+added to the current list of locations.
+If prefixed with "x", the given location will be and'ed instead of
+added to the current list.
+If prefixed with "^", the given location will be xor'ed.
+.
+More complex operations may be performed by using
+.R hwloc-mask
+to compute intermediate values.
+.
 .SS Hwloc Objects
 .
 .PP
