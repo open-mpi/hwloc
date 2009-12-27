@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/config.h>
 #include <hwloc.h>
 #define NUMA_VERSION1_COMPATIBILITY
 #include <hwloc/linux-libnuma.h>

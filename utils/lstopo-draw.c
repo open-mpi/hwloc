@@ -4,6 +4,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -79,11 +80,11 @@ static int prefer_ratio(float ratio1, float ratio2) {
   return _ratio1 < _ratio2;
 }
 
-static void* null_start(void *output, int width, int height) { return output; }
-static void null_declare_color(void *output, int r, int g, int b) { }
-static void null_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height) { }
-static void null_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2) { }
-static void null_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text) { }
+static void* null_start(void *output, int width __hwloc_attribute_unused, int height __hwloc_attribute_unused) { return output; }
+static void null_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused) { }
+static void null_box(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x __hwloc_attribute_unused, unsigned width __hwloc_attribute_unused, unsigned y __hwloc_attribute_unused, unsigned height __hwloc_attribute_unused) { }
+static void null_line(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1 __hwloc_attribute_unused, unsigned y1 __hwloc_attribute_unused, unsigned x2 __hwloc_attribute_unused, unsigned y2 __hwloc_attribute_unused) { }
+static void null_text(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x __hwloc_attribute_unused, unsigned y __hwloc_attribute_unused, const char *text __hwloc_attribute_unused) { }
 
 static struct draw_methods null_draw_methods = {
   .start = null_start,
@@ -628,23 +629,31 @@ struct coords {
 };
 
 static void
-getmax_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
+getmax_box(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   struct coords *coords = output;
 
+  if (x > coords->x)
+    coords->x = x;
   if (x + width > coords->x)
     coords->x = x + width;
+  if (y > coords->y)
+    coords->y = y;
   if (y + height > coords->y)
     coords->y = y + height;
 }
 
 static void
-getmax_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+getmax_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct coords *coords = output;
 
+  if (x1 > coords->x)
+    coords->x = x1;
   if (x2 > coords->x)
     coords->x = x2;
+  if (y1 > coords->y)
+    coords->y = y1;
   if (y2 > coords->y)
     coords->y = y2;
 }

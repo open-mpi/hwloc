@@ -66,7 +66,7 @@ hwloc__process_root_attr(struct hwloc_topology *topology,
 }
 
 static void
-hwloc__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
+hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
 			   const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;

@@ -26,7 +26,7 @@
 #include <sys/thread.h>
 
 static int
-hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   rsethandle_t rset, rad;
   hwloc_obj_t objs[2];
@@ -76,7 +76,7 @@ out:
 }
 
 static hwloc_cpuset_t
-hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, int policy)
+hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, int policy __hwloc_attribute_unused)
 {
   hwloc_cpuset_t hwloc_set = NULL;
   rsethandle_t rset;

@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
 #include <private/private.h>
+#include <hwloc.h>
 
 #include <unistd.h>
 #include <assert.h>

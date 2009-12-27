@@ -233,7 +233,7 @@ static void print_children(hwloc_topology_t topology, hwloc_obj_t obj,
  }
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
  int depth;
  unsigned i;
@@ -384,5 +384,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Dec 17 13:26:56 2009 for Hardware Locality (hwloc) by  doxygen
+Generated on Sun Dec 27 22:32:11 2009 for Hardware Locality (hwloc) by  doxygen
 1.6.1

@@ -52,7 +52,7 @@ hwloc_hpux_find_ldom(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set)
 }
 
 static spu_t
-hwloc_hpux_find_spu(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set)
+hwloc_hpux_find_spu(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t hwloc_set)
 {
   spu_t cpu;
 

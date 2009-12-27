@@ -44,7 +44,7 @@
 #if (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE)
 /* Cairo methods */
 static void
-topo_cairo_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
+topo_cairo_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   cairo_t *c = output;
   cairo_rectangle(c, x, y, width, height);
@@ -58,7 +58,7 @@ topo_cairo_box(void *output, int r, int g, int b, unsigned depth, unsigned x, un
 }
 
 static void
-topo_cairo_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+topo_cairo_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   cairo_t *c = output;
   cairo_move_to(c, x1, y1);
@@ -68,7 +68,7 @@ topo_cairo_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, 
 }
 
 static void
-topo_cairo_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
+topo_cairo_text(void *output, int r, int g, int b, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   cairo_t *c = output;
   cairo_move_to(c, x, y + size);
@@ -97,7 +97,7 @@ topo_cairo_paint(struct draw_methods *methods, hwloc_topology_t topology, cairo_
   cairo_destroy(c);
 }
 
-static void null_declare_color (void *output, int r, int g, int b) {}
+static void null_declare_color (void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused) {}
 #endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
@@ -114,7 +114,7 @@ struct display {
 };
 
 static void *
-x11_start(void *output, int width, int height)
+x11_start(void *output __hwloc_attribute_unused, int width, int height)
 {
   cairo_surface_t *cs;
   Display *dpy;
@@ -173,7 +173,7 @@ static struct draw_methods x11_draw_methods = {
 
 /** Clip coordinates of the visible part. */
 static void
-move_x11(hwloc_topology_t topology, struct display *disp)
+move_x11(struct display *disp)
 {
   if (disp->width <= disp->screen_width) {
     disp->x = 0;
@@ -195,7 +195,7 @@ move_x11(hwloc_topology_t topology, struct display *disp)
 }
 
 void
-output_x11(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_x11(hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int verbose_mode __hwloc_attribute_unused)
 {
   struct display *disp = output_draw_start(&x11_draw_methods, topology, NULL);
   int finish = 0;
@@ -227,13 +227,13 @@ output_x11(hwloc_topology_t topology, const char *filename, int verbose_mode)
 	  disp->y -= e.xmotion.y_root - y;
 	  x = e.xmotion.x_root;
 	  y = e.xmotion.y_root;
-	  move_x11(topology, disp);
+	  move_x11(disp);
 	}
 	break;
       case ConfigureNotify:
 	disp->screen_width = e.xconfigure.width;
 	disp->screen_height = e.xconfigure.height;
-	move_x11(topology, disp);
+	move_x11(disp);
 	if (disp->x != lastx || disp->y != lasty)
 	  XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
 	break;
@@ -270,7 +270,7 @@ output_x11(hwloc_topology_t topology, const char *filename, int verbose_mode)
 #if CAIRO_HAS_PNG_FUNCTIONS
 /* PNG back-end */
 static void *
-png_start(void *output, int width, int height)
+png_start(void *output __hwloc_attribute_unused, int width, int height)
 {
   return cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
 }
@@ -284,7 +284,7 @@ static struct draw_methods png_draw_methods = {
 };
 
 void
-output_png(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_png(hwloc_topology_t topology, const char *filename, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
@@ -319,7 +319,7 @@ static struct draw_methods pdf_draw_methods = {
 };
 
 void
-output_pdf(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_pdf(hwloc_topology_t topology, const char *filename, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
@@ -354,7 +354,7 @@ static struct draw_methods ps_draw_methods = {
 };
 
 void
-output_ps(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_ps(hwloc_topology_t topology, const char *filename, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
@@ -389,7 +389,7 @@ static struct draw_methods svg_draw_methods = {
 };
 
 void
-output_svg(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_svg(hwloc_topology_t topology, const char *filename, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {

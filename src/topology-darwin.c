@@ -136,6 +136,6 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 }
 
 void
-hwloc_set_darwin_hooks(struct hwloc_topology *topology)
+hwloc_set_darwin_hooks(struct hwloc_topology *topology __hwloc_attribute_unused)
 {
 }

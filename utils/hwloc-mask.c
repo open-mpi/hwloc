@@ -4,9 +4,9 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/private.h>
 #include <hwloc-mask.h>
 #include <hwloc.h>
-#include <private/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>

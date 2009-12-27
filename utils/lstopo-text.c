@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#include <hwloc.h>
 #include <private/config.h>
+#include <hwloc.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -199,7 +199,7 @@ struct display {
 
 /* Allocate the off-screen buffer */
 static void *
-text_start(void *output, int width, int height)
+text_start(void *output __hwloc_attribute_unused, int width, int height)
 {
   int j, i;
   struct display *disp = malloc(sizeof(*disp));
@@ -288,7 +288,7 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
 
 /* We we can, allocate rgb colors */
 static void
-text_declare_color(void *output, int r, int g, int b)
+text_declare_color(void *output __hwloc_attribute_unused, int r, int g, int b)
 {
 #ifdef HWLOC_HAVE_LIBTERMCAP
   int color = declare_color(r, g, b);
@@ -438,7 +438,7 @@ merge(struct display *disp, int x, int y, int or, int andnot, int r, int g, int 
 
 /* Now we can implement the standard drawing helpers */
 static void
-text_box(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned width, unsigned y1, unsigned height)
+text_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned width, unsigned y1, unsigned height)
 {
   struct display *disp = output;
   unsigned i, j;
@@ -476,7 +476,7 @@ text_box(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigne
 }
 
 static void
-text_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+text_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct display *disp = output;
   unsigned i, j, z;
@@ -526,7 +526,7 @@ text_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsign
 }
 
 static void
-text_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
+text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   struct display *disp = output;
   x /= (gridsize/2);
@@ -543,7 +543,7 @@ static struct draw_methods text_draw_methods = {
   .text = text_text,
 };
 
-void output_text(hwloc_topology_t topology, const char *filename, int verbose_mode)
+void output_text(hwloc_topology_t topology, const char *filename, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output;
   struct display *disp;

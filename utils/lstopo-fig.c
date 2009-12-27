@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -17,7 +18,7 @@
 #define FIG_FACTOR 20
 
 static void *
-fig_start(void *output_, int width, int height)
+fig_start(void *output_, int width __hwloc_attribute_unused, int height __hwloc_attribute_unused)
 {
   FILE *output = output_;
   fprintf(output, "#FIG 3.2  Produced by hwloc's lstopo\n");
@@ -111,7 +112,7 @@ static struct draw_methods fig_draw_methods = {
 };
 
 void
-output_fig (hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_fig (hwloc_topology_t topology, const char *filename, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {

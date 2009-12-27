@@ -13,7 +13,7 @@
 
 #include "lstopo.h"
 
-void output_xml(hwloc_topology_t topology, const char *filename, int verbose_mode)
+void output_xml(hwloc_topology_t topology, const char *filename, int verbose_mode __hwloc_attribute_unused)
 {
   if (!strcasecmp(filename, "-.xml"))
     filename = "-";

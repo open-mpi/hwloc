@@ -7,6 +7,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <private/config.h>
 #include <hwloc.h>
 #include <private/config.h>
 

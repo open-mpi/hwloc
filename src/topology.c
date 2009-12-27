@@ -118,7 +118,6 @@ hwloc_fallback_nbprocessors(void) {
  */
 static unsigned
 hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
-					  struct hwloc_obj **objs,
 					  unsigned *_distances,
 					  unsigned *groupids)
 {
@@ -183,7 +182,6 @@ hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
  */
 static unsigned
 hwloc_setup_group_from_min_distance_transitivity(unsigned nbobjs,
-						struct hwloc_obj **objs,
 						unsigned *_distances,
 						unsigned *groupids)
 {
@@ -271,9 +269,9 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
   if (nbobjs <= 2)
     return;
 
-  nbgroups = hwloc_setup_group_from_min_distance_clique(nbobjs, objs, _distances, groupids);
+  nbgroups = hwloc_setup_group_from_min_distance_clique(nbobjs, _distances, groupids);
   if (!nbgroups) {
-    nbgroups = hwloc_setup_group_from_min_distance_transitivity(nbobjs, objs, _distances, groupids);
+    nbgroups = hwloc_setup_group_from_min_distance_transitivity(nbobjs, _distances, groupids);
     if (!nbgroups)
       return;
   }
@@ -793,7 +791,7 @@ traverse(hwloc_topology_t topology,
 }
 
 static void
-get_proc_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
+get_proc_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *obj, void *data)
 {
   hwloc_cpuset_t cpuset = data;
   if ((*obj)->type != HWLOC_OBJ_PROC)
@@ -802,7 +800,7 @@ get_proc_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
 }
 
 static void
-apply_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data)
+apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
 {
   hwloc_cpuset_t nodeset = data;
   hwloc_obj_t obj = *pobj;
@@ -815,7 +813,7 @@ apply_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data)
 }
 
 static void
-apply_cpuset(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
+apply_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *obj, void *data)
 {
   hwloc_cpuset_t cpuset = data;
   hwloc_cpuset_andset((*obj)->cpuset, cpuset);
@@ -840,7 +838,7 @@ drop_object(hwloc_obj_t *pfather)
 
 /* Remove all ignored objects.  */
 static void
-remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
+remove_ignored(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pfather, void *data __hwloc_attribute_unused)
 {
   hwloc_obj_t father = *pfather;
   if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
@@ -851,7 +849,7 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
 }
 
 static void
-do_free_object(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data)
+do_free_object(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
 {
   hwloc_obj_t obj = *pobj;
   *pobj = obj->next_sibling;
@@ -861,7 +859,7 @@ do_free_object(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data)
 /* Remove all children whose cpuset is empty, except NUMA nodes
  * since we want to keep memory information.  */
 static void
-remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
+remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data __hwloc_attribute_unused)
 {
   if ((*obj)->type != HWLOC_OBJ_NODE && hwloc_cpuset_iszero((*obj)->cpuset)) {
     /* Remove empty children */
@@ -876,7 +874,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data)
  * ignored while keeping structure
  */
 static void
-merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data)
+merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data __hwloc_attribute_unused)
 {
   hwloc_obj_t father = *pfather, child = father->first_child;
   if (child->next_sibling)
@@ -957,44 +955,44 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
  * Empty binding hooks always returning success
  */
 
-static int dontset_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
+static int dontset_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_cpubind(hwloc_topology_t topology, int policy)
+static hwloc_cpuset_t dontget_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
-static int dontset_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
+static int dontset_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thisthread_cpubind(hwloc_topology_t topology, int policy)
+static hwloc_cpuset_t dontget_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
-static int dontset_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
+static int dontset_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology, int policy)
+static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
-static int dontset_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy)
+static int dontset_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
+static hwloc_cpuset_t dontget_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
 #ifdef hwloc_thread_t
-static int dontset_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy)
+static int dontset_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy)
+static hwloc_cpuset_t dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
 }
@@ -1661,7 +1659,7 @@ hwloc_topology_get_allowed_cpuset(struct hwloc_topology *topology)
 
 /* check children between a father object */
 static void
-hwloc__check_children(struct hwloc_topology *topology, struct hwloc_obj *father)
+hwloc__check_children(struct hwloc_obj *father)
 {
   hwloc_cpuset_t remaining_father_set;
   unsigned j;
@@ -1766,7 +1764,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
 	assert(obj->prev_cousin == prev);
       }
       /* check children */
-      hwloc__check_children(topology, obj);
+      hwloc__check_children(obj);
       prev = obj;
     }
 

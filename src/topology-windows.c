@@ -143,7 +143,7 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 /* TODO: SetThreadIdealProcessor */
 
 static int
-hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   /* TODO: groups SetThreadGroupAffinity */
   /* The resulting binding is always strict */
@@ -160,7 +160,7 @@ hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t
 }
 
 static int
-hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   /* TODO: groups */
   /* The resulting binding is always strict */
@@ -171,7 +171,7 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_co
 }
 
 static hwloc_cpuset_t
-hwloc_win_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, int policy)
+hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, int policy __hwloc_attribute_unused)
 {
   hwloc_cpuset_t ret;
   DWORD proc_mask, sys_mask;

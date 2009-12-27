@@ -6,6 +6,7 @@
 #ifndef UTILS_LSTOPO_H
 #define UTILS_LSTOPO_H
 
+#include <private/config.h>
 #include <hwloc.h>
 
 typedef void output_method (struct hwloc_topology *topology, const char *output, int verbose_mode);

@@ -172,7 +172,7 @@ hwloc_obj_type_of_string (const char * string)
 
 int
 hwloc_obj_snprintf(char *string, size_t size,
-		  struct hwloc_topology *topology, struct hwloc_obj *l, const char *_indexprefix, int verbose)
+    struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *l, const char *_indexprefix, int verbose)
 {
   hwloc_obj_type_t type = l->type;
   const char *indexprefix = _indexprefix ? _indexprefix : "#";

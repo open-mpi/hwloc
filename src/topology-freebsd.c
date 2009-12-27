@@ -46,7 +46,7 @@ hwloc_freebsd_hwloc2bsd(hwloc_const_cpuset_t hwloc_cpuset, cpuset_t *cpuset)
 }
 
 static int
-hwloc_freebsd_set_sth_affinity(cpulevel_t level, cpuwhich_t which, id_t id, hwloc_const_cpuset_t hwloc_cpuset)
+hwloc_freebsd_set_sth_affinity(hwloc_topology_t topology __hwloc_attribute_unused, cpulevel_t level, cpuwhich_t which, id_t id, hwloc_const_cpuset_t hwloc_cpuset, int policy __hwloc_attribute_unused)
 {
   cpuset_t cpuset;
 
@@ -59,7 +59,7 @@ hwloc_freebsd_set_sth_affinity(cpulevel_t level, cpuwhich_t which, id_t id, hwlo
 }
 
 static hwloc_cpuset_t
-hwloc_freebsd_get_sth_affinity(cpulevel_t level, cpuwhich_t which, id_t id)
+hwloc_freebsd_get_sth_affinity(hwloc_topology_t topology __hwloc_attribute_unused, cpulevel_t level, cpuwhich_t which, id_t id, int policy __hwloc_attribute_unused)
 {
   cpuset_t cpuset;
 
@@ -72,37 +72,37 @@ hwloc_freebsd_get_sth_affinity(cpulevel_t level, cpuwhich_t which, id_t id)
 static int
 hwloc_freebsd_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_cpuset, int policy)
 {
-  return hwloc_freebsd_set_sth_affinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, hwloc_cpuset);
+  return hwloc_freebsd_set_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, hwloc_cpuset, policy);
 }
 
 static hwloc_cpuset_t
 hwloc_freebsd_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
 {
-  return hwloc_freebsd_get_sth_affinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1);
+  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, policy);
 }
 
 static int
 hwloc_freebsd_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_cpuset, int policy)
 {
-  return hwloc_freebsd_set_sth_affinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, hwloc_cpuset);
+  return hwloc_freebsd_set_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, hwloc_cpuset, policy);
 }
 
 static hwloc_cpuset_t
 hwloc_freebsd_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
 {
-  return hwloc_freebsd_get_sth_affinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1);
+  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, policy);
 }
 
 static int
 hwloc_freebsd_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t hwloc_cpuset, int policy)
 {
-  return hwloc_freebsd_set_sth_affinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, pid, hwloc_cpuset);
+  return hwloc_freebsd_set_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, pid, hwloc_cpuset, policy);
 }
 
 static hwloc_cpuset_t
 hwloc_freebsd_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
 {
-  return hwloc_freebsd_get_sth_affinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, pid);
+  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, pid, policy);
 }
 
 #ifdef hwloc_thread_t
@@ -110,7 +110,7 @@ hwloc_freebsd_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int p
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
 #pragma weak pthread_setaffinity_np
 static int
-hwloc_freebsd_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t hwloc_cpuset, int policy)
+hwloc_freebsd_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid, hwloc_const_cpuset_t hwloc_cpuset, int policy __hwloc_attribute_unused)
 {
   int err;
   cpuset_t cpuset;
@@ -136,7 +136,7 @@ hwloc_freebsd_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, 
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
 #pragma weak pthread_getaffinity_np
 static hwloc_cpuset_t
-hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy)
+hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid, int policy __hwloc_attribute_unused)
 {
   int err;
   cpuset_t cpuset;

@@ -107,6 +107,7 @@ hwloc_fopenat(const char *path, const char *mode, int fsroot_fd)
   const char *relative_path;
 
   assert(!(fsroot_fd < 0));
+  assert(!strcmp(mode, "r"));
 
   /* Skip leading slashes.  */
   for (relative_path = path; *relative_path == '/'; relative_path++);
@@ -128,7 +129,7 @@ hwloc_accessat(const char *path, int mode, int fsroot_fd)
   /* Skip leading slashes.  */
   for (relative_path = path; *relative_path == '/'; relative_path++);
 
-  return faccessat(fsroot_fd, relative_path, O_RDONLY, 0);
+  return faccessat(fsroot_fd, relative_path, mode, 0);
 }
 
 static DIR*
@@ -156,7 +157,7 @@ hwloc_opendirat(const char *path, int fsroot_fd)
 #endif /* !HAVE_OPENAT */
 
 int
-hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cpuset_t hwloc_set)
+hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_const_cpuset_t hwloc_set)
 {
   /* TODO Kerrighed: Use
    * int migrate (pid_t pid, int destination_node);
@@ -209,7 +210,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cp
 }
 
 hwloc_cpuset_t
-hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
+hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid)
 {
   hwloc_cpuset_t hwloc_set;
   int err;
@@ -270,19 +271,19 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid)
 }
 
 static int
-hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
 static hwloc_cpuset_t
-hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy)
+hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_unused)
 {
   return hwloc_linux_get_tid_cpubind(topology, 0);
 }
 
 static int
-hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   if (policy & HWLOC_CPUBIND_PROCESS) {
     errno = ENOSYS;
@@ -292,7 +293,7 @@ hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_c
 }
 
 static hwloc_cpuset_t
-hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy __hwloc_attribute_unused)
 {
   if (policy & HWLOC_CPUBIND_PROCESS) {
     errno = ENOSYS;
@@ -302,13 +303,13 @@ hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 }
 
 static int
-hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
 static hwloc_cpuset_t
-hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_unused)
 {
   return hwloc_linux_get_tid_cpubind(topology, 0);
 }
@@ -317,7 +318,7 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
 #pragma weak pthread_setaffinity_np
 
 static int
-hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   int err;
 
@@ -379,7 +380,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #pragma weak pthread_getaffinity_np
 
 static hwloc_cpuset_t
-hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int policy)
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int policy __hwloc_attribute_unused)
 {
   hwloc_cpuset_t hwloc_set;
   int err;

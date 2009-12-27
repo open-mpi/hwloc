@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -20,7 +21,7 @@
  */
 
 int
-main (int argc, char *argv[])
+main (void)
 {
   hwloc_topology_t topology;
   unsigned depth;

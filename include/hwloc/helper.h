@@ -86,7 +86,7 @@ hwloc_get_system_obj (hwloc_topology_t topology)
 
 /** \brief Returns the parent object of \p obj at depth \p depth. */
 static __inline hwloc_obj_t
-hwloc_get_parent_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_obj_t obj)
+hwloc_get_parent_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj)
 {
   hwloc_obj_t parent = obj;
   if (obj->depth < depth)
@@ -98,7 +98,7 @@ hwloc_get_parent_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_
 
 /** \brief Returns the parent object of \p obj with type \p type. */
 static __inline hwloc_obj_t
-hwloc_get_parent_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, hwloc_obj_t obj)
+hwloc_get_parent_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj)
 {
   hwloc_obj_t parent = obj->father;
   while (parent && parent->type != type)
@@ -159,7 +159,7 @@ hwloc_get_proc_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
  * If \p prev is \c NULL, return the first child.
  */
 static __inline hwloc_obj_t
-hwloc_get_next_child (hwloc_topology_t topology, hwloc_obj_t father, hwloc_obj_t prev)
+hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t father, hwloc_obj_t prev)
 {
   if (!prev)
     return father->first_child;
@@ -170,7 +170,7 @@ hwloc_get_next_child (hwloc_topology_t topology, hwloc_obj_t father, hwloc_obj_t
 
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
 static __inline hwloc_obj_t
-hwloc_get_common_ancestor_obj (hwloc_topology_t topology, hwloc_obj_t obj1, hwloc_obj_t obj2)
+hwloc_get_common_ancestor_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   while (obj1->depth > obj2->depth)
     obj1 = obj1->father;
@@ -186,7 +186,7 @@ hwloc_get_common_ancestor_obj (hwloc_topology_t topology, hwloc_obj_t obj1, hwlo
 /** \brief Returns true if _obj_ is inside the subtree beginning
     with \p subtree_root. */
 static __inline int
-hwloc_obj_is_in_subtree (hwloc_topology_t topology, hwloc_obj_t obj, hwloc_obj_t subtree_root)
+hwloc_obj_is_in_subtree (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj, hwloc_obj_t subtree_root)
 {
   return hwloc_cpuset_isincluded(obj->cpuset, subtree_root->cpuset);
 }
@@ -316,7 +316,7 @@ hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_c
  * \return \c NULL if no child matches or if \p set is empty.
  */
 static __inline hwloc_obj_t
-hwloc_get_child_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set,
+hwloc_get_child_covering_cpuset (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set,
 				hwloc_obj_t father)
 {
   hwloc_obj_t child;
@@ -432,7 +432,7 @@ hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t
  * \return \c NULL if no cache matches
  */
 static __inline hwloc_obj_t
-hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj)
 {
   hwloc_obj_t current = obj->father;
   while (current) {

@@ -184,6 +184,8 @@ AC_DEFUN([HWLOC_INIT],[
     AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_LONG], $ac_cv_sizeof_unsigned_long, [The size of `unsigned long', as computed by sizeof])
     AC_CHECK_SIZEOF([unsigned int])
     AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The size of `unsigned int', as computed by sizeof])
+
+    _HWLOC_CHECK_ATTRIBUTES
     
     #
     # Now detect support
@@ -719,7 +721,7 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
         fi
     fi
     if test "$want_picky" = 1; then
-        add="-Wall -Wundef -Wno-long-long -Wsign-compare"
+        add="-Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare"
         add="$add -Wmissing-prototypes -Wstrict-prototypes"
         add="$add -Wcomment -pedantic"
 
