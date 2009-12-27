@@ -62,6 +62,7 @@ topo_cairo_line(void *output, int r, int g, int b, unsigned depth __hwloc_attrib
 {
   cairo_t *c = output;
   cairo_move_to(c, x1, y1);
+  cairo_set_source_rgb(c, (float) r / 255, (float) g / 255, (float) b / 255);
   cairo_set_line_width(c, 1);
   cairo_line_to(c, x2, y2);
   cairo_stroke(c);
