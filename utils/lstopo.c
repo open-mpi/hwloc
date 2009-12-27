@@ -217,7 +217,7 @@ main (int argc, char *argv[])
   }
 
   if (!filename) {
-#ifdef HWLOC_HWLOC_HAVE_CAIRO
+#ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
     if (!force_console && getenv("DISPLAY"))
       output_x11(topology, NULL, verbose_mode);
