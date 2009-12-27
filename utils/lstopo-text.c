@@ -476,7 +476,7 @@ text_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unu
 }
 
 static void
-text_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+text_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   struct display *disp = output;
   unsigned i, j, z;
