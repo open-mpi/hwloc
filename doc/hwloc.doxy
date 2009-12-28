@@ -467,6 +467,47 @@ the machine.
 
 
 
+\page envvar Environment variables
+
+The behavior of the hwloc library and tools may be tuned thanks to the
+following environment variables.
+
+<dt>HWLOC_XMLFILE=/path/to/file.xml</dt>
+  <dd>enforces the discovery from the given XML file as if
+  hwloc_topology_set_xml() had been called.
+  This file may have been generated earlier with lstopo file.xml.
+  For conveniency, this backend provides empty binding hooks which just
+  return success.  To have hwloc still actually call OS-specific hooks,
+  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
+  the loaded file is really the underlying system.
+  </dd>
+
+<dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
+  <dd>switches to reading the topology from the specified
+  Linux filesystem root instead of the main file-system root, as if
+  hwloc_topology_set_fsroot() had been called.
+  Not using the main file-system root causes hwloc_topology_is_thissystem()
+  to return 0.
+  For conveniency, this backend provides empty binding hooks which just
+  return success.  To have hwloc still actually call OS-specific hooks,
+  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
+  the loaded file is really the underlying system.
+  </dd>
+
+<dt>HWLOC_THISSYSTEM=1</dt>
+  <dd>enforces the return value of hwloc_topology_is_thissystem().
+  It means that it makes hwloc assume that the selected backend provides the
+  topology for the system on which we are running, even if it is not the
+  OS-specific backend but the XML backend for instance.
+  This means making the binding functions actually call the OS-specific
+  system calls and really do binding, while the XML backend would otherwise
+  provide empty hooks just returning success.
+  This can be used for efficiency reasons to first detect the topology once,
+  save it to an XML file, and quickly reload it later through the XML
+  backend, but still having binding functions actually do bind.
+
+
+
 \page embed Embedding hwloc in other software
 
 It can be desirable to include hwloc in a larger software package (be
@@ -568,46 +609,6 @@ Now you can bootstrap, configure, build, and run the sandbox as normal
 than any system-provided copy of hwloc.
 
 
-
-
-\page envvar Environment variables
-
-The behavior of the hwloc library and tools may be tuned thanks to the
-following environment variables.
-
-<dt>HWLOC_XMLFILE=/path/to/file.xml</dt>
-  <dd>enforces the discovery from the given XML file as if
-  hwloc_topology_set_xml() had been called.
-  This file may have been generated earlier with lstopo file.xml.
-  For conveniency, this backend provides empty binding hooks which just
-  return success.  To have hwloc still actually call OS-specific hooks,
-  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
-  the loaded file is really the underlying system.
-  </dd>
-
-<dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
-  <dd>switches to reading the topology from the specified
-  Linux filesystem root instead of the main file-system root, as if
-  hwloc_topology_set_fsroot() had been called.
-  Not using the main file-system root causes hwloc_topology_is_thissystem()
-  to return 0.
-  For conveniency, this backend provides empty binding hooks which just
-  return success.  To have hwloc still actually call OS-specific hooks,
-  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
-  the loaded file is really the underlying system.
-  </dd>
-
-<dt>HWLOC_THISSYSTEM=1</dt>
-  <dd>enforces the return value of hwloc_topology_is_thissystem().
-  It means that it makes hwloc assume that the selected backend provides the
-  topology for the system on which we are running, even if it is not the
-  OS-specific backend but the XML backend for instance.
-  This means making the binding functions actually call the OS-specific
-  system calls and really do binding, while the XML backend would otherwise
-  provide empty hooks just returning success.
-  This can be used for efficiency reasons to first detect the topology once,
-  save it to an XML file, and quickly reload it later through the XML
-  backend, but still having binding functions actually do bind.
 
 
 \page switchfromplpa How to switch from PLPA to hwloc?
