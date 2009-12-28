@@ -10,7 +10,6 @@ include_hwloc_HEADERS = \
         hwloc/cpuset.h \
         hwloc/helper.h \
         hwloc/openfabrics-verbs.h \
-        hwloc/plpa.h \
         hwloc/rename.h
 nodist_include_hwloc_HEADERS = hwloc/config.h 
 
