@@ -613,7 +613,84 @@ than any system-provided copy of hwloc.
 
 \page switchfromplpa How to switch from PLPA to hwloc?
 
-to do
+Although PLPA and hwloc share the same ideas, their programming interfaces
+are different. Converting an application from PLPA to hwloc will require
+some thinking that is explained below.
 
+
+\section switchfromplpa_caching Topology context vs. caching
+
+First, all hwloc functions take a \p topology parameter. It serves as an
+internal storage for the result of the topology discovery. It somehow
+replaces PLPA caching abilities and may even let you manipulate multiple
+topologies as the same time if needed.
+
+Thus, all program should first run hwloc_topology_init() and
+hwloc_topology_init() as they did plpa_init() in the past.
+
+
+\section switchfromplpa_hierarchy Hierarchy vs. Core@Socket
+
+PLPA was designed to manipulate cores within sockets. hwloc offers
+much more different types of objects and stores them within a tree
+of resources.
+
+To emulate PLPA model, it is possible to find sockets using functions
+such as hwloc_get_obj_by_type().
+Iterating over sockets is also possible using hwloc_get_next_obj_by_type().
+Then, finding a core within a socket may be done using
+hwloc_get_obj_inside_cpuset_by_type()
+or hwloc_get_next_obj_inside_cpuset_by_type().
+
+It is also possible to directly find an object below another object
+using hwloc_get_obj_below_by_type()
+(or hwloc_get_obj_below_array_by_type()).
+
+
+\section switchfromplpa_indexes Logical vs. Physical/OS indexes
+
+hwloc manipulates logical indexes, which means indexes with regards to
+the ordering of objects in the hierarchical tree.
+Physical or OS indexes may be entirely hidden if not strictly required.
+The reason for this is that physical/OS indexes may change with the OS
+or with the BIOS version.
+They may be non-consecutive, multiple objects may have the same
+physical/OS indexes, making their manipulation tricky and highly
+non-portable.
+
+It is still possible to retrieve physical/OS indexes through the \p
+os_index field of objects, but it should be avoided as much as possible,
+except for pretty-printing purposes.
+
+::HWLOC_OBJ_PROC objects are supposed to have different physical/OS indexes
+since the OS uses them for binding.
+The \p os_index field of these objects provides the identifier that may
+be used for such binding, and hwloc_get_proc_obj_by_os_index() finds the
+object associated with a OS index.
+However, again, these conversion methods should not be used for actual
+binding since hwloc offers its own binding model using the \p cpuset
+field of objects.
+These cpusets may be duplicated, modified, combined, ... (see hwloc/cpuset.h
+for details) and then passed to hwloc_set_cpubind() or so for actual binding.
+
+
+\section switchfromplpa_counting Counting specification
+
+PLPA offerzs a countspec parameter to specify whether counting all CPUs,
+only the online ones or only the offline ones.
+However, some OS do not expose the topology of offline CPUs.
+Also, some of them may not be available to the current application
+due to administrator's restrictions.
+Also, modern processors let you shutdown a single thread of a core,
+making some of the PLPA features irrelevant.
+
+hwloc stores in the hierarchical tree of objects all CPUs that have
+known topology information.
+It then provides the applications with several cpusets that contain
+the list of CPUs that are actually known, that have topology information,
+that are online, or that are available to the application.
+These cpusets may be retrieved with hwloc_topology_get_online_cpuset()
+and other similar functions to filter the object that are relevant
+or not.
 
 */
