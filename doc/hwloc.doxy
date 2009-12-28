@@ -424,33 +424,46 @@ hwloc comes with an extensive C programming interface and several
 command line utilities. Each of them is fully documented in its
 own manual page.
 
-<dt>lstopo (also known as hwloc-info and hwloc-ls)</dt>
-  <dd>displays the hierarchical topology of the current system
-  in a graphic or textual outputs. It may also display other system
-  topologies thanks to XML input files for instance.
-  </dd>
+\section cli_lstopo lstopo
 
-<dt>hwloc-bind</dt>
-  <dd>lets you bind processes to specific hardware objects through a
-  flexible syntax. It may also retrieve the current binding.  See the
-  hwloc-bind(1) man page for more details.
-  </dd>
+lstopo (also known as hwloc-info and hwloc-ls)
+displays the hierarchical topology of the current system.
+The output may be graphic or textual, and exported to numerous
+graphic file formats such as PDF or PNG.
 
-<dt>hwloc-mask</dt>
-  <dd>generates cpuset strings from given hardware objects
-  with the ability to aggregate them, intersect them, and more.
-  These cpuset strings may for instance be passed to hwloc-bind for binding.
-  hwloc-mask may also generate list of logical processors or NUMA nodes
-  that are convenient to pass to some external tools such as taskset or
-  numactl.
-  </dd>
+lstopo may also display other system topologies thanks to XML
+input files for instance.
 
-<dt>hwloc-distrib</dt>
-  <dd>hwloc-distrib generates a set of cpuset strings that are uniformly
-  distributed across the machine for the given number of processes.
-  These strings may be used with hwloc-bind to run processes so as to
-  maximize their memory bandwidth.
-  </dd>
+\section cli_hwloc_bind hwloc-bind
+
+hwloc-bind lets you bind processes to specific hardware objects through
+a flexible syntax. You may specify multiple objects, objects within
+objects, cpusets, ...
+See the hwloc-bind(1) man page for more details.
+
+hwloc-bind may also retrieve the current binding.
+
+\section cli_hwloc_mask hwloc-mask
+
+hwloc-mask generates cpuset strings from given hardware objects
+with the ability to aggregate them, intersect them, and more.
+
+hwloc-mask uses the same syntax than hwloc-bind, but multiple instances
+may be composed to generate complex combinations.
+The generated cpuset string may for instance be passed to hwloc-bind
+later for binding.
+
+hwloc-mask may also generate lists of logical processors or NUMA nodes
+that are convenient to pass to some external tools such as taskset or
+numactl.
+
+\section cli_hwloc_distrib hwloc-distrib
+
+hwloc-distrib generates a set of cpuset strings that are uniformly
+distributed across the machine for the given number of processes.
+These strings may be used with hwloc-bind to run processes so as to
+maximize their memory bandwidth by properly distributing them across
+the machine.
 
 
 
