@@ -194,15 +194,34 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
     if (!err)
       err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
-  } else if (strlen(arg) > 2 &&
-             strncasecmp(arg, "0x", 2) == 0 &&
-             strlen(arg + 2) == strspn(arg + 2, "0123456789abcdefABCDEF,")) {
+  } else {
+    /* try to parse as a comma-separated list of integer with 0x as an optional prefix */
+    char *tmp = (char*) arg;
+    while (1) {
+      char *next = strchr(tmp, ',');
+      size_t len;
+      if (strncasecmp(tmp, "0x", 2) == 0) {
+        tmp += 2;
+        if (',' == *tmp || 0 == *tmp) {
+          err = -1;
+          goto out;
+        }
+      }
+      len = next ? next-tmp : strlen(tmp);
+      if (len != strspn(tmp, "0123456789abcdefABCDEF")) {
+        err = -1;
+        goto out;
+      }
+      if (!next)
+        break;
+      tmp = next+1;
+    }
     hwloc_cpuset_t newset = hwloc_cpuset_from_string(arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
-  } else
-    err = -1;
+  }
 
+ out:
   return err;
 }
 
