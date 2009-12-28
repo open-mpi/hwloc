@@ -462,6 +462,59 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? By returning the total number of objects instead? */
 extern unsigned hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, hwloc_obj_t * __hwloc_restrict objs, unsigned max);
 
+/** \brief Find an object below another object, both specified by types and indexes.
+ *
+ * Start from the top system object and find object of type \p type1 and index \p idx1.
+ * Then look below this object and find another object of type \p type2 and index \p idx2.
+ * Indexes are specified within the parent, not withing the entire system.
+ *
+ * For instance, if type1 is SOCKET, idx1 is 2, type2 is CORE and idx2 is 3,
+ * return the fourth core object below the third socket.
+ */
+static __inline hwloc_obj_t
+hwloc_get_obj_below_by_type (hwloc_topology_t topology,
+			     hwloc_obj_type_t type1, unsigned idx1,
+			     hwloc_obj_type_t type2, unsigned idx2)
+{
+  hwloc_obj_t obj;
+
+  obj = hwloc_get_obj_by_type (topology, type1, idx1);
+  if (!obj)
+    return NULL;
+
+  return hwloc_get_obj_inside_cpuset_by_type(topology, obj->cpuset, type2, idx2);
+}
+
+/** \brief Find an object below a chain of objects specified by types and indexes.
+ *
+ * This is a generalized version of hwloc_get_obj_below_by_type().
+ *
+ * Arrays \p typev and \p idxv must contain \p nr types and indexes.
+ *
+ * Start from the top system object and walk the arrays \p typev and \p idxv.
+ * For each type and index couple in the arrays, look under the previously found
+ * object to find the index-th object of the given type.
+ * Indexes are specified within the parent, not withing the entire system.
+ *
+ * For instance, if nr is 3, typev contains NODE, SOCKET and CORE,
+ * and idxv contains 0, 1 and 2, return the third core object below
+ * the second socket below the first NUMA node.
+ */
+static __inline hwloc_obj_t
+hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_type_t *typev, unsigned *idxv)
+{
+  hwloc_obj_t obj = hwloc_get_system_obj(topology);
+  int i;
+
+  for(i=0; i<nr; i++) {
+    obj = hwloc_get_obj_inside_cpuset_by_type(topology, obj->cpuset, typev[i], idxv[i]);
+    if (!obj)
+      return NULL;
+  }
+
+  return obj;
+}
+
 /** @} */
 
 
