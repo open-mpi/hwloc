@@ -558,7 +558,32 @@ extern const char * hwloc_obj_type_string (hwloc_obj_type_t type);
 /** \brief Return an object type from the string */
 extern hwloc_obj_type_t hwloc_obj_type_of_string (const char * string);
 
+/** \brief Stringify the type of a given topology object into a human-readable form.
+ *
+ * It differs from hwloc_obj_type_string() because it prints type attributes such
+ * as cache depth.
+ *
+ * \return how many characters were actually written (not including the ending \\0).
+ */
+extern int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj,
+				   int verbose);
+
+/** \brief Stringify the attributes of a given topology object into a human-readable form.
+ *
+ * Attribute values are separated by \p separator.
+ *
+ * Only the major attributes are printed in non-verbose mode.
+ *
+ * \return how many characters were actually written (not including the ending \\0).
+ */
+extern int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * __hwloc_restrict separator,
+				   int verbose);
+
 /** \brief Stringify a given topology object into a human-readable form.
+ *
+ * /note this function is deprecated in favor of hwloc_obj_type_snprintf()
+ * and hwloc_obj_attr_snprintf() since it is not very flexible and
+ * only prints physical/OS indexes.
  *
  * Fill string \p string up to \p size characters with the description
  * of topology object \p obj in topology \p topology.
