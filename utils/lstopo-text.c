@@ -38,25 +38,12 @@
  * Console fashion text output
  */
 
-/* Recursively output topology in a console fashion */
 static void
-output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode) {
-  unsigned x;
-  const char * indexprefix = "#";
+output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
+{
   char type[32], attr[256];
   int attrlen;
   unsigned index = logical ? l->logical_index : l->os_index;
-
-  if (verbose_mode <= 1
-      && parent && parent->arity == 1 && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
-    /* in non-verbose mode, merge objects with their parent is they are exactly identical */
-    fprintf(output, " + ");
-  } else {
-    if (parent)
-      fprintf(output, "\n");
-    indent (output, 2*i);
-    i++;
-  }
   if (l->type != HWLOC_OBJ_PROC) {
     hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
     fprintf(output, type);
@@ -69,6 +56,23 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
     fprintf(output, "(%s)", attr);
   if (verbose_mode >= 2 && l->name)
     fprintf(output, " \"%s\"", l->name);
+}
+
+/* Recursively output topology in a console fashion */
+static void
+output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode) {
+  unsigned x;
+  if (verbose_mode <= 1
+      && parent && parent->arity == 1 && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
+    /* in non-verbose mode, merge objects with their parent is they are exactly identical */
+    fprintf(output, " + ");
+  } else {
+    if (parent)
+      fprintf(output, "\n");
+    indent (output, 2*i);
+    i++;
+  }
+  output_console_obj(l, output, logical, verbose_mode);
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
