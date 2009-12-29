@@ -17,6 +17,7 @@
 
 #include "lstopo.h"
 
+int logical = 1;
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 unsigned int force_horiz = 0;
@@ -59,6 +60,8 @@ static void usage(char *name, FILE *where)
 #endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nOptions:\n");
+  fprintf (where, "   -l --logical          display logical object indexes (default)\n");
+  fprintf (where, "   -p --physical         display physical object indexes\n");
   fprintf (where, "   -v --verbose          increase verbosity (disabled by default)\n");
   fprintf (where, "   -s --silent           decrease verbosity\n");
   fprintf (where, "   --no-caches           do not show caches\n");
@@ -121,7 +124,10 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
-      }
+      } else if (!strcmp (argv[1], "-l") || !strcmp (argv[1], "--logical"))
+	logical = 1;
+      else if (!strcmp (argv[1], "-p") || !strcmp (argv[1], "--physical"))
+	logical = 0;
       else if (!strcmp (argv[1], "--no-caches"))
 	ignorecache = 2;
       else if (!strcmp (argv[1], "--no-useless-caches"))
@@ -220,43 +226,43 @@ main (int argc, char *argv[])
 #ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
     if (!force_console && getenv("DISPLAY"))
-      output_x11(topology, NULL, verbose_mode);
+      output_x11(topology, NULL, logical, verbose_mode);
     else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_WIN_SYS
-      output_windows(topology, NULL, verbose_mode);
+      output_windows(topology, NULL, logical, verbose_mode);
 #else
-    output_console(topology, NULL, verbose_mode);
+    output_console(topology, NULL, logical, verbose_mode);
 #endif
   } else if (!strcmp(filename, "-")
 	  || !strcmp(filename, "/dev/stdout"))
-    output_console(topology, filename, verbose_mode);
+    output_console(topology, filename, logical, verbose_mode);
   else if (strstr(filename, ".txt"))
-    output_text(topology, filename, verbose_mode);
+    output_text(topology, filename, logical, verbose_mode);
   else if (strstr(filename, ".fig"))
-    output_fig(topology, filename, verbose_mode);
+    output_fig(topology, filename, logical, verbose_mode);
 #ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_PNG_FUNCTIONS
   else if (strstr(filename, ".png"))
-    output_png(topology, filename, verbose_mode);
+    output_png(topology, filename, logical, verbose_mode);
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 #if CAIRO_HAS_PDF_SURFACE
   else if (strstr(filename, ".pdf"))
-    output_pdf(topology, filename, verbose_mode);
+    output_pdf(topology, filename, logical, verbose_mode);
 #endif /* CAIRO_HAS_PDF_SURFACE */
 #if CAIRO_HAS_PS_SURFACE
   else if (strstr(filename, ".ps"))
-    output_ps(topology, filename, verbose_mode);
+    output_ps(topology, filename, logical, verbose_mode);
 #endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_SVG_SURFACE
   else if (strstr(filename, ".svg"))
-    output_svg(topology, filename, verbose_mode);
+    output_svg(topology, filename, logical, verbose_mode);
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_HAVE_XML
   else if (strstr(filename, ".xml"))
-    output_xml(topology, filename, verbose_mode);
+    output_xml(topology, filename, logical, verbose_mode);
 #endif
   else {
     fprintf(stderr, "file format not supported\n");

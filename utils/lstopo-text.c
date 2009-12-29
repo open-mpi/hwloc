@@ -40,11 +40,12 @@
 
 /* Recursively output topology in a console fashion */
 static void
-output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int verbose_mode) {
+output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode) {
   unsigned x;
   const char * indexprefix = "#";
   char type[32], attr[256];
   int attrlen;
+  unsigned index = logical ? l->logical_index : l->os_index;
 
   if (verbose_mode <= 1
       && parent && parent->arity == 1 && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
@@ -61,8 +62,8 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
     fprintf(output, type);
   } else
     fprintf(output, "P");
-  if (l->type != HWLOC_OBJ_SYSTEM && l->os_index != (unsigned)-1)
-    fprintf(output, "#%u", l->os_index);
+  if (l->type != HWLOC_OBJ_SYSTEM && index != (unsigned)-1)
+    fprintf(output, "#%u", index);
   attrlen = hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
   if (attrlen)
     fprintf(output, "(%s)", attr);
@@ -71,11 +72,11 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
-	output_topology (topology, l->children[x], l, output, i, verbose_mode);
+	output_topology (topology, l->children[x], l, output, i, logical, verbose_mode);
   }
 }
 
-void output_console(hwloc_topology_t topology, const char *filename, int verbose_mode)
+void output_console(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode)
 {
   unsigned topodepth;
   FILE *output;
@@ -99,7 +100,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int verbose
    */
 
   if (verbose_mode >= 1) {
-    output_topology (topology, hwloc_get_system_obj(topology), NULL, output, 0, verbose_mode);
+    output_topology (topology, hwloc_get_system_obj(topology), NULL, output, 0, logical, verbose_mode);
     fprintf(output, "\n");
   }
 
@@ -552,7 +553,7 @@ static struct draw_methods text_draw_methods = {
   .text = text_text,
 };
 
-void output_text(hwloc_topology_t topology, const char *filename, int verbose_mode __hwloc_attribute_unused)
+void output_text(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output;
   struct display *disp;
@@ -605,8 +606,8 @@ void output_text(hwloc_topology_t topology, const char *filename, int verbose_mo
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
-  disp = output_draw_start(&text_draw_methods, topology, output);
-  output_draw(&text_draw_methods, topology, disp);
+  disp = output_draw_start(&text_draw_methods, logical, topology, output);
+  output_draw(&text_draw_methods, logical, topology, disp);
 
   lfr = lfg = lfb = -1;
   lbr = lbg = lbb = -1;

@@ -39,6 +39,7 @@ rgb_to_brush(int r, int g, int b)
 struct draw_methods windows_draw_methods;
 
 hwloc_topology_t the_topology;
+int logical = logical;
 
 static LRESULT CALLBACK
 WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
@@ -48,7 +49,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       HDC hdc;
       PAINTSTRUCT ps;
       hdc = BeginPaint(hwnd, &ps);
-      output_draw(&windows_draw_methods, the_topology, &ps);
+      output_draw(&windows_draw_methods, logical, the_topology, &ps);
       EndPaint(hwnd, &ps);
       break;
     }
@@ -142,11 +143,12 @@ struct draw_methods windows_draw_methods = {
 };
 
 void
-output_windows (hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_windows (hwloc_topology_t topology, const char *filename, int logical, int verbose_mode)
 {
   HWND toplevel;
   the_topology = topology;
-  toplevel = output_draw_start(&windows_draw_methods, topology, NULL);
+  the_logical = logical;
+  toplevel = output_draw_start(&windows_draw_methods, logical, topology, NULL);
   UpdateWindow(toplevel);
   MSG msg;
   while (GetMessage(&msg, NULL, 0, 0)) {
