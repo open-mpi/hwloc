@@ -51,7 +51,7 @@ then
 fi
 # we need "Topology not from this system" in the output so as to make test-topology.sh happy
 export HWLOC_THISSYSTEM=0
-"$lstopo" - -v > "./$name.tar.gz.output"
+"$lstopo" - -p -v > "./$name.tar.gz.output"
 echo "Expected topology output stored in ./$name.tar.gz.output"
 
 exit 0
