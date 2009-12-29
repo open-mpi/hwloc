@@ -154,14 +154,14 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
 hwloc_obj_type_t
 hwloc_obj_type_of_string (const char * string)
 {
-  if (!strcmp(string, "System")) return HWLOC_OBJ_SYSTEM;
-  if (!strcmp(string, "Machine")) return HWLOC_OBJ_MACHINE;
-  if (!strcmp(string, "Misc")) return HWLOC_OBJ_MISC;
-  if (!strcmp(string, "NUMANode")) return HWLOC_OBJ_NODE;
-  if (!strcmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
-  if (!strcmp(string, "Cache")) return HWLOC_OBJ_CACHE;
-  if (!strcmp(string, "Core")) return HWLOC_OBJ_CORE;
-  if (!strcmp(string, "Proc")) return HWLOC_OBJ_PROC;
+  if (!strcasecmp(string, "System")) return HWLOC_OBJ_SYSTEM;
+  if (!strcasecmp(string, "Machine")) return HWLOC_OBJ_MACHINE;
+  if (!strcasecmp(string, "Misc")) return HWLOC_OBJ_MISC;
+  if (!strcasecmp(string, "NUMANode") || !strcasecmp(string, "Node")) return HWLOC_OBJ_NODE;
+  if (!strcasecmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
+  if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
+  if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
+  if (!strcasecmp(string, "Proc")) return HWLOC_OBJ_PROC;
   return (hwloc_obj_type_t) -1;
 }
 
