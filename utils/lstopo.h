@@ -10,6 +10,7 @@
 #include <hwloc.h>
 
 hwloc_obj_type_t show_only;
+int show_cpuset;
 
 typedef void output_method (struct hwloc_topology *topology, const char *output, int logical, int verbose_mode);
 

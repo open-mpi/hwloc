@@ -44,18 +44,28 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
   char type[32], attr[256];
   int attrlen;
   unsigned index = logical ? l->logical_index : l->os_index;
-  if (l->type != HWLOC_OBJ_PROC) {
-    hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
-    fprintf(output, type);
-  } else
-    fprintf(output, "P");
-  if (l->type != HWLOC_OBJ_SYSTEM && index != (unsigned)-1)
-    fprintf(output, "#%u", index);
-  attrlen = hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
-  if (attrlen)
-    fprintf(output, "(%s)", attr);
-  if (verbose_mode >= 2 && l->name)
-    fprintf(output, " \"%s\"", l->name);
+  if (show_cpuset < 2) {
+    if (l->type != HWLOC_OBJ_PROC) {
+      hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
+      fprintf(output, type);
+    } else
+      fprintf(output, "P");
+    if (l->type != HWLOC_OBJ_SYSTEM && index != (unsigned)-1)
+      fprintf(output, "#%u", index);
+    attrlen = hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
+    if (attrlen)
+      fprintf(output, "(%s)", attr);
+    if (verbose_mode >= 2 && l->name)
+      fprintf(output, " \"%s\"", l->name);
+  }
+  if (show_cpuset == 1)
+    fprintf(output, " cpuset=");
+  if (show_cpuset) {
+    char *cpusetstr;
+    hwloc_cpuset_asprintf(&cpusetstr, l->cpuset);
+    fprintf(output, cpusetstr);
+    free(cpusetstr);
+  }
 }
 
 /* Recursively output topology in a console fashion */
@@ -63,7 +73,8 @@ static void
 output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode)
 {
   unsigned x;
-  if (verbose_mode <= 1
+  int group_identical = (verbose_mode <= 1) && !show_cpuset;
+  if (group_identical
       && parent && parent->arity == 1 && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
     /* in non-verbose mode, merge objects with their parent is they are exactly identical */
     fprintf(output, " + ");

@@ -19,6 +19,7 @@
 
 int logical = 1;
 hwloc_obj_type_t show_only = (hwloc_obj_type_t) -1;
+int show_cpuset = 0;
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 unsigned int force_horiz = 0;
@@ -65,6 +66,8 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   -p --physical         display physical object indexes\n");
   fprintf (where, "   -v --verbose          increase verbosity (disabled by default)\n");
   fprintf (where, "   -s --silent           decrease verbosity\n");
+  fprintf (where, "   -c --cpuset           show the cpuset\n");
+  fprintf (where, "   -C --cpuset-only      only show the cpuset\n");
   fprintf (where, "   --only <type>         only show the given type\n");
   fprintf (where, "   --no-caches           do not show caches\n");
   fprintf (where, "   --no-useless-caches   do not show caches which do not have a hierarchical\n"
@@ -130,6 +133,10 @@ main (int argc, char *argv[])
 	logical = 1;
       else if (!strcmp (argv[1], "-p") || !strcmp (argv[1], "--physical"))
 	logical = 0;
+      else if (!strcmp (argv[1], "-c") || !strcmp (argv[1], "--cpuset"))
+	show_cpuset = 1;
+      else if (!strcmp (argv[1], "-C") || !strcmp (argv[1], "--cpuset-only"))
+	show_cpuset = 2;
       else if (!strcmp (argv[1], "--only")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
@@ -209,6 +216,8 @@ main (int argc, char *argv[])
     merge = 0;
     force_console = 1;
   }
+  if (show_cpuset)
+    force_console = 1;
 
   hwloc_topology_set_flags(topology, flags);
 
