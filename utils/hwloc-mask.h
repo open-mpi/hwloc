@@ -63,9 +63,25 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
   return 0;
 }
 
+static __inline hwloc_obj_t
+hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t rootset,
+					 unsigned depth, unsigned i, int logical)
+{
+  if (logical) {
+    return hwloc_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i);
+  } else {
+    hwloc_obj_t obj = NULL;
+    while ((obj = hwloc_get_next_obj_inside_cpuset_by_depth(topology, rootset, depth, obj)) != NULL) {
+      if (obj->os_index == i)
+        return obj;
+    }
+    return NULL;
+  }
+}
+
 static __inline int
 hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
-		       hwloc_const_cpuset_t rootset, const char *string,
+		       hwloc_const_cpuset_t rootset, const char *string, int logical,
 		       hwloc_cpuset_t set, int verbose)
 {
   hwloc_obj_t obj;
@@ -142,7 +158,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     if (wrap && i==width)
       i = 0;
 
-    obj = hwloc_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i);
+    obj = hwloc_mask_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
     if (verbose) {
       char * s = hwloc_cpuset_printf_value(rootset);
       if (obj)
@@ -155,7 +171,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     }
     if (obj) {
       if (sep3)
-	hwloc_mask_append_object(topology, topodepth, obj->cpuset, sep3+1, set, verbose);
+	hwloc_mask_append_object(topology, topodepth, obj->cpuset, sep3+1, logical, set, verbose);
       else
 	/* add to the temporary cpuset
 	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
@@ -169,7 +185,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 
 static __inline int
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
-		     const char *arg, hwloc_cpuset_t set,
+		     const char *arg, int logical, hwloc_cpuset_t set,
 		     int verbose)
 {
   char *colon;
@@ -190,7 +206,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
   colon = strchr(arg, ':');
   if (colon) {
     hwloc_cpuset_t newset = hwloc_cpuset_alloc();
-    err = hwloc_mask_append_object(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), arg, newset, verbose);
+    err = hwloc_mask_append_object(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), arg, logical, newset, verbose);
     if (!err)
       err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);

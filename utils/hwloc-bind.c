@@ -18,11 +18,13 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-mask utility.\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
-  fprintf(where, "   --strict\trequire strict binding\n");
-  fprintf(where, "   --get\tretrieve current process binding\n");
-  fprintf(where, "   -v\t\tverbose messages\n");
-  fprintf(where, "   --version\treport version and exit\n");
+  fprintf(where, "  -l --logical\tdisplay logical object indexes (default)\n");
+  fprintf(where, "  -p --physical\tdisplay physical object indexes\n");
+  fprintf(where, "  --single\tbind on a single CPU to prevent migration\n");
+  fprintf(where, "  --strict\trequire strict binding\n");
+  fprintf(where, "  --get\tretrieve current process binding\n");
+  fprintf(where, "  -v\t\tverbose messages\n");
+  fprintf(where, "  --version\treport version and exit\n");
 }
 
 int main(int argc, char *argv[])
@@ -34,6 +36,7 @@ int main(int argc, char *argv[])
   int bind_cpus = 0;
   int single = 0;
   int verbose = 0;
+  int logical = 1;
   int flags = 0;
   int ret;
   char **orig_argv = argv;
@@ -76,6 +79,14 @@ int main(int argc, char *argv[])
           printf("%s %s\n", orig_argv[0], VERSION);
           exit(EXIT_SUCCESS);
       }
+      if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
+        logical = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
+        logical = 0;
+        goto next;
+      }
       else if (!strcmp (argv[0], "--get")) {
 	  get_binding = 1;
 	  goto next;
@@ -85,7 +96,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    ret = hwloc_mask_process_arg(topology, depth, argv[0], cpu_set, verbose);
+    ret = hwloc_mask_process_arg(topology, depth, argv[0], logical, cpu_set, verbose);
     if (ret < 0) {
       if (verbose)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
