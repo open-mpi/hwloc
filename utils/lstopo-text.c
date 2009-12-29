@@ -43,7 +43,8 @@ static void
 output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int verbose_mode) {
   unsigned x;
   const char * indexprefix = "#";
-  char line[256];
+  char type[32], attr[256];
+  int attrlen;
 
   if (verbose_mode <= 1
       && parent && parent->arity == 1 && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
@@ -55,8 +56,16 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
     indent (output, 2*i);
     i++;
   }
-  hwloc_obj_snprintf (line, sizeof(line), topology, l, indexprefix, verbose_mode-1);
-  fprintf(output, "%s", line);
+  if (l->type != HWLOC_OBJ_PROC) {
+    hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
+    fprintf(output, type);
+  } else
+    fprintf(output, "P");
+  if (l->type != HWLOC_OBJ_SYSTEM && l->os_index != (unsigned)-1)
+    fprintf(output, "#%u", l->os_index);
+  attrlen = hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
+  if (attrlen)
+    fprintf(output, "(%s)", attr);
   if (verbose_mode >= 2 && l->name)
     fprintf(output, " \"%s\"", l->name);
   if (l->arity || (!i && !l->arity))
