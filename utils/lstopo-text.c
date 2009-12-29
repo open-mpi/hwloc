@@ -60,7 +60,8 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 
 /* Recursively output topology in a console fashion */
 static void
-output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode) {
+output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode)
+{
   unsigned x;
   if (verbose_mode <= 1
       && parent && parent->arity == 1 && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
@@ -78,6 +79,19 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
       for (x=0; x<l->arity; x++)
 	output_topology (topology, l->children[x], l, output, i, logical, verbose_mode);
   }
+}
+
+/* Recursive so that multiple depth types are properly shown */
+static void
+output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
+{
+  unsigned x;
+  if (show_only == l->type) {
+    output_console_obj (l, output, logical, verbose_mode);
+    fprintf (output, "\n");
+  }
+  for (x=0; x<l->arity; x++)
+    output_only (topology, l->children[x], output, logical, verbose_mode);
 }
 
 void output_console(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode)
@@ -103,7 +117,11 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
    * if verbose_mode > 1, print both.
    */
 
-  if (verbose_mode >= 1) {
+  if (show_only != (hwloc_obj_type_t)-1) {
+    if (verbose_mode > 1)
+      fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(show_only));
+    output_only (topology, hwloc_get_system_obj(topology), output, logical, verbose_mode);
+  } else if (verbose_mode >= 1) {
     output_topology (topology, hwloc_get_system_obj(topology), NULL, output, 0, logical, verbose_mode);
     fprintf(output, "\n");
   }

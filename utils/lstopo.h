@@ -9,6 +9,8 @@
 #include <private/config.h>
 #include <hwloc.h>
 
+hwloc_obj_type_t show_only;
+
 typedef void output_method (struct hwloc_topology *topology, const char *output, int logical, int verbose_mode);
 
 FILE *open_file(const char *filename, const char *mode);

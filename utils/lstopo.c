@@ -18,6 +18,7 @@
 #include "lstopo.h"
 
 int logical = 1;
+hwloc_obj_type_t show_only = (hwloc_obj_type_t) -1;
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 unsigned int force_horiz = 0;
@@ -64,6 +65,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   -p --physical         display physical object indexes\n");
   fprintf (where, "   -v --verbose          increase verbosity (disabled by default)\n");
   fprintf (where, "   -s --silent           decrease verbosity\n");
+  fprintf (where, "   --only <type>         only show the given type\n");
   fprintf (where, "   --no-caches           do not show caches\n");
   fprintf (where, "   --no-useless-caches   do not show caches which do not have a hierarchical\n"
                   "                         impact\n");
@@ -128,6 +130,14 @@ main (int argc, char *argv[])
 	logical = 1;
       else if (!strcmp (argv[1], "-p") || !strcmp (argv[1], "--physical"))
 	logical = 0;
+      else if (!strcmp (argv[1], "--only")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        show_only = hwloc_obj_type_of_string(argv[2]);
+	opt = 1;
+      }
       else if (!strcmp (argv[1], "--no-caches"))
 	ignorecache = 2;
       else if (!strcmp (argv[1], "--no-useless-caches"))
@@ -194,6 +204,11 @@ main (int argc, char *argv[])
       argc -= opt+1;
       argv += opt+1;
     }
+
+  if (show_only != (hwloc_obj_type_t)-1) {
+    merge = 0;
+    force_console = 1;
+  }
 
   hwloc_topology_set_flags(topology, flags);
 
