@@ -242,7 +242,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, 
 	      if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
 		if (!strcmp((const char*) attr->name, "type")) {
 		  obj->type = hwloc_obj_type_of_string((const char*) subnode->content);
-		  if (obj->type == HWLOC_OBJ_TYPE_MAX)
+		  if (obj->type == (hwloc_obj_type_t)-1)
 		    fprintf(stderr, "ignoring unknown object type %s\n", (const char*) subnode->content);
 		  else
 		    break;

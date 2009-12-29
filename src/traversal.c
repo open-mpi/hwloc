@@ -162,7 +162,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcmp(string, "Core")) return HWLOC_OBJ_CORE;
   if (!strcmp(string, "Proc")) return HWLOC_OBJ_PROC;
-  return HWLOC_OBJ_TYPE_MAX;
+  return (hwloc_obj_type_t) -1;
 }
 
 #define hwloc_memory_size_printf_value(_size) \

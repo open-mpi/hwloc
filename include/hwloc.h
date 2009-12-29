@@ -555,7 +555,10 @@ hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigne
 /** \brief Return a stringified topology object type */
 extern const char * hwloc_obj_type_string (hwloc_obj_type_t type);
 
-/** \brief Return an object type from the string */
+/** \brief Return an object type from the string
+ *
+ * \return -1 if unrecognized.
+ */
 extern hwloc_obj_type_t hwloc_obj_type_of_string (const char * string);
 
 /** \brief Stringify the type of a given topology object into a human-readable form.
