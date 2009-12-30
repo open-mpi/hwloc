@@ -270,6 +270,134 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   return hwloc_set;
 }
 
+/* Get the array of tids of a process from the task directory in /proc */
+static int
+hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
+{
+  struct dirent *dirent;
+  unsigned nr_tids = 0;
+  unsigned max_tids = 32;
+  pid_t *tids = malloc(max_tids*sizeof(pid_t));
+
+  rewinddir(taskdir);
+
+  while ((dirent = readdir(taskdir)) != NULL) {
+    if (nr_tids == max_tids) {
+      max_tids *= 2;
+      tids = realloc(tids, max_tids*sizeof(pid_t));
+    }
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+      continue;
+    tids[nr_tids++] = atoi(dirent->d_name);
+  }
+
+  *nr_tidsp = nr_tids;
+  *tidsp = tids;
+  return 0;
+}
+
+/* Callbacks for binding each process sub-tid */
+typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data);
+
+static int
+hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data)
+{
+  hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
+  return hwloc_linux_set_tid_cpubind(topology, tid, cpuset);
+}
+
+static int
+hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data)
+{
+  hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
+  hwloc_cpuset_t tidset = hwloc_linux_get_tid_cpubind(topology, 0);
+  if (!tidset)
+    return -1;
+
+  hwloc_cpuset_orset(cpuset, tidset);
+  hwloc_cpuset_free(tidset);
+  return 0;
+}
+
+/* Call the callback for each process tid. */
+static int
+hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
+			     pid_t pid, hwloc_linux_foreach_proc_tid_cb_t cb,
+			     void *data)
+{
+  char taskdir_path[128];
+  DIR *taskdir;
+  pid_t *tids, *newtids;
+  unsigned i, nr, newnr;
+  int err;
+
+  if (pid)
+    snprintf(taskdir_path, sizeof(taskdir_path), "/proc/%u/task", (unsigned) pid);
+  else
+    snprintf(taskdir_path, sizeof(taskdir_path), "/proc/self/task");
+
+  taskdir = opendir(taskdir_path);
+  if (!taskdir) {
+    err = -ENOSYS;
+    goto out;
+  }
+
+  /* read the current list of threads */
+  err = hwloc_linux_get_proc_tids(taskdir, &nr, &tids);
+  if (err < 0)
+    goto out_with_dir;
+
+ retry:
+  /* apply the callback to all threads */
+  for(i=0; i<nr; i++) {
+    err = cb(topology, tids[i], data);
+    if (err < 0)
+      goto out_with_tids;
+  }
+
+  /* re-read the list of thread and retry if it changed in the meantime */
+  err = hwloc_linux_get_proc_tids(taskdir, &newnr, &newtids);
+  if (err < 0)
+    goto out_with_tids;
+  if (newnr != nr || memcmp(newtids, tids, nr*sizeof(pid_t))) {
+    free(tids);
+    tids = newtids;
+    nr = newnr;
+    goto retry;
+  }
+
+  err = 0;
+  free(newtids);
+ out_with_tids:
+  free(tids);
+ out_with_dir:
+  closedir(taskdir);
+ out:
+  return err;
+}
+
+static int
+hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set)
+{
+  return hwloc_linux_foreach_proc_tid(topology, 0,
+				      hwloc_linux_foreach_proc_tid_set_cpubind_cb,
+				      (void*) hwloc_set);
+}
+
+static hwloc_cpuset_t
+hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid)
+{
+  hwloc_cpuset_t hwloc_set = hwloc_cpuset_alloc();
+  int err = hwloc_linux_foreach_proc_tid(topology, 0,
+					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
+					 (void*) hwloc_set);
+  if (err) {
+    hwloc_cpuset_free(hwloc_set);
+    return NULL;
+  }
+  return hwloc_set;
+}
+
 static int
 hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
@@ -285,20 +413,16 @@ hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_
 static int
 hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  if (policy & HWLOC_CPUBIND_PROCESS) {
-    errno = ENOSYS;
-    return -1;
-  }
+  if (policy & HWLOC_CPUBIND_PROCESS)
+    return hwloc_linux_set_pid_cpubind(topology, pid, hwloc_set);
   return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
 }
 
 static hwloc_cpuset_t
 hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 {
-  if (policy & HWLOC_CPUBIND_PROCESS) {
-    errno = ENOSYS;
-    return NULL;
-  }
+  if (policy & HWLOC_CPUBIND_PROCESS)
+    return hwloc_linux_get_pid_cpubind(topology, pid);
   return hwloc_linux_get_tid_cpubind(topology, pid);
 }
 
