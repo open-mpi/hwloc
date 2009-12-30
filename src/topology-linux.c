@@ -283,7 +283,7 @@ hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_
 }
 
 static int
-hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   if (policy & HWLOC_CPUBIND_PROCESS) {
     errno = ENOSYS;
@@ -293,7 +293,7 @@ hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_c
 }
 
 static hwloc_cpuset_t
-hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy __hwloc_attribute_unused)
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 {
   if (policy & HWLOC_CPUBIND_PROCESS) {
     errno = ENOSYS;
