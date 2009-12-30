@@ -399,31 +399,45 @@ hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid)
 }
 
 static int
-hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
-{
-  return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
-}
-
-static hwloc_cpuset_t
-hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_unused)
-{
-  return hwloc_linux_get_tid_cpubind(topology, 0);
-}
-
-static int
 hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  if (policy & HWLOC_CPUBIND_PROCESS)
+  if (policy & HWLOC_CPUBIND_THREAD)
+    return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
+  else
     return hwloc_linux_set_pid_cpubind(topology, pid, hwloc_set);
-  return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
 }
 
 static hwloc_cpuset_t
 hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 {
-  if (policy & HWLOC_CPUBIND_PROCESS)
+  if (policy & HWLOC_CPUBIND_THREAD)
+    return hwloc_linux_get_tid_cpubind(topology, pid);
+  else
     return hwloc_linux_get_pid_cpubind(topology, pid);
-  return hwloc_linux_get_tid_cpubind(topology, pid);
+}
+
+static int
+hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+{
+  return hwloc_linux_set_proc_cpubind(topology, 0, hwloc_set, policy);
+}
+
+static hwloc_cpuset_t
+hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy)
+{
+  return hwloc_linux_get_proc_cpubind(topology, 0, policy);
+}
+
+static int
+hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+{
+  return hwloc_linux_set_pid_cpubind(topology, 0, hwloc_set);
+}
+
+static hwloc_cpuset_t
+hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_unused)
+{
+  return hwloc_linux_get_pid_cpubind(topology, 0);
 }
 
 static int
@@ -1496,6 +1510,8 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
   topology->get_cpubind = hwloc_linux_get_cpubind;
   topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
   topology->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
+  topology->set_thisproc_cpubind = hwloc_linux_set_thisproc_cpubind;
+  topology->get_thisproc_cpubind = hwloc_linux_get_thisproc_cpubind;
   topology->set_proc_cpubind = hwloc_linux_set_proc_cpubind;
   topology->get_proc_cpubind = hwloc_linux_get_proc_cpubind;
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
