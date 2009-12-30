@@ -310,7 +310,7 @@ static int
 hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data)
 {
   hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
-  hwloc_cpuset_t tidset = hwloc_linux_get_tid_cpubind(topology, 0);
+  hwloc_cpuset_t tidset = hwloc_linux_get_tid_cpubind(topology, tid);
   if (!tidset)
     return -1;
 
