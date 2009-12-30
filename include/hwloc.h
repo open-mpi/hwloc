@@ -657,7 +657,7 @@ typedef enum {
   HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
                                    * This may not be supported by some OSes (e.g. Linux). */
   HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process */
-  HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS
+  HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS.
                                    *
                                    * By default, when the designated CPUs are
                                    * all busy while other CPUs are idle, OSes
@@ -675,8 +675,14 @@ typedef enum {
                                    * allowed (administrative reasons), and the
                                    * function will fail in that case.
 				   *
+				   * When retrieving the binding of a process,
+				   * this flag checks whether all its threads
+				   * actually have the same binding.
+				   * If the flag is not given, the binding of
+				   * each thread will be accumulated.
+				   *
 				   * \note This flag is meaningless when retrieving
-				   * the binding of a process or thread.
+				   * the binding of a thread.
                                    */
 } hwloc_cpubind_policy_t;
 
