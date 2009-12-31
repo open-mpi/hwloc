@@ -223,7 +223,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
           goto out;
         }
       }
-      len = next ? next-tmp : strlen(tmp);
+      len = next ? (size_t) (next-tmp) : strlen(tmp);
       if (len != strspn(tmp, "0123456789abcdefABCDEF")) {
         err = -1;
         goto out;
