@@ -394,7 +394,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 static int
 hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_linux_foreach_proc_tid(topology, 0,
+  return hwloc_linux_foreach_proc_tid(topology, pid,
 				      hwloc_linux_foreach_proc_tid_set_cpubind_cb,
 				      (void*) hwloc_set, policy);
 }
@@ -403,7 +403,7 @@ static hwloc_cpuset_t
 hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 {
   hwloc_cpuset_t hwloc_set = hwloc_cpuset_alloc();
-  int err = hwloc_linux_foreach_proc_tid(topology, 0,
+  int err = hwloc_linux_foreach_proc_tid(topology, pid,
 					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
 					 (void*) hwloc_set, policy);
   if (err) {
