@@ -180,9 +180,9 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_NODE:
   case HWLOC_OBJ_SOCKET:
   case HWLOC_OBJ_CORE:
-    return hwloc_snprintf(string, size, hwloc_obj_type_string(type));
+    return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_PROC:
-    return hwloc_snprintf(string, size, verbose ? hwloc_obj_type_string(type) : "P");
+    return hwloc_snprintf(string, size, "%s", verbose ? hwloc_obj_type_string(type) : "P");
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "L%u%s", obj->attr->cache.depth, verbose ? hwloc_obj_type_string(type): "");
   case HWLOC_OBJ_MISC:

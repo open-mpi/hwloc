@@ -67,7 +67,10 @@ hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute
  */
 static __inline hwloc_cpuset_t
 hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused,
-				      const cpu_set_t *schedset, size_t schedsetsize)
+                                       const cpu_set_t *schedset, size_t schedsetsize) __hwloc_attribute_malloc;
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused,
+                                       const cpu_set_t *schedset, size_t schedsetsize)
 {
   hwloc_cpuset_t hwlocset = hwloc_cpuset_alloc();
 #ifdef CPU_ZERO_S

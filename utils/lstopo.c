@@ -96,7 +96,7 @@ main (int argc, char *argv[])
   int err;
   int verbose_mode = 1;
   hwloc_topology_t topology;
-  char *filename = NULL;
+  const char *filename = NULL;
   unsigned long flags = 0;
   int merge = 0;
   int ignorecache = 0;

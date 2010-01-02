@@ -288,12 +288,14 @@ void
 output_png(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
+  cairo_surface_t *cs;
+
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
-  cairo_surface_t *cs = output_draw_start(&png_draw_methods, logical, topology, output);
+  cs = output_draw_start(&png_draw_methods, logical, topology, output);
 
   topo_cairo_paint(&png_draw_methods, logical, topology, cs);
   cairo_surface_write_to_png_stream(cs, topo_cairo_write, output);
@@ -323,12 +325,14 @@ void
 output_pdf(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
+  cairo_surface_t *cs;
+
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
-  cairo_surface_t *cs = output_draw_start(&pdf_draw_methods, logical, topology, output);
+  cs = output_draw_start(&pdf_draw_methods, logical, topology, output);
 
   topo_cairo_paint(&pdf_draw_methods, logical, topology, cs);
   cairo_surface_flush(cs);
@@ -358,12 +362,14 @@ void
 output_ps(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
+  cairo_surface_t *cs;
+
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
-  cairo_surface_t *cs = output_draw_start(&ps_draw_methods, logical, topology, output);
+  cs = output_draw_start(&ps_draw_methods, logical, topology, output);
 
   topo_cairo_paint(&ps_draw_methods, logical, topology, cs);
   cairo_surface_flush(cs);
@@ -393,12 +399,14 @@ void
 output_svg(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
+  cairo_surface_t *cs;
+
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
-  cairo_surface_t *cs = output_draw_start(&svg_draw_methods, logical, topology, output);
+  cs = output_draw_start(&svg_draw_methods, logical, topology, output);
 
   topo_cairo_paint(&svg_draw_methods, logical, topology, cs);
   cairo_surface_flush(cs);

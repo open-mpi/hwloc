@@ -149,8 +149,10 @@ hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   int size;
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
-  rsid_t who = { .at_tid = info.__pi_tid };
-  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
+  {
+    rsid_t who = { .at_tid = info.__pi_tid };
+    return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
+  }
 }
 
 static hwloc_cpuset_t
@@ -160,8 +162,10 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   int size;
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return NULL;
-  rsid_t who = { .at_tid = info.__pi_tid };
-  return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, policy);
+  {
+    rsid_t who = { .at_tid = info.__pi_tid };
+    return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, policy);
+  }
 }
 
 static int

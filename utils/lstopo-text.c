@@ -47,7 +47,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
   if (show_cpuset < 2) {
     if (l->type != HWLOC_OBJ_PROC) {
       hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
-      fprintf(output, type);
+      fprintf(output, "%s", type);
     } else
       fprintf(output, "P");
     if (l->type != HWLOC_OBJ_SYSTEM && index != (unsigned)-1)
@@ -63,7 +63,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
   if (show_cpuset) {
     char *cpusetstr;
     hwloc_cpuset_asprintf(&cpusetstr, l->cpuset);
-    fprintf(output, cpusetstr);
+    fprintf(output, "%s", cpusetstr);
     free(cpusetstr);
   }
 }

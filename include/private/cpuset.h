@@ -72,7 +72,7 @@ struct hwloc_cpuset_s {
 #elif defined(HWLOC_HAVE_FFSL)
 
 #  ifndef HWLOC_HAVE_DECL_FFSL
-extern int ffsl(long);
+extern int ffsl(long) __hwloc_attribute_const;
 #  endif
 
 #  define hwloc_ffsl(x) ffsl(x)
@@ -80,7 +80,7 @@ extern int ffsl(long);
 #elif defined(HWLOC_HAVE_FFS)
 
 #  ifndef HWLOC_HAVE_DECL_FFS
-extern int ffs(int);
+extern int ffs(int) __hwloc_attribute_const;
 #  endif
 
 #  define hwloc_ffs(x) ffs(x)
@@ -88,6 +88,7 @@ extern int ffs(int);
 
 #else /* no ffs implementation */
 
+static __inline int hwloc_ffsl(unsigned long x) __hwloc_attribute_const;
 static __inline int hwloc_ffsl(unsigned long x)
 {
 	int i;
@@ -133,6 +134,7 @@ static __inline int hwloc_ffsl(unsigned long x)
 /* We only have an int ffs(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
+static __inline int hwloc_ffs32(unsigned long x) __hwloc_attribute_const;
 static __inline int hwloc_ffs32(unsigned long x)
 {
 #if HWLOC_BITS_PER_INT == 16
@@ -153,6 +155,7 @@ static __inline int hwloc_ffs32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
+static __inline int hwloc_ffsl(unsigned long x) __hwloc_attribute_const;
 static __inline int hwloc_ffsl(unsigned long x)
 {
 #if HWLOC_BITS_PER_LONG == 64
@@ -188,7 +191,7 @@ static __inline int hwloc_ffsl(unsigned long x)
 #elif defined(HWLOC_HAVE_FLSL)
 
 #  ifndef HWLOC_HAVE_DECL_FLSL
-extern int flsl(long);
+extern int flsl(long) __hwloc_attribute_const;
 #  endif
 
 #  define hwloc_flsl(x) flsl(x)
@@ -196,7 +199,7 @@ extern int flsl(long);
 #elif defined(HWLOC_HAVE_CLZL)
 
 #  ifndef HWLOC_HAVE_DECL_CLZL
-extern int clzl(long);
+extern int clzl(long) __hwloc_attribute_const;
 #  endif
 
 #  define hwloc_flsl(x) (x ? 8*sizeof(long) - clzl(x) : 0)
@@ -204,7 +207,7 @@ extern int clzl(long);
 #elif defined(HWLOC_HAVE_FLS)
 
 #  ifndef HWLOC_HAVE_DECL_FLS
-extern int fls(int);
+extern int fls(int) __hwloc_attribute_const;
 #  endif
 
 #  define hwloc_fls(x) fls(x)
@@ -213,7 +216,7 @@ extern int fls(int);
 #elif defined(HWLOC_HAVE_CLZ)
 
 #  ifndef HWLOC_HAVE_DECL_CLZ
-extern int clz(int);
+extern int clz(int) __hwloc_attribute_const;
 #  endif
 
 #  define hwloc_fls(x) (x ? 8*sizeof(int) - clz(x) : 0)
@@ -221,6 +224,7 @@ extern int clz(int);
 
 #else /* no fls implementation */
 
+static __inline int hwloc_flsl(unsigned long x) __hwloc_attribute_const;
 static __inline int hwloc_flsl(unsigned long x)
 {
 	int i = 0;
@@ -266,6 +270,7 @@ static __inline int hwloc_flsl(unsigned long x)
 /* We only have an int fls(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
+static __inline int hwloc_fls32(unsigned long x) __hwloc_attribute_const;
 static __inline int hwloc_fls32(unsigned long x)
 {
 #if HWLOC_BITS_PER_INT == 16
@@ -286,6 +291,7 @@ static __inline int hwloc_fls32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
+static __inline int hwloc_flsl(unsigned long x) __hwloc_attribute_const;
 static __inline int hwloc_flsl(unsigned long x)
 {
 #if HWLOC_BITS_PER_LONG == 64
@@ -306,6 +312,7 @@ static __inline int hwloc_flsl(unsigned long x)
 }
 #endif
 
+static __inline int hwloc_weight_long(unsigned long w) __hwloc_attribute_const;
 static __inline int hwloc_weight_long(unsigned long w)
 {
 #if HWLOC_BITS_PER_LONG == 32

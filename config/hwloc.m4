@@ -168,11 +168,11 @@ AC_DEFUN([HWLOC_INIT],[
 
     AC_USE_SYSTEM_EXTENSIONS # for O_DIRECTORY, fdopen, ffsl, ...
     AH_VERBATIM([USE_HPUX_SYSTEM_EXTENSIONS],
-    [/* Enable extensions on HP-UX. */
-    #ifndef _HPUX_SOURCE
-    # undef _HPUX_SOURCE
-    #endif
-    ])
+[/* Enable extensions on HP-UX. */
+#ifndef _HPUX_SOURCE
+# undef _HPUX_SOURCE
+#endif
+])
     AC_DEFINE([_HPUX_SOURCE], [1], [Are we building for HP-UX?])
     
     AC_LANG_PUSH([C])

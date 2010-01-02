@@ -31,7 +31,7 @@
  *
  * \return newly-allocated cpuset.
  */
-extern hwloc_cpuset_t hwloc_linux_parse_cpumap_file(FILE *file);
+extern hwloc_cpuset_t hwloc_linux_parse_cpumap_file(FILE *file) __hwloc_attribute_malloc;
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
@@ -47,7 +47,7 @@ extern int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwl
  *
  * \return newly-allocated cpuset.
  */
-extern hwloc_cpuset_t hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid);
+extern hwloc_cpuset_t hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid) __hwloc_attribute_malloc;
 
 /** @} */
 

@@ -17,6 +17,16 @@
 #include <assert.h>
 #include <string.h>
 
+#ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
+# if HWLOC_HAVE_ATTRIBUTE_FORMAT
+#  define __hwloc_attribute_format(type, str, arg)  __attribute__((format(type, str, arg)))
+# else
+#  define __hwloc_attribute_format
+# endif
+#else
+# define __hwloc_attribute_format
+#endif
+
 enum hwloc_ignore_type_e {
   HWLOC_IGNORE_TYPE_NEVER = 0,
   HWLOC_IGNORE_TYPE_KEEP_STRUCTURE,
@@ -243,7 +253,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
 
 /* On some systems, snprintf returns the size of written data, not the actually
  * required size.  hwloc_snprintf always report the actually required size. */
-int hwloc_snprintf(char *str, size_t size, const char *format, ...);
+int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
 
 /* Compile-time assertion */
 #define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))

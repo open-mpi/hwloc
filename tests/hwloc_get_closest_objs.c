@@ -30,6 +30,7 @@ main (void)
   unsigned found;
   int err;
   unsigned numprocs;
+  hwloc_obj_t ancestor;
 
   err = hwloc_topology_init (&topology);
   if (err)
@@ -64,7 +65,7 @@ main (void)
   assert(closest[found/2/3-1] == hwloc_get_obj_by_depth(topology, depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
 
   /* get ancestor of last and less close object */
-  hwloc_obj_t ancestor = hwloc_get_common_ancestor_obj(topology, last, closest[found-1]);
+  ancestor = hwloc_get_common_ancestor_obj(topology, last, closest[found-1]);
   assert(hwloc_obj_is_in_subtree(topology, last, ancestor));
   assert(hwloc_obj_is_in_subtree(topology, closest[found-1], ancestor));
   assert(ancestor == hwloc_get_system_obj(topology));

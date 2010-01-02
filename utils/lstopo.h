@@ -14,7 +14,7 @@ int show_cpuset;
 
 typedef void output_method (struct hwloc_topology *topology, const char *output, int logical, int verbose_mode);
 
-FILE *open_file(const char *filename, const char *mode);
+FILE *open_file(const char *filename, const char *mode) __hwloc_attribute_malloc;
 
 extern output_method output_console, output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
 
@@ -31,7 +31,7 @@ extern unsigned int gridsize, fontsize, force_horiz, force_vert;
 extern void *output_draw_start(struct draw_methods *draw_methods, int logical, struct hwloc_topology *topology, void *output);
 extern void output_draw(struct draw_methods *draw_methods, int logical, struct hwloc_topology *topology, void *output);
 
-int rgb_to_color(int r, int g, int b);
+int rgb_to_color(int r, int g, int b) __hwloc_attribute_const;
 int declare_color(int r, int g, int b);
 
 #endif /* UTILS_LSTOPO_H */

@@ -130,12 +130,12 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
   lgrp_cookie_t cookie;
   unsigned curlgrp = 0;
   int nlgrps;
+  lgrp_id_t root;
 
   if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
     cookie = lgrp_init(LGRP_VIEW_OS);
   else
     cookie = lgrp_init(LGRP_VIEW_CALLER);
-  lgrp_id_t root;
   if (cookie == LGRP_COOKIE_NONE)
     {
       hwloc_debug("lgrp_init failed: %s\n", strerror(errno));

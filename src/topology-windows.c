@@ -224,6 +224,11 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
     if (GetLogicalProcessorInformationProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;
+      unsigned id;
+      unsigned i;
+      struct hwloc_obj *obj;
+      hwloc_obj_type_t type;
+
       length = 0;
       procInfo = NULL;
 
@@ -235,11 +240,6 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	free(procInfo);
 	procInfo = malloc(length);
       }
-
-      unsigned id;
-      unsigned i;
-      struct hwloc_obj *obj;
-      hwloc_obj_type_t type;
 
       for (i = 0; i < length / sizeof(*procInfo); i++) {
 
@@ -308,6 +308,12 @@ hwloc_look_windows(struct hwloc_topology *topology)
     if (0 && GetLogicalProcessorInformationExProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX procInfoTotal, procInfo;
 
+      signed id;
+      struct hwloc_obj *obj;
+      hwloc_obj_type_t type;
+      KAFFINITY mask;
+      WORD group;
+
       fprintf(stderr,"Note: GetLogicalProcessorInformationEx was never tested yet!\n");
 
       length = 0;
@@ -321,12 +327,6 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	free(procInfoTotal);
 	procInfo = malloc(length);
       }
-
-      signed id;
-      struct hwloc_obj *obj;
-      hwloc_obj_type_t type;
-      KAFFINITY mask;
-      WORD group;
 
       for (procInfo = procInfoTotal;
 	   (void*) procInfo < (void*) ((unsigned long) procInfoTotal + length);

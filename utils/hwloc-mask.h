@@ -65,6 +65,9 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
 
 static __inline hwloc_obj_t
 hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t rootset,
+					 unsigned depth, unsigned i, int logical) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t rootset,
 					 unsigned depth, unsigned i, int logical)
 {
   if (logical) {
@@ -213,6 +216,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
   } else {
     /* try to parse as a comma-separated list of integer with 0x as an optional prefix */
     char *tmp = (char*) arg;
+    hwloc_cpuset_t newset;
     while (1) {
       char *next = strchr(tmp, ',');
       size_t len;
@@ -232,7 +236,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
         break;
       tmp = next+1;
     }
-    hwloc_cpuset_t newset = hwloc_cpuset_from_string(arg);
+    newset = hwloc_cpuset_from_string(arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
   }

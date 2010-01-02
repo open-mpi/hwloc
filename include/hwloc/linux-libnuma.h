@@ -77,6 +77,9 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpus
  */
 static __inline hwloc_cpuset_t
 hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
+				      const unsigned long *mask, unsigned long maxnode) __hwloc_attribute_malloc;
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
 				      const unsigned long *mask, unsigned long maxnode)
 {
   hwloc_cpuset_t cpuset;
@@ -124,6 +127,8 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
  * that use a struct bitmask as an input parameter.
  */
 static __inline struct bitmask *
+hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset) __hwloc_attribute_malloc;
+static __inline struct bitmask *
 hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset)
 {
   struct bitmask *bitmask;
@@ -156,6 +161,9 @@ hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpu
  *
  * \return newly-allocated cpuset
  */
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
+				       const struct bitmask *bitmask) __hwloc_attribute_malloc;
 static __inline hwloc_cpuset_t
 hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
 				       const struct bitmask *bitmask)
@@ -229,6 +237,9 @@ hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_const_cp
  *
  * \return newly-allocated cpuset
  */
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology,
+					const nodemask_t *nodemask) __hwloc_attribute_malloc;
 static __inline hwloc_cpuset_t
 hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology,
 					const nodemask_t *nodemask)
