@@ -824,6 +824,8 @@ hwloc_read_linux_cpuset_mask(const char *type, int fsroot_fd)
 gotfile:
   ssize = getline(&info, &size, fd);
   fclose(fd);
+  if (ssize < 0)
+    goto out;
   if (!info)
     goto out;
 
@@ -1317,7 +1319,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       obj->cpuset = hwloc_cpuset_alloc();
       hwloc_cpuset_cpu(obj->cpuset, processor);
 
-      hwloc_debug_2args_cpuset("cpu %d (os %ld) has cpuset %s\n",
+      hwloc_debug_2args_cpuset("cpu %u (os %ld) has cpuset %s\n",
 		 numprocs, processor, obj->cpuset);
       numprocs++;
       hwloc_insert_object_by_cpuset(topology, obj);
@@ -1329,7 +1331,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (physid == osphysids[i])
 	  break;
       proc_physids[processor]=i;
-      hwloc_debug("%ld on socket %d (%lx)\n", processor, i, physid);
+      hwloc_debug("%ld on socket %u (%lx)\n", processor, i, physid);
       if (i==numsockets)
 	osphysids[(numsockets)++] = physid;
       getprocnb_end() else
@@ -1338,7 +1340,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (coreid == oscoreids[i] && proc_osphysids[processor] == core_osphysids[i])
 	  break;
       proc_coreids[processor]=i;
-      hwloc_debug("%ld on core %d (%lx:%x)\n", processor, i, coreid, proc_osphysids[processor]);
+      hwloc_debug("%ld on core %u (%lx:%x)\n", processor, i, coreid, proc_osphysids[processor]);
       if (i==numcores)
 	{
 	  core_osphysids[numcores] = proc_osphysids[processor];
@@ -1370,13 +1372,13 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug_cpuset("online processor cpuset: %s\n", online_cpuset);
 
   hwloc_debug("%s", "\n * Topology summary *\n");
-  hwloc_debug("%d processors (%d max id)\n", numprocs, procid_max);
+  hwloc_debug("%u processors (%u max id)\n", numprocs, procid_max);
 
-  hwloc_debug("%d sockets\n", numsockets);
+  hwloc_debug("%u sockets\n", numsockets);
   if (numsockets>0)
     hwloc_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, HWLOC_OBJ_SOCKET);
 
-  hwloc_debug("%d cores\n", numcores);
+  hwloc_debug("%u cores\n", numcores);
   if (numcores>0)
     hwloc_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, HWLOC_OBJ_CORE);
 

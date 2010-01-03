@@ -174,7 +174,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
   unsigned osphysids[HWLOC_NBMAXCPUS];
 
   unsigned proc_coreids[HWLOC_NBMAXCPUS];
-  unsigned proc_oscoreids[HWLOC_NBMAXCPUS];
   unsigned oscoreids[HWLOC_NBMAXCPUS];
 
   unsigned core_osphysids[HWLOC_NBMAXCPUS];
@@ -206,7 +205,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
       proc_physids[cpuid] = -1;
       proc_osphysids[cpuid] = -1;
       proc_coreids[cpuid] = -1;
-      proc_oscoreids[cpuid] = -1;
 
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
@@ -227,7 +225,7 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 	}
 
       procid_max++;
-      hwloc_debug("cpu%d's state is %s\n", cpuid, stat->value.c);
+      hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
       if (strcmp(stat->value.c, "on-line"))
 	/* not online */
         hwloc_cpuset_clr(topology->online_cpuset, cpuid);
@@ -309,7 +307,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 	    look_cores = 0;
 	    continue;
 	}
-	proc_oscoreids[cpuid] = coreid;
 	for (i = 0; i < numcores; i++)
 	  if (coreid == oscoreids[i] && proc_osphysids[cpuid] == core_osphysids[i])
 	    break;

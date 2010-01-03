@@ -54,7 +54,7 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
   if (rs_getrad(rset, rad, objs[0]->os_level, objs[0]->os_index, 0)) {
-    fprintf(stderr,"rs_getrad(%d,%d) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
+    fprintf(stderr,"rs_getrad(%d,%u) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
     goto out;
   }
 
@@ -81,11 +81,10 @@ hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   hwloc_cpuset_t hwloc_set = NULL;
   rsethandle_t rset;
   unsigned cpu, maxcpus;
-  int result;
 
   rset = rs_alloc(RS_EMPTY);
 
-  if ((result = ra_getrset(what, who, 0, rset)) == -1)
+  if (ra_getrset(what, who, 0, rset) == -1)
     goto out;
 
   hwloc_set = hwloc_cpuset_alloc();

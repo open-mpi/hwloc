@@ -272,7 +272,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
 	obj = hwloc_alloc_setup_object(type, id);
         obj->cpuset = hwloc_cpuset_alloc();
-	hwloc_debug("%s#%d mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
+	hwloc_debug("%s#%u mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
 	hwloc_cpuset_from_ulong(obj->cpuset, procInfo[i].ProcessorMask);
 
 	switch (type) {

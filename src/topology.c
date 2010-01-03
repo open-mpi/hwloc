@@ -347,13 +347,13 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
   hwloc_debug("%s", "node distance matrix:\n");
   hwloc_debug("%s", "   ");
   for(j=0; j<nbobjs; j++)
-    hwloc_debug(" %3d", j);
+    hwloc_debug(" %3u", j);
   hwloc_debug("%s", "\n");
 
   for(i=0; i<nbobjs; i++) {
-    hwloc_debug("%3d", i);
+    hwloc_debug("%3u", i);
     for(j=0; j<nbobjs; j++)
-      hwloc_debug(" %3d", (*distances)[i][j]);
+      hwloc_debug(" %3u", (*distances)[i][j]);
     hwloc_debug("%s", "\n");
   }
 #endif
@@ -397,7 +397,7 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
       obj->cpuset = hwloc_cpuset_alloc();
       hwloc_cpuset_cpu(obj->cpuset, oscpu);
 
-      hwloc_debug_2args_cpuset("cpu %d (os %d) has cpuset %s\n",
+      hwloc_debug_2args_cpuset("cpu %u (os %u) has cpuset %s\n",
 		 cpu, oscpu, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
 
@@ -416,7 +416,7 @@ print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unuse
   hwloc_debug(" %s", cpuset);
   free(cpuset);
   if (obj->arity)
-    hwloc_debug(" arity %d", obj->arity);
+    hwloc_debug(" arity %u", obj->arity);
   hwloc_debug("%s", "\n");
 }
 
@@ -463,7 +463,7 @@ free_object(hwloc_obj_t obj)
 enum hwloc_type_cmp_e {
   HWLOC_TYPE_HIGHER,
   HWLOC_TYPE_DEEPER,
-  HWLOC_TYPE_EQUAL,
+  HWLOC_TYPE_EQUAL
 };
 
 static const unsigned obj_type_order[] = {
@@ -474,7 +474,7 @@ static const unsigned obj_type_order[] = {
   [HWLOC_OBJ_SOCKET] = 4,
   [HWLOC_OBJ_CACHE] = 5,
   [HWLOC_OBJ_CORE] = 6,
-  [HWLOC_OBJ_PROC] = 7,
+  [HWLOC_OBJ_PROC] = 7
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
@@ -488,6 +488,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   [7] = HWLOC_OBJ_PROC,
 };
 
+static unsigned hwloc_get_type_order(hwloc_obj_type_t type) __hwloc_attribute_const;
 static unsigned hwloc_get_type_order(hwloc_obj_type_t type)
 {
   return obj_type_order[type];
@@ -1241,10 +1242,10 @@ hwloc_discover(struct hwloc_topology *topology)
 
     /* One more level!  */
     if (top_obj->type == HWLOC_OBJ_CACHE)
-      hwloc_debug("--- Cache level depth %d", top_obj->attr->cache.depth);
+      hwloc_debug("--- Cache level depth %u", top_obj->attr->cache.depth);
     else
       hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
-    hwloc_debug(" has number %d\n\n", topology->nb_levels);
+    hwloc_debug(" has number %u\n\n", topology->nb_levels);
 
     if (topology->type_depth[top_obj->type] == HWLOC_TYPE_DEPTH_UNKNOWN)
       topology->type_depth[top_obj->type] = topology->nb_levels;

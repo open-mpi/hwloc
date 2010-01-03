@@ -34,6 +34,8 @@ fig_start(void *output_, int width __hwloc_attribute_unused, int height __hwloc_
 }
 
 static int
+rgb_to_fig(int r, int g, int b) __hwloc_attribute_pure;
+static int
 rgb_to_fig(int r, int g, int b)
 {
   if (r == 0xff && g == 0xff && b == 0xff)

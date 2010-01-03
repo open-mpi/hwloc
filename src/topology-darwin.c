@@ -34,7 +34,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
     return;
   nprocs = _nprocs;
 
-  hwloc_debug("%d procs\n", nprocs);
+  hwloc_debug("%u procs\n", nprocs);
 
   if (!hwloc_get_sysctlbyname("hw.packages", &_npackages) && _npackages > 0) {
     unsigned npackages = _npackages;
@@ -42,7 +42,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
     int _logical_per_package;
     unsigned logical_per_package;
 
-    hwloc_debug("%d packages\n", npackages);
+    hwloc_debug("%u packages\n", npackages);
 
     if (!hwloc_get_sysctlbyname("machdep.cpu.logical_per_package", &_logical_per_package) && _logical_per_package > 0)
       logical_per_package = _logical_per_package;
@@ -50,7 +50,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
       /* Assume the trivia.  */
       logical_per_package = nprocs / npackages;
 
-    hwloc_debug("%d threads per package\n", logical_per_package);
+    hwloc_debug("%u threads per package\n", logical_per_package);
 
     assert(nprocs == npackages * logical_per_package);
 
@@ -60,14 +60,14 @@ hwloc_look_darwin(struct hwloc_topology *topology)
       for (cpu = i*logical_per_package; cpu < (i+1)*logical_per_package; cpu++)
 	hwloc_cpuset_set(obj->cpuset, cpu);
 
-      hwloc_debug_1arg_cpuset("package %d has cpuset %s\n",
+      hwloc_debug_1arg_cpuset("package %u has cpuset %s\n",
 		 i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
 
     if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &_cores_per_package) && _cores_per_package > 0) {
       unsigned cores_per_package = _cores_per_package;
-      hwloc_debug("%d cores per package\n", cores_per_package);
+      hwloc_debug("%u cores per package\n", cores_per_package);
 
       assert(!(logical_per_package % cores_per_package));
 
@@ -79,7 +79,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 	     cpu++)
 	  hwloc_cpuset_set(obj->cpuset, cpu);
 
-        hwloc_debug_1arg_cpuset("core %d has cpuset %s\n",
+        hwloc_debug_1arg_cpuset("core %u has cpuset %s\n",
 		   i, obj->cpuset);
 	hwloc_insert_object_by_cpuset(topology, obj);
       }
@@ -99,11 +99,11 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 
     hwloc_debug("%s", "caches");
     for (i = 0; i < n && cacheconfig[i]; i++)
-      hwloc_debug(" %"PRId64"(%"PRId64"kB)", cacheconfig[i], cachesize[i] / 1024);
+      hwloc_debug(" %"PRIu64"(%"PRIu64"kB)", cacheconfig[i], cachesize[i] / 1024);
 
     /* Now we know how many caches there are */
     n = i;
-    hwloc_debug("\n%d cache levels\n", n - 1);
+    hwloc_debug("\n%u cache levels\n", n - 1);
 
     for (i = 0; i < n; i++) {
       for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
@@ -115,12 +115,12 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 	  hwloc_cpuset_set(obj->cpuset, cpu);
 
 	if (i) {
-          hwloc_debug_2args_cpuset("L%dcache %d has cpuset %s\n",
+          hwloc_debug_2args_cpuset("L%ucache %u has cpuset %s\n",
 	      i, j, obj->cpuset);
 	  obj->attr->cache.depth = i;
 	  obj->attr->cache.memory_kB = cachesize[i] / 1024;
 	} else {
-          hwloc_debug_1arg_cpuset("node %d has cpuset %s\n",
+          hwloc_debug_1arg_cpuset("node %u has cpuset %s\n",
 	      j, obj->cpuset);
 	  obj->attr->node.memory_kB = cachesize[i] / 1024;
 	  obj->attr->node.huge_page_free = 0; /* TODO */
