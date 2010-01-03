@@ -540,7 +540,7 @@ enum hwloc_obj_cmp_e {
   HWLOC_OBJ_INCLUDED,	/**< \brief Strictly included into */
   HWLOC_OBJ_CONTAINS,	/**< \brief Strictly contains */
   HWLOC_OBJ_INTERSECTS,	/**< \brief Intersects, but no inclusion! */
-  HWLOC_OBJ_DIFFERENT,	/**< \brief No intersection */
+  HWLOC_OBJ_DIFFERENT	/**< \brief No intersection */
 };
 
 static int
