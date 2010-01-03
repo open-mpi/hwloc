@@ -406,7 +406,7 @@ hwloc_setup_proc_level(struct hwloc_topology *topology,
 }
 
 static void
-print_object(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
+print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unused, hwloc_obj_t obj)
 {
   char line[256], *cpuset = NULL;
   hwloc_debug("%*s", 2*indent, "");
