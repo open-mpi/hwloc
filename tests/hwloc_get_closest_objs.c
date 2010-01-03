@@ -54,7 +54,7 @@ main (void)
 
   /* get closest levels */
   found = hwloc_get_closest_objs (topology, last, closest, numprocs);
-  printf("looked for %u closest entries, found %d\n", numprocs, found);
+  printf("looked for %u closest entries, found %u\n", numprocs, found);
   assert(found == numprocs-1);
 
   /* check first found is closest */
