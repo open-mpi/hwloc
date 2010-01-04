@@ -232,7 +232,6 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
     hwloc_cv___attribute__pure=0
     hwloc_cv___attribute__sentinel=0
     hwloc_cv___attribute__unused=0
-    hwloc_cv___attribute__visibility=0
     hwloc_cv___attribute__warn_unused_result=0
     hwloc_cv___attribute__weak_alias=0
   else
@@ -450,17 +449,6 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
 
 
     #
-    # Ignored by PGI-6.2.5 (pgCC) -- recognized by the output-parser
-    #
-    _HWLOC_CHECK_SPECIFIC_ATTRIBUTE([visibility],
-        [
-         int square(int arg1) __attribute__ ((__visibility__("hidden")));
-        ],
-        [],
-        [])
-
-
-    #
     # Attribute warn_unused_result:
     # Ignored by the intel-compiler 9.1.045 -- recognized by cross-check
     # Ignored by pathcc-2.2.1 -- recognized by cross-check (through grep ignore)
@@ -541,8 +529,6 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
                      [Whether your compiler has __attribute__ sentinel or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_UNUSED, [$hwloc_cv___attribute__unused],
                      [Whether your compiler has __attribute__ unused or not])
-  AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_VISIBILITY, [$hwloc_cv___attribute__visibility],
-                     [Whether your compiler has __attribute__ visibility or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_WARN_UNUSED_RESULT, [$hwloc_cv___attribute__warn_unused_result],
                      [Whether your compiler has __attribute__ warn unused result or not])
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_WEAK_ALIAS, [$hwloc_cv___attribute__weak_alias],

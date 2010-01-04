@@ -117,7 +117,7 @@ typedef enum {
  * e.g. as of today cores may also contain caches, and sockets may also contain
  * nodes. This is thus just to be seen as a fallback comparison method.
  */
-int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2) __hwloc_attribute_const;
+HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2) __hwloc_attribute_const;
 
 /** \brief Value returned by hwloc_compare_types when types can not be compared. */
 enum {
@@ -224,7 +224,7 @@ union hwloc_obj_attr_u {
  *
  * \return 0 on success, -1 on error.
  */
-extern int hwloc_topology_init (hwloc_topology_t *topologyp);
+HWLOC_DECLSPEC int hwloc_topology_init (hwloc_topology_t *topologyp);
 
 /** \brief Build the actual topology
  *
@@ -238,19 +238,19 @@ extern int hwloc_topology_init (hwloc_topology_t *topologyp);
  *
  * \sa hwlocality_configuration
  */
-extern int hwloc_topology_load(hwloc_topology_t topology);
+HWLOC_DECLSPEC int hwloc_topology_load(hwloc_topology_t topology);
 
 /** \brief Terminate and free a topology context
  *
  * \param topology is the topology to be freed
  */
-extern void hwloc_topology_destroy (hwloc_topology_t topology);
+HWLOC_DECLSPEC void hwloc_topology_destroy (hwloc_topology_t topology);
 
 /** \brief Run internal checks on a topology structure
  *
  * \param topology is the topology to be checked
  */
-extern void hwloc_topology_check(hwloc_topology_t topology);
+HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 
 /** @} */
 
@@ -283,7 +283,7 @@ extern void hwloc_topology_check(hwloc_topology_t topology);
  * The top-level type HWLOC_OBJ_SYSTEM and bottom-level type HWLOC_OBJ_PROC may
  * not be ignored.
  */
-extern int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_t type);
+HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_t type);
 
 /** \brief Ignore an object type if it does not bring any structure.
  *
@@ -292,14 +292,14 @@ extern int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_
  * The top-level type HWLOC_OBJ_SYSTEM and bottom-level type HWLOC_OBJ_PROC may
  * not be ignored.
  */
-extern int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
+HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
 
 /** \brief Ignore all objects that do not bring any structure.
  *
  * Ignore all objects that do not bring any structure:
  * Each ignored object should have a single children or be the only child of its father.
  */
-extern int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t topology);
+HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t topology);
 
 /** \brief Flags to be set onto a topology context before load.
  *
@@ -337,7 +337,7 @@ enum hwloc_topology_flags_e {
  *
  * Set a OR'ed set of hwloc_topology_flags_e onto a topology that was not yet loaded.
  */
-extern int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long flags);
+HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long flags);
 
 /** \brief Change the file-system root path when building the topology from sysfs/procfs.
  *
@@ -352,7 +352,7 @@ extern int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long fl
  * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
  * file is really the underlying system.
  */
-extern int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
+HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
 
 /** \brief Enable synthetic topology.
  *
@@ -365,7 +365,7 @@ extern int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology,
  * \note For conveniency, this backend provides empty binding hooks which just
  * return success.
  */
-extern int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict description);
+HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict description);
 
 /** \brief Enable XML-file based topology.
  *
@@ -378,7 +378,7 @@ extern int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topolo
  * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
  * file is really the underlying system.
  */
-extern int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
+HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
 /** \brief Flags describing the actual OS support for this topology.
  *
@@ -398,7 +398,7 @@ enum hwloc_topology_support_flags_e {
 };
 
 /** \brief Retrieve the OR'ed flags of topology support. */
-extern int hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology, unsigned long *flags);
+HWLOC_DECLSPEC int hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology, unsigned long *flags);
 
 /** @} */
 
@@ -412,7 +412,7 @@ extern int hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology
  *
  * This file may be loaded later through hwloc_topology_set_xml().
  */
-extern void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
+HWLOC_DECLSPEC void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
 
 /** @} */
 
@@ -426,7 +426,7 @@ extern void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xml
  *
  * This is the depth of HWLOC_OBJ_PROC objects plus one.
  */
-extern unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topology) __hwloc_attribute_pure;
+HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topology) __hwloc_attribute_pure;
 
 /** \brief Returns the depth of objects of type \p type.
  *
@@ -437,17 +437,17 @@ extern unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topol
  * If type is absent but a similar type is acceptable, see also
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  */
-extern int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
+HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
 enum {
     HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. */
     HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. */
 };
 
 /** \brief Returns the type of objects at depth \p depth. */
-extern hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
 
 /** \brief Returns the width of level at depth \p depth */
-extern unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
+HWLOC_DECLSPEC unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
 
 /** \brief Returns the width of level type \p type
  *
@@ -474,7 +474,7 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
  * \return 0 instead (for instance if using another file-system root,
  * a XML topology file, or a synthetic topology).
  */
-extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology) __hwloc_attribute_pure;
+HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology) __hwloc_attribute_pure;
 
 /* \brief Get complete CPU set
  *
@@ -485,7 +485,7 @@ extern int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topol
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed, hwloc_cpuset_dup must be used instead.
  */
-extern hwloc_const_cpuset_t hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_const_cpuset_t hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
 
 /* \brief Get topology CPU set
  *
@@ -496,7 +496,7 @@ extern hwloc_const_cpuset_t hwloc_topology_get_complete_cpuset(hwloc_topology_t 
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed, hwloc_cpuset_dup must be used instead.
  */
-extern hwloc_const_cpuset_t hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_const_cpuset_t hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
 
 /** \brief Get online CPU set
  *
@@ -506,7 +506,7 @@ extern hwloc_const_cpuset_t hwloc_topology_get_topology_cpuset(hwloc_topology_t 
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed, hwloc_cpuset_dup must be used instead.
  */
-extern hwloc_const_cpuset_t hwloc_topology_get_online_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_const_cpuset_t hwloc_topology_get_online_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
 
 /** \brief Get allowed CPU set
  *
@@ -516,7 +516,7 @@ extern hwloc_const_cpuset_t hwloc_topology_get_online_cpuset(hwloc_topology_t to
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed, hwloc_cpuset_dup must be used instead.
  */
-extern hwloc_const_cpuset_t hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_const_cpuset_t hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
 
 /** @} */
 
@@ -527,7 +527,7 @@ extern hwloc_const_cpuset_t hwloc_topology_get_allowed_cpuset(hwloc_topology_t t
  */
 
 /** \brief Returns the topology object at index \p index from depth \p depth */
-extern hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned depth, unsigned idx) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned depth, unsigned idx) __hwloc_attribute_pure;
 
 /** \brief Returns the topology object at index \p index with type \p type
  *
@@ -557,13 +557,13 @@ hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigne
  */
 
 /** \brief Return a stringified topology object type */
-extern const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwloc_attribute_const;
+HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwloc_attribute_const;
 
 /** \brief Return an object type from the string
  *
  * \return -1 if unrecognized.
  */
-extern hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) __hwloc_attribute_pure;
+HWLOC_DECLSPEC hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) __hwloc_attribute_pure;
 
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *
@@ -572,7 +572,7 @@ extern hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) __hwloc_a
  *
  * \return how many characters were actually written (not including the ending \\0).
  */
-extern int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj,
+HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj,
 				   int verbose);
 
 /** \brief Stringify the attributes of a given topology object into a human-readable form.
@@ -583,7 +583,7 @@ extern int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, 
  *
  * \return how many characters were actually written (not including the ending \\0).
  */
-extern int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * __hwloc_restrict separator,
+HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * __hwloc_restrict separator,
 				   int verbose);
 
 /** \brief Stringify a given topology object into a human-readable form.
@@ -603,14 +603,14 @@ extern int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, 
  *
  * \return how many characters were actually written (not including the ending \\0).
  */
-extern int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t size,
+HWLOC_DECLSPEC int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t size,
 			     hwloc_topology_t topology, hwloc_obj_t obj,
 			     const char * __hwloc_restrict indexprefix, int verbose);
 
 /** \brief Stringify the cpuset containing a set of objects.
  *
  * \return how many characters were actually written (not including the ending \\0). */
-extern int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, size_t nobj, const hwloc_obj_t * __hwloc_restrict objs);
+HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, size_t nobj, const hwloc_obj_t * __hwloc_restrict objs);
 
 /** @} */
 
@@ -692,14 +692,14 @@ typedef enum {
 
 /** \brief Bind current process or thread on cpus given in cpuset \p set
  */
-extern int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set,
+HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set,
 			    int policy);
 
 /** \brief Get current process or thread binding
  *
  * \return newly-allocated cpuset
  */
-extern hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int policy) __hwloc_attribute_malloc;
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
  *
@@ -708,7 +708,7 @@ extern hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int policy) _
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
  */
-extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
+HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
 
 /** \brief Get the current binding of process \p pid on
  *
@@ -719,7 +719,7 @@ extern int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hw
  *
  * \return newly-allocated cpuset
  */
-extern hwloc_cpuset_t hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy) __hwloc_attribute_malloc;
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
@@ -729,7 +729,7 @@ extern hwloc_cpuset_t hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pi
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
  */
 #ifdef hwloc_thread_t
-extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
+HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
 #endif
 
 /** \brief Get the current binding of thread \p tid
@@ -742,7 +742,7 @@ extern int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t ti
  * \return newly-allocated cpuset
  */
 #ifdef hwloc_thread_t
-extern hwloc_cpuset_t hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy) __hwloc_attribute_malloc;
 #endif
 
 /** @} */

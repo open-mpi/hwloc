@@ -186,6 +186,7 @@ AC_DEFUN([HWLOC_INIT],[
     AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The size of `unsigned int', as computed by sizeof])
 
     _HWLOC_CHECK_ATTRIBUTES
+    _HWLOC_CHECK_VISIBILITY
     
     #
     # Now detect support

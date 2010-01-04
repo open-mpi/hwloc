@@ -98,7 +98,22 @@ if HWLOC_BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
-	-sed -i -e 's/__hwloc_restrict/restrict/g;s/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g;s/__inline/inline/g;s/\\_\\-\\_\\-inline/inline/g' $(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
+	-sed -i \
+		-e 's/__hwloc_restrict/restrict/g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g' \
+		-e 's/__hwloc_attribute_unused//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-unused//g' \
+		-e 's/__hwloc_attribute_malloc//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-malloc//g' \
+		-e 's/__hwloc_attribute_const//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-const//g' \
+		-e 's/__hwloc_attribute_pure//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-pure//g' \
+		-e 's/HWLOC_DECLSPEC//g' \
+		-e 's/HWLOC\\_\\-DECLSPEC//g' \
+		-e 's/__inline/inline/g' \
+		-e 's/\\_\\-\\_\\-inline/inline/g' \
+		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
 endif
 
 #
