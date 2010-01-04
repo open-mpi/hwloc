@@ -350,7 +350,7 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
   sprintf(tmp, "%d", obj->os_level);
   xmlNewProp(node, BAD_CAST "os_level", BAD_CAST tmp);
   if (obj->os_index != (unsigned) -1) {
-    sprintf(tmp, "%d", obj->os_index);
+    sprintf(tmp, "%u", obj->os_index);
     xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
   }
   hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
