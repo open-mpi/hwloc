@@ -120,7 +120,7 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
   hwloc_obj_t *subobjs = obj->children; \
   unsigned numsubobjs = obj->arity; \
   unsigned width, height; \
-  unsigned maxwidth, maxheight; \
+  unsigned maxwidth __hwloc_attribute_unused, maxheight __hwloc_attribute_unused; \
   maxwidth = maxheight = 0; \
   totwidth = (border) + mywidth; \
   totheight = (border) + myheight; \
