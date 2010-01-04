@@ -116,7 +116,8 @@ int main(int argc, char *argv[])
     hwloc_cpuset_free(cpu_set);
     cpu_set = hwloc_get_cpubind(topology, 0);
     if (!cpu_set) {
-      fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, strerror(errno));
+      const char *errmsg = strerror(errno);
+      fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
       return EXIT_FAILURE;
     }
     s = hwloc_cpuset_printf_value(cpu_set);
@@ -136,8 +137,9 @@ int main(int argc, char *argv[])
     ret = hwloc_set_cpubind(topology, cpu_set, flags);
     if (ret) {
       int bind_errno = errno;
+      const char *errmsg = strerror(bind_errno);
       char *s = hwloc_cpuset_printf_value(cpu_set);
-      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, strerror(bind_errno));
+      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
   }

@@ -501,7 +501,9 @@ static hwloc_obj_type_t hwloc_get_order_type(int order)
 
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
-  return hwloc_get_type_order(type1) - hwloc_get_type_order(type2);
+  unsigned order1 = hwloc_get_type_order(type1);
+  unsigned order2 = hwloc_get_type_order(type2);
+  return order1 - order2;
 }
 
 static enum hwloc_type_cmp_e
@@ -1692,8 +1694,11 @@ hwloc__check_children(struct hwloc_obj *father)
     /* check that child cpuset is included in the father */
     assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
     /* check that children are correctly ordered (see below), empty ones may be anywhere */
-    if (!hwloc_cpuset_iszero(father->children[j]->cpuset))
-      assert(hwloc_cpuset_first(father->children[j]->cpuset) == hwloc_cpuset_first(remaining_father_set));
+    if (!hwloc_cpuset_iszero(father->children[j]->cpuset)) {
+      int firstchild = hwloc_cpuset_first(father->children[j]->cpuset);
+      int firstfather = hwloc_cpuset_first(remaining_father_set);
+      assert(firstchild == firstfather);
+    }
     /* clear previously used father cpuset bits so that we actually checked above
      * that children cpusets do not intersect and are ordered properly
      */

@@ -99,10 +99,12 @@ static void
 fig_text(void *output_, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
   FILE *output = output_;
+  unsigned len = strlen(text);
+  int color = rgb_to_fig(r, g, b);
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   size = (size * 16) / 10;
-  fprintf(output, "4 0 %d %u -1 0 %d 0.0 4 %d %u %u %u %s\\001\n", rgb_to_fig(r, g, b), depth, size, size * 10, (unsigned) strlen(text) * size * 10, x, y + size * 10, text);
+  fprintf(output, "4 0 %d %u -1 0 %d 0.0 4 %d %u %u %u %s\\001\n", color, depth, size, size * 10, len * size * 10, x, y + size * 10, text);
 }
 
 static struct draw_methods fig_draw_methods = {
