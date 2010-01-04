@@ -327,7 +327,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
     fprintf(stderr, "Loading XML topology without DTD\n");
   else if (strcmp((char *) dtd->SystemID, "hwloc.dtd"))
     fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
-	    dtd->SystemID, "hwloc.dtd");
+	    (char *) dtd->SystemID, "hwloc.dtd");
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 
@@ -349,7 +349,7 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
   xmlNewProp(node, BAD_CAST "type", BAD_CAST hwloc_obj_type_string(obj->type));
   sprintf(tmp, "%d", obj->os_level);
   xmlNewProp(node, BAD_CAST "os_level", BAD_CAST tmp);
-  sprintf(tmp, "%d", obj->os_index);
+  sprintf(tmp, "%u", obj->os_index);
   xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
   hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
   xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
