@@ -16,16 +16,18 @@ hwloc_topology_t topology;
 
 static void result_set(const char *msg, int err)
 {
+  const char *errmsg = strerror(errno);
   if (err)
-    printf("%-30s: FAILED (%d, %s)\n", msg, errno, strerror(errno));
+    printf("%-30s: FAILED (%d, %s)\n", msg, errno, errmsg);
   else
     printf("%-30s: OK\n", msg);
 }
 
 static void result_get(const char *msg, hwloc_const_cpuset_t expected, hwloc_const_cpuset_t result)
 {
+  const char *errmsg = strerror(errno);
   if (!result)
-    printf("%-30s: FAILED (%d, %s)\n", msg, errno, strerror(errno));
+    printf("%-30s: FAILED (%d, %s)\n", msg, errno, errmsg);
   else if (hwloc_cpuset_isequal(expected, result))
     printf("%-30s: OK\n", msg);
   else {
