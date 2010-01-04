@@ -34,6 +34,7 @@ Version 1.0.0
 * Add Linux cgroup support to the Linux cpuset code.
 * lstopo now displays logical indexes by default, use --physical to
   revert back to OS/physical indexes.
+* Add FreeBSD support.
 
 
 Version 0.9.4 (unreleased)
