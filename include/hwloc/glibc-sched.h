@@ -16,6 +16,7 @@
 
 #include <hwloc.h>
 #include <hwloc/helper.h>
+#include <assert.h>
 
 #if !defined _GNU_SOURCE || !defined _SCHED_H
 #error sched.h must be included with _GNU_SOURCE defined
