@@ -88,7 +88,8 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
   unsigned i;
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+    return NULL;
 
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
@@ -174,7 +175,8 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
   int i;
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+    return NULL;
 
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
@@ -250,7 +252,8 @@ hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology,
   int i;
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+    return NULL;
 
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */

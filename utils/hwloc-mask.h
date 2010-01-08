@@ -56,7 +56,7 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
     hwloc_cpuset_xorset(set, newset);
     break;
   default:
-    assert(1);
+    assert(0);
   }
   free(s1);
   free(s2);

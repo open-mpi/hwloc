@@ -18,7 +18,6 @@
 
 #include <private/config.h>
 
-#include <assert.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
@@ -183,9 +182,12 @@ hwloc_look_hpux(struct hwloc_topology *topology)
         for (i = 0; i < nbnodes; i++)
           if ((ldom_t) nodes[i]->os_index == currentnode)
             break;
-      assert(i < nbnodes);
-      hwloc_cpuset_set(nodes[i]->cpuset, currentcpu);
-      hwloc_debug("is in node %d\n", i);
+      if (i < nbnodes) {
+        hwloc_cpuset_set(nodes[i]->cpuset, currentcpu);
+        hwloc_debug("is in node %d\n", i);
+      } else {
+        hwloc_debug("is in no node?!\n");
+      }
     }
 
     /* Add cpu */

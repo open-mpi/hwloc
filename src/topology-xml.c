@@ -292,13 +292,6 @@ hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, 
 	  fprintf(stderr, "ignoring system object at invalid depth %d\n", depth);
 	  free(obj);
 	} else {
-	  if (!hwloc_cpuset_isincluded(obj->cpuset, topology->levels[0][0]->cpuset)) {
-            char *s1 = hwloc_cpuset_printf_value(obj->cpuset), *s2 = hwloc_cpuset_printf_value(topology->levels[0][0]->cpuset);
-	    fprintf(stderr, "ignoring object (cpuset %s) not covered by system (cpuset %s)\n", s1, s2);
-            free(s1);
-            free(s2);
-          }
-	  else
 	    hwloc_insert_object_by_parent(topology, father, obj);
 	}
       }

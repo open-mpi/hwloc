@@ -412,9 +412,11 @@ print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unuse
   hwloc_debug("%*s", 2*indent, "");
   hwloc_obj_snprintf(line, sizeof(line), topology, obj, "#", 1);
   hwloc_debug("%s", line);
-  hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
-  hwloc_debug(" %s", cpuset);
-  free(cpuset);
+  if (obj->cpuset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
+    hwloc_debug(" %s", cpuset);
+    free(cpuset);
+  }
   if (obj->arity)
     hwloc_debug(" arity %u", obj->arity);
   hwloc_debug("%s", "\n");
@@ -596,10 +598,13 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 #define merge_sizes(new, old, field) \
   if (!(old)->field) \
     (old)->field = (new)->field;
+#ifdef HWLOC_DEBUG
 #define check_sizes(new, old, field) \
-  merge_sizes(new, old, field) \
   if ((new)->field) \
     assert((old)->field == (new)->field)
+#else
+#define check_sizes(new, old, field)
+#endif
 
 /* Try to insert OBJ in CUR, recurse if needed */
 static void
@@ -609,16 +614,24 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
   int put;
 
   /* Make sure we haven't gone too deep.  */
-  assert(hwloc_cpuset_isincluded(obj->cpuset, cur->cpuset));
+  if (!hwloc_cpuset_isincluded(obj->cpuset, cur->cpuset)) {
+    fprintf(stderr,"recursion has gone too deep?!\n");
+    return;
+  }
 
   /* Check whether OBJ is included in some child.  */
   container = NULL;
   for (child = cur->first_child; child; child = child->next_sibling) {
     switch (hwloc_obj_cmp(obj, child)) {
       case HWLOC_OBJ_EQUAL:
-	assert(hwloc_cpuset_isequal(obj->cpuset, child->cpuset));
-	assert(obj->os_level == child->os_level);
-	assert(obj->os_index == child->os_index);
+	if (obj->os_level != child->os_level) {
+          fprintf(stderr, "Different OS level\n");
+          return;
+        }
+	if (obj->os_index != child->os_index) {
+          fprintf(stderr, "Different OS indexes\n");
+          return;
+        }
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
 	    /* Do not check these, it may change between calls */
@@ -626,6 +639,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	    merge_sizes(obj, child, attr->node.huge_page_free);
 	    break;
 	  case HWLOC_OBJ_CACHE:
+	    merge_sizes(obj, child, attr->cache.memory_kB);
 	    check_sizes(obj, child, attr->cache.memory_kB);
 	    break;
 	  default:
@@ -726,8 +740,6 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 void
 hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
-  assert(!obj->first_child);
-
   /* Start at the top.  */
   hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
 }
@@ -927,7 +939,6 @@ hwloc_connect(hwloc_obj_t father)
   }
 
   father->children = malloc(n * sizeof(*father->children));
-  assert(father->children);
   for (n = 0, child = father->first_child;
        child;
        n++,   child = child->next_sibling) {
@@ -1009,8 +1020,6 @@ hwloc_discover(struct hwloc_topology *topology)
   unsigned l, i=0, taken_i, new_i, j;
   hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
   unsigned n_objs, n_taken_objs, n_new_objs;
-
-  assert(topology!=NULL);
 
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     hwloc_look_synthetic(topology);
@@ -1180,7 +1189,6 @@ hwloc_discover(struct hwloc_topology *topology)
   l = 0;
   n_objs = topology->levels[0][0]->arity;
   objs = malloc(n_objs * sizeof(objs[0]));
-  assert(objs);
   memcpy(objs, topology->levels[0][0]->children, n_objs * sizeof(objs[0]));
 
   /* Keep building levels while there are objects left in OBJS.  */
@@ -1228,9 +1236,11 @@ hwloc_discover(struct hwloc_topology *topology)
 	new_objs[new_i++] = objs[i];
 
 
+#ifdef HWLOC_DEBUG
     /* Make sure we didn't mess up.  */
     assert(taken_i == n_taken_objs);
     assert(new_i == n_objs - n_taken_objs + n_new_objs);
+#endif
 
     /* Ok, put numbers in the level.  */
     for (i = 0; i < n_taken_objs; i++) {
@@ -1689,23 +1699,25 @@ hwloc__check_children(struct hwloc_obj *father)
   assert(father->last_child == father->children[father->arity-1]);
   assert(father->last_child->next_sibling == NULL);
 
-  remaining_father_set = hwloc_cpuset_dup(father->cpuset);
-  for(j=0; j<father->arity; j++) {
-    /* check that child cpuset is included in the father */
-    assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
-    /* check that children are correctly ordered (see below), empty ones may be anywhere */
-    if (!hwloc_cpuset_iszero(father->children[j]->cpuset)) {
-      int firstchild = hwloc_cpuset_first(father->children[j]->cpuset);
-      int firstfather = hwloc_cpuset_first(remaining_father_set);
-      assert(firstchild == firstfather);
+  if (!hwloc_cpuset_iszero(father->cpuset)) {
+    remaining_father_set = hwloc_cpuset_dup(father->cpuset);
+    for(j=0; j<father->arity; j++) {
+      /* check that child cpuset is included in the father */
+      assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
+      /* check that children are correctly ordered (see below), empty ones may be anywhere */
+      if (!hwloc_cpuset_iszero(father->children[j]->cpuset)) {
+        int firstchild = hwloc_cpuset_first(father->children[j]->cpuset);
+        int firstfather = hwloc_cpuset_first(remaining_father_set);
+        assert(firstchild == firstfather);
+      }
+      /* clear previously used father cpuset bits so that we actually checked above
+       * that children cpusets do not intersect and are ordered properly
+       */
+      hwloc_cpuset_clearset(remaining_father_set, father->children[j]->cpuset);
     }
-    /* clear previously used father cpuset bits so that we actually checked above
-     * that children cpusets do not intersect and are ordered properly
-     */
-    hwloc_cpuset_clearset(remaining_father_set, father->children[j]->cpuset);
+    assert(hwloc_cpuset_iszero(remaining_father_set));
+    hwloc_cpuset_free(remaining_father_set);
   }
-  assert(hwloc_cpuset_iszero(remaining_father_set));
-  hwloc_cpuset_free(remaining_father_set);
 
   /* checks for all children */
   for(j=1; j<father->arity; j++) {

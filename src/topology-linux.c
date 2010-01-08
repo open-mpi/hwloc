@@ -106,8 +106,14 @@ hwloc_fopenat(const char *path, const char *mode, int fsroot_fd)
   int fd;
   const char *relative_path;
 
-  assert(!(fsroot_fd < 0));
-  assert(!strcmp(mode, "r"));
+  if (fsroot_fd < 0) {
+    errno = EBADF;
+    return NULL;
+  }
+  if (strcmp(mode, "r")) {
+    errno = ENOTSUP;
+    return NULL;
+  }
 
   /* Skip leading slashes.  */
   for (relative_path = path; *relative_path == '/'; relative_path++);
@@ -124,7 +130,10 @@ hwloc_accessat(const char *path, int mode, int fsroot_fd)
 {
   const char *relative_path;
 
-  assert(!(fsroot_fd < 0));
+  if (fsroot_fd < 0) {
+    errno = EBADF;
+    return -1;
+  }
 
   /* Skip leading slashes.  */
   for (relative_path = path; *relative_path == '/'; relative_path++);
@@ -667,6 +676,7 @@ hwloc_linux_parse_cpumap_file(FILE *file)
   unsigned long maps[MAX_KERNEL_CPU_MASK];
   hwloc_cpuset_t set;
   int nr_maps = 0;
+  int n;
 
   int i;
 
@@ -677,7 +687,8 @@ hwloc_linux_parse_cpumap_file(FILE *file)
   while (fgets(string, KERNEL_CPU_MAP_LEN, file) && *string != '\0') /* read one kernel cpu mask and the ending comma */
     {
       unsigned long map;
-      assert(!(nr_maps == MAX_KERNEL_CPU_MASK)); /* too many cpumasks in this cpumap */
+      if (nr_maps == MAX_KERNEL_CPU_MASK)
+        break; /* too many cpumasks in this cpumap */
 
       map = strtoul(string, NULL, 16);
       if (!map && !nr_maps)
@@ -690,10 +701,12 @@ hwloc_linux_parse_cpumap_file(FILE *file)
     }
 
   /* check that the map can be stored in our cpuset */
-  assert(!(nr_maps*KERNEL_CPU_MASK_BITS > HWLOC_NBMAXCPUS));
+  n = nr_maps*KERNEL_CPU_MASK_BITS;
+  if (n > HWLOC_NBMAXCPUS)
+    n = HWLOC_NBMAXCPUS;
 
   /* convert into a set */
-  for(i=0; i<nr_maps*KERNEL_CPU_MASK_BITS; i++)
+  for(i=0; i<n; i++)
     if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
       hwloc_cpuset_set(set, i);
 
@@ -1067,7 +1080,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	continue;
       cpu = strtoul(dirent->d_name+3, NULL, 0);
 
-      assert(cpu < HWLOC_NBMAXCPUS);
+      if (cpu >= HWLOC_NBMAXCPUS)
+        continue;
 
       /* Maybe we don't have topology information but at least it exists */
       hwloc_cpuset_set(topology->complete_cpuset, cpu);
@@ -1118,10 +1132,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      if (socketset) {
-        assert(socketset);
-        assert(hwloc_cpuset_weight(socketset) >= 1);
-
+      if (socketset && hwloc_cpuset_weight(socketset) >= 1) {
         if (hwloc_cpuset_first(socketset) == i) {
           /* first cpu in this socket, add the socket */
           socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
@@ -1140,9 +1151,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      if (coreset) {
-        assert(hwloc_cpuset_weight(coreset) >= 1);
-
+      if (coreset && hwloc_cpuset_weight(coreset) >= 1) {
         if (hwloc_cpuset_first(coreset) == i) {
           core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
           core->cpuset = coreset;
@@ -1156,7 +1165,6 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       /* look at the thread */
       threadset = hwloc_cpuset_alloc();
       hwloc_cpuset_cpu(threadset, i);
-      assert(hwloc_cpuset_weight(threadset) == 1);
 
       /* add the thread */
       thread = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, i);
@@ -1213,22 +1221,23 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
-	assert(cacheset);
-	if (hwloc_cpuset_weight(cacheset) < 1)
-	  /* mask is wrong (happens on ia64), assumes it's not shared */
-	  hwloc_cpuset_cpu(cacheset, i);
+        if (cacheset) {
+          if (hwloc_cpuset_weight(cacheset) < 1)
+            /* mask is wrong (happens on ia64), assumes it's not shared */
+            hwloc_cpuset_cpu(cacheset, i);
 
-	if (hwloc_cpuset_first(cacheset) == i) {
-	  /* first cpu in this cache, add the cache */
-	  cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
-	  cache->attr->cache.memory_kB = kB;
-	  cache->attr->cache.depth = depth+1;
-	  cache->cpuset = cacheset;
-          hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n",
-		     depth, cacheset);
-	  hwloc_insert_object_by_cpuset(topology, cache);
-	} else
-          hwloc_cpuset_free(cacheset);
+          if (hwloc_cpuset_first(cacheset) == i) {
+            /* first cpu in this cache, add the cache */
+            cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+            cache->attr->cache.memory_kB = kB;
+            cache->attr->cache.depth = depth+1;
+            cache->cpuset = cacheset;
+            hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n",
+                       depth, cacheset);
+            hwloc_insert_object_by_cpuset(topology, cache);
+          } else
+            hwloc_cpuset_free(cacheset);
+        }
       }
     }
   hwloc_cpuset_foreach_end();

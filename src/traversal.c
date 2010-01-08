@@ -9,8 +9,6 @@
 #include <private/private.h>
 #include <private/debug.h>
 
-#include <assert.h>
-
 int
 hwloc_get_type_depth (struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
@@ -87,7 +85,8 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_cp
   unsigned i;
 
   /* the caller must ensure this */
-  assert(*max > 0);
+  if (*max <= 0)
+    return 0;
 
   if (hwloc_cpuset_isequal(current->cpuset, set)) {
     **res = current;

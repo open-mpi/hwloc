@@ -8,7 +8,6 @@
 #include <hwloc.h>
 
 #include <unistd.h>
-#include <assert.h>
 
 static void usage(FILE *where)
 {

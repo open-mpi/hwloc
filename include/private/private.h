@@ -14,7 +14,6 @@
 #include <hwloc/cpuset.h>
 #include <private/debug.h>
 
-#include <assert.h>
 #include <string.h>
 
 #ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
@@ -206,7 +205,6 @@ static __inline struct hwloc_obj *
 hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
 {
   struct hwloc_obj *obj = malloc(sizeof(*obj));
-  assert(obj);
   memset(obj, 0, sizeof(*obj));
   obj->type = type;
   obj->os_index = idx;

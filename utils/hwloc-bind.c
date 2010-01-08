@@ -10,7 +10,6 @@
 
 #include <unistd.h>
 #include <errno.h>
-#include <assert.h>
 
 static void usage(FILE *where)
 {
