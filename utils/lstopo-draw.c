@@ -330,7 +330,7 @@ prefer_vert(hwloc_topology_t topology, int logical, hwloc_obj_t level, void *out
   return force_vert || (!force_horiz && prefer_ratio(vert_ratio, horiz_ratio));
 }
 
-static void
+static int
 lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 {
   unsigned index = logical ? obj->logical_index : obj->os_index;
@@ -344,9 +344,9 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     snprintf(indexstr, sizeof(indexstr), "#%u", index);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
   if (attrlen)
-    snprintf(text, textlen, "%s%s(%s)", typestr, indexstr, attrstr);
+    return snprintf(text, textlen, "%s%s(%s)", typestr, indexstr, attrstr);
   else
-    snprintf(text, textlen, "%s%s", typestr, indexstr);
+    return snprintf(text, textlen, "%s%s", typestr, indexstr);
 }
 
 static void
