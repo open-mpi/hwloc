@@ -164,10 +164,10 @@ hwloc_obj_type_of_string (const char * string)
   return (hwloc_obj_type_t) -1;
 }
 
-#define hwloc_memory_size_printf_value(_size) \
-  (_size) < (10*1024) ? (_size) : (_size) < (10*1024*1024) ? (((_size)>>9)+1)>>1 : (((_size)>>19)+1)>>1
-#define hwloc_memory_size_printf_unit(_size) \
-  (_size) < (10*1024) ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
+#define hwloc_memory_size_printf_value(_size, _verbose) \
+  (_size) < (10*1024) || _verbose ? (_size) : (_size) < (10*1024*1024) ? (((_size)>>9)+1)>>1 : (((_size)>>19)+1)>>1
+#define hwloc_memory_size_printf_unit(_size, _verbose) \
+  (_size) < (10*1024) || _verbose ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
 
 int
 hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, int verbose)
@@ -200,8 +200,8 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_SYSTEM:
     if (verbose)
       return hwloc_snprintf(string, size, "%lu%s%sHP=%lu*%lukB%s%s%s%s",
-			    hwloc_memory_size_printf_value(obj->attr->system.memory_kB),
-			    hwloc_memory_size_printf_unit(obj->attr->system.memory_kB),
+			    hwloc_memory_size_printf_value(obj->attr->system.memory_kB, verbose),
+			    hwloc_memory_size_printf_unit(obj->attr->system.memory_kB, verbose),
 			    separator,
 			    obj->attr->system.huge_page_free, obj->attr->system.huge_page_size_kB,
 			    separator,
@@ -210,13 +210,13 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 			    obj->attr->system.dmi_board_name?obj->attr->system.dmi_board_name:"");
     else
       return hwloc_snprintf(string, size, "%lu%s",
-			    hwloc_memory_size_printf_value(obj->attr->system.memory_kB),
-			    hwloc_memory_size_printf_unit(obj->attr->system.memory_kB));
+			    hwloc_memory_size_printf_value(obj->attr->system.memory_kB, verbose),
+			    hwloc_memory_size_printf_unit(obj->attr->system.memory_kB, verbose));
   case HWLOC_OBJ_MACHINE:
     if (verbose)
       return hwloc_snprintf(string, size, "%lu%s%sHP=%lu*%lukB%s%s%s%s",
-			    hwloc_memory_size_printf_value(obj->attr->machine.memory_kB),
-			    hwloc_memory_size_printf_unit(obj->attr->machine.memory_kB),
+			    hwloc_memory_size_printf_value(obj->attr->machine.memory_kB, verbose),
+			    hwloc_memory_size_printf_unit(obj->attr->machine.memory_kB, verbose),
 			    separator,
 			    obj->attr->machine.huge_page_free, obj->attr->machine.huge_page_size_kB,
 			    separator,
@@ -225,16 +225,16 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 			    obj->attr->machine.dmi_board_name?obj->attr->machine.dmi_board_name:"");
     else
       return hwloc_snprintf(string, size, "%lu%s",
-			    hwloc_memory_size_printf_value(obj->attr->machine.memory_kB),
-			    hwloc_memory_size_printf_unit(obj->attr->machine.memory_kB));
+			    hwloc_memory_size_printf_value(obj->attr->machine.memory_kB, verbose),
+			    hwloc_memory_size_printf_unit(obj->attr->machine.memory_kB, verbose));
   case HWLOC_OBJ_NODE:
     return hwloc_snprintf(string, size, "%lu%s",
-			  hwloc_memory_size_printf_value(obj->attr->node.memory_kB),
-			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB));
+			  hwloc_memory_size_printf_value(obj->attr->node.memory_kB, verbose),
+			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB, verbose));
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "%lu%s",
-			  hwloc_memory_size_printf_value(obj->attr->node.memory_kB),
-			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB));
+			  hwloc_memory_size_printf_value(obj->attr->node.memory_kB, verbose),
+			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB, verbose));
   default:
     *string = '\0';
     return 0;
@@ -266,37 +266,37 @@ hwloc_obj_snprintf(char *string, size_t size,
   case HWLOC_OBJ_SYSTEM:
     if (verbose)
       return hwloc_snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
-		      hwloc_memory_size_printf_value(l->attr->system.memory_kB),
-		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB),
+		      hwloc_memory_size_printf_value(l->attr->system.memory_kB, verbose),
+		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB, verbose),
 		      l->attr->system.huge_page_free, l->attr->system.huge_page_size_kB,
 		      l->attr->system.dmi_board_vendor?l->attr->system.dmi_board_vendor:"",
 		      l->attr->system.dmi_board_name?l->attr->system.dmi_board_name:"");
     else
       return hwloc_snprintf(string, size, "%s(%lu%s)", hwloc_obj_type_string(type),
-		      hwloc_memory_size_printf_value(l->attr->system.memory_kB),
-		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB));
+		      hwloc_memory_size_printf_value(l->attr->system.memory_kB, verbose),
+		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB, verbose));
   case HWLOC_OBJ_MACHINE:
     if (verbose)
       return hwloc_snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
-		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB),
-		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB),
+		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB, verbose),
+		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB, verbose),
 		      l->attr->machine.huge_page_free, l->attr->machine.huge_page_size_kB,
 		      l->attr->machine.dmi_board_vendor?l->attr->machine.dmi_board_vendor:"",
 		      l->attr->machine.dmi_board_name?l->attr->machine.dmi_board_name:"");
     else
       return hwloc_snprintf(string, size, "%s%s(%lu%s)", hwloc_obj_type_string(type), os_index,
-		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB),
-		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB));
+		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB, verbose),
+		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB, verbose));
   case HWLOC_OBJ_NODE:
     return hwloc_snprintf(string, size, "%s%s(%lu%s)",
 		    verbose ? hwloc_obj_type_string(type) : "Node", os_index,
-		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
-		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));
+		    hwloc_memory_size_printf_value(l->attr->node.memory_kB, verbose),
+		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB, verbose));
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "L%u%s%s(%lu%s)", l->attr->cache.depth,
 		      verbose ? hwloc_obj_type_string(type) : "", os_index,
-		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
-		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));
+		    hwloc_memory_size_printf_value(l->attr->node.memory_kB, verbose),
+		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB, verbose));
   default:
     *string = '\0';
     return 0;
