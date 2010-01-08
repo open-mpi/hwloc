@@ -1319,7 +1319,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /* PCI */
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_PCI)) {
     int gotsome = 0;
-    hwloc_debug("\nLooking for PCI devices\n");
+    hwloc_debug("%s", "\nLooking for PCI devices\n");
 
     if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
       /* TODO */
@@ -1339,13 +1339,13 @@ hwloc_discover(struct hwloc_topology *topology)
     if (gotsome) {
       print_objects(topology, 0, topology->levels[0][0]);
 
-      hwloc_debug("\nNow reconnecting\n");
+      hwloc_debug("%s", "\nNow reconnecting\n");
 
       hwloc_connect(topology->levels[0][0]);
 
       print_objects(topology, 0, topology->levels[0][0]);
     } else {
-      hwloc_debug("\nno PCI detection\n");
+      hwloc_debug("%s", "\nno PCI detection\n");
     }
   }
 

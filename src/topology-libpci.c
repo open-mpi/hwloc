@@ -278,7 +278,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   fakehostbridge.first_child = NULL;
   fakehostbridge.last_child = NULL;
 
-  hwloc_debug("\nScanning PCI buses...\n");
+  hwloc_debug("%s", "\nScanning PCI buses...\n");
 
   pciaccess = pci_alloc();
   pci_init(pciaccess);
@@ -367,14 +367,14 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   pci_cleanup(pciaccess);
 
-  hwloc_debug("\nPCI hierarchy after basic scan:\n");
+  hwloc_debug("%s", "\nPCI hierarchy after basic scan:\n");
   hwloc_pci_traverse(&fakehostbridge, 0);
 
   /* drop useless bridges if needed */
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI))
     hwloc_pci_drop_useless_bridges(&fakehostbridge);
 
-  hwloc_debug("\nPCI hierarchy removing useless objects:\n");
+  hwloc_debug("%s", "\nPCI hierarchy removing useless objects:\n");
   hwloc_pci_traverse(&fakehostbridge, 0);
 
   if (!fakehostbridge.first_child)
