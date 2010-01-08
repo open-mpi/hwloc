@@ -74,42 +74,45 @@ int hwloc_get_sysctl(int name[], unsigned namelen, int *ret)
    used as a fall-back method, allowing `hwloc_set_fsroot ()' to
    have the desired effect.  */
 unsigned
-hwloc_fallback_nbprocessors(void) {
+hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
+  int n;
 #if HAVE_DECL__SC_NPROCESSORS_ONLN
-  return sysconf(_SC_NPROCESSORS_ONLN);
+  n = sysconf(_SC_NPROCESSORS_ONLN);
 #elif HAVE_DECL__SC_NPROC_ONLN
-  return sysconf(_SC_NPROC_ONLN);
+  n = sysconf(_SC_NPROC_ONLN);
 #elif HAVE_DECL__SC_NPROCESSORS_CONF
-  return sysconf(_SC_NPROCESSORS_CONF);
+  n = sysconf(_SC_NPROCESSORS_CONF);
 #elif HAVE_DECL__SC_NPROC_CONF
-  return sysconf(_SC_NPROC_CONF);
+  n = sysconf(_SC_NPROC_CONF);
 #elif defined(HAVE_HOST_INFO) && HAVE_HOST_INFO
   struct host_basic_info info;
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
-  return info.avail_cpus;
+  n = info.avail_cpus;
 #elif defined(HAVE_SYSCTLBYNAME)
   int n;
   if (hwloc_get_sysctlbyname("hw.ncpu", &n))
-    return 1;
-  return n;
+    n = -1;
 #elif defined(HAVE_SYSCTL) && HAVE_DECL_CTL_HW && HAVE_DECL_HW_NCPU
   static int name[2] = {CTL_HW, HW_NPCU};
-  int n;
   if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name)), &n)
-    return 1;
-  return n;
+    n = -1;
 #elif defined(HWLOC_WIN_SYS)
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);
-  return sysinfo.dwNumberOfProcessors;
+  n = sysinfo.dwNumberOfProcessors;
 #else
 #ifdef __GNUC__
 #warning No known way to discover number of available processors on this system
 #warning hwloc_fallback_nbprocessors will default to 1
 #endif
-  return 1;
+  n = -1;
 #endif
+  if (n >= 1)
+    topology->support.discovery.proc = 1;
+  else
+    n = 1;
+  return n;
 }
 
 /*
@@ -969,14 +972,6 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
  * Empty binding hooks always returning success
  */
 
-static int dontset_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
-{
-  return 0;
-}
-static hwloc_cpuset_t dontget_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
-{
-  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
-}
 static int dontset_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
@@ -1107,7 +1102,7 @@ hwloc_discover(struct hwloc_topology *topology)
 #    endif /* HWLOC_HPUX_SYS */
 
 #    ifndef HAVE_OS_SUPPORT
-    hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors ());
+    hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
 #    endif /* Unsupported OS */
   }
 
@@ -1315,8 +1310,6 @@ hwloc_discover(struct hwloc_topology *topology)
     hwloc_set_hpux_hooks(topology);
 #    endif /* HWLOC_HPUX_SYS */
   } else {
-    topology->set_cpubind = dontset_cpubind;
-    topology->get_cpubind = dontget_cpubind;
     topology->set_thisproc_cpubind = dontset_thisproc_cpubind;
     topology->get_thisproc_cpubind = dontget_thisproc_cpubind;
     topology->set_thisthread_cpubind = dontset_thisthread_cpubind;
@@ -1327,6 +1320,24 @@ hwloc_discover(struct hwloc_topology *topology)
     topology->set_thread_cpubind = dontset_thread_cpubind;
     topology->get_thread_cpubind = dontget_thread_cpubind;
 #endif
+  }
+
+  /* if not is_thissystem, set_cpubind is fake
+   * and get_cpubind returns the whole system cpuset,
+   * so don't report that set/get_cpubind as supported
+   */
+  if (topology->is_thissystem) {
+#define DO(kind) \
+    if (topology->kind) \
+      topology->support.cpubind.kind = 1;
+    DO(set_thisproc_cpubind);
+    DO(get_thisproc_cpubind);
+    DO(set_proc_cpubind);
+    DO(get_proc_cpubind);
+    DO(set_thisthread_cpubind);
+    DO(get_thisthread_cpubind);
+    DO(set_thread_cpubind);
+    DO(get_thread_cpubind);
   }
 }
 
@@ -1389,8 +1400,6 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->allowed_cpuset = hwloc_cpuset_alloc();
   topology->allowed_nodeset = hwloc_cpuset_alloc();
 
-  topology->set_cpubind = NULL;
-  topology->get_cpubind = NULL;
   topology->set_thisproc_cpubind = NULL;
   topology->get_thisproc_cpubind = NULL;
   topology->set_thisthread_cpubind = NULL;
@@ -1401,6 +1410,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->set_thread_cpubind = NULL;
   topology->get_thread_cpubind = NULL;
 #endif
+  memset(&topology->support, 0, sizeof(topology->support));
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
@@ -1818,29 +1828,8 @@ hwloc_topology_check(struct hwloc_topology *topology)
   }
 }
 
-int
-hwloc_topology_get_support(struct hwloc_topology * topology, unsigned long *flagsp)
+const struct hwloc_topology_support *
+hwloc_topology_get_support(struct hwloc_topology * topology)
 {
-  unsigned long flags = 0;
-#ifndef HWLOC_UNSUPPORTED_SYS
-  flags |= HWLOC_SUPPORT_DISCOVERY;
-#endif
-
-  /* if not is_thissystem, set_cpubind is fake
-   * and get_cpubind returns the whole system cpuset,
-   * so don't report that set/get_cpubind as supported
-   */
-  if (topology->is_thissystem) {
-    if (topology->set_proc_cpubind)
-      flags |= HWLOC_SUPPORT_SET_PROC_CPUBIND;
-    if (topology->set_thread_cpubind)
-      flags |= HWLOC_SUPPORT_SET_THREAD_CPUBIND;
-    if (topology->get_proc_cpubind)
-      flags |= HWLOC_SUPPORT_GET_PROC_CPUBIND;
-    if (topology->get_thread_cpubind)
-      flags |= HWLOC_SUPPORT_GET_THREAD_CPUBIND;
-  }
-
-  *flagsp = flags;
-  return 0;
+  return &topology->support;
 }

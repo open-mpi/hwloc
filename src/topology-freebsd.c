@@ -157,24 +157,12 @@ hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unu
 }
 #endif
 #endif
-
-static int
-hwloc_freebsd_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_cpuset, int policy)
-{
-  return hwloc_freebsd_set_thisproc_cpubind(topology, hwloc_cpuset, policy);
-}
-
-static hwloc_cpuset_t
-hwloc_freebsd_get_cpubind(hwloc_topology_t topology, int policy)
-{
-  return hwloc_freebsd_get_thisproc_cpubind(topology, policy);
-}
 #endif
 
 void
 hwloc_look_freebsd(struct hwloc_topology *topology)
 {
-  unsigned nbprocs = hwloc_fallback_nbprocessors ();
+  unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
 
   /* TODO: use x86 backend */
 
@@ -185,8 +173,6 @@ void
 hwloc_set_freebsd_hooks(struct hwloc_topology *topology)
 {
 #ifdef HAVE_SYS_CPUSET_H
-  topology->set_cpubind = hwloc_freebsd_set_cpubind;
-  topology->get_cpubind = hwloc_freebsd_get_cpubind;
   topology->set_thisproc_cpubind = hwloc_freebsd_set_thisproc_cpubind;
   topology->get_thisproc_cpubind = hwloc_freebsd_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_freebsd_set_thisthread_cpubind;

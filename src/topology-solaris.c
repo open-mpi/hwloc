@@ -58,12 +58,6 @@ hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset
 }
 
 static int
-hwloc_solaris_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_solaris_set_thisproc_cpubind(topology, hwloc_set, policy);
-}
-
-static int
 hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
@@ -337,7 +331,7 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 void
 hwloc_look_solaris(struct hwloc_topology *topology)
 {
-  unsigned nbprocs = hwloc_fallback_nbprocessors ();
+  unsigned nbprocs = hwloc_fallback_nbprocessors (topology);
 #ifdef HAVE_LIBLGRP
   hwloc_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */
@@ -351,7 +345,6 @@ hwloc_look_solaris(struct hwloc_topology *topology)
 void
 hwloc_set_solaris_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_solaris_set_cpubind;
   topology->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;

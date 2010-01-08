@@ -134,12 +134,6 @@ hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t h
   return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
 }
 
-static int
-hwloc_osf_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_osf_set_thisproc_cpubind(topology, hwloc_set, policy);
-}
-
 /* TODO: memory
  *
  * nmadvise(addr,len), nmmap()
@@ -228,13 +222,12 @@ hwloc_look_osf(struct hwloc_topology *topology)
   cpusetdestroy(&cpuset);
 
   /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors());
+  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
 }
 
 void
 hwloc_set_osf_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_osf_set_cpubind;
   topology->set_thread_cpubind = hwloc_osf_set_thread_cpubind;
   topology->set_thisthread_cpubind = hwloc_osf_set_thisthread_cpubind;
   topology->set_proc_cpubind = hwloc_osf_set_proc_cpubind;

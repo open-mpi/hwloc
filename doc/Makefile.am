@@ -337,6 +337,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_binding.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \

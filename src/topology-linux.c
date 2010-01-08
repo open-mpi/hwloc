@@ -441,18 +441,6 @@ hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 }
 
 static int
-hwloc_linux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_linux_set_proc_cpubind(topology, 0, hwloc_set, policy);
-}
-
-static hwloc_cpuset_t
-hwloc_linux_get_cpubind(hwloc_topology_t topology, int policy)
-{
-  return hwloc_linux_get_proc_cpubind(topology, 0, policy);
-}
-
-static int
 hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_linux_set_pid_cpubind(topology, 0, hwloc_set, policy);
@@ -1116,6 +1104,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
     closedir(dir);
   }
 
+  topology->support.discovery.proc = 1;
   hwloc_debug_1arg_cpuset("found %d cpu topologies, cpuset %s\n",
 	     hwloc_cpuset_weight(cpuset), cpuset);
 
@@ -1372,6 +1361,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     return -1;
   }
 
+  topology->support.discovery.proc = 1;
   /* setup the final number of procs */
   procid_max = processor + 1;
   hwloc_cpuset_copy(online_cpuset, cpuset);
@@ -1462,10 +1452,8 @@ hwloc_look_linux(struct hwloc_topology *topology)
       node = strtoul(dirent->d_name+4, NULL, 0);
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/cpuinfo", node);
       err = look_cpuinfo(topology, path, machine_online_set);
-      if (err < 0) {
-	fprintf(stderr, "/proc/cpuinfo missing, required for kerrighed support\n");
-	abort();
-      }
+      if (err < 0)
+        continue;
       hwloc_cpuset_orset(topology->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;
@@ -1504,7 +1492,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
       err = look_cpuinfo(topology, "/proc/cpuinfo", topology->online_cpuset);
       if (err < 0) {
         if (topology->is_thissystem)
-          hwloc_setup_proc_level(topology,  hwloc_fallback_nbprocessors());
+          hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
         else
           /* fsys-root but not this system, no way, assume there's just 1
            * processor :/ */
@@ -1532,8 +1520,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
 void
 hwloc_set_linux_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_linux_set_cpubind;
-  topology->get_cpubind = hwloc_linux_get_cpubind;
   topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
   topology->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
   topology->set_thisproc_cpubind = hwloc_linux_set_thisproc_cpubind;

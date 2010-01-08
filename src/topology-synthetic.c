@@ -270,6 +270,8 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
   hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
   unsigned first_cpu = 0, i;
 
+  topology->support.discovery.proc = 1;
+
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
     first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, cpuset);
 

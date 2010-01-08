@@ -61,8 +61,6 @@ struct hwloc_topology {
   hwloc_cpuset_t allowed_cpuset;
   hwloc_cpuset_t allowed_nodeset;
 
-  int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_cpubind)(hwloc_topology_t topology, int policy);
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology, int policy);
   int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
@@ -73,6 +71,8 @@ struct hwloc_topology {
   int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, int policy);
 #endif
+
+  struct hwloc_topology_support support;
 
   hwloc_backend_t backend_type;
   union hwloc_backend_params_u {
@@ -109,7 +109,7 @@ extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/);
 extern int hwloc_get_sysctlbyname(const char *name, int *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);
-extern unsigned hwloc_fallback_nbprocessors(void);
+extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
 
 #if defined(HWLOC_LINUX_SYS)
 extern void hwloc_look_linux(struct hwloc_topology *topology);

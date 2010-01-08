@@ -315,6 +315,8 @@ hwloc_look_xml(struct hwloc_topology *topology)
   xmlNode* root_node;
   xmlDtd *dtd;
 
+  topology->support.discovery.proc = 1;
+
   dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
   if (!dtd)
     fprintf(stderr, "Loading XML topology without DTD\n");

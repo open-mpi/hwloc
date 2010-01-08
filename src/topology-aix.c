@@ -166,18 +166,6 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   }
 }
 
-static int
-hwloc_aix_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_aix_set_thisproc_cpubind(topology, hwloc_set, policy);
-}
-
-static hwloc_cpuset_t
-hwloc_aix_get_cpubind(hwloc_topology_t topology, int policy)
-{
-  return hwloc_aix_get_thisproc_cpubind(topology, policy);
-}
-
 static void
 look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int level)
 {
@@ -287,6 +275,7 @@ hwloc_look_aix(struct hwloc_topology *topology)
 	  hwloc_debug("looking AIX max sdl %d\n", i);
 	  look_rset(i, HWLOC_OBJ_PROC, topology, i);
 	  known = 1;
+          topology->support.discovery.proc = 1;
 	}
 
       /* Don't know how it should be rendered, make a misc object for it.  */
@@ -301,8 +290,6 @@ hwloc_look_aix(struct hwloc_topology *topology)
 void
 hwloc_set_aix_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_aix_set_cpubind;
-  topology->get_cpubind = hwloc_aix_get_cpubind;
   topology->set_proc_cpubind = hwloc_aix_set_proc_cpubind;
   topology->get_proc_cpubind = hwloc_aix_get_proc_cpubind;
   topology->set_thread_cpubind = hwloc_aix_set_thread_cpubind;

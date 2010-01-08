@@ -93,12 +93,6 @@ hwloc_hpux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t 
   return hwloc_hpux_set_proc_cpubind(topology, MPC_SELFPID, hwloc_set, policy);
 }
 
-static int
-hwloc_hpux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_hpux_set_thisproc_cpubind(topology, hwloc_set, policy);
-}
-
 #ifdef hwloc_thread_t
 static int
 hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_const_cpuset_t hwloc_set, int policy)
@@ -203,12 +197,13 @@ hwloc_look_hpux(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, nodes[i]);
     free(nodes);
   }
+
+  topology->support.discovery.proc = 1;
 }
 
 void
 hwloc_set_hpux_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_hpux_set_cpubind;
   topology->set_proc_cpubind = hwloc_hpux_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_hpux_set_thisproc_cpubind;
 #ifdef hwloc_thread_t

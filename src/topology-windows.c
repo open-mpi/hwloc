@@ -195,18 +195,6 @@ hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
   return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), policy);
 }
 
-static int
-hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, policy);
-}
-
-static hwloc_cpuset_t
-hwloc_win_get_cpubind(hwloc_topology_t topology, int policy)
-{
-  return hwloc_win_get_thisproc_cpubind(topology, policy);
-}
-
 void
 hwloc_look_windows(struct hwloc_topology *topology)
 {
@@ -401,14 +389,12 @@ hwloc_look_windows(struct hwloc_topology *topology)
   }
 
   /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors());
+  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
 }
 
 void
 hwloc_set_windows_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_win_set_cpubind;
-  topology->get_cpubind = hwloc_win_get_cpubind;
   topology->set_proc_cpubind = hwloc_win_set_proc_cpubind;
   topology->get_proc_cpubind = hwloc_win_get_proc_cpubind;
   topology->set_thread_cpubind = hwloc_win_set_thread_cpubind;
