@@ -166,6 +166,15 @@ cd "$distdir"
 echo "*** Now in distdir: $distdir"
 
 #
+# Remove all the latex source files from the distribution tree (the
+# PDFs are still there; we're just removing the latex source because
+# some of the filenames get really, really long...).
+#
+
+echo "*** Removing latex source from dist tree"
+rm -rf doc/doxygen-doc/latex
+
+#
 # Get the latest config.guess and config.sub from ftp.gnu.org
 #
 
