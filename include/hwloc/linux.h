@@ -31,14 +31,14 @@
  *
  * \return newly-allocated cpuset.
  */
-extern hwloc_cpuset_t hwloc_linux_parse_cpumap_file(FILE *file);
+HWLOC_DECLSPEC hwloc_cpuset_t hwloc_linux_parse_cpumap_file(FILE *file) __hwloc_attribute_malloc;
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
  * The behavior is exactly the same as the Linux sched_setaffinity system call,
  * but uses a hwloc cpuset.
  */
-extern int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cpuset_t set);
+HWLOC_DECLSPEC int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cpuset_t set);
 
 /** \brief Get the current binding of thread \p tid
  *
@@ -47,7 +47,7 @@ extern int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwl
  *
  * \return newly-allocated cpuset.
  */
-extern hwloc_cpuset_t hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid);
+HWLOC_DECLSPEC hwloc_cpuset_t hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid) __hwloc_attribute_malloc;
 
 /** @} */
 

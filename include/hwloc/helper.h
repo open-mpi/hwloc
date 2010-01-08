@@ -30,6 +30,8 @@
  * inside \p type.
  */
 static __inline int
+hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
+static __inline int
 hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -52,6 +54,8 @@ hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * function returns the depth of the first "present" object typically
  * containing \p type.
  */
+static __inline int
+hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
 static __inline int
 hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
@@ -79,6 +83,8 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 
 /** \brief Returns the top-object of the topology-tree. Its type is ::HWLOC_OBJ_SYSTEM. */
 static __inline hwloc_obj_t
+hwloc_get_system_obj (hwloc_topology_t topology) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
 hwloc_get_system_obj (hwloc_topology_t topology)
 {
   return hwloc_get_obj_by_depth (topology, 0, 0);
@@ -86,7 +92,9 @@ hwloc_get_system_obj (hwloc_topology_t topology)
 
 /** \brief Returns the parent object of \p obj at depth \p depth. */
 static __inline hwloc_obj_t
-hwloc_get_parent_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_obj_t obj)
+hwloc_get_parent_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_parent_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj)
 {
   hwloc_obj_t parent = obj;
   if (obj->depth < depth)
@@ -98,7 +106,9 @@ hwloc_get_parent_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_
 
 /** \brief Returns the parent object of \p obj with type \p type. */
 static __inline hwloc_obj_t
-hwloc_get_parent_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, hwloc_obj_t obj)
+hwloc_get_parent_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_parent_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj)
 {
   hwloc_obj_t parent = obj->father;
   while (parent && parent->type != type)
@@ -145,6 +155,8 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
  * However, using CPU sets to hide this complexity should often be preferred.
  */
 static __inline hwloc_obj_t
+hwloc_get_proc_obj_by_os_index(hwloc_topology_t topology, unsigned os_index) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
 hwloc_get_proc_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
 {
   hwloc_obj_t obj = NULL;
@@ -159,7 +171,7 @@ hwloc_get_proc_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
  * If \p prev is \c NULL, return the first child.
  */
 static __inline hwloc_obj_t
-hwloc_get_next_child (hwloc_topology_t topology, hwloc_obj_t father, hwloc_obj_t prev)
+hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t father, hwloc_obj_t prev)
 {
   if (!prev)
     return father->first_child;
@@ -170,7 +182,9 @@ hwloc_get_next_child (hwloc_topology_t topology, hwloc_obj_t father, hwloc_obj_t
 
 /** \brief Returns the common father object to objects lvl1 and lvl2 */
 static __inline hwloc_obj_t
-hwloc_get_common_ancestor_obj (hwloc_topology_t topology, hwloc_obj_t obj1, hwloc_obj_t obj2)
+hwloc_get_common_ancestor_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj1, hwloc_obj_t obj2) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_common_ancestor_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   while (obj1->depth > obj2->depth)
     obj1 = obj1->father;
@@ -186,7 +200,9 @@ hwloc_get_common_ancestor_obj (hwloc_topology_t topology, hwloc_obj_t obj1, hwlo
 /** \brief Returns true if _obj_ is inside the subtree beginning
     with \p subtree_root. */
 static __inline int
-hwloc_obj_is_in_subtree (hwloc_topology_t topology, hwloc_obj_t obj, hwloc_obj_t subtree_root)
+hwloc_obj_is_in_subtree (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj, hwloc_obj_t subtree_root) __hwloc_attribute_pure;
+static __inline int
+hwloc_obj_is_in_subtree (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj, hwloc_obj_t subtree_root)
 {
   return hwloc_cpuset_isincluded(obj->cpuset, subtree_root->cpuset);
 }
@@ -203,7 +219,7 @@ hwloc_obj_is_in_subtree (hwloc_topology_t topology, hwloc_obj_t obj, hwloc_obj_t
  *
  * \return the number of objects returned in \p objs.
  */
-extern int hwloc_get_largest_objs_inside_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set,
+HWLOC_DECLSPEC int hwloc_get_largest_objs_inside_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set,
 						 hwloc_obj_t * __hwloc_restrict objs, int max);
 
 /** \brief Return the next object at depth \p depth included in CPU set \p set.
@@ -241,6 +257,9 @@ hwloc_get_next_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const
  */
 static __inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
+				      unsigned depth, unsigned idx) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
 				      unsigned depth, unsigned idx)
 {
   unsigned count = 0;
@@ -263,6 +282,9 @@ hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpu
  */
 static __inline hwloc_obj_t
 hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
+				     hwloc_obj_type_t type, unsigned idx) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
 				     hwloc_obj_type_t type, unsigned idx)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -272,6 +294,9 @@ hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpus
 }
 
 /** \brief Return the number of objects at depth \p depth included in CPU set \p set. */
+static __inline unsigned
+hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
+					 unsigned depth) __hwloc_attribute_pure;
 static __inline unsigned
 hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
 					 unsigned depth)
@@ -291,6 +316,9 @@ hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_
  * If no object for that type exists inside CPU set \p set, 0 is returned.
  * If there are several levels with objects of that type inside CPU set \p set, -1 is returned.
  */
+static __inline int
+hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
+					hwloc_obj_type_t type) __hwloc_attribute_pure;
 static __inline int
 hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
 					hwloc_obj_type_t type)
@@ -316,7 +344,10 @@ hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_c
  * \return \c NULL if no child matches or if \p set is empty.
  */
 static __inline hwloc_obj_t
-hwloc_get_child_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set,
+hwloc_get_child_covering_cpuset (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set,
+				hwloc_obj_t father) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_child_covering_cpuset (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set,
 				hwloc_obj_t father)
 {
   hwloc_obj_t child;
@@ -337,6 +368,8 @@ hwloc_get_child_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t
  *
  * \return \c NULL if no object matches or if \p set is empty.
  */
+static __inline hwloc_obj_t
+hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 static __inline hwloc_obj_t
 hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set)
 {
@@ -416,6 +449,8 @@ hwloc_get_next_obj_covering_cpuset_by_type(hwloc_topology_t topology, hwloc_cons
  * \return \c NULL if no cache matches
  */
 static __inline hwloc_obj_t
+hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
 hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set)
 {
   hwloc_obj_t current = hwloc_get_obj_covering_cpuset(topology, set);
@@ -432,7 +467,9 @@ hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t
  * \return \c NULL if no cache matches
  */
 static __inline hwloc_obj_t
-hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
+hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj)
 {
   hwloc_obj_t current = obj->father;
   while (current) {
@@ -460,7 +497,66 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology, hwloc_obj_t obj)
  *  \return the number of objects returned in \p objs.
  */
 /* TODO: rather provide an iterator? Provide a way to know how much should be allocated? By returning the total number of objects instead? */
-extern unsigned hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, hwloc_obj_t * __hwloc_restrict objs, unsigned max);
+HWLOC_DECLSPEC unsigned hwloc_get_closest_objs (hwloc_topology_t topology, hwloc_obj_t src, hwloc_obj_t * __hwloc_restrict objs, unsigned max);
+
+/** \brief Find an object below another object, both specified by types and indexes.
+ *
+ * Start from the top system object and find object of type \p type1 and index \p idx1.
+ * Then look below this object and find another object of type \p type2 and index \p idx2.
+ * Indexes are specified within the parent, not withing the entire system.
+ *
+ * For instance, if type1 is SOCKET, idx1 is 2, type2 is CORE and idx2 is 3,
+ * return the fourth core object below the third socket.
+ */
+static __inline hwloc_obj_t
+hwloc_get_obj_below_by_type (hwloc_topology_t topology,
+			     hwloc_obj_type_t type1, unsigned idx1,
+			     hwloc_obj_type_t type2, unsigned idx2) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_obj_below_by_type (hwloc_topology_t topology,
+			     hwloc_obj_type_t type1, unsigned idx1,
+			     hwloc_obj_type_t type2, unsigned idx2)
+{
+  hwloc_obj_t obj;
+
+  obj = hwloc_get_obj_by_type (topology, type1, idx1);
+  if (!obj)
+    return NULL;
+
+  return hwloc_get_obj_inside_cpuset_by_type(topology, obj->cpuset, type2, idx2);
+}
+
+/** \brief Find an object below a chain of objects specified by types and indexes.
+ *
+ * This is a generalized version of hwloc_get_obj_below_by_type().
+ *
+ * Arrays \p typev and \p idxv must contain \p nr types and indexes.
+ *
+ * Start from the top system object and walk the arrays \p typev and \p idxv.
+ * For each type and index couple in the arrays, look under the previously found
+ * object to find the index-th object of the given type.
+ * Indexes are specified within the parent, not withing the entire system.
+ *
+ * For instance, if nr is 3, typev contains NODE, SOCKET and CORE,
+ * and idxv contains 0, 1 and 2, return the third core object below
+ * the second socket below the first NUMA node.
+ */
+static __inline hwloc_obj_t
+hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_type_t *typev, unsigned *idxv) __hwloc_attribute_pure;
+static __inline hwloc_obj_t
+hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_type_t *typev, unsigned *idxv)
+{
+  hwloc_obj_t obj = hwloc_get_system_obj(topology);
+  int i;
+
+  for(i=0; i<nr; i++) {
+    obj = hwloc_get_obj_inside_cpuset_by_type(topology, obj->cpuset, typev[i], idxv[i]);
+    if (!obj)
+      return NULL;
+  }
+
+  return obj;
+}
 
 /** @} */
 

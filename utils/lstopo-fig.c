@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -17,7 +18,7 @@
 #define FIG_FACTOR 20
 
 static void *
-fig_start(void *output_, int width, int height)
+fig_start(void *output_, int width __hwloc_attribute_unused, int height __hwloc_attribute_unused)
 {
   FILE *output = output_;
   fprintf(output, "#FIG 3.2  Produced by hwloc's lstopo\n");
@@ -32,6 +33,8 @@ fig_start(void *output_, int width, int height)
   return output;
 }
 
+static int
+rgb_to_fig(int r, int g, int b) __hwloc_attribute_const;
 static int
 rgb_to_fig(int r, int g, int b)
 {
@@ -96,10 +99,12 @@ static void
 fig_text(void *output_, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
 {
   FILE *output = output_;
+  unsigned len = strlen(text);
+  int color = rgb_to_fig(r, g, b);
   x *= FIG_FACTOR;
   y *= FIG_FACTOR;
   size = (size * 16) / 10;
-  fprintf(output, "4 0 %d %u -1 0 %d 0.0 4 %d %u %u %u %s\\001\n", rgb_to_fig(r, g, b), depth, size, size * 10, (unsigned) strlen(text) * size * 10, x, y + size * 10, text);
+  fprintf(output, "4 0 %d %u -1 0 %d 0.0 4 %d %u %u %u %s\\001\n", color, depth, size, size * 10, len * size * 10, x, y + size * 10, text);
 }
 
 static struct draw_methods fig_draw_methods = {
@@ -111,7 +116,7 @@ static struct draw_methods fig_draw_methods = {
 };
 
 void
-output_fig (hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_fig (hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
@@ -119,7 +124,7 @@ output_fig (hwloc_topology_t topology, const char *filename, int verbose_mode)
     return;
   }
 
-  output = output_draw_start(&fig_draw_methods, topology, output);
-  output_draw(&fig_draw_methods, topology, output);
+  output = output_draw_start(&fig_draw_methods, logical, topology, output);
+  output_draw(&fig_draw_methods, logical, topology, output);
   fclose(output);
 }

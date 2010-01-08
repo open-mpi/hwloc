@@ -19,6 +19,56 @@
 # endif
 #endif
 
+#ifdef HWLOC_HAVE_ATTRIBUTE_UNUSED
+# if HWLOC_HAVE_ATTRIBUTE_UNUSED
+#  define __hwloc_attribute_unused __attribute__((__unused__))
+# else
+#  define __hwloc_attribute_unused
+# endif
+#else
+# define __hwloc_attribute_unused
+#endif
+
+#ifdef HWLOC_HAVE_ATTRIBUTE_MALLOC
+# if HWLOC_HAVE_ATTRIBUTE_MALLOC
+#  define __hwloc_attribute_malloc __attribute__((__malloc__))
+# else
+#  define __hwloc_attribute_malloc
+# endif
+#else
+# define __hwloc_attribute_malloc
+#endif
+
+#ifdef HWLOC_HAVE_ATTRIBUTE_CONST
+# if HWLOC_HAVE_ATTRIBUTE_CONST
+#  define __hwloc_attribute_const __attribute__((__const__))
+# else
+#  define __hwloc_attribute_const
+# endif
+#else
+# define __hwloc_attribute_const
+#endif
+
+#ifdef HWLOC_HAVE_ATTRIBUTE_PURE
+# if HWLOC_HAVE_ATTRIBUTE_PURE
+#  define __hwloc_attribute_pure __attribute__((__pure__))
+# else
+#  define __hwloc_attribute_pure
+# endif
+#else
+# define __hwloc_attribute_pure
+#endif
+
+#ifdef HWLOC_C_HAVE_VISIBILITY
+# if HWLOC_C_HAVE_VISIBILITY
+#  define HWLOC_DECLSPEC __attribute__((__visibility__("default")))
+# else
+#  define HWLOC_DECLSPEC
+# endif
+#else
+# define HWLOC_DECLSPEC
+#endif
+
 /* Define to 1 on Linux */
 #undef HWLOC_LINUX_SYS
 

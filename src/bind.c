@@ -49,8 +49,10 @@ hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int polic
     if (topology->set_thisthread_cpubind)
       return topology->set_thisthread_cpubind(topology, set, policy);
   } else {
-    if (topology->set_cpubind)
-      return topology->set_cpubind(topology, set, policy);
+    if (topology->set_thisproc_cpubind)
+      return topology->set_thisproc_cpubind(topology, set, policy);
+    else if (topology->set_thisthread_cpubind)
+      return topology->set_thisthread_cpubind(topology, set, policy);
   }
 
   errno = ENOSYS;
@@ -67,8 +69,10 @@ hwloc_get_cpubind(hwloc_topology_t topology, int policy)
     if (topology->get_thisthread_cpubind)
       return topology->get_thisthread_cpubind(topology, policy);
   } else {
-    if (topology->get_cpubind)
-      return topology->get_cpubind(topology, policy);
+    if (topology->get_thisproc_cpubind)
+      return topology->get_thisproc_cpubind(topology, policy);
+    else if (topology->get_thisthread_cpubind)
+      return topology->get_thisthread_cpubind(topology, policy);
   }
 
   errno = ENOSYS;

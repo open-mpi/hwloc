@@ -4,13 +4,12 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/private.h>
 #include <hwloc-mask.h>
 #include <hwloc.h>
-#include <private/private.h>
 
 #include <unistd.h>
 #include <errno.h>
-#include <assert.h>
 
 static void usage(FILE *where)
 {
@@ -18,11 +17,13 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-mask utility.\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "   --single\tbind on a single CPU to prevent migration\n");
-  fprintf(where, "   --strict\trequire strict binding\n");
-  fprintf(where, "   --get\tretrieve current process binding\n");
-  fprintf(where, "   -v\t\tverbose messages\n");
-  fprintf(where, "   --version\treport version and exit\n");
+  fprintf(where, "  -l --logical\tdisplay logical object indexes (default)\n");
+  fprintf(where, "  -p --physical\tdisplay physical object indexes\n");
+  fprintf(where, "  --single\tbind on a single CPU to prevent migration\n");
+  fprintf(where, "  --strict\trequire strict binding\n");
+  fprintf(where, "  --get\tretrieve current process binding\n");
+  fprintf(where, "  -v\t\tverbose messages\n");
+  fprintf(where, "  --version\treport version and exit\n");
 }
 
 int main(int argc, char *argv[])
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
   int bind_cpus = 0;
   int single = 0;
   int verbose = 0;
+  int logical = 1;
   int flags = 0;
   int ret;
   char **orig_argv = argv;
@@ -76,6 +78,14 @@ int main(int argc, char *argv[])
           printf("%s %s\n", orig_argv[0], VERSION);
           exit(EXIT_SUCCESS);
       }
+      if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
+        logical = 1;
+        goto next;
+      }
+      if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
+        logical = 0;
+        goto next;
+      }
       else if (!strcmp (argv[0], "--get")) {
 	  get_binding = 1;
 	  goto next;
@@ -85,7 +95,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    ret = hwloc_mask_process_arg(topology, depth, argv[0], cpu_set, verbose);
+    ret = hwloc_mask_process_arg(topology, depth, argv[0], logical, cpu_set, verbose);
     if (ret < 0) {
       if (verbose)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
@@ -105,7 +115,8 @@ int main(int argc, char *argv[])
     hwloc_cpuset_free(cpu_set);
     cpu_set = hwloc_get_cpubind(topology, 0);
     if (!cpu_set) {
-      fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, strerror(errno));
+      const char *errmsg = strerror(errno);
+      fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
       return EXIT_FAILURE;
     }
     s = hwloc_cpuset_printf_value(cpu_set);
@@ -125,8 +136,9 @@ int main(int argc, char *argv[])
     ret = hwloc_set_cpubind(topology, cpu_set, flags);
     if (ret) {
       int bind_errno = errno;
+      const char *errmsg = strerror(bind_errno);
       char *s = hwloc_cpuset_printf_value(cpu_set);
-      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, strerror(bind_errno));
+      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
   }

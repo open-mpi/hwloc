@@ -143,7 +143,7 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 /* TODO: SetThreadIdealProcessor */
 
 static int
-hwloc_win_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   /* TODO: groups SetThreadGroupAffinity */
   /* The resulting binding is always strict */
@@ -160,7 +160,7 @@ hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t
 }
 
 static int
-hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   /* TODO: groups */
   /* The resulting binding is always strict */
@@ -171,7 +171,7 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, hwloc_co
 }
 
 static hwloc_cpuset_t
-hwloc_win_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t proc, int policy)
+hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, int policy __hwloc_attribute_unused)
 {
   hwloc_cpuset_t ret;
   DWORD proc_mask, sys_mask;
@@ -195,18 +195,6 @@ hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
   return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), policy);
 }
 
-static int
-hwloc_win_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_win_set_thisproc_cpubind(topology, hwloc_set, policy);
-}
-
-static hwloc_cpuset_t
-hwloc_win_get_cpubind(hwloc_topology_t topology, int policy)
-{
-  return hwloc_win_get_thisproc_cpubind(topology, policy);
-}
-
 void
 hwloc_look_windows(struct hwloc_topology *topology)
 {
@@ -224,6 +212,11 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
     if (GetLogicalProcessorInformationProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;
+      unsigned id;
+      unsigned i;
+      struct hwloc_obj *obj;
+      hwloc_obj_type_t type;
+
       length = 0;
       procInfo = NULL;
 
@@ -235,11 +228,6 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	free(procInfo);
 	procInfo = malloc(length);
       }
-
-      unsigned id;
-      unsigned i;
-      struct hwloc_obj *obj;
-      hwloc_obj_type_t type;
 
       for (i = 0; i < length / sizeof(*procInfo); i++) {
 
@@ -272,7 +260,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
 	obj = hwloc_alloc_setup_object(type, id);
         obj->cpuset = hwloc_cpuset_alloc();
-	hwloc_debug("%s#%d mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
+	hwloc_debug("%s#%u mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
 	hwloc_cpuset_from_ulong(obj->cpuset, procInfo[i].ProcessorMask);
 
 	switch (type) {
@@ -308,6 +296,12 @@ hwloc_look_windows(struct hwloc_topology *topology)
     if (0 && GetLogicalProcessorInformationExProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX procInfoTotal, procInfo;
 
+      signed id;
+      struct hwloc_obj *obj;
+      hwloc_obj_type_t type;
+      KAFFINITY mask;
+      WORD group;
+
       fprintf(stderr,"Note: GetLogicalProcessorInformationEx was never tested yet!\n");
 
       length = 0;
@@ -321,12 +315,6 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	free(procInfoTotal);
 	procInfo = malloc(length);
       }
-
-      signed id;
-      struct hwloc_obj *obj;
-      hwloc_obj_type_t type;
-      KAFFINITY mask;
-      WORD group;
 
       for (procInfo = procInfoTotal;
 	   (void*) procInfo < (void*) ((unsigned long) procInfoTotal + length);
@@ -401,14 +389,12 @@ hwloc_look_windows(struct hwloc_topology *topology)
   }
 
   /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors());
+  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
 }
 
 void
 hwloc_set_windows_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_win_set_cpubind;
-  topology->get_cpubind = hwloc_win_get_cpubind;
   topology->set_proc_cpubind = hwloc_win_set_proc_cpubind;
   topology->get_proc_cpubind = hwloc_win_get_proc_cpubind;
   topology->set_thread_cpubind = hwloc_win_set_thread_cpubind;

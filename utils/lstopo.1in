@@ -2,9 +2,17 @@
 .TH LSTOPO "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
 lstopo \- Show the topology of the system
+.
+.\" **************************
+.\"    Synopsis Section
+.\" **************************
 .SH SYNOPSIS
 .B lstopo
 [ \fIoptions \fR]... [ \fIfilename \fR]
+.
+.\" **************************
+.\"    Description Section
+.\" **************************
 .SH DESCRIPTION
 By default, lstopo displays a graphical window with the topology if DISPLAY is
 set, else a text output on the standard output.
@@ -13,6 +21,10 @@ filename.
 To specify a semi\-graphical text output on the standard output, specify \-.txt
 as filename.
 Recognised file formats are: .txt, .fig, .pdf, .ps, .png, .svg
+.
+.\" **************************
+.\"    Options Section
+.\" **************************
 .SH OPTIONS
 .TP
 \fB\-v\fR \fB\-\-verbose\fR
@@ -20,6 +32,21 @@ increase verbosity (disabled by default)
 .TP
 \fB\-s\fR \fB\-\-silent\fR
 decrease verbosity
+.TP
+\fB\-p\fR \fB\-\-physical\fR
+display OS/physical indexes instead of logical indexes
+.TP
+\fB\-l\fR \fB\-\-logical\fR
+display logical indexes instead of physical/OS indexes (default)
+.TP
+\fB\-c\fR \fB\-\-cpuset\fR
+display the cpuset of each object
+.TP
+\fB\-C\fR \fB\-\-cpuset-only\fR
+only display the cpuset of each object instead of other attributes
+.TP
+\fB\-\-only\fR "type"
+only show object of the given type
 .TP
 \fB\-\-no\-caches\fR
 do not show caches
@@ -32,7 +59,7 @@ impact
 do not consider administration limitations
 .TP
 \fB\-\-merge\fR
-do not show levels that do not have a hierarcical
+do not show levels that do not have a hierarchical
 impact
 .TP
 \fB\-\-synthetic\fR "n:2 2"
@@ -53,3 +80,43 @@ vertical graphic layout instead of nearly 4/3 ratio
 .TP
 \fB\-\-version\fR
 report version and exit
+.\" **************************
+.\"    Examples Section
+.\" **************************
+.SH EXAMPLES
+.PP
+To display the machine topology in text mode:
+
+    lstopo -
+
+To display in graphical mode if supported:
+
+    lstopo
+
+To export the topology in a PNG file:
+
+    lstopo file.png
+
+To get a summary of the topology:
+
+    lstopo -s
+
+To get more details about the topology:
+
+    lstopo -v
+
+To only show cores:
+
+    lstopo --only core
+
+To show cpusets:
+
+    lstopo --cpuset:
+
+To only show the cpusets of sockets:
+
+    lstopo --only socket --cpuset-only
+
+To count the number of logical processors in the system
+
+   lstopo --only proc | wc -l

@@ -7,56 +7,60 @@
 #include <string.h>
 #include <errno.h>
 
+#include <private/config.h>
 #include <hwloc.h>
 #include <private/config.h>
 
 /* check the binding functions */
 hwloc_topology_t topology;
+const struct hwloc_topology_support *support;
 
-static void result_set(const char *msg, int err)
+static void result_set(const char *msg, int err, int supported)
 {
+  const char *errmsg = strerror(errno);
   if (err)
-    printf("%-30s: FAILED (%d, %s)\n", msg, errno, strerror(errno));
+    printf("%-40s: FAILED (%d, %s)%s\n", msg, errno, errmsg, supported ? "" : " (expected)");
   else
-    printf("%-30s: OK\n", msg);
+    printf("%-40s: OK%s\n", msg, supported ? "" : " (unexpected)");
 }
 
-static void result_get(const char *msg, hwloc_const_cpuset_t expected, hwloc_const_cpuset_t result)
+static void result_get(const char *msg, hwloc_const_cpuset_t expected, hwloc_const_cpuset_t result, int supported)
 {
+  const char *errmsg = strerror(errno);
   if (!result)
-    printf("%-30s: FAILED (%d, %s)\n", msg, errno, strerror(errno));
+    printf("%-40s: FAILED (%d, %s)%s\n", msg, errno, errmsg, supported ? "" : " (expected)");
   else if (hwloc_cpuset_isequal(expected, result))
-    printf("%-30s: OK\n", msg);
+    printf("%-40s: OK%s\n", msg, supported ? "" : " (unexpected)");
   else {
     char *expected_s, *result_s;
     hwloc_cpuset_asprintf(&expected_s, expected);
     hwloc_cpuset_asprintf(&result_s, result);
-    printf("%-30s: expected %s, got %s\n", msg, expected_s, result_s);
+    printf("%-40s: expected %s, got %s\n", msg, expected_s, result_s);
   }
 }
 
 static void test(hwloc_const_cpuset_t cpuset, int flags)
 {
-  result_set("Bind singlethreaded process", hwloc_set_cpubind(topology, cpuset, flags));
-  result_get("Get  singlethreaded process", cpuset, hwloc_get_cpubind(topology, flags));
-  result_set("Bind this thread", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_THREAD));
-  result_get("Get  this thread", cpuset, hwloc_get_cpubind(topology, flags | HWLOC_CPUBIND_THREAD));
-  result_set("Bind this whole process", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_PROCESS));
-  result_get("Get  this whole process", cpuset, hwloc_get_cpubind(topology, flags | HWLOC_CPUBIND_PROCESS));
+  result_set("Bind this singlethreaded process", hwloc_set_cpubind(topology, cpuset, flags), support->cpubind.set_thisproc_cpubind || support->cpubind.set_thisthread_cpubind);
+  result_get("Get  this singlethreaded process", cpuset, hwloc_get_cpubind(topology, flags), support->cpubind.get_thisproc_cpubind || support->cpubind.get_thisthread_cpubind);
+  result_set("Bind this thread", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind.set_thisthread_cpubind);
+  result_get("Get  this thread", cpuset, hwloc_get_cpubind(topology, flags | HWLOC_CPUBIND_THREAD), support->cpubind.get_thisthread_cpubind);
+  result_set("Bind this whole process", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.set_thisproc_cpubind);
+  result_get("Get  this whole process", cpuset, hwloc_get_cpubind(topology, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.get_thisproc_cpubind);
 
 #ifdef HWLOC_WIN_SYS
-  result_set("Bind process", hwloc_set_proc_cpubind(topology, GetCurrentProcess(), cpuset, flags | HWLOC_CPUBIND_PROCESS));
-  result_get("Get  process", cpuset, hwloc_get_proc_cpubind(topology, GetCurrentProcess(), flags | HWLOC_CPUBIND_PROCESS));
-  result_set("Bind thread", hwloc_set_thread_cpubind(topology, GetCurrentThread(), cpuset, flags | HWLOC_CPUBIND_THREAD));
-  result_get("Get  thread", cpuset, hwloc_get_thread_cpubind(topology, GetCurrentThread(), flags | HWLOC_CPUBIND_THREAD));
+  result_set("Bind process", hwloc_set_proc_cpubind(topology, GetCurrentProcess(), cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.set_proc_cpubind);
+  result_get("Get  process", cpuset, hwloc_get_proc_cpubind(topology, GetCurrentProcess(), flags | HWLOC_CPUBIND_PROCESS), support->cpubind.get_proc_cpubind);
+  result_set("Bind thread", hwloc_set_thread_cpubind(topology, GetCurrentThread(), cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind.set_thread_cpubind);
+  result_get("Get  thread", cpuset, hwloc_get_thread_cpubind(topology, GetCurrentThread(), flags | HWLOC_CPUBIND_THREAD), support->cpubind.get_thread_cpubind);
 #else /* !HWLOC_WIN_SYS */
-  result_set("Bind whole process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags | HWLOC_CPUBIND_PROCESS));
-  result_get("Get  whole process", cpuset, hwloc_get_proc_cpubind(topology, getpid(), flags | HWLOC_CPUBIND_PROCESS));
-  result_set("Bind process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags));
-  result_get("Get  process", cpuset, hwloc_get_proc_cpubind(topology, getpid(), flags));
+  result_set("Bind whole process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.set_proc_cpubind);
+  result_get("Get  whole process", cpuset, hwloc_get_proc_cpubind(topology, getpid(), flags | HWLOC_CPUBIND_PROCESS), support->cpubind.get_proc_cpubind);
+  result_set("Bind process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags), support->cpubind.set_proc_cpubind);
+  result_get("Get  process", cpuset, hwloc_get_proc_cpubind(topology, getpid(), flags), support->cpubind.get_proc_cpubind);
 #ifdef hwloc_thread_t
-  result_set("Bind thread", hwloc_set_thread_cpubind(topology, pthread_self(), cpuset, flags));
-  result_get("Get  thread", cpuset, hwloc_get_thread_cpubind(topology, pthread_self(), flags));
+  result_set("Bind thread", hwloc_set_thread_cpubind(topology, pthread_self(), cpuset, flags), support->cpubind.set_thread_cpubind);
+  result_get("Get  thread", cpuset, hwloc_get_thread_cpubind(topology, pthread_self(), flags), support->cpubind.get_thread_cpubind);
 #endif
 #endif /* !HWLOC_WIN_SYS */
   printf("\n");
@@ -70,6 +74,8 @@ int main(void)
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
+
+  support = hwloc_topology_get_support(topology);
 
   obj = hwloc_get_system_obj(topology);
   set = hwloc_cpuset_dup(obj->cpuset);

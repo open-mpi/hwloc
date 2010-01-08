@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <assert.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -20,7 +19,7 @@
 /* Note: get_cpubind not available on Solaris */
 /* TODO: try to use pset (restricted to super-user) to support cpusets with weigth > 1? */
 static int
-hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   unsigned target;
 
@@ -56,12 +55,6 @@ static int
 hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_solaris_set_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, policy);
-}
-
-static int
-hwloc_solaris_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_solaris_set_thisproc_cpubind(topology, hwloc_set, policy);
 }
 
 static int
@@ -130,12 +123,12 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
   lgrp_cookie_t cookie;
   unsigned curlgrp = 0;
   int nlgrps;
+  lgrp_id_t root;
 
   if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
     cookie = lgrp_init(LGRP_VIEW_OS);
   else
     cookie = lgrp_init(LGRP_VIEW_CALLER);
-  lgrp_id_t root;
   if (cookie == LGRP_COOKIE_NONE)
     {
       hwloc_debug("lgrp_init failed: %s\n", strerror(errno));
@@ -174,7 +167,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
   unsigned osphysids[HWLOC_NBMAXCPUS];
 
   unsigned proc_coreids[HWLOC_NBMAXCPUS];
-  unsigned proc_oscoreids[HWLOC_NBMAXCPUS];
   unsigned oscoreids[HWLOC_NBMAXCPUS];
 
   unsigned core_osphysids[HWLOC_NBMAXCPUS];
@@ -206,7 +198,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
       proc_physids[cpuid] = -1;
       proc_osphysids[cpuid] = -1;
       proc_coreids[cpuid] = -1;
-      proc_oscoreids[cpuid] = -1;
 
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
@@ -227,7 +218,7 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 	}
 
       procid_max++;
-      hwloc_debug("cpu%d's state is %s\n", cpuid, stat->value.c);
+      hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
       if (strcmp(stat->value.c, "on-line"))
 	/* not online */
         hwloc_cpuset_clr(topology->online_cpuset, cpuid);
@@ -309,7 +300,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 	    look_cores = 0;
 	    continue;
 	}
-	proc_oscoreids[cpuid] = coreid;
 	for (i = 0; i < numcores; i++)
 	  if (coreid == oscoreids[i] && proc_osphysids[cpuid] == core_osphysids[i])
 	    break;
@@ -341,7 +331,7 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 void
 hwloc_look_solaris(struct hwloc_topology *topology)
 {
-  unsigned nbprocs = hwloc_fallback_nbprocessors ();
+  unsigned nbprocs = hwloc_fallback_nbprocessors (topology);
 #ifdef HAVE_LIBLGRP
   hwloc_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */
@@ -355,7 +345,6 @@ hwloc_look_solaris(struct hwloc_topology *topology)
 void
 hwloc_set_solaris_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_solaris_set_cpubind;
   topology->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;

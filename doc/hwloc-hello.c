@@ -21,7 +21,7 @@ static void print_children(hwloc_topology_t topology, hwloc_obj_t obj,
     }
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
     int depth;
     unsigned i;
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
             hwloc_obj_snprintf(string, sizeof(string), topology,
                        hwloc_get_obj_by_depth(topology, depth, i),
                        "#", 0);
-            printf("Index %d: %s\n", i, string);
+            printf("Index %u: %s\n", i, string);
         }
     }
 

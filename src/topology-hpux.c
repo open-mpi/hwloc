@@ -18,7 +18,6 @@
 
 #include <private/config.h>
 
-#include <assert.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
@@ -52,7 +51,7 @@ hwloc_hpux_find_ldom(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set)
 }
 
 static spu_t
-hwloc_hpux_find_spu(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set)
+hwloc_hpux_find_spu(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t hwloc_set)
 {
   spu_t cpu;
 
@@ -92,12 +91,6 @@ static int
 hwloc_hpux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
   return hwloc_hpux_set_proc_cpubind(topology, MPC_SELFPID, hwloc_set, policy);
-}
-
-static int
-hwloc_hpux_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_hpux_set_thisproc_cpubind(topology, hwloc_set, policy);
 }
 
 #ifdef hwloc_thread_t
@@ -183,9 +176,12 @@ hwloc_look_hpux(struct hwloc_topology *topology)
         for (i = 0; i < nbnodes; i++)
           if ((ldom_t) nodes[i]->os_index == currentnode)
             break;
-      assert(i < nbnodes);
-      hwloc_cpuset_set(nodes[i]->cpuset, currentcpu);
-      hwloc_debug("is in node %d\n", i);
+      if (i < nbnodes) {
+        hwloc_cpuset_set(nodes[i]->cpuset, currentcpu);
+        hwloc_debug("is in node %d\n", i);
+      } else {
+        hwloc_debug("is in no node?!\n");
+      }
     }
 
     /* Add cpu */
@@ -201,12 +197,13 @@ hwloc_look_hpux(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, nodes[i]);
     free(nodes);
   }
+
+  topology->support.discovery.proc = 1;
 }
 
 void
 hwloc_set_hpux_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_hpux_set_cpubind;
   topology->set_proc_cpubind = hwloc_hpux_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_hpux_set_thisproc_cpubind;
 #ifdef hwloc_thread_t

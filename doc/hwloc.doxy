@@ -124,10 +124,10 @@ On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool
 may show the following outputs:
 
 \image html dudley.png
-\image latex dudley.png width=\textwidth
+\image latex dudley.png "" width=9cm
 
 \verbatim
-System(15GB)
+System(16GB)
   Socket#0 + L3(4096KB)
     L2(1024KB) + L1(16KB) + Core#0
       P#0
@@ -166,7 +166,7 @@ System(15GB)
 
 \verbatim
 System(62GB)
-  Node#0(8190MB) + Socket#0
+  Node#0(8192MB) + Socket#0
     L2(1024KB) + L1(64KB) + Core#0 + P#0
     L2(1024KB) + L1(64KB) + Core#1 + P#1
   Node#1(8192MB) + Socket#1
@@ -196,10 +196,10 @@ System(62GB)
  each socket):
 
 \image html emmett.png
-\image latex emmett.png "" width=8cm
+\image latex emmett.png "" width=7cm
 
 \verbatim
-System(15GB)
+System(16GB)
   Socket#0
     L2(4096KB)
       L1(32KB) + Core#0 + P#0
@@ -424,33 +424,87 @@ hwloc comes with an extensive C programming interface and several
 command line utilities. Each of them is fully documented in its
 own manual page.
 
-<dt>lstopo (also known as hwloc-info and hwloc-ls)</dt>
-  <dd>displays the hierarchical topology of the current system
-  in a graphic or textual outputs. It may also display other system
-  topologies thanks to XML input files for instance.
+\section cli_lstopo lstopo
+
+lstopo (also known as hwloc-info and hwloc-ls)
+displays the hierarchical topology of the current system.
+The output may be graphic or textual, and exported to numerous
+graphic file formats such as PDF or PNG.
+
+lstopo may also display other system topologies thanks to XML
+input files for instance.
+
+\section cli_hwloc_bind hwloc-bind
+
+hwloc-bind lets you bind processes to specific hardware objects through
+a flexible syntax. You may specify multiple objects, objects within
+objects, cpusets, ...
+See the hwloc-bind(1) man page for more details.
+
+hwloc-bind may also retrieve the current binding.
+
+\section cli_hwloc_mask hwloc-mask
+
+hwloc-mask generates cpuset strings from given hardware objects
+with the ability to aggregate them, intersect them, and more.
+
+hwloc-mask uses the same syntax than hwloc-bind, but multiple instances
+may be composed to generate complex combinations.
+The generated cpuset string may for instance be passed to hwloc-bind
+later for binding.
+
+hwloc-mask may also generate lists of logical processors or NUMA nodes
+that are convenient to pass to some external tools such as taskset or
+numactl.
+
+\section cli_hwloc_distrib hwloc-distrib
+
+hwloc-distrib generates a set of cpuset strings that are uniformly
+distributed across the machine for the given number of processes.
+These strings may be used with hwloc-bind to run processes so as to
+maximize their memory bandwidth by properly distributing them across
+the machine.
+
+
+
+\page envvar Environment variables
+
+The behavior of the hwloc library and tools may be tuned thanks to the
+following environment variables.
+
+<dt>HWLOC_XMLFILE=/path/to/file.xml</dt>
+  <dd>enforces the discovery from the given XML file as if
+  hwloc_topology_set_xml() had been called.
+  This file may have been generated earlier with lstopo file.xml.
+  For conveniency, this backend provides empty binding hooks which just
+  return success.  To have hwloc still actually call OS-specific hooks,
+  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
+  the loaded file is really the underlying system.
   </dd>
 
-<dt>hwloc-bind</dt>
-  <dd>lets you bind processes to specific hardware objects through a
-  flexible syntax. It may also retrieve the current binding.  See the
-  hwloc-bind(1) man page for more details.
+<dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
+  <dd>switches to reading the topology from the specified
+  Linux filesystem root instead of the main file-system root, as if
+  hwloc_topology_set_fsroot() had been called.
+  Not using the main file-system root causes hwloc_topology_is_thissystem()
+  to return 0.
+  For conveniency, this backend provides empty binding hooks which just
+  return success.  To have hwloc still actually call OS-specific hooks,
+  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
+  the loaded file is really the underlying system.
   </dd>
 
-<dt>hwloc-mask</dt>
-  <dd>generates cpuset strings from given hardware objects
-  with the ability to aggregate them, intersect them, and more.
-  These cpuset strings may for instance be passed to hwloc-bind for binding.
-  hwloc-mask may also generate list of logical processors or NUMA nodes
-  that are convenient to pass to some external tools such as taskset or
-  numactl.
-  </dd>
-
-<dt>hwloc-distrib</dt>
-  <dd>hwloc-distrib generates a set of cpuset strings that are uniformly
-  distributed across the machine for the given number of processes.
-  These strings may be used with hwloc-bind to run processes so as to
-  maximize their memory bandwidth.
-  </dd>
+<dt>HWLOC_THISSYSTEM=1</dt>
+  <dd>enforces the return value of hwloc_topology_is_thissystem().
+  It means that it makes hwloc assume that the selected backend provides the
+  topology for the system on which we are running, even if it is not the
+  OS-specific backend but the XML backend for instance.
+  This means making the binding functions actually call the OS-specific
+  system calls and really do binding, while the XML backend would otherwise
+  provide empty hooks just returning success.
+  This can be used for efficiency reasons to first detect the topology once,
+  save it to an XML file, and quickly reload it later through the XML
+  backend, but still having binding functions actually do bind.
 
 
 
@@ -557,49 +611,86 @@ than any system-provided copy of hwloc.
 
 
 
-\page envvar Environment variables
-
-The behavior of the hwloc library and tools may be tuned thanks to the
-following environment variables.
-
-<dt>HWLOC_XMLFILE=/path/to/file.xml</dt>
-  <dd>enforces the discovery from the given XML file as if
-  hwloc_topology_set_xml() had been called.
-  This file may have been generated earlier with lstopo file.xml.
-  For conveniency, this backend provides empty binding hooks which just
-  return success.  To have hwloc still actually call OS-specific hooks,
-  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
-  the loaded file is really the underlying system.
-  </dd>
-
-<dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
-  <dd>switches to reading the topology from the specified
-  Linux filesystem root instead of the main file-system root, as if
-  hwloc_topology_set_fsroot() had been called.
-  Not using the main file-system root causes hwloc_topology_is_thissystem()
-  to return 0.
-  For conveniency, this backend provides empty binding hooks which just
-  return success.  To have hwloc still actually call OS-specific hooks,
-  HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
-  the loaded file is really the underlying system.
-  </dd>
-
-<dt>HWLOC_THISSYSTEM=1</dt>
-  <dd>enforces the return value of hwloc_topology_is_thissystem().
-  It means that it makes hwloc assume that the selected backend provides the
-  topology for the system on which we are running, even if it is not the
-  OS-specific backend but the XML backend for instance.
-  This means making the binding functions actually call the OS-specific
-  system calls and really do binding, while the XML backend would otherwise
-  provide empty hooks just returning success.
-  This can be used for efficiency reasons to first detect the topology once,
-  save it to an XML file, and quickly reload it later through the XML
-  backend, but still having binding functions actually do bind.
-
-
 \page switchfromplpa How to switch from PLPA to hwloc?
 
-to do
+Although PLPA and hwloc share the same ideas, their programming interfaces
+are different. Converting an application from PLPA to hwloc will require
+some thinking that is explained below.
 
+
+\section switchfromplpa_caching Topology context vs. caching
+
+First, all hwloc functions take a \p topology parameter. It serves as an
+internal storage for the result of the topology discovery. It somehow
+replaces PLPA caching abilities and may even let you manipulate multiple
+topologies as the same time if needed.
+
+Thus, all program should first run hwloc_topology_init() and
+hwloc_topology_init() as they did plpa_init() in the past.
+
+
+\section switchfromplpa_hierarchy Hierarchy vs. Core@Socket
+
+PLPA was designed to manipulate cores within sockets. hwloc offers
+much more different types of objects and stores them within a tree
+of resources.
+
+To emulate PLPA model, it is possible to find sockets using functions
+such as hwloc_get_obj_by_type().
+Iterating over sockets is also possible using hwloc_get_next_obj_by_type().
+Then, finding a core within a socket may be done using
+hwloc_get_obj_inside_cpuset_by_type()
+or hwloc_get_next_obj_inside_cpuset_by_type().
+
+It is also possible to directly find an object below another object
+using hwloc_get_obj_below_by_type()
+(or hwloc_get_obj_below_array_by_type()).
+
+
+\section switchfromplpa_indexes Logical vs. Physical/OS indexes
+
+hwloc manipulates logical indexes, which means indexes with regards to
+the ordering of objects in the hierarchical tree.
+Physical or OS indexes may be entirely hidden if not strictly required.
+The reason for this is that physical/OS indexes may change with the OS
+or with the BIOS version.
+They may be non-consecutive, multiple objects may have the same
+physical/OS indexes, making their manipulation tricky and highly
+non-portable.
+
+It is still possible to retrieve physical/OS indexes through the \p
+os_index field of objects, but it should be avoided as much as possible,
+except for pretty-printing purposes.
+
+::HWLOC_OBJ_PROC objects are supposed to have different physical/OS indexes
+since the OS uses them for binding.
+The \p os_index field of these objects provides the identifier that may
+be used for such binding, and hwloc_get_proc_obj_by_os_index() finds the
+object associated with a OS index.
+However, again, these conversion methods should not be used for actual
+binding since hwloc offers its own binding model using the \p cpuset
+field of objects.
+These cpusets may be duplicated, modified, combined, ... (see hwloc/cpuset.h
+for details) and then passed to hwloc_set_cpubind() or so for actual binding.
+
+
+\section switchfromplpa_counting Counting specification
+
+PLPA offerzs a countspec parameter to specify whether counting all CPUs,
+only the online ones or only the offline ones.
+However, some OS do not expose the topology of offline CPUs.
+Also, some of them may not be available to the current application
+due to administrator's restrictions.
+Also, modern processors let you shutdown a single thread of a core,
+making some of the PLPA features irrelevant.
+
+hwloc stores in the hierarchical tree of objects all CPUs that have
+known topology information.
+It then provides the applications with several cpusets that contain
+the list of CPUs that are actually known, that have topology information,
+that are online, or that are available to the application.
+These cpusets may be retrieved with hwloc_topology_get_online_cpuset()
+and other similar functions to filter the object that are relevant
+or not.
 
 */

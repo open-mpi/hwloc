@@ -7,7 +7,6 @@
 
 #include <private/config.h>
 
-#include <assert.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
@@ -26,7 +25,7 @@
 #include <sys/thread.h>
 
 static int
-hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   rsethandle_t rset, rad;
   hwloc_obj_t objs[2];
@@ -54,7 +53,7 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
   if (rs_getrad(rset, rad, objs[0]->os_level, objs[0]->os_index, 0)) {
-    fprintf(stderr,"rs_getrad(%d,%d) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
+    fprintf(stderr,"rs_getrad(%d,%u) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
     goto out;
   }
 
@@ -76,16 +75,15 @@ out:
 }
 
 static hwloc_cpuset_t
-hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, int policy)
+hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, int policy __hwloc_attribute_unused)
 {
   hwloc_cpuset_t hwloc_set = NULL;
   rsethandle_t rset;
   unsigned cpu, maxcpus;
-  int result;
 
   rset = rs_alloc(RS_EMPTY);
 
-  if ((result = ra_getrset(what, who, 0, rset)) == -1)
+  if (ra_getrset(what, who, 0, rset) == -1)
     goto out;
 
   hwloc_set = hwloc_cpuset_alloc();
@@ -149,8 +147,10 @@ hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   int size;
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
-  rsid_t who = { .at_tid = info.__pi_tid };
-  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
+  {
+    rsid_t who = { .at_tid = info.__pi_tid };
+    return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
+  }
 }
 
 static hwloc_cpuset_t
@@ -160,20 +160,10 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   int size;
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return NULL;
-  rsid_t who = { .at_tid = info.__pi_tid };
-  return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, policy);
-}
-
-static int
-hwloc_aix_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
-{
-  return hwloc_aix_set_thisproc_cpubind(topology, hwloc_set, policy);
-}
-
-static hwloc_cpuset_t
-hwloc_aix_get_cpubind(hwloc_topology_t topology, int policy)
-{
-  return hwloc_aix_get_thisproc_cpubind(topology, policy);
+  {
+    rsid_t who = { .at_tid = info.__pi_tid };
+    return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, policy);
+  }
 }
 
 static void
@@ -285,6 +275,7 @@ hwloc_look_aix(struct hwloc_topology *topology)
 	  hwloc_debug("looking AIX max sdl %d\n", i);
 	  look_rset(i, HWLOC_OBJ_PROC, topology, i);
 	  known = 1;
+          topology->support.discovery.proc = 1;
 	}
 
       /* Don't know how it should be rendered, make a misc object for it.  */
@@ -299,8 +290,6 @@ hwloc_look_aix(struct hwloc_topology *topology)
 void
 hwloc_set_aix_hooks(struct hwloc_topology *topology)
 {
-  topology->set_cpubind = hwloc_aix_set_cpubind;
-  topology->get_cpubind = hwloc_aix_get_cpubind;
   topology->set_proc_cpubind = hwloc_aix_set_proc_cpubind;
   topology->get_proc_cpubind = hwloc_aix_get_proc_cpubind;
   topology->set_thread_cpubind = hwloc_aix_set_thread_cpubind;

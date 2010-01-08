@@ -183,7 +183,7 @@ int hwloc_cpuset_asprintf(char ** strp, const struct hwloc_cpuset_s * __hwloc_re
 struct hwloc_cpuset_s * hwloc_cpuset_from_string(const char * __hwloc_restrict string)
 {
   struct hwloc_cpuset_s * set;
-  char * current = (char *) string;
+  const char * current = string;
   int count=0, i;
   unsigned long accum = 0;
   int accumed = 0;
@@ -211,7 +211,7 @@ struct hwloc_cpuset_s * hwloc_cpuset_from_string(const char * __hwloc_restrict s
     }
     if (*next != ',')
       break;
-    current = next+1;
+    current = (const char*) next+1;
     if (count == HWLOC_CPUSUBSET_COUNT)
       break;
   }

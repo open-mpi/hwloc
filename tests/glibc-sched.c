@@ -7,6 +7,7 @@
 #define _GNU_SOURCE
 #include <sched.h>
 #include <assert.h>
+#include <private/config.h>
 #include <hwloc.h>
 #include <hwloc/glibc-sched.h>
 

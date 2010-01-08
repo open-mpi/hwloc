@@ -4,9 +4,9 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/private.h>
 #include <hwloc-mask.h>
 #include <hwloc.h>
-#include <private/private.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,6 +18,8 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-bind utility.\n");
   fprintf(where, "Options:\n");
+  fprintf(where, "  -l --logical\tdisplay logical object indexes (default)\n");
+  fprintf(where, "  -p --physical\tdisplay physical object indexes\n");
   fprintf(where, "  --proclist\treport the list of processors' OS indexes in the CPU set\n");
   fprintf(where, "  --nodelist\treport the list of memory nodes' OS indexes near the CPU set\n");
   fprintf(where, "  -v\t\tverbose messages\n");
@@ -30,6 +32,7 @@ int main(int argc, char *argv[])
   unsigned depth;
   hwloc_cpuset_t set;
   int verbose = 0;
+  int logical = 1;
   int nodelist = 0;
   int proclist = 0;
   char **orig_argv = argv;
@@ -62,11 +65,19 @@ int main(int argc, char *argv[])
         printf("%s %s\n", orig_argv[0], VERSION);
         exit(EXIT_SUCCESS);
       }
+      if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--logical")) {
+	logical = 1;
+	goto next;
+      }
+      if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--physical")) {
+	logical = 0;
+	goto next;
+      }
       usage(stderr);
       return EXIT_FAILURE;
     }
 
-    if (hwloc_mask_process_arg(topology, depth, argv[1], set, verbose) < 0) {
+    if (hwloc_mask_process_arg(topology, depth, argv[1], logical, set, verbose) < 0) {
       if (verbose)
 	fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
     }
@@ -81,7 +92,7 @@ int main(int argc, char *argv[])
     while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PROC, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%d", proc->os_index);
+      printf("%u", proc->os_index);
       prev = proc;
     }
     printf("\n");
@@ -90,7 +101,7 @@ int main(int argc, char *argv[])
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%d", node->os_index);
+      printf("%u", node->os_index);
       prev = node;
     }
     printf("\n");

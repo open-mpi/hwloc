@@ -9,7 +9,7 @@
 
 /* check hwloc_get_next_iodevice() */
 
-int main()
+int main(void)
 {
   hwloc_topology_t topology;
   hwloc_obj_t obj;

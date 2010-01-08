@@ -16,6 +16,7 @@
 
 #include <hwloc.h>
 #include <hwloc/helper.h>
+#include <assert.h>
 
 #if !defined _GNU_SOURCE || !defined _SCHED_H
 #error sched.h must be included with _GNU_SOURCE defined
@@ -37,7 +38,7 @@
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
 static __inline void
-hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, hwloc_const_cpuset_t hwlocset,
+hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t hwlocset,
 				    cpu_set_t *schedset, size_t schedsetsize)
 {
 #ifdef CPU_ZERO_S
@@ -66,8 +67,11 @@ hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology, hwloc_const_cpus
  * \return newly-allocated cpuset
  */
 static __inline hwloc_cpuset_t
-hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology,
-				      const cpu_set_t *schedset, size_t schedsetsize)
+hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused,
+                                       const cpu_set_t *schedset, size_t schedsetsize) __hwloc_attribute_malloc;
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused,
+                                       const cpu_set_t *schedset, size_t schedsetsize)
 {
   hwloc_cpuset_t hwlocset = hwloc_cpuset_alloc();
 #ifdef CPU_ZERO_S

@@ -15,7 +15,6 @@
 
 #include <hwloc.h>
 #include <numa.h>
-#include <assert.h>
 
 
 /** \defgroup hwlocality_linux_libnuma_ulongs Helpers for manipulating Linux libnuma unsigned long masks
@@ -77,6 +76,9 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpus
  */
 static __inline hwloc_cpuset_t
 hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
+				      const unsigned long *mask, unsigned long maxnode) __hwloc_attribute_malloc;
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
 				      const unsigned long *mask, unsigned long maxnode)
 {
   hwloc_cpuset_t cpuset;
@@ -85,7 +87,8 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
   unsigned i;
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+    return NULL;
 
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
@@ -124,6 +127,8 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology,
  * that use a struct bitmask as an input parameter.
  */
 static __inline struct bitmask *
+hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset) __hwloc_attribute_malloc;
+static __inline struct bitmask *
 hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset)
 {
   struct bitmask *bitmask;
@@ -158,6 +163,9 @@ hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpu
  */
 static __inline hwloc_cpuset_t
 hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
+				       const struct bitmask *bitmask) __hwloc_attribute_malloc;
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
 				       const struct bitmask *bitmask)
 {
   hwloc_cpuset_t cpuset;
@@ -166,7 +174,8 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology,
   int i;
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+    return NULL;
 
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */
@@ -231,6 +240,9 @@ hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_const_cp
  */
 static __inline hwloc_cpuset_t
 hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology,
+					const nodemask_t *nodemask) __hwloc_attribute_malloc;
+static __inline hwloc_cpuset_t
+hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology,
 					const nodemask_t *nodemask)
 {
   hwloc_cpuset_t cpuset;
@@ -239,7 +251,8 @@ hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology,
   int i;
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+    return NULL;
 
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
     /* if no numa, libnuma assumes we have a single node */

@@ -1,5 +1,5 @@
 System(0KB HP=0*0kB  )
-  NUMANode#0(15GB)
+  NUMANode#0(16776592KB)
     Socket#0
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -9,7 +9,7 @@ System(0KB HP=0*0kB  )
           L1Cache(64KB)
           Core#1
             P#4
-  NUMANode#1(16GB)
+  NUMANode#1(16777216KB)
     Socket#1
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -19,7 +19,7 @@ System(0KB HP=0*0kB  )
           L1Cache(64KB)
           Core#1
             P#5
-  NUMANode#2(16GB)
+  NUMANode#2(16777216KB)
     Socket#2
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -29,7 +29,7 @@ System(0KB HP=0*0kB  )
           L1Cache(64KB)
           Core#1
             P#6
-  NUMANode#3(16GB)
+  NUMANode#3(16777216KB)
     Socket#3
         L2Cache(1024KB)
           L1Cache(64KB)

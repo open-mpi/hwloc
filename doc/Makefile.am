@@ -57,8 +57,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(HWLOC_top_srcdir)/include/hwloc/glibc-sched.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux-libnuma.h \
-       $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h \
-       $(HWLOC_top_srcdir)/include/hwloc/plpa.h
+       $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h
 
 #
 # Create the images that we need for the PDF output and the HTML
@@ -99,7 +98,22 @@ if HWLOC_BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
-	-sed -i -e 's/__hwloc_restrict/restrict/g;s/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g;s/__inline/inline/g;s/\\_\\-\\_\\-inline/inline/g' $(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
+	-sed -i \
+		-e 's/__hwloc_restrict/restrict/g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g' \
+		-e 's/__hwloc_attribute_unused//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-unused//g' \
+		-e 's/__hwloc_attribute_malloc//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-malloc//g' \
+		-e 's/__hwloc_attribute_const//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-const//g' \
+		-e 's/__hwloc_attribute_pure//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-pure//g' \
+		-e 's/HWLOC_DECLSPEC//g' \
+		-e 's/HWLOC\\_\\-DECLSPEC//g' \
+		-e 's/__inline/inline/g' \
+		-e 's/\\_\\-\\_\\-inline/inline/g' \
+		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
 endif
 
 #
@@ -270,6 +284,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_iodevice.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_obj_by_os_index.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_array_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
@@ -293,6 +309,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_misc_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_type_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_of_string.3 \
@@ -320,6 +338,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_binding.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \

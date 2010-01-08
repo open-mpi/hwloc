@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -15,8 +16,9 @@
 
 static void result(const char *msg, int err)
 {
+  const char *errmsg = strerror(errno);
   if (err)
-    printf("%-30s: FAILED (%d, %s)\n", msg, errno, strerror(errno));
+    printf("%-30s: FAILED (%d, %s)\n", msg, errno, errmsg);
   else
     printf("%-30s: OK\n", msg);
 }

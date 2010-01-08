@@ -66,7 +66,7 @@ hwloc__process_root_attr(struct hwloc_topology *topology,
 }
 
 static void
-hwloc__process_object_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
+hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
 			   const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
@@ -315,7 +315,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, 
 	      if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
 		if (!strcmp((const char*) attr->name, "type")) {
 		  obj->type = hwloc_obj_type_of_string((const char*) subnode->content);
-		  if (obj->type == HWLOC_OBJ_TYPE_MAX)
+		  if (obj->type == (hwloc_obj_type_t)-1)
 		    fprintf(stderr, "ignoring unknown object type %s\n", (const char*) subnode->content);
 		  else
 		    break;
@@ -365,13 +365,6 @@ hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, 
 	  fprintf(stderr, "ignoring system object at invalid depth %d\n", depth);
 	  free(obj);
 	} else {
-	  if (!hwloc_cpuset_isincluded(obj->cpuset, topology->levels[0][0]->cpuset)) {
-            char *s1 = hwloc_cpuset_printf_value(obj->cpuset), *s2 = hwloc_cpuset_printf_value(topology->levels[0][0]->cpuset);
-	    fprintf(stderr, "ignoring object (cpuset %s) not covered by system (cpuset %s)\n", s1, s2);
-            free(s1);
-            free(s2);
-          }
-	  else
 	    hwloc_insert_object_by_parent(topology, father, obj);
 	}
       }
@@ -395,12 +388,14 @@ hwloc_look_xml(struct hwloc_topology *topology)
   xmlNode* root_node;
   xmlDtd *dtd;
 
+  topology->support.discovery.proc = 1;
+
   dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
   if (!dtd)
     fprintf(stderr, "Loading XML topology without DTD\n");
   else if (strcmp((char *) dtd->SystemID, "hwloc.dtd"))
     fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
-	    dtd->SystemID, "hwloc.dtd");
+	    (char *) dtd->SystemID, "hwloc.dtd");
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 
@@ -422,8 +417,10 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
   xmlNewProp(node, BAD_CAST "type", BAD_CAST hwloc_obj_type_string(obj->type));
   sprintf(tmp, "%d", obj->os_level);
   xmlNewProp(node, BAD_CAST "os_level", BAD_CAST tmp);
-  sprintf(tmp, "%d", obj->os_index);
-  xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
+  if (obj->os_index != (unsigned) -1) {
+    sprintf(tmp, "%u", obj->os_index);
+    xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
+  }
   hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
   xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
   free(cpuset);

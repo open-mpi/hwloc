@@ -44,7 +44,7 @@
 #if (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE)
 /* Cairo methods */
 static void
-topo_cairo_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
+topo_cairo_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   cairo_t *c = output;
   cairo_rectangle(c, x, y, width, height);
@@ -58,17 +58,18 @@ topo_cairo_box(void *output, int r, int g, int b, unsigned depth, unsigned x, un
 }
 
 static void
-topo_cairo_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+topo_cairo_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   cairo_t *c = output;
   cairo_move_to(c, x1, y1);
+  cairo_set_source_rgb(c, (float) r / 255, (float) g / 255, (float) b / 255);
   cairo_set_line_width(c, 1);
   cairo_line_to(c, x2, y2);
   cairo_stroke(c);
 }
 
 static void
-topo_cairo_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
+topo_cairo_text(void *output, int r, int g, int b, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   cairo_t *c = output;
   cairo_move_to(c, x, y + size);
@@ -88,16 +89,16 @@ topo_cairo_write(void *closure, const unsigned char *data, unsigned int length)
 #endif /* (CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 static void
-topo_cairo_paint(struct draw_methods *methods, hwloc_topology_t topology, cairo_surface_t *cs)
+topo_cairo_paint(struct draw_methods *methods, int logical, hwloc_topology_t topology, cairo_surface_t *cs)
 {
   cairo_t *c;
   c = cairo_create(cs);
-  output_draw(methods, topology, c);
+  output_draw(methods, logical, topology, c);
   cairo_show_page(c);
   cairo_destroy(c);
 }
 
-static void null_declare_color (void *output, int r, int g, int b) {}
+static void null_declare_color (void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused) {}
 #endif /* (CAIRO_HAS_XLIB_SURFACE + CAIRO_HAS_PNG_FUNCTIONS + CAIRO_HAS_PDF_SURFACE + CAIRO_HAS_PS_SURFACE + CAIRO_HAS_SVG_SURFACE) */
 
 
@@ -114,7 +115,7 @@ struct display {
 };
 
 static void *
-x11_start(void *output, int width, int height)
+x11_start(void *output __hwloc_attribute_unused, int width, int height)
 {
   cairo_surface_t *cs;
   Display *dpy;
@@ -173,7 +174,7 @@ static struct draw_methods x11_draw_methods = {
 
 /** Clip coordinates of the visible part. */
 static void
-move_x11(hwloc_topology_t topology, struct display *disp)
+move_x11(struct display *disp)
 {
   if (disp->width <= disp->screen_width) {
     disp->x = 0;
@@ -195,15 +196,15 @@ move_x11(hwloc_topology_t topology, struct display *disp)
 }
 
 void
-output_x11(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_x11(hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int logical, int verbose_mode __hwloc_attribute_unused)
 {
-  struct display *disp = output_draw_start(&x11_draw_methods, topology, NULL);
+  struct display *disp = output_draw_start(&x11_draw_methods, logical, topology, NULL);
   int finish = 0;
   int state = 0;
   int x = 0, y = 0; /* shut warning down */
   int lastx = disp->x, lasty = disp->y;
 
-  topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
+  topo_cairo_paint(&x11_draw_methods, logical, topology, disp->cs);
 
   while (!finish) {
     XEvent e;
@@ -219,7 +220,7 @@ output_x11(hwloc_topology_t topology, const char *filename, int verbose_mode)
     switch (e.type) {
       case Expose:
 	if (e.xexpose.count < 1)
-	  topo_cairo_paint(&x11_draw_methods, topology, disp->cs);
+	  topo_cairo_paint(&x11_draw_methods, logical, topology, disp->cs);
 	break;
       case MotionNotify:
 	if (state) {
@@ -227,13 +228,13 @@ output_x11(hwloc_topology_t topology, const char *filename, int verbose_mode)
 	  disp->y -= e.xmotion.y_root - y;
 	  x = e.xmotion.x_root;
 	  y = e.xmotion.y_root;
-	  move_x11(topology, disp);
+	  move_x11(disp);
 	}
 	break;
       case ConfigureNotify:
 	disp->screen_width = e.xconfigure.width;
 	disp->screen_height = e.xconfigure.height;
-	move_x11(topology, disp);
+	move_x11(disp);
 	if (disp->x != lastx || disp->y != lasty)
 	  XMoveWindow(disp->dpy, disp->win, -disp->x, -disp->y);
 	break;
@@ -270,7 +271,7 @@ output_x11(hwloc_topology_t topology, const char *filename, int verbose_mode)
 #if CAIRO_HAS_PNG_FUNCTIONS
 /* PNG back-end */
 static void *
-png_start(void *output, int width, int height)
+png_start(void *output __hwloc_attribute_unused, int width, int height)
 {
   return cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
 }
@@ -284,17 +285,19 @@ static struct draw_methods png_draw_methods = {
 };
 
 void
-output_png(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_png(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
+  cairo_surface_t *cs;
+
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
-  cairo_surface_t *cs = output_draw_start(&png_draw_methods, topology, output);
+  cs = output_draw_start(&png_draw_methods, logical, topology, output);
 
-  topo_cairo_paint(&png_draw_methods, topology, cs);
+  topo_cairo_paint(&png_draw_methods, logical, topology, cs);
   cairo_surface_write_to_png_stream(cs, topo_cairo_write, output);
   cairo_surface_destroy(cs);
   fclose(output);
@@ -319,17 +322,19 @@ static struct draw_methods pdf_draw_methods = {
 };
 
 void
-output_pdf(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_pdf(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
+  cairo_surface_t *cs;
+
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
-  cairo_surface_t *cs = output_draw_start(&pdf_draw_methods, topology, output);
+  cs = output_draw_start(&pdf_draw_methods, logical, topology, output);
 
-  topo_cairo_paint(&pdf_draw_methods, topology, cs);
+  topo_cairo_paint(&pdf_draw_methods, logical, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
   fclose(output);
@@ -354,17 +359,19 @@ static struct draw_methods ps_draw_methods = {
 };
 
 void
-output_ps(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_ps(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
+  cairo_surface_t *cs;
+
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
-  cairo_surface_t *cs = output_draw_start(&ps_draw_methods, topology, output);
+  cs = output_draw_start(&ps_draw_methods, logical, topology, output);
 
-  topo_cairo_paint(&ps_draw_methods, topology, cs);
+  topo_cairo_paint(&ps_draw_methods, logical, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
   fclose(output);
@@ -389,17 +396,19 @@ static struct draw_methods svg_draw_methods = {
 };
 
 void
-output_svg(hwloc_topology_t topology, const char *filename, int verbose_mode)
+output_svg(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
+  cairo_surface_t *cs;
+
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
   }
 
-  cairo_surface_t *cs = output_draw_start(&svg_draw_methods, topology, output);
+  cs = output_draw_start(&svg_draw_methods, logical, topology, output);
 
-  topo_cairo_paint(&svg_draw_methods, topology, cs);
+  topo_cairo_paint(&svg_draw_methods, logical, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
   fclose(output);

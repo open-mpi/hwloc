@@ -14,8 +14,17 @@
 #include <hwloc/cpuset.h>
 #include <private/debug.h>
 
-#include <assert.h>
 #include <string.h>
+
+#ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
+# if HWLOC_HAVE_ATTRIBUTE_FORMAT
+#  define __hwloc_attribute_format(type, str, arg)  __attribute__((__format__(type, str, arg)))
+# else
+#  define __hwloc_attribute_format(type, str, arg)
+# endif
+#else
+# define __hwloc_attribute_format(type, str, arg)
+#endif
 
 enum hwloc_ignore_type_e {
   HWLOC_IGNORE_TYPE_NEVER = 0,
@@ -54,8 +63,6 @@ struct hwloc_topology {
 
   struct hwloc_obj *first_device, *last_device;
 
-  int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_cpubind)(hwloc_topology_t topology, int policy);
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology, int policy);
   int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
@@ -66,6 +73,8 @@ struct hwloc_topology {
   int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, int policy);
 #endif
+
+  struct hwloc_topology_support support;
 
   hwloc_backend_t backend_type;
   union hwloc_backend_params_u {
@@ -102,7 +111,7 @@ extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/);
 extern int hwloc_get_sysctlbyname(const char *name, int *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);
-extern unsigned hwloc_fallback_nbprocessors(void);
+extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
 
 #if defined(HWLOC_LINUX_SYS)
 extern void hwloc_look_linux(struct hwloc_topology *topology);
@@ -202,12 +211,12 @@ static __inline struct hwloc_obj *
 hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
 {
   struct hwloc_obj *obj = malloc(sizeof(*obj));
-  assert(obj);
   memset(obj, 0, sizeof(*obj));
   obj->type = type;
   obj->os_index = idx;
   obj->os_level = -1;
   obj->attr = malloc(sizeof(*obj->attr));
+  memset(obj->attr, 0, sizeof(*obj->attr));
   /* do not allocate the cpuset here, let the caller do it */
   return obj;
 }
@@ -249,7 +258,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
 
 /* On some systems, snprintf returns the size of written data, not the actually
  * required size.  hwloc_snprintf always report the actually required size. */
-int hwloc_snprintf(char *str, size_t size, const char *format, ...);
+int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
 
 /* Compile-time assertion */
 #define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))

@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -20,7 +21,7 @@
  */
 
 int
-main (int argc, char *argv[])
+main (void)
 {
   hwloc_topology_t topology;
   unsigned depth;
@@ -29,6 +30,7 @@ main (int argc, char *argv[])
   unsigned found;
   int err;
   unsigned numprocs;
+  hwloc_obj_t ancestor;
 
   err = hwloc_topology_init (&topology);
   if (err)
@@ -52,7 +54,7 @@ main (int argc, char *argv[])
 
   /* get closest levels */
   found = hwloc_get_closest_objs (topology, last, closest, numprocs);
-  printf("looked for %u closest entries, found %d\n", numprocs, found);
+  printf("looked for %u closest entries, found %u\n", numprocs, found);
   assert(found == numprocs-1);
 
   /* check first found is closest */
@@ -63,7 +65,7 @@ main (int argc, char *argv[])
   assert(closest[found/2/3-1] == hwloc_get_obj_by_depth(topology, depth-1, 1*3*4*5+2*4*5+3*5-1 /* last of third quarter of third third of second half */));
 
   /* get ancestor of last and less close object */
-  hwloc_obj_t ancestor = hwloc_get_common_ancestor_obj(topology, last, closest[found-1]);
+  ancestor = hwloc_get_common_ancestor_obj(topology, last, closest[found-1]);
   assert(hwloc_obj_is_in_subtree(topology, last, ancestor));
   assert(hwloc_obj_is_in_subtree(topology, closest[found-1], ancestor));
   assert(ancestor == hwloc_get_system_obj(topology));

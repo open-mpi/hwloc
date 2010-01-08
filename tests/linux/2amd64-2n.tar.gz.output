@@ -1,11 +1,11 @@
 System(0KB HP=0*0kB  )
-  NUMANode#0(2046MB)
+  NUMANode#0(2095800KB)
     Socket#0
         L2Cache(1024KB)
           L1Cache(64KB)
           Core#0
             P#0
-  NUMANode#1(2048MB)
+  NUMANode#1(2097152KB)
     Socket#1
         L2Cache(1024KB)
           L1Cache(64KB)

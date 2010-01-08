@@ -69,8 +69,14 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       return -1;
     }
 
-    assert(count + 1 < HWLOC_SYNTHETIC_MAX_DEPTH);
-    assert(item <= UINT_MAX);
+    if (count + 1 >= HWLOC_SYNTHETIC_MAX_DEPTH) {
+      fprintf(stderr,"Too many synthetic levels, max %d\n", HWLOC_SYNTHETIC_MAX_DEPTH);
+      return -1;
+    }
+    if (item > UINT_MAX) {
+      fprintf(stderr,"Too big arity, max %d\n", UINT_MAX);
+      return -1;
+    }
 
     topology->backend_params.synthetic.arity[count-1] = (unsigned)item;
     topology->backend_params.synthetic.type[count] = type;
@@ -208,10 +214,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   obj->cpuset = hwloc_cpuset_alloc();
 
   if (type == HWLOC_OBJ_PROC) {
-    assert(topology->backend_params.synthetic.arity[level] == 0);
     hwloc_cpuset_set(obj->cpuset, first_cpu++);
   } else {
-    assert(topology->backend_params.synthetic.arity[level] != 0);
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
       first_cpu = hwloc__look_synthetic(topology, level + 1, first_cpu, pmemory, obj->cpuset);
   }
@@ -269,6 +273,8 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
 {
   hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
   unsigned first_cpu = 0, i;
+
+  topology->support.discovery.proc = 1;
 
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
     first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, cpuset);

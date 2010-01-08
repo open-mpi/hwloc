@@ -32,6 +32,9 @@ Version 1.0.0
   + hwloc_get_proc_obj_by_os_index()
   + hwloc_get_parent_by_depth/type()
 * Add Linux cgroup support to the Linux cpuset code.
+* lstopo now displays logical indexes by default, use --physical to
+  revert back to OS/physical indexes.
+* Add FreeBSD support.
 
 
 Version 0.9.4 (unreleased)
