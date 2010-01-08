@@ -19,7 +19,7 @@ hwloc_obj_type_t
 hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
-    return HWLOC_OBJ_TYPE_MAX; /* FIXME: add an invalid value ? */
+    return (hwloc_obj_type_t) -1;
   return topology->levels[depth][0]->type;
 }
 

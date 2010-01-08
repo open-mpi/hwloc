@@ -461,7 +461,10 @@ enum {
     HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. */
 };
 
-/** \brief Returns the type of objects at depth \p depth. */
+/** \brief Returns the type of objects at depth \p depth.
+ *
+ * \return -1 if depth \p depth does not exist.
+ */
 HWLOC_DECLSPEC hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
 
 /** \brief Returns the width of level at depth \p depth */
