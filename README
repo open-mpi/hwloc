@@ -269,7 +269,7 @@ int main(void)
          hwloc_obj_snprintf(string, sizeof(string), topology,
                     hwloc_get_obj_by_depth(topology, depth, i),
                     "#", 0);
-         printf("Index %d: %s\n", i, string);
+         printf("Index %u: %s\n", i, string);
      }
  }
 
@@ -384,5 +384,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Sun Jan 3 03:23:28 2010 for Hardware Locality (hwloc) by  doxygen
+Generated on Fri Jan 8 15:55:15 2010 for Hardware Locality (hwloc) by  doxygen
 1.6.1
