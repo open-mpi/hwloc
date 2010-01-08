@@ -1,7 +1,7 @@
-System(503GB HP=0*2048kB  )
-  NUMANode#0(125GB)
+System(527617788KB HP=0*2048kB  )
+  NUMANode#0(132101504KB)
     Socket#1
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -24,7 +24,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#20
     Socket#0
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -47,7 +47,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#21
     Socket#2
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -70,7 +70,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#22
     Socket#3
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -92,9 +92,9 @@ System(503GB HP=0*2048kB  )
           L1Cache(32KB)
             Core#5
               P#23
-  NUMANode#1(126GB)
+  NUMANode#1(132124160KB)
     Socket#4
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -117,7 +117,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#44
     Socket#5
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -140,7 +140,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#45
     Socket#6
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -163,7 +163,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#46
     Socket#7
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -185,9 +185,9 @@ System(503GB HP=0*2048kB  )
           L1Cache(32KB)
             Core#5
               P#47
-  NUMANode#2(126GB)
+  NUMANode#2(132124160KB)
     Socket#8
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -210,7 +210,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#68
     Socket#9
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -233,7 +233,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#69
     Socket#10
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -256,7 +256,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#70
     Socket#11
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -278,9 +278,9 @@ System(503GB HP=0*2048kB  )
           L1Cache(32KB)
             Core#5
               P#71
-  NUMANode#3(126GB)
+  NUMANode#3(132124160KB)
     Socket#12
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -303,7 +303,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#92
     Socket#13
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -326,7 +326,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#93
     Socket#14
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0
@@ -349,7 +349,7 @@ System(503GB HP=0*2048kB  )
             Core#5
               P#94
     Socket#15
-      L3Cache(16MB)
+      L3Cache(16384KB)
         L2Cache(3072KB)
           L1Cache(32KB)
             Core#0

@@ -9,7 +9,7 @@ System(0KB HP=0*0kB TYAN Computer Corp S4881 )
           L1Cache(64KB)
           Core#1
             P#1
-  NUMANode#1(8192MB)
+  NUMANode#1(8388608KB)
     Socket#1
         L2Cache(1024KB)
           L1Cache(64KB)
@@ -19,20 +19,20 @@ System(0KB HP=0*0kB TYAN Computer Corp S4881 )
           L1Cache(64KB)
           Core#1
             P#3
-  NUMANode#2(8192MB)
+  NUMANode#2(8388608KB)
     Socket#2
         L2Cache(1024KB)
           L1Cache(64KB)
           Core#1
             P#5
-  NUMANode#3(8192MB)
+  NUMANode#3(8388608KB)
     Socket#3
         L2Cache(1024KB)
           L1Cache(64KB)
           Core#0
             P#6
-  NUMANode#4(8192MB)
-  NUMANode#5(8192MB)
+  NUMANode#4(8388608KB)
+  NUMANode#5(8388608KB)
   NUMANode#6(0KB)
     Socket#6
         L2Cache(1024KB)
