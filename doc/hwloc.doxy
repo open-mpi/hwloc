@@ -124,10 +124,10 @@ On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool
 may show the following outputs:
 
 \image html dudley.png
-\image latex dudley.png width=\textwidth
+\image latex dudley.png "" width=9cm
 
 \verbatim
-System(15GB)
+System(16GB)
   Socket#0 + L3(4096KB)
     L2(1024KB) + L1(16KB) + Core#0
       P#0
@@ -166,7 +166,7 @@ System(15GB)
 
 \verbatim
 System(62GB)
-  Node#0(8190MB) + Socket#0
+  Node#0(8192MB) + Socket#0
     L2(1024KB) + L1(64KB) + Core#0 + P#0
     L2(1024KB) + L1(64KB) + Core#1 + P#1
   Node#1(8192MB) + Socket#1
@@ -196,10 +196,10 @@ System(62GB)
  each socket):
 
 \image html emmett.png
-\image latex emmett.png "" width=8cm
+\image latex emmett.png "" width=7cm
 
 \verbatim
-System(15GB)
+System(16GB)
   Socket#0
     L2(4096KB)
       L1(32KB) + Core#0 + P#0
