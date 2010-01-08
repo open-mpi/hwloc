@@ -490,7 +490,7 @@ static const hwloc_obj_type_t obj_order_type[] = {
   [4] = HWLOC_OBJ_SOCKET,
   [5] = HWLOC_OBJ_CACHE,
   [6] = HWLOC_OBJ_CORE,
-  [7] = HWLOC_OBJ_PROC,
+  [7] = HWLOC_OBJ_PROC
 };
 
 static unsigned hwloc_get_type_order(hwloc_obj_type_t type) __hwloc_attribute_const;
