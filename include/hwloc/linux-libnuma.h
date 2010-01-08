@@ -15,7 +15,6 @@
 
 #include <hwloc.h>
 #include <numa.h>
-#include <assert.h>
 
 
 /** \defgroup hwlocality_linux_libnuma_ulongs Helpers for manipulating Linux libnuma unsigned long masks
