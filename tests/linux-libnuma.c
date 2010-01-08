@@ -5,6 +5,7 @@
 
 #include <private/config.h>
 #include <hwloc.h>
+#include <assert.h>
 #define NUMA_VERSION1_COMPATIBILITY
 #include <hwloc/linux-libnuma.h>
 
