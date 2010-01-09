@@ -1448,7 +1448,7 @@ hwloc_backend_exit(struct hwloc_topology *topology)
 }
 
 int
-hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_path)
+hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_path __hwloc_attribute_unused)
 {
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
@@ -1471,7 +1471,8 @@ hwloc_topology_set_synthetic(struct hwloc_topology *topology, const char *descri
 }
 
 int
-hwloc_topology_set_xml(struct hwloc_topology *topology, const char *xmlpath)
+hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
+                       const char *xmlpath __hwloc_attribute_unused)
 {
 #ifdef HWLOC_HAVE_XML
   /* cleanup existing backend */
