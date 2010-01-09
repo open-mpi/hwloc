@@ -201,6 +201,24 @@ To count the number of logical processors in the system
    lstopo --only proc | wc -l
 .
 .\" **************************
+.\"    Colors Section
+.\" **************************
+.SH COLORS
+CPUs have varying colors in the semi-graphical and graphical output:
+.TP
+Green
+The CPU is in the current cpu binding mask 
+.TP
+White
+The CPU is allowed but not in the current cpu binding mask
+.TP
+Red
+The CPU is not allowed
+.TP
+Black
+The CPU is offline
+.
+.\" **************************
 .\"    See also section
 .\" **************************
 .SH SEE ALSO
