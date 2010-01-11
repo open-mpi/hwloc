@@ -36,7 +36,7 @@ endif
 
 # Only install man pages if we're building in standalone mode
 if HWLOC_BUILD_STANDALONE
-man_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-mask.1
+man_pages = hwloc.7 lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-mask.1
 EXTRA_DIST += $(man_pages:.1=.1in)
 nodist_man_MANS = $(man_pages)
 
