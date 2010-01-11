@@ -76,7 +76,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --xml <path>          Read topology from XML file <path>\n");
 #endif
 #ifdef HWLOC_LINUX_SYS
-  fprintf (where, "   --fsys-root <path>    chroot containing the /proc and /sys of another system\n");
+  fprintf (where, "   --fsys-root <path>    Chroot containing the /proc and /sys of another system\n");
 #endif
   fprintf (where, "   --synthetic \"n:2 2\"   Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
                   "                         processors\n");
