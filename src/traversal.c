@@ -159,6 +159,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_CORE: return "Core";
     case HWLOC_OBJ_BRIDGE: return "Bridge";
     case HWLOC_OBJ_PCI_DEVICE: return "PCIDev";
+    case HWLOC_OBJ_OS_DEVICE: return "OSDev";
     case HWLOC_OBJ_PROC: return "Proc";
     default: return "Unknown";
     }
@@ -177,6 +178,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Proc")) return HWLOC_OBJ_PROC;
   if (!strcasecmp(string, "Bridge")) return HWLOC_OBJ_BRIDGE;
   if (!strcasecmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
+  if (!strcasecmp(string, "OSDev")) return HWLOC_OBJ_OS_DEVICE;
   return (hwloc_obj_type_t) -1;
 }
 

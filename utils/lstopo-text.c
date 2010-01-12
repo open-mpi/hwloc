@@ -57,7 +57,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     attrlen = hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
     if (attrlen)
       fprintf(output, "(%s)", attr);
-    if (verbose_mode >= 2 && l->name)
+    if ((l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2) && l->name)
       fprintf(output, " \"%s\"", l->name);
   }
   if (show_cpuset == 1)

@@ -16,6 +16,10 @@
 #include <fcntl.h>
 #include <string.h>
 #include <assert.h>
+#ifdef HWLOC_LINUX_SYS
+#include <dirent.h>
+#include <sys/types.h>
+#endif
 
 #define CONFIG_SPACE_CACHESIZE 64
 
@@ -46,6 +50,146 @@ hwloc_pci_traverse_setbridgedepth_cb(struct hwloc_obj *pcidev, int depth)
 {
   if (pcidev->type == HWLOC_OBJ_BRIDGE)
     pcidev->attr->bridge.depth = depth;
+}
+
+#ifdef HWLOC_LINUX_SYS
+static void
+hwloc_linux_add_os_device(struct hwloc_obj *pcidev, const char *name)
+{
+  struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
+  obj->name = strdup(name);
+  obj->cpuset = hwloc_cpuset_alloc();
+  obj->logical_index = -1;
+
+  if (pcidev->last_child) {
+    pcidev->last_child->next_sibling = obj;
+    obj->prev_sibling = pcidev->last_child;
+  } else {
+    pcidev->first_child = obj;
+  }
+  pcidev->last_child = obj;
+}
+
+/* look for objects of the given class below a sysfs directory */
+static void
+hwloc_linux_class_readdir(struct hwloc_obj *pcidev, const char *devicepath, const char *classname)
+{
+  size_t classnamelen = strlen(classname);
+  char path[256];
+  DIR *dir;
+  struct dirent *dirent;
+
+  snprintf(path, sizeof(path), "%s/%s", devicepath, classname);
+  dir = opendir(path);
+  if (dir) {
+    /* modern sysfs: <device>/<class>/<name> */
+    while ((dirent = readdir(dir)) != NULL) {
+      if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+	continue;
+      hwloc_linux_add_os_device(pcidev, dirent->d_name);
+    }
+    closedir(dir);
+  } else {
+    /* deprecated sysfs: <device>/<class>:<name> */
+    dir = opendir(devicepath);
+    if (dir) {
+      while ((dirent = readdir(dir)) != NULL) {
+	if (strncmp(dirent->d_name, classname, classnamelen) || dirent->d_name[classnamelen] != ':')
+	  continue;
+	hwloc_linux_add_os_device(pcidev, dirent->d_name);
+      }
+    }
+    closedir(dir);
+  }
+}
+
+/* net class objects are immediately below pci devices */
+static void
+hwloc_linux_lookup_net_class(struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  hwloc_linux_class_readdir(pcidev, pcidevpath, "net");
+}
+
+/* block class objects are in host%d/target%d:%d:%d/%d:%d:%d/ below pci devices */
+static void
+hwloc_linux_lookup_block_class(struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  size_t pathlen;
+  DIR *devicedir, *hostdir, *targetdir;
+  struct dirent *devicedirent, *hostdirent, *targetdirent;
+  char path[256];
+  int dummy;
+
+  strcpy(path, pcidevpath);
+  pathlen = strlen(path);
+
+  devicedir = opendir(pcidevpath);
+  if (!devicedir)
+    return;
+  while ((devicedirent = readdir(devicedir)) != NULL) {
+    if (sscanf(devicedirent->d_name, "host%d", &dummy) != 1)
+      continue;
+    /* found for host%d */
+    path[pathlen] = '/';
+    strcpy(&path[pathlen+1], devicedirent->d_name);
+    pathlen += 1+strlen(devicedirent->d_name);
+    hostdir = opendir(path);
+    if (!hostdir)
+      continue;
+    while ((hostdirent = readdir(hostdir)) != NULL) {
+      if (sscanf(hostdirent->d_name, "target%d:%d:%d", &dummy, &dummy, &dummy) != 3)
+	continue;
+      /* found host%d/target%d:%d:%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], hostdirent->d_name);
+      pathlen += 1+strlen(hostdirent->d_name);
+      targetdir = opendir(path);
+      if (!targetdir)
+	continue;
+      while ((targetdirent = readdir(targetdir)) != NULL) {
+	if (sscanf(targetdirent->d_name, "%d:%d:%d:%d", &dummy, &dummy, &dummy, &dummy) != 4)
+	  continue;
+	/* found host%d/target%d:%d:%d/%d:%d:%d:%d */
+	path[pathlen] = '/';
+	strcpy(&path[pathlen+1], targetdirent->d_name);
+	pathlen += 1+strlen(targetdirent->d_name);
+	/* lookup block class for real */
+	hwloc_linux_class_readdir(pcidev, path, "block");
+	/* restore parent path */
+	pathlen -= 1+strlen(targetdirent->d_name);
+	path[pathlen] = '\0';
+      }
+      closedir(targetdir);
+      /* restore parent path */
+      pathlen -= 1+strlen(hostdirent->d_name);
+      path[pathlen] = '\0';
+    }
+    closedir(hostdir);
+    /* restore parent path */
+    pathlen -= 1+strlen(devicedirent->d_name);
+    path[pathlen] = '\0';
+  }
+  closedir(devicedir);
+}
+#endif /* HWLOC_LINUX_SYS */
+
+static void
+hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
+{
+  if (pcidev->type == HWLOC_OBJ_BRIDGE)
+    return;
+
+#ifdef HWLOC_LINUX_SYS
+  char pcidevpath[256];
+
+  snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
+	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
+	   pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
+
+  hwloc_linux_lookup_net_class(pcidev, pcidevpath);
+  hwloc_linux_lookup_block_class(pcidev, pcidevpath);
+
+#endif /* HWLOC_LINUX_SYS */
 }
 
 static void
@@ -384,8 +528,9 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     /* found nothing, exit */
     return;
 
-  /* walk the hierarchy and set bridge depth */
+  /* walk the hierarchy, set bridge depth and lookup OS devices */
   hwloc_pci_traverse(&fakehostbridge, hwloc_pci_traverse_setbridgedepth_cb);
+  hwloc_pci_traverse(&fakehostbridge, hwloc_pci_traverse_lookuposdevices_cb);
 
   /*
    * fakehostbridge lists all objects connected to any upstream bus in the machine.

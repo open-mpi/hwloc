@@ -102,9 +102,11 @@ typedef enum {
 			  * Any bridge that connects the host or an I/O bus,
 			  * to another I/O bus.
 			  */
-  /* FIXME: rename into device with a type attribute ? */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
 			  */
+
+  HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
+			 */
 } hwloc_obj_type_t;
 
 /** \brief Compare the depth of two object types
