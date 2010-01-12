@@ -16,9 +16,6 @@
 #include <fcntl.h>
 #include <string.h>
 #include <assert.h>
-#ifdef LINUX_SYS
-#include <hwloc/linux.h>
-#endif
 
 #define CONFIG_SPACE_CACHESIZE 64
 
@@ -414,7 +411,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     hwloc_pci_remove_child(&fakehostbridge, child);
     hwloc_pci_add_child_before(hostbridge, NULL, child);
 
-    /* compute hostbrigde secondary/subordinate buses */
+    /* compute hostbridge secondary/subordinate buses */
     if (child->type == HWLOC_OBJ_BRIDGE
 	&& child->attr->bridge.downstream.pci.subordinate_bus > current_subordinate)
       current_subordinate = child->attr->bridge.downstream.pci.subordinate_bus;
