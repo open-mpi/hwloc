@@ -23,44 +23,50 @@
 #define CONFIG_SPACE_CACHESIZE 64
 
 static void
-hwloc_pci_traverse(struct hwloc_obj *root, int depth)
+hwloc_pci_traverse_print_cb(struct hwloc_obj *pcidev, int depth)
+{
+  char busid[14];
+  snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
+           pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus, pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
+
+  if (pcidev->type == HWLOC_OBJ_BRIDGE) {
+    if (pcidev->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST)
+      hwloc_debug("%*s HostBridge", depth, "");
+    else
+      hwloc_debug("%*s %s Bridge [%04x:%04x]", depth, "", busid,
+		  pcidev->attr->pcidev.vendor_id, pcidev->attr->pcidev.device_id);
+    hwloc_debug(" to %04x:[%02x:%02x]\n",
+		pcidev->attr->bridge.downstream.pci.domain, pcidev->attr->bridge.downstream.pci.secondary_bus, pcidev->attr->bridge.downstream.pci.subordinate_bus);
+  } else
+    hwloc_debug("%*s %s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", depth, "", busid,
+		pcidev->attr->pcidev.vendor_id, pcidev->attr->pcidev.device_id,
+		pcidev->attr->pcidev.subvendor_id, pcidev->attr->pcidev.subdevice_id,
+		pcidev->attr->pcidev.revision, pcidev->attr->pcidev.class_id);
+}
+
+static void
+hwloc_pci_traverse_setbridgedepth_cb(struct hwloc_obj *pcidev, int depth)
+{
+  if (pcidev->type == HWLOC_OBJ_BRIDGE)
+    pcidev->attr->bridge.depth = depth;
+}
+
+static void
+hwloc_pci__traverse(struct hwloc_obj *root, void (*cb)(struct hwloc_obj *, int depth), int depth)
 {
   struct hwloc_obj *child = root->first_child;
   while (child) {
-    char busid[14];
-    snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
-             child->attr->pcidev.domain, child->attr->pcidev.bus, child->attr->pcidev.dev, child->attr->pcidev.func);
-
-    if (child->type == HWLOC_OBJ_BRIDGE) {
-      if (child->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST)
-	hwloc_debug("%*s HostBridge", depth, "");
-      else
-	hwloc_debug("%*s %s Bridge [%04x:%04x]", depth, "", busid,
-		    child->attr->pcidev.vendor_id, child->attr->pcidev.device_id);
-      hwloc_debug(" to %04x:[%02x:%02x]\n",
-		  child->attr->bridge.downstream.pci.domain, child->attr->bridge.downstream.pci.secondary_bus, child->attr->bridge.downstream.pci.subordinate_bus);
-    } else
-      hwloc_debug("%*s %s Device [%04x:%04x (%04x:%04x) rev=%02x class=%04x]\n", depth, "", busid,
-		  child->attr->pcidev.vendor_id, child->attr->pcidev.device_id,
-		  child->attr->pcidev.subvendor_id, child->attr->pcidev.subdevice_id,
-		  child->attr->pcidev.revision, child->attr->pcidev.class_id);
-
-    hwloc_pci_traverse(child, depth+2);
+    cb(child, depth);
+    if (child->type == HWLOC_OBJ_BRIDGE)
+      hwloc_pci__traverse(child, cb, depth+1);
     child = child->next_sibling;
   }
 }
 
 static void
-hwloc_pci_set_bridge_depths(struct hwloc_obj *root, int depth)
+hwloc_pci_traverse(struct hwloc_obj *root, void (*cb)(struct hwloc_obj *, int depth))
 {
-  struct hwloc_obj *child = root->first_child;
-  while (child) {
-    if (child->type == HWLOC_OBJ_BRIDGE) {
-      child->attr->bridge.depth = depth;
-      hwloc_pci_set_bridge_depths(child, depth+1);
-    }
-    child = child->next_sibling;
-  }
+  hwloc_pci__traverse(root, cb, 0);
 }
 
 enum hwloc_pci_busid_comparison_e {
@@ -368,21 +374,21 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   pci_cleanup(pciaccess);
 
   hwloc_debug("%s", "\nPCI hierarchy after basic scan:\n");
-  hwloc_pci_traverse(&fakehostbridge, 0);
+  hwloc_pci_traverse(&fakehostbridge, hwloc_pci_traverse_print_cb);
 
   /* drop useless bridges if needed */
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI))
     hwloc_pci_drop_useless_bridges(&fakehostbridge);
 
   hwloc_debug("%s", "\nPCI hierarchy removing useless objects:\n");
-  hwloc_pci_traverse(&fakehostbridge, 0);
+  hwloc_pci_traverse(&fakehostbridge, hwloc_pci_traverse_print_cb);
 
   if (!fakehostbridge.first_child)
     /* found nothing, exit */
     return;
 
   /* walk the hierarchy and set bridge depth */
-  hwloc_pci_set_bridge_depths(&fakehostbridge, 0);
+  hwloc_pci_traverse(&fakehostbridge, hwloc_pci_traverse_setbridgedepth_cb);
 
   /*
    * fakehostbridge lists all objects connected to any upstream bus in the machine.
