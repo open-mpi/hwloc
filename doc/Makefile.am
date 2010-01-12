@@ -92,6 +92,8 @@ endif
 #
 # Rules for running doxygen.  It depends on the built images and the
 # dox_inputs.
+# Remove useless manpages, they have too long filenames anyway because
+# of nested structurre/union declarations.
 #
 
 if HWLOC_BUILD_DOXYGEN
@@ -114,6 +116,11 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 		-e 's/__inline/inline/g' \
 		-e 's/\\_\\-\\_\\-inline/inline/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
+	@echo "Removing useless manpages..."
+	@mkdir $(DOX_DIR)/man.tmp
+	@mv $(man3_MANS) $(DOX_DIR)/man.tmp/
+	@rm -rf $(DOX_DIR)/man/man3
+	@mv $(DOX_DIR)/man.tmp $(DOX_DIR)/man/man3
 endif
 
 #
