@@ -50,7 +50,9 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
       fprintf(output, "%s", type);
     } else
       fprintf(output, "P");
-    if (l->type != HWLOC_OBJ_SYSTEM && index != (unsigned)-1)
+    if (index != (unsigned)-1 && l->type != HWLOC_OBJ_SYSTEM
+        && l->type != HWLOC_OBJ_PCI_DEVICE
+        && (l->type != HWLOC_OBJ_BRIDGE || l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
       fprintf(output, "#%u", index);
     attrlen = hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
     if (attrlen)
