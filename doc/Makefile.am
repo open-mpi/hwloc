@@ -40,7 +40,6 @@ EXTRA_DIST = \
         www.open-mpi.org-footer.inc \
         www.open-mpi.org-header.inc \
         $(image_built_sources) \
-        $(DOX_HTML_DIR) $(DOX_MAN_DIR) $(DOX_TAG)
 
 #
 # Files where the doxygen inputs live (i.e., dependencies).  Make the
