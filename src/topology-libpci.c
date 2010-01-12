@@ -24,7 +24,7 @@
 #define CONFIG_SPACE_CACHESIZE 64
 
 static void
-hwloc_pci_traverse_print_cb(struct hwloc_obj *pcidev, int depth)
+hwloc_pci_traverse_print_cb(struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
 {
   char busid[14];
   snprintf(busid, sizeof(busid), "%04x:%02x:%02x.%01x",
