@@ -75,7 +75,7 @@ BUILT_SOURCES = $(image_built_sources)
 images/diagram.png: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
 	@if test "x$(FIG2DEV)" = "x"; then \
-	    echo "ERROR: Cannot find the 'fig2dev' exectuable -- cannot make $@"; \
+	    echo "ERROR: Cannot find the 'fig2dev' executable -- cannot make $@"; \
 	    exit 1; \
 	fi
 	$(FIG2DEV) -L png $< $@
@@ -83,7 +83,7 @@ images/diagram.png: $(srcdir)/images/diagram.fig
 images/diagram.eps: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
 	@if test "x$(FIG2DEV)" = "x"; then \
-	    echo "ERROR: Cannot find the 'fig2dev' exectuable -- cannot make $@"; \
+	    echo "ERROR: Cannot find the 'fig2dev' executable -- cannot make $@"; \
 	    exit 1; \
 	fi
 	$(FIG2DEV) -L eps $< $@
