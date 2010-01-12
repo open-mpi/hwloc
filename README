@@ -90,7 +90,7 @@ following outputs:
 
                                dudley.png
 
-System(15GB)
+System(16GB)
   Socket#0 + L3(4096KB)
  L2(1024KB) + L1(16KB) + Core#0
    P#0
@@ -126,7 +126,7 @@ following outputs:
                                hagrid.png
 
 System(62GB)
-  Node#0(8190MB) + Socket#0
+  Node#0(8192MB) + Socket#0
  L2(1024KB) + L1(64KB) + Core#0 + P#0
  L2(1024KB) + L1(64KB) + Core#1 + P#1
   Node#1(8192MB) + Socket#1
@@ -156,7 +156,7 @@ socket):
 
                                emmett.png
 
-System(15GB)
+System(16GB)
   Socket#0
  L2(4096KB)
    L1(32KB) + Core#0 + P#0
@@ -191,8 +191,8 @@ For Linux systems with the OpenFabrics verbs library, some dedicated helpers
 are provided in hwloc/openfabrics-verbs.h (this helper file is not yet useful
 on non-Linux systems with the OpenFabrics verbs library).
 
-To precisely define the vocabulary used by hwloc, a Glossary is available and
-should probably be read first.
+To precisely define the vocabulary used by hwloc, a Terms and Definitions
+section is available and should probably be read first.
 
 Further documentation is available in a full set of HTML pages, man pages, and
 self-contained PDF files (formatted for both both US letter and A4 formats) in
@@ -384,5 +384,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Fri Jan 8 15:55:15 2010 for Hardware Locality (hwloc) by  doxygen
+Generated on Tue Jan 12 21:06:03 2010 for Hardware Locality (hwloc) by  doxygen
 1.6.1

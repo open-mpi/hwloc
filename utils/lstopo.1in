@@ -1,103 +1,177 @@
 .\" -*- nroff -*-
+.\" Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
 .TH LSTOPO "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
-lstopo \- Show the topology of the system
+lstopo \- Show the topology of the system (note that hwloc-bind(1)
+provides a detailed explanation of the hwloc system; it should be read
+before reading this man page).
 .
 .\" **************************
 .\"    Synopsis Section
 .\" **************************
 .SH SYNOPSIS
+.
 .B lstopo
 [ \fIoptions \fR]... [ \fIfilename \fR]
-.
-.\" **************************
-.\"    Description Section
-.\" **************************
-.SH DESCRIPTION
-By default, lstopo displays a graphical window with the topology if DISPLAY is
-set, else a text output on the standard output.
-To force a text output on the standard output, specify \- or /dev/stdout as
-filename.
-To specify a semi\-graphical text output on the standard output, specify \-.txt
-as filename.
-Recognised file formats are: .txt, .fig, .pdf, .ps, .png, .svg
 .
 .\" **************************
 .\"    Options Section
 .\" **************************
 .SH OPTIONS
+.
 .TP
 \fB\-v\fR \fB\-\-verbose\fR
-increase verbosity (disabled by default)
+Include additional detail.
 .TP
 \fB\-s\fR \fB\-\-silent\fR
-decrease verbosity
-.TP
-\fB\-p\fR \fB\-\-physical\fR
-display OS/physical indexes instead of logical indexes
+Opposite of --verbose (default).
 .TP
 \fB\-l\fR \fB\-\-logical\fR
-display logical indexes instead of physical/OS indexes (default)
+Display hwloc logical indexes instead of physical/OS indexes (default).
+.TP
+\fB\-p\fR \fB\-\-physical\fR
+Display OS/physical indexes instead of hwloc logical indexes.
 .TP
 \fB\-c\fR \fB\-\-cpuset\fR
-display the cpuset of each object
+Display the cpuset of each object.
 .TP
 \fB\-C\fR \fB\-\-cpuset-only\fR
-only display the cpuset of each object instead of other attributes
+Only display the cpuset of each object; do not display anything else
+about the object.
 .TP
 \fB\-\-only\fR "type"
-only show object of the given type
+Only show objects of the given type.
 .TP
 \fB\-\-no\-caches\fR
-do not show caches
+Do not show caches.
 .TP
 \fB\-\-no\-useless\-caches\fR
-do not show caches which do not have a hierarchical
-impact
+Do not show caches which do not have a hierarchical impact.
 .TP
 \fB\-\-whole\-system\fR
-do not consider administration limitations
+Do not consider administration limitations.
 .TP
 \fB\-\-merge\fR
-do not show levels that do not have a hierarchical
-impact
+Do not show levels that do not have a hierarchical impact.
 .TP
-\fB\-\-synthetic\fR "n:2 2"
-simulate a fake hierarchy, here with 2 NUMA nodes of 2
-processors
+\fB\-\-synthetic\fR <specification>
+Simulate a fake hierarchy (instead of discovering the topology on the
+local machine).
 .TP
-\fB\-\-fontsize\fR 10
-set size of text font
+\fB\-\-xml\fR <path>
+Read topology from XML file <path> (instead of discovering the
+topology on the local machine).  If <path> is "-", the standard input
+is used.  XML support must have been compiled in to hwloc for this
+option to be usable.
 .TP
-\fB\-\-gridsize\fR 10
-set size of margin between elements
+\fB\-\-fsys-root\fR <path>
+Read topology from the chroot specified by <path> (instead of
+discovering the topology on the local machine).  This option is
+generally only available on Linux.
+.TP
+\fB\-\-fontsize\fR <size>
+Set size of text font.
+.TP
+\fB\-\-gridsize\fR <size>
+Set size of margin between elements.
 .TP
 \fB\-\-horiz\fR
-horizontal graphic layout instead of nearly 4/3 ratio
+Horizontal graphic layout instead of nearly 4/3 ratio.
 .TP
 \fB\-\-vert\fR
-vertical graphic layout instead of nearly 4/3 ratio
+Vertical graphic layout instead of nearly 4/3 ratio.
 .TP
 \fB\-\-version\fR
-report version and exit
+Report version and exit.
+.
+.\" **************************
+.\"    Description Section
+.\" **************************
+.SH DESCRIPTION
+.
+lstopo is capable of displaying a topological map of the system in a
+variety of different output formats.  If no filename is specified and
+the DISPLAY environment variable is set, lstopo displays the map in a
+graphical window.  If no filename is specified and the DISPLAY
+environment variable is
+.I not
+set, a text summary is displayed.  Otherwise, the filename implies
+what format lstopo should use:
+.
+.TP
+.B \-
+Send a text summary to stdout.
+.
+.TP
+.B /dev/stdout
+Send a text summary to stdout.  It is effectively the same as
+specifying "\-".
+.
+.TP
+.B <filename>.txt
+If the filename ends in ".txt", lstopo outputs an ASCII art
+representation of the map.
+.
+.TP
+.B \-.txt
+If the entire filename is "\-.txt", lstopo outputs the same ASCII art
+representation as other ".txt" filenames, but with two execeptions: 1)
+the output is sent to stdout, and 2) if colors are supported on the
+terminal, the ASCII art will be colorized.
+.
+.TP
+.B <filename>.fig
+If the filename ends in ".fig", lstopo outputs a representation of the
+map that can be loaded in Xfig.
+.
+.TP
+.B <filename>.pdf
+If the filename ends in ".pdf" and lstopo was compiled with the proper
+support, lstopo outputs a PDF representation of the map.
+.
+.TP
+.B <filename>.ps
+If the filename ends in ".ps" and lstopo was compiled with the proper
+support, lstopo outputs a Postscript representation of the map.
+.
+.TP
+.B <filename>.png
+If the filename ends in ".png" and lstopo was compiled with the proper
+support, lstopo outputs a PNG representation of the map.
+.
+.TP
+.B <filename>.svg
+If the filename ends in ".svn" and lstopo was compiled with the proper
+support, lstopo outputs an SVG representation of the map.
+.
+.TP
+.B <filename>.xml
+If the filename ends in ".xml" and lstopo was compiled with the proper
+support, lstopo outputs an XML representation of the map.
+.
+.PP
+See the output of "lstopo --help" for a specific list of what
+graphical output formats are supported in your hwloc installation.
+.
 .\" **************************
 .\"    Examples Section
 .\" **************************
 .SH EXAMPLES
-.PP
+.
 To display the machine topology in text mode:
 
     lstopo -
 
-To display in graphical mode if supported:
+To display in graphical mode (assuming that the DISPLAY environment
+variable is set to a relevant value):
 
     lstopo
 
-To export the topology in a PNG file:
+To export the topology to a PNG file:
 
     lstopo file.png
 
-To get a summary of the topology:
+To display a summary of the topology:
 
     lstopo -s
 
@@ -111,12 +185,44 @@ To only show cores:
 
 To show cpusets:
 
-    lstopo --cpuset:
+    lstopo --cpuset
 
 To only show the cpusets of sockets:
 
     lstopo --only socket --cpuset-only
 
+Simulate a fake hierarchy; this example shows with 2 NUMA nodes of 2
+processors:
+
+    lstopo --synthetic "n:2 2"
+
 To count the number of logical processors in the system
 
    lstopo --only proc | wc -l
+.
+.\" **************************
+.\"    Colors Section
+.\" **************************
+.SH COLORS
+CPUs have varying colors in the semi-graphical and graphical output:
+.TP
+Green
+The CPU is in the current cpu binding mask 
+.TP
+White
+The CPU is allowed but not in the current cpu binding mask
+.TP
+Red
+The CPU is not allowed
+.TP
+Black
+The CPU is offline
+.
+.\" **************************
+.\"    See also section
+.\" **************************
+.SH SEE ALSO
+.
+.ft R
+hwloc-bind(1)
+.sp

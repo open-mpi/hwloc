@@ -16,10 +16,6 @@ hwloc-mask \- Operate on cpu mask strings
 .\" **************************
 .SH OPTIONS
 .
-See
-.ft R
-hwloc-bind(1)
-for a description of valid <location> formats.
 .TP 10
 \fB\-p\fR \fB\-\-physical\fR
 display OS/physical indexes instead of logical indexes
@@ -39,28 +35,48 @@ Verbose output.
 \fB\-\-version\fR
 Report version and exit.
 .
+.
+.\" **************************
+.\"    Description Section
+.\" **************************
+.SH DESCRIPTION
+.
+hwloc-mask generates and manipulates CPU mask strings.
+.
+.PP
+.B NOTE:
+It is highly recommended that you read the hwloc(7) overview page
+before reading this man page.  Most of the concepts described in
+hwloc(7) directly apply to the hwloc-mask utility.
+.
+.
 .\" **************************
 .\"    Examples Section
 .\" **************************
 .SH EXAMPLES
 .PP
-To display the cpu mask corresponding to the second socket:
+hwloc-mask's operation is best described through several examples.
+.
+.PP
+To display the CPU mask corresponding to the second socket:
 
     hwloc-mask socket:1
 
-To display the cpumask corresponding to the third socket except its even numbered logical priocessors:
+To display the CPU mask corresponding to the third socket, excluding
+its even numbered logical priocessors:
 
     hwloc-mask socket:2 ~proc:even
 
-To accumulate to cpu mask:
+To combine two CPU masks:
 
     hwloc-mask 0x0000ffff 0xff000000
 
-To display the list of logical processors included in the second socket:
+To display the list of logical processors included in the second
+socket:
 
     hwloc-mask --proclist socket:1
 
-To display the list of NUMA nodes that intersect a given cpu mask:
+To display the list of NUMA nodes that intersect a given CPU mask:
 
    hwloc-mask --nodelist 0xf0f0f0f0
 .
@@ -68,8 +84,8 @@ To display the list of NUMA nodes that intersect a given cpu mask:
 .\"    Return value section
 .\" **************************
 .SH RETURN VALUE
-Upon successful execution, hwloc-mask displays the cpu mask string.
-The return value is 0
+Upon successful execution, hwloc-mask displays the CPU mask string.
+The return value is 0.
 .
 .
 .PP
@@ -82,6 +98,5 @@ hwloc-mask will return nonzero if any kind of error occurs, such as
 .SH SEE ALSO
 .
 .ft R
-hwloc-bind(1)
+hwloc(7)
 .sp
-

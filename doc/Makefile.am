@@ -39,8 +39,7 @@ EXTRA_DIST = \
         www.open-mpi.org-css.inc \
         www.open-mpi.org-footer.inc \
         www.open-mpi.org-header.inc \
-        $(image_built_sources) \
-        $(DOX_HTML_DIR) $(DOX_MAN_DIR) $(DOX_LATEX_DIR) $(DOX_TAG)
+        $(image_built_sources)
 
 #
 # Files where the doxygen inputs live (i.e., dependencies).  Make the
@@ -75,7 +74,7 @@ BUILT_SOURCES = $(image_built_sources)
 images/diagram.png: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
 	@if test "x$(FIG2DEV)" = "x"; then \
-	    echo "ERROR: Cannot find the 'fig2dev' exectuable -- cannot make $@"; \
+	    echo "ERROR: Cannot find the 'fig2dev' executable -- cannot make $@"; \
 	    exit 1; \
 	fi
 	$(FIG2DEV) -L png $< $@
@@ -83,7 +82,7 @@ images/diagram.png: $(srcdir)/images/diagram.fig
 images/diagram.eps: $(srcdir)/images/diagram.fig
 	$(MKDIR_P) images
 	@if test "x$(FIG2DEV)" = "x"; then \
-	    echo "ERROR: Cannot find the 'fig2dev' exectuable -- cannot make $@"; \
+	    echo "ERROR: Cannot find the 'fig2dev' executable -- cannot make $@"; \
 	    exit 1; \
 	fi
 	$(FIG2DEV) -L eps $< $@
@@ -92,6 +91,8 @@ endif
 #
 # Rules for running doxygen.  It depends on the built images and the
 # dox_inputs.
+# Remove useless manpages, they have too long filenames anyway because
+# of nested structurre/union declarations.
 #
 
 if HWLOC_BUILD_DOXYGEN
@@ -114,6 +115,11 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 		-e 's/__inline/inline/g' \
 		-e 's/\\_\\-\\_\\-inline/inline/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
+	@echo "Removing useless manpages..."
+	@mkdir $(DOX_DIR)/man.tmp
+	@mv $(man3_MANS) $(DOX_DIR)/man.tmp/
+	@rm -rf $(DOX_DIR)/man/man3
+	@mv $(DOX_DIR)/man.tmp $(DOX_DIR)/man/man3
 endif
 
 #

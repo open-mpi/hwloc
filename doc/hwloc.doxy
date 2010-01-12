@@ -242,8 +242,8 @@ systems with the OpenFabrics verbs library, some dedicated helpers are
 provided in hwloc/openfabrics-verbs.h (this helper file is not yet
 useful on non-Linux systems with the OpenFabrics verbs library).
 
-To precisely define the vocabulary used by hwloc, a \ref glossary is
-available and should probably be read first.
+To precisely define the vocabulary used by hwloc, a \ref termsanddefs
+section is available and should probably be read first.
 
 Further documentation is available in a full set of HTML pages, man
 pages, and self-contained PDF files (formatted for both both US letter
@@ -345,7 +345,7 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
 
 
 
-\page glossary Glossary
+\page termsanddefs Terms and Definitions 
 
 <dl>
 
@@ -421,49 +421,55 @@ computed linearly by hwloc -- is not the same as the OS index.
 \page tools Command-line tools 
 
 hwloc comes with an extensive C programming interface and several
-command line utilities. Each of them is fully documented in its
-own manual page.
+command line utilities. Each of them is fully documented in its own
+manual page; the following is a summary of the available command line
+tools.
 
 \section cli_lstopo lstopo
 
-lstopo (also known as hwloc-info and hwloc-ls)
-displays the hierarchical topology of the current system.
-The output may be graphic or textual, and exported to numerous
-graphic file formats such as PDF or PNG.
+lstopo (also known as hwloc-info and hwloc-ls) displays the
+hierarchical topology map of the current system.  The output may be
+graphic or textual, and can also be exported to numerous file
+formats such as PDF, PNG, XML, and others.
 
-lstopo may also display other system topologies thanks to XML
-input files for instance.
+Note that lstopo can read XML files and/or alternate chroot
+filesystems and display topological maps representing those systems
+(e.g., use lstopo to output an XML file on one system, and then use
+lstopo to read in that XML file and display it on a different system).
 
 \section cli_hwloc_bind hwloc-bind
 
-hwloc-bind lets you bind processes to specific hardware objects through
-a flexible syntax. You may specify multiple objects, objects within
-objects, cpusets, ...
-See the hwloc-bind(1) man page for more details.
+hwloc-bind binds processes to specific hardware objects through a
+flexible syntax.  A simple example is binding an executable to
+specific cores (or sockets or cpusets or ...).  The hwloc-bind(1) man
+page provies much more detail on what is possible.
 
-hwloc-bind may also retrieve the current binding.
+hwloc-bind can also be used to retrieve the current process' binding.
 
 \section cli_hwloc_mask hwloc-mask
 
-hwloc-mask generates cpuset strings from given hardware objects
-with the ability to aggregate them, intersect them, and more.
+hwloc-mask is generally used to create cpuset strings to pass to
+hwloc-bind.  Although hwloc-bind accepts many forms of object
+specification (i.e., cpuset strings are one of many forms that
+hwloc-bind understands), they can be useful, compact representations
+in shell scripts, for example.
 
-hwloc-mask uses the same syntax than hwloc-bind, but multiple instances
-may be composed to generate complex combinations.
-The generated cpuset string may for instance be passed to hwloc-bind
-later for binding.
+hwloc-mask generates cpuset strings from given hardware objects with
+the ability to aggregate them, intersect them, and more.  hwloc-mask
+generally uses the same syntax than hwloc-bind, but multiple instances
+may be composed to generate complex combinations.  
 
-hwloc-mask may also generate lists of logical processors or NUMA nodes
-that are convenient to pass to some external tools such as taskset or
-numactl.
+Note that hwloc-mask can also generate lists of logical processors or
+NUMA nodes that are convenient to pass to some external tools such as
+taskset or numactl.
 
 \section cli_hwloc_distrib hwloc-distrib
 
 hwloc-distrib generates a set of cpuset strings that are uniformly
 distributed across the machine for the given number of processes.
-These strings may be used with hwloc-bind to run processes so as to
-maximize their memory bandwidth by properly distributing them across
-the machine.
+These strings may be used with hwloc-bind to run processes to maximize
+their memory bandwidth by properly distributing them across the
+machine.
 
 
 
@@ -613,84 +619,107 @@ than any system-provided copy of hwloc.
 
 \page switchfromplpa How to switch from PLPA to hwloc?
 
-Although PLPA and hwloc share the same ideas, their programming interfaces
-are different. Converting an application from PLPA to hwloc will require
-some thinking that is explained below.
+Although PLPA and hwloc share some of the same ideas, their
+programming interfaces are quite different.  After much debate, it was
+decided <em>not</em> to emulate the PLPA API with hwloc's API because
+hwloc's API is already far more rich than PLPA's.  
+
+More specifically, exploiting modern computing architecture
+<em>requires</em> the flexible functionality provided by the hwloc API
+-- the PLPA API is too rigid in its definitions and practices to
+handle the evolving server hardware landscape (e.g., PLPA only
+understands cores and sockets; hwloc understands a much larger set
+of hardware objects).
+
+As such, even though it is fully possible to emulate the PLPA API with
+hwloc (e.g., only deal with sockets and cores), and while the
+documentation below describes how to do this, we encourage any
+existing PLPA application authors to actually re-think their
+application in terms of more than just sockets and cores.  In short,
+we encourage you to use the full hwloc API to exploit <em>all</em> the
+hardware.
 
 
 \section switchfromplpa_caching Topology context vs. caching
 
-First, all hwloc functions take a \p topology parameter. It serves as an
-internal storage for the result of the topology discovery. It somehow
-replaces PLPA caching abilities and may even let you manipulate multiple
-topologies as the same time if needed.
+First, all hwloc functions take a \p topology parameter. This
+parameter serves as an internal storage for the result of the topology
+discovery. It replaces PLPA's caching abilities and even lets you
+manipulate multiple topologies as the same time, if needed.
 
-Thus, all program should first run hwloc_topology_init() and
-hwloc_topology_init() as they did plpa_init() in the past.
+Thus, all programs should first run hwloc_topology_init() and
+hwloc_topology_destroy() as they did plpa_init() and plpa_finalize()
+in the past.
 
 
 \section switchfromplpa_hierarchy Hierarchy vs. Core@Socket
 
-PLPA was designed to manipulate cores within sockets. hwloc offers
-much more different types of objects and stores them within a tree
-of resources.
+PLPA was designed to understand only cores and sockets.  hwloc offers
+many more different types of objects (e.g., cores, sockets, hardware
+threads, NUMA nodes, and others) and stores them within a tree of
+resources.
 
-To emulate PLPA model, it is possible to find sockets using functions
-such as hwloc_get_obj_by_type().
-Iterating over sockets is also possible using hwloc_get_next_obj_by_type().
-Then, finding a core within a socket may be done using
-hwloc_get_obj_inside_cpuset_by_type()
-or hwloc_get_next_obj_inside_cpuset_by_type().
+To emulate the PLPA model, it is possible to find sockets using
+functions such as hwloc_get_obj_by_type().  Iterating over sockets is
+also possible using hwloc_get_next_obj_by_type().  Then, finding a
+core within a socket may be done using
+hwloc_get_obj_inside_cpuset_by_type() or
+hwloc_get_next_obj_inside_cpuset_by_type().
 
-It is also possible to directly find an object below another object
-using hwloc_get_obj_below_by_type()
-(or hwloc_get_obj_below_array_by_type()).
+It is also possible to directly find an object "below" another object
+using hwloc_get_obj_below_by_type() (or
+hwloc_get_obj_below_array_by_type()).
 
 
 \section switchfromplpa_indexes Logical vs. Physical/OS indexes
 
-hwloc manipulates logical indexes, which means indexes with regards to
-the ordering of objects in the hierarchical tree.
-Physical or OS indexes may be entirely hidden if not strictly required.
-The reason for this is that physical/OS indexes may change with the OS
-or with the BIOS version.
-They may be non-consecutive, multiple objects may have the same
-physical/OS indexes, making their manipulation tricky and highly
-non-portable.
+hwloc manipulates logical indexes, meaning indexes specified with
+regard to the ordering of objects in the hwloc-provided hierarchical
+tree.  Physical or OS indexes may be entirely hidden if not strictly
+required.  The reason for this is that physical/OS indexes may change
+with the OS or with the BIOS version.  They may be non-consecutive,
+multiple objects may have the same physical/OS indexes, making their
+manipulation tricky and highly non-portable.
+
+Note that hwloc tries very hard to always present a hierarchical tree
+with the same logical ordering, regardless of physica or OS index
+ordering.
 
 It is still possible to retrieve physical/OS indexes through the \p
-os_index field of objects, but it should be avoided as much as possible,
-except for pretty-printing purposes.
+os_index field of objects, but such practice should be avoided as much
+as possible for the reasons described above (except perhaps for
+prettyprinting / debugging purposes).
 
-::HWLOC_OBJ_PROC objects are supposed to have different physical/OS indexes
-since the OS uses them for binding.
-The \p os_index field of these objects provides the identifier that may
-be used for such binding, and hwloc_get_proc_obj_by_os_index() finds the
-object associated with a OS index.
-However, again, these conversion methods should not be used for actual
-binding since hwloc offers its own binding model using the \p cpuset
-field of objects.
-These cpusets may be duplicated, modified, combined, ... (see hwloc/cpuset.h
-for details) and then passed to hwloc_set_cpubind() or so for actual binding.
+::HWLOC_OBJ_PROC objects are supposed to have different physical/OS
+indexes since the OS uses them for binding.  The \p os_index field of
+these objects provides the identifier that may be used for such
+binding, and hwloc_get_proc_obj_by_os_index() finds the object
+associated with a specfic OS index.  
+
+But as mentioned above, we discourage the use of these conversion
+methods for actual binding.  Instead, hwloc offers its own binding
+model using the \p cpuset field of objects.  These cpusets may be
+duplicated, modified, combined, etc. (see hwloc/cpuset.h for details)
+and then passed to hwloc_set_cpubind() for binding.
 
 
 \section switchfromplpa_counting Counting specification
 
-PLPA offerzs a countspec parameter to specify whether counting all CPUs,
-only the online ones or only the offline ones.
-However, some OS do not expose the topology of offline CPUs.
-Also, some of them may not be available to the current application
-due to administrator's restrictions.
-Also, modern processors let you shutdown a single thread of a core,
-making some of the PLPA features irrelevant.
+PLPA offers a countspec parameter to specify whether counting all
+CPUs, only the online ones or only the offline ones.  However, some
+operating systems do not expose the topology of offline CPUs (i.e.,
+offline CPUs are not reported at all by the OS).  Also, some
+processors may not be visible to the current application due to
+administrative restrictions.  Finally, some processors let you
+shutdown a single hardware thread in a core, making some of the PLPA
+features irrelevant.
 
 hwloc stores in the hierarchical tree of objects all CPUs that have
-known topology information.
-It then provides the applications with several cpusets that contain
-the list of CPUs that are actually known, that have topology information,
-that are online, or that are available to the application.
-These cpusets may be retrieved with hwloc_topology_get_online_cpuset()
-and other similar functions to filter the object that are relevant
-or not.
+known topology information.  It then provides the applications with
+several cpusets that contain the list of CPUs that are actually known,
+that have topology information, that are online, or that are available
+to the application.  These cpusets may be retrieved with
+hwloc_topology_get_online_cpuset() and other similar functions to
+filter the object that are relevant or not.
 
 */

@@ -37,12 +37,9 @@ FILE *open_file(const char *filename, const char *mode)
 
 static void usage(char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ]... [ filename ]\n", name);
-  fprintf (where, "\n");
-  fprintf (where, "By default, lstopo displays a graphical window with the topology if DISPLAY is\nset, else a text output on the standard output.\n");
-  fprintf (where, "To force a text output on the standard output, specify - or /dev/stdout as\nfilename.\n");
-  fprintf (where, "To specify a semi-graphical text output on the standard output, specify -.txt\nas filename.\n");
-  fprintf (where, "Recognised file formats are: .txt, .fig"
+  fprintf (where, "Usage: %s [ options ] ... [ filename ]\n\n", name);
+  fprintf (where, "See lstopo(1) for more details.\n\n");
+  fprintf (where, "Supported output file formats: .txt, .fig"
 #ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_PDF_SURFACE
 		  ", .pdf"
@@ -62,36 +59,36 @@ static void usage(char *name, FILE *where)
 #endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nOptions:\n");
-  fprintf (where, "   -l --logical          display logical object indexes (default)\n");
-  fprintf (where, "   -p --physical         display physical object indexes\n");
-  fprintf (where, "   -v --verbose          increase verbosity (disabled by default)\n");
-  fprintf (where, "   -s --silent           decrease verbosity\n");
-  fprintf (where, "   -c --cpuset           show the cpuset\n");
-  fprintf (where, "   -C --cpuset-only      only show the cpuset\n");
-  fprintf (where, "   --only <type>         only show the given type\n");
-  fprintf (where, "   --no-caches           do not show caches\n");
-  fprintf (where, "   --no-useless-caches   do not show caches which do not have a hierarchical\n"
+  fprintf (where, "   -l --logical          Display hwloc logical object indexes (default)\n");
+  fprintf (where, "   -p --physical         Display physical object indexes\n");
+  fprintf (where, "   -v --verbose          Include additional detail\n");
+  fprintf (where, "   -s --silent           Opposite of --verbose (default)\n");
+  fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
+  fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
+  fprintf (where, "   --only <type>         Only show the given type\n");
+  fprintf (where, "   --no-caches           Do not show caches\n");
+  fprintf (where, "   --no-useless-caches   Do not show caches which do not have a hierarchical\n"
                   "                         impact\n");
-  fprintf (where, "   --whole-system        do not consider administration limitations\n");
-  fprintf (where, "   --merge               do not show levels that do not have a hierarcical\n"
+  fprintf (where, "   --whole-system        Do not consider administration limitations\n");
+  fprintf (where, "   --merge               Do not show levels that do not have a hierarcical\n"
                   "                         impact\n");
 #ifdef HWLOC_HAVE_LIBPCI
   fprintf (where, "   --whole-pci           show all PCI devices and bridges\n");
   fprintf (where, "   --no-pci              do not show any PCI device or bridge\n");
 #endif
 #ifdef HWLOC_HAVE_XML
-  fprintf (where, "   --xml <path>          read topology from XML file <path>\n");
+  fprintf (where, "   --xml <path>          Read topology from XML file <path>\n");
 #endif
 #ifdef HWLOC_LINUX_SYS
-  fprintf (where, "   --fsys-root <path>    chroot containing the /proc and /sys of another system\n");
+  fprintf (where, "   --fsys-root <path>    Chroot containing the /proc and /sys of another system\n");
 #endif
-  fprintf (where, "   --synthetic \"n:2 2\"   simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
+  fprintf (where, "   --synthetic \"n:2 2\"   Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
                   "                         processors\n");
-  fprintf (where, "   --fontsize 10         set size of text font\n");
-  fprintf (where, "   --gridsize 10         set size of margin between elements\n");
-  fprintf (where, "   --horiz               horizontal graphic layout instead of nearly 4/3 ratio\n");
-  fprintf (where, "   --vert                vertical graphic layout instead of nearly 4/3 ratio\n");
-  fprintf (where, "   --version             report version and exit\n");
+  fprintf (where, "   --fontsize 10         Set size of text font\n");
+  fprintf (where, "   --gridsize 10         Set size of margin between elements\n");
+  fprintf (where, "   --horiz               Horizontal graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "   --vert                Vertical graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "   --version             Report version and exit\n");
 }
 
 int
@@ -187,24 +184,31 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	synthetic = argv[2]; opt = 1;
-#ifdef HWLOC_HAVE_XML
       } else if (!strcmp (argv[1], "--xml")) {
+#ifdef HWLOC_HAVE_XML
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
 	xmlpath = argv[2]; opt = 1;
-	if (!strcmp(xmlpath, "-"))
+	if (!strcmp(xmlpath, "-")) {
 	  xmlpath = "/dev/stdin";
+        }
+#else /* HWLOC_HAVE_XML */
+        fprintf(stderr, "This installation of hwloc does not support --xml, sorry.\n");
+        exit(EXIT_FAILURE);
 #endif /* HWLOC_HAVE_XML */
-#ifdef HWLOC_LINUX_SYS
       } else if (!strcmp (argv[1], "--fsys-root")) {
+#ifdef HWLOC_LINUX_SYS
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
 	fsysroot = argv[2]; opt = 1;
-#endif
+#else /* HWLOC_LINUX_SYS */
+        fprintf(stderr, "This installation of hwloc does not support --fsys-root, sorry.\n");
+        exit(EXIT_FAILURE);
+#endif /* HWLOC_LINUX_SYS */
       } else if (!strcmp (argv[1], "--version")) {
           printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
