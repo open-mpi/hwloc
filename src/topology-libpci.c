@@ -96,7 +96,7 @@ hwloc_linux_class_readdir(struct hwloc_obj *pcidev, const char *devicepath, cons
       while ((dirent = readdir(dir)) != NULL) {
 	if (strncmp(dirent->d_name, classname, classnamelen) || dirent->d_name[classnamelen] != ':')
 	  continue;
-	hwloc_linux_add_os_device(pcidev, dirent->d_name);
+	hwloc_linux_add_os_device(pcidev, dirent->d_name + classnamelen+1);
       }
     }
     closedir(dir);
