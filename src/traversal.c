@@ -361,6 +361,16 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_MISC:
 	  /* TODO: more pretty presentation? */
     return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->misc.depth);
+  case HWLOC_OBJ_BRIDGE:
+    if (verbose)
+      return snprintf(string, size, "Bridge %s->%s",
+		      obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCI" : "Host",
+		      "PCI");
+    else
+      return snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
+  case HWLOC_OBJ_PCI_DEVICE:
+    return snprintf(string, size, "PCI %04x:%04x",
+		    obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
   default:
     *string = '\0';
     return 0;
@@ -409,6 +419,34 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     return hwloc_snprintf(string, size, "%lu%s",
 			  hwloc_memory_size_printf_value(obj->attr->node.memory_kB, verbose),
 			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB, verbose));
+  case HWLOC_OBJ_BRIDGE:
+    if (verbose) {
+      char up[64], down[64];
+      /* upstream is PCI or HOST */
+      if (obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
+	snprintf(up, sizeof(up), "busid=%04x:%02x:%02x.%01x%sid=%04x:%04x%sclass=%04x(%s)",
+		 obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
+		 obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id, separator,
+		 obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id));
+      else
+        *up = '\0';
+      /* downstream is_PCI */
+      snprintf(down, sizeof(down), "buses=%04x:[%02x-%02x]",
+	       obj->attr->bridge.downstream.pci.domain, obj->attr->bridge.downstream.pci.secondary_bus, obj->attr->bridge.downstream.pci.subordinate_bus);
+      if (*up)
+	return snprintf(string, size, "%s%s%s", up, separator, down);
+      else
+	return snprintf(string, size, "%s", down);
+    }
+    *string = '\0';
+    return 0;
+  case HWLOC_OBJ_PCI_DEVICE:
+    if (verbose)
+      return snprintf(string, size, "busid=%04x:%02x:%02x.%01x%sclass=%04x(%s)",
+		      obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
+		      obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id));
+    *string = '\0';
+    return 0;
   default:
     *string = '\0';
     return 0;
@@ -494,7 +532,7 @@ hwloc_obj_snprintf(char *string, size_t size,
     if (verbose)
       return snprintf(string, size, "%s%04x:%02x:%02x.%01x(%04x:%04x,class=%04x(%s))", hwloc_obj_type_string(type),
 		      l->attr->pcidev.domain, l->attr->pcidev.bus, l->attr->pcidev.dev, l->attr->pcidev.func,
-		      l->attr->pcidev.device_id, l->attr->pcidev.vendor_id, l->attr->pcidev.class_id, hwloc_pci_class_string(l->attr->pcidev.class_id));
+		      l->attr->pcidev.vendor_id, l->attr->pcidev.device_id, l->attr->pcidev.class_id, hwloc_pci_class_string(l->attr->pcidev.class_id));
     else {
       return snprintf(string, size, "%s %04x:%04x", hwloc_pci_class_string(l->attr->pcidev.class_id), l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
     }
