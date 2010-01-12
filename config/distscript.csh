@@ -128,12 +128,6 @@ if ($vpath == 0) then
         exit 1
     endif
 
-    # Remove generate latex kruft; no need to ship that.  
-    echo "*** Remove generated latex kruft: `pwd`"
-    cd doxygen-doc/latex
-    rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out
-    cd ../..
-
     # Make new README file
     echo "*** Making new README"
     make readme
