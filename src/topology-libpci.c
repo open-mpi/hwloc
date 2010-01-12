@@ -103,7 +103,7 @@ hwloc_linux_class_readdir(struct hwloc_obj *pcidev, const char *devicepath, cons
   }
 }
 
-/* net and infiniband class objects are immediately below pci devices */
+/* class objects that are immediately below pci devices */
 static void
 hwloc_linux_lookup_net_class(struct hwloc_obj *pcidev, const char *pcidevpath)
 {
@@ -113,6 +113,11 @@ static void
 hwloc_linux_lookup_infiniband_class(struct hwloc_obj *pcidev, const char *pcidevpath)
 {
   hwloc_linux_class_readdir(pcidev, pcidevpath, "infiniband");
+}
+static void
+hwloc_linux_lookup_dma_class(struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  hwloc_linux_class_readdir(pcidev, pcidevpath, "dma");
 }
 
 /* block class objects are in host%d/target%d:%d:%d/%d:%d:%d/ below pci devices */
@@ -193,7 +198,9 @@ hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_obj *pcidev, int depth __hwlo
 
   hwloc_linux_lookup_net_class(pcidev, pcidevpath);
   hwloc_linux_lookup_infiniband_class(pcidev, pcidevpath);
+  hwloc_linux_lookup_dma_class(pcidev, pcidevpath);
   hwloc_linux_lookup_block_class(pcidev, pcidevpath);
+  /* FIXME: what about gpus? could try class "drm", but proprietary drivers won't appear there */
 
 #endif /* HWLOC_LINUX_SYS */
 }
