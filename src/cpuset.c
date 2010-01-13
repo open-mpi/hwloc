@@ -475,7 +475,7 @@ void hwloc_cpuset_notset (struct hwloc_cpuset_s *set)
 	HWLOC__CPUSET_CHECK(set);
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
-		HWLOC_CPUSUBSET_SUBSET(*set,i) = !HWLOC_CPUSUBSET_SUBSET(*set,i);
+		HWLOC_CPUSUBSET_SUBSET(*set,i) = ~HWLOC_CPUSUBSET_SUBSET(*set,i);
 }
 
 int hwloc_cpuset_first(const struct hwloc_cpuset_s * set)
