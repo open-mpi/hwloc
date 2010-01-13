@@ -17,8 +17,6 @@
 #include <assert.h>
 #include <strings.h>
 
-/* FIXME: system not at the top */
-
 int
 hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
 {
@@ -278,20 +276,12 @@ hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, 
 	assert (!obj);
 
       } else if (depth == 1) {
-	/* system object is already there */
-	if (obj->type != HWLOC_OBJ_SYSTEM) {
-	  fprintf(stderr, "enforcing System type in top level instead of %s\n",
-		  hwloc_obj_type_string(obj->type));
-	  obj->type = HWLOC_OBJ_SYSTEM;
-	}
+	/* root object is already there */
 
       } else {
 	/* add object */
 	if (obj->type >= HWLOC_OBJ_TYPE_MAX) {
 	  fprintf(stderr, "ignoring object with invalid type %u\n", obj->type);
-	  free(obj);
-	} else if (obj->type == HWLOC_OBJ_SYSTEM) {
-	  fprintf(stderr, "ignoring system object at invalid depth %d\n", depth);
 	  free(obj);
 	} else {
 	    hwloc_insert_object_by_parent(topology, father, obj);
@@ -304,7 +294,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, 
 
     } else if (node->type == XML_TEXT_NODE) {
       if (node->content && node->content[0] != '\0' && node->content[0] != '\n')
-	fprintf(stderr, "ignoring object text content %s\n", (const char*) node->content);      
+	fprintf(stderr, "ignoring object text content %s\n", (const char*) node->content);
     } else {
       fprintf(stderr, "ignoring unexpected xml node type %u\n", node->type);
     }
