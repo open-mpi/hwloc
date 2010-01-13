@@ -417,7 +417,27 @@ print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unuse
   hwloc_debug("%s", line);
   if (obj->cpuset) {
     hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
-    hwloc_debug(" %s", cpuset);
+    hwloc_debug(" cpuset %s", cpuset);
+    free(cpuset);
+  }
+  if (obj->complete_cpuset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->complete_cpuset);
+    hwloc_debug(" complete %s", cpuset);
+    free(cpuset);
+  }
+  if (obj->online_cpuset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->online_cpuset);
+    hwloc_debug(" online %s", cpuset);
+    free(cpuset);
+  }
+  if (obj->allowed_cpuset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->allowed_cpuset);
+    hwloc_debug(" allowed %s", cpuset);
+    free(cpuset);
+  }
+  if (obj->allowed_nodeset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->allowed_nodeset);
+    hwloc_debug(" allowedN %s", cpuset);
     free(cpuset);
   }
   if (obj->arity)
@@ -454,6 +474,9 @@ free_object(hwloc_obj_t obj)
   free(obj->children);
   free(obj->name);
   hwloc_cpuset_free(obj->cpuset);
+  hwloc_cpuset_free(obj->complete_cpuset);
+  hwloc_cpuset_free(obj->online_cpuset);
+  hwloc_cpuset_free(obj->allowed_cpuset);
   free(obj);
 }
 
@@ -766,6 +789,8 @@ void
 hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
   /* Start at the top.  */
+  /* Add the cpuset to the top */
+  hwloc_cpuset_orset(topology->levels[0][0]->complete_cpuset, obj->cpuset);
   hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
 }
 
@@ -807,8 +832,8 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t fathe
 
 /*
  * traverse the whole tree in a deletion-safe way, calling node_before at
- * nodes, leaf at leaves, and node_after when back at nodes, passing data along
- * the way through nodes. data returned by leaf() is ignored.
+ * arrival on nodes, leaf at arrival on leaves, and node_after when back at
+ * nodes, passing data along the way through nodes.
  *
  * Hooks can modify the pointer they're given to remove or replace themselves.
  */
@@ -842,33 +867,126 @@ traverse(hwloc_topology_t topology,
     node_after(topology, father, data);
 }
 
+/* While traversing down and up, propagate the offline/disallowed cpus by
+ * and'ing them to and from the first object that has a cpuset */
 static void
-get_proc_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *obj, void *data)
+propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
 {
-  hwloc_cpuset_t cpuset = data;
-  if ((*obj)->type != HWLOC_OBJ_PROC)
-    return;
-  hwloc_cpuset_orset(cpuset, (*obj)->cpuset);
+  hwloc_obj_t *systemp = data, system = *systemp;
+  hwloc_obj_t obj = *pobj;
+
+  if (system) {
+    /* We are already given a pointer to an system object, update it and update ourselves */
+    hwloc_cpuset_t mask = hwloc_cpuset_alloc();
+
+    /* Update complete cpuset down */
+    if (obj->complete_cpuset) {
+      hwloc_cpuset_andset(obj->complete_cpuset, system->complete_cpuset);
+    } else {
+      obj->complete_cpuset = hwloc_cpuset_dup(system->complete_cpuset);
+      hwloc_cpuset_andset(obj->complete_cpuset, obj->cpuset);
+    }
+
+    if (obj->online_cpuset) {
+      /* Update ours */
+      hwloc_cpuset_andset(obj->online_cpuset, system->online_cpuset);
+
+      /* Update the given cpuset, but only what we know */
+      hwloc_cpuset_copy(mask, obj->cpuset);
+      hwloc_cpuset_notset(mask);
+      hwloc_cpuset_orset(mask, obj->online_cpuset);
+      hwloc_cpuset_andset(system->online_cpuset, mask);
+    } else {
+      /* Just take it as such */
+      obj->online_cpuset = hwloc_cpuset_dup(system->online_cpuset);
+      hwloc_cpuset_andset(obj->online_cpuset, obj->cpuset);
+    }
+
+    if (obj->allowed_cpuset) {
+      /* Update ours */
+      hwloc_cpuset_andset(obj->allowed_cpuset, system->allowed_cpuset);
+
+      /* Update the given cpuset, but only what we know */
+      hwloc_cpuset_copy(mask, obj->cpuset);
+      hwloc_cpuset_notset(mask);
+      hwloc_cpuset_orset(mask, obj->allowed_cpuset);
+      hwloc_cpuset_andset(system->allowed_cpuset, mask);
+    } else {
+      /* Just take it as such */
+      obj->allowed_cpuset = hwloc_cpuset_dup(system->allowed_cpuset);
+      hwloc_cpuset_andset(obj->allowed_cpuset, obj->cpuset);
+    }
+
+    hwloc_cpuset_free(mask);
+  } else {
+    if (obj->cpuset) {
+      *systemp = obj;
+      /* Apply complete cpuset to cpuset, online_cpuset and allowed_cpuset, it
+       * will automatically be applied below */
+      if (obj->complete_cpuset)
+        hwloc_cpuset_andset(obj->cpuset, obj->complete_cpuset);
+      else
+        obj->complete_cpuset = hwloc_cpuset_dup(obj->cpuset);
+      if (obj->online_cpuset)
+        hwloc_cpuset_andset(obj->online_cpuset, obj->complete_cpuset);
+      else
+        obj->online_cpuset = hwloc_cpuset_dup(obj->complete_cpuset);
+      if (obj->allowed_cpuset)
+        hwloc_cpuset_andset(obj->allowed_cpuset, obj->complete_cpuset);
+      else
+        obj->allowed_cpuset = hwloc_cpuset_dup(obj->complete_cpuset);
+    }
+  }
+}
+
+/* While going up, remember to clear the system pointer */
+static void
+propagate_unused_cpuset_after(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+{
+  hwloc_obj_t *systemp = data;
+  hwloc_obj_t obj = *pobj;
+  if (*systemp == obj)
+    /* We gave ourselves for objects below, clear ourselves before continuing up */
+    *systemp = NULL;
 }
 
 static void
 apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
 {
-  hwloc_cpuset_t nodeset = data;
+  hwloc_obj_t *systemp = data, system = *systemp;
   hwloc_obj_t obj = *pobj;
-  if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
-      !hwloc_cpuset_isset(nodeset, obj->os_index)) {
-    hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
-    obj->attr->node.memory_kB = 0;
-    obj->attr->node.huge_page_free = 0;
+  if (system) {
+    if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
+        !hwloc_cpuset_isset(system->allowed_nodeset, obj->os_index)) {
+      hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
+      obj->attr->node.memory_kB = 0;
+      obj->attr->node.huge_page_free = 0;
+    }
+  } else {
+    if (obj->allowed_nodeset) {
+      *systemp = obj;
+    }
   }
 }
 
 static void
-apply_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *obj, void *data)
+apply_nodeset_after(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
 {
-  hwloc_cpuset_t cpuset = data;
-  hwloc_cpuset_andset((*obj)->cpuset, cpuset);
+  hwloc_obj_t *systemp = data;
+  hwloc_obj_t obj = *pobj;
+  if (*systemp == obj)
+    /* We gave ourselves for objects below, clear ourselves before continuing up */
+    *systemp = NULL;
+}
+
+static void
+remove_unused_cpusets(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
+{
+  hwloc_obj_t obj = *pobj;
+  if (obj->cpuset) {
+    hwloc_cpuset_andset(obj->cpuset, obj->online_cpuset);
+    hwloc_cpuset_andset(obj->cpuset, obj->allowed_cpuset);
+  }
 }
 
 static void
@@ -912,16 +1030,18 @@ do_free_object(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *
  * since we want to keep memory information, and except PCI bridges and devices.
  */
 static void
-remove_empty(hwloc_topology_t topology, hwloc_obj_t *obj, void *data __hwloc_attribute_unused)
+remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
 {
-  if ((*obj)->type != HWLOC_OBJ_NODE
-      && (*obj)->type != HWLOC_OBJ_PCI_DEVICE
-      && (*obj)->type != HWLOC_OBJ_BRIDGE
-      && hwloc_cpuset_iszero((*obj)->cpuset)) {
+  hwloc_obj_t obj = *pobj;
+  if (obj->type != HWLOC_OBJ_NODE
+      && obj->type != HWLOC_OBJ_PCI_DEVICE
+      && obj->type != HWLOC_OBJ_BRIDGE
+      && obj->cpuset
+      && hwloc_cpuset_iszero(obj->cpuset)) {
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
-    print_object(topology, 0, *obj);
-    traverse(topology, obj, NULL, do_free_object, do_free_object, NULL);
+    print_object(topology, 0, obj);
+    traverse(topology, pobj, NULL, do_free_object, do_free_object, NULL);
   }
 }
 
@@ -1024,7 +1144,11 @@ static int dontset_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_
 }
 static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
-  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
+  hwloc_const_cpuset_t cpuset = hwloc_topology_get_complete_cpuset(topology);
+  if (cpuset)
+    return hwloc_cpuset_dup(cpuset);
+  else
+    return NULL;
 }
 static int dontset_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
@@ -1045,6 +1169,19 @@ static hwloc_cpuset_t dontget_thread_cpubind(hwloc_topology_t topology __hwloc_a
 }
 #endif
 
+static void alloc_cpusets(hwloc_obj_t obj)
+{
+  obj->cpuset = hwloc_cpuset_alloc();
+  obj->complete_cpuset = hwloc_cpuset_alloc();
+  obj->online_cpuset = hwloc_cpuset_alloc();
+  obj->allowed_cpuset = hwloc_cpuset_alloc();
+  obj->allowed_nodeset = hwloc_cpuset_alloc();
+  hwloc_cpuset_fill(obj->cpuset);
+  hwloc_cpuset_zero(obj->complete_cpuset);
+  hwloc_cpuset_fill(obj->online_cpuset);
+  hwloc_cpuset_fill(obj->allowed_cpuset);
+  hwloc_cpuset_fill(obj->allowed_nodeset);
+}
 
 /* Main discovery loop */
 static void
@@ -1055,6 +1192,7 @@ hwloc_discover(struct hwloc_topology *topology)
   unsigned n_objs, n_taken_objs, n_new_objs;
 
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
+    alloc_cpusets(topology->levels[0][0]);
     hwloc_look_synthetic(topology);
 #ifdef HWLOC_HAVE_XML
   } else if (topology->backend_type == HWLOC_BACKEND_XML) {
@@ -1085,15 +1223,24 @@ hwloc_discover(struct hwloc_topology *topology)
    *
    * - If some processors exist but topology information is unknown for them
    *   (and thus the backend couldn't create objects for them), they should be
-   *   added to topology->complete_cpuset.
+   *   added to the complete_cpuset field of the lowest object where the object
+   *   could reside.
    *
-   * - If some processors are not online, they should be dropped from
-   *   topology->online_cpuset.
+   * - If some processors are not online, they should be dropped from the
+   *   online_cpuset field.
    *
    * - If some processors are not allowed for the application (e.g. for
-   *   administration reasons), they should be dropped from
-   *   topology->allowed_cpuset.
+   *   administration reasons), they should be dropped from the allowed_cpuset
+   *   field.
+   *
+   * If such field doesn't exist yet, it can be allocated, and initialized to
+   * zero (for complete), or to full (for online and allowed). The values are
+   * automatically propagated to the whole tree after detection.
+   *
+   * Here, we only allocate cpusets for the root object.
    */
+
+    alloc_cpusets(topology->levels[0][0]);
 
   /* Each OS type should also fill the bind functions pointers, at least the
    * set_cpubind one
@@ -1147,46 +1294,21 @@ hwloc_discover(struct hwloc_topology *topology)
   print_objects(topology, 0, topology->levels[0][0]);
 
   /* First tweak a bit to clean the topology.  */
-
-  hwloc_debug("%s", "\nComputing the system cpuset by ORing all Proc objects\n");
-  hwloc_cpuset_zero(topology->levels[0][0]->cpuset);
-  traverse(topology, &topology->levels[0][0], NULL, get_proc_cpuset, NULL, topology->levels[0][0]->cpuset);
-  hwloc_debug_cpuset("-> %s\n", topology->levels[0][0]->cpuset);
-
-  hwloc_debug("%s", "\nAdding it to the complete cpuset\n");
-  hwloc_debug_cpuset("%s", topology->complete_cpuset);
-  hwloc_cpuset_orset(topology->complete_cpuset, topology->levels[0][0]->cpuset);
-  hwloc_debug_cpuset(" -> %s\n", topology->complete_cpuset);
-
-  hwloc_debug("%s", "\nLimiting online cpuset to the complete cpuset\n");
-  hwloc_debug_cpuset("%s", topology->online_cpuset);
-  hwloc_cpuset_andset(topology->online_cpuset, topology->complete_cpuset);
-  hwloc_debug_cpuset(" -> %s\n", topology->online_cpuset);
-
-  hwloc_debug("%s", "\nLimiting allowed cpuset to the complete cpuset\n");
-  hwloc_debug_cpuset("%s", topology->allowed_cpuset);
-  hwloc_cpuset_andset(topology->allowed_cpuset, topology->complete_cpuset);
-  hwloc_debug_cpuset(" -> %s\n", topology->allowed_cpuset);
-
-  if (!topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
-    hwloc_debug("%s", "\nRemoving unauthorized cpuset from system cpuset\n");
-    hwloc_debug_cpuset("%s", topology->levels[0][0]->cpuset);
-    hwloc_cpuset_andset(topology->levels[0][0]->cpuset, topology->allowed_cpuset);
-    hwloc_debug_cpuset(" -> %s\n", topology->levels[0][0]->cpuset);
-
-    hwloc_debug("%s", "\nRemoving offline cpuset from system cpuset\n");
-    hwloc_debug_cpuset("%s", topology->levels[0][0]->cpuset);
-    hwloc_cpuset_andset(topology->levels[0][0]->cpuset, topology->online_cpuset);
-    hwloc_debug_cpuset(" -> %s\n", topology->levels[0][0]->cpuset);
-
-    hwloc_debug_cpuset("\nRemoving disallowed memory according to nodeset %s\n", topology->allowed_nodeset);
-    traverse(topology, &topology->levels[0][0], apply_nodeset, apply_nodeset, NULL, topology->allowed_nodeset);
-  }
-
-  hwloc_debug("%s", "\nApplying the system cpuset to all objects\n");
-  traverse(topology, &topology->levels[0][0], apply_cpuset, apply_cpuset, NULL, topology->levels[0][0]->cpuset);
+  hwloc_obj_t system = NULL;
+  hwloc_debug("%s", "\nPropagate offline and disallowed cpus down and up\n");
+  traverse(topology, &topology->levels[0][0], propagate_unused_cpuset, propagate_unused_cpuset, propagate_unused_cpuset_after, &system);
 
   print_objects(topology, 0, topology->levels[0][0]);
+
+  if (!topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
+    hwloc_debug("%s", "\nRemoving unauthorized and offline cpusets from all cpusets\n");
+    traverse(topology, &topology->levels[0][0], remove_unused_cpusets, remove_unused_cpusets, NULL, NULL);
+
+    hwloc_debug("%s", "\nRemoving disallowed memory according to nodesets\n");
+    traverse(topology, &topology->levels[0][0], apply_nodeset, apply_nodeset, apply_nodeset_after, &system);
+
+    print_objects(topology, 0, topology->levels[0][0]);
+  }
 
   hwloc_debug("%s", "\nRemoving ignored objects\n");
   traverse(topology, &topology->levels[0][0], remove_ignored, remove_ignored, NULL, NULL);
@@ -1435,14 +1557,9 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
-  hwloc_cpuset_zero(topology->complete_cpuset);
-  hwloc_cpuset_fill(topology->online_cpuset);
-  hwloc_cpuset_fill(topology->allowed_cpuset);
-  hwloc_cpuset_fill(topology->allowed_nodeset);
 
   /* Create the actual System object */
   root_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, 0);
-  root_obj->cpuset = hwloc_cpuset_alloc();
   root_obj->depth = 0;
   root_obj->logical_index = 0;
   root_obj->sibling_rank = 0;
@@ -1455,7 +1572,6 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 #endif /* HAVE__SC_LARGE_PAGESIZE */
   root_obj->attr->machine.dmi_board_vendor = NULL;
   root_obj->attr->machine.dmi_board_name = NULL;
-  hwloc_cpuset_fill(root_obj->cpuset);
   topology->levels[0][0] = root_obj;
 }
 
@@ -1474,10 +1590,6 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->flags = 0;
   topology->is_thissystem = 1;
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
-  topology->complete_cpuset = hwloc_cpuset_alloc();
-  topology->online_cpuset = hwloc_cpuset_alloc();
-  topology->allowed_cpuset = hwloc_cpuset_alloc();
-  topology->allowed_nodeset = hwloc_cpuset_alloc();
 
   topology->set_thisproc_cpubind = NULL;
   topology->get_thisproc_cpubind = NULL;
@@ -1634,10 +1746,6 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 {
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
-  hwloc_cpuset_free(topology->complete_cpuset);
-  hwloc_cpuset_free(topology->online_cpuset);
-  hwloc_cpuset_free(topology->allowed_cpuset);
-  hwloc_cpuset_free(topology->allowed_nodeset);
   free(topology);
 }
 
@@ -1730,31 +1838,6 @@ hwloc_topology_get_depth(struct hwloc_topology *topology)
   return topology->nb_levels;
 }
 
-hwloc_const_cpuset_t
-hwloc_topology_get_complete_cpuset(struct hwloc_topology *topology)
-{
-  return topology->complete_cpuset;
-}
-
-hwloc_const_cpuset_t
-hwloc_topology_get_topology_cpuset(struct hwloc_topology *topology)
-{
-  return hwloc_get_root_obj(topology)->cpuset;
-}
-
-hwloc_const_cpuset_t
-hwloc_topology_get_online_cpuset(struct hwloc_topology *topology)
-{
-  return topology->online_cpuset;
-}
-
-hwloc_const_cpuset_t
-hwloc_topology_get_allowed_cpuset(struct hwloc_topology *topology)
-{
-  return topology->allowed_cpuset;
-}
-
-
 /* check children between a father object */
 static void
 hwloc__check_children(struct hwloc_obj *father)
@@ -1784,7 +1867,7 @@ hwloc__check_children(struct hwloc_obj *father)
   assert(father->last_child == father->children[father->arity-1]);
   assert(father->last_child->next_sibling == NULL);
 
-  if (!hwloc_cpuset_iszero(father->cpuset)) {
+  if (father->cpuset) {
     remaining_father_set = hwloc_cpuset_dup(father->cpuset);
     for(j=0; j<father->arity; j++) {
       /* check that child cpuset is included in the father */
@@ -1831,7 +1914,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
   /* check that last level is PROC */
   assert(hwloc_get_depth_type(topology, hwloc_topology_get_depth(topology)-1) == HWLOC_OBJ_PROC);
-  /* check that other levels are neither PROC nor SYSTEM */
+  /* check that other levels are not PROC */
   for(i=1; i<hwloc_topology_get_depth(topology)-1; i++)
     assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_PROC);
 
@@ -1859,6 +1942,14 @@ hwloc_topology_check(struct hwloc_topology *topology)
 	assert(hwloc_type_cmp(obj, prev) == HWLOC_TYPE_EQUAL);
 	assert(prev->next_cousin == obj);
 	assert(obj->prev_cousin == prev);
+      }
+      if (obj->complete_cpuset) {
+        if (obj->cpuset)
+          assert(hwloc_cpuset_isincluded(obj->cpuset, obj->complete_cpuset));
+        if (obj->online_cpuset)
+          assert(hwloc_cpuset_isincluded(obj->online_cpuset, obj->complete_cpuset));
+        if (obj->allowed_cpuset)
+          assert(hwloc_cpuset_isincluded(obj->allowed_cpuset, obj->complete_cpuset));
       }
       /* check children */
       hwloc__check_children(obj);

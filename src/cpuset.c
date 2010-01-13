@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
+#include <ctype.h>
 
 
 /* overzealous check in debug-mode, not as powerful as valgrind but still useful */
@@ -58,6 +59,18 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
   return ret;
 }
 
+int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
+{
+  size_t i = 0;
+  while (*haystack && *haystack != ':') {
+    if (tolower(*haystack++) != tolower(*needle++)) {
+      return 1;
+      }
+    i++;
+  }
+  return i < n;
+}
+
 struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 {
   struct hwloc_cpuset_s * set;
@@ -71,6 +84,8 @@ struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 
 void hwloc_cpuset_free(struct hwloc_cpuset_s * set)
 {
+  if (!set)
+    return;
   HWLOC__CPUSET_CHECK(set);
 #ifdef HWLOC_DEBUG
   set->magic = 0;
@@ -460,7 +475,7 @@ void hwloc_cpuset_notset (struct hwloc_cpuset_s *set)
 	HWLOC__CPUSET_CHECK(set);
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
-		HWLOC_CPUSUBSET_SUBSET(*set,i) = !HWLOC_CPUSUBSET_SUBSET(*set,i);
+		HWLOC_CPUSUBSET_SUBSET(*set,i) = ~HWLOC_CPUSUBSET_SUBSET(*set,i);
 }
 
 int hwloc_cpuset_first(const struct hwloc_cpuset_s * set)

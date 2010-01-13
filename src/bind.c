@@ -24,6 +24,12 @@ hwloc_fix_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set)
   hwloc_const_cpuset_t topology_set = hwloc_topology_get_topology_cpuset(topology);
   hwloc_const_cpuset_t complete_set = hwloc_topology_get_complete_cpuset(topology);
 
+  if (!topology_set) {
+    /* The topology is composed of several systems, the cpuset is ambiguous. */
+    errno = EXDEV;
+    return NULL;
+  }
+
   if (!hwloc_cpuset_isincluded(set, complete_set)) {
     errno = EINVAL;
     return NULL;

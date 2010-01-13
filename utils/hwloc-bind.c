@@ -17,11 +17,11 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-mask utility.\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "  -l --logical\tdisplay logical object indexes (default)\n");
-  fprintf(where, "  -p --physical\tdisplay physical object indexes\n");
+  fprintf(where, "  -l --logical\ttake logical object indexes (default)\n");
+  fprintf(where, "  -p --physical\ttake physical object indexes\n");
   fprintf(where, "  --single\tbind on a single CPU to prevent migration\n");
   fprintf(where, "  --strict\trequire strict binding\n");
-  fprintf(where, "  --get\tretrieve current process binding\n");
+  fprintf(where, "  --get\t\tretrieve current process binding\n");
   fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
 }

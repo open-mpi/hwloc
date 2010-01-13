@@ -9,7 +9,8 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 xml_inputs = \
 	16amd64-8nd2c-cpusets.xml \
 	16em64t-4s2c2t.xml \
-	16em64t-4s2c2t-offlines.xml 
+	16em64t-4s2c2t-offlines.xml \
+	8em64t-2mi2ma2c.xml
 
 if HWLOC_HAVE_XML
 TESTS = $(xml_inputs)

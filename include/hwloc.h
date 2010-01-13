@@ -198,6 +198,16 @@ struct hwloc_obj {
                                           */
 
   signed os_level;			/**< \brief OS-provided physical level */
+
+  hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
+                                          * i.e. including logical processors for which topology information is
+                                          * unknown or incomplete and thus no PROC object is provided.  */
+  hwloc_cpuset_t online_cpuset;         /**< \brief The CPU set of online logical processors, i.e. that can execute threads
+                                          * (but are not necessarily allowed for the application).  */
+  hwloc_cpuset_t allowed_cpuset;        /**< \brief The CPU set of allowed logical processors, i.e. processors which the
+                                          * application is allowed to run on according to administration rules. */
+  hwloc_cpuset_t allowed_nodeset;       /**< \brief The set of allowed NUMA memory nodes, i.e. nodes  from which the
+                                          * application is allowed to allocate memory.  */
 };
 /**
  * \brief Convenience typedef; a pointer to a struct hwloc_obj.
@@ -563,48 +573,6 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
  * a XML topology file, or a synthetic topology).
  */
 HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology) __hwloc_attribute_pure;
-
-/* \brief Get complete CPU set
- *
- * \return the complete CPU set of logical processors of the system, i.e.
- * including logical processors for which no topology information is know and
- * thus no PROC object is provided.
- *
- * \note The returned cpuset is not newly allocated and should thus not be
- * changed, hwloc_cpuset_dup must be used instead.
- */
-HWLOC_DECLSPEC hwloc_const_cpuset_t hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
-
-/* \brief Get topology CPU set
- *
- * \return the CPU set of logical processors of the system for which hwloc
- * provides topology information. This is equivalent to the cpuset of the
- * system object.
- *
- * \note The returned cpuset is not newly allocated and should thus not be
- * changed, hwloc_cpuset_dup must be used instead.
- */
-HWLOC_DECLSPEC hwloc_const_cpuset_t hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
-
-/** \brief Get online CPU set
- *
- * \return the CPU set of online logical processors, i.e. that can execute
- * threads (but are not necessarily allowed for the application).
- *
- * \note The returned cpuset is not newly allocated and should thus not be
- * changed, hwloc_cpuset_dup must be used instead.
- */
-HWLOC_DECLSPEC hwloc_const_cpuset_t hwloc_topology_get_online_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
-
-/** \brief Get allowed CPU set
- *
- * \return the CPU set of allowed logical processors, i.e. processors which the
- * application is allowed to run on according to administration rules.
- *
- * \note The returned cpuset is not newly allocated and should thus not be
- * changed, hwloc_cpuset_dup must be used instead.
- */
-HWLOC_DECLSPEC hwloc_const_cpuset_t hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
 
 /** @} */
 

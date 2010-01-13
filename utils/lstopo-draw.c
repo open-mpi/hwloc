@@ -489,8 +489,8 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   DYNA_CHECK();
 
   /* TODO: current: green */
-  if (hwloc_cpuset_isset(hwloc_topology_get_online_cpuset(topology), level->os_index))
-    if (!hwloc_cpuset_isset(hwloc_topology_get_allowed_cpuset(topology), level->os_index))
+  if (hwloc_cpuset_isset(level->online_cpuset, level->os_index))
+    if (!hwloc_cpuset_isset(level->allowed_cpuset, level->os_index))
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
     else {
       hwloc_cpuset_t bind = hwloc_get_cpubind(topology, 0);
@@ -506,7 +506,7 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   if (fontsize) {
     char text[64];
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    if (hwloc_cpuset_isset(hwloc_topology_get_online_cpuset(topology), level->os_index))
+    if (hwloc_cpuset_isset(level->online_cpuset, level->os_index))
       methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
     else
       methods->text(output, 0xff, 0xff, 0xff, fontsize, depth-1, x + gridsize, y + gridsize, text);

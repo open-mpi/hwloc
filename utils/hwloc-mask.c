@@ -18,8 +18,8 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-bind utility.\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "  -l --logical\tdisplay logical object indexes (default)\n");
-  fprintf(where, "  -p --physical\tdisplay physical object indexes\n");
+  fprintf(where, "  -l --logical\ttake logical object indexes (default)\n");
+  fprintf(where, "  -p --physical\ttake physical object indexes\n");
   fprintf(where, "  --proclist\treport the list of processors' OS indexes in the CPU set\n");
   fprintf(where, "  --nodelist\treport the list of memory nodes' OS indexes near the CPU set\n");
   fprintf(where, "  -v\t\tverbose messages\n");

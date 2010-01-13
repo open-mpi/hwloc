@@ -1072,7 +1072,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
         continue;
 
       /* Maybe we don't have topology information but at least it exists */
-      hwloc_cpuset_set(topology->complete_cpuset, cpu);
+      hwloc_cpuset_set(topology->levels[0][0]->complete_cpuset, cpu);
 
       /* check whether this processor is online */
       sprintf(str, "%s/cpu%lu/online", path, cpu);
@@ -1084,7 +1084,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	    hwloc_debug("os proc %lu is online\n", cpu);
 	  } else {
 	    hwloc_debug("os proc %lu is offline\n", cpu);
-            hwloc_cpuset_clr(topology->online_cpuset, cpu);
+            hwloc_cpuset_clr(topology->levels[0][0]->online_cpuset, cpu);
 	  }
 	} else {
 	  fclose(fd);
@@ -1429,8 +1429,8 @@ hwloc_look_linux(struct hwloc_topology *topology)
   int err;
 
   /* Gather the list of admin-disabled cpus and mems */
-  hwloc_admin_disable_set_from_cpuset(topology, "cpus", topology->allowed_cpuset);
-  hwloc_admin_disable_set_from_cpuset(topology, "mems", topology->allowed_nodeset);
+  hwloc_admin_disable_set_from_cpuset(topology, "cpus", topology->levels[0][0]->allowed_cpuset);
+  hwloc_admin_disable_set_from_cpuset(topology, "mems", topology->levels[0][0]->allowed_nodeset);
 
   nodes_dir = hwloc_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);
   if (nodes_dir) {
@@ -1457,7 +1457,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
       err = look_cpuinfo(topology, path, machine_online_set);
       if (err < 0)
         continue;
-      hwloc_cpuset_orset(topology->online_cpuset, machine_online_set);
+      hwloc_cpuset_orset(topology->levels[0][0]->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;
       machine->attr->machine.dmi_board_name = NULL;
@@ -1492,7 +1492,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
 	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
-      err = look_cpuinfo(topology, "/proc/cpuinfo", topology->online_cpuset);
+      err = look_cpuinfo(topology, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
       if (err < 0) {
         if (topology->is_thissystem)
           hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));

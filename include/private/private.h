@@ -56,10 +56,6 @@ struct hwloc_topology {
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
   int is_thissystem;
   int is_loaded;
-  hwloc_cpuset_t complete_cpuset;
-  hwloc_cpuset_t online_cpuset;
-  hwloc_cpuset_t allowed_cpuset;
-  hwloc_cpuset_t allowed_nodeset;
 
   struct hwloc_obj *first_device, *last_device;
 
@@ -259,6 +255,11 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
 /* On some systems, snprintf returns the size of written data, not the actually
  * required size.  hwloc_snprintf always report the actually required size. */
 int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
+
+/* Check whether needle matches the beginning of haystack, at least n, and up
+ * to a colon or \0 */
+HWLOC_DECLSPEC
+int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
 
 /* Compile-time assertion */
 #define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))

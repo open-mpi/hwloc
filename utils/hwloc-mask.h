@@ -93,20 +93,27 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   unsigned first, wrap, amount, step;
   unsigned i,j;
 
-  if (!hwloc_strncasecmp(string, "system", 2))
+  if (!hwloc_namecoloncmp(string, "system", 2))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SYSTEM);
-  else if (!hwloc_strncasecmp(string, "machine", 1))
+  else if (!hwloc_namecoloncmp(string, "machine", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_MACHINE);
-  else if (!hwloc_strncasecmp(string, "node", 1))
+  else if (!hwloc_namecoloncmp(string, "node", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_NODE);
-  else if (!hwloc_strncasecmp(string, "socket", 2))
+  else if (!hwloc_namecoloncmp(string, "socket", 2))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SOCKET);
-  else if (!hwloc_strncasecmp(string, "core", 1))
+  else if (!hwloc_namecoloncmp(string, "core", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_CORE);
-  else if (!hwloc_strncasecmp(string, "proc", 1))
+  else if (!hwloc_namecoloncmp(string, "proc", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PROC);
-  else
-    depth = atoi(string);
+  else {
+    char *end;
+    depth = strtol(string, &end, 0);
+    if (end == string) {
+      if (verbose)
+        fprintf(stderr, "invalid object name %s\n", string);
+      return -1;
+    }
+  }
 
   if (depth >= topodepth) {
     if (verbose)
