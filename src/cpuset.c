@@ -84,6 +84,8 @@ struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 
 void hwloc_cpuset_free(struct hwloc_cpuset_s * set)
 {
+  if (!set)
+    return;
   HWLOC__CPUSET_CHECK(set);
 #ifdef HWLOC_DEBUG
   set->magic = 0;
