@@ -127,7 +127,7 @@ may show the following outputs:
 \image latex dudley.png "" width=9cm
 
 \verbatim
-System(16GB)
+Machine(16GB)
   Socket#0 + L3(4096KB)
     L2(1024KB) + L1(16KB) + Core#0
       P#0
@@ -165,7 +165,7 @@ System(16GB)
 \image latex hagrid.png width=\textwidth
 
 \verbatim
-System(62GB)
+Machine(62GB)
   Node#0(8192MB) + Socket#0
     L2(1024KB) + L1(64KB) + Core#0 + P#0
     L2(1024KB) + L1(64KB) + Core#1 + P#1
@@ -199,7 +199,7 @@ System(62GB)
 \image latex emmett.png "" width=7cm
 
 \verbatim
-System(16GB)
+Machine(16GB)
   Socket#0
     L2(4096KB)
       L1(32KB) + Core#0 + P#0
@@ -281,7 +281,7 @@ hwloc-hello could be something like the following:
 \verbatim
 shell$ ./hwloc-hello
 *** Objects at level 0
-Index 0: System(3938MB)
+Index 0: Machine(3938MB)
 *** Objects at level 1
 Index 0: Socket#0
 Index 1: Socket#1
@@ -296,7 +296,7 @@ Index 1: P#1
 Index 2: P#2
 Index 3: P#3
 *** Printing overall tree
-System(3938MB)
+Machine(3938MB)
   Socket#0
     Core#0
       P#0
@@ -354,14 +354,15 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
   a Memory node, etc. The different types detected by hwloc are
   detailed in the ::hwloc_obj_type_t enumeration.
   
-  They are topologically sorted by CPU set into a tree whose root is
-  the System object (which always exists).
+  They are topologically sorted by CPU set into a tree.
   </dd>
 
 <dt>CPU set</dt>
   <dd>The set of logical processors logically included in an object
-  (if any).  This term does \em not have any relation to an operating
-  system ``CPU set.''</dd>
+  (if it makes sense).  They are always expressed using physical logical
+  processor numbers (as announced by the OS).  They are just masks, they do \em
+  not have any relation with an operating system actual binding notion like
+  Linux' cpusets.</dd>
 
 <dt>Father object</dt>
   <dd>The object logically containing the current object, for example
@@ -393,8 +394,7 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
   BIOS configuration.</dd>
 
 <dt>Depth</dt>
-  <dd>Nesting level in the object tree, starting from the 0th object
-  (i.e., the System object).</dd>
+  <dd>Nesting level in the object tree, starting from the 0th object.</dd>
 
 <dt>Logical index</dt>
   <dd>Index to uniquely identify objects of the same type.  It
