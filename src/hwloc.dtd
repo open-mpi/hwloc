@@ -1,7 +1,4 @@
 <!ELEMENT root (object)+>
-<!ATTLIST root complete_cpuset CDATA "" >
-<!ATTLIST root online_cpuset CDATA "" >
-<!ATTLIST root allowed_cpuset CDATA "" >
 
 <!ELEMENT object (object)*>
 <!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
@@ -15,3 +12,6 @@
 <!ATTLIST object huge_page_size_kB CDATA "0" >
 <!ATTLIST object huge_page_free CDATA "0" >
 <!ATTLIST object depth CDATA "-1" >
+<!ATTLIST object complete_cpuset CDATA "" >
+<!ATTLIST object online_cpuset CDATA "" >
+<!ATTLIST object allowed_cpuset CDATA "" >

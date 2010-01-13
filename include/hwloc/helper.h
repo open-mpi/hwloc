@@ -621,4 +621,79 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
 
 /** @} */
 
+/** \defgroup hwlocality_helper_cpuset Cpuset Helpers
+ * @{
+ */
+/* \brief Get complete CPU set
+ *
+ * \return the complete CPU set of logical processors of the system. If the
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+static __inline hwloc_const_cpuset_t
+hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+static __inline hwloc_const_cpuset_t
+hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->complete_cpuset;
+}
+
+/* \brief Get topology CPU set
+ *
+ * \return the CPU set of logical processors of the system for which hwloc
+ * provides topology information. This is equivalent to the cpuset of the
+ * system object. If the topology is the result of a combination of several
+ * systems, NULL is returned.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+static __inline hwloc_const_cpuset_t
+hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+static __inline hwloc_const_cpuset_t
+hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->cpuset;
+}
+
+/** \brief Get online CPU set
+ *
+ * \return the CPU set of online logical processors of the system. If the
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+static __inline hwloc_const_cpuset_t
+hwloc_topology_get_online_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+static __inline hwloc_const_cpuset_t
+hwloc_topology_get_online_cpuset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->online_cpuset;
+}
+
+/** \brief Get allowed CPU set
+ *
+ * \return the CPU set of allowed logical processors of the system. If the
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
+ *
+ * \note The returned cpuset is not newly allocated and should thus not be
+ * changed, hwloc_cpuset_dup must be used instead.
+ */
+static __inline hwloc_const_cpuset_t
+hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
+static __inline hwloc_const_cpuset_t
+hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->allowed_cpuset;
+}
+
+
+/** @} */
+
 #endif /* HWLOC_HELPER_H */

@@ -46,23 +46,12 @@ hwloc_backend_xml_exit(struct hwloc_topology *topology)
 }
 
 static void
-hwloc__process_root_attr(struct hwloc_topology *topology,
-			const xmlChar *_name, const xmlChar *_value)
+hwloc__process_root_attr(struct hwloc_topology *topology __hwloc_attribute_unused,
+    const xmlChar *_name, const xmlChar *_value __hwloc_attribute_unused)
 {
   const char *name = (const char *) _name;
-  const char *value = (const char *) _value;
 
-  if (!strcmp(name, "complete_cpuset")) {
-    hwloc_cpuset_free(topology->complete_cpuset);
-    topology->complete_cpuset = hwloc_cpuset_from_string(value);
-  } else if (!strcmp(name, "online_cpuset")) {
-    hwloc_cpuset_free(topology->online_cpuset);
-    topology->online_cpuset = hwloc_cpuset_from_string(value);
-  } else if (!strcmp(name, "allowed_cpuset")) {
-    hwloc_cpuset_free(topology->allowed_cpuset);
-    topology->allowed_cpuset = hwloc_cpuset_from_string(value);
-  } else
-    fprintf(stderr, "ignoring unknown root attribute %s\n", name);
+  fprintf(stderr, "ignoring unknown root attribute %s\n", name);
 }
 
 static void
@@ -83,6 +72,12 @@ hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unu
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cpuset"))
     obj->cpuset = hwloc_cpuset_from_string(value);
+  else if (!strcmp(name, "complete_cpuset"))
+    obj->complete_cpuset = hwloc_cpuset_from_string(value);
+  else if (!strcmp(name, "online_cpuset"))
+    obj->online_cpuset = hwloc_cpuset_from_string(value);
+  else if (!strcmp(name, "allowed_cpuset"))
+    obj->allowed_cpuset = hwloc_cpuset_from_string(value);
   else if (!strcmp(name, "name"))
     obj->name = strdup(value);
 
@@ -340,9 +335,26 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
     sprintf(tmp, "%u", obj->os_index);
     xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
   }
-  hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
-  xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
-  free(cpuset);
+  if (obj->cpuset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
+    xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
+    free(cpuset);
+  }
+  if (obj->complete_cpuset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->complete_cpuset);
+    xmlNewProp(node, BAD_CAST "complete_cpuset", BAD_CAST cpuset);
+    free(cpuset);
+  }
+  if (obj->online_cpuset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->online_cpuset);
+    xmlNewProp(node, BAD_CAST "online_cpuset", BAD_CAST cpuset);
+    free(cpuset);
+  }
+  if (obj->allowed_cpuset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->allowed_cpuset);
+    xmlNewProp(node, BAD_CAST "allowed_cpuset", BAD_CAST cpuset);
+    free(cpuset);
+  }
 
   if (obj->name)
     xmlNewProp(node, BAD_CAST "name", BAD_CAST obj->name);
@@ -396,21 +408,8 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
 }
 
 static void
-hwloc__topology_export_info (hwloc_topology_t topology, xmlNodePtr root_node)
+hwloc__topology_export_info (hwloc_topology_t topology __hwloc_attribute_unused, xmlNodePtr root_node __hwloc_attribute_unused)
 {
-  char *str = NULL;
-
-  hwloc_cpuset_asprintf(&str, hwloc_topology_get_complete_cpuset(topology));
-  xmlNewProp(root_node, BAD_CAST "complete_cpuset", BAD_CAST str);
-  free(str);
-
-  hwloc_cpuset_asprintf(&str, hwloc_topology_get_online_cpuset(topology));
-  xmlNewProp(root_node, BAD_CAST "online_cpuset", BAD_CAST str);
-  free(str);
-
-  hwloc_cpuset_asprintf(&str, hwloc_topology_get_allowed_cpuset(topology));
-  xmlNewProp(root_node, BAD_CAST "allowed_cpuset", BAD_CAST str);
-  free(str);
 }
 
 void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)

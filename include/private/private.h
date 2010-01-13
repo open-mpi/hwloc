@@ -56,10 +56,6 @@ struct hwloc_topology {
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
   int is_thissystem;
   int is_loaded;
-  hwloc_cpuset_t complete_cpuset;
-  hwloc_cpuset_t online_cpuset;
-  hwloc_cpuset_t allowed_cpuset;
-  hwloc_cpuset_t allowed_nodeset;
 
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology, int policy);
