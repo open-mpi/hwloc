@@ -63,6 +63,7 @@ typedef enum {
 			  * like Kerrighed.
 			  */
   HWLOC_OBJ_MACHINE,	/**< \brief Machine.
+			  * The typical root object type.
 			  * A set of processors and memory with cache
 			  * coherency.
 			  */
@@ -111,8 +112,7 @@ typedef enum {
  * contain sockets which contain caches, which contain cores, which contain
  * processors).
  *
- * \note HWLOC_OBJ_SYSTEM will always be the highest, and
- * HWLOC_OBJ_PROC will always be the deepest.
+ * \note HWLOC_OBJ_PROC will always be the deepest.
  * \note This does not mean that the actual topology will respect that order:
  * e.g. as of today cores may also contain caches, and sockets may also contain
  * nodes. This is thus just to be seen as a fallback comparison method.
@@ -203,7 +203,7 @@ union hwloc_obj_attr_u {
     unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
   } machine;
   /** \brief System-specific Object Attributes */
-  struct hwloc_machine_attr_s system;
+  struct hwloc_machine_attr_s system; /* FIXME: drop entirely? or keep memory_kB? */
   /** \brief Misc-specific Object Attributes */
   struct hwloc_misc_attr_s {
     unsigned depth;			  /**< \brief Depth of misc object */
@@ -280,17 +280,16 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 /** \brief Ignore an object type.
  *
  * Ignore all objects from the given type.
- * The top-level type HWLOC_OBJ_SYSTEM and bottom-level type HWLOC_OBJ_PROC may
- * not be ignored.
+ * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
  */
+/* FIXME: clarify what happens if ignoring the top-level type (ignore the ignoring?) */
 HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_t type);
 
 /** \brief Ignore an object type if it does not bring any structure.
  *
  * Ignore all objects from the given type as long as they do not bring any structure:
  * Each ignored object should have a single children or be the only child of its father.
- * The top-level type HWLOC_OBJ_SYSTEM and bottom-level type HWLOC_OBJ_PROC may
- * not be ignored.
+ * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
  */
 HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
 
