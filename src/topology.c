@@ -782,6 +782,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t fathe
   obj->next_sibling = NULL;
   obj->first_child = NULL;
 
+  /* TODO: rather move to after the main detection loop? */
   if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
     /* Insert in the main device list */
     if (topology->first_device) {
