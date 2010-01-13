@@ -134,6 +134,13 @@ typedef enum hwloc_obj_bridge_type_e {
   HWLOC_OBJ_BRIDGE_PCI,		/**< \brief PCI-side of a bridge. */
 } hwloc_obj_bridge_type_t;
 
+typedef enum hwloc_obj_osdev_type_e {
+  HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device. */
+  HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device. */
+  HWLOC_OBJ_OSDEV_INFINIBAND,	/**< \brief Operating system infiniband device. */
+  HWLOC_OBJ_OSDEV_DMA,	/**< \brief Operating system dma device. */
+} hwloc_obj_osdev_type_t;
+
 /** \brief Value returned by hwloc_compare_types when types can not be compared. */
 enum {
     HWLOC_TYPE_UNORDERED = INT_MAX
@@ -246,6 +253,10 @@ union hwloc_obj_attr_u {
     hwloc_obj_bridge_type_t downstream_type;
     unsigned depth;
   } bridge;
+  /** \brief OS Device specific Object Attributes */
+  struct hwloc_osdev_attr_u {
+    hwloc_obj_osdev_type_t type;
+  } osdev;
 };
 
 /** @} */
