@@ -17,6 +17,7 @@
 #include <string.h>
 #include <assert.h>
 #ifdef HWLOC_LINUX_SYS
+#include <hwloc/linux.h>
 #include <dirent.h>
 #include <sys/types.h>
 #endif
