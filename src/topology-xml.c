@@ -439,7 +439,7 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
   /* Creates a DTD declaration. Isn't mandatory. */
   dtd = xmlCreateIntSubset(doc, BAD_CAST "root", NULL, BAD_CAST "hwloc.dtd");
 
-  hwloc__topology_export_xml_object (topology, hwloc_get_system_obj(topology), root_node);
+  hwloc__topology_export_xml_object (topology, hwloc_get_root_obj(topology), root_node);
 
   hwloc__topology_export_info (topology, root_node);
 

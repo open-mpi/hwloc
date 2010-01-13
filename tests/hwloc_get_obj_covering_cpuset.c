@@ -48,7 +48,7 @@ int main(void)
 
   set = hwloc_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
-  assert(obj == hwloc_get_system_obj(topology));
+  assert(obj == hwloc_get_root_obj(topology));
   fprintf(stderr, "found system as covering object of first+last cpus cpuset %s\n",
 	  GIVEN_LARGESPLIT_CPUSET_STRING);
   hwloc_cpuset_free(set);

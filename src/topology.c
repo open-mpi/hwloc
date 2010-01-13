@@ -1657,7 +1657,7 @@ hwloc_topology_get_complete_cpuset(struct hwloc_topology *topology)
 hwloc_const_cpuset_t
 hwloc_topology_get_topology_cpuset(struct hwloc_topology *topology)
 {
-  return hwloc_get_system_obj(topology)->cpuset;
+  return hwloc_get_root_obj(topology)->cpuset;
 }
 
 hwloc_const_cpuset_t
@@ -1755,7 +1755,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
   /* top-level specific checks */
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
-  obj = hwloc_get_system_obj(topology);
+  obj = hwloc_get_root_obj(topology);
   assert(obj);
 
   depth = hwloc_topology_get_depth(topology);

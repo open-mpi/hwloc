@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
       hwloc_topology_set_xml(topology, xmlpath);
     hwloc_topology_load(topology);
 
-    hwloc_distribute(topology, hwloc_get_system_obj(topology), cpuset, n);
+    hwloc_distribute(topology, hwloc_get_root_obj(topology), cpuset, n);
     for (i = 0; i < n; i++) {
       char *str = NULL;
       hwloc_cpuset_asprintf(&str, cpuset[i]);

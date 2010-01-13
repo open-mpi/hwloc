@@ -690,7 +690,7 @@ void *
 output_draw_start(struct draw_methods *methods, int logical, hwloc_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(topology, &getmax_draw_methods, logical, hwloc_get_system_obj(topology), &coords, 100, 0, 0);
+  fig(topology, &getmax_draw_methods, logical, hwloc_get_root_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
@@ -711,5 +711,5 @@ output_draw_start(struct draw_methods *methods, int logical, hwloc_topology_t to
 void
 output_draw(struct draw_methods *methods, int logical, hwloc_topology_t topology, void *output)
 {
-	fig(topology, methods, logical, hwloc_get_system_obj(topology), output, 100, 0, 0);
+	fig(topology, methods, logical, hwloc_get_root_obj(topology), output, 100, 0, 0);
 }

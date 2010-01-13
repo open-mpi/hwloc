@@ -27,7 +27,7 @@ int main(void)
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
 
-  obj = hwloc_get_system_obj(topology);
+  obj = hwloc_get_root_obj(topology);
   stringlen = hwloc_cpuset_asprintf(&string, obj->cpuset);
   printf("system cpuset is %s\n", string);
   set = hwloc_cpuset_from_string(string);

@@ -36,7 +36,7 @@ int main(void)
   depth = hwloc_topology_get_depth(topology);
 
   /* just get the system object */
-  obj = hwloc_get_system_obj(topology);
+  obj = hwloc_get_root_obj(topology);
   ret = hwloc_get_largest_objs_inside_cpuset(topology, obj->cpuset, objs, 1);
   assert(ret == 1);
   assert(objs[0] == obj);

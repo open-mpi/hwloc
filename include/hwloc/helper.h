@@ -81,14 +81,21 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * @{
  */
 
-/** \brief Returns the top-object of the topology-tree. Its type is ::HWLOC_OBJ_SYSTEM. */
+/** \brief Returns the top-object of the topology-tree.
+ *
+ * Its type is typically ::HWLOC_OBJ_MACHINE but it could be different for complex topologies.
+ * This function replaces the old deprecated hwloc_get_system_obj().
+ */
 static __inline hwloc_obj_t
-hwloc_get_system_obj (hwloc_topology_t topology) __hwloc_attribute_pure;
+hwloc_get_root_obj (hwloc_topology_t topology) __hwloc_attribute_pure;
 static __inline hwloc_obj_t
-hwloc_get_system_obj (hwloc_topology_t topology)
+hwloc_get_root_obj (hwloc_topology_t topology)
 {
   return hwloc_get_obj_by_depth (topology, 0, 0);
 }
+
+static __inline hwloc_obj_t hwloc_get_system_obj (hwloc_topology_t topology) __hwloc_attribute_deprecated;
+static __inline hwloc_obj_t hwloc_get_system_obj (hwloc_topology_t topology) { return hwloc_get_root_obj (topology); }
 
 /** \brief Returns the parent object of \p obj at depth \p depth. */
 static __inline hwloc_obj_t
@@ -373,7 +380,7 @@ hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t s
 static __inline hwloc_obj_t
 hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t set)
 {
-  struct hwloc_obj *current = hwloc_get_system_obj(topology);
+  struct hwloc_obj *current = hwloc_get_root_obj(topology);
 
   if (hwloc_cpuset_iszero(set))
     return NULL;
@@ -546,7 +553,7 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
 static __inline hwloc_obj_t
 hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_type_t *typev, unsigned *idxv)
 {
-  hwloc_obj_t obj = hwloc_get_system_obj(topology);
+  hwloc_obj_t obj = hwloc_get_root_obj(topology);
   int i;
 
   for(i=0; i<nr; i++) {
