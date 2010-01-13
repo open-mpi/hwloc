@@ -1,8 +1,8 @@
-System(0KB HP=0*0kB  )
+Machine(0KB HP=0*0kB  )
   Core
     P#0
     P#1
-depth 0:	1 System (type #0)
+depth 0:	1 Machine (type #1)
  depth 1:	1 Core (type #5)
   depth 2:	2 Procs (type #6)
 Topology not from this system

@@ -110,6 +110,8 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-const//g' \
 		-e 's/__hwloc_attribute_pure//g' \
 		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-pure//g' \
+		-e 's/__hwloc_attribute_deprecated//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-deprecated//g' \
 		-e 's/HWLOC_DECLSPEC//g' \
 		-e 's/HWLOC\\_\\-DECLSPEC//g' \
 		-e 's/__inline/inline/g' \
@@ -299,7 +301,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_parent_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_parent_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_covering_obj.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_system_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_root_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \

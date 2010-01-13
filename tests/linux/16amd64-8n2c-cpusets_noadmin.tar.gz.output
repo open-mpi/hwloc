@@ -1,4 +1,4 @@
-System(0KB HP=0*0kB TYAN Computer Corp S4881 )
+Machine(0KB HP=0*0kB TYAN Computer Corp S4881 )
   NUMANode#0(8386704KB)
     Socket#0
         L2Cache(1024KB)
@@ -79,7 +79,7 @@ System(0KB HP=0*0kB TYAN Computer Corp S4881 )
           L1Cache(64KB)
           Core#1
             P#15
-depth 0:	1 System (type #0)
+depth 0:	1 Machine (type #1)
  depth 1:	8 NUMANodes (type #2)
   depth 2:	8 Sockets (type #3)
    depth 3:	16 Caches (type #4)

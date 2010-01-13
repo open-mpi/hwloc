@@ -50,7 +50,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
       fprintf(output, "%s", type);
     } else
       fprintf(output, "P");
-    if (index != (unsigned)-1 && l->type != HWLOC_OBJ_SYSTEM
+    if (l->depth != 0 && index != (unsigned)-1
         && l->type != HWLOC_OBJ_PCI_DEVICE
         && (l->type != HWLOC_OBJ_BRIDGE || l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
       fprintf(output, "#%u", index);
@@ -133,9 +133,9 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
   if (show_only != (hwloc_obj_type_t)-1) {
     if (verbose_mode > 1)
       fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(show_only));
-    output_only (topology, hwloc_get_system_obj(topology), output, logical, verbose_mode);
+    output_only (topology, hwloc_get_root_obj(topology), output, logical, verbose_mode);
   } else if (verbose_mode >= 1) {
-    output_topology (topology, hwloc_get_system_obj(topology), NULL, output, 0, logical, verbose_mode);
+    output_topology (topology, hwloc_get_root_obj(topology), NULL, output, 0, logical, verbose_mode);
     fprintf(output, "\n");
   }
 

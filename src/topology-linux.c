@@ -1440,6 +1440,9 @@ hwloc_look_linux(struct hwloc_topology *topology)
     hwloc_obj_t machine;
     hwloc_cpuset_t machine_online_set;
 
+    /* replace top-level object type with SYSTEM and add some MACHINE underneath */
+
+    topology->levels[0][0]->type = HWLOC_OBJ_SYSTEM;
     topology->levels[0][0]->attr->system.memory_kB = 0;
     topology->levels[0][0]->attr->system.huge_page_free = 0;
     /* No cpuset support for now.  */
@@ -1505,15 +1508,15 @@ hwloc_look_linux(struct hwloc_topology *topology)
     /* Compute the whole system memory and huge page */
     hwloc_get_procfs_meminfo_info(topology,
 				 "/proc/meminfo",
-				 &topology->levels[0][0]->attr->system.memory_kB,
-				 &topology->levels[0][0]->attr->system.huge_page_size_kB,
-				 &topology->levels[0][0]->attr->system.huge_page_free);
+				 &topology->levels[0][0]->attr->machine.memory_kB,
+				 &topology->levels[0][0]->attr->machine.huge_page_size_kB,
+				 &topology->levels[0][0]->attr->machine.huge_page_free);
 				 /* FIXME: gather page_size_kB as well? MaMI needs it */
 
     /* Gather DMI info */
     hwloc__get_dmi_info(topology,
-		       &topology->levels[0][0]->attr->system.dmi_board_vendor,
-		       &topology->levels[0][0]->attr->system.dmi_board_name);
+		       &topology->levels[0][0]->attr->machine.dmi_board_vendor,
+		       &topology->levels[0][0]->attr->machine.dmi_board_name);
   }
 }
 

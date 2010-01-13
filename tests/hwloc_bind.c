@@ -77,7 +77,7 @@ int main(void)
 
   support = hwloc_topology_get_support(topology);
 
-  obj = hwloc_get_system_obj(topology);
+  obj = hwloc_get_root_obj(topology);
   set = hwloc_cpuset_dup(obj->cpuset);
 
   while (hwloc_cpuset_isequal(obj->cpuset, set)) {

@@ -63,7 +63,7 @@ int main(void)
 
     /* Walk the topology with a tree style. */
     printf("*** Printing overall tree\n");
-    print_children(topology, hwloc_get_system_obj(topology), 0);
+    print_children(topology, hwloc_get_root_obj(topology), 0);
 
     /* Print the number of sockets. */
     depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);

@@ -373,7 +373,7 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
   size_t attrlen;
   if (obj->type != HWLOC_OBJ_PROC)
     hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
-  if (index != (unsigned)-1 && obj->type != HWLOC_OBJ_SYSTEM
+  if (index != (unsigned)-1 && obj->depth != 0
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
     snprintf(indexstr, sizeof(indexstr), "#%u", index);
@@ -828,7 +828,7 @@ void *
 output_draw_start(struct draw_methods *methods, int logical, hwloc_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(topology, &getmax_draw_methods, logical, hwloc_get_system_obj(topology), &coords, 100, 0, 0);
+  fig(topology, &getmax_draw_methods, logical, hwloc_get_root_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
@@ -851,5 +851,5 @@ output_draw_start(struct draw_methods *methods, int logical, hwloc_topology_t to
 void
 output_draw(struct draw_methods *methods, int logical, hwloc_topology_t topology, void *output)
 {
-	fig(topology, methods, logical, hwloc_get_system_obj(topology), output, 100, 0, 0);
+	fig(topology, methods, logical, hwloc_get_root_obj(topology), output, 100, 0, 0);
 }

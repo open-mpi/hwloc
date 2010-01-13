@@ -1,4 +1,4 @@
-System(0KB HP=0*0kB  )
+Machine(0KB HP=0*0kB  )
   NUMANode#0(1048576KB)
     Socket#0
       L3Cache(8192KB)
@@ -163,7 +163,7 @@ System(0KB HP=0*0kB  )
             Core#1
               P#59
               P#63
-depth 0:	1 System (type #0)
+depth 0:	1 Machine (type #1)
  depth 1:	4 NUMANodes (type #2)
   depth 2:	8 Sockets (type #3)
    depth 3:	8 Caches (type #4)

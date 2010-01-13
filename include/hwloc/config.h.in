@@ -59,6 +59,16 @@
 # define __hwloc_attribute_pure
 #endif
 
+#ifdef HWLOC_HAVE_ATTRIBUTE_DEPRECATED
+# if HWLOC_HAVE_ATTRIBUTE_DEPRECATED
+#  define __hwloc_attribute_deprecated __attribute__((__deprecated__))
+# else
+#  define __hwloc_attribute_deprecated
+# endif
+#else
+# define __hwloc_attribute_deprecated
+#endif
+
 #ifdef HWLOC_C_HAVE_VISIBILITY
 # if HWLOC_C_HAVE_VISIBILITY
 #  define HWLOC_DECLSPEC __attribute__((__visibility__("default")))
