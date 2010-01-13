@@ -137,6 +137,29 @@ hwloc_linux_lookup_block_class(struct hwloc_obj *pcidev, const char *pcidevpath)
   if (!devicedir)
     return;
   while ((devicedirent = readdir(devicedir)) != NULL) {
+    if (sscanf(devicedirent->d_name, "ide%d", &dummy) == 1) {
+      /* found for ide% */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], devicedirent->d_name);
+      pathlen += 1+strlen(devicedirent->d_name);
+      hostdir = opendir(path);
+      if (!hostdir)
+	continue;
+      while ((hostdirent = readdir(hostdir)) != NULL) {
+	if (sscanf(hostdirent->d_name, "%d.%d", &dummy, &dummy) != 2)
+	  continue;
+	/* found ide%d/%d.%d */
+	path[pathlen] = '/';
+	strcpy(&path[pathlen+1], hostdirent->d_name);
+	pathlen += 1+strlen(hostdirent->d_name);
+	/* lookup block class for real */
+	hwloc_linux_class_readdir(pcidev, path, "block");
+	/* restore parent path */
+	pathlen -= 1+strlen(hostdirent->d_name);
+	path[pathlen] = '\0';
+      }
+      continue;
+    }
     if (sscanf(devicedirent->d_name, "host%d", &dummy) != 1)
       continue;
     /* found for host%d */
