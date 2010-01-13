@@ -110,6 +110,8 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-const//g' \
 		-e 's/__hwloc_attribute_pure//g' \
 		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-pure//g' \
+		-e 's/__hwloc_attribute_deprecated//g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-deprecated//g' \
 		-e 's/HWLOC_DECLSPEC//g' \
 		-e 's/HWLOC\\_\\-DECLSPEC//g' \
 		-e 's/__inline/inline/g' \
