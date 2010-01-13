@@ -129,7 +129,7 @@ typedef enum {
  */
 HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2) __hwloc_attribute_const;
 
-typedef enum hwloc_obj_bridge_e {
+typedef enum hwloc_obj_bridge_type_e {
   HWLOC_OBJ_BRIDGE_HOST,	/**< \brief Host-side of a bridge, only possible upstream. */
   HWLOC_OBJ_BRIDGE_PCI,		/**< \brief PCI-side of a bridge. */
 } hwloc_obj_bridge_type_t;
