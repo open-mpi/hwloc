@@ -387,7 +387,7 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 static void
 pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  unsigned textwidth = 0;
+  unsigned textwidth = gridsize;
   unsigned textheight = (fontsize ? (fontsize + gridsize) : 0);
   unsigned myheight = textheight;
   unsigned mywidth = 0;
@@ -418,19 +418,19 @@ static void
 os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_methods *methods, int logical __hwloc_attribute_unused, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned textwidth = 0;
-  unsigned textheight = 0;
+  unsigned totheight = gridsize;
   unsigned totwidth = gridsize;
   int n;
 
   if (fontsize) {
     n = strlen(level->name);
     textwidth = (n * fontsize * 3) / 4;
-    textheight = gridsize + fontsize + gridsize;
+    totheight = gridsize + fontsize + gridsize;
     totwidth = gridsize + textwidth + gridsize;
   }
 
   *retwidth = totwidth;
-  *retheight = textheight;
+  *retheight = totheight;
 
   methods->box(output, OS_DEVICE_R_COLOR, OS_DEVICE_G_COLOR, OS_DEVICE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
@@ -442,7 +442,7 @@ static void
 bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   /* Room for the box and separation from cards */
-  unsigned textwidth = 12*fontsize;
+  unsigned textwidth = gridsize + 7*fontsize + gridsize;
   unsigned textheight = PCI_HEIGHT;
   unsigned myheight = textheight;
   unsigned mywidth = gridsize + gridsize;
