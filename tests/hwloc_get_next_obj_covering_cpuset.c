@@ -54,7 +54,7 @@ main (void)
 
 
 
-  hwloc_topology_set_synthetic (topology, "ndoes:2 socket:5 cores:3 4");
+  hwloc_topology_set_synthetic (topology, "nodes:2 socket:5 cores:3 4");
   err = hwloc_topology_load (topology);
   if (err)
     return EXIT_FAILURE;

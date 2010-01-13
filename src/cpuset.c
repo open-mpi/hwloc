@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
+#include <ctype.h>
 
 
 /* overzealous check in debug-mode, not as powerful as valgrind but still useful */
@@ -56,6 +57,18 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
   } while ((size_t) ret == size-1 || (ret < 0 && !errno));
 
   return ret;
+}
+
+int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
+{
+  size_t i = 0;
+  while (*haystack && *haystack != ':') {
+    if (tolower(*haystack++) != tolower(*needle++)) {
+      return 1;
+      }
+    i++;
+  }
+  return i < n;
 }
 
 struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
