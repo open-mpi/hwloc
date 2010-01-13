@@ -79,6 +79,10 @@
 #define PCI_DEVICE_G_COLOR DARKER_EPOXY_G_COLOR
 #define PCI_DEVICE_B_COLOR DARKER_EPOXY_B_COLOR
 
+#define OS_DEVICE_R_COLOR 0xff
+#define OS_DEVICE_G_COLOR 0xff
+#define OS_DEVICE_B_COLOR 0xff
+
 #define BRIDGE_R_COLOR 0xff
 #define BRIDGE_G_COLOR 0xff
 #define BRIDGE_B_COLOR 0xff
@@ -384,21 +388,54 @@ static void
 pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned textwidth = 0;
+  unsigned textheight = (fontsize ? (fontsize + gridsize) : 0);
+  unsigned myheight = textheight;
+  unsigned mywidth = 0;
+  unsigned totwidth, totheight;
   char text[64];
   int n;
+
+  DYNA_CHECK();
 
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = (n * fontsize * 3) / 4;
   }
 
-  *retwidth = textwidth;
-  *retheight = PCI_HEIGHT;
+  RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
   methods->box(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   if (fontsize)
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+
+  RECURSE_RECT(level, methods, gridsize, gridsize);
+
+  DYNA_SAVE();
+}
+
+static void
+os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_methods *methods, int logical __hwloc_attribute_unused, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+{
+  unsigned textwidth = 0;
+  unsigned textheight = 0;
+  unsigned totwidth = gridsize;
+  int n;
+
+  if (fontsize) {
+    n = strlen(level->name);
+    textwidth = (n * fontsize * 3) / 4;
+    textheight = gridsize + fontsize + gridsize;
+    totwidth = gridsize + textwidth + gridsize;
+  }
+
+  *retwidth = totwidth;
+  *retheight = textheight;
+
+  methods->box(output, OS_DEVICE_R_COLOR, OS_DEVICE_G_COLOR, OS_DEVICE_B_COLOR, depth, x, *retwidth, y, *retheight);
+
+  if (fontsize)
+    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
 }
 
 static void
@@ -733,6 +770,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PROC: return proc_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
+    case HWLOC_OBJ_OS_DEVICE: return os_device_draw;
     case HWLOC_OBJ_BRIDGE: return bridge_draw;
     default:
     case HWLOC_OBJ_MISC: return misc_draw;
