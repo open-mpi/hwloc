@@ -18,10 +18,10 @@ hwloc-mask \- Operate on cpu mask strings
 .
 .TP 10
 \fB\-p\fR \fB\-\-physical\fR
-display OS/physical indexes instead of logical indexes
+take OS/physical indexes instead of logical indexes
 .TP
 \fB\-l\fR \fB\-\-logical\fR
-display logical indexes instead of physical/OS indexes (default)
+take logical indexes instead of physical/OS indexes (default)
 .TP
 \fB\-\-proclist\fR
 Report the list of processors' physical/OS indexes instead of the cpu mask string.
@@ -41,7 +41,8 @@ Report version and exit.
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-mask generates and manipulates CPU mask strings.
+hwloc-mask generates and manipulates CPU mask strings. Output is always
+physical/OS masks and numbers
 .
 .PP
 .B NOTE:
