@@ -1749,7 +1749,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
 
   /* check that last level is PROC */
   assert(hwloc_get_depth_type(topology, hwloc_topology_get_depth(topology)-1) == HWLOC_OBJ_PROC);
-  /* check that other levels are neither PROC nor SYSTEM */
+  /* check that other levels are not PROC */
   for(i=1; i<hwloc_topology_get_depth(topology)-1; i++)
     assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_PROC);
 
