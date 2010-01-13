@@ -415,7 +415,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   }
 
   /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
-#ifdef LINUX_SYS
+#ifdef HWLOC_LINUX_SYS
   char path[256];
   FILE *file;
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
