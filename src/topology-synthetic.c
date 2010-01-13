@@ -191,6 +191,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_BRIDGE:
     case HWLOC_OBJ_PCI_DEVICE:
+    case HWLOC_OBJ_OS_DEVICE:
       /* Shouldn't happen.  */
       abort();
       break;
@@ -232,6 +233,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_BRIDGE:
     case HWLOC_OBJ_PCI_DEVICE:
+    case HWLOC_OBJ_OS_DEVICE:
       abort();
       break;
     case HWLOC_OBJ_MACHINE:
