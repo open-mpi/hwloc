@@ -1178,7 +1178,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /* initialize all depth to unknown */
   for (l=1; l < HWLOC_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
-  topology->type_depth[HWLOC_OBJ_SYSTEM] = 0;
+  topology->type_depth[topology->levels[0][0]->type] = 0;
 
   /* Start with children of the whole system.  */
   l = 0;
@@ -1344,7 +1344,7 @@ hwloc_discover(struct hwloc_topology *topology)
 static void
 hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
-  struct hwloc_obj *system_obj;
+  struct hwloc_obj *root_obj;
   int i;
 
 
@@ -1355,29 +1355,28 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
-  topology->type_depth[HWLOC_OBJ_SYSTEM] = 0;
   hwloc_cpuset_zero(topology->complete_cpuset);
   hwloc_cpuset_fill(topology->online_cpuset);
   hwloc_cpuset_fill(topology->allowed_cpuset);
   hwloc_cpuset_fill(topology->allowed_nodeset);
 
   /* Create the actual System object */
-  system_obj = hwloc_alloc_setup_object(HWLOC_OBJ_SYSTEM, 0);
-  system_obj->cpuset = hwloc_cpuset_alloc();
-  system_obj->depth = 0;
-  system_obj->logical_index = 0;
-  system_obj->sibling_rank = 0;
-  system_obj->attr->system.memory_kB = 0;
-  system_obj->attr->system.huge_page_free = 0;
+  root_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, 0);
+  root_obj->cpuset = hwloc_cpuset_alloc();
+  root_obj->depth = 0;
+  root_obj->logical_index = 0;
+  root_obj->sibling_rank = 0;
+  root_obj->attr->machine.memory_kB = 0;
+  root_obj->attr->machine.huge_page_free = 0;
 #ifdef HAVE__SC_LARGE_PAGESIZE
-  system_obj->attr->system.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+  root_obj->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
 #else /* HAVE__SC_LARGE_PAGESIZE */
-  system_obj->attr->system.huge_page_size_kB = 0;
+  root_obj->attr->machine.huge_page_size_kB = 0;
 #endif /* HAVE__SC_LARGE_PAGESIZE */
-  system_obj->attr->system.dmi_board_vendor = NULL;
-  system_obj->attr->system.dmi_board_name = NULL;
-  hwloc_cpuset_fill(system_obj->cpuset);
-  topology->levels[0][0] = system_obj;
+  root_obj->attr->machine.dmi_board_vendor = NULL;
+  root_obj->attr->machine.dmi_board_name = NULL;
+  hwloc_cpuset_fill(root_obj->cpuset);
+  topology->levels[0][0] = root_obj;
 }
 
 int
@@ -1497,9 +1496,6 @@ hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t typ
   if (type >= HWLOC_OBJ_TYPE_MAX)
     return -1;
 
-  if (type == HWLOC_OBJ_SYSTEM)
-    /* we don't want 2 heads */
-    return -1;
 
   if (type == HWLOC_OBJ_PROC)
     /* we need the proc level */
@@ -1515,10 +1511,6 @@ hwloc_topology_ignore_type_keep_structure(struct hwloc_topology *topology, hwloc
   if (type >= HWLOC_OBJ_TYPE_MAX)
     return -1;
 
-  if (type == HWLOC_OBJ_SYSTEM)
-    /* we don't want 2 heads */
-    return -1;
-
   if (type == HWLOC_OBJ_PROC)
     /* we need the proc level */
     return -1;
@@ -1532,7 +1524,7 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
 {
   unsigned type;
   for(type=0; type<HWLOC_OBJ_TYPE_MAX; type++)
-    if (type != HWLOC_OBJ_SYSTEM && type != HWLOC_OBJ_PROC)
+    if (type != HWLOC_OBJ_PROC)
       topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }
@@ -1750,27 +1742,21 @@ hwloc_topology_check(struct hwloc_topology *topology)
   for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
     assert(hwloc_get_order_type(hwloc_get_type_order(type)) == type);
   }
-  for (i = hwloc_get_type_order(HWLOC_OBJ_SYSTEM); 
+  for (i = hwloc_get_type_order(HWLOC_OBJ_SYSTEM);
        i <= hwloc_get_type_order(HWLOC_OBJ_CORE); i++) {
     assert(i == hwloc_get_type_order(hwloc_get_order_type(i)));
   }
 
-  /* check that first level is SYSTEM */
-  assert(hwloc_get_depth_type(topology, 0) == HWLOC_OBJ_SYSTEM);
   /* check that last level is PROC */
   assert(hwloc_get_depth_type(topology, hwloc_topology_get_depth(topology)-1) == HWLOC_OBJ_PROC);
   /* check that other levels are neither PROC nor SYSTEM */
-  for(i=1; i<hwloc_topology_get_depth(topology)-1; i++) {
-    assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_SYSTEM);
+  for(i=1; i<hwloc_topology_get_depth(topology)-1; i++)
     assert(hwloc_get_depth_type(topology, i) != HWLOC_OBJ_PROC);
-  }
 
   /* top-level specific checks */
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
   obj = hwloc_get_system_obj(topology);
   assert(obj);
-  /* top-level object must be SYSTEM */
-  assert(obj->type == HWLOC_OBJ_SYSTEM);
 
   depth = hwloc_topology_get_depth(topology);
 

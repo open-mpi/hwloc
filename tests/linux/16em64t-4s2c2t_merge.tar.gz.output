@@ -1,4 +1,4 @@
-System(0KB HP=0*0kB  )
+Machine(0KB HP=0*0kB  )
   L3Cache(4096KB)
     Core#0
       P#0
@@ -27,7 +27,7 @@ System(0KB HP=0*0kB  )
     Core#1
       P#7
       P#15
-depth 0:	1 System (type #0)
+depth 0:	1 Machine (type #1)
  depth 1:	4 Caches (type #4)
   depth 2:	8 Cores (type #5)
    depth 3:	16 Procs (type #6)

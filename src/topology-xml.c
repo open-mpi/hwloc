@@ -17,6 +17,8 @@
 #include <assert.h>
 #include <strings.h>
 
+/* FIXME: system not at the top */
+
 int
 hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
 {

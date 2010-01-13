@@ -1,4 +1,4 @@
-System(514993840KB HP=0*262144kB  )
+Machine(514993840KB HP=0*262144kB  )
   Misc1
     Misc0
       NUMANode#0(8064400KB)
@@ -723,7 +723,7 @@ System(514993840KB HP=0*262144kB  )
             P#254
           Core#1
             P#255
-depth 0:	1 System (type #0)
+depth 0:	1 Machine (type #1)
  depth 1:	4 Miscs (type #7)
   depth 2:	16 Miscs (type #7)
    depth 3:	64 NUMANodes (type #2)

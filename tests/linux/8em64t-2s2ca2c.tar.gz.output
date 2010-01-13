@@ -1,4 +1,4 @@
-System(16468292KB HP=0*2048kB Dell Inc. 0NR282)
+Machine(16468292KB HP=0*2048kB Dell Inc. 0NR282)
   Socket#0
     L2Cache(4096KB)
       L1Cache(32KB)
@@ -29,7 +29,7 @@ System(16468292KB HP=0*2048kB Dell Inc. 0NR282)
       L1Cache(32KB)
         Core#3
           P#7
-depth 0:	1 System (type #0)
+depth 0:	1 Machine (type #1)
  depth 1:	2 Sockets (type #3)
   depth 2:	4 Caches (type #4)
    depth 3:	8 Caches (type #4)

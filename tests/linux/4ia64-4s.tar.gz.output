@@ -1,4 +1,4 @@
-System(0KB HP=0*0kB  )
+Machine(0KB HP=0*0kB  )
   Socket
       L3Cache(4096KB)
         L2Cache(256KB)
@@ -23,7 +23,7 @@ System(0KB HP=0*0kB  )
           L1Cache(16KB)
           Core#0
             P#3
-depth 0:	1 System (type #0)
+depth 0:	1 Machine (type #1)
  depth 1:	4 Sockets (type #3)
   depth 2:	4 Caches (type #4)
    depth 3:	4 Caches (type #4)

@@ -340,7 +340,7 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
   size_t attrlen;
   if (obj->type != HWLOC_OBJ_PROC)
     hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
-  if (index != (unsigned)-1 && obj->type != HWLOC_OBJ_SYSTEM)
+  if (index != (unsigned)-1 && obj->depth != 0)
     snprintf(indexstr, sizeof(indexstr), "#%u", index);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
   if (attrlen)

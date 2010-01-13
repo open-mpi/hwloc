@@ -38,11 +38,11 @@ main (void)
   assert(!obj);
 
   /* first system object is the top-level object of the topology */
-  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_SYSTEM, 0);
+  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_MACHINE, 0);
   assert(obj == hwloc_get_system_obj(topology));
 
   /* first next-object object is the top-level object of the topology */
-  obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_SYSTEM, NULL);
+  obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_MACHINE, NULL);
   assert(obj == hwloc_get_system_obj(topology));
   /* there is no next object after the system object */
   obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_SYSTEM, obj);

@@ -27,7 +27,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
-  topology->backend_params.synthetic.type[0] = HWLOC_OBJ_SYSTEM;
+  topology->backend_params.synthetic.type[0] = HWLOC_OBJ_MACHINE;
   topology->backend_params.synthetic.id[0] = 0;
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
@@ -41,9 +41,11 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       break;
 
     if (*pos < '0' || *pos > '9') {
-      if (!hwloc_strncasecmp(pos, "machines", 2))
+      if (!hwloc_strncasecmp(pos, "machines", 2)) {
 	type = HWLOC_OBJ_MACHINE;
-      else if (!hwloc_strncasecmp(pos, "nodes", 1))
+	/* switch top-level into system */
+	topology->backend_params.synthetic.type[0] = HWLOC_OBJ_SYSTEM;
+      } else if (!hwloc_strncasecmp(pos, "nodes", 1))
 	type = HWLOC_OBJ_NODE;
       else if (!hwloc_strncasecmp(pos, "sockets", 1))
 	type = HWLOC_OBJ_SOCKET;
@@ -272,8 +274,12 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
 
   topology->support.discovery.proc = 1;
 
+  /* update first level type according to the synthetic type array */
+  topology->levels[0][0]->type = topology->backend_params.synthetic.type[0];
+
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
     first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, cpuset);
 
   hwloc_cpuset_free(cpuset);
 }
+

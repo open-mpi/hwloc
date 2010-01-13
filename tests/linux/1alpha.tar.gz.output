@@ -1,5 +1,5 @@
-System(8299024KB HP=0*0kB  )
+Machine(8299024KB HP=0*0kB  )
   P#0
-depth 0:	1 System (type #0)
+depth 0:	1 Machine (type #1)
  depth 1:	1 Proc (type #6)
 Topology not from this system
