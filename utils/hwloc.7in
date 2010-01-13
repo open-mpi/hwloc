@@ -23,7 +23,9 @@ man page and other hwloc documentation.
 .
 .TP 5
 .B Hwloc CPU set:
-A set of processors included in an hwloc object.  The hwloc definition
+A set of processors included in an hwloc object, expressed as a bitmask
+indexed by the physical numbers of the CPUs (as announced by the OS).
+The hwloc definition
 of "CPU set" does not carry any the same connotations as Linux's "CPU
 set" (e.g., process affinity, etc.).
 .
@@ -135,14 +137,6 @@ Objects can be any of the following strings
 (listed from "biggest" to "smallest"):
 .
 .TP 10
-.B system
-The entire system that hwloc can see.  This is usually a single
-computer / server (and is therefore usually a synonym for
-.BR machine ), 
-but it can also be a cluster of machines that comprise an overall
-single system image (SSI), such as Kerrighed.
-.
-.TP
 .B machine
 A set of processors and memory.
 .
@@ -170,6 +164,11 @@ Short for
 The smallest physical execution unit that hwloc recognizes.  For
 example, there may be multiple procs on a core (e.g.,
 hardware threads).
+.PP
+The additional
+.B system
+type can be used when several machines form an overall single system image
+(SSI), such as Kerrighed.
 .
 .PP
 Finally, note that an object can be denoted by its numeric "depth" in
@@ -201,32 +200,32 @@ successive object.
 .I Physical 
 indexes are how the operating system refers to objects.  Note that
 while physical indexes are non-negative integer values, the hardware
-and/or operating system may choose arbitrary values -- they need not
+and/or operating system may choose arbitrary values -- they may not
 start with 0, and successive objects may not have consecutive values.
 .
 .PP
-For example, if the first few lines of lstopo output are the
+For example, if the first few lines of lstopo -p output are the
 following:
 .
 
   System(32GB)
-    Node#0(16GB) + Socket#0 + L3(16MB)
-      L2(128KB) + L1(32KB) + Core#0
-        P#3
-        P#7
-      L2(128KB) + L1(32KB) + Core#1
-        P#3
-        P#7
+    Node#0(16GB)
+      Socket#0 + L2(4MB)
+        L1(32KB) + Core#16 + P#0
+        L1(32KB) + Core#18 + P#2
+      Socket#1 + L2(4MB)
+	L1(32KB) + Core#16 + P#1
+	L1(32KB) + Core#18 + P#3
 
-The first processor on the second core is logically number 2 (i.e.,
-logically the 3rd processor, starting from 0).  Its physical index is
-3, but note that another processor
+The first core on the second socket is logically number 2 (i.e.,
+logically the 3rd core, starting from 0).  Its physical index is
+16, but note that another core
 .I also 
-has a physical index of 3.  Hence, physical indexes may only be
+has a physical index of 16.  Hence, physical indexes may only be
 relevant within the scope of their parent (or set of grandparents).
-In this example, to uniquely identify logical processor 2 with
-physical indexes, you must specify (at a minimum) both a core and a
-processor: core 1, processor 3.
+In this example, to uniquely identify logical core 2 with
+physical indexes, you must specify (at a minimum) both a socket and a
+core: socket 1, core 16.
 .PP
 Index values, regardless of whether they are logical or physical, can
 be expressed in several different forms (where X, Y, and N are
