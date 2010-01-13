@@ -55,25 +55,19 @@ hwloc_pci_traverse_setbridgedepth_cb(struct hwloc_topology *topology __hwloc_att
 
 #ifdef HWLOC_LINUX_SYS
 static void
-hwloc_linux_add_os_device(struct hwloc_obj *pcidev, const char *name)
+hwloc_linux_add_os_device(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *name)
 {
   struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
   obj->name = strdup(name);
   obj->cpuset = hwloc_cpuset_alloc();
   obj->logical_index = -1;
 
-  if (pcidev->last_child) {
-    pcidev->last_child->next_sibling = obj;
-    obj->prev_sibling = pcidev->last_child;
-  } else {
-    pcidev->first_child = obj;
-  }
-  pcidev->last_child = obj;
+  hwloc_insert_object_by_parent(topology, pcidev, obj);
 }
 
 /* look for objects of the given class below a sysfs directory */
 static void
-hwloc_linux_class_readdir(struct hwloc_obj *pcidev, const char *devicepath, const char *classname)
+hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *devicepath, const char *classname)
 {
   size_t classnamelen = strlen(classname);
   char path[256];
@@ -87,7 +81,7 @@ hwloc_linux_class_readdir(struct hwloc_obj *pcidev, const char *devicepath, cons
     while ((dirent = readdir(dir)) != NULL) {
       if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
 	continue;
-      hwloc_linux_add_os_device(pcidev, dirent->d_name);
+      hwloc_linux_add_os_device(topology, pcidev, dirent->d_name);
     }
     closedir(dir);
   } else {
@@ -97,7 +91,7 @@ hwloc_linux_class_readdir(struct hwloc_obj *pcidev, const char *devicepath, cons
       while ((dirent = readdir(dir)) != NULL) {
 	if (strncmp(dirent->d_name, classname, classnamelen) || dirent->d_name[classnamelen] != ':')
 	  continue;
-	hwloc_linux_add_os_device(pcidev, dirent->d_name + classnamelen+1);
+	hwloc_linux_add_os_device(topology, pcidev, dirent->d_name + classnamelen+1);
       }
     }
     closedir(dir);
@@ -106,24 +100,24 @@ hwloc_linux_class_readdir(struct hwloc_obj *pcidev, const char *devicepath, cons
 
 /* class objects that are immediately below pci devices */
 static void
-hwloc_linux_lookup_net_class(struct hwloc_obj *pcidev, const char *pcidevpath)
+hwloc_linux_lookup_net_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
-  hwloc_linux_class_readdir(pcidev, pcidevpath, "net");
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, "net");
 }
 static void
-hwloc_linux_lookup_infiniband_class(struct hwloc_obj *pcidev, const char *pcidevpath)
+hwloc_linux_lookup_infiniband_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
-  hwloc_linux_class_readdir(pcidev, pcidevpath, "infiniband");
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, "infiniband");
 }
 static void
-hwloc_linux_lookup_dma_class(struct hwloc_obj *pcidev, const char *pcidevpath)
+hwloc_linux_lookup_dma_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
-  hwloc_linux_class_readdir(pcidev, pcidevpath, "dma");
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, "dma");
 }
 
 /* block class objects are in host%d/target%d:%d:%d/%d:%d:%d/ below pci devices */
 static void
-hwloc_linux_lookup_block_class(struct hwloc_obj *pcidev, const char *pcidevpath)
+hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
   size_t pathlen;
   DIR *devicedir, *hostdir, *targetdir;
@@ -154,7 +148,7 @@ hwloc_linux_lookup_block_class(struct hwloc_obj *pcidev, const char *pcidevpath)
 	strcpy(&path[pathlen+1], hostdirent->d_name);
 	pathlen += 1+strlen(hostdirent->d_name);
 	/* lookup block class for real */
-	hwloc_linux_class_readdir(pcidev, path, "block");
+	hwloc_linux_class_readdir(topology, pcidev, path, "block");
 	/* restore parent path */
 	pathlen -= 1+strlen(hostdirent->d_name);
 	path[pathlen] = '\0';
@@ -188,7 +182,7 @@ hwloc_linux_lookup_block_class(struct hwloc_obj *pcidev, const char *pcidevpath)
 	strcpy(&path[pathlen+1], targetdirent->d_name);
 	pathlen += 1+strlen(targetdirent->d_name);
 	/* lookup block class for real */
-	hwloc_linux_class_readdir(pcidev, path, "block");
+	hwloc_linux_class_readdir(topology, pcidev, path, "block");
 	/* restore parent path */
 	pathlen -= 1+strlen(targetdirent->d_name);
 	path[pathlen] = '\0';
@@ -208,7 +202,7 @@ hwloc_linux_lookup_block_class(struct hwloc_obj *pcidev, const char *pcidevpath)
 #endif /* HWLOC_LINUX_SYS */
 
 static void
-hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
+hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_topology *topology, struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
 {
   if (pcidev->type == HWLOC_OBJ_BRIDGE)
     return;
@@ -220,10 +214,10 @@ hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_topology *topology __hwloc_at
 	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
 	   pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
 
-  hwloc_linux_lookup_net_class(pcidev, pcidevpath);
-  hwloc_linux_lookup_infiniband_class(pcidev, pcidevpath);
-  hwloc_linux_lookup_dma_class(pcidev, pcidevpath);
-  hwloc_linux_lookup_block_class(pcidev, pcidevpath);
+  hwloc_linux_lookup_net_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_infiniband_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_dma_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_block_class(topology, pcidev, pcidevpath);
   /* FIXME: what about gpus? could try class "drm", but proprietary drivers won't appear there */
 
 #endif /* HWLOC_LINUX_SYS */
