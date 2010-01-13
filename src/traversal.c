@@ -373,6 +373,17 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_PCI_DEVICE:
     return snprintf(string, size, "PCI %04x:%04x",
 		    obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
+  case HWLOC_OBJ_OS_DEVICE:
+    switch (obj->attr->osdev.type) {
+    case HWLOC_OBJ_OSDEV_BLOCK: return hwloc_snprintf(string, size, "Block");
+    case HWLOC_OBJ_OSDEV_NETWORK: return hwloc_snprintf(string, size, "Net");
+    case HWLOC_OBJ_OSDEV_INFINIBAND: return hwloc_snprintf(string, size, "InfiniBand");
+    case HWLOC_OBJ_OSDEV_DMA: return hwloc_snprintf(string, size, "DMA");
+    default:
+      *string = '\0';
+      return 0;
+    }
+    break;
   default:
     *string = '\0';
     return 0;
@@ -538,6 +549,17 @@ hwloc_obj_snprintf(char *string, size_t size,
     else {
       return snprintf(string, size, "%s %04x:%04x", hwloc_pci_class_string(l->attr->pcidev.class_id), l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
     }
+  case HWLOC_OBJ_OS_DEVICE:
+    switch (l->attr->osdev.type) {
+    case HWLOC_OBJ_OSDEV_BLOCK: return hwloc_snprintf(string, size, "Block");
+    case HWLOC_OBJ_OSDEV_NETWORK: return hwloc_snprintf(string, size, "Net");
+    case HWLOC_OBJ_OSDEV_INFINIBAND: return hwloc_snprintf(string, size, "InfiniBand");
+    case HWLOC_OBJ_OSDEV_DMA: return hwloc_snprintf(string, size, "DMA");
+    default:
+      *string = '\0';
+      return 0;
+    }
+    break;
   default:
     *string = '\0';
     return 0;
