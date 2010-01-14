@@ -45,7 +45,7 @@ support)</li>
 <li>Solaris</li>
 <li>AIX</li>
 <li>Darwin / OS X</li>
-<li>*FreeBSD</li>
+<li>FreeBSD and its variants, such as kFreeBSD/GNU</li>
 <li>OSF/1 (a.k.a., Tru64)</li>
 <li>HP-UX</li>
 <li>Microsoft Windows</li>
