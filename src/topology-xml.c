@@ -155,9 +155,6 @@ hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unu
       case HWLOC_OBJ_MACHINE:
 	obj->attr->machine.dmi_board_vendor = strdup(value);
 	break;
-      case HWLOC_OBJ_SYSTEM:
-	obj->attr->system.dmi_board_vendor = strdup(value);
-	break;
       default:
 	fprintf(stderr, "ignoring dmi_board_vendor attribute for object type without DMI board\n");
 	break;
@@ -168,9 +165,6 @@ hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unu
     switch (obj->type) {
       case HWLOC_OBJ_MACHINE:
 	obj->attr->machine.dmi_board_name = strdup(value);
-	break;
-      case HWLOC_OBJ_SYSTEM:
-	obj->attr->system.dmi_board_name = strdup(value);
 	break;
       default:
 	fprintf(stderr, "ignoring dmi_board_name attribute for object type without DMI board\n");
@@ -367,13 +361,11 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
     xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
     break;
   case HWLOC_OBJ_SYSTEM:
-    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
-    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
     sprintf(tmp, "%lu", obj->attr->system.memory_kB);
     xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
     sprintf(tmp, "%lu", obj->attr->system.huge_page_free);
     xmlNewProp(node, BAD_CAST "huge_page_free", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr->machine.huge_page_size_kB);
+    sprintf(tmp, "%lu", obj->attr->system.huge_page_size_kB);
     xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
     break;
   case HWLOC_OBJ_MACHINE:

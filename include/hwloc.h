@@ -213,7 +213,11 @@ union hwloc_obj_attr_u {
     unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
   } machine;
   /** \brief System-specific Object Attributes */
-  struct hwloc_machine_attr_s system; /* FIXME: drop entirely? or keep memory_kB? */
+  struct hwloc_system_attr_s {
+    unsigned long memory_kB;		  /**< \brief Size of memory node */
+    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
+    unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
+  } system;
   /** \brief Misc-specific Object Attributes */
   struct hwloc_misc_attr_s {
     unsigned depth;			  /**< \brief Depth of misc object */
