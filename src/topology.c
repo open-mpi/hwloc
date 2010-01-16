@@ -1784,6 +1784,8 @@ hwloc__check_children(struct hwloc_obj *father)
   if (father->cpuset) {
     remaining_father_set = hwloc_cpuset_dup(father->cpuset);
     for(j=0; j<father->arity; j++) {
+      if (!father->children[j]->cpuset)
+	continue;
       /* check that child cpuset is included in the father */
       assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
       /* check that children are correctly ordered (see below), empty ones may be anywhere */
