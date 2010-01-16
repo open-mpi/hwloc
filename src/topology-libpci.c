@@ -59,7 +59,6 @@ hwloc_linux_add_os_device(struct hwloc_topology *topology, struct hwloc_obj *pci
 {
   struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
   obj->name = strdup(name);
-  obj->cpuset = hwloc_cpuset_alloc();
   obj->logical_index = -1;
   obj->attr->osdev.type = type;
 
@@ -540,7 +539,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     os_index = (pcidev->domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
 
     obj = hwloc_alloc_setup_object(isbridge ? HWLOC_OBJ_BRIDGE : HWLOC_OBJ_PCI_DEVICE, os_index);
-    obj->cpuset = hwloc_cpuset_alloc();
     obj->attr->pcidev.domain = pcidev->domain;
     obj->attr->pcidev.bus = pcidev->bus;
     obj->attr->pcidev.dev = pcidev->dev;
@@ -642,7 +640,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       goto next_child;
 
     /* finish setting up this hostbridge */
-    hostbridge->cpuset = hwloc_cpuset_alloc();
     hostbridge->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_HOST;
     hostbridge->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
     hostbridge->attr->bridge.downstream.pci.domain = current_domain;
