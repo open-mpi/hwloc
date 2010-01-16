@@ -95,8 +95,18 @@ the DISPLAY environment variable is set, lstopo displays the map in a
 graphical window.  If no filename is specified and the DISPLAY
 environment variable is
 .I not
-set, a text summary is displayed.  Otherwise, the filename implies
-what format lstopo should use:
+set, a text summary is displayed.  
+.
+.PP
+The filename specified directly implies the output format that will be
+used; see the OUTPUT FORMATS section, below.  Output formats that
+support color will indicate specific characteristics about individual
+CPUs by their color; see the COLORS section, below.
+.
+.\" **************************
+.\"    Output Formats Section
+.\" **************************
+.SH OUTPUT FORMATS
 .
 .TP
 .B \-
@@ -154,6 +164,39 @@ See the output of "lstopo --help" for a specific list of what
 graphical output formats are supported in your hwloc installation.
 .
 .\" **************************
+.\"    Colors Section
+.\" **************************
+.SH COLORS
+Individual CPUs are colored in the semi-graphical and graphical output
+formats to indicate different characteristics:
+.TP
+Green
+The CPU is in the current CPU binding mask.
+.TP
+White
+The CPU is in the allowed set (see below), but it is not in the
+current CPU binding mask.
+.TP
+Red
+The CPU is not in the allowed set (see below).
+.TP
+Black
+The CPU is offline (not all OS's support displaying offline CPUs).
+.
+.PP
+The "allowed set" is the set of CPUs to which the current process is
+allowed to bind.  The allowed set is usually either inherited from the
+parent process or set by administrative qpolicies on the system.  Linux
+cpusets are one example of limiting the allowed set for a process and
+its children to be less than the full set of CPUs on the system.
+.PP
+Different processes may therefore have different CPUs in the allowed
+set.  Hence, invoking lstopo in different contexts and/or as different
+users may display different colors for the same individual CPUs (e.g.,
+running lstopo in one context may show a specific CPU as red, but
+running lstopo in a different context may show the same CPU as white).
+.
+.\" **************************
 .\"    Examples Section
 .\" **************************
 .SH EXAMPLES
@@ -199,25 +242,6 @@ processors:
 To count the number of logical processors in the system
 
    lstopo --only proc | wc -l
-.
-.\" **************************
-.\"    Colors Section
-.\" **************************
-.SH COLORS
-CPUs have varying colors in the semi-graphical and graphical output:
-.TP
-Green
-The CPU is in the current cpu binding mask 
-.TP
-White
-The CPU is allowed but not in the current cpu binding mask
-.TP
-Red
-The CPU is not allowed
-.TP
-Black
-The CPU is offline
-.
 .\" **************************
 .\"    See also section
 .\" **************************

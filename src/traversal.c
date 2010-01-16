@@ -396,15 +396,11 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   switch (obj->type) {
   case HWLOC_OBJ_SYSTEM:
     if (verbose)
-      return hwloc_snprintf(string, size, "%lu%s%sHP=%lu*%lukB%s%s%s%s",
+      return hwloc_snprintf(string, size, "%lu%s%sHP=%lu*%lukB",
 			    hwloc_memory_size_printf_value(obj->attr->system.memory_kB, verbose),
 			    hwloc_memory_size_printf_unit(obj->attr->system.memory_kB, verbose),
 			    separator,
-			    obj->attr->system.huge_page_free, obj->attr->system.huge_page_size_kB,
-			    separator,
-			    obj->attr->system.dmi_board_vendor?obj->attr->system.dmi_board_vendor:"",
-			    separator,
-			    obj->attr->system.dmi_board_name?obj->attr->system.dmi_board_name:"");
+			    obj->attr->system.huge_page_free, obj->attr->system.huge_page_size_kB);
     else
       return hwloc_snprintf(string, size, "%lu%s",
 			    hwloc_memory_size_printf_value(obj->attr->system.memory_kB, verbose),
@@ -490,12 +486,10 @@ hwloc_obj_snprintf(char *string, size_t size,
     return hwloc_snprintf(string, size, "P%s", os_index);
   case HWLOC_OBJ_SYSTEM:
     if (verbose)
-      return hwloc_snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
+      return hwloc_snprintf(string, size, "%s(%lu%s HP=%lu*%lukB)", hwloc_obj_type_string(type),
 		      hwloc_memory_size_printf_value(l->attr->system.memory_kB, verbose),
 		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB, verbose),
-		      l->attr->system.huge_page_free, l->attr->system.huge_page_size_kB,
-		      l->attr->system.dmi_board_vendor?l->attr->system.dmi_board_vendor:"",
-		      l->attr->system.dmi_board_name?l->attr->system.dmi_board_name:"");
+		      l->attr->system.huge_page_free, l->attr->system.huge_page_size_kB);
     else
       return hwloc_snprintf(string, size, "%s(%lu%s)", hwloc_obj_type_string(type),
 		      hwloc_memory_size_printf_value(l->attr->system.memory_kB, verbose),

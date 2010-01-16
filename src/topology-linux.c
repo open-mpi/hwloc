@@ -1443,6 +1443,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     /* replace top-level object type with SYSTEM and add some MACHINE underneath */
 
     topology->levels[0][0]->type = HWLOC_OBJ_SYSTEM;
+    topology->levels[0][0]->name = strdup("Kerrighed");
     topology->levels[0][0]->attr->system.memory_kB = 0;
     topology->levels[0][0]->attr->system.huge_page_free = 0;
     /* No cpuset support for now.  */

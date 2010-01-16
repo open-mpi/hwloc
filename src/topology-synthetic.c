@@ -277,14 +277,18 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
 {
   hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
   unsigned first_cpu = 0, i;
+  unsigned long *memory_kB_p;
 
   topology->support.discovery.proc = 1;
 
   /* update first level type according to the synthetic type array */
   topology->levels[0][0]->type = topology->backend_params.synthetic.type[0];
 
+  memory_kB_p = topology->backend_params.synthetic.type[0] == HWLOC_OBJ_SYSTEM ?
+    &topology->levels[0][0]->attr->system.memory_kB : &topology->levels[0][0]->attr->machine.memory_kB;
+
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
-    first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, &topology->levels[0][0]->attr->system.memory_kB, cpuset);
+    first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, memory_kB_p, cpuset);
 
   hwloc_cpuset_free(cpuset);
 }

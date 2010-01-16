@@ -459,10 +459,6 @@ void
 free_object(hwloc_obj_t obj)
 {
   switch (obj->type) {
-  case HWLOC_OBJ_SYSTEM:
-    free(obj->attr->system.dmi_board_vendor);
-    free(obj->attr->system.dmi_board_name);
-    break;
   case HWLOC_OBJ_MACHINE:
     free(obj->attr->machine.dmi_board_vendor);
     free(obj->attr->machine.dmi_board_name);
@@ -1565,6 +1561,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   root_obj->sibling_rank = 0;
   root_obj->attr->machine.memory_kB = 0;
   root_obj->attr->machine.huge_page_free = 0;
+  /* TODO: this should move to the OS backend since it may change machine into a system, and their attributes are different */
 #ifdef HAVE__SC_LARGE_PAGESIZE
   root_obj->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
 #else /* HAVE__SC_LARGE_PAGESIZE */
@@ -1870,6 +1867,8 @@ hwloc__check_children(struct hwloc_obj *father)
   if (father->cpuset) {
     remaining_father_set = hwloc_cpuset_dup(father->cpuset);
     for(j=0; j<father->arity; j++) {
+      if (!father->children[j]->cpuset)
+	continue;
       /* check that child cpuset is included in the father */
       assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
       /* check that children are correctly ordered (see below), empty ones may be anywhere */

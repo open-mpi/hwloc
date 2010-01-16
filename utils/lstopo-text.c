@@ -60,6 +60,8 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     if ((l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2) && l->name)
       fprintf(output, " \"%s\"", l->name);
   }
+  if (l->cpuset)
+    return;
   if (show_cpuset == 1)
     fprintf(output, " cpuset=");
   if (show_cpuset) {
@@ -77,7 +79,8 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
   unsigned x;
   int group_identical = (verbose_mode <= 1) && !show_cpuset;
   if (group_identical
-      && parent && parent->arity == 1 && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
+      && parent && parent->arity == 1
+      && l->cpuset && parent->cpuset && hwloc_cpuset_isequal(l->cpuset, parent->cpuset)) {
     /* in non-verbose mode, merge objects with their parent is they are exactly identical */
     fprintf(output, " + ");
   } else {
