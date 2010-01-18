@@ -97,30 +97,30 @@ hwloc_get_root_obj (hwloc_topology_t topology)
 static __inline hwloc_obj_t hwloc_get_system_obj (hwloc_topology_t topology) __hwloc_attribute_deprecated;
 static __inline hwloc_obj_t hwloc_get_system_obj (hwloc_topology_t topology) { return hwloc_get_root_obj (topology); }
 
-/** \brief Returns the parent object of \p obj at depth \p depth. */
+/** \brief Returns the ancestor object of \p obj at depth \p depth. */
 static __inline hwloc_obj_t
-hwloc_get_parent_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj) __hwloc_attribute_pure;
+hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj) __hwloc_attribute_pure;
 static __inline hwloc_obj_t
-hwloc_get_parent_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj)
+hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj)
 {
-  hwloc_obj_t parent = obj;
+  hwloc_obj_t ancestor = obj;
   if (obj->depth < depth)
     return NULL;
-  while (parent && parent->depth > depth)
-    parent = parent->father;
-  return parent;
+  while (ancestor && ancestor->depth > depth)
+    ancestor = ancestor->father;
+  return ancestor;
 }
 
-/** \brief Returns the parent object of \p obj with type \p type. */
+/** \brief Returns the ancestor object of \p obj with type \p type. */
 static __inline hwloc_obj_t
-hwloc_get_parent_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj) __hwloc_attribute_pure;
+hwloc_get_ancestor_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj) __hwloc_attribute_pure;
 static __inline hwloc_obj_t
-hwloc_get_parent_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj)
+hwloc_get_ancestor_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj)
 {
-  hwloc_obj_t parent = obj->father;
-  while (parent && parent->type != type)
-    parent = parent->father;
-  return parent;
+  hwloc_obj_t ancestor = obj->father;
+  while (ancestor && ancestor->type != type)
+    ancestor = ancestor->father;
+  return ancestor;
 }
 
 /** \brief Returns the next object at depth \p depth.
