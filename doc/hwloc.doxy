@@ -368,6 +368,9 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
   <dd>The object logically containing the current object, for example
   because its CPU set includes the CPU set of the current object.</dd>
 
+<dt>Ancestor object</dt>
+  <dd>The parent object, or its own parent object, and so on.</dd>
+
 <dt>Children object(s)</dt>
   <dd>The object (or objects) contained in the current object because
   their CPU set is included in the CPU set of the current object.</dd>
