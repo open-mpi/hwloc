@@ -107,7 +107,7 @@ hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unu
   if (obj->depth < depth)
     return NULL;
   while (ancestor && ancestor->depth > depth)
-    ancestor = ancestor->father;
+    ancestor = ancestor->parent;
   return ancestor;
 }
 
@@ -117,9 +117,9 @@ hwloc_get_ancestor_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unus
 static __inline hwloc_obj_t
 hwloc_get_ancestor_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_type_t type, hwloc_obj_t obj)
 {
-  hwloc_obj_t ancestor = obj->father;
+  hwloc_obj_t ancestor = obj->parent;
   while (ancestor && ancestor->type != type)
-    ancestor = ancestor->father;
+    ancestor = ancestor->parent;
   return ancestor;
 }
 
@@ -178,28 +178,28 @@ hwloc_get_proc_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
  * If \p prev is \c NULL, return the first child.
  */
 static __inline hwloc_obj_t
-hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t father, hwloc_obj_t prev)
+hwloc_get_next_child (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t parent, hwloc_obj_t prev)
 {
   if (!prev)
-    return father->first_child;
-  if (prev->father != father)
+    return parent->first_child;
+  if (prev->parent != parent)
     return NULL;
   return prev->next_sibling;
 }
 
-/** \brief Returns the common father object to objects lvl1 and lvl2 */
+/** \brief Returns the common parent object to objects lvl1 and lvl2 */
 static __inline hwloc_obj_t
 hwloc_get_common_ancestor_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj1, hwloc_obj_t obj2) __hwloc_attribute_pure;
 static __inline hwloc_obj_t
 hwloc_get_common_ancestor_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
   while (obj1->depth > obj2->depth)
-    obj1 = obj1->father;
+    obj1 = obj1->parent;
   while (obj2->depth > obj1->depth)
-    obj2 = obj2->father;
+    obj2 = obj2->parent;
   while (obj1 != obj2) {
-    obj1 = obj1->father;
-    obj2 = obj2->father;
+    obj1 = obj1->parent;
+    obj2 = obj2->parent;
   }
   return obj1;
 }
@@ -352,17 +352,17 @@ hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_c
  */
 static __inline hwloc_obj_t
 hwloc_get_child_covering_cpuset (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set,
-				hwloc_obj_t father) __hwloc_attribute_pure;
+				hwloc_obj_t parent) __hwloc_attribute_pure;
 static __inline hwloc_obj_t
 hwloc_get_child_covering_cpuset (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set,
-				hwloc_obj_t father)
+				hwloc_obj_t parent)
 {
   hwloc_obj_t child;
 
   if (hwloc_cpuset_iszero(set))
     return NULL;
 
-  child = father->first_child;
+  child = parent->first_child;
   while (child) {
     if (hwloc_cpuset_isincluded(set, child->cpuset))
       return child;
@@ -464,7 +464,7 @@ hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t
   while (current) {
     if (current->type == HWLOC_OBJ_CACHE)
       return current;
-    current = current->father;
+    current = current->parent;
   }
   return NULL;
 }
@@ -478,12 +478,12 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute
 static __inline hwloc_obj_t
 hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj)
 {
-  hwloc_obj_t current = obj->father;
+  hwloc_obj_t current = obj->parent;
   while (current) {
     if (!hwloc_cpuset_isequal(current->cpuset, obj->cpuset)
         && current->type == HWLOC_OBJ_CACHE)
       return current;
-    current = current->father;
+    current = current->parent;
   }
   return NULL;
 }

@@ -53,7 +53,7 @@ unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_o
   parent = src;
   while (stored < max) {
     while (1) {
-      nextparent = parent->father;
+      nextparent = parent->parent;
       if (!nextparent)
 	goto out;
       if (!hwloc_cpuset_isequal(parent->cpuset, nextparent->cpuset))

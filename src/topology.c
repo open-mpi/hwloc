@@ -769,26 +769,26 @@ hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 }
 
 void
-hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj)
+hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj)
 {
   hwloc_obj_t child, next_child = obj->first_child;
   hwloc_obj_t *current;
 
   /* FIXME: mark KEEP_STRUCTURE as unsupported for I/O devices ? */
   /* Append to the end of the list */
-  for (current = &father->first_child; *current; current = &(*current)->next_sibling)
+  for (current = &parent->first_child; *current; current = &(*current)->next_sibling)
     ;
   *current = obj;
   obj->next_sibling = NULL;
   obj->first_child = NULL;
   /* Use the new object to insert children */
-  father = obj;
+  parent = obj;
 
   /* Recursively insert children below */
   while (next_child) {
     child = next_child;
     next_child = child->next_sibling;
-    hwloc_insert_object_by_parent(topology, father, child);
+    hwloc_insert_object_by_parent(topology, parent, child);
   }
 }
 
@@ -801,7 +801,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t fathe
  */
 static void
 traverse(hwloc_topology_t topology,
-	 hwloc_obj_t *father,
+	 hwloc_obj_t *parent,
 	 void (*node_before)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
 	 void (*leaf)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
 	 void (*node_after)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
@@ -809,16 +809,16 @@ traverse(hwloc_topology_t topology,
 {
   hwloc_obj_t *pobj, obj;
 
-  if (!(*father)->first_child) {
+  if (!(*parent)->first_child) {
     if (leaf)
-      leaf(topology, father, data);
+      leaf(topology, parent, data);
     return;
   }
   if (node_before)
-    node_before(topology, father, data);
-  if (!(*father))
+    node_before(topology, parent, data);
+  if (!(*parent))
     return;
-  for (pobj = &(*father)->first_child, obj = *pobj;
+  for (pobj = &(*parent)->first_child, obj = *pobj;
        obj;
        /* Check whether the current obj was dropped.  */
        (*pobj == obj ? pobj = &(*pobj)->next_sibling : NULL),
@@ -826,7 +826,7 @@ traverse(hwloc_topology_t topology,
 	obj = *pobj)
     traverse(topology, pobj, node_before, leaf, node_after, data);
   if (node_after)
-    node_after(topology, father, data);
+    node_after(topology, parent, data);
 }
 
 /* While traversing down and up, propagate the offline/disallowed cpus by
@@ -952,31 +952,31 @@ remove_unused_cpusets(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_
 }
 
 static void
-drop_object(hwloc_obj_t *pfather)
+drop_object(hwloc_obj_t *pparent)
 {
-  hwloc_obj_t father = *pfather;
-  hwloc_obj_t child = father->first_child;
+  hwloc_obj_t parent = *pparent;
+  hwloc_obj_t child = parent->first_child;
   /* Replace object with its list of children */
   if (child) {
-    *pfather = child;
+    *pparent = child;
     while (child->next_sibling)
       child = child->next_sibling;
-    child->next_sibling = father->next_sibling;
+    child->next_sibling = parent->next_sibling;
   } else
-    *pfather = father->next_sibling;
+    *pparent = parent->next_sibling;
   /* Remove ignored object */
-  free_object(father);
+  free_object(parent);
 }
 
 /* Remove all ignored objects.  */
 static void
-remove_ignored(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pfather, void *data __hwloc_attribute_unused)
+remove_ignored(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pparent, void *data __hwloc_attribute_unused)
 {
-  hwloc_obj_t father = *pfather;
-  if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
+  hwloc_obj_t parent = *pparent;
+  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     hwloc_debug("%s", "\nDropping ignored object ");
-    print_object(topology, 0, father);
-    drop_object(pfather);
+    print_object(topology, 0, parent);
+    drop_object(pparent);
   }
 }
 
@@ -1003,30 +1003,30 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data __hwloc_at
 }
 
 /*
- * Merge with the only child if either the father or the child has a type to be
+ * Merge with the only child if either the parent or the child has a type to be
  * ignored while keeping structure
  */
 static void
-merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data __hwloc_attribute_unused)
+merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent, void *data __hwloc_attribute_unused)
 {
-  hwloc_obj_t father = *pfather, child = father->first_child;
+  hwloc_obj_t parent = *pparent, child = parent->first_child;
   if (child->next_sibling)
     /* There are several children, it's useful to keep them.  */
     return;
 
   /* TODO: have a preference order?  */
-  if (topology->ignored_types[father->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
-    /* Father can be ignored in favor of the child.  */
-    hwloc_debug("%s", "\nIgnoring father ");
-    print_object(topology, 0, father);
-    *pfather = child;
-    child->next_sibling = father->next_sibling;
-    free_object(father);
+  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
+    /* Parent can be ignored in favor of the child.  */
+    hwloc_debug("%s", "\nIgnoring parent ");
+    print_object(topology, 0, parent);
+    *pparent = child;
+    child->next_sibling = parent->next_sibling;
+    free_object(parent);
   } else if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
-    /* Child can be ignored in favor of the father.  */
+    /* Child can be ignored in favor of the parent.  */
     hwloc_debug("%s", "\nIgnoring child ");
     print_object(topology, 0, child);
-    father->first_child = child->first_child;
+    parent->first_child = child->first_child;
     free_object(child);
   }
 }
@@ -1035,32 +1035,32 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pfather, void *data 
  * Initialize handy pointers in the whole topology
  */
 static void
-hwloc_connect(hwloc_obj_t father)
+hwloc_connect(hwloc_obj_t parent)
 {
   unsigned n;
   hwloc_obj_t child, prev_child = NULL;
 
-  for (n = 0, child = father->first_child;
+  for (n = 0, child = parent->first_child;
        child;
        n++,   prev_child = child, child = child->next_sibling) {
-    child->father = father;
+    child->parent = parent;
     child->sibling_rank = n;
     child->prev_sibling = prev_child;
   }
-  father->last_child = prev_child;
+  parent->last_child = prev_child;
 
-  father->arity = n;
-  free(father->children);
+  parent->arity = n;
+  free(parent->children);
   if (!n) {
-    father->children = NULL;
+    parent->children = NULL;
     return;
   }
 
-  father->children = malloc(n * sizeof(*father->children));
-  for (n = 0, child = father->first_child;
+  parent->children = malloc(n * sizeof(*parent->children));
+  for (n = 0, child = parent->first_child;
        child;
        n++,   child = child->next_sibling) {
-    father->children[n] = child;
+    parent->children[n] = child;
     hwloc_connect(child);
   }
 }
@@ -1752,62 +1752,62 @@ hwloc_topology_get_depth(struct hwloc_topology *topology)
   return topology->nb_levels;
 }
 
-/* check children between a father object */
+/* check children between a parent object */
 static void
-hwloc__check_children(struct hwloc_obj *father)
+hwloc__check_children(struct hwloc_obj *parent)
 {
-  hwloc_cpuset_t remaining_father_set;
+  hwloc_cpuset_t remaining_parent_set;
   unsigned j;
 
-  if (!father->arity) {
-    /* check whether that father has no children for real */
-    assert(!father->children);
-    assert(!father->first_child);
-    assert(!father->last_child);
+  if (!parent->arity) {
+    /* check whether that parent has no children for real */
+    assert(!parent->children);
+    assert(!parent->first_child);
+    assert(!parent->last_child);
     return;
   }
-  /* check whether that father has children for real */
-  assert(father->children);
-  assert(father->first_child);
-  assert(father->last_child);
+  /* check whether that parent has children for real */
+  assert(parent->children);
+  assert(parent->first_child);
+  assert(parent->last_child);
 
   /* first child specific checks */
-  assert(father->first_child->sibling_rank == 0);
-  assert(father->first_child == father->children[0]);
-  assert(father->first_child->prev_sibling == NULL);
+  assert(parent->first_child->sibling_rank == 0);
+  assert(parent->first_child == parent->children[0]);
+  assert(parent->first_child->prev_sibling == NULL);
 
   /* last child specific checks */
-  assert(father->last_child->sibling_rank == father->arity-1);
-  assert(father->last_child == father->children[father->arity-1]);
-  assert(father->last_child->next_sibling == NULL);
+  assert(parent->last_child->sibling_rank == parent->arity-1);
+  assert(parent->last_child == parent->children[parent->arity-1]);
+  assert(parent->last_child->next_sibling == NULL);
 
-  if (father->cpuset) {
-    remaining_father_set = hwloc_cpuset_dup(father->cpuset);
-    for(j=0; j<father->arity; j++) {
-      if (!father->children[j]->cpuset)
+  if (parent->cpuset) {
+    remaining_parent_set = hwloc_cpuset_dup(parent->cpuset);
+    for(j=0; j<parent->arity; j++) {
+      if (!parent->children[j]->cpuset)
 	continue;
-      /* check that child cpuset is included in the father */
-      assert(hwloc_cpuset_isincluded(father->children[j]->cpuset, remaining_father_set));
+      /* check that child cpuset is included in the parent */
+      assert(hwloc_cpuset_isincluded(parent->children[j]->cpuset, remaining_parent_set));
       /* check that children are correctly ordered (see below), empty ones may be anywhere */
-      if (!hwloc_cpuset_iszero(father->children[j]->cpuset)) {
-        int firstchild = hwloc_cpuset_first(father->children[j]->cpuset);
-        int firstfather = hwloc_cpuset_first(remaining_father_set);
-        assert(firstchild == firstfather);
+      if (!hwloc_cpuset_iszero(parent->children[j]->cpuset)) {
+        int firstchild = hwloc_cpuset_first(parent->children[j]->cpuset);
+        int firstparent = hwloc_cpuset_first(remaining_parent_set);
+        assert(firstchild == firstparent);
       }
-      /* clear previously used father cpuset bits so that we actually checked above
+      /* clear previously used parent cpuset bits so that we actually checked above
        * that children cpusets do not intersect and are ordered properly
        */
-      hwloc_cpuset_clearset(remaining_father_set, father->children[j]->cpuset);
+      hwloc_cpuset_clearset(remaining_parent_set, parent->children[j]->cpuset);
     }
-    assert(hwloc_cpuset_iszero(remaining_father_set));
-    hwloc_cpuset_free(remaining_father_set);
+    assert(hwloc_cpuset_iszero(remaining_parent_set));
+    hwloc_cpuset_free(remaining_parent_set);
   }
 
   /* checks for all children */
-  for(j=1; j<father->arity; j++) {
-    assert(father->children[j]->sibling_rank == j);
-    assert(father->children[j-1]->next_sibling == father->children[j]);
-    assert(father->children[j]->prev_sibling == father->children[j-1]);
+  for(j=1; j<parent->arity; j++) {
+    assert(parent->children[j]->sibling_rank == j);
+    assert(parent->children[j-1]->next_sibling == parent->children[j]);
+    assert(parent->children[j]->prev_sibling == parent->children[j-1]);
   }
 }
 

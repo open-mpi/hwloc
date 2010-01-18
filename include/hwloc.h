@@ -154,11 +154,11 @@ struct hwloc_obj {
   struct hwloc_obj *next_cousin;	/**< \brief Next object of same type */
   struct hwloc_obj *prev_cousin;	/**< \brief Previous object of same type */
 
-  /* father */
-  struct hwloc_obj *father;		/**< \brief Father, \c NULL if root (system object) */
-  unsigned sibling_rank;		/**< \brief Index in father's \c children[] array */
-  struct hwloc_obj *next_sibling;	/**< \brief Next object below the same father*/
-  struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same father */
+  /* parent */
+  struct hwloc_obj *parent;		/**< \brief Parent, \c NULL if root (system object) */
+  unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array */
+  struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent */
+  struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent */
 
   /* children */
   unsigned arity;			/**< \brief Number of children */
@@ -302,7 +302,7 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_o
 /** \brief Ignore an object type if it does not bring any structure.
  *
  * Ignore all objects from the given type as long as they do not bring any structure:
- * Each ignored object should have a single children or be the only child of its father.
+ * Each ignored object should have a single children or be the only child of its parent.
  * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
  */
 HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
@@ -310,7 +310,7 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t to
 /** \brief Ignore all objects that do not bring any structure.
  *
  * Ignore all objects that do not bring any structure:
- * Each ignored object should have a single children or be the only child of its father.
+ * Each ignored object should have a single children or be the only child of its parent.
  */
 HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t topology);
 
