@@ -479,8 +479,8 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   /* do not attach to the lowest object since it could be a cache or so,
    * go up as long as the cpuset is the same
    */
-  while (parent->father && hwloc_cpuset_isequal(parent->cpuset, parent->father->cpuset))
-    parent = parent->father;
+  while (parent->parent && hwloc_cpuset_isequal(parent->cpuset, parent->parent->cpuset))
+    parent = parent->parent;
 
   hwloc_cpuset_free(cpuset);
 

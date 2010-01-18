@@ -270,7 +270,7 @@ hwloc__look_xml_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
 }
 
 static void
-hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, xmlNode *node, int depth)
+hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth)
 {
   for (; node; node = node->next) {
     if (node->type == XML_ELEMENT_NODE) {
@@ -346,7 +346,7 @@ hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *father, 
 	  fprintf(stderr, "ignoring object with invalid type %u\n", obj->type);
 	  free(obj);
 	} else {
-	    hwloc_insert_object_by_parent(topology, father, obj);
+	    hwloc_insert_object_by_parent(topology, parent, obj);
 	}
       }
 

@@ -184,7 +184,7 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
 /*
  * Insert an object somewhere in the topology.
  *
- * It is added as the last child of the given father.
+ * It is added as the last child of the given parent.
  * The cpuset is completely ignored, so strange objects such as I/O devices should
  * preferably be inserted with this.
  *
@@ -192,7 +192,7 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
  *
  * Remember to call topology_connect() afterwards to fix handy pointers.
  */
-extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t father, hwloc_obj_t obj);
+extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 static __inline char *
