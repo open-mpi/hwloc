@@ -803,18 +803,6 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   obj->next_sibling = NULL;
   obj->first_child = NULL;
 
-  /* TODO: rather move to after the main detection loop? */
-  if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
-    /* Insert in the main device list */
-    if (topology->first_device) {
-      obj->prev_cousin = topology->last_device;
-      obj->prev_cousin->next_cousin = obj;
-      topology->last_device = obj;
-    } else {
-      topology->first_device = topology->last_device = obj;
-    }
-  }
-
   /* Use the new object to insert children */
   parent = obj;
 
@@ -861,6 +849,24 @@ traverse(hwloc_topology_t topology,
     traverse(topology, pobj, node_before, leaf, node_after, data);
   if (node_after)
     node_after(topology, parent, data);
+}
+
+/* While traversing, list all iodevices */
+static void
+append_iodevice(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
+{
+  hwloc_obj_t obj = *pobj;
+
+  if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
+    /* Insert in the main device list */
+    if (topology->first_device) {
+      obj->prev_cousin = topology->last_device;
+      obj->prev_cousin->next_cousin = obj;
+      topology->last_device = obj;
+    } else {
+      topology->first_device = topology->last_device = obj;
+    }
+  }
 }
 
 /* While traversing down and up, propagate the offline/disallowed cpus by
@@ -1467,6 +1473,8 @@ hwloc_discover(struct hwloc_topology *topology)
       hwloc_debug("%s", "\nno PCI detection\n");
     }
   }
+
+  traverse(topology, &topology->levels[0][0], NULL, NULL, append_iodevice, NULL);
 
   /*
    * Eventually, register OS-specific binding functions
