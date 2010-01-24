@@ -1473,16 +1473,14 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
 
-  /* Create the actual System object */
+  /* Create the actual machine object, but don't touch its attributes yet
+   * since the OS backend may still change the object into something else
+   * (for instance System)
+   */
   root_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, 0);
   root_obj->depth = 0;
   root_obj->logical_index = 0;
   root_obj->sibling_rank = 0;
-  root_obj->attr->machine.memory_kB = 0;
-  root_obj->attr->machine.huge_page_free = 0;
-  root_obj->attr->machine.huge_page_size_kB = 0;
-  root_obj->attr->machine.dmi_board_vendor = NULL;
-  root_obj->attr->machine.dmi_board_name = NULL;
   topology->levels[0][0] = root_obj;
 }
 
