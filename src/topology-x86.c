@@ -95,15 +95,18 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid) {
   hwloc_debug("APIC ID 0x%02x max_log_proc %d\n", infos->apicid, infos->max_log_proc);
   infos->socketid = infos->apicid / infos->max_log_proc;
   infos->logprocid = infos->apicid % infos->max_log_proc;
+  infos->coreid = (unsigned) -1;
+  infos->threadid = (unsigned) -1;
   hwloc_debug("phys %d thread %d\n", infos->socketid, infos->logprocid);
 
+  infos->numcaches = 0;
   infos->cache = NULL;
 
   if (highest_cpuid < 0x04)
     return;
 
+  /* TODO: AMD version */
   cachenum = 0;
-  infos->numcaches = 0;
   for (cachenum = 0; ; cachenum++) {
     unsigned type;
     eax = 0x04;
@@ -206,9 +209,19 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       unsigned socketid = infos[i].socketid;
       unsigned coreid = infos[i].coreid;
 
+      if (coreid == (unsigned) -1) {
+        hwloc_cpuset_clr(cores_cpuset, i);
+	continue;
+      }
+
       core_cpuset = hwloc_cpuset_alloc();
       hwloc_cpuset_zero(core_cpuset);
       for (j = i; j < nbprocs; j++) {
+	if (infos[j].coreid == (unsigned) -1) {
+	  hwloc_cpuset_clr(cores_cpuset, j);
+	  continue;
+	}
+
         if (infos[j].socketid == socketid && infos[j].coreid == coreid) {
           hwloc_cpuset_set(core_cpuset, j);
           hwloc_cpuset_clr(cores_cpuset, j);
@@ -306,8 +319,8 @@ hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
   cpuid(&eax, &ebx, &ecx, &edx);
   highest_cpuid = eax;
 
+  hwloc_debug("highest cpuid %d \n", highest_cpuid);
   if (highest_cpuid < 0x01)
-    /* TODO: AMD version */
     return;
 
   if (topology->get_thisthread_cpubind && topology->set_thisthread_cpubind) {
