@@ -161,6 +161,23 @@ AC_DEFUN([HWLOC_INIT],[
         sleep 10
         ;;
     esac
+
+    #
+    # Check CPU support
+    #
+    AC_MSG_CHECKING([which CPU support to include])
+    case ${target} in
+      i*86-*-*)
+        AC_DEFINE(HWLOC_X86_32_ARCH, 1, [Define to 1 on x86_32])
+        hwloc_x86_32=yes
+        AC_MSG_RESULT([x86_32])
+        ;;
+      x86_64-*-*)
+        AC_DEFINE(HWLOC_X86_64_ARCH, 1, [Define to 1 on x86_64])
+        hwloc_x86_64=yes
+        AC_MSG_RESULT([x86_64])
+        ;;
+    esac
     
     #
     # Define C flags
@@ -618,6 +635,9 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_WINDOWS], [test "x$hwloc_windows" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_MINGW32], 
                        [test "x$hwloc_target_os" = "xmingw32"])
+
+        AM_CONDITIONAL([HWLOC_HAVE_X86_32], [test "x$hwloc_x86_32" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_X86_64], [test "x$hwloc_x86_64" = "xyes"])
     ])
     hwloc_did_am_conditionals=yes
 ])dnl

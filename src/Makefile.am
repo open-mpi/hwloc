@@ -88,6 +88,13 @@ if HWLOC_HAVE_MS_LIB
 endif HWLOC_HAVE_MS_LIB
 endif HWLOC_HAVE_WINDOWS
 
+if HWLOC_HAVE_X86_32
+sources += topology-x86.c
+endif HWLOC_HAVE_X86_32
+if HWLOC_HAVE_X86_64
+sources += topology-x86.c
+endif HWLOC_HAVE_X86_64
+
 # Installable library
 
 libhwloc_la_SOURCES = $(sources)

@@ -164,11 +164,12 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 {
   unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
 
-  /* TODO: use x86 backend */
-
 #ifdef HAVE__SC_LARGE_PAGESIZE
   topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
 #endif
+
+  hwloc_set_freebsd_hooks(topology);
+  hwloc_look_x86(topology, nbprocs);
 
   hwloc_setup_proc_level(topology, nbprocs);
 }
