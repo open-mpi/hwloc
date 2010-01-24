@@ -1,72 +1,13 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2010 CNRS, INRIA, Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
 #include <private/config.h>
 #include <hwloc.h>
-#include <hwloc/linux.h>
 #include <private/private.h>
 #include <private/debug.h>
-
-#ifdef HWLOC_X86_32_ARCH
-static inline int have_cpuid(void)
-{
-  int ret;
-  unsigned tmp, tmp2;
-  asm(
-      "mov $0,%0\n\t"   /* Not supported a priori */
-
-      "pushfl   \n\t"   /* Save flags */
-
-      "pushfl   \n\t"                                           \
-      "pop %1   \n\t"   /* Get flags */                         \
-
-#define TRY_TOGGLE                                              \
-      "xor $0x00200000,%1\n\t"        /* Try to toggle ID */    \
-      "mov %1,%2\n\t"   /* Save expected value */               \
-      "push %1  \n\t"                                           \
-      "popfl    \n\t"   /* Try to toggle */                     \
-      "pushfl   \n\t"                                           \
-      "pop %1   \n\t"                                           \
-      "cmp %1,%2\n\t"   /* Compare with expected value */       \
-      "jnz L1   \n\t"   /* Unexpected, failure */               \
-
-      TRY_TOGGLE        /* Try to set/clear */
-      TRY_TOGGLE        /* Try to clear/set */
-
-      "mov $1,%0\n\t"   /* Passed the test! */
-
-      "L1:      \n\t"
-      "popfl    \n\t"   /* Restore flags */
-
-      : "=r" (ret), "=&r" (tmp), "=&r" (tmp2));
-  return ret;
-}
-#endif /* HWLOC_X86_32_ARCH */
-#ifdef HWLOC_X86_64_ARCH
-#define have_cpuid() 1
-#endif /* HWLOC_X86_64_ARCH */
-
-static inline void cpuid(unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx)
-{
-  asm(
-#ifdef HWLOC_X86_32_ARCH 
-  "push %%ebx\n\t"
-#endif
-  "cpuid\n\t"
-#ifdef HWLOC_X86_32_ARCH 
-  "mov %%ebx,%1\n\t"
-  "pop %%ebx\n\t"
-#endif
-  : "+a" (*eax),
-#ifdef HWLOC_X86_32_ARCH 
-    "=r" (*ebx),
-#else
-    "=b" (*ebx),
-#endif
-    "+c" (*ecx), "=d" (*edx));
-}
+#include <private/cpuid.h>
 
 struct cacheinfo {
   unsigned type;
@@ -104,7 +45,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid) {
   infos->present = 1;
 
   eax = 0x01;
-  cpuid(&eax, &ebx, &ecx, &edx);
+  hwloc_cpuid(&eax, &ebx, &ecx, &edx);
   infos->apicid = ebx >> 24;
   infos->max_log_proc = (ebx >> 16) & 0xff;
   hwloc_debug("APIC ID 0x%02x max_log_proc %d\n", infos->apicid, infos->max_log_proc);
@@ -126,7 +67,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid) {
     unsigned type;
     eax = 0x04;
     ecx = cachenum;
-    cpuid(&eax, &ebx, &ecx, &edx);
+    hwloc_cpuid(&eax, &ebx, &ecx, &edx);
 
     type = eax & 0x1f;
 
@@ -145,7 +86,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid) {
     unsigned type;
     eax = 0x04;
     ecx = cachenum;
-    cpuid(&eax, &ebx, &ecx, &edx);
+    hwloc_cpuid(&eax, &ebx, &ecx, &edx);
 
     type = eax & 0x1f;
 
@@ -327,11 +268,11 @@ hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
   unsigned highest_cpuid;
   struct procinfo infos[nbprocs];
 
-  if (!have_cpuid())
+  if (!hwloc_have_cpuid())
     return;
 
   eax = 0x00;
-  cpuid(&eax, &ebx, &ecx, &edx);
+  hwloc_cpuid(&eax, &ebx, &ecx, &edx);
   highest_cpuid = eax;
 
   hwloc_debug("highest cpuid %d \n", highest_cpuid);
