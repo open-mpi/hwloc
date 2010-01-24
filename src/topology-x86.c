@@ -50,7 +50,22 @@ static inline int have_cpuid(void)
 
 static inline void cpuid(unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx)
 {
-  asm("cpuid" : "+a" (*eax), "=b" (*ebx), "+c" (*ecx), "=d" (*edx));
+  asm(
+#ifdef HWLOC_X86_32_ARCH 
+  "push %%ebx\n\t"
+#endif
+  "cpuid\n\t"
+#ifdef HWLOC_X86_32_ARCH 
+  "mov %%ebx,%1\n\t"
+  "pop %%ebx\n\t"
+#endif
+  : "+a" (*eax),
+#ifdef HWLOC_X86_32_ARCH 
+    "=r" (*ebx),
+#else
+    "=b" (*ebx),
+#endif
+    "+c" (*ecx), "=d" (*edx));
 }
 
 struct cacheinfo {
