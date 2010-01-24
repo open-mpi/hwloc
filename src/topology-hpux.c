@@ -135,6 +135,10 @@ hwloc_look_hpux(struct hwloc_topology *topology)
   ldom_t currentnode;
   int i, nbnodes = 0;
 
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+
   if (has_numa) {
     nbnodes = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETNUMLDOMS_SYS : MPC_GETNUMLDOMS, 0, 0);

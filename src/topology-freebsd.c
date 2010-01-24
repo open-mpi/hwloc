@@ -166,6 +166,10 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 
   /* TODO: use x86 backend */
 
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+
   hwloc_setup_proc_level(topology, nbprocs);
 }
 

@@ -1480,12 +1480,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   root_obj->sibling_rank = 0;
   root_obj->attr->machine.memory_kB = 0;
   root_obj->attr->machine.huge_page_free = 0;
-  /* TODO: this should move to the OS backend since it may change machine into a system, and their attributes are different */
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  root_obj->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#else /* HAVE__SC_LARGE_PAGESIZE */
   root_obj->attr->machine.huge_page_size_kB = 0;
-#endif /* HAVE__SC_LARGE_PAGESIZE */
   root_obj->attr->machine.dmi_board_vendor = NULL;
   root_obj->attr->machine.dmi_board_name = NULL;
   topology->levels[0][0] = root_obj;

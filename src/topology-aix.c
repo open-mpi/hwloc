@@ -233,6 +233,10 @@ hwloc_look_aix(struct hwloc_topology *topology)
   int i;
   /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
 
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {
       int known = 0;

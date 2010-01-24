@@ -205,6 +205,10 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
   HMODULE kernel32;
 
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+
   kernel32 = LoadLibrary("kernel32.dll");
   if (kernel32) {
     GetLogicalProcessorInformationProc = GetProcAddress(kernel32, "GetLogicalProcessorInformation");

@@ -30,6 +30,10 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   size_t size;
 
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+
   if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
     return;
   nprocs = _nprocs;
