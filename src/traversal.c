@@ -229,8 +229,8 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB, verbose));
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "%lu%s",
-			  hwloc_memory_size_printf_value(obj->attr->node.memory_kB, verbose),
-			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB, verbose));
+			  hwloc_memory_size_printf_value(obj->attr->cache.memory_kB, verbose),
+			  hwloc_memory_size_printf_unit(obj->attr->cache.memory_kB, verbose));
   default:
     *string = '\0';
     return 0;
@@ -289,8 +289,8 @@ hwloc_obj_snprintf(char *string, size_t size,
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "L%u%s%s(%lu%s)", l->attr->cache.depth,
 		      verbose ? hwloc_obj_type_string(type) : "", os_index,
-		    hwloc_memory_size_printf_value(l->attr->node.memory_kB, verbose),
-		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB, verbose));
+		    hwloc_memory_size_printf_value(l->attr->cache.memory_kB, verbose),
+		    hwloc_memory_size_printf_unit(l->attr->cache.memory_kB, verbose));
   default:
     *string = '\0';
     return 0;
