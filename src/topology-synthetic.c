@@ -252,10 +252,10 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       obj->attr->cache.depth = topology->backend_params.synthetic.depth[level];
       if (obj->attr->cache.depth == 1)
 	/* 32Kb in L1 */
-	obj->attr->cache.memory_kB = 32*1024;
+	obj->attr->cache.size = 32*1024;
       else
 	/* *4 at each level, starting from 1MB for L2 */
-	obj->attr->cache.memory_kB = 256*1024 << (2*obj->attr->cache.depth);
+	obj->attr->cache.size = 256*1024 << (2*obj->attr->cache.depth);
       break;
     case HWLOC_OBJ_CORE:
       break;

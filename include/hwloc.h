@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 
 /*
  * Symbol transforms
@@ -196,7 +197,7 @@ typedef struct hwloc_obj * hwloc_obj_t;
 union hwloc_obj_attr_u {
   /** \brief Cache-specific Object Attributes */
   struct hwloc_cache_attr_s {
-    unsigned long memory_kB;		  /**< \brief Size of cache */
+    uint64_t size;			  /**< \brief Size of cache in bytes */
     unsigned depth;			  /**< \brief Depth of cache */
   } cache;
   /** \brief Node-specific Object Attributes */

@@ -204,7 +204,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj->attr->node.huge_page_free = 0; /* TODO: rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
 	break;
       case HWLOC_OBJ_CACHE:
-	obj->attr->cache.memory_kB = 0; /* TODO: ? */
+	obj->attr->cache.size = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
       case HWLOC_OBJ_MISC:

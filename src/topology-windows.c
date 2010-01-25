@@ -279,7 +279,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	      break;
 	    }
 	  case HWLOC_OBJ_CACHE:
-	    obj->attr->cache.memory_kB = procInfo[i].Cache.Size >> 10;
+	    obj->attr->cache.size = procInfo[i].Cache.Size;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
 	    break;
 	  case HWLOC_OBJ_MISC:
@@ -380,7 +380,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    obj->attr->node.huge_page_free = 0; /* TODO */
 	    break;
 	  case HWLOC_OBJ_CACHE:
-	    obj->attr->cache.memory_kB = procInfo->Cache.CacheSize >> 10;
+	    obj->attr->cache.size = procInfo->Cache.CacheSize;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
 	    break;
 	  default:

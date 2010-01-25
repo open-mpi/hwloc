@@ -243,7 +243,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
           }
           cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, cacheid);
           cache->attr->cache.depth = level;
-          cache->attr->cache.memory_kB = infos[i].cache[l].size >> 10;
+          cache->attr->cache.size = infos[i].cache[l].size;
           cache->cpuset = cache_cpuset;
           hwloc_debug_2args_cpuset("os L%u cache %u has cpuset %s\n",
               level, cacheid, cache_cpuset);

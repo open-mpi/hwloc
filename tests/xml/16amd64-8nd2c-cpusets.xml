@@ -4,15 +4,15 @@
   <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000f07f" complete_cpuset="0x0000ff7f" online_cpuset="0x0000ff7f" allowed_cpuset="0x0000f07f" dmi_board_vendor="TYAN Computer Corp" dmi_board_name="S4881 " memory_kB="0" huge_page_free="0" huge_page_size_kB="0">
     <object type="NUMANode" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" memory_kB="0" huge_page_free="0">
       <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">
-        <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001">
               <object type="Proc" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001"/>
             </object>
           </object>
         </object>
-        <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002">
               <object type="Proc" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002"/>
             </object>
@@ -22,15 +22,15 @@
     </object>
     <object type="NUMANode" os_level="-1" os_index="1" cpuset="0x0000000c" complete_cpuset="0x0000000c" online_cpuset="0x0000000c" allowed_cpuset="0x0000000c" memory_kB="8388608" huge_page_free="0">
       <object type="Socket" os_level="-1" os_index="1" cpuset="0x0000000c" complete_cpuset="0x0000000c" online_cpuset="0x0000000c" allowed_cpuset="0x0000000c">
-        <object type="Cache" os_level="-1" cpuset="0x00000004" complete_cpuset="0x00000004" online_cpuset="0x00000004" allowed_cpuset="0x00000004" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00000004" complete_cpuset="0x00000004" online_cpuset="0x00000004" allowed_cpuset="0x00000004" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00000004" complete_cpuset="0x00000004" online_cpuset="0x00000004" allowed_cpuset="0x00000004" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00000004" complete_cpuset="0x00000004" online_cpuset="0x00000004" allowed_cpuset="0x00000004" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="0" cpuset="0x00000004" complete_cpuset="0x00000004" online_cpuset="0x00000004" allowed_cpuset="0x00000004">
               <object type="Proc" os_level="-1" os_index="2" cpuset="0x00000004" complete_cpuset="0x00000004" online_cpuset="0x00000004" allowed_cpuset="0x00000004"/>
             </object>
           </object>
         </object>
-        <object type="Cache" os_level="-1" cpuset="0x00000008" complete_cpuset="0x00000008" online_cpuset="0x00000008" allowed_cpuset="0x00000008" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00000008" complete_cpuset="0x00000008" online_cpuset="0x00000008" allowed_cpuset="0x00000008" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00000008" complete_cpuset="0x00000008" online_cpuset="0x00000008" allowed_cpuset="0x00000008" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00000008" complete_cpuset="0x00000008" online_cpuset="0x00000008" allowed_cpuset="0x00000008" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="1" cpuset="0x00000008" complete_cpuset="0x00000008" online_cpuset="0x00000008" allowed_cpuset="0x00000008">
               <object type="Proc" os_level="-1" os_index="3" cpuset="0x00000008" complete_cpuset="0x00000008" online_cpuset="0x00000008" allowed_cpuset="0x00000008"/>
             </object>
@@ -40,15 +40,15 @@
     </object>
     <object type="NUMANode" os_level="-1" os_index="2" cpuset="0x00000030" complete_cpuset="0x00000030" online_cpuset="0x00000030" allowed_cpuset="0x00000030" memory_kB="8388608" huge_page_free="0">
       <object type="Socket" os_level="-1" os_index="2" cpuset="0x00000030" complete_cpuset="0x00000030" online_cpuset="0x00000030" allowed_cpuset="0x00000030">
-        <object type="Cache" os_level="-1" cpuset="0x00000010" complete_cpuset="0x00000010" online_cpuset="0x00000010" allowed_cpuset="0x00000010" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00000010" complete_cpuset="0x00000010" online_cpuset="0x00000010" allowed_cpuset="0x00000010" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00000010" complete_cpuset="0x00000010" online_cpuset="0x00000010" allowed_cpuset="0x00000010" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00000010" complete_cpuset="0x00000010" online_cpuset="0x00000010" allowed_cpuset="0x00000010" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="0" cpuset="0x00000010" complete_cpuset="0x00000010" online_cpuset="0x00000010" allowed_cpuset="0x00000010">
               <object type="Proc" os_level="-1" os_index="4" cpuset="0x00000010" complete_cpuset="0x00000010" online_cpuset="0x00000010" allowed_cpuset="0x00000010"/>
             </object>
           </object>
         </object>
-        <object type="Cache" os_level="-1" cpuset="0x00000020" complete_cpuset="0x00000020" online_cpuset="0x00000020" allowed_cpuset="0x00000020" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00000020" complete_cpuset="0x00000020" online_cpuset="0x00000020" allowed_cpuset="0x00000020" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00000020" complete_cpuset="0x00000020" online_cpuset="0x00000020" allowed_cpuset="0x00000020" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00000020" complete_cpuset="0x00000020" online_cpuset="0x00000020" allowed_cpuset="0x00000020" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="1" cpuset="0x00000020" complete_cpuset="0x00000020" online_cpuset="0x00000020" allowed_cpuset="0x00000020">
               <object type="Proc" os_level="-1" os_index="5" cpuset="0x00000020" complete_cpuset="0x00000020" online_cpuset="0x00000020" allowed_cpuset="0x00000020"/>
             </object>
@@ -58,8 +58,8 @@
     </object>
     <object type="NUMANode" os_level="-1" os_index="3" cpuset="0x00000040" complete_cpuset="0x00000040" online_cpuset="0x00000040" allowed_cpuset="0x00000040" memory_kB="8388608" huge_page_free="0">
       <object type="Socket" os_level="-1" os_index="3" cpuset="0x00000040" complete_cpuset="0x00000040" online_cpuset="0x00000040" allowed_cpuset="0x00000040">
-        <object type="Cache" os_level="-1" cpuset="0x00000040" complete_cpuset="0x00000040" online_cpuset="0x00000040" allowed_cpuset="0x00000040" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00000040" complete_cpuset="0x00000040" online_cpuset="0x00000040" allowed_cpuset="0x00000040" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00000040" complete_cpuset="0x00000040" online_cpuset="0x00000040" allowed_cpuset="0x00000040" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00000040" complete_cpuset="0x00000040" online_cpuset="0x00000040" allowed_cpuset="0x00000040" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="0" cpuset="0x00000040" complete_cpuset="0x00000040" online_cpuset="0x00000040" allowed_cpuset="0x00000040">
               <object type="Proc" os_level="-1" os_index="6" cpuset="0x00000040" complete_cpuset="0x00000040" online_cpuset="0x00000040" allowed_cpuset="0x00000040"/>
             </object>
@@ -69,15 +69,15 @@
     </object>
     <object type="NUMANode" os_level="-1" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" online_cpuset="0x00003000" allowed_cpuset="0x00003000" memory_kB="0" huge_page_free="0">
       <object type="Socket" os_level="-1" os_index="6" cpuset="0x00003000" complete_cpuset="0x00003000" online_cpuset="0x00003000" allowed_cpuset="0x00003000">
-        <object type="Cache" os_level="-1" cpuset="0x00001000" complete_cpuset="0x00001000" online_cpuset="0x00001000" allowed_cpuset="0x00001000" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00001000" complete_cpuset="0x00001000" online_cpuset="0x00001000" allowed_cpuset="0x00001000" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00001000" complete_cpuset="0x00001000" online_cpuset="0x00001000" allowed_cpuset="0x00001000" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00001000" complete_cpuset="0x00001000" online_cpuset="0x00001000" allowed_cpuset="0x00001000" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="0" cpuset="0x00001000" complete_cpuset="0x00001000" online_cpuset="0x00001000" allowed_cpuset="0x00001000">
               <object type="Proc" os_level="-1" os_index="12" cpuset="0x00001000" complete_cpuset="0x00001000" online_cpuset="0x00001000" allowed_cpuset="0x00001000"/>
             </object>
           </object>
         </object>
-        <object type="Cache" os_level="-1" cpuset="0x00002000" complete_cpuset="0x00002000" online_cpuset="0x00002000" allowed_cpuset="0x00002000" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00002000" complete_cpuset="0x00002000" online_cpuset="0x00002000" allowed_cpuset="0x00002000" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00002000" complete_cpuset="0x00002000" online_cpuset="0x00002000" allowed_cpuset="0x00002000" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00002000" complete_cpuset="0x00002000" online_cpuset="0x00002000" allowed_cpuset="0x00002000" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="1" cpuset="0x00002000" complete_cpuset="0x00002000" online_cpuset="0x00002000" allowed_cpuset="0x00002000">
               <object type="Proc" os_level="-1" os_index="13" cpuset="0x00002000" complete_cpuset="0x00002000" online_cpuset="0x00002000" allowed_cpuset="0x00002000"/>
             </object>
@@ -87,15 +87,15 @@
     </object>
     <object type="NUMANode" os_level="-1" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" online_cpuset="0x0000c000" allowed_cpuset="0x0000c000" memory_kB="0" huge_page_free="0">
       <object type="Socket" os_level="-1" os_index="7" cpuset="0x0000c000" complete_cpuset="0x0000c000" online_cpuset="0x0000c000" allowed_cpuset="0x0000c000">
-        <object type="Cache" os_level="-1" cpuset="0x00004000" complete_cpuset="0x00004000" online_cpuset="0x00004000" allowed_cpuset="0x00004000" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00004000" complete_cpuset="0x00004000" online_cpuset="0x00004000" allowed_cpuset="0x00004000" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00004000" complete_cpuset="0x00004000" online_cpuset="0x00004000" allowed_cpuset="0x00004000" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00004000" complete_cpuset="0x00004000" online_cpuset="0x00004000" allowed_cpuset="0x00004000" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="0" cpuset="0x00004000" complete_cpuset="0x00004000" online_cpuset="0x00004000" allowed_cpuset="0x00004000">
               <object type="Proc" os_level="-1" os_index="14" cpuset="0x00004000" complete_cpuset="0x00004000" online_cpuset="0x00004000" allowed_cpuset="0x00004000"/>
             </object>
           </object>
         </object>
-        <object type="Cache" os_level="-1" cpuset="0x00008000" complete_cpuset="0x00008000" online_cpuset="0x00008000" allowed_cpuset="0x00008000" memory_kB="1024" depth="2">
-          <object type="Cache" os_level="-1" cpuset="0x00008000" complete_cpuset="0x00008000" online_cpuset="0x00008000" allowed_cpuset="0x00008000" memory_kB="64" depth="1">
+        <object type="Cache" os_level="-1" cpuset="0x00008000" complete_cpuset="0x00008000" online_cpuset="0x00008000" allowed_cpuset="0x00008000" cache_size="1048576" depth="2">
+          <object type="Cache" os_level="-1" cpuset="0x00008000" complete_cpuset="0x00008000" online_cpuset="0x00008000" allowed_cpuset="0x00008000" cache_size="65536" depth="1">
             <object type="Core" os_level="-1" os_index="1" cpuset="0x00008000" complete_cpuset="0x00008000" online_cpuset="0x00008000" allowed_cpuset="0x00008000">
               <object type="Proc" os_level="-1" os_index="15" cpuset="0x00008000" complete_cpuset="0x00008000" online_cpuset="0x00008000" allowed_cpuset="0x00008000"/>
             </object>

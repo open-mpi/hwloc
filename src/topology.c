@@ -666,8 +666,8 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	    merge_sizes(obj, child, attr->node.huge_page_free);
 	    break;
 	  case HWLOC_OBJ_CACHE:
-	    merge_sizes(obj, child, attr->cache.memory_kB);
-	    check_sizes(obj, child, attr->cache.memory_kB);
+	    merge_sizes(obj, child, attr->cache.size);
+	    check_sizes(obj, child, attr->cache.size);
 	    break;
 	  default:
 	    break;

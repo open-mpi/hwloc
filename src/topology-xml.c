@@ -81,12 +81,17 @@ hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unu
   else if (!strcmp(name, "name"))
     obj->name = strdup(value);
 
+  else if (!strcmp(name, "cache_size")) {
+    unsigned long long lvalue = strtoull(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_CACHE)
+      obj->attr->cache.size = lvalue;
+    else
+      fprintf(stderr, "ignoring cache_size attribute for non-cache object type\n");
+  }
+
   else if (!strcmp(name, "memory_kB")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     switch (obj->type) {
-      case HWLOC_OBJ_CACHE:
-	obj->attr->cache.memory_kB = lvalue;
-	break;
       case HWLOC_OBJ_NODE:
 	obj->attr->node.memory_kB = lvalue;
 	break;
@@ -355,8 +360,8 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
 
   switch (obj->type) {
   case HWLOC_OBJ_CACHE:
-    sprintf(tmp, "%lu", obj->attr->cache.memory_kB);
-    xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
+    sprintf(tmp, "%llu", (unsigned long long) obj->attr->cache.size);
+    xmlNewProp(node, BAD_CAST "cache_size", BAD_CAST tmp);
     sprintf(tmp, "%u", obj->attr->cache.depth);
     xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
     break;

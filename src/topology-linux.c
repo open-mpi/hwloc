@@ -1218,7 +1218,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
           if (hwloc_cpuset_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
             cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
-            cache->attr->cache.memory_kB = kB;
+            cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
             cache->cpuset = cacheset;
             hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n",
