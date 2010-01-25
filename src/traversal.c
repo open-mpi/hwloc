@@ -222,8 +222,8 @@ hwloc_obj_snprintf(char *string, size_t size,
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "L%u%s%s(%lu%s)", l->attr->cache.depth,
 		      verbose ? hwloc_obj_type_string(type) : "", os_index,
-		    hwloc_memory_size_printf_value(l->attr->node.memory_kB),
-		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB));
+		    hwloc_memory_size_printf_value(l->attr->cache.memory_kB),
+		    hwloc_memory_size_printf_unit(l->attr->cache.memory_kB));
   default:
     *string = '\0';
     return 0;
