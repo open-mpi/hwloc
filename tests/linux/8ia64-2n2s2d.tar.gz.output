@@ -1,4 +1,4 @@
-Machine(0KB HP=0*0kB  )
+Machine(0KB HP=0*0kB)
   NUMANode#0(16554432KB)
     Socket#0
         L3Cache(9216KB)

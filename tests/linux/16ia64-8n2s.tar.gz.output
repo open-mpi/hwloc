@@ -1,4 +1,4 @@
-Machine(48258496KB HP=0*262144kB  )
+Machine(48258496KB HP=0*262144kB)
   Misc0
     NUMANode#0(6045632KB)
       Socket#0
