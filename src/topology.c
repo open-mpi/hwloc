@@ -617,6 +617,9 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
  * complete.
  */
 
+#define merge_index(new, old, field) \
+  if ((old)->field == (typeof((old)->field)) -1) \
+    (old)->field = (new)->field;
 #define merge_sizes(new, old, field) \
   if (!(old)->field) \
     (old)->field = (new)->field;
@@ -646,10 +649,12 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
   for (child = cur->first_child; child; child = child->next_sibling) {
     switch (hwloc_obj_cmp(obj, child)) {
       case HWLOC_OBJ_EQUAL:
+        merge_index(obj, child, os_level);
 	if (obj->os_level != child->os_level) {
           fprintf(stderr, "Different OS level\n");
           return;
         }
+        merge_index(obj, child, os_index);
 	if (obj->os_index != child->os_index) {
           fprintf(stderr, "Different OS indexes\n");
           return;
