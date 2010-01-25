@@ -123,16 +123,16 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	@rm -rf $(DOX_DIR)/man/man3
 	@mv $(DOX_DIR)/man.tmp $(DOX_DIR)/man/man3
 	@echo "Work-around buggy doxygen filenames..."
-	@mv -f $(DOX_DIR)/html/termsanddefs.html $(DOX_DIR)/html/a00001.html
-	@mv -f $(DOX_DIR)/latex/termsanddefs.tex $(DOX_DIR)/latex/a00001.tex
-	@mv -f $(DOX_DIR)/html/tools.html $(DOX_DIR)/html/a00002.html
-	@mv -f $(DOX_DIR)/latex/tools.tex $(DOX_DIR)/latex/a00002.tex
-	@mv -f $(DOX_DIR)/html/envvar.html $(DOX_DIR)/html/a00003.html
-	@mv -f $(DOX_DIR)/latex/envvar.tex $(DOX_DIR)/latex/a00003.tex
-	@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00004.html
-	@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00004.tex
-	@mv -f $(DOX_DIR)/html/switchfromplpa.html $(DOX_DIR)/html/a00005.html
-	@mv -f $(DOX_DIR)/latex/switchfromplpa.tex $(DOX_DIR)/latex/a00005.tex
+	-@mv -f $(DOX_DIR)/html/termsanddefs.html $(DOX_DIR)/html/a00001.html
+	-@mv -f $(DOX_DIR)/latex/termsanddefs.tex $(DOX_DIR)/latex/a00001.tex
+	-@mv -f $(DOX_DIR)/html/tools.html $(DOX_DIR)/html/a00002.html
+	-@mv -f $(DOX_DIR)/latex/tools.tex $(DOX_DIR)/latex/a00002.tex
+	-@mv -f $(DOX_DIR)/html/envvar.html $(DOX_DIR)/html/a00003.html
+	-@mv -f $(DOX_DIR)/latex/envvar.tex $(DOX_DIR)/latex/a00003.tex
+	-@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00004.html
+	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00004.tex
+	-@mv -f $(DOX_DIR)/html/switchfromplpa.html $(DOX_DIR)/html/a00005.html
+	-@mv -f $(DOX_DIR)/latex/switchfromplpa.tex $(DOX_DIR)/latex/a00005.tex
 endif
 
 #
