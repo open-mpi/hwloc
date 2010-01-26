@@ -215,9 +215,9 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 			    hwloc_memory_size_printf_unit(obj->attr->machine.memory_kB, verbose),
 			    separator,
 			    obj->attr->machine.huge_page_free, obj->attr->machine.huge_page_size_kB,
-			    separator,
+			    obj->attr->machine.dmi_board_vendor?separator:"",
 			    obj->attr->machine.dmi_board_vendor?obj->attr->machine.dmi_board_vendor:"",
-			    separator,
+			    obj->attr->machine.dmi_board_name?separator:"",
 			    obj->attr->machine.dmi_board_name?obj->attr->machine.dmi_board_name:"");
     else
       return hwloc_snprintf(string, size, "%lu%s",
