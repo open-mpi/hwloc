@@ -1,4 +1,4 @@
-Machine(0KB HP=0*0kB TYAN Computer Corp S4881 )
+Machine(0KB TYAN Computer Corp S4881 )
   NUMANode#0(0KB)
     Socket#0
         L2Cache(1024KB)

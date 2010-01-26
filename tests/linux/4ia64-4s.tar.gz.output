@@ -1,4 +1,4 @@
-Machine(0KB HP=0*0kB)
+Machine(0KB)
   Socket
       L3Cache(4096KB)
         L2Cache(256KB)
