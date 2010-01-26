@@ -466,7 +466,7 @@ free_object(hwloc_obj_t obj)
   default:
     break;
   }
-  free(obj->memory.pages);
+  free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
   free(obj->name);
@@ -936,18 +936,15 @@ apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *p
 {
   hwloc_obj_t *systemp = data, system = *systemp;
   hwloc_obj_t obj = *pobj;
+  int i;
   if (system) {
     if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
         !hwloc_cpuset_isset(system->allowed_nodeset, obj->os_index)) {
       hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
       obj->memory.local_memory = 0;
       obj->memory.total_memory = 0;
-      if (obj->memory.pages) {
-	int i;
-	for(i=0; obj->memory.pages[i].count>0; i++) {
-	  obj->memory.pages[i].count = 0;
-	}
-      }
+      for(i=0; i<obj->memory.page_types_len; i++)
+	obj->memory.page_types[i].count = 0;
     }
   } else {
     if (obj->allowed_nodeset) {

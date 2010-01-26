@@ -98,11 +98,12 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
     /* or LGRP_MEM_SZ_FREE */
     hwloc_debug("node %ld has %lldkB\n", lgrp, mem_size/1024);
     obj->memory.local_memory = mem_size;
-    obj->memory.pages = malloc(3*sizeof(*obj->memory.pages));
-    memset(obj->memory.pages, 0, 3*sizeof(*obj->memory.pages));
-    obj->memory.pages[0].size = getpagesize();
+    obj->memory.page_types_len = 2;
+    obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
+    memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
+    obj->memory.page_types[0].size = getpagesize();
 #ifdef HAVE__SC_LARGE_PAGESIZE
-    obj->memory.pages[1].size = sysconf(_SC_LARGE_PAGESIZE);
+    obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
     hwloc_insert_object_by_cpuset(topology, obj);
   }

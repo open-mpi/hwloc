@@ -182,11 +182,12 @@ hwloc_look_osf(struct hwloc_topology *topology)
       nodes[radid] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, radid);
       obj->cpuset = hwloc_cpuset_alloc();
       obj->memory.local_memory = rad_get_physmem(radid) * getpagesize();
-      obj->memory.pages = malloc(3*sizeof(*obj->memory.pages));
-      memset(obj->memory.pages, 0, 3*sizeof(*obj->memory.pages));
-      obj->memory.pages[0].size = getpagesize();
+      obj->memory.page_types_len = 2;
+      obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
+      memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
+      obj->memory.page_types[0].size = getpagesize();
 #ifdef HAVE__SC_LARGE_PAGESIZE
-      obj->memory.pages[1].size = sysconf(_SC_LARGE_PAGESIZE);
+      obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
 
       cursor = SET_CURSOR_INIT;

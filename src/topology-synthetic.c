@@ -233,10 +233,11 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_NODE:
       /* 1GB in memory nodes, 256k 4k-pages.  */
       obj->memory.local_memory = 1024*1024*1024;
-      obj->memory.pages = malloc(2*sizeof(*obj->memory.pages)); /* normal pages + ending 0 */
-      memset(obj->memory.pages, 0, 2*sizeof(*obj->memory.pages));
-      obj->memory.pages[0].size = 4096;
-      obj->memory.pages[0].count = 256*1024;
+      obj->memory.page_types_len = 1;
+      obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+      memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
+      obj->memory.page_types[0].size = 4096;
+      obj->memory.page_types[0].count = 256*1024;
       break;
     case HWLOC_OBJ_SOCKET:
       break;
