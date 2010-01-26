@@ -369,8 +369,10 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
     xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
     break;
   case HWLOC_OBJ_MACHINE:
-    xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
-    xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
+    if (obj->attr->machine.dmi_board_vendor)
+      xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
+    if (obj->attr->machine.dmi_board_name)
+      xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
     sprintf(tmp, "%lu", obj->attr->machine.memory_kB);
     xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
     sprintf(tmp, "%lu", obj->attr->machine.huge_page_free);
