@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE root SYSTEM "hwloc.dtd">
-<root>
+<!DOCTYPE topology SYSTEM "hwloc.dtd">
+<topology>
   <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" online_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" memory_kB="0" huge_page_free="0" huge_page_size_kB="0">
     <object type="Socket" os_level="-1" os_index="0" cpuset="0x00001111" complete_cpuset="0x00001111" online_cpuset="0x00001111" allowed_cpuset="0x00001111">
       <object type="Cache" os_level="-1" cpuset="0x00001111" complete_cpuset="0x00001111" online_cpuset="0x00001111" allowed_cpuset="0x00001111" memory_kB="4096" depth="3">
@@ -83,4 +83,4 @@
       </object>
     </object>
   </object>
-</root>
+</topology>

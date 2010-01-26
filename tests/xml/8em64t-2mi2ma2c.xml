@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE root SYSTEM "hwloc.dtd">
-<root>
+<!DOCTYPE topology SYSTEM "hwloc.dtd">
+<topology>
   <object type="System" os_level="-1" os_index="0" memory_kB="0" huge_page_free="0" huge_page_size_kB="0">
     <object type="Misc" os_level="-1" depth="0">
       <object type="Machine" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" dmi_board_vendor="Dell Inc." dmi_board_name="0F331C" memory_kB="1016368" huge_page_free="0" huge_page_size_kB="2048">
@@ -71,4 +71,4 @@
       </object>
     </object>
   </object>
-</root>
+</topology>

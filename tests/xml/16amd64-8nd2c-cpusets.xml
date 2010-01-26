@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE root SYSTEM "hwloc.dtd">
-<root>
+<!DOCTYPE topology SYSTEM "hwloc.dtd">
+<topology>
   <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000f07f" complete_cpuset="0x0000ff7f" online_cpuset="0x0000ff7f" allowed_cpuset="0x0000f07f" dmi_board_vendor="TYAN Computer Corp" dmi_board_name="S4881 " memory_kB="0" huge_page_free="0" huge_page_size_kB="0">
     <object type="NUMANode" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" memory_kB="0" huge_page_free="0">
       <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">
@@ -106,4 +106,4 @@
     <object type="NUMANode" os_level="-1" os_index="4" cpuset="0x0" complete_cpuset="0x0" online_cpuset="0x0" allowed_cpuset="0x0" memory_kB="8388608" huge_page_free="0"/>
     <object type="NUMANode" os_level="-1" os_index="5" cpuset="0x0" complete_cpuset="0x0" online_cpuset="0x0" allowed_cpuset="0x0" memory_kB="8388608" huge_page_free="0"/>
   </object>
-</root>
+</topology>

@@ -283,8 +283,8 @@ hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
 {
   xmlAttr *attr = NULL;
 
-  if (strcmp((const char *) node->name, "root")) {
-    /* root node should be in "root" class */
+  if (strcmp((const char *) node->name, "topology") && strcmp((const char *) node->name, "root")) {
+    /* root node should be in "topology" class (or "root" if importing from < 1.0) */
     fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) node->name);
     return;
   }
@@ -439,11 +439,11 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 
   /* Creates a new document, a node and set it as a root node. */
   doc = xmlNewDoc(BAD_CAST "1.0");
-  root_node = xmlNewNode(NULL, BAD_CAST "root");
+  root_node = xmlNewNode(NULL, BAD_CAST "topology");
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */
-  dtd = xmlCreateIntSubset(doc, BAD_CAST "root", NULL, BAD_CAST "hwloc.dtd");
+  dtd = xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
 
   hwloc__xml_export_object (topology, hwloc_get_root_obj(topology), root_node);
 
