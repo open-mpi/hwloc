@@ -140,7 +140,12 @@ struct hwloc_obj_memory_s {
   uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
   uint64_t local_memory; /**< \brief Local memory (in bytes) */
 
-  /** \brief Array of local memory pages details, \c NULL if no local memory */
+  /** \brief Array of local memory pages details, \c NULL if no local memory.
+   *
+   * The array is sorted by increasing \p size fields.
+   * It is terminated with a slot whose \p size is 0.
+   * Any other slot has a non-null \p size.
+   */
   struct hwloc_obj_memory_pages_s {
     uint64_t size;	/**< \brief Size of pages */
     uint64_t count;	/**< \brief Number of pages of this size */
