@@ -89,20 +89,15 @@ hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unu
       fprintf(stderr, "ignoring cache_size attribute for non-cache object type\n");
   }
 
-  else if (!strcmp(name, "memory_kB")) {
+  else if (!strcmp(name, "local_memory")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
     switch (obj->type) {
       case HWLOC_OBJ_NODE:
-	obj->attr->node.memory_kB = lvalue;
-	break;
       case HWLOC_OBJ_MACHINE:
-	obj->attr->machine.memory_kB = lvalue;
-	break;
-      case HWLOC_OBJ_SYSTEM:
-	obj->attr->system.memory_kB = lvalue;
+	obj->memory.local_memory = lvalue;
 	break;
       default:
-	fprintf(stderr, "ignoring memory_kB attribute for object type without memory\n");
+	fprintf(stderr, "ignoring local_memory attribute for object type without memory\n");
 	break;
     }
   }
@@ -122,38 +117,7 @@ hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unu
     }
   }
 
-  else if (!strcmp(name, "huge_page_free")) {
-    unsigned long lvalue = strtoul(value, NULL, 10);
-    switch (obj->type) {
-      case HWLOC_OBJ_NODE:
-	obj->attr->node.huge_page_free = lvalue;
-	break;
-      case HWLOC_OBJ_MACHINE:
-	obj->attr->machine.huge_page_free = lvalue;
-	break;
-      case HWLOC_OBJ_SYSTEM:
-	obj->attr->system.huge_page_free = lvalue;
-	break;
-      default:
-	fprintf(stderr, "ignoring huge_page_free attribute for object type without huge pages\n");
-	break;
-    }
-  }
-
-  else if (!strcmp(name, "huge_page_size_kB")) {
-    unsigned long lvalue = strtoul(value, NULL, 10);
-    switch (obj->type) {
-      case HWLOC_OBJ_MACHINE:
-	obj->attr->machine.huge_page_size_kB = lvalue;
-	break;
-      case HWLOC_OBJ_SYSTEM:
-	obj->attr->system.huge_page_size_kB = strtoul(value, NULL, 10);
-	break;
-      default:
-	fprintf(stderr, "ignoring huge_page_size_kB attribute for object type without huge pages\n");
-	break;
-    }
-  }
+#warning TODO hugepages
 
   else if (!strcmp(name, "dmi_board_vendor")) {
     switch (obj->type) {
@@ -365,29 +329,17 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
     sprintf(tmp, "%u", obj->attr->cache.depth);
     xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
     break;
-  case HWLOC_OBJ_SYSTEM:
-    sprintf(tmp, "%lu", obj->attr->system.memory_kB);
-    xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr->system.huge_page_free);
-    xmlNewProp(node, BAD_CAST "huge_page_free", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr->system.huge_page_size_kB);
-    xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
-    break;
   case HWLOC_OBJ_MACHINE:
     xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
     xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
-    sprintf(tmp, "%lu", obj->attr->machine.memory_kB);
-    xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr->machine.huge_page_free);
-    xmlNewProp(node, BAD_CAST "huge_page_free", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr->machine.huge_page_size_kB);
-    xmlNewProp(node, BAD_CAST "huge_page_size_kB", BAD_CAST tmp);
+    sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
+    xmlNewProp(node, BAD_CAST "local_memory", BAD_CAST tmp);
+#warning TODO hugepages
     break;
   case HWLOC_OBJ_NODE:
-    sprintf(tmp, "%lu", obj->attr->node.memory_kB);
-    xmlNewProp(node, BAD_CAST "memory_kB", BAD_CAST tmp);
-    sprintf(tmp, "%lu", obj->attr->node.huge_page_free);
-    xmlNewProp(node, BAD_CAST "huge_page_free", BAD_CAST tmp);
+    sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
+    xmlNewProp(node, BAD_CAST "local_memory", BAD_CAST tmp);
+#warning TODO hugepages
     break;
   case HWLOC_OBJ_MISC:
     sprintf(tmp, "%u", obj->attr->misc.depth);

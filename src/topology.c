@@ -466,6 +466,7 @@ free_object(hwloc_obj_t obj)
   default:
     break;
   }
+  free(obj->memory.pages);
   free(obj->attr);
   free(obj->children);
   free(obj->name);
@@ -661,9 +662,12 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
         }
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
+#if 0
 	    /* Do not check these, it may change between calls */
 	    merge_sizes(obj, child, attr->node.memory_kB);
 	    merge_sizes(obj, child, attr->node.huge_page_free);
+#endif
+#warning TODO
 	    break;
 	  case HWLOC_OBJ_CACHE:
 	    merge_sizes(obj, child, attr->cache.size);
@@ -834,6 +838,16 @@ traverse(hwloc_topology_t topology,
     node_after(topology, parent, data);
 }
 
+/* While traversing down and up, propagate memory counts */
+static void
+propagate_total_memory(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+{
+  /* Called on leaf or after processing an object, so already got contribution from its children */
+  (*pobj)->memory.total_memory += (*pobj)->memory.local_memory;
+  if ((*pobj)->parent)
+    (*pobj)->parent->memory.total_memory += (*pobj)->memory.total_memory;
+}
+
 /* While traversing down and up, propagate the offline/disallowed cpus by
  * and'ing them to and from the first object that has a cpuset */
 static void
@@ -926,8 +940,14 @@ apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *p
     if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
         !hwloc_cpuset_isset(system->allowed_nodeset, obj->os_index)) {
       hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
-      obj->attr->node.memory_kB = 0;
-      obj->attr->node.huge_page_free = 0;
+      obj->memory.local_memory = 0;
+      obj->memory.total_memory = 0;
+      if (obj->memory.pages) {
+	int i;
+	for(i=0; obj->memory.pages[i].count>0; i++) {
+	  obj->memory.pages[i].count = 0;
+	}
+      }
     }
   } else {
     if (obj->allowed_nodeset) {
@@ -1395,6 +1415,10 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* It's empty now.  */
   free(objs);
+
+  /* accumulate children memory in total_memory fields (only once parent is set) */
+  hwloc_debug("%s", "\nPropagate total memory up\n");
+  traverse(topology, &topology->levels[0][0], NULL, propagate_total_memory, propagate_total_memory, NULL);
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;

@@ -893,13 +893,19 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
 
 static void
 hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
-			     const char *path,
-			     unsigned long *mem_size_kB,
-			     unsigned long *huge_page_size_kB,
-			     unsigned long *huge_page_free)
+			     const char *path, struct hwloc_obj_memory_s *memory)
 {
   char string[64];
   FILE *fd;
+
+  memory->pages = malloc(3*sizeof(*memory->pages)); /* normal pages + huge pages + ending 0 */
+  memset(memory->pages, 0, 3*sizeof(*memory->pages));
+
+  /* Try to get the hugepage size from sysconf in case we fail to get it from /proc/meminfo later */
+#ifdef HAVE__SC_LARGE_PAGESIZE
+  memory->pages[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+  memory->pages[0].size = getpagesize();
 
   fd = hwloc_fopen(path, "r", topology->backend_params.sysfs.root_fd);
   if (!fd)
@@ -907,14 +913,16 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
 
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
-      unsigned long number;
-      if (sscanf(string, "MemTotal: %lu kB", &number) == 1)
-	*mem_size_kB = number;
-      else if (sscanf(string, "Hugepagesize: %lu", &number) == 1)
-	*huge_page_size_kB = number;
-      else if (sscanf(string, "HugePages_Free: %lu", &number) == 1)
-	*huge_page_free = number;
+      unsigned long long number;
+      if (sscanf(string, "MemTotal: %llu kB", &number) == 1)
+	memory->local_memory = number << 10;
+      else if (sscanf(string, "Hugepagesize: %llu", &number) == 1)
+	memory->pages[1].size = number << 10;
+      else if (sscanf(string, "HugePages_Free: %llu", &number) == 1)
+	memory->pages[1].count = number;
     }
+
+  memory->pages[0].count = (memory->local_memory - memory->pages[1].count*memory->pages[1].size) / memory->pages[0].size;
 
   fclose(fd);
 }
@@ -923,10 +931,8 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
 
 static void
 hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
-			     const char *syspath,
-			     int node,
-			     unsigned long *mem_size_kB,
-			     unsigned long *huge_page_free)
+			     const char *syspath, int node,
+			     struct hwloc_obj_memory_s *memory)
 {
   char path[SYSFS_NUMA_NODE_PATH_LEN];
   char string[64];
@@ -937,14 +943,22 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
   if (!fd)
     return;
 
+  memory->pages = malloc(3*sizeof(*memory->pages)); /* normal pages + huge pages + ending 0 */
+  memset(memory->pages, 0, 3*sizeof(*memory->pages));
+
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
-      unsigned long number;
-      if (sscanf(string, "Node %d MemTotal: %lu kB", &node, &number) == 2)
-	*mem_size_kB = number;
-      else if (sscanf(string, "Node %d HugePages_Free: %lu kB", &node, &number) == 2)
-	*huge_page_free = number;
+      unsigned long long number;
+      if (sscanf(string, "Node %d MemTotal: %llu kB", &node, &number) == 2)
+	memory->local_memory = number << 10;
+      else if (sscanf(string, "Node %d HugePages_Free: %llu kB", &node, &number) == 2)
+	memory->pages[1].count = number;
     }
+
+  /* hwloc_get_procfs_meminfo_info must have been called earlier */
+  memory->pages[1].size = topology->levels[0][0]->memory.pages[1].size;
+  memory->pages[0].size = getpagesize();
+  memory->pages[0].count = (memory->local_memory - memory->pages[1].count*memory->pages[1].size) / memory->pages[0].size;
 
   fclose(fd);
 }
@@ -980,13 +994,15 @@ hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned *
 }
 
 static void
-look_sysfsnode(struct hwloc_topology *topology, const char *path)
+look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *found)
 {
   unsigned osnode;
   unsigned nbnodes = 1;
   DIR *dir;
   struct dirent *dirent;
   hwloc_obj_t node;
+
+  *found = 0;
 
   dir = hwloc_opendir(path, topology->backend_params.sysfs.root_fd);
   if (dir)
@@ -1014,33 +1030,30 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path)
       for (osnode=0; osnode < nbnodes; osnode++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_cpuset_t cpuset;
-          unsigned long size = -1;
-          unsigned long hpfree = -1;
-          
+
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
           if (!cpuset)
               continue;
-          
-          hwloc_sysfs_node_meminfo_info(topology, path, osnode, &size, &hpfree);
-          
+
           node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
           node->cpuset = cpuset;
-          node->attr->node.memory_kB = size;
-          node->attr->node.huge_page_free = hpfree;
-          node->cpuset = cpuset;
-          
+
+          hwloc_sysfs_node_meminfo_info(topology, path, osnode, &node->memory);
+
           hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
           hwloc_insert_object_by_cpuset(topology, node);
           nodes[osnode] = node;
-          
+
           sprintf(nodepath, "%s/node%u/distance", path, osnode);
           hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
       }
-      
+
       hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances);
   }
+
+  *found = nbnodes;
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
@@ -1338,7 +1351,6 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (coreid == oscoreids[i] && proc_osphysids[processor] == core_osphysids[i])
 	  break;
       proc_coreids[processor]=i;
-      hwloc_debug("%ld on core %u (%lx:%x)\n", processor, i, coreid, proc_osphysids[processor]);
       if (i==numcores)
 	{
 	  core_osphysids[numcores] = proc_osphysids[processor];
@@ -1426,6 +1438,7 @@ void
 hwloc_look_linux(struct hwloc_topology *topology)
 {
   DIR *nodes_dir;
+  unsigned nbnodes;
   int err;
 
   /* Gather the list of admin-disabled cpus and mems */
@@ -1444,8 +1457,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
 
     topology->levels[0][0]->type = HWLOC_OBJ_SYSTEM;
     topology->levels[0][0]->name = strdup("Kerrighed");
-    topology->levels[0][0]->attr->system.memory_kB = 0;
-    topology->levels[0][0]->attr->system.huge_page_free = 0;
+
     /* No cpuset support for now.  */
     /* No sys support for now.  */
     while ((dirent = readdir(nodes_dir)) != NULL) {
@@ -1468,15 +1480,8 @@ hwloc_look_linux(struct hwloc_topology *topology)
       hwloc_insert_object_by_cpuset(topology, machine);
 
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/meminfo", node);
-      /* Compute the machine memory and huge page */
-      hwloc_get_procfs_meminfo_info(topology,
-				   path,
-				   &machine->attr->machine.memory_kB,
-				   &machine->attr->machine.huge_page_size_kB,
-				   &machine->attr->machine.huge_page_free);
-				   /* FIXME: gather page_size_kB as well? MaMI needs it */
-      topology->levels[0][0]->attr->system.memory_kB += machine->attr->machine.memory_kB;
-      topology->levels[0][0]->attr->system.huge_page_free += machine->attr->machine.huge_page_free;
+      /* Get the machine memory attributes */
+      hwloc_get_procfs_meminfo_info(topology, path, &machine->memory);
 
       /* Gather DMI info */
       /* FIXME: get the right DMI info of each machine */
@@ -1486,8 +1491,18 @@ hwloc_look_linux(struct hwloc_topology *topology)
     }
     closedir(nodes_dir);
   } else {
-    /* Gather NUMA information */
-    look_sysfsnode(topology, "/sys/devices/system/node");
+    /* Get the machine memory attributes */
+    hwloc_get_procfs_meminfo_info(topology, "/proc/meminfo", &topology->levels[0][0]->memory);
+
+    /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
+    look_sysfsnode(topology, "/sys/devices/system/node", &nbnodes);
+
+    /* if we found some numa nodes, the machine object has no local memory */
+    if (nbnodes) {
+      topology->levels[0][0]->memory.local_memory = 0;
+      topology->levels[0][0]->memory.pages[0].count = 0;
+      topology->levels[0][0]->memory.pages[1].count = 0;
+    }
 
     /* Gather the list of cpus now */
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
@@ -1505,14 +1520,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
     } else {
       look_sysfscpu(topology, "/sys/devices/system/cpu");
     }
-
-    /* Compute the whole system memory and huge page */
-    hwloc_get_procfs_meminfo_info(topology,
-				 "/proc/meminfo",
-				 &topology->levels[0][0]->attr->machine.memory_kB,
-				 &topology->levels[0][0]->attr->machine.huge_page_size_kB,
-				 &topology->levels[0][0]->attr->machine.huge_page_free);
-				 /* FIXME: gather page_size_kB as well? MaMI needs it */
 
     /* Gather DMI info */
     hwloc__get_dmi_info(topology,
