@@ -205,10 +205,6 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
   HMODULE kernel32;
 
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#endif
-
   kernel32 = LoadLibrary("kernel32.dll");
   if (kernel32) {
     GetLogicalProcessorInformationProc = GetProcAddress(kernel32, "GetLogicalProcessorInformation");
@@ -272,10 +268,12 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    {
 	      ULONGLONG avail;
 	      if (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail))
-		obj->attr->node.memory_kB = avail >> 10;
-	      else
-		obj->attr->node.memory_kB = 0;
-	      obj->attr->node.huge_page_free = 0; /* TODO */
+		obj->memory.local_memory = avail;
+	      obj->memory.pages = malloc(3*sizeof(*obj->memory.pages));
+	      memset(obj->memory.pages, 0, 3*sizeof(*obj->memory.pages));
+#ifdef HAVE__SC_LARGE_PAGESIZE
+	      obj->memory.pages[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
 	      break;
 	    }
 	  case HWLOC_OBJ_CACHE:
@@ -376,8 +374,12 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
 	switch (type) {
 	  case HWLOC_OBJ_NODE:
-	    obj->attr->node.memory_kB = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
-	    obj->attr->node.huge_page_free = 0; /* TODO */
+	    obj->memory.local_memory = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
+	    obj->memory.pages = malloc(3*sizeof(*obj->memory.pages));
+	    memset(obj->memory.pages, 0, 3*sizeof(*obj->memory.pages));
+#ifdef HAVE__SC_LARGE_PAGESIZE
+	    obj->memory.pages[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
 	    break;
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo->Cache.CacheSize;

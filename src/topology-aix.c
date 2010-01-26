@@ -200,8 +200,14 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     obj->os_level = sdl;
     switch(type) {
       case HWLOC_OBJ_NODE:
-	obj->attr->node.memory_kB = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
-	obj->attr->node.huge_page_free = 0; /* TODO: rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
+	obj->memory.local_memory = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
+	obj->memory.pages = malloc(3*sizeof(*obj->memory.pages));
+	memset(obj->memory.pages, 0, 3*sizeof(*obj->memory.pages));
+	obj->memory.pages[0].size = getpagesize();
+#ifdef HAVE__SC_LARGE_PAGESIZE
+	obj->memory.pages[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+	/* TODO: obj->memory.pages[1].count = rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
 	break;
       case HWLOC_OBJ_CACHE:
 	obj->attr->cache.size = 0; /* TODO: ? */
@@ -232,10 +238,6 @@ hwloc_look_aix(struct hwloc_topology *topology)
 {
   int i;
   /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
-
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#endif
 
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {

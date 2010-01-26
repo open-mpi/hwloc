@@ -96,9 +96,14 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
 	lgrp, obj->cpuset);
 
     /* or LGRP_MEM_SZ_FREE */
-    obj->attr->node.huge_page_free = 0; /* TODO */
     hwloc_debug("node %ld has %lldkB\n", lgrp, mem_size/1024);
-    obj->attr->node.memory_kB = mem_size / 1024;
+    obj->memory.local_memory = mem_size;
+    obj->memory.pages = malloc(3*sizeof(*obj->memory.pages));
+    memset(obj->memory.pages, 0, 3*sizeof(*obj->memory.pages));
+    obj->memory.pages[0].size = getpagesize();
+#ifdef HAVE__SC_LARGE_PAGESIZE
+    obj->memory.pages[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
     hwloc_insert_object_by_cpuset(topology, obj);
   }
 
@@ -332,9 +337,6 @@ void
 hwloc_look_solaris(struct hwloc_topology *topology)
 {
   unsigned nbprocs = hwloc_fallback_nbprocessors (topology);
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#endif
 #ifdef HAVE_LIBLGRP
   hwloc_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */
