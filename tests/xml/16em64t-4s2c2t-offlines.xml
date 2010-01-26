@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root SYSTEM "hwloc.dtd">
 <root>
-  <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000905b" complete_cpuset="0x0001915b" online_cpuset="0x0000905b" allowed_cpuset="0x0000915b" dmi_board_vendor="" dmi_board_name="" memory_kB="0" huge_page_free="0" huge_page_size_kB="0">
+  <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000905b" complete_cpuset="0x0001915b" online_cpuset="0x0000905b" allowed_cpuset="0x0000915b" memory_kB="0" huge_page_free="0" huge_page_size_kB="0">
     <object type="Socket" os_level="-1" os_index="0" cpuset="0x00001011" complete_cpuset="0x00001011" online_cpuset="0x00001011" allowed_cpuset="0x00001011">
       <object type="Cache" os_level="-1" cpuset="0x00001011" complete_cpuset="0x00001011" online_cpuset="0x00001011" allowed_cpuset="0x00001011" cache_size="4194304" depth="3">
         <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="1048576" depth="2">
