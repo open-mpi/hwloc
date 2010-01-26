@@ -1474,7 +1474,7 @@ hwloc_discover(struct hwloc_topology *topology)
     }
   }
 
-  traverse(topology, &topology->levels[0][0], NULL, NULL, append_iodevice, NULL);
+  traverse(topology, &topology->levels[0][0], NULL, append_iodevice, append_iodevice, NULL);
 
   /*
    * Eventually, register OS-specific binding functions
