@@ -662,12 +662,20 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
         }
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
-#if 0
 	    /* Do not check these, it may change between calls */
-	    merge_sizes(obj, child, attr->node.memory_kB);
-	    merge_sizes(obj, child, attr->node.huge_page_free);
-#endif
-#warning TODO
+	    merge_sizes(obj, child, memory.local_memory);
+	    merge_sizes(obj, child, memory.total_memory);
+	    /* if both objects have a page_types array, just keep the biggest one for now */
+	    if (obj->memory.page_types_len && child->memory.page_types_len)
+	      hwloc_debug("%s", "merging page_types by keeping the biggest one only\n");
+	    if (obj->memory.page_types_len > child->memory.page_types_len) {
+	      free(child->memory.page_types);
+	    } else {
+	      free(obj->memory.page_types);
+	      obj->memory.page_types_len = child->memory.page_types_len;
+	      obj->memory.page_types = child->memory.page_types;
+	      child->memory.page_types = NULL;
+	    }
 	    break;
 	  case HWLOC_OBJ_CACHE:
 	    merge_sizes(obj, child, attr->cache.size);
