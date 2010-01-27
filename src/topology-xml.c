@@ -396,8 +396,10 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     break;
   }
 
-  sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
-  xmlNewProp(node, BAD_CAST "local_memory", BAD_CAST tmp);
+  if (obj->memory.local_memory) {
+    sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
+    xmlNewProp(node, BAD_CAST "local_memory", BAD_CAST tmp);
+  }
   for(i=0; i<obj->memory.page_types_len; i++) {
     ptnode = xmlNewChild(node, NULL, BAD_CAST "page_type", NULL);
     sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].size);
