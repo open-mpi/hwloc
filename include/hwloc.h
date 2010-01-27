@@ -146,7 +146,7 @@ struct hwloc_obj_memory_s {
    * The array is sorted by increasing \p size fields.
    * It contains \p page_types_len slots.
    */
-  struct hwloc_obj_memory_pages_s {
+  struct hwloc_obj_memory_page_type_s {
     uint64_t size;	/**< \brief Size of pages */
     uint64_t count;	/**< \brief Number of pages of this size */
   } * page_types;
