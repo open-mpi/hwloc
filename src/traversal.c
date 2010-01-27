@@ -196,36 +196,43 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 int
 hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * separator, int verbose)
 {
+  char memory[64] = "";
+
+  if (verbose) {
+    if (obj->memory.local_memory)
+      snprintf(memory, sizeof(memory), "local=%llu%s%stotal=%llu%s",
+	       hwloc_memory_size_printf_value(obj->memory.total_memory >> 10, verbose),
+	       hwloc_memory_size_printf_unit(obj->memory.total_memory >> 10, verbose),
+	       separator,
+	       hwloc_memory_size_printf_value(obj->memory.local_memory >> 10, verbose),
+	       hwloc_memory_size_printf_unit(obj->memory.local_memory >> 10, verbose));
+    else if (obj->memory.total_memory)
+      snprintf(memory, sizeof(memory), "total=%llu%s",
+	       hwloc_memory_size_printf_value(obj->memory.total_memory >> 10, verbose),
+	       hwloc_memory_size_printf_unit(obj->memory.total_memory >> 10, verbose));
+  } else {
+    if (obj->memory.total_memory)
+      snprintf(memory, sizeof(memory), "%llu%s",
+	       hwloc_memory_size_printf_value(obj->memory.total_memory >> 10, verbose),
+	       hwloc_memory_size_printf_unit(obj->memory.total_memory >> 10, verbose));
+  }
+
   switch (obj->type) {
-  case HWLOC_OBJ_SYSTEM:
-    return hwloc_snprintf(string, size, "%llu%s",
-			  hwloc_memory_size_printf_value(obj->memory.local_memory >> 10, verbose),
-			  hwloc_memory_size_printf_unit(obj->memory.local_memory >> 10, verbose));
   case HWLOC_OBJ_MACHINE:
-#warning report total_memory, and add local if verbose ?
     if (verbose)
-      return hwloc_snprintf(string, size, "%llu%s%s%s%s%s",
-			    hwloc_memory_size_printf_value(obj->memory.local_memory >> 10, verbose),
-			    hwloc_memory_size_printf_unit(obj->memory.local_memory >> 10, verbose),
+      return hwloc_snprintf(string, size, "%s%s%s%s%s", memory,
 			    obj->attr->machine.dmi_board_vendor?separator:"",
 			    obj->attr->machine.dmi_board_vendor?obj->attr->machine.dmi_board_vendor:"",
 			    obj->attr->machine.dmi_board_name?separator:"",
 			    obj->attr->machine.dmi_board_name?obj->attr->machine.dmi_board_name:"");
     else
-      return hwloc_snprintf(string, size, "%llu%s",
-			    hwloc_memory_size_printf_value(obj->memory.local_memory >> 10, verbose),
-			    hwloc_memory_size_printf_unit(obj->memory.local_memory >> 10, verbose));
-  case HWLOC_OBJ_NODE:
-    return hwloc_snprintf(string, size, "%llu%s",
-			  hwloc_memory_size_printf_value(obj->memory.local_memory >> 10, verbose),
-			  hwloc_memory_size_printf_unit(obj->memory.local_memory >> 10, verbose));
+      return hwloc_snprintf(string, size, "%s", memory);
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "%llu%s",
 			  hwloc_memory_size_printf_value(obj->attr->cache.size >> 10, verbose),
 			  hwloc_memory_size_printf_unit(obj->attr->cache.size >> 10, verbose));
   default:
-    *string = '\0';
-    return 0;
+    return hwloc_snprintf(string, size, "%s", memory);
   }
 }
 
