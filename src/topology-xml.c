@@ -149,6 +149,67 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
   }
 
+
+
+  /*************************
+   * deprecated (from 0.9)
+   */
+  else if (!strcmp(name, "memory_kB")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    switch (obj->type) {
+      case HWLOC_OBJ_CACHE:
+	obj->attr->cache.size = lvalue << 10;
+	break;
+      case HWLOC_OBJ_NODE:
+      case HWLOC_OBJ_MACHINE:
+      case HWLOC_OBJ_SYSTEM:
+	obj->memory.local_memory = lvalue << 10;
+	break;
+      default:
+	fprintf(stderr, "ignoring memory_kB attribute for object type without memory\n");
+	break;
+    }
+  }
+  else if (!strcmp(name, "huge_page_size_kB")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    switch (obj->type) {
+      case HWLOC_OBJ_NODE:
+      case HWLOC_OBJ_MACHINE:
+      case HWLOC_OBJ_SYSTEM:
+	if (!obj->memory.page_types) {
+	  obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+	  obj->memory.page_types_len = 1;
+	}
+	obj->memory.page_types[0].size = lvalue << 10;
+	break;
+      default:
+	fprintf(stderr, "ignoring huge_page_size_kB attribute for object type without huge pages\n");
+	break;
+    }
+  }
+  else if (!strcmp(name, "huge_page_free")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    switch (obj->type) {
+      case HWLOC_OBJ_NODE:
+      case HWLOC_OBJ_MACHINE:
+      case HWLOC_OBJ_SYSTEM:
+	if (!obj->memory.page_types) {
+	  obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+	  obj->memory.page_types_len = 1;
+	}
+	obj->memory.page_types[0].count = lvalue;
+	break;
+      default:
+	fprintf(stderr, "ignoring huge_page_free attribute for object type without huge pages\n");
+	break;
+    }
+  }
+  /*
+   * end of deprecated (from 0.9)
+   *******************************/
+
+
+
   else
     fprintf(stderr, "ignoring unknown object attribute %s\n", name);
 }
