@@ -45,9 +45,13 @@ hwloc_backend_xml_exit(struct hwloc_topology *topology)
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
+/******************************
+ ********* XML import *********
+ ******************************/
+
 static void
-hwloc__process_root_attr(struct hwloc_topology *topology __hwloc_attribute_unused,
-    const xmlChar *_name, const xmlChar *_value __hwloc_attribute_unused)
+hwloc__xml_import_topology_attr(struct hwloc_topology *topology __hwloc_attribute_unused,
+				const xmlChar *_name, const xmlChar *_value __hwloc_attribute_unused)
 {
   const char *name = (const char *) _name;
 
@@ -55,8 +59,8 @@ hwloc__process_root_attr(struct hwloc_topology *topology __hwloc_attribute_unuse
 }
 
 static void
-hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
-			   const xmlChar *_name, const xmlChar *_value)
+hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
+			      const xmlChar *_name, const xmlChar *_value)
 {
   const char *name = (const char *) _name;
   const char *value = (const char *) _value;
@@ -145,110 +149,94 @@ hwloc__process_object_attr(struct hwloc_topology *topology __hwloc_attribute_unu
     fprintf(stderr, "ignoring unknown object attribute %s\n", name);
 }
 
-static void
-hwloc__look_xml_attr(struct hwloc_topology *topology, struct hwloc_obj *obj,
-		    const xmlChar *attrname, xmlNode *node)
+static const xmlChar *
+hwloc__xml_import_attr_value(xmlAttr *attr)
 {
+  xmlNode *subnode;
   /* use the first valid attribute content */
-  for (; node; node = node->next) {
-    if (node->type == XML_TEXT_NODE) {
-      if (node->content && node->content[0] != '\0' && node->content[0] != '\n') {
-	if (obj)
-	  hwloc__process_object_attr(topology, obj, attrname, node->content);
-	else
-	  hwloc__process_root_attr(topology, attrname, node->content);
-	break;
-      }
+  for (subnode = attr->children; subnode; subnode = subnode->next) {
+    if (subnode->type == XML_TEXT_NODE) {
+      if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n')
+	return subnode->content;
     } else {
-	fprintf(stderr, "ignoring unexpected xml attr node type %u name %s\n", node->type, (const char*) node->name);
+      fprintf(stderr, "ignoring unexpected xml attr node type %u\n", subnode->type);
     }
   }
+  return NULL;
+}
+
+static void hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth);
+
+static void
+hwloc__xml_import_object_node(struct hwloc_topology *topology, struct hwloc_obj *parent, struct hwloc_obj *obj, xmlNode *node, int depth)
+{
+  xmlAttr *attr = NULL;
+
+  /* first determine the object type */
+  for (attr = node->properties; attr; attr = attr->next) {
+    if (attr->type == XML_ATTRIBUTE_NODE && !strcmp((const char*) attr->name, "type")) {
+      const xmlChar *value = hwloc__xml_import_attr_value(attr);
+      if (!value) {
+	fprintf(stderr, "ignoring xml object without type attr %s\n", (const char*) value);
+	return;
+      }
+      obj->type = hwloc_obj_type_of_string((const char*) value);
+      if (obj->type == (hwloc_obj_type_t)-1) {
+	fprintf(stderr, "ignoring unknown object type %s\n", (const char*) value);
+	return;
+      }
+      break;
+    } else {
+      fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
+    }
+  }
+  if (obj->type == HWLOC_OBJ_TYPE_MAX) {
+    fprintf(stderr, "ignoring object without type\n");
+    return;
+  }
+
+  /* process attributes now that the type is known */
+  for (attr = node->properties; attr; attr = attr->next) {
+    if (attr->type == XML_ATTRIBUTE_NODE) {
+      const xmlChar *value = hwloc__xml_import_attr_value(attr);
+      if (value)
+	hwloc__xml_import_object_attr(topology, obj, attr->name, value);
+      else
+	fprintf(stderr, "ignoring unexpected xml object attr name `%s' with no value\n", attr->name);
+    } else {
+      fprintf(stderr, "ignoring unexpected xml object attr type %u\n", attr->type);
+    }
+  }
+
+  if (depth > 0) { /* root object is already in place */
+    /* add object */
+    hwloc_insert_object_by_parent(topology, parent, obj);
+  }
+
+  /* process children */
+  if (node->children)
+    hwloc__xml_import_node(topology, obj, node->children, depth+1);
 }
 
 static void
-hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth)
+hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth)
 {
   for (; node; node = node->next) {
     if (node->type == XML_ELEMENT_NODE) {
-      xmlAttr *attr = NULL;
-      struct hwloc_obj *obj = NULL;
-
-      if (depth == 0) {
-	/* root node should be in root class */
-	if (strcmp((const char *) node->name, "root"))
-	  fprintf(stderr, "root node of class `%s' instead of `root'\n", (const char*) node->name);
-
-	/* no object yet */
-
-      } else {
-	/* object node should be in object class */
-	if (strcmp((const char*) node->name, "object"))
-	  fprintf(stderr, "object node of class `%s' instead of `object'\n", (const char*) node->name);
-
-	if (depth > 1)
+      if (!strcmp((const char*) node->name, "object")) {
+	/* object attributes */
+	struct hwloc_obj *obj = NULL;
+	if (depth)
 	  obj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
 	else
 	  obj = topology->levels[0][0];
-      }
-
-      /* first determine the object type */
-      for (attr = node->properties; attr; attr = attr->next) {
-	if (attr->type == XML_ATTRIBUTE_NODE) {
-	  xmlNode *subnode;
-	  for (subnode = attr->children; subnode; subnode = subnode->next) {
-	    if (subnode->type == XML_TEXT_NODE) {
-	      if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
-		if (!strcmp((const char*) attr->name, "type")) {
-		  obj->type = hwloc_obj_type_of_string((const char*) subnode->content);
-		  if (obj->type == (hwloc_obj_type_t)-1)
-		    fprintf(stderr, "ignoring unknown object type %s\n", (const char*) subnode->content);
-		  else
-		    break;
-		}
-	      }
-	    } else {
-		fprintf(stderr, "ignoring unexpected xml attr subnode type %u name %s\n", subnode->type, (const char*) subnode->name);
-	    }
-	  }
-	  if (obj && obj->type == HWLOC_OBJ_TYPE_MAX) {
-	    fprintf(stderr, "ignoring attributes of object without type\n");
-	    return;
-	  }
-	} else {
-	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
-	}
-      }
-
-      /* process attributes */
-      for (attr = node->properties; attr; attr = attr->next) {
-	if (attr->type == XML_ATTRIBUTE_NODE) {
-	  if (attr->children)
-	    hwloc__look_xml_attr(topology, obj, attr->name, attr->children);
-	} else {
-	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
-	}
-      }
-
-      if (depth == 0) {
-	/* no object in xml doc root */
-	assert (!obj);
-
-      } else if (depth == 1) {
-	/* root object is already there */
+	hwloc__xml_import_object_node(topology, parent, obj, node, depth);
 
       } else {
-	/* add object */
-	if (obj->type >= HWLOC_OBJ_TYPE_MAX) {
-	  fprintf(stderr, "ignoring object with invalid type %u\n", obj->type);
-	  free(obj);
-	} else {
-	    hwloc_insert_object_by_parent(topology, parent, obj);
-	}
+	/* unknown class */
+	fprintf(stderr, "ignoring unexpected node class `%s'\n", (const char*) node->name);
+	continue;
       }
-
-      /* process children */
-      if (node->children)
-	hwloc__look_xml_node(topology, obj, node->children, depth+1);
 
     } else if (node->type == XML_TEXT_NODE) {
       if (node->content && node->content[0] != '\0' && node->content[0] != '\n')
@@ -257,6 +245,35 @@ hwloc__look_xml_node(struct hwloc_topology *topology, struct hwloc_obj *parent, 
       fprintf(stderr, "ignoring unexpected xml node type %u\n", node->type);
     }
   }
+}
+
+static void
+hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
+{
+  xmlAttr *attr = NULL;
+
+  if (strcmp((const char *) node->name, "topology") && strcmp((const char *) node->name, "root")) {
+    /* root node should be in "topology" class (or "root" if importing from < 1.0) */
+    fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) node->name);
+    return;
+  }
+
+  /* process attributes */
+  for (attr = node->properties; attr; attr = attr->next) {
+    if (attr->type == XML_ATTRIBUTE_NODE) {
+      const xmlChar *value = hwloc__xml_import_attr_value(attr);
+      if (value)
+	hwloc__xml_import_topology_attr(topology, attr->name, value);
+      else
+	fprintf(stderr, "ignoring unexpected xml root attr name `%s' with no value\n", attr->name);
+    } else {
+      fprintf(stderr, "ignoring unexpected xml root attr type %u\n", attr->type);
+    }
+  }
+
+  /* process children */
+  if (node->children)
+    hwloc__xml_import_node(topology, NULL, node->children, 0);
 }
 
 void
@@ -276,13 +293,19 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
   root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 
-  hwloc__look_xml_node(topology, NULL, root_node, 0);
+  hwloc__xml_import_topology_node(topology, root_node);
+  if (root_node->next)
+    fprintf(stderr, "ignoring non-first root nodes\n");
 
   /* TODO: abort if we got an invalid topology or so */
 }
 
+/******************************
+ ********* XML export *********
+ ******************************/
+
 static void
-hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr root_node)
+hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr root_node)
 {
   xmlNodePtr node = NULL;
   char *cpuset = NULL;
@@ -354,12 +377,12 @@ hwloc__topology_export_xml_object (hwloc_topology_t topology, hwloc_obj_t obj, x
   if (obj->arity) {
     unsigned x;
     for (x=0; x<obj->arity; x++)
-      hwloc__topology_export_xml_object (topology, obj->children[x], node);
+      hwloc__xml_export_object (topology, obj->children[x], node);
   }
 }
 
 static void
-hwloc__topology_export_info (hwloc_topology_t topology __hwloc_attribute_unused, xmlNodePtr root_node __hwloc_attribute_unused)
+hwloc__xml_export_topology_info (hwloc_topology_t topology __hwloc_attribute_unused, xmlNodePtr root_node __hwloc_attribute_unused)
 {
 }
 
@@ -373,15 +396,15 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 
   /* Creates a new document, a node and set it as a root node. */
   doc = xmlNewDoc(BAD_CAST "1.0");
-  root_node = xmlNewNode(NULL, BAD_CAST "root");
+  root_node = xmlNewNode(NULL, BAD_CAST "topology");
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */
-  dtd = xmlCreateIntSubset(doc, BAD_CAST "root", NULL, BAD_CAST "hwloc.dtd");
+  dtd = xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
 
-  hwloc__topology_export_xml_object (topology, hwloc_get_root_obj(topology), root_node);
+  hwloc__xml_export_object (topology, hwloc_get_root_obj(topology), root_node);
 
-  hwloc__topology_export_info (topology, root_node);
+  hwloc__xml_export_topology_info (topology, root_node);
 
   /* Dumping document to stdio or file. */
   xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);

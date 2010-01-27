@@ -1,3 +1,4 @@
+<!ELEMENT topology (object)+>
 <!ELEMENT root (object)+>
 
 <!ELEMENT object (object)*>
