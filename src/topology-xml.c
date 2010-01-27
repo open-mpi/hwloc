@@ -59,6 +59,22 @@ hwloc__xml_import_topology_attr(struct hwloc_topology *topology __hwloc_attribut
 }
 
 static void
+hwloc__xml_import_pagetype_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj_memory_page_type_s *page_type,
+				const xmlChar *_name, const xmlChar *_value)
+{
+  const char *name = (const char *) _name;
+  const char *value = (const char *) _value;
+
+  if (!strcmp(name, "size"))
+    page_type->size = strtoul(value, NULL, 10);
+  else if (!strcmp(name, "count"))
+    page_type->count = strtoul(value, NULL, 10);
+
+  else
+    fprintf(stderr, "ignoring unknown pagetype attribute %s\n", name);
+}
+
+static void
 hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
 			      const xmlChar *_name, const xmlChar *_value)
 {
@@ -93,18 +109,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       fprintf(stderr, "ignoring cache_size attribute for non-cache object type\n");
   }
 
-  else if (!strcmp(name, "local_memory")) {
-    unsigned long lvalue = strtoul(value, NULL, 10);
-    switch (obj->type) {
-      case HWLOC_OBJ_NODE:
-      case HWLOC_OBJ_MACHINE:
-	obj->memory.local_memory = lvalue;
-	break;
-      default:
-	fprintf(stderr, "ignoring local_memory attribute for object type without memory\n");
-	break;
-    }
-  }
+  else if (!strcmp(name, "local_memory"))
+    obj->memory.local_memory = strtoul(value, NULL, 10);
 
   else if (!strcmp(name, "depth")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
@@ -120,8 +126,6 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	break;
     }
   }
-
-#warning TODO hugepages
 
   else if (!strcmp(name, "dmi_board_vendor")) {
     switch (obj->type) {
@@ -163,6 +167,24 @@ hwloc__xml_import_attr_value(xmlAttr *attr)
     }
   }
   return NULL;
+}
+
+static void
+hwloc__xml_import_pagetype_node(struct hwloc_topology *topology, struct hwloc_obj_memory_page_type_s *pagetype, xmlNode *node)
+{
+  xmlAttr *attr = NULL;
+
+  for (attr = node->properties; attr; attr = attr->next) {
+    if (attr->type == XML_ATTRIBUTE_NODE) {
+      const xmlChar *value = hwloc__xml_import_attr_value(attr);
+      if (value)
+	hwloc__xml_import_pagetype_attr(topology, pagetype, attr->name, value);
+      else
+	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", attr->name);
+    } else {
+      fprintf(stderr, "ignoring unexpected xml pagetype attr type %u\n", attr->type);
+    }
+  }
 }
 
 static void hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth);
@@ -218,6 +240,7 @@ hwloc__xml_import_object_node(struct hwloc_topology *topology, struct hwloc_obj 
     hwloc__xml_import_node(topology, obj, node->children, depth+1);
 }
 
+
 static void
 hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth)
 {
@@ -225,12 +248,18 @@ hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent
     if (node->type == XML_ELEMENT_NODE) {
       if (!strcmp((const char*) node->name, "object")) {
 	/* object attributes */
-	struct hwloc_obj *obj = NULL;
+	struct hwloc_obj *obj;
 	if (depth)
 	  obj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
 	else
 	  obj = topology->levels[0][0];
 	hwloc__xml_import_object_node(topology, parent, obj, node, depth);
+
+      } else if (!strcmp((const char*) node->name, "page_type")) {
+	int index = parent->memory.page_types_len;
+	parent->memory.page_types = realloc(parent->memory.page_types, (index+1)*sizeof(*parent->memory.page_types));
+	hwloc__xml_import_pagetype_node(topology, &parent->memory.page_types[index], node);
+	parent->memory.page_types_len = index+1;
 
       } else {
 	/* unknown class */
@@ -307,9 +336,10 @@ hwloc_look_xml(struct hwloc_topology *topology)
 static void
 hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr root_node)
 {
-  xmlNodePtr node = NULL;
+  xmlNodePtr node = NULL, ptnode = NULL;
   char *cpuset = NULL;
   char tmp[255];
+  unsigned i;
 
   /* xmlNewChild() creates a new node, which is "attached" as child node
    * of root_node node. */
@@ -357,14 +387,6 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
       xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
     if (obj->attr->machine.dmi_board_name)
       xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
-    sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
-    xmlNewProp(node, BAD_CAST "local_memory", BAD_CAST tmp);
-#warning TODO hugepages
-    break;
-  case HWLOC_OBJ_NODE:
-    sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
-    xmlNewProp(node, BAD_CAST "local_memory", BAD_CAST tmp);
-#warning TODO hugepages
     break;
   case HWLOC_OBJ_MISC:
     sprintf(tmp, "%u", obj->attr->misc.depth);
@@ -372,6 +394,16 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     break;
   default:
     break;
+  }
+
+  sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
+  xmlNewProp(node, BAD_CAST "local_memory", BAD_CAST tmp);
+  for(i=0; i<obj->memory.page_types_len; i++) {
+    ptnode = xmlNewChild(node, NULL, BAD_CAST "page_type", NULL);
+    sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].size);
+    xmlNewProp(ptnode, BAD_CAST "size", BAD_CAST tmp);
+    sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].count);
+    xmlNewProp(ptnode, BAD_CAST "count", BAD_CAST tmp);
   }
 
   if (obj->arity) {
