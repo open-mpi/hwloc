@@ -1,4 +1,4 @@
-Machine(16468292KB Dell Inc. 0NR282)
+Machine(local=16468292KB total=16468292KB Dell Inc. 0NR282)
   Socket#0
     L2Cache(4096KB)
       L1Cache(32KB)
