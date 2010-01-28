@@ -846,14 +846,29 @@ traverse(hwloc_topology_t topology,
     node_after(topology, parent, data);
 }
 
+static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
+{
+  const struct hwloc_obj_memory_page_type_s *a = _a;
+  const struct hwloc_obj_memory_page_type_s *b = _b;
+  return a->size - b->size;
+}
+
 /* While traversing down and up, propagate memory counts */
 static void
 propagate_total_memory(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
 {
-  /* Called on leaf or after processing an object, so already got contribution from its children */
+  /* Compute our local memory.
+   * This callback is called on leaf or after processing an object,
+   * so this object already got contribution from its children.
+   */
   (*pobj)->memory.total_memory += (*pobj)->memory.local_memory;
   if ((*pobj)->parent)
     (*pobj)->parent->memory.total_memory += (*pobj)->memory.total_memory;
+
+  /* By the way, sort the page_type array.
+   * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
+   */
+  qsort((*pobj)->memory.page_types, (*pobj)->memory.page_types_len, sizeof(*(*pobj)->memory.page_types), hwloc_memory_page_type_compare);
 }
 
 /* While traversing down and up, propagate the offline/disallowed cpus by
