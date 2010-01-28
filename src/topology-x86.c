@@ -47,7 +47,10 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid) {
   eax = 0x01;
   hwloc_cpuid(&eax, &ebx, &ecx, &edx);
   infos->apicid = ebx >> 24;
-  infos->max_log_proc = (ebx >> 16) & 0xff;
+  if (edx & (1 << 28))
+    infos->max_log_proc = (ebx >> 16) & 0xff;
+  else
+    infos->max_log_proc = 1;
   hwloc_debug("APIC ID 0x%02x max_log_proc %d\n", infos->apicid, infos->max_log_proc);
   infos->socketid = infos->apicid / infos->max_log_proc;
   infos->logprocid = infos->apicid % infos->max_log_proc;
