@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 
 /*
  * Symbol transforms
@@ -134,6 +135,23 @@ enum {
 
 union hwloc_obj_attr_u;
 
+/** \brief Object memory */
+struct hwloc_obj_memory_s {
+  uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
+  uint64_t local_memory; /**< \brief Local memory (in bytes) */
+
+  unsigned page_types_len; /**< \brief Size of array \p page_types */
+  /** \brief Array of local memory page types, \c NULL if no local memory and \p page_types is 0.
+   *
+   * The array is sorted by increasing \p size fields.
+   * It contains \p page_types_len slots.
+   */
+  struct hwloc_obj_memory_page_type_s {
+    uint64_t size;	/**< \brief Size of pages */
+    uint64_t count;	/**< \brief Number of pages of this size */
+  } * page_types;
+};
+
 /** \brief Structure of a topology object
  *
  * Applications mustn't modify any field except ::userdata .
@@ -143,6 +161,9 @@ struct hwloc_obj {
   hwloc_obj_type_t type;		/**< \brief Type of object */
   unsigned os_index;			/**< \brief OS-provided physical index number */
   char *name;				/**< \brief Object description if any */
+
+  /** \brief Memory attributes */
+  struct hwloc_obj_memory_s memory;
 
   /** \brief Object type-specific Attributes */
   union hwloc_obj_attr_u *attr;
@@ -196,28 +217,14 @@ typedef struct hwloc_obj * hwloc_obj_t;
 union hwloc_obj_attr_u {
   /** \brief Cache-specific Object Attributes */
   struct hwloc_cache_attr_s {
-    unsigned long memory_kB;		  /**< \brief Size of cache */
+    uint64_t size;			  /**< \brief Size of cache in bytes */
     unsigned depth;			  /**< \brief Depth of cache */
   } cache;
-  /** \brief Node-specific Object Attributes */
-  struct hwloc_memory_attr_s {
-    unsigned long memory_kB;		  /**< \brief Size of memory node */
-    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
-  } node;
   /** \brief Machine-specific Object Attributes */
   struct hwloc_machine_attr_s {
     char *dmi_board_vendor;		  /**< \brief DMI board vendor name */
     char *dmi_board_name;		  /**< \brief DMI board model name */
-    unsigned long memory_kB;		  /**< \brief Size of memory node */
-    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
-    unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
   } machine;
-  /** \brief System-specific Object Attributes */
-  struct hwloc_system_attr_s {
-    unsigned long memory_kB;		  /**< \brief Size of memory node */
-    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
-    unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
-  } system;
   /** \brief Misc-specific Object Attributes */
   struct hwloc_misc_attr_s {
     unsigned depth;			  /**< \brief Depth of misc object */

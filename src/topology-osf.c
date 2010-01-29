@@ -155,10 +155,6 @@ hwloc_look_osf(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   unsigned distance;
 
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#endif
-
   topology->backend_params.osf.nbnodes = nbnodes = rad_get_num();
 
   cpusetcreate(&cpuset);
@@ -185,8 +181,14 @@ hwloc_look_osf(struct hwloc_topology *topology)
 
       nodes[radid] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, radid);
       obj->cpuset = hwloc_cpuset_alloc();
-      obj->attr->node.memory_kB = rad_get_physmem(radid) * getpagesize() / 1024;
-      obj->attr->node.huge_page_free = 0;
+      obj->memory.local_memory = rad_get_physmem(radid) * getpagesize();
+      obj->memory.page_types_len = 2;
+      obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
+      memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
+      obj->memory.page_types[0].size = getpagesize();
+#ifdef HAVE__SC_LARGE_PAGESIZE
+      obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
 
       cursor = SET_CURSOR_INIT;
       while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)

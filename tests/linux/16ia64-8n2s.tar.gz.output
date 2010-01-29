@@ -1,6 +1,6 @@
-Machine(48258496KB HP=0*262144kB)
-  Misc0
-    NUMANode#0(6045632KB)
+Machine(total=48346688KB)
+  Misc0(total=24182720KB)
+    NUMANode#0(local=6045632KB total=6045632KB)
       Socket#0
         L3Cache(9216KB)
           L2Cache(256KB)
@@ -13,7 +13,7 @@ Machine(48258496KB HP=0*262144kB)
             L1Cache(16KB)
               Core#0
                 P#1
-    NUMANode#1(6045696KB)
+    NUMANode#1(local=6045696KB total=6045696KB)
       Socket#512
         L3Cache(9216KB)
           L2Cache(256KB)
@@ -26,7 +26,7 @@ Machine(48258496KB HP=0*262144kB)
             L1Cache(16KB)
               Core#0
                 P#3
-    NUMANode#2(6045696KB)
+    NUMANode#2(local=6045696KB total=6045696KB)
       Socket#1024
         L3Cache(9216KB)
           L2Cache(256KB)
@@ -39,7 +39,7 @@ Machine(48258496KB HP=0*262144kB)
             L1Cache(16KB)
               Core#0
                 P#5
-    NUMANode#3(6045696KB)
+    NUMANode#3(local=6045696KB total=6045696KB)
       Socket#1536
         L3Cache(9216KB)
           L2Cache(256KB)
@@ -52,8 +52,8 @@ Machine(48258496KB HP=0*262144kB)
             L1Cache(16KB)
               Core#0
                 P#7
-  Misc0
-    NUMANode#4(6045696KB)
+  Misc0(total=24163968KB)
+    NUMANode#4(local=6045696KB total=6045696KB)
       Socket#2048
         L3Cache(9216KB)
           L2Cache(256KB)
@@ -66,7 +66,7 @@ Machine(48258496KB HP=0*262144kB)
             L1Cache(16KB)
               Core#0
                 P#9
-    NUMANode#5(6045632KB)
+    NUMANode#5(local=6045632KB total=6045632KB)
       Socket#2560
         L3Cache(9216KB)
           L2Cache(256KB)
@@ -79,7 +79,7 @@ Machine(48258496KB HP=0*262144kB)
             L1Cache(16KB)
               Core#0
                 P#11
-    NUMANode#6(6045696KB)
+    NUMANode#6(local=6045696KB total=6045696KB)
       Socket#3072
         L3Cache(9216KB)
           L2Cache(256KB)
@@ -92,7 +92,7 @@ Machine(48258496KB HP=0*262144kB)
             L1Cache(16KB)
               Core#0
                 P#13
-    NUMANode#7(6026944KB)
+    NUMANode#7(local=6026944KB total=6026944KB)
       Socket#3584
         L3Cache(9216KB)
           L2Cache(256KB)

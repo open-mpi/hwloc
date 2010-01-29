@@ -1,7 +1,7 @@
 <!ELEMENT topology (object)+>
 <!ELEMENT root (object)+>
 
-<!ELEMENT object (object)*>
+<!ELEMENT object (page_type*,object*)>
 <!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | Proc) #REQUIRED>
 <!ATTLIST object os_level CDATA "-1" >
 <!ATTLIST object os_index CDATA "-1" >
@@ -9,10 +9,15 @@
 <!ATTLIST object name CDATA "" >
 <!ATTLIST object dmi_board_vendor CDATA "" >
 <!ATTLIST object dmi_board_name CDATA "" >
-<!ATTLIST object memory_kB CDATA "0" >
+<!ATTLIST object local_memory CDATA "0" >
+<!ATTLIST object cache_size CDATA "0" >
 <!ATTLIST object huge_page_size_kB CDATA "0" >
 <!ATTLIST object huge_page_free CDATA "0" >
 <!ATTLIST object depth CDATA "-1" >
 <!ATTLIST object complete_cpuset CDATA "" >
 <!ATTLIST object online_cpuset CDATA "" >
 <!ATTLIST object allowed_cpuset CDATA "" >
+
+<!ELEMENT page_type EMPTY>
+<!ATTLIST page_type size CDATA #REQUIRED>
+<!ATTLIST page_type count CDATA #REQUIRED>

@@ -178,10 +178,8 @@ hwloc_backend_synthetic_exit(struct hwloc_topology *topology)
 static unsigned
 hwloc__look_synthetic(struct hwloc_topology *topology,
     int level, unsigned first_cpu,
-    unsigned long *parent_memory_kB,
     hwloc_cpuset_t parent_cpuset)
 {
-  unsigned long my_memory = 0, *pmemory = parent_memory_kB;
   hwloc_obj_t obj;
   unsigned i;
   hwloc_obj_type_t type = topology->backend_params.synthetic.type[level];
@@ -195,8 +193,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       abort();
       break;
     case HWLOC_OBJ_MACHINE:
-      /* Gather memory size from memory nodes for this machine */
-      pmemory = &my_memory;
       break;
     case HWLOC_OBJ_NODE:
       break;
@@ -217,7 +213,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     hwloc_cpuset_set(obj->cpuset, first_cpu++);
   } else {
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
-      first_cpu = hwloc__look_synthetic(topology, level + 1, first_cpu, pmemory, obj->cpuset);
+      first_cpu = hwloc__look_synthetic(topology, level + 1, first_cpu, obj->cpuset);
   }
 
   hwloc_insert_object_by_cpuset(topology, obj);
@@ -233,18 +229,15 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       abort();
       break;
     case HWLOC_OBJ_MACHINE:
-      obj->attr->machine.memory_kB = my_memory;
-      obj->attr->machine.dmi_board_vendor = NULL;
-      obj->attr->machine.dmi_board_name = NULL;
-      obj->attr->machine.huge_page_size_kB = 0;
-      obj->attr->machine.huge_page_free = 0;
-      *parent_memory_kB += obj->attr->machine.memory_kB;
       break;
     case HWLOC_OBJ_NODE:
-      /* 1GB in memory nodes.  */
-      obj->attr->node.memory_kB = 1024*1024;
-      *parent_memory_kB += obj->attr->node.memory_kB;
-      obj->attr->node.huge_page_free = 0;
+      /* 1GB in memory nodes, 256k 4k-pages.  */
+      obj->memory.local_memory = 1024*1024*1024;
+      obj->memory.page_types_len = 1;
+      obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+      memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
+      obj->memory.page_types[0].size = 4096;
+      obj->memory.page_types[0].count = 256*1024;
       break;
     case HWLOC_OBJ_SOCKET:
       break;
@@ -252,10 +245,10 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       obj->attr->cache.depth = topology->backend_params.synthetic.depth[level];
       if (obj->attr->cache.depth == 1)
 	/* 32Kb in L1 */
-	obj->attr->cache.memory_kB = 32*1024;
+	obj->attr->cache.size = 32*1024;
       else
 	/* *4 at each level, starting from 1MB for L2 */
-	obj->attr->cache.memory_kB = 256*1024 << (2*obj->attr->cache.depth);
+	obj->attr->cache.size = 256*1024 << (2*obj->attr->cache.depth);
       break;
     case HWLOC_OBJ_CORE:
       break;
@@ -271,18 +264,14 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
 {
   hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
   unsigned first_cpu = 0, i;
-  unsigned long *memory_kB_p;
 
   topology->support.discovery.proc = 1;
 
   /* update first level type according to the synthetic type array */
   topology->levels[0][0]->type = topology->backend_params.synthetic.type[0];
 
-  memory_kB_p = topology->backend_params.synthetic.type[0] == HWLOC_OBJ_SYSTEM ?
-    &topology->levels[0][0]->attr->system.memory_kB : &topology->levels[0][0]->attr->machine.memory_kB;
-
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
-    first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, memory_kB_p, cpuset);
+    first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, cpuset);
 
   hwloc_cpuset_free(cpuset);
 }

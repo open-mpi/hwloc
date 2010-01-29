@@ -1,4 +1,4 @@
-Machine(8299024KB HP=0*0kB)
+Machine(local=8299024KB total=8299024KB)
   P#0
 depth 0:	1 Machine (type #1)
  depth 1:	1 Proc (type #6)

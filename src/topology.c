@@ -466,6 +466,7 @@ free_object(hwloc_obj_t obj)
   default:
     break;
   }
+  free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
   free(obj->name);
@@ -662,12 +663,23 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
 	    /* Do not check these, it may change between calls */
-	    merge_sizes(obj, child, attr->node.memory_kB);
-	    merge_sizes(obj, child, attr->node.huge_page_free);
+	    merge_sizes(obj, child, memory.local_memory);
+	    merge_sizes(obj, child, memory.total_memory);
+	    /* if both objects have a page_types array, just keep the biggest one for now */
+	    if (obj->memory.page_types_len && child->memory.page_types_len)
+	      hwloc_debug("%s", "merging page_types by keeping the biggest one only\n");
+	    if (obj->memory.page_types_len > child->memory.page_types_len) {
+	      free(child->memory.page_types);
+	    } else {
+	      free(obj->memory.page_types);
+	      obj->memory.page_types_len = child->memory.page_types_len;
+	      obj->memory.page_types = child->memory.page_types;
+	      child->memory.page_types = NULL;
+	    }
 	    break;
 	  case HWLOC_OBJ_CACHE:
-	    merge_sizes(obj, child, attr->cache.memory_kB);
-	    check_sizes(obj, child, attr->cache.memory_kB);
+	    merge_sizes(obj, child, attr->cache.size);
+	    check_sizes(obj, child, attr->cache.size);
 	    break;
 	  default:
 	    break;
@@ -834,6 +846,39 @@ traverse(hwloc_topology_t topology,
     node_after(topology, parent, data);
 }
 
+static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
+{
+  const struct hwloc_obj_memory_page_type_s *a = _a;
+  const struct hwloc_obj_memory_page_type_s *b = _b;
+  /* consider 0 as larger so that 0-size page_type go to the end */
+  return b->size ? (int)(a->size - b->size) : -1;
+}
+
+/* While traversing down and up, propagate memory counts */
+static void
+propagate_total_memory(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
+{
+  unsigned i;
+
+  /* Compute our local memory.
+   * This callback is called on leaf or after processing an object,
+   * so this object already got contribution from its children.
+   */
+  (*pobj)->memory.total_memory += (*pobj)->memory.local_memory;
+  if ((*pobj)->parent)
+    (*pobj)->parent->memory.total_memory += (*pobj)->memory.total_memory;
+
+  /* By the way, sort the page_type array.
+   * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
+   */
+  qsort((*pobj)->memory.page_types, (*pobj)->memory.page_types_len, sizeof(*(*pobj)->memory.page_types), hwloc_memory_page_type_compare);
+  /* Ignore 0-size page_types, they are at the end */
+  for(i=(*pobj)->memory.page_types_len; i>=1; i--)
+    if ((*pobj)->memory.page_types[i-1].size)
+      break;
+  (*pobj)->memory.page_types_len = i;
+}
+
 /* While traversing down and up, propagate the offline/disallowed cpus by
  * and'ing them to and from the first object that has a cpuset */
 static void
@@ -922,12 +967,15 @@ apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *p
 {
   hwloc_obj_t *systemp = data, system = *systemp;
   hwloc_obj_t obj = *pobj;
+  unsigned i;
   if (system) {
     if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
         !hwloc_cpuset_isset(system->allowed_nodeset, obj->os_index)) {
       hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
-      obj->attr->node.memory_kB = 0;
-      obj->attr->node.huge_page_free = 0;
+      obj->memory.local_memory = 0;
+      obj->memory.total_memory = 0;
+      for(i=0; i<obj->memory.page_types_len; i++)
+	obj->memory.page_types[i].count = 0;
     }
   } else {
     if (obj->allowed_nodeset) {
@@ -1395,6 +1443,10 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* It's empty now.  */
   free(objs);
+
+  /* accumulate children memory in total_memory fields (only once parent is set) */
+  hwloc_debug("%s", "\nPropagate total memory up\n");
+  traverse(topology, &topology->levels[0][0], NULL, propagate_total_memory, propagate_total_memory, NULL);
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;
