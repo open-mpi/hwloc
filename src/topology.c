@@ -851,12 +851,12 @@ static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
   const struct hwloc_obj_memory_page_type_s *a = _a;
   const struct hwloc_obj_memory_page_type_s *b = _b;
   /* consider 0 as larger so that 0-size page_type go to the end */
-  return b->size ? a->size - b->size : -1;
+  return b->size ? (int)(a->size - b->size) : -1;
 }
 
 /* While traversing down and up, propagate memory counts */
 static void
-propagate_total_memory(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+propagate_total_memory(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
 {
   unsigned i;
 
@@ -967,7 +967,7 @@ apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *p
 {
   hwloc_obj_t *systemp = data, system = *systemp;
   hwloc_obj_t obj = *pobj;
-  int i;
+  unsigned i;
   if (system) {
     if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
         !hwloc_cpuset_isset(system->allowed_nodeset, obj->os_index)) {
