@@ -42,8 +42,25 @@ enum cpuid_type {
   unknown
 };
 
-static void fill_amd_cache(struct procinfo *infos, struct cacheinfo *cache, unsigned level, unsigned cpuid)
+static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpuid)
 {
+  struct cacheinfo *cache;
+  unsigned cachenum;
+  unsigned size;
+
+  cachenum = infos->numcaches++;
+  infos->cache = realloc(infos->cache, infos->numcaches*sizeof(*infos->cache));
+  cache = &infos->cache[cachenum];
+
+  if (level == 1)
+    size = ((cpuid >> 24)) << 10;
+  else if (level == 2)
+    size = ((cpuid >> 16)) << 10;
+  else if (level == 3)
+    size = ((cpuid >> 18)) << 19;
+  if (!size)
+    return;
+
   cache->type = 1;
   cache->level = level;
   if (level <= 2)
@@ -59,12 +76,7 @@ static void fill_amd_cache(struct procinfo *infos, struct cacheinfo *cache, unsi
     unsigned ways = (cpuid >> 12) & 0xf;
     cache->ways = ways_tab[ways];
   }
-  if (level == 1)
-    cache->size = ((cpuid >> 24)) << 10;
-  else if (level == 2)
-    cache->size = ((cpuid >> 16)) << 10;
-  else if (level == 3)
-    cache->size = ((cpuid >> 18)) << 19;
+  cache->size = size;
   cache->sets = 0;
 
   hwloc_debug("cache L%d t%d linesize %d ways %d size %dKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
@@ -106,7 +118,8 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     } else 
       infos->max_nbcores = 1 << coreidsize;
     hwloc_debug("Thus max # of cores: %d\n", infos->max_nbcores);
-    infos->max_nbthreads = infos->max_log_proc / infos->max_nbcores;
+    /* Still no multithreaded AMD */
+    infos->max_nbthreads = 1 ;
     hwloc_debug("and max # of threads: %d\n", infos->max_nbthreads);
     infos->threadid = infos->logprocid % infos->max_nbthreads;
     infos->coreid = infos->logprocid / infos->max_nbthreads;
@@ -118,28 +131,17 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
   /* Intel doesn't actually provide 0x80000005 information */
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000005) {
-    unsigned cachenum = infos->numcaches++;
-    struct cacheinfo *cache;
-    infos->cache = realloc(infos->cache, infos->numcaches*sizeof(*infos->cache));
-    
-    cache = &infos->cache[cachenum];
     eax = 0x80000005;
     hwloc_cpuid(&eax, &ebx, &ecx, &edx);
-    fill_amd_cache(infos, cache, 1, ecx);
+    fill_amd_cache(infos, 1, ecx);
   }
 
   /* Intel doesn't actually provide 0x80000006 information */
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000006) {
-    unsigned cachenum = infos->numcaches;
-    struct cacheinfo *cache;
-    infos->numcaches += 2;
-    infos->cache = realloc(infos->cache, infos->numcaches*sizeof(*infos->cache));
-    
-    cache = &infos->cache[cachenum];
     eax = 0x80000006;
     hwloc_cpuid(&eax, &ebx, &ecx, &edx);
-    fill_amd_cache(infos, cache, 2, ecx);
-    fill_amd_cache(infos, cache+1, 3, edx);
+    fill_amd_cache(infos, 2, ecx);
+    fill_amd_cache(infos, 3, edx);
   }
 
   /* AMD doesn't actually provide 0x80000008 information */
