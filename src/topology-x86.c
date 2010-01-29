@@ -96,7 +96,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   hwloc_cpuid(&eax, &ebx, &ecx, &edx);
   infos->apicid = ebx >> 24;
   if (edx & (1 << 28))
-    infos->max_log_proc = 1 << hwloc_flsl((ebx >> 16) & 0xff);
+    infos->max_log_proc = 1 << hwloc_flsl(((ebx >> 16) & 0xff) - 1);
   else
     infos->max_log_proc = 1;
   hwloc_debug("APIC ID 0x%02x max_log_proc %d\n", infos->apicid, infos->max_log_proc);
