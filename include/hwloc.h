@@ -856,12 +856,12 @@ HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_thread_cpubind(hwloc_topology_t topology
 
 
 
-/** \defgroup hwlocality_iodevice Basic I/O Device Management
+/** \defgroup hwlocality_pcidev Basic PCI Device Management
  * @{
  */
 
-/** \brief Get the next I/O device in the system */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_get_next_iodevice(struct hwloc_topology *topology, struct hwloc_obj *prev);
+/** \brief Get the next PCI device in the system */
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_get_next_pcidev(struct hwloc_topology *topology, struct hwloc_obj *prev);
 
 /** @} */
 

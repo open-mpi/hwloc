@@ -23,7 +23,7 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_object_userdata \
 	hwloc_synthetic \
 	hwloc_is_thissystem \
-	hwloc_get_next_iodevice
+	hwloc_get_next_pcidev
 
 EXTRA_DIST = 
 

@@ -57,7 +57,7 @@ struct hwloc_topology {
   int is_thissystem;
   int is_loaded;
 
-  struct hwloc_obj *first_device, *last_device;
+  struct hwloc_obj *first_pcidev, *last_pcidev;
 
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
   hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology, int policy);

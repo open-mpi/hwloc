@@ -877,12 +877,12 @@ append_iodevice(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data __hwloc
 
   if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
     /* Insert in the main device list */
-    if (topology->first_device) {
-      obj->prev_cousin = topology->last_device;
+    if (topology->first_pcidev) {
+      obj->prev_cousin = topology->last_pcidev;
       obj->prev_cousin->next_cousin = obj;
-      topology->last_device = obj;
+      topology->last_pcidev = obj;
     } else {
-      topology->first_device = topology->last_device = obj;
+      topology->first_pcidev = topology->last_pcidev = obj;
     }
   }
 }
@@ -1701,8 +1701,8 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->set_thread_cpubind = NULL;
   topology->get_thread_cpubind = NULL;
 #endif
-  topology->first_device = NULL;
-  topology->last_device = NULL;
+  topology->first_pcidev = NULL;
+  topology->last_pcidev = NULL;
   memset(&topology->support, 0, sizeof(topology->support));
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
