@@ -880,6 +880,38 @@ propagate_total_memory(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
   (*pobj)->memory.page_types_len = i;
 }
 
+/* Collect the cpuset of all the PROC objects. */
+static void
+collect_proc_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+{
+  hwloc_obj_t *systemp = data, system = *systemp;
+  hwloc_obj_t obj = *pobj;
+
+  if (system) {
+    /* We are already given a pointer to an system object */
+    if (obj->type == HWLOC_OBJ_PROC)
+      hwloc_cpuset_orset(system->cpuset, obj->cpuset);
+  } else {
+    if (obj->cpuset) {
+      /* This object is the root of a machine */
+      *systemp = obj;
+      /* Assume no proc for now */
+      hwloc_cpuset_zero(obj->cpuset);
+    }
+  }
+}
+
+/* While going up, remember to clear the system pointer */
+static void
+collect_proc_cpuset_after(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+{
+  hwloc_obj_t *systemp = data;
+  hwloc_obj_t obj = *pobj;
+  if (*systemp == obj)
+    /* We gave ourselves for objects below, clear ourselves before continuing up */
+    *systemp = NULL;
+}
+
 /* While traversing down and up, propagate the offline/disallowed cpus by
  * and'ing them to and from the first object that has a cpuset */
 static void
@@ -891,6 +923,9 @@ propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwlo
   if (system) {
     /* We are already given a pointer to an system object, update it and update ourselves */
     hwloc_cpuset_t mask = hwloc_cpuset_alloc();
+
+    /* Apply the topology cpuset */
+    hwloc_cpuset_andset(obj->cpuset, system->cpuset);
 
     /* Update complete cpuset down */
     if (obj->complete_cpuset) {
@@ -933,6 +968,7 @@ propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwlo
     hwloc_cpuset_free(mask);
   } else {
     if (obj->cpuset) {
+      /* This object is the root of a machine */
       *systemp = obj;
       /* Apply complete cpuset to cpuset, online_cpuset and allowed_cpuset, it
        * will automatically be applied below */
@@ -1306,6 +1342,9 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* First tweak a bit to clean the topology.  */
   hwloc_obj_t system = NULL;
+  hwloc_debug("%s", "\nRestrict topology cpusets to existing PROC objects\n");
+  traverse(topology, &topology->levels[0][0], collect_proc_cpuset, collect_proc_cpuset, collect_proc_cpuset_after, &system);
+
   hwloc_debug("%s", "\nPropagate offline and disallowed cpus down and up\n");
   traverse(topology, &topology->levels[0][0], propagate_unused_cpuset, propagate_unused_cpuset, propagate_unused_cpuset_after, &system);
 

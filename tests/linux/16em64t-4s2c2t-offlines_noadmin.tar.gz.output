@@ -1,43 +1,43 @@
 Machine
   Socket#0
     L3Cache(4096KB)
-        L2Cache(1024KB)
-          L1Cache(16KB)
+      L2Cache(1024KB)
+        L1Cache(16KB)
           Core#0
             P#0
             P#8
-        L2Cache(1024KB)
-          L1Cache(16KB)
+      L2Cache(1024KB)
+        L1Cache(16KB)
           Core#1
             P#4
             P#12
   Socket#1
     L3Cache(4096KB)
-        L2Cache(1024KB)
-          L1Cache(16KB)
+      L2Cache(1024KB)
+        L1Cache(16KB)
           Core#0
             P#1
             P#9
   Socket#3
     L3Cache(4096KB)
-        L2Cache(1024KB)
-          L1Cache(16KB)
+      L2Cache(1024KB)
+        L1Cache(16KB)
           Core#0
             P#3
             P#11
-        L2Cache(1024KB)
-          L1Cache(16KB)
+      L2Cache(1024KB)
+        L1Cache(16KB)
           Core#1
             P#7
             P#15
   Socket#2
     L3Cache(4096KB)
-        L2Cache(1024KB)
-          L1Cache(16KB)
+      L2Cache(1024KB)
+        L1Cache(16KB)
           Core#1
             P#6
-        L2Cache(1024KB)
-          L1Cache(16KB)
+      L2Cache(1024KB)
+        L1Cache(16KB)
           Core#0
             P#10
 depth 0:	1 Machine (type #1)
