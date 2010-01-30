@@ -268,14 +268,17 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    {
 	      ULONGLONG avail;
 	      if (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail))
-		obj->attr->node.memory_kB = avail >> 10;
-	      else
-		obj->attr->node.memory_kB = 0;
-	      obj->attr->node.huge_page_free = 0; /* TODO */
+		obj->memory.local_memory = avail;
+	      obj->memory.page_types_len = 1;
+	      obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+	      memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
+#ifdef HAVE__SC_LARGE_PAGESIZE
+	      obj->memory.page_types[0].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
 	      break;
 	    }
 	  case HWLOC_OBJ_CACHE:
-	    obj->attr->cache.memory_kB = procInfo[i].Cache.Size >> 10;
+	    obj->attr->cache.size = procInfo[i].Cache.Size;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
 	    break;
 	  case HWLOC_OBJ_MISC:
@@ -372,11 +375,16 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
 	switch (type) {
 	  case HWLOC_OBJ_NODE:
-	    obj->attr->node.memory_kB = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
-	    obj->attr->node.huge_page_free = 0; /* TODO */
+	    obj->memory.local_memory = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
+	    obj->memory.page_types_len = 1;
+	    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+	    memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
+#ifdef HAVE__SC_LARGE_PAGESIZE
+	    obj->memory.page_types[0].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
 	    break;
 	  case HWLOC_OBJ_CACHE:
-	    obj->attr->cache.memory_kB = procInfo->Cache.CacheSize >> 10;
+	    obj->attr->cache.size = procInfo->Cache.CacheSize;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
 	    break;
 	  default:

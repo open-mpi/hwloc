@@ -466,6 +466,7 @@ free_object(hwloc_obj_t obj)
   default:
     break;
   }
+  free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
   free(obj->name);
@@ -473,6 +474,7 @@ free_object(hwloc_obj_t obj)
   hwloc_cpuset_free(obj->complete_cpuset);
   hwloc_cpuset_free(obj->online_cpuset);
   hwloc_cpuset_free(obj->allowed_cpuset);
+  hwloc_cpuset_free(obj->allowed_nodeset);
   free(obj);
 }
 
@@ -639,6 +641,9 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
  * complete.
  */
 
+#define merge_index(new, old, field) \
+  if ((old)->field == (typeof((old)->field)) -1) \
+    (old)->field = (new)->field;
 #define merge_sizes(new, old, field) \
   if (!(old)->field) \
     (old)->field = (new)->field;
@@ -668,10 +673,12 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
   for (child = cur->first_child; child; child = child->next_sibling) {
     switch (hwloc_obj_cmp(obj, child)) {
       case HWLOC_OBJ_EQUAL:
+        merge_index(obj, child, os_level);
 	if (obj->os_level != child->os_level) {
           fprintf(stderr, "Different OS level\n");
           return;
         }
+        merge_index(obj, child, os_index);
 	if (obj->os_index != child->os_index) {
           fprintf(stderr, "Different OS indexes\n");
           return;
@@ -679,12 +686,23 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
 	    /* Do not check these, it may change between calls */
-	    merge_sizes(obj, child, attr->node.memory_kB);
-	    merge_sizes(obj, child, attr->node.huge_page_free);
+	    merge_sizes(obj, child, memory.local_memory);
+	    merge_sizes(obj, child, memory.total_memory);
+	    /* if both objects have a page_types array, just keep the biggest one for now */
+	    if (obj->memory.page_types_len && child->memory.page_types_len)
+	      hwloc_debug("%s", "merging page_types by keeping the biggest one only\n");
+	    if (obj->memory.page_types_len > child->memory.page_types_len) {
+	      free(child->memory.page_types);
+	    } else {
+	      free(obj->memory.page_types);
+	      obj->memory.page_types_len = child->memory.page_types_len;
+	      obj->memory.page_types = child->memory.page_types;
+	      child->memory.page_types = NULL;
+	    }
 	    break;
 	  case HWLOC_OBJ_CACHE:
-	    merge_sizes(obj, child, attr->cache.memory_kB);
-	    check_sizes(obj, child, attr->cache.memory_kB);
+	    merge_sizes(obj, child, attr->cache.size);
+	    check_sizes(obj, child, attr->cache.size);
 	    break;
 	  default:
 	    break;
@@ -869,6 +887,71 @@ append_iodevice(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data __hwloc
   }
 }
 
+static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
+{
+  const struct hwloc_obj_memory_page_type_s *a = _a;
+  const struct hwloc_obj_memory_page_type_s *b = _b;
+  /* consider 0 as larger so that 0-size page_type go to the end */
+  return b->size ? (int)(a->size - b->size) : -1;
+}
+
+/* While traversing down and up, propagate memory counts */
+static void
+propagate_total_memory(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
+{
+  unsigned i;
+
+  /* Compute our local memory.
+   * This callback is called on leaf or after processing an object,
+   * so this object already got contribution from its children.
+   */
+  (*pobj)->memory.total_memory += (*pobj)->memory.local_memory;
+  if ((*pobj)->parent)
+    (*pobj)->parent->memory.total_memory += (*pobj)->memory.total_memory;
+
+  /* By the way, sort the page_type array.
+   * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
+   */
+  qsort((*pobj)->memory.page_types, (*pobj)->memory.page_types_len, sizeof(*(*pobj)->memory.page_types), hwloc_memory_page_type_compare);
+  /* Ignore 0-size page_types, they are at the end */
+  for(i=(*pobj)->memory.page_types_len; i>=1; i--)
+    if ((*pobj)->memory.page_types[i-1].size)
+      break;
+  (*pobj)->memory.page_types_len = i;
+}
+
+/* Collect the cpuset of all the PROC objects. */
+static void
+collect_proc_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+{
+  hwloc_obj_t *systemp = data, system = *systemp;
+  hwloc_obj_t obj = *pobj;
+
+  if (system) {
+    /* We are already given a pointer to an system object */
+    if (obj->type == HWLOC_OBJ_PROC)
+      hwloc_cpuset_orset(system->cpuset, obj->cpuset);
+  } else {
+    if (obj->cpuset) {
+      /* This object is the root of a machine */
+      *systemp = obj;
+      /* Assume no proc for now */
+      hwloc_cpuset_zero(obj->cpuset);
+    }
+  }
+}
+
+/* While going up, remember to clear the system pointer */
+static void
+collect_proc_cpuset_after(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+{
+  hwloc_obj_t *systemp = data;
+  hwloc_obj_t obj = *pobj;
+  if (*systemp == obj)
+    /* We gave ourselves for objects below, clear ourselves before continuing up */
+    *systemp = NULL;
+}
+
 /* While traversing down and up, propagate the offline/disallowed cpus by
  * and'ing them to and from the first object that has a cpuset */
 static void
@@ -877,51 +960,55 @@ propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwlo
   hwloc_obj_t *systemp = data, system = *systemp;
   hwloc_obj_t obj = *pobj;
 
-  if (system) {
-    /* We are already given a pointer to an system object, update it and update ourselves */
-    hwloc_cpuset_t mask = hwloc_cpuset_alloc();
+  if (obj->cpuset) {
+    if (system) {
+      /* We are already given a pointer to an system object, update it and update ourselves */
+      hwloc_cpuset_t mask = hwloc_cpuset_alloc();
 
-    /* Update complete cpuset down */
-    if (obj->complete_cpuset) {
-      hwloc_cpuset_andset(obj->complete_cpuset, system->complete_cpuset);
+      /* Apply the topology cpuset */
+      hwloc_cpuset_andset(obj->cpuset, system->cpuset);
+
+      /* Update complete cpuset down */
+      if (obj->complete_cpuset) {
+	hwloc_cpuset_andset(obj->complete_cpuset, system->complete_cpuset);
+      } else {
+	obj->complete_cpuset = hwloc_cpuset_dup(system->complete_cpuset);
+	hwloc_cpuset_andset(obj->complete_cpuset, obj->cpuset);
+      }
+
+      if (obj->online_cpuset) {
+	/* Update ours */
+	hwloc_cpuset_andset(obj->online_cpuset, system->online_cpuset);
+
+	/* Update the given cpuset, but only what we know */
+	hwloc_cpuset_copy(mask, obj->cpuset);
+	hwloc_cpuset_notset(mask);
+	hwloc_cpuset_orset(mask, obj->online_cpuset);
+	hwloc_cpuset_andset(system->online_cpuset, mask);
+      } else {
+	/* Just take it as such */
+	obj->online_cpuset = hwloc_cpuset_dup(system->online_cpuset);
+	hwloc_cpuset_andset(obj->online_cpuset, obj->cpuset);
+      }
+
+      if (obj->allowed_cpuset) {
+	/* Update ours */
+	hwloc_cpuset_andset(obj->allowed_cpuset, system->allowed_cpuset);
+
+	/* Update the given cpuset, but only what we know */
+	hwloc_cpuset_copy(mask, obj->cpuset);
+	hwloc_cpuset_notset(mask);
+	hwloc_cpuset_orset(mask, obj->allowed_cpuset);
+	hwloc_cpuset_andset(system->allowed_cpuset, mask);
+      } else {
+	/* Just take it as such */
+	obj->allowed_cpuset = hwloc_cpuset_dup(system->allowed_cpuset);
+	hwloc_cpuset_andset(obj->allowed_cpuset, obj->cpuset);
+      }
+
+      hwloc_cpuset_free(mask);
     } else {
-      obj->complete_cpuset = hwloc_cpuset_dup(system->complete_cpuset);
-      hwloc_cpuset_andset(obj->complete_cpuset, obj->cpuset);
-    }
-
-    if (obj->online_cpuset) {
-      /* Update ours */
-      hwloc_cpuset_andset(obj->online_cpuset, system->online_cpuset);
-
-      /* Update the given cpuset, but only what we know */
-      hwloc_cpuset_copy(mask, obj->cpuset);
-      hwloc_cpuset_notset(mask);
-      hwloc_cpuset_orset(mask, obj->online_cpuset);
-      hwloc_cpuset_andset(system->online_cpuset, mask);
-    } else {
-      /* Just take it as such */
-      obj->online_cpuset = hwloc_cpuset_dup(system->online_cpuset);
-      hwloc_cpuset_andset(obj->online_cpuset, obj->cpuset);
-    }
-
-    if (obj->allowed_cpuset) {
-      /* Update ours */
-      hwloc_cpuset_andset(obj->allowed_cpuset, system->allowed_cpuset);
-
-      /* Update the given cpuset, but only what we know */
-      hwloc_cpuset_copy(mask, obj->cpuset);
-      hwloc_cpuset_notset(mask);
-      hwloc_cpuset_orset(mask, obj->allowed_cpuset);
-      hwloc_cpuset_andset(system->allowed_cpuset, mask);
-    } else {
-      /* Just take it as such */
-      obj->allowed_cpuset = hwloc_cpuset_dup(system->allowed_cpuset);
-      hwloc_cpuset_andset(obj->allowed_cpuset, obj->cpuset);
-    }
-
-    hwloc_cpuset_free(mask);
-  } else {
-    if (obj->cpuset) {
+      /* This object is the root of a machine */
       *systemp = obj;
       /* Apply complete cpuset to cpuset, online_cpuset and allowed_cpuset, it
        * will automatically be applied below */
@@ -957,12 +1044,15 @@ apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *p
 {
   hwloc_obj_t *systemp = data, system = *systemp;
   hwloc_obj_t obj = *pobj;
+  unsigned i;
   if (system) {
     if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
         !hwloc_cpuset_isset(system->allowed_nodeset, obj->os_index)) {
       hwloc_debug("Dropping memory from disallowed node %u\n", obj->os_index);
-      obj->attr->node.memory_kB = 0;
-      obj->attr->node.huge_page_free = 0;
+      obj->memory.local_memory = 0;
+      obj->memory.total_memory = 0;
+      for(i=0; i<obj->memory.page_types_len; i++)
+	obj->memory.page_types[i].count = 0;
     }
   } else {
     if (obj->allowed_nodeset) {
@@ -1297,6 +1387,9 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* First tweak a bit to clean the topology.  */
   hwloc_obj_t system = NULL;
+  hwloc_debug("%s", "\nRestrict topology cpusets to existing PROC objects\n");
+  traverse(topology, &topology->levels[0][0], collect_proc_cpuset, collect_proc_cpuset, collect_proc_cpuset_after, &system);
+
   hwloc_debug("%s", "\nPropagate offline and disallowed cpus down and up\n");
   traverse(topology, &topology->levels[0][0], propagate_unused_cpuset, propagate_unused_cpuset, propagate_unused_cpuset_after, &system);
 
@@ -1351,9 +1444,14 @@ hwloc_discover(struct hwloc_topology *topology)
   /* Keep building levels while there are objects left in OBJS.  */
   while (n_objs) {
 
-    /* First find which type of object is the topmost.  */
-    top_obj = objs[0];
-    for (i = 1; i < n_objs; i++) {
+    /* First find which type of object is the topmost.
+     * Don't use PROC if there are other types since we want to keep PROC at the bottom.
+     */
+    for (i = 0; i < n_objs; i++)
+      if (objs[i]->type != HWLOC_OBJ_PROC)
+        break;
+    top_obj = i == n_objs ? objs[0] : objs[i];
+    for (i = 0; i < n_objs; i++) {
       if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
 	if (find_same_type(objs[i], top_obj)) {
 	  /* OBJS[i] is strictly above an object of the same type as TOP_OBJ, so it
@@ -1435,6 +1533,10 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* It's empty now.  */
   free(objs);
+
+  /* accumulate children memory in total_memory fields (only once parent is set) */
+  hwloc_debug("%s", "\nPropagate total memory up\n");
+  traverse(topology, &topology->levels[0][0], NULL, propagate_total_memory, propagate_total_memory, NULL);
 
   /*
    * Additional detection, using hwloc_insert_object to add a few objects here
@@ -1562,21 +1664,14 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
 
-  /* Create the actual System object */
+  /* Create the actual machine object, but don't touch its attributes yet
+   * since the OS backend may still change the object into something else
+   * (for instance System)
+   */
   root_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, 0);
   root_obj->depth = 0;
   root_obj->logical_index = 0;
   root_obj->sibling_rank = 0;
-  root_obj->attr->machine.memory_kB = 0;
-  root_obj->attr->machine.huge_page_free = 0;
-  /* TODO: this should move to the OS backend since it may change machine into a system, and their attributes are different */
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  root_obj->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#else /* HAVE__SC_LARGE_PAGESIZE */
-  root_obj->attr->machine.huge_page_size_kB = 0;
-#endif /* HAVE__SC_LARGE_PAGESIZE */
-  root_obj->attr->machine.dmi_board_vendor = NULL;
-  root_obj->attr->machine.dmi_board_name = NULL;
   topology->levels[0][0] = root_obj;
 }
 

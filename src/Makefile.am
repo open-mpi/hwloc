@@ -92,6 +92,10 @@ if HWLOC_HAVE_MS_LIB
 endif HWLOC_HAVE_MS_LIB
 endif HWLOC_HAVE_WINDOWS
 
+if HWLOC_HAVE_CPUID
+sources += topology-x86.c
+endif HWLOC_HAVE_CPUID
+
 # Installable library
 
 libhwloc_la_SOURCES = $(sources)

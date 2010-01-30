@@ -1,5 +1,5 @@
-Machine(0KB HP=0*0kB  )
-  NUMANode#0(1048576KB)
+Machine(total=4194304KB)
+  NUMANode#0(local=1048576KB total=1048576KB)
     Socket#0
       L3Cache(8192KB)
         L2Cache(256KB)
@@ -40,7 +40,7 @@ Machine(0KB HP=0*0kB  )
             Core#1
               P#11
               P#15
-  NUMANode#1(1048576KB)
+  NUMANode#1(local=1048576KB total=1048576KB)
     Socket#2
       L3Cache(8192KB)
         L2Cache(256KB)
@@ -81,7 +81,7 @@ Machine(0KB HP=0*0kB  )
             Core#1
               P#27
               P#31
-  NUMANode#2(1048576KB)
+  NUMANode#2(local=1048576KB total=1048576KB)
     Socket#4
       L3Cache(8192KB)
         L2Cache(256KB)
@@ -122,7 +122,7 @@ Machine(0KB HP=0*0kB  )
             Core#1
               P#43
               P#47
-  NUMANode#3(1048576KB)
+  NUMANode#3(local=1048576KB total=1048576KB)
     Socket#6
       L3Cache(8192KB)
         L2Cache(256KB)

@@ -17,6 +17,7 @@ in v0.9.1).
 Version 1.0.0
 -------------
 
+* The ABI has changed.
 * Renamed hwloc_cpuset_compar_first() and hwloc_cpuset_compar() to
   hwloc_cpuset_compare_first() and hwloc_cpuset_compare(),
   respectively (i.e., added the missing "e").

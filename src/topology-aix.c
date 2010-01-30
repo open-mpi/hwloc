@@ -200,11 +200,18 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     obj->os_level = sdl;
     switch(type) {
       case HWLOC_OBJ_NODE:
-	obj->attr->node.memory_kB = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
-	obj->attr->node.huge_page_free = 0; /* TODO: rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
+	obj->memory.local_memory = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
+	obj->memory.page_types_len = 2;
+	obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
+	memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
+	obj->memory.page_types[0].size = getpagesize();
+#ifdef HAVE__SC_LARGE_PAGESIZE
+	obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+	/* TODO: obj->memory.page_types[1].count = rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
 	break;
       case HWLOC_OBJ_CACHE:
-	obj->attr->cache.memory_kB = 0; /* TODO: ? */
+	obj->attr->cache.size = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
       case HWLOC_OBJ_MISC:

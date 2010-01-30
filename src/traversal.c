@@ -341,9 +341,9 @@ hwloc_pci_class_string(unsigned short class_id)
 }
 
 #define hwloc_memory_size_printf_value(_size, _verbose) \
-  (_size) < (10*1024) || _verbose ? (_size) : (_size) < (10*1024*1024) ? (((_size)>>9)+1)>>1 : (((_size)>>19)+1)>>1
+  (_size) < (10ULL<<20) || _verbose ? (((_size)>>9)+1)>>1 : (_size) < (10ULL<<30) ? (((_size)>>19)+1)>>1 : (((_size)>>29)+1)>>1
 #define hwloc_memory_size_printf_unit(_size, _verbose) \
-  (_size) < (10*1024) || _verbose ? "KB" : (_size) < (10*1024*1024) ? "MB" : "GB"
+  (_size) < (10ULL<<20) || _verbose ? "KB" : (_size) < (10ULL<<30) ? "MB" : "GB"
 
 int
 hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, int verbose)
@@ -393,41 +393,41 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 int
 hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * separator, int verbose)
 {
+  char memory[64] = "";
+
+  if (verbose) {
+    if (obj->memory.local_memory)
+      snprintf(memory, sizeof(memory), "local=%llu%s%stotal=%llu%s",
+	       hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose),
+	       separator,
+	       hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
+	       hwloc_memory_size_printf_unit(obj->memory.local_memory, verbose));
+    else if (obj->memory.total_memory)
+      snprintf(memory, sizeof(memory), "total=%llu%s",
+	       hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
+  } else {
+    if (obj->memory.total_memory)
+      snprintf(memory, sizeof(memory), "%llu%s",
+	       hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
+  }
+
   switch (obj->type) {
-  case HWLOC_OBJ_SYSTEM:
-    if (verbose)
-      return hwloc_snprintf(string, size, "%lu%s%sHP=%lu*%lukB",
-			    hwloc_memory_size_printf_value(obj->attr->system.memory_kB, verbose),
-			    hwloc_memory_size_printf_unit(obj->attr->system.memory_kB, verbose),
-			    separator,
-			    obj->attr->system.huge_page_free, obj->attr->system.huge_page_size_kB);
-    else
-      return hwloc_snprintf(string, size, "%lu%s",
-			    hwloc_memory_size_printf_value(obj->attr->system.memory_kB, verbose),
-			    hwloc_memory_size_printf_unit(obj->attr->system.memory_kB, verbose));
   case HWLOC_OBJ_MACHINE:
     if (verbose)
-      return hwloc_snprintf(string, size, "%lu%s%sHP=%lu*%lukB%s%s%s%s",
-			    hwloc_memory_size_printf_value(obj->attr->machine.memory_kB, verbose),
-			    hwloc_memory_size_printf_unit(obj->attr->machine.memory_kB, verbose),
-			    separator,
-			    obj->attr->machine.huge_page_free, obj->attr->machine.huge_page_size_kB,
-			    separator,
+      return hwloc_snprintf(string, size, "%s%s%s%s%s", memory,
+			    obj->attr->machine.dmi_board_vendor?separator:"",
 			    obj->attr->machine.dmi_board_vendor?obj->attr->machine.dmi_board_vendor:"",
-			    separator,
+			    obj->attr->machine.dmi_board_name?separator:"",
 			    obj->attr->machine.dmi_board_name?obj->attr->machine.dmi_board_name:"");
     else
-      return hwloc_snprintf(string, size, "%lu%s",
-			    hwloc_memory_size_printf_value(obj->attr->machine.memory_kB, verbose),
-			    hwloc_memory_size_printf_unit(obj->attr->machine.memory_kB, verbose));
-  case HWLOC_OBJ_NODE:
-    return hwloc_snprintf(string, size, "%lu%s",
-			  hwloc_memory_size_printf_value(obj->attr->node.memory_kB, verbose),
-			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB, verbose));
+      return hwloc_snprintf(string, size, "%s", memory);
   case HWLOC_OBJ_CACHE:
-    return hwloc_snprintf(string, size, "%lu%s",
-			  hwloc_memory_size_printf_value(obj->attr->node.memory_kB, verbose),
-			  hwloc_memory_size_printf_unit(obj->attr->node.memory_kB, verbose));
+    return hwloc_snprintf(string, size, "%llu%s",
+			  hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
+			  hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
   case HWLOC_OBJ_BRIDGE:
     if (verbose) {
       char up[64], down[64];
@@ -457,8 +457,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     *string = '\0';
     return 0;
   default:
-    *string = '\0';
-    return 0;
+    return hwloc_snprintf(string, size, "%s", memory);
   }
 }
 
@@ -467,97 +466,24 @@ int
 hwloc_obj_snprintf(char *string, size_t size,
     struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *l, const char *_indexprefix, int verbose)
 {
-  hwloc_obj_type_t type = l->type;
   const char *indexprefix = _indexprefix ? _indexprefix : "#";
   char os_index[12] = "";
+  char type[64];
+  int typelen;
+  char attr[128];
+  int attrlen;
 
   if (l->os_index != (unsigned) -1) {
       snprintf(os_index, 12, "%s%u", indexprefix, l->os_index);
   }
 
-  switch (type) {
-  case HWLOC_OBJ_SOCKET:
-  case HWLOC_OBJ_CORE:
-    return hwloc_snprintf(string, size, "%s%s", hwloc_obj_type_string(type), os_index);
-  case HWLOC_OBJ_MISC:
-	  /* TODO: more pretty presentation? */
-    return hwloc_snprintf(string, size, "%s%u%s", hwloc_obj_type_string(type), l->attr->misc.depth, os_index);
-  case HWLOC_OBJ_PROC:
-    return hwloc_snprintf(string, size, "P%s", os_index);
-  case HWLOC_OBJ_SYSTEM:
-    if (verbose)
-      return hwloc_snprintf(string, size, "%s(%lu%s HP=%lu*%lukB)", hwloc_obj_type_string(type),
-		      hwloc_memory_size_printf_value(l->attr->system.memory_kB, verbose),
-		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB, verbose),
-		      l->attr->system.huge_page_free, l->attr->system.huge_page_size_kB);
-    else
-      return hwloc_snprintf(string, size, "%s(%lu%s)", hwloc_obj_type_string(type),
-		      hwloc_memory_size_printf_value(l->attr->system.memory_kB, verbose),
-		      hwloc_memory_size_printf_unit(l->attr->system.memory_kB, verbose));
-  case HWLOC_OBJ_MACHINE:
-    if (verbose)
-      return hwloc_snprintf(string, size, "%s(%lu%s HP=%lu*%lukB %s %s)", hwloc_obj_type_string(type),
-		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB, verbose),
-		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB, verbose),
-		      l->attr->machine.huge_page_free, l->attr->machine.huge_page_size_kB,
-		      l->attr->machine.dmi_board_vendor?l->attr->machine.dmi_board_vendor:"",
-		      l->attr->machine.dmi_board_name?l->attr->machine.dmi_board_name:"");
-    else
-      return hwloc_snprintf(string, size, "%s%s(%lu%s)", hwloc_obj_type_string(type), os_index,
-		      hwloc_memory_size_printf_value(l->attr->machine.memory_kB, verbose),
-		      hwloc_memory_size_printf_unit(l->attr->machine.memory_kB, verbose));
-  case HWLOC_OBJ_NODE:
-    return hwloc_snprintf(string, size, "%s%s(%lu%s)",
-		    verbose ? hwloc_obj_type_string(type) : "Node", os_index,
-		    hwloc_memory_size_printf_value(l->attr->node.memory_kB, verbose),
-		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB, verbose));
-  case HWLOC_OBJ_CACHE:
-    return hwloc_snprintf(string, size, "L%u%s%s(%lu%s)", l->attr->cache.depth,
-		      verbose ? hwloc_obj_type_string(type) : "", os_index,
-		    hwloc_memory_size_printf_value(l->attr->node.memory_kB, verbose),
-		    hwloc_memory_size_printf_unit(l->attr->node.memory_kB, verbose));
-  case HWLOC_OBJ_BRIDGE:
-    if (verbose) {
-      char up[32], down[32];
-      /* upstream is PCI or HOST */
-      if (l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
-	snprintf(up, sizeof(up), "PCI%04x:%02x:%02x.%01x",
-		 l->attr->pcidev.domain, l->attr->pcidev.bus, l->attr->pcidev.dev, l->attr->pcidev.func);
-      else /* HWLOC_OBJ_BRIDGE_HOST */
-	snprintf(up, sizeof(up), "Host");
-      /* downstream is_PCI */
-      snprintf(down, sizeof(down), "PCI%04x:[%02x-%02x]",
-	       l->attr->bridge.downstream.pci.domain, l->attr->bridge.downstream.pci.secondary_bus, l->attr->bridge.downstream.pci.subordinate_bus);
-      return snprintf(string, size, "Bridge %s->%s", up, down);
-    } else {
-      if (l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
-        return snprintf(string, size, "PCI %04x:%04x", l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
-      else if (l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST)
-	return snprintf(string, size, "HostBridge");
-    }
-  case HWLOC_OBJ_PCI_DEVICE:
-    if (verbose)
-      return snprintf(string, size, "%s%04x:%02x:%02x.%01x(%04x:%04x,class=%04x(%s))", hwloc_obj_type_string(type),
-		      l->attr->pcidev.domain, l->attr->pcidev.bus, l->attr->pcidev.dev, l->attr->pcidev.func,
-		      l->attr->pcidev.vendor_id, l->attr->pcidev.device_id, l->attr->pcidev.class_id, hwloc_pci_class_string(l->attr->pcidev.class_id));
-    else {
-      return snprintf(string, size, "%s %04x:%04x", hwloc_pci_class_string(l->attr->pcidev.class_id), l->attr->pcidev.vendor_id, l->attr->pcidev.device_id);
-    }
-  case HWLOC_OBJ_OS_DEVICE:
-    switch (l->attr->osdev.type) {
-    case HWLOC_OBJ_OSDEV_BLOCK: return hwloc_snprintf(string, size, "Block");
-    case HWLOC_OBJ_OSDEV_NETWORK: return hwloc_snprintf(string, size, "Net");
-    case HWLOC_OBJ_OSDEV_INFINIBAND: return hwloc_snprintf(string, size, "InfiniBand");
-    case HWLOC_OBJ_OSDEV_DMA: return hwloc_snprintf(string, size, "DMA");
-    default:
-      *string = '\0';
-      return 0;
-    }
-    break;
-  default:
-    *string = '\0';
-    return 0;
-  }
+  typelen = hwloc_obj_type_snprintf(type, sizeof(type), l, verbose);
+  attrlen = hwloc_obj_attr_snprintf(attr, sizeof(attr), l, " ", verbose);
+
+  if (attrlen)
+    return hwloc_snprintf(string, size, "%s%s(%s)", type, os_index, attr);
+  else
+    return hwloc_snprintf(string, size, "%s%s", type, os_index);
 }
 
 int hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_obj * const *objs)

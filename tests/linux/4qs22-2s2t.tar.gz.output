@@ -1,8 +1,8 @@
-Machine(16467840KB HP=0*16384kB  )
-  NUMANode#0(8388608KB)
+Machine(total=16777216KB)
+  NUMANode#0(local=8388608KB total=8388608KB)
     P#0
     P#1
-  NUMANode#1(8388608KB)
+  NUMANode#1(local=8388608KB total=8388608KB)
     P#2
     P#3
 depth 0:	1 Machine (type #1)

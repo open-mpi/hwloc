@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 
 /*
  * Symbol transforms
@@ -156,6 +157,23 @@ enum {
 
 union hwloc_obj_attr_u;
 
+/** \brief Object memory */
+struct hwloc_obj_memory_s {
+  uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
+  uint64_t local_memory; /**< \brief Local memory (in bytes) */
+
+  unsigned page_types_len; /**< \brief Size of array \p page_types */
+  /** \brief Array of local memory page types, \c NULL if no local memory and \p page_types is 0.
+   *
+   * The array is sorted by increasing \p size fields.
+   * It contains \p page_types_len slots.
+   */
+  struct hwloc_obj_memory_page_type_s {
+    uint64_t size;	/**< \brief Size of pages */
+    uint64_t count;	/**< \brief Number of pages of this size */
+  } * page_types;
+};
+
 /** \brief Structure of a topology object
  *
  * Applications mustn't modify any field except ::userdata .
@@ -166,6 +184,9 @@ struct hwloc_obj {
   unsigned os_index;			/**< \brief OS-provided physical index number */
   char *name;				/**< \brief Object description if any */
 
+  /** \brief Memory attributes */
+  struct hwloc_obj_memory_s memory;
+
   /** \brief Object type-specific Attributes */
   union hwloc_obj_attr_u *attr;
 
@@ -173,6 +194,8 @@ struct hwloc_obj {
   unsigned depth;			/**< \brief Vertical index in the hierarchy */
   unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects,
 					 * could be a "cousin_rank" since it's the rank within the "cousin" list below */
+  signed os_level;			/**< \brief OS-provided physical level, -1 if unknown or meaningless */
+
   struct hwloc_obj *next_cousin;	/**< \brief Next object of same type */
   struct hwloc_obj *prev_cousin;	/**< \brief Previous object of same type */
 
@@ -194,20 +217,56 @@ struct hwloc_obj {
   /* cpuset */
   hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
                                           *
+                                          * This is the set of CPUs for which there are PROC objects in the topology
+                                          * under this object, i.e. which are known to be physically contained in this
+                                          * object and known how (the children path between this object and the PROC
+                                          * objects).
+                                          *
+                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
+                                          * these CPUs may be offline, or not allowed for binding, see online_cpuset
+                                          * and allowed_cpuset.
+                                          *
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
 
-  signed os_level;			/**< \brief OS-provided physical level */
-
   hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
-                                          * i.e. including logical processors for which topology information is
-                                          * unknown or incomplete and thus no PROC object is provided.  */
-  hwloc_cpuset_t online_cpuset;         /**< \brief The CPU set of online logical processors, i.e. that can execute threads
-                                          * (but are not necessarily allowed for the application).  */
-  hwloc_cpuset_t allowed_cpuset;        /**< \brief The CPU set of allowed logical processors, i.e. processors which the
-                                          * application is allowed to run on according to administration rules. */
-  hwloc_cpuset_t allowed_nodeset;       /**< \brief The set of allowed NUMA memory nodes, i.e. nodes  from which the
-                                          * application is allowed to allocate memory.  */
+                                          *
+                                          * This includes not only the same as the cpuset field, but also the CPUs for
+                                          * which topology information is unknown or incomplete, and the CPUs that are
+                                          * ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
+                                          * Thus no corresponding PROC object may be found in the topology, because the
+                                          * precise position is undefined. It is however known that it would be somewhere
+                                          * under this object.
+                                          *
+                                          * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
+                                          */
+  hwloc_cpuset_t online_cpuset;         /**< \brief The CPU set of online logical processors
+                                          *
+                                          * This includes the CPUs contained in this object that are online, i.e. draw
+                                          * power and can execute threads.  It may however not be allowed to bind to
+                                          * them due to administration rules, see allowed_cpuset.
+                                          *
+                                          * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
+                                          */
+  hwloc_cpuset_t allowed_cpuset;        /**< \brief The CPU set of allowed logical processors
+                                          *
+                                          * This includes the CPUs contained in this object which are allowed for
+                                          * binding, i.e. passing them to the hwloc binding functions should not return
+                                          * permission errors.  This is usually restricted by administration rules.
+                                          * Some of them may however be offline so binding to them may still not be
+                                          * possible, see online_cpuset.
+                                          *
+                                          * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
+                                          */
+  hwloc_cpuset_t allowed_nodeset;       /**< \brief The set of allowed NUMA memory nodes
+                                          *
+                                          * This includes the NUMA memory nodes contained in this object which are
+                                          * allowed for memory allocation, i.e. passing them to NUMA node-directed
+                                          * memory allocation should not return permission errors. This is usually
+                                          * restricted by administration rules.
+                                          *
+                                          * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
+                                          */
 };
 /**
  * \brief Convenience typedef; a pointer to a struct hwloc_obj.
@@ -218,28 +277,14 @@ typedef struct hwloc_obj * hwloc_obj_t;
 union hwloc_obj_attr_u {
   /** \brief Cache-specific Object Attributes */
   struct hwloc_cache_attr_s {
-    unsigned long memory_kB;		  /**< \brief Size of cache */
+    uint64_t size;			  /**< \brief Size of cache in bytes */
     unsigned depth;			  /**< \brief Depth of cache */
   } cache;
-  /** \brief Node-specific Object Attributes */
-  struct hwloc_memory_attr_s {
-    unsigned long memory_kB;		  /**< \brief Size of memory node */
-    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
-  } node;
   /** \brief Machine-specific Object Attributes */
   struct hwloc_machine_attr_s {
     char *dmi_board_vendor;		  /**< \brief DMI board vendor name */
     char *dmi_board_name;		  /**< \brief DMI board model name */
-    unsigned long memory_kB;		  /**< \brief Size of memory node */
-    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
-    unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
   } machine;
-  /** \brief System-specific Object Attributes */
-  struct hwloc_system_attr_s {
-    unsigned long memory_kB;		  /**< \brief Size of memory node */
-    unsigned long huge_page_free;	  /**< \brief Number of available huge pages */
-    unsigned long huge_page_size_kB;	  /**< \brief Size of huge pages */
-  } system;
   /** \brief Misc-specific Object Attributes */
   struct hwloc_misc_attr_s {
     unsigned depth;			  /**< \brief Depth of misc object */
@@ -344,8 +389,9 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
  *
  * Ignore all objects from the given type.
  * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
+ * The top-level object of the hierarchy will never be ignored, even if this function
+ * succeeds.
  */
-/* FIXME: clarify what happens if ignoring the top-level type (ignore the ignoring?) */
 HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_t type);
 
 /** \brief Ignore an object type if it does not bring any structure.
@@ -368,10 +414,11 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t top
  * Flags should be given to hwloc_topology_set_flags().
  */
 enum hwloc_topology_flags_e {
-  /* \brief Detect the whole system, ignore reservations that may have been setup by the administrator.
+  /* \brief Detect the whole system, ignore reservations and offline settings.
    *
    * Gather all resources, even if some were disabled by the administrator.
-   * For instance, ignore Linux Cpusets and gather all processors and memory nodes.
+   * For instance, ignore Linux Cpusets and gather all processors and memory nodes,
+   * and ignore the fact that some resources may be offline.
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
 

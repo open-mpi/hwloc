@@ -26,7 +26,7 @@ hwloc supports the following operating systems:
   * Solaris
   * AIX
   * Darwin / OS X
-  * *FreeBSD
+  * FreeBSD and its variants, such as kFreeBSD/GNU
   * OSF/1 (a.k.a., Tru64)
   * HP-UX
   * Microsoft Windows
@@ -90,7 +90,7 @@ following outputs:
 
                                dudley.png
 
-System(16GB)
+Machine(16GB)
   Socket#0 + L3(4096KB)
  L2(1024KB) + L1(16KB) + Core#0
    P#0
@@ -125,7 +125,7 @@ following outputs:
 
                                hagrid.png
 
-System(62GB)
+Machine(62GB)
   Node#0(8192MB) + Socket#0
  L2(1024KB) + L1(64KB) + Core#0 + P#0
  L2(1024KB) + L1(64KB) + Core#1 + P#1
@@ -156,7 +156,7 @@ socket):
 
                                emmett.png
 
-System(16GB)
+Machine(16GB)
   Socket#0
  L2(4096KB)
    L1(32KB) + Core#0 + P#0
@@ -275,7 +275,7 @@ int main(void)
 
  /* Walk the topology with a tree style. */
  printf("*** Printing overall tree\n");
- print_children(topology, hwloc_get_system_obj(topology), 0);
+ print_children(topology, hwloc_get_root_obj(topology), 0);
 
  /* Print the number of sockets. */
  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
@@ -333,7 +333,7 @@ something like the following:
 
 shell$ ./hwloc-hello
 *** Objects at level 0
-Index 0: System(3938MB)
+Index 0: Machine(3938MB)
 *** Objects at level 1
 Index 0: Socket#0
 Index 1: Socket#1
@@ -348,7 +348,7 @@ Index 1: P#1
 Index 2: P#2
 Index 3: P#3
 *** Printing overall tree
-System(3938MB)
+Machine(3938MB)
   Socket#0
  Core#0
    P#0
@@ -384,5 +384,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Tue Jan 12 21:06:03 2010 for Hardware Locality (hwloc) by  doxygen
+Generated on Mon Jan 25 09:51:53 2010 for Hardware Locality (hwloc) by  doxygen
 1.6.1

@@ -161,6 +161,23 @@ AC_DEFUN([HWLOC_INIT],[
         sleep 10
         ;;
     esac
+
+    #
+    # Check CPU support
+    #
+    AC_MSG_CHECKING([which CPU support to include])
+    case ${target} in
+      i*86-*-*)
+        AC_DEFINE(HWLOC_X86_32_ARCH, 1, [Define to 1 on x86_32])
+        hwloc_x86_32=yes
+        AC_MSG_RESULT([x86_32])
+        ;;
+      x86_64-*-*)
+        AC_DEFINE(HWLOC_X86_64_ARCH, 1, [Define to 1 on x86_64])
+        hwloc_x86_64=yes
+        AC_MSG_RESULT([x86_64])
+        ;;
+    esac
     
     #
     # Define C flags
@@ -507,7 +524,30 @@ AC_DEFUN([HWLOC_INIT],[
     AC_SUBST(HWLOC_CPPFLAGS)
     HWLOC_LDFLAGS='-L$(top_builddir)/'hwloc_config_prefix'src'
     AC_SUBST(HWLOC_LDFLAGS)
-    
+
+    # Try to compile the cpuid inlines
+    AC_MSG_CHECKING([for cpuid])
+    old_CPPFLAGS="$CPPFLAGS"
+    CFLAGS="$CFLAGS -I$HWLOC_top_srcdir/include"
+    AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[
+        #include <stdio.h>
+        #include <private/cpuid.h>
+      ]], [[
+        if (hwloc_have_cpuid()) {
+          unsigned eax = 0, ebx, ecx = 0, edx;
+          hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+          printf("highest cpuid %x\n", eax);
+          return 0;
+        }
+      ]]), [
+      AC_MSG_RESULT([yes])
+      AC_DEFINE(HWLOC_HAVE_CPUID, 1, [Define to 1 if you have cpuid])
+      hwloc_have_cpuid=yes
+    ], [
+      AC_MSG_RESULT([no])
+    ])
+    CPPFLAGS="$old_CPPFLAGS"
+    AM_CONDITIONAL([HWLOC_HAVE_CPUID], [test "x$hwloc_have_cpuid" = "xyes"])
     # Setup all the AM_CONDITIONALs
     HWLOC_DO_AM_CONDITIONALS
 
@@ -644,6 +684,9 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_WINDOWS], [test "x$hwloc_windows" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_MINGW32], 
                        [test "x$hwloc_target_os" = "xmingw32"])
+
+        AM_CONDITIONAL([HWLOC_HAVE_X86_32], [test "x$hwloc_x86_32" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_X86_64], [test "x$hwloc_x86_64" = "xyes"])
     ])
     hwloc_did_am_conditionals=yes
 ])dnl

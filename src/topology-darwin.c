@@ -117,12 +117,18 @@ hwloc_look_darwin(struct hwloc_topology *topology)
             hwloc_debug_2args_cpuset("L%ucache %u has cpuset %s\n",
                 i, j, obj->cpuset);
             obj->attr->cache.depth = i;
-            obj->attr->cache.memory_kB = cachesize[i] / 1024;
+            obj->attr->cache.size = cachesize[i];
           } else {
             hwloc_debug_1arg_cpuset("node %u has cpuset %s\n",
                 j, obj->cpuset);
-            obj->attr->node.memory_kB = cachesize[i] / 1024;
-            obj->attr->node.huge_page_free = 0; /* TODO */
+	    obj->memory.local_memory = cachesize[i];
+	    obj->memory.page_types_len = 2;
+	    obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
+	    memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
+	    obj->memory.page_types[0].size = getpagesize();
+#ifdef HAVE__SC_LARGE_PAGESIZE
+	    obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
           }
 
           hwloc_insert_object_by_cpuset(topology, obj);

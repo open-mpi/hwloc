@@ -1,0 +1,53 @@
+Machine cpuset=0x00009fdb
+  Socket#0 cpuset=0x00001111
+    L3Cache(4096KB) cpuset=0x00001111
+      L2Cache(1024KB) cpuset=0x00000101
+        L1Cache(16KB) cpuset=0x00000101
+          Core#0 cpuset=0x00000101
+            P#0 cpuset=0x00000001
+            P#8 cpuset=0x00000100
+      L2Cache(1024KB) cpuset=0x00001010
+        L1Cache(16KB) cpuset=0x00001010
+          Core#1 cpuset=0x00001010
+            P#4 cpuset=0x00000010
+            P#12 cpuset=0x00001000
+  Socket#1 cpuset=0x00000202
+    L3Cache(4096KB) cpuset=0x00000202
+      L2Cache(1024KB) cpuset=0x00000202
+        L1Cache(16KB) cpuset=0x00000202
+          Core#0 cpuset=0x00000202
+            P#1 cpuset=0x00000002
+            P#9 cpuset=0x00000200
+  Socket#3 cpuset=0x00008888
+    L3Cache(4096KB) cpuset=0x00008888
+      L2Cache(1024KB) cpuset=0x00000808
+        L1Cache(16KB) cpuset=0x00000808
+          Core#0 cpuset=0x00000808
+            P#3 cpuset=0x00000008
+            P#11 cpuset=0x00000800
+      L2Cache(1024KB) cpuset=0x00008080
+        L1Cache(16KB) cpuset=0x00008080
+          Core#1 cpuset=0x00008080
+            P#7 cpuset=0x00000080
+            P#15 cpuset=0x00008000
+  Socket#2 cpuset=0x00000440
+    L3Cache(4096KB) cpuset=0x00000440
+      L2Cache(1024KB) cpuset=0x00000040
+        L1Cache(16KB) cpuset=0x00000040
+          Core#1 cpuset=0x00000040
+            P#6 cpuset=0x00000040
+      L2Cache(1024KB) cpuset=0x00000400
+        L1Cache(16KB) cpuset=0x00000400
+          Core#0 cpuset=0x00000400
+            P#10 cpuset=0x00000400
+depth 0:	1 Machine (type #1)
+ depth 1:	4 Sockets (type #3)
+  depth 2:	4 Caches (type #4)
+   depth 3:	7 Caches (type #4)
+    depth 4:	7 Caches (type #4)
+     depth 5:	7 Cores (type #5)
+      depth 6:	12 Procs (type #6)
+4 processors not represented in topology: 0x00006024
+4 processors offline: 0x00006024
+4 processors allowed but not online: 0x00006024
+Topology not from this system
