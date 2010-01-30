@@ -196,9 +196,11 @@ struct hwloc_obj {
                                           * This is the set of CPUs for which there are PROC objects in the topology
                                           * under this object, i.e. which are known to be physically contained in this
                                           * object and known how (the children path between this object and the PROC
-                                          * objects). They however may be offline, or not allowed for binding if the
-                                          * HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, see
-                                          * online_cpuset and allowed_cpuset.
+                                          * objects).
+                                          *
+                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
+                                          * these CPUs may be offline, or not allowed for binding, see online_cpuset
+                                          * and allowed_cpuset.
                                           *
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
@@ -208,11 +210,11 @@ struct hwloc_obj {
   hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
                                           *
                                           * This includes not only the same as the cpuset field, but also the CPUs for
-                                          * which topology information is unknown or incomplete or ignored by the
-                                          * HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag or hwloc_topology_ignore configuration
-                                          * functions and thus no corresponding PROC object will be found in the
-                                          * topology, because its precise position is undefined. It is however known
-                                          * that it would be somewhere under this object.
+                                          * which topology information is unknown or incomplete, and the CPUs that are
+                                          * ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
+                                          * Thus no corresponding PROC object may be found in the topology, because the
+                                          * precise position is undefined. It is however known that it would be somewhere
+                                          * under this object.
                                           *
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
@@ -362,10 +364,11 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t top
  * Flags should be given to hwloc_topology_set_flags().
  */
 enum hwloc_topology_flags_e {
-  /* \brief Detect the whole system, ignore reservations that may have been setup by the administrator.
+  /* \brief Detect the whole system, ignore reservations and offline settings.
    *
    * Gather all resources, even if some were disabled by the administrator.
-   * For instance, ignore Linux Cpusets and gather all processors and memory nodes.
+   * For instance, ignore Linux Cpusets and gather all processors and memory nodes,
+   * and ignore the fact that some resources may be offline.
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
 
