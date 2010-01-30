@@ -172,6 +172,8 @@ struct hwloc_obj {
   unsigned depth;			/**< \brief Vertical index in the hierarchy */
   unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects,
 					 * could be a "cousin_rank" since it's the rank within the "cousin" list below */
+  signed os_level;			/**< \brief OS-provided physical level, -1 if unknown or meaningless */
+
   struct hwloc_obj *next_cousin;	/**< \brief Next object of same type */
   struct hwloc_obj *prev_cousin;	/**< \brief Previous object of same type */
 
@@ -204,8 +206,6 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
-
-  signed os_level;			/**< \brief OS-provided physical level */
 
   hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
                                           *
