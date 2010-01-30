@@ -474,6 +474,7 @@ free_object(hwloc_obj_t obj)
   hwloc_cpuset_free(obj->complete_cpuset);
   hwloc_cpuset_free(obj->online_cpuset);
   hwloc_cpuset_free(obj->allowed_cpuset);
+  hwloc_cpuset_free(obj->allowed_nodeset);
   free(obj);
 }
 
