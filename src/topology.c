@@ -920,54 +920,54 @@ propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwlo
   hwloc_obj_t *systemp = data, system = *systemp;
   hwloc_obj_t obj = *pobj;
 
-  if (system) {
-    /* We are already given a pointer to an system object, update it and update ourselves */
-    hwloc_cpuset_t mask = hwloc_cpuset_alloc();
+  if (obj->cpuset) {
+    if (system) {
+      /* We are already given a pointer to an system object, update it and update ourselves */
+      hwloc_cpuset_t mask = hwloc_cpuset_alloc();
 
-    /* Apply the topology cpuset */
-    hwloc_cpuset_andset(obj->cpuset, system->cpuset);
+      /* Apply the topology cpuset */
+      hwloc_cpuset_andset(obj->cpuset, system->cpuset);
 
-    /* Update complete cpuset down */
-    if (obj->complete_cpuset) {
-      hwloc_cpuset_andset(obj->complete_cpuset, system->complete_cpuset);
+      /* Update complete cpuset down */
+      if (obj->complete_cpuset) {
+	hwloc_cpuset_andset(obj->complete_cpuset, system->complete_cpuset);
+      } else {
+	obj->complete_cpuset = hwloc_cpuset_dup(system->complete_cpuset);
+	hwloc_cpuset_andset(obj->complete_cpuset, obj->cpuset);
+      }
+
+      if (obj->online_cpuset) {
+	/* Update ours */
+	hwloc_cpuset_andset(obj->online_cpuset, system->online_cpuset);
+
+	/* Update the given cpuset, but only what we know */
+	hwloc_cpuset_copy(mask, obj->cpuset);
+	hwloc_cpuset_notset(mask);
+	hwloc_cpuset_orset(mask, obj->online_cpuset);
+	hwloc_cpuset_andset(system->online_cpuset, mask);
+      } else {
+	/* Just take it as such */
+	obj->online_cpuset = hwloc_cpuset_dup(system->online_cpuset);
+	hwloc_cpuset_andset(obj->online_cpuset, obj->cpuset);
+      }
+
+      if (obj->allowed_cpuset) {
+	/* Update ours */
+	hwloc_cpuset_andset(obj->allowed_cpuset, system->allowed_cpuset);
+
+	/* Update the given cpuset, but only what we know */
+	hwloc_cpuset_copy(mask, obj->cpuset);
+	hwloc_cpuset_notset(mask);
+	hwloc_cpuset_orset(mask, obj->allowed_cpuset);
+	hwloc_cpuset_andset(system->allowed_cpuset, mask);
+      } else {
+	/* Just take it as such */
+	obj->allowed_cpuset = hwloc_cpuset_dup(system->allowed_cpuset);
+	hwloc_cpuset_andset(obj->allowed_cpuset, obj->cpuset);
+      }
+
+      hwloc_cpuset_free(mask);
     } else {
-      obj->complete_cpuset = hwloc_cpuset_dup(system->complete_cpuset);
-      hwloc_cpuset_andset(obj->complete_cpuset, obj->cpuset);
-    }
-
-    if (obj->online_cpuset) {
-      /* Update ours */
-      hwloc_cpuset_andset(obj->online_cpuset, system->online_cpuset);
-
-      /* Update the given cpuset, but only what we know */
-      hwloc_cpuset_copy(mask, obj->cpuset);
-      hwloc_cpuset_notset(mask);
-      hwloc_cpuset_orset(mask, obj->online_cpuset);
-      hwloc_cpuset_andset(system->online_cpuset, mask);
-    } else {
-      /* Just take it as such */
-      obj->online_cpuset = hwloc_cpuset_dup(system->online_cpuset);
-      hwloc_cpuset_andset(obj->online_cpuset, obj->cpuset);
-    }
-
-    if (obj->allowed_cpuset) {
-      /* Update ours */
-      hwloc_cpuset_andset(obj->allowed_cpuset, system->allowed_cpuset);
-
-      /* Update the given cpuset, but only what we know */
-      hwloc_cpuset_copy(mask, obj->cpuset);
-      hwloc_cpuset_notset(mask);
-      hwloc_cpuset_orset(mask, obj->allowed_cpuset);
-      hwloc_cpuset_andset(system->allowed_cpuset, mask);
-    } else {
-      /* Just take it as such */
-      obj->allowed_cpuset = hwloc_cpuset_dup(system->allowed_cpuset);
-      hwloc_cpuset_andset(obj->allowed_cpuset, obj->cpuset);
-    }
-
-    hwloc_cpuset_free(mask);
-  } else {
-    if (obj->cpuset) {
       /* This object is the root of a machine */
       *systemp = obj;
       /* Apply complete cpuset to cpuset, online_cpuset and allowed_cpuset, it
