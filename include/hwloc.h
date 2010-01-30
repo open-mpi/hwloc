@@ -340,8 +340,9 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
  *
  * Ignore all objects from the given type.
  * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
+ * The top-level object of the hierarchy will never be ignored, even if this function
+ * succeeds.
  */
-/* FIXME: clarify what happens if ignoring the top-level type (ignore the ignoring?) */
 HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_obj_type_t type);
 
 /** \brief Ignore an object type if it does not bring any structure.
