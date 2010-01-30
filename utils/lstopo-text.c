@@ -58,7 +58,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     if (verbose_mode >= 2 && l->name)
       fprintf(output, " \"%s\"", l->name);
   }
-  if (l->cpuset)
+  if (!l->cpuset)
     return;
   if (show_cpuset == 1)
     fprintf(output, " cpuset=");
