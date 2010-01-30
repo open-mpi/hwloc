@@ -1399,9 +1399,14 @@ hwloc_discover(struct hwloc_topology *topology)
   /* Keep building levels while there are objects left in OBJS.  */
   while (n_objs) {
 
-    /* First find which type of object is the topmost.  */
-    top_obj = objs[0];
-    for (i = 1; i < n_objs; i++) {
+    /* First find which type of object is the topmost.
+     * Don't use PROC if there are other types since we want to keep PROC at the bottom.
+     */
+    for (i = 0; i < n_objs; i++)
+      if (objs[i]->type != HWLOC_OBJ_PROC)
+        break;
+    top_obj = i == n_objs ? objs[0] : objs[i];
+    for (i = 0; i < n_objs; i++) {
       if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
 	if (find_same_type(objs[i], top_obj)) {
 	  /* OBJS[i] is strictly above an object of the same type as TOP_OBJ, so it
