@@ -1682,6 +1682,7 @@ hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
 
   return hwloc_backend_xml_init(topology, xmlpath);
 #else /* HWLOC_HAVE_XML */
+  errno = ENOSYS;
   return -1;
 #endif /* !HWLOC_HAVE_XML */
 }
@@ -1696,13 +1697,17 @@ hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
 int
 hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
-  if (type >= HWLOC_OBJ_TYPE_MAX)
+  if (type >= HWLOC_OBJ_TYPE_MAX) {
+    errno = EINVAL;
     return -1;
+  }
 
 
-  if (type == HWLOC_OBJ_PROC)
+  if (type == HWLOC_OBJ_PROC) {
     /* we need the proc level */
+    errno = EINVAL;
     return -1;
+  }
 
   topology->ignored_types[type] = HWLOC_IGNORE_TYPE_ALWAYS;
   return 0;
@@ -1711,12 +1716,16 @@ hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t typ
 int
 hwloc_topology_ignore_type_keep_structure(struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
-  if (type >= HWLOC_OBJ_TYPE_MAX)
+  if (type >= HWLOC_OBJ_TYPE_MAX) {
+    errno = EINVAL;
     return -1;
+  }
 
-  if (type == HWLOC_OBJ_PROC)
+  if (type == HWLOC_OBJ_PROC) {
     /* we need the proc level */
+    errno = EINVAL;
     return -1;
+  }
 
   topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
