@@ -685,7 +685,7 @@ multiple objects may have the same physical/OS indexes, making their
 manipulation tricky and highly non-portable.
 
 Note that hwloc tries very hard to always present a hierarchical tree
-with the same logical ordering, regardless of physica or OS index
+with the same logical ordering, regardless of physical or OS index
 ordering.
 
 It is still possible to retrieve physical/OS indexes through the \p
