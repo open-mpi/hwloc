@@ -362,7 +362,11 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
     if (!hwloc_cpuset_isset(level->allowed_cpuset, level->os_index))
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
     else {
-      hwloc_cpuset_t bind = hwloc_get_cpubind(topology, 0);
+      hwloc_cpuset_t bind;
+      if (pid)
+        bind = hwloc_get_proc_cpubind(topology, pid, 0);
+      else
+        bind = hwloc_get_cpubind(topology, 0);
       if (bind && hwloc_cpuset_isset(bind, level->os_index))
         methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);
       else

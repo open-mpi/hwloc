@@ -1601,6 +1601,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->flags = 0;
   topology->is_thissystem = 1;
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
+  topology->pid = 0;
 
   topology->set_thisproc_cpubind = NULL;
   topology->get_thisproc_cpubind = NULL;
@@ -1661,6 +1662,18 @@ hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_pa
 #endif /* HWLOC_LINUX_SYS */
 
   return 0;
+}
+
+int
+hwloc_topology_set_pid(struct hwloc_topology *topology, hwloc_pid_t pid)
+{
+#ifdef HWLOC_LINUX_SYS
+  topology->pid = pid;
+  return 0;
+#else /* HWLOC_LINUX_SYS */
+  errno = ENOSYS;
+  return -1;
+#endif /* HWLOC_LINUX_SYS */
 }
 
 int

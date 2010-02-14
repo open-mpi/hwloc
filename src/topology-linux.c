@@ -718,7 +718,7 @@ hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
 }
 
 static char *
-hwloc_read_linux_cpuset_name(int fsroot_fd)
+hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
 {
 #define CPUSET_NAME_LEN 128
   char cpuset_name[CPUSET_NAME_LEN];
@@ -726,7 +726,13 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
   char *tmp;
 
   /* check whether a cgroup-cpuset is enabled */
-  fd = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
+  if (!pid)
+    fd = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
+  else {
+    char path[] = "/proc/XXXXXXXXXX/cgroup";
+    snprintf(path, sizeof(path), "/proc/%u/cgroup", pid);
+    fd = hwloc_fopen(path, "r", fsroot_fd);
+  }
   if (fd) {
     /* find a cpuset line */
 #define CGROUP_LINE_LEN 256
@@ -750,7 +756,13 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
   }
 
   /* check whether a cpuset is enabled */
-  fd = hwloc_fopen("/proc/self/cpuset", "r", fsroot_fd);
+  if (!pid)
+    fd = hwloc_fopen("/proc/self/cpuset", "r", fsroot_fd);
+  else {
+    char path[] = "/proc/XXXXXXXXXX/cpuset";
+    snprintf(path, sizeof(path), "/proc/%u/cpuset", pid);
+    fd = hwloc_fopen(path, "r", fsroot_fd);
+  }
   if (!fd) {
     /* found nothing */
     hwloc_debug("%s", "No cgroup or cpuset found\n");
@@ -771,8 +783,8 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
 
 /*
  * Linux cpusets may be managed directly or through cgroup.
- * If cgroup is used, tasks get a /proc/self/cgroup which may contain a
- * single line %d:cpuset:<name>. If cpuset are used they get /proc/self/cpuset
+ * If cgroup is used, tasks get a /proc/pid/cgroup which may contain a
+ * single line %d:cpuset:<name>. If cpuset are used they get /proc/pid/cpuset
  * containing <name>.
  *
  * Then, the cpuset description is available from either the cgroup or
@@ -780,7 +792,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd)
  * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
  */
 static char *
-hwloc_read_linux_cpuset_mask(const char *type, int fsroot_fd)
+hwloc_read_linux_cpuset_mask(const char *type, int fsroot_fd, hwloc_pid_t pid)
 {
   char *cpuset_name;
 #define CPUSET_FILENAME_LEN 256
@@ -790,7 +802,7 @@ hwloc_read_linux_cpuset_mask(const char *type, int fsroot_fd)
   ssize_t ssize;
   size_t size;
 
-  cpuset_name = hwloc_read_linux_cpuset_name(fsroot_fd);
+  cpuset_name = hwloc_read_linux_cpuset_name(fsroot_fd, pid);
   if (!cpuset_name)
     return NULL;
 
@@ -848,7 +860,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
 
-  cpuset_mask = hwloc_read_linux_cpuset_mask(name, topology->backend_params.sysfs.root_fd);
+  cpuset_mask = hwloc_read_linux_cpuset_mask(name, topology->backend_params.sysfs.root_fd, topology->pid);
   if (!cpuset_mask)
     return;
 
