@@ -242,13 +242,26 @@ main (int argc, char *argv[])
     hwloc_topology_ignore_all_keep_structure(topology);
 
   if (synthetic)
-    hwloc_topology_set_synthetic(topology, synthetic);
-  if (xmlpath)
-    hwloc_topology_set_xml(topology, xmlpath);
-  if (fsysroot)
-    hwloc_topology_set_fsroot(topology, fsysroot);
-  if (pid)
-    hwloc_topology_set_pid(topology, pid);
+    if (hwloc_topology_set_synthetic(topology, synthetic))
+      return EXIT_FAILURE;
+  if (xmlpath) {
+    if (hwloc_topology_set_xml(topology, xmlpath)) {
+      perror("Setting target XML file");
+      return EXIT_FAILURE;
+    }
+  }
+  if (fsysroot) {
+    if (hwloc_topology_set_fsroot(topology, fsysroot)) {
+      perror("Setting target filesystem root");
+      return EXIT_FAILURE;
+    }
+  }
+  if (pid) {
+    if (hwloc_topology_set_pid(topology, pid)) {
+      perror("Setting target pid");
+      return EXIT_FAILURE;
+    }
+  }
 
   err = hwloc_topology_load (topology);
   if (err)
