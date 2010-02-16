@@ -54,10 +54,6 @@ Do not consider administration limitations.
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
 .TP
-\fB\-\-synthetic\fR <specification>
-Simulate a fake hierarchy (instead of discovering the topology on the
-local machine).
-.TP
 \fB\-\-xml\fR <path>
 Read topology from XML file <path> (instead of discovering the
 topology on the local machine).  If <path> is "-", the standard input
@@ -68,6 +64,10 @@ option to be usable.
 Read topology from the chroot specified by <path> (instead of
 discovering the topology on the local machine).  This option is
 generally only available on Linux.
+.TP
+\fB\-\-synthetic\fR <specification>
+Simulate a fake hierarchy (instead of discovering the topology on the
+local machine).
 .TP
 \fB\-\-fontsize\fR <size>
 Set size of text font.
