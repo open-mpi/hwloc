@@ -17,51 +17,52 @@ in v0.9.1).
 Version 1.0.0
 -------------
 
-* The ABI has changed.
-* Renamed hwloc_cpuset_compar_first() and hwloc_cpuset_compar() to
-  hwloc_cpuset_compare_first() and hwloc_cpuset_compare(),
-  respectively (i.e., added the missing "e").
-* Add hwloc_topology_export_xml() to export the topology in a XML file.
-* Add hwloc_topology_get_support() to retrieve the supported features
-  for the current topologt context.
-* Add hwloc_get_*cpubind() routines to retrieve the current binding
-  of processes and threads.
-  + Only implemented for Linux so far.
-* Add hwloc_topology_get_offline_cpuset() to retrieve the list of
-  currently offline or disabled CPUs.
-* Add several new helpers:
-  + hwloc_get_proc_obj_by_os_index()
-  + hwloc_get_parent_by_depth/type()
-* Add Linux cgroup support to the Linux cpuset code.
-* lstopo now displays logical indexes by default, use --physical to
-  revert back to OS/physical indexes.
-* Add FreeBSD support.
-* Add support for looking up specific PID topology information.
-* Rework memory attributes.
-* Add different cpusets in each object to specify processors that
-  are offline, unavailable, ...
-* Extend lstopo to show cpusets, filter objects by type, ...
-* Support non-SYSTEM object as the root of the tree.
-* Add x86 cpuid based backend.
-* Deprecate hwloc_obj_snprintf in favor of hwloc_obj_type/attr_snprintf
-* Clarify the use of parent and ancestor in the API, do not use father anymore.
-* Cleanup the storage of object names and DMI infos.
-* Replace get_system_obj with get_root_obj
-* Add a hwloc(7) manpage documentation containing general information.
-* Add colors in the lstopo graphical outputs to distinguish between online,
-  offline, reserved, ... objects.
-* Cleanup the distributed documentation files.
-* Return -1 instead of HWLOC_OBJ_TYPE_MAX in the API since the latter
-  isn't public.
-* Improve displaying of memory sizes.
-* Cleanup XML export/import.
-* Cleanup the ABI by using the visibility attribute.
-* Many compilers warning fixes.
-* Support binding of entire multithreaded process on Linux.
-* Relaxed constraints in hwloc_obj_type_of_string().
-* Add documentation about how to switch from PLPA to hwloc.
-* Add project embedding support.
-* Add 0x prefix to cpuset strings.
+* The ABI of the library has changed.
+* Backend updates
+  + Add FreeBSD support.
+  + Add x86 cpuid based backend.
+  + Add Linux cgroup support to the Linux cpuset code.
+  + Support binding of entire multithreaded process on Linux.
+  + Cleanup XML export/import.
+* Objects
+  + Rework memory attributes.
+  + Add different cpusets in each object to specify processors that
+    are offline, unavailable, ...
+  + Cleanup the storage of object names and DMI infos.
+* Features
+  + Add support for looking up specific PID topology information.
+  + Add hwloc_topology_export_xml() to export the topology in a XML file.
+  + Add hwloc_topology_get_support() to retrieve the supported features
+    for the current topology context.
+  + Support non-SYSTEM object as the root of the tree, use MACHINE in
+    most common cases.
+  + Add hwloc_get_*cpubind() routines to retrieve the current binding
+    of processes and threads.
+* API
+  + Add missing ending "e" to *compare* functions.
+  + Add several routines to emulate PLPA functions.
+  + Deprecate hwloc_obj_snprintf() in favor of hwloc_obj_type/attr_snprintf().
+  + Clarify the use of parent and ancestor in the API, do not use father.
+  + Replace hwloc_get_system_obj() with hwloc_get_root_obj().
+  + Return -1 instead of HWLOC_OBJ_TYPE_MAX in the API since the latter
+    isn't public.
+  + Relax constraints in hwloc_obj_type_of_string().
+  + Improve displaying of memory sizes.
+  + Add 0x prefix to cpuset strings.
+* Tools
+  + lstopo now displays logical indexes by default, use --physical to
+    revert back to OS/physical indexes.
+  + Add colors in the lstopo graphical outputs to distinguish between online,
+    offline, reserved, ... objects.
+  + Extend lstopo to show cpusets, filter objects by type, ...
+* Documentation
+  + Add a hwloc(7) manpage containing general information.
+  + Add documentation about how to switch from PLPA to hwloc.
+  + Cleanup the distributed documentation files.
+* Miscellaneous
+  + Many compilers warning fixes.
+  + Cleanup the ABI by using the visibility attribute.
+  + Add project embedding support.
 
 
 Version 0.9.4 (unreleased)
