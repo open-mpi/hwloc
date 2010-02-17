@@ -24,7 +24,7 @@ Version 1.0.0
 * Add hwloc_topology_export_xml() to export the topology in a XML file.
 * Add hwloc_topology_get_support() to retrieve the supported features
   for the current topologt context.
-* Add hwloc_set_*cpubind() routines to retrieve the current binding
+* Add hwloc_get_*cpubind() routines to retrieve the current binding
   of processes and threads.
   + Only implemented for Linux so far.
 * Add hwloc_topology_get_offline_cpuset() to retrieve the list of
@@ -36,6 +36,32 @@ Version 1.0.0
 * lstopo now displays logical indexes by default, use --physical to
   revert back to OS/physical indexes.
 * Add FreeBSD support.
+* Add support for looking up specific PID topology information.
+* Rework memory attributes.
+* Add different cpusets in each object to specify processors that
+  are offline, unavailable, ...
+* Extend lstopo to show cpusets, filter objects by type, ...
+* Support non-SYSTEM object as the root of the tree.
+* Add x86 cpuid based backend.
+* Deprecate hwloc_obj_snprintf in favor of hwloc_obj_type/attr_snprintf
+* Clarify the use of parent and ancestor in the API, do not use father anymore.
+* Cleanup the storage of object names and DMI infos.
+* Replace get_system_obj with get_root_obj
+* Add a hwloc(7) manpage documentation containing general information.
+* Add colors in the lstopo graphical outputs to distinguish between online,
+  offline, reserved, ... objects.
+* Cleanup the distributed documentation files.
+* Return -1 instead of HWLOC_OBJ_TYPE_MAX in the API since the latter
+  isn't public.
+* Improve displaying of memory sizes.
+* Cleanup XML export/import.
+* Cleanup the ABI by using the visibility attribute.
+* Many compilers warning fixes.
+* Support binding of entire multithreaded process on Linux.
+* Relaxed constraints in hwloc_obj_type_of_string().
+* Add documentation about how to switch from PLPA to hwloc.
+* Add project embedding support.
+* Add 0x prefix to cpuset strings.
 
 
 Version 0.9.4 (unreleased)
