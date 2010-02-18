@@ -409,9 +409,12 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
 
 </dl>
 
-The following diagram can help to understand the vocabulary of the
-relationships by showing the example of a machine with two dual core
-sockets (with no hardware threads); thus, a topology with 4 levels.
+The following diagram can help to understand the vocabulary of the relationships
+by showing the example of a machine with two dual core sockets (with no
+hardware threads); thus, a topology with 4 levels. Each box with rounded corner
+corresponds to one hwloc_obj_t, containing the values of the different integer
+fields (depth, logical_index, etc.), and arrows show to which other hwloc_obj_t
+pointers point to (first_child, parent, etc.)
 
 \image html diagram.png
 \image latex diagram.eps width=\textwidth
