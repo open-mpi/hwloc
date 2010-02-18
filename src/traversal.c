@@ -200,20 +200,20 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 
   if (verbose) {
     if (obj->memory.local_memory)
-      snprintf(memory, sizeof(memory), "local=%llu%s%stotal=%llu%s",
-	       hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+      snprintf(memory, sizeof(memory), "local=%lu%s%stotal=%lu%s",
+               (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
 	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose),
 	       separator,
-	       hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
+	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
 	       hwloc_memory_size_printf_unit(obj->memory.local_memory, verbose));
     else if (obj->memory.total_memory)
-      snprintf(memory, sizeof(memory), "total=%llu%s",
-	       hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+      snprintf(memory, sizeof(memory), "total=%lu%s",
+	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
 	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
   } else {
     if (obj->memory.total_memory)
-      snprintf(memory, sizeof(memory), "%llu%s",
-	       hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+      snprintf(memory, sizeof(memory), "%lu%s",
+	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
 	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
   }
 
@@ -228,8 +228,8 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     else
       return hwloc_snprintf(string, size, "%s", memory);
   case HWLOC_OBJ_CACHE:
-    return hwloc_snprintf(string, size, "%llu%s",
-			  hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
+    return hwloc_snprintf(string, size, "%lu%s",
+			  (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
 			  hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
   default:
     return hwloc_snprintf(string, size, "%s", memory);
