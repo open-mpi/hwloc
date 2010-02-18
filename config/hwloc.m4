@@ -681,6 +681,8 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
     # don't have all of them, refuse the build the docs.
     AC_ARG_VAR([DOXYGEN], [Location of the doxygen program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([DOXYGEN], [doxygen])
+    DOXYGEN_VERSION=`doxygen --version 2> /dev/null`
+    AM_CONDITIONAL([HWLOC_DOXYGEN_BROKEN_SHORT_NAMES], [test "$DOXYGEN_VERSION" = "1.6.2"])
     
     AC_ARG_VAR([PDFLATEX], [Location of the pdflatex program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([PDFLATEX], [pdflatex])

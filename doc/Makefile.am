@@ -122,6 +122,7 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	@mv $(man3_MANS) $(DOX_DIR)/man.tmp/
 	@rm -rf $(DOX_DIR)/man/man3
 	@mv $(DOX_DIR)/man.tmp $(DOX_DIR)/man/man3
+if HWLOC_DOXYGEN_BROKEN_SHORT_NAMES
 	@echo "Work-around buggy doxygen filenames..."
 	-@mv -f $(DOX_DIR)/html/termsanddefs.html $(DOX_DIR)/html/a00001.html
 	-@mv -f $(DOX_DIR)/latex/termsanddefs.tex $(DOX_DIR)/latex/a00001.tex
@@ -133,6 +134,7 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00004.tex
 	-@mv -f $(DOX_DIR)/html/switchfromplpa.html $(DOX_DIR)/html/a00005.html
 	-@mv -f $(DOX_DIR)/latex/switchfromplpa.tex $(DOX_DIR)/latex/a00005.tex
+endif
 endif
 
 #
