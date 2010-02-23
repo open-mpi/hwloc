@@ -39,6 +39,7 @@ Version 1.0.0
   + Add hwloc_get_*cpubind() routines to retrieve the current binding
     of processes and threads.
 * API
+  + Add HWLOC_API_VERSION to help detect the currently used API version.
   + Add missing ending "e" to *compare* functions.
   + Add several routines to emulate PLPA functions.
   + Deprecate hwloc_obj_snprintf() in favor of hwloc_obj_type/attr_snprintf().

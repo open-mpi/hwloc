@@ -32,6 +32,17 @@
 
 
 
+/** \defgroup hwlocality_api_version API version
+ * @{
+ */
+
+/** \brief Indicate at build time which hwloc API version is being used. */
+#define HWLOC_API_VERSION 0x00010000
+
+/** @} */
+
+
+
 /** \defgroup hwlocality_topology Topology context
  * @{
  */
