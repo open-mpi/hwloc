@@ -12,6 +12,12 @@ dnl Copyright © 2006-2009  Cisco Systems, Inc.  All rights reserved.
 
 #-----------------------------------------------------------------------
 
+# check that libtool 2 is available
+# cannot be inside a m4 function since it's a m4 check
+m4_ifdef([LT_PREREQ], [],
+	 [errprint([error: you must have Libtool 2.2.6 or a more recent version
+])])
+
 # Main hwloc m4 macro, to be invoked by the user
 #
 # Expects two or three paramters:
@@ -405,9 +411,6 @@ AC_DEFUN([HWLOC_INIT],[
     HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [:])
     
     # disable C++, F77, Java and Windows Resource Compiler support
-    m4_ifdef([LT_PREREQ], [],
-             [errprint([error: you must have Libtool 2.2.6 or a more recent version])
-    ])
     LT_PREREQ([2.2.6])
     LT_INIT
     LT_LANG([C])
