@@ -406,7 +406,8 @@ AC_DEFUN([HWLOC_INIT],[
     
     # disable C++, F77, Java and Windows Resource Compiler support
     m4_ifdef([LT_PREREQ], [],
-             [errprint([error: you must have Libtool 2.2.6 or a more recent version])])
+             [errprint([error: you must have Libtool 2.2.6 or a more recent version])
+    ])
     LT_PREREQ([2.2.6])
     LT_INIT
     LT_LANG([C])
