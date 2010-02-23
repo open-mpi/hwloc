@@ -12,12 +12,6 @@ dnl Copyright © 2006-2009  Cisco Systems, Inc.  All rights reserved.
 
 #-----------------------------------------------------------------------
 
-# check that libtool 2 is available
-# cannot be inside a m4 function since it's a m4 check
-m4_ifdef([LT_PREREQ], [],
-	 [errprint([error: you must have Libtool 2.2.6 or a more recent version
-])])
-
 # Main hwloc m4 macro, to be invoked by the user
 #
 # Expects two or three paramters:
