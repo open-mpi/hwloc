@@ -717,6 +717,59 @@ hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
   return set;
 }
 
+static void
+hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int fsroot_fd)
+{
+#define PROC_MOUNT_LINE_LEN 128
+  char line[PROC_MOUNT_LINE_LEN];
+  FILE *fd;
+
+  *cgroup_mntpnt = NULL;
+  *cpuset_mntpnt = NULL;
+
+  fd = hwloc_fopen("/proc/mounts", "r", fsroot_fd);
+  if (!fd)
+    return;
+
+  while (fgets(line, sizeof(line), fd)) {
+    char *path;
+    char *type;
+    char *tmp;
+
+    /* path is after first field and a space */
+    tmp = strchr(line, ' ');
+    if (!tmp)
+      continue;
+    path = tmp+1;
+
+    /* type is after path, which may contain escaped spaces */
+  retry:
+    tmp = strchr(tmp+1, ' ');
+    if (!tmp)
+      continue;
+    if (*(tmp-1) == '\\')
+      goto retry;
+    type = tmp+1;
+    /* mark the end of path to ease upcoming strdup */
+    *tmp = '\0';
+
+    if (!strncmp(type, "cpuset ", 7)) {
+      /* found a cpuset mntpnt */
+      hwloc_debug("Found cpuset mount point on %s\n", path);
+      *cpuset_mntpnt = strdup(path);
+      break;
+    } else if (!strncmp(type, "cgroup ", 7)
+	       /* found a cgroup mntpnt, look for a cpuset options after the path */
+	       && strstr(type+7, "cpuset")) {
+      hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
+      *cgroup_mntpnt = strdup(path);
+      break;
+    }
+  }
+
+  fclose(fd);
+}
+
 /*
  * Linux cpusets may be managed directly or through cgroup.
  * If cgroup is used, tasks get a /proc/pid/cgroup which may contain a
@@ -793,7 +846,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
  * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
  */
 static char *
-hwloc_read_linux_cpuset_mask(const char *cpuset_name, const char *attr_name, int fsroot_fd)
+hwloc_read_linux_cpuset_mask(const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name, const char *attr_name, int fsroot_fd)
 {
 #define CPUSET_FILENAME_LEN 256
   char cpuset_filename[CPUSET_FILENAME_LEN];
@@ -802,29 +855,21 @@ hwloc_read_linux_cpuset_mask(const char *cpuset_name, const char *attr_name, int
   ssize_t ssize;
   size_t size;
 
-  /* try to read the cpuset from cgroup */
-  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cgroup%s/cpuset.%s", cpuset_name, attr_name);
-  hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (fd)
-    goto gotfile;
-  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cgroup%s/cpuset.%s", cpuset_name, attr_name);
-  hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (fd)
-    goto gotfile;
-
-  /* try to read the cpuset directly */
-  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cpuset%s/%s", cpuset_name, attr_name);
-  hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (fd)
-    goto gotfile;
-  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cpusets%s/%s", cpuset_name, attr_name);
-  hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (fd)
-    goto gotfile;
+  if (cgroup_mntpnt) {
+    /* try to read the cpuset from cgroup */
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s", cgroup_mntpnt, cpuset_name, attr_name);
+    hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
+    fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
+    if (fd)
+      goto gotfile;
+  } else if (cpuset_mntpnt) {
+    /* try to read the cpuset directly */
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/%s", cpuset_mntpnt, cpuset_name, attr_name);
+    hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
+    fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
+    if (fd)
+      goto gotfile;
+  }
 
   /* found no cpuset description, ignore it */
   hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
@@ -848,7 +893,7 @@ out:
 
 static void
 hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
-				    const char *cpuset_name,
+				    const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name,
 				    const char *attr_name,
 				    hwloc_cpuset_t admin_enabled_cpus_set)
 {
@@ -856,7 +901,8 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
 
-  cpuset_mask = hwloc_read_linux_cpuset_mask(cpuset_name, attr_name, topology->backend_params.sysfs.root_fd);
+  cpuset_mask = hwloc_read_linux_cpuset_mask(cgroup_mntpnt, cpuset_mntpnt, cpuset_name,
+					     attr_name, topology->backend_params.sysfs.root_fd);
   if (!cpuset_mask)
     return;
 
@@ -1456,15 +1502,20 @@ hwloc_look_linux(struct hwloc_topology *topology)
 {
   DIR *nodes_dir;
   unsigned nbnodes;
-  char *cpuset_name;
+  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name;
   int err;
 
   /* Gather the list of admin-disabled cpus and mems */
-  cpuset_name = hwloc_read_linux_cpuset_name(topology->backend_params.sysfs.root_fd, topology->pid);
-  if (cpuset_name) {
-    hwloc_admin_disable_set_from_cpuset(topology, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
-    hwloc_admin_disable_set_from_cpuset(topology, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
-    free(cpuset_name);
+  hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, topology->backend_params.sysfs.root_fd);
+  if (cgroup_mntpnt || cpuset_mntpnt) {
+    cpuset_name = hwloc_read_linux_cpuset_name(topology->backend_params.sysfs.root_fd, topology->pid);
+    if (cpuset_name) {
+      hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
+      hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
+      free(cpuset_name);
+    }
+    free(cgroup_mntpnt);
+    free(cpuset_mntpnt);
   }
 
   nodes_dir = hwloc_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);
