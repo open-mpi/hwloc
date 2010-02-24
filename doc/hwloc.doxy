@@ -484,6 +484,8 @@ machine.
 The behavior of the hwloc library and tools may be tuned thanks to the
 following environment variables.
 
+<dl>
+
 <dt>HWLOC_XMLFILE=/path/to/file.xml</dt>
   <dd>enforces the discovery from the given XML file as if
   hwloc_topology_set_xml() had been called.
@@ -517,6 +519,9 @@ following environment variables.
   This can be used for efficiency reasons to first detect the topology once,
   save it to an XML file, and quickly reload it later through the XML
   backend, but still having binding functions actually do bind.
+  </dd>
+
+</dl>
 
 
 
