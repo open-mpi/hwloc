@@ -1368,7 +1368,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 #endif
 #ifdef HAVE_XML
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
-    char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
+    char *xmlpath_env = getenv("HWLOC_XMLFILE");
     if (xmlpath_env)
       hwloc_backend_xml_init(topology, xmlpath_env);
   }
