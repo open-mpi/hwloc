@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topology SYSTEM "hwloc.dtd">
 <topology>
-  <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" online_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff">
-    <page_type size="4096" count="0"/>
+  <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" online_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff" allowed_nodeset="0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff,0xffffffff">
     <object type="Socket" os_level="-1" os_index="0" cpuset="0x00001111" complete_cpuset="0x00001111" online_cpuset="0x00001111" allowed_cpuset="0x00001111">
       <object type="Cache" os_level="-1" cpuset="0x00001111" complete_cpuset="0x00001111" online_cpuset="0x00001111" allowed_cpuset="0x00001111" cache_size="4194304" depth="3">
         <object type="Cache" os_level="-1" cpuset="0x00000101" complete_cpuset="0x00000101" online_cpuset="0x00000101" allowed_cpuset="0x00000101" cache_size="1048576" depth="2">

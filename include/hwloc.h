@@ -32,6 +32,17 @@
 
 
 
+/** \defgroup hwlocality_api_version API version
+ * @{
+ */
+
+/** \brief Indicate at build time which hwloc API version is being used. */
+#define HWLOC_API_VERSION 0x00010000
+
+/** @} */
+
+
+
 /** \defgroup hwlocality_topology Topology context
  * @{
  */
@@ -481,6 +492,21 @@ HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned
  * file is really the underlying system.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict fsroot_path);
+
+/** \brief Change which pid the topology is viewed from
+ *
+ * On some systems, processes may have different views of the machine, for
+ * instance the set of allowed CPUs. By default, hwloc exposes the view from
+ * the current process. Calling hwloc_topology_set_pid() permits to make it
+ * expose the topology of the machine from the point of view of another
+ * process.
+ *
+ * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
+ * platforms
+ * \note The ENOSYS error is returned on platforms that does not support this
+ * feature.
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topology, hwloc_pid_t pid);
 
 /** \brief Enable synthetic topology.
  *

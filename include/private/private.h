@@ -56,6 +56,7 @@ struct hwloc_topology {
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
   int is_thissystem;
   int is_loaded;
+  hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
 
   struct hwloc_obj *first_pcidev, *last_pcidev;
 

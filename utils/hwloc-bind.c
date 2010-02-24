@@ -22,6 +22,7 @@ static void usage(FILE *where)
   fprintf(where, "  --single\tbind on a single CPU to prevent migration\n");
   fprintf(where, "  --strict\trequire strict binding\n");
   fprintf(where, "  --get\t\tretrieve current process binding\n");
+  fprintf(where, "  --pid <pid>\toperate on process <pid>\n");
   fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
 }
@@ -37,7 +38,9 @@ int main(int argc, char *argv[])
   int verbose = 0;
   int logical = 1;
   int flags = 0;
+  int opt;
   int ret;
+  hwloc_pid_t pid = 0;
   char **orig_argv = argv;
 
   cpu_set = hwloc_cpuset_alloc();
@@ -57,6 +60,8 @@ int main(int argc, char *argv[])
       break;
     }
 
+    opt = 0;
+
     if (*argv[0] == '-') {
       if (!strcmp(argv[0], "-v")) {
 	verbose = 1;
@@ -73,6 +78,15 @@ int main(int argc, char *argv[])
       else if (!strcmp(argv[0], "--strict")) {
 	flags |= HWLOC_CPUBIND_STRICT;
 	goto next;
+      }
+      else if (!strcmp(argv[0], "--pid")) {
+        if (argc < 2) {
+          usage (stderr);
+          exit(EXIT_FAILURE);
+        }
+        pid = atoi(argv[1]);
+        opt = 1;
+        goto next;
       }
       else if (!strcmp (argv[0], "--version")) {
           printf("%s %s\n", orig_argv[0], VERSION);
@@ -106,14 +120,17 @@ int main(int argc, char *argv[])
     bind_cpus = 1;
 
   next:
-    argc--;
-    argv++;
+    argc -= opt+1;
+    argv += opt+1;
   }
 
   if (get_binding) {
     char *s;
     hwloc_cpuset_free(cpu_set);
-    cpu_set = hwloc_get_cpubind(topology, 0);
+    if (pid)
+      cpu_set = hwloc_get_proc_cpubind(topology, pid, 0);
+    else
+      cpu_set = hwloc_get_cpubind(topology, 0);
     if (!cpu_set) {
       const char *errmsg = strerror(errno);
       fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
@@ -133,7 +150,10 @@ int main(int argc, char *argv[])
     }
     if (single)
       hwloc_cpuset_singlify(cpu_set);
-    ret = hwloc_set_cpubind(topology, cpu_set, flags);
+    if (pid)
+      ret = hwloc_set_proc_cpubind(topology, pid, cpu_set, flags);
+    else
+      ret = hwloc_set_cpubind(topology, cpu_set, flags);
     if (ret) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
@@ -146,6 +166,9 @@ int main(int argc, char *argv[])
   hwloc_cpuset_free(cpu_set);
 
   hwloc_topology_destroy(topology);
+
+  if (pid)
+    return EXIT_SUCCESS;
 
   if (0 == argc) {
     fprintf(stderr, "%s: nothing to do!\n", orig_argv[0]);

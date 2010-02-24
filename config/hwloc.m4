@@ -431,8 +431,6 @@ AC_DEFUN([HWLOC_INIT],[
     HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [:])
     
     # disable C++, F77, Java and Windows Resource Compiler support
-    m4_ifdef([LT_PREREQ], [],
-             [errprint([error: you must have Libtool 2.2.6 or a more recent version])])
     LT_PREREQ([2.2.6])
     LT_INIT
     LT_LANG([C])
@@ -707,6 +705,8 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
     # don't have all of them, refuse the build the docs.
     AC_ARG_VAR([DOXYGEN], [Location of the doxygen program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([DOXYGEN], [doxygen])
+    DOXYGEN_VERSION=`doxygen --version 2> /dev/null`
+    AM_CONDITIONAL([HWLOC_DOXYGEN_BROKEN_SHORT_NAMES], [test "$DOXYGEN_VERSION" = "1.6.2"])
     
     AC_ARG_VAR([PDFLATEX], [Location of the pdflatex program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([PDFLATEX], [pdflatex])
