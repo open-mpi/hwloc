@@ -1330,9 +1330,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned numprocs=0;
   unsigned numsockets=0;
   unsigned numcores=0;
-  long physid;
-  long coreid;
-  long processor = -1;
+  unsigned long physid;
+  unsigned long coreid;
+  unsigned long processor = -1;
   unsigned i;
   hwloc_cpuset_t cpuset;
   hwloc_obj_t obj;
@@ -1369,13 +1369,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
-	else if (var==LONG_MIN)						\
-	  {								\
-            hwloc_debug("%s", "too small "field" number in /proc/cpuinfo\n"); \
-            hwloc_cpuset_free(cpuset);					\
-            return -1;							\
-	  }								\
-	else if (var==LONG_MAX)						\
+	else if (var==ULONG_MAX)						\
 	  {								\
             hwloc_debug("%s", "too big "field" number in /proc/cpuinfo\n"); \
             hwloc_cpuset_free(cpuset);					\
