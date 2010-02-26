@@ -1,6 +1,4 @@
-# -*- shell-script -*-
-#
-# Copied from open-mpi:
+# This macro set originally copied from Open MPI:
 # Copyright (c) 2004-2007 The Trustees of Indiana University and Indiana
 #                         University Research and Technology
 #                         Corporation.  All rights reserved.
@@ -13,6 +11,7 @@
 #                         All rights reserved.
 # and renamed for hwloc:
 # Copyright (c) 2009 INRIA, Université Bordeaux 1
+# Copyright (c) 2010 Cisco Systems, Inc.  All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -70,7 +69,10 @@ AC_DEFUN([_HWLOC_ATTRIBUTE_FAIL_SEARCH],[
 ])
 
 #
-# Check for one specific attribute by compiling with C and C++
+# HWLOC: Remove C++ compiler check.  It can result in a circular
+# dependency in embedded situations.
+#
+# Check for one specific attribute by compiling with C
 # and possibly using a cross-check.
 #
 # If the cross-check is defined, a static function "usage" should be
@@ -86,7 +88,7 @@ AC_DEFUN([_HWLOC_CHECK_SPECIFIC_ATTRIBUTE], [
     AC_MSG_CHECKING([for __attribute__([$1])])
     AC_CACHE_VAL(hwloc_cv___attribute__[$1], [
         #
-        # Try to compile using the C compiler, then C++
+        # Try to compile using the C compiler
         #
         AC_TRY_COMPILE([$2],[],
                        [
@@ -99,18 +101,6 @@ AC_DEFUN([_HWLOC_CHECK_SPECIFIC_ATTRIBUTE], [
                         _HWLOC_ATTRIBUTE_FAIL_SEARCH([$1])
                        ],
                        [hwloc_cv___attribute__[$1]=0])
-        if test "$hwloc_cv___attribute__[$1]" = "1" ; then
-            AC_LANG_PUSH(C++)
-            AC_TRY_COMPILE([
-                           extern "C" {
-                           $2
-                           }],[],
-                           [
-                            hwloc_cv___attribute__[$1]=1
-                            _HWLOC_ATTRIBUTE_FAIL_SEARCH([$1])
-                           ],[hwloc_cv___attribute__[$1]=0])
-            AC_LANG_POP(C++)
-        fi
         
         #
         # If the attribute is supported by both compilers,
@@ -534,3 +524,4 @@ AC_DEFUN([_HWLOC_CHECK_ATTRIBUTES], [
   AC_DEFINE_UNQUOTED(HWLOC_HAVE_ATTRIBUTE_WEAK_ALIAS, [$hwloc_cv___attribute__weak_alias],
                      [Whether your compiler has __attribute__ weak alias or not])
 ])
+
