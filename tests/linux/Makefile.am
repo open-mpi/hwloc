@@ -70,9 +70,7 @@ if HWLOC_HAVE_LINUX
 if HWLOC_HAVE_OPENAT
 TESTS = $(sysfs_tarballs)
 endif HWLOC_HAVE_OPENAT
-else !HWLOC_HAVE_LINUX
-TESTS =
-endif !HWLOC_HAVE_LINUX
+endif HWLOC_HAVE_LINUX
 
 EXTRA_DIST = $(sysfs_tarballs) $(sysfs_outputs)
 
