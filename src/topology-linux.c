@@ -94,11 +94,7 @@
 #endif
 
 #ifdef HAVE_OPENAT
-
-/* Use our own filesystem functions.  */
-#define hwloc_fopen(p, m, d)   hwloc_fopenat(p, m, d)
-#define hwloc_access(p, m, d)  hwloc_accessat(p, m, d)
-#define hwloc_opendir(p, d)    hwloc_opendirat(p, d)
+/* Use our own filesystem functions if we have openat */
 
 static FILE *
 hwloc_fopenat(const char *path, const char *mode, int fsroot_fd)
@@ -157,13 +153,43 @@ hwloc_opendirat(const char *path, int fsroot_fd)
   return fdopendir(dir_fd);
 }
 
-#else /* !HAVE_OPENAT */
+#endif /* HAVE_OPENAT */
 
-#define hwloc_fopen(p, m, d)   fopen(p, m)
-#define hwloc_access(p, m, d)  access(p, m)
-#define hwloc_opendir(p, d)    opendir(p)
+/* Static inline version of fopen so that we can use openat if we have
+   it, but still preserve compiler parameter checking */
+static inline FILE *
+hwloc_fopen(const char *p, const char *m, int d __hwloc_attribute_unused)
+{ 
+#ifdef HAVE_OPENAT
+    return hwloc_fopenat(p, m, d);
+#else
+    return fopen(p, m); 
+#endif
+}
 
-#endif /* !HAVE_OPENAT */
+/* Static inline version of access so that we can use openat if we have
+   it, but still preserve compiler parameter checking */
+static inline int 
+hwloc_access(const char *p, int m, int d __hwloc_attribute_unused)
+{ 
+#ifdef HAVE_OPENAT
+    return hwloc_accessat(p, m, d);
+#else
+    return access(p, m); 
+#endif
+}
+
+/* Static inline version of opendir so that we can use openat if we have
+   it, but still preserve compiler parameter checking */
+static inline DIR *
+hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
+{ 
+#ifdef HAVE_OPENAT
+    return hwloc_opendir(p, d);
+#else
+    return opendir(p); 
+#endif
+}
 
 int
 hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_const_cpuset_t hwloc_set)
@@ -593,7 +619,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
 int
-hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path)
+hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path __hwloc_attribute_unused)
 {
 #ifdef HAVE_OPENAT
   int root;
