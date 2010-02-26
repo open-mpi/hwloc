@@ -19,6 +19,7 @@ Version 0.9.4 (unreleased)
 
 * Fix reseting colors to normal in lstopo -.txt output.
 * Fix Linux pthread_t binding error report.
+* Fix support for Linux kernels with CONFIG_NR_CPUS not a multiple of 32.
 
 
 Version 0.9.3

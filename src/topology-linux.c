@@ -292,8 +292,8 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 hwloc_cpuset_t
 hwloc_linux_parse_cpumap_file(FILE *file)
 {
-  char string[KERNEL_CPU_MAP_LEN]; /* enough for a shared map mask (32bits hexa) */
   unsigned long maps[MAX_KERNEL_CPU_MASK];
+  unsigned long map;
   hwloc_cpuset_t set;
   int nr_maps = 0;
 
@@ -303,12 +303,10 @@ hwloc_linux_parse_cpumap_file(FILE *file)
   set = hwloc_cpuset_alloc();
 
   /* parse the whole mask */
-  while (fgets(string, KERNEL_CPU_MAP_LEN, file) && *string != '\0') /* read one kernel cpu mask and the ending comma */
+  while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
     {
-      unsigned long map;
       assert(!(nr_maps == MAX_KERNEL_CPU_MASK)); /* too many cpumasks in this cpumap */
 
-      map = strtoul(string, NULL, 16);
       if (!map && !nr_maps)
 	/* ignore the first map if it's empty */
 	continue;
