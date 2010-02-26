@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -1665,7 +1665,8 @@ hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_pa
 }
 
 int
-hwloc_topology_set_pid(struct hwloc_topology *topology, hwloc_pid_t pid)
+hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
+                       hwloc_pid_t pid __hwloc_attribute_unused)
 {
 #ifdef HWLOC_LINUX_SYS
   topology->pid = pid;
