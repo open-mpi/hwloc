@@ -545,6 +545,21 @@ AC_DEFUN([HWLOC_INIT],[
     # Setup all the AM_CONDITIONALs
     HWLOC_DO_AM_CONDITIONALS
 
+    # It would be nice to m4 foreach this somehow, but whenever I
+    # tried it, I got obscure "invalid tag" errors from
+    # AC_CONFIG_LINKS.  :-\
+    AC_CONFIG_LINKS(
+        hwloc_config_prefix[tests/ports/topology.c]:hwloc_config_prefix[src/topology.c]
+	hwloc_config_prefix[tests/ports/traversal.c]:hwloc_config_prefix[src/traversal.c]
+	hwloc_config_prefix[tests/ports/topology-synthetic.c]:hwloc_config_prefix[src/topology-synthetic.c]
+	hwloc_config_prefix[tests/ports/topology-solaris.c]:hwloc_config_prefix[src/topology-solaris.c]
+	hwloc_config_prefix[tests/ports/topology-aix.c]:hwloc_config_prefix[src/topology-aix.c]
+	hwloc_config_prefix[tests/ports/topology-osf.c]:hwloc_config_prefix[src/topology-osf.c]
+	hwloc_config_prefix[tests/ports/topology-windows.c]:hwloc_config_prefix[src/topology-windows.c]
+	hwloc_config_prefix[tests/ports/topology-darwin.c]:hwloc_config_prefix[src/topology-darwin.c]
+	hwloc_config_prefix[tests/ports/topology-freebsd.c]:hwloc_config_prefix[src/topology-freebsd.c]
+	hwloc_config_prefix[tests/ports/topology-hpux.c]:hwloc_config_prefix[src/topology-hpux.c])
+
     # JMS do we really need all of these if we're embedded?
     AC_CONFIG_FILES(
         hwloc_config_prefix[hwloc.pc]

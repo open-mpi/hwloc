@@ -11,10 +11,13 @@ if HWLOC_HAVE_LINUX
 check_LTLIBRARIES = libhwloc-ports.la
 endif
 
-# Because embedded projects may use the Automake "subdir-object"
-# option, we have to sym link other hwloc sources here rather than
-# just using the sources elsewhere in the tree.
-SYMLINKED_SOURCES = \
+# Note that AC_CONFIG_LINKS sets up the sym links for the files in
+# this directory (back to the $top_srcdir/src directory).  So if you
+# need more sym-linked files in here, go edit configure.ac.  Note that
+# we have to use sym links in here rather than just directly
+# referencing the files via $HWLOC_top_srcdir/src/foo.c because of
+# dependencies issues when using the Automake option "subdir-objects".
+libhwloc_ports_la_SOURCES = \
         topology.c \
         traversal.c \
         topology-synthetic.c \
@@ -24,23 +27,7 @@ SYMLINKED_SOURCES = \
         topology-windows.c \
         topology-darwin.c \
         topology-freebsd.c \
-        topology-hpux.c
-
-$(SYMLINKED_SOURCES):
-	if test ! -r $@ ; then \
-	    $(LN_S) $(SRC)/$@ $(HWLOC_top_srcdir)/tests/ports/$@; \
-	fi
-
-clean-local:
-	for file in $(SYMLINKED_SOURCES); do \
-	    if -f $(HWLOC_top_srcdir)/tests/ports/$$file; then \
-	        rm -f $(HWLOC_top_srcdir)/tests/ports/$$file; \
-	    fi; \
-	done
-
-nodist_libhwloc_ports_la_SOURCES = $(SYMLINKED_SOURCES)
-
-libhwloc_ports_la_SOURCES = \
+        topology-hpux.c \
         include/windows.h \
         include/kstat.h \
         include/sys/rset.h \
