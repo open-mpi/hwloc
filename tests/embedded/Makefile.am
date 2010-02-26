@@ -10,3 +10,5 @@ AM_CPPFLAGS = $(HWLOC_EMBEDDED_CPPFLAGS)
 
 main_SOURCES = main.c
 main_LDADD = $(HWLOC_EMBEDDED_LDADD)
+
+EXTRA_DIST = run-embedded-tests.sh
