@@ -512,6 +512,14 @@ AC_DEFUN([HWLOC_INIT],[
     HWLOC_LDFLAGS='-L$(top_builddir)/'hwloc_config_prefix'src'
     AC_SUBST(HWLOC_LDFLAGS)
 
+    # Set these values explicitly for embedded builds.  Exporting
+    # these values through *_EMBEDDED_* values gives us the freedom to
+    # do something different someday if we ever need to.
+    HWLOC_EMBEDDED_CPPFLAGS=$HWLOC_CPPFLAGS
+    AC_SUBST(HWLOC_EMBEDDED_CPPFLAGS)
+    HWLOC_EMBEDDED_LDADD='$(HWLOC_top_builddir)/src/libhwloc_embedded.la'
+    AC_SUBST(HWLOC_EMBEDDED_LDADD)
+
     # Try to compile the cpuid inlines
     AC_MSG_CHECKING([for cpuid])
     old_CPPFLAGS="$CPPFLAGS"
