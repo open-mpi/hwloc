@@ -92,8 +92,8 @@
 #define HWLOC_TYPE_DEPTH_MULTIPLE HWLOC_NAME_CAPS(TYPE_DEPTH_MULTIPLE)
 
 #define hwloc_get_depth_type HWLOC_NAME(get_type_depth)
-#define hwloc_get_nobjs_by_depth HWLOC_NAME(get_nobjs_by_depth)
-#define hwloc_get_nobjs_by_type HWLOC_NAME(get_nobjs_by_type)
+#define hwloc_get_nbobjs_by_depth HWLOC_NAME(get_nbobjs_by_depth)
+#define hwloc_get_nbobjs_by_type HWLOC_NAME(get_nbobjs_by_type)
 
 #define hwloc_topology_is_thissystem HWLOC_NAME(topology_is_thissystem)
 #define hwloc_topology_get_complete_cpuset HWLOC_NAME(topology_get_complete_cpuset)
