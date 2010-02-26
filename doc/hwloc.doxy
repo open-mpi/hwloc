@@ -97,7 +97,7 @@ shell$ cd hwloc-trunk
 shell$ ./autogen.sh
 \endcode
 
-Note that GNU Autoconf >=2.60, Automake >=1.10 and Libtool >=2.2.6 are
+Note that GNU Autoconf >=2.63, Automake >=1.10 and Libtool >=2.2.6 are
 required when building from a Subversion checkout.
 
 Installation by itself is the fairly common GNU-based process:
@@ -560,8 +560,8 @@ If your project uses recent versions Autoconf, Automake, and Libtool
 to build, you can use hwloc's embedded m4 capabilities.  We have
 tested the embedded m4 with projects that use Autoconf 2.65, Automake
 1.11.1, and Libtool 2.2.6b.  Slightly earlier versions of may also
-work but are untested.  Autoconf versions prior to 2.60 are almost
-certain to not work because hwloc uses macros introduced in 2.60.
+work but are untested.  Autoconf versions prior to 2.63 are almost
+certain to not work because hwloc uses macros introduced in 2.63.
 
 You can either copy all the config/hwloc*m4 files from the hwloc
 source tree to the directory where your project's m4 files reside, or
