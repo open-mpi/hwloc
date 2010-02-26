@@ -17,7 +17,8 @@ endif
 # we have to use sym links in here rather than just directly
 # referencing the files via $HWLOC_top_srcdir/src/foo.c because of
 # dependencies issues when using the Automake option "subdir-objects".
-libhwloc_ports_la_SOURCES = \
+# We nodist these because they're created by configure.
+nodist_libhwloc_ports_la_SOURCES = \
         topology.c \
         traversal.c \
         topology-synthetic.c \
@@ -27,7 +28,9 @@ libhwloc_ports_la_SOURCES = \
         topology-windows.c \
         topology-darwin.c \
         topology-freebsd.c \
-        topology-hpux.c \
+        topology-hpux.c
+
+libhwloc_ports_la_SOURCES = \
         include/windows.h \
         include/kstat.h \
         include/sys/rset.h \
