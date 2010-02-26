@@ -556,13 +556,18 @@ Every project is different, and there are many different ways of
 integrating hwloc into yours.  What follows is <em>one</em> example of
 how to do it.
 
-If your project uses Autoconf, Automake, and Libtool to build, you can
-use hwloc's embedded m4 capabilities.  You can either copy all the
-config/hwloc*m4 files from the hwloc source tree to the directory
-where your project's m4 files reside, or you can tell aclocal to find
-more m4 files in the embedded hwloc's "config" subdirectory (e.g., add
-"-Ipath/to/embedded/hwloc/config" to your Makefile.am's
-ACLOCAL_AMFLAGS).
+If your project uses recent versions Autoconf, Automake, and Libtool
+to build, you can use hwloc's embedded m4 capabilities.  We have
+tested the embedded m4 with projects that use Autoconf 2.65, Automake
+1.11.1, and Libtool 2.2.6b.  Slightly earlier versions of may also
+work but are untested.  Autoconf versions prior to 2.60 are almost
+certain to not work because hwloc uses macros introduced in 2.60.
+
+You can either copy all the config/hwloc*m4 files from the hwloc
+source tree to the directory where your project's m4 files reside, or
+you can tell aclocal to find more m4 files in the embedded hwloc's
+"config" subdirectory (e.g., add "-Ipath/to/embedded/hwloc/config" to
+your Makefile.am's ACLOCAL_AMFLAGS).
 
 The following macros can then be used from your configure script (only
 HWLOC_INIT <em>must</em> be invoked if using the m4 macros):
@@ -602,6 +607,13 @@ HWLOC_INIT <em>must</em> be invoked if using the m4 macros):
   and AM_CONDITIONALs cannot be defined conditionally.  Note that it
   is safe (but unnecessary) to call HWLOC_DO_AM_CONDITIONALS even if
   HWLOC_INIT is invoked unconditionally.
+
+NOTE: When using the HWLOC_INIT m4 macro, it may be necessary to
+explicitly invoke AC_CANONICAL_TARGET and/or AC_USE_SYSTEM_EXTENSIONS
+macros early in the configure script (e.g., after AC_INIT but before
+AM_INIT_AUTOMAKE).  See the Autoconf documentation for further
+information.
+
 
 \section embedding_example Example embedding hwloc
 
