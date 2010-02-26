@@ -38,7 +38,15 @@ endif HWLOC_HAVE_LIBIBVERBS
 
 TESTS = $(check_PROGRAMS)
 
-LIBS = $(HWLOC_top_builddir)/src/libhwloc.la
+# The library has a different name depending on whether we are
+# building in standalone or embedded mode.
+if HWLOC_BUILD_STANDALONE
+hwloc_lib = libhwloc.la
+else
+hwloc_lib = libhwloc_embedded.la
+endif
+
+LIBS = $(HWLOC_top_builddir)/src/$(hwloc_lib)
 
 linux_libnuma_LDFLAGS = -lnuma
 openfabrics_verbs_LDFLAGS = -libverbs
