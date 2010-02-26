@@ -99,6 +99,7 @@ AM_PROG_CC_C_O
 CFLAGS="$CFLAGS_save"
 
 # Setup hwloc (taking all defaults)
+HWLOC_STANDALONE
 HWLOC_INIT([], [hwloc_setup=happy], [hwloc_setup=unhappy])
 AS_IF([test "$hwloc_setup" = "unhappy"],
       [AC_MSG_ERROR([Cannot continue])])
