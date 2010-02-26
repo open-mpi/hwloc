@@ -3,6 +3,7 @@
 
 #
 # Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+# Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
@@ -11,7 +12,7 @@
 
 abs_top_builddir="@abs_top_builddir@"
 abs_top_srcdir="@abs_top_srcdir@"
-lstopo="$abs_top_builddir/utils/lstopo"
+lstopo="$HWLOC_top_builddir/utils/lstopo"
 
 if [ ! -x "$lstopo" ]
 then
