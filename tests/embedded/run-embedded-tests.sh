@@ -19,8 +19,10 @@ fi
 #---------------------------------------------------------------------
 
 i=1
+last_print=
 print() {
-    echo === $i: $*
+    last_print="=== $i: $*"
+    echo $last_print
     i=`expr $i + 1`
 }
 
@@ -32,6 +34,7 @@ try() {
     status=$?
     if test "$status" != "0"; then
         echo "Command failed (status $status): $cmd"
+        echo "Last print was: $last_print"
         exit 1
     fi
 }
@@ -40,19 +43,19 @@ try() {
 
 do_build() {
     print Running $1 configure...
-    try $2/configure
+    try $2/configure 2>&1 | tee config.out
 
     print Running make
-    try make
+    try make 2>&1 | tee make.out
 
     print Running make check
-    try make check
+    try make check 2>&1 | tee check.out
 
     print Running make clean
-    try make clean
+    try make clean 2>&1 | tee clean.out
 
     print Running make distclean
-    try make distclean
+    try make distclean 2>&1 | tee distclean.out
 }
 
 #---------------------------------------------------------------------
