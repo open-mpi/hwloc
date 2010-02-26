@@ -1,5 +1,5 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
@@ -29,10 +29,13 @@ lstopo_LDADD = $(HWLOC_CAIRO_LIBS) $(HWLOC_XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $
 
 hwloc_mask_SOURCES = hwloc-mask.c hwloc-mask.h
 
-if HWLOC_HAVE_MINGW32
-else
+# Only run the tests if we're building standalone, because the tests
+# call hwloc executables.
+if HWLOC_BUILD_STANDALONE
+if !HWLOC_HAVE_MINGW32
 TESTS = test-hwloc-distrib.sh
-endif
+endif !HWLOC_HAVE_MINGW32
+endif HWLOC_BUILD_STANDALONE
 
 # Only install man pages if we're building in standalone mode
 if HWLOC_BUILD_STANDALONE
