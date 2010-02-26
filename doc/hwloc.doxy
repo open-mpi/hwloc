@@ -543,24 +543,26 @@ There are two ways to put hwloc into "embedded" mode.  From the
 configure command line:
 
 \verbatim
-shell$ ./configure --enable-included-mode ...
+shell$ ./configure --enable-embedded-mode ...
 \endverbatim
 
 Or by directly integrating hwloc's m4 configure macro in your
 configure script and invoking a specific macro to enable the embedded
-mode.
+mode (see below).
+
+\section embedding_m4 Using hwloc's m4 embedding capabilities
 
 Every project is different, and there are many different ways of
 integrating hwloc into yours.  What follows is <em>one</em> example of
 how to do it.
 
-Copy the hwloc directory in your source tree and include the hwloc.m4
-file in your configure script -- perhaps with the following line in
-acinclude.m4 (assuming the use of Automake):
-
-\verbatim
-m4_include(path/to/hwloc.m4)
-\endverbatim
+If your project uses Autoconf, Automake, and Libtool to build, you can
+use hwloc's embedded m4 capabilities.  You can either copy all the
+config/hwloc*m4 files from the hwloc source tree to the directory
+where your project's m4 files reside, or you can tell aclocal to find
+more m4 files in the embedded hwloc's "config" subdirectory (e.g., add
+"-Ipath/to/embedded/hwloc/config" to your Makefile.am's
+ACLOCAL_AMFLAGS).
 
 The following macros can then be used from your configure script (only
 HWLOC_INIT <em>must</em> be invoked if using the m4 macros):
@@ -601,34 +603,40 @@ HWLOC_INIT <em>must</em> be invoked if using the m4 macros):
   is safe (but unnecessary) to call HWLOC_DO_AM_CONDITIONALS even if
   HWLOC_INIT is invoked unconditionally.
 
-Here's an example of integrating with a larger project named sandbox:
+\section embedding_example Example embedding hwloc
+
+Here's an example of integrating with a larger project named sandbox
+that already uses Autoconf, Automake, and Libtool to build itself:
 
 \verbatim
+# First, cd into the sandbox project source tree
 shell$ cd sandbox
 shell$ cp -r /somewhere/else/hwloc-<version> my-embedded-hwloc
-shell$ echo 'm4_include(my-embedded-hwloc/config/hwloc.m4)' >> acinclude.m4
 shell$ edit Makefile.am
-...add "my-embedded-hwloc" to SUBDIRS...
-...add "$(top_builddir)/my-embedded-hwloc/src/libhwloc_included.la" to
-   sandbox's executable's LDADD line...
-...add "-I$(top_builddir)/my-embedded-hwloc/include" to AM_CPPFLAGS
+  1. Add "-Imy-embedded-hwloc/config" to ACLOCAL_AMFLAGS
+  2. Add "my-embedded-hwloc" to SUBDIRS
+  3. Add "$(HWLOC_EMBEDDED_LDADD)" to sandbox's executable's LDADD line
+  4. Add "$(HWLOC_EMBEDDED_CPPFLAGS)" to AM_CPPFLAGS
 shell$ edit configure.ac
-...add "HWLOC_SET_SYMBOL_PREFIX(sandbox_hwloc_)" line...
-...add "HWLOC_INIT([my-embedded-hwloc], [happy=yes], [happy=no])" line...
-...add error checking for happy=no case...
-shell$ edit src/my_program.c
-...add #include <hwloc.h>...
-...add calls to sandbox_hwloc_init()...
+  1. Add "HWLOC_SET_SYMBOL_PREFIX(sandbox_hwloc_)" line
+  2. Add "HWLOC_INIT([my-embedded-hwloc], [happy=yes], [happy=no])" line
+  3. Add error checking for happy=no case
+shell$ edit sandbox.c
+  1. Add #include <hwloc.h>
+  2. Add calls to sandbox_hwloc_init()
 \endverbatim
 
 Now you can bootstrap, configure, build, and run the sandbox as normal
 -- all calls to "sandbox_hwloc_*" will use the embedded hwloc rather
 than any system-provided copy of hwloc.
 
+For additional reference, there is a small test / example of a
+standalone Automake/Autoconf/Libtool-built project that embeds hwloc
+in tests/embedded.
 
 
 
-\page switchfromplpa How to switch from PLPA to hwloc?
+\page switchfromplpa Switching from PLPA to hwloc
 
 Although PLPA and hwloc share some of the same ideas, their
 programming interfaces are quite different.  After much debate, it was
