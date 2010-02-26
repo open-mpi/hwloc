@@ -1,6 +1,6 @@
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-ACLOCAL_AMFLAGS = -I ./config
+ACLOCAL_AMFLAGS = -I./config -I./hwloc-tree/config
 
 SUBDIRS = hwloc-tree
 
