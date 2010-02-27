@@ -642,10 +642,6 @@ Now you can bootstrap, configure, build, and run the sandbox as normal
 -- all calls to "sandbox_hwloc_*" will use the embedded hwloc rather
 than any system-provided copy of hwloc.
 
-For additional reference, there is a small test / example of a
-standalone Automake/Autoconf/Libtool-built project that embeds hwloc
-in tests/embedded.
-
 
 
 \page switchfromplpa Switching from PLPA to hwloc
