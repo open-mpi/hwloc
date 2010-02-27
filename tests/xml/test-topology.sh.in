@@ -12,7 +12,7 @@
 
 abs_top_builddir="@abs_top_builddir@"
 abs_top_srcdir="@abs_top_srcdir@"
-lstopo="$HWLOC_top_builddir/utils/lstopo"
+lstopo="@HWLOC_top_builddir@/utils/lstopo"
 
 if [ ! -x "$lstopo" ]
 then
