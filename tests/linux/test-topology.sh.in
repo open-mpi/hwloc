@@ -11,8 +11,8 @@
 # hierarchies available here.  Return true on success.
 
 
-abs_top_builddir="@abs_top_builddir@"
-lstopo="$abs_top_builddir/utils/lstopo"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+lstopo="$HWLOC_top_builddir/utils/lstopo"
 
 topology="$1"
 
