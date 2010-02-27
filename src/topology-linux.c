@@ -185,7 +185,7 @@ static inline DIR *
 hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 { 
 #ifdef HAVE_OPENAT
-    return hwloc_opendir(p, d);
+    return hwloc_opendirat(p, d);
 #else
     return opendir(p); 
 #endif
