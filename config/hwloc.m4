@@ -507,9 +507,9 @@ AC_DEFUN([HWLOC_INIT],[
     AC_SUBST(HWLOC_REQUIRES)
 
     # Setup HWLOC's CPP and LD flags
-    HWLOC_CPPFLAGS='-I$(top_srcdir)/'hwloc_config_prefix'include -I$(top_builddir)/'hwloc_config_prefix'include'
+    HWLOC_CPPFLAGS='-I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include'
     AC_SUBST(HWLOC_CPPFLAGS)
-    HWLOC_LDFLAGS='-L$(top_builddir)/'hwloc_config_prefix'src'
+    HWLOC_LDFLAGS='-L$(HWLOC_top_builddir)/src'
     AC_SUBST(HWLOC_LDFLAGS)
 
     # Set these values explicitly for embedded builds.  Exporting
