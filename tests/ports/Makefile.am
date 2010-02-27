@@ -47,6 +47,7 @@ libhwloc_ports_la_SOURCES = \
         include/pthread_np.h
 
 libhwloc_ports_la_CPPFLAGS = \
+        $(HWLOC_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/include \
         -I$(HWLOC_top_srcdir)/tests/ports/include \
         -DHWLOC_COMPILE_PORTS \
