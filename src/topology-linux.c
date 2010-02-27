@@ -1358,7 +1358,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned numcores=0;
   unsigned long physid;
   unsigned long coreid;
-  unsigned long processor = -1;
+  unsigned long processor = (unsigned long) -1;
   unsigned i;
   hwloc_cpuset_t cpuset;
   hwloc_obj_t obj;
@@ -1449,7 +1449,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     }
   fclose(fd);
 
-  if (processor == -1) {
+  if (processor == (unsigned long) -1) {
     hwloc_cpuset_free(cpuset);
     return -1;
   }
