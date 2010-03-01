@@ -653,7 +653,7 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
 
 /** \brief Stringify a given topology object into a human-readable form.
  *
- * /note this function is deprecated in favor of hwloc_obj_type_snprintf()
+ * \note This function is deprecated in favor of hwloc_obj_type_snprintf()
  * and hwloc_obj_attr_snprintf() since it is not very flexible and
  * only prints physical/OS indexes.
  *
