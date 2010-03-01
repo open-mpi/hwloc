@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -107,6 +107,8 @@
 #define hwloc_obj_type_string HWLOC_NAME(obj_type_string )
 #define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
 #define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
+#define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
+#define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
 
 #define HWLOC_CPUBIND_PROCESS HWLOC_NAME_CAPS(CPUBIND_PROCESS)
