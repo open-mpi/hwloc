@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -o pipefail
 #
 # Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
 #
@@ -44,18 +44,23 @@ try() {
 do_build() {
     print Running $1 configure...
     try $2/configure 2>&1 | tee config.out
+    if test "$?" != 0; then exit $?; fi
 
     print Running make
     try make 2>&1 | tee make.out
+    if test "$?" != 0; then exit $?; fi
 
     print Running make check
     try make check 2>&1 | tee check.out
+    if test "$?" != 0; then exit $?; fi
 
     print Running make clean
     try make clean 2>&1 | tee clean.out
+    if test "$?" != 0; then exit $?; fi
 
     print Running make distclean
     try make distclean 2>&1 | tee distclean.out
+    if test "$?" != 0; then exit $?; fi
 }
 
 #---------------------------------------------------------------------
