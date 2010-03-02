@@ -91,8 +91,8 @@
 #define HWLOC_TYPE_DEPTH_UNKNOWN HWLOC_NAME_CAPS(TYPE_DEPTH_UNKNOWN)
 #define HWLOC_TYPE_DEPTH_MULTIPLE HWLOC_NAME_CAPS(TYPE_DEPTH_MULTIPLE)
 
-#define hwloc_get_depth_type HWLOC_NAME(get_type_depth)
-#define hwloc_get_type_depth HWLOC_NAME(get_depth_type)
+#define hwloc_get_depth_type HWLOC_NAME(get_depth_type)
+#define hwloc_get_type_depth HWLOC_NAME(get_type_depth)
 #define hwloc_get_nbobjs_by_depth HWLOC_NAME(get_nbobjs_by_depth)
 #define hwloc_get_nbobjs_by_type HWLOC_NAME(get_nbobjs_by_type)
 
