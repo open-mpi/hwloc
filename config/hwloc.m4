@@ -44,7 +44,9 @@ AC_DEFUN([HWLOC_INIT],[
 
     # Get hwloc's absolute top srcdir (which may not be the same as
     # the real $top_srcdir, because we may be building in embedded
-    # mode).
+    # mode).  First, go back to the startdir incase the $srcdir is
+    # relative.
+    cd "$HWLOC_startdir"
     cd "$srcdir"/hwloc_config_prefix
     HWLOC_top_srcdir="`pwd`"
     AC_SUBST(HWLOC_top_srcdir)
@@ -64,6 +66,22 @@ AC_DEFUN([HWLOC_INIT],[
 
     # Debug mode?
     AC_MSG_CHECKING([if want hwloc maintainer support])
+    hwloc_debug=
+    AS_IF([test "$enable_debug" = "yes"],
+          [hwloc_debug=1
+           hwloc_debug_msg="enabled"])
+    AS_IF([test "$hwloc_debug" = "" -a "$hwloc_mode" = "embedded" -a "$enable_debug" = ""],
+          [hwloc_debug=0
+           hwloc_debug_msg="disabled (embedded mode)"])
+    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .svn],
+          [hwloc_debug=1
+           hwloc_debug_msg="enabled (SVN checkout default)"])
+    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .hg],
+          [hwloc_debug=1
+           hwloc_debug_msg="enabled (HG clone default)"])
+    AS_IF([test "$hwloc_debug" = ""],
+          [hwloc_debug=0
+           hwloc_debug_msg="disabled"])
     # Grr; we use #ifndef for HWLOC_DEBUG!  :-(
     AH_TEMPLATE(HWLOC_DEBUG, [Whether we are in debugging mode or not])
     AS_IF([test "$hwloc_debug" = "1"], [AC_DEFINE([HWLOC_DEBUG])])
@@ -82,15 +100,12 @@ AC_DEFUN([HWLOC_INIT],[
     AM_CONFIG_HEADER(hwloc_config_prefix[include/private/config.h])
     AM_CONFIG_HEADER(hwloc_config_prefix[include/hwloc/config.h])
 
-    # Give an easy #define to know if we need to transform all the
-    # hwloc names
-    AH_TEMPLATE([HWLOC_SYM_TRANSFORM], [Whether we need to re-define all the hwloc public symbols or not])
-    AS_IF([test "$hwloc_symbol_prefix_value" = "hwloc_"],
-          [AC_DEFINE([HWLOC_SYM_TRANSFORM], [0])],
-          [AC_DEFINE([HWLOC_SYM_TRANSFORM], [1])])
-
     # What prefix are we using?
     AC_MSG_CHECKING([for hwloc symbol prefix])
+    AS_IF([test "$hwloc_symbol_prefix_value" = ""],
+          [AS_IF([test "$with_hwloc_symbol_prefix" = ""],
+                 [hwloc_symbol_prefix_value=hwloc_],
+                 [hwloc_symbol_prefix_value=$with_hwloc_symbol_prefix])])
     AC_DEFINE_UNQUOTED(HWLOC_SYM_PREFIX, [$hwloc_symbol_prefix_value],
                        [The hwloc symbol prefix])
     # Ensure to [] escape the whole next line so that we can get the
@@ -99,6 +114,13 @@ AC_DEFUN([HWLOC_INIT],[
     AC_DEFINE_UNQUOTED(HWLOC_SYM_PREFIX_CAPS, [$hwloc_symbol_prefix_value_caps],
                        [The hwloc symbol prefix in all caps])
     AC_MSG_RESULT([$hwloc_symbol_prefix_value])
+
+    # Give an easy #define to know if we need to transform all the
+    # hwloc names
+    AH_TEMPLATE([HWLOC_SYM_TRANSFORM], [Whether we need to re-define all the hwloc public symbols or not])
+    AS_IF([test "$hwloc_symbol_prefix_value" = "hwloc_"],
+          [AC_DEFINE([HWLOC_SYM_TRANSFORM], [0])],
+          [AC_DEFINE([HWLOC_SYM_TRANSFORM], [1])])
 
     #
     # Setup hwloc docs support if we're building standalone
@@ -369,12 +391,8 @@ AC_DEFUN([HWLOC_INIT],[
         AC_MSG_RESULT([yes]),
         AC_MSG_RESULT([no])
     )
-    
-    AC_ARG_ENABLE([cairo],
-      [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
-      [enable_cairo="$enableval"],
-      [enable_cairo="yes"])
-    
+
+    # Cairo support
     if test "x$enable_cairo" = "xyes"; then
       HWLOC_PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
       if test "x$enable_cairo" = "xyes"; then
@@ -398,11 +416,8 @@ AC_DEFUN([HWLOC_INIT],[
     if test "x$enable_cairo" = "xyes"; then
       AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
     fi
-    
-    AC_ARG_ENABLE([xml],
-      [AS_HELP_STRING([--disable-xml], [disable the XML back-end of `lstopo'])],
-      [enable_xml="$enableval"],
-      [enable_xml="yes"])
+
+    # XML support        
     
     if test "x$enable_xml" = "xyes"; then
       HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [:], [enable_xml="no"])
@@ -426,20 +441,7 @@ AC_DEFUN([HWLOC_INIT],[
     AC_LIBTOOL_WIN32_DLL
     AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
     AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
-    
-    AC_ARG_ENABLE([debug],
-      AS_HELP_STRING([--enable-debug], [enable debugging messages]),
-      [enable_debug="$enableval"],
-      [enable_debug="no"])
-    
-    AC_MSG_CHECKING([whether debug is enabled])
-    if test x$enable_debug = xyes; then
-      AC_DEFINE_UNQUOTED([HWLOC_DEBUG], [1], [Define to 1 to enable debug])
-      AC_MSG_RESULT([yes])
-    else
-      AC_MSG_RESULT([no])
-    fi
-    
+
     AC_PATH_PROG([BASH], [bash])
     
     AC_CHECK_FUNCS([ffs], [
@@ -641,29 +643,35 @@ AC_DEFUN([_HWLOC_DEFINE_ARGS],[
     AC_ARG_WITH([hwloc-symbol-prefix],
                 AC_HELP_STRING([--with-hwloc-symbol-prefix=STRING],
                                [STRING can be any valid C symbol name.  It will be prefixed to all public HWLOC symbols.  Default: "hwloc_"]))
-    if test "$with_hwloc_symbol_prefix" = ""; then
-        hwloc_symbol_prefix_value=hwloc_
-    else
-        hwloc_symbol_prefix_value=$with_hwloc_symbol_prefix
-    fi
 
     # Debug mode?
+    # If we're building in embedded mode, default to disabling debug.
+    AS_IF([test "$hwloc_mode" = "embedded"], [enable_debug=no])
     AC_ARG_ENABLE([debug],
-                    AC_HELP_STRING([--enable-debug],
-                                   [Using --enable-debug enables various maintainer-level debugging controls.  This option is not recomended for end users.]))
-    if test "$enable_debug" = "yes"; then
-        hwloc_debug=1
-        hwloc_debug_msg="enabled"
-    elif test "$enable_debug" = "" -a -d .svn; then
-        hwloc_debug=1
-        hwloc_debug_msg="enabled (SVN checkout default)"
-    elif test "$enable_debug" = "" -a -d .hg; then
-        hwloc_debug=1
-        hwloc_debug_msg="enabled (HG clone default)"
-    else
-        hwloc_debug=0
-        hwloc_debug_msg="disabled"
-    fi
+                  AC_HELP_STRING([--enable-debug],
+                                 [Using --enable-debug enables various hwloc maintainer-level debugging controls.  This option is not recomended for end users.]))
+
+    # If we're building in embedded mode, default to disabling the docs.
+    AS_IF([test "$hwloc_mode" = "embedded"], [enable_doxygen=no])
+    AC_ARG_ENABLE([doxygen],
+        [AC_HELP_STRING([--enable-doxygen],
+                        [enable support for building Doxygen documentation (note that this option is ONLY relevant in developer builds; Doxygen documentation is pre-built for tarball builds and this option is therefore ignored)])])
+
+    AC_ARG_ENABLE(picky,
+                  AC_HELP_STRING([--disable-picky],
+                                 [When in developer checkouts of hwloc and compiling with gcc, the default is to enable maximum compiler pickyness.  Using --disable-picky or --enable-picky overrides any default setting]))
+
+    # If we're building in embedded mode, default to disabling Cairo.
+    AS_IF([test "$hwloc_mode" = "embedded"], [enable_cairo=no])
+    AC_ARG_ENABLE([cairo],
+                  AS_HELP_STRING([--disable-cairo], 
+                                 [Disable the Cairo back-end of hwloc's lstopo command]))
+
+    # If we're building in embedded mode, default to disable XML.
+    AS_IF([test "$hwloc_mode" = "embedded"], [enable_xml=no])
+    AC_ARG_ENABLE([xml],
+                  AS_HELP_STRING([--disable-xml], 
+		                 [Disable the XML back-end of hwloc's lstopo command]))
 ])dnl
 
 #-----------------------------------------------------------------------
@@ -721,7 +729,7 @@ dnl included in the tarball.
 
 AC_DEFUN([_HWLOC_SETUP_DOCS],[
     AC_MSG_CHECKING([if this is a developer build])
-    AS_IF([test ! -d "$srcdir/.svn" -a ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
+    AS_IF([test "$hwloc_mode" = "embedded" -o ! -d "$srcdir/.svn" -a ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
           [AC_MSG_RESULT([no (doxygen generation is optional)])],
           [AC_MSG_RESULT([yes])])
     
@@ -764,9 +772,6 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
     
     # If any one of the above tools is missing, we will refuse to make dist.
     
-    AC_ARG_ENABLE([doxygen],
-        [AC_HELP_STRING([--enable-doxygen],
-                        [enable support for building Doxygen documentation (note that this option is ONLY relevant in developer builds; Doxygen documentation is pre-built for tarball builds and this option is therefore ignored)])])
     AC_MSG_CHECKING([if will build doxygen docs])
     AS_IF([test "x$hwloc_generate_doxs" = "xyes" -a "x$enable_doxygen" != "xno"],
           [], [hwloc_generate_doxs=no])
@@ -791,9 +796,6 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
     AS_IF([test "$GCC" = "yes"],
           [AS_IF([test -d "$srcdir/.svn" -o -d "$srcdir/.hg"],
                  [want_picky=1])])
-    AC_ARG_ENABLE(picky,
-                  AC_HELP_STRING([--disable-picky],
-                                 [When in developer checkouts of hwloc and compiling with gcc, the default is to enable maximum compiler pickyness.  Using --disable-picky or --enable-picky overrides any default setting]))
     if test "$enable_picky" = "yes"; then
         if test "$GCC" = "yes"; then
             AC_MSG_RESULT([yes])
