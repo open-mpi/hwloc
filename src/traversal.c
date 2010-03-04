@@ -222,11 +222,10 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   switch (obj->type) {
   case HWLOC_OBJ_MACHINE:
     if (verbose)
-      hwloc_snprintf(specific, sizeof(specific), "%s%s%s%s",
-		     obj->attr->machine.dmi_board_vendor?separator:"",
-		     obj->attr->machine.dmi_board_vendor?obj->attr->machine.dmi_board_vendor:"",
-		     obj->attr->machine.dmi_board_name?separator:"",
-		     obj->attr->machine.dmi_board_name?obj->attr->machine.dmi_board_name:"");
+      hwloc_snprintf(specific, sizeof(specific), "%s%s%s",
+		     obj->attr->machine.dmi_board_vendor ? obj->attr->machine.dmi_board_vendor : "",
+		     obj->attr->machine.dmi_board_vendor && obj->attr->machine.dmi_board_name ? separator : "",
+		     obj->attr->machine.dmi_board_name ? obj->attr->machine.dmi_board_name : "");
     break;
   case HWLOC_OBJ_CACHE:
     hwloc_snprintf(specific, sizeof(specific), "%lu%s",
