@@ -36,7 +36,7 @@ test_topology ()
     export HWLOC_FSROOT="$dir"
     export HWLOC_DEBUG_CHECK=1
 
-    opts="-p -v -"
+    opts="-v -"
     [ -r "$options" ] && opts=`cat $options`
 
     if ! "$lstopo" $opts > "$output"
