@@ -41,8 +41,7 @@
 static void
 output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
-  char type[32], attr[256];
-  int attrlen;
+  char type[32], attr[256], phys[32] = "";
   unsigned index = logical ? l->logical_index : l->os_index;
   if (show_cpuset < 2) {
     if (l->type != HWLOC_OBJ_PROC) {
@@ -52,9 +51,14 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
       fprintf(output, "P");
     if (l->depth != 0 && index != (unsigned)-1)
       fprintf(output, "#%u", index);
-    attrlen = hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
-    if (attrlen)
-      fprintf(output, "(%s)", attr);
+    if (logical && l->os_index != (unsigned) -1 &&
+	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PROC || l->type == HWLOC_OBJ_NODE))
+      snprintf(phys, sizeof(phys), "phys=%u", l->os_index);
+    hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
+    if (*phys || *attr) {
+      const char *separator = *phys != '\0' && *attr!= '\0' ? " " : "";
+      fprintf(output, "(%s%s%s)", phys, separator, attr);
+    }
     if (verbose_mode >= 2 && l->name)
       fprintf(output, " \"%s\"", l->name);
   }
