@@ -57,7 +57,9 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
     if (*phys || *attr) {
       const char *separator = *phys != '\0' && *attr!= '\0' ? " " : "";
-      fprintf(output, "(%s%s%s)", phys, separator, attr);
+      fprintf(output, "%s(%s%s%s)",
+	      verbose_mode >= 2 ? " " : "", /* add a space before attributes when there's a single object per line */
+	      phys, separator, attr);
     }
     if (verbose_mode >= 2 && l->name)
       fprintf(output, " \"%s\"", l->name);
