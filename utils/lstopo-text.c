@@ -43,6 +43,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
   char type[32], attr[256], phys[32] = "";
   unsigned index = logical ? l->logical_index : l->os_index;
+  const char *indexprefix = logical ? "#" :  " p#";
   if (show_cpuset < 2) {
     if (l->type != HWLOC_OBJ_PROC) {
       hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
@@ -50,7 +51,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     } else
       fprintf(output, "P");
     if (l->depth != 0 && index != (unsigned)-1)
-      fprintf(output, "#%u", index);
+      fprintf(output, "%s%u", indexprefix, index);
     if (logical && l->os_index != (unsigned) -1 &&
 	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PROC || l->type == HWLOC_OBJ_NODE))
       snprintf(phys, sizeof(phys), "phys=%u", l->os_index);
