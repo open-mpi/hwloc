@@ -393,10 +393,15 @@ AC_DEFUN([HWLOC_INIT],[
     )
 
     # Cairo support
-    if test "x$enable_cairo" = "xyes"; then
+    if test "x$enable_cairo" != "xno"; then
       HWLOC_PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
-      if test "x$enable_cairo" = "xyes"; then
-        AC_PATH_X
+      if test "x$enable_cairo" != "xno"; then
+        AC_PATH_XTRA
+	CFLAGS_save=$CFLAGS
+	LIBS_save=$LIBS
+
+	CFLAGS="$CFLAGS $X_CFLAGS"
+	LIBS="$LIBS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS"
         AC_CHECK_HEADERS([X11/Xlib.h], [
           AC_CHECK_HEADERS([X11/Xutil.h X11/keysym.h], [
             AC_CHECK_LIB([X11], [XOpenDisplay], [
@@ -410,20 +415,23 @@ AC_DEFUN([HWLOC_INIT],[
         if test "x$enable_X11" != "xyes"; then
           AC_MSG_WARN([X11 headers not found, Cairo/X11 back-end disabled])
         fi
+
+	CFLAGS=$CFLAGS_save
+	LIBS=$LIBS_save
       fi
     fi
     
-    if test "x$enable_cairo" = "xyes"; then
+    if test "x$enable_cairo" != "xno"; then
       AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
     fi
 
     # XML support        
     
-    if test "x$enable_xml" = "xyes"; then
+    if test "x$enable_xml" != "xno"; then
       HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [:], [enable_xml="no"])
     fi
     
-    if test "x$enable_xml" = "xyes"; then
+    if test "x$enable_xml" != "xno"; then
       HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
       AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
       AC_SUBST([HWLOC_HAVE_XML], [1])
@@ -691,8 +699,8 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
                        [test "x$have_sched_setaffinity" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS], 
                        [test "x$have_libibverbs" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" != "xno"])
+        AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" != "xno"])
 
         AM_CONDITIONAL([HWLOC_BUILD_DOXYGEN],
                        [test "x$hwloc_generate_doxs" = "xyes"])
