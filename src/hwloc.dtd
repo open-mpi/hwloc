@@ -17,6 +17,8 @@
 <!ATTLIST object complete_cpuset CDATA "" >
 <!ATTLIST object online_cpuset CDATA "" >
 <!ATTLIST object allowed_cpuset CDATA "" >
+<!ATTLIST object nodeset CDATA "" >
+<!ATTLIST object complete_nodeset CDATA "" >
 <!ATTLIST object allowed_nodeset CDATA "" >
 
 <!ELEMENT page_type EMPTY>

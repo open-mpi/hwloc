@@ -7,7 +7,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 # XXX: Add your XML input files here.
 xml_inputs = \
-	16amd64-8nd2c-cpusets.xml \
+	16amd64-8n2c-cpusets.xml \
 	16em64t-4s2c2t.xml \
 	16em64t-4s2c2t-offlines.xml \
 	8em64t-2mi2ma2c.xml

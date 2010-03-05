@@ -1125,6 +1125,8 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 
           node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
           node->cpuset = cpuset;
+          node->nodeset = hwloc_cpuset_alloc();
+          hwloc_cpuset_set(node->nodeset, osnode);
 
           hwloc_sysfs_node_meminfo_info(topology, path, osnode, &node->memory);
 

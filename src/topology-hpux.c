@@ -154,6 +154,8 @@ hwloc_look_hpux(struct hwloc_topology *topology)
       hwloc_debug("node %d is %d\n", i, currentnode);
       nodes[i] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, currentnode);
       obj->cpuset = hwloc_cpuset_alloc();
+      obj->nodeset = hwloc_cpuset_alloc();
+      hwloc_cpuset_set(obj->nodeset, currentnode);
       /* TODO: obj->attr->node.memory_kB */
       /* TODO: obj->attr->node.huge_page_free */
 

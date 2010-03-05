@@ -84,6 +84,8 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
     processorid_t cpuids[n];
 
     obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, lgrp);
+    obj->nodeset = hwloc_cpuset_alloc();
+    hwloc_cpuset_set(obj->nodeset, lgrp);
     obj->cpuset = hwloc_cpuset_alloc();
     glob_lgrps[(*curlgrp)++] = obj;
 

@@ -19,9 +19,11 @@ sysfs_tarballs = \
 		8ia64-4s2c.tar.gz \
 		16amd64-8n2c.tar.gz \
 		16amd64-8n2c-cpusets.tar.gz \
+		16amd64-8n2c-cpusets.xml.tar.gz \
 		16amd64-8n2c-cpusets_noadmin.tar.gz \
 		16em64t-4s2c2t.tar.gz \
 		16em64t-4s2c2t-offlines.tar.gz \
+		16em64t-4s2c2t-offlines.xml.tar.gz \
 		16em64t-4s2c2t-offlines_noadmin.tar.gz \
 		16em64t-4s2c2t_ncaches.tar.gz \
 		16em64t-4s2c2t_merge.tar.gz \
@@ -50,9 +52,11 @@ sysfs_outputs = \
 		8ia64-4s2c.tar.gz.output \
 		16amd64-8n2c.tar.gz.output \
 		16amd64-8n2c-cpusets.tar.gz.output \
+		16amd64-8n2c-cpusets.xml.tar.gz.output 16amd64-8n2c-cpusets.xml.tar.gz.options \
 		16amd64-8n2c-cpusets_noadmin.tar.gz.output 16amd64-8n2c-cpusets_noadmin.tar.gz.options \
 		16em64t-4s2c2t.tar.gz.output \
 		16em64t-4s2c2t-offlines.tar.gz.output \
+		16em64t-4s2c2t-offlines.xml.tar.gz.output 16em64t-4s2c2t-offlines.xml.tar.gz.options \
 		16em64t-4s2c2t-offlines_noadmin.tar.gz.output 16em64t-4s2c2t-offlines_noadmin.tar.gz.options \
 		16em64t-4s2c2t_ncaches.tar.gz.output 16em64t-4s2c2t_ncaches.tar.gz.options \
 		16em64t-4s2c2t_merge.tar.gz.output 16em64t-4s2c2t_merge.tar.gz.options \

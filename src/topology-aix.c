@@ -200,6 +200,8 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     obj->os_level = sdl;
     switch(type) {
       case HWLOC_OBJ_NODE:
+	obj->nodeset = hwloc_cpuset_alloc();
+	hwloc_cpuset_set(obj->nodeset, i);
 	obj->memory.local_memory = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
 	obj->memory.page_types_len = 2;
 	obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));

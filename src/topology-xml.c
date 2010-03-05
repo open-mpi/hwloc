@@ -98,6 +98,10 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     obj->online_cpuset = hwloc_cpuset_from_string(value);
   else if (!strcmp(name, "allowed_cpuset"))
     obj->allowed_cpuset = hwloc_cpuset_from_string(value);
+  else if (!strcmp(name, "nodeset"))
+    obj->nodeset = hwloc_cpuset_from_string(value);
+  else if (!strcmp(name, "complete_nodeset"))
+    obj->complete_nodeset = hwloc_cpuset_from_string(value);
   else if (!strcmp(name, "allowed_nodeset"))
     obj->allowed_nodeset = hwloc_cpuset_from_string(value);
   else if (!strcmp(name, "name"))
@@ -432,6 +436,16 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
   if (obj->allowed_cpuset) {
     hwloc_cpuset_asprintf(&cpuset, obj->allowed_cpuset);
     xmlNewProp(node, BAD_CAST "allowed_cpuset", BAD_CAST cpuset);
+    free(cpuset);
+  }
+  if (obj->nodeset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->nodeset);
+    xmlNewProp(node, BAD_CAST "nodeset", BAD_CAST cpuset);
+    free(cpuset);
+  }
+  if (obj->complete_nodeset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->complete_nodeset);
+    xmlNewProp(node, BAD_CAST "complete_nodeset", BAD_CAST cpuset);
     free(cpuset);
   }
   if (obj->allowed_nodeset) {

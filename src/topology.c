@@ -435,6 +435,16 @@ print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unuse
     hwloc_debug(" allowed %s", cpuset);
     free(cpuset);
   }
+  if (obj->nodeset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->nodeset);
+    hwloc_debug(" nodeset %s", cpuset);
+    free(cpuset);
+  }
+  if (obj->complete_nodeset) {
+    hwloc_cpuset_asprintf(&cpuset, obj->complete_nodeset);
+    hwloc_debug(" completeN %s", cpuset);
+    free(cpuset);
+  }
   if (obj->allowed_nodeset) {
     hwloc_cpuset_asprintf(&cpuset, obj->allowed_nodeset);
     hwloc_debug(" allowedN %s", cpuset);
@@ -474,6 +484,8 @@ free_object(hwloc_obj_t obj)
   hwloc_cpuset_free(obj->complete_cpuset);
   hwloc_cpuset_free(obj->online_cpuset);
   hwloc_cpuset_free(obj->allowed_cpuset);
+  hwloc_cpuset_free(obj->nodeset);
+  hwloc_cpuset_free(obj->complete_nodeset);
   hwloc_cpuset_free(obj->allowed_nodeset);
   free(obj);
 }
@@ -783,6 +795,8 @@ hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
   /* Start at the top.  */
   /* Add the cpuset to the top */
   hwloc_cpuset_orset(topology->levels[0][0]->complete_cpuset, obj->cpuset);
+  if (obj->nodeset)
+    hwloc_cpuset_orset(topology->levels[0][0]->complete_nodeset, obj->nodeset);
   hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
 }
 
@@ -810,42 +824,15 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   }
 }
 
-/*
- * traverse the whole tree in a deletion-safe way, calling node_before at
- * arrival on nodes, leaf at arrival on leaves, and node_after when back at
- * nodes, passing data along the way through nodes.
- *
- * Hooks can modify the pointer they're given to remove or replace themselves.
- */
-static void
-traverse(hwloc_topology_t topology,
-	 hwloc_obj_t *parent,
-	 void (*node_before)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
-	 void (*leaf)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
-	 void (*node_after)(hwloc_topology_t topology, hwloc_obj_t *obj, void *),
-	 void *data)
-{
-  hwloc_obj_t *pobj, obj;
-
-  if (!(*parent)->first_child) {
-    if (leaf)
-      leaf(topology, parent, data);
-    return;
-  }
-  if (node_before)
-    node_before(topology, parent, data);
-  if (!(*parent))
-    return;
-  for (pobj = &(*parent)->first_child, obj = *pobj;
-       obj;
-       /* Check whether the current obj was dropped.  */
-       (*pobj == obj ? pobj = &(*pobj)->next_sibling : NULL),
-       /* Get pointer to next object.  */
-	obj = *pobj)
-    traverse(topology, pobj, node_before, leaf, node_after, data);
-  if (node_after)
-    node_after(topology, parent, data);
-}
+/* Traverse children of a parent in a safe way: reread the next pointer as
+ * appropriate to prevent crash on child deletion:  */
+#define for_each_child_safe(child, parent, pchild) \
+  for (pchild = &(parent)->first_child, child = *pchild; \
+       child; \
+       /* Check whether the current child was not dropped.  */ \
+       (*pchild == child ? pchild = &(child->next_sibling) : NULL), \
+       /* Get pointer to next childect.  */ \
+        child = *pchild)
 
 static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
 {
@@ -855,37 +842,36 @@ static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
   return b->size ? (int)(a->size - b->size) : -1;
 }
 
-/* While traversing down and up, propagate memory counts */
+/* Propagate memory counts */
 static void
-propagate_total_memory(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
+propagate_total_memory(hwloc_obj_t obj)
 {
+  hwloc_obj_t *temp, child;
   unsigned i;
 
-  /* Compute our local memory.
-   * This callback is called on leaf or after processing an object,
-   * so this object already got contribution from its children.
-   */
-  (*pobj)->memory.total_memory += (*pobj)->memory.local_memory;
-  if ((*pobj)->parent)
-    (*pobj)->parent->memory.total_memory += (*pobj)->memory.total_memory;
+  /* Propagate memory up */
+  for_each_child_safe(child, obj, temp) {
+    propagate_total_memory(child);
+    obj->memory.total_memory += child->memory.total_memory;
+  }
+  obj->memory.total_memory += obj->memory.local_memory;
 
   /* By the way, sort the page_type array.
    * Cannot do it on insert since some backends (e.g. XML) add page_types after inserting the object.
    */
-  qsort((*pobj)->memory.page_types, (*pobj)->memory.page_types_len, sizeof(*(*pobj)->memory.page_types), hwloc_memory_page_type_compare);
+  qsort(obj->memory.page_types, obj->memory.page_types_len, sizeof(*obj->memory.page_types), hwloc_memory_page_type_compare);
   /* Ignore 0-size page_types, they are at the end */
-  for(i=(*pobj)->memory.page_types_len; i>=1; i--)
-    if ((*pobj)->memory.page_types[i-1].size)
+  for(i=obj->memory.page_types_len; i>=1; i--)
+    if (obj->memory.page_types[i-1].size)
       break;
-  (*pobj)->memory.page_types_len = i;
+  obj->memory.page_types_len = i;
 }
 
 /* Collect the cpuset of all the PROC objects. */
 static void
-collect_proc_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t system)
 {
-  hwloc_obj_t *systemp = data, system = *systemp;
-  hwloc_obj_t obj = *pobj;
+  hwloc_obj_t child, *temp;
 
   if (system) {
     /* We are already given a pointer to an system object */
@@ -894,31 +880,22 @@ collect_proc_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_ob
   } else {
     if (obj->cpuset) {
       /* This object is the root of a machine */
-      *systemp = obj;
+      system = obj;
       /* Assume no proc for now */
       hwloc_cpuset_zero(obj->cpuset);
     }
   }
-}
 
-/* While going up, remember to clear the system pointer */
-static void
-collect_proc_cpuset_after(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
-{
-  hwloc_obj_t *systemp = data;
-  hwloc_obj_t obj = *pobj;
-  if (*systemp == obj)
-    /* We gave ourselves for objects below, clear ourselves before continuing up */
-    *systemp = NULL;
+  for_each_child_safe(child, obj, temp)
+    collect_proc_cpuset(child, system);
 }
 
 /* While traversing down and up, propagate the offline/disallowed cpus by
  * and'ing them to and from the first object that has a cpuset */
 static void
-propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t system)
 {
-  hwloc_obj_t *systemp = data, system = *systemp;
-  hwloc_obj_t obj = *pobj;
+  hwloc_obj_t child, *temp;
 
   if (obj->cpuset) {
     if (system) {
@@ -936,6 +913,7 @@ propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwlo
 	hwloc_cpuset_andset(obj->complete_cpuset, obj->cpuset);
       }
 
+      /* Update online cpusets */
       if (obj->online_cpuset) {
 	/* Update ours */
 	hwloc_cpuset_andset(obj->online_cpuset, system->online_cpuset);
@@ -951,6 +929,7 @@ propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwlo
 	hwloc_cpuset_andset(obj->online_cpuset, obj->cpuset);
       }
 
+      /* Update allowed cpusets */
       if (obj->allowed_cpuset) {
 	/* Update ours */
 	hwloc_cpuset_andset(obj->allowed_cpuset, system->allowed_cpuset);
@@ -969,7 +948,7 @@ propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwlo
       hwloc_cpuset_free(mask);
     } else {
       /* This object is the root of a machine */
-      *systemp = obj;
+      system = obj;
       /* Apply complete cpuset to cpuset, online_cpuset and allowed_cpuset, it
        * will automatically be applied below */
       if (obj->complete_cpuset)
@@ -986,25 +965,116 @@ propagate_unused_cpuset(hwloc_topology_t topology __hwloc_attribute_unused, hwlo
         obj->allowed_cpuset = hwloc_cpuset_dup(obj->complete_cpuset);
     }
   }
+
+  for_each_child_safe(child, obj, temp)
+    propagate_unused_cpuset(child, system);
 }
 
-/* While going up, remember to clear the system pointer */
+/* Propagate nodesets up and down */
 static void
-propagate_unused_cpuset_after(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t system)
 {
-  hwloc_obj_t *systemp = data;
-  hwloc_obj_t obj = *pobj;
-  if (*systemp == obj)
-    /* We gave ourselves for objects below, clear ourselves before continuing up */
-    *systemp = NULL;
+  hwloc_obj_t child, *temp;
+  hwloc_cpuset_t parent_nodeset = NULL;
+  int parent_weight = 0;
+
+  if (!system && obj->nodeset) {
+    system = obj;
+    if (!obj->complete_nodeset)
+      obj->complete_nodeset = hwloc_cpuset_dup(obj->nodeset);
+    if (!obj->allowed_nodeset)
+      obj->allowed_nodeset = hwloc_cpuset_dup(obj->complete_nodeset);
+  }
+
+  if (system) {
+    if (obj->nodeset) {
+      /* Some existing nodeset coming from above, to possibly propagate down */
+      parent_nodeset = obj->nodeset;
+      parent_weight = hwloc_cpuset_weight(parent_nodeset);
+    } else
+      obj->nodeset = hwloc_cpuset_alloc();
+  }
+
+  for_each_child_safe(child, obj, temp) {
+    /* Propagate singleton nodesets down */
+    if (parent_weight == 1) {
+      if (!child->nodeset)
+        child->nodeset = hwloc_cpuset_dup(obj->nodeset);
+      else if (!hwloc_cpuset_isequal(child->nodeset, parent_nodeset)) {
+        hwloc_debug_cpuset("Oops, parent nodeset %s", parent_nodeset);
+        hwloc_debug_cpuset(" is different from child nodeset %s, ignoring the child one\n", child->nodeset);
+        hwloc_cpuset_copy(child->nodeset, parent_nodeset);
+      }
+    }
+
+    /* Recurse */
+    propagate_nodeset(child, system);
+
+    /* Propagate children nodesets up */
+    if (system && child->nodeset)
+      hwloc_cpuset_orset(obj->nodeset, child->nodeset);
+  }
+}
+
+/* Propagate allowed and complete nodesets */
+static void
+propagate_nodesets(hwloc_obj_t obj)
+{
+  hwloc_cpuset_t mask = hwloc_cpuset_alloc();
+  hwloc_obj_t child, *temp;
+
+  for_each_child_safe(child, obj, temp) {
+    if (obj->nodeset) {
+      /* Update complete nodesets down */
+      if (child->complete_nodeset) {
+        hwloc_cpuset_andset(child->complete_nodeset, obj->complete_nodeset);
+      } else if (child->nodeset) {
+        child->complete_nodeset = hwloc_cpuset_dup(obj->complete_nodeset);
+        hwloc_cpuset_andset(child->complete_nodeset, child->nodeset);
+      } /* else the child doesn't have nodeset information, we can not provide a complete nodeset */
+
+      /* Update allowed nodesets down */
+      if (child->allowed_nodeset) {
+        hwloc_cpuset_andset(child->allowed_nodeset, obj->allowed_nodeset);
+      } else if (child->nodeset) {
+        child->allowed_nodeset = hwloc_cpuset_dup(obj->allowed_nodeset);
+        hwloc_cpuset_andset(child->allowed_nodeset, child->nodeset);
+      }
+    }
+
+    propagate_nodesets(child);
+
+    if (obj->nodeset) {
+      /* Update allowed nodesets up */
+      if (child->nodeset && child->allowed_nodeset) {
+        hwloc_cpuset_copy(mask, child->nodeset);
+        hwloc_cpuset_notset(mask);
+        hwloc_cpuset_orset(mask, child->allowed_nodeset);
+        hwloc_cpuset_andset(obj->allowed_nodeset, mask);
+      }
+    }
+  }
+  hwloc_cpuset_free(mask);
+
+  if (obj->nodeset) {
+    /* Apply complete nodeset to nodeset and allowed_nodeset */
+    if (obj->complete_nodeset)
+      hwloc_cpuset_andset(obj->nodeset, obj->complete_nodeset);
+    else
+      obj->complete_nodeset = hwloc_cpuset_dup(obj->nodeset);
+    if (obj->allowed_nodeset)
+      hwloc_cpuset_andset(obj->allowed_nodeset, obj->complete_nodeset);
+    else
+      obj->allowed_nodeset = hwloc_cpuset_dup(obj->complete_nodeset);
+  }
 }
 
 static void
-apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+apply_nodeset(hwloc_obj_t obj, hwloc_obj_t system)
 {
-  hwloc_obj_t *systemp = data, system = *systemp;
-  hwloc_obj_t obj = *pobj;
   unsigned i;
+  hwloc_obj_t child, *temp;
+
   if (system) {
     if (obj->type == HWLOC_OBJ_NODE && obj->os_index != (unsigned) -1 &&
         !hwloc_cpuset_isset(system->allowed_nodeset, obj->os_index)) {
@@ -1016,29 +1086,26 @@ apply_nodeset(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *p
     }
   } else {
     if (obj->allowed_nodeset) {
-      *systemp = obj;
+      system = obj;
     }
   }
+
+  for_each_child_safe(child, obj, temp)
+    apply_nodeset(child, system);
 }
 
 static void
-apply_nodeset_after(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data)
+remove_unused_cpusets(hwloc_obj_t obj)
 {
-  hwloc_obj_t *systemp = data;
-  hwloc_obj_t obj = *pobj;
-  if (*systemp == obj)
-    /* We gave ourselves for objects below, clear ourselves before continuing up */
-    *systemp = NULL;
-}
+  hwloc_obj_t child, *temp;
 
-static void
-remove_unused_cpusets(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
-{
-  hwloc_obj_t obj = *pobj;
   if (obj->cpuset) {
     hwloc_cpuset_andset(obj->cpuset, obj->online_cpuset);
     hwloc_cpuset_andset(obj->cpuset, obj->allowed_cpuset);
   }
+
+  for_each_child_safe(child, obj, temp)
+    remove_unused_cpusets(child);
 }
 
 static void
@@ -1060,9 +1127,13 @@ drop_object(hwloc_obj_t *pparent)
 
 /* Remove all ignored objects.  */
 static void
-remove_ignored(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pparent, void *data __hwloc_attribute_unused)
+remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
-  hwloc_obj_t parent = *pparent;
+  hwloc_obj_t parent = *pparent, child, *pchild;
+
+  for_each_child_safe(child, parent, pchild)
+    remove_ignored(topology, pchild);
+
   if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     hwloc_debug("%s", "\nDropping ignored object ");
     print_object(topology, 0, parent);
@@ -1071,9 +1142,13 @@ remove_ignored(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *
 }
 
 static void
-do_free_object(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
+do_free_object(hwloc_obj_t *pobj)
 {
-  hwloc_obj_t obj = *pobj;
+  hwloc_obj_t obj = *pobj, child, *pchild;
+
+  for_each_child_safe(child, obj, pchild)
+    do_free_object(pchild);
+
   *pobj = obj->next_sibling;
   free_object(obj);
 }
@@ -1081,14 +1156,18 @@ do_free_object(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t *
 /* Remove all children whose cpuset is empty, except NUMA nodes
  * since we want to keep memory information.  */
 static void
-remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data __hwloc_attribute_unused)
+remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
 {
-  hwloc_obj_t obj = *pobj;
+  hwloc_obj_t obj = *pobj, child, *pchild;
+
+  for_each_child_safe(child, obj, pchild)
+    remove_empty(topology, pchild);
+
   if (obj->type != HWLOC_OBJ_NODE && obj->cpuset && hwloc_cpuset_iszero(obj->cpuset)) {
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
     print_object(topology, 0, obj);
-    traverse(topology, pobj, NULL, do_free_object, do_free_object, NULL);
+    do_free_object(pobj);
   }
 }
 
@@ -1097,11 +1176,16 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj, void *data __hwloc_at
  * ignored while keeping structure
  */
 static void
-merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent, void *data __hwloc_attribute_unused)
+merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
-  hwloc_obj_t parent = *pparent, child = parent->first_child;
-  if (child->next_sibling)
-    /* There are several children, it's useful to keep them.  */
+  hwloc_obj_t parent = *pparent, child, *pchild;
+
+  for_each_child_safe(child, parent, pchild)
+    merge_useless_child(topology, pchild);
+
+  child = parent->first_child;
+  if (!child || child->next_sibling)
+    /* There are no or several children, it's useful to keep them.  */
     return;
 
   /* TODO: have a preference order?  */
@@ -1222,11 +1306,15 @@ static void alloc_cpusets(hwloc_obj_t obj)
   obj->complete_cpuset = hwloc_cpuset_alloc();
   obj->online_cpuset = hwloc_cpuset_alloc();
   obj->allowed_cpuset = hwloc_cpuset_alloc();
+  obj->nodeset = hwloc_cpuset_alloc();
+  obj->complete_nodeset = hwloc_cpuset_alloc();
   obj->allowed_nodeset = hwloc_cpuset_alloc();
   hwloc_cpuset_fill(obj->cpuset);
   hwloc_cpuset_zero(obj->complete_cpuset);
   hwloc_cpuset_fill(obj->online_cpuset);
   hwloc_cpuset_fill(obj->allowed_cpuset);
+  hwloc_cpuset_zero(obj->nodeset);
+  hwloc_cpuset_zero(obj->complete_nodeset);
   hwloc_cpuset_fill(obj->allowed_nodeset);
 }
 
@@ -1250,14 +1338,19 @@ hwloc_discover(struct hwloc_topology *topology)
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
 
   /* hwloc_look_* functions should use hwloc_obj_add to add objects initialized
-   * through hwloc_alloc_setup_object. For node levels, memory_Kb and
+   * through hwloc_alloc_setup_object. For node levels, nodeset, memory_Kb and
    * huge_page_free must be initialized. For cache levels, memory_kB and
-   * attr->cache.depth must be initialized, for misc levels, attr->misc.depth
-   * must be initialized
+   * attr->cache.depth must be initialized. For misc levels, attr->misc.depth
+   * must be initialized.
    */
 
   /* There must be at least a PROC object for each logical processor, at worse
    * produced by hwloc_setup_proc_level()
+   */
+
+  /* To be able to just use hwloc_insert_object_by_cpuset to insert the object
+   * in the topology according to the cpuset, the cpuset field must be
+   * initialized.
    */
 
   /* If the OS can provide NUMA distances, it should call
@@ -1279,6 +1372,8 @@ hwloc_discover(struct hwloc_topology *topology)
    * - If some processors are not allowed for the application (e.g. for
    *   administration reasons), they should be dropped from the allowed_cpuset
    *   field.
+   *
+   * The same applies to the node sets complete_nodeset and allowed_cpuset.
    *
    * If such field doesn't exist yet, it can be allocated, and initialized to
    * zero (for complete), or to full (for online and allowed). The values are
@@ -1341,37 +1436,49 @@ hwloc_discover(struct hwloc_topology *topology)
   print_objects(topology, 0, topology->levels[0][0]);
 
   /* First tweak a bit to clean the topology.  */
-  hwloc_obj_t system = NULL;
-  hwloc_debug("%s", "\nRestrict topology cpusets to existing PROC objects\n");
-  traverse(topology, &topology->levels[0][0], collect_proc_cpuset, collect_proc_cpuset, collect_proc_cpuset_after, &system);
+  hwloc_debug("%s", "\nRestrict topology cpusets to existing PROC and NODE objects\n");
+  collect_proc_cpuset(topology->levels[0][0], NULL);
 
   hwloc_debug("%s", "\nPropagate offline and disallowed cpus down and up\n");
-  traverse(topology, &topology->levels[0][0], propagate_unused_cpuset, propagate_unused_cpuset, propagate_unused_cpuset_after, &system);
+  propagate_unused_cpuset(topology->levels[0][0], NULL);
+
+  if (topology->levels[0][0]->complete_nodeset && hwloc_cpuset_iszero(topology->levels[0][0]->complete_nodeset)) {
+    /* No nodeset, drop all of them */
+    hwloc_cpuset_free(topology->levels[0][0]->nodeset);
+    topology->levels[0][0]->nodeset = NULL;
+    hwloc_cpuset_free(topology->levels[0][0]->complete_nodeset);
+    topology->levels[0][0]->complete_nodeset = NULL;
+    hwloc_cpuset_free(topology->levels[0][0]->allowed_nodeset);
+    topology->levels[0][0]->allowed_nodeset = NULL;
+  }
+  hwloc_debug("%s", "\nPropagate nodesets\n");
+  propagate_nodeset(topology->levels[0][0], NULL);
+  propagate_nodesets(topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
   if (!topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
     hwloc_debug("%s", "\nRemoving unauthorized and offline cpusets from all cpusets\n");
-    traverse(topology, &topology->levels[0][0], remove_unused_cpusets, remove_unused_cpusets, NULL, NULL);
+    remove_unused_cpusets(topology->levels[0][0]);
 
     hwloc_debug("%s", "\nRemoving disallowed memory according to nodesets\n");
-    traverse(topology, &topology->levels[0][0], apply_nodeset, apply_nodeset, apply_nodeset_after, &system);
+    apply_nodeset(topology->levels[0][0], NULL);
 
     print_objects(topology, 0, topology->levels[0][0]);
   }
 
   hwloc_debug("%s", "\nRemoving ignored objects\n");
-  traverse(topology, &topology->levels[0][0], remove_ignored, remove_ignored, NULL, NULL);
+  remove_ignored(topology, &topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
-  traverse(topology, &topology->levels[0][0], remove_empty, remove_empty, NULL, NULL);
+  remove_empty(topology, &topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
-  traverse(topology, &topology->levels[0][0], NULL, NULL, merge_useless_child, NULL);
+  merge_useless_child(topology, &topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
@@ -1491,7 +1598,7 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");
-  traverse(topology, &topology->levels[0][0], NULL, propagate_total_memory, propagate_total_memory, NULL);
+  propagate_total_memory(topology->levels[0][0]);
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;
@@ -1984,6 +2091,12 @@ hwloc_topology_check(struct hwloc_topology *topology)
           assert(hwloc_cpuset_isincluded(obj->online_cpuset, obj->complete_cpuset));
         if (obj->allowed_cpuset)
           assert(hwloc_cpuset_isincluded(obj->allowed_cpuset, obj->complete_cpuset));
+      }
+      if (obj->complete_nodeset) {
+        if (obj->nodeset)
+          assert(hwloc_cpuset_isincluded(obj->nodeset, obj->complete_nodeset));
+        if (obj->allowed_nodeset)
+          assert(hwloc_cpuset_isincluded(obj->allowed_nodeset, obj->complete_nodeset));
       }
       /* check children */
       hwloc__check_children(obj);
