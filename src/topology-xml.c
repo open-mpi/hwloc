@@ -116,7 +116,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
   }
 
   else if (!strcmp(name, "local_memory"))
-    obj->memory.local_memory = strtoul(value, NULL, 10);
+    obj->memory.local_memory = strtoull(value, NULL, 10);
 
   else if (!strcmp(name, "depth")) {
     unsigned long lvalue = strtoul(value, NULL, 10);
@@ -161,7 +161,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
    * deprecated (from 0.9)
    */
   else if (!strcmp(name, "memory_kB")) {
-    unsigned long lvalue = strtoul(value, NULL, 10);
+    unsigned long long lvalue = strtoull(value, NULL, 10);
     switch (obj->type) {
       case HWLOC_OBJ_CACHE:
 	obj->attr->cache.size = lvalue << 10;
