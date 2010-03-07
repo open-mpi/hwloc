@@ -18,16 +18,20 @@ hwloc-mask \- Operate on cpu mask strings
 .
 .TP 10
 \fB\-p\fR \fB\-\-physical\fR
-take OS/physical indexes instead of logical indexes
+Take OS/physical indexes instead of logical indexes
 .TP
 \fB\-l\fR \fB\-\-logical\fR
-take logical indexes instead of physical/OS indexes (default)
+Take logical indexes instead of physical/OS indexes (default)
 .TP
 \fB\-\-proclist\fR
-Report the list of processors' indexes instead of the cpu mask string.
+Report the comma-separated list of processors' indexes instead of the cpu mask string.
+When combined with \fB\-\-physical\fR, the list is convenient to pass to external
+tools such as taskset or numactl \fB\-\-physcpubind\fR.
 .TP
 \fB\-\-nodelist\fR
-report the list of memory nodes' indexes instead of the cpu mask string.
+Report the comma-separated list of memory nodes' indexes instead of the cpu mask string.
+When combined with \fB\-\-physical\fR, the list is convenient to pass to external
+tools such as numactl \fB\-\-membind\fR.
 .TP
 \fB\-v\fR
 Verbose output.
