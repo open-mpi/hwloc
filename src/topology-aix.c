@@ -28,8 +28,7 @@ static int
 hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   rsethandle_t rset, rad;
-  hwloc_obj_t objs[2];
-  int n;
+  hwloc_obj_t obj;
   int res = -1;
 
   /* The resulting binding is always strict */
@@ -40,8 +39,8 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     return 0;
   }
 
-  n = hwloc_get_largest_objs_inside_cpuset(topology, hwloc_set, objs, 2);
-  if (n > 1 || objs[0]->os_level == -1) {
+  obj = hwloc_get_first_largest_obj_inside_cpuset(topology, hwloc_set);
+  if (!hwloc_cpuset_isequal(obj->cpuset, hwloc_set) || obj->os_level == -1) {
     /* Does not correspond to exactly one radset, not possible */
     errno = EXDEV;
     return -1;
@@ -52,8 +51,8 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   else
     rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
-  if (rs_getrad(rset, rad, objs[0]->os_level, objs[0]->os_index, 0)) {
-    fprintf(stderr,"rs_getrad(%d,%u) failed: %s\n", objs[0]->os_level, objs[0]->os_index, strerror(errno));
+  if (rs_getrad(rset, rad, obj->os_level, obj->os_index, 0)) {
+    fprintf(stderr,"rs_getrad(%d,%u) failed: %s\n", obj->os_level, obj->os_index, strerror(errno));
     goto out;
   }
 
