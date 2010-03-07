@@ -18,8 +18,12 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-bind utility.\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "  -l --logical\ttake logical object indexes (default)\n");
-  fprintf(where, "  -p --physical\ttake physical object indexes\n");
+  fprintf(where, "  -l --logical\tuse logical object indexes (default)\n");
+  fprintf(where, "  -p --physical\tuse physical object indexes\n");
+  fprintf(where, "  --li --logical-input\tuse logical indexes for input (default)\n");
+  fprintf(where, "  --lo --logical-output\tuse logical indexes for output (default)\n");
+  fprintf(where, "  --pi --physical-input\tuse physical indexes for input\n");
+  fprintf(where, "  --po --physical-output\tuse physical indexes for output\n");
   fprintf(where, "  --proclist\treport the list of processors' indexes in the CPU set\n");
   fprintf(where, "  --nodelist\treport the list of memory nodes' indexes near the CPU set\n");
   fprintf(where, "  --objects\treport the list of largest objects in the CPU set\n");
@@ -33,7 +37,8 @@ int main(int argc, char *argv[])
   unsigned depth;
   hwloc_cpuset_t set;
   int verbose = 0;
-  int logical = 1;
+  int logicali = 1;
+  int logicalo = 1;
   int nodelist = 0;
   int proclist = 0;
   int showobjs = 0;
@@ -72,18 +77,36 @@ int main(int argc, char *argv[])
         exit(EXIT_SUCCESS);
       }
       if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--logical")) {
-	logical = 1;
+	logicali = 1;
+	logicalo = 1;
+	goto next;
+      }
+      if (!strcmp(argv[1], "--li") || !strcmp(argv[1], "--logical-input")) {
+	logicali = 1;
+	goto next;
+      }
+      if (!strcmp(argv[1], "--lo") || !strcmp(argv[1], "--logical-output")) {
+	logicalo = 1;
 	goto next;
       }
       if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--physical")) {
-	logical = 0;
+	logicali = 0;
+	logicalo = 0;
+	goto next;
+      }
+      if (!strcmp(argv[1], "--pi") || !strcmp(argv[1], "--physical-input")) {
+	logicali = 0;
+	goto next;
+      }
+      if (!strcmp(argv[1], "--po") || !strcmp(argv[1], "--physical-output")) {
+	logicalo = 0;
 	goto next;
       }
       usage(stderr);
       return EXIT_FAILURE;
     }
 
-    if (hwloc_mask_process_arg(topology, depth, argv[1], logical, set, verbose) < 0) {
+    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0) {
       if (verbose)
 	fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
     }
@@ -101,7 +124,7 @@ int main(int argc, char *argv[])
       unsigned index;
       hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
-      index = logical ? obj->logical_index : obj->os_index;
+      index = logicalo ? obj->logical_index : obj->os_index;
       printf("%s%s:%u", first ? "" : " ", type, index);
       hwloc_cpuset_clearset(remaining, obj->cpuset);
       first = 0;
@@ -113,7 +136,7 @@ int main(int argc, char *argv[])
     while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PROC, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%u", logical ? proc->logical_index : proc->os_index);
+      printf("%u", logicalo ? proc->logical_index : proc->os_index);
       prev = proc;
     }
     printf("\n");
@@ -122,7 +145,7 @@ int main(int argc, char *argv[])
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%u", logical ? node->logical_index : node->os_index);
+      printf("%u", logicalo ? node->logical_index : node->os_index);
       prev = node;
     }
     printf("\n");
