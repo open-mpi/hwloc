@@ -22,6 +22,7 @@ static void usage(FILE *where)
   fprintf(where, "  -p --physical\ttake physical object indexes\n");
   fprintf(where, "  --proclist\treport the list of processors' indexes in the CPU set\n");
   fprintf(where, "  --nodelist\treport the list of memory nodes' indexes near the CPU set\n");
+  fprintf(where, "  --objects\treport the list of largest objects in the CPU set\n");
   fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
 }
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
   int logical = 1;
   int nodelist = 0;
   int proclist = 0;
+  int showobjs = 0;
   char **orig_argv = argv;
 
   set = hwloc_cpuset_alloc();
@@ -59,6 +61,10 @@ int main(int argc, char *argv[])
       }
       if (!strcmp(argv[1], "--nodelist")) {
 	nodelist = 1;
+        goto next;
+      }
+      if (!strcmp(argv[1], "--objects")) {
+	showobjs = 1;
         goto next;
       }
       if (!strcmp(argv[1], "--version")) {
@@ -87,7 +93,22 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  if (proclist) {
+  if (showobjs) {
+    hwloc_cpuset_t remaining = hwloc_cpuset_dup(set);
+    int first = 1;
+    while (!hwloc_cpuset_iszero(remaining)) {
+      char type[64];
+      unsigned index;
+      hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
+      hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+      index = logical ? obj->logical_index : obj->os_index;
+      printf("%s%s:%u", first ? "" : " ", type, index);
+      hwloc_cpuset_clearset(remaining, obj->cpuset);
+      first = 0;
+    }
+    printf("\n");
+    hwloc_cpuset_free(remaining);
+  } else if (proclist) {
     hwloc_obj_t proc, prev = NULL;
     while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PROC, prev)) != NULL) {
       if (prev)
