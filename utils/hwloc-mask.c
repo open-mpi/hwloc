@@ -20,8 +20,8 @@ static void usage(FILE *where)
   fprintf(where, "Options:\n");
   fprintf(where, "  -l --logical\ttake logical object indexes (default)\n");
   fprintf(where, "  -p --physical\ttake physical object indexes\n");
-  fprintf(where, "  --proclist\treport the list of processors' OS indexes in the CPU set\n");
-  fprintf(where, "  --nodelist\treport the list of memory nodes' OS indexes near the CPU set\n");
+  fprintf(where, "  --proclist\treport the list of processors' indexes in the CPU set\n");
+  fprintf(where, "  --nodelist\treport the list of memory nodes' indexes near the CPU set\n");
   fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
 }
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PROC, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%u", proc->os_index);
+      printf("%u", logical ? proc->logical_index : proc->os_index);
       prev = proc;
     }
     printf("\n");
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, prev)) != NULL) {
       if (prev)
 	printf(",");
-      printf("%u", node->os_index);
+      printf("%u", logical ? node->logical_index : node->os_index);
       prev = node;
     }
     printf("\n");

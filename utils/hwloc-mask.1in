@@ -24,10 +24,10 @@ take OS/physical indexes instead of logical indexes
 take logical indexes instead of physical/OS indexes (default)
 .TP
 \fB\-\-proclist\fR
-Report the list of processors' physical/OS indexes instead of the cpu mask string.
+Report the list of processors' indexes instead of the cpu mask string.
 .TP
 \fB\-\-nodelist\fR
-report the list of memory nodes' physical/OS indexes instead of the cpu mask string.
+report the list of memory nodes' indexes instead of the cpu mask string.
 .TP
 \fB\-v\fR
 Verbose output.
@@ -77,9 +77,9 @@ socket:
 
     hwloc-mask --proclist socket:1
 
-To display the list of NUMA nodes that intersect a given CPU mask:
+To display the list of NUMA nodes, by physical indexes, that intersect a given CPU mask:
 
-   hwloc-mask --nodelist 0xf0f0f0f0
+   hwloc-mask --physical --nodelist 0xf0f0f0f0
 .
 .\" **************************
 .\"    Return value section
