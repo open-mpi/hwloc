@@ -293,6 +293,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_complete_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_online_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_topology_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_first_largest_obj_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_depth.3 \
