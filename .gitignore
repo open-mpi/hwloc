@@ -19,8 +19,8 @@ Makefile
 /utils/lstopo.1
 /utils/hwloc-bind
 /utils/hwloc-bind.1
-/utils/hwloc-mask
-/utils/hwloc-mask.1
+/utils/hwloc-calc
+/utils/hwloc-calc.1
 /utils/hwloc-distrib
 /utils/hwloc-distrib.1
 /utils/test-hwloc-distrib.sh

@@ -452,20 +452,20 @@ page provies much more detail on what is possible.
 
 hwloc-bind can also be used to retrieve the current process' binding.
 
-\section cli_hwloc_mask hwloc-mask
+\section cli_hwloc_calc hwloc-calc
 
-hwloc-mask is generally used to create cpuset strings to pass to
+hwloc-calc is generally used to create cpuset strings to pass to
 hwloc-bind.  Although hwloc-bind accepts many forms of object
 specification (i.e., cpuset strings are one of many forms that
 hwloc-bind understands), they can be useful, compact representations
 in shell scripts, for example.
 
-hwloc-mask generates cpuset strings from given hardware objects with
-the ability to aggregate them, intersect them, and more.  hwloc-mask
+hwloc-calc generates cpuset strings from given hardware objects with
+the ability to aggregate them, intersect them, and more.  hwloc-calc
 generally uses the same syntax than hwloc-bind, but multiple instances
 may be composed to generate complex combinations.  
 
-Note that hwloc-mask can also generate lists of logical processors or
+Note that hwloc-calc can also generate lists of logical processors or
 NUMA nodes that are convenient to pass to some external tools such as
 taskset or numactl.
 

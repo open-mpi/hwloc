@@ -56,6 +56,7 @@ Version 1.0.0
   + Add colors in the lstopo graphical outputs to distinguish between online,
     offline, reserved, ... objects.
   + Extend lstopo to show cpusets, filter objects by type, ...
+  + Renamed hwloc-mask into hwloc-calc which supports many new options.
 * Documentation
   + Add a hwloc(7) manpage containing general information.
   + Add documentation about how to switch from PLPA to hwloc.
