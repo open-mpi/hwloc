@@ -36,7 +36,7 @@
  * Linux; other systems will simply get a full cpuset.
  */
 static __inline hwloc_cpuset_t
-hwloc_ibv_get_device_cpuset(struct ibv_device *ibdev)
+hwloc_ibv_get_device_cpuset(hwloc_topology_t topology, struct ibv_device *ibdev)
 {
 #if defined(HWLOC_LINUX_SYS)
   /* If we're on Linux, use the verbs-provided sysfs mechanism to
