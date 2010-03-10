@@ -598,7 +598,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = 6*fontsize;
+  unsigned textwidth = level->name ? strlen(level->name) * fontsize : 6*fontsize;
 
   DYNA_CHECK();
 
@@ -607,9 +607,13 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
-    char text[64];
-    lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    if (level->name) {
+      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
+    } else {
+      char text[64];
+      lstopo_obj_snprintf(text, sizeof(text), level, logical);
+      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    }
   }
 
   RECURSE_RECT(level, methods, gridsize, gridsize);

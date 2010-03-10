@@ -824,6 +824,40 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   }
 }
 
+static void
+hwloc_connect(hwloc_obj_t parent);
+/* Adds a misc object _after_ detection, and thus has to reconnect all the pointers */
+hwloc_obj_t
+hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, const char *name)
+{
+  hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+  obj->cpuset = hwloc_cpuset_dup(cpuset);
+  if (name)
+    obj->name = strdup(name);
+
+  hwloc_insert_object_by_cpuset(topology, obj);
+
+  hwloc_connect(topology->levels[0][0]);
+
+  return obj;
+}
+
+hwloc_obj_t
+hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, const char *name)
+{
+  hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+  if (parent->cpuset)
+    obj->cpuset = hwloc_cpuset_dup(parent->cpuset);
+  if (name)
+    obj->name = strdup(name);
+
+  hwloc_insert_object_by_parent(topology, parent, obj);
+
+  hwloc_connect(topology->levels[0][0]);
+
+  return obj;
+}
+
 /* Traverse children of a parent in a safe way: reread the next pointer as
  * appropriate to prevent crash on child deletion:  */
 #define for_each_child_safe(child, parent, pchild) \

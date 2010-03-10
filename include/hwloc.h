@@ -531,15 +531,37 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
 
 
 
-/** \defgroup hwlocality_export Export the Topology
+/** \defgroup hwlocality_tinker Tinker with topologies.
  * @{
  */
 
-/** \brief Export the topology into a XML file.
+/** \brief Export the topology into an XML file.
  *
  * This file may be loaded later through hwloc_topology_set_xml().
  */
 HWLOC_DECLSPEC void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
+
+/** \brief Add a MISC object to the topology
+ *
+ * A new MISC object will be created and insert into the topology at the
+ * position given by cpuset.
+ *
+ * cpuset and name will be copied.
+ *
+ * \return the newly-created object
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
+
+/** \brief Add a MISC object to the topology
+ *
+ * A new MISC object will be created and insert into the topology at the
+ * position given by parent.
+ *
+ * name will be copied.
+ *
+ * \return the newly-created object
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
 
 /** @} */
 
