@@ -491,9 +491,9 @@ AC_DEFUN([HWLOC_INIT],[
       AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
     ])
     
-    AC_CHECK_FUNCS([openat], [have_openat=yes])
+    AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
     
-    AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
+    AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
     	      [#include <numa.h>])
     
     AC_CHECK_HEADERS([pthread_np.h])
@@ -509,7 +509,7 @@ AC_DEFUN([HWLOC_INIT],[
       #  include <pthread_np.h>
       #endif
     ]])
-    AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
+    AC_CHECK_FUNC([sched_setaffinity], [hwloc_have_sched_setaffinity=yes])
     AC_CHECK_HEADERS([sys/cpuset.h],,,[[#include <sys/param.h>]])
     
     AC_CHECK_PROGS(XMLLINT, [xmllint])
@@ -692,11 +692,11 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 
         AM_CONDITIONAL([HWLOC_HAVE_GCC], [test "x$GCC" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_MS_LIB], [test "x$HWLOC_MS_LIB" != "x"])
-        AM_CONDITIONAL([HWLOC_HAVE_OPENAT], [test "x$have_openat" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_OPENAT], [test "x$hwloc_have_openat" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LINUX_LIBNUMA],
-                       [test "x$have_linux_libnuma" = "xyes"])
+                       [test "x$hwloc_have_linux_libnuma" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_SCHED_SETAFFINITY],
-                       [test "x$have_sched_setaffinity" = "xyes"])
+                       [test "x$hwloc_have_sched_setaffinity" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS], 
                        [test "x$hwloc_have_libibverbs" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" != "xno"])
