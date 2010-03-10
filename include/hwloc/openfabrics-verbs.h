@@ -38,9 +38,11 @@
  * \return newly-allocated cpuset.
  */
 static __inline hwloc_cpuset_t
-hwloc_ibv_get_device_cpuset(struct ibv_device *ibdev) __hwloc_attribute_malloc;
+hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
+			    struct ibv_device *ibdev) __hwloc_attribute_malloc;
 static __inline hwloc_cpuset_t
-hwloc_ibv_get_device_cpuset(struct ibv_device *ibdev)
+hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
+			    struct ibv_device *ibdev)
 {
 #ifdef HWLOC_LINUX_SYS
   /* If we're on Linux, use the verbs-provided sysfs mechanism to
