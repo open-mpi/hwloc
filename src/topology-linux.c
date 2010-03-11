@@ -18,6 +18,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sched.h>
 #include <pthread.h>
 
@@ -312,13 +313,20 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
   struct dirent *dirent;
   unsigned nr_tids = 0;
   unsigned max_tids = 32;
-  pid_t *tids = malloc(max_tids*sizeof(pid_t));
+  pid_t *tids;
+  struct stat sb;
+
+  /* take the number of links as a good estimate for the number of tids */
+  if (fstat(dirfd(taskdir), &sb) == 0)
+    max_tids = sb.st_nlink;
+
+  tids = malloc(max_tids*sizeof(pid_t));
 
   rewinddir(taskdir);
 
   while ((dirent = readdir(taskdir)) != NULL) {
     if (nr_tids == max_tids) {
-      max_tids *= 2;
+      max_tids += 8;
       tids = realloc(tids, max_tids*sizeof(pid_t));
     }
     if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
