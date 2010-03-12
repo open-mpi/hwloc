@@ -749,6 +749,33 @@ hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
   return set;
 }
 
+static char *
+hwloc_strdup_mntpath(const char *escapedpath, size_t length)
+{
+  char *path = malloc(length+1);
+  const char *src = escapedpath, *tmp = src;
+  char *dst = path;
+
+  while ((tmp = strchr(src, '\\')) != NULL) {
+    strncpy(dst, src, tmp-src);
+    dst += tmp-src;
+    if (!strncmp(tmp+1, "040", 3))
+      *dst = ' ';
+    else if (!strncmp(tmp+1, "011", 3))
+      *dst = '	';
+    else if (!strncmp(tmp+1, "012", 3))
+      *dst = '\n';
+    else
+      *dst = '\\';
+    dst++;
+    src = tmp+4;
+  }
+
+  strcpy(dst, src);
+
+  return path;
+}
+
 static void
 hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int fsroot_fd)
 {
@@ -758,6 +785,10 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
 
   *cgroup_mntpnt = NULL;
   *cpuset_mntpnt = NULL;
+
+  /* ideally we should use setmntent, getmntent, hasmntopt and endmntent,
+   * but they do not support fsroot_fd.
+   */
 
   fd = hwloc_fopen("/proc/mounts", "r", fsroot_fd);
   if (!fd)
@@ -774,13 +805,11 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
       continue;
     path = tmp+1;
 
-    /* type is after path, which may contain escaped spaces */
-  retry:
+    /* type is after path, which may not contain spaces since the kernel escaped them to \040
+     * (see the manpage of getmntent) */
     tmp = strchr(tmp+1, ' ');
     if (!tmp)
       continue;
-    if (*(tmp-1) == '\\')
-      goto retry;
     type = tmp+1;
     /* mark the end of path to ease upcoming strdup */
     *tmp = '\0';
@@ -788,13 +817,13 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
     if (!strncmp(type, "cpuset ", 7)) {
       /* found a cpuset mntpnt */
       hwloc_debug("Found cpuset mount point on %s\n", path);
-      *cpuset_mntpnt = strdup(path);
+      *cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
       break;
     } else if (!strncmp(type, "cgroup ", 7)
 	       /* found a cgroup mntpnt, look for a cpuset options after the path */
 	       && strstr(type+7, "cpuset")) {
       hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
-      *cgroup_mntpnt = strdup(path);
+      *cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
       break;
     }
   }
