@@ -358,13 +358,14 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 
   DYNA_CHECK();
 
-  /* TODO: current: green */
   if (hwloc_cpuset_isset(level->online_cpuset, level->os_index))
     if (!hwloc_cpuset_isset(level->allowed_cpuset, level->os_index))
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
     else {
       hwloc_cpuset_t bind;
-      if (pid)
+      if (pid < 0)
+        bind = hwloc_cpuset_alloc();
+      else if (pid > 0)
         bind = hwloc_get_proc_cpubind(topology, pid, 0);
       else
         bind = hwloc_get_cpubind(topology, 0);
