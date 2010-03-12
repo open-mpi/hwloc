@@ -187,13 +187,16 @@ HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribu
  * (the cpu set) and \p cpu (the loop variable)
  */
 #define hwloc_cpuset_foreach_begin(cpu, set) \
-        for (cpu = 0; cpu < HWLOC_NBMAXCPUS; cpu++) \
+do { \
+        for (cpu = 0; cpu < HWLOC_NBMAXCPUS; cpu++) { \
                 if (hwloc_cpuset_isset(set, cpu)) {
-/** \brief End of loop
+/** \brief End of loop. Needs a terminating ';'.
  *
  * \sa hwloc_cpuset_foreach_begin */
 #define hwloc_cpuset_foreach_end() \
-                }
+                } \
+        } \
+} while (0)
 
 /** @} */
 

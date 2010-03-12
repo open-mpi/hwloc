@@ -37,7 +37,7 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_cpuset_t
   cpuemptyset(target_cpuset);
   hwloc_cpuset_foreach_begin(cpu, hwloc_set)
     cpuaddset(target_cpuset, cpu);
-  hwloc_cpuset_foreach_end()
+  hwloc_cpuset_foreach_end();
 
   cpusetcreate(&cpuset);
   cpusetcreate(&xor_cpuset);
