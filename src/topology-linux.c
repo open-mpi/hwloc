@@ -807,7 +807,7 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
 
     /* type is after path, which may not contain spaces since the kernel escaped them to \040
      * (see the manpage of getmntent) */
-    tmp = strchr(tmp+1, ' ');
+    tmp = strchr(path, ' ');
     if (!tmp)
       continue;
     type = tmp+1;
@@ -819,9 +819,22 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
       hwloc_debug("Found cpuset mount point on %s\n", path);
       *cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
       break;
-    } else if (!strncmp(type, "cgroup ", 7)
-	       /* found a cgroup mntpnt, look for a cpuset options after the path */
-	       && strstr(type+7, "cpuset")) {
+    } else if (!strncmp(type, "cgroup ", 7)) {
+      /* found a cgroup mntpnt */
+      char *opt, *opts;
+
+      /* find options */
+      tmp = strchr(type, ' ');
+      if (!tmp)
+	continue;
+      opts = tmp+1;
+
+      /* find "cpuset" option */
+      while ((opt = strsep(&opts, ",")) && strcmp(opt, "cpuset"))
+        ; /* continue */
+      if (!opt)
+	continue;
+
       hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
       *cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
       break;
