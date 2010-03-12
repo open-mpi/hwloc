@@ -510,6 +510,29 @@ int hwloc_cpuset_last(const struct hwloc_cpuset_s * set)
 	return -1;
 }
 
+int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
+{
+	int i = HWLOC_CPUSUBSET_INDEX(prev_cpu + 1);
+
+	HWLOC__CPUSET_CHECK(set);
+
+	for(; i<HWLOC_CPUSUBSET_COUNT; i++) {
+		unsigned long w = HWLOC_CPUSUBSET_SUBSET(*set,i);
+
+		/* if the prev cpu is in the same word as the possible next one,
+		   we need to mask out previous cpus */
+		if (HWLOC_CPUSUBSET_INDEX(prev_cpu) == i)
+			w &= ~((HWLOC_CPUSUBSET_VAL(prev_cpu) << 1) - 1);
+
+		/* subsets are unsigned longs, use ffsl */
+		int _ffs = hwloc_ffsl(w);
+		if (_ffs>0)
+			return _ffs - 1 + HWLOC_CPUSUBSET_SIZE*i;
+	}
+
+	return -1;
+}
+
 void hwloc_cpuset_singlify(struct hwloc_cpuset_s * set)
 {
 	int i,found = 0;

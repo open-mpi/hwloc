@@ -266,6 +266,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_isset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_iszero.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_last.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_next.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_notset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_orset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \

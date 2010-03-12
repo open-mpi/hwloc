@@ -165,6 +165,7 @@
 #define hwloc_cpuset_notset HWLOC_NAME(cpuset_notset)
 #define hwloc_cpuset_first HWLOC_NAME(cpuset_first)
 #define hwloc_cpuset_last HWLOC_NAME(cpuset_last)
+#define hwloc_cpuset_next HWLOC_NAME(cpuset_next)
 #define hwloc_cpuset_singlify HWLOC_NAME(cpuset_singlify)
 #define hwloc_cpuset_compare_first HWLOC_NAME(cpuset_compare_first)
 #define hwloc_cpuset_compare HWLOC_NAME(cpuset_compare)
