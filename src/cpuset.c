@@ -512,7 +512,7 @@ int hwloc_cpuset_last(const struct hwloc_cpuset_s * set)
 
 int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
 {
-	int i = HWLOC_CPUSUBSET_INDEX(prev_cpu + 1);
+	unsigned i = HWLOC_CPUSUBSET_INDEX(prev_cpu + 1);
 
 	HWLOC__CPUSET_CHECK(set);
 
