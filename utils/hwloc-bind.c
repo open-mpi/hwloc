@@ -5,7 +5,7 @@
  */
 
 #include <private/private.h>
-#include <hwloc-mask.h>
+#include <hwloc-calc.h>
 #include <hwloc.h>
 
 #include <unistd.h>
@@ -15,7 +15,7 @@ static void usage(FILE *where)
 {
   fprintf(where, "Usage: hwloc-bind [options] <location> -- command ...\n");
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
-  fprintf(where, "            as supported by the hwloc-mask utility.\n");
+  fprintf(where, "            as supported by the hwloc-calc utility.\n");
   fprintf(where, "Options:\n");
   fprintf(where, "  -l --logical\ttake logical object indexes (default)\n");
   fprintf(where, "  -p --physical\ttake physical object indexes\n");

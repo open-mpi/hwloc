@@ -394,40 +394,41 @@ int
 hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * separator, int verbose)
 {
   char memory[64] = "";
+  char specific[64] = "";
+  const char *specificseparator;
 
   if (verbose) {
     if (obj->memory.local_memory)
-      snprintf(memory, sizeof(memory), "local=%lu%s%stotal=%lu%s",
-               (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
-	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose),
-	       separator,
-	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
-	       hwloc_memory_size_printf_unit(obj->memory.local_memory, verbose));
+      hwloc_snprintf(memory, sizeof(memory), "local=%lu%s%stotal=%lu%s",
+		     (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+		     hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose),
+		     separator,
+		     (unsigned long) hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
+		     hwloc_memory_size_printf_unit(obj->memory.local_memory, verbose));
     else if (obj->memory.total_memory)
-      snprintf(memory, sizeof(memory), "total=%lu%s",
-	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
-	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
+      hwloc_snprintf(memory, sizeof(memory), "total=%lu%s",
+		     (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+		     hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
   } else {
     if (obj->memory.total_memory)
-      snprintf(memory, sizeof(memory), "%lu%s",
-	       (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
-	       hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
+      hwloc_snprintf(memory, sizeof(memory), "%lu%s",
+		     (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+		     hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
   }
 
   switch (obj->type) {
   case HWLOC_OBJ_MACHINE:
     if (verbose)
-      return hwloc_snprintf(string, size, "%s%s%s%s%s", memory,
-			    obj->attr->machine.dmi_board_vendor?separator:"",
-			    obj->attr->machine.dmi_board_vendor?obj->attr->machine.dmi_board_vendor:"",
-			    obj->attr->machine.dmi_board_name?separator:"",
-			    obj->attr->machine.dmi_board_name?obj->attr->machine.dmi_board_name:"");
-    else
-      return hwloc_snprintf(string, size, "%s", memory);
+      hwloc_snprintf(specific, sizeof(specific), "%s%s%s",
+		     obj->attr->machine.dmi_board_vendor ? obj->attr->machine.dmi_board_vendor : "",
+		     obj->attr->machine.dmi_board_vendor && obj->attr->machine.dmi_board_name ? separator : "",
+		     obj->attr->machine.dmi_board_name ? obj->attr->machine.dmi_board_name : "");
+    break;
   case HWLOC_OBJ_CACHE:
-    return hwloc_snprintf(string, size, "%lu%s",
-			  (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
-			  hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
+    hwloc_snprintf(specific, sizeof(specific), "%lu%s",
+		   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
+		   hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
+    break;
   case HWLOC_OBJ_BRIDGE:
     if (verbose) {
       char up[64], down[64];
@@ -457,8 +458,15 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     *string = '\0';
     return 0;
   default:
-    return hwloc_snprintf(string, size, "%s", memory);
+    break;
   }
+
+  /* does the type-specific attribute string need separator prefix ? */
+  specificseparator = *memory && *specific ? separator : "";
+
+  return hwloc_snprintf(string, size, "%s%s%s",
+			memory,
+			specificseparator, specific);
 }
 
 
@@ -474,7 +482,7 @@ hwloc_obj_snprintf(char *string, size_t size,
   int attrlen;
 
   if (l->os_index != (unsigned) -1) {
-      snprintf(os_index, 12, "%s%u", indexprefix, l->os_index);
+    hwloc_snprintf(os_index, 12, "%s%u", indexprefix, l->os_index);
   }
 
   typelen = hwloc_obj_type_snprintf(type, sizeof(type), l, verbose);

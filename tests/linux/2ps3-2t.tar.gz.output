@@ -1,7 +1,7 @@
-Machine
-  Core
-    P#0
-    P#1
+Machine (phys=0)
+  Core#0
+    P#0 (phys=0)
+    P#1 (phys=1)
 depth 0:	1 Machine (type #1)
  depth 1:	1 Core (type #5)
   depth 2:	2 Procs (type #6)

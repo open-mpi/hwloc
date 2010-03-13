@@ -266,6 +266,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_isset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_iszero.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_last.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_next.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_notset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_orset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
@@ -293,6 +294,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_complete_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_online_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_topology_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_first_largest_obj_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_depth.3 \
@@ -346,6 +348,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
+	$(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_cpuset.3 \
+	$(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_parent.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_support.3 \

@@ -1,5 +1,5 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
@@ -23,31 +23,32 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_object_userdata \
 	hwloc_synthetic \
 	hwloc_is_thissystem \
+	hwloc_insert_misc \
 	hwloc_get_next_pcidev
-
-EXTRA_DIST = 
 
 if HWLOC_HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma
-else !HWLOC_HAVE_LINUX_LIBNUMA
-EXTRA_DIST += linux-libnuma.c
-endif !HWLOC_HAVE_LINUX_LIBNUMA
+endif HWLOC_HAVE_LINUX_LIBNUMA
 
 if HWLOC_HAVE_SCHED_SETAFFINITY
 check_PROGRAMS += glibc-sched
-else !HWLOC_HAVE_SCHED_SETAFFINITY
-EXTRA_DIST += glibc-sched.c
-endif !HWLOC_HAVE_SCHED_SETAFFINITY
+endif HWLOC_HAVE_SCHED_SETAFFINITY
 
 if HWLOC_HAVE_LIBIBVERBS
 check_PROGRAMS += openfabrics-verbs
-else !HWLOC_HAVE_LIBIBVERBS
-EXTRA_DIST += openfabrics-verbs.c
-endif !HWLOC_HAVE_LIBIBVERBS
+endif HWLOC_HAVE_LIBIBVERBS
 
 TESTS = $(check_PROGRAMS)
 
-LIBS = $(HWLOC_top_builddir)/src/libhwloc.la
+# The library has a different name depending on whether we are
+# building in standalone or embedded mode.
+if HWLOC_BUILD_STANDALONE
+hwloc_lib = libhwloc.la
+else
+hwloc_lib = libhwloc_embedded.la
+endif
+
+LIBS = $(HWLOC_top_builddir)/src/$(hwloc_lib)
 
 linux_libnuma_LDFLAGS = -lnuma
 openfabrics_verbs_LDFLAGS = -libverbs

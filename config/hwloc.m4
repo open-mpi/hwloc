@@ -8,7 +8,7 @@ dnl Copyright (c) 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
 dnl                         University of Stuttgart.  All rights reserved.
-dnl Copyright © 2006-2009  Cisco Systems, Inc.  All rights reserved.
+dnl Copyright © 2006-2010  Cisco Systems, Inc.  All rights reserved.
 
 #-----------------------------------------------------------------------
 
@@ -21,6 +21,7 @@ dnl Copyright © 2006-2009  Cisco Systems, Inc.  All rights reserved.
 #
 AC_DEFUN([HWLOC_INIT],[
     AC_REQUIRE([AC_CANONICAL_TARGET])
+    AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
     AC_REQUIRE([_HWLOC_DEFINE_ARGS])
     AC_REQUIRE([AC_PROG_CC])
     AC_REQUIRE([AM_PROG_CC_C_O])
@@ -30,18 +31,31 @@ AC_DEFUN([HWLOC_INIT],[
              [m4_define([hwloc_config_prefix],[$1/])],
              [m4_define([hwloc_config_prefix], [])])
 
-    HWLOC_top_srcdir='$(top_srcdir)/'hwloc_config_prefix
-    AC_SUBST(HWLOC_top_srcdir)
-
-    HWLOC_top_builddir="`pwd`"
+    # Get hwloc's absolute top builddir (which may not be the same as
+    # the real $top_builddir, because we may be building in embedded
+    # mode).
+    HWLOC_startdir=`pwd`
+    if test x"hwloc_config_prefix" != "x" -a ! -d "hwloc_config_prefix"; then
+        mkdir "hwloc_config_prefix"
+    fi
+    cd "hwloc_config_prefix"
+    HWLOC_top_builddir=`pwd`
     AC_SUBST(HWLOC_top_builddir)
-    cd "$srcdir"
+
+    # Get hwloc's absolute top srcdir (which may not be the same as
+    # the real $top_srcdir, because we may be building in embedded
+    # mode).  First, go back to the startdir incase the $srcdir is
+    # relative.
+    cd "$HWLOC_startdir"
+    cd "$srcdir"/hwloc_config_prefix
     HWLOC_top_srcdir="`pwd`"
     AC_SUBST(HWLOC_top_srcdir)
-    cd "$HWLOC_top_builddir"
 
-    AC_MSG_NOTICE([builddir: $HWLOC_top_builddir])
-    AC_MSG_NOTICE([srcdir: $HWLOC_top_srcdir])
+    # Go back to where we started
+    cd "$HWLOC_startdir"
+
+    AC_MSG_NOTICE([hwloc builddir: $HWLOC_top_builddir])
+    AC_MSG_NOTICE([hwloc srcdir: $HWLOC_top_srcdir])
     if test "$HWLOC_top_builddir" != "$HWLOC_top_srcdir"; then
         AC_MSG_NOTICE([Detected VPATH build])
     fi
@@ -52,6 +66,22 @@ AC_DEFUN([HWLOC_INIT],[
 
     # Debug mode?
     AC_MSG_CHECKING([if want hwloc maintainer support])
+    hwloc_debug=
+    AS_IF([test "$enable_debug" = "yes"],
+          [hwloc_debug=1
+           hwloc_debug_msg="enabled"])
+    AS_IF([test "$hwloc_debug" = "" -a "$hwloc_mode" = "embedded" -a "$enable_debug" = ""],
+          [hwloc_debug=0
+           hwloc_debug_msg="disabled (embedded mode)"])
+    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .svn],
+          [hwloc_debug=1
+           hwloc_debug_msg="enabled (SVN checkout default)"])
+    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .hg],
+          [hwloc_debug=1
+           hwloc_debug_msg="enabled (HG clone default)"])
+    AS_IF([test "$hwloc_debug" = ""],
+          [hwloc_debug=0
+           hwloc_debug_msg="disabled"])
     # Grr; we use #ifndef for HWLOC_DEBUG!  :-(
     AH_TEMPLATE(HWLOC_DEBUG, [Whether we are in debugging mode or not])
     AS_IF([test "$hwloc_debug" = "1"], [AC_DEFINE([HWLOC_DEBUG])])
@@ -70,15 +100,12 @@ AC_DEFUN([HWLOC_INIT],[
     AM_CONFIG_HEADER(hwloc_config_prefix[include/private/config.h])
     AM_CONFIG_HEADER(hwloc_config_prefix[include/hwloc/config.h])
 
-    # Give an easy #define to know if we need to transform all the
-    # hwloc names
-    AH_TEMPLATE([HWLOC_SYM_TRANSFORM], [Whether we need to re-define all the hwloc public symbols or not])
-    AS_IF([test "$hwloc_symbol_prefix_value" = "hwloc_"],
-          [AC_DEFINE([HWLOC_SYM_TRANSFORM], [0])],
-          [AC_DEFINE([HWLOC_SYM_TRANSFORM], [1])])
-
     # What prefix are we using?
     AC_MSG_CHECKING([for hwloc symbol prefix])
+    AS_IF([test "$hwloc_symbol_prefix_value" = ""],
+          [AS_IF([test "$with_hwloc_symbol_prefix" = ""],
+                 [hwloc_symbol_prefix_value=hwloc_],
+                 [hwloc_symbol_prefix_value=$with_hwloc_symbol_prefix])])
     AC_DEFINE_UNQUOTED(HWLOC_SYM_PREFIX, [$hwloc_symbol_prefix_value],
                        [The hwloc symbol prefix])
     # Ensure to [] escape the whole next line so that we can get the
@@ -87,6 +114,13 @@ AC_DEFUN([HWLOC_INIT],[
     AC_DEFINE_UNQUOTED(HWLOC_SYM_PREFIX_CAPS, [$hwloc_symbol_prefix_value_caps],
                        [The hwloc symbol prefix in all caps])
     AC_MSG_RESULT([$hwloc_symbol_prefix_value])
+
+    # Give an easy #define to know if we need to transform all the
+    # hwloc names
+    AH_TEMPLATE([HWLOC_SYM_TRANSFORM], [Whether we need to re-define all the hwloc public symbols or not])
+    AS_IF([test "$hwloc_symbol_prefix_value" = "hwloc_"],
+          [AC_DEFINE([HWLOC_SYM_TRANSFORM], [0])],
+          [AC_DEFINE([HWLOC_SYM_TRANSFORM], [1])])
 
     #
     # Setup hwloc docs support if we're building standalone
@@ -202,6 +236,9 @@ AC_DEFUN([HWLOC_INIT],[
     AC_CHECK_SIZEOF([unsigned int])
     AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_INT], $ac_cv_sizeof_unsigned_int, [The size of `unsigned int', as computed by sizeof])
 
+    #
+    # Check for compiler attributes and visibility
+    #
     _HWLOC_CHECK_ATTRIBUTES
     _HWLOC_CHECK_VISIBILITY
     
@@ -354,16 +391,17 @@ AC_DEFUN([HWLOC_INIT],[
         AC_MSG_RESULT([yes]),
         AC_MSG_RESULT([no])
     )
-    
-    AC_ARG_ENABLE([cairo],
-      [AS_HELP_STRING([--disable-cairo], [disable the Cairo back-end of `lstopo'])],
-      [enable_cairo="$enableval"],
-      [enable_cairo="yes"])
-    
-    if test "x$enable_cairo" = "xyes"; then
+
+    # Cairo support
+    if test "x$enable_cairo" != "xno"; then
       HWLOC_PKG_CHECK_MODULES([CAIRO], [cairo], [:], [enable_cairo="no"])
-      if test "x$enable_cairo" = "xyes"; then
-        AC_PATH_X
+      if test "x$enable_cairo" != "xno"; then
+        AC_PATH_XTRA
+	CFLAGS_save=$CFLAGS
+	LIBS_save=$LIBS
+
+	CFLAGS="$CFLAGS $X_CFLAGS"
+	LIBS="$LIBS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS"
         AC_CHECK_HEADERS([X11/Xlib.h], [
           AC_CHECK_HEADERS([X11/Xutil.h X11/keysym.h], [
             AC_CHECK_LIB([X11], [XOpenDisplay], [
@@ -377,23 +415,23 @@ AC_DEFUN([HWLOC_INIT],[
         if test "x$enable_X11" != "xyes"; then
           AC_MSG_WARN([X11 headers not found, Cairo/X11 back-end disabled])
         fi
+
+	CFLAGS=$CFLAGS_save
+	LIBS=$LIBS_save
       fi
     fi
     
-    if test "x$enable_cairo" = "xyes"; then
+    if test "x$enable_cairo" != "xno"; then
       AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
     fi
+
+    # XML support        
     
-    AC_ARG_ENABLE([xml],
-      [AS_HELP_STRING([--disable-xml], [disable the XML back-end of `lstopo'])],
-      [enable_xml="$enableval"],
-      [enable_xml="yes"])
-    
-    if test "x$enable_xml" = "xyes"; then
+    if test "x$enable_xml" != "xno"; then
       HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [:], [enable_xml="no"])
     fi
     
-    if test "x$enable_xml" = "xyes"; then
+    if test "x$enable_xml" != "xno"; then
       HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
       AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
       AC_SUBST([HWLOC_HAVE_XML], [1])
@@ -437,20 +475,7 @@ AC_DEFUN([HWLOC_INIT],[
     AC_LIBTOOL_WIN32_DLL
     AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
     AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
-    
-    AC_ARG_ENABLE([debug],
-      AS_HELP_STRING([--enable-debug], [enable debugging messages]),
-      [enable_debug="$enableval"],
-      [enable_debug="no"])
-    
-    AC_MSG_CHECKING([whether debug is enabled])
-    if test x$enable_debug = xyes; then
-      AC_DEFINE_UNQUOTED([HWLOC_DEBUG], [1], [Define to 1 to enable debug])
-      AC_MSG_RESULT([yes])
-    else
-      AC_MSG_RESULT([no])
-    fi
-    
+
     AC_PATH_PROG([BASH], [bash])
     
     AC_CHECK_FUNCS([ffs], [
@@ -492,9 +517,9 @@ AC_DEFUN([HWLOC_INIT],[
       AC_DEFINE([HWLOC_HAVE_CLZL], [1], [Define to 1 if you have the `clzl' function.])
     ])
     
-    AC_CHECK_FUNCS([openat], [have_openat=yes])
+    AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
     
-    AC_CHECK_DECL([numa_bitmask_alloc], [have_linux_libnuma=yes], [],
+    AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
     	      [#include <numa.h>])
     
     AC_CHECK_HEADERS([pthread_np.h])
@@ -510,7 +535,7 @@ AC_DEFUN([HWLOC_INIT],[
       #  include <pthread_np.h>
       #endif
     ]])
-    AC_CHECK_FUNC([sched_setaffinity], [have_sched_setaffinity=yes])
+    AC_CHECK_FUNC([sched_setaffinity], [hwloc_have_sched_setaffinity=yes])
     AC_CHECK_HEADERS([sys/cpuset.h],,,[[#include <sys/param.h>]])
     
     AC_CHECK_PROGS(XMLLINT, [xmllint])
@@ -518,10 +543,18 @@ AC_DEFUN([HWLOC_INIT],[
     AC_SUBST(HWLOC_REQUIRES)
 
     # Setup HWLOC's CPP and LD flags
-    HWLOC_CPPFLAGS='-I$(top_srcdir)/'hwloc_config_prefix'include -I$(top_builddir)/'hwloc_config_prefix'include'
+    HWLOC_CPPFLAGS='-I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include'
     AC_SUBST(HWLOC_CPPFLAGS)
-    HWLOC_LDFLAGS='-L$(top_builddir)/'hwloc_config_prefix'src'
+    HWLOC_LDFLAGS='-L$(HWLOC_top_builddir)/src'
     AC_SUBST(HWLOC_LDFLAGS)
+
+    # Set these values explicitly for embedded builds.  Exporting
+    # these values through *_EMBEDDED_* values gives us the freedom to
+    # do something different someday if we ever need to.
+    HWLOC_EMBEDDED_CPPFLAGS=$HWLOC_CPPFLAGS
+    AC_SUBST(HWLOC_EMBEDDED_CPPFLAGS)
+    HWLOC_EMBEDDED_LDADD='$(HWLOC_top_builddir)/src/libhwloc_embedded.la'
+    AC_SUBST(HWLOC_EMBEDDED_LDADD)
 
     # Try to compile the cpuid inlines
     AC_MSG_CHECKING([for cpuid])
@@ -545,29 +578,54 @@ AC_DEFUN([HWLOC_INIT],[
       AC_MSG_RESULT([no])
     ])
     CPPFLAGS="$old_CPPFLAGS"
-    AM_CONDITIONAL([HWLOC_HAVE_CPUID], [test "x$hwloc_have_cpuid" = "xyes"])
     # Setup all the AM_CONDITIONALs
     HWLOC_DO_AM_CONDITIONALS
 
-    # JMS do we really need all of these if we're embedded?
+    # Only generate these files/links in standalone mode
+    AS_IF([test "$hwloc_mode" = "standalone"],
+          [
+           # These files are only needed in standalone mode
+           AC_CONFIG_FILES(
+               hwloc_config_prefix[hwloc.pc]
+               hwloc_config_prefix[doc/doxygen-config.cfg]
+               hwloc_config_prefix[tests/linux/gather-topology.sh]
+               hwloc_config_prefix[tests/linux/test-topology.sh]
+               hwloc_config_prefix[tests/xml/test-topology.sh]
+               hwloc_config_prefix[utils/test-hwloc-distrib.sh])
+
+           AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/gather-topology.sh ]hwloc_config_prefix[utils/test-hwloc-distrib.sh])
+
+           # These links are only needed in standalone mode.  It would
+           # be nice to m4 foreach this somehow, but whenever I tried
+           # it, I got obscure "invalid tag" errors from
+           # AC_CONFIG_LINKS.  :-\ Since these tests are only run when
+           # built in standalone mode, only generate them in
+           # standalone mode.
+           AC_CONFIG_LINKS(
+        hwloc_config_prefix[tests/ports/topology.c]:hwloc_config_prefix[src/topology.c]
+	hwloc_config_prefix[tests/ports/traversal.c]:hwloc_config_prefix[src/traversal.c]
+	hwloc_config_prefix[tests/ports/topology-synthetic.c]:hwloc_config_prefix[src/topology-synthetic.c]
+	hwloc_config_prefix[tests/ports/topology-solaris.c]:hwloc_config_prefix[src/topology-solaris.c]
+	hwloc_config_prefix[tests/ports/topology-aix.c]:hwloc_config_prefix[src/topology-aix.c]
+	hwloc_config_prefix[tests/ports/topology-osf.c]:hwloc_config_prefix[src/topology-osf.c]
+	hwloc_config_prefix[tests/ports/topology-windows.c]:hwloc_config_prefix[src/topology-windows.c]
+	hwloc_config_prefix[tests/ports/topology-darwin.c]:hwloc_config_prefix[src/topology-darwin.c]
+	hwloc_config_prefix[tests/ports/topology-freebsd.c]:hwloc_config_prefix[src/topology-freebsd.c]
+	hwloc_config_prefix[tests/ports/topology-hpux.c]:hwloc_config_prefix[src/topology-hpux.c])
+    ])
+
+    # Always generate these files
     AC_CONFIG_FILES(
-        hwloc_config_prefix[hwloc.pc]
-        hwloc_config_prefix[doc/doxygen-config.cfg]
         hwloc_config_prefix[Makefile]
         hwloc_config_prefix[doc/Makefile]
         hwloc_config_prefix[include/Makefile]
         hwloc_config_prefix[src/Makefile ]
         hwloc_config_prefix[tests/Makefile ]
         hwloc_config_prefix[tests/linux/Makefile]
-        hwloc_config_prefix[tests/linux/gather-topology.sh]
-        hwloc_config_prefix[tests/linux/test-topology.sh]
         hwloc_config_prefix[tests/xml/Makefile]
-        hwloc_config_prefix[tests/xml/test-topology.sh]
         hwloc_config_prefix[tests/ports/Makefile]
         hwloc_config_prefix[utils/Makefile]
-        hwloc_config_prefix[utils/test-hwloc-distrib.sh]
     )
-    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/gather-topology.sh ]hwloc_config_prefix[utils/test-hwloc-distrib.sh])
 
     # Cleanup
     unset hwloc_config_happy
@@ -619,29 +677,35 @@ AC_DEFUN([_HWLOC_DEFINE_ARGS],[
     AC_ARG_WITH([hwloc-symbol-prefix],
                 AC_HELP_STRING([--with-hwloc-symbol-prefix=STRING],
                                [STRING can be any valid C symbol name.  It will be prefixed to all public HWLOC symbols.  Default: "hwloc_"]))
-    if test "$with_hwloc_symbol_prefix" = ""; then
-        hwloc_symbol_prefix_value=hwloc_
-    else
-        hwloc_symbol_prefix_value=$with_hwloc_symbol_prefix
-    fi
 
     # Debug mode?
+    # If we're building in embedded mode, default to disabling debug.
+    AS_IF([test "$hwloc_mode" = "embedded"], [enable_debug=no])
     AC_ARG_ENABLE([debug],
-                    AC_HELP_STRING([--enable-debug],
-                                   [Using --enable-debug enables various maintainer-level debugging controls.  This option is not recomended for end users.]))
-    if test "$enable_debug" = "yes"; then
-        hwloc_debug=1
-        hwloc_debug_msg="enabled"
-    elif test "$enable_debug" = "" -a -d .svn; then
-        hwloc_debug=1
-        hwloc_debug_msg="enabled (SVN checkout default)"
-    elif test "$enable_debug" = "" -a -d .hg; then
-        hwloc_debug=1
-        hwloc_debug_msg="enabled (HG clone default)"
-    else
-        hwloc_debug=0
-        hwloc_debug_msg="disabled"
-    fi
+                  AC_HELP_STRING([--enable-debug],
+                                 [Using --enable-debug enables various hwloc maintainer-level debugging controls.  This option is not recomended for end users.]))
+
+    # If we're building in embedded mode, default to disabling the docs.
+    AS_IF([test "$hwloc_mode" = "embedded"], [enable_doxygen=no])
+    AC_ARG_ENABLE([doxygen],
+        [AC_HELP_STRING([--enable-doxygen],
+                        [enable support for building Doxygen documentation (note that this option is ONLY relevant in developer builds; Doxygen documentation is pre-built for tarball builds and this option is therefore ignored)])])
+
+    AC_ARG_ENABLE(picky,
+                  AC_HELP_STRING([--disable-picky],
+                                 [When in developer checkouts of hwloc and compiling with gcc, the default is to enable maximum compiler pickyness.  Using --disable-picky or --enable-picky overrides any default setting]))
+
+    # If we're building in embedded mode, default to disabling Cairo.
+    AS_IF([test "$hwloc_mode" = "embedded"], [enable_cairo=no])
+    AC_ARG_ENABLE([cairo],
+                  AS_HELP_STRING([--disable-cairo], 
+                                 [Disable the Cairo back-end of hwloc's lstopo command]))
+
+    # If we're building in embedded mode, default to disable XML.
+    AS_IF([test "$hwloc_mode" = "embedded"], [enable_xml=no])
+    AC_ARG_ENABLE([xml],
+                  AS_HELP_STRING([--disable-xml], 
+		                 [Disable the XML back-end of hwloc's lstopo command]))
 ])dnl
 
 #-----------------------------------------------------------------------
@@ -654,15 +718,15 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 
         AM_CONDITIONAL([HWLOC_HAVE_GCC], [test "x$GCC" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_MS_LIB], [test "x$HWLOC_MS_LIB" != "x"])
-        AM_CONDITIONAL([HWLOC_HAVE_OPENAT], [test "x$have_openat" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_OPENAT], [test "x$hwloc_have_openat" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LINUX_LIBNUMA],
-                       [test "x$have_linux_libnuma" = "xyes"])
+                       [test "x$hwloc_have_linux_libnuma" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_SCHED_SETAFFINITY],
-                       [test "x$have_sched_setaffinity" = "xyes"])
+                       [test "x$hwloc_have_sched_setaffinity" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS], 
-                       [test "x$have_libibverbs" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" = "xyes"])
+                       [test "x$hwloc_have_libibverbs" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" != "xno"])
+        AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" != "xno"])
 
         AM_CONDITIONAL([HWLOC_BUILD_DOXYGEN],
                        [test "x$hwloc_generate_doxs" = "xyes"])
@@ -685,6 +749,8 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 
         AM_CONDITIONAL([HWLOC_HAVE_X86_32], [test "x$hwloc_x86_32" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_X86_64], [test "x$hwloc_x86_64" = "xyes"])
+        AM_CONDITIONAL([HWLOC_DOXYGEN_BROKEN_SHORT_NAMES], [test "$DOXYGEN_VERSION" = "1.6.2"])
+        AM_CONDITIONAL([HWLOC_HAVE_CPUID], [test "x$hwloc_have_cpuid" = "xyes"])
     ])
     hwloc_did_am_conditionals=yes
 ])dnl
@@ -697,7 +763,7 @@ dnl included in the tarball.
 
 AC_DEFUN([_HWLOC_SETUP_DOCS],[
     AC_MSG_CHECKING([if this is a developer build])
-    AS_IF([test ! -d "$srcdir/.svn" -a ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
+    AS_IF([test "$hwloc_mode" = "embedded" -o ! -d "$srcdir/.svn" -a ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
           [AC_MSG_RESULT([no (doxygen generation is optional)])],
           [AC_MSG_RESULT([yes])])
     
@@ -706,7 +772,6 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
     AC_ARG_VAR([DOXYGEN], [Location of the doxygen program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([DOXYGEN], [doxygen])
     DOXYGEN_VERSION=`doxygen --version 2> /dev/null`
-    AM_CONDITIONAL([HWLOC_DOXYGEN_BROKEN_SHORT_NAMES], [test "$DOXYGEN_VERSION" = "1.6.2"])
     
     AC_ARG_VAR([PDFLATEX], [Location of the pdflatex program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([PDFLATEX], [pdflatex])
@@ -741,9 +806,6 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
     
     # If any one of the above tools is missing, we will refuse to make dist.
     
-    AC_ARG_ENABLE([doxygen],
-        [AC_HELP_STRING([--enable-doxygen],
-                        [enable support for building Doxygen documentation (note that this option is ONLY relevant in developer builds; Doxygen documentation is pre-built for tarball builds and this option is therefore ignored)])])
     AC_MSG_CHECKING([if will build doxygen docs])
     AS_IF([test "x$hwloc_generate_doxs" = "xyes" -a "x$enable_doxygen" != "xno"],
           [], [hwloc_generate_doxs=no])
@@ -768,9 +830,6 @@ AC_DEFUN([_HWLOC_SETUP_DOCS],[
     AS_IF([test "$GCC" = "yes"],
           [AS_IF([test -d "$srcdir/.svn" -o -d "$srcdir/.hg"],
                  [want_picky=1])])
-    AC_ARG_ENABLE(picky,
-                  AC_HELP_STRING([--disable-picky],
-                                 [When in developer checkouts of hwloc and compiling with gcc, the default is to enable maximum compiler pickyness.  Using --disable-picky or --enable-picky overrides any default setting]))
     if test "$enable_picky" = "yes"; then
         if test "$GCC" = "yes"; then
             AC_MSG_RESULT([yes])
@@ -857,165 +916,3 @@ AC_DEFUN([_HWLOC_CHECK_DECLS], [
     [Define to 1 if you have the declaration of `$1', and to 0 if you don't])
 ])
 
-#-----------------------------------------------------------------------
-
-# hwloc modification to the following PKG_* macros -- add HWLOC_
-# prefix to make it "safe" to embed these macros in other packages.
-
-# pkg.m4 - Macros to locate and utilise pkg-config.            -*- Autoconf -*-
-# 
-# Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-#
-# As a special exception to the GNU General Public License, if you
-# distribute this file as part of a program that contains a
-# configuration script generated by Autoconf, you may include it under
-# the same distribution terms that you use for the rest of that program.
-
-# HWLOC_PKG_PROG_PKG_CONFIG([MIN-VERSION])
-# ----------------------------------
-AC_DEFUN([HWLOC_PKG_PROG_PKG_CONFIG],
-[m4_pattern_forbid([^_?PKG_[A-Z_]+$])
-m4_pattern_allow([^HWLOC_PKG_CONFIG(_PATH)?$])
-AC_ARG_VAR([HWLOC_PKG_CONFIG], [path to pkg-config utility])dnl
-if test "x$ac_cv_env_HWLOC_PKG_CONFIG_set" != "xset"; then
-	AC_PATH_TOOL([HWLOC_PKG_CONFIG], [pkg-config])
-fi
-if test -n "$HWLOC_PKG_CONFIG"; then
-	HWLOC_pkg_min_version=m4_default([$1], [0.9.0])
-	AC_MSG_CHECKING([pkg-config is at least version $HWLOC_pkg_min_version])
-	if $HWLOC_PKG_CONFIG --atleast-pkgconfig-version $HWLOC_pkg_min_version; then
-		AC_MSG_RESULT([yes])
-	else
-		AC_MSG_RESULT([no])
-		HWLOC_PKG_CONFIG=""
-	fi
-		
-fi[]dnl
-])# HWLOC_PKG_PROG_PKG_CONFIG
-
-# HWLOC_PKG_CHECK_EXISTS(MODULES, [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
-#
-# Check to see whether a particular set of modules exists.  Similar
-# to HWLOC_PKG_CHECK_MODULES(), but does not set variables or print errors.
-#
-#
-# Similar to HWLOC_PKG_CHECK_MODULES, make sure that the first instance of
-# this or HWLOC_PKG_CHECK_MODULES is called, or make sure to call
-# HWLOC_PKG_CHECK_EXISTS manually
-# --------------------------------------------------------------
-AC_DEFUN([HWLOC_PKG_CHECK_EXISTS],
-[AC_REQUIRE([HWLOC_PKG_PROG_PKG_CONFIG])dnl
-if test -n "$HWLOC_PKG_CONFIG" && \
-    AC_RUN_LOG([$HWLOC_PKG_CONFIG --exists --print-errors "$1"]); then
-  m4_ifval([$2], [$2], [:])
-m4_ifvaln([$3], [else
-  $3])dnl
-fi])
-
-
-# _HWLOC_PKG_CONFIG([VARIABLE], [COMMAND], [MODULES])
-# ---------------------------------------------
-m4_define([_HWLOC_PKG_CONFIG],
-[if test -n "$HWLOC_PKG_CONFIG"; then
-    if test -n "$$1"; then
-        HWLOC_pkg_cv_[]$1="$$1"
-    else
-        HWLOC_PKG_CHECK_EXISTS([$3],
-                         [HWLOC_pkg_cv_[]$1=`$HWLOC_PKG_CONFIG --[]$2 "$3" 2>/dev/null`],
-			 [HWLOC_pkg_failed=yes])
-    fi
-else
-	HWLOC_pkg_failed=untried
-fi[]
-])# _HWLOC_PKG_CONFIG
-
-# _HWLOC_PKG_SHORT_ERRORS_SUPPORTED
-# -----------------------------
-AC_DEFUN([_HWLOC_PKG_SHORT_ERRORS_SUPPORTED],
-[AC_REQUIRE([HWLOC_PKG_PROG_PKG_CONFIG])
-if $HWLOC_PKG_CONFIG --atleast-pkgconfig-version 0.20; then
-        HWLOC_pkg_short_errors_supported=yes
-else
-        HWLOC_pkg_short_errors_supported=no
-fi[]dnl
-])# _HWLOC_PKG_SHORT_ERRORS_SUPPORTED
-
-
-# HWLOC_PKG_CHECK_MODULES(VARIABLE-PREFIX, MODULES, [ACTION-IF-FOUND],
-# [ACTION-IF-NOT-FOUND])
-#
-#
-# Note that if there is a possibility the first call to
-# HWLOC_PKG_CHECK_MODULES might not happen, you should be sure to include an
-# explicit call to HWLOC_PKG_PROG_PKG_CONFIG in your configure.ac
-#
-#
-# --------------------------------------------------------------
-AC_DEFUN([HWLOC_PKG_CHECK_MODULES],
-[AC_REQUIRE([HWLOC_PKG_PROG_PKG_CONFIG])dnl
-AC_ARG_VAR([HWLOC_]$1[_CFLAGS], [C compiler flags for $1, overriding pkg-config])dnl
-AC_ARG_VAR([HWLOC_]$1[_LIBS], [linker flags for $1, overriding pkg-config])dnl
-
-HWLOC_pkg_failed=no
-AC_MSG_CHECKING([for $1])
-
-_HWLOC_PKG_CONFIG([HWLOC_][$1][_CFLAGS], [cflags], [$2])
-_HWLOC_PKG_CONFIG([HWLOC_][$1][_LIBS], [libs], [$2])
-
-m4_define([_HWLOC_PKG_TEXT], [Alternatively, you may set the environment variables HWLOC_[]$1[]_CFLAGS
-and HWLOC_[]$1[]_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.])
-
-if test $HWLOC_pkg_failed = yes; then
-        _HWLOC_PKG_SHORT_ERRORS_SUPPORTED
-        if test $HWLOC_pkg_short_errors_supported = yes; then
-	        HWLOC_[]$1[]_PKG_ERRORS=`$HWLOC_PKG_CONFIG --short-errors --errors-to-stdout --print-errors "$2"`
-        else 
-	        HWLOC_[]$1[]_PKG_ERRORS=`$HWLOC_PKG_CONFIG --errors-to-stdout --print-errors "$2"`
-        fi
-	# Put the nasty error message in config.log where it belongs
-	echo "$HWLOC_[]$1[]_PKG_ERRORS" >&AS_MESSAGE_LOG_FD
-
-	ifelse([$4], , [AC_MSG_ERROR(dnl
-[Package requirements ($2) were not met:
-
-$HWLOCC_$1_PKG_ERRORS
-
-Consider adjusting the HWLOC_PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
-
-_HWLOC_PKG_TEXT
-])],
-		[AC_MSG_RESULT([no])
-                $4])
-elif test $HWLOC_pkg_failed = untried; then
-	ifelse([$4], , [AC_MSG_FAILURE(dnl
-[The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the HWLOC_PKG_CONFIG environment variable to the full
-path to pkg-config.
-
-_HWLOC_PKG_TEXT
-
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.])],
-		[$4])
-else
-	HWLOC_[]$1[]_CFLAGS=$HWLOC_pkg_cv_HWLOC_[]$1[]_CFLAGS
-	HWLOC_[]$1[]_LIBS=$HWLOC_pkg_cv_HWLOC_[]$1[]_LIBS
-        AC_MSG_RESULT([yes])
-	ifelse([$3], , :, [$3])
-fi[]dnl
-])# HWLOC_PKG_CHECK_MODULES

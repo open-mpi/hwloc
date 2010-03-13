@@ -367,6 +367,7 @@ static int
 lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 {
   unsigned index = logical ? obj->logical_index : obj->os_index;
+  const char *indexprefix = logical ? "#" : " p#";
   char typestr[32] = "P";
   char indexstr[32]= "";
   char attrstr[256];
@@ -376,7 +377,7 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
   if (index != (unsigned)-1 && obj->depth != 0
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
-    snprintf(indexstr, sizeof(indexstr), "#%u", index);
+    snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, index);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
   if (attrlen)
     return snprintf(text, textlen, "%s%s(%s)", typestr, indexstr, attrstr);
@@ -488,13 +489,14 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 
   DYNA_CHECK();
 
-  /* TODO: current: green */
   if (hwloc_cpuset_isset(level->online_cpuset, level->os_index))
     if (!hwloc_cpuset_isset(level->allowed_cpuset, level->os_index))
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
     else {
       hwloc_cpuset_t bind;
-      if (pid)
+      if (pid < 0)
+        bind = hwloc_cpuset_alloc();
+      else if (pid > 0)
         bind = hwloc_get_proc_cpubind(topology, pid, 0);
       else
         bind = hwloc_get_cpubind(topology, 0);
@@ -728,23 +730,30 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = 0;
-  char text[64];
-  int n;
+  unsigned textwidth = level->name ? strlen(level->name) * fontsize : 6*fontsize;
 
   DYNA_CHECK();
 
+#if 0
   if (fontsize) {
     n = lstopo_obj_snprintf(text, sizeof(text), level, logical);
     textwidth = (n * fontsize * 3) / 4;
   }
+#endif
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
   methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, totwidth, y, totheight);
 
-  if (fontsize)
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+  if (fontsize) {
+    if (level->name) {
+      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
+    } else {
+      char text[64];
+      lstopo_obj_snprintf(text, sizeof(text), level, logical);
+      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    }
+  }
 
   RECURSE_RECT(level, methods, gridsize, gridsize);
 

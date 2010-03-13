@@ -156,6 +156,9 @@ HWLOC_DECLSPEC int hwloc_cpuset_first(hwloc_const_cpuset_t set) __hwloc_attribut
 /** \brief Compute the last CPU (most significant bit) in CPU set \p set */
 HWLOC_DECLSPEC int hwloc_cpuset_last(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
+/** \brief Compute the next CPU in CPU set \p set which is after CPU \p prev_cpu */
+HWLOC_DECLSPEC int hwloc_cpuset_next(hwloc_const_cpuset_t set, unsigned prev_cpu) __hwloc_attribute_pure;
+
 /** \brief Keep a single CPU among those set in CPU set \p set
  *
  * Might be used before binding so that the process does not
@@ -187,13 +190,16 @@ HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribu
  * (the cpu set) and \p cpu (the loop variable)
  */
 #define hwloc_cpuset_foreach_begin(cpu, set) \
-        for (cpu = 0; cpu < HWLOC_NBMAXCPUS; cpu++) \
-                if (hwloc_cpuset_isset(set, cpu)) {
-/** \brief End of loop
+do { \
+        for (cpu = hwloc_cpuset_first(set); \
+             cpu != (typeof(cpu)) -1; \
+             cpu = hwloc_cpuset_next(set, cpu)) { \
+/** \brief End of loop. Needs a terminating ';'.
  *
  * \sa hwloc_cpuset_foreach_begin */
 #define hwloc_cpuset_foreach_end() \
-                }
+        } \
+} while (0)
 
 /** @} */
 

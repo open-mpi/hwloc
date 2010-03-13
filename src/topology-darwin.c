@@ -107,6 +107,10 @@ hwloc_look_darwin(struct hwloc_topology *topology)
       for (i = 0; i < n; i++) {
         for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
           obj = hwloc_alloc_setup_object(i?HWLOC_OBJ_CACHE:HWLOC_OBJ_NODE, j);
+          if (!i) {
+            obj->nodeset = hwloc_cpuset_alloc();
+            hwloc_cpuset_set(obj->nodeset, j);
+          }
           obj->cpuset = hwloc_cpuset_alloc();
           for (cpu = j*cacheconfig[i];
                cpu < ((j+1)*cacheconfig[i]);

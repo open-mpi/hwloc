@@ -1,5 +1,5 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
@@ -11,7 +11,7 @@ EXTRA_DIST = test-hwloc-distrib.output
 
 # Only build the utilities if we're building in standalone mode
 if HWLOC_BUILD_STANDALONE
-bin_PROGRAMS = lstopo hwloc-mask hwloc-bind hwloc-distrib
+bin_PROGRAMS = lstopo hwloc-calc hwloc-bind hwloc-distrib
 endif
 
 lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c
@@ -27,16 +27,19 @@ endif
 lstopo_CFLAGS = $(HWLOC_CAIRO_CFLAGS) $(HWLOC_XML_CFLAGS) $(HWLOC_PCI_CFLAGS)
 lstopo_LDADD = $(HWLOC_CAIRO_LIBS) $(HWLOC_XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS) $(HWLOC_PCI_LIBS)
 
-hwloc_mask_SOURCES = hwloc-mask.c hwloc-mask.h
+hwloc_calc_SOURCES = hwloc-calc.c hwloc-calc.h
 
-if HWLOC_HAVE_MINGW32
-else
+# Only run the tests if we're building standalone, because the tests
+# call hwloc executables.
+if HWLOC_BUILD_STANDALONE
+if !HWLOC_HAVE_MINGW32
 TESTS = test-hwloc-distrib.sh
-endif
+endif !HWLOC_HAVE_MINGW32
+endif HWLOC_BUILD_STANDALONE
 
 # Only install man pages if we're building in standalone mode
 if HWLOC_BUILD_STANDALONE
-man_pages = hwloc.7 lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-mask.1
+man_pages = hwloc.7 lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1
 EXTRA_DIST += $(man_pages:.1=.1in)
 nodist_man_MANS = $(man_pages)
 
@@ -62,14 +65,14 @@ nodist_man_MANS = $(man_pages)
 	  > $@ < $<
 
 install-exec-hook: install-man
-	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
-	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT)
-	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1
-	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1 && $(LN_S) lstopo.1 hwloc-info.1
+	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-mask$(EXEEXT)
+	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT) && $(LN_S) hwloc-calc$(EXEEXT) hwloc-mask$(EXEEXT)
+	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/hwloc-mask.1
+	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1 && $(LN_S) lstopo.1 hwloc-info.1 && $(LN_S) hwloc-calc.1 hwloc-mask.1
 
 uninstall-local:
-	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
-	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1
+	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-mask$(EXEEXT)
+	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/hwloc-mask.1
 
 distclean-local:
 	rm -f $(man_pages)

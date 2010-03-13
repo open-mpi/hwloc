@@ -267,6 +267,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	  case HWLOC_OBJ_NODE:
 	    {
 	      ULONGLONG avail;
+	      obj->nodeset = hwloc_cpuset_alloc();
+	      hwloc_cpuset_set(obj->nodeset, id);
 	      if (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail))
 		obj->memory.local_memory = avail;
 	      obj->memory.page_types_len = 1;
@@ -375,6 +377,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
 	switch (type) {
 	  case HWLOC_OBJ_NODE:
+	    obj->nodeset = hwloc_cpuset_alloc();
+	    hwloc_cpuset_set(obj->nodeset, id);
 	    obj->memory.local_memory = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
 	    obj->memory.page_types_len = 1;
 	    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));

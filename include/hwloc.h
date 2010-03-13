@@ -239,7 +239,6 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
-
   hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
                                           *
                                           * This includes not only the same as the cpuset field, but also the CPUs for
@@ -266,6 +265,30 @@ struct hwloc_obj {
                                           * permission errors.  This is usually restricted by administration rules.
                                           * Some of them may however be offline so binding to them may still not be
                                           * possible, see online_cpuset.
+                                          *
+                                          * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
+                                          */
+
+  hwloc_cpuset_t nodeset;               /**< \brief NUMA nodes covered by this object or containing this object
+                                          *
+                                          * This is the set of NUMA nodes for which there are NODE objects in the
+                                          * topology under or above this object, i.e. which are known to be physically
+                                          * contained in this object or containing it and known how (the children path
+                                          * between this object and the NODE objects).
+                                          *
+                                          * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
+                                          * these nodes may not be allowed for allocation, see allowed_nodeset.
+                                          *
+                                          * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
+                                          */
+  hwloc_cpuset_t complete_nodeset;      /**< \brief The complete NUMA node set of this object,
+                                          *
+                                          * This includes not only the same as the nodeset field, but also the NUMA
+                                          * nodes for which topology information is unknown or incomplete, and the nodes
+                                          * that are ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
+                                          * Thus no corresponding NODE object may be found in the topology, because the
+                                          * precise position is undefined. It is however known that it would be
+                                          * somewhere under this object.
                                           *
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
@@ -576,15 +599,37 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
 
 
 
-/** \defgroup hwlocality_export Export the Topology
+/** \defgroup hwlocality_tinker Tinker with topologies.
  * @{
  */
 
-/** \brief Export the topology into a XML file.
+/** \brief Export the topology into an XML file.
  *
  * This file may be loaded later through hwloc_topology_set_xml().
  */
 HWLOC_DECLSPEC void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
+
+/** \brief Add a MISC object to the topology
+ *
+ * A new MISC object will be created and insert into the topology at the
+ * position given by cpuset.
+ *
+ * cpuset and name will be copied.
+ *
+ * \return the newly-created object
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
+
+/** \brief Add a MISC object to the topology
+ *
+ * A new MISC object will be created and insert into the topology at the
+ * position given by parent.
+ *
+ * name will be copied.
+ *
+ * \return the newly-created object
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
 
 /** @} */
 
@@ -721,7 +766,7 @@ HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_
 
 /** \brief Stringify a given topology object into a human-readable form.
  *
- * /note this function is deprecated in favor of hwloc_obj_type_snprintf()
+ * \note This function is deprecated in favor of hwloc_obj_type_snprintf()
  * and hwloc_obj_attr_snprintf() since it is not very flexible and
  * only prints physical/OS indexes.
  *

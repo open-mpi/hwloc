@@ -41,9 +41,9 @@
 static void
 output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
-  char type[32], attr[256];
-  int attrlen;
+  char type[32], attr[256], phys[32] = "";
   unsigned index = logical ? l->logical_index : l->os_index;
+  const char *indexprefix = logical ? "#" :  " p#";
   if (show_cpuset < 2) {
     if (l->type != HWLOC_OBJ_PROC) {
       hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
@@ -53,10 +53,17 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     if (l->depth != 0 && index != (unsigned)-1
         && l->type != HWLOC_OBJ_PCI_DEVICE
         && (l->type != HWLOC_OBJ_BRIDGE || l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
-      fprintf(output, "#%u", index);
-    attrlen = hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
-    if (attrlen)
-      fprintf(output, "(%s)", attr);
+      fprintf(output, "%s%u", indexprefix, index);
+    if (logical && l->os_index != (unsigned) -1 &&
+	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PROC || l->type == HWLOC_OBJ_NODE))
+      snprintf(phys, sizeof(phys), "phys=%u", l->os_index);
+    hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
+    if (*phys || *attr) {
+      const char *separator = *phys != '\0' && *attr!= '\0' ? " " : "";
+      fprintf(output, "%s(%s%s%s)",
+	      verbose_mode >= 2 ? " " : "", /* add a space before attributes when there's a single object per line */
+	      phys, separator, attr);
+    }
     if ((l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2) && l->name)
       fprintf(output, " \"%s\"", l->name);
   }

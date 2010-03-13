@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -91,9 +91,10 @@
 #define HWLOC_TYPE_DEPTH_UNKNOWN HWLOC_NAME_CAPS(TYPE_DEPTH_UNKNOWN)
 #define HWLOC_TYPE_DEPTH_MULTIPLE HWLOC_NAME_CAPS(TYPE_DEPTH_MULTIPLE)
 
-#define hwloc_get_depth_type HWLOC_NAME(get_type_depth)
-#define hwloc_get_nobjs_by_depth HWLOC_NAME(get_nobjs_by_depth)
-#define hwloc_get_nobjs_by_type HWLOC_NAME(get_nobjs_by_type)
+#define hwloc_get_depth_type HWLOC_NAME(get_depth_type)
+#define hwloc_get_type_depth HWLOC_NAME(get_type_depth)
+#define hwloc_get_nbobjs_by_depth HWLOC_NAME(get_nbobjs_by_depth)
+#define hwloc_get_nbobjs_by_type HWLOC_NAME(get_nbobjs_by_type)
 
 #define hwloc_topology_is_thissystem HWLOC_NAME(topology_is_thissystem)
 #define hwloc_topology_get_complete_cpuset HWLOC_NAME(topology_get_complete_cpuset)
@@ -107,6 +108,8 @@
 #define hwloc_obj_type_string HWLOC_NAME(obj_type_string )
 #define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
 #define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
+#define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
+#define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
 
 #define HWLOC_CPUBIND_PROCESS HWLOC_NAME_CAPS(CPUBIND_PROCESS)
@@ -162,6 +165,7 @@
 #define hwloc_cpuset_notset HWLOC_NAME(cpuset_notset)
 #define hwloc_cpuset_first HWLOC_NAME(cpuset_first)
 #define hwloc_cpuset_last HWLOC_NAME(cpuset_last)
+#define hwloc_cpuset_next HWLOC_NAME(cpuset_next)
 #define hwloc_cpuset_singlify HWLOC_NAME(cpuset_singlify)
 #define hwloc_cpuset_compare_first HWLOC_NAME(cpuset_compare_first)
 #define hwloc_cpuset_compare HWLOC_NAME(cpuset_compare)

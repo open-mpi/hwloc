@@ -35,19 +35,18 @@ static ldom_t
 hwloc_hpux_find_ldom(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set)
 {
   int has_numa = sysconf(_SC_CCNUMA_SUPPORT) == 1;
-  int n;
-  hwloc_obj_t objs[2];
+  hwloc_obj_t obj;
 
   if (!has_numa)
     return -1;
 
-  n = hwloc_get_largest_objs_inside_cpuset(topology, hwloc_set, objs, 2);
-  if (n > 1 || objs[0]->type != HWLOC_OBJ_NODE) {
+  obj = hwloc_get_first_largest_obj_inside_cpuset(topology, hwloc_set);
+  if (!hwloc_cpuset_isequal(obj->cpuset, hwloc_set) || obj->type != HWLOC_OBJ_NODE) {
     /* Does not correspond to exactly one node */
     return -1;
   }
 
-  return objs[0]->os_index;
+  return obj->os_index;
 }
 
 static spu_t
@@ -154,6 +153,8 @@ hwloc_look_hpux(struct hwloc_topology *topology)
       hwloc_debug("node %d is %d\n", i, currentnode);
       nodes[i] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, currentnode);
       obj->cpuset = hwloc_cpuset_alloc();
+      obj->nodeset = hwloc_cpuset_alloc();
+      hwloc_cpuset_set(obj->nodeset, currentnode);
       /* TODO: obj->attr->node.memory_kB */
       /* TODO: obj->attr->node.huge_page_free */
 

@@ -11,8 +11,8 @@
 # hierarchies available here.  Return true on success.
 
 
-abs_top_builddir="@abs_top_builddir@"
-lstopo="$abs_top_builddir/utils/lstopo"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+lstopo="$HWLOC_top_builddir/utils/lstopo"
 
 topology="$1"
 
@@ -36,7 +36,7 @@ test_topology ()
     export HWLOC_FSROOT="$dir"
     export HWLOC_DEBUG_CHECK=1
 
-    opts="-p -v -"
+    opts="-v -"
     [ -r "$options" ] && opts=`cat $options`
 
     if ! "$lstopo" $opts > "$output"

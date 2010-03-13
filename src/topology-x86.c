@@ -46,7 +46,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
 {
   struct cacheinfo *cache;
   unsigned cachenum;
-  unsigned size;
+  unsigned size = 0;
 
   cachenum = infos->numcaches++;
   infos->cache = realloc(infos->cache, infos->numcaches*sizeof(*infos->cache));

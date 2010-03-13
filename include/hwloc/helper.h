@@ -222,6 +222,37 @@ hwloc_obj_is_in_subtree (hwloc_topology_t topology __hwloc_attribute_unused, hwl
  * @{
  */
 
+/** \brief Get the first largest object included in the given cpuset \p set.
+ *
+ * \return the first object that is included in \p set and whose parent is not.
+ *
+ * This is convenient for iterating over all largest objects within a CPU set
+ * by doing a loop getting the first largest object and clearing its CPU set
+ * from the remaining CPU set.
+ */
+static __inline hwloc_obj_t
+hwloc_get_first_largest_obj_inside_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t set)
+{
+  hwloc_obj_t obj = hwloc_get_root_obj(topology);
+  if (!hwloc_cpuset_intersects(obj->cpuset, set))
+    return NULL;
+  while (!hwloc_cpuset_isincluded(obj->cpuset, set)) {
+    /* while the object intersects without being included, look at its children */
+    hwloc_obj_t child = NULL;
+    while ((child = hwloc_get_next_child(topology, obj, child)) != NULL) {
+      if (hwloc_cpuset_intersects(child->cpuset, set))
+	break;
+    }
+    if (!child)
+      /* no child intersects, return their father */
+      return obj;
+    /* found one intersecting child, look at its children */
+    obj = child;
+  }
+  /* obj is included, return it */
+  return obj;
+}
+
 /** \brief Get the set of largest objects covering exactly a given cpuset \p set
  *
  * \return the number of objects returned in \p objs.

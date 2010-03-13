@@ -18,6 +18,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sched.h>
 #include <pthread.h>
 
@@ -94,11 +95,7 @@
 #endif
 
 #ifdef HAVE_OPENAT
-
-/* Use our own filesystem functions.  */
-#define hwloc_fopen(p, m, d)   hwloc_fopenat(p, m, d)
-#define hwloc_access(p, m, d)  hwloc_accessat(p, m, d)
-#define hwloc_opendir(p, d)    hwloc_opendirat(p, d)
+/* Use our own filesystem functions if we have openat */
 
 static FILE *
 hwloc_fopenat(const char *path, const char *mode, int fsroot_fd)
@@ -157,13 +154,43 @@ hwloc_opendirat(const char *path, int fsroot_fd)
   return fdopendir(dir_fd);
 }
 
-#else /* !HAVE_OPENAT */
+#endif /* HAVE_OPENAT */
 
-#define hwloc_fopen(p, m, d)   fopen(p, m)
-#define hwloc_access(p, m, d)  access(p, m)
-#define hwloc_opendir(p, d)    opendir(p)
+/* Static inline version of fopen so that we can use openat if we have
+   it, but still preserve compiler parameter checking */
+static inline FILE *
+hwloc_fopen(const char *p, const char *m, int d __hwloc_attribute_unused)
+{ 
+#ifdef HAVE_OPENAT
+    return hwloc_fopenat(p, m, d);
+#else
+    return fopen(p, m); 
+#endif
+}
 
-#endif /* !HAVE_OPENAT */
+/* Static inline version of access so that we can use openat if we have
+   it, but still preserve compiler parameter checking */
+static inline int 
+hwloc_access(const char *p, int m, int d __hwloc_attribute_unused)
+{ 
+#ifdef HAVE_OPENAT
+    return hwloc_accessat(p, m, d);
+#else
+    return access(p, m); 
+#endif
+}
+
+/* Static inline version of opendir so that we can use openat if we have
+   it, but still preserve compiler parameter checking */
+static inline DIR *
+hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
+{ 
+#ifdef HAVE_OPENAT
+    return hwloc_opendirat(p, d);
+#else
+    return opendir(p); 
+#endif
+}
 
 int
 hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_const_cpuset_t hwloc_set)
@@ -286,13 +313,20 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
   struct dirent *dirent;
   unsigned nr_tids = 0;
   unsigned max_tids = 32;
-  pid_t *tids = malloc(max_tids*sizeof(pid_t));
+  pid_t *tids;
+  struct stat sb;
+
+  /* take the number of links as a good estimate for the number of tids */
+  if (fstat(dirfd(taskdir), &sb) == 0)
+    max_tids = sb.st_nlink;
+
+  tids = malloc(max_tids*sizeof(pid_t));
 
   rewinddir(taskdir);
 
   while ((dirent = readdir(taskdir)) != NULL) {
     if (nr_tids == max_tids) {
-      max_tids *= 2;
+      max_tids += 8;
       tids = realloc(tids, max_tids*sizeof(pid_t));
     }
     if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
@@ -593,7 +627,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
 int
-hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path)
+hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path __hwloc_attribute_unused)
 {
 #ifdef HAVE_OPENAT
   int root;
@@ -660,8 +694,8 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 hwloc_cpuset_t
 hwloc_linux_parse_cpumap_file(FILE *file)
 {
-  char string[KERNEL_CPU_MAP_LEN]; /* enough for a shared map mask (32bits hexa) */
   unsigned long maps[MAX_KERNEL_CPU_MASK];
+  unsigned long map;
   hwloc_cpuset_t set;
   int nr_maps = 0;
   int n;
@@ -672,13 +706,11 @@ hwloc_linux_parse_cpumap_file(FILE *file)
   set = hwloc_cpuset_alloc();
 
   /* parse the whole mask */
-  while (fgets(string, KERNEL_CPU_MAP_LEN, file) && *string != '\0') /* read one kernel cpu mask and the ending comma */
+  while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
     {
-      unsigned long map;
       if (nr_maps == MAX_KERNEL_CPU_MASK)
         break; /* too many cpumasks in this cpumap */
 
-      map = strtoul(string, NULL, 16);
       if (!map && !nr_maps)
 	/* ignore the first map if it's empty */
 	continue;
@@ -718,6 +750,107 @@ hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
 }
 
 static char *
+hwloc_strdup_mntpath(const char *escapedpath, size_t length)
+{
+  char *path = malloc(length+1);
+  const char *src = escapedpath, *tmp = src;
+  char *dst = path;
+
+  while ((tmp = strchr(src, '\\')) != NULL) {
+    strncpy(dst, src, tmp-src);
+    dst += tmp-src;
+    if (!strncmp(tmp+1, "040", 3))
+      *dst = ' ';
+    else if (!strncmp(tmp+1, "011", 3))
+      *dst = '	';
+    else if (!strncmp(tmp+1, "012", 3))
+      *dst = '\n';
+    else
+      *dst = '\\';
+    dst++;
+    src = tmp+4;
+  }
+
+  strcpy(dst, src);
+
+  return path;
+}
+
+static void
+hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int fsroot_fd)
+{
+#define PROC_MOUNT_LINE_LEN 128
+  char line[PROC_MOUNT_LINE_LEN];
+  FILE *fd;
+
+  *cgroup_mntpnt = NULL;
+  *cpuset_mntpnt = NULL;
+
+  /* ideally we should use setmntent, getmntent, hasmntopt and endmntent,
+   * but they do not support fsroot_fd.
+   */
+
+  fd = hwloc_fopen("/proc/mounts", "r", fsroot_fd);
+  if (!fd)
+    return;
+
+  while (fgets(line, sizeof(line), fd)) {
+    char *path;
+    char *type;
+    char *tmp;
+
+    /* path is after first field and a space */
+    tmp = strchr(line, ' ');
+    if (!tmp)
+      continue;
+    path = tmp+1;
+
+    /* type is after path, which may not contain spaces since the kernel escaped them to \040
+     * (see the manpage of getmntent) */
+    tmp = strchr(path, ' ');
+    if (!tmp)
+      continue;
+    type = tmp+1;
+    /* mark the end of path to ease upcoming strdup */
+    *tmp = '\0';
+
+    if (!strncmp(type, "cpuset ", 7)) {
+      /* found a cpuset mntpnt */
+      hwloc_debug("Found cpuset mount point on %s\n", path);
+      *cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      break;
+    } else if (!strncmp(type, "cgroup ", 7)) {
+      /* found a cgroup mntpnt */
+      char *opt, *opts;
+
+      /* find options */
+      tmp = strchr(type, ' ');
+      if (!tmp)
+	continue;
+      opts = tmp+1;
+
+      /* find "cpuset" option */
+      while ((opt = strsep(&opts, ",")) && strcmp(opt, "cpuset"))
+        ; /* continue */
+      if (!opt)
+	continue;
+
+      hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
+      *cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      break;
+    }
+  }
+
+  fclose(fd);
+}
+
+/*
+ * Linux cpusets may be managed directly or through cgroup.
+ * If cgroup is used, tasks get a /proc/pid/cgroup which may contain a
+ * single line %d:cpuset:<name>. If cpuset are used they get /proc/pid/cpuset
+ * containing <name>.
+ */
+static char *
 hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
 {
 #define CPUSET_NAME_LEN 128
@@ -736,7 +869,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
   if (fd) {
     /* find a cpuset line */
 #define CGROUP_LINE_LEN 256
-    char line[CGROUP_LINE_LEN];    
+    char line[CGROUP_LINE_LEN];
     while (fgets(line, sizeof(line), fd)) {
       char *end, *colon = strchr(line, ':');
       if (!colon)
@@ -782,19 +915,13 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
 }
 
 /*
- * Linux cpusets may be managed directly or through cgroup.
- * If cgroup is used, tasks get a /proc/pid/cgroup which may contain a
- * single line %d:cpuset:<name>. If cpuset are used they get /proc/pid/cpuset
- * containing <name>.
- *
  * Then, the cpuset description is available from either the cgroup or
  * the cpuset filesystem (usually mounted in / or /dev) where there
  * are cgroup<name>/cpuset.{cpus,mems} or cpuset<name>/{cpus,mems} files.
  */
 static char *
-hwloc_read_linux_cpuset_mask(const char *type, int fsroot_fd, hwloc_pid_t pid)
+hwloc_read_linux_cpuset_mask(const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name, const char *attr_name, int fsroot_fd)
 {
-  char *cpuset_name;
 #define CPUSET_FILENAME_LEN 256
   char cpuset_filename[CPUSET_FILENAME_LEN];
   FILE *fd;
@@ -802,33 +929,21 @@ hwloc_read_linux_cpuset_mask(const char *type, int fsroot_fd, hwloc_pid_t pid)
   ssize_t ssize;
   size_t size;
 
-  cpuset_name = hwloc_read_linux_cpuset_name(fsroot_fd, pid);
-  if (!cpuset_name)
-    return NULL;
-
-  /* try to read the cpuset from cgroup */
-  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cgroup%s/cpuset.%s", cpuset_name, type);
-  hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (fd)
-    goto gotfile;
-  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cgroup%s/cpuset.%s", cpuset_name, type);
-  hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (fd)
-    goto gotfile;
-
-  /* try to read the cpuset directly */
-  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/dev/cpuset%s/%s", cpuset_name, type);
-  hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (fd)
-    goto gotfile;
-  snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "/cpusets%s/%s", cpuset_name, type);
-  hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
-  fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
-  if (fd)
-    goto gotfile;
+  if (cgroup_mntpnt) {
+    /* try to read the cpuset from cgroup */
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/cpuset.%s", cgroup_mntpnt, cpuset_name, attr_name);
+    hwloc_debug("Trying to read cgroup file <%s>\n", cpuset_filename);
+    fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
+    if (fd)
+      goto gotfile;
+  } else if (cpuset_mntpnt) {
+    /* try to read the cpuset directly */
+    snprintf(cpuset_filename, CPUSET_FILENAME_LEN, "%s%s/%s", cpuset_mntpnt, cpuset_name, attr_name);
+    hwloc_debug("Trying to read cpuset file <%s>\n", cpuset_filename);
+    fd = hwloc_fopen(cpuset_filename, "r", fsroot_fd);
+    if (fd)
+      goto gotfile;
+  }
 
   /* found no cpuset description, ignore it */
   hwloc_debug("Couldn't find cpuset <%s> description, ignoring\n", cpuset_name);
@@ -847,24 +962,25 @@ gotfile:
     *tmp = '\0';
 
 out:
-  free(cpuset_name);
   return info;
 }
 
 static void
 hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
-				   const char *name,
-				   hwloc_cpuset_t admin_enabled_cpus_set)
+				    const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name,
+				    const char *attr_name,
+				    hwloc_cpuset_t admin_enabled_cpus_set)
 {
   char *cpuset_mask;
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
 
-  cpuset_mask = hwloc_read_linux_cpuset_mask(name, topology->backend_params.sysfs.root_fd, topology->pid);
+  cpuset_mask = hwloc_read_linux_cpuset_mask(cgroup_mntpnt, cpuset_mntpnt, cpuset_name,
+					     attr_name, topology->backend_params.sysfs.root_fd);
   if (!cpuset_mask)
     return;
 
-  hwloc_debug("found cpuset %s: %s\n", name, cpuset_mask);
+  hwloc_debug("found cpuset %s: %s\n", attr_name, cpuset_mask);
 
   current = cpuset_mask;
   prevlast = -1;
@@ -882,7 +998,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
     else
       nextlast = nextfirst;
     if (prevlast+1 <= nextfirst-1) {
-      hwloc_debug("%s [%d:%d] excluded by cpuset\n", name, prevlast+1, nextfirst-1);
+      hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
       hwloc_cpuset_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
     }
 
@@ -896,7 +1012,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
   /* disable after last enabled-segment */
   nextfirst = HWLOC_NBMAXCPUS;
   if (prevlast+1 <= nextfirst-1) {
-    hwloc_debug("%s [%d:%d] excluded by cpuset\n", name, prevlast+1, nextfirst-1);
+    hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
     hwloc_cpuset_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
   }
 
@@ -1059,6 +1175,8 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 
           node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
           node->cpuset = cpuset;
+          node->nodeset = hwloc_cpuset_alloc();
+          hwloc_cpuset_set(node->nodeset, osnode);
 
           hwloc_sysfs_node_meminfo_info(topology, path, osnode, &node->memory);
 
@@ -1290,9 +1408,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned numprocs=0;
   unsigned numsockets=0;
   unsigned numcores=0;
-  long physid;
-  long coreid;
-  long processor = -1;
+  unsigned long physid;
+  unsigned long coreid;
+  unsigned long processor = (unsigned long) -1;
   unsigned i;
   hwloc_cpuset_t cpuset;
   hwloc_obj_t obj;
@@ -1329,13 +1447,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
-	else if (var==LONG_MIN)						\
-	  {								\
-            hwloc_debug("%s", "too small "field" number in /proc/cpuinfo\n"); \
-            hwloc_cpuset_free(cpuset);					\
-            return -1;							\
-	  }								\
-	else if (var==LONG_MAX)						\
+	else if (var==ULONG_MAX)						\
 	  {								\
             hwloc_debug("%s", "too big "field" number in /proc/cpuinfo\n"); \
             hwloc_cpuset_free(cpuset);					\
@@ -1389,7 +1501,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     }
   fclose(fd);
 
-  if (processor == -1) {
+  if (processor == (unsigned long) -1) {
     hwloc_cpuset_free(cpuset);
     return -1;
   }
@@ -1460,11 +1572,21 @@ hwloc_look_linux(struct hwloc_topology *topology)
 {
   DIR *nodes_dir;
   unsigned nbnodes;
+  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name;
   int err;
 
   /* Gather the list of admin-disabled cpus and mems */
-  hwloc_admin_disable_set_from_cpuset(topology, "cpus", topology->levels[0][0]->allowed_cpuset);
-  hwloc_admin_disable_set_from_cpuset(topology, "mems", topology->levels[0][0]->allowed_nodeset);
+  hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, topology->backend_params.sysfs.root_fd);
+  if (cgroup_mntpnt || cpuset_mntpnt) {
+    cpuset_name = hwloc_read_linux_cpuset_name(topology->backend_params.sysfs.root_fd, topology->pid);
+    if (cpuset_name) {
+      hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
+      hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
+      free(cpuset_name);
+    }
+    free(cgroup_mntpnt);
+    free(cpuset_mntpnt);
+  }
 
   nodes_dir = hwloc_opendir("/proc/nodes", topology->backend_params.sysfs.root_fd);
   if (nodes_dir) {
