@@ -586,7 +586,8 @@ enum hwloc_obj_cmp_e {
 static int
 hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (hwloc_cpuset_iszero(obj1->cpuset) || hwloc_cpuset_iszero(obj2->cpuset))
+  if (!obj1->cpuset || hwloc_cpuset_iszero(obj1->cpuset)
+      || !obj2->cpuset || hwloc_cpuset_iszero(obj2->cpuset))
     return HWLOC_OBJ_DIFFERENT;
 
   if (hwloc_cpuset_isequal(obj1->cpuset, obj2->cpuset)) {
@@ -806,13 +807,13 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   hwloc_obj_t child, next_child = obj->first_child;
   hwloc_obj_t *current;
 
-  /* FIXME: mark KEEP_STRUCTURE as unsupported for I/O devices ? */
   /* Append to the end of the list */
   for (current = &parent->first_child; *current; current = &(*current)->next_sibling)
     ;
   *current = obj;
   obj->next_sibling = NULL;
   obj->first_child = NULL;
+
   /* Use the new object to insert children */
   parent = obj;
 
@@ -1197,7 +1198,9 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
   for_each_child_safe(child, obj, pchild)
     remove_empty(topology, pchild);
 
-  if (obj->type != HWLOC_OBJ_NODE && obj->cpuset && hwloc_cpuset_iszero(obj->cpuset)) {
+  if (obj->type != HWLOC_OBJ_NODE
+      && obj->cpuset
+      && hwloc_cpuset_iszero(obj->cpuset)) {
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
     print_object(topology, 0, obj);
