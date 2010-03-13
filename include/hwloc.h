@@ -543,7 +543,7 @@ HWLOC_DECLSPEC void hwloc_topology_export_xml(hwloc_topology_t topology, const c
 
 /** \brief Add a MISC object to the topology
  *
- * A new MISC object will be created and insert into the topology at the
+ * A new MISC object will be created and inserted into the topology at the
  * position given by cpuset.
  *
  * cpuset and name will be copied.
@@ -554,7 +554,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_top
 
 /** \brief Add a MISC object to the topology
  *
- * A new MISC object will be created and insert into the topology at the
+ * A new MISC object will be created and inserted into the topology at the
  * position given by parent.
  *
  * name will be copied.
