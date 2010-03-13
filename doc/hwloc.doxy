@@ -527,13 +527,16 @@ following environment variables.
 
 \page threadsafety Thread safety
 
-Hwloc is not thread safe.
-Two threads should not invoke functions that modify the same topology at
-same the time.
-Also one thread should not modify the topology while another thread
-is consulting or traversing it.
-However two threads may operate and modify two different topologies
-without risks.
+Like any library that just fills structures, Hwloc is not thread safe but
+reentrant: all the hwloc state is held in the hwloc_topology_t structure without
+mutex protection. That means that two threads can operate on and modify two
+different hwloc_topology_t objects, but they should not invoke functions that
+modify the same topology at same the time, and one thread should not modify
+the topology while another thread is consulting or traversing it. Two threads
+can however consult or traverse the same topology concurrently. Just like any
+structure pointer, to safely pass a hwloc_topology_t from a thread to another,
+proper synchronization is needed (e.g. mutex, semaphore, or just a memory
+barrier) to ensure memory coherency.
 
 Modification operations include:
 <dl>
