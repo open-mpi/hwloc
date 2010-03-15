@@ -486,9 +486,9 @@ int hwloc_cpuset_first(const struct hwloc_cpuset_s * set)
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++) {
 		/* subsets are unsigned longs, use ffsl */
-		int _ffs = hwloc_ffsl(HWLOC_CPUSUBSET_SUBSET(*set,i));
-		if (_ffs>0)
-			return _ffs - 1 + HWLOC_CPUSUBSET_SIZE*i;
+		unsigned long w = HWLOC_CPUSUBSET_SUBSET(*set,i);
+		if (w)
+			return hwloc_ffsl(w) - 1 + HWLOC_CPUSUBSET_SIZE*i;
 	}
 
 	return -1;
@@ -502,9 +502,9 @@ int hwloc_cpuset_last(const struct hwloc_cpuset_s * set)
 
 	for(i=HWLOC_CPUSUBSET_COUNT-1; i>=0; i--) {
 		/* subsets are unsigned longs, use flsl */
-		int _fls = hwloc_flsl(HWLOC_CPUSUBSET_SUBSET(*set,i));
-		if (_fls>0)
-			return _fls - 1 + HWLOC_CPUSUBSET_SIZE*i;
+		unsigned long w = HWLOC_CPUSUBSET_SUBSET(*set,i);
+		if (w)
+			return hwloc_flsl(w) - 1 + HWLOC_CPUSUBSET_SIZE*i;
 	}
 
 	return -1;
@@ -517,6 +517,7 @@ int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
 	HWLOC__CPUSET_CHECK(set);
 
 	for(; i<HWLOC_CPUSUBSET_COUNT; i++) {
+		/* subsets are unsigned longs, use ffsl */
 		unsigned long w = HWLOC_CPUSUBSET_SUBSET(*set,i);
 
 		/* if the prev cpu is in the same word as the possible next one,
@@ -524,10 +525,8 @@ int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
 		if (HWLOC_CPUSUBSET_INDEX(prev_cpu) == i)
 			w &= ~((HWLOC_CPUSUBSET_VAL(prev_cpu) << 1) - 1);
 
-		/* subsets are unsigned longs, use ffsl */
-		int _ffs = hwloc_ffsl(w);
-		if (_ffs>0)
-			return _ffs - 1 + HWLOC_CPUSUBSET_SIZE*i;
+		if (w)
+			return hwloc_ffsl(w) - 1 + HWLOC_CPUSUBSET_SIZE*i;
 	}
 
 	return -1;
@@ -545,8 +544,9 @@ void hwloc_cpuset_singlify(struct hwloc_cpuset_s * set)
 			continue;
 		} else {
 			/* subsets are unsigned longs, use ffsl */
-			int _ffs = hwloc_ffsl(HWLOC_CPUSUBSET_SUBSET(*set,i));
-			if (_ffs>0) {
+			unsigned long w = HWLOC_CPUSUBSET_SUBSET(*set,i);
+			if (w) {
+				int _ffs = hwloc_ffsl(w);
 				HWLOC_CPUSUBSET_SUBSET(*set,i) = HWLOC_CPUSUBSET_VAL(_ffs-1);
 				found = 1;
 			}
@@ -562,15 +562,17 @@ int hwloc_cpuset_compare_first(const struct hwloc_cpuset_s * set1, const struct 
 	HWLOC__CPUSET_CHECK(set2);
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++) {
-		int _ffs1 = hwloc_ffsl(HWLOC_CPUSUBSET_SUBSET(*set1,i));
-		int _ffs2 = hwloc_ffsl(HWLOC_CPUSUBSET_SUBSET(*set2,i));
-		if (!_ffs1 && !_ffs2)
-			continue;
-		/* if both have a bit set, compare for real */
-		if (_ffs1 && _ffs2)
-			return _ffs1-_ffs2;
-		/* one is empty, and it is considered higher, so reverse-compare them */
-		return _ffs2-_ffs1;
+		unsigned long w1 = HWLOC_CPUSUBSET_SUBSET(*set1,i);
+		unsigned long w2 = HWLOC_CPUSUBSET_SUBSET(*set2,i);
+		if (w1 || w2) {
+			int _ffs1 = hwloc_ffsl(HWLOC_CPUSUBSET_SUBSET(*set1,i));
+			int _ffs2 = hwloc_ffsl(HWLOC_CPUSUBSET_SUBSET(*set2,i));
+			/* if both have a bit set, compare for real */
+			if (_ffs1 && _ffs2)
+				return _ffs1-_ffs2;
+			/* one is empty, and it is considered higher, so reverse-compare them */
+			return _ffs2-_ffs1;
+		}
 	}
 	return 0;
 }
