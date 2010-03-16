@@ -459,6 +459,8 @@ hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 static int
 hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
+  if (pid == 0)
+    pid = topology->pid;
   if (policy & HWLOC_CPUBIND_THREAD)
     return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
   else
@@ -468,6 +470,8 @@ hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_c
 static hwloc_cpuset_t
 hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 {
+  if (pid == 0)
+    pid = topology->pid;
   if (policy & HWLOC_CPUBIND_THREAD)
     return hwloc_linux_get_tid_cpubind(topology, pid);
   else
@@ -477,24 +481,32 @@ hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
 static int
 hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_linux_set_pid_cpubind(topology, 0, hwloc_set, policy);
+  return hwloc_linux_set_pid_cpubind(topology, topology->pid, hwloc_set, policy);
 }
 
 static hwloc_cpuset_t
 hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
 {
-  return hwloc_linux_get_pid_cpubind(topology, 0, policy);
+  return hwloc_linux_get_pid_cpubind(topology, topology->pid, policy);
 }
 
 static int
 hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
+  if (topology->pid) {
+    errno = -ENOSYS;
+    return -1;
+  }
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
 static hwloc_cpuset_t
 hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_unused)
 {
+  if (topology->pid) {
+    errno = -ENOSYS;
+    return NULL;
+  }
   return hwloc_linux_get_tid_cpubind(topology, 0);
 }
 
@@ -505,6 +517,11 @@ static int
 hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   int err;
+
+  if (topology->pid) {
+    errno = -ENOSYS;
+    return -1;
+  }
 
   if (tid == pthread_self())
     return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
@@ -568,6 +585,11 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 {
   hwloc_cpuset_t hwloc_set;
   int err;
+
+  if (topology->pid) {
+    errno = -ENOSYS;
+    return NULL;
+  }
 
   if (tid == pthread_self())
     return hwloc_linux_get_tid_cpubind(topology, 0);
