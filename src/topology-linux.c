@@ -340,26 +340,30 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
 }
 
 /* Callbacks for binding each process sub-tid */
-typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int policy);
+typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int index, int policy);
 
 static int
-hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int policy __hwloc_attribute_unused)
+hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int index __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
   return hwloc_linux_set_tid_cpubind(topology, tid, cpuset);
 }
 
 static int
-hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int policy)
+hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int index, int policy)
 {
   hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
   hwloc_cpuset_t tidset = hwloc_linux_get_tid_cpubind(topology, tid);
   if (!tidset)
     return -1;
 
+  /* reset the cpuset on first iteration (in case we're doing a retry) */
+  if (!index)
+    hwloc_cpuset_zero(cpuset);
+
   if (policy & HWLOC_CPUBIND_STRICT) {
     /* if STRICT, we want all threads to have the same binding */
-    if (hwloc_cpuset_iszero(cpuset)) {
+    if (!index) {
       /* this is the first thread, copy its binding */
       hwloc_cpuset_copy(cpuset, tidset);
     } else if (!hwloc_cpuset_isequal(cpuset, tidset)) {
@@ -408,7 +412,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
  retry:
   /* apply the callback to all threads */
   for(i=0; i<nr; i++) {
-    err = cb(topology, tids[i], data, policy);
+    err = cb(topology, tids[i], data, i, policy);
     if (err < 0)
       goto out_with_tids;
   }
