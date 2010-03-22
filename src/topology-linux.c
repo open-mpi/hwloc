@@ -245,10 +245,9 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #endif /* !CPU_SET */
 }
 
-hwloc_cpuset_t
-hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid)
+int
+hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_cpuset_t hwloc_set)
 {
-  hwloc_cpuset_t hwloc_set;
   int err;
   /* TODO Kerrighed */
 
@@ -263,10 +262,10 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   if (err < 0) {
     CPU_FREE(plinux_set);
-    return NULL;
+    return -1;
   }
 
-  hwloc_set = hwloc_cpuset_alloc();
+  hwloc_cpuset_zero(hwloc_set);
   for(cpu=0; cpu<HWLOC_NBMAXCPUS; cpu++)
     if (CPU_ISSET_S(cpu, setsize, plinux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
@@ -282,9 +281,9 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   err = sched_getaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   if (err < 0)
-    return NULL;
+    return -1;
 
-  hwloc_set = hwloc_cpuset_alloc();
+  hwloc_cpuset_zero(hwloc_set);
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, &linux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
@@ -297,13 +296,12 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   err = sched_getaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   if (err < 0)
-    return NULL;
+    return -1;
 
-  hwloc_set = hwloc_cpuset_alloc();
   hwloc_cpuset_from_ulong(hwloc_set, mask);
 #endif /* !CPU_SET */
 
-  return hwloc_set;
+  return 0;
 }
 
 /* Get the array of tids of a process from the task directory in /proc */
@@ -345,19 +343,21 @@ typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_
 static int
 hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int index __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
-  hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
+  hwloc_cpuset_t cpuset = data;
   return hwloc_linux_set_tid_cpubind(topology, tid, cpuset);
 }
 
 static int
 hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int index, int policy)
 {
-  hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
-  hwloc_cpuset_t tidset = hwloc_linux_get_tid_cpubind(topology, tid);
-  if (!tidset)
+  hwloc_cpuset_t *cpusets = data;
+  hwloc_cpuset_t cpuset = cpusets[0];
+  hwloc_cpuset_t tidset = cpusets[1];
+
+  if (hwloc_linux_get_tid_cpubind(topology, tid, tidset))
     return -1;
 
-  /* reset the cpuset on first iteration (in case we're doing a retry) */
+  /* reset the cpuset on first iteration */
   if (!index)
     hwloc_cpuset_zero(cpuset);
 
@@ -368,7 +368,6 @@ hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid
       hwloc_cpuset_copy(cpuset, tidset);
     } else if (!hwloc_cpuset_isequal(cpuset, tidset)) {
       /* this is not the first thread, and it's binding is different */
-      hwloc_cpuset_free(tidset);
       errno = EXDEV;
       return -1;
     }
@@ -376,7 +375,6 @@ hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid
     /* if not STRICT, just OR all thread bindings */
     hwloc_cpuset_orset(cpuset, tidset);
   }
-  hwloc_cpuset_free(tidset);
   return 0;
 }
 
@@ -446,18 +444,17 @@ hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cp
 				      (void*) hwloc_set, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
+static int
+hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
 {
-  hwloc_cpuset_t hwloc_set = hwloc_cpuset_alloc();
-  int err = hwloc_linux_foreach_proc_tid(topology, pid,
+  hwloc_cpuset_t tidset = hwloc_cpuset_alloc();
+  hwloc_cpuset_t cpusets[2] = { hwloc_set, tidset };
+  int ret;
+  ret = hwloc_linux_foreach_proc_tid(topology, pid,
 					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
-					 (void*) hwloc_set, policy);
-  if (err) {
-    hwloc_cpuset_free(hwloc_set);
-    return NULL;
-  }
-  return hwloc_set;
+					 (void*) cpusets, policy);
+  hwloc_cpuset_free(tidset);
+  return ret;
 }
 
 static int
@@ -471,15 +468,15 @@ hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_c
     return hwloc_linux_set_pid_cpubind(topology, pid, hwloc_set, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
+static int
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
 {
   if (pid == 0)
     pid = topology->pid;
   if (policy & HWLOC_CPUBIND_THREAD)
-    return hwloc_linux_get_tid_cpubind(topology, pid);
+    return hwloc_linux_get_tid_cpubind(topology, pid, hwloc_set);
   else
-    return hwloc_linux_get_pid_cpubind(topology, pid, policy);
+    return hwloc_linux_get_pid_cpubind(topology, pid, hwloc_set, policy);
 }
 
 static int
@@ -488,10 +485,10 @@ hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t
   return hwloc_linux_set_pid_cpubind(topology, topology->pid, hwloc_set, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
+static int
+hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_linux_get_pid_cpubind(topology, topology->pid, policy);
+  return hwloc_linux_get_pid_cpubind(topology, topology->pid, hwloc_set, policy);
 }
 
 static int
@@ -504,14 +501,14 @@ hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
-static hwloc_cpuset_t
-hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_unused)
+static int
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   if (topology->pid) {
     errno = -ENOSYS;
-    return NULL;
+    return -1;
   }
-  return hwloc_linux_get_tid_cpubind(topology, 0);
+  return hwloc_linux_get_tid_cpubind(topology, 0, hwloc_set);
 }
 
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
@@ -584,24 +581,23 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
 #pragma weak pthread_getaffinity_np
 
-static hwloc_cpuset_t
-hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int policy __hwloc_attribute_unused)
+static int
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
-  hwloc_cpuset_t hwloc_set;
   int err;
 
   if (topology->pid) {
     errno = -ENOSYS;
-    return NULL;
+    return -1;
   }
 
   if (tid == pthread_self())
-    return hwloc_linux_get_tid_cpubind(topology, 0);
+    return hwloc_linux_get_tid_cpubind(topology, 0, hwloc_set);
 
   if (!pthread_getaffinity_np) {
     /* ?! Application uses get_thread_cpubind, but doesn't link against libpthread ?! */
     errno = ENOSYS;
-    return NULL;
+    return -1;
   }
   /* TODO Kerrighed */
 
@@ -619,10 +615,10 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
      if (err) {
         errno = err;
-	return NULL;
+        return -1;
      }
 
-     hwloc_set = hwloc_cpuset_alloc();
+     hwloc_cpuset_zero(hwloc_set);
      for(cpu=0; cpu<CPU_SETSIZE; cpu++)
        if (CPU_ISSET(cpu, &linux_set))
 	 hwloc_cpuset_set(hwloc_set, cpu);
@@ -640,15 +636,14 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
       if (err) {
         errno = err;
-	return NULL;
+        return -1;
       }
 
-     hwloc_set = hwoc_cpuset_alloc();
      hwloc_cpuset_from_ulong(hwloc_set, mask);
   }
 #endif /* CPU_SET */
 
-  return hwloc_set;
+  return 0;
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 

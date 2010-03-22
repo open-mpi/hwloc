@@ -806,10 +806,8 @@ HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpus
 			    int policy);
 
 /** \brief Get current process or thread binding
- *
- * \return newly-allocated cpuset
  */
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
  *
@@ -820,16 +818,14 @@ HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int p
  */
 HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
 
-/** \brief Get the current binding of process \p pid on
+/** \brief Get the current binding of process \p pid
  *
  * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
- *
- * \return newly-allocated cpuset
  */
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
@@ -848,11 +844,9 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * Windows platforms
  *
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
- *
- * \return newly-allocated cpuset
  */
 #ifdef hwloc_thread_t
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
 /** @} */

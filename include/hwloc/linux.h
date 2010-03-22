@@ -44,10 +44,8 @@ HWLOC_DECLSPEC int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t 
  *
  * The behavior is exactly the same as the Linux sched_setaffinity system call,
  * but uses a hwloc cpuset.
- *
- * \return newly-allocated cpuset.
  */
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t set);
 
 /** @} */
 

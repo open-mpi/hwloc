@@ -1302,38 +1302,42 @@ static int dontset_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribut
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+static int dontget_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, hwloc_cpuset_t set, int policy __hwloc_attribute_unused)
 {
-  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
+  hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  return 0;
 }
 static int dontset_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+static int dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, hwloc_cpuset_t set, int policy __hwloc_attribute_unused)
 {
   hwloc_const_cpuset_t cpuset = hwloc_topology_get_complete_cpuset(topology);
-  if (cpuset)
-    return hwloc_cpuset_dup(cpuset);
-  else
-    return NULL;
+  if (cpuset) {
+    hwloc_cpuset_copy(set,cpuset);
+    return 0;
+  } else
+    return -1;
 }
 static int dontset_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+static int dontget_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_cpuset_t cpuset, int policy __hwloc_attribute_unused)
 {
-  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
+  hwloc_cpuset_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
+  return 0;
 }
 #ifdef hwloc_thread_t
 static int dontset_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
-static hwloc_cpuset_t dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+static int dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_cpuset_t cpuset, int policy __hwloc_attribute_unused)
 {
-  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
+  hwloc_cpuset_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
+  return 0;
 }
 #endif
 
@@ -1761,7 +1765,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
-  topology->ignored_types[HWLOC_OBJ_MISC] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
+  //topology->ignored_types[HWLOC_OBJ_MISC] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);

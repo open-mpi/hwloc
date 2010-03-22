@@ -386,9 +386,10 @@ hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
 
   hwloc_debug("highest extended cpuid %x\n", highest_ext_cpuid);
 
+  orig_cpuset = hwloc_cpuset_alloc();
+
   if (topology->get_thisthread_cpubind && topology->set_thisthread_cpubind) {
-    orig_cpuset = topology->get_thisthread_cpubind(topology, HWLOC_CPUBIND_STRICT);
-    if (orig_cpuset) {
+    if (!topology->get_thisthread_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
       for (i = 0; i < nbprocs; i++) {
         hwloc_cpuset_cpu(cpuset, i);
@@ -404,8 +405,7 @@ hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
     }
   }
   if (topology->get_thisproc_cpubind && topology->set_thisproc_cpubind) {
-    orig_cpuset = topology->get_thisproc_cpubind(topology, HWLOC_CPUBIND_STRICT);
-    if (orig_cpuset) {
+    if (!topology->get_thisproc_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
       for (i = 0; i < nbprocs; i++) {
         hwloc_cpuset_cpu(cpuset, i);

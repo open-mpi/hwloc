@@ -59,14 +59,14 @@ struct hwloc_topology {
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
 
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology, int policy);
+  int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
   int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_thisthread_cpubind)(hwloc_topology_t topology, int policy);
+  int (*get_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
   int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, int policy);
+  int (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
 #ifdef hwloc_thread_t
   int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, int policy);
+  int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
   struct hwloc_topology_support support;
