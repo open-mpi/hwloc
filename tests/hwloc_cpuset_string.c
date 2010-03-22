@@ -30,7 +30,8 @@ int main(void)
   obj = hwloc_get_root_obj(topology);
   stringlen = hwloc_cpuset_asprintf(&string, obj->cpuset);
   printf("system cpuset is %s\n", string);
-  set = hwloc_cpuset_from_string(string);
+  set = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_string(set, string);
   assert(hwloc_cpuset_isequal(set, obj->cpuset));
   hwloc_cpuset_free(set);
   printf("system cpuset converted back and forth, ok\n");
@@ -99,7 +100,8 @@ int main(void)
   obj = hwloc_get_obj_by_depth(topology, depth-1, 0);
   hwloc_obj_cpuset_snprintf(string, stringlen+1, 1, &obj);
   printf("first cpu cpuset is %s\n", string);
-  set = hwloc_cpuset_from_string(string);
+  set = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_string(set, string);
   assert(hwloc_cpuset_isequal(set, obj->cpuset));
   hwloc_cpuset_free(set);
   printf("first cpu cpuset converted back and forth, ok\n");
@@ -107,12 +109,13 @@ int main(void)
   obj = hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1) - 1);
   hwloc_obj_cpuset_snprintf(string, stringlen+1, 1, &obj);
   printf("last cpu cpuset is %s\n", string);
-  set = hwloc_cpuset_from_string(string);
+  set = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_string(set, string);
   assert(hwloc_cpuset_isequal(set, obj->cpuset));
   hwloc_cpuset_free(set);
   printf("last cpu cpuset converted back and forth, ok\n");
 
-//  hwloc_cpuset_from_string("1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n", &set);
+//  hwloc_cpuset_from_string(set, "1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n");
 //  char *s = hwloc_cpuset_printf_value(&set);
 //  printf("%s\n", s);
 //  free(s);

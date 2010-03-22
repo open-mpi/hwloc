@@ -243,7 +243,8 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
         break;
       tmp = next+1;
     }
-    newset = hwloc_cpuset_from_string(arg);
+    newset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(newset, arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
   }

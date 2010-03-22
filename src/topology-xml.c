@@ -90,21 +90,28 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     obj->os_level = strtoul(value, NULL, 10);
   else if (!strcmp(name, "os_index"))
     obj->os_index = strtoul(value, NULL, 10);
-  else if (!strcmp(name, "cpuset"))
-    obj->cpuset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "complete_cpuset"))
-    obj->complete_cpuset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "online_cpuset"))
-    obj->online_cpuset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "allowed_cpuset"))
-    obj->allowed_cpuset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "nodeset"))
-    obj->nodeset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "complete_nodeset"))
-    obj->complete_nodeset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "allowed_nodeset"))
-    obj->allowed_nodeset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "name"))
+  else if (!strcmp(name, "cpuset")) {
+    obj->cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->cpuset, value);
+  } else if (!strcmp(name, "complete_cpuset")) {
+    obj->complete_cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->complete_cpuset,value);
+  } else if (!strcmp(name, "online_cpuset")) {
+    obj->online_cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->online_cpuset, value);
+  } else if (!strcmp(name, "allowed_cpuset")) {
+    obj->allowed_cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->allowed_cpuset, value);
+  } else if (!strcmp(name, "nodeset")) {
+    obj->nodeset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->nodeset, value);
+  } else if (!strcmp(name, "complete_nodeset")) {
+    obj->complete_nodeset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->complete_nodeset, value);
+  } else if (!strcmp(name, "allowed_nodeset")) {
+    obj->allowed_nodeset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->allowed_nodeset, value);
+  } else if (!strcmp(name, "name"))
     obj->name = strdup(value);
 
   else if (!strcmp(name, "cache_size")) {

@@ -195,17 +195,14 @@ int hwloc_cpuset_asprintf(char ** strp, const struct hwloc_cpuset_s * __hwloc_re
   return hwloc_cpuset_snprintf(buf, len+1, set);
 }
 
-struct hwloc_cpuset_s * hwloc_cpuset_from_string(const char * __hwloc_restrict string)
+int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_restrict string)
 {
-  struct hwloc_cpuset_s * set;
   const char * current = string;
   int count=0, i;
   unsigned long accum = 0;
   int accumed = 0;
 
-  set = hwloc_cpuset_alloc();
-  if (!set)
-    return NULL;
+  hwloc_cpuset_zero(set);
 
   while (*current != '\0') {
     unsigned long val;
@@ -244,7 +241,7 @@ struct hwloc_cpuset_s * hwloc_cpuset_from_string(const char * __hwloc_restrict s
   for( ; i<HWLOC_CPUSUBSET_COUNT; i++)
     set->s[i] = 0;
 
-  return set;
+  return 0;
 }
 
 void hwloc_cpuset_zero(struct hwloc_cpuset_s * set)

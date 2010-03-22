@@ -68,13 +68,11 @@ HWLOC_DECLSPEC int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buf
  */
 HWLOC_DECLSPEC int hwloc_cpuset_asprintf(char ** strp, hwloc_const_cpuset_t set);
 
-/** \brief Parse a cpuset string.
+/** \brief Parse a cpuset string and stores it in CPU set \p set.
  *
  * Must start and end with a digit.
- *
- * \return newly-allocated cpuset.
  */
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_cpuset_from_string(const char * __hwloc_restrict string) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_cpuset_from_string(hwloc_cpuset_t set, const char * __hwloc_restrict string);
 
 
 /** \brief
