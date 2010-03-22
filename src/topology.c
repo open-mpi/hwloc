@@ -1302,7 +1302,7 @@ static int dontset_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribut
 {
   return 0;
 }
-static int dontget_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, hwloc_cpuset_t set, int policy __hwloc_attribute_unused)
+static int dontget_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int policy __hwloc_attribute_unused)
 {
   hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
   return 0;
@@ -1311,7 +1311,7 @@ static int dontset_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_
 {
   return 0;
 }
-static int dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused __hwloc_attribute_unused, hwloc_cpuset_t set, int policy __hwloc_attribute_unused)
+static int dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int policy __hwloc_attribute_unused)
 {
   hwloc_const_cpuset_t cpuset = hwloc_topology_get_complete_cpuset(topology);
   if (cpuset) {
