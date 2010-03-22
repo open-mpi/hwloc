@@ -42,7 +42,8 @@ int main(void)
   err = sched_getaffinity(0, sizeof(schedset), &schedset);
 #endif
   assert(!err);
-  hwlocset = hwloc_cpuset_from_glibc_sched_affinity(topology, &schedset, sizeof(schedset));
+  hwlocset = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
   assert(hwloc_cpuset_isincluded(hwlocset, hwloc_topology_get_complete_cpuset(topology)));
   hwloc_cpuset_clearset(hwlocset, hwloc_topology_get_online_cpuset(topology));
   hwloc_cpuset_clearset(hwlocset, hwloc_topology_get_allowed_cpuset(topology));
@@ -69,7 +70,8 @@ int main(void)
   err = sched_getaffinity(0, sizeof(schedset), &schedset);
 #endif
   assert(!err);
-  hwlocset = hwloc_cpuset_from_glibc_sched_affinity(topology, &schedset, sizeof(schedset));
+  hwlocset = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
   assert(hwloc_cpuset_isequal(hwlocset, obj->cpuset));
   hwloc_cpuset_free(hwlocset);
 
