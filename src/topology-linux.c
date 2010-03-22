@@ -373,7 +373,7 @@ hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid
     }
   } else {
     /* if not STRICT, just OR all thread bindings */
-    hwloc_cpuset_orset(cpuset, tidset);
+    hwloc_cpuset_or(cpuset, cpuset, tidset);
   }
   return 0;
 }
@@ -1634,7 +1634,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
       err = look_cpuinfo(topology, path, machine_online_set);
       if (err < 0)
         continue;
-      hwloc_cpuset_orset(topology->levels[0][0]->online_cpuset, machine_online_set);
+      hwloc_cpuset_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;
       machine->attr->machine.dmi_board_name = NULL;

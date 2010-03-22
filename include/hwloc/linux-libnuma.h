@@ -97,7 +97,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
       if (mask[i/HWLOC_BITS_PER_LONG] & (1 << (i% HWLOC_BITS_PER_LONG))) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
-	  hwloc_cpuset_orset(cpuset, node->cpuset);
+	  hwloc_cpuset_or(cpuset, cpuset, node->cpuset);
       }
   }
 
@@ -179,7 +179,7 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_
       if (numa_bitmask_isbitset(bitmask, i)) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
-	  hwloc_cpuset_orset(cpuset, node->cpuset);
+	  hwloc_cpuset_or(cpuset, cpuset, node->cpuset);
       }
   }
 
@@ -251,7 +251,7 @@ hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset
       if (nodemask_isset(nodemask, i)) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
-	  hwloc_cpuset_orset(cpuset, node->cpuset);
+	  hwloc_cpuset_or(cpuset, cpuset, node->cpuset);
       }
   }
 

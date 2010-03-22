@@ -133,20 +133,20 @@ HWLOC_DECLSPEC int hwloc_cpuset_intersects (hwloc_const_cpuset_t set1, hwloc_con
 /** \brief Test whether set \p sub_set is part of set \p super_set */
 HWLOC_DECLSPEC int hwloc_cpuset_isincluded (hwloc_const_cpuset_t sub_set, hwloc_const_cpuset_t super_set) __hwloc_attribute_pure;
 
-/** \brief Or set \p modifier_set into set \p set */
-HWLOC_DECLSPEC void hwloc_cpuset_orset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+/** \brief Or sets \p set1 and \p set2 and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_or (hwloc_cpuset_t res, hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief And set \p modifier_set into set \p set */
-HWLOC_DECLSPEC void hwloc_cpuset_andset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+/** \brief And sets \p set1 and \p set2 and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_and (hwloc_cpuset_t res, hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief Clear set \p modifier_set out of set \p set */
-HWLOC_DECLSPEC void hwloc_cpuset_clearset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+/** \brief And set \p set1 and the negation of \p set2 and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_andnot (hwloc_cpuset_t res, hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief Xor set \p set with set \p modifier_set */
-HWLOC_DECLSPEC void hwloc_cpuset_xorset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+/** \brief Xor sets \p set1 and \p set2 and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_xor (hwloc_cpuset_t res, hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief Negate set \p set */
-HWLOC_DECLSPEC void hwloc_cpuset_notset (hwloc_cpuset_t set);
+/** \brief Negate set \p set and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_not (hwloc_cpuset_t res, hwloc_const_cpuset_t set);
 
 /** \brief Compute the first CPU (least significant bit) in CPU set \p set */
 HWLOC_DECLSPEC int hwloc_cpuset_first(hwloc_const_cpuset_t set) __hwloc_attribute_pure;

@@ -242,8 +242,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_dup.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_copy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_all_but_cpu.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_andset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_clearset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_and.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_andnot.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare.3 \
@@ -267,8 +267,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_iszero.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_last.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_next.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_notset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_orset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_not.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_or.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
@@ -282,7 +282,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_weight.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_xorset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_xor.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \

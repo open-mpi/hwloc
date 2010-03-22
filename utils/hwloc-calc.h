@@ -35,25 +35,25 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
     if (verbose)
       fprintf(stderr, "adding %s to %s\n",
           s1, s2);
-    hwloc_cpuset_orset(set, newset);
+    hwloc_cpuset_or(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_CLR:
     if (verbose)
       fprintf(stderr, "clearing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_clearset(set, newset);
+    hwloc_cpuset_andnot(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_AND:
     if (verbose)
       fprintf(stderr, "and'ing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_andset(set, newset);
+    hwloc_cpuset_and(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_XOR:
     if (verbose)
       fprintf(stderr, "xor'ing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_xorset(set, newset);
+    hwloc_cpuset_xor(set, set, newset);
     break;
   default:
     assert(0);

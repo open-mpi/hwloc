@@ -301,7 +301,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
           misc_obj->attr->misc.depth = depth;
           for (j=0; j<nbobjs; j++)
               if (groupids[j] == i+1) {
-                  hwloc_cpuset_orset(misc_obj->cpuset, objs[j]->cpuset);
+                  hwloc_cpuset_or(misc_obj->cpuset, misc_obj->cpuset, objs[j]->cpuset);
                   groupsizes[i]++;
               }
           hwloc_debug_1arg_cpuset("adding misc object with %u objects and cpuset %s\n",
@@ -795,9 +795,9 @@ hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
   /* Start at the top.  */
   /* Add the cpuset to the top */
-  hwloc_cpuset_orset(topology->levels[0][0]->complete_cpuset, obj->cpuset);
+  hwloc_cpuset_or(topology->levels[0][0]->complete_cpuset, topology->levels[0][0]->complete_cpuset, obj->cpuset);
   if (obj->nodeset)
-    hwloc_cpuset_orset(topology->levels[0][0]->complete_nodeset, obj->nodeset);
+    hwloc_cpuset_or(topology->levels[0][0]->complete_nodeset, topology->levels[0][0]->complete_nodeset, obj->nodeset);
   hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
 }
 
@@ -911,7 +911,7 @@ collect_proc_cpuset(hwloc_obj_t obj, hwloc_obj_t system)
   if (system) {
     /* We are already given a pointer to an system object */
     if (obj->type == HWLOC_OBJ_PROC)
-      hwloc_cpuset_orset(system->cpuset, obj->cpuset);
+      hwloc_cpuset_or(system->cpuset, system->cpuset, obj->cpuset);
   } else {
     if (obj->cpuset) {
       /* This object is the root of a machine */
@@ -938,46 +938,46 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t system)
       hwloc_cpuset_t mask = hwloc_cpuset_alloc();
 
       /* Apply the topology cpuset */
-      hwloc_cpuset_andset(obj->cpuset, system->cpuset);
+      hwloc_cpuset_and(obj->cpuset, obj->cpuset, system->cpuset);
 
       /* Update complete cpuset down */
       if (obj->complete_cpuset) {
-	hwloc_cpuset_andset(obj->complete_cpuset, system->complete_cpuset);
+	hwloc_cpuset_and(obj->complete_cpuset, obj->complete_cpuset, system->complete_cpuset);
       } else {
 	obj->complete_cpuset = hwloc_cpuset_dup(system->complete_cpuset);
-	hwloc_cpuset_andset(obj->complete_cpuset, obj->cpuset);
+	hwloc_cpuset_and(obj->complete_cpuset, obj->complete_cpuset, obj->cpuset);
       }
 
       /* Update online cpusets */
       if (obj->online_cpuset) {
 	/* Update ours */
-	hwloc_cpuset_andset(obj->online_cpuset, system->online_cpuset);
+	hwloc_cpuset_and(obj->online_cpuset, obj->online_cpuset, system->online_cpuset);
 
 	/* Update the given cpuset, but only what we know */
 	hwloc_cpuset_copy(mask, obj->cpuset);
-	hwloc_cpuset_notset(mask);
-	hwloc_cpuset_orset(mask, obj->online_cpuset);
-	hwloc_cpuset_andset(system->online_cpuset, mask);
+	hwloc_cpuset_not(mask, mask);
+	hwloc_cpuset_or(mask, mask, obj->online_cpuset);
+	hwloc_cpuset_and(system->online_cpuset, system->online_cpuset, mask);
       } else {
 	/* Just take it as such */
 	obj->online_cpuset = hwloc_cpuset_dup(system->online_cpuset);
-	hwloc_cpuset_andset(obj->online_cpuset, obj->cpuset);
+	hwloc_cpuset_and(obj->online_cpuset, obj->online_cpuset, obj->cpuset);
       }
 
       /* Update allowed cpusets */
       if (obj->allowed_cpuset) {
 	/* Update ours */
-	hwloc_cpuset_andset(obj->allowed_cpuset, system->allowed_cpuset);
+	hwloc_cpuset_and(obj->allowed_cpuset, obj->allowed_cpuset, system->allowed_cpuset);
 
 	/* Update the given cpuset, but only what we know */
 	hwloc_cpuset_copy(mask, obj->cpuset);
-	hwloc_cpuset_notset(mask);
-	hwloc_cpuset_orset(mask, obj->allowed_cpuset);
-	hwloc_cpuset_andset(system->allowed_cpuset, mask);
+	hwloc_cpuset_not(mask, mask);
+	hwloc_cpuset_or(mask, mask, obj->allowed_cpuset);
+	hwloc_cpuset_and(system->allowed_cpuset, system->allowed_cpuset, mask);
       } else {
 	/* Just take it as such */
 	obj->allowed_cpuset = hwloc_cpuset_dup(system->allowed_cpuset);
-	hwloc_cpuset_andset(obj->allowed_cpuset, obj->cpuset);
+	hwloc_cpuset_and(obj->allowed_cpuset, obj->allowed_cpuset, obj->cpuset);
       }
 
       hwloc_cpuset_free(mask);
@@ -987,15 +987,15 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t system)
       /* Apply complete cpuset to cpuset, online_cpuset and allowed_cpuset, it
        * will automatically be applied below */
       if (obj->complete_cpuset)
-        hwloc_cpuset_andset(obj->cpuset, obj->complete_cpuset);
+        hwloc_cpuset_and(obj->cpuset, obj->cpuset, obj->complete_cpuset);
       else
         obj->complete_cpuset = hwloc_cpuset_dup(obj->cpuset);
       if (obj->online_cpuset)
-        hwloc_cpuset_andset(obj->online_cpuset, obj->complete_cpuset);
+        hwloc_cpuset_and(obj->online_cpuset, obj->online_cpuset, obj->complete_cpuset);
       else
         obj->online_cpuset = hwloc_cpuset_dup(obj->complete_cpuset);
       if (obj->allowed_cpuset)
-        hwloc_cpuset_andset(obj->allowed_cpuset, obj->complete_cpuset);
+        hwloc_cpuset_and(obj->allowed_cpuset, obj->allowed_cpuset, obj->complete_cpuset);
       else
         obj->allowed_cpuset = hwloc_cpuset_dup(obj->complete_cpuset);
     }
@@ -1047,7 +1047,7 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t system)
 
     /* Propagate children nodesets up */
     if (system && child->nodeset)
-      hwloc_cpuset_orset(obj->nodeset, child->nodeset);
+      hwloc_cpuset_or(obj->nodeset, obj->nodeset, child->nodeset);
   }
 }
 
@@ -1062,18 +1062,18 @@ propagate_nodesets(hwloc_obj_t obj)
     if (obj->nodeset) {
       /* Update complete nodesets down */
       if (child->complete_nodeset) {
-        hwloc_cpuset_andset(child->complete_nodeset, obj->complete_nodeset);
+        hwloc_cpuset_and(child->complete_nodeset, child->complete_nodeset, obj->complete_nodeset);
       } else if (child->nodeset) {
         child->complete_nodeset = hwloc_cpuset_dup(obj->complete_nodeset);
-        hwloc_cpuset_andset(child->complete_nodeset, child->nodeset);
+        hwloc_cpuset_and(child->complete_nodeset, child->complete_nodeset, child->nodeset);
       } /* else the child doesn't have nodeset information, we can not provide a complete nodeset */
 
       /* Update allowed nodesets down */
       if (child->allowed_nodeset) {
-        hwloc_cpuset_andset(child->allowed_nodeset, obj->allowed_nodeset);
+        hwloc_cpuset_and(child->allowed_nodeset, child->allowed_nodeset, obj->allowed_nodeset);
       } else if (child->nodeset) {
         child->allowed_nodeset = hwloc_cpuset_dup(obj->allowed_nodeset);
-        hwloc_cpuset_andset(child->allowed_nodeset, child->nodeset);
+        hwloc_cpuset_and(child->allowed_nodeset, child->allowed_nodeset, child->nodeset);
       }
     }
 
@@ -1083,9 +1083,9 @@ propagate_nodesets(hwloc_obj_t obj)
       /* Update allowed nodesets up */
       if (child->nodeset && child->allowed_nodeset) {
         hwloc_cpuset_copy(mask, child->nodeset);
-        hwloc_cpuset_notset(mask);
-        hwloc_cpuset_orset(mask, child->allowed_nodeset);
-        hwloc_cpuset_andset(obj->allowed_nodeset, mask);
+        hwloc_cpuset_not(mask, mask);
+        hwloc_cpuset_or(mask, mask, child->allowed_nodeset);
+        hwloc_cpuset_and(obj->allowed_nodeset, obj->allowed_nodeset, mask);
       }
     }
   }
@@ -1094,11 +1094,11 @@ propagate_nodesets(hwloc_obj_t obj)
   if (obj->nodeset) {
     /* Apply complete nodeset to nodeset and allowed_nodeset */
     if (obj->complete_nodeset)
-      hwloc_cpuset_andset(obj->nodeset, obj->complete_nodeset);
+      hwloc_cpuset_and(obj->nodeset, obj->nodeset, obj->complete_nodeset);
     else
       obj->complete_nodeset = hwloc_cpuset_dup(obj->nodeset);
     if (obj->allowed_nodeset)
-      hwloc_cpuset_andset(obj->allowed_nodeset, obj->complete_nodeset);
+      hwloc_cpuset_and(obj->allowed_nodeset, obj->allowed_nodeset, obj->complete_nodeset);
     else
       obj->allowed_nodeset = hwloc_cpuset_dup(obj->complete_nodeset);
   }
@@ -1135,8 +1135,8 @@ remove_unused_cpusets(hwloc_obj_t obj)
   hwloc_obj_t child, *temp;
 
   if (obj->cpuset) {
-    hwloc_cpuset_andset(obj->cpuset, obj->online_cpuset);
-    hwloc_cpuset_andset(obj->cpuset, obj->allowed_cpuset);
+    hwloc_cpuset_and(obj->cpuset, obj->cpuset, obj->online_cpuset);
+    hwloc_cpuset_and(obj->cpuset, obj->cpuset, obj->allowed_cpuset);
   }
 
   for_each_child_safe(child, obj, temp)
@@ -2063,7 +2063,7 @@ hwloc__check_children(struct hwloc_obj *parent)
       /* clear previously used parent cpuset bits so that we actually checked above
        * that children cpusets do not intersect and are ordered properly
        */
-      hwloc_cpuset_clearset(remaining_parent_set, parent->children[j]->cpuset);
+      hwloc_cpuset_andnot(remaining_parent_set, remaining_parent_set, parent->children[j]->cpuset);
     }
     assert(hwloc_cpuset_iszero(remaining_parent_set));
     hwloc_cpuset_free(remaining_parent_set);

@@ -42,6 +42,8 @@ Version 1.0.0
   + Add HWLOC_API_VERSION to help detect the currently used API version.
   + Add missing ending "e" to *compare* functions.
   + Add several routines to emulate PLPA functions.
+  + Rename and rework the cpuset and/or/xor/not/clear operators to output
+    their result in a dedicated argument instead of modifying one input.
   + Deprecate hwloc_obj_snprintf() in favor of hwloc_obj_type/attr_snprintf().
   + Clarify the use of parent and ancestor in the API, do not use father.
   + Replace hwloc_get_system_obj() with hwloc_get_root_obj().

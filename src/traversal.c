@@ -100,7 +100,7 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_cp
     int ret;
 
     /* split out the cpuset part corresponding to this child and see if there's anything to do */
-    hwloc_cpuset_andset(subset, current->children[i]->cpuset);
+    hwloc_cpuset_and(subset, subset, current->children[i]->cpuset);
     if (hwloc_cpuset_iszero(subset)) {
       hwloc_cpuset_free(subset);
       continue;
@@ -277,7 +277,7 @@ int hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_
 
   hwloc_cpuset_zero(set);
   for(i=0; i<nobj; i++)
-    hwloc_cpuset_orset(set, objs[i]->cpuset);
+    hwloc_cpuset_or(set, set, objs[i]->cpuset);
 
   res = hwloc_cpuset_snprintf(str, size, set);
   hwloc_cpuset_free(set);

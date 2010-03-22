@@ -82,9 +82,9 @@ int main(void)
   assert(objs[0] == hwloc_get_obj_by_depth(topology, depth-1, 0));
   assert(objs[1] == hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1)-1));
   objs[0] = hwloc_get_first_largest_obj_inside_cpuset(topology, set);
-  hwloc_cpuset_clearset(set, objs[0]->cpuset);
+  hwloc_cpuset_andnot(set, set, objs[0]->cpuset);
   objs[1] = hwloc_get_first_largest_obj_inside_cpuset(topology, set);
-  hwloc_cpuset_clearset(set, objs[1]->cpuset);
+  hwloc_cpuset_andnot(set, set, objs[1]->cpuset);
   objs[2] = hwloc_get_first_largest_obj_inside_cpuset(topology, set);
   assert(objs[0] == hwloc_get_obj_by_depth(topology, depth-1, 0));
   assert(objs[1] == hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1)-1));

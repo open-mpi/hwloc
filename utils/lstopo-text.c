@@ -168,7 +168,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
       hwloc_cpuset_t unknown = hwloc_cpuset_alloc();
       char *unknownstr;
       hwloc_cpuset_copy(unknown, complete);
-      hwloc_cpuset_clearset(unknown, topo);
+      hwloc_cpuset_andnot(unknown, unknown, topo);
       hwloc_cpuset_asprintf(&unknownstr, unknown);
       fprintf (output, "%d processors not represented in topology: %s\n", hwloc_cpuset_weight(unknown), unknownstr);
       free(unknownstr);
@@ -178,7 +178,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
       hwloc_cpuset_t offline = hwloc_cpuset_alloc();
       char *offlinestr;
       hwloc_cpuset_copy(offline, complete);
-      hwloc_cpuset_clearset(offline, online);
+      hwloc_cpuset_andnot(offline, offline, online);
       hwloc_cpuset_asprintf(&offlinestr, offline);
       fprintf (output, "%d processors offline: %s\n", hwloc_cpuset_weight(offline), offlinestr);
       free(offlinestr);
@@ -189,7 +189,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
         hwloc_cpuset_t forbidden = hwloc_cpuset_alloc();
         char *forbiddenstr;
         hwloc_cpuset_copy(forbidden, online);
-        hwloc_cpuset_clearset(forbidden, allowed);
+        hwloc_cpuset_andnot(forbidden, forbidden, allowed);
         hwloc_cpuset_asprintf(&forbiddenstr, forbidden);
         fprintf(output, "%d processors online but not allowed: %s\n", hwloc_cpuset_weight(forbidden), forbiddenstr);
         free(forbiddenstr);
@@ -199,7 +199,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
         hwloc_cpuset_t potential = hwloc_cpuset_alloc();
         char *potentialstr;
         hwloc_cpuset_copy(potential, allowed);
-        hwloc_cpuset_clearset(potential, online);
+        hwloc_cpuset_andnot(potential, potential, online);
         hwloc_cpuset_asprintf(&potentialstr, potential);
         fprintf(output, "%d processors allowed but not online: %s\n", hwloc_cpuset_weight(potential), potentialstr);
         free(potentialstr);

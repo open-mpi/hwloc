@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
       index = logicalo ? obj->logical_index : obj->os_index;
       printf("%s%s:%u", first ? "" : " ", type, index);
-      hwloc_cpuset_clearset(remaining, obj->cpuset);
+      hwloc_cpuset_andnot(remaining, remaining, obj->cpuset);
       first = 0;
     }
     printf("\n");

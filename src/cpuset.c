@@ -421,58 +421,63 @@ int hwloc_cpuset_isincluded (const struct hwloc_cpuset_s *sub_set, const struct 
 	return 1;
 }
 
-void hwloc_cpuset_orset (struct hwloc_cpuset_s *set, const struct hwloc_cpuset_s *modifier_set)
+void hwloc_cpuset_or (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *set1, const struct hwloc_cpuset_s *set2)
 {
 	int i;
 
-	HWLOC__CPUSET_CHECK(set);
-	HWLOC__CPUSET_CHECK(modifier_set);
+	HWLOC__CPUSET_CHECK(res);
+	HWLOC__CPUSET_CHECK(set1);
+	HWLOC__CPUSET_CHECK(set2);
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
-		HWLOC_CPUSUBSET_SUBSET(*set,i) |= HWLOC_CPUSUBSET_SUBSET(*modifier_set,i);
+		HWLOC_CPUSUBSET_SUBSET(*res,i) = HWLOC_CPUSUBSET_SUBSET(*set1,i) | HWLOC_CPUSUBSET_SUBSET(*set2,i);
 }
 
-void hwloc_cpuset_andset (struct hwloc_cpuset_s *set, const struct hwloc_cpuset_s *modifier_set)
+void hwloc_cpuset_and (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *set1, const struct hwloc_cpuset_s *set2)
 {
 	int i;
 
-	HWLOC__CPUSET_CHECK(set);
-	HWLOC__CPUSET_CHECK(modifier_set);
+	HWLOC__CPUSET_CHECK(res);
+	HWLOC__CPUSET_CHECK(set1);
+	HWLOC__CPUSET_CHECK(set2);
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
-		HWLOC_CPUSUBSET_SUBSET(*set,i) &= HWLOC_CPUSUBSET_SUBSET(*modifier_set,i);
+		HWLOC_CPUSUBSET_SUBSET(*res,i) = HWLOC_CPUSUBSET_SUBSET(*set1,i) & HWLOC_CPUSUBSET_SUBSET(*set2,i);
 }
 
-void hwloc_cpuset_clearset (struct hwloc_cpuset_s *set, const struct hwloc_cpuset_s *modifier_set)
+void hwloc_cpuset_andnot (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *set1, const struct hwloc_cpuset_s *set2)
 {
 	int i;
 
-	HWLOC__CPUSET_CHECK(set);
-	HWLOC__CPUSET_CHECK(modifier_set);
+	HWLOC__CPUSET_CHECK(res);
+	HWLOC__CPUSET_CHECK(set1);
+	HWLOC__CPUSET_CHECK(set2);
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
-		HWLOC_CPUSUBSET_SUBSET(*set,i) &= ~HWLOC_CPUSUBSET_SUBSET(*modifier_set,i);
+		HWLOC_CPUSUBSET_SUBSET(*res,i) = HWLOC_CPUSUBSET_SUBSET(*set1,i) & ~HWLOC_CPUSUBSET_SUBSET(*set2,i);
 }
 
-void hwloc_cpuset_xorset (struct hwloc_cpuset_s *set, const struct hwloc_cpuset_s *modifier_set)
+void hwloc_cpuset_xor (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *set1, const struct hwloc_cpuset_s *set2)
 {
 	int i;
 
-	HWLOC__CPUSET_CHECK(set);
-	HWLOC__CPUSET_CHECK(modifier_set);
+	HWLOC__CPUSET_CHECK(res);
+	HWLOC__CPUSET_CHECK(set1);
+	HWLOC__CPUSET_CHECK(set2);
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
-		HWLOC_CPUSUBSET_SUBSET(*set,i) ^= HWLOC_CPUSUBSET_SUBSET(*modifier_set,i);
+		HWLOC_CPUSUBSET_SUBSET(*res,i) = HWLOC_CPUSUBSET_SUBSET(*set1,i) ^ HWLOC_CPUSUBSET_SUBSET(*set2,i);
 }
 
-void hwloc_cpuset_notset (struct hwloc_cpuset_s *set)
+void hwloc_cpuset_not (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *set)
 {
 	int i;
 
+	HWLOC__CPUSET_CHECK(res);
 	HWLOC__CPUSET_CHECK(set);
 
 	for(i=0; i<HWLOC_CPUSUBSET_COUNT; i++)
-		HWLOC_CPUSUBSET_SUBSET(*set,i) = ~HWLOC_CPUSUBSET_SUBSET(*set,i);
+		HWLOC_CPUSUBSET_SUBSET(*res,i) = ~HWLOC_CPUSUBSET_SUBSET(*set,i);
 }
 
 int hwloc_cpuset_first(const struct hwloc_cpuset_s * set)

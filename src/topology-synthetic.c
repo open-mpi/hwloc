@@ -223,7 +223,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 
   hwloc_insert_object_by_cpuset(topology, obj);
 
-  hwloc_cpuset_orset(parent_cpuset, obj->cpuset);
+  hwloc_cpuset_or(parent_cpuset, parent_cpuset, obj->cpuset);
 
   /* post-hooks */
   switch (type) {

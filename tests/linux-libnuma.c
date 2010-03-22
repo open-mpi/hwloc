@@ -30,9 +30,9 @@ int main(void)
   if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE)) {
     node = NULL;
     while ((node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, node)) != NULL)
-      hwloc_cpuset_orset(set, node->cpuset);
+      hwloc_cpuset_or(set, set, node->cpuset);
   } else {
-    hwloc_cpuset_orset(set, hwloc_topology_get_complete_cpuset(topology));
+    hwloc_cpuset_or(set, set, hwloc_topology_get_complete_cpuset(topology));
   }
 
   set2 = hwloc_cpuset_alloc();
