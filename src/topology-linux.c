@@ -712,19 +712,18 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 #define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
 #define MAX_KERNEL_CPU_MASK ((HWLOC_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
-hwloc_cpuset_t
-hwloc_linux_parse_cpumap_file(FILE *file)
+int
+hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
 {
   unsigned long maps[MAX_KERNEL_CPU_MASK];
   unsigned long map;
-  hwloc_cpuset_t set;
   int nr_maps = 0;
   int n;
 
   int i;
 
-  /* allocate and reset to zero first */
-  set = hwloc_cpuset_alloc();
+  /* reset to zero first */
+  hwloc_cpuset_zero(set);
 
   /* parse the whole mask */
   while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
@@ -751,7 +750,7 @@ hwloc_linux_parse_cpumap_file(FILE *file)
     if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
       hwloc_cpuset_set(set, i);
 
-  return set;
+  return 0;
 }
 
 static hwloc_cpuset_t
@@ -764,7 +763,8 @@ hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
   if (!file)
     return NULL;
 
-  set = hwloc_linux_parse_cpumap_file(file);
+  set = hwloc_cpuset_alloc();
+  hwloc_linux_parse_cpumap_file(file, set);
 
   fclose(file);
   return set;

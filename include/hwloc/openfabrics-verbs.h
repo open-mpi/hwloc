@@ -58,7 +58,8 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
   if (!sysfile)
     return NULL;
 
-  set = hwloc_linux_parse_cpumap_file(sysfile);
+  set = hwloc_cpuset_alloc();
+  hwloc_linux_parse_cpumap_file(sysfile, set);
 
   fclose(sysfile);
   return set;
