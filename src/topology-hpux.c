@@ -185,7 +185,7 @@ hwloc_look_hpux(struct hwloc_topology *topology)
         hwloc_cpuset_set(nodes[i]->cpuset, currentcpu);
         hwloc_debug("is in node %d\n", i);
       } else {
-        hwloc_debug("is in no node?!\n");
+        hwloc_debug("%s", "is in no node?!\n");
       }
     }
 
