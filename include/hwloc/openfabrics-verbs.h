@@ -34,15 +34,10 @@
  * kernel-provided cpumap file and return the corresponding CPU set.
  * This function is currently only implemented in a meaningful way for
  * Linux; other systems will simply get a full cpuset.
- *
- * \return newly-allocated cpuset.
  */
-static __inline hwloc_cpuset_t
+static __inline int
 hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
-			    struct ibv_device *ibdev) __hwloc_attribute_malloc;
-static __inline hwloc_cpuset_t
-hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
-			    struct ibv_device *ibdev)
+			    struct ibv_device *ibdev, hwloc_cpuset_t set)
 {
 #ifdef HWLOC_LINUX_SYS
   /* If we're on Linux, use the verbs-provided sysfs mechanism to
@@ -50,7 +45,6 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
 #define HWLOC_OPENFABRICS_VERBS_SYSFS_PATH_MAX 128
   char path[HWLOC_OPENFABRICS_VERBS_SYSFS_PATH_MAX];
   FILE *sysfile = NULL;
-  hwloc_cpuset_t set;
 
   sprintf(path, "/sys/class/infiniband/%s/device/local_cpus",
 	  ibv_get_device_name(ibdev));
@@ -58,15 +52,14 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
   if (!sysfile)
     return NULL;
 
-  set = hwloc_cpuset_alloc();
   hwloc_linux_parse_cpumap_file(sysfile, set);
 
   fclose(sysfile);
-  return set;
 #else
   /* Non-Linux systems simply get a full cpuset */
-  return hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
+  hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
 #endif
+  return 0;
 }
 
 /** @} */
