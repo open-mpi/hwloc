@@ -30,6 +30,8 @@
 
 /* Names from hwloc.h */
 
+#define HWLOC_API_VERSION HWLOC_NAME_CAPS(API_VERSION)
+
 #define hwloc_topology HWLOC_NAME(topology)
 #define hwloc_topology_t HWLOC_NAME(topology_t)
 
@@ -107,6 +109,8 @@
 
 #define hwloc_obj_type_string HWLOC_NAME(obj_type_string )
 #define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
+#define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
+#define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
 #define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 #define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
 #define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
