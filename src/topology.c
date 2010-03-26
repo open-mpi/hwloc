@@ -526,8 +526,8 @@ static const hwloc_obj_type_t obj_order_type[] = {
   [7] = HWLOC_OBJ_PROC
 };
 
-static unsigned hwloc_get_type_order(hwloc_obj_type_t type) __hwloc_attribute_const;
-static unsigned hwloc_get_type_order(hwloc_obj_type_t type)
+static unsigned __hwloc_attribute_const
+hwloc_get_type_order(hwloc_obj_type_t type)
 {
   return obj_type_order[type];
 }

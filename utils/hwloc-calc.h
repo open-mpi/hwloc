@@ -63,10 +63,7 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
   return 0;
 }
 
-static __inline hwloc_obj_t
-hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t rootset,
-					 unsigned depth, unsigned i, int logical) __hwloc_attribute_pure;
-static __inline hwloc_obj_t
+static __inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t rootset,
 					 unsigned depth, unsigned i, int logical)
 {

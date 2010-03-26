@@ -606,9 +606,7 @@ HWLOC_DECLSPEC unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, un
  * If no object for that type exists, 0 is returned.
  * If there are several levels with objects of that type, -1 is returned.
  */
-static __inline int
-hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
-static __inline int
+static __inline int __hwloc_attribute_pure
 hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
 	int depth = hwloc_get_type_depth(topology, type);
@@ -645,9 +643,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, un
  * If there are several levels with objects of that type, \c NULL is returned
  * and ther caller may fallback to hwloc_get_obj_by_depth().
  */
-static __inline hwloc_obj_t
-hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned idx) __hwloc_attribute_pure;
-static __inline hwloc_obj_t
+static __inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned idx)
 {
   int depth = hwloc_get_type_depth(topology, type);

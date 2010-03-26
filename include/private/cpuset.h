@@ -88,8 +88,8 @@ extern int ffs(int) __hwloc_attribute_const;
 
 #else /* no ffs implementation */
 
-static __inline int hwloc_ffsl(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_ffsl(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_ffsl(unsigned long x)
 {
 	int i;
 
@@ -134,8 +134,8 @@ static __inline int hwloc_ffsl(unsigned long x)
 /* We only have an int ffs(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline int hwloc_ffs32(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_ffs32(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_ffs32(unsigned long x)
 {
 #if HWLOC_BITS_PER_INT == 16
 	int low_ffs, hi_ffs;
@@ -155,8 +155,8 @@ static __inline int hwloc_ffs32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline int hwloc_ffsl(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_ffsl(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_ffsl(unsigned long x)
 {
 #if HWLOC_BITS_PER_LONG == 64
 	int low_ffs, hi_ffs;
@@ -224,8 +224,8 @@ extern int clz(int) __hwloc_attribute_const;
 
 #else /* no fls implementation */
 
-static __inline int hwloc_flsl(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_flsl(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_flsl(unsigned long x)
 {
 	int i = 0;
 
@@ -270,8 +270,8 @@ static __inline int hwloc_flsl(unsigned long x)
 /* We only have an int fls(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline int hwloc_fls32(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_fls32(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_fls32(unsigned long x)
 {
 #if HWLOC_BITS_PER_INT == 16
 	int low_fls, hi_fls;
@@ -291,8 +291,8 @@ static __inline int hwloc_fls32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline int hwloc_flsl(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_flsl(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_flsl(unsigned long x)
 {
 #if HWLOC_BITS_PER_LONG == 64
 	int low_fls, hi_fls;
@@ -312,8 +312,8 @@ static __inline int hwloc_flsl(unsigned long x)
 }
 #endif
 
-static __inline int hwloc_weight_long(unsigned long w) __hwloc_attribute_const;
-static __inline int hwloc_weight_long(unsigned long w)
+static __inline int __hwloc_attribute_const
+hwloc_weight_long(unsigned long w)
 {
 #if HWLOC_BITS_PER_LONG == 32
 #if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)

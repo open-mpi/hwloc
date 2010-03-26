@@ -122,9 +122,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
  *
  * \return newly allocated struct bitmask.
  */
-static __inline struct bitmask *
-hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset) __hwloc_attribute_malloc;
-static __inline struct bitmask *
+static __inline struct bitmask * __hwloc_attribute_malloc
 hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset)
 {
   struct bitmask *bitmask;
