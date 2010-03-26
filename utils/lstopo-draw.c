@@ -353,7 +353,7 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 static void
 proc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  *retwidth = fontsize ? 4*fontsize : gridsize;
+  *retwidth = fontsize ? 5*fontsize : gridsize;
   *retheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
 
   DYNA_CHECK();
