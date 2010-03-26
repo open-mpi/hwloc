@@ -334,7 +334,7 @@ static int
 lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 {
   unsigned index = logical ? obj->logical_index : obj->os_index;
-  const char *indexprefix = logical ? "#" : " p#";
+  const char *indexprefix = logical ? " #" : " p#";
   char typestr[32] = "P";
   char indexstr[32]= "";
   char attrstr[256];
@@ -345,7 +345,7 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, index);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
   if (attrlen)
-    return snprintf(text, textlen, "%s%s(%s)", typestr, indexstr, attrstr);
+    return snprintf(text, textlen, "%s%s (%s)", typestr, indexstr, attrstr);
   else
     return snprintf(text, textlen, "%s%s", typestr, indexstr);
 }

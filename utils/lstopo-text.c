@@ -43,7 +43,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
   char type[32], attr[256], phys[32] = "";
   unsigned index = logical ? l->logical_index : l->os_index;
-  const char *indexprefix = logical ? "#" :  " p#";
+  const char *indexprefix = logical ? " #" :  " p#";
   if (show_cpuset < 2) {
     if (l->type != HWLOC_OBJ_PROC) {
       hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
@@ -58,8 +58,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
     if (*phys || *attr) {
       const char *separator = *phys != '\0' && *attr!= '\0' ? " " : "";
-      fprintf(output, "%s(%s%s%s)",
-	      verbose_mode >= 2 ? " " : "", /* add a space before attributes when there's a single object per line */
+      fprintf(output, " (%s%s%s)",
 	      phys, separator, attr);
     }
     if (verbose_mode >= 2 && l->name)
