@@ -16,7 +16,7 @@ nodist_include_hwloc_HEADERS = hwloc/config.h
 noinst_HEADERS = \
         private/private.h \
         private/debug.h \
-        private/cpuset.h \
+        private/misc.h \
         private/cpuid.h
 
 if HWLOC_HAVE_LINUX

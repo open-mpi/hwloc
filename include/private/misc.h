@@ -3,13 +3,12 @@
  * See COPYING in top-level directory.
  */
 
-/* Internals for cpuset API.  */
+/* Misc internals routines.  */
 
-#ifndef HWLOC_PRIVATE_CPUSET_H
-#define HWLOC_PRIVATE_CPUSET_H
+#ifndef HWLOC_PRIVATE_MISC_H
+#define HWLOC_PRIVATE_MISC_H
 
 #include <hwloc/config.h>
-#include <hwloc/rename.h>
 #include <private/config.h>
 
 /**
@@ -298,4 +297,4 @@ hwloc_weight_long(unsigned long w)
 }
 
 
-#endif /* HWLOC_PRIVATE_CPUSET_H */
+#endif /* HWLOC_PRIVATE_MISC_H */

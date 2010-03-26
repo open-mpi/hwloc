@@ -8,7 +8,7 @@
 #include <private/private.h>
 #include <private/debug.h>
 #include <private/cpuid.h>
-#include <private/cpuset.h>
+#include <private/misc.h>
 
 struct cacheinfo {
   unsigned type;
