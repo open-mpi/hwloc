@@ -106,9 +106,11 @@ struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 {
   struct hwloc_cpuset_s * set;
   set = calloc(sizeof(*set), 1);
+  if (!set)
+    return NULL;
+
 #ifdef HWLOC_DEBUG
-  if (set)
-    set->magic = HWLOC_CPUSET_MAGIC;
+  set->magic = HWLOC_CPUSET_MAGIC;
 #endif
   return set;
 }
@@ -117,6 +119,7 @@ void hwloc_cpuset_free(struct hwloc_cpuset_s * set)
 {
   if (!set)
     return;
+
   HWLOC__CPUSET_CHECK(set);
 #ifdef HWLOC_DEBUG
   set->magic = 0;
@@ -132,12 +135,10 @@ struct hwloc_cpuset_s * hwloc_cpuset_dup(const struct hwloc_cpuset_s * old)
   HWLOC__CPUSET_CHECK(old);
 
   new = malloc(sizeof(*new));
-  if (new) {
-#ifdef HWLOC_DEBUG
-    new->magic = HWLOC_CPUSET_MAGIC;
-#endif
-    memcpy(new, old, sizeof(*new));
-  }
+  if (!new)
+    return NULL;
+
+  memcpy(new, old, sizeof(*new));
   return new;
 }
 
