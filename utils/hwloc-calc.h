@@ -8,6 +8,7 @@
 
 #include <private/config.h>
 #include <private/private.h>
+#include <private/misc.h>
 #include <hwloc.h>
 
 #include <stdlib.h>

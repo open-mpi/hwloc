@@ -53,55 +53,6 @@ struct hwloc_cpuset_s {
 #define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
 #define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
 
-int hwloc_snprintf(char *str, size_t size, const char *format, ...)
-{
-  int ret;
-  va_list ap;
-  static char bin;
-
-  /* Some systems crash on str == NULL */
-  if (!size) {
-    str = &bin;
-    size = 1;
-  }
-
-  va_start(ap, format);
-  ret = vsnprintf(str, size, format, ap);
-  va_end(ap);
-
-  if (ret >= 0 && (size_t) ret != size-1)
-    return ret;
-
-  /* vsnprintf returned size-1 or -1. That could be a system which reports the
-   * written data and not the actually required room. Try increasing buffer
-   * size to get the latter. */
-
-  do {
-    size *= 2;
-    str = malloc(size);
-    va_start(ap, format);
-    errno = 0;
-    ret = vsnprintf(str, size, format, ap);
-    va_end(ap);
-    free(str);
-  } while ((size_t) ret == size-1 || (ret < 0 && !errno));
-
-  return ret;
-}
-
-int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
-{
-  size_t i = 0;
-  while (*haystack && *haystack != ':') {
-    int low_h = tolower(*haystack++);
-    int low_n = tolower(*needle++);
-    if (low_h != low_n)
-      return 1;
-    i++;
-  }
-  return i < n;
-}
-
 struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 {
   struct hwloc_cpuset_s * set;
