@@ -117,6 +117,11 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 		-e 's/__inline/inline/g' \
 		-e 's/\\_\\-\\_\\-inline/inline/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
+	@echo "Work-around spurious leading _ in doxygen filenames..."
+	(cd $(DOX_DIR)/man/man3 ; \
+	for i in _hwloc* ; do \
+		mv $$i $${i#_} ; \
+	done)
 	@echo "Removing useless manpages..."
 	@mkdir $(DOX_DIR)/man.tmp
 	@mv $(man3_MANS) $(DOX_DIR)/man.tmp/
