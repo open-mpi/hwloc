@@ -76,7 +76,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       return -1;
     }
     if (item > UINT_MAX) {
-      fprintf(stderr,"Too big arity, max %d\n", UINT_MAX);
+      fprintf(stderr,"Too big arity, max %u\n", UINT_MAX);
       return -1;
     }
 

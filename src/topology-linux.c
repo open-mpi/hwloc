@@ -884,7 +884,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
     fd = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
   else {
     char path[] = "/proc/XXXXXXXXXX/cgroup";
-    snprintf(path, sizeof(path), "/proc/%u/cgroup", pid);
+    snprintf(path, sizeof(path), "/proc/%d/cgroup", pid);
     fd = hwloc_fopen(path, "r", fsroot_fd);
   }
   if (fd) {
@@ -914,7 +914,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
     fd = hwloc_fopen("/proc/self/cpuset", "r", fsroot_fd);
   else {
     char path[] = "/proc/XXXXXXXXXX/cpuset";
-    snprintf(path, sizeof(path), "/proc/%u/cpuset", pid);
+    snprintf(path, sizeof(path), "/proc/%d/cpuset", pid);
     fd = hwloc_fopen(path, "r", fsroot_fd);
   }
   if (!fd) {
@@ -1474,7 +1474,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
-	hwloc_debug(field " %ld\n", var)
+	hwloc_debug(field " %lu\n", var)
 #      define getprocnb_end()			\
       }
       getprocnb_begin(PROCESSOR,processor);
@@ -1484,7 +1484,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       obj->cpuset = hwloc_cpuset_alloc();
       hwloc_cpuset_cpu(obj->cpuset, processor);
 
-      hwloc_debug_2args_cpuset("cpu %u (os %ld) has cpuset %s\n",
+      hwloc_debug_2args_cpuset("cpu %u (os %lu) has cpuset %s\n",
 		 numprocs, processor, obj->cpuset);
       numprocs++;
       hwloc_insert_object_by_cpuset(topology, obj);
@@ -1496,7 +1496,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (physid == osphysids[i])
 	  break;
       proc_physids[processor]=i;
-      hwloc_debug("%ld on socket %u (%lx)\n", processor, i, physid);
+      hwloc_debug("%lu on socket %u (%lx)\n", processor, i, physid);
       if (i==numsockets)
 	osphysids[(numsockets)++] = physid;
       getprocnb_end() else

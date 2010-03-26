@@ -254,7 +254,7 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology, struct hwloc_ob
       if (value)
 	hwloc__xml_import_pagetype_attr(topology, pagetype, attr->name, value);
       else
-	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", attr->name);
+	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml pagetype attr type %u\n", attr->type);
     }
@@ -298,7 +298,7 @@ hwloc__xml_import_object_node(struct hwloc_topology *topology, struct hwloc_obj 
       if (value)
 	hwloc__xml_import_object_attr(topology, obj, attr->name, value);
       else
-	fprintf(stderr, "ignoring unexpected xml object attr name `%s' with no value\n", attr->name);
+	fprintf(stderr, "ignoring unexpected xml object attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml object attr type %u\n", attr->type);
     }
@@ -368,7 +368,7 @@ hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
       if (value)
 	hwloc__xml_import_topology_attr(topology, attr->name, value);
       else
-	fprintf(stderr, "ignoring unexpected xml root attr name `%s' with no value\n", attr->name);
+	fprintf(stderr, "ignoring unexpected xml root attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml root attr type %u\n", attr->type);
     }
