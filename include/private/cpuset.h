@@ -12,49 +12,6 @@
 #include <hwloc/rename.h>
 #include <private/config.h>
 
-#include <sys/types.h>
-#include <inttypes.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
-
-
-/**
- * Cpuset internals.
- */
-
-/* size and count of subsets within a set */
-#define HWLOC_CPUSUBSET_SIZE	HWLOC_BITS_PER_LONG
-#define HWLOC_CPUSUBSET_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSUBSET_SIZE-1)/HWLOC_CPUSUBSET_SIZE)
-
-/* magic number */
-#define HWLOC_CPUSET_MAGIC 0x20091007
-
-/* actual opaque type internals */
-struct hwloc_cpuset_s {
-	unsigned long s[HWLOC_CPUSUBSET_COUNT];
-#ifdef HWLOC_DEBUG
-	int magic;
-#endif
-};
-
-/* extract a subset from a set using an index or a cpu */
-#define HWLOC_CPUSUBSET_SUBSET(set,x)		((set).s[x])
-#define HWLOC_CPUSUBSET_INDEX(cpu)		((cpu)/(HWLOC_CPUSUBSET_SIZE))
-#define HWLOC_CPUSUBSET_CPUSUBSET(set,cpu)	HWLOC_CPUSUBSET_SUBSET(set,HWLOC_CPUSUBSET_INDEX(cpu))
-
-/* predefined subset values */
-#define HWLOC_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(HWLOC_CPUSUBSET_SIZE)))
-#define HWLOC_CPUSUBSET_ZERO		0UL
-#define HWLOC_CPUSUBSET_FULL		~0UL
-
-/* Strings always use 32bit groups */
-#define HWLOC_PRIxCPUSUBSET		"%08lx"
-#define HWLOC_CPUSET_SUBSTRING_SIZE	32
-#define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
-#define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
-
-
 /**
  * ffsl helpers.
  */
