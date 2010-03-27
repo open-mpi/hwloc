@@ -25,7 +25,7 @@ int main(void)
   /* full set */
   hwloc_cpuset_fill(set);
   assert(hwloc_cpuset_first(set) == 0);
-  assert(hwloc_cpuset_last(set) == HWLOC_NBMAXCPUS-1);
+  assert(hwloc_cpuset_last(set) == -1);
   assert(hwloc_cpuset_next(set, 0) == 1);
   assert(hwloc_cpuset_next(set, 1) == 2);
   assert(hwloc_cpuset_next(set, 2) == 3);
@@ -35,10 +35,8 @@ int main(void)
   assert(hwloc_cpuset_next(set, 62) == 63);
   assert(hwloc_cpuset_next(set, 63) == 64);
   assert(hwloc_cpuset_next(set, 64) == 65);
-  assert(hwloc_cpuset_next(set, HWLOC_NBMAXCPUS-3) == HWLOC_NBMAXCPUS-2);
-  assert(hwloc_cpuset_next(set, HWLOC_NBMAXCPUS-2) == HWLOC_NBMAXCPUS-1);
-  assert(hwloc_cpuset_next(set, HWLOC_NBMAXCPUS-1) == -1);
-  assert(hwloc_cpuset_weight(set) == HWLOC_NBMAXCPUS);
+  assert(hwloc_cpuset_next(set, 12345) == 12346);
+  assert(hwloc_cpuset_weight(set) == -1);
 
   /* custom sets */
   hwloc_cpuset_zero(set);
