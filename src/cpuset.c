@@ -181,48 +181,29 @@ int hwloc_cpuset_asprintf(char ** strp, const struct hwloc_cpuset_s * __hwloc_re
 int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_restrict string)
 {
   const char * current = string;
-  int count=0, i;
-  unsigned long accum = 0;
-  int accumed = 0;
+  int count=0;
 
   hwloc_cpuset_zero(set);
 
+  /* count how many substrings there are */
+  count++;
+  while ((current = strchr(current+1, ',')) != NULL)
+    count++;
+
+  current = string;
   while (*current != '\0') {
     unsigned long val;
     char *next;
     val = strtoul(current, &next, 16);
-    /* store subset in order, starting from the end */
-#if HWLOC_BITS_PER_LONG == HWLOC_CPUSET_SUBSTRING_SIZE
-    accum = val;
-#else
-    accum = (accum << HWLOC_CPUSET_SUBSTRING_SIZE) | val;
-#endif
-    accumed += HWLOC_CPUSET_SUBSTRING_SIZE;
-    if (accumed == HWLOC_BITS_PER_LONG) {
-      set->s[HWLOC_CPUSUBSET_COUNT-1-count] = accum;
-      count++;
-      accum = 0;
-      accumed = 0;
-    }
+
+    count--;
+    if (count / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE) < HWLOC_CPUSUBSET_COUNT)
+      set->s[count / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE)] |= (val << ((count * HWLOC_CPUSET_SUBSTRING_SIZE) % HWLOC_BITS_PER_LONG));
+
     if (*next != ',')
       break;
     current = (const char*) next+1;
-    if (count == HWLOC_CPUSUBSET_COUNT)
-      break;
   }
-
-  /* move subsets back to the beginning and clear the missing subsets */
-  for (i = 0; i < count; i++) {
-    set->s[i] = accum;
-    set->s[i] |= set->s[HWLOC_CPUSUBSET_COUNT-count+i] << accumed;
-    if (accumed)
-      accum = set->s[HWLOC_CPUSUBSET_COUNT-count+i] >> (HWLOC_BITS_PER_LONG - accumed);
-  }
-  /* Remaining bit from last iteration */
-  if (accumed && count < HWLOC_CPUSUBSET_COUNT)
-    set->s[i++] = accum;
-  for( ; i<HWLOC_CPUSUBSET_COUNT; i++)
-    set->s[i] = 0;
 
   return 0;
 }
