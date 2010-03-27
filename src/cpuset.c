@@ -43,14 +43,9 @@ struct hwloc_cpuset_s {
 
 /* predefined subset values */
 #define HWLOC_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(HWLOC_BITS_PER_LONG)))
-#define HWLOC_CPUSUBSET_ZERO		0UL
-#define HWLOC_CPUSUBSET_FULL		~0UL
+#define HWLOC_CPUSUBSET_ZERO			0UL
+#define HWLOC_CPUSUBSET_FULL			~0UL
 
-/* Strings always use 32bit groups */
-#define HWLOC_PRIxCPUSUBSET		"%08lx"
-#define HWLOC_CPUSET_SUBSTRING_SIZE	32
-#define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
-#define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
 
 struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 {
@@ -99,6 +94,12 @@ void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, const struct hwloc_cpuset_s 
 
   memcpy(dst, src, sizeof(*dst));
 }
+
+/* Strings always use 32bit groups */
+#define HWLOC_PRIxCPUSUBSET		"%08lx"
+#define HWLOC_CPUSET_SUBSTRING_SIZE	32
+#define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
+#define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
 
 int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_cpuset_s * __hwloc_restrict set)
 {
