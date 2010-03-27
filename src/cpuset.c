@@ -692,7 +692,7 @@ int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
 
 	HWLOC__CPUSET_CHECK(set);
 
-	if (prev_cpu >= set->ulongs_count * HWLOC_BITS_PER_LONG - 1) {
+	if (i >= set->ulongs_count) {
 		if (set->infinite)
 			return prev_cpu + 1;
 		else
