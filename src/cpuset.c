@@ -16,8 +16,7 @@
 #include <ctype.h>
 
 /* size and count of subsets within a set */
-#define HWLOC_CPUSUBSET_SIZE	HWLOC_BITS_PER_LONG
-#define HWLOC_CPUSUBSET_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSUBSET_SIZE-1)/HWLOC_CPUSUBSET_SIZE)
+#define HWLOC_CPUSUBSET_COUNT	((HWLOC_NBMAXCPUS+HWLOC_BITS_PER_LONG-1)/HWLOC_BITS_PER_LONG)
 
 /* magic number */
 #define HWLOC_CPUSET_MAGIC 0x20091007
@@ -39,11 +38,11 @@ struct hwloc_cpuset_s {
 
 /* extract a subset from a set using an index or a cpu */
 #define HWLOC_CPUSUBSET_SUBSET(set,x)		((set).s[x])
-#define HWLOC_CPUSUBSET_INDEX(cpu)		((cpu)/(HWLOC_CPUSUBSET_SIZE))
+#define HWLOC_CPUSUBSET_INDEX(cpu)		((cpu)/(HWLOC_BITS_PER_LONG))
 #define HWLOC_CPUSUBSET_CPUSUBSET(set,cpu)	HWLOC_CPUSUBSET_SUBSET(set,HWLOC_CPUSUBSET_INDEX(cpu))
 
 /* predefined subset values */
-#define HWLOC_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(HWLOC_CPUSUBSET_SIZE)))
+#define HWLOC_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(HWLOC_BITS_PER_LONG)))
 #define HWLOC_CPUSUBSET_ZERO		0UL
 #define HWLOC_CPUSUBSET_FULL		~0UL
 
@@ -454,7 +453,7 @@ int hwloc_cpuset_first(const struct hwloc_cpuset_s * set)
 		/* subsets are unsigned longs, use ffsl */
 		unsigned long w = HWLOC_CPUSUBSET_SUBSET(*set,i);
 		if (w)
-			return hwloc_ffsl(w) - 1 + HWLOC_CPUSUBSET_SIZE*i;
+			return hwloc_ffsl(w) - 1 + HWLOC_BITS_PER_LONG*i;
 	}
 
 	return -1;
@@ -470,7 +469,7 @@ int hwloc_cpuset_last(const struct hwloc_cpuset_s * set)
 		/* subsets are unsigned longs, use flsl */
 		unsigned long w = HWLOC_CPUSUBSET_SUBSET(*set,i);
 		if (w)
-			return hwloc_flsl(w) - 1 + HWLOC_CPUSUBSET_SIZE*i;
+			return hwloc_flsl(w) - 1 + HWLOC_BITS_PER_LONG*i;
 	}
 
 	return -1;
@@ -492,7 +491,7 @@ int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
 			w &= ~((HWLOC_CPUSUBSET_VAL(prev_cpu) << 1) - 1);
 
 		if (w)
-			return hwloc_ffsl(w) - 1 + HWLOC_CPUSUBSET_SIZE*i;
+			return hwloc_ffsl(w) - 1 + HWLOC_BITS_PER_LONG*i;
 	}
 
 	return -1;
