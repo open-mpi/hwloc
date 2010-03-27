@@ -160,11 +160,6 @@ void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, const struct hwloc_cpuset_s 
     dst->ulongs[i] = dst->infinite ? HWLOC_CPUSUBSET_FULL : HWLOC_CPUSUBSET_ZERO;
 }
 
-static unsigned hwloc_cpuset_maxnbcpus(const struct hwloc_cpuset_s * set)
-{
-  return set->ulongs_count * HWLOC_BITS_PER_LONG;
-}
-
 /* Strings always use 32bit groups */
 #define HWLOC_PRIxCPUSUBSET		"%08lx"
 #define HWLOC_CPUSET_SUBSTRING_SIZE	32
@@ -433,7 +428,7 @@ int hwloc_cpuset_isset(const struct hwloc_cpuset_s * set, unsigned cpu)
 {
 	HWLOC__CPUSET_CHECK(set);
 
-	return cpu >= hwloc_cpuset_maxnbcpus(set) ? set->infinite : (HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) & HWLOC_CPUSUBSET_VAL(cpu)) != 0;
+	return cpu >= set->ulongs_count * HWLOC_BITS_PER_LONG ? set->infinite : ((HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) & HWLOC_CPUSUBSET_VAL(cpu)) != 0);
 }
 
 int hwloc_cpuset_iszero(const struct hwloc_cpuset_s *set)
