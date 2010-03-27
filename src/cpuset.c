@@ -365,7 +365,10 @@ void hwloc_cpuset_set(struct hwloc_cpuset_s * set, unsigned cpu)
 {
 	HWLOC__CPUSET_CHECK(set);
 
-	/* TODO: don't realloc if infinite */
+	/* nothing to do if setting inside the infinite part of the cpuset */
+	if (set->infinite && cpu >= set->ulongs_count * HWLOC_BITS_PER_LONG)
+		return;
+
 	hwloc_cpuset_realloc_by_cpu_index(set, cpu);
 	HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) |= HWLOC_CPUSUBSET_VAL(cpu);
 }
@@ -376,9 +379,17 @@ void hwloc_cpuset_set_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 
 	HWLOC__CPUSET_CHECK(set);
 
-	/* TODO: don't realloc if infinite */
-	if (endcpu >= begincpu)
-		hwloc_cpuset_realloc_by_cpu_index(set, endcpu);
+	if (set->infinite) {
+		/* truncate the range according to the infinite part of the cpuset */
+		if (endcpu >= set->ulongs_count * HWLOC_BITS_PER_LONG)
+			endcpu = set->ulongs_count * HWLOC_BITS_PER_LONG - 1;
+		if (begincpu >= set->ulongs_count * HWLOC_BITS_PER_LONG)
+			return;
+	}
+	if (endcpu < begincpu)
+		return;
+	hwloc_cpuset_realloc_by_cpu_index(set, endcpu);
+
 	/* TODO: optimize */
 	for (i=begincpu; i<=endcpu; i++)
 		HWLOC_CPUSUBSET_CPUSUBSET(*set,i) |= HWLOC_CPUSUBSET_VAL(i);
@@ -388,7 +399,10 @@ void hwloc_cpuset_clr(struct hwloc_cpuset_s * set, unsigned cpu)
 {
 	HWLOC__CPUSET_CHECK(set);
 
-	/* TODO: don't realloc if not infinite */
+	/* nothing to do if clearing inside the infinitely-unset part of the cpuset */
+	if (!set->infinite && cpu >= set->ulongs_count * HWLOC_BITS_PER_LONG)
+		return;
+
 	hwloc_cpuset_realloc_by_cpu_index(set, cpu);
 	HWLOC_CPUSUBSET_CPUSUBSET(*set,cpu) &= ~HWLOC_CPUSUBSET_VAL(cpu);
 }
@@ -399,9 +413,17 @@ void hwloc_cpuset_clr_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 
 	HWLOC__CPUSET_CHECK(set);
 
-	/* TODO: don't realloc if infinite */
-	if (endcpu >= begincpu)
-		hwloc_cpuset_realloc_by_cpu_index(set, endcpu);
+	if (!set->infinite) {
+		/* truncate the range according to the infinitely-unset part of the cpuset */
+		if (endcpu >= set->ulongs_count * HWLOC_BITS_PER_LONG)
+			endcpu = set->ulongs_count * HWLOC_BITS_PER_LONG - 1;
+		if (begincpu >= set->ulongs_count * HWLOC_BITS_PER_LONG)
+			return;
+	}
+	if (endcpu < begincpu)
+		return;
+	hwloc_cpuset_realloc_by_cpu_index(set, endcpu);
+
 	/* TODO: optimize */
 	for (i=begincpu; i<=endcpu; i++)
 		HWLOC_CPUSUBSET_CPUSUBSET(*set,i) &= ~HWLOC_CPUSUBSET_VAL(i);
