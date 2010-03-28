@@ -148,10 +148,16 @@ HWLOC_DECLSPEC void hwloc_cpuset_xor (hwloc_cpuset_t res, hwloc_const_cpuset_t s
 /** \brief Negate set \p set and store the result in set \p res */
 HWLOC_DECLSPEC void hwloc_cpuset_not (hwloc_cpuset_t res, hwloc_const_cpuset_t set);
 
-/** \brief Compute the first CPU (least significant bit) in CPU set \p set */
+/** \brief Compute the first CPU (least significant bit) in CPU set \p set
+ *
+ * \return -1 if no CPU is set.
+ */
 HWLOC_DECLSPEC int hwloc_cpuset_first(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
-/** \brief Compute the last CPU (most significant bit) in CPU set \p set */
+/** \brief Compute the last CPU (most significant bit) in CPU set \p set
+ *
+ * \return -1 if no CPU is set.
+ */
 HWLOC_DECLSPEC int hwloc_cpuset_last(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
 /** \brief Compute the next CPU in CPU set \p set which is after CPU \p prev_cpu */
@@ -179,7 +185,10 @@ HWLOC_DECLSPEC int hwloc_cpuset_compare_first(hwloc_const_cpuset_t set1, hwloc_c
  */
 HWLOC_DECLSPEC int hwloc_cpuset_compare(hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2) __hwloc_attribute_pure;
 
-/** \brief Compute the weight of CPU set \p set */
+/** \brief Compute the weight of CPU set \p set
+ *
+ * \return the number of CPUs that are set.
+ */
 HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
 /** \brief Loop macro iterating on CPU set \p set
