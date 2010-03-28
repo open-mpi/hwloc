@@ -71,7 +71,7 @@ struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
   set->ulongs_count = 1;
   set->ulongs = calloc(sizeof(unsigned long), set->ulongs_count);
   if (!set->ulongs) {
-    free(set->ulongs);
+    free(set);
     return NULL;
   }
 
