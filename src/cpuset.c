@@ -107,10 +107,8 @@ hwloc_cpuset_realloc_by_ulongs(struct hwloc_cpuset_s * set, unsigned needed_coun
     return;
 
   /* realloc larger if needed */
-  tmp = set->ulongs_allocated;
-  while (tmp < needed_count)
-    tmp *= 2;
-  if (tmp != set->ulongs_allocated) {
+  tmp = 1 << hwloc_flsl((unsigned long) needed_count - 1);
+  if (tmp > set->ulongs_allocated) {
     set->ulongs = realloc(set->ulongs, tmp * sizeof(unsigned long));
     assert(set->ulongs);
     set->ulongs_allocated = tmp;
