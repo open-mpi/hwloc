@@ -17,7 +17,7 @@
 /** \defgroup hwlocality_cpuset The Cpuset API
  *
  * For use in hwloc itself, a hwloc_cpuset_t represents a set of logical
- * processors.
+ * processors. It may be infinite.
  *
  * \note cpusets are indexed by OS logical processor number.
  * @{
@@ -156,11 +156,14 @@ HWLOC_DECLSPEC int hwloc_cpuset_first(hwloc_const_cpuset_t set) __hwloc_attribut
 
 /** \brief Compute the last CPU (most significant bit) in CPU set \p set
  *
- * \return -1 if no CPU is set.
+ * \return -1 if no CPU is set, or if the CPU set is infinite.
  */
 HWLOC_DECLSPEC int hwloc_cpuset_last(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
-/** \brief Compute the next CPU in CPU set \p set which is after CPU \p prev_cpu */
+/** \brief Compute the next CPU in CPU set \p set which is after CPU \p prev_cpu
+ *
+ * \return -1 if no CPU with higher index is set.
+ */
 HWLOC_DECLSPEC int hwloc_cpuset_next(hwloc_const_cpuset_t set, unsigned prev_cpu) __hwloc_attribute_pure;
 
 /** \brief Keep a single CPU among those set in CPU set \p set
@@ -194,7 +197,9 @@ HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribu
 /** \brief Loop macro iterating on CPU set \p set
  *
  * It yields on each cpu that is member of the set. It uses variables \p set
- * (the cpu set) and \p cpu (the loop variable)
+ * (the cpu set) and \p cpu (the loop variable).
+ *
+ * The loop is infinite if the CPU set is infinite.
  */
 #define hwloc_cpuset_foreach_begin(cpu, set) \
 do { \

@@ -18,8 +18,6 @@
 /* TODO
  *
  * - convert infinite-flag into 0xf...f, prefixing strings
- * - document infinite cpusets, that last and weight return -1
- *   and that the foreach loop will never end
  * - drop NBMAXCPUS entirely in other files
  *
  * - optimize some stuff (see TODO below)
@@ -691,7 +689,6 @@ int hwloc_cpuset_last(const struct hwloc_cpuset_s * set)
 	HWLOC__CPUSET_CHECK(set);
 
 	if (set->infinite)
-		/* TODO: document */
 		return -1;
 
 	for(i=set->ulongs_count-1; i>=0; i--) {
@@ -833,7 +830,6 @@ int hwloc_cpuset_weight(const struct hwloc_cpuset_s * set)
 	HWLOC__CPUSET_CHECK(set);
 
 	if (set->infinite)
-		/* TODO: document */
 		return -1;
 
 	for(i=0; i<set->ulongs_count; i++)
