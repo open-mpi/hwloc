@@ -32,8 +32,8 @@
 
 /* actual opaque type internals */
 struct hwloc_cpuset_s {
-  unsigned ulongs_count;
-  /* TODO add ulongs_allocated_counts so that we may reduce the used size without reallocating to smaller */
+  unsigned ulongs_count; /* how many ulong bitmasks are valid */
+  unsigned ulongs_allocated; /* how many ulong bitmasks are allocated */
   unsigned long *ulongs;
   int infinite; /* set to 1 if all bits beyond ulongs are set */
 #ifdef HWLOC_DEBUG
@@ -66,8 +66,8 @@ struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
   if (!set)
     return NULL;
 
-  set->ulongs_count = 1;
-  set->ulongs = calloc(sizeof(unsigned long), set->ulongs_count);
+  set->ulongs_count = set->ulongs_allocated = 1;
+  set->ulongs = calloc(sizeof(unsigned long), set->ulongs_allocated);
   if (!set->ulongs) {
     free(set);
     return NULL;
@@ -98,25 +98,28 @@ void hwloc_cpuset_free(struct hwloc_cpuset_s * set)
 static void
 hwloc_cpuset_realloc_by_ulongs(struct hwloc_cpuset_s * set, unsigned needed_count)
 {
-  unsigned ulongs_count = set->ulongs_count;
+  unsigned tmp;
   unsigned i;
 
   HWLOC__CPUSET_CHECK(set);
 
-  if (needed_count <= ulongs_count)
+  if (needed_count <= set->ulongs_count)
     return;
 
-  while (ulongs_count < needed_count)
-    ulongs_count *= 2;
-
-  set->ulongs = realloc(set->ulongs, ulongs_count * sizeof(unsigned long));
-  assert(set->ulongs);
+  /* realloc larger if needed */
+  tmp = set->ulongs_allocated;
+  while (tmp < needed_count)
+    tmp *= 2;
+  if (tmp != set->ulongs_allocated) {
+    set->ulongs = realloc(set->ulongs, tmp * sizeof(unsigned long));
+    assert(set->ulongs);
+    set->ulongs_allocated = tmp;
+  }
 
   /* fill the newly allocated subset depending on the infinite flag */
-  for(i=set->ulongs_count; i<ulongs_count; i++)
+  for(i=set->ulongs_count; i<needed_count; i++)
     set->ulongs[i] = set->infinite ? HWLOC_CPUSUBSET_FULL : HWLOC_CPUSUBSET_ZERO;
-
-  set->ulongs_count = ulongs_count;
+  set->ulongs_count = needed_count;
 }
 
 /* realloc until it contains at least cpu+1 bits */
