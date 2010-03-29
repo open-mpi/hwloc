@@ -258,7 +258,7 @@ int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_re
   while ((current = strchr(current+1, ',')) != NULL)
     count++;
 
-  hwloc_cpuset_realloc_by_ulongs(set, count / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE) + 1);
+  hwloc_cpuset_realloc_by_ulongs(set, (count + HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE - 1) / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE) + 1);
 
   current = string;
   while (*current != '\0') {
