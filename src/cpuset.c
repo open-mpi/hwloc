@@ -21,9 +21,6 @@
  * - drop NBMAXCPUS entirely in other files
  *
  * - optimize some stuff (see TODO below)
- * - add realloc_mayreduce to reduce ulongs_count when possible
- *   without deallocating, so that the number of ulongs to manage
- *   is smaller, but reallocating larger is trivial
  * - have a way to change the initial allocation size
  */
 
@@ -94,11 +91,25 @@ void hwloc_cpuset_free(struct hwloc_cpuset_s * set)
   free(set);
 }
 
-/* realloc until it contains at least needed_count ulongs */
+/* enlarge until it contains at least needed_count ulongs.
+ */
+static void
+hwloc_cpuset_enlarge_by_ulongs(struct hwloc_cpuset_s * set, unsigned needed_count)
+{
+  unsigned tmp = 1 << hwloc_flsl((unsigned long) needed_count - 1);
+  if (tmp > set->ulongs_allocated) {
+    set->ulongs = realloc(set->ulongs, tmp * sizeof(unsigned long));
+    assert(set->ulongs);
+    set->ulongs_allocated = tmp;
+  }
+}
+
+/* enlarge until it contains at least needed_count ulongs,
+ * and update new ulongs according to the infinite field.
+ */
 static void
 hwloc_cpuset_realloc_by_ulongs(struct hwloc_cpuset_s * set, unsigned needed_count)
 {
-  unsigned tmp;
   unsigned i;
 
   HWLOC__CPUSET_CHECK(set);
@@ -107,12 +118,7 @@ hwloc_cpuset_realloc_by_ulongs(struct hwloc_cpuset_s * set, unsigned needed_coun
     return;
 
   /* realloc larger if needed */
-  tmp = 1 << hwloc_flsl((unsigned long) needed_count - 1);
-  if (tmp > set->ulongs_allocated) {
-    set->ulongs = realloc(set->ulongs, tmp * sizeof(unsigned long));
-    assert(set->ulongs);
-    set->ulongs_allocated = tmp;
-  }
+  hwloc_cpuset_enlarge_by_ulongs(set, needed_count);
 
   /* fill the newly allocated subset depending on the infinite flag */
   for(i=set->ulongs_count; i<needed_count; i++)
@@ -122,6 +128,21 @@ hwloc_cpuset_realloc_by_ulongs(struct hwloc_cpuset_s * set, unsigned needed_coun
 
 /* realloc until it contains at least cpu+1 bits */
 #define hwloc_cpuset_realloc_by_cpu_index(set, cpu) hwloc_cpuset_realloc_by_ulongs(set, ((cpu)/HWLOC_BITS_PER_LONG)+1)
+
+/* reset a cpuset to exactely the needed size.
+ * the caller must reinitialize all ulongs and the infinite flag later.
+ */
+static void
+hwloc_cpuset_reset_by_ulongs(struct hwloc_cpuset_s * set, unsigned needed_count)
+{
+  hwloc_cpuset_enlarge_by_ulongs(set, needed_count);
+  set->ulongs_count = needed_count;
+}
+
+/* reset until it contains exactly cpu+1 bits (roundup to a ulong).
+ * the caller must reinitialize all ulongs and the infinite flag later.
+ */
+#define hwloc_cpuset_reset_by_cpu_index(set, cpu) hwloc_cpuset_reset_by_ulongs(set, ((cpu)/HWLOC_BITS_PER_LONG)+1)
 
 struct hwloc_cpuset_s * hwloc_cpuset_dup(const struct hwloc_cpuset_s * old)
 {
@@ -150,17 +171,13 @@ struct hwloc_cpuset_s * hwloc_cpuset_dup(const struct hwloc_cpuset_s * old)
 
 void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, const struct hwloc_cpuset_s * src)
 {
-  int i;
-
   HWLOC__CPUSET_CHECK(dst);
   HWLOC__CPUSET_CHECK(src);
 
-  hwloc_cpuset_realloc_by_ulongs(dst, src->ulongs_count);
+  hwloc_cpuset_reset_by_ulongs(dst, src->ulongs_count);
 
   memcpy(dst->ulongs, src->ulongs, src->ulongs_count * sizeof(unsigned long));
   dst->infinite = src->infinite;
-  for(i=src->ulongs_count; i<dst->ulongs_count; i++)
-    dst->ulongs[i] = dst->infinite ? HWLOC_CPUSUBSET_FULL : HWLOC_CPUSUBSET_ZERO;
 }
 
 /* Strings always use 32bit groups */
@@ -277,37 +294,45 @@ int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_re
   return 0;
 }
 
-void hwloc_cpuset_zero(struct hwloc_cpuset_s * set)
+static void hwloc_cpuset__zero(struct hwloc_cpuset_s *set)
 {
 	int i;
-
-	HWLOC__CPUSET_CHECK(set);
-
 	for(i=0; i<set->ulongs_count; i++)
 		HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_ZERO;
 	set->infinite = 0;
 }
 
-void hwloc_cpuset_fill(struct hwloc_cpuset_s * set)
+void hwloc_cpuset_zero(struct hwloc_cpuset_s * set)
 {
-	int i;
-
 	HWLOC__CPUSET_CHECK(set);
 
+	hwloc_cpuset_reset_by_ulongs(set, 1);
+	hwloc_cpuset__zero(set);
+}
+
+static void hwloc_cpuset__fill(struct hwloc_cpuset_s * set)
+{
+	int i;
 	for(i=0; i<set->ulongs_count; i++)
 		HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_FULL;
 	set->infinite = 1;
 }
 
-void hwloc_cpuset_from_ulong(struct hwloc_cpuset_s *set, unsigned long mask)
+void hwloc_cpuset_fill(struct hwloc_cpuset_s * set)
 {
-	int i;
-
 	HWLOC__CPUSET_CHECK(set);
 
+	hwloc_cpuset_reset_by_ulongs(set, 1);
+	hwloc_cpuset__fill(set);
+}
+
+void hwloc_cpuset_from_ulong(struct hwloc_cpuset_s *set, unsigned long mask)
+{
+	HWLOC__CPUSET_CHECK(set);
+
+	hwloc_cpuset_reset_by_ulongs(set, 1);
 	HWLOC_CPUSUBSET_SUBSET(set, 0) = mask;
-	for(i=1; i<set->ulongs_count; i++)
-		HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_ZERO;
+	set->infinite = 0;
 }
 
 void hwloc_cpuset_from_ith_ulong(struct hwloc_cpuset_s *set, int i, unsigned long mask)
@@ -316,12 +341,11 @@ void hwloc_cpuset_from_ith_ulong(struct hwloc_cpuset_s *set, int i, unsigned lon
 
 	HWLOC__CPUSET_CHECK(set);
 
-	hwloc_cpuset_realloc_by_ulongs(set, i+1);
-
+	hwloc_cpuset_reset_by_ulongs(set, i+1);
 	HWLOC_CPUSUBSET_SUBSET(set, i) = mask;
-	for(j=1; j<set->ulongs_count; j++)
-		if (j != i)
-			HWLOC_CPUSUBSET_SUBSET(set, j) = HWLOC_CPUSUBSET_ZERO;
+	for(j=1; j<i; j++)
+		HWLOC_CPUSUBSET_SUBSET(set, j) = HWLOC_CPUSUBSET_ZERO;
+	set->infinite = 0;
 }
 
 unsigned long hwloc_cpuset_to_ulong(const struct hwloc_cpuset_s *set)
@@ -345,8 +369,8 @@ void hwloc_cpuset_cpu(struct hwloc_cpuset_s * set, unsigned cpu)
 {
 	HWLOC__CPUSET_CHECK(set);
 
-	hwloc_cpuset_zero(set);
-	hwloc_cpuset_realloc_by_cpu_index(set, cpu);
+	hwloc_cpuset_reset_by_cpu_index(set, cpu);
+	hwloc_cpuset__zero(set);
 	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) |= HWLOC_CPUSUBSET_VAL(cpu);
 }
 
@@ -354,8 +378,8 @@ void hwloc_cpuset_all_but_cpu(struct hwloc_cpuset_s * set, unsigned cpu)
 {
 	HWLOC__CPUSET_CHECK(set);
 
-	hwloc_cpuset_fill(set);
-	hwloc_cpuset_realloc_by_cpu_index(set, cpu);
+	hwloc_cpuset_reset_by_cpu_index(set, cpu);
+	hwloc_cpuset__fill(set);
 	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) &= ~HWLOC_CPUSUBSET_VAL(cpu);
 }
 
@@ -550,7 +574,7 @@ void hwloc_cpuset_or (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *s
 	HWLOC__CPUSET_CHECK(set1);
 	HWLOC__CPUSET_CHECK(set2);
 
-	hwloc_cpuset_realloc_by_ulongs(res, largest->ulongs_count);
+	hwloc_cpuset_realloc_by_ulongs(res, largest->ulongs_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<set1->ulongs_count && i<set2->ulongs_count; i++)
 		HWLOC_CPUSUBSET_SUBSET(res, i) = HWLOC_CPUSUBSET_SUBSET(set1, i) | HWLOC_CPUSUBSET_SUBSET(set2, i);
@@ -577,7 +601,7 @@ void hwloc_cpuset_and (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *
 	HWLOC__CPUSET_CHECK(set1);
 	HWLOC__CPUSET_CHECK(set2);
 
-	hwloc_cpuset_realloc_by_ulongs(res, largest->ulongs_count);
+	hwloc_cpuset_realloc_by_ulongs(res, largest->ulongs_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<set1->ulongs_count && i<set2->ulongs_count; i++)
 		HWLOC_CPUSUBSET_SUBSET(res, i) = HWLOC_CPUSUBSET_SUBSET(set1, i) & HWLOC_CPUSUBSET_SUBSET(set2, i);
@@ -604,7 +628,7 @@ void hwloc_cpuset_andnot (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_
 	HWLOC__CPUSET_CHECK(set1);
 	HWLOC__CPUSET_CHECK(set2);
 
-	hwloc_cpuset_realloc_by_ulongs(res, largest->ulongs_count);
+	hwloc_cpuset_realloc_by_ulongs(res, largest->ulongs_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<set1->ulongs_count && i<set2->ulongs_count; i++)
 		HWLOC_CPUSUBSET_SUBSET(res, i) = HWLOC_CPUSUBSET_SUBSET(set1, i) & ~HWLOC_CPUSUBSET_SUBSET(set2, i);
@@ -631,7 +655,7 @@ void hwloc_cpuset_xor (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *
 	HWLOC__CPUSET_CHECK(set1);
 	HWLOC__CPUSET_CHECK(set2);
 
-	hwloc_cpuset_realloc_by_ulongs(res, largest->ulongs_count);
+	hwloc_cpuset_realloc_by_ulongs(res, largest->ulongs_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<set1->ulongs_count && i<set2->ulongs_count; i++)
 		HWLOC_CPUSUBSET_SUBSET(res, i) = HWLOC_CPUSUBSET_SUBSET(set1, i) ^ HWLOC_CPUSUBSET_SUBSET(set2, i);
@@ -655,7 +679,7 @@ void hwloc_cpuset_not (struct hwloc_cpuset_s *res, const struct hwloc_cpuset_s *
 	HWLOC__CPUSET_CHECK(res);
 	HWLOC__CPUSET_CHECK(set);
 
-	hwloc_cpuset_realloc_by_ulongs(res, set->ulongs_count);
+	hwloc_cpuset_realloc_by_ulongs(res, set->ulongs_count); /* cannot reset since the output may also be an input */
 
 	for(i=0; i<set->ulongs_count; i++)
 		HWLOC_CPUSUBSET_SUBSET(res, i) = ~HWLOC_CPUSUBSET_SUBSET(set, i);
