@@ -266,16 +266,16 @@ int hwloc_cpuset_asprintf(char ** strp, const struct hwloc_cpuset_s * __hwloc_re
 int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_restrict string)
 {
   const char * current = string;
+  unsigned long accum = 0;
   int count=0;
-
-  hwloc_cpuset_zero(set);
 
   /* count how many substrings there are */
   count++;
   while ((current = strchr(current+1, ',')) != NULL)
     count++;
 
-  hwloc_cpuset_realloc_by_ulongs(set, (count + HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE - 1) / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE) + 1);
+  hwloc_cpuset_reset_by_ulongs(set, (count + HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE - 1) / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE));
+  set->infinite = 0;
 
   current = string;
   while (*current != '\0') {
@@ -283,15 +283,30 @@ int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_re
     char *next;
     val = strtoul(current, &next, 16);
 
+    assert(count > 0);
     count--;
-    set->ulongs[count / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE)] |= (val << ((count * HWLOC_CPUSET_SUBSTRING_SIZE) % HWLOC_BITS_PER_LONG));
 
-    if (*next != ',')
-      break;
+    accum |= (val << ((count * HWLOC_CPUSET_SUBSTRING_SIZE) % HWLOC_BITS_PER_LONG));
+    if (!(count % (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE))) {
+      set->ulongs[count / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE)] = accum;
+      accum = 0;
+    }
+
+    if (*next != ',') {
+      if (*next || count > 0)
+	goto failed;
+      else
+	break;
+    }
     current = (const char*) next+1;
   }
 
   return 0;
+
+ failed:
+  /* failure to parse */
+  hwloc_cpuset_zero(set);
+  return -1;
 }
 
 static void hwloc_cpuset__zero(struct hwloc_cpuset_s *set)
