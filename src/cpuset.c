@@ -185,6 +185,7 @@ void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, const struct hwloc_cpuset_s 
 #define HWLOC_CPUSET_SUBSTRING_SIZE	32
 #define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
 #define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
+#define HWLOC_CPUSET_STRING_PER_LONG	(HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE)
 
 int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_cpuset_s * __hwloc_restrict set)
 {
@@ -274,7 +275,7 @@ int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_re
   while ((current = strchr(current+1, ',')) != NULL)
     count++;
 
-  hwloc_cpuset_reset_by_ulongs(set, (count + HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE - 1) / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE));
+  hwloc_cpuset_reset_by_ulongs(set, (count + HWLOC_CPUSET_STRING_PER_LONG - 1) / HWLOC_CPUSET_STRING_PER_LONG);
   set->infinite = 0;
 
   current = string;
@@ -287,8 +288,8 @@ int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_re
     count--;
 
     accum |= (val << ((count * HWLOC_CPUSET_SUBSTRING_SIZE) % HWLOC_BITS_PER_LONG));
-    if (!(count % (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE))) {
-      set->ulongs[count / (HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE)] = accum;
+    if (!(count % HWLOC_CPUSET_STRING_PER_LONG)) {
+      set->ulongs[count / HWLOC_CPUSET_STRING_PER_LONG] = accum;
       accum = 0;
     }
 
