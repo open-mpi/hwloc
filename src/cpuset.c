@@ -133,15 +133,18 @@ struct hwloc_cpuset_s * hwloc_cpuset_dup(const struct hwloc_cpuset_s * old)
   if (!new)
     return NULL;
 
-  memcpy(new, old, sizeof(struct hwloc_cpuset_s));
-
-  new->ulongs = malloc(old->ulongs_count * sizeof(unsigned long));
+  new->ulongs = malloc(old->ulongs_allocated * sizeof(unsigned long));
   if (!new->ulongs) {
     free(new);
     return NULL;
   }
-
+  new->ulongs_allocated = old->ulongs_allocated;
+  new->ulongs_count = old->ulongs_count;
   memcpy(new->ulongs, old->ulongs, new->ulongs_count * sizeof(unsigned long));
+  new->infinite = old->infinite;
+#ifdef HWLOC_DEBUG
+  set->magic = HWLOC_CPUSET_MAGIC;
+#endif
   return new;
 }
 
@@ -154,8 +157,8 @@ void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, const struct hwloc_cpuset_s 
 
   hwloc_cpuset_realloc_by_ulongs(dst, src->ulongs_count);
 
-  dst->infinite = src->infinite;
   memcpy(dst->ulongs, src->ulongs, src->ulongs_count * sizeof(unsigned long));
+  dst->infinite = src->infinite;
   for(i=src->ulongs_count; i<dst->ulongs_count; i++)
     dst->ulongs[i] = dst->infinite ? HWLOC_CPUSUBSET_FULL : HWLOC_CPUSUBSET_ZERO;
 }
