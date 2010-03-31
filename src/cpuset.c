@@ -59,17 +59,20 @@ struct hwloc_cpuset_s {
 struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 {
   struct hwloc_cpuset_s * set;
+
   set = malloc(sizeof(struct hwloc_cpuset_s));
   if (!set)
     return NULL;
 
-  set->ulongs_count = set->ulongs_allocated = 1;
-  set->ulongs = calloc(sizeof(unsigned long), set->ulongs_allocated);
+  set->ulongs_count = 1;
+  set->ulongs_allocated = 64/sizeof(unsigned long);
+  set->ulongs = malloc(64);
   if (!set->ulongs) {
     free(set);
     return NULL;
   }
 
+  set->ulongs[0] = HWLOC_CPUSUBSET_ZERO;
   set->infinite = 0;
 #ifdef HWLOC_DEBUG
   set->magic = HWLOC_CPUSET_MAGIC;
