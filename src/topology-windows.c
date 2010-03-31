@@ -398,8 +398,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
     }
   }
 
-  /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
+  /* add PU objects */
+  hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
 }
 
 void

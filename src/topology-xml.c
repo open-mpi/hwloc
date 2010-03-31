@@ -385,7 +385,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
   xmlNode* root_node;
   xmlDtd *dtd;
 
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
 
   dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
   if (!dtd)

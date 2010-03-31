@@ -25,6 +25,8 @@ Version 1.0.0
   + Support binding of entire multithreaded process on Linux.
   + Cleanup XML export/import.
 * Objects
+  + HWLOC_OBJ_PROC is renamed into HWLOC_OBJ_PU for "Processing Unit",
+    its stringified type name is now "PU".
   + Rework memory attributes.
   + Add different cpusets in each object to specify processors that
     are offline, unavailable, ...

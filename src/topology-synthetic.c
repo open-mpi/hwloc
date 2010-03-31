@@ -54,8 +54,8 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 	type = HWLOC_OBJ_CORE;
       else if (!hwloc_namecoloncmp(pos, "caches", 2))
 	type = HWLOC_OBJ_CACHE;
-      else if (!hwloc_namecoloncmp(pos, "procs", 1))
-	type = HWLOC_OBJ_PROC;
+      else if (!hwloc_namecoloncmp(pos, "pus", 1))
+	type = HWLOC_OBJ_PU;
       else if (!hwloc_namecoloncmp(pos, "misc", 2))
 	type = HWLOC_OBJ_MISC;
 
@@ -99,7 +99,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 
     if (type == HWLOC_OBJ_TYPE_UNKNOWN) {
       switch (count-1-i) {
-      case 0: type = HWLOC_OBJ_PROC; break;
+      case 0: type = HWLOC_OBJ_PU; break;
       case 1: type = HWLOC_OBJ_CORE; break;
       case 2: type = HWLOC_OBJ_CACHE; break;
       case 3: type = HWLOC_OBJ_SOCKET; break;
@@ -148,9 +148,9 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       topology->backend_params.synthetic.depth[i] = cache_depth--;
   }
 
-  /* last level must be PROC */
-  if (topology->backend_params.synthetic.type[count-1] != HWLOC_OBJ_PROC) {
-    fprintf(stderr,"synthetic string needs to have a number of processors\n");
+  /* last level must be PU */
+  if (topology->backend_params.synthetic.type[count-1] != HWLOC_OBJ_PU) {
+    fprintf(stderr,"synthetic string needs to have a number of PUs\n");
     return -1;
   }
 
@@ -203,14 +203,14 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_CORE:
       break;
-    case HWLOC_OBJ_PROC:
+    case HWLOC_OBJ_PU:
       break;
   }
 
   obj = hwloc_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
   obj->cpuset = hwloc_cpuset_alloc();
 
-  if (type == HWLOC_OBJ_PROC) {
+  if (type == HWLOC_OBJ_PU) {
     hwloc_cpuset_set(obj->cpuset, first_cpu++);
   } else {
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
@@ -258,7 +258,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_CORE:
       break;
-    case HWLOC_OBJ_PROC:
+    case HWLOC_OBJ_PU:
       break;
   }
 
@@ -271,7 +271,7 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
   hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
   unsigned first_cpu = 0, i;
 
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
 
   /* update first level type according to the synthetic type array */
   topology->levels[0][0]->type = topology->backend_params.synthetic.type[0];

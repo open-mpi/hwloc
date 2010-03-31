@@ -18,7 +18,8 @@
 hwloc provides command line tools and a C API to obtain the
 hierarchical map of key computing elements, such as: NUMA memory
 nodes, shared caches, processor sockets, processor cores, and
-processor "threads".  hwloc also gathers various attributes such as
+processing units (logical processors or "threads").
+hwloc also gathers various attributes such as
 cache and memory information, and is portable across a variety of
 different operating systems and platforms.
 
@@ -228,7 +229,7 @@ manipulate objects and follow links between them.  Developers should
 look at hwloc/helper.h, which provides good higher-level topology
 traversal examples.
 
-Each object contains a cpuset describing the list of processors that
+Each object contains a cpuset describing the list of processing units that
 it contains.  These cpusets may be used for \ref hwlocality_binding.
 hwloc offers an extensive cpuset manipulation interface in
 hwloc/cpuset.h.
@@ -259,7 +260,7 @@ The following section presents an example of API usage.
 \section interface_example API example
 
 The following small C example (named ``hwloc-hello.c'') prints the
-topology of the machine and bring the process to the first processor
+topology of the machine and bring the process to the first logical processor
 of the second core of the machine.
 
 \include hwloc-hello.c
@@ -275,7 +276,7 @@ cc hwloc-hello.c $(CFLAGS) -o hwloc-hello $(LDLIBS)
 \endverbatim
 
 On a machine with 4GB of RAM and 2 processor sockets -- each socket of
-which has two processor cores -- the output from running \c
+which has two processing cores -- the output from running \c
 hwloc-hello could be something like the following:
 
 \verbatim
@@ -358,7 +359,7 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
   </dd>
 
 <dt>CPU set</dt>
-  <dd>The set of logical processors logically included in an object
+  <dd>The set of logical processors (or processing units) logically included in an object
   (if it makes sense).  They are always expressed using physical logical
   processor numbers (as announced by the OS).  They are just masks, they do \em
   not have any relation with an operating system actual binding notion like
@@ -407,6 +408,12 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
   then on OS CPU numbers, so it is stable across everything except
   firmware CPU renumbering.</dd>
 
+<dt>Logical processor</dt>
+<dt>Processing unit</dt>
+  <dd>The smallest processing element that can be represented by a hwloc
+  object. It may be a single-core processor, a core of a multicore
+  processor, or a single thread in SMT processor.</dd>
+
 </dl>
 
 The following diagram can help to understand the vocabulary of the relationships
@@ -419,7 +426,7 @@ pointers point to (first_child, parent, etc.)
 \image html diagram.png
 \image latex diagram.eps width=\textwidth
 
-It should be noted that for Processor objects, the logical index -- as
+It should be noted that for PU objects, the logical index -- as
 computed linearly by hwloc -- is not the same as the OS index.
 
 
@@ -769,7 +776,7 @@ os_index field of objects, but such practice should be avoided as much
 as possible for the reasons described above (except perhaps for
 prettyprinting / debugging purposes).
 
-::HWLOC_OBJ_PROC objects are supposed to have different physical/OS
+::HWLOC_OBJ_PU objects are supposed to have different physical/OS
 indexes since the OS uses them for binding.  The \p os_index field of
 these objects provides the identifier that may be used for such
 binding, and hwloc_get_proc_obj_by_os_index() finds the object

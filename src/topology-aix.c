@@ -195,7 +195,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 
     /* It seems logical processors are numbered from 1 here, while the
      * bindprocessor functions numbers them from 0... */
-    obj = hwloc_alloc_setup_object(type, i - (type == HWLOC_OBJ_PROC));
+    obj = hwloc_alloc_setup_object(type, i - (type == HWLOC_OBJ_PU));
     obj->cpuset = hwloc_cpuset_alloc();
     obj->os_level = sdl;
     switch(type) {
@@ -282,9 +282,9 @@ hwloc_look_aix(struct hwloc_topology *topology)
       if (i == rs_getinfo(NULL, R_MAXSDL, 0))
 	{
 	  hwloc_debug("looking AIX max sdl %d\n", i);
-	  look_rset(i, HWLOC_OBJ_PROC, topology, i);
+	  look_rset(i, HWLOC_OBJ_PU, topology, i);
 	  known = 1;
-          topology->support.discovery.proc = 1;
+          topology->support.discovery.pu = 1;
 	}
 
       /* Don't know how it should be rendered, make a misc object for it.  */

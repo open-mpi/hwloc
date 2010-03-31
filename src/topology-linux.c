@@ -1277,7 +1277,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
     closedir(dir);
   }
 
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
   hwloc_debug_1arg_cpuset("found %d cpu topologies, cpuset %s\n",
 	     hwloc_cpuset_weight(cpuset), cpuset);
 
@@ -1329,7 +1329,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       hwloc_cpuset_cpu(threadset, i);
 
       /* add the thread */
-      thread = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, i);
+      thread = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
       thread->cpuset = threadset;
       hwloc_debug_1arg_cpuset("thread %d has cpuset %s\n",
 		 i, threadset);
@@ -1480,7 +1480,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       getprocnb_begin(PROCESSOR,processor);
       hwloc_cpuset_set(cpuset, processor);
 
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, processor);
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, processor);
       obj->cpuset = hwloc_cpuset_alloc();
       hwloc_cpuset_cpu(obj->cpuset, processor);
 
@@ -1527,7 +1527,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     return -1;
   }
 
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
   /* setup the final number of procs */
   procid_max = processor + 1;
   hwloc_cpuset_copy(online_cpuset, cpuset);
@@ -1677,11 +1677,11 @@ hwloc_look_linux(struct hwloc_topology *topology)
       err = look_cpuinfo(topology, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
       if (err < 0) {
         if (topology->is_thissystem)
-          hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
+          hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
         else
           /* fsys-root but not this system, no way, assume there's just 1
            * processor :/ */
-          hwloc_setup_proc_level(topology, 1);
+          hwloc_setup_pu_level(topology, 1);
       }
     } else {
       look_sysfscpu(topology, "/sys/devices/system/cpu");

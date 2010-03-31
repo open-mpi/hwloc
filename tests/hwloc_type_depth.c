@@ -31,12 +31,12 @@ int main(void)
   assert(hwloc_get_depth_type(topology, 3) == HWLOC_OBJ_CORE);
   assert(hwloc_get_depth_type(topology, 4) == HWLOC_OBJ_CACHE);
   assert(hwloc_get_depth_type(topology, 5) == HWLOC_OBJ_CACHE);
-  assert(hwloc_get_depth_type(topology, 6) == HWLOC_OBJ_PROC);
+  assert(hwloc_get_depth_type(topology, 6) == HWLOC_OBJ_PU);
 
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_MACHINE) == 1);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_MISC) == 2);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == 3);
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PROC) == 6);
+  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PU) == 6);
 
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_NODE) == HWLOC_TYPE_DEPTH_UNKNOWN);
   assert(hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_NODE) == 2);

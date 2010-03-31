@@ -94,7 +94,7 @@ typedef enum {
 			  * A computation unit (may be shared by several
 			  * logical processors).
 			  */
-  HWLOC_OBJ_PROC,	/**< \brief (Logical) Processor.
+  HWLOC_OBJ_PU,		/**< \brief Processing Unit, or (Logical) Processor.
 			  * An execution unit (may share a core with some
 			  * other logical processors, e.g. in the case of
 			  * an SMT core).
@@ -124,7 +124,7 @@ typedef enum {
  * contain sockets which contain caches, which contain cores, which contain
  * processors).
  *
- * \note HWLOC_OBJ_PROC will always be the deepest.
+ * \note HWLOC_OBJ_PU will always be the deepest.
  * \note This does not mean that the actual topology will respect that order:
  * e.g. as of today cores may also contain caches, and sockets may also contain
  * nodes. This is thus just to be seen as a fallback comparison method.
@@ -206,9 +206,9 @@ struct hwloc_obj {
   /* cpuset */
   hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
                                           *
-                                          * This is the set of CPUs for which there are PROC objects in the topology
+                                          * This is the set of CPUs for which there are PU objects in the topology
                                           * under this object, i.e. which are known to be physically contained in this
-                                          * object and known how (the children path between this object and the PROC
+                                          * object and known how (the children path between this object and the PU
                                           * objects).
                                           *
                                           * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
@@ -222,7 +222,7 @@ struct hwloc_obj {
                                           * This includes not only the same as the cpuset field, but also the CPUs for
                                           * which topology information is unknown or incomplete, and the CPUs that are
                                           * ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
-                                          * Thus no corresponding PROC object may be found in the topology, because the
+                                          * Thus no corresponding PU object may be found in the topology, because the
                                           * precise position is undefined. It is however known that it would be somewhere
                                           * under this object.
                                           *
@@ -373,7 +373,7 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 /** \brief Ignore an object type.
  *
  * Ignore all objects from the given type.
- * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
+ * The bottom-level type HWLOC_OBJ_PU may not be ignored.
  * The top-level object of the hierarchy will never be ignored, even if this function
  * succeeds.
  */
@@ -383,7 +383,7 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_o
  *
  * Ignore all objects from the given type as long as they do not bring any structure:
  * Each ignored object should have a single children or be the only child of its parent.
- * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
+ * The bottom-level type HWLOC_OBJ_PU may not be ignored.
  */
 HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
 
@@ -497,8 +497,8 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
 struct hwloc_topology_support {
   /** \brief Flags describing actual discovery support for this topology. */
   struct {
-    /* \brief Detecting the number of PROC objects is supported. */
-    unsigned int proc:1;
+    /* \brief Detecting the number of PU objects is supported. */
+    unsigned int pu:1;
     unsigned int pad:31;
   } discovery;
 
@@ -573,7 +573,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_top
 
 /** \brief Get the depth of the hierachical tree of objects.
  *
- * This is the depth of HWLOC_OBJ_PROC objects plus one.
+ * This is the depth of HWLOC_OBJ_PU objects plus one.
  */
 HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topology) __hwloc_attribute_pure;
 
