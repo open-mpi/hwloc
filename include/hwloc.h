@@ -132,7 +132,7 @@ typedef enum {
 HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2) __hwloc_attribute_const;
 
 enum hwloc_compare_types_e {
-    HWLOC_TYPE_UNORDERED = INT_MAX	/**< \brief Value returned by hwloc_compare_types when types can not be compared. */
+    HWLOC_TYPE_UNORDERED = INT_MAX	/**< \brief Value returned by hwloc_compare_types when types can not be compared. \hideinitializer */
 };
 
 /** @} */
@@ -398,16 +398,19 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t top
  * Flags should be given to hwloc_topology_set_flags().
  */
 enum hwloc_topology_flags_e {
-  /* \brief Detect the whole system, ignore reservations and offline settings.
+  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
+ /**< \brief Detect the whole system, ignore reservations and offline settings.
+   * \hideinitializer
    *
    * Gather all resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cpusets and gather all processors and memory nodes,
    * and ignore the fact that some resources may be offline.
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
 
-  /* \brief Assume that the selected backend provides the topology for the
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
+ /**< \brief Assume that the selected backend provides the topology for the
    * system on which we are running.
+   * \hideinitializer
    *
    * This forces hwloc_topology_is_thissystem to return 1, i.e. makes hwloc assume that
    * the selected backend provides the topology for the system on which we are running,
@@ -423,7 +426,6 @@ enum hwloc_topology_flags_e {
    * save it to an XML file, and quickly reload it later through the XML
    * backend, but still having binding functions actually do bind.
    */
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
@@ -588,8 +590,8 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
 HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
 
 enum hwloc_get_type_depth_e {
-    HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. */
-    HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. */
+    HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. \hideinitializer */
 };
 
 /** \brief Returns the type of objects at depth \p depth.
@@ -765,9 +767,12 @@ HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t
  */
 typedef enum {
   HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
-                                   * This may not be supported by some OSes (e.g. Linux). */
-  HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process */
+                                   * This may not be supported by some OSes (e.g. Linux).
+                                   * \hideinitializer */
+  HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
+                                   * \hideinitializer */
   HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS.
+                                   * \hideinitializer
                                    *
                                    * By default, when the designated CPUs are
                                    * all busy while other CPUs are idle, OSes

@@ -75,7 +75,7 @@ HWLOC_DECLSPEC int hwloc_cpuset_asprintf(char ** strp, hwloc_const_cpuset_t set)
 HWLOC_DECLSPEC int hwloc_cpuset_from_string(hwloc_cpuset_t set, const char * __hwloc_restrict string);
 
 
-/** \brief
+/*
  *  Primitives & macros for building, modifying and consulting "sets" of cpus.
  */
 
@@ -195,6 +195,7 @@ HWLOC_DECLSPEC int hwloc_cpuset_compare(hwloc_const_cpuset_t set1, hwloc_const_c
 HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
 /** \brief Loop macro iterating on CPU set \p set
+ * \hideinitializer
  *
  * It yields on each cpu that is member of the set. It uses variables \p set
  * (the cpu set) and \p cpu (the loop variable)
@@ -205,6 +206,7 @@ do { \
              cpu != (typeof(cpu)) -1; \
              cpu = hwloc_cpuset_next(set, cpu)) { \
 /** \brief End of loop. Needs a terminating ';'.
+ * \hideinitializer
  *
  * \sa hwloc_cpuset_foreach_begin */
 #define hwloc_cpuset_foreach_end() \
