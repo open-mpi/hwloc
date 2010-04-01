@@ -75,11 +75,11 @@ hwloc-bind's operation is best described through several examples.
 To run the echo command on the first logical processor of the second
 socket:
 
-    hwloc-bind socket:1.proc:0 -- echo hello
+    hwloc-bind socket:1.pu:0 -- echo hello
 
 which is exactly equivalent to
 
-    hwloc-bind socket:1.proc:0 echo hello
+    hwloc-bind socket:1.pu:0 echo hello
 
 To bind the "echo" command to the first core of the second socket and
 the second core of the first socket:

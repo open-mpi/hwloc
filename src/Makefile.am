@@ -23,7 +23,8 @@ sources = \
         traversal.c \
         topology-synthetic.c \
         bind.c \
-        cpuset.c
+        cpuset.c \
+        misc.c
 ldflags =
 
 # Conditionally add to the sources and ldflags

@@ -245,10 +245,9 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #endif /* !CPU_SET */
 }
 
-hwloc_cpuset_t
-hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid)
+int
+hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_cpuset_t hwloc_set)
 {
-  hwloc_cpuset_t hwloc_set;
   int err;
   /* TODO Kerrighed */
 
@@ -263,10 +262,10 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   if (err < 0) {
     CPU_FREE(plinux_set);
-    return NULL;
+    return -1;
   }
 
-  hwloc_set = hwloc_cpuset_alloc();
+  hwloc_cpuset_zero(hwloc_set);
   for(cpu=0; cpu<HWLOC_NBMAXCPUS; cpu++)
     if (CPU_ISSET_S(cpu, setsize, plinux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
@@ -282,9 +281,9 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   err = sched_getaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   if (err < 0)
-    return NULL;
+    return -1;
 
-  hwloc_set = hwloc_cpuset_alloc();
+  hwloc_cpuset_zero(hwloc_set);
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, &linux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
@@ -297,13 +296,12 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   err = sched_getaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   if (err < 0)
-    return NULL;
+    return -1;
 
-  hwloc_set = hwloc_cpuset_alloc();
   hwloc_cpuset_from_ulong(hwloc_set, mask);
 #endif /* !CPU_SET */
 
-  return hwloc_set;
+  return 0;
 }
 
 /* Get the array of tids of a process from the task directory in /proc */
@@ -340,39 +338,43 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
 }
 
 /* Callbacks for binding each process sub-tid */
-typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int policy);
+typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int index, int policy);
 
 static int
-hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int policy __hwloc_attribute_unused)
+hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int index __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
-  hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
+  hwloc_cpuset_t cpuset = data;
   return hwloc_linux_set_tid_cpubind(topology, tid, cpuset);
 }
 
 static int
-hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int policy)
+hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int index, int policy)
 {
-  hwloc_cpuset_t cpuset = (hwloc_cpuset_t) data;
-  hwloc_cpuset_t tidset = hwloc_linux_get_tid_cpubind(topology, tid);
-  if (!tidset)
+  hwloc_cpuset_t *cpusets = data;
+  hwloc_cpuset_t cpuset = cpusets[0];
+  hwloc_cpuset_t tidset = cpusets[1];
+
+  if (hwloc_linux_get_tid_cpubind(topology, tid, tidset))
     return -1;
+
+  /* reset the cpuset on first iteration */
+  if (!index)
+    hwloc_cpuset_zero(cpuset);
 
   if (policy & HWLOC_CPUBIND_STRICT) {
     /* if STRICT, we want all threads to have the same binding */
-    if (hwloc_cpuset_iszero(cpuset)) {
+    if (!index) {
       /* this is the first thread, copy its binding */
       hwloc_cpuset_copy(cpuset, tidset);
     } else if (!hwloc_cpuset_isequal(cpuset, tidset)) {
       /* this is not the first thread, and it's binding is different */
-      hwloc_cpuset_free(tidset);
       errno = EXDEV;
       return -1;
     }
   } else {
     /* if not STRICT, just OR all thread bindings */
-    hwloc_cpuset_orset(cpuset, tidset);
+    hwloc_cpuset_or(cpuset, cpuset, tidset);
   }
-  hwloc_cpuset_free(tidset);
   return 0;
 }
 
@@ -408,7 +410,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
  retry:
   /* apply the callback to all threads */
   for(i=0; i<nr; i++) {
-    err = cb(topology, tids[i], data, policy);
+    err = cb(topology, tids[i], data, i, policy);
     if (err < 0)
       goto out_with_tids;
   }
@@ -442,60 +444,71 @@ hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cp
 				      (void*) hwloc_set, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
+static int
+hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
 {
-  hwloc_cpuset_t hwloc_set = hwloc_cpuset_alloc();
-  int err = hwloc_linux_foreach_proc_tid(topology, pid,
+  hwloc_cpuset_t tidset = hwloc_cpuset_alloc();
+  hwloc_cpuset_t cpusets[2] = { hwloc_set, tidset };
+  int ret;
+  ret = hwloc_linux_foreach_proc_tid(topology, pid,
 					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
-					 (void*) hwloc_set, policy);
-  if (err) {
-    hwloc_cpuset_free(hwloc_set);
-    return NULL;
-  }
-  return hwloc_set;
+					 (void*) cpusets, policy);
+  hwloc_cpuset_free(tidset);
+  return ret;
 }
 
 static int
 hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
 {
+  if (pid == 0)
+    pid = topology->pid;
   if (policy & HWLOC_CPUBIND_THREAD)
     return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
   else
     return hwloc_linux_set_pid_cpubind(topology, pid, hwloc_set, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, int policy)
+static int
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
 {
+  if (pid == 0)
+    pid = topology->pid;
   if (policy & HWLOC_CPUBIND_THREAD)
-    return hwloc_linux_get_tid_cpubind(topology, pid);
+    return hwloc_linux_get_tid_cpubind(topology, pid, hwloc_set);
   else
-    return hwloc_linux_get_pid_cpubind(topology, pid, policy);
+    return hwloc_linux_get_pid_cpubind(topology, pid, hwloc_set, policy);
 }
 
 static int
 hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_linux_set_pid_cpubind(topology, 0, hwloc_set, policy);
+  return hwloc_linux_set_pid_cpubind(topology, topology->pid, hwloc_set, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
+static int
+hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
 {
-  return hwloc_linux_get_pid_cpubind(topology, 0, policy);
+  return hwloc_linux_get_pid_cpubind(topology, topology->pid, hwloc_set, policy);
 }
 
 static int
 hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
+  if (topology->pid) {
+    errno = -ENOSYS;
+    return -1;
+  }
   return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 }
 
-static hwloc_cpuset_t
-hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, int policy __hwloc_attribute_unused)
+static int
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
-  return hwloc_linux_get_tid_cpubind(topology, 0);
+  if (topology->pid) {
+    errno = -ENOSYS;
+    return -1;
+  }
+  return hwloc_linux_get_tid_cpubind(topology, 0, hwloc_set);
 }
 
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
@@ -505,6 +518,11 @@ static int
 hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   int err;
+
+  if (topology->pid) {
+    errno = -ENOSYS;
+    return -1;
+  }
 
   if (tid == pthread_self())
     return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
@@ -563,19 +581,23 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
 #pragma weak pthread_getaffinity_np
 
-static hwloc_cpuset_t
-hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int policy __hwloc_attribute_unused)
+static int
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
-  hwloc_cpuset_t hwloc_set;
   int err;
 
+  if (topology->pid) {
+    errno = -ENOSYS;
+    return -1;
+  }
+
   if (tid == pthread_self())
-    return hwloc_linux_get_tid_cpubind(topology, 0);
+    return hwloc_linux_get_tid_cpubind(topology, 0, hwloc_set);
 
   if (!pthread_getaffinity_np) {
     /* ?! Application uses get_thread_cpubind, but doesn't link against libpthread ?! */
     errno = ENOSYS;
-    return NULL;
+    return -1;
   }
   /* TODO Kerrighed */
 
@@ -593,10 +615,10 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
      if (err) {
         errno = err;
-	return NULL;
+        return -1;
      }
 
-     hwloc_set = hwloc_cpuset_alloc();
+     hwloc_cpuset_zero(hwloc_set);
      for(cpu=0; cpu<CPU_SETSIZE; cpu++)
        if (CPU_ISSET(cpu, &linux_set))
 	 hwloc_cpuset_set(hwloc_set, cpu);
@@ -614,15 +636,14 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, int pol
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
       if (err) {
         errno = err;
-	return NULL;
+        return -1;
       }
 
-     hwloc_set = hwoc_cpuset_alloc();
      hwloc_cpuset_from_ulong(hwloc_set, mask);
   }
 #endif /* CPU_SET */
 
-  return hwloc_set;
+  return 0;
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
@@ -691,19 +712,18 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 #define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
 #define MAX_KERNEL_CPU_MASK ((HWLOC_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
-hwloc_cpuset_t
-hwloc_linux_parse_cpumap_file(FILE *file)
+int
+hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
 {
   unsigned long maps[MAX_KERNEL_CPU_MASK];
   unsigned long map;
-  hwloc_cpuset_t set;
   int nr_maps = 0;
   int n;
 
   int i;
 
-  /* allocate and reset to zero first */
-  set = hwloc_cpuset_alloc();
+  /* reset to zero first */
+  hwloc_cpuset_zero(set);
 
   /* parse the whole mask */
   while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
@@ -730,7 +750,7 @@ hwloc_linux_parse_cpumap_file(FILE *file)
     if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
       hwloc_cpuset_set(set, i);
 
-  return set;
+  return 0;
 }
 
 static hwloc_cpuset_t
@@ -743,7 +763,8 @@ hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
   if (!file)
     return NULL;
 
-  set = hwloc_linux_parse_cpumap_file(file);
+  set = hwloc_cpuset_alloc();
+  hwloc_linux_parse_cpumap_file(file, set);
 
   fclose(file);
   return set;
@@ -863,7 +884,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
     fd = hwloc_fopen("/proc/self/cgroup", "r", fsroot_fd);
   else {
     char path[] = "/proc/XXXXXXXXXX/cgroup";
-    snprintf(path, sizeof(path), "/proc/%u/cgroup", pid);
+    snprintf(path, sizeof(path), "/proc/%d/cgroup", pid);
     fd = hwloc_fopen(path, "r", fsroot_fd);
   }
   if (fd) {
@@ -893,7 +914,7 @@ hwloc_read_linux_cpuset_name(int fsroot_fd, hwloc_pid_t pid)
     fd = hwloc_fopen("/proc/self/cpuset", "r", fsroot_fd);
   else {
     char path[] = "/proc/XXXXXXXXXX/cpuset";
-    snprintf(path, sizeof(path), "/proc/%u/cpuset", pid);
+    snprintf(path, sizeof(path), "/proc/%d/cpuset", pid);
     fd = hwloc_fopen(path, "r", fsroot_fd);
   }
   if (!fd) {
@@ -1256,7 +1277,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
     closedir(dir);
   }
 
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
   hwloc_debug_1arg_cpuset("found %d cpu topologies, cpuset %s\n",
 	     hwloc_cpuset_weight(cpuset), cpuset);
 
@@ -1308,7 +1329,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       hwloc_cpuset_cpu(threadset, i);
 
       /* add the thread */
-      thread = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, i);
+      thread = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
       thread->cpuset = threadset;
       hwloc_debug_1arg_cpuset("thread %d has cpuset %s\n",
 		 i, threadset);
@@ -1453,17 +1474,17 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
             hwloc_cpuset_free(cpuset);					\
             return -1;							\
 	  }								\
-	hwloc_debug(field " %ld\n", var)
+	hwloc_debug(field " %lu\n", var)
 #      define getprocnb_end()			\
       }
       getprocnb_begin(PROCESSOR,processor);
       hwloc_cpuset_set(cpuset, processor);
 
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, processor);
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, processor);
       obj->cpuset = hwloc_cpuset_alloc();
       hwloc_cpuset_cpu(obj->cpuset, processor);
 
-      hwloc_debug_2args_cpuset("cpu %u (os %ld) has cpuset %s\n",
+      hwloc_debug_2args_cpuset("cpu %u (os %lu) has cpuset %s\n",
 		 numprocs, processor, obj->cpuset);
       numprocs++;
       hwloc_insert_object_by_cpuset(topology, obj);
@@ -1475,7 +1496,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (physid == osphysids[i])
 	  break;
       proc_physids[processor]=i;
-      hwloc_debug("%ld on socket %u (%lx)\n", processor, i, physid);
+      hwloc_debug("%lu on socket %u (%lx)\n", processor, i, physid);
       if (i==numsockets)
 	osphysids[(numsockets)++] = physid;
       getprocnb_end() else
@@ -1506,7 +1527,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     return -1;
   }
 
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
   /* setup the final number of procs */
   procid_max = processor + 1;
   hwloc_cpuset_copy(online_cpuset, cpuset);
@@ -1613,7 +1634,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
       err = look_cpuinfo(topology, path, machine_online_set);
       if (err < 0)
         continue;
-      hwloc_cpuset_orset(topology->levels[0][0]->online_cpuset, machine_online_set);
+      hwloc_cpuset_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;
       machine->attr->machine.dmi_board_name = NULL;
@@ -1656,11 +1677,11 @@ hwloc_look_linux(struct hwloc_topology *topology)
       err = look_cpuinfo(topology, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
       if (err < 0) {
         if (topology->is_thissystem)
-          hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
+          hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
         else
           /* fsys-root but not this system, no way, assume there's just 1
            * processor :/ */
-          hwloc_setup_proc_level(topology, 1);
+          hwloc_setup_pu_level(topology, 1);
       }
     } else {
       look_sysfscpu(topology, "/sys/devices/system/cpu");

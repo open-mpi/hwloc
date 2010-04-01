@@ -65,24 +65,24 @@ hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int polic
   return -1;
 }
 
-hwloc_cpuset_t
-hwloc_get_cpubind(hwloc_topology_t topology, int policy)
+int
+hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy)
 {
   if (policy & HWLOC_CPUBIND_PROCESS) {
     if (topology->get_thisproc_cpubind)
-      return topology->get_thisproc_cpubind(topology, policy);
+      return topology->get_thisproc_cpubind(topology, set, policy);
   } else if (policy & HWLOC_CPUBIND_THREAD) {
     if (topology->get_thisthread_cpubind)
-      return topology->get_thisthread_cpubind(topology, policy);
+      return topology->get_thisthread_cpubind(topology, set, policy);
   } else {
     if (topology->get_thisproc_cpubind)
-      return topology->get_thisproc_cpubind(topology, policy);
+      return topology->get_thisproc_cpubind(topology, set, policy);
     else if (topology->get_thisthread_cpubind)
-      return topology->get_thisthread_cpubind(topology, policy);
+      return topology->get_thisthread_cpubind(topology, set, policy);
   }
 
   errno = ENOSYS;
-  return NULL;
+  return -1;
 }
 
 int
@@ -99,14 +99,14 @@ hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_c
   return -1;
 }
 
-hwloc_cpuset_t
-hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
+int
+hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy)
 {
   if (topology->get_proc_cpubind)
-    return topology->get_proc_cpubind(topology, pid, policy);
+    return topology->get_proc_cpubind(topology, pid, set, policy);
 
   errno = ENOSYS;
-  return NULL;
+  return -1;
 }
 
 #ifdef hwloc_thread_t
@@ -124,14 +124,14 @@ hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_co
   return -1;
 }
 
-hwloc_cpuset_t
-hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy)
+int
+hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy)
 {
   if (topology->get_thread_cpubind)
-    return topology->get_thread_cpubind(topology, tid, policy);
+    return topology->get_thread_cpubind(topology, tid, set, policy);
 
   errno = ENOSYS;
-  return NULL;
+  return -1;
 }
 #endif
 

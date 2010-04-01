@@ -30,7 +30,7 @@ int main(void)
   set = hwloc_cpuset_alloc();
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX);
   assert(obj);
-  hwloc_cpuset_orset(set, obj->cpuset);
+  hwloc_cpuset_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
@@ -44,10 +44,10 @@ int main(void)
   set = hwloc_cpuset_alloc();
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX1);
   assert(obj);
-  hwloc_cpuset_orset(set, obj->cpuset);
+  hwloc_cpuset_or(set, set, obj->cpuset);
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX2);
   assert(obj);
-  hwloc_cpuset_orset(set, obj->cpuset);
+  hwloc_cpuset_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(cache);
   assert(cache->type == HWLOC_OBJ_CACHE);
@@ -62,10 +62,10 @@ int main(void)
   set = hwloc_cpuset_alloc();
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX1);
   assert(obj);
-  hwloc_cpuset_orset(set, obj->cpuset);
+  hwloc_cpuset_or(set, set, obj->cpuset);
   obj = hwloc_get_obj_by_depth(topology, 5, CPUINDEX2);
   assert(obj);
-  hwloc_cpuset_orset(set, obj->cpuset);
+  hwloc_cpuset_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(!cache);
   hwloc_cpuset_free(set);
@@ -74,7 +74,7 @@ int main(void)
   set = hwloc_cpuset_alloc();
   obj = hwloc_get_obj_by_depth(topology, 2, 0);
   assert(obj);
-  hwloc_cpuset_orset(set, obj->cpuset);
+  hwloc_cpuset_or(set, set, obj->cpuset);
   cache = hwloc_get_cache_covering_cpuset(topology, set);
   assert(!cache);
   hwloc_cpuset_free(set);

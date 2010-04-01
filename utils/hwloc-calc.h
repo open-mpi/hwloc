@@ -8,6 +8,7 @@
 
 #include <private/config.h>
 #include <private/private.h>
+#include <private/misc.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -35,25 +36,25 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
     if (verbose)
       fprintf(stderr, "adding %s to %s\n",
           s1, s2);
-    hwloc_cpuset_orset(set, newset);
+    hwloc_cpuset_or(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_CLR:
     if (verbose)
       fprintf(stderr, "clearing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_clearset(set, newset);
+    hwloc_cpuset_andnot(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_AND:
     if (verbose)
       fprintf(stderr, "and'ing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_andset(set, newset);
+    hwloc_cpuset_and(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_XOR:
     if (verbose)
       fprintf(stderr, "xor'ing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_xorset(set, newset);
+    hwloc_cpuset_xor(set, set, newset);
     break;
   default:
     assert(0);
@@ -63,10 +64,7 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
   return 0;
 }
 
-static __inline hwloc_obj_t
-hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t rootset,
-					 unsigned depth, unsigned i, int logical) __hwloc_attribute_pure;
-static __inline hwloc_obj_t
+static __inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t rootset,
 					 unsigned depth, unsigned i, int logical)
 {
@@ -103,8 +101,8 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SOCKET);
   else if (!hwloc_namecoloncmp(string, "core", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_CORE);
-  else if (!hwloc_namecoloncmp(string, "proc", 1))
-    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PROC);
+  else if (!hwloc_namecoloncmp(string, "pu", 1) || !hwloc_namecoloncmp(string, "proc", 1) /* backward compat with 0.9 */)
+    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PU);
   else {
     char *end;
     depth = strtol(string, &end, 0);
@@ -243,7 +241,8 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
         break;
       tmp = next+1;
     }
-    newset = hwloc_cpuset_from_string(arg);
+    newset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(newset, arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
   }

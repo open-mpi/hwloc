@@ -48,11 +48,11 @@ main (void)
   obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_SYSTEM, obj);
   assert(!obj);
 
-  /* check last proc */
-  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PROC, 2*3*4*5*6-1);
+  /* check last PU */
+  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PU, 2*3*4*5*6-1);
   assert(obj == hwloc_get_obj_by_depth(topology, 5, 2*3*4*5*6-1));
-  /* there is no next proc after the last one */
-  obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PROC, obj);
+  /* there is no next PU after the last one */
+  obj = hwloc_get_next_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PU, obj);
   assert(!obj);
 
 
@@ -65,9 +65,9 @@ main (void)
   assert(hwloc_get_nbobjs_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_CACHE) == 12);
 
 
-  /* check first proc of second socket */
+  /* check first PU of second socket */
   root = hwloc_get_obj_by_depth(topology, 2, 1);
-  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PROC, 0);
+  obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PU, 0);
   assert(obj == hwloc_get_obj_by_depth(topology, 5, 4*5*6));
 
   /* check third core of third socket */

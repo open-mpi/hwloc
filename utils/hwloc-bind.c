@@ -126,12 +126,12 @@ int main(int argc, char *argv[])
 
   if (get_binding) {
     char *s;
-    hwloc_cpuset_free(cpu_set);
+    int err;
     if (pid)
-      cpu_set = hwloc_get_proc_cpubind(topology, pid, 0);
+      err = hwloc_get_proc_cpubind(topology, pid, cpu_set, 0);
     else
-      cpu_set = hwloc_get_cpubind(topology, 0);
-    if (!cpu_set) {
+      err = hwloc_get_cpubind(topology, cpu_set, 0);
+    if (err) {
       const char *errmsg = strerror(errno);
       fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
       return EXIT_FAILURE;

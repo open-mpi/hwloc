@@ -170,17 +170,15 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, h
   return 0;
 }
 
-static hwloc_cpuset_t
-hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, int policy __hwloc_attribute_unused)
+static int
+hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
-  hwloc_cpuset_t ret;
   DWORD proc_mask, sys_mask;
   /* TODO: groups */
   if (!GetProcessAffinityMask(proc, &proc_mask, &sys_mask))
-    return NULL;
-  ret = hwloc_cpuset_alloc();
-  hwloc_cpuset_from_ulong(ret, proc_mask);
-  return ret;
+    return -1;
+  hwloc_cpuset_from_ulong(hwloc_set, proc_mask);
+  return 0;
 }
 
 static int
@@ -189,10 +187,10 @@ hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t h
   return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
+static int
+hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_cpuset, int policy)
 {
-  return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), policy);
+  return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), hwloc_cpuset, policy);
 }
 
 void
@@ -400,8 +398,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
     }
   }
 
-  /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
+  /* add PU objects */
+  hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
 }
 
 void

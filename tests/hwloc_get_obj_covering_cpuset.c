@@ -30,8 +30,9 @@ int main(void)
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION);
   hwloc_topology_load(topology);
+  set = hwloc_cpuset_alloc();
 
-  set = hwloc_cpuset_from_string(GIVEN_CPUSET_STRING);
+  hwloc_cpuset_from_string(set, GIVEN_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
 
   assert(obj);
@@ -44,22 +45,20 @@ int main(void)
 	  GIVEN_CPUSET_STRING, string, EXPECTED_CPUSET_STRING);
   assert(!strcmp(EXPECTED_CPUSET_STRING, string));
   free(string);
-  hwloc_cpuset_free(set);
 
-  set = hwloc_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING);
+  hwloc_cpuset_from_string(set, GIVEN_LARGESPLIT_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
   assert(obj == hwloc_get_root_obj(topology));
   fprintf(stderr, "found system as covering object of first+last cpus cpuset %s\n",
 	  GIVEN_LARGESPLIT_CPUSET_STRING);
-  hwloc_cpuset_free(set);
 
-  set = hwloc_cpuset_from_string(GIVEN_TOOLARGE_CPUSET_STRING);
+  hwloc_cpuset_from_string(set, GIVEN_TOOLARGE_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
   assert(!obj);
   fprintf(stderr, "found no covering object for too-large cpuset %s\n",
 	  GIVEN_TOOLARGE_CPUSET_STRING);
-  hwloc_cpuset_free(set);
 
+  hwloc_cpuset_free(set);
   hwloc_topology_destroy(topology);
 
   return EXIT_SUCCESS;

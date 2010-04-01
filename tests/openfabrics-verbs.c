@@ -33,7 +33,8 @@ int main(int argc, char **argv)
     hwloc_cpuset_t set;
     dev = dev_list[i];
 
-    set = hwloc_ibv_get_device_cpuset(topology, dev);
+    set = hwloc_cpuset_alloc();
+    hwloc_ibv_get_device_cpuset(topology, dev, set);
     if (!set) {
       printf("failed to get cpuset for device %d (%s)\n",
 	     i, ibv_get_device_name(dev));

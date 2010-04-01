@@ -117,6 +117,11 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 		-e 's/__inline/inline/g' \
 		-e 's/\\_\\-\\_\\-inline/inline/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
+	@echo "Work-around spurious leading _ in doxygen filenames..."
+	(cd $(DOX_DIR)/man/man3 ; \
+	for i in _hwloc* ; do \
+		[ ! -f $$i ] || mv $$i $${i#_} ; \
+	done)
 	@echo "Removing useless manpages..."
 	@mkdir $(DOX_DIR)/man.tmp
 	@mv $(man3_MANS) $(DOX_DIR)/man.tmp/
@@ -228,7 +233,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MACHINE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MISC.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_NODE.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PROC.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PU.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
@@ -242,8 +247,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_dup.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_copy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_all_but_cpu.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_andset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_clearset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_and.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_andnot.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare.3 \
@@ -267,8 +272,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_iszero.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_last.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_next.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_notset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_orset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_not.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_or.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
@@ -282,7 +287,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_weight.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_xorset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_xor.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
@@ -306,7 +311,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_pcidev.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_proc_obj_by_os_index.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_pu_obj_by_os_index.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_array_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_type.3 \

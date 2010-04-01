@@ -19,8 +19,16 @@
 # endif
 #endif
 
-#ifdef HWLOC_HAVE_ATTRIBUTE_UNUSED
-# if HWLOC_HAVE_ATTRIBUTE_UNUSED
+/*
+ * Note: this is public.  We can not assume anything from the compiler used
+ * by the application and thus the HWLOC_HAVE_* macros below are not
+ * fetched from the autoconf result here. We only automatically use a few
+ * well-known easy cases.
+ */
+
+/* Maybe before gcc 2.95 too */
+#if defined(HWLOC_HAVE_ATTRIBUTE_UNUSED) || (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+# if HWLOC_HAVE_ATTRIBUTE_UNUSED || (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
 #  define __hwloc_attribute_unused __attribute__((__unused__))
 # else
 #  define __hwloc_attribute_unused
@@ -29,8 +37,8 @@
 # define __hwloc_attribute_unused
 #endif
 
-#ifdef HWLOC_HAVE_ATTRIBUTE_MALLOC
-# if HWLOC_HAVE_ATTRIBUTE_MALLOC
+#if defined(HWLOC_HAVE_ATTRIBUTE_MALLOC) || (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
+# if HWLOC_HAVE_ATTRIBUTE_MALLOC || (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
 #  define __hwloc_attribute_malloc __attribute__((__malloc__))
 # else
 #  define __hwloc_attribute_malloc
@@ -39,8 +47,8 @@
 # define __hwloc_attribute_malloc
 #endif
 
-#ifdef HWLOC_HAVE_ATTRIBUTE_CONST
-# if HWLOC_HAVE_ATTRIBUTE_CONST
+#if defined(HWLOC_HAVE_ATTRIBUTE_CONST) || (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+# if HWLOC_HAVE_ATTRIBUTE_CONST || (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
 #  define __hwloc_attribute_const __attribute__((__const__))
 # else
 #  define __hwloc_attribute_const
@@ -49,8 +57,8 @@
 # define __hwloc_attribute_const
 #endif
 
-#ifdef HWLOC_HAVE_ATTRIBUTE_PURE
-# if HWLOC_HAVE_ATTRIBUTE_PURE
+#if defined(HWLOC_HAVE_ATTRIBUTE_PURE) || (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
+# if HWLOC_HAVE_ATTRIBUTE_PURE || (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
 #  define __hwloc_attribute_pure __attribute__((__pure__))
 # else
 #  define __hwloc_attribute_pure
@@ -59,8 +67,8 @@
 # define __hwloc_attribute_pure
 #endif
 
-#ifdef HWLOC_HAVE_ATTRIBUTE_DEPRECATED
-# if HWLOC_HAVE_ATTRIBUTE_DEPRECATED
+#if defined(HWLOC_HAVE_ATTRIBUTE_DEPRECATED) || (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 3))
+# if HWLOC_HAVE_ATTRIBUTE_DEPRECATED || (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 3))
 #  define __hwloc_attribute_deprecated __attribute__((__deprecated__))
 # else
 #  define __hwloc_attribute_deprecated

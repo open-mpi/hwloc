@@ -28,6 +28,8 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
+  set = hwloc_cpuset_alloc();
+
 
 
   hwloc_topology_set_synthetic (topology, "nodes:8 cores:2 1");
@@ -35,7 +37,7 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
-  set = hwloc_cpuset_from_string("00008f18");
+  hwloc_cpuset_from_string(set, "00008f18");
 
   obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, NULL);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 1));
@@ -50,8 +52,6 @@ main (void)
   obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, obj);
   assert(!obj);
 
-  hwloc_cpuset_free(set);
-
 
 
   hwloc_topology_set_synthetic (topology, "nodes:2 socket:5 cores:3 4");
@@ -59,7 +59,7 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
-  set = hwloc_cpuset_from_string("0ff08000");
+  hwloc_cpuset_from_string(set, "0ff08000");
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
   assert(depth == 2);
@@ -70,9 +70,9 @@ main (void)
   obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, depth, obj);
   assert(!obj);
 
+
+
   hwloc_cpuset_free(set);
-
-
 
   hwloc_topology_destroy (topology);
 

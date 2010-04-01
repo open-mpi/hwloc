@@ -168,7 +168,7 @@ hwloc_look_hpux(struct hwloc_topology *topology)
   currentcpu = mpctl(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM ?
       MPC_GETFIRSTSPU_SYS : MPC_GETFIRSTSPU, 0,0);
   while (currentcpu != -1) {
-    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PROC, currentcpu);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, currentcpu);
     obj->cpuset = hwloc_cpuset_alloc();
     hwloc_cpuset_set(obj->cpuset, currentcpu);
 
@@ -185,7 +185,7 @@ hwloc_look_hpux(struct hwloc_topology *topology)
         hwloc_cpuset_set(nodes[i]->cpuset, currentcpu);
         hwloc_debug("is in node %d\n", i);
       } else {
-        hwloc_debug("is in no node?!\n");
+        hwloc_debug("%s", "is in no node?!\n");
       }
     }
 
@@ -203,7 +203,7 @@ hwloc_look_hpux(struct hwloc_topology *topology)
     free(nodes);
   }
 
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
 }
 
 void

@@ -3,56 +3,27 @@
  * See COPYING in top-level directory.
  */
 
-/* Internals for cpuset API.  */
+/* Misc internals routines.  */
 
-#ifndef HWLOC_PRIVATE_CPUSET_H
-#define HWLOC_PRIVATE_CPUSET_H
+#ifndef HWLOC_PRIVATE_MISC_H
+#define HWLOC_PRIVATE_MISC_H
 
 #include <hwloc/config.h>
-#include <hwloc/rename.h>
 #include <private/config.h>
-
-#include <sys/types.h>
-#include <inttypes.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
+#include <private/private.h>
 
 
-/**
- * Cpuset internals.
- */
+/* On some systems, snprintf returns the size of written data, not the actually
+ * required size.  hwloc_snprintf always report the actually required size. */
+int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
 
-/* size and count of subsets within a set */
-#define HWLOC_CPUSUBSET_SIZE	HWLOC_BITS_PER_LONG
-#define HWLOC_CPUSUBSET_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSUBSET_SIZE-1)/HWLOC_CPUSUBSET_SIZE)
+/* Check whether needle matches the beginning of haystack, at least n, and up
+ * to a colon or \0 */
+HWLOC_DECLSPEC
+int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
 
-/* magic number */
-#define HWLOC_CPUSET_MAGIC 0x20091007
-
-/* actual opaque type internals */
-struct hwloc_cpuset_s {
-	unsigned long s[HWLOC_CPUSUBSET_COUNT];
-#ifdef HWLOC_DEBUG
-	int magic;
-#endif
-};
-
-/* extract a subset from a set using an index or a cpu */
-#define HWLOC_CPUSUBSET_SUBSET(set,x)		((set).s[x])
-#define HWLOC_CPUSUBSET_INDEX(cpu)		((cpu)/(HWLOC_CPUSUBSET_SIZE))
-#define HWLOC_CPUSUBSET_CPUSUBSET(set,cpu)	HWLOC_CPUSUBSET_SUBSET(set,HWLOC_CPUSUBSET_INDEX(cpu))
-
-/* predefined subset values */
-#define HWLOC_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(HWLOC_CPUSUBSET_SIZE)))
-#define HWLOC_CPUSUBSET_ZERO		0UL
-#define HWLOC_CPUSUBSET_FULL		~0UL
-
-/* Strings always use 32bit groups */
-#define HWLOC_PRIxCPUSUBSET		"%08lx"
-#define HWLOC_CPUSET_SUBSTRING_SIZE	32
-#define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
-#define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
+/* Compile-time assertion */
+#define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
 
 
 /**
@@ -88,8 +59,8 @@ extern int ffs(int) __hwloc_attribute_const;
 
 #else /* no ffs implementation */
 
-static __inline int hwloc_ffsl(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_ffsl(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_ffsl(unsigned long x)
 {
 	int i;
 
@@ -134,8 +105,8 @@ static __inline int hwloc_ffsl(unsigned long x)
 /* We only have an int ffs(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline int hwloc_ffs32(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_ffs32(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_ffs32(unsigned long x)
 {
 #if HWLOC_BITS_PER_INT == 16
 	int low_ffs, hi_ffs;
@@ -155,8 +126,8 @@ static __inline int hwloc_ffs32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline int hwloc_ffsl(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_ffsl(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_ffsl(unsigned long x)
 {
 #if HWLOC_BITS_PER_LONG == 64
 	int low_ffs, hi_ffs;
@@ -224,8 +195,8 @@ extern int clz(int) __hwloc_attribute_const;
 
 #else /* no fls implementation */
 
-static __inline int hwloc_flsl(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_flsl(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_flsl(unsigned long x)
 {
 	int i = 0;
 
@@ -270,8 +241,8 @@ static __inline int hwloc_flsl(unsigned long x)
 /* We only have an int fls(int) implementation, build a long one.  */
 
 /* First make it 32 bits if it was only 16.  */
-static __inline int hwloc_fls32(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_fls32(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_fls32(unsigned long x)
 {
 #if HWLOC_BITS_PER_INT == 16
 	int low_fls, hi_fls;
@@ -291,8 +262,8 @@ static __inline int hwloc_fls32(unsigned long x)
 }
 
 /* Then make it 64 bit if longs are.  */
-static __inline int hwloc_flsl(unsigned long x) __hwloc_attribute_const;
-static __inline int hwloc_flsl(unsigned long x)
+static __inline int __hwloc_attribute_const
+hwloc_flsl(unsigned long x)
 {
 #if HWLOC_BITS_PER_LONG == 64
 	int low_fls, hi_fls;
@@ -312,8 +283,8 @@ static __inline int hwloc_flsl(unsigned long x)
 }
 #endif
 
-static __inline int hwloc_weight_long(unsigned long w) __hwloc_attribute_const;
-static __inline int hwloc_weight_long(unsigned long w)
+static __inline int __hwloc_attribute_const
+hwloc_weight_long(unsigned long w)
 {
 #if HWLOC_BITS_PER_LONG == 32
 #if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__) >= 4)
@@ -341,4 +312,4 @@ static __inline int hwloc_weight_long(unsigned long w)
 }
 
 
-#endif /* HWLOC_PRIVATE_CPUSET_H */
+#endif /* HWLOC_PRIVATE_MISC_H */

@@ -367,20 +367,19 @@ static int
 lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 {
   unsigned index = logical ? obj->logical_index : obj->os_index;
-  const char *indexprefix = logical ? "#" : " p#";
-  char typestr[32] = "P";
+  const char *indexprefix = logical ? " #" : " p#";
+  char typestr[32];
   char indexstr[32]= "";
   char attrstr[256];
   size_t attrlen;
-  if (obj->type != HWLOC_OBJ_PROC)
-    hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
+  hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
   if (index != (unsigned)-1 && obj->depth != 0
       && obj->type != HWLOC_OBJ_PCI_DEVICE
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, index);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
   if (attrlen)
-    return snprintf(text, textlen, "%s%s(%s)", typestr, indexstr, attrstr);
+    return snprintf(text, textlen, "%s%s (%s)", typestr, indexstr, attrstr);
   else
     return snprintf(text, textlen, "%s%s", typestr, indexstr);
 }
@@ -484,7 +483,7 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
 static void
 proc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  *retwidth = fontsize ? 4*fontsize : gridsize;
+  *retwidth = fontsize ? 5*fontsize : gridsize;
   *retheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
 
   DYNA_CHECK();
@@ -493,13 +492,11 @@ proc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
     if (!hwloc_cpuset_isset(level->allowed_cpuset, level->os_index))
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
     else {
-      hwloc_cpuset_t bind;
-      if (pid < 0)
-        bind = hwloc_cpuset_alloc();
-      else if (pid > 0)
-        bind = hwloc_get_proc_cpubind(topology, pid, 0);
-      else
-        bind = hwloc_get_cpubind(topology, 0);
+      hwloc_cpuset_t bind = hwloc_cpuset_alloc();
+      if (pid > 0)
+        hwloc_get_proc_cpubind(topology, pid, bind, 0);
+      else if (pid == 0)
+        hwloc_get_cpubind(topology, bind, 0);
       if (bind && hwloc_cpuset_isset(bind, level->os_index))
         methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);
       else
@@ -781,7 +778,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_SOCKET: return socket_draw;
     case HWLOC_OBJ_CACHE: return cache_draw;
     case HWLOC_OBJ_CORE: return core_draw;
-    case HWLOC_OBJ_PROC: return proc_draw;
+    case HWLOC_OBJ_PU: return proc_draw;
     case HWLOC_OBJ_PCI_DEVICE: return pci_device_draw;
     case HWLOC_OBJ_OS_DEVICE: return os_device_draw;
     case HWLOC_OBJ_BRIDGE: return bridge_draw;

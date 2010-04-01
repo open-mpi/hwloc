@@ -8,6 +8,7 @@
 #include <hwloc/helper.h>
 #include <private/private.h>
 #include <private/debug.h>
+#include <private/misc.h>
 
 #ifdef HWLOC_HAVE_LIBPCI
 
@@ -437,7 +438,8 @@ hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
 static struct hwloc_obj *
 hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
 {
-  hwloc_cpuset_t cpuset;
+  hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
+  int err;
 
   /* override the cpuset with the environment if given */
   char envname[256];
@@ -446,7 +448,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   char *env = getenv(envname);
   if (env) {
     hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
-    cpuset = hwloc_cpuset_from_string(env);
+    hwloc_cpuset_from_string(cpuset, env);
     goto found;
   }
 
@@ -458,14 +460,13 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
 	   hostbridge->first_child->attr->pcidev.domain, hostbridge->first_child->attr->pcidev.bus,
 	   hostbridge->first_child->attr->pcidev.dev, hostbridge->first_child->attr->pcidev.func);
   file = fopen(path, "r"); /* the libpci backend doesn't use sysfs.fsroot */
-  cpuset = hwloc_linux_parse_cpumap_file(file);
+  err = hwloc_linux_parse_cpumap_file(file, cpuset);
   fclose(file);
-  if (cpuset)
+  if (!err)
     goto found;
 #endif
 
   /* if we got nothing, assume the hostbridge is attached to the top of hierarchy */
-  cpuset = hwloc_cpuset_alloc();
   hwloc_cpuset_fill(cpuset);
 
  found:

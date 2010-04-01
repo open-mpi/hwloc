@@ -7,6 +7,7 @@
 #include <private/config.h>
 #include <hwloc.h>
 #include <private/private.h>
+#include <private/misc.h>
 #include <private/debug.h>
 
 int
@@ -112,7 +113,7 @@ hwloc__get_largest_objs_inside_cpuset (struct hwloc_obj *current, hwloc_const_cp
     int ret;
 
     /* split out the cpuset part corresponding to this child and see if there's anything to do */
-    hwloc_cpuset_andset(subset, current->children[i]->cpuset);
+    hwloc_cpuset_and(subset, subset, current->children[i]->cpuset);
     if (hwloc_cpuset_iszero(subset)) {
       hwloc_cpuset_free(subset);
       continue;
@@ -160,7 +161,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_BRIDGE: return "Bridge";
     case HWLOC_OBJ_PCI_DEVICE: return "PCIDev";
     case HWLOC_OBJ_OS_DEVICE: return "OSDev";
-    case HWLOC_OBJ_PROC: return "Proc";
+    case HWLOC_OBJ_PU: return "PU";
     default: return "Unknown";
     }
 }
@@ -175,7 +176,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
   if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
-  if (!strcasecmp(string, "Proc")) return HWLOC_OBJ_PROC;
+  if (!strcasecmp(string, "PU") || !strcasecmp(string, "proc") /* backward compatiliby with 0.9 */) return HWLOC_OBJ_PU;
   if (!strcasecmp(string, "Bridge")) return HWLOC_OBJ_BRIDGE;
   if (!strcasecmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
   if (!strcasecmp(string, "OSDev")) return HWLOC_OBJ_OS_DEVICE;
@@ -355,9 +356,8 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_NODE:
   case HWLOC_OBJ_SOCKET:
   case HWLOC_OBJ_CORE:
+  case HWLOC_OBJ_PU:
     return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
-  case HWLOC_OBJ_PROC:
-    return hwloc_snprintf(string, size, "%s", verbose ? hwloc_obj_type_string(type) : "P");
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "L%u%s", obj->attr->cache.depth, verbose ? hwloc_obj_type_string(type): "");
   case HWLOC_OBJ_MISC:
@@ -477,7 +477,6 @@ hwloc_obj_snprintf(char *string, size_t size,
   const char *indexprefix = _indexprefix ? _indexprefix : "#";
   char os_index[12] = "";
   char type[64];
-  int typelen;
   char attr[128];
   int attrlen;
 
@@ -485,7 +484,7 @@ hwloc_obj_snprintf(char *string, size_t size,
     hwloc_snprintf(os_index, 12, "%s%u", indexprefix, l->os_index);
   }
 
-  typelen = hwloc_obj_type_snprintf(type, sizeof(type), l, verbose);
+  hwloc_obj_type_snprintf(type, sizeof(type), l, verbose);
   attrlen = hwloc_obj_attr_snprintf(attr, sizeof(attr), l, " ", verbose);
 
   if (attrlen)
@@ -502,7 +501,7 @@ int hwloc_obj_cpuset_snprintf(char *str, size_t size, size_t nobj, struct hwloc_
 
   hwloc_cpuset_zero(set);
   for(i=0; i<nobj; i++)
-    hwloc_cpuset_orset(set, objs[i]->cpuset);
+    hwloc_cpuset_or(set, set, objs[i]->cpuset);
 
   res = hwloc_cpuset_snprintf(str, size, set);
   hwloc_cpuset_free(set);

@@ -347,7 +347,7 @@ hwloc_look_solaris(struct hwloc_topology *topology)
   nbprocs = 0;
   hwloc_look_kstat(topology, &nbprocs);
 #endif /* HAVE_LIBKSTAT */
-  hwloc_setup_proc_level(topology, nbprocs);
+  hwloc_setup_pu_level(topology, nbprocs);
 }
 
 void

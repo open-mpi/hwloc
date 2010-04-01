@@ -30,6 +30,8 @@
 
 /* Names from hwloc.h */
 
+#define HWLOC_API_VERSION HWLOC_NAME_CAPS(API_VERSION)
+
 #define hwloc_topology HWLOC_NAME(topology)
 #define hwloc_topology_t HWLOC_NAME(topology_t)
 
@@ -39,7 +41,7 @@
 #define HWLOC_OBJ_SOCKET HWLOC_NAME_CAPS(OBJ_SOCKET)
 #define HWLOC_OBJ_CACHE HWLOC_NAME_CAPS(OBJ_CACHE)
 #define HWLOC_OBJ_CORE HWLOC_NAME_CAPS(OBJ_CORE)
-#define HWLOC_OBJ_PROC HWLOC_NAME_CAPS(OBJ_PROC)
+#define HWLOC_OBJ_PU HWLOC_NAME_CAPS(OBJ_PU)
 #define HWLOC_OBJ_MISC HWLOC_NAME_CAPS(OBJ_MISC)
 
 #define hwloc_obj_type_t HWLOC_NAME(obj_type_t)
@@ -158,11 +160,11 @@
 #define hwloc_cpuset_isequal HWLOC_NAME(cpuset_isequal)
 #define hwloc_cpuset_intersects HWLOC_NAME(cpuset_intersects)
 #define hwloc_cpuset_isincluded HWLOC_NAME(cpuset_isincluded)
-#define hwloc_cpuset_orset HWLOC_NAME(cpuset_orset)
-#define hwloc_cpuset_andset HWLOC_NAME(cpuset_andset)
-#define hwloc_cpuset_clearset HWLOC_NAME(cpuset_clearset)
-#define hwloc_cpuset_xorset HWLOC_NAME(cpuset_xorset)
-#define hwloc_cpuset_notset HWLOC_NAME(cpuset_notset)
+#define hwloc_cpuset_or HWLOC_NAME(cpuset_or)
+#define hwloc_cpuset_and HWLOC_NAME(cpuset_and)
+#define hwloc_cpuset_andnot HWLOC_NAME(cpuset_andnot)
+#define hwloc_cpuset_xor HWLOC_NAME(cpuset_xor)
+#define hwloc_cpuset_not HWLOC_NAME(cpuset_not)
 #define hwloc_cpuset_first HWLOC_NAME(cpuset_first)
 #define hwloc_cpuset_last HWLOC_NAME(cpuset_last)
 #define hwloc_cpuset_next HWLOC_NAME(cpuset_next)

@@ -60,7 +60,8 @@ int main(void)
   hwloc_cpuset_free(set);
 
   /* try an impossible one */
-  set = hwloc_cpuset_from_string(GIVEN_TOOLARGE_CPUSET_STRING);
+  set = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_string(set, GIVEN_TOOLARGE_CPUSET_STRING);
   ret = hwloc_get_largest_objs_inside_cpuset(topology, set, objs, 1);
   assert(ret == -1);
   objs[0] = hwloc_get_first_largest_obj_inside_cpuset(topology, set);
@@ -68,7 +69,8 @@ int main(void)
   hwloc_cpuset_free(set);
 
   /* try a harder one with 1 obj instead of 2 needed */
-  set = hwloc_cpuset_from_string(GIVEN_LARGESPLIT_CPUSET_STRING);
+  set = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_string(set, GIVEN_LARGESPLIT_CPUSET_STRING);
   ret = hwloc_get_largest_objs_inside_cpuset(topology, set, objs, 1);
   assert(ret == 1);
   assert(objs[0] == hwloc_get_obj_by_depth(topology, depth-1, 0));
@@ -80,9 +82,9 @@ int main(void)
   assert(objs[0] == hwloc_get_obj_by_depth(topology, depth-1, 0));
   assert(objs[1] == hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1)-1));
   objs[0] = hwloc_get_first_largest_obj_inside_cpuset(topology, set);
-  hwloc_cpuset_clearset(set, objs[0]->cpuset);
+  hwloc_cpuset_andnot(set, set, objs[0]->cpuset);
   objs[1] = hwloc_get_first_largest_obj_inside_cpuset(topology, set);
-  hwloc_cpuset_clearset(set, objs[1]->cpuset);
+  hwloc_cpuset_andnot(set, set, objs[1]->cpuset);
   objs[2] = hwloc_get_first_largest_obj_inside_cpuset(topology, set);
   assert(objs[0] == hwloc_get_obj_by_depth(topology, depth-1, 0));
   assert(objs[1] == hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1)-1));
@@ -91,7 +93,8 @@ int main(void)
   hwloc_cpuset_free(set);
 
   /* try a very hard one */
-  set = hwloc_cpuset_from_string(GIVEN_HARD_CPUSET_STRING);
+  set = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_string(set, GIVEN_HARD_CPUSET_STRING);
   ret = hwloc_get_largest_objs_inside_cpuset(topology, set, objs, OBJ_MAX);
   assert(objs[0] == hwloc_get_obj_by_depth(topology, 5, 29));
   assert(objs[1] == hwloc_get_obj_by_depth(topology, 3, 5));

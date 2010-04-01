@@ -8,7 +8,7 @@
 #include <private/private.h>
 #include <private/debug.h>
 #include <private/cpuid.h>
-#include <private/cpuset.h>
+#include <private/misc.h>
 
 struct cacheinfo {
   unsigned type;
@@ -79,7 +79,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
   cache->size = size;
   cache->sets = 0;
 
-  hwloc_debug("cache L%d t%d linesize %d ways %d size %dKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
+  hwloc_debug("cache L%u t%u linesize %u ways %u size %uKB\n", cache->level, cache->nbthreads_sharing, cache->linesize, cache->ways, cache->size >> 10);
 }
 
 /* Fetch information from the processor itself thanks to cpuid and store it in
@@ -99,12 +99,12 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     infos->max_log_proc = 1 << hwloc_flsl(((ebx >> 16) & 0xff) - 1);
   else
     infos->max_log_proc = 1;
-  hwloc_debug("APIC ID 0x%02x max_log_proc %d\n", infos->apicid, infos->max_log_proc);
+  hwloc_debug("APIC ID 0x%02x max_log_proc %u\n", infos->apicid, infos->max_log_proc);
   infos->socketid = infos->apicid / infos->max_log_proc;
   infos->logprocid = infos->apicid % infos->max_log_proc;
   infos->coreid = (unsigned) -1;
   infos->threadid = (unsigned) -1;
-  hwloc_debug("phys %d thread %d\n", infos->socketid, infos->logprocid);
+  hwloc_debug("phys %u thread %u\n", infos->socketid, infos->logprocid);
 
   /* Intel doesn't actually provide 0x80000008 information */
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000008) {
@@ -112,18 +112,18 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     eax = 0x80000008;
     hwloc_cpuid(&eax, &ebx, &ecx, &edx);
     coreidsize = (ecx >> 12) & 0xf;
-    hwloc_debug("core ID size: %d\n", coreidsize);
+    hwloc_debug("core ID size: %u\n", coreidsize);
     if (!coreidsize) {
       infos->max_nbcores = (ecx & 0xff) + 1;
     } else 
       infos->max_nbcores = 1 << coreidsize;
-    hwloc_debug("Thus max # of cores: %d\n", infos->max_nbcores);
+    hwloc_debug("Thus max # of cores: %u\n", infos->max_nbcores);
     /* Still no multithreaded AMD */
     infos->max_nbthreads = 1 ;
-    hwloc_debug("and max # of threads: %d\n", infos->max_nbthreads);
+    hwloc_debug("and max # of threads: %u\n", infos->max_nbthreads);
     infos->threadid = infos->logprocid % infos->max_nbthreads;
     infos->coreid = infos->logprocid / infos->max_nbthreads;
-    hwloc_debug("this is thread %d of core %d\n", infos->threadid, infos->coreid);
+    hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
   }
 
   infos->numcaches = 0;
@@ -155,7 +155,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
       type = eax & 0x1f;
 
-      hwloc_debug("cache %d type %d\n", cachenum, type);
+      hwloc_debug("cache %u type %u\n", cachenum, type);
 
       if (type == 0)
 	break;
@@ -194,12 +194,12 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
 
-      hwloc_debug("cache %d type %d L%d t%d c%d linesize %d linepart %d ways %d sets %d, size %dKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
+      hwloc_debug("cache %u type %u L%u t%u c%u linesize %u linepart %u ways %u sets %u, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
       infos->max_nbthreads = infos->max_log_proc / infos->max_nbcores;
-      hwloc_debug("thus %d threads\n", infos->max_nbthreads);
+      hwloc_debug("thus %u threads\n", infos->max_nbthreads);
       infos->threadid = infos->logprocid % infos->max_nbthreads;
       infos->coreid = infos->logprocid / infos->max_nbthreads;
-      hwloc_debug("this is thread %d of core %d\n", infos->threadid, infos->coreid);
+      hwloc_debug("this is thread %u of core %u\n", infos->threadid, infos->coreid);
 
       cache++;
     }
@@ -376,7 +376,7 @@ hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
   if (ebx == AMD_EBX && ecx == AMD_ECX && edx == AMD_EDX)
     cpuid_type = amd;
 
-  hwloc_debug("highest cpuid %x, cpuid type %d\n", highest_cpuid, cpuid_type);
+  hwloc_debug("highest cpuid %x, cpuid type %u\n", highest_cpuid, cpuid_type);
   if (highest_cpuid < 0x01)
     return;
 
@@ -386,9 +386,10 @@ hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
 
   hwloc_debug("highest extended cpuid %x\n", highest_ext_cpuid);
 
+  orig_cpuset = hwloc_cpuset_alloc();
+
   if (topology->get_thisthread_cpubind && topology->set_thisthread_cpubind) {
-    orig_cpuset = topology->get_thisthread_cpubind(topology, HWLOC_CPUBIND_STRICT);
-    if (orig_cpuset) {
+    if (!topology->get_thisthread_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
       for (i = 0; i < nbprocs; i++) {
         hwloc_cpuset_cpu(cpuset, i);
@@ -404,8 +405,7 @@ hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
     }
   }
   if (topology->get_thisproc_cpubind && topology->set_thisproc_cpubind) {
-    orig_cpuset = topology->get_thisproc_cpubind(topology, HWLOC_CPUBIND_STRICT);
-    if (orig_cpuset) {
+    if (!topology->get_thisproc_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
       for (i = 0; i < nbprocs; i++) {
         hwloc_cpuset_cpu(cpuset, i);

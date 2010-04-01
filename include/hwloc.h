@@ -94,7 +94,7 @@ typedef enum {
 			  * A computation unit (may be shared by several
 			  * logical processors).
 			  */
-  HWLOC_OBJ_PROC,	/**< \brief (Logical) Processor.
+  HWLOC_OBJ_PU,		/**< \brief Processing Unit, or (Logical) Processor.
 			  * An execution unit (may share a core with some
 			  * other logical processors, e.g. in the case of
 			  * an SMT core).
@@ -134,7 +134,7 @@ typedef enum {
  * contain sockets which contain caches, which contain cores, which contain
  * processors).
  *
- * \note HWLOC_OBJ_PROC will always be the deepest.
+ * \note HWLOC_OBJ_PU will always be the deepest.
  * \note This does not mean that the actual topology will respect that order:
  * e.g. as of today cores may also contain caches, and sockets may also contain
  * nodes. This is thus just to be seen as a fallback comparison method.
@@ -228,9 +228,9 @@ struct hwloc_obj {
   /* cpuset */
   hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
                                           *
-                                          * This is the set of CPUs for which there are PROC objects in the topology
+                                          * This is the set of CPUs for which there are PU objects in the topology
                                           * under this object, i.e. which are known to be physically contained in this
-                                          * object and known how (the children path between this object and the PROC
+                                          * object and known how (the children path between this object and the PU
                                           * objects).
                                           *
                                           * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
@@ -244,7 +244,7 @@ struct hwloc_obj {
                                           * This includes not only the same as the cpuset field, but also the CPUs for
                                           * which topology information is unknown or incomplete, and the CPUs that are
                                           * ignored when the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM flag is not set.
-                                          * Thus no corresponding PROC object may be found in the topology, because the
+                                          * Thus no corresponding PU object may be found in the topology, because the
                                           * precise position is undefined. It is however known that it would be somewhere
                                           * under this object.
                                           *
@@ -422,7 +422,7 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 /** \brief Ignore an object type.
  *
  * Ignore all objects from the given type.
- * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
+ * The bottom-level type HWLOC_OBJ_PU may not be ignored.
  * The top-level object of the hierarchy will never be ignored, even if this function
  * succeeds.
  */
@@ -432,7 +432,7 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_type(hwloc_topology_t topology, hwloc_o
  *
  * Ignore all objects from the given type as long as they do not bring any structure:
  * Each ignored object should have a single children or be the only child of its parent.
- * The bottom-level type HWLOC_OBJ_PROC may not be ignored.
+ * The bottom-level type HWLOC_OBJ_PU may not be ignored.
  */
 HWLOC_DECLSPEC int hwloc_topology_ignore_type_keep_structure(hwloc_topology_t topology, hwloc_obj_type_t type);
 
@@ -565,8 +565,8 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
 struct hwloc_topology_support {
   /** \brief Flags describing actual discovery support for this topology. */
   struct {
-    /* \brief Detecting the number of PROC objects is supported. */
-    unsigned int proc:1;
+    /* \brief Detecting the number of PU objects is supported. */
+    unsigned int pu:1;
     unsigned int pad:31;
   } discovery;
 
@@ -611,7 +611,7 @@ HWLOC_DECLSPEC void hwloc_topology_export_xml(hwloc_topology_t topology, const c
 
 /** \brief Add a MISC object to the topology
  *
- * A new MISC object will be created and insert into the topology at the
+ * A new MISC object will be created and inserted into the topology at the
  * position given by cpuset.
  *
  * cpuset and name will be copied.
@@ -622,7 +622,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_top
 
 /** \brief Add a MISC object to the topology
  *
- * A new MISC object will be created and insert into the topology at the
+ * A new MISC object will be created and inserted into the topology at the
  * position given by parent.
  *
  * name will be copied.
@@ -641,7 +641,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_top
 
 /** \brief Get the depth of the hierachical tree of objects.
  *
- * This is the depth of HWLOC_OBJ_PROC objects plus one.
+ * This is the depth of HWLOC_OBJ_PU objects plus one.
  */
 HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restrict topology) __hwloc_attribute_pure;
 
@@ -674,9 +674,7 @@ HWLOC_DECLSPEC unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, un
  * If no object for that type exists, 0 is returned.
  * If there are several levels with objects of that type, -1 is returned.
  */
-static __inline int
-hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
-static __inline int
+static __inline int __hwloc_attribute_pure
 hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
 	int depth = hwloc_get_type_depth(topology, type);
@@ -713,9 +711,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, un
  * If there are several levels with objects of that type, \c NULL is returned
  * and ther caller may fallback to hwloc_get_obj_by_depth().
  */
-static __inline hwloc_obj_t
-hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned idx) __hwloc_attribute_pure;
-static __inline hwloc_obj_t
+static __inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned idx)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -874,10 +870,8 @@ HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpus
 			    int policy);
 
 /** \brief Get current process or thread binding
- *
- * \return newly-allocated cpuset
  */
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
 
 /** \brief Bind a process \p pid on cpus given in cpuset \p set
  *
@@ -888,16 +882,14 @@ HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_cpubind(hwloc_topology_t topology, int p
  */
 HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
 
-/** \brief Get the current binding of process \p pid on
+/** \brief Get the current binding of process \p pid
  *
  * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
- *
- * \return newly-allocated cpuset
  */
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
@@ -916,11 +908,9 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * Windows platforms
  *
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
- *
- * \return newly-allocated cpuset
  */
 #ifdef hwloc_thread_t
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
 /** @} */

@@ -61,14 +61,14 @@ struct hwloc_topology {
   struct hwloc_obj *first_pcidev, *last_pcidev;
 
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_thisproc_cpubind)(hwloc_topology_t topology, int policy);
+  int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
   int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_thisthread_cpubind)(hwloc_topology_t topology, int policy);
+  int (*get_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
   int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, int policy);
+  int (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
 #ifdef hwloc_thread_t
   int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
-  hwloc_cpuset_t (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, int policy);
+  int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
   struct hwloc_topology_support support;
@@ -104,7 +104,7 @@ struct hwloc_topology {
 };
 
 
-extern void hwloc_setup_proc_level(struct hwloc_topology *topology, unsigned nb_processors);
+extern void hwloc_setup_pu_level(struct hwloc_topology *topology, unsigned nb_pus);
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/);
 extern int hwloc_get_sysctlbyname(const char *name, int *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);
@@ -258,17 +258,5 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
     }
   hwloc_debug("%s", "\n");
 }
-
-/* On some systems, snprintf returns the size of written data, not the actually
- * required size.  hwloc_snprintf always report the actually required size. */
-int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
-
-/* Check whether needle matches the beginning of haystack, at least n, and up
- * to a colon or \0 */
-HWLOC_DECLSPEC
-int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
-
-/* Compile-time assertion */
-#define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
 
 #endif /* HWLOC_PRIVATE_H */

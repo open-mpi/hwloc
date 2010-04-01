@@ -68,13 +68,11 @@ HWLOC_DECLSPEC int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buf
  */
 HWLOC_DECLSPEC int hwloc_cpuset_asprintf(char ** strp, hwloc_const_cpuset_t set);
 
-/** \brief Parse a cpuset string.
+/** \brief Parse a cpuset string and stores it in CPU set \p set.
  *
  * Must start and end with a digit.
- *
- * \return newly-allocated cpuset.
  */
-HWLOC_DECLSPEC hwloc_cpuset_t hwloc_cpuset_from_string(const char * __hwloc_restrict string) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC int hwloc_cpuset_from_string(hwloc_cpuset_t set, const char * __hwloc_restrict string);
 
 
 /** \brief
@@ -135,28 +133,37 @@ HWLOC_DECLSPEC int hwloc_cpuset_intersects (hwloc_const_cpuset_t set1, hwloc_con
 /** \brief Test whether set \p sub_set is part of set \p super_set */
 HWLOC_DECLSPEC int hwloc_cpuset_isincluded (hwloc_const_cpuset_t sub_set, hwloc_const_cpuset_t super_set) __hwloc_attribute_pure;
 
-/** \brief Or set \p modifier_set into set \p set */
-HWLOC_DECLSPEC void hwloc_cpuset_orset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+/** \brief Or sets \p set1 and \p set2 and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_or (hwloc_cpuset_t res, hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief And set \p modifier_set into set \p set */
-HWLOC_DECLSPEC void hwloc_cpuset_andset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+/** \brief And sets \p set1 and \p set2 and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_and (hwloc_cpuset_t res, hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief Clear set \p modifier_set out of set \p set */
-HWLOC_DECLSPEC void hwloc_cpuset_clearset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+/** \brief And set \p set1 and the negation of \p set2 and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_andnot (hwloc_cpuset_t res, hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief Xor set \p set with set \p modifier_set */
-HWLOC_DECLSPEC void hwloc_cpuset_xorset (hwloc_cpuset_t set, hwloc_const_cpuset_t modifier_set);
+/** \brief Xor sets \p set1 and \p set2 and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_xor (hwloc_cpuset_t res, hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2);
 
-/** \brief Negate set \p set */
-HWLOC_DECLSPEC void hwloc_cpuset_notset (hwloc_cpuset_t set);
+/** \brief Negate set \p set and store the result in set \p res */
+HWLOC_DECLSPEC void hwloc_cpuset_not (hwloc_cpuset_t res, hwloc_const_cpuset_t set);
 
-/** \brief Compute the first CPU (least significant bit) in CPU set \p set */
+/** \brief Compute the first CPU (least significant bit) in CPU set \p set
+ *
+ * \return -1 if no CPU is set.
+ */
 HWLOC_DECLSPEC int hwloc_cpuset_first(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
-/** \brief Compute the last CPU (most significant bit) in CPU set \p set */
+/** \brief Compute the last CPU (most significant bit) in CPU set \p set
+ *
+ * \return -1 if no CPU is set.
+ */
 HWLOC_DECLSPEC int hwloc_cpuset_last(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
-/** \brief Compute the next CPU in CPU set \p set which is after CPU \p prev_cpu */
+/** \brief Compute the next CPU in CPU set \p set which is after CPU \p prev_cpu
+ *
+ * \return -1 if no CPU with higher index is set.
+ */
 HWLOC_DECLSPEC int hwloc_cpuset_next(hwloc_const_cpuset_t set, unsigned prev_cpu) __hwloc_attribute_pure;
 
 /** \brief Keep a single CPU among those set in CPU set \p set
@@ -181,7 +188,10 @@ HWLOC_DECLSPEC int hwloc_cpuset_compare_first(hwloc_const_cpuset_t set1, hwloc_c
  */
 HWLOC_DECLSPEC int hwloc_cpuset_compare(hwloc_const_cpuset_t set1, hwloc_const_cpuset_t set2) __hwloc_attribute_pure;
 
-/** \brief Compute the weight of CPU set \p set */
+/** \brief Compute the weight of CPU set \p set
+ *
+ * \return the number of CPUs that are set.
+ */
 HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
 /** \brief Loop macro iterating on CPU set \p set

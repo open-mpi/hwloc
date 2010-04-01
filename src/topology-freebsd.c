@@ -22,17 +22,14 @@
 #include <private/debug.h>
 
 #ifdef HAVE_SYS_CPUSET_H
-static hwloc_cpuset_t
-hwloc_freebsd_bsd2hwloc(const cpuset_t *cpuset)
+static void
+hwloc_freebsd_bsd2hwloc(hwloc_cpuset_t hwloc_cpuset, const cpuset_t *cpuset)
 {
   unsigned cpu;
-  hwloc_cpuset_t hwloc_cpuset = hwloc_cpuset_alloc();
-
+  hwloc_cpuset_zero(hwloc_cpuset);
   for (cpu = 0; cpu < HWLOC_NBMAXCPUS && cpu < CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, cpuset))
       hwloc_cpuset_set(hwloc_cpuset, cpu);
-
-  return hwloc_cpuset;
 }
 
 static void
@@ -58,15 +55,16 @@ hwloc_freebsd_set_sth_affinity(hwloc_topology_t topology __hwloc_attribute_unuse
   return 0;
 }
 
-static hwloc_cpuset_t
-hwloc_freebsd_get_sth_affinity(hwloc_topology_t topology __hwloc_attribute_unused, cpulevel_t level, cpuwhich_t which, id_t id, int policy __hwloc_attribute_unused)
+static int
+hwloc_freebsd_get_sth_affinity(hwloc_topology_t topology __hwloc_attribute_unused, cpulevel_t level, cpuwhich_t which, id_t id, hwloc_cpuset_t hwloc_cpuset, int policy __hwloc_attribute_unused)
 {
   cpuset_t cpuset;
 
   if (cpuset_getaffinity(level, which, id, sizeof(cpuset), &cpuset))
-    return NULL;
+    return -1;
 
-  return hwloc_freebsd_bsd2hwloc(&cpuset);
+  hwloc_freebsd_bsd2hwloc(hwloc_cpuset, &cpuset);
+  return 0;
 }
 
 static int
@@ -75,10 +73,10 @@ hwloc_freebsd_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset
   return hwloc_freebsd_set_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, hwloc_cpuset, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_freebsd_get_thisproc_cpubind(hwloc_topology_t topology, int policy)
+static int
+hwloc_freebsd_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_cpuset, int policy)
 {
-  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, policy);
+  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, -1, hwloc_cpuset, policy);
 }
 
 static int
@@ -87,10 +85,10 @@ hwloc_freebsd_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpus
   return hwloc_freebsd_set_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, hwloc_cpuset, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_freebsd_get_thisthread_cpubind(hwloc_topology_t topology, int policy)
+static int
+hwloc_freebsd_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_cpuset, int policy)
 {
-  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, policy);
+  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, hwloc_cpuset, policy);
 }
 
 static int
@@ -99,10 +97,10 @@ hwloc_freebsd_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc
   return hwloc_freebsd_set_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, pid, hwloc_cpuset, policy);
 }
 
-static hwloc_cpuset_t
-hwloc_freebsd_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, int policy)
+static int
+hwloc_freebsd_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_cpuset, int policy)
 {
-  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, pid, policy);
+  return hwloc_freebsd_get_sth_affinity(topology, CPU_LEVEL_WHICH, CPU_WHICH_PID, pid, hwloc_cpuset, policy);
 }
 
 #ifdef hwloc_thread_t
@@ -135,25 +133,26 @@ hwloc_freebsd_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unu
 
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
 #pragma weak pthread_getaffinity_np
-static hwloc_cpuset_t
-hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid, int policy __hwloc_attribute_unused)
+static int
+hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid, hwloc_cpuset_t hwloc_cpuset, int policy __hwloc_attribute_unused)
 {
   int err;
   cpuset_t cpuset;
 
   if (!pthread_getaffinity_np) {
     errno = ENOSYS;
-    return NULL;
+    return -1;
   }
 
   err = pthread_getaffinity_np(tid, sizeof(cpuset), &cpuset);
 
   if (err) {
     errno = err;
-    return NULL;
+    return -1;
   }
 
-  return hwloc_freebsd_bsd2hwloc(&cpuset);
+  hwloc_freebsd_bsd2hwloc(hwloc_cpuset, &cpuset);
+  return 0;
 }
 #endif
 #endif
@@ -171,7 +170,7 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
   hwloc_set_freebsd_hooks(topology);
   hwloc_look_x86(topology, nbprocs);
 
-  hwloc_setup_proc_level(topology, nbprocs);
+  hwloc_setup_pu_level(topology, nbprocs);
 }
 
 void

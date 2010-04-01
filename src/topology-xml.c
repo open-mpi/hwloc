@@ -90,21 +90,28 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     obj->os_level = strtoul(value, NULL, 10);
   else if (!strcmp(name, "os_index"))
     obj->os_index = strtoul(value, NULL, 10);
-  else if (!strcmp(name, "cpuset"))
-    obj->cpuset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "complete_cpuset"))
-    obj->complete_cpuset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "online_cpuset"))
-    obj->online_cpuset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "allowed_cpuset"))
-    obj->allowed_cpuset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "nodeset"))
-    obj->nodeset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "complete_nodeset"))
-    obj->complete_nodeset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "allowed_nodeset"))
-    obj->allowed_nodeset = hwloc_cpuset_from_string(value);
-  else if (!strcmp(name, "name"))
+  else if (!strcmp(name, "cpuset")) {
+    obj->cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->cpuset, value);
+  } else if (!strcmp(name, "complete_cpuset")) {
+    obj->complete_cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->complete_cpuset,value);
+  } else if (!strcmp(name, "online_cpuset")) {
+    obj->online_cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->online_cpuset, value);
+  } else if (!strcmp(name, "allowed_cpuset")) {
+    obj->allowed_cpuset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->allowed_cpuset, value);
+  } else if (!strcmp(name, "nodeset")) {
+    obj->nodeset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->nodeset, value);
+  } else if (!strcmp(name, "complete_nodeset")) {
+    obj->complete_nodeset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->complete_nodeset, value);
+  } else if (!strcmp(name, "allowed_nodeset")) {
+    obj->allowed_nodeset = hwloc_cpuset_alloc();
+    hwloc_cpuset_from_string(obj->allowed_nodeset, value);
+  } else if (!strcmp(name, "name"))
     obj->name = strdup(value);
 
   else if (!strcmp(name, "cache_size")) {
@@ -321,7 +328,7 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology, struct hwloc_ob
       if (value)
 	hwloc__xml_import_pagetype_attr(topology, pagetype, attr->name, value);
       else
-	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", attr->name);
+	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml pagetype attr type %u\n", attr->type);
     }
@@ -365,7 +372,7 @@ hwloc__xml_import_object_node(struct hwloc_topology *topology, struct hwloc_obj 
       if (value)
 	hwloc__xml_import_object_attr(topology, obj, attr->name, value);
       else
-	fprintf(stderr, "ignoring unexpected xml object attr name `%s' with no value\n", attr->name);
+	fprintf(stderr, "ignoring unexpected xml object attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml object attr type %u\n", attr->type);
     }
@@ -435,7 +442,7 @@ hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
       if (value)
 	hwloc__xml_import_topology_attr(topology, attr->name, value);
       else
-	fprintf(stderr, "ignoring unexpected xml root attr name `%s' with no value\n", attr->name);
+	fprintf(stderr, "ignoring unexpected xml root attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml root attr type %u\n", attr->type);
     }
@@ -452,7 +459,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
   xmlNode* root_node;
   xmlDtd *dtd;
 
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
 
   dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
   if (!dtd)
