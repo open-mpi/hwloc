@@ -128,35 +128,35 @@ may show the following outputs:
 \image latex dudley.png "" width=9cm
 
 \verbatim
-Machine(16GB)
-  Socket#0 + L3(4096KB)
-    L2(1024KB) + L1(16KB) + Core#0
-      P#0
-      P#8
-    L2(1024KB) + L1(16KB) + Core#1
-      P#4
-      P#12
-  Socket#1 + L3(4096KB)
-    L2(1024KB) + L1(16KB) + Core#0
-      P#1
-      P#9
-    L2(1024KB) + L1(16KB) + Core#1
-      P#5
-      P#13
-  Socket#2 + L3(4096KB)
-    L2(1024KB) + L1(16KB) + Core#0
-      P#2
-      P#10
-    L2(1024KB) + L1(16KB) + Core#1
-      P#6
-      P#14
-  Socket#3 + L3(4096KB)
-    L2(1024KB) + L1(16KB) + Core#0
-      P#3
-      P#11
-    L2(1024KB) + L1(16KB) + Core#1
-      P#7
-      P#15
+Machine (16GB)
+  Socket #0 + L3 #0 (4096KB)
+    L2 #0 (1024KB) + L1 #0 (16KB) + Core #0
+      PU #0 (phys=0)
+      PU #1 (phys=8)
+    L2 #1 (1024KB) + L1 #1 (16KB) + Core #1
+      PU #2 (phys=4)
+      PU #3 (phys=12)
+  Socket #1 + L3 #1 (4096KB)
+    L2 #2 (1024KB) + L1 #2 (16KB) + Core #2
+      PU #4 (phys=1)
+      PU #5 (phys=9)
+    L2 #3 (1024KB) + L1 #3 (16KB) + Core #3
+      PU #6 (phys=5)
+      PU #7 (phys=13)
+  Socket #2 + L3 #2 (4096KB)
+    L2 #4 (1024KB) + L1 #4 (16KB) + Core #4
+      PU #8 (phys=2)
+      PU #9 (phys=10)
+    L2 #5 (1024KB) + L1 #5 (16KB) + Core #5
+      PU #10 (phys=6)
+      PU #11 (phys=14)
+  Socket #3 + L3 #3 (4096KB)
+    L2 #6 (1024KB) + L1 #6 (16KB) + Core #6
+      PU #12 (phys=3)
+      PU #13 (phys=11)
+    L2 #7 (1024KB) + L1 #7 (16KB) + Core #7
+      PU #14 (phys=7)
+      PU #15 (phys=15)
 \endverbatim
 
  On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may
@@ -166,31 +166,31 @@ Machine(16GB)
 \image latex hagrid.png width=\textwidth
 
 \verbatim
-Machine(62GB)
-  Node#0(8192MB) + Socket#0
-    L2(1024KB) + L1(64KB) + Core#0 + P#0
-    L2(1024KB) + L1(64KB) + Core#1 + P#1
-  Node#1(8192MB) + Socket#1
-    L2(1024KB) + L1(64KB) + Core#0 + P#2
-    L2(1024KB) + L1(64KB) + Core#1 + P#3
-  Node#2(8192MB) + Socket#2
-    L2(1024KB) + L1(64KB) + Core#0 + P#4
-    L2(1024KB) + L1(64KB) + Core#1 + P#5
-  Node#3(8192MB) + Socket#3
-    L2(1024KB) + L1(64KB) + Core#0 + P#6
-    L2(1024KB) + L1(64KB) + Core#1 + P#7
-  Node#4(8192MB) + Socket#4
-    L2(1024KB) + L1(64KB) + Core#0 + P#8
-    L2(1024KB) + L1(64KB) + Core#1 + P#9
-  Node#5(8192MB) + Socket#5
-    L2(1024KB) + L1(64KB) + Core#0 + P#10
-    L2(1024KB) + L1(64KB) + Core#1 + P#11
-  Node#6(8192MB) + Socket#6
-    L2(1024KB) + L1(64KB) + Core#0 + P#12
-    L2(1024KB) + L1(64KB) + Core#1 + P#13
-  Node#7(8192MB) + Socket#7
-    L2(1024KB) + L1(64KB) + Core#0 + P#14
-    L2(1024KB) + L1(64KB) + Core#1 + P#15
+Machine (64GB)
+  NUMANode #0 (phys=0 8190MB) + Socket #0
+    L2 #0 (1024KB) + L1 #0 (64KB) + Core #0 + PU #0 (phys=0)
+    L2 #1 (1024KB) + L1 #1 (64KB) + Core #1 + PU #1 (phys=1)
+  NUMANode #1 (phys=1 8192MB) + Socket #1
+    L2 #2 (1024KB) + L1 #2 (64KB) + Core #2 + PU #2 (phys=2)
+    L2 #3 (1024KB) + L1 #3 (64KB) + Core #3 + PU #3 (phys=3)
+  NUMANode #2 (phys=2 8192MB) + Socket #2
+    L2 #4 (1024KB) + L1 #4 (64KB) + Core #4 + PU #4 (phys=4)
+    L2 #5 (1024KB) + L1 #5 (64KB) + Core #5 + PU #5 (phys=5)
+  NUMANode #3 (phys=3 8192MB) + Socket #3
+    L2 #6 (1024KB) + L1 #6 (64KB) + Core #6 + PU #6 (phys=6)
+    L2 #7 (1024KB) + L1 #7 (64KB) + Core #7 + PU #7 (phys=7)
+  NUMANode #4 (phys=4 8192MB) + Socket #4
+    L2 #8 (1024KB) + L1 #8 (64KB) + Core #8 + PU #8 (phys=8)
+    L2 #9 (1024KB) + L1 #9 (64KB) + Core #9 + PU #9 (phys=9)
+  NUMANode #5 (phys=5 8192MB) + Socket #5
+    L2 #10 (1024KB) + L1 #10 (64KB) + Core #10 + PU #10 (phys=10)
+    L2 #11 (1024KB) + L1 #11 (64KB) + Core #11 + PU #11 (phys=11)
+  NUMANode #6 (phys=6 8192MB) + Socket #6
+    L2 #12 (1024KB) + L1 #12 (64KB) + Core #12 + PU #12 (phys=12)
+    L2 #13 (1024KB) + L1 #13 (64KB) + Core #13 + PU #13 (phys=13)
+  NUMANode #7 (phys=7 8192MB) + Socket #7
+    L2 #14 (1024KB) + L1 #14 (64KB) + Core #14 + PU #14 (phys=14)
+    L2 #15 (1024KB) + L1 #15 (64KB) + Core #15 + PU #15 (phys=15)
 \endverbatim
 
  On a 2-socket quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
@@ -200,21 +200,21 @@ Machine(62GB)
 \image latex emmett.png "" width=7cm
 
 \verbatim
-Machine(16GB)
-  Socket#0
-    L2(4096KB)
-      L1(32KB) + Core#0 + P#0
-      L1(32KB) + Core#1 + P#4
-    L2(4096KB)
-      L1(32KB) + Core#2 + P#2
-      L1(32KB) + Core#3 + P#6
-  Socket#1
-    L2(4096KB)
-      L1(32KB) + Core#0 + P#1
-      L1(32KB) + Core#1 + P#5
-    L2(4096KB)
-      L1(32KB) + Core#2 + P#3
-      L1(32KB) + Core#3 + P#7
+Machine (16GB)
+  Socket #0
+    L2 #0 (4096KB)
+      L1 #0 (32KB) + Core #0 + PU #0 (phys=0)
+      L1 #1 (32KB) + Core #1 + PU #1 (phys=4)
+    L2 #1 (4096KB)
+      L1 #2 (32KB) + Core #2 + PU #2 (phys=2)
+      L1 #3 (32KB) + Core #3 + PU #3 (phys=6)
+  Socket #1
+    L2 #2 (4096KB)
+      L1 #4 (32KB) + Core #4 + PU #4 (phys=1)
+      L1 #5 (32KB) + Core #5 + PU #5 (phys=5)
+    L2 #3 (4096KB)
+      L1 #6 (32KB) + Core #6 + PU #6 (phys=3)
+      L1 #7 (32KB) + Core #7 + PU #7 (phys=7)
 \endverbatim
 
 \htmlonly
@@ -292,22 +292,22 @@ Index 1: Core#1
 Index 2: Core#3
 Index 3: Core#2
 *** Objects at level 3
-Index 0: P#0
-Index 1: P#1
-Index 2: P#2
-Index 3: P#3
+Index 0: PU#0
+Index 1: PU#1
+Index 2: PU#2
+Index 3: PU#3
 *** Printing overall tree
 Machine(3938MB)
   Socket#0
     Core#0
-      P#0
+      PU#0
     Core#1
-      P#1
+      PU#1
   Socket#1
     Core#3
-      P#2
+      PU#2
     Core#2
-      P#3
+      PU#3
 *** 2 socket(s)
 shell$ 
 \endverbatim
