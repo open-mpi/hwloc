@@ -309,7 +309,7 @@ int main(void)
   * Bind to only one thread of the last core of the machine.
   *
   * First find out where cores are, or else smaller sets of CPUs if
-  * the OS doesn&apos;t have the notion of a "core". */
+  * the OS doesn't have the notion of a "core". */
  depth = hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_CORE);
 
  /* Get last core. */
@@ -327,7 +327,7 @@ int main(void)
      if (hwloc_set_cpubind(topology, cpuset, 0)) {
          char *str;
          hwloc_cpuset_asprintf(&str, obj->cpuset);
-         printf("Couldn&apos;t bind to cpuset %s\n", str);
+         printf("Couldn't bind to cpuset %s\n", str);
          free(str);
      }
 
@@ -406,5 +406,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Sat Feb 27 16:14:15 2010 for Hardware Locality (hwloc) by  doxygen
-1.6.1
+Generated on Fri Mar 26 17:39:51 2010 for Hardware Locality (hwloc) by  doxygen
+1.6.3
