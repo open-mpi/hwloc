@@ -131,9 +131,8 @@ typedef enum {
  */
 HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2) __hwloc_attribute_const;
 
-/** \brief Value returned by hwloc_compare_types when types can not be compared. */
-enum {
-    HWLOC_TYPE_UNORDERED = INT_MAX
+enum hwloc_compare_types_e {
+    HWLOC_TYPE_UNORDERED = INT_MAX	/**< \brief Value returned by hwloc_compare_types when types can not be compared. */
 };
 
 /** @} */
@@ -587,7 +586,8 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  */
 HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
-enum {
+
+enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. */
     HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. */
 };
