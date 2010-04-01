@@ -89,13 +89,13 @@ HWLOC_DECLSPEC void hwloc_cpuset_fill(hwloc_cpuset_t set);
 HWLOC_DECLSPEC void hwloc_cpuset_from_ulong(hwloc_cpuset_t set, unsigned long mask);
 
 /** \brief Setup CPU set \p set from unsigned long \p mask used as \p i -th subset */
-HWLOC_DECLSPEC void hwloc_cpuset_from_ith_ulong(hwloc_cpuset_t set, int i, unsigned long mask);
+HWLOC_DECLSPEC void hwloc_cpuset_from_ith_ulong(hwloc_cpuset_t set, unsigned i, unsigned long mask);
 
 /** \brief Convert the beginning part of CPU set \p set into unsigned long \p mask */
 HWLOC_DECLSPEC unsigned long hwloc_cpuset_to_ulong(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
 /** \brief Convert the \p i -th subset of CPU set \p set into unsigned long mask */
-HWLOC_DECLSPEC unsigned long hwloc_cpuset_to_ith_ulong(hwloc_const_cpuset_t set, int i) __hwloc_attribute_pure;
+HWLOC_DECLSPEC unsigned long hwloc_cpuset_to_ith_ulong(hwloc_const_cpuset_t set, unsigned i) __hwloc_attribute_pure;
 
 /** \brief Clear CPU set \p set and set CPU \p cpu */
 HWLOC_DECLSPEC void hwloc_cpuset_cpu(hwloc_cpuset_t set, unsigned cpu);
