@@ -101,8 +101,8 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SOCKET);
   else if (!hwloc_namecoloncmp(string, "core", 1))
     depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_CORE);
-  else if (!hwloc_namecoloncmp(string, "proc", 1))
-    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PROC);
+  else if (!hwloc_namecoloncmp(string, "pu", 1) || !hwloc_namecoloncmp(string, "proc", 1) /* backward compat with 0.9 */)
+    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PU);
   else {
     char *end;
     depth = strtol(string, &end, 0);

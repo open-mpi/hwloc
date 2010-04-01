@@ -33,7 +33,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
     return;
   nprocs = _nprocs;
-  topology->support.discovery.proc = 1;
+  topology->support.discovery.pu = 1;
 
   hwloc_debug("%u procs\n", nprocs);
 
@@ -141,8 +141,8 @@ hwloc_look_darwin(struct hwloc_topology *topology)
     }
   }
 
-  /* add PROC objects */
-  hwloc_setup_proc_level(topology, nprocs);
+  /* add PU objects */
+  hwloc_setup_pu_level(topology, nprocs);
 }
 
 void

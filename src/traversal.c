@@ -146,7 +146,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_SOCKET: return "Socket";
     case HWLOC_OBJ_CACHE: return "Cache";
     case HWLOC_OBJ_CORE: return "Core";
-    case HWLOC_OBJ_PROC: return "Proc";
+    case HWLOC_OBJ_PU: return "PU";
     default: return "Unknown";
     }
 }
@@ -161,7 +161,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
   if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
-  if (!strcasecmp(string, "Proc")) return HWLOC_OBJ_PROC;
+  if (!strcasecmp(string, "PU") || !strcasecmp(string, "proc") /* backward compatiliby with 0.9 */) return HWLOC_OBJ_PU;
   return (hwloc_obj_type_t) -1;
 }
 
@@ -180,9 +180,8 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_NODE:
   case HWLOC_OBJ_SOCKET:
   case HWLOC_OBJ_CORE:
+  case HWLOC_OBJ_PU:
     return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
-  case HWLOC_OBJ_PROC:
-    return hwloc_snprintf(string, size, "%s", verbose ? hwloc_obj_type_string(type) : "P");
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "L%u%s", obj->attr->cache.depth, verbose ? hwloc_obj_type_string(type): "");
   case HWLOC_OBJ_MISC:

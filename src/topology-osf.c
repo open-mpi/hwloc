@@ -227,8 +227,8 @@ hwloc_look_osf(struct hwloc_topology *topology)
   radsetdestroy(&radset);
   cpusetdestroy(&cpuset);
 
-  /* add PROC objects */
-  hwloc_setup_proc_level(topology, hwloc_fallback_nbprocessors(topology));
+  /* add PU objects */
+  hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
 }
 
 void

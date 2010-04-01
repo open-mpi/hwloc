@@ -120,7 +120,7 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
 	@echo "Work-around spurious leading _ in doxygen filenames..."
 	(cd $(DOX_DIR)/man/man3 ; \
 	for i in _hwloc* ; do \
-		mv $$i $${i#_} ; \
+		[ ! -f $$i ] || mv $$i $${i#_} ; \
 	done)
 	@echo "Removing useless manpages..."
 	@mkdir $(DOX_DIR)/man.tmp
@@ -233,7 +233,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MACHINE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MISC.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_NODE.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PROC.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PU.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
@@ -310,7 +310,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_proc_obj_by_os_index.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_pu_obj_by_os_index.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_array_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_type.3 \

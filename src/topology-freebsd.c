@@ -170,7 +170,7 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
   hwloc_set_freebsd_hooks(topology);
   hwloc_look_x86(topology, nbprocs);
 
-  hwloc_setup_proc_level(topology, nbprocs);
+  hwloc_setup_pu_level(topology, nbprocs);
 }
 
 void

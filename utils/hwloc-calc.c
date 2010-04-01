@@ -24,7 +24,7 @@ static void usage(FILE *where)
   fprintf(where, "  --lo --logical-output\tuse logical indexes for output (default)\n");
   fprintf(where, "  --pi --physical-input\tuse physical indexes for input\n");
   fprintf(where, "  --po --physical-output\tuse physical indexes for output\n");
-  fprintf(where, "  --proclist\treport the list of processors' indexes in the CPU set\n");
+  fprintf(where, "  --PUlist\treport the list of processing units' indexes in the CPU set\n");
   fprintf(where, "  --nodelist\treport the list of memory nodes' indexes near the CPU set\n");
   fprintf(where, "  --objects\treport the list of largest objects in the CPU set\n");
   fprintf(where, "  -v\t\tverbose messages\n");
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   int logicali = 1;
   int logicalo = 1;
   int nodelist = 0;
-  int proclist = 0;
+  int pulist = 0;
   int showobjs = 0;
   char **orig_argv = argv;
 
@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
 	usage(stdout);
 	return EXIT_SUCCESS;
       }
-      if (!strcmp(argv[1], "--proclist")) {
-	proclist = 1;
+      if (!strcasecmp(argv[1], "--pulist") || !strcmp(argv[1], "--proclist") /* backward compat with 0.9 */) {
+	pulist = 1;
         goto next;
       }
       if (!strcmp(argv[1], "--nodelist")) {
@@ -131,9 +131,9 @@ int main(int argc, char *argv[])
     }
     printf("\n");
     hwloc_cpuset_free(remaining);
-  } else if (proclist) {
+  } else if (pulist) {
     hwloc_obj_t proc, prev = NULL;
-    while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PROC, prev)) != NULL) {
+    while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PU, prev)) != NULL) {
       if (prev)
 	printf(",");
       printf("%u", logicalo ? proc->logical_index : proc->os_index);

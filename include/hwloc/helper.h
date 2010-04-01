@@ -38,7 +38,7 @@ hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
     return depth;
 
   /* find the highest existing level with type order >= */
-  for(depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PROC); ; depth--)
+  for(depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU); ; depth--)
     if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) < 0)
       return depth+1;
 
@@ -65,7 +65,7 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
     if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) > 0)
       return depth-1;
 
-  /* Shouldn't ever happen, as there is always a PROC level with higher order and known depth.  */
+  /* Shouldn't ever happen, as there is always a PU level with higher order and known depth.  */
   abort();
 }
 
@@ -143,19 +143,19 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
   return hwloc_get_next_obj_by_depth (topology, depth, prev);
 }
 
-/** \brief Returns the object of type ::HWLOC_OBJ_PROC with \p os_index.
+/** \brief Returns the object of type ::HWLOC_OBJ_PU with \p os_index.
  *
  * \note The \p os_index field of object should most of the times only be
- * used for pretty-printing purpose. Type ::HWLOC_OBJ_PROC is the only case
+ * used for pretty-printing purpose. Type ::HWLOC_OBJ_PU is the only case
  * where \p os_index could actually be useful, when manually binding to
  * processors.
  * However, using CPU sets to hide this complexity should often be preferred.
  */
 static __inline hwloc_obj_t __hwloc_attribute_pure
-hwloc_get_proc_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
+hwloc_get_pu_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
 {
   hwloc_obj_t obj = NULL;
-  while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PROC, obj)) != NULL)
+  while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PU, obj)) != NULL)
     if (obj->os_index == os_index)
       return obj;
   return NULL;

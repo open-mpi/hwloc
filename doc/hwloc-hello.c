@@ -84,7 +84,7 @@ int main(void)
      */
     levels = 0;
     size = 0;
-    for (obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PROC, 0);
+    for (obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0);
          obj;
          obj = obj->parent)
       if (obj->type == HWLOC_OBJ_CACHE) {
