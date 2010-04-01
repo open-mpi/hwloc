@@ -25,20 +25,19 @@ DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 # tree (e.g., everything in the man and latex directories).
 #
 
+PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png
 image_built_sources = images/diagram.png images/diagram.eps
 
 EXTRA_DIST = \
         hwloc.doxy \
         doxygen.css \
         doxygen.cfg \
-        images/dudley.png \
-        images/emmett.png \
-        images/hagrid.png \
         images/diagram.fig \
         www.open-mpi.org.cfg \
         www.open-mpi.org-css.inc \
         www.open-mpi.org-footer.inc \
         www.open-mpi.org-header.inc \
+        $(PREBUILT_IMAGES) \
         $(image_built_sources)
 
 #
@@ -96,7 +95,7 @@ endif
 #
 
 if HWLOC_BUILD_DOXYGEN
-$(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
+$(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
 	-sed -i \
