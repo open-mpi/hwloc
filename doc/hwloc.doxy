@@ -1,10 +1,10 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-/*! \mainpage hwloc
+/*! \mainpage Hardware Locality
 
 <h1 class="sub">Portable abstraction of hierarchical architectures for high-performance computing</h1>
 
@@ -534,51 +534,60 @@ following environment variables.
 
 \page threadsafety Thread safety
 
-Like any library that just fills structures, Hwloc is not thread safe but
-reentrant: all the hwloc state is held in the hwloc_topology_t structure without
-mutex protection. That means that two threads can operate on and modify two
-different hwloc_topology_t objects, but they should not invoke functions that
-modify the same topology at same the time, and one thread should not modify
-the topology while another thread is consulting or traversing it. Two threads
-can however consult or traverse the same topology concurrently. Just like any
-structure pointer, to safely pass a hwloc_topology_t from a thread to another,
-proper synchronization is needed (e.g. mutex, semaphore, or just a memory
-barrier) to ensure memory coherency.
+Like most libraries that mainly fill data structures, hwloc is not
+thread safe but rather reentrant: all state is held in a \ref
+hwloc_topology_t instance without mutex protection.  That means, for
+example, that two threads can safely operate on and modify two
+different \ref hwloc_topology_t instances, but they should not
+simultaneously invoke functions that modify the <em>same</em>
+instance.  Similarly, one thread should not modify a \ref
+hwloc_topology_t instance while another thread is reading or
+traversing it.  However, two threads can safely read or traverse the
+same \ref hwloc_topology_t instance concurrently.
 
-Modification operations include:
+When running in NUMA environments, be aware that proper thread
+synchronization and/or memory coherency protection is needed hwloc
+data (such as \ref hwloc_topology_t pointers) from one NUMA locality
+to another (e.g., a mutex, semaphore, or perhaps a memory barrier).
+Note that this is not a hwloc-specific requirement, but it is worth
+mentioning.
+
+For reference, \ref hwloc_topology_t modification operations include
+(but may not be limited to):
+
 <dl>
 
-<dt>The actual creation and destruction</dt>
-<dd><tt>hwloc_topology_init(), hwloc_topology_load(), hwloc_topology_destroy()</tt>
- (see \ref hwlocality_creation) imply major modifications of the structure, including
- freeing some objects.
- No other thread cannot access the topology or any of its objects at the same time.
+<dt>Creation and destruction</dt>
+  <dd><tt>hwloc_topology_init(), hwloc_topology_load(),
+  hwloc_topology_destroy()</tt> (see \ref hwlocality_creation) imply
+  major modifications of the structure, including freeing some
+  objects.  No other thread cannot access the topology or any of its
+  objects at the same time.
 
- Also references to objects inside the topology are not valid anymore after these
- functions return.
-</dd>
+  Also references to objects inside the topology are not valid anymore
+  after these functions return.  </dd>
 
 <dt>Runtime topology modifications</dt>
-<dd><tt>hwloc_topology_insert_misc_object_by_*</tt> (see \ref hwlocality_tinker)
- may modify the topology significantly by adding objects inside the tree,
- changing the topology depth, ...
+  <dd><tt>hwloc_topology_insert_misc_object_by_*</tt> (see \ref
+  hwlocality_tinker) may modify the topology significantly by adding
+  objects inside the tree, changing the topology depth, etc.
 
- Although references to former objects should still be valid after insertion,
- it is strongly advised to not rely on any such guarantee and always re-consult
- the topology to reacquire new instances of objects.
-</dd>
+  Although references to former objects <em>may</em> still be valid
+  after insertion, it is strongly advised to not rely on any such
+  guarantee and always re-consult the topology to reacquire new
+  instances of objects.  </dd>
 
-<dt>Topology load configuration</dt>
-<dd><tt>hwloc_topology_ignore*</tt>, <tt>hwloc_topology_set*</tt>
- (see \ref hwlocality_configuration) do not modify the topology directly
- but they modify internal structures describing the behavior of the next
- invocation of <tt>hwloc_topology_load</tt>.
- So all these functions should not be used concurrently.
+<dt>Locating topologies</dt>
 
- These functions do not modify the current topology until it is actually
- reloaded, so it is possible to use them while other threads are only
- consulting the current topology.
-</dd>
+  <dd><tt>hwloc_topology_ignore*</tt>, <tt>hwloc_topology_set*</tt>
+  (see \ref hwlocality_configuration) do not modify the topology
+  directly, but they do modify internal structures describing the
+  behavior of the next invocation of <tt>hwloc_topology_load()</tt>.
+  Hence, all of these functions should not be used concurrently.
+
+  Note that these functions do not modify the current topology until
+  it is actually reloaded; it is possible to use them while other
+  threads are only read the current topology.  </dd>
 
 </dl>
 
