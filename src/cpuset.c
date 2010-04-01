@@ -258,9 +258,9 @@ void hwloc_cpuset_from_ulong(struct hwloc_cpuset_s *set, unsigned long mask)
 		HWLOC_CPUSUBSET_SUBSET(*set,i) = HWLOC_CPUSUBSET_ZERO;
 }
 
-void hwloc_cpuset_from_ith_ulong(struct hwloc_cpuset_s *set, int i, unsigned long mask)
+void hwloc_cpuset_from_ith_ulong(struct hwloc_cpuset_s *set, unsigned i, unsigned long mask)
 {
-	int j;
+	unsigned j;
 
 	HWLOC__CPUSET_CHECK(set);
 
@@ -277,7 +277,7 @@ unsigned long hwloc_cpuset_to_ulong(const struct hwloc_cpuset_s *set)
 	return HWLOC_CPUSUBSET_SUBSET(*set,0);
 }
 
-unsigned long hwloc_cpuset_to_ith_ulong(const struct hwloc_cpuset_s *set, int i)
+unsigned long hwloc_cpuset_to_ith_ulong(const struct hwloc_cpuset_s *set, unsigned i)
 {
 	HWLOC__CPUSET_CHECK(set);
 
