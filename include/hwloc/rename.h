@@ -30,8 +30,6 @@
 
 /* Names from hwloc.h */
 
-#define HWLOC_API_VERSION HWLOC_NAME_CAPS(API_VERSION)
-
 #define hwloc_topology HWLOC_NAME(topology)
 #define hwloc_topology_t HWLOC_NAME(topology_t)
 
