@@ -545,10 +545,10 @@ hwloc_topology_t instance while another thread is reading or
 traversing it.  However, two threads can safely read or traverse the
 same \ref hwloc_topology_t instance concurrently.
 
-When running in NUMA environments, be aware that proper thread
-synchronization and/or memory coherency protection is needed hwloc
-data (such as \ref hwloc_topology_t pointers) from one NUMA locality
-to another (e.g., a mutex, semaphore, or perhaps a memory barrier).
+When running in multiprocessor environments, be aware that proper thread
+synchronization and/or memory coherency protection is needed to pass hwloc
+data (such as \ref hwloc_topology_t pointers) from one processor
+to another (e.g., a mutex, semaphore, or a memory barrier).
 Note that this is not a hwloc-specific requirement, but it is worth
 mentioning.
 
