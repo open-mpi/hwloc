@@ -1,5 +1,7 @@
 /*
  * Copyright © 2010 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
+ *
  * See COPYING in top-level directory.
  */
 
@@ -44,7 +46,7 @@ static inline int hwloc_have_cpuid(void)
 }
 #endif /* HWLOC_X86_32_ARCH */
 #ifdef HWLOC_X86_64_ARCH
-#define hwloc_have_cpuid() 1
+static inline int hwloc_have_cpuid(void) { return 1; }
 #endif /* HWLOC_X86_64_ARCH */
 
 static inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx)

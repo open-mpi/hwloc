@@ -1,6 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009      CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+ *
  * See COPYING in top-level directory.
  */
 
@@ -156,11 +157,7 @@ extern void hwloc_look_hpux(struct hwloc_topology *topology);
 extern void hwloc_set_hpux_hooks(struct hwloc_topology *topology);
 #endif /* HWLOC_HPUX_SYS */
 
-#if defined(HWLOC_HAVE_CPUID)
 extern void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs);
-#else
-#define hwloc_look_x86(topology, nbprocs) ((void)0)
-#endif /* HWLOC_HAVE_CPUID */
 
 extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *description);
 extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);

@@ -1,12 +1,15 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
-AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
+AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 SUBDIRS = linux ports xml
 
+LIBS =
+
+if HWLOC_BUILD_TESTS
 check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_get_closest_objs \
 	hwloc_get_obj_covering_cpuset \
@@ -47,10 +50,12 @@ else
 hwloc_lib = libhwloc_embedded.la
 endif
 
-LIBS = $(HWLOC_top_builddir)/src/$(hwloc_lib)
+LIBS += $(HWLOC_top_builddir)/src/$(hwloc_lib)
 
 linux_libnuma_LDFLAGS = -lnuma
 openfabrics_verbs_LDFLAGS = -libverbs
 if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
-endif
+endif !HWLOC_HAVE_WINDOWS
+
+endif HWLOC_BUILD_TESTS

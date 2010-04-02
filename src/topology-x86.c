@@ -1,5 +1,7 @@
 /*
  * Copyright © 2010 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
+ *
  * See COPYING in top-level directory.
  */
 
@@ -354,9 +356,10 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 #define AMD_EDX ('e' | ('n'<<8) | ('t'<<16) | ('i'<<24))
 #define AMD_ECX ('c' | ('A'<<8) | ('M'<<16) | ('D'<<24))
 
-void
-hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
+void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
 {
+    /* This function must always be here, but it's ok if it's empty. */
+#if defined(HWLOC_HAVE_CPUID)
   unsigned eax, ebx, ecx = 0, edx;
   hwloc_cpuset_t orig_cpuset;
   unsigned i;
@@ -420,5 +423,5 @@ hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
       return;
     }
   }
-
+#endif
 }

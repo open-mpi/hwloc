@@ -1,7 +1,8 @@
-# Copyright 2009 INRIA, Université Bordeaux 1
-# Copyright 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright 2009      INRIA, Université Bordeaux 1
+# Copyright 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
-# Only install the headers if we're in standalone mode
+# Only install the headers if we're in standalone mode (meaning:
+# *don't* install the headers if we're in embedded mode).
 
 if HWLOC_BUILD_STANDALONE
 include_HEADERS = hwloc.h

@@ -1,5 +1,5 @@
-# Copyright 2009 INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009      INRIA, Université Bordeaux 1
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 # Note that the -I directory must *exactly* match what was specified
 # via AC_CONFIG_MACRO_DIR in configure.ac.
@@ -7,7 +7,7 @@ ACLOCAL_AMFLAGS = -I ./config
 
 SUBDIRS = src utils tests include doc
 
-# Only install the pkg file if we're building standalone
+# Only install the pkg file if we're building in standalone mode
 if HWLOC_BUILD_STANDALONE
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hwloc.pc
@@ -45,15 +45,15 @@ dist-hook: cannot-dist
 else
 dist-hook:
 	csh "$(top_srcdir)/config/distscript.csh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)" "$(HWLOC_SVN_R)"
-endif
-endif
+endif HWLOC_BUILD_README
+endif HWLOC_BUILD_DOXYGEN
 
 #
-# Build the top-level README file -- only in standalone mode
+# Build the top-level README file
 #
 
 if HWLOC_BUILD_STANDALONE
 .PHONY: doc readme
 doc readme:
 	$(MAKE) -C doc readme
-endif
+endif HWLOC_BUILD_STANDALONE

@@ -604,8 +604,17 @@ with it?).
 When used in "embedded" mode, hwloc will:
 
 - not install any header files
-- not build or install any executables
-- not build libhwloc.* -- instead, it will build libhwloc_embedded.*
+- not build any documentation files
+- not build or install any executables or tests
+- not build <tt>libhwloc.*</tt> -- instead, it will build
+  <tt>libhwloc_embedded.*</tt>
+
+JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS
+
+DO WE REALLY WANT hwloc.m4 EMBEDDING?  
+SEE http://www.open-mpi.org/community/lists/hwloc-devel/2010/04/0875.php
+
+JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS
 
 There are two ways to put hwloc into "embedded" mode.  From the
 configure command line:

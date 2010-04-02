@@ -48,6 +48,8 @@
 
 #define HWLOC_TYPE_UNORDERED HWLOC_NAME_CAPS(TYPE_UNORDERED)
 
+#define hwloc_obj_memory_s HWLOC_NAME(obj_memory_s)
+
 #define hwloc_obj HWLOC_NAME(obj)
 #define hwloc_obj_t HWLOC_NAME(obj_t)
 
@@ -72,44 +74,37 @@
 
 #define hwloc_topology_set_flags HWLOC_NAME(topology_set_flags)
 #define hwloc_topology_set_fsroot HWLOC_NAME(topology_set_fsroot)
+#define hwloc_topology_set_pid HWLOC_NAME(topology_set_pid)
 #define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)
 #define hwloc_topology_set_xml HWLOC_NAME(topology_set_xml)
 
-#define hwloc_topology_support_flags_e HWLOC_NAME(topology_support_flags_e)
-
-#define HWLOC_SUPPORT_DISCOVERY HWLOC_NAME_CAPS(SUPPORT_DISCOVERY)
-#define HWLOC_SUPPORT_SET_PROC_CPUBIND HWLOC_NAME_CAPS(SUPPORT_SET_PROC_CPUBIND)
-#define HWLOC_SUPPORT_SET_THREAD_CPUBIND HWLOC_NAME_CAPS(SUPPORT_SET_THREAD_CPUBIND)
-#define HWLOC_SUPPORT_GET_PROC_CPUBIND HWLOC_NAME_CAPS(SUPPORT_GET_PROC_CPUBIND)
-#define HWLOC_SUPPORT_GET_THREAD_CPUBIND HWLOC_NAME_CAPS(SUPPORT_GET_THREAD_CPUBIND)
-
+#define hwloc_topology_support HWLOC_NAME(topology_support)
 #define hwloc_topology_get_support HWLOC_NAME(topology_get_support)
 #define hwloc_topology_export_xml HWLOC_NAME(topology_export_xml)
+
+#define hwloc_topology_insert_misc_object_by_cpuset HWLOC_NAME(topology_insert_misc_object_by_cpuset)
+#define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
+
 #define hwloc_topology_get_depth HWLOC_NAME(topology_get_depth)
-#define hwloc_topology_get_type_depth HWLOC_NAME(topology_get_type_depth)
+#define hwloc_get_type_depth HWLOC_NAME(get_type_depth)
 
 #define HWLOC_TYPE_DEPTH_UNKNOWN HWLOC_NAME_CAPS(TYPE_DEPTH_UNKNOWN)
 #define HWLOC_TYPE_DEPTH_MULTIPLE HWLOC_NAME_CAPS(TYPE_DEPTH_MULTIPLE)
 
 #define hwloc_get_depth_type HWLOC_NAME(get_depth_type)
-#define hwloc_get_type_depth HWLOC_NAME(get_type_depth)
 #define hwloc_get_nbobjs_by_depth HWLOC_NAME(get_nbobjs_by_depth)
 #define hwloc_get_nbobjs_by_type HWLOC_NAME(get_nbobjs_by_type)
 
 #define hwloc_topology_is_thissystem HWLOC_NAME(topology_is_thissystem)
-#define hwloc_topology_get_complete_cpuset HWLOC_NAME(topology_get_complete_cpuset)
-#define hwloc_topology_get_topology_cpuset HWLOC_NAME(topology_get_topology_cpuset)
-#define hwloc_topology_get_online_cpuset HWLOC_NAME(topology_get_online_cpuset)
 
-#define hwloc_topology_get_allowed_cpuset HWLOC_NAME(topology_get_allowed_cpuset)
 #define hwloc_get_obj_by_depth HWLOC_NAME(get_obj_by_depth )
 #define hwloc_get_obj_by_type HWLOC_NAME(get_obj_by_type )
 
 #define hwloc_obj_type_string HWLOC_NAME(obj_type_string )
 #define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
-#define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 #define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
 #define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
+#define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
 
 #define HWLOC_CPUBIND_PROCESS HWLOC_NAME_CAPS(CPUBIND_PROCESS)
@@ -176,14 +171,39 @@
 #define hwloc_get_type_or_below_depth HWLOC_NAME(get_type_or_below_depth)
 #define hwloc_get_type_or_above_depth HWLOC_NAME(get_type_or_above_depth)
 #define hwloc_get_root_obj HWLOC_NAME(get_root_obj)
+#define hwloc_get_system_obj HWLOC_NAME(get_system_obj)
 #define hwloc_get_ancestor_obj_by_depth HWLOC_NAME(get_ancestor_obj_by_depth)
 #define hwloc_get_ancestor_obj_by_type HWLOC_NAME(get_ancestor_obj_by_type)
 #define hwloc_get_next_obj_by_depth HWLOC_NAME(get_next_obj_by_depth)
 #define hwloc_get_next_obj_by_type HWLOC_NAME(get_next_obj_by_type)
-#define hwloc_get_proc_obj_by_os_index HWLOC_NAME(get_proc_obj_by_os_index)
+#define hwloc_get_pu_obj_by_os_index HWLOC_NAME(get_pu_obj_by_os_index)
 #define hwloc_get_next_child HWLOC_NAME(get_next_child)
 #define hwloc_get_common_ancestor_obj HWLOC_NAME(get_common_ancestor_obj)
 #define hwloc_obj_is_in_subtree HWLOC_NAME(obj_is_in_subtree)
+
+#define hwloc_get_first_largest_obj_inside_cpuset HWLOC_NAME(get_first_largest_obj_inside_cpuset)
+#define hwloc_get_largest_objs_inside_cpuset HWLOC_NAME(get_largest_objs_inside_cpuset)
+#define hwloc_get_next_obj_inside_cpuset_by_depth HWLOC_NAME(get_next_obj_inside_cpuset_by_depth)
+
+#define hwloc_get_next_obj_inside_cpuset_by_type HWLOC_NAME(get_next_obj_inside_cpuset_by_type)
+#define hwloc_get_obj_inside_cpuset_by_depth HWLOC_NAME(get_obj_inside_cpuset_by_depth)
+#define hwloc_get_obj_inside_cpuset_by_type HWLOC_NAME(get_obj_inside_cpuset_by_type)
+#define hwloc_get_nbobjs_inside_cpuset_by_depth HWLOC_NAME(get_nbobjs_inside_cpuset_by_depth)
+#define hwloc_get_nbobjs_inside_cpuset_by_type HWLOC_NAME(get_nbobjs_inside_cpuset_by_type)
+#define hwloc_get_child_covering_cpuset HWLOC_NAME(get_child_covering_cpuset)
+#define hwloc_get_obj_covering_cpuset HWLOC_NAME(get_obj_covering_cpuset)
+#define hwloc_get_next_obj_covering_cpuset_by_depth HWLOC_NAME(get_next_obj_covering_cpuset_by_depth)
+#define hwloc_get_next_obj_covering_cpuset_by_type HWLOC_NAME(get_next_obj_covering_cpuset_by_type)
+#define hwloc_get_cache_covering_cpuset HWLOC_NAME(get_cache_covering_cpuset)
+#define hwloc_get_shared_cache_covering_obj HWLOC_NAME(get_shared_cache_covering_obj)
+#define hwloc_get_closest_objs HWLOC_NAME(get_closest_objs)
+#define hwloc_get_obj_below_by_type HWLOC_NAME(get_obj_below_by_type)
+#define hwloc_get_obj_below_array_by_type HWLOC_NAME(get_obj_below_array_by_type)
+#define hwloc_distribute HWLOC_NAME(distribute)
+#define hwloc_topology_get_complete_cpuset HWLOC_NAME(topology_get_complete_cpuset)
+#define hwloc_topology_get_topology_cpuset HWLOC_NAME(topology_get_topology_cpuset)
+#define hwloc_topology_get_online_cpuset HWLOC_NAME(topology_get_online_cpuset)
+#define hwloc_topology_get_allowed_cpuset HWLOC_NAME(topology_get_allowed_cpuset)
 
 /* glibc-sched.h */
 
@@ -209,6 +229,88 @@
 
 #define hwloc_ibv_get_device_cpuset HWLOC_NAME(ibv_get_device_cpuset)
 
-#endif
+/* private/misc.h */
+
+#define hwloc_snprintf HWLOC_NAME(snprintf)
+#define hwloc_namecoloncmp HWLOC_NAME(namecoloncmp)
+#define hwloc_weight_long HWLOC_NAME(weight_long)
+
+/* private/cpuid.h */
+
+#define hwloc_have_cpuid HWLOC_NAME(have_cpuid)
+#define hwloc_cpuid HWLOC_NAME(cpuid)
+
+/* private/private.h */
+
+#define hwloc_ignore_type_e HWLOC_NAME(ignore_type_e)
+
+#define HWLOC_IGNORE_TYPE_NEVER HWLOC_NAME_CAPS(IGNORE_TYPE_NEVER)
+#define HWLOC_IGNORE_TYPE_KEEP_STRUCTURE HWLOC_NAME_CAPS(IGNORE_TYPE_KEEP_STRUCTURE)
+#define HWLOC_IGNORE_TYPE_ALWAYS HWLOC_NAME_CAPS(IGNORE_TYPE_ALWAYS)
+
+#define hwloc_backend_e HWLOC_NAME(backend_e)
+
+#define HWLOC_BACKEND_NONE HWLOC_NAME_CAPS(BACKEND_NONE)
+#define HWLOC_BACKEND_SYNTHETIC HWLOC_NAME_CAPS(BACKEND_SYNTHETIC)
+#define HWLOC_BACKEND_SYSFS HWLOC_NAME_CAPS(BACKEND_SYSFS)
+#define HWLOC_BACKEND_XML HWLOC_NAME_CAPS(BACKEND_XML)
+
+#define hwloc_backend_t HWLOC_NAME(backend_t)
+
+#define hwloc_backend_params_u HWLOC_NAME(backend_params_u)
+#define hwloc_backend_params_sysfs_s HWLOC_NAME(backend_params_sysfs_s)
+#define hwloc_backend_params_osf HWLOC_NAME(backend_params_osf)
+#define hwloc_backend_params_xml_s HWLOC_NAME(backend_params_xml_s)
+#define hwloc_backend_params_synthetic_s HWLOC_NAME(backend_params_synthetic_s)
+
+#define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)
+#define hwloc_setup_misc_level_from_distances HWLOC_NAME(setup_misc_level_from_distances)
+#define hwloc_get_sysctlbyname HWLOC_NAME(get_sysctlbyname)
+#define hwloc_get_sysctl HWLOC_NAME(get_sysctl)
+#define hwloc_fallback_nbprocessors HWLOC_NAME(fallback_nbprocessors)
+
+#define hwloc_look_linux HWLOC_NAME(look_linux)
+#define hwloc_set_linux_hooks HWLOC_NAME(set_linux_hooks)
+#define hwloc_backend_sysfs_init HWLOC_NAME(backend_sysfs_init)
+#define hwloc_backend_sysfs_exit HWLOC_NAME(backend_sysfs_exit)
+
+#define hwloc_backend_xml_init HWLOC_NAME(backend_xml_init)
+#define hwloc_look_xml HWLOC_NAME(look_xml)
+#define hwloc_backend_xml_exit HWLOC_NAME(backend_xml_exit)
+
+#define hwloc_look_solaris HWLOC_NAME(look_solaris)
+#define hwloc_set_solaris_hooks HWLOC_NAME(set_solaris_hooks)
+
+#define hwloc_look_aix HWLOC_NAME(look_aix)
+#define hwloc_set_aix_hooks HWLOC_NAME(set_aix_hooks)
+
+#define hwloc_look_osf HWLOC_NAME(look_osf)
+#define hwloc_set_osf_hooks HWLOC_NAME(set_osf_hooks)
+
+#define hwloc_look_windows HWLOC_NAME(look_windows)
+#define hwloc_set_windows_hooks HWLOC_NAME(set_windows_hooks)
+
+#define hwloc_look_darwin HWLOC_NAME(look_darwin)
+#define hwloc_set_darwin_hooks HWLOC_NAME(set_darwin_hooks)
+
+#define hwloc_look_freebsd HWLOC_NAME(look_freebsd)
+#define hwloc_set_freebsd_hooks HWLOC_NAME(set_freebsd_hooks)
+
+#define hwloc_look_hpux HWLOC_NAME(look_hpux)
+#define hwloc_set_hpux_hooks HWLOC_NAME(set_hpux_hooks)
+
+#define hwloc_look_x86 HWLOC_NAME(look_x86)
+
+#define hwloc_backend_synthetic_init HWLOC_NAME(backend_synthetic_init)
+#define hwloc_backend_synthetic_exit HWLOC_NAME(backend_synthetic_exit)
+#define hwloc_look_synthetic  HWLOC_NAME(look_synthetic )
+
+#define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
+#define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
+#define hwloc_cpuset_printf_value HWLOC_NAME(cpuset_printf_value)
+#define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
+#define hwloc_setup_level HWLOC_NAME(setup_level)
+
+#endif /* HWLOC_SYM_TRANSFORM */
 
 #endif /* HWLOC_RENAME_H */

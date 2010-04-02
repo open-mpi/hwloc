@@ -1,5 +1,5 @@
-# Copyright © 2009 INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009      INRIA, Université Bordeaux 1
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 
@@ -414,10 +414,10 @@ endif
 # Make sure that the documentation example works
 #
 
-if HWLOC_BUILD_STANDALONE
+if HWLOC_BUILD_TESTS
 TESTS = hwloc-hello
 check_PROGRAMS = $(TESTS)
-endif
+endif HWLOC_BUILD_TESTS
 
 hwloc_hello_LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 hwloc_hello_DEPENDENCIES = $(hwloc_hello_LDADD)
