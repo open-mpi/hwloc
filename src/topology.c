@@ -601,7 +601,19 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 	return HWLOC_OBJ_INCLUDED;
       case HWLOC_TYPE_HIGHER:
 	return HWLOC_OBJ_CONTAINS;
+
       case HWLOC_TYPE_EQUAL:
+        if (obj1->type == HWLOC_OBJ_MISC) {
+          /* Misc objects may vary by name */
+          int res = strcmp(obj1->name, obj2->name);
+          if (res < 0)
+            return HWLOC_OBJ_INCLUDED;
+          if (res > 0)
+            return HWLOC_OBJ_CONTAINS;
+          if (res == 0)
+            return HWLOC_OBJ_EQUAL;
+        }
+
 	/* Same level cpuset and type!  Let's hope it's coherent.  */
 	return HWLOC_OBJ_EQUAL;
     }

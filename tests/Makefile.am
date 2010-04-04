@@ -26,7 +26,8 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_object_userdata \
 	hwloc_synthetic \
 	hwloc_is_thissystem \
-	hwloc_insert_misc
+	hwloc_insert_misc \
+	hwloc_top
 
 if HWLOC_HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma

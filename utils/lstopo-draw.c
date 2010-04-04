@@ -592,7 +592,7 @@ system_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
 }
 
 static void
-misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+group_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
@@ -620,6 +620,34 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 }
 
 static void
+misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
+{
+  unsigned myheight = gridsize + (fontsize ? (fontsize + gridsize) : 0) + gridsize, totheight;
+  unsigned mywidth = 0, totwidth;
+  unsigned textwidth = level->name ? strlen(level->name) * fontsize : 6*fontsize;
+
+  DYNA_CHECK();
+
+  RECURSE_HORIZ(level, &null_draw_methods, gridsize, 0);
+
+  methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, totwidth, y, myheight - gridsize);
+
+  if (fontsize) {
+    if (level->name) {
+      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
+    } else {
+      char text[64];
+      lstopo_obj_snprintf(text, sizeof(text), level, logical);
+      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    }
+  }
+
+  RECURSE_RECT(level, methods, gridsize, 0);
+
+  DYNA_SAVE();
+}
+
+static void
 fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
   unsigned totwidth, totheight;
@@ -641,7 +669,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_CACHE: return cache_draw;
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PU: return proc_draw;
-    case HWLOC_OBJ_GROUP: return misc_draw;
+    case HWLOC_OBJ_GROUP: return group_draw;
     case HWLOC_OBJ_MISC: return misc_draw;
   }
   return NULL;
