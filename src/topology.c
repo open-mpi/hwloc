@@ -295,10 +295,10 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
       for(i=0; i<nbgroups; i++) {
           /* create the misc object */
           hwloc_obj_t misc_obj;
-          misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+          misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
           misc_obj->cpuset = hwloc_cpuset_alloc();
           hwloc_cpuset_zero(misc_obj->cpuset);
-          misc_obj->attr->misc.depth = depth;
+          misc_obj->attr->group.depth = depth;
           for (j=0; j<nbobjs; j++)
               if (groupids[j] == i+1) {
                   hwloc_cpuset_or(misc_obj->cpuset, misc_obj->cpuset, objs[j]->cpuset);
@@ -508,22 +508,24 @@ static const unsigned obj_type_order[] = {
   [HWLOC_OBJ_SYSTEM] = 0,
   [HWLOC_OBJ_MACHINE] = 1,
   [HWLOC_OBJ_MISC] = 2,
-  [HWLOC_OBJ_NODE] = 3,
-  [HWLOC_OBJ_SOCKET] = 4,
-  [HWLOC_OBJ_CACHE] = 5,
-  [HWLOC_OBJ_CORE] = 6,
-  [HWLOC_OBJ_PU] = 7
+  [HWLOC_OBJ_GROUP] = 3,
+  [HWLOC_OBJ_NODE] = 4,
+  [HWLOC_OBJ_SOCKET] = 5,
+  [HWLOC_OBJ_CACHE] = 6,
+  [HWLOC_OBJ_CORE] = 7,
+  [HWLOC_OBJ_PU] = 8
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
   [0] = HWLOC_OBJ_SYSTEM,
   [1] = HWLOC_OBJ_MACHINE,
   [2] = HWLOC_OBJ_MISC,
-  [3] = HWLOC_OBJ_NODE,
-  [4] = HWLOC_OBJ_SOCKET,
-  [5] = HWLOC_OBJ_CACHE,
-  [6] = HWLOC_OBJ_CORE,
-  [7] = HWLOC_OBJ_PU
+  [3] = HWLOC_OBJ_GROUP,
+  [4] = HWLOC_OBJ_NODE,
+  [5] = HWLOC_OBJ_SOCKET,
+  [6] = HWLOC_OBJ_CACHE,
+  [7] = HWLOC_OBJ_CORE,
+  [8] = HWLOC_OBJ_PU
 };
 
 static unsigned __hwloc_attribute_const
@@ -560,11 +562,11 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
       return HWLOC_TYPE_HIGHER;
   }
 
-  /* Misc objects have the same types but can have different depths.  */
-  if (obj1->type == HWLOC_OBJ_MISC) {
-    if (obj1->attr->misc.depth < obj2->attr->misc.depth)
+  /* Group objects have the same types but can have different depths.  */
+  if (obj1->type == HWLOC_OBJ_GROUP) {
+    if (obj1->attr->group.depth < obj2->attr->group.depth)
       return HWLOC_TYPE_DEEPER;
-    else if (obj1->attr->misc.depth > obj2->attr->misc.depth)
+    else if (obj1->attr->group.depth > obj2->attr->group.depth)
       return HWLOC_TYPE_HIGHER;
   }
 
@@ -1765,7 +1767,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
-  //topology->ignored_types[HWLOC_OBJ_MISC] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
+  topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);

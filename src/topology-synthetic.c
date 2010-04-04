@@ -23,7 +23,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
   const char *pos, *next_pos;
   unsigned long item, count;
   unsigned i;
-  int cache_depth = 0, misc_depth = 0;
+  int cache_depth = 0, group_depth = 0;
   int nb_machine_levels = 0, nb_node_levels = 0;
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
@@ -58,6 +58,8 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 	type = HWLOC_OBJ_PU;
       else if (!hwloc_namecoloncmp(pos, "misc", 2))
 	type = HWLOC_OBJ_MISC;
+      else if (!hwloc_namecoloncmp(pos, "group", 2))
+	type = HWLOC_OBJ_GROUP;
 
       next_pos = strchr(pos, ':');
       if (!next_pos) {
@@ -105,6 +107,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       case 3: type = HWLOC_OBJ_SOCKET; break;
       case 4: type = HWLOC_OBJ_NODE; break;
       case 5: type = HWLOC_OBJ_MACHINE; break;
+      case 6: type = HWLOC_OBJ_GROUP; break;
       default: type = HWLOC_OBJ_MISC; break;
       }
       topology->backend_params.synthetic.type[i] = type;
@@ -113,8 +116,8 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       case HWLOC_OBJ_CACHE:
 	cache_depth++;
 	break;
-      case HWLOC_OBJ_MISC:
-	misc_depth++;
+      case HWLOC_OBJ_GROUP:
+	group_depth++;
 	break;
       case HWLOC_OBJ_NODE:
 	if (nb_node_levels) {
@@ -142,8 +145,8 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
   for (i=0; i<count; i++) {
     hwloc_obj_type_t type = topology->backend_params.synthetic.type[i];
 
-    if (type == HWLOC_OBJ_MISC)
-      topology->backend_params.synthetic.depth[i] = misc_depth--;
+    if (type == HWLOC_OBJ_GROUP)
+      topology->backend_params.synthetic.depth[i] = group_depth--;
     else if (type == HWLOC_OBJ_CACHE)
       topology->backend_params.synthetic.depth[i] = cache_depth--;
   }
@@ -189,6 +192,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   switch (type) {
     case HWLOC_OBJ_MISC:
       break;
+    case HWLOC_OBJ_GROUP:
+      break;
     case HWLOC_OBJ_SYSTEM:
       /* Shouldn't happen.  */
       abort();
@@ -229,7 +234,9 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   /* post-hooks */
   switch (type) {
     case HWLOC_OBJ_MISC:
-      obj->attr->misc.depth = topology->backend_params.synthetic.depth[level];
+      break;
+    case HWLOC_OBJ_GROUP:
+      obj->attr->group.depth = topology->backend_params.synthetic.depth[level];
       break;
     case HWLOC_OBJ_SYSTEM:
       abort();

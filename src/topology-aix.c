@@ -216,8 +216,8 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj->attr->cache.size = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
-      case HWLOC_OBJ_MISC:
-	obj->attr->misc.depth = level;
+      case HWLOC_OBJ_GROUP:
+	obj->attr->group.depth = level;
       default:
 	break;
     }
@@ -291,7 +291,7 @@ hwloc_look_aix(struct hwloc_topology *topology)
       if (!known)
 	{
 	  hwloc_debug("looking AIX unknown sdl %d\n", i);
-	  look_rset(i, HWLOC_OBJ_MISC, topology, i);
+	  look_rset(i, HWLOC_OBJ_GROUP, topology, i);
 	}
     }
 }

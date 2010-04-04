@@ -103,12 +103,18 @@ typedef enum {
 			  * thus be used as fallback when others are not.
 			  */
 
-  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
+  HWLOC_OBJ_GROUP,	/**< \brief Group objects.
 			  * Objects which do not fit in the above but are
 			  * detected by hwloc and are useful to take into
 			  * account for affinity. For instance, some OSes
 			  * expose their arbitrary processors aggregation this
-			  * way.
+			  * way.  They are ignored when they do not bring any
+			  * structure.
+			  */
+
+  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
+			  * Objects without particular meaning, that can e.g. be
+			  * added by the application for its own use.
 			  */
 } hwloc_obj_type_t;
 
@@ -296,10 +302,10 @@ union hwloc_obj_attr_u {
     char *dmi_board_vendor;		  /**< \brief DMI board vendor name */
     char *dmi_board_name;		  /**< \brief DMI board model name */
   } machine;
-  /** \brief Misc-specific Object Attributes */
-  struct hwloc_misc_attr_s {
-    unsigned depth;			  /**< \brief Depth of misc object */
-  } misc;
+  /** \brief Group-specific Object Attributes */
+  struct hwloc_group_attr_s {
+    unsigned depth;			  /**< \brief Depth of group object */
+  } group;
 };
 
 /** @} */

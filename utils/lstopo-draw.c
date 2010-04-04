@@ -641,6 +641,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_CACHE: return cache_draw;
     case HWLOC_OBJ_CORE: return core_draw;
     case HWLOC_OBJ_PU: return proc_draw;
+    case HWLOC_OBJ_GROUP: return misc_draw;
     case HWLOC_OBJ_MISC: return misc_draw;
   }
   return NULL;

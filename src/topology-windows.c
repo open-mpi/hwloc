@@ -252,7 +252,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    break;
 	  case RelationGroup:
 	  default:
-	    type = HWLOC_OBJ_MISC;
+	    type = HWLOC_OBJ_GROUP;
 	    break;
 	}
 
@@ -281,8 +281,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    obj->attr->cache.size = procInfo[i].Cache.Size;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
 	    break;
-	  case HWLOC_OBJ_MISC:
-	    obj->attr->misc.depth = procInfo[i].Relationship == RelationGroup;
+	  case HWLOC_OBJ_GROUP:
+	    obj->attr->group.depth = procInfo[i].Relationship == RelationGroup;
 	    break;
 	  default:
 	    break;
@@ -355,7 +355,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	  case RelationGroup:
 	    /* So strange an interface... */
 	    for (id = 0; id < procInfo->Group.ActiveGroupCount; id++) {
-	      obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, id);
+	      obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, id);
 	      obj->cpuset = hwloc_cpuset_alloc();
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
 	      hwloc_debug("group %d mask %lx\n", id, mask);

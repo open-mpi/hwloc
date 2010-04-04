@@ -142,6 +142,7 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_SYSTEM: return "System";
     case HWLOC_OBJ_MACHINE: return "Machine";
     case HWLOC_OBJ_MISC: return "Misc";
+    case HWLOC_OBJ_GROUP: return "Group";
     case HWLOC_OBJ_NODE: return "NUMANode";
     case HWLOC_OBJ_SOCKET: return "Socket";
     case HWLOC_OBJ_CACHE: return "Cache";
@@ -157,6 +158,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "System")) return HWLOC_OBJ_SYSTEM;
   if (!strcasecmp(string, "Machine")) return HWLOC_OBJ_MACHINE;
   if (!strcasecmp(string, "Misc")) return HWLOC_OBJ_MISC;
+  if (!strcasecmp(string, "Group")) return HWLOC_OBJ_GROUP;
   if (!strcasecmp(string, "NUMANode") || !strcasecmp(string, "Node")) return HWLOC_OBJ_NODE;
   if (!strcasecmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
   if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
@@ -175,6 +177,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 {
   hwloc_obj_type_t type = obj->type;
   switch (type) {
+  case HWLOC_OBJ_MISC:
   case HWLOC_OBJ_SYSTEM:
   case HWLOC_OBJ_MACHINE:
   case HWLOC_OBJ_NODE:
@@ -184,9 +187,9 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "L%u%s", obj->attr->cache.depth, verbose ? hwloc_obj_type_string(type): "");
-  case HWLOC_OBJ_MISC:
+  case HWLOC_OBJ_GROUP:
 	  /* TODO: more pretty presentation? */
-    return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->misc.depth);
+    return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->group.depth);
   default:
     *string = '\0';
     return 0;
