@@ -507,25 +507,25 @@ enum hwloc_type_cmp_e {
 static const unsigned obj_type_order[] = {
   [HWLOC_OBJ_SYSTEM] = 0,
   [HWLOC_OBJ_MACHINE] = 1,
-  [HWLOC_OBJ_MISC] = 2,
-  [HWLOC_OBJ_GROUP] = 3,
-  [HWLOC_OBJ_NODE] = 4,
-  [HWLOC_OBJ_SOCKET] = 5,
-  [HWLOC_OBJ_CACHE] = 6,
-  [HWLOC_OBJ_CORE] = 7,
-  [HWLOC_OBJ_PU] = 8
+  [HWLOC_OBJ_GROUP] = 2,
+  [HWLOC_OBJ_NODE] = 3,
+  [HWLOC_OBJ_SOCKET] = 4,
+  [HWLOC_OBJ_CACHE] = 5,
+  [HWLOC_OBJ_CORE] = 6,
+  [HWLOC_OBJ_PU] = 7,
+  [HWLOC_OBJ_MISC] = 8,
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
   [0] = HWLOC_OBJ_SYSTEM,
   [1] = HWLOC_OBJ_MACHINE,
-  [2] = HWLOC_OBJ_MISC,
-  [3] = HWLOC_OBJ_GROUP,
-  [4] = HWLOC_OBJ_NODE,
-  [5] = HWLOC_OBJ_SOCKET,
-  [6] = HWLOC_OBJ_CACHE,
-  [7] = HWLOC_OBJ_CORE,
-  [8] = HWLOC_OBJ_PU
+  [2] = HWLOC_OBJ_GROUP,
+  [3] = HWLOC_OBJ_NODE,
+  [4] = HWLOC_OBJ_SOCKET,
+  [5] = HWLOC_OBJ_CACHE,
+  [6] = HWLOC_OBJ_CORE,
+  [7] = HWLOC_OBJ_PU,
+  [8] = HWLOC_OBJ_MISC
 };
 
 static unsigned __hwloc_attribute_const
