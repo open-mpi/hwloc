@@ -50,7 +50,9 @@ EOF
     if test x"hwloc_config_prefix" != "x" -a ! -d "hwloc_config_prefix"; then
         mkdir "hwloc_config_prefix"
     fi
-    cd "hwloc_config_prefix"
+    if test x"hwloc_config_prefix" != "x"; then
+        cd "hwloc_config_prefix"
+    fi
     HWLOC_top_builddir=`pwd`
     AC_SUBST(HWLOC_top_builddir)
 
