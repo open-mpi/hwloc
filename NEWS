@@ -27,6 +27,8 @@ Version 1.0.0
 * Objects
   + HWLOC_OBJ_PROC is renamed into HWLOC_OBJ_PU for "Processing Unit",
     its stringified type name is now "PU".
+  + Use new HWLOC_OBJ_GROUP objects instead of MISC when grouping
+    objects according to NUMA distances or arbitrary OS aggregation.
   + Rework memory attributes.
   + Add different cpusets in each object to specify processors that
     are offline, unavailable, ...

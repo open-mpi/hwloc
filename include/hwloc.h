@@ -108,8 +108,11 @@ typedef enum {
 			  * detected by hwloc and are useful to take into
 			  * account for affinity. For instance, some OSes
 			  * expose their arbitrary processors aggregation this
-			  * way.  They are ignored when they do not bring any
-			  * structure.
+			  * way.  And hwloc may insert such objects to group
+			  * NUMA nodes according to their distances.
+			  *
+			  * These objects are ignored when they do not bring
+			  * any structure.
 			  */
 
   HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
