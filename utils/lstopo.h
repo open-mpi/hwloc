@@ -9,9 +9,9 @@
 #include <private/config.h>
 #include <hwloc.h>
 
-hwloc_obj_type_t show_only;
-int show_cpuset;
-hwloc_pid_t pid;
+extern hwloc_obj_type_t show_only;
+extern int show_cpuset;
+extern hwloc_pid_t pid;
 
 typedef void output_method (struct hwloc_topology *topology, const char *output, int logical, int verbose_mode);
 
