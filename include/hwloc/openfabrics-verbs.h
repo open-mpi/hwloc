@@ -50,7 +50,7 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
 	  ibv_get_device_name(ibdev));
   sysfile = fopen(path, "r");
   if (!sysfile)
-    return NULL;
+    return -1;
 
   hwloc_linux_parse_cpumap_file(sysfile, set);
 
