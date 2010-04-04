@@ -496,42 +496,44 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
+/** \brief Flags describing actual discovery support for this topology. */
+struct hwloc_topology_discovery_support {
+  /** \brief Detecting the number of PU objects is supported. */
+  unsigned char pu;
+};
+
+/** \brief Flags describing actual binding support for this topology. */
+struct hwloc_topology_cpubind_support {
+  /** Binding the whole current process is supported.  */
+  unsigned char set_thisproc_cpubind;
+  /** Getting the binding of the whole current process is supported.  */
+  unsigned char get_thisproc_cpubind;
+  /** Binding a whole given process is supported.  */
+  unsigned char set_proc_cpubind;
+  /** Getting the binding of a whole given process is supported.  */
+  unsigned char get_proc_cpubind;
+  /** Binding the current thread only is supported.  */
+  unsigned char set_thisthread_cpubind;
+  /** Getting the binding of the current thread only is supported.  */
+  unsigned char get_thisthread_cpubind;
+  /** Binding a given thread only is supported.  */
+  unsigned char set_thread_cpubind;
+  /** Getting the binding of a given thread only is supported.  */
+  unsigned char get_thread_cpubind;
+};
+
 /** \brief Set of flags describing actual support for this topology.
  *
  * This is retrieved with hwloc_topology_get_support() and will be valid until
- * the topology object is destroyed.
+ * the topology object is destroyed.  Note: the values are correct only after
+ * discovery.
  */
 struct hwloc_topology_support {
-  /** \brief Flags describing actual discovery support for this topology. */
-  struct {
-    /* \brief Detecting the number of PU objects is supported. */
-    unsigned int pu:1;
-    unsigned int pad:31;
-  } discovery;
-
-  /** \brief Flags describing actual binding support for this topology. */
-  struct {
-    /** Binding the whole current process is supported.  */
-    unsigned int set_thisproc_cpubind:1;
-    /** Getting the binding of the whole current process is supported.  */
-    unsigned int get_thisproc_cpubind:1;
-    /** Binding a whole given process is supported.  */
-    unsigned int set_proc_cpubind:1;
-    /** Getting the binding of a whole given process is supported.  */
-    unsigned int get_proc_cpubind:1;
-    /** Binding the current thread only is supported.  */
-    unsigned int set_thisthread_cpubind:1;
-    /** Getting the binding of the current thread only is supported.  */
-    unsigned int get_thisthread_cpubind:1;
-    /** Binding a given thread only is supported.  */
-    unsigned int set_thread_cpubind:1;
-    /** Getting the binding of a given thread only is supported.  */
-    unsigned int get_thread_cpubind:1;
-    unsigned int pad:24;
-  } cpubind;
+  struct hwloc_topology_discovery_support *discovery;
+  struct hwloc_topology_cpubind_support *cpubind;
 };
 
-/** \brief Retrieve the OR'ed flags of topology support. */
+/** \brief Retrieve the topology support. */
 HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
 
 /** @} */

@@ -51,7 +51,7 @@ static void add_process_objects(hwloc_topology_t topology)
 
   support = hwloc_topology_get_support(topology);
 
-  if (!support->cpubind.get_thisproc_cpubind)
+  if (!support->cpubind->get_thisproc_cpubind)
     return;
 
   dir  = opendir("/proc");

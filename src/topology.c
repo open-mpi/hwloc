@@ -109,7 +109,7 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
   n = -1;
 #endif
   if (n >= 1)
-    topology->support.discovery.pu = 1;
+    topology->support.discovery->pu = 1;
   else
     n = 1;
   return n;
@@ -1710,7 +1710,7 @@ hwloc_discover(struct hwloc_topology *topology)
   if (topology->is_thissystem) {
 #define DO(kind) \
     if (topology->kind) \
-      topology->support.cpubind.kind = 1;
+      topology->support.cpubind->kind = 1;
     DO(set_thisproc_cpubind);
     DO(get_thisproc_cpubind);
     DO(set_proc_cpubind);
@@ -1775,7 +1775,9 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->set_thread_cpubind = NULL;
   topology->get_thread_cpubind = NULL;
 #endif
-  memset(&topology->support, 0, sizeof(topology->support));
+  topology->support.discovery = calloc(1, sizeof(*topology->support.discovery));
+  topology->support.cpubind = calloc(1, sizeof(*topology->support.cpubind));
+
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;

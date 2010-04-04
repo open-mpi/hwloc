@@ -278,7 +278,7 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
   hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
   unsigned first_cpu = 0, i;
 
-  topology->support.discovery.pu = 1;
+  topology->support.discovery->pu = 1;
 
   /* update first level type according to the synthetic type array */
   topology->levels[0][0]->type = topology->backend_params.synthetic.type[0];
