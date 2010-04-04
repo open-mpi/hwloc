@@ -1991,11 +1991,9 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_xml_init(topology, xmlpath_env);
   }
 #endif
-  if (topology->backend_type == HWLOC_BACKEND_NONE) {
-    local_env = getenv("HWLOC_THISSYSTEM");
-    if (local_env)
-      topology->is_thissystem = atoi(local_env);
-  }
+  local_env = getenv("HWLOC_THISSYSTEM");
+  if (local_env)
+    topology->is_thissystem = atoi(local_env);
 
   /* if we haven't chosen the backend, set the OS-specific one if needed */
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
