@@ -45,7 +45,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
   unsigned index = logical ? l->logical_index : l->os_index;
   const char *indexprefix = logical ? " #" :  " p#";
   if (show_cpuset < 2) {
-    if (l->type == HWLOC_OBJ_MISC)
+    if (l->type == HWLOC_OBJ_MISC && l->name)
       fprintf(output, "%s", l->name);
     else {
       hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
