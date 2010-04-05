@@ -13,7 +13,7 @@
  * and hwloc_get_depth_type()
  */
 
-#define SYNTHETIC_TOPOLOGY_DESCRIPTION "machine:3 misc:2 group:2 core:3 cache:2 cache:2 2"
+#define SYNTHETIC_TOPOLOGY_DESCRIPTION "machine:3 group:2 group:2 core:3 cache:2 cache:2 2"
 
 int main(void)
 {
@@ -27,7 +27,7 @@ int main(void)
 
   assert(hwloc_get_depth_type(topology, 0) == HWLOC_OBJ_SYSTEM);
   assert(hwloc_get_depth_type(topology, 1) == HWLOC_OBJ_MACHINE);
-  assert(hwloc_get_depth_type(topology, 2) == HWLOC_OBJ_MISC);
+  assert(hwloc_get_depth_type(topology, 2) == HWLOC_OBJ_GROUP);
   assert(hwloc_get_depth_type(topology, 3) == HWLOC_OBJ_GROUP);
   assert(hwloc_get_depth_type(topology, 4) == HWLOC_OBJ_CORE);
   assert(hwloc_get_depth_type(topology, 5) == HWLOC_OBJ_CACHE);
@@ -35,8 +35,6 @@ int main(void)
   assert(hwloc_get_depth_type(topology, 7) == HWLOC_OBJ_PU);
 
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_MACHINE) == 1);
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_MISC) == 2);
-  assert(hwloc_get_type_depth(topology, HWLOC_OBJ_GROUP) == 3);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_CORE) == 4);
   assert(hwloc_get_type_depth(topology, HWLOC_OBJ_PU) == 7);
 
