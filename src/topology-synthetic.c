@@ -173,12 +173,6 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       topology->backend_params.synthetic.depth[i] = cache_depth--;
   }
 
-  /* last level must be PU */
-  if (topology->backend_params.synthetic.type[count-1] != HWLOC_OBJ_PU) {
-    fprintf(stderr,"synthetic string needs to have a number of PUs\n");
-    return -1;
-  }
-
   topology->backend_type = HWLOC_BACKEND_SYNTHETIC;
   topology->backend_params.synthetic.arity[count-1] = 0;
   topology->is_thissystem = 0;
@@ -237,7 +231,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   obj = hwloc_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
   obj->cpuset = hwloc_cpuset_alloc();
 
-  if (type == HWLOC_OBJ_PU) {
+  if (!topology->backend_params.synthetic.arity[level]) {
     hwloc_cpuset_set(obj->cpuset, first_cpu++);
   } else {
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
