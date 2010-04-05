@@ -120,22 +120,24 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 	group_depth++;
 	break;
       case HWLOC_OBJ_NODE:
-	if (nb_node_levels) {
-	    fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
-	    return -1;
-	}
 	nb_node_levels++;
 	break;
       case HWLOC_OBJ_MACHINE:
-	if (nb_machine_levels) {
-	    fprintf(stderr,"synthetic string can not have several machine levels\n");
-	    return -1;
-	}
 	nb_machine_levels++;
 	break;
       default:
 	break;
     }
+  }
+
+  if (nb_node_levels > 1) {
+    fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
+    return -1;
+  }
+
+  if (nb_machine_levels > 1) {
+    fprintf(stderr,"synthetic string can not have several machine levels\n");
+    return -1;
   }
 
   if (cache_depth == 1)
