@@ -216,8 +216,8 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj->attr->cache.size = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
-      case HWLOC_OBJ_MISC:
-	obj->attr->misc.depth = level;
+      case HWLOC_OBJ_GROUP:
+	obj->attr->group.depth = level;
       default:
 	break;
     }
@@ -284,14 +284,14 @@ hwloc_look_aix(struct hwloc_topology *topology)
 	  hwloc_debug("looking AIX max sdl %d\n", i);
 	  look_rset(i, HWLOC_OBJ_PU, topology, i);
 	  known = 1;
-          topology->support.discovery.pu = 1;
+          topology->support.discovery->pu = 1;
 	}
 
       /* Don't know how it should be rendered, make a misc object for it.  */
       if (!known)
 	{
 	  hwloc_debug("looking AIX unknown sdl %d\n", i);
-	  look_rset(i, HWLOC_OBJ_MISC, topology, i);
+	  look_rset(i, HWLOC_OBJ_GROUP, topology, i);
 	}
     }
 }

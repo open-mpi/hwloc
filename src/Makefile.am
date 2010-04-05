@@ -1,7 +1,7 @@
-# Copyright 2009 INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009      INRIA, Université Bordeaux 1
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
-AM_CFLAGS = $(HWLOC_GCC_CFLAGS) $(HWLOC_XML_CFLAGS) $(HWLOC_PCI_CFLAGS)
+AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 

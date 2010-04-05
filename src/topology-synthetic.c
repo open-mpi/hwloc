@@ -23,13 +23,11 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
   const char *pos, *next_pos;
   unsigned long item, count;
   unsigned i;
-  int cache_depth = 0, misc_depth = 0;
+  int cache_depth = 0, group_depth = 0;
   int nb_machine_levels = 0, nb_node_levels = 0;
+  int nb_pu_levels = 0;
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
-
-  topology->backend_params.synthetic.type[0] = HWLOC_OBJ_MACHINE;
-  topology->backend_params.synthetic.id[0] = 0;
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
 #define HWLOC_OBJ_TYPE_UNKNOWN ((unsigned) -1)
@@ -44,8 +42,6 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
     if (*pos < '0' || *pos > '9') {
       if (!hwloc_namecoloncmp(pos, "machines", 2)) {
 	type = HWLOC_OBJ_MACHINE;
-	/* switch top-level into system */
-	topology->backend_params.synthetic.type[0] = HWLOC_OBJ_SYSTEM;
       } else if (!hwloc_namecoloncmp(pos, "nodes", 1))
 	type = HWLOC_OBJ_NODE;
       else if (!hwloc_namecoloncmp(pos, "sockets", 1))
@@ -54,10 +50,12 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 	type = HWLOC_OBJ_CORE;
       else if (!hwloc_namecoloncmp(pos, "caches", 2))
 	type = HWLOC_OBJ_CACHE;
-      else if (!hwloc_namecoloncmp(pos, "pus", 1))
+      else if (!hwloc_namecoloncmp(pos, "pus", 1) || !hwloc_namecoloncmp(pos, "procs", 1) /* backward compatiblity with 0.9 */)
 	type = HWLOC_OBJ_PU;
       else if (!hwloc_namecoloncmp(pos, "misc", 2))
 	type = HWLOC_OBJ_MISC;
+      else if (!hwloc_namecoloncmp(pos, "group", 2))
+	type = HWLOC_OBJ_GROUP;
 
       next_pos = strchr(pos, ':');
       if (!next_pos) {
@@ -92,48 +90,75 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
     return -1;
   }
 
-  for(i=0; i<count; i++) {
+  for(i=count-1; i>0; i--) {
     hwloc_obj_type_t type;
 
     type = topology->backend_params.synthetic.type[i];
 
     if (type == HWLOC_OBJ_TYPE_UNKNOWN) {
-      switch (count-1-i) {
-      case 0: type = HWLOC_OBJ_PU; break;
-      case 1: type = HWLOC_OBJ_CORE; break;
-      case 2: type = HWLOC_OBJ_CACHE; break;
-      case 3: type = HWLOC_OBJ_SOCKET; break;
-      case 4: type = HWLOC_OBJ_NODE; break;
-      case 5: type = HWLOC_OBJ_MACHINE; break;
-      default: type = HWLOC_OBJ_MISC; break;
+      if (i == count-1)
+	type = HWLOC_OBJ_PU;
+      else {
+	switch (topology->backend_params.synthetic.type[i+1]) {
+	case HWLOC_OBJ_PU: type = HWLOC_OBJ_CORE; break;
+	case HWLOC_OBJ_CORE: type = HWLOC_OBJ_CACHE; break;
+	case HWLOC_OBJ_CACHE: type = HWLOC_OBJ_SOCKET; break;
+	case HWLOC_OBJ_SOCKET: type = HWLOC_OBJ_NODE; break;
+	case HWLOC_OBJ_NODE:
+	case HWLOC_OBJ_GROUP: type = HWLOC_OBJ_GROUP; break;
+	case HWLOC_OBJ_MACHINE:
+	case HWLOC_OBJ_MISC: type = HWLOC_OBJ_MISC; break;
+	default:
+	  assert(0);
+	}
       }
       topology->backend_params.synthetic.type[i] = type;
     }
     switch (type) {
+      case HWLOC_OBJ_PU:
+	if (nb_pu_levels) {
+	    fprintf(stderr,"synthetic string can not have several PU levels\n");
+	    return -1;
+	}
+	nb_pu_levels++;
+	break;
       case HWLOC_OBJ_CACHE:
 	cache_depth++;
 	break;
-      case HWLOC_OBJ_MISC:
-	misc_depth++;
+      case HWLOC_OBJ_GROUP:
+	group_depth++;
 	break;
       case HWLOC_OBJ_NODE:
-	if (nb_node_levels) {
-	    fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
-	    return -1;
-	}
 	nb_node_levels++;
 	break;
       case HWLOC_OBJ_MACHINE:
-	if (nb_machine_levels) {
-	    fprintf(stderr,"synthetic string can not have several machine levels\n");
-	    return -1;
-	}
 	nb_machine_levels++;
 	break;
       default:
 	break;
     }
   }
+
+  if (nb_pu_levels > 1) {
+    fprintf(stderr,"synthetic string can not have several PU levels\n");
+    return -1;
+  }
+  if (nb_node_levels > 1) {
+    fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
+    return -1;
+  }
+  if (nb_machine_levels > 1) {
+    fprintf(stderr,"synthetic string can not have several machine levels\n");
+    return -1;
+  }
+
+  if (nb_machine_levels)
+    topology->backend_params.synthetic.type[0] = HWLOC_OBJ_SYSTEM;
+  else {
+    topology->backend_params.synthetic.type[0] = HWLOC_OBJ_MACHINE;
+    nb_machine_levels++;
+  }
+  topology->backend_params.synthetic.id[0] = 0;
 
   if (cache_depth == 1)
     /* if there is a single cache level, make it L2 */
@@ -142,16 +167,10 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
   for (i=0; i<count; i++) {
     hwloc_obj_type_t type = topology->backend_params.synthetic.type[i];
 
-    if (type == HWLOC_OBJ_MISC)
-      topology->backend_params.synthetic.depth[i] = misc_depth--;
+    if (type == HWLOC_OBJ_GROUP)
+      topology->backend_params.synthetic.depth[i] = group_depth--;
     else if (type == HWLOC_OBJ_CACHE)
       topology->backend_params.synthetic.depth[i] = cache_depth--;
-  }
-
-  /* last level must be PU */
-  if (topology->backend_params.synthetic.type[count-1] != HWLOC_OBJ_PU) {
-    fprintf(stderr,"synthetic string needs to have a number of PUs\n");
-    return -1;
   }
 
   topology->backend_type = HWLOC_BACKEND_SYNTHETIC;
@@ -189,6 +208,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   switch (type) {
     case HWLOC_OBJ_MISC:
       break;
+    case HWLOC_OBJ_GROUP:
+      break;
     case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_BRIDGE:
     case HWLOC_OBJ_PCI_DEVICE:
@@ -213,7 +234,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   obj = hwloc_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
   obj->cpuset = hwloc_cpuset_alloc();
 
-  if (type == HWLOC_OBJ_PU) {
+  if (!topology->backend_params.synthetic.arity[level]) {
     hwloc_cpuset_set(obj->cpuset, first_cpu++);
   } else {
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
@@ -232,7 +253,9 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   /* post-hooks */
   switch (type) {
     case HWLOC_OBJ_MISC:
-      obj->attr->misc.depth = topology->backend_params.synthetic.depth[level];
+      break;
+    case HWLOC_OBJ_GROUP:
+      obj->attr->group.depth = topology->backend_params.synthetic.depth[level];
       break;
     case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_BRIDGE:
@@ -277,7 +300,7 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
   hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
   unsigned first_cpu = 0, i;
 
-  topology->support.discovery.pu = 1;
+  topology->support.discovery->pu = 1;
 
   /* update first level type according to the synthetic type array */
   topology->levels[0][0]->type = topology->backend_params.synthetic.type[0];

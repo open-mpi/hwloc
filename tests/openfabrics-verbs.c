@@ -13,7 +13,7 @@
 
 /* check the ibverbs helpers */
 
-int main(int argc, char **argv)
+int main(void)
 {
   hwloc_topology_t topology;
   struct ibv_device **dev_list, *dev;

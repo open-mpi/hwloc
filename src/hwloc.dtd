@@ -2,7 +2,7 @@
 <!ELEMENT root (object)+>
 
 <!ELEMENT object (page_type*,object*)>
-<!ATTLIST object type (System | Machine | Misc | NUMANode | Socket| Cache | Core | PU | Bridge | PCIDev) #REQUIRED>
+<!ATTLIST object type (System | Machine | Misc | Group | NUMANode | Socket| Cache | Core | PU | Bridge | PCIDev) #REQUIRED>
 <!ATTLIST object os_level CDATA "-1" >
 <!ATTLIST object os_index CDATA "-1" >
 <!ATTLIST object name CDATA "" >

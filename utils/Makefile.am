@@ -1,7 +1,7 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
-AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
+AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
@@ -10,7 +10,7 @@ LIBS += $(HWLOC_top_builddir)/src/libhwloc.la
 EXTRA_DIST = test-hwloc-distrib.output
 
 # Only build the utilities if we're building in standalone mode
-if HWLOC_BUILD_STANDALONE
+if HWLOC_BUILD_UTILS
 bin_PROGRAMS = lstopo hwloc-calc hwloc-bind hwloc-distrib
 endif
 
@@ -31,14 +31,14 @@ hwloc_calc_SOURCES = hwloc-calc.c hwloc-calc.h
 
 # Only run the tests if we're building standalone, because the tests
 # call hwloc executables.
-if HWLOC_BUILD_STANDALONE
+if HWLOC_BUILD_TESTS
 if !HWLOC_HAVE_MINGW32
 TESTS = test-hwloc-distrib.sh
 endif !HWLOC_HAVE_MINGW32
-endif HWLOC_BUILD_STANDALONE
+endif HWLOC_BUILD_TESTS
 
 # Only install man pages if we're building in standalone mode
-if HWLOC_BUILD_STANDALONE
+if HWLOC_BUILD_UTILS
 man_pages = hwloc.7 lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1
 EXTRA_DIST += $(man_pages:.1=.1in)
 nodist_man_MANS = $(man_pages)

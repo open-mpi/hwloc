@@ -75,7 +75,7 @@ HWLOC_DECLSPEC int hwloc_cpuset_asprintf(char ** strp, hwloc_const_cpuset_t set)
 HWLOC_DECLSPEC int hwloc_cpuset_from_string(hwloc_cpuset_t set, const char * __hwloc_restrict string);
 
 
-/** \brief
+/*
  *  Primitives & macros for building, modifying and consulting "sets" of cpus.
  */
 
@@ -89,13 +89,13 @@ HWLOC_DECLSPEC void hwloc_cpuset_fill(hwloc_cpuset_t set);
 HWLOC_DECLSPEC void hwloc_cpuset_from_ulong(hwloc_cpuset_t set, unsigned long mask);
 
 /** \brief Setup CPU set \p set from unsigned long \p mask used as \p i -th subset */
-HWLOC_DECLSPEC void hwloc_cpuset_from_ith_ulong(hwloc_cpuset_t set, int i, unsigned long mask);
+HWLOC_DECLSPEC void hwloc_cpuset_from_ith_ulong(hwloc_cpuset_t set, unsigned i, unsigned long mask);
 
 /** \brief Convert the beginning part of CPU set \p set into unsigned long \p mask */
 HWLOC_DECLSPEC unsigned long hwloc_cpuset_to_ulong(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
 /** \brief Convert the \p i -th subset of CPU set \p set into unsigned long mask */
-HWLOC_DECLSPEC unsigned long hwloc_cpuset_to_ith_ulong(hwloc_const_cpuset_t set, int i) __hwloc_attribute_pure;
+HWLOC_DECLSPEC unsigned long hwloc_cpuset_to_ith_ulong(hwloc_const_cpuset_t set, unsigned i) __hwloc_attribute_pure;
 
 /** \brief Clear CPU set \p set and set CPU \p cpu */
 HWLOC_DECLSPEC void hwloc_cpuset_cpu(hwloc_cpuset_t set, unsigned cpu);
@@ -195,6 +195,7 @@ HWLOC_DECLSPEC int hwloc_cpuset_compare(hwloc_const_cpuset_t set1, hwloc_const_c
 HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
 /** \brief Loop macro iterating on CPU set \p set
+ * \hideinitializer
  *
  * It yields on each cpu that is member of the set. It uses variables \p set
  * (the cpu set) and \p cpu (the loop variable)
@@ -202,9 +203,10 @@ HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribu
 #define hwloc_cpuset_foreach_begin(cpu, set) \
 do { \
         for (cpu = hwloc_cpuset_first(set); \
-             cpu != (typeof(cpu)) -1; \
+             cpu != (__typeof__(cpu)) -1; \
              cpu = hwloc_cpuset_next(set, cpu)) { \
 /** \brief End of loop. Needs a terminating ';'.
+ * \hideinitializer
  *
  * \sa hwloc_cpuset_foreach_begin */
 #define hwloc_cpuset_foreach_end() \

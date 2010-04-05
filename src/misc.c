@@ -53,8 +53,10 @@ int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
 {
   size_t i = 0;
   while (*haystack && *haystack != ':') {
-    int low_h = tolower(*haystack++);
-    int low_n = tolower(*needle++);
+    int ha = *haystack++;
+    int low_h = tolower(ha);
+    int ne = *needle++;
+    int low_n = tolower(ne);
     if (low_h != low_n)
       return 1;
     i++;

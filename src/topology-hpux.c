@@ -203,7 +203,7 @@ hwloc_look_hpux(struct hwloc_topology *topology)
     free(nodes);
   }
 
-  topology->support.discovery.pu = 1;
+  topology->support.discovery->pu = 1;
 }
 
 void

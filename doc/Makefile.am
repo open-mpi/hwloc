@@ -1,5 +1,5 @@
-# Copyright © 2009 INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009      INRIA, Université Bordeaux 1
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 
@@ -25,20 +25,19 @@ DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 # tree (e.g., everything in the man and latex directories).
 #
 
+PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png
 image_built_sources = images/diagram.png images/diagram.eps
 
 EXTRA_DIST = \
         hwloc.doxy \
         doxygen.css \
         doxygen.cfg \
-        images/dudley.png \
-        images/emmett.png \
-        images/hagrid.png \
         images/diagram.fig \
         www.open-mpi.org.cfg \
         www.open-mpi.org-css.inc \
         www.open-mpi.org-footer.inc \
         www.open-mpi.org-header.inc \
+        $(PREBUILT_IMAGES) \
         $(image_built_sources)
 
 #
@@ -96,7 +95,7 @@ endif
 #
 
 if HWLOC_BUILD_DOXYGEN
-$(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs)
+$(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
 	-sed -i \
@@ -135,10 +134,12 @@ if HWLOC_DOXYGEN_BROKEN_SHORT_NAMES
 	-@mv -f $(DOX_DIR)/latex/tools.tex $(DOX_DIR)/latex/a00002.tex
 	-@mv -f $(DOX_DIR)/html/envvar.html $(DOX_DIR)/html/a00003.html
 	-@mv -f $(DOX_DIR)/latex/envvar.tex $(DOX_DIR)/latex/a00003.tex
-	-@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00004.html
-	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00004.tex
-	-@mv -f $(DOX_DIR)/html/switchfromplpa.html $(DOX_DIR)/html/a00005.html
-	-@mv -f $(DOX_DIR)/latex/switchfromplpa.tex $(DOX_DIR)/latex/a00005.tex
+	-@mv -f $(DOX_DIR)/html/threadsafety.html $(DOX_DIR)/html/a00004.html
+	-@mv -f $(DOX_DIR)/latex/threadsafety.tex $(DOX_DIR)/latex/a00004.tex
+	-@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00005.html
+	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00005.tex
+	-@mv -f $(DOX_DIR)/html/switchfromplpa.html $(DOX_DIR)/html/a00006.html
+	-@mv -f $(DOX_DIR)/latex/switchfromplpa.tex $(DOX_DIR)/latex/a00006.tex
 endif
 endif
 
@@ -232,6 +233,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CORE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MACHINE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MISC.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_GROUP.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_NODE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PU.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
@@ -333,7 +335,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_machine_attr_s.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_misc_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_group_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_memory_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3 \
@@ -370,6 +372,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_discovery_support.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_binding.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
@@ -414,10 +418,10 @@ endif
 # Make sure that the documentation example works
 #
 
-if HWLOC_BUILD_STANDALONE
+if HWLOC_BUILD_TESTS
 TESTS = hwloc-hello
 check_PROGRAMS = $(TESTS)
-endif
+endif HWLOC_BUILD_TESTS
 
 hwloc_hello_LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 hwloc_hello_DEPENDENCIES = $(hwloc_hello_LDADD)

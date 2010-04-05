@@ -103,12 +103,21 @@ typedef enum {
 			  * thus be used as fallback when others are not.
 			  */
 
-  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
+  HWLOC_OBJ_GROUP,	/**< \brief Group objects.
 			  * Objects which do not fit in the above but are
 			  * detected by hwloc and are useful to take into
 			  * account for affinity. For instance, some OSes
 			  * expose their arbitrary processors aggregation this
-			  * way.
+			  * way.  And hwloc may insert such objects to group
+			  * NUMA nodes according to their distances.
+			  *
+			  * These objects are ignored when they do not bring
+			  * any structure.
+			  */
+
+  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
+			  * Objects without particular meaning, that can e.g. be
+			  * added by the application for its own use.
 			  */
 
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge.
@@ -141,6 +150,11 @@ typedef enum {
  */
 HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2) __hwloc_attribute_const;
 
+enum hwloc_compare_types_e {
+    HWLOC_TYPE_UNORDERED = INT_MAX	/**< \brief Value returned by hwloc_compare_types when types can not be compared. \hideinitializer */
+};
+
+
 typedef enum hwloc_obj_bridge_type_e {
   HWLOC_OBJ_BRIDGE_HOST,	/**< \brief Host-side of a bridge, only possible upstream. */
   HWLOC_OBJ_BRIDGE_PCI,		/**< \brief PCI-side of a bridge. */
@@ -150,13 +164,8 @@ typedef enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device. */
   HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device. */
   HWLOC_OBJ_OSDEV_INFINIBAND,	/**< \brief Operating system infiniband device. */
-  HWLOC_OBJ_OSDEV_DMA,	/**< \brief Operating system dma device. */
+  HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma device. */
 } hwloc_obj_osdev_type_t;
-
-/** \brief Value returned by hwloc_compare_types when types can not be compared. */
-enum {
-    HWLOC_TYPE_UNORDERED = INT_MAX
-};
 
 /** @} */
 
@@ -319,10 +328,10 @@ union hwloc_obj_attr_u {
     char *dmi_board_vendor;		  /**< \brief DMI board vendor name */
     char *dmi_board_name;		  /**< \brief DMI board model name */
   } machine;
-  /** \brief Misc-specific Object Attributes */
-  struct hwloc_misc_attr_s {
-    unsigned depth;			  /**< \brief Depth of misc object */
-  } misc;
+  /** \brief Group-specific Object Attributes */
+  struct hwloc_group_attr_s {
+    unsigned depth;			  /**< \brief Depth of group object */
+  } group;
   /** \brief PCI Device specific Object Attributes */
   struct hwloc_pcidev_attr_u {
     unsigned short domain;
@@ -448,16 +457,19 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t top
  * Flags should be given to hwloc_topology_set_flags().
  */
 enum hwloc_topology_flags_e {
-  /* \brief Detect the whole system, ignore reservations and offline settings.
+  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
+ /**< \brief Detect the whole system, ignore reservations and offline settings.
+   * \hideinitializer
    *
    * Gather all resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cpusets and gather all processors and memory nodes,
    * and ignore the fact that some resources may be offline.
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
 
-  /* \brief Assume that the selected backend provides the topology for the
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
+ /**< \brief Assume that the selected backend provides the topology for the
    * system on which we are running.
+   * \hideinitializer
    *
    * This forces hwloc_topology_is_thissystem to return 1, i.e. makes hwloc assume that
    * the selected backend provides the topology for the system on which we are running,
@@ -473,7 +485,6 @@ enum hwloc_topology_flags_e {
    * save it to an XML file, and quickly reload it later through the XML
    * backend, but still having binding functions actually do bind.
    */
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
 
   /* \brief Detect the whole PCI hierarchy.
    *
@@ -537,7 +548,9 @@ HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topo
  * which should be a comma separated string of numbers describing
  * the arity of each level.
  * Each number may be prefixed with a type and a colon to enforce the type
- * of a level.
+ * of a level.  If only some level types are enforced, hwloc will try to
+ * choose the other types according to usual topologies, but it may fail
+ * and you may have to specify more level types manually.
  *
  * \note For conveniency, this backend provides empty binding hooks which just
  * return success.
@@ -557,42 +570,44 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
+/** \brief Flags describing actual discovery support for this topology. */
+struct hwloc_topology_discovery_support {
+  /** \brief Detecting the number of PU objects is supported. */
+  unsigned char pu;
+};
+
+/** \brief Flags describing actual binding support for this topology. */
+struct hwloc_topology_cpubind_support {
+  /** Binding the whole current process is supported.  */
+  unsigned char set_thisproc_cpubind;
+  /** Getting the binding of the whole current process is supported.  */
+  unsigned char get_thisproc_cpubind;
+  /** Binding a whole given process is supported.  */
+  unsigned char set_proc_cpubind;
+  /** Getting the binding of a whole given process is supported.  */
+  unsigned char get_proc_cpubind;
+  /** Binding the current thread only is supported.  */
+  unsigned char set_thisthread_cpubind;
+  /** Getting the binding of the current thread only is supported.  */
+  unsigned char get_thisthread_cpubind;
+  /** Binding a given thread only is supported.  */
+  unsigned char set_thread_cpubind;
+  /** Getting the binding of a given thread only is supported.  */
+  unsigned char get_thread_cpubind;
+};
+
 /** \brief Set of flags describing actual support for this topology.
  *
  * This is retrieved with hwloc_topology_get_support() and will be valid until
- * the topology object is destroyed.
+ * the topology object is destroyed.  Note: the values are correct only after
+ * discovery.
  */
 struct hwloc_topology_support {
-  /** \brief Flags describing actual discovery support for this topology. */
-  struct {
-    /* \brief Detecting the number of PU objects is supported. */
-    unsigned int pu:1;
-    unsigned int pad:31;
-  } discovery;
-
-  /** \brief Flags describing actual binding support for this topology. */
-  struct {
-    /** Binding the whole current process is supported.  */
-    unsigned int set_thisproc_cpubind:1;
-    /** Getting the binding of the whole current process is supported.  */
-    unsigned int get_thisproc_cpubind:1;
-    /** Binding a whole given process is supported.  */
-    unsigned int set_proc_cpubind:1;
-    /** Getting the binding of a whole given process is supported.  */
-    unsigned int get_proc_cpubind:1;
-    /** Binding the current thread only is supported.  */
-    unsigned int set_thisthread_cpubind:1;
-    /** Getting the binding of the current thread only is supported.  */
-    unsigned int get_thisthread_cpubind:1;
-    /** Binding a given thread only is supported.  */
-    unsigned int set_thread_cpubind:1;
-    /** Getting the binding of a given thread only is supported.  */
-    unsigned int get_thread_cpubind:1;
-    unsigned int pad:24;
-  } cpubind;
+  struct hwloc_topology_discovery_support *discovery;
+  struct hwloc_topology_cpubind_support *cpubind;
 };
 
-/** \brief Retrieve the OR'ed flags of topology support. */
+/** \brief Retrieve the topology support. */
 HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
 
 /** @} */
@@ -655,9 +670,10 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  */
 HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
-enum {
-    HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. */
-    HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. */
+
+enum hwloc_get_type_depth_e {
+    HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. \hideinitializer */
 };
 
 /** \brief Returns the type of objects at depth \p depth.
@@ -833,9 +849,12 @@ HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t
  */
 typedef enum {
   HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
-                                   * This may not be supported by some OSes (e.g. Linux). */
-  HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process */
+                                   * This may not be supported by some OSes (e.g. Linux).
+                                   * \hideinitializer */
+  HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
+                                   * \hideinitializer */
   HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS.
+                                   * \hideinitializer
                                    *
                                    * By default, when the designated CPUs are
                                    * all busy while other CPUs are idle, OSes

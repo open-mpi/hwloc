@@ -45,8 +45,12 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
   unsigned index = logical ? l->logical_index : l->os_index;
   const char *indexprefix = logical ? " #" :  " p#";
   if (show_cpuset < 2) {
-    hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
-    fprintf(output, "%s", type);
+    if (l->type == HWLOC_OBJ_MISC && l->name)
+      fprintf(output, "%s", l->name);
+    else {
+      hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
+      fprintf(output, "%s", type);
+    }
     if (l->depth != 0 && index != (unsigned)-1
         && l->type != HWLOC_OBJ_PCI_DEVICE
         && (l->type != HWLOC_OBJ_BRIDGE || l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
@@ -60,7 +64,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
       fprintf(output, " (%s%s%s)",
 	      phys, separator, attr);
     }
-    if ((l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2) && l->name)
+    if ((l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2) && l->name && l->type != HWLOC_OBJ_MISC)
       fprintf(output, " \"%s\"", l->name);
   }
   if (!l->cpuset)
