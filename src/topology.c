@@ -2183,8 +2183,6 @@ hwloc_topology_check(struct hwloc_topology *topology)
   for(j=0; j<hwloc_get_nbobjs_by_depth(topology, depth-1); j++) {
     obj = hwloc_get_obj_by_depth(topology, depth-1, j);
     assert(obj);
-    assert(obj->arity == 0);
-    assert(obj->children == NULL);
     /* bottom-level object must always be PU */
     assert(obj->type == HWLOC_OBJ_PU);
   }
