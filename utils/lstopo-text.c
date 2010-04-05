@@ -62,7 +62,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
       fprintf(output, " (%s%s%s)",
 	      phys, separator, attr);
     }
-    if (verbose_mode >= 2 && l->name)
+    if (verbose_mode >= 2 && l->name && l->type != HWLOC_OBJ_MISC)
       fprintf(output, " \"%s\"", l->name);
   }
   if (!l->cpuset)
