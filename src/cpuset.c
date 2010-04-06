@@ -22,6 +22,8 @@
  *
  * - optimize some stuff (see TODO below)
  * - have a way to change the initial allocation size
+ * - preallocate inside the cpuset structure (so that the whole structure is a cacheline for instance)
+ *   and allocate a dedicated array only later when reallocating larger
  */
 
 /* magic number */
@@ -417,6 +419,7 @@ void hwloc_cpuset_set(struct hwloc_cpuset_s * set, unsigned cpu)
 void hwloc_cpuset_set_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsigned endcpu)
 {
 	unsigned i;
+	unsigned beginset,endset;
 
 	HWLOC__CPUSET_CHECK(set);
 
@@ -431,9 +434,20 @@ void hwloc_cpuset_set_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 		return;
 	hwloc_cpuset_realloc_by_cpu_index(set, endcpu);
 
+	beginset = HWLOC_CPUSUBSET_INDEX(begincpu);
+	endset = HWLOC_CPUSUBSET_INDEX(endcpu);
+	for(i=beginset+1; i<endset; i++)
+		HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_FULL;
 	/* TODO: optimize */
-	for (i=begincpu; i<=endcpu; i++)
-		HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_VAL(i);
+	if (beginset == endset) {
+		for(i=begincpu; i<=endcpu; i++)
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_VAL(i);
+	} else {
+		for(i=begincpu; i<(beginset+1)*HWLOC_BITS_PER_LONG; i++)
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_VAL(i);
+		for(i=(endcpu & ~31); i<=endcpu; i++)
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_VAL(i);
+	}
 }
 
 void hwloc_cpuset_clr(struct hwloc_cpuset_s * set, unsigned cpu)
@@ -451,6 +465,7 @@ void hwloc_cpuset_clr(struct hwloc_cpuset_s * set, unsigned cpu)
 void hwloc_cpuset_clr_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsigned endcpu)
 {
 	unsigned i;
+	unsigned beginset,endset;
 
 	HWLOC__CPUSET_CHECK(set);
 
@@ -465,9 +480,20 @@ void hwloc_cpuset_clr_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 		return;
 	hwloc_cpuset_realloc_by_cpu_index(set, endcpu);
 
+	beginset = HWLOC_CPUSUBSET_INDEX(begincpu);
+	endset = HWLOC_CPUSUBSET_INDEX(endcpu);
+	for(i=beginset+1; i<endset; i++)
+		HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_ZERO;
 	/* TODO: optimize */
-	for (i=begincpu; i<=endcpu; i++)
-		HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_VAL(i);
+	if (beginset == endset) {
+		for(i=begincpu; i<=endcpu; i++)
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_VAL(i);
+	} else {
+		for(i=begincpu; i<(beginset+1)*HWLOC_BITS_PER_LONG; i++)
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_VAL(i);
+		for(i=(endcpu & ~31); i<=endcpu; i++)
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_VAL(i);
+	}
 }
 
 int hwloc_cpuset_isset(const struct hwloc_cpuset_s * set, unsigned cpu)
