@@ -50,13 +50,14 @@ struct hwloc_cpuset_s {
 /* extract a subset from a set using an index or a cpu */
 #define HWLOC_CPUSUBSET_SUBSET(set,x)		((set)->ulongs[x])
 #define HWLOC_CPUSUBSET_INDEX(cpu)		((cpu)/(HWLOC_BITS_PER_LONG))
+#define HWLOC_CPUSUBSET_CPU_ULBIT(cpu)		((cpu)%(HWLOC_BITS_PER_LONG))
 #define HWLOC_CPUSUBSET_CPUSUBSET(set,cpu)	HWLOC_CPUSUBSET_SUBSET(set,HWLOC_CPUSUBSET_INDEX(cpu))
 
 /* predefined subset values */
-#define HWLOC_CPUSUBSET_VAL(cpu)		(1UL<<((cpu)%(HWLOC_BITS_PER_LONG)))
 #define HWLOC_CPUSUBSET_ZERO			0UL
-#define HWLOC_CPUSUBSET_FULL			~0UL
-
+#define HWLOC_CPUSUBSET_FULL			(~0UL)
+#define HWLOC_CPUSUBSET_ULBIT(bit)		(1UL<<(bit))
+#define HWLOC_CPUSUBSET_CPU(cpu)		HWLOC_CPUSUBSET_ULBIT(HWLOC_CPUSUBSET_CPU_ULBIT(cpu))
 
 struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 {
@@ -392,7 +393,7 @@ void hwloc_cpuset_cpu(struct hwloc_cpuset_s * set, unsigned cpu)
 
 	hwloc_cpuset_reset_by_cpu_index(set, cpu);
 	hwloc_cpuset__zero(set);
-	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) |= HWLOC_CPUSUBSET_VAL(cpu);
+	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) |= HWLOC_CPUSUBSET_CPU(cpu);
 }
 
 void hwloc_cpuset_all_but_cpu(struct hwloc_cpuset_s * set, unsigned cpu)
@@ -401,7 +402,7 @@ void hwloc_cpuset_all_but_cpu(struct hwloc_cpuset_s * set, unsigned cpu)
 
 	hwloc_cpuset_reset_by_cpu_index(set, cpu);
 	hwloc_cpuset__fill(set);
-	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) &= ~HWLOC_CPUSUBSET_VAL(cpu);
+	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) &= ~HWLOC_CPUSUBSET_CPU(cpu);
 }
 
 void hwloc_cpuset_set(struct hwloc_cpuset_s * set, unsigned cpu)
@@ -413,7 +414,7 @@ void hwloc_cpuset_set(struct hwloc_cpuset_s * set, unsigned cpu)
 		return;
 
 	hwloc_cpuset_realloc_by_cpu_index(set, cpu);
-	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) |= HWLOC_CPUSUBSET_VAL(cpu);
+	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) |= HWLOC_CPUSUBSET_CPU(cpu);
 }
 
 void hwloc_cpuset_set_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsigned endcpu)
@@ -441,12 +442,12 @@ void hwloc_cpuset_set_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 	/* TODO: optimize */
 	if (beginset == endset) {
 		for(i=begincpu; i<=endcpu; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_VAL(i);
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_CPU(i);
 	} else {
 		for(i=begincpu; i<(beginset+1)*HWLOC_BITS_PER_LONG; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_VAL(i);
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_CPU(i);
 		for(i=(endcpu & ~31); i<=endcpu; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_VAL(i);
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_CPU(i);
 	}
 }
 
@@ -459,7 +460,7 @@ void hwloc_cpuset_clr(struct hwloc_cpuset_s * set, unsigned cpu)
 		return;
 
 	hwloc_cpuset_realloc_by_cpu_index(set, cpu);
-	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) &= ~HWLOC_CPUSUBSET_VAL(cpu);
+	HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) &= ~HWLOC_CPUSUBSET_CPU(cpu);
 }
 
 void hwloc_cpuset_clr_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsigned endcpu)
@@ -487,12 +488,12 @@ void hwloc_cpuset_clr_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 	/* TODO: optimize */
 	if (beginset == endset) {
 		for(i=begincpu; i<=endcpu; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_VAL(i);
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_CPU(i);
 	} else {
 		for(i=begincpu; i<(beginset+1)*HWLOC_BITS_PER_LONG; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_VAL(i);
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_CPU(i);
 		for(i=(endcpu & ~31); i<=endcpu; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_VAL(i);
+			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_CPU(i);
 	}
 }
 
@@ -500,7 +501,7 @@ int hwloc_cpuset_isset(const struct hwloc_cpuset_s * set, unsigned cpu)
 {
 	HWLOC__CPUSET_CHECK(set);
 
-	return cpu >= set->ulongs_count * HWLOC_BITS_PER_LONG ? set->infinite : ((HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) & HWLOC_CPUSUBSET_VAL(cpu)) != 0);
+	return cpu >= set->ulongs_count * HWLOC_BITS_PER_LONG ? set->infinite : ((HWLOC_CPUSUBSET_CPUSUBSET(set, cpu) & HWLOC_CPUSUBSET_CPU(cpu)) != 0);
 }
 
 int hwloc_cpuset_iszero(const struct hwloc_cpuset_s *set)
@@ -794,7 +795,7 @@ int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
 		/* if the prev cpu is in the same word as the possible next one,
 		   we need to mask out previous cpus */
 		if (HWLOC_CPUSUBSET_INDEX(prev_cpu) == i)
-			w &= ~((HWLOC_CPUSUBSET_VAL(prev_cpu) << 1) - 1);
+			w &= ~((HWLOC_CPUSUBSET_CPU(prev_cpu) << 1) - 1);
 
 		if (w)
 			return hwloc_ffsl(w) - 1 + HWLOC_BITS_PER_LONG*i;
@@ -819,7 +820,7 @@ void hwloc_cpuset_singlify(struct hwloc_cpuset_s * set)
 			unsigned long w = HWLOC_CPUSUBSET_SUBSET(set, i);
 			if (w) {
 				int _ffs = hwloc_ffsl(w);
-				HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_VAL(_ffs-1);
+				HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_CPU(_ffs-1);
 				found = 1;
 			}
 		}
