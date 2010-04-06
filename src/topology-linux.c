@@ -999,8 +999,6 @@ out:
   return info;
 }
 
-#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
-
 static void
 hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
 				    const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name,
@@ -1010,6 +1008,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
   char *cpuset_mask;
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
+  hwloc_cpuset_t tmpset;
 
   cpuset_mask = hwloc_read_linux_cpuset_mask(cgroup_mntpnt, cpuset_mntpnt, cpuset_name,
 					     attr_name, topology->backend_params.sysfs.root_fd);
@@ -1045,12 +1044,12 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
     current = comma+1;
   }
 
-  /* disable after last enabled-segment */
-  nextfirst = HWLOC_NBMAXCPUS;
-  if (prevlast+1 <= nextfirst-1) {
-    hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
-    hwloc_cpuset_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
-  }
+  hwloc_debug("%s [%d:...] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
+  /* no easy way to clear until the infinity */
+  tmpset = hwloc_cpuset_alloc();
+  hwloc_cpuset_set_range(tmpset, 0, prevlast);
+  hwloc_cpuset_and(admin_enabled_cpus_set, admin_enabled_cpus_set, tmpset);
+  hwloc_cpuset_free(tmpset);
 
   free(cpuset_mask);
 }
@@ -1424,6 +1423,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 #      define PROCESSOR	"processor"
 #      define PHYSID "physical id"
 #      define COREID "core id"
+#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 static int
 look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	     hwloc_cpuset_t online_cpuset)
