@@ -17,7 +17,6 @@
 
 /* TODO
  *
- * - convert infinite-flag into 0xf...f, prefixing strings
  * - drop NBMAXCPUS entirely in other files
  *
  * - have a way to change the initial allocation size
@@ -191,7 +190,6 @@ void hwloc_cpuset_copy(struct hwloc_cpuset_s * dst, const struct hwloc_cpuset_s 
 /* Strings always use 32bit groups */
 #define HWLOC_PRIxCPUSUBSET		"%08lx"
 #define HWLOC_CPUSET_SUBSTRING_SIZE	32
-#define HWLOC_CPUSET_SUBSTRING_COUNT	((HWLOC_NBMAXCPUS+HWLOC_CPUSET_SUBSTRING_SIZE-1)/HWLOC_CPUSET_SUBSTRING_SIZE)
 #define HWLOC_CPUSET_SUBSTRING_LENGTH	(HWLOC_CPUSET_SUBSTRING_SIZE/4)
 #define HWLOC_CPUSET_STRING_PER_LONG	(HWLOC_BITS_PER_LONG/HWLOC_CPUSET_SUBSTRING_SIZE)
 
@@ -215,6 +213,18 @@ int hwloc_cpuset_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
   /* mark the end in case we do nothing later */
   if (buflen > 0)
     tmp[0] = '\0';
+
+  if (set->infinite) {
+    res = hwloc_snprintf(tmp, size, "0xf...f");
+    needcomma = 1;
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= size)
+      res = size>0 ? size - 1 : 0;
+    tmp += res;
+    size -= res;
+  }
 
   i=set->ulongs_count-1;
   while (i>=0 || accumed) {
@@ -277,16 +287,23 @@ int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_re
   const char * current = string;
   unsigned long accum = 0;
   int count=0;
+  int infinite = 0;
 
   /* count how many substrings there are */
   count++;
   while ((current = strchr(current+1, ',')) != NULL)
     count++;
 
+  current = string;
+  if (!strncmp("0xf...f,", current, 8)) {
+    infinite = 1;
+    current += 8;
+    count--;
+  }
+
   hwloc_cpuset_reset_by_ulongs(set, (count + HWLOC_CPUSET_STRING_PER_LONG - 1) / HWLOC_CPUSET_STRING_PER_LONG);
   set->infinite = 0;
 
-  current = string;
   while (*current != '\0') {
     unsigned long val;
     char *next;
@@ -309,6 +326,8 @@ int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_re
     }
     current = (const char*) next+1;
   }
+
+  set->infinite = infinite; /* set at the end, to avoid spurious realloc with filled new ulongs */
 
   return 0;
 
