@@ -720,22 +720,20 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 }
 
 
-#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
-
 /* kernel cpumaps are composed of an array of 32bits cpumasks */
 #define KERNEL_CPU_MASK_BITS 32
 #define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
-#define MAX_KERNEL_CPU_MASK ((HWLOC_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
 int
 hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
 {
-  unsigned long maps[MAX_KERNEL_CPU_MASK];
+  unsigned long *maps;
   unsigned long map;
   int nr_maps = 0;
-  int n;
-
+  static int nr_maps_allocated = 8; /* only compute the power-of-two above the kernel cpumask size once */
   int i;
+
+  maps = malloc(nr_maps_allocated * sizeof(*maps));
 
   /* reset to zero first */
   hwloc_cpuset_zero(set);
@@ -743,8 +741,10 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
   /* parse the whole mask */
   while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
     {
-      if (nr_maps == MAX_KERNEL_CPU_MASK)
-        break; /* too many cpumasks in this cpumap */
+      if (nr_maps == nr_maps_allocated) {
+	nr_maps_allocated *= 2;
+	maps = realloc(maps, nr_maps_allocated * sizeof(*maps));
+      }
 
       if (!map && !nr_maps)
 	/* ignore the first map if it's empty */
@@ -755,15 +755,13 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
       nr_maps++;
     }
 
-  /* check that the map can be stored in our cpuset */
-  n = nr_maps*KERNEL_CPU_MASK_BITS;
-  if (n > HWLOC_NBMAXCPUS)
-    n = HWLOC_NBMAXCPUS;
-
   /* convert into a set */
-  for(i=0; i<n; i++)
+  /* FIXME: optimize using hwloc_cpuset_ith_long? */
+  for(i=0; i<nr_maps*KERNEL_CPU_MASK_BITS; i++)
     if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
       hwloc_cpuset_set(set, i);
+
+  free(maps);
 
   return 0;
 }
@@ -1000,6 +998,8 @@ gotfile:
 out:
   return info;
 }
+
+#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 
 static void
 hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
