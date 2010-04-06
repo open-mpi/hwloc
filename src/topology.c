@@ -1942,6 +1942,8 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 {
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
+  free(topology->support.discovery);
+  free(topology->support.cpubind);
   free(topology);
 }
 
