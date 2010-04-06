@@ -1241,9 +1241,6 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	continue;
       cpu = strtoul(dirent->d_name+3, NULL, 0);
 
-      if (cpu >= HWLOC_NBMAXCPUS)
-        continue;
-
       /* Maybe we don't have topology information but at least it exists */
       hwloc_cpuset_set(topology->levels[0][0]->complete_cpuset, cpu);
 

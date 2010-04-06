@@ -27,7 +27,7 @@ hwloc_freebsd_bsd2hwloc(hwloc_cpuset_t hwloc_cpuset, const cpuset_t *cpuset)
 {
   unsigned cpu;
   hwloc_cpuset_zero(hwloc_cpuset);
-  for (cpu = 0; cpu < HWLOC_NBMAXCPUS && cpu < CPU_SETSIZE; cpu++)
+  for (cpu = 0; cpu < CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, cpuset))
       hwloc_cpuset_set(hwloc_cpuset, cpu);
 }
@@ -37,7 +37,7 @@ hwloc_freebsd_hwloc2bsd(hwloc_const_cpuset_t hwloc_cpuset, cpuset_t *cpuset)
 {
   unsigned cpu;
   CPU_ZERO(cpuset);
-  for (cpu = 0; cpu < HWLOC_NBMAXCPUS && cpu < CPU_SETSIZE; cpu++)
+  for (cpu = 0; cpu < CPU_SETSIZE; cpu++)
     if (hwloc_cpuset_isset(hwloc_cpuset, cpu))
       CPU_SET(cpu, cpuset);
 }
