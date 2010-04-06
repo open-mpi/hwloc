@@ -1722,12 +1722,28 @@ hwloc_discover(struct hwloc_topology *topology)
   }
 }
 
+/* To be before discovery is actually launched,
+ * Resets everything in case a previous load initialized some stuff.
+ */
 static void
 hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
   struct hwloc_obj *root_obj;
   int i;
 
+  /* reset support */
+  topology->set_thisproc_cpubind = NULL;
+  topology->get_thisproc_cpubind = NULL;
+  topology->set_thisthread_cpubind = NULL;
+  topology->get_thisthread_cpubind = NULL;
+  topology->set_proc_cpubind = NULL;
+  topology->get_proc_cpubind = NULL;
+#ifdef hwloc_thread_t
+  topology->set_thread_cpubind = NULL;
+  topology->get_thread_cpubind = NULL;
+#endif
+  memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
+  memset(topology->support.cpubind, 0, sizeof(*topology->support.cpubind));
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
@@ -1765,18 +1781,8 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
   topology->pid = 0;
 
-  topology->set_thisproc_cpubind = NULL;
-  topology->get_thisproc_cpubind = NULL;
-  topology->set_thisthread_cpubind = NULL;
-  topology->get_thisthread_cpubind = NULL;
-  topology->set_proc_cpubind = NULL;
-  topology->get_proc_cpubind = NULL;
-#ifdef hwloc_thread_t
-  topology->set_thread_cpubind = NULL;
-  topology->get_thread_cpubind = NULL;
-#endif
-  topology->support.discovery = calloc(1, sizeof(*topology->support.discovery));
-  topology->support.cpubind = calloc(1, sizeof(*topology->support.cpubind));
+  topology->support.discovery = malloc(sizeof(*topology->support.discovery));
+  topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
 
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
