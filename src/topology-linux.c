@@ -192,8 +192,6 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 #endif
 }
 
-#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
-
 int
 hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_const_cpuset_t hwloc_set)
 {
@@ -205,13 +203,21 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   /* The resulting binding is always strict */
 
-#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
   cpu_set_t *plinux_set;
   unsigned cpu;
-  size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
+  int last;
+  size_t setsize;
   int err;
 
-  plinux_set = CPU_ALLOC(HWLOC_NBMAXCPUS);
+  last = hwloc_cpuset_last(hwloc_set);
+  if (last == -1) {
+    errno = -EINVAL;
+    return -1;
+  }
+
+  setsize = CPU_ALLOC_SIZE(last+1);
+  plinux_set = CPU_ALLOC(last+1);
 
   CPU_ZERO_S(setsize, plinux_set);
   hwloc_cpuset_foreach_begin(cpu, hwloc_set)
@@ -253,12 +259,17 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   int err;
   /* TODO Kerrighed */
 
-#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
   cpu_set_t *plinux_set;
   unsigned cpu;
-  size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
+  int last;
+  size_t setsize;
 
-  plinux_set = CPU_ALLOC(HWLOC_NBMAXCPUS);
+  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+  assert(last != -1);
+
+  setsize = CPU_ALLOC_SIZE(last+1);
+  plinux_set = CPU_ALLOC(last+1);
 
   err = sched_getaffinity(tid, setsize, plinux_set);
 
@@ -268,7 +279,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   }
 
   hwloc_cpuset_zero(hwloc_set);
-  for(cpu=0; cpu<HWLOC_NBMAXCPUS; cpu++)
+  for(cpu=0; cpu<last; cpu++)
     if (CPU_ISSET_S(cpu, setsize, plinux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
 
@@ -708,6 +719,8 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
   return 0;
 }
 
+
+#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 
 /* kernel cpumaps are composed of an array of 32bits cpumasks */
 #define KERNEL_CPU_MASK_BITS 32
