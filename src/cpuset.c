@@ -20,7 +20,6 @@
  * - convert infinite-flag into 0xf...f, prefixing strings
  * - drop NBMAXCPUS entirely in other files
  *
- * - optimize some stuff (see TODO below)
  * - have a way to change the initial allocation size
  * - preallocate inside the cpuset structure (so that the whole structure is a cacheline for instance)
  *   and allocate a dedicated array only later when reallocating larger
@@ -58,6 +57,9 @@ struct hwloc_cpuset_s {
 #define HWLOC_CPUSUBSET_FULL			(~0UL)
 #define HWLOC_CPUSUBSET_ULBIT(bit)		(1UL<<(bit))
 #define HWLOC_CPUSUBSET_CPU(cpu)		HWLOC_CPUSUBSET_ULBIT(HWLOC_CPUSUBSET_CPU_ULBIT(cpu))
+#define HWLOC_CPUSUBSET_ULBIT_TO(bit)		(HWLOC_CPUSUBSET_FULL>>(HWLOC_BITS_PER_LONG-1-(bit)))
+#define HWLOC_CPUSUBSET_ULBIT_FROM(bit)		(HWLOC_CPUSUBSET_FULL<<(bit))
+#define HWLOC_CPUSUBSET_ULBIT_FROMTO(begin,end)	(HWLOC_CPUSUBSET_ULBIT_TO(end) & HWLOC_CPUSUBSET_ULBIT_FROM(begin))
 
 struct hwloc_cpuset_s * hwloc_cpuset_alloc(void)
 {
@@ -439,15 +441,11 @@ void hwloc_cpuset_set_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 	endset = HWLOC_CPUSUBSET_INDEX(endcpu);
 	for(i=beginset+1; i<endset; i++)
 		HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_FULL;
-	/* TODO: optimize */
 	if (beginset == endset) {
-		for(i=begincpu; i<=endcpu; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_CPU(i);
+		HWLOC_CPUSUBSET_SUBSET(set, beginset) |= HWLOC_CPUSUBSET_ULBIT_FROMTO(HWLOC_CPUSUBSET_CPU_ULBIT(begincpu), HWLOC_CPUSUBSET_CPU_ULBIT(endcpu));
 	} else {
-		for(i=begincpu; i<(beginset+1)*HWLOC_BITS_PER_LONG; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_CPU(i);
-		for(i=(endcpu & ~31); i<=endcpu; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) |= HWLOC_CPUSUBSET_CPU(i);
+		HWLOC_CPUSUBSET_SUBSET(set, beginset) |= HWLOC_CPUSUBSET_ULBIT_FROM(HWLOC_CPUSUBSET_CPU_ULBIT(begincpu));
+		HWLOC_CPUSUBSET_SUBSET(set, endset) |= HWLOC_CPUSUBSET_ULBIT_TO(HWLOC_CPUSUBSET_CPU_ULBIT(endcpu));
 	}
 }
 
@@ -485,15 +483,11 @@ void hwloc_cpuset_clr_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 	endset = HWLOC_CPUSUBSET_INDEX(endcpu);
 	for(i=beginset+1; i<endset; i++)
 		HWLOC_CPUSUBSET_SUBSET(set, i) = HWLOC_CPUSUBSET_ZERO;
-	/* TODO: optimize */
 	if (beginset == endset) {
-		for(i=begincpu; i<=endcpu; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_CPU(i);
+		HWLOC_CPUSUBSET_SUBSET(set, beginset) &= ~HWLOC_CPUSUBSET_ULBIT_FROMTO(HWLOC_CPUSUBSET_CPU_ULBIT(begincpu), HWLOC_CPUSUBSET_CPU_ULBIT(endcpu));
 	} else {
-		for(i=begincpu; i<(beginset+1)*HWLOC_BITS_PER_LONG; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_CPU(i);
-		for(i=(endcpu & ~31); i<=endcpu; i++)
-			HWLOC_CPUSUBSET_CPUSUBSET(set, i) &= ~HWLOC_CPUSUBSET_CPU(i);
+		HWLOC_CPUSUBSET_SUBSET(set, beginset) &= ~HWLOC_CPUSUBSET_ULBIT_FROM(HWLOC_CPUSUBSET_CPU_ULBIT(begincpu));
+		HWLOC_CPUSUBSET_SUBSET(set, endset) &= ~HWLOC_CPUSUBSET_ULBIT_TO(HWLOC_CPUSUBSET_CPU_ULBIT(endcpu));
 	}
 }
 
