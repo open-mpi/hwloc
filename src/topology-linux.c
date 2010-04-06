@@ -192,6 +192,8 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 #endif
 }
 
+#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
+
 int
 hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_const_cpuset_t hwloc_set)
 {

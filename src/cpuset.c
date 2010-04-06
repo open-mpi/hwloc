@@ -16,9 +16,6 @@
 #include <ctype.h>
 
 /* TODO
- *
- * - drop NBMAXCPUS entirely in other files
- *
  * - have a way to change the initial allocation size
  * - preallocate inside the cpuset structure (so that the whole structure is a cacheline for instance)
  *   and allocate a dedicated array only later when reallocating larger
