@@ -789,7 +789,7 @@ int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
 		/* if the prev cpu is in the same word as the possible next one,
 		   we need to mask out previous cpus */
 		if (HWLOC_CPUSUBSET_INDEX(prev_cpu) == i)
-			w &= ~((HWLOC_CPUSUBSET_CPU(prev_cpu) << 1) - 1);
+			w &= ~HWLOC_CPUSUBSET_ULBIT_TO(HWLOC_CPUSUBSET_CPU_ULBIT(prev_cpu));
 
 		if (w)
 			return hwloc_ffsl(w) - 1 + HWLOC_BITS_PER_LONG*i;
