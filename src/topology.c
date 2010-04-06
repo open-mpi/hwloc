@@ -1886,7 +1886,6 @@ hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t typ
     return -1;
   }
 
-
   if (type == HWLOC_OBJ_PU) {
     /* we need the PU level */
     errno = EINVAL;
@@ -1999,6 +1998,8 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_xml_init(topology, xmlpath_env);
   }
 #endif
+
+  /* always apply non-FORCE THISSYSTEM since it was explicitly designed to override setups from other backends */
   local_env = getenv("HWLOC_THISSYSTEM");
   if (local_env)
     topology->is_thissystem = atoi(local_env);
