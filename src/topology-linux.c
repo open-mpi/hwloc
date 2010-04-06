@@ -279,7 +279,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   }
 
   hwloc_cpuset_zero(hwloc_set);
-  for(cpu=0; cpu<last; cpu++)
+  for(cpu=0; cpu<=last; cpu++)
     if (CPU_ISSET_S(cpu, setsize, plinux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
 
