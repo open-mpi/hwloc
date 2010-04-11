@@ -41,8 +41,8 @@ hwloc supports the following operating systems:
 
 <ul>
 <li>Linux (including old kernels not having sysfs topology
-information, with knowledge of cpusets, offline cpus, and Kerrighed
-support)</li>
+information, with knowledge of cpusets, offline cpus, ScaleMP vSMP,
+and Kerrighed support)</li>
 <li>Solaris</li>
 <li>AIX</li>
 <li>Darwin / OS X</li>
