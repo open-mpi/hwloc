@@ -138,7 +138,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   -s --silent           Opposite of --verbose (default)\n");
   fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
-  fprintf (where, "   --only <type>         Only show the given type\n");
+  fprintf (where, "   --only <type>         Only show the given type in the text output\n");
   fprintf (where, "   --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "   --no-caches           Do not show caches\n");
   fprintf (where, "   --no-useless-caches   Do not show caches which do not have a hierarchical\n"
