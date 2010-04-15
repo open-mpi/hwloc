@@ -139,6 +139,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
   fprintf (where, "   --only <type>         Only show the given type\n");
+  fprintf (where, "   --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "   --no-caches           Do not show caches\n");
   fprintf (where, "   --no-useless-caches   Do not show caches which do not have a hierarchical\n"
                   "                         impact\n");
@@ -215,6 +216,14 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
         show_only = hwloc_obj_type_of_string(argv[2]);
+	opt = 1;
+      }
+      else if (!strcmp (argv[1], "--ignore")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        hwloc_topology_ignore_type(topology, hwloc_obj_type_of_string(argv[2]));
 	opt = 1;
       }
       else if (!strcmp (argv[1], "--no-caches"))
