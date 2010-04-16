@@ -16,18 +16,20 @@ dnl Copyright © 2006-2010  Cisco Systems, Inc.  All rights reserved.
 # 1. Configuration prefix
 # 2. What to do upon success
 # 3. What to do upon failure
+# 4. If non-empty, print the announcement banner
 #
 AC_DEFUN([HWLOC_SETUP_CORE],[
     AC_REQUIRE([AC_CANONICAL_TARGET])
     AC_REQUIRE([AC_PROG_CC])
     AC_REQUIRE([AM_PROG_CC_C_O])
 
-    cat <<EOF
+    AS_IF([test "x$4" != "x"],
+          [cat <<EOF
 
 ###
 ### Configuring hwloc core
 ###
-EOF
+EOF])
 
     # We want new Libtool.  None of that old stuff.  Pfft.    
     LT_PREREQ([2.2.6])
@@ -617,12 +619,11 @@ AC_DEFUN([_HWLOC_CHECK_DECL], [
   AC_MSG_CHECKING([whether function $1 is declared])
   AC_REQUIRE([AC_PROG_CC])
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT([$4])],[$1(1,2,3,4,5,6,7,8,9,10);])],
-    ac_res=no
-    $3,
-    ac_res=yes
-    $2
+    [AC_MSG_RESULT([no])
+     $3],
+    [AC_MSG_RESULT([yes])
+     $2]
   )
-  AC_MSG_RESULT([$ac_res])
 ])
 
 #-----------------------------------------------------------------------

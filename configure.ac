@@ -119,7 +119,7 @@ AS_IF([test "$enable_embedded_mode" != "yes"],
       [HWLOC_BUILD_STANDALONE])
 
 # Setup the hwloc core
-HWLOC_SETUP_CORE([], [], [hwloc_setup=unhappy])
+HWLOC_SETUP_CORE([], [], [hwloc_setup=unhappy], [1])
 AS_IF([test "$hwloc_setup" = "unhappy"],
       [AC_MSG_ERROR([Cannot continue])])
 
