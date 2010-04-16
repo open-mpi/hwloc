@@ -1,7 +1,7 @@
 /* Example hwloc API program.
  *
  * Copyright © 2009 INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  *
  * hwloc-hello.c 
  */
@@ -36,7 +36,7 @@ int main(void)
     /* Allocate and initialize topology object. */
     hwloc_topology_init(&topology);
 
-    /* ... Optionally, put detection configuration here to e.g. ignore
+    /* ... Optionally, put detection configuration here to ignore
        some objects types, define a synthetic topology, etc....  
 
        The default is to detect all the objects of the machine that
@@ -50,9 +50,11 @@ int main(void)
        in case we need the topology depth later. */
     topodepth = hwloc_topology_get_depth(topology);
 
-    /* First example:
-     * Walk the topology with an array style, from level 0 (always the
-     * system level) to the lowest level (always the proc level). */
+    /*****************************************************************
+     * First example:
+     * Walk the topology with an array style, from level 0 (always
+     * the system level) to the lowest level (always the proc level).
+     *****************************************************************/
     for (depth = 0; depth < topodepth; depth++) {
         printf("*** Objects at level %d\n", depth);
         for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); 
@@ -64,13 +66,17 @@ int main(void)
         }
     }
 
-    /* Second example:
-     * Walk the topology with a tree style. */
+    /*****************************************************************
+     * Second example:
+     * Walk the topology with a tree style.
+     *****************************************************************/
     printf("*** Printing overall tree\n");
     print_children(topology, hwloc_get_root_obj(topology), 0);
 
-    /* Third example:
-     * Print the number of sockets. */
+    /*****************************************************************
+     * Third example:
+     * Print the number of sockets.
+     *****************************************************************/
     depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
     if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
         printf("*** The number of sockets is unknown\n");
@@ -79,9 +85,11 @@ int main(void)
                hwloc_get_nbobjs_by_depth(topology, depth));
     }
 
-    /* Fourth example:
-     * Compute the amount of cache that the first logical processor has above it.
-     */
+    /*****************************************************************
+     * Fourth example:
+     * Compute the amount of cache that the first logical processor
+     * has above it.
+     *****************************************************************/
     levels = 0;
     size = 0;
     for (obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_PU, 0);
@@ -91,13 +99,16 @@ int main(void)
         levels++;
         size += obj->attr->cache.size;
       }
-    printf("*** Logical processor 0 has %u caches totaling %luKB\n", levels, size / 1024);
+    printf("*** Logical processor 0 has %u caches totaling %luKB\n", 
+           levels, size / 1024);
 
-    /* Fifth example:
+    /*****************************************************************
+     * Fifth example:
      * Bind to only one thread of the last core of the machine.
      *
      * First find out where cores are, or else smaller sets of CPUs if
-     * the OS doesn't have the notion of a "core". */
+     * the OS doesn't have the notion of a "core".
+     *****************************************************************/
     depth = hwloc_get_type_or_below_depth(topology, HWLOC_OBJ_CORE);
 
     /* Get last core. */

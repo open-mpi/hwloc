@@ -597,9 +597,10 @@ For reference, \ref hwloc_topology_t modification operations include
 
 It can be desirable to include hwloc in a larger software package (be
 sure to check out the LICENSE file) so that users don't have to
-separately download and install it before installing your software
-(after all, hwloc is a tiny little project -- why make users bother
-with it?).
+separately download and install it before installing your software.
+This can be advantageous to ensure that your software uses a
+known-tested/good version of hwloc, or for use on systems that do not
+have hwloc pre-installed.
 
 When used in "embedded" mode, hwloc will:
 
@@ -609,23 +610,18 @@ When used in "embedded" mode, hwloc will:
 - not build <tt>libhwloc.*</tt> -- instead, it will build
   <tt>libhwloc_embedded.*</tt>
 
-JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS
-
-DO WE REALLY WANT hwloc.m4 EMBEDDING?  
-SEE http://www.open-mpi.org/community/lists/hwloc-devel/2010/04/0875.php
-
-JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS
-
-There are two ways to put hwloc into "embedded" mode.  From the
-configure command line:
+There are two ways to put hwloc into "embedded" mode.  The first is
+directly from the configure command line:
 
 \verbatim
 shell$ ./configure --enable-embedded-mode ...
 \endverbatim
 
-Or by directly integrating hwloc's m4 configure macro in your
-configure script and invoking a specific macro to enable the embedded
-mode (see below).
+The second requires that your software project uses the GNU Autoconf /
+Automake / Libtool tool chain to build your software.  If you do this,
+you can directly integrate hwloc's m4 configure macro into your
+configure script.  You can then invoke hwloc's configuration tests and
+build setup by calling an m4 macro (see below).
 
 \section embedding_m4 Using hwloc's m4 embedding capabilities
 
@@ -638,7 +634,8 @@ to build, you can use hwloc's embedded m4 capabilities.  We have
 tested the embedded m4 with projects that use Autoconf 2.65, Automake
 1.11.1, and Libtool 2.2.6b.  Slightly earlier versions of may also
 work but are untested.  Autoconf versions prior to 2.63 are almost
-certain to not work because hwloc uses macros introduced in 2.63.
+certain to not work because hwloc uses macros that were introduced in
+2.63.
 
 You can either copy all the config/hwloc*m4 files from the hwloc
 source tree to the directory where your project's m4 files reside, or
@@ -649,31 +646,33 @@ your Makefile.am's ACLOCAL_AMFLAGS).
 The following macros can then be used from your configure script (only
 HWLOC_INIT <em>must</em> be invoked if using the m4 macros):
 
-- HWLOC_SET_SYMBOL_PREFIX(foo_): Tells the hwloc to prefix all of
-  hwloc's types and public symbols with "foo"; meaning that function
-  hwloc_init() becomes foo_hwloc_init().  This is recommended behavior
-  if you are including hwloc in a larger project -- it is possible
-  that your software will be combined with other software that also
-  includes hwloc.  If you both use different symbol prefixes, there
-  will be no type/symbol clashes, and everything will compile and link
-  successfully.  If you both include hwloc and do not change the
-  symbol prefix, it is likely that you will get multiple symbol
-  definitions when linking if an external hwloc is linked against your
-  library / application.  Enum values are prefixed with an upper-case
-  translation if the prefix supplied.  For example,
-  HWLOC_SET_SYMBOL_PREFIX(foo_) will result in both foo_hwloc_init()
-  and FOO_HWLOC_OBJ_SYSTEM.
+- HWLOC_INIT(config-dir-prefix, action-upon-success,
+  action-upon-failure): Invoke the hwloc configuration tests and setup
+  the hwloc tree to build.  The first argument is the prefix to use
+  for AC_OUTPUT files -- it's where the hwloc tree is located relative
+  to <tt>$top_srcdir</tt>.  Hence, if your embedded hwloc is located
+  in the source tree at contrib/hwloc, you should pass
+  <tt>[contrib/hwloc]</tt> as the first argument.  If HWLOC_INIT and
+  the rest of <tt>configure</tt> completes successfully, then "make"
+  traversals of the hwloc tree with standard Automake targets (all,
+  clean, install, etc.) should behave as expected.  For example, it is
+  safe to list the hwloc directory in the SUBDIRS of a higher-level
+  Makefile.am.  <strong>NOTE: If the HWLOC_SET_SYMBOL_PREFIX macro is
+  used, it must be invoked <em>before</em> HWLOC_INIT.</strong>
 
-- HWLOC_INIT(config-dir-prefix, action-upon-success, action-upon-failure):
-  Invoke the hwloc tests and setup the hwloc tree to build.  A
-  traversal of "make" into the hwloc directory should build everything
-  (it is safe to list the hwloc directory in the SUBDIRS of a
-  higher-level Makefile.am, for example).  ***hwloc_INIT must be
-  invoked after the SET_SYMBOL_PREFIX macro.*** The first argument is
-  the prefix to use for AC_OUTPUT files -- it's where the hwloc tree
-  is located relative to $top_srcdir.  Hence, if your embedded hwloc
-  is located in the source tree at contrib/hwloc, you should pass
-  [contrib/hwloc] as the first argument.
+- HWLOC_SET_SYMBOL_PREFIX(foo_): Tells the hwloc to prefix all of
+  hwloc's types and public symbols with "foo_"; meaning that function
+  hwloc_init() becomes foo_hwloc_init().  Enum values are prefixed
+  with an upper-case translation if the prefix supplied;
+  HWLOC_OBJ_SYSTEM becomes FOO_HWLOC_OBJ_SYSTEM.  This is recommended
+  behavior if you are including hwloc in middleware -- it is possible
+  that your software will be combined with other software that links
+  to another copy of hwloc.  If both uses of hwloc utilize different
+  symbol prefixes, there will be no type/symbol clashes, and
+  everything will compile, link, and run successfully.  If you both
+  embed hwloc without changing the symbol prefix and also link against
+  an external hwloc, you may get multiple symbol definitions when
+  linking your final library or application.
 
 - HWLOC_DO_AM_CONDITIONALS: If you embed hwloc in a larger project and
   build it conditionally (e.g., if HWLOC_INIT is invoked
@@ -712,7 +711,7 @@ shell$ edit configure.ac
   3. Add error checking for happy=no case
 shell$ edit sandbox.c
   1. Add #include <hwloc.h>
-  2. Add calls to sandbox_hwloc_init()
+  2. Add calls to sandbox_hwloc_init() and other hwloc API functions
 \endverbatim
 
 Now you can bootstrap, configure, build, and run the sandbox as normal
