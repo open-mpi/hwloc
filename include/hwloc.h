@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -815,6 +815,9 @@ typedef enum {
 } hwloc_cpubind_policy_t;
 
 /** \brief Bind current process or thread on cpus given in cpuset \p set
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set,
 			    int policy);
