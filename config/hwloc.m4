@@ -285,7 +285,7 @@ EOF])
     LIBS=
     AC_CHECK_HEADERS([curses.h], [
       AC_CHECK_HEADERS([term.h], [
-        AC_SEARCH_LIBS([tparm], [termcap curses], [
+        AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
             AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
             AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
                       [Define to 1 if you have a library providing the termcap interface])
