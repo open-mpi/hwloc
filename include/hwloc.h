@@ -115,7 +115,7 @@ typedef enum {
 			  * any structure.
 			  */
 
-  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
+  HWLOC_OBJ_MISC 	/**< \brief Miscellaneous objects.
 			  * Objects without particular meaning, that can e.g. be
 			  * added by the application for its own use.
 			  */
@@ -416,7 +416,7 @@ enum hwloc_topology_flags_e {
    * and ignore the fact that some resources may be offline.
    */
 
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1)
  /**< \brief Assume that the selected backend provides the topology for the
    * system on which we are running.
    * \hideinitializer
@@ -784,7 +784,7 @@ typedef enum {
                                    * \hideinitializer */
   HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
                                    * \hideinitializer */
-  HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS.
+  HWLOC_CPUBIND_STRICT = (1<<2)   /**< \brief Request for strict binding from the OS.
                                    * \hideinitializer
                                    *
                                    * By default, when the designated CPUs are
