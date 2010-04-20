@@ -11,7 +11,7 @@
 
 static void usage(FILE *where)
 {
-  fprintf(where, "Usage: topodistrib [options] number\n");
+  fprintf(where, "Usage: hwloc-distrib [options] number\n");
   fprintf(where, "Options:\n");
   fprintf(where, "   -v\t\t\tverbose messages\n");
   fprintf(where, "   --synthetic \"2 2\"\tsimulate a fake hierarchy\n");
