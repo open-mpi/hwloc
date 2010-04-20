@@ -223,10 +223,10 @@ Machine (16GB)
 
 \section interface Programming interface
 
-The basic interface is available in hwloc.h. It mostly offers
+The basic interface is available in hwloc.h.  It essentially offers
 low-level routines for advanced programmers that want to manually
 manipulate objects and follow links between them.  Developers should
-look at hwloc/helper.h, which provides good higher-level topology
+also look at hwloc/helper.h, which provides good higher-level topology
 traversal examples.
 
 Each object contains a cpuset describing the list of processing units that
@@ -450,7 +450,7 @@ lstopo to read in that XML file and display it on a different system).
 hwloc-bind binds processes to specific hardware objects through a
 flexible syntax.  A simple example is binding an executable to
 specific cores (or sockets or cpusets or ...).  The hwloc-bind(1) man
-page provies much more detail on what is possible.
+page provides much more detail on what is possible.
 
 hwloc-bind can also be used to retrieve the current process' binding.
 
@@ -492,7 +492,7 @@ following environment variables.
   <dd>enforces the discovery from the given XML file as if
   hwloc_topology_set_xml() had been called.
   This file may have been generated earlier with lstopo file.xml.
-  For conveniency, this backend provides empty binding hooks which just
+  For convenience, this backend provides empty binding hooks which just
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
@@ -504,7 +504,7 @@ following environment variables.
   hwloc_topology_set_fsroot() had been called.
   Not using the main file-system root causes hwloc_topology_is_thissystem()
   to return 0.
-  For conveniency, this backend provides empty binding hooks which just
+  For convenience, this backend provides empty binding hooks which just
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
@@ -529,46 +529,47 @@ following environment variables.
 
 \page interoperability Interoperability with other software
 
-hwloc offers its own portable interface but it still may have to
+Although hwloc offers its own portable interface, it still may have to
 interoperate with specific or non-portable libraries that manipulate
-some similar objects.
-It thus offers several specific helpers to help converting between
-those specific interfaces and hwloc.
+similar kinds of objects.  hwloc therefore offers several specific
+"helpers" to assist converting between those specific interfaces and
+hwloc.
 
-Such external libraries may be specific to some OS or may not always
-be installed, so hwloc does not explicitly depend on them.
-However, when a custom program depends on such a library, it may optionally
-include the corresponding hwloc helper to extend the hwloc interface with
-dedicated helpers.
+Some external libraries may be specific to a particular OS; others may
+not always be available.  The hwloc core therefore generally does not
+explicitly depend on these types of libraries.  However, when a custom
+application uses or otherwise depends on such a library, it may
+optionally include the corresponding hwloc helper to extend the hwloc
+interface with dedicated helpers.
 
 <dl>
 
 <dt>Linux specific features</dt>
  <dd>
-  hwloc/linux.h offers Linux specific helpers that access some non-portable
-  features of the Linux system, such as binding threads through their tid
-  or parsing kernel CPU mask files.
+  hwloc/linux.h offers Linux-specific helpers that utilize some
+  non-portable features of the Linux system, such as binding threads
+  through their thread ID ("tid") or parsing kernel CPU mask files.
  </dd>
 
 <dt>Linux libnuma</dt>
  <dd>
-  hwloc/linux-libnuma.h provides conversion helpers between hwloc CPU sets
-  and libnuma specific types such as nodemasks and bitmasks.
-  It helps you use libnuma memory binding functions with hwloc CPU sets.
+  hwloc/linux-libnuma.h provides conversion helpers between hwloc CPU
+  sets and libnuma-specific types, such as nodemasks and bitmasks.  It
+  helps you use libnuma memory-binding functions with hwloc CPU sets.
  </dd>
 
 <dt>Glibc</dt>
  <dd>
-  hwloc/glibc-sched.h offers conversion routines between Glibc and hwloc
-  CPU sets so as to manipulate functions such as sched_setaffinity()
-  together with hwloc.
+  hwloc/glibc-sched.h offers conversion routines between Glibc and
+  hwloc CPU sets in order to use hwloc with functions such as
+  sched_setaffinity().
  </dd>
 
 <dt>OpenFabrics Verbs</dt>
  <dd>
-  hwloc/openfabrics-verbs.h help interoperability with the OpenFabrics Verbs
-  interface, for instance by returning the list of processors near an
-  InfiniBand device.
+  hwloc/openfabrics-verbs.h helps interoperability with the
+  OpenFabrics Verbs interface.  For example, it can return a list of
+  processors near an OpenFabrics device.
  </dd>
 
 </dl>
@@ -840,7 +841,7 @@ prettyprinting / debugging purposes).
 indexes since the OS uses them for binding.  The \p os_index field of
 these objects provides the identifier that may be used for such
 binding, and hwloc_get_proc_obj_by_os_index() finds the object
-associated with a specfic OS index.  
+associated with a specific OS index.  
 
 But as mentioned above, we discourage the use of these conversion
 methods for actual binding.  Instead, hwloc offers its own binding
