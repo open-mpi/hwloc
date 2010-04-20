@@ -379,7 +379,10 @@ EOF])
         AC_MSG_RESULT([yes]),
         AC_MSG_RESULT([no])
       )
-    ])
+    ], , [[
+#define GNU_SOURCE
+#include <sched.h>
+]])
     
     AC_MSG_CHECKING([for working CPU_SET])
     AC_LINK_IFELSE(
