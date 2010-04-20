@@ -44,6 +44,39 @@ hwloc(7) directly apply to the hwloc-bind utility.
 .
 .
 .\" **************************
+.\"    Examples Section
+.\" **************************
+.SH EXAMPLES
+.PP
+hwloc-distrib's operation is best described through several examples.
+.
+.PP
+If 4 processes have to be distributed across a machine, their CPU masks
+may be obtained with:
+
+    $ hwloc-distrib 4
+    0000000f
+    00000f00
+    000000f0
+    0000f000
+
+To get a single processor of each CPU masks (prevent migration in case
+of binding)
+
+    $ hwloc-distrib 4 --single
+    00000001
+    00000100
+    00000010
+    00001000
+
+To convert the output into a list of processors that may be passed to
+dplace -c inside a mpirun command line:
+
+    $ hwloc-distrib 4 --single | xargs hwloc-calc --pulist
+    0,8,4,16
+.
+.
+.\" **************************
 .\"    Return value section
 .\" **************************
 .SH RETURN VALUE
