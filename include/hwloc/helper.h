@@ -89,9 +89,6 @@ hwloc_get_root_obj (hwloc_topology_t topology)
   return hwloc_get_obj_by_depth (topology, 0, 0);
 }
 
-static __inline hwloc_obj_t __hwloc_attribute_deprecated
-hwloc_get_system_obj (hwloc_topology_t topology) { return hwloc_get_root_obj (topology); }
-
 /** \brief Returns the ancestor object of \p obj at depth \p depth. */
 static __inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_get_ancestor_obj_by_depth (hwloc_topology_t topology __hwloc_attribute_unused, unsigned depth, hwloc_obj_t obj)
