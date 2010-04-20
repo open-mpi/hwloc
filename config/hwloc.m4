@@ -380,7 +380,7 @@ EOF])
         AC_MSG_RESULT([no])
       )
     ], , [[
-#define GNU_SOURCE
+#define _GNU_SOURCE
 #include <sched.h>
 ]])
     
