@@ -457,11 +457,13 @@ print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unuse
 
 /* Just for debugging.  */
 static void
-print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
+print_objects(struct hwloc_topology *topology __hwloc_attribute_unused, int indent __hwloc_attribute_unused, hwloc_obj_t obj __hwloc_attribute_unused)
 {
+#ifdef HWLOC_DEBUG
   print_object(topology, indent, obj);
   for (obj = obj->first_child; obj; obj = obj->next_sibling)
     print_objects(topology, indent + 1, obj);
+#endif
 }
 
 /* Free an object and all its content.  */
