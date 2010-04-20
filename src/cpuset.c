@@ -168,7 +168,7 @@ struct hwloc_cpuset_s * hwloc_cpuset_dup(const struct hwloc_cpuset_s * old)
   memcpy(new->ulongs, old->ulongs, new->ulongs_count * sizeof(unsigned long));
   new->infinite = old->infinite;
 #ifdef HWLOC_DEBUG
-  set->magic = HWLOC_CPUSET_MAGIC;
+  new->magic = HWLOC_CPUSET_MAGIC;
 #endif
   return new;
 }
