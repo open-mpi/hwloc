@@ -235,13 +235,8 @@ hwloc offers an extensive cpuset manipulation interface in
 hwloc/cpuset.h.
 
 Moreover, hwloc also comes with additional helpers for
-interoperability with several commonly used environments.  For Linux,
-some specific helpers are available in hwloc/linux.h, and
-hwloc/linux-libnuma.h if using libnuma.  On glibc-based systems,
-additional helpers are available in hwloc/glibc-sched.h.  For Linux
-systems with the OpenFabrics verbs library, some dedicated helpers are
-provided in hwloc/openfabrics-verbs.h (this helper file is not yet
-useful on non-Linux systems with the OpenFabrics verbs library).
+interoperability with several commonly used environments.
+See the \ref interoperability section for details.
 
 To precisely define the vocabulary used by hwloc, a \ref termsanddefs
 section is available and should probably be read first.
@@ -527,6 +522,54 @@ following environment variables.
   save it to an XML file, and quickly reload it later through the XML
   backend, but still having binding functions actually do bind.
   </dd>
+
+</dl>
+
+
+
+\page interoperability Interoperability with other software
+
+hwloc offers its own portable interface but it still may have to
+interoperate with specific or non-portable libraries that manipulate
+some similar objects.
+It thus offers several specific helpers to help converting between
+those specific interfaces and hwloc.
+
+Such external libraries may be specific to some OS or may not always
+be installed, so hwloc does not explicitly depend on them.
+However, when a custom program depends on such a library, it may optionally
+include the corresponding hwloc helper to extend the hwloc interface with
+dedicated helpers.
+
+<dl>
+
+<dt>Linux specific features</dt>
+ <dd>
+  hwloc/linux.h offers Linux specific helpers that access some non-portable
+  features of the Linux system, such as binding threads through their tid
+  or parsing kernel CPU mask files.
+ </dd>
+
+<dt>Linux libnuma</dt>
+ <dd>
+  hwloc/linux-libnuma.h provides conversion helpers between hwloc CPU sets
+  and libnuma specific types such as nodemasks and bitmasks.
+  It helps you use libnuma memory binding functions with hwloc CPU sets.
+ </dd>
+
+<dt>Glibc</dt>
+ <dd>
+  hwloc/glibc-sched.h offers conversion routines between Glibc and hwloc
+  CPU sets so as to manipulate functions such as sched_setaffinity()
+  together with hwloc.
+ </dd>
+
+<dt>OpenFabrics Verbs</dt>
+ <dd>
+  hwloc/openfabrics-verbs.h help interoperability with the OpenFabrics Verbs
+  interface, for instance by returning the list of processors near an
+  InfiniBand device.
+ </dd>
 
 </dl>
 
