@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -115,7 +115,7 @@ typedef enum {
 			  * any structure.
 			  */
 
-  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
+  HWLOC_OBJ_MISC, 	/**< \brief Miscellaneous objects.
 			  * Objects without particular meaning, that can e.g. be
 			  * added by the application for its own use.
 			  */
@@ -127,7 +127,7 @@ typedef enum {
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
 			  */
 
-  HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
+  HWLOC_OBJ_OS_DEVICE	/**< \brief Operating system device.
 			 */
 } hwloc_obj_type_t;
 
@@ -503,7 +503,7 @@ enum hwloc_topology_flags_e {
    * objects are ignored.
    * This flag disables all PCI objects.
    */
-  HWLOC_TOPOLOGY_FLAG_NO_PCI = (1<<3),
+  HWLOC_TOPOLOGY_FLAG_NO_PCI = (1<<3)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
@@ -853,7 +853,7 @@ typedef enum {
                                    * \hideinitializer */
   HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
                                    * \hideinitializer */
-  HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS.
+  HWLOC_CPUBIND_STRICT = (1<<2)   /**< \brief Request for strict binding from the OS.
                                    * \hideinitializer
                                    *
                                    * By default, when the designated CPUs are
@@ -884,6 +884,9 @@ typedef enum {
 } hwloc_cpubind_policy_t;
 
 /** \brief Bind current process or thread on cpus given in cpuset \p set
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set,
 			    int policy);

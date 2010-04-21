@@ -41,8 +41,8 @@ hwloc supports the following operating systems:
 
 <ul>
 <li>Linux (including old kernels not having sysfs topology
-information, with knowledge of cpusets, offline cpus, and Kerrighed
-support)</li>
+information, with knowledge of cpusets, offline cpus, ScaleMP vSMP,
+and Kerrighed support)</li>
 <li>Solaris</li>
 <li>AIX</li>
 <li>Darwin / OS X</li>
@@ -223,10 +223,10 @@ Machine (16GB)
 
 \section interface Programming interface
 
-The basic interface is available in hwloc.h. It mostly offers
+The basic interface is available in hwloc.h.  It essentially offers
 low-level routines for advanced programmers that want to manually
 manipulate objects and follow links between them.  Developers should
-look at hwloc/helper.h, which provides good higher-level topology
+also look at hwloc/helper.h, which provides good higher-level topology
 traversal examples.
 
 Each object contains a cpuset describing the list of processing units that
@@ -235,13 +235,8 @@ hwloc offers an extensive cpuset manipulation interface in
 hwloc/cpuset.h.
 
 Moreover, hwloc also comes with additional helpers for
-interoperability with several commonly used environments.  For Linux,
-some specific helpers are available in hwloc/linux.h, and
-hwloc/linux-libnuma.h if using libnuma.  On glibc-based systems,
-additional helpers are available in hwloc/glibc-sched.h.  For Linux
-systems with the OpenFabrics verbs library, some dedicated helpers are
-provided in hwloc/openfabrics-verbs.h (this helper file is not yet
-useful on non-Linux systems with the OpenFabrics verbs library).
+interoperability with several commonly used environments.
+See the \ref interoperability section for details.
 
 To precisely define the vocabulary used by hwloc, a \ref termsanddefs
 section is available and should probably be read first.
@@ -455,7 +450,7 @@ lstopo to read in that XML file and display it on a different system).
 hwloc-bind binds processes to specific hardware objects through a
 flexible syntax.  A simple example is binding an executable to
 specific cores (or sockets or cpusets or ...).  The hwloc-bind(1) man
-page provies much more detail on what is possible.
+page provides much more detail on what is possible.
 
 hwloc-bind can also be used to retrieve the current process' binding.
 
@@ -497,7 +492,7 @@ following environment variables.
   <dd>enforces the discovery from the given XML file as if
   hwloc_topology_set_xml() had been called.
   This file may have been generated earlier with lstopo file.xml.
-  For conveniency, this backend provides empty binding hooks which just
+  For convenience, this backend provides empty binding hooks which just
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
@@ -509,7 +504,7 @@ following environment variables.
   hwloc_topology_set_fsroot() had been called.
   Not using the main file-system root causes hwloc_topology_is_thissystem()
   to return 0.
-  For conveniency, this backend provides empty binding hooks which just
+  For convenience, this backend provides empty binding hooks which just
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
@@ -527,6 +522,55 @@ following environment variables.
   save it to an XML file, and quickly reload it later through the XML
   backend, but still having binding functions actually do bind.
   </dd>
+
+</dl>
+
+
+
+\page interoperability Interoperability with other software
+
+Although hwloc offers its own portable interface, it still may have to
+interoperate with specific or non-portable libraries that manipulate
+similar kinds of objects.  hwloc therefore offers several specific
+"helpers" to assist converting between those specific interfaces and
+hwloc.
+
+Some external libraries may be specific to a particular OS; others may
+not always be available.  The hwloc core therefore generally does not
+explicitly depend on these types of libraries.  However, when a custom
+application uses or otherwise depends on such a library, it may
+optionally include the corresponding hwloc helper to extend the hwloc
+interface with dedicated helpers.
+
+<dl>
+
+<dt>Linux specific features</dt>
+ <dd>
+  hwloc/linux.h offers Linux-specific helpers that utilize some
+  non-portable features of the Linux system, such as binding threads
+  through their thread ID ("tid") or parsing kernel CPU mask files.
+ </dd>
+
+<dt>Linux libnuma</dt>
+ <dd>
+  hwloc/linux-libnuma.h provides conversion helpers between hwloc CPU
+  sets and libnuma-specific types, such as nodemasks and bitmasks.  It
+  helps you use libnuma memory-binding functions with hwloc CPU sets.
+ </dd>
+
+<dt>Glibc</dt>
+ <dd>
+  hwloc/glibc-sched.h offers conversion routines between Glibc and
+  hwloc CPU sets in order to use hwloc with functions such as
+  sched_setaffinity().
+ </dd>
+
+<dt>OpenFabrics Verbs</dt>
+ <dd>
+  hwloc/openfabrics-verbs.h helps interoperability with the
+  OpenFabrics Verbs interface.  For example, it can return a list of
+  processors near an OpenFabrics device.
+ </dd>
 
 </dl>
 
@@ -597,9 +641,10 @@ For reference, \ref hwloc_topology_t modification operations include
 
 It can be desirable to include hwloc in a larger software package (be
 sure to check out the LICENSE file) so that users don't have to
-separately download and install it before installing your software
-(after all, hwloc is a tiny little project -- why make users bother
-with it?).
+separately download and install it before installing your software.
+This can be advantageous to ensure that your software uses a
+known-tested/good version of hwloc, or for use on systems that do not
+have hwloc pre-installed.
 
 When used in "embedded" mode, hwloc will:
 
@@ -609,23 +654,18 @@ When used in "embedded" mode, hwloc will:
 - not build <tt>libhwloc.*</tt> -- instead, it will build
   <tt>libhwloc_embedded.*</tt>
 
-JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS
-
-DO WE REALLY WANT hwloc.m4 EMBEDDING?  
-SEE http://www.open-mpi.org/community/lists/hwloc-devel/2010/04/0875.php
-
-JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS JMS
-
-There are two ways to put hwloc into "embedded" mode.  From the
-configure command line:
+There are two ways to put hwloc into "embedded" mode.  The first is
+directly from the configure command line:
 
 \verbatim
 shell$ ./configure --enable-embedded-mode ...
 \endverbatim
 
-Or by directly integrating hwloc's m4 configure macro in your
-configure script and invoking a specific macro to enable the embedded
-mode (see below).
+The second requires that your software project uses the GNU Autoconf /
+Automake / Libtool tool chain to build your software.  If you do this,
+you can directly integrate hwloc's m4 configure macro into your
+configure script.  You can then invoke hwloc's configuration tests and
+build setup by calling an m4 macro (see below).
 
 \section embedding_m4 Using hwloc's m4 embedding capabilities
 
@@ -638,7 +678,8 @@ to build, you can use hwloc's embedded m4 capabilities.  We have
 tested the embedded m4 with projects that use Autoconf 2.65, Automake
 1.11.1, and Libtool 2.2.6b.  Slightly earlier versions of may also
 work but are untested.  Autoconf versions prior to 2.63 are almost
-certain to not work because hwloc uses macros introduced in 2.63.
+certain to not work because hwloc uses macros that were introduced in
+2.63.
 
 You can either copy all the config/hwloc*m4 files from the hwloc
 source tree to the directory where your project's m4 files reside, or
@@ -649,31 +690,33 @@ your Makefile.am's ACLOCAL_AMFLAGS).
 The following macros can then be used from your configure script (only
 HWLOC_INIT <em>must</em> be invoked if using the m4 macros):
 
-- HWLOC_SET_SYMBOL_PREFIX(foo_): Tells the hwloc to prefix all of
-  hwloc's types and public symbols with "foo"; meaning that function
-  hwloc_init() becomes foo_hwloc_init().  This is recommended behavior
-  if you are including hwloc in a larger project -- it is possible
-  that your software will be combined with other software that also
-  includes hwloc.  If you both use different symbol prefixes, there
-  will be no type/symbol clashes, and everything will compile and link
-  successfully.  If you both include hwloc and do not change the
-  symbol prefix, it is likely that you will get multiple symbol
-  definitions when linking if an external hwloc is linked against your
-  library / application.  Enum values are prefixed with an upper-case
-  translation if the prefix supplied.  For example,
-  HWLOC_SET_SYMBOL_PREFIX(foo_) will result in both foo_hwloc_init()
-  and FOO_HWLOC_OBJ_SYSTEM.
+- HWLOC_INIT(config-dir-prefix, action-upon-success,
+  action-upon-failure): Invoke the hwloc configuration tests and setup
+  the hwloc tree to build.  The first argument is the prefix to use
+  for AC_OUTPUT files -- it's where the hwloc tree is located relative
+  to <tt>$top_srcdir</tt>.  Hence, if your embedded hwloc is located
+  in the source tree at contrib/hwloc, you should pass
+  <tt>[contrib/hwloc]</tt> as the first argument.  If HWLOC_INIT and
+  the rest of <tt>configure</tt> completes successfully, then "make"
+  traversals of the hwloc tree with standard Automake targets (all,
+  clean, install, etc.) should behave as expected.  For example, it is
+  safe to list the hwloc directory in the SUBDIRS of a higher-level
+  Makefile.am.  <strong>NOTE: If the HWLOC_SET_SYMBOL_PREFIX macro is
+  used, it must be invoked <em>before</em> HWLOC_INIT.</strong>
 
-- HWLOC_INIT(config-dir-prefix, action-upon-success, action-upon-failure):
-  Invoke the hwloc tests and setup the hwloc tree to build.  A
-  traversal of "make" into the hwloc directory should build everything
-  (it is safe to list the hwloc directory in the SUBDIRS of a
-  higher-level Makefile.am, for example).  ***hwloc_INIT must be
-  invoked after the SET_SYMBOL_PREFIX macro.*** The first argument is
-  the prefix to use for AC_OUTPUT files -- it's where the hwloc tree
-  is located relative to $top_srcdir.  Hence, if your embedded hwloc
-  is located in the source tree at contrib/hwloc, you should pass
-  [contrib/hwloc] as the first argument.
+- HWLOC_SET_SYMBOL_PREFIX(foo_): Tells the hwloc to prefix all of
+  hwloc's types and public symbols with "foo_"; meaning that function
+  hwloc_init() becomes foo_hwloc_init().  Enum values are prefixed
+  with an upper-case translation if the prefix supplied;
+  HWLOC_OBJ_SYSTEM becomes FOO_HWLOC_OBJ_SYSTEM.  This is recommended
+  behavior if you are including hwloc in middleware -- it is possible
+  that your software will be combined with other software that links
+  to another copy of hwloc.  If both uses of hwloc utilize different
+  symbol prefixes, there will be no type/symbol clashes, and
+  everything will compile, link, and run successfully.  If you both
+  embed hwloc without changing the symbol prefix and also link against
+  an external hwloc, you may get multiple symbol definitions when
+  linking your final library or application.
 
 - HWLOC_DO_AM_CONDITIONALS: If you embed hwloc in a larger project and
   build it conditionally (e.g., if HWLOC_INIT is invoked
@@ -712,7 +755,7 @@ shell$ edit configure.ac
   3. Add error checking for happy=no case
 shell$ edit sandbox.c
   1. Add #include <hwloc.h>
-  2. Add calls to sandbox_hwloc_init()
+  2. Add calls to sandbox_hwloc_init() and other hwloc API functions
 \endverbatim
 
 Now you can bootstrap, configure, build, and run the sandbox as normal
@@ -798,7 +841,7 @@ prettyprinting / debugging purposes).
 indexes since the OS uses them for binding.  The \p os_index field of
 these objects provides the identifier that may be used for such
 binding, and hwloc_get_proc_obj_by_os_index() finds the object
-associated with a specfic OS index.  
+associated with a specific OS index.  
 
 But as mentioned above, we discourage the use of these conversion
 methods for actual binding.  Instead, hwloc offers its own binding

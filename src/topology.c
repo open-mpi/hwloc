@@ -457,11 +457,13 @@ print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unuse
 
 /* Just for debugging.  */
 static void
-print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
+print_objects(struct hwloc_topology *topology __hwloc_attribute_unused, int indent __hwloc_attribute_unused, hwloc_obj_t obj __hwloc_attribute_unused)
 {
+#ifdef HWLOC_DEBUG
   print_object(topology, indent, obj);
   for (obj = obj->first_child; obj; obj = obj->next_sibling)
     print_objects(topology, indent + 1, obj);
+#endif
 }
 
 /* Free an object and all its content.  */
@@ -1812,12 +1814,28 @@ hwloc_discover(struct hwloc_topology *topology)
   }
 }
 
+/* To be before discovery is actually launched,
+ * Resets everything in case a previous load initialized some stuff.
+ */
 static void
 hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
   struct hwloc_obj *root_obj;
   int i;
 
+  /* reset support */
+  topology->set_thisproc_cpubind = NULL;
+  topology->get_thisproc_cpubind = NULL;
+  topology->set_thisthread_cpubind = NULL;
+  topology->get_thisthread_cpubind = NULL;
+  topology->set_proc_cpubind = NULL;
+  topology->get_proc_cpubind = NULL;
+#ifdef hwloc_thread_t
+  topology->set_thread_cpubind = NULL;
+  topology->get_thread_cpubind = NULL;
+#endif
+  memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
+  memset(topology->support.cpubind, 0, sizeof(*topology->support.cpubind));
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
@@ -1855,18 +1873,8 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
   topology->pid = 0;
 
-  topology->set_thisproc_cpubind = NULL;
-  topology->get_thisproc_cpubind = NULL;
-  topology->set_thisthread_cpubind = NULL;
-  topology->get_thisthread_cpubind = NULL;
-  topology->set_proc_cpubind = NULL;
-  topology->get_proc_cpubind = NULL;
-#ifdef hwloc_thread_t
-  topology->set_thread_cpubind = NULL;
-  topology->get_thread_cpubind = NULL;
-#endif
-  topology->support.discovery = calloc(1, sizeof(*topology->support.discovery));
-  topology->support.cpubind = calloc(1, sizeof(*topology->support.cpubind));
+  topology->support.discovery = malloc(sizeof(*topology->support.discovery));
+  topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
 
   topology->first_pcidev = NULL;
   topology->last_pcidev = NULL;
@@ -1973,7 +1981,6 @@ hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t typ
     return -1;
   }
 
-
   if (type == HWLOC_OBJ_PU) {
     /* we need the PU level */
     errno = EINVAL;
@@ -2035,6 +2042,8 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 {
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
+  free(topology->support.discovery);
+  free(topology->support.cpubind);
   free(topology);
 }
 
@@ -2084,6 +2093,8 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_xml_init(topology, xmlpath_env);
   }
 #endif
+
+  /* always apply non-FORCE THISSYSTEM since it was explicitly designed to override setups from other backends */
   local_env = getenv("HWLOC_THISSYSTEM");
   if (local_env)
     topology->is_thissystem = atoi(local_env);

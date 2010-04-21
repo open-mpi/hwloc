@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -79,17 +79,15 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
 
 /** \brief Returns the top-object of the topology-tree.
  *
- * Its type is typically ::HWLOC_OBJ_MACHINE but it could be different for complex topologies.
- * This function replaces the old deprecated hwloc_get_system_obj().
+ * Its type is typically ::HWLOC_OBJ_MACHINE but it could be different
+ * for complex topologies.  This function replaces the old deprecated
+ * hwloc_get_system_obj().
  */
 static __inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_get_root_obj (hwloc_topology_t topology)
 {
   return hwloc_get_obj_by_depth (topology, 0, 0);
 }
-
-static __inline hwloc_obj_t __hwloc_attribute_deprecated
-hwloc_get_system_obj (hwloc_topology_t topology) { return hwloc_get_root_obj (topology); }
 
 /** \brief Returns the ancestor object of \p obj at depth \p depth. */
 static __inline hwloc_obj_t __hwloc_attribute_pure
@@ -129,9 +127,9 @@ hwloc_get_next_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_ob
 
 /** \brief Returns the next object of type \p type.
  *
- * If \p prev is \c NULL, return the first object at type \p type.
- * If there are multiple or no depth for given type, return \c NULL and let the caller
- * fallback to hwloc_get_next_obj_by_depth().
+ * If \p prev is \c NULL, return the first object at type \p type.  If
+ * there are multiple or no depth for given type, return \c NULL and
+ * let the caller fallback to hwloc_get_next_obj_by_depth().
  */
 static __inline hwloc_obj_t
 hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
@@ -246,9 +244,9 @@ HWLOC_DECLSPEC int hwloc_get_largest_objs_inside_cpuset (hwloc_topology_t topolo
 
 /** \brief Return the next object at depth \p depth included in CPU set \p set.
  *
- * If \p prev is \c NULL, return the first object at depth \p depth included in \p set.
- * The next invokation should pass the previous return value in \p prev so as
- * to obtain the next object in \p set.
+ * If \p prev is \c NULL, return the first object at depth \p depth
+ * included in \p set.  The next invokation should pass the previous
+ * return value in \p prev so as to obtain the next object in \p set.
  */
 static __inline hwloc_obj_t
 hwloc_get_next_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -262,8 +260,9 @@ hwloc_get_next_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_cons
 
 /** \brief Return the next object of type \p type included in CPU set \p set.
  *
- * If there are multiple or no depth for given type, return \c NULL and let the caller
- * fallback to hwloc_get_next_obj_inside_cpuset_by_depth().
+ * If there are multiple or no depth for given type, return \c NULL
+ * and let the caller fallback to
+ * hwloc_get_next_obj_inside_cpuset_by_depth().
  */
 static __inline hwloc_obj_t
 hwloc_get_next_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -296,8 +295,9 @@ hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpu
 
 /** \brief Return the \p idx -th object of type \p type included in CPU set \p set.
  *
- * If there are multiple or no depth for given type, return \c NULL and let the caller
- * fallback to hwloc_get_obj_inside_cpuset_by_depth().
+ * If there are multiple or no depth for given type, return \c NULL
+ * and let the caller fallback to
+ * hwloc_get_obj_inside_cpuset_by_depth().
  */
 static __inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_get_obj_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -326,8 +326,9 @@ hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_
 
 /** \brief Return the number of objects of type \p type included in CPU set \p set.
  *
- * If no object for that type exists inside CPU set \p set, 0 is returned.
- * If there are several levels with objects of that type inside CPU set \p set, -1 is returned.
+ * If no object for that type exists inside CPU set \p set, 0 is
+ * returned.  If there are several levels with objects of that type
+ * inside CPU set \p set, -1 is returned.
  */
 static __inline int __hwloc_attribute_pure
 hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_cpuset_t set,
@@ -405,9 +406,9 @@ hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t s
 
 /** \brief Iterate through same-depth objects covering at least CPU set \p set
  *
- * If object \p prev is \c NULL, return the first object at depth \p depth
- * covering at least part of CPU set \p set.
- * The next invokation should pass the previous return value in \p prev so as
+ * If object \p prev is \c NULL, return the first object at depth \p
+ * depth covering at least part of CPU set \p set.  The next
+ * invokation should pass the previous return value in \p prev so as
  * to obtain the next object covering at least another part of \p set.
  */
 static __inline hwloc_obj_t
@@ -422,10 +423,11 @@ hwloc_get_next_obj_covering_cpuset_by_depth(hwloc_topology_t topology, hwloc_con
 
 /** \brief Iterate through same-type objects covering at least CPU set \p set
  *
- * If object \p prev is \c NULL, return the first object of type \p type
- * covering at least part of CPU set \p set.
- * The next invokation should pass the previous return value in \p prev so as
- * to obtain the next object of type \p type covering at least another part of \p set.
+ * If object \p prev is \c NULL, return the first object of type \p
+ * type covering at least part of CPU set \p set.  The next invokation
+ * should pass the previous return value in \p prev so as to obtain
+ * the next object of type \p type covering at least another part of
+ * \p set.
  *
  * If there are no or multiple depths for type \p type, \c NULL is returned.
  * The caller may fallback to hwloc_get_next_obj_covering_cpuset_by_depth()
@@ -502,12 +504,13 @@ HWLOC_DECLSPEC unsigned hwloc_get_closest_objs (hwloc_topology_t topology, hwloc
 
 /** \brief Find an object below another object, both specified by types and indexes.
  *
- * Start from the top system object and find object of type \p type1 and index \p idx1.
- * Then look below this object and find another object of type \p type2 and index \p idx2.
- * Indexes are specified within the parent, not withing the entire system.
+ * Start from the top system object and find object of type \p type1
+ * and index \p idx1.  Then look below this object and find another
+ * object of type \p type2 and index \p idx2.  Indexes are specified
+ * within the parent, not withing the entire system.
  *
- * For instance, if type1 is SOCKET, idx1 is 2, type2 is CORE and idx2 is 3,
- * return the fourth core object below the third socket.
+ * For instance, if type1 is SOCKET, idx1 is 2, type2 is CORE and idx2
+ * is 3, return the fourth core object below the third socket.
  */
 static __inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_get_obj_below_by_type (hwloc_topology_t topology,
@@ -570,8 +573,8 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
  * threads over a machine, giving each of them as much private cache as
  * possible and keeping them locally in number order.
  *
- * The caller may typicall want to additionally call hwloc_cpuset_singlify()
- * before binding a thread, so that it doesn't move at all.
+ * The caller may typically want to also call hwloc_cpuset_singlify()
+ * before binding a thread so that it does not move at all.
  */
 static __inline void
 hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, unsigned n)
@@ -619,7 +622,7 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
  * returned.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
- * changed, hwloc_cpuset_dup must be used instead.
+ * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
  */
 static __inline hwloc_const_cpuset_t __hwloc_attribute_pure
 hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
@@ -635,7 +638,7 @@ hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
  * systems, NULL is returned.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
- * changed, hwloc_cpuset_dup must be used instead.
+ * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
  */
 static __inline hwloc_const_cpuset_t __hwloc_attribute_pure
 hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
@@ -650,7 +653,7 @@ hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
  * returned.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
- * changed, hwloc_cpuset_dup must be used instead.
+ * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
  */
 static __inline hwloc_const_cpuset_t __hwloc_attribute_pure
 hwloc_topology_get_online_cpuset(hwloc_topology_t topology)
@@ -665,7 +668,7 @@ hwloc_topology_get_online_cpuset(hwloc_topology_t topology)
  * returned.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
- * changed, hwloc_cpuset_dup must be used instead.
+ * changed or freed, hwloc_cpuset_dup must be used to obtain a local copy.
  */
 static __inline hwloc_const_cpuset_t __hwloc_attribute_pure
 hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
