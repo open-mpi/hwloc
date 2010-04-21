@@ -30,7 +30,7 @@
 enum hwloc_ignore_type_e {
   HWLOC_IGNORE_TYPE_NEVER = 0,
   HWLOC_IGNORE_TYPE_KEEP_STRUCTURE,
-  HWLOC_IGNORE_TYPE_ALWAYS,
+  HWLOC_IGNORE_TYPE_ALWAYS
 };
 
 /* Maximal value of an object type */
@@ -46,6 +46,9 @@ typedef enum hwloc_backend_e {
 #ifdef HWLOC_HAVE_XML
   HWLOC_BACKEND_XML,
 #endif
+  /* This value is only here so that we can end the enum list without
+     a comma (thereby preventing compiler warnings) */
+  HWLOC_BACKEND_MAX
 } hwloc_backend_t;
 
 struct hwloc_topology {
