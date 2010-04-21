@@ -2,7 +2,7 @@
 <!DOCTYPE topology SYSTEM "hwloc.dtd">
 <topology>
   <object type="System" os_level="-1" os_index="0">
-    <object type="Misc" os_level="-1" depth="0">
+    <object type="Group" os_level="-1" depth="0">
       <object type="Machine" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" dmi_board_vendor="Dell Inc." dmi_board_name="0F331C" local_memory="1016368">
         <page_type size="4096" count="65536"/>
         <page_type size="1048576" count="1024"/>
@@ -39,7 +39,7 @@
         </object>
       </object>
     </object>
-    <object type="Misc" os_level="-1" depth="0">
+    <object type="Group" os_level="-1" depth="0">
       <object type="Machine" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" dmi_board_vendor="Dell Inc." dmi_board_name="0F331C" local_memory="1016368">
         <page_type size="2048" count="0"/>
         <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">

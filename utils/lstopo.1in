@@ -43,8 +43,11 @@ Display the cpuset of each object.
 Only display the cpuset of each object; do not display anything else
 about the object.
 .TP
-\fB\-\-only\fR "type"
-Only show objects of the given type.
+\fB\-\-only\fR <type>
+Only show objects of the given type in the text output.
+.TP
+\fB\-\-ignore\fR <type>
+Ignore all objects of type <type> in the topology.
 .TP
 \fB\-\-no\-caches\fR
 Do not show caches.
@@ -60,7 +63,7 @@ Do not show levels that do not have a hierarchical impact.
 .TP
 \fB\-\-xml\fR <path>
 Read topology from XML file <path> (instead of discovering the
-topology on the local machine).  If <path> is "-", the standard input
+topology on the local machine).  If <path> is "\-", the standard input
 is used.  XML support must have been compiled in to hwloc for this
 option to be usable.
 .TP
@@ -73,6 +76,11 @@ generally only available on Linux.
 Detect topology as seen by process <pid>, i.e. as if process <pid> did the
 discovery itself, and show its current binding. Note that this can for instance
 change the set of allowed processors. If 0 is given as pid, the current binding for the lstopo process will be shown.
+.TP
+\fB\-\-top\fR <pid>
+Show existing processes as misc objects in the output. To avoid uselessly
+cluttering the output, only processes that are restricted to some part of the
+machine are shown.  On Linux, kernel threads are not shown.
 .TP
 \fB\-\-synthetic\fR <specification>
 Simulate a fake hierarchy (instead of discovering the topology on the
@@ -169,7 +177,7 @@ If the filename ends in ".xml" and lstopo was compiled with the proper
 support, lstopo outputs an XML representation of the map.
 .
 .PP
-See the output of "lstopo --help" for a specific list of what
+See the output of "lstopo \-\-help" for a specific list of what
 graphical output formats are supported in your hwloc installation.
 .
 .\" **************************

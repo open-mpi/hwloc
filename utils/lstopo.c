@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <dirent.h>
+#include <fcntl.h>
 
 #ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
@@ -24,6 +26,7 @@ unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 unsigned int force_horiz = 0;
 unsigned int force_vert = 0;
+unsigned int top = 0;
 hwloc_pid_t pid = -1;
 
 FILE *open_file(const char *filename, const char *mode)
@@ -34,6 +37,75 @@ FILE *open_file(const char *filename, const char *mode)
     return stdout;
 
   return fopen(filename, mode);
+}
+
+static void add_process_objects(hwloc_topology_t topology)
+{
+  hwloc_obj_t root;
+  hwloc_cpuset_t cpuset;
+  DIR *dir;
+  struct dirent *dirent;
+  const struct hwloc_topology_support *support;
+
+  root = hwloc_get_root_obj(topology);
+
+  support = hwloc_topology_get_support(topology);
+
+  if (!support->cpubind->get_thisproc_cpubind)
+    return;
+
+  dir  = opendir("/proc");
+  if (!dir)
+    return;
+  cpuset = hwloc_cpuset_alloc();
+
+  while ((dirent = readdir(dir))) {
+    long pid;
+    char *end;
+    char name[64];
+
+    pid = strtol(dirent->d_name, &end, 10);
+    if (*end)
+      /* Not a number */
+      continue;
+
+    snprintf(name, sizeof(name), "%ld", pid);
+
+#ifdef HWLOC_LINUX_SYS
+    {
+      char path[6 + strlen(dirent->d_name) + 1 + 7 + 1];
+      snprintf(path, sizeof(path), "/proc/%s/cmdline", dirent->d_name);
+      char cmd[64], *c;
+      int file;
+      ssize_t n;
+
+      if ((file = open(path, O_RDONLY)) >= 0) {
+        n = read(file, cmd, sizeof(cmd) - 1);
+        close(file);
+
+        if (n <= 0)
+          /* Ignore kernel threads and errors */
+          continue;
+
+        cmd[n] = 0;
+        if ((c = strchr(cmd, ' ')))
+          *c = 0;
+        snprintf(name, sizeof(name), "%ld %s", pid, cmd);
+      }
+    }
+#endif /* HWLOC_LINUX_SYS */
+
+    if (hwloc_get_proc_cpubind(topology, pid, cpuset, 0))
+      continue;
+
+    if (hwloc_cpuset_isincluded(root->cpuset, cpuset))
+      continue;
+
+    hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name);
+  }
+
+  hwloc_cpuset_free(cpuset);
+  closedir(dir);
 }
 
 static void usage(char *name, FILE *where)
@@ -66,7 +138,8 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   -s --silent           Opposite of --verbose (default)\n");
   fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
-  fprintf (where, "   --only <type>         Only show the given type\n");
+  fprintf (where, "   --only <type>         Only show the given type in the text output\n");
+  fprintf (where, "   --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "   --no-caches           Do not show caches\n");
   fprintf (where, "   --no-useless-caches   Do not show caches which do not have a hierarchical\n"
                   "                         impact\n");
@@ -80,6 +153,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --fsys-root <path>    Chroot containing the /proc and /sys of another system\n");
 #endif
   fprintf (where, "   --pid <pid>           Detect topology as seen by process <pid>\n");
+  fprintf (where, "   --top                 Display processes within the hierarchy\n");
   fprintf (where, "   --synthetic \"n:2 2\"   Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
                   "                         processors\n");
   fprintf (where, "   --fontsize 10         Set size of text font\n");
@@ -142,6 +216,14 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
         show_only = hwloc_obj_type_of_string(argv[2]);
+	opt = 1;
+      }
+      else if (!strcmp (argv[1], "--ignore")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        hwloc_topology_ignore_type(topology, hwloc_obj_type_of_string(argv[2]));
 	opt = 1;
       }
       else if (!strcmp (argv[1], "--no-caches"))
@@ -209,7 +291,9 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	pid = atoi(argv[2]); opt = 1;
-      } else if (!strcmp (argv[1], "--version")) {
+      } else if (!strcmp (argv[1], "--top"))
+        top = 1;
+      else if (!strcmp (argv[1], "--version")) {
           printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
       } else {
@@ -266,6 +350,9 @@ main (int argc, char *argv[])
   err = hwloc_topology_load (topology);
   if (err)
     return EXIT_FAILURE;
+
+  if (top)
+    add_process_objects(topology);
 
   if (!filename && !strcmp(callname,"hwloc-info")) {
     /* behave kind-of plpa-info */

@@ -1,7 +1,7 @@
 # Copyright 2009 INRIA, Université Bordeaux 1
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 
-AM_CFLAGS = $(HWLOC_GCC_CFLAGS)
+AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
@@ -72,11 +72,13 @@ sysfs_outputs = \
 		2s390-2c.tar.gz.output \
 		1alpha.tar.gz.output
 
+if HWLOC_BUILD_TESTS
 if HWLOC_HAVE_LINUX
 if HWLOC_HAVE_OPENAT
 TESTS = $(sysfs_tarballs)
 endif HWLOC_HAVE_OPENAT
 endif HWLOC_HAVE_LINUX
+endif HWLOC_BUILD_TESTS
 
 EXTRA_DIST = $(sysfs_tarballs) $(sysfs_outputs)
 

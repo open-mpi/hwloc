@@ -131,8 +131,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       case HWLOC_OBJ_CACHE:
 	obj->attr->cache.depth = lvalue;
 	break;
-      case HWLOC_OBJ_MISC:
-	obj->attr->misc.depth = lvalue;
+      case HWLOC_OBJ_GROUP:
+	obj->attr->group.depth = lvalue;
 	break;
       default:
 	fprintf(stderr, "ignoring depth attribute for object type without depth\n");
@@ -385,7 +385,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
   xmlNode* root_node;
   xmlDtd *dtd;
 
-  topology->support.discovery.pu = 1;
+  topology->support.discovery->pu = 1;
 
   dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
   if (!dtd)
@@ -477,8 +477,8 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     if (obj->attr->machine.dmi_board_name)
       xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
     break;
-  case HWLOC_OBJ_MISC:
-    sprintf(tmp, "%u", obj->attr->misc.depth);
+  case HWLOC_OBJ_GROUP:
+    sprintf(tmp, "%u", obj->attr->group.depth);
     xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
     break;
   default:

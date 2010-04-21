@@ -42,26 +42,26 @@ static void result_get(const char *msg, hwloc_const_cpuset_t expected, hwloc_con
 static void test(hwloc_const_cpuset_t cpuset, int flags)
 {
   hwloc_cpuset_t new_cpuset = hwloc_cpuset_alloc();
-  result_set("Bind this singlethreaded process", hwloc_set_cpubind(topology, cpuset, flags), support->cpubind.set_thisproc_cpubind || support->cpubind.set_thisthread_cpubind);
-  result_get("Get  this singlethreaded process", cpuset, new_cpuset, hwloc_get_cpubind(topology, new_cpuset, flags), support->cpubind.get_thisproc_cpubind || support->cpubind.get_thisthread_cpubind);
-  result_set("Bind this thread", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind.set_thisthread_cpubind);
-  result_get("Get  this thread", cpuset, new_cpuset, hwloc_get_cpubind(topology, new_cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind.get_thisthread_cpubind);
-  result_set("Bind this whole process", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.set_thisproc_cpubind);
-  result_get("Get  this whole process", cpuset, new_cpuset, hwloc_get_cpubind(topology, new_cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.get_thisproc_cpubind);
+  result_set("Bind this singlethreaded process", hwloc_set_cpubind(topology, cpuset, flags), support->cpubind->set_thisproc_cpubind || support->cpubind->set_thisthread_cpubind);
+  result_get("Get  this singlethreaded process", cpuset, new_cpuset, hwloc_get_cpubind(topology, new_cpuset, flags), support->cpubind->get_thisproc_cpubind || support->cpubind->get_thisthread_cpubind);
+  result_set("Bind this thread", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind->set_thisthread_cpubind);
+  result_get("Get  this thread", cpuset, new_cpuset, hwloc_get_cpubind(topology, new_cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind->get_thisthread_cpubind);
+  result_set("Bind this whole process", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind->set_thisproc_cpubind);
+  result_get("Get  this whole process", cpuset, new_cpuset, hwloc_get_cpubind(topology, new_cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind->get_thisproc_cpubind);
 
 #ifdef HWLOC_WIN_SYS
-  result_set("Bind process", hwloc_set_proc_cpubind(topology, GetCurrentProcess(), cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.set_proc_cpubind);
-  result_get("Get  process", cpuset, new_cpuset, hwloc_get_proc_cpubind(topology, GetCurrentProcess(), new_cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.get_proc_cpubind);
-  result_set("Bind thread", hwloc_set_thread_cpubind(topology, GetCurrentThread(), cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind.set_thread_cpubind);
-  result_get("Get  thread", cpuset, new_cpuset, hwloc_get_thread_cpubind(topology, GetCurrentThread(), new_cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind.get_thread_cpubind);
+  result_set("Bind process", hwloc_set_proc_cpubind(topology, GetCurrentProcess(), cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind->set_proc_cpubind);
+  result_get("Get  process", cpuset, new_cpuset, hwloc_get_proc_cpubind(topology, GetCurrentProcess(), new_cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind->get_proc_cpubind);
+  result_set("Bind thread", hwloc_set_thread_cpubind(topology, GetCurrentThread(), cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind->set_thread_cpubind);
+  result_get("Get  thread", cpuset, new_cpuset, hwloc_get_thread_cpubind(topology, GetCurrentThread(), new_cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind->get_thread_cpubind);
 #else /* !HWLOC_WIN_SYS */
-  result_set("Bind whole process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.set_proc_cpubind);
-  result_get("Get  whole process", cpuset, new_cpuset, hwloc_get_proc_cpubind(topology, getpid(), new_cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind.get_proc_cpubind);
-  result_set("Bind process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags), support->cpubind.set_proc_cpubind);
-  result_get("Get  process", cpuset, new_cpuset, hwloc_get_proc_cpubind(topology, getpid(), new_cpuset, flags), support->cpubind.get_proc_cpubind);
+  result_set("Bind whole process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind->set_proc_cpubind);
+  result_get("Get  whole process", cpuset, new_cpuset, hwloc_get_proc_cpubind(topology, getpid(), new_cpuset, flags | HWLOC_CPUBIND_PROCESS), support->cpubind->get_proc_cpubind);
+  result_set("Bind process", hwloc_set_proc_cpubind(topology, getpid(), cpuset, flags), support->cpubind->set_proc_cpubind);
+  result_get("Get  process", cpuset, new_cpuset, hwloc_get_proc_cpubind(topology, getpid(), new_cpuset, flags), support->cpubind->get_proc_cpubind);
 #ifdef hwloc_thread_t
-  result_set("Bind thread", hwloc_set_thread_cpubind(topology, pthread_self(), cpuset, flags), support->cpubind.set_thread_cpubind);
-  result_get("Get  thread", cpuset, new_cpuset, hwloc_get_thread_cpubind(topology, pthread_self(), new_cpuset, flags), support->cpubind.get_thread_cpubind);
+  result_set("Bind thread", hwloc_set_thread_cpubind(topology, pthread_self(), cpuset, flags), support->cpubind->set_thread_cpubind);
+  result_get("Get  thread", cpuset, new_cpuset, hwloc_get_thread_cpubind(topology, pthread_self(), new_cpuset, flags), support->cpubind->get_thread_cpubind);
 #endif
 #endif /* !HWLOC_WIN_SYS */
   printf("\n");

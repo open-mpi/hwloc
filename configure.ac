@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
-# Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009      CNRS, INRIA, Université Bordeaux 1
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 #
 # See COPYING in top-level directory.
 # 
@@ -19,11 +19,19 @@ AC_CONFIG_AUX_DIR(./config)
 # -I in ACLOCAL_AMFLAGS in the top-level Makefile.am.
 AC_CONFIG_MACRO_DIR(./config)
 
+cat <<EOF
+
+###
+### Configuring hwloc distribution tarball
+### Startup tests
+###
+EOF
+
 # This must be before AM_INIT_AUTOMAKE
 AC_CANONICAL_TARGET
 
 # Init automake
-AM_INIT_AUTOMAKE([1.10 dist-bzip2 foreign tar-ustar -Wall -Werror])
+AM_INIT_AUTOMAKE([1.10 dist-bzip2 subdir-objects foreign tar-ustar -Wall -Werror])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Libtool2 is needed
@@ -98,19 +106,42 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 CFLAGS="$CFLAGS_save"
 
-# Setup hwloc (taking all defaults)
-HWLOC_INIT([], [hwloc_setup=happy], [hwloc_setup=unhappy])
+# Define hwloc's configure arguments
+HWLOC_DEFINE_ARGS
+
+# If debug mode, add -g
+AS_IF([test "$hwloc_debug" = "1"],
+      [CFLAGS="$CFLAGS -g"])
+
+# If the user didn't specifically ask for embedding mode, default to
+# standalone mode
+AS_IF([test "$enable_embedded_mode" != "yes"],
+      [HWLOC_BUILD_STANDALONE])
+
+# Setup the hwloc core
+HWLOC_SETUP_CORE([], [], [hwloc_setup=unhappy], [1])
 AS_IF([test "$hwloc_setup" = "unhappy"],
       [AC_MSG_ERROR([Cannot continue])])
 
-if test "$hwloc_debug" = "1"; then
-    CFLAGS="$CFLAGS -g"
-fi
+# Setup hwloc's docs, utils, and tests
+AS_IF([test "$hwloc_mode" = "standalone"],
+      [HWLOC_SETUP_DOCS
+       HWLOC_SETUP_UTILS
+       HWLOC_SETUP_TESTS])
 
-# Setup libtool
+# Run the AM_CONDITIONALs
+HWLOC_DO_AM_CONDITIONALS
+
+# Set the final flags
+CFLAGS="$HWLOC_EMBEDDED_CFLAGS $CFLAGS"
+CPPFLAGS="$HWLOC_EMBEDDED_CPPFLAGS $CPPFLAGS"
+
+# Setup libtool, but disable C++, F77, Java and Windows Resource
+# Compiler support -- we don't need that stuff.
 AM_ENABLE_SHARED
 AM_DISABLE_STATIC
-AM_PROG_LIBTOOL
+AM_PROG_LIBTOOL([win32-dll])
+LT_LANG([C])
 
 # Party on
 AC_OUTPUT

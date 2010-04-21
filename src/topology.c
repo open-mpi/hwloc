@@ -109,7 +109,7 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
   n = -1;
 #endif
   if (n >= 1)
-    topology->support.discovery.pu = 1;
+    topology->support.discovery->pu = 1;
   else
     n = 1;
   return n;
@@ -295,10 +295,10 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
       for(i=0; i<nbgroups; i++) {
           /* create the misc object */
           hwloc_obj_t misc_obj;
-          misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+          misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
           misc_obj->cpuset = hwloc_cpuset_alloc();
           hwloc_cpuset_zero(misc_obj->cpuset);
-          misc_obj->attr->misc.depth = depth;
+          misc_obj->attr->group.depth = depth;
           for (j=0; j<nbobjs; j++)
               if (groupids[j] == i+1) {
                   hwloc_cpuset_or(misc_obj->cpuset, misc_obj->cpuset, objs[j]->cpuset);
@@ -457,11 +457,13 @@ print_object(struct hwloc_topology *topology, int indent __hwloc_attribute_unuse
 
 /* Just for debugging.  */
 static void
-print_objects(struct hwloc_topology *topology, int indent, hwloc_obj_t obj)
+print_objects(struct hwloc_topology *topology __hwloc_attribute_unused, int indent __hwloc_attribute_unused, hwloc_obj_t obj __hwloc_attribute_unused)
 {
+#ifdef HWLOC_DEBUG
   print_object(topology, indent, obj);
   for (obj = obj->first_child; obj; obj = obj->next_sibling)
     print_objects(topology, indent + 1, obj);
+#endif
 }
 
 /* Free an object and all its content.  */
@@ -507,23 +509,25 @@ enum hwloc_type_cmp_e {
 static const unsigned obj_type_order[] = {
   [HWLOC_OBJ_SYSTEM] = 0,
   [HWLOC_OBJ_MACHINE] = 1,
-  [HWLOC_OBJ_MISC] = 2,
+  [HWLOC_OBJ_GROUP] = 2,
   [HWLOC_OBJ_NODE] = 3,
   [HWLOC_OBJ_SOCKET] = 4,
   [HWLOC_OBJ_CACHE] = 5,
   [HWLOC_OBJ_CORE] = 6,
-  [HWLOC_OBJ_PU] = 7
+  [HWLOC_OBJ_PU] = 7,
+  [HWLOC_OBJ_MISC] = 8,
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
   [0] = HWLOC_OBJ_SYSTEM,
   [1] = HWLOC_OBJ_MACHINE,
-  [2] = HWLOC_OBJ_MISC,
+  [2] = HWLOC_OBJ_GROUP,
   [3] = HWLOC_OBJ_NODE,
   [4] = HWLOC_OBJ_SOCKET,
   [5] = HWLOC_OBJ_CACHE,
   [6] = HWLOC_OBJ_CORE,
-  [7] = HWLOC_OBJ_PU
+  [7] = HWLOC_OBJ_PU,
+  [8] = HWLOC_OBJ_MISC
 };
 
 static unsigned __hwloc_attribute_const
@@ -560,11 +564,11 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
       return HWLOC_TYPE_HIGHER;
   }
 
-  /* Misc objects have the same types but can have different depths.  */
-  if (obj1->type == HWLOC_OBJ_MISC) {
-    if (obj1->attr->misc.depth < obj2->attr->misc.depth)
+  /* Group objects have the same types but can have different depths.  */
+  if (obj1->type == HWLOC_OBJ_GROUP) {
+    if (obj1->attr->group.depth < obj2->attr->group.depth)
       return HWLOC_TYPE_DEEPER;
-    else if (obj1->attr->misc.depth > obj2->attr->misc.depth)
+    else if (obj1->attr->group.depth > obj2->attr->group.depth)
       return HWLOC_TYPE_HIGHER;
   }
 
@@ -599,7 +603,19 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 	return HWLOC_OBJ_INCLUDED;
       case HWLOC_TYPE_HIGHER:
 	return HWLOC_OBJ_CONTAINS;
+
       case HWLOC_TYPE_EQUAL:
+        if (obj1->type == HWLOC_OBJ_MISC) {
+          /* Misc objects may vary by name */
+          int res = strcmp(obj1->name, obj2->name);
+          if (res < 0)
+            return HWLOC_OBJ_INCLUDED;
+          if (res > 0)
+            return HWLOC_OBJ_CONTAINS;
+          if (res == 0)
+            return HWLOC_OBJ_EQUAL;
+        }
+
 	/* Same level cpuset and type!  Let's hope it's coherent.  */
 	return HWLOC_OBJ_EQUAL;
     }
@@ -1696,7 +1712,7 @@ hwloc_discover(struct hwloc_topology *topology)
   if (topology->is_thissystem) {
 #define DO(kind) \
     if (topology->kind) \
-      topology->support.cpubind.kind = 1;
+      topology->support.cpubind->kind = 1;
     DO(set_thisproc_cpubind);
     DO(get_thisproc_cpubind);
     DO(set_proc_cpubind);
@@ -1708,12 +1724,28 @@ hwloc_discover(struct hwloc_topology *topology)
   }
 }
 
+/* To be before discovery is actually launched,
+ * Resets everything in case a previous load initialized some stuff.
+ */
 static void
 hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
   struct hwloc_obj *root_obj;
   int i;
 
+  /* reset support */
+  topology->set_thisproc_cpubind = NULL;
+  topology->get_thisproc_cpubind = NULL;
+  topology->set_thisthread_cpubind = NULL;
+  topology->get_thisthread_cpubind = NULL;
+  topology->set_proc_cpubind = NULL;
+  topology->get_proc_cpubind = NULL;
+#ifdef hwloc_thread_t
+  topology->set_thread_cpubind = NULL;
+  topology->get_thread_cpubind = NULL;
+#endif
+  memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
+  memset(topology->support.cpubind, 0, sizeof(*topology->support.cpubind));
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
@@ -1751,21 +1783,13 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->backend_type = HWLOC_BACKEND_NONE; /* backend not specified by default */
   topology->pid = 0;
 
-  topology->set_thisproc_cpubind = NULL;
-  topology->get_thisproc_cpubind = NULL;
-  topology->set_thisthread_cpubind = NULL;
-  topology->get_thisthread_cpubind = NULL;
-  topology->set_proc_cpubind = NULL;
-  topology->get_proc_cpubind = NULL;
-#ifdef hwloc_thread_t
-  topology->set_thread_cpubind = NULL;
-  topology->get_thread_cpubind = NULL;
-#endif
-  memset(&topology->support, 0, sizeof(topology->support));
+  topology->support.discovery = malloc(sizeof(*topology->support.discovery));
+  topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
+
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
-  //topology->ignored_types[HWLOC_OBJ_MISC] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
+  topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);
@@ -1864,7 +1888,6 @@ hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t typ
     return -1;
   }
 
-
   if (type == HWLOC_OBJ_PU) {
     /* we need the PU level */
     errno = EINVAL;
@@ -1926,6 +1949,8 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 {
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
+  free(topology->support.discovery);
+  free(topology->support.cpubind);
   free(topology);
 }
 
@@ -1975,11 +2000,11 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_xml_init(topology, xmlpath_env);
   }
 #endif
-  if (topology->backend_type == HWLOC_BACKEND_NONE) {
-    local_env = getenv("HWLOC_THISSYSTEM");
-    if (local_env)
-      topology->is_thissystem = atoi(local_env);
-  }
+
+  /* always apply non-FORCE THISSYSTEM since it was explicitly designed to override setups from other backends */
+  local_env = getenv("HWLOC_THISSYSTEM");
+  if (local_env)
+    topology->is_thissystem = atoi(local_env);
 
   /* if we haven't chosen the backend, set the OS-specific one if needed */
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
@@ -2169,8 +2194,6 @@ hwloc_topology_check(struct hwloc_topology *topology)
   for(j=0; j<hwloc_get_nbobjs_by_depth(topology, depth-1); j++) {
     obj = hwloc_get_obj_by_depth(topology, depth-1, j);
     assert(obj);
-    assert(obj->arity == 0);
-    assert(obj->children == NULL);
     /* bottom-level object must always be PU */
     assert(obj->type == HWLOC_OBJ_PU);
   }

@@ -15,11 +15,11 @@ cat <<EOF
 === Configuring hwloc (embedded mode)
 EOF
 
-HWLOC_EMBEDDED
 HWLOC_SET_SYMBOL_PREFIX([mytest_])
-HWLOC_INIT([hwloc-tree], [hwloc_setup=happy], [hwloc_setup=unhappy])
+HWLOC_SETUP_CORE([hwloc-tree], [hwloc_setup=happy], [hwloc_setup=unhappy])
 AS_IF([test "$hwloc_setup" = "unhappy"],
       [AC_MSG_ERROR([Cannot continue])])
+HWLOC_DO_AM_CONDITIONALS
 
 cat <<EOF
 === Done configuring hwloc (embedded mode)

@@ -1288,7 +1288,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
     closedir(dir);
   }
 
-  topology->support.discovery.pu = 1;
+  topology->support.discovery->pu = 1;
   hwloc_debug_1arg_cpuset("found %d cpu topologies, cpuset %s\n",
 	     hwloc_cpuset_weight(cpuset), cpuset);
 
@@ -1539,7 +1539,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     return -1;
   }
 
-  topology->support.discovery.pu = 1;
+  topology->support.discovery->pu = 1;
   /* setup the final number of procs */
   procid_max = processor + 1;
   hwloc_cpuset_copy(online_cpuset, cpuset);
