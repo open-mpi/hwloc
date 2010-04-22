@@ -196,7 +196,7 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
 extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
-static __inline char *
+static inline char *
 hwloc_cpuset_printf_value(hwloc_const_cpuset_t cpuset)
 {
   char *buf;
@@ -204,7 +204,7 @@ hwloc_cpuset_printf_value(hwloc_const_cpuset_t cpuset)
   return buf;
 }
 
-static __inline struct hwloc_obj *
+static inline struct hwloc_obj *
 hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
 {
   struct hwloc_obj *obj = malloc(sizeof(*obj));
@@ -233,7 +233,7 @@ extern void free_object(hwloc_obj_t obj);
 /* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
  * and for which processors have ID PROC_PHYSIDS, and add them to the topology.
  * */
-static __inline void
+static inline void
 hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
   struct hwloc_obj *obj;
