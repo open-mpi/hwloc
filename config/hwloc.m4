@@ -258,6 +258,20 @@ EOF])
     #
     _HWLOC_CHECK_ATTRIBUTES
     _HWLOC_CHECK_VISIBILITY
+
+    #
+    # Check for inline compatibility support
+    #
+    AC_MSG_CHECKING([for inline compatibility keyword])
+    AC_TRY_COMPILE([static void __inline__ f(void) { }], [],
+      [__hwloc_inline=__inline__],
+      [AC_TRY_COMPILE([static void __inline f(void) {}], [],
+        [__hwloc_inline=__inline],
+        [__hwloc_inline=]
+      )]
+    )
+    AC_MSG_RESULT([$__hwloc_inline])
+    AC_DEFINE_UNQUOTED(__hwloc_inline, $__hwloc_inline, [Define this to a keyword that can safely replace inline in installed headers])
     
     #
     # Now detect support
