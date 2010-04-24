@@ -113,8 +113,8 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 		-e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-deprecated//g' \
 		-e 's/HWLOC_DECLSPEC//g' \
 		-e 's/HWLOC\\_\\-DECLSPEC//g' \
-		-e 's/__inline/inline/g' \
-		-e 's/\\_\\-\\_\\-inline/inline/g' \
+		-e 's/__hwloc_inline/inline/g' \
+		-e 's/\\_\\-\\_\\-hwloc\\_\\-inline/inline/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
 	@echo "Work-around spurious leading _ in doxygen filenames..."
 	(cd $(DOX_DIR)/man/man3 ; \

@@ -130,11 +130,11 @@ int main(int argc, char *argv[])
     int first = 1;
     while (!hwloc_cpuset_iszero(remaining)) {
       char type[64];
-      unsigned index;
+      unsigned idx;
       hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
-      index = logicalo ? obj->logical_index : obj->os_index;
-      printf("%s%s:%u", first ? "" : " ", type, index);
+      idx = logicalo ? obj->logical_index : obj->os_index;
+      printf("%s%s:%u", first ? "" : " ", type, idx);
       hwloc_cpuset_andnot(remaining, remaining, obj->cpuset);
       first = 0;
     }
