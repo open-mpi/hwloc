@@ -258,6 +258,9 @@ EOF])
     #
     _HWLOC_CHECK_ATTRIBUTES
     _HWLOC_CHECK_VISIBILITY
+    HWLOC_CFLAGS="$HWLOC_FLAGS $HWLOC_VISIBILITY_CFLAGS"
+    AS_IF([test "$HWLOC_VISIBILITY_CFLAGS" != ""],
+          [AC_MSG_WARN(["$HWLOC_VISIBILITY_CFLAGS" has been added to hwloc's CFLAGS])])
 
     #
     # Check for inline compatibility support
