@@ -605,8 +605,8 @@ void output_text(hwloc_topology_t topology, const char *filename, int logical, i
   int lbr, lbg, lbb; /* Last background color */
 #ifdef HWLOC_HAVE_LIBTERMCAP
   int term = 0;
-#endif
   char *tmp;
+#endif
 
   if (!filename || !strcmp(filename, "-"))
     output = stdout;
