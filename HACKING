@@ -53,8 +53,8 @@ Notes to developers:
   "make check".
 
 - For the windows zipball, make sure you have Microsoft's lib tool in
-  PATH, and remember to copy README and NEWS at the root of the zip into
-  README.txt and NEWS.txt files with CRLF:
+  PATH, to pass --enable-static to ./configure, and remember to copy README and
+  NEWS at the root of the zip into README.txt and NEWS.txt files with CRLF:
 
   sed -e 's/$/'$'\015'/ < README > $prefix/README.txt
   sed -e 's/$/'$'\015'/ < NEWS > $prefix/NEWS.txt
