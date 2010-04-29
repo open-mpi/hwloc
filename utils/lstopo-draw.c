@@ -365,7 +365,7 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
     else {
       hwloc_cpuset_t bind = hwloc_cpuset_alloc();
-      if (pid > 0)
+      if (pid != (hwloc_pid_t) -1 && pid != 0)
         hwloc_get_proc_cpubind(topology, pid, bind, 0);
       else if (pid == 0)
         hwloc_get_cpubind(topology, bind, 0);
