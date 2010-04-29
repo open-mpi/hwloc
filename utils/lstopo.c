@@ -341,7 +341,7 @@ main (int argc, char *argv[])
       return EXIT_FAILURE;
     }
   }
-  if (pid != (hwloc_pid_t) -1) {
+  if (pid != (hwloc_pid_t) -1 && pid != 0) {
     if (hwloc_topology_set_pid(topology, pid)) {
       perror("Setting target pid");
       return EXIT_FAILURE;
