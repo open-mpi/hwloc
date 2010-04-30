@@ -223,8 +223,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	  break;
 	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
 	  return;
-	free(procInfo);
-	procInfo = malloc(length);
+	procInfo = realloc(procInfo, length);
       }
 
       for (i = 0; i < length / sizeof(*procInfo); i++) {
@@ -315,8 +314,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	  break;
 	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
 	  return;
-	free(procInfoTotal);
-	procInfo = malloc(length);
+        procInfoTotal = realloc(profInfoTotal, length);
       }
 
       for (procInfo = procInfoTotal;
