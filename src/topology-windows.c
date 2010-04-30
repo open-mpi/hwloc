@@ -111,8 +111,8 @@ typedef struct _CACHE_RELATIONSHIP {
 typedef struct _PROCESSOR_GROUP_INFO {
   BYTE MaximumProcessorCount;
   BYTE ActiveProcessorCount;
+  BYTE Reserved[38];
   KAFFINITY ActiveProcessorMask;
-  ULONGLONG Reserved[4];
 } PROCESSOR_GROUP_INFO, *PPROCESSOR_GROUP_INFO;
 #endif
 
@@ -199,6 +199,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
   BOOL WINAPI (*GetLogicalProcessorInformationProc)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
   BOOL WINAPI (*GetLogicalProcessorInformationExProc)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
   BOOL WINAPI (*GetNumaAvailableMemoryNodeProc)(UCHAR Node, PULONGLONG AvailableBytes);
+  BOOL WINAPI (*GetNumaAvailableMemoryNodeExProc)(USHORT Node, PULONGLONG AvailableBytes);
+
   DWORD length;
 
   HMODULE kernel32;
@@ -207,8 +209,10 @@ hwloc_look_windows(struct hwloc_topology *topology)
   if (kernel32) {
     GetLogicalProcessorInformationProc = GetProcAddress(kernel32, "GetLogicalProcessorInformation");
     GetNumaAvailableMemoryNodeProc = GetProcAddress(kernel32, "GetNumaAvailableMemoryNode");
+    GetNumaAvailableMemoryNodeExProc = GetProcAddress(kernel32, "GetNumaAvailableMemoryNodeEx");
+    GetLogicalProcessorInformationExProc = GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
 
-    if (GetLogicalProcessorInformationProc) {
+    if (!GetLogicalProcessorInformationExProc && GetLogicalProcessorInformationProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION procInfo;
       unsigned id;
       unsigned i;
@@ -266,7 +270,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	      ULONGLONG avail;
 	      obj->nodeset = hwloc_cpuset_alloc();
 	      hwloc_cpuset_set(obj->nodeset, id);
-	      if (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail))
+	      if ((GetNumaAvailableMemoryNodeExProc && GetNumaAvailableMemoryNodeExProc(id, &avail))
+	       || (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail)))
 		obj->memory.local_memory = avail;
 	      obj->memory.page_types_len = 1;
 	      obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
@@ -292,10 +297,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
       free(procInfo);
     }
 
-    GetLogicalProcessorInformationExProc = GetProcAddress(kernel32, "GetLogicalProcessorInformationEx");
-
-    /* Disabled for now as it wasn't tested at all.  */
-    if (0 && GetLogicalProcessorInformationExProc) {
+    if (GetLogicalProcessorInformationExProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX procInfoTotal, procInfo;
 
       unsigned id;
@@ -356,7 +358,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	      obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, id);
 	      obj->cpuset = hwloc_cpuset_alloc();
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
-	      hwloc_debug("group %u mask %lx\n", id, mask);
+	      hwloc_debug("group %u %d cpus mask %lx\n", id,
+                  procInfo->Group.GroupInfo[id].ActiveProcessorCount, mask);
 	      hwloc_cpuset_from_ith_ulong(obj->cpuset, id, mask);
 	      hwloc_insert_object_by_cpuset(topology, obj);
 	    }
@@ -373,16 +376,21 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
 	switch (type) {
 	  case HWLOC_OBJ_NODE:
-	    obj->nodeset = hwloc_cpuset_alloc();
-	    hwloc_cpuset_set(obj->nodeset, id);
-	    obj->memory.local_memory = 0; /* TODO GetNumaAvailableMemoryNodeEx  */
-	    obj->memory.page_types_len = 1;
-	    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-	    memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
+	    {
+	      ULONGLONG avail;
+	      obj->nodeset = hwloc_cpuset_alloc();
+	      hwloc_cpuset_set(obj->nodeset, id);
+	      if ((GetNumaAvailableMemoryNodeExProc && GetNumaAvailableMemoryNodeExProc(id, &avail))
+	       || (GetNumaAvailableMemoryNodeProc && GetNumaAvailableMemoryNodeProc(id, &avail)))
+	        obj->memory.local_memory = avail;
+	      obj->memory.page_types_len = 1;
+	      obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+	      memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
 #ifdef HAVE__SC_LARGE_PAGESIZE
-	    obj->memory.page_types[0].size = sysconf(_SC_LARGE_PAGESIZE);
+	      obj->memory.page_types[0].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-	    break;
+	      break;
+	    }
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo->Cache.CacheSize;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
