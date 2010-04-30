@@ -298,7 +298,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
     if (0 && GetLogicalProcessorInformationExProc) {
       PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX procInfoTotal, procInfo;
 
-      signed id;
+      unsigned id;
       struct hwloc_obj *obj;
       hwloc_obj_type_t type;
       KAFFINITY mask;
@@ -356,7 +356,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	      obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, id);
 	      obj->cpuset = hwloc_cpuset_alloc();
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
-	      hwloc_debug("group %d mask %lx\n", id, mask);
+	      hwloc_debug("group %u mask %lx\n", id, mask);
 	      hwloc_cpuset_from_ith_ulong(obj->cpuset, id, mask);
 	      hwloc_insert_object_by_cpuset(topology, obj);
 	    }
@@ -368,7 +368,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
 	obj = hwloc_alloc_setup_object(type, id);
         obj->cpuset = hwloc_cpuset_alloc();
-	hwloc_debug("%s#%d mask %d:%lx\n", hwloc_obj_type_string(type), id, group, mask);
+	hwloc_debug("%s#%u mask %d:%lx\n", hwloc_obj_type_string(type), id, group, mask);
 	hwloc_cpuset_from_ith_ulong(obj->cpuset, group, mask);
 
 	switch (type) {
