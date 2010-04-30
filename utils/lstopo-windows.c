@@ -61,7 +61,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 }
 
 static void *
-windows_start(void *output_, int width, int height)
+windows_start(void *output_ __hwloc_attribute_unused, int width, int height)
 {
   WNDCLASS wndclass = {
     .hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH),
@@ -85,7 +85,7 @@ windows_start(void *output_, int width, int height)
 }
 
 static void
-windows_declare_color(void *output_, int r, int g, int b)
+windows_declare_color(void *output_ __hwloc_attribute_unused, int r, int g, int b)
 {
   HBRUSH brush;
   COLORREF color = RGB(r, g, b);
@@ -105,7 +105,7 @@ windows_declare_color(void *output_, int r, int g, int b)
 }
 
 static void
-windows_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
+windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
 {
   PAINTSTRUCT *ps = output;
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
@@ -114,7 +114,7 @@ windows_box(void *output, int r, int g, int b, unsigned depth, unsigned x, unsig
 }
 
 static void
-windows_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+windows_line(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x1, unsigned y1, unsigned x2, unsigned y2)
 {
   PAINTSTRUCT *ps = output;
   SelectObject(ps->hdc, rgb_to_brush(r, g, b));
@@ -123,7 +123,7 @@ windows_line(void *output, int r, int g, int b, unsigned depth, unsigned x1, uns
 }
 
 static void
-windows_text(void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
+windows_text(void *output, int r, int g, int b, int size, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
 {
   PAINTSTRUCT *ps = output;
   HFONT font;
@@ -143,7 +143,7 @@ struct draw_methods windows_draw_methods = {
 };
 
 void
-output_windows (hwloc_topology_t topology, const char *filename, int logical, int verbose_mode)
+output_windows (hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int logical, int verbose_mode __hwloc_attribute_unused)
 {
   HWND toplevel;
   the_topology = topology;
