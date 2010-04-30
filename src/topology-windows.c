@@ -314,7 +314,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	  break;
 	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
 	  return;
-        procInfoTotal = realloc(profInfoTotal, length);
+        procInfoTotal = realloc(procInfoTotal, length);
       }
 
       for (procInfo = procInfoTotal;
