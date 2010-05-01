@@ -323,11 +323,11 @@ recent updates installed for your operating system.  Indeed, most of
 hwloc topology discovery relies on hardware information retrieved
 through the operation system (e.g., via the /sys virtual filesystem of
 the Linux kernel).  If upgrading your OS or Linux kernel does not
-solve your problem, check to ensure that you are running the most
-recent version of the BIOS for your machine.
+solve your problem, you may also want to ensure that you are running
+the most recent version of the BIOS for your machine.
 
-If both of those things fail, contact us on the mailing list for
-additional help.
+If those things fail, contact us on the mailing list for additional
+help.
 
 \htmlonly
 </div><div class="section" id="credits">
