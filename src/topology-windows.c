@@ -306,8 +306,6 @@ hwloc_look_windows(struct hwloc_topology *topology)
       KAFFINITY mask;
       WORD group;
 
-      fprintf(stderr,"Note: GetLogicalProcessorInformationEx was never tested yet!\n");
-
       length = 0;
       procInfoTotal = NULL;
 
