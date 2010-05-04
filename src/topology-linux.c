@@ -328,12 +328,15 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
 
   while ((dirent = readdir(taskdir)) != NULL) {
     if (nr_tids == max_tids) {
+      pid_t *newtids;
       max_tids += 8;
-      tids = realloc(tids, max_tids*sizeof(pid_t));
-      if (!tids) {
+      newtids = realloc(tids, max_tids*sizeof(pid_t));
+      if (!newtids) {
+        free(tids);
         errno = ENOMEM;
         return -1;
       }
+      tids = newtids;
     }
     if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
       continue;
