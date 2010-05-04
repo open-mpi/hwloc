@@ -319,6 +319,10 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
     max_tids = sb.st_nlink;
 
   tids = malloc(max_tids*sizeof(pid_t));
+  if (!tids) {
+    errno = ENOMEM;
+    return -1;
+  }
 
   rewinddir(taskdir);
 
@@ -326,6 +330,10 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
     if (nr_tids == max_tids) {
       max_tids += 8;
       tids = realloc(tids, max_tids*sizeof(pid_t));
+      if (!tids) {
+        errno = ENOMEM;
+        return -1;
+      }
     }
     if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
       continue;
