@@ -1515,7 +1515,7 @@ hwloc_discover(struct hwloc_topology *topology)
 
   print_objects(topology, 0, topology->levels[0][0]);
 
-  if (!topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM) {
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM)) {
     hwloc_debug("%s", "\nRemoving unauthorized and offline cpusets from all cpusets\n");
     remove_unused_cpusets(topology->levels[0][0]);
 
