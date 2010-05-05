@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "lstopo.h"
 
@@ -261,8 +262,57 @@ output_x11(hwloc_topology_t topology, const char *filename __hwloc_attribute_unu
       case KeyPress: {
 	KeySym keysym;
 	XLookupString(&e.xkey, NULL, 0, &keysym, NULL);
-	if (keysym == XK_q || keysym == XK_Q)
-	  finish = 1;
+        switch (keysym) {
+          case XK_q:
+          case XK_Q:
+          case XK_Escape:
+            finish = 1;
+            break;
+          case XK_Left:
+            disp->x -= disp->screen_width/10;
+            move_x11(disp);
+            break;
+          case XK_Right:
+            disp->x += disp->screen_width/10;
+            move_x11(disp);
+            break;
+          case XK_Up:
+            disp->y -= disp->screen_height/10;
+            move_x11(disp);
+            break;
+          case XK_Down:
+            disp->y += disp->screen_height/10;
+            move_x11(disp);
+            break;
+          case XK_Page_Up:
+            if (e.xkey.state & ControlMask) {
+              disp->x -= disp->screen_width;
+              move_x11(disp);
+            } else {
+              disp->y -= disp->screen_height;
+              move_x11(disp);
+            }
+            break;
+          case XK_Page_Down:
+            if (e.xkey.state & ControlMask) {
+              disp->x += disp->screen_width;
+              move_x11(disp);
+            } else {
+              disp->y += disp->screen_height;
+              move_x11(disp);
+            }
+            break;
+          case XK_Home:
+            disp->x = 0;
+            disp->y = 0;
+            move_x11(disp);
+            break;
+          case XK_End:
+            disp->x = INT_MAX;
+            disp->y = INT_MAX;
+            move_x11(disp);
+            break;
+        }
 	break;
       }
     }
