@@ -32,6 +32,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
+#include <X11/cursorfont.h>
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 
 #include <stdio.h>
@@ -109,6 +110,7 @@ struct display {
   Display *dpy;
   cairo_surface_t *cs;
   Window win;
+  Cursor hand;
   int screen_width, screen_height;	/** visible part size */
   int width, height;			/** total size */
   int x, y;				/** top left corner of the visible part */
@@ -124,6 +126,7 @@ x11_start(void *output __hwloc_attribute_unused, int width, int height)
   Screen *screen;
   int screen_width = width, screen_height = height;
   struct display *disp;
+  Cursor hand;
 
   if (!(dpy = XOpenDisplay(NULL))) {
     fprintf(stderr, "couldn't connect to X\n");
@@ -138,6 +141,8 @@ x11_start(void *output __hwloc_attribute_unused, int width, int height)
   root = RootWindow(dpy, scr);
   top = XCreateSimpleWindow(dpy, root, 0, 0, screen_width, screen_height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
   win = XCreateSimpleWindow(dpy, top, 0, 0, width, height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
+  hand = XCreateFontCursor(dpy, XC_fleur);
+  XDefineCursor(dpy, win, hand);
 
   XSelectInput(dpy, win,
       KeyPressMask |
@@ -154,6 +159,7 @@ x11_start(void *output __hwloc_attribute_unused, int width, int height)
   disp->dpy = dpy;
   disp->cs = cs;
   disp->win = win;
+  disp->hand = hand;
   disp->screen_width = screen_width;
   disp->screen_height = screen_height;
   disp->width = width;
@@ -262,6 +268,7 @@ output_x11(hwloc_topology_t topology, const char *filename __hwloc_attribute_unu
     }
   }
   cairo_surface_destroy(disp->cs);
+  XFreeCursor(disp->dpy, disp->hand);
   XCloseDisplay(disp->dpy);
   free(disp);
 }
