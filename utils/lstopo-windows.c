@@ -43,7 +43,6 @@ static hwloc_topology_t the_topology;
 static int the_logical;
 static int state, control;
 static int x, y, x_delta, y_delta;
-static HCURSOR cursor;
 static int finish;
 static int the_width, the_height;
 static int win_width, win_height;
@@ -144,12 +143,6 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
         control = 0;
         break;
       }
-      break;
-    case WM_MOUSEHOVER:
-      SetCursor(cursor);
-      break;
-    case WM_MOUSELEAVE:
-      SetCursor(NULL);
       break;
     case WM_DESTROY:
       PostQuitMessage(0);
@@ -279,5 +272,4 @@ output_windows (hwloc_topology_t topology, const char *filename __hwloc_attribut
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }
-  DestroyCursor(cursor);
 }
