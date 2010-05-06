@@ -47,7 +47,7 @@ typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP {
   RelationCache,
   RelationProcessorPackage,
   RelationGroup,
-  RelationAll = 0xffff,
+  RelationAll = 0xffff
 } LOGICAL_PROCESSOR_RELATIONSHIP;
 #endif
 

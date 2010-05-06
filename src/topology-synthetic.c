@@ -84,7 +84,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 
     nb_pu *= item;
     if (nb_pu > HWLOC_NBMAXCPUS) {
-      fprintf(stderr, "To many PUs, max %u\n", HWLOC_NBMAXCPUS);
+      fprintf(stderr, "To many PUs, max %d\n", HWLOC_NBMAXCPUS);
       return -1;
     }
 
