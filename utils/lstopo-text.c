@@ -389,7 +389,7 @@ enum {
   up = (1<<0),
   down = (1<<1),
   left = (1<<2),
-  right = (1<<3),
+  right = (1<<3)
 };
 
 /* Convert a bar character into its directions */
