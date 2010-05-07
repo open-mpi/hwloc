@@ -39,10 +39,8 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
   do {
     size *= 2;
     str = malloc(size);
-    if (NULL == str) {
-      /* Couldn't allocate?! Let's return the least surprising value. */
-      return 0;
-    }
+    if (NULL == str)
+      return -1;
     va_start(ap, format);
     errno = 0;
     ret = vsnprintf(str, size, format, ap);

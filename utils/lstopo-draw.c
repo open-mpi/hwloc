@@ -338,12 +338,12 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
   char typestr[32];
   char indexstr[32]= "";
   char attrstr[256];
-  size_t attrlen;
+  int attrlen;
   hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
   if (idx != (unsigned)-1 && obj->depth != 0)
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
-  if (attrlen)
+  if (attrlen > 0)
     return snprintf(text, textlen, "%s%s (%s)", typestr, indexstr, attrstr);
   else
     return snprintf(text, textlen, "%s%s", typestr, indexstr);
