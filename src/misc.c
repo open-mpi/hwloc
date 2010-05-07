@@ -40,7 +40,8 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
     size *= 2;
     str = malloc(size);
     if (NULL == str) {
-        return -1;
+      /* Couldn't allocate?! Let's return the least surprising value. */
+      return 0;
     }
     va_start(ap, format);
     errno = 0;
