@@ -224,7 +224,10 @@ EOF])
     hwloc_CC_save=$CC
     hwloc_CFLAGS_save=$CFLAGS
     AC_PROG_CC_C99
-    hwloc_CC_c99_flags=`echo $CC | sed -e s/^$hwloc_CC_save//`
+    if test x"$ac_cv_prog_cc_c99" = xno; then
+      AC_ERROR([C99 support is required by hwloc])
+    fi
+    hwloc_CC_c99_flags=`echo $CC | sed -e "s/^$hwloc_CC_save//"`
     CC=$hwloc_CC_save
     CFLAGS=$hwloc_CFLAGS_save
 
