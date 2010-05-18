@@ -539,10 +539,12 @@ hwloc_get_type_order(hwloc_obj_type_t type)
   return obj_type_order[type];
 }
 
+#if !defined(NDEBUG)
 static hwloc_obj_type_t hwloc_get_order_type(int order)
 {
   return obj_order_type[order];
 }
+#endif
 
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
@@ -2093,12 +2095,14 @@ hwloc__check_children(struct hwloc_obj *parent)
 	continue;
       /* check that child cpuset is included in the parent */
       assert(hwloc_cpuset_isincluded(parent->children[j]->cpuset, remaining_parent_set));
+#if !defined(NDEBUG)
       /* check that children are correctly ordered (see below), empty ones may be anywhere */
       if (!hwloc_cpuset_iszero(parent->children[j]->cpuset)) {
         int firstchild = hwloc_cpuset_first(parent->children[j]->cpuset);
         int firstparent = hwloc_cpuset_first(remaining_parent_set);
         assert(firstchild == firstparent);
       }
+#endif
       /* clear previously used parent cpuset bits so that we actually checked above
        * that children cpusets do not intersect and are ordered properly
        */
