@@ -50,7 +50,7 @@ EOF])
     # mode).
     HWLOC_startdir=`pwd`
     if test x"hwloc_config_prefix" != "x" -a ! -d "hwloc_config_prefix"; then
-        mkdir "hwloc_config_prefix"
+        mkdir -p "hwloc_config_prefix"
     fi
     if test x"hwloc_config_prefix" != "x"; then
         cd "hwloc_config_prefix"
@@ -79,12 +79,19 @@ EOF])
     # Debug mode?
     AC_MSG_CHECKING([if want hwloc maintainer support])
     hwloc_debug=
-    AS_IF([test "$enable_debug" = "yes"],
-          [hwloc_debug=1
-           hwloc_debug_msg="enabled"])
-    AS_IF([test "$hwloc_debug" = "" -a "$hwloc_mode" = "embedded" -a "$enable_debug" = ""],
+
+    # Unconditionally disable debug mode in embedded mode; if someone
+    # asks, we can add a configure-time option for it.  Disable it
+    # now, however, because --enable-debug is not even added as an
+    # option when configuring in embedded mode, and we wouldn't want
+    # to hijack the enclosing application's --enable-debug configure
+    # switch.
+    AS_IF([test "$hwloc_mode" = "embedded"],
           [hwloc_debug=0
            hwloc_debug_msg="disabled (embedded mode)"])
+    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "yes"],
+          [hwloc_debug=1
+           hwloc_debug_msg="enabled"])
     AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .svn],
           [hwloc_debug=1
            hwloc_debug_msg="enabled (SVN checkout default)"])
@@ -224,7 +231,15 @@ EOF])
     hwloc_CC_save=$CC
     hwloc_CFLAGS_save=$CFLAGS
     AC_PROG_CC_C99
-    hwloc_CC_c99_flags=`echo $CC | sed -e s/^$hwloc_CC_save//`
+    AS_IF([test x"$ac_cv_prog_cc_c99" = xno],
+          [AC_WARN([C99 support is required by hwloc])
+           $3],
+          [HWLOC_SETUP_CORE_AFTER_C99($1, $2, $3, $4)])
+])
+
+dnl Same order of parameters form HWLOC-SETUP-CORE
+AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
+    hwloc_CC_c99_flags=`echo $CC | sed -e "s/^$hwloc_CC_save//"`
     CC=$hwloc_CC_save
     CFLAGS=$hwloc_CFLAGS_save
 
@@ -258,6 +273,9 @@ EOF])
     #
     _HWLOC_CHECK_ATTRIBUTES
     _HWLOC_CHECK_VISIBILITY
+    HWLOC_CFLAGS="$HWLOC_FLAGS $HWLOC_VISIBILITY_CFLAGS"
+    AS_IF([test "$HWLOC_VISIBILITY_CFLAGS" != ""],
+          [AC_MSG_WARN(["$HWLOC_VISIBILITY_CFLAGS" has been added to hwloc's CFLAGS])])
 
     #
     # Check for inline compatibility support
@@ -538,18 +556,11 @@ EOF])
     # Always generate these files
     AC_CONFIG_FILES(
         hwloc_config_prefix[Makefile]
-        hwloc_config_prefix[doc/Makefile]
         hwloc_config_prefix[include/Makefile]
         hwloc_config_prefix[src/Makefile ]
-        hwloc_config_prefix[tests/Makefile ]
-        hwloc_config_prefix[tests/linux/Makefile]
-        hwloc_config_prefix[tests/xml/Makefile]
-        hwloc_config_prefix[tests/ports/Makefile]
-        hwloc_config_prefix[utils/Makefile]
     )
 
     # Cleanup
-    unset hwloc_config_happy
     AC_LANG_POP
 
     # Success
