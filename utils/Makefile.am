@@ -11,7 +11,7 @@ EXTRA_DIST = test-hwloc-distrib.output
 
 # Only build the utilities if we're building in standalone mode
 if HWLOC_BUILD_UTILS
-bin_PROGRAMS = lstopo hwloc-calc hwloc-bind hwloc-distrib
+bin_PROGRAMS = lstopo hwloc-calc hwloc-bind hwloc-distrib hwloc-ps
 endif
 
 lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c
