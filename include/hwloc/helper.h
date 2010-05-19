@@ -365,7 +365,7 @@ hwloc_get_child_covering_cpuset (hwloc_topology_t topology __hwloc_attribute_unu
 
   child = parent->first_child;
   while (child) {
-    if (hwloc_cpuset_isincluded(set, child->cpuset))
+    if (child->cpuset && hwloc_cpuset_isincluded(set, child->cpuset))
       return child;
     child = child->next_sibling;
   }
