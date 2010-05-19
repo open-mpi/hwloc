@@ -140,8 +140,10 @@ hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
     unsigned size = 1; /* current object i */
 
     /* if already grouped, skip */
-    if (groupids[i])
+    if (groupids[i]) {
+      hwloc_cpuset_free(closest_objs_set);
       continue;
+    }
 
     /* find closest nodes */
     for(j=i+1; j<nbobjs; j++) {
@@ -164,6 +166,7 @@ hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
 	    (*distances)[j][k] != min_distance) {
 	  /* the minimal-distance graph is not complete. abort */
 	  hwloc_debug("%s", "found incomplete minimal-distance graph, aborting\n");
+	  hwloc_cpuset_free(closest_objs_set);
 	  return 0;
 	}
 
