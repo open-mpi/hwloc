@@ -823,8 +823,8 @@ int hwloc_cpuset_compare(const struct hwloc_cpuset_s * set1, const struct hwloc_
 		return !!set1->infinite - !!set2->infinite;
 
 	for(i=largest->ulongs_count-1; i>=0; i--) {
-		unsigned long val1 = HWLOC_CPUSUBSET_READULONG(set1, i);
-		unsigned long val2 = HWLOC_CPUSUBSET_READULONG(set2, i);
+		unsigned long val1 = HWLOC_CPUSUBSET_READULONG(set1, (unsigned) i);
+		unsigned long val2 = HWLOC_CPUSUBSET_READULONG(set2, (unsigned) i);
 		if (val1 == val2)
 			continue;
 		return val1 < val2 ? -1 : 1;
