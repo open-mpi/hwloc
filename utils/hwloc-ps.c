@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
   int show_all = 0;
   char *callname;
   int err;
-  char c;
   int opt;
 
   callname = strrchr(argv[0], '/');
