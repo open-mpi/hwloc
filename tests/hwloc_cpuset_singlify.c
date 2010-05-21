@@ -30,6 +30,7 @@ int main(void)
   hwloc_cpuset_singlify(orig);
   hwloc_cpuset_zero(expected);
   hwloc_cpuset_set(expected, 0);
+  assert(hwloc_cpuset_isequal(orig, expected));
   assert(!hwloc_cpuset_compare(orig, expected));
 
   /* actual non-trivial set */
@@ -40,6 +41,7 @@ int main(void)
   hwloc_cpuset_singlify(orig);
   hwloc_cpuset_zero(expected);
   hwloc_cpuset_set(expected, 45);
+  assert(hwloc_cpuset_isequal(orig, expected));
   assert(!hwloc_cpuset_compare(orig, expected));
 
   hwloc_cpuset_free(orig);

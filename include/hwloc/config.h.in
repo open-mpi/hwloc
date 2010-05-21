@@ -95,8 +95,6 @@
 /* Define to 1 if the CPU_SET macro works */
 #undef HWLOC_HAVE_CPU_SET
 
-#define HWLOC_NBMAXCPUS	1024
-
 #undef HWLOC_SIZEOF_UNSIGNED_LONG
 #undef HWLOC_SIZEOF_UNSIGNED_INT
 

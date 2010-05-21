@@ -20,7 +20,20 @@ int main(void)
   char *string = NULL;
   int stringlen, len;
   hwloc_obj_t obj;
-  hwloc_cpuset_t set;
+  hwloc_cpuset_t set, set2;
+
+  /* check an infinite cpuset */
+  set = hwloc_cpuset_alloc();
+  hwloc_cpuset_fill(set);
+  hwloc_cpuset_clr(set, 173);
+  hwloc_cpuset_clr_range(set, 60, 70);
+  hwloc_cpuset_asprintf(&string, set);
+  set2 = hwloc_cpuset_alloc();
+  hwloc_cpuset_from_string(set2, string);
+  free(string);
+  assert(hwloc_cpuset_isequal(set, set2));
+  hwloc_cpuset_free(set);
+  hwloc_cpuset_free(set2);
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "6 5 4 3 2");

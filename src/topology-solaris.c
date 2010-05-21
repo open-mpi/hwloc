@@ -162,6 +162,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
+#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 static void
 hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 {

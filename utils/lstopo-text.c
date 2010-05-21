@@ -343,7 +343,7 @@ set_color(int fr, int fg, int fb, int br, int bg, int bb)
 
 /* We we can, allocate rgb colors */
 static void
-text_declare_color(void *output __hwloc_attribute_unused, int r, int g, int b)
+text_declare_color(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused)
 {
 #ifdef HWLOC_HAVE_LIBTERMCAP
   int color = declare_color(r, g, b);
@@ -365,7 +365,7 @@ text_declare_color(void *output __hwloc_attribute_unused, int r, int g, int b)
 
 /* output text, erasing any previous content */
 static void
-put(struct display *disp, int x, int y, character c, int fr, int fg, int fb, int br, int bg, int bb)
+put(struct display *disp, int x, int y, character c, int fr __hwloc_attribute_unused, int fg __hwloc_attribute_unused, int fb __hwloc_attribute_unused, int br __hwloc_attribute_unused, int bg __hwloc_attribute_unused, int bb __hwloc_attribute_unused)
 {
   if (x >= disp->width || y >= disp->height) {
     /* fprintf(stderr, "%"PRIchar" overflowed to (%d,%d)\n", c, x, y); */
@@ -391,7 +391,7 @@ enum {
   up = (1<<0),
   down = (1<<1),
   left = (1<<2),
-  right = (1<<3),
+  right = (1<<3)
 };
 
 /* Convert a bar character into its directions */
@@ -607,8 +607,8 @@ void output_text(hwloc_topology_t topology, const char *filename, int logical, i
   int lbr, lbg, lbb; /* Last background color */
 #ifdef HWLOC_HAVE_LIBTERMCAP
   int term = 0;
-#endif
   char *tmp;
+#endif
 
   if (!filename || !strcmp(filename, "-"))
     output = stdout;
