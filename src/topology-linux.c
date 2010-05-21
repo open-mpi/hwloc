@@ -203,13 +203,21 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   /* The resulting binding is always strict */
 
-#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
   cpu_set_t *plinux_set;
   unsigned cpu;
-  size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
+  int last;
+  size_t setsize;
   int err;
 
-  plinux_set = CPU_ALLOC(HWLOC_NBMAXCPUS);
+  last = hwloc_cpuset_last(hwloc_set);
+  if (last == -1) {
+    errno = -EINVAL;
+    return -1;
+  }
+
+  setsize = CPU_ALLOC_SIZE(last+1);
+  plinux_set = CPU_ALLOC(last+1);
 
   CPU_ZERO_S(setsize, plinux_set);
   hwloc_cpuset_foreach_begin(cpu, hwloc_set)
@@ -251,12 +259,17 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   int err;
   /* TODO Kerrighed */
 
-#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
   cpu_set_t *plinux_set;
   unsigned cpu;
-  size_t setsize = CPU_ALLOC_SIZE(HWLOC_NBMAXCPUS);
+  int last;
+  size_t setsize;
 
-  plinux_set = CPU_ALLOC(HWLOC_NBMAXCPUS);
+  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+  assert(last != -1);
+
+  setsize = CPU_ALLOC_SIZE(last+1);
+  plinux_set = CPU_ALLOC(last+1);
 
   err = sched_getaffinity(tid, setsize, plinux_set);
 
@@ -266,7 +279,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   }
 
   hwloc_cpuset_zero(hwloc_set);
-  for(cpu=0; cpu<HWLOC_NBMAXCPUS; cpu++)
+  for(cpu=0; cpu<=(unsigned) last; cpu++)
     if (CPU_ISSET_S(cpu, setsize, plinux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
 
@@ -721,17 +734,17 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 /* kernel cpumaps are composed of an array of 32bits cpumasks */
 #define KERNEL_CPU_MASK_BITS 32
 #define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
-#define MAX_KERNEL_CPU_MASK ((HWLOC_NBMAXCPUS+KERNEL_CPU_MASK_BITS-1)/KERNEL_CPU_MASK_BITS)
 
 int
 hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
 {
-  unsigned long maps[MAX_KERNEL_CPU_MASK];
+  unsigned long *maps;
   unsigned long map;
   int nr_maps = 0;
-  int n;
-
+  static int nr_maps_allocated = 8; /* only compute the power-of-two above the kernel cpumask size once */
   int i;
+
+  maps = malloc(nr_maps_allocated * sizeof(*maps));
 
   /* reset to zero first */
   hwloc_cpuset_zero(set);
@@ -739,8 +752,10 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
   /* parse the whole mask */
   while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
     {
-      if (nr_maps == MAX_KERNEL_CPU_MASK)
-        break; /* too many cpumasks in this cpumap */
+      if (nr_maps == nr_maps_allocated) {
+	nr_maps_allocated *= 2;
+	maps = realloc(maps, nr_maps_allocated * sizeof(*maps));
+      }
 
       if (!map && !nr_maps)
 	/* ignore the first map if it's empty */
@@ -751,15 +766,13 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
       nr_maps++;
     }
 
-  /* check that the map can be stored in our cpuset */
-  n = nr_maps*KERNEL_CPU_MASK_BITS;
-  if (n > HWLOC_NBMAXCPUS)
-    n = HWLOC_NBMAXCPUS;
-
   /* convert into a set */
-  for(i=0; i<n; i++)
+  /* FIXME: optimize using hwloc_cpuset_ith_long? */
+  for(i=0; i<nr_maps*KERNEL_CPU_MASK_BITS; i++)
     if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
       hwloc_cpuset_set(set, i);
+
+  free(maps);
 
   return 0;
 }
@@ -1006,6 +1019,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
   char *cpuset_mask;
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
+  hwloc_cpuset_t tmpset;
 
   cpuset_mask = hwloc_read_linux_cpuset_mask(cgroup_mntpnt, cpuset_mntpnt, cpuset_name,
 					     attr_name, topology->backend_params.sysfs.root_fd);
@@ -1041,12 +1055,12 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
     current = comma+1;
   }
 
-  /* disable after last enabled-segment */
-  nextfirst = HWLOC_NBMAXCPUS;
-  if (prevlast+1 <= nextfirst-1) {
-    hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
-    hwloc_cpuset_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
-  }
+  hwloc_debug("%s [%d:...] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
+  /* no easy way to clear until the infinity */
+  tmpset = hwloc_cpuset_alloc();
+  hwloc_cpuset_set_range(tmpset, 0, prevlast);
+  hwloc_cpuset_and(admin_enabled_cpus_set, admin_enabled_cpus_set, tmpset);
+  hwloc_cpuset_free(tmpset);
 
   free(cpuset_mask);
 }
@@ -1252,9 +1266,6 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	continue;
       cpu = strtoul(dirent->d_name+3, NULL, 0);
 
-      if (cpu >= HWLOC_NBMAXCPUS)
-        continue;
-
       /* Maybe we don't have topology information but at least it exists */
       hwloc_cpuset_set(topology->levels[0][0]->complete_cpuset, cpu);
 
@@ -1423,6 +1434,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 #      define PROCESSOR	"processor"
 #      define PHYSID "physical id"
 #      define COREID "core id"
+#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 static int
 look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	     hwloc_cpuset_t online_cpuset)

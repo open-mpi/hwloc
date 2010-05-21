@@ -80,8 +80,6 @@ hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribu
       count--;
     }
     cpu++;
-    if (cpu > HWLOC_NBMAXCPUS)
-      break;
   }
 #else /* !CPU_ZERO_S */
   /* sched.h does not support dynamic cpu_set_t (introduced in glibc 2.7),
@@ -89,7 +87,7 @@ hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribu
    */
   int cpu;
   assert(schedsetsize == sizeof(cpu_set_t));
-  for(cpu=0; cpu<CPU_SETSIZE && cpu<HWLOC_NBMAXCPUS; cpu++)
+  for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, schedset))
       hwloc_cpuset_set(hwlocset, cpu);
 #endif /* !CPU_ZERO_S */

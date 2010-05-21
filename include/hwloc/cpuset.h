@@ -17,7 +17,7 @@
 /** \defgroup hwlocality_cpuset The Cpuset API
  *
  * For use in hwloc itself, a hwloc_cpuset_t represents a set of logical
- * processors.
+ * processors. It may be infinite.
  *
  * \note cpusets are indexed by OS logical processor number.
  * @{
@@ -161,7 +161,7 @@ HWLOC_DECLSPEC int hwloc_cpuset_first(hwloc_const_cpuset_t set) __hwloc_attribut
 
 /** \brief Compute the last CPU (most significant bit) in CPU set \p set
  *
- * \return -1 if no CPU is set.
+ * \return -1 if no CPU is set, or if the CPU set is infinite.
  */
 HWLOC_DECLSPEC int hwloc_cpuset_last(hwloc_const_cpuset_t set) __hwloc_attribute_pure;
 
@@ -208,6 +208,8 @@ HWLOC_DECLSPEC int hwloc_cpuset_weight(hwloc_const_cpuset_t set) __hwloc_attribu
  * Successive iterations will iterate through, in order, all remaining
  * CPUs that in the set.  To be specific: each iteration will return a
  * value for \p cpu such that hwloc_cpuset_isset(set, cpu) is true.
+ *
+ * The loop is infinite if the CPU set is infinite.
  */
 #define hwloc_cpuset_foreach_begin(cpu, set) \
 do { \
