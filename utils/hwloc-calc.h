@@ -29,8 +29,9 @@ static inline int
 hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
-  char *s1 = hwloc_cpuset_printf_value(newset);
-  char *s2 = hwloc_cpuset_printf_value(set);
+  char *s1, *s2;
+  hwloc_cpuset_asprintf(&s1, newset);
+  hwloc_cpuset_asprintf(&s2, set);
   switch (mode) {
   case HWLOC_MASK_APPEND_ADD:
     if (verbose)
@@ -168,7 +169,8 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 
     obj = hwloc_mask_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
     if (verbose) {
-      char * s = hwloc_cpuset_printf_value(rootset);
+      char *s;
+      hwloc_cpuset_asprintf(&s, rootset);
       if (obj)
 	printf("object #%u depth %u below cpuset %s found\n",
 	       i, depth, s);

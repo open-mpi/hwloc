@@ -129,7 +129,8 @@ int main(void)
   printf("last cpu cpuset converted back and forth, ok\n");
 
 //  hwloc_cpuset_from_string(set, "1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n");
-//  char *s = hwloc_cpuset_printf_value(&set);
+//  char *s;
+//  hwloc_cpuset_asprintf(&s, &set);
 //  printf("%s\n", s);
 //  free(s);
 //  will be truncated after ",4," since it's too large

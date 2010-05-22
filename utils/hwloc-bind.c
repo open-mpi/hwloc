@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
       fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
       return EXIT_FAILURE;
     }
-    s = hwloc_cpuset_printf_value(cpu_set);
+    hwloc_cpuset_asprintf(&s, cpu_set);
     printf("%s\n", s);
     free(s);
     return EXIT_SUCCESS;
@@ -144,7 +144,8 @@ int main(int argc, char *argv[])
 
   if (bind_cpus) {
     if (verbose) {
-      char *s = hwloc_cpuset_printf_value(cpu_set);
+      char *s;
+      hwloc_cpuset_asprintf(&s, cpu_set);
       fprintf(stderr, "binding on cpu set %s\n", s);
       free(s);
     }
@@ -157,7 +158,8 @@ int main(int argc, char *argv[])
     if (ret) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
-      char *s = hwloc_cpuset_printf_value(cpu_set);
+      char *s;
+      hwloc_cpuset_asprintf(&s, cpu_set);
       fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
