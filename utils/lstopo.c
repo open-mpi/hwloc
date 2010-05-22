@@ -156,7 +156,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --fsys-root <path>    Chroot containing the /proc and /sys of another system\n");
 #endif
   fprintf (where, "   --pid <pid>           Detect topology as seen by process <pid>\n");
-  fprintf (where, "   --top                 Display processes within the hierarchy\n");
+  fprintf (where, "   --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "   --synthetic \"n:2 2\"   Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
                   "                         processors\n");
   fprintf (where, "   --fontsize 10         Set size of text font\n");
@@ -296,7 +296,7 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	pid = atoi(argv[2]); opt = 1;
-      } else if (!strcmp (argv[1], "--top"))
+      } else if (!!strcmp (argv[1], "--ps") || !strcmp (argv[1], "--top"))
         top = 1;
       else if (!strcmp (argv[1], "--version")) {
           printf("%s %s\n", callname, VERSION);
