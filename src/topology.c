@@ -489,10 +489,6 @@ free_object(hwloc_obj_t obj)
 {
   int i;
   switch (obj->type) {
-  case HWLOC_OBJ_MACHINE:
-    free(obj->attr->machine.dmi_board_vendor);
-    free(obj->attr->machine.dmi_board_name);
-    break;
   default:
     break;
   }

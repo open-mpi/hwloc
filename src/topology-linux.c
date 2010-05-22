@@ -1574,11 +1574,11 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 }
 
 static void
-hwloc__get_dmi_info(struct hwloc_topology *topology,
-		   char **dmi_board_vendor, char **dmi_board_name)
+hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
 #define DMI_BOARD_STRINGS_LEN 50
   char dmi_line[DMI_BOARD_STRINGS_LEN];
+  char *info;
   char *tmp;
   FILE *fd;
 
@@ -1591,8 +1591,9 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      *dmi_board_vendor = strdup(dmi_line);
-      hwloc_debug("found DMI board vendor '%s'\n", *dmi_board_vendor);
+      hwloc_debug("found DMI board vendor '%s'\n", dmi_line);
+      asprintf(&info, "DMIBoardVendor=%s", dmi_line);
+      add_object_info(obj, info);
     }
   }
 
@@ -1605,8 +1606,9 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      *dmi_board_name = strdup(dmi_line);
-      hwloc_debug("found DMI board name '%s'\n", *dmi_board_name);
+      hwloc_debug("found DMI board name '%s'\n", dmi_line);
+      asprintf(&info, "DMIBoardName=%s", dmi_line);
+      add_object_info(obj, info);
     }
   }
 }
@@ -1660,8 +1662,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
       hwloc_cpuset_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;
-      machine->attr->machine.dmi_board_name = NULL;
-      machine->attr->machine.dmi_board_vendor = NULL;
       hwloc_debug_1arg_cpuset("machine number %lu has cpuset %s\n",
 		 node, machine_online_set);
       hwloc_insert_object_by_cpuset(topology, machine);
@@ -1672,9 +1672,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
 
       /* Gather DMI info */
       /* FIXME: get the right DMI info of each machine */
-      hwloc__get_dmi_info(topology,
-			 &machine->attr->machine.dmi_board_vendor,
-			 &machine->attr->machine.dmi_board_name);
+      hwloc__get_dmi_info(topology, machine);
     }
     closedir(nodes_dir);
   } else {
@@ -1711,9 +1709,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     }
 
     /* Gather DMI info */
-    hwloc__get_dmi_info(topology,
-		       &topology->levels[0][0]->attr->machine.dmi_board_vendor,
-		       &topology->levels[0][0]->attr->machine.dmi_board_name);
+    hwloc__get_dmi_info(topology, topology->levels[0][0]);
   }
 }
 

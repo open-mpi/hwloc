@@ -155,29 +155,21 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
   }
 
+
+
+  /*************************
+   * deprecated (from 1.0)
+   */
   else if (!strcmp(name, "dmi_board_vendor")) {
-    switch (obj->type) {
-      case HWLOC_OBJ_MACHINE:
-	obj->attr->machine.dmi_board_vendor = strdup(value);
-	break;
-      default:
-	fprintf(stderr, "ignoring dmi_board_vendor attribute for object type without DMI board\n");
-	break;
-    }
+    char *info = malloc(17+strlen(value));
+    sprintf(info, "DMIBoardVendor=%s", value);
+    add_object_info(obj, info);
   }
-
   else if (!strcmp(name, "dmi_board_name")) {
-    switch (obj->type) {
-      case HWLOC_OBJ_MACHINE:
-	obj->attr->machine.dmi_board_name = strdup(value);
-	break;
-      default:
-	fprintf(stderr, "ignoring dmi_board_name attribute for object type without DMI board\n");
-	break;
-    }
+    char *info = malloc(15+strlen(value));
+    sprintf(info, "DMIBoardName=%s", value);
+    add_object_info(obj, info);
   }
-
-
 
   /*************************
    * deprecated (from 0.9)
@@ -506,12 +498,6 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     xmlNewProp(node, BAD_CAST "cache_size", BAD_CAST tmp);
     sprintf(tmp, "%u", obj->attr->cache.depth);
     xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
-    break;
-  case HWLOC_OBJ_MACHINE:
-    if (obj->attr->machine.dmi_board_vendor)
-      xmlNewProp(node, BAD_CAST "dmi_board_vendor", BAD_CAST obj->attr->machine.dmi_board_vendor);
-    if (obj->attr->machine.dmi_board_name)
-      xmlNewProp(node, BAD_CAST "dmi_board_name", BAD_CAST obj->attr->machine.dmi_board_name);
     break;
   case HWLOC_OBJ_GROUP:
     sprintf(tmp, "%u", obj->attr->group.depth);

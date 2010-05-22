@@ -305,8 +305,6 @@ union hwloc_obj_attr_u {
   } cache;
   /** \brief Machine-specific Object Attributes */
   struct hwloc_machine_attr_s {
-    char *dmi_board_vendor;		  /**< \brief DMI board vendor name */
-    char *dmi_board_name;		  /**< \brief DMI board model name */
   } machine;
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {

@@ -6,8 +6,6 @@
 <!ATTLIST object os_level CDATA "-1" >
 <!ATTLIST object os_index CDATA "-1" >
 <!ATTLIST object name CDATA "" >
-<!ATTLIST object dmi_board_vendor CDATA "" >
-<!ATTLIST object dmi_board_name CDATA "" >
 <!ATTLIST object local_memory CDATA "0" >
 <!ATTLIST object cache_size CDATA "0" >
 <!ATTLIST object huge_page_size_kB CDATA "0" >
