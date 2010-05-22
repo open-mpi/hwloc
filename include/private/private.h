@@ -195,6 +195,9 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
  */
 extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
+/* Insert a string in the object infos array */
+extern void add_object_info(hwloc_obj_t obj, char *info);
+
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 static inline char *
 hwloc_cpuset_printf_value(hwloc_const_cpuset_t cpuset)

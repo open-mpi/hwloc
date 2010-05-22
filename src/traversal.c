@@ -201,6 +201,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 {
   char memory[64] = "";
   char specific[64] = "";
+  char infos[256] = "";
   const char *specificseparator;
 
   if (verbose) {
@@ -239,12 +240,27 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     break;
   }
 
+  if (verbose) {
+    char *tmpinfos = infos;
+    unsigned tmplen = sizeof(infos);
+    int res;
+    int i;
+    for(i=0; i<obj->infos_count; i++) {
+      res = hwloc_snprintf(tmpinfos, tmplen, "%s%s", separator, obj->infos[i]);
+      if (res >= tmplen)
+        res = tmplen;
+      tmplen -= res;
+      tmpinfos += res;
+    }
+  }
+
   /* does the type-specific attribute string need separator prefix ? */
   specificseparator = *memory && *specific ? separator : "";
 
-  return hwloc_snprintf(string, size, "%s%s%s",
+  return hwloc_snprintf(string, size, "%s%s%s%s",
 			memory,
-			specificseparator, specific);
+			specificseparator, specific,
+			infos);
 }
 
 

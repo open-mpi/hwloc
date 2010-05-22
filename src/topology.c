@@ -472,10 +472,22 @@ print_objects(struct hwloc_topology *topology __hwloc_attribute_unused, int inde
 #endif
 }
 
+void
+add_object_info(hwloc_obj_t obj, char *info)
+{
+#define OBJECT_INFO_ALLOC 8
+  /* nothing allocated initially, (re-)allocate by multiple of 8 */
+  unsigned alloccount = (obj->infos_count + 1 + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
+  if (obj->infos_count != alloccount)
+    obj->infos = realloc(obj->infos, alloccount*sizeof(*obj->infos));
+  obj->infos[obj->infos_count++] = info;
+}
+
 /* Free an object and all its content.  */
 void
 free_object(hwloc_obj_t obj)
 {
+  int i;
   switch (obj->type) {
   case HWLOC_OBJ_MACHINE:
     free(obj->attr->machine.dmi_board_vendor);
@@ -484,6 +496,9 @@ free_object(hwloc_obj_t obj)
   default:
     break;
   }
+  for(i=0; i<obj->infos_count; i++)
+    free(obj->infos[i]);
+  free(obj->infos);
   free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);

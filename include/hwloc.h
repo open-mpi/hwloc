@@ -287,6 +287,9 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
+
+  char **infos;			/**< \brief Array of stringified info type=name. */
+  unsigned infos_count;		/**< \brief Size of infos array. */
 };
 /**
  * \brief Convenience typedef; a pointer to a struct hwloc_obj.
