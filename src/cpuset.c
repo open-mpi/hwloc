@@ -867,6 +867,9 @@ int hwloc_cpuset_next(const struct hwloc_cpuset_s * set, unsigned prev_cpu)
 			return hwloc_ffsl(w) - 1 + HWLOC_BITS_PER_LONG*i;
 	}
 
+	if (set->infinite)
+		return set->ulongs_count * HWLOC_BITS_PER_LONG;
+
 	return -1;
 }
 
