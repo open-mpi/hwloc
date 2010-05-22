@@ -220,10 +220,48 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
     if (!err)
       err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
-  } else {
-    /* try to parse as a comma-separated list of integer with 0x as an optional prefix */
+
+  } else if (taskset) {
+    /* try to parse as a list of integer starting with 0xf...f or 0x */
     char *tmp = (char*) arg;
     hwloc_cpuset_t newset;
+    if (strncasecmp(tmp, "0xf...f", 7) == 0) {
+      tmp += 7;
+      if (0 == *tmp) {
+        err = -1;
+        goto out;
+      }
+    } else {
+      if (strncasecmp(tmp, "0x", 2) != 0) {
+        err = -1;
+        goto out;
+      }
+      tmp += 2;
+      if (0 == *tmp) {
+        err = -1;
+        goto out;
+      }
+    }
+    if (strlen(tmp) != strspn(tmp, "0123456789abcdefABCDEF")) {
+      err = -1;
+      goto out;
+    }
+    newset = hwloc_cpuset_alloc();
+    hwloc_cpuset_taskset_sscanf(newset, arg);
+    err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
+    hwloc_cpuset_free(newset);
+
+  } else {
+    /* try to parse as a comma-separated list of integer with 0x as an optional prefix, and possibly starting with 0xf...f */
+    char *tmp = (char*) arg;
+    hwloc_cpuset_t newset;
+    if (strncasecmp(tmp, "0xf...f,", 8) == 0) {
+      tmp += 8;
+      if (0 == *tmp) {
+        err = -1;
+        goto out;
+      }
+    }
     while (1) {
       char *next = strchr(tmp, ',');
       size_t len;
@@ -244,10 +282,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
       tmp = next+1;
     }
     newset = hwloc_cpuset_alloc();
-    if (taskset)
-      hwloc_cpuset_taskset_sscanf(newset, arg);
-    else
-      hwloc_cpuset_from_string(newset, arg);
+    hwloc_cpuset_from_string(newset, arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
   }
