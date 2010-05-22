@@ -491,6 +491,11 @@ These strings may be used with hwloc-bind to run processes to maximize
 their memory bandwidth by properly distributing them across the
 machine.
 
+\section cli_hwloc_ps hwloc-ps
+
+hwloc-ps lists all processes currently running on the machine with
+their corresponding binding according to the hwloc topology.
+
 
 
 \page envvar Environment variables

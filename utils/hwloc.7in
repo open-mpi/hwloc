@@ -275,7 +275,7 @@ to switch from one mode to another.
 .SH SEE ALSO
 .
 Hwloc's command line tool documentation: lstopo(1), hwloc-bind(1),
-hwloc-calc(1), hwloc-distrib(1).
+hwloc-calc(1), hwloc-distrib(1), hwloc-ps(1).
 .
 .PP
 Hwloc has many C API functions, each of which have their own man page.

@@ -85,6 +85,8 @@ change the set of allowed processors. If 0 is given as pid, the current binding 
 Show existing processes as misc objects in the output. To avoid uselessly
 cluttering the output, only processes that are restricted to some part of the
 machine are shown.  On Linux, kernel threads are not shown.
+If many processes appear, the output may become hard to read anyway,
+making the hwloc-ps program more practical.
 .TP
 \fB\-\-synthetic\fR <specification>
 Simulate a fake hierarchy (instead of discovering the topology on the
@@ -279,5 +281,5 @@ To count the number of logical processors in the system
 .SH SEE ALSO
 .
 .ft R
-hwloc-bind(1)
+hwloc-bind(1), hwloc-ps(1)
 .sp
