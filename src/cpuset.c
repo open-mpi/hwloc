@@ -336,6 +336,124 @@ int hwloc_cpuset_from_string(struct hwloc_cpuset_s *set, const char * __hwloc_re
   return -1;
 }
 
+int hwloc_cpuset_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_cpuset_s * __hwloc_restrict set)
+{
+  ssize_t size = buflen;
+  char *tmp = buf;
+  int res, ret = 0;
+  int started = 0;
+  int i;
+
+  HWLOC__CPUSET_CHECK(set);
+
+  /* mark the end in case we do nothing later */
+  if (buflen > 0)
+    tmp[0] = '\0';
+
+  if (set->infinite) {
+    res = hwloc_snprintf(tmp, size, "0xf...f");
+    started = 1;
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= size)
+      res = size>0 ? size - 1 : 0;
+    tmp += res;
+    size -= res;
+  }
+
+  i=set->ulongs_count-1;
+  while (i>=0) {
+    unsigned long val = set->ulongs[i--];
+    if (started) {
+      /* print the whole subset */
+      res = hwloc_snprintf(tmp, size, "%08lx", val);
+    } else if (val) {
+      res = hwloc_snprintf(tmp, size, "0x%lx", val);
+      started = 1;
+    } else {
+      res = 0;
+    }
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= size)
+      res = size>0 ? size - 1 : 0;
+    tmp += res;
+    size -= res;
+  }
+
+  return ret;
+}
+
+int hwloc_cpuset_taskset_asprintf(char ** strp, const struct hwloc_cpuset_s * __hwloc_restrict set)
+{
+  int len;
+  char *buf;
+
+  HWLOC__CPUSET_CHECK(set);
+
+  len = hwloc_cpuset_taskset_snprintf(NULL, 0, set);
+  buf = malloc(len+1);
+  *strp = buf;
+  return hwloc_cpuset_taskset_snprintf(buf, len+1, set);
+}
+
+int hwloc_cpuset_taskset_sscanf(struct hwloc_cpuset_s *set, const char * __hwloc_restrict string)
+{
+  const char * current = string;
+  unsigned long accum = 0;
+  int chars;
+  int count;
+  int infinite = 0;
+
+  current = string;
+  if (!strncmp("0xf...f", current, 7)) {
+    infinite = 1;
+    current += 7;
+  } else if (!strncmp("0x", current, 2)) {
+    current += 2;
+  }
+
+  chars = strlen(current);
+  count = (chars * 4 + HWLOC_BITS_PER_LONG - 1) / HWLOC_BITS_PER_LONG;
+
+  hwloc_cpuset_reset_by_ulongs(set, count);
+  set->infinite = 0;
+
+  while (*current != '\0') {
+    int tmpchars;
+    char ustr[9];
+    unsigned long val;
+    char *next;
+
+    tmpchars = chars % 8;
+    if (!tmpchars)
+      tmpchars = 8;
+
+    memcpy(ustr, current, tmpchars);
+    ustr[tmpchars] = '\0';
+    val = strtoul(ustr, &next, 16);
+    if (*next != '\0')
+      goto failed;
+
+    set->ulongs[count-1] = val;
+
+    current += tmpchars;
+    chars -= tmpchars;
+    count--;
+  }
+
+  set->infinite = infinite; /* set at the end, to avoid spurious realloc with filled new ulongs */
+
+  return 0;
+
+ failed:
+  /* failure to parse */
+  hwloc_cpuset_zero(set);
+  return -1;
+}
+
 static void hwloc_cpuset__zero(struct hwloc_cpuset_s *set)
 {
 	unsigned i;

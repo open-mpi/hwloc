@@ -20,6 +20,8 @@ Version 1.1.0
 * CPU sets are now dynamically (re-)allocated, HWLOC_NBMAXCPUS
   has been removed.
 * Add hwloc-ps to list process' bindings.
+* Add taskset-specific functions and command-line tools options to
+  manipulate CPU set strings in the format of the taskset program.
 
 
 Version 1.0.0

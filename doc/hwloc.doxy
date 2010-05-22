@@ -584,6 +584,18 @@ interface with dedicated helpers.
   processors near an OpenFabrics device.
  </dd>
 
+<dt>Taskset command-line tool</dt>
+ <dd>
+  The taskset command-line tool is widely used for binding
+  processes. It manipulates CPU set strings in a format that
+  is slightly different from hwloc's one (it does not divide the
+  string in fixed-size subsets and separates them with commas).
+  To ease interoperability, hwloc offers routines to convert
+  hwloc CPU sets from/to taskset-specific string format.
+  Most hwloc command-line tools also support the --taskset
+  option to manipulate taskset-specific strings.
+ </dd>
+
 </dl>
 
 

@@ -28,6 +28,7 @@ static void usage(FILE *where)
   fprintf(where, "  --nodelist\treport the list of memory nodes' indexes near the CPU set\n");
   fprintf(where, "  --objects\treport the list of largest objects in the CPU set\n");
   fprintf(where, "  --single\tsinglify the output to a single CPU\n");
+  fprintf(where, "  --taskset\tmanipulate taskset-specific cpuset strings\n");
   fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
 }
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
   int pulist = 0;
   int showobjs = 0;
   int singlify = 0;
+  int taskset = 0;
   char **orig_argv = argv;
 
   set = hwloc_cpuset_alloc();
@@ -104,15 +106,15 @@ int main(int argc, char *argv[])
 	logicalo = 0;
 	goto next;
       }
-      if (!strcmp(argv[1], "--single")) {
-	singlify = 1;
+      if (!strcmp(argv[1], "--taskset")) {
+	taskset = 1;
 	goto next;
       }
       usage(stderr);
       return EXIT_FAILURE;
     }
 
-    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0) {
+    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, taskset, verbose) < 0) {
       if (verbose)
 	fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
     }
@@ -160,7 +162,10 @@ int main(int argc, char *argv[])
     printf("\n");
   } else {
     char *string = NULL;
-    hwloc_cpuset_asprintf(&string, set);
+    if (taskset)
+      hwloc_cpuset_taskset_asprintf(&string, set);
+    else
+      hwloc_cpuset_asprintf(&string, set);
     printf("%s\n", string);
     free(string);
   }

@@ -196,7 +196,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 static inline int
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		     const char *arg, int logical, hwloc_cpuset_t set,
-		     int verbose)
+		     int taskset, int verbose)
 {
   char *colon;
   hwloc_mask_append_mode_t mode = HWLOC_MASK_APPEND_ADD;
@@ -244,7 +244,10 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
       tmp = next+1;
     }
     newset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(newset, arg);
+    if (taskset)
+      hwloc_cpuset_taskset_sscanf(newset, arg);
+    else
+      hwloc_cpuset_from_string(newset, arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
   }

@@ -22,6 +22,7 @@
 int logical = 1;
 hwloc_obj_type_t show_only = (hwloc_obj_type_t) -1;
 int show_cpuset = 0;
+int taskset = 0;
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 unsigned int force_horiz = 0;
@@ -139,6 +140,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   -s --silent           Opposite of --verbose (default)\n");
   fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
+  fprintf (where, "   --taskset             Show taskset-specific cpuset strings\n");
   fprintf (where, "   --only <type>         Only show the given type in the text output\n");
   fprintf (where, "   --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "   --no-caches           Do not show caches\n");
@@ -211,6 +213,8 @@ main (int argc, char *argv[])
 	show_cpuset = 1;
       else if (!strcmp (argv[1], "-C") || !strcmp (argv[1], "--cpuset-only"))
 	show_cpuset = 2;
+      else if (!strcmp (argv[1], "--taskset"))
+	taskset = 1;
       else if (!strcmp (argv[1], "--only")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);

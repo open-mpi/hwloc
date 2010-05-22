@@ -71,7 +71,10 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     fprintf(output, " cpuset=");
   if (show_cpuset) {
     char *cpusetstr;
-    hwloc_cpuset_asprintf(&cpusetstr, l->cpuset);
+    if (taskset)
+      hwloc_cpuset_taskset_asprintf(&cpusetstr, l->cpuset);
+    else
+      hwloc_cpuset_asprintf(&cpusetstr, l->cpuset);
     fprintf(output, "%s", cpusetstr);
     free(cpusetstr);
   }
