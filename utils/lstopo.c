@@ -296,7 +296,7 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	pid = atoi(argv[2]); opt = 1;
-      } else if (!!strcmp (argv[1], "--ps") || !strcmp (argv[1], "--top"))
+      } else if (!strcmp (argv[1], "--ps") || !strcmp (argv[1], "--top"))
         top = 1;
       else if (!strcmp (argv[1], "--version")) {
           printf("%s %s\n", callname, VERSION);
