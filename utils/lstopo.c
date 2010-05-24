@@ -213,9 +213,11 @@ main (int argc, char *argv[])
 	show_cpuset = 1;
       else if (!strcmp (argv[1], "-C") || !strcmp (argv[1], "--cpuset-only"))
 	show_cpuset = 2;
-      else if (!strcmp (argv[1], "--taskset"))
+      else if (!strcmp (argv[1], "--taskset")) {
 	taskset = 1;
-      else if (!strcmp (argv[1], "--only")) {
+	if (!show_cpuset)
+	  show_cpuset = 1;
+      } else if (!strcmp (argv[1], "--only")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
