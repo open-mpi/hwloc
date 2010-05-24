@@ -14,6 +14,7 @@ static void usage(FILE *where)
   fprintf(where, "Usage: hwloc-distrib [options] number\n");
   fprintf(where, "Options:\n");
   fprintf(where, "   --single\tsinglify each output to a single CPU\n");
+  fprintf(where, "   --taskset\tShow taskset-specific cpuset strings\n");
   fprintf(where, "   -v\t\t\tverbose messages\n");
   fprintf(where, "   --synthetic \"2 2\"\tsimulate a fake hierarchy\n");
 #ifdef HWLOC_HAVE_XML
@@ -27,6 +28,7 @@ int main(int argc, char *argv[])
   long n = -1;
   char * synthetic = NULL;
   const char * xmlpath = NULL;
+  int taskset = 0;
   int singlify = 0;
   int verbose = 0;
   char **orig_argv = argv;
@@ -45,6 +47,10 @@ int main(int argc, char *argv[])
     if (*argv[0] == '-') {
       if (!strcmp(argv[0], "--single")) {
 	singlify = 1;
+	goto next;
+      }
+      if (!strcmp(argv[0], "--taskset")) {
+	taskset = 1;
 	goto next;
       }
       if (!strcmp(argv[0], "-v")) {
@@ -126,7 +132,10 @@ int main(int argc, char *argv[])
       char *str = NULL;
       if (singlify)
 	hwloc_cpuset_singlify(cpuset[i]);
-      hwloc_cpuset_asprintf(&str, cpuset[i]);
+      if (taskset)
+	hwloc_cpuset_taskset_asprintf(&str, cpuset[i]);
+      else
+	hwloc_cpuset_asprintf(&str, cpuset[i]);
       printf("%s\n", str);
       free(str);
       hwloc_cpuset_free(cpuset[i]);
