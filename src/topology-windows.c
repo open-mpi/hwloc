@@ -366,6 +366,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    continue;
 	  default:
 	    /* Don't know how to get the mask.  */
+            hwloc_debug("unknown relation %d\n", procInfo->Relationship);
 	    continue;
 	}
 
