@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
   hwloc_topology_t topology;
   unsigned depth;
   hwloc_cpuset_t set;
+  int cmdline_args = 0;
   char **orig_argv = argv;
 
   set = hwloc_cpuset_alloc();
@@ -168,6 +169,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
+    cmdline_args++;
     if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, taskset, verbose) < 0) {
       if (verbose)
 	fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
@@ -178,7 +180,27 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  hwloc_calc_output(topology, set);
+  if (cmdline_args) {
+    /* process command-line arguments */
+    hwloc_calc_output(topology, set);
+
+  } else {
+    /* process stdin arguments line-by-line */
+#define HWLOC_CALC_LINE_LEN 1024
+    char line[HWLOC_CALC_LINE_LEN];
+    while (fgets(line, sizeof(line), stdin)) {
+      char *current = line;
+      hwloc_cpuset_zero(set);
+      while (current) {
+	char *token = strsep(&current, " \n");
+	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, taskset, verbose) < 0) {
+	  if (verbose)
+	    fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
+	}
+      }
+      hwloc_calc_output(topology, set);
+    }
+  }
 
   hwloc_topology_destroy(topology);
 

@@ -72,6 +72,16 @@ Both input and output may be either objects (with physical or logical
 indexes) or CPU mask strings (no logical or physical index involved).
 .
 .PP
+If objects or CPU mask strings are given on the command-line,
+they are combined and a single output is printed.
+If no object or CPU mask strings are given on the command-line,
+the program will read the standard input.
+It will combine multiple objects or CPU mask strings that are
+given on the same line of the standard input line with spaces
+as separators.
+Different input lines will be processed separately.
+.
+.PP
 .B NOTE:
 It is highly recommended that you read the hwloc(7) overview page
 before reading this man page.  Most of the concepts described in
