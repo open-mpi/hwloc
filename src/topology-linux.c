@@ -1055,7 +1055,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
     current = comma+1;
   }
 
-  hwloc_debug("%s [%d:...] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
+  hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
   /* no easy way to clear until the infinity */
   tmpset = hwloc_cpuset_alloc();
   hwloc_cpuset_set_range(tmpset, 0, prevlast);
