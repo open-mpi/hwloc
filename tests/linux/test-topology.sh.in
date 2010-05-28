@@ -43,8 +43,18 @@ test_topology ()
     then
 	result=1
     else
-	diff -uBb "$expected_output" "$output"
-	result=$?
+	if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
+	then
+	    diff -uBb "$expected_output" "$output"
+	    result=$?
+	else
+	    if ! diff "$expected_output" "$output" >/dev/null
+	    then
+		cp -f "$output" "$expected_output"
+		echo "Updated $expected_output"
+	    fi
+	    result=0
+	fi
     fi
 
     rm "$output"
