@@ -69,6 +69,14 @@ of binding)
     00000010
     00001000
 
+Each output line may be converted independently with hwloc-calc and xargs:
+
+    $ hwloc-distrib 4 --single | xargs -n 1 hwloc-calc --objects
+    PU:0
+    PU:1
+    PU:2
+    PU:3
+
 To convert the output into a list of processors that may be passed to
 dplace -c inside a mpirun command line:
 
