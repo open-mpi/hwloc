@@ -1632,6 +1632,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
   DIR *nodes_dir;
   unsigned nbnodes;
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name;
+  char *cgroup_info = NULL;
   int err;
 
   /* Gather the list of admin-disabled cpus and mems */
@@ -1641,6 +1642,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     if (cpuset_name) {
       hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
       hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
+      asprintf(&cgroup_info, "LinuxCgroup=%s", cpuset_name);
       free(cpuset_name);
     }
     free(cgroup_mntpnt);
@@ -1724,6 +1726,10 @@ hwloc_look_linux(struct hwloc_topology *topology)
     /* Gather DMI info */
     hwloc__get_dmi_info(topology, topology->levels[0][0]);
   }
+
+  add_object_info(topology->levels[0][0], strdup("Backend=Linux"));
+  if (cgroup_info)
+    add_object_info(topology->levels[0][0], cgroup_info);
 }
 
 void

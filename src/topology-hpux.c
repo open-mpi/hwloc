@@ -204,6 +204,8 @@ hwloc_look_hpux(struct hwloc_topology *topology)
   }
 
   topology->support.discovery->pu = 1;
+
+  add_object_info(topology->levels[0][0], strdup("Backend=HP-UX"));
 }
 
 void
