@@ -241,7 +241,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 
   if (verbose) {
     char *tmpinfos = infos;
-    unsigned tmplen = sizeof(infos);
+    int tmplen = sizeof(infos);
     int res;
     unsigned i;
     for(i=0; i<obj->infos_count; i++) {
