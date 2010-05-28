@@ -1365,6 +1365,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	struct hwloc_obj *cache;
 	hwloc_cpuset_t cacheset;
 	unsigned long kB = 0;
+	unsigned linesize = 0;
 	int depth; /* 0 for L1, .... */
 
 	/* get the cache level depth */
@@ -1403,6 +1404,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	  fclose(fd);
 	}
 
+	/* get the line size */
+	sprintf(mappath, "%s/cpu%d/cache/index%d/coherency_line_size", path, i, j);
+	fd = hwloc_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
+	if (fd) {
+	  if (fgets(str2,sizeof(str2), fd))
+	    linesize = atol(str2); /* in bytes */
+	  fclose(fd);
+	}
+
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
         if (cacheset) {
@@ -1415,6 +1425,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
             cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
+            cache->attr->cache.linesize = linesize;
             cache->cpuset = cacheset;
             hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n",
                        depth, cacheset);

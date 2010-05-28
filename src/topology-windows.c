@@ -284,6 +284,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    }
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo[i].Cache.Size;
+	    obj->attr->cache.linesize = procInfo[i].Cache.LineSize;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
 	    break;
 	  case HWLOC_OBJ_GROUP:
@@ -396,6 +397,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    }
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo->Cache.CacheSize;
+	    obj->attr->cache.linesize = procInfo->Cache.LineSize;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
 	    break;
 	  default:

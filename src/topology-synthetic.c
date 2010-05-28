@@ -274,6 +274,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_CACHE:
       obj->attr->cache.depth = topology->backend_params.synthetic.depth[level];
+      obj->attr->cache.linesize = 64;
       if (obj->attr->cache.depth == 1)
 	/* 32Kb in L1 */
 	obj->attr->cache.size = 32*1024;

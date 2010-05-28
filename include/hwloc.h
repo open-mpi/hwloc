@@ -299,6 +299,7 @@ union hwloc_obj_attr_u {
   struct hwloc_cache_attr_s {
     uint64_t size;			  /**< \brief Size of cache in bytes */
     unsigned depth;			  /**< \brief Depth of cache */
+    unsigned linesize;			  /**< \brief Cache-line size in bytes */
   } cache;
   /** \brief Machine-specific Object Attributes */
   struct hwloc_machine_attr_s {
