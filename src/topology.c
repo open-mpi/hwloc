@@ -487,7 +487,7 @@ add_object_info(hwloc_obj_t obj, char *info)
 void
 free_object(hwloc_obj_t obj)
 {
-  int i;
+  unsigned i;
   switch (obj->type) {
   default:
     break;

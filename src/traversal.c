@@ -243,7 +243,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     char *tmpinfos = infos;
     unsigned tmplen = sizeof(infos);
     int res;
-    int i;
+    unsigned i;
     for(i=0; i<obj->infos_count; i++) {
       res = hwloc_snprintf(tmpinfos, tmplen, "%s%s", separator, obj->infos[i]);
       if (res >= tmplen)
