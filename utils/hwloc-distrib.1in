@@ -59,19 +59,19 @@ If 4 processes have to be distributed across a machine, their CPU masks
 may be obtained with:
 
     $ hwloc-distrib 4
-    0000000f
-    00000f00
-    000000f0
-    0000f000
+    0x0000000f
+    0x00000f00
+    0x000000f0
+    0x0000f000
 
 To get a single processor of each CPU masks (prevent migration in case
 of binding)
 
     $ hwloc-distrib 4 --single
-    00000001
-    00000100
-    00000010
-    00001000
+    0x00000001
+    0x00000100
+    0x00000010
+    0x00001000
 
 Each output line may be converted independently with hwloc-calc:
 
