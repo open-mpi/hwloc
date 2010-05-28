@@ -304,9 +304,6 @@ union hwloc_obj_attr_u {
     unsigned depth;			  /**< \brief Depth of cache */
     unsigned linesize;			  /**< \brief Cache-line size in bytes */
   } cache;
-  /** \brief Machine-specific Object Attributes */
-  struct hwloc_machine_attr_s {
-  } machine;
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {
     unsigned depth;			  /**< \brief Depth of group object */
