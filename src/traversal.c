@@ -225,9 +225,15 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 
   switch (obj->type) {
   case HWLOC_OBJ_CACHE:
-    hwloc_snprintf(specific, sizeof(specific), "%lu%s",
-		   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
-		   hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
+    if (verbose)
+      hwloc_snprintf(specific, sizeof(specific), "%lu%s%sline=%u",
+		     (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
+		     hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose),
+		     separator, obj->attr->cache.linesize);
+    else
+      hwloc_snprintf(specific, sizeof(specific), "%lu%s",
+		     (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
+		     hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
     break;
   default:
     break;

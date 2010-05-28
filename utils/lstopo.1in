@@ -39,13 +39,15 @@ These indexes are prefixed with "p#" instead of "#".
 \fB\-c\fR \fB\-\-cpuset\fR
 Display the cpuset of each object.
 .TP
-\fB\-C\fR \fB\-\-cpuset-only\fR
+\fB\-C\fR \fB\-\-cpuset\-only\fR
 Only display the cpuset of each object; do not display anything else
 about the object.
 .TP
 \fB\-\-taskset\fR
 Show CPU set strings in the format recognized by the taskset command-line
 program instead of hwloc-specific CPU set string format.
+This option should be combined with \fB\-\-cpuset\fR or \fB\-\-cpuset\-only\fR,
+otherwise it will imply \fB\-\-cpuset\fR.
 .TP
 \fB\-\-only\fR <type>
 Only show objects of the given type in the text output.
@@ -71,7 +73,7 @@ topology on the local machine).  If <path> is "\-", the standard input
 is used.  XML support must have been compiled in to hwloc for this
 option to be usable.
 .TP
-\fB\-\-fsys-root\fR <path>
+\fB\-\-fsys\-root\fR <path>
 Read topology from the chroot specified by <path> (instead of
 discovering the topology on the local machine).  This option is
 generally only available on Linux.

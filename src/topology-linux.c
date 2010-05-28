@@ -1055,7 +1055,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
     current = comma+1;
   }
 
-  hwloc_debug("%s [%d:...] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
+  hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
   /* no easy way to clear until the infinity */
   tmpset = hwloc_cpuset_alloc();
   hwloc_cpuset_set_range(tmpset, 0, prevlast);
@@ -1314,18 +1314,20 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i);
       hwloc_parse_sysfs_unsigned(str, &mysocketid, topology->backend_params.sysfs.root_fd);
 
-      sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
-      socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      if (socketset && hwloc_cpuset_weight(socketset) >= 1) {
-        if (hwloc_cpuset_first(socketset) == i) {
-          /* first cpu in this socket, add the socket */
-          socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
-          socket->cpuset = socketset;
-          hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
-                     mysocketid, socketset);
-          hwloc_insert_object_by_cpuset(topology, socket);
-        } else
-          hwloc_cpuset_free(socketset);
+      if (mysocketid != (unsigned) -1) {
+        sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
+        socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
+        if (socketset && hwloc_cpuset_weight(socketset) >= 1) {
+          if (hwloc_cpuset_first(socketset) == i) {
+            /* first cpu in this socket, add the socket */
+            socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
+            socket->cpuset = socketset;
+            hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
+                       mysocketid, socketset);
+            hwloc_insert_object_by_cpuset(topology, socket);
+          } else
+            hwloc_cpuset_free(socketset);
+        }
       }
 
       /* look at the core */
@@ -1365,6 +1367,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	struct hwloc_obj *cache;
 	hwloc_cpuset_t cacheset;
 	unsigned long kB = 0;
+	unsigned linesize = 0;
 	int depth; /* 0 for L1, .... */
 
 	/* get the cache level depth */
@@ -1403,6 +1406,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	  fclose(fd);
 	}
 
+	/* get the line size */
+	sprintf(mappath, "%s/cpu%d/cache/index%d/coherency_line_size", path, i, j);
+	fd = hwloc_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
+	if (fd) {
+	  if (fgets(str2,sizeof(str2), fd))
+	    linesize = atol(str2); /* in bytes */
+	  fclose(fd);
+	}
+
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
         if (cacheset) {
@@ -1415,6 +1427,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
             cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
+            cache->attr->cache.linesize = linesize;
             cache->cpuset = cacheset;
             hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n",
                        depth, cacheset);

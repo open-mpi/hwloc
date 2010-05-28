@@ -214,6 +214,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	break;
       case HWLOC_OBJ_CACHE:
 	obj->attr->cache.size = 0; /* TODO: ? */
+	obj->attr->cache.linesize = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
       case HWLOC_OBJ_GROUP:

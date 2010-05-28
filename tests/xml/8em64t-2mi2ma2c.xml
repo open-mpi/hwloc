@@ -9,13 +9,13 @@
         <info value="DMIBoardVendor=Dell Inc."/>
         <info value="DMIBoardName=0F331C"/>
         <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">
-          <object type="Cache" os_level="-1" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2">
-            <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1">
+          <object type="Cache" os_level="-1" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2" cache_linesize="0">
+            <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1" cache_linesize="0">
               <object type="Core" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001">
                 <object type="PU" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001"/>
               </object>
             </object>
-            <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1">
+            <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1" cache_linesize="0">
               <object type="Core" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002">
                 <object type="PU" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002"/>
               </object>
@@ -28,13 +28,13 @@
         <info value="DMIBoardVendor=Dell Inc."/>
         <info value="DMIBoardName=0F331C"/>
         <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">
-          <object type="Cache" os_level="-1" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2">
-            <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1">
+          <object type="Cache" os_level="-1" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2" cache_linesize="0">
+            <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1" cache_linesize="0">
               <object type="Core" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001">
                 <object type="PU" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001"/>
               </object>
             </object>
-            <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1">
+            <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1" cache_linesize="0">
               <object type="Core" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002">
                 <object type="PU" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002"/>
               </object>
@@ -49,13 +49,13 @@
         <info value="DMIBoardVendor=Dell Inc."/>
         <info value="DMIBoardName=0F331C"/>
         <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">
-          <object type="Cache" os_level="-1" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2">
-            <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1">
+          <object type="Cache" os_level="-1" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2" cache_linesize="0">
+            <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1" cache_linesize="0">
               <object type="Core" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001">
                 <object type="PU" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001"/>
               </object>
             </object>
-            <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1">
+            <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1" cache_linesize="0">
               <object type="Core" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002">
                 <object type="PU" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002"/>
               </object>
@@ -70,13 +70,13 @@
         <info value="DMIBoardVendor=Dell Inc."/>
         <info value="DMIBoardName=0F331C"/>
         <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003">
-          <object type="Cache" os_level="-1" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2">
-            <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1">
+          <object type="Cache" os_level="-1" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" cache_size="2097152" depth="2" cache_linesize="0">
+            <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" cache_size="32768" depth="1" cache_linesize="0">
               <object type="Core" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001">
                 <object type="PU" os_level="-1" os_index="0" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001"/>
               </object>
             </object>
-            <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1">
+            <object type="Cache" os_level="-1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002" cache_size="32768" depth="1" cache_linesize="0">
               <object type="Core" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002">
                 <object type="PU" os_level="-1" os_index="1" cpuset="0x00000002" complete_cpuset="0x00000002" online_cpuset="0x00000002" allowed_cpuset="0x00000002"/>
               </object>

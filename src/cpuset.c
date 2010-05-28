@@ -402,7 +402,6 @@ int hwloc_cpuset_taskset_asprintf(char ** strp, const struct hwloc_cpuset_s * __
 int hwloc_cpuset_taskset_sscanf(struct hwloc_cpuset_s *set, const char * __hwloc_restrict string)
 {
   const char * current = string;
-  unsigned long accum = 0;
   int chars;
   int count;
   int infinite = 0;

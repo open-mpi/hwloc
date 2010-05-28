@@ -730,6 +730,8 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	  case HWLOC_OBJ_CACHE:
 	    merge_sizes(obj, child, attr->cache.size);
 	    check_sizes(obj, child, attr->cache.size);
+	    merge_sizes(obj, child, attr->cache.linesize);
+	    check_sizes(obj, child, attr->cache.linesize);
 	    break;
 	  default:
 	    break;

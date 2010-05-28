@@ -284,6 +284,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    }
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo[i].Cache.Size;
+	    obj->attr->cache.linesize = procInfo[i].Cache.LineSize;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
 	    break;
 	  case HWLOC_OBJ_GROUP:
@@ -323,9 +324,9 @@ hwloc_look_windows(struct hwloc_topology *topology)
         GROUP_AFFINITY *GroupMask;
 
         /* Ignore non-data caches */
-	if (procInfo->Relationship == RelationCache &&
-		  (procInfo->Cache.Type == CacheUnified
-		|| procInfo->Cache.Type == CacheData))
+	if (procInfo->Relationship == RelationCache
+		&& procInfo->Cache.Type != CacheUnified
+		&& procInfo->Cache.Type != CacheData)
 	  continue;
 
 	id = -1;
@@ -366,6 +367,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    continue;
 	  default:
 	    /* Don't know how to get the mask.  */
+            hwloc_debug("unknown relation %d\n", procInfo->Relationship);
 	    continue;
 	}
 
@@ -395,6 +397,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    }
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo->Cache.CacheSize;
+	    obj->attr->cache.linesize = procInfo->Cache.LineSize;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
 	    break;
 	  default:

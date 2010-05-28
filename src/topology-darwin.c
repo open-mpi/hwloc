@@ -122,6 +122,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
                 i, j, obj->cpuset);
             obj->attr->cache.depth = i;
             obj->attr->cache.size = cachesize[i];
+            obj->attr->cache.linesize = 0; /* TODO */
           } else {
             hwloc_debug_1arg_cpuset("node %u has cpuset %s\n",
                 j, obj->cpuset);
