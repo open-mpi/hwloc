@@ -166,6 +166,8 @@ extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const c
 extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);
 extern void hwloc_look_synthetic (struct hwloc_topology *topology);
 
+extern void hwloc_add_uname_info(struct hwloc_topology *topology);
+
 /*
  * Add an object to the topology.
  * It is sorted along the tree of other objects according to the inclusion of

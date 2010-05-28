@@ -1510,6 +1510,8 @@ hwloc_discover(struct hwloc_topology *topology)
 #    ifndef HAVE_OS_SUPPORT
     hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
 #    endif /* Unsupported OS */
+
+    hwloc_add_uname_info(topology);
   }
 
   print_objects(topology, 0, topology->levels[0][0]);
