@@ -1511,7 +1511,11 @@ hwloc_discover(struct hwloc_topology *topology)
     hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
 #    endif /* Unsupported OS */
 
+
+#    ifndef HWLOC_LINUX_SYS
+    /* gather uname info, except for Linux, which does it internally depending on load options */
     hwloc_add_uname_info(topology);
+#    endif
   }
 
   print_objects(topology, 0, topology->levels[0][0]);

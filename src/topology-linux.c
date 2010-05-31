@@ -1734,6 +1734,10 @@ hwloc_look_linux(struct hwloc_topology *topology)
   add_object_info(topology->levels[0][0], strdup("Backend=Linux"));
   if (cgroup_info)
     add_object_info(topology->levels[0][0], cgroup_info);
+
+  /* gather uname info if fsroot wasn't changed */
+  if (!strcmp(topology->backend_params.sysfs.root_path, "/"))
+     hwloc_add_uname_info(topology);
 }
 
 void
