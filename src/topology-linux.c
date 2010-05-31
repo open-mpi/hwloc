@@ -689,8 +689,10 @@ hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_pat
   if (strcmp(fsroot_path, "/"))
     topology->is_thissystem = 0;
 
+  topology->backend_params.sysfs.root_path = strdup(fsroot_path);
   topology->backend_params.sysfs.root_fd = root;
 #else
+  topology->backend_params.sysfs.root_path = NULL;
   topology->backend_params.sysfs.root_fd = -1;
 #endif
   topology->backend_type = HWLOC_BACKEND_SYSFS;
@@ -703,6 +705,8 @@ hwloc_backend_sysfs_exit(struct hwloc_topology *topology)
   assert(topology->backend_type == HWLOC_BACKEND_SYSFS);
 #ifdef HAVE_OPENAT
   close(topology->backend_params.sysfs.root_fd);
+  free(topology->backend_params.sysfs.root_path);
+  topology->backend_params.sysfs.root_path = NULL;
 #endif
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
