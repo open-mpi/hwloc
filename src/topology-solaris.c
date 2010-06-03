@@ -74,7 +74,7 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
   hwloc_obj_t obj;
   lgrp_mem_size_t mem_size;
 
-  n = lgrp_cpus(cookie, lgrp, NULL, 0, LGRP_CONTENT_ALL);
+  n = lgrp_cpus(cookie, lgrp, NULL, 0, LGRP_CONTENT_HIERARCHY);
   if (n == -1)
     return;
 
