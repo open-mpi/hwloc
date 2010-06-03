@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
-Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 $COPYRIGHT$
 
@@ -20,6 +20,22 @@ Version 1.1.0
 * CPU sets are now dynamically (re-)allocated, HWLOC_NBMAXCPUS
   has been removed.
 * Add hwloc-ps to list process' bindings.
+* Add taskset-specific functions and command-line tools options to
+  manipulate CPU set strings in the format of the taskset program.
+
+
+Version 1.0.1
+-------------
+
+* Fix "non-native" builds on x86 platforms (e.g., when building 32
+  bit executables with compilers that natively build 64 bit).
+* Ignore sockets with unknown ID values (which fixes issues on POWER7
+  machines).  Thanks to Greg Bauer for reporting the issue.
+* Various man page clarifications and minor updates.
+* Fixed memory leaks in hwloc_setup_group_from_min_distance_clique().
+* Fix cache type filtering on MS Windows 7.  Thanks to Αλέξανδρος
+  Παπαδογιαννάκ for reporting the issue.
+* Fixed warnings when compiling with -DNDEBUG.
 
 
 Version 1.0.0

@@ -79,6 +79,21 @@ HWLOC_DECLSPEC int hwloc_cpuset_asprintf(char ** strp, hwloc_const_cpuset_t set)
  */
 HWLOC_DECLSPEC int hwloc_cpuset_from_string(hwloc_cpuset_t set, const char * __hwloc_restrict string);
 
+/** \brief Stringify a cpuset in the taskset-specific format.
+ *
+ * The taskset command manipulates cpuset strings that contain a single
+ * (possible very long) hexadecimal number starting with 0x.
+ */
+HWLOC_DECLSPEC int hwloc_cpuset_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_cpuset_t set);
+
+/** \brief Stringify a cpuset into a newly allocated taskset-specific string.
+ */
+HWLOC_DECLSPEC int hwloc_cpuset_taskset_asprintf(char ** strp, hwloc_const_cpuset_t set);
+
+/** \brief Parse a taskset-specific cpuset string and stores it in CPU set \p set.
+ */
+HWLOC_DECLSPEC int hwloc_cpuset_taskset_sscanf(hwloc_cpuset_t set, const char * __hwloc_restrict string);
+
 
 /*
  *  Primitives & macros for building, modifying and consulting "sets" of cpus.

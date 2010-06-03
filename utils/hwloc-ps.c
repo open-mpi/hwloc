@@ -16,7 +16,10 @@
 static void usage(char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] ... [ filename ]\n\n", name);
-  fprintf (where, "   -a       Show all processes, including those that are not bound\n");
+  fprintf (where, "  -a             show all processes, including those that are not bound\n");
+  fprintf (where, "  -l --logical   use logical object indexes (default)\n");
+  fprintf (where, "  -p --physical  use physical object indexes\n");
+  fprintf (where, "  -c --cpuset    show cpuset instead of objects\n");
 }
 
 int main(int argc, char *argv[])
@@ -25,6 +28,8 @@ int main(int argc, char *argv[])
   hwloc_topology_t topology;
   hwloc_obj_t root;
   hwloc_cpuset_t cpuset;
+  int logical = 1;
+  int show_cpuset = 0;
   DIR *dir;
   struct dirent *dirent;
   int show_all = 0;
@@ -42,7 +47,13 @@ int main(int argc, char *argv[])
     opt = 0;
     if (!strcmp(argv[1], "-a"))
       show_all = 1;
-    else {
+    else if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--logical")) {
+      logical = 1;
+    } else if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--physical")) {
+      logical = 0;
+    } else if (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cpuset")) {
+      show_cpuset = 1;
+    } else {
       fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
       usage (callname, stderr);
       exit(EXIT_FAILURE);
@@ -108,14 +119,34 @@ int main(int argc, char *argv[])
     if (hwloc_get_proc_cpubind(topology, pid, cpuset, 0))
       continue;
 
-    hwloc_cpuset_asprintf(&cpuset_str, cpuset);
-    if (!cpuset_str)
-      continue;
-
     if (hwloc_cpuset_isequal(cpuset, root->cpuset) && !show_all)
       continue;
 
-    printf("%ld\t%s\t%s\n", pid, cpuset_str, name);
+    printf("%ld\t", pid);
+
+    if (show_cpuset) {
+      hwloc_cpuset_asprintf(&cpuset_str, cpuset);
+      printf("%s", cpuset_str);
+    } else {
+      hwloc_cpuset_t remaining = hwloc_cpuset_dup(cpuset);
+      int first = 1;
+      while (!hwloc_cpuset_iszero(remaining)) {
+        char type[64];
+        unsigned idx;
+        hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
+        hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+        idx = logical ? obj->logical_index : obj->os_index;
+        if (idx == (unsigned) -1)
+          printf("%s%s", first ? "" : " ", type);
+        else
+          printf("%s%s:%u", first ? "" : " ", type, idx);
+        hwloc_cpuset_andnot(remaining, remaining, obj->cpuset);
+        first = 0;
+      }
+      hwloc_cpuset_free(remaining);
+    }
+
+    printf("\t\t%s\n", name);
     free(cpuset_str);
   }
 

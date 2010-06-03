@@ -28,8 +28,71 @@ static void usage(FILE *where)
   fprintf(where, "  --nodelist\treport the list of memory nodes' indexes near the CPU set\n");
   fprintf(where, "  --objects\treport the list of largest objects in the CPU set\n");
   fprintf(where, "  --single\tsinglify the output to a single CPU\n");
+  fprintf(where, "  --taskset\tmanipulate taskset-specific cpuset strings\n");
   fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
+}
+
+static int verbose = 0;
+static int logicali = 1;
+static int logicalo = 1;
+static int nodelist = 0;
+static int pulist = 0;
+static int showobjs = 0;
+static int singlify = 0;
+static int taskset = 0;
+
+static void
+hwloc_calc_output(hwloc_topology_t topology, hwloc_cpuset_t set)
+{
+  if (singlify)
+    hwloc_cpuset_singlify(set);
+
+  if (showobjs) {
+    hwloc_cpuset_t remaining = hwloc_cpuset_dup(set);
+    int first = 1;
+    while (!hwloc_cpuset_iszero(remaining)) {
+      char type[64];
+      unsigned idx;
+      hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
+      hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+      idx = logicalo ? obj->logical_index : obj->os_index;
+      if (idx == (unsigned) -1)
+        printf("%s%s", first ? "" : " ", type);
+      else
+        printf("%s%s:%u", first ? "" : " ", type, idx);
+      hwloc_cpuset_andnot(remaining, remaining, obj->cpuset);
+      first = 0;
+    }
+    printf("\n");
+    hwloc_cpuset_free(remaining);
+  } else if (pulist) {
+    hwloc_obj_t proc, prev = NULL;
+    while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PU, prev)) != NULL) {
+      if (prev)
+	printf(",");
+      printf("%u", logicalo ? proc->logical_index : proc->os_index);
+      prev = proc;
+    }
+    printf("\n");
+  } else if (nodelist) {
+    hwloc_obj_t node, prev = NULL;
+    while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, prev)) != NULL) {
+      if (prev)
+	printf(",");
+      printf("%u", logicalo ? node->logical_index : node->os_index);
+      prev = node;
+    }
+    printf("\n");
+  } else {
+    char *string = NULL;
+    if (taskset)
+      hwloc_cpuset_taskset_asprintf(&string, set);
+    else
+      hwloc_cpuset_asprintf(&string, set);
+    printf("%s\n", string);
+    free(string);
+  }
 }
 
 int main(int argc, char *argv[])
@@ -37,13 +100,7 @@ int main(int argc, char *argv[])
   hwloc_topology_t topology;
   unsigned depth;
   hwloc_cpuset_t set;
-  int verbose = 0;
-  int logicali = 1;
-  int logicalo = 1;
-  int nodelist = 0;
-  int pulist = 0;
-  int showobjs = 0;
-  int singlify = 0;
+  int cmdline_args = 0;
   char **orig_argv = argv;
 
   set = hwloc_cpuset_alloc();
@@ -104,15 +161,16 @@ int main(int argc, char *argv[])
 	logicalo = 0;
 	goto next;
       }
-      if (!strcmp(argv[1], "--single")) {
-	singlify = 1;
+      if (!strcmp(argv[1], "--taskset")) {
+	taskset = 1;
 	goto next;
       }
       usage(stderr);
       return EXIT_FAILURE;
     }
 
-    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0) {
+    cmdline_args++;
+    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, taskset, verbose) < 0) {
       if (verbose)
 	fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
     }
@@ -122,47 +180,26 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  if (singlify)
-   hwloc_cpuset_singlify(set);
+  if (cmdline_args) {
+    /* process command-line arguments */
+    hwloc_calc_output(topology, set);
 
-  if (showobjs) {
-    hwloc_cpuset_t remaining = hwloc_cpuset_dup(set);
-    int first = 1;
-    while (!hwloc_cpuset_iszero(remaining)) {
-      char type[64];
-      unsigned idx;
-      hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
-      hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
-      idx = logicalo ? obj->logical_index : obj->os_index;
-      printf("%s%s:%u", first ? "" : " ", type, idx);
-      hwloc_cpuset_andnot(remaining, remaining, obj->cpuset);
-      first = 0;
-    }
-    printf("\n");
-    hwloc_cpuset_free(remaining);
-  } else if (pulist) {
-    hwloc_obj_t proc, prev = NULL;
-    while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PU, prev)) != NULL) {
-      if (prev)
-	printf(",");
-      printf("%u", logicalo ? proc->logical_index : proc->os_index);
-      prev = proc;
-    }
-    printf("\n");
-  } else if (nodelist) {
-    hwloc_obj_t node, prev = NULL;
-    while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, prev)) != NULL) {
-      if (prev)
-	printf(",");
-      printf("%u", logicalo ? node->logical_index : node->os_index);
-      prev = node;
-    }
-    printf("\n");
   } else {
-    char *string = NULL;
-    hwloc_cpuset_asprintf(&string, set);
-    printf("%s\n", string);
-    free(string);
+    /* process stdin arguments line-by-line */
+#define HWLOC_CALC_LINE_LEN 1024
+    char line[HWLOC_CALC_LINE_LEN];
+    while (fgets(line, sizeof(line), stdin)) {
+      char *current = line;
+      hwloc_cpuset_zero(set);
+      while (current) {
+	char *token = strsep(&current, " \n");
+	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, taskset, verbose) < 0) {
+	  if (verbose)
+	    fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
+	}
+      }
+      hwloc_calc_output(topology, set);
+    }
   }
 
   hwloc_topology_destroy(topology);

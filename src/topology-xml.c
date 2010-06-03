@@ -122,6 +122,14 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       fprintf(stderr, "ignoring cache_size attribute for non-cache object type\n");
   }
 
+  else if (!strcmp(name, "cache_linesize")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_CACHE)
+      obj->attr->cache.linesize = lvalue;
+    else
+      fprintf(stderr, "ignoring cache_linesize attribute for non-cache object type\n");
+  }
+
   else if (!strcmp(name, "local_memory"))
     obj->memory.local_memory = strtoull(value, NULL, 10);
 
@@ -544,6 +552,8 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     xmlNewProp(node, BAD_CAST "cache_size", BAD_CAST tmp);
     sprintf(tmp, "%u", obj->attr->cache.depth);
     xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
+    sprintf(tmp, "%u", (unsigned) obj->attr->cache.linesize);
+    xmlNewProp(node, BAD_CAST "cache_linesize", BAD_CAST tmp);
     break;
   case HWLOC_OBJ_MACHINE:
     if (obj->attr->machine.dmi_board_vendor)

@@ -11,6 +11,7 @@
 
 extern hwloc_obj_type_t show_only;
 extern int show_cpuset;
+extern int taskset;
 extern hwloc_pid_t pid;
 
 typedef void output_method (struct hwloc_topology *topology, const char *output, int logical, int verbose_mode);

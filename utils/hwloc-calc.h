@@ -29,8 +29,9 @@ static inline int
 hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
-  char *s1 = hwloc_cpuset_printf_value(newset);
-  char *s2 = hwloc_cpuset_printf_value(set);
+  char *s1, *s2;
+  hwloc_cpuset_asprintf(&s1, newset);
+  hwloc_cpuset_asprintf(&s2, set);
   switch (mode) {
   case HWLOC_MASK_APPEND_ADD:
     if (verbose)
@@ -168,7 +169,8 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 
     obj = hwloc_mask_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
     if (verbose) {
-      char * s = hwloc_cpuset_printf_value(rootset);
+      char *s;
+      hwloc_cpuset_asprintf(&s, rootset);
       if (obj)
 	printf("object #%u depth %u below cpuset %s found\n",
 	       i, depth, s);
@@ -194,7 +196,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 static inline int
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		     const char *arg, int logical, hwloc_cpuset_t set,
-		     int verbose)
+		     int taskset, int verbose)
 {
   char *colon;
   hwloc_mask_append_mode_t mode = HWLOC_MASK_APPEND_ADD;
@@ -218,10 +220,48 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
     if (!err)
       err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_cpuset_free(newset);
-  } else {
-    /* try to parse as a comma-separated list of integer with 0x as an optional prefix */
+
+  } else if (taskset) {
+    /* try to parse as a list of integer starting with 0xf...f or 0x */
     char *tmp = (char*) arg;
     hwloc_cpuset_t newset;
+    if (strncasecmp(tmp, "0xf...f", 7) == 0) {
+      tmp += 7;
+      if (0 == *tmp) {
+        err = -1;
+        goto out;
+      }
+    } else {
+      if (strncasecmp(tmp, "0x", 2) != 0) {
+        err = -1;
+        goto out;
+      }
+      tmp += 2;
+      if (0 == *tmp) {
+        err = -1;
+        goto out;
+      }
+    }
+    if (strlen(tmp) != strspn(tmp, "0123456789abcdefABCDEF")) {
+      err = -1;
+      goto out;
+    }
+    newset = hwloc_cpuset_alloc();
+    hwloc_cpuset_taskset_sscanf(newset, arg);
+    err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
+    hwloc_cpuset_free(newset);
+
+  } else {
+    /* try to parse as a comma-separated list of integer with 0x as an optional prefix, and possibly starting with 0xf...f */
+    char *tmp = (char*) arg;
+    hwloc_cpuset_t newset;
+    if (strncasecmp(tmp, "0xf...f,", 8) == 0) {
+      tmp += 8;
+      if (0 == *tmp) {
+        err = -1;
+        goto out;
+      }
+    }
     while (1) {
       char *next = strchr(tmp, ',');
       size_t len;
