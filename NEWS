@@ -27,6 +27,7 @@ Version 1.1.0
 Version 1.0.1
 -------------
 
+* Various Solaris fixes.
 * Fix "non-native" builds on x86 platforms (e.g., when building 32
   bit executables with compilers that natively build 64 bit).
 * Ignore sockets with unknown ID values (which fixes issues on POWER7
