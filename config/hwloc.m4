@@ -368,6 +368,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     
     AC_CHECK_HEADERS([sys/lgrp_user.h], [
       AC_HAVE_LIBRARY([lgrp])
+      AC_CHECK_FUNCS([lgrp_latency_cookie])
     ])
     AC_CHECK_HEADERS([kstat.h], [
       AC_HAVE_LIBRARY([kstat])
