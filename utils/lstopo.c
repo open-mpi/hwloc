@@ -138,8 +138,8 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   -p --physical         Display physical object indexes\n");
   fprintf (where, "Textual output options:\n");
   fprintf (where, "   --only <type>         Only show objects of the given type in the text output\n");
-  fprintf (where, "   -v --verbose          Include additional detail\n");
-  fprintf (where, "   -s --silent           Opposite of --verbose (default)\n");
+  fprintf (where, "   -v --verbose          Include additional details\n");
+  fprintf (where, "   -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
   fprintf (where, "   --taskset             Show taskset-specific cpuset strings\n");
