@@ -153,7 +153,8 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --xml <path>          Read topology from XML file <path>\n");
 #endif
 #ifdef HWLOC_LINUX_SYS
-  fprintf (where, "   --fsys-root <path>    Chroot containing the /proc and /sys of another system\n");
+  fprintf (where, "   --fsroot <path>       Read topology from chroot containing the /proc and /sys\n"
+		  "                         of another system\n");
 #endif
   fprintf (where, "   --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "   --ps --top            Display processes within the hierarchy\n");
@@ -179,7 +180,7 @@ main (int argc, char *argv[])
   char * callname;
   char * synthetic = NULL;
   const char * xmlpath = NULL;
-  char * fsysroot = NULL;
+  char * fsroot = NULL;
   int force_console = 0;
   int opt;
 
@@ -281,15 +282,15 @@ main (int argc, char *argv[])
         fprintf(stderr, "This installation of hwloc does not support --xml, sorry.\n");
         exit(EXIT_FAILURE);
 #endif /* HWLOC_HAVE_XML */
-      } else if (!strcmp (argv[1], "--fsys-root")) {
+      } else if (!strcmp (argv[1], "--fsroot") || !strcmp (argv[1], "--fsys-root") /* backward compat with 1.0 */) {
 #ifdef HWLOC_LINUX_SYS
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	fsysroot = argv[2]; opt = 1;
+	fsroot = argv[2]; opt = 1;
 #else /* HWLOC_LINUX_SYS */
-        fprintf(stderr, "This installation of hwloc does not support --fsys-root, sorry.\n");
+        fprintf(stderr, "This installation of hwloc does not support --fsroot, sorry.\n");
         exit(EXIT_FAILURE);
 #endif /* HWLOC_LINUX_SYS */
       } else if (!strcmp (argv[1], "--pid")) {
@@ -341,8 +342,8 @@ main (int argc, char *argv[])
       return EXIT_FAILURE;
     }
   }
-  if (fsysroot) {
-    if (hwloc_topology_set_fsroot(topology, fsysroot)) {
+  if (fsroot) {
+    if (hwloc_topology_set_fsroot(topology, fsroot)) {
       perror("Setting target filesystem root");
       return EXIT_FAILURE;
     }
