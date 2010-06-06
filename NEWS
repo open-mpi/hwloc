@@ -19,6 +19,7 @@ Version 1.0.2
 
 * Solaris fix for non-contiguous cpu numbers.  Thanks to Rolf vandeVaart for
   reporting the issue.
+* Darwin 10.4 fix.  Thanks to Olivier Cessenat for reporting the issue.
 
 Version 1.0.1
 -------------
