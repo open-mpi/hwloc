@@ -14,10 +14,16 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9 (as initially released as "libtopology", then re-branded to "hwloc"
 in v0.9.1).
 
+Version 1.0.2
+-------------
+
+* Solaris fix for non-contiguous cpu numbers.  Thanks to Rolf vandeVaart for
+  reporting the issue.
+
 Version 1.0.1
 -------------
 
-* Various Solaris fixes.
+* Various Solaris fixes.  Thanks to Yannick Martin for reporting the issue.
 * Fix "non-native" builds on x86 platforms (e.g., when building 32
   bit executables with compilers that natively build 64 bit).
 * Ignore sockets with unknown ID values (which fixes issues on POWER7

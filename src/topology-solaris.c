@@ -187,6 +187,13 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
   unsigned numcores = 0;
   unsigned i;
 
+  for (cpuid = 0; cpuid < HWLOC_NBMAXCPUS; cpuid++)
+    {
+      proc_physids[cpuid] = -1;
+      proc_osphysids[cpuid] = -1;
+      proc_coreids[cpuid] = -1;
+    }
+
   if (!kc)
     {
       hwloc_debug("kstat_open failed: %s\n", strerror(errno));
@@ -204,10 +211,6 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 	  fprintf(stderr,"CPU id too big: %u\n", cpuid);
 	  continue;
 	}
-
-      proc_physids[cpuid] = -1;
-      proc_osphysids[cpuid] = -1;
-      proc_coreids[cpuid] = -1;
 
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
@@ -227,7 +230,9 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
 	  continue;
 	}
 
-      procid_max++;
+      if (cpuid >= procid_max)
+        procid_max = cpuid + 1;
+
       hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
       if (strcmp(stat->value.c, "on-line"))
 	/* not online */
