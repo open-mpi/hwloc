@@ -165,31 +165,36 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
 #define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
-static void
-hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
+static int
+hwloc_look_kstat(struct hwloc_topology *topology)
 {
   kstat_ctl_t *kc = kstat_open();
   kstat_t *ksp;
   kstat_named_t *stat;
   unsigned look_cores = 1, look_chips = 1;
 
+  unsigned numsockets = 0;
   unsigned proc_physids[HWLOC_NBMAXCPUS];
   unsigned proc_osphysids[HWLOC_NBMAXCPUS];
   unsigned osphysids[HWLOC_NBMAXCPUS];
 
+  unsigned numcores = 0;
   unsigned proc_coreids[HWLOC_NBMAXCPUS];
   unsigned oscoreids[HWLOC_NBMAXCPUS];
 
   unsigned core_osphysids[HWLOC_NBMAXCPUS];
 
+  unsigned numprocs = 0;
+  unsigned proc_procids[HWLOC_NBMAXCPUS];
+  unsigned osprocids[HWLOC_NBMAXCPUS];
+
   unsigned physid, coreid, cpuid;
   unsigned procid_max = 0;
-  unsigned numsockets = 0;
-  unsigned numcores = 0;
   unsigned i;
 
   for (cpuid = 0; cpuid < HWLOC_NBMAXCPUS; cpuid++)
     {
+      proc_procids[cpuid] = -1;
       proc_physids[cpuid] = -1;
       proc_osphysids[cpuid] = -1;
       proc_coreids[cpuid] = -1;
@@ -198,7 +203,7 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
   if (!kc)
     {
       hwloc_debug("kstat_open failed: %s\n", strerror(errno));
-      return;
+      return 0;
     }
 
   for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next)
@@ -216,31 +221,28 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
 	  fprintf(stderr, "kstat_read failed for CPU%u: %s\n", cpuid, strerror(errno));
-	  goto out;
+	  continue;
 	}
 
-      stat = (kstat_named_t *) kstat_data_lookup(ksp, "state");
-      if (!stat)
-	{
-	  hwloc_debug("could not read state for CPU%u: %s\n", cpuid, strerror(errno));
-	  continue;
-	}
-      if (stat->data_type != KSTAT_DATA_CHAR)
-	{
-	  hwloc_debug("unknown kstat type %d for cpu state\n", stat->data_type);
-	  continue;
-	}
+      hwloc_debug("cpu%u\n", cpuid);
+      proc_procids[cpuid] = cpuid;
+      osprocids[numprocs++] = cpuid;
 
       if (cpuid >= procid_max)
         procid_max = cpuid + 1;
 
-      hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
-      if (strcmp(stat->value.c, "on-line"))
-	/* not online */
-        hwloc_cpuset_clr(topology->levels[0][0]->online_cpuset, cpuid);
-
-      (*nbprocs)++;
-
+      stat = (kstat_named_t *) kstat_data_lookup(ksp, "state");
+      if (!stat)
+          hwloc_debug("could not read state for CPU%u: %s\n", cpuid, strerror(errno));
+      else if (stat->data_type != KSTAT_DATA_CHAR)
+          hwloc_debug("unknown kstat type %d for cpu state\n", stat->data_type);
+      else
+        {
+          hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
+          if (strcmp(stat->value.c, "on-line"))
+            /* not online */
+            hwloc_cpuset_clr(topology->levels[0][0]->online_cpuset, cpuid);
+        }
 
       if (look_chips) do {
 	/* Get Chip ID */
@@ -339,8 +341,12 @@ hwloc_look_kstat(struct hwloc_topology *topology, unsigned *nbprocs)
   if (look_cores)
     hwloc_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, HWLOC_OBJ_CORE);
 
- out:
+  if (numprocs)
+    hwloc_setup_level(procid_max, numprocs, osprocids, proc_procids, topology, HWLOC_OBJ_PU);
+
   kstat_close(kc);
+
+  return numprocs > 0;
 }
 #endif /* LIBKSTAT */
 
@@ -353,7 +359,8 @@ hwloc_look_solaris(struct hwloc_topology *topology)
 #endif /* HAVE_LIBLGRP */
 #ifdef HAVE_LIBKSTAT
   nbprocs = 0;
-  hwloc_look_kstat(topology, &nbprocs);
+  if (hwloc_look_kstat(topology))
+    return;
 #endif /* HAVE_LIBKSTAT */
   hwloc_setup_pu_level(topology, nbprocs);
 }
