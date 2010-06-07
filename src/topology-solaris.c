@@ -225,8 +225,9 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	}
 
       hwloc_debug("cpu%u\n", cpuid);
-      proc_procids[cpuid] = cpuid;
-      osprocids[numprocs++] = cpuid;
+      proc_procids[cpuid] = numprocs;
+      osprocids[numprocs] = cpuid;
+      numprocs++;
 
       if (cpuid >= procid_max)
         procid_max = cpuid + 1;
