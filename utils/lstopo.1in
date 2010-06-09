@@ -133,6 +133,12 @@ CPUs by their color; see the COLORS section, below.
 .\" **************************
 .SH OUTPUT FORMATS
 .
+.PP
+The filename on the command line determines the format of the output.
+There are a few filenames that indicate specific output formats and
+devices (e.g., a filename of "-" will output a text summary to
+stdout), but most filenames indicate the desired output format by 
+their suffix (e.g., "topo.png" will output a PNG-format file).
 .TP
 .B \-
 Send a text summary to stdout.
