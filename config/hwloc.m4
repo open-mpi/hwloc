@@ -159,7 +159,7 @@ EOF])
 
 dnl Same order of parameters form HWLOC-SETUP-CORE
 AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
-    hwloc_CC_c99_flags=`echo $CC | sed -e "s/^$hwloc_CC_save//"`
+    hwloc_CC_c99_flags=`echo $CC | sed -e "s;^$hwloc_CC_save;;"`
     CC=$hwloc_CC_save
     CFLAGS=$hwloc_CFLAGS_save
 
