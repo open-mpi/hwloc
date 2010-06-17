@@ -3,10 +3,12 @@
  * Copyright © 2009 INRIA, Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  *
- * hwloc-hello.c 
+ * hwloc-hello.c
  */
 
 #include <hwloc.h>
+#include <errno.h>
+#include <stdio.h>
 
 static void print_children(hwloc_topology_t topology, hwloc_obj_t obj, 
                            int depth)
@@ -125,8 +127,9 @@ int main(void)
         /* And try to bind ourself there. */
         if (hwloc_set_cpubind(topology, cpuset, 0)) {
             char *str;
+            int error = errno;
             hwloc_cpuset_asprintf(&str, obj->cpuset);
-            printf("Couldn't bind to cpuset %s\n", str);
+            printf("Couldn't bind to cpuset %s: %s\n", str, strerror(errno));
             free(str);
         }
 
