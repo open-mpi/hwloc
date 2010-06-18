@@ -212,7 +212,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   last = hwloc_cpuset_last(hwloc_set);
   if (last == -1) {
-    errno = -EINVAL;
+    errno = EINVAL;
     return -1;
   }
 
