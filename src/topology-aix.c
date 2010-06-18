@@ -146,7 +146,7 @@ hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 {
   struct __pthrdsinfo info;
   int size;
-  if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
+  if ((errno = pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size)))
     return -1;
   {
     rsid_t who = { .at_tid = info.__pi_tid };
