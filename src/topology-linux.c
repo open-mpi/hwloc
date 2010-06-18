@@ -562,7 +562,34 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
    * int thread_migrate (int thread_id, int destination_node);
    */
 
-#ifdef HWLOC_HAVE_CPU_SET
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+     cpu_set_t *plinux_set;
+     unsigned cpu;
+     int last;
+     size_t setsize;
+
+     last = hwloc_cpuset_last(hwloc_set);
+     if (last == -1) {
+       errno = EINVAL;
+       return -1;
+     }
+
+     setsize = CPU_ALLOC_SIZE(last+1);
+     plinux_set = CPU_ALLOC(last+1);
+
+     CPU_ZERO_S(setsize, plinux_set);
+     hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+         CPU_SET_S(cpu, setsize, plinux_set);
+     hwloc_cpuset_foreach_end();
+
+     err = pthread_setaffinity_np(tid, setsize, plinux_set);
+
+     CPU_FREE(plinux_set);
+  }
+#elif defined(HWLOC_HAVE_CPU_SET)
   /* Use a separate block so that we can define specific variable
      types here */
   {
@@ -625,7 +652,36 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
   }
   /* TODO Kerrighed */
 
-#ifdef HWLOC_HAVE_CPU_SET
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+     cpu_set_t *plinux_set;
+     unsigned cpu;
+     int last;
+     size_t setsize;
+
+     last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+     assert (last != -1);
+
+     setsize = CPU_ALLOC_SIZE(last+1);
+     plinux_set = CPU_ALLOC(last+1);
+
+     err = pthread_getaffinity_np(tid, setsize, plinux_set);
+     if (err) {
+        CPU_FREE(plinux_set);
+        errno = err;
+        return -1;
+     }
+
+     hwloc_cpuset_zero(hwloc_set);
+     for(cpu=0; cpu<(unsigned) last; cpu++)
+       if (CPU_ISSET_S(cpu, setsize, plinux_set))
+	 hwloc_cpuset_set(hwloc_set, cpu);
+
+     CPU_FREE(plinux_set);
+  }
+#elif defined(HWLOC_HAVE_CPU_SET)
   /* Use a separate block so that we can define specific variable
      types here */
   {
