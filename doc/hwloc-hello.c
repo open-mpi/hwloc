@@ -129,7 +129,7 @@ int main(void)
             char *str;
             int error = errno;
             hwloc_cpuset_asprintf(&str, obj->cpuset);
-            printf("Couldn't bind to cpuset %s: %s\n", str, strerror(errno));
+            printf("Couldn't bind to cpuset %s: %s\n", str, strerror(error));
             free(str);
         }
 
