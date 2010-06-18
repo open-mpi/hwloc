@@ -7,7 +7,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 SUBDIRS = linux ports xml
 
-LIBS =
+LDADD =
 
 if HWLOC_BUILD_TESTS
 check_PROGRAMS = hwloc_cpuset_string \
@@ -50,7 +50,7 @@ else
 hwloc_lib = libhwloc_embedded.la
 endif
 
-LIBS += $(HWLOC_top_builddir)/src/$(hwloc_lib)
+LDADD += $(HWLOC_top_builddir)/src/$(hwloc_lib)
 
 linux_libnuma_LDFLAGS = -lnuma
 openfabrics_verbs_LDFLAGS = -libverbs
