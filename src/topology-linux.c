@@ -1523,6 +1523,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned numcores=0;
   unsigned long physid;
   unsigned long coreid;
+  unsigned missingsocket;
+  unsigned missingcore;
   unsigned long processor = (unsigned long) -1;
   unsigned i;
   hwloc_cpuset_t cpuset;
@@ -1631,12 +1633,26 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug("%s", "\n * Topology summary *\n");
   hwloc_debug("%u processors (%u max id)\n", numprocs, procid_max);
 
-  hwloc_debug("%u sockets\n", numsockets);
-  if (numsockets>0)
+  /* Some buggy Linuxes don't provide numbers for processor 0, which makes us
+   * provide bogus information. We should rather drop it. */
+  missingsocket=0;
+  missingcore=0;
+  hwloc_cpuset_foreach_begin(processor, online_cpuset)
+    if (proc_physids[processor] == (unsigned) -1)
+      missingsocket=1;
+    if (proc_coreids[processor] == (unsigned) -1)
+      missingcore=1;
+    if (missingcore && missingsocket)
+      /* No usable information, no need to continue */
+      break;
+  hwloc_cpuset_foreach_end();
+
+  hwloc_debug("%u sockets%s\n", numsockets, missingsocket ? ", but some missing socket" : "");
+  if (!missingsocket && numsockets>0)
     hwloc_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, HWLOC_OBJ_SOCKET);
 
-  hwloc_debug("%u cores\n", numcores);
-  if (numcores>0)
+  hwloc_debug("%u cores%s\n", numcores, missingcore ? ", but some missing core" : "");
+  if (!missingcore && numcores>0)
     hwloc_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, HWLOC_OBJ_CORE);
 
   return 0;
