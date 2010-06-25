@@ -65,7 +65,7 @@ work on "fake" topologies:
 
 hwloc can display the topology in a human-readable format, either in
 graphical mode (X11), or by exporting in one of several different
-formats, including: plain text, PDF, PNG, and FIG (see Examples
+formats, including: plain text, PDF, PNG, and FIG (see \ref cli_examples
 below).  Note that some of the export formats require additional
 support libraries.
 
@@ -117,15 +117,17 @@ and build.  Similarly, lstopo's XML support requires the libxml2
 development package.
 
 \htmlonly
-</div><div class="section" id="examples">
+</div><div class="section" id="cli_examples">
 \endhtmlonly
-\section examples Examples
+\section cli_examples CLI Examples
 
 On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool
-may show the following outputs:
+may show the following graphic output:
 
 \image html dudley.png
 \image latex dudley.png "" width=9cm
+
+Here's the equivalent output in textual form:
 
 \verbatim
 Machine (16GB)
@@ -159,11 +161,82 @@ Machine (16GB)
       PU #15 (phys=15)
 \endverbatim
 
- On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may
- show the following outputs:
+Finally, here's the equivalent output in XML.  Long lines were
+artificially broken for document clarity (in the real output, each XML
+tag is on a single line), and only socket #0 is shown for brevity:
+
+\verbatim
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topology SYSTEM "hwloc.dtd">
+<topology>
+  <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000ffff" 
+      complete_cpuset="0x0000ffff" online_cpuset="0x0000ffff" 
+      allowed_cpuset="0x0000ffff" 
+      dmi_board_vendor="Dell Computer Corporation" dmi_board_name="0RD318" 
+      local_memory="16648183808">
+    <page_type size="4096" count="4064498"/>
+    <page_type size="2097152" count="0"/>
+    <object type="Socket" os_level="-1" os_index="0" cpuset="0x00001111" 
+        complete_cpuset="0x00001111" online_cpuset="0x00001111" 
+        allowed_cpuset="0x00001111">
+      <object type="Cache" os_level="-1" cpuset="0x00001111" 
+          complete_cpuset="0x00001111" online_cpuset="0x00001111" 
+          allowed_cpuset="0x00001111" cache_size="4194304" depth="3" 
+          cache_linesize="64">
+        <object type="Cache" os_level="-1" cpuset="0x00000101" 
+            complete_cpuset="0x00000101" online_cpuset="0x00000101" 
+            allowed_cpuset="0x00000101" cache_size="1048576" depth="2" 
+            cache_linesize="64">
+          <object type="Cache" os_level="-1" cpuset="0x00000101" 
+              complete_cpuset="0x00000101" online_cpuset="0x00000101" 
+              allowed_cpuset="0x00000101" cache_size="16384" depth="1" 
+              cache_linesize="64">
+            <object type="Core" os_level="-1" os_index="0" cpuset="0x00000101" 
+                complete_cpuset="0x00000101" online_cpuset="0x00000101" 
+                allowed_cpuset="0x00000101">
+              <object type="PU" os_level="-1" os_index="0" cpuset="0x00000001" 
+                  complete_cpuset="0x00000001" online_cpuset="0x00000001" 
+                  allowed_cpuset="0x00000001"/>
+              <object type="PU" os_level="-1" os_index="8" cpuset="0x00000100" 
+                  complete_cpuset="0x00000100" online_cpuset="0x00000100" 
+                  allowed_cpuset="0x00000100"/>
+            </object>
+          </object>
+        </object>
+        <object type="Cache" os_level="-1" cpuset="0x00001010" 
+            complete_cpuset="0x00001010" online_cpuset="0x00001010" 
+            allowed_cpuset="0x00001010" cache_size="1048576" depth="2" 
+            cache_linesize="64">
+          <object type="Cache" os_level="-1" cpuset="0x00001010" 
+              complete_cpuset="0x00001010" online_cpuset="0x00001010" 
+              allowed_cpuset="0x00001010" cache_size="16384" depth="1" 
+              cache_linesize="64">
+            <object type="Core" os_level="-1" os_index="1" cpuset="0x00001010" 
+                complete_cpuset="0x00001010" online_cpuset="0x00001010" 
+                allowed_cpuset="0x00001010">
+              <object type="PU" os_level="-1" os_index="4" cpuset="0x00000010" 
+                  complete_cpuset="0x00000010" online_cpuset="0x00000010" 
+                  allowed_cpuset="0x00000010"/>
+              <object type="PU" os_level="-1" os_index="12" cpuset="0x00001000" 
+                  complete_cpuset="0x00001000" online_cpuset="0x00001000" 
+                  allowed_cpuset="0x00001000"/>
+            </object>
+          </object>
+        </object>
+      </object>
+    </object>
+    <!-- ...other sockets listed here ... -->
+  </object>
+</topology>
+\endverbatim
+
+On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may show
+the following graphic output:
 
 \image html hagrid.png
 \image latex hagrid.png width=\textwidth
+
+Here's the equivalent output in textual form:
 
 \verbatim
 Machine (64GB)
@@ -193,11 +266,64 @@ Machine (64GB)
     L2 #15 (1024KB) + L1 #15 (64KB) + Core #15 + PU #15 (phys=15)
 \endverbatim
 
- On a 2-socket quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
- each socket):
+And here's the equivalent output in XML.  Similar to above, line
+breaks were added and only PU#0 is shown for brevity:
+
+\verbatim
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topology SYSTEM "hwloc.dtd">
+<topology>
+  <object type="Machine" os_level="-1" os_index="0" cpuset="0x000000ff" 
+      complete_cpuset="0x000000ff" online_cpuset="0x000000ff" 
+      allowed_cpuset="0x000000ff" nodeset="0x000000ff" 
+      complete_nodeset="0x000000ff" allowed_nodeset="0x000000ff" 
+      dmi_board_vendor="TYAN Computer Corp" dmi_board_name="S4881 ">
+    <page_type size="4096" count="0"/>
+    <page_type size="2097152" count="0"/>
+    <object type="NUMANode" os_level="-1" os_index="0" cpuset="0x00000003" 
+        complete_cpuset="0x00000003" online_cpuset="0x00000003" 
+        allowed_cpuset="0x00000003" nodeset="0x00000001" 
+        complete_nodeset="0x00000001" allowed_nodeset="0x00000001" 
+        local_memory="7514177536">
+      <page_type size="4096" count="1834516"/>
+      <page_type size="2097152" count="0"/>
+      <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" 
+          complete_cpuset="0x00000003" online_cpuset="0x00000003" 
+          allowed_cpuset="0x00000003" nodeset="0x00000001" 
+          complete_nodeset="0x00000001" allowed_nodeset="0x00000001">
+        <object type="Cache" os_level="-1" cpuset="0x00000001" 
+            complete_cpuset="0x00000001" online_cpuset="0x00000001" 
+            allowed_cpuset="0x00000001" nodeset="0x00000001" 
+            complete_nodeset="0x00000001" allowed_nodeset="0x00000001" 
+            cache_size="1048576" depth="2" cache_linesize="64">
+          <object type="Cache" os_level="-1" cpuset="0x00000001" 
+              complete_cpuset="0x00000001" online_cpuset="0x00000001" 
+              allowed_cpuset="0x00000001" nodeset="0x00000001" 
+              complete_nodeset="0x00000001" allowed_nodeset="0x00000001" 
+              cache_size="65536" depth="1" cache_linesize="64">
+            <object type="Core" os_level="-1" os_index="0" 
+                cpuset="0x00000001" complete_cpuset="0x00000001" 
+                online_cpuset="0x00000001" allowed_cpuset="0x00000001" 
+                nodeset="0x00000001" complete_nodeset="0x00000001" 
+                allowed_nodeset="0x00000001">
+              <object type="PU" os_level="-1" os_index="0" cpuset="0x00000001" 
+                  complete_cpuset="0x00000001" online_cpuset="0x00000001" 
+                  allowed_cpuset="0x00000001" nodeset="0x00000001" 
+                  complete_nodeset="0x00000001" allowed_nodeset="0x00000001"/>
+            </object>
+          </object>
+        </object>
+  <!-- ...more objects listed here ... -->
+</topology>
+\endverbatim
+
+On a 2-socket quad-core Xeon (pre-Nehalem, with 2 dual-core dies into
+each socket):
 
 \image html emmett.png
 \image latex emmett.png "" width=7cm
+
+Here's the same output in text form:
 
 \verbatim
 Machine (16GB)
@@ -217,42 +343,139 @@ Machine (16GB)
       L1 #7 (32KB) + Core #7 + PU #7 (phys=7)
 \endverbatim
 
+And the same output in XML (line breaks added, only PU#0 shown):
+
+\verbatim
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topology SYSTEM "hwloc.dtd">
+<topology>
+  <object type="Machine" os_level="-1" os_index="0" cpuset="0x000000ff" 
+      complete_cpuset="0x000000ff" online_cpuset="0x000000ff" 
+      allowed_cpuset="0x000000ff" dmi_board_vendor="Dell Inc." 
+      dmi_board_name="0NR282" local_memory="16865292288">
+    <page_type size="4096" count="4117503"/>
+    <page_type size="2097152" count="0"/>
+    <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000055" 
+        complete_cpuset="0x00000055" online_cpuset="0x00000055" 
+        allowed_cpuset="0x00000055">
+      <object type="Cache" os_level="-1" cpuset="0x00000011" 
+          complete_cpuset="0x00000011" online_cpuset="0x00000011" 
+          allowed_cpuset="0x00000011" cache_size="4194304" depth="2" 
+          cache_linesize="64">
+        <object type="Cache" os_level="-1" cpuset="0x00000001" 
+            complete_cpuset="0x00000001" online_cpuset="0x00000001" 
+            allowed_cpuset="0x00000001" cache_size="32768" depth="1" 
+            cache_linesize="64">
+          <object type="Core" os_level="-1" os_index="0" cpuset="0x00000001" 
+              complete_cpuset="0x00000001" online_cpuset="0x00000001" 
+              allowed_cpuset="0x00000001">
+            <object type="PU" os_level="-1" os_index="0" cpuset="0x00000001" 
+                complete_cpuset="0x00000001" online_cpuset="0x00000001" 
+                allowed_cpuset="0x00000001"/>
+          </object>
+        </object>
+        <object type="Cache" os_level="-1" cpuset="0x00000010" 
+            complete_cpuset="0x00000010" online_cpuset="0x00000010" 
+            allowed_cpuset="0x00000010" cache_size="32768" depth="1" 
+            cache_linesize="64">
+          <object type="Core" os_level="-1" os_index="1" cpuset="0x00000010" 
+              complete_cpuset="0x00000010" online_cpuset="0x00000010" 
+              allowed_cpuset="0x00000010">
+            <object type="PU" os_level="-1" os_index="4" cpuset="0x00000010" 
+                complete_cpuset="0x00000010" online_cpuset="0x00000010" 
+                allowed_cpuset="0x00000010"/>
+          </object>
+        </object>
+      </object>
+  <!-- ...more objects listed here ... -->
+</topology>
+\endverbatim
+
 \htmlonly
 </div><div class="section" id="interface">
 \endhtmlonly
 
-\section interface Programming interface
+\section interface Programming Interface
 
 The basic interface is available in hwloc.h.  It essentially offers
 low-level routines for advanced programmers that want to manually
-manipulate objects and follow links between them.  Developers should
-also look at hwloc/helper.h, which provides good higher-level topology
-traversal examples.
+manipulate objects and follow links between them.  Documentation for
+everything in hwloc.h are provided later in this document.  Developers
+should also look at hwloc/helper.h (and also in this document, which
+provides good higher-level topology traversal examples.
 
-Each object contains a cpuset describing the list of processing units that
-it contains.  These cpusets may be used for \ref hwlocality_binding.
-hwloc offers an extensive cpuset manipulation interface in
-hwloc/cpuset.h.
+To precisely define the vocabulary used by hwloc, a \ref termsanddefs
+section is available and should probably be read first.  
+
+Each hwloc object contains a cpuset describing the list of processing
+units that it contains.  These cpusets may be used for \ref
+hwlocality_binding.  hwloc offers an extensive cpuset manipulation
+interface in hwloc/cpuset.h.
 
 Moreover, hwloc also comes with additional helpers for
 interoperability with several commonly used environments.
 See the \ref interoperability section for details.
 
-To precisely define the vocabulary used by hwloc, a \ref termsanddefs
-section is available and should probably be read first.
+The complete API documentation is available in a full set of HTML
+pages, man pages, and self-contained PDF files (formatted for both
+both US letter and A4 formats) in the source tarball in
+doc/doxygen-doc/.  
 
-Further documentation is available in a full set of HTML pages, man
-pages, and self-contained PDF files (formatted for both both US letter
-and A4 formats) in the source tarball in doc/doxygen-doc/.  If you are
-building from a Subversion checkout, you will need to have Doxygen and
-pdflatex installed -- the documentation will be built during the
-normal "make" process.  The documentation is installed during "make
-install" to $prefix/share/doc/hwloc/ and your systems default man page
-tree (under $prefix, of course).
+<strong>NOTE:</strong> If you are building the documentation from a
+Subversion checkout, you will need to have Doxygen and pdflatex
+installed -- the documentation will be built during the normal "make"
+process.  The documentation is installed during "make install" to
+$prefix/share/doc/hwloc/ and your systems default man page tree (under
+$prefix, of course).
 
-The following section presents an example of API usage.
+\subsection portability Portability (especially when using the API or XML)
 
-\section interface_example API example
+As shown in \ref cli_examples, hwloc can obtain information on a wide
+variety of hardware topologies.  However, some platforms and/or
+operating system versions will only report a subset of this
+information.  For example, on an PPC64-based system with 32 cores
+(each with 2 hardware threads) running RHEL 5.4 using their default
+2.6.18-based kernel, hwloc is only able to glean information about
+NUMA nodes and processor units (PUs).  No information about caches,
+sockets, or cores is available.
+
+Here's the graphic output from lstopo on this platform when
+Simultaneous Multi-Threading (SMT) is enabled:
+
+\image html ppc64-with-smt.png
+\image latex ppc64-with-smt.pdf "" width=\textwidth
+
+And here's the graphic output from lstopo on this platform when SMT is
+disabled:
+
+\image html ppc64-without-smt.png
+\image latex ppc64-without-smt.pdf "" width=\textwidth
+
+Notice that hwloc only sees half the PUs when SMT is disabled.  PU#15,
+for example, seems to change location from NUMA node #0 to #1.  In
+reality, no PUs "moved" -- they were simply re-numbered when hwloc
+only saw half as many.  Hence, PU#15 in the SMT-disabled picture
+probably corresponds to PU#30 in the SMT-enabled picture.  
+
+This same "PUs have disappeared" effect can be seen on other platforms
+-- even platforms / OSs that provide much more information than the
+above PPC64 system.  This is an unfortunate side-effect of how
+operating systems report information to hwloc.
+
+Developers using the hwloc API or XML output for portable applications
+should therefore be extremely careful to not make any assumptions
+about the structure of data that is returned.  For example, per the
+above reported PPC topology, it is not safe to assume that PUs will
+always be descendants of cores.
+
+Additionally, future hardware may insert new topology elements that
+are not available in this version of hwloc.  Long-lived applications
+that are meant to span multiple different hardware platforms should
+also be careful about making structure assumptions.  For example,
+there may someday be an element "lower" than a PU, or perhaps a new
+element may exist between a core and a PU.
+
+\subsection interface_example API Example
 
 The following small C example (named ``hwloc-hello.c'') prints the
 topology of the machine and bring the process to the first logical processor
@@ -310,7 +533,7 @@ shell$
 \htmlonly
 </div><div class="section" id="bugs">
 \endhtmlonly
-\section bugs Questions and bugs
+\section bugs Questions and Bugs
 
 Questions should be sent to the devel mailing
 list (http://www.open-mpi.org/community/lists/hwloc.php).
@@ -334,7 +557,7 @@ debugging output.
 \htmlonly
 </div><div class="section" id="credits">
 \endhtmlonly
-\section history History / credits
+\section history History / Credits
 
 hwloc is the evolution and merger of the libtopology
 (http://runtime.bordeaux.inria.fr/libtopology/) project and the Portable
@@ -495,8 +718,10 @@ machine.
 
 \section cli_hwloc_ps hwloc-ps
 
-hwloc-ps lists all processes currently running on the machine with
-their corresponding binding according to the hwloc topology.
+hwloc-ps is a tool to display the bindings of processes that are
+currently running on the local machine.  By default, hwloc-ps only
+lists processes that are bound; unbound process (and Linux kernel
+threads) are not displayed.
 
 
 
@@ -698,7 +923,7 @@ you can directly integrate hwloc's m4 configure macro into your
 configure script.  You can then invoke hwloc's configuration tests and
 build setup by calling an m4 macro (see below).
 
-\section embedding_m4 Using hwloc's m4 embedding capabilities
+\section embedding_m4 Using hwloc's M4 Embedding Capabilities
 
 Every project is different, and there are many different ways of
 integrating hwloc into yours.  What follows is <em>one</em> example of
@@ -766,7 +991,7 @@ AM_INIT_AUTOMAKE).  See the Autoconf documentation for further
 information.
 
 
-\section embedding_example Example embedding hwloc
+\section embedding_example Example Embedding hwloc
 
 Here's an example of integrating with a larger project named sandbox
 that already uses Autoconf, Automake, and Libtool to build itself:
@@ -822,7 +1047,7 @@ we encourage you to use the full hwloc API to exploit <em>all</em> the
 hardware.
 
 
-\section switchfromplpa_caching Topology context vs. caching
+\section switchfromplpa_caching Topology Context vs. Caching
 
 First, all hwloc functions take a \p topology parameter. This
 parameter serves as an internal storage for the result of the topology
@@ -853,7 +1078,7 @@ using hwloc_get_obj_below_by_type() (or
 hwloc_get_obj_below_array_by_type()).
 
 
-\section switchfromplpa_indexes Logical vs. Physical/OS indexes
+\section switchfromplpa_indexes Logical vs. Physical/OS Indexes
 
 hwloc manipulates logical indexes, meaning indexes specified with
 regard to the ordering of objects in the hwloc-provided hierarchical
@@ -885,7 +1110,7 @@ duplicated, modified, combined, etc. (see hwloc/cpuset.h for details)
 and then passed to hwloc_set_cpubind() for binding.
 
 
-\section switchfromplpa_counting Counting specification
+\section switchfromplpa_counting Counting Specification
 
 PLPA offers a countspec parameter to specify whether counting all
 CPUs, only the online ones or only the offline ones.  However, some
