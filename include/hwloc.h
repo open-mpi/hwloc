@@ -17,6 +17,7 @@
 #include <hwloc/config.h>
 #include <sys/types.h>
 #include <stdio.h>
+#include <string.h>
 #include <limits.h>
 #ifdef HWLOC_HAVE_STDINT_H
 #include <stdint.h>
@@ -743,6 +744,20 @@ HWLOC_DECLSPEC int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t siz
  *
  * \return how many characters were actually written (not including the ending \\0). */
 HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, size_t nobj, const hwloc_obj_t * __hwloc_restrict objs);
+
+/** \brief Search the given key name in object infos and return the corresponding value.
+ *
+ * \return \c NULL if no such key exists.
+ */
+static __hwloc_inline char * __hwloc_attribute_pure
+hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
+{
+  unsigned i;
+  for(i=0; i<obj->infos_count; i++)
+    if (!strcmp(obj->infos[i].name, name))
+      return obj->infos[i].value;
+  return NULL;
+}
 
 /** @} */
 

@@ -350,6 +350,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_of_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_get_info_by_name.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_thread_cpubind.3 \
