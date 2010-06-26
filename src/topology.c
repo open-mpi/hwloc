@@ -138,7 +138,6 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
 				    unsigned *groupids)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
-  hwloc_cpuset_t grouped_set = hwloc_cpuset_alloc();
   unsigned min_distance = UINT_MAX;
   unsigned groupid = 1;
   unsigned i,j,k;
