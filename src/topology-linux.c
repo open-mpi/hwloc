@@ -1595,7 +1595,6 @@ hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
 #define DMI_BOARD_STRINGS_LEN 50
   char dmi_line[DMI_BOARD_STRINGS_LEN];
-  char *info;
   char *tmp;
   FILE *fd;
 
@@ -1609,8 +1608,7 @@ hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
       if (tmp)
 	*tmp = '\0';
       hwloc_debug("found DMI board vendor '%s'\n", dmi_line);
-      asprintf(&info, "DMIBoardVendor=%s", dmi_line);
-      add_object_info(obj, info);
+      hwloc_add_object_info(obj, "DMIBoardVendor", dmi_line);
     }
   }
 
@@ -1624,8 +1622,7 @@ hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
       if (tmp)
 	*tmp = '\0';
       hwloc_debug("found DMI board name '%s'\n", dmi_line);
-      asprintf(&info, "DMIBoardName=%s", dmi_line);
-      add_object_info(obj, info);
+      hwloc_add_object_info(obj, "DMIBoardName", dmi_line);
     }
   }
 }
@@ -1635,8 +1632,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
 {
   DIR *nodes_dir;
   unsigned nbnodes;
-  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name;
-  char *cgroup_info = NULL;
+  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
   int err;
 
   /* Gather the list of admin-disabled cpus and mems */
@@ -1646,8 +1642,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
     if (cpuset_name) {
       hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
       hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
-      asprintf(&cgroup_info, "LinuxCgroup=%s", cpuset_name);
-      free(cpuset_name);
     }
     free(cgroup_mntpnt);
     free(cpuset_mntpnt);
@@ -1731,9 +1725,11 @@ hwloc_look_linux(struct hwloc_topology *topology)
     hwloc__get_dmi_info(topology, topology->levels[0][0]);
   }
 
-  add_object_info(topology->levels[0][0], strdup("Backend=Linux"));
-  if (cgroup_info)
-    add_object_info(topology->levels[0][0], cgroup_info);
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "Linux");
+  if (cpuset_name) {
+    hwloc_add_object_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
+    free(cpuset_name);
+  }
 
   /* gather uname info if fsroot wasn't changed */
   if (!strcmp(topology->backend_params.sysfs.root_path, "/"))

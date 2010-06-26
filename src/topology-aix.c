@@ -296,7 +296,7 @@ hwloc_look_aix(struct hwloc_topology *topology)
 	}
     }
 
-  add_object_info(topology->levels[0][0], strdup("Backend=AIX"));
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "AIX");
 }
 
 void

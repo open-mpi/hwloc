@@ -172,7 +172,7 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 
   hwloc_setup_pu_level(topology, nbprocs);
 
-  add_object_info(topology->levels[0][0], strdup("Backend=FreeBSD"));
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "FreeBSD");
 }
 
 void

@@ -171,6 +171,12 @@ struct hwloc_obj_memory_s {
   } * page_types;
 };
 
+/** \brief Object info */
+struct hwloc_obj_info_s {
+  char *name;	/**< \brief Info name */
+  char *value;	/**< \brief Info value */
+};
+
 /** \brief Structure of a topology object
  *
  * Applications mustn't modify any field except ::userdata .
@@ -288,8 +294,8 @@ struct hwloc_obj {
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
 
-  char **infos;			/**< \brief Array of stringified info type=name. */
-  unsigned infos_count;		/**< \brief Size of infos array. */
+  struct hwloc_obj_info_s *infos;	/**< \brief Array of stringified info type=name. */
+  unsigned infos_count;			/**< \brief Size of infos array. */
 };
 /**
  * \brief Convenience typedef; a pointer to a struct hwloc_obj.

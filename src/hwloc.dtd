@@ -25,4 +25,5 @@
 <!ATTLIST page_type count CDATA #REQUIRED>
 
 <!ELEMENT info EMPTY>
+<!ATTLIST info name CDATA #REQUIRED>
 <!ATTLIST info value CDATA #REQUIRED>

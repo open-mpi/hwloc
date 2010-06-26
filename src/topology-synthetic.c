@@ -307,6 +307,6 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
 
   hwloc_cpuset_free(cpuset);
 
-  add_object_info(topology->levels[0][0], strdup("Backend=Synthetic"));
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "Synthetic");
 }
 

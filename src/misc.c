@@ -69,39 +69,14 @@ int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
 
 void hwloc_add_uname_info(struct hwloc_topology *topology)
 {
-  char *info;
   struct utsname utsname;
 
   if (uname(&utsname) < 0)
     return;
 
-  info = malloc(7 + strlen(utsname.sysname) + 1);
-  if (!info)
-    return;
-  sprintf(info, "OSName=%s", utsname.sysname);
-  add_object_info(topology->levels[0][0], info);
-
-  info = malloc(10 + strlen(utsname.release) + 1);
-  if (!info)
-    return;
-  sprintf(info, "OSRelease=%s", utsname.release);
-  add_object_info(topology->levels[0][0], info);
-
-  info = malloc(10 + strlen(utsname.version) + 1);
-  if (!info)
-    return;
-  sprintf(info, "OSVersion=%s", utsname.version);
-  add_object_info(topology->levels[0][0], info);
-
-  info = malloc(9 + strlen(utsname.nodename) + 1);
-  if (!info)
-    return;
-  sprintf(info, "HostName=%s", utsname.nodename);
-  add_object_info(topology->levels[0][0], info);
-
-  info = malloc(13 + strlen(utsname.machine) + 1);
-  if (!info)
-    return;
-  sprintf(info, "Architecture=%s", utsname.machine);
-  add_object_info(topology->levels[0][0], info);
+  hwloc_add_object_info(topology->levels[0][0], "OSName", utsname.sysname);
+  hwloc_add_object_info(topology->levels[0][0], "OSRelease", utsname.release);
+  hwloc_add_object_info(topology->levels[0][0], "OSVersion", utsname.version);
+  hwloc_add_object_info(topology->levels[0][0], "HostName", utsname.nodename);
+  hwloc_add_object_info(topology->levels[0][0], "Architecture", utsname.machine);
 }

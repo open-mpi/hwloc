@@ -167,8 +167,6 @@ extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const c
 extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);
 extern void hwloc_look_synthetic (struct hwloc_topology *topology);
 
-extern void hwloc_add_uname_info(struct hwloc_topology *topology);
-
 /*
  * Add an object to the topology.
  * It is sorted along the tree of other objects according to the inclusion of
@@ -198,8 +196,11 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
  */
 extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
-/* Insert a string in the object infos array */
-extern void add_object_info(hwloc_obj_t obj, char *info);
+/* Insert name/value in the object infos array. name and value are copied by the callee. */
+extern void hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char *value);
+
+/* Insert uname-specific names/values in the object infos array */
+extern void hwloc_add_uname_info(struct hwloc_topology *topology);
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 static inline char *
