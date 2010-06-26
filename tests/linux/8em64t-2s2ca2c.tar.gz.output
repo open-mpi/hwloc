@@ -1,4 +1,4 @@
-Machine (phys=0 local=16468292KB total=16468292KB DMIBoardVendor=Dell Inc. DMIBoardName=0NR282)
+Machine (phys=0 local=16468292KB total=16468292KB DMIBoardVendor="Dell Inc." DMIBoardName=0NR282 Backend=Linux)
   Socket #0 (phys=0)
     L2Cache #0 (4096KB line=64)
       L1Cache #0 (32KB line=64)

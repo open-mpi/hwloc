@@ -1,4 +1,4 @@
-Machine (phys=0)
+Machine (phys=0 Backend=Linux)
   Socket #0 (phys=6147)
     L3Cache #0 (9216KB line=128)
       L2Cache #0 (256KB line=128)

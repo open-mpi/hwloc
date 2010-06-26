@@ -1,4 +1,4 @@
-Machine (phys=0 local=1025408KB total=1025408KB)
+Machine (phys=0 local=1025408KB total=1025408KB Backend=Linux)
   PU #0 (phys=0)
   PU #1 (phys=1)
 depth 0:	1 Machine (type #1)
