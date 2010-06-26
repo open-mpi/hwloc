@@ -217,7 +217,7 @@ RECURSE_BEGIN(obj, border) \
     /* Total area for subobjects */ \
     area = (obj_maxwidth + (separator)) * (obj_maxheight + (separator)) * numsubobjs; \
     /* Ideal total height for spreading that area with RATIO */ \
-    idealtotheight = sqrtf(area/RATIO); \
+    idealtotheight = (float) sqrt(area/RATIO); \
     /* Underestimated number of rows */ \
     rows = idealtotheight / (obj_maxheight + (separator)); \
     columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
@@ -403,7 +403,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 
   DYNA_CHECK();
 
-  RECURSE_RECT(level, &null_draw_methods, separator, 0);
+  RECURSE_HORIZ(level, &null_draw_methods, separator, 0);
 
   methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, totwidth, y, myheight - gridsize);
 
@@ -414,7 +414,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  RECURSE_RECT(level, methods, separator, 0);
+  RECURSE_HORIZ(level, methods, separator, 0);
 
   DYNA_SAVE();
 }
@@ -485,7 +485,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   DYNA_CHECK();
 
   /* Compute the size needed by sublevels */
-  RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
+  RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
 
   /* Draw the epoxy box */
   methods->box(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR, depth, x, totwidth, y, totheight);
@@ -500,7 +500,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   }
 
   /* Restart, now really drawing sublevels */
-  RECURSE_RECT(level, methods, gridsize, gridsize);
+  RECURSE_HORIZ(level, methods, gridsize, gridsize);
 
   /* Save result for dynamic programming */
   DYNA_SAVE();

@@ -59,22 +59,6 @@ hwloc__xml_import_topology_attr(struct hwloc_topology *topology __hwloc_attribut
 }
 
 static void
-hwloc__xml_import_pagetype_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj_memory_page_type_s *page_type,
-				const xmlChar *_name, const xmlChar *_value)
-{
-  const char *name = (const char *) _name;
-  const char *value = (const char *) _value;
-
-  if (!strcmp(name, "size"))
-    page_type->size = strtoul(value, NULL, 10);
-  else if (!strcmp(name, "count"))
-    page_type->count = strtoul(value, NULL, 10);
-
-  else
-    fprintf(stderr, "ignoring unknown pagetype attribute %s\n", name);
-}
-
-static void
 hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
 			      const xmlChar *_name, const xmlChar *_value)
 {
@@ -240,20 +224,34 @@ hwloc__xml_import_attr_value(xmlAttr *attr)
 }
 
 static void
-hwloc__xml_import_pagetype_node(struct hwloc_topology *topology, struct hwloc_obj_memory_page_type_s *pagetype, xmlNode *node)
+hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
 {
+  uint64_t size = 0, count = 0;
   xmlAttr *attr = NULL;
 
   for (attr = node->properties; attr; attr = attr->next) {
     if (attr->type == XML_ATTRIBUTE_NODE) {
       const xmlChar *value = hwloc__xml_import_attr_value(attr);
-      if (value)
-	hwloc__xml_import_pagetype_attr(topology, pagetype, attr->name, value);
-      else
+      if (value) {
+	if (!strcmp((char *) attr->name, "size"))
+	  size = strtoul((char *) value, NULL, 10);
+	else if (!strcmp((char *) attr->name, "count"))
+	  count = strtoul((char *) value, NULL, 10);
+	else
+	  fprintf(stderr, "ignoring unknown pagetype attribute %s\n", (char *) attr->name);
+      } else
 	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml pagetype attr type %u\n", attr->type);
     }
+  }
+
+  if (size && count) {
+    int idx = obj->memory.page_types_len;
+    obj->memory.page_types = realloc(obj->memory.page_types, (idx+1)*sizeof(*obj->memory.page_types));
+    obj->memory.page_types_len = idx+1;
+    obj->memory.page_types[idx].size = size;
+    obj->memory.page_types[idx].count = count;
   }
 }
 
@@ -356,10 +354,7 @@ hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent
 	hwloc__xml_import_object_node(topology, parent, obj, node, depth);
 
       } else if (!strcmp((const char*) node->name, "page_type")) {
-	int idx = parent->memory.page_types_len;
-	parent->memory.page_types = realloc(parent->memory.page_types, (idx+1)*sizeof(*parent->memory.page_types));
-	hwloc__xml_import_pagetype_node(topology, &parent->memory.page_types[idx], node);
-	parent->memory.page_types_len = idx+1;
+	hwloc__xml_import_pagetype_node(topology, parent, node);
 
       } else if (!strcmp((const char*) node->name, "info")) {
 	hwloc__xml_import_info_node(topology, parent, node);

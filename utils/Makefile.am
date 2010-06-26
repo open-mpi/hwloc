@@ -5,7 +5,7 @@ AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-LIBS += $(HWLOC_top_builddir)/src/libhwloc.la
+LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 
 EXTRA_DIST = test-hwloc-distrib.output
 
@@ -25,7 +25,7 @@ if HWLOC_HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
 endif
 lstopo_CFLAGS = $(HWLOC_CAIRO_CFLAGS) $(HWLOC_XML_CFLAGS)
-lstopo_LDADD = $(HWLOC_CAIRO_LIBS) $(HWLOC_XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS)
+lstopo_LDADD = $(LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS)
 
 hwloc_calc_SOURCES = hwloc-calc.c hwloc-calc.h
 

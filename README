@@ -407,6 +407,8 @@ does not solve your problem, you may also want to ensure that you are running
 the most recent version of the BIOS for your machine.
 
 If those things fail, contact us on the mailing list for additional help.
+Please attach the output of lstopo after having given the --enable-debug option
+to ./configure and rebuilt completely, to get debugging output.
 
 History / credits
 
@@ -424,5 +426,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Wed May 12 17:26:09 2010 for Hardware Locality (hwloc) by  doxygen
+Generated on Wed Jun 16 17:03:24 2010 for Hardware Locality (hwloc) by  doxygen
 1.6.3
