@@ -50,15 +50,6 @@ hwloc_backend_xml_exit(struct hwloc_topology *topology)
  ******************************/
 
 static void
-hwloc__xml_import_topology_attr(struct hwloc_topology *topology __hwloc_attribute_unused,
-				const xmlChar *_name, const xmlChar *_value __hwloc_attribute_unused)
-{
-  const char *name = (const char *) _name;
-
-  fprintf(stderr, "ignoring unknown root attribute %s\n", name);
-}
-
-static void
 hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
 			      const xmlChar *_name, const xmlChar *_value)
 {
@@ -369,7 +360,7 @@ hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
     if (attr->type == XML_ATTRIBUTE_NODE) {
       const xmlChar *value = hwloc__xml_import_attr_value(attr);
       if (value)
-	hwloc__xml_import_topology_attr(topology, attr->name, value);
+	fprintf(stderr, "ignoring unknown root attribute %s\n", (char *) attr->name);
       else
 	fprintf(stderr, "ignoring unexpected xml root attr name `%s' with no value\n", (const char*) attr->name);
     } else {
