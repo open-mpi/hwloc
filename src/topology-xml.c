@@ -49,6 +49,24 @@ hwloc_backend_xml_exit(struct hwloc_topology *topology)
  ********* XML import *********
  ******************************/
 
+static void hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth);
+
+static const xmlChar *
+hwloc__xml_import_attr_value(xmlAttr *attr)
+{
+  xmlNode *subnode;
+  /* use the first valid attribute content */
+  for (subnode = attr->children; subnode; subnode = subnode->next) {
+    if (subnode->type == XML_TEXT_NODE) {
+      if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n')
+	return subnode->content;
+    } else {
+      fprintf(stderr, "ignoring unexpected xml attr node type %u\n", subnode->type);
+    }
+  }
+  return NULL;
+}
+
 static void
 hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj,
 			      const xmlChar *_name, const xmlChar *_value)
@@ -210,56 +228,6 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     fprintf(stderr, "ignoring unknown object attribute %s\n", name);
 }
 
-static const xmlChar *
-hwloc__xml_import_attr_value(xmlAttr *attr)
-{
-  xmlNode *subnode;
-  /* use the first valid attribute content */
-  for (subnode = attr->children; subnode; subnode = subnode->next) {
-    if (subnode->type == XML_TEXT_NODE) {
-      if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n')
-	return subnode->content;
-    } else {
-      fprintf(stderr, "ignoring unexpected xml attr node type %u\n", subnode->type);
-    }
-  }
-  return NULL;
-}
-
-static void
-hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
-{
-  uint64_t size = 0, count = 0;
-  xmlAttr *attr = NULL;
-
-  for (attr = node->properties; attr; attr = attr->next) {
-    if (attr->type == XML_ATTRIBUTE_NODE) {
-      const xmlChar *value = hwloc__xml_import_attr_value(attr);
-      if (value) {
-	if (!strcmp((char *) attr->name, "size"))
-	  size = strtoul((char *) value, NULL, 10);
-	else if (!strcmp((char *) attr->name, "count"))
-	  count = strtoul((char *) value, NULL, 10);
-	else
-	  fprintf(stderr, "ignoring unknown pagetype attribute %s\n", (char *) attr->name);
-      } else
-	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", (const char*) attr->name);
-    } else {
-      fprintf(stderr, "ignoring unexpected xml pagetype attr type %u\n", attr->type);
-    }
-  }
-
-  if (size && count) {
-    int idx = obj->memory.page_types_len;
-    obj->memory.page_types = realloc(obj->memory.page_types, (idx+1)*sizeof(*obj->memory.page_types));
-    obj->memory.page_types_len = idx+1;
-    obj->memory.page_types[idx].size = size;
-    obj->memory.page_types[idx].count = count;
-  }
-}
-
-static void hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth);
-
 static void
 hwloc__xml_import_object_node(struct hwloc_topology *topology, struct hwloc_obj *parent, struct hwloc_obj *obj, xmlNode *node, int depth)
 {
@@ -311,6 +279,37 @@ hwloc__xml_import_object_node(struct hwloc_topology *topology, struct hwloc_obj 
     hwloc__xml_import_node(topology, obj, node->children, depth+1);
 }
 
+static void
+hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
+{
+  uint64_t size = 0, count = 0;
+  xmlAttr *attr = NULL;
+
+  for (attr = node->properties; attr; attr = attr->next) {
+    if (attr->type == XML_ATTRIBUTE_NODE) {
+      const xmlChar *value = hwloc__xml_import_attr_value(attr);
+      if (value) {
+	if (!strcmp((char *) attr->name, "size"))
+	  size = strtoul((char *) value, NULL, 10);
+	else if (!strcmp((char *) attr->name, "count"))
+	  count = strtoul((char *) value, NULL, 10);
+	else
+	  fprintf(stderr, "ignoring unknown pagetype attribute %s\n", (char *) attr->name);
+      } else
+	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", (const char*) attr->name);
+    } else {
+      fprintf(stderr, "ignoring unexpected xml pagetype attr type %u\n", attr->type);
+    }
+  }
+
+  if (size && count) {
+    int idx = obj->memory.page_types_len;
+    obj->memory.page_types = realloc(obj->memory.page_types, (idx+1)*sizeof(*obj->memory.page_types));
+    obj->memory.page_types_len = idx+1;
+    obj->memory.page_types[idx].size = size;
+    obj->memory.page_types[idx].count = count;
+  }
+}
 
 static void
 hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth)
