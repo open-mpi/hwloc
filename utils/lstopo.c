@@ -133,40 +133,46 @@ static void usage(char *name, FILE *where)
 		  ", .xml"
 #endif /* HWLOC_HAVE_XML */
 		  "\n");
-  fprintf (where, "\nOptions:\n");
+  fprintf (where, "\nFormatting options:\n");
   fprintf (where, "   -l --logical          Display hwloc logical object indexes (default)\n");
   fprintf (where, "   -p --physical         Display physical object indexes\n");
-  fprintf (where, "   -v --verbose          Include additional detail\n");
-  fprintf (where, "   -s --silent           Opposite of --verbose (default)\n");
+  fprintf (where, "Textual output options:\n");
+  fprintf (where, "   --only <type>         Only show objects of the given type in the text output\n");
+  fprintf (where, "   -v --verbose          Include additional details\n");
+  fprintf (where, "   -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
   fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
   fprintf (where, "   --taskset             Show taskset-specific cpuset strings\n");
-  fprintf (where, "   --only <type>         Only show the given type in the text output\n");
+  fprintf (where, "Object filtering options:\n");
   fprintf (where, "   --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "   --no-caches           Do not show caches\n");
   fprintf (where, "   --no-useless-caches   Do not show caches which do not have a hierarchical\n"
                   "                         impact\n");
-  fprintf (where, "   --whole-system        Do not consider administration limitations\n");
   fprintf (where, "   --merge               Do not show levels that do not have a hierarcical\n"
                   "                         impact\n");
 #ifdef HWLOC_HAVE_LIBPCI
   fprintf (where, "   --whole-pci           show all PCI devices and bridges\n");
   fprintf (where, "   --no-pci              do not show any PCI device or bridge\n");
 #endif
+  fprintf (where, "Input options:\n");
 #ifdef HWLOC_HAVE_XML
   fprintf (where, "   --xml <path>          Read topology from XML file <path>\n");
 #endif
 #ifdef HWLOC_LINUX_SYS
-  fprintf (where, "   --fsys-root <path>    Chroot containing the /proc and /sys of another system\n");
+  fprintf (where, "   --fsroot <path>       Read topology from chroot containing the /proc and /sys\n"
+		  "                         of another system\n");
 #endif
-  fprintf (where, "   --pid <pid>           Detect topology as seen by process <pid>\n");
-  fprintf (where, "   --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "   --synthetic \"n:2 2\"   Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
                   "                         processors\n");
+  fprintf (where, "   --pid <pid>           Detect topology as seen by process <pid>\n");
+  fprintf (where, "   --whole-system        Do not consider administration limitations\n");
+  fprintf (where, "Graphical output options:\n");
   fprintf (where, "   --fontsize 10         Set size of text font\n");
   fprintf (where, "   --gridsize 10         Set size of margin between elements\n");
   fprintf (where, "   --horiz               Horizontal graphic layout instead of nearly 4/3 ratio\n");
   fprintf (where, "   --vert                Vertical graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "Miscellaneous options:\n");
+  fprintf (where, "   --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "   --version             Report version and exit\n");
 }
 
@@ -183,7 +189,7 @@ main (int argc, char *argv[])
   char * callname;
   char * synthetic = NULL;
   const char * xmlpath = NULL;
-  char * fsysroot = NULL;
+  char * fsroot = NULL;
   int force_console = 0;
   int opt;
 
@@ -289,15 +295,15 @@ main (int argc, char *argv[])
         fprintf(stderr, "This installation of hwloc does not support --xml, sorry.\n");
         exit(EXIT_FAILURE);
 #endif /* HWLOC_HAVE_XML */
-      } else if (!strcmp (argv[1], "--fsys-root")) {
+      } else if (!strcmp (argv[1], "--fsroot") || !strcmp (argv[1], "--fsys-root") /* backward compat with 1.0 */) {
 #ifdef HWLOC_LINUX_SYS
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	fsysroot = argv[2]; opt = 1;
+	fsroot = argv[2]; opt = 1;
 #else /* HWLOC_LINUX_SYS */
-        fprintf(stderr, "This installation of hwloc does not support --fsys-root, sorry.\n");
+        fprintf(stderr, "This installation of hwloc does not support --fsroot, sorry.\n");
         exit(EXIT_FAILURE);
 #endif /* HWLOC_LINUX_SYS */
       } else if (!strcmp (argv[1], "--pid")) {
@@ -349,8 +355,8 @@ main (int argc, char *argv[])
       return EXIT_FAILURE;
     }
   }
-  if (fsysroot) {
-    if (hwloc_topology_set_fsroot(topology, fsysroot)) {
+  if (fsroot) {
+    if (hwloc_topology_set_fsroot(topology, fsroot)) {
       perror("Setting target filesystem root");
       return EXIT_FAILURE;
     }

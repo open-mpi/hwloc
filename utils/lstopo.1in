@@ -24,7 +24,7 @@ before reading this man page).
 Include additional detail.
 .TP
 \fB\-s\fR \fB\-\-silent\fR
-Opposite of --verbose (default).
+Reduce the amount of details to show.
 .TP
 \fB\-l\fR \fB\-\-logical\fR
 Display hwloc logical indexes instead of physical/OS indexes (default).
@@ -73,7 +73,7 @@ topology on the local machine).  If <path> is "\-", the standard input
 is used.  XML support must have been compiled in to hwloc for this
 option to be usable.
 .TP
-\fB\-\-fsys\-root\fR <path>
+\fB\-\-fsroot\fR <path>
 Read topology from the chroot specified by <path> (instead of
 discovering the topology on the local machine).  This option is
 generally only available on Linux.
@@ -133,6 +133,12 @@ CPUs by their color; see the COLORS section, below.
 .\" **************************
 .SH OUTPUT FORMATS
 .
+.PP
+The filename on the command line determines the format of the output.
+There are a few filenames that indicate specific output formats and
+devices (e.g., a filename of "-" will output a text summary to
+stdout), but most filenames indicate the desired output format by 
+their suffix (e.g., "topo.png" will output a PNG-format file).
 .TP
 .B \-
 Send a text summary to stdout.
@@ -183,6 +189,9 @@ support, lstopo outputs an SVG representation of the map.
 .B <filename>.xml
 If the filename ends in ".xml" and lstopo was compiled with the proper
 support, lstopo outputs an XML representation of the map.
+It may be reused later, even on another machine, with lstopo \-\-xml,
+the HWLOC_XMLFILE environment variable, or the hwloc_topology_set_xml()
+function.
 .
 .PP
 See the output of "lstopo \-\-help" for a specific list of what
@@ -248,6 +257,13 @@ variable is set to a relevant value):
 To export the topology to a PNG file:
 
     lstopo file.png
+
+To export a XML file on a machine and later display the corresponding
+graphic output on another machine:
+
+    machine1$ lstopo file.xml
+    <transfer file.xml from machine1 to machine2>
+    machine2$ lstopo --xml file.xml
 
 To display a summary of the topology:
 

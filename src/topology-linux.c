@@ -212,7 +212,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   last = hwloc_cpuset_last(hwloc_set);
   if (last == -1) {
-    errno = -EINVAL;
+    errno = EINVAL;
     return -1;
   }
 
@@ -562,7 +562,34 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
    * int thread_migrate (int thread_id, int destination_node);
    */
 
-#ifdef HWLOC_HAVE_CPU_SET
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+     cpu_set_t *plinux_set;
+     unsigned cpu;
+     int last;
+     size_t setsize;
+
+     last = hwloc_cpuset_last(hwloc_set);
+     if (last == -1) {
+       errno = EINVAL;
+       return -1;
+     }
+
+     setsize = CPU_ALLOC_SIZE(last+1);
+     plinux_set = CPU_ALLOC(last+1);
+
+     CPU_ZERO_S(setsize, plinux_set);
+     hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+         CPU_SET_S(cpu, setsize, plinux_set);
+     hwloc_cpuset_foreach_end();
+
+     err = pthread_setaffinity_np(tid, setsize, plinux_set);
+
+     CPU_FREE(plinux_set);
+  }
+#elif defined(HWLOC_HAVE_CPU_SET)
   /* Use a separate block so that we can define specific variable
      types here */
   {
@@ -625,7 +652,36 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
   }
   /* TODO Kerrighed */
 
-#ifdef HWLOC_HAVE_CPU_SET
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
+  /* Use a separate block so that we can define specific variable
+     types here */
+  {
+     cpu_set_t *plinux_set;
+     unsigned cpu;
+     int last;
+     size_t setsize;
+
+     last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+     assert (last != -1);
+
+     setsize = CPU_ALLOC_SIZE(last+1);
+     plinux_set = CPU_ALLOC(last+1);
+
+     err = pthread_getaffinity_np(tid, setsize, plinux_set);
+     if (err) {
+        CPU_FREE(plinux_set);
+        errno = err;
+        return -1;
+     }
+
+     hwloc_cpuset_zero(hwloc_set);
+     for(cpu=0; cpu<(unsigned) last; cpu++)
+       if (CPU_ISSET_S(cpu, setsize, plinux_set))
+	 hwloc_cpuset_set(hwloc_set, cpu);
+
+     CPU_FREE(plinux_set);
+  }
+#elif defined(HWLOC_HAVE_CPU_SET)
   /* Use a separate block so that we can define specific variable
      types here */
   {
@@ -1467,6 +1523,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned numcores=0;
   unsigned long physid;
   unsigned long coreid;
+  unsigned missingsocket;
+  unsigned missingcore;
   unsigned long processor = (unsigned long) -1;
   unsigned i;
   hwloc_cpuset_t cpuset;
@@ -1575,12 +1633,26 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug("%s", "\n * Topology summary *\n");
   hwloc_debug("%u processors (%u max id)\n", numprocs, procid_max);
 
-  hwloc_debug("%u sockets\n", numsockets);
-  if (numsockets>0)
+  /* Some buggy Linuxes don't provide numbers for processor 0, which makes us
+   * provide bogus information. We should rather drop it. */
+  missingsocket=0;
+  missingcore=0;
+  hwloc_cpuset_foreach_begin(processor, online_cpuset)
+    if (proc_physids[processor] == (unsigned) -1)
+      missingsocket=1;
+    if (proc_coreids[processor] == (unsigned) -1)
+      missingcore=1;
+    if (missingcore && missingsocket)
+      /* No usable information, no need to continue */
+      break;
+  hwloc_cpuset_foreach_end();
+
+  hwloc_debug("%u sockets%s\n", numsockets, missingsocket ? ", but some missing socket" : "");
+  if (!missingsocket && numsockets>0)
     hwloc_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, HWLOC_OBJ_SOCKET);
 
-  hwloc_debug("%u cores\n", numcores);
-  if (numcores>0)
+  hwloc_debug("%u cores%s\n", numcores, missingcore ? ", but some missing core" : "");
+  if (!missingcore && numcores>0)
     hwloc_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, HWLOC_OBJ_CORE);
 
   return 0;

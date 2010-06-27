@@ -45,15 +45,25 @@ static void
 hwloc_topology_clear (struct hwloc_topology *topology);
 
 #if defined(HAVE_SYSCTLBYNAME)
-int hwloc_get_sysctlbyname(const char *name, int *ret)
+int hwloc_get_sysctlbyname(const char *name, int64_t *ret)
 {
-  int n;
+  union {
+    int32_t i32;
+    int64_t i64;
+  } n;
   size_t size = sizeof(n);
   if (sysctlbyname(name, &n, &size, NULL, 0))
     return -1;
-  if (size != sizeof(n))
-    return -1;
-  *ret = n;
+  switch (size) {
+    case sizeof(n.i32):
+      *ret = n.i32;
+      break;
+    case sizeof(n.i64):
+      *ret = n.i64;
+      break;
+    default:
+      return -1;
+  }
   return 0;
 }
 #endif
@@ -93,7 +103,7 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
   n = info.avail_cpus;
 #elif defined(HAVE_SYSCTLBYNAME)
-  int n;
+  int64_t n;
   if (hwloc_get_sysctlbyname("hw.ncpu", &n))
     n = -1;
 #elif defined(HAVE_SYSCTL) && HAVE_DECL_CTL_HW && HAVE_DECL_HW_NCPU
@@ -119,141 +129,81 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
 }
 
 /*
- * Place objects in groups if they are in complete graphs with minimal distances.
- * Return how many groups were created, or 0 if some incomplete distance graphs were found.
- */
-static unsigned
-hwloc_setup_group_from_min_distance_clique(unsigned nbobjs,
-					  unsigned *_distances,
-					  unsigned *groupids)
-{
-  unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
-  unsigned groupid = 0;
-  unsigned i,j,k;
-
-  memset(groupids, 0, nbobjs*sizeof(*groupids));
-
-  /* try to find complete graphs */
-  for(i=0; i<nbobjs; i++) {
-    hwloc_cpuset_t closest_objs_set = hwloc_cpuset_alloc();
-    unsigned min_distance = UINT_MAX;
-    unsigned size = 1; /* current object i */
-
-    /* if already grouped, skip */
-    if (groupids[i]) {
-      hwloc_cpuset_free(closest_objs_set);
-      continue;
-    }
-
-    /* find closest nodes */
-    for(j=i+1; j<nbobjs; j++) {
-      if ((*distances)[i][j] < min_distance) {
-	/* reset the closest set and use new min_distance */
-	hwloc_cpuset_cpu(closest_objs_set, j);
-	min_distance = (*distances)[i][j];
-	size = 2; /* current objects i and j */
-      } else if ((*distances)[i][j] == min_distance) {
-	/* add object to current closest set */
-	hwloc_cpuset_set(closest_objs_set, j);
-	size++;
-      }
-    }
-    /* check that we actually have a complete graph between these closest objects */
-    for (j=i+1; j<nbobjs; j++)
-      for (k=j+1; k<nbobjs; k++)
-	if (hwloc_cpuset_isset(closest_objs_set, j) &&
-	    hwloc_cpuset_isset(closest_objs_set, k) &&
-	    (*distances)[j][k] != min_distance) {
-	  /* the minimal-distance graph is not complete. abort */
-	  hwloc_debug("%s", "found incomplete minimal-distance graph, aborting\n");
-	  hwloc_cpuset_free(closest_objs_set);
-	  return 0;
-	}
-
-    /* fill a new group */
-    groupid++;
-    groupids[i] = groupid;
-    for(j=i+1; j<nbobjs; j++)
-      if (hwloc_cpuset_isset(closest_objs_set, j))
-	groupids[j] = groupid;
-    hwloc_debug("found complete graph with %u objects with minimal distance %u\n",
-	       size, min_distance);
-    hwloc_cpuset_free(closest_objs_set);
-  }
-
-  /* return the last id, since it's also the number of used group ids */
-  return groupid;
-}
-
-/*
  * Place objects in groups if they are in a transitive graph of minimal distances.
  * Return how many groups were created, or 0 if some incomplete distance graphs were found.
  */
 static unsigned
-hwloc_setup_group_from_min_distance_transitivity(unsigned nbobjs,
-						unsigned *_distances,
-						unsigned *groupids)
+hwloc_setup_group_from_min_distance(unsigned nbobjs,
+				    unsigned *_distances,
+				    unsigned *groupids)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
-  unsigned groupid = 0;
+  unsigned min_distance = UINT_MAX;
+  unsigned groupid = 1;
   unsigned i,j,k;
 
   memset(groupids, 0, nbobjs*sizeof(*groupids));
 
-  /* try to find complete graphs */
-  for(i=0; i<nbobjs; i++) {
-    hwloc_cpuset_t closest_objs_set = hwloc_cpuset_alloc();
-    unsigned min_distance = UINT_MAX;
-    unsigned size = 1; /* current object i */
+  /* find the minimal distance */
+  for(i=0; i<nbobjs; i++)
+    for(j=i+1; j<nbobjs; j++)
+      if ((*distances)[i][j] < min_distance)
+	min_distance = (*distances)[i][j];
+  hwloc_debug("found minimal distance %u between objects\n", min_distance);
 
-    hwloc_cpuset_zero(closest_objs_set);
+  if (min_distance == UINT_MAX)
+    return 0;
+
+  /* build groups of objects connected with this distance */
+  for(i=0; i<nbobjs; i++) {
+    unsigned size;
+    int firstfound;
 
     /* if already grouped, skip */
     if (groupids[i])
       continue;
 
-    /* find closest nodes */
-    for(j=i+1; j<nbobjs; j++) {
-      if ((*distances)[i][j] < min_distance) {
-	/* reset the closest set and use new min_distance */
-	hwloc_cpuset_cpu(closest_objs_set, j);
-	min_distance = (*distances)[i][j];
-	size = 2; /* current objects i and j */
-      } else if ((*distances)[i][j] == min_distance) {
-	/* add object to current closest set */
-	hwloc_cpuset_set(closest_objs_set, j);
-	size++;
-      }
-    }
-    /* find close objs by transitivity */
-    while (1) {
-      unsigned found = 0;
-      for(j=i+1; j<nbobjs; j++)
-	for(k=j+1; k<nbobjs; k++)
-	  if ((*distances)[j][k] <= min_distance
-	      && hwloc_cpuset_isset(closest_objs_set, j)
-	      && !hwloc_cpuset_isset(closest_objs_set, k)) {
-	    hwloc_cpuset_set(closest_objs_set, k);
-	    size++;
-	    found = 1;
-	  }
-      if (!found)
-	break;
+    /* start a new group */
+    groupids[i] = groupid;
+    size = 1;
+    firstfound = i;
+
+    while (firstfound != -1) {
+      /* we added new objects to the group, the first one was firstfound.
+       * rescan all connections from these new objects (starting at first found) to any other objects,
+       * so as to find new objects minimally-connected by transivity.
+       */
+      int newfirstfound = -1;
+      for(j=firstfound; j<nbobjs; j++)
+	if (groupids[j] == groupid)
+	  for(k=0; k<nbobjs; k++)
+	    if (!groupids[k] && (*distances)[j][k] == min_distance) {
+	      groupids[k] = groupid;
+	      size++;
+	      if (newfirstfound == -1)
+		newfirstfound = k;
+	      if (i == j)
+		hwloc_debug("object %u is minimally connected to %u\n", k, i);
+	      else
+	        hwloc_debug("object %u is minimally connected to %u through %u\n", k, i, j);
+	    }
+      firstfound = newfirstfound;
     }
 
-    /* fill a new group */
+    if (size == 1) {
+      /* cancel this group and start over */
+      groupids[i] = 0;
+      continue;
+    }
+
+    /* valid this group */
     groupid++;
-    groupids[i] = groupid;
-    for(j=i+1; j<nbobjs; j++)
-      if (hwloc_cpuset_isset(closest_objs_set, j))
-	groupids[j] = groupid;
     hwloc_debug("found transitive graph with %u objects with minimal distance %u\n",
 	       size, min_distance);
-    hwloc_cpuset_free(closest_objs_set);
   }
 
   /* return the last id, since it's also the number of used group ids */
-  return groupid;
+  return groupid-1;
 }
 
 /*
@@ -278,12 +228,9 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
   if (nbobjs <= 2)
     return;
 
-  nbgroups = hwloc_setup_group_from_min_distance_clique(nbobjs, _distances, groupids);
-  if (!nbgroups) {
-    nbgroups = hwloc_setup_group_from_min_distance_transitivity(nbobjs, _distances, groupids);
-    if (!nbgroups)
-      return;
-  }
+  nbgroups = hwloc_setup_group_from_min_distance(nbobjs, _distances, groupids);
+  if (!nbgroups)
+    return;
 
   if (nbgroups == 1) {
     hwloc_debug("%s", "ignoring misc object with all objects\n");

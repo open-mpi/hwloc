@@ -33,6 +33,7 @@ sysfs_tarballs = \
 		48amd64-4d2n6c.tar.gz \
 		64fake-4n2s2ca2c2t.tar.gz \
 		96em64t-4n4d3ca2co.tar.gz \
+		128ia64-17n4s2c.tar.gz \
 		256ia64-64n2s2c.tar.gz \
 		4qs22-2s2t.tar.gz \
 		2s390-2c.tar.gz \
@@ -67,6 +68,7 @@ sysfs_outputs = \
 		48amd64-4d2n6c.tar.gz.output \
 		64fake-4n2s2ca2c2t.tar.gz.output \
 		96em64t-4n4d3ca2co.tar.gz.output \
+		128ia64-17n4s2c.tar.gz.output \
 		256ia64-64n2s2c.tar.gz.output \
 		4qs22-2s2t.tar.gz.output \
 		2s390-2c.tar.gz.output \

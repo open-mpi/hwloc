@@ -1,8 +1,8 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+.\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .TH HWLOC-PS "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
-hwloc-bind \- List currently running processes and their binding.
+hwloc-ps \- List currently-running processes that are bound.
 .
 .\" **************************
 .\"    Synopsis Section
@@ -36,13 +36,21 @@ show process bindings as cpusets instead of objects.
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-ps lists currently running processes and prints their identifier,
-command-line and binding.
-The binding may be reported as objects or cpusets.
+By default, hwloc-ps lists only those currently-running processes that
+are bound; it displays their their identifier, command-line and
+binding.  The binding may be reported as objects or cpusets.
 .
 The output is a plain list. If you wish to annotate the hierarchical
 topology with processes so as to see how they are actual distributed
-on the machine, you might want to use lstopo --ps instead.
+on the machine, you might want to use lstopo --ps instead (which also
+only shows processes that are bound).
+.
+.PP
+The
+.I -a
+switch can be used to show
+.I all
+processes, if desired.
 .
 .\" **************************
 .\"    See also section
