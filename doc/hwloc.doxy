@@ -434,9 +434,9 @@ As shown in \ref cli_examples, hwloc can obtain information on a wide
 variety of hardware topologies.  However, some platforms and/or
 operating system versions will only report a subset of this
 information.  For example, on an PPC64-based system with 32 cores
-(each with 2 hardware threads) running RHEL 5.4 using their default
-2.6.18-based kernel, hwloc is only able to glean information about
-NUMA nodes and processor units (PUs).  No information about caches,
+(each with 2 hardware threads) running a default 2.6.18-based kernel
+from RHEL 5.4, hwloc is only able to glean information about NUMA
+nodes and processor units (PUs).  No information about caches,
 sockets, or cores is available.
 
 Here's the graphic output from lstopo on this platform when
@@ -461,6 +461,14 @@ This same "PUs have disappeared" effect can be seen on other platforms
 -- even platforms / OSs that provide much more information than the
 above PPC64 system.  This is an unfortunate side-effect of how
 operating systems report information to hwloc.
+
+Note that upgrading the Linux kernel on the same PPC64 system
+mentioned above to 2.6.34, hwloc is able to discover all the topology
+information.  The following picture shows the entire topology layout
+when SMT is enabled:
+
+\image html ppc64-full-with-smt.png
+\image latex ppc64-full-with-smt.pdf "" width=\textwidth
 
 Developers using the hwloc API or XML output for portable applications
 should therefore be extremely careful to not make any assumptions
