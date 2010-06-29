@@ -1265,7 +1265,8 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
      from a bunch of mallocs, particularly with the 2D array. */
   {
       hwloc_obj_t nodes[nbnodes];
-      unsigned distances[nbnodes][nbnodes];
+      unsigned * distances = calloc(nbnodes*nbnodes, sizeof(unsigned));
+
       for (osnode=0; osnode < nbnodes; osnode++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_cpuset_t cpuset;
@@ -1288,10 +1289,12 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           nodes[osnode] = node;
 
           sprintf(nodepath, "%s/node%u/distance", path, osnode);
-          hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
+          hwloc_parse_node_distance(nodepath, nbnodes, distances+osnode*nbnodes, topology->backend_params.sysfs.root_fd);
       }
 
-      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances);
+      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances);
+
+      topology->os_distances[HWLOC_OBJ_NODE] = (unsigned*) distances;
   }
 
   *found = nbnodes;

@@ -149,12 +149,16 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
     browse(topology, cookie, root, glob_lgrps, &curlgrp);
 #ifdef HAVE_LGRP_LATENCY_COOKIE
     {
-      unsigned distances[curlgrp][curlgrp];
+      unsigned *distances = calloc(curlgrp*curlgrp, sizeof(unsigned));
       unsigned i, j;
       for (i = 0; i < curlgrp; i++)
 	for (j = 0; j < curlgrp; j++)
 	  distances[i][j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       hwloc_setup_misc_level_from_distances(topology, curlgrp, glob_lgrps, (unsigned*) distances);
+      if (glob_lgrps[0]->type == HWLOC_OBJ_NODE)
+	topology->os_distances[HWLOC_OBJ_NODE] = distances;
+      else
+	free(distances);
     }
 #endif /* HAVE_LGRP_LATENCY_COOKIE */
   }

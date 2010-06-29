@@ -1714,8 +1714,11 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
-  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++)
+  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
+    free(topology->os_distances[i]);
+    topology->os_distances[i] = NULL;
+  }
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
@@ -1751,9 +1754,13 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->support.discovery = malloc(sizeof(*topology->support.discovery));
   topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
 
-  /* Only ignore useless cruft by default */
-  for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
+  for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++) {
+    /* Only ignore useless cruft by default */
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
+
+    topology->os_distances[i] = NULL;
+  }
+
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
   /* Make the topology look like something coherent but empty */
@@ -1912,8 +1919,11 @@ hwloc_topology_clear (struct hwloc_topology *topology)
 void
 hwloc_topology_destroy (struct hwloc_topology *topology)
 {
+  int i;
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
+  for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
+    free(topology->os_distances[i]);
   free(topology->support.discovery);
   free(topology->support.cpubind);
   free(topology);
