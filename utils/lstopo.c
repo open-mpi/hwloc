@@ -32,8 +32,12 @@ hwloc_pid_t pid = (hwloc_pid_t) -1;
 
 FILE *open_file(const char *filename, const char *mode)
 {
-  const char *extn = strrchr(filename, '.');
+  const char *extn;
 
+  if (!filename)
+    return stdout;
+
+  extn = strrchr(filename, '.');
   if (filename[0] == '-' && extn == filename + 1)
     return stdout;
 
@@ -136,6 +140,9 @@ static void usage(char *name, FILE *where)
   fprintf (where, "\nFormatting options:\n");
   fprintf (where, "   -l --logical          Display hwloc logical object indexes (default)\n");
   fprintf (where, "   -p --physical         Display physical object indexes\n");
+  fprintf (where, "Output options:\n");
+  fprintf (where, "   --output-format <format>\n");
+  fprintf (where, "   --of <format>         Force the output to use the given format\n");
   fprintf (where, "Textual output options:\n");
   fprintf (where, "   --only <type>         Only show objects of the given type in the text output\n");
   fprintf (where, "   -v --verbose          Include additional details\n");
@@ -321,6 +328,33 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[1], "--version")) {
           printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
+      } else if (!strcmp (argv[1], "--of")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	if (!strcmp(argv[2], "console"))
+	  output_format = LSTOPO_OUTPUT_CONSOLE;
+        else if (!strcmp(argv[2], "txt"))
+	  output_format = LSTOPO_OUTPUT_TEXT;
+        else if (!strcmp(argv[2], "fig"))
+	  output_format = LSTOPO_OUTPUT_FIG;
+        else if (!strcmp(argv[2], "png"))
+	  output_format = LSTOPO_OUTPUT_PNG;
+        else if (!strcmp(argv[2], "pdf"))
+	  output_format = LSTOPO_OUTPUT_PDF;
+        else if (!strcmp(argv[2], "ps"))
+	  output_format = LSTOPO_OUTPUT_PS;
+        else if (!strcmp(argv[2], "svg"))
+	  output_format = LSTOPO_OUTPUT_SVG;
+        else if (!strcmp(argv[2], "xml"))
+	  output_format = LSTOPO_OUTPUT_XML;
+	else {
+	  fprintf(stderr, "file format not supported\n");
+	  usage(callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        opt = 1;
       } else {
 	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);

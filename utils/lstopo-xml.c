@@ -15,7 +15,7 @@
 
 void output_xml(hwloc_topology_t topology, const char *filename, int logical __hwloc_attribute_unused, int verbose_mode __hwloc_attribute_unused)
 {
-  if (!strcasecmp(filename, "-.xml"))
+  if (!filename || !strcasecmp(filename, "-.xml"))
     filename = "-";
 
   hwloc_topology_export_xml(topology, filename);
