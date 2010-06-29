@@ -194,7 +194,9 @@ enum output_format {
 static enum output_format
 parse_output_format(const char *name, char *callname)
 {
-  if (!strcmp(name, "console"))
+  if (!strcmp(name, "default"))
+    return LSTOPO_OUTPUT_DEFAULT;
+  else if (!strcmp(name, "console"))
     return LSTOPO_OUTPUT_CONSOLE;
   else if (!strcmp(name, "txt"))
     return LSTOPO_OUTPUT_TEXT;
