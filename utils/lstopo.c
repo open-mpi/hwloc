@@ -191,6 +191,31 @@ enum output_format {
   LSTOPO_OUTPUT_XML
 };
 
+static enum output_format
+parse_output_format(const char *name, char *callname)
+{
+  if (!strcmp(name, "console"))
+    return LSTOPO_OUTPUT_CONSOLE;
+  else if (!strcmp(name, "txt"))
+    return LSTOPO_OUTPUT_TEXT;
+  else if (!strcmp(name, "fig"))
+    return LSTOPO_OUTPUT_FIG;
+  else if (!strcmp(name, "png"))
+    return LSTOPO_OUTPUT_PNG;
+  else if (!strcmp(name, "pdf"))
+    return LSTOPO_OUTPUT_PDF;
+  else if (!strcmp(name, "ps"))
+    return LSTOPO_OUTPUT_PS;
+  else if (!strcmp(name, "svg"))
+    return LSTOPO_OUTPUT_SVG;
+  else if (!strcmp(name, "xml"))
+    return LSTOPO_OUTPUT_XML;
+
+  fprintf(stderr, "file format `%s' not supported\n", name);
+  usage(callname, stderr);
+  exit(EXIT_FAILURE);
+}
+
 #define LSTOPO_VERBOSE_MODE_DEFAULT 1
 
 int
@@ -333,27 +358,7 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	if (!strcmp(argv[2], "console"))
-	  output_format = LSTOPO_OUTPUT_CONSOLE;
-        else if (!strcmp(argv[2], "txt"))
-	  output_format = LSTOPO_OUTPUT_TEXT;
-        else if (!strcmp(argv[2], "fig"))
-	  output_format = LSTOPO_OUTPUT_FIG;
-        else if (!strcmp(argv[2], "png"))
-	  output_format = LSTOPO_OUTPUT_PNG;
-        else if (!strcmp(argv[2], "pdf"))
-	  output_format = LSTOPO_OUTPUT_PDF;
-        else if (!strcmp(argv[2], "ps"))
-	  output_format = LSTOPO_OUTPUT_PS;
-        else if (!strcmp(argv[2], "svg"))
-	  output_format = LSTOPO_OUTPUT_SVG;
-        else if (!strcmp(argv[2], "xml"))
-	  output_format = LSTOPO_OUTPUT_XML;
-	else {
-	  fprintf(stderr, "file format not supported\n");
-	  usage(callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
+        output_format = parse_output_format(argv[2], callname);
         opt = 1;
       } else {
 	if (filename) {
@@ -418,26 +423,12 @@ main (int argc, char *argv[])
   /* if the output format wasn't enforced, look at the filename */
   if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
     if (!strcmp(filename, "-")
-	|| !strcmp(filename, "/dev/stdout"))
+	|| !strcmp(filename, "/dev/stdout")) {
       output_format = LSTOPO_OUTPUT_CONSOLE;
-    else if (strstr(filename, ".txt"))
-      output_format = LSTOPO_OUTPUT_TEXT;
-    else if (strstr(filename, ".fig"))
-      output_format = LSTOPO_OUTPUT_FIG;
-    else if (strstr(filename, ".png"))
-      output_format = LSTOPO_OUTPUT_PNG;
-    else if (strstr(filename, ".pdf"))
-      output_format = LSTOPO_OUTPUT_PDF;
-    else if (strstr(filename, ".ps"))
-      output_format = LSTOPO_OUTPUT_PS;
-    else if (strstr(filename, ".svg"))
-      output_format = LSTOPO_OUTPUT_SVG;
-    else if (strstr(filename, ".xml"))
-      output_format = LSTOPO_OUTPUT_XML;
-    else {
-      fprintf(stderr, "file format not supported\n");
-      usage(callname, stderr);
-      exit(EXIT_FAILURE);
+    } else {
+      char *dot = strrchr(filename, '.');
+      if (dot)
+        output_format = parse_output_format(dot+1, callname);
     }
   }
 
