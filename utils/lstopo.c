@@ -184,11 +184,13 @@ enum output_format {
   LSTOPO_OUTPUT_XML
 };
 
+#define LSTOPO_VERBOSE_MODE_DEFAULT 1
+
 int
 main (int argc, char *argv[])
 {
   int err;
-  int verbose_mode = 1;
+  int verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   hwloc_topology_t topology;
   const char *filename = NULL;
   unsigned long flags = 0;
@@ -216,10 +218,8 @@ main (int argc, char *argv[])
       opt = 0;
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose")) {
 	verbose_mode++;
-	output_format = LSTOPO_OUTPUT_CONSOLE;
       } else if (!strcmp (argv[1], "-s") || !strcmp (argv[1], "--silent")) {
 	verbose_mode--;
-	output_format = LSTOPO_OUTPUT_CONSOLE;
       } else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
@@ -333,12 +333,8 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
-  if (show_only != (hwloc_obj_type_t)-1) {
+  if (show_only != (hwloc_obj_type_t)-1)
     merge = 0;
-    output_format = LSTOPO_OUTPUT_CONSOLE;
-  }
-  if (show_cpuset)
-    output_format = LSTOPO_OUTPUT_CONSOLE;
 
   hwloc_topology_set_flags(topology, flags);
 
@@ -409,6 +405,14 @@ main (int argc, char *argv[])
       usage(callname, stderr);
       exit(EXIT_FAILURE);
     }
+  }
+
+  /* if  the output format wasn't enforced, think a bit about what the user probably want */
+  if (output_format == LSTOPO_OUTPUT_DEFAULT) {
+    if (show_cpuset
+        || show_only != (hwloc_obj_type_t)-1
+        || verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
+      output_format = LSTOPO_OUTPUT_CONSOLE;
   }
 
   switch (output_format) {
