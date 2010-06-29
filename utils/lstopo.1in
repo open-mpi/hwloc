@@ -20,6 +20,10 @@ before reading this man page).
 .SH OPTIONS
 .
 .TP
+\fB\-\-of\fR <format>, \fB\-\-output\-format\fR <format>
+Enforce the output in the given format.
+See the OUTPUT FORMATS section below.
+.TP
 \fB\-v\fR \fB\-\-verbose\fR
 Include additional detail.
 .TP
@@ -134,11 +138,66 @@ CPUs by their color; see the COLORS section, below.
 .SH OUTPUT FORMATS
 .
 .PP
-The filename on the command line determines the format of the output.
+The filename on the command line usually determines the format of the output.
 There are a few filenames that indicate specific output formats and
 devices (e.g., a filename of "-" will output a text summary to
 stdout), but most filenames indicate the desired output format by 
 their suffix (e.g., "topo.png" will output a PNG-format file).
+.PP
+The format of the output may also be changed with "\-\-of".
+For instance, "\-\-of pdf" will generate a PDF-format file on the standard
+output, while "\-\-of fig toto" will output a Xfig-format file named "toto".
+
+.PP
+The list of currently supported formats is given below. Any of them may
+be used with "\-\-of" or as a filename suffix.
+.TP
+.B default
+Send the output to a window or to the console depending on the environment.
+.TP
+.B console
+Send a text summary to stdout.
+.
+.TP
+.B txt
+Output an ASCII art representation of the map.
+If outputting to stdout and if colors are supported on the terminal,
+the output will be colorized.
+.
+.TP
+.B fig
+Output a representation of the map that can be loaded in Xfig.
+.
+.TP
+.B pdf
+If lstopo was compiled with the proper
+support, lstopo outputs a PDF representation of the map.
+.
+.TP
+.B ps
+If lstopo was compiled with the proper
+support, lstopo outputs a Postscript representation of the map.
+.
+.TP
+.B png
+If lstopo was compiled with the proper
+support, lstopo outputs a PNG representation of the map.
+.
+.TP
+.B svg
+If lstopo was compiled with the proper
+support, lstopo outputs an SVG representation of the map.
+.
+.TP
+.B xml
+If lstopo was compiled with the proper
+support, lstopo outputs an XML representation of the map.
+It may be reused later, even on another machine, with lstopo \-\-xml,
+the HWLOC_XMLFILE environment variable, or the hwloc_topology_set_xml()
+function.
+
+.PP
+The following special names may be used:
 .TP
 .B \-
 Send a text summary to stdout.
@@ -149,50 +208,11 @@ Send a text summary to stdout.  It is effectively the same as
 specifying "\-".
 .
 .TP
-.B <filename>.txt
-If the filename ends in ".txt", lstopo outputs an ASCII art
-representation of the map.
-.
-.TP
-.B \-.txt
-If the entire filename is "\-.txt", lstopo outputs the same ASCII art
-representation as other ".txt" filenames, but with two execeptions: 1)
-the output is sent to stdout, and 2) if colors are supported on the
-terminal, the ASCII art will be colorized.
-.
-.TP
-.B <filename>.fig
-If the filename ends in ".fig", lstopo outputs a representation of the
-map that can be loaded in Xfig.
-.
-.TP
-.B <filename>.pdf
-If the filename ends in ".pdf" and lstopo was compiled with the proper
-support, lstopo outputs a PDF representation of the map.
-.
-.TP
-.B <filename>.ps
-If the filename ends in ".ps" and lstopo was compiled with the proper
-support, lstopo outputs a Postscript representation of the map.
-.
-.TP
-.B <filename>.png
-If the filename ends in ".png" and lstopo was compiled with the proper
-support, lstopo outputs a PNG representation of the map.
-.
-.TP
-.B <filename>.svg
-If the filename ends in ".svn" and lstopo was compiled with the proper
-support, lstopo outputs an SVG representation of the map.
-.
-.TP
-.B <filename>.xml
-If the filename ends in ".xml" and lstopo was compiled with the proper
-support, lstopo outputs an XML representation of the map.
-It may be reused later, even on another machine, with lstopo \-\-xml,
-the HWLOC_XMLFILE environment variable, or the hwloc_topology_set_xml()
-function.
-.
+.B \-.<format>
+If the entire filename is "\-.<format>", lstopo behaves as if
+"\-\-of <format> -" was given, which means a file of the given format
+is sent to the standard output.
+
 .PP
 See the output of "lstopo \-\-help" for a specific list of what
 graphical output formats are supported in your hwloc installation.

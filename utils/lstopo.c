@@ -116,25 +116,25 @@ static void add_process_objects(hwloc_topology_t topology)
 
 static void usage(char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ] ... [ filename ]\n\n", name);
+  fprintf (where, "Usage: %s [ options ] ... [ filename.format ]\n\n", name);
   fprintf (where, "See lstopo(1) for more details.\n\n");
-  fprintf (where, "Supported output file formats: .txt, .fig"
+  fprintf (where, "Supported output file formats: console, txt, fig"
 #ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_PDF_SURFACE
-		  ", .pdf"
+		  ", pdf"
 #endif /* CAIRO_HAS_PDF_SURFACE */
 #if CAIRO_HAS_PS_SURFACE
-		  ", .ps"
+		  ", ps"
 #endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_PNG_FUNCTIONS
-		  ", .png"
+		  ", png"
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 #if CAIRO_HAS_SVG_SURFACE
-		  ", .svg"
+		  ", svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_HAVE_XML
-		  ", .xml"
+		  ", xml"
 #endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
