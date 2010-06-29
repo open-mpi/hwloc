@@ -2184,3 +2184,55 @@ hwloc_topology_get_support(struct hwloc_topology * topology)
 {
   return &topology->support;
 }
+
+int
+hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
+		    unsigned *nbobjsp, unsigned ** distancesp)
+{
+  unsigned i, j, nbobjs;
+  unsigned *distances;
+  int depth;
+
+  if (type >= HWLOC_OBJ_TYPE_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+  depth = hwloc_get_type_depth(topology, type);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+    errno = EINVAL;
+    return -1;
+  }
+  nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
+
+  if (!topology->os_distances[type]) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  distances = malloc(nbobjs*nbobjs*sizeof(*distances));
+  if (!distances) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  for(i=0; i<nbobjs; i++)
+    for(j=0; j<nbobjs; j++) {
+      hwloc_obj_t obj_i, obj_j;
+      unsigned distance = UINT_MAX;
+
+      obj_i = hwloc_get_obj_by_depth(topology, depth, i);
+      obj_j = hwloc_get_obj_by_depth(topology, depth, j);
+      if (obj_i && obj_j) {
+	unsigned os_i = obj_i->os_index;
+	unsigned os_j = obj_j->os_index;
+	if (os_i >= 0 && os_j >= 0)
+	  distance = topology->os_distances[type][i+nbobjs*j];
+      }
+
+      distances[i+nbobjs*j] = distance;
+    }
+
+  *distancesp = distances;
+  *nbobjsp = nbobjs;
+  return 0;
+}

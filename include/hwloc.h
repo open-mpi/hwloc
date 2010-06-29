@@ -744,6 +744,31 @@ HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t
 
 
 
+/** \defgroup hwlocality_distances Distances
+ *
+ */
+
+/** \brief Get the matrix of distances between objects of the given type.
+ *
+ * \p nbobjs is filled with the number of objects.
+ *
+ * \p distances is filled with an array of nbobjs*nbobjs distances.
+ * Slot i+nbobjs*j contains the distance from the object of logical index i
+ * the object of logical index j.
+ *
+ * The returned matrix is allocated anf given to the caller, which will
+ * have to free it later.
+ *
+ * \return 0 on success, or -1 if no matrix is available for this object type.
+ */
+
+HWLOC_DECLSPEC int hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
+				       unsigned *nbobjs, unsigned ** distances);
+
+/** @} */
+
+
+
 /** \defgroup hwlocality_binding Binding
  *
  * It is often useful to call hwloc_cpuset_singlify() first so that a single CPU
