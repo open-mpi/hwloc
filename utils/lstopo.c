@@ -12,6 +12,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <assert.h>
 
 #ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
@@ -159,14 +160,23 @@ static void usage(char *name, FILE *where)
                   "                         impact\n");
   fprintf (where, "Input options:\n");
 #ifdef HWLOC_HAVE_XML
-  fprintf (where, "   --xml <path>          Read topology from XML file <path>\n");
+  fprintf (where, "   --input <XML file>    Read topology from XML file <path>\n");
 #endif
 #ifdef HWLOC_LINUX_SYS
-  fprintf (where, "   --fsroot <path>       Read topology from chroot containing the /proc and /sys\n"
+  fprintf (where, "   --input <directory>   Read topology from chroot containing the /proc and /sys\n"
 		  "                         of another system\n");
 #endif
-  fprintf (where, "   --synthetic \"n:2 2\"   Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
+  fprintf (where, "   --input \"n:2 2\"     Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
                   "                         processors\n");
+  fprintf (where, "   --input-format <format>\n");
+  fprintf (where, "   --if <format>         Enforce input format among "
+#ifdef HWLOC_HAVE_XML
+	   "xml, "
+#endif
+#ifdef HWLOC_LINUX_SYS
+	   "fsroot, "
+#endif
+	   "synthetic\n");
   fprintf (where, "   --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "   --whole-system        Do not consider administration limitations\n");
   fprintf (where, "Graphical output options:\n");
@@ -177,6 +187,30 @@ static void usage(char *name, FILE *where)
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "   --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "   --version             Report version and exit\n");
+}
+
+enum input_format {
+  LSTOPO_INPUT_DEFAULT,
+  LSTOPO_INPUT_XML,
+  LSTOPO_INPUT_FSROOT,
+  LSTOPO_INPUT_SYNTHETIC
+};
+
+static enum input_format
+parse_input_format(const char *name, char *callname)
+{
+  if (!strcmp(name, "default"))
+    return LSTOPO_INPUT_DEFAULT;
+  else if (!strcmp(name, "xml"))
+    return LSTOPO_INPUT_XML;
+  else if (!strcmp(name, "fsroot"))
+    return LSTOPO_INPUT_FSROOT;
+  else if (!strcmp(name, "synthetic"))
+    return LSTOPO_INPUT_SYNTHETIC;
+
+  fprintf(stderr, "input format `%s' not supported\n", name);
+  usage(callname, stderr);
+  exit(EXIT_FAILURE);
 }
 
 enum output_format {
@@ -231,9 +265,8 @@ main (int argc, char *argv[])
   int merge = 0;
   int ignorecache = 0;
   char * callname;
-  char * synthetic = NULL;
-  const char * xmlpath = NULL;
-  char * fsroot = NULL;
+  char * input = NULL;
+  enum input_format input_format = LSTOPO_INPUT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   int opt;
 
@@ -313,37 +346,47 @@ main (int argc, char *argv[])
 	gridsize = atoi(argv[2]);
 	opt = 1;
       }
+
+      else if (!strcmp (argv[1], "--input")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	input = argv[2]; opt = 1;
+      }
+      else if (!strcmp (argv[1], "--input-format")
+	       || !strcmp (argv[1], "--if")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	input_format = parse_input_format (argv[2], callname);
+	opt = 1;
+      }
       else if (!strcmp (argv[1], "--synthetic")) {
+	/* backward compat with 1.0 */
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	synthetic = argv[2]; opt = 1;
+	input = argv[2]; opt = 1;
+	input_format = LSTOPO_INPUT_SYNTHETIC;
       } else if (!strcmp (argv[1], "--xml")) {
-#ifdef HWLOC_HAVE_XML
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	xmlpath = argv[2]; opt = 1;
-	if (!strcmp(xmlpath, "-")) {
-	  xmlpath = "/dev/stdin";
-        }
-#else /* HWLOC_HAVE_XML */
-        fprintf(stderr, "This installation of hwloc does not support --xml, sorry.\n");
-        exit(EXIT_FAILURE);
-#endif /* HWLOC_HAVE_XML */
-      } else if (!strcmp (argv[1], "--fsroot") || !strcmp (argv[1], "--fsys-root") /* backward compat with 1.0 */) {
-#ifdef HWLOC_LINUX_SYS
+	input = argv[2]; opt = 1;
+	input_format = LSTOPO_INPUT_XML;
+      } else if (!strcmp (argv[1], "--fsroot") || !strcmp (argv[1], "--fsys-root")) {
+	/* backward compat with 1.0 */
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	fsroot = argv[2]; opt = 1;
-#else /* HWLOC_LINUX_SYS */
-        fprintf(stderr, "This installation of hwloc does not support --fsroot, sorry.\n");
-        exit(EXIT_FAILURE);
-#endif /* HWLOC_LINUX_SYS */
+	input = argv[2]; opt = 1;
+	input_format = LSTOPO_INPUT_FSROOT;
+
       } else if (!strcmp (argv[1], "--pid")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
@@ -387,21 +430,57 @@ main (int argc, char *argv[])
   if (merge)
     hwloc_topology_ignore_all_keep_structure(topology);
 
-  if (synthetic)
-    if (hwloc_topology_set_synthetic(topology, synthetic))
-      return EXIT_FAILURE;
-  if (xmlpath) {
-    if (hwloc_topology_set_xml(topology, xmlpath)) {
-      perror("Setting target XML file");
-      return EXIT_FAILURE;
+  /* input format */
+  if (input) {
+    if (input_format == LSTOPO_INPUT_DEFAULT) {
+      struct stat inputst;
+      int err;
+      err = stat(input, &inputst);
+      if (err < 0) {
+	input_format = LSTOPO_INPUT_SYNTHETIC;
+      } else if (S_ISDIR(inputst.st_mode)) {
+	input_format = LSTOPO_INPUT_FSROOT;
+      } else if (S_ISREG(inputst.st_mode)) {
+	input_format = LSTOPO_INPUT_XML;
+      } else {
+	fprintf (stderr, "Unrecognized input file: %s\n", input);
+	usage (callname, stderr);
+      }
+    }
+    switch (input_format) {
+    case LSTOPO_INPUT_XML:
+#ifdef HWLOC_HAVE_XML
+      if (!strcmp(input, "-"))
+	input = "/dev/stdin";
+      if (hwloc_topology_set_xml(topology, input)) {
+	perror("Setting target XML file");
+	return EXIT_FAILURE;
+      }
+#else /* HWLOC_HAVE_XML */
+      fprintf(stderr, "This installation of hwloc does not support XML, sorry.\n");
+      exit(EXIT_FAILURE);
+#endif /* HWLOC_HAVE_XML */
+      break;
+    case LSTOPO_INPUT_FSROOT:
+#ifdef HWLOC_LINUX_SYS
+      if (hwloc_topology_set_fsroot(topology, input)) {
+	perror("Setting target filesystem root");
+	return EXIT_FAILURE;
+      }
+#else /* HWLOC_LINUX_SYS */
+      fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
+      exit(EXIT_FAILURE);
+#endif /* HWLOC_LINUX_SYS */
+      break;
+    case LSTOPO_INPUT_SYNTHETIC:
+      if (hwloc_topology_set_synthetic(topology, input))
+	return EXIT_FAILURE;
+      break;
+    case LSTOPO_INPUT_DEFAULT:
+      assert(0);
     }
   }
-  if (fsroot) {
-    if (hwloc_topology_set_fsroot(topology, fsroot)) {
-      perror("Setting target filesystem root");
-      return EXIT_FAILURE;
-    }
-  }
+
   if (pid != (hwloc_pid_t) -1 && pid != 0) {
     if (hwloc_topology_set_pid(topology, pid)) {
       perror("Setting target pid");
