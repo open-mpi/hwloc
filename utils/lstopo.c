@@ -199,13 +199,13 @@ enum input_format {
 static enum input_format
 parse_input_format(const char *name, char *callname)
 {
-  if (!strcmp(name, "default"))
+  if (!strncasecmp(name, "default", 3))
     return LSTOPO_INPUT_DEFAULT;
-  else if (!strcmp(name, "xml"))
+  else if (!strncasecmp(name, "xml", 1))
     return LSTOPO_INPUT_XML;
-  else if (!strcmp(name, "fsroot"))
+  else if (!strncasecmp(name, "fsroot", 1))
     return LSTOPO_INPUT_FSROOT;
-  else if (!strcmp(name, "synthetic"))
+  else if (!strncasecmp(name, "synthetic", 1))
     return LSTOPO_INPUT_SYNTHETIC;
 
   fprintf(stderr, "input format `%s' not supported\n", name);
@@ -228,23 +228,23 @@ enum output_format {
 static enum output_format
 parse_output_format(const char *name, char *callname)
 {
-  if (!strcmp(name, "default"))
+  if (!strncasecmp(name, "default", 3))
     return LSTOPO_OUTPUT_DEFAULT;
-  else if (!strcmp(name, "console"))
+  else if (!strncasecmp(name, "console", 3))
     return LSTOPO_OUTPUT_CONSOLE;
-  else if (!strcmp(name, "txt"))
+  else if (!strcasecmp(name, "txt"))
     return LSTOPO_OUTPUT_TEXT;
-  else if (!strcmp(name, "fig"))
+  else if (!strcasecmp(name, "fig"))
     return LSTOPO_OUTPUT_FIG;
-  else if (!strcmp(name, "png"))
+  else if (!strcasecmp(name, "png"))
     return LSTOPO_OUTPUT_PNG;
-  else if (!strcmp(name, "pdf"))
+  else if (!strcasecmp(name, "pdf"))
     return LSTOPO_OUTPUT_PDF;
-  else if (!strcmp(name, "ps"))
+  else if (!strcasecmp(name, "ps"))
     return LSTOPO_OUTPUT_PS;
-  else if (!strcmp(name, "svg"))
+  else if (!strcasecmp(name, "svg"))
     return LSTOPO_OUTPUT_SVG;
-  else if (!strcmp(name, "xml"))
+  else if (!strcasecmp(name, "xml"))
     return LSTOPO_OUTPUT_XML;
 
   fprintf(stderr, "file format `%s' not supported\n", name);
