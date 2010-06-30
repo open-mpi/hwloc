@@ -355,7 +355,7 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[1], "--version")) {
           printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
-      } else if (!strcmp (argv[1], "--of")) {
+      } else if (!strcmp (argv[1], "--output-format") || !strcmp (argv[1], "--of")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
