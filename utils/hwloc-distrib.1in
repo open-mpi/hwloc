@@ -21,8 +21,16 @@ Singlify each output to a single CPU.
 \fB\-v\fR
 Verbose messages.
 .TP
-\fB\-\-synthetic\fR "2 2"
-Simulate a fake hierarchy.
+\fB\-\-xml\fR <path>
+Read topology from XML file <path> (instead of discovering the
+topology on the local machine).  If <path> is "\-", the standard input
+is used.  XML support must have been compiled in to hwloc for this
+option to be usable.
+.TP
+\fB\-\-synthetic\fR <specification>
+Simulate a fake hierarchy (instead of discovering the topology on the
+local machine). If <specification> is "node:2 pu:3", the topology will
+contain two NUMA nodes with 3 processing units in each of them.
 .TP
 \fB\-\-version\fR
 Report version and exit.
