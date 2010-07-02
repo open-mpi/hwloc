@@ -37,7 +37,8 @@ generally only available on Linux.
 .TP
 \fB\-\-input\fR <specification>
 Simulate a fake hierarchy (instead of discovering the topology on the
-local machine).
+local machine). If <specification> is "node:2 pu:3", the topology will
+contain two NUMA nodes with 3 processing units in each of them.
 .TP
 \fB\-\-if\fR <format>, \fB\-\-input\-format\fR <format>
 Enforce the input in the given format, among \fBxml\fR, \fBfsroot\fR
