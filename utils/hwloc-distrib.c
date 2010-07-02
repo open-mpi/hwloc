@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009, 2010 CNRS, INRIA, Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -7,33 +7,35 @@
 #include <private/private.h>
 #include <hwloc.h>
 
+#include "misc.h"
+
 #include <unistd.h>
 
-static void usage(FILE *where)
+void usage(const char *callname, FILE *where)
 {
   fprintf(where, "Usage: hwloc-distrib [options] number\n");
   fprintf(where, "Options:\n");
   fprintf(where, "   --single\tsinglify each output to a single CPU\n");
   fprintf(where, "   --taskset\tShow taskset-specific cpuset strings\n");
   fprintf(where, "   -v\t\t\tverbose messages\n");
-  fprintf(where, "   --synthetic \"2 2\"\tsimulate a fake hierarchy\n");
-#ifdef HWLOC_HAVE_XML
-  fprintf(where, "   --xml <path>\t\tread topology from XML file <path>\n");
-#endif
+  hwloc_utils_input_format_usage(where);
   fprintf(where, "   --version\t\treport version and exit\n");
 }
 
 int main(int argc, char *argv[])
 {
   long n = -1;
-  char * synthetic = NULL;
-  const char * xmlpath = NULL;
+  char *callname;
+  char *input = NULL;
+  enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   int taskset = 0;
   int singlify = 0;
   int verbose = 0;
   char **orig_argv = argv;
+  int opt;
 
   /* skip argv[0], handle options */
+  callname = argv[0];
   argv++;
   argc--;
 
@@ -58,45 +60,28 @@ int main(int argc, char *argv[])
 	goto next;
       }
       if (!strcmp(argv[0], "--help")) {
-	usage(stdout);
+	usage(callname, stdout);
 	return EXIT_SUCCESS;
       }
-      if (!strcmp (argv[0], "--synthetic")) {
-	if (argc <= 2) {
-	  usage(stdout);
-	  exit(EXIT_FAILURE);
-	}
-	synthetic = argv[1];
-	argv++;
-	argc--;
+      if (hwloc_utils_lookup_input_option(argv, argc, &opt,
+					  &input, &input_format,
+					  callname)) {
+	argv += opt;
+	argc -= opt;
 	goto next;
       }
       else if (!strcmp (argv[0], "--version")) {
           printf("%s %s\n", orig_argv[0], VERSION);
           exit(EXIT_SUCCESS);
       }
-#ifdef HWLOC_HAVE_XML
-      if (!strcmp (argv[0], "--xml")) {
-	if (argc <= 2) {
-	  usage(stdout);
-	  exit(EXIT_FAILURE);
-	}
-	xmlpath = argv[1];
-	argc--;
-	argv++;
-	if (!strcmp(xmlpath, "-"))
-	  xmlpath = "/dev/stdin";
-	goto next;
-      }
-#endif /* HWLOC_HAVE_XML */
 
-      usage(stderr);
+      usage(callname, stderr);
       return EXIT_FAILURE;
     }
 
     if (n != -1) {
       fprintf(stderr,"duplicate number\n");
-      usage(stderr);
+      usage(callname, stderr);
       return EXIT_FAILURE;
     }
     n = atol(argv[0]);
@@ -108,7 +93,7 @@ int main(int argc, char *argv[])
 
   if (n == -1) {
     fprintf(stderr,"need a number\n");
-    usage(stderr);
+    usage(callname, stderr);
     return EXIT_FAILURE;
   }
 
@@ -121,10 +106,8 @@ int main(int argc, char *argv[])
     hwloc_topology_t topology;
 
     hwloc_topology_init(&topology);
-    if (synthetic)
-      hwloc_topology_set_synthetic(topology, synthetic);
-    if (xmlpath)
-      hwloc_topology_set_xml(topology, xmlpath);
+    if (input)
+      hwloc_utils_enable_input_format(topology, input, input_format, callname);
     hwloc_topology_load(topology);
 
     hwloc_distribute(topology, hwloc_get_root_obj(topology), cpuset, n);
