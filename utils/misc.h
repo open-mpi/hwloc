@@ -1,0 +1,183 @@
+/*
+ * Copyright © 2009, 2010 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * See COPYING in top-level directory.
+ */
+
+#include <private/config.h>
+#include <hwloc.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <assert.h>
+
+extern void usage(const char *name, FILE *where);
+
+static __inline void
+hwloc_utils_input_format_usage(FILE *where)
+{
+#ifdef HWLOC_HAVE_XML
+  fprintf (where, "   --input <XML file>    Read topology from XML file <path>\n");
+#endif
+#ifdef HWLOC_LINUX_SYS
+  fprintf (where, "   --input <directory>   Read topology from chroot containing the /proc and /sys\n"
+		  "                         of another system\n");
+#endif
+  fprintf (where, "   --input \"n:2 2\"       Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
+                  "                         processors\n");
+  fprintf (where, "   --input-format <format>\n");
+  fprintf (where, "   --if <format>         Enforce input format among "
+#ifdef HWLOC_HAVE_XML
+	   "xml, "
+#endif
+#ifdef HWLOC_LINUX_SYS
+	   "fsroot, "
+#endif
+	   "synthetic\n");
+}
+
+enum hwloc_utils_input_format {
+  HWLOC_UTILS_INPUT_DEFAULT,
+  HWLOC_UTILS_INPUT_XML,
+  HWLOC_UTILS_INPUT_FSROOT,
+  HWLOC_UTILS_INPUT_SYNTHETIC
+};
+
+static __inline enum hwloc_utils_input_format
+hwloc_utils_parse_input_format(const char *name, const char *callname)
+{
+  if (!strncasecmp(name, "default", 3))
+    return HWLOC_UTILS_INPUT_DEFAULT;
+  else if (!strncasecmp(name, "xml", 1))
+    return HWLOC_UTILS_INPUT_XML;
+  else if (!strncasecmp(name, "fsroot", 1))
+    return HWLOC_UTILS_INPUT_FSROOT;
+  else if (!strncasecmp(name, "synthetic", 1))
+    return HWLOC_UTILS_INPUT_SYNTHETIC;
+
+  fprintf(stderr, "input format `%s' not supported\n", name);
+  usage(callname, stderr);
+  exit(EXIT_FAILURE);
+}
+
+static __inline int
+hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
+				char **inputp, enum hwloc_utils_input_format *input_formatp,
+				const char *callname)
+{
+  if (!strcmp (argv[0], "--input")) {
+    if (argc <= 1) {
+      usage (callname, stderr);
+      exit(EXIT_FAILURE);
+    }
+    *inputp = argv[1];
+    *consumed_opts = 1;
+    return 1;
+  }
+  else if (!strcmp (argv[0], "--input-format")
+	   || !strcmp (argv[0], "--if")) {
+    if (argc <= 1) {
+      usage (callname, stderr);
+      exit(EXIT_FAILURE);
+    }
+    *input_formatp = hwloc_utils_parse_input_format (argv[1], callname);
+    *consumed_opts = 1;
+    return 1;
+  }
+
+  /* backward compat with 1.0 */
+  else if (!strcmp (argv[0], "--synthetic")) {
+    if (argc <= 1) {
+      usage (callname, stderr);
+      exit(EXIT_FAILURE);
+    }
+    *inputp = argv[1];
+    *input_formatp = HWLOC_UTILS_INPUT_SYNTHETIC;
+    *consumed_opts = 1;
+    return 1;
+  } else if (!strcmp (argv[0], "--xml")) {
+    if (argc <= 1) {
+      usage (callname, stderr);
+      exit(EXIT_FAILURE);
+    }
+    *inputp = argv[1];
+    *input_formatp = HWLOC_UTILS_INPUT_XML;
+    *consumed_opts = 1;
+    return 1;
+  } else if (!strcmp (argv[0], "--fsroot") || !strcmp (argv[0], "--fsys-root")) {
+    if (argc <= 1) {
+      usage (callname, stderr);
+      exit(EXIT_FAILURE);
+    }
+    *inputp = argv[1];
+    *input_formatp = HWLOC_UTILS_INPUT_FSROOT;
+    *consumed_opts = 1;
+    return 1;
+  }
+
+  return 0;
+}
+
+static __inline int
+hwloc_utils_enable_input_format(struct hwloc_topology *topology,
+				const char *input,
+				enum hwloc_utils_input_format input_format,
+				const char *callname)
+{
+  if (input_format == HWLOC_UTILS_INPUT_DEFAULT) {
+    struct stat inputst;
+    int err;
+    err = stat(input, &inputst);
+    if (err < 0) {
+      input_format = HWLOC_UTILS_INPUT_SYNTHETIC;
+    } else if (S_ISDIR(inputst.st_mode)) {
+      input_format = HWLOC_UTILS_INPUT_FSROOT;
+    } else if (S_ISREG(inputst.st_mode)) {
+      input_format = HWLOC_UTILS_INPUT_XML;
+    } else {
+      fprintf (stderr, "Unrecognized input file: %s\n", input);
+      usage (callname, stderr);
+    }
+  }
+
+  switch (input_format) {
+  case HWLOC_UTILS_INPUT_XML:
+#ifdef HWLOC_HAVE_XML
+    if (!strcmp(input, "-"))
+      input = "/dev/stdin";
+    if (hwloc_topology_set_xml(topology, input)) {
+      perror("Setting target XML file");
+      return EXIT_FAILURE;
+    }
+#else /* HWLOC_HAVE_XML */
+    fprintf(stderr, "This installation of hwloc does not support XML, sorry.\n");
+    exit(EXIT_FAILURE);
+#endif /* HWLOC_HAVE_XML */
+    break;
+
+  case HWLOC_UTILS_INPUT_FSROOT:
+#ifdef HWLOC_LINUX_SYS
+    if (hwloc_topology_set_fsroot(topology, input)) {
+      perror("Setting target filesystem root");
+      return EXIT_FAILURE;
+    }
+#else /* HWLOC_LINUX_SYS */
+    fprintf(stderr, "This installation of hwloc does not support changing the file-system root, sorry.\n");
+    exit(EXIT_FAILURE);
+#endif /* HWLOC_LINUX_SYS */
+    break;
+
+  case HWLOC_UTILS_INPUT_SYNTHETIC:
+    if (hwloc_topology_set_synthetic(topology, input))
+      return EXIT_FAILURE;
+    break;
+
+  case HWLOC_UTILS_INPUT_DEFAULT:
+    assert(0);
+  }
+
+  return 0;
+}
+
