@@ -42,6 +42,13 @@ This may be useful in case of asymmetric topologies since ignoring
 large objects (e.g. NUMA nodes) may improve the distribution of
 smaller objects (e.g. cores or PUs) among the machine.
 .TP
+\fB\-\-among\fR <type>
+Distribute among objects of the given type instead of from
+the top of the topology hierarchy.
+This may be useful in case of asymmetric topologies since small
+objects (e.g. cores or PUs) may be more uniformly distributed across
+the machine than larger objects (e.g. NUMA nodes).
+.TP
 \fB\-\-version\fR
 Report version and exit.
 .
