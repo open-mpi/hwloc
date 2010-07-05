@@ -20,6 +20,7 @@ static void usage(FILE *where)
 #ifdef HWLOC_HAVE_XML
   fprintf(where, "   --xml <path>\t\tread topology from XML file <path>\n");
 #endif
+  fprintf(where, "   --ignore <type>\tIgnore objects of the given type\n");
   fprintf(where, "   --version\t\treport version and exit\n");
 }
 
@@ -32,6 +33,9 @@ int main(int argc, char *argv[])
   int singlify = 0;
   int verbose = 0;
   char **orig_argv = argv;
+  hwloc_topology_t topology;
+
+  hwloc_topology_init(&topology);
 
   /* skip argv[0], handle options */
   argv++;
@@ -69,6 +73,16 @@ int main(int argc, char *argv[])
 	synthetic = argv[1];
 	argv++;
 	argc--;
+	goto next;
+      }
+      else if (!strcmp (argv[0], "--ignore")) {
+	if (argc <= 2) {
+	  usage(stdout);
+	  exit(EXIT_FAILURE);
+	}
+	hwloc_topology_ignore_type(topology, hwloc_obj_type_of_string(argv[1]));
+	argc--;
+	argv++;
 	goto next;
       }
       else if (!strcmp (argv[0], "--version")) {
@@ -118,9 +132,7 @@ int main(int argc, char *argv[])
   {
     long i;
     hwloc_cpuset_t cpuset[n];
-    hwloc_topology_t topology;
 
-    hwloc_topology_init(&topology);
     if (synthetic)
       hwloc_topology_set_synthetic(topology, synthetic);
     if (xmlpath)
@@ -140,8 +152,9 @@ int main(int argc, char *argv[])
       free(str);
       hwloc_cpuset_free(cpuset[i]);
     }
-    hwloc_topology_destroy(topology);
   }
+
+  hwloc_topology_destroy(topology);
 
   return EXIT_SUCCESS;
 }

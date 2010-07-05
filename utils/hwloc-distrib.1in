@@ -36,6 +36,12 @@ Simulate a fake hierarchy (instead of discovering the topology on the
 local machine). If <specification> is "node:2 pu:3", the topology will
 contain two NUMA nodes with 3 processing units in each of them.
 .TP
+\fB\-\-ignore\fR <type>
+Ignore all objects of type <type> in the topology.
+This may be useful in case of asymmetric topologies since ignoring
+large objects (e.g. NUMA nodes) may improve the distribution of
+smaller objects (e.g. cores or PUs) among the machine.
+.TP
 \fB\-\-version\fR
 Report version and exit.
 .
