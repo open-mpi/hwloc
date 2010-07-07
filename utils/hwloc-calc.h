@@ -107,23 +107,20 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     char *end;
     depth = strtol(string, &end, 0);
     if (end == string) {
-      if (verbose)
-        fprintf(stderr, "invalid object name %s\n", string);
+      fprintf(stderr, "invalid object name %s\n", string);
       return -1;
     }
   }
 
   if (depth >= topodepth) {
-    if (verbose)
-      fprintf(stderr, "ignoring invalid depth %u\n", depth);
+    fprintf(stderr, "ignoring invalid depth %u\n", depth);
     return -1;
   }
   width = hwloc_get_nbobjs_by_depth(topology, depth);
 
   sep = strchr(string, ':');
   if (!sep) {
-    if (verbose)
-      fprintf(stderr, "missing colon separator in argument %s\n", string);
+    fprintf(stderr, "missing colon separator in argument %s\n", string);
     return -1;
   }
 
@@ -167,14 +164,14 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
       i = 0;
 
     obj = hwloc_mask_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
-    if (verbose) {
+    if (verbose || !obj) {
       char * s = hwloc_cpuset_printf_value(rootset);
       if (obj)
 	printf("object #%u depth %u below cpuset %s found\n",
 	       i, depth, s);
       else
-	printf("object #%u depth %u below cpuset %s does not exist\n",
-	       i, depth, s);
+	fprintf(stderr, "object #%u depth %u below cpuset %s does not exist\n",
+		i, depth, s);
       free(s);
     }
     if (obj) {

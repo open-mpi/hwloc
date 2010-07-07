@@ -112,10 +112,8 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0) {
-      if (verbose)
-	fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
-    }
+    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0)
+      fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
 
  next:
     argc--;
