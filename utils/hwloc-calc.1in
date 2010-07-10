@@ -35,8 +35,8 @@ Use OS/physical indexes instead of logical indexes for output.
 \fB\-\-lo\fR \fB\-\-logical\-output\fR
 Use logical indexes instead of physical/OS indexes for output (default).
 .TP
-\fB\-\-proclist\fR
-Report the comma-separated list of processors' indexes instead of the cpu mask string.
+\fB\-\-PUlist\fR
+Report the comma-separated list of processing units' indexes instead of the cpu mask string.
 When combined with \fB\-\-physical\fR, the list is convenient to pass to external
 tools such as taskset or numactl \fB\-\-physcpubind\fR.
 .TP
@@ -102,9 +102,9 @@ To display the CPU mask corresponding to the second socket:
     0x000000f0
 
 To display the CPU mask corresponding to the third socket, excluding
-its even numbered logical priocessors:
+its even numbered logical processors:
 
-    $ hwloc-calc socket:2 ~proc:even
+    $ hwloc-calc socket:2 ~PU:even
     0x00000c00
 
 To combine two CPU masks:
@@ -115,7 +115,7 @@ To combine two CPU masks:
 To display the list of logical processors included in the second
 socket:
 
-    $ hwloc-calc --proclist socket:1
+    $ hwloc-calc --PUlist socket:1
     0,2,4,6
 
 To display the list of NUMA nodes, by physical indexes, that intersect a given CPU mask:
@@ -125,12 +125,12 @@ To display the list of NUMA nodes, by physical indexes, that intersect a given C
 
 To display the physical index of a processor given by its logical index:
 
-    $ hwloc-calc proc:2 --physical-output --proclist
+    $ hwloc-calc PU:2 --physical-output --PUlist
     3
 
 To combine both physical and logical indexes as input:
 
-    $ hwloc-calc proc:2 --physical-input proc:3
+    $ hwloc-calc PU:2 --physical-input PU:3
     0x0000000c
 
 .
