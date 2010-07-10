@@ -143,7 +143,8 @@ int main(int argc, char *argv[])
 
   {
     long i,j;
-    unsigned depth, chunks;
+    int depth;
+    unsigned chunks;
     hwloc_cpuset_t cpuset[n];
 
     if (synthetic)
