@@ -170,10 +170,8 @@ int main(int argc, char *argv[])
     }
 
     cmdline_args++;
-    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, taskset, verbose) < 0) {
-      if (verbose)
-	fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
-    }
+    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, taskset, verbose) < 0)
+      fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
 
  next:
     argc--;
@@ -193,10 +191,8 @@ int main(int argc, char *argv[])
       hwloc_cpuset_zero(set);
       while (current) {
 	char *token = strsep(&current, " \n");
-	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, taskset, verbose) < 0) {
-	  if (verbose)
-	    fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
-	}
+	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, taskset, verbose) < 0)
+	  fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
       }
       hwloc_calc_output(topology, set);
     }

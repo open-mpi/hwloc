@@ -19,6 +19,8 @@ void usage(const char *callname, FILE *where)
   fprintf(where, "   --taskset\tShow taskset-specific cpuset strings\n");
   fprintf(where, "   -v\t\t\tverbose messages\n");
   hwloc_utils_input_format_usage(where);
+  fprintf(where, "   --ignore <type>\tIgnore objects of the given type\n");
+  fprintf(where, "   --among <type>\tDistribute among objects of the given type\n");
   fprintf(where, "   --version\t\treport version and exit\n");
 }
 
@@ -31,8 +33,12 @@ int main(int argc, char *argv[])
   int taskset = 0;
   int singlify = 0;
   int verbose = 0;
+  hwloc_obj_type_t amongtype = (hwloc_obj_type_t) -1;
   char **orig_argv = argv;
+  hwloc_topology_t topology;
   int opt;
+
+  hwloc_topology_init(&topology);
 
   /* skip argv[0], handle options */
   callname = argv[0];
@@ -70,6 +76,26 @@ int main(int argc, char *argv[])
 	argc -= opt;
 	goto next;
       }
+      else if (!strcmp (argv[0], "--ignore")) {
+	if (argc <= 2) {
+	  usage(callname, stdout);
+	  exit(EXIT_FAILURE);
+	}
+	hwloc_topology_ignore_type(topology, hwloc_obj_type_of_string(argv[1]));
+	argc--;
+	argv++;
+	goto next;
+      }
+      else if (!strcmp (argv[0], "--among")) {
+	if (argc <= 2) {
+	  usage(callname, stdout);
+	  exit(EXIT_FAILURE);
+	}
+	amongtype = hwloc_obj_type_of_string(argv[1]);
+	argc--;
+	argv++;
+	goto next;
+      }
       else if (!strcmp (argv[0], "--version")) {
           printf("%s %s\n", orig_argv[0], VERSION);
           exit(EXIT_SUCCESS);
@@ -101,30 +127,49 @@ int main(int argc, char *argv[])
     fprintf(stderr, "distributing %ld\n", n);
 
   {
-    long i;
+    long i,j;
+    unsigned depth, chunks;
     hwloc_cpuset_t cpuset[n];
-    hwloc_topology_t topology;
 
-    hwloc_topology_init(&topology);
     if (input)
       hwloc_utils_enable_input_format(topology, input, input_format, callname);
     hwloc_topology_load(topology);
 
-    hwloc_distribute(topology, hwloc_get_root_obj(topology), cpuset, n);
-    for (i = 0; i < n; i++) {
-      char *str = NULL;
-      if (singlify)
-	hwloc_cpuset_singlify(cpuset[i]);
-      if (taskset)
-	hwloc_cpuset_taskset_asprintf(&str, cpuset[i]);
-      else
-	hwloc_cpuset_asprintf(&str, cpuset[i]);
-      printf("%s\n", str);
-      free(str);
-      hwloc_cpuset_free(cpuset[i]);
+    if (amongtype == (hwloc_obj_type_t) -1) {
+      depth = 0;
+    } else {
+      depth = hwloc_get_type_depth(topology, amongtype);
+      if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_obj_type_string(amongtype));
+	depth = 0;
+      } else if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_obj_type_string(amongtype));
+	depth = 0;
+      }
     }
-    hwloc_topology_destroy(topology);
+
+    chunks =  hwloc_get_nbobjs_by_depth(topology, depth);
+    for (j = 0; j < chunks; j++) {
+      /* split the remaining requested cpusets into chunks-j sets, rounding up each division */
+      unsigned m = (n+chunks-j-1)/(chunks-j);
+      n -= m;
+      hwloc_distribute(topology, hwloc_get_obj_by_depth(topology, depth, j), cpuset, m);
+      for (i = 0; i < m; i++) {
+	char *str = NULL;
+	if (singlify)
+	  hwloc_cpuset_singlify(cpuset[i]);
+	if (taskset)
+	  hwloc_cpuset_taskset_asprintf(&str, cpuset[i]);
+	else
+	  hwloc_cpuset_asprintf(&str, cpuset[i]);
+	printf("%s\n", str);
+	free(str);
+	hwloc_cpuset_free(cpuset[i]);
+      }
+    }
   }
+
+  hwloc_topology_destroy(topology);
 
   return EXIT_SUCCESS;
 }
