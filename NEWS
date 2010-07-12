@@ -23,6 +23,7 @@ Version 1.0.2
 * Revert 1.0.1 patch that ignored sockets with unknown ID values since it
   only slightly helped POWER7 machines with old Linux kernels while it
   prevents recent kernels from getting the complete POWER7 topology.
+* Remove arch-specific bits in public headers.
 * Various man page clarifications and minor updates.
 
 
