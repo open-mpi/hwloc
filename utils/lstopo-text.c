@@ -484,7 +484,12 @@ from_directions(struct display *disp, int direction)
 static void
 merge(struct display *disp, int x, int y, int or, int andnot, int r, int g, int b)
 {
-  character current = disp->cells[y][x].c;
+  character current;
+  if (x >= disp->width || y >= disp->height) {
+    /* fprintf(stderr, "|%x &~%x overflowed to (%d,%d)\n", or, andnot, x, y); */
+    return;
+  }
+  current = disp->cells[y][x].c;
   int directions = (to_directions(disp, current) & ~andnot) | or;
   put(disp, x, y, from_directions(disp, directions), -1, -1, -1, r, g, b);
 }
