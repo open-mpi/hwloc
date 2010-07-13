@@ -35,7 +35,6 @@ static void usage(FILE *where)
 static int verbose = 0;
 static int logicali = 1;
 static int logicalo = 1;
-static int nodelist = 0;
 static int listdepth = -1;
 static int showobjs = 0;
 static int singlify = 0;
