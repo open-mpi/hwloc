@@ -11,7 +11,7 @@
 
 #include <unistd.h>
 
-void usage(const char *callname, FILE *where)
+void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
   fprintf(where, "Usage: hwloc-distrib [options] number\n");
   fprintf(where, "Options:\n");
