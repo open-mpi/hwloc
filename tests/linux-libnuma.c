@@ -71,7 +71,7 @@ int main(void)
 
   mask=0;
   set = hwloc_cpuset_alloc();
-  hwloc_cpuset_from_linux_libnuma_ulongs(topology, set, &mask, HWLOC_BITS_PER_LONG);
+  hwloc_cpuset_from_linux_libnuma_ulongs(topology, set, &mask, sizeof(mask)*8);
   assert(hwloc_cpuset_iszero(set));
   hwloc_cpuset_free(set);
 
@@ -92,7 +92,7 @@ int main(void)
   hwloc_cpuset_free(set);
 
   set = hwloc_cpuset_alloc();
-  maxnode = HWLOC_BITS_PER_LONG;
+  maxnode = sizeof(mask)*8;
   hwloc_cpuset_to_linux_libnuma_ulongs(topology, set, &mask, &maxnode);
   assert(!mask);
   assert(!maxnode);
@@ -116,9 +116,9 @@ int main(void)
     numa_bitmask_free(bitmask);
     numa_bitmask_free(bitmask2);
 
-    maxnode = HWLOC_BITS_PER_LONG;
+    maxnode = sizeof(mask)*8;
     hwloc_cpuset_to_linux_libnuma_ulongs(topology, node->cpuset, &mask, &maxnode);
-    if (node->os_index >= HWLOC_BITS_PER_LONG) {
+    if (node->os_index >= sizeof(mask)*8) {
       assert(!maxnode);
       assert(!mask);
     } else {
