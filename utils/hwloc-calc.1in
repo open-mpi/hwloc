@@ -42,14 +42,16 @@ This may be used for determining the list of objects above or below the input
 objects.
 When combined with \fB\-\-physical\fR, the list is convenient to pass to external
 tools such as taskset or numactl \fB\-\-physcpubind\fR or \fB\-\-membind\fR.
-This is different from \-\-objects since the latter requires that all reported
+This is different from \-\-largest since the latter requires that all reported
 objects are strictly included inside the input objects.
 .TP
-\fB\-\-objects\fR
-Report the list of highest objects instead of the cpu mask string.
-Contrary to \-\-intersect where reported objects may only intersects the CPU set,
-those objects are exactly included in the CPU set and none of their parents
-may be included.
+\fB\-\-largest\fR
+Report (in a human readable format) the list of largest objects which exactly
+include all input objects.
+None of these output objects intersect each other, and the sum of them is
+exactly equivalent to the input. No largest object is included in the input
+This is different from \-\-intersect where reported objects may not be
+strictly included in the input.
 .TP
 \fB\-\-single\fR
 Singlify the output to a single CPU.
@@ -135,6 +137,21 @@ To combine both physical and logical indexes as input:
 
     $ hwloc-calc PU:2 --physical-input PU:3
     0x0000000c
+
+To synthetize a set of cores into largest objects on a 2-node 2-socket 2-core machine:
+
+    $ hwloc-calc core:0 --largest
+    Core:0
+    $ hwloc-calc core:0-1 --largest
+    Socket:0
+    $ hwloc-calc core:4-7 --largest
+    NUMANode:1
+    $ hwloc-calc core:2-6 --largest
+    Socket:1 Socket:2 Core:6
+    $ hwloc-calc socket:2 --largest
+    Socket:2
+    $ hwloc-calc socket:2-3 --largest
+    NUMANode:1
 
 .
 .\" **************************

@@ -25,7 +25,7 @@ static void usage(FILE *where)
   fprintf(where, "  --pi --physical-input\tuse physical indexes for input\n");
   fprintf(where, "  --po --physical-output\tuse physical indexes for output\n");
   fprintf(where, "  --intersect <type|depth>\treport the list of object indexes intersecting the CPU set\n");
-  fprintf(where, "  --objects\treport the list of largest objects in the CPU set\n");
+  fprintf(where, "  --largest\treport the list of largest objects in the CPU set\n");
   fprintf(where, "  --single\tsinglify the output to a single CPU\n");
   fprintf(where, "  --taskset\tmanipulate taskset-specific cpuset strings\n");
   fprintf(where, "  -v\t\tverbose messages\n");
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 	listtype = HWLOC_OBJ_NODE;
         goto next;
       }
-      if (!strcmp(argv[1], "--objects")) {
+      if (!strcmp(argv[1], "--largest")  || !strcmp(argv[1], "--objects") /* backward compat with 1.0 */) {
 	showobjs = 1;
         goto next;
       }
