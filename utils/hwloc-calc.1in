@@ -35,18 +35,21 @@ Use OS/physical indexes instead of logical indexes for output.
 \fB\-\-lo\fR \fB\-\-logical\-output\fR
 Use logical indexes instead of physical/OS indexes for output (default).
 .TP
-\fB\-\-PUlist\fR
-Report the comma-separated list of processing units' indexes instead of the cpu mask string.
+\fB\-\-intersect <type|depth>\fR
+Find the list of objects of the given type or depth that intersect the CPU set and
+report the comma-separated list of their indexes instead of the cpu mask string.
+This may be used for determining the list of objects above or below the input
+objects.
 When combined with \fB\-\-physical\fR, the list is convenient to pass to external
-tools such as taskset or numactl \fB\-\-physcpubind\fR.
-.TP
-\fB\-\-nodelist\fR
-Report the comma-separated list of memory nodes' indexes instead of the cpu mask string.
-When combined with \fB\-\-physical\fR, the list is convenient to pass to external
-tools such as numactl \fB\-\-membind\fR.
+tools such as taskset or numactl \fB\-\-physcpubind\fR or \fB\-\-membind\fR.
+This is different from \-\-objects since the latter requires that all reported
+objects are strictly included inside the input objects.
 .TP
 \fB\-\-objects\fR
 Report the list of highest objects instead of the cpu mask string.
+Contrary to \-\-intersect where reported objects may only intersects the CPU set,
+those objects are exactly included in the CPU set and none of their parents
+may be included.
 .TP
 \fB\-\-single\fR
 Singlify the output to a single CPU.
@@ -115,17 +118,17 @@ To combine two CPU masks:
 To display the list of logical processors included in the second
 socket:
 
-    $ hwloc-calc --PUlist socket:1
+    $ hwloc-calc --intersect PU socket:1
     0,2,4,6
 
 To display the list of NUMA nodes, by physical indexes, that intersect a given CPU mask:
 
-    $ hwloc-calc --physical --nodelist 0xf0f0f0f0
+    $ hwloc-calc --physical --intersect NUMAnode 0xf0f0f0f0
     0,2
 
 To display the physical index of a processor given by its logical index:
 
-    $ hwloc-calc PU:2 --physical-output --PUlist
+    $ hwloc-calc PU:2 --physical-output --intersect PU
     3
 
 To combine both physical and logical indexes as input:

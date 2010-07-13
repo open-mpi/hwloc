@@ -24,8 +24,7 @@ static void usage(FILE *where)
   fprintf(where, "  --lo --logical-output\tuse logical indexes for output (default)\n");
   fprintf(where, "  --pi --physical-input\tuse physical indexes for input\n");
   fprintf(where, "  --po --physical-output\tuse physical indexes for output\n");
-  fprintf(where, "  --PUlist\treport the list of processing units' indexes in the CPU set\n");
-  fprintf(where, "  --nodelist\treport the list of memory nodes' indexes near the CPU set\n");
+  fprintf(where, "  --intersect <type|depth>\treport the list of object indexes intersecting the CPU set\n");
   fprintf(where, "  --objects\treport the list of largest objects in the CPU set\n");
   fprintf(where, "  --single\tsinglify the output to a single CPU\n");
   fprintf(where, "  --taskset\tmanipulate taskset-specific cpuset strings\n");
@@ -37,7 +36,7 @@ static int verbose = 0;
 static int logicali = 1;
 static int logicalo = 1;
 static int nodelist = 0;
-static int pulist = 0;
+static int listdepth = -1;
 static int showobjs = 0;
 static int singlify = 0;
 static int taskset = 0;
@@ -66,22 +65,13 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_cpuset_t set)
     }
     printf("\n");
     hwloc_cpuset_free(remaining);
-  } else if (pulist) {
+  } else if (listdepth != -1) {
     hwloc_obj_t proc, prev = NULL;
-    while ((proc = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_PU, prev)) != NULL) {
+    while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, listdepth, prev)) != NULL) {
       if (prev)
 	printf(",");
       printf("%u", logicalo ? proc->logical_index : proc->os_index);
       prev = proc;
-    }
-    printf("\n");
-  } else if (nodelist) {
-    hwloc_obj_t node, prev = NULL;
-    while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, prev)) != NULL) {
-      if (prev)
-	printf(",");
-      printf("%u", logicalo ? node->logical_index : node->os_index);
-      prev = node;
     }
     printf("\n");
   } else {
@@ -102,6 +92,7 @@ int main(int argc, char *argv[])
   hwloc_cpuset_t set;
   int cmdline_args = 0;
   char **orig_argv = argv;
+  hwloc_obj_type_t listtype = (hwloc_obj_type_t) -1;
 
   set = hwloc_cpuset_alloc();
 
@@ -119,12 +110,34 @@ int main(int argc, char *argv[])
 	usage(stdout);
 	return EXIT_SUCCESS;
       }
-      if (!strcasecmp(argv[1], "--pulist") || !strcmp(argv[1], "--proclist") /* backward compat with 0.9 */) {
-	pulist = 1;
+      if (!strcmp(argv[1], "--intersect")) {
+	if (argc <= 2) {
+	  usage(stderr);
+	  return EXIT_SUCCESS;
+	}
+	listtype = hwloc_obj_type_of_string(argv[2]);
+	if (listtype == (hwloc_obj_type_t) -1) {
+	  char *endptr;
+	  unsigned depth = strtoul(argv[2], &endptr, 0);
+	  if (*endptr) {
+	    fprintf(stderr, "unrecognized list type or depth %s\n", argv[2]);
+	    usage(stderr);
+	    return EXIT_SUCCESS;
+	  }
+	  listdepth = depth;
+	}
+	argv++;
+	argc--;
+	goto next;
+      }
+      if (!strcasecmp(argv[1], "--pulist") || !strcmp(argv[1], "--proclist")) {
+	/* backward compat with 1.0 */
+	listtype = HWLOC_OBJ_PU;
         goto next;
       }
       if (!strcmp(argv[1], "--nodelist")) {
-	nodelist = 1;
+	/* backward compat with 1.0 */
+	listtype = HWLOC_OBJ_NODE;
         goto next;
       }
       if (!strcmp(argv[1], "--objects")) {
@@ -178,6 +191,17 @@ int main(int argc, char *argv[])
     argv++;
   }
 
+  if (listtype != (hwloc_obj_type_t) -1) {
+    listdepth = hwloc_get_type_depth(topology, listtype);
+    if (listdepth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "unavailable list type %s\n", hwloc_obj_type_string(listtype));
+      goto out;
+    } else  if (listdepth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      fprintf(stderr, "cannot list type %s with multiple depth, please use the relevant depth directly\n", hwloc_obj_type_string(listtype));
+      goto out;
+    }
+  }
+
   if (cmdline_args) {
     /* process command-line arguments */
     hwloc_calc_output(topology, set);
@@ -198,6 +222,7 @@ int main(int argc, char *argv[])
     }
   }
 
+ out:
   hwloc_topology_destroy(topology);
 
   hwloc_cpuset_free(set);
