@@ -24,18 +24,18 @@ before reading this man page).
 Enforce the output in the given format.
 See the OUTPUT FORMATS section below.
 .TP
-\fB\-\-input\fR <file>
+\fB\-i\fR <file>, \fB\-\-input\fR <file>
 Read topology from XML file <file> (instead of discovering the
 topology on the local machine).  If <file> is "\-", the standard input
 is used.  XML support must have been compiled in to hwloc for this
 option to be usable.
 .TP
-\fB\-\-input\fR <directory>
+\fB\-i\fR <directory>, \fB\-\-input\fR <directory>
 Read topology from the chroot specified by <directory> (instead of
 discovering the topology on the local machine).  This option is
 generally only available on Linux.
 .TP
-\fB\-\-input\fR <specification>
+\fB\-i\fR <specification>, \fB\-\-input\fR <specification>
 Simulate a fake hierarchy (instead of discovering the topology on the
 local machine). If <specification> is "node:2 pu:3", the topology will
 contain two NUMA nodes with 3 processing units in each of them.

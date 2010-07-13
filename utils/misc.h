@@ -19,13 +19,16 @@ static __inline void
 hwloc_utils_input_format_usage(FILE *where)
 {
 #ifdef HWLOC_HAVE_XML
-  fprintf (where, "   --input <XML file>    Read topology from XML file <path>\n");
+  fprintf (where, "   --input <XML file>\n");
+  fprintf (where, "   -i <XML file>         Read topology from XML file <path>\n");
 #endif
 #ifdef HWLOC_LINUX_SYS
-  fprintf (where, "   --input <directory>   Read topology from chroot containing the /proc and /sys\n"
+  fprintf (where, "   --input <directory>\n");
+  fprintf (where, "   -i <directory>        Read topology from chroot containing the /proc and /sys\n"
 		  "                         of another system\n");
 #endif
-  fprintf (where, "   --input \"n:2 2\"       Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
+  fprintf (where, "   --input \"n:2 2\"\n");
+  fprintf (where, "   -i \"n:2 2\"            Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
                   "                         processors\n");
   fprintf (where, "   --input-format <format>\n");
   fprintf (where, "   --if <format>         Enforce input format among "
@@ -67,7 +70,8 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
 				char **inputp, enum hwloc_utils_input_format *input_formatp,
 				const char *callname)
 {
-  if (!strcmp (argv[0], "--input")) {
+  if (!strcmp (argv[0], "--input")
+	       || !strcmp (argv[0], "-i")) {
     if (argc <= 1) {
       usage (callname, stderr);
       exit(EXIT_FAILURE);
