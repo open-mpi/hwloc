@@ -39,7 +39,7 @@ fi
 file="$tmp/lstopo_xml.output.xml"
 
 set -e
-$lstopo --xml "$1" "$file"
+$lstopo --if xml --input "$1" --of xml "$file"
 
 if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
 then

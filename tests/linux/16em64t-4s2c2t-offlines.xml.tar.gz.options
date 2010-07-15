@@ -1,1 +1,1 @@
--p -v -.xml
+-p -v --of xml

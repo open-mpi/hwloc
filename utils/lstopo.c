@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009, 2010 CNRS, INRIA, Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -12,12 +12,14 @@
 #include <string.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <assert.h>
 
 #ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
 #endif
 
 #include "lstopo.h"
+#include "misc.h"
 
 int logical = 1;
 hwloc_obj_type_t show_only = (hwloc_obj_type_t) -1;
@@ -32,8 +34,12 @@ hwloc_pid_t pid = (hwloc_pid_t) -1;
 
 FILE *open_file(const char *filename, const char *mode)
 {
-  const char *extn = strrchr(filename, '.');
+  const char *extn;
 
+  if (!filename)
+    return stdout;
+
+  extn = strrchr(filename, '.');
   if (filename[0] == '-' && extn == filename + 1)
     return stdout;
 
@@ -110,32 +116,35 @@ static void add_process_objects(hwloc_topology_t topology)
   closedir(dir);
 }
 
-static void usage(char *name, FILE *where)
+void usage(const char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ] ... [ filename ]\n\n", name);
+  fprintf (where, "Usage: %s [ options ] ... [ filename.format ]\n\n", name);
   fprintf (where, "See lstopo(1) for more details.\n\n");
-  fprintf (where, "Supported output file formats: .txt, .fig"
+  fprintf (where, "Supported output file formats: console, txt, fig"
 #ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_PDF_SURFACE
-		  ", .pdf"
+		  ", pdf"
 #endif /* CAIRO_HAS_PDF_SURFACE */
 #if CAIRO_HAS_PS_SURFACE
-		  ", .ps"
+		  ", ps"
 #endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_PNG_FUNCTIONS
-		  ", .png"
+		  ", png"
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 #if CAIRO_HAS_SVG_SURFACE
-		  ", .svg"
+		  ", svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_HAVE_XML
-		  ", .xml"
+		  ", xml"
 #endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
   fprintf (where, "   -l --logical          Display hwloc logical object indexes (default)\n");
   fprintf (where, "   -p --physical         Display physical object indexes\n");
+  fprintf (where, "Output options:\n");
+  fprintf (where, "   --output-format <format>\n");
+  fprintf (where, "   --of <format>         Force the output to use the given format\n");
   fprintf (where, "Textual output options:\n");
   fprintf (where, "   --only <type>         Only show objects of the given type in the text output\n");
   fprintf (where, "   -v --verbose          Include additional details\n");
@@ -151,15 +160,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --merge               Do not show levels that do not have a hierarcical\n"
                   "                         impact\n");
   fprintf (where, "Input options:\n");
-#ifdef HWLOC_HAVE_XML
-  fprintf (where, "   --xml <path>          Read topology from XML file <path>\n");
-#endif
-#ifdef HWLOC_LINUX_SYS
-  fprintf (where, "   --fsroot <path>       Read topology from chroot containing the /proc and /sys\n"
-		  "                         of another system\n");
-#endif
-  fprintf (where, "   --synthetic \"n:2 2\"   Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
-                  "                         processors\n");
+  hwloc_utils_input_format_usage(where);
   fprintf (where, "   --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "   --whole-system        Do not consider administration limitations\n");
   fprintf (where, "Graphical output options:\n");
@@ -172,21 +173,61 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   --version             Report version and exit\n");
 }
 
+enum output_format {
+  LSTOPO_OUTPUT_DEFAULT,
+  LSTOPO_OUTPUT_CONSOLE,
+  LSTOPO_OUTPUT_TEXT,
+  LSTOPO_OUTPUT_FIG,
+  LSTOPO_OUTPUT_PNG,
+  LSTOPO_OUTPUT_PDF,
+  LSTOPO_OUTPUT_PS,
+  LSTOPO_OUTPUT_SVG,
+  LSTOPO_OUTPUT_XML
+};
+
+static enum output_format
+parse_output_format(const char *name, char *callname)
+{
+  if (!strncasecmp(name, "default", 3))
+    return LSTOPO_OUTPUT_DEFAULT;
+  else if (!strncasecmp(name, "console", 3))
+    return LSTOPO_OUTPUT_CONSOLE;
+  else if (!strcasecmp(name, "txt"))
+    return LSTOPO_OUTPUT_TEXT;
+  else if (!strcasecmp(name, "fig"))
+    return LSTOPO_OUTPUT_FIG;
+  else if (!strcasecmp(name, "png"))
+    return LSTOPO_OUTPUT_PNG;
+  else if (!strcasecmp(name, "pdf"))
+    return LSTOPO_OUTPUT_PDF;
+  else if (!strcasecmp(name, "ps"))
+    return LSTOPO_OUTPUT_PS;
+  else if (!strcasecmp(name, "svg"))
+    return LSTOPO_OUTPUT_SVG;
+  else if (!strcasecmp(name, "xml"))
+    return LSTOPO_OUTPUT_XML;
+
+  fprintf(stderr, "file format `%s' not supported\n", name);
+  usage(callname, stderr);
+  exit(EXIT_FAILURE);
+}
+
+#define LSTOPO_VERBOSE_MODE_DEFAULT 1
+
 int
 main (int argc, char *argv[])
 {
   int err;
-  int verbose_mode = 1;
+  int verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   hwloc_topology_t topology;
   const char *filename = NULL;
   unsigned long flags = 0;
   int merge = 0;
   int ignorecache = 0;
   char * callname;
-  char * synthetic = NULL;
-  const char * xmlpath = NULL;
-  char * fsroot = NULL;
-  int force_console = 0;
+  char * input = NULL;
+  enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
+  enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   int opt;
 
   callname = strrchr(argv[0], '/');
@@ -204,10 +245,8 @@ main (int argc, char *argv[])
       opt = 0;
       if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose")) {
 	verbose_mode++;
-	force_console = 1;
       } else if (!strcmp (argv[1], "-s") || !strcmp (argv[1], "--silent")) {
 	verbose_mode--;
-	force_console = 1;
       } else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
@@ -267,37 +306,12 @@ main (int argc, char *argv[])
 	gridsize = atoi(argv[2]);
 	opt = 1;
       }
-      else if (!strcmp (argv[1], "--synthetic")) {
-	if (argc <= 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	synthetic = argv[2]; opt = 1;
-      } else if (!strcmp (argv[1], "--xml")) {
-#ifdef HWLOC_HAVE_XML
-	if (argc <= 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	xmlpath = argv[2]; opt = 1;
-	if (!strcmp(xmlpath, "-")) {
-	  xmlpath = "/dev/stdin";
-        }
-#else /* HWLOC_HAVE_XML */
-        fprintf(stderr, "This installation of hwloc does not support --xml, sorry.\n");
-        exit(EXIT_FAILURE);
-#endif /* HWLOC_HAVE_XML */
-      } else if (!strcmp (argv[1], "--fsroot") || !strcmp (argv[1], "--fsys-root") /* backward compat with 1.0 */) {
-#ifdef HWLOC_LINUX_SYS
-	if (argc <= 2) {
-	  usage (callname, stderr);
-	  exit(EXIT_FAILURE);
-	}
-	fsroot = argv[2]; opt = 1;
-#else /* HWLOC_LINUX_SYS */
-        fprintf(stderr, "This installation of hwloc does not support --fsroot, sorry.\n");
-        exit(EXIT_FAILURE);
-#endif /* HWLOC_LINUX_SYS */
+
+      else if (hwloc_utils_lookup_input_option(argv+1, argc-1, &opt,
+					       &input, &input_format,
+					       callname)) {
+	/* nothing to do anymore */
+
       } else if (!strcmp (argv[1], "--pid")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
@@ -309,6 +323,13 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[1], "--version")) {
           printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
+      } else if (!strcmp (argv[1], "--output-format") || !strcmp (argv[1], "--of")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+        output_format = parse_output_format(argv[2], callname);
+        opt = 1;
       } else {
 	if (filename) {
 	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
@@ -321,12 +342,8 @@ main (int argc, char *argv[])
       argv += opt+1;
     }
 
-  if (show_only != (hwloc_obj_type_t)-1) {
+  if (show_only != (hwloc_obj_type_t)-1)
     merge = 0;
-    force_console = 1;
-  }
-  if (show_cpuset)
-    force_console = 1;
 
   hwloc_topology_set_flags(topology, flags);
 
@@ -338,21 +355,9 @@ main (int argc, char *argv[])
   if (merge)
     hwloc_topology_ignore_all_keep_structure(topology);
 
-  if (synthetic)
-    if (hwloc_topology_set_synthetic(topology, synthetic))
-      return EXIT_FAILURE;
-  if (xmlpath) {
-    if (hwloc_topology_set_xml(topology, xmlpath)) {
-      perror("Setting target XML file");
-      return EXIT_FAILURE;
-    }
-  }
-  if (fsroot) {
-    if (hwloc_topology_set_fsroot(topology, fsroot)) {
-      perror("Setting target filesystem root");
-      return EXIT_FAILURE;
-    }
-  }
+  if (input)
+    hwloc_utils_enable_input_format(topology, input, input_format, verbose_mode > 1, callname);
+
   if (pid != (hwloc_pid_t) -1 && pid != 0) {
     if (hwloc_topology_set_pid(topology, pid)) {
       perror("Setting target pid");
@@ -373,52 +378,82 @@ main (int argc, char *argv[])
     verbose_mode--;
   }
 
-  if (!filename) {
+  /* if the output format wasn't enforced, look at the filename */
+  if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
+    if (!strcmp(filename, "-")
+	|| !strcmp(filename, "/dev/stdout")) {
+      output_format = LSTOPO_OUTPUT_CONSOLE;
+    } else {
+      char *dot = strrchr(filename, '.');
+      if (dot)
+        output_format = parse_output_format(dot+1, callname);
+    }
+  }
+
+  /* if  the output format wasn't enforced, think a bit about what the user probably want */
+  if (output_format == LSTOPO_OUTPUT_DEFAULT) {
+    if (show_cpuset
+        || show_only != (hwloc_obj_type_t)-1
+        || verbose_mode != LSTOPO_VERBOSE_MODE_DEFAULT)
+      output_format = LSTOPO_OUTPUT_CONSOLE;
+  }
+
+  switch (output_format) {
+    case LSTOPO_OUTPUT_DEFAULT:
 #ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
-    if (!force_console && getenv("DISPLAY"))
-      output_x11(topology, NULL, logical, verbose_mode);
-    else
+      if (getenv("DISPLAY"))
+        output_x11(topology, NULL, logical, verbose_mode);
+      else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_WIN_SYS
-      output_windows(topology, NULL, logical, verbose_mode);
+        output_windows(topology, NULL, logical, verbose_mode);
 #else
-    output_console(topology, NULL, logical, verbose_mode);
+      output_console(topology, NULL, logical, verbose_mode);
 #endif
-  } else if (!strcmp(filename, "-")
-	  || !strcmp(filename, "/dev/stdout"))
-    output_console(topology, filename, logical, verbose_mode);
-  else if (strstr(filename, ".txt"))
-    output_text(topology, filename, logical, verbose_mode);
-  else if (strstr(filename, ".fig"))
-    output_fig(topology, filename, logical, verbose_mode);
+      break;
+
+    case LSTOPO_OUTPUT_CONSOLE:
+      output_console(topology, filename, logical, verbose_mode);
+      break;
+    case LSTOPO_OUTPUT_TEXT:
+      output_text(topology, filename, logical, verbose_mode);
+      break;
+    case LSTOPO_OUTPUT_FIG:
+      output_fig(topology, filename, logical, verbose_mode);
+      break;
 #ifdef HWLOC_HAVE_CAIRO
-#if CAIRO_HAS_PNG_FUNCTIONS
-  else if (strstr(filename, ".png"))
-    output_png(topology, filename, logical, verbose_mode);
-#endif /* CAIRO_HAS_PNG_FUNCTIONS */
-#if CAIRO_HAS_PDF_SURFACE
-  else if (strstr(filename, ".pdf"))
-    output_pdf(topology, filename, logical, verbose_mode);
-#endif /* CAIRO_HAS_PDF_SURFACE */
-#if CAIRO_HAS_PS_SURFACE
-  else if (strstr(filename, ".ps"))
-    output_ps(topology, filename, logical, verbose_mode);
+# if CAIRO_HAS_PNG_FUNCTIONS
+    case LSTOPO_OUTPUT_PNG:
+      output_png(topology, filename, logical, verbose_mode);
+      break;
+# endif /* CAIRO_HAS_PNG_FUNCTIONS */
+# if CAIRO_HAS_PDF_SURFACE
+    case LSTOPO_OUTPUT_PDF:
+      output_pdf(topology, filename, logical, verbose_mode);
+      break;
+# endif /* CAIRO_HAS_PDF_SURFACE */
+# if CAIRO_HAS_PS_SURFACE
+    case LSTOPO_OUTPUT_PS:
+      output_ps(topology, filename, logical, verbose_mode);
+      break;
 #endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_SVG_SURFACE
-  else if (strstr(filename, ".svg"))
-    output_svg(topology, filename, logical, verbose_mode);
+    case LSTOPO_OUTPUT_SVG:
+      output_svg(topology, filename, logical, verbose_mode);
+      break;
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_HAVE_XML
-  else if (strstr(filename, ".xml"))
-    output_xml(topology, filename, logical, verbose_mode);
+    case LSTOPO_OUTPUT_XML:
+      output_xml(topology, filename, logical, verbose_mode);
+      break;
 #endif
-  else {
-    fprintf(stderr, "file format not supported\n");
-    usage(callname, stderr);
-    exit(EXIT_FAILURE);
+    default:
+      fprintf(stderr, "file format not supported\n");
+      usage(callname, stderr);
+      exit(EXIT_FAILURE);
   }
 
   hwloc_topology_destroy (topology);
