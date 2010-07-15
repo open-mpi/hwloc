@@ -37,6 +37,8 @@ EXTRA_DIST = \
         images/ppc64-with-smt.pdf \
         images/ppc64-without-smt.png \
         images/ppc64-without-smt.pdf \
+        images/ppc64-full-with-smt.png \
+        images/ppc64-full-with-smt.pdf \
         www.open-mpi.org.cfg \
         www.open-mpi.org-css.inc \
         www.open-mpi.org-footer.inc \

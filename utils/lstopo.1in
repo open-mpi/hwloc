@@ -92,7 +92,8 @@ making the hwloc-ps program more practical.
 .TP
 \fB\-\-synthetic\fR <specification>
 Simulate a fake hierarchy (instead of discovering the topology on the
-local machine).
+local machine). If <specification> is "node:2 pu:3", the topology will
+contain two NUMA nodes with 3 processing units in each of them.
 .TP
 \fB\-\-fontsize\fR <size>
 Set size of text font.
@@ -156,7 +157,7 @@ representation of the map.
 .TP
 .B \-.txt
 If the entire filename is "\-.txt", lstopo outputs the same ASCII art
-representation as other ".txt" filenames, but with two execeptions: 1)
+representation as other ".txt" filenames, but with two exceptions: 1)
 the output is sent to stdout, and 2) if colors are supported on the
 terminal, the ASCII art will be colorized.
 .
@@ -182,7 +183,7 @@ support, lstopo outputs a PNG representation of the map.
 .
 .TP
 .B <filename>.svg
-If the filename ends in ".svn" and lstopo was compiled with the proper
+If the filename ends in ".svg" and lstopo was compiled with the proper
 support, lstopo outputs an SVG representation of the map.
 .
 .TP
