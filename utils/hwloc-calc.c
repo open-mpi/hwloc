@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	argv += opt;
 	argc -= opt;
 	if (input) {
-	  hwloc_utils_enable_input_format(topology, input, input_format, callname);
+	  hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
 	  hwloc_topology_load(topology);
 	  depth = hwloc_topology_get_depth(topology);
 	}
