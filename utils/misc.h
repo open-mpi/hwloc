@@ -76,7 +76,10 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
       usage (callname, stderr);
       exit(EXIT_FAILURE);
     }
-    *inputp = argv[1];
+    if (strlen(argv[1]))
+      *inputp = argv[1];
+    else
+      *inputp = NULL;
     *consumed_opts = 1;
     return 1;
   }
