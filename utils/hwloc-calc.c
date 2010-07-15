@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
   hwloc_topology_t topology;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
+  int input_changed = 0;
   unsigned depth;
   hwloc_cpuset_t set;
   int cmdline_args = 0;
@@ -191,16 +192,19 @@ int main(int argc, char *argv[])
 					  callname)) {
 	argv += opt;
 	argc -= opt;
-	if (input) {
-	  hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
-	  hwloc_topology_load(topology);
-	  depth = hwloc_topology_get_depth(topology);
-	}
+	input_changed = 1;
 	goto next;
       }
 
       usage(callname, stderr);
       return EXIT_FAILURE;
+    }
+
+    if (input_changed && input) {
+      hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+      hwloc_topology_load(topology);
+      depth = hwloc_topology_get_depth(topology);
+      input_changed = 0;
     }
 
     cmdline_args++;
