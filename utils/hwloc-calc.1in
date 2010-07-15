@@ -107,6 +107,12 @@ as separators.
 Different input lines will be processed separately.
 .
 .PP
+Command-line arguments and options are processed in order.
+For instance, it means that changing the type of input indexes
+with \fB\-\-li\fR or changing the input topology with \fB\-i\fR
+only affects the processing the following arguments.
+.
+.PP
 .B NOTE:
 It is highly recommended that you read the hwloc(7) overview page
 before reading this man page.  Most of the concepts described in
