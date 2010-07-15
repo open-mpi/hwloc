@@ -201,56 +201,78 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 {
   char memory[64] = "";
   char specific[64] = "";
-  const char *specificseparator;
+  char infos[256] = "";
+  const char *prefix = "";
 
   if (verbose) {
     if (obj->memory.local_memory)
-      hwloc_snprintf(memory, sizeof(memory), "local=%lu%s%stotal=%lu%s",
+      hwloc_snprintf(memory, sizeof(memory), "%slocal=%lu%s%stotal=%lu%s",
+		     prefix,
 		     (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
 		     hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose),
 		     separator,
 		     (unsigned long) hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
 		     hwloc_memory_size_printf_unit(obj->memory.local_memory, verbose));
     else if (obj->memory.total_memory)
-      hwloc_snprintf(memory, sizeof(memory), "total=%lu%s",
+      hwloc_snprintf(memory, sizeof(memory), "%stotal=%lu%s",
+		     prefix,
 		     (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
 		     hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
   } else {
     if (obj->memory.total_memory)
-      hwloc_snprintf(memory, sizeof(memory), "%lu%s",
+      hwloc_snprintf(memory, sizeof(memory), "%s%lu%s",
+		     prefix,
 		     (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
 		     hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose));
   }
+  if (*memory)
+    prefix = separator;
 
   switch (obj->type) {
-  case HWLOC_OBJ_MACHINE:
-    if (verbose)
-      hwloc_snprintf(specific, sizeof(specific), "%s%s%s",
-		     obj->attr->machine.dmi_board_vendor ? obj->attr->machine.dmi_board_vendor : "",
-		     obj->attr->machine.dmi_board_vendor && obj->attr->machine.dmi_board_name ? separator : "",
-		     obj->attr->machine.dmi_board_name ? obj->attr->machine.dmi_board_name : "");
-    break;
   case HWLOC_OBJ_CACHE:
     if (verbose)
-      hwloc_snprintf(specific, sizeof(specific), "%lu%s%sline=%u",
+      hwloc_snprintf(specific, sizeof(specific), "%s%lu%s%sline=%u",
+		     prefix,
 		     (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
 		     hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose),
 		     separator, obj->attr->cache.linesize);
     else
-      hwloc_snprintf(specific, sizeof(specific), "%lu%s",
+      hwloc_snprintf(specific, sizeof(specific), "%s%lu%s",
+		     prefix,
 		     (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
 		     hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
     break;
   default:
     break;
   }
+  if (*specific)
+    prefix = separator;
 
-  /* does the type-specific attribute string need separator prefix ? */
-  specificseparator = *memory && *specific ? separator : "";
+  if (verbose) {
+    char *tmpinfos = infos;
+    int tmplen = sizeof(infos);
+    int res;
+    unsigned i;
+    for(i=0; i<obj->infos_count; i++) {
+      if (strchr(obj->infos[i].value, ' '))
+	res = hwloc_snprintf(tmpinfos, tmplen, "%s%s=\"%s\"",
+			     prefix,
+			     obj->infos[i].name, obj->infos[i].value);
+      else
+	res = hwloc_snprintf(tmpinfos, tmplen, "%s%s=%s",
+			     prefix,
+			     obj->infos[i].name, obj->infos[i].value);
+      if (res >= tmplen)
+        res = tmplen;
+      tmplen -= res;
+      tmpinfos += res;
+    }
+  }
+  if (*infos)
+    prefix = separator;
 
   return hwloc_snprintf(string, size, "%s%s%s",
-			memory,
-			specificseparator, specific);
+			memory, specific, infos);
 }
 
 

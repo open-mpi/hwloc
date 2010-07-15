@@ -1,4 +1,4 @@
-Machine (phys=0) cpuset=0x00009fdb
+Machine (phys=0 Backend=Linux) cpuset=0x00009fdb
   Socket #0 (phys=0) cpuset=0x00001111
     L3Cache #0 (4096KB line=64) cpuset=0x00001111
       L2Cache #0 (1024KB line=64) cpuset=0x00000101

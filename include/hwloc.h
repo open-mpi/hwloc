@@ -17,6 +17,7 @@
 #include <hwloc/config.h>
 #include <sys/types.h>
 #include <stdio.h>
+#include <string.h>
 #include <limits.h>
 #ifdef HWLOC_HAVE_STDINT_H
 #include <stdint.h>
@@ -174,6 +175,12 @@ struct hwloc_obj_memory_s {
   } * page_types;
 };
 
+/** \brief Object info */
+struct hwloc_obj_info_s {
+  char *name;	/**< \brief Info name */
+  char *value;	/**< \brief Info value */
+};
+
 /** \brief Structure of a topology object
  *
  * Applications mustn't modify any field except ::userdata .
@@ -290,6 +297,9 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
+
+  struct hwloc_obj_info_s *infos;	/**< \brief Array of stringified info type=name. */
+  unsigned infos_count;			/**< \brief Size of infos array. */
 };
 /**
  * \brief Convenience typedef; a pointer to a struct hwloc_obj.
@@ -304,11 +314,6 @@ union hwloc_obj_attr_u {
     unsigned depth;			  /**< \brief Depth of cache */
     unsigned linesize;			  /**< \brief Cache-line size in bytes */
   } cache;
-  /** \brief Machine-specific Object Attributes */
-  struct hwloc_machine_attr_s {
-    char *dmi_board_vendor;		  /**< \brief DMI board vendor name */
-    char *dmi_board_name;		  /**< \brief DMI board model name */
-  } machine;
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {
     unsigned depth;			  /**< \brief Depth of group object */
@@ -739,6 +744,20 @@ HWLOC_DECLSPEC int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t siz
  *
  * \return how many characters were actually written (not including the ending \\0). */
 HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t size, size_t nobj, const hwloc_obj_t * __hwloc_restrict objs);
+
+/** \brief Search the given key name in object infos and return the corresponding value.
+ *
+ * \return \c NULL if no such key exists.
+ */
+static __hwloc_inline char * __hwloc_attribute_pure
+hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
+{
+  unsigned i;
+  for(i=0; i<obj->infos_count; i++)
+    if (!strcmp(obj->infos[i].name, name))
+      return obj->infos[i].value;
+  return NULL;
+}
 
 /** @} */
 

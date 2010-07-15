@@ -229,6 +229,8 @@ hwloc_look_osf(struct hwloc_topology *topology)
 
   /* add PU objects */
   hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
+
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "OSF");
 }
 
 void
