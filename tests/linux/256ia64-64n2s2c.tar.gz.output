@@ -1,4 +1,4 @@
-Machine (phys=0 total=516912176KB)
+Machine (phys=0 total=516912176KB Backend=Linux)
   Group1 #0 (total=129224048KB)
     Group0 #0 (total=32296336KB)
       NUMANode #0 (phys=0 local=8064400KB total=8064400KB)

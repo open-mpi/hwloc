@@ -8,6 +8,7 @@
 #include <private/misc.h>
 
 #include <stdarg.h>
+#include <sys/utsname.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -64,4 +65,18 @@ int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
     i++;
   }
   return i < n;
+}
+
+void hwloc_add_uname_info(struct hwloc_topology *topology)
+{
+  struct utsname utsname;
+
+  if (uname(&utsname) < 0)
+    return;
+
+  hwloc_add_object_info(topology->levels[0][0], "OSName", utsname.sysname);
+  hwloc_add_object_info(topology->levels[0][0], "OSRelease", utsname.release);
+  hwloc_add_object_info(topology->levels[0][0], "OSVersion", utsname.version);
+  hwloc_add_object_info(topology->levels[0][0], "HostName", utsname.nodename);
+  hwloc_add_object_info(topology->levels[0][0], "Architecture", utsname.machine);
 }

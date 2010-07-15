@@ -419,18 +419,33 @@ print_objects(struct hwloc_topology *topology __hwloc_attribute_unused, int inde
 #endif
 }
 
+void
+hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char *value)
+{
+#define OBJECT_INFO_ALLOC 8
+  /* nothing allocated initially, (re-)allocate by multiple of 8 */
+  unsigned alloccount = (obj->infos_count + 1 + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
+  if (obj->infos_count != alloccount)
+    obj->infos = realloc(obj->infos, alloccount*sizeof(*obj->infos));
+  obj->infos[obj->infos_count].name = strdup(name);
+  obj->infos[obj->infos_count].value = strdup(value);
+  obj->infos_count++;
+}
+
 /* Free an object and all its content.  */
 void
 free_object(hwloc_obj_t obj)
 {
+  unsigned i;
   switch (obj->type) {
-  case HWLOC_OBJ_MACHINE:
-    free(obj->attr->machine.dmi_board_vendor);
-    free(obj->attr->machine.dmi_board_name);
-    break;
   default:
     break;
   }
+  for(i=0; i<obj->infos_count; i++) {
+    free(obj->infos[i].name);
+    free(obj->infos[i].value);
+  }
+  free(obj->infos);
   free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
@@ -1446,6 +1461,12 @@ hwloc_discover(struct hwloc_topology *topology)
 #    ifndef HAVE_OS_SUPPORT
     hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
 #    endif /* Unsupported OS */
+
+
+#    ifndef HWLOC_LINUX_SYS
+    /* gather uname info, except for Linux, which does it internally depending on load options */
+    hwloc_add_uname_info(topology);
+#    endif
   }
 
   print_objects(topology, 0, topology->levels[0][0]);

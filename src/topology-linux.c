@@ -745,8 +745,10 @@ hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_pat
   if (strcmp(fsroot_path, "/"))
     topology->is_thissystem = 0;
 
+  topology->backend_params.sysfs.root_path = strdup(fsroot_path);
   topology->backend_params.sysfs.root_fd = root;
 #else
+  topology->backend_params.sysfs.root_path = NULL;
   topology->backend_params.sysfs.root_fd = -1;
 #endif
   topology->backend_type = HWLOC_BACKEND_SYSFS;
@@ -759,6 +761,8 @@ hwloc_backend_sysfs_exit(struct hwloc_topology *topology)
   assert(topology->backend_type == HWLOC_BACKEND_SYSFS);
 #ifdef HAVE_OPENAT
   close(topology->backend_params.sysfs.root_fd);
+  free(topology->backend_params.sysfs.root_path);
+  topology->backend_params.sysfs.root_path = NULL;
 #endif
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
@@ -1657,8 +1661,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 }
 
 static void
-hwloc__get_dmi_info(struct hwloc_topology *topology,
-		   char **dmi_board_vendor, char **dmi_board_name)
+hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
 #define DMI_BOARD_STRINGS_LEN 50
   char dmi_line[DMI_BOARD_STRINGS_LEN];
@@ -1674,8 +1677,8 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      *dmi_board_vendor = strdup(dmi_line);
-      hwloc_debug("found DMI board vendor '%s'\n", *dmi_board_vendor);
+      hwloc_debug("found DMI board vendor '%s'\n", dmi_line);
+      hwloc_add_object_info(obj, "DMIBoardVendor", dmi_line);
     }
   }
 
@@ -1688,8 +1691,8 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      *dmi_board_name = strdup(dmi_line);
-      hwloc_debug("found DMI board name '%s'\n", *dmi_board_name);
+      hwloc_debug("found DMI board name '%s'\n", dmi_line);
+      hwloc_add_object_info(obj, "DMIBoardName", dmi_line);
     }
   }
 }
@@ -1699,7 +1702,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
 {
   DIR *nodes_dir;
   unsigned nbnodes;
-  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name;
+  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
   int err;
 
   /* Gather the list of admin-disabled cpus and mems */
@@ -1709,7 +1712,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
     if (cpuset_name) {
       hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
       hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
-      free(cpuset_name);
     }
     free(cgroup_mntpnt);
     free(cpuset_mntpnt);
@@ -1743,8 +1745,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
       hwloc_cpuset_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;
-      machine->attr->machine.dmi_board_name = NULL;
-      machine->attr->machine.dmi_board_vendor = NULL;
       hwloc_debug_1arg_cpuset("machine number %lu has cpuset %s\n",
 		 node, machine_online_set);
       hwloc_insert_object_by_cpuset(topology, machine);
@@ -1755,9 +1755,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
 
       /* Gather DMI info */
       /* FIXME: get the right DMI info of each machine */
-      hwloc__get_dmi_info(topology,
-			 &machine->attr->machine.dmi_board_vendor,
-			 &machine->attr->machine.dmi_board_name);
+      hwloc__get_dmi_info(topology, machine);
     }
     closedir(nodes_dir);
   } else {
@@ -1794,10 +1792,18 @@ hwloc_look_linux(struct hwloc_topology *topology)
     }
 
     /* Gather DMI info */
-    hwloc__get_dmi_info(topology,
-		       &topology->levels[0][0]->attr->machine.dmi_board_vendor,
-		       &topology->levels[0][0]->attr->machine.dmi_board_name);
+    hwloc__get_dmi_info(topology, topology->levels[0][0]);
   }
+
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "Linux");
+  if (cpuset_name) {
+    hwloc_add_object_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
+    free(cpuset_name);
+  }
+
+  /* gather uname info if fsroot wasn't changed */
+  if (!strcmp(topology->backend_params.sysfs.root_path, "/"))
+     hwloc_add_uname_info(topology);
 }
 
 void
