@@ -1,4 +1,4 @@
-Machine (phys=0 total=33331648KB)
+Machine (phys=0 total=33331648KB Backend=Linux)
   NUMANode #0 (phys=0 local=16554432KB total=16554432KB)
     Socket #0 (phys=0)
       L3Cache #0 (9216KB line=128)

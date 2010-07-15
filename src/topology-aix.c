@@ -297,6 +297,8 @@ hwloc_look_aix(struct hwloc_topology *topology)
 	  look_rset(i, HWLOC_OBJ_GROUP, topology, i);
 	}
     }
+
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "AIX");
 }
 
 void

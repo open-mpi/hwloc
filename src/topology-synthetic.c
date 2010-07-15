@@ -312,5 +312,7 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
     first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, cpuset);
 
   hwloc_cpuset_free(cpuset);
+
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "Synthetic");
 }
 

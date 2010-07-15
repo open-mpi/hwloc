@@ -364,6 +364,8 @@ hwloc_look_solaris(struct hwloc_topology *topology)
     return;
 #endif /* HAVE_LIBKSTAT */
   hwloc_setup_pu_level(topology, nbprocs);
+
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "Solaris");
 }
 
 void

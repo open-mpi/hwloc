@@ -86,6 +86,7 @@ struct hwloc_topology {
 #ifdef HWLOC_LINUX_SYS
     struct hwloc_backend_params_sysfs_s {
       /* sysfs backend parameters */
+      char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
     } sysfs;
 #endif /* HWLOC_LINUX_SYS */
@@ -204,6 +205,12 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
  * Remember to call topology_connect() afterwards to fix handy pointers.
  */
 extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
+
+/* Insert name/value in the object infos array. name and value are copied by the callee. */
+extern void hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char *value);
+
+/* Insert uname-specific names/values in the object infos array */
+extern void hwloc_add_uname_info(struct hwloc_topology *topology);
 
 /** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
 static inline char *

@@ -1,4 +1,4 @@
-System (phys=0 total=2032544KB) "Kerrighed"
+System (phys=0 total=2032544KB Backend=Linux) "Kerrighed"
   Machine #0 (phys=2 local=1016272KB total=1016272KB)
     Socket #0 (phys=1)
       Core #0 (phys=0)
