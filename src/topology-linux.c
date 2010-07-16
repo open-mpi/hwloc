@@ -1802,7 +1802,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
   }
 
   /* gather uname info if fsroot wasn't changed */
-  if (!strcmp(topology->backend_params.sysfs.root_path, "/"))
+  if (!topology->backend_params.sysfs.root_path || !strcmp(topology->backend_params.sysfs.root_path, "/"))
      hwloc_add_uname_info(topology);
 }
 
