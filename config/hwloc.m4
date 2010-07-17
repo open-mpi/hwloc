@@ -541,6 +541,20 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     AC_SEARCH_LIBS([pthread_getthrds_np], [pthread],
       AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, `Define to 1 if you have pthread_getthrds_np')
     )
+
+    # XML support
+    if test "x$enable_xml" != "xno"; then
+        HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [xmlNewDoc], [:], [enable_xml="no"])
+    fi
+    if test "x$enable_xml" != "xno"; then
+        HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
+        AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
+        AC_SUBST([HWLOC_HAVE_XML], [1])
+    else
+        AC_SUBST([HWLOC_HAVE_XML], [0])
+    fi
+    AC_SUBST(HWLOC_REQUIRES)
+    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_XML_CFLAGS"
     
     # Setup HWLOC's C, CPP, and LD flags, and LIBS
     HWLOC_CFLAGS="$hwloc_CC_c99_flags $HWLOC_CFLAGS"

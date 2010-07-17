@@ -217,22 +217,6 @@ EOF
         AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
     fi
 
-    # XML support        
-    
-    if test "x$enable_xml" != "xno"; then
-        HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [xmlNewDoc], [:], [enable_xml="no"])
-    fi
-    
-    if test "x$enable_xml" != "xno"; then
-        HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
-        AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
-        AC_SUBST([HWLOC_HAVE_XML], [1])
-    else
-        AC_SUBST([HWLOC_HAVE_XML], [0])
-    fi
-    AC_SUBST(HWLOC_REQUIRES)
-    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_XML_CFLAGS"
-
     # Only generate this if we're building the utilities
     AC_CONFIG_FILES(
         hwloc_config_prefix[utils/Makefile]
