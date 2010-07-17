@@ -227,7 +227,6 @@ EOF
         HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
         AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
         AC_SUBST([HWLOC_HAVE_XML], [1])
-        AC_CHECK_PROGS(XMLLINT, [xmllint])
     else
         AC_SUBST([HWLOC_HAVE_XML], [0])
     fi
@@ -256,6 +255,11 @@ EOF
     # linux-libnuma.h testing requires libnuma with numa_bitmask_alloc()
     AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
     	      [#include <numa.h>])
+
+
+    if test "x$enable_xml" != "xno"; then
+        AC_CHECK_PROGS(XMLLINT, [xmllint])
+    fi
 
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(
