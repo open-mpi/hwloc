@@ -135,4 +135,35 @@ hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cp
 }
 #endif
 
+int
+hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
+{
+#if 0
+  /* TODO */
+  set = hwloc_fix_membind(topology, set);
+  if (!set)
+    return -1;
+#endif
+
+  if (topology->set_membind)
+    return topology->set_membind(topology, set, policy);
+
+  errno = ENOSYS;
+  return -1;
+}
+
+int
+hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t set, int * policy)
+{
+  if (topology->get_membind) {
+    int err = topology->get_membind(topology, set, policy);
+    if (!err && *policy == HWLOC_MEMBIND_DEFAULT)
+      hwloc_cpuset_copy(set, hwloc_topology_get_topology_cpuset(topology));
+    return err;
+  }
+
+  errno = ENOSYS;
+  return -1;
+}
+
 /* TODO: memory bind */

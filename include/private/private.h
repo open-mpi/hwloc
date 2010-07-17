@@ -77,6 +77,9 @@ struct hwloc_topology {
   int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
+  int (*set_membind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
+  int (*get_membind)(hwloc_topology_t topology, hwloc_cpuset_t set, int * policy);
+
   struct hwloc_topology_support support;
 
   hwloc_backend_t backend_type;

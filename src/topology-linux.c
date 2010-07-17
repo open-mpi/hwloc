@@ -7,6 +7,7 @@
 #include <private/config.h>
 #include <hwloc.h>
 #include <hwloc/linux.h>
+#include <private/misc.h>
 #include <private/private.h>
 #include <private/debug.h>
 
@@ -21,6 +22,9 @@
 #include <sys/stat.h>
 #include <sched.h>
 #include <pthread.h>
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
+#include <numaif.h>
+#endif
 
 #ifndef HWLOC_HAVE_CPU_SET
 /* libc doesn't have support for sched_setaffinity, build system call
@@ -760,6 +764,143 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
   return 0;
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+
+#if HWLOC_HAVE_SET_MEMPOLICY
+static int
+hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+{
+  hwloc_obj_t obj;
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  int depth;
+  int linuxpolicy;
+  int err;
+
+  switch (policy & ~HWLOC_MEMBIND_STRICT) {
+  case HWLOC_MEMBIND_DEFAULT:
+    linuxpolicy = MPOL_DEFAULT;
+    break;
+  case HWLOC_MEMBIND_PREFERRED:
+    linuxpolicy = MPOL_PREFERRED;
+    break;
+  case HWLOC_MEMBIND_BIND:
+    linuxpolicy = MPOL_BIND;
+    break;
+  case HWLOC_MEMBIND_INTERLEAVE:
+    linuxpolicy = MPOL_INTERLEAVE;
+    break;
+  default:
+    errno = -EINVAL;
+    goto out;
+  }
+
+  /* compute max_os_index */
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+    max_os_index = 0;
+    depth = 0;
+  } else {
+    obj = NULL;
+    while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
+      if (obj->os_index > max_os_index)
+	max_os_index = obj->os_index;
+  }
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
+  if (!linuxmask) {
+    errno = ENOMEM;
+    goto out;
+  }
+
+  obj = NULL;
+  while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, hwloc_set, depth, obj)) != NULL) {
+    int index = obj->os_index;
+    linuxmask[index/HWLOC_BITS_PER_LONG] |= 1 << (index % HWLOC_BITS_PER_LONG);
+  }
+
+  err = set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
+  if (err < 0)
+    goto out_with_mask;
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+static int
+hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int *policy)
+{
+  hwloc_obj_t obj;
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  int depth;
+  int linuxpolicy;
+  int err;
+
+  /* compute max_os_index */
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+    max_os_index = 0;
+    depth = 0;
+  } else {
+    obj = NULL;
+    while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
+      if (obj->os_index > max_os_index)
+	max_os_index = obj->os_index;
+  }
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
+  if (!linuxmask) {
+    errno = ENOMEM;
+    goto out;
+  }
+
+  err = get_mempolicy(&linuxpolicy, linuxmask, max_os_index, 0, 0);
+  if (err < 0)
+    goto out_with_mask;
+
+  obj = NULL;
+  while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
+    int index = obj->os_index;
+    if (linuxmask[index/HWLOC_BITS_PER_LONG] & (1 << (index % HWLOC_BITS_PER_LONG)))
+      hwloc_cpuset_or(hwloc_set, hwloc_set, obj->cpuset);
+  }
+
+  switch (linuxpolicy) {
+  case MPOL_DEFAULT:
+    *policy = HWLOC_MEMBIND_DEFAULT;
+    break;
+  case MPOL_PREFERRED:
+    *policy = HWLOC_MEMBIND_PREFERRED;
+    break;
+  case MPOL_BIND:
+    *policy = HWLOC_MEMBIND_BIND;
+    break;
+  case MPOL_INTERLEAVE:
+    *policy = HWLOC_MEMBIND_INTERLEAVE;
+    break;
+  default:
+    errno = -EINVAL;
+    goto out_with_mask;
+  }
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+#endif /* HWLOC_HAVE_SET_MEMPOLICY */
 
 int
 hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path __hwloc_attribute_unused)
@@ -1855,6 +1996,10 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
   topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
+  topology->set_membind = hwloc_linux_set_membind;
+  topology->get_membind = hwloc_linux_get_membind;
+#endif /* HWLOC_HAVE_SET_MEMPOLICY */
 }
 
 /* TODO mbind, setpolicy */

@@ -1330,6 +1330,17 @@ static int dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_un
 }
 #endif
 
+static int dontset_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t set, int * policy __hwloc_attribute_unused)
+{
+  hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  *policy = HWLOC_MEMBIND_DEFAULT;
+  return 0;
+}
+
 static void alloc_cpusets(hwloc_obj_t obj)
 {
   obj->cpuset = hwloc_cpuset_alloc();
@@ -1687,6 +1698,8 @@ hwloc_discover(struct hwloc_topology *topology)
     topology->set_thread_cpubind = dontset_thread_cpubind;
     topology->get_thread_cpubind = dontget_thread_cpubind;
 #endif
+    topology->set_membind = dontset_membind;
+    topology->get_membind = dontget_membind;
   }
 
   /* if not is_thissystem, set_cpubind is fake
@@ -1705,6 +1718,7 @@ hwloc_discover(struct hwloc_topology *topology)
     DO(get_thisthread_cpubind);
     DO(set_thread_cpubind);
     DO(get_thread_cpubind);
+    /* TODO membind */
   }
 
   return 0;

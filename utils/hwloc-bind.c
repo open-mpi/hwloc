@@ -17,6 +17,8 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-calc utility.\n");
   fprintf(where, "Options:\n");
+  fprintf(where, "  --cpubind\tuse following arguments for cpu binding (default)\n");
+  fprintf(where, "  --membind\tuse following arguments for memory binding (default)\n");
   fprintf(where, "  -l --logical\ttake logical object indexes (default)\n");
   fprintf(where, "  -p --physical\ttake physical object indexes\n");
   fprintf(where, "  --single\tbind on a single CPU to prevent migration\n");
@@ -32,19 +34,22 @@ int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
   unsigned depth;
-  hwloc_cpuset_t cpubind_set;
+  hwloc_cpuset_t cpubind_set, membind_set;
+  int cpubind = 1; /* membind if 0 */
   int get_binding = 0;
   int single = 0;
   int verbose = 0;
   int logical = 1;
   int taskset = 0;
-  int flags = 0;
+  int cpubind_flags = 0;
+  int membind_flags = HWLOC_MEMBIND_BIND;
   int opt;
   int ret;
   hwloc_pid_t pid = 0;
   char **orig_argv = argv;
 
   cpubind_set = hwloc_cpuset_alloc();
+  membind_set = hwloc_cpuset_alloc();
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
@@ -77,7 +82,8 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp(argv[0], "--strict")) {
-	flags |= HWLOC_CPUBIND_STRICT;
+	cpubind_flags |= HWLOC_CPUBIND_STRICT;
+	membind_flags |= HWLOC_MEMBIND_STRICT;
 	goto next;
       }
       else if (!strcmp(argv[0], "--pid")) {
@@ -109,12 +115,22 @@ int main(int argc, char *argv[])
 	  get_binding = 1;
 	  goto next;
       }
+      else if (!strcmp (argv[0], "--cpubind")) {
+	  cpubind = 1;
+	  goto next;
+      }
+      else if (!strcmp (argv[0], "--membind")) {
+	  cpubind = 0;
+	  goto next;
+      }
 
       usage(stderr);
       return EXIT_FAILURE;
     }
 
-    ret = hwloc_mask_process_arg(topology, depth, argv[0], logical, cpubind_set, taskset, verbose);
+    ret = hwloc_mask_process_arg(topology, depth, argv[0], logical,
+				 cpubind ? cpubind_set : membind_set,
+				 taskset, verbose);
     if (ret < 0) {
       if (verbose)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
@@ -129,19 +145,36 @@ int main(int argc, char *argv[])
   if (get_binding) {
     char *s;
     int err;
-    if (pid)
-      err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
-    else
-      err = hwloc_get_cpubind(topology, cpubind_set, 0);
-    if (err) {
-      const char *errmsg = strerror(errno);
-      fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
-      return EXIT_FAILURE;
+    if (cpubind) {
+      if (pid)
+	err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
+      else
+	err = hwloc_get_cpubind(topology, cpubind_set, 0);
+      if (err) {
+	const char *errmsg = strerror(errno);
+	fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
+	return EXIT_FAILURE;
+      }
+      if (taskset)
+	hwloc_cpuset_taskset_asprintf(&s, cpubind_set);
+      else
+	hwloc_cpuset_asprintf(&s, cpubind_set);
+    } else {
+      int policy;
+//      if (pid)
+//	err = hwloc_get_proc_memind(topology, pid, membind_set, 0);
+//      else
+	err = hwloc_get_membind(topology, membind_set, &policy);
+      if (err) {
+	const char *errmsg = strerror(errno);
+	fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
+	return EXIT_FAILURE;
+      }
+      if (taskset)
+	hwloc_cpuset_taskset_asprintf(&s, membind_set);
+      else
+	hwloc_cpuset_asprintf(&s, membind_set);
     }
-    if (taskset)
-      hwloc_cpuset_taskset_asprintf(&s, cpubind_set);
-    else
-      hwloc_cpuset_asprintf(&s, cpubind_set);
     printf("%s\n", s);
     free(s);
     return EXIT_SUCCESS;
@@ -157,9 +190,9 @@ int main(int argc, char *argv[])
     if (single)
       hwloc_cpuset_singlify(cpubind_set);
     if (pid)
-      ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, flags);
+      ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, cpubind_flags);
     else
-      ret = hwloc_set_cpubind(topology, cpubind_set, flags);
+      ret = hwloc_set_cpubind(topology, cpubind_set, cpubind_flags);
     if (ret) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
@@ -170,7 +203,31 @@ int main(int argc, char *argv[])
     }
   }
 
+  if (!hwloc_cpuset_iszero(membind_set)) {
+    if (verbose) {
+      char *s;
+      hwloc_cpuset_asprintf(&s, membind_set);
+      fprintf(stderr, "binding on memory set %s\n", s);
+      free(s);
+    }
+//    if (single)
+//      hwloc_cpuset_singlify(membind_set);
+//    if (pid)
+//      ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, flags);
+//    else
+      ret = hwloc_set_membind(topology, membind_set, membind_flags);
+    if (ret) {
+      int bind_errno = errno;
+      const char *errmsg = strerror(bind_errno);
+      char *s;
+      hwloc_cpuset_asprintf(&s, membind_set);
+      fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
+      free(s);
+    }
+  }
+
   hwloc_cpuset_free(cpubind_set);
+  hwloc_cpuset_free(membind_set);
 
   hwloc_topology_destroy(topology);
 

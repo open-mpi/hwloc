@@ -892,6 +892,32 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
+typedef enum {
+  HWLOC_MEMBIND_DEFAULT = (1<<0),	/**< \brief Reset the memory allocation policy.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_PREFERRED = (1<<1),	/**< \brief Allocate memory preferably on the given nodes.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_BIND = (1<<2),		/**< \brief Allocate memory only on the given nodes.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_INTERLEAVE = (1<<3),	/**< \brief Allocate memory only on the given nodes
+					 * in a round-robin manner.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_STRICT = (1<<4)		/**< Request strict binding from the OS.
+					 * \hideinitializer  */
+} hwloc_membind_policy_t;
+
+/** \brief Bind current process memory on memory nodes near the given cpuset \p set
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
+
+/** \brief Get current process memory binding
+ */
+HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t set, int * policy);
+
+
 /** @} */
 
 
