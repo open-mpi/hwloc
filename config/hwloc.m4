@@ -278,8 +278,6 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
         esac
     esac
     
-    _HWLOC_CHECK_DIFF_U
-    
     AC_CHECK_SIZEOF([unsigned long])
     AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_LONG], $ac_cv_sizeof_unsigned_long, [The size of `unsigned long', as computed by sizeof])
     AC_CHECK_SIZEOF([unsigned int])

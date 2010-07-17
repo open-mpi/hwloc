@@ -241,6 +241,8 @@ EOF
     LIBS="$hwloc_old_LIBS"
     unset hwloc_old_LIBS
 
+    _HWLOC_CHECK_DIFF_U
+
     # Only generate this if we're building the utilities
     AC_CONFIG_FILES(
         hwloc_config_prefix[utils/Makefile]
@@ -273,6 +275,8 @@ EOF
     if test "x$enable_xml" != "xno"; then
         AC_CHECK_PROGS(XMLLINT, [xmllint])
     fi
+
+    _HWLOC_CHECK_DIFF_U
 
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(
