@@ -324,30 +324,6 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
       AC_DEFINE([HWLOC_HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
     ])
     
-    AC_CHECK_TYPES([wchar_t], [
-      AC_CHECK_FUNCS([putwc])
-    ], [], [[#include <wchar.h>]])
-    
-    AC_CHECK_HEADERS([locale.h], [
-      AC_CHECK_FUNCS([setlocale])
-    ])
-    AC_CHECK_HEADERS([langinfo.h], [
-      AC_CHECK_FUNCS([nl_langinfo])
-    ])
-    hwloc_old_LIBS="$LIBS"
-    LIBS=
-    AC_CHECK_HEADERS([curses.h], [
-      AC_CHECK_HEADERS([term.h], [
-        AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
-            AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
-            AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
-                      [Define to 1 if you have a library providing the termcap interface])
-          ])
-      ], [], [[#include <curses.h>]])
-    ])
-    LIBS="$hwloc_old_LIBS"
-    unset hwloc_old_LIBS
-
     AC_CHECK_TYPES([KAFFINITY,
                     PROCESSOR_CACHE_TYPE,
                     CACHE_DESCRIPTOR,
