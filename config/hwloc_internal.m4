@@ -264,6 +264,11 @@ EOF
     AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
     	      [#include <numa.h>])
 
+    AC_CHECK_HEADERS([infiniband/verbs.h], [
+      AC_CHECK_LIB([ibverbs], [ibv_open_device],
+                   [HWLOC_LIBS="-libverbs $HWLOC_LIBS"
+                    AC_DEFINE([HAVE_LIBIBVERBS], 1, [Define to 1 if we have -libverbs])])
+    ])
 
     if test "x$enable_xml" != "xno"; then
         AC_CHECK_PROGS(XMLLINT, [xmllint])

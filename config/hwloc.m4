@@ -356,12 +356,6 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
                     AC_DEFINE([HAVE_LIBKSTAT], 1, [Define to 1 if we have -lkstat])])
     ])
     
-    AC_CHECK_HEADERS([infiniband/verbs.h], [
-      AC_CHECK_LIB([ibverbs], [ibv_open_device], 
-                   [HWLOC_LIBS="-libverbs $HWLOC_LIBS"
-                    AC_DEFINE([HAVE_LIBIBVERBS], 1, [Define to 1 if we have -libverbs])])
-    ])
-    
     AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
     		_SC_NPROCESSORS_CONF,
     		_SC_NPROC_ONLN,
