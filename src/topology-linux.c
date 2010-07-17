@@ -253,6 +253,37 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #endif /* !CPU_SET */
 }
 
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
+/*
+ * On some kernels, sched_getaffinity requires the output size to be larger
+ * than the kernel cpu_set size (defined by CONFIG_NR_CPUS).
+ * Try sched_affinity on ourself until we find a nr_cpus value that makes
+ * the kernel happy.
+ */
+static int
+hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
+{
+  static int nr_cpus = -1;
+
+  if (nr_cpus != -1)
+    /* already computed */
+    return nr_cpus;
+
+  /* start with a nr_cpus that may contain the whole topology */
+  nr_cpus = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset) + 1;
+  while (1) {
+    cpu_set_t *set = CPU_ALLOC(nr_cpus);
+    size_t setsize = CPU_ALLOC_SIZE(nr_cpus);
+    int err = sched_getaffinity(0, setsize, set); /* always works, unless setsize is too small */
+    CPU_FREE(set);
+    if (!err)
+      /* found it */
+      return nr_cpus;
+    nr_cpus *= 2;
+  }
+}
+#endif
+
 int
 hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_cpuset_t hwloc_set)
 {
@@ -264,12 +295,12 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   unsigned cpu;
   int last;
   size_t setsize;
+  int kernel_nr_cpus;
 
-  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
-  assert(last != -1);
-
-  setsize = CPU_ALLOC_SIZE(last+1);
-  plinux_set = CPU_ALLOC(last+1);
+  /* find the kernel nr_cpus so as to use a large enough cpu_set size */
+  kernel_nr_cpus = hwloc_linux_find_kernel_nr_cpus(topology);
+  setsize = CPU_ALLOC_SIZE(kernel_nr_cpus);
+  plinux_set = CPU_ALLOC(kernel_nr_cpus);
 
   err = sched_getaffinity(tid, setsize, plinux_set);
 
@@ -277,6 +308,9 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
     CPU_FREE(plinux_set);
     return -1;
   }
+
+  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+  assert(last != -1);
 
   hwloc_cpuset_zero(hwloc_set);
   for(cpu=0; cpu<=(unsigned) last; cpu++)
