@@ -523,9 +523,6 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     
     AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
     
-    AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
-    	      [#include <numa.h>])
-    
     AC_CHECK_HEADERS([pthread_np.h])
     AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
       #include <pthread.h>

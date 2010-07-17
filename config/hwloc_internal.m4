@@ -253,6 +253,10 @@ EOF
 
     hwloc_build_tests=yes
 
+    # linux-libnuma.h testing requires libnuma with numa_bitmask_alloc()
+    AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
+    	      [#include <numa.h>])
+
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(
         hwloc_config_prefix[tests/Makefile ]
