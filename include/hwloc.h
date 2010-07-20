@@ -34,6 +34,10 @@
 #include <hwloc/cpuset.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /** \defgroup hwlocality_api_version API version
  * @{
@@ -873,6 +877,11 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 #endif
 
 /** @} */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 
 /* high-level helpers */
