@@ -24,6 +24,10 @@
 #include <sys/processor.h>
 #include <sys/thread.h>
 
+/* TODO: memory binding and policy (P_DEFAULT / P_FIRST_TOUCH / P_BALANCED)
+ * ra_mmap to allocation on an rset
+ */
+
 static int
 hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
@@ -55,10 +59,6 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     fprintf(stderr,"rs_getrad(%d,%u) failed: %s\n", obj->os_level, obj->os_index, strerror(errno));
     goto out;
   }
-
-  /* TODO: memory binding and policy (P_DEFAULT / P_FIRST_TOUCH / P_BALANCED)
-   * ra_mmap to allocation on an rset
-   */
 
   if (ra_attachrset(what, who, rad, 0)) {
     res = -1;

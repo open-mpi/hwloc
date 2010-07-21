@@ -5,7 +5,7 @@
 
 /* TODO: memory:
  * mmap/shmget: +MAP/IPC_MEM_INTERLEAVED, MAP/IPC_MEM_LOCAL,
-   MAP_IPC/MEM_FIRST_TOUCH */
+   MAP/IPC_MEM_FIRST_TOUCH */
 
 /* TODO: psets?
  * since 11i 1.6:

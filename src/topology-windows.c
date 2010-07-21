@@ -13,6 +13,8 @@
 
 #include <windows.h>
 
+/* TODO memory binding: VirtualAllocExNuma */
+
 #ifndef HAVE_KAFFINITY
 typedef ULONG_PTR KAFFINITY, *PKAFFINITY;
 #endif
@@ -425,5 +427,3 @@ hwloc_set_windows_hooks(struct hwloc_topology *topology)
   topology->get_thisproc_cpubind = hwloc_win_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
 }
-
-/* TODO memory binding: VirtualAllocExNuma */

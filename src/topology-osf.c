@@ -23,6 +23,15 @@
 #include <radset.h>
 #include <cpuset.h>
 
+/* TODO: memory
+ *
+ * nmadvise(addr,len), nmmap()
+ * policies: DIRECTED, STRIPPED, first_touch(REPLICATED)
+ *
+ * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
+ * assign_pid_to_pset()
+ */
+
 static int
 prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_cpuset_t hwloc_set)
 {
@@ -133,15 +142,6 @@ hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t h
 {
   return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
 }
-
-/* TODO: memory
- *
- * nmadvise(addr,len), nmmap()
- * policies: DIRECTED, STRIPPED, first_touch(REPLICATED)
- *
- * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
- * assign_pid_to_pset()
- */
 
 void
 hwloc_look_osf(struct hwloc_topology *topology)

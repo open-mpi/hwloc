@@ -16,6 +16,11 @@
 #include <sys/processor.h>
 #include <sys/procset.h>
 
+/* TODO:
+ * memory binding: lgrp_affinity_set
+ * madvise(MADV_ACCESS_LWP / ACCESS_MANY)
+ */
+
 /* Note: get_cpubind not available on Solaris */
 /* TODO: try to use pset (restricted to super-user) to support cpusets with weigth > 1? */
 static int
@@ -375,8 +380,3 @@ hwloc_set_solaris_hooks(struct hwloc_topology *topology)
   topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
 }
-
-/* TODO:
- * memory binding: lgrp_affinity_set
- * madvise(MADV_ACCESS_LWP / ACCESS_MANY)
- */
