@@ -938,6 +938,13 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
     char *type;
     char *tmp;
 
+    /* remove the ending " 0 0\n" that the kernel always adds */
+    tmp = line + strlen(line) - 5;
+    if (tmp < line || strcmp(tmp, " 0 0\n"))
+      fprintf(stderr, "Unexpected end of /proc/mounts line `%s'\n", line);
+    else
+      *tmp = '\0';
+
     /* path is after first field and a space */
     tmp = strchr(line, ' ');
     if (!tmp)
