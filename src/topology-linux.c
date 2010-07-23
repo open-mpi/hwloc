@@ -965,9 +965,12 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
       hwloc_debug("Found cpuset mount point on %s\n", path);
       *cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
       break;
+
     } else if (!strncmp(type, "cgroup ", 7)) {
       /* found a cgroup mntpnt */
       char *opt, *opts;
+      int cpuset_opt = 0;
+      int noprefix_opt = 0;
 
       /* find options */
       tmp = strchr(type, ' ');
@@ -975,14 +978,23 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
 	continue;
       opts = tmp+1;
 
-      /* find "cpuset" option */
-      while ((opt = strsep(&opts, ",")) && strcmp(opt, "cpuset"))
-        ; /* continue */
-      if (!opt)
+      /* look at options */
+      while ((opt = strsep(&opts, ",")) != NULL) {
+	if (!strcmp(opt, "cpuset"))
+	  cpuset_opt = 1;
+	else if (!strcmp(opt, "noprefix"))
+	  noprefix_opt = 1;
+      }
+      if (!cpuset_opt)
 	continue;
 
-      hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
-      *cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      if (noprefix_opt) {
+	hwloc_debug("Found cgroup emulating a cpuset mount point on %s\n", path);
+	*cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      } else {
+	hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
+	*cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      }
       break;
     }
   }
