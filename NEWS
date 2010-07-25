@@ -18,6 +18,8 @@ Version 1.0.3
 -------------
 
 * Fix support for Linux cpuset when emulated by a cgroup mount point.
+* Remove unneeded runtime dependency on libibverbs.so in the library and
+  all utils programs.
 
 
 Version 1.0.2
