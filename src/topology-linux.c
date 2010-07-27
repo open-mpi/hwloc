@@ -8,6 +8,7 @@
 #include <hwloc.h>
 #include <hwloc/linux.h>
 #include <private/private.h>
+#include <private/misc.h>
 #include <private/debug.h>
 
 #include <limits.h>
@@ -253,6 +254,37 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #endif /* !CPU_SET */
 }
 
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
+/*
+ * On some kernels, sched_getaffinity requires the output size to be larger
+ * than the kernel cpu_set size (defined by CONFIG_NR_CPUS).
+ * Try sched_affinity on ourself until we find a nr_cpus value that makes
+ * the kernel happy.
+ */
+static int
+hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
+{
+  static int nr_cpus = -1;
+
+  if (nr_cpus != -1)
+    /* already computed */
+    return nr_cpus;
+
+  /* start with a nr_cpus that may contain the whole topology */
+  nr_cpus = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset) + 1;
+  while (1) {
+    cpu_set_t *set = CPU_ALLOC(nr_cpus);
+    size_t setsize = CPU_ALLOC_SIZE(nr_cpus);
+    int err = sched_getaffinity(0, setsize, set); /* always works, unless setsize is too small */
+    CPU_FREE(set);
+    if (!err)
+      /* found it */
+      return nr_cpus;
+    nr_cpus *= 2;
+  }
+}
+#endif
+
 int
 hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_cpuset_t hwloc_set)
 {
@@ -264,12 +296,12 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   unsigned cpu;
   int last;
   size_t setsize;
+  int kernel_nr_cpus;
 
-  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
-  assert(last != -1);
-
-  setsize = CPU_ALLOC_SIZE(last+1);
-  plinux_set = CPU_ALLOC(last+1);
+  /* find the kernel nr_cpus so as to use a large enough cpu_set size */
+  kernel_nr_cpus = hwloc_linux_find_kernel_nr_cpus(topology);
+  setsize = CPU_ALLOC_SIZE(kernel_nr_cpus);
+  plinux_set = CPU_ALLOC(kernel_nr_cpus);
 
   err = sched_getaffinity(tid, setsize, plinux_set);
 
@@ -277,6 +309,9 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
     CPU_FREE(plinux_set);
     return -1;
   }
+
+  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+  assert(last != -1);
 
   hwloc_cpuset_zero(hwloc_set);
   for(cpu=0; cpu<=(unsigned) last; cpu++)
@@ -827,10 +862,18 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
     }
 
   /* convert into a set */
-  /* FIXME: optimize using hwloc_cpuset_ith_long? */
-  for(i=0; i<nr_maps*KERNEL_CPU_MASK_BITS; i++)
-    if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
-      hwloc_cpuset_set(set, i);
+#if KERNEL_CPU_MASK_BITS == HWLOC_BITS_PER_LONG
+  for(i=0; i<nr_maps; i++)
+    hwloc_cpuset_from_ith_ulong(set, i, maps[i]);
+#else
+  for(i=0; i<(nr_maps+1)/2; i++) {
+    unsigned long ulong;
+    ulong = maps[2*i];
+    if (2*i+1<nr_maps)
+      ulong |= maps[2*i+1] << KERNEL_CPU_MASK_BITS;
+    hwloc_cpuset_from_ith_ulong(set, i, ulong);
+  }
+#endif
 
   free(maps);
 
@@ -884,7 +927,7 @@ hwloc_strdup_mntpath(const char *escapedpath, size_t length)
 static void
 hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int fsroot_fd)
 {
-#define PROC_MOUNT_LINE_LEN 128
+#define PROC_MOUNT_LINE_LEN 512
   char line[PROC_MOUNT_LINE_LEN];
   FILE *fd;
 
@@ -903,6 +946,13 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
     char *path;
     char *type;
     char *tmp;
+
+    /* remove the ending " 0 0\n" that the kernel always adds */
+    tmp = line + strlen(line) - 5;
+    if (tmp < line || strcmp(tmp, " 0 0\n"))
+      fprintf(stderr, "Unexpected end of /proc/mounts line `%s'\n", line);
+    else
+      *tmp = '\0';
 
     /* path is after first field and a space */
     tmp = strchr(line, ' ');
@@ -924,9 +974,12 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
       hwloc_debug("Found cpuset mount point on %s\n", path);
       *cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
       break;
+
     } else if (!strncmp(type, "cgroup ", 7)) {
       /* found a cgroup mntpnt */
       char *opt, *opts;
+      int cpuset_opt = 0;
+      int noprefix_opt = 0;
 
       /* find options */
       tmp = strchr(type, ' ');
@@ -934,14 +987,23 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
 	continue;
       opts = tmp+1;
 
-      /* find "cpuset" option */
-      while ((opt = strsep(&opts, ",")) && strcmp(opt, "cpuset"))
-        ; /* continue */
-      if (!opt)
+      /* look at options */
+      while ((opt = strsep(&opts, ",")) != NULL) {
+	if (!strcmp(opt, "cpuset"))
+	  cpuset_opt = 1;
+	else if (!strcmp(opt, "noprefix"))
+	  noprefix_opt = 1;
+      }
+      if (!cpuset_opt)
 	continue;
 
-      hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
-      *cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      if (noprefix_opt) {
+	hwloc_debug("Found cgroup emulating a cpuset mount point on %s\n", path);
+	*cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      } else {
+	hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
+	*cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      }
       break;
     }
   }
@@ -1802,7 +1864,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
   }
 
   /* gather uname info if fsroot wasn't changed */
-  if (!strcmp(topology->backend_params.sysfs.root_path, "/"))
+  if (!topology->backend_params.sysfs.root_path || !strcmp(topology->backend_params.sysfs.root_path, "/"))
      hwloc_add_uname_info(topology);
 }
 

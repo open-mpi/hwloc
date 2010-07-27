@@ -19,6 +19,11 @@
 #include <errno.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /** \defgroup hwlocality_helper_types Object Type Helpers
  * @{
  */
@@ -685,5 +690,11 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
 
 
 /** @} */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 
 #endif /* HWLOC_HELPER_H */

@@ -32,9 +32,8 @@ int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
   unsigned depth;
-  hwloc_cpuset_t cpu_set; /* invalid until bind_cpus is set */
+  hwloc_cpuset_t cpubind_set;
   int get_binding = 0;
-  int bind_cpus = 0;
   int single = 0;
   int verbose = 0;
   int logical = 1;
@@ -45,7 +44,7 @@ int main(int argc, char *argv[])
   hwloc_pid_t pid = 0;
   char **orig_argv = argv;
 
-  cpu_set = hwloc_cpuset_alloc();
+  cpubind_set = hwloc_cpuset_alloc();
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
@@ -115,15 +114,12 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    ret = hwloc_mask_process_arg(topology, depth, argv[0], logical, cpu_set, taskset, verbose);
+    ret = hwloc_mask_process_arg(topology, depth, argv[0], logical, cpubind_set, taskset, verbose);
     if (ret < 0) {
       if (verbose)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
       break;
     }
-
-    /* we found at least one binding argument */
-    bind_cpus = 1;
 
   next:
     argc -= opt+1;
@@ -134,47 +130,47 @@ int main(int argc, char *argv[])
     char *s;
     int err;
     if (pid)
-      err = hwloc_get_proc_cpubind(topology, pid, cpu_set, 0);
+      err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
     else
-      err = hwloc_get_cpubind(topology, cpu_set, 0);
+      err = hwloc_get_cpubind(topology, cpubind_set, 0);
     if (err) {
       const char *errmsg = strerror(errno);
       fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
       return EXIT_FAILURE;
     }
     if (taskset)
-      hwloc_cpuset_taskset_asprintf(&s, cpu_set);
+      hwloc_cpuset_taskset_asprintf(&s, cpubind_set);
     else
-      hwloc_cpuset_asprintf(&s, cpu_set);
+      hwloc_cpuset_asprintf(&s, cpubind_set);
     printf("%s\n", s);
     free(s);
     return EXIT_SUCCESS;
   }
 
-  if (bind_cpus) {
+  if (!hwloc_cpuset_iszero(cpubind_set)) {
     if (verbose) {
       char *s;
-      hwloc_cpuset_asprintf(&s, cpu_set);
+      hwloc_cpuset_asprintf(&s, cpubind_set);
       fprintf(stderr, "binding on cpu set %s\n", s);
       free(s);
     }
     if (single)
-      hwloc_cpuset_singlify(cpu_set);
+      hwloc_cpuset_singlify(cpubind_set);
     if (pid)
-      ret = hwloc_set_proc_cpubind(topology, pid, cpu_set, flags);
+      ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, flags);
     else
-      ret = hwloc_set_cpubind(topology, cpu_set, flags);
+      ret = hwloc_set_cpubind(topology, cpubind_set, flags);
     if (ret) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
       char *s;
-      hwloc_cpuset_asprintf(&s, cpu_set);
+      hwloc_cpuset_asprintf(&s, cpubind_set);
       fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
   }
 
-  hwloc_cpuset_free(cpu_set);
+  hwloc_cpuset_free(cpubind_set);
 
   hwloc_topology_destroy(topology);
 

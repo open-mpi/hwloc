@@ -455,9 +455,10 @@ static struct draw_methods svg_draw_methods = {
 void
 output_svg(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
 {
-  FILE *output = open_file(filename, "w");
+  FILE *output;
   cairo_surface_t *cs;
 
+  output = open_file(filename, "w");
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;

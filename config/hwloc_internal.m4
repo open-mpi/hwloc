@@ -223,45 +223,31 @@ EOF
         AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
     fi
 
-    # XML support        
-    
-    if test "x$enable_xml" != "xno"; then
-        HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [xmlNewDoc], [:], [enable_xml="no"])
-    fi
-    
-    if test "x$enable_xml" != "xno"; then
-        HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
-        AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
-        AC_SUBST([HWLOC_HAVE_XML], [1])
-        AC_CHECK_PROGS(XMLLINT, [xmllint])
-    else
-        AC_SUBST([HWLOC_HAVE_XML], [0])
-    fi
+    AC_CHECK_TYPES([wchar_t], [
+      AC_CHECK_FUNCS([putwc])
+    ], [], [[#include <wchar.h>]])
 
-    # PCI support
-
-    if test "x$enable_pci" != "xno"; then
-        HWLOC_PKG_CHECK_MODULES([PCI], [libpci], [pci_cleanup], [:], [
-          # manually check pciutils in case a old one without .pc is installed
-          AC_CHECK_HEADERS([pci/pci.h], [
-            AC_CHECK_LIB([pci], [pci_cleanup], [
-              HWLOC_PCI_LIBS="-lpci"
-              AC_SUBST(HWLOC_PCI_LIBS)
-              ], [enable_pci=no])
-            ], [enable_pci=no])
+    AC_CHECK_HEADERS([locale.h], [
+      AC_CHECK_FUNCS([setlocale])
+    ])
+    AC_CHECK_HEADERS([langinfo.h], [
+      AC_CHECK_FUNCS([nl_langinfo])
+    ])
+    hwloc_old_LIBS="$LIBS"
+    LIBS=
+    AC_CHECK_HEADERS([curses.h], [
+      AC_CHECK_HEADERS([term.h], [
+        AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
+            AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
+            AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
+                      [Define to 1 if you have a library providing the termcap interface])
           ])
-    fi
+      ], [], [[#include <curses.h>]])
+    ])
+    LIBS="$hwloc_old_LIBS"
+    unset hwloc_old_LIBS
 
-    if test "x$enable_pci" != "xno"; then
-      HWLOC_REQUIRES="libpci $HWLOC_REQUIRES"
-      AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
-      AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
-    else
-      AC_SUBST([HWLOC_HAVE_LIBPCI], [0])
-    fi
-
-    AC_SUBST(HWLOC_REQUIRES)
-    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_XML_CFLAGS $HWLOC_PCI_CFLAGS"
+    _HWLOC_CHECK_DIFF_U
 
     # Only generate this if we're building the utilities
     AC_CONFIG_FILES(
@@ -281,6 +267,22 @@ AC_DEFUN([HWLOC_SETUP_TESTS],[
 EOF
 
     hwloc_build_tests=yes
+
+    # linux-libnuma.h testing requires libnuma with numa_bitmask_alloc()
+    AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
+    	      [#include <numa.h>])
+
+    AC_CHECK_HEADERS([infiniband/verbs.h], [
+      AC_CHECK_LIB([ibverbs], [ibv_open_device],
+                   [AC_DEFINE([HAVE_LIBIBVERBS], 1, [Define to 1 if we have -libverbs])
+                    hwloc_have_libibverbs=yes])
+    ])
+
+    if test "x$enable_xml" != "xno"; then
+        AC_CHECK_PROGS(XMLLINT, [xmllint])
+    fi
+
+    _HWLOC_CHECK_DIFF_U
 
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(

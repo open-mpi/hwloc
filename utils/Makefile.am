@@ -9,6 +9,8 @@ LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 
 EXTRA_DIST = test-hwloc-distrib.output
 
+noinst_HEADERS = misc.h
+
 # Only build the utilities if we're building in standalone mode
 if HWLOC_BUILD_UTILS
 bin_PROGRAMS = lstopo hwloc-calc hwloc-bind hwloc-distrib hwloc-ps

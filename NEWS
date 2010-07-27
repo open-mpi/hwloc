@@ -19,7 +19,19 @@ Version 1.1.0
 
 * CPU sets are now dynamically (re-)allocated, HWLOC_NBMAXCPUS
   has been removed.
+* Add an `infos' array in each object to store couples of info names and
+  values. It enables generic storage of things like the old dmi board infos
+  that were previously stored in machine specific attributes.
+* Add linesize cache attribute.
+* Improve the distance-based grouping code to better support irregular
+  distance matrices.
 * Add hwloc-ps to list process' bindings.
+* Improve tools command-line options by adding a generic --input option
+  (and more) which replaces the old --xml, --synthetic and --fsys-root.
+* Cleanup lstopo output configuration by adding --output-format.
+* Add --intersect in hwloc-calc, and replace --objects with --largest.
+* Add the ability to work on standard input in hwloc-calc.
+* Add --among in hwloc-distrib.
 * Add taskset-specific functions and command-line tools options to
   manipulate CPU set strings in the format of the taskset program.
 
@@ -27,10 +39,18 @@ Version 1.1.0
 Version 1.0.2
 -------------
 
+* Public headers can now be included directly from C++ programs.
 * Solaris fix for non-contiguous cpu numbers.  Thanks to Rolf vandeVaart for
   reporting the issue.
 * Darwin 10.4 fix.  Thanks to Olivier Cessenat for reporting the issue.
-* Documentation fixes.
+* Revert 1.0.1 patch that ignored sockets with unknown ID values since it
+  only slightly helped POWER7 machines with old Linux kernels while it
+  prevents recent kernels from getting the complete POWER7 topology.
+* Fix hwloc_get_common_ancestor_obj().
+* Remove arch-specific bits in public headers.
+* Some fixes in the lstopo graphical output.
+* Various man page clarifications and minor updates.
+
 
 Version 1.0.1
 -------------

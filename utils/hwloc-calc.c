@@ -8,11 +8,13 @@
 #include <hwloc-calc.h>
 #include <hwloc.h>
 
+#include "misc.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-static void usage(FILE *where)
+void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
   fprintf(where, "Usage: hwloc-calc [options] <location> ...\n");
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
@@ -28,6 +30,7 @@ static void usage(FILE *where)
   fprintf(where, "  --largest\treport the list of largest objects in the CPU set\n");
   fprintf(where, "  --single\tsinglify the output to a single CPU\n");
   fprintf(where, "  --taskset\tmanipulate taskset-specific cpuset strings\n");
+  hwloc_utils_input_format_usage(where);
   fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
 }
@@ -87,11 +90,18 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_cpuset_t set)
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
+  char *input = NULL;
+  enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
+  int input_changed = 0;
   unsigned depth;
   hwloc_cpuset_t set;
   int cmdline_args = 0;
   char **orig_argv = argv;
   hwloc_obj_type_t listtype = (hwloc_obj_type_t) -1;
+  char *callname;
+  int opt;
+
+  callname = argv[0];
 
   set = hwloc_cpuset_alloc();
 
@@ -106,12 +116,12 @@ int main(int argc, char *argv[])
         goto next;
       }
       if (!strcmp(argv[1], "--help")) {
-	usage(stdout);
+	usage(callname, stdout);
 	return EXIT_SUCCESS;
       }
       if (!strcmp(argv[1], "--intersect")) {
 	if (argc <= 2) {
-	  usage(stderr);
+	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
 	}
 	listtype = hwloc_obj_type_of_string(argv[2]);
@@ -120,7 +130,7 @@ int main(int argc, char *argv[])
 	  unsigned depth = strtoul(argv[2], &endptr, 0);
 	  if (*endptr) {
 	    fprintf(stderr, "unrecognized list type or depth %s\n", argv[2]);
-	    usage(stderr);
+	    usage(callname, stderr);
 	    return EXIT_SUCCESS;
 	  }
 	  listdepth = depth;
@@ -177,8 +187,24 @@ int main(int argc, char *argv[])
 	taskset = 1;
 	goto next;
       }
-      usage(stderr);
+      if (hwloc_utils_lookup_input_option(argv+1, argc, &opt,
+					  &input, &input_format,
+					  callname)) {
+	argv += opt;
+	argc -= opt;
+	input_changed = 1;
+	goto next;
+      }
+
+      usage(callname, stderr);
       return EXIT_FAILURE;
+    }
+
+    if (input_changed && input) {
+      hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+      hwloc_topology_load(topology);
+      depth = hwloc_topology_get_depth(topology);
+      input_changed = 0;
     }
 
     cmdline_args++;
