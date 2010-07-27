@@ -521,10 +521,10 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     else
         AC_SUBST([HWLOC_HAVE_XML], [0])
     fi
-    AC_SUBST(HWLOC_REQUIRES)
-    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_XML_CFLAGS"
-    
+    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_XML_CFLAGS"    
+
     # Setup HWLOC's C, CPP, and LD flags, and LIBS
+    AC_SUBST(HWLOC_REQUIRES)
     HWLOC_CFLAGS="$hwloc_CC_c99_flags $HWLOC_CFLAGS"
     AC_SUBST(HWLOC_CFLAGS)
     HWLOC_CPPFLAGS='-I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include'
