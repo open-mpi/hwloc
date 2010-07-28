@@ -152,6 +152,7 @@ extern "C" {
 #define hwloc_cpuset_all_but_cpu HWLOC_NAME(cpuset_all_but_cpu)
 #define hwloc_cpuset_set HWLOC_NAME(cpuset_set)
 #define hwloc_cpuset_set_range HWLOC_NAME(cpuset_set_range)
+#define hwloc_cpuset_set_ith_ulong HWLOC_NAME(cpuset_set_ith_ulong)
 #define hwloc_cpuset_clr HWLOC_NAME(cpuset_clr)
 #define hwloc_cpuset_clr_range HWLOC_NAME(cpuset_clr_range)
 #define hwloc_cpuset_isset HWLOC_NAME(cpuset_isset)

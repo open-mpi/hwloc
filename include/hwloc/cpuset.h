@@ -134,6 +134,9 @@ HWLOC_DECLSPEC void hwloc_cpuset_set(hwloc_cpuset_t set, unsigned cpu);
 /** \brief Add CPUs from \p begincpu to \p endcpu in CPU set \p set */
 HWLOC_DECLSPEC void hwloc_cpuset_set_range(hwloc_cpuset_t set, unsigned begincpu, unsigned endcpu);
 
+/** \brief Replace \p i -th subset of CPU set \p set with unsigned long \p mask */
+HWLOC_DECLSPEC void hwloc_cpuset_set_ith_ulong(hwloc_cpuset_t set, unsigned i, unsigned long mask);
+
 /** \brief Remove CPU \p cpu from CPU set \p set */
 HWLOC_DECLSPEC void hwloc_cpuset_clr(hwloc_cpuset_t set, unsigned cpu);
 

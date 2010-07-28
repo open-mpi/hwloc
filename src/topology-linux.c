@@ -864,14 +864,14 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
   /* convert into a set */
 #if KERNEL_CPU_MASK_BITS == HWLOC_BITS_PER_LONG
   for(i=0; i<nr_maps; i++)
-    hwloc_cpuset_from_ith_ulong(set, i, maps[i]);
+    hwloc_cpuset_set_ith_ulong(set, i, maps[i]);
 #else
   for(i=0; i<(nr_maps+1)/2; i++) {
     unsigned long ulong;
     ulong = maps[2*i];
     if (2*i+1<nr_maps)
       ulong |= maps[2*i+1] << KERNEL_CPU_MASK_BITS;
-    hwloc_cpuset_from_ith_ulong(set, i, ulong);
+    hwloc_cpuset_set_ith_ulong(set, i, ulong);
   }
 #endif
 
