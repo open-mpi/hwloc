@@ -161,9 +161,9 @@ int main(int argc, char *argv[])
 	hwloc_cpuset_asprintf(&s, cpubind_set);
     } else {
       int policy;
-//      if (pid)
-//	err = hwloc_get_proc_memind(topology, pid, membind_set, 0);
-//      else
+      if (pid)
+	err = hwloc_get_proc_membind(topology, pid, membind_set, 0);
+      else
 	err = hwloc_get_membind(topology, membind_set, &policy);
       if (err) {
 	const char *errmsg = strerror(errno);
@@ -210,11 +210,11 @@ int main(int argc, char *argv[])
       fprintf(stderr, "binding on memory set %s\n", s);
       free(s);
     }
-//    if (single)
-//      hwloc_cpuset_singlify(membind_set);
-//    if (pid)
-//      ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, flags);
-//    else
+    if (single)
+      hwloc_cpuset_singlify(membind_set);
+    if (pid)
+      ret = hwloc_set_proc_membind(topology, pid, membind_set, membind_flags);
+    else
       ret = hwloc_set_membind(topology, membind_set, membind_flags);
     if (ret) {
       int bind_errno = errno;
