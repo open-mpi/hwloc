@@ -68,6 +68,53 @@ static void test(hwloc_const_cpuset_t cpuset, int flags)
   hwloc_cpuset_free(new_cpuset);
 }
 
+static void testmem(hwloc_const_cpuset_t memset, int flags)
+{
+  hwloc_cpuset_t new_memset = hwloc_cpuset_alloc();
+  int newflags;
+  void *area;
+  size_t area_size = 1024;
+  result_set("Bind this process memory", hwloc_set_membind(topology, memset, flags), support->membind->set_membind);
+  result_get("Get  this process memory", memset, new_memset, hwloc_get_membind(topology, new_memset, &newflags), support->membind->get_membind);
+#ifdef HWLOC_WIN_SYS
+  result_set("Bind process memory", hwloc_set_proc_membind(topology, GetCurrentProcess(), memset, flags), support->membind->set_proc_membind);
+  result_get("Get  process memory", memset, new_memset, hwloc_get_proc_membind(topology, GetCurrentProcess(), new_memset, &newflags), support->membind->get_proc_membind);
+#else /* !HWLOC_WIN_SYS */
+  result_set("Bind process memory", hwloc_set_proc_membind(topology, getpid(), memset, flags), support->membind->set_proc_membind);
+  result_get("Get  process memory", memset, new_memset, hwloc_get_proc_membind(topology, getpid(), new_memset, &newflags), support->membind->get_proc_membind);
+#endif /* !HWLOC_WIN_SYS */
+  result_set("Bind area", hwloc_set_area_membind(topology, &new_memset, sizeof(new_memset), memset, flags), support->membind->set_area_membind);
+  result_get("Get  area", memset, new_memset, hwloc_get_area_membind(topology, &new_memset, sizeof(new_memset), new_memset, &newflags), support->membind->get_area_membind);
+  result_set("Alloc bound area", (area = hwloc_alloc_membind(topology, area_size, memset, flags)) == NULL, support->membind->alloc_membind);
+  if (area)
+    result_get("Free  bound area", memset, new_memset, hwloc_free_membind(topology, area, area_size), support->membind->alloc_membind);
+  printf("\n");
+  hwloc_cpuset_free(new_memset);
+}
+
+static void testmem2(hwloc_const_cpuset_t set, int flags)
+{
+  printf("  default\n");
+  testmem(set, flags | HWLOC_MEMBIND_DEFAULT);
+  printf("  firsttouch\n");
+  testmem(set, flags | HWLOC_MEMBIND_FIRSTTOUCH);
+  printf("  bound\n");
+  testmem(set, flags | HWLOC_MEMBIND_BIND);
+  printf("  interleave\n");
+  testmem(set, flags | HWLOC_MEMBIND_INTERLEAVE);
+}
+
+static void testmem3(hwloc_const_cpuset_t set)
+{
+  testmem2(set, 0);
+  printf("now strict\n\n");
+  testmem2(set, HWLOC_MEMBIND_STRICT);
+  printf("now migrate\n\n");
+  testmem2(set, HWLOC_MEMBIND_MIGRATE);
+  printf("now strictly migrate\n\n");
+  testmem2(set, HWLOC_MEMBIND_STRICT | HWLOC_MEMBIND_MIGRATE);
+}
+
 int main(void)
 {
   hwloc_cpuset_t set;
@@ -93,7 +140,6 @@ int main(void)
   free(str);
 
   test(set, 0);
-
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
 
@@ -104,7 +150,6 @@ int main(void)
   free(str);
 
   test(set, 0);
-
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
 
@@ -114,11 +159,32 @@ int main(void)
   free(str);
 
   test(set, 0);
-
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
 
   hwloc_cpuset_free(set);
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 0);
+  if (obj) {
+    printf("\n\nmemory tests\n\n");
+    set = hwloc_cpuset_dup(obj->cpuset);
+    hwloc_cpuset_asprintf(&str, set);
+    printf("node set is %s\n", str);
+    free(str);
+
+    testmem3(set);
+
+    obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 1);
+    if (obj) {
+      hwloc_cpuset_or(set, set, obj->cpuset);
+      hwloc_cpuset_asprintf(&str, set);
+      printf("node set is %s\n", str);
+      free(str);
+
+      testmem3(set);
+    }
+    hwloc_cpuset_free(set);
+  }
+
   hwloc_topology_destroy(topology);
   return 0;
 }

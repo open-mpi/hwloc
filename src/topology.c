@@ -1341,6 +1341,38 @@ static int dontget_membind(hwloc_topology_t topology __hwloc_attribute_unused, h
   return 0;
 }
 
+static int dontset_proc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_proc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_cpuset_t set, int * policy __hwloc_attribute_unused)
+{
+  hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  *policy = HWLOC_MEMBIND_DEFAULT;
+  return 0;
+}
+
+static int dontset_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_cpuset_t set, int * policy __hwloc_attribute_unused)
+{
+  hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  *policy = HWLOC_MEMBIND_DEFAULT;
+  return 0;
+}
+
+static void * dontalloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_cpuset_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+{
+  return malloc(size);
+}
+static int dontfree_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused)
+{
+  free(addr);
+  return 0;
+}
+
 static void alloc_cpusets(hwloc_obj_t obj)
 {
   obj->cpuset = hwloc_cpuset_alloc();
@@ -1700,6 +1732,12 @@ hwloc_discover(struct hwloc_topology *topology)
 #endif
     topology->set_membind = dontset_membind;
     topology->get_membind = dontget_membind;
+    topology->set_proc_membind = dontset_proc_membind;
+    topology->get_proc_membind = dontget_proc_membind;
+    topology->set_area_membind = dontset_area_membind;
+    topology->get_area_membind = dontget_area_membind;
+    topology->alloc_membind = dontalloc_membind;
+    topology->free_membind = dontfree_membind;
   }
 
   /* if not is_thissystem, set_cpubind is fake
@@ -1750,8 +1788,17 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->set_thread_cpubind = NULL;
   topology->get_thread_cpubind = NULL;
 #endif
+  topology->set_membind = NULL;
+  topology->get_membind = NULL;
+  topology->set_proc_membind = NULL;
+  topology->get_proc_membind = NULL;
+  topology->set_area_membind = NULL;
+  topology->get_area_membind = NULL;
+  topology->alloc_membind = NULL;
+  topology->free_membind = NULL;
   memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
   memset(topology->support.cpubind, 0, sizeof(*topology->support.cpubind));
+  memset(topology->support.membind, 0, sizeof(*topology->support.membind));
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
@@ -1791,6 +1838,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
 
   topology->support.discovery = malloc(sizeof(*topology->support.discovery));
   topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
+  topology->support.membind = malloc(sizeof(*topology->support.membind));
 
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
@@ -1957,6 +2005,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   hwloc_backend_exit(topology);
   free(topology->support.discovery);
   free(topology->support.cpubind);
+  free(topology->support.membind);
   free(topology);
 }
 

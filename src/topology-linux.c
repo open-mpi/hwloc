@@ -776,7 +776,7 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
   int linuxpolicy;
   int err;
 
-  switch (policy & ~HWLOC_MEMBIND_STRICT) {
+  switch (policy & ~(HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
   case HWLOC_MEMBIND_DEFAULT:
     linuxpolicy = MPOL_DEFAULT;
     break;
@@ -790,7 +790,7 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
     linuxpolicy = MPOL_INTERLEAVE;
     break;
   default:
-    errno = -EINVAL;
+    errno = EINVAL;
     goto out;
   }
 
@@ -894,7 +894,7 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int
     *policy = HWLOC_MEMBIND_INTERLEAVE;
     break;
   default:
-    errno = -EINVAL;
+    errno = EINVAL;
     goto out_with_mask;
   }
 

@@ -84,7 +84,7 @@ struct hwloc_topology {
   int (*set_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t set, int policy);
   int (*get_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t set, int * policy);
   void *(*alloc_membind)(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, int policy);
-  int (*free_membind)(hwloc_topology_t topology, const void *addr, size_t len);
+  int (*free_membind)(hwloc_topology_t topology, void *addr, size_t len);
 
   struct hwloc_topology_support support;
 
