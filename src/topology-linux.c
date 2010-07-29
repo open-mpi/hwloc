@@ -780,11 +780,11 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
   case HWLOC_MEMBIND_DEFAULT:
     linuxpolicy = MPOL_DEFAULT;
     break;
-  case HWLOC_MEMBIND_PREFERRED:
-    linuxpolicy = MPOL_PREFERRED;
-    break;
   case HWLOC_MEMBIND_BIND:
-    linuxpolicy = MPOL_BIND;
+    if (policy & HWLOC_MEMBIND_STRICT)
+      linuxpolicy = MPOL_BIND;
+    else
+      linuxpolicy = MPOL_PREFERRED;
     break;
   case HWLOC_MEMBIND_INTERLEAVE:
     linuxpolicy = MPOL_INTERLEAVE;
@@ -823,6 +823,8 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
   err = set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
   if (err < 0)
     goto out_with_mask;
+
+  /* TODO: MIGRATE */
 
   free(linuxmask);
   return 0;
@@ -867,11 +869,15 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int
   if (err < 0)
     goto out_with_mask;
 
-  obj = NULL;
-  while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
-    int index = obj->os_index;
-    if (linuxmask[index/HWLOC_BITS_PER_LONG] & (1 << (index % HWLOC_BITS_PER_LONG)))
-      hwloc_cpuset_or(hwloc_set, hwloc_set, obj->cpuset);
+  if (linuxpolicy == MPOL_DEFAULT) {
+    hwloc_cpuset_copy(hwloc_set, hwloc_topology_get_topology_cpuset(topology));
+  } else {
+    obj = NULL;
+    while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
+      int index = obj->os_index;
+      if (linuxmask[index/HWLOC_BITS_PER_LONG] & (1 << (index % HWLOC_BITS_PER_LONG)))
+	hwloc_cpuset_or(hwloc_set, hwloc_set, obj->cpuset);
+    }
   }
 
   switch (linuxpolicy) {
@@ -879,7 +885,7 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int
     *policy = HWLOC_MEMBIND_DEFAULT;
     break;
   case MPOL_PREFERRED:
-    *policy = HWLOC_MEMBIND_PREFERRED;
+    *policy = HWLOC_MEMBIND_BIND|HWLOC_MEMBIND_STRICT;
     break;
   case MPOL_BIND:
     *policy = HWLOC_MEMBIND_BIND;

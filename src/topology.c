@@ -1707,18 +1707,24 @@ hwloc_discover(struct hwloc_topology *topology)
    * so don't report that set/get_cpubind as supported
    */
   if (topology->is_thissystem) {
-#define DO(kind) \
+#define DO(which,kind) \
     if (topology->kind) \
-      topology->support.cpubind->kind = 1;
-    DO(set_thisproc_cpubind);
-    DO(get_thisproc_cpubind);
-    DO(set_proc_cpubind);
-    DO(get_proc_cpubind);
-    DO(set_thisthread_cpubind);
-    DO(get_thisthread_cpubind);
-    DO(set_thread_cpubind);
-    DO(get_thread_cpubind);
-    /* TODO membind */
+      topology->support.which##bind->kind = 1;
+    DO(cpu,set_thisproc_cpubind);
+    DO(cpu,get_thisproc_cpubind);
+    DO(cpu,set_proc_cpubind);
+    DO(cpu,get_proc_cpubind);
+    DO(cpu,set_thisthread_cpubind);
+    DO(cpu,get_thisthread_cpubind);
+    DO(cpu,set_thread_cpubind);
+    DO(cpu,get_thread_cpubind);
+    DO(mem,set_membind);
+    DO(mem,get_membind);
+    DO(mem,set_proc_membind);
+    DO(mem,get_proc_membind);
+    DO(mem,set_area_membind);
+    DO(mem,get_area_membind);
+    DO(mem,alloc_membind);
   }
 
   return 0;
