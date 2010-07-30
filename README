@@ -353,8 +353,8 @@ To precisely define the vocabulary used by hwloc, a Terms and Definitions
 section is available and should probably be read first.
 
 Each hwloc object contains a cpuset describing the list of processing units
-that it contains. These cpusets may be used for Binding. hwloc offers an
-extensive cpuset manipulation interface in hwloc/cpuset.h.
+that it contains. These cpusets may be used for CPU binding and Memory binding.
+hwloc offers an extensive cpuset manipulation interface in hwloc/cpuset.h.
 
 Moreover, hwloc also comes with additional helpers for interoperability with
 several commonly used environments. See the Interoperability with other
@@ -647,5 +647,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Fri Jul 30 12:27:38 2010 for Hardware Locality (hwloc) by  doxygen
+Generated on Fri Jul 30 15:43:24 2010 for Hardware Locality (hwloc) by  doxygen
 1.6.3
