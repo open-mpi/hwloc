@@ -360,6 +360,14 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_set_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_free_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_area_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_area_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
@@ -383,7 +391,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_discovery_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
-        $(DOX_MAN_DIR)/man3/hwlocality_binding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_cpubinding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_membinding.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_conversion.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_cpuset.3 \

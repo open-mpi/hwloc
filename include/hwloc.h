@@ -786,7 +786,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
 
 
 
-/** \defgroup hwlocality_binding Binding
+/** \defgroup hwlocality_cpubinding CPU binding
  *
  * It is often useful to call hwloc_cpuset_singlify() first so that a single CPU
  * remains in the set. This way, the process will not even migrate between
@@ -798,8 +798,8 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * is returned when the requested cpuset can not be enforced (e.g. some systems
  * only allow one CPU, and some other systems only allow one NUMA node)
  *
- * The most portable version that
- * should be preferred over the others, whenever possible, is
+ * The most portable version that should be preferred over the others, whenever
+ * possible, is
  *
  * \code
  * hwloc_set_cpubind(topology, set, 0),
@@ -915,6 +915,36 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
+/** @} */
+
+
+/** \defgroup hwlocality_membinding Memory binding
+ *
+ * \note Not all OSes support all ways to bind existing allocated memory
+ * (migration), future memory allocation, explicit memory allocation, etc. and
+ * the corresponding binding functions may fail. ENOSYS is returned when it is
+ * not possible to bind the requested kind of object processes/threads). EXDEV
+ * is returned when the requested cpuset can not be enforced (e.g. some systems
+ * only allow one NUMA node)
+ *
+ * The most portable version that should be preferred over the others, whenever
+ * possible, is
+ *
+ * \code
+ * hwloc_alloc_membind(topology, size, set, HWLOC_MEMBIND_BIND),
+ * \endcode
+ *
+ * which will allocate new data bound to the given set (at worse, hwloc will
+ * allocate memory itself and bind it).
+ * @{
+ */
+
+/** \brief Memory binding policy.
+ *
+ * These flags can be used to refine the binding policy.
+ *
+ * Note that not all systems support all kinds of binding.
+ */
 typedef enum {
   HWLOC_MEMBIND_DEFAULT = (1<<0),	/**< \brief Reset the memory allocation policy to the system default.
 					 * \hideinitializer */
@@ -925,7 +955,8 @@ typedef enum {
 					 * \hideinitializer */
   HWLOC_MEMBIND_INTERLEAVE = (1<<3),	/**< \brief Allocate memory on the given nodes in a round-robin manner.
 					 * \hideinitializer */
-  HWLOC_MEMBIND_MIGRATE = (1<<4),	/**< Migrate existing allocated memory.
+  HWLOC_MEMBIND_MIGRATE = (1<<4),	/**< Migrate existing allocated memory. If memory can not be migrated and the
+					 * STRICT flag is passed, an error will be returned.
 					 * \hideinitializer  */
   HWLOC_MEMBIND_STRICT = (1<<5)		/**< Request strict binding from the OS.
 					 * \hideinitializer  */
