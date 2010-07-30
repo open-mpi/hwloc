@@ -172,18 +172,37 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 #ifdef P_DEFAULT
 static void *
 hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
-  hwloc_cpuset_t nodeset = hwloc_cpuset_alloc(), nodeset1 = hwloc_cpuset_alloc();
+  hwloc_cpuset_t nodeset, nodeset1;
   int node;
   rsethandle_t rset, rad;
   int MCMlevel;
   void *ret;
   rsid_t rsid;
 
+  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+    case HWLOC_MEMBIND_DEFAULT:
+    case HWLOC_MEMBIND_BIND:
+      policy = P_DEFAULT;
+      break;
+    case HWLOC_MEMBIND_FIRSTTOUCH:
+      policy = P_FIRST_TOUCH;
+      break;
+    case HWLOC_MEMBIND_INTERLEAVE:
+      policy = P_BALANCED;
+      break;
+    default:
+      errno = EINVAL;
+      return NULL;
+  }
+
+  nodeset1 = hwloc_cpuset_alloc();
+  nodeset = hwloc_cpuset_alloc();
   hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
   node = hwloc_cpuset_first(nodeset);
   hwloc_cpuset_cpu(nodeset1, node);
   if (!hwloc_cpuset_isequal(nodeset, nodeset1)) {
     /* Not a single node, can't do this */
+    /* FIXME */
     errno = EXDEV;
     return NULL;
   }
@@ -198,7 +217,7 @@ hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuse
 
   ret =
     ra_mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,
-            0, R_RSET, rsid, P_DEFAULT);
+            0, R_RSET, rsid, policy);
 
   rs_free(rset);
   rs_free(rad);
@@ -206,7 +225,7 @@ hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuse
 }
 
 static int
-hwloc_aix_free_membind(hwloc_topology_t topology, void *addr, size_t len) {
+hwloc_aix_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len) {
   return munmap(addr, len);
 }
 #endif /* P_DEFAULT */

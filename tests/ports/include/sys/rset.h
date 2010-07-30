@@ -37,6 +37,10 @@ typedef int rsinfo_t;
 #define R_FILDES 5
 #define R_THREAD 6
 
+#define P_DEFAULT 0
+#define P_FIRST_TOUCH 1
+#define P_BALANCED 2	/* This is the default */
+
 rsethandle_t rs_alloc (unsigned int flags);
 int rs_numrads(rsethandle_t rset, unsigned int sdl, unsigned int flags);
 int rs_getrad (rsethandle_t rset, rsethandle_t rad, unsigned int sdl, unsigned int index, unsigned int flags);
@@ -69,5 +73,8 @@ struct subrange {
 int ra_attachrset (rstype_t rstype, rsid_t rsid, rsethandle_t rset, unsigned int flags);
 int ra_detachrset (rstype_t rstype, rsid_t rsid, unsigned int flags);
 int ra_getrset (rstype_t rstype, rsid_t rsid, unsigned int flags, rsethandle_t rset);
+
+void * ra_mmap(void *addr, off64_t len, int prot, int flags, int fildes, off64_t off, rstype_t rstype, rsid_t rsid, unsigned int att_flags);
+
 
 #endif /* HWLOC_PORT_SYS_RSET_H */
