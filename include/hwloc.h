@@ -35,6 +35,10 @@
 #include <hwloc/cpuset.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /** \defgroup hwlocality_api_version API version
  * @{
@@ -973,6 +977,11 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, 
 HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len);
 
 /** @} */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 
 /* high-level helpers */

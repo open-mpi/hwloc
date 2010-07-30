@@ -217,21 +217,31 @@ EOF
         AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
     fi
 
-    # XML support        
-    
-    if test "x$enable_xml" != "xno"; then
-        HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [xmlNewDoc], [:], [enable_xml="no"])
-    fi
-    
-    if test "x$enable_xml" != "xno"; then
-        HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
-        AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
-        AC_SUBST([HWLOC_HAVE_XML], [1])
-    else
-        AC_SUBST([HWLOC_HAVE_XML], [0])
-    fi
-    AC_SUBST(HWLOC_REQUIRES)
-    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_XML_CFLAGS"
+    AC_CHECK_TYPES([wchar_t], [
+      AC_CHECK_FUNCS([putwc])
+    ], [], [[#include <wchar.h>]])
+
+    AC_CHECK_HEADERS([locale.h], [
+      AC_CHECK_FUNCS([setlocale])
+    ])
+    AC_CHECK_HEADERS([langinfo.h], [
+      AC_CHECK_FUNCS([nl_langinfo])
+    ])
+    hwloc_old_LIBS="$LIBS"
+    LIBS=
+    AC_CHECK_HEADERS([curses.h], [
+      AC_CHECK_HEADERS([term.h], [
+        AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
+            AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
+            AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
+                      [Define to 1 if you have a library providing the termcap interface])
+          ])
+      ], [], [[#include <curses.h>]])
+    ])
+    LIBS="$hwloc_old_LIBS"
+    unset hwloc_old_LIBS
+
+    _HWLOC_CHECK_DIFF_U
 
     # Only generate this if we're building the utilities
     AC_CONFIG_FILES(
@@ -256,10 +266,17 @@ EOF
     AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
     	      [#include <numa.h>])
 
+    AC_CHECK_HEADERS([infiniband/verbs.h], [
+      AC_CHECK_LIB([ibverbs], [ibv_open_device],
+                   [AC_DEFINE([HAVE_LIBIBVERBS], 1, [Define to 1 if we have -libverbs])
+                    hwloc_have_libibverbs=yes])
+    ])
 
     if test "x$enable_xml" != "xno"; then
         AC_CHECK_PROGS(XMLLINT, [xmllint])
     fi
+
+    _HWLOC_CHECK_DIFF_U
 
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(

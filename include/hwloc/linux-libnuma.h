@@ -17,6 +17,11 @@
 #include <numa.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /** \defgroup hwlocality_linux_libnuma_ulongs Helpers for manipulating Linux libnuma unsigned long masks
  * @{
  */
@@ -258,6 +263,11 @@ hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset
 
 /** @} */
 #endif /* NUMA_VERSION1_COMPATIBILITY */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 
 #endif /* HWLOC_LINUX_NUMA_H */

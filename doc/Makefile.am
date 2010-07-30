@@ -286,6 +286,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_or.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_asprintf.3 \
