@@ -267,6 +267,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_first.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_begin.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_end.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_glibc_sched_affinity.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
@@ -291,6 +292,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_asprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_bitmask.3 \

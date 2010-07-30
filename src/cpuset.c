@@ -975,3 +975,39 @@ int hwloc_cpuset_weight(const struct hwloc_cpuset_s * set)
 		weight += hwloc_weight_long(set->ulongs[i]);
 	return weight;
 }
+
+void hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_cpuset_t nodeset)
+{
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	hwloc_obj_t obj;
+
+	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+		/* Assume the whole system */
+		hwloc_cpuset_fill(nodeset);
+		return;
+	}
+
+	hwloc_cpuset_zero(nodeset);
+	obj = NULL;
+	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, cpuset, depth, obj)) != NULL)
+		hwloc_cpuset_set(nodeset, obj->os_index);
+}
+
+void hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_const_cpuset_t nodeset)
+{
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	hwloc_obj_t obj;
+
+	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+		/* Assume the whole system */
+		hwloc_cpuset_fill(cpuset);
+		return;
+	}
+
+	hwloc_cpuset_zero(cpuset);
+	obj = NULL;
+	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
+		if (hwloc_cpuset_isset(nodeset, obj->os_index))
+			hwloc_cpuset_or(cpuset, cpuset, obj->cpuset);
+	}
+}

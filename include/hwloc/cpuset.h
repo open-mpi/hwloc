@@ -247,6 +247,15 @@ do { \
         } \
 } while (0)
 
+struct hwloc_topology;
+/** \brief Convert a CPU set into a NUMA node set
+ */
+HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, hwloc_cpuset_t nodeset);
+
+/** \brief Convert a NUMA node set set into a CPU set
+ */
+HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset, hwloc_const_cpuset_t nodeset);
+
 /** @} */
 
 
