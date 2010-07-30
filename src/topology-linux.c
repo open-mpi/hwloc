@@ -766,7 +766,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
-#if HWLOC_HAVE_SET_MEMPOLICY
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
 hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
 {
