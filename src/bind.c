@@ -229,7 +229,7 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
   if (!set)
     return NULL;
 
-  if (topology->set_area_membind)
+  if (topology->alloc_membind)
     return topology->alloc_membind(topology, len, set, policy);
 
   errno = ENOSYS;
@@ -239,7 +239,7 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
 int
 hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len)
 {
-  if (topology->get_area_membind)
+  if (topology->free_membind)
     return topology->free_membind(topology, addr, len);
 
   errno = ENOSYS;
