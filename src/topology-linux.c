@@ -796,7 +796,7 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
     goto out;
   }
 
-  if (policy & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE) == HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE) {
+  if ((policy & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
     /* TODO: MIGRATE */
     errno = ENOSYS;
     goto out;
