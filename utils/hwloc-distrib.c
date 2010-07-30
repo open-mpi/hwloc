@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "distributing %ld\n", n);
 
   {
-    long i,j;
+    unsigned i,j;
     int depth;
     unsigned chunks;
     hwloc_cpuset_t cpuset[n];
