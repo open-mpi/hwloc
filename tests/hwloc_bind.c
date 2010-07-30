@@ -85,10 +85,12 @@ static void testmem(hwloc_const_cpuset_t memset, int flags)
 #endif /* !HWLOC_WIN_SYS */
   result_set("Bind area", hwloc_set_area_membind(topology, &new_memset, sizeof(new_memset), memset, flags), support->membind->set_area_membind);
   result_get("Get  area", memset, new_memset, hwloc_get_area_membind(topology, &new_memset, sizeof(new_memset), new_memset, &newflags), support->membind->get_area_membind);
-  result_set("Alloc bound area", (area = hwloc_alloc_membind(topology, area_size, memset, flags)) == NULL, support->membind->alloc_membind);
-  if (area) {
-    result_get("Get   bound area", memset, new_memset, hwloc_get_area_membind(topology, area, area_size, new_memset, &newflags), support->membind->get_area_membind);
-    result_get("Free  bound area", NULL, NULL, hwloc_free_membind(topology, area, area_size), support->membind->alloc_membind);
+  if (!(flags & HWLOC_MEMBIND_MIGRATE)) {
+    result_set("Alloc bound area", (area = hwloc_alloc_membind(topology, area_size, memset, flags)) == NULL, support->membind->alloc_membind);
+    if (area) {
+      result_get("Get   bound area", memset, new_memset, hwloc_get_area_membind(topology, area, area_size, new_memset, &newflags), support->membind->get_area_membind);
+      result_get("Free  bound area", NULL, NULL, hwloc_free_membind(topology, area, area_size), support->membind->alloc_membind);
+    }
   }
   printf("\n");
   hwloc_cpuset_free(new_memset);
