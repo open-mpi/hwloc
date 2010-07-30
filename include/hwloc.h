@@ -810,7 +810,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  */
 typedef enum {
   HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
-                                   * This may not be supported by some OSes (e.g. Linux).
+                                   * This may not be supported by some OSes.
                                    * \hideinitializer */
   HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
                                    * \hideinitializer */
