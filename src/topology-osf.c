@@ -22,10 +22,11 @@
 #include <numa.h>
 #include <radset.h>
 #include <cpuset.h>
+#include <sys/mman.h>
 
 /* TODO: memory
  *
- * nmadvise(addr,len), nmmap()
+ * nmadvise(addr,len)
  * policies: DIRECTED, STRIPPED, first_touch(REPLICATED)
  *
  * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
@@ -143,6 +144,59 @@ hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t h
   return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
 }
 
+static void *
+hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
+  hwloc_cpuset_t nodeset, nodeset1;
+  int node;
+  memalloc_attr_t mattr;
+  unsigned long osf_policy;
+
+  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+    case HWLOC_MEMBIND_DEFAULT:
+    case HWLOC_MEMBIND_FIRSTTOUCH:
+    case HWLOC_MEMBIND_BIND:
+      osf_policy = DIRECTED;
+      break;
+    case HWLOC_MEMBIND_INTERLEAVE:
+      errno = ENOSYS;
+      return NULL;
+    /* TODO: REPLICATED */
+    default:
+      errno = EINVAL;
+      return NULL;
+  }
+
+  nodeset = hwloc_cpuset_alloc();
+  nodeset1 = hwloc_cpuset_alloc();
+
+  hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
+  node = hwloc_cpuset_first(nodeset);
+  hwloc_cpuset_cpu(nodeset1, node);
+  if (!hwloc_cpuset_isequal(nodeset, nodeset1)) {
+    /* Not a single node, can't do this */
+    errno = EXDEV;
+    return NULL;
+  }
+  hwloc_cpuset_free(nodeset);
+  hwloc_cpuset_free(nodeset1);
+
+  /* TODO: rather use acreate/amalloc ? */
+
+  memset(&mattr, 0, sizeof(mattr));
+  mattr.mattr_policy = osf_policy;
+  mattr.mattr_rad = node;
+  radsetcreate(&mattr.mattr_radset);
+  rademptyset(mattr.mattr_radset);
+  radaddset(mattr.mattr_radset, node);
+  return nmmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,
+               0, &mattr);
+}
+
+static int
+hwloc_osf_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len) {
+  return munmap(addr, len);
+}
+
 void
 hwloc_look_osf(struct hwloc_topology *topology)
 {
@@ -240,4 +294,6 @@ hwloc_set_osf_hooks(struct hwloc_topology *topology)
   topology->set_thisthread_cpubind = hwloc_osf_set_thisthread_cpubind;
   topology->set_proc_cpubind = hwloc_osf_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_osf_set_thisproc_cpubind;
+  topology->alloc_membind = hwloc_osf_alloc_membind;
+  topology->free_membind = hwloc_osf_free_membind;
 }

@@ -23,6 +23,7 @@
 #include <sys/rset.h>
 #include <sys/processor.h>
 #include <sys/thread.h>
+#include <sys/mman.h>
 
 /* TODO: memory binding and policy (P_DEFAULT / P_FIRST_TOUCH / P_BALANCED)
  * ra_mmap to allocation on an rset
@@ -167,6 +168,48 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   }
 }
 #endif /* HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
+
+#ifdef P_DEFAULT
+static void *
+hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
+  hwloc_cpuset_t nodeset = hwloc_cpuset_alloc(), nodeset1 = hwloc_cpuset_alloc();
+  int node;
+  rsethandle_t rset, rad;
+  int MCMlevel;
+  void *ret;
+  rsid_t rsid;
+
+  hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
+  node = hwloc_cpuset_first(nodeset);
+  hwloc_cpuset_cpu(nodeset1, node);
+  if (!hwloc_cpuset_isequal(nodeset, nodeset1)) {
+    /* Not a single node, can't do this */
+    errno = EXDEV;
+    return NULL;
+  }
+  hwloc_cpuset_free(nodeset);
+  hwloc_cpuset_free(nodeset1);
+
+  MCMlevel = rs_getinfo(NULL, R_MCMSDL, 0);
+  rset = rs_alloc(RS_PARTITION);
+  rad = rs_alloc(RS_EMPTY);
+  rs_getrad(rset, rad, MCMlevel, node, 0);
+  rsid.at_rset = rad;
+
+  ret =
+    ra_mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,
+            0, R_RSET, rsid, P_DEFAULT);
+
+  rs_free(rset);
+  rs_free(rad);
+  return ret;
+}
+
+static int
+hwloc_aix_free_membind(hwloc_topology_t topology, void *addr, size_t len) {
+  return munmap(addr, len);
+}
+#endif /* P_DEFAULT */
 
 static void
 look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int level)
@@ -314,4 +357,8 @@ hwloc_set_aix_hooks(struct hwloc_topology *topology)
   topology->get_thisproc_cpubind = hwloc_aix_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
   topology->get_thisthread_cpubind = hwloc_aix_get_thisthread_cpubind;
+#ifdef P_DEFAULT
+  topology->alloc_membind = hwloc_aix_alloc_membind;
+  topology->free_membind = hwloc_aix_free_membind;
+#endif /* P_DEFAULT */
 }
