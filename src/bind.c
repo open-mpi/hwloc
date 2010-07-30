@@ -7,7 +7,12 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <hwloc/helper.h>
+#ifdef HAVE_MALLOC_H
+#  include <malloc.h>
+#endif
 
+#include <unistd.h>
+#include <stdlib.h>
 #include <errno.h>
 
 /* TODO: HWLOC_GNU_SYS, HWLOC_IRIX_SYS,
@@ -232,8 +237,16 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
   if (topology->alloc_membind)
     return topology->alloc_membind(topology, len, set, policy);
   else if (topology->set_area_membind) {
-    /* TODO: align on a page */
-    void *p = malloc(len);
+    void *p;
+#if defined(HAVE_GETPAGESIZE) && defined(HAVE_POSIX_MEMALIGN)
+    errno = posix_memalign(&p, getpagesize(), len);
+    if (errno)
+      p = NULL;
+#elif defined(HAVE_GETPAGESIZE) && defined(HAVE_MEMALIGN)
+    p = memalign(getpagesize(), len);
+#else
+    p = malloc(len);
+#endif
     if (!topology->set_area_membind(topology, p, len, set, policy)) {
       int error = errno;
       free(p);

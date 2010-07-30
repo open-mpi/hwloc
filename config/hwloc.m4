@@ -491,6 +491,9 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     
     AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
 
+    AC_CHECK_HEADERS([malloc.h])
+    AC_CHECK_FUNCS([getpagesize memalign posix_memalign])
+
     # set_mempolicy support   
     AC_CHECK_HEADERS([numaif.h], [
       AC_CHECK_LIB([numa], [set_mempolicy], [
