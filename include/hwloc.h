@@ -790,7 +790,7 @@ HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t
  */
 typedef enum {
   HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
-                                   * This may not be supported by some OSes (e.g. Linux).
+                                   * This may not be supported by some OSes.
                                    * \hideinitializer */
   HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
                                    * \hideinitializer */
