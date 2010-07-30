@@ -916,6 +916,8 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int
  out:
   return -1;
 }
+
+/* TODO: mbind, migrate_pages */
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 
 int
@@ -2044,5 +2046,3 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
   topology->get_membind = hwloc_linux_get_membind;
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 }
-
-/* TODO mbind, setpolicy */
