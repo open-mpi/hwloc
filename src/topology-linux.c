@@ -779,6 +779,7 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
 
   switch (policy & ~(HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
   case HWLOC_MEMBIND_DEFAULT:
+  case HWLOC_MEMBIND_FIRSTTOUCH:
     linuxpolicy = MPOL_DEFAULT;
     break;
   case HWLOC_MEMBIND_BIND:
@@ -883,7 +884,7 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int
 
   switch (linuxpolicy) {
   case MPOL_DEFAULT:
-    *policy = HWLOC_MEMBIND_DEFAULT;
+    *policy = HWLOC_MEMBIND_FIRSTTOUCH;
     break;
   case MPOL_PREFERRED:
     *policy = HWLOC_MEMBIND_BIND|HWLOC_MEMBIND_STRICT;
