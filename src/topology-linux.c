@@ -796,6 +796,10 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
     goto out;
   }
 
+  if (linuxpolicy == MPOL_DEFAULT)
+    /* Some Linux kernels don't like being passed a set */
+    return set_mempolicy(linuxpolicy, NULL, 0);
+
   /* compute max_os_index */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
