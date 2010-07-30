@@ -25,16 +25,12 @@
 #include <sys/thread.h>
 #include <sys/mman.h>
 
-/* TODO: memory binding and policy (P_DEFAULT / P_FIRST_TOUCH / P_BALANCED)
- * ra_mmap to allocation on an rset
- */
-
 static int
 hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
-  rsethandle_t rset, rad;
-  hwloc_obj_t obj;
-  int res = -1;
+  rsethandle_t rad;
+  int res;
+  unsigned cpu;
 
   /* The resulting binding is always strict */
 
@@ -44,32 +40,13 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     return 0;
   }
 
-  obj = hwloc_get_first_largest_obj_inside_cpuset(topology, hwloc_set);
-  if (!hwloc_cpuset_isequal(obj->cpuset, hwloc_set) || obj->os_level == -1) {
-    /* Does not correspond to exactly one radset, not possible */
-    errno = EXDEV;
-    return -1;
-  }
-
-  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
-    rset = rs_alloc(RS_ALL);
-  else
-    rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
-  if (rs_getrad(rset, rad, obj->os_level, obj->os_index, 0)) {
-    fprintf(stderr,"rs_getrad(%d,%u) failed: %s\n", obj->os_level, obj->os_index, strerror(errno));
-    goto out;
-  }
+  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+    rs_op(RS_ADDRESOURCE, rad, NULL, R_PROCS, cpu);
+  hwloc_cpuset_foreach_end();
 
-  if (ra_attachrset(what, who, rad, 0)) {
-    res = -1;
-    goto out;
-  }
+  res = ra_attachrset(what, who, rad, 0);
 
-  res = 0;
-
-out:
-  rs_free(rset);
   rs_free(rad);
   return res;
 }
@@ -170,11 +147,14 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 #endif /* HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
 
 #ifdef P_DEFAULT
+
+/* TODO: set_membind set_proc_membind, document that it binds threads too. */
+
 static void *
 hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
-  hwloc_cpuset_t nodeset, nodeset1;
+  hwloc_cpuset_t nodeset;
   int node;
-  rsethandle_t rset, rad;
+  rsethandle_t rset, rad, noderad;
   int MCMlevel;
   void *ret;
   rsid_t rsid;
@@ -195,19 +175,8 @@ hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuse
       return NULL;
   }
 
-  nodeset1 = hwloc_cpuset_alloc();
   nodeset = hwloc_cpuset_alloc();
   hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
-  node = hwloc_cpuset_first(nodeset);
-  hwloc_cpuset_cpu(nodeset1, node);
-  if (!hwloc_cpuset_isequal(nodeset, nodeset1)) {
-    /* Not a single node, can't do this */
-    /* FIXME */
-    errno = EXDEV;
-    return NULL;
-  }
-  hwloc_cpuset_free(nodeset);
-  hwloc_cpuset_free(nodeset1);
 
   MCMlevel = rs_getinfo(NULL, R_MCMSDL, 0);
   if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
@@ -215,15 +184,22 @@ hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuse
   else
     rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
-  rs_getrad(rset, rad, MCMlevel, node, 0);
+  noderad = rs_alloc(RS_EMPTY);
+
+  hwloc_cpuset_foreach_begin(node, nodeset)
+    rs_getrad(rset, noderad, MCMlevel, node, 0);
+    rs_op(RS_UNION, noderad, rad, 0, 0);
+  hwloc_cpuset_foreach_end();
   rsid.at_rset = rad;
 
   ret =
     ra_mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,
             0, R_RSET, rsid, policy);
 
+  hwloc_cpuset_free(nodeset);
   rs_free(rset);
   rs_free(rad);
+  rs_free(noderad);
   return ret;
 }
 

@@ -16,7 +16,19 @@ typedef void *rsethandle_t;
 #define RS_ALL 2
 #define RS_PARTITION 3
 
+#define RS_UNION 1
+#define RS_INTERSECTION 2
+#define RS_EXCLUSION 3
+#define RS_COPY 4
+#define RS_FIRST 5
+#define RS_NEXT 6
+#define RS_NEXT_WRAP 7
+#define RS_ISEMPTY 8
+#define RS_ISEQUAL 9
+#define RS_ISCONTAINED 10
 #define RS_TESTRESOURCE 11
+#define RS_ADDRESOURCE 12
+#define RS_DELRESOURCE 13
 
 typedef int rsinfo_t;
 #define R_NUMPROCS 0
