@@ -210,7 +210,10 @@ hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuse
   hwloc_cpuset_free(nodeset1);
 
   MCMlevel = rs_getinfo(NULL, R_MCMSDL, 0);
-  rset = rs_alloc(RS_PARTITION);
+  if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
+    rset = rs_alloc(RS_ALL);
+  else
+    rset = rs_alloc(RS_PARTITION);
   rad = rs_alloc(RS_EMPTY);
   rs_getrad(rset, rad, MCMlevel, node, 0);
   rsid.at_rset = rad;
