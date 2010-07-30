@@ -233,6 +233,10 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
   set = hwloc_fix_membind(topology, set);
   if (!set)
     return NULL;
+  if (policy & HWLOC_MEMBIND_MIGRATE) {
+    errno = EINVAL;
+    return NULL;
+  }
 
   if (topology->alloc_membind)
     return topology->alloc_membind(topology, len, set, policy);
