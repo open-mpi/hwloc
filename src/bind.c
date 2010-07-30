@@ -231,6 +231,17 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
 
   if (topology->alloc_membind)
     return topology->alloc_membind(topology, len, set, policy);
+  else if (topology->set_area_membind) {
+    /* TODO: align on a page */
+    void *p = malloc(len);
+    if (!topology->set_area_membind(topology, p, len, set, policy)) {
+      int error = errno;
+      free(p);
+      errno = error;
+      return NULL;
+    }
+    return p;
+  }
 
   errno = ENOSYS;
   return NULL;
@@ -241,6 +252,8 @@ hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len)
 {
   if (topology->free_membind)
     return topology->free_membind(topology, addr, len);
+  else if (topology->set_area_membind)
+    free(addr);
 
   errno = ENOSYS;
   return -1;
