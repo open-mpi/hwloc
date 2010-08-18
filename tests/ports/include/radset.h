@@ -72,6 +72,9 @@ typedef enum memalloc_policy {
 } memalloc_policy_t;
 #define MPOL_NO_MIGRATE 0x100
 
+#define MADV_CURRENT 1
+#define MADV_INSIST 2
+
 int nloc(numa_attr_t *numa_attr, radset_t radset);
 
 #endif /* HWLOC_PORT_RADSET_H */

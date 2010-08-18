@@ -24,10 +24,8 @@
 #include <cpuset.h>
 #include <sys/mman.h>
 
-/* TODO: memory
- *
- * nmadvise(addr,len)
- * policies: DIRECTED, STRIPPED, first_touch(REPLICATED)
+/*
+ * TODO REPLICATED
  *
  * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
  * assign_pid_to_pset()
@@ -144,52 +142,76 @@ hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t h
   return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
 }
 
-static void *
-hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
-  hwloc_cpuset_t nodeset, nodeset1;
-  int node;
-  memalloc_attr_t mattr;
+static int
+hwloc_osf_prepare_mattr(hwloc_topology_t topology, memalloc_attr_t *mattr, hwloc_const_cpuset_t hwloc_set, int policy) {
   unsigned long osf_policy;
+  hwloc_cpuset_t nodeset;
+  int node;
 
   switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
-    case HWLOC_MEMBIND_DEFAULT:
     case HWLOC_MEMBIND_FIRSTTOUCH:
+      osf_policy = MPOL_THREAD;
+      break;
+    case HWLOC_MEMBIND_DEFAULT:
     case HWLOC_MEMBIND_BIND:
-      osf_policy = DIRECTED;
+      osf_policy = MPOL_DIRECTED;
       break;
     case HWLOC_MEMBIND_INTERLEAVE:
-      errno = ENOSYS;
-      return NULL;
+      errno = MPOL_STRIPPED;
+      break;
     /* TODO: REPLICATED */
     default:
       errno = EINVAL;
-      return NULL;
+      return -1;
   }
+
+  memset(mattr, 0, sizeof(*mattr));
+  mattr->mattr_policy = osf_policy;
+  mattr->mattr_rad = RAD_NONE;
+  radsetcreate(&mattr->mattr_radset);
+  rademptyset(mattr->mattr_radset);
 
   nodeset = hwloc_cpuset_alloc();
-  nodeset1 = hwloc_cpuset_alloc();
-
   hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
-  node = hwloc_cpuset_first(nodeset);
-  hwloc_cpuset_cpu(nodeset1, node);
-  if (!hwloc_cpuset_isequal(nodeset, nodeset1)) {
-    /* Not a single node, can't do this */
-    errno = EXDEV;
-    return NULL;
-  }
+  hwloc_cpuset_foreach_begin(node, nodeset)
+    radaddset(mattr->mattr_radset, node);
+  hwloc_cpuset_foreach_end();
   hwloc_cpuset_free(nodeset);
-  hwloc_cpuset_free(nodeset1);
+  return 0;
+}
+
+static int
+hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
+  memalloc_attr_t mattr;
+  int behavior = 0;
+  int ret;
+
+  if (policy & HWLOC_MEMBIND_MIGRATE)
+    behavior |= MADV_CURRENT;
+  if (policy & HWLOC_MEMBIND_STRICT)
+    behavior |= MADV_INSIST;
+
+  if (hwloc_osf_prepare_mattr(topology, &mattr, hwloc_set, policy))
+    return -1;
+
+  ret = nmadvise(addr, len, MADV_CURRENT, &mattr);
+  radsetdestroy(&mattr.mattr_radset);
+  return ret;
+}
+
+static void *
+hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
+  memalloc_attr_t mattr;
+  void *ptr;
+
+  if (hwloc_osf_prepare_mattr(topology, &mattr, hwloc_set, policy))
+    return NULL;
 
   /* TODO: rather use acreate/amalloc ? */
-
-  memset(&mattr, 0, sizeof(mattr));
-  mattr.mattr_policy = osf_policy;
-  mattr.mattr_rad = node;
-  radsetcreate(&mattr.mattr_radset);
-  rademptyset(mattr.mattr_radset);
-  radaddset(mattr.mattr_radset, node);
-  return nmmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,
+  ptr = nmmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,
                0, &mattr);
+  radsetdestroy(&mattr.mattr_radset);
+  return ptr;
 }
 
 static int
@@ -294,6 +316,7 @@ hwloc_set_osf_hooks(struct hwloc_topology *topology)
   topology->set_thisthread_cpubind = hwloc_osf_set_thisthread_cpubind;
   topology->set_proc_cpubind = hwloc_osf_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_osf_set_thisproc_cpubind;
+  topology->set_area_membind = hwloc_osf_set_area_membind;
   topology->alloc_membind = hwloc_osf_alloc_membind;
   topology->free_membind = hwloc_osf_free_membind;
 }
