@@ -13,8 +13,6 @@
 
 #include <windows.h>
 
-/* TODO memory binding: VirtualAllocExNuma */
-
 #ifndef HAVE_KAFFINITY
 typedef ULONG_PTR KAFFINITY, *PKAFFINITY;
 #endif
@@ -194,6 +192,70 @@ static int
 hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_cpuset, int policy)
 {
   return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), hwloc_cpuset, policy);
+}
+
+static LPVOID WINAPI (*VirtualAllocExNumaProc)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect, DWORD nndPreferred);
+static BOOL WINAPI (*VirtualFreeExProc)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType);
+
+static int hwloc_win_get_VirtualAllocExNumaProc(void) {
+  if (VirtualAllocExNumaProc == NULL) {
+    FARPROC alloc_fun, free_fun;
+    HMODULE kernel32;
+
+    kernel32 = LoadLibrary("kernel32.dll");
+    if (kernel32) {
+      alloc_fun = GetProcAddress(kernel32, "VirtualAllocExNuma");
+      free_fun = GetProcAddress(kernel32, "VirtualFreeEx");
+    }
+
+    if (!kernel32 || !alloc_fun || !free_fun) {
+      VirtualAllocExNumaProc = (FARPROC) -1;
+      errno = ENOSYS;
+      return -1;
+    }
+
+    VirtualAllocExNumaProc = alloc_fun;
+    VirtualFreeExProc = free_fun;
+  } else if ((FARPROC) VirtualAllocExNumaProc == (FARPROC)-1) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  return 0;
+}
+
+static void *
+hwloc_win_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused) {
+  hwloc_cpuset_t nodeset, nodeset1;
+  int node;
+
+  if (policy & HWLOC_MEMBIND_STRICT) {
+    errno = ENOSYS;
+    return NULL;
+  }
+
+  nodeset = hwloc_cpuset_alloc();
+  nodeset1 = hwloc_cpuset_alloc();
+
+  hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
+  node = hwloc_cpuset_first(nodeset);
+  hwloc_cpuset_cpu(nodeset1, node);
+  if (!hwloc_cpuset_isequal(nodeset, nodeset1)) {
+    /* Not a single node, can't do this */
+    errno = EXDEV;
+    return NULL;
+  }
+  hwloc_cpuset_free(nodeset);
+  hwloc_cpuset_free(nodeset1);
+
+  return VirtualAllocExNumaProc(GetCurrentProcess(), NULL, len, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE, node);
+}
+
+static int
+hwloc_win_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len __hwloc_attribute_unused) {
+  if (!VirtualFreeExProc(GetCurrentProcess(), addr, 0, MEM_RELEASE))
+    return -1;
+  return 0;
 }
 
 void
@@ -426,4 +488,9 @@ hwloc_set_windows_hooks(struct hwloc_topology *topology)
   topology->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
   topology->get_thisproc_cpubind = hwloc_win_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
+
+  if (!hwloc_win_get_VirtualAllocExNumaProc()) {
+    topology->alloc_membind = hwloc_win_alloc_membind;
+    topology->free_membind = hwloc_win_free_membind;
+  }
 }

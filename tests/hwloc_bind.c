@@ -68,32 +68,33 @@ static void test(hwloc_const_cpuset_t cpuset, int flags)
   hwloc_cpuset_free(new_cpuset);
 }
 
-static void testmem(hwloc_const_cpuset_t memset, int flags)
+static void testmem(hwloc_const_cpuset_t nodeset, int flags)
 {
-  hwloc_cpuset_t new_memset = hwloc_cpuset_alloc();
+  hwloc_cpuset_t new_nodeset = hwloc_cpuset_alloc();
   int newflags;
   void *area;
   size_t area_size = 1024;
-  result_set("Bind this process memory", hwloc_set_membind(topology, memset, flags), support->membind->set_membind);
-  result_get("Get  this process memory", memset, new_memset, hwloc_get_membind(topology, new_memset, &newflags), support->membind->get_membind);
+  result_set("Bind this process memory", hwloc_set_membind(topology, nodeset, flags), support->membind->set_membind);
+  result_get("Get  this process memory", nodeset, new_nodeset, hwloc_get_membind(topology, new_nodeset, &newflags), support->membind->get_membind);
 #ifdef HWLOC_WIN_SYS
-  result_set("Bind process memory", hwloc_set_proc_membind(topology, GetCurrentProcess(), memset, flags), support->membind->set_proc_membind);
-  result_get("Get  process memory", memset, new_memset, hwloc_get_proc_membind(topology, GetCurrentProcess(), new_memset, &newflags), support->membind->get_proc_membind);
+  result_set("Bind process memory", hwloc_set_proc_membind(topology, GetCurrentProcess(), nodeset, flags), support->membind->set_proc_membind);
+  result_get("Get  process memory", nodeset, new_nodeset, hwloc_get_proc_membind(topology, GetCurrentProcess(), new_nodeset, &newflags), support->membind->get_proc_membind);
 #else /* !HWLOC_WIN_SYS */
-  result_set("Bind process memory", hwloc_set_proc_membind(topology, getpid(), memset, flags), support->membind->set_proc_membind);
-  result_get("Get  process memory", memset, new_memset, hwloc_get_proc_membind(topology, getpid(), new_memset, &newflags), support->membind->get_proc_membind);
+  result_set("Bind process memory", hwloc_set_proc_membind(topology, getpid(), nodeset, flags), support->membind->set_proc_membind);
+  result_get("Get  process memory", nodeset, new_nodeset, hwloc_get_proc_membind(topology, getpid(), new_nodeset, &newflags), support->membind->get_proc_membind);
 #endif /* !HWLOC_WIN_SYS */
-  result_set("Bind area", hwloc_set_area_membind(topology, &new_memset, sizeof(new_memset), memset, flags), support->membind->set_area_membind);
-  result_get("Get  area", memset, new_memset, hwloc_get_area_membind(topology, &new_memset, sizeof(new_memset), new_memset, &newflags), support->membind->get_area_membind);
+  result_set("Bind area", hwloc_set_area_membind(topology, &new_nodeset, sizeof(new_nodeset), nodeset, flags), support->membind->set_area_membind);
+  result_get("Get  area", nodeset, new_nodeset, hwloc_get_area_membind(topology, &new_nodeset, sizeof(new_nodeset), new_nodeset, &newflags), support->membind->get_area_membind);
   if (!(flags & HWLOC_MEMBIND_MIGRATE)) {
-    result_set("Alloc bound area", (area = hwloc_alloc_membind(topology, area_size, memset, flags)) == NULL, support->membind->alloc_membind);
+    result_set("Alloc bound area", (area = hwloc_alloc_membind(topology, area_size, nodeset, flags)) == NULL, support->membind->alloc_membind);
     if (area) {
-      result_get("Get   bound area", memset, new_memset, hwloc_get_area_membind(topology, area, area_size, new_memset, &newflags), support->membind->get_area_membind);
+      memset(area, 0, area_size);
+      result_get("Get   bound area", nodeset, new_nodeset, hwloc_get_area_membind(topology, area, area_size, new_nodeset, &newflags), support->membind->get_area_membind);
       result_get("Free  bound area", NULL, NULL, hwloc_free_membind(topology, area, area_size), support->membind->alloc_membind);
     }
   }
   printf("\n");
-  hwloc_cpuset_free(new_memset);
+  hwloc_cpuset_free(new_nodeset);
 }
 
 static void testmem2(hwloc_const_cpuset_t set, int flags)
