@@ -113,7 +113,7 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
     *input_formatp = HWLOC_UTILS_INPUT_XML;
     *consumed_opts = 1;
     return 1;
-  } else if (!strcmp (argv[0], "--fsroot") || !strcmp (argv[0], "--fsys-root")) {
+  } else if (!strcmp (argv[0], "--fsys-root")) {
     if (argc <= 1) {
       usage (callname, stderr);
       exit(EXIT_FAILURE);
