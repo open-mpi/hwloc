@@ -15,13 +15,13 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
   fprintf(where, "Usage: hwloc-distrib [options] number\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "   --single\tsinglify each output to a single CPU\n");
-  fprintf(where, "   --taskset\tShow taskset-specific cpuset strings\n");
-  fprintf(where, "   -v\t\t\tverbose messages\n");
+  fprintf(where, "  --single\tsinglify each output to a single CPU\n");
+  fprintf(where, "  --taskset\tShow taskset-specific cpuset strings\n");
+  fprintf(where, "  -v\t\t\tverbose messages\n");
   hwloc_utils_input_format_usage(where);
-  fprintf(where, "   --ignore <type>\tIgnore objects of the given type\n");
-  fprintf(where, "   --among <type>\tDistribute among objects of the given type\n");
-  fprintf(where, "   --version\t\treport version and exit\n");
+  fprintf(where, "  --ignore <type>\tIgnore objects of the given type\n");
+  fprintf(where, "  --among <type>\tDistribute among objects of the given type\n");
+  fprintf(where, "  --version\t\treport version and exit\n");
 }
 
 int main(int argc, char *argv[])

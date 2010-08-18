@@ -23,7 +23,7 @@ static void usage(FILE *where)
   fprintf(where, "  --strict\trequire strict binding\n");
   fprintf(where, "  --get\t\tretrieve current process binding\n");
   fprintf(where, "  --pid <pid>\toperate on process <pid>\n");
-  fprintf(where, " --taskset\tmanipulate taskset-specific cpuset strings\n");
+  fprintf(where, "  --taskset\tmanipulate taskset-specific cpuset strings\n");
   fprintf(where, "  -v\t\tverbose messages\n");
   fprintf(where, "  --version\treport version and exit\n");
 }
