@@ -238,8 +238,11 @@ int main(int argc, char *argv[])
     while (fgets(line, sizeof(line), stdin)) {
       char *current = line;
       hwloc_cpuset_zero(set);
-      while (current) {
-	char *token = strsep(&current, " \n");
+      while (1) {
+	char *token = strtok(current, " \n");
+	if (!token)
+	  break;
+	current = NULL;
 	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, taskset, verbose) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
       }
