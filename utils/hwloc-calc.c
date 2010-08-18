@@ -30,7 +30,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "  --taskset                 Manipulate taskset-specific cpuset strings\n");
-  hwloc_utils_input_format_usage(where);
+  hwloc_utils_input_format_usage(where, 10);
   fprintf(where, "  -v                        Show verbose messages\n");
   fprintf(where, "  --version                 Report version and exit\n");
 }

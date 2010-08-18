@@ -160,7 +160,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --merge               Do not show levels that do not have a hierarcical\n"
                   "                        impact\n");
   fprintf (where, "Input options:\n");
-  hwloc_utils_input_format_usage(where);
+  hwloc_utils_input_format_usage(where, 6);
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "  --whole-system        Do not consider administration limitations\n");
   fprintf (where, "Graphical output options:\n");

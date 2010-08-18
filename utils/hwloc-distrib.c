@@ -17,7 +17,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "Options:\n");
   fprintf(where, "  --single         Singlify each output to a single CPU\n");
   fprintf(where, "  --taskset        Show taskset-specific cpuset strings\n");
-  hwloc_utils_input_format_usage(where);
+  hwloc_utils_input_format_usage(where, 0);
   fprintf(where, "  --ignore <type>  Ignore objects of the given type\n");
   fprintf(where, "  --among <type>   Distribute among objects of the given type\n");
   fprintf(where, "  -v               Show verbose messages\n");
