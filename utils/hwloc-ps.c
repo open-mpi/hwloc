@@ -15,11 +15,12 @@
 
 static void usage(char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ] ... [ filename ]\n\n", name);
-  fprintf (where, "  -a             show all processes, including those that are not bound\n");
-  fprintf (where, "  -l --logical   use logical object indexes (default)\n");
-  fprintf (where, "  -p --physical  use physical object indexes\n");
-  fprintf (where, "  -c --cpuset    show cpuset instead of objects\n");
+  fprintf (where, "Usage: %s [ options ] ... [ filename ]\n", name);
+  fprintf (where, "Options:\n");
+  fprintf (where, "  -a             Show all processes, including those that are not bound\n");
+  fprintf (where, "  -l --logical   Use logical object indexes (default)\n");
+  fprintf (where, "  -p --physical  Use physical object indexes\n");
+  fprintf (where, "  -c --cpuset    Show cpuset instead of objects\n");
 }
 
 int main(int argc, char *argv[])

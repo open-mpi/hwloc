@@ -20,19 +20,19 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-bind utility.\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "  -l --logical\tuse logical object indexes (default)\n");
-  fprintf(where, "  -p --physical\tuse physical object indexes\n");
-  fprintf(where, "  --li --logical-input\tuse logical indexes for input (default)\n");
-  fprintf(where, "  --lo --logical-output\tuse logical indexes for output (default)\n");
-  fprintf(where, "  --pi --physical-input\tuse physical indexes for input\n");
-  fprintf(where, "  --po --physical-output\tuse physical indexes for output\n");
-  fprintf(where, "  --intersect <type|depth>\treport the list of object indexes intersecting the CPU set\n");
-  fprintf(where, "  --largest\treport the list of largest objects in the CPU set\n");
-  fprintf(where, "  --single\tsinglify the output to a single CPU\n");
-  fprintf(where, "  --taskset\tmanipulate taskset-specific cpuset strings\n");
+  fprintf(where, "  -l --logical              Use logical object indexes (default)\n");
+  fprintf(where, "  -p --physical             Use physical object indexes\n");
+  fprintf(where, "  --li --logical-input      Use logical indexes for input (default)\n");
+  fprintf(where, "  --lo --logical-output     Use logical indexes for output (default)\n");
+  fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
+  fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
+  fprintf(where, "  --intersect <type|depth>  Report the list of object indexes intersecting the CPU set\n");
+  fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
+  fprintf(where, "  --single                  Singlify the output to a single CPU\n");
+  fprintf(where, "  --taskset                 Manipulate taskset-specific cpuset strings\n");
   hwloc_utils_input_format_usage(where);
-  fprintf(where, "  -v\t\tverbose messages\n");
-  fprintf(where, "  --version\treport version and exit\n");
+  fprintf(where, "  -v                        Show verbose messages\n");
+  fprintf(where, "  --version                 Report version and exit\n");
 }
 
 static int verbose = 0;
