@@ -10,6 +10,7 @@
 
 #include "thread.h"
 
+typedef unsigned int uint_t;
 typedef void *rsethandle_t;
 
 #define RS_EMPTY 3
