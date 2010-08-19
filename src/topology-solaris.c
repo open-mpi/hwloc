@@ -92,6 +92,55 @@ hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpus
   return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
 }
 
+#ifdef HAVE_LIBLGRP
+static int
+hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+{
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  int n;
+  int i;
+
+  if (depth < 0) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  hwloc_cpuset_zero(hwloc_set);
+  n = hwloc_get_nbobjs_by_depth(topology, depth);
+
+  for (i = 0; i < n; i++) {
+    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+    lgrp_affinity_t aff = lgrp_affinity_get(idtype, id, obj->os_index);
+
+    if (aff == LGRP_AFF_STRONG)
+      hwloc_cpuset_or(hwloc_set, hwloc_set, obj->cpuset);      
+  }
+
+  if (hwloc_cpuset_iszero(hwloc_set))
+    hwloc_cpuset_copy(hwloc_set, hwloc_topology_get_complete_cpuset(topology));
+
+  return 0;
+}
+
+static int
+hwloc_solaris_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+{
+  return hwloc_solaris_get_sth_cpubind(topology, P_PID, pid, hwloc_set, policy);
+}
+
+static int
+hwloc_solaris_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+{
+  return hwloc_solaris_get_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, policy);
+}
+
+static int
+hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+{
+  return hwloc_solaris_get_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
+}
+#endif /* HAVE_LIBLGRP */
+
 /* TODO: thread, maybe not easy because of the historical n:m implementation */
 
 #ifdef HAVE_LIBLGRP
@@ -402,6 +451,11 @@ hwloc_set_solaris_hooks(struct hwloc_topology *topology)
   topology->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
+#ifdef HAVE_LIBLGRP
+  topology->get_proc_cpubind = hwloc_solaris_get_proc_cpubind;
+  topology->get_thisproc_cpubind = hwloc_solaris_get_thisproc_cpubind;
+  topology->get_thisthread_cpubind = hwloc_solaris_get_thisthread_cpubind;
+#endif /* HAVE_LIBLGRP */
 }
 
 /* TODO:
