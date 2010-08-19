@@ -169,6 +169,7 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
   if (n == -1)
     return;
 
+  /* Is this lgrp a NUMA node? */
   if ((mem_size = lgrp_mem_size(cookie, lgrp, LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT)) > 0)
   {
     int i;
