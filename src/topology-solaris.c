@@ -18,10 +18,6 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 
-/* TODO:
- * memory binding: lgrp_affinity_set
- */
-
 #ifdef HAVE_LIBLGRP
 #  include <sys/lgrp_user.h>
 #endif
@@ -162,7 +158,7 @@ hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t h
 /* TODO: given thread, probably not easy because of the historical n:m implementation */
 
 #ifdef MADV_ACCESS_LWP 
-/* TODO: set_membind set_proc_membind, document that it binds threads too. */
+/* TODO: set_membind set_proc_membind thanks to lgrp_affinity, document that it binds threads too. */
 static int
 hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
   int advice;
