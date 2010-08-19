@@ -20,8 +20,6 @@
 #  include <sys/lgrp_user.h>
 #endif
 
-/* Note: get_cpubind not available on Solaris */
-/* TODO: try to use pset (restricted to super-user) to support cpusets with weigth > 1? */
 static int
 hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
