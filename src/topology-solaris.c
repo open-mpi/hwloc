@@ -16,6 +16,10 @@
 #include <sys/processor.h>
 #include <sys/procset.h>
 
+#ifdef HAVE_LIBLGRP
+#  include <sys/lgrp_user.h>
+#endif
+
 /* Note: get_cpubind not available on Solaris */
 /* TODO: try to use pset (restricted to super-user) to support cpusets with weigth > 1? */
 static int
@@ -30,6 +34,31 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
       return -1;
     return 0;
   }
+
+#ifdef HAVE_LIBLGRP
+  {
+    int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+    if (depth >= 0) {
+      int n = hwloc_get_nbobjs_by_depth(topology, depth);
+      int i;
+
+      for (i = 0; i < n; i++) {
+	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+
+	if (hwloc_cpuset_isequal(obj->cpuset, hwloc_set)) {
+	  lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
+	} else {
+	  if (policy & HWLOC_CPUBIND_STRICT)
+	    lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
+	  else
+	    lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_WEAK);
+	}
+      }
+
+      return 0;
+    }
+  }
+#endif /* HAVE_LIBLGRP */
 
   if (hwloc_cpuset_weight(hwloc_set) != 1) {
     errno = EXDEV;
@@ -66,7 +95,6 @@ hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpus
 /* TODO: thread, maybe not easy because of the historical n:m implementation */
 
 #ifdef HAVE_LIBLGRP
-#      include <sys/lgrp_user.h>
 static void
 browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hwloc_obj_t *glob_lgrps, unsigned *curlgrp)
 {
