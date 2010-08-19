@@ -122,6 +122,7 @@ hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_
 }
 #endif
 
+#ifdef MAP_MEM_FIRST_TOUCH
 static void*
 hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, int policy)
 {
@@ -157,6 +158,7 @@ hwloc_hpux_free_membind(hwloc_topology_t topology, void *addr, size_t len)
 {
   return munmap(addr, len);
 }
+#endif /* MAP_MEM_FIRST_TOUCH */
 
 void
 hwloc_look_hpux(struct hwloc_topology *topology)
@@ -250,6 +252,8 @@ hwloc_set_hpux_hooks(struct hwloc_topology *topology)
   topology->set_thread_cpubind = hwloc_hpux_set_thread_cpubind;
   topology->set_thisthread_cpubind = hwloc_hpux_set_thisthread_cpubind;
 #endif
+#ifdef MAP_MEM_FIRST_TOUCH
   topology->alloc_membind = hwloc_hpux_alloc_membind;
   topology->free_membind = hwloc_hpux_free_membind;
+#endif /* MAP_MEM_FIRST_TOUCH */
 }
