@@ -15,10 +15,11 @@
 #include <sys/types.h>
 #include <sys/processor.h>
 #include <sys/procset.h>
+#include <sys/types.h>
+#include <sys/mman.h>
 
 /* TODO:
  * memory binding: lgrp_affinity_set
- * madvise(MADV_ACCESS_LWP / ACCESS_MANY)
  */
 
 /* Note: get_cpubind not available on Solaris */
@@ -67,6 +68,43 @@ hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpus
 {
   return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
 }
+
+#ifdef MADV_ACCESS_LWP 
+/* TODO: set_membind set_proc_membind, document that it binds threads too. */
+static int
+hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
+  int advice;
+  size_t remainder;
+
+  /* Can not give a set of nodes just for an area.  */
+  if (!hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
+    errno = EXDEV;
+    return -1;
+  }
+
+  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+    case HWLOC_MEMBIND_DEFAULT:
+    case HWLOC_MEMBIND_BIND:
+      advice = MADV_ACCESS_DEFAULT;
+      break;
+    case HWLOC_MEMBIND_FIRSTTOUCH:
+      /* TODO: actually next touch */
+      advice = MADV_ACCESS_LWP;
+      break;
+    case HWLOC_MEMBIND_INTERLEAVE:
+      advice = MADV_ACCESS_MANY;
+      break;
+    default:
+      errno = EINVAL;
+      return -1;
+  }
+
+  remainder = (uintptr_t) addr & (sysconf(_SC_PAGESIZE)-1);
+  addr = (char*) addr - remainder;
+  len += remainder;
+  return madvise((void*) addr, len, advice);
+}
+#endif
 
 /* TODO: thread, maybe not easy because of the historical n:m implementation */
 
@@ -379,4 +417,7 @@ hwloc_set_solaris_hooks(struct hwloc_topology *topology)
   topology->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
+#ifdef MADV_ACCESS_LWP 
+  topology->set_area_membind = hwloc_solaris_set_area_membind;
+#endif
 }
