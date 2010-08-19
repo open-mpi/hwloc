@@ -69,6 +69,8 @@ hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpus
   return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
 }
 
+/* TODO: given thread, maybe not easy because of the historical n:m implementation */
+
 #ifdef MADV_ACCESS_LWP 
 /* TODO: set_membind set_proc_membind, document that it binds threads too. */
 static int
@@ -105,8 +107,6 @@ hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size
   return madvise((void*) addr, len, advice);
 }
 #endif
-
-/* TODO: thread, maybe not easy because of the historical n:m implementation */
 
 #ifdef HAVE_LIBLGRP
 #      include <sys/lgrp_user.h>
