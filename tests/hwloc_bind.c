@@ -166,11 +166,16 @@ int main(void)
   test(set, 0);
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
-
   hwloc_cpuset_free(set);
+
+  printf("\n\nmemory tests\n\n");
+  printf("complete node set\n");
+  set = hwloc_cpuset_dup(hwloc_get_root_obj(topology)->cpuset);
+  testmem3(set);
+  hwloc_cpuset_free(set);
+
   obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 0);
   if (obj) {
-    printf("\n\nmemory tests\n\n");
     set = hwloc_cpuset_dup(obj->cpuset);
     hwloc_cpuset_asprintf(&str, set);
     printf("node set is %s\n", str);

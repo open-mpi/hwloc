@@ -3,10 +3,6 @@
  * See COPYING in top-level directory.
  */
 
-/* TODO: memory:
- * mmap/shmget: +MAP/IPC_MEM_INTERLEAVED, MAP/IPC_MEM_LOCAL,
-   MAP/IPC_MEM_FIRST_TOUCH */
-
 /* TODO: psets?
  * since 11i 1.6:
    _SC_PSET_SUPPORT
@@ -29,6 +25,7 @@
 #include <private/debug.h>
 
 #include <sys/mpctl.h>
+#include <sys/mman.h>
 #include <pthread.h>
 
 static ldom_t
@@ -125,6 +122,42 @@ hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_
 }
 #endif
 
+static void*
+hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, int policy)
+{
+  int flags;
+
+  /* Can not give a set of nodes.  */
+  if (!hwloc_cpuset_isequal(set, hwloc_topology_get_complete_cpuset(topology))) {
+    errno = EXDEV;
+    return NULL;
+  }
+
+  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+    case HWLOC_MEMBIND_DEFAULT:
+    case HWLOC_MEMBIND_BIND:
+      flags = 0;
+      break;
+    case HWLOC_MEMBIND_FIRSTTOUCH:
+      flags = MAP_MEM_FIRST_TOUCH;
+      break;
+    case HWLOC_MEMBIND_INTERLEAVE:
+      flags = MAP_MEM_INTERLEAVED;
+      break;
+    default:
+      errno = EINVAL;
+      return NULL;
+  }
+
+  return mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | flags, -1, 0);
+}
+
+static int
+hwloc_hpux_free_membind(hwloc_topology_t topology, void *addr, size_t len)
+{
+  return munmap(addr, len);
+}
+
 void
 hwloc_look_hpux(struct hwloc_topology *topology)
 {
@@ -217,4 +250,6 @@ hwloc_set_hpux_hooks(struct hwloc_topology *topology)
   topology->set_thread_cpubind = hwloc_hpux_set_thread_cpubind;
   topology->set_thisthread_cpubind = hwloc_hpux_set_thisthread_cpubind;
 #endif
+  topology->alloc_membind = hwloc_hpux_alloc_membind;
+  topology->free_membind = hwloc_hpux_free_membind;
 }
