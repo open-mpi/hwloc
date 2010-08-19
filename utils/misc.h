@@ -16,29 +16,35 @@
 extern void usage(const char *name, FILE *where);
 
 static __inline void
-hwloc_utils_input_format_usage(FILE *where)
+hwloc_utils_input_format_usage(FILE *where, int addspaces)
 {
 #ifdef HWLOC_HAVE_XML
-  fprintf (where, "   --input <XML file>\n");
-  fprintf (where, "   -i <XML file>         Read topology from XML file <path>\n");
+  fprintf (where, "  --input <XML file>\n");
+  fprintf (where, "  -i <XML file>   %*sRead topology from XML file <path>\n",
+	   addspaces, " ");
 #endif
 #ifdef HWLOC_LINUX_SYS
-  fprintf (where, "   --input <directory>\n");
-  fprintf (where, "   -i <directory>        Read topology from chroot containing the /proc and /sys\n"
-		  "                         of another system\n");
+  fprintf (where, "  --input <directory>\n");
+  fprintf (where, "  -i <directory>  %*sRead topology from chroot containing the /proc and /sys\n",
+	   addspaces, " ");
+  fprintf (where, "                  %*sof another system\n",
+	   addspaces, " ");
 #endif
-  fprintf (where, "   --input \"n:2 2\"\n");
-  fprintf (where, "   -i \"n:2 2\"            Simulate a fake hierarchy, here with 2 NUMA nodes of 2\n"
-                  "                         processors\n");
-  fprintf (where, "   --input-format <format>\n");
-  fprintf (where, "   --if <format>         Enforce input format among "
+  fprintf (where, "  --input \"n:2 2\"\n");
+  fprintf (where, "  -i \"n:2 2\"      %*sSimulate a fake hierarchy, here with 2 NUMA nodes of 2\n",
+	   addspaces, " ");
+  fprintf (where, "                  %*sprocessors\n",
+	   addspaces, " ");
+  fprintf (where, "  --input-format <format>\n");
+  fprintf (where, "  --if <format>   %*sEnforce input format among "
 #ifdef HWLOC_HAVE_XML
 	   "xml, "
 #endif
 #ifdef HWLOC_LINUX_SYS
 	   "fsroot, "
 #endif
-	   "synthetic\n");
+	   "synthetic\n",
+	   addspaces, " ");
 }
 
 enum hwloc_utils_input_format {
@@ -113,7 +119,7 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
     *input_formatp = HWLOC_UTILS_INPUT_XML;
     *consumed_opts = 1;
     return 1;
-  } else if (!strcmp (argv[0], "--fsroot") || !strcmp (argv[0], "--fsys-root")) {
+  } else if (!strcmp (argv[0], "--fsys-root")) {
     if (argc <= 1) {
       usage (callname, stderr);
       exit(EXIT_FAILURE);
