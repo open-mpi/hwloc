@@ -20,6 +20,9 @@
 #  include <sys/lgrp_user.h>
 #endif
 
+/* TODO: use psets? (only for root)
+ */
+
 static int
 hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
