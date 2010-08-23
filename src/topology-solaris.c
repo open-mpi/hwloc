@@ -56,21 +56,36 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     if (depth >= 0) {
       int n = hwloc_get_nbobjs_by_depth(topology, depth);
       int i;
+      int ok;
+      hwloc_cpuset_t target = hwloc_cpuset_alloc();
 
       for (i = 0; i < n; i++) {
 	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
-
-	if (hwloc_cpuset_isequal(obj->cpuset, hwloc_set)) {
-	  lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
-	} else {
-	  if (policy & HWLOC_CPUBIND_STRICT)
-	    lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
-	  else
-	    lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_WEAK);
-	}
+        if (hwloc_cpuset_isincluded(obj->cpuset, hwloc_set))
+          hwloc_cpuset_or(target, target, obj->cpuset);
       }
 
-      return 0;
+      ok = hwloc_cpuset_isequal(target, hwloc_set);
+      hwloc_cpuset_free(target);
+
+      if (ok) {
+        /* Ok, managed to achieve hwloc_set by just combining NUMA nodes */
+
+        for (i = 0; i < n; i++) {
+          hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+
+          if (hwloc_cpuset_isincluded(obj->cpuset, hwloc_set)) {
+            lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
+          } else {
+            if (policy & HWLOC_CPUBIND_STRICT)
+              lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
+            else
+              lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_WEAK);
+          }
+        }
+
+        return 0;
+      }
     }
   }
 #endif /* HAVE_LIBLGRP */
