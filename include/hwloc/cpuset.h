@@ -24,7 +24,7 @@ extern "C" {
  * For use in hwloc itself, a hwloc_cpuset_t represents a set of logical
  * processors. It may be infinite.
  *
- * \note cpusets are indexed by OS logical processor number.
+ * \note cpusets are indexed by OS logical processor physical number.
  * @{
  */
 
