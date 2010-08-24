@@ -341,6 +341,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_linux_parse_cpumap_file.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nodeset_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
@@ -363,13 +364,20 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_free_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_membind_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_membind_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_area_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_area_membind_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_area_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_area_membind_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \

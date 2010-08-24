@@ -35,6 +35,12 @@ extern "C" {
 typedef struct hwloc_cpuset_s * hwloc_cpuset_t;
 typedef const struct hwloc_cpuset_s * hwloc_const_cpuset_t;
 
+/** \brief
+ * Set of NUMA nodes represented as an opaque pointer to an internal bitmask.
+ */
+typedef struct hwloc_cpuset_s * hwloc_nodeset_t;
+typedef const struct hwloc_cpuset_s * hwloc_const_nodeset_t;
+
 
 /*
  * CPU set allocation, freeing and copying.

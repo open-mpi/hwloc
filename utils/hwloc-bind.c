@@ -162,9 +162,9 @@ int main(int argc, char *argv[])
     } else {
       int policy;
       if (pid)
-	err = hwloc_get_proc_membind(topology, pid, membind_set, 0);
+	err = hwloc_get_proc_membind_cpuset(topology, pid, membind_set, 0);
       else
-	err = hwloc_get_membind(topology, membind_set, &policy);
+	err = hwloc_get_membind_cpuset(topology, membind_set, &policy);
       if (err) {
 	const char *errmsg = strerror(errno);
 	fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
@@ -213,9 +213,9 @@ int main(int argc, char *argv[])
     if (single)
       hwloc_cpuset_singlify(membind_set);
     if (pid)
-      ret = hwloc_set_proc_membind(topology, pid, membind_set, membind_flags);
+      ret = hwloc_set_proc_membind_cpuset(topology, pid, membind_set, membind_flags);
     else
-      ret = hwloc_set_membind(topology, membind_set, membind_flags);
+      ret = hwloc_set_membind_cpuset(topology, membind_set, membind_flags);
     if (ret) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);

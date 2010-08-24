@@ -140,23 +140,73 @@ hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cp
 }
 #endif
 
-static hwloc_const_cpuset_t
-hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_cpuset_t set)
+static hwloc_const_nodeset_t
+hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
 {
-  hwloc_const_cpuset_t topology_set = hwloc_topology_get_topology_cpuset(topology);
+  hwloc_const_nodeset_t topology_nodeset = hwloc_get_root_obj(topology)->nodeset;
+  hwloc_const_nodeset_t complete_nodeset = hwloc_get_root_obj(topology)->complete_nodeset;
 
-  if (!topology_set) {
-    /* The topology is composed of several systems, the set is ambiguous. */
+  if (!hwloc_topology_get_topology_cpuset(topology)) {
+    /* The topology is composed of several systems, the nodeset is thus
+     * ambiguous. */
     errno = EXDEV;
     return NULL;
   }
 
-  /* TODO */
-  return set;
+  if (!complete_nodeset) {
+    /* There is no NUMA node */
+    errno = ENODEV;
+    return NULL;
+  }
+
+  if (!hwloc_cpuset_isincluded(nodeset, complete_nodeset)) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  if (hwloc_cpuset_isincluded(topology_nodeset, nodeset))
+    return complete_nodeset;
+
+  return nodeset;
 }
 
+static int
+hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_const_cpuset_t cpuset)
+{
+  hwloc_const_cpuset_t topology_set = hwloc_topology_get_topology_cpuset(topology);
+  hwloc_const_cpuset_t complete_set = hwloc_topology_get_complete_cpuset(topology);
+  hwloc_const_cpuset_t complete_nodeset = hwloc_get_root_obj(topology)->complete_nodeset;
+
+  if (!topology_set) {
+    /* The topology is composed of several systems, the cpuset is thus
+     * ambiguous. */
+    errno = EXDEV;
+    return -1;
+  }
+
+  if (!complete_nodeset) {
+    /* There is no NUMA node */
+    errno = ENODEV;
+    return -1;
+  }
+
+  if (!hwloc_cpuset_isincluded(cpuset, complete_set)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (hwloc_cpuset_isincluded(topology_set, cpuset)) {
+    hwloc_cpuset_copy(nodeset, complete_nodeset);
+    return 0;
+  }
+
+  hwloc_cpuset_to_nodeset(topology, cpuset, nodeset);
+  return 0;
+}
+
+
 int
-hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
+hwloc_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t set, int policy)
 {
   set = hwloc_fix_membind(topology, set);
   if (!set)
@@ -170,7 +220,22 @@ hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int polic
 }
 
 int
-hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t set, int * policy)
+hwloc_set_membind_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
+{
+  hwloc_nodeset_t nodeset = hwloc_cpuset_alloc();
+  int ret;
+
+  if (!hwloc_fix_membind_cpuset(topology, nodeset, set))
+    ret = -1;
+  else
+    ret = hwloc_set_membind(topology, nodeset, policy);
+
+  hwloc_cpuset_free(nodeset);
+  return ret;
+}
+
+int
+hwloc_get_membind(hwloc_topology_t topology, hwloc_nodeset_t set, int * policy)
 {
   if (topology->get_membind)
     return topology->get_membind(topology, set, policy);
@@ -180,7 +245,22 @@ hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t set, int * policy)
 }
 
 int
-hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy)
+hwloc_get_membind_cpuset(hwloc_topology_t topology, hwloc_cpuset_t set, int * policy)
+{
+  hwloc_nodeset_t nodeset;
+  int ret;
+
+  nodeset = hwloc_cpuset_alloc();
+  ret = hwloc_get_membind(topology, nodeset, policy);
+
+  if (!ret)
+    hwloc_cpuset_from_nodeset(topology, set, nodeset);
+
+  return ret;
+}
+
+int
+hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t set, int policy)
 {
   set = hwloc_fix_membind(topology, set);
   if (!set)
@@ -194,7 +274,22 @@ hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_c
 }
 
 int
-hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int * policy)
+hwloc_set_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy)
+{
+  hwloc_nodeset_t nodeset = hwloc_cpuset_alloc();
+  int ret;
+
+  if (!hwloc_fix_membind_cpuset(topology, nodeset, set))
+    ret = -1;
+  else
+    ret = hwloc_set_proc_membind(topology, pid, set, policy);
+
+  hwloc_cpuset_free(nodeset);
+  return ret;
+}
+
+int
+hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t set, int * policy)
 {
   if (topology->get_proc_membind)
     return topology->get_proc_membind(topology, pid, set, policy);
@@ -204,7 +299,22 @@ hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_
 }
 
 int
-hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t set, int policy)
+hwloc_get_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int * policy)
+{
+  hwloc_nodeset_t nodeset;
+  int ret;
+
+  nodeset = hwloc_cpuset_alloc();
+  ret = hwloc_get_proc_membind(topology, pid, nodeset, policy);
+
+  if (!ret)
+    hwloc_cpuset_from_nodeset(topology, set, nodeset);
+
+  return ret;
+}
+
+int
+hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t set, int policy)
 {
   set = hwloc_fix_membind(topology, set);
   if (!set)
@@ -218,7 +328,22 @@ hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
 }
 
 int
-hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t set, int * policy)
+hwloc_set_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t set, int policy)
+{
+  hwloc_nodeset_t nodeset = hwloc_cpuset_alloc();
+  int ret;
+
+  if (!hwloc_fix_membind_cpuset(topology, nodeset, set))
+    ret = -1;
+  else
+    ret = hwloc_set_area_membind(topology, addr, len, nodeset, policy);
+
+  hwloc_cpuset_free(nodeset);
+  return ret;
+}
+
+int
+hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t set, int * policy)
 {
   if (topology->get_area_membind)
     return topology->get_area_membind(topology, addr, len, set, policy);
@@ -227,8 +352,23 @@ hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
   return -1;
 }
 
+int
+hwloc_get_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t set, int * policy)
+{
+  hwloc_nodeset_t nodeset;
+  int ret;
+
+  nodeset = hwloc_cpuset_alloc();
+  ret = hwloc_get_area_membind(topology, addr, len, nodeset, policy);
+
+  if (!ret)
+    hwloc_cpuset_from_nodeset(topology, set, nodeset);
+
+  return ret;
+}
+
 void *
-hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, int policy)
+hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t set, int policy)
 {
   set = hwloc_fix_membind(topology, set);
   if (!set)
@@ -262,6 +402,21 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
 
   errno = ENOSYS;
   return NULL;
+}
+
+void *
+hwloc_alloc_membind_cpuset(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, int policy)
+{
+  hwloc_nodeset_t nodeset = hwloc_cpuset_alloc();
+  void *ret;
+
+  if (!hwloc_fix_membind_cpuset(topology, nodeset, set))
+    ret = NULL;
+  else
+    ret = hwloc_alloc_membind(topology, len, nodeset, policy);
+
+  hwloc_cpuset_free(nodeset);
+  return ret;
 }
 
 int

@@ -225,8 +225,8 @@ static int hwloc_win_get_VirtualAllocExNumaProc(void) {
 }
 
 static void *
-hwloc_win_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused) {
-  hwloc_cpuset_t nodeset, nodeset1;
+hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, int policy __hwloc_attribute_unused) {
+  hwloc_cpuset_t nodeset1;
   int node;
 
   if (policy & HWLOC_MEMBIND_STRICT) {
@@ -234,10 +234,8 @@ hwloc_win_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuse
     return NULL;
   }
 
-  nodeset = hwloc_cpuset_alloc();
   nodeset1 = hwloc_cpuset_alloc();
 
-  hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
   node = hwloc_cpuset_first(nodeset);
   hwloc_cpuset_cpu(nodeset1, node);
   if (!hwloc_cpuset_isequal(nodeset, nodeset1)) {
@@ -245,7 +243,6 @@ hwloc_win_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuse
     errno = EXDEV;
     return NULL;
   }
-  hwloc_cpuset_free(nodeset);
   hwloc_cpuset_free(nodeset1);
 
   return VirtualAllocExNumaProc(GetCurrentProcess(), NULL, len, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE, node);

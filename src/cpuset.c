@@ -976,7 +976,7 @@ int hwloc_cpuset_weight(const struct hwloc_cpuset_s * set)
 	return weight;
 }
 
-void hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_cpuset_t nodeset)
+void hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;
@@ -993,7 +993,7 @@ void hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t cpu
 		hwloc_cpuset_set(nodeset, obj->os_index);
 }
 
-void hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_const_cpuset_t nodeset)
+void hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;

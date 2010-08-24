@@ -768,7 +768,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
-hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy)
 {
   hwloc_obj_t obj;
   unsigned max_os_index; /* highest os_index + 1 */
@@ -776,6 +776,7 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
   int depth;
   int linuxpolicy;
   int err;
+  int index;
 
   switch (policy & ~(HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
   case HWLOC_MEMBIND_DEFAULT:
@@ -826,11 +827,9 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
     goto out;
   }
 
-  obj = NULL;
-  while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, hwloc_set, depth, obj)) != NULL) {
-    int index = obj->os_index;
+  hwloc_cpuset_foreach_begin(index, nodeset)
     linuxmask[index/HWLOC_BITS_PER_LONG] |= 1 << (index % HWLOC_BITS_PER_LONG);
-  }
+  hwloc_cpuset_foreach_end();
 
   err = set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
   if (err < 0)
@@ -846,7 +845,7 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_se
 }
 
 static int
-hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int *policy)
+hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, int *policy)
 {
   hwloc_obj_t obj;
   unsigned max_os_index; /* highest os_index + 1 */
@@ -854,6 +853,7 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int
   int depth;
   int linuxpolicy;
   int err;
+  unsigned index;
 
   /* compute max_os_index */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
@@ -880,13 +880,12 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int
     goto out_with_mask;
 
   if (linuxpolicy == MPOL_DEFAULT) {
-    hwloc_cpuset_copy(hwloc_set, hwloc_topology_get_topology_cpuset(topology));
+    hwloc_cpuset_copy(nodeset, hwloc_get_root_obj(topology)->nodeset);
   } else {
-    obj = NULL;
-    while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
-      int index = obj->os_index;
+    hwloc_cpuset_zero(nodeset);
+    for (index = 0; index < max_os_index; index++) {
       if (linuxmask[index/HWLOC_BITS_PER_LONG] & (1 << (index % HWLOC_BITS_PER_LONG)))
-	hwloc_cpuset_or(hwloc_set, hwloc_set, obj->cpuset);
+	hwloc_cpuset_set(nodeset, index);
     }
   }
 

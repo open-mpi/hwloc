@@ -160,12 +160,12 @@ hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t h
 #ifdef MADV_ACCESS_LWP 
 /* TODO: set_membind set_proc_membind thanks to lgrp_affinity, document that it binds threads too. */
 static int
-hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
+hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy) {
   int advice;
   size_t remainder;
 
   /* Can not give a set of nodes just for an area.  */
-  if (!hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
+  if (!hwloc_cpuset_isequal(nodeset, hwloc_get_root_obj(topology)->complete_cpuset)) {
     errno = EXDEV;
     return -1;
   }

@@ -151,10 +151,9 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 /* TODO: set_membind set_proc_membind, document that it binds threads too. */
 
 static int
-hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_const_cpuset_t hwloc_set, uint_t *aix_policy, int policy)
+hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_const_nodeset_t nodeset, uint_t *aix_policy, int policy)
 {
   rsethandle_t rset, noderad;
-  hwloc_cpuset_t nodeset = hwloc_cpuset_alloc();
   int MCMlevel;
   int node;
 
@@ -174,8 +173,6 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
       return -1;
   }
 
-  hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
-
   MCMlevel = rs_getinfo(NULL, R_MCMSDL, 0);
   if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
     rset = rs_alloc(RS_ALL);
@@ -189,7 +186,6 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
     rs_op(RS_UNION, noderad, *rad, 0, 0);
   hwloc_cpuset_foreach_end();
 
-  hwloc_cpuset_free(nodeset);
   rs_free(rset);
   rs_free(noderad);
 
@@ -200,7 +196,7 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
 /* TODO: seems to be right, but doesn't seem to be working (EINVAL), even after
  * aligning the range on 64K... */
 static int
-hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy)
 {
   subrange_t subrange;
   rsid_t rsid = { .at_subrange = &subrange };
@@ -211,7 +207,7 @@ hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
   subrange.su_length = len;
   subrange.su_rstype = R_RSET;
 
-  if (hwloc_aix_prepare_membind(topology, &subrange.su_rsid.at_rset, hwloc_set, &aix_policy, policy))
+  if (hwloc_aix_prepare_membind(topology, &subrange.su_rsid.at_rset, nodeset, &aix_policy, policy))
     return -1;
 
   subrange.su_policy = aix_policy;
@@ -223,13 +219,13 @@ hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
 #endif
 
 static void *
-hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy)
 {
   void *ret;
   rsid_t rsid;
   uint_t aix_policy;
 
-  if (hwloc_aix_prepare_membind(topology, &rsid.at_rset, hwloc_set, &aix_policy, policy))
+  if (hwloc_aix_prepare_membind(topology, &rsid.at_rset, nodeset, &aix_policy, policy))
     return NULL;
 
   ret = ra_mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0, R_RSET, rsid, aix_policy);

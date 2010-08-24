@@ -143,9 +143,8 @@ hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t h
 }
 
 static int
-hwloc_osf_prepare_mattr(hwloc_topology_t topology, memalloc_attr_t *mattr, hwloc_const_cpuset_t hwloc_set, int policy) {
+hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, memalloc_attr_t *mattr, hwloc_const_nodeset_t nodeset, int policy) {
   unsigned long osf_policy;
-  hwloc_cpuset_t nodeset;
   int node;
 
   switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
@@ -171,17 +170,14 @@ hwloc_osf_prepare_mattr(hwloc_topology_t topology, memalloc_attr_t *mattr, hwloc
   radsetcreate(&mattr->mattr_radset);
   rademptyset(mattr->mattr_radset);
 
-  nodeset = hwloc_cpuset_alloc();
-  hwloc_cpuset_to_nodeset(topology, hwloc_set, nodeset);
   hwloc_cpuset_foreach_begin(node, nodeset)
     radaddset(mattr->mattr_radset, node);
   hwloc_cpuset_foreach_end();
-  hwloc_cpuset_free(nodeset);
   return 0;
 }
 
 static int
-hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
+hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy) {
   memalloc_attr_t mattr;
   int behavior = 0;
   int ret;
@@ -191,7 +187,7 @@ hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
   if (policy & HWLOC_MEMBIND_STRICT)
     behavior |= MADV_INSIST;
 
-  if (hwloc_osf_prepare_mattr(topology, &mattr, hwloc_set, policy))
+  if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy))
     return -1;
 
   ret = nmadvise(addr, len, MADV_CURRENT, &mattr);
@@ -200,11 +196,11 @@ hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
 }
 
 static void *
-hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t hwloc_set, int policy) {
+hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy) {
   memalloc_attr_t mattr;
   void *ptr;
 
-  if (hwloc_osf_prepare_mattr(topology, &mattr, hwloc_set, policy))
+  if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy))
     return NULL;
 
   /* TODO: rather use acreate/amalloc ? */
