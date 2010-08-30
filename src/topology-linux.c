@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <sched.h>
 #include <pthread.h>
+#include <sys/mman.h>
 #if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
 #include <numaif.h>
 #endif
@@ -874,6 +875,31 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   free(linuxmask);
  out:
   return -1;
+}
+
+static void *
+hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy)
+{
+  void *buffer;
+  int err;
+
+  buffer = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0); /* has this been supported for long enough? */
+  if (buffer == MAP_FAILED)
+    return NULL;
+
+  err = hwloc_linux_set_area_membind(topology, buffer, len, nodeset, policy);
+  if (err < 0) {
+    munmap(buffer, len);
+    return NULL;
+  }
+
+  return buffer;
+}
+
+static int
+hwloc_linux_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len)
+{
+  return munmap(addr, len);
 }
 #endif /* HWLOC_HAVE_MBIND */
 
@@ -2119,5 +2145,7 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 #ifdef HWLOC_HAVE_MBIND
   topology->set_area_membind = hwloc_linux_set_area_membind;
+  topology->alloc_membind = hwloc_linux_alloc_membind;
+  topology->free_membind = hwloc_linux_free_membind;
 #endif /* HWLOC_HAVE_MBIND */
 }
