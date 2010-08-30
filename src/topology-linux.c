@@ -768,44 +768,38 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
-hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy)
+hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, int policy)
 {
-  hwloc_obj_t obj;
-  unsigned max_os_index = 0; /* highest os_index + 1 */
-  unsigned long *linuxmask;
-  int depth;
-  int linuxpolicy;
-  int err;
-  int index;
-
   switch (policy & ~(HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
   case HWLOC_MEMBIND_DEFAULT:
   case HWLOC_MEMBIND_FIRSTTOUCH:
-    linuxpolicy = MPOL_DEFAULT;
+    *linuxpolicy = MPOL_DEFAULT;
     break;
   case HWLOC_MEMBIND_BIND:
     if (policy & HWLOC_MEMBIND_STRICT)
-      linuxpolicy = MPOL_BIND;
+      *linuxpolicy = MPOL_BIND;
     else
-      linuxpolicy = MPOL_PREFERRED;
+      *linuxpolicy = MPOL_PREFERRED;
     break;
   case HWLOC_MEMBIND_INTERLEAVE:
-    linuxpolicy = MPOL_INTERLEAVE;
+    *linuxpolicy = MPOL_INTERLEAVE;
     break;
   default:
     errno = EINVAL;
-    goto out;
+    return -1;
   }
+  return 0;
+}
 
-  if ((policy & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
-    /* TODO: MIGRATE */
-    errno = ENOSYS;
-    goto out;
-  }
-
-  if (linuxpolicy == MPOL_DEFAULT)
-    /* Some Linux kernels don't like being passed a set */
-    return set_mempolicy(linuxpolicy, NULL, 0);
+int
+hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset,
+				      unsigned *max_os_index_p, unsigned long **linuxmaskp)
+{
+  unsigned max_os_index = 0; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  hwloc_obj_t obj;
+  int depth;
+  int index;
 
   /* compute max_os_index */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
@@ -824,12 +818,43 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset
   linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
   if (!linuxmask) {
     errno = ENOMEM;
-    goto out;
+    return -1;
   }
 
   hwloc_cpuset_foreach_begin(index, nodeset)
     linuxmask[index/HWLOC_BITS_PER_LONG] |= 1 << (index % HWLOC_BITS_PER_LONG);
   hwloc_cpuset_foreach_end();
+
+  *max_os_index_p = max_os_index;
+  *linuxmaskp = linuxmask;
+  return 0;
+}
+
+static int
+hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy)
+{
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  int linuxpolicy;
+  int err;
+
+  err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy);
+  if (err < 0)
+    return err;
+
+  if ((policy & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
+    /* TODO: MIGRATE */
+    errno = ENOSYS;
+    goto out;
+  }
+
+  if (linuxpolicy == MPOL_DEFAULT)
+    /* Some Linux kernels don't like being passed a set */
+    return set_mempolicy(linuxpolicy, NULL, 0);
+
+  err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
+  if (err < 0)
+    goto out;
 
   err = set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
   if (err < 0)
