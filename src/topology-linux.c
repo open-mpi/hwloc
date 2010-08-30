@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include <sched.h>
 #include <pthread.h>
-#ifdef HWLOC_HAVE_SET_MEMPOLICY
+#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
 #include <numaif.h>
 #endif
 
@@ -766,7 +766,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
-#ifdef HWLOC_HAVE_SET_MEMPOLICY
+#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
 static int
 hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, int policy)
 {
@@ -829,7 +829,9 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nod
   *linuxmaskp = linuxmask;
   return 0;
 }
+#endif /* HWLOC_HAVE_SET_MEMPOLICY || HWLOC_HAVE_MBIND */
 
+#ifdef HWLOC_HAVE_MBIND
 static int
 hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy)
 {
@@ -868,7 +870,9 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
  out:
   return -1;
 }
+#endif /* HWLOC_HAVE_MBIND */
 
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
 hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy)
 {
@@ -2107,6 +2111,8 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
   topology->set_membind = hwloc_linux_set_membind;
   topology->get_membind = hwloc_linux_get_membind;
-  topology->set_area_membind = hwloc_linux_set_area_membind;
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
+#ifdef HWLOC_HAVE_MBIND
+  topology->set_area_membind = hwloc_linux_set_area_membind;
+#endif /* HWLOC_HAVE_MBIND */
 }
