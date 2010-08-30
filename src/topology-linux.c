@@ -837,8 +837,13 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
 {
   unsigned max_os_index; /* highest os_index + 1 */
   unsigned long *linuxmask;
+  size_t remainder;
   int linuxpolicy;
   int err;
+
+  remainder = (uintptr_t) addr & (sysconf(_SC_PAGESIZE)-1);
+  addr = (char*) addr - remainder;
+  len += remainder;
 
   err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy);
   if (err < 0)
