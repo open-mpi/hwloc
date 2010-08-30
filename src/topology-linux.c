@@ -771,7 +771,7 @@ static int
 hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy)
 {
   hwloc_obj_t obj;
-  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned max_os_index = 0; /* highest os_index + 1 */
   unsigned long *linuxmask;
   int depth;
   int linuxpolicy;
