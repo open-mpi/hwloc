@@ -831,6 +831,45 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nod
 }
 
 static int
+hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy)
+{
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  int linuxpolicy;
+  int err;
+
+  err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy);
+  if (err < 0)
+    return err;
+
+  if ((policy & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
+    /* TODO: MIGRATE */
+    errno = ENOSYS;
+    goto out;
+  }
+
+  if (linuxpolicy == MPOL_DEFAULT)
+    /* Some Linux kernels don't like being passed a set */
+    return mbind((void *) addr, len, linuxpolicy, NULL, 0, 0);
+
+  err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
+  if (err < 0)
+    goto out;
+
+  err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, 0);
+  if (err < 0)
+    goto out_with_mask;
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+static int
 hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy)
 {
   unsigned max_os_index; /* highest os_index + 1 */
@@ -2068,5 +2107,6 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
   topology->set_membind = hwloc_linux_set_membind;
   topology->get_membind = hwloc_linux_get_membind;
+  topology->set_area_membind = hwloc_linux_set_area_membind;
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 }
