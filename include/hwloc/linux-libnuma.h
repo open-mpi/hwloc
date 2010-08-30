@@ -54,7 +54,8 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpus
       if (node->os_index >= *maxnode)
 	break;
       mask[node->os_index/sizeof(*mask)/8] |= 1 << (node->os_index % (sizeof(*mask)*8));
-      outmaxnode = node->os_index;
+      if (outmaxnode == (unsigned long) -1 || outmaxnode < node->os_index)
+	outmaxnode = node->os_index;
     }
 
   } else {
