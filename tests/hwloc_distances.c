@@ -17,6 +17,7 @@ int main(void)
   hwloc_obj_type_t type;
   unsigned nbobjs;
   unsigned *distances;
+  unsigned d1, d2;
   int err;
 
   hwloc_topology_init(&topology);
@@ -32,6 +33,12 @@ int main(void)
 	printf("%u ", distances[i+nbobjs*j]);
       printf("\n");
     }
+
+    err = hwloc_get_distance(topology, HWLOC_OBJ_NODE, 0, nbobjs-1, &d1, &d2);
+    assert(!err);
+    assert(d1 == distances[0+nbobjs*(nbobjs-1)]);
+    assert(d2 == distances[nbobjs-1]);
+
     free(distances);
   }
 

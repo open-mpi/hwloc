@@ -2251,3 +2251,31 @@ hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
   *nbobjsp = nbobjs;
   return 0;
 }
+
+int hwloc_get_distance(hwloc_topology_t topology, hwloc_obj_type_t type,
+		       unsigned logical_index1, unsigned logical_index2,
+		       unsigned *distance, unsigned *reverse_distance)
+{
+  unsigned nbobjs;
+  int depth;
+
+  if (type >= HWLOC_OBJ_TYPE_MAX) {
+    errno = EINVAL;
+    return -1;
+  }
+  depth = hwloc_get_type_depth(topology, type);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+    errno = EINVAL;
+    return -1;
+  }
+  nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
+
+  if (!topology->distances[type]) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  *distance = topology->distances[type][logical_index1+nbobjs*logical_index2];
+  *reverse_distance = topology->distances[type][logical_index2+nbobjs*logical_index1];
+  return 0;
+}

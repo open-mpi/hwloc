@@ -788,6 +788,12 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
 HWLOC_DECLSPEC int hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
 				       unsigned *nbobjs, unsigned ** distances);
 
+/** \brief Get the distance in both directions between two objects.
+ */
+HWLOC_DECLSPEC int hwloc_get_distance(hwloc_topology_t topology, hwloc_obj_type_t type,
+				      unsigned logical_index1, unsigned logical_index2,
+				      unsigned *distance, unsigned *reverse_distance);
+
 /** @} */
 
 
