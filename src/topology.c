@@ -289,11 +289,13 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
  */
 void
 hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
-				     unsigned nbobjs,
-				     struct hwloc_obj **objs,
-				     unsigned *_distances)
+				      unsigned nbobjs,
+				      struct hwloc_obj **objs,
+				      unsigned *_distances,
+				      unsigned *_distance_indexes)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
+  unsigned (*distance_indexes)[nbobjs] = (unsigned (*)[nbobjs])_distance_indexes;
   unsigned i,j;
 
   if (getenv("HWLOC_IGNORE_DISTANCES"))
@@ -303,11 +305,11 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
   hwloc_debug("%s", "node distance matrix:\n");
   hwloc_debug("%s", "   ");
   for(j=0; j<nbobjs; j++)
-    hwloc_debug(" %3u", j);
+    hwloc_debug(" %3u", (*distance_indexes)[j]);
   hwloc_debug("%s", "\n");
 
   for(i=0; i<nbobjs; i++) {
-    hwloc_debug("%3u", i);
+    hwloc_debug("%3u", (*distance_indexes)[i]);
     for(j=0; j<nbobjs; j++)
       hwloc_debug(" %3u", (*distances)[i][j]);
     hwloc_debug("%s", "\n");
@@ -1641,6 +1643,11 @@ hwloc_discover(struct hwloc_topology *topology)
   hwloc_debug("%s", "\nPropagate total memory up\n");
   propagate_total_memory(topology->levels[0][0]);
 
+#  ifdef HWLOC_LINUX_SYS
+  if (topology->backend_type == HWLOC_BACKEND_SYSFS)
+    hwloc_set_linux_distances(topology);
+#  endif /* HWLOC_LINUX_SYS */
+
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;
 
@@ -1737,8 +1744,8 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
   for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
-    free(topology->os_distances[i]);
-    topology->os_distances[i] = NULL;
+    free(topology->distances[i]);
+    topology->distances[i] = NULL;
   }
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
@@ -1779,7 +1786,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
     /* Only ignore useless cruft by default */
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
 
-    topology->os_distances[i] = NULL;
+    topology->distances[i] = NULL;
   }
 
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
@@ -1944,7 +1951,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
-    free(topology->os_distances[i]);
+    free(topology->distances[i]);
   free(topology->support.discovery);
   free(topology->support.cpubind);
   free(topology);
@@ -2225,7 +2232,7 @@ hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
   }
   nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
 
-  if (!topology->os_distances[type]) {
+  if (!topology->distances[type]) {
     errno = ENOSYS;
     return -1;
   }
@@ -2237,21 +2244,8 @@ hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
   }
 
   for(i=0; i<nbobjs; i++)
-    for(j=0; j<nbobjs; j++) {
-      hwloc_obj_t obj_i, obj_j;
-      unsigned distance = UINT_MAX;
-
-      obj_i = hwloc_get_obj_by_depth(topology, depth, i);
-      obj_j = hwloc_get_obj_by_depth(topology, depth, j);
-      if (obj_i && obj_j) {
-	unsigned os_i = obj_i->os_index;
-	unsigned os_j = obj_j->os_index;
-	if (os_i >= 0 && os_j >= 0)
-	  distance = topology->os_distances[type][i+nbobjs*j];
-      }
-
-      distances[i+nbobjs*j] = distance;
-    }
+    for(j=0; j<nbobjs; j++)
+      distances[i+nbobjs*j] = topology->distances[type][i+nbobjs*j];
 
   *distancesp = distances;
   *nbobjsp = nbobjs;

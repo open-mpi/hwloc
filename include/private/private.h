@@ -62,7 +62,7 @@ struct hwloc_topology {
   unsigned long flags;
   int type_depth[HWLOC_OBJ_TYPE_MAX];
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
-  unsigned *os_distances[HWLOC_OBJ_TYPE_MAX];
+  unsigned *distances[HWLOC_OBJ_TYPE_MAX];
   int is_thissystem;
   int is_loaded;
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
@@ -87,6 +87,10 @@ struct hwloc_topology {
       /* sysfs backend parameters */
       char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
+
+      /* temporary distance matrices that will copied into the main logical-index-ordered distance at the end of the discovery */
+      unsigned *numa_os_distances;
+      unsigned *numa_os_distance_indexes;
     } sysfs;
 #endif /* HWLOC_LINUX_SYS */
 #if defined(HWLOC_OSF_SYS) || defined(HWLOC_COMPILE_PORTS)
@@ -113,7 +117,7 @@ struct hwloc_topology {
 
 
 extern void hwloc_setup_pu_level(struct hwloc_topology *topology, unsigned nb_pus);
-extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/);
+extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/, unsigned *distance_indexes /*[nbobjs]*/);
 extern int hwloc_get_sysctlbyname(const char *name, int64_t *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);
 extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
@@ -121,6 +125,7 @@ extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
 #if defined(HWLOC_LINUX_SYS)
 extern void hwloc_look_linux(struct hwloc_topology *topology);
 extern void hwloc_set_linux_hooks(struct hwloc_topology *topology);
+extern void hwloc_set_linux_distances(struct hwloc_topology *topology);
 extern int hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path);
 extern void hwloc_backend_sysfs_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_LINUX_SYS */
