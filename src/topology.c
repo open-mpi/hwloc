@@ -295,7 +295,7 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
 				      unsigned *_distance_indexes)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
-  unsigned (*distance_indexes)[nbobjs] = (unsigned (*)[nbobjs])_distance_indexes;
+  unsigned (*distance_indexes)[nbobjs] __hwloc_attribute_unused = (unsigned (*)[nbobjs])_distance_indexes;
   unsigned i,j;
 
   if (getenv("HWLOC_IGNORE_DISTANCES"))
