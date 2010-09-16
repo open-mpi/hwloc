@@ -289,11 +289,13 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
  */
 void
 hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
-				     unsigned nbobjs,
-				     struct hwloc_obj **objs,
-				     unsigned *_distances)
+				      unsigned nbobjs,
+				      struct hwloc_obj **objs,
+				      unsigned *_distances,
+				      unsigned *_distance_indexes)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
+  unsigned (*distance_indexes)[nbobjs] = (unsigned (*)[nbobjs])_distance_indexes;
   unsigned i,j;
 
   if (getenv("HWLOC_IGNORE_DISTANCES"))
@@ -303,11 +305,11 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
   hwloc_debug("%s", "node distance matrix:\n");
   hwloc_debug("%s", "   ");
   for(j=0; j<nbobjs; j++)
-    hwloc_debug(" %3u", j);
+    hwloc_debug(" %3u", (*distance_indexes)[j]);
   hwloc_debug("%s", "\n");
 
   for(i=0; i<nbobjs; i++) {
-    hwloc_debug("%3u", i);
+    hwloc_debug("%3u", (*distance_indexes)[i]);
     for(j=0; j<nbobjs; j++)
       hwloc_debug(" %3u", (*distances)[i][j]);
     hwloc_debug("%s", "\n");

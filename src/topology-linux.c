@@ -1302,39 +1302,67 @@ static void
 look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *found)
 {
   unsigned osnode;
-  unsigned nbnodes = 1;
+  unsigned nbnodes = 0;
   DIR *dir;
   struct dirent *dirent;
   hwloc_obj_t node;
+  hwloc_cpuset_t nodeset = hwloc_cpuset_alloc();
 
   *found = 0;
 
+  /* Get the list of nodes first */
   dir = hwloc_opendir(path, topology->backend_params.sysfs.root_fd);
   if (dir)
     {
       while ((dirent = readdir(dir)) != NULL)
 	{
-	  unsigned long numnode;
 	  if (strncmp(dirent->d_name, "node", 4))
 	    continue;
-	  numnode = strtoul(dirent->d_name+4, NULL, 0);
-	  if (nbnodes < numnode+1)
-	    nbnodes = numnode+1;
+	  osnode = strtoul(dirent->d_name+4, NULL, 0);
+	  hwloc_cpuset_set(nodeset, osnode);
+	  nbnodes++;
 	}
       closedir(dir);
     }
 
   if (nbnodes <= 1)
-    return;
+    {
+      hwloc_cpuset_free(nodeset);
+      return;
+    }
 
   /* For convenience, put these declarations inside a block.  Saves us
      from a bunch of mallocs, particularly with the 2D array. */
+
   {
       hwloc_obj_t nodes[nbnodes];
       unsigned distances[nbnodes][nbnodes];
-      for (osnode=0; osnode < nbnodes; osnode++) {
+      unsigned distance_indexes[nbnodes];
+      unsigned index;
+
+      /* Get node indexes now. We need them in order since Linux groups
+       * sparse distances but keep them in order in the sysfs distance files.
+       */
+      index = 0;
+      hwloc_cpuset_foreach_begin (osnode, nodeset) {
+	distance_indexes[index] = osnode;
+	index++;
+      } hwloc_cpuset_foreach_end();
+      hwloc_cpuset_free(nodeset);
+
+#ifdef HWLOC_DEBUG
+      hwloc_debug("%s", "numa distance indexes: ");
+      for (index = 0; index < nbnodes; index++) {
+	hwloc_debug(" %u", distance_indexes[index]);
+      }
+      hwloc_debug("%s", "\n");
+#endif
+
+      /* Get actual distances now */
+      for (index = 0; index < nbnodes; index++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_cpuset_t cpuset;
+	  unsigned int osnode = distance_indexes[index];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
@@ -1351,13 +1379,13 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
           hwloc_insert_object_by_cpuset(topology, node);
-          nodes[osnode] = node;
+          nodes[index] = node;
 
           sprintf(nodepath, "%s/node%u/distance", path, osnode);
-          hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
+          hwloc_parse_node_distance(nodepath, nbnodes, distances[index], topology->backend_params.sysfs.root_fd);
       }
 
-      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances);
+      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned *) distances, (unsigned *) distance_indexes);
   }
 
   *found = nbnodes;
