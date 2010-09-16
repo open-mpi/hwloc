@@ -425,4 +425,6 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
     }
   }
 #endif
+
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "x86");
 }

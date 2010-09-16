@@ -22,6 +22,12 @@
 #error sched.h must be included with _GNU_SOURCE defined
 #endif
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #ifdef HWLOC_HAVE_CPU_SET
 
 
@@ -98,5 +104,11 @@ hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribu
 
 
 #endif /* CPU_SET */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 
 #endif /* HWLOC_GLIBC_SCHED_H */

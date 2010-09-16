@@ -8,6 +8,12 @@
 
 #include <hwloc/config.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /* Only enact these defines if we're actually renaming the symbols
    (i.e., avoid trying to have no-op defines if we're *not*
    renaming). */
@@ -146,6 +152,7 @@
 #define hwloc_cpuset_all_but_cpu HWLOC_NAME(cpuset_all_but_cpu)
 #define hwloc_cpuset_set HWLOC_NAME(cpuset_set)
 #define hwloc_cpuset_set_range HWLOC_NAME(cpuset_set_range)
+#define hwloc_cpuset_set_ith_ulong HWLOC_NAME(cpuset_set_ith_ulong)
 #define hwloc_cpuset_clr HWLOC_NAME(cpuset_clr)
 #define hwloc_cpuset_clr_range HWLOC_NAME(cpuset_clr_range)
 #define hwloc_cpuset_isset HWLOC_NAME(cpuset_isset)
@@ -313,5 +320,11 @@
 #define hwloc_setup_level HWLOC_NAME(setup_level)
 
 #endif /* HWLOC_SYM_TRANSFORM */
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 
 #endif /* HWLOC_RENAME_H */

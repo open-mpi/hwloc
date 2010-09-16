@@ -37,6 +37,8 @@ EXTRA_DIST = \
         images/ppc64-with-smt.pdf \
         images/ppc64-without-smt.png \
         images/ppc64-without-smt.pdf \
+        images/ppc64-full-with-smt.png \
+        images/ppc64-full-with-smt.pdf \
         www.open-mpi.org.cfg \
         www.open-mpi.org-css.inc \
         www.open-mpi.org-footer.inc \
@@ -284,6 +286,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_or.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_asprintf.3 \
@@ -339,7 +342,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_machine_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_group_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_memory_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_cpuset_snprintf.3 \
@@ -351,6 +353,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_of_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_get_info_by_name.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_thread_cpubind.3 \

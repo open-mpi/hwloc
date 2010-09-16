@@ -25,8 +25,38 @@ program instead of hwloc-specific CPU set string format.
 \fB\-v\fR
 Verbose messages.
 .TP
-\fB\-\-synthetic\fR "2 2"
-Simulate a fake hierarchy.
+\fB\-i\fR <file>, \fB\-\-input\fR <file>
+Read topology from XML file <file> (instead of discovering the
+topology on the local machine).  If <file> is "\-", the standard input
+is used.  XML support must have been compiled in to hwloc for this
+option to be usable.
+.TP
+\fB\-i\fR <directory>, \fB\-\-input\fR <directory>
+Read topology from the chroot specified by <directory> (instead of
+discovering the topology on the local machine).  This option is
+generally only available on Linux.
+.TP
+\fB\-i\fR <specification>, \fB\-\-input\fR <specification>
+Simulate a fake hierarchy (instead of discovering the topology on the
+local machine). If <specification> is "node:2 pu:3", the topology will
+contain two NUMA nodes with 3 processing units in each of them.
+.TP
+\fB\-\-if\fR <format>, \fB\-\-input\-format\fR <format>
+Enforce the input in the given format, among \fBxml\fR, \fBfsroot\fR
+and \fBsynthetic\fR.
+.TP
+\fB\-\-ignore\fR <type>
+Ignore all objects of type <type> in the topology.
+This may be useful in case of asymmetric topologies since ignoring
+large objects (e.g. NUMA nodes) may improve the distribution of
+smaller objects (e.g. cores or PUs) among the machine.
+.TP
+\fB\-\-among\fR <type>
+Distribute among objects of the given type instead of from
+the top of the topology hierarchy.
+This may be useful in case of asymmetric topologies since small
+objects (e.g. cores or PUs) may be more uniformly distributed across
+the machine than larger objects (e.g. NUMA nodes).
 .TP
 \fB\-\-version\fR
 Report version and exit.

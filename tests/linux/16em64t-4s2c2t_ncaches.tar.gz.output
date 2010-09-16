@@ -1,4 +1,4 @@
-Machine (phys=0)
+Machine (phys=0 Backend=Linux)
   Socket #0 (phys=0)
     Core #0 (phys=0)
       PU #0 (phys=0)

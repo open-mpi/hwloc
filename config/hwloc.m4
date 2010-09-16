@@ -278,8 +278,6 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
         esac
     esac
     
-    _HWLOC_CHECK_DIFF_U
-    
     AC_CHECK_SIZEOF([unsigned long])
     AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_LONG], $ac_cv_sizeof_unsigned_long, [The size of `unsigned long', as computed by sizeof])
     AC_CHECK_SIZEOF([unsigned int])
@@ -324,30 +322,6 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
       AC_DEFINE([HWLOC_HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
     ])
     
-    AC_CHECK_TYPES([wchar_t], [
-      AC_CHECK_FUNCS([putwc])
-    ], [], [[#include <wchar.h>]])
-    
-    AC_CHECK_HEADERS([locale.h], [
-      AC_CHECK_FUNCS([setlocale])
-    ])
-    AC_CHECK_HEADERS([langinfo.h], [
-      AC_CHECK_FUNCS([nl_langinfo])
-    ])
-    hwloc_old_LIBS="$LIBS"
-    LIBS=
-    AC_CHECK_HEADERS([curses.h], [
-      AC_CHECK_HEADERS([term.h], [
-        AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
-            AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
-            AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
-                      [Define to 1 if you have a library providing the termcap interface])
-          ])
-      ], [], [[#include <curses.h>]])
-    ])
-    LIBS="$hwloc_old_LIBS"
-    unset hwloc_old_LIBS
-
     AC_CHECK_TYPES([KAFFINITY,
                     PROCESSOR_CACHE_TYPE,
                     CACHE_DESCRIPTOR,
@@ -378,12 +352,6 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
       AC_CHECK_LIB([kstat], [main], 
                    [HWLOC_LIBS="-lkstat $HWLOC_LIBS"
                     AC_DEFINE([HAVE_LIBKSTAT], 1, [Define to 1 if we have -lkstat])])
-    ])
-    
-    AC_CHECK_HEADERS([infiniband/verbs.h], [
-      AC_CHECK_LIB([ibverbs], [ibv_open_device], 
-                   [HWLOC_LIBS="-libverbs $HWLOC_LIBS"
-                    AC_DEFINE([HAVE_LIBIBVERBS], 1, [Define to 1 if we have -libverbs])])
     ])
     
     AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
@@ -523,9 +491,6 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     
     AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
     
-    AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
-    	      [#include <numa.h>])
-    
     AC_CHECK_HEADERS([pthread_np.h])
     AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
       #include <pthread.h>
@@ -544,8 +509,22 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     AC_SEARCH_LIBS([pthread_getthrds_np], [pthread],
       AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, `Define to 1 if you have pthread_getthrds_np')
     )
-    
+
+    # XML support
+    if test "x$enable_xml" != "xno"; then
+        HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [xmlNewDoc], [:], [enable_xml="no"])
+    fi
+    if test "x$enable_xml" != "xno"; then
+        HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
+        AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
+        AC_SUBST([HWLOC_HAVE_XML], [1])
+    else
+        AC_SUBST([HWLOC_HAVE_XML], [0])
+    fi
+    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_XML_CFLAGS"    
+
     # Setup HWLOC's C, CPP, and LD flags, and LIBS
+    AC_SUBST(HWLOC_REQUIRES)
     HWLOC_CFLAGS="$hwloc_CC_c99_flags $HWLOC_CFLAGS"
     AC_SUBST(HWLOC_CFLAGS)
     HWLOC_CPPFLAGS='-I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include'

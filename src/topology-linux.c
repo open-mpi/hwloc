@@ -8,6 +8,7 @@
 #include <hwloc.h>
 #include <hwloc/linux.h>
 #include <private/private.h>
+#include <private/misc.h>
 #include <private/debug.h>
 
 #include <limits.h>
@@ -253,6 +254,37 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #endif /* !CPU_SET */
 }
 
+#if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
+/*
+ * On some kernels, sched_getaffinity requires the output size to be larger
+ * than the kernel cpu_set size (defined by CONFIG_NR_CPUS).
+ * Try sched_affinity on ourself until we find a nr_cpus value that makes
+ * the kernel happy.
+ */
+static int
+hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
+{
+  static int nr_cpus = -1;
+
+  if (nr_cpus != -1)
+    /* already computed */
+    return nr_cpus;
+
+  /* start with a nr_cpus that may contain the whole topology */
+  nr_cpus = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset) + 1;
+  while (1) {
+    cpu_set_t *set = CPU_ALLOC(nr_cpus);
+    size_t setsize = CPU_ALLOC_SIZE(nr_cpus);
+    int err = sched_getaffinity(0, setsize, set); /* always works, unless setsize is too small */
+    CPU_FREE(set);
+    if (!err)
+      /* found it */
+      return nr_cpus;
+    nr_cpus *= 2;
+  }
+}
+#endif
+
 int
 hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_cpuset_t hwloc_set)
 {
@@ -264,12 +296,12 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   unsigned cpu;
   int last;
   size_t setsize;
+  int kernel_nr_cpus;
 
-  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
-  assert(last != -1);
-
-  setsize = CPU_ALLOC_SIZE(last+1);
-  plinux_set = CPU_ALLOC(last+1);
+  /* find the kernel nr_cpus so as to use a large enough cpu_set size */
+  kernel_nr_cpus = hwloc_linux_find_kernel_nr_cpus(topology);
+  setsize = CPU_ALLOC_SIZE(kernel_nr_cpus);
+  plinux_set = CPU_ALLOC(kernel_nr_cpus);
 
   err = sched_getaffinity(tid, setsize, plinux_set);
 
@@ -277,6 +309,9 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
     CPU_FREE(plinux_set);
     return -1;
   }
+
+  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+  assert(last != -1);
 
   hwloc_cpuset_zero(hwloc_set);
   for(cpu=0; cpu<=(unsigned) last; cpu++)
@@ -745,8 +780,10 @@ hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_pat
   if (strcmp(fsroot_path, "/"))
     topology->is_thissystem = 0;
 
+  topology->backend_params.sysfs.root_path = strdup(fsroot_path);
   topology->backend_params.sysfs.root_fd = root;
 #else
+  topology->backend_params.sysfs.root_path = NULL;
   topology->backend_params.sysfs.root_fd = -1;
 #endif
   topology->backend_type = HWLOC_BACKEND_SYSFS;
@@ -759,6 +796,8 @@ hwloc_backend_sysfs_exit(struct hwloc_topology *topology)
   assert(topology->backend_type == HWLOC_BACKEND_SYSFS);
 #ifdef HAVE_OPENAT
   close(topology->backend_params.sysfs.root_fd);
+  free(topology->backend_params.sysfs.root_path);
+  topology->backend_params.sysfs.root_path = NULL;
 #endif
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
@@ -823,10 +862,18 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
     }
 
   /* convert into a set */
-  /* FIXME: optimize using hwloc_cpuset_ith_long? */
-  for(i=0; i<nr_maps*KERNEL_CPU_MASK_BITS; i++)
-    if (maps[i/KERNEL_CPU_MASK_BITS] & 1<<(i%KERNEL_CPU_MASK_BITS))
-      hwloc_cpuset_set(set, i);
+#if KERNEL_CPU_MASK_BITS == HWLOC_BITS_PER_LONG
+  for(i=0; i<nr_maps; i++)
+    hwloc_cpuset_set_ith_ulong(set, i, maps[i]);
+#else
+  for(i=0; i<(nr_maps+1)/2; i++) {
+    unsigned long ulong;
+    ulong = maps[2*i];
+    if (2*i+1<nr_maps)
+      ulong |= maps[2*i+1] << KERNEL_CPU_MASK_BITS;
+    hwloc_cpuset_set_ith_ulong(set, i, ulong);
+  }
+#endif
 
   free(maps);
 
@@ -880,7 +927,7 @@ hwloc_strdup_mntpath(const char *escapedpath, size_t length)
 static void
 hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int fsroot_fd)
 {
-#define PROC_MOUNT_LINE_LEN 128
+#define PROC_MOUNT_LINE_LEN 512
   char line[PROC_MOUNT_LINE_LEN];
   FILE *fd;
 
@@ -899,6 +946,13 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
     char *path;
     char *type;
     char *tmp;
+
+    /* remove the ending " 0 0\n" that the kernel always adds */
+    tmp = line + strlen(line) - 5;
+    if (tmp < line || strcmp(tmp, " 0 0\n"))
+      fprintf(stderr, "Unexpected end of /proc/mounts line `%s'\n", line);
+    else
+      *tmp = '\0';
 
     /* path is after first field and a space */
     tmp = strchr(line, ' ');
@@ -920,9 +974,12 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
       hwloc_debug("Found cpuset mount point on %s\n", path);
       *cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
       break;
+
     } else if (!strncmp(type, "cgroup ", 7)) {
       /* found a cgroup mntpnt */
       char *opt, *opts;
+      int cpuset_opt = 0;
+      int noprefix_opt = 0;
 
       /* find options */
       tmp = strchr(type, ' ');
@@ -930,14 +987,23 @@ hwloc_find_linux_cpuset_mntpnt(char **cgroup_mntpnt, char **cpuset_mntpnt, int f
 	continue;
       opts = tmp+1;
 
-      /* find "cpuset" option */
-      while ((opt = strsep(&opts, ",")) && strcmp(opt, "cpuset"))
-        ; /* continue */
-      if (!opt)
+      /* look at options */
+      while ((opt = strsep(&opts, ",")) != NULL) {
+	if (!strcmp(opt, "cpuset"))
+	  cpuset_opt = 1;
+	else if (!strcmp(opt, "noprefix"))
+	  noprefix_opt = 1;
+      }
+      if (!cpuset_opt)
 	continue;
 
-      hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
-      *cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      if (noprefix_opt) {
+	hwloc_debug("Found cgroup emulating a cpuset mount point on %s\n", path);
+	*cpuset_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      } else {
+	hwloc_debug("Found cgroup/cpuset mount point on %s\n", path);
+	*cgroup_mntpnt = hwloc_strdup_mntpath(path, type-path);
+      }
       break;
     }
   }
@@ -1373,20 +1439,18 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       sprintf(str, "%s/cpu%d/topology/physical_package_id", path, i);
       hwloc_parse_sysfs_unsigned(str, &mysocketid, topology->backend_params.sysfs.root_fd);
 
-      if (mysocketid != (unsigned) -1) {
-        sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
-        socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-        if (socketset && hwloc_cpuset_weight(socketset) >= 1) {
-          if (hwloc_cpuset_first(socketset) == i) {
-            /* first cpu in this socket, add the socket */
-            socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
-            socket->cpuset = socketset;
-            hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
-                       mysocketid, socketset);
-            hwloc_insert_object_by_cpuset(topology, socket);
-          } else
-            hwloc_cpuset_free(socketset);
-        }
+      sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
+      socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
+      if (socketset && hwloc_cpuset_weight(socketset) >= 1) {
+        if (hwloc_cpuset_first(socketset) == i) {
+          /* first cpu in this socket, add the socket */
+          socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
+          socket->cpuset = socketset;
+          hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
+                     mysocketid, socketset);
+          hwloc_insert_object_by_cpuset(topology, socket);
+        } else
+          hwloc_cpuset_free(socketset);
       }
 
       /* look at the core */
@@ -1662,8 +1726,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 }
 
 static void
-hwloc__get_dmi_info(struct hwloc_topology *topology,
-		   char **dmi_board_vendor, char **dmi_board_name)
+hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
 #define DMI_BOARD_STRINGS_LEN 50
   char dmi_line[DMI_BOARD_STRINGS_LEN];
@@ -1679,8 +1742,8 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      *dmi_board_vendor = strdup(dmi_line);
-      hwloc_debug("found DMI board vendor '%s'\n", *dmi_board_vendor);
+      hwloc_debug("found DMI board vendor '%s'\n", dmi_line);
+      hwloc_add_object_info(obj, "DMIBoardVendor", dmi_line);
     }
   }
 
@@ -1693,8 +1756,8 @@ hwloc__get_dmi_info(struct hwloc_topology *topology,
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      *dmi_board_name = strdup(dmi_line);
-      hwloc_debug("found DMI board name '%s'\n", *dmi_board_name);
+      hwloc_debug("found DMI board name '%s'\n", dmi_line);
+      hwloc_add_object_info(obj, "DMIBoardName", dmi_line);
     }
   }
 }
@@ -1704,7 +1767,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
 {
   DIR *nodes_dir;
   unsigned nbnodes;
-  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name;
+  char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
   int err;
 
   /* Gather the list of admin-disabled cpus and mems */
@@ -1714,7 +1777,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
     if (cpuset_name) {
       hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "cpus", topology->levels[0][0]->allowed_cpuset);
       hwloc_admin_disable_set_from_cpuset(topology, cgroup_mntpnt, cpuset_mntpnt, cpuset_name, "mems", topology->levels[0][0]->allowed_nodeset);
-      free(cpuset_name);
     }
     free(cgroup_mntpnt);
     free(cpuset_mntpnt);
@@ -1748,8 +1810,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
       hwloc_cpuset_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;
-      machine->attr->machine.dmi_board_name = NULL;
-      machine->attr->machine.dmi_board_vendor = NULL;
       hwloc_debug_1arg_cpuset("machine number %lu has cpuset %s\n",
 		 node, machine_online_set);
       hwloc_insert_object_by_cpuset(topology, machine);
@@ -1760,9 +1820,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
 
       /* Gather DMI info */
       /* FIXME: get the right DMI info of each machine */
-      hwloc__get_dmi_info(topology,
-			 &machine->attr->machine.dmi_board_vendor,
-			 &machine->attr->machine.dmi_board_name);
+      hwloc__get_dmi_info(topology, machine);
     }
     closedir(nodes_dir);
   } else {
@@ -1799,10 +1857,18 @@ hwloc_look_linux(struct hwloc_topology *topology)
     }
 
     /* Gather DMI info */
-    hwloc__get_dmi_info(topology,
-		       &topology->levels[0][0]->attr->machine.dmi_board_vendor,
-		       &topology->levels[0][0]->attr->machine.dmi_board_name);
+    hwloc__get_dmi_info(topology, topology->levels[0][0]);
   }
+
+  hwloc_add_object_info(topology->levels[0][0], "Backend", "Linux");
+  if (cpuset_name) {
+    hwloc_add_object_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
+    free(cpuset_name);
+  }
+
+  /* gather uname info if fsroot wasn't changed */
+  if (!topology->backend_params.sysfs.root_path || !strcmp(topology->backend_params.sysfs.root_path, "/"))
+     hwloc_add_uname_info(topology);
 }
 
 void
