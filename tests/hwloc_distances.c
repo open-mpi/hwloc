@@ -14,7 +14,6 @@
 int main(void)
 {
   hwloc_topology_t topology;
-  hwloc_obj_type_t type;
   unsigned nbobjs;
   unsigned *distances;
   unsigned d1, d2;
@@ -28,9 +27,20 @@ int main(void)
     printf("No NUMA distances\n");
   } else {
     unsigned i, j;
+
+    /* column header */
+    printf("nodes");
+    for(j=0; j<nbobjs; j++)
+      printf(" % 5d", (int) j);
+    printf("\n");
+
+    /* each line */
     for(i=0; i<nbobjs; i++) {
+      /* row header */
+      printf("% 5d", (int) i);
+      /* each value */
       for(j=0; j<nbobjs; j++)
-	printf("%u ", distances[i+nbobjs*j]);
+	printf(" % 5d", (int) distances[i+nbobjs*j]);
       printf("\n");
     }
 
