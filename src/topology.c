@@ -2217,7 +2217,7 @@ int
 hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
 		    unsigned *nbobjsp, unsigned ** distancesp)
 {
-  unsigned i, j, nbobjs;
+  unsigned nbobjs;
   unsigned *distances;
   int depth;
 
@@ -2243,9 +2243,7 @@ hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
     return -1;
   }
 
-  for(i=0; i<nbobjs; i++)
-    for(j=0; j<nbobjs; j++)
-      distances[i+nbobjs*j] = topology->distances[type][i+nbobjs*j];
+  memcpy(distances, topology->distances[type], nbobjs*nbobjs*sizeof(unsigned));
 
   *distancesp = distances;
   *nbobjsp = nbobjs;
