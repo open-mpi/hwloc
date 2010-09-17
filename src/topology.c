@@ -2250,6 +2250,11 @@ int hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
   }
   nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
 
+  if (logical_index1 >= nbobjs || logical_index2 >= nbobjs) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (!topology->distances[depth]) {
     errno = ENOSYS;
     return -1;

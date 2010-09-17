@@ -44,6 +44,10 @@ int main(void)
       printf("\n");
     }
 
+    err = hwloc_get_distance(topology, HWLOC_OBJ_NODE, -1, -1, &d1, &d2);
+    assert(err < 0);
+    err = hwloc_get_distance(topology, HWLOC_OBJ_NODE, 0, -1, &d1, &d2);
+    assert(err < 0);
     err = hwloc_get_distance(topology, HWLOC_OBJ_NODE, 0, nbobjs-1, &d1, &d2);
     assert(!err);
     assert(d1 == distances[0+nbobjs*(nbobjs-1)]);
