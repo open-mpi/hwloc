@@ -1905,31 +1905,40 @@ hwloc_look_linux(struct hwloc_topology *topology)
 void
 hwloc_set_linux_distances(struct hwloc_topology *topology)
 {
-  unsigned nbnodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
+  unsigned nbnodes;
+  int depth;
+
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+    return;
+  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+
+  nbnodes = hwloc_get_nbobjs_by_depth(topology, depth);
+  if (nbnodes < 1)
+    return;
 
   assert(!!topology->backend_params.sysfs.numa_os_distances == !!topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes);
+
   if (topology->backend_params.sysfs.numa_os_distances) {
     unsigned logical_index_of_non_sparse_physical_index[nbnodes]; /* cache the translation from one index to the other */
     unsigned i, j, li, lj;
     hwloc_obj_t obj;
 
-    assert(nbnodes > 0);
-
     for(i=0; i<nbnodes; i++) {
-      while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, obj)) != NULL)
+      while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
         if (obj->os_index == topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes[i])
           logical_index_of_non_sparse_physical_index[i] = obj->logical_index;
     }
 
-    topology->distances[HWLOC_OBJ_NODE] = malloc(nbnodes*nbnodes*sizeof(unsigned));
+    topology->distances[depth] = malloc(nbnodes*nbnodes*sizeof(unsigned));
 
     for(i=0; i<nbnodes; i++) {
       li = logical_index_of_non_sparse_physical_index[i];
-      topology->distances[HWLOC_OBJ_NODE][li*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+i];
+      topology->distances[depth][li*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+i];
       for(j=i+1; j<nbnodes; j++) {
 	lj = logical_index_of_non_sparse_physical_index[j];
-	topology->distances[HWLOC_OBJ_NODE][li*nbnodes+lj] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+j];
-	topology->distances[HWLOC_OBJ_NODE][lj*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[j*nbnodes+i];
+	topology->distances[depth][li*nbnodes+lj] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+j];
+	topology->distances[depth][lj*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[j*nbnodes+i];
       }
     }
 
