@@ -779,14 +779,14 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * Slot i+nbobjs*j contains the distance from the object of logical index i
  * the object of logical index j.
  *
- * The returned matrix is allocated anf given to the caller, which will
- * have to free it later.
+ * The returned matrix belongs to the hwloc library. The caller should
+ * not modify or free it.
  *
  * \return 0 on success, or -1 if no matrix is available for this depth.
  */
 
 HWLOC_DECLSPEC int hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
-				       unsigned *nbobjs, unsigned ** distances);
+				       unsigned *nbobjs, const unsigned ** distances);
 
 /** \brief Get the distance in both directions between two objects.
  */

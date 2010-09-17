@@ -162,7 +162,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
   }
 
   if (verbose_mode > 1) {
-    unsigned *distances;
+    const unsigned *distances;
     unsigned nbobjs;
     unsigned depth;
 
@@ -189,7 +189,6 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
           printf(" % 5d", (int) distances[i+nbobjs*j]);
         printf("\n");
       }
-      free(distances);
     }
   }
 

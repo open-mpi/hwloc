@@ -2218,10 +2218,9 @@ hwloc_topology_get_support(struct hwloc_topology * topology)
 
 int
 hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
-		    unsigned *nbobjsp, unsigned ** distancesp)
+		    unsigned *nbobjsp, const unsigned ** distancesp)
 {
   unsigned nbobjs;
-  unsigned *distances;
 
   if (depth >= topology->nb_levels) {
     errno = EINVAL;
@@ -2234,15 +2233,7 @@ hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
     return -1;
   }
 
-  distances = malloc(nbobjs*nbobjs*sizeof(*distances));
-  if (!distances) {
-    errno = ENOMEM;
-    return -1;
-  }
-
-  memcpy(distances, topology->distances[depth], nbobjs*nbobjs*sizeof(unsigned));
-
-  *distancesp = distances;
+  *distancesp = topology->distances[depth];
   *nbobjsp = nbobjs;
   return 0;
 }
