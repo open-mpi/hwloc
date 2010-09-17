@@ -17,19 +17,25 @@ int main(void)
   unsigned nbobjs;
   const unsigned *distances;
   unsigned d1, d2;
+  unsigned depth, topodepth;
   int err;
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
 
-  err = hwloc_get_distances(topology, HWLOC_OBJ_NODE, &nbobjs, &distances);
-  if (err < 0) {
-    printf("No NUMA distances\n");
-  } else {
+  topodepth = hwloc_topology_get_depth(topology);
+
+  for(depth=0; depth<topodepth; depth++) {
     unsigned i, j;
 
+    err = hwloc_get_distances(topology, depth, &nbobjs, &distances);
+    if (err < 0) {
+      printf("No distance at depth %u\n", depth);
+      continue;
+    }
+
     /* column header */
-    printf("nodes");
+    printf("distance matrix for depth %u:\n     ", depth);
     for(j=0; j<nbobjs; j++)
       printf(" % 5d", (int) j);
     printf("\n");
@@ -44,18 +50,15 @@ int main(void)
       printf("\n");
     }
 
-    err = hwloc_get_distance(topology, HWLOC_OBJ_NODE, -1, -1, &d1, &d2);
+    err = hwloc_get_distance(topology, depth, -1, -1, &d1, &d2);
     assert(err < 0);
-    err = hwloc_get_distance(topology, HWLOC_OBJ_NODE, 0, -1, &d1, &d2);
+    err = hwloc_get_distance(topology, depth, 0, -1, &d1, &d2);
     assert(err < 0);
-    err = hwloc_get_distance(topology, HWLOC_OBJ_NODE, 0, nbobjs-1, &d1, &d2);
+    err = hwloc_get_distance(topology, depth, 0, nbobjs-1, &d1, &d2);
     assert(!err);
     assert(d1 == distances[0+nbobjs*(nbobjs-1)]);
     assert(d2 == distances[nbobjs-1]);
   }
-
-  err = hwloc_get_distances(topology, HWLOC_OBJ_PU, &nbobjs, &distances);
-  assert(err == -1);
 
   hwloc_topology_destroy(topology);
 
