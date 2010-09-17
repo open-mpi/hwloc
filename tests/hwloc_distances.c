@@ -15,7 +15,7 @@ int main(void)
 {
   hwloc_topology_t topology;
   unsigned nbobjs;
-  unsigned *distances;
+  const unsigned *distances;
   unsigned d1, d2;
   int err;
 
@@ -48,8 +48,6 @@ int main(void)
     assert(!err);
     assert(d1 == distances[0+nbobjs*(nbobjs-1)]);
     assert(d2 == distances[nbobjs-1]);
-
-    free(distances);
   }
 
   err = hwloc_get_distances(topology, HWLOC_OBJ_PU, &nbobjs, &distances);
