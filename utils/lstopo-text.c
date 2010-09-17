@@ -168,10 +168,9 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
 
     for (depth = 0; depth < topodepth; depth++) {
       unsigned i, j;
-      int err;
 
-      err = hwloc_get_distances(topology, depth, &nbobjs, &distances);
-      if (err < 0)
+      distances = hwloc_get_distances(topology, depth, &nbobjs);
+      if (!distances)
         continue;
 
       printf("depth %u distance matrix:\n", depth);

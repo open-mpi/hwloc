@@ -2216,26 +2216,21 @@ hwloc_topology_get_support(struct hwloc_topology * topology)
   return &topology->support;
 }
 
-int
+const unsigned *
 hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
-		    unsigned *nbobjsp, const unsigned ** distancesp)
+		    unsigned *nbobjsp)
 {
   unsigned nbobjs;
 
-  if (depth >= topology->nb_levels) {
-    errno = EINVAL;
-    return -1;
-  }
+  if (depth >= topology->nb_levels)
+    return NULL;
   nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
 
-  if (!topology->distances[depth]) {
-    errno = ENOSYS;
-    return -1;
-  }
+  if (!topology->distances[depth])
+    return NULL;
 
-  *distancesp = topology->distances[depth];
   *nbobjsp = nbobjs;
-  return 0;
+  return topology->distances[depth];
 }
 
 int hwloc_get_distance(hwloc_topology_t topology, unsigned depth,

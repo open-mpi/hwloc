@@ -782,11 +782,11 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * The returned matrix belongs to the hwloc library. The caller should
  * not modify or free it.
  *
- * \return 0 on success, or -1 if no matrix is available for this depth.
+ * \return \c NULL if no such distant matrix exists.
  */
 
-HWLOC_DECLSPEC int hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
-				       unsigned *nbobjs, const unsigned ** distances);
+HWLOC_DECLSPEC const unsigned * hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
+						    unsigned *nbobjs);
 
 /** \brief Get the distance in both directions between two objects.
  */

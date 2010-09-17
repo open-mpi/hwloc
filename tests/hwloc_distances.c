@@ -28,8 +28,8 @@ int main(void)
   for(depth=0; depth<topodepth; depth++) {
     unsigned i, j;
 
-    err = hwloc_get_distances(topology, depth, &nbobjs, &distances);
-    if (err < 0) {
+    distances = hwloc_get_distances(topology, depth, &nbobjs);
+    if (!distances) {
       printf("No distance at depth %u\n", depth);
       continue;
     }
