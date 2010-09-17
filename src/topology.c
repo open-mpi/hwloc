@@ -1744,6 +1744,8 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
   for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  }
+  for (i=0; i < HWLOC_DEPTH_MAX; i++) {
     free(topology->distances[i]);
     topology->distances[i] = NULL;
   }
@@ -1785,7 +1787,8 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++) {
     /* Only ignore useless cruft by default */
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
-
+  }
+  for(i=0; i< HWLOC_DEPTH_MAX; i++) {
     topology->distances[i] = NULL;
   }
 
@@ -1950,7 +1953,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   int i;
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
-  for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
+  for(i=0; i< HWLOC_DEPTH_MAX; i++)
     free(topology->distances[i]);
   free(topology->support.discovery);
   free(topology->support.cpubind);
@@ -2214,25 +2217,19 @@ hwloc_topology_get_support(struct hwloc_topology * topology)
 }
 
 int
-hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
+hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
 		    unsigned *nbobjsp, unsigned ** distancesp)
 {
   unsigned nbobjs;
   unsigned *distances;
-  int depth;
 
-  if (type >= HWLOC_OBJ_TYPE_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  depth = hwloc_get_type_depth(topology, type);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+  if (depth >= topology->nb_levels) {
     errno = EINVAL;
     return -1;
   }
   nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
 
-  if (!topology->distances[type]) {
+  if (!topology->distances[depth]) {
     errno = ENOSYS;
     return -1;
   }
@@ -2243,37 +2240,31 @@ hwloc_get_distances(hwloc_topology_t topology, hwloc_obj_type_t type,
     return -1;
   }
 
-  memcpy(distances, topology->distances[type], nbobjs*nbobjs*sizeof(unsigned));
+  memcpy(distances, topology->distances[depth], nbobjs*nbobjs*sizeof(unsigned));
 
   *distancesp = distances;
   *nbobjsp = nbobjs;
   return 0;
 }
 
-int hwloc_get_distance(hwloc_topology_t topology, hwloc_obj_type_t type,
+int hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
 		       unsigned logical_index1, unsigned logical_index2,
 		       unsigned *distance, unsigned *reverse_distance)
 {
   unsigned nbobjs;
-  int depth;
 
-  if (type >= HWLOC_OBJ_TYPE_MAX) {
-    errno = EINVAL;
-    return -1;
-  }
-  depth = hwloc_get_type_depth(topology, type);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+  if (depth >= topology->nb_levels) {
     errno = EINVAL;
     return -1;
   }
   nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
 
-  if (!topology->distances[type]) {
+  if (!topology->distances[depth]) {
     errno = ENOSYS;
     return -1;
   }
 
-  *distance = topology->distances[type][logical_index1+nbobjs*logical_index2];
-  *reverse_distance = topology->distances[type][logical_index2+nbobjs*logical_index1];
+  *distance = topology->distances[depth][logical_index1+nbobjs*logical_index2];
+  *reverse_distance = topology->distances[depth][logical_index2+nbobjs*logical_index1];
   return 0;
 }

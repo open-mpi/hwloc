@@ -62,7 +62,7 @@ struct hwloc_topology {
   unsigned long flags;
   int type_depth[HWLOC_OBJ_TYPE_MAX];
   enum hwloc_ignore_type_e ignored_types[HWLOC_OBJ_TYPE_MAX];
-  unsigned *distances[HWLOC_OBJ_TYPE_MAX];
+  unsigned *distances[HWLOC_DEPTH_MAX];
   int is_thissystem;
   int is_loaded;
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */

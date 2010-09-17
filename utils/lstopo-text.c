@@ -162,16 +162,19 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
   }
 
   if (verbose_mode > 1) {
-    hwloc_obj_type_t type = HWLOC_OBJ_NODE;
     unsigned *distances;
     unsigned nbobjs;
-    int err;
+    unsigned depth;
 
-    /* should be a loop for all types, but we only have NODE distances so far */
-    err = hwloc_get_distances(topology, type, &nbobjs, &distances);
-    if (!err) {
+    for (depth = 0; depth < topodepth; depth++) {
       unsigned i, j;
-      printf("%s distance matrix:\n", hwloc_obj_type_string(type));
+      int err;
+
+      err = hwloc_get_distances(topology, depth, &nbobjs, &distances);
+      if (err < 0)
+        continue;
+
+      printf("depth %u distance matrix:\n", depth);
       /* column header */
       printf("  index");
       for(j=0; j<nbobjs; j++)
