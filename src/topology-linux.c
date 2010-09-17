@@ -1337,7 +1337,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
   {
       hwloc_obj_t nodes[nbnodes];
       unsigned * distances = calloc(nbnodes*nbnodes, sizeof(unsigned));
-      unsigned * distance_indexes  = calloc(nbnodes, sizeof(unsigned));
+      unsigned * nonsparse_physical_indexes  = calloc(nbnodes, sizeof(unsigned));
       unsigned index;
 
       /* Get node indexes now. We need them in order since Linux groups
@@ -1345,7 +1345,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
        */
       index = 0;
       hwloc_cpuset_foreach_begin (osnode, nodeset) {
-	distance_indexes[index] = osnode;
+	nonsparse_physical_indexes[index] = osnode;
 	index++;
       } hwloc_cpuset_foreach_end();
       hwloc_cpuset_free(nodeset);
@@ -1353,7 +1353,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 #ifdef HWLOC_DEBUG
       hwloc_debug("%s", "numa distance indexes: ");
       for (index = 0; index < nbnodes; index++) {
-	hwloc_debug(" %u", distance_indexes[index]);
+	hwloc_debug(" %u", nonsparse_physical_indexes[index]);
       }
       hwloc_debug("%s", "\n");
 #endif
@@ -1362,7 +1362,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       for (index = 0; index < nbnodes; index++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_cpuset_t cpuset;
-	  unsigned int osnode = distance_indexes[index];
+	  unsigned int osnode = nonsparse_physical_indexes[index];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
@@ -1385,10 +1385,10 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index*nbnodes, topology->backend_params.sysfs.root_fd);
       }
 
-      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances, distance_indexes);
+      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances, nonsparse_physical_indexes);
 
       topology->backend_params.sysfs.numa_os_distances = distances;
-      topology->backend_params.sysfs.numa_os_distance_indexes = distance_indexes;
+      topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes = nonsparse_physical_indexes;
   }
 
   *found = nbnodes;
@@ -1799,7 +1799,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
   int err;
 
   topology->backend_params.sysfs.numa_os_distances = NULL;
-  topology->backend_params.sysfs.numa_os_distance_indexes = NULL;
+  topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes = NULL;
 
   /* Gather the list of admin-disabled cpus and mems */
   hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, topology->backend_params.sysfs.root_fd);
@@ -1907,7 +1907,7 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
 {
   unsigned nbnodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
 
-  assert(!!topology->backend_params.sysfs.numa_os_distances == !!topology->backend_params.sysfs.numa_os_distance_indexes);
+  assert(!!topology->backend_params.sysfs.numa_os_distances == !!topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes);
   if (topology->backend_params.sysfs.numa_os_distances) {
     unsigned logical_index_of_non_sparse_physical_index[nbnodes]; /* cache the translation from one index to the other */
     unsigned i, j, li, lj;
@@ -1917,7 +1917,7 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
 
     for(i=0; i<nbnodes; i++) {
       while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, obj)) != NULL)
-        if (obj->os_index == topology->backend_params.sysfs.numa_os_distance_indexes[i])
+        if (obj->os_index == topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes[i])
           logical_index_of_non_sparse_physical_index[i] = obj->logical_index;
     }
 
@@ -1934,7 +1934,7 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
     }
 
     free(topology->backend_params.sysfs.numa_os_distances);
-    free(topology->backend_params.sysfs.numa_os_distance_indexes);
+    free(topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes);
   }
 }
 
