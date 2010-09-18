@@ -2262,8 +2262,8 @@ int hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
 	unsigned first_logical = hwloc_get_next_obj_inside_cpuset_by_depth(topology, ancestor->cpuset, depth, NULL)->logical_index;
 	logical_index1 -= first_logical;
 	logical_index2 -= first_logical;
-        *distance = ancestor->distances[i].matrix[logical_index1+nbobjs*logical_index2];
-	*reverse_distance = ancestor->distances[i].matrix[logical_index2+nbobjs*logical_index1];
+        *distance = ancestor->distances[i].matrix[logical_index1*nbobjs+logical_index2];
+	*reverse_distance = ancestor->distances[i].matrix[logical_index2*nbobjs+logical_index1];
         return 0;
       }
     }

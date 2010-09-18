@@ -185,7 +185,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
         printf("  % 5d", (int) i);
         /* each value */
         for(j=0; j<nbobjs; j++)
-          printf(" % 5d", (int) distances[i+nbobjs*j]);
+          printf(" % 5d", (int) distances[i*nbobjs+j]);
         printf("\n");
       }
     }

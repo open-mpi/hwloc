@@ -263,7 +263,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
       for (i = 0; i < curlgrp; i++) {
 	indexes[i] = i;
 	for (j = 0; j < curlgrp; j++)
-	  distances[i+curlgrp*j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
+	  distances[i*curlgrp+j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
       hwloc_setup_misc_level_from_distances(topology, curlgrp, glob_lgrps, (unsigned*) distances, (unsigned*) indexes);
       /* FIXME: stores this in the backend and convert it into logical-indexed matrice later

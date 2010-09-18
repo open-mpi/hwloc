@@ -1381,6 +1381,8 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_insert_object_by_cpuset(topology, node);
           nodes[index] = node;
 
+	  /* Linux nodeX/distance file contains distance from X to other localities (from ACPI SLIT table or so),
+	   * store them in slots X*N...X*N+N-1 */
           sprintf(nodepath, "%s/node%u/distance", path, osnode);
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index*nbnodes, topology->backend_params.sysfs.root_fd);
       }

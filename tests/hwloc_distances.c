@@ -46,7 +46,7 @@ int main(void)
       printf("% 5d", (int) i);
       /* each value */
       for(j=0; j<nbobjs; j++)
-	printf(" % 5d", (int) distances[i+nbobjs*j]);
+	printf(" % 5d", (int) distances[i*nbobjs+j]);
       printf("\n");
     }
 
