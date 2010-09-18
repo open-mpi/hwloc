@@ -4,7 +4,7 @@
   <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000f06f" complete_cpuset="0x0000ffff" online_cpuset="0x0000ffef" allowed_cpuset="0x0000f07f" nodeset="0x000000ff" complete_nodeset="0x000000ff" allowed_nodeset="0x0000003e">
     <info name="DMIBoardVendor" value="TYAN Computer Corp"/>
     <info name="DMIBoardName" value="S4881 "/>
-    <distances_matrix relative_depth="1">
+    <distances_matrix nbobjs="8" relative_depth="1">
       <distance value="10"/>
       <distance value="20"/>
       <distance value="20"/>

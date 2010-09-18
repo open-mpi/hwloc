@@ -302,7 +302,7 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribut
 static void
 hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
 {
-  unsigned long reldepth = 0;
+  unsigned long reldepth = 0, nbobjs = 0;
   xmlAttr *attr = NULL;
   xmlNode *subnode;
 
@@ -310,7 +310,9 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
     if (attr->type == XML_ATTRIBUTE_NODE) {
       const xmlChar *value = hwloc__xml_import_attr_value(attr);
       if (value) {
-	if (!strcmp((char *) attr->name, "relative_depth"))
+	if (!strcmp((char *) attr->name, "nbobjs"))
+	  nbobjs = strtoul((char *) value, NULL, 10);
+	else if (!strcmp((char *) attr->name, "relative_depth"))
 	  reldepth = strtoul((char *) value, NULL, 10);
 	else
 	  fprintf(stderr, "ignoring unknown distmatrix attribute %s\n", (char *) attr->name);
@@ -321,21 +323,27 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
     }
   }
 
-  if (reldepth) {
+  if (nbobjs && reldepth) {
     int idx = obj->distances_count;
     unsigned nbcells, i;
     unsigned *matrix;
+
+    nbcells = 0;
+    if (node->children)
+      for(subnode = node->children; subnode; subnode = subnode->next)
+ 	if (subnode->type == XML_ELEMENT_NODE)
+	  nbcells++;
+    if (nbcells != nbobjs*nbobjs) {
+      fprintf(stderr, "ignoring distmatrix with %u cells instead of %u\n", nbcells, nbobjs*nbobjs);
+      return;
+    }
+
     obj->distances = realloc(obj->distances, (idx+1)*sizeof(*obj->distances));
     obj->distances_count = idx+1;
     obj->distances[idx].depth = reldepth;
-
-    assert(node->children);
-    nbcells = 0;
-    for(subnode = node->children; subnode; subnode = subnode->next)
-      if (subnode->type == XML_ELEMENT_NODE)
-        nbcells++;
-
+    obj->distances[idx].nbobjs = nbobjs;
     obj->distances[idx].matrix = matrix = malloc(nbcells*sizeof(unsigned));
+
     i = 0;
     for(subnode = node->children; subnode; subnode = subnode->next)
       if (subnode->type == XML_ELEMENT_NODE) {
@@ -582,11 +590,13 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
   }
 
   for(i=0; i<obj->distances_count; i++) {
-    unsigned nbobjs, j;
+    unsigned nbobjs = obj->distances[i].nbobjs;
+    unsigned j;
     dnode = xmlNewChild(node, NULL, BAD_CAST "distances_matrix", NULL);
+    sprintf(tmp, "%u", nbobjs);
+    xmlNewProp(dnode, BAD_CAST "nbobjs", BAD_CAST tmp);
     sprintf(tmp, "%u", obj->distances[i].depth);
     xmlNewProp(dnode, BAD_CAST "relative_depth", BAD_CAST tmp);
-    nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, obj->cpuset, obj->depth + obj->distances[i].depth);
     for(j=0; j<nbobjs*nbobjs; j++) {
       dcnode = xmlNewChild(dnode, NULL, BAD_CAST "distance", NULL);
       sprintf(tmp, "%u", obj->distances[i].matrix[j]);

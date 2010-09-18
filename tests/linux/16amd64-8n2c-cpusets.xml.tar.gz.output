@@ -6,7 +6,7 @@
     <info name="DMIBoardName" value="S4881 "/>
     <info name="Backend" value="Linux"/>
     <info name="LinuxCgroup" value="/dummy"/>
-    <distances_matrix relative_depth="1">
+    <distances_matrix nbobjs="8" relative_depth="1">
       <distance value="10"/>
       <distance value="20"/>
       <distance value="20"/>

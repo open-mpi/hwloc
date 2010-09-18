@@ -324,9 +324,10 @@ union hwloc_obj_attr_u {
 /** \brief Distances between objects */
 struct hwloc_distances_s {
   unsigned *matrix;			/**< \brief Matrix of distances between all objects, stored as a one-dimension array.
-					 * Distance from i-th to j-th object is stored in slot i*N+j. */
+					 * Distance from i-th to j-th object is stored in slot i*nbobjs+j. */
+  unsigned nbobjs;			/**< \brief Number of objects considered in this matrix,
+					 * corresponds to hwloc_get_nbobjs_inside_cpuset_by_depth. */
   unsigned depth;			/**< \brief Relative depth of theses objects below the container object */
-  /* FIXME: cache nbobjs here as well so that get_nbobjs_inside_cpuset isn't needed? cache the entire nbobjs in the topology too? */
 };
 
 /** \brief Object info */

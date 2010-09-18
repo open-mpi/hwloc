@@ -1325,6 +1325,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       closedir(dir);
     }
 
+  topology->backend_params.sysfs.nbnodes = nbnodes;
   if (nbnodes <= 1)
     {
       hwloc_cpuset_free(nodeset);
@@ -1915,7 +1916,7 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
     return;
   assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
 
-  nbnodes = hwloc_get_nbobjs_by_depth(topology, depth);
+  nbnodes = topology->backend_params.sysfs.nbnodes;
   if (nbnodes < 1)
     return;
 
@@ -1940,6 +1941,7 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
     root->distances_count = 1;
     root->distances = malloc(sizeof(struct hwloc_distances_s));
     root->distances[0].depth = depth;
+    root->distances[0].nbobjs = nbnodes;
     root->distances[0].matrix = matrix = malloc(nbnodes*nbnodes*sizeof(unsigned));
 
     for(i=0; i<nbnodes; i++) {

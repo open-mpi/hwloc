@@ -87,8 +87,9 @@ struct hwloc_topology {
       char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
 
+      int nbnodes;
       unsigned *numa_os_distances; /* temporary distance matrices, ordered by non-sparse physical indexes.
-                                    * distance from i to j is stored in slot i*N+j.
+                                    * distance from i to j is stored in slot i*nbnodes+j.
                                     * will be copied into the main logical-index-ordered distance at the end of the discovery. */
       unsigned *numa_os_nonsparse_physical_indexes; /* array translating non-sparse physical indexes into physical indexes */
     } sysfs;

@@ -29,6 +29,7 @@
 <!ATTLIST info value CDATA #REQUIRED>
 
 <!ELEMENT distances_matrix (distance*)>
+<!ATTLIST distances_matrix nbobjs CDATA #REQUIRED>
 <!ATTLIST distances_matrix relative_depth CDATA #REQUIRED>
 
 <!ELEMENT distance EMPTY>
