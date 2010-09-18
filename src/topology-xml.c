@@ -300,6 +300,67 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribut
 }
 
 static void
+hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
+{
+  unsigned long reldepth = 0;
+  xmlAttr *attr = NULL;
+  xmlNode *subnode;
+
+  for (attr = node->properties; attr; attr = attr->next) {
+    if (attr->type == XML_ATTRIBUTE_NODE) {
+      const xmlChar *value = hwloc__xml_import_attr_value(attr);
+      if (value) {
+	if (!strcmp((char *) attr->name, "relative_depth"))
+	  reldepth = strtoul((char *) value, NULL, 10);
+	else
+	  fprintf(stderr, "ignoring unknown distmatrix attribute %s\n", (char *) attr->name);
+      } else
+	fprintf(stderr, "ignoring unexpected xml distmatrix attr name `%s' with no value\n", (const char*) attr->name);
+    } else {
+      fprintf(stderr, "ignoring unexpected xml distmatrix attr type %u\n", attr->type);
+    }
+  }
+
+  if (reldepth) {
+    int idx = obj->distances_count;
+    unsigned nbcells, i;
+    unsigned *matrix;
+    obj->distances = realloc(obj->distances, (idx+1)*sizeof(*obj->distances));
+    obj->distances_count = idx+1;
+    obj->distances[idx].depth = reldepth;
+
+    assert(node->children);
+    nbcells = 0;
+    for(subnode = node->children; subnode; subnode = subnode->next)
+      if (subnode->type == XML_ELEMENT_NODE)
+        nbcells++;
+
+    obj->distances[idx].matrix = matrix = malloc(nbcells*sizeof(unsigned));
+    i = 0;
+    for(subnode = node->children; subnode; subnode = subnode->next)
+      if (subnode->type == XML_ELEMENT_NODE) {
+	/* read one cell */
+	for (attr = subnode->properties; attr; attr = attr->next)
+	  if (attr->type == XML_ATTRIBUTE_NODE) {
+	    const xmlChar *value = hwloc__xml_import_attr_value(attr);
+	    if (value) {
+	      if (!strcmp((char *) attr->name, "value"))
+		matrix[i] = strtoul((char *) value, NULL, 10);
+	      else
+		fprintf(stderr, "ignoring unknown distance attribute %s\n", (char *) attr->name);
+	    } else
+	      fprintf(stderr, "ignoring unexpected xml distance attr name `%s' with no value\n", (const char*) attr->name);
+	  } else {
+	    fprintf(stderr, "ignoring unexpected xml distance attr type %u\n", attr->type);
+	  }
+	/* next matrix cell */
+	i++;
+      }
+  }
+  /* FIXME: store the array length and check at the end of the discovery that we length corresponds to objects below us at this relative depth */
+}
+
+static void
 hwloc__xml_import_info_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
 {
   char *infoname = NULL;
@@ -348,6 +409,9 @@ hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent
 
       } else if (!strcmp((const char*) node->name, "info")) {
 	hwloc__xml_import_info_node(topology, parent, node);
+
+      } else if (!strcmp((const char*) node->name, "distances_matrix")) {
+	hwloc__xml_import_distmatrix_node(topology, parent, node);
 
       } else {
 	/* unknown class */
@@ -428,7 +492,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
 static void
 hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr root_node)
 {
-  xmlNodePtr node = NULL, ptnode = NULL;
+  xmlNodePtr node = NULL, ptnode = NULL, dnode = NULL, dcnode = NULL;
   char *cpuset = NULL;
   char tmp[255];
   unsigned i;
@@ -515,6 +579,19 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     ptnode = xmlNewChild(node, NULL, BAD_CAST "info", NULL);
     xmlNewProp(ptnode, BAD_CAST "name", BAD_CAST obj->infos[i].name);
     xmlNewProp(ptnode, BAD_CAST "value", BAD_CAST obj->infos[i].value);
+  }
+
+  for(i=0; i<obj->distances_count; i++) {
+    unsigned nbobjs, j;
+    dnode = xmlNewChild(node, NULL, BAD_CAST "distances_matrix", NULL);
+    sprintf(tmp, "%u", obj->distances[i].depth);
+    xmlNewProp(dnode, BAD_CAST "relative_depth", BAD_CAST tmp);
+    nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, obj->cpuset, obj->depth + obj->distances[i].depth);
+    for(j=0; j<nbobjs*nbobjs; j++) {
+      dcnode = xmlNewChild(dnode, NULL, BAD_CAST "distance", NULL);
+      sprintf(tmp, "%u", obj->distances[i].matrix[j]);
+      xmlNewProp(dcnode, BAD_CAST "value", BAD_CAST tmp);
+    }
   }
 
   if (obj->arity) {
