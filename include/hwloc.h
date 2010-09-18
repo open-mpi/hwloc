@@ -179,12 +179,6 @@ struct hwloc_obj_memory_s {
   } * page_types;
 };
 
-/** \brief Object info */
-struct hwloc_obj_info_s {
-  char *name;	/**< \brief Info name */
-  char *value;	/**< \brief Info value */
-};
-
 /** \brief Structure of a topology object
  *
  * Applications mustn't modify any field except ::userdata .
@@ -322,6 +316,12 @@ union hwloc_obj_attr_u {
   struct hwloc_group_attr_s {
     unsigned depth;			  /**< \brief Depth of group object */
   } group;
+};
+
+/** \brief Object info */
+struct hwloc_obj_info_s {
+  char *name;	/**< \brief Info name */
+  char *value;	/**< \brief Info value */
 };
 
 /** @} */
