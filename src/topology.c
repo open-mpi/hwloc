@@ -1651,6 +1651,10 @@ hwloc_discover(struct hwloc_topology *topology)
   if (topology->backend_type == HWLOC_BACKEND_SYSFS)
     hwloc_set_linux_distances(topology);
 #  endif /* HWLOC_LINUX_SYS */
+#  ifdef HWLOC_HAVE_XML
+  if (topology->backend_type == HWLOC_BACKEND_XML)
+    hwloc_set_xml_distances(topology);
+#  endif
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;

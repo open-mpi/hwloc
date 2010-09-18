@@ -365,7 +365,6 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
 	i++;
       }
   }
-  /* FIXME: store the array length and check at the end of the discovery that we length corresponds to objects below us at this relative depth */
 }
 
 static void
@@ -491,6 +490,30 @@ hwloc_look_xml(struct hwloc_topology *topology)
   /* FIXME: do not add another backend info since there's likely one in the input XML?
    * or append a second one if the first one is different?
    */
+}
+
+static void
+hwloc_xml_check_distances(struct hwloc_topology *topology, hwloc_obj_t obj)
+{
+  unsigned i=0;
+  while (i<obj->distances_count) {
+    unsigned depth = obj->depth + obj->distances[i].depth;
+    unsigned nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, obj->cpuset, depth);
+    if (nbobjs != obj->distances[i].nbobjs) {
+      fprintf(stderr, "ignoring invalid distance matrix with %u objs instead of %u\n",
+	      obj->distances[i].nbobjs, nbobjs);
+      memmove(&obj->distances[i], &obj->distances[i+1], (obj->distances_count-i-1)*sizeof(*obj->distances));
+      obj->distances_count--;
+    } else
+      i++;
+  }
+}
+
+void
+hwloc_set_xml_distances(struct hwloc_topology *topology)
+{
+  /* nothing to actually set, but we need to validate matrix sizes */
+  hwloc_xml_check_distances(topology, topology->levels[0][0]);
 }
 
 /******************************
