@@ -1922,9 +1922,9 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
   if (topology->backend_params.sysfs.numa_os_distances) {
     unsigned logical_index_of_non_sparse_physical_index[nbnodes]; /* cache the translation from one index to the other */
     unsigned i, j, li, lj;
-    hwloc_obj_t obj;
 
     for(i=0; i<nbnodes; i++) {
+      hwloc_obj_t obj = NULL;
       while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
         if (obj->os_index == topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes[i])
           logical_index_of_non_sparse_physical_index[i] = obj->logical_index;
