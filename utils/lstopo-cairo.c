@@ -33,6 +33,8 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
+/* Avoid Xwindow's definition conflict with Windows' use for fields names.  */
+#undef Status
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 
 #include <stdio.h>
