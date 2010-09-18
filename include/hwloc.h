@@ -296,6 +296,9 @@ struct hwloc_obj {
                                           * \note Its value must not be changed, hwloc_cpuset_dup must be used instead.
                                           */
 
+  struct hwloc_distances_s *distances;	/**< \brief Distances between all objects at same depth below this object */
+  unsigned distances_count;
+
   struct hwloc_obj_info_s *infos;	/**< \brief Array of stringified info type=name. */
   unsigned infos_count;			/**< \brief Size of infos array. */
 };
@@ -316,6 +319,13 @@ union hwloc_obj_attr_u {
   struct hwloc_group_attr_s {
     unsigned depth;			  /**< \brief Depth of group object */
   } group;
+};
+
+/** \brief Distances between objects */
+struct hwloc_distances_s {
+  unsigned *matrix;			/**< \brief Matrix of distances between all objects, stored as a one-dimension array */
+  unsigned depth;			/**< \brief Relative depth of theses objects below the container object */
+  /* FIXME: cache nbobjs here as well so that get_nbobjs_inside_cpuset isn't needed? cache the entire nbobjs in the topology too? */
 };
 
 /** \brief Object info */
@@ -771,7 +781,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  *
  */
 
-/** \brief Get the matrix of distances between objects at the given depth.
+/** \brief Get the matrix of distances between all objects at the given depth.
  *
  * \p nbobjs is filled with the number of objects.
  *
@@ -779,16 +789,30 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * Slot i+nbobjs*j contains the distance from the object of logical index i
  * the object of logical index j.
  *
+ * \note This function only returns matrices covering the whole topology,
+ * without any unknown distance value. Those matrices are available in
+ * top-level object of the hierarchy. Matrices of lower objects are not
+ * reported here since they cover only part of the machine.
+ *
  * The returned matrix belongs to the hwloc library. The caller should
  * not modify or free it.
  *
- * \return \c NULL if no such distant matrix exists.
+ * \return \c NULL if no such distance matrix exists.
  */
 
 HWLOC_DECLSPEC const unsigned * hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
 						    unsigned *nbobjs);
 
 /** \brief Get the distance in both directions between two objects.
+ *
+ * Look at ancestor objects from the bottom to the top until one of them
+ * contains a distance matrix that matches the input indexes and depth.
+ *
+ * \p distance gets the value from object 1 to object 2, while
+ * \p reverse_distance gets the reverse-direction value, which
+ * may be different on some architectures.
+ *
+ * \return -1 if no ancestor contains a matching distance matrix.
  */
 HWLOC_DECLSPEC int hwloc_get_distance(hwloc_topology_t topology, hwloc_obj_type_t type,
 				      unsigned logical_index1, unsigned logical_index2,

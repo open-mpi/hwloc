@@ -448,6 +448,10 @@ free_object(hwloc_obj_t obj)
     free(obj->infos[i].value);
   }
   free(obj->infos);
+  for (i=0; i<obj->distances_count; i++) {
+    free(obj->distances[i].matrix);
+  }
+  free(obj->distances);
   free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
@@ -1745,10 +1749,6 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
   }
-  for (i=0; i < HWLOC_DEPTH_MAX; i++) {
-    free(topology->distances[i]);
-    topology->distances[i] = NULL;
-  }
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
@@ -1788,10 +1788,6 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
     /* Only ignore useless cruft by default */
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
   }
-  for(i=0; i< HWLOC_DEPTH_MAX; i++) {
-    topology->distances[i] = NULL;
-  }
-
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
   /* Make the topology look like something coherent but empty */
@@ -1950,11 +1946,8 @@ hwloc_topology_clear (struct hwloc_topology *topology)
 void
 hwloc_topology_destroy (struct hwloc_topology *topology)
 {
-  int i;
   hwloc_topology_clear(topology);
   hwloc_backend_exit(topology);
-  for(i=0; i< HWLOC_DEPTH_MAX; i++)
-    free(topology->distances[i]);
   free(topology->support.discovery);
   free(topology->support.cpubind);
   free(topology);
@@ -2216,46 +2209,67 @@ hwloc_topology_get_support(struct hwloc_topology * topology)
   return &topology->support;
 }
 
+/* FIXME: move this to helper.h? */
 const unsigned *
 hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
 		    unsigned *nbobjsp)
 {
+  unsigned i;
   unsigned nbobjs;
+  hwloc_obj_t root = topology->levels[0][0];
 
   if (depth >= topology->nb_levels)
     return NULL;
   nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
 
-  if (!topology->distances[depth])
-    return NULL;
+  for(i=0; i<root->distances_count; i++)
+    if (root->distances[i].depth == depth) {
+      *nbobjsp = nbobjs;
+      return root->distances[i].matrix;
+    }
 
-  *nbobjsp = nbobjs;
-  return topology->distances[depth];
+  return NULL;
 }
 
+/* FIXME: move this to helper.h? */
 int hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
 		       unsigned logical_index1, unsigned logical_index2,
 		       unsigned *distance, unsigned *reverse_distance)
 {
-  unsigned nbobjs;
+  hwloc_obj_t obj1, obj2, ancestor;
 
   if (depth >= topology->nb_levels) {
     errno = EINVAL;
     return -1;
   }
-  nbobjs = hwloc_get_nbobjs_by_depth(topology, depth);
 
-  if (logical_index1 >= nbobjs || logical_index2 >= nbobjs) {
+  obj1 = hwloc_get_obj_by_depth(topology, depth, logical_index1);
+  obj2 = hwloc_get_obj_by_depth(topology, depth, logical_index2);
+  if (!obj1 || !obj2) {
     errno = EINVAL;
     return -1;
   }
 
-  if (!topology->distances[depth]) {
-    errno = ENOSYS;
-    return -1;
+  /* FIXME: extract this into another helper? */
+
+  /* walk up the ancestors until one of them has a matrix for this depth */
+  ancestor = hwloc_get_common_ancestor_obj(topology, obj1, obj2);
+  while (ancestor) {
+    unsigned i;
+    for(i=0; i<ancestor->distances_count; i++) {
+      if (ancestor->distances[i].depth == depth - ancestor->depth) {
+	unsigned nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, ancestor->cpuset, depth);
+	unsigned first_logical = hwloc_get_next_obj_inside_cpuset_by_depth(topology, ancestor->cpuset, depth, NULL)->logical_index;
+	logical_index1 -= first_logical;
+	logical_index2 -= first_logical;
+        *distance = ancestor->distances[i].matrix[logical_index1+nbobjs*logical_index2];
+	*reverse_distance = ancestor->distances[i].matrix[logical_index2+nbobjs*logical_index1];
+        return 0;
+      }
+    }
+    ancestor = ancestor->parent;
   }
 
-  *distance = topology->distances[depth][logical_index1+nbobjs*logical_index2];
-  *reverse_distance = topology->distances[depth][logical_index2+nbobjs*logical_index1];
-  return 0;
+  errno = ENOSYS;
+  return -1;
 }

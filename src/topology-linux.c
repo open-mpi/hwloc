@@ -1922,6 +1922,8 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
   if (topology->backend_params.sysfs.numa_os_distances) {
     unsigned logical_index_of_non_sparse_physical_index[nbnodes]; /* cache the translation from one index to the other */
     unsigned i, j, li, lj;
+    hwloc_obj_t root;
+    unsigned *matrix;
 
     for(i=0; i<nbnodes; i++) {
       hwloc_obj_t obj = NULL;
@@ -1930,15 +1932,21 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
           logical_index_of_non_sparse_physical_index[i] = obj->logical_index;
     }
 
-    topology->distances[depth] = malloc(nbnodes*nbnodes*sizeof(unsigned));
+    root = topology->levels[0][0];
+    assert(!root->distances_count);
+    assert(!root->distances);
+    root->distances_count = 1;
+    root->distances = malloc(sizeof(struct hwloc_distances_s));
+    root->distances[0].depth = depth;
+    root->distances[0].matrix = matrix = malloc(nbnodes*nbnodes*sizeof(unsigned));
 
     for(i=0; i<nbnodes; i++) {
       li = logical_index_of_non_sparse_physical_index[i];
-      topology->distances[depth][li*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+i];
+      matrix[li*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+i];
       for(j=i+1; j<nbnodes; j++) {
 	lj = logical_index_of_non_sparse_physical_index[j];
-	topology->distances[depth][li*nbnodes+lj] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+j];
-	topology->distances[depth][lj*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[j*nbnodes+i];
+	matrix[li*nbnodes+lj] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+j];
+	matrix[lj*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[j*nbnodes+i];
       }
     }
 
