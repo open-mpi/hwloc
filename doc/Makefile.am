@@ -61,6 +61,8 @@ dox_inputs = $(DOX_CONFIG) \
        $(HWLOC_top_srcdir)/include/hwloc/glibc-sched.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux-libnuma.h \
+       $(HWLOC_top_srcdir)/include/hwloc/cuda.h \
+       $(HWLOC_top_srcdir)/include/hwloc/cudart.h \
        $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h
 
 #
