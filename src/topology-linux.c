@@ -22,7 +22,7 @@
 #include <sched.h>
 #include <pthread.h>
 
-#ifndef HWLOC_HAVE_CPU_SET
+#if !defined(HWLOC_HAVE_CPU_SET) && !(defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY))
 /* libc doesn't have support for sched_setaffinity, build system call
  * ourselves: */
 #    include <linux/unistd.h>
