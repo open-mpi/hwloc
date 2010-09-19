@@ -22,7 +22,7 @@
 #include <sched.h>
 #include <pthread.h>
 
-#if !defined(HWLOC_HAVE_CPU_SET) && !(defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY))
+#if !defined(HWLOC_HAVE_CPU_SET) && !(defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)) && defined(HWLOC_HAVE__SYSCALL3)
 /* libc doesn't have support for sched_setaffinity, build system call
  * ourselves: */
 #    include <linux/unistd.h>
@@ -57,7 +57,7 @@
 #       endif
 #    endif
 #    ifndef sched_setaffinity
-       _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, const void *, mask);
+       _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, const void *, mask)
 #    endif
 #    ifndef __NR_sched_getaffinity
 #       ifdef __i386__
@@ -90,7 +90,7 @@
 #       endif
 #    endif
 #    ifndef sched_getaffinity
-       _syscall3(int, sched_getaffinity, pid_t, pid, unsigned int, lg, void *, mask);
+       _syscall3(int, sched_getaffinity, pid_t, pid, unsigned int, lg, void *, mask)
 #    endif
 #endif
 
@@ -193,7 +193,7 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 }
 
 int
-hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_const_cpuset_t hwloc_set)
+hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_const_cpuset_t hwloc_set __hwloc_attribute_unused)
 {
   /* TODO Kerrighed: Use
    * int migrate (pid_t pid, int destination_node);
@@ -234,7 +234,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
-#else /* !CPU_SET */
+#elif defined(HWLOC_HAVE__SYSCALL3)
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
@@ -242,13 +242,16 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
-#endif /* !CPU_SET */
+#else /* !_SYSCALL3 */
+  errno = ENOSYS;
+  return -1;
+#endif /* !_SYSCALL3 */
 }
 
 int
-hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_cpuset_t hwloc_set)
+hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_cpuset_t hwloc_set __hwloc_attribute_unused)
 {
-  int err;
+  int err __hwloc_attribute_unused;
   /* TODO Kerrighed */
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY) && CPU_SETSIZE < HWLOC_NBMAXCPUS
@@ -287,7 +290,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, &linux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
-#else /* !CPU_SET */
+#elif defined(HWLOC_HAVE__SYSCALL3)
   unsigned long mask;
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
@@ -299,7 +302,10 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
     return -1;
 
   hwloc_cpuset_from_ulong(hwloc_set, mask);
-#endif /* !CPU_SET */
+#else /* !_SYSCALL3 */
+  errno = ENOSYS;
+  return -1;
+#endif /* !_SYSCALL3 */
 
   return 0;
 }
