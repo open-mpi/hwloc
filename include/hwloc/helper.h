@@ -663,6 +663,37 @@ hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth,
   return NULL;
 }
 
+/** \brief Get a distance matrix for the given depth and covering some objects
+ *
+ * Return a distance matrix that describes depth \p depth and covers at
+ * least object \p obj and all its ancestors.
+ *
+ * When looking for the distance between some objects, a common ancestor should
+ * be passed in \p obj.
+ *
+ * \p nbobjs is set to width of the matrix.
+ * \p first is set to logical index of the first object described by the matrix.
+ */
+static __hwloc_inline const unsigned *
+hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
+						hwloc_obj_t obj, unsigned depth,
+						unsigned *nbobjsp, unsigned *firstp)
+{
+  while (obj) {
+    unsigned i;
+    for(i=0; i<obj->distances_count; i++)
+      if (obj->distances[i].relative_depth == depth - obj->depth) {
+	if (!obj->distances[i].nbobjs)
+	  continue;
+	*firstp = hwloc_get_next_obj_inside_cpuset_by_depth(topology, obj->cpuset, depth, NULL)->logical_index;
+	*nbobjsp = obj->distances[i].nbobjs;
+	return obj->distances[i].matrix;
+      }
+    obj = obj->parent;
+  }
+  return NULL;
+}
+
 /** \brief Get the distance in both directions between two objects.
  *
  * Look at ancestor objects from the bottom to the top until one of them
@@ -680,6 +711,9 @@ hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
 		   unsigned *distance, unsigned *reverse_distance)
 {
   hwloc_obj_t obj1, obj2, ancestor;
+  const unsigned * matrix;
+  unsigned nbobjs;
+  unsigned first_logical ;
 
   if (depth >= hwloc_topology_get_depth(topology)) {
     errno = EINVAL;
@@ -692,25 +726,14 @@ hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
     errno = EINVAL;
     return -1;
   }
-
-  /* FIXME: extract this into another helper? */
-
-  /* walk up the ancestors until one of them has a matrix for this depth */
   ancestor = hwloc_get_common_ancestor_obj(topology, obj1, obj2);
-  while (ancestor) {
-    unsigned i;
-    for(i=0; i<ancestor->distances_count; i++) {
-      if (ancestor->distances[i].relative_depth == depth - ancestor->depth) {
-	unsigned nbobjs = ancestor->distances[i].nbobjs;
-	unsigned first_logical = hwloc_get_next_obj_inside_cpuset_by_depth(topology, ancestor->cpuset, depth, NULL)->logical_index;
-	logical_index1 -= first_logical;
-	logical_index2 -= first_logical;
-        *distance = ancestor->distances[i].matrix[logical_index1*nbobjs+logical_index2];
-	*reverse_distance = ancestor->distances[i].matrix[logical_index2*nbobjs+logical_index1];
-        return 0;
-      }
-    }
-    ancestor = ancestor->parent;
+  matrix = hwloc_get_distance_matrix_covering_obj_by_depth(topology, ancestor, depth, &nbobjs, &first_logical);
+  if (matrix) {
+    logical_index1 -= first_logical;
+    logical_index2 -= first_logical;
+    *distance = matrix[logical_index1*nbobjs+logical_index2];
+    *reverse_distance = matrix[logical_index2*nbobjs+logical_index1];
+    return 0;
   }
 
   errno = ENOSYS;
