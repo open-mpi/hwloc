@@ -327,7 +327,7 @@ struct hwloc_distances_s {
 					 * Distance from i-th to j-th object is stored in slot i*nbobjs+j. */
   unsigned nbobjs;			/**< \brief Number of objects considered in this matrix,
 					 * corresponds to hwloc_get_nbobjs_inside_cpuset_by_depth. */
-  unsigned depth;			/**< \brief Relative depth of theses objects below the container object */
+  unsigned relative_depth;		/**< \brief Relative depth of theses objects below the container object */
 };
 
 /** \brief Object info */

@@ -656,7 +656,7 @@ hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth,
   hwloc_obj_t root = hwloc_get_root_obj(topology);
   unsigned i;
   for(i=0; i<root->distances_count; i++)
-    if (root->distances[i].depth == depth) {
+    if (root->distances[i].relative_depth == depth) {
       *nbobjsp = root->distances[i].nbobjs;
       return root->distances[i].matrix;
     }
@@ -700,7 +700,7 @@ hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
   while (ancestor) {
     unsigned i;
     for(i=0; i<ancestor->distances_count; i++) {
-      if (ancestor->distances[i].depth == depth - ancestor->depth) {
+      if (ancestor->distances[i].relative_depth == depth - ancestor->depth) {
 	unsigned nbobjs = ancestor->distances[i].nbobjs;
 	unsigned first_logical = hwloc_get_next_obj_inside_cpuset_by_depth(topology, ancestor->cpuset, depth, NULL)->logical_index;
 	logical_index1 -= first_logical;

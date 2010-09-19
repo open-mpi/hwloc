@@ -1940,7 +1940,7 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
     assert(!root->distances);
     root->distances_count = 1;
     root->distances = malloc(sizeof(struct hwloc_distances_s));
-    root->distances[0].depth = depth;
+    root->distances[0].relative_depth = depth;
     root->distances[0].nbobjs = nbnodes;
     root->distances[0].matrix = matrix = malloc(nbnodes*nbnodes*sizeof(unsigned));
 
