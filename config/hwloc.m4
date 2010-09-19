@@ -442,6 +442,21 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
         AC_MSG_RESULT([no])
     )
 
+    AC_MSG_CHECKING([for working _syscall3])
+    AC_LINK_IFELSE(
+      AC_LANG_PROGRAM([[
+          #include <linux/unistd.h>
+          #include <errno.h>
+          #define __NR_hwloc_test 123
+          _syscall3(int, hwloc_test, int, param1, int, param2, int, param3);
+        ]], [[
+          hwloc_test(1, 2, 3);
+        ]]),
+        AC_DEFINE([HWLOC_HAVE__SYSCALL3], [1], [Define to 1 if the _syscall3 macro works])
+        AC_MSG_RESULT([yes]),
+        AC_MSG_RESULT([no])
+    )
+
     # check for kerrighed, but don't abort if not found
     HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [], [:])
 
