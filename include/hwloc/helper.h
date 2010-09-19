@@ -697,42 +697,36 @@ hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
 /** \brief Get the distance in both directions between two objects.
  *
  * Look at ancestor objects from the bottom to the top until one of them
- * contains a distance matrix that matches the input indexes and depth.
+ * contains a distance matrix that matches the objects exactly.
  *
- * \p distance gets the value from object 1 to object 2, while
+ * \p distance gets the value from object \p obj1 to \p obj2, while
  * \p reverse_distance gets the reverse-direction value, which
  * may be different on some architectures.
  *
  * \return -1 if no ancestor contains a matching distance matrix.
  */
 static __hwloc_inline int
-hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
-		   unsigned logical_index1, unsigned logical_index2,
+hwloc_get_distance(hwloc_topology_t topology,
+		   hwloc_obj_t obj1, hwloc_obj_t obj2,
 		   unsigned *distance, unsigned *reverse_distance)
 {
-  hwloc_obj_t obj1, obj2, ancestor;
+  hwloc_obj_t ancestor;
   const unsigned * matrix;
   unsigned nbobjs;
   unsigned first_logical ;
 
-  if (depth >= hwloc_topology_get_depth(topology)) {
+  if (obj1->depth != obj2->depth) {
     errno = EINVAL;
     return -1;
   }
 
-  obj1 = hwloc_get_obj_by_depth(topology, depth, logical_index1);
-  obj2 = hwloc_get_obj_by_depth(topology, depth, logical_index2);
-  if (!obj1 || !obj2) {
-    errno = EINVAL;
-    return -1;
-  }
   ancestor = hwloc_get_common_ancestor_obj(topology, obj1, obj2);
-  matrix = hwloc_get_distance_matrix_covering_obj_by_depth(topology, ancestor, depth, &nbobjs, &first_logical);
+  matrix = hwloc_get_distance_matrix_covering_obj_by_depth(topology, ancestor, obj1->depth, &nbobjs, &first_logical);
   if (matrix) {
-    logical_index1 -= first_logical;
-    logical_index2 -= first_logical;
-    *distance = matrix[logical_index1*nbobjs+logical_index2];
-    *reverse_distance = matrix[logical_index2*nbobjs+logical_index1];
+    unsigned l1 = obj1->logical_index - first_logical;
+    unsigned l2 = obj2->logical_index - first_logical;
+    *distance = matrix[l1*nbobjs+l2];
+    *reverse_distance = matrix[l2*nbobjs+l1];
     return 0;
   }
 

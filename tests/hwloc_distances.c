@@ -27,6 +27,7 @@ int main(void)
 
   for(depth=0; depth<topodepth; depth++) {
     unsigned i, j;
+    hwloc_obj_t obj1, obj2;
 
     distances = hwloc_get_whole_distance_matrix(topology, depth, &nbobjs);
     if (!distances) {
@@ -50,11 +51,9 @@ int main(void)
       printf("\n");
     }
 
-    err = hwloc_get_distance(topology, depth, -1, -1, &d1, &d2);
-    assert(err < 0);
-    err = hwloc_get_distance(topology, depth, 0, -1, &d1, &d2);
-    assert(err < 0);
-    err = hwloc_get_distance(topology, depth, 0, nbobjs-1, &d1, &d2);
+    obj1 = hwloc_get_obj_by_depth(topology, depth, 0);
+    obj2 = hwloc_get_obj_by_depth(topology, depth, nbobjs-1);
+    err = hwloc_get_distance(topology, obj1, obj2, &d1, &d2);
     assert(!err);
     assert(d1 == distances[0*nbobjs+(nbobjs-1)]);
     assert(d2 == distances[(nbobjs-1)*nbobjs+0]);
