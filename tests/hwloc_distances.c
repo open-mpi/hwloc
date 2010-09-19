@@ -56,8 +56,8 @@ int main(void)
     assert(err < 0);
     err = hwloc_get_distance(topology, depth, 0, nbobjs-1, &d1, &d2);
     assert(!err);
-    assert(d1 == distances[0+nbobjs*(nbobjs-1)]);
-    assert(d2 == distances[nbobjs-1]);
+    assert(d1 == distances[0*nbobjs+(nbobjs-1)]);
+    assert(d2 == distances[(nbobjs-1)*nbobjs+0]);
   }
 
   hwloc_topology_destroy(topology);
