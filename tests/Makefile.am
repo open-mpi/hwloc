@@ -40,6 +40,14 @@ if HWLOC_HAVE_LIBIBVERBS
 check_PROGRAMS += openfabrics-verbs
 endif HWLOC_HAVE_LIBIBVERBS
 
+if HWLOC_HAVE_CUDA
+check_PROGRAMS += cuda
+endif HWLOC_HAVE_CUDA
+
+if HWLOC_HAVE_CUDART
+check_PROGRAMS += cudart
+endif HWLOC_HAVE_CUDART
+
 TESTS = $(check_PROGRAMS)
 
 # The library has a different name depending on whether we are
@@ -54,6 +62,8 @@ LDADD += $(HWLOC_top_builddir)/src/$(hwloc_lib)
 
 linux_libnuma_LDFLAGS = -lnuma
 openfabrics_verbs_LDFLAGS = -libverbs
+cuda_LDFLAGS = -lcuda
+cudart_LDFLAGS = -lcuda -lcudart
 if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
 endif !HWLOC_HAVE_WINDOWS

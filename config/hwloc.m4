@@ -621,6 +621,10 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
                        [test "x$hwloc_have_sched_setaffinity" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS], 
                        [test "x$hwloc_have_libibverbs" = "xyes"])
+	AM_CONDITIONAL([HWLOC_HAVE_CUDA],
+		       [test "x$hwloc_have_cuda" = "xyes"])
+	AM_CONDITIONAL([HWLOC_HAVE_CUDART],
+		       [test "x$hwloc_have_cudart" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" != "xno"])
 
