@@ -650,8 +650,8 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
  */
 
 static __hwloc_inline const unsigned *
-hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
-		    unsigned *nbobjsp)
+hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth,
+				unsigned *nbobjsp)
 {
   hwloc_obj_t root = hwloc_get_root_obj(topology);
   unsigned i;
