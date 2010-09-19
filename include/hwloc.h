@@ -779,51 +779,6 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
 
 
 
-/** \defgroup hwlocality_distances Distances
- * @{
- */
-
-/** \brief Get the matrix of distances between all objects at the given depth.
- *
- * \p nbobjs is filled with the number of objects.
- *
- * \p distances is filled with an array of nbobjs*nbobjs distances.
- * Slot i+nbobjs*j contains the distance from the object of logical index i
- * the object of logical index j.
- *
- * \note This function only returns matrices covering the whole topology,
- * without any unknown distance value. Those matrices are available in
- * top-level object of the hierarchy. Matrices of lower objects are not
- * reported here since they cover only part of the machine.
- *
- * The returned matrix belongs to the hwloc library. The caller should
- * not modify or free it.
- *
- * \return \c NULL if no such distance matrix exists.
- */
-
-HWLOC_DECLSPEC const unsigned * hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
-						    unsigned *nbobjs);
-
-/** \brief Get the distance in both directions between two objects.
- *
- * Look at ancestor objects from the bottom to the top until one of them
- * contains a distance matrix that matches the input indexes and depth.
- *
- * \p distance gets the value from object 1 to object 2, while
- * \p reverse_distance gets the reverse-direction value, which
- * may be different on some architectures.
- *
- * \return -1 if no ancestor contains a matching distance matrix.
- */
-HWLOC_DECLSPEC int hwloc_get_distance(hwloc_topology_t topology, hwloc_obj_type_t type,
-				      unsigned logical_index1, unsigned logical_index2,
-				      unsigned *distance, unsigned *reverse_distance);
-
-/** @} */
-
-
-
 /** \defgroup hwlocality_binding Binding
  *
  * It is often useful to call hwloc_cpuset_singlify() first so that a single CPU

@@ -624,6 +624,103 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
 
 /** @} */
 
+
+
+/** \defgroup hwlocality_distances Distances
+ * @{
+ */
+
+/** \brief Get the matrix of distances between all objects at the given depth.
+ *
+ * \p nbobjs is filled with the number of objects.
+ *
+ * \p distances is filled with an array of nbobjs*nbobjs distances.
+ * Slot i+nbobjs*j contains the distance from the object of logical index i
+ * the object of logical index j.
+ *
+ * \note This function only returns matrices covering the whole topology,
+ * without any unknown distance value. Those matrices are available in
+ * top-level object of the hierarchy. Matrices of lower objects are not
+ * reported here since they cover only part of the machine.
+ *
+ * The returned matrix belongs to the hwloc library. The caller should
+ * not modify or free it.
+ *
+ * \return \c NULL if no such distance matrix exists.
+ */
+
+static __hwloc_inline const unsigned *
+hwloc_get_distances(hwloc_topology_t topology, unsigned depth,
+		    unsigned *nbobjsp)
+{
+  hwloc_obj_t root = hwloc_get_root_obj(topology);
+  unsigned i;
+  for(i=0; i<root->distances_count; i++)
+    if (root->distances[i].depth == depth) {
+      *nbobjsp = root->distances[i].nbobjs;
+      return root->distances[i].matrix;
+    }
+  return NULL;
+}
+
+/** \brief Get the distance in both directions between two objects.
+ *
+ * Look at ancestor objects from the bottom to the top until one of them
+ * contains a distance matrix that matches the input indexes and depth.
+ *
+ * \p distance gets the value from object 1 to object 2, while
+ * \p reverse_distance gets the reverse-direction value, which
+ * may be different on some architectures.
+ *
+ * \return -1 if no ancestor contains a matching distance matrix.
+ */
+static __hwloc_inline int
+hwloc_get_distance(hwloc_topology_t topology, unsigned depth,
+		   unsigned logical_index1, unsigned logical_index2,
+		   unsigned *distance, unsigned *reverse_distance)
+{
+  hwloc_obj_t obj1, obj2, ancestor;
+
+  if (depth >= hwloc_topology_get_depth(topology)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  obj1 = hwloc_get_obj_by_depth(topology, depth, logical_index1);
+  obj2 = hwloc_get_obj_by_depth(topology, depth, logical_index2);
+  if (!obj1 || !obj2) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  /* FIXME: extract this into another helper? */
+
+  /* walk up the ancestors until one of them has a matrix for this depth */
+  ancestor = hwloc_get_common_ancestor_obj(topology, obj1, obj2);
+  while (ancestor) {
+    unsigned i;
+    for(i=0; i<ancestor->distances_count; i++) {
+      if (ancestor->distances[i].depth == depth - ancestor->depth) {
+	unsigned nbobjs = ancestor->distances[i].nbobjs;
+	unsigned first_logical = hwloc_get_next_obj_inside_cpuset_by_depth(topology, ancestor->cpuset, depth, NULL)->logical_index;
+	logical_index1 -= first_logical;
+	logical_index2 -= first_logical;
+        *distance = ancestor->distances[i].matrix[logical_index1*nbobjs+logical_index2];
+	*reverse_distance = ancestor->distances[i].matrix[logical_index2*nbobjs+logical_index1];
+        return 0;
+      }
+    }
+    ancestor = ancestor->parent;
+  }
+
+  errno = ENOSYS;
+  return -1;
+}
+
+/** @} */
+
+
+
 /** \defgroup hwlocality_helper_cpuset Cpuset Helpers
  * @{
  */
@@ -687,7 +784,6 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
 {
   return hwloc_get_root_obj(topology)->allowed_cpuset;
 }
-
 
 /** @} */
 
