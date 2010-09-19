@@ -780,7 +780,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
 
 
 /** \defgroup hwlocality_distances Distances
- *
+ * @{
  */
 
 /** \brief Get the matrix of distances between all objects at the given depth.
