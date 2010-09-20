@@ -1905,6 +1905,13 @@ hwloc_look_linux(struct hwloc_topology *topology)
      hwloc_add_uname_info(topology);
 }
 
+/*
+ * TODO: this is actually not Linux-specific.  Backends should be able to just
+ * provide a matrix and the numa_os_nonsparse_physical_indexes array whenever
+ * they prefer during their detection, and the core will rearrange the distance
+ * matrix after sorting objects according to where nodes end up (thanks to
+ * checking the values of os_index).
+ */
 void
 hwloc_set_linux_distances(struct hwloc_topology *topology)
 {
