@@ -261,7 +261,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
       unsigned indexes[curlgrp];
       unsigned i, j;
       for (i = 0; i < curlgrp; i++) {
-	indexes[i] = i;
+        indexes[i] = glob_lgrps[i]->os_index;
 	for (j = 0; j < curlgrp; j++)
 	  distances[i][j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
