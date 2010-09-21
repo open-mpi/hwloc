@@ -1471,6 +1471,9 @@ hwloc_discover(struct hwloc_topology *topology)
 #    endif
   }
 
+  /*
+   * Now that backends have detected objects, sort them and establish pointers.
+   */
   print_objects(topology, 0, topology->levels[0][0]);
 
   /* First tweak a bit to clean the topology.  */
@@ -1642,6 +1645,12 @@ hwloc_discover(struct hwloc_topology *topology)
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");
   propagate_total_memory(topology->levels[0][0]);
+
+  /*
+   * Now set binding hooks.
+   * If the represented system is actually not this system, use dummy binding
+   * hooks.
+   */
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;
