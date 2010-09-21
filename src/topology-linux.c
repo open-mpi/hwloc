@@ -23,7 +23,7 @@
 #include <sched.h>
 #include <pthread.h>
 
-#ifndef HWLOC_HAVE_CPU_SET
+#if !defined(HWLOC_HAVE_CPU_SET) && !(defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)) && defined(HWLOC_HAVE__SYSCALL3)
 /* libc doesn't have support for sched_setaffinity, build system call
  * ourselves: */
 #    include <linux/unistd.h>
@@ -58,7 +58,7 @@
 #       endif
 #    endif
 #    ifndef sched_setaffinity
-       _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, const void *, mask);
+       _syscall3(int, sched_setaffinity, pid_t, pid, unsigned int, lg, const void *, mask)
 #    endif
 #    ifndef __NR_sched_getaffinity
 #       ifdef __i386__
@@ -91,7 +91,7 @@
 #       endif
 #    endif
 #    ifndef sched_getaffinity
-       _syscall3(int, sched_getaffinity, pid_t, pid, unsigned int, lg, void *, mask);
+       _syscall3(int, sched_getaffinity, pid_t, pid, unsigned int, lg, void *, mask)
 #    endif
 #endif
 
@@ -194,7 +194,7 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 }
 
 int
-hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_const_cpuset_t hwloc_set)
+hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_const_cpuset_t hwloc_set __hwloc_attribute_unused)
 {
   /* TODO Kerrighed: Use
    * int migrate (pid_t pid, int destination_node);
@@ -243,7 +243,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
-#else /* !CPU_SET */
+#elif defined(HWLOC_HAVE__SYSCALL3)
   unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
@@ -251,7 +251,10 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 #else /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
   return sched_setaffinity(tid, sizeof(mask), (void*) &mask);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
-#endif /* !CPU_SET */
+#else /* !_SYSCALL3 */
+  errno = ENOSYS;
+  return -1;
+#endif /* !_SYSCALL3 */
 }
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
@@ -286,9 +289,9 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
 #endif
 
 int
-hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_cpuset_t hwloc_set)
+hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_cpuset_t hwloc_set __hwloc_attribute_unused)
 {
-  int err;
+  int err __hwloc_attribute_unused;
   /* TODO Kerrighed */
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
@@ -335,7 +338,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, &linux_set))
       hwloc_cpuset_set(hwloc_set, cpu);
-#else /* !CPU_SET */
+#elif defined(HWLOC_HAVE__SYSCALL3)
   unsigned long mask;
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
@@ -347,7 +350,10 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
     return -1;
 
   hwloc_cpuset_from_ulong(hwloc_set, mask);
-#endif /* !CPU_SET */
+#else /* !_SYSCALL3 */
+  errno = ENOSYS;
+  return -1;
+#endif /* !_SYSCALL3 */
 
   return 0;
 }
@@ -864,14 +870,14 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
   /* convert into a set */
 #if KERNEL_CPU_MASK_BITS == HWLOC_BITS_PER_LONG
   for(i=0; i<nr_maps; i++)
-    hwloc_cpuset_from_ith_ulong(set, i, maps[i]);
+    hwloc_cpuset_set_ith_ulong(set, i, maps[i]);
 #else
   for(i=0; i<(nr_maps+1)/2; i++) {
     unsigned long ulong;
     ulong = maps[2*i];
     if (2*i+1<nr_maps)
       ulong |= maps[2*i+1] << KERNEL_CPU_MASK_BITS;
-    hwloc_cpuset_from_ith_ulong(set, i, ulong);
+    hwloc_cpuset_set_ith_ulong(set, i, ulong);
   }
 #endif
 
@@ -1302,39 +1308,67 @@ static void
 look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *found)
 {
   unsigned osnode;
-  unsigned nbnodes = 1;
+  unsigned nbnodes = 0;
   DIR *dir;
   struct dirent *dirent;
   hwloc_obj_t node;
+  hwloc_cpuset_t nodeset = hwloc_cpuset_alloc();
 
   *found = 0;
 
+  /* Get the list of nodes first */
   dir = hwloc_opendir(path, topology->backend_params.sysfs.root_fd);
   if (dir)
     {
       while ((dirent = readdir(dir)) != NULL)
 	{
-	  unsigned long numnode;
 	  if (strncmp(dirent->d_name, "node", 4))
 	    continue;
-	  numnode = strtoul(dirent->d_name+4, NULL, 0);
-	  if (nbnodes < numnode+1)
-	    nbnodes = numnode+1;
+	  osnode = strtoul(dirent->d_name+4, NULL, 0);
+	  hwloc_cpuset_set(nodeset, osnode);
+	  nbnodes++;
 	}
       closedir(dir);
     }
 
   if (nbnodes <= 1)
-    return;
+    {
+      hwloc_cpuset_free(nodeset);
+      return;
+    }
 
   /* For convenience, put these declarations inside a block.  Saves us
      from a bunch of mallocs, particularly with the 2D array. */
+
   {
       hwloc_obj_t nodes[nbnodes];
       unsigned distances[nbnodes][nbnodes];
-      for (osnode=0; osnode < nbnodes; osnode++) {
+      unsigned distance_indexes[nbnodes];
+      unsigned index;
+
+      /* Get node indexes now. We need them in order since Linux groups
+       * sparse distances but keep them in order in the sysfs distance files.
+       */
+      index = 0;
+      hwloc_cpuset_foreach_begin (osnode, nodeset) {
+	distance_indexes[index] = osnode;
+	index++;
+      } hwloc_cpuset_foreach_end();
+      hwloc_cpuset_free(nodeset);
+
+#ifdef HWLOC_DEBUG
+      hwloc_debug("%s", "numa distance indexes: ");
+      for (index = 0; index < nbnodes; index++) {
+	hwloc_debug(" %u", distance_indexes[index]);
+      }
+      hwloc_debug("%s", "\n");
+#endif
+
+      /* Get actual distances now */
+      for (index = 0; index < nbnodes; index++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_cpuset_t cpuset;
+	  unsigned int osnode = distance_indexes[index];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
@@ -1351,13 +1385,13 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
           hwloc_insert_object_by_cpuset(topology, node);
-          nodes[osnode] = node;
+          nodes[index] = node;
 
           sprintf(nodepath, "%s/node%u/distance", path, osnode);
-          hwloc_parse_node_distance(nodepath, nbnodes, distances[osnode], topology->backend_params.sysfs.root_fd);
+          hwloc_parse_node_distance(nodepath, nbnodes, distances[index], topology->backend_params.sysfs.root_fd);
       }
 
-      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances);
+      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned *) distances, (unsigned *) distance_indexes);
   }
 
   *found = nbnodes;

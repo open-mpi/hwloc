@@ -202,12 +202,6 @@ struct hwloc_obj_memory_s {
   } * page_types;
 };
 
-/** \brief Object info */
-struct hwloc_obj_info_s {
-  char *name;	/**< \brief Info name */
-  char *value;	/**< \brief Info value */
-};
-
 /** \brief Structure of a topology object
  *
  * Applications mustn't modify any field except ::userdata .
@@ -372,6 +366,12 @@ union hwloc_obj_attr_u {
   struct hwloc_osdev_attr_u {
     hwloc_obj_osdev_type_t type;
   } osdev;
+};
+
+/** \brief Object info */
+struct hwloc_obj_info_s {
+  char *name;	/**< \brief Info name */
+  char *value;	/**< \brief Info value */
 };
 
 /** @} */
@@ -879,7 +879,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  */
 typedef enum {
   HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
-                                   * This may not be supported by some OSes (e.g. Linux).
+                                   * This may not be supported by some OSes.
                                    * \hideinitializer */
   HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
                                    * \hideinitializer */

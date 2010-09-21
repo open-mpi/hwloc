@@ -44,8 +44,8 @@ int main(void)
       printf("got cpuset %s for device %d (%s)\n",
 	     cpuset_string, i, ibv_get_device_name(dev));
       free(cpuset_string);
-      hwloc_cpuset_free(set);
     }
+    hwloc_cpuset_free(set);
   }
 
   hwloc_topology_destroy(topology);

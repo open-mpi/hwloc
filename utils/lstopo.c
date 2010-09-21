@@ -6,6 +6,9 @@
 
 #include <private/config.h>
 #include <hwloc.h>
+#ifdef HWLOC_LINUX_SYS
+#include <hwloc/linux.h>
+#endif /* HWLOC_LINUX_SYS */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,6 +53,9 @@ static void add_process_objects(hwloc_topology_t topology)
 {
   hwloc_obj_t root;
   hwloc_cpuset_t cpuset;
+#ifdef HWLOC_LINUX_SYS
+  hwloc_cpuset_t task_cpuset;
+#endif /* HWLOC_LINUX_SYS */
   DIR *dir;
   struct dirent *dirent;
   const struct hwloc_topology_support *support;
@@ -65,11 +71,15 @@ static void add_process_objects(hwloc_topology_t topology)
   if (!dir)
     return;
   cpuset = hwloc_cpuset_alloc();
+#ifdef HWLOC_LINUX_SYS
+  task_cpuset = hwloc_cpuset_alloc();
+#endif /* HWLOC_LINUX_SYS */
 
   while ((dirent = readdir(dir))) {
     long local_pid;
     char *end;
     char name[64];
+    int proc_cpubind;
 
     local_pid = strtol(dirent->d_name, &end, 10);
     if (*end)
@@ -78,8 +88,11 @@ static void add_process_objects(hwloc_topology_t topology)
 
     snprintf(name, sizeof(name), "%ld", local_pid);
 
+    proc_cpubind = hwloc_get_proc_cpubind(topology, local_pid, cpuset, 0) != -1;
+
 #ifdef HWLOC_LINUX_SYS
     {
+      /* Get the process name */
       char path[6 + strlen(dirent->d_name) + 1 + 7 + 1];
       char cmd[64], *c;
       int file;
@@ -101,9 +114,42 @@ static void add_process_objects(hwloc_topology_t topology)
         snprintf(name, sizeof(name), "%ld %s", local_pid, cmd);
       }
     }
+
+    {
+      /* Get threads */
+      char path[6+strlen(dirent->d_name) + 1 + 4 + 1];
+      DIR *task_dir;
+      struct dirent *task_dirent;
+
+      snprintf(path, sizeof(path), "/proc/%s/task", dirent->d_name);
+
+      if ((task_dir = opendir(path))) {
+        while ((task_dirent = readdir(task_dir))) {
+          long local_tid;
+          char *task_end;
+          char task_name[64];
+
+          local_tid = strtol(task_dirent->d_name, &task_end, 10);
+          if (*task_end)
+            /* Not a number, or the main task */
+            continue;
+
+          if (hwloc_linux_get_tid_cpubind(topology, local_tid, task_cpuset))
+            continue;
+
+          if (proc_cpubind && hwloc_cpuset_isequal(task_cpuset, cpuset))
+            continue;
+
+          snprintf(task_name, sizeof(task_name), "%s %li", name, local_tid);
+
+          hwloc_topology_insert_misc_object_by_cpuset(topology, task_cpuset, task_name);
+        }
+        closedir(task_dir);
+      }
+    }
 #endif /* HWLOC_LINUX_SYS */
 
-    if (hwloc_get_proc_cpubind(topology, local_pid, cpuset, 0))
+    if (!proc_cpubind)
       continue;
 
     if (hwloc_cpuset_isincluded(root->cpuset, cpuset))
@@ -113,6 +159,9 @@ static void add_process_objects(hwloc_topology_t topology)
   }
 
   hwloc_cpuset_free(cpuset);
+#ifdef HWLOC_LINUX_SYS
+  hwloc_cpuset_free(task_cpuset);
+#endif /* HWLOC_LINUX_SYS */
   closedir(dir);
 }
 
@@ -140,41 +189,41 @@ void usage(const char *name, FILE *where)
 #endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
-  fprintf (where, "   -l --logical          Display hwloc logical object indexes (default)\n");
-  fprintf (where, "   -p --physical         Display physical object indexes\n");
+  fprintf (where, "  -l --logical          Display hwloc logical object indexes (default)\n");
+  fprintf (where, "  -p --physical         Display physical object indexes\n");
   fprintf (where, "Output options:\n");
-  fprintf (where, "   --output-format <format>\n");
-  fprintf (where, "   --of <format>         Force the output to use the given format\n");
+  fprintf (where, "  --output-format <format>\n");
+  fprintf (where, "  --of <format>         Force the output to use the given format\n");
   fprintf (where, "Textual output options:\n");
-  fprintf (where, "   --only <type>         Only show objects of the given type in the text output\n");
-  fprintf (where, "   -v --verbose          Include additional details\n");
-  fprintf (where, "   -s --silent           Reduce the amount of details to show\n");
-  fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
-  fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
-  fprintf (where, "   --taskset             Show taskset-specific cpuset strings\n");
+  fprintf (where, "  --only <type>         Only show objects of the given type in the text output\n");
+  fprintf (where, "  -v --verbose          Include additional details\n");
+  fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
+  fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
+  fprintf (where, "  -C --cpuset-only      Only show the cpuset of each ofbject\n");
+  fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
   fprintf (where, "Object filtering options:\n");
-  fprintf (where, "   --ignore <type>       Ignore objects of the given type\n");
-  fprintf (where, "   --no-caches           Do not show caches\n");
-  fprintf (where, "   --no-useless-caches   Do not show caches which do not have a hierarchical\n"
-                  "                         impact\n");
-  fprintf (where, "   --merge               Do not show levels that do not have a hierarcical\n"
-                  "                         impact\n");
+  fprintf (where, "  --ignore <type>       Ignore objects of the given type\n");
+  fprintf (where, "  --no-caches           Do not show caches\n");
+  fprintf (where, "  --no-useless-caches   Do not show caches which do not have a hierarchical\n"
+                  "                        impact\n");
+  fprintf (where, "  --merge               Do not show levels that do not have a hierarcical\n"
+                  "                        impact\n");
 #ifdef HWLOC_HAVE_LIBPCI
   fprintf (where, "   --whole-pci           show all PCI devices and bridges\n");
   fprintf (where, "   --no-pci              do not show any PCI device or bridge\n");
 #endif
   fprintf (where, "Input options:\n");
-  hwloc_utils_input_format_usage(where);
-  fprintf (where, "   --pid <pid>           Detect topology as seen by process <pid>\n");
-  fprintf (where, "   --whole-system        Do not consider administration limitations\n");
+  hwloc_utils_input_format_usage(where, 6);
+  fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
+  fprintf (where, "  --whole-system        Do not consider administration limitations\n");
   fprintf (where, "Graphical output options:\n");
-  fprintf (where, "   --fontsize 10         Set size of text font\n");
-  fprintf (where, "   --gridsize 10         Set size of margin between elements\n");
-  fprintf (where, "   --horiz               Horizontal graphic layout instead of nearly 4/3 ratio\n");
-  fprintf (where, "   --vert                Vertical graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "  --fontsize 10         Set size of text font\n");
+  fprintf (where, "  --gridsize 10         Set size of margin between elements\n");
+  fprintf (where, "  --horiz               Horizontal graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "  --vert                Vertical graphic layout instead of nearly 4/3 ratio\n");
   fprintf (where, "Miscellaneous options:\n");
-  fprintf (where, "   --ps --top            Display processes within the hierarchy\n");
-  fprintf (where, "   --version             Report version and exit\n");
+  fprintf (where, "  --ps --top            Display processes within the hierarchy\n");
+  fprintf (where, "  --version             Report version and exit\n");
 }
 
 enum output_format {

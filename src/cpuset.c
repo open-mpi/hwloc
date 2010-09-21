@@ -587,6 +587,14 @@ void hwloc_cpuset_set_range(struct hwloc_cpuset_s * set, unsigned begincpu, unsi
 	}
 }
 
+void hwloc_cpuset_set_ith_ulong(struct hwloc_cpuset_s *set, unsigned i, unsigned long mask)
+{
+	HWLOC__CPUSET_CHECK(set);
+
+	hwloc_cpuset_realloc_by_ulongs(set, i+1);
+	set->ulongs[i] = mask;
+}
+
 void hwloc_cpuset_clr(struct hwloc_cpuset_s * set, unsigned cpu)
 {
 	unsigned index = HWLOC_CPUSUBSET_INDEX(cpu);

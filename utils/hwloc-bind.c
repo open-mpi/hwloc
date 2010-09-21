@@ -17,15 +17,15 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-calc utility.\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "  -l --logical\ttake logical object indexes (default)\n");
-  fprintf(where, "  -p --physical\ttake physical object indexes\n");
-  fprintf(where, "  --single\tbind on a single CPU to prevent migration\n");
-  fprintf(where, "  --strict\trequire strict binding\n");
-  fprintf(where, "  --get\t\tretrieve current process binding\n");
-  fprintf(where, "  --pid <pid>\toperate on process <pid>\n");
-  fprintf(where, " --taskset\tmanipulate taskset-specific cpuset strings\n");
-  fprintf(where, "  -v\t\tverbose messages\n");
-  fprintf(where, "  --version\treport version and exit\n");
+  fprintf(where, "  -l --logical   Take logical object indexes (default)\n");
+  fprintf(where, "  -p --physical  Take physical object indexes\n");
+  fprintf(where, "  --single       Bind on a single CPU to prevent migration\n");
+  fprintf(where, "  --strict       Require strict binding\n");
+  fprintf(where, "  --get          Retrieve current process binding\n");
+  fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
+  fprintf(where, "  --taskset      Manipulate taskset-specific cpuset strings\n");
+  fprintf(where, "  -v             Show verbose messages\n");
+  fprintf(where, "  --version      Report version and exit\n");
 }
 
 int main(int argc, char *argv[])

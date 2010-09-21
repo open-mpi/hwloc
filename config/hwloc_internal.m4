@@ -278,6 +278,39 @@ EOF
                     hwloc_have_libibverbs=yes])
     ])
 
+    AC_CHECK_HEADERS([cuda.h], [
+      AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
+      AC_COMPILE_IFELSE([
+#include <cuda.h>
+#ifndef CUDA_VERSION
+#error CUDA_VERSION undefined
+#elif CUDA_VERSION < 3020
+#error CUDA_VERSION too old
+#endif
+      ], [
+        AC_MSG_RESULT(yes)
+        AC_CHECK_LIB([cuda], [cuInit],
+		     [AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
+		      hwloc_have_cuda=yes])
+      ], [AC_MSG_RESULT(no)])
+    ])
+    AC_CHECK_HEADERS([cuda_runtime_api.h], [
+      AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
+      AC_COMPILE_IFELSE([
+#include <cuda_runtime_api.h>
+#ifndef CUDART_VERSION
+#error CUDART_VERSION undefined
+#elif CUDART_VERSION < 3020
+#error CUDART_VERSION too old
+#endif
+      ], [
+        AC_MSG_RESULT(yes)
+        AC_CHECK_LIB([cudart], [cudaGetDeviceCount],
+		     [AC_DEFINE([HAVE_CUDART], 1, [Define to 1 if we have -lcudart])
+		      hwloc_have_cudart=yes])
+      ], [AC_MSG_RESULT(no)])
+    ])
+
     if test "x$enable_xml" != "xno"; then
         AC_CHECK_PROGS(XMLLINT, [xmllint])
     fi

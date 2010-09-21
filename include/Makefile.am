@@ -11,6 +11,8 @@ include_hwloc_HEADERS = \
         hwloc/cpuset.h \
         hwloc/helper.h \
         hwloc/openfabrics-verbs.h \
+        hwloc/cuda.h \
+        hwloc/cudart.h \
         hwloc/rename.h
 nodist_include_hwloc_HEADERS = hwloc/config.h 
 

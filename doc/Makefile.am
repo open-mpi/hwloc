@@ -61,6 +61,8 @@ dox_inputs = $(DOX_CONFIG) \
        $(HWLOC_top_srcdir)/include/hwloc/glibc-sched.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux-libnuma.h \
+       $(HWLOC_top_srcdir)/include/hwloc/cuda.h \
+       $(HWLOC_top_srcdir)/include/hwloc/cudart.h \
        $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h
 
 #
@@ -286,6 +288,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_or.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_asprintf.3 \
