@@ -17,12 +17,14 @@ in v0.9.1).
 Version 1.1.0
 -------------
 
-* CPU sets are now dynamically (re-)allocated, HWLOC_NBMAXCPUS
-  has been removed.
+* CPU sets are now dynamically (re-)allocated, the maximal number of CPUs
+  (HWLOC_NBMAXCPUS) has been removed.
 * Add an `infos' array in each object to store couples of info names and
   values. It enables generic storage of things like the old dmi board infos
   that were previously stored in machine specific attributes.
 * Add linesize cache attribute.
+* Add NVIDIA CUDA helpers in cuda.h and cudart.h to ease interoperability
+  with CUDA Runtime and Driver APIs.
 * Improve the distance-based grouping code to better support irregular
   distance matrices.
 * Add hwloc-ps to list process' bindings.
