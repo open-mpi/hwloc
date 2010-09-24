@@ -975,3 +975,47 @@ int hwloc_bitmap_weight(const struct hwloc_bitmap_s * set)
 		weight += hwloc_weight_long(set->ulongs[i]);
 	return weight;
 }
+
+
+/* to be dropped when hwloc/cpuset.h is dropped */
+#pragma weak hwloc_cpuset_alloc = hwloc_bitmap_alloc
+#pragma weak hwloc_cpuset_free = hwloc_bitmap_free
+#pragma weak hwloc_cpuset_dup = hwloc_bitmap_dup
+#pragma weak hwloc_cpuset_copy = hwloc_bitmap_copy
+#pragma weak hwloc_cpuset_snprintf = hwloc_bitmap_snprintf
+#pragma weak hwloc_cpuset_asprintf = hwloc_bitmap_asprintf
+#pragma weak hwloc_cpuset_from_string = hwloc_bitmap_sscanf
+#pragma weak hwloc_cpuset_taskset_snprintf = hwloc_bitmap_taskset_snprintf
+#pragma weak hwloc_cpuset_taskset_asprintf = hwloc_bitmap_taskset_asprintf
+#pragma weak hwloc_cpuset_taskset_sscanf = hwloc_bitmap_taskset_sscanf
+#pragma weak hwloc_cpuset_zero = hwloc_bitmap_zero
+#pragma weak hwloc_cpuset_fill = hwloc_bitmap_fill
+#pragma weak hwloc_cpuset_from_ulong = hwloc_bitmap_from_ulong
+#pragma weak hwloc_cpuset_from_ith_ulong = hwloc_bitmap_from_ith_ulong
+#pragma weak hwloc_cpuset_to_ulong = hwloc_bitmap_to_ulong
+#pragma weak hwloc_cpuset_to_ith_ulong = hwloc_bitmap_to_ith_ulong
+#pragma weak hwloc_cpuset_cpu = hwloc_bitmap_setonly
+#pragma weak hwloc_cpuset_all_but_cpu = hwloc_bitmap_allbut
+#pragma weak hwloc_cpuset_set = hwloc_bitmap_set
+#pragma weak hwloc_cpuset_set_range = hwloc_bitmap_set_range
+#pragma weak hwloc_cpuset_set_ith_ulong = hwloc_bitmap_set_ith_ulong
+#pragma weak hwloc_cpuset_clr = hwloc_bitmap_clr
+#pragma weak hwloc_cpuset_clr_range = hwloc_bitmap_clr_range
+#pragma weak hwloc_cpuset_isset = hwloc_bitmap_isset
+#pragma weak hwloc_cpuset_iszero = hwloc_bitmap_iszero
+#pragma weak hwloc_cpuset_isfull = hwloc_bitmap_isfull
+#pragma weak hwloc_cpuset_isequal = hwloc_bitmap_isequal
+#pragma weak hwloc_cpuset_intersects = hwloc_bitmap_intersects
+#pragma weak hwloc_cpuset_isincluded = hwloc_bitmap_isincluded
+#pragma weak hwloc_cpuset_or = hwloc_bitmap_or
+#pragma weak hwloc_cpuset_and = hwloc_bitmap_and
+#pragma weak hwloc_cpuset_andnot = hwloc_bitmap_andnot
+#pragma weak hwloc_cpuset_xor = hwloc_bitmap_xor
+#pragma weak hwloc_cpuset_not = hwloc_bitmap_not
+#pragma weak hwloc_cpuset_first = hwloc_bitmap_first
+#pragma weak hwloc_cpuset_last = hwloc_bitmap_last
+#pragma weak hwloc_cpuset_next = hwloc_bitmap_next
+#pragma weak hwloc_cpuset_singlify = hwloc_bitmap_singlify
+#pragma weak hwloc_cpuset_compare_first = hwloc_bitmap_compare_first
+#pragma weak hwloc_cpuset_compare = hwloc_bitmap_compare
+#pragma weak hwloc_cpuset_weight = hwloc_bitmap_weight
