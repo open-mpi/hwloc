@@ -265,6 +265,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare_first.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_cpu.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_fill.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_first.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_begin.3 \
@@ -301,6 +302,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_weight.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_xor.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cuda_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
@@ -390,6 +393,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_conversion.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_creation.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_cuda.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_cudart.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_glibc_sched.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_binding.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
@@ -403,6 +408,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_bitmask.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_nodemask.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_ulongs.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_openfabrics.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_objects.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_traversal.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_types.3
