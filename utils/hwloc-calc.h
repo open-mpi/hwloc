@@ -26,36 +26,36 @@ typedef enum hwloc_mask_append_mode_e {
 } hwloc_mask_append_mode_t;
 
 static inline int
-hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
+hwloc_mask_append_cpuset(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
   char *s1, *s2;
-  hwloc_cpuset_asprintf(&s1, newset);
-  hwloc_cpuset_asprintf(&s2, set);
+  hwloc_bitmap_asprintf(&s1, newset);
+  hwloc_bitmap_asprintf(&s2, set);
   switch (mode) {
   case HWLOC_MASK_APPEND_ADD:
     if (verbose)
       fprintf(stderr, "adding %s to %s\n",
           s1, s2);
-    hwloc_cpuset_or(set, set, newset);
+    hwloc_bitmap_or(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_CLR:
     if (verbose)
       fprintf(stderr, "clearing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_andnot(set, set, newset);
+    hwloc_bitmap_andnot(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_AND:
     if (verbose)
       fprintf(stderr, "and'ing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_and(set, set, newset);
+    hwloc_bitmap_and(set, set, newset);
     break;
   case HWLOC_MASK_APPEND_XOR:
     if (verbose)
       fprintf(stderr, "xor'ing %s from %s\n",
           s1, s2);
-    hwloc_cpuset_xor(set, set, newset);
+    hwloc_bitmap_xor(set, set, newset);
     break;
   default:
     assert(0);
@@ -66,7 +66,7 @@ hwloc_mask_append_cpuset(hwloc_cpuset_t set, hwloc_const_cpuset_t newset,
 }
 
 static inline hwloc_obj_t __hwloc_attribute_pure
-hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_cpuset_t rootset,
+hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_bitmap_t rootset,
 					 unsigned depth, unsigned i, int logical)
 {
   if (logical) {
@@ -83,8 +83,8 @@ hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const
 
 static inline int
 hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
-		       hwloc_const_cpuset_t rootset, const char *string, int logical,
-		       hwloc_cpuset_t set, int verbose)
+		       hwloc_const_bitmap_t rootset, const char *string, int logical,
+		       hwloc_bitmap_t set, int verbose)
 {
   hwloc_obj_t obj;
   unsigned depth, width;
@@ -167,7 +167,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     obj = hwloc_mask_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
     if (verbose || !obj) {
       char *s;
-      hwloc_cpuset_asprintf(&s, rootset);
+      hwloc_bitmap_asprintf(&s, rootset);
       if (obj)
 	printf("object #%u depth %u below cpuset %s found\n",
 	       i, depth, s);
@@ -192,7 +192,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 
 static inline int
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
-		     const char *arg, int logical, hwloc_cpuset_t set,
+		     const char *arg, int logical, hwloc_bitmap_t set,
 		     int taskset, int verbose)
 {
   char *colon;
@@ -212,16 +212,16 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 
   colon = strchr(arg, ':');
   if (colon) {
-    hwloc_cpuset_t newset = hwloc_cpuset_alloc();
+    hwloc_bitmap_t newset = hwloc_bitmap_alloc();
     err = hwloc_mask_append_object(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), arg, logical, newset, verbose);
     if (!err)
       err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
-    hwloc_cpuset_free(newset);
+    hwloc_bitmap_free(newset);
 
   } else if (taskset) {
     /* try to parse as a list of integer starting with 0xf...f or 0x */
     char *tmp = (char*) arg;
-    hwloc_cpuset_t newset;
+    hwloc_bitmap_t newset;
     if (strncasecmp(tmp, "0xf...f", 7) == 0) {
       tmp += 7;
       if (0 == *tmp) {
@@ -243,15 +243,15 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
       err = -1;
       goto out;
     }
-    newset = hwloc_cpuset_alloc();
-    hwloc_cpuset_taskset_sscanf(newset, arg);
+    newset = hwloc_bitmap_alloc();
+    hwloc_bitmap_taskset_sscanf(newset, arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
-    hwloc_cpuset_free(newset);
+    hwloc_bitmap_free(newset);
 
   } else {
     /* try to parse as a comma-separated list of integer with 0x as an optional prefix, and possibly starting with 0xf...f */
     char *tmp = (char*) arg;
-    hwloc_cpuset_t newset;
+    hwloc_bitmap_t newset;
     if (strncasecmp(tmp, "0xf...f,", 8) == 0) {
       tmp += 8;
       if (0 == *tmp) {
@@ -278,10 +278,10 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
         break;
       tmp = next+1;
     }
-    newset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(newset, arg);
+    newset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(newset, arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
-    hwloc_cpuset_free(newset);
+    hwloc_bitmap_free(newset);
   }
 
  out:

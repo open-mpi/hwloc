@@ -44,15 +44,15 @@ static int singlify = 0;
 static int taskset = 0;
 
 static void
-hwloc_calc_output(hwloc_topology_t topology, hwloc_cpuset_t set)
+hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
 {
   if (singlify)
-    hwloc_cpuset_singlify(set);
+    hwloc_bitmap_singlify(set);
 
   if (showobjs) {
-    hwloc_cpuset_t remaining = hwloc_cpuset_dup(set);
+    hwloc_bitmap_t remaining = hwloc_bitmap_dup(set);
     int first = 1;
-    while (!hwloc_cpuset_iszero(remaining)) {
+    while (!hwloc_bitmap_iszero(remaining)) {
       char type[64];
       unsigned idx;
       hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
@@ -62,11 +62,11 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_cpuset_t set)
         printf("%s%s", first ? "" : " ", type);
       else
         printf("%s%s:%u", first ? "" : " ", type, idx);
-      hwloc_cpuset_andnot(remaining, remaining, obj->cpuset);
+      hwloc_bitmap_andnot(remaining, remaining, obj->cpuset);
       first = 0;
     }
     printf("\n");
-    hwloc_cpuset_free(remaining);
+    hwloc_bitmap_free(remaining);
   } else if (listdepth != -1) {
     hwloc_obj_t proc, prev = NULL;
     while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, listdepth, prev)) != NULL) {
@@ -79,9 +79,9 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_cpuset_t set)
   } else {
     char *string = NULL;
     if (taskset)
-      hwloc_cpuset_taskset_asprintf(&string, set);
+      hwloc_bitmap_taskset_asprintf(&string, set);
     else
-      hwloc_cpuset_asprintf(&string, set);
+      hwloc_bitmap_asprintf(&string, set);
     printf("%s\n", string);
     free(string);
   }
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   int input_changed = 0;
   unsigned depth;
-  hwloc_cpuset_t set;
+  hwloc_bitmap_t set;
   int cmdline_args = 0;
   char **orig_argv = argv;
   hwloc_obj_type_t listtype = (hwloc_obj_type_t) -1;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
   callname = argv[0];
 
-  set = hwloc_cpuset_alloc();
+  set = hwloc_bitmap_alloc();
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
     char line[HWLOC_CALC_LINE_LEN];
     while (fgets(line, sizeof(line), stdin)) {
       char *current = line;
-      hwloc_cpuset_zero(set);
+      hwloc_bitmap_zero(set);
       while (1) {
 	char *token = strtok(current, " \n");
 	if (!token)
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
  out:
   hwloc_topology_destroy(topology);
 
-  hwloc_cpuset_free(set);
+  hwloc_bitmap_free(set);
 
   return EXIT_SUCCESS;
 }

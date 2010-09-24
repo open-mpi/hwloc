@@ -24,13 +24,13 @@
  */
 
 static int
-hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   unsigned target;
 
   /* The resulting binding is always strict */
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
+  if (hwloc_bitmap_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if (processor_bind(idtype, id, PBIND_NONE, NULL) != 0)
       return -1;
 #ifdef HAVE_LIBLGRP
@@ -57,16 +57,16 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
       int n = hwloc_get_nbobjs_by_depth(topology, depth);
       int i;
       int ok;
-      hwloc_cpuset_t target = hwloc_cpuset_alloc();
+      hwloc_bitmap_t target = hwloc_bitmap_alloc();
 
       for (i = 0; i < n; i++) {
 	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
-        if (hwloc_cpuset_isincluded(obj->cpuset, hwloc_set))
-          hwloc_cpuset_or(target, target, obj->cpuset);
+        if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set))
+          hwloc_bitmap_or(target, target, obj->cpuset);
       }
 
-      ok = hwloc_cpuset_isequal(target, hwloc_set);
-      hwloc_cpuset_free(target);
+      ok = hwloc_bitmap_isequal(target, hwloc_set);
+      hwloc_bitmap_free(target);
 
       if (ok) {
         /* Ok, managed to achieve hwloc_set by just combining NUMA nodes */
@@ -74,7 +74,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
         for (i = 0; i < n; i++) {
           hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
 
-          if (hwloc_cpuset_isincluded(obj->cpuset, hwloc_set)) {
+          if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set)) {
             lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
           } else {
             if (policy & HWLOC_CPUBIND_STRICT)
@@ -90,12 +90,12 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
   }
 #endif /* HAVE_LIBLGRP */
 
-  if (hwloc_cpuset_weight(hwloc_set) != 1) {
+  if (hwloc_bitmap_weight(hwloc_set) != 1) {
     errno = EXDEV;
     return -1;
   }
 
-  target = hwloc_cpuset_first(hwloc_set);
+  target = hwloc_bitmap_first(hwloc_set);
 
   if (processor_bind(idtype, id,
 		     (processorid_t) (target), NULL) != 0)
@@ -105,26 +105,26 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 }
 
 static int
-hwloc_solaris_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_solaris_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   return hwloc_solaris_set_sth_cpubind(topology, P_PID, pid, hwloc_set, policy);
 }
 
 static int
-hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   return hwloc_solaris_set_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, policy);
 }
 
 static int
-hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
 }
 
 #ifdef HAVE_LIBLGRP
 static int
-hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   int n;
@@ -135,7 +135,7 @@ hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     return -1;
   }
 
-  hwloc_cpuset_zero(hwloc_set);
+  hwloc_bitmap_zero(hwloc_set);
   n = hwloc_get_nbobjs_by_depth(topology, depth);
 
   for (i = 0; i < n; i++) {
@@ -143,29 +143,29 @@ hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     lgrp_affinity_t aff = lgrp_affinity_get(idtype, id, obj->os_index);
 
     if (aff == LGRP_AFF_STRONG)
-      hwloc_cpuset_or(hwloc_set, hwloc_set, obj->cpuset);      
+      hwloc_bitmap_or(hwloc_set, hwloc_set, obj->cpuset);      
   }
 
-  if (hwloc_cpuset_iszero(hwloc_set))
-    hwloc_cpuset_copy(hwloc_set, hwloc_topology_get_complete_cpuset(topology));
+  if (hwloc_bitmap_iszero(hwloc_set))
+    hwloc_bitmap_copy(hwloc_set, hwloc_topology_get_complete_cpuset(topology));
 
   return 0;
 }
 
 static int
-hwloc_solaris_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_solaris_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
 {
   return hwloc_solaris_get_sth_cpubind(topology, P_PID, pid, hwloc_set, policy);
 }
 
 static int
-hwloc_solaris_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_solaris_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
 {
   return hwloc_solaris_get_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, policy);
 }
 
 static int
-hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
 {
   return hwloc_solaris_get_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
 }
@@ -192,17 +192,17 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
     processorid_t cpuids[n];
 
     obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, lgrp);
-    obj->nodeset = hwloc_cpuset_alloc();
-    hwloc_cpuset_set(obj->nodeset, lgrp);
-    obj->cpuset = hwloc_cpuset_alloc();
+    obj->nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_set(obj->nodeset, lgrp);
+    obj->cpuset = hwloc_bitmap_alloc();
     glob_lgrps[(*curlgrp)++] = obj;
 
     lgrp_cpus(cookie, lgrp, cpuids, n, LGRP_CONTENT_HIERARCHY);
     for (i = 0; i < n ; i++) {
       hwloc_debug("node %ld's cpu %d is %d\n", lgrp, i, cpuids[i]);
-      hwloc_cpuset_set(obj->cpuset, cpuids[i]);
+      hwloc_bitmap_set(obj->cpuset, cpuids[i]);
     }
-    hwloc_debug_1arg_cpuset("node %ld has cpuset %s\n",
+    hwloc_debug_1arg_bitmap("node %ld has cpuset %s\n",
 	lgrp, obj->cpuset);
 
     /* or LGRP_MEM_SZ_FREE */
@@ -353,7 +353,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
           hwloc_debug("cpu%u's state is %s\n", cpuid, stat->value.c);
           if (strcmp(stat->value.c, "on-line"))
             /* not online */
-            hwloc_cpuset_clr(topology->levels[0][0]->online_cpuset, cpuid);
+            hwloc_bitmap_clr(topology->levels[0][0]->online_cpuset, cpuid);
         }
 
       if (look_chips) do {

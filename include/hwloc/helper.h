@@ -636,7 +636,7 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_bitmap_t *cp
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
  */
-static __hwloc_inline hwloc_const_cpuset_t __hwloc_attribute_pure
+static __hwloc_inline hwloc_const_bitmap_t __hwloc_attribute_pure
 hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
 {
   return hwloc_get_root_obj(topology)->complete_cpuset;
@@ -652,7 +652,7 @@ hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
  */
-static __hwloc_inline hwloc_const_cpuset_t __hwloc_attribute_pure
+static __hwloc_inline hwloc_const_bitmap_t __hwloc_attribute_pure
 hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
 {
   return hwloc_get_root_obj(topology)->cpuset;
@@ -667,7 +667,7 @@ hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
  */
-static __hwloc_inline hwloc_const_cpuset_t __hwloc_attribute_pure
+static __hwloc_inline hwloc_const_bitmap_t __hwloc_attribute_pure
 hwloc_topology_get_online_cpuset(hwloc_topology_t topology)
 {
   return hwloc_get_root_obj(topology)->online_cpuset;
@@ -682,7 +682,7 @@ hwloc_topology_get_online_cpuset(hwloc_topology_t topology)
  * \note The returned cpuset is not newly allocated and should thus not be
  * changed or freed, hwloc_cpuset_dup must be used to obtain a local copy.
  */
-static __hwloc_inline hwloc_const_cpuset_t __hwloc_attribute_pure
+static __hwloc_inline hwloc_const_bitmap_t __hwloc_attribute_pure
 hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
 {
   return hwloc_get_root_obj(topology)->allowed_cpuset;

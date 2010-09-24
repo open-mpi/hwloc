@@ -61,11 +61,11 @@ hwloc_look_darwin(struct hwloc_topology *topology)
     if (nprocs == npackages * logical_per_package)
       for (i = 0; i < npackages; i++) {
         obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, i);
-        obj->cpuset = hwloc_cpuset_alloc();
+        obj->cpuset = hwloc_bitmap_alloc();
         for (cpu = i*logical_per_package; cpu < (i+1)*logical_per_package; cpu++)
-          hwloc_cpuset_set(obj->cpuset, cpu);
+          hwloc_bitmap_set(obj->cpuset, cpu);
 
-        hwloc_debug_1arg_cpuset("package %u has cpuset %s\n",
+        hwloc_debug_1arg_bitmap("package %u has cpuset %s\n",
                    i, obj->cpuset);
         hwloc_insert_object_by_cpuset(topology, obj);
       }
@@ -77,13 +77,13 @@ hwloc_look_darwin(struct hwloc_topology *topology)
       if (!(logical_per_package % cores_per_package))
         for (i = 0; i < npackages * cores_per_package; i++) {
           obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, i);
-          obj->cpuset = hwloc_cpuset_alloc();
+          obj->cpuset = hwloc_bitmap_alloc();
           for (cpu = i*(logical_per_package/cores_per_package);
                cpu < (i+1)*(logical_per_package/cores_per_package);
                cpu++)
-            hwloc_cpuset_set(obj->cpuset, cpu);
+            hwloc_bitmap_set(obj->cpuset, cpu);
 
-          hwloc_debug_1arg_cpuset("core %u has cpuset %s\n",
+          hwloc_debug_1arg_bitmap("core %u has cpuset %s\n",
                      i, obj->cpuset);
           hwloc_insert_object_by_cpuset(topology, obj);
         }
@@ -144,23 +144,23 @@ hwloc_look_darwin(struct hwloc_topology *topology)
         for (j = 0; j < (nprocs / cacheconfig[i]); j++) {
           obj = hwloc_alloc_setup_object(i?HWLOC_OBJ_CACHE:HWLOC_OBJ_NODE, j);
           if (!i) {
-            obj->nodeset = hwloc_cpuset_alloc();
-            hwloc_cpuset_set(obj->nodeset, j);
+            obj->nodeset = hwloc_bitmap_alloc();
+            hwloc_bitmap_set(obj->nodeset, j);
           }
-          obj->cpuset = hwloc_cpuset_alloc();
+          obj->cpuset = hwloc_bitmap_alloc();
           for (cpu = j*cacheconfig[i];
                cpu < ((j+1)*cacheconfig[i]);
                cpu++)
-            hwloc_cpuset_set(obj->cpuset, cpu);
+            hwloc_bitmap_set(obj->cpuset, cpu);
 
           if (i) {
-            hwloc_debug_2args_cpuset("L%ucache %u has cpuset %s\n",
+            hwloc_debug_2args_bitmap("L%ucache %u has cpuset %s\n",
                 i, j, obj->cpuset);
             obj->attr->cache.depth = i;
             obj->attr->cache.size = cachesize[i];
             obj->attr->cache.linesize = cachelinesize;
           } else {
-            hwloc_debug_1arg_cpuset("node %u has cpuset %s\n",
+            hwloc_debug_1arg_bitmap("node %u has cpuset %s\n",
                 j, obj->cpuset);
 	    obj->memory.local_memory = cachesize[i];
 	    obj->memory.page_types_len = 2;
