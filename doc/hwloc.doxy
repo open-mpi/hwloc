@@ -408,9 +408,9 @@ To precisely define the vocabulary used by hwloc, a \ref termsanddefs
 section is available and should probably be read first.  
 
 Each hwloc object contains a cpuset describing the list of processing
-units that it contains.  These cpusets may be used for \ref
-hwlocality_binding.  hwloc offers an extensive cpuset manipulation
-interface in hwloc/cpuset.h.
+units that it contains.  These bitmaps may be used for \ref
+hwlocality_binding.  hwloc offers an extensive bitmap manipulation
+interface in hwloc/bitmap.h.
 
 Moreover, hwloc also comes with additional helpers for
 interoperability with several commonly used environments.
@@ -694,20 +694,20 @@ lstopo to read in that XML file and display it on a different system).
 
 hwloc-bind binds processes to specific hardware objects through a
 flexible syntax.  A simple example is binding an executable to
-specific cores (or sockets or cpusets or ...).  The hwloc-bind(1) man
+specific cores (or sockets or bitmaps or ...).  The hwloc-bind(1) man
 page provides much more detail on what is possible.
 
 hwloc-bind can also be used to retrieve the current process' binding.
 
 \section cli_hwloc_calc hwloc-calc
 
-hwloc-calc is generally used to create cpuset strings to pass to
+hwloc-calc is generally used to create bitmap strings to pass to
 hwloc-bind.  Although hwloc-bind accepts many forms of object
-specification (i.e., cpuset strings are one of many forms that
+specification (i.e., bitmap strings are one of many forms that
 hwloc-bind understands), they can be useful, compact representations
 in shell scripts, for example.
 
-hwloc-calc generates cpuset strings from given hardware objects with
+hwloc-calc generates bitmap strings from given hardware objects with
 the ability to aggregate them, intersect them, and more.  hwloc-calc
 generally uses the same syntax than hwloc-bind, but multiple instances
 may be composed to generate complex combinations.  
@@ -718,7 +718,7 @@ taskset or numactl.
 
 \section cli_hwloc_distrib hwloc-distrib
 
-hwloc-distrib generates a set of cpuset strings that are uniformly
+hwloc-distrib generates a set of bitmap strings that are uniformly
 distributed across the machine for the given number of processes.
 These strings may be used with hwloc-bind to run processes to maximize
 their memory bandwidth by properly distributing them across the
@@ -1121,7 +1121,7 @@ associated with a specific OS index.
 But as mentioned above, we discourage the use of these conversion
 methods for actual binding.  Instead, hwloc offers its own binding
 model using the \p cpuset field of objects.  These cpusets may be
-duplicated, modified, combined, etc. (see hwloc/cpuset.h for details)
+duplicated, modified, combined, etc. (see hwloc/bitmap.h for details)
 and then passed to hwloc_set_cpubind() for binding.
 
 
