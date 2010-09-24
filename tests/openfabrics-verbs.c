@@ -30,22 +30,22 @@ int main(void)
   hwloc_topology_load(topology);
 
   for(i=0; i<count; i++) {
-    hwloc_cpuset_t set;
+    hwloc_bitmap_t set;
     dev = dev_list[i];
 
-    set = hwloc_cpuset_alloc();
+    set = hwloc_bitmap_alloc();
     hwloc_ibv_get_device_cpuset(topology, dev, set);
     if (!set) {
       printf("failed to get cpuset for device %d (%s)\n",
 	     i, ibv_get_device_name(dev));
     } else {
       char *cpuset_string = NULL;
-      hwloc_cpuset_asprintf(&cpuset_string, set);
+      hwloc_bitmap_asprintf(&cpuset_string, set);
       printf("got cpuset %s for device %d (%s)\n",
 	     cpuset_string, i, ibv_get_device_name(dev));
       free(cpuset_string);
     }
-    hwloc_cpuset_free(set);
+    hwloc_bitmap_free(set);
   }
 
   hwloc_topology_destroy(topology);

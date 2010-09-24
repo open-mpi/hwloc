@@ -29,19 +29,19 @@ int main(void)
   hwloc_topology_load(topology);
 
   for(i=0; i<count; i++) {
-    hwloc_cpuset_t set;
+    hwloc_bitmap_t set;
 
-    set = hwloc_cpuset_alloc();
+    set = hwloc_bitmap_alloc();
     hwloc_cudart_get_device_cpuset(topology, i, set);
     if (!set) {
       printf("failed to get cpuset for device %d\n", i);
     } else {
       char *cpuset_string = NULL;
-      hwloc_cpuset_asprintf(&cpuset_string, set);
+      hwloc_bitmap_asprintf(&cpuset_string, set);
       printf("got cpuset %s for device %d\n", cpuset_string, i);
       free(cpuset_string);
     }
-    hwloc_cpuset_free(set);
+    hwloc_bitmap_free(set);
   }
 
   hwloc_topology_destroy(topology);

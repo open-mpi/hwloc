@@ -40,7 +40,7 @@ extern "C" {
  */
 static __hwloc_inline int
 hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
-			     CUdevice cudevice, hwloc_cpuset_t set)
+			     CUdevice cudevice, hwloc_bitmap_t set)
 {
 #ifdef HWLOC_LINUX_SYS
   /* If we're on Linux, use the sysfs mechanism to get the local cpus */
@@ -72,7 +72,7 @@ hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
   fclose(sysfile);
 #else
   /* Non-Linux systems simply get a full cpuset */
-  hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
 #endif
   return 0;
 }
