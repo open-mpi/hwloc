@@ -10,7 +10,7 @@ SUBDIRS = linux ports xml
 LDADD =
 
 if HWLOC_BUILD_TESTS
-check_PROGRAMS = hwloc_cpuset_string \
+check_PROGRAMS = hwloc_bitmap_string \
 	hwloc_get_closest_objs \
 	hwloc_get_obj_covering_cpuset \
 	hwloc_get_cache_covering_cpuset \
@@ -19,8 +19,8 @@ check_PROGRAMS = hwloc_cpuset_string \
 	hwloc_get_obj_inside_cpuset \
 	hwloc_get_shared_cache_covering_obj \
 	hwloc_get_obj_below_array_by_type \
-	hwloc_cpuset_first_last_weight \
-	hwloc_cpuset_singlify \
+	hwloc_bitmap_first_last_weight \
+	hwloc_bitmap_singlify \
 	hwloc_type_depth \
 	hwloc_bind \
 	hwloc_object_userdata \
