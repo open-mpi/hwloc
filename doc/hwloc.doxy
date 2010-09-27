@@ -824,6 +824,13 @@ interface with dedicated helpers.
   processors near an OpenFabrics device.
  </dd>
 
+<dt>Myrinet Express</dt>
+ <dd>
+  hwloc/myriexpress.h offers interoperability with the Myrinet
+  Express interface.  It can return the list of processors near
+  a Myrinet board managed by the MX driver.
+ </dd>
+
 <dt>NVIDIA CUDA</dt>
  <dd>
   hwloc/cuda.h and hwloc/cudart.h enable interoperability with

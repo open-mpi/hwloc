@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwloc_cuda CUDA Driver API Specific Functions
+/** \defgroup hwlocality_cuda CUDA Driver API Specific Functions
  * @{
  */
 

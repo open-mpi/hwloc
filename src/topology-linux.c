@@ -98,25 +98,44 @@
 #ifdef HAVE_OPENAT
 /* Use our own filesystem functions if we have openat */
 
-static FILE *
-hwloc_fopenat(const char *path, const char *mode, int fsroot_fd)
+static const char *
+hwloc_checkat(const char *path, int fsroot_fd)
 {
-  int fd;
   const char *relative_path;
-
   if (fsroot_fd < 0) {
     errno = EBADF;
-    return NULL;
-  }
-  if (strcmp(mode, "r")) {
-    errno = ENOTSUP;
     return NULL;
   }
 
   /* Skip leading slashes.  */
   for (relative_path = path; *relative_path == '/'; relative_path++);
 
-  fd = openat (fsroot_fd, relative_path, O_RDONLY);
+  return relative_path;
+}
+
+static int
+hwloc_openat(const char *path, int fsroot_fd)
+{
+  const char *relative_path;
+
+  relative_path = hwloc_checkat(path, fsroot_fd);
+  if (!relative_path)
+    return -1;
+
+  return openat (fsroot_fd, relative_path, O_RDONLY);
+}
+
+static FILE *
+hwloc_fopenat(const char *path, const char *mode, int fsroot_fd)
+{
+  int fd;
+
+  if (strcmp(mode, "r")) {
+    errno = ENOTSUP;
+    return NULL;
+  }
+
+  fd = hwloc_openat (path, fsroot_fd);
   if (fd == -1)
     return NULL;
 
@@ -128,13 +147,9 @@ hwloc_accessat(const char *path, int mode, int fsroot_fd)
 {
   const char *relative_path;
 
-  if (fsroot_fd < 0) {
-    errno = EBADF;
+  relative_path = hwloc_checkat(path, fsroot_fd);
+  if (!relative_path)
     return -1;
-  }
-
-  /* Skip leading slashes.  */
-  for (relative_path = path; *relative_path == '/'; relative_path++);
 
   return faccessat(fsroot_fd, relative_path, mode, 0);
 }
@@ -145,8 +160,9 @@ hwloc_opendirat(const char *path, int fsroot_fd)
   int dir_fd;
   const char *relative_path;
 
-  /* Skip leading slashes.  */
-  for (relative_path = path; *relative_path == '/'; relative_path++);
+  relative_path = hwloc_checkat(path, fsroot_fd);
+  if (!relative_path)
+    return NULL;
 
   dir_fd = openat(fsroot_fd, relative_path, O_RDONLY | O_DIRECTORY);
   if (dir_fd < 0)
@@ -159,13 +175,23 @@ hwloc_opendirat(const char *path, int fsroot_fd)
 
 /* Static inline version of fopen so that we can use openat if we have
    it, but still preserve compiler parameter checking */
+static inline int
+hwloc_open(const char *p, int d __hwloc_attribute_unused)
+{ 
+#ifdef HAVE_OPENAT
+    return hwloc_openat(p, d);
+#else
+    return open(p, O_RDONLY);
+#endif
+}
+
 static inline FILE *
 hwloc_fopen(const char *p, const char *m, int d __hwloc_attribute_unused)
 { 
 #ifdef HAVE_OPENAT
     return hwloc_fopenat(p, m, d);
 #else
-    return fopen(p, m); 
+    return fopen(p, m);
 #endif
 }
 
@@ -177,7 +203,7 @@ hwloc_access(const char *p, int m, int d __hwloc_attribute_unused)
 #ifdef HAVE_OPENAT
     return hwloc_accessat(p, m, d);
 #else
-    return access(p, m); 
+    return access(p, m);
 #endif
 }
 
@@ -189,7 +215,7 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 #ifdef HAVE_OPENAT
     return hwloc_opendirat(p, d);
 #else
-    return opendir(p); 
+    return opendir(p);
 #endif
 }
 

@@ -18,6 +18,7 @@ int main(void)
   hwloc_topology_t topology;
   struct ibv_device **dev_list, *dev;
   int count, i;
+  int err;
 
   dev_list = ibv_get_device_list(&count);
   if (!dev_list) {
@@ -34,8 +35,8 @@ int main(void)
     dev = dev_list[i];
 
     set = hwloc_cpuset_alloc();
-    hwloc_ibv_get_device_cpuset(topology, dev, set);
-    if (!set) {
+    err = hwloc_ibv_get_device_cpuset(topology, dev, set);
+    if (err < 0) {
       printf("failed to get cpuset for device %d (%s)\n",
 	     i, ibv_get_device_name(dev));
     } else {

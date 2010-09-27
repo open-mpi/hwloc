@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwloc_cuda CUDA Runtime API Specific Functions
+/** \defgroup hwlocality_cudart CUDA Runtime API Specific Functions
  * @{
  */
 

@@ -41,6 +41,10 @@ if HWLOC_HAVE_LIBIBVERBS
 check_PROGRAMS += openfabrics-verbs
 endif HWLOC_HAVE_LIBIBVERBS
 
+if HWLOC_HAVE_MYRIEXPRESS
+check_PROGRAMS += myriexpress
+endif HWLOC_HAVE_MYRIEXPRESS
+
 if HWLOC_HAVE_CUDA
 check_PROGRAMS += cuda
 endif HWLOC_HAVE_CUDA
@@ -63,6 +67,7 @@ LDADD += $(HWLOC_top_builddir)/src/$(hwloc_lib)
 
 linux_libnuma_LDFLAGS = -lnuma
 openfabrics_verbs_LDFLAGS = -libverbs
+myriexpress_LDFLAGS = -lmyriexpress
 cuda_LDFLAGS = -lcuda
 cudart_LDFLAGS = -lcuda -lcudart
 if !HWLOC_HAVE_WINDOWS
