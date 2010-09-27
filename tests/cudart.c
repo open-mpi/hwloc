@@ -17,6 +17,7 @@ int main(void)
   hwloc_topology_t topology;
   cudaError_t cerr;
   int count, i;
+  int err;
 
   cerr = cudaGetDeviceCount(&count);
   if (cerr) {
@@ -32,8 +33,8 @@ int main(void)
     hwloc_cpuset_t set;
 
     set = hwloc_cpuset_alloc();
-    hwloc_cudart_get_device_cpuset(topology, i, set);
-    if (!set) {
+    err = hwloc_cudart_get_device_cpuset(topology, i, set);
+    if (err < 0) {
       printf("failed to get cpuset for device %d\n", i);
     } else {
       char *cpuset_string = NULL;

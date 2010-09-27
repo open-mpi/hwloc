@@ -18,6 +18,7 @@ int main(void)
   CUresult cres;
   CUdevice device;
   int count, i;
+  int err;
 
   cres = cuInit(0);
   if (cres != CUDA_SUCCESS) {
@@ -45,8 +46,8 @@ int main(void)
     }
 
     set = hwloc_cpuset_alloc();
-    hwloc_cuda_get_device_cpuset(topology, device, set);
-    if (!set) {
+    err = hwloc_cuda_get_device_cpuset(topology, device, set);
+    if (err < 0) {
       printf("failed to get cpuset for device %d\n", i);
     } else {
       char *cpuset_string = NULL;
