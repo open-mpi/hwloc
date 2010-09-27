@@ -601,9 +601,23 @@ in favor of hwloc, which is distributed as an Open MPI sub-project.
 <dt>CPU set</dt>
   <dd>The set of logical processors (or processing units) logically included in an object
   (if it makes sense).  They are always expressed using physical logical
-  processor numbers (as announced by the OS).  They are just masks, they do \em
-  not have any relation with an operating system actual binding notion like
+  processor numbers (as announced by the OS).  They are implemented as the
+  ::hwloc_bitmap_t opaque structure.  hwloc CPU sets are just masks, they
+  do \em not have any relation with an operating system actual binding notion like
   Linux' cpusets.</dd>
+
+<dt>Node set</dt>
+  <dd>The set of NUMA memory nodes logically included in an object
+  (if it makes sense).  They are always expressed using physical node
+  numbers (as announced by the OS).  They are implemented with the
+  ::hwloc_bitmap_t opaque structure.
+  as bitmaps.</dd>
+
+<dt>Bitmap</dt>
+  <dd>A possibly-infinite set of bits used for describing sets of objects
+  such as CPUs (CPU sets) or memory nodes (Node sets). They are implemented
+  with the ::hwloc_bitmap_t opaque structure.
+</dd>
 
 <dt>Parent object</dt>
   <dd>The object logically containing the current object, for example
