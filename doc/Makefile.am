@@ -63,7 +63,8 @@ dox_inputs = $(DOX_CONFIG) \
        $(HWLOC_top_srcdir)/include/hwloc/linux-libnuma.h \
        $(HWLOC_top_srcdir)/include/hwloc/cuda.h \
        $(HWLOC_top_srcdir)/include/hwloc/cudart.h \
-       $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h
+       $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h \
+       $(HWLOC_top_srcdir)/include/hwloc/myriexpress.h
 
 #
 # Create the images that we need for the PDF output and the HTML
@@ -344,6 +345,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_linux_parse_cpumap_file.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_mx_board_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_mx_endpoint_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
@@ -409,6 +412,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_nodemask.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_openfabrics.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_myriexpress.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_objects.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_traversal.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_types.3
