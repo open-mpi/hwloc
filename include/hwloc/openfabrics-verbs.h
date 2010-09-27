@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwloc_openfabrics OpenFabrics-Specific Functions
+/** \defgroup hwlocality_openfabrics OpenFabrics-Specific Functions
  * @{
  */
 

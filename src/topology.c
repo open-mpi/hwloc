@@ -289,11 +289,13 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
  */
 void
 hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
-				     unsigned nbobjs,
-				     struct hwloc_obj **objs,
-				     unsigned *_distances)
+				      unsigned nbobjs,
+				      struct hwloc_obj **objs,
+				      unsigned *_distances,
+				      unsigned *_distance_indexes)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
+  unsigned (*distance_indexes)[nbobjs] __hwloc_attribute_unused = (unsigned (*)[nbobjs])_distance_indexes;
   unsigned i,j;
 
   if (getenv("HWLOC_IGNORE_DISTANCES"))
@@ -303,11 +305,11 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
   hwloc_debug("%s", "node distance matrix:\n");
   hwloc_debug("%s", "   ");
   for(j=0; j<nbobjs; j++)
-    hwloc_debug(" %3u", j);
+    hwloc_debug(" %3u", (*distance_indexes)[j]);
   hwloc_debug("%s", "\n");
 
   for(i=0; i<nbobjs; i++) {
-    hwloc_debug("%3u", i);
+    hwloc_debug("%3u", (*distance_indexes)[i]);
     for(j=0; j<nbobjs; j++)
       hwloc_debug(" %3u", (*distances)[i][j]);
     hwloc_debug("%s", "\n");
@@ -1512,6 +1514,9 @@ hwloc_discover(struct hwloc_topology *topology)
 #    endif
   }
 
+  /*
+   * Now that backends have detected objects, sort them and establish pointers.
+   */
   print_objects(topology, 0, topology->levels[0][0]);
 
   /* First tweak a bit to clean the topology.  */
@@ -1683,6 +1688,12 @@ hwloc_discover(struct hwloc_topology *topology)
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");
   propagate_total_memory(topology->levels[0][0]);
+
+  /*
+   * Now set binding hooks.
+   * If the represented system is actually not this system, use dummy binding
+   * hooks.
+   */
 
   if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
     topology->is_thissystem = 1;

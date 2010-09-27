@@ -58,6 +58,7 @@ Notes to developers:
 
   sed -e 's/$/'$'\015'/ < README > $prefix/README.txt
   sed -e 's/$/'$'\015'/ < NEWS > $prefix/NEWS.txt
+  sed -e 's/$/'$'\015'/ < COPYING > $prefix/COPYING.txt
 
 - make maintainer-clean can be used to properly remove the generated
   documentations.

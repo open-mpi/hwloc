@@ -16,7 +16,8 @@
 #include <errno.h>
 
 /* TODO: HWLOC_GNU_SYS, HWLOC_IRIX_SYS,
- * IRIX: see _DSM_MUSTRUN
+ *
+ * IRIX: see MP_MUSTRUN / _DSM_MUSTRUN, pthread_setrunon_np, /hw, procss_cpulink, numa_create
  *
  * We could use glibc's sched_setaffinity generically when it is available
  *

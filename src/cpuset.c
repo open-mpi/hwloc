@@ -925,8 +925,8 @@ int hwloc_cpuset_compare_first(const struct hwloc_cpuset_s * set1, const struct 
 		unsigned long w1 = HWLOC_CPUSUBSET_READULONG(set1, i);
 		unsigned long w2 = HWLOC_CPUSUBSET_READULONG(set2, i);
 		if (w1 || w2) {
-			int _ffs1 = hwloc_ffsl(set1->ulongs[i]);
-			int _ffs2 = hwloc_ffsl(set2->ulongs[i]);
+			int _ffs1 = hwloc_ffsl(w1);
+			int _ffs2 = hwloc_ffsl(w2);
 			/* if both have a bit set, compare for real */
 			if (_ffs1 && _ffs2)
 				return _ffs1-_ffs2;

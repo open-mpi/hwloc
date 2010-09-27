@@ -22,6 +22,9 @@
 #  include <sys/lgrp_user.h>
 #endif
 
+/* TODO: use psets? (only for root)
+ */
+
 static int
 hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
 {
@@ -55,21 +58,36 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     if (depth >= 0) {
       int n = hwloc_get_nbobjs_by_depth(topology, depth);
       int i;
+      int ok;
+      hwloc_cpuset_t target = hwloc_cpuset_alloc();
 
       for (i = 0; i < n; i++) {
 	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
-
-	if (hwloc_cpuset_isequal(obj->cpuset, hwloc_set)) {
-	  lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
-	} else {
-	  if (policy & HWLOC_CPUBIND_STRICT)
-	    lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
-	  else
-	    lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_WEAK);
-	}
+        if (hwloc_cpuset_isincluded(obj->cpuset, hwloc_set))
+          hwloc_cpuset_or(target, target, obj->cpuset);
       }
 
-      return 0;
+      ok = hwloc_cpuset_isequal(target, hwloc_set);
+      hwloc_cpuset_free(target);
+
+      if (ok) {
+        /* Ok, managed to achieve hwloc_set by just combining NUMA nodes */
+
+        for (i = 0; i < n; i++) {
+          hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+
+          if (hwloc_cpuset_isincluded(obj->cpuset, hwloc_set)) {
+            lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
+          } else {
+            if (policy & HWLOC_CPUBIND_STRICT)
+              lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
+            else
+              lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_WEAK);
+          }
+        }
+
+        return 0;
+      }
     }
   }
 #endif /* HAVE_LIBLGRP */
@@ -279,11 +297,14 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 #ifdef HAVE_LGRP_LATENCY_COOKIE
     {
       unsigned distances[curlgrp][curlgrp];
+      unsigned indexes[curlgrp];
       unsigned i, j;
-      for (i = 0; i < curlgrp; i++)
+      for (i = 0; i < curlgrp; i++) {
+        indexes[i] = glob_lgrps[i]->os_index;
 	for (j = 0; j < curlgrp; j++)
 	  distances[i][j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
-      hwloc_setup_misc_level_from_distances(topology, curlgrp, glob_lgrps, (unsigned*) distances);
+      }
+      hwloc_setup_misc_level_from_distances(topology, curlgrp, glob_lgrps, (unsigned*) distances, (unsigned*) indexes);
     }
 #endif /* HAVE_LGRP_LATENCY_COOKIE */
   }

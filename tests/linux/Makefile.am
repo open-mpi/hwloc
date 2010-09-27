@@ -30,7 +30,7 @@ sysfs_tarballs = \
 		16em64t-4s2c2t.xml.tar.gz \
 		16em64t-2m4c2t.tar.gz \
 		16ia64-8n2s.tar.gz \
-		48amd64-4d2n6c.tar.gz \
+		48amd64-4d2n6c-sparse.tar.gz \
 		64fake-4n2s2ca2c2t.tar.gz \
 		96em64t-4n4d3ca2co.tar.gz \
 		128ia64-17n4s2c.tar.gz \
@@ -65,7 +65,7 @@ sysfs_outputs = \
 		16em64t-4s2c2t.xml.tar.gz.output 16em64t-4s2c2t.xml.tar.gz.options \
 		16em64t-2m4c2t.tar.gz.output \
 		16ia64-8n2s.tar.gz.output \
-		48amd64-4d2n6c.tar.gz.output \
+		48amd64-4d2n6c-sparse.tar.gz.output \
 		64fake-4n2s2ca2c2t.tar.gz.output \
 		96em64t-4n4d3ca2co.tar.gz.output \
 		128ia64-17n4s2c.tar.gz.output \

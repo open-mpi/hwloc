@@ -3,7 +3,7 @@
  * See COPYING in top-level directory.
  */
 
-/* TODO: psets?
+/* TODO: psets? (Only for root)
  * since 11i 1.6:
    _SC_PSET_SUPPORT
    pset_create/destroy/assign/setattr
