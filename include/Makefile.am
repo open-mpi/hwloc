@@ -11,6 +11,7 @@ include_hwloc_HEADERS = \
         hwloc/bitmap.h \
         hwloc/cpuset.h \
         hwloc/helper.h \
+        hwloc/myriexpress.h \
         hwloc/openfabrics-verbs.h \
         hwloc/cuda.h \
         hwloc/cudart.h \

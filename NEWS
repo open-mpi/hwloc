@@ -25,6 +25,7 @@ Version 1.1.0
 * Add linesize cache attribute.
 * Add NVIDIA CUDA helpers in cuda.h and cudart.h to ease interoperability
   with CUDA Runtime and Driver APIs.
+* Add Myrinet Express helper in myriexpress.h to ease interoperability.
 * Improve the distance-based grouping code to better support irregular
   distance matrices.
 * Add hwloc-ps to list process' bindings.
