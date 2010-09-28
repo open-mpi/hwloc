@@ -324,6 +324,8 @@ int main() {
         AC_CHECK_PROGS(XMLLINT, [xmllint])
     fi
 
+    AC_CHECK_PROGS(BUNZIPP, bunzip2, false)
+
     _HWLOC_CHECK_DIFF_U
 
     # Only generate these files if we're making the tests
