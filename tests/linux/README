@@ -21,3 +21,15 @@ A new topology may be added by:
 When adding a XML-based output, make sure that the filename of the
 tarball ends with .xml.tar.gz (so that test-topology may skip it
 if XML support is disabled).
+
+If a `xyz.options' file is found, it will override the `lstopo' options
+(`-v -' by default) for generating the output `xyz.output'.
+
+If the output and tarball names do not match, it is possible to specify
+the actual tarball name in a `xyz.source' file.
+If some files should be excluded when extracting the tarball, they may
+be listed in a `xyz.exclude' file. For instance, to exclude `/sys/*/foo'
+from the saved topology, you should add `*/sys/foo' to `xyz.exclude'.
+These features are especially useful when the same tarball should be
+used for different tests with different configurations and thus different
+expected outputs, without having to save multiple copies of the tarball.
