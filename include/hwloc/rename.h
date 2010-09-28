@@ -113,6 +113,7 @@ extern "C" {
 #define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
 #define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
+#define hwloc_obj_get_info_by_name HWLOC_NAME(obj_get_info_by_name)
 
 #define HWLOC_CPUBIND_PROCESS HWLOC_NAME_CAPS(CPUBIND_PROCESS)
 #define HWLOC_CPUBIND_THREAD HWLOC_NAME_CAPS(CPUBIND_THREAD)
@@ -188,11 +189,9 @@ extern "C" {
 #define hwloc_get_next_child HWLOC_NAME(get_next_child)
 #define hwloc_get_common_ancestor_obj HWLOC_NAME(get_common_ancestor_obj)
 #define hwloc_obj_is_in_subtree HWLOC_NAME(obj_is_in_subtree)
-
 #define hwloc_get_first_largest_obj_inside_cpuset HWLOC_NAME(get_first_largest_obj_inside_cpuset)
 #define hwloc_get_largest_objs_inside_cpuset HWLOC_NAME(get_largest_objs_inside_cpuset)
 #define hwloc_get_next_obj_inside_cpuset_by_depth HWLOC_NAME(get_next_obj_inside_cpuset_by_depth)
-
 #define hwloc_get_next_obj_inside_cpuset_by_type HWLOC_NAME(get_next_obj_inside_cpuset_by_type)
 #define hwloc_get_obj_inside_cpuset_by_depth HWLOC_NAME(get_obj_inside_cpuset_by_depth)
 #define hwloc_get_obj_inside_cpuset_by_type HWLOC_NAME(get_obj_inside_cpuset_by_type)
@@ -237,6 +236,19 @@ extern "C" {
 
 #define hwloc_ibv_get_device_cpuset HWLOC_NAME(ibv_get_device_cpuset)
 
+/* myriexpress.h */
+
+#define hwloc_mx_board_get_device_cpuset HWLOC_NAME(mx_board_get_device_cpuset)
+#define hwloc_mx_endpoint_get_device_cpuset HWLOC_NAME(mx_endpoint_get_device_cpuset)
+
+/* cuda.h */
+
+#define hwloc_cuda_get_device_cpuset HWLOC_NAME(cuda_get_device_cpuset)
+
+/* cudart.h */
+
+#define hwloc_cudart_get_device_cpuset HWLOC_NAME(cudart_get_device_cpuset)
+
 /* private/misc.h */
 
 #define hwloc_snprintf HWLOC_NAME(snprintf)
@@ -257,13 +269,12 @@ extern "C" {
 #define HWLOC_IGNORE_TYPE_ALWAYS HWLOC_NAME_CAPS(IGNORE_TYPE_ALWAYS)
 
 #define hwloc_backend_e HWLOC_NAME(backend_e)
+#define hwloc_backend_t HWLOC_NAME(backend_t)
 
 #define HWLOC_BACKEND_NONE HWLOC_NAME_CAPS(BACKEND_NONE)
 #define HWLOC_BACKEND_SYNTHETIC HWLOC_NAME_CAPS(BACKEND_SYNTHETIC)
 #define HWLOC_BACKEND_SYSFS HWLOC_NAME_CAPS(BACKEND_SYSFS)
 #define HWLOC_BACKEND_XML HWLOC_NAME_CAPS(BACKEND_XML)
-
-#define hwloc_backend_t HWLOC_NAME(backend_t)
 
 #define hwloc_backend_params_u HWLOC_NAME(backend_params_u)
 #define hwloc_backend_params_sysfs_s HWLOC_NAME(backend_params_sysfs_s)
@@ -315,6 +326,9 @@ extern "C" {
 
 #define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
+#define hwloc_add_object_info HWLOC_NAME(add_object_info)
+#define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
+#define hwloc_free_object HWLOC_NAME(free_object)
 #define hwloc_cpuset_printf_value HWLOC_NAME(cpuset_printf_value)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_setup_level HWLOC_NAME(setup_level)
