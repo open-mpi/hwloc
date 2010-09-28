@@ -1,6 +1,7 @@
 /*
  * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2010 IBM
  * See COPYING in top-level directory.
  */
 
@@ -94,6 +95,9 @@
        _syscall3(int, sched_getaffinity, pid_t, pid, unsigned int, lg, void *, mask)
 #    endif
 #endif
+
+/* Added for ntohl() */
+#include <arpa/inet.h>
 
 #ifdef HAVE_OPENAT
 /* Use our own filesystem functions if we have openat */
@@ -1423,6 +1427,272 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
   *found = nbnodes;
 }
 
+/* Reads the entire file and returns bytes read if bytes_read != NULL
+ * Returned pointer can be freed by using free().  */
+static void * 
+hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
+{
+  char fname[strlen(p) + 1 + strlen(p1) + 1];
+  char *ret = NULL;
+  struct stat fs;
+
+  snprintf(fname, sizeof(fname), "%s/%s", p, p1);
+
+  int file = hwloc_open(fname, root_fd);
+  if (-1 == file)
+    return NULL;
+  if (fstat(file, &fs)) {
+    close(file);
+    return NULL;
+  }
+
+  ret = (char *) malloc(fs.st_size);
+  if (NULL != ret) {
+    ssize_t cb = read(file, ret, fs.st_size);
+    if (cb == -1) {
+      free(ret);
+      ret = NULL;
+    } else {
+      if (NULL != bytes_read)
+        *bytes_read = cb;
+    }
+  }
+  close(file);
+  return ret;
+}
+
+/* Reads the entire file and returns it as a 0-terminated string
+ * Returned pointer can be freed by using free().  */
+static char *
+hwloc_read_str(const char *p, const char *p1, int root_fd)
+{
+  size_t cb = 0;
+  char *ret = hwloc_read_raw(p, p1, &cb, root_fd);
+  if ((NULL != ret) && (0 < cb) && (0 != ret[cb-1])) {
+    ret = realloc(ret, cb + 1);
+    ret[cb] = 0;
+  }
+  return ret;
+}
+
+/* Reads first 32bit bigendian value */
+static size_t 
+hwloc_read_unit32be(const char *p, const char *p1, uint32_t *buf, int root_fd)
+{
+  size_t cb = 0;
+  uint32_t *tmp = hwloc_read_raw(p, p1, &cb, root_fd);
+  if (sizeof(*buf) != cb) {
+    errno = EINVAL;
+    return -1;
+  }
+  *buf = htonl(*tmp);
+  free(tmp);
+  return sizeof(*buf);
+}
+
+typedef struct {
+  unsigned int n, allocated;
+  struct {
+    hwloc_cpuset_t cpuset;
+    uint32_t ibm_phandle;
+    uint32_t l2_cache;
+    char *name;
+  } *p;
+} device_tree_cpus_t;
+
+static void
+add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_cpuset_t cpuset,
+    uint32_t l2_cache, uint32_t ibm_phandle, const char *name)
+{
+  if (cpus->n == cpus->allocated) {
+    if (!cpus->allocated)
+      cpus->allocated = 64;
+    else
+      cpus->allocated *= 2;
+    cpus->p = realloc(cpus->p, cpus->allocated * sizeof(cpus->p[0]));
+  }
+  cpus->p[cpus->n].ibm_phandle = ibm_phandle;
+  cpus->p[cpus->n].cpuset = (NULL == cpuset)?NULL:hwloc_cpuset_dup(cpuset);
+  cpus->p[cpus->n].l2_cache = l2_cache;
+  cpus->p[cpus->n].name = strdup(name);
+  ++cpus->n;
+}
+
+/* Walks over the cache list in order to detect nested caches and CPU mask for each */
+static int
+look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
+    uint32_t ibm_phandle, unsigned int *level, hwloc_cpuset_t cpuset)
+{
+  int ret = -1;
+  if ((NULL == level) || (NULL == cpuset))
+    return ret;
+  for (unsigned int i = 0; i < cpus->n; ++i) {
+    if (ibm_phandle != cpus->p[i].l2_cache)
+      continue;
+    if (NULL != cpus->p[i].cpuset) {
+      hwloc_cpuset_or(cpuset, cpuset, cpus->p[i].cpuset);
+      ret = 0;
+    } else {
+      ++(*level);
+      if (0 == look_powerpc_device_tree_discover_cache(cpus,
+            cpus->p[i].ibm_phandle, level, cpuset))
+        ret = 0;
+    }
+  }
+  return ret;
+}
+
+static void
+try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
+  const char *cpu, unsigned int level, hwloc_cpuset_t cpuset)
+{
+  /* Ignore Instruction caches */
+  /* d-cache-block-size - ignore */
+  /* d-cache-line-size - to read, in bytes */
+  /* d-cache-sets - ignore */
+  /* d-cache-size - to read, in bytes */ 
+  /* d-tlb-sets - ignore */
+  /* d-tlb-size - ignore, always 0 on power6 */
+  /* i-cache-* and i-tlb-* represent instruction cache, ignore */
+  uint32_t d_cache_line_size = 0, d_cache_size = 0;
+
+  hwloc_read_unit32be(cpu, "d-cache-line-size", &d_cache_line_size,
+      topology->backend_params.sysfs.root_fd);
+  hwloc_read_unit32be(cpu, "d-cache-size", &d_cache_size,
+      topology->backend_params.sysfs.root_fd);
+
+  if ( (0 == d_cache_line_size) && (0 == d_cache_size) )
+    return;
+
+  struct hwloc_obj *c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+  c->attr->cache.depth = level;
+  c->attr->cache.linesize = d_cache_line_size;
+  c->attr->cache.size = d_cache_size;
+  c->cpuset = hwloc_cpuset_dup(cpuset);
+  hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n", level, c->cpuset);
+  hwloc_insert_object_by_cpuset(topology, c);
+}
+
+/* 
+ * Discovers L1/L2/L3 cache information on IBM PowerPC systems for old kernels (RHEL5.*)
+ * which provide NUMA nodes information without any details
+ */
+static void
+look_powerpc_device_tree(struct hwloc_topology *topology)
+{
+  device_tree_cpus_t cpus = { .n = 0, .p = NULL, .allocated = 0 };
+  const char ofroot[] = "/proc/device-tree/cpus";
+
+  int root_fd = topology->backend_params.sysfs.root_fd;
+  DIR *dt = hwloc_opendir(ofroot, root_fd);
+  if (NULL == dt)
+    return;
+
+  struct dirent *dirent;
+  while (NULL != (dirent = readdir(dt))) {
+
+    if (('.' == dirent->d_name[0]) || (0 == (dirent->d_type & DT_DIR)))
+      continue;
+
+    char cpu[sizeof(ofroot) + 1 + strlen(dirent->d_name) + 1];
+    snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, dirent->d_name);
+    
+    char *device_type = hwloc_read_str(cpu, "device_type", root_fd);
+    if (NULL == device_type)
+      continue;
+
+    uint32_t reg = -1, l2_cache = -1, ibm_phandle = -1;
+    hwloc_read_unit32be(cpu, "reg", &reg, root_fd);
+    hwloc_read_unit32be(cpu, "l2-cache", &l2_cache, root_fd);
+    hwloc_read_unit32be(cpu, "ibm,phandle", &ibm_phandle, root_fd);
+
+    if (0 == strcmp(device_type, "cache")) {
+      add_device_tree_cpus_node(&cpus, NULL, l2_cache, ibm_phandle, dirent->d_name); 
+    }
+    else if (0 == strcmp(device_type, "cpu")) {
+      /* Found CPU */
+      hwloc_cpuset_t cpuset = NULL;
+      size_t cb = 0;
+      uint32_t *threads = hwloc_read_raw(cpu, "ibm,ppc-interrupt-server#s", &cb, root_fd);
+      uint32_t nthreads = cb / sizeof(threads[0]);
+
+      if (NULL != threads) {
+        cpuset = hwloc_cpuset_alloc();
+        for (unsigned int i = 0; i < nthreads; ++i) {
+          hwloc_cpuset_set(cpuset, ntohl(threads[i]));
+        }
+        free(threads);
+      } else if ((unsigned int)-1 != reg) {
+        cpuset = hwloc_cpuset_alloc();
+        hwloc_cpuset_set(cpuset, reg);
+      }
+
+      if (NULL == cpuset) {
+        hwloc_debug("%s has no \"reg\" property, skipping\n", cpu);
+      } else {
+        add_device_tree_cpus_node(&cpus, cpuset, l2_cache, ibm_phandle, dirent->d_name); 
+
+        /* Add core */
+        struct hwloc_obj *core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
+        core->cpuset = hwloc_cpuset_dup(cpuset);
+        hwloc_insert_object_by_cpuset(topology, core);
+
+        /* Add L1 cache */
+        try_add_cache_from_device_tree_cpu(topology, cpu, 1, cpuset);
+
+        hwloc_cpuset_free(cpuset);
+      }
+      free(device_type);
+    }
+  }
+  closedir(dt);
+
+  /* No cores and L2 cache were found, exiting */
+  if (0 == cpus.n) {
+    hwloc_debug("No cores and L2 cache were found in %s, exiting\n", ofroot);
+    return;
+  }
+
+#ifdef HWLOC_DEBUG
+  for (unsigned int i = 0; i < cpus.n; ++i) {
+    hwloc_debug("%i: %s  ibm,phandle=%08X l2_cache=%08X ",
+      i, cpus.p[i].name, cpus.p[i].ibm_phandle, cpus.p[i].l2_cache);
+    if (NULL == cpus.p[i].cpuset) {
+      hwloc_debug("%s\n", "no cpuset");
+    } else {
+      hwloc_debug_cpuset("cpuset %s\n", cpus.p[i].cpuset);
+    }
+  }
+#endif
+
+  /* Scan L2/L3/... caches */
+  for (unsigned int i = 0; i < cpus.n; ++i) {
+    /* Skip real CPUs */
+    if (NULL != cpus.p[i].cpuset)
+      continue;
+
+    /* Calculate cache level and CPU mask */
+    unsigned int level = 2;
+    hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
+    if (0 == look_powerpc_device_tree_discover_cache(&cpus,
+          cpus.p[i].ibm_phandle, &level, cpuset)) {
+
+      char cpu[sizeof(ofroot) + 1 + strlen(cpus.p[i].name) + 1];
+      snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, cpus.p[i].name);
+
+      try_add_cache_from_device_tree_cpu(topology, cpu, level, cpuset);
+    }
+    hwloc_cpuset_free(cpuset);
+  }
+
+  /* Do cleanup */
+  for (unsigned int i = 0; i < cpus.n; ++i) {
+    hwloc_cpuset_free(cpus.p[i].cpuset);
+    free(cpus.p[i].name);
+  }
+  free(cpus.p);
+}
+
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
 look_sysfscpu(struct hwloc_topology *topology, const char *path)
@@ -1485,6 +1755,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   hwloc_debug_1arg_cpuset("found %d cpu topologies, cpuset %s\n",
 	     hwloc_cpuset_weight(cpuset), cpuset);
 
+  unsigned caches_added = 0;
   hwloc_cpuset_foreach_begin(i, cpuset)
     {
       struct hwloc_obj *socket, *core, *thread;
@@ -1612,12 +1883,16 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
             hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n",
                        depth, cacheset);
             hwloc_insert_object_by_cpuset(topology, cache);
+            ++caches_added;
           } else
             hwloc_cpuset_free(cacheset);
         }
       }
     }
   hwloc_cpuset_foreach_end();
+
+  if (0 == caches_added)
+    look_powerpc_device_tree(topology);
 
   hwloc_cpuset_free(cpuset);
 }
@@ -1774,6 +2049,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug("%u sockets%s\n", numsockets, missingsocket ? ", but some missing socket" : "");
   if (!missingsocket && numsockets>0)
     hwloc_setup_level(procid_max, numsockets, osphysids, proc_physids, topology, HWLOC_OBJ_SOCKET);
+
+  look_powerpc_device_tree(topology);
 
   hwloc_debug("%u cores%s\n", numcores, missingcore ? ", but some missing core" : "");
   if (!missingcore && numcores>0)

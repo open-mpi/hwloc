@@ -11,6 +11,9 @@ sysfs_tarballs = \
 		2ps3-2t.tar.gz \
 		4ia64-4s.tar.gz \
 		4ppc-4c.tar.gz \
+		256ppc-8n8s4t.tar.gz \
+		256ppc-8n8s4t-nocache.tar.gz \
+		256ppc-8n8s4t-nosys.tar.gz \
 		8amd64-4n2c.tar.gz  \
 		8em64t-4c2t.tar.gz \
 		8em64t-2s2ca2c.tar.gz \
@@ -46,6 +49,9 @@ sysfs_outputs = \
 		2ps3-2t.tar.gz.output \
 		4ia64-4s.tar.gz.output \
 		4ppc-4c.tar.gz.output \
+		256ppc-8n8s4t.tar.gz.output \
+		256ppc-8n8s4t-nocache.tar.gz.output \
+		256ppc-8n8s4t-nosys.tar.gz.output \
 		8amd64-4n2c.tar.gz.output  \
 		8em64t-4c2t.tar.gz.output \
 		8em64t-2s2ca2c.tar.gz.output \

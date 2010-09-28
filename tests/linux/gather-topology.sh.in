@@ -36,6 +36,7 @@ cat << EOF | while read path ; do savepath "$destdir/$name" "$path" ; done
 /proc/cpuinfo
 /proc/meminfo
 /proc/stat
+/proc/device-tree/cpus
 EOF
 
 # Create the archive and keep the tree in /tmp for testing
