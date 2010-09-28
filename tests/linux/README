@@ -1,7 +1,7 @@
 -*- text -*-
 
 This directory contains tarballs of Linux sysfs hierarchies collected on
-various systems.  Each tarball `xyz.tar.gz' comes with the corresponding
+various systems.  Each tarball `xyz.tar.bz2' comes with the corresponding
 `xyz.output', which gives the expected output of "lstopo -v -" for that
 system.
 
@@ -19,7 +19,7 @@ A new topology may be added by:
   properly handled in "make check" and "make dist".
 
 When adding a XML-based output, make sure that the filename of the
-tarball ends with .xml.tar.gz (so that test-topology may skip it
+tarball ends with .xml.tar.bz2 (so that test-topology may skip it
 if XML support is disabled).
 
 If a `xyz.options' file is found, it will override the `lstopo' options

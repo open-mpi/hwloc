@@ -43,43 +43,43 @@ sysfs_outputs = \
 		2s390-2c.output \
 		1alpha.output
 
-# Each output `xyz.output' must have a corresponding tarball `xyz.tar.gz'
+# Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # or a corresponding `xyz.source' specifying which tarball to use
 sysfs_tarballs = \
-		2amd64-2n.tar.gz \
-		2ps3-2t.tar.gz \
-		4ia64-4s.tar.gz \
-		4ppc-4c.tar.gz \
-		256ppc-8n8s4t.tar.gz \
+		2amd64-2n.tar.bz2 \
+		2ps3-2t.tar.bz2 \
+		4ia64-4s.tar.bz2 \
+		4ppc-4c.tar.bz2 \
+		256ppc-8n8s4t.tar.bz2 \
 		256ppc-8n8s4t-nocache.source \
 		256ppc-8n8s4t-nosys.source \
-		8amd64-4n2c.tar.gz  \
-		8em64t-4c2t.tar.gz \
-		8em64t-2s2ca2c.tar.gz \
-		8em64t-2s4c-heterogeneous.tar.gz \
-		8ia64-2n2s2d.tar.gz \
-		8ia64-4s2c.tar.gz \
-		16amd64-8n2c.tar.gz \
-		16amd64-8n2c-cpusets.tar.gz \
+		8amd64-4n2c.tar.bz2  \
+		8em64t-4c2t.tar.bz2 \
+		8em64t-2s2ca2c.tar.bz2 \
+		8em64t-2s4c-heterogeneous.tar.bz2 \
+		8ia64-2n2s2d.tar.bz2 \
+		8ia64-4s2c.tar.bz2 \
+		16amd64-8n2c.tar.bz2 \
+		16amd64-8n2c-cpusets.tar.bz2 \
 		16amd64-8n2c-cpusets.xml.source \
 		16amd64-8n2c-cpusets_noadmin.source \
-		16em64t-4s2c2t.tar.gz \
-		16em64t-4s2c2t-offlines.tar.gz \
+		16em64t-4s2c2t.tar.bz2 \
+		16em64t-4s2c2t-offlines.tar.bz2 \
 		16em64t-4s2c2t-offlines.xml.source \
 		16em64t-4s2c2t-offlines_noadmin.source \
-		16em64t-2m4c2t.tar.gz \
+		16em64t-2m4c2t.tar.bz2 \
 		16em64t-4s2c2t_merge.source \
 		16em64t-4s2c2t_ncaches.source \
 		16em64t-4s2c2t.xml.source \
-		16ia64-8n2s.tar.gz \
-		48amd64-4d2n6c-sparse.tar.gz \
-		64fake-4n2s2ca2c2t.tar.gz \
-		96em64t-4n4d3ca2co.tar.gz \
-		128ia64-17n4s2c.tar.gz \
-		256ia64-64n2s2c.tar.gz \
-		4qs22-2s2t.tar.gz \
-		2s390-2c.tar.gz \
-		1alpha.tar.gz
+		16ia64-8n2s.tar.bz2 \
+		48amd64-4d2n6c-sparse.tar.bz2 \
+		64fake-4n2s2ca2c2t.tar.bz2 \
+		96em64t-4n4d3ca2co.tar.bz2 \
+		128ia64-17n4s2c.tar.bz2 \
+		256ia64-64n2s2c.tar.bz2 \
+		4qs22-2s2t.tar.bz2 \
+		2s390-2c.tar.bz2 \
+		1alpha.tar.bz2
 
 # Each `xyz.output' may have a corresponding exclude `xyz.exclude'
 sysfs_excludes = \

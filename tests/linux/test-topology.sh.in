@@ -96,7 +96,7 @@ actual_options="$topology".options
 if [ -f "$topology".source ] ; then
     actual_source="$HWLOC_top_srcdir"/tests/linux/`cat "$topology".source`
 else
-    actual_source="$topology".tar.gz
+    actual_source="$topology".tar.bz2
 fi
 
 actual_exclude="$HWLOC_top_srcdir/tests/linux/$topology".exclude
@@ -106,7 +106,7 @@ result=1
 
 dir="`mktemp -d`"
 
-if ! ( gunzip -c "$actual_source" | ( cd "$dir" && tar xf - "$tar_options" ) )
+if ! ( bunzip2 -c "$actual_source" | ( cd "$dir" && tar xf - "$tar_options" ) )
 then
     error "failed to extract topology \`$topology'"
 else
