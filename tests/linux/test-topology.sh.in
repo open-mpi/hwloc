@@ -93,8 +93,8 @@ then
     error "failed to extract topology \`$topology'"
 else
     actual_dir="`echo "$dir"/*`"
-    actual_output="$topology".output
-    actual_options="$topology".options
+    actual_output="${topology%.tar.gz}".output
+    actual_options="${topology%.tar.gz}".options
 
     if test_eligible "$actual_dir" "$actual_output"
     then
