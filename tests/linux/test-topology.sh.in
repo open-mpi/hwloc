@@ -10,7 +10,7 @@
 # Check the conformance of `lstopo' for all the Linux sysfs
 # hierarchies available here.  Return true on success.
 
-
+HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 lstopo="$HWLOC_top_builddir/utils/lstopo"
 
@@ -92,11 +92,19 @@ then
 fi
 actual_options="$topology".options
 
+# if there's a .source file, use the tarball name it contains instead of $topology
+if [ -f "$topology".source ] ; then
+    actual_source="$HWLOC_top_srcdir"/tests/linux/`cat "$topology".source`
+else
+    actual_source="$topology".tar.gz
+fi
+
+
 result=1
 
 dir="`mktemp -d`"
 
-if ! ( gunzip -c "${topology}.tar.gz" | ( cd "$dir" && tar xf - ) )
+if ! ( gunzip -c "$actual_source" | ( cd "$dir" && tar xf - ) )
 then
     error "failed to extract topology \`$topology'"
 else

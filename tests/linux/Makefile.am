@@ -44,6 +44,7 @@ sysfs_outputs = \
 		1alpha.output
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.gz'
+# or a corresponding `xyz.source' specifying which tarball to use
 sysfs_tarballs = \
 		2amd64-2n.tar.gz \
 		2ps3-2t.tar.gz \
@@ -60,16 +61,16 @@ sysfs_tarballs = \
 		8ia64-4s2c.tar.gz \
 		16amd64-8n2c.tar.gz \
 		16amd64-8n2c-cpusets.tar.gz \
-		16amd64-8n2c-cpusets.xml.tar.gz \
-		16amd64-8n2c-cpusets_noadmin.tar.gz \
+		16amd64-8n2c-cpusets.xml.source \
+		16amd64-8n2c-cpusets_noadmin.source \
 		16em64t-4s2c2t.tar.gz \
 		16em64t-4s2c2t-offlines.tar.gz \
-		16em64t-4s2c2t-offlines.xml.tar.gz \
-		16em64t-4s2c2t-offlines_noadmin.tar.gz \
-		16em64t-4s2c2t_ncaches.tar.gz \
-		16em64t-4s2c2t_merge.tar.gz \
-		16em64t-4s2c2t.xml.tar.gz \
+		16em64t-4s2c2t-offlines.xml.source \
+		16em64t-4s2c2t-offlines_noadmin.source \
 		16em64t-2m4c2t.tar.gz \
+		16em64t-4s2c2t_merge.source \
+		16em64t-4s2c2t_ncaches.source \
+		16em64t-4s2c2t.xml.source \
 		16ia64-8n2s.tar.gz \
 		48amd64-4d2n6c-sparse.tar.gz \
 		64fake-4n2s2ca2c2t.tar.gz \
