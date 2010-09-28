@@ -99,12 +99,14 @@ else
     actual_source="$topology".tar.gz
 fi
 
+actual_exclude="$HWLOC_top_srcdir/tests/linux/$topology".exclude
+[ -f "$actual_exclude" ] && tar_options="--exclude-from=$actual_exclude"
 
 result=1
 
 dir="`mktemp -d`"
 
-if ! ( gunzip -c "$actual_source" | ( cd "$dir" && tar xf - ) )
+if ! ( gunzip -c "$actual_source" | ( cd "$dir" && tar xf - "$tar_options" ) )
 then
     error "failed to extract topology \`$topology'"
 else

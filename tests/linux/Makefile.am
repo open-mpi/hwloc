@@ -51,8 +51,8 @@ sysfs_tarballs = \
 		4ia64-4s.tar.gz \
 		4ppc-4c.tar.gz \
 		256ppc-8n8s4t.tar.gz \
-		256ppc-8n8s4t-nocache.tar.gz \
-		256ppc-8n8s4t-nosys.tar.gz \
+		256ppc-8n8s4t-nocache.source \
+		256ppc-8n8s4t-nosys.source \
 		8amd64-4n2c.tar.gz  \
 		8em64t-4c2t.tar.gz \
 		8em64t-2s2ca2c.tar.gz \
@@ -81,6 +81,11 @@ sysfs_tarballs = \
 		2s390-2c.tar.gz \
 		1alpha.tar.gz
 
+# Each `xyz.output' may have a corresponding exclude `xyz.exclude'
+sysfs_excludes = \
+		256ppc-8n8s4t-nocache.exclude \
+		256ppc-8n8s4t-nosys.exclude
+
 # Each output `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
 sysfs_options = \
@@ -100,6 +105,6 @@ endif HWLOC_HAVE_OPENAT
 endif HWLOC_HAVE_LINUX
 endif HWLOC_BUILD_TESTS
 
-EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_options)
+EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options)
 
 TESTS_ENVIRONMENT = $(builddir)/test-topology.sh
