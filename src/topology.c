@@ -436,7 +436,7 @@ hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char *value)
 
 /* Free an object and all its content.  */
 void
-free_object(hwloc_obj_t obj)
+hwloc_free_object(hwloc_obj_t obj)
 {
   unsigned i;
   switch (obj->type) {
@@ -1148,7 +1148,7 @@ drop_object(hwloc_obj_t *pparent)
   } else
     *pparent = parent->next_sibling;
   /* Remove ignored object */
-  free_object(parent);
+  hwloc_free_object(parent);
 }
 
 /* Remove all ignored objects.  */
@@ -1176,7 +1176,7 @@ do_free_object(hwloc_obj_t *pobj)
     do_free_object(pchild);
 
   *pobj = obj->next_sibling;
-  free_object(obj);
+  hwloc_free_object(obj);
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
@@ -1223,13 +1223,13 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
     print_object(topology, 0, parent);
     *pparent = child;
     child->next_sibling = parent->next_sibling;
-    free_object(parent);
+    hwloc_free_object(parent);
   } else if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Child can be ignored in favor of the parent.  */
     hwloc_debug("%s", "\nIgnoring child ");
     print_object(topology, 0, child);
     parent->first_child = child->first_child;
-    free_object(child);
+    hwloc_free_object(child);
   }
 }
 
@@ -1929,7 +1929,7 @@ hwloc_topology_clear_tree (struct hwloc_topology *topology, struct hwloc_obj *ro
   unsigned i;
   for(i=0; i<root->arity; i++)
     hwloc_topology_clear_tree (topology, root->children[i]);
-  free_object (root);
+  hwloc_free_object (root);
 }
 
 static void
