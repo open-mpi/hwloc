@@ -37,6 +37,7 @@ Version 1.1.0
 * Add --among in hwloc-distrib.
 * Add taskset-specific functions and command-line tools options to
   manipulate CPU set strings in the format of the taskset program.
+* Add support for device-tree to get cache information.
 
 
 Version 1.0.2

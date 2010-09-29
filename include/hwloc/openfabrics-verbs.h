@@ -43,7 +43,7 @@ extern "C" {
  */
 static __hwloc_inline int
 hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
-			    struct ibv_device *ibdev, hwloc_cpuset_t set)
+			    struct ibv_device *ibdev, hwloc_bitmap_t set)
 {
 #ifdef HWLOC_LINUX_SYS
   /* If we're on Linux, use the verbs-provided sysfs mechanism to
@@ -63,7 +63,7 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
   fclose(sysfile);
 #else
   /* Non-Linux systems simply get a full cpuset */
-  hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
 #endif
   return 0;
 }

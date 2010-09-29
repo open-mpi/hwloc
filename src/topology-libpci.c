@@ -430,7 +430,7 @@ hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
     hwloc_pci_drop_useless_bridges(child);
     if (!child->first_child) {
       hwloc_pci_remove_child(root, child);
-      free_object(child);
+      hwloc_free_object(child);
     }
   }
 }
@@ -438,7 +438,7 @@ hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
 static struct hwloc_obj *
 hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
 {
-  hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
+  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   int err;
 
   /* override the cpuset with the environment if given */
@@ -448,7 +448,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   char *env = getenv(envname);
   if (env) {
     hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
-    hwloc_cpuset_from_string(cpuset, env);
+    hwloc_bitmap_sscanf(cpuset, env);
     goto found;
   }
 
@@ -467,10 +467,10 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
 #endif
 
   /* if we got nothing, assume the hostbridge is attached to the top of hierarchy */
-  hwloc_cpuset_fill(cpuset);
+  hwloc_bitmap_fill(cpuset);
 
  found:
-  hwloc_debug_cpuset("Attaching hostbridge to cpuset %s\n", cpuset);
+  hwloc_debug_bitmap("Attaching hostbridge to cpuset %s\n", cpuset);
 
   /* attach the hostbridge now that it contains the right objects */
   struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
@@ -480,10 +480,10 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   /* do not attach to the lowest object since it could be a cache or so,
    * go up as long as the cpuset is the same
    */
-  while (parent->parent && hwloc_cpuset_isequal(parent->cpuset, parent->parent->cpuset))
+  while (parent->parent && hwloc_bitmap_isequal(parent->cpuset, parent->parent->cpuset))
     parent = parent->parent;
 
-  hwloc_cpuset_free(cpuset);
+  hwloc_bitmap_free(cpuset);
 
   return parent;
 }

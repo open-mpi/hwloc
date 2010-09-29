@@ -26,7 +26,7 @@ static void result(const char *msg, int err)
 int main(void)
 {
   hwloc_topology_t topology;
-  hwloc_cpuset_t cpuset;
+  hwloc_bitmap_t cpuset;
   int err;
 
   /* check the OS topology */
@@ -34,14 +34,14 @@ int main(void)
   hwloc_topology_load(topology);
   assert(hwloc_topology_is_thissystem(topology));
 
-  cpuset = hwloc_cpuset_dup(hwloc_topology_get_complete_cpuset(topology));
+  cpuset = hwloc_bitmap_dup(hwloc_topology_get_complete_cpuset(topology));
   result("Binding with OS backend", hwloc_set_cpubind(topology, cpuset, 0));
 
   hwloc_topology_destroy(topology);
 
   /* We're assume there is a real processor numbered 0 */
-  hwloc_cpuset_zero(cpuset);
-  hwloc_cpuset_set(cpuset, 0);
+  hwloc_bitmap_zero(cpuset);
+  hwloc_bitmap_set(cpuset, 0);
 
   /* check a synthetic topology */
   hwloc_topology_init(&topology);
@@ -66,7 +66,7 @@ int main(void)
 
   hwloc_topology_destroy(topology);
 
-  hwloc_cpuset_free(cpuset);
+  hwloc_bitmap_free(cpuset);
 
   return 0;
 }

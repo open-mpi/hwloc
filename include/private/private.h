@@ -12,7 +12,7 @@
 
 #include <private/config.h>
 #include <hwloc.h>
-#include <hwloc/cpuset.h>
+#include <hwloc/bitmap.h>
 #include <private/debug.h>
 #include <sys/types.h>
 #ifdef HAVE_STDINT_H
@@ -68,15 +68,15 @@ struct hwloc_topology {
 
   struct hwloc_obj *first_pcidev, *last_pcidev;
 
-  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
-  int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
-  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy);
-  int (*get_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
-  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
-  int (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
+  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_bitmap_t set, int policy);
+  int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_bitmap_t set, int policy);
+  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_bitmap_t set, int policy);
+  int (*get_thisthread_cpubind)(hwloc_topology_t topology, hwloc_bitmap_t set, int policy);
+  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t set, int policy);
+  int (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int policy);
 #ifdef hwloc_thread_t
-  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
-  int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
+  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_bitmap_t set, int policy);
+  int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bitmap_t set, int policy);
 #endif
 
   struct hwloc_topology_support support;
@@ -212,12 +212,12 @@ extern void hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char 
 /* Insert uname-specific names/values in the object infos array */
 extern void hwloc_add_uname_info(struct hwloc_topology *topology);
 
-/** \brief Return a locally-allocated stringified cpuset for printf-like calls. */
+/** \brief Return a locally-allocated stringified bitmap for printf-like calls. */
 static inline char *
-hwloc_cpuset_printf_value(hwloc_const_cpuset_t cpuset)
+hwloc_bitmap_printf_value(hwloc_const_bitmap_t bitmap)
 {
   char *buf;
-  hwloc_cpuset_asprintf(&buf, cpuset);
+  hwloc_bitmap_asprintf(&buf, bitmap);
   return buf;
 }
 
@@ -235,16 +235,16 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
   return obj;
 }
 
-extern void free_object(hwloc_obj_t obj);
+extern void hwloc_free_object(hwloc_obj_t obj);
 
 #define hwloc_object_cpuset_from_array(l, _value, _array, _max) do {	\
 		struct hwloc_obj *__l = (l);				\
 		unsigned int *__a = (_array);				\
 		int k;							\
-		__l->cpuset = hwloc_cpuset_alloc();			\
+		__l->cpuset = hwloc_bitmap_alloc();			\
 		for(k=0; k<_max; k++)					\
 			if (__a[k] == _value)				\
-				hwloc_cpuset_set(__l->cpuset, k);	\
+				hwloc_bitmap_set(__l->cpuset, k);	\
 	} while (0)
 
 /* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
@@ -262,7 +262,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
     {
       obj = hwloc_alloc_setup_object(type, osphysids[j]);
       hwloc_object_cpuset_from_array(obj, j, proc_physids, procid_max);
-      hwloc_debug_2args_cpuset("%s %d has cpuset %s\n",
+      hwloc_debug_2args_bitmap("%s %d has cpuset %s\n",
 		 hwloc_obj_type_string(type),
 		 j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);

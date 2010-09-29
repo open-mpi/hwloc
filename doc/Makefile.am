@@ -57,7 +57,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(srcdir)/hwloc.doxy \
        $(HWLOC_top_srcdir)/include/hwloc.h \
        $(HWLOC_top_srcdir)/include/hwloc/helper.h \
-       $(HWLOC_top_srcdir)/include/hwloc/cpuset.h \
+       $(HWLOC_top_srcdir)/include/hwloc/bitmap.h \
        $(HWLOC_top_srcdir)/include/hwloc/glibc-sched.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux-libnuma.h \
@@ -255,54 +255,54 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpubind_policy_t.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_alloc.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_free.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_dup.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_copy.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_all_but_cpu.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_and.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_andnot.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_clr_range.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_compare_first.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_cpu.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_fill.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_first.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_begin.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_foreach_end.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_alloc.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_free.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_dup.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_copy.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_allbut.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_and.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_andnot.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_clr.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_clr_range.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_compare.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_compare_first.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_fill.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_first.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_foreach_begin.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_foreach_end.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_glibc_sched_affinity.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_ith_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_nodemask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_ulongs.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_string.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_ulong.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_intersects.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_isequal.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_isfull.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_isincluded.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_isset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_iszero.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_last.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_next.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_not.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_or.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_set.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_range.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_set_ith_ulong.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_singlify.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_snprintf.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_asprintf.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_sscanf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_intersects.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_isequal.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_isfull.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_isincluded.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_isset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_iszero.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_last.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_next.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_not.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_or.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_set.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_setonly.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_set_range.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_set_ith_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_singlify.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_asprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ith_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_bitmask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_nodemask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_ulong.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_weight.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_xor.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_weight.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_xor.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cuda_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
@@ -393,9 +393,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_binding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_bitmap.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_conversion.3 \
-        $(DOX_MAN_DIR)/man3/hwlocality_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_creation.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_cuda.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_cudart.3 \

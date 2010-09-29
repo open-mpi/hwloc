@@ -19,7 +19,7 @@ int
 main (void)
 {
   hwloc_topology_t topology;
-  hwloc_cpuset_t set;
+  hwloc_bitmap_t set;
   hwloc_obj_t obj;
   int depth;
   int err;
@@ -28,7 +28,7 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
-  set = hwloc_cpuset_alloc();
+  set = hwloc_bitmap_alloc();
 
 
 
@@ -37,7 +37,7 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
-  hwloc_cpuset_from_string(set, "00008f18");
+  hwloc_bitmap_sscanf(set, "00008f18");
 
   obj = hwloc_get_next_obj_covering_cpuset_by_type(topology, set, HWLOC_OBJ_NODE, NULL);
   assert(obj == hwloc_get_obj_by_depth(topology, 1, 1));
@@ -59,7 +59,7 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
-  hwloc_cpuset_from_string(set, "0ff08000");
+  hwloc_bitmap_sscanf(set, "0ff08000");
 
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_SOCKET);
   assert(depth == 2);
@@ -72,7 +72,7 @@ main (void)
 
 
 
-  hwloc_cpuset_free(set);
+  hwloc_bitmap_free(set);
 
   hwloc_topology_destroy (topology);
 

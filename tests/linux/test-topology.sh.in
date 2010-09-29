@@ -10,11 +10,11 @@
 # Check the conformance of `lstopo' for all the Linux sysfs
 # hierarchies available here.  Return true on success.
 
-
+HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 lstopo="$HWLOC_top_builddir/utils/lstopo"
 
-topology="$1"
+actual_output="$1"
 
 error()
 {
@@ -84,17 +84,33 @@ then
     exit 1
 fi
 
+topology="${actual_output%.output}"
+if [ "$topology" = "$actual_output" ] ;
+then
+    error "Input file \`$1' should end with .output"
+    exit 1
+fi
+actual_options="$topology".options
+
+# if there's a .source file, use the tarball name it contains instead of $topology
+if [ -f "$topology".source ] ; then
+    actual_source="$HWLOC_top_srcdir"/tests/linux/`cat "$topology".source`
+else
+    actual_source="$topology".tar.bz2
+fi
+
+actual_exclude="$HWLOC_top_srcdir/tests/linux/$topology".exclude
+[ -f "$actual_exclude" ] && tar_options="--exclude-from=$actual_exclude"
+
 result=1
 
 dir="`mktemp -d`"
 
-if ! ( gunzip -c "$topology" | ( cd "$dir" && tar xf - ) )
+if ! ( bunzip2 -c "$actual_source" | ( cd "$dir" && tar xf - "$tar_options" ) )
 then
     error "failed to extract topology \`$topology'"
 else
     actual_dir="`echo "$dir"/*`"
-    actual_output="$topology".output
-    actual_options="$topology".options
 
     if test_eligible "$actual_dir" "$actual_output"
     then

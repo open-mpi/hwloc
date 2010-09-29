@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     unsigned i,j;
     int depth;
     unsigned chunks;
-    hwloc_cpuset_t cpuset[n];
+    hwloc_bitmap_t cpuset[n];
 
     if (input)
       hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
@@ -158,14 +158,14 @@ int main(int argc, char *argv[])
       for (i = 0; i < m; i++) {
 	char *str = NULL;
 	if (singlify)
-	  hwloc_cpuset_singlify(cpuset[i]);
+	  hwloc_bitmap_singlify(cpuset[i]);
 	if (taskset)
-	  hwloc_cpuset_taskset_asprintf(&str, cpuset[i]);
+	  hwloc_bitmap_taskset_asprintf(&str, cpuset[i]);
 	else
-	  hwloc_cpuset_asprintf(&str, cpuset[i]);
+	  hwloc_bitmap_asprintf(&str, cpuset[i]);
 	printf("%s\n", str);
 	free(str);
-	hwloc_cpuset_free(cpuset[i]);
+	hwloc_bitmap_free(cpuset[i]);
       }
     }
   }
