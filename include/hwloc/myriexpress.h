@@ -38,7 +38,7 @@ extern "C" {
  */
 static __hwloc_inline int
 hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
-				 unsigned index, hwloc_cpuset_t set)
+				 unsigned index, hwloc_bitmap_t set)
 {
   uint32_t in, out;
 
@@ -52,12 +52,12 @@ hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
     hwloc_obj_t obj = NULL;
     while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, obj)) != NULL)
       if (obj->os_index == out) {
-	hwloc_cpuset_copy(set, obj->cpuset);
+	hwloc_bitmap_copy(set, obj->cpuset);
 	goto out;
       }
   }
   /* fallback to the full topology cpuset */
-  hwloc_cpuset_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
 
  out:
   return 0;
@@ -71,7 +71,7 @@ hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
  */
 static __hwloc_inline int
 hwloc_mx_endpoint_get_device_cpuset(hwloc_topology_t topology,
-				    mx_endpoint_t endpoint, hwloc_cpuset_t set)
+				    mx_endpoint_t endpoint, hwloc_bitmap_t set)
 {
   uint64_t nid;
   uint32_t nindex, eid;

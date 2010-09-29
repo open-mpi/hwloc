@@ -9,12 +9,12 @@ int do_test(void)
 {
     mytest_hwloc_topology_t topology;
     unsigned depth;
-    hwloc_cpuset_t cpu_set;
+    hwloc_bitmap_t cpu_set;
 
     /* Just call a bunch of functions to see if we can link and run */
 
-    printf("*** Test 1: cpuset alloc\n");
-    cpu_set = mytest_hwloc_cpuset_alloc();
+    printf("*** Test 1: bitmap alloc\n");
+    cpu_set = mytest_hwloc_bitmap_alloc();
     if (NULL == cpu_set) return 1;
     printf("*** Test 2: topology init\n");
     if (0 != mytest_hwloc_topology_init(&topology)) return 1;
@@ -26,8 +26,8 @@ int do_test(void)
     printf("    Max depth: %u\n", depth);
     printf("*** Test 5: topology destroy\n");
     mytest_hwloc_topology_destroy(topology);
-    printf("*** Test 6: cpuset free\n");
-    mytest_hwloc_cpuset_free(cpu_set);
+    printf("*** Test 6: bitmap free\n");
+    mytest_hwloc_bitmap_free(cpu_set);
 
     return 0;
 }

@@ -24,24 +24,24 @@ static void result_set(const char *msg, int err, int supported)
     printf("%-40s: OK%s\n", msg, supported ? "" : " (unexpected)");
 }
 
-static void result_get(const char *msg, hwloc_const_cpuset_t expected, hwloc_const_cpuset_t result, int err, int supported)
+static void result_get(const char *msg, hwloc_const_bitmap_t expected, hwloc_const_bitmap_t result, int err, int supported)
 {
   const char *errmsg = strerror(errno);
   if (err)
     printf("%-40s: FAILED (%d, %s)%s\n", msg, errno, errmsg, supported ? "" : " (expected)");
-  else if (hwloc_cpuset_isequal(expected, result))
+  else if (hwloc_bitmap_isequal(expected, result))
     printf("%-40s: OK%s\n", msg, supported ? "" : " (unexpected)");
   else {
     char *expected_s, *result_s;
-    hwloc_cpuset_asprintf(&expected_s, expected);
-    hwloc_cpuset_asprintf(&result_s, result);
+    hwloc_bitmap_asprintf(&expected_s, expected);
+    hwloc_bitmap_asprintf(&result_s, result);
     printf("%-40s: expected %s, got %s\n", msg, expected_s, result_s);
   }
 }
 
-static void test(hwloc_const_cpuset_t cpuset, int flags)
+static void test(hwloc_const_bitmap_t cpuset, int flags)
 {
-  hwloc_cpuset_t new_cpuset = hwloc_cpuset_alloc();
+  hwloc_bitmap_t new_cpuset = hwloc_bitmap_alloc();
   result_set("Bind this singlethreaded process", hwloc_set_cpubind(topology, cpuset, flags), support->cpubind->set_thisproc_cpubind || support->cpubind->set_thisthread_cpubind);
   result_get("Get  this singlethreaded process", cpuset, new_cpuset, hwloc_get_cpubind(topology, new_cpuset, flags), support->cpubind->get_thisproc_cpubind || support->cpubind->get_thisthread_cpubind);
   result_set("Bind this thread", hwloc_set_cpubind(topology, cpuset, flags | HWLOC_CPUBIND_THREAD), support->cpubind->set_thisthread_cpubind);
@@ -65,12 +65,12 @@ static void test(hwloc_const_cpuset_t cpuset, int flags)
 #endif
 #endif /* !HWLOC_WIN_SYS */
   printf("\n");
-  hwloc_cpuset_free(new_cpuset);
+  hwloc_bitmap_free(new_cpuset);
 }
 
 int main(void)
 {
-  hwloc_cpuset_t set;
+  hwloc_bitmap_t set;
   hwloc_obj_t obj;
   char *str = NULL;
 
@@ -80,15 +80,15 @@ int main(void)
   support = hwloc_topology_get_support(topology);
 
   obj = hwloc_get_root_obj(topology);
-  set = hwloc_cpuset_dup(obj->cpuset);
+  set = hwloc_bitmap_dup(obj->cpuset);
 
-  while (hwloc_cpuset_isequal(obj->cpuset, set)) {
+  while (hwloc_bitmap_isequal(obj->cpuset, set)) {
     if (!obj->arity)
       break;
     obj = obj->children[0];
   }
 
-  hwloc_cpuset_asprintf(&str, set);
+  hwloc_bitmap_asprintf(&str, set);
   printf("system set is %s\n", str);
   free(str);
 
@@ -97,9 +97,9 @@ int main(void)
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
 
-  hwloc_cpuset_free(set);
-  set = hwloc_cpuset_dup(obj->cpuset);
-  hwloc_cpuset_asprintf(&str, set);
+  hwloc_bitmap_free(set);
+  set = hwloc_bitmap_dup(obj->cpuset);
+  hwloc_bitmap_asprintf(&str, set);
   printf("obj set is %s\n", str);
   free(str);
 
@@ -108,8 +108,8 @@ int main(void)
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
 
-  hwloc_cpuset_singlify(set);
-  hwloc_cpuset_asprintf(&str, set);
+  hwloc_bitmap_singlify(set);
+  hwloc_bitmap_asprintf(&str, set);
   printf("singlified to %s\n", str);
   free(str);
 
@@ -118,7 +118,7 @@ int main(void)
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
 
-  hwloc_cpuset_free(set);
+  hwloc_bitmap_free(set);
   hwloc_topology_destroy(topology);
   return 0;
 }

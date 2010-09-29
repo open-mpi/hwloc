@@ -33,7 +33,7 @@ int main(void)
     char string[128];
     int topodepth;
     hwloc_topology_t topology;
-    hwloc_cpuset_t cpuset;
+    hwloc_bitmap_t cpuset;
     hwloc_obj_t obj;
 
     /* Allocate and initialize topology object. */
@@ -119,23 +119,23 @@ int main(void)
                    hwloc_get_nbobjs_by_depth(topology, depth) - 1);
     if (obj) {
         /* Get a copy of its cpuset that we may modify. */
-        cpuset = hwloc_cpuset_dup(obj->cpuset);
+        cpuset = hwloc_bitmap_dup(obj->cpuset);
 
         /* Get only one logical processor (in case the core is
            SMT/hyperthreaded). */
-        hwloc_cpuset_singlify(cpuset);
+        hwloc_bitmap_singlify(cpuset);
 
         /* And try to bind ourself there. */
         if (hwloc_set_cpubind(topology, cpuset, 0)) {
             char *str;
             int error = errno;
-            hwloc_cpuset_asprintf(&str, obj->cpuset);
+            hwloc_bitmap_asprintf(&str, obj->cpuset);
             printf("Couldn't bind to cpuset %s: %s\n", str, strerror(error));
             free(str);
         }
 
         /* Free our cpuset copy */
-        hwloc_cpuset_free(cpuset);
+        hwloc_bitmap_free(cpuset);
     }
 
     /* Destroy topology object. */

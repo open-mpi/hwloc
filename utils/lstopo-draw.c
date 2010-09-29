@@ -360,20 +360,20 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
 
   RECURSE_HORIZ(level, &null_draw_methods, 0, gridsize);
 
-  if (hwloc_cpuset_isset(level->online_cpuset, level->os_index))
-    if (!hwloc_cpuset_isset(level->allowed_cpuset, level->os_index))
+  if (hwloc_bitmap_isset(level->online_cpuset, level->os_index))
+    if (!hwloc_bitmap_isset(level->allowed_cpuset, level->os_index))
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
     else {
-      hwloc_cpuset_t bind = hwloc_cpuset_alloc();
+      hwloc_bitmap_t bind = hwloc_bitmap_alloc();
       if (pid != (hwloc_pid_t) -1 && pid != 0)
         hwloc_get_proc_cpubind(topology, pid, bind, 0);
       else if (pid == 0)
         hwloc_get_cpubind(topology, bind, 0);
-      if (bind && hwloc_cpuset_isset(bind, level->os_index))
+      if (bind && hwloc_bitmap_isset(bind, level->os_index))
         methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);
       else
         methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
-      hwloc_cpuset_free(bind);
+      hwloc_bitmap_free(bind);
     }
   else
     methods->box(output, OFFLINE_R_COLOR, OFFLINE_G_COLOR, OFFLINE_B_COLOR, depth, x, *retwidth, y, *retheight);
@@ -381,7 +381,7 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
   if (fontsize) {
     char text[64];
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    if (hwloc_cpuset_isset(level->online_cpuset, level->os_index))
+    if (hwloc_bitmap_isset(level->online_cpuset, level->os_index))
       methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
     else
       methods->text(output, 0xff, 0xff, 0xff, fontsize, depth-1, x + gridsize, y + gridsize, text);

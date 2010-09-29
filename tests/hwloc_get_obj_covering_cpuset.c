@@ -25,40 +25,40 @@ int main(void)
   hwloc_topology_t topology;
   char *string = NULL;
   hwloc_obj_t obj;
-  hwloc_cpuset_t set;
+  hwloc_bitmap_t set;
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, SYNTHETIC_TOPOLOGY_DESCRIPTION);
   hwloc_topology_load(topology);
-  set = hwloc_cpuset_alloc();
+  set = hwloc_bitmap_alloc();
 
-  hwloc_cpuset_from_string(set, GIVEN_CPUSET_STRING);
+  hwloc_bitmap_sscanf(set, GIVEN_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
 
   assert(obj);
   fprintf(stderr, "found covering object type %s covering cpuset %s\n",
 	  hwloc_obj_type_string(obj->type), GIVEN_CPUSET_STRING);
-  assert(hwloc_cpuset_isincluded(set, obj->cpuset));
+  assert(hwloc_bitmap_isincluded(set, obj->cpuset));
 
-  hwloc_cpuset_asprintf(&string, obj->cpuset);
+  hwloc_bitmap_asprintf(&string, obj->cpuset);
   fprintf(stderr, "covering object of %s is %s, expected %s\n",
 	  GIVEN_CPUSET_STRING, string, EXPECTED_CPUSET_STRING);
   assert(!strcmp(EXPECTED_CPUSET_STRING, string));
   free(string);
 
-  hwloc_cpuset_from_string(set, GIVEN_LARGESPLIT_CPUSET_STRING);
+  hwloc_bitmap_sscanf(set, GIVEN_LARGESPLIT_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
   assert(obj == hwloc_get_root_obj(topology));
   fprintf(stderr, "found system as covering object of first+last cpus cpuset %s\n",
 	  GIVEN_LARGESPLIT_CPUSET_STRING);
 
-  hwloc_cpuset_from_string(set, GIVEN_TOOLARGE_CPUSET_STRING);
+  hwloc_bitmap_sscanf(set, GIVEN_TOOLARGE_CPUSET_STRING);
   obj = hwloc_get_obj_covering_cpuset(topology, set);
   assert(!obj);
   fprintf(stderr, "found no covering object for too-large cpuset %s\n",
 	  GIVEN_TOOLARGE_CPUSET_STRING);
 
-  hwloc_cpuset_free(set);
+  hwloc_bitmap_free(set);
   hwloc_topology_destroy(topology);
 
   return EXIT_SUCCESS;
