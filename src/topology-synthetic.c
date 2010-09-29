@@ -200,7 +200,7 @@ hwloc_backend_synthetic_exit(struct hwloc_topology *topology)
 static unsigned
 hwloc__look_synthetic(struct hwloc_topology *topology,
     int level, unsigned first_cpu,
-    hwloc_cpuset_t parent_cpuset)
+    hwloc_bitmap_t parent_cpuset)
 {
   hwloc_obj_t obj;
   unsigned i;
@@ -231,23 +231,23 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   }
 
   obj = hwloc_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
-  obj->cpuset = hwloc_cpuset_alloc();
+  obj->cpuset = hwloc_bitmap_alloc();
 
   if (!topology->backend_params.synthetic.arity[level]) {
-    hwloc_cpuset_set(obj->cpuset, first_cpu++);
+    hwloc_bitmap_set(obj->cpuset, first_cpu++);
   } else {
     for (i = 0; i < topology->backend_params.synthetic.arity[level]; i++)
       first_cpu = hwloc__look_synthetic(topology, level + 1, first_cpu, obj->cpuset);
   }
 
   if (type == HWLOC_OBJ_NODE) {
-    obj->nodeset = hwloc_cpuset_alloc();
-    hwloc_cpuset_set(obj->nodeset, obj->os_index);
+    obj->nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_set(obj->nodeset, obj->os_index);
   }
 
   hwloc_insert_object_by_cpuset(topology, obj);
 
-  hwloc_cpuset_or(parent_cpuset, parent_cpuset, obj->cpuset);
+  hwloc_bitmap_or(parent_cpuset, parent_cpuset, obj->cpuset);
 
   /* post-hooks */
   switch (type) {
@@ -294,7 +294,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 void
 hwloc_look_synthetic(struct hwloc_topology *topology)
 {
-  hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
+  hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   unsigned first_cpu = 0, i;
 
   topology->support.discovery->pu = 1;
@@ -305,7 +305,7 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
   for (i = 0; i < topology->backend_params.synthetic.arity[0]; i++)
     first_cpu = hwloc__look_synthetic(topology, 1, first_cpu, cpuset);
 
-  hwloc_cpuset_free(cpuset);
+  hwloc_bitmap_free(cpuset);
 
   hwloc_add_object_info(topology->levels[0][0], "Backend", "Synthetic");
 }

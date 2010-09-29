@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
   const struct hwloc_topology_support *support;
   hwloc_topology_t topology;
   hwloc_obj_t root;
-  hwloc_cpuset_t cpuset;
+  hwloc_bitmap_t cpuset;
   int logical = 1;
   int show_cpuset = 0;
   DIR *dir;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
   if (!dir)
     goto out_with_topology;
 
-  cpuset = hwloc_cpuset_alloc();
+  cpuset = hwloc_bitmap_alloc();
   if (!cpuset)
     goto out_with_dir;
 
@@ -120,18 +120,18 @@ int main(int argc, char *argv[])
     if (hwloc_get_proc_cpubind(topology, pid, cpuset, 0))
       continue;
 
-    if (hwloc_cpuset_isequal(cpuset, root->cpuset) && !show_all)
+    if (hwloc_bitmap_isequal(cpuset, root->cpuset) && !show_all)
       continue;
 
     printf("%ld\t", pid);
 
     if (show_cpuset) {
-      hwloc_cpuset_asprintf(&cpuset_str, cpuset);
+      hwloc_bitmap_asprintf(&cpuset_str, cpuset);
       printf("%s", cpuset_str);
     } else {
-      hwloc_cpuset_t remaining = hwloc_cpuset_dup(cpuset);
+      hwloc_bitmap_t remaining = hwloc_bitmap_dup(cpuset);
       int first = 1;
-      while (!hwloc_cpuset_iszero(remaining)) {
+      while (!hwloc_bitmap_iszero(remaining)) {
         char type[64];
         unsigned idx;
         hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
@@ -141,10 +141,10 @@ int main(int argc, char *argv[])
           printf("%s%s", first ? "" : " ", type);
         else
           printf("%s%s:%u", first ? "" : " ", type, idx);
-        hwloc_cpuset_andnot(remaining, remaining, obj->cpuset);
+        hwloc_bitmap_andnot(remaining, remaining, obj->cpuset);
         first = 0;
       }
-      hwloc_cpuset_free(remaining);
+      hwloc_bitmap_free(remaining);
     }
 
     printf("\t\t%s\n", name);
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
   }
 
   err = 0;
-  hwloc_cpuset_free(cpuset);
+  hwloc_bitmap_free(cpuset);
 
  out_with_dir:
   closedir(dir);

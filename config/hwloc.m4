@@ -398,13 +398,13 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     
     _HWLOC_CHECK_DECL([sched_setaffinity], [
       AC_MSG_CHECKING([for old prototype of sched_setaffinity])
-      AC_COMPILE_IFELSE(
+      AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
           #define _GNU_SOURCE
           #include <sched.h>
           static unsigned long mask;
           ]], [[ sched_setaffinity(0, (void*) &mask);
-          ]]),
+          ]])],
         AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
         AC_MSG_RESULT([yes]),
         AC_MSG_RESULT([no])
@@ -415,19 +415,19 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
 ]])
     
     AC_MSG_CHECKING([for working CPU_SET])
-    AC_LINK_IFELSE(
+    AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
         #include <sched.h>
         cpu_set_t set;
         ]], [[ CPU_ZERO(&set); CPU_SET(0, &set);
-        ]]),
+        ]])],
         AC_DEFINE([HWLOC_HAVE_CPU_SET], [1], [Define to 1 if the CPU_SET macro works])
         AC_MSG_RESULT([yes]),
         AC_MSG_RESULT([no])
     )
     
     AC_MSG_CHECKING([for working CPU_SET_S])
-    AC_LINK_IFELSE(
+    AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
           #include <sched.h>
           cpu_set_t *set;
@@ -436,8 +436,23 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
           CPU_ZERO_S(CPU_ALLOC_SIZE(1024), set);
           CPU_SET_S(CPU_ALLOC_SIZE(1024), 0, set);
           CPU_FREE(set);
-        ]]),
+        ]])],
         AC_DEFINE([HWLOC_HAVE_CPU_SET_S], [1], [Define to 1 if the CPU_SET_S macro works])
+        AC_MSG_RESULT([yes]),
+        AC_MSG_RESULT([no])
+    )
+
+    AC_MSG_CHECKING([for working _syscall3])
+    AC_LINK_IFELSE(
+      AC_LANG_PROGRAM([[
+          #include <linux/unistd.h>
+          #include <errno.h>
+          #define __NR_hwloc_test 123
+          _syscall3(int, hwloc_test, int, param1, int, param2, int, param3);
+        ]], [[
+          hwloc_test(1, 2, 3);
+        ]]),
+        AC_DEFINE([HWLOC_HAVE__SYSCALL3], [1], [Define to 1 if the _syscall3 macro works])
         AC_MSG_RESULT([yes]),
         AC_MSG_RESULT([no])
     )
@@ -549,7 +564,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     AC_MSG_CHECKING([for cpuid])
     old_CPPFLAGS="$CPPFLAGS"
     CFLAGS="$CFLAGS -I$HWLOC_top_srcdir/include"
-    AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
         #include <private/cpuid.h>
       ]], [[
@@ -559,7 +574,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
           printf("highest cpuid %x\n", eax);
           return 0;
         }
-      ]]), [
+      ]])], [
       AC_MSG_RESULT([yes])
       AC_DEFINE(HWLOC_HAVE_CPUID, 1, [Define to 1 if you have cpuid])
       hwloc_have_cpuid=yes
@@ -606,8 +621,15 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
                        [test "x$hwloc_have_sched_setaffinity" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS], 
                        [test "x$hwloc_have_libibverbs" = "xyes"])
+	AM_CONDITIONAL([HWLOC_HAVE_CUDA],
+		       [test "x$hwloc_have_cuda" = "xyes"])
+	AM_CONDITIONAL([HWLOC_HAVE_MYRIEXPRESS],
+		       [test "x$hwloc_have_myriexpress" = "xyes"])
+	AM_CONDITIONAL([HWLOC_HAVE_CUDART],
+		       [test "x$hwloc_have_cudart" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" != "xno"])
+        AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
 
         AM_CONDITIONAL([HWLOC_BUILD_DOXYGEN],
                        [test "x$hwloc_generate_doxs" = "xyes"])

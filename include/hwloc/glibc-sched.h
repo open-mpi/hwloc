@@ -44,22 +44,22 @@ extern "C" {
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
 static __hwloc_inline int
-hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t hwlocset,
+hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t hwlocset,
 				    cpu_set_t *schedset, size_t schedsetsize)
 {
 #ifdef CPU_ZERO_S
   unsigned cpu;
   CPU_ZERO_S(schedsetsize, schedset);
-  hwloc_cpuset_foreach_begin(cpu, hwlocset)
+  hwloc_bitmap_foreach_begin(cpu, hwlocset)
     CPU_SET_S(cpu, schedsetsize, schedset);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 #else /* !CPU_ZERO_S */
   unsigned cpu;
   CPU_ZERO(schedset);
   assert(schedsetsize == sizeof(cpu_set_t));
-  hwloc_cpuset_foreach_begin(cpu, hwlocset)
+  hwloc_bitmap_foreach_begin(cpu, hwlocset)
     CPU_SET(cpu, schedset);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 #endif /* !CPU_ZERO_S */
   return 0;
 }
@@ -72,17 +72,17 @@ hwloc_cpuset_to_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute
  * \p schedsetsize should be sizeof(cpu_set_t) unless \p schedset was dynamically allocated with CPU_ALLOC
  */
 static __hwloc_inline int
-hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t hwlocset,
+hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t hwlocset,
                                        const cpu_set_t *schedset, size_t schedsetsize)
 {
-  hwloc_cpuset_zero(hwlocset);
+  hwloc_bitmap_zero(hwlocset);
 #ifdef CPU_ZERO_S
   int cpu, count;
   count = CPU_COUNT_S(schedsetsize, schedset);
   cpu = 0;
   while (count) {
     if (CPU_ISSET_S(cpu, schedsetsize, schedset)) {
-      hwloc_cpuset_set(hwlocset, cpu);
+      hwloc_bitmap_set(hwlocset, cpu);
       count--;
     }
     cpu++;
@@ -95,7 +95,7 @@ hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribu
   assert(schedsetsize == sizeof(cpu_set_t));
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, schedset))
-      hwloc_cpuset_set(hwlocset, cpu);
+      hwloc_bitmap_set(hwlocset, cpu);
 #endif /* !CPU_ZERO_S */
   return 0;
 }

@@ -18,6 +18,7 @@ int main(void)
   hwloc_topology_t topology;
   struct ibv_device **dev_list, *dev;
   int count, i;
+  int err;
 
   dev_list = ibv_get_device_list(&count);
   if (!dev_list) {
@@ -30,22 +31,22 @@ int main(void)
   hwloc_topology_load(topology);
 
   for(i=0; i<count; i++) {
-    hwloc_cpuset_t set;
+    hwloc_bitmap_t set;
     dev = dev_list[i];
 
-    set = hwloc_cpuset_alloc();
-    hwloc_ibv_get_device_cpuset(topology, dev, set);
-    if (!set) {
+    set = hwloc_bitmap_alloc();
+    err = hwloc_ibv_get_device_cpuset(topology, dev, set);
+    if (err < 0) {
       printf("failed to get cpuset for device %d (%s)\n",
 	     i, ibv_get_device_name(dev));
     } else {
       char *cpuset_string = NULL;
-      hwloc_cpuset_asprintf(&cpuset_string, set);
+      hwloc_bitmap_asprintf(&cpuset_string, set);
       printf("got cpuset %s for device %d (%s)\n",
 	     cpuset_string, i, ibv_get_device_name(dev));
       free(cpuset_string);
-      hwloc_cpuset_free(set);
     }
+    hwloc_bitmap_free(set);
   }
 
   hwloc_topology_destroy(topology);

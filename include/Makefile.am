@@ -8,9 +8,13 @@ if HWLOC_BUILD_STANDALONE
 include_HEADERS = hwloc.h
 include_hwlocdir = $(includedir)/hwloc
 include_hwloc_HEADERS = \
+        hwloc/bitmap.h \
         hwloc/cpuset.h \
         hwloc/helper.h \
+        hwloc/myriexpress.h \
         hwloc/openfabrics-verbs.h \
+        hwloc/cuda.h \
+        hwloc/cudart.h \
         hwloc/rename.h
 nodist_include_hwloc_HEADERS = hwloc/config.h 
 
