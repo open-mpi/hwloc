@@ -1047,6 +1047,14 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind_cpuset(hwloc_topology_t topology, size_
  */
 HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len);
 
+/** \brief Convert a CPU set into a NUMA node set
+ */
+HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, hwloc_bitmap_t nodeset);
+
+/** \brief Convert a NUMA node set set into a CPU set
+ */
+HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_bitmap_t cpuset, hwloc_const_bitmap_t nodeset);
+
 /** @} */
 
 
