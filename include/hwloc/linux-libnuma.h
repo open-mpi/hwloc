@@ -46,8 +46,8 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_bitm
   unsigned nbnodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
   unsigned i;
 
-  for(i=0; i<*maxnode/sizeof(*mask)/8; i++)
-    mask[i] = 0;
+  /* round-up to the next ulong and clear all bytes */
+  memset(mask, 0, (*maxnode+8*sizeof(*mask)-1)/8);
 
   if (nbnodes) {
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL) {
