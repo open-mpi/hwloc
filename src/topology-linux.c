@@ -828,7 +828,7 @@ hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, int policy)
   return 0;
 }
 
-int
+static int
 hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset,
 				      unsigned *max_os_index_p, unsigned long **linuxmaskp)
 {
