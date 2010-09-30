@@ -26,7 +26,7 @@
 #include <sys/mman.h>
 
 static int
-hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   rsethandle_t rad;
   int res;
@@ -34,16 +34,16 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
 
   /* The resulting binding is always strict */
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
+  if (hwloc_bitmap_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if (ra_detachrset(what, who, 0))
       return -1;
     return 0;
   }
 
   rad = rs_alloc(RS_EMPTY);
-  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+  hwloc_bitmap_foreach_begin(cpu, hwloc_set)
     rs_op(RS_ADDRESOURCE, rad, NULL, R_PROCS, cpu);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 
   res = ra_attachrset(what, who, rad, 0);
 
@@ -52,7 +52,7 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
 }
 
 static int
-hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   rsethandle_t rset;
   unsigned cpu, maxcpus;
@@ -63,12 +63,12 @@ hwloc_aix_get_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   if (ra_getrset(what, who, 0, rset) == -1)
     goto out;
 
-  hwloc_cpuset_zero(hwloc_set);
+  hwloc_bitmap_zero(hwloc_set);
   maxcpus = rs_getinfo(rset, R_MAXPROCS, 0);
   for (cpu = 0; cpu < maxcpus; cpu++)
     if (rs_op(RS_TESTRESOURCE, rset, NULL, R_PROCS, cpu) == 1)
-      hwloc_cpuset_set(hwloc_set, cpu);
-  hwloc_cpuset_and(hwloc_set, hwloc_set, hwloc_topology_get_complete_cpuset(topology));
+      hwloc_bitmap_set(hwloc_set, cpu);
+  hwloc_bitmap_and(hwloc_set, hwloc_set, hwloc_topology_get_complete_cpuset(topology));
   res = 0;
 
 out:
@@ -77,42 +77,42 @@ out:
 }
 
 static int
-hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   rsid_t who = { .at_pid = getpid() };
   return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_aix_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
 {
   rsid_t who = { .at_pid = getpid() };
   return hwloc_aix_get_sth_cpubind(topology, R_PROCESS, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   rsid_t who = { .at_tid = thread_self() };
   return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_aix_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
 {
   rsid_t who = { .at_tid = thread_self() };
   return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   rsid_t who = { .at_pid = pid };
   return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, policy);
 }
 
 static int
-hwloc_aix_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_aix_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
 {
   rsid_t who = { .at_pid = pid };
   return hwloc_aix_get_sth_cpubind(topology, R_PROCESS, who, hwloc_set, policy);
@@ -120,7 +120,7 @@ hwloc_aix_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpu
 
 #ifdef HWLOC_HAVE_PTHREAD_GETTHRDS_NP
 static int
-hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   struct __pthrdsinfo info;
   int size;
@@ -133,7 +133,7 @@ hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 }
 
 static int
-hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_bitmap_t hwloc_set, int policy)
 {
   struct __pthrdsinfo info;
   int size;
@@ -181,10 +181,10 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
   *rad = rs_alloc(RS_EMPTY);
   noderad = rs_alloc(RS_EMPTY);
 
-  hwloc_cpuset_foreach_begin(node, nodeset)
+  hwloc_bitmap_foreach_begin(node, nodeset)
     rs_getrad(rset, noderad, MCMlevel, node, 0);
     rs_op(RS_UNION, noderad, *rad, 0, 0);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 
   rs_free(rset);
   rs_free(noderad);
@@ -270,12 +270,12 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     /* It seems logical processors are numbered from 1 here, while the
      * bindprocessor functions numbers them from 0... */
     obj = hwloc_alloc_setup_object(type, i - (type == HWLOC_OBJ_PU));
-    obj->cpuset = hwloc_cpuset_alloc();
+    obj->cpuset = hwloc_bitmap_alloc();
     obj->os_level = sdl;
     switch(type) {
       case HWLOC_OBJ_NODE:
-	obj->nodeset = hwloc_cpuset_alloc();
-	hwloc_cpuset_set(obj->nodeset, i);
+	obj->nodeset = hwloc_bitmap_alloc();
+	hwloc_bitmap_set(obj->nodeset, i);
 	obj->memory.local_memory = 0; /* TODO: odd, rs_getinfo(rad, R_MEMSIZE, 0) << 10 returns the total memory ... */
 	obj->memory.page_types_len = 2;
 	obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
@@ -299,9 +299,9 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
     for (j = 0; j < maxcpus; j++) {
       if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
-	hwloc_cpuset_set(obj->cpuset, j);
+	hwloc_bitmap_set(obj->cpuset, j);
     }
-    hwloc_debug_2args_cpuset("%s %d has cpuset %s\n",
+    hwloc_debug_2args_bitmap("%s %d has cpuset %s\n",
 	       hwloc_obj_type_string(type),
 	       i, obj->cpuset);
     hwloc_insert_object_by_cpuset(topology, obj);

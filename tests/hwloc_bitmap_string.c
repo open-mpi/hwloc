@@ -11,7 +11,7 @@
 #include <string.h>
 #include <assert.h>
 
-/* check hwloc_cpuset_asprintf(), hwloc_obj_cpuset_snprintf() and hwloc_cpuset_from_string() */
+/* check hwloc_bitmap_asprintf(), hwloc_obj_cpuset_snprintf() and hwloc_bitmap_sscanf() */
 
 int main(void)
 {
@@ -20,20 +20,20 @@ int main(void)
   char *string = NULL;
   int stringlen, len;
   hwloc_obj_t obj;
-  hwloc_cpuset_t set, set2;
+  hwloc_bitmap_t set, set2;
 
   /* check an infinite cpuset */
-  set = hwloc_cpuset_alloc();
-  hwloc_cpuset_fill(set);
-  hwloc_cpuset_clr(set, 173);
-  hwloc_cpuset_clr_range(set, 60, 70);
-  hwloc_cpuset_asprintf(&string, set);
-  set2 = hwloc_cpuset_alloc();
-  hwloc_cpuset_from_string(set2, string);
+  set = hwloc_bitmap_alloc();
+  hwloc_bitmap_fill(set);
+  hwloc_bitmap_clr(set, 173);
+  hwloc_bitmap_clr_range(set, 60, 70);
+  hwloc_bitmap_asprintf(&string, set);
+  set2 = hwloc_bitmap_alloc();
+  hwloc_bitmap_sscanf(set2, string);
   free(string);
-  assert(hwloc_cpuset_isequal(set, set2));
-  hwloc_cpuset_free(set);
-  hwloc_cpuset_free(set2);
+  assert(hwloc_bitmap_isequal(set, set2));
+  hwloc_bitmap_free(set);
+  hwloc_bitmap_free(set2);
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "6 5 4 3 2");
@@ -41,12 +41,12 @@ int main(void)
   depth = hwloc_topology_get_depth(topology);
 
   obj = hwloc_get_root_obj(topology);
-  stringlen = hwloc_cpuset_asprintf(&string, obj->cpuset);
+  stringlen = hwloc_bitmap_asprintf(&string, obj->cpuset);
   printf("system cpuset is %s\n", string);
-  set = hwloc_cpuset_alloc();
-  hwloc_cpuset_from_string(set, string);
-  assert(hwloc_cpuset_isequal(set, obj->cpuset));
-  hwloc_cpuset_free(set);
+  set = hwloc_bitmap_alloc();
+  hwloc_bitmap_sscanf(set, string);
+  assert(hwloc_bitmap_isequal(set, obj->cpuset));
+  hwloc_bitmap_free(set);
   printf("system cpuset converted back and forth, ok\n");
 
   printf("truncating system cpuset to NULL buffer\n");
@@ -113,24 +113,24 @@ int main(void)
   obj = hwloc_get_obj_by_depth(topology, depth-1, 0);
   hwloc_obj_cpuset_snprintf(string, stringlen+1, 1, &obj);
   printf("first cpu cpuset is %s\n", string);
-  set = hwloc_cpuset_alloc();
-  hwloc_cpuset_from_string(set, string);
-  assert(hwloc_cpuset_isequal(set, obj->cpuset));
-  hwloc_cpuset_free(set);
+  set = hwloc_bitmap_alloc();
+  hwloc_bitmap_sscanf(set, string);
+  assert(hwloc_bitmap_isequal(set, obj->cpuset));
+  hwloc_bitmap_free(set);
   printf("first cpu cpuset converted back and forth, ok\n");
 
   obj = hwloc_get_obj_by_depth(topology, depth-1, hwloc_get_nbobjs_by_depth(topology, depth-1) - 1);
   hwloc_obj_cpuset_snprintf(string, stringlen+1, 1, &obj);
   printf("last cpu cpuset is %s\n", string);
-  set = hwloc_cpuset_alloc();
-  hwloc_cpuset_from_string(set, string);
-  assert(hwloc_cpuset_isequal(set, obj->cpuset));
-  hwloc_cpuset_free(set);
+  set = hwloc_bitmap_alloc();
+  hwloc_bitmap_sscanf(set, string);
+  assert(hwloc_bitmap_isequal(set, obj->cpuset));
+  hwloc_bitmap_free(set);
   printf("last cpu cpuset converted back and forth, ok\n");
 
-//  hwloc_cpuset_from_string(set, "1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n");
+//  hwloc_bitmap_sscanf(set, "1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n");
 //  char *s;
-//  hwloc_cpuset_asprintf(&s, &set);
+//  hwloc_bitmap_asprintf(&s, &set);
 //  printf("%s\n", s);
 //  free(s);
 //  will be truncated after ",4," since it's too large

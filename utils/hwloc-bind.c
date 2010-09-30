@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
   unsigned depth;
-  hwloc_cpuset_t cpubind_set, membind_set;
+  hwloc_bitmap_t cpubind_set, membind_set;
   int cpubind = 1; /* membind if 0 */
   int get_binding = 0;
   int single = 0;
@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
   hwloc_pid_t pid = 0;
   char **orig_argv = argv;
 
-  cpubind_set = hwloc_cpuset_alloc();
-  membind_set = hwloc_cpuset_alloc();
+  cpubind_set = hwloc_bitmap_alloc();
+  membind_set = hwloc_bitmap_alloc();
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
@@ -156,9 +156,9 @@ int main(int argc, char *argv[])
 	return EXIT_FAILURE;
       }
       if (taskset)
-	hwloc_cpuset_taskset_asprintf(&s, cpubind_set);
+	hwloc_bitmap_taskset_asprintf(&s, cpubind_set);
       else
-	hwloc_cpuset_asprintf(&s, cpubind_set);
+	hwloc_bitmap_asprintf(&s, cpubind_set);
     } else {
       int policy;
       if (pid)
@@ -171,24 +171,24 @@ int main(int argc, char *argv[])
 	return EXIT_FAILURE;
       }
       if (taskset)
-	hwloc_cpuset_taskset_asprintf(&s, membind_set);
+	hwloc_bitmap_taskset_asprintf(&s, membind_set);
       else
-	hwloc_cpuset_asprintf(&s, membind_set);
+	hwloc_bitmap_asprintf(&s, membind_set);
     }
     printf("%s\n", s);
     free(s);
     return EXIT_SUCCESS;
   }
 
-  if (!hwloc_cpuset_iszero(cpubind_set)) {
+  if (!hwloc_bitmap_iszero(cpubind_set)) {
     if (verbose) {
       char *s;
-      hwloc_cpuset_asprintf(&s, cpubind_set);
+      hwloc_bitmap_asprintf(&s, cpubind_set);
       fprintf(stderr, "binding on cpu set %s\n", s);
       free(s);
     }
     if (single)
-      hwloc_cpuset_singlify(cpubind_set);
+      hwloc_bitmap_singlify(cpubind_set);
     if (pid)
       ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, cpubind_flags);
     else
@@ -197,21 +197,21 @@ int main(int argc, char *argv[])
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
       char *s;
-      hwloc_cpuset_asprintf(&s, cpubind_set);
+      hwloc_bitmap_asprintf(&s, cpubind_set);
       fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
   }
 
-  if (!hwloc_cpuset_iszero(membind_set)) {
+  if (!hwloc_bitmap_iszero(membind_set)) {
     if (verbose) {
       char *s;
-      hwloc_cpuset_asprintf(&s, membind_set);
+      hwloc_bitmap_asprintf(&s, membind_set);
       fprintf(stderr, "binding on memory set %s\n", s);
       free(s);
     }
     if (single)
-      hwloc_cpuset_singlify(membind_set);
+      hwloc_bitmap_singlify(membind_set);
     if (pid)
       ret = hwloc_set_proc_membind_cpuset(topology, pid, membind_set, membind_flags);
     else
@@ -220,14 +220,14 @@ int main(int argc, char *argv[])
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
       char *s;
-      hwloc_cpuset_asprintf(&s, membind_set);
+      hwloc_bitmap_asprintf(&s, membind_set);
       fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
   }
 
-  hwloc_cpuset_free(cpubind_set);
-  hwloc_cpuset_free(membind_set);
+  hwloc_bitmap_free(cpubind_set);
+  hwloc_bitmap_free(membind_set);
 
   hwloc_topology_destroy(topology);
 

@@ -84,26 +84,26 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
   else if (!strcmp(name, "os_index"))
     obj->os_index = strtoul(value, NULL, 10);
   else if (!strcmp(name, "cpuset")) {
-    obj->cpuset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(obj->cpuset, value);
+    obj->cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(obj->cpuset, value);
   } else if (!strcmp(name, "complete_cpuset")) {
-    obj->complete_cpuset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(obj->complete_cpuset,value);
+    obj->complete_cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(obj->complete_cpuset,value);
   } else if (!strcmp(name, "online_cpuset")) {
-    obj->online_cpuset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(obj->online_cpuset, value);
+    obj->online_cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(obj->online_cpuset, value);
   } else if (!strcmp(name, "allowed_cpuset")) {
-    obj->allowed_cpuset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(obj->allowed_cpuset, value);
+    obj->allowed_cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(obj->allowed_cpuset, value);
   } else if (!strcmp(name, "nodeset")) {
-    obj->nodeset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(obj->nodeset, value);
+    obj->nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(obj->nodeset, value);
   } else if (!strcmp(name, "complete_nodeset")) {
-    obj->complete_nodeset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(obj->complete_nodeset, value);
+    obj->complete_nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(obj->complete_nodeset, value);
   } else if (!strcmp(name, "allowed_nodeset")) {
-    obj->allowed_nodeset = hwloc_cpuset_alloc();
-    hwloc_cpuset_from_string(obj->allowed_nodeset, value);
+    obj->allowed_nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_sscanf(obj->allowed_nodeset, value);
   } else if (!strcmp(name, "name"))
     obj->name = strdup(value);
 
@@ -444,37 +444,37 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
   }
   if (obj->cpuset) {
-    hwloc_cpuset_asprintf(&cpuset, obj->cpuset);
+    hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
     xmlNewProp(node, BAD_CAST "cpuset", BAD_CAST cpuset);
     free(cpuset);
   }
   if (obj->complete_cpuset) {
-    hwloc_cpuset_asprintf(&cpuset, obj->complete_cpuset);
+    hwloc_bitmap_asprintf(&cpuset, obj->complete_cpuset);
     xmlNewProp(node, BAD_CAST "complete_cpuset", BAD_CAST cpuset);
     free(cpuset);
   }
   if (obj->online_cpuset) {
-    hwloc_cpuset_asprintf(&cpuset, obj->online_cpuset);
+    hwloc_bitmap_asprintf(&cpuset, obj->online_cpuset);
     xmlNewProp(node, BAD_CAST "online_cpuset", BAD_CAST cpuset);
     free(cpuset);
   }
   if (obj->allowed_cpuset) {
-    hwloc_cpuset_asprintf(&cpuset, obj->allowed_cpuset);
+    hwloc_bitmap_asprintf(&cpuset, obj->allowed_cpuset);
     xmlNewProp(node, BAD_CAST "allowed_cpuset", BAD_CAST cpuset);
     free(cpuset);
   }
   if (obj->nodeset) {
-    hwloc_cpuset_asprintf(&cpuset, obj->nodeset);
+    hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
     xmlNewProp(node, BAD_CAST "nodeset", BAD_CAST cpuset);
     free(cpuset);
   }
   if (obj->complete_nodeset) {
-    hwloc_cpuset_asprintf(&cpuset, obj->complete_nodeset);
+    hwloc_bitmap_asprintf(&cpuset, obj->complete_nodeset);
     xmlNewProp(node, BAD_CAST "complete_nodeset", BAD_CAST cpuset);
     free(cpuset);
   }
   if (obj->allowed_nodeset) {
-    hwloc_cpuset_asprintf(&cpuset, obj->allowed_nodeset);
+    hwloc_bitmap_asprintf(&cpuset, obj->allowed_nodeset);
     xmlNewProp(node, BAD_CAST "allowed_nodeset", BAD_CAST cpuset);
     free(cpuset);
   }

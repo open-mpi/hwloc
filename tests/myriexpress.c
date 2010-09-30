@@ -38,35 +38,35 @@ int main(void)
   for(i=0; i<count; i++) {
     mx_endpoint_t ep;
     char *cpuset_string;
-    hwloc_cpuset_t set;
+    hwloc_bitmap_t set;
 
     ret = mx_open_endpoint(i, MX_ANY_ENDPOINT, 0, NULL, 0, &ep);
     if (ret != MX_SUCCESS)
       continue;
-    set = hwloc_cpuset_alloc();
+    set = hwloc_bitmap_alloc();
     err = hwloc_mx_endpoint_get_device_cpuset(topology, ep, set);
     if (err < 0) {
       perror("hwloc_mx_endpoint_get_device_cpuset failed");
       return -1;
     }
-    hwloc_cpuset_asprintf(&cpuset_string, set);
+    hwloc_bitmap_asprintf(&cpuset_string, set);
     printf("got cpuset %s for endpoint on board #%d\n",
 	   cpuset_string, i);
     free(cpuset_string);
-    hwloc_cpuset_free(set);
+    hwloc_bitmap_free(set);
     mx_close_endpoint(ep);
 
-    set = hwloc_cpuset_alloc();
+    set = hwloc_bitmap_alloc();
     err = hwloc_mx_board_get_device_cpuset(topology, i, set);
     if (err < 0) {
       perror("hwloc_mx_board_get_device_cpuset failed");
       return -1;
     }
-    hwloc_cpuset_asprintf(&cpuset_string, set);
+    hwloc_bitmap_asprintf(&cpuset_string, set);
     printf("got cpuset %s for board #%d\n",
            cpuset_string, i);
     free(cpuset_string);
-    hwloc_cpuset_free(set);
+    hwloc_bitmap_free(set);
   }
 
   hwloc_topology_destroy(topology);

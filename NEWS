@@ -17,8 +17,18 @@ in v0.9.1).
 Version 1.1.0
 -------------
 
-* CPU sets are now dynamically (re-)allocated, the maximal number of CPUs
-  (HWLOC_NBMAXCPUS) has been removed.
+* The cpuset API (hwloc/cpuset.h) is now deprecated. It is replaced by
+  the bitmap API (hwloc/bitmap.h) which offers the same features with more
+  generic names since it applies to CPU sets, node sets and more.
+  Backward compatibility with the cpuset API and ABI is still provided but
+  it will be removed in a future release. Replacing hwloc_cpuset with
+  hwloc_bitmap is enough to switch from the old API to the new one, with
+  the following exceptions:
+  - hwloc_cpuset_cpu -> hwloc_bitmap_setonly
+  - hwloc_cpuset_all_but_cpu -> hwloc_bitmap_allbut
+  - hwloc_cpuset_from_string -> hwloc_bitmap_sscanf
+* Bitmaps (and thus CPU sets) are dynamically (re-)allocated, the maximal
+  number of CPUs (HWLOC_NBMAXCPUS) has been removed.
 * Add an `infos' array in each object to store couples of info names and
   values. It enables generic storage of things like the old dmi board infos
   that were previously stored in machine specific attributes.

@@ -32,7 +32,7 @@
  */
 
 static int
-prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_cpuset_t hwloc_set)
+prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_bitmap_t hwloc_set)
 {
   unsigned cpu;
   cpuset_t target_cpuset;
@@ -43,9 +43,9 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_cpuset_t
 
   cpusetcreate(&target_cpuset);
   cpuemptyset(target_cpuset);
-  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+  hwloc_bitmap_foreach_begin(cpu, hwloc_set)
     cpuaddset(target_cpuset, cpu);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 
   cpusetcreate(&cpuset);
   cpusetcreate(&xor_cpuset);
@@ -79,11 +79,11 @@ out:
 /* Note: get_cpubind not available on OSF */
 
 static int
-hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   radset_t radset;
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
+  if (hwloc_bitmap_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if ((errno = pthread_rad_detach(thread)))
       return -1;
     return 0;
@@ -105,11 +105,11 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
 }
 
 static int
-hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   radset_t radset;
 
-  if (hwloc_cpuset_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
+  if (hwloc_bitmap_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
     if (rad_detach_pid(pid))
       return -1;
     return 0;
@@ -131,13 +131,13 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
 }
 
 static int
-hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, policy);
 }
 
 static int
-hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
 }
@@ -170,9 +170,9 @@ hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, mema
   radsetcreate(&mattr->mattr_radset);
   rademptyset(mattr->mattr_radset);
 
-  hwloc_cpuset_foreach_begin(node, nodeset)
+  hwloc_bitmap_foreach_begin(node, nodeset)
     radaddset(mattr->mattr_radset, node);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
   return 0;
 }
 
@@ -253,7 +253,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
       }
 
       nodes[radid] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, radid);
-      obj->cpuset = hwloc_cpuset_alloc();
+      obj->cpuset = hwloc_bitmap_alloc();
       obj->memory.local_memory = rad_get_physmem(radid) * getpagesize();
       obj->memory.page_types_len = 2;
       obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
@@ -265,9 +265,9 @@ hwloc_look_osf(struct hwloc_topology *topology)
 
       cursor = SET_CURSOR_INIT;
       while((cpuid = cpu_foreach(cpuset, 0, &cursor)) != CPU_NONE)
-	hwloc_cpuset_set(obj->cpuset, cpuid);
+	hwloc_bitmap_set(obj->cpuset, cpuid);
 
-      hwloc_debug_1arg_cpuset("node %d has cpuset %s\n",
+      hwloc_debug_1arg_bitmap("node %d has cpuset %s\n",
 		 radid, obj->cpuset);
 
       hwloc_insert_object_by_cpuset(topology, obj);

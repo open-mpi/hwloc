@@ -52,9 +52,9 @@ FILE *open_file(const char *filename, const char *mode)
 static void add_process_objects(hwloc_topology_t topology)
 {
   hwloc_obj_t root;
-  hwloc_cpuset_t cpuset;
+  hwloc_bitmap_t cpuset;
 #ifdef HWLOC_LINUX_SYS
-  hwloc_cpuset_t task_cpuset;
+  hwloc_bitmap_t task_cpuset;
 #endif /* HWLOC_LINUX_SYS */
   DIR *dir;
   struct dirent *dirent;
@@ -70,9 +70,9 @@ static void add_process_objects(hwloc_topology_t topology)
   dir  = opendir("/proc");
   if (!dir)
     return;
-  cpuset = hwloc_cpuset_alloc();
+  cpuset = hwloc_bitmap_alloc();
 #ifdef HWLOC_LINUX_SYS
-  task_cpuset = hwloc_cpuset_alloc();
+  task_cpuset = hwloc_bitmap_alloc();
 #endif /* HWLOC_LINUX_SYS */
 
   while ((dirent = readdir(dir))) {
@@ -137,7 +137,7 @@ static void add_process_objects(hwloc_topology_t topology)
           if (hwloc_linux_get_tid_cpubind(topology, local_tid, task_cpuset))
             continue;
 
-          if (proc_cpubind && hwloc_cpuset_isequal(task_cpuset, cpuset))
+          if (proc_cpubind && hwloc_bitmap_isequal(task_cpuset, cpuset))
             continue;
 
           snprintf(task_name, sizeof(task_name), "%s %li", name, local_tid);
@@ -152,15 +152,15 @@ static void add_process_objects(hwloc_topology_t topology)
     if (!proc_cpubind)
       continue;
 
-    if (hwloc_cpuset_isincluded(root->cpuset, cpuset))
+    if (hwloc_bitmap_isincluded(root->cpuset, cpuset))
       continue;
 
     hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name);
   }
 
-  hwloc_cpuset_free(cpuset);
+  hwloc_bitmap_free(cpuset);
 #ifdef HWLOC_LINUX_SYS
-  hwloc_cpuset_free(task_cpuset);
+  hwloc_bitmap_free(task_cpuset);
 #endif /* HWLOC_LINUX_SYS */
   closedir(dir);
 }

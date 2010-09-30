@@ -229,7 +229,7 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 }
 
 int
-hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_const_cpuset_t hwloc_set __hwloc_attribute_unused)
+hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_const_bitmap_t hwloc_set __hwloc_attribute_unused)
 {
   /* TODO Kerrighed: Use
    * int migrate (pid_t pid, int destination_node);
@@ -246,7 +246,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   size_t setsize;
   int err;
 
-  last = hwloc_cpuset_last(hwloc_set);
+  last = hwloc_bitmap_last(hwloc_set);
   if (last == -1) {
     errno = EINVAL;
     return -1;
@@ -256,9 +256,9 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   plinux_set = CPU_ALLOC(last+1);
 
   CPU_ZERO_S(setsize, plinux_set);
-  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+  hwloc_bitmap_foreach_begin(cpu, hwloc_set)
     CPU_SET_S(cpu, setsize, plinux_set);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 
   err = sched_setaffinity(tid, setsize, plinux_set);
 
@@ -269,9 +269,9 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   unsigned cpu;
 
   CPU_ZERO(&linux_set);
-  hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+  hwloc_bitmap_foreach_begin(cpu, hwloc_set)
     CPU_SET(cpu, &linux_set);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   return sched_setaffinity(tid, &linux_set);
@@ -279,7 +279,7 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   return sched_setaffinity(tid, sizeof(linux_set), &linux_set);
 #endif /* HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
 #elif defined(HWLOC_HAVE__SYSCALL3)
-  unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
+  unsigned long mask = hwloc_bitmap_to_ulong(hwloc_set);
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
   return sched_setaffinity(tid, (void*) &mask);
@@ -309,7 +309,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
     return nr_cpus;
 
   /* start with a nr_cpus that may contain the whole topology */
-  nr_cpus = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset) + 1;
+  nr_cpus = hwloc_bitmap_last(topology->levels[0][0]->complete_cpuset) + 1;
   while (1) {
     cpu_set_t *set = CPU_ALLOC(nr_cpus);
     size_t setsize = CPU_ALLOC_SIZE(nr_cpus);
@@ -324,7 +324,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
 #endif
 
 int
-hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_cpuset_t hwloc_set __hwloc_attribute_unused)
+hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_bitmap_t hwloc_set __hwloc_attribute_unused)
 {
   int err __hwloc_attribute_unused;
   /* TODO Kerrighed */
@@ -348,13 +348,13 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
     return -1;
   }
 
-  last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+  last = hwloc_bitmap_last(topology->levels[0][0]->complete_cpuset);
   assert(last != -1);
 
-  hwloc_cpuset_zero(hwloc_set);
+  hwloc_bitmap_zero(hwloc_set);
   for(cpu=0; cpu<=(unsigned) last; cpu++)
     if (CPU_ISSET_S(cpu, setsize, plinux_set))
-      hwloc_cpuset_set(hwloc_set, cpu);
+      hwloc_bitmap_set(hwloc_set, cpu);
 
   CPU_FREE(plinux_set);
 #elif defined(HWLOC_HAVE_CPU_SET)
@@ -369,10 +369,10 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   if (err < 0)
     return -1;
 
-  hwloc_cpuset_zero(hwloc_set);
+  hwloc_bitmap_zero(hwloc_set);
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, &linux_set))
-      hwloc_cpuset_set(hwloc_set, cpu);
+      hwloc_bitmap_set(hwloc_set, cpu);
 #elif defined(HWLOC_HAVE__SYSCALL3)
   unsigned long mask;
 
@@ -384,7 +384,7 @@ hwloc_linux_get_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
   if (err < 0)
     return -1;
 
-  hwloc_cpuset_from_ulong(hwloc_set, mask);
+  hwloc_bitmap_from_ulong(hwloc_set, mask);
 #else /* !_SYSCALL3 */
   errno = ENOSYS;
   return -1;
@@ -443,37 +443,37 @@ typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_
 static int
 hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
-  hwloc_cpuset_t cpuset = data;
+  hwloc_bitmap_t cpuset = data;
   return hwloc_linux_set_tid_cpubind(topology, tid, cpuset);
 }
 
 static int
 hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int policy)
 {
-  hwloc_cpuset_t *cpusets = data;
-  hwloc_cpuset_t cpuset = cpusets[0];
-  hwloc_cpuset_t tidset = cpusets[1];
+  hwloc_bitmap_t *cpusets = data;
+  hwloc_bitmap_t cpuset = cpusets[0];
+  hwloc_bitmap_t tidset = cpusets[1];
 
   if (hwloc_linux_get_tid_cpubind(topology, tid, tidset))
     return -1;
 
   /* reset the cpuset on first iteration */
   if (!idx)
-    hwloc_cpuset_zero(cpuset);
+    hwloc_bitmap_zero(cpuset);
 
   if (policy & HWLOC_CPUBIND_STRICT) {
     /* if STRICT, we want all threads to have the same binding */
     if (!idx) {
       /* this is the first thread, copy its binding */
-      hwloc_cpuset_copy(cpuset, tidset);
-    } else if (!hwloc_cpuset_isequal(cpuset, tidset)) {
+      hwloc_bitmap_copy(cpuset, tidset);
+    } else if (!hwloc_bitmap_isequal(cpuset, tidset)) {
       /* this is not the first thread, and it's binding is different */
       errno = EXDEV;
       return -1;
     }
   } else {
     /* if not STRICT, just OR all thread bindings */
-    hwloc_cpuset_or(cpuset, cpuset, tidset);
+    hwloc_bitmap_or(cpuset, cpuset, tidset);
   }
   return 0;
 }
@@ -537,7 +537,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 }
 
 static int
-hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   return hwloc_linux_foreach_proc_tid(topology, pid,
 				      hwloc_linux_foreach_proc_tid_set_cpubind_cb,
@@ -545,20 +545,20 @@ hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cp
 }
 
 static int
-hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
 {
-  hwloc_cpuset_t tidset = hwloc_cpuset_alloc();
-  hwloc_cpuset_t cpusets[2] = { hwloc_set, tidset };
+  hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
+  hwloc_bitmap_t cpusets[2] = { hwloc_set, tidset };
   int ret;
   ret = hwloc_linux_foreach_proc_tid(topology, pid,
 					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
 					 (void*) cpusets, policy);
-  hwloc_cpuset_free(tidset);
+  hwloc_bitmap_free(tidset);
   return ret;
 }
 
 static int
-hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   if (pid == 0)
     pid = topology->pid;
@@ -569,7 +569,7 @@ hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_c
 }
 
 static int
-hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
 {
   if (pid == 0)
     pid = topology->pid;
@@ -580,19 +580,19 @@ hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_cpuset_
 }
 
 static int
-hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy)
+hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
 {
   return hwloc_linux_set_pid_cpubind(topology, topology->pid, hwloc_set, policy);
 }
 
 static int
-hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy)
+hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
 {
   return hwloc_linux_get_pid_cpubind(topology, topology->pid, hwloc_set, policy);
 }
 
 static int
-hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   if (topology->pid) {
     errno = ENOSYS;
@@ -602,7 +602,7 @@ hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_cpuset
 }
 
 static int
-hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   if (topology->pid) {
     errno = ENOSYS;
@@ -615,7 +615,7 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_cpuset_t hwl
 #pragma weak pthread_setaffinity_np
 
 static int
-hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   int err;
 
@@ -647,7 +647,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
      int last;
      size_t setsize;
 
-     last = hwloc_cpuset_last(hwloc_set);
+     last = hwloc_bitmap_last(hwloc_set);
      if (last == -1) {
        errno = EINVAL;
        return -1;
@@ -657,9 +657,9 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
      plinux_set = CPU_ALLOC(last+1);
 
      CPU_ZERO_S(setsize, plinux_set);
-     hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+     hwloc_bitmap_foreach_begin(cpu, hwloc_set)
          CPU_SET_S(cpu, setsize, plinux_set);
-     hwloc_cpuset_foreach_end();
+     hwloc_bitmap_foreach_end();
 
      err = pthread_setaffinity_np(tid, setsize, plinux_set);
 
@@ -673,9 +673,9 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
      unsigned cpu;
 
      CPU_ZERO(&linux_set);
-     hwloc_cpuset_foreach_begin(cpu, hwloc_set)
+     hwloc_bitmap_foreach_begin(cpu, hwloc_set)
          CPU_SET(cpu, &linux_set);
-     hwloc_cpuset_foreach_end();
+     hwloc_bitmap_foreach_end();
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
      err = pthread_setaffinity_np(tid, &linux_set);
@@ -687,7 +687,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
   /* Use a separate block so that we can define specific variable
      types here */
   {
-      unsigned long mask = hwloc_cpuset_to_ulong(hwloc_set);
+      unsigned long mask = hwloc_bitmap_to_ulong(hwloc_set);
 
 #ifdef HWLOC_HAVE_OLD_SCHED_SETAFFINITY
       err = pthread_setaffinity_np(tid, (void*) &mask);
@@ -709,7 +709,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #pragma weak pthread_getaffinity_np
 
 static int
-hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_cpuset_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
 {
   int err;
 
@@ -737,7 +737,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
      int last;
      size_t setsize;
 
-     last = hwloc_cpuset_last(topology->levels[0][0]->complete_cpuset);
+     last = hwloc_bitmap_last(topology->levels[0][0]->complete_cpuset);
      assert (last != -1);
 
      setsize = CPU_ALLOC_SIZE(last+1);
@@ -750,10 +750,10 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
         return -1;
      }
 
-     hwloc_cpuset_zero(hwloc_set);
+     hwloc_bitmap_zero(hwloc_set);
      for(cpu=0; cpu<(unsigned) last; cpu++)
        if (CPU_ISSET_S(cpu, setsize, plinux_set))
-	 hwloc_cpuset_set(hwloc_set, cpu);
+	 hwloc_bitmap_set(hwloc_set, cpu);
 
      CPU_FREE(plinux_set);
   }
@@ -774,10 +774,10 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
         return -1;
      }
 
-     hwloc_cpuset_zero(hwloc_set);
+     hwloc_bitmap_zero(hwloc_set);
      for(cpu=0; cpu<CPU_SETSIZE; cpu++)
        if (CPU_ISSET(cpu, &linux_set))
-	 hwloc_cpuset_set(hwloc_set, cpu);
+	 hwloc_bitmap_set(hwloc_set, cpu);
   }
 #else /* CPU_SET */
   /* Use a separate block so that we can define specific variable
@@ -795,7 +795,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
         return -1;
       }
 
-     hwloc_cpuset_from_ulong(hwloc_set, mask);
+     hwloc_bitmap_from_ulong(hwloc_set, mask);
   }
 #endif /* CPU_SET */
 
@@ -858,9 +858,9 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nod
     return -1;
   }
 
-  hwloc_cpuset_foreach_begin(index, nodeset)
+  hwloc_bitmap_foreach_begin(index, nodeset)
     linuxmask[index/HWLOC_BITS_PER_LONG] |= 1 << (index % HWLOC_BITS_PER_LONG);
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 
   *max_os_index_p = max_os_index;
   *linuxmaskp = linuxmask;
@@ -1015,12 +1015,12 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, int 
     goto out_with_mask;
 
   if (linuxpolicy == MPOL_DEFAULT) {
-    hwloc_cpuset_copy(nodeset, hwloc_get_root_obj(topology)->nodeset);
+    hwloc_bitmap_copy(nodeset, hwloc_get_root_obj(topology)->nodeset);
   } else {
-    hwloc_cpuset_zero(nodeset);
+    hwloc_bitmap_zero(nodeset);
     for (index = 0; index < max_os_index; index++) {
       if (linuxmask[index/HWLOC_BITS_PER_LONG] & (1 << (index % HWLOC_BITS_PER_LONG)))
-	hwloc_cpuset_set(nodeset, index);
+	hwloc_bitmap_set(nodeset, index);
     }
   }
 
@@ -1123,7 +1123,7 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 #define KERNEL_CPU_MAP_LEN (KERNEL_CPU_MASK_BITS/4+2)
 
 int
-hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
+hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
 {
   unsigned long *maps;
   unsigned long map;
@@ -1134,7 +1134,7 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
   maps = malloc(nr_maps_allocated * sizeof(*maps));
 
   /* reset to zero first */
-  hwloc_cpuset_zero(set);
+  hwloc_bitmap_zero(set);
 
   /* parse the whole mask */
   while (fscanf(file, "%lx,", &map) == 1) /* read one kernel cpu mask and the ending comma */
@@ -1156,14 +1156,14 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
   /* convert into a set */
 #if KERNEL_CPU_MASK_BITS == HWLOC_BITS_PER_LONG
   for(i=0; i<nr_maps; i++)
-    hwloc_cpuset_set_ith_ulong(set, i, maps[i]);
+    hwloc_bitmap_set_ith_ulong(set, i, maps[i]);
 #else
   for(i=0; i<(nr_maps+1)/2; i++) {
     unsigned long ulong;
     ulong = maps[2*i];
     if (2*i+1<nr_maps)
       ulong |= maps[2*i+1] << KERNEL_CPU_MASK_BITS;
-    hwloc_cpuset_set_ith_ulong(set, i, ulong);
+    hwloc_bitmap_set_ith_ulong(set, i, ulong);
   }
 #endif
 
@@ -1172,17 +1172,17 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
   return 0;
 }
 
-static hwloc_cpuset_t
+static hwloc_bitmap_t
 hwloc_parse_cpumap(const char *mappath, int fsroot_fd)
 {
-  hwloc_cpuset_t set;
+  hwloc_bitmap_t set;
   FILE * file;
 
   file = hwloc_fopen(mappath, "r", fsroot_fd);
   if (!file)
     return NULL;
 
-  set = hwloc_cpuset_alloc();
+  set = hwloc_bitmap_alloc();
   hwloc_linux_parse_cpumap_file(file, set);
 
   fclose(file);
@@ -1428,12 +1428,12 @@ static void
 hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
 				    const char *cgroup_mntpnt, const char *cpuset_mntpnt, const char *cpuset_name,
 				    const char *attr_name,
-				    hwloc_cpuset_t admin_enabled_cpus_set)
+				    hwloc_bitmap_t admin_enabled_cpus_set)
 {
   char *cpuset_mask;
   char *current, *comma, *tmp;
   int prevlast, nextfirst, nextlast; /* beginning/end of enabled-segments */
-  hwloc_cpuset_t tmpset;
+  hwloc_bitmap_t tmpset;
 
   cpuset_mask = hwloc_read_linux_cpuset_mask(cgroup_mntpnt, cpuset_mntpnt, cpuset_name,
 					     attr_name, topology->backend_params.sysfs.root_fd);
@@ -1459,7 +1459,7 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
       nextlast = nextfirst;
     if (prevlast+1 <= nextfirst-1) {
       hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
-      hwloc_cpuset_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
+      hwloc_bitmap_clr_range(admin_enabled_cpus_set, prevlast+1, nextfirst-1);
     }
 
     /* switch to next enabled-segment */
@@ -1471,10 +1471,10 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
 
   hwloc_debug("%s [%d:%d] excluded by cpuset\n", attr_name, prevlast+1, nextfirst-1);
   /* no easy way to clear until the infinity */
-  tmpset = hwloc_cpuset_alloc();
-  hwloc_cpuset_set_range(tmpset, 0, prevlast);
-  hwloc_cpuset_and(admin_enabled_cpus_set, admin_enabled_cpus_set, tmpset);
-  hwloc_cpuset_free(tmpset);
+  tmpset = hwloc_bitmap_alloc();
+  hwloc_bitmap_set_range(tmpset, 0, prevlast);
+  hwloc_bitmap_and(admin_enabled_cpus_set, admin_enabled_cpus_set, tmpset);
+  hwloc_bitmap_free(tmpset);
 
   free(cpuset_mask);
 }
@@ -1598,7 +1598,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
   DIR *dir;
   struct dirent *dirent;
   hwloc_obj_t node;
-  hwloc_cpuset_t nodeset = hwloc_cpuset_alloc();
+  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
 
   *found = 0;
 
@@ -1611,7 +1611,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 	  if (strncmp(dirent->d_name, "node", 4))
 	    continue;
 	  osnode = strtoul(dirent->d_name+4, NULL, 0);
-	  hwloc_cpuset_set(nodeset, osnode);
+	  hwloc_bitmap_set(nodeset, osnode);
 	  nbnodes++;
 	}
       closedir(dir);
@@ -1619,7 +1619,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 
   if (nbnodes <= 1)
     {
-      hwloc_cpuset_free(nodeset);
+      hwloc_bitmap_free(nodeset);
       return;
     }
 
@@ -1636,11 +1636,11 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
        * sparse distances but keep them in order in the sysfs distance files.
        */
       index = 0;
-      hwloc_cpuset_foreach_begin (osnode, nodeset) {
+      hwloc_bitmap_foreach_begin (osnode, nodeset) {
 	distance_indexes[index] = osnode;
 	index++;
-      } hwloc_cpuset_foreach_end();
-      hwloc_cpuset_free(nodeset);
+      } hwloc_bitmap_foreach_end();
+      hwloc_bitmap_free(nodeset);
 
 #ifdef HWLOC_DEBUG
       hwloc_debug("%s", "numa distance indexes: ");
@@ -1653,7 +1653,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       /* Get actual distances now */
       for (index = 0; index < nbnodes; index++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
-          hwloc_cpuset_t cpuset;
+          hwloc_bitmap_t cpuset;
 	  unsigned int osnode = distance_indexes[index];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
@@ -1663,12 +1663,12 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 
           node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
           node->cpuset = cpuset;
-          node->nodeset = hwloc_cpuset_alloc();
-          hwloc_cpuset_set(node->nodeset, osnode);
+          node->nodeset = hwloc_bitmap_alloc();
+          hwloc_bitmap_set(node->nodeset, osnode);
 
           hwloc_sysfs_node_meminfo_info(topology, path, osnode, &node->memory);
 
-          hwloc_debug_1arg_cpuset("os node %u has cpuset %s\n",
+          hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
           hwloc_insert_object_by_cpuset(topology, node);
           nodes[index] = node;
@@ -1749,7 +1749,7 @@ hwloc_read_unit32be(const char *p, const char *p1, uint32_t *buf, int root_fd)
 typedef struct {
   unsigned int n, allocated;
   struct {
-    hwloc_cpuset_t cpuset;
+    hwloc_bitmap_t cpuset;
     uint32_t ibm_phandle;
     uint32_t l2_cache;
     char *name;
@@ -1757,7 +1757,7 @@ typedef struct {
 } device_tree_cpus_t;
 
 static void
-add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_cpuset_t cpuset,
+add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
     uint32_t l2_cache, uint32_t ibm_phandle, const char *name)
 {
   if (cpus->n == cpus->allocated) {
@@ -1768,7 +1768,7 @@ add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_cpuset_t cpuset,
     cpus->p = realloc(cpus->p, cpus->allocated * sizeof(cpus->p[0]));
   }
   cpus->p[cpus->n].ibm_phandle = ibm_phandle;
-  cpus->p[cpus->n].cpuset = (NULL == cpuset)?NULL:hwloc_cpuset_dup(cpuset);
+  cpus->p[cpus->n].cpuset = (NULL == cpuset)?NULL:hwloc_bitmap_dup(cpuset);
   cpus->p[cpus->n].l2_cache = l2_cache;
   cpus->p[cpus->n].name = strdup(name);
   ++cpus->n;
@@ -1777,7 +1777,7 @@ add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_cpuset_t cpuset,
 /* Walks over the cache list in order to detect nested caches and CPU mask for each */
 static int
 look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
-    uint32_t ibm_phandle, unsigned int *level, hwloc_cpuset_t cpuset)
+    uint32_t ibm_phandle, unsigned int *level, hwloc_bitmap_t cpuset)
 {
   int ret = -1;
   if ((NULL == level) || (NULL == cpuset))
@@ -1786,7 +1786,7 @@ look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
     if (ibm_phandle != cpus->p[i].l2_cache)
       continue;
     if (NULL != cpus->p[i].cpuset) {
-      hwloc_cpuset_or(cpuset, cpuset, cpus->p[i].cpuset);
+      hwloc_bitmap_or(cpuset, cpuset, cpus->p[i].cpuset);
       ret = 0;
     } else {
       ++(*level);
@@ -1800,7 +1800,7 @@ look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
 
 static void
 try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
-  const char *cpu, unsigned int level, hwloc_cpuset_t cpuset)
+  const char *cpu, unsigned int level, hwloc_bitmap_t cpuset)
 {
   /* Ignore Instruction caches */
   /* d-cache-block-size - ignore */
@@ -1824,8 +1824,8 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   c->attr->cache.depth = level;
   c->attr->cache.linesize = d_cache_line_size;
   c->attr->cache.size = d_cache_size;
-  c->cpuset = hwloc_cpuset_dup(cpuset);
-  hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n", level, c->cpuset);
+  c->cpuset = hwloc_bitmap_dup(cpuset);
+  hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n", level, c->cpuset);
   hwloc_insert_object_by_cpuset(topology, c);
 }
 
@@ -1867,20 +1867,20 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
     }
     else if (0 == strcmp(device_type, "cpu")) {
       /* Found CPU */
-      hwloc_cpuset_t cpuset = NULL;
+      hwloc_bitmap_t cpuset = NULL;
       size_t cb = 0;
       uint32_t *threads = hwloc_read_raw(cpu, "ibm,ppc-interrupt-server#s", &cb, root_fd);
       uint32_t nthreads = cb / sizeof(threads[0]);
 
       if (NULL != threads) {
-        cpuset = hwloc_cpuset_alloc();
+        cpuset = hwloc_bitmap_alloc();
         for (unsigned int i = 0; i < nthreads; ++i) {
-          hwloc_cpuset_set(cpuset, ntohl(threads[i]));
+          hwloc_bitmap_set(cpuset, ntohl(threads[i]));
         }
         free(threads);
       } else if ((unsigned int)-1 != reg) {
-        cpuset = hwloc_cpuset_alloc();
-        hwloc_cpuset_set(cpuset, reg);
+        cpuset = hwloc_bitmap_alloc();
+        hwloc_bitmap_set(cpuset, reg);
       }
 
       if (NULL == cpuset) {
@@ -1890,13 +1890,13 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 
         /* Add core */
         struct hwloc_obj *core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
-        core->cpuset = hwloc_cpuset_dup(cpuset);
+        core->cpuset = hwloc_bitmap_dup(cpuset);
         hwloc_insert_object_by_cpuset(topology, core);
 
         /* Add L1 cache */
         try_add_cache_from_device_tree_cpu(topology, cpu, 1, cpuset);
 
-        hwloc_cpuset_free(cpuset);
+        hwloc_bitmap_free(cpuset);
       }
       free(device_type);
     }
@@ -1929,7 +1929,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 
     /* Calculate cache level and CPU mask */
     unsigned int level = 2;
-    hwloc_cpuset_t cpuset = hwloc_cpuset_alloc();
+    hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
     if (0 == look_powerpc_device_tree_discover_cache(&cpus,
           cpus.p[i].ibm_phandle, &level, cpuset)) {
 
@@ -1938,12 +1938,12 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 
       try_add_cache_from_device_tree_cpu(topology, cpu, level, cpuset);
     }
-    hwloc_cpuset_free(cpuset);
+    hwloc_bitmap_free(cpuset);
   }
 
   /* Do cleanup */
   for (unsigned int i = 0; i < cpus.n; ++i) {
-    hwloc_cpuset_free(cpus.p[i].cpuset);
+    hwloc_bitmap_free(cpus.p[i].cpuset);
     free(cpus.p[i].name);
   }
   free(cpus.p);
@@ -1953,14 +1953,14 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 static void
 look_sysfscpu(struct hwloc_topology *topology, const char *path)
 {
-  hwloc_cpuset_t cpuset; /* Set of cpus for which we have topology information */
+  hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
 #define CPU_TOPOLOGY_STR_LEN 128
   char str[CPU_TOPOLOGY_STR_LEN];
   DIR *dir;
   int i,j;
   FILE *fd;
 
-  cpuset = hwloc_cpuset_alloc();
+  cpuset = hwloc_bitmap_alloc();
 
   /* fill the cpuset of interesting cpus */
   dir = hwloc_opendir(path, topology->backend_params.sysfs.root_fd);
@@ -1975,7 +1975,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       cpu = strtoul(dirent->d_name+3, NULL, 0);
 
       /* Maybe we don't have topology information but at least it exists */
-      hwloc_cpuset_set(topology->levels[0][0]->complete_cpuset, cpu);
+      hwloc_bitmap_set(topology->levels[0][0]->complete_cpuset, cpu);
 
       /* check whether this processor is online */
       sprintf(str, "%s/cpu%lu/online", path, cpu);
@@ -1987,7 +1987,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	    hwloc_debug("os proc %lu is online\n", cpu);
 	  } else {
 	    hwloc_debug("os proc %lu is offline\n", cpu);
-            hwloc_cpuset_clr(topology->levels[0][0]->online_cpuset, cpu);
+            hwloc_bitmap_clr(topology->levels[0][0]->online_cpuset, cpu);
 	  }
 	} else {
 	  fclose(fd);
@@ -2002,20 +2002,20 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	continue;
       }
 
-      hwloc_cpuset_set(cpuset, cpu);
+      hwloc_bitmap_set(cpuset, cpu);
     }
     closedir(dir);
   }
 
   topology->support.discovery->pu = 1;
-  hwloc_debug_1arg_cpuset("found %d cpu topologies, cpuset %s\n",
-	     hwloc_cpuset_weight(cpuset), cpuset);
+  hwloc_debug_1arg_bitmap("found %d cpu topologies, cpuset %s\n",
+	     hwloc_bitmap_weight(cpuset), cpuset);
 
   unsigned caches_added = 0;
-  hwloc_cpuset_foreach_begin(i, cpuset)
+  hwloc_bitmap_foreach_begin(i, cpuset)
     {
       struct hwloc_obj *socket, *core, *thread;
-      hwloc_cpuset_t socketset, coreset, threadset;
+      hwloc_bitmap_t socketset, coreset, threadset;
       unsigned mysocketid, mycoreid;
 
       /* look at the socket */
@@ -2025,16 +2025,16 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      if (socketset && hwloc_cpuset_weight(socketset) >= 1) {
-        if (hwloc_cpuset_first(socketset) == i) {
+      if (socketset && hwloc_bitmap_weight(socketset) >= 1) {
+        if (hwloc_bitmap_first(socketset) == i) {
           /* first cpu in this socket, add the socket */
           socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
           socket->cpuset = socketset;
-          hwloc_debug_1arg_cpuset("os socket %u has cpuset %s\n",
+          hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
                      mysocketid, socketset);
           hwloc_insert_object_by_cpuset(topology, socket);
         } else
-          hwloc_cpuset_free(socketset);
+          hwloc_bitmap_free(socketset);
       }
 
       /* look at the core */
@@ -2044,25 +2044,25 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      if (coreset && hwloc_cpuset_weight(coreset) >= 1) {
-        if (hwloc_cpuset_first(coreset) == i) {
+      if (coreset && hwloc_bitmap_weight(coreset) >= 1) {
+        if (hwloc_bitmap_first(coreset) == i) {
           core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
           core->cpuset = coreset;
-          hwloc_debug_1arg_cpuset("os core %u has cpuset %s\n",
+          hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
                      mycoreid, coreset);
           hwloc_insert_object_by_cpuset(topology, core);
         } else
-          hwloc_cpuset_free(coreset);
+          hwloc_bitmap_free(coreset);
       }
 
       /* look at the thread */
-      threadset = hwloc_cpuset_alloc();
-      hwloc_cpuset_cpu(threadset, i);
+      threadset = hwloc_bitmap_alloc();
+      hwloc_bitmap_setonly(threadset, i);
 
       /* add the thread */
       thread = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
       thread->cpuset = threadset;
-      hwloc_debug_1arg_cpuset("thread %d has cpuset %s\n",
+      hwloc_debug_1arg_bitmap("thread %d has cpuset %s\n",
 		 i, threadset);
       hwloc_insert_object_by_cpuset(topology, thread);
 
@@ -2072,7 +2072,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	char mappath[SHARED_CPU_MAP_STRLEN];
 	char str2[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
 	struct hwloc_obj *cache;
-	hwloc_cpuset_t cacheset;
+	hwloc_bitmap_t cacheset;
 	unsigned long kB = 0;
 	unsigned linesize = 0;
 	int depth; /* 0 for L1, .... */
@@ -2125,32 +2125,32 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
         if (cacheset) {
-          if (hwloc_cpuset_weight(cacheset) < 1)
+          if (hwloc_bitmap_weight(cacheset) < 1)
             /* mask is wrong (happens on ia64), assumes it's not shared */
-            hwloc_cpuset_cpu(cacheset, i);
+            hwloc_bitmap_setonly(cacheset, i);
 
-          if (hwloc_cpuset_first(cacheset) == i) {
+          if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
             cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
             cache->attr->cache.linesize = linesize;
             cache->cpuset = cacheset;
-            hwloc_debug_1arg_cpuset("cache depth %d has cpuset %s\n",
+            hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n",
                        depth, cacheset);
             hwloc_insert_object_by_cpuset(topology, cache);
             ++caches_added;
           } else
-            hwloc_cpuset_free(cacheset);
+            hwloc_bitmap_free(cacheset);
         }
       }
     }
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 
   if (0 == caches_added)
     look_powerpc_device_tree(topology);
 
-  hwloc_cpuset_free(cpuset);
+  hwloc_bitmap_free(cpuset);
 }
 
 
@@ -2161,7 +2161,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 #define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 static int
 look_cpuinfo(struct hwloc_topology *topology, const char *path,
-	     hwloc_cpuset_t online_cpuset)
+	     hwloc_bitmap_t online_cpuset)
 {
   FILE *fd;
   char str[strlen(PHYSID)+1+9+1+1];
@@ -2182,7 +2182,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned missingcore;
   unsigned long processor = (unsigned long) -1;
   unsigned i;
-  hwloc_cpuset_t cpuset;
+  hwloc_bitmap_t cpuset;
   hwloc_obj_t obj;
 
   for (i = 0; i < HWLOC_NBMAXCPUS; i++) {
@@ -2200,7 +2200,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       return -1;
     }
 
-  cpuset = hwloc_cpuset_alloc();
+  cpuset = hwloc_bitmap_alloc();
   /* Just record information and count number of sockets and cores */
 
   hwloc_debug("%s", "\n\n * Topology extraction from /proc/cpuinfo *\n\n");
@@ -2214,26 +2214,26 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (endptr==c)							\
 	  {								\
             hwloc_debug("%s", "no number in "field" field of /proc/cpuinfo\n"); \
-            hwloc_cpuset_free(cpuset);					\
+            hwloc_bitmap_free(cpuset);					\
             return -1;							\
 	  }								\
 	else if (var==ULONG_MAX)						\
 	  {								\
             hwloc_debug("%s", "too big "field" number in /proc/cpuinfo\n"); \
-            hwloc_cpuset_free(cpuset);					\
+            hwloc_bitmap_free(cpuset);					\
             return -1;							\
 	  }								\
 	hwloc_debug(field " %lu\n", var)
 #      define getprocnb_end()			\
       }
       getprocnb_begin(PROCESSOR,processor);
-      hwloc_cpuset_set(cpuset, processor);
+      hwloc_bitmap_set(cpuset, processor);
 
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, processor);
-      obj->cpuset = hwloc_cpuset_alloc();
-      hwloc_cpuset_cpu(obj->cpuset, processor);
+      obj->cpuset = hwloc_bitmap_alloc();
+      hwloc_bitmap_setonly(obj->cpuset, processor);
 
-      hwloc_debug_2args_cpuset("cpu %u (os %lu) has cpuset %s\n",
+      hwloc_debug_2args_bitmap("cpu %u (os %lu) has cpuset %s\n",
 		 numprocs, processor, obj->cpuset);
       numprocs++;
       hwloc_insert_object_by_cpuset(topology, obj);
@@ -2272,18 +2272,18 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   fclose(fd);
 
   if (processor == (unsigned long) -1) {
-    hwloc_cpuset_free(cpuset);
+    hwloc_bitmap_free(cpuset);
     return -1;
   }
 
   topology->support.discovery->pu = 1;
   /* setup the final number of procs */
   procid_max = processor + 1;
-  hwloc_cpuset_copy(online_cpuset, cpuset);
-  hwloc_cpuset_free(cpuset);
+  hwloc_bitmap_copy(online_cpuset, cpuset);
+  hwloc_bitmap_free(cpuset);
 
   hwloc_debug("%u online processors found, with id max %u\n", numprocs, procid_max);
-  hwloc_debug_cpuset("online processor cpuset: %s\n", online_cpuset);
+  hwloc_debug_bitmap("online processor cpuset: %s\n", online_cpuset);
 
   hwloc_debug("%s", "\n * Topology summary *\n");
   hwloc_debug("%u processors (%u max id)\n", numprocs, procid_max);
@@ -2292,7 +2292,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
    * provide bogus information. We should rather drop it. */
   missingsocket=0;
   missingcore=0;
-  hwloc_cpuset_foreach_begin(processor, online_cpuset)
+  hwloc_bitmap_foreach_begin(processor, online_cpuset)
     if (proc_physids[processor] == (unsigned) -1)
       missingsocket=1;
     if (proc_coreids[processor] == (unsigned) -1)
@@ -2300,7 +2300,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     if (missingcore && missingsocket)
       /* No usable information, no need to continue */
       break;
-  hwloc_cpuset_foreach_end();
+  hwloc_bitmap_foreach_end();
 
   hwloc_debug("%u sockets%s\n", numsockets, missingsocket ? ", but some missing socket" : "");
   if (!missingsocket && numsockets>0)
@@ -2378,7 +2378,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
     struct dirent *dirent;
     char path[128];
     hwloc_obj_t machine;
-    hwloc_cpuset_t machine_online_set;
+    hwloc_bitmap_t machine_online_set;
 
     /* replace top-level object type with SYSTEM and add some MACHINE underneath */
 
@@ -2391,16 +2391,16 @@ hwloc_look_linux(struct hwloc_topology *topology)
       unsigned long node;
       if (strncmp(dirent->d_name, "node", 4))
 	continue;
-      machine_online_set = hwloc_cpuset_alloc();
+      machine_online_set = hwloc_bitmap_alloc();
       node = strtoul(dirent->d_name+4, NULL, 0);
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/cpuinfo", node);
       err = look_cpuinfo(topology, path, machine_online_set);
       if (err < 0)
         continue;
-      hwloc_cpuset_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
+      hwloc_bitmap_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;
-      hwloc_debug_1arg_cpuset("machine number %lu has cpuset %s\n",
+      hwloc_debug_1arg_bitmap("machine number %lu has cpuset %s\n",
 		 node, machine_online_set);
       hwloc_insert_object_by_cpuset(topology, machine);
 
