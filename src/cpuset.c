@@ -978,7 +978,7 @@ int hwloc_bitmap_weight(const struct hwloc_bitmap_s * set)
 
 /* TODO move somewhere else */
 
-void hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_bitmap_t cpuset, hwloc_nodeset_t nodeset)
+void hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_bitmap_t cpuset, hwloc_bitmap_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;
@@ -995,7 +995,7 @@ void hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_bitmap_t cpu
 		hwloc_bitmap_set(nodeset, obj->os_index);
 }
 
-void hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_bitmap_t cpuset, hwloc_const_nodeset_t nodeset)
+void hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_bitmap_t cpuset, hwloc_const_bitmap_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;

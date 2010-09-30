@@ -225,7 +225,7 @@ static int hwloc_win_get_VirtualAllocExNumaProc(void) {
 }
 
 static void *
-hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, int policy __hwloc_attribute_unused) {
+hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_bitmap_t nodeset, int policy __hwloc_attribute_unused) {
   hwloc_bitmap_t nodeset1;
   int node;
 

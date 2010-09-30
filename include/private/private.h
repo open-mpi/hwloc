@@ -77,13 +77,13 @@ struct hwloc_topology {
   int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bitmap_t set, int policy);
 #endif
 
-  int (*set_membind)(hwloc_topology_t topology, hwloc_const_nodeset_t set, int policy);
-  int (*get_membind)(hwloc_topology_t topology, hwloc_nodeset_t set, int * policy);
-  int (*set_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t set, int policy);
-  int (*get_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t set, int * policy);
-  int (*set_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t set, int policy);
-  int (*get_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t set, int * policy);
-  void *(*alloc_membind)(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t set, int policy);
+  int (*set_membind)(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset, int policy);
+  int (*get_membind)(hwloc_topology_t topology, hwloc_bitmap_t nodeset, int * policy);
+  int (*set_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t nodeset, int policy);
+  int (*get_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t nodeset, int * policy);
+  int (*set_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_bitmap_t nodeset, int policy);
+  int (*get_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t nodeset, int * policy);
+  void *(*alloc_membind)(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t nodeset, int policy);
   int (*free_membind)(hwloc_topology_t topology, void *addr, size_t len);
 
   struct hwloc_topology_support support;

@@ -270,20 +270,14 @@ HWLOC_DECLSPEC int hwloc_bitmap_compare(hwloc_const_bitmap_t bitmap1, hwloc_cons
 
 /* TODO move somewhere else */
 
-/** \brief
- * Set of NUMA nodes represented as an opaque pointer to an internal bitmask.
- */
-typedef struct hwloc_bitmap_s * hwloc_nodeset_t;
-typedef const struct hwloc_bitmap_s * hwloc_const_nodeset_t;
-
 struct hwloc_topology;
 /** \brief Convert a CPU set into a NUMA node set
  */
-HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, hwloc_nodeset_t nodeset);
+HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, hwloc_bitmap_t nodeset);
 
 /** \brief Convert a NUMA node set set into a CPU set
  */
-HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_bitmap_t cpuset, hwloc_const_nodeset_t nodeset);
+HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_bitmap_t cpuset, hwloc_const_bitmap_t nodeset);
 
 /** @} */
 

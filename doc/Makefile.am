@@ -349,7 +349,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_linux_parse_cpumap_file.3 \
         $(DOX_MAN_DIR)/man3/hwloc_mx_board_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_mx_endpoint_get_device_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_nodeset_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
