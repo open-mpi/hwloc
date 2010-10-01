@@ -320,8 +320,11 @@ void hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_bitmap_t cpu
 	hwloc_obj_t obj;
 
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-		/* Assume the whole system */
-		hwloc_bitmap_fill(nodeset);
+		 if (hwloc_bitmap_iszero(cpuset))
+			hwloc_bitmap_zero(nodeset);
+		else
+			/* Assume the whole system */
+			hwloc_bitmap_fill(nodeset);
 		return;
 	}
 
@@ -336,9 +339,12 @@ void hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_bitmap_t cpuset,
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;
 
-	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-		/* Assume the whole system */
-		hwloc_bitmap_fill(cpuset);
+	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN ) {
+		if (hwloc_bitmap_iszero(nodeset))
+			hwloc_bitmap_zero(cpuset);
+		else
+			/* Assume the whole system */
+			hwloc_bitmap_fill(cpuset);
 		return;
 	}
 

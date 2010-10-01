@@ -1048,10 +1048,20 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind_cpuset(hwloc_topology_t topology, size_
 HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len);
 
 /** \brief Convert a CPU set into a NUMA node set
+ *
+ * If the topology contains no NUMA nodes, the machine is considered
+ * as a single memory node, and the following behavior is used:
+ * If \p cpuset is empty, \p nodeset will be emptied as well.
+ * Otherwise \p nodeset will be entirely filled.
  */
 HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, hwloc_bitmap_t nodeset);
 
 /** \brief Convert a NUMA node set set into a CPU set
+ *
+ * If the topology contains no NUMA nodes, the machine is considered
+ * as a single memory node, and the following behavior is used:
+ * If \p nodeset is empty, \p cpuset will be emptied as well.
+ * Otherwise \p cpuset will be entirely filled.
  */
 HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_bitmap_t cpuset, hwloc_const_bitmap_t nodeset);
 
