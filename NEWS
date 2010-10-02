@@ -21,9 +21,12 @@ Version 1.1.0
   the bitmap API (hwloc/bitmap.h) which offers the same features with more
   generic names since it applies to CPU sets, node sets and more.
   Backward compatibility with the cpuset API and ABI is still provided but
-  it will be removed in a future release. Replacing hwloc_cpuset with
-  hwloc_bitmap is enough to switch from the old API to the new one, with
-  the following exceptions:
+  it will be removed in a future release.
+  Old types (hwloc_cpuset_t, ...) are still available as a way to clarify
+  what kind of hwloc_bitmap_t each API function manipulates.
+  Upgrading to the new API only requires to replace hwloc_cpuset_ function
+  calls with the corresponding hwloc_bitmap_ calls, with the following
+  renaming exceptions:
   - hwloc_cpuset_cpu -> hwloc_bitmap_setonly
   - hwloc_cpuset_all_but_cpu -> hwloc_bitmap_allbut
   - hwloc_cpuset_from_string -> hwloc_bitmap_sscanf

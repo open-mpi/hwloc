@@ -24,9 +24,6 @@ extern "C" {
 
 #include "hwloc/bitmap.h"
 
-typedef hwloc_bitmap_t hwloc_cpuset_t;
-typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
-
 #define hwloc_cpuset_alloc hwloc_bitmap_alloc
 #define hwloc_cpuset_free hwloc_bitmap_free
 #define hwloc_cpuset_dup hwloc_bitmap_dup

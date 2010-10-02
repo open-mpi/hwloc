@@ -39,6 +39,11 @@ extern "C" {
 #define hwloc_topology HWLOC_NAME(topology)
 #define hwloc_topology_t HWLOC_NAME(topology_t)
 
+#define hwloc_cpuset_t HWLOC_NAME(cpuset_t)
+#define hwloc_const_cpuset_t HWLOC_NAME(const_cpuset_t)
+#define hwloc_nodeset_t HWLOC_NAME(nodeset_t)
+#define hwloc_const_nodeset_t HWLOC_NAME(const_nodeset_t)
+
 #define HWLOC_OBJ_SYSTEM HWLOC_NAME_CAPS(OBJ_SYSTEM)
 #define HWLOC_OBJ_MACHINE HWLOC_NAME_CAPS(OBJ_MACHINE)
 #define HWLOC_OBJ_NODE HWLOC_NAME_CAPS(OBJ_NODE)

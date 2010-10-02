@@ -38,7 +38,7 @@ extern "C" {
  * node number as input parameter.
  */
 static __hwloc_inline int
-hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_bitmap_t cpuset,
+hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset,
 				    unsigned long *mask, unsigned long *maxnode)
 {
   unsigned long outmaxnode = -1;
@@ -80,7 +80,7 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_bitm
  * a maximal node number as input parameter).
  */
 static __hwloc_inline int
-hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_bitmap_t cpuset,
+hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 				      const unsigned long *mask, unsigned long maxnode)
 {
   hwloc_obj_t node;
@@ -129,7 +129,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_bitmap_t
  * \return newly allocated struct bitmask.
  */
 static __hwloc_inline struct bitmask * __hwloc_attribute_malloc
-hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_bitmap_t cpuset)
+hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset)
 {
   struct bitmask *bitmask;
   hwloc_obj_t node = NULL;
@@ -160,7 +160,7 @@ hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_bit
  * that use a struct bitmask as an output parameter.
  */
 static __hwloc_inline int
-hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_bitmap_t cpuset,
+hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 				       const struct bitmask *bitmask)
 {
   hwloc_obj_t node;
@@ -206,7 +206,7 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_bitmap_
  * that use a nodemask_t as an input parameter.
  */
 static __hwloc_inline int
-hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_const_bitmap_t cpuset,
+hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset,
 				      nodemask_t *nodemask)
 {
   hwloc_obj_t node = NULL;
@@ -232,7 +232,7 @@ hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_const_bi
  * that use a nodemask_t as an output parameter.
  */
 static __hwloc_inline int
-hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_bitmap_t cpuset,
+hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 					const nodemask_t *nodemask)
 {
   hwloc_obj_t node;

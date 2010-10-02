@@ -66,6 +66,31 @@ typedef struct hwloc_topology * hwloc_topology_t;
 
 
 
+/** \defgroup hwlocality_sets Object sets
+ * @{
+ */
+
+/** \brief A CPU set is a bitmap whose bits are set according to CPU physical OS indexes.
+ *
+ * It may be consulted and modified with the bitmap API as any ::hwloc_bitmap_t (see hwloc/bitmap.h).
+ */
+typedef hwloc_bitmap_t hwloc_cpuset_t;
+/** \brief A non-modifiable ::hwloc_cpuset_t. */
+typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
+
+/** \brief A node set is a bitmap whose bits are set according to NUMA memory node physical OS indexes.
+ *
+ * It may be consulted and modified with the bitmap API as any ::hwloc_bitmap_t (see hwloc/bitmap.h).
+ */
+typedef hwloc_bitmap_t hwloc_nodeset_t;
+/** \brief A non-modifiable ::hwloc_nodeset_t.
+ */
+typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
+
+/** @} */
+
+
+
 /** \defgroup hwlocality_types Topology Object Types
  * @{
  */
@@ -220,7 +245,7 @@ struct hwloc_obj {
   void *userdata;			/**< \brief Application-given private data pointer, initialized to \c NULL, use it as you wish */
 
   /* cpusets and nodesets */
-  hwloc_bitmap_t cpuset;		/**< \brief CPUs covered by this object
+  hwloc_cpuset_t cpuset;		/**< \brief CPUs covered by this object
                                           *
                                           * This is the set of CPUs for which there are PU objects in the topology
                                           * under this object, i.e. which are known to be physically contained in this
@@ -233,7 +258,7 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
-  hwloc_bitmap_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
+  hwloc_cpuset_t complete_cpuset;       /**< \brief The complete CPU set of logical processors of this object,
                                           *
                                           * This includes not only the same as the cpuset field, but also the CPUs for
                                           * which topology information is unknown or incomplete, and the CPUs that are
@@ -244,7 +269,7 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
-  hwloc_bitmap_t online_cpuset;         /**< \brief The CPU set of online logical processors
+  hwloc_cpuset_t online_cpuset;         /**< \brief The CPU set of online logical processors
                                           *
                                           * This includes the CPUs contained in this object that are online, i.e. draw
                                           * power and can execute threads.  It may however not be allowed to bind to
@@ -252,7 +277,7 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
-  hwloc_bitmap_t allowed_cpuset;        /**< \brief The CPU set of allowed logical processors
+  hwloc_cpuset_t allowed_cpuset;        /**< \brief The CPU set of allowed logical processors
                                           *
                                           * This includes the CPUs contained in this object which are allowed for
                                           * binding, i.e. passing them to the hwloc binding functions should not return
@@ -263,7 +288,7 @@ struct hwloc_obj {
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
 
-  hwloc_bitmap_t nodeset;               /**< \brief NUMA nodes covered by this object or containing this object
+  hwloc_nodeset_t nodeset;              /**< \brief NUMA nodes covered by this object or containing this object
                                           *
                                           * This is the set of NUMA nodes for which there are NODE objects in the
                                           * topology under or above this object, i.e. which are known to be physically
@@ -275,7 +300,7 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
-  hwloc_bitmap_t complete_nodeset;      /**< \brief The complete NUMA node set of this object,
+  hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,
                                           *
                                           * This includes not only the same as the nodeset field, but also the NUMA
                                           * nodes for which topology information is unknown or incomplete, and the nodes
@@ -286,7 +311,7 @@ struct hwloc_obj {
                                           *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
-  hwloc_bitmap_t allowed_nodeset;       /**< \brief The set of allowed NUMA memory nodes
+  hwloc_nodeset_t allowed_nodeset;      /**< \brief The set of allowed NUMA memory nodes
                                           *
                                           * This includes the NUMA memory nodes contained in this object which are
                                           * allowed for memory allocation, i.e. passing them to NUMA node-directed
@@ -577,7 +602,7 @@ HWLOC_DECLSPEC void hwloc_topology_export_xml(hwloc_topology_t topology, const c
  *
  * \return the newly-created object
  */
-HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_bitmap_t cpuset, const char *name);
+HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
 
 /** \brief Add a MISC object to the topology
  *
@@ -849,12 +874,12 @@ typedef enum {
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t set,
+HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set,
 			    int policy);
 
 /** \brief Get current process or thread binding
  */
-HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_bitmap_t set, int policy);
+HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
 
 /** \brief Bind a process \p pid on cpus given in bitmap \p set
  *
@@ -863,7 +888,7 @@ HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_bitmap_t s
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
  */
-HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t set, int policy);
+HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
 
 /** \brief Get the current binding of process \p pid
  *
@@ -872,7 +897,7 @@ HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
  */
-HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int policy);
+HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
 
 #ifdef hwloc_thread_t
 /** \brief Bind a thread \p tid on cpus given in bitmap \p set
@@ -882,7 +907,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
  *
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
  */
-HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_bitmap_t set, int policy);
+HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
 #endif
 
 #ifdef hwloc_thread_t
@@ -893,7 +918,7 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  *
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
  */
-HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bitmap_t set, int policy);
+HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
 /** @} */

@@ -35,21 +35,21 @@ extern "C" {
  * Might be used when reading CPU set from sysfs attributes such as topology
  * and caches for processors, or local_cpus for devices.
  */
-HWLOC_DECLSPEC int hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set);
+HWLOC_DECLSPEC int hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set);
 
 /** \brief Bind a thread \p tid on cpus given in cpuset \p set
  *
  * The behavior is exactly the same as the Linux sched_setaffinity system call,
  * but uses a hwloc cpuset.
  */
-HWLOC_DECLSPEC int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_bitmap_t set);
+HWLOC_DECLSPEC int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cpuset_t set);
 
 /** \brief Get the current binding of thread \p tid
  *
  * The behavior is exactly the same as the Linux sched_setaffinity system call,
  * but uses a hwloc cpuset.
  */
-HWLOC_DECLSPEC int hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_bitmap_t set);
+HWLOC_DECLSPEC int hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t set);
 
 /** @} */
 
