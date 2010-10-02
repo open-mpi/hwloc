@@ -112,7 +112,7 @@ HWLOC_DECLSPEC void hwloc_bitmap_zero(hwloc_bitmap_t bitmap);
 HWLOC_DECLSPEC void hwloc_bitmap_fill(hwloc_bitmap_t bitmap);
 
 /** \brief Empty the bitmap \p bitmap and add bit \p index */
-HWLOC_DECLSPEC void hwloc_bitmap_setonly(hwloc_bitmap_t bitmap, unsigned index);
+HWLOC_DECLSPEC void hwloc_bitmap_only(hwloc_bitmap_t bitmap, unsigned index);
 
 /** \brief Fill the bitmap \p and clear the index \p index */
 HWLOC_DECLSPEC void hwloc_bitmap_allbut(hwloc_bitmap_t bitmap, unsigned index);

@@ -521,7 +521,7 @@ unsigned long hwloc_bitmap_to_ith_ulong(const struct hwloc_bitmap_s *set, unsign
 	return HWLOC_SUBBITMAP_READULONG(set, i);
 }
 
-void hwloc_bitmap_setonly(struct hwloc_bitmap_s * set, unsigned cpu)
+void hwloc_bitmap_only(struct hwloc_bitmap_s * set, unsigned cpu)
 {
 	unsigned index = HWLOC_SUBBITMAP_INDEX(cpu);
 
@@ -1049,7 +1049,7 @@ void hwloc_cpuset_from_ulong(struct hwloc_bitmap_s *set, unsigned long mask) { h
 void hwloc_cpuset_from_ith_ulong(struct hwloc_bitmap_s *set, unsigned i, unsigned long mask) { hwloc_bitmap_from_ith_ulong(set, i, mask); }
 unsigned long hwloc_cpuset_to_ulong(const struct hwloc_bitmap_s *set) { return hwloc_bitmap_to_ulong(set); }
 unsigned long hwloc_cpuset_to_ith_ulong(const struct hwloc_bitmap_s *set, unsigned i) { return hwloc_bitmap_to_ith_ulong(set, i); }
-void hwloc_cpuset_cpu(struct hwloc_bitmap_s * set, unsigned cpu) { hwloc_bitmap_setonly(set, cpu); }
+void hwloc_cpuset_cpu(struct hwloc_bitmap_s * set, unsigned cpu) { hwloc_bitmap_only(set, cpu); }
 void hwloc_cpuset_all_but_cpu(struct hwloc_bitmap_s * set, unsigned cpu) { hwloc_bitmap_allbut(set, cpu); }
 void hwloc_cpuset_set(struct hwloc_bitmap_s * set, unsigned cpu) { hwloc_bitmap_set(set, cpu); }
 void hwloc_cpuset_set_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsigned endcpu) { hwloc_bitmap_set_range(set, begincpu, endcpu); }

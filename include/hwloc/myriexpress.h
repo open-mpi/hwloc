@@ -38,7 +38,7 @@ extern "C" {
  */
 static __hwloc_inline int
 hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
-				 unsigned index, hwloc_bitmap_t set)
+				 unsigned index, hwloc_cpuset_t set)
 {
   uint32_t in, out;
 
@@ -71,7 +71,7 @@ hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
  */
 static __hwloc_inline int
 hwloc_mx_endpoint_get_device_cpuset(hwloc_topology_t topology,
-				    mx_endpoint_t endpoint, hwloc_bitmap_t set)
+				    mx_endpoint_t endpoint, hwloc_cpuset_t set)
 {
   uint64_t nid;
   uint32_t nindex, eid;

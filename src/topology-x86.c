@@ -396,7 +396,7 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
     if (!topology->get_thisthread_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
       for (i = 0; i < nbprocs; i++) {
-        hwloc_bitmap_setonly(cpuset, i);
+        hwloc_bitmap_only(cpuset, i);
         if (topology->set_thisthread_cpubind(topology, cpuset, HWLOC_CPUBIND_STRICT))
           continue;
         look_proc(&infos[i], highest_cpuid, highest_ext_cpuid, cpuid_type);
@@ -412,7 +412,7 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
     if (!topology->get_thisproc_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
       for (i = 0; i < nbprocs; i++) {
-        hwloc_bitmap_setonly(cpuset, i);
+        hwloc_bitmap_only(cpuset, i);
         if (topology->set_thisproc_cpubind(topology, cpuset, HWLOC_CPUBIND_STRICT))
           continue;
         look_proc(&infos[i], highest_cpuid, highest_ext_cpuid, cpuid_type);

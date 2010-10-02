@@ -287,9 +287,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_last.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_next.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_not.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_only.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_or.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_bitmap_setonly.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_singlify.3 \
@@ -305,6 +305,10 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_weight.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_xor.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_const_cpuset_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nodeset_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_const_nodeset_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cuda_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
