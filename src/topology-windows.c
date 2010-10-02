@@ -226,7 +226,6 @@ static int hwloc_win_get_VirtualAllocExNumaProc(void) {
 
 static void *
 hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, int policy __hwloc_attribute_unused) {
-  hwloc_nodeset_t nodeset1;
   int node;
 
   if (policy & HWLOC_MEMBIND_STRICT) {
@@ -234,17 +233,13 @@ hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size
     return NULL;
   }
 
-  nodeset1 = hwloc_bitmap_alloc();
-
-  node = hwloc_bitmap_first(nodeset);
-  hwloc_bitmap_cpu(nodeset1, node);
-  if (!hwloc_bitmap_isequal(nodeset, nodeset1)) {
+  if (hwloc_bitmap_weight(nodeset) != 1) {
     /* Not a single node, can't do this */
     errno = EXDEV;
     return NULL;
   }
-  hwloc_bitmap_free(nodeset1);
 
+  node = hwloc_bitmap_first(nodeset);
   return VirtualAllocExNumaProc(GetCurrentProcess(), NULL, len, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE, node);
 }
 
