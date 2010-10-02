@@ -993,80 +993,80 @@ typedef enum {
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset, int policy);
+HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy);
 
 /** \brief Bind current process memory on memory nodes near the given cpuset \p cpuset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_membind_cpuset(hwloc_topology_t topology, hwloc_const_bitmap_t cpuset, int policy);
+HWLOC_DECLSPEC int hwloc_set_membind_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, int policy);
 
 /** \brief Get current process memory binding in nodeset \p nodeset
  */
-HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_bitmap_t nodeset, int * policy);
+HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, int * policy);
 
 /** \brief Get current process memory binding in cpuset \p cpuset
  */
-HWLOC_DECLSPEC int hwloc_get_membind_cpuset(hwloc_topology_t topology, hwloc_bitmap_t cpuset, int * policy);
+HWLOC_DECLSPEC int hwloc_get_membind_cpuset(hwloc_topology_t topology, hwloc_cpuset_t cpuset, int * policy);
 
 /** \brief Bind given process memory on memory nodes near the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t nodeset, int policy);
+HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, int policy);
 
 /** \brief Bind given process memory on memory nodes near the given cpuset \p cpuset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t cpuset, int policy);
+HWLOC_DECLSPEC int hwloc_set_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, int policy);
 
 /** \brief Get current process memory binding in nodeset \p nodeset
  */
-HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t nodeset, int * policy);
+HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, int * policy);
 
 /** \brief Get current process memory binding in cpuset \p cpuset
  */
-HWLOC_DECLSPEC int hwloc_get_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t cpuset, int * policy);
+HWLOC_DECLSPEC int hwloc_get_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset, int * policy);
 
 /** \brief Bind some memory range on memory nodes near the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_bitmap_t nodeset, int policy);
+HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy);
 
 /** \brief Bind some memory range on memory nodes near the given cpuset \p cpuset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_bitmap_t cpuset, int policy);
+HWLOC_DECLSPEC int hwloc_set_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t cpuset, int policy);
 
 /** \brief Get some memory range memory binding in nodeset \p nodeset
  */
-HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t nodeset, int * policy);
+HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, int * policy);
 
 /** \brief Get some memory range memory binding in cpuset \p cpuset
  */
-HWLOC_DECLSPEC int hwloc_get_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t cpuset, int * policy);
+HWLOC_DECLSPEC int hwloc_get_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t cpuset, int * policy);
 
 /** \brief Allocate some memory on memory nodes near the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t nodeset, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy) __hwloc_attribute_malloc;
 
 /** \brief Allocate some memory on memory nodes near the given cpuset \p cpuset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC void *hwloc_alloc_membind_cpuset(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t cpuset, int policy) __hwloc_attribute_malloc;
+HWLOC_DECLSPEC void *hwloc_alloc_membind_cpuset(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, int policy) __hwloc_attribute_malloc;
 
 /** \brief Free some memory allocated by hwloc_alloc_membind
  */
@@ -1079,7 +1079,7 @@ HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, siz
  * If \p cpuset is empty, \p nodeset will be emptied as well.
  * Otherwise \p nodeset will be entirely filled.
  */
-HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, hwloc_bitmap_t nodeset);
+HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset);
 
 /** \brief Convert a NUMA node set set into a CPU set
  *
@@ -1088,7 +1088,7 @@ HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwl
  * If \p nodeset is empty, \p cpuset will be emptied as well.
  * Otherwise \p cpuset will be entirely filled.
  */
-HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_bitmap_t cpuset, hwloc_const_bitmap_t nodeset);
+HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset);
 
 /** @} */
 
