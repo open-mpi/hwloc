@@ -829,7 +829,7 @@ hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, int policy)
 }
 
 static int
-hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset,
+hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset,
 				      unsigned *max_os_index_p, unsigned long **linuxmaskp)
 {
   unsigned max_os_index = 0; /* highest os_index + 1 */
@@ -870,7 +870,7 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_bit
 
 #ifdef HWLOC_HAVE_MBIND
 static int
-hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_bitmap_t nodeset, int policy)
+hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy)
 {
   unsigned max_os_index; /* highest os_index + 1 */
   unsigned long *linuxmask;
@@ -914,7 +914,7 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
 }
 
 static void *
-hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t nodeset, int policy)
+hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy)
 {
   void *buffer;
   int err;
@@ -941,7 +941,7 @@ hwloc_linux_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, voi
 
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
-hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset, int policy)
+hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy)
 {
   unsigned max_os_index; /* highest os_index + 1 */
   unsigned long *linuxmask;
@@ -980,7 +980,7 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset,
 }
 
 static int
-hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_bitmap_t nodeset, int *policy)
+hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, int *policy)
 {
   hwloc_obj_t obj;
   unsigned max_os_index; /* highest os_index + 1 */

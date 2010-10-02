@@ -141,8 +141,8 @@ hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bi
 }
 #endif
 
-static hwloc_const_bitmap_t
-hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset)
+static hwloc_const_nodeset_t
+hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
 {
   hwloc_const_bitmap_t topology_nodeset = hwloc_get_root_obj(topology)->nodeset;
   hwloc_const_bitmap_t complete_nodeset = hwloc_get_root_obj(topology)->complete_nodeset;
@@ -172,7 +172,7 @@ hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset)
 }
 
 static int
-hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_bitmap_t nodeset, hwloc_const_bitmap_t cpuset)
+hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_const_cpuset_t cpuset)
 {
   hwloc_const_bitmap_t topology_set = hwloc_topology_get_topology_cpuset(topology);
   hwloc_const_bitmap_t complete_set = hwloc_topology_get_complete_cpuset(topology);
@@ -207,7 +207,7 @@ hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_bitmap_t nodeset, hwlo
 
 
 int
-hwloc_set_membind(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset, int policy)
+hwloc_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy)
 {
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
@@ -221,9 +221,9 @@ hwloc_set_membind(hwloc_topology_t topology, hwloc_const_bitmap_t nodeset, int p
 }
 
 int
-hwloc_set_membind_cpuset(hwloc_topology_t topology, hwloc_const_bitmap_t set, int policy)
+hwloc_set_membind_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t set, int policy)
 {
-  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+  hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   int ret;
 
   if (!hwloc_fix_membind_cpuset(topology, nodeset, set))
@@ -236,7 +236,7 @@ hwloc_set_membind_cpuset(hwloc_topology_t topology, hwloc_const_bitmap_t set, in
 }
 
 int
-hwloc_get_membind(hwloc_topology_t topology, hwloc_bitmap_t nodeset, int * policy)
+hwloc_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, int * policy)
 {
   if (topology->get_membind)
     return topology->get_membind(topology, nodeset, policy);
@@ -246,9 +246,9 @@ hwloc_get_membind(hwloc_topology_t topology, hwloc_bitmap_t nodeset, int * polic
 }
 
 int
-hwloc_get_membind_cpuset(hwloc_topology_t topology, hwloc_bitmap_t set, int * policy)
+hwloc_get_membind_cpuset(hwloc_topology_t topology, hwloc_cpuset_t set, int * policy)
 {
-  hwloc_bitmap_t nodeset;
+  hwloc_nodeset_t nodeset;
   int ret;
 
   nodeset = hwloc_bitmap_alloc();
@@ -261,7 +261,7 @@ hwloc_get_membind_cpuset(hwloc_topology_t topology, hwloc_bitmap_t set, int * po
 }
 
 int
-hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t nodeset, int policy)
+hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, int policy)
 {
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
@@ -275,9 +275,9 @@ hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_b
 }
 
 int
-hwloc_set_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t set, int policy)
+hwloc_set_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy)
 {
-  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+  hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   int ret;
 
   if (!hwloc_fix_membind_cpuset(topology, nodeset, set))
@@ -290,7 +290,7 @@ hwloc_set_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_
 }
 
 int
-hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t nodeset, int * policy)
+hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, int * policy)
 {
   if (topology->get_proc_membind)
     return topology->get_proc_membind(topology, pid, nodeset, policy);
@@ -300,9 +300,9 @@ hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_
 }
 
 int
-hwloc_get_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int * policy)
+hwloc_get_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int * policy)
 {
-  hwloc_bitmap_t nodeset;
+  hwloc_nodeset_t nodeset;
   int ret;
 
   nodeset = hwloc_bitmap_alloc();
@@ -315,7 +315,7 @@ hwloc_get_proc_membind_cpuset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_
 }
 
 int
-hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_bitmap_t nodeset, int policy)
+hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy)
 {
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
@@ -329,9 +329,9 @@ hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
 }
 
 int
-hwloc_set_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_bitmap_t set, int policy)
+hwloc_set_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t set, int policy)
 {
-  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+  hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   int ret;
 
   if (!hwloc_fix_membind_cpuset(topology, nodeset, set))
@@ -344,7 +344,7 @@ hwloc_set_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_
 }
 
 int
-hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t nodeset, int * policy)
+hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, int * policy)
 {
   if (topology->get_area_membind)
     return topology->get_area_membind(topology, addr, len, nodeset, policy);
@@ -354,9 +354,9 @@ hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
 }
 
 int
-hwloc_get_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_bitmap_t set, int * policy)
+hwloc_get_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t set, int * policy)
 {
-  hwloc_bitmap_t nodeset;
+  hwloc_nodeset_t nodeset;
   int ret;
 
   nodeset = hwloc_bitmap_alloc();
@@ -369,7 +369,7 @@ hwloc_get_area_membind_cpuset(hwloc_topology_t topology, const void *addr, size_
 }
 
 void *
-hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t nodeset, int policy)
+hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy)
 {
   nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
@@ -406,9 +406,9 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t 
 }
 
 void *
-hwloc_alloc_membind_cpuset(hwloc_topology_t topology, size_t len, hwloc_const_bitmap_t set, int policy)
+hwloc_alloc_membind_cpuset(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, int policy)
 {
-  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+  hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   void *ret;
 
   if (!hwloc_fix_membind_cpuset(topology, nodeset, set))
