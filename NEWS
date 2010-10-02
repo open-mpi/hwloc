@@ -27,7 +27,7 @@ Version 1.1.0
   Upgrading to the new API only requires to replace hwloc_cpuset_ function
   calls with the corresponding hwloc_bitmap_ calls, with the following
   renaming exceptions:
-  - hwloc_cpuset_cpu -> hwloc_bitmap_setonly
+  - hwloc_cpuset_cpu -> hwloc_bitmap_only
   - hwloc_cpuset_all_but_cpu -> hwloc_bitmap_allbut
   - hwloc_cpuset_from_string -> hwloc_bitmap_sscanf
 * Bitmaps (and thus CPU sets) are dynamically (re-)allocated, the maximal

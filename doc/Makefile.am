@@ -286,9 +286,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_last.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_next.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_not.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_only.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_or.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_bitmap_setonly.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_singlify.3 \

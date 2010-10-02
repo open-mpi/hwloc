@@ -1801,7 +1801,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       /* look at the thread */
       threadset = hwloc_bitmap_alloc();
-      hwloc_bitmap_setonly(threadset, i);
+      hwloc_bitmap_only(threadset, i);
 
       /* add the thread */
       thread = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
@@ -1871,7 +1871,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
         if (cacheset) {
           if (hwloc_bitmap_weight(cacheset) < 1)
             /* mask is wrong (happens on ia64), assumes it's not shared */
-            hwloc_bitmap_setonly(cacheset, i);
+            hwloc_bitmap_only(cacheset, i);
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
@@ -1975,7 +1975,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, processor);
       obj->cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_setonly(obj->cpuset, processor);
+      hwloc_bitmap_only(obj->cpuset, processor);
 
       hwloc_debug_2args_bitmap("cpu %u (os %lu) has cpuset %s\n",
 		 numprocs, processor, obj->cpuset);

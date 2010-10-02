@@ -11,7 +11,7 @@
  * hwloc/bitmap.h should be used instead. Most hwloc_cpuset_foo functions are
  * replaced with hwloc_bitmap_foo. The only exceptions are:
  * - hwloc_cpuset_from_string -> hwloc_bitmap_sscanf
- * - hwloc_cpuset_cpu -> hwloc_bitmap_setonly
+ * - hwloc_cpuset_cpu -> hwloc_bitmap_only
  * - hwloc_cpuset_all_but_cpu -> hwloc_bitmap_allbut
  */
 
@@ -40,7 +40,7 @@ extern "C" {
 #define hwloc_cpuset_from_ith_ulong hwloc_bitmap_from_ith_ulong
 #define hwloc_cpuset_to_ulong hwloc_bitmap_to_ulong
 #define hwloc_cpuset_to_ith_ulong hwloc_bitmap_to_ith_ulong
-#define hwloc_cpuset_cpu hwloc_bitmap_setonly
+#define hwloc_cpuset_cpu hwloc_bitmap_only
 #define hwloc_cpuset_all_but_cpu hwloc_bitmap_allbut
 #define hwloc_cpuset_set hwloc_bitmap_set
 #define hwloc_cpuset_set_range hwloc_bitmap_set_range

@@ -154,7 +154,7 @@ extern "C" {
 #define hwloc_bitmap_from_ith_ulong HWLOC_NAME(bitmap_from_ith_ulong)
 #define hwloc_bitmap_to_ulong HWLOC_NAME(bitmap_to_ulong)
 #define hwloc_bitmap_to_ith_ulong HWLOC_NAME(bitmap_to_ith_ulong)
-#define hwloc_bitmap_setonly HWLOC_NAME(bitmap_setonly)
+#define hwloc_bitmap_only HWLOC_NAME(bitmap_only)
 #define hwloc_bitmap_allbut HWLOC_NAME(bitmap_allbut)
 #define hwloc_bitmap_set HWLOC_NAME(bitmap_set)
 #define hwloc_bitmap_set_range HWLOC_NAME(bitmap_set_range)
