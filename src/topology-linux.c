@@ -2060,40 +2060,35 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 }
 
 static void
-hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
+hwloc__get_dmi_one_info(struct hwloc_topology *topology, hwloc_obj_t obj, char *sysfs_name, char *hwloc_name)
 {
-#define DMI_BOARD_STRINGS_LEN 50
-  char dmi_line[DMI_BOARD_STRINGS_LEN];
+  char sysfs_path[128];
+  char dmi_line[64];
   char *tmp;
   FILE *fd;
 
-  dmi_line[0] = '\0';
-  fd = hwloc_fopen("/sys/class/dmi/id/board_vendor", "r", topology->backend_params.sysfs.root_fd);
-  if (fd) {
-    tmp = fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
-    fclose (fd);
-    if (tmp && dmi_line[0] != '\0') {
-      tmp = strchr(dmi_line, '\n');
-      if (tmp)
-	*tmp = '\0';
-      hwloc_debug("found DMI board vendor '%s'\n", dmi_line);
-      hwloc_add_object_info(obj, "DMIBoardVendor", dmi_line);
-    }
-  }
+  snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/dmi/id/%s", sysfs_name);
 
   dmi_line[0] = '\0';
-  fd = hwloc_fopen("/sys/class/dmi/id/board_name", "r", topology->backend_params.sysfs.root_fd);
+  fd = hwloc_fopen(sysfs_path, "r", topology->backend_params.sysfs.root_fd);
   if (fd) {
-    tmp = fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
+    tmp = fgets(dmi_line, sizeof(dmi_line), fd);
     fclose (fd);
     if (tmp && dmi_line[0] != '\0') {
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      hwloc_debug("found DMI board name '%s'\n", dmi_line);
-      hwloc_add_object_info(obj, "DMIBoardName", dmi_line);
+      hwloc_debug("found %s '%s'\n", hwloc_name, dmi_line);
+      hwloc_add_object_info(obj, hwloc_name, dmi_line);
     }
   }
+}
+
+static void
+hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
+{
+  hwloc__get_dmi_one_info(topology, obj, "board_vendor", "DMIBoardVendor");
+  hwloc__get_dmi_one_info(topology, obj, "board_name", "DMIBoardName");
 }
 
 void
