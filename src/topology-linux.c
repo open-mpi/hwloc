@@ -2087,8 +2087,24 @@ hwloc__get_dmi_one_info(struct hwloc_topology *topology, hwloc_obj_t obj, char *
 static void
 hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
+  hwloc__get_dmi_one_info(topology, obj, "product_name", "DMIProductName");
+  hwloc__get_dmi_one_info(topology, obj, "product_version", "DMIProductVersion");
+  hwloc__get_dmi_one_info(topology, obj, "product_serial", "DMIProductSerial");
+  hwloc__get_dmi_one_info(topology, obj, "product_uuid", "DMIProductUUID");
   hwloc__get_dmi_one_info(topology, obj, "board_vendor", "DMIBoardVendor");
   hwloc__get_dmi_one_info(topology, obj, "board_name", "DMIBoardName");
+  hwloc__get_dmi_one_info(topology, obj, "board_version", "DMIBoardVersion");
+  hwloc__get_dmi_one_info(topology, obj, "board_serial", "DMIBoardSerial");
+  hwloc__get_dmi_one_info(topology, obj, "board_asset_tag", "DMIBoardAssetTag");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_vendor", "DMIChassisVendor");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_type", "DMIChassisType");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_version", "DMIChassisVersion");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_serial", "DMIChassisSerial");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_asset_tag", "DMIChassisAssetTag");
+  hwloc__get_dmi_one_info(topology, obj, "bios_vendor", "DMIBIOSVendor");
+  hwloc__get_dmi_one_info(topology, obj, "bios_version", "DMIBIOSVersion");
+  hwloc__get_dmi_one_info(topology, obj, "bios_date", "DMIBIOSDate");
+  hwloc__get_dmi_one_info(topology, obj, "sys_vendor", "DMISysVendor");
 }
 
 void
