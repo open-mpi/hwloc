@@ -1660,7 +1660,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
     if (NULL == cpus.p[i].cpuset) {
       hwloc_debug("%s\n", "no cpuset");
     } else {
-      hwloc_debug_cpuset("cpuset %s\n", cpus.p[i].cpuset);
+      hwloc_debug_bitmap("cpuset %s\n", cpus.p[i].cpuset);
     }
   }
 #endif
