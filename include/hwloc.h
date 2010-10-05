@@ -81,6 +81,10 @@ typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
 /** \brief A node set is a bitmap whose bits are set according to NUMA memory node physical OS indexes.
  *
  * It may be consulted and modified with the bitmap API as any ::hwloc_bitmap_t (see hwloc/bitmap.h).
+ *
+ * If there are no NUMA nodes in the system (when the whole memory is considered
+ * as a single memory bank), the nodeset may be either empty (no memory selected)
+ * or full (whole memory selected).
  */
 typedef hwloc_bitmap_t hwloc_nodeset_t;
 /** \brief A non-modifiable ::hwloc_nodeset_t.

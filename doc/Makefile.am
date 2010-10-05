@@ -273,9 +273,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_glibc_sched_affinity.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ith_ulong.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_nodemask.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_intersects.3 \
@@ -299,9 +296,18 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ith_ulong.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_nodemask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_bitmask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_nodemask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_ulongs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nodeset_from_linux_libnuma_bitmask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nodeset_from_linux_libnuma_nodemask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nodeset_from_linux_libnuma_ulongs.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nodeset_to_linux_libnuma_bitmask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nodeset_to_linux_libnuma_nodemask.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nodeset_to_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_weight.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_xor.3 \

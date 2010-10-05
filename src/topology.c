@@ -1559,6 +1559,11 @@ hwloc_discover(struct hwloc_topology *topology)
   hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
   remove_empty(topology, &topology->levels[0][0]);
 
+  if (!topology->levels[0][0]) {
+    fprintf(stderr, "Topology became empty, aborting!\n");
+    abort();
+  }
+
   print_objects(topology, 0, topology->levels[0][0]);
 
   hwloc_debug("%s", "\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");

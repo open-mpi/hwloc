@@ -1,4 +1,4 @@
-Machine (phys=0 local=16468292KB total=16468292KB DMIBoardVendor="Dell Inc." DMIBoardName=0NR282 Backend=Linux)
+Machine (phys=0 local=16468292KB total=16468292KB DMIProductName="PowerEdge 2950" DMIProductVersion= DMIBoardVendor="Dell Inc." DMIBoardName=0NR282 DMIBoardVersion=A00 DMIBoardAssetTag= DMIChassisVendor="Dell Inc." DMIChassisType=23 DMIChassisVersion= DMIChassisAssetTag=)
   Socket #0 (phys=0)
     L1Cache #0 (32KB line=64)
       Core #0 (phys=0)

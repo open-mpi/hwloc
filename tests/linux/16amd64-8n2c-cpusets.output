@@ -1,4 +1,4 @@
-Machine (phys=0 total=41943040KB DMIBoardVendor="TYAN Computer Corp" DMIBoardName="S4881 " Backend=Linux LinuxCgroup=/dummy)
+Machine (phys=0 total=41943040KB DMIBoardVendor="TYAN Computer Corp" DMIBoardName="S4881 " DMIBoardVersion=S4881 DMIBoardAssetTag= Backend=Linux LinuxCgroup=/dummy)
   NUMANode #0 (phys=0)
     Socket #0 (phys=0)
       L2Cache #0 (1024KB line=64)
