@@ -1666,7 +1666,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
     if (NULL == cpus.p[i].cpuset) {
       hwloc_debug("%s\n", "no cpuset");
     } else {
-      hwloc_debug_cpuset("cpuset %s\n", cpus.p[i].cpuset);
+      hwloc_debug_bitmap("cpuset %s\n", cpus.p[i].cpuset);
     }
   }
 #endif
@@ -1807,7 +1807,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       /* look at the thread */
       threadset = hwloc_bitmap_alloc();
-      hwloc_bitmap_setonly(threadset, i);
+      hwloc_bitmap_only(threadset, i);
 
       /* add the thread */
       thread = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
@@ -1877,7 +1877,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
         if (cacheset) {
           if (hwloc_bitmap_weight(cacheset) < 1)
             /* mask is wrong (happens on ia64), assumes it's not shared */
-            hwloc_bitmap_setonly(cacheset, i);
+            hwloc_bitmap_only(cacheset, i);
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
@@ -1981,7 +1981,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, processor);
       obj->cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_setonly(obj->cpuset, processor);
+      hwloc_bitmap_only(obj->cpuset, processor);
 
       hwloc_debug_2args_bitmap("cpu %u (os %lu) has cpuset %s\n",
 		 numprocs, processor, obj->cpuset);
@@ -2066,40 +2066,51 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 }
 
 static void
-hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
+hwloc__get_dmi_one_info(struct hwloc_topology *topology, hwloc_obj_t obj, char *sysfs_name, char *hwloc_name)
 {
-#define DMI_BOARD_STRINGS_LEN 50
-  char dmi_line[DMI_BOARD_STRINGS_LEN];
+  char sysfs_path[128];
+  char dmi_line[64];
   char *tmp;
   FILE *fd;
 
-  dmi_line[0] = '\0';
-  fd = hwloc_fopen("/sys/class/dmi/id/board_vendor", "r", topology->backend_params.sysfs.root_fd);
-  if (fd) {
-    tmp = fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
-    fclose (fd);
-    if (tmp && dmi_line[0] != '\0') {
-      tmp = strchr(dmi_line, '\n');
-      if (tmp)
-	*tmp = '\0';
-      hwloc_debug("found DMI board vendor '%s'\n", dmi_line);
-      hwloc_add_object_info(obj, "DMIBoardVendor", dmi_line);
-    }
-  }
+  snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/dmi/id/%s", sysfs_name);
 
   dmi_line[0] = '\0';
-  fd = hwloc_fopen("/sys/class/dmi/id/board_name", "r", topology->backend_params.sysfs.root_fd);
+  fd = hwloc_fopen(sysfs_path, "r", topology->backend_params.sysfs.root_fd);
   if (fd) {
-    tmp = fgets(dmi_line, DMI_BOARD_STRINGS_LEN, fd);
+    tmp = fgets(dmi_line, sizeof(dmi_line), fd);
     fclose (fd);
     if (tmp && dmi_line[0] != '\0') {
       tmp = strchr(dmi_line, '\n');
       if (tmp)
 	*tmp = '\0';
-      hwloc_debug("found DMI board name '%s'\n", dmi_line);
-      hwloc_add_object_info(obj, "DMIBoardName", dmi_line);
+      hwloc_debug("found %s '%s'\n", hwloc_name, dmi_line);
+      hwloc_add_object_info(obj, hwloc_name, dmi_line);
     }
   }
+}
+
+static void
+hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
+{
+  hwloc__get_dmi_one_info(topology, obj, "product_name", "DMIProductName");
+  hwloc__get_dmi_one_info(topology, obj, "product_version", "DMIProductVersion");
+  hwloc__get_dmi_one_info(topology, obj, "product_serial", "DMIProductSerial");
+  hwloc__get_dmi_one_info(topology, obj, "product_uuid", "DMIProductUUID");
+  hwloc__get_dmi_one_info(topology, obj, "board_vendor", "DMIBoardVendor");
+  hwloc__get_dmi_one_info(topology, obj, "board_name", "DMIBoardName");
+  hwloc__get_dmi_one_info(topology, obj, "board_version", "DMIBoardVersion");
+  hwloc__get_dmi_one_info(topology, obj, "board_serial", "DMIBoardSerial");
+  hwloc__get_dmi_one_info(topology, obj, "board_asset_tag", "DMIBoardAssetTag");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_vendor", "DMIChassisVendor");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_type", "DMIChassisType");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_version", "DMIChassisVersion");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_serial", "DMIChassisSerial");
+  hwloc__get_dmi_one_info(topology, obj, "chassis_asset_tag", "DMIChassisAssetTag");
+  hwloc__get_dmi_one_info(topology, obj, "bios_vendor", "DMIBIOSVendor");
+  hwloc__get_dmi_one_info(topology, obj, "bios_version", "DMIBIOSVersion");
+  hwloc__get_dmi_one_info(topology, obj, "bios_date", "DMIBIOSDate");
+  hwloc__get_dmi_one_info(topology, obj, "sys_vendor", "DMISysVendor");
 }
 
 void

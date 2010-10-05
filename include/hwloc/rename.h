@@ -39,6 +39,11 @@ extern "C" {
 #define hwloc_topology HWLOC_NAME(topology)
 #define hwloc_topology_t HWLOC_NAME(topology_t)
 
+#define hwloc_cpuset_t HWLOC_NAME(cpuset_t)
+#define hwloc_const_cpuset_t HWLOC_NAME(const_cpuset_t)
+#define hwloc_nodeset_t HWLOC_NAME(nodeset_t)
+#define hwloc_const_nodeset_t HWLOC_NAME(const_nodeset_t)
+
 #define HWLOC_OBJ_SYSTEM HWLOC_NAME_CAPS(OBJ_SYSTEM)
 #define HWLOC_OBJ_MACHINE HWLOC_NAME_CAPS(OBJ_MACHINE)
 #define HWLOC_OBJ_NODE HWLOC_NAME_CAPS(OBJ_NODE)
@@ -149,7 +154,7 @@ extern "C" {
 #define hwloc_bitmap_from_ith_ulong HWLOC_NAME(bitmap_from_ith_ulong)
 #define hwloc_bitmap_to_ulong HWLOC_NAME(bitmap_to_ulong)
 #define hwloc_bitmap_to_ith_ulong HWLOC_NAME(bitmap_to_ith_ulong)
-#define hwloc_bitmap_setonly HWLOC_NAME(bitmap_setonly)
+#define hwloc_bitmap_only HWLOC_NAME(bitmap_only)
 #define hwloc_bitmap_allbut HWLOC_NAME(bitmap_allbut)
 #define hwloc_bitmap_set HWLOC_NAME(bitmap_set)
 #define hwloc_bitmap_set_range HWLOC_NAME(bitmap_set_range)

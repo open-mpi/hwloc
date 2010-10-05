@@ -353,7 +353,7 @@ hwloc_setup_pu_level(struct hwloc_topology *topology,
     {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, oscpu);
       obj->cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_setonly(obj->cpuset, oscpu);
+      hwloc_bitmap_only(obj->cpuset, oscpu);
 
       hwloc_debug_2args_bitmap("cpu %u (os %u) has cpuset %s\n",
 		 cpu, oscpu, obj->cpuset);
@@ -1519,6 +1519,11 @@ hwloc_discover(struct hwloc_topology *topology)
 
   hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
   remove_empty(topology, &topology->levels[0][0]);
+
+  if (!topology->levels[0][0]) {
+    fprintf(stderr, "Topology became empty, aborting!\n");
+    abort();
+  }
 
   print_objects(topology, 0, topology->levels[0][0]);
 

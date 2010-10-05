@@ -40,7 +40,7 @@ extern "C" {
  */
 static __hwloc_inline int
 hwloc_cudart_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
-			       int device, hwloc_bitmap_t set)
+			       int device, hwloc_cpuset_t set)
 {
 #ifdef HWLOC_LINUX_SYS
   /* If we're on Linux, use the sysfs mechanism to get the local cpus */
