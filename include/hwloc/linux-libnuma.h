@@ -41,15 +41,14 @@ static __hwloc_inline int
 hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset,
 				    unsigned long *mask, unsigned long *maxnode)
 {
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   unsigned long outmaxnode = -1;
-  hwloc_obj_t node = NULL;
-  unsigned nbnodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
-  unsigned i;
 
   /* round-up to the next ulong and clear all bytes */
   memset(mask, 0, (*maxnode+8*sizeof(*mask)-1)/8);
 
-  if (nbnodes) {
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
+    hwloc_obj_t node = NULL;
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL) {
       if (node->os_index >= *maxnode)
 	break;
@@ -83,21 +82,11 @@ static __hwloc_inline int
 hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 				      const unsigned long *mask, unsigned long maxnode)
 {
-  hwloc_obj_t node;
-  int depth;
-  unsigned i;
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  /* cannot be HWLOC_TYPE_DEPTH_MULTIPLE */
-
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-    /* if no numa, libnuma assumes we have a single node */
-    if (mask[0] & 1)
-      hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
-    else
-      hwloc_bitmap_zero(cpuset);
-
-  } else {
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
+    hwloc_obj_t node;
+    unsigned i;
     hwloc_bitmap_zero(cpuset);
     for(i=0; i<maxnode; i++)
       if (mask[i/sizeof(*mask)/8] & (1 << (i% (sizeof(*mask)*8)))) {
@@ -105,6 +94,12 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
 	if (node)
 	  hwloc_bitmap_or(cpuset, cpuset, node->cpuset);
       }
+  } else {
+    /* if no numa, libnuma assumes we have a single node */
+    if (mask[0] & 1)
+      hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
+    else
+      hwloc_bitmap_zero(cpuset);
   }
 
   return 0;
@@ -131,22 +126,17 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
 static __hwloc_inline struct bitmask * __hwloc_attribute_malloc
 hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset)
 {
-  struct bitmask *bitmask;
-  hwloc_obj_t node = NULL;
-  unsigned nbnodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  struct bitmask *bitmask = numa_allocate_cpumask();
+  if (!bitmask)
+    return NULL;
 
-  if (nbnodes) {
-    bitmask = numa_bitmask_alloc(nbnodes);
-    if (!bitmask)
-      return NULL;
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
+    hwloc_obj_t node = NULL;
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL)
       numa_bitmask_setbit(bitmask, node->os_index);
-
   } else {
     /* if no numa, libnuma assumes we have a single node */
-    bitmask = numa_bitmask_alloc(1);
-    if (!bitmask)
-      return NULL;
     if (!hwloc_bitmap_iszero(cpuset))
       numa_bitmask_setbit(bitmask, 0);
   }
@@ -163,21 +153,11 @@ static __hwloc_inline int
 hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 				       const struct bitmask *bitmask)
 {
-  hwloc_obj_t node;
-  int depth;
-  int i;
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  /* cannot be HWLOC_TYPE_DEPTH_MULTIPLE */
-
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-    /* if no numa, libnuma assumes we have a single node */
-    if (numa_bitmask_isbitset(bitmask, 0))
-      hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
-    else
-      hwloc_bitmap_zero(cpuset);
-
-  } else {
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
+    hwloc_obj_t node;
+    int i;
     hwloc_bitmap_zero(cpuset);
     for(i=0; i<NUMA_NUM_NODES; i++)
       if (numa_bitmask_isbitset(bitmask, i)) {
@@ -185,6 +165,12 @@ hwloc_cpuset_from_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_cpuset_
 	if (node)
 	  hwloc_bitmap_or(cpuset, cpuset, node->cpuset);
       }
+  } else {
+    /* if no numa, libnuma assumes we have a single node */
+    if (numa_bitmask_isbitset(bitmask, 0))
+      hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
+    else
+      hwloc_bitmap_zero(cpuset);
   }
 
   return 0;
@@ -209,14 +195,14 @@ static __hwloc_inline int
 hwloc_cpuset_to_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset,
 				      nodemask_t *nodemask)
 {
-  hwloc_obj_t node = NULL;
-  unsigned nbnodes = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 
   nodemask_zero(nodemask);
-  if (nbnodes) {
+
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
+    hwloc_obj_t node = NULL;
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL)
       nodemask_set(nodemask, node->os_index);
-
   } else {
     /* if no numa, libnuma assumes we have a single node */
     if (!hwloc_bitmap_iszero(cpuset))
@@ -235,21 +221,11 @@ static __hwloc_inline int
 hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 					const nodemask_t *nodemask)
 {
-  hwloc_obj_t node;
-  int depth;
-  int i;
+  int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  /* cannot be HWLOC_TYPE_DEPTH_MULTIPLE */
-
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-    /* if no numa, libnuma assumes we have a single node */
-    if (nodemask_isset(nodemask, 0))
-      hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
-    else
-      hwloc_bitmap_zero(cpuset);
-
-  } else {
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
+    hwloc_obj_t node;
+    int i;
     hwloc_bitmap_zero(cpuset);
     for(i=0; i<NUMA_NUM_NODES; i++)
       if (nodemask_isset(nodemask, i)) {
@@ -257,6 +233,12 @@ hwloc_cpuset_from_linux_libnuma_nodemask(hwloc_topology_t topology, hwloc_cpuset
 	if (node)
 	  hwloc_bitmap_or(cpuset, cpuset, node->cpuset);
       }
+  } else {
+    /* if no numa, libnuma assumes we have a single node */
+    if (nodemask_isset(nodemask, 0))
+      hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
+    else
+      hwloc_bitmap_zero(cpuset);
   }
 
   return 0;
