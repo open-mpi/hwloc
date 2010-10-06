@@ -56,7 +56,11 @@
 #   Sun C++: skip
 #
 AC_DEFUN([_HWLOC_ATTRIBUTE_FAIL_SEARCH],[
-    AC_REQUIRE([AC_PROG_GREP])
+    # Be safe for systems that have ancient Autoconf's (e.g., RHEL5)
+    m4_ifdef([AC_PROG_GREP], 
+             [AC_REQUIRE([AC_PROG_GREP])],
+             [GREP=grep])
+
     if test -s conftest.err ; then
         for i in ignore skip ; do
             $GREP -iq $i conftest.err
