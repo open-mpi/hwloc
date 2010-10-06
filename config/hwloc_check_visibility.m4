@@ -54,7 +54,10 @@
 # _HWLOC_CHECK_VISIBILITY
 # --------------------------------------------------------
 AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
-    AC_REQUIRE([AC_PROG_GREP])
+    # Be safe for systems that have ancient Autoconf's (e.g., RHEL5)
+    m4_ifdef([AC_PROG_GREP], 
+             [AC_REQUIRE([AC_PROG_GREP])],
+             [GREP=grep])
 
     # Check if the compiler has support for visibility, like some versions of gcc, icc.
     AC_ARG_ENABLE(visibility, 
