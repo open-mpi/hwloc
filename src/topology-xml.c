@@ -289,7 +289,7 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribut
     }
   }
 
-  if (size && count) {
+  if (size) {
     int idx = obj->memory.page_types_len;
     obj->memory.page_types = realloc(obj->memory.page_types, (idx+1)*sizeof(*obj->memory.page_types));
     obj->memory.page_types_len = idx+1;
