@@ -18,7 +18,7 @@
 #include <strings.h>
 
 int
-hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
+hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen)
 {
   xmlDoc *doc = NULL;
 
@@ -26,7 +26,10 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
 
   LIBXML_TEST_VERSION;
 
-  doc = xmlReadFile(xmlpath, NULL, 0);
+  if (xmlpath)
+    doc = xmlReadFile(xmlpath, NULL, 0);
+  else if (xmlbuffer)
+    doc = xmlReadMemory(xmlbuffer, buflen, "", NULL, 0);
   if (!doc)
     return -1;
 
@@ -525,7 +528,8 @@ hwloc__xml_export_topology_info (hwloc_topology_t topology __hwloc_attribute_unu
 {
 }
 
-void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+static xmlDocPtr
+hwloc__topology_prepare_export(hwloc_topology_t topology)
 {
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
@@ -545,11 +549,22 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 
   hwloc__xml_export_topology_info (topology, root_node);
 
-  /* Dumping document to stdio or file. */
-  xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+  return doc;
+}
 
-  /* Free the document. */
+void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+{
+  xmlDocPtr doc = hwloc__topology_prepare_export(topology);
+  xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
 }
+
+void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
+{
+  xmlDocPtr doc = hwloc__topology_prepare_export(topology);
+  xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
+  xmlFreeDoc(doc);
+}
+
 
 #endif /* HWLOC_HAVE_XML */

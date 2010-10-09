@@ -543,6 +543,13 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
+/** \brief Enable XML based topology using a memory buffer instead of a file.
+ *
+ * Gather topology information from the XML memory buffer given at \p buffer
+ * and of length \p length.
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
+
 /** \brief Flags describing actual discovery support for this topology. */
 struct hwloc_topology_discovery_support {
   /** \brief Detecting the number of PU objects is supported. */
@@ -596,6 +603,14 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
  * This file may be loaded later through hwloc_topology_set_xml().
  */
 HWLOC_DECLSPEC void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
+
+/** \brief Export the topology into a newly-allocated XML memory buffer.
+ *
+ * \p xmlbuffer is allocated by the callee and should be freed with xmlFree later in the caller.
+ *
+ * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
+ */
+HWLOC_DECLSPEC void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen);
 
 /** \brief Add a MISC object to the topology
  *

@@ -381,6 +381,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
+	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xmlbuffer.3 \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_cpuset.3 \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_parent.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_flags_e.3 \
@@ -397,6 +398,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_pid.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_synthetic.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_xml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_xmlbuffer.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_discovery_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
