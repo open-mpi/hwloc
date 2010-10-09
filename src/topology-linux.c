@@ -1290,7 +1290,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
       unsigned long long number;
       if (sscanf(string, "Node %d MemTotal: %llu kB", &node, &number) == 2)
 	memory->local_memory = number << 10;
-      else if (memory->page_types && sscanf(string, "Node %d HugePages_Free: %llu kB", &node, &number) == 2)
+      else if (memory->page_types && sscanf(string, "Node %d HugePages_Free: %llu", &node, &number) == 2)
 	memory->page_types[1].count = number;
     }
 
