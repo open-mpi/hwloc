@@ -41,7 +41,6 @@ hwloc_backend_xml_exit(struct hwloc_topology *topology)
 {
   assert(topology->backend_type == HWLOC_BACKEND_XML);
   xmlFreeDoc((xmlDoc*)topology->backend_params.xml.doc);
-  xmlCleanupParser();
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
@@ -534,9 +533,6 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 
   /* Free the document. */
   xmlFreeDoc(doc);
-
-  /* Free the global variables that may have been allocated by the parser. */
-  xmlCleanupParser();
 }
 
 #endif /* HWLOC_HAVE_XML */
