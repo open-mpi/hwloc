@@ -249,8 +249,6 @@ hwloc__xml_import_object_node(struct hwloc_topology *topology, struct hwloc_obj 
       const xmlChar *value = hwloc__xml_import_attr_value(attr);
       if (value)
 	hwloc__xml_import_object_attr(topology, obj, attr->name, value);
-      else
-	fprintf(stderr, "ignoring unexpected xml object attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml object attr type %u\n", attr->type);
     }
@@ -282,8 +280,7 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribut
 	  count = strtoul((char *) value, NULL, 10);
 	else
 	  fprintf(stderr, "ignoring unknown pagetype attribute %s\n", (char *) attr->name);
-      } else
-	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", (const char*) attr->name);
+      }
     } else {
       fprintf(stderr, "ignoring unexpected xml pagetype attr type %u\n", attr->type);
     }
@@ -295,7 +292,8 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribut
     obj->memory.page_types_len = idx+1;
     obj->memory.page_types[idx].size = size;
     obj->memory.page_types[idx].count = count;
-  }
+  } else
+    fprintf(stderr, "ignoring pagetype attribute without size\n");
 }
 
 static void
@@ -315,8 +313,7 @@ hwloc__xml_import_info_node(struct hwloc_topology *topology __hwloc_attribute_un
 	  infovalue = (char *) value;
 	else
 	  fprintf(stderr, "ignoring unknown info attribute %s\n", (char *) attr->name);
-      } else
-	fprintf(stderr, "ignoring unexpected xml info attr name `%s' with no value\n", (const char*) attr->name);
+      }
     } else {
       fprintf(stderr, "ignoring unexpected xml info attr type %u\n", attr->type);
     }
@@ -379,10 +376,9 @@ hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
   for (attr = node->properties; attr; attr = attr->next) {
     if (attr->type == XML_ATTRIBUTE_NODE) {
       const xmlChar *value = hwloc__xml_import_attr_value(attr);
-      if (value)
+      if (value) {
 	fprintf(stderr, "ignoring unknown root attribute %s\n", (char *) attr->name);
-      else
-	fprintf(stderr, "ignoring unexpected xml root attr name `%s' with no value\n", (const char*) attr->name);
+      }
     } else {
       fprintf(stderr, "ignoring unexpected xml root attr type %u\n", attr->type);
     }
