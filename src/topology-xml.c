@@ -322,10 +322,11 @@ hwloc__xml_import_info_node(struct hwloc_topology *topology __hwloc_attribute_un
     }
   }
 
-  if (infoname && infovalue)
-    hwloc_add_object_info(obj, infoname, infovalue);
+  if (infoname)
+    /* empty strings are ignored by libxml */
+    hwloc_add_object_info(obj, infoname, infovalue ? infovalue : "");
   else
-    fprintf(stderr, "ignoring incomplete info attribute\n");
+    fprintf(stderr, "ignoring info attribute without name\n");
 }
 
 static void
