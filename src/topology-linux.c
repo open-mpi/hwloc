@@ -158,6 +158,18 @@ hwloc_accessat(const char *path, int mode, int fsroot_fd)
   return faccessat(fsroot_fd, relative_path, mode, 0);
 }
 
+static int
+hwloc_fstatat(const char *path, struct stat *st, int flags, int fsroot_fd)
+{
+  const char *relative_path;
+
+  relative_path = hwloc_checkat(path, fsroot_fd);
+  if (!relative_path)
+    return -1;
+
+  return fstatat(fsroot_fd, relative_path, st, flags);
+}
+
 static DIR*
 hwloc_opendirat(const char *path, int fsroot_fd)
 {
@@ -208,6 +220,16 @@ hwloc_access(const char *p, int m, int d __hwloc_attribute_unused)
     return hwloc_accessat(p, m, d);
 #else
     return access(p, m);
+#endif
+}
+
+static inline int
+hwloc_stat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
+{
+#ifdef HAVE_OPENAT
+    return hwloc_fstatat(p, st, 0, d);
+#else
+    return stat(p, st);
 #endif
 }
 
@@ -1230,6 +1252,8 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
   char string[64];
   FILE *fd;
 
+  /* TODO: use /sys/kernel/mm/hugepages/ instead, and gather it in sysfs tarballs */
+
   if (topology->is_thissystem) {
     memory->page_types_len = 2;
     memory->page_types = malloc(2*sizeof(*memory->page_types));
@@ -1270,19 +1294,30 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 			     const char *syspath, int node,
 			     struct hwloc_obj_memory_s *memory)
 {
+  struct stat st;
   char path[SYSFS_NUMA_NODE_PATH_LEN];
   char string[64];
   FILE *fd;
+  int has_sysfs_hugepages = 0;
+  int types = 2;
+  int err;
 
   sprintf(path, "%s/node%d/meminfo", syspath, node);
   fd = hwloc_fopen(path, "r", topology->backend_params.sysfs.root_fd);
   if (!fd)
     return;
 
+  sprintf(path, "%s/node%d/hugepages", syspath, node);
+  err = hwloc_stat(path, &st, topology->backend_params.sysfs.root_fd);
+  if (!err) {
+    types = 1 + st.st_nlink-2;
+    has_sysfs_hugepages = 1;
+  }
+
   if (topology->is_thissystem) {
-    memory->page_types_len = 2;
-    memory->page_types = malloc(2*sizeof(*memory->page_types));
-    memset(memory->page_types, 0, 2*sizeof(*memory->page_types));
+    memory->page_types_len = types;
+    memory->page_types = malloc(types*sizeof(*memory->page_types));
+    memset(memory->page_types, 0, types*sizeof(*memory->page_types));
   }
 
   while (fgets(string, sizeof(string), fd) && *string != '\0')
@@ -1290,15 +1325,51 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
       unsigned long long number;
       if (sscanf(string, "Node %d MemTotal: %llu kB", &node, &number) == 2)
 	memory->local_memory = number << 10;
-      else if (memory->page_types && sscanf(string, "Node %d HugePages_Free: %llu", &node, &number) == 2)
+      else if (!has_sysfs_hugepages && memory->page_types && sscanf(string, "Node %d HugePages_Free: %llu", &node, &number) == 2)
+        /* these are free hugepages, not the total amount of huge pages */
 	memory->page_types[1].count = number;
     }
 
   if (memory->page_types) {
-    /* hwloc_get_procfs_meminfo_info must have been called earlier */
-    memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
+    uint64_t remaining_local_memory = memory->local_memory;
+
+    if (has_sysfs_hugepages) {
+      /* read from node%d/hugepages/hugepages-%skB/nr_hugepages */
+      DIR *dir;
+      struct dirent *dirent;
+      unsigned long index = 1;
+      FILE *hpfd;
+      char line[64];
+      dir = hwloc_opendir(path, topology->backend_params.sysfs.root_fd);
+      if (dir) {
+        while ((dirent = readdir(dir)) != NULL) {
+          if (strncmp(dirent->d_name, "hugepages-", 10))
+            continue;
+          memory->page_types[index].size = strtoul(dirent->d_name+10, NULL, 0) * 1024ULL;
+          sprintf(path, "%s/node%d/hugepages/%s/nr_hugepages", syspath, node, dirent->d_name);
+          hpfd = hwloc_fopen(path, "r", topology->backend_params.sysfs.root_fd);
+          if (hpfd) {
+            if (fgets(line, sizeof(line), hpfd)) {
+              fclose(hpfd);
+              /* these are the actual total amount of huge pages */
+              memory->page_types[index].count = strtoull(line, NULL, 0);
+              remaining_local_memory -= memory->page_types[index].count * memory->page_types[index].size;
+              index++;
+            }
+          }
+        }
+        closedir(dir);
+        memory->page_types_len = index;
+      }
+    } else {
+      /* use what we found in meminfo */
+      /* hwloc_get_procfs_meminfo_info must have been called earlier */
+      memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
+      remaining_local_memory -= memory->page_types[1].count * memory->page_types[1].size;
+    }
+    /* update what's remaining as normal pages */
     memory->page_types[0].size = getpagesize();
-    memory->page_types[0].count = (memory->local_memory - memory->page_types[1].count*memory->page_types[1].size) / memory->page_types[0].size;
+    memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
 
   fclose(fd);
