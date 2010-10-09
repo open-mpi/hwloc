@@ -532,7 +532,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
 
 /** \brief Enable XML-file based topology.
  *
- * Gather topology information the XML file given at \p xmlpath.
+ * Gather topology information from the XML file given at \p xmlpath.
  * Setting the environment variable HWLOC_XMLFILE may also result in this behavior.
  * This file may have been generated earlier with lstopo file.xml.
  *
