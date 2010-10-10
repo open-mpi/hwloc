@@ -77,6 +77,9 @@ struct hwloc_topology {
   int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
 #endif
 
+  int (*set_cpumembind)(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, int cpupolicy, int mempolicy);
+  int (*set_proc_cpumembind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, int cpupolicy, int mempolicy);
+
   int (*set_membind)(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy);
   int (*get_membind)(hwloc_topology_t topology, hwloc_nodeset_t nodeset, int * policy);
   int (*set_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, int policy);

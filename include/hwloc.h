@@ -569,6 +569,8 @@ struct hwloc_topology_cpubind_support {
   unsigned char get_thread_cpubind;
 };
 
+/* TODO add relevant cpumembind stuff */
+
 /** \brief Flags describing actual memory binding support for this topology. */
 struct hwloc_topology_membind_support {
   /** Binding the whole current process is supported.  */
@@ -991,6 +993,30 @@ typedef enum {
 					 * \hideinitializer  */
   /* TODO: replicate? but only OSF supports it. */
 } hwloc_membind_policy_t;
+
+/** \brief Bind current process execution on CPU and its memory on memory nodes near the given cpuset \p cpuset
+ *
+ * This combined binding strategy should be preferred over independent binding
+ * of the execution and memory since the latter is not widely portable.
+ * This strategy obviously conflicts with execution-only (cpubind) or (memory-only)
+ * membind routines.
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC int hwloc_set_cpumembind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int cpupolicy, int mempolicy);
+
+/** \brief Bind given process execution on CPU and its memory on memory nodes near the given cpuset \p cpuset
+ *
+ * This combined binding strategy should be preferred over independent binding
+ * of the execution and memory since the latter is not widely portable.
+ * This strategy obviously conflicts with execution-only (cpubind) or (memory-only)
+ * membind routines.
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+  HWLOC_DECLSPEC int hwloc_set_proc_cpumembind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, int cpupolicy, int mempolicy);
 
 /** \brief Bind current process memory on memory nodes near the given nodeset \p nodeset
  *
