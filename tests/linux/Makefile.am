@@ -24,7 +24,7 @@ sysfs_outputs = \
 		16amd64-8n2c.output \
 		16amd64-8n2c-cpusets.output \
 		16amd64-8n2c-cpusets.xml.output \
-		16amd64-8n2c-cpusets_noadmin.output
+		16amd64-8n2c-cpusets_noadmin.output \
 		16em64t-4s2c2t.output \
 		16em64t-4s2c2t-offlines.output \
 		16em64t-4s2c2t-offlines.xml.output \
