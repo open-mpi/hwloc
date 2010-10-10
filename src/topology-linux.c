@@ -1368,8 +1368,8 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
 
   if (topology->is_thissystem) {
     memory->page_types_len = types;
-    memory->page_types = malloc(2*sizeof(*memory->page_types));
-    memset(memory->page_types, 0, 2*sizeof(*memory->page_types));
+    memory->page_types = malloc(types*sizeof(*memory->page_types));
+    memset(memory->page_types, 0, types*sizeof(*memory->page_types));
     /* Try to get the hugepage size from sysconf in case we fail to get it from /proc/meminfo later */
 #ifdef HAVE__SC_LARGE_PAGESIZE
     memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
@@ -2321,11 +2321,11 @@ hwloc_look_linux(struct hwloc_topology *topology)
 
     /* if we found some numa nodes, the machine object has no local memory */
     if (nbnodes) {
+      unsigned i;
       topology->levels[0][0]->memory.local_memory = 0;
-      if (topology->levels[0][0]->memory.page_types) {
-        topology->levels[0][0]->memory.page_types[0].count = 0;
-        topology->levels[0][0]->memory.page_types[1].count = 0;
-      }
+      if (topology->levels[0][0]->memory.page_types)
+        for(i=0; i<topology->levels[0][0]->memory.page_types_len; i++)
+          topology->levels[0][0]->memory.page_types[i].count = 0;
     }
 
     /* Gather the list of cpus now */
