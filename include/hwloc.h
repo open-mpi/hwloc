@@ -1078,6 +1078,9 @@ HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, siz
 
 /** \brief Convert a CPU set into a NUMA node set
  *
+ * If some NUMA nodes have no CPUs at all, this function never set their
+ * indexes in the output node set, even if a full CPU set is given in input.
+ *
  * If the topology contains no NUMA nodes, the machine is considered
  * as a single memory node, and the following behavior is used:
  * If \p cpuset is empty, \p nodeset will be emptied as well.
@@ -1085,7 +1088,7 @@ HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, siz
  */
 HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset);
 
-/** \brief Convert a NUMA node set set into a CPU set
+/** \brief Convert a NUMA node set into a CPU set
  *
  * If the topology contains no NUMA nodes, the machine is considered
  * as a single memory node, and the following behavior is used:
