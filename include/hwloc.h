@@ -350,7 +350,20 @@ union hwloc_obj_attr_u {
   } group;
 };
 
-/** \brief Distances between objects */
+/** \brief Distances between objects
+ *
+ * Distance values are those defined in the ACPI System Locality
+ * Information Table (SLIT) interface. The distance between one
+ * locality and itself is defined to 10 and called the SMP distance.
+ * Other values are normalized to this SMP distance. For instance
+ * 33 means that the distance from locality i to locality j is
+ * 3.3 times the SMP distance.
+ *
+ * FIXME: What about non-ACPI interfaces? Convert values into a
+ * more generic normalization? Add a flag specifying which distance
+ * interface was used? Report the base/diagonal value in a
+ * dedicated field of the distance structure?
+ */
 struct hwloc_distances_s {
   unsigned *matrix;			/**< \brief Matrix of distances between all objects, stored as a one-dimension array.
 					 * Distance from i-th to j-th object is stored in slot i*nbobjs+j. */
