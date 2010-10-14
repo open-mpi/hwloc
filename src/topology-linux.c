@@ -829,7 +829,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
 static int
 hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, int policy)
 {
-  switch (policy & ~(HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
+  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
   case HWLOC_MEMBIND_DEFAULT:
   case HWLOC_MEMBIND_FIRSTTOUCH:
     *linuxpolicy = MPOL_DEFAULT;
@@ -843,8 +843,9 @@ hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, int policy)
   case HWLOC_MEMBIND_INTERLEAVE:
     *linuxpolicy = MPOL_INTERLEAVE;
     break;
+  /* TODO: next-touch when (if?) patch applied upstream */
   default:
-    errno = EINVAL;
+    errno = ENOSYS;
     return -1;
   }
   return 0;
@@ -908,7 +909,8 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   if (err < 0)
     return err;
 
-  if ((policy & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
+  if ((policy & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE))
+	     == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
     /* TODO: MIGRATE */
     errno = ENOSYS;
     goto out;
@@ -2639,5 +2641,8 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
   topology->set_area_membind = hwloc_linux_set_area_membind;
   topology->alloc_membind = hwloc_linux_alloc_membind;
   topology->free_membind = hwloc_linux_free_membind;
+  topology->support.membind->firsttouch_membind = 1;
+  topology->support.membind->bind_membind = 1;
+  topology->support.membind->interleave_membind = 1;
 #endif /* HWLOC_HAVE_MBIND */
 }

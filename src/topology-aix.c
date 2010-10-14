@@ -157,6 +157,12 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
   int MCMlevel;
   int node;
 
+  if ((policy & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))
+             == (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+    errno = ENOSYS;
+    return -1;
+  }
+
   switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
     case HWLOC_MEMBIND_DEFAULT:
     case HWLOC_MEMBIND_BIND:
@@ -169,7 +175,7 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
       *aix_policy = P_BALANCED;
       break;
     default:
-      errno = EINVAL;
+      errno = ENOSYS;
       return -1;
   }
 
@@ -391,5 +397,8 @@ hwloc_set_aix_hooks(struct hwloc_topology *topology)
   /* get_area_membind is not available */
   topology->alloc_membind = hwloc_aix_alloc_membind;
   topology->free_membind = hwloc_aix_free_membind;
+  topology->support.membind->firsttouch_membind = 1;
+  topology->support.membind->bind_membind = 1;
+  topology->support.membind->interleave_membind = 1;
 #endif /* P_DEFAULT */
 }

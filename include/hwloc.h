@@ -594,6 +594,18 @@ struct hwloc_topology_membind_support {
   unsigned char get_area_membind;
   /** Allocating a bound memory area is supported. */
   unsigned char alloc_membind;
+  /** First-touch policy is supported. */
+  unsigned char firsttouch_membind;
+  /** Bind policy is supported. */
+  unsigned char bind_membind;
+  /** Interleave policy is supported. */
+  unsigned char interleave_membind;
+  /** Replication policy is supported. */
+  unsigned char replicate_membind;
+  /** Next-touch migration policy is supported. */
+  unsigned char nexttouch_membind;
+  /** Migration request is supported. */
+  unsigned char migrate_membind;
 };
 
 /** \brief Set of flags describing actual support for this topology.
@@ -992,22 +1004,30 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * Note that not all systems support all kinds of binding.
  */
 typedef enum {
-  HWLOC_MEMBIND_DEFAULT = (1<<0),	/**< \brief Reset the memory allocation policy to the system default.
+  HWLOC_MEMBIND_DEFAULT =	(0<<0),	/**< \brief Reset the memory allocation policy to the system default.
 					 * \hideinitializer */
-  HWLOC_MEMBIND_FIRSTTOUCH = (1<<1),	/**< \brief Allocate memory on the given nodes, but preferably on the
+  HWLOC_MEMBIND_FIRSTTOUCH =	(1<<0),	/**< \brief Allocate memory on the given nodes, but preferably on the
 					  node where the first accessor is running.
 					 * \hideinitializer */
-  HWLOC_MEMBIND_BIND = (1<<2),		/**< \brief Allocate memory on the given nodes.
+  HWLOC_MEMBIND_BIND =		(2<<0),	/**< \brief Allocate memory on the given nodes.
 					 * \hideinitializer */
-  HWLOC_MEMBIND_INTERLEAVE = (1<<3),	/**< \brief Allocate memory on the given nodes in a round-robin manner.
+  HWLOC_MEMBIND_INTERLEAVE =	(3<<0),	/**< \brief Allocate memory on the given nodes in a round-robin manner.
 					 * \hideinitializer */
-  HWLOC_MEMBIND_MIGRATE = (1<<4),	/**< Migrate existing allocated memory. If memory can not be migrated and the
-					 * STRICT flag is passed, an error will be returned.
+  HWLOC_MEMBIND_REPLICATE =	(4<<0),	/**< \brief Replicate memory on the given nodes.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_NEXTTOUCH =	(5<<0),	/**< \brief On next touch of existing allocated memory, migrate it to the node
+					 * where the memory reference happened.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_MIGRATE =	(1<<8),	/**< \brief Migrate existing allocated memory.
+					 * If memory can not be migrated and the STRICT flag is passed, an error will be
+					 * returned.
 					 * \hideinitializer  */
-  HWLOC_MEMBIND_STRICT = (1<<5)		/**< Request strict binding from the OS.
+  HWLOC_MEMBIND_STRICT =	(1<<10)	/**< Request strict binding from the OS.
 					 * \hideinitializer  */
-  /* TODO: replicate? but only OSF supports it. */
 } hwloc_membind_policy_t;
+
+/* TODO thread/proc */
+/* TODO: rather separate mempolicy and flags, rename policy into flags in cpubind functions */
 
 /** \brief Bind current process execution on CPU and its memory on memory nodes near the given cpuset \p cpuset
  *

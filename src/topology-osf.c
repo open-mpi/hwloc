@@ -156,11 +156,13 @@ hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, mema
       osf_policy = MPOL_DIRECTED;
       break;
     case HWLOC_MEMBIND_INTERLEAVE:
-      errno = MPOL_STRIPPED;
+      osf_policy = MPOL_STRIPPED;
       break;
-    /* TODO: REPLICATED */
+    case HWLOC_MEMBIND_REPLICATE:
+      osf_policy = MPOL_REPLICATED;
+      break;
     default:
-      errno = EINVAL;
+      errno = ENOSYS;
       return -1;
   }
 
@@ -318,4 +320,8 @@ hwloc_set_osf_hooks(struct hwloc_topology *topology)
   topology->set_area_membind = hwloc_osf_set_area_membind;
   topology->alloc_membind = hwloc_osf_alloc_membind;
   topology->free_membind = hwloc_osf_free_membind;
+  topology->support.membind->firsttouch_membind = 1;
+  topology->support.membind->bind_membind = 1;
+  topology->support.membind->interleave_membind = 1;
+  topology->support.membind->replicate_membind = 1;
 }

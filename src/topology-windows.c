@@ -228,9 +228,19 @@ static void *
 hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, int policy __hwloc_attribute_unused) {
   int node;
 
-  if (policy & HWLOC_MEMBIND_STRICT) {
+  if ((policy & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))
+             == (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
     errno = ENOSYS;
-    return NULL;
+    return -1;
+  }
+
+  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+    case HWLOC_MEMBIND_DEFAULT:
+    case HWLOC_MEMBIND_BIND:
+      break;
+    default:
+      errno = ENOSYS;
+      return -1;
   }
 
   if (hwloc_bitmap_weight(nodeset) != 1) {
@@ -484,5 +494,6 @@ hwloc_set_windows_hooks(struct hwloc_topology *topology)
   if (!hwloc_win_get_VirtualAllocExNumaProc()) {
     topology->alloc_membind = hwloc_win_alloc_membind;
     topology->free_membind = hwloc_win_free_membind;
+    topology->support.membind->bind_membind = 1;
   }
 }

@@ -194,14 +194,14 @@ hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size
       advice = MADV_ACCESS_DEFAULT;
       break;
     case HWLOC_MEMBIND_FIRSTTOUCH:
-      /* TODO: actually next touch */
+    case HWLOC_MEMBIND_NEXTTOUCH:
       advice = MADV_ACCESS_LWP;
       break;
     case HWLOC_MEMBIND_INTERLEAVE:
       advice = MADV_ACCESS_MANY;
       break;
     default:
-      errno = EINVAL;
+      errno = ENOSYS;
       return -1;
   }
 
@@ -531,5 +531,9 @@ hwloc_set_solaris_hooks(struct hwloc_topology *topology)
 #endif /* HAVE_LIBLGRP */
 #ifdef MADV_ACCESS_LWP 
   topology->set_area_membind = hwloc_solaris_set_area_membind;
+  topology->support.membind->firsttouch_membind = 1;
+  topology->support.membind->bind_membind = 1;
+  topology->support.membind->interleave_membind = 1;
+  topology->support.membind->nextouch_membind = 1;
 #endif
 }

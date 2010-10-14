@@ -148,7 +148,7 @@ hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_node
       flags = MAP_MEM_INTERLEAVED;
       break;
     default:
-      errno = EINVAL;
+      errno = ENOSYS;
       return NULL;
   }
 
@@ -257,5 +257,8 @@ hwloc_set_hpux_hooks(struct hwloc_topology *topology)
 #ifdef MAP_MEM_FIRST_TOUCH
   topology->alloc_membind = hwloc_hpux_alloc_membind;
   topology->free_membind = hwloc_hpux_free_membind;
+  topology->support.membind->firsttouch_membind = 1;
+  topology->support.membind->bind_membind = 1;
+  topology->support.membind->interleave_membind = 1;
 #endif /* MAP_MEM_FIRST_TOUCH */
 }
