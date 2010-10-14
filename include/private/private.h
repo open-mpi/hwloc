@@ -137,7 +137,7 @@ extern void hwloc_backend_sysfs_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_LINUX_SYS */
 
 #ifdef HWLOC_HAVE_XML
-extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath);
+extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen);
 extern void hwloc_look_xml(struct hwloc_topology *topology);
 extern void hwloc_backend_xml_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_HAVE_XML */

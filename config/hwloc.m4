@@ -21,7 +21,6 @@ dnl Copyright © 2006-2010  Cisco Systems, Inc.  All rights reserved.
 AC_DEFUN([HWLOC_SETUP_CORE],[
     AC_REQUIRE([AC_CANONICAL_TARGET])
     AC_REQUIRE([AC_PROG_CC])
-    AC_REQUIRE([AM_PROG_CC_C_O])
 
     AS_IF([test "x$4" != "x"],
           [cat <<EOF
@@ -30,9 +29,6 @@ AC_DEFUN([HWLOC_SETUP_CORE],[
 ### Configuring hwloc core
 ###
 EOF])
-
-    # We want new Libtool.  None of that old stuff.  Pfft.    
-    LT_PREREQ([2.2.6])
 
     # If no prefix was defined, set a good value
     m4_ifval([$1], 
@@ -457,8 +453,11 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
         AC_MSG_RESULT([no])
     )
 
-    # check for kerrighed, but don't abort if not found
-    HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [], [:])
+    # Check for kerrighed, but don't abort if not found.  It's illegal
+    # to pass in an empty 3rd argument, but we trust the output of
+    # pkg-config, so just give it a value that will always work:
+    # printf.
+    HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [printf], [], [:])
 
     AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
     AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
