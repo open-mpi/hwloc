@@ -68,10 +68,10 @@ static void test(hwloc_const_bitmap_t cpuset, int flags)
   hwloc_bitmap_free(new_cpuset);
 }
 
-static void testmem(hwloc_const_bitmap_t nodeset, int policy, int flags)
+static void testmem(hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   hwloc_bitmap_t new_nodeset = hwloc_bitmap_alloc();
-  int newpolicy;
+  hwloc_membind_policy_t newpolicy;
   void *area;
   size_t area_size = 1024;
   result_set("Bind this process memory", hwloc_set_membind_cpuset(topology, nodeset, policy, flags), support->membind->set_membind);

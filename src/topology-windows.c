@@ -225,7 +225,7 @@ static int hwloc_win_get_VirtualAllocExNumaProc(void) {
 }
 
 static void *
-hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags) {
+hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) {
   int node;
 
   if ((flags & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))

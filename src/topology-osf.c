@@ -143,7 +143,7 @@ hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t h
 }
 
 static int
-hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, memalloc_attr_t *mattr, hwloc_const_nodeset_t nodeset, int policy, int flags __hwloc_attribute_unused)
+hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, memalloc_attr_t *mattr, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags __hwloc_attribute_unused)
 {
   unsigned long osf_policy;
   int node;
@@ -180,7 +180,7 @@ hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, mema
 }
 
 static int
-hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   memalloc_attr_t mattr;
   int behavior = 0;
@@ -200,7 +200,7 @@ hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
 }
 
 static void *
-hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   memalloc_attr_t mattr;
   void *ptr;

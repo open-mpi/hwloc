@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
   int logical = 1;
   int taskset = 0;
   int cpubind_flags = 0;
-  int membind_policy = HWLOC_MEMBIND_BIND;
+  hwloc_membind_policy_t membind_policy = HWLOC_MEMBIND_BIND;
   int membind_flags = 0;
   int opt;
   int ret;
@@ -163,9 +163,9 @@ int main(int argc, char *argv[])
       else
 	hwloc_bitmap_asprintf(&s, cpubind_set);
     } else {
-      int policy;
+      hwloc_membind_policy_t policy;
       if (pid)
-	err = hwloc_get_proc_membind_cpuset(topology, pid, membind_set, 0, 0);
+	err = hwloc_get_proc_membind_cpuset(topology, pid, membind_set, &policy, 0);
       else
 	err = hwloc_get_membind_cpuset(topology, membind_set, &policy, 0);
       if (err) {

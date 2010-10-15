@@ -178,7 +178,7 @@ hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t h
 #ifdef MADV_ACCESS_LWP 
 /* TODO: set_membind set_proc_membind thanks to lgrp_affinity, document that it binds threads too. */
 static int
-hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags __hwloc_attribute_unused)
+hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags __hwloc_attribute_unused)
 {
   int advice;
   size_t remainder;

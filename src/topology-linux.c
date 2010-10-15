@@ -827,7 +827,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
 
 #if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
 static int
-hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, int policy, int flags)
+hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t policy, int flags)
 {
   switch (policy) {
   case HWLOC_MEMBIND_DEFAULT:
@@ -893,7 +893,7 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nod
 
 #ifdef HWLOC_HAVE_MBIND
 static int
-hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   unsigned max_os_index; /* highest os_index + 1 */
   unsigned long *linuxmask;
@@ -938,7 +938,7 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
 }
 
 static void *
-hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   void *buffer;
   int err;
@@ -965,7 +965,7 @@ hwloc_linux_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, voi
 
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
-hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, int policy, int flags)
+hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   unsigned max_os_index; /* highest os_index + 1 */
   unsigned long *linuxmask;
@@ -1005,7 +1005,7 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset
 }
 
 static int
-hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, int *policy, int flags __hwloc_attribute_unused)
+hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
   hwloc_obj_t obj;
   unsigned max_os_index; /* highest os_index + 1 */

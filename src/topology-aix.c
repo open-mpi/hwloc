@@ -151,7 +151,7 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 /* TODO: set_membind set_proc_membind, document that it binds threads too. */
 
 static int
-hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_const_nodeset_t nodeset, uint_t *aix_policy, int policy, int flags)
+hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_const_nodeset_t nodeset, uint_t *aix_policy, hwloc_membind_policy_t policy, int flags)
 {
   rsethandle_t rset, noderad;
   int MCMlevel;
@@ -202,7 +202,7 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
 /* TODO: seems to be right, but doesn't seem to be working (EINVAL), even after
  * aligning the range on 64K... */
 static int
-hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   subrange_t subrange;
   rsid_t rsid = { .at_subrange = &subrange };
@@ -225,7 +225,7 @@ hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
 #endif
 
 static void *
-hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   void *ret;
   rsid_t rsid;

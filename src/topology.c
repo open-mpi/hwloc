@@ -1332,40 +1332,40 @@ static int dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_un
 }
 #endif
 
-static int dontset_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+static int dontset_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
 {
   return 0;
 }
-static int dontget_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, int * policy, int flags __hwloc_attribute_unused)
-{
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-  *policy = HWLOC_MEMBIND_DEFAULT;
-  return 0;
-}
-
-static int dontset_proc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
-{
-  return 0;
-}
-static int dontget_proc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_bitmap_t set, int * policy, int flags __hwloc_attribute_unused)
+static int dontget_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags __hwloc_attribute_unused)
 {
   hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
   *policy = HWLOC_MEMBIND_DEFAULT;
   return 0;
 }
 
-static int dontset_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+static int dontset_proc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
 {
   return 0;
 }
-static int dontget_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_bitmap_t set, int * policy, int flags __hwloc_attribute_unused)
+static int dontget_proc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags __hwloc_attribute_unused)
 {
   hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
   *policy = HWLOC_MEMBIND_DEFAULT;
   return 0;
 }
 
-static void * dontalloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+static int dontset_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags __hwloc_attribute_unused)
+{
+  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
+  *policy = HWLOC_MEMBIND_DEFAULT;
+  return 0;
+}
+
+static void * dontalloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
 {
   return malloc(size);
 }

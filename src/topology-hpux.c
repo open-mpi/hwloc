@@ -126,7 +126,7 @@ hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_
 
 #ifdef MAP_MEM_FIRST_TOUCH
 static void*
-hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   int flags;
 
