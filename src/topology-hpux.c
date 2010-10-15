@@ -59,7 +59,7 @@ hwloc_hpux_find_spu(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_co
 
 /* Note: get_cpubind not available on HP-UX */
 static int
-hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   ldom_t ldom;
   spu_t cpu;
@@ -77,21 +77,21 @@ hwloc_hpux_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_co
 
   cpu = hwloc_hpux_find_spu(topology, hwloc_set);
   if (cpu != -1)
-    return mpctl(policy & HWLOC_CPUBIND_STRICT ? MPC_SETPROCESS_FORCE : MPC_SETPROCESS, cpu, pid);
+    return mpctl(flags & HWLOC_CPUBIND_STRICT ? MPC_SETPROCESS_FORCE : MPC_SETPROCESS, cpu, pid);
 
   errno = EXDEV;
   return -1;
 }
 
 static int
-hwloc_hpux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_hpux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_hpux_set_proc_cpubind(topology, MPC_SELFPID, hwloc_set, policy);
+  return hwloc_hpux_set_proc_cpubind(topology, MPC_SELFPID, hwloc_set, flags);
 }
 
 #ifdef hwloc_thread_t
 static int
-hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   ldom_t ldom, ldom2;
   spu_t cpu, cpu2;
@@ -109,16 +109,16 @@ hwloc_hpux_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread,
 
   cpu = hwloc_hpux_find_spu(topology, hwloc_set);
   if (cpu != -1)
-    return pthread_processor_bind_np(policy & HWLOC_CPUBIND_STRICT ? PTHREAD_BIND_FORCED_NP : PTHREAD_BIND_ADVISORY_NP, &cpu2, cpu, pthread);
+    return pthread_processor_bind_np(flags & HWLOC_CPUBIND_STRICT ? PTHREAD_BIND_FORCED_NP : PTHREAD_BIND_ADVISORY_NP, &cpu2, cpu, pthread);
 
   errno = EXDEV;
   return -1;
 }
 
 static int
-hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_hpux_set_thread_cpubind(topology, PTHREAD_SELFTID_NP, hwloc_set, policy);
+  return hwloc_hpux_set_thread_cpubind(topology, PTHREAD_SELFTID_NP, hwloc_set, flags);
 }
 #endif
 
@@ -126,7 +126,7 @@ hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_
 
 #ifdef MAP_MEM_FIRST_TOUCH
 static void*
-hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy)
+hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
 {
   int flags;
 
@@ -136,7 +136,7 @@ hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_node
     return NULL;
   }
 
-  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+  switch (policy) {
     case HWLOC_MEMBIND_DEFAULT:
     case HWLOC_MEMBIND_BIND:
       flags = 0;

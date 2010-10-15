@@ -26,7 +26,7 @@
  */
 
 static int
-hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   unsigned target;
 
@@ -79,7 +79,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
           if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set)) {
             lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_STRONG);
           } else {
-            if (policy & HWLOC_CPUBIND_STRICT)
+            if (flags & HWLOC_CPUBIND_STRICT)
               lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_NONE);
             else
               lgrp_affinity_set(idtype, id, obj->os_index, LGRP_AFF_WEAK);
@@ -107,26 +107,26 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 }
 
 static int
-hwloc_solaris_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_solaris_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_solaris_set_sth_cpubind(topology, P_PID, pid, hwloc_set, policy);
+  return hwloc_solaris_set_sth_cpubind(topology, P_PID, pid, hwloc_set, flags);
 }
 
 static int
-hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_solaris_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_solaris_set_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, policy);
+  return hwloc_solaris_set_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, flags);
 }
 
 static int
-hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
+  return hwloc_solaris_set_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, flags);
 }
 
 #ifdef HAVE_LIBLGRP
 static int
-hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   int n;
@@ -155,21 +155,21 @@ hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
 }
 
 static int
-hwloc_solaris_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_solaris_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_solaris_get_sth_cpubind(topology, P_PID, pid, hwloc_set, policy);
+  return hwloc_solaris_get_sth_cpubind(topology, P_PID, pid, hwloc_set, flags);
 }
 
 static int
-hwloc_solaris_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_solaris_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_solaris_get_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, policy);
+  return hwloc_solaris_get_sth_cpubind(topology, P_PID, P_MYID, hwloc_set, flags);
 }
 
 static int
-hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_solaris_get_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, policy);
+  return hwloc_solaris_get_sth_cpubind(topology, P_LWPID, P_MYID, hwloc_set, flags);
 }
 #endif /* HAVE_LIBLGRP */
 
@@ -178,7 +178,8 @@ hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t h
 #ifdef MADV_ACCESS_LWP 
 /* TODO: set_membind set_proc_membind thanks to lgrp_affinity, document that it binds threads too. */
 static int
-hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy) {
+hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags __hwloc_attribute_unused)
+{
   int advice;
   size_t remainder;
 
@@ -188,7 +189,7 @@ hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size
     return -1;
   }
 
-  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+  switch (policy) {
     case HWLOC_MEMBIND_DEFAULT:
     case HWLOC_MEMBIND_BIND:
       advice = MADV_ACCESS_DEFAULT;

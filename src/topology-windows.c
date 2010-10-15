@@ -144,7 +144,7 @@ typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX {
 /* TODO: SetThreadIdealProcessor */
 
 static int
-hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   /* TODO: groups SetThreadGroupAffinity */
   /* The resulting binding is always strict */
@@ -155,13 +155,13 @@ hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
 }
 
 static int
-hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_win_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, policy);
+  return hwloc_win_set_thread_cpubind(topology, GetCurrentThread(), hwloc_set, flags);
 }
 
 static int
-hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   /* TODO: groups */
   /* The resulting binding is always strict */
@@ -172,7 +172,7 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, h
 }
 
 static int
-hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   DWORD proc_mask, sys_mask;
   /* TODO: groups */
@@ -183,15 +183,15 @@ hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, h
 }
 
 static int
-hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_win_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, policy);
+  return hwloc_win_set_proc_cpubind(topology, GetCurrentProcess(), hwloc_set, flags);
 }
 
 static int
-hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_cpuset, int policy)
+hwloc_win_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_cpuset, int flags)
 {
-  return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), hwloc_cpuset, policy);
+  return hwloc_win_get_proc_cpubind(topology, GetCurrentProcess(), hwloc_cpuset, flags);
 }
 
 static LPVOID WINAPI (*VirtualAllocExNumaProc)(HANDLE hProcess, LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect, DWORD nndPreferred);
@@ -225,16 +225,16 @@ static int hwloc_win_get_VirtualAllocExNumaProc(void) {
 }
 
 static void *
-hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, int policy __hwloc_attribute_unused) {
+hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags) {
   int node;
 
-  if ((policy & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))
+  if ((flags & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))
              == (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
     errno = ENOSYS;
     return -1;
   }
 
-  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+  switch (policy) {
     case HWLOC_MEMBIND_DEFAULT:
     case HWLOC_MEMBIND_BIND:
       break;

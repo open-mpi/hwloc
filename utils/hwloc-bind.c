@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+/* TODO: Add default/first-touch/bind/round-robin/next-touch/replicate */
+
 static void usage(FILE *where)
 {
   fprintf(where, "Usage: hwloc-bind [options] <location> -- command ...\n");
@@ -42,7 +44,8 @@ int main(int argc, char *argv[])
   int logical = 1;
   int taskset = 0;
   int cpubind_flags = 0;
-  int membind_flags = HWLOC_MEMBIND_BIND;
+  int membind_policy = HWLOC_MEMBIND_BIND;
+  int membind_flags = 0;
   int opt;
   int ret;
   hwloc_pid_t pid = 0;
@@ -162,9 +165,9 @@ int main(int argc, char *argv[])
     } else {
       int policy;
       if (pid)
-	err = hwloc_get_proc_membind_cpuset(topology, pid, membind_set, 0);
+	err = hwloc_get_proc_membind_cpuset(topology, pid, membind_set, 0, 0);
       else
-	err = hwloc_get_membind_cpuset(topology, membind_set, &policy);
+	err = hwloc_get_membind_cpuset(topology, membind_set, &policy, 0);
       if (err) {
 	const char *errmsg = strerror(errno);
 	fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
@@ -213,9 +216,9 @@ int main(int argc, char *argv[])
     if (single)
       hwloc_bitmap_singlify(membind_set);
     if (pid)
-      ret = hwloc_set_proc_membind_cpuset(topology, pid, membind_set, membind_flags);
+      ret = hwloc_set_proc_membind_cpuset(topology, pid, membind_set, membind_policy, membind_flags);
     else
-      ret = hwloc_set_membind_cpuset(topology, membind_set, membind_flags);
+      ret = hwloc_set_membind_cpuset(topology, membind_set, membind_policy, membind_flags);
     if (ret) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);

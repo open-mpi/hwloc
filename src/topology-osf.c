@@ -79,7 +79,7 @@ out:
 /* Note: get_cpubind not available on OSF */
 
 static int
-hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   radset_t radset;
 
@@ -92,7 +92,7 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
   if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
-  if (policy & HWLOC_CPUBIND_STRICT) {
+  if (flags & HWLOC_CPUBIND_STRICT) {
     if ((errno = pthread_rad_bind(thread, radset, RAD_INSIST | RAD_WAIT)))
       return -1;
   } else {
@@ -105,7 +105,7 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
 }
 
 static int
-hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   radset_t radset;
 
@@ -118,7 +118,7 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
   if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
-  if (policy & HWLOC_CPUBIND_STRICT) {
+  if (flags & HWLOC_CPUBIND_STRICT) {
     if (rad_bind_pid(pid, radset, RAD_INSIST | RAD_WAIT))
       return -1;
   } else {
@@ -131,23 +131,24 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
 }
 
 static int
-hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, policy);
+  return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, flags);
 }
 
 static int
-hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
+  return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, flags);
 }
 
 static int
-hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, memalloc_attr_t *mattr, hwloc_const_nodeset_t nodeset, int policy) {
+hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, memalloc_attr_t *mattr, hwloc_const_nodeset_t nodeset, int policy, int flags __hwloc_attribute_unused)
+{
   unsigned long osf_policy;
   int node;
 
-  switch (policy & ~(HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+  switch (policy) {
     case HWLOC_MEMBIND_FIRSTTOUCH:
       osf_policy = MPOL_THREAD;
       break;
@@ -179,17 +180,18 @@ hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, mema
 }
 
 static int
-hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy) {
+hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+{
   memalloc_attr_t mattr;
   int behavior = 0;
   int ret;
 
-  if (policy & HWLOC_MEMBIND_MIGRATE)
+  if (flags & HWLOC_MEMBIND_MIGRATE)
     behavior |= MADV_CURRENT;
-  if (policy & HWLOC_MEMBIND_STRICT)
+  if (flags & HWLOC_MEMBIND_STRICT)
     behavior |= MADV_INSIST;
 
-  if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy))
+  if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy, flags))
     return -1;
 
   ret = nmadvise(addr, len, MADV_CURRENT, &mattr);
@@ -198,11 +200,12 @@ hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
 }
 
 static void *
-hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy) {
+hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, int policy, int flags)
+{
   memalloc_attr_t mattr;
   void *ptr;
 
-  if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy))
+  if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy, flags))
     return NULL;
 
   /* TODO: rather use acreate/amalloc ? */

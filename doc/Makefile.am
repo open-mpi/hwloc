@@ -254,7 +254,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpubind_policy_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpubind_flags_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_membind_flags_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_membind_policy_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_alloc.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_free.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_dup.3 \
