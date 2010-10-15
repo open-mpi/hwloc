@@ -25,7 +25,7 @@
 #include <sys/mman.h>
 
 /*
- * TODO REPLICATED
+ * TODO
  *
  * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
  * assign_pid_to_pset()
