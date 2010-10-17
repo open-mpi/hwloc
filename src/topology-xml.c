@@ -303,6 +303,7 @@ static void
 hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
 {
   unsigned long reldepth = 0, nbobjs = 0;
+  float latbase;
   xmlAttr *attr = NULL;
   xmlNode *subnode;
 
@@ -314,6 +315,8 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
 	  nbobjs = strtoul((char *) value, NULL, 10);
 	else if (!strcmp((char *) attr->name, "relative_depth"))
 	  reldepth = strtoul((char *) value, NULL, 10);
+	else if (!strcmp((char *) attr->name, "latency_base"))
+	  latbase = atof((char *) value);
 	else
 	  fprintf(stderr, "ignoring unknown distmatrix attribute %s\n", (char *) attr->name);
       } else
@@ -323,10 +326,10 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
     }
   }
 
-  if (nbobjs && reldepth) {
+  if (nbobjs && reldepth && latbase) {
     int idx = obj->distances_count;
     unsigned nbcells, i;
-    unsigned *matrix;
+    float *matrix, latmax = 0;
 
     nbcells = 0;
     if (node->children)
@@ -342,7 +345,8 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
     obj->distances_count = idx+1;
     obj->distances[idx].relative_depth = reldepth;
     obj->distances[idx].nbobjs = nbobjs;
-    obj->distances[idx].matrix = matrix = malloc(nbcells*sizeof(unsigned));
+    obj->distances[idx].latency = matrix = malloc(nbcells*sizeof(float));
+    obj->distances[idx].latency_base = latbase;
 
     i = 0;
     for(subnode = node->children; subnode; subnode = subnode->next)
@@ -352,9 +356,12 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
 	  if (attr->type == XML_ATTRIBUTE_NODE) {
 	    const xmlChar *value = hwloc__xml_import_attr_value(attr);
 	    if (value) {
-	      if (!strcmp((char *) attr->name, "value"))
-		matrix[i] = strtoul((char *) value, NULL, 10);
-	      else
+	      if (!strcmp((char *) attr->name, "value")) {
+		float val = atof((char *) value);
+		matrix[i] = val;
+		if (val > latmax)
+		  latmax = val;
+	      } else
 		fprintf(stderr, "ignoring unknown distance attribute %s\n", (char *) attr->name);
 	    } else
 	      fprintf(stderr, "ignoring unexpected xml distance attr name `%s' with no value\n", (const char*) attr->name);
@@ -364,6 +371,8 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
 	/* next matrix cell */
 	i++;
       }
+
+    obj->distances[idx].latency_max = latmax;
   }
 }
 
@@ -417,7 +426,7 @@ hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent
       } else if (!strcmp((const char*) node->name, "info")) {
 	hwloc__xml_import_info_node(topology, parent, node);
 
-      } else if (!strcmp((const char*) node->name, "distances_matrix")) {
+      } else if (!strcmp((const char*) node->name, "distances")) {
 	hwloc__xml_import_distmatrix_node(topology, parent, node);
 
       } else {
@@ -614,14 +623,16 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
   for(i=0; i<obj->distances_count; i++) {
     unsigned nbobjs = obj->distances[i].nbobjs;
     unsigned j;
-    dnode = xmlNewChild(node, NULL, BAD_CAST "distances_matrix", NULL);
+    dnode = xmlNewChild(node, NULL, BAD_CAST "distances", NULL);
     sprintf(tmp, "%u", nbobjs);
     xmlNewProp(dnode, BAD_CAST "nbobjs", BAD_CAST tmp);
     sprintf(tmp, "%u", obj->distances[i].relative_depth);
     xmlNewProp(dnode, BAD_CAST "relative_depth", BAD_CAST tmp);
+    sprintf(tmp, "%f", obj->distances[i].latency_base);
+    xmlNewProp(dnode, BAD_CAST "latency_base", BAD_CAST tmp);
     for(j=0; j<nbobjs*nbobjs; j++) {
-      dcnode = xmlNewChild(dnode, NULL, BAD_CAST "distance", NULL);
-      sprintf(tmp, "%u", obj->distances[i].matrix[j]);
+      dcnode = xmlNewChild(dnode, NULL, BAD_CAST "latency", NULL);
+      sprintf(tmp, "%f", obj->distances[i].latency[j]);
       xmlNewProp(dcnode, BAD_CAST "value", BAD_CAST tmp);
     }
   }

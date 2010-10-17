@@ -10,6 +10,6 @@ depth 0:	1 Machine (type #1)
   depth 2:	4 PUs (type #6)
 depth 1 distance matrix:
   index     0     1
-      0    10    20
-      1    20    10
+      0 1.000 2.000
+      1 2.000 1.000
 Topology not from this system

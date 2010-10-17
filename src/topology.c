@@ -449,7 +449,7 @@ hwloc_free_object(hwloc_obj_t obj)
   }
   free(obj->infos);
   for (i=0; i<obj->distances_count; i++) {
-    free(obj->distances[i].matrix);
+    free(obj->distances[i].latency);
   }
   free(obj->distances);
   free(obj->memory.page_types);

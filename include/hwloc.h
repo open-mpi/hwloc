@@ -352,24 +352,30 @@ union hwloc_obj_attr_u {
 
 /** \brief Distances between objects
  *
- * Distance values are those defined in the ACPI System Locality
- * Information Table (SLIT) interface. The distance between one
- * locality and itself is defined to 10 and called the SMP distance.
- * Other values are normalized to this SMP distance. For instance
- * 33 means that the distance from locality i to locality j is
- * 3.3 times the SMP distance.
+ * One object may contain a distance structure describing distances
+ * between all its descendants at a given relative depth. If the
+ * containing object is the root object of the topology, then the
+ * distances are available for all objects in the machine.
  *
- * FIXME: What about non-ACPI interfaces? Convert values into a
- * more generic normalization? Add a flag specifying which distance
- * interface was used? Report the base/diagonal value in a
- * dedicated field of the distance structure?
+ * The distance may be a memory latency, as defined by the ACPI SLIT
+ * specification. Such a value is never 0.
  */
 struct hwloc_distances_s {
-  unsigned *matrix;			/**< \brief Matrix of distances between all objects, stored as a one-dimension array.
-					 * Distance from i-th to j-th object is stored in slot i*nbobjs+j. */
-  unsigned nbobjs;			/**< \brief Number of objects considered in this matrix,
-					 * corresponds to hwloc_get_nbobjs_inside_cpuset_by_depth. */
-  unsigned relative_depth;		/**< \brief Relative depth of theses objects below the container object */
+  unsigned relative_depth;	/**< \brief Relative depth of the considered objects
+				 * below the object containing this distance information. */
+  unsigned nbobjs;		/**< \brief Number of objects considered in the matrix.
+				 * It is the number of descendant objects at \p relative_depth
+				 * below the containing object.
+				 * It corresponds to the result of hwloc_get_nbobjs_inside_cpuset_by_depth. */
+
+  float *latency;		/**< \brief Matrix of latencies between objects, stored as a one-dimension array.
+				 * Values are normalized to get 1.0 as the minimal value in the matrix.
+				 * Latency from i-th to j-th object is stored in slot i*nbobjs+j. */
+  float latency_max;		/**< \brief The maximal value in the matrix. */
+  float latency_base;		/**< \brief The multiplier that should be applied to matrix values
+				 * to retrieve the original OS-provided latencies.
+				 * Usually 10 on Linux since ACPI SLIT uses 10 for local latency.
+				 */
 };
 
 /** \brief Object info */

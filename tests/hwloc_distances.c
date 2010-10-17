@@ -15,8 +15,8 @@ int main(void)
 {
   hwloc_topology_t topology;
   unsigned nbobjs;
-  const unsigned *distances;
-  unsigned d1, d2;
+  const float *distances;
+  float d1, d2;
   unsigned depth, topodepth;
   int err;
 
@@ -47,7 +47,7 @@ int main(void)
       printf("% 5d", (int) i);
       /* each value */
       for(j=0; j<nbobjs; j++)
-	printf(" % 5d", (int) distances[i*nbobjs+j]);
+	printf(" %2.3f", distances[i*nbobjs+j]);
       printf("\n");
     }
 

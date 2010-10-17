@@ -2398,11 +2398,31 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
   assert(!!topology->backend_params.sysfs.numa_os_distances == !!topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes);
 
   if (topology->backend_params.sysfs.numa_os_distances) {
-    unsigned logical_index_of_non_sparse_physical_index[nbnodes]; /* cache the translation from one index to the other */
+    unsigned logical_index_of_non_sparse_physical_index[nbnodes];
     unsigned i, j, li, lj;
+    unsigned min = UINT_MAX, max = 0;
     hwloc_obj_t root;
-    unsigned *matrix;
+    float *matrix;
 
+    /* compute/check min/max values */
+    for(i=0; i<nbnodes; i++)
+      for(j=0; j<nbnodes; j++) {
+	unsigned val = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+j];
+	if (val < min)
+	  min = val;
+	if (val > max)
+	  max = val;
+      }
+    if (!min) {
+      /* Linux up to 2.6.36 reports ACPI SLIT distances, which should be memory latencies.
+       * Except of SGI IP27 (SGI Origin 200/2000 with MIPS processors) where the distances
+       * are the number of hops between routers.
+       */
+      hwloc_debug("minimal distance is 0, matrix does not seem to contain latencies, ignoring\n");
+      goto ignore;
+    }
+
+    /* cache the translation from one index to the other */
     for(i=0; i<nbnodes; i++) {
       hwloc_obj_t obj = NULL;
       while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
@@ -2410,6 +2430,7 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
           logical_index_of_non_sparse_physical_index[i] = obj->logical_index;
     }
 
+    /* store the normalized latency matrix in the root object */
     root = topology->levels[0][0];
     assert(!root->distances_count);
     assert(!root->distances);
@@ -2417,18 +2438,22 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
     root->distances = malloc(sizeof(struct hwloc_distances_s));
     root->distances[0].relative_depth = depth;
     root->distances[0].nbobjs = nbnodes;
-    root->distances[0].matrix = matrix = malloc(nbnodes*nbnodes*sizeof(unsigned));
+    root->distances[0].latency = matrix = malloc(nbnodes*nbnodes*sizeof(float));
 
+    root->distances[0].latency_base = (float) min;
+#define NORMALIZE_LATENCY(d) (((float) d)/(float) min)
+    root->distances[0].latency_max = NORMALIZE_LATENCY(max);
     for(i=0; i<nbnodes; i++) {
       li = logical_index_of_non_sparse_physical_index[i];
-      matrix[li*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+i];
+      matrix[li*nbnodes+li] = NORMALIZE_LATENCY(topology->backend_params.sysfs.numa_os_distances[i*nbnodes+i]);
       for(j=i+1; j<nbnodes; j++) {
 	lj = logical_index_of_non_sparse_physical_index[j];
-	matrix[li*nbnodes+lj] = topology->backend_params.sysfs.numa_os_distances[i*nbnodes+j];
-	matrix[lj*nbnodes+li] = topology->backend_params.sysfs.numa_os_distances[j*nbnodes+i];
+	matrix[li*nbnodes+lj] = NORMALIZE_LATENCY(topology->backend_params.sysfs.numa_os_distances[i*nbnodes+j]);
+	matrix[lj*nbnodes+li] = NORMALIZE_LATENCY(topology->backend_params.sysfs.numa_os_distances[j*nbnodes+i]);
       }
     }
 
+ ignore:
     free(topology->backend_params.sysfs.numa_os_distances);
     free(topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes);
   }

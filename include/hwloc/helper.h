@@ -649,7 +649,7 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
  * \return \c NULL if no such distance matrix exists.
  */
 
-static __hwloc_inline const unsigned *
+static __hwloc_inline const float *
 hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth,
 				unsigned *nbobjsp)
 {
@@ -658,7 +658,7 @@ hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth,
   for(i=0; i<root->distances_count; i++)
     if (root->distances[i].relative_depth == depth) {
       *nbobjsp = root->distances[i].nbobjs;
-      return root->distances[i].matrix;
+      return root->distances[i].latency;
     }
   return NULL;
 }
@@ -674,7 +674,7 @@ hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth,
  * \p nbobjs is set to width of the matrix.
  * \p first is set to logical index of the first object described by the matrix.
  */
-static __hwloc_inline const unsigned *
+static __hwloc_inline const float *
 hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
 						hwloc_obj_t obj, unsigned depth,
 						unsigned *nbobjsp, unsigned *firstp)
@@ -687,7 +687,7 @@ hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
 	  continue;
 	*firstp = hwloc_get_next_obj_inside_cpuset_by_depth(topology, obj->cpuset, depth, NULL)->logical_index;
 	*nbobjsp = obj->distances[i].nbobjs;
-	return obj->distances[i].matrix;
+	return obj->distances[i].latency;
       }
     obj = obj->parent;
   }
@@ -708,10 +708,10 @@ hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
 static __hwloc_inline int
 hwloc_get_distance(hwloc_topology_t topology,
 		   hwloc_obj_t obj1, hwloc_obj_t obj2,
-		   unsigned *distance, unsigned *reverse_distance)
+		   float *distance, float *reverse_distance)
 {
   hwloc_obj_t ancestor;
-  const unsigned * matrix;
+  const float * matrix;
   unsigned nbobjs;
   unsigned first_logical ;
 

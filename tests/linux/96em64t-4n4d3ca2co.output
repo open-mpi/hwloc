@@ -381,8 +381,8 @@ depth 0:	1 Machine (type #1)
        depth 7:	96 PUs (type #6)
 depth 1 distance matrix:
   index     0     1     2     3
-      0    10    26    26    26
-      1    26    10    26    26
-      2    26    26    10    26
-      3    26    26    26    10
+      0 1.000 2.600 2.600 2.600
+      1 2.600 1.000 2.600 2.600
+      2 2.600 2.600 1.000 2.600
+      3 2.600 2.600 2.600 1.000
 Topology not from this system
