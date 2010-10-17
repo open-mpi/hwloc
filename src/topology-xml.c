@@ -18,7 +18,7 @@
 #include <strings.h>
 
 int
-hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
+hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen)
 {
   xmlDoc *doc = NULL;
 
@@ -26,7 +26,10 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath)
 
   LIBXML_TEST_VERSION;
 
-  doc = xmlReadFile(xmlpath, NULL, 0);
+  if (xmlpath)
+    doc = xmlReadFile(xmlpath, NULL, 0);
+  else if (xmlbuffer)
+    doc = xmlReadMemory(xmlbuffer, buflen, "", NULL, 0);
   if (!doc)
     return -1;
 
@@ -41,7 +44,6 @@ hwloc_backend_xml_exit(struct hwloc_topology *topology)
 {
   assert(topology->backend_type == HWLOC_BACKEND_XML);
   xmlFreeDoc((xmlDoc*)topology->backend_params.xml.doc);
-  xmlCleanupParser();
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
@@ -250,8 +252,6 @@ hwloc__xml_import_object_node(struct hwloc_topology *topology, struct hwloc_obj 
       const xmlChar *value = hwloc__xml_import_attr_value(attr);
       if (value)
 	hwloc__xml_import_object_attr(topology, obj, attr->name, value);
-      else
-	fprintf(stderr, "ignoring unexpected xml object attr name `%s' with no value\n", (const char*) attr->name);
     } else {
       fprintf(stderr, "ignoring unexpected xml object attr type %u\n", attr->type);
     }
@@ -283,20 +283,20 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribut
 	  count = strtoul((char *) value, NULL, 10);
 	else
 	  fprintf(stderr, "ignoring unknown pagetype attribute %s\n", (char *) attr->name);
-      } else
-	fprintf(stderr, "ignoring unexpected xml pagetype attr name `%s' with no value\n", (const char*) attr->name);
+      }
     } else {
       fprintf(stderr, "ignoring unexpected xml pagetype attr type %u\n", attr->type);
     }
   }
 
-  if (size && count) {
+  if (size) {
     int idx = obj->memory.page_types_len;
     obj->memory.page_types = realloc(obj->memory.page_types, (idx+1)*sizeof(*obj->memory.page_types));
     obj->memory.page_types_len = idx+1;
     obj->memory.page_types[idx].size = size;
     obj->memory.page_types[idx].count = count;
-  }
+  } else
+    fprintf(stderr, "ignoring pagetype attribute without size\n");
 }
 
 static void
@@ -384,17 +384,17 @@ hwloc__xml_import_info_node(struct hwloc_topology *topology __hwloc_attribute_un
 	  infovalue = (char *) value;
 	else
 	  fprintf(stderr, "ignoring unknown info attribute %s\n", (char *) attr->name);
-      } else
-	fprintf(stderr, "ignoring unexpected xml info attr name `%s' with no value\n", (const char*) attr->name);
+      }
     } else {
       fprintf(stderr, "ignoring unexpected xml info attr type %u\n", attr->type);
     }
   }
 
-  if (infoname && infovalue)
-    hwloc_add_object_info(obj, infoname, infovalue);
+  if (infoname)
+    /* empty strings are ignored by libxml */
+    hwloc_add_object_info(obj, infoname, infovalue ? infovalue : "");
   else
-    fprintf(stderr, "ignoring incomplete info attribute\n");
+    fprintf(stderr, "ignoring info attribute without name\n");
 }
 
 static void
@@ -450,10 +450,9 @@ hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
   for (attr = node->properties; attr; attr = attr->next) {
     if (attr->type == XML_ATTRIBUTE_NODE) {
       const xmlChar *value = hwloc__xml_import_attr_value(attr);
-      if (value)
+      if (value) {
 	fprintf(stderr, "ignoring unknown root attribute %s\n", (char *) attr->name);
-      else
-	fprintf(stderr, "ignoring unexpected xml root attr name `%s' with no value\n", (const char*) attr->name);
+      }
     } else {
       fprintf(stderr, "ignoring unexpected xml root attr type %u\n", attr->type);
     }
@@ -639,7 +638,8 @@ hwloc__xml_export_topology_info (hwloc_topology_t topology __hwloc_attribute_unu
 {
 }
 
-void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+static xmlDocPtr
+hwloc__topology_prepare_export(hwloc_topology_t topology)
 {
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
@@ -659,14 +659,22 @@ void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 
   hwloc__xml_export_topology_info (topology, root_node);
 
-  /* Dumping document to stdio or file. */
-  xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
-
-  /* Free the document. */
-  xmlFreeDoc(doc);
-
-  /* Free the global variables that may have been allocated by the parser. */
-  xmlCleanupParser();
+  return doc;
 }
+
+void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+{
+  xmlDocPtr doc = hwloc__topology_prepare_export(topology);
+  xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+  xmlFreeDoc(doc);
+}
+
+void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
+{
+  xmlDocPtr doc = hwloc__topology_prepare_export(topology);
+  xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
+  xmlFreeDoc(doc);
+}
+
 
 #endif /* HWLOC_HAVE_XML */
