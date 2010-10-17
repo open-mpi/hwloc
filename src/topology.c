@@ -337,6 +337,67 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
   hwloc__setup_misc_level_from_distances(topology, nbobjs, objs, _distances, 0);
 }
 
+void
+hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
+					      hwloc_obj_t root, unsigned relative_depth, unsigned nbobjs,
+					      unsigned *osmatrix, unsigned *osindex)
+{
+  unsigned logical_index_of_non_sparse_physical_index[nbobjs];
+  unsigned i, j, li, lj;
+  unsigned min = UINT_MAX, max = 0;
+  float *matrix;
+  int idx;
+
+  /* check that root/depth/nbobjs are consistent */
+  assert(hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, root->depth + relative_depth) == nbobjs);
+
+  /* compute/check min/max values */
+  for(i=0; i<nbobjs; i++)
+    for(j=0; j<nbobjs; j++) {
+      unsigned val = osmatrix[i*nbobjs+j];
+      if (val < min)
+	min = val;
+      if (val > max)
+	max = val;
+    }
+  if (!min) {
+    /* Linux up to 2.6.36 reports ACPI SLIT distances, which should be memory latencies.
+     * Except of SGI IP27 (SGI Origin 200/2000 with MIPS processors) where the distances
+     * are the number of hops between routers.
+     */
+    hwloc_debug("minimal distance is 0, matrix does not seem to contain latencies, ignoring\n");
+    return;
+  }
+
+  /* cache the translation from one index to the other */
+  for(i=0; i<nbobjs; i++) {
+    hwloc_obj_t obj = NULL;
+    while ((obj = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, root->depth + relative_depth, obj)) != NULL)
+      if (obj->os_index == osindex[i])
+	logical_index_of_non_sparse_physical_index[i] = obj->logical_index;
+  }
+
+  /* store the normalized latency matrix in the root object */
+  idx = root->distances_count++;
+  root->distances = realloc(root->distances, root->distances_count * sizeof(struct hwloc_distances_s));
+  root->distances[idx].relative_depth = relative_depth;
+  root->distances[idx].nbobjs = nbobjs;
+  root->distances[idx].latency = matrix = malloc(nbobjs*nbobjs*sizeof(float));
+
+  root->distances[0].latency_base = (float) min;
+#define NORMALIZE_LATENCY(d) (((float) d)/(float) min)
+  root->distances[0].latency_max = NORMALIZE_LATENCY(max);
+  for(i=0; i<nbobjs; i++) {
+    li = logical_index_of_non_sparse_physical_index[i];
+    matrix[li*nbobjs+li] = NORMALIZE_LATENCY(osmatrix[i*nbobjs+i]);
+    for(j=i+1; j<nbobjs; j++) {
+      lj = logical_index_of_non_sparse_physical_index[j];
+      matrix[li*nbobjs+lj] = NORMALIZE_LATENCY(osmatrix[i*nbobjs+j]);
+      matrix[lj*nbobjs+li] = NORMALIZE_LATENCY(osmatrix[j*nbobjs+i]);
+    }
+  }
+}
+
 /*
  * Use the given number of processors and the optional online cpuset if given
  * to set a PU level.

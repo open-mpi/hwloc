@@ -119,6 +119,7 @@ struct hwloc_topology {
 
 extern void hwloc_setup_pu_level(struct hwloc_topology *topology, unsigned nb_pus);
 extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/, unsigned *distance_indexes /*[nbobjs]*/);
+extern void hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology, hwloc_obj_t root, unsigned relative_depth, unsigned nbobjs, unsigned *osmatrix, unsigned *osindex);
 extern int hwloc_get_sysctlbyname(const char *name, int64_t *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);
 extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
