@@ -15,7 +15,7 @@ int main(void)
 {
   hwloc_topology_t topology;
   unsigned nbobjs;
-  const float *distances;
+  const struct hwloc_distances_s *distances;
   float d1, d2;
   unsigned depth, topodepth;
   int err;
@@ -29,11 +29,12 @@ int main(void)
     unsigned i, j;
     hwloc_obj_t obj1, obj2;
 
-    distances = hwloc_get_whole_distance_matrix(topology, depth, &nbobjs);
-    if (!distances) {
+    distances = hwloc_get_whole_distance_matrix(topology, depth);
+    if (!distances || !distances->latency) {
       printf("No distance at depth %u\n", depth);
       continue;
     }
+    nbobjs = distances->nbobjs;
 
     /* column header */
     printf("distance matrix for depth %u:\n     ", depth);
@@ -47,16 +48,16 @@ int main(void)
       printf("% 5d", (int) i);
       /* each value */
       for(j=0; j<nbobjs; j++)
-	printf(" %2.3f", distances[i*nbobjs+j]);
+	printf(" %2.3f", distances->latency[i*nbobjs+j]);
       printf("\n");
     }
 
     obj1 = hwloc_get_obj_by_depth(topology, depth, 0);
     obj2 = hwloc_get_obj_by_depth(topology, depth, nbobjs-1);
-    err = hwloc_get_distance(topology, obj1, obj2, &d1, &d2);
+    err = hwloc_get_latency(topology, obj1, obj2, &d1, &d2);
     assert(!err);
-    assert(d1 == distances[0*nbobjs+(nbobjs-1)]);
-    assert(d2 == distances[(nbobjs-1)*nbobjs+0]);
+    assert(d1 == distances->latency[0*nbobjs+(nbobjs-1)]);
+    assert(d2 == distances->latency[(nbobjs-1)*nbobjs+0]);
   }
 
   hwloc_topology_destroy(topology);

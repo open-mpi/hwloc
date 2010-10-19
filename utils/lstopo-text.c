@@ -162,16 +162,17 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
   }
 
   if (verbose_mode > 1) {
-    const float *distances;
-    unsigned nbobjs;
+    const struct hwloc_distances_s * distances;
     unsigned depth;
 
     for (depth = 0; depth < topodepth; depth++) {
+      unsigned nbobjs;
       unsigned i, j;
 
-      distances = hwloc_get_whole_distance_matrix(topology, depth, &nbobjs);
-      if (!distances)
+      distances = hwloc_get_whole_distance_matrix(topology, depth);
+      if (!distances || !distances->latency)
         continue;
+      nbobjs = distances->nbobjs;
 
       printf("depth %u distance matrix:\n", depth);
       /* column header */
@@ -185,7 +186,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
         printf("  % 5d", (int) i);
         /* each value */
         for(j=0; j<nbobjs; j++)
-          printf(" %2.3f", distances[i*nbobjs+j]);
+          printf(" %2.3f", distances->latency[i*nbobjs+j]);
         printf("\n");
       }
     }

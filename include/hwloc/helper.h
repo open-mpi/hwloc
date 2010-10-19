@@ -630,11 +630,11 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
  * @{
  */
 
-/** \brief Get the matrix of distances between all objects at the given depth.
+/** \brief Get the distances between all objects at the given depth.
  *
- * \p nbobjs is filled with the number of objects.
+ * \return a distances structure containing a matrix with all distances
+ * between all objects at the given depth.
  *
- * \p distances is filled with an array of nbobjs*nbobjs distances.
  * Slot i+nbobjs*j contains the distance from the object of logical index i
  * the object of logical index j.
  *
@@ -643,27 +643,24 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
  * top-level object of the hierarchy. Matrices of lower objects are not
  * reported here since they cover only part of the machine.
  *
- * The returned matrix belongs to the hwloc library. The caller should
+ * The returned structure belongs to the hwloc library. The caller should
  * not modify or free it.
  *
  * \return \c NULL if no such distance matrix exists.
  */
 
-static __hwloc_inline const float *
-hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth,
-				unsigned *nbobjsp)
+static __hwloc_inline const struct hwloc_distances_s *
+hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth)
 {
   hwloc_obj_t root = hwloc_get_root_obj(topology);
   unsigned i;
   for(i=0; i<root->distances_count; i++)
-    if (root->distances[i].relative_depth == depth) {
-      *nbobjsp = root->distances[i].nbobjs;
-      return root->distances[i].latency;
-    }
+    if (root->distances[i].relative_depth == depth)
+      return &root->distances[i];
   return NULL;
 }
 
-/** \brief Get a distance matrix for the given depth and covering some objects
+/** \brief Get distances for the given depth and covering some objects
  *
  * Return a distance matrix that describes depth \p depth and covers at
  * least object \p obj and all its ancestors.
@@ -671,13 +668,15 @@ hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth,
  * When looking for the distance between some objects, a common ancestor should
  * be passed in \p obj.
  *
- * \p nbobjs is set to width of the matrix.
- * \p first is set to logical index of the first object described by the matrix.
+ * \p firstp is set to logical index of the first object described by the matrix.
+ *
+ * The returned structure belongs to the hwloc library. The caller should
+ * not modify or free it.
  */
-static __hwloc_inline const float *
+static __hwloc_inline const struct hwloc_distances_s *
 hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
 						hwloc_obj_t obj, unsigned depth,
-						unsigned *nbobjsp, unsigned *firstp)
+						unsigned *firstp)
 {
   while (obj) {
     unsigned i;
@@ -686,33 +685,31 @@ hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
 	if (!obj->distances[i].nbobjs)
 	  continue;
 	*firstp = hwloc_get_next_obj_inside_cpuset_by_depth(topology, obj->cpuset, depth, NULL)->logical_index;
-	*nbobjsp = obj->distances[i].nbobjs;
-	return obj->distances[i].latency;
+	return &obj->distances[i];
       }
     obj = obj->parent;
   }
   return NULL;
 }
 
-/** \brief Get the distance in both directions between two objects.
+/** \brief Get the latency in both directions between two objects.
  *
  * Look at ancestor objects from the bottom to the top until one of them
  * contains a distance matrix that matches the objects exactly.
  *
- * \p distance gets the value from object \p obj1 to \p obj2, while
- * \p reverse_distance gets the reverse-direction value, which
+ * \p latency gets the value from object \p obj1 to \p obj2, while
+ * \p reverse_latency gets the reverse-direction value, which
  * may be different on some architectures.
  *
- * \return -1 if no ancestor contains a matching distance matrix.
+ * \return -1 if no ancestor contains a matching latency matrix.
  */
 static __hwloc_inline int
-hwloc_get_distance(hwloc_topology_t topology,
+hwloc_get_latency(hwloc_topology_t topology,
 		   hwloc_obj_t obj1, hwloc_obj_t obj2,
-		   float *distance, float *reverse_distance)
+		   float *latency, float *reverse_latency)
 {
   hwloc_obj_t ancestor;
-  const float * matrix;
-  unsigned nbobjs;
+  const struct hwloc_distances_s * distances;
   unsigned first_logical ;
 
   if (obj1->depth != obj2->depth) {
@@ -721,12 +718,14 @@ hwloc_get_distance(hwloc_topology_t topology,
   }
 
   ancestor = hwloc_get_common_ancestor_obj(topology, obj1, obj2);
-  matrix = hwloc_get_distance_matrix_covering_obj_by_depth(topology, ancestor, obj1->depth, &nbobjs, &first_logical);
-  if (matrix) {
+  distances = hwloc_get_distance_matrix_covering_obj_by_depth(topology, ancestor, obj1->depth, &first_logical);
+  if (distances && distances->latency) {
+    const float * latency_matrix = distances->latency;
+    unsigned nbobjs = distances->nbobjs;
     unsigned l1 = obj1->logical_index - first_logical;
     unsigned l2 = obj2->logical_index - first_logical;
-    *distance = matrix[l1*nbobjs+l2];
-    *reverse_distance = matrix[l2*nbobjs+l1];
+    *latency = latency_matrix[l1*nbobjs+l2];
+    *reverse_latency = latency_matrix[l2*nbobjs+l1];
     return 0;
   }
 

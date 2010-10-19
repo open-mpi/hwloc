@@ -355,7 +355,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_whole_distance_matrix.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_distance_matrix_covering_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_distance.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_latency.3 \
         $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_linux_parse_cpumap_file.3 \
         $(DOX_MAN_DIR)/man3/hwloc_mx_board_get_device_cpuset.3 \
