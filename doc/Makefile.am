@@ -385,20 +385,20 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_cpumembind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_free_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_free_membind.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_membind_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_set_membind_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_area_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_area_membind_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_area_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_area_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_set_area_membind_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_area_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
