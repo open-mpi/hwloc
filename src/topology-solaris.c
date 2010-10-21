@@ -36,7 +36,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     if (processor_bind(idtype, id, PBIND_NONE, NULL) != 0)
       return -1;
 #ifdef HAVE_LIBLGRP
-    if (!(flags & HWLOC_CPUBIND_MEMBIND)) {
+    if (!(flags & HWLOC_CPUBIND_NOMEMBIND)) {
       int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
       if (depth >= 0) {
 	int n = hwloc_get_nbobjs_by_depth(topology, depth);
@@ -53,7 +53,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
   }
 
 #ifdef HAVE_LIBLGRP
-  if (!(flags & HWLOC_CPUBIND_MEMBIND)) {
+  if (!(flags & HWLOC_CPUBIND_NOMEMBIND)) {
     int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
     if (depth >= 0) {
       int n = hwloc_get_nbobjs_by_depth(topology, depth);
