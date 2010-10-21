@@ -535,6 +535,6 @@ hwloc_set_solaris_hooks(struct hwloc_topology *topology)
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;
   topology->support.membind->interleave_membind = 1;
-  topology->support.membind->nextouch_membind = 1;
+  topology->support.membind->nexttouch_membind = 1;
 #endif
 }
