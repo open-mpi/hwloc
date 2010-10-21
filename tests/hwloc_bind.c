@@ -171,6 +171,9 @@ int main(void)
   printf("\n\nmemory tests\n\n");
   printf("complete node set\n");
   set = hwloc_bitmap_dup(hwloc_get_root_obj(topology)->cpuset);
+  hwloc_bitmap_asprintf(&str, set);
+  printf("i.e. cpuset %s\n", str);
+  free(str);
   testmem3(set);
   hwloc_bitmap_free(set);
 
@@ -178,7 +181,7 @@ int main(void)
   if (obj) {
     set = hwloc_bitmap_dup(obj->cpuset);
     hwloc_bitmap_asprintf(&str, set);
-    printf("node set is %s\n", str);
+    printf("cpuset set is %s\n", str);
     free(str);
 
     testmem3(set);
@@ -187,7 +190,7 @@ int main(void)
     if (obj) {
       hwloc_bitmap_or(set, set, obj->cpuset);
       hwloc_bitmap_asprintf(&str, set);
-      printf("node set is %s\n", str);
+      printf("cpuset set is %s\n", str);
       free(str);
 
       testmem3(set);
