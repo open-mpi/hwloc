@@ -368,6 +368,22 @@ hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
   return ret;
 }
 
+static void *
+hwloc_allocate(size_t len)
+{
+  void *p;
+#if defined(HAVE_GETPAGESIZE) && defined(HAVE_POSIX_MEMALIGN)
+  errno = posix_memalign(&p, getpagesize(), len);
+  if (errno)
+    p = NULL;
+#elif defined(HAVE_GETPAGESIZE) && defined(HAVE_MEMALIGN)
+  p = memalign(getpagesize(), len);
+#else
+  p = malloc(len);
+#endif
+  return p;
+}
+
 void *
 hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
@@ -382,23 +398,18 @@ hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_n
   if (topology->alloc_membind)
     return topology->alloc_membind(topology, len, nodeset, policy, flags);
   else if (topology->set_area_membind) {
-    void *p;
-#if defined(HAVE_GETPAGESIZE) && defined(HAVE_POSIX_MEMALIGN)
-    errno = posix_memalign(&p, getpagesize(), len);
-    if (errno)
-      p = NULL;
-#elif defined(HAVE_GETPAGESIZE) && defined(HAVE_MEMALIGN)
-    p = memalign(getpagesize(), len);
-#else
-    p = malloc(len);
-#endif
-    if (!topology->set_area_membind(topology, p, len, nodeset, policy, flags)) {
+    void *p = hwloc_allocate(len);
+    if (!p)
+      return NULL;
+    if (topology->set_area_membind(topology, p, len, nodeset, policy, flags) && flags & HWLOC_MEMBIND_STRICT) {
       int error = errno;
       free(p);
       errno = error;
       return NULL;
     }
     return p;
+  } else if (!(flags & HWLOC_MEMBIND_STRICT)) {
+    return hwloc_allocate(len);
   }
 
   errno = ENOSYS;

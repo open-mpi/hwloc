@@ -1008,7 +1008,8 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * hwloc_alloc_membind(topology, size, set, HWLOC_MEMBIND_DEFAULT, 0),
  * \endcode
  *
- * which will allocate new data bound to the given set.
+ * which will try to allocate new data bound to the given set, or at worse
+ * allocate memory without binding it at all.
  *
  * Each binding is available with a CPU set argument or a NUMA memory node set
  * argument. The name of the latter ends with _nodeset. It is also possible to
@@ -1057,6 +1058,9 @@ typedef enum {
                                          * the current process.
                                          * \hideinitializer */
   HWLOC_MEMBIND_STRICT =        (1<<2), /**< Request strict binding from the OS.
+                                         * The function will fail if the
+                                         * binding can not be completely
+                                         * enforced.
                                          * \hideinitializer  */
   HWLOC_MEMBIND_MIGRATE =       (1<<3), /**< \brief Migrate existing allocated memory.
                                          * If memory can not be migrated and the STRICT
