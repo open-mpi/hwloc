@@ -600,9 +600,9 @@ struct hwloc_topology_membind_support {
   unsigned char interleave_membind;
   /** Replication policy is supported. */
   unsigned char replicate_membind;
-
-  /** Next-touch migration flags is supported. */
+  /** Next-touch migration policy is supported. */
   unsigned char nexttouch_membind;
+
   /** Migration flags is supported. */
   unsigned char migrate_membind;
 };
