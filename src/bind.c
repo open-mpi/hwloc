@@ -283,7 +283,7 @@ hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_c
   if (hwloc_fix_membind_cpuset(topology, nodeset, set))
     ret = -1;
   else
-    ret = hwloc_set_proc_membind_nodeset(topology, pid, set, policy, flags);
+    ret = hwloc_set_proc_membind_nodeset(topology, pid, nodeset, policy, flags);
 
   hwloc_bitmap_free(nodeset);
   return ret;
