@@ -742,6 +742,10 @@ hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
 
 /** @} */
 
+/* TODO: add helper which changes the current memory policy and allocates bound
+ * memory, to maximize chances to get something bound at the expense of
+ * changing the current memory policy.  */
+
 
 #ifdef __cplusplus
 } /* extern "C" */
