@@ -1289,14 +1289,23 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
  * Empty binding hooks always returning success
  */
 
+static int dontset_return_complete_cpuset(hwloc_topology_t topology, hwloc_cpuset_t set)
+{
+  hwloc_const_cpuset_t cpuset = hwloc_topology_get_complete_cpuset(topology);
+  if (cpuset) {
+    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
+    return 0;
+  } else
+    return -1;
+}
+
 static int dontset_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
   return 0;
 }
 static int dontget_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, int policy __hwloc_attribute_unused)
 {
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-  return 0;
+  return dontset_return_complete_cpuset(topology, set);
 }
 static int dontset_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
@@ -1304,12 +1313,7 @@ static int dontset_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_
 }
 static int dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, int policy __hwloc_attribute_unused)
 {
-  hwloc_const_bitmap_t cpuset = hwloc_topology_get_complete_cpuset(topology);
-  if (cpuset) {
-    hwloc_bitmap_copy(set,cpuset);
-    return 0;
-  } else
-    return -1;
+  return dontset_return_complete_cpuset(topology, set);
 }
 static int dontset_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
 {
@@ -1317,8 +1321,7 @@ static int dontset_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unus
 }
 static int dontget_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_bitmap_t cpuset, int policy __hwloc_attribute_unused)
 {
-  hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
-  return 0;
+  return dontset_return_complete_cpuset(topology, cpuset);
 }
 #ifdef hwloc_thread_t
 static int dontset_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
@@ -1327,8 +1330,7 @@ static int dontset_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_un
 }
 static int dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_bitmap_t cpuset, int policy __hwloc_attribute_unused)
 {
-  hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
-  return 0;
+  return dontset_return_complete_cpuset(topology, cpuset);
 }
 #endif
 
