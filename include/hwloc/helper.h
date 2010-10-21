@@ -691,6 +691,57 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
 
 /** @} */
 
+/** \defgroup hwlocality_helper_nodeset Cpuset Helpers
+ * @{
+ */
+/* \brief Get complete node set
+ *
+ * \return the complete node set of memory of the system. If the
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
+ *
+ * \note The returned nodeset is not newly allocated and should thus not be
+ * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
+ */
+static __hwloc_inline hwloc_const_nodeset_t __hwloc_attribute_pure
+hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->complete_nodeset;
+}
+
+/* \brief Get topology node set
+ *
+ * \return the node set of memory of the system for which hwloc
+ * provides topology information. This is equivalent to the nodeset of the
+ * system object. If the topology is the result of a combination of several
+ * systems, NULL is returned.
+ *
+ * \note The returned nodeset is not newly allocated and should thus not be
+ * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
+ */
+static __hwloc_inline hwloc_const_nodeset_t __hwloc_attribute_pure
+hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->nodeset;
+}
+
+/** \brief Get allowed node set
+ *
+ * \return the node set of allowed memory of the system. If the
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
+ *
+ * \note The returned nodeset is not newly allocated and should thus not be
+ * changed or freed, hwloc_nodeset_dup must be used to obtain a local copy.
+ */
+static __hwloc_inline hwloc_const_nodeset_t __hwloc_attribute_pure
+hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->allowed_nodeset;
+}
+
+/** @} */
+
 
 #ifdef __cplusplus
 } /* extern "C" */

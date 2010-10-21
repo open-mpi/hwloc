@@ -212,8 +212,18 @@ hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodes
   if (!nodeset)
     return -1;
 
-  if (topology->set_membind)
-    return topology->set_membind(topology, nodeset, policy, flags);
+  if (flags & HWLOC_MEMBIND_PROCESS) {
+    if (topology->set_thisproc_membind)
+      return topology->set_thisproc_membind(topology, nodeset, policy, flags);
+  } else if (flags & HWLOC_MEMBIND_THREAD) {
+    if (topology->set_thisthread_membind)
+      return topology->set_thisthread_membind(topology, nodeset, policy, flags);
+  } else {
+    if (topology->set_thisproc_membind)
+      return topology->set_thisproc_membind(topology, nodeset, policy, flags);
+    else if (topology->set_thisthread_membind)
+      return topology->set_thisthread_membind(topology, nodeset, policy, flags);
+  }
 
   errno = ENOSYS;
   return -1;
@@ -237,8 +247,18 @@ hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t set, hwloc_mem
 int
 hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
-  if (topology->get_membind)
-    return topology->get_membind(topology, nodeset, policy, flags);
+  if (flags & HWLOC_MEMBIND_PROCESS) {
+    if (topology->get_thisproc_membind)
+      return topology->get_thisproc_membind(topology, nodeset, policy, flags);
+  } else if (flags & HWLOC_MEMBIND_THREAD) {
+    if (topology->get_thisthread_membind)
+      return topology->get_thisthread_membind(topology, nodeset, policy, flags);
+  } else {
+    if (topology->get_thisproc_membind)
+      return topology->get_thisproc_membind(topology, nodeset, policy, flags);
+    else if (topology->get_thisthread_membind)
+      return topology->get_thisthread_membind(topology, nodeset, policy, flags);
+  }
 
   errno = ENOSYS;
   return -1;

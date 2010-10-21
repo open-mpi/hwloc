@@ -579,13 +579,17 @@ struct hwloc_topology_cpubind_support {
 /** \brief Flags describing actual memory binding support for this topology. */
 struct hwloc_topology_membind_support {
   /** Binding the whole current process is supported.  */
-  unsigned char set_membind;
+  unsigned char set_thisproc_membind;
   /** Getting the binding of the whole current process is supported.  */
-  unsigned char get_membind;
+  unsigned char get_thisproc_membind;
   /** Binding a whole given process is supported.  */
   unsigned char set_proc_membind;
   /** Getting the binding of a whole given process is supported.  */
   unsigned char get_proc_membind;
+  /** Binding the current thread only is supported.  */
+  unsigned char set_thisthread_membind;
+  /** Getting the binding of the current thread only is supported.  */
+  unsigned char get_thisthread_membind;
   /** Binding a given memory area is supported. */
   unsigned char set_area_membind;
   /** Getting the binding of a given memory area is supported.  */
