@@ -432,10 +432,12 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_cudart.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_glibc_sched.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_binding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_covering.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_coverings.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_inside.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal_basic.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_types.3 \
