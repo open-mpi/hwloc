@@ -1086,7 +1086,7 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwlo
   return -1;
 }
 
-/* TODO: mbind, migrate_pages */
+/* TODO: migrate_pages */
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 
 int
