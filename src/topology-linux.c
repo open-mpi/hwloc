@@ -976,9 +976,12 @@ hwloc_linux_set_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset
   if (err < 0)
     return err;
 
+  /* TODO: MIGRATE */
   if ((flags & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE))
-            == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
-    /* TODO: MIGRATE */
+            == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)
+	    /* TODO: documentation says process, but do_set_mempolicy source
+	     * code says current->mempolicy = new;... */
+      || (flags & HWLOC_MEMBIND_PROCESS)) {
     errno = ENOSYS;
     goto out;
   }
@@ -1014,6 +1017,13 @@ hwloc_linux_get_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwlo
   int linuxpolicy;
   int err;
   unsigned index;
+
+  if ((flags & HWLOC_MEMBIND_PROCESS)) {
+	    /* TODO: documentation says process, but do_get_mempolicy source
+	     * code says pol = current->mempolicy;... */
+    errno = ENOSYS;
+    goto out;
+  }
 
   /* compute max_os_index */
   depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);

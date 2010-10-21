@@ -36,7 +36,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     if (processor_bind(idtype, id, PBIND_NONE, NULL) != 0)
       return -1;
 #ifdef HAVE_LIBLGRP
-    {
+    if (!(flags & HWLOC_CPUBIND_MEMBIND)) {
       int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
       if (depth >= 0) {
 	int n = hwloc_get_nbobjs_by_depth(topology, depth);
@@ -53,7 +53,7 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
   }
 
 #ifdef HAVE_LIBLGRP
-  {
+  if (!(flags & HWLOC_CPUBIND_MEMBIND)) {
     int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
     if (depth >= 0) {
       int n = hwloc_get_nbobjs_by_depth(topology, depth);
@@ -176,7 +176,7 @@ hwloc_solaris_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t h
 /* TODO: given thread, probably not easy because of the historical n:m implementation */
 
 #ifdef MADV_ACCESS_LWP 
-/* TODO: set_membind set_proc_membind thanks to lgrp_affinity, document that it binds threads too. */
+/* TODO: set_membind set_proc_membind thanks to lgrp_affinity, express that it binds threads too. */
 static int
 hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags __hwloc_attribute_unused)
 {

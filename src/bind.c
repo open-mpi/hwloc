@@ -141,70 +141,6 @@ hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bi
 }
 #endif
 
-static hwloc_const_bitmap_t
-hwloc_fix_cpumembind_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t set)
-{
-  hwloc_const_bitmap_t topology_set = hwloc_topology_get_topology_cpuset(topology);
-  hwloc_const_bitmap_t complete_set = hwloc_topology_get_complete_cpuset(topology);
-
-  if (!topology_set) {
-    /* The topology is composed of several systems, the cpuset is thus
-     * ambiguous. */
-    errno = EXDEV;
-    return NULL;
-  }
-
-  if (!hwloc_get_root_obj(topology)->complete_nodeset) {
-    /* There is no NUMA node */
-    errno = ENODEV;
-    return NULL;
-  }
-
-  if (!hwloc_bitmap_isincluded(set, complete_set)) {
-    errno = EINVAL;
-    return NULL;
-  }
-
-  if (hwloc_bitmap_isincluded(topology_set, set))
-    set = complete_set;
-
-  return set;
-}
-
-int
-hwloc_set_cpumembind(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t mempolicy, int flags)
-{
-  if (topology->set_cpumembind) {
-    cpuset = hwloc_fix_cpumembind_cpuset(topology, cpuset);
-    if (!cpuset)
-      return -1;
-    return topology->set_cpumembind(topology, cpuset, mempolicy, flags);
-  } else {
-    int err;
-    err = hwloc_set_cpubind(topology, cpuset, flags);
-    if (err < 0)
-      return err;
-    return hwloc_set_membind(topology, cpuset, mempolicy, flags);
-  }
-}
-
-int
-hwloc_set_proc_cpumembind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t mempolicy, int flags)
-{
-  if (topology->set_proc_cpumembind) {
-    cpuset = hwloc_fix_cpumembind_cpuset(topology, cpuset);
-    if (!cpuset)
-      return -1;
-    return topology->set_proc_cpumembind(topology, pid, cpuset, mempolicy, flags);
-  } else {
-    int err;
-    err = hwloc_set_proc_cpubind(topology, pid, cpuset, flags);
-    if (err < 0)
-      return err;
-    return hwloc_set_proc_membind(topology, pid, cpuset, mempolicy, flags);
-  }
-}
-
 static hwloc_const_nodeset_t
 hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
 {
@@ -336,6 +272,7 @@ hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc
   errno = ENOSYS;
   return -1;
 }
+
 
 int
 hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)

@@ -32,6 +32,11 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   int res;
   unsigned cpu;
 
+  if (flags & HWLOC_CPUBIND_NOMEMBIND) {
+    errno = ENOSYS;
+    return -1;
+  }
+
   /* The resulting binding is always strict */
 
   if (hwloc_bitmap_isequal(hwloc_set, hwloc_topology_get_complete_cpuset(topology))) {
@@ -148,7 +153,7 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 
 #ifdef P_DEFAULT
 
-/* TODO: set_membind set_proc_membind, document that it binds threads too. */
+/* TODO: set_membind set_proc_membind, potentially avoid binding threads too. */
 
 static int
 hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_const_nodeset_t nodeset, uint_t *aix_policy, hwloc_membind_policy_t policy, int flags)

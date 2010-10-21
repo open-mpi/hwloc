@@ -576,8 +576,6 @@ struct hwloc_topology_cpubind_support {
   unsigned char get_thread_cpubind;
 };
 
-/* TODO add relevant cpumembind stuff */
-
 /** \brief Flags describing actual memory binding support for this topology. */
 struct hwloc_topology_membind_support {
   /** Binding the whole current process is supported.  */
@@ -875,6 +873,9 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  *
  * \note To unbind, just call the binding function with either a full cpuset or
  * a cpuset equal to the system cpuset.
+ *
+ * \note On some OSes, CPU binding may have effects on memory binding, see
+ * ::HWLOC_CPUBIND_NOMEMBIND
  * @{
  */
 
@@ -885,14 +886,16 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * The default (0) is to bind the current process, assumed to be mono-thread,
  * in a non-strict way.  This is the most portable way to bind as all OSes
  * usually provide it.
+ *
+ * \note Not all systems support all kinds of binding.
  */
 typedef enum {
-  HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
-                                   * This may not be supported by some OSes.
+  HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current
+                                   * (possibly) multithreaded process.
                                    * \hideinitializer */
   HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
                                    * \hideinitializer */
-  HWLOC_CPUBIND_STRICT = (1<<2)   /**< \brief Request for strict binding from the OS.
+  HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS.
                                    * \hideinitializer
                                    *
                                    * By default, when the designated CPUs are
@@ -919,6 +922,19 @@ typedef enum {
 				   *
 				   * \note This flag is meaningless when retrieving
 				   * the binding of a thread.
+                                   */
+  HWLOC_CPUBIND_NOMEMBIND = (1<<3)/**< \brief Avoid any effect on memory binding
+                                   * \hideinitializer
+                                   *
+                                   * On some OSes, some CPU binding function
+                                   * would also bind the memory on the
+                                   * corresponding NUMA node.  It is often not
+                                   * a problem for the application, but if it
+                                   * is, setting this flag will make hwloc
+                                   * avoid using OS functions that would also
+                                   * bind memory.  This will however reduce the
+                                   * support of CPU bindings, i.e. potentially
+                                   * return ENOSYS in some cases.
                                    */
 } hwloc_cpubind_flags_t;
 
@@ -989,16 +1005,18 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * possible, is
  *
  * \code
- * hwloc_alloc_membind(topology, size, set, HWLOC_MEMBIND_BIND),
+ * hwloc_alloc_membind(topology, size, set, HWLOC_MEMBIND_DEFAULT, 0),
  * \endcode
  *
- * which will allocate new data bound to the given set (at worse, hwloc will
- * allocate memory itself and bind it).
+ * which will allocate new data bound to the given set.
  *
  * Each binding is available with a CPU set argument or a NUMA memory node set
  * argument. The name of the latter ends with _nodeset. It is also possible to
  * convert between CPU set and node set using ::hwloc_cpuset_to_nodeset or
  * ::hwloc_cpuset_from_nodeset.
+ *
+ * \note On some OSes, memory binding may have effects on CPU binding, see
+ * ::HWLOC_CPUBIND_NOCPUBIND
  * @{
  */
 
@@ -1029,42 +1047,35 @@ typedef enum {
  *
  * These flags can be used to refine the binding policy.
  *
- * Note that not all systems support all kinds of binding.
+ * \note Not all systems support all kinds of binding.
  */
 typedef enum {
-  HWLOC_MEMBIND_MIGRATE =	(1<<3),	/**< \brief Migrate existing allocated memory.
-					 * If memory can not be migrated and the STRICT flag is passed, an error will be
-					 * returned.
-					 * \hideinitializer  */
-  HWLOC_MEMBIND_STRICT =	(1<<2)	/**< Request strict binding from the OS.
-					 * \hideinitializer  */
+  HWLOC_MEMBIND_PROCESS =       (1<<0), /**< \brief Set policy for all threads of the
+                                         * current (possibly multithreaded) process.
+                                         * \hideinitializer */
+  HWLOC_MEMBIND_THREAD =        (1<<1), /**< \brief Set policy for the current thread of
+                                         * the current process.
+                                         * \hideinitializer */
+  HWLOC_MEMBIND_STRICT =        (1<<2), /**< Request strict binding from the OS.
+                                         * \hideinitializer  */
+  HWLOC_MEMBIND_MIGRATE =       (1<<3), /**< \brief Migrate existing allocated memory.
+                                         * If memory can not be migrated and the STRICT
+                                         * flag is passed, an error will be returned.
+                                         * \hideinitializer  */
+  HWLOC_MEMBIND_NOCPUBIND =     (1<<4)  /**< \brief Avoid any effect on CPU binding
+                                         * \hideinitializer
+                                         *
+                                         * On some OSes, some memory binding function
+                                         * would also bind the application on
+                                         * the corresponding CPUs. It is often
+                                         * not a problem for the application, but if it
+                                         * is, setting this flag will make hwloc
+                                         * avoid using OS functions that would also
+                                         * bind on CPUs.  This will however reduce the
+                                         * support of memory bindings, i.e. potentially
+                                         * return ENOSYS in some cases.
+                                         */
 } hwloc_membind_flags_t;
-
-/* TODO thread/proc */
-
-/** \brief Bind current process execution on CPU and its memory on memory nodes near the given cpuset \p cpuset
- *
- * This combined binding strategy should be preferred over independent binding
- * of the execution and memory since the latter is not widely portable.
- * This strategy obviously conflicts with execution-only (cpubind) or (memory-only)
- * membind routines.
- *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
- */
-HWLOC_DECLSPEC int hwloc_set_cpumembind(hwloc_topology_t topology, hwloc_const_cpuset_t set, hwloc_membind_policy_t mempolicy, int flags);
-
-/** \brief Bind given process execution on CPU and its memory on memory nodes near the given cpuset \p cpuset
- *
- * This combined binding strategy should be preferred over independent binding
- * of the execution and memory since the latter is not widely portable.
- * This strategy obviously conflicts with execution-only (cpubind) or (memory-only)
- * membind routines.
- *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
- */
-HWLOC_DECLSPEC int hwloc_set_proc_cpumembind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t mempolicy, int flags);
 
 /** \brief Bind current process memory on memory nodes near the given nodeset \p nodeset
  *

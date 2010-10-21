@@ -229,10 +229,6 @@ int main(int argc, char *argv[])
     }
   }
 
-  /* TODO if topology doesn't have cpubind or membind support,
-   * try cpumembind support instead, and error/warn if sets are different
-   */
-
   hwloc_bitmap_free(cpubind_set);
   hwloc_bitmap_free(membind_set);
 
