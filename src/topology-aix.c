@@ -153,21 +153,9 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 
 #ifdef P_DEFAULT
 
-/* TODO: set_membind set_proc_membind, potentially avoid binding threads too. */
-
 static int
-hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_const_nodeset_t nodeset, uint_t *aix_policy, hwloc_membind_policy_t policy, int flags)
+hwloc_aix_membind_policy_from_hwloc(uint_t *aix_policy, int policy)
 {
-  rsethandle_t rset, noderad;
-  int MCMlevel;
-  int node;
-
-  if ((flags & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))
-            == (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   switch (policy) {
     case HWLOC_MEMBIND_DEFAULT:
     case HWLOC_MEMBIND_BIND:
@@ -183,6 +171,15 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
       errno = ENOSYS;
       return -1;
   }
+  return 0;
+}
+
+static int
+hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_const_nodeset_t nodeset, int flags __hwloc_attribute_unused)
+{
+  rsethandle_t rset, noderad;
+  int MCMlevel;
+  int node;
 
   MCMlevel = rs_getinfo(NULL, R_MCMSDL, 0);
   if ((topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM))
@@ -203,6 +200,148 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
   return 0;
 }
 
+static int
+hwloc_aix_set_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  rsethandle_t rad;
+  int res;
+
+  if (flags & HWLOC_MEMBIND_NOCPUBIND) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  switch (policy) {
+    case HWLOC_MEMBIND_DEFAULT:
+    case HWLOC_MEMBIND_BIND:
+      break;
+    default:
+      errno = ENOSYS;
+      return -1;
+  }
+
+  if (hwloc_aix_prepare_membind(topology, &rad, nodeset, flags))
+    return -1;
+
+  res = ra_attachrset(what, who, rad, 0);
+
+  rs_free(rad);
+  return res;
+}
+
+static int
+hwloc_aix_get_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_bitmap_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
+{
+  hwloc_bitmap_t hwloc_set;
+  rsethandle_t rset;
+  unsigned cpu, maxcpus;
+  int res = -1;
+  int depth, n, i;
+
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  if (depth < 0) {
+    errno = EXDEV;
+    return -1;
+  }
+  n = hwloc_get_nbobjs_by_depth(topology, depth);
+
+  rset = rs_alloc(RS_EMPTY);
+
+  if (ra_getrset(what, who, 0, rset) == -1)
+    goto out;
+
+  hwloc_set = hwloc_bitmap_alloc();
+  maxcpus = rs_getinfo(rset, R_MAXPROCS, 0);
+  for (cpu = 0; cpu < maxcpus; cpu++)
+    if (rs_op(RS_TESTRESOURCE, rset, NULL, R_PROCS, cpu) == 1)
+      hwloc_bitmap_set(hwloc_set, cpu);
+  hwloc_bitmap_and(hwloc_set, hwloc_set, hwloc_topology_get_complete_cpuset(topology));
+
+  hwloc_bitmap_zero(nodeset);
+  for (i = 0; i < n; i++) {
+    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
+    if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set))
+      hwloc_bitmap_set(nodeset, obj->os_index);
+  }
+
+  *policy = HWLOC_MEMBIND_DEFAULT;
+  res = 0;
+
+out:
+  rs_free(rset);
+  return res;
+}
+
+static int
+hwloc_aix_set_thisproc_membind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, hwloc_membind_policy_t policy, int flags)
+{
+  rsid_t who = { .at_pid = getpid() };
+  return hwloc_aix_set_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
+}
+
+static int
+hwloc_aix_get_thisproc_membind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, hwloc_membind_policy_t *policy, int flags)
+{
+  rsid_t who = { .at_pid = getpid() };
+  return hwloc_aix_get_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
+}
+
+static int
+hwloc_aix_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, hwloc_membind_policy_t policy, int flags)
+{
+  rsid_t who = { .at_tid = thread_self() };
+  return hwloc_aix_set_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
+}
+
+static int
+hwloc_aix_get_thisthread_membind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, hwloc_membind_policy_t *policy, int flags)
+{
+  rsid_t who = { .at_tid = thread_self() };
+  return hwloc_aix_get_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
+}
+
+static int
+hwloc_aix_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, hwloc_membind_policy_t policy, int flags)
+{
+  rsid_t who = { .at_pid = pid };
+  return hwloc_aix_set_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
+}
+
+static int
+hwloc_aix_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t hwloc_set, hwloc_membind_policy_t *policy, int flags)
+{
+  rsid_t who = { .at_pid = pid };
+  return hwloc_aix_get_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
+}
+
+#if 0 /* def HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
+static int
+hwloc_aix_set_thread_membind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_const_bitmap_t hwloc_set, hwloc_membind_policy_t policy, int flags)
+{
+  struct __pthrdsinfo info;
+  int size;
+  if ((errno = pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size)))
+    return -1;
+  {
+    rsid_t who = { .at_tid = info.__pi_tid };
+    return hwloc_aix_set_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
+  }
+}
+
+static int
+hwloc_aix_get_thread_membind(hwloc_topology_t topology, hwloc_thread_t pthread, hwloc_bitmap_t hwloc_set, hwloc_membind_policy_t *policy, int flags)
+{
+  struct __pthrdsinfo info;
+  int size;
+  if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
+    return -1;
+  {
+    rsid_t who = { .at_tid = info.__pi_tid };
+    return hwloc_aix_get_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
+  }
+}
+#endif /* HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
+
 #if 0
 /* TODO: seems to be right, but doesn't seem to be working (EINVAL), even after
  * aligning the range on 64K... */
@@ -213,17 +352,27 @@ hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
   rsid_t rsid = { .at_subrange = &subrange };
   uint_t aix_policy;
   int ret;
+  fprintf(stderr,"yop\n");
+
+  if ((flags & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))
+            == (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
+    errno = ENOSYS;
+    return -1;
+  }
 
   subrange.su_offset = (uintptr_t) addr;
   subrange.su_length = len;
   subrange.su_rstype = R_RSET;
 
-  if (hwloc_aix_prepare_membind(topology, &subrange.su_rsid.at_rset, nodeset, &aix_policy, policy, flags))
+  if (hwloc_aix_membind_policy_from_hwloc(&aix_policy, policy))
+    return -1;
+
+  if (hwloc_aix_prepare_membind(topology, &subrange.su_rsid.at_rset, nodeset, flags))
     return -1;
 
   subrange.su_policy = aix_policy;
 
-  ret = ra_attachrset(R_SUBRANGE, rsid, subrange.su_rsid.at_rset, aix_policy);
+  ret = ra_attachrset(R_SUBRANGE, rsid, subrange.su_rsid.at_rset, 0);
   rs_free(subrange.su_rsid.at_rset);
   return ret;
 }
@@ -236,7 +385,10 @@ hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodes
   rsid_t rsid;
   uint_t aix_policy;
 
-  if (hwloc_aix_prepare_membind(topology, &rsid.at_rset, nodeset, &aix_policy, policy, flags))
+  if (hwloc_aix_membind_policy_from_hwloc(&aix_policy, policy))
+    return NULL;
+
+  if (hwloc_aix_prepare_membind(topology, &rsid.at_rset, nodeset, flags))
     return NULL;
 
   ret = ra_mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0, R_RSET, rsid, aix_policy);
@@ -398,6 +550,17 @@ hwloc_set_aix_hooks(struct hwloc_topology *topology)
   topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
   topology->get_thisthread_cpubind = hwloc_aix_get_thisthread_cpubind;
 #ifdef P_DEFAULT
+  topology->set_proc_membind = hwloc_aix_set_proc_membind;
+  topology->get_proc_membind = hwloc_aix_get_proc_membind;
+#if 0 /* def HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
+  /* Does it really make sense to set the memory binding of another thread? */
+  topology->set_thread_membind = hwloc_aix_set_thread_membind;
+  topology->get_thread_membind = hwloc_aix_get_thread_membind;
+#endif /* HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
+  topology->set_thisproc_membind = hwloc_aix_set_thisproc_membind;
+  topology->get_thisproc_membind = hwloc_aix_get_thisproc_membind;
+  topology->set_thisthread_membind = hwloc_aix_set_thisthread_membind;
+  topology->get_thisthread_membind = hwloc_aix_get_thisthread_membind;
   //topology->set_area_membind = hwloc_aix_set_area_membind;
   /* get_area_membind is not available */
   topology->alloc_membind = hwloc_aix_alloc_membind;
