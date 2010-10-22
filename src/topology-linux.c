@@ -882,7 +882,7 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nod
   }
 
   hwloc_bitmap_foreach_begin(index, nodeset)
-    linuxmask[index/HWLOC_BITS_PER_LONG] |= 1 << (index % HWLOC_BITS_PER_LONG);
+    linuxmask[index/HWLOC_BITS_PER_LONG] |= 1UL << (index % HWLOC_BITS_PER_LONG);
   hwloc_bitmap_foreach_end();
 
   *max_os_index_p = max_os_index;
@@ -1048,7 +1048,7 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
   } else {
     hwloc_bitmap_zero(nodeset);
     for (index = 0; index < max_os_index; index++) {
-      if (linuxmask[index/HWLOC_BITS_PER_LONG] & (1 << (index % HWLOC_BITS_PER_LONG)))
+      if (linuxmask[index/HWLOC_BITS_PER_LONG] & (1UL << (index % HWLOC_BITS_PER_LONG)))
 	hwloc_bitmap_set(nodeset, index);
     }
   }

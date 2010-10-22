@@ -52,7 +52,7 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpus
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL) {
       if (node->os_index >= *maxnode)
 	continue;
-      mask[node->os_index/sizeof(*mask)/8] |= 1 << (node->os_index % (sizeof(*mask)*8));
+      mask[node->os_index/sizeof(*mask)/8] |= 1UL << (node->os_index % (sizeof(*mask)*8));
       if (outmaxnode == (unsigned long) -1 || outmaxnode < node->os_index)
 	outmaxnode = node->os_index;
     }
@@ -96,7 +96,7 @@ hwloc_nodeset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_nod
 	continue;
       if (!hwloc_bitmap_isset(nodeset, node->os_index))
 	continue;
-      mask[node->os_index/sizeof(*mask)/8] |= 1 << (node->os_index % (sizeof(*mask)*8));
+      mask[node->os_index/sizeof(*mask)/8] |= 1UL << (node->os_index % (sizeof(*mask)*8));
       if (outmaxnode == (unsigned long) -1 || outmaxnode < node->os_index)
 	outmaxnode = node->os_index;
     }
@@ -133,7 +133,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
     unsigned i;
     hwloc_bitmap_zero(cpuset);
     for(i=0; i<maxnode; i++)
-      if (mask[i/sizeof(*mask)/8] & (1 << (i% (sizeof(*mask)*8)))) {
+      if (mask[i/sizeof(*mask)/8] & (1UL << (i% (sizeof(*mask)*8)))) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
 	  hwloc_bitmap_or(cpuset, cpuset, node->cpuset);
@@ -169,7 +169,7 @@ hwloc_nodeset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_nodeset
     unsigned i;
     hwloc_bitmap_zero(nodeset);
     for(i=0; i<maxnode; i++)
-      if (mask[i/sizeof(*mask)/8] & (1 << (i% (sizeof(*mask)*8)))) {
+      if (mask[i/sizeof(*mask)/8] & (1UL << (i% (sizeof(*mask)*8)))) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
 	  hwloc_bitmap_set(nodeset, node->os_index);
