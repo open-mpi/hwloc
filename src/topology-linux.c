@@ -893,7 +893,7 @@ hwloc_linux_membind_mask_to_nodeset(hwloc_topology_t topology __hwloc_attribute_
 
   hwloc_bitmap_zero(nodeset);
   for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
-    hwloc_bitmap_from_ith_ulong(nodeset, i, linuxmask[i]);
+    hwloc_bitmap_set_ith_ulong(nodeset, i, linuxmask[i]);
   /* if we don't trust the kernel, we could clear bits from _max_os_index+1 to max_os_index-1 */
 }
 #endif /* HWLOC_HAVE_SET_MEMPOLICY || HWLOC_HAVE_MBIND */
