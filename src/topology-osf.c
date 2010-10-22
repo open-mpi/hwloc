@@ -29,6 +29,8 @@
  *
  * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
  * assign_pid_to_pset()
+ *
+ * pthread_use_only_cpu too?
  */
 
 static int
