@@ -89,6 +89,12 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
     return 0;
   }
 
+  /* Apparently OSF migrates pages */
+  if (flags & HWLOC_CPUBIND_NOMEMBIND) {
+    errno = ENOSYS;
+    return -1;
+  }
+
   if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
@@ -113,6 +119,12 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
     if (rad_detach_pid(pid))
       return -1;
     return 0;
+  }
+
+  /* Apparently OSF migrates pages */
+  if (flags & HWLOC_CPUBIND_NOMEMBIND) {
+    errno = ENOSYS;
+    return -1;
   }
 
   if (!prepare_radset(topology, &radset, hwloc_set))
