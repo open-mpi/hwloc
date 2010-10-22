@@ -53,7 +53,7 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpus
     while ((node = hwloc_get_next_obj_covering_cpuset_by_type(topology, cpuset, HWLOC_OBJ_NODE, node)) != NULL) {
       if (node->os_index >= *maxnode)
 	break;
-      mask[node->os_index/sizeof(*mask)/8] |= 1 << (node->os_index % (sizeof(*mask)*8));
+      mask[node->os_index/sizeof(*mask)/8] |= 1UL << (node->os_index % (sizeof(*mask)*8));
       if (outmaxnode == (unsigned long) -1 || outmaxnode < node->os_index)
 	outmaxnode = node->os_index;
     }
@@ -100,7 +100,7 @@ hwloc_cpuset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_cpuset_t
   } else {
     hwloc_cpuset_zero(cpuset);
     for(i=0; i<maxnode; i++)
-      if (mask[i/sizeof(*mask)/8] & (1 << (i% (sizeof(*mask)*8)))) {
+      if (mask[i/sizeof(*mask)/8] & (1UL << (i% (sizeof(*mask)*8)))) {
 	node = hwloc_get_obj_by_depth(topology, depth, i);
 	if (node)
 	  hwloc_cpuset_or(cpuset, cpuset, node->cpuset);
