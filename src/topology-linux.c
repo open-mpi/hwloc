@@ -918,9 +918,10 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   if (err < 0)
     goto out;
 
-  if ((flags & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE))
-	    == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
+  if (flags & HWLOC_MEMBIND_MIGRATE) {
     linuxflags = MPOL_MF_MOVE;
+    if (flags & HWLOC_MEMBIND_STRICT)
+      linuxflags |= MPOL_MF_STRICT;
   }
 
   err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
