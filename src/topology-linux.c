@@ -852,26 +852,17 @@ hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t p
 }
 
 static int
-hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset,
+hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribute_unused,
+				      hwloc_const_nodeset_t nodeset,
 				      unsigned *max_os_index_p, unsigned long **linuxmaskp)
 {
   unsigned max_os_index = 0; /* highest os_index + 1 */
   unsigned long *linuxmask;
-  hwloc_obj_t obj;
-  int depth;
-  int index;
+  unsigned i;
 
-  /* compute max_os_index */
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+  max_os_index = hwloc_bitmap_last(nodeset);
+  if (max_os_index == (unsigned) -1)
     max_os_index = 0;
-    depth = 0;
-  } else {
-    obj = NULL;
-    while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
-      if (obj->os_index > max_os_index)
-	max_os_index = obj->os_index;
-  }
   /* round up to the nearest multiple of BITS_PER_LONG */
   max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
 
@@ -881,13 +872,29 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology, hwloc_const_nod
     return -1;
   }
 
-  hwloc_bitmap_foreach_begin(index, nodeset)
-    linuxmask[index/HWLOC_BITS_PER_LONG] |= 1UL << (index % HWLOC_BITS_PER_LONG);
-  hwloc_bitmap_foreach_end();
+  for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
+    linuxmask[i] = hwloc_bitmap_to_ith_ulong(nodeset, i);
 
   *max_os_index_p = max_os_index;
   *linuxmaskp = linuxmask;
   return 0;
+}
+
+static void
+hwloc_linux_membind_mask_to_nodeset(hwloc_topology_t topology __hwloc_attribute_unused,
+				    hwloc_nodeset_t nodeset,
+				    unsigned _max_os_index, const unsigned long *linuxmask)
+{
+  unsigned max_os_index;
+  unsigned i;
+
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (_max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  hwloc_bitmap_zero(nodeset);
+  for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
+    hwloc_bitmap_from_ith_ulong(nodeset, i, linuxmask[i]);
+  /* if we don't trust the kernel, we could clear bits from _max_os_index+1 to max_os_index-1 */
 }
 #endif /* HWLOC_HAVE_SET_MEMPOLICY || HWLOC_HAVE_MBIND */
 
@@ -1021,24 +1028,20 @@ static int
 	     * code says pol = current->mempolicy;... */
 hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
-  hwloc_obj_t obj;
+  hwloc_const_bitmap_t complete_nodeset;
   unsigned max_os_index; /* highest os_index + 1 */
   unsigned long *linuxmask;
-  int depth;
   int linuxpolicy;
   int err;
-  unsigned index;
 
   /* compute max_os_index */
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-    max_os_index = 0;
-    depth = 0;
+  complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
+  if (complete_nodeset) {
+    max_os_index = hwloc_bitmap_last(complete_nodeset);
+    if (max_os_index == (unsigned) -1)
+      max_os_index = 0;
   } else {
-    obj = NULL;
-    while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
-      if (obj->os_index > max_os_index)
-	max_os_index = obj->os_index;
+    max_os_index = 0;
   }
   /* round up to the nearest multiple of BITS_PER_LONG */
   max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
@@ -1056,11 +1059,7 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
   if (linuxpolicy == MPOL_DEFAULT) {
     hwloc_bitmap_copy(nodeset, hwloc_get_root_obj(topology)->nodeset);
   } else {
-    hwloc_bitmap_zero(nodeset);
-    for (index = 0; index < max_os_index; index++) {
-      if (linuxmask[index/HWLOC_BITS_PER_LONG] & (1UL << (index % HWLOC_BITS_PER_LONG)))
-	hwloc_bitmap_set(nodeset, index);
-    }
+    hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, linuxmask);
   }
 
   switch (linuxpolicy) {
