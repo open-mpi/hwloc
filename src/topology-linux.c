@@ -899,6 +899,7 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   unsigned long *linuxmask;
   size_t remainder;
   int linuxpolicy;
+  unsigned linuxflags = 0;
   int err;
 
   remainder = (uintptr_t) addr & (sysconf(_SC_PAGESIZE)-1);
@@ -909,13 +910,6 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   if (err < 0)
     return err;
 
-  if ((flags & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE))
-	    == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
-    /* TODO: MIGRATE */
-    errno = ENOSYS;
-    goto out;
-  }
-
   if (linuxpolicy == MPOL_DEFAULT)
     /* Some Linux kernels don't like being passed a set */
     return mbind((void *) addr, len, linuxpolicy, NULL, 0, 0);
@@ -924,7 +918,12 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
   if (err < 0)
     goto out;
 
-  err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, 0);
+  if ((flags & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE))
+	    == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
+    linuxflags = MPOL_MF_MOVE;
+  }
+
+  err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
   if (err < 0)
     goto out_with_mask;
 
@@ -978,13 +977,6 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
   if (err < 0)
     return err;
 
-  /* TODO: MIGRATE */
-  if ((flags & (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE))
-            == (HWLOC_MEMBIND_STRICT|HWLOC_MEMBIND_MIGRATE)) {
-    errno = ENOSYS;
-    goto out;
-  }
-
   if (linuxpolicy == MPOL_DEFAULT)
     /* Some Linux kernels don't like being passed a set */
     return set_mempolicy(linuxpolicy, NULL, 0);
@@ -992,6 +984,23 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
   err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
   if (err < 0)
     goto out;
+
+  if (flags & HWLOC_MEMBIND_MIGRATE) {
+#ifdef HWLOC_HAVE_MIGRATE_PAGES
+    unsigned long *fullmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
+    if (fullmask) {
+      memset(fullmask, max_os_index/HWLOC_BITS_PER_LONG * sizeof(long), 0xf);
+      err = migrate_pages(0, max_os_index+1, fullmask, linuxmask);
+      free(fullmask);
+    } else
+      err = -1;
+    if (err < 0 && (flags & HWLOC_MEMBIND_STRICT))
+      goto out_with_mask;
+#else
+    errno = ENOSYS;
+    goto out_with_mask;
+#endif
+  }
 
   err = set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
   if (err < 0)
@@ -1080,7 +1089,6 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
   return -1;
 }
 
-/* TODO: migrate_pages */
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 
 int
@@ -2649,5 +2657,6 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;
   topology->support.membind->interleave_membind = 1;
+  topology->support.membind->migrate_membind = 1;
 #endif /* HWLOC_HAVE_MBIND */
 }

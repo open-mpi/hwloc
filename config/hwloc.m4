@@ -518,7 +518,12 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
       AC_CHECK_LIB([numa], [mbind], [
 	enable_mbind=yes
 	AC_SUBST([HWLOC_LINUX_LIBNUMA_LIBS], ["-lnuma"])
-	AC_DEFINE([HWLOC_HAVE_MBIND], [1], [Define to 1 if set_mbind is available.])
+	AC_DEFINE([HWLOC_HAVE_MBIND], [1], [Define to 1 if mbind is available.])
+      ])
+      AC_CHECK_LIB([numa], [migrate_pages], [
+	enable_migrate_pages=yes
+	AC_SUBST([HWLOC_LINUX_LIBNUMA_LIBS], ["-lnuma"])
+	AC_DEFINE([HWLOC_HAVE_MIGRATE_PAGES], [1], [Define to 1 if migrate_pages is available.])
       ])
     ])
 
