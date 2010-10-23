@@ -302,6 +302,8 @@ struct hwloc_obj {
                                           * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
                                           * these nodes may not be allowed for allocation, see allowed_nodeset.
                                           *
+					  * If the machine contains no NUMA memory node, \p nodeset is \c NULL.
+					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,
@@ -313,6 +315,8 @@ struct hwloc_obj {
                                           * precise position is undefined. It is however known that it would be
                                           * somewhere under this object.
                                           *
+					  * If the machine contains no NUMA memory node, \p complete_nodeset is \c NULL.
+					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t allowed_nodeset;      /**< \brief The set of allowed NUMA memory nodes
@@ -322,6 +326,8 @@ struct hwloc_obj {
                                           * memory allocation should not return permission errors. This is usually
                                           * restricted by administration rules.
                                           *
+					  * If the machine contains no NUMA memory node, \p allowed_nodeset is \c NULL.
+					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
 
@@ -1178,6 +1184,10 @@ HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, siz
  * as a single memory node, and the following behavior is used:
  * If \p cpuset is empty, \p nodeset will be emptied as well.
  * Otherwise \p nodeset will be entirely filled.
+ *
+ * Because of these special cases, converting an object cpuset with this
+ * function only returns the exact object nodeset if there are some NUMA
+ * nodes in the machine (otherwise the object nodeset is \c NULL).
  */
 HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset);
 
@@ -1187,6 +1197,10 @@ HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwl
  * as a single memory node, and the following behavior is used:
  * If \p nodeset is empty, \p cpuset will be emptied as well.
  * Otherwise \p cpuset will be entirely filled.
+ *
+ * Because of these special cases, converting an object nodeset with this
+ * function only returns the exact object cpuset if there are some NUMA
+ * nodes in the machine (otherwise the object nodeset is \c NULL).
  */
 HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset);
 
