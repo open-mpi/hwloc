@@ -1186,8 +1186,8 @@ HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, siz
  * Otherwise \p nodeset will be entirely filled.
  *
  * Because of these special cases, converting an object cpuset with this
- * function only returns the exact object nodeset if there are some NUMA
- * nodes in the machine (otherwise the object nodeset is \c NULL).
+ * function may only return the object nodeset if there are some NUMA nodes
+ * in the machine (otherwise the object nodeset is \c NULL).
  */
 HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset);
 
@@ -1199,8 +1199,8 @@ HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwl
  * Otherwise \p cpuset will be entirely filled.
  *
  * Because of these special cases, converting an object nodeset with this
- * function only returns the exact object cpuset if there are some NUMA
- * nodes in the machine (otherwise the object nodeset is \c NULL).
+ * function may only return the object cpuset if there are some NUMA nodes
+ * in the machine (otherwise the object nodeset is \c NULL).
  */
 HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset);
 
