@@ -337,7 +337,7 @@ HWLOC_DECLSPEC int hwloc_topology_init (hwloc_topology_t *topologyp);
 /** \brief Build the actual topology
  *
  * Build the actual topology once initialized with hwloc_topology_init() and
- * tuned with ::hwlocality_configuration routine.
+ * tuned with \ref hwlocality_configuration routines.
  * No other routine may be called earlier using this topology context.
  *
  * \param topology is the topology to be loaded with objects.
