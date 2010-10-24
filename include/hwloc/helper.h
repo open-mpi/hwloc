@@ -624,6 +624,8 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
 
 /** @} */
 
+
+
 /** \defgroup hwlocality_helper_cpuset Cpuset Helpers
  * @{
  */
@@ -688,10 +690,11 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
   return hwloc_get_root_obj(topology)->allowed_cpuset;
 }
 
-
 /** @} */
 
-/** \defgroup hwlocality_helper_nodeset Cpuset Helpers
+
+
+/** \defgroup hwlocality_helper_nodeset Nodeset Helpers
  * @{
  */
 /* \brief Get complete node set
@@ -742,9 +745,12 @@ hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
 
 /** @} */
 
+
+
 /* TODO: add helper which changes the current memory policy and allocates bound
  * memory, to maximize chances to get something bound at the expense of
  * changing the current memory policy.  */
+
 
 
 #ifdef __cplusplus
