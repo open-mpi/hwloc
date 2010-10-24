@@ -82,9 +82,12 @@ typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
  *
  * It may be consulted and modified with the bitmap API as any ::hwloc_bitmap_t (see hwloc/bitmap.h).
  *
- * If there are no NUMA nodes in the system (when the whole memory is considered
- * as a single memory bank), the nodeset may be either empty (no memory selected)
- * or full (whole memory selected).
+ * When binding memory on a system without any NUMA node
+ * (when the whole memory is considered as a single memory bank),
+ * the nodeset may be either empty (no memory selected)
+ * or full (whole system memory selected).
+ *
+ * See also \ref hwlocality_helper_nodeset_convert.
  */
 typedef hwloc_bitmap_t hwloc_nodeset_t;
 /** \brief A non-modifiable ::hwloc_nodeset_t.
@@ -1174,35 +1177,6 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, 
 /** \brief Free some memory allocated by hwloc_alloc_membind
  */
 HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len);
-
-/** \brief Convert a CPU set into a NUMA node set
- *
- * If some NUMA nodes have no CPUs at all, this function never set their
- * indexes in the output node set, even if a full CPU set is given in input.
- *
- * If the topology contains no NUMA nodes, the machine is considered
- * as a single memory node, and the following behavior is used:
- * If \p cpuset is empty, \p nodeset will be emptied as well.
- * Otherwise \p nodeset will be entirely filled.
- *
- * Because of these special cases, converting an object cpuset with this
- * function may only return the object nodeset if there are some NUMA nodes
- * in the machine (otherwise the object nodeset is \c NULL).
- */
-HWLOC_DECLSPEC void hwloc_cpuset_to_nodeset(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset);
-
-/** \brief Convert a NUMA node set into a CPU set
- *
- * If the topology contains no NUMA nodes, the machine is considered
- * as a single memory node, and the following behavior is used:
- * If \p nodeset is empty, \p cpuset will be emptied as well.
- * Otherwise \p cpuset will be entirely filled.
- *
- * Because of these special cases, converting an object nodeset with this
- * function may only return the object cpuset if there are some NUMA nodes
- * in the machine (otherwise the object nodeset is \c NULL).
- */
-HWLOC_DECLSPEC void hwloc_cpuset_from_nodeset(struct hwloc_topology *topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset);
 
 /** @} */
 
