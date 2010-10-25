@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
           exit(EXIT_SUCCESS);
       }
 
+      fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage(callname, stderr);
       return EXIT_FAILURE;
     }

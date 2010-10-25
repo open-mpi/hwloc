@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     } else if (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cpuset")) {
       show_cpuset = 1;
     } else {
-      fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
+      fprintf (stderr, "Unrecognized option: %s\n", argv[1]);
       usage (callname, stderr);
       exit(EXIT_FAILURE);
     }
