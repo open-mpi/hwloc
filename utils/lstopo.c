@@ -381,7 +381,7 @@ main (int argc, char *argv[])
         opt = 1;
       } else {
 	if (filename) {
-	  fprintf (stderr, "Unrecognized options: %s\n", argv[1]);
+	  fprintf (stderr, "Unrecognized option: %s\n", argv[1]);
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	} else

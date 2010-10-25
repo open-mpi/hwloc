@@ -106,10 +106,11 @@ int main(int argc, char *argv[])
         goto next;
       }
       else if (!strcmp (argv[0], "--get")) {
-	  get_binding = 1;
-	  goto next;
+	get_binding = 1;
+	goto next;
       }
 
+      fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage(stderr);
       return EXIT_FAILURE;
     }
