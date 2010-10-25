@@ -144,6 +144,12 @@ by hwloc-calc).  For example:
 
     hwloc-bind 0x00004444,0x44000000 echo hello
     hwloc-bind `hwloc-calc node:1.socket:2` echo hello
+
+Memory binding may also be reported:
+
+    hwloc-bind --membind node:1 --mempolicy interleave -- hwloc-bind --get --membind
+
+It returns something such as "0x000000f0 (interleave)".
 .
 .\" **************************
 .\"    Return value section
