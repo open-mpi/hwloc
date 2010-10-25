@@ -20,7 +20,7 @@ static void usage(FILE *where)
   fprintf(where, "            as supported by the hwloc-calc utility.\n");
   fprintf(where, "Options:\n");
   fprintf(where, "  --cpubind      use following arguments for cpu binding (default)\n");
-  fprintf(where, "  --membind      use following arguments for memory binding (default)\n");
+  fprintf(where, "  --membind      use following arguments for memory binding\n");
   fprintf(where, "  -l --logical   Take logical object indexes (default)\n");
   fprintf(where, "  -p --physical  Take physical object indexes\n");
   fprintf(where, "  --single       Bind on a single CPU to prevent migration\n");
