@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
       }
 #endif /* HWLOC_HAVE_XML */
 
+      fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage(stderr);
       return EXIT_FAILURE;
     }

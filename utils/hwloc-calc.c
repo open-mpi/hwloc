@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
 	singlify = 1;
 	goto next;
       }
+      fprintf (stderr, "Unrecognized option: %s\n", argv[1]);
       usage(stderr);
       return EXIT_FAILURE;
     }
