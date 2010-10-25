@@ -1067,8 +1067,6 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
     *policy = HWLOC_MEMBIND_FIRSTTOUCH;
     break;
   case MPOL_PREFERRED:
-    *policy = HWLOC_MEMBIND_BIND|HWLOC_MEMBIND_STRICT;
-    break;
   case MPOL_BIND:
     *policy = HWLOC_MEMBIND_BIND;
     break;
