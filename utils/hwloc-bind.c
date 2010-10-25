@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-/* TODO: Add default/first-touch/bind/round-robin/next-touch/replicate */
+/* TODO: get memory policy */
 
 static void usage(FILE *where)
 {
@@ -19,8 +19,10 @@ static void usage(FILE *where)
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-calc utility.\n");
   fprintf(where, "Options:\n");
-  fprintf(where, "  --cpubind      use following arguments for cpu binding (default)\n");
-  fprintf(where, "  --membind      use following arguments for memory binding\n");
+  fprintf(where, "  --cpubind      Use following arguments for cpu binding (default)\n");
+  fprintf(where, "  --membind      Use following arguments for memory binding\n");
+  fprintf(where, "  --mempolicy <default|firsttouch|bind|interleave|replicate|nexttouch>\n"
+		 "                 Change the memory binding policy (default is bind)\n");
   fprintf(where, "  -l --logical   Take logical object indexes (default)\n");
   fprintf(where, "  -p --physical  Take physical object indexes\n");
   fprintf(where, "  --single       Bind on a single CPU to prevent migration\n");
@@ -125,6 +127,27 @@ int main(int argc, char *argv[])
       else if (!strcmp (argv[0], "--membind")) {
 	  cpubind = 0;
 	  goto next;
+      }
+      else if (!strcmp (argv[0], "--mempolicy")) {
+	if (!strncmp(argv[1], "default", 2))
+	  membind_policy = HWLOC_MEMBIND_DEFAULT;
+	else if (!strncmp(argv[1], "firsttouch", 2))
+	  membind_policy = HWLOC_MEMBIND_FIRSTTOUCH;
+	else if (!strncmp(argv[1], "bind", 2))
+	  membind_policy = HWLOC_MEMBIND_BIND;
+	else if (!strncmp(argv[1], "interleace", 2))
+	  membind_policy = HWLOC_MEMBIND_INTERLEAVE;
+	else if (!strncmp(argv[1], "replicate", 2))
+	  membind_policy = HWLOC_MEMBIND_REPLICATE;
+	else if (!strncmp(argv[1], "nexttouch", 2))
+	  membind_policy = HWLOC_MEMBIND_NEXTTOUCH;
+	else {
+	  fprintf(stderr, "Unrecognized memory binding policy %s\n", argv[1]);
+          usage (stderr);
+          exit(EXIT_FAILURE);
+	}
+	opt = 1;
+	goto next;
       }
 
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
