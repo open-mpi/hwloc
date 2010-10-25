@@ -124,7 +124,7 @@ extern "C" {
 #define HWLOC_CPUBIND_THREAD HWLOC_NAME_CAPS(CPUBIND_THREAD)
 #define HWLOC_CPUBIND_STRICT HWLOC_NAME_CAPS(CPUBIND_STRICT)
 
-#define hwloc_cpubind_policy_t HWLOC_NAME(hwloc_cpubind_policy_t)
+#define hwloc_cpubind_policy_t HWLOC_NAME(cpubind_policy_t)
 
 #define hwloc_set_cpubind HWLOC_NAME(set_cpubind)
 #define hwloc_get_cpubind HWLOC_NAME(get_cpubind)
