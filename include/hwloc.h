@@ -45,7 +45,7 @@ extern "C" {
  */
 
 /** \brief Indicate at build time which hwloc API version is being used. */
-#define HWLOC_API_VERSION 0x00010000
+#define HWLOC_API_VERSION 0x00010100
 
 /** @} */
 

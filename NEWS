@@ -17,6 +17,8 @@ in v0.9.1).
 Version 1.1.0
 -------------
 
+* Increase HWLOC_API_VERSION to 0x00010100 so that API changes may be
+  detected at build-time.
 * The cpuset API (hwloc/cpuset.h) is now deprecated. It is replaced by
   the bitmap API (hwloc/bitmap.h) which offers the same features with more
   generic names since it applies to CPU sets, node sets and more.
