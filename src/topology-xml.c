@@ -413,11 +413,8 @@ hwloc_look_xml(struct hwloc_topology *topology)
   if (root_node->next)
     fprintf(stderr, "ignoring non-first root nodes\n");
 
-  /* TODO: abort if we got an invalid topology or so */
-
-  /* FIXME: do not add another backend info since there's likely one in the input XML?
-   * or append a second one if the first one is different?
-   */
+  /* keep the "Backend" information intact */
+  /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
 }
 
 /******************************
