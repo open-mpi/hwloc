@@ -486,8 +486,9 @@ static const unsigned obj_type_order[] = {
   [HWLOC_OBJ_CORE] = 6,
   [HWLOC_OBJ_BRIDGE] = 7,
   [HWLOC_OBJ_PCI_DEVICE] = 8,
-  [HWLOC_OBJ_PU] = 9,
-  [HWLOC_OBJ_MISC] = 10
+  [HWLOC_OBJ_OS_DEVICE] = 9,
+  [HWLOC_OBJ_PU] = 10,
+  [HWLOC_OBJ_MISC] = 11
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
@@ -500,8 +501,9 @@ static const hwloc_obj_type_t obj_order_type[] = {
   [6] = HWLOC_OBJ_CORE,
   [7] = HWLOC_OBJ_BRIDGE,
   [8] = HWLOC_OBJ_PCI_DEVICE,
-  [9] = HWLOC_OBJ_PU,
-  [10] = HWLOC_OBJ_MISC
+  [9] = HWLOC_OBJ_OS_DEVICE,
+  [10] = HWLOC_OBJ_PU,
+  [11] = HWLOC_OBJ_MISC
 };
 
 static unsigned __hwloc_attribute_const
