@@ -1049,6 +1049,12 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
   hwloc_bitmap_t parent_nodeset = NULL;
   int parent_weight = 0;
 
+  /* don't propagate nodesets in I/O objects, keep them NULL */
+  if (obj->type == HWLOC_OBJ_BRIDGE
+      || obj->type == HWLOC_OBJ_PCI_DEVICE
+      || obj->type == HWLOC_OBJ_OS_DEVICE)
+    return;
+
   if (!sys && obj->nodeset) {
     sys = obj;
     if (!obj->complete_nodeset)
@@ -1093,6 +1099,12 @@ propagate_nodesets(hwloc_obj_t obj)
 {
   hwloc_bitmap_t mask = hwloc_bitmap_alloc();
   hwloc_obj_t child, *temp;
+
+  /* don't propagate nodesets in I/O objects, keep them NULL */
+  if (obj->type == HWLOC_OBJ_BRIDGE
+      || obj->type == HWLOC_OBJ_PCI_DEVICE
+      || obj->type == HWLOC_OBJ_OS_DEVICE)
+    return;
 
   for_each_child_safe(child, obj, temp) {
     if (obj->nodeset) {
