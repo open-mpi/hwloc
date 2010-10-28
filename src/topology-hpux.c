@@ -131,7 +131,7 @@ hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_node
   int flags;
 
   /* Can not give a set of nodes.  */
-  if (!hwloc_bitmap_isequal(nodeset, hwloc_get_root_obj(topology)->complete_nodeset)) {
+  if (!hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
     errno = EXDEV;
     return NULL;
   }

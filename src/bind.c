@@ -144,8 +144,8 @@ hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bi
 static hwloc_const_nodeset_t
 hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
 {
-  hwloc_const_bitmap_t topology_nodeset = hwloc_get_root_obj(topology)->nodeset;
-  hwloc_const_bitmap_t complete_nodeset = hwloc_get_root_obj(topology)->complete_nodeset;
+  hwloc_const_bitmap_t topology_nodeset = hwloc_topology_get_topology_nodeset(topology);
+  hwloc_const_bitmap_t complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
 
   if (!hwloc_topology_get_topology_cpuset(topology)) {
     /* The topology is composed of several systems, the nodeset is thus
@@ -176,7 +176,7 @@ hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwl
 {
   hwloc_const_bitmap_t topology_set = hwloc_topology_get_topology_cpuset(topology);
   hwloc_const_bitmap_t complete_set = hwloc_topology_get_complete_cpuset(topology);
-  hwloc_const_bitmap_t complete_nodeset = hwloc_get_root_obj(topology)->complete_nodeset;
+  hwloc_const_bitmap_t complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
 
   if (!topology_set) {
     /* The topology is composed of several systems, the cpuset is thus

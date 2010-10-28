@@ -1057,7 +1057,7 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
     goto out_with_mask;
 
   if (linuxpolicy == MPOL_DEFAULT) {
-    hwloc_bitmap_copy(nodeset, hwloc_get_root_obj(topology)->nodeset);
+    hwloc_bitmap_copy(nodeset, hwloc_topology_get_topology_nodeset(topology));
   } else {
     hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, linuxmask);
   }

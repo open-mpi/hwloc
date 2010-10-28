@@ -293,7 +293,7 @@ hwloc_solaris_set_area_membind(hwloc_topology_t topology, const void *addr, size
   size_t remainder;
 
   /* Can not give a set of nodes just for an area.  */
-  if (!hwloc_bitmap_isequal(nodeset, hwloc_get_root_obj(topology)->complete_cpuset)) {
+  if (!hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
     errno = EXDEV;
     return -1;
   }
