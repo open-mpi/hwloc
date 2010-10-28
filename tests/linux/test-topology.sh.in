@@ -106,7 +106,7 @@ result=1
 
 dir="`mktemp -d`"
 
-if ! ( bunzip2 -c "$actual_source" | ( cd "$dir" && tar xf - "$tar_options" ) )
+if ! ( bunzip2 -c "$actual_source" | ( cd "$dir" && tar xf - $tar_options ) )
 then
     error "failed to extract topology \`$topology'"
 else

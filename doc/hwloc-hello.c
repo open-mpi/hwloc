@@ -27,13 +27,13 @@ static void print_children(hwloc_topology_t topology, hwloc_obj_t obj,
 int main(void)
 {
     int depth;
-    unsigned i;
+    unsigned i, n;
     unsigned long size;
     int levels;
     char string[128];
     int topodepth;
     hwloc_topology_t topology;
-    hwloc_bitmap_t cpuset;
+    hwloc_cpuset_t cpuset;
     hwloc_obj_t obj;
 
     /* Allocate and initialize topology object. */
@@ -136,6 +136,28 @@ int main(void)
 
         /* Free our cpuset copy */
         hwloc_bitmap_free(cpuset);
+    }
+
+    /*****************************************************************
+     * Sixth example:
+     * Allocate some memory on the last NUMA node, bind some existing
+     * memory to the last NUMA node.
+     *****************************************************************/
+    /* Get last node. */
+    n = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
+    if (n) {
+        void *m;
+        size_t size = 1024*1024;
+
+        obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, n - 1);
+        m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
+                HWLOC_MEMBIND_DEFAULT, 0);
+        hwloc_free_membind(topology, m, size);
+
+        m = malloc(size);
+        hwloc_set_area_membind_nodeset(topology, m, size, obj->nodeset,
+                HWLOC_MEMBIND_DEFAULT, 0);
+        free(m);
     }
 
     /* Destroy topology object. */

@@ -29,7 +29,7 @@ static void result_get(const char *msg, hwloc_const_bitmap_t expected, hwloc_con
   const char *errmsg = strerror(errno);
   if (err)
     printf("%-40s: FAILED (%d, %s)%s\n", msg, errno, errmsg, supported ? "" : " (expected)");
-  else if (hwloc_bitmap_isequal(expected, result))
+  else if (!expected || hwloc_bitmap_isequal(expected, result))
     printf("%-40s: OK%s\n", msg, supported ? "" : " (unexpected)");
   else {
     char *expected_s, *result_s;
@@ -68,6 +68,66 @@ static void test(hwloc_const_bitmap_t cpuset, int flags)
   hwloc_bitmap_free(new_cpuset);
 }
 
+static void testmem(hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy, int flags, int expected)
+{
+  hwloc_bitmap_t new_nodeset = hwloc_bitmap_alloc();
+  hwloc_membind_policy_t newpolicy;
+  void *area;
+  size_t area_size = 1024;
+  result_set("Bind this singlethreaded process memory", hwloc_set_membind(topology, nodeset, policy, flags), (support->membind->set_thisproc_membind || support->membind->set_thisthread_membind) && expected);
+  result_get("Get  this singlethreaded process memory", nodeset, new_nodeset, hwloc_get_membind(topology, new_nodeset, &newpolicy, flags), (support->membind->get_thisproc_membind || support->membind->get_thisthread_membind) && expected);
+  result_set("Bind this thread memory", hwloc_set_membind(topology, nodeset, policy, flags | HWLOC_MEMBIND_THREAD), support->membind->set_thisproc_membind && expected);
+  result_get("Get  this thread memory", nodeset, new_nodeset, hwloc_get_membind(topology, new_nodeset, &newpolicy, flags | HWLOC_MEMBIND_THREAD), support->membind->get_thisproc_membind && expected);
+  result_set("Bind this whole process memory", hwloc_set_membind(topology, nodeset, policy, flags | HWLOC_MEMBIND_PROCESS), support->membind->set_thisproc_membind && expected);
+  result_get("Get  this whole process memory", nodeset, new_nodeset, hwloc_get_membind(topology, new_nodeset, &newpolicy, flags | HWLOC_MEMBIND_PROCESS), support->membind->get_thisproc_membind && expected);
+#ifdef HWLOC_WIN_SYS
+  result_set("Bind process memory", hwloc_set_proc_membind(topology, GetCurrentProcess(), nodeset, policy, flags), support->membind->set_proc_membind && expected);
+  result_get("Get  process memory", nodeset, new_nodeset, hwloc_get_proc_membind(topology, GetCurrentProcess(), new_nodeset, &newpolicy, flags), support->membind->get_proc_membind && expected);
+#else /* !HWLOC_WIN_SYS */
+  result_set("Bind process memory", hwloc_set_proc_membind(topology, getpid(), nodeset, policy, flags), support->membind->set_proc_membind && expected);
+  result_get("Get  process memory", nodeset, new_nodeset, hwloc_get_proc_membind(topology, getpid(), new_nodeset, &newpolicy, flags), support->membind->get_proc_membind && expected);
+#endif /* !HWLOC_WIN_SYS */
+  result_set("Bind area", hwloc_set_area_membind(topology, &new_nodeset, sizeof(new_nodeset), nodeset, policy, flags), support->membind->set_area_membind && expected);
+  result_get("Get  area", nodeset, new_nodeset, hwloc_get_area_membind(topology, &new_nodeset, sizeof(new_nodeset), new_nodeset, &newpolicy, flags), support->membind->get_area_membind && expected);
+  if (!(flags & HWLOC_MEMBIND_MIGRATE)) {
+    result_set("Alloc bound area", (area = hwloc_alloc_membind(topology, area_size, nodeset, policy, flags)) == NULL, (support->membind->alloc_membind && expected) || !(flags & HWLOC_MEMBIND_STRICT));
+    if (area) {
+      memset(area, 0, area_size);
+      result_get("Get   bound area", nodeset, new_nodeset, hwloc_get_area_membind(topology, area, area_size, new_nodeset, &newpolicy, flags), support->membind->get_area_membind && expected);
+      result_get("Free  bound area", NULL, NULL, hwloc_free_membind(topology, area, area_size), support->membind->alloc_membind && expected);
+    }
+  }
+  printf("\n");
+  hwloc_bitmap_free(new_nodeset);
+}
+
+static void testmem2(hwloc_const_bitmap_t set, int flags)
+{
+  printf("  default\n");
+  testmem(set, HWLOC_MEMBIND_DEFAULT, flags, 1);
+  printf("  firsttouch\n");
+  testmem(set, HWLOC_MEMBIND_FIRSTTOUCH, flags, support->membind->firsttouch_membind);
+  printf("  bound\n");
+  testmem(set, HWLOC_MEMBIND_BIND, flags, support->membind->bind_membind);
+  printf("  interleave\n");
+  testmem(set, HWLOC_MEMBIND_INTERLEAVE, flags, support->membind->interleave_membind);
+  printf("  replicate\n");
+  testmem(set, HWLOC_MEMBIND_REPLICATE, flags, support->membind->replicate_membind);
+  printf("  nexttouch\n");
+  testmem(set, HWLOC_MEMBIND_NEXTTOUCH, flags, support->membind->nexttouch_membind);
+}
+
+static void testmem3(hwloc_const_bitmap_t set)
+{
+  testmem2(set, 0);
+  printf("now strict\n\n");
+  testmem2(set, HWLOC_MEMBIND_STRICT);
+  printf("now migrate\n\n");
+  testmem2(set, HWLOC_MEMBIND_MIGRATE);
+  printf("now strictly migrate\n\n");
+  testmem2(set, HWLOC_MEMBIND_STRICT | HWLOC_MEMBIND_MIGRATE);
+}
+
 int main(void)
 {
   hwloc_bitmap_t set;
@@ -93,7 +153,6 @@ int main(void)
   free(str);
 
   test(set, 0);
-
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
 
@@ -104,7 +163,6 @@ int main(void)
   free(str);
 
   test(set, 0);
-
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
 
@@ -114,11 +172,40 @@ int main(void)
   free(str);
 
   test(set, 0);
-
   printf("now strict\n");
   test(set, HWLOC_CPUBIND_STRICT);
-
   hwloc_bitmap_free(set);
+
+  printf("\n\nmemory tests\n\n");
+  printf("complete node set\n");
+  set = hwloc_bitmap_dup(hwloc_get_root_obj(topology)->cpuset);
+  hwloc_bitmap_asprintf(&str, set);
+  printf("i.e. cpuset %s\n", str);
+  free(str);
+  testmem3(set);
+  hwloc_bitmap_free(set);
+
+  obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 0);
+  if (obj) {
+    set = hwloc_bitmap_dup(obj->cpuset);
+    hwloc_bitmap_asprintf(&str, set);
+    printf("cpuset set is %s\n", str);
+    free(str);
+
+    testmem3(set);
+
+    obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, 1);
+    if (obj) {
+      hwloc_bitmap_or(set, set, obj->cpuset);
+      hwloc_bitmap_asprintf(&str, set);
+      printf("cpuset set is %s\n", str);
+      free(str);
+
+      testmem3(set);
+    }
+    hwloc_bitmap_free(set);
+  }
+
   hwloc_topology_destroy(topology);
   return 0;
 }

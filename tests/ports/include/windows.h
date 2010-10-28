@@ -20,7 +20,8 @@ typedef unsigned short WORD, USHORT;
 typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD, *PDWORD_PTR;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)();
-typedef void *PVOID;
+typedef void *LPVOID;
+typedef ULONG_PTR SIZE_T;
 
 // This is to cope with linux using integers for hwloc_pid_t and hwloc_thread_t
 //typedef PVOID HANDLE;
@@ -39,6 +40,12 @@ typedef int HANDLE;
 #define ANYSIZE_ARRAY 1
 
 #define ERROR_INSUFFICIENT_BUFFER 122L
+
+#define MEM_COMMIT	0x1000
+#define MEM_RESERVE	0x2000
+#define MEM_RELEASE	0x8000
+
+#define PAGE_EXECUTE_READWRITE	0x0040
 
 WINAPI HINSTANCE LoadLibrary(LPCSTR);
 WINAPI void *GetProcAddress(HINSTANCE, LPCSTR);

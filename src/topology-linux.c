@@ -8,6 +8,7 @@
 #include <private/config.h>
 #include <hwloc.h>
 #include <hwloc/linux.h>
+#include <private/misc.h>
 #include <private/private.h>
 #include <private/misc.h>
 #include <private/debug.h>
@@ -23,6 +24,10 @@
 #include <sys/stat.h>
 #include <sched.h>
 #include <pthread.h>
+#include <sys/mman.h>
+#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
+#include <numaif.h>
+#endif
 
 #if !defined(HWLOC_HAVE_CPU_SET) && !(defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)) && defined(HWLOC_HAVE__SYSCALL3)
 /* libc doesn't have support for sched_setaffinity, build system call
@@ -455,17 +460,17 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
 }
 
 /* Callbacks for binding each process sub-tid */
-typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int idx, int policy);
+typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags);
 
 static int
-hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
 {
   hwloc_bitmap_t cpuset = data;
   return hwloc_linux_set_tid_cpubind(topology, tid, cpuset);
 }
 
 static int
-hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int policy)
+hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags)
 {
   hwloc_bitmap_t *cpusets = data;
   hwloc_bitmap_t cpuset = cpusets[0];
@@ -478,7 +483,7 @@ hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid
   if (!idx)
     hwloc_bitmap_zero(cpuset);
 
-  if (policy & HWLOC_CPUBIND_STRICT) {
+  if (flags & HWLOC_CPUBIND_STRICT) {
     /* if STRICT, we want all threads to have the same binding */
     if (!idx) {
       /* this is the first thread, copy its binding */
@@ -499,7 +504,7 @@ hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid
 static int
 hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 			     pid_t pid, hwloc_linux_foreach_proc_tid_cb_t cb,
-			     void *data, int policy)
+			     void *data, int flags)
 {
   char taskdir_path[128];
   DIR *taskdir;
@@ -527,7 +532,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
  retry:
   /* apply the callback to all threads */
   for(i=0; i<nr; i++) {
-    err = cb(topology, tids[i], data, i, policy);
+    err = cb(topology, tids[i], data, i, flags);
     if (err < 0)
       goto out_with_tids;
   }
@@ -554,62 +559,62 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 }
 
 static int
-hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   return hwloc_linux_foreach_proc_tid(topology, pid,
 				      hwloc_linux_foreach_proc_tid_set_cpubind_cb,
-				      (void*) hwloc_set, policy);
+				      (void*) hwloc_set, flags);
 }
 
 static int
-hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
   hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
   hwloc_bitmap_t cpusets[2] = { hwloc_set, tidset };
   int ret;
   ret = hwloc_linux_foreach_proc_tid(topology, pid,
 					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
-					 (void*) cpusets, policy);
+					 (void*) cpusets, flags);
   hwloc_bitmap_free(tidset);
   return ret;
 }
 
 static int
-hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   if (pid == 0)
     pid = topology->pid;
-  if (policy & HWLOC_CPUBIND_THREAD)
+  if (flags & HWLOC_CPUBIND_THREAD)
     return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
   else
-    return hwloc_linux_set_pid_cpubind(topology, pid, hwloc_set, policy);
+    return hwloc_linux_set_pid_cpubind(topology, pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
   if (pid == 0)
     pid = topology->pid;
-  if (policy & HWLOC_CPUBIND_THREAD)
+  if (flags & HWLOC_CPUBIND_THREAD)
     return hwloc_linux_get_tid_cpubind(topology, pid, hwloc_set);
   else
-    return hwloc_linux_get_pid_cpubind(topology, pid, hwloc_set, policy);
+    return hwloc_linux_get_pid_cpubind(topology, pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_linux_set_pid_cpubind(topology, topology->pid, hwloc_set, policy);
+  return hwloc_linux_set_pid_cpubind(topology, topology->pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_linux_get_pid_cpubind(topology, topology->pid, hwloc_set, policy);
+  return hwloc_linux_get_pid_cpubind(topology, topology->pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   if (topology->pid) {
     errno = ENOSYS;
@@ -619,7 +624,7 @@ hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap
 }
 
 static int
-hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   if (topology->pid) {
     errno = ENOSYS;
@@ -632,7 +637,7 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwl
 #pragma weak pthread_setaffinity_np
 
 static int
-hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   int err;
 
@@ -726,7 +731,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #pragma weak pthread_getaffinity_np
 
 static int
-hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   int err;
 
@@ -819,6 +824,274 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
   return 0;
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+
+#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
+static int
+hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t policy, int flags)
+{
+  switch (policy) {
+  case HWLOC_MEMBIND_DEFAULT:
+  case HWLOC_MEMBIND_FIRSTTOUCH:
+    *linuxpolicy = MPOL_DEFAULT;
+    break;
+  case HWLOC_MEMBIND_BIND:
+    if (flags & HWLOC_MEMBIND_STRICT)
+      *linuxpolicy = MPOL_BIND;
+    else
+      *linuxpolicy = MPOL_PREFERRED;
+    break;
+  case HWLOC_MEMBIND_INTERLEAVE:
+    *linuxpolicy = MPOL_INTERLEAVE;
+    break;
+  /* TODO: next-touch when (if?) patch applied upstream */
+  default:
+    errno = ENOSYS;
+    return -1;
+  }
+  return 0;
+}
+
+static int
+hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribute_unused,
+				      hwloc_const_nodeset_t nodeset,
+				      unsigned *max_os_index_p, unsigned long **linuxmaskp)
+{
+  unsigned max_os_index = 0; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  unsigned i;
+
+  max_os_index = hwloc_bitmap_last(nodeset);
+  if (max_os_index == (unsigned) -1)
+    max_os_index = 0;
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
+  if (!linuxmask) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
+    linuxmask[i] = hwloc_bitmap_to_ith_ulong(nodeset, i);
+
+  *max_os_index_p = max_os_index;
+  *linuxmaskp = linuxmask;
+  return 0;
+}
+
+static void
+hwloc_linux_membind_mask_to_nodeset(hwloc_topology_t topology __hwloc_attribute_unused,
+				    hwloc_nodeset_t nodeset,
+				    unsigned _max_os_index, const unsigned long *linuxmask)
+{
+  unsigned max_os_index;
+  unsigned i;
+
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (_max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  hwloc_bitmap_zero(nodeset);
+  for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
+    hwloc_bitmap_set_ith_ulong(nodeset, i, linuxmask[i]);
+  /* if we don't trust the kernel, we could clear bits from _max_os_index+1 to max_os_index-1 */
+}
+#endif /* HWLOC_HAVE_SET_MEMPOLICY || HWLOC_HAVE_MBIND */
+
+#ifdef HWLOC_HAVE_MBIND
+static int
+hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  size_t remainder;
+  int linuxpolicy;
+  unsigned linuxflags = 0;
+  int err;
+
+  remainder = (uintptr_t) addr & (sysconf(_SC_PAGESIZE)-1);
+  addr = (char*) addr - remainder;
+  len += remainder;
+
+  err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy, flags);
+  if (err < 0)
+    return err;
+
+  if (linuxpolicy == MPOL_DEFAULT)
+    /* Some Linux kernels don't like being passed a set */
+    return mbind((void *) addr, len, linuxpolicy, NULL, 0, 0);
+
+  err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
+  if (err < 0)
+    goto out;
+
+  if (flags & HWLOC_MEMBIND_MIGRATE) {
+    linuxflags = MPOL_MF_MOVE;
+    if (flags & HWLOC_MEMBIND_STRICT)
+      linuxflags |= MPOL_MF_STRICT;
+  }
+
+  err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
+  if (err < 0)
+    goto out_with_mask;
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+static void *
+hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  void *buffer;
+  int err;
+
+  buffer = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0); /* has this been supported for long enough? */
+  if (buffer == MAP_FAILED)
+    return NULL;
+
+  err = hwloc_linux_set_area_membind(topology, buffer, len, nodeset, policy, flags);
+  if (err < 0) {
+    munmap(buffer, len);
+    return NULL;
+  }
+
+  return buffer;
+}
+
+static int
+hwloc_linux_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len)
+{
+  return munmap(addr, len);
+}
+#endif /* HWLOC_HAVE_MBIND */
+
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
+static int
+	    /* TODO: documentation says process, but do_set_mempolicy source
+	     * code says current->mempolicy = new;... */
+hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  int linuxpolicy;
+  int err;
+
+  err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy, flags);
+  if (err < 0)
+    return err;
+
+  if (linuxpolicy == MPOL_DEFAULT)
+    /* Some Linux kernels don't like being passed a set */
+    return set_mempolicy(linuxpolicy, NULL, 0);
+
+  err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
+  if (err < 0)
+    goto out;
+
+  if (flags & HWLOC_MEMBIND_MIGRATE) {
+#ifdef HWLOC_HAVE_MIGRATE_PAGES
+    unsigned long *fullmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
+    if (fullmask) {
+      memset(fullmask, max_os_index/HWLOC_BITS_PER_LONG * sizeof(long), 0xf);
+      err = migrate_pages(0, max_os_index+1, fullmask, linuxmask);
+      free(fullmask);
+    } else
+      err = -1;
+    if (err < 0 && (flags & HWLOC_MEMBIND_STRICT))
+      goto out_with_mask;
+#else
+    errno = ENOSYS;
+    goto out_with_mask;
+#endif
+  }
+
+  err = set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
+  if (err < 0)
+    goto out_with_mask;
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+static int
+	    /* TODO: documentation says process, but do_get_mempolicy source
+	     * code says pol = current->mempolicy;... */
+hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
+{
+  hwloc_const_bitmap_t complete_nodeset;
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  int linuxpolicy;
+  int err;
+
+  /* compute max_os_index */
+  complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
+  if (complete_nodeset) {
+    max_os_index = hwloc_bitmap_last(complete_nodeset);
+    if (max_os_index == (unsigned) -1)
+      max_os_index = 0;
+  } else {
+    max_os_index = 0;
+  }
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
+  if (!linuxmask) {
+    errno = ENOMEM;
+    goto out;
+  }
+
+  err = get_mempolicy(&linuxpolicy, linuxmask, max_os_index, 0, 0);
+  if (err < 0)
+    goto out_with_mask;
+
+  if (linuxpolicy == MPOL_DEFAULT) {
+    hwloc_const_nodeset_t topology_nodeset = hwloc_topology_get_topology_nodeset(topology);
+    if (topology_nodeset)
+      hwloc_bitmap_copy(nodeset, topology_nodeset);
+    else
+      hwloc_bitmap_fill(nodeset);
+  } else {
+    hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, linuxmask);
+  }
+
+  switch (linuxpolicy) {
+  case MPOL_DEFAULT:
+    *policy = HWLOC_MEMBIND_FIRSTTOUCH;
+    break;
+  case MPOL_PREFERRED:
+  case MPOL_BIND:
+    *policy = HWLOC_MEMBIND_BIND;
+    break;
+  case MPOL_INTERLEAVE:
+    *policy = HWLOC_MEMBIND_INTERLEAVE;
+    break;
+  default:
+    errno = EINVAL;
+    goto out_with_mask;
+  }
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+#endif /* HWLOC_HAVE_SET_MEMPOLICY */
 
 int
 hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path __hwloc_attribute_unused)
@@ -2426,6 +2699,17 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
   topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
+  topology->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
+  topology->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
+#endif /* HWLOC_HAVE_SET_MEMPOLICY */
+#ifdef HWLOC_HAVE_MBIND
+  topology->set_area_membind = hwloc_linux_set_area_membind;
+  topology->alloc_membind = hwloc_linux_alloc_membind;
+  topology->free_membind = hwloc_linux_free_membind;
+  topology->support.membind->firsttouch_membind = 1;
+  topology->support.membind->bind_membind = 1;
+  topology->support.membind->interleave_membind = 1;
+  topology->support.membind->migrate_membind = 1;
+#endif /* HWLOC_HAVE_MBIND */
 }
-
-/* TODO mbind, setpolicy */

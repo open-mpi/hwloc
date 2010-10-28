@@ -504,7 +504,29 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     ])
     
     AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
-    
+
+    AC_CHECK_HEADERS([malloc.h])
+    AC_CHECK_FUNCS([getpagesize memalign posix_memalign])
+
+    # set_mempolicy and mbind support   
+    AC_CHECK_HEADERS([numaif.h], [
+      AC_CHECK_LIB([numa], [set_mempolicy], [
+	enable_set_mempolicy=yes
+	AC_SUBST([HWLOC_LINUX_LIBNUMA_LIBS], ["-lnuma"])
+	AC_DEFINE([HWLOC_HAVE_SET_MEMPOLICY], [1], [Define to 1 if set_mempolicy is available.])
+      ])
+      AC_CHECK_LIB([numa], [mbind], [
+	enable_mbind=yes
+	AC_SUBST([HWLOC_LINUX_LIBNUMA_LIBS], ["-lnuma"])
+	AC_DEFINE([HWLOC_HAVE_MBIND], [1], [Define to 1 if mbind is available.])
+      ])
+      AC_CHECK_LIB([numa], [migrate_pages], [
+	enable_migrate_pages=yes
+	AC_SUBST([HWLOC_LINUX_LIBNUMA_LIBS], ["-lnuma"])
+	AC_DEFINE([HWLOC_HAVE_MIGRATE_PAGES], [1], [Define to 1 if migrate_pages is available.])
+      ])
+    ])
+
     AC_CHECK_HEADERS([pthread_np.h])
     AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
       #include <pthread.h>
@@ -628,6 +650,8 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 		       [test "x$hwloc_have_cudart" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" != "xno"])
+        AM_CONDITIONAL([HWLOC_HAVE_SET_MEMPOLICY], [test "x$enable_set_mempolicy" != "xno"])
+        AM_CONDITIONAL([HWLOC_HAVE_MBIND], [test "x$enable_mbind" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
 
         AM_CONDITIONAL([HWLOC_BUILD_DOXYGEN],
