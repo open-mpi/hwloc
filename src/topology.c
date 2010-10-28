@@ -1335,48 +1335,107 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
  * Empty binding hooks always returning success
  */
 
-static int dontset_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+static int dontset_return_complete_cpuset(hwloc_topology_t topology, hwloc_cpuset_t set)
 {
-  return 0;
-}
-static int dontget_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, int policy __hwloc_attribute_unused)
-{
-  hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
-  return 0;
-}
-static int dontset_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
-{
-  return 0;
-}
-static int dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, int policy __hwloc_attribute_unused)
-{
-  hwloc_const_bitmap_t cpuset = hwloc_topology_get_complete_cpuset(topology);
+  hwloc_const_cpuset_t cpuset = hwloc_topology_get_complete_cpuset(topology);
   if (cpuset) {
-    hwloc_bitmap_copy(set,cpuset);
+    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
     return 0;
   } else
     return -1;
 }
-static int dontset_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+
+static int dontset_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
 {
   return 0;
 }
-static int dontget_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_bitmap_t cpuset, int policy __hwloc_attribute_unused)
+static int dontget_thisthread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, int flags __hwloc_attribute_unused)
 {
-  hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
+  return dontset_return_complete_cpuset(topology, set);
+}
+static int dontset_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+{
   return 0;
+}
+static int dontget_thisproc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, int flags __hwloc_attribute_unused)
+{
+  return dontset_return_complete_cpuset(topology, set);
+}
+static int dontset_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_bitmap_t cpuset, int flags __hwloc_attribute_unused)
+{
+  return dontset_return_complete_cpuset(topology, cpuset);
 }
 #ifdef hwloc_thread_t
-static int dontset_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+static int dontset_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
 {
   return 0;
 }
-static int dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_bitmap_t cpuset, int policy __hwloc_attribute_unused)
+static int dontget_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t tid __hwloc_attribute_unused, hwloc_bitmap_t cpuset, int flags __hwloc_attribute_unused)
 {
-  hwloc_bitmap_copy(cpuset, hwloc_topology_get_complete_cpuset(topology));
-  return 0;
+  return dontset_return_complete_cpuset(topology, cpuset);
 }
 #endif
+
+static int dontset_return_complete_nodeset(hwloc_topology_t topology, hwloc_nodeset_t set, hwloc_membind_policy_t *policy)
+{
+  hwloc_const_nodeset_t nodeset = hwloc_topology_get_complete_nodeset(topology);
+  if (nodeset) {
+    hwloc_bitmap_copy(set, hwloc_topology_get_complete_nodeset(topology));
+    *policy = HWLOC_MEMBIND_DEFAULT;
+    return 0;
+  } else
+    return -1;
+}
+
+static int dontset_thisproc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_thisproc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags __hwloc_attribute_unused)
+{
+  return dontset_return_complete_nodeset(topology, set, policy);
+}
+
+static int dontset_thisthread_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_thisthread_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags __hwloc_attribute_unused)
+{
+  return dontset_return_complete_nodeset(topology, set, policy);
+}
+
+static int dontset_proc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_proc_membind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t pid __hwloc_attribute_unused, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags __hwloc_attribute_unused)
+{
+  return dontset_return_complete_nodeset(topology, set, policy);
+}
+
+static int dontset_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int dontget_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, const void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_bitmap_t set, hwloc_membind_policy_t * policy, int flags __hwloc_attribute_unused)
+{
+  return dontset_return_complete_nodeset(topology, set, policy);
+}
+
+static void * dontalloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t size __hwloc_attribute_unused, hwloc_const_bitmap_t set __hwloc_attribute_unused, hwloc_membind_policy_t policy __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+{
+  return malloc(size);
+}
+static int dontfree_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr __hwloc_attribute_unused, size_t size __hwloc_attribute_unused)
+{
+  free(addr);
+  return 0;
+}
 
 static void alloc_cpusets(hwloc_obj_t obj)
 {
@@ -1789,6 +1848,16 @@ hwloc_discover(struct hwloc_topology *topology)
     topology->set_thread_cpubind = dontset_thread_cpubind;
     topology->get_thread_cpubind = dontget_thread_cpubind;
 #endif
+    topology->set_thisproc_membind = dontset_thisproc_membind;
+    topology->get_thisproc_membind = dontget_thisproc_membind;
+    topology->set_thisthread_membind = dontset_thisthread_membind;
+    topology->get_thisthread_membind = dontget_thisthread_membind;
+    topology->set_proc_membind = dontset_proc_membind;
+    topology->get_proc_membind = dontget_proc_membind;
+    topology->set_area_membind = dontset_area_membind;
+    topology->get_area_membind = dontget_area_membind;
+    topology->alloc_membind = dontalloc_membind;
+    topology->free_membind = dontfree_membind;
   }
 
   /* if not is_thissystem, set_cpubind is fake
@@ -1796,17 +1865,26 @@ hwloc_discover(struct hwloc_topology *topology)
    * so don't report that set/get_cpubind as supported
    */
   if (topology->is_thissystem) {
-#define DO(kind) \
+#define DO(which,kind) \
     if (topology->kind) \
-      topology->support.cpubind->kind = 1;
-    DO(set_thisproc_cpubind);
-    DO(get_thisproc_cpubind);
-    DO(set_proc_cpubind);
-    DO(get_proc_cpubind);
-    DO(set_thisthread_cpubind);
-    DO(get_thisthread_cpubind);
-    DO(set_thread_cpubind);
-    DO(get_thread_cpubind);
+      topology->support.which##bind->kind = 1;
+    DO(cpu,set_thisproc_cpubind);
+    DO(cpu,get_thisproc_cpubind);
+    DO(cpu,set_proc_cpubind);
+    DO(cpu,get_proc_cpubind);
+    DO(cpu,set_thisthread_cpubind);
+    DO(cpu,get_thisthread_cpubind);
+    DO(cpu,set_thread_cpubind);
+    DO(cpu,get_thread_cpubind);
+    DO(mem,set_thisproc_membind);
+    DO(mem,get_thisproc_membind);
+    DO(mem,set_thisthread_membind);
+    DO(mem,get_thisthread_membind);
+    DO(mem,set_proc_membind);
+    DO(mem,get_proc_membind);
+    DO(mem,set_area_membind);
+    DO(mem,get_area_membind);
+    DO(mem,alloc_membind);
   }
 
   return 0;
@@ -1832,8 +1910,19 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->set_thread_cpubind = NULL;
   topology->get_thread_cpubind = NULL;
 #endif
+  topology->set_thisproc_membind = NULL;
+  topology->get_thisproc_membind = NULL;
+  topology->set_thisthread_membind = NULL;
+  topology->get_thisthread_membind = NULL;
+  topology->set_proc_membind = NULL;
+  topology->get_proc_membind = NULL;
+  topology->set_area_membind = NULL;
+  topology->get_area_membind = NULL;
+  topology->alloc_membind = NULL;
+  topology->free_membind = NULL;
   memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
   memset(topology->support.cpubind, 0, sizeof(*topology->support.cpubind));
+  memset(topology->support.membind, 0, sizeof(*topology->support.membind));
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
@@ -1873,6 +1962,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
 
   topology->support.discovery = malloc(sizeof(*topology->support.discovery));
   topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
+  topology->support.membind = malloc(sizeof(*topology->support.membind));
 
   topology->first_pcidev = NULL;
   topology->last_pcidev = NULL;
@@ -1957,7 +2047,22 @@ hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
-  return hwloc_backend_xml_init(topology, xmlpath);
+  return hwloc_backend_xml_init(topology, xmlpath, NULL, 0);
+#else /* HWLOC_HAVE_XML */
+  errno = ENOSYS;
+  return -1;
+#endif /* !HWLOC_HAVE_XML */
+}
+
+int
+hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology __hwloc_attribute_unused,
+                             const char *xmlbuffer __hwloc_attribute_unused, int size)
+{
+#ifdef HWLOC_HAVE_XML
+  /* cleanup existing backend */
+  hwloc_backend_exit(topology);
+
+  return hwloc_backend_xml_init(topology, NULL, xmlbuffer, size);
 #else /* HWLOC_HAVE_XML */
   errno = ENOSYS;
   return -1;
@@ -2042,6 +2147,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
   hwloc_backend_exit(topology);
   free(topology->support.discovery);
   free(topology->support.cpubind);
+  free(topology->support.membind);
   free(topology);
 }
 
@@ -2072,7 +2178,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
     char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
     if (xmlpath_env) {
       hwloc_backend_exit(topology);
-      hwloc_backend_xml_init(topology, xmlpath_env);
+      hwloc_backend_xml_init(topology, xmlpath_env, NULL, 0);
     }
   }
 #endif
@@ -2089,7 +2195,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
     char *xmlpath_env = getenv("HWLOC_XMLFILE");
     if (xmlpath_env)
-      hwloc_backend_xml_init(topology, xmlpath_env);
+      hwloc_backend_xml_init(topology, xmlpath_env, NULL, 0);
   }
 #endif
 

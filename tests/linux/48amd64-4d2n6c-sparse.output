@@ -1,4 +1,4 @@
-Machine (phys=0 total=100661148KB DMIBoardVendor=AMD DMIBoardName=DRACHMA Backend=Linux)
+Machine (phys=0 total=100661148KB DMIProductName=DRACHMA DMIProductVersion="Rev 2" DMIProductSerial=0123456789 DMIProductUUID=008844D0-2214-DF11-B89F-F50F715B14E8 DMIBoardVendor=AMD DMIBoardName=DRACHMA DMIBoardVersion="Rev 2" DMIBoardSerial=0123456789 DMIBoardAssetTag= )
   Socket #0 (phys=0 total=25163676KB)
     NUMANode #0 (phys=0 local=8386460KB total=8386460KB)
       L3Cache #0 (5118KB line=64)

@@ -53,6 +53,10 @@ if HWLOC_HAVE_CUDART
 check_PROGRAMS += cudart
 endif HWLOC_HAVE_CUDART
 
+if HWLOC_HAVE_XML
+check_PROGRAMS += xmlbuffer
+endif HWLOC_HAVE_XML
+
 TESTS = $(check_PROGRAMS)
 
 # The library has a different name depending on whether we are
@@ -70,6 +74,7 @@ openfabrics_verbs_LDFLAGS = -libverbs
 myriexpress_LDFLAGS = -lmyriexpress
 cuda_LDFLAGS = -lcuda
 cudart_LDFLAGS = -lcuda -lcudart
+xmlbuffer = -lxml2
 if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
 endif !HWLOC_HAVE_WINDOWS

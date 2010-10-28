@@ -8,6 +8,7 @@
 #include <private/config.h>
 #include <hwloc.h>
 #include <hwloc/linux.h>
+#include <private/misc.h>
 #include <private/private.h>
 #include <private/misc.h>
 #include <private/debug.h>
@@ -23,6 +24,10 @@
 #include <sys/stat.h>
 #include <sched.h>
 #include <pthread.h>
+#include <sys/mman.h>
+#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
+#include <numaif.h>
+#endif
 
 #if !defined(HWLOC_HAVE_CPU_SET) && !(defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)) && defined(HWLOC_HAVE__SYSCALL3)
 /* libc doesn't have support for sched_setaffinity, build system call
@@ -158,6 +163,18 @@ hwloc_accessat(const char *path, int mode, int fsroot_fd)
   return faccessat(fsroot_fd, relative_path, mode, 0);
 }
 
+static int
+hwloc_fstatat(const char *path, struct stat *st, int flags, int fsroot_fd)
+{
+  const char *relative_path;
+
+  relative_path = hwloc_checkat(path, fsroot_fd);
+  if (!relative_path)
+    return -1;
+
+  return fstatat(fsroot_fd, relative_path, st, flags);
+}
+
 static DIR*
 hwloc_opendirat(const char *path, int fsroot_fd)
 {
@@ -208,6 +225,16 @@ hwloc_access(const char *p, int m, int d __hwloc_attribute_unused)
     return hwloc_accessat(p, m, d);
 #else
     return access(p, m);
+#endif
+}
+
+static inline int
+hwloc_stat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
+{
+#ifdef HAVE_OPENAT
+    return hwloc_fstatat(p, st, 0, d);
+#else
+    return stat(p, st);
 #endif
 }
 
@@ -433,17 +460,17 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
 }
 
 /* Callbacks for binding each process sub-tid */
-typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int idx, int policy);
+typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags);
 
 static int
-hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused, int policy __hwloc_attribute_unused)
+hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
 {
   hwloc_bitmap_t cpuset = data;
   return hwloc_linux_set_tid_cpubind(topology, tid, cpuset);
 }
 
 static int
-hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int policy)
+hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags)
 {
   hwloc_bitmap_t *cpusets = data;
   hwloc_bitmap_t cpuset = cpusets[0];
@@ -456,7 +483,7 @@ hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid
   if (!idx)
     hwloc_bitmap_zero(cpuset);
 
-  if (policy & HWLOC_CPUBIND_STRICT) {
+  if (flags & HWLOC_CPUBIND_STRICT) {
     /* if STRICT, we want all threads to have the same binding */
     if (!idx) {
       /* this is the first thread, copy its binding */
@@ -477,7 +504,7 @@ hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid
 static int
 hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 			     pid_t pid, hwloc_linux_foreach_proc_tid_cb_t cb,
-			     void *data, int policy)
+			     void *data, int flags)
 {
   char taskdir_path[128];
   DIR *taskdir;
@@ -505,7 +532,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
  retry:
   /* apply the callback to all threads */
   for(i=0; i<nr; i++) {
-    err = cb(topology, tids[i], data, i, policy);
+    err = cb(topology, tids[i], data, i, flags);
     if (err < 0)
       goto out_with_tids;
   }
@@ -532,62 +559,62 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 }
 
 static int
-hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   return hwloc_linux_foreach_proc_tid(topology, pid,
 				      hwloc_linux_foreach_proc_tid_set_cpubind_cb,
-				      (void*) hwloc_set, policy);
+				      (void*) hwloc_set, flags);
 }
 
 static int
-hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
   hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
   hwloc_bitmap_t cpusets[2] = { hwloc_set, tidset };
   int ret;
   ret = hwloc_linux_foreach_proc_tid(topology, pid,
 					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
-					 (void*) cpusets, policy);
+					 (void*) cpusets, flags);
   hwloc_bitmap_free(tidset);
   return ret;
 }
 
 static int
-hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_linux_set_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   if (pid == 0)
     pid = topology->pid;
-  if (policy & HWLOC_CPUBIND_THREAD)
+  if (flags & HWLOC_CPUBIND_THREAD)
     return hwloc_linux_set_tid_cpubind(topology, pid, hwloc_set);
   else
-    return hwloc_linux_set_pid_cpubind(topology, pid, hwloc_set, policy);
+    return hwloc_linux_set_pid_cpubind(topology, pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_linux_get_proc_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
   if (pid == 0)
     pid = topology->pid;
-  if (policy & HWLOC_CPUBIND_THREAD)
+  if (flags & HWLOC_CPUBIND_THREAD)
     return hwloc_linux_get_tid_cpubind(topology, pid, hwloc_set);
   else
-    return hwloc_linux_get_pid_cpubind(topology, pid, hwloc_set, policy);
+    return hwloc_linux_get_pid_cpubind(topology, pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_linux_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_linux_set_pid_cpubind(topology, topology->pid, hwloc_set, policy);
+  return hwloc_linux_set_pid_cpubind(topology, topology->pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy)
+hwloc_linux_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_linux_get_pid_cpubind(topology, topology->pid, hwloc_set, policy);
+  return hwloc_linux_get_pid_cpubind(topology, topology->pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   if (topology->pid) {
     errno = ENOSYS;
@@ -597,7 +624,7 @@ hwloc_linux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap
 }
 
 static int
-hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   if (topology->pid) {
     errno = ENOSYS;
@@ -610,7 +637,7 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwl
 #pragma weak pthread_setaffinity_np
 
 static int
-hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   int err;
 
@@ -704,7 +731,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 #pragma weak pthread_getaffinity_np
 
 static int
-hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_bitmap_t hwloc_set, int policy __hwloc_attribute_unused)
+hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   int err;
 
@@ -797,6 +824,274 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
   return 0;
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+
+#if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
+static int
+hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t policy, int flags)
+{
+  switch (policy) {
+  case HWLOC_MEMBIND_DEFAULT:
+  case HWLOC_MEMBIND_FIRSTTOUCH:
+    *linuxpolicy = MPOL_DEFAULT;
+    break;
+  case HWLOC_MEMBIND_BIND:
+    if (flags & HWLOC_MEMBIND_STRICT)
+      *linuxpolicy = MPOL_BIND;
+    else
+      *linuxpolicy = MPOL_PREFERRED;
+    break;
+  case HWLOC_MEMBIND_INTERLEAVE:
+    *linuxpolicy = MPOL_INTERLEAVE;
+    break;
+  /* TODO: next-touch when (if?) patch applied upstream */
+  default:
+    errno = ENOSYS;
+    return -1;
+  }
+  return 0;
+}
+
+static int
+hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribute_unused,
+				      hwloc_const_nodeset_t nodeset,
+				      unsigned *max_os_index_p, unsigned long **linuxmaskp)
+{
+  unsigned max_os_index = 0; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  unsigned i;
+
+  max_os_index = hwloc_bitmap_last(nodeset);
+  if (max_os_index == (unsigned) -1)
+    max_os_index = 0;
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
+  if (!linuxmask) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
+    linuxmask[i] = hwloc_bitmap_to_ith_ulong(nodeset, i);
+
+  *max_os_index_p = max_os_index;
+  *linuxmaskp = linuxmask;
+  return 0;
+}
+
+static void
+hwloc_linux_membind_mask_to_nodeset(hwloc_topology_t topology __hwloc_attribute_unused,
+				    hwloc_nodeset_t nodeset,
+				    unsigned _max_os_index, const unsigned long *linuxmask)
+{
+  unsigned max_os_index;
+  unsigned i;
+
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (_max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  hwloc_bitmap_zero(nodeset);
+  for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
+    hwloc_bitmap_set_ith_ulong(nodeset, i, linuxmask[i]);
+  /* if we don't trust the kernel, we could clear bits from _max_os_index+1 to max_os_index-1 */
+}
+#endif /* HWLOC_HAVE_SET_MEMPOLICY || HWLOC_HAVE_MBIND */
+
+#ifdef HWLOC_HAVE_MBIND
+static int
+hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  size_t remainder;
+  int linuxpolicy;
+  unsigned linuxflags = 0;
+  int err;
+
+  remainder = (uintptr_t) addr & (sysconf(_SC_PAGESIZE)-1);
+  addr = (char*) addr - remainder;
+  len += remainder;
+
+  err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy, flags);
+  if (err < 0)
+    return err;
+
+  if (linuxpolicy == MPOL_DEFAULT)
+    /* Some Linux kernels don't like being passed a set */
+    return mbind((void *) addr, len, linuxpolicy, NULL, 0, 0);
+
+  err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
+  if (err < 0)
+    goto out;
+
+  if (flags & HWLOC_MEMBIND_MIGRATE) {
+    linuxflags = MPOL_MF_MOVE;
+    if (flags & HWLOC_MEMBIND_STRICT)
+      linuxflags |= MPOL_MF_STRICT;
+  }
+
+  err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
+  if (err < 0)
+    goto out_with_mask;
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+static void *
+hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  void *buffer;
+  int err;
+
+  buffer = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0); /* has this been supported for long enough? */
+  if (buffer == MAP_FAILED)
+    return NULL;
+
+  err = hwloc_linux_set_area_membind(topology, buffer, len, nodeset, policy, flags);
+  if (err < 0) {
+    munmap(buffer, len);
+    return NULL;
+  }
+
+  return buffer;
+}
+
+static int
+hwloc_linux_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len)
+{
+  return munmap(addr, len);
+}
+#endif /* HWLOC_HAVE_MBIND */
+
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
+static int
+	    /* TODO: documentation says process, but do_set_mempolicy source
+	     * code says current->mempolicy = new;... */
+hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  int linuxpolicy;
+  int err;
+
+  err = hwloc_linux_membind_policy_from_hwloc(&linuxpolicy, policy, flags);
+  if (err < 0)
+    return err;
+
+  if (linuxpolicy == MPOL_DEFAULT)
+    /* Some Linux kernels don't like being passed a set */
+    return set_mempolicy(linuxpolicy, NULL, 0);
+
+  err = hwloc_linux_membind_mask_from_nodeset(topology, nodeset, &max_os_index, &linuxmask);
+  if (err < 0)
+    goto out;
+
+  if (flags & HWLOC_MEMBIND_MIGRATE) {
+#ifdef HWLOC_HAVE_MIGRATE_PAGES
+    unsigned long *fullmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
+    if (fullmask) {
+      memset(fullmask, max_os_index/HWLOC_BITS_PER_LONG * sizeof(long), 0xf);
+      err = migrate_pages(0, max_os_index+1, fullmask, linuxmask);
+      free(fullmask);
+    } else
+      err = -1;
+    if (err < 0 && (flags & HWLOC_MEMBIND_STRICT))
+      goto out_with_mask;
+#else
+    errno = ENOSYS;
+    goto out_with_mask;
+#endif
+  }
+
+  err = set_mempolicy(linuxpolicy, linuxmask, max_os_index+1);
+  if (err < 0)
+    goto out_with_mask;
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+static int
+	    /* TODO: documentation says process, but do_get_mempolicy source
+	     * code says pol = current->mempolicy;... */
+hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
+{
+  hwloc_const_bitmap_t complete_nodeset;
+  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned long *linuxmask;
+  int linuxpolicy;
+  int err;
+
+  /* compute max_os_index */
+  complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
+  if (complete_nodeset) {
+    max_os_index = hwloc_bitmap_last(complete_nodeset);
+    if (max_os_index == (unsigned) -1)
+      max_os_index = 0;
+  } else {
+    max_os_index = 0;
+  }
+  /* round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+
+  linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
+  if (!linuxmask) {
+    errno = ENOMEM;
+    goto out;
+  }
+
+  err = get_mempolicy(&linuxpolicy, linuxmask, max_os_index, 0, 0);
+  if (err < 0)
+    goto out_with_mask;
+
+  if (linuxpolicy == MPOL_DEFAULT) {
+    hwloc_const_nodeset_t topology_nodeset = hwloc_topology_get_topology_nodeset(topology);
+    if (topology_nodeset)
+      hwloc_bitmap_copy(nodeset, topology_nodeset);
+    else
+      hwloc_bitmap_fill(nodeset);
+  } else {
+    hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, linuxmask);
+  }
+
+  switch (linuxpolicy) {
+  case MPOL_DEFAULT:
+    *policy = HWLOC_MEMBIND_FIRSTTOUCH;
+    break;
+  case MPOL_PREFERRED:
+  case MPOL_BIND:
+    *policy = HWLOC_MEMBIND_BIND;
+    break;
+  case MPOL_INTERLEAVE:
+    *policy = HWLOC_MEMBIND_INTERLEAVE;
+    break;
+  default:
+    errno = EINVAL;
+    goto out_with_mask;
+  }
+
+  free(linuxmask);
+  return 0;
+
+ out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+#endif /* HWLOC_HAVE_SET_MEMPOLICY */
 
 int
 hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path __hwloc_attribute_unused)
@@ -1224,23 +1519,16 @@ hwloc_admin_disable_set_from_cpuset(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
-			     const char *path, struct hwloc_obj_memory_s *memory)
+hwloc_parse_meminfo_info(struct hwloc_topology *topology,
+			 const char *path,
+			 int prefixlength,
+			 uint64_t *local_memory,
+			 uint64_t *meminfo_hugepages_count,
+			 uint64_t *meminfo_hugepages_size,
+			 int onlytotal)
 {
   char string[64];
   FILE *fd;
-
-  if (topology->is_thissystem) {
-    memory->page_types_len = 2;
-    memory->page_types = malloc(2*sizeof(*memory->page_types));
-    memset(memory->page_types, 0, 2*sizeof(*memory->page_types));
-
-  /* Try to get the hugepage size from sysconf in case we fail to get it from /proc/meminfo later */
-#ifdef HAVE__SC_LARGE_PAGESIZE
-    memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
-#endif
-    memory->page_types[0].size = getpagesize();
-  }
 
   fd = hwloc_fopen(path, "r", topology->backend_params.sysfs.root_fd);
   if (!fd)
@@ -1249,16 +1537,19 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
       unsigned long long number;
-      if (sscanf(string, "MemTotal: %llu kB", &number) == 1)
-	memory->local_memory = number << 10;
-      else if (memory->page_types && sscanf(string, "Hugepagesize: %llu", &number) == 1)
-	memory->page_types[1].size = number << 10;
-      else if (memory->page_types && sscanf(string, "HugePages_Free: %llu", &number) == 1)
-	memory->page_types[1].count = number;
+      if (sscanf(string+prefixlength, "MemTotal: %llu kB", (unsigned long long *) &number) == 1) {
+	*local_memory = number << 10;
+	if (onlytotal)
+	  break;
+      }
+      else if (!onlytotal) {
+	if (sscanf(string+prefixlength, "Hugepagesize: %llu", (unsigned long long *) &number) == 1)
+	  *meminfo_hugepages_size = number << 10;
+	else if (sscanf(string+prefixlength, "HugePages_Free: %llu", (unsigned long long *) &number) == 1)
+          /* these are free hugepages, not the total amount of huge pages */
+	  *meminfo_hugepages_count = number;
+      }
     }
-
-  if (memory->page_types)
-    memory->page_types[0].count = (memory->local_memory - memory->page_types[1].count*memory->page_types[1].size) / memory->page_types[0].size;
 
   fclose(fd);
 }
@@ -1266,42 +1557,169 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology,
 #define SYSFS_NUMA_NODE_PATH_LEN 128
 
 static void
-hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
-			     const char *syspath, int node,
-			     struct hwloc_obj_memory_s *memory)
+hwloc_parse_hugepages_info(struct hwloc_topology *topology,
+			   const char *dirpath,
+			   struct hwloc_obj_memory_s *memory,
+			   uint64_t *remaining_local_memory)
 {
+  DIR *dir;
+  struct dirent *dirent;
+  unsigned long index = 1;
+  FILE *hpfd;
+  char line[64];
   char path[SYSFS_NUMA_NODE_PATH_LEN];
-  char string[64];
-  FILE *fd;
 
-  sprintf(path, "%s/node%d/meminfo", syspath, node);
-  fd = hwloc_fopen(path, "r", topology->backend_params.sysfs.root_fd);
-  if (!fd)
-    return;
+  dir = hwloc_opendir(dirpath, topology->backend_params.sysfs.root_fd);
+  if (dir) {
+    while ((dirent = readdir(dir)) != NULL) {
+      if (strncmp(dirent->d_name, "hugepages-", 10))
+        continue;
+      memory->page_types[index].size = strtoul(dirent->d_name+10, NULL, 0) * 1024ULL;
+      sprintf(path, "%s/%s/nr_hugepages", dirpath, dirent->d_name);
+      hpfd = hwloc_fopen(path, "r", topology->backend_params.sysfs.root_fd);
+      if (hpfd) {
+        if (fgets(line, sizeof(line), hpfd)) {
+          fclose(hpfd);
+          /* these are the actual total amount of huge pages */
+          memory->page_types[index].count = strtoull(line, NULL, 0);
+          *remaining_local_memory -= memory->page_types[index].count * memory->page_types[index].size;
+          index++;
+        }
+      }
+    }
+    closedir(dir);
+    memory->page_types_len = index;
+  }
+}
+
+static void
+hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology, unsigned long node, struct hwloc_obj_memory_s *memory)
+{
+  char path[128];
+  uint64_t meminfo_hugepages_count, meminfo_hugepages_size;
 
   if (topology->is_thissystem) {
     memory->page_types_len = 2;
     memory->page_types = malloc(2*sizeof(*memory->page_types));
     memset(memory->page_types, 0, 2*sizeof(*memory->page_types));
+    /* Try to get the hugepage size from sysconf in case we fail to get it from /proc/meminfo later */
+#ifdef HAVE__SC_LARGE_PAGESIZE
+    memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+    memory->page_types[0].size = getpagesize();
   }
 
-  while (fgets(string, sizeof(string), fd) && *string != '\0')
-    {
-      unsigned long long number;
-      if (sscanf(string, "Node %d MemTotal: %llu kB", &node, &number) == 2)
-	memory->local_memory = number << 10;
-      else if (memory->page_types && sscanf(string, "Node %d HugePages_Free: %llu kB", &node, &number) == 2)
-	memory->page_types[1].count = number;
-    }
+  snprintf(path, sizeof(path), "/proc/nodes/node%lu/meminfo", node);
+  hwloc_parse_meminfo_info(topology, path, 0 /* no prefix */,
+			   &memory->local_memory,
+			   &meminfo_hugepages_count, &meminfo_hugepages_size,
+			   memory->page_types == NULL);
 
   if (memory->page_types) {
-    /* hwloc_get_procfs_meminfo_info must have been called earlier */
-    memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
-    memory->page_types[0].size = getpagesize();
-    memory->page_types[0].count = (memory->local_memory - memory->page_types[1].count*memory->page_types[1].size) / memory->page_types[0].size;
+    uint64_t remaining_local_memory = memory->local_memory;
+    memory->page_types[1].size = meminfo_hugepages_size;
+    memory->page_types[1].count = meminfo_hugepages_count;
+    remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+    memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
+  }
+}
+
+static void
+hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_memory_s *memory)
+{
+  uint64_t meminfo_hugepages_count, meminfo_hugepages_size;
+  struct stat st;
+  int has_sysfs_hugepages = 0;
+  int types = 2;
+  int err;
+
+  err = hwloc_stat("/sys/kernel/mm/hugepages", &st, topology->backend_params.sysfs.root_fd);
+  if (!err) {
+    types = 1 + st.st_nlink-2;
+    has_sysfs_hugepages = 1;
   }
 
-  fclose(fd);
+  if (topology->is_thissystem) {
+    memory->page_types_len = types;
+    memory->page_types = malloc(types*sizeof(*memory->page_types));
+    memset(memory->page_types, 0, types*sizeof(*memory->page_types));
+    /* Try to get the hugepage size from sysconf in case we fail to get it from /proc/meminfo later */
+#ifdef HAVE__SC_LARGE_PAGESIZE
+    memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
+#endif
+    memory->page_types[0].size = getpagesize();
+  }
+
+  hwloc_parse_meminfo_info(topology, "/proc/meminfo", 0 /* no prefix */,
+			   &memory->local_memory,
+			   &meminfo_hugepages_count, &meminfo_hugepages_size,
+			   memory->page_types == NULL);
+
+  if (memory->page_types) {
+    uint64_t remaining_local_memory = memory->local_memory;
+    if (has_sysfs_hugepages) {
+      /* read from node%d/hugepages/hugepages-%skB/nr_hugepages */
+      hwloc_parse_hugepages_info(topology, "/sys/kernel/mm/hugepages", memory, &remaining_local_memory);
+    } else {
+      /* use what we found in meminfo */
+      memory->page_types[1].size = meminfo_hugepages_size;
+      memory->page_types[1].count = meminfo_hugepages_count;
+      remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+    }
+    memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
+  }
+}
+
+static void
+hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
+			     const char *syspath, int node,
+			     struct hwloc_obj_memory_s *memory)
+{
+  char path[SYSFS_NUMA_NODE_PATH_LEN];
+  char meminfopath[SYSFS_NUMA_NODE_PATH_LEN];
+  uint64_t meminfo_hugepages_count = 0;
+  uint64_t meminfo_hugepages_size = 0;
+  struct stat st;
+  int has_sysfs_hugepages = 0;
+  int types = 2;
+  int err;
+
+  sprintf(path, "%s/node%d/hugepages", syspath, node);
+  err = hwloc_stat(path, &st, topology->backend_params.sysfs.root_fd);
+  if (!err) {
+    types = 1 + st.st_nlink-2;
+    has_sysfs_hugepages = 1;
+  }
+
+  if (topology->is_thissystem) {
+    memory->page_types_len = types;
+    memory->page_types = malloc(types*sizeof(*memory->page_types));
+    memset(memory->page_types, 0, types*sizeof(*memory->page_types));
+  }
+
+  sprintf(meminfopath, "%s/node%d/meminfo", syspath, node);
+  hwloc_parse_meminfo_info(topology, meminfopath,
+			   hwloc_snprintf(NULL, 0, "Node %d ", node),
+			   &memory->local_memory,
+			   &meminfo_hugepages_count, &meminfo_hugepages_size,
+			   memory->page_types == NULL);
+
+  if (memory->page_types) {
+    uint64_t remaining_local_memory = memory->local_memory;
+    if (has_sysfs_hugepages) {
+      /* read from node%d/hugepages/hugepages-%skB/nr_hugepages */
+      hwloc_parse_hugepages_info(topology, path, memory, &remaining_local_memory);
+    } else {
+      /* use what we found in meminfo */
+      /* hwloc_get_procfs_meminfo_info must have been called earlier */
+      memory->page_types[1].count = meminfo_hugepages_count;
+      memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
+      remaining_local_memory -= meminfo_hugepages_count * memory->page_types[1].size;
+    }
+    /* update what's remaining as normal pages */
+    memory->page_types[0].size = getpagesize();
+    memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
+  }
 }
 
 static void
@@ -2159,9 +2577,8 @@ hwloc_look_linux(struct hwloc_topology *topology)
 		 node, machine_online_set);
       hwloc_insert_object_by_cpuset(topology, machine);
 
-      snprintf(path, sizeof(path), "/proc/nodes/node%lu/meminfo", node);
       /* Get the machine memory attributes */
-      hwloc_get_procfs_meminfo_info(topology, path, &machine->memory);
+      hwloc_get_kerrighed_node_meminfo_info(topology, node, &machine->memory);
 
       /* Gather DMI info */
       /* FIXME: get the right DMI info of each machine */
@@ -2170,18 +2587,18 @@ hwloc_look_linux(struct hwloc_topology *topology)
     closedir(nodes_dir);
   } else {
     /* Get the machine memory attributes */
-    hwloc_get_procfs_meminfo_info(topology, "/proc/meminfo", &topology->levels[0][0]->memory);
+    hwloc_get_procfs_meminfo_info(topology, &topology->levels[0][0]->memory);
 
     /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
     look_sysfsnode(topology, "/sys/devices/system/node", &nbnodes);
 
     /* if we found some numa nodes, the machine object has no local memory */
     if (nbnodes) {
+      unsigned i;
       topology->levels[0][0]->memory.local_memory = 0;
-      if (topology->levels[0][0]->memory.page_types) {
-        topology->levels[0][0]->memory.page_types[0].count = 0;
-        topology->levels[0][0]->memory.page_types[1].count = 0;
-      }
+      if (topology->levels[0][0]->memory.page_types)
+        for(i=0; i<topology->levels[0][0]->memory.page_types_len; i++)
+          topology->levels[0][0]->memory.page_types[i].count = 0;
     }
 
     /* Gather the list of cpus now */
@@ -2231,6 +2648,17 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
   topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
+  topology->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
+  topology->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
+#endif /* HWLOC_HAVE_SET_MEMPOLICY */
+#ifdef HWLOC_HAVE_MBIND
+  topology->set_area_membind = hwloc_linux_set_area_membind;
+  topology->alloc_membind = hwloc_linux_alloc_membind;
+  topology->free_membind = hwloc_linux_free_membind;
+  topology->support.membind->firsttouch_membind = 1;
+  topology->support.membind->bind_membind = 1;
+  topology->support.membind->interleave_membind = 1;
+  topology->support.membind->migrate_membind = 1;
+#endif /* HWLOC_HAVE_MBIND */
 }
-
-/* TODO mbind, setpolicy */

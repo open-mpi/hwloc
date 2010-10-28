@@ -21,7 +21,6 @@ dnl Copyright © 2006-2010  Cisco Systems, Inc.  All rights reserved.
 AC_DEFUN([HWLOC_SETUP_CORE],[
     AC_REQUIRE([AC_CANONICAL_TARGET])
     AC_REQUIRE([AC_PROG_CC])
-    AC_REQUIRE([AM_PROG_CC_C_O])
 
     AS_IF([test "x$4" != "x"],
           [cat <<EOF
@@ -30,9 +29,6 @@ AC_DEFUN([HWLOC_SETUP_CORE],[
 ### Configuring hwloc core
 ###
 EOF])
-
-    # We want new Libtool.  None of that old stuff.  Pfft.    
-    LT_PREREQ([2.2.6])
 
     # If no prefix was defined, set a good value
     m4_ifval([$1], 
@@ -457,8 +453,11 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
         AC_MSG_RESULT([no])
     )
 
-    # check for kerrighed, but don't abort if not found
-    HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [], [], [:])
+    # Check for kerrighed, but don't abort if not found.  It's illegal
+    # to pass in an empty 3rd argument, but we trust the output of
+    # pkg-config, so just give it a value that will always work:
+    # printf.
+    HWLOC_PKG_CHECK_MODULES([KERRIGHED], [kerrighed >= 2.0], [printf], [], [:])
 
     AC_PATH_PROGS([HWLOC_MS_LIB], [lib])
     AC_ARG_VAR([HWLOC_MS_LIB], [Path to Microsoft's Visual Studio `lib' tool])
@@ -505,7 +504,29 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     ])
     
     AC_CHECK_FUNCS([openat], [hwloc_have_openat=yes])
-    
+
+    AC_CHECK_HEADERS([malloc.h])
+    AC_CHECK_FUNCS([getpagesize memalign posix_memalign])
+
+    # set_mempolicy and mbind support   
+    AC_CHECK_HEADERS([numaif.h], [
+      AC_CHECK_LIB([numa], [set_mempolicy], [
+	enable_set_mempolicy=yes
+	AC_SUBST([HWLOC_LINUX_LIBNUMA_LIBS], ["-lnuma"])
+	AC_DEFINE([HWLOC_HAVE_SET_MEMPOLICY], [1], [Define to 1 if set_mempolicy is available.])
+      ])
+      AC_CHECK_LIB([numa], [mbind], [
+	enable_mbind=yes
+	AC_SUBST([HWLOC_LINUX_LIBNUMA_LIBS], ["-lnuma"])
+	AC_DEFINE([HWLOC_HAVE_MBIND], [1], [Define to 1 if mbind is available.])
+      ])
+      AC_CHECK_LIB([numa], [migrate_pages], [
+	enable_migrate_pages=yes
+	AC_SUBST([HWLOC_LINUX_LIBNUMA_LIBS], ["-lnuma"])
+	AC_DEFINE([HWLOC_HAVE_MIGRATE_PAGES], [1], [Define to 1 if migrate_pages is available.])
+      ])
+    ])
+
     AC_CHECK_HEADERS([pthread_np.h])
     AC_CHECK_DECLS([pthread_setaffinity_np],,[:],[[
       #include <pthread.h>
@@ -651,6 +672,8 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBPCI], [test "x$enable_pci" != "xno"])
+        AM_CONDITIONAL([HWLOC_HAVE_SET_MEMPOLICY], [test "x$enable_set_mempolicy" != "xno"])
+        AM_CONDITIONAL([HWLOC_HAVE_MBIND], [test "x$enable_mbind" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
 
         AM_CONDITIONAL([HWLOC_BUILD_DOXYGEN],

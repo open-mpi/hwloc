@@ -33,6 +33,7 @@ cat << EOF | while read path ; do savepath "$destdir/$name" "$path" ; done
 /sys/devices/system/cpu/
 /sys/devices/system/node/
 /sys/class/dmi/id/
+/sys/kernel/mm/hugepages/
 /proc/cpuinfo
 /proc/meminfo
 /proc/stat

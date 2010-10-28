@@ -68,16 +68,27 @@ struct hwloc_topology {
 
   struct hwloc_obj *first_pcidev, *last_pcidev;
 
-  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_bitmap_t set, int policy);
-  int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_bitmap_t set, int policy);
-  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_bitmap_t set, int policy);
-  int (*get_thisthread_cpubind)(hwloc_topology_t topology, hwloc_bitmap_t set, int policy);
-  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t set, int policy);
-  int (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int policy);
+  int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
+  int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
+  int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
+  int (*get_thisthread_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
+  int (*set_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int flags);
+  int (*get_proc_cpubind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 #ifdef hwloc_thread_t
-  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_bitmap_t set, int policy);
-  int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bitmap_t set, int policy);
+  int (*set_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int flags);
+  int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int flags);
 #endif
+
+  int (*set_thisproc_membind)(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
+  int (*get_thisproc_membind)(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+  int (*set_thisthread_membind)(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
+  int (*get_thisthread_membind)(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+  int (*set_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
+  int (*get_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+  int (*set_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
+  int (*get_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+  void *(*alloc_membind)(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
+  int (*free_membind)(hwloc_topology_t topology, void *addr, size_t len);
 
   struct hwloc_topology_support support;
 
@@ -127,7 +138,7 @@ extern void hwloc_backend_sysfs_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_LINUX_SYS */
 
 #ifdef HWLOC_HAVE_XML
-extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath);
+extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen);
 extern void hwloc_look_xml(struct hwloc_topology *topology);
 extern void hwloc_backend_xml_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_HAVE_XML */
