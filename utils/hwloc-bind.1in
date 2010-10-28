@@ -20,6 +20,18 @@ and/or memory.
 .
 See below for a description of valid <location> formats.
 .TP 10
+\fB\-\-cpubind\fR
+Use following arguments for CPU binding (default).
+.TP
+\fB\-\-membind\fR
+Use following arguments for memory binding.
+.TP
+\fB\-\-mempolicy\fR <policy>
+Change the memory binding policy.
+The available policies are default, firsttouch, bind, interleave
+replicate and nexttouch.
+If a binding set is given, the default policy is bind.
+.TP
 \fB\-\-get\fR
 Report the current bindings.
 .TP
@@ -112,6 +124,10 @@ To run on the first socket, except on its second and fifth cores:
 
     hwloc-bind socket:0 ~socket:0.core:1 ~socket:0.core:4 echo hello
 
+To bind memory on second memory node and run on first node (when supported by the OS):
+
+    hwloc-bind --cpubind node:1 --membind:0 echo hello
+
 The --get option can report current bindings.  This example shows
 nesting hwloc-bind invocations to set a binding and then report it:
 
@@ -128,6 +144,12 @@ by hwloc-calc).  For example:
 
     hwloc-bind 0x00004444,0x44000000 echo hello
     hwloc-bind `hwloc-calc node:1.socket:2` echo hello
+
+Memory binding may also be reported:
+
+    hwloc-bind --membind node:1 --mempolicy interleave -- hwloc-bind --get --membind
+
+It returns something such as "0x000000f0 (interleave)".
 .
 .\" **************************
 .\"    Return value section

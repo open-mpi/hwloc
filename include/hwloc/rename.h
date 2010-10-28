@@ -124,7 +124,7 @@ extern "C" {
 #define HWLOC_CPUBIND_THREAD HWLOC_NAME_CAPS(CPUBIND_THREAD)
 #define HWLOC_CPUBIND_STRICT HWLOC_NAME_CAPS(CPUBIND_STRICT)
 
-#define hwloc_cpubind_policy_t HWLOC_NAME(cpubind_policy_t)
+#define hwloc_cpubind_flags_t HWLOC_NAME(cpubind_flags_t)
 
 #define hwloc_set_cpubind HWLOC_NAME(set_cpubind)
 #define hwloc_get_cpubind HWLOC_NAME(get_cpubind)
@@ -132,6 +132,39 @@ extern "C" {
 #define hwloc_get_proc_cpubind HWLOC_NAME(get_proc_cpubind)
 #define hwloc_set_thread_cpubind HWLOC_NAME(set_thread_cpubind)
 #define hwloc_get_thread_cpubind HWLOC_NAME(get_thread_cpubind)
+
+#define HWLOC_MEMBIND_DEFAULT HWLOC_NAME_CAPS(MEMBIND_DEFAULT)
+#define HWLOC_MEMBIND_FIRSTTOUCH HWLOC_NAME_CAPS(MEMBIND_FIRSTTOUCH)
+#define HWLOC_MEMBIND_BIND HWLOC_NAME_CAPS(MEMBIND_BIND)
+#define HWLOC_MEMBIND_INTERLEAVE HWLOC_NAME_CAPS(MEMBIND_INTERLEAVE)
+#define HWLOC_MEMBIND_REPLICATE HWLOC_NAME_CAPS(MEMBIND_REPLICATE)
+#define HWLOC_MEMBIND_NEXTTOUCH HWLOC_NAME_CAPS(MEMBIND_NEXTTOUCH)
+
+#define hwloc_membind_policy_t HWLOC_NAME(membind_policy_t)
+
+#define HWLOC_MEMBIND_PROCESS HWLOC_NAME_CAPS(MEMBIND_PROCESS)
+#define HWLOC_MEMBIND_THREAD HWLOC_NAME_CAPS(MEMBIND_THREAD)
+#define HWLOC_MEMBIND_STRICT HWLOC_NAME_CAPS(MEMBIND_STRICT)
+#define HWLOC_MEMBIND_MIGRATE HWLOC_NAME_CAPS(MEMBIND_MIGRATE)
+#define HWLOC_MEMBIND_NOCPUBIND HWLOC_NAME_CAPS(MEMBIND_NOCPUBIND)
+
+#define hwloc_membind_flags_t HWLOC_NAME(membind_flags_t)
+
+#define hwloc_set_membind_nodeset HWLOC_NAME(set_membind_nodeset)
+#define hwloc_set_membind HWLOC_NAME(set_membind)
+#define hwloc_get_membind_nodeset HWLOC_NAME(get_membind_nodeset)
+#define hwloc_get_membind HWLOC_NAME(get_membind)
+#define hwloc_set_proc_membind_nodeset HWLOC_NAME(set_proc_membind_nodeset)
+#define hwloc_set_proc_membind HWLOC_NAME(set_proc_membind)
+#define hwloc_get_proc_membind_nodeset HWLOC_NAME(get_proc_membind_nodeset)
+#define hwloc_get_proc_membind HWLOC_NAME(get_proc_membind)
+#define hwloc_set_area_membind_nodeset HWLOC_NAME(set_area_membind_nodeset)
+#define hwloc_set_area_membind HWLOC_NAME(set_area_membind)
+#define hwloc_get_area_membind_nodeset HWLOC_NAME(get_area_membind_nodeset)
+#define hwloc_get_area_membind HWLOC_NAME(get_area_membind)
+#define hwloc_alloc_membind_nodeset HWLOC_NAME(alloc_membind_nodeset)
+#define hwloc_alloc_membind HWLOC_NAME(alloc_membind)
+#define hwloc_free_membind HWLOC_NAME(free_membind)
 
 /* hwloc/bitmap.h */
 
@@ -216,6 +249,13 @@ extern "C" {
 #define hwloc_topology_get_topology_cpuset HWLOC_NAME(topology_get_topology_cpuset)
 #define hwloc_topology_get_online_cpuset HWLOC_NAME(topology_get_online_cpuset)
 #define hwloc_topology_get_allowed_cpuset HWLOC_NAME(topology_get_allowed_cpuset)
+#define hwloc_topology_get_complete_nodeset HWLOC_NAME(topology_get_complete_nodeset)
+#define hwloc_topology_get_topology_nodeset HWLOC_NAME(topology_get_topology_nodeset)
+#define hwloc_topology_get_allowed_nodeset HWLOC_NAME(topology_get_allowed_nodeset)
+#define hwloc_cpuset_to_nodeset HWLOC_NAME(cpuset_to_nodeset)
+#define hwloc_cpuset_to_nodeset_strict HWLOC_NAME(cpuset_to_nodeset_strict)
+#define hwloc_cpuset_from_nodeset HWLOC_NAME(cpuset_from_nodeset)
+#define hwloc_cpuset_from_nodeset_strict HWLOC_NAME(cpuset_from_nodeset_strict)
 
 /* glibc-sched.h */
 

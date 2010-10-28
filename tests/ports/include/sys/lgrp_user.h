@@ -52,4 +52,9 @@ lgrp_affinity_t lgrp_affinity_get(idtype_t idtype, id_t id, lgrp_id_t lgrp);
 
 int lgrp_fini(lgrp_cookie_t cookie);
 
+/* Should actually be in sys/mman.h, but don't want to interfere with the system one */
+#define MADV_ACCESS_DEFAULT 6
+#define MADV_ACCESS_LWP     7
+#define MADV_ACCESS_MANY    8
+
 #endif /* HWLOC_PORT_SYS_LGRP_USER_H */

@@ -22,6 +22,16 @@
 #include <numa.h>
 #include <radset.h>
 #include <cpuset.h>
+#include <sys/mman.h>
+
+/*
+ * TODO
+ *
+ * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
+ * assign_pid_to_pset()
+ *
+ * pthread_use_only_cpu too?
+ */
 
 static int
 prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_bitmap_t hwloc_set)
@@ -71,7 +81,7 @@ out:
 /* Note: get_cpubind not available on OSF */
 
 static int
-hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   radset_t radset;
 
@@ -81,10 +91,16 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
     return 0;
   }
 
+  /* Apparently OSF migrates pages */
+  if (flags & HWLOC_CPUBIND_NOMEMBIND) {
+    errno = ENOSYS;
+    return -1;
+  }
+
   if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
-  if (policy & HWLOC_CPUBIND_STRICT) {
+  if (flags & HWLOC_CPUBIND_STRICT) {
     if ((errno = pthread_rad_bind(thread, radset, RAD_INSIST | RAD_WAIT)))
       return -1;
   } else {
@@ -97,7 +113,7 @@ hwloc_osf_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, h
 }
 
 static int
-hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
   radset_t radset;
 
@@ -107,10 +123,16 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
     return 0;
   }
 
+  /* Apparently OSF migrates pages */
+  if (flags & HWLOC_CPUBIND_NOMEMBIND) {
+    errno = ENOSYS;
+    return -1;
+  }
+
   if (!prepare_radset(topology, &radset, hwloc_set))
     return -1;
 
-  if (policy & HWLOC_CPUBIND_STRICT) {
+  if (flags & HWLOC_CPUBIND_STRICT) {
     if (rad_bind_pid(pid, radset, RAD_INSIST | RAD_WAIT))
       return -1;
   } else {
@@ -123,25 +145,94 @@ hwloc_osf_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
 }
 
 static int
-hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_osf_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, policy);
+  return hwloc_osf_set_thread_cpubind(topology, pthread_self(), hwloc_set, flags);
 }
 
 static int
-hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int policy)
+hwloc_osf_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, policy);
+  return hwloc_osf_set_proc_cpubind(topology, getpid(), hwloc_set, flags);
 }
 
-/* TODO: memory
- *
- * nmadvise(addr,len), nmmap()
- * policies: DIRECTED, STRIPPED, first_touch(REPLICATED)
- *
- * nsg_init(), nsg_attach_pid(), RAD_MIGRATE/RAD_WAIT
- * assign_pid_to_pset()
- */
+static int
+hwloc_osf_prepare_mattr(hwloc_topology_t topology __hwloc_attribute_unused, memalloc_attr_t *mattr, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags __hwloc_attribute_unused)
+{
+  unsigned long osf_policy;
+  int node;
+
+  switch (policy) {
+    case HWLOC_MEMBIND_FIRSTTOUCH:
+      osf_policy = MPOL_THREAD;
+      break;
+    case HWLOC_MEMBIND_DEFAULT:
+    case HWLOC_MEMBIND_BIND:
+      osf_policy = MPOL_DIRECTED;
+      break;
+    case HWLOC_MEMBIND_INTERLEAVE:
+      osf_policy = MPOL_STRIPPED;
+      break;
+    case HWLOC_MEMBIND_REPLICATE:
+      osf_policy = MPOL_REPLICATED;
+      break;
+    default:
+      errno = ENOSYS;
+      return -1;
+  }
+
+  memset(mattr, 0, sizeof(*mattr));
+  mattr->mattr_policy = osf_policy;
+  mattr->mattr_rad = RAD_NONE;
+  radsetcreate(&mattr->mattr_radset);
+  rademptyset(mattr->mattr_radset);
+
+  hwloc_bitmap_foreach_begin(node, nodeset)
+    radaddset(mattr->mattr_radset, node);
+  hwloc_bitmap_foreach_end();
+  return 0;
+}
+
+static int
+hwloc_osf_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  memalloc_attr_t mattr;
+  int behavior = 0;
+  int ret;
+
+  if (flags & HWLOC_MEMBIND_MIGRATE)
+    behavior |= MADV_CURRENT;
+  if (flags & HWLOC_MEMBIND_STRICT)
+    behavior |= MADV_INSIST;
+
+  if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy, flags))
+    return -1;
+
+  ret = nmadvise(addr, len, MADV_CURRENT, &mattr);
+  radsetdestroy(&mattr.mattr_radset);
+  return ret;
+}
+
+static void *
+hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  memalloc_attr_t mattr;
+  void *ptr;
+
+  if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy, flags))
+    return NULL;
+
+  /* TODO: rather use acreate/amalloc ? */
+  ptr = nmmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,
+               0, &mattr);
+  radsetdestroy(&mattr.mattr_radset);
+  return ptr;
+}
+
+static int
+hwloc_osf_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len) {
+  return munmap(addr, len);
+}
 
 void
 hwloc_look_osf(struct hwloc_topology *topology)
@@ -243,4 +334,11 @@ hwloc_set_osf_hooks(struct hwloc_topology *topology)
   topology->set_thisthread_cpubind = hwloc_osf_set_thisthread_cpubind;
   topology->set_proc_cpubind = hwloc_osf_set_proc_cpubind;
   topology->set_thisproc_cpubind = hwloc_osf_set_thisproc_cpubind;
+  topology->set_area_membind = hwloc_osf_set_area_membind;
+  topology->alloc_membind = hwloc_osf_alloc_membind;
+  topology->free_membind = hwloc_osf_free_membind;
+  topology->support.membind->firsttouch_membind = 1;
+  topology->support.membind->bind_membind = 1;
+  topology->support.membind->interleave_membind = 1;
+  topology->support.membind->replicate_membind = 1;
 }

@@ -10,13 +10,26 @@
 
 #include "thread.h"
 
+typedef unsigned int uint_t;
 typedef void *rsethandle_t;
 
 #define RS_EMPTY 3
 #define RS_ALL 2
 #define RS_PARTITION 3
 
+#define RS_UNION 1
+#define RS_INTERSECTION 2
+#define RS_EXCLUSION 3
+#define RS_COPY 4
+#define RS_FIRST 5
+#define RS_NEXT 6
+#define RS_NEXT_WRAP 7
+#define RS_ISEMPTY 8
+#define RS_ISEQUAL 9
+#define RS_ISCONTAINED 10
 #define RS_TESTRESOURCE 11
+#define RS_ADDRESOURCE 12
+#define RS_DELRESOURCE 13
 
 typedef int rsinfo_t;
 #define R_NUMPROCS 0
@@ -36,6 +49,10 @@ typedef int rsinfo_t;
 #define R_SHM 4
 #define R_FILDES 5
 #define R_THREAD 6
+
+#define P_DEFAULT 0
+#define P_FIRST_TOUCH 1
+#define P_BALANCED 2	/* This is the default */
 
 rsethandle_t rs_alloc (unsigned int flags);
 int rs_numrads(rsethandle_t rset, unsigned int sdl, unsigned int flags);
@@ -69,5 +86,8 @@ struct subrange {
 int ra_attachrset (rstype_t rstype, rsid_t rsid, rsethandle_t rset, unsigned int flags);
 int ra_detachrset (rstype_t rstype, rsid_t rsid, unsigned int flags);
 int ra_getrset (rstype_t rstype, rsid_t rsid, unsigned int flags, rsethandle_t rset);
+
+void * ra_mmap(void *addr, off64_t len, int prot, int flags, int fildes, off64_t off, rstype_t rstype, rsid_t rsid, unsigned int att_flags);
+
 
 #endif /* HWLOC_PORT_SYS_RSET_H */

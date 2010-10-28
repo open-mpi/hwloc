@@ -82,9 +82,12 @@ typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
  *
  * It may be consulted and modified with the bitmap API as any ::hwloc_bitmap_t (see hwloc/bitmap.h).
  *
- * If there are no NUMA nodes in the system (when the whole memory is considered
- * as a single memory bank), the nodeset may be either empty (no memory selected)
- * or full (whole memory selected).
+ * When binding memory on a system without any NUMA node
+ * (when the whole memory is considered as a single memory bank),
+ * the nodeset may be either empty (no memory selected)
+ * or full (whole system memory selected).
+ *
+ * See also \ref hwlocality_helper_nodeset_convert.
  */
 typedef hwloc_bitmap_t hwloc_nodeset_t;
 /** \brief A non-modifiable ::hwloc_nodeset_t.
@@ -302,6 +305,8 @@ struct hwloc_obj {
                                           * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
                                           * these nodes may not be allowed for allocation, see allowed_nodeset.
                                           *
+					  * If the machine contains no NUMA memory node, \p nodeset is \c NULL.
+					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,
@@ -313,6 +318,8 @@ struct hwloc_obj {
                                           * precise position is undefined. It is however known that it would be
                                           * somewhere under this object.
                                           *
+					  * If the machine contains no NUMA memory node, \p complete_nodeset is \c NULL.
+					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t allowed_nodeset;      /**< \brief The set of allowed NUMA memory nodes
@@ -322,6 +329,8 @@ struct hwloc_obj {
                                           * memory allocation should not return permission errors. This is usually
                                           * restricted by administration rules.
                                           *
+					  * If the machine contains no NUMA memory node, \p allowed_nodeset is \c NULL.
+					  *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
 
@@ -556,7 +565,7 @@ struct hwloc_topology_discovery_support {
   unsigned char pu;
 };
 
-/** \brief Flags describing actual binding support for this topology. */
+/** \brief Flags describing actual PU binding support for this topology. */
 struct hwloc_topology_cpubind_support {
   /** Binding the whole current process is supported.  */
   unsigned char set_thisproc_cpubind;
@@ -576,6 +585,41 @@ struct hwloc_topology_cpubind_support {
   unsigned char get_thread_cpubind;
 };
 
+/** \brief Flags describing actual memory binding support for this topology. */
+struct hwloc_topology_membind_support {
+  /** Binding the whole current process is supported.  */
+  unsigned char set_thisproc_membind;
+  /** Getting the binding of the whole current process is supported.  */
+  unsigned char get_thisproc_membind;
+  /** Binding a whole given process is supported.  */
+  unsigned char set_proc_membind;
+  /** Getting the binding of a whole given process is supported.  */
+  unsigned char get_proc_membind;
+  /** Binding the current thread only is supported.  */
+  unsigned char set_thisthread_membind;
+  /** Getting the binding of the current thread only is supported.  */
+  unsigned char get_thisthread_membind;
+  /** Binding a given memory area is supported. */
+  unsigned char set_area_membind;
+  /** Getting the binding of a given memory area is supported.  */
+  unsigned char get_area_membind;
+  /** Allocating a bound memory area is supported. */
+  unsigned char alloc_membind;
+  /** First-touch policy is supported. */
+  unsigned char firsttouch_membind;
+  /** Bind policy is supported. */
+  unsigned char bind_membind;
+  /** Interleave policy is supported. */
+  unsigned char interleave_membind;
+  /** Replication policy is supported. */
+  unsigned char replicate_membind;
+  /** Next-touch migration policy is supported. */
+  unsigned char nexttouch_membind;
+
+  /** Migration flags is supported. */
+  unsigned char migrate_membind;
+};
+
 /** \brief Set of flags describing actual support for this topology.
  *
  * This is retrieved with hwloc_topology_get_support() and will be valid until
@@ -585,6 +629,7 @@ struct hwloc_topology_cpubind_support {
 struct hwloc_topology_support {
   struct hwloc_topology_discovery_support *discovery;
   struct hwloc_topology_cpubind_support *cpubind;
+  struct hwloc_topology_membind_support *membind;
 };
 
 /** \brief Retrieve the topology support. */
@@ -811,7 +856,7 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
 
 
 
-/** \defgroup hwlocality_binding Binding
+/** \defgroup hwlocality_cpubinding CPU binding
  *
  * It is often useful to call hwloc_bitmap_singlify() first so that a single CPU
  * remains in the set. This way, the process will not even migrate between
@@ -823,8 +868,8 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * is returned when the requested cpuset can not be enforced (e.g. some systems
  * only allow one CPU, and some other systems only allow one NUMA node)
  *
- * The most portable version that
- * should be preferred over the others, whenever possible, is
+ * The most portable version that should be preferred over the others, whenever
+ * possible, is
  *
  * \code
  * hwloc_set_cpubind(topology, set, 0),
@@ -841,24 +886,29 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  *
  * \note To unbind, just call the binding function with either a full cpuset or
  * a cpuset equal to the system cpuset.
+ *
+ * \note On some OSes, CPU binding may have effects on memory binding, see
+ * ::HWLOC_CPUBIND_NOMEMBIND
  * @{
  */
 
-/** \brief Process/Thread binding policy.
+/** \brief Process/Thread binding flags.
  *
  * These flags can be used to refine the binding policy.
  *
  * The default (0) is to bind the current process, assumed to be mono-thread,
  * in a non-strict way.  This is the most portable way to bind as all OSes
  * usually provide it.
+ *
+ * \note Not all systems support all kinds of binding.
  */
 typedef enum {
-  HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current multithreaded process.
-                                   * This may not be supported by some OSes.
+  HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current
+                                   * (possibly) multithreaded process.
                                    * \hideinitializer */
   HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
                                    * \hideinitializer */
-  HWLOC_CPUBIND_STRICT = (1<<2)   /**< \brief Request for strict binding from the OS.
+  HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS.
                                    * \hideinitializer
                                    *
                                    * By default, when the designated CPUs are
@@ -886,37 +936,49 @@ typedef enum {
 				   * \note This flag is meaningless when retrieving
 				   * the binding of a thread.
                                    */
-} hwloc_cpubind_policy_t;
+  HWLOC_CPUBIND_NOMEMBIND = (1<<3)/**< \brief Avoid any effect on memory binding
+                                   * \hideinitializer
+                                   *
+                                   * On some OSes, some CPU binding function
+                                   * would also bind the memory on the
+                                   * corresponding NUMA node.  It is often not
+                                   * a problem for the application, but if it
+                                   * is, setting this flag will make hwloc
+                                   * avoid using OS functions that would also
+                                   * bind memory.  This will however reduce the
+                                   * support of CPU bindings, i.e. potentially
+                                   * return ENOSYS in some cases.
+                                   */
+} hwloc_cpubind_flags_t;
 
 /** \brief Bind current process or thread on cpus given in bitmap \p set
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
  */
-HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set,
-			    int policy);
+HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
 
 /** \brief Get current process or thread binding
  */
-HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int policy);
+HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
 /** \brief Bind a process \p pid on cpus given in bitmap \p set
  *
  * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
  *
- * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
+ * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
  */
-HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int policy);
+HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int flags);
 
 /** \brief Get the current binding of process \p pid
  *
  * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
  *
- * \note HWLOC_CPUBIND_THREAD can not be used in \p policy.
+ * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
  */
-HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int policy);
+HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
 #ifdef hwloc_thread_t
 /** \brief Bind a thread \p tid on cpus given in bitmap \p set
@@ -924,9 +986,9 @@ HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
  * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
  * Windows platforms
  *
- * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
+ * \note HWLOC_CPUBIND_PROCESS can not be used in \p flags.
  */
-HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int policy);
+HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int flags);
 #endif
 
 #ifdef hwloc_thread_t
@@ -935,10 +997,186 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
  * Windows platforms
  *
- * \note HWLOC_CPUBIND_PROCESS can not be used in \p policy.
+ * \note HWLOC_CPUBIND_PROCESS can not be used in \p flags.
  */
-HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int policy);
+HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int flags);
 #endif
+
+/** @} */
+
+
+/** \defgroup hwlocality_membinding Memory binding
+ *
+ * \note Not all OSes support all ways to bind existing allocated memory
+ * (migration), future memory allocation, explicit memory allocation, etc. and
+ * the corresponding binding functions may fail. ENOSYS is returned when it is
+ * not possible to bind the requested kind of object processes/threads). EXDEV
+ * is returned when the requested cpuset can not be enforced (e.g. some systems
+ * only allow one NUMA node)
+ *
+ * The most portable version that should be preferred over the others, whenever
+ * possible, is
+ *
+ * \code
+ * hwloc_alloc_membind(topology, size, set, HWLOC_MEMBIND_DEFAULT, 0),
+ * \endcode
+ *
+ * which will try to allocate new data bound to the given set, or at worse
+ * allocate memory without binding it at all.
+ *
+ * Each binding is available with a CPU set argument or a NUMA memory node set
+ * argument. The name of the latter ends with _nodeset. It is also possible to
+ * convert between CPU set and node set using ::hwloc_cpuset_to_nodeset or
+ * ::hwloc_cpuset_from_nodeset.
+ *
+ * \note On some OSes, memory binding may have effects on CPU binding, see
+ * ::HWLOC_CPUBIND_NOCPUBIND
+ * @{
+ */
+
+/** \brief Memory binding policy.
+ *
+ * These can be used to choose the binding policy.
+ *
+ * Note that not all systems support all kinds of binding.
+ */
+typedef enum {
+  HWLOC_MEMBIND_DEFAULT =	0,	/**< \brief Reset the memory allocation policy to the system default.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_FIRSTTOUCH =	1,	/**< \brief Allocate memory on the given nodes, but preferably on the
+					  node where the first accessor is running.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_BIND =		2,	/**< \brief Allocate memory on the given nodes.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_INTERLEAVE =	3,	/**< \brief Allocate memory on the given nodes in a round-robin manner.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_REPLICATE =	4,	/**< \brief Replicate memory on the given nodes.
+					 * \hideinitializer */
+  HWLOC_MEMBIND_NEXTTOUCH =	5	/**< \brief On next touch of existing allocated memory, migrate it to the node
+					 * where the memory reference happened.
+					 * \hideinitializer */
+} hwloc_membind_policy_t;
+
+/** \brief Memory binding flags.
+ *
+ * These flags can be used to refine the binding policy.
+ *
+ * \note Not all systems support all kinds of binding.
+ */
+typedef enum {
+  HWLOC_MEMBIND_PROCESS =       (1<<0), /**< \brief Set policy for all threads of the
+                                         * current (possibly multithreaded) process.
+                                         * \hideinitializer */
+  HWLOC_MEMBIND_THREAD =        (1<<1), /**< \brief Set policy for the current thread of
+                                         * the current process.
+                                         * \hideinitializer */
+  HWLOC_MEMBIND_STRICT =        (1<<2), /**< Request strict binding from the OS.
+                                         * The function will fail if the
+                                         * binding can not be completely
+                                         * enforced.
+                                         * \hideinitializer  */
+  HWLOC_MEMBIND_MIGRATE =       (1<<3), /**< \brief Migrate existing allocated memory.
+                                         * If memory can not be migrated and the STRICT
+                                         * flag is passed, an error will be returned.
+                                         * \hideinitializer  */
+  HWLOC_MEMBIND_NOCPUBIND =     (1<<4)  /**< \brief Avoid any effect on CPU binding
+                                         * \hideinitializer
+                                         *
+                                         * On some OSes, some memory binding function
+                                         * would also bind the application on
+                                         * the corresponding CPUs. It is often
+                                         * not a problem for the application, but if it
+                                         * is, setting this flag will make hwloc
+                                         * avoid using OS functions that would also
+                                         * bind on CPUs.  This will however reduce the
+                                         * support of memory bindings, i.e. potentially
+                                         * return ENOSYS in some cases.
+                                         */
+} hwloc_membind_flags_t;
+
+/** \brief Bind current process memory on memory nodes near the given nodeset \p nodeset
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC int hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
+
+/** \brief Bind current process memory on memory nodes near the given cpuset \p cpuset
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
+
+/** \brief Get current process memory binding in nodeset \p nodeset
+ */
+HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+
+/** \brief Get current process memory binding in cpuset \p cpuset
+ */
+HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
+
+/** \brief Bind given process memory on memory nodes near the given nodeset \p nodeset
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
+
+/** \brief Bind given process memory on memory nodes near the given cpuset \p cpuset
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
+
+/** \brief Get current process memory binding in nodeset \p nodeset
+ */
+HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+
+/** \brief Get current process memory binding in cpuset \p cpuset
+ */
+HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
+
+/** \brief Bind some memory range on memory nodes near the given nodeset \p nodeset
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC int hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
+
+/** \brief Bind some memory range on memory nodes near the given cpuset \p cpuset
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
+
+/** \brief Get some memory range memory binding in nodeset \p nodeset
+ */
+HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+
+/** \brief Get some memory range memory binding in cpuset \p cpuset
+ */
+HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
+
+/** \brief Allocate some memory on memory nodes near the given nodeset \p nodeset
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
+
+/** \brief Allocate some memory on memory nodes near the given cpuset \p cpuset
+ *
+ * \return ENOSYS if the action is not supported
+ * \return EXDEV if the binding cannot be enforced
+ */
+HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
+
+/** \brief Free some memory allocated by hwloc_alloc_membind
+ */
+HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len);
 
 /** @} */
 

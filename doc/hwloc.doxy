@@ -409,8 +409,8 @@ section is available and should probably be read first.
 
 Each hwloc object contains a cpuset describing the list of processing
 units that it contains.  These bitmaps may be used for \ref
-hwlocality_binding.  hwloc offers an extensive bitmap manipulation
-interface in hwloc/bitmap.h.
+hwlocality_cpubinding and \ref hwlocality_membinding.  hwloc offers an extensive
+bitmap manipulation interface in hwloc/bitmap.h.
 
 Moreover, hwloc also comes with additional helpers for
 interoperability with several commonly used environments.

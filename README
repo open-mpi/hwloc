@@ -353,8 +353,8 @@ To precisely define the vocabulary used by hwloc, a Terms and Definitions
 section is available and should probably be read first.
 
 Each hwloc object contains a cpuset describing the list of processing units
-that it contains. These bitmaps may be used for Binding. hwloc offers an
-extensive bitmap manipulation interface in hwloc/bitmap.h.
+that it contains. These bitmaps may be used for CPU binding and Memory binding.
+hwloc offers an extensive bitmap manipulation interface in hwloc/bitmap.h.
 
 Moreover, hwloc also comes with additional helpers for interoperability with
 several commonly used environments. See the Interoperability with other
@@ -647,5 +647,5 @@ which is distributed as an Open MPI sub-project.
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Oct 21 2010 17:31:36 for Hardware Locality (hwloc) by  doxygen
+Generated on Thu Oct 21 2010 17:46:01 for Hardware Locality (hwloc) by  doxygen
 1.7.1

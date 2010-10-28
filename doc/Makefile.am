@@ -254,7 +254,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpubind_policy_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpubind_flags_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_membind_flags_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_membind_policy_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_alloc.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_free.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_dup.3 \
@@ -292,6 +294,10 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_asprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset_strict.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_nodeset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_nodeset_strict.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_glibc_sched_affinity.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_to_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
@@ -378,6 +384,21 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_set_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_free_membind.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_set_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_get_area_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_area_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_set_area_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_area_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_set_proc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_topology_check.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
 	$(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
@@ -403,7 +424,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_discovery_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
-        $(DOX_MAN_DIR)/man3/hwlocality_binding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_cpubinding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_membinding.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_bitmap.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_conversion.3 \
@@ -412,10 +434,12 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_cudart.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_glibc_sched.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_binding.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_covering.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_coverings.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_inside.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal_basic.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_types.3 \

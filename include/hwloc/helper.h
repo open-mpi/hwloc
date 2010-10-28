@@ -624,6 +624,8 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
 
 /** @} */
 
+
+
 /** \defgroup hwlocality_helper_cpuset Cpuset Helpers
  * @{
  */
@@ -688,8 +690,190 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
   return hwloc_get_root_obj(topology)->allowed_cpuset;
 }
 
+/** @} */
+
+
+
+/** \defgroup hwlocality_helper_nodeset Nodeset Helpers
+ * @{
+ */
+/* \brief Get complete node set
+ *
+ * \return the complete node set of memory of the system. If the
+ * topology is the result of a combination of several systems, or if it
+ * contains no NUMA memory nodes, NULL is returned;
+ *
+ * \note The returned nodeset is not newly allocated and should thus not be
+ * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
+ */
+static __hwloc_inline hwloc_const_nodeset_t __hwloc_attribute_pure
+hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->complete_nodeset;
+}
+
+/* \brief Get topology node set
+ *
+ * \return the node set of memory of the system for which hwloc
+ * provides topology information. This is equivalent to the nodeset of the
+ * system object. If the topology is the result of a combination of several
+ * systems, or if it contains no NUMA memory nodes, NULL is returned.
+ *
+ * \note The returned nodeset is not newly allocated and should thus not be
+ * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
+ */
+static __hwloc_inline hwloc_const_nodeset_t __hwloc_attribute_pure
+hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->nodeset;
+}
+
+/** \brief Get allowed node set
+ *
+ * \return the node set of allowed memory of the system. If the
+ * topology is the result of a combination of several systems, or if it
+ * contains no NUMA memory nodes, NULL is returned.
+ *
+ * \note The returned nodeset is not newly allocated and should thus not be
+ * changed or freed, hwloc_nodeset_dup must be used to obtain a local copy.
+ */
+static __hwloc_inline hwloc_const_nodeset_t __hwloc_attribute_pure
+hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
+{
+  return hwloc_get_root_obj(topology)->allowed_nodeset;
+}
 
 /** @} */
+
+
+
+/** \defgroup hwlocality_helper_nodeset_convert Conversion between cpuset and nodeset 
+ *
+ * There are two semantics for converting cpusets to nodesets depending on how
+ * non-NUMA machines are handled.
+ *
+ * When manipulating nodesets for memory binding, non-NUMA machines should be
+ * considered as having a single NUMA node. The standard conversion routines
+ * below should be used so that marking the first bit of the nodeset means
+ * that memory should be bound to a non-NUMA whole machine.
+ *
+ * When manipulating nodesets as an actual list of NUMA nodes without any
+ * need to handle memory binding on non-NUMA machines, the strict conversion
+ * routines may be used instead.
+ * @{
+ */
+
+/** \brief Convert a CPU set into a NUMA node set and handle non-NUMA cases
+ *
+ * If some NUMA nodes have no CPUs at all, this function never sets their
+ * indexes in the output node set, even if a full CPU set is given in input.
+ *
+ * If the topology contains no NUMA nodes, the machine is considered
+ * as a single memory node, and the following behavior is used:
+ * If \p cpuset is empty, \p nodeset will be emptied as well.
+ * Otherwise \p nodeset will be entirely filled.
+ */
+static __hwloc_inline void
+hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset)
+{
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	hwloc_obj_t obj;
+
+	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+		 if (hwloc_bitmap_iszero(cpuset))
+			hwloc_bitmap_zero(nodeset);
+		else
+			/* Assume the whole system */
+			hwloc_bitmap_fill(nodeset);
+		return;
+	}
+
+	hwloc_bitmap_zero(nodeset);
+	obj = NULL;
+	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, cpuset, depth, obj)) != NULL)
+		hwloc_bitmap_set(nodeset, obj->os_index);
+}
+
+/** \brief Convert a CPU set into a NUMA node set without handling non-NUMA cases
+ *
+ * This is the strict variant of ::hwloc_cpuset_to_nodeset. It does not fix
+ * non-NUMA cases. If the topology contains some NUMA nodes, behave exactly
+ * the same. However, if the topology contains no NUMA nodes, return an empty
+ * nodeset.
+ */
+static __hwloc_inline void
+hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset)
+{
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	hwloc_obj_t obj;
+	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN )
+		return;
+	hwloc_bitmap_zero(nodeset);
+	obj = NULL;
+	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, cpuset, depth, obj)) != NULL)
+		hwloc_bitmap_set(nodeset, obj->os_index);
+}
+
+/** \brief Convert a NUMA node set into a CPU set and handle non-NUMA cases
+ *
+ * If the topology contains no NUMA nodes, the machine is considered
+ * as a single memory node, and the following behavior is used:
+ * If \p nodeset is empty, \p cpuset will be emptied as well.
+ * Otherwise \p cpuset will be entirely filled.
+ * This is useful for manipulating memory binding sets.
+ */
+static __hwloc_inline void
+hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset)
+{
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	hwloc_obj_t obj;
+
+	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN ) {
+		if (hwloc_bitmap_iszero(nodeset))
+			hwloc_bitmap_zero(cpuset);
+		else
+			/* Assume the whole system */
+			hwloc_bitmap_fill(cpuset);
+		return;
+	}
+
+	hwloc_bitmap_zero(cpuset);
+	obj = NULL;
+	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
+		if (hwloc_bitmap_isset(nodeset, obj->os_index))
+			hwloc_bitmap_or(cpuset, cpuset, obj->cpuset);
+	}
+}
+
+/** \brief Convert a NUMA node set into a CPU set without handling non-NUMA cases
+ *
+ * This is the strict variant of ::hwloc_cpuset_from_nodeset. It does not fix
+ * non-NUMA cases. If the topology contains some NUMA nodes, behave exactly
+ * the same. However, if the topology contains no NUMA nodes, return an empty
+ * cpuset.
+ */
+static __hwloc_inline void
+hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset)
+{
+	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+	hwloc_obj_t obj;
+	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN )
+		return;
+	hwloc_bitmap_zero(cpuset);
+	obj = NULL;
+	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
+		if (hwloc_bitmap_isset(nodeset, obj->os_index))
+			hwloc_bitmap_or(cpuset, cpuset, obj->cpuset);
+}
+
+/** @} */
+
+
+
+/* TODO: add helper which changes the current memory policy and allocates bound
+ * memory, to maximize chances to get something bound at the expense of
+ * changing the current memory policy.  */
+
 
 
 #ifdef __cplusplus
