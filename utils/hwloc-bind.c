@@ -168,8 +168,7 @@ int main(int argc, char *argv[])
   }
 
   if (get_binding) {
-    hwloc_membind_policy_t policy;
-    char *s, *policystr;
+    char *s, *policystr = NULL;
     int err;
     if (cpubind) {
       if (pid)
@@ -186,6 +185,7 @@ int main(int argc, char *argv[])
       else
 	hwloc_bitmap_asprintf(&s, cpubind_set);
     } else {
+      hwloc_membind_policy_t policy;
       if (pid)
 	err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, 0);
       else
@@ -199,17 +199,20 @@ int main(int argc, char *argv[])
 	hwloc_bitmap_taskset_asprintf(&s, membind_set);
       else
 	hwloc_bitmap_asprintf(&s, membind_set);
+      switch (policy) {
+      case HWLOC_MEMBIND_DEFAULT: policystr = "default"; break;
+      case HWLOC_MEMBIND_FIRSTTOUCH: policystr = "firsttouch"; break;
+      case HWLOC_MEMBIND_BIND: policystr = "bind"; break;
+      case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
+      case HWLOC_MEMBIND_REPLICATE: policystr = "replicate"; break;
+      case HWLOC_MEMBIND_NEXTTOUCH: policystr = "nexttouch"; break;
+      default: fprintf(stderr, "unknown memory policy %d\n", policy); assert(0); break;
+      }
     }
-    switch (policy) {
-    case HWLOC_MEMBIND_DEFAULT: policystr = "default"; break;
-    case HWLOC_MEMBIND_FIRSTTOUCH: policystr = "firsttouch"; break;
-    case HWLOC_MEMBIND_BIND: policystr = "bind"; break;
-    case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
-    case HWLOC_MEMBIND_REPLICATE: policystr = "replicate"; break;
-    case HWLOC_MEMBIND_NEXTTOUCH: policystr = "nexttouch"; break;
-    default: fprintf(stderr, "unknown memory policy %d\n", policy); assert(0); break;
-    }
-    printf("%s (%s)\n", s, policystr);
+    if (policystr)
+      printf("%s (%s)\n", s, policystr);
+    else
+      printf("%s\n", s);
     free(s);
     return EXIT_SUCCESS;
   }
