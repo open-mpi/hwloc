@@ -258,6 +258,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_membind_flags_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_membind_policy_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_alloc.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_alloc_full.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_free.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_dup.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_copy.3 \
