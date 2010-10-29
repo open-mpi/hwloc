@@ -67,7 +67,7 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
   if (!set)
     return NULL;
 
-  set->ulongs_count = 1;
+  set->ulongs_count = 0;
   set->ulongs_allocated = 64/sizeof(unsigned long);
   set->ulongs = malloc(64);
   if (!set->ulongs) {
@@ -75,7 +75,6 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
     return NULL;
   }
 
-  set->ulongs[0] = HWLOC_SUBBITMAP_ZERO;
   set->infinite = 0;
 #ifdef HWLOC_DEBUG
   set->magic = HWLOC_BITMAP_MAGIC;
@@ -223,6 +222,13 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
       res = size>0 ? size - 1 : 0;
     tmp += res;
     size -= res;
+  }
+
+  if (!set->infinite && !set->ulongs_count) {
+    res = hwloc_snprintf(tmp, size, "0x0");
+    if (res < 0)
+      return -1;
+    return res;
   }
 
   i=set->ulongs_count-1;
@@ -465,7 +471,7 @@ void hwloc_bitmap_zero(struct hwloc_bitmap_s * set)
 {
 	HWLOC__BITMAP_CHECK(set);
 
-	hwloc_bitmap_reset_by_ulongs(set, 1);
+	hwloc_bitmap_reset_by_ulongs(set, 0);
 	hwloc_bitmap__zero(set);
 }
 
@@ -481,7 +487,7 @@ void hwloc_bitmap_fill(struct hwloc_bitmap_s * set)
 {
 	HWLOC__BITMAP_CHECK(set);
 
-	hwloc_bitmap_reset_by_ulongs(set, 1);
+	hwloc_bitmap_reset_by_ulongs(set, 0);
 	hwloc_bitmap__fill(set);
 }
 
