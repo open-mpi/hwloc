@@ -82,6 +82,14 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
   return set;
 }
 
+struct hwloc_bitmap_s * hwloc_bitmap_alloc_full(void)
+{
+  struct hwloc_bitmap_s * set = hwloc_bitmap_alloc();
+  if (set)
+    set->infinite = 1;
+  return set;
+}
+
 void hwloc_bitmap_free(struct hwloc_bitmap_s * set)
 {
   if (!set)

@@ -1393,20 +1393,13 @@ static int dontfree_membind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
 static void alloc_cpusets(hwloc_obj_t obj)
 {
-  obj->cpuset = hwloc_bitmap_alloc();
+  obj->cpuset = hwloc_bitmap_alloc_full();
   obj->complete_cpuset = hwloc_bitmap_alloc();
-  obj->online_cpuset = hwloc_bitmap_alloc();
-  obj->allowed_cpuset = hwloc_bitmap_alloc();
+  obj->online_cpuset = hwloc_bitmap_alloc_full();
+  obj->allowed_cpuset = hwloc_bitmap_alloc_full();
   obj->nodeset = hwloc_bitmap_alloc();
   obj->complete_nodeset = hwloc_bitmap_alloc();
-  obj->allowed_nodeset = hwloc_bitmap_alloc();
-  hwloc_bitmap_fill(obj->cpuset);
-  hwloc_bitmap_zero(obj->complete_cpuset);
-  hwloc_bitmap_fill(obj->online_cpuset);
-  hwloc_bitmap_fill(obj->allowed_cpuset);
-  hwloc_bitmap_zero(obj->nodeset);
-  hwloc_bitmap_zero(obj->complete_nodeset);
-  hwloc_bitmap_fill(obj->allowed_nodeset);
+  obj->allowed_nodeset = hwloc_bitmap_alloc_full();
 }
 
 /* Main discovery loop */

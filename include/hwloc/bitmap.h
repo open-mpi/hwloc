@@ -49,6 +49,9 @@ typedef const struct hwloc_bitmap_s * hwloc_const_bitmap_t;
  * hwloc_bitmap_free(). */
 HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_alloc(void) __hwloc_attribute_malloc;
 
+/** \brief Allocate a new full bitmap. */
+HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_alloc_full(void) __hwloc_attribute_malloc;
+
 /** \brief Free bitmap \p bitmap */
 HWLOC_DECLSPEC void hwloc_bitmap_free(hwloc_bitmap_t bitmap);
 
