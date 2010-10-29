@@ -36,6 +36,11 @@ hwloc_fix_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t set)
     return NULL;
   }
 
+  if (hwloc_bitmap_iszero(set)) {
+    errno = EINVAL;
+    return NULL;
+  }
+
   if (!hwloc_bitmap_isincluded(set, complete_set)) {
     errno = EINVAL;
     return NULL;
@@ -160,6 +165,11 @@ hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
     return NULL;
   }
 
+  if (hwloc_bitmap_iszero(nodeset)) {
+    errno = EINVAL;
+    return NULL;
+  }
+
   if (!hwloc_bitmap_isincluded(nodeset, complete_nodeset)) {
     errno = EINVAL;
     return NULL;
@@ -188,6 +198,11 @@ hwloc_fix_membind_cpuset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwl
   if (!complete_nodeset) {
     /* There is no NUMA node */
     errno = ENODEV;
+    return -1;
+  }
+
+  if (hwloc_bitmap_iszero(cpuset)) {
+    errno = EINVAL;
     return -1;
   }
 
