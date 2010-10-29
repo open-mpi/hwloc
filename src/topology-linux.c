@@ -926,9 +926,16 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
     goto out;
 
   if (flags & HWLOC_MEMBIND_MIGRATE) {
+#ifdef MPOL_MF_MOVE
     linuxflags = MPOL_MF_MOVE;
     if (flags & HWLOC_MEMBIND_STRICT)
       linuxflags |= MPOL_MF_STRICT;
+#else
+    if (flags & HWLOC_MEMBIND_STRICT) {
+      errno = ENOSYS;
+      goto out_with_mask;
+    }
+#endif
   }
 
   err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
@@ -2659,6 +2666,8 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;
   topology->support.membind->interleave_membind = 1;
-  topology->support.membind->migrate_membind = 1;
 #endif /* HWLOC_HAVE_MBIND */
+#if (defined HWLOC_HAVE_MIGRATE_PAGES) || ((defined HWLOC_HAVE_MBIND) && (defined MPOL_MF_MOVE))
+  topology->support.membind->migrate_membind = 1;
+#endif
 }
