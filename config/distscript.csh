@@ -104,8 +104,8 @@ endif
 if ($vpath == 1 && ! -d $srcdir/doc/doxygen-doc) then
     echo "*** This is a VPATH 'make dist', but the srcdir does not already"
     echo "*** have a doxygen-doc tree built.  hwloc's config/distscript.csh"
-    echo "*** the docs to be built in the srcdir before executing 'make"
-    echo "*** dist' in a VPATH build."
+    echo "*** requores the docs to be built in the srcdir before executing"
+    echo "*** 'make dist' in a VPATH build."
     exit 1
 endif
 

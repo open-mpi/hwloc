@@ -94,8 +94,14 @@ EOF
     AC_ARG_VAR([FIG2DEV], [Location of the fig2dev program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([FIG2DEV], [fig2dev])
     
+    AC_ARG_VAR([GS], [Location of the gs program (required for building the hwloc doxygen documentation)])
+    AC_PATH_TOOL([GS], [gs])
+
+    AC_ARG_VAR([EPSTOPDF], [Location of the epstopdf program (required for building the hwloc doxygen documentation)])
+    AC_PATH_TOOL([EPSTOPDF], [epstopdf])
+
     AC_MSG_CHECKING([if can build doxygen docs])
-    AS_IF([test "x$DOXYGEN" != "x" -a "x$PDFLATEX" != "x" -a "x$MAKEINDEX" != "x" -a "x$FIG2DEV" != "x"],
+    AS_IF([test "x$DOXYGEN" != "x" -a "x$PDFLATEX" != "x" -a "x$MAKEINDEX" != "x" -a "x$FIG2DEV" != "x" -a "x$GS" != "x" -a "x$EPSTOPDF" != "x"],
                  [hwloc_generate_doxs=yes], [hwloc_generate_doxs=no])
     AC_MSG_RESULT([$hwloc_generate_doxs])
     

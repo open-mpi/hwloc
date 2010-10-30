@@ -18,9 +18,12 @@ Notes to developers:
   flavor of "make dist" will fail if these tools are not available):
 
   - doxygen with man, pdf and html support
-  - help2man
-  - fig2dev
-  - w3m
+  - a latex distribution with pdflatex, and the usually recommended
+    package files (such as float.sty) and fonts (such as ptmr8t)
+  - fig2dev (transfig package)
+  - gs (ghostscript package)
+  - epstopdf
+  - w3m or lynx (to generate the README)
 
 - *** BEFORE MAKING AN OFFICIAL RELEASE TARBALL: the release manager
   MUST update the VERSION file:
