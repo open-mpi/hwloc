@@ -700,8 +700,8 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
 /* \brief Get complete node set
  *
  * \return the complete node set of memory of the system. If the
- * topology is the result of a combination of several systems, or if it
- * contains no NUMA memory nodes, NULL is returned;
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
@@ -717,7 +717,7 @@ hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
  * \return the node set of memory of the system for which hwloc
  * provides topology information. This is equivalent to the nodeset of the
  * system object. If the topology is the result of a combination of several
- * systems, or if it contains no NUMA memory nodes, NULL is returned.
+ * systems, NULL is returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
@@ -731,8 +731,8 @@ hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
 /** \brief Get allowed node set
  *
  * \return the node set of allowed memory of the system. If the
- * topology is the result of a combination of several systems, or if it
- * contains no NUMA memory nodes, NULL is returned.
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed, hwloc_nodeset_dup must be used to obtain a local copy.

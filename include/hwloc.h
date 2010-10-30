@@ -305,8 +305,9 @@ struct hwloc_obj {
                                           * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
                                           * these nodes may not be allowed for allocation, see allowed_nodeset.
                                           *
-					  * If the machine contains no NUMA memory node, \p nodeset is \c NULL.
-					  *
+                                          * If there are no NUMA nodes in the machine, all the memory is close to this
+                                          * object, so \p nodeset is full.
+                                          *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,
@@ -318,8 +319,9 @@ struct hwloc_obj {
                                           * precise position is undefined. It is however known that it would be
                                           * somewhere under this object.
                                           *
-					  * If the machine contains no NUMA memory node, \p complete_nodeset is \c NULL.
-					  *
+                                          * If there are no NUMA nodes in the machine, all the memory is close to this
+                                          * object, so \p complete_nodeset is full.
+                                          *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t allowed_nodeset;      /**< \brief The set of allowed NUMA memory nodes
@@ -329,8 +331,9 @@ struct hwloc_obj {
                                           * memory allocation should not return permission errors. This is usually
                                           * restricted by administration rules.
                                           *
-					  * If the machine contains no NUMA memory node, \p allowed_nodeset is \c NULL.
-					  *
+                                          * If there are no NUMA nodes in the machine, all the memory is close to this
+                                          * object, so \p allowed_nodeset is full.
+                                          *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
 

@@ -459,17 +459,17 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     xmlNewProp(node, BAD_CAST "allowed_cpuset", BAD_CAST cpuset);
     free(cpuset);
   }
-  if (obj->nodeset) {
+  if (obj->nodeset && !hwloc_bitmap_isfull(obj->nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
     xmlNewProp(node, BAD_CAST "nodeset", BAD_CAST cpuset);
     free(cpuset);
   }
-  if (obj->complete_nodeset) {
+  if (obj->complete_nodeset && !hwloc_bitmap_isfull(obj->complete_nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->complete_nodeset);
     xmlNewProp(node, BAD_CAST "complete_nodeset", BAD_CAST cpuset);
     free(cpuset);
   }
-  if (obj->allowed_nodeset) {
+  if (obj->allowed_nodeset && !hwloc_bitmap_isfull(obj->allowed_nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->allowed_nodeset);
     xmlNewProp(node, BAD_CAST "allowed_nodeset", BAD_CAST cpuset);
     free(cpuset);

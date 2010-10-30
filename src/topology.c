@@ -996,6 +996,39 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     propagate_unused_cpuset(child, sys);
 }
 
+/* Force full nodeset for non-NUMA machines */
+static void
+add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
+{
+  hwloc_obj_t child, *temp;
+
+  if (parent_has_sets || obj->cpuset) {
+    /* if the parent has non-NULL sets, or if the object has non-NULL cpusets,
+     * it must have non-NULL nodesets
+     */
+    assert(obj->cpuset);
+    assert(obj->online_cpuset);
+    assert(obj->complete_cpuset);
+    assert(obj->allowed_cpuset);
+    if (!obj->nodeset)
+      obj->nodeset = hwloc_bitmap_alloc_full();
+    if (!obj->complete_nodeset)
+      obj->complete_nodeset = hwloc_bitmap_alloc_full();
+    if (!obj->allowed_nodeset)
+      obj->allowed_nodeset = hwloc_bitmap_alloc_full();
+  } else {
+    /* parent has no sets and object has NULL cpusets,
+     * it must have NULL nodesets
+     */
+    assert(!obj->nodeset);
+    assert(!obj->complete_nodeset);
+    assert(!obj->allowed_nodeset);
+  }
+
+  for_each_child_safe(child, obj, temp)
+    add_default_object_sets(child, obj->cpuset != NULL);
+}
+
 /* Propagate nodesets up and down */
 static void
 propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
@@ -1579,6 +1612,9 @@ hwloc_discover(struct hwloc_topology *topology)
   merge_useless_child(topology, &topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
+
+  hwloc_debug("%s", "\nAdd default object sets\n");
+  add_default_object_sets(topology->levels[0][0], 0);
 
   hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
 
