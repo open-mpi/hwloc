@@ -12,6 +12,7 @@
 #define HWLOC_BITMAP_H
 
 #include <hwloc/config.h>
+#include <assert.h>
 
 
 #ifdef __cplusplus
@@ -208,10 +209,11 @@ HWLOC_DECLSPEC int hwloc_bitmap_weight(hwloc_const_bitmap_t bitmap) __hwloc_attr
  * indexes that in the bitmap.  To be specific: each iteration will return a
  * value for \p index such that hwloc_bitmap_isset(bitmap, index) is true.
  *
- * The loop is infinite if the bitmap is infinite.
+ * The assert prevents the loop from being infinite if the bitmap is infinite.
  */
 #define hwloc_bitmap_foreach_begin(index, bitmap) \
 do { \
+        assert(hwloc_bitmap_weight(bitmap) != -1); \
         for (index = hwloc_bitmap_first(bitmap); \
              (unsigned) index != (unsigned) -1; \
              index = hwloc_bitmap_next(bitmap, index)) { \
