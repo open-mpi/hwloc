@@ -1,5 +1,6 @@
-# Copyright 2009      INRIA, Université Bordeaux 1
-# Copyright 2009-2010 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2010 INRIA
+# Copyright © 2009-2010 Université Bordeaux 1
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 # Only install the headers if we're in standalone mode (meaning:
 # *don't* install the headers if we're in embedded mode).

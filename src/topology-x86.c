@@ -1,5 +1,6 @@
 /*
- * Copyright © 2010 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2010 INRIA
+ * Copyright © 2010 Université Bordeaux 1
  * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
  *
  * See COPYING in top-level directory.

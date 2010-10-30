@@ -1,6 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright 2009 INRIA, Université Bordeaux 1
+dnl Copyright (c) 2009 INRIA
+dnl Copyright (c) 2009 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -8,6 +9,7 @@ dnl Copyright (c) 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
 dnl                         University of Stuttgart.  All rights reserved.
+dnl Copyright ©  2010 INRIA
 dnl Copyright ©  2006-2010 Cisco Systems, Inc.  All rights reserved.
 
 #-----------------------------------------------------------------------

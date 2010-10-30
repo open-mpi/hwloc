@@ -1,5 +1,6 @@
 /*
- * Copyright © 2010 INRIA, Université Bordeaux 1
+ * Copyright © 2010 INRIA
+ * Copyright © 2010 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
