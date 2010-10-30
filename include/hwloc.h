@@ -302,6 +302,8 @@ struct hwloc_obj {
                                           * contained in this object or containing it and known how (the children path
                                           * between this object and the NODE objects).
                                           *
+                                          * In the end, these nodes are those that are close to the current object.
+                                          *
                                           * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
                                           * these nodes may not be allowed for allocation, see allowed_nodeset.
                                           *
