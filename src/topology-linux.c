@@ -2182,7 +2182,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
       struct hwloc_obj *socket, *core, *thread;
-      hwloc_bitmap_t socketset, coreset, threadset;
+      hwloc_bitmap_t socketset, coreset, threadset, savedcoreset;
       unsigned mysocketid, mycoreid;
 
       /* look at the socket */
@@ -2216,6 +2216,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
         hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
                      mycoreid, coreset);
         hwloc_insert_object_by_cpuset(topology, core);
+        savedcoreset = coreset; /* store it for later work-arounds */
         coreset = NULL; /* don't free it */
       }
       hwloc_bitmap_free(coreset);
@@ -2291,8 +2292,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
         if (cacheset) {
           if (hwloc_bitmap_weight(cacheset) < 1)
-            /* mask is wrong (happens on ia64), assumes it's not shared */
-            hwloc_bitmap_only(cacheset, i);
+            /* mask is wrong, assume it's a core-specific cache (useful for many itaniums) */
+            hwloc_bitmap_copy(cacheset, savedcoreset);
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
