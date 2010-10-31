@@ -14,6 +14,11 @@ name="$1"; shift
 
 destdir=`mktemp -d`
 
+error()
+{
+    echo $@ 2>&1
+}
+
 # Get all files from the given path (either a file or a directory)
 # ignore errors since some files may be missing, and some may be
 # Restricted to root (but we don't need them).
