@@ -9,10 +9,18 @@
 #
 
 abs_top_builddir="@abs_top_builddir@"
-lstopo="$abs_top_builddir/utils/lstopo"
+prefix="@prefix@"
+build_lstopo="$abs_top_builddir/utils/lstopo"
+install_lstopo="$prefix/bin/lstopo"
+
 
 name="$1"; shift
-[ -z "$name" ] && echo "Save name needed as an argument" && exit -1
+if [ -z "$name" ] ; then
+  echo "$0 <name>"
+  echo "  Saves the Linux topology files under ./<name>.tar.bz2"
+  echo "  and the corresponding lstopo output under ./<name>.output"
+  exit -1
+fi
 
 destdir=`mktemp -d`
 
@@ -53,9 +61,11 @@ mv "$destdir/$name.tar.bz2" "./$name.tar.bz2"
 echo "Hierarchy gathered in ./$name.tar.bz2 and kept in $destdir/$name/"
 
 # Generate the output as well
+[ -x "$install_lstopo" ] && lstopo="$install_lstopo"
+[ -x "$build_lstopo" ] && lstopo="$build_lstopo"
 if [ ! -x "$lstopo" ]
 then
-    error "Could not find executable file \`$lstopo'."
+    error "Could not find lstopo executable in the install or build dir."
     exit 1
 fi
 # we need "Topology not from this system" in the output so as to make test-topology.sh happy
