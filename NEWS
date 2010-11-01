@@ -61,6 +61,7 @@ Version 1.1.0
   + Add --among in hwloc-distrib.
   + Add taskset-specific functions and command-line tools options to
     manipulate CPU set strings in the format of the taskset program.
+  + Install hwloc-gather-topology.sh on Linux.
 
 
 Version 1.0.2
