@@ -1553,8 +1553,10 @@ hwloc_discover(struct hwloc_topology *topology)
 
 
 #    ifndef HWLOC_LINUX_SYS
-    /* gather uname info, except for Linux, which does it internally depending on load options */
-    hwloc_add_uname_info(topology);
+    if (topology->is_thissystem) {
+      /* gather uname info, except for Linux, which does it internally depending on load options */
+      hwloc_add_uname_info(topology);
+    }
 #    endif
   }
 
