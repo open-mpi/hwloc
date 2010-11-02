@@ -303,7 +303,7 @@ EOF
         AC_CHECK_LIB([cuda], [cuInit],
 		     [AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
 		      hwloc_have_cuda=yes])],
-       [AC_MSG_RESULT(no)])
+       [AC_MSG_RESULT(no)])])
 
     AC_CHECK_HEADERS([cuda_runtime_api.h], [
       AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
@@ -330,7 +330,7 @@ EOF
 
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(
-        hwloc_config_prefix[tests/Makefile ]
+        hwloc_config_prefix[tests/Makefile]
         hwloc_config_prefix[tests/linux/Makefile]
         hwloc_config_prefix[tests/linux/gather/Makefile]
         hwloc_config_prefix[tests/xml/Makefile]
@@ -361,6 +361,4 @@ EOF
 	hwloc_config_prefix[tests/ports/topology-freebsd.c]:hwloc_config_prefix[src/topology-freebsd.c]
 	hwloc_config_prefix[tests/ports/topology-hpux.c]:hwloc_config_prefix[src/topology-hpux.c])
     ])
-
-	echo done setting up tests
 ])dnl
