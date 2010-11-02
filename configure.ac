@@ -41,6 +41,8 @@ m4_ifdef([LT_PREREQ], [],
 	 [m4_fatal([libtool version 2.2.6 or higher is required], [63])])
 LT_PREREQ([2.2.6])
 
+AC_LANG([C])
+
 # Make configure depend on the VERSION file, since it's used in AC_INIT
 AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
 
