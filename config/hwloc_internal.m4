@@ -282,51 +282,43 @@ EOF
 
     AC_CHECK_HEADERS([myriexpress.h], [
       AC_MSG_CHECKING(if MX_NUMA_NODE exists)
-      AC_COMPILE_IFELSE([
-#include <myriexpress.h>
-int main() {
-  int a = MX_NUMA_NODE;
-}
-      ], [
-	AC_MSG_RESULT(yes)
-	AC_CHECK_LIB([myriexpress], [mx_get_info],
-		     [AC_DEFINE([HAVE_MYRIEXPRESS], 1, [Define to 1 if we have -lmyriexpress])
-		      hwloc_have_myriexpress=yes])
-      ], [AC_MSG_RESULT(no)])
-    ])
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <myriexpress.h>]],
+                                         [[int a = MX_NUMA_NODE;]],
+                        [AC_MSG_RESULT(yes)
+                         AC_CHECK_LIB([myriexpress], [mx_get_info],
+                                      [AC_DEFINE([HAVE_MYRIEXPRESS], 1, [Define to 1 if we have -lmyriexpress])
+                                       hwloc_have_myriexpress=yes])],
+                        [AC_MSG_RESULT(no)])])])
 
     AC_CHECK_HEADERS([cuda.h], [
       AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
-      AC_COMPILE_IFELSE([
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <cuda.h>
 #ifndef CUDA_VERSION
 #error CUDA_VERSION undefined
 #elif CUDA_VERSION < 3020
 #error CUDA_VERSION too old
-#endif
-      ], [
-        AC_MSG_RESULT(yes)
+#endif]], [[int i = 3;]])],
+       [AC_MSG_RESULT(yes)
         AC_CHECK_LIB([cuda], [cuInit],
 		     [AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
-		      hwloc_have_cuda=yes])
-      ], [AC_MSG_RESULT(no)])
-    ])
+		      hwloc_have_cuda=yes])],
+       [AC_MSG_RESULT(no)])])
+
     AC_CHECK_HEADERS([cuda_runtime_api.h], [
       AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
-      AC_COMPILE_IFELSE([
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <cuda_runtime_api.h>
 #ifndef CUDART_VERSION
 #error CUDART_VERSION undefined
 #elif CUDART_VERSION < 3020
 #error CUDART_VERSION too old
-#endif
-      ], [
-        AC_MSG_RESULT(yes)
+#endif]], [[int i = 3;]])],
+       [AC_MSG_RESULT(yes)
         AC_CHECK_LIB([cudart], [cudaGetDeviceCount],
 		     [AC_DEFINE([HAVE_CUDART], 1, [Define to 1 if we have -lcudart])
-		      hwloc_have_cudart=yes])
-      ], [AC_MSG_RESULT(no)])
-    ])
+		      hwloc_have_cudart=yes])],
+       [AC_MSG_RESULT(no)])])
 
     if test "x$enable_xml" != "xno"; then
         AC_CHECK_PROGS(XMLLINT, [xmllint])
@@ -338,7 +330,7 @@ int main() {
 
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(
-        hwloc_config_prefix[tests/Makefile ]
+        hwloc_config_prefix[tests/Makefile]
         hwloc_config_prefix[tests/linux/Makefile]
         hwloc_config_prefix[tests/linux/gather/Makefile]
         hwloc_config_prefix[tests/xml/Makefile]
@@ -369,6 +361,4 @@ int main() {
 	hwloc_config_prefix[tests/ports/topology-freebsd.c]:hwloc_config_prefix[src/topology-freebsd.c]
 	hwloc_config_prefix[tests/ports/topology-hpux.c]:hwloc_config_prefix[src/topology-hpux.c])
     ])
-
-	echo done setting up tests
 ])dnl
