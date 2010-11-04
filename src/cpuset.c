@@ -6,6 +6,14 @@
  * See COPYING in top-level directory.
  */
 
+/* cpuset.h converts from the old cpuset API to the new bitmap API, we don't want it here */
+#ifndef HWLOC_CPUSET_H
+/* make sure cpuset.h will not be automatically included here */
+#define HWLOC_CPUSET_H 1
+#else
+#error Do not include cpuset.h in cpuset.c
+#endif
+
 #include <private/config.h>
 #include <private/misc.h>
 #include <private/private.h>
@@ -996,11 +1004,6 @@ int hwloc_bitmap_weight(const struct hwloc_bitmap_s * set)
 /********************************************************************
  * everything below should be dropped when hwloc/cpuset.h is dropped
  */
-
-#ifdef HWLOC_CPUSET_H
-/* cpuset.h converts from the old cpuset API to the new bitmap API, we don't want it here */
-#error Do not include cpuset.h in cpuset.c
-#endif
 
 /* for HWLOC_DECLSPEC */
 #include <hwloc/config.h>
