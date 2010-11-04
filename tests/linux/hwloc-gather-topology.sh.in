@@ -15,6 +15,11 @@ bindir="@bindir@"
 # this will be changed into $bindir/lstopo during make install
 lstopo="$abs_top_builddir/utils/lstopo"
 
+error()
+{
+    echo $@ 2>&1
+}
+
 name="$1"; shift
 if [ -z "$name" ] ; then
   echo "$0 <savepath>"
@@ -24,14 +29,13 @@ if [ -z "$name" ] ; then
 fi
 basename=`basename "$name"`
 dirname=`dirname "$name"`
-mkdir -p "$dirname"
+
+if ! mkdir -p "$dirname" ; then
+    error "Failed to create directory $dirname."
+    exit 1
+fi
 
 destdir=`mktemp -d`
-
-error()
-{
-    echo $@ 2>&1
-}
 
 # Get all files from the given path (either a file or a directory)
 # ignore errors since some files may be missing, and some may be
