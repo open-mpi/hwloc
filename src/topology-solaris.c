@@ -25,6 +25,9 @@
 #endif
 
 /* TODO: use psets? (only for root)
+ * TODO: get cache info from prtdiag? (it is setgid sys to be able to read from
+ * crw-r-----   1 root     sys       88,  0 nov   3 14:35 /devices/pseudo/devinfo@0:devinfo
+ * and run (apparently undocumented) ioctls on it.
  */
 
 static int
