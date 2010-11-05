@@ -2196,7 +2196,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
       struct hwloc_obj *socket, *core, *thread;
-      hwloc_bitmap_t socketset, coreset, threadset, savedcoreset = NULL;
+      hwloc_bitmap_t socketset, coreset, threadset, savedcoreset;
       unsigned mysocketid, mycoreid;
 
       /* look at the socket */
@@ -2224,16 +2224,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
+      savedcoreset = coreset; /* store it for later work-arounds */
       if (coreset && hwloc_bitmap_first(coreset) == i) {
         core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
         core->cpuset = coreset;
         hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
                      mycoreid, coreset);
         hwloc_insert_object_by_cpuset(topology, core);
-        savedcoreset = coreset; /* store it for later work-arounds */
         coreset = NULL; /* don't free it */
       }
-      hwloc_bitmap_free(coreset);
 
       /* look at the thread */
       threadset = hwloc_bitmap_alloc();
@@ -2331,6 +2330,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
         }
         hwloc_bitmap_free(cacheset);
       }
+      hwloc_bitmap_free(coreset);
     }
   hwloc_bitmap_foreach_end();
 
