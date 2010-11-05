@@ -15,7 +15,7 @@
 int main(void)
 {
   hwloc_bitmap_t set;
-  int i, cpu, expected_cpu;
+  int i, cpu, expected_cpu = 0;
 
   /* empty set */
   set = hwloc_bitmap_alloc();
