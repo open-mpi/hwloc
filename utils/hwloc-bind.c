@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
       case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
       case HWLOC_MEMBIND_REPLICATE: policystr = "replicate"; break;
       case HWLOC_MEMBIND_NEXTTOUCH: policystr = "nexttouch"; break;
-      default: fprintf(stderr, "unknown memory policy %d\n", policy); assert(0); break;
+      default: fprintf(stderr, "unknown memory policy %u\n", policy); assert(0); break;
       }
     }
     if (policystr)
