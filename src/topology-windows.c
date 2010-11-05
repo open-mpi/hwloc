@@ -233,7 +233,7 @@ hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size
   if ((flags & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))
              == (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
     errno = ENOSYS;
-    return -1;
+    return NULL;
   }
 
   switch (policy) {
@@ -242,7 +242,7 @@ hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size
       break;
     default:
       errno = ENOSYS;
-      return -1;
+      return NULL;
   }
 
   if (hwloc_bitmap_weight(nodeset) != 1) {
