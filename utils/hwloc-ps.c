@@ -113,8 +113,8 @@ int main(int argc, char *argv[])
         if (n <= 0)
           /* Ignore kernel threads and errors */
           continue;
+        name[n] = 0;
       }
-      name[n] = 0;
     }
 #endif /* HWLOC_LINUX_SYS */
 
