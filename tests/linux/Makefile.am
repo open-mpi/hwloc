@@ -101,13 +101,11 @@ sysfs_options = \
 		16em64t-4s2c2t.xml.options
 
 if HWLOC_BUILD_TESTS
-if HWLOC_HAVE_LINUX
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
 TESTS = $(sysfs_outputs)
 endif HWLOC_HAVE_BUNZIPP
 endif HWLOC_HAVE_OPENAT
-endif HWLOC_HAVE_LINUX
 endif HWLOC_BUILD_TESTS
 
 EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options)
