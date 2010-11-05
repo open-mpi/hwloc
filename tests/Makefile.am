@@ -6,7 +6,11 @@ AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-SUBDIRS = linux ports xml
+SUBDIRS = ports xml
+
+if HWLOC_HAVE_LINUX
+SUBDIRS += linux
+endif
 
 LDADD =
 
