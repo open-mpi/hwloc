@@ -10,7 +10,9 @@
 #include <private/misc.h>
 
 #include <stdarg.h>
+#ifdef HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -69,8 +71,9 @@ int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n)
   return i < n;
 }
 
-void hwloc_add_uname_info(struct hwloc_topology *topology)
+void hwloc_add_uname_info(struct hwloc_topology *topology __hwloc_attribute_unused)
 {
+#ifdef HAVE_UNAME
   struct utsname utsname;
 
   if (uname(&utsname) < 0)
@@ -81,4 +84,5 @@ void hwloc_add_uname_info(struct hwloc_topology *topology)
   hwloc_add_object_info(topology->levels[0][0], "OSVersion", utsname.version);
   hwloc_add_object_info(topology->levels[0][0], "HostName", utsname.nodename);
   hwloc_add_object_info(topology->levels[0][0], "Architecture", utsname.machine);
+#endif /* HAVE_UNAME */
 }

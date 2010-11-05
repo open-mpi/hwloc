@@ -503,6 +503,9 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     AC_CHECK_HEADERS([malloc.h])
     AC_CHECK_FUNCS([getpagesize memalign posix_memalign])
 
+    AC_CHECK_HEADERS([sys/utsname.h])
+    AC_CHECK_FUNCS([uname])
+
     # set_mempolicy and mbind support   
     AC_CHECK_HEADERS([numaif.h], [
       AC_CHECK_LIB([numa], [set_mempolicy], [
