@@ -1542,6 +1542,8 @@ hwloc_parse_meminfo_info(struct hwloc_topology *topology,
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
       unsigned long long number;
+      if (strlen(string) < prefixlength)
+        continue;
       if (sscanf(string+prefixlength, "MemTotal: %llu kB", (unsigned long long *) &number) == 1) {
 	*local_memory = number << 10;
 	if (onlytotal)
