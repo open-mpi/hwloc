@@ -1601,7 +1601,7 @@ static void
 hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology, unsigned long node, struct hwloc_obj_memory_s *memory)
 {
   char path[128];
-  uint64_t meminfo_hugepages_count, meminfo_hugepages_size;
+  uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
 
   if (topology->is_thissystem) {
     memory->page_types_len = 2;
@@ -1622,9 +1622,13 @@ hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology, unsigned 
 
   if (memory->page_types) {
     uint64_t remaining_local_memory = memory->local_memory;
-    memory->page_types[1].size = meminfo_hugepages_size;
-    memory->page_types[1].count = meminfo_hugepages_count;
-    remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+    if (meminfo_hugepages_size) {
+      memory->page_types[1].size = meminfo_hugepages_size;
+      memory->page_types[1].count = meminfo_hugepages_count;
+      remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+    } else {
+      memory->page_types_len = 1;
+    }
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
 }
@@ -1632,7 +1636,7 @@ hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology, unsigned 
 static void
 hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_memory_s *memory)
 {
-  uint64_t meminfo_hugepages_count, meminfo_hugepages_size;
+  uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
   struct stat st;
   int has_sysfs_hugepages = 0;
   int types = 2;
@@ -1667,9 +1671,13 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
       hwloc_parse_hugepages_info(topology, "/sys/kernel/mm/hugepages", memory, &remaining_local_memory);
     } else {
       /* use what we found in meminfo */
-      memory->page_types[1].size = meminfo_hugepages_size;
-      memory->page_types[1].count = meminfo_hugepages_count;
-      remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+      if (meminfo_hugepages_size) {
+        memory->page_types[1].size = meminfo_hugepages_size;
+        memory->page_types[1].count = meminfo_hugepages_count;
+        remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+      } else {
+        memory->page_types_len = 1;
+      }
     }
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
@@ -1717,9 +1725,13 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
     } else {
       /* use what we found in meminfo */
       /* hwloc_get_procfs_meminfo_info must have been called earlier */
-      memory->page_types[1].count = meminfo_hugepages_count;
-      memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
-      remaining_local_memory -= meminfo_hugepages_count * memory->page_types[1].size;
+      if (meminfo_hugepages_size) {
+        memory->page_types[1].count = meminfo_hugepages_count;
+        memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
+        remaining_local_memory -= meminfo_hugepages_count * memory->page_types[1].size;
+      } else {
+        memory->page_types_len = 1;
+      }
     }
     /* update what's remaining as normal pages */
     memory->page_types[0].size = getpagesize();
