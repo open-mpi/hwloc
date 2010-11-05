@@ -1833,7 +1833,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       for (index = 0; index < nbnodes; index++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
-	  unsigned int osnode = distance_indexes[index];
+	  osnode = distance_indexes[index];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
