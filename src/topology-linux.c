@@ -2196,7 +2196,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
       struct hwloc_obj *socket, *core, *thread;
-      hwloc_bitmap_t socketset, coreset, threadset, savedcoreset;
+      hwloc_bitmap_t socketset, coreset, threadset, savedcoreset = NULL;
       unsigned mysocketid, mycoreid;
 
       /* look at the socket */
@@ -2305,9 +2305,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
         if (cacheset) {
-          if (hwloc_bitmap_weight(cacheset) < 1)
-            /* mask is wrong, assume it's a core-specific cache (useful for many itaniums) */
-            hwloc_bitmap_copy(cacheset, savedcoreset);
+          if (hwloc_bitmap_weight(cacheset) < 1) {
+            /* mask is wrong (useful for many itaniums) */
+            if (savedcoreset)
+              /* assume it's a core-specific cache */
+              hwloc_bitmap_copy(cacheset, savedcoreset);
+            else
+              /* assumes it's not shared */
+              hwloc_bitmap_only(cacheset, i);
+          }
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
