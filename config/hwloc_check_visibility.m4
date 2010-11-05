@@ -67,7 +67,7 @@ AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
             [enable visibility feature of certain compilers/linkers (default: enabled)]))
 
     case ${target} in
-      *-*-aix*|*-*-mingw*|*-*-cygwin*)
+      *-*-aix*|*-*-mingw*|*-*-cygwin*|*-*-hpux*)
         enable_visibility=no
         ;;
     esac
