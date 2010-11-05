@@ -65,6 +65,13 @@ AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
     AC_ARG_ENABLE(visibility, 
         AC_HELP_STRING([--enable-visibility],
             [enable visibility feature of certain compilers/linkers (default: enabled)]))
+
+    case ${target} in
+      *-*-aix*|*-*-mingw*|*-*-cygwin*)
+        enable_visibility=no
+        ;;
+    esac
+
     if test "$enable_visibility" = "no"; then
         AC_MSG_CHECKING([$msg])
         AC_MSG_RESULT([no (disabled)]) 
