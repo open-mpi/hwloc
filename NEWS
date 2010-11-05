@@ -53,6 +53,7 @@ Version 1.1.0
   + Add Myrinet Express helper in myriexpress.h to ease interoperability.
 * Tools
   + Add hwloc-ps to list process' bindings.
+  + Add --membind and --mempolicy options to hwloc-bind.
   + Improve tools command-line options by adding a generic --input option
     (and more) which replaces the old --xml, --synthetic and --fsys-root.
   + Cleanup lstopo output configuration by adding --output-format.
