@@ -88,6 +88,8 @@ hwloc(7) directly apply to the hwloc-bind utility.
 .SH EXAMPLES
 .PP
 hwloc-bind's operation is best described through several examples.
+More details about how locations are specified on the hwloc-bind
+command line are described in hwloc(7).
 .
 .PP
 To run the echo command on the first logical processor of the second
@@ -112,7 +114,7 @@ hwloc-bind can do.
 .PP
 To run on the three first sockets on the second and third nodes:
 
-    hwloc-bind node:1-2.socket:0:3 echo hello
+    hwloc-bind node:1-2.socket:0-3 echo hello
 
 To run on processor with physical index 2 in socket with physical index 1:
 
