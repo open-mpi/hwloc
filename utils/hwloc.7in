@@ -162,13 +162,13 @@ A single, physical processing unit which may still contain multiple
 logical processors, such as hardware threads.
 .
 .TP
-.B proc
+.B pu
 Short for 
-.I processor 
+.I processor unit
 (not 
 .IR process !).  
 The smallest physical execution unit that hwloc recognizes.  For
-example, there may be multiple procs on a core (e.g.,
+example, there may be multiple PUs on a core (e.g.,
 hardware threads).
 .PP
 The additional
