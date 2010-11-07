@@ -186,7 +186,7 @@ specific type.  Indexes can be expressed either as
 .I logical
 values or
 .I physical 
-values.  Most hwloc utiities accept logical indexes by default.
+values.  Most hwloc utilities accept logical indexes by default.
 Passing
 .B --physical
 switches to physical/OS indexes.
