@@ -112,9 +112,18 @@ single-threaded application); these examples just serve to show what
 hwloc-bind can do.
 .
 .PP
-To run on the three first sockets on the second and third nodes:
+To run on the first three sockets on the second and third nodes:
 
-    hwloc-bind node:1-2.socket:0-3 echo hello
+    hwloc-bind node:1-2.socket:0:3 echo hello
+
+which is also equivalent to:
+
+    hwloc-bind node:1-2.socket:0-2 echo hello
+
+Note that if you attempt to bind to objects that do not exist,
+hwloc-bind will not warn unless 
+.I -v 
+was specified.
 
 To run on processor with physical index 2 in socket with physical index 1:
 
