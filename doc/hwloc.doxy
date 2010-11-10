@@ -583,6 +583,25 @@ the Open MPI development team as a sub-project. Both are now deprecated
 in favor of hwloc, which is distributed as an Open MPI sub-project.
 
 \htmlonly
+</div><div class="section" id="further_reading">
+\endhtmlonly
+\section further_read Further Reading
+
+The documentation chapters include
+
+<ul>
+<li> \ref termsanddefs 
+<li> \ref tools
+<li> \ref envvar
+<li> \ref interoperability
+<li> \ref threadsafety
+<li> \ref embed
+<li> \ref switchfromplpa
+</ul>
+
+Make sure to have had a look at those too!
+
+\htmlonly
 </div>
 \endhtmlonly
 
