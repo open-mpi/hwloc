@@ -230,25 +230,19 @@ static void *
 hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) {
   int node;
 
-  if ((flags & (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT))
-             == (HWLOC_MEMBIND_MIGRATE|HWLOC_MEMBIND_STRICT)) {
-    errno = ENOSYS;
-    return NULL;
-  }
-
   switch (policy) {
     case HWLOC_MEMBIND_DEFAULT:
     case HWLOC_MEMBIND_BIND:
       break;
     default:
       errno = ENOSYS;
-      return NULL;
+      return hwloc_alloc_or_fail(len, flags);
   }
 
   if (hwloc_bitmap_weight(nodeset) != 1) {
     /* Not a single node, can't do this */
     errno = EXDEV;
-    return NULL;
+    return hwloc_alloc_or_fail(len, flags);
   }
 
   node = hwloc_bitmap_first(nodeset);
