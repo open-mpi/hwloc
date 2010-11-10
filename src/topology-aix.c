@@ -388,10 +388,10 @@ hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodes
   uint_t aix_policy;
 
   if (hwloc_aix_membind_policy_from_hwloc(&aix_policy, policy))
-    return NULL;
+    return hwloc_alloc_or_fail(len, flags);
 
   if (hwloc_aix_prepare_membind(topology, &rsid.at_rset, nodeset, flags))
-    return NULL;
+    return hwloc_alloc_or_fail(len, flags);
 
   ret = ra_mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0, R_RSET, rsid, aix_policy);
 

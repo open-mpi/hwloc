@@ -583,6 +583,26 @@ the Open MPI development team as a sub-project. Both are now deprecated
 in favor of hwloc, which is distributed as an Open MPI sub-project.
 
 \htmlonly
+</div><div class="section" id="further_reading">
+\endhtmlonly
+\section further_read Further Reading
+
+The documentation chapters include
+
+<ul>
+<li> \ref termsanddefs 
+<li> \ref tools
+<li> \ref envvar
+<li> \ref cpu_mem_bind
+<li> \ref interoperability
+<li> \ref threadsafety
+<li> \ref embed
+<li> \ref switchfromplpa
+</ul>
+
+Make sure to have had a look at those too!
+
+\htmlonly
 </div>
 \endhtmlonly
 
@@ -794,6 +814,44 @@ following environment variables.
 </dl>
 
 
+
+\page cpu_mem_bind CPU Binding and Memory Binding
+
+Some OSes do not systematically provide separate functions for CPU and Memory
+binding.  This means that CPU binding functions may have have effects on the
+memory binding policy, and changing the memory binding policy may change the CPU
+binding of the current thread.  This is often not a problem for the application,
+so by default hwloc will make use of these functions when they provide better
+binding support.
+
+If the application does not want any CPU binding change when changing the
+memory policy, it needs to use the HWLOC_MEMBIND_NOCPUBIND flag to prevent
+hwloc from using OS functions which would change the CPU binding.  Conversely,
+HWLOC_CPUBIND_NOMEMBIND can be passed to cpu binding function to prevent hwloc
+form using OS functions woudl change the memory binding policy.  Of course, this
+will thus reduce hwloc's support for binding, so their use is discouraged.
+
+One can however avoid using these flags but still closely control both memory
+and CPU binding, by allocating memory and touching it, and then changing the
+CPU binding.  The already-really-allocated memory will not be migrated, thus
+even if the memory binding policy gets changed by the CPU binding order, the
+effect will have been achieved.  On binding and allocating further memory, the
+CPU binding should be performed again in case the memory binding altered the
+previously-selected CPU binding.
+
+Not all OSes support the notion of a current memory binding policy for the
+current process but those often still provide a way to allocate data on a given
+node set. Conversely, some OSes support the notion of a current memory binding
+policy, and do not permit to allocate data on a given node set without just
+changing the current policy and allocate the data. Hwloc provides functions
+that set the current memory binding policies (if supported) as well as
+functions which allocat memory bound to given node set.  By default, it
+does not use the former to achieve the latter, so that users can use both
+on OSes where they are both supported, and get both effects at the same time.
+For convenience, hwloc however also provides the hwloc_alloc_membind_policy
+and hwloc_alloc_membind_policy_nodeset helpers which are allowed to change the
+current memory binding policy of the process, in order to achieve memory binding
+even if that means having to change the current memory binding policy.
 
 \page interoperability Interoperability with other software
 

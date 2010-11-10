@@ -222,7 +222,7 @@ hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodes
   void *ptr;
 
   if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy, flags))
-    return NULL;
+    return hwloc_alloc_or_fail(len, flags);
 
   /* TODO: rather use acreate/amalloc ? */
   ptr = nmmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,

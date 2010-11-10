@@ -405,8 +405,8 @@ hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
   return ret;
 }
 
-static void *
-hwloc_allocate(size_t len)
+void *
+hwloc_alloc(size_t len)
 {
   void *p;
 #if defined(HAVE_GETPAGESIZE) && defined(HAVE_POSIX_MEMALIGN)
@@ -425,17 +425,18 @@ void *
 hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   nodeset = hwloc_fix_membind(topology, nodeset);
+  void *p;
   if (!nodeset)
-    return NULL;
+    goto fallback;
   if (flags & HWLOC_MEMBIND_MIGRATE) {
     errno = EINVAL;
-    return NULL;
+    goto fallback;
   }
 
   if (topology->alloc_membind)
     return topology->alloc_membind(topology, len, nodeset, policy, flags);
   else if (topology->set_area_membind) {
-    void *p = hwloc_allocate(len);
+    p = hwloc_alloc(len);
     if (!p)
       return NULL;
     if (topology->set_area_membind(topology, p, len, nodeset, policy, flags) && flags & HWLOC_MEMBIND_STRICT) {
@@ -445,12 +446,16 @@ hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_n
       return NULL;
     }
     return p;
-  } else if (!(flags & HWLOC_MEMBIND_STRICT)) {
-    return hwloc_allocate(len);
+  } else {
+    errno = ENOSYS;
   }
 
-  errno = ENOSYS;
-  return NULL;
+fallback:
+  if (flags & HWLOC_MEMBIND_STRICT)
+    /* Report error */
+    return NULL;
+  /* Never mind, allocate anyway */
+  return hwloc_alloc(len);
 }
 
 void *
@@ -473,9 +478,6 @@ hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len)
 {
   if (topology->free_membind)
     return topology->free_membind(topology, addr, len);
-  else if (topology->set_area_membind)
-    free(addr);
-
-  errno = ENOSYS;
-  return -1;
+  free(addr);
+  return 0;
 }

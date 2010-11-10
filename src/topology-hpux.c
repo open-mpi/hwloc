@@ -128,14 +128,14 @@ hwloc_hpux_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_
 
 #ifdef MAP_MEM_FIRST_TOUCH
 static void*
-hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags __hwloc_attribute_unused)
+hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   int mmap_flags;
 
   /* Can not give a set of nodes.  */
   if (!hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
     errno = EXDEV;
-    return NULL;
+    return hwloc_alloc_or_fail(len, flags);
   }
 
   switch (policy) {

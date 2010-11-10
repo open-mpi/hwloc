@@ -964,7 +964,7 @@ hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nod
     return NULL;
 
   err = hwloc_linux_set_area_membind(topology, buffer, len, nodeset, policy, flags);
-  if (err < 0) {
+  if (err < 0 && policy & HWLOC_MEMBIND_STRICT) {
     munmap(buffer, len);
     return NULL;
   }
