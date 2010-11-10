@@ -1026,11 +1026,13 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * possible, is
  *
  * \code
- * hwloc_alloc_membind(topology, size, set, HWLOC_MEMBIND_DEFAULT, 0),
+ * hwloc_alloc_membind_policy(topology, size, set, HWLOC_MEMBIND_DEFAULT, 0),
  * \endcode
  *
- * which will try to allocate new data bound to the given set, or at worse
- * allocate memory without binding it at all.
+ * which will try to allocate new data bound to the given set, possibly by
+ * changing the current memory binding policy, or at worse allocate memory
+ * without binding it at all.  Since HWLOC_MEMBIND_STRICT is not given, this
+ * will even not fail unless a mere malloc() itself would fail, i.e. ENOMEM.
  *
  * Each binding is available with a CPU set argument or a NUMA memory node set
  * argument. The name of the latter ends with _nodeset. It is also possible to
@@ -1038,7 +1040,7 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * ::hwloc_cpuset_from_nodeset.
  *
  * \note On some OSes, memory binding may have effects on CPU binding, see
- * ::HWLOC_CPUBIND_NOCPUBIND
+ * ::HWLOC_MEMBIND_NOCPUBIND
  * @{
  */
 
@@ -1102,7 +1104,7 @@ typedef enum {
                                          */
 } hwloc_membind_flags_t;
 
-/** \brief Bind current process memory on memory nodes near the given nodeset \p nodeset
+/** \brief Bind current process memory on the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
@@ -1124,7 +1126,7 @@ HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_no
  */
 HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Bind given process memory on memory nodes near the given nodeset \p nodeset
+/** \brief Bind given process memory on the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
@@ -1146,7 +1148,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwl
  */
 HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Bind some memory range on memory nodes near the given nodeset \p nodeset
+/** \brief Bind some memory range on the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
@@ -1168,17 +1170,28 @@ HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, con
  */
 HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Allocate some memory on memory nodes near the given nodeset \p nodeset
+/** \brief Allocate some memory
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * This is equivalent to malloc(), except it tries to allocated page-aligned
+ * memory from the OS.
+ */
+HWLOC_DECLSPEC void *hwloc_alloc(size_t len);
+
+/** \brief Allocate some memory on the given nodeset \p nodeset
+ *
+ * \return ENOSYS if the action is not supported and HWLOC_MEMBIND_STRICT is
+ * given
+ * \return EXDEV if the binding cannot be enforced and HWLOC_MEMBIND_STRICT is
+ * given
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
 /** \brief Allocate some memory on memory nodes near the given cpuset \p cpuset
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return ENOSYS if the action is not supported and HWLOC_MEMBIND_STRICT is
+ * given
+ * \return EXDEV if the binding cannot be enforced and HWLOC_MEMBIND_STRICT is
+ * given
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 

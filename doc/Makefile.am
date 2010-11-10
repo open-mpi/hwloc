@@ -386,8 +386,11 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_set_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_free_membind.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind_nodeset.3  \
