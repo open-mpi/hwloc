@@ -185,6 +185,10 @@ int main(int argc, char *argv[])
 	logicalo = 0;
 	goto next;
       }
+      if (!strcmp(argv[1], "--single")) {
+	singlify = 1;
+	goto next;
+      }
       if (!strcmp(argv[1], "--taskset")) {
 	taskset = 1;
 	goto next;
