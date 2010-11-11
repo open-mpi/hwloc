@@ -1030,26 +1030,45 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
   return -1;
 }
 
+/*
+ * On some kernels, get_mempolicy requires the output size to be larger
+ * than the kernel MAX_NUMNODES (defined by CONFIG_NODES_SHIFT).
+ * Try get_mempolicy on ourself until we find a max_os_index value that
+ * makes the kernel happy.
+ */
+static int
+hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology)
+{
+  static int max_numnodes = -1;
+  int linuxpolicy;
+
+  if (max_numnodes != -1)
+    /* already computed */
+    return max_numnodes;
+
+  /* start with a single ulong, it's the minimal and it's enough for most machines */
+  max_numnodes = HWLOC_BITS_PER_LONG;
+  while (1) {
+    unsigned long *mask = malloc(max_numnodes / HWLOC_BITS_PER_LONG * sizeof(long));
+    int err = get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
+    free(mask);
+    if (!err)
+      /* found it */
+      return max_numnodes;
+    max_numnodes *= 2;
+  }
+}
+
 static int
 hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
   hwloc_const_bitmap_t complete_nodeset;
-  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned max_os_index;
   unsigned long *linuxmask;
   int linuxpolicy;
   int err;
 
-  /* compute max_os_index */
-  complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
-  if (complete_nodeset) {
-    max_os_index = hwloc_bitmap_last(complete_nodeset);
-    if (max_os_index == (unsigned) -1)
-      max_os_index = 0;
-  } else {
-    max_os_index = 0;
-  }
-  /* round up to the nearest multiple of BITS_PER_LONG */
-  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+  max_os_index = hwloc_linux_find_kernel_max_numnodes(topology);
 
   linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
   if (!linuxmask) {
