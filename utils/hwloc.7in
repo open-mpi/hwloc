@@ -113,10 +113,11 @@ and "0x0000000f" is exactly equivalent to "0xf".  Intermediate blocks
 of 8 digits that are all zeoro can be left empty; "0xff0,,0x13" is
 equivalent to "0xff0,0x00000000,0x13".
 .
-If the location starts with "0xf...f", then all bits not specified
-later are set (as if the set was infinite). For instance, "0xf...f,0x1"
-selects the very first bit and all bits starting from the 33rd.
-"0xf...f" just selects all bits.
+If the location is prefixed with the special string "0xf...f", then
+all bits unspecified bits are set (as if the set were infinite). For
+example, "0xf...f,0x1" sets both the first bit and all bits starting
+with the 33rd.  The string "0xf...f" -- with no other specified values
+-- sets all bits.
 .
 .PP
 Multiple locations can be specified on the hwloc-bind command line

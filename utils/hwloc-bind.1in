@@ -164,10 +164,10 @@ Memory binding may also be reported:
 
     hwloc-bind --membind node:1 --mempolicy interleave -- hwloc-bind --get --membind
 
-It returns something such as "0x000000f0 (interleave)".
-If the system does not contain any NUMA node, a full set may be returned
-instead ("0xf...f"), meaning that memory allocation is bound to the entire
-system memory.
+This returns a string describing the memory binding, such as "0x000000f0
+(interleave)".  Note that if the system does not contain any NUMA
+nodes, the reported string will indicate that the process is bound to
+the entire system memory (e.g., "0xf...f").
 .
 .\" **************************
 .\"    Return value section
