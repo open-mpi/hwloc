@@ -910,12 +910,6 @@ hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t
 
 
 
-/* TODO: add helper which changes the current memory policy and allocates bound
- * memory, to maximize chances to get something bound at the expense of
- * changing the current memory policy.  */
-
-
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

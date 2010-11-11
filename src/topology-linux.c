@@ -981,8 +981,6 @@ hwloc_linux_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, voi
 
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
-	    /* TODO: documentation says process, but do_set_mempolicy source
-	     * code says current->mempolicy = new;... */
 hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   unsigned max_os_index; /* highest os_index + 1 */
@@ -1033,8 +1031,6 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
 }
 
 static int
-	    /* TODO: documentation says process, but do_get_mempolicy source
-	     * code says pol = current->mempolicy;... */
 hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
   hwloc_const_bitmap_t complete_nodeset;
