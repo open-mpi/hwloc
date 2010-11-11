@@ -1110,7 +1110,7 @@ HWLOC_SETUP_CORE <em>must</em> be invoked if using the m4 macros):
   Automake to build hwloc, this macro is unncessary (and will actually
   cause errors because it invoked AM_* macros that will be undefined).
 
-<strongNOTE:</strong> When using the HWLOC_SETUP_CORE m4 macro, it may
+<strong>NOTE:</strong> When using the HWLOC_SETUP_CORE m4 macro, it may
 be necessary to explicitly invoke AC_CANONICAL_TARGET (which requires
 config.sub and config.guess) and/or AC_USE_SYSTEM_EXTENSIONS macros
 early in the configure script (e.g., after AC_INIT but before
