@@ -36,6 +36,8 @@ If a binding set is given, the default policy is bind.
 .TP
 \fB\-\-get\fR
 Report the current bindings.
+When combined with \fB\-\-membind\fR, report the memory binding
+instead of CPU binding.
 .TP
 \fB\-\-single\fR
 Bind on a single CPU to prevent migration.
@@ -162,7 +164,10 @@ Memory binding may also be reported:
 
     hwloc-bind --membind node:1 --mempolicy interleave -- hwloc-bind --get --membind
 
-It returns something such as "0x000000f0 (interleave)".
+This returns a string describing the memory binding, such as "0x000000f0
+(interleave)".  Note that if the system does not contain any NUMA
+nodes, the reported string will indicate that the process is bound to
+the entire system memory (e.g., "0xf...f").
 .
 .\" **************************
 .\"    Return value section

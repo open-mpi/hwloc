@@ -224,11 +224,10 @@ struct hwloc_obj {
   unsigned os_index;			/**< \brief OS-provided physical index number */
   char *name;				/**< \brief Object description if any */
 
-  /** \brief Memory attributes */
-  struct hwloc_obj_memory_s memory;
+  struct hwloc_obj_memory_s memory;	/**< \brief Memory attributes */
 
-  /** \brief Object type-specific Attributes */
-  union hwloc_obj_attr_u *attr;
+  union hwloc_obj_attr_u *attr;		/**< \brief Object type-specific Attributes,
+					 * may be \c NULL if no attribute value was found */
 
   /* global position */
   unsigned depth;			/**< \brief Vertical index in the hierarchy */
