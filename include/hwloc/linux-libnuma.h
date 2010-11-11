@@ -47,7 +47,8 @@ hwloc_cpuset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_cpus
   unsigned long outmaxnode = -1;
 
   /* round-up to the next ulong and clear all bytes */
-  memset(mask, 0, (*maxnode+8*sizeof(*mask)-1)/8);
+  *maxnode = (*maxnode + 8*sizeof(*mask) - 1) & ~(8*sizeof(*mask) - 1);
+  memset(mask, 0, *maxnode/8);
 
   if (depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
     hwloc_obj_t node = NULL;
@@ -89,7 +90,8 @@ hwloc_nodeset_to_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_const_nod
   unsigned long outmaxnode = -1;
 
   /* round-up to the next ulong and clear all bytes */
-  memset(mask, 0, (*maxnode+8*sizeof(*mask)-1)/8);
+  *maxnode = (*maxnode + 8*sizeof(*mask) - 1) & ~(8*sizeof(*mask) - 1);
+  memset(mask, 0, *maxnode/8);
 
   if (depth != HWLOC_TYPE_DEPTH_UNKNOWN) {
     hwloc_obj_t node = NULL;
