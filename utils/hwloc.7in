@@ -114,7 +114,7 @@ of 8 digits that are all zeoro can be left empty; "0xff0,,0x13" is
 equivalent to "0xff0,0x00000000,0x13".
 .
 If the location is prefixed with the special string "0xf...f", then
-all bits unspecified bits are set (as if the set were infinite). For
+all unspecified bits are set (as if the set were infinite). For
 example, "0xf...f,0x1" sets both the first bit and all bits starting
 with the 33rd.  The string "0xf...f" -- with no other specified values
 -- sets all bits.
