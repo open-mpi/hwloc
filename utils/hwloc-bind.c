@@ -179,7 +179,10 @@ int main(int argc, char *argv[])
 	err = hwloc_get_cpubind(topology, cpubind_set, 0);
       if (err) {
 	const char *errmsg = strerror(errno);
-	fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
+        if (pid)
+	  fprintf(stderr, "hwloc_get_proc_cpubind %d failed (errno %d %s)\n", pid, errno, errmsg);
+        else
+	  fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
 	return EXIT_FAILURE;
       }
       if (taskset)
@@ -194,7 +197,10 @@ int main(int argc, char *argv[])
 	err = hwloc_get_membind(topology, membind_set, &policy, 0);
       if (err) {
 	const char *errmsg = strerror(errno);
-	fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
+        if (pid)
+	  fprintf(stderr, "hwloc_get_proc_membind %d failed (errno %d %s)\n", pid, errno, errmsg);
+        else
+	  fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
 	return EXIT_FAILURE;
       }
       if (taskset)
@@ -237,7 +243,10 @@ int main(int argc, char *argv[])
       const char *errmsg = strerror(bind_errno);
       char *s;
       hwloc_bitmap_asprintf(&s, cpubind_set);
-      fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
+      if (pid)
+        fprintf(stderr, "hwloc_set_proc_cpubind %s %d failed (errno %d %s)\n", s, pid, bind_errno, errmsg);
+      else
+        fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
   }
@@ -260,7 +269,10 @@ int main(int argc, char *argv[])
       const char *errmsg = strerror(bind_errno);
       char *s;
       hwloc_bitmap_asprintf(&s, membind_set);
-      fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
+      if (pid)
+        fprintf(stderr, "hwloc_set_proc_membind %s %d failed (errno %d %s)\n", s, pid, bind_errno, errmsg);
+      else
+        fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
   }
