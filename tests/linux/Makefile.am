@@ -1,5 +1,6 @@
-# Copyright 2009 INRIA, Université Bordeaux 1
-# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2010 INRIA
+# Copyright © 2009-2010 Université Bordeaux 1
+# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
@@ -19,7 +20,8 @@ sysfs_outputs = \
 		8em64t-4c2t.output \
 		8em64t-2s2ca2c.output \
 		8em64t-2s4c-heterogeneous.output \
-		8ia64-2n2s2d.output \
+		8ia64-2n2s2c.output \
+		8ia64-2s2c2t.output \
 		8ia64-4s2c.output \
 		16amd64-8n2c.output \
 		16amd64-8n2c-cpusets.output \
@@ -57,7 +59,8 @@ sysfs_tarballs = \
 		8em64t-4c2t.tar.bz2 \
 		8em64t-2s2ca2c.tar.bz2 \
 		8em64t-2s4c-heterogeneous.tar.bz2 \
-		8ia64-2n2s2d.tar.bz2 \
+		8ia64-2n2s2c.tar.bz2 \
+		8ia64-2s2c2t.tar.bz2 \
 		8ia64-4s2c.tar.bz2 \
 		16amd64-8n2c.tar.bz2 \
 		16amd64-8n2c-cpusets.tar.bz2 \
@@ -98,15 +101,21 @@ sysfs_options = \
 		16em64t-4s2c2t.xml.options
 
 if HWLOC_BUILD_TESTS
-if HWLOC_HAVE_LINUX
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
 TESTS = $(sysfs_outputs)
 endif HWLOC_HAVE_BUNZIPP
 endif HWLOC_HAVE_OPENAT
-endif HWLOC_HAVE_LINUX
 endif HWLOC_BUILD_TESTS
 
 EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options)
 
 TESTS_ENVIRONMENT = $(builddir)/test-topology.sh
+
+
+bin_SCRIPTS = hwloc-gather-topology.sh
+
+install-exec-hook:
+	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' -i $(DESTDIR)$(bindir)/hwloc-gather-topology.sh
+
+SUBDIRS = gather

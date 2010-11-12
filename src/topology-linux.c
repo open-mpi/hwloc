@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2010 IBM
  * See COPYING in top-level directory.
@@ -926,9 +928,16 @@ hwloc_linux_set_area_membind(hwloc_topology_t topology, const void *addr, size_t
     goto out;
 
   if (flags & HWLOC_MEMBIND_MIGRATE) {
+#ifdef MPOL_MF_MOVE
     linuxflags = MPOL_MF_MOVE;
     if (flags & HWLOC_MEMBIND_STRICT)
       linuxflags |= MPOL_MF_STRICT;
+#else
+    if (flags & HWLOC_MEMBIND_STRICT) {
+      errno = ENOSYS;
+      goto out_with_mask;
+    }
+#endif
   }
 
   err = mbind((void *) addr, len, linuxpolicy, linuxmask, max_os_index+1, linuxflags);
@@ -955,7 +964,7 @@ hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nod
     return NULL;
 
   err = hwloc_linux_set_area_membind(topology, buffer, len, nodeset, policy, flags);
-  if (err < 0) {
+  if (err < 0 && policy & HWLOC_MEMBIND_STRICT) {
     munmap(buffer, len);
     return NULL;
   }
@@ -972,8 +981,6 @@ hwloc_linux_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, voi
 
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
 static int
-	    /* TODO: documentation says process, but do_set_mempolicy source
-	     * code says current->mempolicy = new;... */
 hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   unsigned max_os_index; /* highest os_index + 1 */
@@ -1023,28 +1030,45 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
   return -1;
 }
 
+/*
+ * On some kernels, get_mempolicy requires the output size to be larger
+ * than the kernel MAX_NUMNODES (defined by CONFIG_NODES_SHIFT).
+ * Try get_mempolicy on ourself until we find a max_os_index value that
+ * makes the kernel happy.
+ */
 static int
-	    /* TODO: documentation says process, but do_get_mempolicy source
-	     * code says pol = current->mempolicy;... */
+hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology)
+{
+  static int max_numnodes = -1;
+  int linuxpolicy;
+
+  if (max_numnodes != -1)
+    /* already computed */
+    return max_numnodes;
+
+  /* start with a single ulong, it's the minimal and it's enough for most machines */
+  max_numnodes = HWLOC_BITS_PER_LONG;
+  while (1) {
+    unsigned long *mask = malloc(max_numnodes / HWLOC_BITS_PER_LONG * sizeof(long));
+    int err = get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
+    free(mask);
+    if (!err)
+      /* found it */
+      return max_numnodes;
+    max_numnodes *= 2;
+  }
+}
+
+static int
 hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
   hwloc_const_bitmap_t complete_nodeset;
-  unsigned max_os_index; /* highest os_index + 1 */
+  unsigned max_os_index;
   unsigned long *linuxmask;
   int linuxpolicy;
   int err;
 
-  /* compute max_os_index */
-  complete_nodeset = hwloc_topology_get_complete_nodeset(topology);
-  if (complete_nodeset) {
-    max_os_index = hwloc_bitmap_last(complete_nodeset);
-    if (max_os_index == (unsigned) -1)
-      max_os_index = 0;
-  } else {
-    max_os_index = 0;
-  }
-  /* round up to the nearest multiple of BITS_PER_LONG */
-  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+  max_os_index = hwloc_linux_find_kernel_max_numnodes(topology);
 
   linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
   if (!linuxmask) {
@@ -1057,11 +1081,7 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
     goto out_with_mask;
 
   if (linuxpolicy == MPOL_DEFAULT) {
-    hwloc_const_nodeset_t topology_nodeset = hwloc_topology_get_topology_nodeset(topology);
-    if (topology_nodeset)
-      hwloc_bitmap_copy(nodeset, topology_nodeset);
-    else
-      hwloc_bitmap_fill(nodeset);
+    hwloc_bitmap_copy(nodeset, hwloc_topology_get_topology_nodeset(topology));
   } else {
     hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, linuxmask);
   }
@@ -1537,6 +1557,8 @@ hwloc_parse_meminfo_info(struct hwloc_topology *topology,
   while (fgets(string, sizeof(string), fd) && *string != '\0')
     {
       unsigned long long number;
+      if (strlen(string) < (size_t) prefixlength)
+        continue;
       if (sscanf(string+prefixlength, "MemTotal: %llu kB", (unsigned long long *) &number) == 1) {
 	*local_memory = number << 10;
 	if (onlytotal)
@@ -1596,7 +1618,7 @@ static void
 hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology, unsigned long node, struct hwloc_obj_memory_s *memory)
 {
   char path[128];
-  uint64_t meminfo_hugepages_count, meminfo_hugepages_size;
+  uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
 
   if (topology->is_thissystem) {
     memory->page_types_len = 2;
@@ -1617,9 +1639,13 @@ hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology, unsigned 
 
   if (memory->page_types) {
     uint64_t remaining_local_memory = memory->local_memory;
-    memory->page_types[1].size = meminfo_hugepages_size;
-    memory->page_types[1].count = meminfo_hugepages_count;
-    remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+    if (meminfo_hugepages_size) {
+      memory->page_types[1].size = meminfo_hugepages_size;
+      memory->page_types[1].count = meminfo_hugepages_count;
+      remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+    } else {
+      memory->page_types_len = 1;
+    }
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
 }
@@ -1627,7 +1653,7 @@ hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology, unsigned 
 static void
 hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_memory_s *memory)
 {
-  uint64_t meminfo_hugepages_count, meminfo_hugepages_size;
+  uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
   struct stat st;
   int has_sysfs_hugepages = 0;
   int types = 2;
@@ -1662,9 +1688,13 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
       hwloc_parse_hugepages_info(topology, "/sys/kernel/mm/hugepages", memory, &remaining_local_memory);
     } else {
       /* use what we found in meminfo */
-      memory->page_types[1].size = meminfo_hugepages_size;
-      memory->page_types[1].count = meminfo_hugepages_count;
-      remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+      if (meminfo_hugepages_size) {
+        memory->page_types[1].size = meminfo_hugepages_size;
+        memory->page_types[1].count = meminfo_hugepages_count;
+        remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
+      } else {
+        memory->page_types_len = 1;
+      }
     }
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
@@ -1712,9 +1742,13 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
     } else {
       /* use what we found in meminfo */
       /* hwloc_get_procfs_meminfo_info must have been called earlier */
-      memory->page_types[1].count = meminfo_hugepages_count;
-      memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
-      remaining_local_memory -= meminfo_hugepages_count * memory->page_types[1].size;
+      if (meminfo_hugepages_size) {
+        memory->page_types[1].count = meminfo_hugepages_count;
+        memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
+        remaining_local_memory -= meminfo_hugepages_count * memory->page_types[1].size;
+      } else {
+        memory->page_types_len = 1;
+      }
     }
     /* update what's remaining as normal pages */
     memory->page_types[0].size = getpagesize();
@@ -1817,7 +1851,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       for (index = 0; index < nbnodes; index++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
-	  unsigned int osnode = nonsparse_physical_indexes[index];
+	  osnode = nonsparse_physical_indexes[index];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
@@ -2183,7 +2217,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
       struct hwloc_obj *socket, *core, *thread;
-      hwloc_bitmap_t socketset, coreset, threadset;
+      hwloc_bitmap_t socketset, coreset, threadset, savedcoreset;
       unsigned mysocketid, mycoreid;
 
       /* look at the socket */
@@ -2193,17 +2227,16 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       sprintf(str, "%s/cpu%d/topology/core_siblings", path, i);
       socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      if (socketset && hwloc_bitmap_weight(socketset) >= 1) {
-        if (hwloc_bitmap_first(socketset) == i) {
-          /* first cpu in this socket, add the socket */
-          socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
-          socket->cpuset = socketset;
-          hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
+      if (socketset && hwloc_bitmap_first(socketset) == i) {
+        /* first cpu in this socket, add the socket */
+        socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
+        socket->cpuset = socketset;
+        hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
                      mysocketid, socketset);
-          hwloc_insert_object_by_cpuset(topology, socket);
-        } else
-          hwloc_bitmap_free(socketset);
+        hwloc_insert_object_by_cpuset(topology, socket);
+        socketset = NULL; /* don't free it */
       }
+      hwloc_bitmap_free(socketset);
 
       /* look at the core */
       mycoreid = 0; /* shut-up the compiler */
@@ -2212,15 +2245,14 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
-      if (coreset && hwloc_bitmap_weight(coreset) >= 1) {
-        if (hwloc_bitmap_first(coreset) == i) {
-          core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
-          core->cpuset = coreset;
-          hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
+      savedcoreset = coreset; /* store it for later work-arounds */
+      if (coreset && hwloc_bitmap_first(coreset) == i) {
+        core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
+        core->cpuset = coreset;
+        hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
                      mycoreid, coreset);
-          hwloc_insert_object_by_cpuset(topology, core);
-        } else
-          hwloc_bitmap_free(coreset);
+        hwloc_insert_object_by_cpuset(topology, core);
+        coreset = NULL; /* don't free it */
       }
 
       /* look at the thread */
@@ -2293,9 +2325,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
         if (cacheset) {
-          if (hwloc_bitmap_weight(cacheset) < 1)
-            /* mask is wrong (happens on ia64), assumes it's not shared */
-            hwloc_bitmap_only(cacheset, i);
+          if (hwloc_bitmap_weight(cacheset) < 1) {
+            /* mask is wrong (useful for many itaniums) */
+            if (savedcoreset)
+              /* assume it's a core-specific cache */
+              hwloc_bitmap_copy(cacheset, savedcoreset);
+            else
+              /* assumes it's not shared */
+              hwloc_bitmap_only(cacheset, i);
+          }
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
@@ -2307,11 +2345,13 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
             hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n",
                        depth, cacheset);
             hwloc_insert_object_by_cpuset(topology, cache);
+            cacheset = NULL; /* don't free it */
             ++caches_added;
-          } else
-            hwloc_bitmap_free(cacheset);
+          }
         }
+        hwloc_bitmap_free(cacheset);
       }
+      hwloc_bitmap_free(coreset);
     }
   hwloc_bitmap_foreach_end();
 
@@ -2638,7 +2678,7 @@ hwloc_look_linux(struct hwloc_topology *topology)
   }
 
   /* gather uname info if fsroot wasn't changed */
-  if (!topology->backend_params.sysfs.root_path || !strcmp(topology->backend_params.sysfs.root_path, "/"))
+  if (topology->is_thissystem)
      hwloc_add_uname_info(topology);
 }
 
@@ -2710,6 +2750,8 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;
   topology->support.membind->interleave_membind = 1;
-  topology->support.membind->migrate_membind = 1;
 #endif /* HWLOC_HAVE_MBIND */
+#if (defined HWLOC_HAVE_MIGRATE_PAGES) || ((defined HWLOC_HAVE_MBIND) && (defined MPOL_MF_MOVE))
+  topology->support.membind->migrate_membind = 1;
+#endif
 }

@@ -1,4 +1,5 @@
-# Copyright © 2009      INRIA, Université Bordeaux 1
+# Copyright © 2009-2010 INRIA
+# Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
@@ -258,6 +259,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_membind_flags_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_membind_policy_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_alloc.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_alloc_full.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_free.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_dup.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_copy.3 \
@@ -387,8 +389,11 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_set_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_proc_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_thread_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_free_membind.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind_nodeset.3  \

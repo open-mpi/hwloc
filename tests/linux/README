@@ -10,7 +10,7 @@ used by `test-topologies.sh' to check for any regression introduced in
 hwloc detection logic.
 
 A new topology may be added by:
-* running "gather-topology.sh" on the target system and saving the
+* running "hwloc-gather-topology.sh" on the target system and saving the
   tarball and output files here.
 * if lstopo is not available on the target system, running "lstopo -v -"
   on the extracted tarball to generate the corresponding `output' file

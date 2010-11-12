@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -1061,6 +1063,39 @@ propagate_unused_cpuset(hwloc_obj_t obj, hwloc_obj_t sys)
     propagate_unused_cpuset(child, sys);
 }
 
+/* Force full nodeset for non-NUMA machines */
+static void
+add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
+{
+  hwloc_obj_t child, *temp;
+
+  if (parent_has_sets || obj->cpuset) {
+    /* if the parent has non-NULL sets, or if the object has non-NULL cpusets,
+     * it must have non-NULL nodesets
+     */
+    assert(obj->cpuset);
+    assert(obj->online_cpuset);
+    assert(obj->complete_cpuset);
+    assert(obj->allowed_cpuset);
+    if (!obj->nodeset)
+      obj->nodeset = hwloc_bitmap_alloc_full();
+    if (!obj->complete_nodeset)
+      obj->complete_nodeset = hwloc_bitmap_alloc_full();
+    if (!obj->allowed_nodeset)
+      obj->allowed_nodeset = hwloc_bitmap_alloc_full();
+  } else {
+    /* parent has no sets and object has NULL cpusets,
+     * it must have NULL nodesets
+     */
+    assert(!obj->nodeset);
+    assert(!obj->complete_nodeset);
+    assert(!obj->allowed_nodeset);
+  }
+
+  for_each_child_safe(child, obj, temp)
+    add_default_object_sets(child, obj->cpuset != NULL);
+}
+
 /* Propagate nodesets up and down */
 static void
 propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
@@ -1458,20 +1493,13 @@ static int dontfree_membind(hwloc_topology_t topology __hwloc_attribute_unused, 
 
 static void alloc_cpusets(hwloc_obj_t obj)
 {
-  obj->cpuset = hwloc_bitmap_alloc();
+  obj->cpuset = hwloc_bitmap_alloc_full();
   obj->complete_cpuset = hwloc_bitmap_alloc();
-  obj->online_cpuset = hwloc_bitmap_alloc();
-  obj->allowed_cpuset = hwloc_bitmap_alloc();
+  obj->online_cpuset = hwloc_bitmap_alloc_full();
+  obj->allowed_cpuset = hwloc_bitmap_alloc_full();
   obj->nodeset = hwloc_bitmap_alloc();
   obj->complete_nodeset = hwloc_bitmap_alloc();
-  obj->allowed_nodeset = hwloc_bitmap_alloc();
-  hwloc_bitmap_fill(obj->cpuset);
-  hwloc_bitmap_zero(obj->complete_cpuset);
-  hwloc_bitmap_fill(obj->online_cpuset);
-  hwloc_bitmap_fill(obj->allowed_cpuset);
-  hwloc_bitmap_zero(obj->nodeset);
-  hwloc_bitmap_zero(obj->complete_nodeset);
-  hwloc_bitmap_fill(obj->allowed_nodeset);
+  obj->allowed_nodeset = hwloc_bitmap_alloc_full();
 }
 
 /* Main discovery loop */
@@ -1590,8 +1618,10 @@ hwloc_discover(struct hwloc_topology *topology)
 
 
 #    ifndef HWLOC_LINUX_SYS
-    /* gather uname info, except for Linux, which does it internally depending on load options */
-    hwloc_add_uname_info(topology);
+    if (topology->is_thissystem) {
+      /* gather uname info, except for Linux, which does it internally depending on load options */
+      hwloc_add_uname_info(topology);
+    }
 #    endif
   }
 
@@ -1651,6 +1681,9 @@ hwloc_discover(struct hwloc_topology *topology)
   merge_useless_child(topology, &topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
+
+  hwloc_debug("%s", "\nAdd default object sets\n");
+  add_default_object_sets(topology->levels[0][0], 0);
 
   hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
 

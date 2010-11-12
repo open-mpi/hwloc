@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -23,6 +25,9 @@
 #endif
 
 /* TODO: use psets? (only for root)
+ * TODO: get cache info from prtdiag? (it is setgid sys to be able to read from
+ * crw-r-----   1 root     sys       88,  0 nov   3 14:35 /devices/pseudo/devinfo@0:devinfo
+ * and run (apparently undocumented) ioctls on it.
  */
 
 static int

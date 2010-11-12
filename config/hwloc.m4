@@ -1,6 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright 2009 INRIA, Université Bordeaux 1
+dnl Copyright (c) 2009 INRIA
+dnl Copyright (c) 2009 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -8,6 +9,8 @@ dnl Copyright (c) 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
 dnl                         University of Stuttgart.  All rights reserved.
+dnl Copyright © 2010  INRIA
+dnl Copyright © 2010  Université of Bordeaux
 dnl Copyright © 2006-2010  Cisco Systems, Inc.  All rights reserved.
 
 # Main hwloc m4 macro, to be invoked by the user
@@ -399,12 +402,10 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
           #define _GNU_SOURCE
           #include <sched.h>
           static unsigned long mask;
-          ]], [[ sched_setaffinity(0, (void*) &mask);
-          ]])],
-        AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
-        AC_MSG_RESULT([yes]),
-        AC_MSG_RESULT([no])
-      )
+          ]], [[ sched_setaffinity(0, (void*) &mask); ]])],
+        [AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
+         AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])])
     ], , [[
 #define _GNU_SOURCE
 #include <sched.h>
@@ -415,12 +416,10 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
       AC_LANG_PROGRAM([[
         #include <sched.h>
         cpu_set_t set;
-        ]], [[ CPU_ZERO(&set); CPU_SET(0, &set);
-        ]])],
-        AC_DEFINE([HWLOC_HAVE_CPU_SET], [1], [Define to 1 if the CPU_SET macro works])
-        AC_MSG_RESULT([yes]),
-        AC_MSG_RESULT([no])
-    )
+        ]], [[ CPU_ZERO(&set); CPU_SET(0, &set);]])],
+	[AC_DEFINE([HWLOC_HAVE_CPU_SET], [1], [Define to 1 if the CPU_SET macro works])
+         AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])])
     
     AC_MSG_CHECKING([for working CPU_SET_S])
     AC_LINK_IFELSE([
@@ -433,25 +432,21 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
           CPU_SET_S(CPU_ALLOC_SIZE(1024), 0, set);
           CPU_FREE(set);
         ]])],
-        AC_DEFINE([HWLOC_HAVE_CPU_SET_S], [1], [Define to 1 if the CPU_SET_S macro works])
-        AC_MSG_RESULT([yes]),
-        AC_MSG_RESULT([no])
-    )
+        [AC_DEFINE([HWLOC_HAVE_CPU_SET_S], [1], [Define to 1 if the CPU_SET_S macro works])
+         AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])])
 
     AC_MSG_CHECKING([for working _syscall3])
-    AC_LINK_IFELSE(
+    AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
           #include <linux/unistd.h>
           #include <errno.h>
           #define __NR_hwloc_test 123
           _syscall3(int, hwloc_test, int, param1, int, param2, int, param3);
-        ]], [[
-          hwloc_test(1, 2, 3);
-        ]]),
-        AC_DEFINE([HWLOC_HAVE__SYSCALL3], [1], [Define to 1 if the _syscall3 macro works])
-        AC_MSG_RESULT([yes]),
-        AC_MSG_RESULT([no])
-    )
+        ]], [[ hwloc_test(1, 2, 3); ]])],
+        [AC_DEFINE([HWLOC_HAVE__SYSCALL3], [1], [Define to 1 if the _syscall3 macro works])
+         AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])])
 
     # Check for kerrighed, but don't abort if not found.  It's illegal
     # to pass in an empty 3rd argument, but we trust the output of
@@ -507,6 +502,9 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
 
     AC_CHECK_HEADERS([malloc.h])
     AC_CHECK_FUNCS([getpagesize memalign posix_memalign])
+
+    AC_CHECK_HEADERS([sys/utsname.h])
+    AC_CHECK_FUNCS([uname])
 
     # set_mempolicy and mbind support   
     AC_CHECK_HEADERS([numaif.h], [
@@ -595,13 +593,11 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
           printf("highest cpuid %x\n", eax);
           return 0;
         }
-      ]])], [
-      AC_MSG_RESULT([yes])
-      AC_DEFINE(HWLOC_HAVE_CPUID, 1, [Define to 1 if you have cpuid])
-      hwloc_have_cpuid=yes
-    ], [
-      AC_MSG_RESULT([no])
-    ])
+      ]])],
+      [AC_MSG_RESULT([yes])
+       AC_DEFINE(HWLOC_HAVE_CPUID, 1, [Define to 1 if you have cpuid])
+       hwloc_have_cpuid=yes],
+      [AC_MSG_RESULT([no])])
     CPPFLAGS="$old_CPPFLAGS"
 
     # Always generate these files

@@ -1,5 +1,6 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -112,8 +113,8 @@ int main(int argc, char *argv[])
         if (n <= 0)
           /* Ignore kernel threads and errors */
           continue;
+        name[n] = 0;
       }
-      name[n] = 0;
     }
 #endif /* HWLOC_LINUX_SYS */
 

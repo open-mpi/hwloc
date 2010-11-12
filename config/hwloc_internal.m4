@@ -1,6 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright 2009 INRIA, Université Bordeaux 1
+dnl Copyright (c) 2009 INRIA
+dnl Copyright (c) 2009 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -8,6 +9,7 @@ dnl Copyright (c) 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
 dnl                         University of Stuttgart.  All rights reserved.
+dnl Copyright ©  2010 INRIA
 dnl Copyright ©  2006-2010 Cisco Systems, Inc.  All rights reserved.
 
 #-----------------------------------------------------------------------
@@ -92,8 +94,14 @@ EOF
     AC_ARG_VAR([FIG2DEV], [Location of the fig2dev program (required for building the hwloc doxygen documentation)])
     AC_PATH_TOOL([FIG2DEV], [fig2dev])
     
+    AC_ARG_VAR([GS], [Location of the gs program (required for building the hwloc doxygen documentation)])
+    AC_PATH_TOOL([GS], [gs])
+
+    AC_ARG_VAR([EPSTOPDF], [Location of the epstopdf program (required for building the hwloc doxygen documentation)])
+    AC_PATH_TOOL([EPSTOPDF], [epstopdf])
+
     AC_MSG_CHECKING([if can build doxygen docs])
-    AS_IF([test "x$DOXYGEN" != "x" -a "x$PDFLATEX" != "x" -a "x$MAKEINDEX" != "x" -a "x$FIG2DEV" != "x"],
+    AS_IF([test "x$DOXYGEN" != "x" -a "x$PDFLATEX" != "x" -a "x$MAKEINDEX" != "x" -a "x$FIG2DEV" != "x" -a "x$GS" != "x" -a "x$EPSTOPDF" != "x"],
                  [hwloc_generate_doxs=yes], [hwloc_generate_doxs=no])
     AC_MSG_RESULT([$hwloc_generate_doxs])
     
@@ -274,51 +282,43 @@ EOF
 
     AC_CHECK_HEADERS([myriexpress.h], [
       AC_MSG_CHECKING(if MX_NUMA_NODE exists)
-      AC_COMPILE_IFELSE([
-#include <myriexpress.h>
-int main() {
-  int a = MX_NUMA_NODE;
-}
-      ], [
-	AC_MSG_RESULT(yes)
-	AC_CHECK_LIB([myriexpress], [mx_get_info],
-		     [AC_DEFINE([HAVE_MYRIEXPRESS], 1, [Define to 1 if we have -lmyriexpress])
-		      hwloc_have_myriexpress=yes])
-      ], [AC_MSG_RESULT(no)])
-    ])
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <myriexpress.h>]],
+                                         [[int a = MX_NUMA_NODE;]],
+                        [AC_MSG_RESULT(yes)
+                         AC_CHECK_LIB([myriexpress], [mx_get_info],
+                                      [AC_DEFINE([HAVE_MYRIEXPRESS], 1, [Define to 1 if we have -lmyriexpress])
+                                       hwloc_have_myriexpress=yes])],
+                        [AC_MSG_RESULT(no)])])])
 
     AC_CHECK_HEADERS([cuda.h], [
       AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
-      AC_COMPILE_IFELSE([
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <cuda.h>
 #ifndef CUDA_VERSION
 #error CUDA_VERSION undefined
 #elif CUDA_VERSION < 3020
 #error CUDA_VERSION too old
-#endif
-      ], [
-        AC_MSG_RESULT(yes)
+#endif]], [[int i = 3;]])],
+       [AC_MSG_RESULT(yes)
         AC_CHECK_LIB([cuda], [cuInit],
 		     [AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
-		      hwloc_have_cuda=yes])
-      ], [AC_MSG_RESULT(no)])
-    ])
+		      hwloc_have_cuda=yes])],
+       [AC_MSG_RESULT(no)])])
+
     AC_CHECK_HEADERS([cuda_runtime_api.h], [
       AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
-      AC_COMPILE_IFELSE([
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <cuda_runtime_api.h>
 #ifndef CUDART_VERSION
 #error CUDART_VERSION undefined
 #elif CUDART_VERSION < 3020
 #error CUDART_VERSION too old
-#endif
-      ], [
-        AC_MSG_RESULT(yes)
+#endif]], [[int i = 3;]])],
+       [AC_MSG_RESULT(yes)
         AC_CHECK_LIB([cudart], [cudaGetDeviceCount],
 		     [AC_DEFINE([HAVE_CUDART], 1, [Define to 1 if we have -lcudart])
-		      hwloc_have_cudart=yes])
-      ], [AC_MSG_RESULT(no)])
-    ])
+		      hwloc_have_cudart=yes])],
+       [AC_MSG_RESULT(no)])])
 
     if test "x$enable_xml" != "xno"; then
         AC_CHECK_PROGS(XMLLINT, [xmllint])
@@ -330,16 +330,18 @@ int main() {
 
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(
-        hwloc_config_prefix[tests/Makefile ]
+        hwloc_config_prefix[tests/Makefile]
         hwloc_config_prefix[tests/linux/Makefile]
+        hwloc_config_prefix[tests/linux/gather/Makefile]
         hwloc_config_prefix[tests/xml/Makefile]
         hwloc_config_prefix[tests/ports/Makefile]
-        hwloc_config_prefix[tests/linux/gather-topology.sh]
+        hwloc_config_prefix[tests/linux/hwloc-gather-topology.sh]
+        hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh]
         hwloc_config_prefix[tests/linux/test-topology.sh]
         hwloc_config_prefix[tests/xml/test-topology.sh]
         hwloc_config_prefix[utils/test-hwloc-distrib.sh])
 
-    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/gather-topology.sh ]hwloc_config_prefix[utils/test-hwloc-distrib.sh])
+    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/hwloc-gather-topology.sh ]hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh ]hwloc_config_prefix[utils/test-hwloc-distrib.sh])
 
     # These links are only needed in standalone mode.  It would
     # be nice to m4 foreach this somehow, but whenever I tried
@@ -359,6 +361,4 @@ int main() {
 	hwloc_config_prefix[tests/ports/topology-freebsd.c]:hwloc_config_prefix[src/topology-freebsd.c]
 	hwloc_config_prefix[tests/ports/topology-hpux.c]:hwloc_config_prefix[src/topology-hpux.c])
     ])
-
-	echo done setting up tests
 ])dnl

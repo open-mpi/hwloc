@@ -1,6 +1,8 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -337,7 +339,7 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
  	if (subnode->type == XML_ELEMENT_NODE)
 	  nbcells++;
     if (nbcells != nbobjs*nbobjs) {
-      fprintf(stderr, "ignoring distmatrix with %u cells instead of %u\n", nbcells, nbobjs*nbobjs);
+      fprintf(stderr, "ignoring distmatrix with %u cells instead of %lu\n", nbcells, nbobjs*nbobjs);
       return;
     }
 
@@ -563,17 +565,17 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     xmlNewProp(node, BAD_CAST "allowed_cpuset", BAD_CAST cpuset);
     free(cpuset);
   }
-  if (obj->nodeset) {
+  if (obj->nodeset && !hwloc_bitmap_isfull(obj->nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
     xmlNewProp(node, BAD_CAST "nodeset", BAD_CAST cpuset);
     free(cpuset);
   }
-  if (obj->complete_nodeset) {
+  if (obj->complete_nodeset && !hwloc_bitmap_isfull(obj->complete_nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->complete_nodeset);
     xmlNewProp(node, BAD_CAST "complete_nodeset", BAD_CAST cpuset);
     free(cpuset);
   }
-  if (obj->allowed_nodeset) {
+  if (obj->allowed_nodeset && !hwloc_bitmap_isfull(obj->allowed_nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->allowed_nodeset);
     xmlNewProp(node, BAD_CAST "allowed_nodeset", BAD_CAST cpuset);
     free(cpuset);
