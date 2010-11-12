@@ -1052,7 +1052,7 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
     unsigned long *mask = malloc(max_numnodes / HWLOC_BITS_PER_LONG * sizeof(long));
     int err = get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
     free(mask);
-    if (!err)
+    if (!err || errno != EINVAL)
       /* found it */
       return max_numnodes;
     max_numnodes *= 2;
