@@ -1037,7 +1037,7 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
  * makes the kernel happy.
  */
 static int
-hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology)
+hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute_unused)
 {
   static int max_numnodes = -1;
   int linuxpolicy;
@@ -1062,7 +1062,6 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology)
 static int
 hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
-  hwloc_const_bitmap_t complete_nodeset;
   unsigned max_os_index;
   unsigned long *linuxmask;
   int linuxpolicy;
