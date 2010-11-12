@@ -1,6 +1,8 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009 CNRS
+ * Copyright © 2009 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -181,6 +183,10 @@ int main(int argc, char *argv[])
       }
       if (!strcmp(argv[1], "--po") || !strcmp(argv[1], "--physical-output")) {
 	logicalo = 0;
+	goto next;
+      }
+      if (!strcmp(argv[1], "--single")) {
+	singlify = 1;
 	goto next;
       }
       if (!strcmp(argv[1], "--taskset")) {

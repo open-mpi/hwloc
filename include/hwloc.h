@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -33,6 +35,7 @@
  */
 
 #include <hwloc/bitmap.h>
+#include <hwloc/cpuset.h>
 
 
 #ifdef __cplusplus
@@ -244,11 +247,10 @@ struct hwloc_obj {
   unsigned os_index;			/**< \brief OS-provided physical index number */
   char *name;				/**< \brief Object description if any */
 
-  /** \brief Memory attributes */
-  struct hwloc_obj_memory_s memory;
+  struct hwloc_obj_memory_s memory;	/**< \brief Memory attributes */
 
-  /** \brief Object type-specific Attributes */
-  union hwloc_obj_attr_u *attr;
+  union hwloc_obj_attr_u *attr;		/**< \brief Object type-specific Attributes,
+					 * may be \c NULL if no attribute value was found */
 
   /* global position */
   unsigned depth;			/**< \brief Vertical index in the hierarchy */
@@ -325,11 +327,14 @@ struct hwloc_obj {
                                           * contained in this object or containing it and known how (the children path
                                           * between this object and the NODE objects).
                                           *
+                                          * In the end, these nodes are those that are close to the current object.
+                                          *
                                           * If the HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM configuration flag is set, some of
                                           * these nodes may not be allowed for allocation, see allowed_nodeset.
                                           *
-					  * If the machine contains no NUMA memory node, \p nodeset is \c NULL.
-					  *
+                                          * If there are no NUMA nodes in the machine, all the memory is close to this
+                                          * object, so \p nodeset is full.
+                                          *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t complete_nodeset;     /**< \brief The complete NUMA node set of this object,
@@ -341,8 +346,9 @@ struct hwloc_obj {
                                           * precise position is undefined. It is however known that it would be
                                           * somewhere under this object.
                                           *
-					  * If the machine contains no NUMA memory node, \p complete_nodeset is \c NULL.
-					  *
+                                          * If there are no NUMA nodes in the machine, all the memory is close to this
+                                          * object, so \p complete_nodeset is full.
+                                          *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
   hwloc_nodeset_t allowed_nodeset;      /**< \brief The set of allowed NUMA memory nodes
@@ -352,8 +358,9 @@ struct hwloc_obj {
                                           * memory allocation should not return permission errors. This is usually
                                           * restricted by administration rules.
                                           *
-					  * If the machine contains no NUMA memory node, \p allowed_nodeset is \c NULL.
-					  *
+                                          * If there are no NUMA nodes in the machine, all the memory is close to this
+                                          * object, so \p allowed_nodeset is full.
+                                          *
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
 
@@ -1088,11 +1095,13 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * possible, is
  *
  * \code
- * hwloc_alloc_membind(topology, size, set, HWLOC_MEMBIND_DEFAULT, 0),
+ * hwloc_alloc_membind_policy(topology, size, set, HWLOC_MEMBIND_DEFAULT, 0),
  * \endcode
  *
- * which will try to allocate new data bound to the given set, or at worse
- * allocate memory without binding it at all.
+ * which will try to allocate new data bound to the given set, possibly by
+ * changing the current memory binding policy, or at worse allocate memory
+ * without binding it at all.  Since HWLOC_MEMBIND_STRICT is not given, this
+ * will even not fail unless a mere malloc() itself would fail, i.e. ENOMEM.
  *
  * Each binding is available with a CPU set argument or a NUMA memory node set
  * argument. The name of the latter ends with _nodeset. It is also possible to
@@ -1100,7 +1109,7 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * ::hwloc_cpuset_from_nodeset.
  *
  * \note On some OSes, memory binding may have effects on CPU binding, see
- * ::HWLOC_CPUBIND_NOCPUBIND
+ * ::HWLOC_MEMBIND_NOCPUBIND
  * @{
  */
 
@@ -1164,7 +1173,7 @@ typedef enum {
                                          */
 } hwloc_membind_flags_t;
 
-/** \brief Bind current process memory on memory nodes near the given nodeset \p nodeset
+/** \brief Bind current process memory on the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
@@ -1186,7 +1195,7 @@ HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_no
  */
 HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Bind given process memory on memory nodes near the given nodeset \p nodeset
+/** \brief Bind given process memory on the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
@@ -1208,7 +1217,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwl
  */
 HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Bind some memory range on memory nodes near the given nodeset \p nodeset
+/** \brief Bind some memory range on the given nodeset \p nodeset
  *
  * \return ENOSYS if the action is not supported
  * \return EXDEV if the binding cannot be enforced
@@ -1230,17 +1239,28 @@ HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, con
  */
 HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Allocate some memory on memory nodes near the given nodeset \p nodeset
+/** \brief Allocate some memory
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * This is equivalent to malloc(), except it tries to allocated page-aligned
+ * memory from the OS.
+ */
+HWLOC_DECLSPEC void *hwloc_alloc(size_t len);
+
+/** \brief Allocate some memory on the given nodeset \p nodeset
+ *
+ * \return ENOSYS if the action is not supported and HWLOC_MEMBIND_STRICT is
+ * given
+ * \return EXDEV if the binding cannot be enforced and HWLOC_MEMBIND_STRICT is
+ * given
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
 /** \brief Allocate some memory on memory nodes near the given cpuset \p cpuset
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return ENOSYS if the action is not supported and HWLOC_MEMBIND_STRICT is
+ * given
+ * \return EXDEV if the binding cannot be enforced and HWLOC_MEMBIND_STRICT is
+ * given
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 

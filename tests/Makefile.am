@@ -1,11 +1,17 @@
-# Copyright 2009 INRIA, Université Bordeaux 1
+# Copyright © 2009-2010 INRIA
+# Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-SUBDIRS = linux ports xml
+SUBDIRS = ports xml
+DIST_SUBDIRS = ports xml linux
+
+if HWLOC_HAVE_LINUX
+SUBDIRS += linux
+endif HWLOC_HAVE_LINUX
 
 LDADD =
 

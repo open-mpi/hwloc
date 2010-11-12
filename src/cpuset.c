@@ -1,8 +1,18 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
+
+/* cpuset.h converts from the old cpuset API to the new bitmap API, we don't want it here */
+#ifndef HWLOC_CPUSET_H
+/* make sure cpuset.h will not be automatically included here */
+#define HWLOC_CPUSET_H 1
+#else
+#error Do not include cpuset.h in cpuset.c
+#endif
 
 #include <private/config.h>
 #include <private/misc.h>
@@ -67,7 +77,7 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
   if (!set)
     return NULL;
 
-  set->ulongs_count = 1;
+  set->ulongs_count = 0;
   set->ulongs_allocated = 64/sizeof(unsigned long);
   set->ulongs = malloc(64);
   if (!set->ulongs) {
@@ -75,11 +85,18 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
     return NULL;
   }
 
-  set->ulongs[0] = HWLOC_SUBBITMAP_ZERO;
   set->infinite = 0;
 #ifdef HWLOC_DEBUG
   set->magic = HWLOC_BITMAP_MAGIC;
 #endif
+  return set;
+}
+
+struct hwloc_bitmap_s * hwloc_bitmap_alloc_full(void)
+{
+  struct hwloc_bitmap_s * set = hwloc_bitmap_alloc();
+  if (set)
+    set->infinite = 1;
   return set;
 }
 
@@ -223,6 +240,13 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
       res = size>0 ? size - 1 : 0;
     tmp += res;
     size -= res;
+  }
+
+  if (!set->infinite && !set->ulongs_count) {
+    res = hwloc_snprintf(tmp, size, "0x0");
+    if (res < 0)
+      return -1;
+    return res;
   }
 
   i=set->ulongs_count-1;
@@ -465,7 +489,7 @@ void hwloc_bitmap_zero(struct hwloc_bitmap_s * set)
 {
 	HWLOC__BITMAP_CHECK(set);
 
-	hwloc_bitmap_reset_by_ulongs(set, 1);
+	hwloc_bitmap_reset_by_ulongs(set, 0);
 	hwloc_bitmap__zero(set);
 }
 
@@ -481,7 +505,7 @@ void hwloc_bitmap_fill(struct hwloc_bitmap_s * set)
 {
 	HWLOC__BITMAP_CHECK(set);
 
-	hwloc_bitmap_reset_by_ulongs(set, 1);
+	hwloc_bitmap_reset_by_ulongs(set, 0);
 	hwloc_bitmap__fill(set);
 }
 
@@ -980,11 +1004,6 @@ int hwloc_bitmap_weight(const struct hwloc_bitmap_s * set)
 /********************************************************************
  * everything below should be dropped when hwloc/cpuset.h is dropped
  */
-
-#ifdef HWLOC_CPUSET_H
-/* cpuset.h converts from the old cpuset API to the new bitmap API, we don't want it here */
-#error Do not include cpuset.h in cpuset.c
-#endif
 
 /* for HWLOC_DECLSPEC */
 #include <hwloc/config.h>

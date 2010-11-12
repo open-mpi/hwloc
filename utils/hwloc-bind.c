@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -206,7 +208,7 @@ int main(int argc, char *argv[])
       case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
       case HWLOC_MEMBIND_REPLICATE: policystr = "replicate"; break;
       case HWLOC_MEMBIND_NEXTTOUCH: policystr = "nexttouch"; break;
-      default: fprintf(stderr, "unknown memory policy %d\n", policy); assert(0); break;
+      default: fprintf(stderr, "unknown memory policy %u\n", policy); assert(0); break;
       }
     }
     if (policystr)

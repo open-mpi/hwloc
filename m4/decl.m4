@@ -1,5 +1,7 @@
 dnl -*- Autoconf -*-
-dnl Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+dnl Copyright © 2009 CNRS
+dnl Copyright © 2009 INRIA
+dnl Copyright © 2009 Université Bordeaux 1
 dnl See COPYING in top-level directory.
 
 dnl HWLOC_CHECK_DECL

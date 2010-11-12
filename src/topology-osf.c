@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -220,7 +222,7 @@ hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodes
   void *ptr;
 
   if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy, flags))
-    return NULL;
+    return hwloc_alloc_or_fail(len, flags);
 
   /* TODO: rather use acreate/amalloc ? */
   ptr = nmmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,

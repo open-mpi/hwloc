@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009      CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009      CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  *
  * See COPYING in top-level directory.
@@ -87,6 +89,8 @@ struct hwloc_topology {
   int (*get_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
   int (*set_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
   int (*get_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+  /* alloc_membind has to always succeed if !(flags & HWLOC_MEMBIND_STRICT).
+   * see hwloc_alloc_or_fail which is convenient for that.  */
   void *(*alloc_membind)(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
   int (*free_membind)(hwloc_topology_t topology, void *addr, size_t len);
 
@@ -279,6 +283,16 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
       hwloc_insert_object_by_cpuset(topology, obj);
     }
   hwloc_debug("%s", "\n");
+}
+
+/* Allocates unbound memory or fail, depending on whether STRICT is requested
+ * or not */
+static inline void *
+hwloc_alloc_or_fail(size_t len, int flags)
+{
+  if (flags & HWLOC_MEMBIND_STRICT)
+    return NULL;
+  return hwloc_alloc(len);
 }
 
 #endif /* HWLOC_PRIVATE_H */

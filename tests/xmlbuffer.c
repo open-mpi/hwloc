@@ -17,6 +17,7 @@ int main(void)
   hwloc_topology_t topology;
   int size1, size2;
   char *buf1, *buf2;
+  int err = 0;
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
@@ -33,11 +34,18 @@ int main(void)
   hwloc_topology_destroy(topology);
   printf("re-exported to buffer %p length %d\n", buf2, size2);
 
-  assert(size1 == size2);
-  assert(!strcmp(buf1, buf2));
+  if (strcmp(buf1, buf2)) {
+    printf("### First exported buffer is:\n");
+    printf(buf1);
+    printf("### End of first export buffer\n");
+    printf("### Second exported buffer is:\n");
+    printf(buf2);
+    printf("### End of second export buffer\n");
+    err = 1;
+  }
 
   xmlFree(BAD_CAST buf1);
   xmlFree(BAD_CAST buf2);
 
-  return 0;
+  return err;
 }

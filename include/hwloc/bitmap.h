@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -12,6 +14,7 @@
 #define HWLOC_BITMAP_H
 
 #include <hwloc/config.h>
+#include <assert.h>
 
 
 #ifdef __cplusplus
@@ -48,6 +51,9 @@ typedef const struct hwloc_bitmap_s * hwloc_const_bitmap_t;
  * The bitmap should be freed by a corresponding call to
  * hwloc_bitmap_free(). */
 HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_alloc(void) __hwloc_attribute_malloc;
+
+/** \brief Allocate a new full bitmap. */
+HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_alloc_full(void) __hwloc_attribute_malloc;
 
 /** \brief Free bitmap \p bitmap */
 HWLOC_DECLSPEC void hwloc_bitmap_free(hwloc_bitmap_t bitmap);
@@ -205,10 +211,11 @@ HWLOC_DECLSPEC int hwloc_bitmap_weight(hwloc_const_bitmap_t bitmap) __hwloc_attr
  * indexes that in the bitmap.  To be specific: each iteration will return a
  * value for \p index such that hwloc_bitmap_isset(bitmap, index) is true.
  *
- * The loop is infinite if the bitmap is infinite.
+ * The assert prevents the loop from being infinite if the bitmap is infinite.
  */
 #define hwloc_bitmap_foreach_begin(index, bitmap) \
 do { \
+        assert(hwloc_bitmap_weight(bitmap) != -1); \
         for (index = hwloc_bitmap_first(bitmap); \
              (unsigned) index != (unsigned) -1; \
              index = hwloc_bitmap_next(bitmap, index)) { \

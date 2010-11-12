@@ -1,5 +1,7 @@
 /*
- * Copyright © 2009 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2009 CNRS
+ * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -622,6 +624,44 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
     hwloc_distribute(topology, root->children[u], cpusetp, chunk_size-1);
 }
 
+/** \brief Allocate some memory on the given nodeset \p nodeset
+ *
+ * This is similar to hwloc_alloc_membind except that it is allowed to change
+ * the current memory binding policy, thus providing more binding support, at
+ * the expense of changing the current state.
+ */
+static __hwloc_inline void *
+hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  void *p = hwloc_alloc_membind_nodeset(topology, len, nodeset, policy, flags);
+  if (p)
+    return p;
+  hwloc_set_membind_nodeset(topology, nodeset, policy, flags);
+  p = hwloc_alloc(len);
+  if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
+    /* Enforce the binding by touching the data */
+    memset(p, 0, len);
+  return p;
+}
+
+/** \brief Allocate some memory on the memory nodes near given cpuset \p cpuset
+ *
+ * This is similar to hwloc_alloc_membind_policy_nodeset, but for a given cpuset.
+ */
+static __hwloc_inline void *
+hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags)
+{
+  void *p = hwloc_alloc_membind(topology, len, cpuset, policy, flags);
+  if (p)
+    return p;
+  hwloc_set_membind(topology, cpuset, policy, flags);
+  p = hwloc_alloc(len);
+  if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
+    /* Enforce the binding by touching the data */
+    memset(p, 0, len);
+  return p;
+}
+
 /** @} */
 
 
@@ -700,8 +740,8 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
 /* \brief Get complete node set
  *
  * \return the complete node set of memory of the system. If the
- * topology is the result of a combination of several systems, or if it
- * contains no NUMA memory nodes, NULL is returned;
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
@@ -717,7 +757,7 @@ hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
  * \return the node set of memory of the system for which hwloc
  * provides topology information. This is equivalent to the nodeset of the
  * system object. If the topology is the result of a combination of several
- * systems, or if it contains no NUMA memory nodes, NULL is returned.
+ * systems, NULL is returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
@@ -731,8 +771,8 @@ hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
 /** \brief Get allowed node set
  *
  * \return the node set of allowed memory of the system. If the
- * topology is the result of a combination of several systems, or if it
- * contains no NUMA memory nodes, NULL is returned.
+ * topology is the result of a combination of several systems, NULL is
+ * returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
  * changed or freed, hwloc_nodeset_dup must be used to obtain a local copy.
@@ -867,12 +907,6 @@ hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t
 }
 
 /** @} */
-
-
-
-/* TODO: add helper which changes the current memory policy and allocates bound
- * memory, to maximize chances to get something bound at the expense of
- * changing the current memory policy.  */
 
 
 
