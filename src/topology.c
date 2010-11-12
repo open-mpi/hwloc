@@ -1049,6 +1049,12 @@ add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
 {
   hwloc_obj_t child, *temp;
 
+  /* I/O devices (and their children) have no sets */
+  if (obj->type == HWLOC_OBJ_BRIDGE
+      || obj->type == HWLOC_OBJ_PCI_DEVICE
+      || obj->type == HWLOC_OBJ_OS_DEVICE)
+    return;
+
   if (parent_has_sets || obj->cpuset) {
     /* if the parent has non-NULL sets, or if the object has non-NULL cpusets,
      * it must have non-NULL nodesets
