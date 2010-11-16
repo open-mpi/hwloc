@@ -580,8 +580,9 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
 
 /** \brief Distribute \p n items over the topology under \p root
  *
- * Array \p cpuset will be filled with \p n cpusets distributed linearly over
- * the topology under \p root .
+ * Array \p cpuset will be filled with \p n cpusets recursively distributed
+ * linearly over the topology under \p root, down to depth \p until (which can
+ * be MAX_INT to distribute down to the finest level).
  *
  * This is typically useful when an application wants to distribute \p n
  * threads over a machine, giving each of them as much private cache as
@@ -591,37 +592,52 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
  * before binding a thread so that it does not move at all.
  */
 static __hwloc_inline void
-hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, unsigned n)
+hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *root, unsigned n_roots, hwloc_cpuset_t *cpuset, unsigned n, unsigned until);
+static __hwloc_inline void
+hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, unsigned n, unsigned until)
 {
   unsigned i;
-  unsigned u;
-  unsigned chunk_size, complete_chunks;
-  hwloc_cpuset_t *cpusetp;
 
-  if (!root->arity || n == 1) {
+  if (!root->arity || n == 1 || root->depth >= until) {
     /* Got to the bottom, we can't split any more, put everything there.  */
     for (i=0; i<n; i++)
       cpuset[i] = hwloc_bitmap_dup(root->cpuset);
     return;
   }
 
+  hwloc_distributev(topology, root->children, root->arity, cpuset, n, until);
+}
+
+/** \brief Distribute \p n items over the topology under \p roots
+ *
+ * This is the same as hwloc_distribute, but takes an array of roots instead of
+ * just one root.
+ */
+static __hwloc_inline void
+hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *cpuset, unsigned n, unsigned until)
+{
+  unsigned i;
+  unsigned u;
+  unsigned chunk_size, complete_chunks;
+  hwloc_cpuset_t *cpusetp;
+
   /* Divide n in root->arity chunks.  */
-  chunk_size = (n + root->arity - 1) / root->arity;
-  complete_chunks = n % root->arity;
+  chunk_size = (n + n_roots - 1) / n_roots;
+  complete_chunks = n % n_roots;
   if (!complete_chunks)
-    complete_chunks = root->arity;
+    complete_chunks = n_roots;
 
   /* Allocate complete chunks first.  */
   for (cpusetp = cpuset, i = 0;
        i < complete_chunks;
        i ++, cpusetp += chunk_size)
-    hwloc_distribute(topology, root->children[i], cpusetp, chunk_size);
+    hwloc_distribute(topology, roots[i], cpusetp, chunk_size, until);
 
   /* Now allocate not-so-complete chunks.  */
   for (u = i;
-       u < root->arity;
+       u < n_roots;
        u++, cpusetp += chunk_size-1)
-    hwloc_distribute(topology, root->children[u], cpusetp, chunk_size-1);
+    hwloc_distribute(topology, roots[u], cpusetp, chunk_size-1, until);
 }
 
 /** \brief Allocate some memory on the given nodeset \p nodeset
