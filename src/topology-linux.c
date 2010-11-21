@@ -2042,12 +2042,18 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
   struct dirent *dirent;
   while (NULL != (dirent = readdir(dt))) {
 
-    if (('.' == dirent->d_name[0]) || (0 == (dirent->d_type & DT_DIR)))
+    if ('.' == dirent->d_name[0])
       continue;
 
     char cpu[sizeof(ofroot) + 1 + strlen(dirent->d_name) + 1];
     snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, dirent->d_name);
-    
+    struct stat statbuf;
+    int err;
+
+    err = hwloc_stat(cpu, &statbuf, root_fd);
+    if (err < 0 || !S_ISDIR(statbuf.st_mode))
+      continue;
+
     char *device_type = hwloc_read_str(cpu, "device_type", root_fd);
     if (NULL == device_type)
       continue;
