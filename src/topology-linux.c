@@ -2042,12 +2042,18 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
   struct dirent *dirent;
   while (NULL != (dirent = readdir(dt))) {
 
-    if (('.' == dirent->d_name[0]) || (0 == (dirent->d_type & DT_DIR)))
+    if ('.' == dirent->d_name[0])
       continue;
 
     char cpu[sizeof(ofroot) + 1 + strlen(dirent->d_name) + 1];
     snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, dirent->d_name);
-    
+    struct stat statbuf;
+    int err;
+
+    err = hwloc_stat(cpu, &statbuf, root_fd);
+    if (err < 0 || !S_ISDIR(statbuf.st_mode))
+      continue;
+
     char *device_type = hwloc_read_str(cpu, "device_type", root_fd);
     if (NULL == device_type)
       continue;
@@ -2642,8 +2648,10 @@ hwloc_look_linux(struct hwloc_topology *topology)
 
     /* Gather the list of cpus now */
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
-	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
+	|| (hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
+	    && hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0)) {
+	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16)
+	 * or not containing anything interesting */
       err = look_cpuinfo(topology, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
       if (err < 0) {
         if (topology->is_thissystem)
