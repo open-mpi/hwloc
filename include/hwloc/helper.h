@@ -653,7 +653,7 @@ hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_
   if (p)
     return p;
   hwloc_set_membind_nodeset(topology, nodeset, policy, flags);
-  p = hwloc_alloc(len);
+  p = hwloc_alloc(topology, len);
   if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
     /* Enforce the binding by touching the data */
     memset(p, 0, len);
@@ -671,7 +671,7 @@ hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cp
   if (p)
     return p;
   hwloc_set_membind(topology, cpuset, policy, flags);
-  p = hwloc_alloc(len);
+  p = hwloc_alloc(topology, len);
   if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
     /* Enforce the binding by touching the data */
     memset(p, 0, len);
