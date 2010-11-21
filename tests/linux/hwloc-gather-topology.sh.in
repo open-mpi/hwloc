@@ -51,6 +51,7 @@ savepath() {
   done
   # gather all files now
   find "$path" -type f 2>/dev/null | while read file ; do	\
+    mkdir -p "$dest/"`dirname $file` ;		\
     cat "$file" > "$dest/$file" 2>/dev/null ;	\
   done
 }
