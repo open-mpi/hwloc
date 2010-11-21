@@ -959,7 +959,7 @@ hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nod
   void *buffer;
   int err;
 
-  buffer = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0); /* has this been supported for long enough? */
+  buffer = hwloc_alloc_mmap(topology, len);
   if (buffer == MAP_FAILED)
     return NULL;
 
@@ -2702,6 +2702,7 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #ifdef HWLOC_HAVE_MBIND
   topology->set_area_membind = hwloc_linux_set_area_membind;
   topology->alloc_membind = hwloc_linux_alloc_membind;
+  topology->alloc = hwloc_alloc_mmap;
   topology->free_membind = hwloc_linux_free_membind;
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;

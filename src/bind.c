@@ -9,6 +9,7 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <hwloc/helper.h>
+#include <sys/mman.h>
 #ifdef HAVE_MALLOC_H
 #  include <malloc.h>
 #endif
@@ -406,7 +407,7 @@ hwloc_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
 }
 
 void *
-hwloc_alloc(size_t len)
+hwloc_alloc_heap(hwloc_topology_t topology __hwloc_attribute_unused, size_t len)
 {
   void *p;
 #if defined(HAVE_GETPAGESIZE) && defined(HAVE_POSIX_MEMALIGN)
@@ -419,6 +420,22 @@ hwloc_alloc(size_t len)
   p = malloc(len);
 #endif
   return p;
+}
+
+#ifdef MAP_ANONYMOUS
+void *
+hwloc_alloc_mmap(hwloc_topology_t topology __hwloc_attribute_unused, size_t len)
+{
+  return mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+}
+#endif
+
+void *
+hwloc_alloc(hwloc_topology_t topology, size_t len)
+{
+  if (topology->alloc)
+    return topology->alloc(topology, len);
+  return hwloc_alloc_heap(topology, len);
 }
 
 void *
@@ -436,7 +453,7 @@ hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_n
   if (topology->alloc_membind)
     return topology->alloc_membind(topology, len, nodeset, policy, flags);
   else if (topology->set_area_membind) {
-    p = hwloc_alloc(len);
+    p = hwloc_alloc(topology, len);
     if (!p)
       return NULL;
     if (topology->set_area_membind(topology, p, len, nodeset, policy, flags) && flags & HWLOC_MEMBIND_STRICT) {
@@ -455,7 +472,7 @@ fallback:
     /* Report error */
     return NULL;
   /* Never mind, allocate anyway */
-  return hwloc_alloc(len);
+  return hwloc_alloc(topology, len);
 }
 
 void *
