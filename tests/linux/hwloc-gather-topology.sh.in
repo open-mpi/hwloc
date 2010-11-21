@@ -45,8 +45,12 @@ destdir=`mktemp -d`
 savepath() {
   local dest="$1"
   local path="$2"
+  # gather all directories, including empty ones
+  find "$path" -type d 2>/dev/null | while read dir ; do	\
+    mkdir -p "$dest/$dir" 2>/dev/null ;		\
+  done
+  # gather all files now
   find "$path" -type f 2>/dev/null | while read file ; do	\
-    mkdir -p "$dest/"`dirname $file` ;		\
     cat "$file" > "$dest/$file" 2>/dev/null ;	\
   done
 }
