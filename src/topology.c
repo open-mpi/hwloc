@@ -1195,7 +1195,8 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pparent)
   for_each_child_safe(child, parent, pchild)
     remove_ignored(topology, pchild);
 
-  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
+  if (parent != topology->levels[0][0] &&
+      topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     hwloc_debug("%s", "\nDropping ignored object ");
     print_object(topology, 0, parent);
     drop_object(pparent);
