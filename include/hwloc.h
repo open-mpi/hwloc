@@ -1244,7 +1244,7 @@ HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void 
  * This is equivalent to malloc(), except it tries to allocated page-aligned
  * memory from the OS.
  */
-HWLOC_DECLSPEC void *hwloc_alloc(size_t len);
+HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
 
 /** \brief Allocate some memory on the given nodeset \p nodeset
  *

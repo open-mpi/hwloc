@@ -59,7 +59,7 @@ Version 1.1.0
   + Cleanup lstopo output configuration by adding --output-format.
   + Add --intersect in hwloc-calc, and replace --objects with --largest.
   + Add the ability to work on standard input in hwloc-calc.
-  + Add --among in hwloc-distrib.
+  + Add --from, --to and --at in hwloc-distrib.
   + Add taskset-specific functions and command-line tools options to
     manipulate CPU set strings in the format of the taskset program.
   + Install hwloc-gather-topology.sh on Linux.

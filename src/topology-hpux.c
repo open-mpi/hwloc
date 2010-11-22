@@ -135,7 +135,7 @@ hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_node
   /* Can not give a set of nodes.  */
   if (!hwloc_bitmap_isequal(nodeset, hwloc_topology_get_complete_nodeset(topology))) {
     errno = EXDEV;
-    return hwloc_alloc_or_fail(len, flags);
+    return hwloc_alloc_or_fail(topology, len, flags);
   }
 
   switch (policy) {
@@ -258,6 +258,7 @@ hwloc_set_hpux_hooks(struct hwloc_topology *topology)
 #endif
 #ifdef MAP_MEM_FIRST_TOUCH
   topology->alloc_membind = hwloc_hpux_alloc_membind;
+  topology->alloc = hwloc_alloc_mmap;
   topology->free_membind = hwloc_hpux_free_membind;
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;

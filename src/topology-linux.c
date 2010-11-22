@@ -959,7 +959,7 @@ hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nod
   void *buffer;
   int err;
 
-  buffer = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0); /* has this been supported for long enough? */
+  buffer = hwloc_alloc_mmap(topology, len);
   if (buffer == MAP_FAILED)
     return NULL;
 
@@ -1037,7 +1037,7 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
  * makes the kernel happy.
  */
 static int
-hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology)
+hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute_unused)
 {
   static int max_numnodes = -1;
   int linuxpolicy;
@@ -1052,7 +1052,7 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology)
     unsigned long *mask = malloc(max_numnodes / HWLOC_BITS_PER_LONG * sizeof(long));
     int err = get_mempolicy(&linuxpolicy, mask, max_numnodes, 0, 0);
     free(mask);
-    if (!err)
+    if (!err || errno != EINVAL)
       /* found it */
       return max_numnodes;
     max_numnodes *= 2;
@@ -1062,7 +1062,6 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology)
 static int
 hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
-  hwloc_const_bitmap_t complete_nodeset;
   unsigned max_os_index;
   unsigned long *linuxmask;
   int linuxpolicy;
@@ -2043,12 +2042,18 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
   struct dirent *dirent;
   while (NULL != (dirent = readdir(dt))) {
 
-    if (('.' == dirent->d_name[0]) || (0 == (dirent->d_type & DT_DIR)))
+    if ('.' == dirent->d_name[0])
       continue;
 
     char cpu[sizeof(ofroot) + 1 + strlen(dirent->d_name) + 1];
     snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, dirent->d_name);
-    
+    struct stat statbuf;
+    int err;
+
+    err = hwloc_stat(cpu, &statbuf, root_fd);
+    if (err < 0 || !S_ISDIR(statbuf.st_mode))
+      continue;
+
     char *device_type = hwloc_read_str(cpu, "device_type", root_fd);
     if (NULL == device_type)
       continue;
@@ -2643,8 +2648,10 @@ hwloc_look_linux(struct hwloc_topology *topology)
 
     /* Gather the list of cpus now */
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
-	|| hwloc_access("/sys/devices/system/cpu/cpu0/topology", R_OK, topology->backend_params.sysfs.root_fd) < 0) {
-	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16) */
+	|| (hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
+	    && hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0)) {
+	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16)
+	 * or not containing anything interesting */
       err = look_cpuinfo(topology, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
       if (err < 0) {
         if (topology->is_thissystem)
@@ -2695,6 +2702,7 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #ifdef HWLOC_HAVE_MBIND
   topology->set_area_membind = hwloc_linux_set_area_membind;
   topology->alloc_membind = hwloc_linux_alloc_membind;
+  topology->alloc = hwloc_alloc_mmap;
   topology->free_membind = hwloc_linux_free_membind;
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;

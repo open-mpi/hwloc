@@ -89,6 +89,8 @@ struct hwloc_topology {
   int (*get_proc_membind)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
   int (*set_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
   int (*get_area_membind)(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
+  /* This has to return the same kind of pointer as alloc_membind, so that free_membind can be used on it */
+  void *(*alloc)(hwloc_topology_t topology, size_t len);
   /* alloc_membind has to always succeed if !(flags & HWLOC_MEMBIND_STRICT).
    * see hwloc_alloc_or_fail which is convenient for that.  */
   void *(*alloc_membind)(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
@@ -285,14 +287,20 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
   hwloc_debug("%s", "\n");
 }
 
+/* This can be used for the alloc field to get allocated data that can be freed by free() */
+void *hwloc_alloc_heap(hwloc_topology_t topology, size_t len);
+
+/* This can be used for the alloc field to get allocated data that can be freed by munmap() */
+void *hwloc_alloc_mmap(hwloc_topology_t topology, size_t len);
+
 /* Allocates unbound memory or fail, depending on whether STRICT is requested
  * or not */
 static inline void *
-hwloc_alloc_or_fail(size_t len, int flags)
+hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
 {
   if (flags & HWLOC_MEMBIND_STRICT)
     return NULL;
-  return hwloc_alloc(len);
+  return hwloc_alloc(topology, len);
 }
 
 #endif /* HWLOC_PRIVATE_H */

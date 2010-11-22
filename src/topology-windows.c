@@ -227,6 +227,11 @@ static int hwloc_win_get_VirtualAllocExNumaProc(void) {
 }
 
 static void *
+hwloc_win_alloc(hwloc_topology_t topology __hwloc_attribute_unused, size_t len) {
+  return VirtualAlloc(NULL, len, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+}
+
+static void *
 hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) {
   int node;
 
@@ -236,13 +241,13 @@ hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size
       break;
     default:
       errno = ENOSYS;
-      return hwloc_alloc_or_fail(len, flags);
+      return hwloc_alloc_or_fail(topology, len, flags);
   }
 
   if (hwloc_bitmap_weight(nodeset) != 1) {
     /* Not a single node, can't do this */
     errno = EXDEV;
-    return hwloc_alloc_or_fail(len, flags);
+    return hwloc_alloc_or_fail(topology, len, flags);
   }
 
   node = hwloc_bitmap_first(nodeset);
@@ -489,6 +494,7 @@ hwloc_set_windows_hooks(struct hwloc_topology *topology)
 
   if (!hwloc_win_get_VirtualAllocExNumaProc()) {
     topology->alloc_membind = hwloc_win_alloc_membind;
+    topology->alloc = hwloc_win_alloc;
     topology->free_membind = hwloc_win_free_membind;
     topology->support.membind->bind_membind = 1;
   }

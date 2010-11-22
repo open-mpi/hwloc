@@ -222,7 +222,7 @@ hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodes
   void *ptr;
 
   if (hwloc_osf_prepare_mattr(topology, &mattr, nodeset, policy, flags))
-    return hwloc_alloc_or_fail(len, flags);
+    return hwloc_alloc_or_fail(topology, len, flags);
 
   /* TODO: rather use acreate/amalloc ? */
   ptr = nmmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1,
@@ -338,6 +338,7 @@ hwloc_set_osf_hooks(struct hwloc_topology *topology)
   topology->set_thisproc_cpubind = hwloc_osf_set_thisproc_cpubind;
   topology->set_area_membind = hwloc_osf_set_area_membind;
   topology->alloc_membind = hwloc_osf_alloc_membind;
+  topology->alloc = hwloc_alloc_mmap;
   topology->free_membind = hwloc_osf_free_membind;
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;

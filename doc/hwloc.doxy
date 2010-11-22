@@ -430,7 +430,7 @@ process.  The documentation is installed during "make install" to
 $prefix/share/doc/hwloc/ and your systems default man page tree (under
 $prefix, of course).
 
-\subsection portability Portability (especially when using the API or XML)
+\subsection portability Portability
 
 As shown in \ref cli_examples, hwloc can obtain information on a wide
 variety of hardware topologies.  However, some platforms and/or
@@ -440,6 +440,17 @@ information.  For example, on an PPC64-based system with 32 cores
 from RHEL 5.4, hwloc is only able to glean information about NUMA
 nodes and processor units (PUs).  No information about caches,
 sockets, or cores is available.
+
+Similarly, Operating System have varying support for CPU and memory binding,
+e.g. while some Operating Systems provide interfaces for all kinds of CPU and
+memory bindings, some others provide only interfaces for a limited number of
+kinds of CPU and memory binding, and some do not provide any binding interface
+at all.  Hwloc's binding functions would then simply return the ENOSYS error
+(Function not implemented), meaning that the underlying Operating System
+does not provide any interface for them. \ref hwlocality_cpubinding and \ref
+hwlocality_membinding provide more information on which hwloc binding functions
+should be preferred because interfaces for them are usually available on the
+supported Operating Systems.
 
 Here's the graphic output from lstopo on this platform when
 Simultaneous Multi-Threading (SMT) is enabled:
