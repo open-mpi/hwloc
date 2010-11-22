@@ -32,7 +32,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
-#define HWLOC_OBJ_TYPE_UNKNOWN ((unsigned) -1)
+#define HWLOC_OBJ_TYPE_UNKNOWN ((hwloc_obj_type_t) -1)
     hwloc_obj_type_t type = HWLOC_OBJ_TYPE_UNKNOWN;
 
     while (*pos == ' ')
