@@ -526,8 +526,8 @@ HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict t
  *
  * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
- * \note The ENOSYS error is returned on platforms that does not support this
- * feature.
+ * \note -1 is returned and errno is set to ENOSYS on platforms that do not
+ * support this feature.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topology, hwloc_pid_t pid);
 
@@ -870,10 +870,11 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * different CPUs. Some OSes also only support that kind of binding.
  *
  * \note Some OSes do not provide all ways to bind processes, threads, etc and
- * the corresponding binding functions may fail. ENOSYS is returned when it is
- * not possible to bind the requested kind of object processes/threads). EXDEV
- * is returned when the requested cpuset can not be enforced (e.g. some systems
- * only allow one CPU, and some other systems only allow one NUMA node)
+ * the corresponding binding functions may fail. -1 is returned and errno is set
+ * to ENOSYS when it is not possible to bind the requested kind of object
+ * processes/threads. errno is set to EXDEV when the requested cpuset can not be
+ * enforced (e.g. some systems only allow one CPU, and some other systems only
+ * allow one NUMA node).
  *
  * The most portable version that should be preferred over the others, whenever
  * possible, is
@@ -954,14 +955,15 @@ typedef enum {
                                    * avoid using OS functions that would also
                                    * bind memory.  This will however reduce the
                                    * support of CPU bindings, i.e. potentially
-                                   * return ENOSYS in some cases.
+                                   * return -1 with errno set to ENOSYS in some
+                                   * cases.
                                    */
 } hwloc_cpubind_flags_t;
 
 /** \brief Bind current process or thread on cpus given in bitmap \p set
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
 
@@ -1016,10 +1018,10 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  *
  * \note Not all OSes support all ways to bind existing allocated memory
  * (migration), future memory allocation, explicit memory allocation, etc. and
- * the corresponding binding functions may fail. ENOSYS is returned when it is
- * not possible to bind the requested kind of object processes/threads). EXDEV
- * is returned when the requested cpuset can not be enforced (e.g. some systems
- * only allow one NUMA node)
+ * the corresponding binding functions may fail. -1 is returned and errno is
+ * set to ENOSYS when it is not possible to bind the requested kind of object
+ * processes/threads). errno is set to EXDEV when the requested cpuset can not
+ * be enforced (e.g. some systems only allow one NUMA node).
  *
  * The most portable version that should be preferred over the others, whenever
  * possible, is
@@ -1105,15 +1107,15 @@ typedef enum {
 
 /** \brief Bind current process memory on the given nodeset \p nodeset
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Bind current process memory on memory nodes near the given cpuset \p cpuset
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
 
@@ -1127,15 +1129,15 @@ HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t c
 
 /** \brief Bind given process memory on the given nodeset \p nodeset
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Bind given process memory on memory nodes near the given cpuset \p cpuset
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
 
@@ -1149,15 +1151,15 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 
 /** \brief Bind some memory range on the given nodeset \p nodeset
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Bind some memory range on memory nodes near the given cpuset \p cpuset
  *
- * \return ENOSYS if the action is not supported
- * \return EXDEV if the binding cannot be enforced
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
 
@@ -1178,19 +1180,19 @@ HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
 
 /** \brief Allocate some memory on the given nodeset \p nodeset
  *
- * \return ENOSYS if the action is not supported and HWLOC_MEMBIND_STRICT is
- * given
- * \return EXDEV if the binding cannot be enforced and HWLOC_MEMBIND_STRICT is
- * given
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * and HWLOC_MEMBIND_STRICT is given
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
+ * and HWLOC_MEMBIND_STRICT is given
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
 /** \brief Allocate some memory on memory nodes near the given cpuset \p cpuset
  *
- * \return ENOSYS if the action is not supported and HWLOC_MEMBIND_STRICT is
- * given
- * \return EXDEV if the binding cannot be enforced and HWLOC_MEMBIND_STRICT is
- * given
+ * \return -1 with errno set to ENOSYS if the action is not supported
+ * and HWLOC_MEMBIND_STRICT is given
+ * \return -1 with errno set to EXDEV if the binding cannot be enforced
+ * and HWLOC_MEMBIND_STRICT is given
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
