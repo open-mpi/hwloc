@@ -256,6 +256,8 @@ hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size
 
 static int
 hwloc_win_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len __hwloc_attribute_unused) {
+  if (!addr)
+    return 0;
   if (!VirtualFreeExProc(GetCurrentProcess(), addr, 0, MEM_RELEASE))
     return -1;
   return 0;

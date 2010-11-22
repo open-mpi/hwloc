@@ -156,12 +156,6 @@ hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_node
 
   return mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | mmap_flags, -1, 0);
 }
-
-static int
-hwloc_hpux_free_membind(hwloc_topology_t topology, void *addr, size_t len)
-{
-  return munmap(addr, len);
-}
 #endif /* MAP_MEM_FIRST_TOUCH */
 
 void
@@ -259,7 +253,7 @@ hwloc_set_hpux_hooks(struct hwloc_topology *topology)
 #ifdef MAP_MEM_FIRST_TOUCH
   topology->alloc_membind = hwloc_hpux_alloc_membind;
   topology->alloc = hwloc_alloc_mmap;
-  topology->free_membind = hwloc_hpux_free_membind;
+  topology->free_membind = hwloc_free_mmap;
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;
   topology->support.membind->interleave_membind = 1;

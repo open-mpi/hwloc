@@ -287,6 +287,12 @@ void *hwloc_alloc_heap(hwloc_topology_t topology, size_t len);
 /* This can be used for the alloc field to get allocated data that can be freed by munmap() */
 void *hwloc_alloc_mmap(hwloc_topology_t topology, size_t len);
 
+/* This can be used for the free_membind field to free data using free() */
+int hwloc_free_heap(hwloc_topology_t topology, void *addr, size_t len);
+
+/* This can be used for the free_membind field to free data using munmap() */
+int hwloc_free_mmap(hwloc_topology_t topology, void *addr, size_t len);
+
 /* Allocates unbound memory or fail, depending on whether STRICT is requested
  * or not */
 static inline void *

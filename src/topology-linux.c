@@ -971,12 +971,6 @@ hwloc_linux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nod
 
   return buffer;
 }
-
-static int
-hwloc_linux_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len)
-{
-  return munmap(addr, len);
-}
 #endif /* HWLOC_HAVE_MBIND */
 
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
@@ -2703,7 +2697,7 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
   topology->set_area_membind = hwloc_linux_set_area_membind;
   topology->alloc_membind = hwloc_linux_alloc_membind;
   topology->alloc = hwloc_alloc_mmap;
-  topology->free_membind = hwloc_linux_free_membind;
+  topology->free_membind = hwloc_free_mmap;
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;
   topology->support.membind->interleave_membind = 1;
