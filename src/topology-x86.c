@@ -75,7 +75,7 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
   if (level == 1)
     cache->ways = (cpuid >> 16) & 0xff;
   else {
-    static const unsigned ways_tab[] = { 0, 1, 2, 0, 4, 0, 8, 0, 16, 0, 32, 48, 64, 96, 128, -1 };
+    static const unsigned ways_tab[] = { 0, 1, 2, 0, 4, 0, 8, 0, 16, 0, 32, 48, 64, 96, 128, 0 };
     unsigned ways = (cpuid >> 12) & 0xf;
     cache->ways = ways_tab[ways];
   }
