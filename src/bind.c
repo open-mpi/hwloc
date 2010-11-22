@@ -430,6 +430,21 @@ hwloc_alloc_mmap(hwloc_topology_t topology __hwloc_attribute_unused, size_t len)
 }
 #endif
 
+int
+hwloc_free_heap(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len __hwloc_attribute_unused)
+{
+  free(addr);
+  return 0;
+}
+
+int
+hwloc_free_mmap(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len)
+{
+  if (!addr)
+    return 0;
+  return munmap(addr, len);
+}
+
 void *
 hwloc_alloc(hwloc_topology_t topology, size_t len)
 {
@@ -495,6 +510,5 @@ hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len)
 {
   if (topology->free_membind)
     return topology->free_membind(topology, addr, len);
-  free(addr);
-  return 0;
+  return hwloc_free_heap(topology, addr, len);
 }
