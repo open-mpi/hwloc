@@ -49,17 +49,11 @@ and \fBsynthetic\fR.
 .TP
 \fB\-\-ignore\fR <type>
 Ignore all objects of type <type> in the topology.
-This may be useful in case of asymmetric topologies since ignoring
-large objects (e.g. NUMA nodes) may improve the distribution of
-smaller objects (e.g. cores or PUs) among the machine.
 .TP
 \fB\-\-from\fR <type>
 Distribute starting from objects of the given type instead of from
 the top of the topology hierarchy, i.e. ignoring the structure given by objects
 above.
-This may be useful in case of asymmetric topologies since small
-objects (e.g. cores or PUs) may be more uniformly distributed across
-the machine than larger objects (e.g. NUMA nodes).
 .TP
 \fB\-\-top\fR <type>
 Distribute down to objects of the given type instead of down to the bottom of
@@ -95,16 +89,6 @@ to the topology of a machine. These masks can be used with hwloc-bind(1).
 It is highly recommended that you read the hwloc(7) overview page
 before reading this man page.  Most of the concepts described in
 hwloc(7) directly apply to the hwloc-bind utility.
-.
-.
-.\" **************************
-.\"    bugs Section
-.\" **************************
-.SH BUGS
-.PP
-.
-hwloc-distrib does not take potential hierarchy unbalance into account yet.
-\fB\-\-from\fR can be used to ignore unbalanced top levels.
 .
 .\" **************************
 .\"    Examples Section

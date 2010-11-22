@@ -617,27 +617,22 @@ static __hwloc_inline void
 hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *cpuset, unsigned n, unsigned until)
 {
   unsigned i;
-  unsigned u;
-  unsigned chunk_size, complete_chunks;
-  hwloc_cpuset_t *cpusetp;
+  unsigned tot_weight;
+  hwloc_cpuset_t *cpusetp = cpuset;
 
-  /* Divide n in root->arity chunks.  */
-  chunk_size = (n + n_roots - 1) / n_roots;
-  complete_chunks = n % n_roots;
-  if (!complete_chunks)
-    complete_chunks = n_roots;
+  tot_weight = 0;
+  for (i = 0; i < n_roots; i++)
+    tot_weight += hwloc_bitmap_weight(roots[i]->cpuset);
 
-  /* Allocate complete chunks first.  */
-  for (cpusetp = cpuset, i = 0;
-       i < complete_chunks;
-       i ++, cpusetp += chunk_size)
-    hwloc_distribute(topology, roots[i], cpusetp, chunk_size, until);
-
-  /* Now allocate not-so-complete chunks.  */
-  for (u = i;
-       u < n_roots;
-       u++, cpusetp += chunk_size-1)
-    hwloc_distribute(topology, roots[u], cpusetp, chunk_size-1, until);
+  for (i = 0; i < n_roots; i++) {
+    /* Give to roots[i] a portion proportional to its weight */
+    unsigned weight = hwloc_bitmap_weight(roots[i]->cpuset);
+    unsigned chunk = (n * weight + tot_weight-1) / tot_weight;
+    hwloc_distribute(topology, roots[i], cpusetp, chunk, until);
+    cpusetp += chunk;
+    tot_weight -= weight;
+    n -= chunk;
+  }
 }
 
 /** \brief Allocate some memory on the given nodeset \p nodeset
