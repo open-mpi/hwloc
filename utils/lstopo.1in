@@ -53,14 +53,14 @@ Include additional detail.
 Reduce the amount of details to show.
 .TP
 \fB\-l\fR \fB\-\-logical\fR
-Display hwloc logical indexes instead of physical/OS indexes (default).
+Display hwloc logical indexes instead of physical/OS indexes (default for console output).
 These indexes are prefixed with "#".
 The physical indexes of some objects (PU and Node by default, all
 objects if verbose) will appear as object attribute "phys=...".
 .TP
 \fB\-p\fR \fB\-\-physical\fR
-Display OS/physical indexes instead of hwloc logical indexes.
-These indexes are prefixed with "p#" instead of "#".
+Display OS/physical indexes instead of hwloc logical indexes (default for drawing output).
+These indexes are prefixed with "p#" instead of "#" in the console output.
 .TP
 \fB\-c\fR \fB\-\-cpuset\fR
 Display the cpuset of each object.
