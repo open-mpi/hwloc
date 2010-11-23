@@ -336,7 +336,7 @@ static int
 lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 {
   unsigned idx = logical ? obj->logical_index : obj->os_index;
-  const char *indexprefix = logical ? " #" : " p#";
+  const char *indexprefix = "#";
   char typestr[32];
   char indexstr[32]= "";
   char attrstr[256];
@@ -355,7 +355,7 @@ static void
 pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
-  unsigned textwidth = fontsize ? (6-logical)*fontsize : gridsize;
+  unsigned textwidth = fontsize ? 5*fontsize : gridsize;
   unsigned mywidth = 0, totwidth;
 
   DYNA_CHECK();
@@ -399,7 +399,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 {
   unsigned myheight = gridsize + (fontsize ? (fontsize + gridsize) : 0) + gridsize, totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = fontsize ? ((logical ? level->logical_index : level->os_index) == (unsigned) -1 ? 7*fontsize : 9*fontsize) : 0;
+  unsigned textwidth = fontsize ? ((logical ? level->logical_index : level->os_index) == (unsigned) -1 ? 6*fontsize : 8*fontsize) : 0;
   /* Do not separate objects when in L1 (SMT) */
   unsigned separator = level->attr->cache.depth > 1 ? gridsize : 0;
 
@@ -426,7 +426,7 @@ core_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = 5*fontsize;
+  unsigned textwidth = 4*fontsize;
 
   DYNA_CHECK();
 
@@ -450,7 +450,7 @@ socket_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = 6*fontsize;
+  unsigned textwidth = 5*fontsize;
 
   DYNA_CHECK();
 
@@ -481,7 +481,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   /* Currently filled width */
   unsigned totwidth;
   /* Width of the heading text, thus minimal width */
-  unsigned textwidth = 11*fontsize;
+  unsigned textwidth = 10*fontsize;
 
   /* Check whether dynamic programming can save us time */
   DYNA_CHECK();
@@ -513,7 +513,7 @@ machine_draw(hwloc_topology_t topology, struct draw_methods *methods, int logica
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = 11*fontsize;
+  unsigned textwidth = 7*fontsize;
 
   DYNA_CHECK();
 
@@ -537,7 +537,7 @@ system_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = 10*fontsize;
+  unsigned textwidth = 9*fontsize;
   int vert = prefer_vert(topology, logical, level, output, depth, x, y, gridsize);
 
   DYNA_CHECK();
@@ -603,7 +603,7 @@ group_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = level->name ? strlen(level->name) * fontsize : 6*fontsize;
+  unsigned textwidth = level->name ? strlen(level->name) * fontsize : 5*fontsize;
 
   DYNA_CHECK();
 
@@ -632,7 +632,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   unsigned boxheight = gridsize + (fontsize ? (fontsize + gridsize) : 0);
   unsigned myheight = boxheight + (level->arity?gridsize:0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = level->name ? strlen(level->name) * fontsize : 6*fontsize;
+  unsigned textwidth = level->name ? strlen(level->name) * fontsize : 5*fontsize;
 
   DYNA_CHECK();
 
@@ -659,8 +659,29 @@ static void
 fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
   unsigned totwidth, totheight;
+  time_t t;
+  char text[64];
+  char *date;
+  char hostname[64];
+  unsigned long hostname_size = sizeof(hostname);
 
   system_draw(topology, methods, logical, level, output, depth, x, &totwidth, y, &totheight);
+
+  t = time(NULL);
+  date = ctime(&t);
+
+  if (hwloc_topology_is_thissystem(topology) &&
+#ifdef HWLOC_WIN_SYS
+      GetComputerName(hostname, &hostname_size)
+#else
+      !gethostname(hostname, hostname_size)
+#endif
+      )
+    snprintf(text, sizeof(text), "%s IDs for %s on %s", logical ? "logical" : "physical", hostname, date);
+  else
+    snprintf(text, sizeof(text), "%s IDs on %s", logical ? "logical" : "physical", date);
+  methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + fontsize + gridsize);
+  methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
 }
 
 /*
