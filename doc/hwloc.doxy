@@ -679,7 +679,7 @@ Make sure to have had a look at those too!
 <dt>Level</dt>
   <dd>Set of objects of the same type.</dd>
 
-<dt>OS index</dt>
+<dt>OS or physical index</dt>
   <dd>The index that the operating system (OS) uses to identify the
   object.  This may be completely arbitrary, or it may depend on the
   BIOS configuration.</dd>

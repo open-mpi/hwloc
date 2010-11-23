@@ -26,7 +26,7 @@
 #include "lstopo.h"
 #include "misc.h"
 
-int logical = 1;
+int logical = -1;
 hwloc_obj_type_t show_only = (hwloc_obj_type_t) -1;
 int show_cpuset = 0;
 int taskset = 0;
@@ -191,8 +191,10 @@ void usage(const char *name, FILE *where)
 #endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
-  fprintf (where, "  -l --logical          Display hwloc logical object indexes (default)\n");
+  fprintf (where, "  -l --logical          Display hwloc logical object indexes\n");
+  fprintf (where, "                        (default for console output)\n");
   fprintf (where, "  -p --physical         Display physical object indexes\n");
+  fprintf (where, "                        (default for drawing output)\n");
   fprintf (where, "Output options:\n");
   fprintf (where, "  --output-format <format>\n");
   fprintf (where, "  --of <format>         Force the output to use the given format\n");
@@ -449,19 +451,36 @@ main (int argc, char *argv[])
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }
 
+  if (logical == -1) {
+    if (output_format == LSTOPO_OUTPUT_CONSOLE)
+      logical = 1;
+    else if (output_format != LSTOPO_OUTPUT_DEFAULT)
+      logical = 0;
+  }
+
   switch (output_format) {
     case LSTOPO_OUTPUT_DEFAULT:
 #ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
-      if (getenv("DISPLAY"))
+      if (getenv("DISPLAY")) {
+        if (logical == -1)
+          logical = 0;
         output_x11(topology, NULL, logical, verbose_mode);
-      else
+      } else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_WIN_SYS
+      {
+        if (logical == -1)
+          logical = 0;
         output_windows(topology, NULL, logical, verbose_mode);
+      }
 #else
-      output_console(topology, NULL, logical, verbose_mode);
+      {
+        if (logical == -1)
+          logical = 1;
+        output_console(topology, NULL, logical, verbose_mode);
+      }
 #endif
       break;
 
