@@ -663,12 +663,16 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_
   char text[64];
   char *date;
   char hostname[64];
+  int n;
   unsigned long hostname_size = sizeof(hostname);
 
   system_draw(topology, methods, logical, level, output, depth, x, &totwidth, y, &totheight);
 
   t = time(NULL);
   date = ctime(&t);
+  n = strlen(date);
+  if (n && date[n-1] == '\n');
+    date[n-1] = 0;
 
   if (hwloc_topology_is_thissystem(topology) &&
 #ifdef HWLOC_WIN_SYS
