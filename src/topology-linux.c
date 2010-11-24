@@ -1579,7 +1579,7 @@ hwloc_parse_hugepages_info(struct hwloc_topology *topology,
 {
   DIR *dir;
   struct dirent *dirent;
-  unsigned long index = 1;
+  unsigned long index_ = 1;
   FILE *hpfd;
   char line[64];
   char path[SYSFS_NUMA_NODE_PATH_LEN];
@@ -1589,21 +1589,21 @@ hwloc_parse_hugepages_info(struct hwloc_topology *topology,
     while ((dirent = readdir(dir)) != NULL) {
       if (strncmp(dirent->d_name, "hugepages-", 10))
         continue;
-      memory->page_types[index].size = strtoul(dirent->d_name+10, NULL, 0) * 1024ULL;
+      memory->page_types[index_].size = strtoul(dirent->d_name+10, NULL, 0) * 1024ULL;
       sprintf(path, "%s/%s/nr_hugepages", dirpath, dirent->d_name);
       hpfd = hwloc_fopen(path, "r", topology->backend_params.sysfs.root_fd);
       if (hpfd) {
         if (fgets(line, sizeof(line), hpfd)) {
           fclose(hpfd);
           /* these are the actual total amount of huge pages */
-          memory->page_types[index].count = strtoull(line, NULL, 0);
-          *remaining_local_memory -= memory->page_types[index].count * memory->page_types[index].size;
-          index++;
+          memory->page_types[index_].count = strtoull(line, NULL, 0);
+          *remaining_local_memory -= memory->page_types[index_].count * memory->page_types[index_].size;
+          index_++;
         }
       }
     }
     closedir(dir);
-    memory->page_types_len = index;
+    memory->page_types_len = index_;
   }
 }
 
@@ -1819,31 +1819,31 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       hwloc_obj_t nodes[nbnodes];
       unsigned distances[nbnodes][nbnodes];
       unsigned distance_indexes[nbnodes];
-      unsigned index;
+      unsigned index_;
 
       /* Get node indexes now. We need them in order since Linux groups
        * sparse distances but keep them in order in the sysfs distance files.
        */
-      index = 0;
+      index_ = 0;
       hwloc_bitmap_foreach_begin (osnode, nodeset) {
-	distance_indexes[index] = osnode;
-	index++;
+	distance_indexes[index_] = osnode;
+	index_++;
       } hwloc_bitmap_foreach_end();
       hwloc_bitmap_free(nodeset);
 
 #ifdef HWLOC_DEBUG
       hwloc_debug("%s", "numa distance indexes: ");
-      for (index = 0; index < nbnodes; index++) {
-	hwloc_debug(" %u", distance_indexes[index]);
+      for (index_ = 0; index_ < nbnodes; index_++) {
+	hwloc_debug(" %u", distance_indexes[index_]);
       }
       hwloc_debug("%s", "\n");
 #endif
 
       /* Get actual distances now */
-      for (index = 0; index < nbnodes; index++) {
+      for (index_ = 0; index_ < nbnodes; index_++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
-	  osnode = distance_indexes[index];
+	  osnode = distance_indexes[index_];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
@@ -1860,10 +1860,10 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
           hwloc_insert_object_by_cpuset(topology, node);
-          nodes[index] = node;
+          nodes[index_] = node;
 
           sprintf(nodepath, "%s/node%u/distance", path, osnode);
-          hwloc_parse_node_distance(nodepath, nbnodes, distances[index], topology->backend_params.sysfs.root_fd);
+          hwloc_parse_node_distance(nodepath, nbnodes, distances[index_], topology->backend_params.sysfs.root_fd);
       }
 
       hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned *) distances, (unsigned *) distance_indexes);
@@ -2209,7 +2209,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   unsigned caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
-      struct hwloc_obj *socket, *core, *thread;
+      struct hwloc_obj *sock, *core, *thread;
       hwloc_bitmap_t socketset, coreset, threadset, savedcoreset;
       unsigned mysocketid, mycoreid;
 
@@ -2222,11 +2222,11 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       socketset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
       if (socketset && hwloc_bitmap_first(socketset) == i) {
         /* first cpu in this socket, add the socket */
-        socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
-        socket->cpuset = socketset;
+        sock = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
+        sock->cpuset = socketset;
         hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
                      mysocketid, socketset);
-        hwloc_insert_object_by_cpuset(topology, socket);
+        hwloc_insert_object_by_cpuset(topology, sock);
         socketset = NULL; /* don't free it */
       }
       hwloc_bitmap_free(socketset);
