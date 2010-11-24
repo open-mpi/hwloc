@@ -120,7 +120,7 @@ output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical
     output_only (topology, l->children[x], output, logical, verbose_mode);
 }
 
-void output_console(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode)
+void output_console(hwloc_topology_t topology, const char *filename, int logical, int legend __hwloc_attribute_unused, int verbose_mode)
 {
   unsigned topodepth;
   FILE *output;
@@ -606,7 +606,7 @@ static struct draw_methods text_draw_methods = {
   .text = text_text,
 };
 
-void output_text(hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
+void output_text(hwloc_topology_t topology, const char *filename, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output;
   struct display *disp;
@@ -665,8 +665,8 @@ void output_text(hwloc_topology_t topology, const char *filename, int logical, i
   }
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
-  disp = output_draw_start(&text_draw_methods, logical, topology, output);
-  output_draw(&text_draw_methods, logical, topology, disp);
+  disp = output_draw_start(&text_draw_methods, logical, legend, topology, output);
+  output_draw(&text_draw_methods, logical, legend, topology, disp);
 
   lfr = lfg = lfb = -1;
   lbr = lbg = lbb = -1;
