@@ -223,7 +223,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
   {
     hwloc_bitmap_t sockets_cpuset = hwloc_bitmap_dup(complete_cpuset);
     hwloc_bitmap_t socket_cpuset;
-    hwloc_obj_t socket;
+    hwloc_obj_t sock;
 
     while ((i = hwloc_bitmap_first(sockets_cpuset)) != (unsigned) -1) {
       unsigned socketid = infos[i].socketid;
@@ -236,11 +236,11 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
           hwloc_bitmap_clr(sockets_cpuset, j);
         }
       }
-      socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, socketid);
-      socket->cpuset = socket_cpuset;
+      sock = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, socketid);
+      sock->cpuset = socket_cpuset;
       hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
           socketid, socket_cpuset);
-      hwloc_insert_object_by_cpuset(topology, socket);
+      hwloc_insert_object_by_cpuset(topology, sock);
     }
     hwloc_bitmap_free(sockets_cpuset);
   }

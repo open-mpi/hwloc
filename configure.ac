@@ -125,11 +125,11 @@ AS_IF([test "$enable_embedded_mode" != "yes"],
              [AC_MSG_WARN([The hwloc source tree looks incomplete for a standalobe])
               AC_MSG_WARN([build.  Perhaps this hwloc tree is intended for an embedded])
               AC_MSG_WARN([build?  Try using the --enable-embedded-mode switch.])
-              AC_MSG_ERROR([Cannot continue])],
+              AC_MSG_ERROR([Cannot build standalone hwloc])],
              [HWLOC_BUILD_STANDALONE])])
 
 # Setup the hwloc core
-HWLOC_SETUP_CORE([], [], [AC_MSG_ERROR([Cannot continue])], [1])
+HWLOC_SETUP_CORE([], [], [AC_MSG_ERROR([Cannot build hwloc core])], [1])
 
 # Setup hwloc's docs, utils, and tests
 AS_IF([test "$hwloc_mode" = "standalone"],

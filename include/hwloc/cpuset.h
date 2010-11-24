@@ -39,14 +39,14 @@ static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_from_ulong(
 static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_from_ith_ulong(hwloc_bitmap_t bitmap, unsigned i, unsigned long mask) { hwloc_bitmap_from_ith_ulong(bitmap, i, mask); }
 static __hwloc_inline unsigned __hwloc_attribute_deprecated long hwloc_cpuset_to_ulong(hwloc_const_bitmap_t bitmap) { return hwloc_bitmap_to_ulong(bitmap); }
 static __hwloc_inline unsigned __hwloc_attribute_deprecated long hwloc_cpuset_to_ith_ulong(hwloc_const_bitmap_t bitmap, unsigned i) { return hwloc_bitmap_to_ith_ulong(bitmap, i); }
-static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_cpu(hwloc_bitmap_t bitmap, unsigned index) { hwloc_bitmap_only(bitmap, index); }
-static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_all_but_cpu(hwloc_bitmap_t bitmap, unsigned index) { hwloc_bitmap_allbut(bitmap, index); }
-static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_set(hwloc_bitmap_t bitmap, unsigned index) { hwloc_bitmap_set(bitmap, index); }
+static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_cpu(hwloc_bitmap_t bitmap, unsigned index_) { hwloc_bitmap_only(bitmap, index_); }
+static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_all_but_cpu(hwloc_bitmap_t bitmap, unsigned index_) { hwloc_bitmap_allbut(bitmap, index_); }
+static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_set(hwloc_bitmap_t bitmap, unsigned index_) { hwloc_bitmap_set(bitmap, index_); }
 static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_set_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end) { hwloc_bitmap_set_range(bitmap, begin, end); }
 static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_set_ith_ulong(hwloc_bitmap_t bitmap, unsigned i, unsigned long mask) { hwloc_bitmap_set_ith_ulong(bitmap, i, mask); }
-static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_clr(hwloc_bitmap_t bitmap, unsigned index) { hwloc_bitmap_clr(bitmap, index); }
+static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_clr(hwloc_bitmap_t bitmap, unsigned index_) { hwloc_bitmap_clr(bitmap, index_); }
 static __hwloc_inline void __hwloc_attribute_deprecated hwloc_cpuset_clr_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end) { hwloc_bitmap_clr_range(bitmap, begin, end); }
-static __hwloc_inline int __hwloc_attribute_deprecated hwloc_cpuset_isset(hwloc_const_bitmap_t bitmap, unsigned index) { return hwloc_bitmap_isset(bitmap, index); }
+static __hwloc_inline int __hwloc_attribute_deprecated hwloc_cpuset_isset(hwloc_const_bitmap_t bitmap, unsigned index_) { return hwloc_bitmap_isset(bitmap, index_); }
 static __hwloc_inline int __hwloc_attribute_deprecated hwloc_cpuset_iszero(hwloc_const_bitmap_t bitmap) { return hwloc_bitmap_iszero(bitmap); }
 static __hwloc_inline int __hwloc_attribute_deprecated hwloc_cpuset_isfull(hwloc_const_bitmap_t bitmap) { return hwloc_bitmap_isfull(bitmap); }
 static __hwloc_inline int __hwloc_attribute_deprecated hwloc_cpuset_isequal(hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2) { return hwloc_bitmap_isequal(bitmap1, bitmap2); }
