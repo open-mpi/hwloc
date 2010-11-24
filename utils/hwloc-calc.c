@@ -129,13 +129,13 @@ int main(int argc, char *argv[])
 	listtype = hwloc_obj_type_of_string(argv[2]);
 	if (listtype == (hwloc_obj_type_t) -1) {
 	  char *endptr;
-	  unsigned depth = strtoul(argv[2], &endptr, 0);
+	  unsigned _depth = strtoul(argv[2], &endptr, 0);
 	  if (*endptr) {
 	    fprintf(stderr, "unrecognized list type or depth %s\n", argv[2]);
 	    usage(callname, stderr);
 	    return EXIT_SUCCESS;
 	  }
-	  listdepth = depth;
+	  listdepth = _depth;
 	}
 	argv++;
 	argc--;
