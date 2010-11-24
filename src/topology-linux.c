@@ -1211,11 +1211,11 @@ hwloc_linux_parse_cpumap_file(FILE *file, hwloc_bitmap_t set)
     hwloc_bitmap_set_ith_ulong(set, i, maps[i]);
 #else
   for(i=0; i<(nr_maps+1)/2; i++) {
-    unsigned long ulong;
-    ulong = maps[2*i];
+    unsigned long mask;
+    mask = maps[2*i];
     if (2*i+1<nr_maps)
-      ulong |= maps[2*i+1] << KERNEL_CPU_MASK_BITS;
-    hwloc_bitmap_set_ith_ulong(set, i, ulong);
+      mask |= maps[2*i+1] << KERNEL_CPU_MASK_BITS;
+    hwloc_bitmap_set_ith_ulong(set, i, mask);
   }
 #endif
 
