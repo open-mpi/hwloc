@@ -656,7 +656,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 }
 
 static void
-fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
+fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int legend, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
   unsigned totwidth, totheight;
   time_t t;
@@ -674,18 +674,20 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_
   if (n && date[n-1] == '\n');
     date[n-1] = 0;
 
-  if (hwloc_topology_is_thissystem(topology) &&
+  if (legend) {
+    if (hwloc_topology_is_thissystem(topology) &&
 #ifdef HWLOC_WIN_SYS
-      GetComputerName(hostname, &hostname_size)
+        GetComputerName(hostname, &hostname_size)
 #else
-      !gethostname(hostname, hostname_size)
+        !gethostname(hostname, hostname_size)
 #endif
-      )
-    snprintf(text, sizeof(text), "%s IDs for %s on %s", logical ? "logical" : "physical", hostname, date);
-  else
-    snprintf(text, sizeof(text), "%s IDs on %s", logical ? "logical" : "physical", date);
-  methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + fontsize + gridsize);
-  methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
+        )
+      snprintf(text, sizeof(text), "%s IDs for %s on %s", logical ? "logical" : "physical", hostname, date);
+    else
+      snprintf(text, sizeof(text), "%s IDs on %s", logical ? "logical" : "physical", date);
+    methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + fontsize + gridsize);
+    methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
+  }
 }
 
 /*
@@ -756,10 +758,10 @@ static struct draw_methods getmax_draw_methods = {
 };
 
 void *
-output_draw_start(struct draw_methods *methods, int logical, hwloc_topology_t topology, void *output)
+output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_topology_t topology, void *output)
 {
   struct coords coords = { .x = 0, .y = 0};
-  fig(topology, &getmax_draw_methods, logical, hwloc_get_root_obj(topology), &coords, 100, 0, 0);
+  fig(topology, &getmax_draw_methods, logical, legend, hwloc_get_root_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, 0, 0, 0);
   methods->declare_color(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR);
@@ -778,7 +780,7 @@ output_draw_start(struct draw_methods *methods, int logical, hwloc_topology_t to
 }
 
 void
-output_draw(struct draw_methods *methods, int logical, hwloc_topology_t topology, void *output)
+output_draw(struct draw_methods *methods, int logical, int legend, hwloc_topology_t topology, void *output)
 {
-	fig(topology, methods, logical, hwloc_get_root_obj(topology), output, 100, 0, 0);
+	fig(topology, methods, logical, legend, hwloc_get_root_obj(topology), output, 100, 0, 0);
 }

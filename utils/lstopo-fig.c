@@ -116,7 +116,7 @@ static struct draw_methods fig_draw_methods = {
 };
 
 void
-output_fig (hwloc_topology_t topology, const char *filename, int logical, int verbose_mode __hwloc_attribute_unused)
+output_fig (hwloc_topology_t topology, const char *filename, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output = open_file(filename, "w");
   if (!output) {
@@ -124,7 +124,7 @@ output_fig (hwloc_topology_t topology, const char *filename, int logical, int ve
     return;
   }
 
-  output = output_draw_start(&fig_draw_methods, logical, topology, output);
-  output_draw(&fig_draw_methods, logical, topology, output);
+  output = output_draw_start(&fig_draw_methods, logical, legend, topology, output);
+  output_draw(&fig_draw_methods, logical, legend, topology, output);
   fclose(output);
 }
