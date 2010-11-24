@@ -1866,6 +1866,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->get_proc_membind = NULL;
   topology->set_area_membind = NULL;
   topology->get_area_membind = NULL;
+  topology->alloc = NULL;
   topology->alloc_membind = NULL;
   topology->free_membind = NULL;
   memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
