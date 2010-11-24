@@ -998,7 +998,7 @@ hwloc_linux_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodese
 #ifdef HWLOC_HAVE_MIGRATE_PAGES
     unsigned long *fullmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
     if (fullmask) {
-      memset(fullmask, max_os_index/HWLOC_BITS_PER_LONG * sizeof(long), 0xf);
+      memset(fullmask, 0xf, max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
       err = migrate_pages(0, max_os_index+1, fullmask, linuxmask);
       free(fullmask);
     } else
