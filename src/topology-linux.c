@@ -2517,7 +2517,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 }
 
 static void
-hwloc__get_dmi_one_info(struct hwloc_topology *topology, hwloc_obj_t obj, char *sysfs_name, char *hwloc_name)
+hwloc__get_dmi_one_info(struct hwloc_topology *topology, hwloc_obj_t obj, const char *sysfs_name, const char *hwloc_name)
 {
   char sysfs_path[128];
   char dmi_line[64];

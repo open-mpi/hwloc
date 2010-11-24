@@ -170,7 +170,8 @@ int main(int argc, char *argv[])
   }
 
   if (get_binding) {
-    char *s, *policystr = NULL;
+    char *s;
+    const char *policystr = NULL;
     int err;
     if (cpubind) {
       if (pid)
