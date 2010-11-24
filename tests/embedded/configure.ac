@@ -18,7 +18,7 @@ EOF
 HWLOC_SET_SYMBOL_PREFIX([mytest_])
 HWLOC_SETUP_CORE([hwloc-tree], [hwloc_setup=happy], [hwloc_setup=unhappy])
 AS_IF([test "$hwloc_setup" = "unhappy"],
-      [AC_MSG_ERROR([Cannot continue])])
+      [AC_MSG_ERROR([Cannot build hwloc core])])
 HWLOC_DO_AM_CONDITIONALS
 
 cat <<EOF
