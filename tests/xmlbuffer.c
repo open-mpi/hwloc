@@ -36,10 +36,10 @@ int main(void)
 
   if (strcmp(buf1, buf2)) {
     printf("### First exported buffer is:\n");
-    printf(buf1);
+    printf("%s", buf1);
     printf("### End of first export buffer\n");
     printf("### Second exported buffer is:\n");
-    printf(buf2);
+    printf("%s", buf2);
     printf("### End of second export buffer\n");
     err = 1;
   }
