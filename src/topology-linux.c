@@ -28,6 +28,7 @@
 #include <pthread.h>
 #include <sys/mman.h>
 #if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
+#define migratepages migrate_pages /* workaround broken migratepages prototype in numaif.h before libnuma 2.0.2 */
 #include <numaif.h>
 #endif
 
