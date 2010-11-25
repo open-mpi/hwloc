@@ -244,6 +244,11 @@ hwloc_win_alloc_membind(hwloc_topology_t topology __hwloc_attribute_unused, size
       return hwloc_alloc_or_fail(topology, len, flags);
   }
 
+  if (flags & HWLOC_MEMBIND_STRICT) {
+    errno = ENOSYS;
+    return NULL;
+  }
+
   if (hwloc_bitmap_weight(nodeset) != 1) {
     /* Not a single node, can't do this */
     errno = EXDEV;
