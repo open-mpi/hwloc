@@ -22,6 +22,9 @@ Version 1.0.3
   all utils programs.
 * Fix hwloc_cpuset_to_linux_libnuma_ulongs in case of non-linear OS-indexes
   for NUMA nodes.
+* lstopo now displays physical/OS indexes by default in graphical mode
+  (use -l to switch back to logical indexes). The textual output still uses
+  logical by default (use -p to switch to physical indexes).
 
 
 Version 1.0.2
