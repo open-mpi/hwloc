@@ -314,6 +314,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     AC_CHECK_HEADER([stdint.h], [
       AC_DEFINE([HWLOC_HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
     ])
+    AC_CHECK_HEADERS([sys/mman.h])
     
     AC_CHECK_TYPES([KAFFINITY,
                     PROCESSOR_CACHE_TYPE,

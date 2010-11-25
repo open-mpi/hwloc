@@ -9,7 +9,9 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <hwloc/helper.h>
-#include <sys/mman.h>
+#ifdef HAVE_SYS_MMAN_H
+#  include <sys/mman.h>
+#endif
 #ifdef HAVE_MALLOC_H
 #  include <malloc.h>
 #endif
@@ -437,6 +439,7 @@ hwloc_free_heap(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, 
   return 0;
 }
 
+#ifdef MAP_ANONYMOUS
 int
 hwloc_free_mmap(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len)
 {
@@ -444,6 +447,7 @@ hwloc_free_mmap(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, 
     return 0;
   return munmap(addr, len);
 }
+#endif
 
 void *
 hwloc_alloc(hwloc_topology_t topology, size_t len)
