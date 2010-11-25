@@ -63,5 +63,10 @@ PVOID WINAPI VirtualAlloc(PVOID,DWORD,DWORD,DWORD);
 
 BOOL GetNumaAvailableMemoryNode(UCHAR Node, PULONGLONG AvailableBytes);
 
+typedef struct _SYSTEM_INFO {
+  DWORD dwPageSize;
+} SYSTEM_INFO, *LPSYSTEM_INFO;
+
+void WINAPI GetSystemInfo(LPSYSTEM_INFO lpSystemInfo);
 
 #endif /* HWLOC_PORT_WINDOWS_H */

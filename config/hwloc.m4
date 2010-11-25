@@ -327,7 +327,9 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
                     CACHE_RELATIONSHIP,
                     PROCESSOR_GROUP_INFO,
                     GROUP_RELATIONSHIP,
-                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX],
+                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX,
+		    PSAPI_WORKING_SET_EX_BLOCK,
+		    PSAPI_WORKING_SET_EX_INFORMATION],
                     [],[],[[#include <windows.h>]])
     AC_CHECK_LIB([gdi32], [main],
                  [HWLOC_LIBS="-lgdi32 $HWLOC_LIBS"
