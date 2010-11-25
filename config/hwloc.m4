@@ -92,12 +92,6 @@ EOF])
     AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "yes"],
           [hwloc_debug=1
            hwloc_debug_msg="enabled"])
-    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .svn],
-          [hwloc_debug=1
-           hwloc_debug_msg="enabled (SVN checkout default)"])
-    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .hg],
-          [hwloc_debug=1
-           hwloc_debug_msg="enabled (HG clone default)"])
     AS_IF([test "$hwloc_debug" = ""],
           [hwloc_debug=0
            hwloc_debug_msg="disabled"])
