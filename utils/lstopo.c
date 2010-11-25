@@ -195,12 +195,12 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -l --logical          Display hwloc logical object indexes\n");
   fprintf (where, "                        (default for console output)\n");
   fprintf (where, "  -p --physical         Display physical object indexes\n");
-  fprintf (where, "                        (default for drawing output)\n");
+  fprintf (where, "                        (default for graphical output)\n");
   fprintf (where, "Output options:\n");
   fprintf (where, "  --output-format <format>\n");
   fprintf (where, "  --of <format>         Force the output to use the given format\n");
   fprintf (where, "Textual output options:\n");
-  fprintf (where, "  --only <type>         Only show objects of the given type in the text output\n");
+  fprintf (where, "  --only <type>         Only show objects of the given type in the textual output\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
@@ -220,8 +220,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Graphical output options:\n");
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 10         Set size of margin between elements\n");
-  fprintf (where, "  --horiz               Horizontal graphic layout instead of nearly 4/3 ratio\n");
-  fprintf (where, "  --vert                Vertical graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "  --horiz               Horizontal graphical layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "  --vert                Vertical graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --ps --top            Display processes within the hierarchy\n");

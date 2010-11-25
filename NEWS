@@ -52,10 +52,10 @@ Version 1.1.0
     with CUDA Runtime and Driver APIs.
   + Add Myrinet Express helper in myriexpress.h to ease interoperability.
 * Tools
-  + lstopo now displays physical/OS indexes by default in drawing mode
-    (use -l to switch back to logical indexes). The text output still uses
+  + lstopo now displays physical/OS indexes by default in graphical mode
+    (use -l to switch back to logical indexes). The textual output still uses
     logical by default (use -p to switch to physical indexes).
-  + Add a legend at the bottom of the lstopo drawing output, use --no-legend
+  + Add a legend at the bottom of the lstopo graphical output, use --no-legend
     to remove it.
   + Add hwloc-ps to list process' bindings.
   + Add --membind and --mempolicy options to hwloc-bind.
@@ -211,8 +211,8 @@ Version 0.9.1
 * Improved binding support on AIX.
 * Add HP-UX support.
 * CPU sets are now allocated/freed dynamically.
-* Add command line options to tune the lstopo graphic output, add
-  semi-graphical text output
+* Add command line options to tune the lstopo graphical output, add
+  semi-graphical textual output
 * Extend topobind to support multiple cpusets or objects on the command
   line as topomask does.
 * Add an Infiniband-specific helper hwloc/openfabrics-verbs.h to retrieve
