@@ -136,12 +136,12 @@ static void usage(char *name, FILE *where)
   fprintf (where, "   -l --logical          Display hwloc logical object indexes\n");
   fprintf (where, "                         (default for console output)\n");
   fprintf (where, "   -p --physical         Display physical object indexes\n");
-  fprintf (where, "                         (default for drawing output)\n");
+  fprintf (where, "                         (default for graphical output)\n");
   fprintf (where, "   -v --verbose          Include additional detail\n");
   fprintf (where, "   -s --silent           Opposite of --verbose (default)\n");
   fprintf (where, "   -c --cpuset           Show the cpuset of each object\n");
-  fprintf (where, "   -C --cpuset-only      Only show the cpuset of each ofbject\n");
-  fprintf (where, "   --only <type>         Only show the given type in the text output\n");
+  fprintf (where, "   -C --cpuset-only      Only show the cpuset of each object\n");
+  fprintf (where, "   --only <type>         Only show the given type in the textual output\n");
   fprintf (where, "   --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "   --no-caches           Do not show caches\n");
   fprintf (where, "   --no-useless-caches   Do not show caches which do not have a hierarchical\n"
@@ -161,8 +161,8 @@ static void usage(char *name, FILE *where)
                   "                         processors\n");
   fprintf (where, "   --fontsize 10         Set size of text font\n");
   fprintf (where, "   --gridsize 10         Set size of margin between elements\n");
-  fprintf (where, "   --horiz               Horizontal graphic layout instead of nearly 4/3 ratio\n");
-  fprintf (where, "   --vert                Vertical graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "   --horiz               Horizontal graphical layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "   --vert                Vertical graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "   --version             Report version and exit\n");
 }
 

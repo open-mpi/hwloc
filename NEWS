@@ -165,8 +165,8 @@ Version 0.9.1
 * Improved binding support on AIX.
 * Add HP-UX support.
 * CPU sets are now allocated/freed dynamically.
-* Add command line options to tune the lstopo graphic output, add
-  semi-graphical text output
+* Add command line options to tune the lstopo graphical output, add
+  semi-graphical textual output
 * Extend topobind to support multiple cpusets or objects on the command
   line as topomask does.
 * Add an Infiniband-specific helper hwloc/openfabrics-verbs.h to retrieve

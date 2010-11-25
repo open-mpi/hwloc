@@ -122,7 +122,7 @@ development package.
 \section cli_examples CLI Examples
 
 On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool
-may show the following graphic output:
+may show the following graphical output:
 
 \image html dudley.png
 \image latex dudley.png "" width=9cm
@@ -231,7 +231,7 @@ tag is on a single line), and only socket #0 is shown for brevity:
 \endverbatim
 
 On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may show
-the following graphic output:
+the following graphical output:
 
 \image html hagrid.png
 \image latex hagrid.png width=\textwidth
@@ -323,7 +323,7 @@ each socket):
 \image html emmett.png
 \image latex emmett.png "" width=7cm
 
-Here's the same output in text form:
+Here's the same output in textual form:
 
 \verbatim
 Machine (16GB)
@@ -439,13 +439,13 @@ from RHEL 5.4, hwloc is only able to glean information about NUMA
 nodes and processor units (PUs).  No information about caches,
 sockets, or cores is available.
 
-Here's the graphic output from lstopo on this platform when
+Here's the graphical output from lstopo on this platform when
 Simultaneous Multi-Threading (SMT) is enabled:
 
 \image html ppc64-with-smt.png
 \image latex ppc64-with-smt.pdf "" width=\textwidth
 
-And here's the graphic output from lstopo on this platform when SMT is
+And here's the graphical output from lstopo on this platform when SMT is
 disabled:
 
 \image html ppc64-without-smt.png
@@ -682,7 +682,7 @@ tools.
 
 lstopo (also known as hwloc-info and hwloc-ls) displays the
 hierarchical topology map of the current system.  The output may be
-graphic or textual, and can also be exported to numerous file
+graphical or textual, and can also be exported to numerous file
 formats such as PDF, PNG, XML, and others.
 
 Note that lstopo can read XML files and/or alternate chroot

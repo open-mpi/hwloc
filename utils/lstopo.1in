@@ -33,7 +33,7 @@ The physical indexes of some objects (PU and Node by default, all
 objects if verbose) will appear as object attribute "phys=...".
 .TP
 \fB\-p\fR \fB\-\-physical\fR
-Display OS/physical indexes instead of hwloc logical indexes (default for drawing output).
+Display OS/physical indexes instead of hwloc logical indexes (default for graphical output).
 These indexes are prefixed with "p#" instead of "#" in the console output.
 .TP
 \fB\-c\fR \fB\-\-cpuset\fR
@@ -44,7 +44,7 @@ Only display the cpuset of each object; do not display anything else
 about the object.
 .TP
 \fB\-\-only\fR <type>
-Only show objects of the given type in the text output.
+Only show objects of the given type in the textual output.
 .TP
 \fB\-\-ignore\fR <type>
 Ignore all objects of type <type> in the topology.
@@ -94,10 +94,10 @@ Set size of text font.
 Set size of margin between elements.
 .TP
 \fB\-\-horiz\fR
-Horizontal graphic layout instead of nearly 4/3 ratio.
+Horizontal graphical layout instead of nearly 4/3 ratio.
 .TP
 \fB\-\-vert\fR
-Vertical graphic layout instead of nearly 4/3 ratio.
+Vertical graphical layout instead of nearly 4/3 ratio.
 .TP
 \fB\-\-version\fR
 Report version and exit.
@@ -238,7 +238,7 @@ topology (lstopo is not able to render that yet).
 .\" **************************
 .SH EXAMPLES
 .
-To display the machine topology in text mode:
+To display the machine topology in textual mode:
 
     lstopo -
 
@@ -252,7 +252,7 @@ To export the topology to a PNG file:
     lstopo file.png
 
 To export a XML file on a machine and later display the corresponding
-graphic output on another machine:
+graphical output on another machine:
 
     machine1$ lstopo file.xml
     <transfer file.xml from machine1 to machine2>
