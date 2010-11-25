@@ -2002,7 +2002,8 @@ hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
 
 int
 hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology __hwloc_attribute_unused,
-                             const char *xmlbuffer __hwloc_attribute_unused, int size)
+                             const char *xmlbuffer __hwloc_attribute_unused,
+                             int size __hwloc_attribute_unused)
 {
 #ifdef HWLOC_HAVE_XML
   /* cleanup existing backend */
