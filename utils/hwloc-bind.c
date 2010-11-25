@@ -226,32 +226,6 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
   }
 
-  if (!hwloc_bitmap_iszero(cpubind_set)) {
-    if (verbose) {
-      char *s;
-      hwloc_bitmap_asprintf(&s, cpubind_set);
-      fprintf(stderr, "binding on cpu set %s\n", s);
-      free(s);
-    }
-    if (single)
-      hwloc_bitmap_singlify(cpubind_set);
-    if (pid)
-      ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, cpubind_flags);
-    else
-      ret = hwloc_set_cpubind(topology, cpubind_set, cpubind_flags);
-    if (ret) {
-      int bind_errno = errno;
-      const char *errmsg = strerror(bind_errno);
-      char *s;
-      hwloc_bitmap_asprintf(&s, cpubind_set);
-      if (pid)
-        fprintf(stderr, "hwloc_set_proc_cpubind %s %d failed (errno %d %s)\n", s, pid, bind_errno, errmsg);
-      else
-        fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
-      free(s);
-    }
-  }
-
   if (!hwloc_bitmap_iszero(membind_set)) {
     if (verbose) {
       char *s;
@@ -274,6 +248,32 @@ int main(int argc, char *argv[])
         fprintf(stderr, "hwloc_set_proc_membind %s %d failed (errno %d %s)\n", s, pid, bind_errno, errmsg);
       else
         fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
+      free(s);
+    }
+  }
+
+  if (!hwloc_bitmap_iszero(cpubind_set)) {
+    if (verbose) {
+      char *s;
+      hwloc_bitmap_asprintf(&s, cpubind_set);
+      fprintf(stderr, "binding on cpu set %s\n", s);
+      free(s);
+    }
+    if (single)
+      hwloc_bitmap_singlify(cpubind_set);
+    if (pid)
+      ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, cpubind_flags);
+    else
+      ret = hwloc_set_cpubind(topology, cpubind_set, cpubind_flags);
+    if (ret) {
+      int bind_errno = errno;
+      const char *errmsg = strerror(bind_errno);
+      char *s;
+      hwloc_bitmap_asprintf(&s, cpubind_set);
+      if (pid)
+        fprintf(stderr, "hwloc_set_proc_cpubind %s %d failed (errno %d %s)\n", s, pid, bind_errno, errmsg);
+      else
+        fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
     }
   }
