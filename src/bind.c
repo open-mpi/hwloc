@@ -500,9 +500,12 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
   hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   void *ret;
 
-  if (hwloc_fix_membind_cpuset(topology, nodeset, set))
-    ret = NULL;
-  else
+  if (!hwloc_fix_membind_cpuset(topology, nodeset, set)) {
+    if (flags & HWLOC_MEMBIND_STRICT)
+      ret = NULL;
+    else
+      ret = hwloc_alloc(topology, len);
+  } else
     ret = hwloc_alloc_membind_nodeset(topology, len, nodeset, policy, flags);
 
   hwloc_bitmap_free(nodeset);

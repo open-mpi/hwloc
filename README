@@ -87,7 +87,7 @@ XML support requires the libxml2 development package.
 CLI Examples
 
 On a 4-socket 2-core machine with hyperthreading, the lstopo tool may show the
-following graphic output:
+following graphical output:
 
                                dudley.png
 
@@ -191,7 +191,7 @@ line), and only socket #0 is shown for brevity:
 </topology>
 
 On a 4-socket 2-core Opteron NUMA machine, the lstopo tool may show the
-following graphic output:
+following graphical output:
 
                                hagrid.png
 
@@ -277,7 +277,7 @@ socket):
 
                                emmett.png
 
-Here's the same output in text form:
+Here's the same output in textual form:
 
 Machine (16GB)
   Socket #0
@@ -370,7 +370,7 @@ built during the normal "make" process. The documentation is installed during
 "make install" to $prefix/share/doc/hwloc/ and your systems default man page
 tree (under $prefix, of course).
 
-Portability (especially when using the API or XML)
+Portability
 
 As shown in CLI Examples, hwloc can obtain information on a wide variety of
 hardware topologies. However, some platforms and/or operating system versions
@@ -380,12 +380,22 @@ system with 32 cores (each with 2 hardware threads) running a default
 about NUMA nodes and processor units (PUs). No information about caches,
 sockets, or cores is available.
 
-Here's the graphic output from lstopo on this platform when Simultaneous
+Similarly, Operating System have varying support for CPU and memory binding,
+e.g. while some Operating Systems provide interfaces for all kinds of CPU and
+memory bindings, some others provide only interfaces for a limited number of
+kinds of CPU and memory binding, and some do not provide any binding interface
+at all. Hwloc's binding functions would then simply return the ENOSYS error
+(Function not implemented), meaning that the underlying Operating System does
+not provide any interface for them. CPU binding and Memory binding provide more
+information on which hwloc binding functions should be preferred because
+interfaces for them are usually available on the supported Operating Systems.
+
+Here's the graphical output from lstopo on this platform when Simultaneous
 Multi-Threading (SMT) is enabled:
 
                            ppc64-with-smt.png
 
-And here's the graphic output from lstopo on this platform when SMT is
+And here's the graphical output from lstopo on this platform when SMT is
 disabled:
 
                           ppc64-without-smt.png
@@ -467,7 +477,7 @@ int main(void)
  hwloc_topology_init(&topology);
 
  /* ... Optionally, put detection configuration here to ignore
-    some objects types, define a synthetic topology, etc....
+    some objects types, define a synthetic topology, etc....  
 
     The default is to detect all the objects of the machine that
     the caller is allowed to access.  See Configure Topology
@@ -668,7 +678,22 @@ dept-info.labri.fr/~namyst/). PLPA was initially developed by the Open MPI
 development team as a sub-project. Both are now deprecated in favor of hwloc,
 which is distributed as an Open MPI sub-project.
 
+Further Reading
+
+The documentation chapters include
+
+  * Terms and Definitions
+  * Command-line tools
+  * Environment variables
+  * CPU Binding and Memory Binding
+  * Interoperability with other software
+  * Thread safety
+  * Embedding hwloc in other software
+  * Switching from PLPA to hwloc
+
+Make sure to have had a look at those too!
+
 -------------------------------------------------------------------------------
 
-Generated on Fri Nov 5 2010 17:52:24 for Hardware Locality (hwloc) by  doxygen
+Generated on Tue Nov 30 2010 15:32:36 for Hardware Locality (hwloc) by  doxygen
 1.7.1
