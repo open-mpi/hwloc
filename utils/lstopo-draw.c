@@ -690,7 +690,7 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
     }
 
     /* Display whether we're showing physical or logical IDs */
-    snprintf(text, sizeof(text), "IDs: %s", logical ? "logical" : "physical");
+    snprintf(text, sizeof(text), "Indexes: %s", logical ? "logical" : "physical");
     methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset, text);
 
     /* Display timestamp */
