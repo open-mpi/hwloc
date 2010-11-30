@@ -511,7 +511,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     struct hwloc_obj *obj;
     unsigned char headertype;
     unsigned os_index;
-    unsigned baseclass;
     unsigned isbridge;
 
     /* cache what we need of the config space */
@@ -522,19 +521,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
     isbridge = (pcidev->device_class == PCI_CLASS_BRIDGE_PCI
 		&& headertype == PCI_HEADER_TYPE_BRIDGE);
-
-    /* is this device interesting? */
-    baseclass = pcidev->device_class >> 8;
-    if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI)
-	&& !isbridge
-	&& baseclass != PCI_BASE_CLASS_DISPLAY
-	&& baseclass != PCI_BASE_CLASS_NETWORK
-	&& baseclass != PCI_BASE_CLASS_STORAGE
-#ifndef PCI_CLASS_SERIAL_INFINIBAND
-#define PCI_CLASS_SERIAL_INFINIBAND     0x0c06
-#endif
-	&& pcidev->device_class != PCI_CLASS_SERIAL_INFINIBAND)
-      goto nextdev;
 
     /* might be useful for debugging (note that domain might be truncated) */
     os_index = (pcidev->domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
@@ -589,8 +575,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 		name);
 
     hwloc_pci_add_object(&fakehostbridge, obj);
-
-  nextdev:
     pcidev = pcidev->next;
   }
 

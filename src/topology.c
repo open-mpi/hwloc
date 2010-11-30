@@ -1334,6 +1334,28 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
   }
 }
 
+static void
+hwloc_drop_useless_pci(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t root)
+{
+  hwloc_obj_t child, *pchild;
+
+  for_each_child_safe(child, root, pchild) {
+    if (child->type == HWLOC_OBJ_PCI_DEVICE) {
+      unsigned classid = child->attr->pcidev.class_id;
+      unsigned baseclass = classid >> 8;
+      if (baseclass != 0x03 /* PCI_BASE_CLASS_DISPLAY */
+	  && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
+	  && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
+	  && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */) {
+	*pchild = child->next_sibling;
+	hwloc_free_object(child);
+      }
+    }
+  }
+  for_each_child_safe(child, root, pchild)
+    hwloc_drop_useless_pci(topology, child);
+}
+
 /*
  * Initialize handy pointers in the whole topology
  */
@@ -1836,6 +1858,9 @@ hwloc_discover(struct hwloc_topology *topology)
 
     if (gotsome) {
       print_objects(topology, 0, topology->levels[0][0]);
+
+      if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI))
+        hwloc_drop_useless_pci(topology, topology->levels[0][0]);
 
       hwloc_debug("%s", "\nNow reconnecting\n");
 
