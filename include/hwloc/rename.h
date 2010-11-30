@@ -164,7 +164,8 @@ extern "C" {
 #define hwloc_get_area_membind HWLOC_NAME(get_area_membind)
 #define hwloc_alloc_membind_nodeset HWLOC_NAME(alloc_membind_nodeset)
 #define hwloc_alloc_membind HWLOC_NAME(alloc_membind)
-#define hwloc_free_membind HWLOC_NAME(free_membind)
+#define hwloc_alloc HWLOC_NAME(alloc)
+#define hwloc_free HWLOC_NAME(free)
 
 /* hwloc/bitmap.h */
 
