@@ -1339,6 +1339,7 @@ hwloc_drop_useless_pci(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
 {
   hwloc_obj_t child, *pchild;
 
+  /* remove useless children */
   for_each_child_safe(child, root, pchild) {
     if (child->type == HWLOC_OBJ_PCI_DEVICE) {
       unsigned classid = child->attr->pcidev.class_id;
@@ -1352,8 +1353,15 @@ hwloc_drop_useless_pci(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
       }
     }
   }
-  for_each_child_safe(child, root, pchild)
+  /* look at remaining children */
+  for_each_child_safe(child, root, pchild) {
     hwloc_drop_useless_pci(topology, child);
+    /* if the child is an empty bridge, drop it */
+    if (child->type == HWLOC_OBJ_BRIDGE && !child->first_child) {
+      *pchild = child->next_sibling;
+      hwloc_free_object(child);
+    }
+  }
 }
 
 /*

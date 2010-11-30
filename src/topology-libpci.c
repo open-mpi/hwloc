@@ -417,24 +417,6 @@ hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
   hwloc_pci_add_child_before(root, NULL, new);
 }
 
-static void
-hwloc_pci_drop_useless_bridges(struct hwloc_obj *root)
-{
-  struct hwloc_obj *child, *next_child;
-  next_child = root->first_child;
-  while (next_child) {
-    child = next_child;
-    next_child = child->next_sibling;
-    if (child->type != HWLOC_OBJ_BRIDGE)
-      continue;
-    hwloc_pci_drop_useless_bridges(child);
-    if (!child->first_child) {
-      hwloc_pci_remove_child(root, child);
-      hwloc_free_object(child);
-    }
-  }
-}
-
 static struct hwloc_obj *
 hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
 {
@@ -581,13 +563,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   pci_cleanup(pciaccess);
 
   hwloc_debug("%s", "\nPCI hierarchy after basic scan:\n");
-  hwloc_pci_traverse(topology, &fakehostbridge, hwloc_pci_traverse_print_cb);
-
-  /* drop useless bridges if needed */
-  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI))
-    hwloc_pci_drop_useless_bridges(&fakehostbridge);
-
-  hwloc_debug("%s", "\nPCI hierarchy removing useless objects:\n");
   hwloc_pci_traverse(topology, &fakehostbridge, hwloc_pci_traverse_print_cb);
 
   if (!fakehostbridge.first_child)
