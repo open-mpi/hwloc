@@ -659,35 +659,49 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 static void
 fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int legend, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned y)
 {
-  unsigned totwidth, totheight;
+  unsigned totwidth, totheight, offset;
   time_t t;
-  char text[64];
+  char text[128];
   char *date;
-  char hostname[64];
+  char hostname[128] = "";
   int n;
   unsigned long hostname_size = sizeof(hostname);
 
   system_draw(topology, methods, logical, level, output, depth, x, &totwidth, y, &totheight);
 
-  t = time(NULL);
-  date = ctime(&t);
-  n = strlen(date);
-  if (n && date[n-1] == '\n');
-    date[n-1] = 0;
-
   if (legend) {
-    if (hwloc_topology_is_thissystem(topology) &&
+      /* Display the hostname, but only if we're showing *this*
+         system */
+    if (hwloc_topology_is_thissystem(topology)) {
 #ifdef HWLOC_WIN_SYS
-        GetComputerName(hostname, &hostname_size)
+      GetComputerName(hostname, &hostname_size);
 #else
-        !gethostname(hostname, hostname_size)
+      gethostname(hostname, hostname_size);
 #endif
-        )
-      snprintf(text, sizeof(text), "%s IDs for %s on %s", logical ? "logical" : "physical", hostname, date);
-    else
-      snprintf(text, sizeof(text), "%s IDs on %s", logical ? "logical" : "physical", date);
-    methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize + fontsize + gridsize);
-    methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
+    }
+    if (*hostname) {
+      snprintf(text, sizeof(text), "Host: %s", hostname);
+      methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize*4 + fontsize*3);
+      methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize, text);
+      offset = gridsize + fontsize;
+    } else {
+      methods->box(output, 0xff, 0xff, 0xff, depth, 0, totwidth, totheight, gridsize*3 + fontsize*2);
+      offset = 0;
+    }
+
+    /* Display whether we're showing physical or logical IDs */
+    snprintf(text, sizeof(text), "IDs: %s", logical ? "logical" : "physical");
+    methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset, text);
+
+    /* Display timestamp */
+    t = time(NULL);
+    date = ctime(&t);
+    n = strlen(date);
+    if (n && date[n-1] == '\n') {
+      date[n-1] = 0;
+    }
+    snprintf(text, sizeof(text), "Date: %s", date);
+    methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset + fontsize + gridsize, text);
   }
 }
 
