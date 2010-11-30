@@ -117,11 +117,11 @@ HWLOC_DECLSPEC void hwloc_bitmap_zero(hwloc_bitmap_t bitmap);
 /** \brief Fill bitmap \p bitmap with all possible indexes (even if those objects don't exist or are otherwise unavailable) */
 HWLOC_DECLSPEC void hwloc_bitmap_fill(hwloc_bitmap_t bitmap);
 
-/** \brief Empty the bitmap \p bitmap and add bit \p index */
-HWLOC_DECLSPEC void hwloc_bitmap_only(hwloc_bitmap_t bitmap, unsigned index);
+/** \brief Empty the bitmap \p bitmap and add bit \p id */
+HWLOC_DECLSPEC void hwloc_bitmap_only(hwloc_bitmap_t bitmap, unsigned id);
 
-/** \brief Fill the bitmap \p and clear the index \p index */
-HWLOC_DECLSPEC void hwloc_bitmap_allbut(hwloc_bitmap_t bitmap, unsigned index);
+/** \brief Fill the bitmap \p and clear the index \p id */
+HWLOC_DECLSPEC void hwloc_bitmap_allbut(hwloc_bitmap_t bitmap, unsigned id);
 
 /** \brief Setup bitmap \p bitmap from unsigned long \p mask */
 HWLOC_DECLSPEC void hwloc_bitmap_from_ulong(hwloc_bitmap_t bitmap, unsigned long mask);
@@ -134,8 +134,8 @@ HWLOC_DECLSPEC void hwloc_bitmap_from_ith_ulong(hwloc_bitmap_t bitmap, unsigned 
  * Modifying bitmaps.
  */
 
-/** \brief Add index \p index in bitmap \p bitmap */
-HWLOC_DECLSPEC void hwloc_bitmap_set(hwloc_bitmap_t bitmap, unsigned index);
+/** \brief Add index \p id in bitmap \p bitmap */
+HWLOC_DECLSPEC void hwloc_bitmap_set(hwloc_bitmap_t bitmap, unsigned id);
 
 /** \brief Add indexess from \p begin to \p end in bitmap \p bitmap */
 HWLOC_DECLSPEC void hwloc_bitmap_set_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end);
@@ -143,8 +143,8 @@ HWLOC_DECLSPEC void hwloc_bitmap_set_range(hwloc_bitmap_t bitmap, unsigned begin
 /** \brief Replace \p i -th subset of bitmap \p bitmap with unsigned long \p mask */
 HWLOC_DECLSPEC void hwloc_bitmap_set_ith_ulong(hwloc_bitmap_t bitmap, unsigned i, unsigned long mask);
 
-/** \brief Remove index \p index from bitmap \p bitmap */
-HWLOC_DECLSPEC void hwloc_bitmap_clr(hwloc_bitmap_t bitmap, unsigned index);
+/** \brief Remove index \p id from bitmap \p bitmap */
+HWLOC_DECLSPEC void hwloc_bitmap_clr(hwloc_bitmap_t bitmap, unsigned id);
 
 /** \brief Remove index from \p begin to \p end in bitmap \p bitmap */
 HWLOC_DECLSPEC void hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end);
@@ -168,8 +168,8 @@ HWLOC_DECLSPEC unsigned long hwloc_bitmap_to_ulong(hwloc_const_bitmap_t bitmap) 
 /** \brief Convert the \p i -th subset of bitmap \p bitmap into unsigned long mask */
 HWLOC_DECLSPEC unsigned long hwloc_bitmap_to_ith_ulong(hwloc_const_bitmap_t bitmap, unsigned i) __hwloc_attribute_pure;
 
-/** \brief Test whether index \p index is part of bitmap \p bitmap */
-HWLOC_DECLSPEC int hwloc_bitmap_isset(hwloc_const_bitmap_t bitmap, unsigned index) __hwloc_attribute_pure;
+/** \brief Test whether index \p id is part of bitmap \p bitmap */
+HWLOC_DECLSPEC int hwloc_bitmap_isset(hwloc_const_bitmap_t bitmap, unsigned id) __hwloc_attribute_pure;
 
 /** \brief Test whether bitmap \p bitmap is empty */
 HWLOC_DECLSPEC int hwloc_bitmap_iszero(hwloc_const_bitmap_t bitmap) __hwloc_attribute_pure;
@@ -213,12 +213,12 @@ HWLOC_DECLSPEC int hwloc_bitmap_weight(hwloc_const_bitmap_t bitmap) __hwloc_attr
  *
  * The assert prevents the loop from being infinite if the bitmap is infinite.
  */
-#define hwloc_bitmap_foreach_begin(index, bitmap) \
+#define hwloc_bitmap_foreach_begin(id, bitmap) \
 do { \
         assert(hwloc_bitmap_weight(bitmap) != -1); \
-        for (index = hwloc_bitmap_first(bitmap); \
-             (unsigned) index != (unsigned) -1; \
-             index = hwloc_bitmap_next(bitmap, index)) { \
+        for (id = hwloc_bitmap_first(bitmap); \
+             (unsigned) id != (unsigned) -1; \
+             id = hwloc_bitmap_next(bitmap, id)) { \
 /** \brief End of loop. Needs a terminating ';'.
  * \hideinitializer
  *

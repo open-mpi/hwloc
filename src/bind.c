@@ -9,7 +9,9 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <hwloc/helper.h>
-#include <sys/mman.h>
+#ifdef HAVE_SYS_MMAN_H
+#  include <sys/mman.h>
+#endif
 #ifdef HAVE_MALLOC_H
 #  include <malloc.h>
 #endif
@@ -430,6 +432,23 @@ hwloc_alloc_mmap(hwloc_topology_t topology __hwloc_attribute_unused, size_t len)
 }
 #endif
 
+int
+hwloc_free_heap(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len __hwloc_attribute_unused)
+{
+  free(addr);
+  return 0;
+}
+
+#ifdef MAP_ANONYMOUS
+int
+hwloc_free_mmap(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len)
+{
+  if (!addr)
+    return 0;
+  return munmap(addr, len);
+}
+#endif
+
 void *
 hwloc_alloc(hwloc_topology_t topology, size_t len)
 {
@@ -481,9 +500,12 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
   hwloc_nodeset_t nodeset = hwloc_bitmap_alloc();
   void *ret;
 
-  if (hwloc_fix_membind_cpuset(topology, nodeset, set))
-    ret = NULL;
-  else
+  if (!hwloc_fix_membind_cpuset(topology, nodeset, set)) {
+    if (flags & HWLOC_MEMBIND_STRICT)
+      ret = NULL;
+    else
+      ret = hwloc_alloc(topology, len);
+  } else
     ret = hwloc_alloc_membind_nodeset(topology, len, nodeset, policy, flags);
 
   hwloc_bitmap_free(nodeset);
@@ -491,10 +513,9 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
 }
 
 int
-hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len)
+hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
 {
   if (topology->free_membind)
     return topology->free_membind(topology, addr, len);
-  free(addr);
-  return 0;
+  return hwloc_free_heap(topology, addr, len);
 }

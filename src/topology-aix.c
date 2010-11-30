@@ -398,11 +398,6 @@ hwloc_aix_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodes
   rs_free(rsid.at_rset);
   return ret;
 }
-
-static int
-hwloc_aix_free_membind(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, size_t len) {
-  return munmap(addr, len);
-}
 #endif /* P_DEFAULT */
 
 static void
@@ -567,7 +562,7 @@ hwloc_set_aix_hooks(struct hwloc_topology *topology)
   /* get_area_membind is not available */
   topology->alloc_membind = hwloc_aix_alloc_membind;
   topology->alloc = hwloc_alloc_mmap;
-  topology->free_membind = hwloc_aix_free_membind;
+  topology->free_membind = hwloc_free_mmap;
   topology->support.membind->firsttouch_membind = 1;
   topology->support.membind->bind_membind = 1;
   topology->support.membind->interleave_membind = 1;

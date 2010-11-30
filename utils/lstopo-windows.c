@@ -43,6 +43,7 @@ struct draw_methods windows_draw_methods;
 
 static hwloc_topology_t the_topology;
 static int the_logical;
+static int the_legend;
 static int state, control;
 static int x, y, x_delta, y_delta;
 static int finish;
@@ -58,7 +59,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       HDC hdc;
       PAINTSTRUCT ps;
       hdc = BeginPaint(hwnd, &ps);
-      output_draw(&windows_draw_methods, the_logical, the_topology, &ps);
+      output_draw(&windows_draw_methods, the_logical, the_legend, the_topology, &ps);
       EndPaint(hwnd, &ps);
       break;
     }
@@ -262,12 +263,13 @@ struct draw_methods windows_draw_methods = {
 };
 
 void
-output_windows (hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int logical, int verbose_mode __hwloc_attribute_unused)
+output_windows (hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
   HWND toplevel;
   the_topology = topology;
   the_logical = logical;
-  toplevel = output_draw_start(&windows_draw_methods, logical, topology, NULL);
+  the_legend = legend;
+  toplevel = output_draw_start(&windows_draw_methods, logical, legend, topology, NULL);
   UpdateWindow(toplevel);
   MSG msg;
   while (!finish && GetMessage(&msg, NULL, 0, 0)) {

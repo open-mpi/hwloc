@@ -31,18 +31,18 @@ extern "C" {
  */
 
 /** \brief Get the CPU set of logical processors that are physically
- * close the MX board \p index.
+ * close the MX board \p id.
  *
- * For the given Myrinet Express board index \p index, read the
+ * For the given Myrinet Express board index \p id, read the
  * OS-provided NUMA node and return the corresponding CPU set.
  */
 static __hwloc_inline int
 hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
-				 unsigned index, hwloc_cpuset_t set)
+				 unsigned id, hwloc_cpuset_t set)
 {
   uint32_t in, out;
 
-  in = index;
+  in = id;
   if (mx_get_info(NULL, MX_NUMA_NODE, &in, sizeof(in), &out, sizeof(out)) != MX_SUCCESS) {
     errno = EINVAL;
     return -1;

@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 
       hwloc_distributev(topology, roots, chunks, cpuset, n, to_depth);
 
-      for (i = 0; i < n; i++) {
+      for (i = 0; (long) i < n; i++) {
 	char *str = NULL;
 	if (singlify)
 	  hwloc_bitmap_singlify(cpuset[i]);

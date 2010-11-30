@@ -92,12 +92,6 @@ EOF])
     AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "yes"],
           [hwloc_debug=1
            hwloc_debug_msg="enabled"])
-    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .svn],
-          [hwloc_debug=1
-           hwloc_debug_msg="enabled (SVN checkout default)"])
-    AS_IF([test "$hwloc_debug" = "" -a "$enable_debug" = "" -a -d .hg],
-          [hwloc_debug=1
-           hwloc_debug_msg="enabled (HG clone default)"])
     AS_IF([test "$hwloc_debug" = ""],
           [hwloc_debug=0
            hwloc_debug_msg="disabled"])
@@ -320,6 +314,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     AC_CHECK_HEADER([stdint.h], [
       AC_DEFINE([HWLOC_HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
     ])
+    AC_CHECK_HEADERS([sys/mman.h])
     
     AC_CHECK_TYPES([KAFFINITY,
                     PROCESSOR_CACHE_TYPE,
@@ -332,7 +327,9 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
                     CACHE_RELATIONSHIP,
                     PROCESSOR_GROUP_INFO,
                     GROUP_RELATIONSHIP,
-                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX],
+                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX,
+		    PSAPI_WORKING_SET_EX_BLOCK,
+		    PSAPI_WORKING_SET_EX_INFORMATION],
                     [],[],[[#include <windows.h>]])
     AC_CHECK_LIB([gdi32], [main],
                  [HWLOC_LIBS="-lgdi32 $HWLOC_LIBS"
