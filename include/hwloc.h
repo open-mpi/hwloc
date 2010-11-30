@@ -561,7 +561,18 @@ enum hwloc_topology_flags_e {
    * objects are ignored.
    * This flag disables all PCI objects.
    */
-  HWLOC_TOPOLOGY_FLAG_NO_PCI = (1<<3)
+  HWLOC_TOPOLOGY_FLAG_NO_PCI = (1<<3),
+
+  /* \brief Do not detect any PCI bridge.
+   *
+   * By default, only interesting PCI objects are added to the topology,
+   * especially GPUs and NICs, and all bridges that do not lead to such
+   * objects are ignored.
+   * This flag only keeps I/O devices that are not PCI bridges.
+   * Host bridges are not ignored since they are an easy way to know
+   * when we enter an I/O subsystem.
+   */
+  HWLOC_TOPOLOGY_FLAG_NO_PCI_BRIDGE = (1<<4)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

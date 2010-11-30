@@ -1357,9 +1357,19 @@ hwloc_drop_useless_pci(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
   for_each_child_safe(child, root, pchild) {
     hwloc_drop_useless_pci(topology, child);
     /* if the child is an empty bridge, drop it */
-    if (child->type == HWLOC_OBJ_BRIDGE && !child->first_child) {
-      *pchild = child->next_sibling;
-      hwloc_free_object(child);
+    if (child->type == HWLOC_OBJ_BRIDGE) {
+      hwloc_obj_t grandchildren = child->first_child;
+      if (!grandchildren) {
+	*pchild = child->next_sibling;
+	hwloc_free_object(child);
+      } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST
+		 && (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_PCI_BRIDGE)) {
+	/* insert grandchildren in place of child */
+	*pchild = grandchildren;
+	for( ; grandchildren->next_sibling != NULL ; grandchildren = grandchildren->next_sibling);
+	grandchildren->next_sibling = child->next_sibling;
+	hwloc_free_object(child);
+      }
     }
   }
 }

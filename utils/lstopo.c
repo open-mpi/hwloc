@@ -212,6 +212,7 @@ void usage(const char *name, FILE *where)
                   "                        impact\n");
 #ifdef HWLOC_HAVE_LIBPCI
   fprintf (where, "   --whole-pci           show all PCI devices and bridges\n");
+  fprintf (where, "   --no-pci-brigde       do not show any PCI bridge\n");
   fprintf (where, "   --no-pci              do not show any PCI device or bridge\n");
 #endif
   fprintf (where, "Input options:\n");
@@ -341,6 +342,8 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--whole-pci"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_PCI;
+      else if (!strcmp (argv[1], "--no-pci-bridge"))
+	flags |= HWLOC_TOPOLOGY_FLAG_NO_PCI_BRIDGE;
       else if (!strcmp (argv[1], "--no-pci"))
 	flags |= HWLOC_TOPOLOGY_FLAG_NO_PCI;
       else if (!strcmp (argv[1], "--merge"))
