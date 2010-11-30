@@ -513,7 +513,7 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
 }
 
 int
-hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len)
+hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
 {
   if (topology->free_membind)
     return topology->free_membind(topology, addr, len);

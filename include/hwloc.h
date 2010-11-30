@@ -1175,6 +1175,8 @@ HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void 
  *
  * This is equivalent to malloc(), except it tries to allocated page-aligned
  * memory from the OS.
+ *
+ * \note The allocated memory should be freed with hwloc_free().
  */
 HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
 
@@ -1184,6 +1186,8 @@ HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
  * and HWLOC_MEMBIND_STRICT is given
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  * and HWLOC_MEMBIND_STRICT is given
+ *
+ * \note The allocated memory should be freed with hwloc_free().
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
@@ -1193,12 +1197,14 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size
  * and HWLOC_MEMBIND_STRICT is given
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  * and HWLOC_MEMBIND_STRICT is given
+ *
+ * \note The allocated memory should be freed with hwloc_free().
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
-/** \brief Free some memory allocated by hwloc_alloc_membind
+/** \brief Free some memory allocated by hwloc_alloc() or hwloc_alloc_membind().
  */
-HWLOC_DECLSPEC int hwloc_free_membind(hwloc_topology_t topology, void *addr, size_t len);
+HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len);
 
 /** @} */
 

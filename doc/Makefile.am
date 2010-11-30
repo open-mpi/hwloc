@@ -392,7 +392,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3  \
-        $(DOX_MAN_DIR)/man3/hwloc_free_membind.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_free.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_membind.3 \
