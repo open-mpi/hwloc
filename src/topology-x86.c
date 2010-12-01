@@ -1,8 +1,16 @@
 /*
  * Copyright © 2010 CNRS, INRIA, Université Bordeaux 1
  * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
- *
  * See COPYING in top-level directory.
+ *
+ *
+ * This backend is only used when the operating system does not export
+ * the necessary hardware topology information to user-space applications.
+ * Currently, only the FreeBSD backend relies on this x86 backend.
+ *
+ * Other backends such as Linux have their own way to retrieve various
+ * pieces of hardware topology information from the operating system
+ * on various architectures, without having to use this x86-specific code.
  */
 
 #include <private/config.h>
