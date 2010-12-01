@@ -1354,17 +1354,17 @@ hwloc_drop_useless_pci(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
       }
     }
   }
+
   /* look at remaining children */
   for_each_child_safe(child, root, pchild) {
     hwloc_drop_useless_pci(topology, child);
-    /* if the child is an empty bridge, drop it */
+    /* drop non-hostbridges */
     if (child->type == HWLOC_OBJ_BRIDGE) {
       hwloc_obj_t grandchildren = child->first_child;
       if (!grandchildren) {
 	*pchild = child->next_sibling;
 	hwloc_free_object(child);
-      } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST
-		 && (topology->flags & HWLOC_TOPOLOGY_FLAG_NO_PCI_BRIDGE)) {
+      } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST) {
 	/* insert grandchildren in place of child */
 	*pchild = grandchildren;
 	for( ; grandchildren->next_sibling != NULL ; grandchildren = grandchildren->next_sibling);
@@ -1856,7 +1856,7 @@ hwloc_discover(struct hwloc_topology *topology)
    */
 
   /* PCI */
-  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_NO_PCI)) {
+  if (topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)) {
     int gotsome = 0;
     hwloc_debug("%s", "\nLooking for PCI devices\n");
 
@@ -1878,7 +1878,7 @@ hwloc_discover(struct hwloc_topology *topology)
     if (gotsome) {
       print_objects(topology, 0, topology->levels[0][0]);
 
-      if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_PCI))
+      if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_IO))
         hwloc_drop_useless_pci(topology, topology->levels[0][0]);
 
       hwloc_debug("%s", "\nNow reconnecting\n");

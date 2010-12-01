@@ -544,35 +544,23 @@ enum hwloc_topology_flags_e {
    * backend, but still having binding functions actually do bind.
    */
 
+  /* \brief Detect PCI devices.
+   *
+   * By default, I/O devices are ignored. This flag enables I/O device
+   * detection using the libpci backend. Only the common PCI devices (GPUs,
+   * NICs, block devices, ...) and host bridges (objects that connect the host
+   * objects to an I/O subsystem) will be added to the topology.
+   * Uncommon devices and other bridges (such as PCI-to-PCI bridges) will be
+   * ignored unless HWLOC_TOPOLOGY_FLAG_WHOLE_IO is also set.
+   */
+  HWLOC_TOPOLOGY_FLAG_IO_DEVICES = (1<<2),
+
   /* \brief Detect the whole PCI hierarchy.
    *
-   * By default, only interesting PCI objects are added to the topology,
-   * especially GPUs and NICs, and all bridges that do not lead to such
-   * objects are ignored.
-   * This flag enables the loading of the actual whole PCI hierarchy.
+   * By default, I/O devices are ignored. This flag enables detection of all
+   * I/O devices and bridges using the libpci backend.
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_PCI = (1<<2),
-
-  /* FIXME: disable by default for "backward compatibility" ? */
-  /* \brief Do not detect the PCI hierarchy.
-   *
-   * By default, only interesting PCI objects are added to the topology,
-   * especially GPUs and NICs, and all bridges that do not lead to such
-   * objects are ignored.
-   * This flag disables all PCI objects.
-   */
-  HWLOC_TOPOLOGY_FLAG_NO_PCI = (1<<3),
-
-  /* \brief Do not detect any PCI bridge.
-   *
-   * By default, only interesting PCI objects are added to the topology,
-   * especially GPUs and NICs, and all bridges that do not lead to such
-   * objects are ignored.
-   * This flag only keeps I/O devices that are not PCI bridges.
-   * Host bridges are not ignored since they are an easy way to know
-   * when we enter an I/O subsystem.
-   */
-  HWLOC_TOPOLOGY_FLAG_NO_PCI_BRIDGE = (1<<4)
+  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<3),
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

@@ -214,9 +214,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --merge               Do not show levels that do not have a hierarcical\n"
                   "                        impact\n");
 #ifdef HWLOC_HAVE_LIBPCI
-  fprintf (where, "   --whole-pci           show all PCI devices and bridges\n");
-  fprintf (where, "   --no-pci-brigde       do not show any PCI bridge\n");
-  fprintf (where, "   --no-pci              do not show any PCI device or bridge\n");
+  fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
+  fprintf (where, "  --whole-io            Show all I/O devices and bridges\n");
 #endif
   fprintf (where, "Input options:\n");
   hwloc_utils_input_format_usage(where, 6);
@@ -281,7 +280,7 @@ main (int argc, char *argv[])
   int verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   hwloc_topology_t topology;
   const char *filename = NULL;
-  unsigned long flags = 0;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES;
   int merge = 0;
   int ignorecache = 0;
   char * callname;
@@ -344,12 +343,10 @@ main (int argc, char *argv[])
 	ignorecache = 1;
       else if (!strcmp (argv[1], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
-      else if (!strcmp (argv[1], "--whole-pci"))
-	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_PCI;
-      else if (!strcmp (argv[1], "--no-pci-bridge"))
-	flags |= HWLOC_TOPOLOGY_FLAG_NO_PCI_BRIDGE;
-      else if (!strcmp (argv[1], "--no-pci"))
-	flags |= HWLOC_TOPOLOGY_FLAG_NO_PCI;
+      else if (!strcmp (argv[1], "--no-io"))
+	flags &= ~HWLOC_TOPOLOGY_FLAG_IO_DEVICES;
+      else if (!strcmp (argv[1], "--whole-io"))
+	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
       else if (!strcmp (argv[1], "--horiz"))
