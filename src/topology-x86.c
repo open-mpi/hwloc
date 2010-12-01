@@ -43,6 +43,8 @@ struct procinfo {
   unsigned logprocid;
   unsigned threadid;
   unsigned coreid;
+  unsigned *otherids;
+  unsigned levels;
   unsigned numcaches;
   struct cacheinfo *cache;
 };
@@ -215,17 +217,63 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       cache++;
     }
   }
+
+  if (cpuid_type == intel && highest_cpuid >= 0x0b) {
+    unsigned level, apic_nextshift, apic_number, apic_type, apic_id, apic_shift = 0, id;
+    for (level = 0; ; level++) {
+      ecx = level;
+      eax = 0x0b;
+      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      if (!eax && !ebx)
+        break;
+    }
+    infos->levels = level;
+    infos->otherids = malloc(level * sizeof(*infos->otherids));
+    for (level = 0; ; level++) {
+      ecx = level;
+      eax = 0x0b;
+      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      if (!eax && !ebx)
+        break;
+      apic_nextshift = eax & 0x1f;
+      apic_number = ebx & 0xffff;
+      apic_type = (ecx & 0xff00) >> 8;
+      apic_id = edx;
+      id = (apic_id >> apic_shift) & ((1 << (apic_nextshift - apic_shift)) - 1);
+      hwloc_debug("x2APIC %08x %d: nextshift %d num %2d type %d id %2d\n", apic_id, level, apic_nextshift, apic_number, apic_type, id);
+      infos->apicid = apic_id;
+      infos->otherids[level] = UINT_MAX;
+      switch (apic_type) {
+      case 1:
+        infos->threadid = id;
+	break;
+      case 2:
+        infos->coreid = id;
+	break;
+      default:
+        hwloc_debug("x2APIC %d: unknown type %d\n", level, apic_type);
+	infos->otherids[level] = apic_id >> apic_shift;
+	break;
+      }
+      apic_shift = apic_nextshift;
+    }
+    infos->socketid = apic_id >> apic_shift;
+    hwloc_debug("x2APIC remainder: %d\n", infos->socketid);
+  } else
+    infos->otherids = NULL;
 }
 
 /* Analyse information stored in infos, and build topology levels accordingly */
 static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigned nbprocs)
 {
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
-  unsigned i, j;
+  unsigned i, j, one, level;
 
   for (i = 0; i < nbprocs; i++)
-    if (infos[i].present)
+    if (infos[i].present) {
       hwloc_bitmap_set(complete_cpuset, i);
+      one = i;
+    }
 
   /* Look for sockets */
   {
@@ -251,6 +299,37 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       hwloc_insert_object_by_cpuset(topology, sock);
     }
     hwloc_bitmap_free(sockets_cpuset);
+  }
+
+  /* Look for unknown objects */
+  if (infos[one].otherids) {
+    for (level = infos[one].levels-1; level <= infos[one].levels-1; level--) {
+      if (infos[one].otherids[level] != UINT_MAX) {
+	hwloc_bitmap_t unknowns_cpuset = hwloc_bitmap_dup(complete_cpuset);
+	hwloc_bitmap_t unknown_cpuset;
+	hwloc_obj_t unknown;
+
+	while ((i = hwloc_bitmap_first(unknowns_cpuset)) != (unsigned) -1) {
+	  unsigned unknownid = infos[i].otherids[level];
+
+	  unknown_cpuset = hwloc_bitmap_alloc();
+	  hwloc_bitmap_zero(unknown_cpuset);
+	  for (j = i; j < nbprocs; j++) {
+	    if (infos[j].otherids[level] == unknownid) {
+	      hwloc_bitmap_set(unknown_cpuset, j);
+	      hwloc_bitmap_clr(unknowns_cpuset, j);
+	    }
+	  }
+	  unknown = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, unknownid);
+	  unknown->cpuset = unknown_cpuset;
+	  unknown->os_level = level;
+	  hwloc_debug_2args_bitmap("os unknown%d %u has cpuset %s\n",
+	      level, unknownid, unknown_cpuset);
+	  hwloc_insert_object_by_cpuset(topology, unknown);
+	}
+	hwloc_bitmap_free(unknowns_cpuset);
+      }
+    }
   }
 
   /* Look for cores */
@@ -292,7 +371,8 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 
   /* Look for caches */
   /* First find max level */
-  unsigned level = 0, l;
+  level = 0;
+  unsigned l;
   for (i = 0; i < nbprocs; i++)
     for (j = 0; j < infos[i].numcaches; j++)
       if (infos[i].cache[j].level > level)
