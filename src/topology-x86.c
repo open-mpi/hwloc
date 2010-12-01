@@ -157,7 +157,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     fill_amd_cache(infos, 3, edx);
   }
 
-  /* AMD doesn't actually provide 0x80000008 information */
+  /* AMD doesn't actually provide 0x04 information */
   if (cpuid_type != amd && highest_cpuid >= 0x04) {
     cachenum = 0;
     for (cachenum = 0; ; cachenum++) {
