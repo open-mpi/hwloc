@@ -227,38 +227,41 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       if (!eax && !ebx)
         break;
     }
-    infos->levels = level;
-    infos->otherids = malloc(level * sizeof(*infos->otherids));
-    for (level = 0; ; level++) {
-      ecx = level;
-      eax = 0x0b;
-      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
-      if (!eax && !ebx)
-        break;
-      apic_nextshift = eax & 0x1f;
-      apic_number = ebx & 0xffff;
-      apic_type = (ecx & 0xff00) >> 8;
-      apic_id = edx;
-      id = (apic_id >> apic_shift) & ((1 << (apic_nextshift - apic_shift)) - 1);
-      hwloc_debug("x2APIC %08x %d: nextshift %d num %2d type %d id %2d\n", apic_id, level, apic_nextshift, apic_number, apic_type, id);
-      infos->apicid = apic_id;
-      infos->otherids[level] = UINT_MAX;
-      switch (apic_type) {
-      case 1:
-        infos->threadid = id;
-	break;
-      case 2:
-        infos->coreid = id;
-	break;
-      default:
-        hwloc_debug("x2APIC %d: unknown type %d\n", level, apic_type);
-	infos->otherids[level] = apic_id >> apic_shift;
-	break;
+    if (level) {
+      infos->levels = level;
+      infos->otherids = malloc(level * sizeof(*infos->otherids));
+      for (level = 0; ; level++) {
+	ecx = level;
+	eax = 0x0b;
+	hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+	if (!eax && !ebx)
+	  break;
+	apic_nextshift = eax & 0x1f;
+	apic_number = ebx & 0xffff;
+	apic_type = (ecx & 0xff00) >> 8;
+	apic_id = edx;
+	id = (apic_id >> apic_shift) & ((1 << (apic_nextshift - apic_shift)) - 1);
+	hwloc_debug("x2APIC %08x %d: nextshift %d num %2d type %d id %2d\n", apic_id, level, apic_nextshift, apic_number, apic_type, id);
+	infos->apicid = apic_id;
+	infos->otherids[level] = UINT_MAX;
+	switch (apic_type) {
+	case 1:
+	  infos->threadid = id;
+	  break;
+	case 2:
+	  infos->coreid = id;
+	  break;
+	default:
+	  hwloc_debug("x2APIC %d: unknown type %d\n", level, apic_type);
+	  infos->otherids[level] = apic_id >> apic_shift;
+	  break;
+	}
+	apic_shift = apic_nextshift;
       }
-      apic_shift = apic_nextshift;
-    }
-    infos->socketid = apic_id >> apic_shift;
-    hwloc_debug("x2APIC remainder: %d\n", infos->socketid);
+      infos->socketid = apic_id >> apic_shift;
+      hwloc_debug("x2APIC remainder: %d\n", infos->socketid);
+    } else
+      infos->otherids = NULL;
   } else
     infos->otherids = NULL;
 }
@@ -434,8 +437,11 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
     level--;
   }
 
-  for (i = 0; i < nbprocs; i++)
+  for (i = 0; i < nbprocs; i++) {
     free(infos[i].cache);
+    if (infos[i].otherids)
+      free(infos[i].otherids);
+  }
 }
 
 #define INTEL_EBX ('G' | ('e'<<8) | ('n'<<16) | ('u'<<24))
