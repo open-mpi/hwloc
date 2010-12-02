@@ -531,7 +531,12 @@ hwloc_look_libpci(struct hwloc_topology *topology)
         unsigned linksta = * (unsigned*) &config_space_cache[cap->addr + PCI_EXP_LNKSTA];
         unsigned speed = linksta & PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
         unsigned width = (linksta & PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
-        obj->attr->pcidev.linkspeed = 0.25 * ((float) speed) * ((float) width) * 0.8; /* FIXME: 0.8 to be replaced with 128/130 for PCIe Gen3 */
+	/* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
+	 * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
+	 * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
+	 */
+        float lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8 * 128/130; /* Gbit/s per lane */
+        obj->attr->pcidev.linkspeed = lanespeed * width / 8; /* GB/s */
       }
     }
 
