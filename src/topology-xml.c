@@ -184,7 +184,20 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
   }
 
-  else if (!strcmp(name, "bridge_type")) {  
+  else if (!strcmp(name, "pci_link_speed")) {
+    switch (obj->type) {
+    case HWLOC_OBJ_PCI_DEVICE:
+    case HWLOC_OBJ_BRIDGE: {
+      obj->attr->pcidev.linkspeed = atof(value);
+      break;
+    }
+    default:
+      fprintf(stderr, "ignoring pci_link_speed attribute for non-PCI object\n");
+      break;
+    }
+  }
+
+  else if (!strcmp(name, "bridge_type")) {
     switch (obj->type) {
     case HWLOC_OBJ_BRIDGE: {
       unsigned upstream_type, downstream_type;
@@ -595,6 +608,8 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
 	    obj->attr->pcidev.subvendor_id, obj->attr->pcidev.subdevice_id,
 	    obj->attr->pcidev.revision);
     xmlNewProp(node, BAD_CAST "pci_type", BAD_CAST tmp);
+    sprintf(tmp, "%f", obj->attr->pcidev.linkspeed);
+    xmlNewProp(node, BAD_CAST "pci_link_speed", BAD_CAST tmp);
     break;
   default:
     break;

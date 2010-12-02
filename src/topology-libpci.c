@@ -23,7 +23,7 @@
 #include <sys/types.h>
 #endif
 
-#define CONFIG_SPACE_CACHESIZE 64
+#define CONFIG_SPACE_CACHESIZE 256
 
 static void
 hwloc_pci_traverse_print_cb(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
@@ -521,6 +521,19 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     obj->attr->pcidev.subvendor_id = config_space_cache[PCI_SUBSYSTEM_VENDOR_ID];
     HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
+
+    obj->attr->pcidev.linkspeed = 0; /* unknown */
+    struct pci_cap *cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
+    if (cap) {
+      if (cap->addr + PCI_EXP_LNKSTA >= CONFIG_SPACE_CACHESIZE) {
+        fprintf(stderr, "cannot read PCI_EXP_LNKSTA cap at %d (only %d cached)\n", cap->addr + PCI_EXP_LNKSTA, CONFIG_SPACE_CACHESIZE);
+      } else {
+        unsigned linksta = * (unsigned*) &config_space_cache[cap->addr + PCI_EXP_LNKSTA];
+        unsigned speed = linksta & PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
+        unsigned width = (linksta & PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
+        obj->attr->pcidev.linkspeed = 0.25 * ((float) speed) * ((float) width) * 0.8; /* FIXME: 0.8 to be replaced with 128/130 for PCIe Gen3 */
+      }
+    }
 
     if (isbridge) {
       HWLOC_BUILD_ASSERT(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);

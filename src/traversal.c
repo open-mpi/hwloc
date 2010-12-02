@@ -445,12 +445,15 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     if (verbose) {
       char up[64], down[64];
       /* upstream is PCI or HOST */
-      if (obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
-	snprintf(up, sizeof(up), "busid=%04x:%02x:%02x.%01x%sid=%04x:%04x%sclass=%04x(%s)",
+      if (obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI) {
+        char linkspeed[64]= "";
+        if (obj->attr->pcidev.linkspeed)
+          snprintf(linkspeed, sizeof(linkspeed), "%slink=%.2fGB/s", separator, obj->attr->pcidev.linkspeed);
+	snprintf(up, sizeof(up), "busid=%04x:%02x:%02x.%01x%sid=%04x:%04x%sclass=%04x(%s)%s",
 		 obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
 		 obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id, separator,
-		 obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id));
-      else
+		 obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
+      } else
         *up = '\0';
       /* downstream is_PCI */
       snprintf(down, sizeof(down), "buses=%04x:[%02x-%02x]",
@@ -463,10 +466,14 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     *string = '\0';
     return 0;
   case HWLOC_OBJ_PCI_DEVICE:
-    if (verbose)
-      return snprintf(string, size, "busid=%04x:%02x:%02x.%01x%sclass=%04x(%s)",
+    if (verbose) {
+      char linkspeed[64]= "";
+      if (obj->attr->pcidev.linkspeed)
+        snprintf(linkspeed, sizeof(linkspeed), "%slink=%.2fGB/s", separator, obj->attr->pcidev.linkspeed);
+      return snprintf(string, size, "busid=%04x:%02x:%02x.%01x%sclass=%04x(%s)%s",
 		      obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
-		      obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id));
+		      obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
+    }
     *string = '\0';
     return 0;
   default:
