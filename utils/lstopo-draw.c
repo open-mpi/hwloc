@@ -297,6 +297,8 @@ RECURSE_BEGIN(obj, border) \
 struct dyna_save {
   unsigned width;
   unsigned height;
+  unsigned fontsize;
+  unsigned gridsize;
 };
 
 /* Save the computed size */
@@ -305,6 +307,8 @@ struct dyna_save {
     struct dyna_save *save = malloc(sizeof(*save)); \
     save->width = *retwidth; \
     save->height = *retheight; \
+    save->fontsize = fontsize; \
+    save->gridsize = gridsize; \
     level->userdata = save; \
   } \
 } while (0)
@@ -313,8 +317,12 @@ struct dyna_save {
 #define DYNA_CHECK() do { \
   if (level->userdata && methods == &null_draw_methods) { \
     struct dyna_save *save = level->userdata; \
-    *retwidth = save->width; \
-    *retheight = save->height; \
+    if (save->fontsize == fontsize && save->gridsize == gridsize) { \
+      *retwidth = save->width; \
+      *retheight = save->height; \
+    } \
+    free(level->userdata); \
+    level->userdata = NULL; \
     return; \
   } \
 } while (0)
