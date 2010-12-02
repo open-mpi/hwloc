@@ -444,44 +444,51 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
 static void
 bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
-  /* Room for the box and separation from cards */
-  unsigned textwidth = gridsize + 7*fontsize + gridsize;
-  unsigned textheight = PCI_HEIGHT;
-  unsigned myheight = textheight;
-  unsigned mywidth = gridsize + gridsize + fontsize + gridsize;
+  unsigned textwidth = 0;
+  unsigned myheight = 0;
+  /* Room for square, left link and speed */
+  unsigned speedwidth = fontsize ? fontsize + gridsize : 0;
+  unsigned mywidth = 2*gridsize + gridsize + speedwidth;
   unsigned totwidth, totheight;
 
   DYNA_CHECK();
 
-  /* separate text from devices */
-  if (level->arity > 0)
-    myheight += gridsize;
+  RECURSE_VERT(level, &null_draw_methods, gridsize, 0);
 
-  RECURSE_VERT(level, &null_draw_methods, gridsize, gridsize);
-
-  methods->box(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR, depth, x, textwidth, y, textheight);
-
-  if (fontsize) {
-    char text[64];
-    lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
-  }
+  /* Square and left link */
+  methods->box(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
+  methods->line(output, 0, 0, 0, depth, x + gridsize, y + PCI_HEIGHT/2, x + 2*gridsize, y + PCI_HEIGHT/2);
 
   if (level->arity > 0) {
-    unsigned bottom = 0;
+    unsigned bottom = 0, top = 0;
     RECURSE_BEGIN(level, 0);
     RECURSE_FOR()
       RECURSE_CALL_FUN(methods);
+
+      /* Line to PCI device */
       unsigned center = y + totheight + PCI_HEIGHT / 2;
+      if (!top)
+        top = center;
       bottom = center;
-      methods->line(output, 0, 0, 0, depth, x + gridsize, center, x + gridsize + gridsize + fontsize + gridsize, center);
-      if ((subobjs[i]->type == HWLOC_OBJ_PCI_DEVICE) && subobjs[i]->attr->pcidev.linkspeed != 0.) {
-        char text[4];
-        snprintf(text, sizeof(text), "%0.1f", subobjs[i]->attr->pcidev.linkspeed);
-        methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize + gridsize, y + totheight, text);
+      methods->line(output, 0, 0, 0, depth, x + 2*gridsize, center, x + 2*gridsize + gridsize + speedwidth, center);
+
+      /* Negotiated link speed */
+      if (fontsize) {
+        float speed = 0.;
+        if (subobjs[i]->type == HWLOC_OBJ_PCI_DEVICE)
+          speed = subobjs[i]->attr->pcidev.linkspeed;
+        if (subobjs[i]->type == HWLOC_OBJ_BRIDGE && subobjs[i]->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI)
+          speed = subobjs[i]->attr->bridge.upstream.pci.linkspeed;
+        if (speed != 0.) {
+          char text[4];
+          snprintf(text, sizeof(text), "%0.1f", subobjs[i]->attr->pcidev.linkspeed);
+          methods->text(output, 0, 0, 0, fontsize, depth-1, x + 2*gridsize + gridsize, y + totheight, text);
+        }
       }
     RECURSE_END_VERT(gridsize, 0);
-    methods->line(output, 0, 0, 0, depth, x + gridsize, y + textheight, x + gridsize, bottom);
+
+    /* Vertical line */
+    methods->line(output, 0, 0, 0, depth, x + 2*gridsize, top, x + 2*gridsize, bottom);
   } else
     RECURSE_VERT(level, methods, gridsize, 0);
 
