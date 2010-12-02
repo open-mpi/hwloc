@@ -448,7 +448,7 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   unsigned textwidth = gridsize + 7*fontsize + gridsize;
   unsigned textheight = PCI_HEIGHT;
   unsigned myheight = textheight;
-  unsigned mywidth = gridsize + gridsize;
+  unsigned mywidth = gridsize + gridsize + fontsize + gridsize;
   unsigned totwidth, totheight;
 
   DYNA_CHECK();
@@ -474,7 +474,12 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
       RECURSE_CALL_FUN(methods);
       unsigned center = y + totheight + PCI_HEIGHT / 2;
       bottom = center;
-      methods->line(output, 0, 0, 0, depth, x + gridsize, center, x + gridsize + gridsize, center);
+      methods->line(output, 0, 0, 0, depth, x + gridsize, center, x + gridsize + gridsize + fontsize + gridsize, center);
+      if ((subobjs[i]->type == HWLOC_OBJ_PCI_DEVICE) && subobjs[i]->attr->pcidev.linkspeed != 0.) {
+        char text[4];
+        snprintf(text, sizeof(text), "%0.1f", subobjs[i]->attr->pcidev.linkspeed);
+        methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize + gridsize, y + totheight, text);
+      }
     RECURSE_END_VERT(gridsize, 0);
     methods->line(output, 0, 0, 0, depth, x + gridsize, y + textheight, x + gridsize, bottom);
   } else
