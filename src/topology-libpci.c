@@ -523,6 +523,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
 
     obj->attr->pcidev.linkspeed = 0; /* unknown */
+#ifdef HWLOC_HAVE_PCI_FIND_CAP
     struct pci_cap *cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
     if (cap) {
       if (cap->addr + PCI_EXP_LNKSTA >= CONFIG_SPACE_CACHESIZE) {
@@ -539,6 +540,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
         obj->attr->pcidev.linkspeed = lanespeed * width / 8; /* GB/s */
       }
     }
+#endif /* HWLOC_HAVE_PCI_FIND_CAP */
 
     if (isbridge) {
       HWLOC_BUILD_ASSERT(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
