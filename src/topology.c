@@ -1336,7 +1336,7 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
 }
 
 static void
-hwloc_drop_useless_pci(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t root)
+hwloc_drop_useless_pci(hwloc_topology_t topology, hwloc_obj_t root)
 {
   hwloc_obj_t child, *pchild;
 
@@ -1364,7 +1364,8 @@ hwloc_drop_useless_pci(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
       if (!grandchildren) {
 	*pchild = child->next_sibling;
 	hwloc_free_object(child);
-      } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST) {
+      } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST
+		 && !(topology->flags & HWLOC_TOPOLOGY_FLAG_IO_BRIDGES)) {
 	/* insert grandchildren in place of child */
 	*pchild = grandchildren;
 	for( ; grandchildren->next_sibling != NULL ; grandchildren = grandchildren->next_sibling);

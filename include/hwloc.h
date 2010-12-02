@@ -552,16 +552,25 @@ enum hwloc_topology_flags_e {
    * NICs, block devices, ...) and host bridges (objects that connect the host
    * objects to an I/O subsystem) will be added to the topology.
    * Uncommon devices and other bridges (such as PCI-to-PCI bridges) will be
-   * ignored unless HWLOC_TOPOLOGY_FLAG_WHOLE_IO is also set.
+   * ignored.
    */
   HWLOC_TOPOLOGY_FLAG_IO_DEVICES = (1<<2),
 
+  /* \brief Detect PCI bridges.
+   *
+   * This flag should be combined with HWLOC_TOPOLOGY_FLAG_IO_DEVICES to enable
+   * the detection of both common devices and of all useful bridges (bridges that
+   * that have at least one device behind them).
+   */
+  HWLOC_TOPOLOGY_FLAG_IO_BRIDGES = (1<<3),
+
   /* \brief Detect the whole PCI hierarchy.
    *
-   * By default, I/O devices are ignored. This flag enables detection of all
-   * I/O devices and bridges using the libpci backend.
+   * This flag enables detection of all I/O devices (even the uncommon ones)
+   * and bridges (even those that have no device behind them) using the libpci
+   * backend.
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<3),
+  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<4)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

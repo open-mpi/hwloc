@@ -214,7 +214,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --merge               Do not show levels that do not have a hierarcical\n"
                   "                        impact\n");
 #ifdef HWLOC_HAVE_LIBPCI
-  fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
+  fprintf (where, "  --no-io               Do not show any I/O device\n");
+  fprintf (where, "  --bridges             Show useful bridges in addition to common I/O devices\n");
   fprintf (where, "  --whole-io            Show all I/O devices and bridges\n");
 #endif
   fprintf (where, "Input options:\n");
@@ -345,6 +346,8 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--no-io"))
 	flags &= ~HWLOC_TOPOLOGY_FLAG_IO_DEVICES;
+      else if (!strcmp (argv[1], "--bridges"))
+	flags |= HWLOC_TOPOLOGY_FLAG_IO_BRIDGES;
       else if (!strcmp (argv[1], "--whole-io"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
       else if (!strcmp (argv[1], "--merge"))
