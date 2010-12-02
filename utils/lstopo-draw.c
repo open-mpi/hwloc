@@ -492,6 +492,10 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   } else
     RECURSE_VERT(level, methods, gridsize, 0);
 
+  /* Empty bridges still need some room */
+  if (*retheight < HWLOC_OBJ_PCI_DEVICE)
+    *retheight = HWLOC_OBJ_PCI_DEVICE;
+
   DYNA_SAVE();
 }
 
