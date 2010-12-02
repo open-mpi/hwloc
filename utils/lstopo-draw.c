@@ -493,8 +493,8 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
     RECURSE_VERT(level, methods, gridsize, 0);
 
   /* Empty bridges still need some room */
-  if (*retheight < HWLOC_OBJ_PCI_DEVICE)
-    *retheight = HWLOC_OBJ_PCI_DEVICE;
+  if (*retheight < PCI_HEIGHT)
+    *retheight = PCI_HEIGHT;
 
   DYNA_SAVE();
 }
