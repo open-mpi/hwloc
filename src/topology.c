@@ -1146,7 +1146,7 @@ propagate_nodesets(hwloc_obj_t obj)
     if (child->type == HWLOC_OBJ_BRIDGE
         || child->type == HWLOC_OBJ_PCI_DEVICE
         || child->type == HWLOC_OBJ_OS_DEVICE)
-      return;
+      continue;
 
     if (obj->nodeset) {
       /* Update complete nodesets down */
