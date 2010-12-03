@@ -1349,8 +1349,7 @@ hwloc_drop_useless_pci(hwloc_topology_t topology, hwloc_obj_t root)
 	  && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
 	  && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
 	  && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */) {
-	*pchild = child->next_sibling;
-	hwloc_free_object(child);
+	do_free_object(pchild);
       }
     }
   }
