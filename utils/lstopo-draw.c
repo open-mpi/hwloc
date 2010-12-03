@@ -695,12 +695,20 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
 
     /* Display timestamp */
     t = time(NULL);
+#ifdef HAVE_STRFTIME
+    {
+      struct tm *tmp;
+      tmp = localtime(&t);
+      strftime(text, sizeof(text), "Date: %c", tmp);
+    }
+#else /* HAVE_STRFTIME */
     date = ctime(&t);
     n = strlen(date);
     if (n && date[n-1] == '\n') {
       date[n-1] = 0;
     }
     snprintf(text, sizeof(text), "Date: %s", date);
+#endif /* HAVE_STRFTIME */
     methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset + fontsize + gridsize, text);
   }
 }
