@@ -670,9 +670,7 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
   unsigned totwidth, totheight, offset;
   time_t t;
   char text[128];
-  char *date;
   char hostname[128] = "";
-  int n;
   unsigned long hostname_size = sizeof(hostname);
 
   system_draw(topology, methods, logical, level, output, depth, x, &totwidth, y, &totheight);
@@ -710,12 +708,16 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
       strftime(text, sizeof(text), "Date: %c", tmp);
     }
 #else /* HAVE_STRFTIME */
-    date = ctime(&t);
-    n = strlen(date);
-    if (n && date[n-1] == '\n') {
-      date[n-1] = 0;
+    {
+      char *date;
+      int n;
+      date = ctime(&t);
+      n = strlen(date);
+      if (n && date[n-1] == '\n') {
+        date[n-1] = 0;
+      }
+      snprintf(text, sizeof(text), "Date: %s", date);
     }
-    snprintf(text, sizeof(text), "Date: %s", date);
 #endif /* HAVE_STRFTIME */
     methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset + fontsize + gridsize, text);
   }
