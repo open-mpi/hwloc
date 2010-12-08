@@ -1,0 +1,2 @@
+To update hagrid.png, emmett.png or dudley.png, run
+  lstopo -i <host>.xml --no-legend --whole-system <host>.png
