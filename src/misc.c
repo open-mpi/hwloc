@@ -57,10 +57,11 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
     va_end(ap);
   } while ((size_t) ret == fakesize-1 || (ret < 0 && (!errno || errno == ERANGE)));
 
-  if (ret >= 0) {
+  if (ret >= 0 && size) {
     if (size > (size_t) ret+1)
       size = ret+1;
-    memcpy(str, fakestr, size);
+    memcpy(str, fakestr, size-1);
+    str[size-1] = 0;
   }
   free(fakestr);
 
