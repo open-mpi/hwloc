@@ -58,8 +58,8 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
   } while ((size_t) ret == fakesize-1 || (ret < 0 && (!errno || errno == ERANGE)));
 
   if (ret >= 0) {
-    if (size > (size_t) ret)
-      size = ret;
+    if (size > (size_t) ret+1)
+      size = ret+1;
     memcpy(str, fakestr, size);
   }
   free(fakestr);
