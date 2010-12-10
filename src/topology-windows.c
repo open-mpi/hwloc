@@ -253,7 +253,7 @@ hwloc_win_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
 static int
 hwloc_win_get_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_bitmap_t hwloc_set, int flags)
 {
-  DWORD proc_mask, sys_mask;
+  DWORD_PTR proc_mask, sys_mask;
   if (flags & HWLOC_CPUBIND_NOMEMBIND) {
     errno = ENOSYS;
     return -1;
