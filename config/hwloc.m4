@@ -323,6 +323,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
                     PROCESSOR_CACHE_TYPE,
                     CACHE_DESCRIPTOR,
                     LOGICAL_PROCESSOR_RELATIONSHIP,
+                    RelationProcessorPackage,
                     SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
                     GROUP_AFFINITY,
                     PROCESSOR_RELATIONSHIP,
