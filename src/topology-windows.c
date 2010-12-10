@@ -51,7 +51,13 @@ typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP {
   RelationGroup,
   RelationAll = 0xffff
 } LOGICAL_PROCESSOR_RELATIONSHIP;
-#endif
+#else /* HAVE_LOGICAL_PROCESSOR_RELATIONSHIP */
+#  ifndef HAVE_RELATIONPROCESSORPACKAGE
+#    define RelationProcessorPackage 3
+#    define RelationGroup 4
+#    define RelationAll 0xffff
+#  endif /* HAVE_RELATIONPROCESSORPACKAGE */
+#endif /* HAVE_LOGICAL_PROCESSOR_RELATIONSHIP */
 
 #ifndef HAVE_SYSTEM_LOGICAL_PROCESSOR_INFORMATION
 typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION {
