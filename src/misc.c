@@ -51,7 +51,7 @@ int hwloc_snprintf(char *str, size_t size, const char *format, ...)
     ret = vsnprintf(str, size, format, ap);
     va_end(ap);
     free(str);
-  } while ((size_t) ret == size-1 || (ret < 0 && !errno));
+  } while ((size_t) ret == size-1 || (ret < 0 && (!errno || errno == ERANGE)));
 
   return ret;
 }
