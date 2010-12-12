@@ -597,6 +597,7 @@ The documentation chapters include
 <li> \ref threadsafety
 <li> \ref embed
 <li> \ref switchfromplpa
+<li> \ref faq
 </ul>
 
 Make sure to have had a look at those too!
@@ -1260,5 +1261,30 @@ that have topology information, that are online, or that are available
 to the application.  These cpusets may be retrieved with
 hwloc_topology_get_online_cpuset() and other similar functions to
 filter the object that are relevant or not.
+
+
+
+\page faq Frequently Asked Questions
+
+\section faq_xml I do not want hwloc to rediscover my enormous machine topology everytime I rerun a process
+
+Although the topology discovery is not expensive on common machines,
+its overhead may become significant when multiple processes repeat
+the discovery on large machines (for instance when starting one process
+per core in a parallel application).
+The machine topology usually does not vary much, except if some cores
+are stopped/restarted or if the administrator restrictions are modified.
+Thus rediscovering the whole topology again and again may look useless.
+
+For this purpose, hwloc offers XML import/export features. It lets you
+save the discovered topology to a file (for instance with the lstopo program)
+and reload it later by setting the HWLOC_XMLFILE environment variable.
+Loading a XML topology is usually much faster than querying multiple
+files or calling multiple functions of the operating system.
+It is also possible to manipulate such XML files with the C programming
+interface, and the import/export may also be directed to memory buffer
+(that may for instance be transmitted between applications through a socket).
+
+
 
 */
