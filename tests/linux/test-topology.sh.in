@@ -18,6 +18,9 @@ lstopo="$HWLOC_top_builddir/utils/lstopo"
 
 actual_output="$1"
 
+# make sure we use default numeric formats
+export LANG=C
+
 error()
 {
     echo $@ 2>&1
