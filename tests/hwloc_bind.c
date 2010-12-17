@@ -21,18 +21,18 @@ static void result_set(const char *msg, int err, int supported)
 {
   const char *errmsg = strerror(errno);
   if (err)
-    printf("%-40s: FAILED (%d, %s)%s\n", msg, errno, errmsg, supported ? "" : " (expected)");
+    printf("%-40s: %sFAILED (%d, %s)\n", msg, supported?"":"X", errno, errmsg);
   else
-    printf("%-40s: OK%s\n", msg, supported ? "" : " (unexpected)");
+    printf("%-40s: OK\n", msg);
 }
 
 static void result_get(const char *msg, hwloc_const_bitmap_t expected, hwloc_const_bitmap_t result, int err, int supported)
 {
   const char *errmsg = strerror(errno);
   if (err)
-    printf("%-40s: FAILED (%d, %s)%s\n", msg, errno, errmsg, supported ? "" : " (expected)");
+    printf("%-40s: %sFAILED (%d, %s)\n", msg, supported?"":"X", errno, errmsg);
   else if (!expected || hwloc_bitmap_isequal(expected, result))
-    printf("%-40s: OK%s\n", msg, supported ? "" : " (unexpected)");
+    printf("%-40s: OK\n", msg);
   else {
     char *expected_s, *result_s;
     hwloc_bitmap_asprintf(&expected_s, expected);
@@ -96,7 +96,7 @@ static void testmem(hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy,
     if (area) {
       memset(area, 0, area_size);
       result_get("Get   bound area", nodeset, new_nodeset, hwloc_get_area_membind(topology, area, area_size, new_nodeset, &newpolicy, flags), support->membind->get_area_membind && expected);
-      result_get("Free  bound area", NULL, NULL, hwloc_free_membind(topology, area, area_size), support->membind->alloc_membind && expected);
+      result_get("Free  bound area", NULL, NULL, hwloc_free(topology, area, area_size), support->membind->alloc_membind && expected);
     }
   }
   printf("\n");

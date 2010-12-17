@@ -1260,7 +1260,8 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pparent)
   for_each_child_safe(child, parent, pchild)
     remove_ignored(topology, pchild);
 
-  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
+  if (parent != topology->levels[0][0] &&
+      topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     hwloc_debug("%s", "\nDropping ignored object ");
     print_object(topology, 0, parent);
     drop_object(pparent);
@@ -1943,6 +1944,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->get_proc_membind = NULL;
   topology->set_area_membind = NULL;
   topology->get_area_membind = NULL;
+  topology->alloc = NULL;
   topology->alloc_membind = NULL;
   topology->free_membind = NULL;
   memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
@@ -2080,7 +2082,8 @@ hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
 
 int
 hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology __hwloc_attribute_unused,
-                             const char *xmlbuffer __hwloc_attribute_unused, int size)
+                             const char *xmlbuffer __hwloc_attribute_unused,
+                             int size __hwloc_attribute_unused)
 {
 #ifdef HWLOC_HAVE_XML
   /* cleanup existing backend */

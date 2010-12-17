@@ -25,6 +25,7 @@ int main(void)
   cpuset = hwloc_bitmap_alloc();
   hwloc_bitmap_set(cpuset, 0);
   obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "test");
+  hwloc_bitmap_free(cpuset);
   hwloc_topology_insert_misc_object_by_parent(topology, obj, "test2");
   hwloc_topology_check(topology);
   hwloc_topology_destroy(topology);

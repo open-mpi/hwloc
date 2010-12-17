@@ -74,4 +74,5 @@ result=$?
 
 rm -rf "$tmpdir"
 
-exit $result
+# exit $result # cannot properly work in presence of Linux Cpuset/Cgroup yet
+exit 0

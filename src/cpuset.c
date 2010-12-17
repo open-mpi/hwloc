@@ -547,29 +547,29 @@ unsigned long hwloc_bitmap_to_ith_ulong(const struct hwloc_bitmap_s *set, unsign
 
 void hwloc_bitmap_only(struct hwloc_bitmap_s * set, unsigned cpu)
 {
-	unsigned index = HWLOC_SUBBITMAP_INDEX(cpu);
+	unsigned index_ = HWLOC_SUBBITMAP_INDEX(cpu);
 
 	HWLOC__BITMAP_CHECK(set);
 
 	hwloc_bitmap_reset_by_cpu_index(set, cpu);
 	hwloc_bitmap__zero(set);
-	set->ulongs[index] |= HWLOC_SUBBITMAP_CPU(cpu);
+	set->ulongs[index_] |= HWLOC_SUBBITMAP_CPU(cpu);
 }
 
 void hwloc_bitmap_allbut(struct hwloc_bitmap_s * set, unsigned cpu)
 {
-	unsigned index = HWLOC_SUBBITMAP_INDEX(cpu);
+	unsigned index_ = HWLOC_SUBBITMAP_INDEX(cpu);
 
 	HWLOC__BITMAP_CHECK(set);
 
 	hwloc_bitmap_reset_by_cpu_index(set, cpu);
 	hwloc_bitmap__fill(set);
-	set->ulongs[index] &= ~HWLOC_SUBBITMAP_CPU(cpu);
+	set->ulongs[index_] &= ~HWLOC_SUBBITMAP_CPU(cpu);
 }
 
 void hwloc_bitmap_set(struct hwloc_bitmap_s * set, unsigned cpu)
 {
-	unsigned index = HWLOC_SUBBITMAP_INDEX(cpu);
+	unsigned index_ = HWLOC_SUBBITMAP_INDEX(cpu);
 
 	HWLOC__BITMAP_CHECK(set);
 
@@ -578,7 +578,7 @@ void hwloc_bitmap_set(struct hwloc_bitmap_s * set, unsigned cpu)
 		return;
 
 	hwloc_bitmap_realloc_by_cpu_index(set, cpu);
-	set->ulongs[index] |= HWLOC_SUBBITMAP_CPU(cpu);
+	set->ulongs[index_] |= HWLOC_SUBBITMAP_CPU(cpu);
 }
 
 void hwloc_bitmap_set_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsigned endcpu)
@@ -621,7 +621,7 @@ void hwloc_bitmap_set_ith_ulong(struct hwloc_bitmap_s *set, unsigned i, unsigned
 
 void hwloc_bitmap_clr(struct hwloc_bitmap_s * set, unsigned cpu)
 {
-	unsigned index = HWLOC_SUBBITMAP_INDEX(cpu);
+	unsigned index_ = HWLOC_SUBBITMAP_INDEX(cpu);
 
 	HWLOC__BITMAP_CHECK(set);
 
@@ -630,7 +630,7 @@ void hwloc_bitmap_clr(struct hwloc_bitmap_s * set, unsigned cpu)
 		return;
 
 	hwloc_bitmap_realloc_by_cpu_index(set, cpu);
-	set->ulongs[index] &= ~HWLOC_SUBBITMAP_CPU(cpu);
+	set->ulongs[index_] &= ~HWLOC_SUBBITMAP_CPU(cpu);
 }
 
 void hwloc_bitmap_clr_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsigned endcpu)
@@ -665,11 +665,11 @@ void hwloc_bitmap_clr_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsi
 
 int hwloc_bitmap_isset(const struct hwloc_bitmap_s * set, unsigned cpu)
 {
-	unsigned index = HWLOC_SUBBITMAP_INDEX(cpu);
+	unsigned index_ = HWLOC_SUBBITMAP_INDEX(cpu);
 
 	HWLOC__BITMAP_CHECK(set);
 
-	return (HWLOC_SUBBITMAP_READULONG(set, index) & HWLOC_SUBBITMAP_CPU(cpu)) != 0;
+	return (HWLOC_SUBBITMAP_READULONG(set, index_) & HWLOC_SUBBITMAP_CPU(cpu)) != 0;
 }
 
 int hwloc_bitmap_iszero(const struct hwloc_bitmap_s *set)

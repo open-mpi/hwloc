@@ -23,10 +23,14 @@
 #include <cairo.h>
 #endif
 
+#ifdef HAVE_SETLOCALE
+#include <locale.h>
+#endif
+
 #include "lstopo.h"
 #include "misc.h"
 
-int logical = 1;
+int logical = -1;
 hwloc_obj_type_t show_only = (hwloc_obj_type_t) -1;
 int show_cpuset = 0;
 int taskset = 0;
@@ -34,6 +38,7 @@ unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 unsigned int force_horiz = 0;
 unsigned int force_vert = 0;
+unsigned int legend = 1;
 unsigned int top = 0;
 hwloc_pid_t pid = (hwloc_pid_t) -1;
 
@@ -191,13 +196,15 @@ void usage(const char *name, FILE *where)
 #endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
-  fprintf (where, "  -l --logical          Display hwloc logical object indexes (default)\n");
+  fprintf (where, "  -l --logical          Display hwloc logical object indexes\n");
+  fprintf (where, "                        (default for console output)\n");
   fprintf (where, "  -p --physical         Display physical object indexes\n");
+  fprintf (where, "                        (default for graphical output)\n");
   fprintf (where, "Output options:\n");
   fprintf (where, "  --output-format <format>\n");
   fprintf (where, "  --of <format>         Force the output to use the given format\n");
   fprintf (where, "Textual output options:\n");
-  fprintf (where, "  --only <type>         Only show objects of the given type in the text output\n");
+  fprintf (where, "  --only <type>         Only show objects of the given type in the textual output\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
@@ -217,8 +224,9 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Graphical output options:\n");
   fprintf (where, "  --fontsize 10         Set size of text font\n");
   fprintf (where, "  --gridsize 10         Set size of margin between elements\n");
-  fprintf (where, "  --horiz               Horizontal graphic layout instead of nearly 4/3 ratio\n");
-  fprintf (where, "  --vert                Vertical graphic layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "  --horiz               Horizontal graphical layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "  --vert                Vertical graphical layout instead of nearly 4/3 ratio\n");
+  fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "  --version             Report version and exit\n");
@@ -280,6 +288,10 @@ main (int argc, char *argv[])
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   int opt;
+
+#ifdef HAVE_SETLOCALE
+  setlocale(LC_ALL, "");
+#endif
 
   callname = strrchr(argv[0], '/');
   if (!callname)
@@ -356,6 +368,9 @@ main (int argc, char *argv[])
 	}
 	gridsize = atoi(argv[2]);
 	opt = 1;
+      }
+      else if (!strcmp (argv[1], "--no-legend")) {
+	legend = 0;
       }
 
       else if (hwloc_utils_lookup_input_option(argv+1, argc-1, &opt,
@@ -449,56 +464,73 @@ main (int argc, char *argv[])
       output_format = LSTOPO_OUTPUT_CONSOLE;
   }
 
+  if (logical == -1) {
+    if (output_format == LSTOPO_OUTPUT_CONSOLE)
+      logical = 1;
+    else if (output_format != LSTOPO_OUTPUT_DEFAULT)
+      logical = 0;
+  }
+
   switch (output_format) {
     case LSTOPO_OUTPUT_DEFAULT:
 #ifdef HWLOC_HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
-      if (getenv("DISPLAY"))
-        output_x11(topology, NULL, logical, verbose_mode);
-      else
+      if (getenv("DISPLAY")) {
+        if (logical == -1)
+          logical = 0;
+        output_x11(topology, NULL, logical, legend, verbose_mode);
+      } else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_WIN_SYS
-        output_windows(topology, NULL, logical, verbose_mode);
+      {
+        if (logical == -1)
+          logical = 0;
+        output_windows(topology, NULL, logical, legend, verbose_mode);
+      }
 #else
-      output_console(topology, NULL, logical, verbose_mode);
+      {
+        if (logical == -1)
+          logical = 1;
+        output_console(topology, NULL, logical, legend, verbose_mode);
+      }
 #endif
       break;
 
     case LSTOPO_OUTPUT_CONSOLE:
-      output_console(topology, filename, logical, verbose_mode);
+      output_console(topology, filename, logical, legend, verbose_mode);
       break;
     case LSTOPO_OUTPUT_TEXT:
-      output_text(topology, filename, logical, verbose_mode);
+      output_text(topology, filename, logical, legend, verbose_mode);
       break;
     case LSTOPO_OUTPUT_FIG:
-      output_fig(topology, filename, logical, verbose_mode);
+      output_fig(topology, filename, logical, legend, verbose_mode);
       break;
 #ifdef HWLOC_HAVE_CAIRO
 # if CAIRO_HAS_PNG_FUNCTIONS
     case LSTOPO_OUTPUT_PNG:
-      output_png(topology, filename, logical, verbose_mode);
+      output_png(topology, filename, logical, legend, verbose_mode);
       break;
 # endif /* CAIRO_HAS_PNG_FUNCTIONS */
 # if CAIRO_HAS_PDF_SURFACE
     case LSTOPO_OUTPUT_PDF:
-      output_pdf(topology, filename, logical, verbose_mode);
+      output_pdf(topology, filename, logical, legend, verbose_mode);
       break;
 # endif /* CAIRO_HAS_PDF_SURFACE */
 # if CAIRO_HAS_PS_SURFACE
     case LSTOPO_OUTPUT_PS:
-      output_ps(topology, filename, logical, verbose_mode);
+      output_ps(topology, filename, logical, legend, verbose_mode);
       break;
 #endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_SVG_SURFACE
     case LSTOPO_OUTPUT_SVG:
-      output_svg(topology, filename, logical, verbose_mode);
+      output_svg(topology, filename, logical, legend, verbose_mode);
       break;
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
 #ifdef HWLOC_HAVE_XML
     case LSTOPO_OUTPUT_XML:
-      output_xml(topology, filename, logical, verbose_mode);
+      output_xml(topology, filename, logical, legend, verbose_mode);
       break;
 #endif
     default:

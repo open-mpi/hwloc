@@ -49,16 +49,21 @@ and \fBsynthetic\fR.
 .TP
 \fB\-\-ignore\fR <type>
 Ignore all objects of type <type> in the topology.
-This may be useful in case of asymmetric topologies since ignoring
-large objects (e.g. NUMA nodes) may improve the distribution of
-smaller objects (e.g. cores or PUs) among the machine.
 .TP
-\fB\-\-among\fR <type>
-Distribute among objects of the given type instead of from
-the top of the topology hierarchy.
-This may be useful in case of asymmetric topologies since small
-objects (e.g. cores or PUs) may be more uniformly distributed across
-the machine than larger objects (e.g. NUMA nodes).
+\fB\-\-from\fR <type>
+Distribute starting from objects of the given type instead of from
+the top of the topology hierarchy, i.e. ignoring the structure given by objects
+above.
+.TP
+\fB\-\-top\fR <type>
+Distribute down to objects of the given type instead of down to the bottom of
+the topology hierarchy, i.e. ignoring the structure given by objects below.
+This may be useful if some latitude is desired for the binding, e.g. just bind
+on sockets and not to precise cores or caches.
+.TP
+\fB\-\-at\fR <type>
+Distribute among objects of the given type.  This is equivalent to specifying
+both \fB\-\-from\fR and \fB\-\-to\fR at the same time.
 .TP
 \fB\-\-version\fR
 Report version and exit.
@@ -68,16 +73,22 @@ Report version and exit.
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-distrib generates a series of CPU masks in an attempt to
-distribute a set of processes around multiple processors in a single
-server.  These masks can be used with hwloc-bind(1).
+hwloc-distrib generates a series of CPU masks corresponding to a distribution of
+a given number of elements over the topology of the machine. The distribution
+is done recursively from the top of the hierarchy (or from the level specified
+by option \fB\-\-from\fR) down to the bottom of the hierarchy (or down to the
+level specified by option \fB\-\-to\fR, or until only one element remains),
+splitting the number of elements at each encountered hierarchy level not ignored
+by options \fB\-\-ignore\fR.
+
+This can e.g. be used to distribute a set of processes hierarchically according
+to the topology of a machine. These masks can be used with hwloc-bind(1).
 .
 .PP
 .B NOTE:
 It is highly recommended that you read the hwloc(7) overview page
 before reading this man page.  Most of the concepts described in
 hwloc(7) directly apply to the hwloc-bind utility.
-.
 .
 .\" **************************
 .\"    Examples Section

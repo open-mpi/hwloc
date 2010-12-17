@@ -580,8 +580,9 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
 
 /** \brief Distribute \p n items over the topology under \p root
  *
- * Array \p cpuset will be filled with \p n cpusets distributed linearly over
- * the topology under \p root .
+ * Array \p cpuset will be filled with \p n cpusets recursively distributed
+ * linearly over the topology under \p root, down to depth \p until (which can
+ * be MAX_INT to distribute down to the finest level).
  *
  * This is typically useful when an application wants to distribute \p n
  * threads over a machine, giving each of them as much private cache as
@@ -591,37 +592,47 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
  * before binding a thread so that it does not move at all.
  */
 static __hwloc_inline void
-hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, unsigned n)
+hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *root, unsigned n_roots, hwloc_cpuset_t *cpuset, unsigned n, unsigned until);
+static __hwloc_inline void
+hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, unsigned n, unsigned until)
 {
   unsigned i;
-  unsigned u;
-  unsigned chunk_size, complete_chunks;
-  hwloc_cpuset_t *cpusetp;
 
-  if (!root->arity || n == 1) {
+  if (!root->arity || n == 1 || root->depth >= until) {
     /* Got to the bottom, we can't split any more, put everything there.  */
     for (i=0; i<n; i++)
       cpuset[i] = hwloc_bitmap_dup(root->cpuset);
     return;
   }
 
-  /* Divide n in root->arity chunks.  */
-  chunk_size = (n + root->arity - 1) / root->arity;
-  complete_chunks = n % root->arity;
-  if (!complete_chunks)
-    complete_chunks = root->arity;
+  hwloc_distributev(topology, root->children, root->arity, cpuset, n, until);
+}
 
-  /* Allocate complete chunks first.  */
-  for (cpusetp = cpuset, i = 0;
-       i < complete_chunks;
-       i ++, cpusetp += chunk_size)
-    hwloc_distribute(topology, root->children[i], cpusetp, chunk_size);
+/** \brief Distribute \p n items over the topology under \p roots
+ *
+ * This is the same as hwloc_distribute, but takes an array of roots instead of
+ * just one root.
+ */
+static __hwloc_inline void
+hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *cpuset, unsigned n, unsigned until)
+{
+  unsigned i;
+  unsigned tot_weight;
+  hwloc_cpuset_t *cpusetp = cpuset;
 
-  /* Now allocate not-so-complete chunks.  */
-  for (u = i;
-       u < root->arity;
-       u++, cpusetp += chunk_size-1)
-    hwloc_distribute(topology, root->children[u], cpusetp, chunk_size-1);
+  tot_weight = 0;
+  for (i = 0; i < n_roots; i++)
+    tot_weight += hwloc_bitmap_weight(roots[i]->cpuset);
+
+  for (i = 0; i < n_roots; i++) {
+    /* Give to roots[i] a portion proportional to its weight */
+    unsigned weight = hwloc_bitmap_weight(roots[i]->cpuset);
+    unsigned chunk = (n * weight + tot_weight-1) / tot_weight;
+    hwloc_distribute(topology, roots[i], cpusetp, chunk, until);
+    cpusetp += chunk;
+    tot_weight -= weight;
+    n -= chunk;
+  }
 }
 
 /** \brief Allocate some memory on the given nodeset \p nodeset
@@ -637,7 +648,7 @@ hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_
   if (p)
     return p;
   hwloc_set_membind_nodeset(topology, nodeset, policy, flags);
-  p = hwloc_alloc(len);
+  p = hwloc_alloc(topology, len);
   if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
     /* Enforce the binding by touching the data */
     memset(p, 0, len);
@@ -655,7 +666,7 @@ hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cp
   if (p)
     return p;
   hwloc_set_membind(topology, cpuset, policy, flags);
-  p = hwloc_alloc(len);
+  p = hwloc_alloc(topology, len);
   if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
     /* Enforce the binding by touching the data */
     memset(p, 0, len);

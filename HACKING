@@ -69,6 +69,9 @@ Notes to developers:
   sed -e 's/$/'$'\015'/ < NEWS > $prefix/NEWS.txt
   sed -e 's/$/'$'\015'/ < COPYING > $prefix/COPYING.txt
 
+- For the 64bit version on windows, pass --host=x86_64-w64-mingw32 to
+  ./configure to use mingw-64
+
 - make maintainer-clean can be used to properly remove the generated
   documentations.
 

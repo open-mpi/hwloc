@@ -1,0 +1,2 @@
+To update PNG file, run
+  lstopo -i XXXX.xml --no-legend --whole-system XXXX.png

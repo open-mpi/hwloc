@@ -21,7 +21,7 @@ typedef unsigned short WORD, USHORT;
 typedef unsigned long ULONG_PTR, DWORD_PTR, DWORD, *PDWORD, *PDWORD_PTR;
 typedef const char *LPCSTR;
 typedef int (*FARPROC)();
-typedef void *LPVOID;
+typedef void *PVOID,*LPVOID;
 typedef ULONG_PTR SIZE_T;
 
 // This is to cope with linux using integers for hwloc_pid_t and hwloc_thread_t
@@ -59,7 +59,14 @@ BOOL WINAPI GetProcessAffinityMask(HANDLE hProcess, PDWORD_PTR lpProcessAffinity
 HANDLE WINAPI GetCurrentThread(void);
 HANDLE WINAPI GetCurrentProcess(void);
 
+PVOID WINAPI VirtualAlloc(PVOID,DWORD,DWORD,DWORD);
+
 BOOL GetNumaAvailableMemoryNode(UCHAR Node, PULONGLONG AvailableBytes);
 
+typedef struct _SYSTEM_INFO {
+  DWORD dwPageSize;
+} SYSTEM_INFO, *LPSYSTEM_INFO;
+
+void WINAPI GetSystemInfo(LPSYSTEM_INFO lpSystemInfo);
 
 #endif /* HWLOC_PORT_WINDOWS_H */

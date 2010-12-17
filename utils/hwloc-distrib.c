@@ -21,7 +21,9 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --taskset        Show taskset-specific cpuset strings\n");
   hwloc_utils_input_format_usage(where, 0);
   fprintf(where, "  --ignore <type>  Ignore objects of the given type\n");
-  fprintf(where, "  --among <type>   Distribute among objects of the given type\n");
+  fprintf(where, "  --from <type>    Distribute starting from objects of the given type\n");
+  fprintf(where, "  --to <type>      Distribute down to objects of the given type\n");
+  fprintf(where, "  --at <type>      Distribute among objects of the given type\n");
   fprintf(where, "  -v               Show verbose messages\n");
   fprintf(where, "  --version        Report version and exit\n");
 }
@@ -35,7 +37,7 @@ int main(int argc, char *argv[])
   int taskset = 0;
   int singlify = 0;
   int verbose = 0;
-  hwloc_obj_type_t amongtype = (hwloc_obj_type_t) -1;
+  hwloc_obj_type_t from_type = (hwloc_obj_type_t) -1, to_type = (hwloc_obj_type_t) -1;
   char **orig_argv = argv;
   hwloc_topology_t topology;
   int opt;
@@ -88,12 +90,32 @@ int main(int argc, char *argv[])
 	argv++;
 	goto next;
       }
-      else if (!strcmp (argv[0], "--among")) {
+      else if (!strcmp (argv[0], "--from")) {
 	if (argc <= 2) {
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	amongtype = hwloc_obj_type_of_string(argv[1]);
+	from_type = hwloc_obj_type_of_string(argv[1]);
+	argc--;
+	argv++;
+	goto next;
+      }
+      else if (!strcmp (argv[0], "--to")) {
+	if (argc <= 2) {
+	  usage(callname, stdout);
+	  exit(EXIT_FAILURE);
+	}
+	to_type = hwloc_obj_type_of_string(argv[1]);
+	argc--;
+	argv++;
+	goto next;
+      }
+      else if (!strcmp (argv[0], "--at")) {
+	if (argc <= 2) {
+	  usage(callname, stdout);
+	  exit(EXIT_FAILURE);
+	}
+	from_type = to_type = hwloc_obj_type_of_string(argv[1]);
 	argc--;
 	argv++;
 	goto next;
@@ -130,8 +152,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "distributing %ld\n", n);
 
   {
-    unsigned i,j;
-    int depth;
+    unsigned i;
+    int from_depth, to_depth;
     unsigned chunks;
     hwloc_bitmap_t cpuset[n];
 
@@ -139,26 +161,42 @@ int main(int argc, char *argv[])
       hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
     hwloc_topology_load(topology);
 
-    if (amongtype == (hwloc_obj_type_t) -1) {
-      depth = 0;
+    if (from_type == (hwloc_obj_type_t) -1) {
+      from_depth = 0;
     } else {
-      depth = hwloc_get_type_depth(topology, amongtype);
-      if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_obj_type_string(amongtype));
-	depth = 0;
-      } else if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_obj_type_string(amongtype));
-	depth = 0;
+      from_depth = hwloc_get_type_depth(topology, from_type);
+      if (from_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_obj_type_string(from_type));
+	from_depth = 0;
+      } else if (from_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_obj_type_string(from_type));
+	from_depth = 0;
       }
     }
 
-    chunks =  hwloc_get_nbobjs_by_depth(topology, depth);
-    for (j = 0; j < chunks; j++) {
-      /* split the remaining requested cpusets into chunks-j sets, rounding up each division */
-      unsigned m = (n+chunks-j-1)/(chunks-j);
-      n -= m;
-      hwloc_distribute(topology, hwloc_get_obj_by_depth(topology, depth, j), cpuset, m);
-      for (i = 0; i < m; i++) {
+    if (to_type == (hwloc_obj_type_t) -1) {
+      to_depth = INT_MAX;
+    } else {
+      to_depth = hwloc_get_type_depth(topology, to_type);
+      if (to_depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+	fprintf(stderr, "unavailable type %s to distribute among, ignoring\n", hwloc_obj_type_string(to_type));
+	to_depth = INT_MAX;
+      } else if (to_depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+	fprintf(stderr, "multiple depth for type %s to distribute among, ignoring\n", hwloc_obj_type_string(to_type));
+	to_depth = INT_MAX;
+      }
+    }
+
+    chunks =  hwloc_get_nbobjs_by_depth(topology, from_depth);
+    {
+      hwloc_obj_t roots[chunks];
+
+      for (i = 0; i < chunks; i++)
+        roots[i] = hwloc_get_obj_by_depth(topology, from_depth, i);
+
+      hwloc_distributev(topology, roots, chunks, cpuset, n, to_depth);
+
+      for (i = 0; (long) i < n; i++) {
 	char *str = NULL;
 	if (singlify)
 	  hwloc_bitmap_singlify(cpuset[i]);

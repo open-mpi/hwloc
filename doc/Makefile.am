@@ -324,6 +324,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cuda_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distributev.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_cpuset.3 \
@@ -394,7 +395,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3  \
-        $(DOX_MAN_DIR)/man3/hwloc_free_membind.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_free.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_membind.3 \
