@@ -217,20 +217,20 @@ following:
 .
 
   Machine (47GB)
-    NUMANode p#0 (24GB) + Socket p#0 + L3 (12MB)
-      L2 (256KB) + L1 (32KB) + Core p#0 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#1 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#2 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#8 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#9 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#10 + PU p#0
-    NUMANode p#1 (24GB) + Socket p#1 + L3 (12MB)
-      L2 (256KB) + L1 (32KB) + Core p#0 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#1 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#2 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#8 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#9 + PU p#0
-      L2 (256KB) + L1 (32KB) + Core p#10 + PU p#0
+    NUMANode P#0 (24GB) + Socket P#0 + L3 (12MB)
+      L2 (256KB) + L1 (32KB) + Core P#0 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#1 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#2 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#8 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#9 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#10 + PU P#0
+    NUMANode P#1 (24GB) + Socket P#1 + L3 (12MB)
+      L2 (256KB) + L1 (32KB) + Core P#0 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#1 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#2 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#8 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#9 + PU P#0
+      L2 (256KB) + L1 (32KB) + Core P#10 + PU P#0
 
 In this example, the first core on the second socket is logically
 number 6 (i.e., logically the 7th core, starting from 0).  Its

@@ -330,6 +330,8 @@ RECURSE_BEGIN(obj, border) \
 struct dyna_save {
   unsigned width;
   unsigned height;
+  unsigned fontsize;
+  unsigned gridsize;
 };
 
 /* Save the computed size */
@@ -338,6 +340,8 @@ struct dyna_save {
     struct dyna_save *save = malloc(sizeof(*save)); \
     save->width = *retwidth; \
     save->height = *retheight; \
+    save->fontsize = fontsize; \
+    save->gridsize = gridsize; \
     level->userdata = save; \
   } \
 } while (0)
@@ -346,8 +350,12 @@ struct dyna_save {
 #define DYNA_CHECK() do { \
   if (level->userdata && methods == &null_draw_methods) { \
     struct dyna_save *save = level->userdata; \
-    *retwidth = save->width; \
-    *retheight = save->height; \
+    if (save->fontsize == fontsize && save->gridsize == gridsize) { \
+      *retwidth = save->width; \
+      *retheight = save->height; \
+    } \
+    free(level->userdata); \
+    level->userdata = NULL; \
     return; \
   } \
 } while (0)
@@ -547,7 +555,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 {
   unsigned myheight = gridsize + (fontsize ? (fontsize + gridsize) : 0) + gridsize, totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = fontsize ? ((logical ? level->logical_index : level->os_index) == (unsigned) -1 ? 7*fontsize : 9*fontsize) : 0;
+  unsigned textwidth = fontsize ? ((logical ? level->logical_index : level->os_index) == (unsigned) -1 ? 8*fontsize : 10*fontsize) : 0;
   /* Do not separate objects when in L1 (SMT) */
   unsigned separator = level->attr->cache.depth > 1 ? gridsize : 0;
 
@@ -629,7 +637,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   /* Currently filled width */
   unsigned totwidth;
   /* Width of the heading text, thus minimal width */
-  unsigned textwidth = 11*fontsize;
+  unsigned textwidth = 16*fontsize;
 
   /* Check whether dynamic programming can save us time */
   DYNA_CHECK();
@@ -816,9 +824,7 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
   unsigned totwidth, totheight, offset;
   time_t t;
   char text[128];
-  char *date;
   char hostname[128] = "";
-  int n;
   unsigned long hostname_size = sizeof(hostname);
 
   system_draw(topology, methods, logical, level, output, depth, x, &totwidth, y, &totheight);
@@ -849,12 +855,24 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
 
     /* Display timestamp */
     t = time(NULL);
-    date = ctime(&t);
-    n = strlen(date);
-    if (n && date[n-1] == '\n') {
-      date[n-1] = 0;
+#ifdef HAVE_STRFTIME
+    {
+      struct tm *tmp;
+      tmp = localtime(&t);
+      strftime(text, sizeof(text), "Date: %c", tmp);
     }
-    snprintf(text, sizeof(text), "Date: %s", date);
+#else /* HAVE_STRFTIME */
+    {
+      char *date;
+      int n;
+      date = ctime(&t);
+      n = strlen(date);
+      if (n && date[n-1] == '\n') {
+        date[n-1] = 0;
+      }
+      snprintf(text, sizeof(text), "Date: %s", date);
+    }
+#endif /* HAVE_STRFTIME */
     methods->text(output, 0, 0, 0, fontsize, depth, gridsize, totheight + gridsize + offset + fontsize + gridsize, text);
   }
 }

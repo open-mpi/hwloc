@@ -23,6 +23,10 @@
 #include <cairo.h>
 #endif
 
+#ifdef HAVE_SETLOCALE
+#include <locale.h>
+#endif
+
 #include "lstopo.h"
 #include "misc.h"
 
@@ -288,6 +292,10 @@ main (int argc, char *argv[])
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
   int opt;
+
+#ifdef HAVE_SETLOCALE
+  setlocale(LC_ALL, "");
+#endif
 
   callname = strrchr(argv[0], '/');
   if (!callname)

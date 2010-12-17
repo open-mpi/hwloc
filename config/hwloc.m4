@@ -310,6 +310,9 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
       ])
     ])
     AC_DEFINE_UNQUOTED(hwloc_strncasecmp, $hwloc_strncasecmp, [Define this to either strncasecmp or strncmp])
+
+    AC_CHECK_FUNCS([strftime])
+    AC_CHECK_FUNCS([setlocale])
     
     AC_CHECK_HEADER([stdint.h], [
       AC_DEFINE([HWLOC_HAVE_STDINT_H], [1], [Define to 1 if you have the <stdint.h> header file.])
@@ -320,6 +323,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
                     PROCESSOR_CACHE_TYPE,
                     CACHE_DESCRIPTOR,
                     LOGICAL_PROCESSOR_RELATIONSHIP,
+                    RelationProcessorPackage,
                     SYSTEM_LOGICAL_PROCESSOR_INFORMATION,
                     GROUP_AFFINITY,
                     PROCESSOR_RELATIONSHIP,
@@ -689,8 +693,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_OSF], [test "x$hwloc_osf" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_HPUX], [test "x$hwloc_hpux" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_WINDOWS], [test "x$hwloc_windows" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_MINGW32], 
-                       [test "x$hwloc_target_os" = "xmingw32"])
+        AM_CONDITIONAL([HWLOC_HAVE_MINGW32], [test "x$target_os" = "xmingw32"])
 
         AM_CONDITIONAL([HWLOC_HAVE_X86_32], [test "x$hwloc_x86_32" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_X86_64], [test "x$hwloc_x86_64" = "xyes"])

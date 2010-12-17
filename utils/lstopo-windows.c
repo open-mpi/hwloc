@@ -49,6 +49,10 @@ static int x, y, x_delta, y_delta;
 static int finish;
 static int the_width, the_height;
 static int win_width, win_height;
+static unsigned int the_fontsize, the_gridsize;
+
+static void
+windows_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height);
 
 static LRESULT CALLBACK
 WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
@@ -59,6 +63,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       HDC hdc;
       PAINTSTRUCT ps;
       hdc = BeginPaint(hwnd, &ps);
+      windows_box(&ps, 0xff, 0xff, 0xff, 0, 0, win_width, 0, win_height);
       output_draw(&windows_draw_methods, the_logical, the_legend, the_topology, &ps);
       EndPaint(hwnd, &ps);
       break;
@@ -165,6 +170,22 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
       x_delta = 0;
     if (y_delta < 0)
       y_delta = 0;
+    if (win_width > the_width && win_height > the_height) {
+      fontsize = the_fontsize;
+      gridsize = the_gridsize;
+      if (win_width > the_width) {
+        fontsize = the_fontsize * win_width / the_width;
+        gridsize = the_gridsize * win_width / the_width;
+      }
+      if (win_height > the_height) {
+        unsigned int new_fontsize = the_fontsize * win_height / the_height;
+        unsigned int new_gridsize = the_gridsize * win_height / the_height;
+	if (new_fontsize < fontsize)
+	  fontsize = new_fontsize;
+	if (new_gridsize < gridsize)
+	  gridsize = new_gridsize;
+      }
+    }
     RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE);
   }
   return DefWindowProc(hwnd, message, wparam, lparam);
@@ -198,6 +219,9 @@ windows_start(void *output_ __hwloc_attribute_unused, int width, int height)
 
   the_width = width;
   the_height = height;
+
+  the_fontsize = fontsize;
+  the_gridsize = gridsize;
 
   ShowWindow(toplevel, SW_SHOWDEFAULT);
 

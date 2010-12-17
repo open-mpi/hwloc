@@ -16,6 +16,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9 (as initially released as "libtopology", then re-branded to "hwloc"
 in v0.9.1).
 
+
+Version 1.2.0
+-------------
+* x86 backend (for freebsd): add x2APIC support
+
+
 Version 1.1.0
 -------------
 
@@ -55,6 +61,9 @@ Version 1.1.0
   + lstopo now displays physical/OS indexes by default in graphical mode
     (use -l to switch back to logical indexes). The textual output still uses
     logical by default (use -p to switch to physical indexes).
+  + lstopo prefixes logical indexes with `L#' and physical indexes with `P#'.
+    Physical indexes are also printed as `P#N' instead of `phys=N' within
+    object attributes (in parentheses).
   + Add a legend at the bottom of the lstopo graphical output, use --no-legend
     to remove it.
   + Add hwloc-ps to list process' bindings.
