@@ -367,7 +367,7 @@ hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
      * Except of SGI IP27 (SGI Origin 200/2000 with MIPS processors) where the distances
      * are the number of hops between routers.
      */
-    hwloc_debug("minimal distance is 0, matrix does not seem to contain latencies, ignoring\n");
+    hwloc_debug("%s", "minimal distance is 0, matrix does not seem to contain latencies, ignoring\n");
     return;
   }
 
