@@ -81,10 +81,22 @@ cat << EOF | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 /proc/device-tree/cpus/
 EOF
 
+# Get an entire mount point, after decoding its path
+# we don't support path with \n since it would break in 'find ... | while read ..." above
+savemntpnt() {
+  local encodedpath=$1
+  if echo "$1" | grep "\\012" ; then
+    echo "Ignoring mount point whose filename contains an end of line."
+    return
+  fi
+  local path=$(echo "$1" | sed -e 's@\\134@\\@g' -e 's@\\040@ @g' -e 's@\\011@	@g')
+  savedir "$destdir/$basename" "${path}/"
+}
+
 # Gather cgroup/cpuset mntpnts
 cat /proc/mounts | while read -r dummy1 mntpath mnttype mntopts dummy2 ; do
-  [ x$mnttype = xcpuset ] && savedir "$mntpath"
-  [ x$mnttype = xcgroup ] && echo $mntopts | grep -w cpuset >/dev/null && savedir "$mntpath"
+  [ x$mnttype = xcpuset ] && savemntpnt "$mntpath"
+  [ x$mnttype = xcgroup ] && echo $mntopts | grep -w cpuset >/dev/null && savemntpnt "$mntpath"
 done
 
 # Create the archive and keep the tree in /tmp for testing
