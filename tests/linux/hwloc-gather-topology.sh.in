@@ -51,7 +51,9 @@ savefile() {
 cat << EOF | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
 /proc/cpuinfo
 /proc/meminfo
+/proc/mounts
 /proc/stat
+/proc/self/cpuset
 EOF
 
 # Get all files from the given directory
@@ -78,6 +80,12 @@ cat << EOF | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 /sys/kernel/mm/hugepages/
 /proc/device-tree/cpus/
 EOF
+
+# Gather cgroup/cpuset mntpnts
+cat /proc/mounts | while read -r dummy1 mntpath mnttype mntopts dummy2 ; do
+  [ x$mnttype = xcpuset ] && savedir "$mntpath"
+  [ x$mnttype = xcgroup ] && echo $mntopts | grep -w cpuset >/dev/null && savedir "$mntpath"
+done
 
 # Create the archive and keep the tree in /tmp for testing
 ( cd "$destdir/" && tar cfj "$basename.tar.bz2" "$basename" )
