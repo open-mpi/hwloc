@@ -37,35 +37,45 @@ fi
 
 destdir=`mktemp -d`
 
-# Get all files from the given path (either a file or a directory)
-# ignore errors since some files may be missing, and some may be
-# Restricted to root (but we don't need them).
 # Use cat so that we properly get proc/sys files even if their
 # file length is wrong
-savepath() {
+savefile() {
+  local dest="$1"
+  local file="$2"
+  mkdir -p "$dest/"`dirname "$file"` 2>/dev/null
+  cat "$file" > "$dest/$file" 2>/dev/null
+}
+
+# Gather the following list of files
+cat << EOF | while read path ; do savefile "$destdir/$basename" "$path" ; done
+/proc/cpuinfo
+/proc/meminfo
+/proc/stat
+EOF
+
+# Get all files from the given directory
+# Ignore errors since some files may be missing, and some may be
+# restricted to root (but we don't need them).
+savedir() {
   local dest="$1"
   local path="$2"
   # gather all directories, including empty ones
-  find "$path" -type d 2>/dev/null | while read dir ; do	\
-    mkdir -p "$dest/$dir" 2>/dev/null ;		\
+  find "$path" -type d 2>/dev/null | while read dir ; do
+    mkdir -p "$dest/$dir" 2>/dev/null
   done
   # gather all files now
-  find "$path" -type f 2>/dev/null | while read file ; do	\
-    mkdir -p "$dest/"`dirname $file` ;		\
-    cat "$file" > "$dest/$file" 2>/dev/null ;	\
+  find "$path" -type f 2>/dev/null | while read file ; do
+    savefile "$dest" "$file"
   done
 }
 
-# Gather the following list of files and directories
-cat << EOF | while read path ; do savepath "$destdir/$basename" "$path" ; done
+# Gather the following list of directories
+cat << EOF | while read path ; do savedir "$destdir/$basename" "$path" ; done
 /sys/devices/system/cpu/
 /sys/devices/system/node/
 /sys/class/dmi/id/
 /sys/kernel/mm/hugepages/
-/proc/cpuinfo
-/proc/meminfo
-/proc/stat
-/proc/device-tree/cpus
+/proc/device-tree/cpus/
 EOF
 
 # Create the archive and keep the tree in /tmp for testing
