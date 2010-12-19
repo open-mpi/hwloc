@@ -667,6 +667,9 @@ fig(hwloc_topology_t topology, struct draw_methods *methods, int logical, int le
 
   system_draw(topology, methods, logical, level, output, depth, x, &totwidth, y, &totheight);
 
+  if (totwidth < 20*fontsize)
+    totwidth = 20*fontsize;
+
   if (legend) {
       /* Display the hostname, but only if we're showing *this*
          system */
