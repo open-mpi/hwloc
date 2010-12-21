@@ -412,19 +412,19 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 #ifdef HAVE_LGRP_LATENCY_COOKIE
     {
       unsigned *distances = calloc(curlgrp*curlgrp, sizeof(unsigned));
-      unsigned indexes[curlgrp];
+      unsigned *indexes = malloc(curlgrp * sizeof(unsigned));
       unsigned i, j;
+      hwloc_obj_type_t type = glob_lgrps[0]->type;
       for (i = 0; i < curlgrp; i++) {
         indexes[i] = glob_lgrps[i]->os_index;
 	for (j = 0; j < curlgrp; j++)
 	  distances[i*curlgrp+j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
-      hwloc_setup_misc_level_from_distances(topology, curlgrp, glob_lgrps, (unsigned*) distances, (unsigned*) indexes);
-      /* FIXME: stores this in the backend and convert it into logical-indexed matrice later
-      if (glob_lgrps[0]->type == HWLOC_OBJ_NODE)
-	topology->os_distances[HWLOC_OBJ_NODE] = distances;
-      else */
-	free(distances);
+      hwloc_setup_misc_level_from_distances(topology, curlgrp, glob_lgrps, distances, indexes);
+
+      topology->os_distances[type].nbobjs = curlgrp;
+      topology->os_distances[type].distances = distances;
+      topology->os_distances[type].indexes = indexes;
     }
 #endif /* HAVE_LGRP_LATENCY_COOKIE */
   }
