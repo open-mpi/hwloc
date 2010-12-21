@@ -20,11 +20,18 @@ error()
     echo $@ 2>&1
 }
 
+usage()
+{
+   echo "$0 <savepath>"
+   echo "  Saves the Linux topology files (/sys, /proc, ...) under <savepath>.tar.bz2"
+   echo "  and the corresponding lstopo verbose output under <savepath>.output"
+   echo "Example:"
+   echo "  $0 /tmp/\$(uname -n)"
+}
+
 name="$1"; shift
 if [ -z "$name" ] ; then
-  echo "$0 <savepath>"
-  echo "  Saves the Linux topology files (/sys, /proc, ...) under <savepath>.tar.bz2"
-  echo "  and the corresponding lstopo verbose output under <savepath>.output"
+  usage
   exit -1
 fi
 basename=`basename "$name"`
