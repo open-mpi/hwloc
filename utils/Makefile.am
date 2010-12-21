@@ -43,6 +43,9 @@ endif HWLOC_BUILD_TESTS
 # Only install man pages if we're building in standalone mode
 if HWLOC_BUILD_UTILS
 man1_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1 hwloc-ps.1
+if HWLOC_HAVE_LINUX
+man1_pages += hwloc-gather-topology.sh.1
+endif HWLOC_HAVE_LINUX
 man7_pages = hwloc.7
 man_pages = $(man7_pages) $(man1_pages)
 EXTRA_DIST += $(man1_pages:.1=.1in) $(man7_pages:.7=.7in)

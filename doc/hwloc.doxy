@@ -767,6 +767,14 @@ currently running on the local machine.  By default, hwloc-ps only
 lists processes that are bound; unbound process (and Linux kernel
 threads) are not displayed.
 
+\section cli_hwloc_gather hwloc-gather-topology.sh
+
+hwloc-gather-topology.sh is a Linux-specific tool that saves the
+relevant topology files of the current machine into a tarball
+(and the corresponding lstopo output). These files may be used
+later (possibly offline) for simulating or debugging a machine
+without actually running on it.
+
 
 
 \page envvar Environment variables
