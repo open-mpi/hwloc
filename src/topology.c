@@ -400,6 +400,41 @@ hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
   }
 }
 
+static void
+hwloc_set_distances(struct hwloc_topology *topology)
+{
+  unsigned nbnodes;
+  int depth;
+
+  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+    return;
+  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+
+  nbnodes = topology->os_distances[HWLOC_OBJ_NODE].nbobjs;
+  if (nbnodes < 1)
+    return;
+
+  assert(!!topology->os_distances[HWLOC_OBJ_NODE].distances == !!topology->os_distances[HWLOC_OBJ_NODE].indexes);
+
+  if (topology->os_distances[HWLOC_OBJ_NODE].distances) {
+    hwloc_obj_t root = topology->levels[0][0];
+    assert(!root->distances_count);
+    assert(!root->distances);
+
+    hwloc_setup_distances_from_nonsparseos_matrix(topology, root, depth, nbnodes,
+						  topology->os_distances[HWLOC_OBJ_NODE].distances,
+						  topology->os_distances[HWLOC_OBJ_NODE].indexes);
+
+    /* clear things that are now unused */
+    free(topology->os_distances[HWLOC_OBJ_NODE].distances);
+    free(topology->os_distances[HWLOC_OBJ_NODE].indexes);
+    topology->os_distances[HWLOC_OBJ_NODE].distances = NULL;
+    topology->os_distances[HWLOC_OBJ_NODE].indexes = NULL;
+    topology->os_distances[HWLOC_OBJ_NODE].nbobjs = 0;
+  }
+}
+
 /*
  * Use the given number of processors and the optional online cpuset if given
  * to set a PU level.
@@ -1813,10 +1848,8 @@ hwloc_discover(struct hwloc_topology *topology)
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology
    */
 
-#  ifdef HWLOC_LINUX_SYS
-  if (topology->backend_type == HWLOC_BACKEND_SYSFS)
-    hwloc_set_linux_distances(topology);
-#  endif /* HWLOC_LINUX_SYS */
+  hwloc_set_distances(topology);
+
 #  ifdef HWLOC_HAVE_XML
   if (topology->backend_type == HWLOC_BACKEND_XML)
     hwloc_set_xml_distances(topology);

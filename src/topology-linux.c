@@ -2681,52 +2681,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
      hwloc_add_uname_info(topology);
 }
 
-/*
- * TODO: this is actually not Linux-specific.  Backends should be able to just
- * provide a matrix and the array of the corresponding objects whenever they
- * prefer during their detection, recording them to the place where it makes
- * sense (the machine object, quite often), and the core will rearrange the
- * distance matrix after sorting objects according to where nodes end up
- * (thanks to checking the values of os_index). The core could also just call
- * hwloc_setup_misc_level_from_distances itself too (before doing the
- * rearrangement of course, since the depths will then change). The core would
- * assume that all the provided objects end up at the same depth.
- */
-void
-hwloc_set_linux_distances(struct hwloc_topology *topology)
-{
-  unsigned nbnodes;
-  int depth;
-
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-    return;
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
-
-  nbnodes = topology->os_distances[HWLOC_OBJ_NODE].nbobjs;
-  if (nbnodes < 1)
-    return;
-
-  assert(!!topology->os_distances[HWLOC_OBJ_NODE].distances == !!topology->os_distances[HWLOC_OBJ_NODE].indexes);
-
-  if (topology->os_distances[HWLOC_OBJ_NODE].distances) {
-    hwloc_obj_t root = topology->levels[0][0];
-    assert(!root->distances_count);
-    assert(!root->distances);
-
-    hwloc_setup_distances_from_nonsparseos_matrix(topology, root, depth, nbnodes,
-						  topology->os_distances[HWLOC_OBJ_NODE].distances,
-						  topology->os_distances[HWLOC_OBJ_NODE].indexes);
-
-    /* clear things that are now unused */
-    free(topology->os_distances[HWLOC_OBJ_NODE].distances);
-    free(topology->os_distances[HWLOC_OBJ_NODE].indexes);
-    topology->os_distances[HWLOC_OBJ_NODE].distances = NULL;
-    topology->os_distances[HWLOC_OBJ_NODE].indexes = NULL;
-    topology->os_distances[HWLOC_OBJ_NODE].nbobjs = 0;
-  }
-}
-
 void
 hwloc_set_linux_hooks(struct hwloc_topology *topology)
 {
