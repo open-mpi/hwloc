@@ -103,6 +103,7 @@ struct hwloc_topology {
 			  * distance from i to j is stored in slot i*nbnodes+j.
 			  * will be copied into the main logical-index-ordered distance at the end of the discovery. */
     unsigned *indexes; /* array translating non-sparse physical indexes into physical indexes */    
+    hwloc_obj_t *objs; /* array of objects, in the same order as above */
   } os_distances[HWLOC_OBJ_TYPE_MAX];
 
   hwloc_backend_t backend_type;

@@ -1817,7 +1817,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
      from a bunch of mallocs, particularly with the 2D array. */
 
   {
-      hwloc_obj_t nodes[nbnodes];
+      hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
       unsigned * distances = calloc(nbnodes*nbnodes, sizeof(unsigned));
       unsigned * nonsparse_physical_indexes  = calloc(nbnodes, sizeof(unsigned));
       unsigned index_;
@@ -1869,11 +1869,10 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, topology->backend_params.sysfs.root_fd);
       }
 
-      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances, nonsparse_physical_indexes);
-
       topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
       topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
       topology->os_distances[HWLOC_OBJ_NODE].indexes = nonsparse_physical_indexes;
+      topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
   }
 
   *found = nbnodes;

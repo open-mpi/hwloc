@@ -339,6 +339,28 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
   hwloc__setup_misc_level_from_distances(topology, nbobjs, objs, _distances, 0);
 }
 
+static void
+hwloc_group_by_distances(struct hwloc_topology *topology)
+{
+  unsigned nbobjs;
+  hwloc_obj_type_t type;
+
+  for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
+    nbobjs = topology->os_distances[type].nbobjs;
+    if (!nbobjs)
+      continue;
+
+    assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].indexes);
+    assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].objs);
+
+    if (topology->os_distances[type].distances)
+      hwloc_setup_misc_level_from_distances(topology, nbobjs,
+					    topology->os_distances[type].objs,
+					    topology->os_distances[type].distances,
+					    topology->os_distances[type].indexes);
+  }
+}
+
 void
 hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
 					      hwloc_obj_t root, unsigned relative_depth, unsigned nbobjs,
@@ -430,8 +452,10 @@ hwloc_set_distances(struct hwloc_topology *topology)
       /* clear things that are now unused */
       free(topology->os_distances[type].distances);
       free(topology->os_distances[type].indexes);
+      free(topology->os_distances[type].objs);
       topology->os_distances[type].distances = NULL;
       topology->os_distances[type].indexes = NULL;
+      topology->os_distances[type].objs = NULL;
       topology->os_distances[type].nbobjs = 0;
     }
   }
@@ -1668,6 +1692,11 @@ hwloc_discover(struct hwloc_topology *topology)
    */
   print_objects(topology, 0, topology->levels[0][0]);
 
+  /*
+   * Group levels by distances
+   */
+  hwloc_group_by_distances(topology);
+
   /* First tweak a bit to clean the topology.  */
   hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
   collect_proc_cpuset(topology->levels[0][0], NULL);
@@ -1993,6 +2022,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
     topology->os_distances[i].nbobjs = 0;
     topology->os_distances[i].distances = NULL;
     topology->os_distances[i].indexes = NULL;
+    topology->os_distances[i].objs = NULL;
   }
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));

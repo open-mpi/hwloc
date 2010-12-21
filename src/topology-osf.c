@@ -249,7 +249,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
   radsetcreate(&radset);
   radsetcreate(&radset2);
   {
-    hwloc_obj_t nodes[nbnodes];
+    hwloc_obj_t *nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
     unsigned *distances = calloc(nbnodes*nbnodes, sizeof(unsigned));
     unsigned *distance_indexes = malloc(nbnodes * sizeof(unsigned));
     unsigned nfound;
@@ -312,11 +312,11 @@ hwloc_look_osf(struct hwloc_topology *topology)
 	  break;
       }
     }
-    hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances, distance_indexes);
 
     topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
     topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
     topology->os_distances[HWLOC_OBJ_NODE].indexes = distance_indexes;
+    topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
   }
   radsetdestroy(&radset2);
   radsetdestroy(&radset);
