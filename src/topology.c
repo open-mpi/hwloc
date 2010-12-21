@@ -373,7 +373,8 @@ hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
   int idx;
 
   /* check that root/depth/nbobjs are consistent */
-  assert(hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, root->depth + relative_depth) == nbobjs);
+  if (hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, root->depth + relative_depth) != nbobjs)
+    return;
 
   /* compute/check min/max values */
   for(i=0; i<nbobjs; i++)
@@ -458,6 +459,105 @@ hwloc_set_distances(struct hwloc_topology *topology)
       topology->os_distances[type].objs = NULL;
       topology->os_distances[type].nbobjs = 0;
     }
+  }
+}
+
+static hwloc_obj_t hwloc_find_obj_by_type_and_os_index(hwloc_obj_t root, hwloc_obj_type_t type, unsigned os_index)
+{
+  hwloc_obj_t child;
+  if (root->type == type && root->os_index == os_index)
+    return root;
+  child = root->first_child;
+  while (child) {
+    if (hwloc_find_obj_by_type_and_os_index(child, type, os_index))
+      return child;
+    child = child->next_sibling;
+  }
+  return NULL;
+}
+
+static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology,
+						 hwloc_obj_type_t type, char *string)
+{
+  /* the string format is: "index[0],...,index[N-1]:distance[0],...,distance[N*N-1]" */
+  char *tmp = string, *next;
+  unsigned *indexes;
+  unsigned *distances;
+  unsigned nbobjs = 0, i;
+  hwloc_obj_t *objs;
+
+  /* count indexes */
+  while (1) {
+    size_t size = strspn(tmp, "0123456789");
+    if (tmp[size] != ',') {
+      /* last element */
+      tmp += size;
+      nbobjs++;
+      break;
+    }
+    /* another index */
+    tmp += size+1;
+    nbobjs++;
+  }
+
+  if (*tmp != ':') {
+    fprintf(stderr, "Ignoring %s distances from environment variable, missing colon\n",
+	    hwloc_obj_type_string(type));
+    return;
+  }
+
+  indexes = calloc(nbobjs, sizeof(unsigned));
+  distances = calloc(nbobjs*nbobjs, sizeof(unsigned));
+  tmp = string;
+
+  /* parse indexes */
+  for(i=0; i<nbobjs; i++) {
+    indexes[i] = strtoul(tmp, &next, 0);
+    tmp = next+1;
+  }
+  /* parse distances */
+  for(i=0; i<nbobjs*nbobjs; i++) {
+    distances[i] = strtoul(tmp, &next, 0);
+    tmp = next+1;
+    if (!*next && i!=nbobjs*nbobjs-1) {
+      fprintf(stderr, "Ignoring %s distances from environment variable, not enough values (%u out of %u)\n",
+	      hwloc_obj_type_string(type), i+1, nbobjs*nbobjs);
+      free(indexes);
+      free(distances);
+      return;
+    }
+  }
+
+  /* traverse the topology and look for the relevant objects */
+  objs = calloc(nbobjs, sizeof(hwloc_obj_t));
+  for(i=0; i<nbobjs; i++) {
+    hwloc_obj_t obj = hwloc_find_obj_by_type_and_os_index(topology->levels[0][0], type, indexes[i]);
+    if (!obj) {
+      fprintf(stderr, "Ignoring %s distances from environment variable, unknown OS index %u\n",
+	      hwloc_obj_type_string(type), indexes[i]);    
+      free(indexes);
+      free(distances);
+      free(objs);
+      return;
+    }
+    objs[i] = obj;
+  }
+
+  topology->os_distances[type].nbobjs = nbobjs;
+  topology->os_distances[type].distances = distances;
+  topology->os_distances[type].indexes = indexes;
+  topology->os_distances[type].objs = objs;
+}
+
+static void hwloc_get_distances_from_env(struct hwloc_topology *topology)
+{
+  hwloc_obj_type_t type;
+  for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
+    char envname[64];
+    snprintf(envname, sizeof(envname), "HWLOC_%s_DISTANCES", hwloc_obj_type_string(type));
+    char *env = getenv(envname);
+    if (env)
+      hwloc_get_type_distances_from_string(topology, type, env);
   }
 }
 
@@ -1695,6 +1795,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /*
    * Group levels by distances
    */
+  hwloc_get_distances_from_env(topology);
   hwloc_group_by_distances(topology);
 
   /* First tweak a bit to clean the topology.  */
