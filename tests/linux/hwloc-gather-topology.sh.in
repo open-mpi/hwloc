@@ -20,18 +20,31 @@ error()
     echo $@ 2>&1
 }
 
+usage()
+{
+   echo "$0 <savepath>"
+   echo "  Saves the Linux topology files (/sys, /proc, ...) under <savepath>.tar.bz2"
+   echo "  and the corresponding lstopo verbose output under <savepath>.output"
+   echo "Example:"
+   echo "  $0 /tmp/\$(uname -n)"
+}
+
 name="$1"; shift
-if [ -z "$name" ] ; then
-  echo "$0 <savepath>"
-  echo "  Saves the Linux topology files (/sys, /proc, ...) under <savepath>.tar.bz2"
-  echo "  and the corresponding lstopo verbose output under <savepath>.output"
-  exit -1
+if [ -z "$name" -o x`echo $name | cut -c1` = x- ] ; then
+  [ x$name != x -a x$name != x-h -a x$name != x--help ] && echo "Unrecognized option: $name"
+  usage
+  exit 1
 fi
 basename=`basename "$name"`
 dirname=`dirname "$name"`
 
 if ! mkdir -p "$dirname" ; then
     error "Failed to create directory $dirname."
+    exit 1
+fi
+
+if [ ! -w  "$dirname" ] ; then
+    echo "$dirname is not writable."
     exit 1
 fi
 
