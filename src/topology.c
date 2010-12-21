@@ -293,11 +293,9 @@ void
 hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
 				      unsigned nbobjs,
 				      struct hwloc_obj **objs,
-				      unsigned *_distances,
-				      unsigned *_distance_indexes)
+				      unsigned *_distances)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
-  unsigned (*distance_indexes)[nbobjs] __hwloc_attribute_unused = (unsigned (*)[nbobjs])_distance_indexes;
   unsigned i,j;
 
   if (getenv("HWLOC_IGNORE_DISTANCES"))
@@ -350,21 +348,19 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
     if (!nbobjs)
       continue;
 
-    assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].indexes);
     assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].objs);
 
     if (topology->os_distances[type].distances)
       hwloc_setup_misc_level_from_distances(topology, nbobjs,
 					    topology->os_distances[type].objs,
-					    topology->os_distances[type].distances,
-					    topology->os_distances[type].indexes);
+					    topology->os_distances[type].distances);
   }
 }
 
-void
+static void
 hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
 					      hwloc_obj_t root, unsigned relative_depth, unsigned nbobjs,
-					      unsigned *osmatrix, unsigned *osindex)
+					      hwloc_obj_t *objs, unsigned *osmatrix)
 {
   unsigned logical_index_of_non_sparse_physical_index[nbobjs];
   unsigned i, j, li, lj;
@@ -398,7 +394,7 @@ hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
   for(i=0; i<nbobjs; i++) {
     hwloc_obj_t obj = NULL;
     while ((obj = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, root->depth + relative_depth, obj)) != NULL)
-      if (obj->os_index == osindex[i])
+      if (obj->os_index == objs[i]->os_index)
 	logical_index_of_non_sparse_physical_index[i] = obj->logical_index;
   }
 
@@ -439,7 +435,7 @@ hwloc_set_distances(struct hwloc_topology *topology)
     if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
       continue;
 
-    assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].indexes);
+    assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].objs);
 
     if (topology->os_distances[type].distances) {
       hwloc_obj_t root = topology->levels[0][0];
@@ -447,15 +443,13 @@ hwloc_set_distances(struct hwloc_topology *topology)
       assert(!root->distances);
 
       hwloc_setup_distances_from_nonsparseos_matrix(topology, root, depth, nbobjs,
-						  topology->os_distances[type].distances,
-						  topology->os_distances[type].indexes);
+						    topology->os_distances[type].objs,
+						    topology->os_distances[type].distances);
 
       /* clear things that are now unused */
       free(topology->os_distances[type].distances);
-      free(topology->os_distances[type].indexes);
       free(topology->os_distances[type].objs);
       topology->os_distances[type].distances = NULL;
-      topology->os_distances[type].indexes = NULL;
       topology->os_distances[type].objs = NULL;
       topology->os_distances[type].nbobjs = 0;
     }
@@ -545,7 +539,6 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
 
   topology->os_distances[type].nbobjs = nbobjs;
   topology->os_distances[type].distances = distances;
-  topology->os_distances[type].indexes = indexes;
   topology->os_distances[type].objs = objs;
 }
 
@@ -1699,11 +1692,6 @@ hwloc_discover(struct hwloc_topology *topology)
    * initialized.
    */
 
-  /* If the OS can provide NUMA distances, it should call
-   * hwloc_setup_misc_level_from_distances() to automatically group NUMA nodes
-   * into misc objects.
-   */
-
   /* A priori, All processors are visible in the topology, online, and allowed
    * for the application.
    *
@@ -2121,9 +2109,8 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
     topology->os_distances[i].nbobjs = 0;
-    topology->os_distances[i].distances = NULL;
-    topology->os_distances[i].indexes = NULL;
     topology->os_distances[i].objs = NULL;
+    topology->os_distances[i].distances = NULL;
   }
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));

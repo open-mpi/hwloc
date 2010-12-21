@@ -1819,7 +1819,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
   {
       hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
       unsigned * distances = calloc(nbnodes*nbnodes, sizeof(unsigned));
-      unsigned * nonsparse_physical_indexes  = calloc(nbnodes, sizeof(unsigned));
+      unsigned nonsparse_physical_indexes[nbnodes];
       unsigned index_;
 
       /* Get node indexes now. We need them in order since Linux groups
@@ -1870,9 +1870,8 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       }
 
       topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
-      topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
-      topology->os_distances[HWLOC_OBJ_NODE].indexes = nonsparse_physical_indexes;
       topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
+      topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
   }
 
   *found = nbnodes;
