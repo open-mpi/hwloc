@@ -96,6 +96,15 @@ struct hwloc_topology {
 
   struct hwloc_topology_support support;
 
+  struct hwloc_os_distances_s {
+    /* these are initialized to NULL, setup when needed during discovery, and cleared after use before the end of discovery */
+    int nbobjs;
+    unsigned *distances; /* temporary distance matrices, ordered by non-sparse physical indexes.
+			  * distance from i to j is stored in slot i*nbnodes+j.
+			  * will be copied into the main logical-index-ordered distance at the end of the discovery. */
+    unsigned *indexes; /* array translating non-sparse physical indexes into physical indexes */    
+  } os_distances[HWLOC_OBJ_TYPE_MAX];
+
   hwloc_backend_t backend_type;
   union hwloc_backend_params_u {
 #ifdef HWLOC_LINUX_SYS
@@ -103,12 +112,6 @@ struct hwloc_topology {
       /* sysfs backend parameters */
       char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-
-      int nbnodes;
-      unsigned *numa_os_distances; /* temporary distance matrices, ordered by non-sparse physical indexes.
-                                    * distance from i to j is stored in slot i*nbnodes+j.
-                                    * will be copied into the main logical-index-ordered distance at the end of the discovery. */
-      unsigned *numa_os_nonsparse_physical_indexes; /* array translating non-sparse physical indexes into physical indexes */
     } sysfs;
 #endif /* HWLOC_LINUX_SYS */
 #if defined(HWLOC_OSF_SYS) || defined(HWLOC_COMPILE_PORTS)

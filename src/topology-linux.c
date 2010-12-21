@@ -1807,7 +1807,6 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       closedir(dir);
     }
 
-  topology->backend_params.sysfs.nbnodes = nbnodes;
   if (nbnodes <= 1)
     {
       hwloc_bitmap_free(nodeset);
@@ -1872,8 +1871,9 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 
       hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, distances, nonsparse_physical_indexes);
 
-      topology->backend_params.sysfs.numa_os_distances = distances;
-      topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes = nonsparse_physical_indexes;
+      topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
+      topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
+      topology->os_distances[HWLOC_OBJ_NODE].indexes = nonsparse_physical_indexes;
   }
 
   *found = nbnodes;
@@ -2579,9 +2579,6 @@ hwloc_look_linux(struct hwloc_topology *topology)
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
   int err;
 
-  topology->backend_params.sysfs.numa_os_distances = NULL;
-  topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes = NULL;
-
   /* Gather the list of admin-disabled cpus and mems */
   hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, topology->backend_params.sysfs.root_fd);
   if (cgroup_mntpnt || cpuset_mntpnt) {
@@ -2706,23 +2703,27 @@ hwloc_set_linux_distances(struct hwloc_topology *topology)
     return;
   assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
 
-  nbnodes = topology->backend_params.sysfs.nbnodes;
+  nbnodes = topology->os_distances[HWLOC_OBJ_NODE].nbobjs;
   if (nbnodes < 1)
     return;
 
-  assert(!!topology->backend_params.sysfs.numa_os_distances == !!topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes);
+  assert(!!topology->os_distances[HWLOC_OBJ_NODE].distances == !!topology->os_distances[HWLOC_OBJ_NODE].indexes);
 
-  if (topology->backend_params.sysfs.numa_os_distances) {
+  if (topology->os_distances[HWLOC_OBJ_NODE].distances) {
     hwloc_obj_t root = topology->levels[0][0];
     assert(!root->distances_count);
     assert(!root->distances);
 
     hwloc_setup_distances_from_nonsparseos_matrix(topology, root, depth, nbnodes,
-						  topology->backend_params.sysfs.numa_os_distances,
-						  topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes);
+						  topology->os_distances[HWLOC_OBJ_NODE].distances,
+						  topology->os_distances[HWLOC_OBJ_NODE].indexes);
 
-    free(topology->backend_params.sysfs.numa_os_distances);
-    free(topology->backend_params.sysfs.numa_os_nonsparse_physical_indexes);
+    /* clear things that are now unused */
+    free(topology->os_distances[HWLOC_OBJ_NODE].distances);
+    free(topology->os_distances[HWLOC_OBJ_NODE].indexes);
+    topology->os_distances[HWLOC_OBJ_NODE].distances = NULL;
+    topology->os_distances[HWLOC_OBJ_NODE].indexes = NULL;
+    topology->os_distances[HWLOC_OBJ_NODE].nbobjs = 0;
   }
 }
 

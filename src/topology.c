@@ -1955,6 +1955,9 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
   for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
+    topology->os_distances[i].nbobjs = 0;
+    topology->os_distances[i].distances = NULL;
+    topology->os_distances[i].indexes = NULL;
   }
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
