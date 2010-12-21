@@ -113,9 +113,9 @@ EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_option
 TESTS_ENVIRONMENT = $(builddir)/test-topology.sh
 
 
-bin_SCRIPTS = hwloc-gather-topology.sh
+bin_SCRIPTS = hwloc-gather-topology
 
 install-exec-hook:
-	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' -i $(DESTDIR)$(bindir)/hwloc-gather-topology.sh
+	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' -i $(DESTDIR)$(bindir)/hwloc-gather-topology
 
 SUBDIRS = gather

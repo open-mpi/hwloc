@@ -1,9 +1,9 @@
 .\" -*- nroff -*-
 .\" Copyright © 2010 Jirka Hladky
 .\" Copyright © 2010 Brice Goglin
-.TH HWLOC-GATHER-TOPOLOGY-SH "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
+.TH HWLOC-GATHER-TOPOLOGY "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
-hwloc-gather-topology.sh \- Saves the relevant Linux topology files
+hwloc-gather-topology \- Saves the relevant Linux topology files
 and the lstopo output for later (possibly offline) usage.
 .
 .\" **************************
@@ -11,7 +11,7 @@ and the lstopo output for later (possibly offline) usage.
 .\" **************************
 .SH SYNOPSIS
 .
-.B hwloc-gather-topology.sh [\fIoptions\fR] \fI<path>\fR
+.B hwloc-gather-topology [\fIoptions\fR] \fI<path>\fR
 .
 .\" **************************
 .\"    Options Section
@@ -26,7 +26,7 @@ display help message and exit
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-gather-topology.sh saves all the relevant topology files into an
+hwloc-gather-topology saves all the relevant topology files into an
 archive (\fB<path>.tar.bz2\fR) and the lstopo output (\fB<path>.output\fR).
 The utility for example stores the /proc/cpuinfo file and the entire
 /sys/devices/system/node/ directory tree.
@@ -44,7 +44,7 @@ Both archive and lstopo output may also be submitted to hwloc developers
 to debug issues remotely.
 .
 .PP
-hwloc-gather-topology.sh is a Linux specific tool, it is not installed
+hwloc-gather-topology is a Linux specific tool, it is not installed
 on other operating systems.
 .
 .PP
@@ -60,7 +60,7 @@ before reading this man page.
 To store topology information to be used later (possibly on
 a different host) please run:
 
-	hwloc-gather-topology.sh /tmp/myhost
+	hwloc-gather-topology /tmp/myhost
 
 It will store all relevant topology files in the \fB/tmp/myhost.tar.bz2\fR
 archive and the lstopo output in the \fB/tmp/myhost.output\fR file.
@@ -101,16 +101,16 @@ The \fBHWLOC_FSROOT\fR environment variable should be used to do so:
 
 All these commands will produce the same output as if executed
 directly on the host on which the topology information was
-originally gathered by the hwloc-gather-topology.sh script.
+originally gathered by the hwloc-gather-topology script.
 .
 .\" **************************
 .\"    Return value section
 .\" **************************
 .SH RETURN VALUE
-Upon successful execution, hwloc-gather-topology.sh will exit with the code 0. 
+Upon successful execution, hwloc-gather-topology will exit with the code 0. 
 .
 .PP
-hwloc-gather-topology.sh will return nonzero exit status if any kind of error occurs,
+hwloc-gather-topology will return nonzero exit status if any kind of error occurs,
 such as (but not limited to) failure to create the archive or output file.
 .
 .\" **************************
