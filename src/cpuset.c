@@ -36,8 +36,8 @@
 
 /* actual opaque type internals */
 struct hwloc_bitmap_s {
-  unsigned ulongs_count; /* how many ulong bitmasks are valid */
-  unsigned ulongs_allocated; /* how many ulong bitmasks are allocated */
+  unsigned ulongs_count; /* how many ulong bitmasks are valid, >= 1 */
+  unsigned ulongs_allocated; /* how many ulong bitmasks are allocated, >= ulongs_count */
   unsigned long *ulongs;
   int infinite; /* set to 1 if all bits beyond ulongs are set */
 #ifdef HWLOC_DEBUG
@@ -47,7 +47,11 @@ struct hwloc_bitmap_s {
 
 /* overzealous check in debug-mode, not as powerful as valgrind but still useful */
 #ifdef HWLOC_DEBUG
-#define HWLOC__BITMAP_CHECK(set) assert((set)->magic == HWLOC_BITMAP_MAGIC)
+#define HWLOC__BITMAP_CHECK(set) do {				\
+  assert((set)->magic == HWLOC_BITMAP_MAGIC);			\
+  assert((set)->ulongs_count >= 1);				\
+  assert((set)->ulongs_allocated >= (set)->ulongs_count);	\
+} while (0)
 #else
 #define HWLOC__BITMAP_CHECK(set)
 #endif
@@ -77,7 +81,7 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
   if (!set)
     return NULL;
 
-  set->ulongs_count = 0;
+  set->ulongs_count = 1;
   set->ulongs_allocated = 64/sizeof(unsigned long);
   set->ulongs = malloc(64);
   if (!set->ulongs) {
@@ -85,6 +89,7 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
     return NULL;
   }
 
+  set->ulongs[0] = HWLOC_SUBBITMAP_ZERO;
   set->infinite = 0;
 #ifdef HWLOC_DEBUG
   set->magic = HWLOC_BITMAP_MAGIC;
@@ -95,8 +100,10 @@ struct hwloc_bitmap_s * hwloc_bitmap_alloc(void)
 struct hwloc_bitmap_s * hwloc_bitmap_alloc_full(void)
 {
   struct hwloc_bitmap_s * set = hwloc_bitmap_alloc();
-  if (set)
+  if (set) {
     set->infinite = 1;
+    set->ulongs[0] = HWLOC_SUBBITMAP_FULL;
+  }
   return set;
 }
 
@@ -240,13 +247,9 @@ int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, const stru
       res = size>0 ? size - 1 : 0;
     tmp += res;
     size -= res;
-  }
-
-  if (!set->infinite && !set->ulongs_count) {
-    res = hwloc_snprintf(tmp, size, "0x0");
-    if (res < 0)
-      return -1;
-    return res;
+    /* optimize a common case: full bitmap should appear as 0xf...f instead of 0xf...f,0xffffffff */
+    if (set->ulongs_count == 1 && set->ulongs[0] == HWLOC_SUBBITMAP_FULL)
+      return ret;
   }
 
   i=set->ulongs_count-1;
@@ -318,9 +321,15 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
     count++;
 
   current = string;
-  if (!strncmp("0xf...f,", current, 8)) {
+  if (!strncmp("0xf...f", current, 7)) {
+    current += 7;
+    if (*current != ',') {
+      /* special case for infinite/full cpuset */
+      hwloc_bitmap_fill(set);
+      return 0;
+    }
+    current++;
     infinite = 1;
-    current += 8;
     count--;
   }
 
@@ -489,7 +498,7 @@ void hwloc_bitmap_zero(struct hwloc_bitmap_s * set)
 {
 	HWLOC__BITMAP_CHECK(set);
 
-	hwloc_bitmap_reset_by_ulongs(set, 0);
+	hwloc_bitmap_reset_by_ulongs(set, 1);
 	hwloc_bitmap__zero(set);
 }
 
@@ -505,7 +514,7 @@ void hwloc_bitmap_fill(struct hwloc_bitmap_s * set)
 {
 	HWLOC__BITMAP_CHECK(set);
 
-	hwloc_bitmap_reset_by_ulongs(set, 0);
+	hwloc_bitmap_reset_by_ulongs(set, 1);
 	hwloc_bitmap__fill(set);
 }
 

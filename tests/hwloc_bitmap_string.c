@@ -27,6 +27,7 @@ int main(void)
   /* check an empty cpuset */
   set = hwloc_bitmap_alloc();
   hwloc_bitmap_asprintf(&string, set);
+  assert(!strcmp(string, "0x0"));
   set2 = hwloc_bitmap_alloc();
   hwloc_bitmap_sscanf(set2, string);
   free(string);
@@ -34,7 +35,18 @@ int main(void)
   hwloc_bitmap_free(set);
   hwloc_bitmap_free(set2);
 
-  /* check an infinite cpuset */
+  /* check a full (and infinite) cpuset */
+  set = hwloc_bitmap_alloc_full();
+  hwloc_bitmap_asprintf(&string, set);
+  assert(!strcmp(string, "0xf...f"));
+  set2 = hwloc_bitmap_alloc();
+  hwloc_bitmap_sscanf(set2, string);
+  free(string);
+  assert(hwloc_bitmap_isequal(set, set2));
+  hwloc_bitmap_free(set);
+  hwloc_bitmap_free(set2);
+
+  /* check an infinite (but non full) cpuset */
   set = hwloc_bitmap_alloc_full();
   hwloc_bitmap_clr(set, 173);
   hwloc_bitmap_clr_range(set, 60, 70);
