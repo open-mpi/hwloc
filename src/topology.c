@@ -403,35 +403,37 @@ hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
 static void
 hwloc_set_distances(struct hwloc_topology *topology)
 {
-  unsigned nbnodes;
-  int depth;
+  unsigned nbobjs;
+  hwloc_obj_type_t type;
+  unsigned depth;
 
-  depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-    return;
-  assert(depth != HWLOC_TYPE_DEPTH_MULTIPLE);
+  for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
+    nbobjs = topology->os_distances[type].nbobjs;
+    if (!nbobjs)
+      continue;
 
-  nbnodes = topology->os_distances[HWLOC_OBJ_NODE].nbobjs;
-  if (nbnodes < 1)
-    return;
+    depth = hwloc_get_type_depth(topology, type);
+    if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+      continue;
 
-  assert(!!topology->os_distances[HWLOC_OBJ_NODE].distances == !!topology->os_distances[HWLOC_OBJ_NODE].indexes);
+    assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].indexes);
 
-  if (topology->os_distances[HWLOC_OBJ_NODE].distances) {
-    hwloc_obj_t root = topology->levels[0][0];
-    assert(!root->distances_count);
-    assert(!root->distances);
+    if (topology->os_distances[type].distances) {
+      hwloc_obj_t root = topology->levels[0][0];
+      assert(!root->distances_count);
+      assert(!root->distances);
 
-    hwloc_setup_distances_from_nonsparseos_matrix(topology, root, depth, nbnodes,
-						  topology->os_distances[HWLOC_OBJ_NODE].distances,
-						  topology->os_distances[HWLOC_OBJ_NODE].indexes);
+      hwloc_setup_distances_from_nonsparseos_matrix(topology, root, depth, nbobjs,
+						  topology->os_distances[type].distances,
+						  topology->os_distances[type].indexes);
 
-    /* clear things that are now unused */
-    free(topology->os_distances[HWLOC_OBJ_NODE].distances);
-    free(topology->os_distances[HWLOC_OBJ_NODE].indexes);
-    topology->os_distances[HWLOC_OBJ_NODE].distances = NULL;
-    topology->os_distances[HWLOC_OBJ_NODE].indexes = NULL;
-    topology->os_distances[HWLOC_OBJ_NODE].nbobjs = 0;
+      /* clear things that are now unused */
+      free(topology->os_distances[type].distances);
+      free(topology->os_distances[type].indexes);
+      topology->os_distances[type].distances = NULL;
+      topology->os_distances[type].indexes = NULL;
+      topology->os_distances[type].nbobjs = 0;
+    }
   }
 }
 
