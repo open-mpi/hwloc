@@ -35,6 +35,11 @@ if ! mkdir -p "$dirname" ; then
     exit 1
 fi
 
+if [ ! -w  "$dirname" ] ; then
+    echo "$dirname is not writable."
+    exit 1
+fi
+
 destdir=`mktemp -d`
 
 # Use cat so that we properly get proc/sys files even if their
