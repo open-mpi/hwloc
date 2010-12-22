@@ -362,7 +362,6 @@ hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
 					      hwloc_obj_t root, unsigned relative_depth, unsigned nbobjs,
 					      hwloc_obj_t *objs, unsigned *osmatrix)
 {
-  unsigned logical_index_of_non_sparse_physical_index[nbobjs];
   unsigned i, j, li, lj;
   unsigned min = UINT_MAX, max = 0;
   float *matrix;
@@ -390,14 +389,6 @@ hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
     return;
   }
 
-  /* cache the translation from one index to the other */
-  for(i=0; i<nbobjs; i++) {
-    hwloc_obj_t obj = NULL;
-    while ((obj = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, root->depth + relative_depth, obj)) != NULL)
-      if (obj->os_index == objs[i]->os_index)
-	logical_index_of_non_sparse_physical_index[i] = obj->logical_index;
-  }
-
   /* store the normalized latency matrix in the root object */
   idx = root->distances_count++;
   root->distances = realloc(root->distances, root->distances_count * sizeof(struct hwloc_distances_s));
@@ -409,10 +400,10 @@ hwloc_setup_distances_from_nonsparseos_matrix(struct hwloc_topology *topology,
 #define NORMALIZE_LATENCY(d) (((float) d)/(float) min)
   root->distances[0].latency_max = NORMALIZE_LATENCY(max);
   for(i=0; i<nbobjs; i++) {
-    li = logical_index_of_non_sparse_physical_index[i];
+    li = objs[i]->logical_index;
     matrix[li*nbobjs+li] = NORMALIZE_LATENCY(osmatrix[i*nbobjs+i]);
     for(j=i+1; j<nbobjs; j++) {
-      lj = logical_index_of_non_sparse_physical_index[j];
+      lj = objs[j]->logical_index;
       matrix[li*nbobjs+lj] = NORMALIZE_LATENCY(osmatrix[i*nbobjs+j]);
       matrix[lj*nbobjs+li] = NORMALIZE_LATENCY(osmatrix[j*nbobjs+i]);
     }
