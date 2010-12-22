@@ -1586,7 +1586,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /*
    * Group levels by distances
    */
-  hwloc_get_distances_from_env(topology);
+  hwloc_convert_distances_indexes_into_objects(topology);
   hwloc_group_by_distances(topology);
 
   /* First tweak a bit to clean the topology.  */
@@ -1770,8 +1770,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /*
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology
    */
-
-  hwloc_set_logical_distances(topology);
+  hwloc_finalize_logical_distances(topology);
 
 #  ifdef HWLOC_HAVE_XML
   if (topology->backend_type == HWLOC_BACKEND_XML)
@@ -1913,6 +1912,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
     topology->os_distances[i].nbobjs = 0;
     topology->os_distances[i].objs = NULL;
+    topology->os_distances[i].indexes = NULL;
     topology->os_distances[i].distances = NULL;
   }
   topology->nb_levels = 1; /* there's at least SYSTEM */
@@ -2197,6 +2197,11 @@ hwloc_topology_load (struct hwloc_topology *topology)
       return -1;
 #endif
   }
+
+  /* get distance matrix from the environment are store them (as indexes) in the topology.
+   * indexes will be converted into objects later once the tree will be filled
+   */
+  hwloc_store_distances_from_env(topology);
 
   /* actual topology discovery */
   err = hwloc_discover(topology);

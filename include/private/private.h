@@ -99,8 +99,15 @@ struct hwloc_topology {
   struct hwloc_os_distances_s {
     /* these are initialized to NULL, setup when needed during discovery, and cleared after use before the end of discovery */
     int nbobjs;
-    struct hwloc_obj **objs; /* array of objects, in the same order as above */
-    unsigned *distances; /* temporary distance matrices, ordered according to the objs array
+    unsigned *indexes; /* array of OS indexes before we can convert them into objs.
+			* used during the early discovery until the tree starts being filled.
+			* not used at all when distances are setup directly by a backend.
+			*/
+    struct hwloc_obj **objs; /* array of objects, in the same order as above.
+			      * may be setup during discovery from os_indexes,
+			      * or setup directly by a backend.
+			      */
+    unsigned *distances; /* distance matrices, ordered according to the objs array
 			  * distance from i to j is stored in slot i*nbnodes+j.
 			  * will be copied into the main logical-index-ordered distance at the end of the discovery. */
   } os_distances[HWLOC_OBJ_TYPE_MAX];
@@ -312,8 +319,9 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
   return hwloc_alloc(topology, len);
 }
 
-extern void hwloc_get_distances_from_env(struct hwloc_topology *topology);
-extern void hwloc_set_logical_distances(struct hwloc_topology *topology);
+extern void hwloc_store_distances_from_env(struct hwloc_topology *topology);
+extern void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology);
+extern void hwloc_finalize_logical_distances(struct hwloc_topology *topology);
 
 
 #endif /* HWLOC_PRIVATE_H */

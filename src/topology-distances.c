@@ -33,7 +33,6 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
   unsigned *indexes;
   unsigned *distances;
   unsigned nbobjs = 0, i, j, x, y, z;
-  hwloc_obj_t *objs;
 
   /* count indexes */
   while (1) {
@@ -102,28 +101,15 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     }
   }
 
-  /* traverse the topology and look for the relevant objects */
-  objs = calloc(nbobjs, sizeof(hwloc_obj_t));
-  for(i=0; i<nbobjs; i++) {
-    hwloc_obj_t obj = hwloc_find_obj_by_type_and_os_index(topology->levels[0][0], type, indexes[i]);
-    if (!obj) {
-      fprintf(stderr, "Ignoring %s distances from environment variable, unknown OS index %u\n",
-	      hwloc_obj_type_string(type), indexes[i]);
-      free(indexes);
-      free(distances);
-      free(objs);
-      return;
-    }
-    objs[i] = obj;
-  }
-
-  free(indexes);
+  topology->os_distances[type].indexes = indexes;
   topology->os_distances[type].nbobjs = nbobjs;
   topology->os_distances[type].distances = distances;
-  topology->os_distances[type].objs = objs;
 }
 
-void hwloc_get_distances_from_env(struct hwloc_topology *topology)
+/* take distances in the environment, store them as is in the topology.
+ * we'll convert them into object later once the tree is filled
+ */
+void hwloc_store_distances_from_env(struct hwloc_topology *topology)
 {
   hwloc_obj_type_t type;
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
@@ -132,6 +118,41 @@ void hwloc_get_distances_from_env(struct hwloc_topology *topology)
     char *env = getenv(envname);
     if (env)
       hwloc_get_type_distances_from_string(topology, type, env);
+  }
+}
+
+/* convert distance indexes that were previously stored in the topology
+ * into actual objects.
+ */
+void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology)
+{
+  hwloc_obj_type_t type;
+  for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
+    unsigned nbobjs = topology->os_distances[type].nbobjs;
+    unsigned *indexes = topology->os_distances[type].indexes;
+    unsigned i;
+    if (indexes) {
+      hwloc_obj_t *objs = calloc(nbobjs, sizeof(hwloc_obj_t));
+      /* traverse the topology and look for the relevant objects */
+      for(i=0; i<nbobjs; i++) {
+	hwloc_obj_t obj = hwloc_find_obj_by_type_and_os_index(topology->levels[0][0], type, indexes[i]);
+	if (!obj) {
+	  fprintf(stderr, "Ignoring %s distances from environment variable, unknown OS index %u\n",
+		  hwloc_obj_type_string(type), indexes[i]);
+	  free(objs);
+	  free(topology->os_distances[type].indexes);
+	  topology->os_distances[type].indexes = NULL;
+	  free(topology->os_distances[type].distances);
+	  topology->os_distances[type].distances = NULL;
+	  continue;
+	}
+	objs[i] = obj;
+      }
+      /* we found objects, we don't need indexes anymore */
+      topology->os_distances[type].objs = objs;
+      free(topology->os_distances[type].indexes);
+      topology->os_distances[type].indexes = NULL;
+    }
   }
 }
 
@@ -188,8 +209,11 @@ hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
   }
 }
 
+/* convert internal distances into logically-ordered distances
+ * that can be exposed in the API
+ */
 void
-hwloc_set_logical_distances(struct hwloc_topology *topology)
+hwloc_finalize_logical_distances(struct hwloc_topology *topology)
 {
   unsigned nbobjs;
   hwloc_obj_type_t type;
