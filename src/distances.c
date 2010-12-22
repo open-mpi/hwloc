@@ -174,17 +174,36 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
 
 static void
 hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
-				     hwloc_obj_t root, unsigned relative_depth, unsigned nbobjs,
+				     unsigned nbobjs,
 				     hwloc_obj_t *objs, unsigned *osmatrix)
 {
-  unsigned i, j, li, lj;
+  unsigned i, j, li, lj, minl;
   unsigned min = UINT_MAX, max = 0;
+  hwloc_obj_t root;
   float *matrix;
+  hwloc_cpuset_t set;
+  unsigned relative_depth;
   int idx;
 
-  /* check that root/depth/nbobjs are consistent */
-  if (hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, root->depth + relative_depth) != nbobjs)
+  /* find the root */
+  set = hwloc_bitmap_alloc();
+  for(i=0; i<nbobjs; i++)
+    hwloc_bitmap_or(set, set, objs[i]->cpuset);
+  root = hwloc_get_obj_covering_cpuset(topology, set);
+  assert(root);
+  if (!hwloc_bitmap_isequal(set, root->cpuset)) {
+    /* partial distance matrix not including all the children of a single object */
+    hwloc_bitmap_free(set);
     return;
+  }
+  hwloc_bitmap_free(set);
+  relative_depth = objs[0]->depth - root->depth; /* FIXME: what if the depth isn't always the same? */
+
+  /* get the logical index offset, it's the min of all logical indexes */
+  minl = UINT_MAX;
+  for(i=0; i<nbobjs; i++)
+    if (minl > objs[i]->logical_index)
+      minl = objs[i]->logical_index;
 
   /* compute/check min/max values */
   for(i=0; i<nbobjs; i++)
@@ -215,10 +234,10 @@ hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
 #define NORMALIZE_LATENCY(d) (((float) d)/(float) min)
   root->distances[0].latency_max = NORMALIZE_LATENCY(max);
   for(i=0; i<nbobjs; i++) {
-    li = objs[i]->logical_index;
+    li = objs[i]->logical_index - minl;
     matrix[li*nbobjs+li] = NORMALIZE_LATENCY(osmatrix[i*nbobjs+i]);
     for(j=i+1; j<nbobjs; j++) {
-      lj = objs[j]->logical_index;
+      lj = objs[j]->logical_index - minl;
       matrix[li*nbobjs+lj] = NORMALIZE_LATENCY(osmatrix[i*nbobjs+j]);
       matrix[lj*nbobjs+li] = NORMALIZE_LATENCY(osmatrix[j*nbobjs+i]);
     }
@@ -251,7 +270,7 @@ hwloc_finalize_logical_distances(struct hwloc_topology *topology)
       assert(!root->distances_count);
       assert(!root->distances);
 
-      hwloc_setup_distances_from_os_matrix(topology, root, depth, nbobjs,
+      hwloc_setup_distances_from_os_matrix(topology, nbobjs,
 					   topology->os_distances[type].objs,
 					   topology->os_distances[type].distances);
 
