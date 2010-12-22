@@ -463,8 +463,9 @@ static hwloc_obj_t hwloc_find_obj_by_type_and_os_index(hwloc_obj_t root, hwloc_o
     return root;
   child = root->first_child;
   while (child) {
-    if (hwloc_find_obj_by_type_and_os_index(child, type, os_index))
-      return child;
+    hwloc_obj_t found = hwloc_find_obj_by_type_and_os_index(child, type, os_index);
+    if (found)
+      return found;
     child = child->next_sibling;
   }
   return NULL;
@@ -528,7 +529,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     hwloc_obj_t obj = hwloc_find_obj_by_type_and_os_index(topology->levels[0][0], type, indexes[i]);
     if (!obj) {
       fprintf(stderr, "Ignoring %s distances from environment variable, unknown OS index %u\n",
-	      hwloc_obj_type_string(type), indexes[i]);    
+	      hwloc_obj_type_string(type), indexes[i]);
       free(indexes);
       free(distances);
       free(objs);
