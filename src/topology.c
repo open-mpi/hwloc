@@ -538,6 +538,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     objs[i] = obj;
   }
 
+  free(indexes);
   topology->os_distances[type].nbobjs = nbobjs;
   topology->os_distances[type].distances = distances;
   topology->os_distances[type].objs = objs;
