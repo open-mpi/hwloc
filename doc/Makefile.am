@@ -325,6 +325,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distributev.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_api_version.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_cpuset.3 \
