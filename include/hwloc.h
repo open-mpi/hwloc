@@ -600,13 +600,14 @@ HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restric
 /** \brief Provide a distance matrix.
  *
  * Provide the matrix of distances between a set of objects of the given type.
+ * The set may or may not contain all the existing objects of this type.
  * The objects are specified by their OS/physical index in the \p os_index
  * array. The \p distances matrix follows the same order.
  * The distance from object i to object j in the i*nbobjs+j.
  */
-HWLOC_DECLSPEC int hwloc_topology_set_whole_distance_matrix(hwloc_topology_t __hwloc_restrict topology,
-							    hwloc_obj_type_t type, unsigned nbobjs,
-							    unsigned *os_index, unsigned *distances);
+HWLOC_DECLSPEC int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology,
+						      hwloc_obj_type_t type, unsigned nbobjs,
+						      unsigned *os_index, unsigned *distances);
 
 /** \brief Flags describing actual discovery support for this topology. */
 struct hwloc_topology_discovery_support {
