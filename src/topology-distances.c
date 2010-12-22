@@ -121,6 +121,22 @@ void hwloc_store_distances_from_env(struct hwloc_topology *topology)
   }
 }
 
+/* take the given distance, store them as is in the topology.
+ * we'll convert them into object later once the tree is filled
+ */
+int hwloc_topology_set_whole_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
+					     unsigned nbobjs, unsigned *indexes, unsigned *distances)
+{
+  free(topology->os_distances[type].indexes);
+  free(topology->os_distances[type].distances);
+  topology->os_distances[type].nbobjs = nbobjs;
+  topology->os_distances[type].indexes = malloc(nbobjs*sizeof(unsigned));
+  memcpy(topology->os_distances[type].indexes, indexes, nbobjs*sizeof(unsigned));
+  topology->os_distances[type].distances = malloc(nbobjs*nbobjs*sizeof(unsigned));
+  memcpy(topology->os_distances[type].distances, distances, nbobjs*nbobjs*sizeof(unsigned));
+  return 0;
+}
+
 /* convert distance indexes that were previously stored in the topology
  * into actual objects.
  */
