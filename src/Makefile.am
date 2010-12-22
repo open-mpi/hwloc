@@ -22,7 +22,7 @@ endif
 sources = \
         topology.c \
         traversal.c \
-        topology-distances.c \
+        distances.c \
         topology-synthetic.c \
         bind.c \
         cpuset.c \
