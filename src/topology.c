@@ -465,11 +465,13 @@ static hwloc_obj_t hwloc_find_obj_by_type_and_os_index(hwloc_obj_t root, hwloc_o
 static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology,
 						 hwloc_obj_type_t type, char *string)
 {
-  /* the string format is: "index[0],...,index[N-1]:distance[0],...,distance[N*N-1]" */
+  /* the string format is: "index[0],...,index[N-1]:distance[0],...,distance[N*N-1]"
+   * or "index[0],...,index[N-1]:X*Y" or "index[0],...,index[N-1]:X*Y*Z"
+   */
   char *tmp = string, *next;
   unsigned *indexes;
   unsigned *distances;
-  unsigned nbobjs = 0, i;
+  unsigned nbobjs = 0, i, j, x, y, z;
   hwloc_obj_t *objs;
 
   /* count indexes */
@@ -501,16 +503,41 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     indexes[i] = strtoul(tmp, &next, 0);
     tmp = next+1;
   }
+
   /* parse distances */
-  for(i=0; i<nbobjs*nbobjs; i++) {
-    distances[i] = strtoul(tmp, &next, 0);
-    tmp = next+1;
-    if (!*next && i!=nbobjs*nbobjs-1) {
-      fprintf(stderr, "Ignoring %s distances from environment variable, not enough values (%u out of %u)\n",
-	      hwloc_obj_type_string(type), i+1, nbobjs*nbobjs);
+  z=1; /* default if sscanf finds only 2 values below */
+  if (sscanf(tmp, "%u*%u*%u", &x, &y, &z) >= 2) {
+    /* generate the matrix to create x groups of y elements */
+    if (x*y*z != nbobjs) {
+      fprintf(stderr, "Ignoring %s distances from environment variable, invalid grouping (%u*%u*%u=%u instead of %u)\n",
+	      hwloc_obj_type_string(type), x, y, z, x*y*z, nbobjs);
       free(indexes);
       free(distances);
       return;
+    }
+    for(i=0; i<nbobjs; i++)
+      for(j=0; j<nbobjs; j++)
+	if (i==j)
+	  distances[i*nbobjs+j] = 1;
+	else if (i/z == j/z)
+	  distances[i*nbobjs+j] = 2;
+	else if (i/z/y == j/z/y)
+	  distances[i*nbobjs+j] = 4;
+	else
+	  distances[i*nbobjs+j] = 8;
+
+  } else {
+    /* parse a comma separated list of distances */
+    for(i=0; i<nbobjs*nbobjs; i++) {
+      distances[i] = strtoul(tmp, &next, 0);
+      tmp = next+1;
+      if (!*next && i!=nbobjs*nbobjs-1) {
+	fprintf(stderr, "Ignoring %s distances from environment variable, not enough values (%u out of %u)\n",
+		hwloc_obj_type_string(type), i+1, nbobjs*nbobjs);
+	free(indexes);
+	free(distances);
+	return;
+      }
     }
   }
 
