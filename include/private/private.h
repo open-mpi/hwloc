@@ -312,4 +312,8 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
   return hwloc_alloc(topology, len);
 }
 
+extern void hwloc_get_distances_from_env(struct hwloc_topology *topology);
+extern void hwloc_set_logical_distances(struct hwloc_topology *topology);
+
+
 #endif /* HWLOC_PRIVATE_H */
