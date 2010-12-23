@@ -16,7 +16,8 @@ endif HWLOC_HAVE_LINUX
 LDADD =
 
 if HWLOC_BUILD_TESTS
-check_PROGRAMS = hwloc_bitmap_string \
+check_PROGRAMS = hwloc_bitmap \
+	hwloc_bitmap_string \
 	hwloc_get_closest_objs \
 	hwloc_get_obj_covering_cpuset \
 	hwloc_get_cache_covering_cpuset \

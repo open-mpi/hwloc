@@ -9,7 +9,7 @@
 
 abs_top_builddir="@abs_top_builddir@"
 lstopo="$abs_top_builddir/utils/lstopo"
-gather="$abs_top_builddir/tests/linux/hwloc-gather-topology.sh"
+gather="$abs_top_builddir/tests/linux/hwloc-gather-topology"
 
 # make sure we use default numeric formats
 export LANG=C
@@ -77,5 +77,4 @@ result=$?
 
 rm -rf "$tmpdir"
 
-# exit $result # cannot properly work in presence of Linux Cpuset/Cgroup yet
-exit 0
+exit $result
