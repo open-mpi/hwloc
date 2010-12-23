@@ -535,7 +535,7 @@ void hwloc_bitmap_from_ith_ulong(struct hwloc_bitmap_s *set, unsigned i, unsigne
 
 	hwloc_bitmap_reset_by_ulongs(set, i+1);
 	set->ulongs[i] = mask;
-	for(j=1; j<(unsigned) i; j++)
+	for(j=0; j<(unsigned) i; j++)
 		set->ulongs[j] = HWLOC_SUBBITMAP_ZERO;
 	set->infinite = 0;
 }
