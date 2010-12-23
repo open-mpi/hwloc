@@ -270,7 +270,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
           hwloc_insert_object_by_cpuset(topology, misc_obj);
           groupobjs[i] = misc_obj;
       }
-      
+
       /* factorize distances */
       memset(groupdistances, 0, sizeof(groupdistances));
       for(i=0; i<nbobjs; i++)
@@ -287,7 +287,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
           hwloc_debug("%s", "\n");
       }
 #endif
-      
+
       hwloc__setup_misc_level_from_distances(topology, nbgroups, groupobjs, (unsigned*) groupdistances, depth + 1);
   }
 }
@@ -295,7 +295,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
 /*
  * Look at object physical distances to group them.
  */
-void
+static void
 hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
 				      unsigned nbobjs,
 				      struct hwloc_obj **objs,

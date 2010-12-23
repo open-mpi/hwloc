@@ -252,7 +252,7 @@ hwloc_finalize_logical_distances(struct hwloc_topology *topology)
 {
   unsigned nbobjs;
   hwloc_obj_type_t type;
-  unsigned depth;
+  int depth;
 
   for (type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
     nbobjs = topology->os_distances[type].nbobjs;
