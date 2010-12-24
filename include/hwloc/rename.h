@@ -36,6 +36,8 @@ extern "C" {
 
 /* Names from hwloc.h */
 
+#define hwloc_get_api_version HWLOC_NAME(get_api_version)
+
 #define hwloc_topology HWLOC_NAME(topology)
 #define hwloc_topology_t HWLOC_NAME(topology_t)
 

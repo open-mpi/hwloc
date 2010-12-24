@@ -50,6 +50,9 @@ extern "C" {
 /** \brief Indicate at build time which hwloc API version is being used. */
 #define HWLOC_API_VERSION 0x00010100
 
+/** \brief Indicate at runtime which hwloc API version was used at build time. */
+HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
+
 /** @} */
 
 

@@ -9,7 +9,7 @@
 
 abs_top_builddir="@abs_top_builddir@"
 lstopo="$abs_top_builddir/utils/lstopo"
-gather="$abs_top_builddir/tests/linux/hwloc-gather-topology.sh"
+gather="$abs_top_builddir/tests/linux/hwloc-gather-topology"
 
 # Ensure we're running on linux.  If not, then just exit with status
 # code 77 (the GNU standard for a skipped test)
@@ -74,5 +74,4 @@ result=$?
 
 rm -rf "$tmpdir"
 
-# exit $result # cannot properly work in presence of Linux Cpuset/Cgroup yet
-exit 0
+exit $result

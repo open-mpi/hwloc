@@ -150,7 +150,7 @@ EOF
     AC_MSG_CHECKING([whether to enable "picky" compiler mode])
     hwloc_want_picky=0
     AS_IF([test "$GCC" = "yes"],
-          [AS_IF([test -d "$srcdir/.svn" -o -d "$srcdir/.hg"],
+          [AS_IF([test -d "$srcdir/.svn" -o -d "$srcdir/.hg" -o -d "$srcdir/.git"],
                  [hwloc_want_picky=1])])
     if test "$enable_picky" = "yes"; then
         if test "$GCC" = "yes"; then
@@ -341,13 +341,13 @@ EOF
         hwloc_config_prefix[tests/linux/gather/Makefile]
         hwloc_config_prefix[tests/xml/Makefile]
         hwloc_config_prefix[tests/ports/Makefile]
-        hwloc_config_prefix[tests/linux/hwloc-gather-topology.sh]
+        hwloc_config_prefix[tests/linux/hwloc-gather-topology]
         hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh]
         hwloc_config_prefix[tests/linux/test-topology.sh]
         hwloc_config_prefix[tests/xml/test-topology.sh]
         hwloc_config_prefix[utils/test-hwloc-distrib.sh])
 
-    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/hwloc-gather-topology.sh ]hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh ]hwloc_config_prefix[utils/test-hwloc-distrib.sh])
+    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/hwloc-gather-topology ]hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh ]hwloc_config_prefix[utils/test-hwloc-distrib.sh])
 
     # These links are only needed in standalone mode.  It would
     # be nice to m4 foreach this somehow, but whenever I tried

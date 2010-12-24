@@ -42,7 +42,7 @@ Makefile
 /tests/glibc-sched
 /tests/lstopo_xml.sh
 /tests/linux/test-topology.sh
-/tests/linux/gather-topology.sh
+/tests/linux/hwloc-gather-topology
 /doc/doxygen.cfg
 /doc/doxygen-doc
 /doc/hwloc-hello
