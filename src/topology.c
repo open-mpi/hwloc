@@ -444,7 +444,7 @@ hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char *value)
 
 /* Free an object and all its content.  */
 void
-hwloc_free_object(hwloc_obj_t obj)
+hwloc_free_unlinked_object(hwloc_obj_t obj)
 {
   unsigned i;
   switch (obj->type) {
@@ -1175,8 +1175,12 @@ remove_unused_cpusets(hwloc_obj_t obj)
     remove_unused_cpusets(child);
 }
 
+/* Remove an object from its parent and free it.
+ * Only updates next_sibling/first_child pointers,
+ * so may only be used during early discovery.
+ */
 static void
-drop_object(hwloc_obj_t *pparent)
+unlink_and_free_single_object(hwloc_obj_t *pparent)
 {
   hwloc_obj_t parent = *pparent;
   hwloc_obj_t child = parent->first_child;
@@ -1189,7 +1193,7 @@ drop_object(hwloc_obj_t *pparent)
   } else
     *pparent = parent->next_sibling;
   /* Remove ignored object */
-  hwloc_free_object(parent);
+  hwloc_free_unlinked_object(parent);
 }
 
 /* Remove all ignored objects.  */
@@ -1205,20 +1209,24 @@ remove_ignored(hwloc_topology_t topology, hwloc_obj_t *pparent)
       topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_ALWAYS) {
     hwloc_debug("%s", "\nDropping ignored object ");
     print_object(topology, 0, parent);
-    drop_object(pparent);
+    unlink_and_free_single_object(pparent);
   }
 }
 
+/* Remove an object and its children from its parent and free them.
+ * Only updates next_sibling/first_child pointers,
+ * so may only be used during early discovery.
+ */
 static void
-do_free_object(hwloc_obj_t *pobj)
+unlink_and_free_object_and_children(hwloc_obj_t *pobj)
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
 
   for_each_child_safe(child, obj, pchild)
-    do_free_object(pchild);
+    unlink_and_free_object_and_children(pchild);
 
   *pobj = obj->next_sibling;
-  hwloc_free_object(obj);
+  hwloc_free_unlinked_object(obj);
 }
 
 /* Remove all children whose cpuset is empty, except NUMA nodes
@@ -1237,7 +1245,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
     print_object(topology, 0, obj);
-    do_free_object(pobj);
+    unlink_and_free_object_and_children(pobj);
   }
 }
 
@@ -1265,13 +1273,13 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
     print_object(topology, 0, parent);
     *pparent = child;
     child->next_sibling = parent->next_sibling;
-    hwloc_free_object(parent);
+    hwloc_free_unlinked_object(parent);
   } else if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
     /* Child can be ignored in favor of the parent.  */
     hwloc_debug("%s", "\nIgnoring child ");
     print_object(topology, 0, child);
     parent->first_child = child->first_child;
-    hwloc_free_object(child);
+    hwloc_free_unlinked_object(child);
   }
 }
 
@@ -2081,7 +2089,7 @@ hwloc_topology_clear_tree (struct hwloc_topology *topology, struct hwloc_obj *ro
   unsigned i;
   for(i=0; i<root->arity; i++)
     hwloc_topology_clear_tree (topology, root->children[i]);
-  hwloc_free_object (root);
+  hwloc_free_unlinked_object (root);
 }
 
 static void
