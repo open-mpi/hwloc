@@ -1161,6 +1161,7 @@ hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 
   if (!fgets(string, 11, fd)) {
     *value = -1;
+    fclose(fd);
     return -1;
   }
   *value = strtoul(string, NULL, 10);
@@ -1761,8 +1762,10 @@ hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned *
   if (!fd)
     return;
 
-  if (!fgets(string, sizeof(string), fd))
+  if (!fgets(string, sizeof(string), fd)) {
+    fclose(fd);
     return;
+  }
 
   tmp = string;
   while (tmp) {

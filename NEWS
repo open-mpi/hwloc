@@ -22,6 +22,7 @@ Version 1.1.1
   at runtime.
 * Fix hwloc_bitmap_to_ulong() right after allocating the bitmap.
 * Fix hwloc_bitmap_from_ith_ulong() to properly zero the first ulong.
+* Fix some file descriptor leaks in the Linux discovery.
 * Fix the minimum width of NUMA nodes, caches and the legend in the graphical
   lstopo output.
 * Cleanup error management in hwloc-gather-topology.sh.
