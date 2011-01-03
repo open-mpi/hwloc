@@ -20,7 +20,8 @@ Version 1.1.1
 -------------
 * Add hwloc_get_api_version() which returns the version of hwloc used
   at runtime.
-* Fix hwloc_bitmap_to_ulong right after allocating the bitmap.
+* Fix hwloc_bitmap_to_ulong() right after allocating the bitmap.
+* Fix hwloc_bitmap_from_ith_ulong() to properly zero the first ulong.
 * Fix the minimum width of NUMA nodes, caches and the legend in the graphical
   lstopo output.
 * Cleanup error management in hwloc-gather-topology.sh.
