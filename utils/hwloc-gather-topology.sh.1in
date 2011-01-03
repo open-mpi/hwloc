@@ -26,10 +26,10 @@ display help message and exit
 .\" **************************
 .SH DESCRIPTION
 .
-hwloc-gather-topology.sh saves all the relevant topology files into an
+\fBhwloc-gather-topology.sh\fR saves all the relevant topology files into an
 archive (\fB<path>.tar.bz2\fR) and the lstopo output (\fB<path>.output\fR).
-The utility for example stores the /proc/cpuinfo file and the entire
-/sys/devices/system/node/ directory tree.
+The utility for example stores the \fB/proc/cpuinfo\fR file and the entire
+\fB/sys/devices/system/node/\fR directory tree.
 .
 .PP
 These files can be used later to explore the machine topology offline.
@@ -44,7 +44,7 @@ Both archive and lstopo output may also be submitted to hwloc developers
 to debug issues remotely.
 .
 .PP
-hwloc-gather-topology.sh is a Linux specific tool, it is not installed
+\fBhwloc-gather-topology.sh\fR is a Linux specific tool, it is not installed
 on other operating systems.
 .
 .PP
@@ -101,16 +101,16 @@ The \fBHWLOC_FSROOT\fR environment variable should be used to do so:
 
 All these commands will produce the same output as if executed
 directly on the host on which the topology information was
-originally gathered by the hwloc-gather-topology.sh script.
+originally gathered by the \fBhwloc-gather-topology.sh\fR script.
 .
 .\" **************************
 .\"    Return value section
 .\" **************************
 .SH RETURN VALUE
-Upon successful execution, hwloc-gather-topology.sh will exit with the code 0. 
+Upon successful execution, \fBhwloc-gather-topology.sh\fR will exit with the code 0. 
 .
 .PP
-hwloc-gather-topology.sh will return nonzero exit status if any kind of error occurs,
+\fBhwloc-gather-topology.sh\fR will return nonzero exit status if any kind of error occurs,
 such as (but not limited to) failure to create the archive or output file.
 .
 .\" **************************
