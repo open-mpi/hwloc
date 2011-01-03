@@ -1286,5 +1286,41 @@ interface, and the import/export may also be directed to memory buffer
 (that may for instance be transmitted between applications through a socket).
 
 
+\section faq_upgrade How do I handle API upgrades?
+
+The hwloc interface is extended with every new major release.
+Any application using the hwloc API should be prepared to check at
+compile-time whether some features are available in the currently
+installed hwloc distribution.
+
+To check whether hwloc is at least 1.1, you should use:
+\verbatim
+#include <hwloc.h>
+#if HWLOC_API_VERSION >= 0x00010100
+...
+#endif
+\endverbatim
+
+One of the major changes in hwloc 1.1 is the addition of the bitmap
+API. It supersedes the now deprecated cpuset API which will be removed
+in a future hwloc release. It is strongly recommended to switch existing
+codes to the bitmap API. Keeping support for older hwloc versions is easy.
+For instance, if your code uses <tt>hwloc_cpuset_alloc</tt>, you should use
+<tt>hwloc_bitmap_alloc</tt> instead and add the following code to one of your
+common headers:
+\verbatim
+#include <hwloc.h>
+#if HWLOC_API_VERSION < 0x00010100
+#define hwloc_bitmap_alloc hwloc_cpuset_alloc
+#endif
+\endverbatim
+
+Similarly, the hwloc 1.0 interface may be detected by comparing
+<tt>HWLOC_API_VERSION</tt> with <tt>0x00010000</tt>.
+
+hwloc 0.9 did not define any <tt>HWLOC_API_VERSION</tt> but this very old
+release probably does not deserve support from your application anymore.
+
+
 
 */
