@@ -32,12 +32,13 @@ code and/or data locality on modern computing platforms.
 *** Note that the hwloc project represents the merger of the
 libtopology project from INRIA and the Portable Linux Processor
 Affinity (PLPA) sub-project from Open MPI.  <em>Both of these prior
-projects are now deprecated.</em> The first hwloc release is essentially a
-"re-branding" of the libtopology code base, but with both a few
-genuinely new features and a few PLPA-like features added in.  More
-new features and more PLPA-like features will be added to hwloc over
-time. See \ref switchfromplpa for more details about converting
-your application from PLPA to hwloc.
+projects are now deprecated.</em> The first hwloc release was
+essentially a "re-branding" of the libtopology code base, but with
+both a few genuinely new features and a few PLPA-like features added
+in.  Prior releases of hwloc included documentation about switching
+from PLPA to hwloc; this documentation has been dropped on the
+assumption that everyone who was using PLPA has already switched to
+hwloc.
 
 hwloc supports the following operating systems:
 
@@ -596,7 +597,6 @@ The documentation chapters include
 <li> \ref interoperability
 <li> \ref threadsafety
 <li> \ref embed
-<li> \ref switchfromplpa
 <li> \ref faq
 </ul>
 
@@ -1168,113 +1168,6 @@ shell$ edit sandbox.c
 Now you can bootstrap, configure, build, and run the sandbox as normal
 -- all calls to "sandbox_hwloc_*" will use the embedded hwloc rather
 than any system-provided copy of hwloc.
-
-
-
-\page switchfromplpa Switching from PLPA to hwloc
-
-Although PLPA and hwloc share some of the same ideas, their
-programming interfaces are quite different.  After much debate, it was
-decided <em>not</em> to emulate the PLPA API with hwloc's API because
-hwloc's API is already far more rich than PLPA's.  
-
-More specifically, exploiting modern computing architecture
-<em>requires</em> the flexible functionality provided by the hwloc API
--- the PLPA API is too rigid in its definitions and practices to
-handle the evolving server hardware landscape (e.g., PLPA only
-understands cores and sockets; hwloc understands a much larger set
-of hardware objects).
-
-As such, even though it is fully possible to emulate the PLPA API with
-hwloc (e.g., only deal with sockets and cores), and while the
-documentation below describes how to do this, we encourage any
-existing PLPA application authors to actually re-think their
-application in terms of more than just sockets and cores.  In short,
-we encourage you to use the full hwloc API to exploit <em>all</em> the
-hardware.
-
-
-\section switchfromplpa_caching Topology Context vs. Caching
-
-First, all hwloc functions take a \p topology parameter. This
-parameter serves as an internal storage for the result of the topology
-discovery. It replaces PLPA's caching abilities and even lets you
-manipulate multiple topologies as the same time, if needed.
-
-Thus, all programs should first run hwloc_topology_init() and
-hwloc_topology_destroy() as they did plpa_init() and plpa_finalize()
-in the past.
-
-
-\section switchfromplpa_hierarchy Hierarchy vs. Core@Socket
-
-PLPA was designed to understand only cores and sockets.  hwloc offers
-many more different types of objects (e.g., cores, sockets, hardware
-threads, NUMA nodes, and others) and stores them within a tree of
-resources.
-
-To emulate the PLPA model, it is possible to find sockets using
-functions such as hwloc_get_obj_by_type().  Iterating over sockets is
-also possible using hwloc_get_next_obj_by_type().  Then, finding a
-core within a socket may be done using
-hwloc_get_obj_inside_cpuset_by_type() or
-hwloc_get_next_obj_inside_cpuset_by_type().
-
-It is also possible to directly find an object "below" another object
-using hwloc_get_obj_below_by_type() (or
-hwloc_get_obj_below_array_by_type()).
-
-
-\section switchfromplpa_indexes Logical vs. Physical/OS Indexes
-
-hwloc manipulates logical indexes, meaning indexes specified with
-regard to the ordering of objects in the hwloc-provided hierarchical
-tree.  Physical or OS indexes may be entirely hidden if not strictly
-required.  The reason for this is that physical/OS indexes may change
-with the OS or with the BIOS version.  They may be non-consecutive,
-multiple objects may have the same physical/OS indexes, making their
-manipulation tricky and highly non-portable.
-
-Note that hwloc tries very hard to always present a hierarchical tree
-with the same logical ordering, regardless of physical or OS index
-ordering.
-
-It is still possible to retrieve physical/OS indexes through the \p
-os_index field of objects, but such practice should be avoided as much
-as possible for the reasons described above (except perhaps for
-prettyprinting / debugging purposes).
-
-::HWLOC_OBJ_PU objects are supposed to have different physical/OS
-indexes since the OS uses them for binding.  The \p os_index field of
-these objects provides the identifier that may be used for such
-binding, and hwloc_get_proc_obj_by_os_index() finds the object
-associated with a specific OS index.  
-
-But as mentioned above, we discourage the use of these conversion
-methods for actual binding.  Instead, hwloc offers its own binding
-model using the \p cpuset field of objects.  These cpusets may be
-duplicated, modified, combined, etc. (see hwloc/bitmap.h for details)
-and then passed to hwloc_set_cpubind() for binding.
-
-
-\section switchfromplpa_counting Counting Specification
-
-PLPA offers a countspec parameter to specify whether counting all
-CPUs, only the online ones or only the offline ones.  However, some
-operating systems do not expose the topology of offline CPUs (i.e.,
-offline CPUs are not reported at all by the OS).  Also, some
-processors may not be visible to the current application due to
-administrative restrictions.  Finally, some processors let you
-shutdown a single hardware thread in a core, making some of the PLPA
-features irrelevant.
-
-hwloc stores in the hierarchical tree of objects all CPUs that have
-known topology information.  It then provides the applications with
-several cpusets that contain the list of CPUs that are actually known,
-that have topology information, that are online, or that are available
-to the application.  These cpusets may be retrieved with
-hwloc_topology_get_online_cpuset() and other similar functions to
-filter the object that are relevant or not.
 
 
 
