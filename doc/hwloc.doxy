@@ -1294,6 +1294,24 @@ interface, and the import/export may also be directed to memory buffer
 (that may for instance be transmitted between applications through a socket).
 
 
+\section faq_onedim hwloc only has a one-dimensional view of the architecture, it ignores distances
+
+hwloc places all objects in a tree. Each level is a one-dimensional
+view of a set of similar objects. All children of the same object (siblings)
+are assumed to be equally interconnected (same distance between any of them),
+while the distance between children of different objects (cousins) is supposed
+to be larger.
+
+Modern machines exhibit complex hardware interconnects, so this tree
+may miss some information about the actual physical distances between objects.
+The hwloc topology may therefore be annotated with distance information that
+may be used to build a more realistic representation (multi-dimensional)
+of each level.
+For instance, the root object may contain a distance matrix that represents
+the latencies between any pairs of NUMA nodes if the BIOS and/or operating
+system reports them.
+
+
 \section faq_upgrade How do I handle API upgrades?
 
 The hwloc interface is extended with every new major release.
