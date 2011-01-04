@@ -17,15 +17,26 @@
 
 static void check_cpuset(hwloc_bitmap_t set, const char *expected)
 {
-  hwloc_bitmap_t set2;
+  hwloc_bitmap_t set2 = hwloc_bitmap_alloc();
   char *string = NULL;
+
   hwloc_bitmap_asprintf(&string, set);
   if (expected)
     assert(!strcmp(string, expected));
-  set2 = hwloc_bitmap_alloc();
   hwloc_bitmap_sscanf(set2, string);
   free(string);
   assert(hwloc_bitmap_isequal(set, set2));
+
+  hwloc_bitmap_list_asprintf(&string, set);
+  hwloc_bitmap_list_sscanf(set2, string);
+  free(string);
+  assert(hwloc_bitmap_isequal(set, set2));
+
+  hwloc_bitmap_taskset_asprintf(&string, set);
+  hwloc_bitmap_taskset_sscanf(set2, string);
+  free(string);
+  assert(hwloc_bitmap_isequal(set, set2));
+
   hwloc_bitmap_free(set2);
 }
 
