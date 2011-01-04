@@ -276,7 +276,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_foreach_end.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_glibc_sched_affinity.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ith_ulong.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_bitmap_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_from_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_intersects.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_isequal.3 \
@@ -293,8 +292,12 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set_range.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_set_ith_ulong.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_singlify.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_asprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_sscanf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_asprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset_strict.3 \
