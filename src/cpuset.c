@@ -369,6 +369,131 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
   return -1;
 }
 
+int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_bitmap_s * __hwloc_restrict set)
+{
+  unsigned prev = (unsigned) -1;
+  hwloc_bitmap_t reverse;
+  ssize_t size = buflen;
+  char *tmp = buf;
+  int res, ret = 0;
+  int needcomma = 0;
+
+  HWLOC__BITMAP_CHECK(set);
+
+  reverse = hwloc_bitmap_alloc(); /* FIXME: optimize */
+  hwloc_bitmap_not(reverse, set);
+
+  /* mark the end in case we do nothing later */
+  if (buflen > 0)
+    tmp[0] = '\0';
+
+  while (1) {
+    unsigned begin, end;
+
+    begin = hwloc_bitmap_next(set, prev);
+    if (begin == (unsigned) -1)
+      break;
+    end = hwloc_bitmap_next(reverse, begin);
+
+    if (end == begin+1) {
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%u" : "%u", begin);
+    } else if (end == (unsigned) -1) {
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%u-" : "%u-", begin);
+    } else {
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%u-%u" : "%u-%u", begin, end-1);
+    }
+    if (res < 0) {
+      hwloc_bitmap_free(reverse);
+      return -1;
+    }
+    ret += res;
+
+    if (res >= size)
+      res = size>0 ? size - 1 : 0;
+
+    tmp += res;
+    size -= res;
+    needcomma = 1;
+
+    if (end == (unsigned) -1)
+      break;
+    else
+      prev = end - 1;
+  }
+
+  hwloc_bitmap_free(reverse);
+
+  return ret;
+}
+
+int hwloc_bitmap_list_asprintf(char ** strp, const struct hwloc_bitmap_s * __hwloc_restrict set)
+{
+  int len;
+  char *buf;
+
+  HWLOC__BITMAP_CHECK(set);
+
+  len = hwloc_bitmap_list_snprintf(NULL, 0, set);
+  buf = malloc(len+1);
+  *strp = buf;
+  return hwloc_bitmap_list_snprintf(buf, len+1, set);
+}
+
+int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restrict string)
+{
+  const char * current = string;
+  char *next;
+  unsigned long begin = -1, val;
+
+  hwloc_bitmap_zero(set);
+
+  while (*current != '\0') {
+
+    /* ignore empty ranges */
+    while (*current == ',')
+      current++;
+
+    val = strtoul(current, &next, 0);
+    /* make sure we got at least one digit */
+    if (next == current)
+      goto failed;
+
+    if (begin != (unsigned long) -1) {
+      /* finishing a range */
+      hwloc_bitmap_set_range(set, begin, val);
+      begin = (unsigned long) -1;
+
+    } else if (*next == '-') {
+      /* starting a new range */
+      if (*(next+1) == '\0') {
+	/* infinite range */
+	hwloc_bitmap_realloc_by_cpu_index(set, val);
+	hwloc_bitmap_set_range(set, val, set->ulongs_count * HWLOC_BITS_PER_LONG - 1); /* FIXME: optimize */
+	set->infinite = 1;
+        break;
+      } else {
+	/* normal range */
+	begin = val;
+      }
+
+    } else if (*next == ',' || *next == '\0') {
+      /* single digit */
+      hwloc_bitmap_set(set, val);
+    }
+
+    if (*next == '\0')
+      break;
+    current = (const char*) next+1;
+  }
+
+  return 0;
+
+ failed:
+  /* failure to parse */
+  hwloc_bitmap_zero(set);
+  return -1;
+}
+
 int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_bitmap_s * __hwloc_restrict set)
 {
   ssize_t size = buflen;

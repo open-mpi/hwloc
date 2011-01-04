@@ -295,6 +295,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_asprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_sscanf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_asprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_taskset_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_taskset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_taskset_asprintf.3 \

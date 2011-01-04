@@ -91,6 +91,22 @@ HWLOC_DECLSPEC int hwloc_bitmap_asprintf(char ** strp, hwloc_const_bitmap_t bitm
  */
 HWLOC_DECLSPEC int hwloc_bitmap_sscanf(hwloc_bitmap_t bitmap, const char * __hwloc_restrict string);
 
+/** \brief Stringify a bitmap in the list format.
+ *
+ * List are comma separated indexes or ranges.
+ * Ranges are dash separated indexes.
+ * The last range may not have a ending indexes if the bitmap is infinite.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
+
+/** \brief Stringify a bitmap into a newly allocated list string.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_list_asprintf(char ** strp, hwloc_const_bitmap_t bitmap);
+
+/** \brief Parse a list string and stores it in bitmap \p bitmap.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_list_sscanf(hwloc_bitmap_t bitmap, const char * __hwloc_restrict string);
+
 /** \brief Stringify a bitmap in the taskset-specific format.
  *
  * The taskset command manipulates bitmap strings that contain a single
