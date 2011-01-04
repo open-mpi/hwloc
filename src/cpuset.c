@@ -393,6 +393,9 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
       res = size>0 ? size - 1 : 0;
     tmp += res;
     size -= res;
+    /* optimize a common case: full bitmap should appear as 0xf...f instead of 0xf...fffffffff */
+    if (set->ulongs_count == 1 && set->ulongs[0] == HWLOC_SUBBITMAP_FULL)
+      return ret;
   }
 
   i=set->ulongs_count-1;
@@ -447,6 +450,11 @@ int hwloc_bitmap_taskset_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc
   if (!strncmp("0xf...f", current, 7)) {
     infinite = 1;
     current += 7;
+    if (*current == '\0') {
+      /* special case for infinite/full cpuset */
+      hwloc_bitmap_fill(set);
+      return 0;
+    }
   } else if (!strncmp("0x", current, 2)) {
     current += 2;
   }
