@@ -400,7 +400,11 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
     unsigned long val = set->ulongs[i--];
     if (started) {
       /* print the whole subset */
+#if HWLOC_BITS_PER_LONG == 64
+      res = hwloc_snprintf(tmp, size, "%016lx", val);
+#else
       res = hwloc_snprintf(tmp, size, "%08lx", val);
+#endif
     } else if (val) {
       res = hwloc_snprintf(tmp, size, "0x%lx", val);
       started = 1;
@@ -455,13 +459,13 @@ int hwloc_bitmap_taskset_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc
 
   while (*current != '\0') {
     int tmpchars;
-    char ustr[9];
+    char ustr[17];
     unsigned long val;
     char *next;
 
-    tmpchars = chars % 8;
+    tmpchars = chars % (HWLOC_BITS_PER_LONG/4);
     if (!tmpchars)
-      tmpchars = 8;
+      tmpchars = (HWLOC_BITS_PER_LONG/4);
 
     memcpy(ustr, current, tmpchars);
     ustr[tmpchars] = '\0';
