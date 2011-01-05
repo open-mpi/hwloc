@@ -21,6 +21,9 @@ int main(void)
   int err;
 
   hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:4 core:4 pu:1");
+  putenv("HWLOC_NUMANode_DISTANCES=0,1,2,3:2*2");
+  putenv("HWLOC_PU_DISTANCES=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15:4*2*2");
   hwloc_topology_load(topology);
 
   topodepth = hwloc_topology_get_depth(topology);
