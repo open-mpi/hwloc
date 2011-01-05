@@ -8,6 +8,32 @@
 #include <private/private.h>
 #include <private/debug.h>
 
+/* check a distance index array and matrix and insert it in the topology.
+ * the caller gives us those pointers, we take care of freeing them later and so on.
+ */
+static int hwloc_topology__set_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
+					       unsigned nbobjs, unsigned *indexes, unsigned *distances)
+{
+  unsigned i,j;
+
+  /* make sure we don't have the same index twice */
+  for(i=0; i<nbobjs; i++)
+    for(j=i+1; j<nbobjs; j++)
+      if (indexes[i] == indexes[j]) {
+	free(indexes);
+	free(distances);
+	errno = EINVAL;
+	return -1;
+      }
+
+  free(topology->os_distances[type].indexes);
+  free(topology->os_distances[type].distances);
+  topology->os_distances[type].nbobjs = nbobjs;
+  topology->os_distances[type].indexes = indexes;
+  topology->os_distances[type].distances = distances;
+  return 0;
+}
+
 static hwloc_obj_t hwloc_find_obj_by_type_and_os_index(hwloc_obj_t root, hwloc_obj_type_t type, unsigned os_index)
 {
   hwloc_obj_t child;
@@ -64,17 +90,6 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     tmp = next+1;
   }
 
-  /* make sure we don't have the same index twice */
-  for(i=0; i<nbobjs; i++)
-    for(j=i+1; j<nbobjs; j++)
-      if (indexes[i] == indexes[j]) {
-	fprintf(stderr, "Ignoring %s distances from environment variable, same index %u at pos %u and %u\n",
-		hwloc_obj_type_string(type), indexes[i], i, j);
-	free(indexes);
-	return;
-      }
-
-
   /* parse distances */
   z=1; /* default if sscanf finds only 2 values below */
   if (sscanf(tmp, "%u*%u*%u", &x, &y, &z) >= 2) {
@@ -112,9 +127,8 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     }
   }
 
-  topology->os_distances[type].indexes = indexes;
-  topology->os_distances[type].nbobjs = nbobjs;
-  topology->os_distances[type].distances = distances;
+  if (hwloc_topology__set_distance_matrix(topology, type, nbobjs, indexes, distances) < 0)
+    fprintf(stderr, "Ignoring invalid %s distances from environment variable\n", hwloc_obj_type_string(type));
 }
 
 /* take distances in the environment, store them as is in the topology.
@@ -133,29 +147,19 @@ void hwloc_store_distances_from_env(struct hwloc_topology *topology)
 }
 
 /* take the given distance, store them as is in the topology.
- * we'll convert them into object later once the tree is filled
+ * we'll convert them into object later once the tree is filled.
  */
 int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
 				       unsigned nbobjs, unsigned *indexes, unsigned *distances)
 {
-  unsigned i,j;
+  unsigned *_indexes, *_distances;
 
-  /* make sure we don't have the same index twice */
-  for(i=0; i<nbobjs; i++)
-    for(j=i+1; j<nbobjs; j++)
-      if (indexes[i] == indexes[j]) {
-	errno = EINVAL;
-	return -1;
-      }
-
-  free(topology->os_distances[type].indexes);
-  free(topology->os_distances[type].distances);
-  topology->os_distances[type].nbobjs = nbobjs;
-  topology->os_distances[type].indexes = malloc(nbobjs*sizeof(unsigned));
-  memcpy(topology->os_distances[type].indexes, indexes, nbobjs*sizeof(unsigned));
-  topology->os_distances[type].distances = malloc(nbobjs*nbobjs*sizeof(unsigned));
-  memcpy(topology->os_distances[type].distances, distances, nbobjs*nbobjs*sizeof(unsigned));
-  return 0;
+  /* copy the input arrays and give them to the topology */
+  _indexes = malloc(nbobjs*sizeof(unsigned));
+  memcpy(_indexes, indexes, nbobjs*sizeof(unsigned));
+  _distances = malloc(nbobjs*nbobjs*sizeof(unsigned));
+  memcpy(_distances, distances, nbobjs*nbobjs*sizeof(unsigned));
+  return hwloc_topology__set_distance_matrix(topology, type, nbobjs, _indexes, _distances);
 }
 
 /* convert distance indexes that were previously stored in the topology
