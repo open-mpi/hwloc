@@ -290,10 +290,6 @@ hwloc_finalize_logical_distances(struct hwloc_topology *topology)
     assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].objs);
 
     if (topology->os_distances[type].distances) {
-      hwloc_obj_t root = topology->levels[0][0];
-      assert(!root->distances_count);
-      assert(!root->distances);
-
       hwloc_setup_distances_from_os_matrix(topology, nbobjs,
 					   topology->os_distances[type].objs,
 					   topology->os_distances[type].distances);
