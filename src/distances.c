@@ -64,6 +64,17 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     tmp = next+1;
   }
 
+  /* make sure we don't have the same index twice */
+  for(i=0; i<nbobjs; i++)
+    for(j=i+1; j<nbobjs; j++)
+      if (indexes[i] == indexes[j]) {
+	fprintf(stderr, "Ignoring %s distances from environment variable, same index %u at pos %u and %u\n",
+		hwloc_obj_type_string(type), indexes[i], i, j);
+	free(indexes);
+	return;
+      }
+
+
   /* parse distances */
   z=1; /* default if sscanf finds only 2 values below */
   if (sscanf(tmp, "%u*%u*%u", &x, &y, &z) >= 2) {
@@ -127,6 +138,16 @@ void hwloc_store_distances_from_env(struct hwloc_topology *topology)
 int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
 				       unsigned nbobjs, unsigned *indexes, unsigned *distances)
 {
+  unsigned i,j;
+
+  /* make sure we don't have the same index twice */
+  for(i=0; i<nbobjs; i++)
+    for(j=i+1; j<nbobjs; j++)
+      if (indexes[i] == indexes[j]) {
+	errno = EINVAL;
+	return -1;
+      }
+
   free(topology->os_distances[type].indexes);
   free(topology->os_distances[type].distances);
   topology->os_distances[type].nbobjs = nbobjs;
