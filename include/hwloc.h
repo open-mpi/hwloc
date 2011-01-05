@@ -1088,6 +1088,12 @@ typedef enum {
                                          * The function will fail if the
                                          * binding can not be completely
                                          * enforced.
+                                         *
+                                         * When retrieving the binding of a memory range,
+                                         * this flag checks whether all its pages
+                                         * actually have the same binding.
+                                         * If the flag is not given, the binding of
+                                         * each page will be accumulated.
                                          * \hideinitializer  */
   HWLOC_MEMBIND_MIGRATE =       (1<<3), /**< \brief Migrate existing allocated memory.
                                          * If memory can not be migrated and the STRICT
