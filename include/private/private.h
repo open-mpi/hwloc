@@ -97,19 +97,20 @@ struct hwloc_topology {
   struct hwloc_topology_support support;
 
   struct hwloc_os_distances_s {
-    /* these are initialized to NULL, setup when needed during discovery, and cleared after use before the end of discovery */
+    /* these are initialized to NULL and setup when needed during between init and load, or during discovery */
     int nbobjs;
     unsigned *indexes; /* array of OS indexes before we can convert them into objs.
-			* used during the early discovery until the tree starts being filled.
-			* not used at all when distances are setup directly by a backend.
+			* only used during the early discovery until the tree starts being filled.
+			* not used anymore when distances are setup directly by a backend.
 			*/
     struct hwloc_obj **objs; /* array of objects, in the same order as above.
 			      * may be setup during discovery from os_indexes,
 			      * or setup directly by a backend.
 			      */
-    unsigned *distances; /* distance matrices, ordered according to the objs array
+    unsigned *distances; /* distance matrices, ordered according to the objs array.
 			  * distance from i to j is stored in slot i*nbnodes+j.
-			  * will be copied into the main logical-index-ordered distance at the end of the discovery. */
+			  * will be copied into the main logical-index-ordered distance at the end of the discovery.
+			  */
   } os_distances[HWLOC_OBJ_TYPE_MAX];
 
   hwloc_backend_t backend_type;
@@ -319,6 +320,9 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
   return hwloc_alloc(topology, len);
 }
 
+extern void hwloc_topology_distances_init(struct hwloc_topology *topology);
+extern void hwloc_topology_distances_clear(struct hwloc_topology *topology);
+extern void hwloc_topology_distances_destroy(struct hwloc_topology *topology);
 extern void hwloc_store_distances_from_env(struct hwloc_topology *topology);
 extern void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology);
 extern void hwloc_finalize_logical_distances(struct hwloc_topology *topology);

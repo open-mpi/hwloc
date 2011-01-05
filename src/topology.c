@@ -354,12 +354,15 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
     if (!nbobjs)
       continue;
 
-    assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].objs);
-
-    if (topology->os_distances[type].distances)
+    if (topology->os_distances[type].objs) {
+      /* if we have objs, we must have distances as well,
+       * thanks to hwloc_convert_distances_indexes_into_objects()
+       */
+      assert(topology->os_distances[type].distances);
       hwloc_setup_misc_level_from_distances(topology, nbobjs,
 					    topology->os_distances[type].objs,
 					    topology->os_distances[type].distances);
+    }
   }
 }
 
@@ -1922,13 +1925,8 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 
   /* No objects by default but System on top by default */
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
-  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
+  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
-    topology->os_distances[i].nbobjs = 0;
-    topology->os_distances[i].objs = NULL;
-    topology->os_distances[i].indexes = NULL;
-    topology->os_distances[i].distances = NULL;
-  }
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
@@ -1970,6 +1968,8 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
   }
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
+
+  hwloc_topology_distances_init(topology);
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);
@@ -2135,6 +2135,7 @@ static void
 hwloc_topology_clear (struct hwloc_topology *topology)
 {
   unsigned l;
+  hwloc_topology_distances_clear(topology);
   hwloc_topology_clear_tree (topology, topology->levels[0][0]);
   for (l=0; l<topology->nb_levels; l++)
     free(topology->levels[l]);
@@ -2144,6 +2145,7 @@ void
 hwloc_topology_destroy (struct hwloc_topology *topology)
 {
   hwloc_topology_clear(topology);
+  hwloc_topology_distances_destroy(topology);
   hwloc_backend_exit(topology);
   free(topology->support.discovery);
   free(topology->support.cpubind);

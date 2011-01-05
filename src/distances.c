@@ -8,6 +8,48 @@
 #include <private/private.h>
 #include <private/debug.h>
 
+/* called during topology init */
+void hwloc_topology_distances_init(struct hwloc_topology *topology)
+{
+  unsigned i;
+  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
+    /* no distances yet */
+    topology->os_distances[i].nbobjs = 0;
+    topology->os_distances[i].objs = NULL;
+    topology->os_distances[i].indexes = NULL;
+    topology->os_distances[i].distances = NULL;
+  }
+}
+
+/* called when reloading a topology.
+ * keep initial parameters (from set_distances and environment),
+ * but drop what was generated during previous load().
+ */
+void hwloc_topology_distances_clear(struct hwloc_topology *topology)
+{
+  unsigned i;
+  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
+    /* remove final distance matrices, but keep physically-ordered ones */
+    free(topology->os_distances[i].objs);
+    topology->os_distances[i].objs = NULL;
+  }
+}
+
+/* called during topology destroy */
+void hwloc_topology_distances_destroy(struct hwloc_topology *topology)
+{
+  unsigned i;
+  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
+    /* remove final distance matrics AND physically-ordered ones */
+    free(topology->os_distances[i].indexes);
+    topology->os_distances[i].indexes = NULL;
+    free(topology->os_distances[i].objs);
+    topology->os_distances[i].objs = NULL;
+    free(topology->os_distances[i].distances);
+    topology->os_distances[i].distances = NULL;
+  }
+}
+
 /* check a distance index array and matrix and insert it in the topology.
  * the caller gives us those pointers, we take care of freeing them later and so on.
  */
@@ -180,8 +222,6 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
 	if (!obj) {
 	  fprintf(stderr, "Ignoring %s distances from environment variable, unknown OS index %u\n",
 		  hwloc_obj_type_string(type), indexes[i]);
-	  free(topology->os_distances[type].distances);
-	  topology->os_distances[type].distances = NULL;
 	  free(objs);
 	  objs = NULL;
 	  break;
@@ -190,8 +230,6 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
       }
       /* objs was either filled or freed/NULLed */
       topology->os_distances[type].objs = objs;
-      free(topology->os_distances[type].indexes);
-      topology->os_distances[type].indexes = NULL;
     }
   }
 }
@@ -287,19 +325,15 @@ hwloc_finalize_logical_distances(struct hwloc_topology *topology)
     if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
       continue;
 
-    assert(!!topology->os_distances[type].distances == !!topology->os_distances[type].objs);
+    if (topology->os_distances[type].objs) {
+      /* if we have objs, we must have distances as well,
+       * thanks to hwloc_convert_distances_indexes_into_objects()
+       */
+      assert(topology->os_distances[type].distances);
 
-    if (topology->os_distances[type].distances) {
       hwloc_setup_distances_from_os_matrix(topology, nbobjs,
 					   topology->os_distances[type].objs,
 					   topology->os_distances[type].distances);
-
-      /* clear things that are now unused */
-      free(topology->os_distances[type].distances);
-      free(topology->os_distances[type].objs);
-      topology->os_distances[type].distances = NULL;
-      topology->os_distances[type].objs = NULL;
-      topology->os_distances[type].nbobjs = 0;
     }
   }
 }
