@@ -180,16 +180,15 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
 	if (!obj) {
 	  fprintf(stderr, "Ignoring %s distances from environment variable, unknown OS index %u\n",
 		  hwloc_obj_type_string(type), indexes[i]);
-	  free(objs);
-	  free(topology->os_distances[type].indexes);
-	  topology->os_distances[type].indexes = NULL;
 	  free(topology->os_distances[type].distances);
 	  topology->os_distances[type].distances = NULL;
-	  continue;
+	  free(objs);
+	  objs = NULL;
+	  break;
 	}
 	objs[i] = obj;
       }
-      /* we found objects, we don't need indexes anymore */
+      /* objs was either filled or freed/NULLed */
       topology->os_distances[type].objs = objs;
       free(topology->os_distances[type].indexes);
       topology->os_distances[type].indexes = NULL;
