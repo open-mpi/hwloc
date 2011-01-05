@@ -1094,9 +1094,6 @@ typedef enum {
                                          * actually have the same binding.
                                          * If the flag is not given, the binding of
                                          * each page will be accumulated.
-                                         *
-                                         * \note This flag is meaningless when retrieving
-                                         * the binding of a thread.
                                          * \hideinitializer  */
   HWLOC_MEMBIND_MIGRATE =       (1<<3), /**< \brief Migrate existing allocated memory.
                                          * If memory can not be migrated and the STRICT
