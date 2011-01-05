@@ -584,7 +584,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     AC_MSG_CHECKING([for cpuid])
     old_CPPFLAGS="$CPPFLAGS"
     CFLAGS="$CFLAGS -I$HWLOC_top_srcdir/include"
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
         #include <private/cpuid.h>
       ]], [[

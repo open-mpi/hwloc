@@ -582,7 +582,7 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
  *
  * Array \p cpuset will be filled with \p n cpusets recursively distributed
  * linearly over the topology under \p root, down to depth \p until (which can
- * be MAX_INT to distribute down to the finest level).
+ * be INT_MAX to distribute down to the finest level).
  *
  * This is typically useful when an application wants to distribute \p n
  * threads over a machine, giving each of them as much private cache as

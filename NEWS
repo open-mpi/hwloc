@@ -21,6 +21,8 @@ Version 1.2.0
 -------------
 * x86 backend (for freebsd): add x2APIC support
 * Rename hwloc-gather-topology.sh into hwloc-gather-topology
+* Add hwloc_bitmap_list_sscanf/snprintf/asprintf to convert between bitmaps
+  and strings such as 4-5,7-9,12,15-
 
 
 Version 1.1.0

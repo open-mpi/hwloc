@@ -1131,6 +1131,12 @@ typedef enum {
                                          * The function will fail if the
                                          * binding can not be completely
                                          * enforced.
+                                         *
+                                         * When retrieving the binding of a memory range,
+                                         * this flag checks whether all its pages
+                                         * actually have the same binding.
+                                         * If the flag is not given, the binding of
+                                         * each page will be accumulated.
                                          * \hideinitializer  */
   HWLOC_MEMBIND_MIGRATE =       (1<<3), /**< \brief Migrate existing allocated memory.
                                          * If memory can not be migrated and the STRICT
@@ -1153,6 +1159,11 @@ typedef enum {
 
 /** \brief Bind current process memory on the given nodeset \p nodeset
  *
+ * When neither HWLOC_MEMBIND_PROCESS nor HWLOC_MEMBIND_THREAD specified, the
+ * current process is assumed to be mono-thread. This is the most portable way
+ * as it permits hwloc to use either process-based OS functions or thread-based
+ * OS functions, whichever are available.
+ *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
@@ -1160,16 +1171,31 @@ HWLOC_DECLSPEC int hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_co
 
 /** \brief Bind current process memory on memory nodes near the given cpuset \p cpuset
  *
+ * When neither HWLOC_MEMBIND_PROCESS nor HWLOC_MEMBIND_THREAD specified, the
+ * current process is assumed to be mono-thread. This is the most portable way
+ * as it permits hwloc to use either process-based OS functions or thread-based
+ * OS functions, whichever are available.
+ *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Get current process memory binding in nodeset \p nodeset
+ *
+ * When neither HWLOC_MEMBIND_PROCESS nor HWLOC_MEMBIND_THREAD specified, the
+ * current process is assumed to be mono-thread. This is the most portable way
+ * as it permits hwloc to use either process-based OS functions or thread-based
+ * OS functions, whichever are available.
  */
 HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Get current process memory binding in cpuset \p cpuset
+ *
+ * When neither HWLOC_MEMBIND_PROCESS nor HWLOC_MEMBIND_THREAD specified, the
+ * current process is assumed to be mono-thread. This is the most portable way
+ * as it permits hwloc to use either process-based OS functions or thread-based
+ * OS functions, whichever are available.
  */
 HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
