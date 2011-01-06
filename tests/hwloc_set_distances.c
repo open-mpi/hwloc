@@ -15,7 +15,7 @@ int main(void)
 {
   hwloc_topology_t topology;
   unsigned indexes[16];
-  unsigned distances[16*16];
+  float distances[16*16];
   unsigned i, j;
   unsigned depth;
   unsigned width;

@@ -107,10 +107,10 @@ struct hwloc_topology {
 			      * may be setup during discovery from os_indexes,
 			      * or setup directly by a backend.
 			      */
-    unsigned *distances; /* distance matrices, ordered according to the objs array.
-			  * distance from i to j is stored in slot i*nbnodes+j.
-			  * will be copied into the main logical-index-ordered distance at the end of the discovery.
-			  */
+    float *distances; /* distance matrices, ordered according to the objs array.
+		       * distance from i to j is stored in slot i*nbnodes+j.
+		       * will be copied into the main logical-index-ordered distance at the end of the discovery.
+		       */
   } os_distances[HWLOC_OBJ_TYPE_MAX];
 
   hwloc_backend_t backend_type;

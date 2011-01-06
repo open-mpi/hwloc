@@ -8,6 +8,8 @@
 #include <private/private.h>
 #include <private/debug.h>
 
+#include <float.h>
+
 /* called during topology init */
 void hwloc_topology_distances_init(struct hwloc_topology *topology)
 {
@@ -54,7 +56,7 @@ void hwloc_topology_distances_destroy(struct hwloc_topology *topology)
  * the caller gives us those pointers, we take care of freeing them later and so on.
  */
 static int hwloc_topology__set_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
-					       unsigned nbobjs, unsigned *indexes, unsigned *distances)
+					       unsigned nbobjs, unsigned *indexes, float *distances)
 {
   unsigned i,j;
 
@@ -99,7 +101,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
    */
   char *tmp = string, *next;
   unsigned *indexes;
-  unsigned *distances;
+  float *distances;
   unsigned nbobjs = 0, i, j, x, y, z;
 
   /* count indexes */
@@ -123,7 +125,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
   }
 
   indexes = calloc(nbobjs, sizeof(unsigned));
-  distances = calloc(nbobjs*nbobjs, sizeof(unsigned));
+  distances = calloc(nbobjs*nbobjs, sizeof(float));
   tmp = string;
 
   /* parse indexes */
@@ -157,7 +159,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
   } else {
     /* parse a comma separated list of distances */
     for(i=0; i<nbobjs*nbobjs; i++) {
-      distances[i] = strtoul(tmp, &next, 0);
+      distances[i] = strtof(tmp, &next);
       tmp = next+1;
       if (!*next && i!=nbobjs*nbobjs-1) {
 	fprintf(stderr, "Ignoring %s distances from environment variable, not enough values (%u out of %u)\n",
@@ -192,15 +194,16 @@ void hwloc_store_distances_from_env(struct hwloc_topology *topology)
  * we'll convert them into object later once the tree is filled.
  */
 int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
-				       unsigned nbobjs, unsigned *indexes, unsigned *distances)
+				       unsigned nbobjs, unsigned *indexes, float *distances)
 {
-  unsigned *_indexes, *_distances;
+  unsigned *_indexes;
+  float *_distances;
 
   /* copy the input arrays and give them to the topology */
   _indexes = malloc(nbobjs*sizeof(unsigned));
   memcpy(_indexes, indexes, nbobjs*sizeof(unsigned));
-  _distances = malloc(nbobjs*nbobjs*sizeof(unsigned));
-  memcpy(_distances, distances, nbobjs*nbobjs*sizeof(unsigned));
+  _distances = malloc(nbobjs*nbobjs*sizeof(float));
+  memcpy(_distances, distances, nbobjs*nbobjs*sizeof(float));
   return hwloc_topology__set_distance_matrix(topology, type, nbobjs, _indexes, _distances);
 }
 
@@ -237,10 +240,10 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
 static void
 hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
 				     unsigned nbobjs,
-				     hwloc_obj_t *objs, unsigned *osmatrix)
+				     hwloc_obj_t *objs, float *osmatrix)
 {
   unsigned i, j, li, lj, minl;
-  unsigned min = UINT_MAX, max = 0;
+  float min = FLT_MAX, max = FLT_MIN;
   hwloc_obj_t root;
   float *matrix;
   hwloc_cpuset_t set;
@@ -270,7 +273,7 @@ hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
   /* compute/check min/max values */
   for(i=0; i<nbobjs; i++)
     for(j=0; j<nbobjs; j++) {
-      unsigned val = osmatrix[i*nbobjs+j];
+      float val = osmatrix[i*nbobjs+j];
       if (val < min)
 	min = val;
       if (val > max)
@@ -293,7 +296,7 @@ hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
   root->distances[idx].latency = matrix = malloc(nbobjs*nbobjs*sizeof(float));
 
   root->distances[0].latency_base = (float) min;
-#define NORMALIZE_LATENCY(d) (((float) d)/(float) min)
+#define NORMALIZE_LATENCY(d) ((d)/(min))
   root->distances[0].latency_max = NORMALIZE_LATENCY(max);
   for(i=0; i<nbobjs; i++) {
     li = objs[i]->logical_index - minl;

@@ -411,7 +411,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
     browse(topology, cookie, root, glob_lgrps, &curlgrp);
 #ifdef HAVE_LGRP_LATENCY_COOKIE
     {
-      unsigned *distances = calloc(curlgrp*curlgrp, sizeof(unsigned));
+      float *distances = calloc(curlgrp*curlgrp, sizeof(float));
       unsigned i, j;
       hwloc_obj_type_t type = glob_lgrps[0]->type;
       for (i = 0; i < curlgrp; i++) {

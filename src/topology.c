@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <float.h>
 
 #include <hwloc.h>
 #include <private/private.h>
@@ -142,11 +143,11 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
  */
 static unsigned
 hwloc_setup_group_from_min_distance(unsigned nbobjs,
-				    unsigned *_distances,
+				    float *_distances,
 				    unsigned *groupids)
 {
-  unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
-  unsigned min_distance = UINT_MAX;
+  float (*distances)[nbobjs][nbobjs] = (float (*)[nbobjs][nbobjs])_distances;
+  float min_distance = FLT_MAX;
   unsigned groupid = 1;
   unsigned i,j,k;
 
@@ -157,9 +158,9 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
     for(j=i+1; j<nbobjs; j++)
       if ((*distances)[i][j] < min_distance)
 	min_distance = (*distances)[i][j];
-  hwloc_debug("found minimal distance %u between objects\n", min_distance);
+  hwloc_debug("found minimal distance %f between objects\n", min_distance);
 
-  if (min_distance == UINT_MAX)
+  if (min_distance == FLT_MAX)
     return 0;
 
   /* build groups of objects connected with this distance */
@@ -206,7 +207,7 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
 
     /* valid this group */
     groupid++;
-    hwloc_debug("found transitive graph with %u objects with minimal distance %u\n",
+    hwloc_debug("found transitive graph with %u objects with minimal distance %f\n",
 	       size, min_distance);
   }
 
@@ -222,10 +223,10 @@ static void
 hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
 				   unsigned nbobjs,
 				   struct hwloc_obj **objs,
-				   unsigned *_distances,
+				   float *_distances,
 				   int depth)
 {
-  unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
+  float (*distances)[nbobjs][nbobjs] = (float (*)[nbobjs][nbobjs])_distances;
   unsigned groupids[nbobjs];
   unsigned nbgroups;
   unsigned i,j;
@@ -250,7 +251,7 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
   {
       hwloc_obj_t groupobjs[nbgroups];
       unsigned groupsizes[nbgroups];
-      unsigned groupdistances[nbgroups][nbgroups];
+      float groupdistances[nbgroups][nbgroups];
       /* create new Group objects and record their size */
       memset(groupsizes, 0, sizeof(groupsizes));
       for(i=0; i<nbgroups; i++) {
@@ -288,12 +289,12 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
       for(i=0; i<nbgroups; i++) {
 	hwloc_debug("  % 5d", (int) i);
 	for(j=0; j<nbgroups; j++)
-	  hwloc_debug(" %3u", groupdistances[i][j]);
+	  hwloc_debug(" %2.3f", groupdistances[i][j]);
 	hwloc_debug("%s", "\n");
       }
 #endif
 
-      hwloc__setup_groups_from_distances(topology, nbgroups, groupobjs, (unsigned*) groupdistances, depth + 1);
+      hwloc__setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, depth + 1);
   }
 }
 
@@ -304,9 +305,9 @@ static void
 hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
 				  unsigned nbobjs,
 				  struct hwloc_obj **objs,
-				  unsigned *_distances)
+				  float *_distances)
 {
-  unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
+  float (*distances)[nbobjs][nbobjs] = (float (*)[nbobjs][nbobjs])_distances;
   unsigned i,j;
 
   if (getenv("HWLOC_IGNORE_DISTANCES"))
@@ -321,7 +322,7 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
   for(i=0; i<nbobjs; i++) {
     hwloc_debug("  % 5d", (int) objs[i]->os_index);
     for(j=0; j<nbobjs; j++)
-      hwloc_debug(" %3u", (*distances)[i][j]);
+      hwloc_debug(" %2.3f", (*distances)[i][j]);
     hwloc_debug("%s", "\n");
   }
 #endif
@@ -331,13 +332,13 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
     for(j=i+1; j<nbobjs; j++) {
       /* should be symmetric */
       if ((*distances)[i][j] != (*distances)[j][i]) {
-	hwloc_debug("distance matrix asymmetric ([%u,%u]=%u != [%u,%u]=%u), aborting\n",
+	hwloc_debug("distance matrix asymmetric ([%u,%u]=%f != [%u,%u]=%f), aborting\n",
 		   i, j, (*distances)[i][j], j, i, (*distances)[j][i]);
 	return;
       }
       /* diagonal is smaller than everything else */
       if ((*distances)[i][j] <= (*distances)[i][i]) {
-	hwloc_debug("distance to self not strictly minimal ([%u,%u]=%u <= [%u,%u]=%u), aborting\n",
+	hwloc_debug("distance to self not strictly minimal ([%u,%u]=%f <= [%u,%u]=%f), aborting\n",
 		   i, j, (*distances)[i][j], i, i, (*distances)[i][i]);
 	return;
       }

@@ -250,7 +250,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
   radsetcreate(&radset2);
   {
     hwloc_obj_t *nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
-    unsigned *distances = calloc(nbnodes*nbnodes, sizeof(unsigned));
+    float *distances = calloc(nbnodes*nbnodes, sizeof(float));
     unsigned nfound;
     numa_attr_t attr = {
       .nattr_type = R_RAD,

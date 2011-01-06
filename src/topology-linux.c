@@ -1752,7 +1752,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned *distances, int fsroot_fd)
+hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, float *distances, int fsroot_fd)
 {
   char string[4096]; /* enough for hundreds of nodes */
   char *tmp, *next;
@@ -1821,7 +1821,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 
   {
       hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
-      unsigned * distances = calloc(nbnodes*nbnodes, sizeof(unsigned));
+      float * distances = calloc(nbnodes*nbnodes, sizeof(float));
       unsigned nonsparse_physical_indexes[nbnodes];
       unsigned index_;
 

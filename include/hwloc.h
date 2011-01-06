@@ -610,7 +610,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restric
  */
 HWLOC_DECLSPEC int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology,
 						      hwloc_obj_type_t type, unsigned nbobjs,
-						      unsigned *os_index, unsigned *distances);
+						      unsigned *os_index, float *distances);
 
 /** \brief Flags describing actual discovery support for this topology. */
 struct hwloc_topology_discovery_support {
