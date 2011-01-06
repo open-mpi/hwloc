@@ -280,11 +280,16 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
           for(j=0; j<nbgroups; j++)
               groupdistances[i][j] /= groupsizes[i]*groupsizes[j];
 #ifdef HWLOC_DEBUG
-      hwloc_debug("%s", "group distances:\n");
+      hwloc_debug("%s", "generated new distance matrix between groups:\n");
+      hwloc_debug("%s", "  index");
+      for(j=0; j<nbgroups; j++)
+	hwloc_debug(" % 5d", (int) j); /* print index because os_index is -1 fro Groups */
+      hwloc_debug("%s", "\n");
       for(i=0; i<nbgroups; i++) {
-          for(j=0; j<nbgroups; j++)
-              hwloc_debug("%u ", groupdistances[i][j]);
-          hwloc_debug("%s", "\n");
+	hwloc_debug("  % 5d", (int) i);
+	for(j=0; j<nbgroups; j++)
+	  hwloc_debug(" %3u", groupdistances[i][j]);
+	hwloc_debug("%s", "\n");
       }
 #endif
 
@@ -308,14 +313,13 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
     return;
 
 #ifdef HWLOC_DEBUG
-  hwloc_debug("%s", "node distance matrix:\n");
-  hwloc_debug("%s", "   ");
+  hwloc_debug("%s", "trying to group objects using distance matrix:\n");
+  hwloc_debug("%s", "  index");
   for(j=0; j<nbobjs; j++)
-    hwloc_debug(" %3u", objs[j]->os_index);
+    hwloc_debug(" % 5d", (int) objs[j]->os_index);
   hwloc_debug("%s", "\n");
-
   for(i=0; i<nbobjs; i++) {
-    hwloc_debug("%3u", objs[i]->os_index);
+    hwloc_debug("  % 5d", (int) objs[i]->os_index);
     for(j=0; j<nbobjs; j++)
       hwloc_debug(" %3u", (*distances)[i][j]);
     hwloc_debug("%s", "\n");
