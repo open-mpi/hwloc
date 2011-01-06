@@ -571,16 +571,25 @@ int hwloc_bitmap_taskset_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc
 
   current = string;
   if (!strncmp("0xf...f", current, 7)) {
+    /* infinite bitmap */
     infinite = 1;
     current += 7;
     if (*current == '\0') {
-      /* special case for infinite/full cpuset */
+      /* special case for infinite/full bitmap */
       hwloc_bitmap_fill(set);
       return 0;
     }
-  } else if (!strncmp("0x", current, 2)) {
-    current += 2;
+  } else {
+    /* finite bitmap */
+    if (!strncmp("0x", current, 2))
+      current += 2;
+    if (*current == '\0') {
+      /* special case for empty bitmap */
+      hwloc_bitmap_zero(set);
+      return 0;
+    }
   }
+  /* we know there are other characters now */
 
   chars = strlen(current);
   count = (chars * 4 + HWLOC_BITS_PER_LONG - 1) / HWLOC_BITS_PER_LONG;
