@@ -1361,7 +1361,7 @@ HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t
  * functions or thread-based OS functions, depending on which are
  * available.
  *
- * Note that it does not make sense to pass HWLOC_MEMBIND_THEAD to
+ * Note that it does not make sense to pass HWLOC_MEMBIND_THREAD to
  * this function.
  *
  * If HWLOC_MEMBIND_STRICT is specified, hwloc will check the default
@@ -1397,7 +1397,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwl
  * functions or thread-based OS functions, depending on which are
  * available.
  *
- * Note that it does not make sense to pass HWLOC_MEMBIND_THEAD to
+ * Note that it does not make sense to pass HWLOC_MEMBIND_THREAD to
  * this function.
  *
  * If HWLOC_MEMBIND_STRICT is specified, hwloc will check the default
