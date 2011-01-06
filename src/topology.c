@@ -311,11 +311,11 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
   hwloc_debug("%s", "node distance matrix:\n");
   hwloc_debug("%s", "   ");
   for(j=0; j<nbobjs; j++)
-    hwloc_debug(" %3u", (*distance_indexes)[j]);
+    hwloc_debug(" %3u", objs[j]->os_index);
   hwloc_debug("%s", "\n");
 
   for(i=0; i<nbobjs; i++) {
-    hwloc_debug("%3u", (*distance_indexes)[i]);
+    hwloc_debug("%3u", objs[i]->os_index);
     for(j=0; j<nbobjs; j++)
       hwloc_debug(" %3u", (*distances)[i][j]);
     hwloc_debug("%s", "\n");
