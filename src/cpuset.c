@@ -380,7 +380,7 @@ int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const
 
   HWLOC__BITMAP_CHECK(set);
 
-  reverse = hwloc_bitmap_alloc(); /* FIXME: optimize */
+  reverse = hwloc_bitmap_alloc(); /* FIXME: add hwloc_bitmap_alloc_size() + hwloc_bitmap_init_allocated() to avoid malloc? */
   hwloc_bitmap_not(reverse, set);
 
   /* mark the end in case we do nothing later */
@@ -467,9 +467,7 @@ int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_re
       /* starting a new range */
       if (*(next+1) == '\0') {
 	/* infinite range */
-	hwloc_bitmap_realloc_by_cpu_index(set, val);
-	hwloc_bitmap_set_range(set, val, set->ulongs_count * HWLOC_BITS_PER_LONG - 1); /* FIXME: optimize */
-	set->infinite = 1;
+	hwloc_bitmap_set_range(set, val, -1);
         break;
       } else {
 	/* normal range */
