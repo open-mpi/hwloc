@@ -531,7 +531,7 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
 #else
       res = hwloc_snprintf(tmp, size, "%08lx", val);
 #endif
-    } else if (val) {
+    } else if (val || i == -1) {
       res = hwloc_snprintf(tmp, size, "0x%lx", val);
       started = 1;
     } else {
