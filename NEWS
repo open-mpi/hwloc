@@ -23,6 +23,7 @@ Version 1.2.0
 * Rename hwloc-gather-topology.sh into hwloc-gather-topology
 * Add hwloc_bitmap_list_sscanf/snprintf/asprintf to convert between bitmaps
   and strings such as 4-5,7-9,12,15-
+* hwloc_bitmap_set/clr_range() now support infinite ranges.
 
 
 Version 1.1.0

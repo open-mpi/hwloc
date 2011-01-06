@@ -380,7 +380,7 @@ int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const
 
   HWLOC__BITMAP_CHECK(set);
 
-  reverse = hwloc_bitmap_alloc(); /* FIXME: optimize */
+  reverse = hwloc_bitmap_alloc(); /* FIXME: add hwloc_bitmap_alloc_size() + hwloc_bitmap_init_allocated() to avoid malloc? */
   hwloc_bitmap_not(reverse, set);
 
   /* mark the end in case we do nothing later */
@@ -467,9 +467,7 @@ int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_re
       /* starting a new range */
       if (*(next+1) == '\0') {
 	/* infinite range */
-	hwloc_bitmap_realloc_by_cpu_index(set, val);
-	hwloc_bitmap_set_range(set, val, set->ulongs_count * HWLOC_BITS_PER_LONG - 1); /* FIXME: optimize */
-	set->infinite = 1;
+	hwloc_bitmap_set_range(set, val, -1);
         break;
       } else {
 	/* normal range */
@@ -533,7 +531,7 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
 #else
       res = hwloc_snprintf(tmp, size, "%08lx", val);
 #endif
-    } else if (val) {
+    } else if (val || i == -1) {
       res = hwloc_snprintf(tmp, size, "0x%lx", val);
       started = 1;
     } else {
@@ -573,16 +571,25 @@ int hwloc_bitmap_taskset_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc
 
   current = string;
   if (!strncmp("0xf...f", current, 7)) {
+    /* infinite bitmap */
     infinite = 1;
     current += 7;
     if (*current == '\0') {
-      /* special case for infinite/full cpuset */
+      /* special case for infinite/full bitmap */
       hwloc_bitmap_fill(set);
       return 0;
     }
-  } else if (!strncmp("0x", current, 2)) {
-    current += 2;
+  } else {
+    /* finite bitmap */
+    if (!strncmp("0x", current, 2))
+      current += 2;
+    if (*current == '\0') {
+      /* special case for empty bitmap */
+      hwloc_bitmap_zero(set);
+      return 0;
+    }
   }
+  /* we know there are other characters now */
 
   chars = strlen(current);
   count = (chars * 4 + HWLOC_BITS_PER_LONG - 1) / HWLOC_BITS_PER_LONG;
@@ -734,6 +741,11 @@ void hwloc_bitmap_set_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsi
 
 	HWLOC__BITMAP_CHECK(set);
 
+	if (endcpu == (unsigned) -1) {
+		set->infinite = 1;
+		/* keep endcpu == -1 since this unsigned is actually larger than anything else */
+	}
+
 	if (set->infinite) {
 		/* truncate the range according to the infinite part of the bitmap */
 		if (endcpu >= set->ulongs_count * HWLOC_BITS_PER_LONG)
@@ -785,6 +797,11 @@ void hwloc_bitmap_clr_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsi
 	unsigned beginset,endset;
 
 	HWLOC__BITMAP_CHECK(set);
+
+	if (endcpu == (unsigned) -1) {
+		set->infinite = 0;
+		/* keep endcpu == -1 since this unsigned is actually larger than anything else */
+	}
 
 	if (!set->infinite) {
 		/* truncate the range according to the infinitely-unset part of the bitmap */
