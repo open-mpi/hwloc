@@ -25,7 +25,7 @@ Version 1.1.1
 * Fix some file descriptor leaks in the Linux discovery.
 * Fix the minimum width of NUMA nodes, caches and the legend in the graphical
   lstopo output.
-* Fix bitmap conversion from/to taskset-strings on 64bits architectures.
+* Various fixes to bitmap conversion from/to taskset-strings.
 * Fix configure to avoid spurious enabling of the cpuid backend.
 * Cleanup error management in hwloc-gather-topology.sh.
 * Add a manpage and usage for hwloc-gather-topology.sh on Linux.
