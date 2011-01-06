@@ -219,18 +219,18 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
  * after having done some basic sanity checks.
  */
 static void
-hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
-				      unsigned nbobjs,
-				      struct hwloc_obj **objs,
-				      unsigned *_distances,
-				      int depth)
+hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
+				   unsigned nbobjs,
+				   struct hwloc_obj **objs,
+				   unsigned *_distances,
+				   int depth)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
   unsigned groupids[nbobjs];
   unsigned nbgroups;
   unsigned i,j;
 
-  hwloc_debug("trying to group %s objects into misc objects according to physical distances\n",
+  hwloc_debug("trying to group %s objects into Group objects according to physical distances\n",
 	     hwloc_obj_type_string(objs[0]->type));
 
   if (nbobjs <= 2)
@@ -241,7 +241,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
     return;
 
   if (nbgroups == 1) {
-    hwloc_debug("%s", "ignoring misc object with all objects\n");
+    hwloc_debug("%s", "ignoring Group object with all objects\n");
     return;
   }
 
@@ -251,24 +251,24 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
       hwloc_obj_t groupobjs[nbgroups];
       unsigned groupsizes[nbgroups];
       unsigned groupdistances[nbgroups][nbgroups];
-      /* create new misc objects and record their size */
+      /* create new Group objects and record their size */
       memset(groupsizes, 0, sizeof(groupsizes));
       for(i=0; i<nbgroups; i++) {
-          /* create the misc object */
-          hwloc_obj_t misc_obj;
-          misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
-          misc_obj->cpuset = hwloc_bitmap_alloc();
-          hwloc_bitmap_zero(misc_obj->cpuset);
-          misc_obj->attr->group.depth = depth;
+          /* create the Group object */
+          hwloc_obj_t group_obj;
+          group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+          group_obj->cpuset = hwloc_bitmap_alloc();
+          hwloc_bitmap_zero(group_obj->cpuset);
+          group_obj->attr->group.depth = depth;
           for (j=0; j<nbobjs; j++)
               if (groupids[j] == i+1) {
-                  hwloc_bitmap_or(misc_obj->cpuset, misc_obj->cpuset, objs[j]->cpuset);
+                  hwloc_bitmap_or(group_obj->cpuset, group_obj->cpuset, objs[j]->cpuset);
                   groupsizes[i]++;
               }
-          hwloc_debug_1arg_bitmap("adding misc object with %u objects and cpuset %s\n",
-                                  groupsizes[i], misc_obj->cpuset);
-          hwloc_insert_object_by_cpuset(topology, misc_obj);
-          groupobjs[i] = misc_obj;
+          hwloc_debug_1arg_bitmap("adding Group object with %u objects and cpuset %s\n",
+                                  groupsizes[i], group_obj->cpuset);
+          hwloc_insert_object_by_cpuset(topology, group_obj);
+          groupobjs[i] = group_obj;
       }
 
       /* factorize distances */
@@ -293,7 +293,7 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
       }
 #endif
 
-      hwloc__setup_misc_level_from_distances(topology, nbgroups, groupobjs, (unsigned*) groupdistances, depth + 1);
+      hwloc__setup_groups_from_distances(topology, nbgroups, groupobjs, (unsigned*) groupdistances, depth + 1);
   }
 }
 
@@ -301,10 +301,10 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
  * Look at object physical distances to group them.
  */
 static void
-hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
-				      unsigned nbobjs,
-				      struct hwloc_obj **objs,
-				      unsigned *_distances)
+hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
+				  unsigned nbobjs,
+				  struct hwloc_obj **objs,
+				  unsigned *_distances)
 {
   unsigned (*distances)[nbobjs][nbobjs] = (unsigned (*)[nbobjs][nbobjs])_distances;
   unsigned i,j;
@@ -344,7 +344,7 @@ hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology,
     }
   }
 
-  hwloc__setup_misc_level_from_distances(topology, nbobjs, objs, _distances, 0);
+  hwloc__setup_groups_from_distances(topology, nbobjs, objs, _distances, 0);
 }
 
 static void
@@ -363,9 +363,9 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
        * thanks to hwloc_convert_distances_indexes_into_objects()
        */
       assert(topology->os_distances[type].distances);
-      hwloc_setup_misc_level_from_distances(topology, nbobjs,
-					    topology->os_distances[type].objs,
-					    topology->os_distances[type].distances);
+      hwloc_setup_groups_from_distances(topology, nbobjs,
+					topology->os_distances[type].objs,
+					topology->os_distances[type].distances);
     }
   }
 }
