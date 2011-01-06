@@ -26,6 +26,8 @@ Version 1.1.1
 * Fix the minimum width of NUMA nodes, caches and the legend in the graphical
   lstopo output.
 * Various fixes to bitmap conversion from/to taskset-strings.
+* Fix and document snprintf functions behavior when the buffer size is too
+  small or zero.
 * Fix configure to avoid spurious enabling of the cpuid backend.
 * Cleanup error management in hwloc-gather-topology.sh.
 * Add a manpage and usage for hwloc-gather-topology.sh on Linux.

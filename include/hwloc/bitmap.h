@@ -73,21 +73,18 @@ HWLOC_DECLSPEC void hwloc_bitmap_copy(hwloc_bitmap_t dst, hwloc_const_bitmap_t s
  *
  * Up to \p buflen characters may be written in buffer \p buf.
  *
+ * If \p buflen is 0, \p buf may safely be \c NULL.
+ *
  * \return the number of character that were actually written if not truncating,
- * or that would have been written  (not including the ending \\0).
+ * or that would have been written (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
 
 /** \brief Stringify a bitmap into a newly allocated string.
- *
- * \return the number of character that were actually written
- * (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_bitmap_asprintf(char ** strp, hwloc_const_bitmap_t bitmap);
 
 /** \brief Parse a bitmap string and stores it in bitmap \p bitmap.
- *
- * Must start and end with a digit.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_sscanf(hwloc_bitmap_t bitmap, const char * __hwloc_restrict string);
 
@@ -95,6 +92,13 @@ HWLOC_DECLSPEC int hwloc_bitmap_sscanf(hwloc_bitmap_t bitmap, const char * __hwl
  *
  * The taskset command manipulates bitmap strings that contain a single
  * (possible very long) hexadecimal number starting with 0x.
+ *
+ * Up to \p buflen characters may be written in buffer \p buf.
+ *
+ * If \p buflen is 0, \p buf may safely be \c NULL.
+ *
+ * \return the number of character that were actually written if not truncating,
+ * or that would have been written (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
 
