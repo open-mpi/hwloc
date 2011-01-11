@@ -882,12 +882,13 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * remains in the set. This way, the process will not even migrate between
  * different CPUs. Some operating systems also only support that kind of binding.
  *
- * \note Some operating systems do not provide all ways to bind processes, threads, etc and
- * the corresponding binding functions may fail. -1 is returned and errno is set
- * to ENOSYS when it is not possible to bind the requested kind of object
- * processes/threads. errno is set to EXDEV when the requested cpuset can not be
- * enforced (e.g. some systems only allow one CPU, and some other systems only
- * allow one NUMA node).
+ * \note Some operating systems do not provide all hwloc-supported
+ * mechanisms to bind processes, threads, etc. and the corresponding
+ * binding functions may fail. -1 is returned and errno is set to
+ * ENOSYS when it is not possible to bind the requested kind of object
+ * processes/threads. errno is set to EXDEV when the requested cpuset
+ * can not be enforced (e.g. some systems only allow one CPU, and some
+ * other systems only allow one NUMA node).
  *
  * The most portable version that should be preferred over the others, whenever
  * possible, is
@@ -1132,13 +1133,14 @@ typedef enum {
 					 * the hwloc_alloc*()
 					 * functions).
 					 * \hideinitializer */
-  HWLOC_MEMBIND_NEXTTOUCH =	5	/**< \brief On next touch of
-					 * each page in the existing
-					 * allocated memory, migrate
-					 * (i.e., move and re-bind) it
-					 * to the local NUMA node of
-					 * the thread where the memory
-					 * reference occurred.
+  HWLOC_MEMBIND_NEXTTOUCH =	5	/**< \brief As each page bound
+                                         * with this policy is
+                                         * touched, it is moved from
+                                         * its current location to the
+                                         * local NUMA node of the
+                                         * thread where the memory
+                                         * reference occurred (if it
+                                         * needs to be moved at all).
 					 * \hideinitializer */
 } hwloc_membind_policy_t;
 
