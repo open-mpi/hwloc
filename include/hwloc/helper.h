@@ -748,7 +748,7 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
 /** \defgroup hwlocality_helper_nodeset Nodeset Helpers
  * @{
  */
-/* \brief Get complete node set
+/** \brief Get complete node set
  *
  * \return the complete node set of memory of the system. If the
  * topology is the result of a combination of several systems, NULL is
@@ -763,7 +763,7 @@ hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
   return hwloc_get_root_obj(topology)->complete_nodeset;
 }
 
-/* \brief Get topology node set
+/** \brief Get topology node set
  *
  * \return the node set of memory of the system for which hwloc
  * provides topology information. This is equivalent to the nodeset of the
