@@ -1148,7 +1148,7 @@ typedef enum {
                                          * functions when several threads or
                                          * parts of a memory area have
                                          * differing memory binding policies.
-                                         */
+                                         * \hideinitializer */
 } hwloc_membind_policy_t;
 
 /** \brief Memory binding flags.
