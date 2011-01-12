@@ -37,6 +37,7 @@ extern "C" {
  * Set of bits represented as an opaque pointer to an internal bitmap.
  */
 typedef struct hwloc_bitmap_s * hwloc_bitmap_t;
+/** \brief a non-modifiable ::hwloc_bitmap_t */
 typedef const struct hwloc_bitmap_s * hwloc_const_bitmap_t;
 
 
