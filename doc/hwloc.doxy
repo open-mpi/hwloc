@@ -857,16 +857,24 @@ binding policy for the current process, but such operating systems often still
 provide a way to allocate data on a given node set.  Conversely, some
 operating systems support the notion of a "current" memory binding policy and do
 not permit allocating data on a specific node set without changing the
-current policy and allocate the data.  Hwloc provides both functions
-that set the current memory binding policies (if supported), and
-functions that allocate memory bound to specific node set.  By
-default, the former is not used to achieve the latter, enabling users
-to use both on operating systems where they are both supported.  For convenience,
-hwloc however also provides the hwloc_alloc_membind_policy() and
-hwloc_alloc_membind_policy_nodeset() helper functions which are
-allowed to change the current memory binding policy of the process in
-order to obtain memory binding -- even if that means having to change
-the current memory binding policy.
+current policy and allocate the data. To provide the most powerful coverage of
+these facilities, hwloc provides:
+
+<ul>
+<li>functions that set/get the current memory binding policies (if supported):
+hwloc_set/get_membind_* and hwloc_set/get_proc_membind
+<li>functions that allocate memory bound to specific node set without changing
+the current memory binding policy(if supported): hwloc_alloc_membind and
+hwloc_alloc_membind_nodeset.
+<li>helpers which, if needed, change the current memory binding policy of the
+process in order to obtain memory binding: hwloc_alloc_membind_policy() and
+hwloc_alloc_membind_policy_nodeset()
+</ul>
+
+An application can thus use the two first sets of functions if it wants to
+manage separately the global process binding policy and directed allocation,
+or use the third set of functions if it does not care about the process memory
+binding policy.
 
 See \ref hwlocality_cpubinding and \ref hwlocality_membinding for
 hwloc's API functions regarding CPU and memory binding, respectively.
