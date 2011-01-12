@@ -680,7 +680,7 @@ hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cp
 /** \defgroup hwlocality_helper_cpuset Cpuset Helpers
  * @{
  */
-/* \brief Get complete CPU set
+/** \brief Get complete CPU set
  *
  * \return the complete CPU set of logical processors of the system. If the
  * topology is the result of a combination of several systems, NULL is
@@ -695,7 +695,7 @@ hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
   return hwloc_get_root_obj(topology)->complete_cpuset;
 }
 
-/* \brief Get topology CPU set
+/** \brief Get topology CPU set
  *
  * \return the CPU set of logical processors of the system for which hwloc
  * provides topology information. This is equivalent to the cpuset of the
