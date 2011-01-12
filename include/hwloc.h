@@ -1134,7 +1134,7 @@ typedef enum {
 					 * the hwloc_alloc*()
 					 * functions).
 					 * \hideinitializer */
-  HWLOC_MEMBIND_NEXTTOUCH =	5	/**< \brief For each page bound
+  HWLOC_MEMBIND_NEXTTOUCH =	5,	/**< \brief For each page bound
                                          * with this policy, by next time
                                          * it is touched (and next time only),
                                          * it is moved from
@@ -1144,6 +1144,11 @@ typedef enum {
                                          * reference occurred (if it
                                          * needs to be moved at all).
 					 * \hideinitializer */
+  HWLOC_MEMBIND_MIXED = -1              /**< \brief Returned by get_membind
+                                         * functions when several threads or
+                                         * parts of a memory area have
+                                         * differing memory binding policies.
+                                         */
 } hwloc_membind_policy_t;
 
 /** \brief Memory binding flags.
