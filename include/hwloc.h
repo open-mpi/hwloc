@@ -1105,11 +1105,12 @@ typedef enum {
                                          * multiple NUMA nodes is
                                          * OS/system specific.
                                          * Interleaving can be useful
-                                         * when multiple threads from
+                                         * when threads distributed on
                                          * the specified NUMA nodes
-                                         * will be effectively
-                                         * splitting the memory
-                                         * amongst themselves.
+                                         * will all be accessing the whole
+                                         * memory range concurrently, since
+                                         * the interleave will then balance
+                                         * the memory references.
                                          * \hideinitializer */
   HWLOC_MEMBIND_REPLICATE =	4,	/**< \brief Replicate memory
 					 * on the given nodes; reads
@@ -1133,9 +1134,10 @@ typedef enum {
 					 * the hwloc_alloc*()
 					 * functions).
 					 * \hideinitializer */
-  HWLOC_MEMBIND_NEXTTOUCH =	5	/**< \brief As each page bound
-                                         * with this policy is
-                                         * touched, it is moved from
+  HWLOC_MEMBIND_NEXTTOUCH =	5	/**< \brief For each page bound
+                                         * with this policy, by next time
+                                         * it is touched (and next time only),
+                                         * it is moved from
                                          * its current location to the
                                          * local NUMA node of the
                                          * thread where the memory
@@ -1157,14 +1159,14 @@ typedef enum {
  */
 typedef enum {
   HWLOC_MEMBIND_PROCESS =       (1<<0), /**< \brief Set policy for all
-                                         * threads of the current
+                                         * threads of the specified
                                          * (possibly multithreaded)
                                          * process.  This flag is
                                          * mutually exclusive with
                                          * HWLOC_MEMBIND_THREAD.
                                          * \hideinitializer */
-  HWLOC_MEMBIND_THREAD =        (1<<1), /**< \brief Set policy for the
-                                         * current thread of the
+  HWLOC_MEMBIND_THREAD =        (1<<1), /**< \brief Set policy for a
+                                         * specific thread of the
                                          * current process.  This flag
                                          * is mutually exclusive with
                                          * HWLOC_MEMBIND_PROCESS.
