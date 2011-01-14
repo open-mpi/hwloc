@@ -72,21 +72,41 @@ typedef struct hwloc_topology * hwloc_topology_t;
 
 
 
-/** \defgroup hwlocality_sets Object sets
+/** \defgroup hwlocality_sets Object sets (hwloc_cpuset_t and hwloc_nodeset_t)
+ *
+ * Hwloc uses bitmasks to represent two distinct kinds of object sets:
+ * CPU sets (::hwloc_cpuset_t) and NUMA node sets (::hwloc_nodeset_t).
+ * These types are both typedefs to a common back end type
+ * (::hwloc_bitmask_t), and therefore all the hwloc bitmap functions
+ * are applicable to both ::hwloc_cpuset_t and ::hwloc_nodeset_t (see
+ * \ref hwlocality_bitmap).
+ *
+ * The rationale for having two different types is that even though
+ * the actions one wants to perform on these types are the same (e.g.,
+ * enable and disable individual items in the set/mask), they're used
+ * in very different contexts: one for specifying which processors to
+ * use and one for specifying which NUMA nodes to use.  Hence, the
+ * name difference is really just to reflect the intent of where the
+ * type is used.
+ *
  * @{
  */
 
-/** \brief A CPU set is a bitmap whose bits are set according to CPU physical OS indexes.
+/** \brief A CPU set is a bitmap whose bits are set according to CPU
+ * physical OS indexes.
  *
- * It may be consulted and modified with the bitmap API as any ::hwloc_bitmap_t (see hwloc/bitmap.h).
+ * It may be consulted and modified with the bitmap API as any
+ * ::hwloc_bitmap_t (see hwloc/bitmap.h).
  */
 typedef hwloc_bitmap_t hwloc_cpuset_t;
 /** \brief A non-modifiable ::hwloc_cpuset_t. */
 typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
 
-/** \brief A node set is a bitmap whose bits are set according to NUMA memory node physical OS indexes.
+/** \brief A node set is a bitmap whose bits are set according to NUMA
+ * memory node physical OS indexes.
  *
- * It may be consulted and modified with the bitmap API as any ::hwloc_bitmap_t (see hwloc/bitmap.h).
+ * It may be consulted and modified with the bitmap API as any
+ * ::hwloc_bitmap_t (see hwloc/bitmap.h).
  *
  * When binding memory on a system without any NUMA node
  * (when the whole memory is considered as a single memory bank),
