@@ -24,13 +24,15 @@ extern "C" {
 
 /** \defgroup hwlocality_bitmap The bitmap API
  *
- * The ::hwloc_bitmap_t type represents a set of objects, typically
- * processors (represented by ::hwloc_cpuset_t, which is a typedef for
- * ::hwloc_bitmap_t) or memory nodes (represented by
- * ::hwloc_nodeset_t, which is also a typedef for LLhwloc_bitmap_t),
- * indexed by OS physical number.
+ * The ::hwloc_bitmap_t type represents a set of objects, typically OS
+ * processors -- which may actually be hardware threads (represented
+ * by ::hwloc_cpuset_t, which is a typedef for ::hwloc_bitmap_t) -- or
+ * memory nodes (represented by ::hwloc_nodeset_t, which is also a
+ * typedef for ::hwloc_bitmap_t).  
  *
- * CPU sets and nodesets are described in \ref hwlocality_sets.
+ * <em>Both CPU and node sets are always indexed by OS physical number.</em>
+ *
+ * \note CPU sets and nodesets are described in \ref hwlocality_sets.
  *
  * A bitmap may be of infinite size.
  * @{
