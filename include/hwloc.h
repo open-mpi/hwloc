@@ -397,7 +397,11 @@ union hwloc_obj_attr_u {
  * distances are available for all objects in the machine.
  *
  * The distance may be a memory latency, as defined by the ACPI SLIT
- * specification. Such a value is never 0.
+ * specification. If so, the \p latency pointer will not be \c NULL
+ * and the pointed array will contain non-zero values.
+ *
+ * In the future, some other types of distances may be considered.
+ * In these cases, \p latency will be \c NULL.
  */
 struct hwloc_distances_s {
   unsigned relative_depth;	/**< \brief Relative depth of the considered objects
@@ -408,10 +412,12 @@ struct hwloc_distances_s {
 				 * It corresponds to the result of hwloc_get_nbobjs_inside_cpuset_by_depth. */
 
   float *latency;		/**< \brief Matrix of latencies between objects, stored as a one-dimension array.
+				 * May be \c NULL if the distances considered here are not latencies.
 				 * Values are normalized to get 1.0 as the minimal value in the matrix.
-				 * Latency from i-th to j-th object is stored in slot i*nbobjs+j. */
-  float latency_max;		/**< \brief The maximal value in the matrix. */
-  float latency_base;		/**< \brief The multiplier that should be applied to matrix values
+				 * Latency from i-th to j-th object is stored in slot i*nbobjs+j.
+				 */
+  float latency_max;		/**< \brief The maximal value in the latency matrix. */
+  float latency_base;		/**< \brief The multiplier that should be applied to latency matrix
 				 * to retrieve the original OS-provided latencies.
 				 * Usually 10 on Linux since ACPI SLIT uses 10 for local latency.
 				 */
