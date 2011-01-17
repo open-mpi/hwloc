@@ -673,7 +673,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 #endif
 
 /* Try to insert OBJ in CUR, recurse if needed */
-static void
+static int
 hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
 {
   hwloc_obj_t child, container, *cur_children, *obj_children, next_child = NULL;
@@ -682,7 +682,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
   /* Make sure we haven't gone too deep.  */
   if (!hwloc_bitmap_isincluded(obj->cpuset, cur->cpuset)) {
     fprintf(stderr,"recursion has gone too deep?!\n");
-    return;
+    return -1;
   }
 
   /* Check whether OBJ is included in some child.  */
@@ -693,12 +693,12 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
         merge_index(obj, child, os_level, signed);
 	if (obj->os_level != child->os_level) {
           fprintf(stderr, "Different OS level\n");
-          return;
+          return -1;
         }
         merge_index(obj, child, os_index, unsigned);
 	if (obj->os_index != child->os_index) {
           fprintf(stderr, "Different OS indexes\n");
-          return;
+          return -1;
         }
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
@@ -728,13 +728,13 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	    break;
 	}
 	/* Already present, no need to insert.  */
-	return;
+	return -1;
       case HWLOC_OBJ_INCLUDED:
 	if (container) {
 	  /* TODO: how to report?  */
 	  fprintf(stderr, "object included in several different objects!\n");
 	  /* We can't handle that.  */
-	  return;
+	  return -1;
 	}
 	/* This child contains OBJ.  */
 	container = child;
@@ -743,7 +743,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	/* TODO: how to report?  */
 	fprintf(stderr, "object intersection without inclusion!\n");
 	/* We can't handle that.  */
-	return;
+	return -1;
       case HWLOC_OBJ_CONTAINS:
 	/* OBJ will be above CHILD.  */
 	break;
@@ -755,8 +755,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 
   if (container) {
     /* OBJ is strictly contained is some child of CUR, go deeper.  */
-    hwloc__insert_object_by_cpuset(topology, container, obj);
-    return;
+    return hwloc__insert_object_by_cpuset(topology, container, obj);
   }
 
   /*
@@ -817,17 +816,22 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
   /* Close children lists.  */
   *obj_children = NULL;
   *cur_children = NULL;
+
+  return 0;
 }
 
 void
 hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
+  int ret;
   /* Start at the top.  */
   /* Add the cpuset to the top */
   hwloc_bitmap_or(topology->levels[0][0]->complete_cpuset, topology->levels[0][0]->complete_cpuset, obj->cpuset);
   if (obj->nodeset)
     hwloc_bitmap_or(topology->levels[0][0]->complete_nodeset, topology->levels[0][0]->complete_nodeset, obj->nodeset);
-  hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
+  ret = hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
+  if (ret < 0)
+    hwloc_free_unlinked_object(obj);
 }
 
 void
