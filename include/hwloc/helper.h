@@ -950,8 +950,8 @@ hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth)
   hwloc_obj_t root = hwloc_get_root_obj(topology);
   unsigned i;
   for(i=0; i<root->distances_count; i++)
-    if (root->distances[i].relative_depth == depth)
-      return &root->distances[i];
+    if (root->distances[i]->relative_depth == depth)
+      return root->distances[i];
   return NULL;
 }
 
@@ -976,11 +976,11 @@ hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
   while (obj) {
     unsigned i;
     for(i=0; i<obj->distances_count; i++)
-      if (obj->distances[i].relative_depth == depth - obj->depth) {
-	if (!obj->distances[i].nbobjs)
+      if (obj->distances[i]->relative_depth == depth - obj->depth) {
+	if (!obj->distances[i]->nbobjs)
 	  continue;
 	*firstp = hwloc_get_next_obj_inside_cpuset_by_depth(topology, obj->cpuset, depth, NULL)->logical_index;
-	return &obj->distances[i];
+	return obj->distances[i];
       }
     obj = obj->parent;
   }

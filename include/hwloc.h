@@ -364,7 +364,7 @@ struct hwloc_obj {
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
 
-  struct hwloc_distances_s *distances;	/**< \brief Distances between all objects at same depth below this object */
+  struct hwloc_distances_s **distances;	/**< \brief Distances between all objects at same depth below this object */
   unsigned distances_count;
 
   struct hwloc_obj_info_s *infos;	/**< \brief Array of stringified info type=name. */

@@ -290,14 +290,15 @@ hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
 
   /* store the normalized latency matrix in the root object */
   idx = root->distances_count++;
-  root->distances = realloc(root->distances, root->distances_count * sizeof(struct hwloc_distances_s));
-  root->distances[idx].relative_depth = relative_depth;
-  root->distances[idx].nbobjs = nbobjs;
-  root->distances[idx].latency = matrix = malloc(nbobjs*nbobjs*sizeof(float));
+  root->distances = realloc(root->distances, root->distances_count * sizeof(struct hwloc_distances_s *));
+  root->distances[idx] = malloc(sizeof(struct hwloc_distances_s));
+  root->distances[idx]->relative_depth = relative_depth;
+  root->distances[idx]->nbobjs = nbobjs;
+  root->distances[idx]->latency = matrix = malloc(nbobjs*nbobjs*sizeof(float));
 
-  root->distances[0].latency_base = (float) min;
+  root->distances[0]->latency_base = (float) min;
 #define NORMALIZE_LATENCY(d) ((d)/(min))
-  root->distances[0].latency_max = NORMALIZE_LATENCY(max);
+  root->distances[0]->latency_max = NORMALIZE_LATENCY(max);
   for(i=0; i<nbobjs; i++) {
     li = objs[i]->logical_index - minl;
     matrix[li*nbobjs+li] = NORMALIZE_LATENCY(osmatrix[i*nbobjs+i]);

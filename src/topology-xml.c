@@ -345,10 +345,11 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
 
     obj->distances = realloc(obj->distances, (idx+1)*sizeof(*obj->distances));
     obj->distances_count = idx+1;
-    obj->distances[idx].relative_depth = reldepth;
-    obj->distances[idx].nbobjs = nbobjs;
-    obj->distances[idx].latency = matrix = malloc(nbcells*sizeof(float));
-    obj->distances[idx].latency_base = latbase;
+    obj->distances[idx] = malloc(sizeof(**obj->distances));
+    obj->distances[idx]->relative_depth = reldepth;
+    obj->distances[idx]->nbobjs = nbobjs;
+    obj->distances[idx]->latency = matrix = malloc(nbcells*sizeof(float));
+    obj->distances[idx]->latency_base = latbase;
 
     i = 0;
     for(subnode = node->children; subnode; subnode = subnode->next)
@@ -374,7 +375,7 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
 	i++;
       }
 
-    obj->distances[idx].latency_max = latmax;
+    obj->distances[idx]->latency_max = latmax;
   }
 }
 
@@ -504,11 +505,11 @@ hwloc_xml_check_distances(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
   unsigned i=0;
   while (i<obj->distances_count) {
-    unsigned depth = obj->depth + obj->distances[i].relative_depth;
+    unsigned depth = obj->depth + obj->distances[i]->relative_depth;
     unsigned nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, obj->cpuset, depth);
-    if (nbobjs != obj->distances[i].nbobjs) {
+    if (nbobjs != obj->distances[i]->nbobjs) {
       fprintf(stderr, "ignoring invalid distance matrix with %u objs instead of %u\n",
-	      obj->distances[i].nbobjs, nbobjs);
+	      obj->distances[i]->nbobjs, nbobjs);
       memmove(&obj->distances[i], &obj->distances[i+1], (obj->distances_count-i-1)*sizeof(*obj->distances));
       obj->distances_count--;
     } else
@@ -620,18 +621,18 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
   }
 
   for(i=0; i<obj->distances_count; i++) {
-    unsigned nbobjs = obj->distances[i].nbobjs;
+    unsigned nbobjs = obj->distances[i]->nbobjs;
     unsigned j;
     dnode = xmlNewChild(node, NULL, BAD_CAST "distances", NULL);
     sprintf(tmp, "%u", nbobjs);
     xmlNewProp(dnode, BAD_CAST "nbobjs", BAD_CAST tmp);
-    sprintf(tmp, "%u", obj->distances[i].relative_depth);
+    sprintf(tmp, "%u", obj->distances[i]->relative_depth);
     xmlNewProp(dnode, BAD_CAST "relative_depth", BAD_CAST tmp);
-    sprintf(tmp, "%f", obj->distances[i].latency_base);
+    sprintf(tmp, "%f", obj->distances[i]->latency_base);
     xmlNewProp(dnode, BAD_CAST "latency_base", BAD_CAST tmp);
     for(j=0; j<nbobjs*nbobjs; j++) {
       dcnode = xmlNewChild(dnode, NULL, BAD_CAST "latency", NULL);
-      sprintf(tmp, "%f", obj->distances[i].latency[j]);
+      sprintf(tmp, "%f", obj->distances[i]->latency[j]);
       xmlNewProp(dcnode, BAD_CAST "value", BAD_CAST tmp);
     }
   }
