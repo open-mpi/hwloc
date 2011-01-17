@@ -340,3 +340,11 @@ hwloc_finalize_logical_distances(struct hwloc_topology *topology)
     }
   }
 }
+
+/* destroy a object distances structure */
+void
+hwloc_free_logical_distances(struct hwloc_distances_s * dist)
+{
+  free(dist->latency);
+  free(dist);
+}

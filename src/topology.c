@@ -482,10 +482,8 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
     free(obj->infos[i].value);
   }
   free(obj->infos);
-  for (i=0; i<obj->distances_count; i++) {
-    free(obj->distances[i]->latency);
-    free(obj->distances[i]);
-  }
+  for (i=0; i<obj->distances_count; i++)
+    hwloc_free_logical_distances(obj->distances[i]);
   free(obj->distances);
   free(obj->memory.page_types);
   free(obj->attr);
