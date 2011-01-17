@@ -1,8 +1,8 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -825,12 +825,13 @@ following environment variables.
 
 \page cpu_mem_bind CPU Binding and Memory Binding
 
-Some OSes do not systematically provide separate functions for CPU and
-Memory binding.  This means that CPU binding functions may have have
-effects on the memory binding policy.  Likewise, changing the memory
-binding policy may change the CPU binding of the current thread.  This
-is often not a problem for applications, so by default hwloc will make
-use of these functions when they provide better binding support.
+Some operating systems do not systematically provide separate
+functions for CPU and Memory binding.  This means that CPU binding
+functions may have have effects on the memory binding policy.
+Likewise, changing the memory binding policy may change the CPU
+binding of the current thread.  This is often not a problem for
+applications, so by default hwloc will make use of these functions
+when they provide better binding support.
 
 If the application does not want the CPU binding to change when
 changing the memory policy, it needs to use the
@@ -851,21 +852,32 @@ memory will not change with it.  When binding and allocating further
 memory, the CPU binding should be performed again in case the memory
 binding altered the previously-selected CPU binding.
 
-Not all OSes support the notion of a "current" memory binding policy
-for the current process, but such OSes often still provide a way to
-allocate data on a given node set.  Conversely, some OSes support the
-notion of a "current" memory binding policy and do not permit
-allocating data on a specific node set without changing the current
-policy and allocate the data.  Hwloc provides both functions that set
-the current memory binding policies (if supported), and functions that
-allocate memory bound to specific node set.  By default, the former is
-not used to achieve the latter, enabling users to use both on OSes
-where they are both supported.  For convenience, hwloc however also
-provides the hwloc_alloc_membind_policy() and
-hwloc_alloc_membind_policy_nodeset() helper functions which are
-allowed to change the current memory binding policy of the process in
-order to obtain memory binding -- even if that means having to change
-the current memory binding policy.
+Not all operating systems support the notion of a "current" memory
+binding policy for the current process, but such operating systems often still
+provide a way to allocate data on a given node set.  Conversely, some
+operating systems support the notion of a "current" memory binding policy and do
+not permit allocating data on a specific node set without changing the
+current policy and allocate the data. To provide the most powerful coverage of
+these facilities, hwloc provides:
+
+<ul>
+<li>functions that set/get the current memory binding policies (if supported):
+hwloc_set/get_membind_* and hwloc_set/get_proc_membind
+<li>functions that allocate memory bound to specific node set without changing
+the current memory binding policy(if supported): hwloc_alloc_membind and
+hwloc_alloc_membind_nodeset.
+<li>helpers which, if needed, change the current memory binding policy of the
+process in order to obtain memory binding: hwloc_alloc_membind_policy() and
+hwloc_alloc_membind_policy_nodeset()
+</ul>
+
+An application can thus use the two first sets of functions if it wants to
+manage separately the global process binding policy and directed allocation,
+or use the third set of functions if it does not care about the process memory
+binding policy.
+
+See \ref hwlocality_cpubinding and \ref hwlocality_membinding for
+hwloc's API functions regarding CPU and memory binding, respectively.
 
 \page interoperability Interoperability with other software
 
