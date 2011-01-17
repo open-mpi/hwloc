@@ -302,7 +302,7 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribut
 }
 
 static void
-hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
+hwloc__xml_import_distances_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
 {
   unsigned long reldepth = 0, nbobjs = 0;
   float latbase;
@@ -320,11 +320,11 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
 	else if (!strcmp((char *) attr->name, "latency_base"))
 	  latbase = atof((char *) value);
 	else
-	  fprintf(stderr, "ignoring unknown distmatrix attribute %s\n", (char *) attr->name);
+	  fprintf(stderr, "ignoring unknown distances attribute %s\n", (char *) attr->name);
       } else
-	fprintf(stderr, "ignoring unexpected xml distmatrix attr name `%s' with no value\n", (const char*) attr->name);
+	fprintf(stderr, "ignoring unexpected xml distances attr name `%s' with no value\n", (const char*) attr->name);
     } else {
-      fprintf(stderr, "ignoring unexpected xml distmatrix attr type %u\n", attr->type);
+      fprintf(stderr, "ignoring unexpected xml distances attr type %u\n", attr->type);
     }
   }
 
@@ -339,7 +339,7 @@ hwloc__xml_import_distmatrix_node(struct hwloc_topology *topology __hwloc_attrib
  	if (subnode->type == XML_ELEMENT_NODE)
 	  nbcells++;
     if (nbcells != nbobjs*nbobjs) {
-      fprintf(stderr, "ignoring distmatrix with %u cells instead of %lu\n", nbcells, nbobjs*nbobjs);
+      fprintf(stderr, "ignoring distances with %u cells instead of %lu\n", nbcells, nbobjs*nbobjs);
       return;
     }
 
@@ -430,7 +430,7 @@ hwloc__xml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent
 	hwloc__xml_import_info_node(topology, parent, node);
 
       } else if (!strcmp((const char*) node->name, "distances")) {
-	hwloc__xml_import_distmatrix_node(topology, parent, node);
+	hwloc__xml_import_distances_node(topology, parent, node);
 
       } else {
 	/* unknown class */
