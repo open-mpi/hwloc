@@ -510,6 +510,8 @@ hwloc_xml_check_distances(struct hwloc_topology *topology, hwloc_obj_t obj)
     if (nbobjs != obj->distances[i]->nbobjs) {
       fprintf(stderr, "ignoring invalid distance matrix with %u objs instead of %u\n",
 	      obj->distances[i]->nbobjs, nbobjs);
+      free(obj->distances[i]->latency);
+      free(obj->distances[i]);
       memmove(&obj->distances[i], &obj->distances[i+1], (obj->distances_count-i-1)*sizeof(*obj->distances));
       obj->distances_count--;
     } else
