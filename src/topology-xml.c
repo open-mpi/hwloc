@@ -501,8 +501,9 @@ hwloc_look_xml(struct hwloc_topology *topology)
 }
 
 static void
-hwloc_xml_check_distances(struct hwloc_topology *topology, hwloc_obj_t obj)
+hwloc_xml__check_distances(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
+  hwloc_obj_t child;
   unsigned i=0;
   while (i<obj->distances_count) {
     unsigned depth = obj->depth + obj->distances[i]->relative_depth;
@@ -516,13 +517,20 @@ hwloc_xml_check_distances(struct hwloc_topology *topology, hwloc_obj_t obj)
     } else
       i++;
   }
+
+  child = obj->first_child;
+  while (child != NULL) {
+    hwloc_xml__check_distances(topology, child);
+    child = child->next_sibling;
+  }
 }
 
 void
-hwloc_set_xml_distances(struct hwloc_topology *topology)
+hwloc_xml_check_distances(struct hwloc_topology *topology)
 {
-  /* nothing to actually set, but we need to validate matrix sizes */
-  hwloc_xml_check_distances(topology, topology->levels[0][0]);
+  /* now that the topology tree has been properly setup,
+   * check that our distance matrice sizes make sense */
+  hwloc_xml__check_distances(topology, topology->levels[0][0]);
 }
 
 /******************************

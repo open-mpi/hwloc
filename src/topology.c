@@ -1799,7 +1799,8 @@ hwloc_discover(struct hwloc_topology *topology)
 
 #  ifdef HWLOC_HAVE_XML
   if (topology->backend_type == HWLOC_BACKEND_XML)
-    hwloc_set_xml_distances(topology);
+    /* make sure the XML-imported distances are ok now that the tree is properly setup */
+    hwloc_xml_check_distances(topology);
 #  endif
 
   /*
