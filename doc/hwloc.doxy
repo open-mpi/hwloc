@@ -44,7 +44,7 @@ hwloc supports the following operating systems:
 
 <ul>
 <li>Linux (including old kernels not having sysfs topology
-information, with knowledge of cpusets, offline cpus, ScaleMP vSMP,
+information, with knowledge of cpusets, offline CPUs, ScaleMP vSMP,
 and Kerrighed support)</li>
 <li>Solaris</li>
 <li>AIX</li>
@@ -707,7 +707,7 @@ computed linearly by hwloc -- is not the same as the OS index.
 
 
 
-\page tools Command-line tools 
+\page tools Command-Line Tools 
 
 hwloc comes with an extensive C programming interface and several
 command line utilities. Each of them is fully documented in its own
@@ -777,7 +777,7 @@ without actually running on it.
 
 
 
-\page envvar Environment variables
+\page envvar Environment Variables
 
 The behavior of the hwloc library and tools may be tuned thanks to the
 following environment variables.
@@ -823,10 +823,10 @@ following environment variables.
 
 
 
-\page cpu_mem_bind CPU Binding and Memory Binding
+\page cpu_mem_bind CPU and Memory Binding Overview
 
 Some operating systems do not systematically provide separate
-functions for CPU and Memory binding.  This means that CPU binding
+functions for CPU and memory binding.  This means that CPU binding
 functions may have have effects on the memory binding policy.
 Likewise, changing the memory binding policy may change the CPU
 binding of the current thread.  This is often not a problem for
@@ -836,10 +836,10 @@ when they provide better binding support.
 If the application does not want the CPU binding to change when
 changing the memory policy, it needs to use the
 HWLOC_MEMBIND_NOCPUBIND flag to prevent hwloc from using OS functions
-which would change the CPU binding.  Conversely,
-HWLOC_CPUBIND_NOMEMBIND can be passed to cpu binding function to
+which would change the CPU binding.  Additionally,
+HWLOC_CPUBIND_NOMEMBIND can be passed to CPU binding function to
 prevent hwloc from using OS functions would change the memory binding
-policy.  Of course, this will thus reduce hwloc's overall support for
+policy.  Of course, using these flags will reduce hwloc's overall support for
 binding, so their use is discouraged.
 
 One can avoid using these flags but still closely control both memory
@@ -862,10 +862,10 @@ these facilities, hwloc provides:
 
 <ul>
 <li>functions that set/get the current memory binding policies (if supported):
-hwloc_set/get_membind_* and hwloc_set/get_proc_membind
+hwloc_set/get_membind_*() and hwloc_set/get_proc_membind()
 <li>functions that allocate memory bound to specific node set without changing
-the current memory binding policy(if supported): hwloc_alloc_membind and
-hwloc_alloc_membind_nodeset.
+the current memory binding policy (if supported): hwloc_alloc_membind() and
+hwloc_alloc_membind_nodeset().
 <li>helpers which, if needed, change the current memory binding policy of the
 process in order to obtain memory binding: hwloc_alloc_membind_policy() and
 hwloc_alloc_membind_policy_nodeset()
@@ -879,7 +879,7 @@ binding policy.
 See \ref hwlocality_cpubinding and \ref hwlocality_membinding for
 hwloc's API functions regarding CPU and memory binding, respectively.
 
-\page interoperability Interoperability with other software
+\page interoperability Interoperability With Other Software
 
 Although hwloc offers its own portable interface, it still may have to
 interoperate with specific or non-portable libraries that manipulate
@@ -954,7 +954,7 @@ interface with dedicated helpers.
 
 
 
-\page threadsafety Thread safety
+\page threadsafety Thread Safety
 
 Like most libraries that mainly fill data structures, hwloc is not
 thread safe but rather reentrant: all state is held in a \ref
@@ -1015,7 +1015,7 @@ For reference, \ref hwloc_topology_t modification operations include
 
 
 
-\page embed Embedding hwloc in other software
+\page embed Embedding hwloc in Other Software
 
 It can be desirable to include hwloc in a larger software package (be
 sure to check out the LICENSE file) so that users don't have to
