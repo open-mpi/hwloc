@@ -945,7 +945,7 @@ hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t
  */
 
 static __hwloc_inline const struct hwloc_distances_s *
-hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth)
+hwloc_get_whole_distance_matrix_by_depth(hwloc_topology_t topology, unsigned depth)
 {
   hwloc_obj_t root = hwloc_get_root_obj(topology);
   unsigned i;
@@ -953,6 +953,34 @@ hwloc_get_whole_distance_matrix(hwloc_topology_t topology, unsigned depth)
     if (root->distances[i]->relative_depth == depth)
       return root->distances[i];
   return NULL;
+}
+
+/** \brief Get the distances between all objects of a given type.
+ *
+ * \return a distances structure containing a matrix with all distances
+ * between all objects of the given type.
+ *
+ * Slot i+nbobjs*j contains the distance from the object of logical index i
+ * the object of logical index j.
+ *
+ * \note This function only returns matrices covering the whole topology,
+ * without any unknown distance value. Those matrices are available in
+ * top-level object of the hierarchy. Matrices of lower objects are not
+ * reported here since they cover only part of the machine.
+ *
+ * The returned structure belongs to the hwloc library. The caller should
+ * not modify or free it.
+ *
+ * \return \c NULL if no such distance matrix exists.
+ */
+
+static __hwloc_inline const struct hwloc_distances_s *
+hwloc_get_whole_distance_matrix_by_type(hwloc_topology_t topology, hwloc_obj_type_t type)
+{
+  int depth = hwloc_get_type_depth(topology, type);
+  if (depth < 0)
+    return NULL;
+  return hwloc_get_whole_distance_matrix_by_depth(topology, depth);
 }
 
 /** \brief Get distances for the given depth and covering some objects

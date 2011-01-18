@@ -171,7 +171,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
       unsigned nbobjs;
       unsigned i, j;
 
-      distances = hwloc_get_whole_distance_matrix(topology, depth);
+      distances = hwloc_get_whole_distance_matrix_by_depth(topology, depth);
       if (!distances || !distances->latency)
         continue;
       nbobjs = distances->nbobjs;
