@@ -1072,14 +1072,16 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  *                            HWLOC_MEMBIND_DEFAULT, 0);
  * \endcode
  *
- * Setting this policy will cause the OS to try to bind a new memory
- * allocation to the specified set.  As a side effect, some operating
- * systems may change the current memory binding policy; others may
- * simply ignore the policy (i.e., not bind the new memory allocation
- * at all).  Note that since HWLOC_MEMBIND_STRICT was not specified,
- * failures to bind will not be reported -- generally, only memory
- * allocation failures will be reported (e.g., even a plain malloc()
- * would have failed with ENOMEM).
+ * This will allocate some memory hopefully bound to the specified set.
+ * To do so, hwloc will possibly have to change the current memory
+ * binding policy in order to actually get the memory bound, if the OS
+ * does not provide any other way to simply allocate bound memory
+ * without changing the policy for all allocations. That is the
+ * difference with hwloc_alloc_membind(), which will never change the
+ * current memory binding policy. Note that since HWLOC_MEMBIND_STRICT
+ * was not specified, failures to bind will not be reported --
+ * generally, only memory allocation failures will be reported (e.g.,
+ * even a plain malloc() would have failed with ENOMEM).
  *
  * Each hwloc memory binding function is available in two forms: one
  * that takes a CPU set argument and another that takes a NUMA memory
