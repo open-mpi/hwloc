@@ -866,8 +866,9 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
   max_os_index = hwloc_bitmap_last(nodeset);
   if (max_os_index == (unsigned) -1)
     max_os_index = 0;
-  /* round up to the nearest multiple of BITS_PER_LONG */
-  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+  /* add 1 to convert the last os_index into a max_os_index,
+   * and round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (max_os_index + 1 + HWLOC_BITS_PER_LONG - 1) & ~(HWLOC_BITS_PER_LONG - 1);
 
   linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
   if (!linuxmask) {
