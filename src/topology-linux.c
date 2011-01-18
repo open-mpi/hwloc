@@ -886,18 +886,18 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
 static void
 hwloc_linux_membind_mask_to_nodeset(hwloc_topology_t topology __hwloc_attribute_unused,
 				    hwloc_nodeset_t nodeset,
-				    unsigned _max_os_index, const unsigned long *linuxmask)
+				    unsigned max_os_index, const unsigned long *linuxmask)
 {
-  unsigned max_os_index;
   unsigned i;
 
-  /* round up to the nearest multiple of BITS_PER_LONG */
-  max_os_index = (_max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+#ifdef HWLOC_DEBUG
+  /* max_os_index comes from hwloc_linux_find_kernel_max_numnodes() so it's a multiple of HWLOC_BITS_PER_LONG */
+  assert(!(max_os_index%HWLOC_BITS_PER_LONG));
+#endif
 
   hwloc_bitmap_zero(nodeset);
   for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
     hwloc_bitmap_set_ith_ulong(nodeset, i, linuxmask[i]);
-  /* if we don't trust the kernel, we could clear bits from _max_os_index+1 to max_os_index-1 */
 }
 #endif /* HWLOC_HAVE_SET_MEMPOLICY || HWLOC_HAVE_MBIND */
 
