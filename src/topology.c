@@ -1971,10 +1971,9 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
   topology->support.membind = malloc(sizeof(*topology->support.membind));
 
-  for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++) {
-    /* Only ignore useless cruft by default */
+  /* Only ignore useless cruft by default */
+  for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
-  }
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
   hwloc_topology_distances_init(topology);
