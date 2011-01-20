@@ -1,6 +1,6 @@
 # Copyright © 2009-2010 INRIA
 # Copyright © 2009-2010 Université Bordeaux 1
-# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 
@@ -314,9 +314,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_isset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_iszero.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_last.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_asprintf.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_snprintf.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_next.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_not.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_only.3 \
