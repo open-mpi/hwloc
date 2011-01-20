@@ -42,23 +42,22 @@ endif HWLOC_BUILD_TESTS
 
 # Only install man pages if we're building in standalone mode
 if HWLOC_BUILD_UTILS
-all_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1 hwloc-ps.1
-install_man1_pages = $(man1_pages)
+man7_pages = hwloc.7
 
 # Only install the gather-topology page if we're on Linux, but we need
 # to include it in the tarball, regardless of what OS we're building
 # on.
+base_man1_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1 hwloc-ps.1
+
+install_man1_pages = $(base_man1_pages)
 hgt_page = hwloc-gather-topology.1
 if HWLOC_HAVE_LINUX
 install_man1_pages += $(hgt_page)
 endif HWLOC_HAVE_LINUX
-all_pages += $(hgt_page)
-
-man7_pages = hwloc.7
-all_pages += $(man7_pages)
+dist_man1_pages = $(base_man1_pages) $(hgt_page)
 
 nodist_man_MANS = $(install_man1_pages) $(man7_pages)
-EXTRA_DIST += $(all_pages:.1=.1in)
+EXTRA_DIST += $(dist_man1_pages:.1=.1in) $(man7_pages:.7=.7in)
 
 .1in.1:
 	@ echo Creating $@ man page...
