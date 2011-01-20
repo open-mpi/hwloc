@@ -48,7 +48,7 @@ install_man1_pages = $(man1_pages)
 # Only install the gather-topology page if we're on Linux, but we need
 # to include it in the tarball, regardless of what OS we're building
 # on.
-hgt_page = hwloc-gather-topology.1
+hgt_page = hwloc-gather-topology.sh.1
 if HWLOC_HAVE_LINUX
 install_man1_pages += $(hgt_page)
 endif HWLOC_HAVE_LINUX
