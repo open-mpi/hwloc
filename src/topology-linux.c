@@ -1926,7 +1926,7 @@ hwloc_read_str(const char *p, const char *p1, int root_fd)
 }
 
 /* Reads first 32bit bigendian value */
-static size_t 
+static ssize_t 
 hwloc_read_unit32be(const char *p, const char *p1, uint32_t *buf, int root_fd)
 {
   size_t cb = 0;
@@ -1944,7 +1944,7 @@ typedef struct {
   unsigned int n, allocated;
   struct {
     hwloc_bitmap_t cpuset;
-    uint32_t ibm_phandle;
+    uint32_t phandle;
     uint32_t l2_cache;
     char *name;
   } *p;
@@ -1952,7 +1952,7 @@ typedef struct {
 
 static void
 add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
-    uint32_t l2_cache, uint32_t ibm_phandle, const char *name)
+    uint32_t l2_cache, uint32_t phandle, const char *name)
 {
   if (cpus->n == cpus->allocated) {
     if (!cpus->allocated)
@@ -1961,7 +1961,7 @@ add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
       cpus->allocated *= 2;
     cpus->p = realloc(cpus->p, cpus->allocated * sizeof(cpus->p[0]));
   }
-  cpus->p[cpus->n].ibm_phandle = ibm_phandle;
+  cpus->p[cpus->n].phandle = phandle;
   cpus->p[cpus->n].cpuset = (NULL == cpuset)?NULL:hwloc_bitmap_dup(cpuset);
   cpus->p[cpus->n].l2_cache = l2_cache;
   cpus->p[cpus->n].name = strdup(name);
@@ -1971,13 +1971,13 @@ add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
 /* Walks over the cache list in order to detect nested caches and CPU mask for each */
 static int
 look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
-    uint32_t ibm_phandle, unsigned int *level, hwloc_bitmap_t cpuset)
+    uint32_t phandle, unsigned int *level, hwloc_bitmap_t cpuset)
 {
   int ret = -1;
-  if ((NULL == level) || (NULL == cpuset))
+  if ((NULL == level) || (NULL == cpuset) || phandle == (uint32_t) -1)
     return ret;
   for (unsigned int i = 0; i < cpus->n; ++i) {
-    if (ibm_phandle != cpus->p[i].l2_cache)
+    if (phandle != cpus->p[i].l2_cache)
       continue;
     if (NULL != cpus->p[i].cpuset) {
       hwloc_bitmap_or(cpuset, cpuset, cpus->p[i].cpuset);
@@ -1985,7 +1985,7 @@ look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
     } else {
       ++(*level);
       if (0 == look_powerpc_device_tree_discover_cache(cpus,
-            cpus->p[i].ibm_phandle, level, cpuset))
+            cpus->p[i].phandle, level, cpuset))
         ret = 0;
     }
   }
@@ -2057,14 +2057,16 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
     if (NULL == device_type)
       continue;
 
-    uint32_t reg = -1, l2_cache = -1, ibm_phandle = -1;
+    uint32_t reg = -1, l2_cache = -1, phandle = -1;
     hwloc_read_unit32be(cpu, "reg", &reg, root_fd);
-    hwloc_read_unit32be(cpu, "l2-cache", &l2_cache, root_fd);
-    /* TODO: http://www.power.org/resources/downloads/Power_ePAPR_APPROVED_v1.0.pdf page 47-48 apparently calls it next-level-cache */
-    hwloc_read_unit32be(cpu, "ibm,phandle", &ibm_phandle, root_fd);
+    if (hwloc_read_unit32be(cpu, "next-level-cache", &l2_cache, root_fd) == -1)
+      hwloc_read_unit32be(cpu, "l2-cache", &l2_cache, root_fd);
+    if (hwloc_read_unit32be(cpu, "phandle", &phandle, root_fd) == -1)
+      if (hwloc_read_unit32be(cpu, "ibm,phandle", &phandle, root_fd) == -1)
+        hwloc_read_unit32be(cpu, "linux,phandle", &phandle, root_fd);
 
     if (0 == strcmp(device_type, "cache")) {
-      add_device_tree_cpus_node(&cpus, NULL, l2_cache, ibm_phandle, dirent->d_name); 
+      add_device_tree_cpus_node(&cpus, NULL, l2_cache, phandle, dirent->d_name); 
     }
     else if (0 == strcmp(device_type, "cpu")) {
       /* Found CPU */
@@ -2087,7 +2089,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
       if (NULL == cpuset) {
         hwloc_debug("%s has no \"reg\" property, skipping\n", cpu);
       } else {
-        add_device_tree_cpus_node(&cpus, cpuset, l2_cache, ibm_phandle, dirent->d_name); 
+        add_device_tree_cpus_node(&cpus, cpuset, l2_cache, phandle, dirent->d_name); 
 
         /* Add core */
         struct hwloc_obj *core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
@@ -2113,7 +2115,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 #ifdef HWLOC_DEBUG
   for (unsigned int i = 0; i < cpus.n; ++i) {
     hwloc_debug("%i: %s  ibm,phandle=%08X l2_cache=%08X ",
-      i, cpus.p[i].name, cpus.p[i].ibm_phandle, cpus.p[i].l2_cache);
+      i, cpus.p[i].name, cpus.p[i].phandle, cpus.p[i].l2_cache);
     if (NULL == cpus.p[i].cpuset) {
       hwloc_debug("%s\n", "no cpuset");
     } else {
@@ -2132,7 +2134,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
     unsigned int level = 2;
     hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
     if (0 == look_powerpc_device_tree_discover_cache(&cpus,
-          cpus.p[i].ibm_phandle, &level, cpuset)) {
+          cpus.p[i].phandle, &level, cpuset)) {
 
       char cpu[sizeof(ofroot) + 1 + strlen(cpus.p[i].name) + 1];
       snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, cpus.p[i].name);

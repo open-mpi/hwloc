@@ -24,6 +24,8 @@ Version 1.2.0
 * Add hwloc_bitmap_list_sscanf/snprintf/asprintf to convert between bitmaps
   and strings such as 4-5,7-9,12,15-
 * hwloc_bitmap_set/clr_range() now support infinite ranges.
+* Support standard device-tree phandle, to get better support on e.g. ARM
+  systems providing it.
 
 
 Version 1.1.1
