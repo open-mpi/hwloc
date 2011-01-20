@@ -74,10 +74,10 @@ typedef struct hwloc_topology * hwloc_topology_t;
 
 /** \defgroup hwlocality_sets Object sets (hwloc_cpuset_t and hwloc_nodeset_t)
  *
- * Hwloc uses bitmasks to represent two distinct kinds of object sets:
+ * Hwloc uses bitmaps to represent two distinct kinds of object sets:
  * CPU sets (::hwloc_cpuset_t) and NUMA node sets (::hwloc_nodeset_t).
  * These types are both typedefs to a common back end type
- * (::hwloc_bitmask_t), and therefore all the hwloc bitmap functions
+ * (::hwloc_bitmap_t), and therefore all the hwloc bitmap functions
  * are applicable to both ::hwloc_cpuset_t and ::hwloc_nodeset_t (see
  * \ref hwlocality_bitmap).
  *
@@ -239,7 +239,7 @@ struct hwloc_obj_memory_s {
 
 /** \brief Structure of a topology object
  *
- * Applications mustn't modify any field except ::userdata .
+ * Applications must not modify any field except hwloc_obj.userdata.
  */
 struct hwloc_obj {
   /* physical information */

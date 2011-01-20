@@ -108,37 +108,37 @@ if HWLOC_BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
-	-sed -i -e 's/__hwloc_restrict/restrict/g' \
+	-$(SED_I) -e 's/__hwloc_restrict/restrict/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g' \
+	-$(SED_I) -e 's/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/__hwloc_attribute_unused//g' \
+	-$(SED_I) -e 's/__hwloc_attribute_unused//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-unused//g' \
+	-$(SED_I) -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-unused//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/__hwloc_attribute_malloc//g' \
+	-$(SED_I) -e 's/__hwloc_attribute_malloc//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-malloc//g' \
+	-$(SED_I) -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-malloc//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/__hwloc_attribute_const//g' \
+	-$(SED_I) -e 's/__hwloc_attribute_const//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-const//g' \
+	-$(SED_I) -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-const//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/__hwloc_attribute_pure//g' \
+	-$(SED_I) -e 's/__hwloc_attribute_pure//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-pure//g' \
+	-$(SED_I) -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-pure//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/__hwloc_attribute_deprecated//g' \
+	-$(SED_I) -e 's/__hwloc_attribute_deprecated//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-deprecated//g' \
+	-$(SED_I) -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-deprecated//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/HWLOC_DECLSPEC//g' \
+	-$(SED_I) -e 's/HWLOC_DECLSPEC//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/HWLOC\\_\\-DECLSPEC//g' \
+	-$(SED_I) -e 's/HWLOC\\_\\-DECLSPEC//g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/__hwloc_inline/inline/g' \
+	-$(SED_I) -e 's/__hwloc_inline/inline/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
-	-sed -i -e 's/\\_\\-\\_\\-hwloc\\_\\-inline/inline/g' \
+	-$(SED_I) -e 's/\\_\\-\\_\\-hwloc\\_\\-inline/inline/g' \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
 	@echo "Work-around spurious leading _ in doxygen filenames..."
 	-(cd $(DOX_DIR)/man/man3 ; \
@@ -200,7 +200,7 @@ $(DOX_A4PDF): $(DOX_TAG)
 $(DOX_LETTERPDF): $(DOX_TAG)
 	cd $(DOX_LATEX_DIR); \
 	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
-	sed -e 's/a4paper/letterpaper/g' -e 's/\\usepackage{a4wide}//' refman.tex > letter-refman.tex; \
+	$(SED) -e 's/a4paper/letterpaper/g' -e 's/\\usepackage{a4wide}//' refman.tex > letter-refman.tex; \
 	$(PDFLATEX) letter-refman.tex; \
 	$(MAKEINDEX) letter-refman.idx; \
 	$(PDFLATEX) letter-refman.tex; \
@@ -314,6 +314,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_isset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_iszero.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_last.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_asprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_snprintf.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bitmap_list_sscanf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_next.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_not.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_only.3 \
@@ -566,7 +569,7 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
 if HWLOC_BUILD_README
 doc readme: all $(HWLOC_top_srcdir)/README
 $(HWLOC_top_srcdir)/README: $(DOX_HTML_DIR)
-	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_DIR)/index.html | sed -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
+	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_DIR)/index.html | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
 else
 doc readme: no-build-readme
 $(HWLOC_top_srcdir)/README: no-build-readme

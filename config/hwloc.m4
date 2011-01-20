@@ -236,7 +236,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
         AC_MSG_WARN([***********************************************************])
         AC_MSG_WARN([*** hwloc does not support this system.])
         AC_MSG_WARN([*** hwloc will *attempt* to build (but it may not work).])
-        AC_MSG_WARN([*** hwloc's run-time results may be reduced to showing just one processor.])
+        AC_MSG_WARN([*** hwloc run-time results may be reduced to showing just one processor.])
         AC_MSG_WARN([*** You have been warned.])
         AC_MSG_WARN([*** Pausing to give you time to read this message...])
         AC_MSG_WARN([***********************************************************])
@@ -281,7 +281,7 @@ AC_DEFUN([HWLOC_SETUP_CORE_AFTER_C99],[
     _HWLOC_CHECK_VISIBILITY
     HWLOC_CFLAGS="$HWLOC_FLAGS $HWLOC_VISIBILITY_CFLAGS"
     AS_IF([test "$HWLOC_VISIBILITY_CFLAGS" != ""],
-          [AC_MSG_WARN(["$HWLOC_VISIBILITY_CFLAGS" has been added to hwloc's CFLAGS])])
+          [AC_MSG_WARN(["$HWLOC_VISIBILITY_CFLAGS" has been added to the hwloc CFLAGS])])
 
     #
     # Check for inline compatibility support
