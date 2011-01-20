@@ -91,5 +91,5 @@ uninstall-local:
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/hwloc-mask.1
 
 distclean-local:
-	rm -f $(man1_pages) $(man7_pages)
+	rm -f $(nodist_man_MANS)
 endif
