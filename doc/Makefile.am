@@ -569,7 +569,7 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
 if HWLOC_BUILD_README
 doc readme: all $(HWLOC_top_srcdir)/README
 $(HWLOC_top_srcdir)/README: $(DOX_HTML_DIR)
-	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_DIR)/index.html | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
+	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_DIR)/index.html | $(SED) -e 's/^   //' | $(SED) -n -e '/^Introduction$$/,$$p' > $@
 else
 doc readme: no-build-readme
 $(HWLOC_top_srcdir)/README: no-build-readme
