@@ -2060,6 +2060,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
     uint32_t reg = -1, l2_cache = -1, ibm_phandle = -1;
     hwloc_read_unit32be(cpu, "reg", &reg, root_fd);
     hwloc_read_unit32be(cpu, "l2-cache", &l2_cache, root_fd);
+    /* TODO: http://www.power.org/resources/downloads/Power_ePAPR_APPROVED_v1.0.pdf page 47-48 apparently calls it next-level-cache */
     hwloc_read_unit32be(cpu, "ibm,phandle", &ibm_phandle, root_fd);
 
     if (0 == strcmp(device_type, "cache")) {
