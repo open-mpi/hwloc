@@ -327,5 +327,6 @@ extern void hwloc_store_distances_from_env(struct hwloc_topology *topology);
 extern void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology);
 extern void hwloc_finalize_logical_distances(struct hwloc_topology *topology);
 extern void hwloc_free_logical_distances(struct hwloc_distances_s *dist);
+extern void hwloc_group_by_distances(struct hwloc_topology *topology);
 
 #endif /* HWLOC_PRIVATE_H */
