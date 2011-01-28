@@ -19,6 +19,10 @@ in v0.9.1).
 
 Version 1.2.0
 -------------
+* Expose latency matrices in the API as an array of distance structures
+  within objects. Add several helpers to find distances.
+* Add hwloc_topology_set_distance_matrix() to provide a matrix of
+  distances between a given set of objects.
 * x86 backend (for freebsd): add x2APIC support
 * Rename hwloc-gather-topology.sh into hwloc-gather-topology
 * Add hwloc_bitmap_list_sscanf/snprintf/asprintf to convert between bitmaps
