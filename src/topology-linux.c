@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2010 IBM
  * See COPYING in top-level directory.
@@ -866,8 +866,9 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
   max_os_index = hwloc_bitmap_last(nodeset);
   if (max_os_index == (unsigned) -1)
     max_os_index = 0;
-  /* round up to the nearest multiple of BITS_PER_LONG */
-  max_os_index = (max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+  /* add 1 to convert the last os_index into a max_os_index,
+   * and round up to the nearest multiple of BITS_PER_LONG */
+  max_os_index = (max_os_index + 1 + HWLOC_BITS_PER_LONG - 1) & ~(HWLOC_BITS_PER_LONG - 1);
 
   linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
   if (!linuxmask) {
@@ -886,18 +887,18 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
 static void
 hwloc_linux_membind_mask_to_nodeset(hwloc_topology_t topology __hwloc_attribute_unused,
 				    hwloc_nodeset_t nodeset,
-				    unsigned _max_os_index, const unsigned long *linuxmask)
+				    unsigned max_os_index, const unsigned long *linuxmask)
 {
-  unsigned max_os_index;
   unsigned i;
 
-  /* round up to the nearest multiple of BITS_PER_LONG */
-  max_os_index = (_max_os_index + HWLOC_BITS_PER_LONG) & ~(HWLOC_BITS_PER_LONG - 1);
+#ifdef HWLOC_DEBUG
+  /* max_os_index comes from hwloc_linux_find_kernel_max_numnodes() so it's a multiple of HWLOC_BITS_PER_LONG */
+  assert(!(max_os_index%HWLOC_BITS_PER_LONG));
+#endif
 
   hwloc_bitmap_zero(nodeset);
   for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
     hwloc_bitmap_set_ith_ulong(nodeset, i, linuxmask[i]);
-  /* if we don't trust the kernel, we could clear bits from _max_os_index+1 to max_os_index-1 */
 }
 #endif /* HWLOC_HAVE_SET_MEMPOLICY || HWLOC_HAVE_MBIND */
 
@@ -1726,7 +1727,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
   hwloc_parse_meminfo_info(topology, meminfopath,
 			   hwloc_snprintf(NULL, 0, "Node %d ", node),
 			   &memory->local_memory,
-			   &meminfo_hugepages_count, &meminfo_hugepages_size,
+			   &meminfo_hugepages_count, NULL /* no hugepage size in node-specific meminfo */,
 			   memory->page_types == NULL);
 
   if (memory->page_types) {
@@ -1735,12 +1736,14 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
       /* read from node%d/hugepages/hugepages-%skB/nr_hugepages */
       hwloc_parse_hugepages_info(topology, path, memory, &remaining_local_memory);
     } else {
+      /* get hugepage size from machine-specific meminfo since there is no size in node-specific meminfo,
+       * hwloc_get_procfs_meminfo_info must have been called earlier */
+      meminfo_hugepages_size = topology->levels[0][0]->memory.page_types[1].size;
       /* use what we found in meminfo */
-      /* hwloc_get_procfs_meminfo_info must have been called earlier */
       if (meminfo_hugepages_size) {
         memory->page_types[1].count = meminfo_hugepages_count;
-        memory->page_types[1].size = topology->levels[0][0]->memory.page_types[1].size;
-        remaining_local_memory -= meminfo_hugepages_count * memory->page_types[1].size;
+        memory->page_types[1].size = meminfo_hugepages_size;
+        remaining_local_memory -= meminfo_hugepages_count * meminfo_hugepages_size;
       } else {
         memory->page_types_len = 1;
       }
@@ -1929,7 +1932,7 @@ hwloc_read_str(const char *p, const char *p1, int root_fd)
 }
 
 /* Reads first 32bit bigendian value */
-static size_t 
+static ssize_t 
 hwloc_read_unit32be(const char *p, const char *p1, uint32_t *buf, int root_fd)
 {
   size_t cb = 0;
@@ -1947,7 +1950,7 @@ typedef struct {
   unsigned int n, allocated;
   struct {
     hwloc_bitmap_t cpuset;
-    uint32_t ibm_phandle;
+    uint32_t phandle;
     uint32_t l2_cache;
     char *name;
   } *p;
@@ -1955,7 +1958,7 @@ typedef struct {
 
 static void
 add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
-    uint32_t l2_cache, uint32_t ibm_phandle, const char *name)
+    uint32_t l2_cache, uint32_t phandle, const char *name)
 {
   if (cpus->n == cpus->allocated) {
     if (!cpus->allocated)
@@ -1964,7 +1967,7 @@ add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
       cpus->allocated *= 2;
     cpus->p = realloc(cpus->p, cpus->allocated * sizeof(cpus->p[0]));
   }
-  cpus->p[cpus->n].ibm_phandle = ibm_phandle;
+  cpus->p[cpus->n].phandle = phandle;
   cpus->p[cpus->n].cpuset = (NULL == cpuset)?NULL:hwloc_bitmap_dup(cpuset);
   cpus->p[cpus->n].l2_cache = l2_cache;
   cpus->p[cpus->n].name = strdup(name);
@@ -1974,13 +1977,13 @@ add_device_tree_cpus_node(device_tree_cpus_t *cpus, hwloc_bitmap_t cpuset,
 /* Walks over the cache list in order to detect nested caches and CPU mask for each */
 static int
 look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
-    uint32_t ibm_phandle, unsigned int *level, hwloc_bitmap_t cpuset)
+    uint32_t phandle, unsigned int *level, hwloc_bitmap_t cpuset)
 {
   int ret = -1;
-  if ((NULL == level) || (NULL == cpuset))
+  if ((NULL == level) || (NULL == cpuset) || phandle == (uint32_t) -1)
     return ret;
   for (unsigned int i = 0; i < cpus->n; ++i) {
-    if (ibm_phandle != cpus->p[i].l2_cache)
+    if (phandle != cpus->p[i].l2_cache)
       continue;
     if (NULL != cpus->p[i].cpuset) {
       hwloc_bitmap_or(cpuset, cpuset, cpus->p[i].cpuset);
@@ -1988,7 +1991,7 @@ look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
     } else {
       ++(*level);
       if (0 == look_powerpc_device_tree_discover_cache(cpus,
-            cpus->p[i].ibm_phandle, level, cpuset))
+            cpus->p[i].phandle, level, cpuset))
         ret = 0;
     }
   }
@@ -2060,13 +2063,16 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
     if (NULL == device_type)
       continue;
 
-    uint32_t reg = -1, l2_cache = -1, ibm_phandle = -1;
+    uint32_t reg = -1, l2_cache = -1, phandle = -1;
     hwloc_read_unit32be(cpu, "reg", &reg, root_fd);
-    hwloc_read_unit32be(cpu, "l2-cache", &l2_cache, root_fd);
-    hwloc_read_unit32be(cpu, "ibm,phandle", &ibm_phandle, root_fd);
+    if (hwloc_read_unit32be(cpu, "next-level-cache", &l2_cache, root_fd) == -1)
+      hwloc_read_unit32be(cpu, "l2-cache", &l2_cache, root_fd);
+    if (hwloc_read_unit32be(cpu, "phandle", &phandle, root_fd) == -1)
+      if (hwloc_read_unit32be(cpu, "ibm,phandle", &phandle, root_fd) == -1)
+        hwloc_read_unit32be(cpu, "linux,phandle", &phandle, root_fd);
 
     if (0 == strcmp(device_type, "cache")) {
-      add_device_tree_cpus_node(&cpus, NULL, l2_cache, ibm_phandle, dirent->d_name); 
+      add_device_tree_cpus_node(&cpus, NULL, l2_cache, phandle, dirent->d_name); 
     }
     else if (0 == strcmp(device_type, "cpu")) {
       /* Found CPU */
@@ -2089,7 +2095,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
       if (NULL == cpuset) {
         hwloc_debug("%s has no \"reg\" property, skipping\n", cpu);
       } else {
-        add_device_tree_cpus_node(&cpus, cpuset, l2_cache, ibm_phandle, dirent->d_name); 
+        add_device_tree_cpus_node(&cpus, cpuset, l2_cache, phandle, dirent->d_name); 
 
         /* Add core */
         struct hwloc_obj *core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
@@ -2115,7 +2121,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 #ifdef HWLOC_DEBUG
   for (unsigned int i = 0; i < cpus.n; ++i) {
     hwloc_debug("%i: %s  ibm,phandle=%08X l2_cache=%08X ",
-      i, cpus.p[i].name, cpus.p[i].ibm_phandle, cpus.p[i].l2_cache);
+      i, cpus.p[i].name, cpus.p[i].phandle, cpus.p[i].l2_cache);
     if (NULL == cpus.p[i].cpuset) {
       hwloc_debug("%s\n", "no cpuset");
     } else {
@@ -2134,7 +2140,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
     unsigned int level = 2;
     hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
     if (0 == look_powerpc_device_tree_discover_cache(&cpus,
-          cpus.p[i].ibm_phandle, &level, cpuset)) {
+          cpus.p[i].phandle, &level, cpuset)) {
 
       char cpu[sizeof(ofroot) + 1 + strlen(cpus.p[i].name) + 1];
       snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, cpus.p[i].name);

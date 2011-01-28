@@ -74,10 +74,10 @@ typedef struct hwloc_topology * hwloc_topology_t;
 
 /** \defgroup hwlocality_sets Object sets (hwloc_cpuset_t and hwloc_nodeset_t)
  *
- * Hwloc uses bitmasks to represent two distinct kinds of object sets:
+ * Hwloc uses bitmaps to represent two distinct kinds of object sets:
  * CPU sets (::hwloc_cpuset_t) and NUMA node sets (::hwloc_nodeset_t).
  * These types are both typedefs to a common back end type
- * (::hwloc_bitmask_t), and therefore all the hwloc bitmap functions
+ * (::hwloc_bitmap_t), and therefore all the hwloc bitmap functions
  * are applicable to both ::hwloc_cpuset_t and ::hwloc_nodeset_t (see
  * \ref hwlocality_bitmap).
  *
@@ -239,7 +239,7 @@ struct hwloc_obj_memory_s {
 
 /** \brief Structure of a topology object
  *
- * Applications mustn't modify any field except ::userdata .
+ * Applications must not modify any field except hwloc_obj.userdata.
  */
 struct hwloc_obj {
   /* physical information */
@@ -1121,29 +1121,33 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  *                            HWLOC_MEMBIND_DEFAULT, 0);
  * \endcode
  *
- * Setting this policy will cause the OS to try to bind all new memory
- * allocations to the specified set.  Some operating systems will
- * dutifully change the current memory binding policy, but others will
- * simply ignore the policy (i.e., not bind new memory allocations at
- * all).  Note that since HWLOC_MEMBIND_STRICT was not specified,
- * failures to bind will not be reported -- generally, only memory
- * allocation failures will be reported (e.g., even a plain malloc()
- * would have failed with ENOMEM).
+ * This will allocate some memory hopefully bound to the specified set.
+ * To do so, hwloc will possibly have to change the current memory
+ * binding policy in order to actually get the memory bound, if the OS
+ * does not provide any other way to simply allocate bound memory
+ * without changing the policy for all allocations. That is the
+ * difference with hwloc_alloc_membind(), which will never change the
+ * current memory binding policy. Note that since HWLOC_MEMBIND_STRICT
+ * was not specified, failures to bind will not be reported --
+ * generally, only memory allocation failures will be reported (e.g.,
+ * even a plain malloc() would have failed with ENOMEM).
  *
- * Each hwloc binding function is available in two forms: one that
- * takes a CPU set argument and another that takes a NUMA memory node
- * set argument.  The names of the latter form end with _nodeset.  It
- * is also possible to convert between CPU set and node set using
- * ::hwloc_cpuset_to_nodeset or ::hwloc_cpuset_from_nodeset.
+ * Each hwloc memory binding function is available in two forms: one
+ * that takes a CPU set argument and another that takes a NUMA memory
+ * node set argument (see \ref hwlocality_sets and \ref
+ * hwlocality_bitmap for a discussion of CPU sets and NUMA memory node
+ * sets).  The names of the latter form end with _nodeset.  It is also
+ * possible to convert between CPU set and node set using
+ * hwloc_cpuset_to_nodeset() or hwloc_cpuset_from_nodeset().
  *
- * \note On some operating systems, memory binding affect the CPU
- * binding, see ::HWLOC_MEMBIND_NOCPUBIND 
+ * \note On some operating systems, memory binding affects the CPU
+ * binding; see ::HWLOC_MEMBIND_NOCPUBIND 
  * @{
  */
 
 /** \brief Memory binding policy.
  *
- * These can be used to choose the binding policy.  Only one policy can
+ * These constants can be used to choose the binding policy.  Only one policy can
  * be used at a time (i.e., the values cannot be OR'ed together).
  *
  * \note Not all systems support all kinds of binding.  See the
@@ -1164,7 +1168,7 @@ typedef enum {
                                          * node of the first thread
                                          * that touches it.
                                          * \hideinitializer */
-  HWLOC_MEMBIND_BIND =		2,	/**< \brief Allocate memory on the given nodes.
+  HWLOC_MEMBIND_BIND =		2,	/**< \brief Allocate memory on the specified nodes.
 					 * \hideinitializer */
   HWLOC_MEMBIND_INTERLEAVE =	3,	/**< \brief Allocate memory on
                                          * the given nodes in an
@@ -1174,7 +1178,7 @@ typedef enum {
                                          * multiple NUMA nodes is
                                          * OS/system specific.
                                          * Interleaving can be useful
-                                         * when threads distributed on
+                                         * when threads distributed across
                                          * the specified NUMA nodes
                                          * will all be accessing the whole
                                          * memory range concurrently, since
@@ -1213,8 +1217,8 @@ typedef enum {
                                          * reference occurred (if it
                                          * needs to be moved at all).
 					 * \hideinitializer */
-  HWLOC_MEMBIND_MIXED = -1              /**< \brief Returned by get_membind
-                                         * functions when several threads or
+  HWLOC_MEMBIND_MIXED = -1              /**< \brief Returned by hwloc_get_membind*()
+                                         * functions when multiple threads or
                                          * parts of a memory area have
                                          * differing memory binding policies.
                                          * \hideinitializer */
@@ -1528,7 +1532,6 @@ HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void 
  *
  * If HWLOC_MEMBIND_STRICT is not specified, \p nodeset is set to the
  * union of all NUMA node(s) containing pages in the address range.
- *
  * If all pages in the target have the same policy, it is returned in
  * \p policy.  Otherwise, \p policy is set to HWLOC_MEMBIND_MIXED.
  *
@@ -1555,7 +1558,6 @@ HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, con
  * If HWLOC_MEMBIND_STRICT is not specified, the union of all NUMA
  * node(s) containing pages in the address range is calculated.  \p
  * cpuset is then set to the CPUs near the NUMA node(s) in this union.
- *
  * If all pages in the target have the same policy, it is returned in
  * \p policy.  Otherwise, \p policy is set to HWLOC_MEMBIND_MIXED.
  *

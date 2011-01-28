@@ -42,32 +42,40 @@ endif HWLOC_BUILD_TESTS
 
 # Only install man pages if we're building in standalone mode
 if HWLOC_BUILD_UTILS
-man1_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1 hwloc-ps.1
-if HWLOC_HAVE_LINUX
-man1_pages += hwloc-gather-topology.1
-endif HWLOC_HAVE_LINUX
 man7_pages = hwloc.7
-man_pages = $(man7_pages) $(man1_pages)
-EXTRA_DIST += $(man1_pages:.1=.1in) $(man7_pages:.7=.7in)
-nodist_man_MANS = $(man_pages)
+EXTRA_DIST += $(man7_pages:.7=.7in)
+nodist_man_MANS = $(man7_pages)
+
+man1_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1 hwloc-ps.1
+EXTRA_DIST += $(man1_pages:.1=.1in)
+nodist_man_MANS += $(man1_pages)
+
+# Only install the gather-topology page if we're on Linux, but we need
+# to include it in the tarball, regardless of what OS we're building
+# on.
+hgt_page = hwloc-gather-topology.1
+EXTRA_DIST += $(hgt_page:.1=.1in)
+if HWLOC_HAVE_LINUX
+nodist_man_MANS += $(hgt_page)
+endif HWLOC_HAVE_LINUX
 
 .1in.1:
 	@ echo Creating $@ man page...
-	@ sed -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
+	@ $(SED) -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
 	  -e 's/#PACKAGE_VERSION#/@PACKAGE_VERSION@/g' \
 	  -e 's/#HWLOC_DATE#/@HWLOC_RELEASE_DATE@/g' \
 	  > $@ < $<
 
 .3in.3:
 	@ echo Creating $@ man page...
-	@ sed -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
+	@ $(SED) -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
 	  -e 's/#PACKAGE_VERSION#/@PACKAGE_VERSION@/g' \
 	  -e 's/#HWLOC_DATE#/@HWLOC_RELEASE_DATE@/g' \
 	  > $@ < $<
 
 .7in.7:
 	@ echo Creating $@ man page...
-	@ sed -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
+	@ $(SED) -e 's/#PACKAGE_NAME#/@PACKAGE_NAME@/g' \
 	  -e 's/#PACKAGE_VERSION#/@PACKAGE_VERSION@/g' \
 	  -e 's/#HWLOC_DATE#/@HWLOC_RELEASE_DATE@/g' \
 	  > $@ < $<
@@ -83,5 +91,5 @@ uninstall-local:
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/hwloc-mask.1
 
 distclean-local:
-	rm -f $(man_pages)
+	rm -f $(nodist_man_MANS)
 endif

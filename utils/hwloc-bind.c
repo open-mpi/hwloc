@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
       if (err) {
 	const char *errmsg = strerror(errno);
         if (pid)
-	  fprintf(stderr, "hwloc_get_proc_cpubind %d failed (errno %d %s)\n", pid, errno, errmsg);
+          fprintf(stderr, "hwloc_get_proc_cpubind %ld failed (errno %d %s)\n", (long) pid, errno, errmsg);
         else
 	  fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
 	return EXIT_FAILURE;
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
       if (err) {
 	const char *errmsg = strerror(errno);
         if (pid)
-	  fprintf(stderr, "hwloc_get_proc_membind %d failed (errno %d %s)\n", pid, errno, errmsg);
+          fprintf(stderr, "hwloc_get_proc_membind %ld failed (errno %d %s)\n", (long) pid, errno, errmsg);
         else
 	  fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
 	return EXIT_FAILURE;
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
       case HWLOC_MEMBIND_INTERLEAVE: policystr = "interleave"; break;
       case HWLOC_MEMBIND_REPLICATE: policystr = "replicate"; break;
       case HWLOC_MEMBIND_NEXTTOUCH: policystr = "nexttouch"; break;
-      default: fprintf(stderr, "unknown memory policy %u\n", policy); assert(0); break;
+      default: fprintf(stderr, "unknown memory policy %d\n", policy); assert(0); break;
       }
     }
     if (policystr)
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
       char *s;
       hwloc_bitmap_asprintf(&s, membind_set);
       if (pid)
-        fprintf(stderr, "hwloc_set_proc_membind %s %d failed (errno %d %s)\n", s, pid, bind_errno, errmsg);
+        fprintf(stderr, "hwloc_set_proc_membind %s %ld failed (errno %d %s)\n", s, (long) pid, bind_errno, errmsg);
       else
         fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
       char *s;
       hwloc_bitmap_asprintf(&s, cpubind_set);
       if (pid)
-        fprintf(stderr, "hwloc_set_proc_cpubind %s %d failed (errno %d %s)\n", s, pid, bind_errno, errmsg);
+        fprintf(stderr, "hwloc_set_proc_cpubind %s %ld failed (errno %d %s)\n", s, (long) pid, bind_errno, errmsg);
       else
         fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
