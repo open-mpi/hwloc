@@ -4,6 +4,72 @@
   <object type="Machine" os_level="-1" os_index="0" cpuset="0x0000f06f" complete_cpuset="0x0000ffff" online_cpuset="0x0000ffef" allowed_cpuset="0x0000f07f" nodeset="0x000000ff" complete_nodeset="0x000000ff" allowed_nodeset="0x0000003e">
     <info name="DMIBoardVendor" value="TYAN Computer Corp"/>
     <info name="DMIBoardName" value="S4881 "/>
+    <distances nbobjs="8" relative_depth="1" latency_base="10.000000">
+      <latency value="1.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="1.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="1.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="1.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="1.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="1.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="1.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="2.000000"/>
+      <latency value="1.000000"/>
+    </distances>
     <object type="NUMANode" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x0">
       <object type="Socket" os_level="-1" os_index="0" cpuset="0x00000003" complete_cpuset="0x00000003" online_cpuset="0x00000003" allowed_cpuset="0x00000003" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x0">
         <object type="Cache" os_level="-1" cpuset="0x00000001" complete_cpuset="0x00000001" online_cpuset="0x00000001" allowed_cpuset="0x00000001" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x0" cache_size="1048576" depth="2" cache_linesize="0">

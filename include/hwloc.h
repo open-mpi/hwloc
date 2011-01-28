@@ -364,6 +364,9 @@ struct hwloc_obj {
                                           * \note Its value must not be changed, hwloc_bitmap_dup must be used instead.
                                           */
 
+  struct hwloc_distances_s **distances;	/**< \brief Distances between all objects at same depth below this object */
+  unsigned distances_count;
+
   struct hwloc_obj_info_s *infos;	/**< \brief Array of stringified info type=name. */
   unsigned infos_count;			/**< \brief Size of infos array. */
 };
@@ -384,6 +387,40 @@ union hwloc_obj_attr_u {
   struct hwloc_group_attr_s {
     unsigned depth;			  /**< \brief Depth of group object */
   } group;
+};
+
+/** \brief Distances between objects
+ *
+ * One object may contain a distance structure describing distances
+ * between all its descendants at a given relative depth. If the
+ * containing object is the root object of the topology, then the
+ * distances are available for all objects in the machine.
+ *
+ * The distance may be a memory latency, as defined by the ACPI SLIT
+ * specification. If so, the \p latency pointer will not be \c NULL
+ * and the pointed array will contain non-zero values.
+ *
+ * In the future, some other types of distances may be considered.
+ * In these cases, \p latency will be \c NULL.
+ */
+struct hwloc_distances_s {
+  unsigned relative_depth;	/**< \brief Relative depth of the considered objects
+				 * below the object containing this distance information. */
+  unsigned nbobjs;		/**< \brief Number of objects considered in the matrix.
+				 * It is the number of descendant objects at \p relative_depth
+				 * below the containing object.
+				 * It corresponds to the result of hwloc_get_nbobjs_inside_cpuset_by_depth. */
+
+  float *latency;		/**< \brief Matrix of latencies between objects, stored as a one-dimension array.
+				 * May be \c NULL if the distances considered here are not latencies.
+				 * Values are normalized to get 1.0 as the minimal value in the matrix.
+				 * Latency from i-th to j-th object is stored in slot i*nbobjs+j.
+				 */
+  float latency_max;		/**< \brief The maximal value in the latency matrix. */
+  float latency_base;		/**< \brief The multiplier that should be applied to latency matrix
+				 * to retrieve the original OS-provided latencies.
+				 * Usually 10 on Linux since ACPI SLIT uses 10 for local latency.
+				 */
 };
 
 /** \brief Object info */
@@ -588,6 +625,18 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
  * and of length \p length.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
+
+/** \brief Provide a distance matrix.
+ *
+ * Provide the matrix of distances between a set of objects of the given type.
+ * The set may or may not contain all the existing objects of this type.
+ * The objects are specified by their OS/physical index in the \p os_index
+ * array. The \p distances matrix follows the same order.
+ * The distance from object i to object j in the i*nbobjs+j.
+ */
+HWLOC_DECLSPEC int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology,
+						      hwloc_obj_type_t type, unsigned nbobjs,
+						      unsigned *os_index, float *distances);
 
 /** \brief Flags describing actual discovery support for this topology. */
 struct hwloc_topology_discovery_support {

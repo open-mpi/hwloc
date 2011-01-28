@@ -1755,7 +1755,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 }
 
 static void
-hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, unsigned *distances, int fsroot_fd)
+hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, float *distances, int fsroot_fd)
 {
   char string[4096]; /* enough for hundreds of nodes */
   char *tmp, *next;
@@ -1823,9 +1823,9 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
      from a bunch of mallocs, particularly with the 2D array. */
 
   {
-      hwloc_obj_t nodes[nbnodes];
-      unsigned distances[nbnodes][nbnodes];
-      unsigned distance_indexes[nbnodes];
+      hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+      float * distances = calloc(nbnodes*nbnodes, sizeof(float));
+      unsigned nonsparse_physical_indexes[nbnodes];
       unsigned index_;
 
       /* Get node indexes now. We need them in order since Linux groups
@@ -1833,7 +1833,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
        */
       index_ = 0;
       hwloc_bitmap_foreach_begin (osnode, nodeset) {
-	distance_indexes[index_] = osnode;
+	nonsparse_physical_indexes[index_] = osnode;
 	index_++;
       } hwloc_bitmap_foreach_end();
       hwloc_bitmap_free(nodeset);
@@ -1841,7 +1841,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 #ifdef HWLOC_DEBUG
       hwloc_debug("%s", "numa distance indexes: ");
       for (index_ = 0; index_ < nbnodes; index_++) {
-	hwloc_debug(" %u", distance_indexes[index_]);
+	hwloc_debug(" %u", nonsparse_physical_indexes[index_]);
       }
       hwloc_debug("%s", "\n");
 #endif
@@ -1850,7 +1850,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       for (index_ = 0; index_ < nbnodes; index_++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
-	  osnode = distance_indexes[index_];
+	  osnode = nonsparse_physical_indexes[index_];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
@@ -1869,11 +1869,15 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_insert_object_by_cpuset(topology, node);
           nodes[index_] = node;
 
+	  /* Linux nodeX/distance file contains distance from X to other localities (from ACPI SLIT table or so),
+	   * store them in slots X*N...X*N+N-1 */
           sprintf(nodepath, "%s/node%u/distance", path, osnode);
-          hwloc_parse_node_distance(nodepath, nbnodes, distances[index_], topology->backend_params.sysfs.root_fd);
+          hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, topology->backend_params.sysfs.root_fd);
       }
 
-      hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned *) distances, (unsigned *) distance_indexes);
+      topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
+      topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
+      topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
   }
 
   *found = nbnodes;
