@@ -97,16 +97,12 @@ Do not show levels that do not have a hierarchical impact.
 \fB\-\-no\-io\fB
 Do not show any I/O device or bridge.
 By default, common devices (GPUs, NICs, block devices, ...) and
-hostbridges are shown.
-.TP
-\fB\-\-bridges\fB
-Show useful bridges in addition to devices.
-Bridges that have no device behind them are still ignored.
+interesting bridges are shown.
 .TP
 \fB\-\-whole\-io\fB
 Show all I/O devices and bridges.
 By default, only common devices (GPUs, NICs, block devices, ...) and
-hostbridges are shown.
+interesting bridges are shown.
 .TP
 \fB\-\-pid\fR <pid>
 Detect topology as seen by process <pid>, i.e. as if process <pid> did the
