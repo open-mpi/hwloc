@@ -369,6 +369,129 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
   return -1;
 }
 
+int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_bitmap_s * __hwloc_restrict set)
+{
+  unsigned prev = (unsigned) -1;
+  hwloc_bitmap_t reverse;
+  ssize_t size = buflen;
+  char *tmp = buf;
+  int res, ret = 0;
+  int needcomma = 0;
+
+  HWLOC__BITMAP_CHECK(set);
+
+  reverse = hwloc_bitmap_alloc(); /* FIXME: add hwloc_bitmap_alloc_size() + hwloc_bitmap_init_allocated() to avoid malloc? */
+  hwloc_bitmap_not(reverse, set);
+
+  /* mark the end in case we do nothing later */
+  if (buflen > 0)
+    tmp[0] = '\0';
+
+  while (1) {
+    unsigned begin, end;
+
+    begin = hwloc_bitmap_next(set, prev);
+    if (begin == (unsigned) -1)
+      break;
+    end = hwloc_bitmap_next(reverse, begin);
+
+    if (end == begin+1) {
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%u" : "%u", begin);
+    } else if (end == (unsigned) -1) {
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%u-" : "%u-", begin);
+    } else {
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%u-%u" : "%u-%u", begin, end-1);
+    }
+    if (res < 0) {
+      hwloc_bitmap_free(reverse);
+      return -1;
+    }
+    ret += res;
+
+    if (res >= size)
+      res = size>0 ? size - 1 : 0;
+
+    tmp += res;
+    size -= res;
+    needcomma = 1;
+
+    if (end == (unsigned) -1)
+      break;
+    else
+      prev = end - 1;
+  }
+
+  hwloc_bitmap_free(reverse);
+
+  return ret;
+}
+
+int hwloc_bitmap_list_asprintf(char ** strp, const struct hwloc_bitmap_s * __hwloc_restrict set)
+{
+  int len;
+  char *buf;
+
+  HWLOC__BITMAP_CHECK(set);
+
+  len = hwloc_bitmap_list_snprintf(NULL, 0, set);
+  buf = malloc(len+1);
+  *strp = buf;
+  return hwloc_bitmap_list_snprintf(buf, len+1, set);
+}
+
+int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restrict string)
+{
+  const char * current = string;
+  char *next;
+  unsigned long begin = -1, val;
+
+  hwloc_bitmap_zero(set);
+
+  while (*current != '\0') {
+
+    /* ignore empty ranges */
+    while (*current == ',')
+      current++;
+
+    val = strtoul(current, &next, 0);
+    /* make sure we got at least one digit */
+    if (next == current)
+      goto failed;
+
+    if (begin != (unsigned long) -1) {
+      /* finishing a range */
+      hwloc_bitmap_set_range(set, begin, val);
+      begin = (unsigned long) -1;
+
+    } else if (*next == '-') {
+      /* starting a new range */
+      if (*(next+1) == '\0') {
+	/* infinite range */
+	hwloc_bitmap_set_range(set, val, -1);
+        break;
+      } else {
+	/* normal range */
+	begin = val;
+      }
+
+    } else if (*next == ',' || *next == '\0') {
+      /* single digit */
+      hwloc_bitmap_set(set, val);
+    }
+
+    if (*next == '\0')
+      break;
+    current = (const char*) next+1;
+  }
+
+  return 0;
+
+ failed:
+  /* failure to parse */
+  hwloc_bitmap_zero(set);
+  return -1;
+}
+
 int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_bitmap_s * __hwloc_restrict set)
 {
   ssize_t size = buflen;
@@ -393,6 +516,9 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
       res = size>0 ? size - 1 : 0;
     tmp += res;
     size -= res;
+    /* optimize a common case: full bitmap should appear as 0xf...f instead of 0xf...fffffffff */
+    if (set->ulongs_count == 1 && set->ulongs[0] == HWLOC_SUBBITMAP_FULL)
+      return ret;
   }
 
   i=set->ulongs_count-1;
@@ -400,8 +526,12 @@ int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, co
     unsigned long val = set->ulongs[i--];
     if (started) {
       /* print the whole subset */
+#if HWLOC_BITS_PER_LONG == 64
+      res = hwloc_snprintf(tmp, size, "%016lx", val);
+#else
       res = hwloc_snprintf(tmp, size, "%08lx", val);
-    } else if (val) {
+#endif
+    } else if (val || i == -1) {
       res = hwloc_snprintf(tmp, size, "0x%lx", val);
       started = 1;
     } else {
@@ -441,11 +571,25 @@ int hwloc_bitmap_taskset_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc
 
   current = string;
   if (!strncmp("0xf...f", current, 7)) {
+    /* infinite bitmap */
     infinite = 1;
     current += 7;
-  } else if (!strncmp("0x", current, 2)) {
-    current += 2;
+    if (*current == '\0') {
+      /* special case for infinite/full bitmap */
+      hwloc_bitmap_fill(set);
+      return 0;
+    }
+  } else {
+    /* finite bitmap */
+    if (!strncmp("0x", current, 2))
+      current += 2;
+    if (*current == '\0') {
+      /* special case for empty bitmap */
+      hwloc_bitmap_zero(set);
+      return 0;
+    }
   }
+  /* we know there are other characters now */
 
   chars = strlen(current);
   count = (chars * 4 + HWLOC_BITS_PER_LONG - 1) / HWLOC_BITS_PER_LONG;
@@ -455,13 +599,13 @@ int hwloc_bitmap_taskset_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc
 
   while (*current != '\0') {
     int tmpchars;
-    char ustr[9];
+    char ustr[17];
     unsigned long val;
     char *next;
 
-    tmpchars = chars % 8;
+    tmpchars = chars % (HWLOC_BITS_PER_LONG/4);
     if (!tmpchars)
-      tmpchars = 8;
+      tmpchars = (HWLOC_BITS_PER_LONG/4);
 
     memcpy(ustr, current, tmpchars);
     ustr[tmpchars] = '\0';
@@ -597,6 +741,11 @@ void hwloc_bitmap_set_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsi
 
 	HWLOC__BITMAP_CHECK(set);
 
+	if (endcpu == (unsigned) -1) {
+		set->infinite = 1;
+		/* keep endcpu == -1 since this unsigned is actually larger than anything else */
+	}
+
 	if (set->infinite) {
 		/* truncate the range according to the infinite part of the bitmap */
 		if (endcpu >= set->ulongs_count * HWLOC_BITS_PER_LONG)
@@ -648,6 +797,11 @@ void hwloc_bitmap_clr_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsi
 	unsigned beginset,endset;
 
 	HWLOC__BITMAP_CHECK(set);
+
+	if (endcpu == (unsigned) -1) {
+		set->infinite = 0;
+		/* keep endcpu == -1 since this unsigned is actually larger than anything else */
+	}
 
 	if (!set->infinite) {
 		/* truncate the range according to the infinitely-unset part of the bitmap */

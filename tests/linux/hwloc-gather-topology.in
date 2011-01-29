@@ -15,6 +15,9 @@ bindir="@bindir@"
 # this will be changed into $bindir/lstopo during make install
 lstopo="$abs_top_builddir/utils/lstopo"
 
+# make sure we use default numeric formats
+export LANG=C
+
 error()
 {
     echo $@ 2>&1

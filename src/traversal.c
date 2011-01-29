@@ -390,7 +390,8 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     }
     break;
   default:
-    *string = '\0';
+    if (size > 0)
+      *string = '\0';
     return 0;
   }
 }

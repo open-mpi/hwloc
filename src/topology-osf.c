@@ -249,9 +249,8 @@ hwloc_look_osf(struct hwloc_topology *topology)
   radsetcreate(&radset);
   radsetcreate(&radset2);
   {
-    hwloc_obj_t nodes[nbnodes];
-    unsigned distances[nbnodes][nbnodes];
-    unsigned distance_indexes[nbnodes];
+    hwloc_obj_t *nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+    float *distances = calloc(nbnodes*nbnodes, sizeof(float));
     unsigned nfound;
     numa_attr_t attr = {
       .nattr_type = R_RAD,
@@ -288,11 +287,9 @@ hwloc_look_osf(struct hwloc_topology *topology)
 
       hwloc_insert_object_by_cpuset(topology, obj);
 
-      distance_indexes[radid] = radid;
-
       nfound = 0;
       for (radid2 = 0; radid2 < (radid_t) nbnodes; radid2++)
-	distances[radid][radid2] = RAD_DIST_REMOTE;
+	distances[radid*nbnodes+radid2] = RAD_DIST_REMOTE;
       for (distance = RAD_DIST_LOCAL; distance < RAD_DIST_REMOTE; distance++) {
 	attr.nattr_distance = distance;
 	/* get set of NUMA nodes at distance <= DISTANCE */
@@ -302,8 +299,8 @@ hwloc_look_osf(struct hwloc_topology *topology)
 	}
 	cursor = SET_CURSOR_INIT;
 	while ((radid2 = rad_foreach(radset2, 0, &cursor)) != RAD_NONE) {
-	  if (distances[radid][radid2] == RAD_DIST_REMOTE) {
-	    distances[radid][radid2] = distance;
+	  if (distances[radid*nbnodes+radid2] == RAD_DIST_REMOTE) {
+	    distances[radid*nbnodes+radid2] = distance;
 	    nfound++;
 	  }
 	}
@@ -312,7 +309,10 @@ hwloc_look_osf(struct hwloc_topology *topology)
 	  break;
       }
     }
-    hwloc_setup_misc_level_from_distances(topology, nbnodes, nodes, (unsigned*) distances, (unsigned*) distance_indexes);
+
+    topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
+    topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
+    topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
   }
   radsetdestroy(&radset2);
   radsetdestroy(&radset);

@@ -16,6 +16,9 @@ HWLOC_top_builddir="@HWLOC_top_builddir@"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 lstopo="@HWLOC_top_builddir@/utils/lstopo"
 
+# make sure we use default numeric formats
+export LANG=C
+
 error()
 {
     echo $@ 2>&1

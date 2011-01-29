@@ -1,7 +1,7 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2010 INRIA
-Copyright © 2009-2010 Université Bordeaux 1
-Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+Copyright © 2009-2011 INRIA
+Copyright © 2009-2011 Université Bordeaux 1
+Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
 $COPYRIGHT$
 
@@ -19,8 +19,43 @@ in v0.9.1).
 
 Version 1.2.0
 -------------
+* Expose latency matrices in the API as an array of distance structures
+  within objects. Add several helpers to find distances.
+* Add hwloc_topology_set_distance_matrix() to provide a matrix of
+  distances between a given set of objects.
 * x86 backend (for freebsd): add x2APIC support
 * Rename hwloc-gather-topology.sh into hwloc-gather-topology
+* Add hwloc_bitmap_list_sscanf/snprintf/asprintf to convert between bitmaps
+  and strings such as 4-5,7-9,12,15-
+* hwloc_bitmap_set/clr_range() now support infinite ranges.
+* Support standard device-tree phandle, to get better support on e.g. ARM
+  systems providing it.
+
+
+Version 1.1.1
+-------------
+* Add hwloc_get_api_version() which returns the version of hwloc used
+  at runtime. Thanks to Guy Streeter for the suggestion.
+* Fix the number of hugepages reported for NUMA nodes on Linux.
+* Fix hwloc_bitmap_to_ulong() right after allocating the bitmap.
+  Thanks to Bernd Kallies for reporting the problem.
+* Fix hwloc_bitmap_from_ith_ulong() to properly zero the first ulong.
+  Thanks to Guy Streeter for reporting the problem.
+* Fix hwloc_get_membind_nodeset() on Linux.
+  Thanks to Bernd Kallies for reporting the problem and providing a patch.
+* Fix some file descriptor leaks in the Linux discovery.
+* Fix the minimum width of NUMA nodes, caches and the legend in the graphical
+  lstopo output. Thanks to Jirka Hladky for reporting the problem.
+* Various fixes to bitmap conversion from/to taskset-strings.
+* Fix and document snprintf functions behavior when the buffer size is too
+  small or zero. Thanks to Guy Streeter for reporting the problem.
+* Fix configure to avoid spurious enabling of the cpuid backend.
+  Thanks to Tim Anderson for reporting the problem.
+* Cleanup error management in hwloc-gather-topology.sh.
+  Thanks to Jirka Hladky for reporting the problem and providing a patch.
+* Add a manpage and usage for hwloc-gather-topology.sh on Linux.
+  Thanks to Jirka Hladky for providing a patch.
+* Memory binding documentation enhancements.
 
 
 Version 1.1.0
@@ -78,6 +113,19 @@ Version 1.1.0
   + Add taskset-specific functions and command-line tools options to
     manipulate CPU set strings in the format of the taskset program.
   + Install hwloc-gather-topology.sh on Linux.
+
+
+Version 1.0.3
+-------------
+
+* Fix support for Linux cpuset when emulated by a cgroup mount point.
+* Remove unneeded runtime dependency on libibverbs.so in the library and
+  all utils programs.
+* Fix hwloc_cpuset_to_linux_libnuma_ulongs in case of non-linear OS-indexes
+  for NUMA nodes.
+* lstopo now displays physical/OS indexes by default in graphical mode
+  (use -l to switch back to logical indexes). The textual output still uses
+  logical by default (use -p to switch to physical indexes).
 
 
 Version 1.0.2

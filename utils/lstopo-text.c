@@ -166,6 +166,37 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
   }
 
   if (verbose_mode > 1) {
+    const struct hwloc_distances_s * distances;
+    unsigned depth;
+
+    for (depth = 0; depth < topodepth; depth++) {
+      unsigned nbobjs;
+      unsigned i, j;
+
+      distances = hwloc_get_whole_distance_matrix_by_depth(topology, depth);
+      if (!distances || !distances->latency)
+        continue;
+      nbobjs = distances->nbobjs;
+
+      printf("depth %u distance matrix:\n", depth);
+      /* column header */
+      printf("  index");
+      for(j=0; j<nbobjs; j++)
+        printf(" % 5d", (int) j);
+      printf("\n");
+      /* each line */
+      for(i=0; i<nbobjs; i++) {
+        /* row header */
+        printf("  % 5d", (int) i);
+        /* each value */
+        for(j=0; j<nbobjs; j++)
+          printf(" %2.3f", distances->latency[i*nbobjs+j]);
+        printf("\n");
+      }
+    }
+  }
+
+  if (verbose_mode > 1) {
     hwloc_const_bitmap_t complete = hwloc_topology_get_complete_cpuset(topology);
     hwloc_const_bitmap_t topo = hwloc_topology_get_topology_cpuset(topology);
     hwloc_const_bitmap_t online = hwloc_topology_get_online_cpuset(topology);

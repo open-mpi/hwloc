@@ -98,6 +98,23 @@ struct hwloc_topology {
 
   struct hwloc_topology_support support;
 
+  struct hwloc_os_distances_s {
+    /* these are initialized to NULL and setup when needed during between init and load, or during discovery */
+    int nbobjs;
+    unsigned *indexes; /* array of OS indexes before we can convert them into objs.
+			* only used during the early discovery until the tree starts being filled.
+			* not used anymore when distances are setup directly by a backend.
+			*/
+    struct hwloc_obj **objs; /* array of objects, in the same order as above.
+			      * may be setup during discovery from os_indexes,
+			      * or setup directly by a backend.
+			      */
+    float *distances; /* distance matrices, ordered according to the objs array.
+		       * distance from i to j is stored in slot i*nbnodes+j.
+		       * will be copied into the main logical-index-ordered distance at the end of the discovery.
+		       */
+  } os_distances[HWLOC_OBJ_TYPE_MAX];
+
   hwloc_backend_t backend_type;
   union hwloc_backend_params_u {
 #ifdef HWLOC_LINUX_SYS
@@ -131,7 +148,6 @@ struct hwloc_topology {
 
 
 extern void hwloc_setup_pu_level(struct hwloc_topology *topology, unsigned nb_pus);
-extern void hwloc_setup_misc_level_from_distances(struct hwloc_topology *topology, unsigned nbobjs, struct hwloc_obj **objs, unsigned *_distances/*[nbnobjs][nbobjs]*/, unsigned *distance_indexes /*[nbobjs]*/);
 extern int hwloc_get_sysctlbyname(const char *name, int64_t *n);
 extern int hwloc_get_sysctl(int name[], unsigned namelen, int *n);
 extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
@@ -145,6 +161,7 @@ extern void hwloc_backend_sysfs_exit(struct hwloc_topology *topology);
 
 #ifdef HWLOC_HAVE_XML
 extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen);
+extern void hwloc_xml_check_distances(struct hwloc_topology *topology);
 extern void hwloc_look_xml(struct hwloc_topology *topology);
 extern void hwloc_backend_xml_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_HAVE_XML */
@@ -308,5 +325,14 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
     return NULL;
   return hwloc_alloc(topology, len);
 }
+
+extern void hwloc_topology_distances_init(struct hwloc_topology *topology);
+extern void hwloc_topology_distances_clear(struct hwloc_topology *topology);
+extern void hwloc_topology_distances_destroy(struct hwloc_topology *topology);
+extern void hwloc_store_distances_from_env(struct hwloc_topology *topology);
+extern void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology);
+extern void hwloc_finalize_logical_distances(struct hwloc_topology *topology);
+extern void hwloc_free_logical_distances(struct hwloc_distances_s *dist);
+extern void hwloc_group_by_distances(struct hwloc_topology *topology);
 
 #endif /* HWLOC_PRIVATE_H */

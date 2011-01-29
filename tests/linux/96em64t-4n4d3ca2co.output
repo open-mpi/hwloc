@@ -379,4 +379,10 @@ depth 0:	1 Machine (type #1)
      depth 5:	96 Caches (type #4)
       depth 6:	96 Cores (type #5)
        depth 7:	96 PUs (type #6)
+depth 1 distance matrix:
+  index     0     1     2     3
+      0 1.000 2.600 2.600 2.600
+      1 2.600 1.000 2.600 2.600
+      2 2.600 2.600 1.000 2.600
+      3 2.600 2.600 2.600 1.000
 Topology not from this system

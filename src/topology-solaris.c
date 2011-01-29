@@ -407,19 +407,20 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
   nlgrps = lgrp_nlgrps(cookie);
   root = lgrp_root(cookie);
   {
-    hwloc_obj_t glob_lgrps[nlgrps];
+    hwloc_obj_t *glob_lgrps = calloc(nlgrps, sizeof(hwloc_obj_t));
     browse(topology, cookie, root, glob_lgrps, &curlgrp);
 #ifdef HAVE_LGRP_LATENCY_COOKIE
     {
-      unsigned distances[curlgrp][curlgrp];
-      unsigned indexes[curlgrp];
+      float *distances = calloc(curlgrp*curlgrp, sizeof(float));
       unsigned i, j;
+      hwloc_obj_type_t type = glob_lgrps[0]->type;
       for (i = 0; i < curlgrp; i++) {
-        indexes[i] = glob_lgrps[i]->os_index;
 	for (j = 0; j < curlgrp; j++)
-	  distances[i][j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
+	  distances[i*curlgrp+j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
-      hwloc_setup_misc_level_from_distances(topology, curlgrp, glob_lgrps, (unsigned*) distances, (unsigned*) indexes);
+      topology->os_distances[type].nbobjs = curlgrp;
+      topology->os_distances[type].objs = glob_lgrps;
+      topology->os_distances[type].distances = distances;
     }
 #endif /* HAVE_LGRP_LATENCY_COOKIE */
   }

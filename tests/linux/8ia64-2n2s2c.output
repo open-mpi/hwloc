@@ -53,4 +53,8 @@ depth 0:	1 Machine (type #1)
      depth 5:	8 Caches (type #4)
       depth 6:	8 Cores (type #5)
        depth 7:	8 PUs (type #6)
+depth 1 distance matrix:
+  index     0     1
+      0 1.000 1.500
+      1 1.500 1.000
 Topology not from this system

@@ -33,6 +33,8 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_object_userdata \
 	hwloc_synthetic \
 	hwloc_is_thissystem \
+	hwloc_distances \
+	hwloc_set_distances \
 	hwloc_insert_misc \
 	hwloc_get_next_pcidev
 

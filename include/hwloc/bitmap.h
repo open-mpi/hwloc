@@ -24,11 +24,17 @@ extern "C" {
 
 /** \defgroup hwlocality_bitmap The bitmap API
  *
- * For use in hwloc itself, a hwloc_bitmap_t usually represents a set of
- * objects, typically logical processors or memory nodes, indexed by OS
- * physical number.
+ * The ::hwloc_bitmap_t type represents a set of objects, typically OS
+ * processors -- which may actually be hardware threads (represented
+ * by ::hwloc_cpuset_t, which is a typedef for ::hwloc_bitmap_t) -- or
+ * memory nodes (represented by ::hwloc_nodeset_t, which is also a
+ * typedef for ::hwloc_bitmap_t).  
  *
- * A bitmap may be infinite.
+ * <em>Both CPU and node sets are always indexed by OS physical number.</em>
+ *
+ * \note CPU sets and nodesets are described in \ref hwlocality_sets.
+ *
+ * A bitmap may be of infinite size.
  * @{
  */
 
@@ -37,6 +43,7 @@ extern "C" {
  * Set of bits represented as an opaque pointer to an internal bitmap.
  */
 typedef struct hwloc_bitmap_s * hwloc_bitmap_t;
+/** \brief a non-modifiable ::hwloc_bitmap_t */
 typedef const struct hwloc_bitmap_s * hwloc_const_bitmap_t;
 
 
@@ -73,28 +80,55 @@ HWLOC_DECLSPEC void hwloc_bitmap_copy(hwloc_bitmap_t dst, hwloc_const_bitmap_t s
  *
  * Up to \p buflen characters may be written in buffer \p buf.
  *
+ * If \p buflen is 0, \p buf may safely be \c NULL.
+ *
  * \return the number of character that were actually written if not truncating,
- * or that would have been written  (not including the ending \\0).
+ * or that would have been written (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_bitmap_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
 
 /** \brief Stringify a bitmap into a newly allocated string.
- *
- * \return the number of character that were actually written
- * (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_bitmap_asprintf(char ** strp, hwloc_const_bitmap_t bitmap);
 
 /** \brief Parse a bitmap string and stores it in bitmap \p bitmap.
- *
- * Must start and end with a digit.
  */
 HWLOC_DECLSPEC int hwloc_bitmap_sscanf(hwloc_bitmap_t bitmap, const char * __hwloc_restrict string);
+
+/** \brief Stringify a bitmap in the list format.
+ *
+ * Lists are comma-separated indexes or ranges.
+ * Ranges are dash separated indexes.
+ * The last range may not have a ending indexes if the bitmap is infinite.
+ *
+ * Up to \p buflen characters may be written in buffer \p buf.
+ *
+ * If \p buflen is 0, \p buf may safely be \c NULL.
+ *
+ * \return the number of character that were actually written if not truncating,
+ * or that would have been written (not including the ending \\0).
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
+
+/** \brief Stringify a bitmap into a newly allocated list string.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_list_asprintf(char ** strp, hwloc_const_bitmap_t bitmap);
+
+/** \brief Parse a list string and stores it in bitmap \p bitmap.
+ */
+HWLOC_DECLSPEC int hwloc_bitmap_list_sscanf(hwloc_bitmap_t bitmap, const char * __hwloc_restrict string);
 
 /** \brief Stringify a bitmap in the taskset-specific format.
  *
  * The taskset command manipulates bitmap strings that contain a single
  * (possible very long) hexadecimal number starting with 0x.
+ *
+ * Up to \p buflen characters may be written in buffer \p buf.
+ *
+ * If \p buflen is 0, \p buf may safely be \c NULL.
+ *
+ * \return the number of character that were actually written if not truncating,
+ * or that would have been written (not including the ending \\0).
  */
 HWLOC_DECLSPEC int hwloc_bitmap_taskset_snprintf(char * __hwloc_restrict buf, size_t buflen, hwloc_const_bitmap_t bitmap);
 
@@ -137,7 +171,10 @@ HWLOC_DECLSPEC void hwloc_bitmap_from_ith_ulong(hwloc_bitmap_t bitmap, unsigned 
 /** \brief Add index \p id in bitmap \p bitmap */
 HWLOC_DECLSPEC void hwloc_bitmap_set(hwloc_bitmap_t bitmap, unsigned id);
 
-/** \brief Add indexess from \p begin to \p end in bitmap \p bitmap */
+/** \brief Add indexes from \p begin to \p end in bitmap \p bitmap.
+ *
+ * If \p end is \c -1, the range is infinite.
+ */
 HWLOC_DECLSPEC void hwloc_bitmap_set_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end);
 
 /** \brief Replace \p i -th subset of bitmap \p bitmap with unsigned long \p mask */
@@ -146,7 +183,10 @@ HWLOC_DECLSPEC void hwloc_bitmap_set_ith_ulong(hwloc_bitmap_t bitmap, unsigned i
 /** \brief Remove index \p id from bitmap \p bitmap */
 HWLOC_DECLSPEC void hwloc_bitmap_clr(hwloc_bitmap_t bitmap, unsigned id);
 
-/** \brief Remove index from \p begin to \p end in bitmap \p bitmap */
+/** \brief Remove indexes from \p begin to \p end in bitmap \p bitmap.
+ *
+ * If \p end is \c -1, the range is infinite.
+ */
 HWLOC_DECLSPEC void hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end);
 
 /** \brief Keep a single index among those set in bitmap \p bitmap
