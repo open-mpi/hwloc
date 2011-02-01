@@ -105,11 +105,11 @@ EOF])
     AC_MSG_RESULT(m4_ifval([$1], hwloc_config_prefix, [(none)]))
 
     # Note that private/config.h *MUST* be listed first so that it
-    # becomes the "main" config header file.  Any AC_CONFIG_HEADERs
+    # becomes the "main" config header file.  Any AC-CONFIG-HEADERS
     # after that (hwloc/config.h) will only have selective #defines
     # replaced, not the entire file.
-    AC_CONFIG_HEADER(hwloc_config_prefix[include/private/config.h])
-    AC_CONFIG_HEADER(hwloc_config_prefix[include/hwloc/config.h])
+    AC_CONFIG_HEADERS(hwloc_config_prefix[include/private/config.h])
+    AC_CONFIG_HEADERS(hwloc_config_prefix[include/hwloc/config.h])
 
     # What prefix are we using?
     AC_MSG_CHECKING([for hwloc symbol prefix])
