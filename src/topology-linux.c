@@ -1979,10 +1979,11 @@ static int
 look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
     uint32_t phandle, unsigned int *level, hwloc_bitmap_t cpuset)
 {
+  unsigned int i;
   int ret = -1;
   if ((NULL == level) || (NULL == cpuset) || phandle == (uint32_t) -1)
     return ret;
-  for (unsigned int i = 0; i < cpus->n; ++i) {
+  for (i = 0; i < cpus->n; ++i) {
     if (phandle != cpus->p[i].l2_cache)
       continue;
     if (NULL != cpus->p[i].cpuset) {
@@ -2038,6 +2039,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 {
   device_tree_cpus_t cpus = { .n = 0, .p = NULL, .allocated = 0 };
   const char ofroot[] = "/proc/device-tree/cpus";
+  unsigned int i;
 
   int root_fd = topology->backend_params.sysfs.root_fd;
   DIR *dt = hwloc_opendir(ofroot, root_fd);
@@ -2082,8 +2084,9 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
       uint32_t nthreads = cb / sizeof(threads[0]);
 
       if (NULL != threads) {
+        unsigned int i;
         cpuset = hwloc_bitmap_alloc();
-        for (unsigned int i = 0; i < nthreads; ++i) {
+        for (i = 0; i < nthreads; ++i) {
           hwloc_bitmap_set(cpuset, ntohl(threads[i]));
         }
         free(threads);
@@ -2119,7 +2122,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
   }
 
 #ifdef HWLOC_DEBUG
-  for (unsigned int i = 0; i < cpus.n; ++i) {
+  for (i = 0; i < cpus.n; ++i) {
     hwloc_debug("%i: %s  ibm,phandle=%08X l2_cache=%08X ",
       i, cpus.p[i].name, cpus.p[i].phandle, cpus.p[i].l2_cache);
     if (NULL == cpus.p[i].cpuset) {
@@ -2131,7 +2134,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 #endif
 
   /* Scan L2/L3/... caches */
-  for (unsigned int i = 0; i < cpus.n; ++i) {
+  for (i = 0; i < cpus.n; ++i) {
     /* Skip real CPUs */
     if (NULL != cpus.p[i].cpuset)
       continue;
@@ -2151,7 +2154,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
   }
 
   /* Do cleanup */
-  for (unsigned int i = 0; i < cpus.n; ++i) {
+  for (i = 0; i < cpus.n; ++i) {
     hwloc_bitmap_free(cpus.p[i].cpuset);
     free(cpus.p[i].name);
   }
