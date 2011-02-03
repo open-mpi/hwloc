@@ -2,14 +2,14 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 #include <stdio.h>
 #include <assert.h>
 #include <infiniband/verbs.h>
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/openfabrics-verbs.h>
 

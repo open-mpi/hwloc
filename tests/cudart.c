@@ -1,12 +1,13 @@
 /*
  * Copyright © 2010 INRIA
+ * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 #include <stdio.h>
 #include <assert.h>
 #include <cuda_runtime_api.h>
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/cudart.h>
 

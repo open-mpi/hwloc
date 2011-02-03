@@ -1,7 +1,7 @@
 /*
  * Copyright © 2010 INRIA
  * Copyright © 2010 Université Bordeaux 1
- * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  *
  *
@@ -14,7 +14,7 @@
  * on various architectures, without having to use this x86-specific code.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>

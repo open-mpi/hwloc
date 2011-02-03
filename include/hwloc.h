@@ -16,7 +16,7 @@
 #ifndef HWLOC_H
 #define HWLOC_H
 
-#include <hwloc/config.h>
+#include <hwloc/autogen/config.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
