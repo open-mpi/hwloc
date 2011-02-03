@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <cuda_runtime_api.h>
-#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/cudart.h>
 

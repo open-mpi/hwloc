@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <cuda.h>
-#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/cuda.h>
 

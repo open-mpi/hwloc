@@ -9,7 +9,6 @@
 #ifndef HWLOC_MASK_H
 #define HWLOC_MASK_H
 
-#include <private/autogen/config.h>
 #include <private/private.h>
 #include <private/misc.h>
 #include <hwloc.h>

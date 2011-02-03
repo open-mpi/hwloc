@@ -8,7 +8,6 @@
 #include <assert.h>
 #include <libxml/xmlstring.h>
 #include <libxml/xmlmemory.h>
-#include <private/autogen/config.h>
 #include <hwloc.h>
 
 /* check the CUDA Driver API helpers */

@@ -5,7 +5,6 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/autogen/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>

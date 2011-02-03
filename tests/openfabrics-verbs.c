@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include <infiniband/verbs.h>
-#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/openfabrics-verbs.h>
 

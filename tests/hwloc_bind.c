@@ -10,7 +10,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <private/autogen/config.h>
+#include <private/autogen/config.h> /* for HWLOC_WIN_SYS */
 #include <hwloc.h>
 
 /* check the binding functions */

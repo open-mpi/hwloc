@@ -9,7 +9,7 @@
 #define _GNU_SOURCE
 #include <sched.h>
 #include <assert.h>
-#include <private/autogen/config.h>
+#include <private/autogen/config.h> /* for HWLOC_HAVE_OLD_SCHED_SETAFFINITY */
 #include <hwloc.h>
 #include <hwloc/glibc-sched.h>
 

@@ -9,7 +9,6 @@
 #ifndef UTILS_LSTOPO_H
 #define UTILS_LSTOPO_H
 
-#include <private/autogen/config.h>
 #include <hwloc.h>
 
 extern hwloc_obj_type_t show_only;
