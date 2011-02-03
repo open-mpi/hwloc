@@ -2,13 +2,14 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
 #ifndef UTILS_LSTOPO_H
 #define UTILS_LSTOPO_H
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 
 extern hwloc_obj_type_t show_only;
