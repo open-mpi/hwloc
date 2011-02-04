@@ -1039,7 +1039,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
     remove_empty(topology, pchild);
 
   if (obj->type != HWLOC_OBJ_NODE
-      && obj->cpuset
+      && obj->cpuset /* FIXME: needed for PCI devices? */
       && hwloc_bitmap_iszero(obj->cpuset)) {
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
@@ -1048,6 +1048,50 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
   }
 }
 
+static void
+restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset)
+{
+  hwloc_obj_t obj = *pobj, child, *pchild;
+
+  if (obj->cpuset)
+    hwloc_bitmap_and(obj->cpuset, obj->cpuset, cpuset);
+  if (obj->complete_cpuset)
+    hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, cpuset);
+  if (obj->online_cpuset)
+    hwloc_bitmap_and(obj->online_cpuset, obj->online_cpuset, cpuset);
+  if (obj->allowed_cpuset)
+    hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, cpuset);
+
+  for_each_child_safe(child, obj, pchild)
+    restrict_object(topology, pchild, cpuset, nodeset);
+
+  if (obj->cpuset /* FIXME: needed for PCI devices? */
+      && hwloc_bitmap_iszero(obj->cpuset)) {
+    /* Remove empty children */
+    hwloc_debug("%s", "\nRemoving empty object during restrict");
+    print_object(topology, 0, obj);
+    unlink_and_free_object_and_children(pobj);
+  } else {
+    if (obj->type == HWLOC_OBJ_NODE)
+      hwloc_bitmap_set(nodeset, obj->os_index);
+  }
+}
+
+static void
+restrict_object_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_nodeset_t nodeset)
+{
+  hwloc_obj_t obj = *pobj, child, *pchild;
+
+  if (obj->nodeset)
+    hwloc_bitmap_and(obj->nodeset, obj->nodeset, nodeset);
+  if (obj->complete_nodeset)
+    hwloc_bitmap_and(obj->complete_nodeset, obj->complete_nodeset, nodeset);
+  if (obj->allowed_nodeset)
+    hwloc_bitmap_and(obj->allowed_nodeset, obj->allowed_nodeset, nodeset);
+
+  for_each_child_safe(child, obj, pchild)
+    restrict_object_nodeset(topology, pchild, nodeset);
+}
 /*
  * Merge with the only child if either the parent or the child has a type to be
  * ignored while keeping structure
@@ -2023,8 +2067,21 @@ hwloc_topology_load (struct hwloc_topology *topology)
 int
 hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset)
 {
-  errno = ENOSYS;
-  return -1;
+  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+
+  /* make sure we'll keep something in the topology */
+  if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->cpuset)) {
+    errno = -EINVAL;
+    return -1;
+  }
+
+  /* drop object based on cpuset, and fill the remaining nodeset */
+  restrict_object(topology, &topology->levels[0][0], cpuset, nodeset);
+  /* update nodesets accordingly */
+  restrict_object_nodeset(topology, &topology->levels[0][0], nodeset);
+
+  hwloc_connect(topology->levels[0][0]);
+  return 0;
 }
 
 int
