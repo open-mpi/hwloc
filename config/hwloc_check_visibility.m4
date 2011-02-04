@@ -12,7 +12,7 @@
 # Copyright (c) 2006-2007 Cisco Systems, Inc.  All rights reserved.
 # and renamed for hwloc:
 # Copyright (c) 2009 INRIA
-# Copyright (c) 2009 Université Bordeaux 1
+# Copyright (c) 2009-2010 Université Bordeaux 1
 # Copyright (c) 2010 Cisco Systems, Inc.  All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
