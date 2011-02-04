@@ -993,9 +993,11 @@ For reference, \ref hwloc_topology_t modification operations include
   <dd><tt>hwloc_topology_insert_misc_object_by_*</tt> (see \ref
   hwlocality_tinker) may modify the topology significantly by adding
   objects inside the tree, changing the topology depth, etc.
+  <tt>hwloc_topology_restrict</tt> modifies the topology even more
+  dramatically by removing some objects.
 
   Although references to former objects <em>may</em> still be valid
-  after insertion, it is strongly advised to not rely on any such
+  after insertion or restriction, it is strongly advised to not rely on any such
   guarantee and always re-consult the topology to reacquire new
   instances of objects.  </dd>
 
