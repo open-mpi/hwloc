@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 #
-# Copyright (c) 2010-2010 Cisco Systems, Inc.  All rights reserved.
+# Copyright (c) 2010-2011 Cisco Systems, Inc.  All rights reserved.
+# Copyright (c) 2011 INRIA
 # $COPYRIGHT$
 #
 
