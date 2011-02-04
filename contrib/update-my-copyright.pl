@@ -84,6 +84,8 @@ $cmd = "svn st ."
     if (-d "$top/.svn");
 $cmd = "hg st ."
     if (-d "$top/.hg" && ! -d "$top/.svn");
+$cmd = "git status . | sed -n -e 's/^\#[ 	]*modified:[ 	]*/M /p' -e 's/^\#[ 	]* new file:[ 	]*/A /p'"
+    if (-d "$top/.git" && ! -d "$top/.svn");
 die "Can't find SVN or HG meta dirs" 
     if (!defined($cmd));
 
