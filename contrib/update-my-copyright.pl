@@ -87,7 +87,7 @@ $cmd = "hg st ."
     if (-d "$top/.hg" && ! -d "$top/.svn");
 $cmd = "git status . | sed -n -e 's/^\#[ 	]*modified:[ 	]*/M /p' -e 's/^\#[ 	]* new file:[ 	]*/A /p'"
     if (-d "$top/.git" && ! -d "$top/.svn");
-die "Can't find SVN or HG meta dirs" 
+die "Can't find SVN, HG or GIT meta dirs" 
     if (!defined($cmd));
 
 # Run the command, parsing the output.  Make a list of files that are
