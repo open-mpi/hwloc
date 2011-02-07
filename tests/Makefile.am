@@ -35,6 +35,7 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_is_thissystem \
 	hwloc_distances \
 	hwloc_set_distances \
+	hwloc_groups \
 	hwloc_insert_misc
 
 if HWLOC_HAVE_LINUX_LIBNUMA
