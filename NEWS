@@ -17,6 +17,13 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.1.2
+-------------
+* Fix a segfault in the distance-based grouping code when some objects
+  are not placed in any group. Thanks to Bernd Kallies for reporting
+  the problem and providing a patch.
+
+
 Version 1.1.1
 -------------
 * Add hwloc_get_api_version() which returns the version of hwloc used

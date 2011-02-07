@@ -274,7 +274,9 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
       /* factorize distances */
       memset(groupdistances, 0, sizeof(groupdistances));
       for(i=0; i<nbobjs; i++)
+	if (groupids[i])
           for(j=0; j<nbobjs; j++)
+	    if (groupids[j])
               groupdistances[groupids[i]-1][groupids[j]-1] += (*distances)[i][j];
       for(i=0; i<nbgroups; i++)
           for(j=0; j<nbgroups; j++)
