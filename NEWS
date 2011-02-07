@@ -30,6 +30,7 @@ Version 1.2.0
 * hwloc_bitmap_set/clr_range() now support infinite ranges.
 * Support standard device-tree phandle, to get better support on e.g. ARM
   systems providing it.
+* Improve grouping to support asymmetric topologies.
 
 
 Version 1.1.1
