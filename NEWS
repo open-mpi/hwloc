@@ -22,6 +22,8 @@ Version 1.1.2
 * Fix a segfault in the distance-based grouping code when some objects
   are not placed in any group. Thanks to Bernd Kallies for reporting
   the problem and providing a patch.
+* Fix the command-line parsing of hwloc-bind --mempolicy interleave.
+  Thanks to Guy Streeter for reporting the problem.
 
 
 Version 1.1.1

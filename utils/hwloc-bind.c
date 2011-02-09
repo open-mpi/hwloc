@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 	  membind_policy = HWLOC_MEMBIND_FIRSTTOUCH;
 	else if (!strncmp(argv[1], "bind", 2))
 	  membind_policy = HWLOC_MEMBIND_BIND;
-	else if (!strncmp(argv[1], "interleace", 2))
+	else if (!strncmp(argv[1], "interleave", 2))
 	  membind_policy = HWLOC_MEMBIND_INTERLEAVE;
 	else if (!strncmp(argv[1], "replicate", 2))
 	  membind_policy = HWLOC_MEMBIND_REPLICATE;
