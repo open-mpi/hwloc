@@ -142,11 +142,12 @@ EOF])
     # compiler flags will drive this.
     hwloc_CC_save=$CC
     hwloc_CFLAGS_save=$CFLAGS
-    AC_PROG_CC_C99
-    AS_IF([test x"$ac_cv_prog_cc_c99" = xno],
-          [AC_WARN([C99 support is required by hwloc])
-           $3],
-          [HWLOC_SETUP_CORE_AFTER_C99($1, $2, $3, $4)])
+dnl    AC_PROG_CC_C99
+dnl    AS_IF([test x"$ac_cv_prog_cc_c99" = xno],
+dnl          [AC_WARN([C99 support is required by hwloc])
+dnl           $3],
+dnl          [HWLOC_SETUP_CORE_AFTER_C99($1, $2, $3, $4)])
+     HWLOC_SETUP_CORE_AFTER_C99($1, $2, $3, $4)
 ])
 
 dnl Same order of parameters form HWLOC-SETUP-CORE
