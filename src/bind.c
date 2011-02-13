@@ -152,6 +152,36 @@ hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bi
 }
 #endif
 
+int
+hwloc_get_lastcpuexec(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
+{
+  if (flags & HWLOC_CPUBIND_PROCESS) {
+    if (topology->get_thisproc_lastcpuexec)
+      return topology->get_thisproc_lastcpuexec(topology, set, flags);
+  } else if (flags & HWLOC_CPUBIND_THREAD) {
+    if (topology->get_thisthread_lastcpuexec)
+      return topology->get_thisthread_lastcpuexec(topology, set, flags);
+  } else {
+    if (topology->get_thisproc_lastcpuexec)
+      return topology->get_thisproc_lastcpuexec(topology, set, flags);
+    else if (topology->get_thisthread_lastcpuexec)
+      return topology->get_thisthread_lastcpuexec(topology, set, flags);
+  }
+
+  errno = ENOSYS;
+  return -1;
+}
+
+int
+hwloc_get_proc_lastcpuexec(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int flags)
+{
+  if (topology->get_proc_lastcpuexec)
+    return topology->get_proc_lastcpuexec(topology, pid, set, flags);
+
+  errno = ENOSYS;
+  return -1;
+}
+
 static hwloc_const_nodeset_t
 hwloc_fix_membind(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
 {
