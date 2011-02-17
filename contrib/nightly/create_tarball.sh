@@ -10,7 +10,7 @@
 #                         University of Stuttgart.  All rights reserved.
 # Copyright (c) 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
-# Copyright (c) 2006-2009 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2006-2011 Cisco Systems, Inc.  All rights reserved.
 # $COPYRIGHT$
 # 
 # Additional copyrights may follow
@@ -265,8 +265,8 @@ cd hwloc
 svnversion="r`svnversion .`"
 version_files="`find . -name VERSION`"
 for file in $version_files; do
-    sed -e 's/^want_svn=.*/want_svn=1/' \
-        -e 's/^svn_r=.*/svn_r='$svnversion/ $file > $file.new
+    sed -e 's/^want_repo_rev=.*/want_repo_rev=1/' \
+        -e 's/^repo_rev=.*/repo_rev='$svnversion/ $file > $file.new
     cp -f $file.new $file
     rm -f $file.new
 done
