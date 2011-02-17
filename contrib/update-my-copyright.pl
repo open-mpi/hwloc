@@ -52,6 +52,10 @@ use Cwd;
 my $my_search_name = "Cisco";
 my $my_formal_name = "Cisco Systems, Inc.  All rights reserved.";
 
+my @tokens;
+push(@tokens, "See COPYING in top-level directory");
+push(@tokens, "\\\$COPYRIGHT\\\$");
+
 # Override the defaults if some values are set in the environment
 $my_search_name = $ENV{HWLOC_COPYRIGHT_SEARCH_NAME}
     if (defined($ENV{HWLOC_COPYRIGHT_SEARCH_NAME}));
@@ -116,19 +120,24 @@ foreach my $f (@files) {
     print "Processing added/changed file: $f\n";
     open(FILE, $f) || die "Can't open file: $f";
 
-    # Read in the file, and look for the "See COPYING in top-level
-    # directory" token; that's the end of the copyright block that
-    # we're allowed to edit.  Do not edit any copyright notices that
-    # may appear below that.
+    # Read in the file, and look for the any of the specified tokens;
+    # that's the end of the copyright block that we're allowed to
+    # edit.  Do not edit any copyright notices that may appear below
+    # that.
 
     my $i = 0;
     my @lines;
     my $my_line_index;
     my $token_line_index;
+    my $token;
     while (<FILE>) {
         push(@lines, $_);
-        $token_line_index = $i
-            if ($_ =~ /See COPYING in top-level directory/);
+        foreach my $t (@tokens) {
+            if ($_ =~ /$t/) {
+                $token_line_index = $i;
+                $token = $t;
+            }
+        }
         $my_line_index = $i
             if (!defined($token_line_index) && $_ =~ /$my_search_name/i);
         ++$i;
@@ -137,13 +146,13 @@ foreach my $f (@files) {
 
     # If there was not copyright token, don't do anything
     if (!defined($token_line_index)) {
-        print "==> WARNING: Did not find the \"See COPYING in top-level directory\" token!\n";
+        print "==> WARNING: Did not find any end-of-copyright tokens!\n";
         print "    File left unchanged\n";
         next;
     }
 
     # Figure out the line prefix
-    $lines[$token_line_index] =~ m/^(.+)\See COPYING in top-level directory/;
+    $lines[$token_line_index] =~ m/^(.+)$token/;
     my $prefix = $1;
 
     # Now act on it
