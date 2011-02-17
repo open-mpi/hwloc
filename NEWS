@@ -33,6 +33,8 @@ Version 1.2.0
 * Support standard device-tree phandle, to get better support on e.g. ARM
   systems providing it.
 * Improve grouping to support asymmetric topologies.
+* Command-line tools now support "all" and "root" special locations
+  consisting in the entire topology.
 
 
 Version 1.1.1

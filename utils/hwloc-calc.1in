@@ -162,6 +162,11 @@ To display the physical index of a processor given by its logical index:
     $ hwloc-calc PU:2 --physical-output --intersect PU
     3
 
+To display the cpuset of the entire topology except the third socket:
+
+    $ hwloc-calc all ~socket:3
+    0x0000f0ff
+
 To combine both physical and logical indexes as input:
 
     $ hwloc-calc PU:2 --physical-input PU:3

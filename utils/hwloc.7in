@@ -137,6 +137,10 @@ prefixed with "x", the given location will be and'ed instead of added
 to the current list.  If prefixed with "^", the given location will be
 xor'ed.
 .
+.PP
+"all" and "root" are a special location consisting in the entire
+current topology.
+.
 More complex operations may be performed by using
 .R hwloc-calc
 to compute intermediate values.

@@ -139,6 +139,10 @@ To run on the first socket, except on its second and fifth cores:
 
     hwloc-bind socket:0 ~socket:0.core:1 ~socket:0.core:4 echo hello
 
+To run anywhere except on the first socket:
+
+    hwloc-bind all ~socket:0 echo hello
+
 To bind memory on second memory node and run on first node (when supported by the OS):
 
     hwloc-bind --cpubind node:1 --membind node:0 echo hello

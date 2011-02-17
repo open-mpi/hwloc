@@ -212,6 +212,9 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
     arg++;
   }
 
+  if (!strcmp(arg, "all") || !strcmp(arg, "root"))
+    return hwloc_mask_append_cpuset(set, hwloc_topology_get_topology_cpuset(topology), mode, verbose);
+
   colon = strchr(arg, ':');
   if (colon) {
     hwloc_bitmap_t newset = hwloc_bitmap_alloc();
