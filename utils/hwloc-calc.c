@@ -28,6 +28,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --lo --logical-output     Use logical indexes for output (default)\n");
   fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
   fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
+  fprintf(where, "  -n --number-of <type|depth>\n"
+                 "                            Report the number of objects intersecting the CPU set\n");
   fprintf(where, "  --intersect <type|depth>  Report the list of object indexes intersecting the CPU set\n");
   fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
@@ -41,6 +43,7 @@ static int verbose = 0;
 static int logicali = 1;
 static int logicalo = 1;
 static int listdepth = -1;
+static int numberofdepth = -1;
 static int showobjs = 0;
 static int singlify = 0;
 static int taskset = 0;
@@ -69,6 +72,12 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
     }
     printf("\n");
     hwloc_bitmap_free(remaining);
+  } else if (numberofdepth != -1) {
+    unsigned nb = 0;
+    hwloc_obj_t obj = NULL;
+    while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, numberofdepth, obj)) != NULL)
+      nb++;
+    printf("%u\n", nb);
   } else if (listdepth != -1) {
     hwloc_obj_t proc, prev = NULL;
     while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, listdepth, prev)) != NULL) {
@@ -99,6 +108,7 @@ int main(int argc, char *argv[])
   hwloc_bitmap_t set;
   int cmdline_args = 0;
   char **orig_argv = argv;
+  hwloc_obj_type_t numberoftype = (hwloc_obj_type_t) -1;
   hwloc_obj_type_t listtype = (hwloc_obj_type_t) -1;
   char *callname;
   int opt;
@@ -120,6 +130,26 @@ int main(int argc, char *argv[])
       if (!strcmp(argv[1], "--help")) {
 	usage(callname, stdout);
 	return EXIT_SUCCESS;
+      }
+      if (!strcmp(argv[1], "--number-of") || !strcmp(argv[1], "-n")) {
+	if (argc <= 2) {
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
+	}
+	numberoftype = hwloc_obj_type_of_string(argv[2]);
+	if (numberoftype == (hwloc_obj_type_t) -1) {
+	  char *endptr;
+	  unsigned _depth = strtoul(argv[2], &endptr, 0);
+	  if (*endptr) {
+	    fprintf(stderr, "unrecognized --number-of type or depth %s\n", argv[2]);
+	    usage(callname, stderr);
+	    return EXIT_SUCCESS;
+	  }
+	  numberofdepth = _depth;
+	}
+	argv++;
+	argc--;
+	goto next;
       }
       if (!strcmp(argv[1], "--intersect")) {
 	if (argc <= 2) {
@@ -221,6 +251,17 @@ int main(int argc, char *argv[])
  next:
     argc--;
     argv++;
+  }
+
+  if (numberoftype != (hwloc_obj_type_t) -1) {
+    numberofdepth = hwloc_get_type_depth(topology, numberoftype);
+    if (numberofdepth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "unavailable --number-of type %s\n", hwloc_obj_type_string(numberoftype));
+      goto out;
+    } else  if (numberofdepth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      fprintf(stderr, "cannot --number-of type %s with multiple depth, please use the relevant depth directly\n", hwloc_obj_type_string(numberoftype));
+      goto out;
+    }
   }
 
   if (listtype != (hwloc_obj_type_t) -1) {

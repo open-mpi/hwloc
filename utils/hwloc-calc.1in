@@ -37,6 +37,11 @@ Use OS/physical indexes instead of logical indexes for output.
 \fB\-\-lo\fR \fB\-\-logical\-output\fR
 Use logical indexes instead of physical/OS indexes for output (default).
 .TP
+\fB\-n \-\-number-of <type|depth>\fR
+Report the number of objects of the given type or depth that intersect the CPU set.
+This is convenient for finding how many cores, NUMA nodes or PUs are available
+in a machine.
+.TP
 \fB\-\-intersect <type|depth>\fR
 Find the list of objects of the given type or depth that intersect the CPU set and
 report the comma-separated list of their indexes instead of the cpu mask string.
