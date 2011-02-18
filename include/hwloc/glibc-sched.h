@@ -21,7 +21,7 @@
 #include <assert.h>
 
 #if !defined _GNU_SOURCE || !defined _SCHED_H
-#error sched.h must be included with _GNU_SOURCE defined
+#error Please make sure to include sched.h before including glibc-sched.h, and define _GNU_SOURCE before any inclusion of sched.h
 #endif
 
 
