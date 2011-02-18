@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -27,6 +27,7 @@
 #include <sys/processor.h>
 #include <sys/thread.h>
 #include <sys/mman.h>
+#include <sys/systemcfg.h>
 
 static int
 hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
@@ -433,6 +434,11 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
     obj = hwloc_alloc_setup_object(type, i - (type == HWLOC_OBJ_PU));
     obj->cpuset = hwloc_bitmap_alloc();
     obj->os_level = sdl;
+    maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
+    for (j = 0; j < maxcpus; j++) {
+      if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
+	hwloc_bitmap_set(obj->cpuset, j);
+    }
     switch(type) {
       case HWLOC_OBJ_NODE:
 	obj->nodeset = hwloc_bitmap_alloc();
@@ -448,19 +454,25 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	/* TODO: obj->memory.page_types[1].count = rs_getinfo(rset, R_LGPGFREE, 0) / hugepagesize */
 	break;
       case HWLOC_OBJ_CACHE:
-	obj->attr->cache.size = 0; /* TODO: ? */
+	obj->attr->cache.size = _system_configuration.L2_cache_size;
 	obj->attr->cache.linesize = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
       case HWLOC_OBJ_GROUP:
 	obj->attr->group.depth = level;
+      case HWLOC_OBJ_CORE:
+      {
+	hwloc_obj_t obj2 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, i);
+	obj2->cpuset = hwloc_bitmap_dup(obj->cpuset);
+	obj2->attr->cache.size = _system_configuration.dcache_size;
+	obj2->attr->cache.linesize = _system_configuration.dcache_line;
+	obj2->attr->cache.depth = 1;
+	hwloc_debug("Adding an L1 cache for core %d\n", i);
+	hwloc_insert_object_by_cpuset(topology, obj2);
+	break;
+      }
       default:
 	break;
-    }
-    maxcpus = rs_getinfo(rad, R_MAXPROCS, 0);
-    for (j = 0; j < maxcpus; j++) {
-      if (rs_op(RS_TESTRESOURCE, rad, NULL, R_PROCS, j))
-	hwloc_bitmap_set(obj->cpuset, j);
     }
     hwloc_debug_2args_bitmap("%s %d has cpuset %s\n",
 	       hwloc_obj_type_string(type),
