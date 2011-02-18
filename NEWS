@@ -37,6 +37,7 @@ Version 1.2.0
   or depth in hwloc-calc.
 * Command-line tools now support "all" and "root" special locations
   consisting in the entire topology.
+* Detect cache size on AIX. Thanks Christopher and IBM.
 
 
 Version 1.1.1
