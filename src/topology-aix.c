@@ -572,7 +572,7 @@ hwloc_set_aix_hooks(struct hwloc_topology *topology)
   topology->get_thisproc_membind = hwloc_aix_get_thisproc_membind;
   topology->set_thisthread_membind = hwloc_aix_set_thisthread_membind;
   topology->get_thisthread_membind = hwloc_aix_get_thisthread_membind;
-  //topology->set_area_membind = hwloc_aix_set_area_membind;
+  /* topology->set_area_membind = hwloc_aix_set_area_membind; */
   /* get_area_membind is not available */
   topology->alloc_membind = hwloc_aix_alloc_membind;
   topology->alloc = hwloc_alloc_mmap;
