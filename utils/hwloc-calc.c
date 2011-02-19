@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -42,8 +42,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 static int verbose = 0;
 static int logicali = 1;
 static int logicalo = 1;
-static int listdepth = -1;
 static int numberofdepth = -1;
+static int intersectdepth = -1;
 static int showobjs = 0;
 static int singlify = 0;
 static int taskset = 0;
@@ -78,9 +78,9 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
     while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, numberofdepth, obj)) != NULL)
       nb++;
     printf("%u\n", nb);
-  } else if (listdepth != -1) {
+  } else if (intersectdepth != -1) {
     hwloc_obj_t proc, prev = NULL;
-    while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, listdepth, prev)) != NULL) {
+    while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, intersectdepth, prev)) != NULL) {
       if (prev)
 	printf(",");
       printf("%u", logicalo ? proc->logical_index : proc->os_index);
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
   int cmdline_args = 0;
   char **orig_argv = argv;
   hwloc_obj_type_t numberoftype = (hwloc_obj_type_t) -1;
-  hwloc_obj_type_t listtype = (hwloc_obj_type_t) -1;
+  hwloc_obj_type_t intersecttype = (hwloc_obj_type_t) -1;
   char *callname;
   int opt;
 
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
 	}
-	if (hwloc_calc_type_depth(argv[2], &listtype, &listdepth) < 0) {
+	if (hwloc_calc_type_depth(argv[2], &intersecttype, &intersectdepth) < 0) {
 	  fprintf(stderr, "unrecognized --intersect type or depth %s\n", argv[2]);
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
@@ -192,12 +192,12 @@ int main(int argc, char *argv[])
       }
       if (!strcasecmp(argv[1], "--pulist") || !strcmp(argv[1], "--proclist")) {
 	/* backward compat with 1.0 */
-	listtype = HWLOC_OBJ_PU;
+	intersecttype = HWLOC_OBJ_PU;
         goto next;
       }
       if (!strcmp(argv[1], "--nodelist")) {
 	/* backward compat with 1.0 */
-	listtype = HWLOC_OBJ_NODE;
+	intersecttype = HWLOC_OBJ_NODE;
         goto next;
       }
       if (!strcmp(argv[1], "--largest")  || !strcmp(argv[1], "--objects") /* backward compat with 1.0 */) {
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
   if (hwloc_calc_check_type_depth(topology, numberoftype, &numberofdepth, "--number-of") < 0)
     goto out;
 
-  if (hwloc_calc_check_type_depth(topology, listtype, &listdepth, "--intersect") < 0)
+  if (hwloc_calc_check_type_depth(topology, intersecttype, &intersectdepth, "--intersect") < 0)
     goto out;
 
   if (cmdline_args) {
