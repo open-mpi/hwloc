@@ -98,6 +98,37 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
   }
 }
 
+static int hwloc_calc_type_depth(const char *string, hwloc_obj_type_t *typep, int *depthp)
+{
+  hwloc_obj_type_t type = hwloc_obj_type_of_string(string);
+  unsigned depth = -1;
+  if (type == (hwloc_obj_type_t) -1) {
+    char *endptr;
+    depth = strtoul(string, &endptr, 0);
+    if (*endptr)
+      return -1;
+  }
+  *depthp = depth;
+  *typep = type;
+  return 0;
+}
+
+static int hwloc_calc_check_type_depth(hwloc_topology_t topology, hwloc_obj_type_t type, int *depthp, const char *caller)
+{
+  if (type != (hwloc_obj_type_t) -1) {
+    int depth = hwloc_get_type_depth(topology, type);
+    if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "unavailable %s type %s\n", caller, hwloc_obj_type_string(type));
+      return -1;
+    } else  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      fprintf(stderr, "cannot use %s type %s with multiple depth, please use the relevant depth directly\n", caller, hwloc_obj_type_string(type));
+      return -1;
+    }
+    *depthp = depth;
+  }
+  return 0;
+}
+
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
@@ -136,16 +167,10 @@ int main(int argc, char *argv[])
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
 	}
-	numberoftype = hwloc_obj_type_of_string(argv[2]);
-	if (numberoftype == (hwloc_obj_type_t) -1) {
-	  char *endptr;
-	  unsigned _depth = strtoul(argv[2], &endptr, 0);
-	  if (*endptr) {
-	    fprintf(stderr, "unrecognized --number-of type or depth %s\n", argv[2]);
-	    usage(callname, stderr);
-	    return EXIT_SUCCESS;
-	  }
-	  numberofdepth = _depth;
+	if (hwloc_calc_type_depth(argv[2], &numberoftype, &numberofdepth) < 0) {
+	  fprintf(stderr, "unrecognized --number-of type or depth %s\n", argv[2]);
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
 	}
 	argv++;
 	argc--;
@@ -156,16 +181,10 @@ int main(int argc, char *argv[])
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
 	}
-	listtype = hwloc_obj_type_of_string(argv[2]);
-	if (listtype == (hwloc_obj_type_t) -1) {
-	  char *endptr;
-	  unsigned _depth = strtoul(argv[2], &endptr, 0);
-	  if (*endptr) {
-	    fprintf(stderr, "unrecognized list type or depth %s\n", argv[2]);
-	    usage(callname, stderr);
-	    return EXIT_SUCCESS;
-	  }
-	  listdepth = _depth;
+	if (hwloc_calc_type_depth(argv[2], &listtype, &listdepth) < 0) {
+	  fprintf(stderr, "unrecognized --intersect type or depth %s\n", argv[2]);
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
 	}
 	argv++;
 	argc--;
@@ -253,27 +272,11 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  if (numberoftype != (hwloc_obj_type_t) -1) {
-    numberofdepth = hwloc_get_type_depth(topology, numberoftype);
-    if (numberofdepth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      fprintf(stderr, "unavailable --number-of type %s\n", hwloc_obj_type_string(numberoftype));
-      goto out;
-    } else  if (numberofdepth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      fprintf(stderr, "cannot --number-of type %s with multiple depth, please use the relevant depth directly\n", hwloc_obj_type_string(numberoftype));
-      goto out;
-    }
-  }
+  if (hwloc_calc_check_type_depth(topology, numberoftype, &numberofdepth, "--number-of") < 0)
+    goto out;
 
-  if (listtype != (hwloc_obj_type_t) -1) {
-    listdepth = hwloc_get_type_depth(topology, listtype);
-    if (listdepth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      fprintf(stderr, "unavailable list type %s\n", hwloc_obj_type_string(listtype));
-      goto out;
-    } else  if (listdepth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      fprintf(stderr, "cannot list type %s with multiple depth, please use the relevant depth directly\n", hwloc_obj_type_string(listtype));
-      goto out;
-    }
-  }
+  if (hwloc_calc_check_type_depth(topology, listtype, &listdepth, "--intersect") < 0)
+    goto out;
 
   if (cmdline_args) {
     /* process command-line arguments */
