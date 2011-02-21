@@ -23,6 +23,9 @@ Version 1.2.0
   within objects. Add several helpers to find distances.
 * Add hwloc_topology_set_distance_matrix() to provide a matrix of
   distances between a given set of objects.
+* Add hwloc_get_last_cpu_location() and hwloc_get_proc_last_cpu_location()
+  to retrieve the processors where a process or thread recently ran.
+  + Add the corresponding --get-last-cpu-location option to hwloc-bind.
 * x86 backend (for freebsd): add x2APIC support
 * Rename hwloc-gather-topology.sh into hwloc-gather-topology
 * Add hwloc_bitmap_list_sscanf/snprintf/asprintf to convert between bitmaps
@@ -30,6 +33,15 @@ Version 1.2.0
 * hwloc_bitmap_set/clr_range() now support infinite ranges.
 * Support standard device-tree phandle, to get better support on e.g. ARM
   systems providing it.
+* Improve grouping to support asymmetric topologies.
+* hwloc-calc improvements:
+  + Add --number-of/-N option to report the number of objects of a given
+    type or depth.
+  + -I is now equivalent to --intersect for listing the indexes of
+    objects of a given type or depth that intersects the input.
+* Command-line tools now support "all" and "root" special locations
+  consisting in the entire topology.
+* Detect cache size on AIX. Thanks Christopher and IBM.
 
 
 Version 1.1.1

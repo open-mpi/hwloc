@@ -364,6 +364,7 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
   float min_distance = FLT_MAX;
   unsigned groupid = 1;
   unsigned i,j,k;
+  unsigned skipped = 0;
 
   memset(groupids, 0, nbobjs*sizeof(*groupids));
 
@@ -414,8 +415,9 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
     }
 
     if (size == 1) {
-      /* cancel this group and start over */
+      /* cancel this useless group, ignore this object and try from the next one */
       groupids[i] = 0;
+      skipped++;
       continue;
     }
 
@@ -424,6 +426,10 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
     hwloc_debug("found transitive graph with %u objects with minimal distance %f\n",
 	       size, min_distance);
   }
+
+  if (groupid == 2 && !skipped)
+    /* we created a single group containing all objects, ignore it */
+    return 0;
 
   /* return the last id, since it's also the number of used group ids */
   return groupid-1;
@@ -455,11 +461,6 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
   if (!nbgroups)
     return;
 
-  if (nbgroups == 1) {
-    hwloc_debug("%s", "ignoring Group object with all objects\n");
-    return;
-  }
-
   /* For convenience, put these declarations inside a block.  Saves us
      from a bunch of mallocs, particularly with the 2D array. */
   {
@@ -489,8 +490,10 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
       /* factorize distances */
       memset(groupdistances, 0, sizeof(groupdistances));
       for(i=0; i<nbobjs; i++)
-          for(j=0; j<nbobjs; j++)
-              groupdistances[groupids[i]-1][groupids[j]-1] += (*distances)[i][j];
+	if (groupids[i])
+	  for(j=0; j<nbobjs; j++)
+	    if (groupids[j])
+	      groupdistances[groupids[i]-1][groupids[j]-1] += (*distances)[i][j];
       for(i=0; i<nbgroups; i++)
           for(j=0; j<nbgroups; j++)
               groupdistances[i][j] /= groupsizes[i]*groupsizes[j];

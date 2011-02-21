@@ -136,6 +136,9 @@ extern "C" {
 #define hwloc_set_thread_cpubind HWLOC_NAME(set_thread_cpubind)
 #define hwloc_get_thread_cpubind HWLOC_NAME(get_thread_cpubind)
 
+#define hwloc_get_last_cpu_location HWLOC_NAME(get_last_cpu_location)
+#define hwloc_get_proc_last_cpu_location HWLOC_NAME(get_proc_last_cpu_location)
+
 #define HWLOC_MEMBIND_DEFAULT HWLOC_NAME_CAPS(MEMBIND_DEFAULT)
 #define HWLOC_MEMBIND_FIRSTTOUCH HWLOC_NAME_CAPS(MEMBIND_FIRSTTOUCH)
 #define HWLOC_MEMBIND_BIND HWLOC_NAME_CAPS(MEMBIND_BIND)

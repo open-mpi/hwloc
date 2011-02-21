@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -211,6 +211,9 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
     mode = HWLOC_MASK_APPEND_XOR;
     arg++;
   }
+
+  if (!strcmp(arg, "all") || !strcmp(arg, "root"))
+    return hwloc_mask_append_cpuset(set, hwloc_topology_get_topology_cpuset(topology), mode, verbose);
 
   colon = strchr(arg, ':');
   if (colon) {

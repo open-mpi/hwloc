@@ -39,6 +39,13 @@ Report the current bindings.
 When combined with \fB\-\-membind\fR, report the memory binding
 instead of CPU binding.
 .TP
+\fB\-\-get-last-cpu-location\fR
+Report the last processors where the process ran.
+Note that the result may already be outdated when reported since
+the operating system may move the process to other processors
+at any time according to the binding.
+This option cannot be combined with \fB\-\-membind\fR.
+.TP
 \fB\-\-single\fR
 Bind on a single CPU to prevent migration.
 .TP
@@ -138,6 +145,10 @@ To run on odd cores within even sockets:
 To run on the first socket, except on its second and fifth cores:
 
     hwloc-bind socket:0 ~socket:0.core:1 ~socket:0.core:4 echo hello
+
+To run anywhere except on the first socket:
+
+    hwloc-bind all ~socket:0 echo hello
 
 To bind memory on second memory node and run on first node (when supported by the OS):
 

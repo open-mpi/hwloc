@@ -1665,6 +1665,10 @@ hwloc_discover(struct hwloc_topology *topology)
     topology->set_thread_cpubind = dontset_thread_cpubind;
     topology->get_thread_cpubind = dontget_thread_cpubind;
 #endif
+    topology->get_thisproc_last_cpu_location = dontget_thisproc_cpubind; /* cpubind instead of last_cpu_location is ok */
+    topology->get_thisthread_last_cpu_location = dontget_thisthread_cpubind; /* cpubind instead of last_cpu_location is ok */
+    topology->get_proc_last_cpu_location = dontget_proc_cpubind; /* cpubind instead of last_cpu_location is ok */
+    /* TODO: get_thread_last_cpu_location */
     topology->set_thisproc_membind = dontset_thisproc_membind;
     topology->get_thisproc_membind = dontget_thisproc_membind;
     topology->set_thisthread_membind = dontset_thisthread_membind;
@@ -1693,6 +1697,9 @@ hwloc_discover(struct hwloc_topology *topology)
     DO(cpu,get_thisthread_cpubind);
     DO(cpu,set_thread_cpubind);
     DO(cpu,get_thread_cpubind);
+    DO(cpu,get_thisproc_last_cpu_location);
+    DO(cpu,get_proc_last_cpu_location);
+    DO(cpu,get_thisthread_last_cpu_location);
     DO(mem,set_thisproc_membind);
     DO(mem,get_thisproc_membind);
     DO(mem,set_thisthread_membind);

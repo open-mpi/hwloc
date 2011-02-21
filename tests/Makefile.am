@@ -30,11 +30,13 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_bitmap_singlify \
 	hwloc_type_depth \
 	hwloc_bind \
+	hwloc_get_last_cpu_location \
 	hwloc_object_userdata \
 	hwloc_synthetic \
 	hwloc_is_thissystem \
 	hwloc_distances \
 	hwloc_set_distances \
+	hwloc_groups \
 	hwloc_insert_misc
 
 if HWLOC_HAVE_LINUX_LIBNUMA

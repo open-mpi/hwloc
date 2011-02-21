@@ -828,6 +828,116 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
+static int
+hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_bitmap_t set)
+{
+  /* read /proc/pid/stat.
+   * its second field contains the command name between parentheses,
+   * and the command itself may contain parentheses,
+   * so read the whole line and find the last closing parenthesis to find the third field.
+   */
+  char buf[1024] = "";
+  char name[64];
+  char *tmp;
+  FILE *file;
+  int i;
+
+  if (!tid)
+    strcpy(name, "/proc/self/stat");
+  else
+    snprintf(name, sizeof(name), "/proc/%lu/stat", (unsigned long) tid);
+  file = fopen(name, "r");
+  if (!file) {
+    errno = ENOSYS;
+    return -1;
+  }
+  fgets(buf, sizeof(buf), file);
+  fclose(file);
+
+  tmp = strrchr(buf, ')');
+  if (!tmp) {
+    errno = ENOSYS;
+    return -1;
+  }
+  /* skip ') ' to find the actual third argument */
+  tmp += 2;
+
+  /* skip 35 fields */
+  for(i=0; i<36; i++) {
+    tmp = strchr(tmp, ' ');
+    if (!tmp) {
+      errno = ENOSYS;
+      return -1;
+    }
+    /* skip the ' ' itself */
+    tmp++;
+  }
+
+  /* read the last cpu in the 38th field now */
+  if (sscanf(tmp, "%d ", &i) != 1) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  hwloc_bitmap_only(set, i);
+  return 0;
+}
+
+static int
+hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags __hwloc_attribute_unused)
+{
+  hwloc_bitmap_t *cpusets = data;
+  hwloc_bitmap_t cpuset = cpusets[0];
+  hwloc_bitmap_t tidset = cpusets[1];
+
+  if (hwloc_linux_get_tid_last_cpu_location(topology, tid, tidset))
+    return -1;
+
+  /* reset the cpuset on first iteration */
+  if (!idx)
+    hwloc_bitmap_zero(cpuset);
+
+  hwloc_bitmap_or(cpuset, cpuset, tidset);
+  return 0;
+}
+
+static int
+hwloc_linux_get_pid_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
+{
+  hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
+  hwloc_bitmap_t cpusets[2] = { hwloc_set, tidset };
+  int ret;
+  ret = hwloc_linux_foreach_proc_tid(topology, pid,
+				     hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb,
+				     (void*) cpusets, flags);
+  hwloc_bitmap_free(tidset);
+  return ret;
+}
+
+static int
+hwloc_linux_get_proc_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
+{
+  if (pid == 0)
+    pid = topology->pid;
+  if (flags & HWLOC_CPUBIND_THREAD)
+    return hwloc_linux_get_tid_last_cpu_location(topology, pid, hwloc_set);
+  else
+    return hwloc_linux_get_pid_last_cpu_location(topology, pid, hwloc_set, flags);
+}
+
+static int
+hwloc_linux_get_thisproc_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
+{
+  return hwloc_linux_get_pid_last_cpu_location(topology, topology->pid, hwloc_set, flags);
+}
+
+static int
+hwloc_linux_get_thisthread_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+{
+  return hwloc_linux_get_tid_last_cpu_location(topology, topology->pid, hwloc_set);
+}
+
+
 #if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
 static int
 hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t policy, int flags)
@@ -2706,6 +2816,9 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
   topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+  topology->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
+  topology->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
+  topology->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
   topology->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
   topology->get_thisthread_membind = hwloc_linux_get_thisthread_membind;

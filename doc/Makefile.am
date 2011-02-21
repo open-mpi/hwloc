@@ -358,6 +358,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_first_largest_obj_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_last_cpu_location.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \
@@ -379,6 +380,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_cpubind.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_proc_last_cpu_location.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_proc_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_get_pu_obj_by_os_index.3 \

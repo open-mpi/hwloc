@@ -37,7 +37,12 @@ Use OS/physical indexes instead of logical indexes for output.
 \fB\-\-lo\fR \fB\-\-logical\-output\fR
 Use logical indexes instead of physical/OS indexes for output (default).
 .TP
-\fB\-\-intersect <type|depth>\fR
+\fB\-N \-\-number-of <type|depth>\fR
+Report the number of objects of the given type or depth that intersect the CPU set.
+This is convenient for finding how many cores, NUMA nodes or PUs are available
+in a machine.
+.TP
+\fB\-I \-\-intersect <type|depth>\fR
 Find the list of objects of the given type or depth that intersect the CPU set and
 report the comma-separated list of their indexes instead of the cpu mask string.
 This may be used for determining the list of objects above or below the input
@@ -46,6 +51,14 @@ When combined with \fB\-\-physical\fR, the list is convenient to pass to externa
 tools such as taskset or numactl \fB\-\-physcpubind\fR or \fB\-\-membind\fR.
 This is different from \-\-largest since the latter requires that all reported
 objects are strictly included inside the input objects.
+.TP
+\fB\-H \-\-hierarchical <type1>.<type2>...\fR
+Find the list of objects of type <type2> that intersect the CPU set and
+report the space-separated list of their hierarchical indexes with respect
+to <type1>, <type2>, etc.
+For instance, if \fIsocket.core\fR is given, the output would be
+\fISocket:1.Core:2 Socket:2.Core:3\fR if the input contains the third
+core of the second socket and the fourth core of the third socket.
 .TP
 \fB\-\-largest\fR
 Report (in a human readable format) the list of largest objects which exactly
@@ -161,6 +174,16 @@ To display the physical index of a processor given by its logical index:
 
     $ hwloc-calc PU:2 --physical-output --intersect PU
     3
+
+To display the list of per-socket cores that intersect the input:
+
+    $ hwloc-calc 0x00003c00 --hierarchical socket.core
+    Socket:2.Core:1 Socket:3.Core:0
+
+To display the cpuset of the entire topology except the third socket:
+
+    $ hwloc-calc all ~socket:3
+    0x0000f0ff
 
 To combine both physical and logical indexes as input:
 
