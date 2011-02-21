@@ -28,9 +28,10 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --lo --logical-output     Use logical indexes for output (default)\n");
   fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
   fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
-  fprintf(where, "  -n --number-of <type|depth>\n"
-                 "                            Report the number of objects intersecting the CPU set\n");
-  fprintf(where, "  --intersect <type|depth>  Report the list of object indexes intersecting the CPU set\n");
+  fprintf(where, "  --number-of <type|depth>\n"
+                 "  -N <type|depth>           Report the number of objects intersecting the CPU set\n");
+  fprintf(where, "  --intersect <type|depth>\n"
+		 "  -I <type|depth>           Report the indexes of object intersecting the CPU set\n");
   fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "  --taskset                 Manipulate taskset-specific cpuset strings\n");
@@ -162,7 +163,7 @@ int main(int argc, char *argv[])
 	usage(callname, stdout);
 	return EXIT_SUCCESS;
       }
-      if (!strcmp(argv[1], "--number-of") || !strcmp(argv[1], "-n")) {
+      if (!strcmp(argv[1], "--number-of") || !strcmp(argv[1], "-N")) {
 	if (argc <= 2) {
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
@@ -176,7 +177,7 @@ int main(int argc, char *argv[])
 	argc--;
 	goto next;
       }
-      if (!strcmp(argv[1], "--intersect")) {
+      if (!strcmp(argv[1], "--intersect") || !strcmp(argv[1], "-I")) {
 	if (argc <= 2) {
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;

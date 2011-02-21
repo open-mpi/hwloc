@@ -34,8 +34,11 @@ Version 1.2.0
 * Support standard device-tree phandle, to get better support on e.g. ARM
   systems providing it.
 * Improve grouping to support asymmetric topologies.
-* Add --number-of/-n option to report the number of objects of a given type
-  or depth in hwloc-calc.
+* hwloc-calc improvements:
+  + Add --number-of/-N option to report the number of objects of a given
+    type or depth.
+  + -I is now equivalent to --intersect for listing the indexes of
+    objects of a given type or depth that intersects the input.
 * Command-line tools now support "all" and "root" special locations
   consisting in the entire topology.
 * Detect cache size on AIX. Thanks Christopher and IBM.
