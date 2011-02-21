@@ -30,6 +30,7 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_bitmap_singlify \
 	hwloc_type_depth \
 	hwloc_bind \
+	hwloc_get_last_cpu_location \
 	hwloc_object_userdata \
 	hwloc_synthetic \
 	hwloc_is_thissystem \
