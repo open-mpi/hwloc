@@ -662,6 +662,12 @@ struct hwloc_topology_cpubind_support {
   unsigned char set_thread_cpubind;
   /** Getting the binding of a given thread only is supported.  */
   unsigned char get_thread_cpubind;
+  /** Getting the last processors where the whole current process ran is supported */
+  unsigned char get_thisproc_last_cpu_location;
+  /** Getting the last processors where a whole process ran is supported */
+  unsigned char get_proc_last_cpu_location;
+  /** Getting the last processors where the current thread ran is supported */
+  unsigned char get_thisthread_last_cpu_location;
 };
 
 /** \brief Flags describing actual memory binding support for this topology. */
@@ -1096,7 +1102,7 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int flags);
 #endif
 
-/** \brief Get the CPU where the current process or thread recently ran.
+/** \brief Get the last CPU where the current process or thread ran.
  *
  * The operating may move some tasks from one processor
  * to another at any time according to their binding,
@@ -1105,7 +1111,7 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  */
 HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
-/** \brief Get the CPU where a process recently ran.
+/** \brief Get the last CPU where a process ran.
  *
  * The operating may move some tasks from one processor
  * to another at any time according to their binding,
