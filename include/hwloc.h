@@ -1103,7 +1103,7 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * so this function may return something that is already
  * outdated.
  */
-HWLOC_DECLSPEC int hwloc_get_lastcpuexec(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
+HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
 /** \brief Get the CPU where a process recently ran.
  *
@@ -1114,7 +1114,7 @@ HWLOC_DECLSPEC int hwloc_get_lastcpuexec(hwloc_topology_t topology, hwloc_cpuset
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
  */
-HWLOC_DECLSPEC int hwloc_get_proc_lastcpuexec(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
+HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
 /** @} */
 

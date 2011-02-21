@@ -686,7 +686,7 @@ hwloc_set_windows_hooks(struct hwloc_topology *topology)
   topology->set_thisproc_cpubind = hwloc_win_set_thisproc_cpubind;
   topology->get_thisproc_cpubind = hwloc_win_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_win_set_thisthread_cpubind;
-  /* TODO: get_lastcpuexec: use GetCurrentProcessorNumber */
+  /* TODO: get_last_cpu_location: use GetCurrentProcessorNumber */
 
   topology->set_proc_membind = hwloc_win_set_proc_membind;
   topology->get_proc_membind = hwloc_win_get_proc_membind;

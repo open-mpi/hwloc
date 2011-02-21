@@ -829,7 +829,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
 static int
-hwloc_linux_get_tid_lastcpuexec(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_bitmap_t set)
+hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_bitmap_t set)
 {
   /* read /proc/pid/stat.
    * its second field contains the command name between parentheses,
@@ -881,13 +881,13 @@ hwloc_linux_get_tid_lastcpuexec(hwloc_topology_t topology __hwloc_attribute_unus
 }
 
 static int
-hwloc_linux_foreach_proc_tid_get_lastcpuexec_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags __hwloc_attribute_unused)
+hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags __hwloc_attribute_unused)
 {
   hwloc_bitmap_t *cpusets = data;
   hwloc_bitmap_t cpuset = cpusets[0];
   hwloc_bitmap_t tidset = cpusets[1];
 
-  if (hwloc_linux_get_tid_lastcpuexec(topology, tid, tidset))
+  if (hwloc_linux_get_tid_last_cpu_location(topology, tid, tidset))
     return -1;
 
   /* reset the cpuset on first iteration */
@@ -899,39 +899,39 @@ hwloc_linux_foreach_proc_tid_get_lastcpuexec_cb(hwloc_topology_t topology, pid_t
 }
 
 static int
-hwloc_linux_get_pid_lastcpuexec(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
+hwloc_linux_get_pid_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
   hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
   hwloc_bitmap_t cpusets[2] = { hwloc_set, tidset };
   int ret;
   ret = hwloc_linux_foreach_proc_tid(topology, pid,
-				     hwloc_linux_foreach_proc_tid_get_lastcpuexec_cb,
+				     hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb,
 				     (void*) cpusets, flags);
   hwloc_bitmap_free(tidset);
   return ret;
 }
 
 static int
-hwloc_linux_get_proc_lastcpuexec(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
+hwloc_linux_get_proc_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
   if (pid == 0)
     pid = topology->pid;
   if (flags & HWLOC_CPUBIND_THREAD)
-    return hwloc_linux_get_tid_lastcpuexec(topology, pid, hwloc_set);
+    return hwloc_linux_get_tid_last_cpu_location(topology, pid, hwloc_set);
   else
-    return hwloc_linux_get_pid_lastcpuexec(topology, pid, hwloc_set, flags);
+    return hwloc_linux_get_pid_last_cpu_location(topology, pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_get_thisproc_lastcpuexec(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
+hwloc_linux_get_thisproc_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
 {
-  return hwloc_linux_get_pid_lastcpuexec(topology, topology->pid, hwloc_set, flags);
+  return hwloc_linux_get_pid_last_cpu_location(topology, topology->pid, hwloc_set, flags);
 }
 
 static int
-hwloc_linux_get_thisthread_lastcpuexec(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+hwloc_linux_get_thisthread_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
-  return hwloc_linux_get_tid_lastcpuexec(topology, topology->pid, hwloc_set);
+  return hwloc_linux_get_tid_last_cpu_location(topology, topology->pid, hwloc_set);
 }
 
 
@@ -2813,9 +2813,9 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
   topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
-  topology->get_thisthread_lastcpuexec = hwloc_linux_get_thisthread_lastcpuexec;
-  topology->get_thisproc_lastcpuexec = hwloc_linux_get_thisproc_lastcpuexec;
-  topology->get_proc_lastcpuexec = hwloc_linux_get_proc_lastcpuexec;
+  topology->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
+  topology->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
+  topology->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
   topology->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
   topology->get_thisthread_membind = hwloc_linux_get_thisthread_membind;

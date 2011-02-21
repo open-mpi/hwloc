@@ -153,19 +153,19 @@ hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bi
 #endif
 
 int
-hwloc_get_lastcpuexec(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
+hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
 {
   if (flags & HWLOC_CPUBIND_PROCESS) {
-    if (topology->get_thisproc_lastcpuexec)
-      return topology->get_thisproc_lastcpuexec(topology, set, flags);
+    if (topology->get_thisproc_last_cpu_location)
+      return topology->get_thisproc_last_cpu_location(topology, set, flags);
   } else if (flags & HWLOC_CPUBIND_THREAD) {
-    if (topology->get_thisthread_lastcpuexec)
-      return topology->get_thisthread_lastcpuexec(topology, set, flags);
+    if (topology->get_thisthread_last_cpu_location)
+      return topology->get_thisthread_last_cpu_location(topology, set, flags);
   } else {
-    if (topology->get_thisproc_lastcpuexec)
-      return topology->get_thisproc_lastcpuexec(topology, set, flags);
-    else if (topology->get_thisthread_lastcpuexec)
-      return topology->get_thisthread_lastcpuexec(topology, set, flags);
+    if (topology->get_thisproc_last_cpu_location)
+      return topology->get_thisproc_last_cpu_location(topology, set, flags);
+    else if (topology->get_thisthread_last_cpu_location)
+      return topology->get_thisthread_last_cpu_location(topology, set, flags);
   }
 
   errno = ENOSYS;
@@ -173,10 +173,10 @@ hwloc_get_lastcpuexec(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
 }
 
 int
-hwloc_get_proc_lastcpuexec(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int flags)
+hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int flags)
 {
-  if (topology->get_proc_lastcpuexec)
-    return topology->get_proc_lastcpuexec(topology, pid, set, flags);
+  if (topology->get_proc_last_cpu_location)
+    return topology->get_proc_last_cpu_location(topology, pid, set, flags);
 
   errno = ENOSYS;
   return -1;

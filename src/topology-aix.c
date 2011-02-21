@@ -559,7 +559,7 @@ hwloc_set_aix_hooks(struct hwloc_topology *topology)
   topology->get_thisproc_cpubind = hwloc_aix_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
   topology->get_thisthread_cpubind = hwloc_aix_get_thisthread_cpubind;
-  /* TODO: get_lastcpuexec: use mycpu() */
+  /* TODO: get_last_cpu_location: use mycpu() */
 #ifdef P_DEFAULT
   topology->set_proc_membind = hwloc_aix_set_proc_membind;
   topology->get_proc_membind = hwloc_aix_get_proc_membind;

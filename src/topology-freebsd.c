@@ -197,5 +197,5 @@ hwloc_set_freebsd_hooks(struct hwloc_topology *topology)
 #endif
 #endif
 #endif
-  /* TODO: get_lastcpuexec: find out ki_lastcpu */
+  /* TODO: get_last_cpu_location: find out ki_lastcpu */
 }
