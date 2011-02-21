@@ -842,7 +842,10 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
   FILE *file;
   int i;
 
-  snprintf(name, sizeof(name), "/proc/%lu/stat", (unsigned long) tid);
+  if (!tid)
+    strcpy(name, "/proc/self/stat");
+  else
+    snprintf(name, sizeof(name), "/proc/%lu/stat", (unsigned long) tid);
   file = fopen(name, "r");
   if (!file) {
     errno = ENOSYS;
