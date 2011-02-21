@@ -491,8 +491,8 @@ hwloc_alloc(hwloc_topology_t topology, size_t len)
 void *
 hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
-  nodeset = hwloc_fix_membind(topology, nodeset);
   void *p;
+  nodeset = hwloc_fix_membind(topology, nodeset);
   if (!nodeset)
     goto fallback;
   if (flags & HWLOC_MEMBIND_MIGRATE) {

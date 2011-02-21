@@ -2,7 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -155,7 +155,9 @@ int main(int argc, char *argv[])
     unsigned i;
     int from_depth, to_depth;
     unsigned chunks;
-    hwloc_bitmap_t cpuset[n];
+    hwloc_bitmap_t *cpuset;
+
+    cpuset = malloc(n * sizeof(hwloc_bitmap_t));
 
     if (input)
       hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
@@ -189,7 +191,9 @@ int main(int argc, char *argv[])
 
     chunks =  hwloc_get_nbobjs_by_depth(topology, from_depth);
     {
-      hwloc_obj_t roots[chunks];
+      hwloc_obj_t *roots;
+
+      roots = malloc(chunks * sizeof(hwloc_obj_t));
 
       for (i = 0; i < chunks; i++)
         roots[i] = hwloc_get_obj_by_depth(topology, from_depth, i);
@@ -208,7 +212,11 @@ int main(int argc, char *argv[])
 	free(str);
 	hwloc_bitmap_free(cpuset[i]);
       }
+
+      free(roots);
     }
+
+   free(cpuset);
   }
 
   hwloc_topology_destroy(topology);

@@ -279,28 +279,49 @@ enum hwloc_type_cmp_e {
   HWLOC_TYPE_EQUAL
 };
 
-static const unsigned obj_type_order[] = {
-  [HWLOC_OBJ_SYSTEM] = 0,
-  [HWLOC_OBJ_MACHINE] = 1,
-  [HWLOC_OBJ_GROUP] = 2,
-  [HWLOC_OBJ_NODE] = 3,
-  [HWLOC_OBJ_SOCKET] = 4,
-  [HWLOC_OBJ_CACHE] = 5,
-  [HWLOC_OBJ_CORE] = 6,
-  [HWLOC_OBJ_PU] = 7,
-  [HWLOC_OBJ_MISC] = 8,
+/* WARNING: The indexes of this array MUST match the ordering that of
+   the obj_order_type[] array, below.  Specifically, the values must
+   be laid out such that:
+
+       obj_order_type[obj_type_order[N]] = N
+
+   for all HWLOC_OBJ_* values of N.  Put differently:
+
+       obj_type_order[A] = B
+
+   where the A values are in order of the hwloc_obj_type_t enum, and
+   the B values are the corresponding indexes of obj_order_type.
+
+   We can't use C99 syntax to initialize this in a little safer manner
+   -- bummer.  :-( 
+
+   *************************************************************
+   *** DO NOT CHANGE THE ORDERING OF THIS ARRAY WITHOUT TRIPLE
+   *** CHECKING ITS CORRECTNESS!
+   *************************************************************
+   */
+static unsigned obj_type_order[] = {
+    /* first entry is HWLOC_OBJ_SYSTEM */  0,
+    /* next entry is HWLOC_OBJ_MACHINE */  1,
+    /* next entry is HWLOC_OBJ_NODE */     3,
+    /* next entry is HWLOC_OBJ_SOCKET */   4,
+    /* next entry is HWLOC_OBJ_CACHE */    5,
+    /* next entry is HWLOC_OBJ_CORE */     6,
+    /* next entry is HWLOC_OBJ_PU */       7,
+    /* next entry is HWLOC_OBJ_GROUP */    2,
+    /* next entry is HWLOC_OBJ_MISC */     8,
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
-  [0] = HWLOC_OBJ_SYSTEM,
-  [1] = HWLOC_OBJ_MACHINE,
-  [2] = HWLOC_OBJ_GROUP,
-  [3] = HWLOC_OBJ_NODE,
-  [4] = HWLOC_OBJ_SOCKET,
-  [5] = HWLOC_OBJ_CACHE,
-  [6] = HWLOC_OBJ_CORE,
-  [7] = HWLOC_OBJ_PU,
-  [8] = HWLOC_OBJ_MISC
+  HWLOC_OBJ_SYSTEM,
+  HWLOC_OBJ_MACHINE,
+  HWLOC_OBJ_GROUP,
+  HWLOC_OBJ_NODE,
+  HWLOC_OBJ_SOCKET,
+  HWLOC_OBJ_CACHE,
+  HWLOC_OBJ_CORE,
+  HWLOC_OBJ_PU,
+  HWLOC_OBJ_MISC,
 };
 
 static unsigned __hwloc_attribute_const

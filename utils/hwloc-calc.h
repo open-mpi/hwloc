@@ -24,7 +24,7 @@ typedef enum hwloc_mask_append_mode_e {
   HWLOC_MASK_APPEND_ADD,
   HWLOC_MASK_APPEND_CLR,
   HWLOC_MASK_APPEND_AND,
-  HWLOC_MASK_APPEND_XOR,
+  HWLOC_MASK_APPEND_XOR
 } hwloc_mask_append_mode_t;
 
 static inline int

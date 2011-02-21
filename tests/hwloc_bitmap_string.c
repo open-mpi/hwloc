@@ -162,13 +162,6 @@ int main(void)
   check_cpuset(obj->cpuset, NULL);
   printf("last cpu cpuset converted back and forth, ok\n");
 
-//  hwloc_bitmap_sscanf(set, "1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n");
-//  char *s;
-//  hwloc_bitmap_asprintf(&s, &set);
-//  printf("%s\n", s);
-//  free(s);
-//  will be truncated after ",4," since it's too large
-
   free(string);
 
   hwloc_topology_destroy(topology);

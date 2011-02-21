@@ -2,6 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -279,11 +280,11 @@ windows_text(void *output, int r, int g, int b, int size, unsigned depth __hwloc
 }
 
 struct draw_methods windows_draw_methods = {
-  .start = windows_start,
-  .declare_color = windows_declare_color,
-  .box = windows_box,
-  .line = windows_line,
-  .text = windows_text,
+  windows_start,
+  windows_declare_color,
+  windows_box,
+  windows_line,
+  windows_text,
 };
 
 void

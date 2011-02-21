@@ -108,11 +108,11 @@ fig_text(void *output_, int r, int g, int b, int size, unsigned depth, unsigned 
 }
 
 static struct draw_methods fig_draw_methods = {
-  .start = fig_start,
-  .declare_color = fig_declare_color,
-  .box = fig_box,
-  .line = fig_line,
-  .text = fig_text,
+  fig_start,
+  fig_declare_color,
+  fig_box,
+  fig_line,
+  fig_text,
 };
 
 void
