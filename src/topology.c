@@ -49,6 +49,23 @@ unsigned hwloc_get_api_version(void)
   return HWLOC_API_VERSION;
 }
 
+static void hwloc_report_error(const char *msg, int line)
+{
+    static int reported = 0;
+
+    if (!reported) {
+        fprintf(stderr, "****************************************************************************\n");
+        fprintf(stderr, "* Hwloc has encountered what looks like an error from the operating system.\n");
+        fprintf(stderr, "*\n");
+        fprintf(stderr, "* %s\n", msg);
+        fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
+        fprintf(stderr, "*\n");
+        fprintf(stderr, "* Please report this error message to the hwloc user's mailing list,\n");
+        fprintf(stderr, "* along with the output from the hwloc-gather-topology.sh script.\n");
+        fprintf(stderr, "****************************************************************************\n");
+        reported = 1;
+    }
+}
 
 static void
 hwloc_topology_clear (struct hwloc_topology *topology);
@@ -517,8 +534,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	return -1;
       case HWLOC_OBJ_INCLUDED:
 	if (container) {
-	  /* TODO: how to report?  */
-	  fprintf(stderr, "object included in several different objects!\n");
+          hwloc_report_error("object included in several different objects!", __LINE__);
 	  /* We can't handle that.  */
 	  return -1;
 	}
@@ -526,8 +542,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	container = child;
 	break;
       case HWLOC_OBJ_INTERSECTS:
-	/* TODO: how to report?  */
-	fprintf(stderr, "object intersection without inclusion!\n");
+          hwloc_report_error("object intersection without inclusion!", __LINE__);
 	/* We can't handle that.  */
 	return -1;
       case HWLOC_OBJ_CONTAINS:
