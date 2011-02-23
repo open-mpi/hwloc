@@ -19,6 +19,7 @@ in v0.9.1).
 
 Version 1.2.0
 -------------
+* Removed C99 usage from code base.
 * Expose latency matrices in the API as an array of distance structures
   within objects. Add several helpers to find distances.
 * Add hwloc_topology_set_distance_matrix() to provide a matrix of
