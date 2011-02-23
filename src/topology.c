@@ -720,7 +720,6 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	return;
       case HWLOC_OBJ_INCLUDED:
 	if (container) {
-	  /* TODO: how to report?  */
           hwloc_report_error("object included in several different objects!", __LINE__);
 	  /* We can't handle that.  */
 	  return;
@@ -729,7 +728,6 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	container = child;
 	break;
       case HWLOC_OBJ_INTERSECTS:
-	/* TODO: how to report?  */
           hwloc_report_error("object intersection without inclusion!", __LINE__);
 	/* We can't handle that.  */
 	return;
