@@ -352,6 +352,24 @@ hwloc_free_logical_distances(struct hwloc_distances_s * dist)
   free(dist);
 }
 
+static void hwloc_report_user_distance_error(const char *msg, int line)
+{
+    static int reported = 0;
+
+    if (!reported) {
+        fprintf(stderr, "****************************************************************************\n");
+        fprintf(stderr, "* Hwloc has encountered what looks like an error from user-given distances.\n");
+        fprintf(stderr, "*\n");
+        fprintf(stderr, "* %s\n", msg);
+        fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
+        fprintf(stderr, "*\n");
+        fprintf(stderr, "* Please make sure that distances given through the interface or environment\n");
+        fprintf(stderr, "* variables do not contradict any other topology information.\n");
+        fprintf(stderr, "****************************************************************************\n");
+        reported = 1;
+    }
+}
+
 /*
  * Place objects in groups if they are in a transitive graph of minimal distances.
  * Return how many groups were created, or 0 if some incomplete distance graphs were found.
@@ -446,7 +464,8 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
 				   unsigned nbobjs,
 				   struct hwloc_obj **objs,
 				   float *_distances,
-				   int depth)
+				   int depth,
+				   int fromuser)
 {
   unsigned *groupids = NULL;
   unsigned nbgroups;
@@ -499,7 +518,8 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
               }
           hwloc_debug_1arg_bitmap("adding Group object with %u objects and cpuset %s\n",
                                   groupsizes[i], group_obj->cpuset);
-          hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error); /* FIXME: show a different error message if the distance was user-given */
+          hwloc__insert_object_by_cpuset(topology, group_obj,
+					 fromuser ? hwloc_report_user_distance_error : hwloc_report_os_error);
           groupobjs[i] = group_obj;
       }
 
@@ -530,7 +550,7 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
       }
 #endif
 
-      hwloc__setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, depth + 1);
+      hwloc__setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, depth + 1, fromuser);
 
   inner_free:
       /* Safely free everything */
@@ -558,7 +578,8 @@ static void
 hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
 				  unsigned nbobjs,
 				  struct hwloc_obj **objs,
-				  float *_distances)
+				  float *_distances,
+				  int fromuser)
 {
   unsigned i,j;
 
@@ -597,7 +618,7 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
     }
   }
 
-  hwloc__setup_groups_from_distances(topology, nbobjs, objs, _distances, 0);
+  hwloc__setup_groups_from_distances(topology, nbobjs, objs, _distances, 0, fromuser);
 }
 
 void
@@ -618,7 +639,8 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
       assert(topology->os_distances[type].distances);
       hwloc_setup_groups_from_distances(topology, nbobjs,
 					topology->os_distances[type].objs,
-					topology->os_distances[type].distances);
+					topology->os_distances[type].distances,
+					topology->os_distances[type].indexes != NULL);
     }
   }
 }
