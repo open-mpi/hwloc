@@ -43,10 +43,11 @@
 static void
 output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
-  char type[32], attr[256], phys[32] = "";
+  char type[32], *attr, phys[32] = "";
   unsigned idx = logical ? l->logical_index : l->os_index;
   const char *indexprefix = logical ? " L#" :  " P#";
   if (show_cpuset < 2) {
+    int len;
     if (l->type == HWLOC_OBJ_MISC && l->name)
       fprintf(output, "%s", l->name);
     else {
@@ -58,12 +59,16 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     if (logical && l->os_index != (unsigned) -1 &&
 	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NODE))
       snprintf(phys, sizeof(phys), "P#%u", l->os_index);
-    hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
+    len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode-1);
+    attr = malloc(len+1);
+    *attr = '\0';
+    len = hwloc_obj_attr_snprintf (attr, len+1, l, " ", verbose_mode-1);
     if (*phys || *attr) {
       const char *separator = *phys != '\0' && *attr!= '\0' ? " " : "";
       fprintf(output, " (%s%s%s)",
 	      phys, separator, attr);
     }
+    free(attr);
     if (verbose_mode >= 2 && l->name && l->type != HWLOC_OBJ_MISC)
       fprintf(output, " \"%s\"", l->name);
   }
