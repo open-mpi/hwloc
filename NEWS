@@ -35,6 +35,7 @@ Version 1.2.0
 * Support standard device-tree phandle, to get better support on e.g. ARM
   systems providing it.
 * Improve grouping to support asymmetric topologies.
+* hwloc_insert_misc_object_by_cpuset() now returns NULL in case of error.
 * hwloc-calc improvements:
   + Add --number-of/-N option to report the number of objects of a given
     type or depth.
