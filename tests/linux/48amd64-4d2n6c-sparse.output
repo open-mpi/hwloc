@@ -1,4 +1,4 @@
-Machine (P#0 total=100661148KB DMIProductName=DRACHMA DMIProductVersion="Rev 2" DMIProductSerial=0123456789 DMIProductUUID=008844D0-2214-DF11-B89F-F50F715B14E8 DMIBoardVendor=AMD DMIBoardName=DRACHMA DMIBoardVersion="Rev 2" DMIBoardSerial=0123456789 DMIBoardAssetTag= )
+Machine (P#0 total=100661148KB DMIProductName=DRACHMA DMIProductVersion="Rev 2" DMIProductSerial=0123456789 DMIProductUUID=008844D0-2214-DF11-B89F-F50F715B14E8 DMIBoardVendor=AMD DMIBoardName=DRACHMA DMIBoardVersion="Rev 2" DMIBoardSerial=0123456789 DMIBoardAssetTag= DMIChassisVendor=AMD DMIChassisType=23 DMIChassisVersion= DMIChassisSerial= DMIChassisAssetTag= DMIBIOSVendor="Phoenix Technologies Ltd." DMIBIOSVersion=PDPAX1-6 DMIBIOSDate=12/15/2009 DMISysVendor=AMD Backend=Linux)
   Socket L#0 (P#0 total=25163676KB)
     NUMANode L#0 (P#0 local=8386460KB total=8386460KB)
       L3Cache L#0 (5118KB line=64)

@@ -24,6 +24,9 @@ Version 1.1.2
   the problem and providing a patch.
 * Fix the command-line parsing of hwloc-bind --mempolicy interleave.
   Thanks to Guy Streeter for reporting the problem.
+* Stop truncating the output in hwloc_obj_attr_snprintf() and in the
+  corresponding lstopo output. Thanks to Guy Streeter for reporting the
+  problem.
 
 
 Version 1.1.1
