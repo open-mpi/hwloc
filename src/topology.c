@@ -49,7 +49,7 @@ unsigned hwloc_get_api_version(void)
   return HWLOC_API_VERSION;
 }
 
-static void hwloc_report_error(const char *msg, int line)
+void hwloc_report_os_error(const char *msg, int line)
 {
     static int reported = 0;
 
@@ -477,7 +477,8 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
 /* Try to insert OBJ in CUR, recurse if needed */
 static int
-hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
+hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj,
+			        hwloc_report_error_t report_error)
 {
   hwloc_obj_t child, container, *cur_children, *obj_children, next_child = NULL;
   int put;
@@ -534,7 +535,8 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	return -1;
       case HWLOC_OBJ_INCLUDED:
 	if (container) {
-          hwloc_report_error("object included in several different objects!", __LINE__);
+          if (report_error)
+            report_error("object included in several different objects!", __LINE__);
 	  /* We can't handle that.  */
 	  return -1;
 	}
@@ -542,7 +544,8 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	container = child;
 	break;
       case HWLOC_OBJ_INTERSECTS:
-          hwloc_report_error("object intersection without inclusion!", __LINE__);
+        if (report_error)
+          report_error("object intersection without inclusion!", __LINE__);
 	/* We can't handle that.  */
 	return -1;
       case HWLOC_OBJ_CONTAINS:
@@ -556,7 +559,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 
   if (container) {
     /* OBJ is strictly contained is some child of CUR, go deeper.  */
-    return hwloc__insert_object_by_cpuset(topology, container, obj);
+    return hwloc___insert_object_by_cpuset(topology, container, obj, report_error);
   }
 
   /*
@@ -621,8 +624,10 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
   return 0;
 }
 
+/* insertion routine that lets you change the error reporting callback */
 void
-hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
+hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
+			       hwloc_report_error_t report_error)
 {
   int ret;
   /* Start at the top.  */
@@ -630,9 +635,17 @@ hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
   hwloc_bitmap_or(topology->levels[0][0]->complete_cpuset, topology->levels[0][0]->complete_cpuset, obj->cpuset);
   if (obj->nodeset)
     hwloc_bitmap_or(topology->levels[0][0]->complete_nodeset, topology->levels[0][0]->complete_nodeset, obj->nodeset);
-  ret = hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
+  ret = hwloc___insert_object_by_cpuset(topology, topology->levels[0][0], obj, report_error);
   if (ret < 0)
     hwloc_free_unlinked_object(obj);
+}
+
+/* the default insertion routine warns in case of error.
+ * it's used by most backends */
+void
+hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
+{
+  hwloc__insert_object_by_cpuset(topology, obj, hwloc_report_os_error);
 }
 
 void
@@ -671,9 +684,11 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
     obj->name = strdup(name);
 
   hwloc_insert_object_by_cpuset(topology, obj);
+  /* FIXME: do not show errors on stdout */
 
   hwloc_connect(topology->levels[0][0]);
 
+  /* FIXME: return NULL in case of error */
   return obj;
 }
 

@@ -499,7 +499,7 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
               }
           hwloc_debug_1arg_bitmap("adding Group object with %u objects and cpuset %s\n",
                                   groupsizes[i], group_obj->cpuset);
-          hwloc_insert_object_by_cpuset(topology, group_obj);
+          hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error); /* FIXME: show a different error message if the distance was user-given */
           groupobjs[i] = group_obj;
       }
 

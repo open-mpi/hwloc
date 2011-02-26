@@ -222,8 +222,17 @@ extern void hwloc_look_synthetic (struct hwloc_topology *topology);
  * The given object should not have children.
  *
  * This shall only be called before levels are built.
+ *
+ * In case of error, hwloc_report_os_error() is called.
  */
 extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
+
+/*
+ * Add an object to the topology and specify which error callback to use
+ */
+typedef void (*hwloc_report_error_t)(const char * msg, int line);
+extern void hwloc_report_os_error(const char * msg, int line);
+extern void hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
 
 /*
  * Insert an object somewhere in the topology.
