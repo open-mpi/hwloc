@@ -625,7 +625,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 }
 
 /* insertion routine that lets you change the error reporting callback */
-void
+int
 hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
 			       hwloc_report_error_t report_error)
 {
@@ -638,6 +638,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
   ret = hwloc___insert_object_by_cpuset(topology, topology->levels[0][0], obj, report_error);
   if (ret < 0)
     hwloc_free_unlinked_object(obj);
+  return ret;
 }
 
 /* the default insertion routine warns in case of error.
@@ -678,17 +679,18 @@ hwloc_connect(hwloc_obj_t parent);
 hwloc_obj_t
 hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
 {
+  int err;
   hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
   obj->cpuset = hwloc_bitmap_dup(cpuset);
   if (name)
     obj->name = strdup(name);
 
-  hwloc_insert_object_by_cpuset(topology, obj);
-  /* FIXME: do not show errors on stdout */
+  err = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
+  if (err < 0)
+    return NULL;
 
   hwloc_connect(topology->levels[0][0]);
 
-  /* FIXME: return NULL in case of error */
   return obj;
 }
 

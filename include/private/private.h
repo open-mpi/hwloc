@@ -232,7 +232,7 @@ extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
  */
 typedef void (*hwloc_report_error_t)(const char * msg, int line);
 extern void hwloc_report_os_error(const char * msg, int line);
-extern void hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
+extern int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
 
 /*
  * Insert an object somewhere in the topology.
