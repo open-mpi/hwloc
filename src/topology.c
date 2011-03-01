@@ -2069,7 +2069,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 int
 hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset)
 {
-  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+  hwloc_bitmap_t nodeset;
   unsigned depth;
 
   /* make sure we'll keep something in the topology */
@@ -2078,10 +2078,12 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
     return -1;
   }
 
+  nodeset = hwloc_bitmap_alloc();
   /* drop object based on cpuset, and fill the remaining nodeset */
   restrict_object(topology, &topology->levels[0][0], cpuset, nodeset);
   /* update nodesets accordingly */
   restrict_object_nodeset(topology, &topology->levels[0][0], nodeset);
+  hwloc_bitmap_free(nodeset);
 
   /* TODO factorize this end code with the end of hwloc_discover */
   hwloc_connect(topology->levels[0][0]);
