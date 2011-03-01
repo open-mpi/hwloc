@@ -534,7 +534,7 @@ enum hwloc_topology_flags_e {
    * and ignore the fact that some resources may be offline.
    */
 
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1)
  /**< \brief Assume that the selected backend provides the topology for the
    * system on which we are running.
    * \hideinitializer
@@ -553,15 +553,6 @@ enum hwloc_topology_flags_e {
    * save it to an XML file, and quickly reload it later through the XML
    * backend, but still having binding functions actually do bind.
    */
-
-  HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_BINDING = (1<<2),
- /**< \brief Restrict the discovered topology to only objects included
-  * in the current thread CPU binding.
-  * \hideinitialize
-  *
-  * This is similar to loading the topology, running hwloc_get_cpubind
-  * and passing the resulting cpuset to hwloc_topology_restrict.
-  */
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

@@ -2059,14 +2059,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
 #endif
     hwloc_topology_check(topology);
 
-  if (topology->flags & HWLOC_TOPOLOGY_FLAG_RESTRICT_TO_BINDING) {
-    hwloc_cpuset_t cpuset = hwloc_bitmap_alloc();
-    int err = hwloc_get_cpubind(topology, cpuset, HWLOC_CPUBIND_THREAD);
-    if (!err)
-      hwloc_topology_restrict(topology, cpuset);
-    hwloc_bitmap_free(cpuset);
-  }
-
   topology->is_loaded = 1;
   return 0;
 }
