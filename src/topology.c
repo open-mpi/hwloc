@@ -2070,7 +2070,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 
   /* make sure we'll keep something in the topology */
   if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->cpuset)) {
-    errno = -EINVAL;
+    errno = EINVAL;
     return -1;
   }
 
@@ -2079,7 +2079,9 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   /* update nodesets accordingly */
   restrict_object_nodeset(topology, &topology->levels[0][0], nodeset);
 
+  /* TODO factorize this end code with the end of hwloc_discover */
   hwloc_connect(topology->levels[0][0]);
+  /* TODO update hwloc_finalize_logical_distances */
   return 0;
 }
 
