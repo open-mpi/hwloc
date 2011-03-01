@@ -43,10 +43,11 @@
 static void
 output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
-  char type[32], attr[256], phys[32] = "";
+  char type[32], *attr, phys[32] = "";
   unsigned idx = logical ? l->logical_index : l->os_index;
   const char *indexprefix = logical ? " L#" :  " P#";
   if (show_cpuset < 2) {
+    int len;
     if (l->type == HWLOC_OBJ_MISC && l->name)
       fprintf(output, "%s", l->name);
     else {
@@ -58,12 +59,16 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     if (logical && l->os_index != (unsigned) -1 &&
 	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NODE))
       snprintf(phys, sizeof(phys), "P#%u", l->os_index);
-    hwloc_obj_attr_snprintf (attr, sizeof(attr), l, " ", verbose_mode-1);
+    len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode-1);
+    attr = malloc(len+1);
+    *attr = '\0';
+    len = hwloc_obj_attr_snprintf (attr, len+1, l, " ", verbose_mode-1);
     if (*phys || *attr) {
       const char *separator = *phys != '\0' && *attr!= '\0' ? " " : "";
       fprintf(output, " (%s%s%s)",
 	      phys, separator, attr);
     }
+    free(attr);
     if (verbose_mode >= 2 && l->name && l->type != HWLOC_OBJ_MISC)
       fprintf(output, " \"%s\"", l->name);
   }
@@ -472,47 +477,45 @@ from_directions(struct display *disp, int direction)
 {
 #ifdef HAVE_PUTWC
   if (disp->utf8) {
-    static const wchar_t chars[] = {
-      [down|right]	= L'\x250c',
-      [down|left]	= L'\x2510',
-      [up|right]	= L'\x2514',
-      [up|left]		= L'\x2518',
-      [left|right]	= L'\x2500',
-      [down|up]		= L'\x2502',
-      [down]		= L'\x2577',
-      [up]		= L'\x2575',
-      [right]		= L'\x2576',
-      [left]		= L'\x2574',
-      [down|up|right]	= L'\x251c',
-      [down|up|left]	= L'\x2524',
-      [down|left|right]	= L'\x252c',
-      [up|left|right]	= L'\x2534',
-      [down|up|left|right]	= L'\x253c',
-      [0]		= L' ',
+    switch (direction) {
+    case down|right:		return L'\x250c';
+    case down|left:		return L'\x2510';
+    case up|right:		return L'\x2514';
+    case up|left:		return L'\x2518';
+    case left|right:		return L'\x2500';
+    case down|up:		return L'\x2502';
+    case down:			return L'\x2577';
+    case up:			return L'\x2575';
+    case right:			return L'\x2576';
+    case left:			return L'\x2574';
+    case down|up|right:		return L'\x251c';
+    case down|up|left:		return L'\x2524';
+    case down|left|right:	return L'\x252c';
+    case up|left|right:		return L'\x2534';
+    case down|up|left|right:	return L'\x253c';
+    default:			return L' ';
     };
-    return chars[direction];
   } else
 #endif /* HAVE_PUTWC */
   {
-    static const char chars[] = {
-      [down|right]	= '/',
-      [down|left]	= '\\',
-      [up|right]	= '\\',
-      [up|left]		= '/',
-      [left|right]	= '-',
-      [down|up]		= '|',
-      [down]		= '|',
-      [up]		= '|',
-      [right]		= '-',
-      [left]		= '-',
-      [down|up|right]	= '+',
-      [down|up|left]	= '+',
-      [down|left|right]	= '+',
-      [up|left|right]	= '+',
-      [down|up|left|right]	= '+',
-      [0]		= ' ',
+    switch (direction) {
+    case down|right:		return '/';
+    case down|left:		return '\\';
+    case up|right:		return '\\';
+    case up|left:		return '/';
+    case left|right:		return '-';
+    case down|up:		return '|';
+    case down:			return '|';
+    case up:			return '|';
+    case right:			return '-';
+    case left:			return '-';
+    case down|up|right:		return '+';
+    case down|up|left:		return '+';
+    case down|left|right:	return '+';
+    case up|left|right:		return '+';
+    case down|up|left|right:	return '+';
+    default:			return ' ';
     };
-    return chars[direction];
   }
 }
 
@@ -521,12 +524,13 @@ static void
 merge(struct display *disp, int x, int y, int or, int andnot, int r, int g, int b)
 {
   character current;
+  int directions;
   if (x >= disp->width || y >= disp->height) {
     /* fprintf(stderr, "|%x &~%x overflowed to (%d,%d)\n", or, andnot, x, y); */
     return;
   }
   current = disp->cells[y][x].c;
-  int directions = (to_directions(disp, current) & ~andnot) | or;
+  directions = (to_directions(disp, current) & ~andnot) | or;
   put(disp, x, y, from_directions(disp, directions), -1, -1, -1, r, g, b);
 }
 
@@ -630,11 +634,11 @@ text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, 
 }
 
 static struct draw_methods text_draw_methods = {
-  .start = text_start,
-  .declare_color = text_declare_color,
-  .box = text_box,
-  .line = text_line,
-  .text = text_text,
+  text_start,
+  text_declare_color,
+  text_box,
+  text_line,
+  text_text,
 };
 
 void output_text(hwloc_topology_t topology, const char *filename, int logical, int legend, int verbose_mode __hwloc_attribute_unused)

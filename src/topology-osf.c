@@ -253,11 +253,11 @@ hwloc_look_osf(struct hwloc_topology *topology)
     hwloc_obj_t *nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
     float *distances = calloc(nbnodes*nbnodes, sizeof(float));
     unsigned nfound;
-    numa_attr_t attr = {
-      .nattr_type = R_RAD,
-      .nattr_descr = { .rd_radset = radset },
-      .nattr_flags = 0,
-    };
+    numa_attr_t attr;
+
+    attr.nattr_type = R_RAD;
+    attr.nattr_descr.rd_radset = radset;
+    attr.nattr_flags = 0;
 
     for (radid = 0; radid < (radid_t) nbnodes; radid++) {
       rademptyset(radset);

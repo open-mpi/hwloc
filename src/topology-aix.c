@@ -88,42 +88,48 @@ out:
 static int
 hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  rsid_t who = { .at_pid = getpid() };
+  rsid_t who;
+  who.at_pid = getpid();
   return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, flags);
 }
 
 static int
 hwloc_aix_get_thisproc_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
 {
-  rsid_t who = { .at_pid = getpid() };
+  rsid_t who;
+  who.at_pid = getpid();
   return hwloc_aix_get_sth_cpubind(topology, R_PROCESS, who, hwloc_set, flags);
 }
 
 static int
 hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  rsid_t who = { .at_tid = thread_self() };
+  rsid_t who;
+  who.at_tid = thread_self();
   return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, flags);
 }
 
 static int
 hwloc_aix_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
 {
-  rsid_t who = { .at_tid = thread_self() };
+  rsid_t who;
+  who.at_tid = thread_self();
   return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, hwloc_set, flags);
 }
 
 static int
 hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  rsid_t who = { .at_pid = pid };
+  rsid_t who;
+  who.at_pid = pid;
   return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, flags);
 }
 
 static int
 hwloc_aix_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
-  rsid_t who = { .at_pid = pid };
+  rsid_t who;
+  who.at_pid = pid;
   return hwloc_aix_get_sth_cpubind(topology, R_PROCESS, who, hwloc_set, flags);
 }
 
@@ -149,7 +155,8 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
   {
-    rsid_t who = { .at_tid = info.__pi_tid };
+    rsid_t who;
+    who.at_tid = info.__pi_tid;
     return hwloc_aix_get_sth_cpubind(topology, R_THREAD, who, hwloc_set, flags);
   }
 }
@@ -279,42 +286,48 @@ out:
 static int
 hwloc_aix_set_thisproc_membind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, hwloc_membind_policy_t policy, int flags)
 {
-  rsid_t who = { .at_pid = getpid() };
+  rsid_t who;
+  who.at_pid = getpid();
   return hwloc_aix_set_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
 }
 
 static int
 hwloc_aix_get_thisproc_membind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, hwloc_membind_policy_t *policy, int flags)
 {
-  rsid_t who = { .at_pid = getpid() };
+  rsid_t who;
+  who.at_pid = getpid();
   return hwloc_aix_get_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
 }
 
 static int
 hwloc_aix_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, hwloc_membind_policy_t policy, int flags)
 {
-  rsid_t who = { .at_tid = thread_self() };
+  rsid_t who;
+  who.at_tid = thread_self();
   return hwloc_aix_set_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
 }
 
 static int
 hwloc_aix_get_thisthread_membind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, hwloc_membind_policy_t *policy, int flags)
 {
-  rsid_t who = { .at_tid = thread_self() };
+  rsid_t who;
+  who.at_tid = thread_self();
   return hwloc_aix_get_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
 }
 
 static int
 hwloc_aix_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_bitmap_t hwloc_set, hwloc_membind_policy_t policy, int flags)
 {
-  rsid_t who = { .at_pid = pid };
+  rsid_t who;
+  who.at_pid = pid;
   return hwloc_aix_set_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
 }
 
 static int
 hwloc_aix_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t hwloc_set, hwloc_membind_policy_t *policy, int flags)
 {
-  rsid_t who = { .at_pid = pid };
+  rsid_t who;
+  who.at_pid = pid;
   return hwloc_aix_get_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
 }
 
@@ -327,7 +340,8 @@ hwloc_aix_set_thread_membind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   if ((errno = pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size)))
     return -1;
   {
-    rsid_t who = { .at_tid = info.__pi_tid };
+    rsid_t who;
+    who.at_tid = info.__pi_tid;
     return hwloc_aix_set_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
   }
 }
@@ -340,7 +354,8 @@ hwloc_aix_get_thread_membind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   if (pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size))
     return -1;
   {
-    rsid_t who = { .at_tid = info.__pi_tid };
+    rsid_t who;
+    who.at_tid = info.__pi_tid;
     return hwloc_aix_get_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
   }
 }
