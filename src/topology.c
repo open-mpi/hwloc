@@ -674,7 +674,7 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 }
 
 static void
-hwloc_connect(hwloc_obj_t parent);
+hwloc_connect_children(hwloc_obj_t parent);
 /* Adds a misc object _after_ detection, and thus has to reconnect all the pointers */
 hwloc_obj_t
 hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
@@ -689,7 +689,7 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
   if (err < 0)
     return NULL;
 
-  hwloc_connect(topology->levels[0][0]);
+  hwloc_connect_children(topology->levels[0][0]);
 
   return obj;
 }
@@ -705,7 +705,8 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
 
   hwloc_insert_object_by_parent(topology, parent, obj);
 
-  hwloc_connect(topology->levels[0][0]);
+  hwloc_connect_children(topology->levels[0][0]);
+  /* no need to hwloc_connect_levels() since misc object are not in levels */
 
   return obj;
 }
@@ -1183,10 +1184,14 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
 }
 
 /*
- * Initialize handy pointers in the whole topology
+ * Initialize handy pointers in the whole topology.
+ * The topology only had first_child and next_sibling pointers.
+ * When this funtions return, all parent/children pointers are initialized.
+ * The remaining fields (levels, cousins, logical_index, depth, ...) will
+ * be setup later in hwloc_connect_levels().
  */
 static void
-hwloc_connect(hwloc_obj_t parent)
+hwloc_connect_children(hwloc_obj_t parent)
 {
   unsigned n;
   hwloc_obj_t child, prev_child = NULL;
@@ -1212,7 +1217,7 @@ hwloc_connect(hwloc_obj_t parent)
        child;
        n++,   child = child->next_sibling) {
     parent->children[n] = child;
-    hwloc_connect(child);
+    hwloc_connect_children(child);
   }
 }
 
@@ -1230,6 +1235,129 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
   for (child = root->first_child; child; child = child->next_sibling)
     if (find_same_type(child, obj))
       return 1;
+
+  return 0;
+}
+
+/*
+ * Do the remaining work that hwloc_connect_children() did not do earlier.
+ */
+static int
+hwloc_connect_levels(hwloc_topology_t topology)
+{
+  unsigned l, i=0, taken_i, new_i, j;
+  hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
+  unsigned n_objs, n_taken_objs, n_new_objs;
+
+  /* initialize all depth to unknown */
+  for (l=1; l < HWLOC_OBJ_TYPE_MAX; l++)
+    topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  topology->type_depth[topology->levels[0][0]->type] = 0;
+
+  /* Start with children of the whole system.  */
+  l = 0;
+  n_objs = topology->levels[0][0]->arity;
+  objs = malloc(n_objs * sizeof(objs[0]));
+  if (!objs) {
+    errno = ENOMEM;
+    hwloc_topology_clear(topology);
+    return -1;
+  }
+  memcpy(objs, topology->levels[0][0]->children, n_objs * sizeof(objs[0]));
+
+  /* Keep building levels while there are objects left in OBJS.  */
+  while (n_objs) {
+
+    /* First find which type of object is the topmost.
+     * Don't use PU if there are other types since we want to keep PU at the bottom.
+     */
+    for (i = 0; i < n_objs; i++)
+      if (objs[i]->type != HWLOC_OBJ_PU)
+        break;
+    top_obj = i == n_objs ? objs[0] : objs[i];
+    for (i = 0; i < n_objs; i++) {
+      if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
+	if (find_same_type(objs[i], top_obj)) {
+	  /* OBJS[i] is strictly above an object of the same type as TOP_OBJ, so it
+	   * is above TOP_OBJ.  */
+	  top_obj = objs[i];
+	}
+      }
+    }
+
+    /* Now peek all objects of the same type, build a level with that and
+     * replace them with their children.  */
+
+    /* First count them.  */
+    n_taken_objs = 0;
+    n_new_objs = 0;
+    for (i = 0; i < n_objs; i++)
+      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
+	n_taken_objs++;
+	n_new_objs += objs[i]->arity;
+      }
+
+    /* New level.  */
+    taken_objs = malloc((n_taken_objs + 1) * sizeof(taken_objs[0]));
+    /* New list of pending objects.  */
+    new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
+
+    taken_i = 0;
+    new_i = 0;
+    for (i = 0; i < n_objs; i++)
+      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
+	/* Take it, add children.  */
+	taken_objs[taken_i++] = objs[i];
+	for (j = 0; j < objs[i]->arity; j++)
+	  new_objs[new_i++] = objs[i]->children[j];
+      } else
+	/* Leave it.  */
+	new_objs[new_i++] = objs[i];
+
+
+#ifdef HWLOC_DEBUG
+    /* Make sure we didn't mess up.  */
+    assert(taken_i == n_taken_objs);
+    assert(new_i == n_objs - n_taken_objs + n_new_objs);
+#endif
+
+    /* Ok, put numbers in the level.  */
+    for (i = 0; i < n_taken_objs; i++) {
+      taken_objs[i]->depth = topology->nb_levels;
+      taken_objs[i]->logical_index = i;
+      if (i) {
+	taken_objs[i]->prev_cousin = taken_objs[i-1];
+	taken_objs[i-1]->next_cousin = taken_objs[i];
+      }
+    }
+
+    /* One more level!  */
+    if (top_obj->type == HWLOC_OBJ_CACHE)
+      hwloc_debug("--- Cache level depth %u", top_obj->attr->cache.depth);
+    else
+      hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
+    hwloc_debug(" has number %u\n\n", topology->nb_levels);
+
+    if (topology->type_depth[top_obj->type] == HWLOC_TYPE_DEPTH_UNKNOWN)
+      topology->type_depth[top_obj->type] = topology->nb_levels;
+    else
+      topology->type_depth[top_obj->type] = HWLOC_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
+
+    taken_objs[n_taken_objs] = NULL;
+
+    free(topology->levels[topology->nb_levels]);
+    topology->level_nbobjects[topology->nb_levels] = n_taken_objs;
+    topology->levels[topology->nb_levels] = taken_objs;
+
+    topology->nb_levels++;
+
+    free(objs);
+    objs = new_objs;
+    n_objs = new_i;
+  }
+
+  /* It's empty now.  */
+  free(objs);  
 
   return 0;
 }
@@ -1355,10 +1483,6 @@ static void alloc_cpusets(hwloc_obj_t obj)
 static int
 hwloc_discover(struct hwloc_topology *topology)
 {
-  unsigned l, i=0, taken_i, new_i, j;
-  hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
-  unsigned n_objs, n_taken_objs, n_new_objs;
-
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     alloc_cpusets(topology->levels[0][0]);
     hwloc_look_synthetic(topology);
@@ -1539,120 +1663,14 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* Now connect handy pointers.  */
 
-  hwloc_connect(topology->levels[0][0]);
+  hwloc_connect_children(topology->levels[0][0]);
 
   print_objects(topology, 0, topology->levels[0][0]);
 
   /* Explore the resulting topology level by level.  */
 
-  /* initialize all depth to unknown */
-  for (l=1; l < HWLOC_OBJ_TYPE_MAX; l++)
-    topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
-  topology->type_depth[topology->levels[0][0]->type] = 0;
-
-  /* Start with children of the whole system.  */
-  l = 0;
-  n_objs = topology->levels[0][0]->arity;
-  objs = malloc(n_objs * sizeof(objs[0]));
-  if (!objs) {
-    errno = ENOMEM;
-    hwloc_topology_clear(topology);
+  if (hwloc_connect_levels(topology) < 0)
     return -1;
-  }
-  memcpy(objs, topology->levels[0][0]->children, n_objs * sizeof(objs[0]));
-
-  /* Keep building levels while there are objects left in OBJS.  */
-  while (n_objs) {
-
-    /* First find which type of object is the topmost.
-     * Don't use PU if there are other types since we want to keep PU at the bottom.
-     */
-    for (i = 0; i < n_objs; i++)
-      if (objs[i]->type != HWLOC_OBJ_PU)
-        break;
-    top_obj = i == n_objs ? objs[0] : objs[i];
-    for (i = 0; i < n_objs; i++) {
-      if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
-	if (find_same_type(objs[i], top_obj)) {
-	  /* OBJS[i] is strictly above an object of the same type as TOP_OBJ, so it
-	   * is above TOP_OBJ.  */
-	  top_obj = objs[i];
-	}
-      }
-    }
-
-    /* Now peek all objects of the same type, build a level with that and
-     * replace them with their children.  */
-
-    /* First count them.  */
-    n_taken_objs = 0;
-    n_new_objs = 0;
-    for (i = 0; i < n_objs; i++)
-      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
-	n_taken_objs++;
-	n_new_objs += objs[i]->arity;
-      }
-
-    /* New level.  */
-    taken_objs = malloc((n_taken_objs + 1) * sizeof(taken_objs[0]));
-    /* New list of pending objects.  */
-    new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
-
-    taken_i = 0;
-    new_i = 0;
-    for (i = 0; i < n_objs; i++)
-      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
-	/* Take it, add children.  */
-	taken_objs[taken_i++] = objs[i];
-	for (j = 0; j < objs[i]->arity; j++)
-	  new_objs[new_i++] = objs[i]->children[j];
-      } else
-	/* Leave it.  */
-	new_objs[new_i++] = objs[i];
-
-
-#ifdef HWLOC_DEBUG
-    /* Make sure we didn't mess up.  */
-    assert(taken_i == n_taken_objs);
-    assert(new_i == n_objs - n_taken_objs + n_new_objs);
-#endif
-
-    /* Ok, put numbers in the level.  */
-    for (i = 0; i < n_taken_objs; i++) {
-      taken_objs[i]->depth = topology->nb_levels;
-      taken_objs[i]->logical_index = i;
-      if (i) {
-	taken_objs[i]->prev_cousin = taken_objs[i-1];
-	taken_objs[i-1]->next_cousin = taken_objs[i];
-      }
-    }
-
-    /* One more level!  */
-    if (top_obj->type == HWLOC_OBJ_CACHE)
-      hwloc_debug("--- Cache level depth %u", top_obj->attr->cache.depth);
-    else
-      hwloc_debug("--- %s level", hwloc_obj_type_string(top_obj->type));
-    hwloc_debug(" has number %u\n\n", topology->nb_levels);
-
-    if (topology->type_depth[top_obj->type] == HWLOC_TYPE_DEPTH_UNKNOWN)
-      topology->type_depth[top_obj->type] = topology->nb_levels;
-    else
-      topology->type_depth[top_obj->type] = HWLOC_TYPE_DEPTH_MULTIPLE; /* mark as unknown */
-
-    taken_objs[n_taken_objs] = NULL;
-
-    topology->level_nbobjects[topology->nb_levels] = n_taken_objs;
-    topology->levels[topology->nb_levels] = taken_objs;
-
-    topology->nb_levels++;
-
-    free(objs);
-    objs = new_objs;
-    n_objs = new_i;
-  }
-
-  /* It's empty now.  */
-  free(objs);
 
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");
@@ -1806,6 +1824,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   memset(topology->support.membind, 0, sizeof(*topology->support.membind));
 
   /* No objects by default but System on top by default */
+  memset(topology->levels, 0, sizeof(topology->levels));
   memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
   for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++)
     topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
@@ -2139,7 +2158,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_bitmap_free(nodeset);
 
   /* TODO factorize this end code with the end of hwloc_discover */
-  hwloc_connect(topology->levels[0][0]);
+  hwloc_connect_children(topology->levels[0][0]);
 
   /* FIXME: optimize this by using next_cousin pointers, but those are not maintained when unlinking */
   for(depth = 0; depth < topology->nb_levels; depth++) {
