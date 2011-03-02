@@ -787,8 +787,10 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_top
  *
  * Topology \p topology is modified so as to remove all objects that
  * are not included (or partially included) in the CPU set \p cpuset.
+ *
+ * \p flags is not used yet.
  */
-HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset);
+HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
 
 /** @} */
 

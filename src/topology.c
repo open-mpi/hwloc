@@ -2144,7 +2144,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 }
 
 int
-hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset)
+hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, unsigned long flags __hwloc_attribute_unused)
 {
   hwloc_bitmap_t nodeset;
 
