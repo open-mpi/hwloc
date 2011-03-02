@@ -1247,6 +1247,13 @@ hwloc_connect_levels(hwloc_topology_t topology)
   hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
   unsigned n_objs, n_taken_objs, n_new_objs;
 
+  /* reset non-root levels (root was initialized during init and will not change here) */
+  for(l=1; l<HWLOC_DEPTH_MAX; l++)
+    free(topology->levels[l]);
+  memset(topology->levels+1, 0, (HWLOC_DEPTH_MAX-1)*sizeof(*topology->levels));
+  memset(topology->level_nbobjects+1, 0,  (HWLOC_DEPTH_MAX-1)*sizeof(*topology->level_nbobjects));
+  topology->nb_levels = 1;
+
   /* initialize all depth to unknown */
   for (l=1; l < HWLOC_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
@@ -1343,7 +1350,6 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     taken_objs[n_taken_objs] = NULL;
 
-    free(topology->levels[topology->nb_levels]);
     topology->level_nbobjects[topology->nb_levels] = n_taken_objs;
     topology->levels[topology->nb_levels] = taken_objs;
 
@@ -1793,7 +1799,6 @@ static void
 hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 {
   struct hwloc_obj *root_obj;
-  int i;
 
   /* reset support */
   topology->set_thisproc_cpubind = NULL;
@@ -1821,14 +1826,12 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   memset(topology->support.cpubind, 0, sizeof(*topology->support.cpubind));
   memset(topology->support.membind, 0, sizeof(*topology->support.membind));
 
-  /* No objects by default but System on top by default */
-  memset(topology->levels, 0, sizeof(topology->levels));
-  memset(topology->level_nbobjects, 0, sizeof(topology->level_nbobjects));
-  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++)
-    topology->type_depth[i] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  /* Only the System object on top by default */
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
+  /* NULLify other levels so that we can detect and free old ones in hwloc_connect_levels() if needed */
+  memset(topology->levels+1, 0, (HWLOC_DEPTH_MAX-1)*sizeof(*topology->levels));
 
   /* Create the actual machine object, but don't touch its attributes yet
    * since the OS backend may still change the object into something else
@@ -2155,7 +2158,6 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_bitmap_free(nodeset);
 
   hwloc_connect_children(topology->levels[0][0]);
-  topology->nb_levels = 1;
   hwloc_connect_levels(topology);
   /* TODO update propagate_total_memory */
   /* TODO update hwloc_finalize_logical_distances */
