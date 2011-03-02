@@ -1034,6 +1034,7 @@ remove_unused_cpusets(hwloc_obj_t obj)
 /* Remove an object from its parent and free it.
  * Only updates next_sibling/first_child pointers,
  * so may only be used during early discovery.
+ * Children are inserted where the object was.
  */
 static void
 unlink_and_free_single_object(hwloc_obj_t *pparent)
@@ -1124,11 +1125,11 @@ restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset
 
   if (obj->cpuset /* FIXME: needed for PCI devices? */
       && hwloc_bitmap_iszero(obj->cpuset)) {
-    /* Remove empty children */
-    hwloc_debug("%s", "\nRemoving empty object during restrict");
+    hwloc_debug("%s", "\nRemoving object during restrict");
     print_object(topology, 0, obj);
     /* remove the object from the tree (no need to remove from levels, they will be entirely rebuilt by the caller) */
-    unlink_and_free_object_and_children(pobj);
+    unlink_and_free_single_object(pobj);
+    /* do not remove children. if they were to be removed, they would have been already */
   } else {
     if (obj->type == HWLOC_OBJ_NODE)
       hwloc_bitmap_set(nodeset, obj->os_index);
