@@ -1124,9 +1124,7 @@ restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object during restrict");
     print_object(topology, 0, obj);
-    /* remove from the level so that we can rebuild the level at the end */
-    topology->levels[obj->depth][obj->logical_index] = NULL;
-    /* remove the object from the tree */
+    /* remove the object from the tree (no need to remove from levels, they will be entirely rebuilt by the caller) */
     unlink_and_free_object_and_children(pobj);
   } else {
     if (obj->type == HWLOC_OBJ_NODE)
@@ -2142,7 +2140,6 @@ int
 hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset)
 {
   hwloc_bitmap_t nodeset;
-  unsigned depth;
 
   /* make sure we'll keep something in the topology */
   if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->cpuset)) {
@@ -2157,23 +2154,10 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   restrict_object_nodeset(topology, &topology->levels[0][0], nodeset);
   hwloc_bitmap_free(nodeset);
 
-  /* TODO factorize this end code with the end of hwloc_discover */
   hwloc_connect_children(topology->levels[0][0]);
-
-  /* FIXME: optimize this by using next_cousin pointers, but those are not maintained when unlinking */
-  for(depth = 0; depth < topology->nb_levels; depth++) {
-    unsigned new_index = 0, old_index;
-    for(old_index=0; old_index<topology->level_nbobjects[depth]; old_index++) {
-      hwloc_obj_t obj = topology->levels[depth][old_index];
-      if (obj) {
-	obj->logical_index = new_index;
-	topology->levels[depth][new_index] = obj;
-	new_index++;
-      }
-    }
-    topology->level_nbobjects[depth] = new_index;
-  }
-
+  topology->nb_levels = 1;
+  hwloc_connect_levels(topology);
+  /* TODO update propagate_total_memory */
   /* TODO update hwloc_finalize_logical_distances */
   return 0;
 }
