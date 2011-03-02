@@ -736,6 +736,9 @@ propagate_total_memory(hwloc_obj_t obj)
   hwloc_obj_t *temp, child;
   unsigned i;
 
+  /* reset total before counting local and children memory */
+  obj->memory.total_memory = 0;
+
   /* Propagate memory up */
   for_each_child_safe(child, obj, temp) {
     propagate_total_memory(child);
@@ -2159,7 +2162,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 
   hwloc_connect_children(topology->levels[0][0]);
   hwloc_connect_levels(topology);
-  /* TODO update propagate_total_memory */
+  propagate_total_memory(topology->levels[0][0]);
   /* TODO update hwloc_finalize_logical_distances */
   return 0;
 }

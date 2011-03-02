@@ -16,6 +16,7 @@ static void check(unsigned nbnodes, unsigned nbcores, unsigned nbpus)
 {
   unsigned depth;
   unsigned nb;
+  unsigned long long total_memory;
 
   /* sanity checks */
   depth = hwloc_topology_get_depth(topology);
@@ -34,6 +35,8 @@ static void check(unsigned nbnodes, unsigned nbcores, unsigned nbpus)
   assert(nb == nbcores);
   nb = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_PU);
   assert(nb == nbpus);
+  total_memory = hwloc_get_root_obj(topology)->memory.total_memory;
+  assert(total_memory == nbnodes * 1024*1024*1024); /* synthetic topology puts 1GB per node */
 }
 
 int main(void)
