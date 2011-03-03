@@ -263,6 +263,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PU.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
@@ -428,6 +429,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_area_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_area_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_cpubind.3 \

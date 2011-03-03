@@ -227,12 +227,22 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
 /* cleanup everything we created from distances so that we may rebuild them
  * at the end of restrict()
  */
-void hwloc_restrict_distances(struct hwloc_topology *topology)
+void hwloc_restrict_distances(struct hwloc_topology *topology, unsigned long flags)
 {
   hwloc_obj_type_t type;
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
+    /* remove the objs array, we'll rebuild it from the indexes
+     * depending on remaining objects */
     free(topology->os_distances[type].objs);
     topology->os_distances[type].objs = NULL;
+    /* if not adapting distances, drop everything */
+    if (!(flags & HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES)) {
+      free(topology->os_distances[type].indexes);
+      topology->os_distances[type].indexes = NULL;
+      free(topology->os_distances[type].distances);
+      topology->os_distances[type].distances = NULL;
+      topology->os_distances[type].nbobjs = 0;
+    }
   }
 }
 

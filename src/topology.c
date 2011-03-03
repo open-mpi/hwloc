@@ -2155,7 +2155,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 }
 
 int
-hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, unsigned long flags __hwloc_attribute_unused)
+hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, unsigned long flags)
 {
   hwloc_bitmap_t nodeset;
 
@@ -2175,7 +2175,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_connect_children(topology->levels[0][0]);
   hwloc_connect_levels(topology);
   propagate_total_memory(topology->levels[0][0]);
-  hwloc_restrict_distances(topology);
+  hwloc_restrict_distances(topology, flags);
   hwloc_convert_distances_indexes_into_objects(topology);
   hwloc_finalize_logical_distances(topology);
   return 0;
