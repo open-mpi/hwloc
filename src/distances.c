@@ -54,29 +54,33 @@ void hwloc_topology_distances_destroy(struct hwloc_topology *topology)
   }
 }
 
-/* check a distance index array and matrix and insert it in the topology.
+/* insert a distance matrix in the topology.
  * the caller gives us those pointers, we take care of freeing them later and so on.
  */
-static int hwloc_topology__set_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
-					       unsigned nbobjs, unsigned *indexes, float *distances)
+void hwloc_topology__set_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
+					 unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances)
+{
+  free(topology->os_distances[type].indexes);
+  free(topology->os_distances[type].objs);
+  free(topology->os_distances[type].distances);
+  topology->os_distances[type].nbobjs = nbobjs;
+  topology->os_distances[type].indexes = indexes;
+  topology->os_distances[type].objs = objs;
+  topology->os_distances[type].distances = distances;
+}
+
+/* make sure a user-given distance matrix is sane */
+static int hwloc_topology__check_distance_matrix(hwloc_topology_t __hwloc_restrict topology __hwloc_attribute_unused, hwloc_obj_type_t type __hwloc_attribute_unused,
+						 unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs __hwloc_attribute_unused, float *distances __hwloc_attribute_unused)
 {
   unsigned i,j;
-
   /* make sure we don't have the same index twice */
   for(i=0; i<nbobjs; i++)
     for(j=i+1; j<nbobjs; j++)
       if (indexes[i] == indexes[j]) {
-	free(indexes);
-	free(distances);
 	errno = EINVAL;
 	return -1;
       }
-
-  free(topology->os_distances[type].indexes);
-  free(topology->os_distances[type].distances);
-  topology->os_distances[type].nbobjs = nbobjs;
-  topology->os_distances[type].indexes = indexes;
-  topology->os_distances[type].distances = distances;
   return 0;
 }
 
@@ -173,8 +177,14 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     }
   }
 
-  if (hwloc_topology__set_distance_matrix(topology, type, nbobjs, indexes, distances) < 0)
+  if (hwloc_topology__check_distance_matrix(topology, type, nbobjs, indexes, NULL, distances) < 0) {
     fprintf(stderr, "Ignoring invalid %s distances from environment variable\n", hwloc_obj_type_string(type));
+    free(indexes);
+    free(distances);
+    return;
+  }
+
+  hwloc_topology__set_distance_matrix(topology, type, nbobjs, indexes, NULL, distances);
 }
 
 /* take distances in the environment, store them as is in the topology.
@@ -201,16 +211,23 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
   unsigned *_indexes;
   float *_distances;
 
+  if (hwloc_topology__check_distance_matrix(topology, type, nbobjs, indexes, NULL, distances) < 0)
+    return -1;
+
   /* copy the input arrays and give them to the topology */
   _indexes = malloc(nbobjs*sizeof(unsigned));
   memcpy(_indexes, indexes, nbobjs*sizeof(unsigned));
   _distances = malloc(nbobjs*nbobjs*sizeof(float));
   memcpy(_distances, distances, nbobjs*nbobjs*sizeof(float));
-  return hwloc_topology__set_distance_matrix(topology, type, nbobjs, _indexes, _distances);
+  hwloc_topology__set_distance_matrix(topology, type, nbobjs, _indexes, NULL, _distances);
+
+  return 0;
 }
 
 /* convert distance indexes that were previously stored in the topology
- * into actual objects.
+ * into actual objects if not done already.
+ * it's already done when distances come from backends.
+ * it's not done when distances come from the user.
  */
 void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology)
 {
@@ -219,7 +236,7 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
     unsigned nbobjs = topology->os_distances[type].nbobjs;
     unsigned *indexes = topology->os_distances[type].indexes;
     unsigned i;
-    if (indexes) {
+    if (!topology->os_distances[type].objs) {
       hwloc_obj_t *objs = calloc(nbobjs, sizeof(hwloc_obj_t));
       /* traverse the topology and look for the relevant objects */
       for(i=0; i<nbobjs; i++) {
@@ -332,9 +349,6 @@ hwloc_finalize_logical_distances(struct hwloc_topology *topology)
       continue;
 
     if (topology->os_distances[type].objs) {
-      /* if we have objs, we must have distances as well,
-       * thanks to hwloc_convert_distances_indexes_into_objects()
-       */
       assert(topology->os_distances[type].distances);
 
       hwloc_setup_distances_from_os_matrix(topology, nbobjs,
