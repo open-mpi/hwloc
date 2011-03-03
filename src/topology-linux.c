@@ -1950,12 +1950,13 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
   {
       hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
       float * distances = calloc(nbnodes*nbnodes, sizeof(float));
-      unsigned *nonsparse_physical_indexes = 
-          calloc(nbnodes, sizeof(unsigned));
+      unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
       unsigned index_;
 
-      if (NULL == nonsparse_physical_indexes ||
-          NULL == distances || NULL == nodes) {
+      if (NULL == indexes || NULL == distances || NULL == nodes) {
+          free(nodes);
+          free(indexes);
+          free(distances);
           goto out;
       }
 
@@ -1964,7 +1965,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
        */
       index_ = 0;
       hwloc_bitmap_foreach_begin (osnode, nodeset) {
-	nonsparse_physical_indexes[index_] = osnode;
+	indexes[index_] = osnode;
 	index_++;
       } hwloc_bitmap_foreach_end();
       hwloc_bitmap_free(nodeset);
@@ -1972,7 +1973,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 #ifdef HWLOC_DEBUG
       hwloc_debug("%s", "numa distance indexes: ");
       for (index_ = 0; index_ < nbnodes; index_++) {
-	hwloc_debug(" %u", nonsparse_physical_indexes[index_]);
+	hwloc_debug(" %u", indexes[index_]);
       }
       hwloc_debug("%s", "\n");
 #endif
@@ -1981,7 +1982,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       for (index_ = 0; index_ < nbnodes; index_++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
-	  osnode = nonsparse_physical_indexes[index_];
+	  osnode = indexes[index_];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
@@ -2006,16 +2007,10 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, topology->backend_params.sysfs.root_fd);
       }
 
-      topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
-      topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
-      topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
-
-out:
-      if (NULL != nonsparse_physical_indexes) {
-          free(nonsparse_physical_indexes);
-      }
+      hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances);
   }
 
+ out:
   *found = nbnodes;
 }
 
