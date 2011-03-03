@@ -209,6 +209,24 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
   return hwloc_topology__set_distance_matrix(topology, type, nbobjs, _indexes, _distances);
 }
 
+/* cleanup everything we created from distances so that we may rebuild them
+ * at the end of restrict()
+ */
+void hwloc_restrict_distances(struct hwloc_topology *topology)
+{
+  hwloc_obj_type_t type;
+  /* TODO
+   * - if os_indexes exist, convert_distances_indexes_into_objects()
+   *   should take care of ignoring unknown indexes and reduce the matrix
+   * - if os_indexes does not exist, we should directly reduce the
+   *   objs array and matrix here.
+   */
+  for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
+    free(topology->os_distances[type].objs);
+    topology->os_distances[type].objs = NULL;
+  }
+}
+
 /* convert distance indexes that were previously stored in the topology
  * into actual objects.
  */
@@ -225,6 +243,7 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
       for(i=0; i<nbobjs; i++) {
 	hwloc_obj_t obj = hwloc_find_obj_by_type_and_os_index(topology->levels[0][0], type, indexes[i]);
 	if (!obj) {
+	  /* TODO: just ignore this index, reduce the matrix accordingly, and continue */
 	  fprintf(stderr, "Ignoring %s distances from environment variable, unknown OS index %u\n",
 		  hwloc_obj_type_string(type), indexes[i]);
 	  free(objs);

@@ -251,6 +251,17 @@ hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char *value)
   obj->infos_count++;
 }
 
+static void
+hwloc_clear_object_distances(hwloc_obj_t obj)
+{
+  unsigned i;
+  for (i=0; i<obj->distances_count; i++)
+    hwloc_free_logical_distances(obj->distances[i]);
+  free(obj->distances);
+  obj->distances = NULL;
+  obj->distances_count = 0;
+}
+
 /* Free an object and all its content.  */
 void
 hwloc_free_unlinked_object(hwloc_obj_t obj)
@@ -265,9 +276,7 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
     free(obj->infos[i].value);
   }
   free(obj->infos);
-  for (i=0; i<obj->distances_count; i++)
-    hwloc_free_logical_distances(obj->distances[i]);
-  free(obj->distances);
+  hwloc_clear_object_distances(obj);
   free(obj->memory.page_types);
   free(obj->attr);
   free(obj->children);
@@ -1110,6 +1119,8 @@ static void
 restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset)
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
+
+  hwloc_clear_object_distances(obj);
 
   if (obj->cpuset)
     hwloc_bitmap_and(obj->cpuset, obj->cpuset, cpuset);
@@ -2164,7 +2175,9 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_connect_children(topology->levels[0][0]);
   hwloc_connect_levels(topology);
   propagate_total_memory(topology->levels[0][0]);
-  /* TODO update hwloc_finalize_logical_distances */
+  hwloc_restrict_distances(topology);
+  hwloc_convert_distances_indexes_into_objects(topology);
+  hwloc_finalize_logical_distances(topology);
   return 0;
 }
 
