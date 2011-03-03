@@ -1956,6 +1956,9 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 
       if (NULL == nonsparse_physical_indexes ||
           NULL == distances || NULL == nodes) {
+          free(nodes);
+          free(nonsparse_physical_indexes);
+          free(distances);
           goto out;
       }
 
@@ -2010,12 +2013,10 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
       topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
 
-out:
-      if (NULL != nonsparse_physical_indexes) {
-          free(nonsparse_physical_indexes);
-      }
+      free(nonsparse_physical_indexes);
   }
 
+ out:
   *found = nbnodes;
 }
 
