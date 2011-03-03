@@ -45,7 +45,7 @@ static void check_distances(unsigned nbnodes, unsigned nbcores)
 
   /* node distance */
   distance = hwloc_get_whole_distance_matrix_by_type(topology, HWLOC_OBJ_NODE);
-  if (nbnodes) {
+  if (nbnodes >= 2) {
     assert(distance);
     assert(distance->nbobjs == nbnodes);
   } else {
@@ -54,7 +54,7 @@ static void check_distances(unsigned nbnodes, unsigned nbcores)
 
   /* core distance */
   distance = hwloc_get_whole_distance_matrix_by_type(topology, HWLOC_OBJ_CORE);
-  if (nbcores) {
+  if (nbcores >= 2) {
     assert(distance);
     assert(distance->nbobjs == nbcores);
   } else {
@@ -124,7 +124,7 @@ int main(void)
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
   check(3, 5, 19);
-  check_distances(3, 0);
+  check_distances(3, 5);
 
   /* remove the entire third node */
   printf("removing one node\n");
@@ -133,7 +133,7 @@ int main(void)
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
   check(2, 3, 11);
-  check_distances(0, 0);
+  check_distances(2, 3);
 
   /* restrict to the third node, impossible */
   printf("restricting to only some already removed node, must fail\n");
@@ -142,7 +142,7 @@ int main(void)
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(err == -1 && errno == EINVAL);
   check(2, 3, 11);
-  check_distances(0, 0);
+  check_distances(2, 3);
 
   /* only keep three PUs (first and last of first core, and last of last core of second node) */
   printf("restricting to 3 PUs\n");
@@ -153,7 +153,7 @@ int main(void)
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
   check(2, 2, 3);
-  check_distances(0, 0);
+  check_distances(2, 2);
 
   /* only keep one PU (last of last core of second node) */
   printf("restricting to a single PU\n");
@@ -162,7 +162,7 @@ int main(void)
   err = hwloc_topology_restrict(topology, cpuset, 0);
   assert(!err);
   check(1, 1, 1);
-  check_distances(0, 0);
+  check_distances(1, 1);
 
   hwloc_topology_destroy(topology);
 

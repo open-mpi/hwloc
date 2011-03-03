@@ -230,12 +230,6 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
 void hwloc_restrict_distances(struct hwloc_topology *topology)
 {
   hwloc_obj_type_t type;
-  /* TODO
-   * - if os_indexes exist, convert_distances_indexes_into_objects()
-   *   should take care of ignoring unknown indexes and reduce the matrix
-   * - if os_indexes does not exist, we should directly reduce the
-   *   objs array and matrix here.
-   */
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
     free(topology->os_distances[type].objs);
     topology->os_distances[type].objs = NULL;
@@ -253,24 +247,59 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++) {
     unsigned nbobjs = topology->os_distances[type].nbobjs;
     unsigned *indexes = topology->os_distances[type].indexes;
-    unsigned i;
+    float *distances = topology->os_distances[type].distances;
+    unsigned i, j;
     if (!topology->os_distances[type].objs) {
       hwloc_obj_t *objs = calloc(nbobjs, sizeof(hwloc_obj_t));
       /* traverse the topology and look for the relevant objects */
       for(i=0; i<nbobjs; i++) {
 	hwloc_obj_t obj = hwloc_find_obj_by_type_and_os_index(topology->levels[0][0], type, indexes[i]);
 	if (!obj) {
-	  /* TODO: just ignore this index, reduce the matrix accordingly, and continue */
-	  fprintf(stderr, "Ignoring %s distances from environment variable, unknown OS index %u\n",
-		  hwloc_obj_type_string(type), indexes[i]);
-	  free(objs);
-	  objs = NULL;
-	  break;
+
+	  /* shift the matrix */
+#define OLDPOS(i,j) (distances+(i)*nbobjs+(j))
+#define NEWPOS(i,j) (distances+(i)*(nbobjs-1)+(j))
+	  if (i>0) {
+	    /** no need to move beginning of 0th line */
+	    for(j=0; j<i-1; j++)
+	      /** move end of jth line + beginning of (j+1)th line */
+	      memmove(NEWPOS(j,i), OLDPOS(j,i+1), (nbobjs-1)*sizeof(*distances));
+	    /** move end of (i-1)th line */
+	    memmove(NEWPOS(i-1,i), OLDPOS(i-1,i+1), (nbobjs-i-1)*sizeof(*distances));
+	  }
+	  if (i<nbobjs-1) {
+	    /** move beginning of (i+1)th line */
+	    memmove(NEWPOS(i,0), OLDPOS(i+1,0), i*sizeof(*distances));
+	    /** move end of jth line + beginning of (j+1)th line */
+	    for(j=i; j<nbobjs-1; j++)
+	      memmove(NEWPOS(j,i), OLDPOS(j+1,i+1), (nbobjs-1)*sizeof(*distances));
+	    /** move end of (nbobjs-2)th line */
+	    memmove(NEWPOS(nbobjs-2,i), OLDPOS(nbobjs-1,i+1), (nbobjs-i-1)*sizeof(*distances));
+	  }
+
+	  /* shift the indexes array */
+	  memmove(indexes+i, indexes+i+1, (nbobjs-i-1)*sizeof(*indexes));
+
+	  /* update counters */
+	  nbobjs--;
+	  i--;
+	  continue;
 	}
 	objs[i] = obj;
       }
-      /* objs was either filled or freed/NULLed */
-      topology->os_distances[type].objs = objs;
+
+      topology->os_distances[type].nbobjs = nbobjs;
+      if (!nbobjs) {
+	/* the whole matrix was invalid */
+	free(objs);
+	free(topology->os_distances[type].indexes);
+	topology->os_distances[type].indexes = NULL;
+	free(topology->os_distances[type].distances);
+	topology->os_distances[type].distances = NULL;
+      } else {
+	/* setup the objs array */
+	topology->os_distances[type].objs = objs;
+      }
     }
   }
 }
