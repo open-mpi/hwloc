@@ -1115,52 +1115,65 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
   }
 }
 
+/* adjust object cpusets according the given droppedcpuset,
+ * drop object whose cpuset becomes empty,
+ * and mark dropped nodes in droppednodeset
+ */
 static void
-restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset)
+restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset_t droppedcpuset, hwloc_nodeset_t droppednodeset)
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
+
+  /* if this object isn't modified, don't bother looking at children */
+  if (!obj->complete_cpuset || !hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset))
+    return;
 
   hwloc_clear_object_distances(obj);
 
   if (obj->cpuset)
-    hwloc_bitmap_and(obj->cpuset, obj->cpuset, cpuset);
+    hwloc_bitmap_andnot(obj->cpuset, obj->cpuset, droppedcpuset);
   if (obj->complete_cpuset)
-    hwloc_bitmap_and(obj->complete_cpuset, obj->complete_cpuset, cpuset);
+    hwloc_bitmap_andnot(obj->complete_cpuset, obj->complete_cpuset, droppedcpuset);
   if (obj->online_cpuset)
-    hwloc_bitmap_and(obj->online_cpuset, obj->online_cpuset, cpuset);
+    hwloc_bitmap_andnot(obj->online_cpuset, obj->online_cpuset, droppedcpuset);
   if (obj->allowed_cpuset)
-    hwloc_bitmap_and(obj->allowed_cpuset, obj->allowed_cpuset, cpuset);
+    hwloc_bitmap_andnot(obj->allowed_cpuset, obj->allowed_cpuset, droppedcpuset);
 
   for_each_child_safe(child, obj, pchild)
-    restrict_object(topology, pchild, cpuset, nodeset);
+    restrict_object(topology, pchild, droppedcpuset, droppednodeset);
 
   if (obj->cpuset /* FIXME: needed for PCI devices? */
       && hwloc_bitmap_iszero(obj->cpuset)) {
     hwloc_debug("%s", "\nRemoving object during restrict");
     print_object(topology, 0, obj);
+    if (obj->type == HWLOC_OBJ_NODE)
+      hwloc_bitmap_set(droppednodeset, obj->os_index);
     /* remove the object from the tree (no need to remove from levels, they will be entirely rebuilt by the caller) */
     unlink_and_free_single_object(pobj);
     /* do not remove children. if they were to be removed, they would have been already */
-  } else {
-    if (obj->type == HWLOC_OBJ_NODE)
-      hwloc_bitmap_set(nodeset, obj->os_index);
   }
 }
 
+/* adjust object nodesets accordingly the given droppednodeset
+ */
 static void
-restrict_object_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_nodeset_t nodeset)
+restrict_object_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_nodeset_t droppednodeset)
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
 
+  /* if this object isn't modified, don't bother looking at children */
+  if (obj->complete_nodeset && !hwloc_bitmap_intersects(obj->complete_nodeset, droppednodeset))
+    return;
+
   if (obj->nodeset)
-    hwloc_bitmap_and(obj->nodeset, obj->nodeset, nodeset);
+    hwloc_bitmap_andnot(obj->nodeset, obj->nodeset, droppednodeset);
   if (obj->complete_nodeset)
-    hwloc_bitmap_and(obj->complete_nodeset, obj->complete_nodeset, nodeset);
+    hwloc_bitmap_andnot(obj->complete_nodeset, obj->complete_nodeset, droppednodeset);
   if (obj->allowed_nodeset)
-    hwloc_bitmap_and(obj->allowed_nodeset, obj->allowed_nodeset, nodeset);
+    hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, droppednodeset);
 
   for_each_child_safe(child, obj, pchild)
-    restrict_object_nodeset(topology, pchild, nodeset);
+    restrict_object_nodeset(topology, pchild, droppednodeset);
 }
 /*
  * Merge with the only child if either the parent or the child has a type to be
@@ -2157,7 +2170,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
 int
 hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, unsigned long flags)
 {
-  hwloc_bitmap_t nodeset;
+  hwloc_bitmap_t droppedcpuset, droppednodeset;
 
   /* make sure we'll keep something in the topology */
   if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->cpuset)) {
@@ -2165,12 +2178,17 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
     return -1;
   }
 
-  nodeset = hwloc_bitmap_alloc();
-  /* drop object based on cpuset, and fill the remaining nodeset */
-  restrict_object(topology, &topology->levels[0][0], cpuset, nodeset);
-  /* update nodesets accordingly */
-  restrict_object_nodeset(topology, &topology->levels[0][0], nodeset);
-  hwloc_bitmap_free(nodeset);
+  droppedcpuset = hwloc_bitmap_alloc();
+  droppednodeset = hwloc_bitmap_alloc();
+
+  /* drop object based on the reverse of cpuset, and fill the 'dropped' nodeset */
+  hwloc_bitmap_not(droppedcpuset, cpuset);
+  restrict_object(topology, &topology->levels[0][0], droppedcpuset, droppednodeset);
+  /* update nodesets according to dropped nodeset */
+  restrict_object_nodeset(topology, &topology->levels[0][0], droppednodeset);
+
+  hwloc_bitmap_free(droppedcpuset);
+  hwloc_bitmap_free(droppednodeset);
 
   hwloc_connect_children(topology->levels[0][0]);
   hwloc_connect_levels(topology);
