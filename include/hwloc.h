@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -16,7 +16,7 @@
 #ifndef HWLOC_H
 #define HWLOC_H
 
-#include <hwloc/config.h>
+#include <hwloc/autogen/config.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
@@ -135,6 +135,15 @@ typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
  * hwloc_compare_types() instead.
  */
 typedef enum {
+    /* ***************************************************************
+       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+
+       If new enum values are added here, you MUST also go update the
+       obj_type_order[] and obj_order_type[] arrays in src/topology.c.
+
+       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+       *************************************************************** */
+
   HWLOC_OBJ_SYSTEM,	/**< \brief Whole system (may be a cluster of machines).
   			  * The whole system that is accessible to hwloc.
 			  * That may comprise several machines in SSI systems
@@ -195,6 +204,17 @@ typedef enum {
 
   HWLOC_OBJ_OS_DEVICE	/**< \brief Operating system device.
 			 */
+
+  HWLOC_OBJ_MAX         /**< \private Sentinel value */
+
+    /* ***************************************************************
+       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+
+       If new enum values are added here, you MUST also go update the
+       obj_type_order[] and obj_order_type[] arrays in src/topology.c.
+
+       WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+       *************************************************************** */
 } hwloc_obj_type_t;
 
 /** \brief Compare the depth of two object types
@@ -740,6 +760,12 @@ struct hwloc_topology_cpubind_support {
   unsigned char set_thread_cpubind;
   /** Getting the binding of a given thread only is supported.  */
   unsigned char get_thread_cpubind;
+  /** Getting the last processors where the whole current process ran is supported */
+  unsigned char get_thisproc_last_cpu_location;
+  /** Getting the last processors where a whole process ran is supported */
+  unsigned char get_proc_last_cpu_location;
+  /** Getting the last processors where the current thread ran is supported */
+  unsigned char get_thisthread_last_cpu_location;
 };
 
 /** \brief Flags describing actual memory binding support for this topology. */
@@ -1173,6 +1199,26 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  */
 HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int flags);
 #endif
+
+/** \brief Get the last CPU where the current process or thread ran.
+ *
+ * The operating may move some tasks from one processor
+ * to another at any time according to their binding,
+ * so this function may return something that is already
+ * outdated.
+ */
+HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
+
+/** \brief Get the last CPU where a process ran.
+ *
+ * The operating may move some tasks from one processor
+ * to another at any time according to their binding,
+ * so this function may return something that is already
+ * outdated.
+ *
+ * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
+ */
+HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
 /** @} */
 

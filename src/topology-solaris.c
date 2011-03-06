@@ -1,11 +1,12 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
@@ -343,7 +344,9 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
   if ((mem_size = lgrp_mem_size(cookie, lgrp, LGRP_MEM_SZ_INSTALLED, LGRP_CONTENT_DIRECT)) > 0)
   {
     int i;
-    processorid_t cpuids[n];
+    processorid_t *cpuids;
+    cpuids = malloc(sizeof(processorid_t) * n);
+    assert(cpuids != NULL);
 
     obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, lgrp);
     obj->nodeset = hwloc_bitmap_alloc();
@@ -370,13 +373,16 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
     obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
     hwloc_insert_object_by_cpuset(topology, obj);
+    free(cpuids);
   }
 
   n = lgrp_children(cookie, lgrp, NULL, 0);
   {
-    lgrp_id_t lgrps[n];
+    lgrp_id_t *lgrps;
     int i;
 
+    lgrps = malloc(sizeof(lgrp_id_t) * n);
+    assert(lgrps != NULL);
     lgrp_children(cookie, lgrp, lgrps, n);
     hwloc_debug("lgrp %ld has %d children\n", lgrp, n);
     for (i = 0; i < n ; i++)
@@ -384,6 +390,7 @@ browse(struct hwloc_topology *topology, lgrp_cookie_t cookie, lgrp_id_t lgrp, hw
 	browse(topology, cookie, lgrps[i], glob_lgrps, curlgrp);
       }
     hwloc_debug("lgrp %ld's children done\n", lgrp);
+    free(lgrps);
   }
 }
 
@@ -412,15 +419,15 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 #ifdef HAVE_LGRP_LATENCY_COOKIE
     {
       float *distances = calloc(curlgrp*curlgrp, sizeof(float));
+      unsigned *indexes;
       unsigned i, j;
       hwloc_obj_type_t type = glob_lgrps[0]->type;
       for (i = 0; i < curlgrp; i++) {
+	indexes[i] = glob_lgrps[i]->os_index;
 	for (j = 0; j < curlgrp; j++)
 	  distances[i*curlgrp+j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
-      topology->os_distances[type].nbobjs = curlgrp;
-      topology->os_distances[type].objs = glob_lgrps;
-      topology->os_distances[type].distances = distances;
+      hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, curlgrp, indexes, glob_lgrps, distances);
     }
 #endif /* HAVE_LGRP_LATENCY_COOKIE */
   }

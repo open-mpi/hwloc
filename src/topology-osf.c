@@ -1,11 +1,12 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -250,13 +251,14 @@ hwloc_look_osf(struct hwloc_topology *topology)
   radsetcreate(&radset2);
   {
     hwloc_obj_t *nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+    unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
     float *distances = calloc(nbnodes*nbnodes, sizeof(float));
     unsigned nfound;
-    numa_attr_t attr = {
-      .nattr_type = R_RAD,
-      .nattr_descr = { .rd_radset = radset },
-      .nattr_flags = 0,
-    };
+    numa_attr_t attr;
+
+    attr.nattr_type = R_RAD;
+    attr.nattr_descr.rd_radset = radset;
+    attr.nattr_flags = 0;
 
     for (radid = 0; radid < (radid_t) nbnodes; radid++) {
       rademptyset(radset);
@@ -267,6 +269,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
 	continue;
       }
 
+      indexes[radid] = radid;
       nodes[radid] = obj = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, radid);
       obj->cpuset = hwloc_bitmap_alloc();
       obj->memory.local_memory = rad_get_physmem(radid) * getpagesize();
@@ -310,9 +313,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
       }
     }
 
-    topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
-    topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
-    topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
+    hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances);
   }
   radsetdestroy(&radset2);
   radsetdestroy(&radset);

@@ -1,4 +1,4 @@
-# Copyright © 2009-2010 INRIA
+# Copyright © 2009-2011 INRIA
 # Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
@@ -30,11 +30,13 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_bitmap_singlify \
 	hwloc_type_depth \
 	hwloc_bind \
+	hwloc_get_last_cpu_location \
 	hwloc_object_userdata \
 	hwloc_synthetic \
 	hwloc_is_thissystem \
 	hwloc_distances \
 	hwloc_set_distances \
+	hwloc_groups \
 	hwloc_insert_misc \
 	hwloc_get_next_pcidev
 

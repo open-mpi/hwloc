@@ -10,7 +10,9 @@ dnl                         All rights reserved.
 dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
 dnl                         University of Stuttgart.  All rights reserved.
 dnl Copyright ©  2010 INRIA
-dnl Copyright ©  2006-2010 Cisco Systems, Inc.  All rights reserved.
+dnl Copyright © 2006-2011 Cisco Systems, Inc.  All rights reserved.
+dnl
+dnl See COPYING in top-level directory.
 
 #-----------------------------------------------------------------------
 

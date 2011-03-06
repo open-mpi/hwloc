@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -22,12 +22,12 @@ typedef enum lgrp_content {
 
 typedef enum lgrp_view {
 	LGRP_VIEW_CALLER,
-	LGRP_VIEW_OS,
+	LGRP_VIEW_OS
 } lgrp_view_t;
 
 typedef enum lgrp_mem_size_flag {
 	LGRP_MEM_SZ_FREE,
-	LGRP_MEM_SZ_INSTALLED,
+	LGRP_MEM_SZ_INSTALLED
 } lgrp_mem_size_flag_t;
 
 typedef enum lgrp_lat_between {
@@ -37,7 +37,7 @@ typedef enum lgrp_lat_between {
 typedef enum lgrp_affinity {
 	LGRP_AFF_NONE,
 	LGRP_AFF_WEAK,
-	LGRP_AFF_STRONG,
+	LGRP_AFF_STRONG
 } lgrp_affinity_t;
 
 lgrp_cookie_t lgrp_init(lgrp_view_t view);

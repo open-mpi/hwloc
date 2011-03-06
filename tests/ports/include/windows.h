@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -24,8 +24,8 @@ typedef int (*FARPROC)();
 typedef void *PVOID,*LPVOID;
 typedef ULONG_PTR SIZE_T;
 
-// This is to cope with linux using integers for hwloc_pid_t and hwloc_thread_t
-//typedef PVOID HANDLE;
+/* This is to cope with linux using integers for hwloc_pid_t and hwloc_thread_t
+typedef PVOID HANDLE; */
 typedef int HANDLE;
 
 #ifdef __GNUC__

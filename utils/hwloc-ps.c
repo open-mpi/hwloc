@@ -1,11 +1,11 @@
 /*
  * Copyright © 2009-2010 INRIA
- * Copyright © 2009 Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -100,13 +100,16 @@ int main(int argc, char *argv[])
 
 #ifdef HWLOC_LINUX_SYS
     {
-      char path[6 + strlen(dirent->d_name) + 1 + 7 + 1];
+      char *path;
       int file;
       ssize_t n;
 
+      path = malloc(6 + strlen(dirent->d_name) + 1 + 7 + 1);
       snprintf(path, sizeof(path), "/proc/%s/cmdline", dirent->d_name);
+      file = open(path, O_RDONLY);
+      free(path);
 
-      if ((file = open(path, O_RDONLY)) >= 0) {
+      if (file >= 0) {
         n = read(file, name, sizeof(name) - 1);
         close(file);
 

@@ -1,8 +1,8 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
  * See COPYING in top-level directory.
  */
@@ -12,7 +12,7 @@
 #ifndef HWLOC_PRIVATE_H
 #define HWLOC_PRIVATE_H
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/bitmap.h>
 #include <private/debug.h>
@@ -81,6 +81,10 @@ struct hwloc_topology {
   int (*get_thread_cpubind)(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int flags);
 #endif
 
+  int (*get_thisproc_last_cpu_location)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
+  int (*get_thisthread_last_cpu_location)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
+  int (*get_proc_last_cpu_location)(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
+
   int (*set_thisproc_membind)(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
   int (*get_thisproc_membind)(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
   int (*set_thisthread_membind)(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
@@ -99,17 +103,14 @@ struct hwloc_topology {
   struct hwloc_topology_support support;
 
   struct hwloc_os_distances_s {
-    /* these are initialized to NULL and setup when needed during between init and load, or during discovery */
     int nbobjs;
-    unsigned *indexes; /* array of OS indexes before we can convert them into objs.
-			* only used during the early discovery until the tree starts being filled.
-			* not used anymore when distances are setup directly by a backend.
+    unsigned *indexes; /* array of OS indexes before we can convert them into objs. always available.
 			*/
     struct hwloc_obj **objs; /* array of objects, in the same order as above.
-			      * may be setup during discovery from os_indexes,
-			      * or setup directly by a backend.
+			      * either given (by a backend) together with the indexes array above.
+			      * or build from the above indexes array when not given (by the user).
 			      */
-    float *distances; /* distance matrices, ordered according to the objs array.
+    float *distances; /* distance matrices, ordered according to the above indexes/objs array.
 		       * distance from i to j is stored in slot i*nbnodes+j.
 		       * will be copied into the main logical-index-ordered distance at the end of the discovery.
 		       */
@@ -224,8 +225,17 @@ extern void hwloc_look_synthetic (struct hwloc_topology *topology);
  * The given object should not have children.
  *
  * This shall only be called before levels are built.
+ *
+ * In case of error, hwloc_report_os_error() is called.
  */
 extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
+
+/*
+ * Add an object to the topology and specify which error callback to use
+ */
+typedef void (*hwloc_report_error_t)(const char * msg, int line);
+extern void hwloc_report_os_error(const char * msg, int line);
+extern int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
 
 /*
  * Insert an object somewhere in the topology.
@@ -329,6 +339,7 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
 extern void hwloc_topology_distances_init(struct hwloc_topology *topology);
 extern void hwloc_topology_distances_clear(struct hwloc_topology *topology);
 extern void hwloc_topology_distances_destroy(struct hwloc_topology *topology);
+extern void hwloc_topology__set_distance_matrix(struct hwloc_topology *topology, hwloc_obj_type_t type, unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances);
 extern void hwloc_store_distances_from_env(struct hwloc_topology *topology);
 extern void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology);
 extern void hwloc_finalize_logical_distances(struct hwloc_topology *topology);

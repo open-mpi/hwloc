@@ -1,12 +1,12 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 
 #define _ATFILE_SOURCE
 #include <assert.h>
@@ -49,6 +49,23 @@ unsigned hwloc_get_api_version(void)
   return HWLOC_API_VERSION;
 }
 
+void hwloc_report_os_error(const char *msg, int line)
+{
+    static int reported = 0;
+
+    if (!reported) {
+        fprintf(stderr, "****************************************************************************\n");
+        fprintf(stderr, "* Hwloc has encountered what looks like an error from the operating system.\n");
+        fprintf(stderr, "*\n");
+        fprintf(stderr, "* %s\n", msg);
+        fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
+        fprintf(stderr, "*\n");
+        fprintf(stderr, "* Please report this error message to the hwloc user's mailing list,\n");
+        fprintf(stderr, "* along with the output from the hwloc-gather-topology.sh script.\n");
+        fprintf(stderr, "****************************************************************************\n");
+        reported = 1;
+    }
+}
 
 static void
 hwloc_topology_clear (struct hwloc_topology *topology);
@@ -279,34 +296,55 @@ enum hwloc_type_cmp_e {
   HWLOC_TYPE_EQUAL
 };
 
-static const unsigned obj_type_order[] = {
-  [HWLOC_OBJ_SYSTEM] = 0,
-  [HWLOC_OBJ_MACHINE] = 1,
-  [HWLOC_OBJ_GROUP] = 2,
-  [HWLOC_OBJ_NODE] = 3,
-  [HWLOC_OBJ_SOCKET] = 4,
-  [HWLOC_OBJ_CACHE] = 5,
-  [HWLOC_OBJ_CORE] = 6,
-  [HWLOC_OBJ_BRIDGE] = 7,
-  [HWLOC_OBJ_PCI_DEVICE] = 8,
-  [HWLOC_OBJ_OS_DEVICE] = 9,
-  [HWLOC_OBJ_PU] = 10,
-  [HWLOC_OBJ_MISC] = 11
+/* WARNING: The indexes of this array MUST match the ordering that of
+   the obj_order_type[] array, below.  Specifically, the values must
+   be laid out such that:
+
+       obj_order_type[obj_type_order[N]] = N
+
+   for all HWLOC_OBJ_* values of N.  Put differently:
+
+       obj_type_order[A] = B
+
+   where the A values are in order of the hwloc_obj_type_t enum, and
+   the B values are the corresponding indexes of obj_order_type.
+
+   We can't use C99 syntax to initialize this in a little safer manner
+   -- bummer.  :-( 
+
+   *************************************************************
+   *** DO NOT CHANGE THE ORDERING OF THIS ARRAY WITHOUT TRIPLE
+   *** CHECKING ITS CORRECTNESS!
+   *************************************************************
+   */
+static unsigned obj_type_order[] = {
+    /* first entry is HWLOC_OBJ_SYSTEM */  0,
+    /* next entry is HWLOC_OBJ_MACHINE */  1,
+    /* next entry is HWLOC_OBJ_NODE */     3,
+    /* next entry is HWLOC_OBJ_SOCKET */   4,
+    /* next entry is HWLOC_OBJ_CACHE */    5,
+    /* next entry is HWLOC_OBJ_CORE */     6,
+    /* next entry is HWLOC_OBJ_PU */       10,
+    /* next entry is HWLOC_OBJ_GROUP */    2,
+    /* next entry is HWLOC_OBJ_MISC */     11,
+    /* next entry is HWLOC_OBJ_BRIDGE */   7,
+    /* next entry is HWLOC_OBJ_PCI_DEVICE */  8, 
+    /* next entry is HWLOC_OBJ_PCI_DEVICE */  9,
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
-  [0] = HWLOC_OBJ_SYSTEM,
-  [1] = HWLOC_OBJ_MACHINE,
-  [2] = HWLOC_OBJ_GROUP,
-  [3] = HWLOC_OBJ_NODE,
-  [4] = HWLOC_OBJ_SOCKET,
-  [5] = HWLOC_OBJ_CACHE,
-  [6] = HWLOC_OBJ_CORE,
-  [7] = HWLOC_OBJ_BRIDGE,
-  [8] = HWLOC_OBJ_PCI_DEVICE,
-  [9] = HWLOC_OBJ_OS_DEVICE,
-  [10] = HWLOC_OBJ_PU,
-  [11] = HWLOC_OBJ_MISC
+  HWLOC_OBJ_SYSTEM,
+  HWLOC_OBJ_MACHINE,
+  HWLOC_OBJ_GROUP,
+  HWLOC_OBJ_NODE,
+  HWLOC_OBJ_SOCKET,
+  HWLOC_OBJ_CACHE,
+  HWLOC_OBJ_CORE,
+  HWLOC_OBJ_BRIDGE,
+  HWLOC_OBJ_PCI_DEVICE,
+  HWLOC_OBJ_OS_DEVICE,
+  HWLOC_OBJ_PU,
+  HWLOC_OBJ_MISC,
 };
 
 static unsigned __hwloc_attribute_const
@@ -463,7 +501,8 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
 /* Try to insert OBJ in CUR, recurse if needed */
 static int
-hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj)
+hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj,
+			        hwloc_report_error_t report_error)
 {
   hwloc_obj_t child, container, *cur_children, *obj_children, next_child = NULL;
   int put;
@@ -520,8 +559,8 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	return -1;
       case HWLOC_OBJ_INCLUDED:
 	if (container) {
-	  /* TODO: how to report?  */
-	  fprintf(stderr, "object included in several different objects!\n");
+          if (report_error)
+            report_error("object included in several different objects!", __LINE__);
 	  /* We can't handle that.  */
 	  return -1;
 	}
@@ -529,8 +568,8 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 	container = child;
 	break;
       case HWLOC_OBJ_INTERSECTS:
-	/* TODO: how to report?  */
-	fprintf(stderr, "object intersection without inclusion!\n");
+        if (report_error)
+          report_error("object intersection without inclusion!", __LINE__);
 	/* We can't handle that.  */
 	return -1;
       case HWLOC_OBJ_CONTAINS:
@@ -544,7 +583,7 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
 
   if (container) {
     /* OBJ is strictly contained is some child of CUR, go deeper.  */
-    return hwloc__insert_object_by_cpuset(topology, container, obj);
+    return hwloc___insert_object_by_cpuset(topology, container, obj, report_error);
   }
 
   /*
@@ -609,8 +648,10 @@ hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur,
   return 0;
 }
 
-void
-hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
+/* insertion routine that lets you change the error reporting callback */
+int
+hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
+			       hwloc_report_error_t report_error)
 {
   int ret;
   /* Start at the top.  */
@@ -618,9 +659,18 @@ hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
   hwloc_bitmap_or(topology->levels[0][0]->complete_cpuset, topology->levels[0][0]->complete_cpuset, obj->cpuset);
   if (obj->nodeset)
     hwloc_bitmap_or(topology->levels[0][0]->complete_nodeset, topology->levels[0][0]->complete_nodeset, obj->nodeset);
-  ret = hwloc__insert_object_by_cpuset(topology, topology->levels[0][0], obj);
+  ret = hwloc___insert_object_by_cpuset(topology, topology->levels[0][0], obj, report_error);
   if (ret < 0)
     hwloc_free_unlinked_object(obj);
+  return ret;
+}
+
+/* the default insertion routine warns in case of error.
+ * it's used by most backends */
+void
+hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
+{
+  hwloc__insert_object_by_cpuset(topology, obj, hwloc_report_os_error);
 }
 
 void
@@ -653,12 +703,15 @@ hwloc_connect(hwloc_obj_t parent);
 hwloc_obj_t
 hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
 {
+  int err;
   hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
   obj->cpuset = hwloc_bitmap_dup(cpuset);
   if (name)
     obj->name = strdup(name);
 
-  hwloc_insert_object_by_cpuset(topology, obj);
+  err = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
+  if (err < 0)
+    return NULL;
 
   hwloc_connect(topology->levels[0][0]);
 
@@ -977,9 +1030,8 @@ propagate_nodesets(hwloc_obj_t obj)
       /* Update allowed nodesets up */
       if (child->nodeset && child->allowed_nodeset) {
         hwloc_bitmap_copy(mask, child->nodeset);
-        hwloc_bitmap_not(mask, mask);
-        hwloc_bitmap_or(mask, mask, child->allowed_nodeset);
-        hwloc_bitmap_and(obj->allowed_nodeset, obj->allowed_nodeset, mask);
+        hwloc_bitmap_andnot(mask, mask, child->allowed_nodeset);
+        hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, mask);
       }
     }
   }
@@ -1770,6 +1822,10 @@ hwloc_discover(struct hwloc_topology *topology)
     topology->set_thread_cpubind = dontset_thread_cpubind;
     topology->get_thread_cpubind = dontget_thread_cpubind;
 #endif
+    topology->get_thisproc_last_cpu_location = dontget_thisproc_cpubind; /* cpubind instead of last_cpu_location is ok */
+    topology->get_thisthread_last_cpu_location = dontget_thisthread_cpubind; /* cpubind instead of last_cpu_location is ok */
+    topology->get_proc_last_cpu_location = dontget_proc_cpubind; /* cpubind instead of last_cpu_location is ok */
+    /* TODO: get_thread_last_cpu_location */
     topology->set_thisproc_membind = dontset_thisproc_membind;
     topology->get_thisproc_membind = dontget_thisproc_membind;
     topology->set_thisthread_membind = dontset_thisthread_membind;
@@ -1798,6 +1854,9 @@ hwloc_discover(struct hwloc_topology *topology)
     DO(cpu,get_thisthread_cpubind);
     DO(cpu,set_thread_cpubind);
     DO(cpu,get_thread_cpubind);
+    DO(cpu,get_thisproc_last_cpu_location);
+    DO(cpu,get_proc_last_cpu_location);
+    DO(cpu,get_thisthread_last_cpu_location);
     DO(mem,set_thisproc_membind);
     DO(mem,get_thisproc_membind);
     DO(mem,set_thisthread_membind);

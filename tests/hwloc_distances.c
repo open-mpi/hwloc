@@ -1,9 +1,9 @@
 /*
- * Copyright © 2010 CNRS, INRIA, Université Bordeaux 1
+ * Copyright © 2010-2011 INRIA
+ * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>

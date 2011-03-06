@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -28,7 +28,14 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --lo --logical-output     Use logical indexes for output (default)\n");
   fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
   fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
-  fprintf(where, "  --intersect <type|depth>  Report the list of object indexes intersecting the CPU set\n");
+  fprintf(where, "  --number-of <type|depth>\n"
+                 "  -N <type|depth>           Report the number of objects intersecting the CPU set\n");
+  fprintf(where, "  --intersect <type|depth>\n"
+		 "  -I <type|depth>           Report the indexes of object intersecting the CPU set\n");
+  fprintf(where, "  --hierarchical <type1>.<type2>...\n"
+		 "  -H <type1>.<type2>...     Find the list of objects intersecting the CPU set and\n"
+		 "                            display them as hierarchical combinations such as\n"
+		 "                            type1:index1.type2:index2...\n");
   fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "  --taskset                 Manipulate taskset-specific cpuset strings\n");
@@ -40,10 +47,38 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 static int verbose = 0;
 static int logicali = 1;
 static int logicalo = 1;
-static int listdepth = -1;
+static int numberofdepth = -1;
+static int intersectdepth = -1;
+static int hiernblevels = 0;
+static int *hierdepth = NULL;
 static int showobjs = 0;
 static int singlify = 0;
 static int taskset = 0;
+
+static void
+hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, hwloc_bitmap_t set, int level)
+{
+  hwloc_obj_t obj, prev = NULL;
+  unsigned logi = 0;
+  while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, hierdepth[level], prev)) != NULL) {
+    char string[256];
+    char type[32];
+    hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+    snprintf(string, sizeof(string), "%s%s%s:%u", prefix, level ? "." : "", type, logicalo ? logi : obj->os_index);
+    if (prev)
+      printf(" ");
+    if (level != hiernblevels - 1) {
+      hwloc_bitmap_t new = hwloc_bitmap_dup(set);
+      hwloc_bitmap_and(new, new, obj->cpuset);
+      hwloc_calc_hierarch_output(topology, string, new, level+1);
+      hwloc_bitmap_free(new);
+    } else {
+      printf("%s", string);
+    }
+    prev = obj;
+    logi++;
+  }
+}
 
 static void
 hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
@@ -69,14 +104,23 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
     }
     printf("\n");
     hwloc_bitmap_free(remaining);
-  } else if (listdepth != -1) {
+  } else if (numberofdepth != -1) {
+    unsigned nb = 0;
+    hwloc_obj_t obj = NULL;
+    while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, numberofdepth, obj)) != NULL)
+      nb++;
+    printf("%u\n", nb);
+  } else if (intersectdepth != -1) {
     hwloc_obj_t proc, prev = NULL;
-    while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, listdepth, prev)) != NULL) {
+    while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, intersectdepth, prev)) != NULL) {
       if (prev)
 	printf(",");
       printf("%u", logicalo ? proc->logical_index : proc->os_index);
       prev = proc;
     }
+    printf("\n");
+  } else if (hiernblevels) {
+    hwloc_calc_hierarch_output(topology, "", set, 0);
     printf("\n");
   } else {
     char *string = NULL;
@@ -89,6 +133,37 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
   }
 }
 
+static int hwloc_calc_type_depth(const char *string, hwloc_obj_type_t *typep, int *depthp)
+{
+  hwloc_obj_type_t type = hwloc_obj_type_of_string(string);
+  unsigned depth = -1;
+  if (type == (hwloc_obj_type_t) -1) {
+    char *endptr;
+    depth = strtoul(string, &endptr, 0);
+    if (*endptr)
+      return -1;
+  }
+  *depthp = depth;
+  *typep = type;
+  return 0;
+}
+
+static int hwloc_calc_check_type_depth(hwloc_topology_t topology, hwloc_obj_type_t type, int *depthp, const char *caller)
+{
+  if (type != (hwloc_obj_type_t) -1) {
+    int depth = hwloc_get_type_depth(topology, type);
+    if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "unavailable %s type %s\n", caller, hwloc_obj_type_string(type));
+      return -1;
+    } else  if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      fprintf(stderr, "cannot use %s type %s with multiple depth, please use the relevant depth directly\n", caller, hwloc_obj_type_string(type));
+      return -1;
+    }
+    *depthp = depth;
+  }
+  return 0;
+}
+
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
@@ -99,9 +174,12 @@ int main(int argc, char *argv[])
   hwloc_bitmap_t set;
   int cmdline_args = 0;
   char **orig_argv = argv;
-  hwloc_obj_type_t listtype = (hwloc_obj_type_t) -1;
+  hwloc_obj_type_t numberoftype = (hwloc_obj_type_t) -1;
+  hwloc_obj_type_t intersecttype = (hwloc_obj_type_t) -1;
+  hwloc_obj_type_t *hiertype = NULL;
   char *callname;
   int opt;
+  int i;
 
   callname = argv[0];
 
@@ -121,21 +199,62 @@ int main(int argc, char *argv[])
 	usage(callname, stdout);
 	return EXIT_SUCCESS;
       }
-      if (!strcmp(argv[1], "--intersect")) {
+      if (!strcmp(argv[1], "--number-of") || !strcmp(argv[1], "-N")) {
 	if (argc <= 2) {
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
 	}
-	listtype = hwloc_obj_type_of_string(argv[2]);
-	if (listtype == (hwloc_obj_type_t) -1) {
-	  char *endptr;
-	  unsigned _depth = strtoul(argv[2], &endptr, 0);
-	  if (*endptr) {
-	    fprintf(stderr, "unrecognized list type or depth %s\n", argv[2]);
+	if (hwloc_calc_type_depth(argv[2], &numberoftype, &numberofdepth) < 0) {
+	  fprintf(stderr, "unrecognized --number-of type or depth %s\n", argv[2]);
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
+	}
+	argv++;
+	argc--;
+	goto next;
+      }
+      if (!strcmp(argv[1], "--intersect") || !strcmp(argv[1], "-I")) {
+	if (argc <= 2) {
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
+	}
+	if (hwloc_calc_type_depth(argv[2], &intersecttype, &intersectdepth) < 0) {
+	  fprintf(stderr, "unrecognized --intersect type or depth %s\n", argv[2]);
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
+	}
+	argv++;
+	argc--;
+	goto next;
+      }
+      if (!strcmp(argv[1], "--hierarchical") || !strcmp(argv[1], "-H")) {
+	char *tmp, *next;
+	if (argc <= 2) {
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
+	}
+	hiernblevels = 1;
+	tmp = argv[2];
+        while (1) {
+	  tmp = strchr(tmp, '.');
+	  if (!tmp)
+	    break;
+	  tmp++;
+	  hiernblevels++;
+        }
+	hiertype = malloc(hiernblevels * sizeof(hwloc_obj_type_t));
+	hierdepth = malloc(hiernblevels * sizeof(int));
+	tmp = argv[2];
+	for(i=0; i<hiernblevels; i++) {
+	  next = strchr(tmp, '.');
+	  if (next)
+	    *next = '\0';
+	  if (hwloc_calc_type_depth(tmp, &hiertype[i], &hierdepth[i]) < 0) {
+	    fprintf(stderr, "unrecognized --hierarchical type or depth %s\n", tmp);
 	    usage(callname, stderr);
 	    return EXIT_SUCCESS;
 	  }
-	  listdepth = _depth;
+	  tmp = next+1;
 	}
 	argv++;
 	argc--;
@@ -143,12 +262,12 @@ int main(int argc, char *argv[])
       }
       if (!strcasecmp(argv[1], "--pulist") || !strcmp(argv[1], "--proclist")) {
 	/* backward compat with 1.0 */
-	listtype = HWLOC_OBJ_PU;
+	intersecttype = HWLOC_OBJ_PU;
         goto next;
       }
       if (!strcmp(argv[1], "--nodelist")) {
 	/* backward compat with 1.0 */
-	listtype = HWLOC_OBJ_NODE;
+	intersecttype = HWLOC_OBJ_NODE;
         goto next;
       }
       if (!strcmp(argv[1], "--largest")  || !strcmp(argv[1], "--objects") /* backward compat with 1.0 */) {
@@ -223,16 +342,15 @@ int main(int argc, char *argv[])
     argv++;
   }
 
-  if (listtype != (hwloc_obj_type_t) -1) {
-    listdepth = hwloc_get_type_depth(topology, listtype);
-    if (listdepth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      fprintf(stderr, "unavailable list type %s\n", hwloc_obj_type_string(listtype));
+  if (hwloc_calc_check_type_depth(topology, numberoftype, &numberofdepth, "--number-of") < 0)
+    goto out;
+
+  if (hwloc_calc_check_type_depth(topology, intersecttype, &intersectdepth, "--intersect") < 0)
+    goto out;
+
+  for(i=0; i<hiernblevels; i++)
+    if (hwloc_calc_check_type_depth(topology, hiertype[i], &hierdepth[i], "--hierarchical") < 0)
       goto out;
-    } else  if (listdepth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      fprintf(stderr, "cannot list type %s with multiple depth, please use the relevant depth directly\n", hwloc_obj_type_string(listtype));
-      goto out;
-    }
-  }
 
   if (cmdline_args) {
     /* process command-line arguments */
@@ -261,6 +379,9 @@ int main(int argc, char *argv[])
   hwloc_topology_destroy(topology);
 
   hwloc_bitmap_free(set);
+
+  free(hierdepth);
+  free(hiertype);
 
   return EXIT_SUCCESS;
 }

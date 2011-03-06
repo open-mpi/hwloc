@@ -1,12 +1,13 @@
 /*
- * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2010-2011 INRIA
  * See COPYING in top-level directory.
  */
 
 #ifndef HWLOC_RENAME_H
 #define HWLOC_RENAME_H
 
-#include <hwloc/config.h>
+#include <hwloc/autogen/config.h>
 
 
 #ifdef __cplusplus
@@ -134,6 +135,9 @@ extern "C" {
 #define hwloc_get_proc_cpubind HWLOC_NAME(get_proc_cpubind)
 #define hwloc_set_thread_cpubind HWLOC_NAME(set_thread_cpubind)
 #define hwloc_get_thread_cpubind HWLOC_NAME(get_thread_cpubind)
+
+#define hwloc_get_last_cpu_location HWLOC_NAME(get_last_cpu_location)
+#define hwloc_get_proc_last_cpu_location HWLOC_NAME(get_proc_last_cpu_location)
 
 #define HWLOC_MEMBIND_DEFAULT HWLOC_NAME_CAPS(MEMBIND_DEFAULT)
 #define HWLOC_MEMBIND_FIRSTTOUCH HWLOC_NAME_CAPS(MEMBIND_FIRSTTOUCH)

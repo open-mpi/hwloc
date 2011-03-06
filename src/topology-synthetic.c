@@ -1,12 +1,12 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/misc.h>
@@ -231,6 +231,10 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_PU:
       break;
+    case HWLOC_OBJ_MAX:
+      /* Should never happen */
+      assert(0);
+      break;
   }
 
   obj = hwloc_alloc_setup_object(type, topology->backend_params.synthetic.id[level]++);
@@ -247,8 +251,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     obj->nodeset = hwloc_bitmap_alloc();
     hwloc_bitmap_set(obj->nodeset, obj->os_index);
   }
-
-  hwloc_insert_object_by_cpuset(topology, obj);
 
   hwloc_bitmap_or(parent_cpuset, parent_cpuset, obj->cpuset);
 
@@ -292,7 +294,13 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
     case HWLOC_OBJ_PU:
       break;
+    case HWLOC_OBJ_MAX:
+      /* Should never happen */
+      assert(0);
+      break;
   }
+
+  hwloc_insert_object_by_cpuset(topology, obj);
 
   return first_cpu;
 }

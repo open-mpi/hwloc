@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1221,6 +1221,66 @@ of each level.
 For instance, the root object may contain a distance matrix that represents
 the latencies between any pairs of NUMA nodes if the BIOS and/or operating
 system reports them.
+
+
+\section faq_smt How may I ignore symmetric multithreading, hyper-threading, ... ?
+
+hwloc creates one PU (processing unit) object per hardware thread.
+If your machine supports symmetric multithreading, for instance Hyper-Threading,
+each Core object may contain multiple PU objects.
+\verbatim
+$ lstopo -
+...
+  Core L#1
+    PU L#2 (P#1)
+    PU L#3 (P#3)
+\endverbatim
+
+If you need to ignore symmetric multithreading, you should likely manipulate
+hwloc Core objects directly:
+\verbatim
+/* get the number of cores */
+unsigned nbcores = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_CORE);
+...
+/* get the third core below the first socket */
+hwloc_obj_t socket, core;
+socket = hwloc_get_obj_by_type(topology, HWLOC_OBJ_SOCKET, 0);
+core = hwloc_get_obj_inside_cpuset_by_type(topology, socket->cpuset,
+                                           HWLOC_OBJ_CORE, 2);
+\endverbatim
+
+Whenever you want to bind a process or thread to a core, make sure you
+singlify its cpuset first, so that the task is actually bound to a single
+thread within this core (to avoid useless migrations).
+\verbatim
+/* bind on the second core */
+hwloc_obj_t core = hwloc_get_obj_by_type(topology, HWLOC_OBJ_CORE, 1);
+hwloc_cpuset_t set = hwloc_bitmap_dup(core->cpuset);
+hwloc_bitmap_singlify(set);
+hwloc_set_cpubind(topology, set, 0);
+hwloc_bitmap_free(set);
+\endverbatim
+
+With hwloc-calc or hwloc-bind command-line tools, you may specify that
+you only want a single-thread within each core by asking for their first
+PU object:
+\verbatim
+$ hwloc-calc core:4-7
+0x0000ff00
+$ hwloc-calc core:4-7.pu:0
+0x00005500
+\endverbatim
+
+When binding a process on the command-line, you may either specify
+the exact thread that you want to use, or ask hwloc-bind to singlify
+the cpuset before binding
+\verbatim
+$ hwloc-bind core:3.pu:0 -- echo "hello from first thread on core #3"
+hello from first thread on core #3
+...
+$ hwloc-bind core:3 --single -- echo "hello from a single thread on core #3"
+hello from a single thread on core #3
+\endverbatim
 
 
 \section faq_upgrade How do I handle API upgrades?

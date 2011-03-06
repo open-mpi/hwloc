@@ -2,11 +2,11 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 
 #ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
@@ -191,11 +191,11 @@ x11_start(void *output __hwloc_attribute_unused, int width, int height)
 }
 
 static struct draw_methods x11_draw_methods = {
-  .start = x11_start,
-  .declare_color = null_declare_color,
-  .box = topo_cairo_box,
-  .line = topo_cairo_line,
-  .text = topo_cairo_text,
+  x11_start,
+  null_declare_color,
+  topo_cairo_box,
+  topo_cairo_line,
+  topo_cairo_text,
 };
 
 /** Clip coordinates of the visible part. */
@@ -379,11 +379,11 @@ png_start(void *output __hwloc_attribute_unused, int width, int height)
 }
 
 static struct draw_methods png_draw_methods = {
-  .start = png_start,
-  .declare_color = null_declare_color,
-  .box = topo_cairo_box,
-  .line = topo_cairo_line,
-  .text = topo_cairo_text,
+  png_start,
+  null_declare_color,
+  topo_cairo_box,
+  topo_cairo_line,
+  topo_cairo_text,
 };
 
 void
@@ -416,11 +416,11 @@ pdf_start(void *output, int width, int height)
 }
 
 static struct draw_methods pdf_draw_methods = {
-  .start = pdf_start,
-  .declare_color = null_declare_color,
-  .box = topo_cairo_box,
-  .line = topo_cairo_line,
-  .text = topo_cairo_text,
+  pdf_start,
+  null_declare_color,
+  topo_cairo_box,
+  topo_cairo_line,
+  topo_cairo_text,
 };
 
 void
@@ -453,11 +453,11 @@ ps_start(void *output, int width, int height)
 }
 
 static struct draw_methods ps_draw_methods = {
-  .start = ps_start,
-  .declare_color = null_declare_color,
-  .box = topo_cairo_box,
-  .line = topo_cairo_line,
-  .text = topo_cairo_text,
+  ps_start,
+  null_declare_color,
+  topo_cairo_box,
+  topo_cairo_line,
+  topo_cairo_text,
 };
 
 void
@@ -490,11 +490,11 @@ svg_start(void *output, int width, int height)
 }
 
 static struct draw_methods svg_draw_methods = {
-  .start = svg_start,
-  .declare_color = null_declare_color,
-  .box = topo_cairo_box,
-  .line = topo_cairo_line,
-  .text = topo_cairo_text,
+  svg_start,
+  null_declare_color,
+  topo_cairo_box,
+  topo_cairo_line,
+  topo_cairo_text,
 };
 
 void

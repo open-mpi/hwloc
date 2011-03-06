@@ -2,11 +2,11 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <private/private.h>
 #include <hwloc.h>
 
@@ -114,11 +114,11 @@ static void null_line(void *output __hwloc_attribute_unused, int r __hwloc_attri
 static void null_text(void *output __hwloc_attribute_unused, int r __hwloc_attribute_unused, int g __hwloc_attribute_unused, int b __hwloc_attribute_unused, int size __hwloc_attribute_unused, unsigned depth __hwloc_attribute_unused, unsigned x __hwloc_attribute_unused, unsigned y __hwloc_attribute_unused, const char *text __hwloc_attribute_unused) { }
 
 static struct draw_methods null_draw_methods = {
-  .start = null_start,
-  .declare_color = null_declare_color,
-  .box = null_box,
-  .line = null_line,
-  .text = null_text,
+  null_start,
+  null_declare_color,
+  null_box,
+  null_line,
+  null_text,
 };
 
 /*
@@ -900,6 +900,7 @@ get_type_fun(hwloc_obj_type_t type)
     case HWLOC_OBJ_BRIDGE: return bridge_draw;
     default:
     case HWLOC_OBJ_MISC: return misc_draw;
+    case HWLOC_OBJ_MAX: assert(0);
   }
 }
 
@@ -943,17 +944,17 @@ getmax_line(void *output, int r __hwloc_attribute_unused, int g __hwloc_attribut
 }
 
 static struct draw_methods getmax_draw_methods = {
-  .start = null_start,
-  .declare_color = null_declare_color,
-  .box = getmax_box,
-  .line = getmax_line,
-  .text = null_text,
+  null_start,
+  null_declare_color,
+  getmax_box,
+  getmax_line,
+  null_text,
 };
 
 void *
 output_draw_start(struct draw_methods *methods, int logical, int legend, hwloc_topology_t topology, void *output)
 {
-  struct coords coords = { .x = 0, .y = 0};
+  struct coords coords = { 0, 0 };
   fig(topology, &getmax_draw_methods, logical, legend, hwloc_get_root_obj(topology), &coords, 100, 0, 0);
   output = methods->start(output, coords.x, coords.y);
   methods->declare_color(output, 0, 0, 0);

@@ -1,13 +1,13 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2011 Université Bordeaux 1
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2010 IBM
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/linux.h>
 #include <private/misc.h>
@@ -573,8 +573,11 @@ static int
 hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
   hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
-  hwloc_bitmap_t cpusets[2] = { hwloc_set, tidset };
+  hwloc_bitmap_t cpusets[2];
   int ret;
+
+  cpusets[0] = hwloc_set;
+  cpusets[1] = tidset;
   ret = hwloc_linux_foreach_proc_tid(topology, pid,
 					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
 					 (void*) cpusets, flags);
@@ -828,6 +831,119 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
+static int
+hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_bitmap_t set)
+{
+  /* read /proc/pid/stat.
+   * its second field contains the command name between parentheses,
+   * and the command itself may contain parentheses,
+   * so read the whole line and find the last closing parenthesis to find the third field.
+   */
+  char buf[1024] = "";
+  char name[64];
+  char *tmp;
+  FILE *file;
+  int i;
+
+  if (!tid)
+    strcpy(name, "/proc/self/stat");
+  else
+    snprintf(name, sizeof(name), "/proc/%lu/stat", (unsigned long) tid);
+  file = fopen(name, "r");
+  if (!file) {
+    errno = ENOSYS;
+    return -1;
+  }
+  fgets(buf, sizeof(buf), file);
+  fclose(file);
+
+  tmp = strrchr(buf, ')');
+  if (!tmp) {
+    errno = ENOSYS;
+    return -1;
+  }
+  /* skip ') ' to find the actual third argument */
+  tmp += 2;
+
+  /* skip 35 fields */
+  for(i=0; i<36; i++) {
+    tmp = strchr(tmp, ' ');
+    if (!tmp) {
+      errno = ENOSYS;
+      return -1;
+    }
+    /* skip the ' ' itself */
+    tmp++;
+  }
+
+  /* read the last cpu in the 38th field now */
+  if (sscanf(tmp, "%d ", &i) != 1) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  hwloc_bitmap_only(set, i);
+  return 0;
+}
+
+static int
+hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags __hwloc_attribute_unused)
+{
+  hwloc_bitmap_t *cpusets = data;
+  hwloc_bitmap_t cpuset = cpusets[0];
+  hwloc_bitmap_t tidset = cpusets[1];
+
+  if (hwloc_linux_get_tid_last_cpu_location(topology, tid, tidset))
+    return -1;
+
+  /* reset the cpuset on first iteration */
+  if (!idx)
+    hwloc_bitmap_zero(cpuset);
+
+  hwloc_bitmap_or(cpuset, cpuset, tidset);
+  return 0;
+}
+
+static int
+hwloc_linux_get_pid_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
+{
+  hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
+  hwloc_bitmap_t cpusets[2];
+  int ret;
+
+  cpusets[0] = hwloc_set;
+  cpusets[1] = tidset;
+  ret = hwloc_linux_foreach_proc_tid(topology, pid,
+				     hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb,
+				     (void*) cpusets, flags);
+  hwloc_bitmap_free(tidset);
+  return ret;
+}
+
+static int
+hwloc_linux_get_proc_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
+{
+  if (pid == 0)
+    pid = topology->pid;
+  if (flags & HWLOC_CPUBIND_THREAD)
+    return hwloc_linux_get_tid_last_cpu_location(topology, pid, hwloc_set);
+  else
+    return hwloc_linux_get_pid_last_cpu_location(topology, pid, hwloc_set, flags);
+}
+
+static int
+hwloc_linux_get_thisproc_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags)
+{
+  return hwloc_linux_get_pid_last_cpu_location(topology, topology->pid, hwloc_set, flags);
+}
+
+static int
+hwloc_linux_get_thisthread_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+{
+  return hwloc_linux_get_tid_last_cpu_location(topology, topology->pid, hwloc_set);
+}
+
+
 #if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
 static int
 hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t policy, int flags)
@@ -862,6 +978,13 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
   unsigned max_os_index = 0; /* highest os_index + 1 */
   unsigned long *linuxmask;
   unsigned i;
+  hwloc_nodeset_t linux_nodeset = NULL;
+
+  if (hwloc_bitmap_isfull(nodeset)) {
+    linux_nodeset = hwloc_bitmap_alloc();
+    hwloc_bitmap_only(linux_nodeset, 0);
+    nodeset = linux_nodeset;
+  }
 
   max_os_index = hwloc_bitmap_last(nodeset);
   if (max_os_index == (unsigned) -1)
@@ -878,6 +1001,9 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
 
   for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
     linuxmask[i] = hwloc_bitmap_to_ith_ulong(nodeset, i);
+
+  if (linux_nodeset)
+    hwloc_bitmap_free(linux_nodeset);
 
   *max_os_index_p = max_os_index;
   *linuxmaskp = linuxmask;
@@ -1819,21 +1945,27 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       return;
     }
 
-  /* For convenience, put these declarations inside a block.  Saves us
-     from a bunch of mallocs, particularly with the 2D array. */
+  /* For convenience, put these declarations inside a block. */
 
   {
       hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
       float * distances = calloc(nbnodes*nbnodes, sizeof(float));
-      unsigned nonsparse_physical_indexes[nbnodes];
+      unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
       unsigned index_;
+
+      if (NULL == indexes || NULL == distances || NULL == nodes) {
+          free(nodes);
+          free(indexes);
+          free(distances);
+          goto out;
+      }
 
       /* Get node indexes now. We need them in order since Linux groups
        * sparse distances but keep them in order in the sysfs distance files.
        */
       index_ = 0;
       hwloc_bitmap_foreach_begin (osnode, nodeset) {
-	nonsparse_physical_indexes[index_] = osnode;
+	indexes[index_] = osnode;
 	index_++;
       } hwloc_bitmap_foreach_end();
       hwloc_bitmap_free(nodeset);
@@ -1841,7 +1973,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 #ifdef HWLOC_DEBUG
       hwloc_debug("%s", "numa distance indexes: ");
       for (index_ = 0; index_ < nbnodes; index_++) {
-	hwloc_debug(" %u", nonsparse_physical_indexes[index_]);
+	hwloc_debug(" %u", indexes[index_]);
       }
       hwloc_debug("%s", "\n");
 #endif
@@ -1850,7 +1982,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
       for (index_ = 0; index_ < nbnodes; index_++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
-	  osnode = nonsparse_physical_indexes[index_];
+	  osnode = indexes[index_];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
           cpuset = hwloc_parse_cpumap(nodepath, topology->backend_params.sysfs.root_fd);
@@ -1875,11 +2007,10 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, topology->backend_params.sysfs.root_fd);
       }
 
-      topology->os_distances[HWLOC_OBJ_NODE].nbobjs = nbnodes;
-      topology->os_distances[HWLOC_OBJ_NODE].objs = nodes;
-      topology->os_distances[HWLOC_OBJ_NODE].distances = distances;
+      hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances);
   }
 
+ out:
   *found = nbnodes;
 }
 
@@ -1888,18 +2019,25 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 static void * 
 hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
 {
-  char fname[strlen(p) + 1 + strlen(p1) + 1];
+  char *fname = NULL;
   char *ret = NULL;
   struct stat fs;
+  int file = -1;
+  unsigned len;
 
-  snprintf(fname, sizeof(fname), "%s/%s", p, p1);
+  len = strlen(p) + 1 + strlen(p1) + 1;
+  fname = malloc(len);
+  if (NULL == fname) {
+      return NULL;
+  }
+  snprintf(fname, len, "%s/%s", p, p1);
 
-  int file = hwloc_open(fname, root_fd);
-  if (-1 == file)
-    return NULL;
+  file = hwloc_open(fname, root_fd);
+  if (-1 == file) {
+      goto out;
+  }
   if (fstat(file, &fs)) {
-    close(file);
-    return NULL;
+    goto out;
   }
 
   ret = (char *) malloc(fs.st_size);
@@ -1913,7 +2051,12 @@ hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
         *bytes_read = cb;
     }
   }
+
+ out:
   close(file);
+  if (NULL != fname) {
+      free(fname);
+  }
   return ret;
 }
 
@@ -1979,10 +2122,11 @@ static int
 look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
     uint32_t phandle, unsigned int *level, hwloc_bitmap_t cpuset)
 {
+  unsigned int i;
   int ret = -1;
   if ((NULL == level) || (NULL == cpuset) || phandle == (uint32_t) -1)
     return ret;
-  for (unsigned int i = 0; i < cpus->n; ++i) {
+  for (i = 0; i < cpus->n; ++i) {
     if (phandle != cpus->p[i].l2_cache)
       continue;
     if (NULL != cpus->p[i].cpuset) {
@@ -2011,6 +2155,7 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   /* d-tlb-size - ignore, always 0 on power6 */
   /* i-cache-* and i-tlb-* represent instruction cache, ignore */
   uint32_t d_cache_line_size = 0, d_cache_size = 0;
+  struct hwloc_obj *c = NULL;
 
   hwloc_read_unit32be(cpu, "d-cache-line-size", &d_cache_line_size,
       topology->backend_params.sysfs.root_fd);
@@ -2020,7 +2165,7 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   if ( (0 == d_cache_line_size) && (0 == d_cache_size) )
     return;
 
-  struct hwloc_obj *c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+  c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
   c->attr->cache.depth = level;
   c->attr->cache.linesize = d_cache_line_size;
   c->attr->cache.size = d_cache_size;
@@ -2036,34 +2181,46 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
 static void
 look_powerpc_device_tree(struct hwloc_topology *topology)
 {
-  device_tree_cpus_t cpus = { .n = 0, .p = NULL, .allocated = 0 };
+  device_tree_cpus_t cpus;
   const char ofroot[] = "/proc/device-tree/cpus";
-
+  unsigned int i;
   int root_fd = topology->backend_params.sysfs.root_fd;
   DIR *dt = hwloc_opendir(ofroot, root_fd);
+  struct dirent *dirent;
+
+  cpus.n = 0;
+  cpus.p = NULL;
+  cpus.allocated = 0;
+
   if (NULL == dt)
     return;
 
-  struct dirent *dirent;
   while (NULL != (dirent = readdir(dt))) {
+    struct stat statbuf;
+    int err;
+    char *cpu;
+    char *device_type;
+    uint32_t reg = -1, l2_cache = -1, phandle = -1;
+    unsigned len;
 
     if ('.' == dirent->d_name[0])
       continue;
 
-    char cpu[sizeof(ofroot) + 1 + strlen(dirent->d_name) + 1];
-    snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, dirent->d_name);
-    struct stat statbuf;
-    int err;
+    len = sizeof(ofroot) + 1 + strlen(dirent->d_name) + 1;
+    cpu = malloc(len);
+    if (NULL == cpu) {
+      continue;
+    }
+    snprintf(cpu, len, "%s/%s", ofroot, dirent->d_name);
 
     err = hwloc_stat(cpu, &statbuf, root_fd);
     if (err < 0 || !S_ISDIR(statbuf.st_mode))
-      continue;
+      goto cont;
 
-    char *device_type = hwloc_read_str(cpu, "device_type", root_fd);
+    device_type = hwloc_read_str(cpu, "device_type", root_fd);
     if (NULL == device_type)
-      continue;
+      goto cont;
 
-    uint32_t reg = -1, l2_cache = -1, phandle = -1;
     hwloc_read_unit32be(cpu, "reg", &reg, root_fd);
     if (hwloc_read_unit32be(cpu, "next-level-cache", &l2_cache, root_fd) == -1)
       hwloc_read_unit32be(cpu, "l2-cache", &l2_cache, root_fd);
@@ -2082,9 +2239,11 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
       uint32_t nthreads = cb / sizeof(threads[0]);
 
       if (NULL != threads) {
+        unsigned int i;
         cpuset = hwloc_bitmap_alloc();
-        for (unsigned int i = 0; i < nthreads; ++i) {
-          hwloc_bitmap_set(cpuset, ntohl(threads[i]));
+        for (i = 0; i < nthreads; ++i) {
+          if (hwloc_bitmap_isset(topology->levels[0][0]->complete_cpuset, ntohl(threads[i])))
+            hwloc_bitmap_set(cpuset, ntohl(threads[i]));
         }
         free(threads);
       } else if ((unsigned int)-1 != reg) {
@@ -2095,10 +2254,11 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
       if (NULL == cpuset) {
         hwloc_debug("%s has no \"reg\" property, skipping\n", cpu);
       } else {
+        struct hwloc_obj *core = NULL;
         add_device_tree_cpus_node(&cpus, cpuset, l2_cache, phandle, dirent->d_name); 
 
         /* Add core */
-        struct hwloc_obj *core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
+        core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
         core->cpuset = hwloc_bitmap_dup(cpuset);
         hwloc_insert_object_by_cpuset(topology, core);
 
@@ -2109,6 +2269,8 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
       }
       free(device_type);
     }
+cont:
+    free(cpu);
   }
   closedir(dt);
 
@@ -2119,7 +2281,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
   }
 
 #ifdef HWLOC_DEBUG
-  for (unsigned int i = 0; i < cpus.n; ++i) {
+  for (i = 0; i < cpus.n; ++i) {
     hwloc_debug("%i: %s  ibm,phandle=%08X l2_cache=%08X ",
       i, cpus.p[i].name, cpus.p[i].phandle, cpus.p[i].l2_cache);
     if (NULL == cpus.p[i].cpuset) {
@@ -2131,27 +2293,35 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
 #endif
 
   /* Scan L2/L3/... caches */
-  for (unsigned int i = 0; i < cpus.n; ++i) {
+  for (i = 0; i < cpus.n; ++i) {
+    unsigned int level = 2;
+    hwloc_bitmap_t cpuset;
     /* Skip real CPUs */
     if (NULL != cpus.p[i].cpuset)
       continue;
 
     /* Calculate cache level and CPU mask */
-    unsigned int level = 2;
-    hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+    cpuset = hwloc_bitmap_alloc();
     if (0 == look_powerpc_device_tree_discover_cache(&cpus,
           cpus.p[i].phandle, &level, cpuset)) {
+      char *cpu;
+      unsigned len;
 
-      char cpu[sizeof(ofroot) + 1 + strlen(cpus.p[i].name) + 1];
-      snprintf(cpu, sizeof(cpu), "%s/%s", ofroot, cpus.p[i].name);
+      len = sizeof(ofroot) + 1 + strlen(cpus.p[i].name) + 1;
+      cpu = malloc(len);
+      if (NULL == cpu) {
+          return;
+      }
+      snprintf(cpu, len, "%s/%s", ofroot, cpus.p[i].name);
 
       try_add_cache_from_device_tree_cpu(topology, cpu, level, cpuset);
+      free(cpu);
     }
     hwloc_bitmap_free(cpuset);
   }
 
   /* Do cleanup */
-  for (unsigned int i = 0; i < cpus.n; ++i) {
+  for (i = 0; i < cpus.n; ++i) {
     hwloc_bitmap_free(cpus.p[i].cpuset);
     free(cpus.p[i].name);
   }
@@ -2168,6 +2338,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   DIR *dir;
   int i,j;
   FILE *fd;
+  unsigned caches_added;
 
   cpuset = hwloc_bitmap_alloc();
 
@@ -2220,7 +2391,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   hwloc_debug_1arg_bitmap("found %d cpu topologies, cpuset %s\n",
 	     hwloc_bitmap_weight(cpuset), cpuset);
 
-  unsigned caches_added = 0;
+  caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
       struct hwloc_obj *sock, *core, *thread;
@@ -2379,8 +2550,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	     hwloc_bitmap_t online_cpuset)
 {
   FILE *fd;
-  char str[strlen(PHYSID)+1+9+1+1];
+  char *str = NULL;
   char *endptr;
+  unsigned len;
   unsigned proc_physids[HWLOC_NBMAXCPUS];
   unsigned osphysids[HWLOC_NBMAXCPUS];
   unsigned proc_coreids[HWLOC_NBMAXCPUS];
@@ -2418,8 +2590,10 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   cpuset = hwloc_bitmap_alloc();
   /* Just record information and count number of sockets and cores */
 
+  len = strlen(PHYSID) + 1 + 9 + 1 + 1;
+  str = malloc(len);
   hwloc_debug("%s", "\n\n * Topology extraction from /proc/cpuinfo *\n\n");
-  while (fgets(str,sizeof(str),fd)!=NULL)
+  while (fgets(str,len,fd)!=NULL)
     {
 #      define getprocnb_begin(field, var)		     \
       if ( !strncmp(field,str,strlen(field)))	     \
@@ -2430,12 +2604,14 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	  {								\
             hwloc_debug("%s", "no number in "field" field of /proc/cpuinfo\n"); \
             hwloc_bitmap_free(cpuset);					\
+            free(str);							\
             return -1;							\
 	  }								\
 	else if (var==ULONG_MAX)						\
 	  {								\
             hwloc_debug("%s", "too big "field" number in /proc/cpuinfo\n"); \
             hwloc_bitmap_free(cpuset);					\
+            free(str);							\
             return -1;							\
 	  }								\
 	hwloc_debug(field " %lu\n", var)
@@ -2485,6 +2661,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	  }
     }
   fclose(fd);
+  free(str);
 
   if (processor == (unsigned long) -1) {
     hwloc_bitmap_free(cpuset);
@@ -2703,6 +2880,9 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
   topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+  topology->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
+  topology->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
+  topology->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
   topology->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
   topology->get_thisthread_membind = hwloc_linux_get_thisthread_membind;

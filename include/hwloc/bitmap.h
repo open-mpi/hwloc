@@ -1,8 +1,8 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
- * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -13,7 +13,7 @@
 #ifndef HWLOC_BITMAP_H
 #define HWLOC_BITMAP_H
 
-#include <hwloc/config.h>
+#include <hwloc/autogen/config.h>
 #include <assert.h>
 
 

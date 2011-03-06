@@ -1,11 +1,11 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009 Université Bordeaux 1
+ * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -161,13 +161,6 @@ int main(void)
   printf("last cpu cpuset is %s\n", string);
   check_cpuset(obj->cpuset, NULL);
   printf("last cpu cpuset converted back and forth, ok\n");
-
-//  hwloc_bitmap_sscanf(set, "1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2,4,8,10,20\n");
-//  char *s;
-//  hwloc_bitmap_asprintf(&s, &set);
-//  printf("%s\n", s);
-//  free(s);
-//  will be truncated after ",4," since it's too large
 
   free(string);
 

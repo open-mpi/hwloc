@@ -1,7 +1,7 @@
 /*
  * Copyright © 2010 INRIA
  * Copyright © 2010 Université Bordeaux 1
- * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  *
  *
@@ -14,7 +14,7 @@
  * on various architectures, without having to use this x86-specific code.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
@@ -270,7 +270,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigned nbprocs)
 {
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
-  unsigned i, j, one, level;
+  unsigned i, j, l, one, level;
 
   for (i = 0; i < nbprocs; i++)
     if (infos[i].present) {
@@ -375,7 +375,6 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
   /* Look for caches */
   /* First find max level */
   level = 0;
-  unsigned l;
   for (i = 0; i < nbprocs; i++)
     for (j = 0; j < infos[i].numcaches; j++)
       if (infos[i].cache[j].level > level)
@@ -461,11 +460,16 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
   unsigned i;
   unsigned highest_cpuid;
   unsigned highest_ext_cpuid;
-  struct procinfo infos[nbprocs];
+  struct procinfo *infos = NULL;
   enum cpuid_type cpuid_type = unknown;
 
   if (!hwloc_have_cpuid())
     return;
+
+  infos = malloc(sizeof(struct procinfo) * nbprocs);
+  if (NULL == infos) {
+      return;
+  }
 
   eax = 0x00;
   hwloc_cpuid(&eax, &ebx, &ecx, &edx);
@@ -476,8 +480,9 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
     cpuid_type = amd;
 
   hwloc_debug("highest cpuid %x, cpuid type %u\n", highest_cpuid, cpuid_type);
-  if (highest_cpuid < 0x01)
-    return;
+  if (highest_cpuid < 0x01) {
+      goto free;
+  }
 
   eax = 0x80000000;
   hwloc_cpuid(&eax, &ebx, &ecx, &edx);
@@ -500,7 +505,7 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
       topology->set_thisthread_cpubind(topology, orig_cpuset, 0);
       hwloc_bitmap_free(orig_cpuset);
       summarize(topology, infos, nbprocs);
-      return;
+      goto free;
     }
   }
   if (topology->get_thisproc_cpubind && topology->set_thisproc_cpubind) {
@@ -516,10 +521,15 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
       topology->set_thisproc_cpubind(topology, orig_cpuset, 0);
       hwloc_bitmap_free(orig_cpuset);
       summarize(topology, infos, nbprocs);
-      return;
+      goto free;
     }
   }
 #endif
 
   hwloc_add_object_info(topology->levels[0][0], "Backend", "x86");
+
+ free:
+  if (NULL != infos) {
+      free(infos);
+  }
 }

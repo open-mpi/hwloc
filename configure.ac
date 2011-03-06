@@ -52,7 +52,7 @@ HWLOC_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION`"
 HWLOC_MAJOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --major`"
 HWLOC_MINOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --minor`"
 HWLOC_RELEASE_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release`"
-HWLOC_SVN_R="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --svn`"
+HWLOC_REPO_REV="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --repo-rev`"
 HWLOC_RELEASE_DATE="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release-date`"
 AC_SUBST(HWLOC_VERSION)
 AC_SUBST(HWLOC_SVN_R)

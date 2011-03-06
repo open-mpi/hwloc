@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2011 INRIA
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -28,6 +28,8 @@ static void usage(FILE *where)
   fprintf(where, "  --single       Bind on a single CPU to prevent migration\n");
   fprintf(where, "  --strict       Require strict binding\n");
   fprintf(where, "  --get          Retrieve current process binding\n");
+  fprintf(where, "  --get-last-cpu-location\n"
+		 "                 Retrieve the last processors where the current process ran\n");
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
   fprintf(where, "  --taskset      Manipulate taskset-specific cpuset strings\n");
   fprintf(where, "  -v             Show verbose messages\n");
@@ -41,6 +43,7 @@ int main(int argc, char *argv[])
   hwloc_bitmap_t cpubind_set, membind_set;
   int cpubind = 1; /* membind if 0 */
   int get_binding = 0;
+  int get_last_cpu_location = 0;
   int single = 0;
   int verbose = 0;
   int logical = 1;
@@ -116,6 +119,10 @@ int main(int argc, char *argv[])
         taskset = 1;
         goto next;
       }
+      else if (!strncmp (argv[0], "--get-last-cpu-location", 10)) {
+	get_last_cpu_location = 1;
+	goto next;
+      }
       else if (!strcmp (argv[0], "--get")) {
 	get_binding = 1;
 	goto next;
@@ -135,7 +142,7 @@ int main(int argc, char *argv[])
 	  membind_policy = HWLOC_MEMBIND_FIRSTTOUCH;
 	else if (!strncmp(argv[1], "bind", 2))
 	  membind_policy = HWLOC_MEMBIND_BIND;
-	else if (!strncmp(argv[1], "interleace", 2))
+	else if (!strncmp(argv[1], "interleave", 2))
 	  membind_policy = HWLOC_MEMBIND_INTERLEAVE;
 	else if (!strncmp(argv[1], "replicate", 2))
 	  membind_policy = HWLOC_MEMBIND_REPLICATE;
@@ -169,21 +176,28 @@ int main(int argc, char *argv[])
     argv += opt+1;
   }
 
-  if (get_binding) {
+  if (get_binding || get_last_cpu_location) {
     char *s;
     const char *policystr = NULL;
     int err;
     if (cpubind) {
-      if (pid)
-	err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
-      else
-	err = hwloc_get_cpubind(topology, cpubind_set, 0);
+      if (get_last_cpu_location) {
+	if (pid)
+	  err = hwloc_get_proc_last_cpu_location(topology, pid, cpubind_set, 0);
+	else
+	  err = hwloc_get_last_cpu_location(topology, cpubind_set, 0);
+      } else {
+	if (pid)
+	  err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
+	else
+	  err = hwloc_get_cpubind(topology, cpubind_set, 0);
+      }
       if (err) {
 	const char *errmsg = strerror(errno);
-        if (pid)
-          fprintf(stderr, "hwloc_get_proc_cpubind %ld failed (errno %d %s)\n", (long) pid, errno, errmsg);
-        else
-	  fprintf(stderr, "hwloc_get_cpubind failed (errno %d %s)\n", errno, errmsg);
+	if (pid)
+	  fprintf(stderr, "hwloc_get_proc_%s %ld failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", (long) pid, errno, errmsg);
+	else
+	  fprintf(stderr, "hwloc_get_%s failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", errno, errmsg);
 	return EXIT_FAILURE;
       }
       if (taskset)
