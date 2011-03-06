@@ -967,9 +967,8 @@ propagate_nodesets(hwloc_obj_t obj)
       /* Update allowed nodesets up */
       if (child->nodeset && child->allowed_nodeset) {
         hwloc_bitmap_copy(mask, child->nodeset);
-        hwloc_bitmap_not(mask, mask);
-        hwloc_bitmap_or(mask, mask, child->allowed_nodeset);
-        hwloc_bitmap_and(obj->allowed_nodeset, obj->allowed_nodeset, mask);
+        hwloc_bitmap_andnot(mask, mask, child->allowed_nodeset);
+        hwloc_bitmap_andnot(obj->allowed_nodeset, obj->allowed_nodeset, mask);
       }
     }
   }
