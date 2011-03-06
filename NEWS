@@ -27,6 +27,7 @@ Version 1.1.2
 * Stop truncating the output in hwloc_obj_attr_snprintf() and in the
   corresponding lstopo output. Thanks to Guy Streeter for reporting the
   problem.
+* Fix object levels ordering in synthetic topologies.
 
 
 Version 1.1.1

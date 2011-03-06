@@ -245,8 +245,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     hwloc_bitmap_set(obj->nodeset, obj->os_index);
   }
 
-  hwloc_insert_object_by_cpuset(topology, obj);
-
   hwloc_bitmap_or(parent_cpuset, parent_cpuset, obj->cpuset);
 
   /* post-hooks */
@@ -287,6 +285,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_PU:
       break;
   }
+
+  hwloc_insert_object_by_cpuset(topology, obj);
 
   return first_cpu;
 }
