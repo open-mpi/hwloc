@@ -23,7 +23,7 @@ static inline void hwloc_debug(const char *s __hwloc_attribute_unused, ...)
 #ifdef HWLOC_DEBUG
     va_list ap;
 
-    va_start(s, ap);
+    va_start(ap, s);
     vfprintf(stderr, s, ap);
     va_end(ap);
 #endif
