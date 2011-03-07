@@ -27,6 +27,7 @@ Version 1.2.0
 * Add hwloc_get_last_cpu_location() and hwloc_get_proc_last_cpu_location()
   to retrieve the processors where a process or thread recently ran.
   + Add the corresponding --get-last-cpu-location option to hwloc-bind.
+* Add hwloc_topology_restrict() and --restrict option to lstopo.
 * x86 backend (for freebsd): add x2APIC support
 * Rename hwloc-gather-topology.sh into hwloc-gather-topology
 * Add hwloc_bitmap_list_sscanf/snprintf/asprintf to convert between bitmaps
