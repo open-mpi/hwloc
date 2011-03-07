@@ -94,6 +94,12 @@ Do not consider administration limitations.
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
 .TP
+\fB\-\-restrict\fR <cpuset>
+Restrict the topology to the given cpuset.
+.TP
+\fB\-\-restrict\fR binding
+Restrict the topology to the current process binding.
+.TP
 \fB\-\-pid\fR <pid>
 Detect topology as seen by process <pid>, i.e. as if process <pid> did the
 discovery itself, and show its current binding. Note that this can for instance
@@ -295,6 +301,14 @@ graphical output on another machine:
     machine1$ lstopo file.xml
     <transfer file.xml from machine1 to machine2>
     machine2$ lstopo --input file.xml
+
+To restrict a XML topology to only physical processors 0, 1, 4 and 5:
+
+    lstopo --input file.xml --restrict 0x33 newfile.xml
+
+To restrict a XML topology to only numa node whose logical index is 1:
+
+    lstopo --input file.xml --restrict $(hwloc-calc --input file.xml node:1) newfile.xml
 
 To display a summary of the topology:
 
