@@ -184,7 +184,7 @@ type can be used when several machines form an overall single system image
 .
 .PP
 Finally, note that an object can be denoted by its numeric "depth" in
-the topology graph.  See the Examples section for more information.
+the topology graph.
 .
 .SS Hwloc Indexes
 Indexes are integer values that uniquely specify a given object of a
