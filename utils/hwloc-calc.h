@@ -83,34 +83,117 @@ hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const
   }
 }
 
+/* extended version of hwloc_obj_type_of_string()
+ *
+ * matches L2, L3Cache and Group4, and return the corresponding depth attribute if depthattrp isn't NULL.
+ * only looks at the beginning of the string to allow truncated type names.
+ */
+static inline int
+hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, unsigned *depthattrp)
+{
+  hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
+  unsigned depthattr = (unsigned) -1;
+
+  /* types without depthattr */
+  if (!strncasecmp(string, "system", 2)) {
+    type = HWLOC_OBJ_SYSTEM;
+  } else if (!hwloc_strncasecmp(string, "machine", 2)) {
+    type = HWLOC_OBJ_MACHINE;
+  } else if (!hwloc_strncasecmp(string, "node", 1)) {
+    type = HWLOC_OBJ_NODE;
+  } else if (!hwloc_strncasecmp(string, "socket", 2)) {
+    type = HWLOC_OBJ_SOCKET;
+  } else if (!hwloc_strncasecmp(string, "core", 2)) {
+    type = HWLOC_OBJ_CORE;
+  } else if (!hwloc_strncasecmp(string, "pu", 1) || !hwloc_strncasecmp(string, "proc", 1) /* backward compat with 0.9 */) {
+    type = HWLOC_OBJ_PU;
+  } else if (!hwloc_strncasecmp(string, "misc", 2)) {
+    type = HWLOC_OBJ_MISC;
+
+  /* types with depthattr */
+  } else if (!hwloc_strncasecmp(string, "cache", 2)) {
+    type = HWLOC_OBJ_CACHE;
+  } else if ((string[0] == 'l' || string[0] == 'L') && string[1] >= '0' && string[1] <= '9') {
+    type = HWLOC_OBJ_CACHE;
+    depthattr = atoi(string+1);
+  } else if (!hwloc_strncasecmp(string, "group", 1)) {
+    int length;
+    type = HWLOC_OBJ_GROUP;
+    length = strcspn(string, "0123456789");
+    if (string[length] != '\0')
+      depthattr = atoi(string+length);
+  } else
+    return -1;
+
+  *typep = type;
+  if (depthattrp)
+    *depthattrp = depthattr;
+
+  return 0;
+}
+
 static inline int
 hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 		       hwloc_const_bitmap_t rootset, const char *string, int logical,
 		       hwloc_bitmap_t set, int verbose)
 {
   hwloc_obj_t obj;
-  unsigned depth, width;
+  hwloc_obj_type_t type;
+  unsigned depth, width, depthattr;
   char *sep, *sep2, *sep3;
+  char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   unsigned first, wrap, amount, step;
   unsigned i,j;
+  int err;
 
-  if (!hwloc_namecoloncmp(string, "system", 2))
-    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SYSTEM);
-  else if (!hwloc_namecoloncmp(string, "machine", 1))
-    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_MACHINE);
-  else if (!hwloc_namecoloncmp(string, "node", 1))
-    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_NODE);
-  else if (!hwloc_namecoloncmp(string, "socket", 2))
-    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_SOCKET);
-  else if (!hwloc_namecoloncmp(string, "core", 1))
-    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_CORE);
-  else if (!hwloc_namecoloncmp(string, "pu", 1) || !hwloc_namecoloncmp(string, "proc", 1) /* backward compat with 0.9 */)
-    depth = hwloc_get_type_or_above_depth(topology, HWLOC_OBJ_PU);
-  else {
+  sep = strchr(string, ':');
+  if (!sep) {
+    fprintf(stderr, "missing colon separator in argument %s\n", string);
+    return -1;
+  }
+  if ((unsigned) (sep-string) >= sizeof(typestring)) {
+    fprintf(stderr, "invalid type name %s\n", string);
+    return -1;
+  }
+  strncpy(typestring, string, sep-string);
+  typestring[sep-string] = '\0';
+
+  /* try to match a type name */
+  err = hwloc_obj_type_sscanf(typestring, &type, &depthattr);
+  if (!err) {
+    if (depthattr == (unsigned) -1) {
+      /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
+      depth = hwloc_get_type_or_above_depth(topology, type);
+      if (depth == (unsigned) HWLOC_TYPE_DEPTH_MULTIPLE) {
+	fprintf(stderr, "type %s has multiple possible depths\n", hwloc_obj_type_string(type));
+	return -1;
+      } else if (depth == (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN) {
+	fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
+	return -1;
+      }
+    } else {
+      /* matched a type with a depth attribute, look at the first object of each level to find the depth */
+      assert(type == HWLOC_OBJ_CACHE || type == HWLOC_OBJ_GROUP);
+      for(i=0; ; i++) {
+	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
+	if (!obj) {
+	  fprintf(stderr, "type %s with custom depth %u does not exists\n", hwloc_obj_type_string(type), depthattr);
+	  return -1;
+	}
+	if (obj->type == type
+	    && ((type == HWLOC_OBJ_CACHE && depthattr == obj->attr->cache.depth)
+		|| (type == HWLOC_OBJ_GROUP && depthattr == obj->attr->group.depth))) {
+	  depth = i;
+	  break;
+	}
+      }
+    }
+  } else {
+    /* try to match a numeric depth */
     char *end;
     depth = strtol(string, &end, 0);
     if (end == string) {
-      fprintf(stderr, "invalid object name %s\n", string);
+      fprintf(stderr, "invalid type name %s\n", string);
       return -1;
     }
   }
@@ -120,12 +203,6 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     return -1;
   }
   width = hwloc_get_nbobjs_by_depth(topology, depth);
-
-  sep = strchr(string, ':');
-  if (!sep) {
-    fprintf(stderr, "missing colon separator in argument %s\n", string);
-    return -1;
-  }
 
   first = atoi(sep+1);
   amount = 1;
