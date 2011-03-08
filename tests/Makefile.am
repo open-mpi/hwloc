@@ -1,5 +1,5 @@
 # Copyright © 2009-2011 INRIA.  All rights reserved.
-# Copyright © 2009-2010 Université Bordeaux 1
+# Copyright © 2009-2011 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -85,7 +85,7 @@ openfabrics_verbs_LDFLAGS = -libverbs
 myriexpress_LDFLAGS = -lmyriexpress
 cuda_LDFLAGS = -lcuda
 cudart_LDFLAGS = -lcuda -lcudart
-xmlbuffer = -lxml2
+xmlbuffer_LDFLAGS = $(HWLOC_XML_LIBS)
 if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
 endif !HWLOC_HAVE_WINDOWS
