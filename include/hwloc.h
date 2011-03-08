@@ -21,9 +21,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
-#ifdef HWLOC_HAVE_STDINT_H
-#include <stdint.h>
-#endif
 
 /*
  * Symbol transforms
@@ -222,8 +219,8 @@ union hwloc_obj_attr_u;
 
 /** \brief Object memory */
 struct hwloc_obj_memory_s {
-  uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
-  uint64_t local_memory; /**< \brief Local memory (in bytes) */
+  hwloc_uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
+  hwloc_uint64_t local_memory; /**< \brief Local memory (in bytes) */
 
   unsigned page_types_len; /**< \brief Size of array \p page_types */
   /** \brief Array of local memory page types, \c NULL if no local memory and \p page_types is 0.
@@ -232,8 +229,8 @@ struct hwloc_obj_memory_s {
    * It contains \p page_types_len slots.
    */
   struct hwloc_obj_memory_page_type_s {
-    uint64_t size;	/**< \brief Size of pages */
-    uint64_t count;	/**< \brief Number of pages of this size */
+    hwloc_uint64_t size;	/**< \brief Size of pages */
+    hwloc_uint64_t count;	/**< \brief Number of pages of this size */
   } * page_types;
 };
 
@@ -376,7 +373,7 @@ typedef struct hwloc_obj * hwloc_obj_t;
 union hwloc_obj_attr_u {
   /** \brief Cache-specific Object Attributes */
   struct hwloc_cache_attr_s {
-    uint64_t size;			  /**< \brief Size of cache in bytes */
+    hwloc_uint64_t size;			  /**< \brief Size of cache in bytes */
     unsigned depth;			  /**< \brief Depth of cache */
     unsigned linesize;			  /**< \brief Cache-line size in bytes */
   } cache;
