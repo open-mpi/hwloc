@@ -162,6 +162,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   err = hwloc_obj_type_sscanf(typestring, &type, &depthattr);
   if (!err) {
     if (depthattr == (unsigned) -1) {
+      hwloc_obj_type_t realtype;
       /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
       depth = hwloc_get_type_or_above_depth(topology, type);
       if (depth == (unsigned) HWLOC_TYPE_DEPTH_MULTIPLE) {
@@ -171,6 +172,10 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 	fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
 	return -1;
       }
+      realtype = hwloc_get_depth_type(topology, depth);
+      if (type != realtype && verbose)
+	fprintf(stderr, "using type %s (depth %d) instead of %s\n",
+		hwloc_obj_type_string(realtype), depth, hwloc_obj_type_string(type));
     } else {
       /* matched a type with a depth attribute, look at the first object of each level to find the depth */
       assert(type == HWLOC_OBJ_CACHE || type == HWLOC_OBJ_GROUP);
@@ -248,11 +253,11 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
       char *s;
       hwloc_bitmap_asprintf(&s, rootset);
       if (obj)
-	printf("object #%u depth %u below cpuset %s found\n",
+	printf("using object #%u depth %u below cpuset %s\n",
 	       i, depth, s);
       else
-	fprintf(stderr, "object #%u depth %u below cpuset %s does not exist\n",
-		i, depth, s);
+	fprintf(stderr, "object #%u depth %u (type %s) below cpuset %s does not exist\n",
+		i, depth, typestring, s);
       free(s);
     }
     if (obj) {
