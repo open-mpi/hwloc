@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -45,7 +45,7 @@ static int showobjs = 0;
 static int singlify = 0;
 static int taskset = 0;
 
-static void
+static int
 hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
 {
   if (singlify)
@@ -58,6 +58,10 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
       char type[64];
       unsigned idx;
       hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
+      if (!obj) {
+        fprintf(stderr, "No object included in this cpuset\n");
+        return EXIT_FAILURE;
+      }
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
       idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
@@ -87,6 +91,7 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
     printf("%s\n", string);
     free(string);
   }
+  return EXIT_SUCCESS;
 }
 
 int main(int argc, char *argv[])
@@ -102,6 +107,7 @@ int main(int argc, char *argv[])
   hwloc_obj_type_t listtype = (hwloc_obj_type_t) -1;
   char *callname;
   int opt;
+  int ret = EXIT_SUCCESS;
 
   callname = argv[0];
 
@@ -236,7 +242,7 @@ int main(int argc, char *argv[])
 
   if (cmdline_args) {
     /* process command-line arguments */
-    hwloc_calc_output(topology, set);
+    ret = hwloc_calc_output(topology, set);
 
   } else {
     /* process stdin arguments line-by-line */
@@ -262,5 +268,5 @@ int main(int argc, char *argv[])
 
   hwloc_bitmap_free(set);
 
-  return EXIT_SUCCESS;
+  return ret;
 }
