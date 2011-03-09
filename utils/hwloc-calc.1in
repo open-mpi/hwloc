@@ -96,7 +96,8 @@ Report version and exit.
 .
 hwloc-calc generates and manipulates CPU mask strings or objects.
 Both input and output may be either objects (with physical or logical
-indexes) or CPU mask strings (no logical or physical index involved).
+indexes), CPU lists (with physical or logical indexes), or CPU mask strings
+(always physically indexed).
 .
 .PP
 If objects or CPU mask strings are given on the command-line,
@@ -129,29 +130,36 @@ hwloc(7) directly apply to the hwloc-calc utility.
 hwloc-calc's operation is best described through several examples.
 .
 .PP
-To display the CPU mask corresponding to the second socket:
+To display the (physical) CPU mask corresponding to the second socket:
 
     $ hwloc-calc socket:1
     0x000000f0
 
-To display the CPU mask corresponding to the third socket, excluding
+To display the (physical) CPU mask corresponding to the third socket, excluding
 its even numbered logical processors:
 
     $ hwloc-calc socket:2 ~PU:even
     0x00000c00
 
-To combine two CPU masks:
+To combine two (physical) CPU masks:
 
     $ hwloc-calc 0x0000ffff 0xff000000
     0xff00ffff
 
-To display the list of logical processors included in the second
+To display the list of logical numbers of processors included in the second
 socket:
 
     $ hwloc-calc --intersect PU socket:1
-    0,2,4,6
+    4,5,6,7
 
-To display the list of NUMA nodes, by physical indexes, that intersect a given CPU mask:
+To bind GNU OpenMP threads logically over the whole machine, we need to use
+physical number output instead:
+
+    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical --intersect PU machine:0`
+    $ echo $GOMP_CPU_AFFINITY
+    0,2,1,3
+
+To display the list of NUMA nodes, by physical indexes, that intersect a given (physical) CPU mask:
 
     $ hwloc-calc --physical --intersect NUMAnode 0xf0f0f0f0
     0,2
@@ -186,7 +194,8 @@ To synthetize a set of cores into largest objects on a 2-node 2-socket 2-core ma
 .\"    Return value section
 .\" **************************
 .SH RETURN VALUE
-Upon successful execution, hwloc-calc displays the CPU mask string.
+Upon successful execution, hwloc-calc displays the (physical) CPU mask string,
+(physical or logical) object list, or (physical or logical) object number list.
 The return value is 0.
 .
 .
