@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010 INRIA.  All rights reserved.
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -214,7 +214,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
-  fprintf (where, "  -C --cpuset-only      Only show the cpuset of each ofbject\n");
+  fprintf (where, "  -C --cpuset-only      Only show the cpuset of each object\n");
   fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --ignore <type>       Ignore objects of the given type\n");

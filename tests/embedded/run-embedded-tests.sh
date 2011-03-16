@@ -1,6 +1,7 @@
 #!/bin/bash -o pipefail
 #
 # Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
+# See COPYING in top-level directory.
 #
 # Simple script to help test embedding:
 #

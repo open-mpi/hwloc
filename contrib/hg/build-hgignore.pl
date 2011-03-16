@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 #
 # Copyright (c) 2008 Cisco Systems, Inc.  All rights reserved.
+# See COPYING in top-level directory.
 #
 # Dumb script to run through all the svn:ignore's in the tree and build
 # build a .hgignore file for Mercurial.  Do a few trivial things to

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 INRIA
+ * Copyright © 2009-2011 INRIA.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -249,8 +249,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     hwloc_bitmap_set(obj->nodeset, obj->os_index);
   }
 
-  hwloc_insert_object_by_cpuset(topology, obj);
-
   hwloc_bitmap_or(parent_cpuset, parent_cpuset, obj->cpuset);
 
   /* post-hooks */
@@ -295,6 +293,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       assert(0);
       break;
   }
+
+  hwloc_insert_object_by_cpuset(topology, obj);
 
   return first_cpu;
 }

@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2011 INRIA
+Copyright © 2009-2011 INRIA.  All rights reserved.
 Copyright © 2009-2011 Université Bordeaux 1
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -42,6 +42,9 @@ Version 1.2.0
     type or depth.
   + -I is now equivalent to --intersect for listing the indexes of
     objects of a given type or depth that intersects the input.
+  + Add -H to report the output as a hierarchical combination of types
+    and depths.
+  + Accept type names with depth attributes such as L2 or Group4 as input.
 * Command-line tools now support "all" and "root" special locations
   consisting in the entire topology.
 * Detect cache size on AIX. Thanks Christopher and IBM.

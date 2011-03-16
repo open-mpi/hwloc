@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
+ * Copyright © 2009-2010 INRIA.  All rights reserved.
  * Copyright © 2009 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -23,7 +23,7 @@ static inline void hwloc_debug(const char *s __hwloc_attribute_unused, ...)
 #ifdef HWLOC_DEBUG
     va_list ap;
 
-    va_start(s, ap);
+    va_start(ap, s);
     vfprintf(stderr, s, ap);
     va_end(ap);
 #endif
