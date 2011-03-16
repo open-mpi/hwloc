@@ -288,7 +288,7 @@ main (int argc, char *argv[])
   int verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   hwloc_topology_t topology;
   const char *filename = NULL;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM; /* we need binding to work when restricting a XML */
+  unsigned long flags = 0;
   int merge = 0;
   int ignorecache = 0;
   char * callname;

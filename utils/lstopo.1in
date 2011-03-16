@@ -100,6 +100,9 @@ Restrict the topology to the given cpuset.
 .TP
 \fB\-\-restrict\fR binding
 Restrict the topology to the current process binding.
+This option requires the use of the actual current machine topology
+(or any other topology with HWLOC_THISSYSTEM set to 1 in the
+environment).
 .TP
 \fB\-\-pid\fR <pid>
 Detect topology as seen by process <pid>, i.e. as if process <pid> did the
