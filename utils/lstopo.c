@@ -223,8 +223,8 @@ void usage(const char *name, FILE *where)
                   "                        impact\n");
   fprintf (where, "  --merge               Do not show levels that do not have a hierarchical\n"
                   "                        impact\n");
-  fprintf (where, " --restrict <cpuset>    Restrict the topology to processors listed in <cpuset>\n");
-  fprintf (where, " --restrict binding     Restrict the topology to the current process binding\n");
+  fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
+  fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
   fprintf (where, "Input options:\n");
   hwloc_utils_input_format_usage(where, 6);
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
