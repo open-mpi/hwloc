@@ -780,6 +780,23 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_top
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
 
+/** \brief Flags to be given to hwloc_topology_restrict(). */
+enum hwloc_restrict_flags_e {
+  HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES = (1<<0)
+ /**< \brief Adapt distance matrices according to objects being removed during restriction.
+  * If this flag is not set, distance matrices are removed.
+  */
+};
+
+/** \brief Restrict the topology to the current thread binding.
+ *
+ * Topology \p topology is modified so as to remove all objects that
+ * are not included (or partially included) in the CPU set \p cpuset.
+ *
+ * \p flags is a OR'ed set of hwloc_restrict_flags_e.
+ */
+HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
+
 /** @} */
 
 

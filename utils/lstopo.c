@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA.  All rights reserved.
+ * Copyright © 2009-2011 INRIA.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -223,6 +223,8 @@ void usage(const char *name, FILE *where)
                   "                        impact\n");
   fprintf (where, "  --merge               Do not show levels that do not have a hierarcical\n"
                   "                        impact\n");
+  fprintf (where, " --restrict <cpuset>    Restrict the topology to processors listed in <cpuset>\n");
+  fprintf (where, " --restrict binding     Restrict the topology to the current process binding\n");
   fprintf (where, "Input options:\n");
   hwloc_utils_input_format_usage(where, 6);
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
@@ -293,6 +295,7 @@ main (int argc, char *argv[])
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
+  char *restrictstring = NULL;
   int opt;
 
 #ifdef HAVE_SETLOCALE
@@ -355,7 +358,14 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
-      else if (!strcmp (argv[1], "--horiz"))
+      else if (!strcmp (argv[1], "--restrict")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	restrictstring = strdup(argv[2]);
+	opt = 1;
+      } else if (!strcmp (argv[1], "--horiz"))
         force_horiz = 1;
       else if (!strcmp (argv[1], "--vert"))
         force_vert = 1;
@@ -440,6 +450,25 @@ main (int argc, char *argv[])
   err = hwloc_topology_load (topology);
   if (err)
     return EXIT_FAILURE;
+
+  if (restrictstring) {
+    hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
+    if (!strcmp (restrictstring, "binding")) {
+      if (pid != (hwloc_pid_t) -1 && pid != 0)
+	hwloc_get_proc_cpubind(topology, pid, restrictset, HWLOC_CPUBIND_PROCESS);
+      else
+	hwloc_get_cpubind(topology, restrictset, HWLOC_CPUBIND_PROCESS);
+    } else {
+      hwloc_bitmap_sscanf(restrictset, restrictstring);
+    }
+    err = hwloc_topology_restrict (topology, restrictset, 0);
+    if (err) {
+      perror("Restricting the topology");
+      /* fallthrough */
+    }
+    hwloc_bitmap_free(restrictset);
+    free(restrictstring);
+  }
 
   if (top)
     add_process_objects(topology);
