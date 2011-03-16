@@ -362,6 +362,9 @@ static hwloc_obj_type_t hwloc_get_order_type(int order)
 
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
+  unsigned order1 = hwloc_get_type_order(type1);
+  unsigned order2 = hwloc_get_type_order(type2);
+
   /* bridge and devices are only comparable with each others and with machine and system */
   if ((type1 == HWLOC_OBJ_BRIDGE || type1 == HWLOC_OBJ_PCI_DEVICE)
       && type2 != HWLOC_OBJ_BRIDGE && type2 != HWLOC_OBJ_PCI_DEVICE
@@ -372,8 +375,6 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
       && type1 != HWLOC_OBJ_SYSTEM && type1 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
 
-  unsigned order1 = hwloc_get_type_order(type1);
-  unsigned order2 = hwloc_get_type_order(type2);
   return order1 - order2;
 }
 

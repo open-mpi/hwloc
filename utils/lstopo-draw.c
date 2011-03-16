@@ -471,10 +471,11 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
     unsigned bottom = 0, top = 0;
     RECURSE_BEGIN(level, 0);
     RECURSE_FOR()
+      unsigned center;
       RECURSE_CALL_FUN(methods);
 
       /* Line to PCI device */
-      unsigned center = y + totheight + PCI_HEIGHT / 2;
+      center = y + totheight + PCI_HEIGHT / 2;
       if (!top)
         top = center;
       bottom = center;

@@ -202,7 +202,7 @@ typedef enum {
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
 			  */
 
-  HWLOC_OBJ_OS_DEVICE	/**< \brief Operating system device.
+  HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
 			 */
 
   HWLOC_OBJ_MAX         /**< \private Sentinel value */
@@ -243,14 +243,14 @@ enum hwloc_compare_types_e {
 
 typedef enum hwloc_obj_bridge_type_e {
   HWLOC_OBJ_BRIDGE_HOST,	/**< \brief Host-side of a bridge, only possible upstream. */
-  HWLOC_OBJ_BRIDGE_PCI,		/**< \brief PCI-side of a bridge. */
+  HWLOC_OBJ_BRIDGE_PCI		/**< \brief PCI-side of a bridge. */
 } hwloc_obj_bridge_type_t;
 
 typedef enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device. */
   HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device. */
   HWLOC_OBJ_OSDEV_INFINIBAND,	/**< \brief Operating system infiniband device. */
-  HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma device. */
+  HWLOC_OBJ_OSDEV_DMA		/**< \brief Operating system dma device. */
 } hwloc_obj_osdev_type_t;
 
 /** @} */

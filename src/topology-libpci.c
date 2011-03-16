@@ -3,7 +3,7 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/helper.h>
 #include <private/private.h>
@@ -247,8 +247,8 @@ hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_topology *topology, struct hw
     return;
 
 #ifdef HWLOC_LINUX_SYS
+  {
   char pcidevpath[256];
-
   snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
 	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
 	   pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
@@ -258,7 +258,7 @@ hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_topology *topology, struct hw
   hwloc_linux_lookup_dma_class(topology, pcidev, pcidevpath);
   hwloc_linux_lookup_block_class(topology, pcidev, pcidevpath);
   /* FIXME: what about gpus? could try class "drm", but proprietary drivers won't appear there */
-
+  }
 #endif /* HWLOC_LINUX_SYS */
 }
 
@@ -287,7 +287,7 @@ enum hwloc_pci_busid_comparison_e {
   HWLOC_PCI_BUSID_LOWER,
   HWLOC_PCI_BUSID_HIGHER,
   HWLOC_PCI_BUSID_INCLUDED,
-  HWLOC_PCI_BUSID_SUPERSET,
+  HWLOC_PCI_BUSID_SUPERSET
 };
 
 static int
@@ -368,6 +368,7 @@ static void hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new);
 static void
 hwloc_pci_try_insert_siblings_below_new_bridge(struct hwloc_obj *root, struct hwloc_obj *new)
 {
+  enum hwloc_pci_busid_comparison_e comp;
   struct hwloc_obj *current, *next;
 
   next = new->next_sibling;
@@ -375,7 +376,7 @@ hwloc_pci_try_insert_siblings_below_new_bridge(struct hwloc_obj *root, struct hw
     current = next;
     next = current->next_sibling;
 
-    enum hwloc_pci_busid_comparison_e comp = hwloc_pci_compare_busids(current, new);
+    comp = hwloc_pci_compare_busids(current, new);
     assert(comp != HWLOC_PCI_BUSID_SUPERSET);
     if (comp == HWLOC_PCI_BUSID_HIGHER)
       continue;
@@ -421,13 +422,15 @@ static struct hwloc_obj *
 hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
+  struct hwloc_obj *parent;
+  char *env;
   int err;
 
   /* override the cpuset with the environment if given */
   char envname[256];
   snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS",
 	   hostbridge->first_child->attr->pcidev.domain, hostbridge->first_child->attr->pcidev.bus);
-  char *env = getenv(envname);
+  env = getenv(envname);
   if (env) {
     hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
     hwloc_bitmap_sscanf(cpuset, env);
@@ -436,6 +439,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
 
   /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
 #ifdef HWLOC_LINUX_SYS
+  {
   char path[256];
   FILE *file;
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
@@ -446,6 +450,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   fclose(file);
   if (!err)
     goto found;
+  }
 #endif
 
   /* if we got nothing, assume the hostbridge is attached to the top of hierarchy */
@@ -455,7 +460,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   hwloc_debug_bitmap("Attaching hostbridge to cpuset %s\n", cpuset);
 
   /* attach the hostbridge now that it contains the right objects */
-  struct hwloc_obj *parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
+  parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
   /* if found nothing, attach to top */
   if (!parent)
     parent = topology->levels[0][0];
@@ -476,6 +481,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   struct pci_access *pciaccess;
   struct pci_dev *pcidev;
   struct hwloc_obj fakehostbridge; /* temporary object covering the whole PCI hierarchy until its complete */
+  unsigned current_hostbridge;
 
   fakehostbridge.first_child = NULL;
   fakehostbridge.last_child = NULL;
@@ -524,6 +530,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
     obj->attr->pcidev.linkspeed = 0; /* unknown */
 #ifdef HWLOC_HAVE_PCI_FIND_CAP
+    {
     struct pci_cap *cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
     if (cap) {
       if (cap->addr + PCI_EXP_LNKSTA >= CONFIG_SPACE_CACHESIZE) {
@@ -539,6 +546,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
         float lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8 * 128/130; /* Gbit/s per lane */
         obj->attr->pcidev.linkspeed = lanespeed * width / 8; /* GB/s */
       }
+    }
     }
 #endif /* HWLOC_HAVE_PCI_FIND_CAP */
 
@@ -603,15 +611,17 @@ hwloc_look_libpci(struct hwloc_topology *topology)
    * We now create one real hostbridge object per upstream bus.
    * It's not actually a PCI device so we have to create it.
    */
-  unsigned current_hostbridge = 0;
+  current_hostbridge = 0;
   while (fakehostbridge.first_child) {
     /* start a new host bridge */
     struct hwloc_obj *hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, current_hostbridge++);
     struct hwloc_obj *child = fakehostbridge.first_child;
     struct hwloc_obj *next_child;
+    struct hwloc_obj *parent;
     unsigned short current_domain = child->attr->pcidev.domain;
     unsigned char current_bus = child->attr->pcidev.bus;
     unsigned char current_subordinate = current_bus;
+
     hwloc_debug("Starting new PCI hostbridge %04x:%02x\n", current_domain, current_bus);
 
     /*
@@ -644,7 +654,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 		current_domain, current_bus, current_subordinate);
 
     /* attach the hostbridge where it belongs */
-    struct hwloc_obj *parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge);
+    parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge);
     hwloc_insert_object_by_parent(topology, parent, hostbridge);
   }
 }

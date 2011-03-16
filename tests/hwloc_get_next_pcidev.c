@@ -3,7 +3,7 @@
  * See COPYING in top-level directory.
  */
 
-#include <private/config.h>
+#include <private/autogen/config.h>
 #include <hwloc.h>
 
 #include <assert.h>
