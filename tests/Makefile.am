@@ -1,6 +1,7 @@
-# Copyright © 2009-2011 INRIA
-# Copyright © 2009-2010 Université Bordeaux 1
+# Copyright © 2009-2011 INRIA.  All rights reserved.
+# Copyright © 2009-2011 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+# See COPYING in top-level directory.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
@@ -38,6 +39,7 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_set_distances \
 	hwloc_groups \
 	hwloc_insert_misc \
+	hwloc_topology_restrict \
 	hwloc_get_next_pcidev
 
 if HWLOC_HAVE_LINUX_LIBNUMA
@@ -85,7 +87,7 @@ openfabrics_verbs_LDFLAGS = -libverbs
 myriexpress_LDFLAGS = -lmyriexpress
 cuda_LDFLAGS = -lcuda
 cudart_LDFLAGS = -lcuda -lcudart
-xmlbuffer = -lxml2
+xmlbuffer_LDFLAGS = $(HWLOC_XML_LIBS)
 if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
 endif !HWLOC_HAVE_WINDOWS

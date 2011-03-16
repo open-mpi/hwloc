@@ -1,7 +1,8 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2010 INRIA
+.\" Copyright © 2009-2011 INRIA.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+.\" See COPYING in top-level directory.
 .TH LSTOPO "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
 lstopo \- Show the topology of the system (note that hwloc-bind(1)
@@ -93,6 +94,15 @@ Do not consider administration limitations.
 .TP
 \fB\-\-merge\fR
 Do not show levels that do not have a hierarchical impact.
+.TP
+\fB\-\-restrict\fR <cpuset>
+Restrict the topology to the given cpuset.
+.TP
+\fB\-\-restrict\fR binding
+Restrict the topology to the current process binding.
+This option requires the use of the actual current machine topology
+(or any other topology with HWLOC_THISSYSTEM set to 1 in the
+environment).
 .TP
 \fB\-\-no\-io\fB
 Do not show any I/O device or bridge.
@@ -305,6 +315,14 @@ graphical output on another machine:
     machine1$ lstopo file.xml
     <transfer file.xml from machine1 to machine2>
     machine2$ lstopo --input file.xml
+
+To restrict a XML topology to only physical processors 0, 1, 4 and 5:
+
+    lstopo --input file.xml --restrict 0x33 newfile.xml
+
+To restrict a XML topology to only numa node whose logical index is 1:
+
+    lstopo --input file.xml --restrict $(hwloc-calc --input file.xml node:1) newfile.xml
 
 To display a summary of the topology:
 

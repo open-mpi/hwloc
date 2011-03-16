@@ -1,6 +1,7 @@
-# Copyright © 2009-2011 INRIA
+# Copyright © 2009-2011 INRIA.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+# See COPYING in top-level directory.
 
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 
@@ -263,6 +264,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PU.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
@@ -429,6 +431,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_area_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_set_area_membind_nodeset.3  \
         $(DOX_MAN_DIR)/man3/hwloc_set_cpubind.3 \
@@ -463,6 +466,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_is_thissystem.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_membind_support.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_pid.3 \

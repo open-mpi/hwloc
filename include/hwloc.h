@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 INRIA
+ * Copyright © 2009-2011 INRIA.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -21,9 +21,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
-#ifdef HWLOC_HAVE_STDINT_H
-#include <stdint.h>
-#endif
 
 /*
  * Symbol transforms
@@ -48,7 +45,7 @@ extern "C" {
  */
 
 /** \brief Indicate at build time which hwloc API version is being used. */
-#define HWLOC_API_VERSION 0x00010100
+#define HWLOC_API_VERSION 0x00010200
 
 /** \brief Indicate at runtime which hwloc API version was used at build time. */
 HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
@@ -265,8 +262,8 @@ union hwloc_obj_attr_u;
 
 /** \brief Object memory */
 struct hwloc_obj_memory_s {
-  uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
-  uint64_t local_memory; /**< \brief Local memory (in bytes) */
+  hwloc_uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
+  hwloc_uint64_t local_memory; /**< \brief Local memory (in bytes) */
 
   unsigned page_types_len; /**< \brief Size of array \p page_types */
   /** \brief Array of local memory page types, \c NULL if no local memory and \p page_types is 0.
@@ -275,8 +272,8 @@ struct hwloc_obj_memory_s {
    * It contains \p page_types_len slots.
    */
   struct hwloc_obj_memory_page_type_s {
-    uint64_t size;	/**< \brief Size of pages */
-    uint64_t count;	/**< \brief Number of pages of this size */
+    hwloc_uint64_t size;	/**< \brief Size of pages */
+    hwloc_uint64_t count;	/**< \brief Number of pages of this size */
   } * page_types;
 };
 
@@ -422,7 +419,7 @@ typedef struct hwloc_obj * hwloc_obj_t;
 union hwloc_obj_attr_u {
   /** \brief Cache-specific Object Attributes */
   struct hwloc_cache_attr_s {
-    uint64_t size;			  /**< \brief Size of cache in bytes */
+    hwloc_uint64_t size;			  /**< \brief Size of cache in bytes */
     unsigned depth;			  /**< \brief Depth of cache */
     unsigned linesize;			  /**< \brief Cache-line size in bytes */
   } cache;
@@ -861,6 +858,23 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_top
  * \return the newly-created object
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
+
+/** \brief Flags to be given to hwloc_topology_restrict(). */
+enum hwloc_restrict_flags_e {
+  HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES = (1<<0)
+ /**< \brief Adapt distance matrices according to objects being removed during restriction.
+  * If this flag is not set, distance matrices are removed.
+  */
+};
+
+/** \brief Restrict the topology to the current thread binding.
+ *
+ * Topology \p topology is modified so as to remove all objects that
+ * are not included (or partially included) in the CPU set \p cpuset.
+ *
+ * \p flags is a OR'ed set of hwloc_restrict_flags_e.
+ */
+HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
 
 /** @} */
 

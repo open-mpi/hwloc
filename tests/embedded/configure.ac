@@ -1,4 +1,5 @@
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+# See COPYING in top-level directory.
 
 AC_INIT([hwloc-embedded-test], [1.0], [http://www.open-mpi.org/community/help], [hwloc-embedded-test])
 AC_PREREQ([2.63])

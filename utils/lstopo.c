@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 INRIA.  All rights reserved.
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -214,15 +214,17 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
   fprintf (where, "  -c --cpuset           Show the cpuset of each object\n");
-  fprintf (where, "  -C --cpuset-only      Only show the cpuset of each ofbject\n");
+  fprintf (where, "  -C --cpuset-only      Only show the cpuset of each object\n");
   fprintf (where, "  --taskset             Show taskset-specific cpuset strings\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --ignore <type>       Ignore objects of the given type\n");
   fprintf (where, "  --no-caches           Do not show caches\n");
   fprintf (where, "  --no-useless-caches   Do not show caches which do not have a hierarchical\n"
                   "                        impact\n");
-  fprintf (where, "  --merge               Do not show levels that do not have a hierarcical\n"
+  fprintf (where, "  --merge               Do not show levels that do not have a hierarchical\n"
                   "                        impact\n");
+  fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
+  fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
 #ifdef HWLOC_HAVE_LIBPCI
   fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
   fprintf (where, "  --whole-io            Show all I/O devices and bridges\n");
@@ -297,6 +299,7 @@ main (int argc, char *argv[])
   char * input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   enum output_format output_format = LSTOPO_OUTPUT_DEFAULT;
+  char *restrictstring = NULL;
   int opt;
 
 #ifdef HAVE_SETLOCALE
@@ -363,7 +366,14 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
-      else if (!strcmp (argv[1], "--horiz"))
+      else if (!strcmp (argv[1], "--restrict")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	restrictstring = strdup(argv[2]);
+	opt = 1;
+      } else if (!strcmp (argv[1], "--horiz"))
         force_horiz = 1;
       else if (!strcmp (argv[1], "--vert"))
         force_vert = 1;
@@ -448,6 +458,25 @@ main (int argc, char *argv[])
   err = hwloc_topology_load (topology);
   if (err)
     return EXIT_FAILURE;
+
+  if (restrictstring) {
+    hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
+    if (!strcmp (restrictstring, "binding")) {
+      if (pid != (hwloc_pid_t) -1 && pid != 0)
+	hwloc_get_proc_cpubind(topology, pid, restrictset, HWLOC_CPUBIND_PROCESS);
+      else
+	hwloc_get_cpubind(topology, restrictset, HWLOC_CPUBIND_PROCESS);
+    } else {
+      hwloc_bitmap_sscanf(restrictset, restrictstring);
+    }
+    err = hwloc_topology_restrict (topology, restrictset, 0);
+    if (err) {
+      perror("Restricting the topology");
+      /* fallthrough */
+    }
+    hwloc_bitmap_free(restrictset);
+    free(restrictstring);
+  }
 
   if (top)
     add_process_objects(topology);
