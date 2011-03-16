@@ -227,6 +227,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
   fprintf (where, "Input options:\n");
   hwloc_utils_input_format_usage(where, 6);
+  fprintf (where, "  --thissystem          Assume that the input topology provides the topology\n"
+		  "                        for the system on which we are running\n");
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "  --whole-system        Do not consider administration limitations\n");
   fprintf (where, "Graphical output options:\n");
@@ -358,6 +360,8 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
+      else if (!strcmp (argv[1], "--thissystem"))
+	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
       else if (!strcmp (argv[1], "--restrict")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
