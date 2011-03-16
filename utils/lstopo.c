@@ -215,7 +215,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-caches           Do not show caches\n");
   fprintf (where, "  --no-useless-caches   Do not show caches which do not have a hierarchical\n"
                   "                        impact\n");
-  fprintf (where, "  --merge               Do not show levels that do not have a hierarcical\n"
+  fprintf (where, "  --merge               Do not show levels that do not have a hierarchical\n"
                   "                        impact\n");
   fprintf (where, "Input options:\n");
   hwloc_utils_input_format_usage(where, 6);
