@@ -688,8 +688,15 @@ hwloc_connect_children(hwloc_obj_t parent);
 hwloc_obj_t
 hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
 {
+  hwloc_obj_t obj;
   int err;
-  hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
+
+  if (hwloc_bitmap_iszero(cpuset))
+    return NULL;
+  if (!hwloc_bitmap_isincluded(cpuset, hwloc_topology_get_complete_cpuset(topology)))
+    return NULL;
+
+  obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
   obj->cpuset = hwloc_bitmap_dup(cpuset);
   if (name)
     obj->name = strdup(name);
