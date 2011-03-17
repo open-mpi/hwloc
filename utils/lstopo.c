@@ -101,12 +101,13 @@ static void add_process_objects(hwloc_topology_t topology)
     {
       /* Get the process name */
       char *path;
+      unsigned pathlen = 6 + strlen(dirent->d_name) + 1 + 7 + 1;
       char cmd[64], *c;
       int file;
       ssize_t n;
 
-      path = malloc(6 + strlen(dirent->d_name) + 1 + 7 + 1);
-      snprintf(path, sizeof(path), "/proc/%s/cmdline", dirent->d_name);
+      path = malloc(pathlen);
+      snprintf(path, pathlen, "/proc/%s/cmdline", dirent->d_name);
       file = open(path, O_RDONLY);
       free(path);
 
@@ -128,11 +129,12 @@ static void add_process_objects(hwloc_topology_t topology)
     {
       /* Get threads */
       char *path;
+      unsigned pathlen = 6+strlen(dirent->d_name) + 1 + 4 + 1;
       DIR *task_dir;
       struct dirent *task_dirent;
 
-      path = malloc(6+strlen(dirent->d_name) + 1 + 4 + 1);
-      snprintf(path, sizeof(path), "/proc/%s/task", dirent->d_name);
+      path = malloc(pathlen);
+      snprintf(path, pathlen, "/proc/%s/task", dirent->d_name);
       task_dir = opendir(path);
       free(path);
 
