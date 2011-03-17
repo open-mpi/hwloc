@@ -460,7 +460,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     break;
   case HWLOC_OBJ_BRIDGE:
     if (verbose) {
-      char up[64], down[64];
+      char up[128], down[64];
       /* upstream is PCI or HOST */
       if (obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI) {
         char linkspeed[64]= "";
@@ -476,23 +476,21 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
       snprintf(down, sizeof(down), "buses=%04x:[%02x-%02x]",
 	       obj->attr->bridge.downstream.pci.domain, obj->attr->bridge.downstream.pci.secondary_bus, obj->attr->bridge.downstream.pci.subordinate_bus);
       if (*up)
-	return snprintf(string, size, "%s%s%s", up, separator, down);
+	res = snprintf(string, size, "%s%s%s", up, separator, down);
       else
-	return snprintf(string, size, "%s", down);
+	res = snprintf(string, size, "%s", down);
     }
-    *string = '\0';
-    return 0;
+    break;
   case HWLOC_OBJ_PCI_DEVICE:
     if (verbose) {
       char linkspeed[64]= "";
       if (obj->attr->pcidev.linkspeed)
         snprintf(linkspeed, sizeof(linkspeed), "%slink=%.2fGB/s", separator, obj->attr->pcidev.linkspeed);
-      return snprintf(string, size, "busid=%04x:%02x:%02x.%01x%sclass=%04x(%s)%s",
-		      obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
-		      obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
+      res = snprintf(string, size, "busid=%04x:%02x:%02x.%01x%sclass=%04x(%s)%s",
+		     obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
+		     obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
     }
-    *string = '\0';
-    return 0;
+    break;
   default:
     break;
   }
