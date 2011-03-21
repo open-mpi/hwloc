@@ -178,6 +178,9 @@ struct hwloc_bitmap_s * hwloc_bitmap_dup(const struct hwloc_bitmap_s * old)
 {
   struct hwloc_bitmap_s * new;
 
+  if (!old)
+    return NULL;
+
   HWLOC__BITMAP_CHECK(old);
 
   new = malloc(sizeof(struct hwloc_bitmap_s));

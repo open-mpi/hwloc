@@ -69,7 +69,10 @@ HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_alloc_full(void) __hwloc_attribute_ma
  */
 HWLOC_DECLSPEC void hwloc_bitmap_free(hwloc_bitmap_t bitmap);
 
-/** \brief Duplicate bitmap \p bitmap by allocating a new bitmap and copying \p bitmap contents */
+/** \brief Duplicate bitmap \p bitmap by allocating a new bitmap and copying \p bitmap contents.
+ *
+ * If \p bitmap is \c NULL, \c NULL is returned.
+ */
 HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_dup(hwloc_const_bitmap_t bitmap) __hwloc_attribute_malloc;
 
 /** \brief Copy the contents of bitmap \p src into the already allocated bitmap \p dst */
