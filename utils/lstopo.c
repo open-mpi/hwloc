@@ -56,6 +56,20 @@ FILE *open_file(const char *filename, const char *mode)
   return fopen(filename, mode);
 }
 
+static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char * name)
+{
+  hwloc_obj_t obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name);
+
+  if (!obj) {
+      char *s;
+      hwloc_bitmap_asprintf(&s, cpuset);
+      fprintf(stderr, "Failed to insert process `%s' with cpuset %s\n", name, s);
+      free(s);
+  }
+
+  return obj;
+}
+
 static void add_process_objects(hwloc_topology_t topology)
 {
   hwloc_obj_t root;
@@ -157,7 +171,7 @@ static void add_process_objects(hwloc_topology_t topology)
 
           snprintf(task_name, sizeof(task_name), "%s %li", name, local_tid);
 
-          hwloc_topology_insert_misc_object_by_cpuset(topology, task_cpuset, task_name);
+          insert_task(topology, task_cpuset, task_name);
         }
         closedir(task_dir);
       }
@@ -170,12 +184,7 @@ static void add_process_objects(hwloc_topology_t topology)
     if (hwloc_bitmap_isincluded(root->cpuset, cpuset))
       continue;
 
-    if (!hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name)) {
-      char *s;
-      hwloc_bitmap_asprintf(&s, cpuset);
-      fprintf(stderr, "Failed to insert process `%s' with cpuset %s\n", name, s);
-      free(s);
-    }
+    insert_task(topology, cpuset, name);
   }
 
   hwloc_bitmap_free(cpuset);
