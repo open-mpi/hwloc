@@ -100,12 +100,13 @@ int main(int argc, char *argv[])
 
 #ifdef HWLOC_LINUX_SYS
     {
+      unsigned pathlen = 6 + strlen(dirent->d_name) + 1 + 7 + 1;
       char *path;
       int file;
       ssize_t n;
 
-      path = malloc(6 + strlen(dirent->d_name) + 1 + 7 + 1);
-      snprintf(path, sizeof(path), "/proc/%s/cmdline", dirent->d_name);
+      path = malloc(pathlen);
+      snprintf(path, pathlen, "/proc/%s/cmdline", dirent->d_name);
       file = open(path, O_RDONLY);
       free(path);
 
@@ -116,6 +117,7 @@ int main(int argc, char *argv[])
         if (n <= 0)
           /* Ignore kernel threads and errors */
           continue;
+
         name[n] = 0;
       }
     }
