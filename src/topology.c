@@ -1271,13 +1271,63 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
   return 0;
 }
 
+static int
+hwloc_levels_ignore_object(hwloc_obj_t obj)
+{
+  return obj->type != HWLOC_OBJ_MISC;
+}
+
+/* traverse the array of current object and compare them with top_obj.
+ * if equal, take the object and put its children into the remaining objs.
+ * if not equal, put the object into the remaining objs.
+ */
+static int
+hwloc_level_take_objects(hwloc_obj_t top_obj,
+			 hwloc_obj_t *current_objs, unsigned n_current_objs,
+			 hwloc_obj_t *taken_objs, unsigned n_taken_objs __hwloc_attribute_unused,
+			 hwloc_obj_t *remaining_objs, unsigned n_remaining_objs __hwloc_attribute_unused)
+{
+  unsigned taken_i = 0;
+  unsigned new_i = 0;
+  unsigned ignored = 0;
+  unsigned i, j;
+
+  for (i = 0; i < n_current_objs; i++)
+    if (hwloc_type_cmp(top_obj, current_objs[i]) == HWLOC_TYPE_EQUAL) {
+      /* Take it, add children.  */
+      taken_objs[taken_i++] = current_objs[i];
+      for (j = 0; j < current_objs[i]->arity; j++) {
+	hwloc_obj_t obj = current_objs[i]->children[j];
+	if (hwloc_levels_ignore_object(obj))
+	  remaining_objs[new_i++] = obj;
+	else
+	  ignored++;
+      }
+    } else {
+      /* Leave it.  */
+      hwloc_obj_t obj = current_objs[i];
+      if (hwloc_levels_ignore_object(obj))
+	remaining_objs[new_i++] = obj;
+      else
+	ignored++;
+    }
+
+#ifdef HWLOC_DEBUG
+  /* Make sure we didn't mess up.  */
+  assert(taken_i == n_taken_objs);
+  assert(new_i + ignored == n_current_objs - n_taken_objs + n_remaining_objs);
+#endif
+
+  return new_i;
+}
+
 /*
  * Do the remaining work that hwloc_connect_children() did not do earlier.
  */
 static int
 hwloc_connect_levels(hwloc_topology_t topology)
 {
-  unsigned l, i=0, taken_i, new_i, j;
+  unsigned l, i=0;
   hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
   unsigned n_objs, n_taken_objs, n_new_objs;
 
@@ -1302,7 +1352,21 @@ hwloc_connect_levels(hwloc_topology_t topology)
     hwloc_topology_clear(topology);
     return -1;
   }
-  memcpy(objs, topology->levels[0][0]->children, n_objs * sizeof(objs[0]));
+
+  {
+    hwloc_obj_t dummy_taken_objs;
+    /* copy all root children that must go into levels,
+     * root will go into dummy_taken_objs but we don't need it anyway
+     * because it stays alone in first level.
+     */
+    n_objs = hwloc_level_take_objects(topology->levels[0][0],
+				      topology->levels[0], 1,
+				      &dummy_taken_objs, 1,
+				      objs, n_objs);
+#ifdef HWLOC_DEBUG
+    assert(dummy_taken_objs == topology->levels[0][0]);
+#endif
+  }
 
   /* Keep building levels while there are objects left in OBJS.  */
   while (n_objs) {
@@ -1341,24 +1405,10 @@ hwloc_connect_levels(hwloc_topology_t topology)
     /* New list of pending objects.  */
     new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
 
-    taken_i = 0;
-    new_i = 0;
-    for (i = 0; i < n_objs; i++)
-      if (hwloc_type_cmp(top_obj, objs[i]) == HWLOC_TYPE_EQUAL) {
-	/* Take it, add children.  */
-	taken_objs[taken_i++] = objs[i];
-	for (j = 0; j < objs[i]->arity; j++)
-	  new_objs[new_i++] = objs[i]->children[j];
-      } else
-	/* Leave it.  */
-	new_objs[new_i++] = objs[i];
-
-
-#ifdef HWLOC_DEBUG
-    /* Make sure we didn't mess up.  */
-    assert(taken_i == n_taken_objs);
-    assert(new_i == n_objs - n_taken_objs + n_new_objs);
-#endif
+    n_new_objs = hwloc_level_take_objects(top_obj,
+					  objs, n_objs,
+					  taken_objs, n_taken_objs,
+					  new_objs, n_new_objs);
 
     /* Ok, put numbers in the level.  */
     for (i = 0; i < n_taken_objs; i++) {
@@ -1391,11 +1441,11 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     free(objs);
     objs = new_objs;
-    n_objs = new_i;
+    n_objs = n_new_objs;
   }
 
   /* It's empty now.  */
-  free(objs);  
+  free(objs);
 
   return 0;
 }
