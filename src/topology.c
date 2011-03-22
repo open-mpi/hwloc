@@ -1126,11 +1126,11 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
  * and mark dropped nodes in droppednodeset
  */
 static void
-restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset_t droppedcpuset, hwloc_nodeset_t droppednodeset)
+restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pobj, hwloc_const_cpuset_t droppedcpuset, hwloc_nodeset_t droppednodeset)
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
-  int modified = (obj->complete_cpuset && hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset));
-
+  int modified = (obj->complete_cpuset && hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset))
+		 || (obj->cpuset && hwloc_bitmap_intersects(obj->cpuset, droppedcpuset)); /* ugly hack for Misc objects (they have a cpuset without complete_cpuset) */
   hwloc_clear_object_distances(obj);
 
   if (obj->cpuset)
@@ -1144,9 +1144,10 @@ restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset
 
   if (modified)
     for_each_child_safe(child, obj, pchild)
-      restrict_object(topology, pchild, droppedcpuset, droppednodeset);
+      restrict_object(topology, flags, pchild, droppedcpuset, droppednodeset);
 
-  if (obj->cpuset && hwloc_bitmap_iszero(obj->cpuset)) {
+  if (obj->cpuset && hwloc_bitmap_iszero(obj->cpuset)
+      && (obj->type != HWLOC_OBJ_MISC || !(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC))) {
     hwloc_debug("%s", "\nRemoving object during restrict");
     print_object(topology, 0, obj);
     if (obj->type == HWLOC_OBJ_NODE)
@@ -2236,7 +2237,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 
   /* drop object based on the reverse of cpuset, and fill the 'dropped' nodeset */
   hwloc_bitmap_not(droppedcpuset, cpuset);
-  restrict_object(topology, &topology->levels[0][0], droppedcpuset, droppednodeset);
+  restrict_object(topology, flags, &topology->levels[0][0], droppedcpuset, droppednodeset);
   /* update nodesets according to dropped nodeset */
   restrict_object_nodeset(topology, &topology->levels[0][0], droppednodeset);
 
