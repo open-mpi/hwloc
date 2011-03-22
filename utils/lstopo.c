@@ -101,12 +101,13 @@ static void add_process_objects(hwloc_topology_t topology)
     {
       /* Get the process name */
       char *path;
+      unsigned pathlen = 6 + strlen(dirent->d_name) + 1 + 7 + 1;
       char cmd[64], *c;
       int file;
       ssize_t n;
 
-      path = malloc(6 + strlen(dirent->d_name) + 1 + 7 + 1);
-      snprintf(path, sizeof(path), "/proc/%s/cmdline", dirent->d_name);
+      path = malloc(pathlen);
+      snprintf(path, pathlen, "/proc/%s/cmdline", dirent->d_name);
       file = open(path, O_RDONLY);
       free(path);
 
@@ -128,11 +129,12 @@ static void add_process_objects(hwloc_topology_t topology)
     {
       /* Get threads */
       char *path;
+      unsigned pathlen = 6+strlen(dirent->d_name) + 1 + 4 + 1;
       DIR *task_dir;
       struct dirent *task_dirent;
 
-      path = malloc(6+strlen(dirent->d_name) + 1 + 4 + 1);
-      snprintf(path, sizeof(path), "/proc/%s/task", dirent->d_name);
+      path = malloc(pathlen);
+      snprintf(path, pathlen, "/proc/%s/task", dirent->d_name);
       task_dir = opendir(path);
       free(path);
 
@@ -168,7 +170,12 @@ static void add_process_objects(hwloc_topology_t topology)
     if (hwloc_bitmap_isincluded(root->cpuset, cpuset))
       continue;
 
-    hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name);
+    if (!hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name)) {
+      char *s;
+      hwloc_bitmap_asprintf(&s, cpuset);
+      fprintf(stderr, "Failed to insert process `%s' with cpuset %s\n", name, s);
+      free(s);
+    }
   }
 
   hwloc_bitmap_free(cpuset);
@@ -231,6 +238,8 @@ void usage(const char *name, FILE *where)
 #endif
   fprintf (where, "Input options:\n");
   hwloc_utils_input_format_usage(where, 6);
+  fprintf (where, "  --thissystem          Assume that the input topology provides the topology\n"
+		  "                        for the system on which we are running\n");
   fprintf (where, "  --pid <pid>           Detect topology as seen by process <pid>\n");
   fprintf (where, "  --whole-system        Do not consider administration limitations\n");
   fprintf (where, "Graphical output options:\n");
@@ -366,6 +375,8 @@ main (int argc, char *argv[])
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
       else if (!strcmp (argv[1], "--merge"))
 	merge = 1;
+      else if (!strcmp (argv[1], "--thissystem"))
+	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
       else if (!strcmp (argv[1], "--restrict")) {
 	if (argc <= 2) {
 	  usage (callname, stderr);
@@ -459,6 +470,9 @@ main (int argc, char *argv[])
   if (err)
     return EXIT_FAILURE;
 
+  if (top)
+    add_process_objects(topology);
+
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     if (!strcmp (restrictstring, "binding")) {
@@ -477,9 +491,6 @@ main (int argc, char *argv[])
     hwloc_bitmap_free(restrictset);
     free(restrictstring);
   }
-
-  if (top)
-    add_process_objects(topology);
 
   if (!filename && !strcmp(callname,"hwloc-info")) {
     /* behave kind-of plpa-info */

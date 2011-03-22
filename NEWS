@@ -47,6 +47,7 @@ Version 1.2.0
   + Accept type names with depth attributes such as L2 or Group4 as input.
 * Command-line tools now support "all" and "root" special locations
   consisting in the entire topology.
+* Add --thissystem to lstopo.
 * Detect cache size on AIX. Thanks Christopher and IBM.
 
 

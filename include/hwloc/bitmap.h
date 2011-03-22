@@ -53,19 +53,26 @@ typedef const struct hwloc_bitmap_s * hwloc_const_bitmap_t;
 
 /** \brief Allocate a new empty bitmap.
  *
- * \returns A valid bitmap or NULL.
+ * \returns A valid bitmap or \c NULL.
  *
  * The bitmap should be freed by a corresponding call to
- * hwloc_bitmap_free(). */
+ * hwloc_bitmap_free().
+ */
 HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_alloc(void) __hwloc_attribute_malloc;
 
 /** \brief Allocate a new full bitmap. */
 HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_alloc_full(void) __hwloc_attribute_malloc;
 
-/** \brief Free bitmap \p bitmap */
+/** \brief Free bitmap \p bitmap.
+ *
+ * If \p bitmap is \c NULL, no operation is performed.
+ */
 HWLOC_DECLSPEC void hwloc_bitmap_free(hwloc_bitmap_t bitmap);
 
-/** \brief Duplicate bitmap \p bitmap by allocating a new bitmap and copying \p bitmap contents */
+/** \brief Duplicate bitmap \p bitmap by allocating a new bitmap and copying \p bitmap contents.
+ *
+ * If \p bitmap is \c NULL, \c NULL is returned.
+ */
 HWLOC_DECLSPEC hwloc_bitmap_t hwloc_bitmap_dup(hwloc_const_bitmap_t bitmap) __hwloc_attribute_malloc;
 
 /** \brief Copy the contents of bitmap \p src into the already allocated bitmap \p dst */

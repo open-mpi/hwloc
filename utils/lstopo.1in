@@ -101,8 +101,8 @@ Restrict the topology to the given cpuset.
 \fB\-\-restrict\fR binding
 Restrict the topology to the current process binding.
 This option requires the use of the actual current machine topology
-(or any other topology with HWLOC_THISSYSTEM set to 1 in the
-environment).
+(or any other topology with \fB\-\-thissystem\fR or with
+HWLOC_THISSYSTEM set to 1 in the environment).
 .TP
 \fB\-\-no\-io\fB
 Do not show any I/O device or bridge.
@@ -113,6 +113,12 @@ interesting bridges are shown.
 Show all I/O devices and bridges.
 By default, only common devices (GPUs, NICs, block devices, ...) and
 interesting bridges are shown.
+.TP
+\fB\-\-thissystem\fR
+Assume that the selected backend provides the topology for the
+system on which we are running. 
+This is useful when using \fB\-\-restrict\fR binding and loading
+a custom topology such as a XML file.
 .TP
 \fB\-\-pid\fR <pid>
 Detect topology as seen by process <pid>, i.e. as if process <pid> did the
@@ -315,6 +321,13 @@ graphical output on another machine:
     machine1$ lstopo file.xml
     <transfer file.xml from machine1 to machine2>
     machine2$ lstopo --input file.xml
+
+To save the current machine topology to XML and later reload it faster
+while still considering it as the current machine:
+
+   $ lstopo file.xml
+   <...>
+   $ lstopo --input file.xml --thissystem
 
 To restrict a XML topology to only physical processors 0, 1, 4 and 5:
 
