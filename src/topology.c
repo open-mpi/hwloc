@@ -1379,7 +1379,10 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
 static int
 hwloc_levels_ignore_object(hwloc_obj_t obj)
 {
-  return obj->type != HWLOC_OBJ_MISC;
+  return obj->type != HWLOC_OBJ_MISC
+	 && obj->type != HWLOC_OBJ_BRIDGE
+	 && obj->type != HWLOC_OBJ_PCI_DEVICE
+	 && obj->type != HWLOC_OBJ_OS_DEVICE;
 }
 
 /* traverse the array of current object and compare them with top_obj.
