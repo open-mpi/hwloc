@@ -457,6 +457,9 @@ main (int argc, char *argv[])
   if (err)
     return EXIT_FAILURE;
 
+  if (top)
+    add_process_objects(topology);
+
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     if (!strcmp (restrictstring, "binding")) {
@@ -475,9 +478,6 @@ main (int argc, char *argv[])
     hwloc_bitmap_free(restrictset);
     free(restrictstring);
   }
-
-  if (top)
-    add_process_objects(topology);
 
   if (!filename && !strcmp(callname,"hwloc-info")) {
     /* behave kind-of plpa-info */
