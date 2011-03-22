@@ -1129,10 +1129,7 @@ static void
 restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset_t droppedcpuset, hwloc_nodeset_t droppednodeset)
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
-
-  /* if this object isn't modified, don't bother looking at children */
-  if (!obj->complete_cpuset || !hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset))
-    return;
+  int modified = (obj->complete_cpuset && hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset));
 
   hwloc_clear_object_distances(obj);
 
@@ -1145,11 +1142,11 @@ restrict_object(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_const_cpuset
   if (obj->allowed_cpuset)
     hwloc_bitmap_andnot(obj->allowed_cpuset, obj->allowed_cpuset, droppedcpuset);
 
-  for_each_child_safe(child, obj, pchild)
-    restrict_object(topology, pchild, droppedcpuset, droppednodeset);
+  if (modified)
+    for_each_child_safe(child, obj, pchild)
+      restrict_object(topology, pchild, droppedcpuset, droppednodeset);
 
-  if (obj->cpuset /* FIXME: needed for PCI devices? */
-      && hwloc_bitmap_iszero(obj->cpuset)) {
+  if (obj->cpuset && hwloc_bitmap_iszero(obj->cpuset)) {
     hwloc_debug("%s", "\nRemoving object during restrict");
     print_object(topology, 0, obj);
     if (obj->type == HWLOC_OBJ_NODE)
