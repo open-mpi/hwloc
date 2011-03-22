@@ -170,7 +170,12 @@ static void add_process_objects(hwloc_topology_t topology)
     if (hwloc_bitmap_isincluded(root->cpuset, cpuset))
       continue;
 
-    hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name);
+    if (!hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name)) {
+      char *s;
+      hwloc_bitmap_asprintf(&s, cpuset);
+      fprintf(stderr, "Failed to insert process `%s' with cpuset %s\n", name, s);
+      free(s);
+    }
   }
 
   hwloc_bitmap_free(cpuset);
