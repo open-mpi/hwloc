@@ -1213,6 +1213,8 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
 
   if (obj->type == HWLOC_OBJ_MISC) {
     dropping = droppingparent && !(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC);
+  } else if (obj->type == HWLOC_OBJ_BRIDGE || obj->type == HWLOC_OBJ_PCI_DEVICE || obj->type == HWLOC_OBJ_OS_DEVICE) {
+    dropping = droppingparent && !(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO);
   } else {
     dropping = droppingparent || (obj->cpuset && hwloc_bitmap_iszero(obj->cpuset));
   }
