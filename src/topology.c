@@ -762,9 +762,9 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
        /* Get pointer to next childect.  */ \
         child = *pchild)
 
-/* List all iodevices */
+/* Append I/O devices below this object to their list */
 static void
-append_pcidev(hwloc_topology_t topology, hwloc_obj_t obj)
+append_pcidevs(hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t child, *temp;
 
@@ -780,7 +780,7 @@ append_pcidev(hwloc_topology_t topology, hwloc_obj_t obj)
   }
 
   for_each_child_safe(child, obj, temp)
-    append_pcidev(topology, child);
+    append_pcidevs(topology, child);
 }
 
 static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
@@ -1399,7 +1399,8 @@ hwloc_levels_ignore_object(hwloc_obj_t obj)
  * if not equal, put the object into the remaining objs.
  */
 static int
-hwloc_level_take_objects(hwloc_obj_t top_obj,
+hwloc_level_take_objects(hwloc_topology_t topology,
+			 hwloc_obj_t top_obj,
 			 hwloc_obj_t *current_objs, unsigned n_current_objs,
 			 hwloc_obj_t *taken_objs, unsigned n_taken_objs __hwloc_attribute_unused,
 			 hwloc_obj_t *remaining_objs, unsigned n_remaining_objs __hwloc_attribute_unused)
@@ -1415,18 +1416,22 @@ hwloc_level_take_objects(hwloc_obj_t top_obj,
       taken_objs[taken_i++] = current_objs[i];
       for (j = 0; j < current_objs[i]->arity; j++) {
 	hwloc_obj_t obj = current_objs[i]->children[j];
-	if (hwloc_levels_ignore_object(obj))
+	if (hwloc_levels_ignore_object(obj)) {
 	  remaining_objs[new_i++] = obj;
-	else
+	} else {
 	  ignored++;
+	  append_pcidevs(topology, obj);
+	}
       }
     } else {
       /* Leave it.  */
       hwloc_obj_t obj = current_objs[i];
-      if (hwloc_levels_ignore_object(obj))
+      if (hwloc_levels_ignore_object(obj)) {
 	remaining_objs[new_i++] = obj;
-      else
+      } else {
 	ignored++;
+	append_pcidevs(topology, obj);
+      }
     }
 
 #ifdef HWLOC_DEBUG
@@ -1460,6 +1465,10 @@ hwloc_connect_levels(hwloc_topology_t topology)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
   topology->type_depth[topology->levels[0][0]->type] = 0;
 
+  /* initialize special PCI device level */
+  topology->first_pcidev = NULL;
+  topology->last_pcidev = NULL;
+
   /* Start with children of the whole system.  */
   l = 0;
   n_objs = topology->levels[0][0]->arity;
@@ -1476,7 +1485,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
      * root will go into dummy_taken_objs but we don't need it anyway
      * because it stays alone in first level.
      */
-    n_objs = hwloc_level_take_objects(topology->levels[0][0],
+    n_objs = hwloc_level_take_objects(topology,
+				      topology->levels[0][0],
 				      topology->levels[0], 1,
 				      &dummy_taken_objs, 1,
 				      objs, n_objs);
@@ -1522,7 +1532,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
     /* New list of pending objects.  */
     new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
 
-    n_new_objs = hwloc_level_take_objects(top_obj,
+    n_new_objs = hwloc_level_take_objects(topology,
+					  top_obj,
 					  objs, n_objs,
 					  taken_objs, n_taken_objs,
 					  new_objs, n_new_objs);
@@ -1922,8 +1933,6 @@ hwloc_discover(struct hwloc_topology *topology)
     }
   }
 
-  append_pcidev(topology, topology->levels[0][0]);
-
   /*
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology
    */
@@ -2086,6 +2095,9 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   root_obj->logical_index = 0;
   root_obj->sibling_rank = 0;
   topology->levels[0][0] = root_obj;
+
+  topology->first_pcidev = NULL;
+  topology->last_pcidev = NULL;
 }
 
 int
@@ -2108,9 +2120,6 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->support.discovery = malloc(sizeof(*topology->support.discovery));
   topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
   topology->support.membind = malloc(sizeof(*topology->support.membind));
-
-  topology->first_pcidev = NULL;
-  topology->last_pcidev = NULL;
 
   /* Only ignore useless cruft by default */
   for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
