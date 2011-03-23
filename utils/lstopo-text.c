@@ -253,7 +253,8 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
       fprintf (output, "Topology not from this system\n");
   }
 
-  fclose(output);
+  if (output != stdout)
+    fclose(output);
 }
 
 /*
@@ -744,4 +745,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int logical, i
 #endif /* HWLOC_HAVE_LIBTERMCAP */
     putcharacter('\n', output);
   }
+
+  if (output != stdout)
+    fclose(output);
 }

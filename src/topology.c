@@ -713,7 +713,7 @@ hwloc_connect_children(hwloc_obj_t parent);
 hwloc_obj_t
 hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
 {
-  hwloc_obj_t obj;
+  hwloc_obj_t obj, child;
   int err;
 
   if (hwloc_bitmap_iszero(cpuset))
@@ -722,15 +722,47 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
     return NULL;
 
   obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
-  obj->cpuset = hwloc_bitmap_dup(cpuset);
   if (name)
     obj->name = strdup(name);
+
+  obj->cpuset = hwloc_bitmap_dup(cpuset);
+  /* initialize default cpusets, we'll adjust them later */
+  obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
+  obj->allowed_cpuset = hwloc_bitmap_dup(cpuset);
+  obj->online_cpuset = hwloc_bitmap_dup(cpuset);
 
   err = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
   if (err < 0)
     return NULL;
 
   hwloc_connect_children(topology->levels[0][0]);
+
+  if ((child = obj->first_child) != NULL && child->cpuset) {
+    /* keep the main cpuset untouched, but update other cpusets and nodesets from children */
+    obj->nodeset = hwloc_bitmap_alloc();
+    obj->complete_nodeset = hwloc_bitmap_alloc();
+    obj->allowed_nodeset = hwloc_bitmap_alloc();
+    while (child) {
+      if (child->complete_cpuset)
+	hwloc_bitmap_or(obj->complete_cpuset, obj->complete_cpuset, child->complete_cpuset);
+      if (child->allowed_cpuset)
+	hwloc_bitmap_or(obj->allowed_cpuset, obj->allowed_cpuset, child->allowed_cpuset);
+      if (child->online_cpuset)
+	hwloc_bitmap_or(obj->online_cpuset, obj->online_cpuset, child->online_cpuset);
+      if (child->nodeset)
+	hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
+      if (child->complete_nodeset)
+	hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
+      if (child->allowed_nodeset)
+	hwloc_bitmap_or(obj->allowed_nodeset, obj->allowed_nodeset, child->allowed_nodeset);
+      child = child->next_sibling;
+    }
+  } else {
+    /* copy the parent nodesets */
+    obj->nodeset = hwloc_bitmap_dup(obj->parent->nodeset);
+    obj->complete_nodeset = hwloc_bitmap_dup(obj->parent->complete_nodeset);
+    obj->allowed_nodeset = hwloc_bitmap_dup(obj->parent->allowed_nodeset);
+  }
 
   return obj;
 }
@@ -739,8 +771,6 @@ hwloc_obj_t
 hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, const char *name)
 {
   hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
-  if (parent->cpuset)
-    obj->cpuset = hwloc_bitmap_dup(parent->cpuset);
   if (name)
     obj->name = strdup(name);
 
@@ -1197,8 +1227,7 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
 {
   hwloc_obj_t obj = *pobj, child, *pchild;
   int dropping;
-  int modified = (obj->complete_cpuset && hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset))
-		 || (obj->cpuset && hwloc_bitmap_intersects(obj->cpuset, droppedcpuset)); /* ugly hack for Misc objects (they have a cpuset without complete_cpuset) */
+  int modified = obj->complete_cpuset && hwloc_bitmap_intersects(obj->complete_cpuset, droppedcpuset);
 
   hwloc_clear_object_distances(obj);
 
