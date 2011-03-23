@@ -402,7 +402,9 @@ output_png(hwloc_topology_t topology, const char *filename, int logical, int leg
   topo_cairo_paint(&png_draw_methods, logical, legend, topology, cs);
   cairo_surface_write_to_png_stream(cs, topo_cairo_write, output);
   cairo_surface_destroy(cs);
-  fclose(output);
+
+  if (output != stdout)
+    fclose(output);
 }
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 
@@ -439,7 +441,9 @@ output_pdf(hwloc_topology_t topology, const char *filename, int logical, int leg
   topo_cairo_paint(&pdf_draw_methods, logical, legend, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
-  fclose(output);
+
+  if (output != stdout)
+    fclose(output);
 }
 #endif /* CAIRO_HAS_PDF_SURFACE */
 
@@ -476,7 +480,9 @@ output_ps(hwloc_topology_t topology, const char *filename, int logical, int lege
   topo_cairo_paint(&ps_draw_methods, logical, legend, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
-  fclose(output);
+
+  if (output != stdout)
+    fclose(output);
 }
 #endif /* CAIRO_HAS_PS_SURFACE */
 
@@ -514,7 +520,9 @@ output_svg(hwloc_topology_t topology, const char *filename, int logical, int leg
   topo_cairo_paint(&svg_draw_methods, logical, legend, topology, cs);
   cairo_surface_flush(cs);
   cairo_surface_destroy(cs);
-  fclose(output);
+
+  if (output != stdout)
+    fclose(output);
 }
 #endif /* CAIRO_HAS_SVG_SURFACE */
 

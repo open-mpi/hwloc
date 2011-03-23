@@ -126,5 +126,7 @@ output_fig (hwloc_topology_t topology, const char *filename, int logical, int le
 
   output = output_draw_start(&fig_draw_methods, logical, legend, topology, output);
   output_draw(&fig_draw_methods, logical, legend, topology, output);
-  fclose(output);
+
+  if (output != stdout)
+    fclose(output);
 }
