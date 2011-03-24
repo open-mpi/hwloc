@@ -799,7 +799,7 @@ enum hwloc_restrict_flags_e {
    */
 };
 
-/** \brief Restrict the topology to the current thread binding.
+/** \brief Restrict the topology to the given CPU set.
  *
  * Topology \p topology is modified so as to remove all objects that
  * are not included (or partially included) in the CPU set \p cpuset.
