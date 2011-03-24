@@ -878,8 +878,9 @@ enum hwloc_restrict_flags_e {
    */
   HWLOC_RESTRICT_FLAG_ADAPT_IO = (1<<2)
  /**< \brief Move I/O objects to ancestors if their parents are removed during restriction.
-  * If this flag is not set, I/O devices and bridges are removed when their parents are removed.
-  */
+   * If this flag is not set, I/O devices and bridges are removed when their parents are removed.
+   * \hideinitializer
+   */
 };
 
 /** \brief Restrict the topology to the given CPU set.
