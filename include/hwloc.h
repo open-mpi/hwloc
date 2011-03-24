@@ -652,7 +652,7 @@ enum hwloc_topology_flags_e {
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
  *
- * Set a OR'ed set of hwloc_topology_flags_e onto a topology that was not yet loaded.
+ * Set a OR'ed set of ::hwloc_topology_flags_e onto a topology that was not yet loaded.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long flags);
 
@@ -868,24 +868,26 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_top
 enum hwloc_restrict_flags_e {
   HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES = (1<<0),
  /**< \brief Adapt distance matrices according to objects being removed during restriction.
-  * If this flag is not set, distance matrices are removed.
-  */
+   * If this flag is not set, distance matrices are removed.
+   * \hideinitializer
+   */
   HWLOC_RESTRICT_FLAG_ADAPT_MISC = (1<<1),
  /**< \brief Move Misc objects to ancestors if their parents are removed during restriction.
-  * If this flag is not set, Misc objects are removed when their parents are removed.
-  */
+   * If this flag is not set, Misc objects are removed when their parents are removed.
+   * \hideinitializer
+   */
   HWLOC_RESTRICT_FLAG_ADAPT_IO = (1<<2)
  /**< \brief Move I/O objects to ancestors if their parents are removed during restriction.
   * If this flag is not set, I/O devices and bridges are removed when their parents are removed.
   */
 };
 
-/** \brief Restrict the topology to the current thread binding.
+/** \brief Restrict the topology to the given CPU set.
  *
  * Topology \p topology is modified so as to remove all objects that
  * are not included (or partially included) in the CPU set \p cpuset.
  *
- * \p flags is a OR'ed set of hwloc_restrict_flags_e.
+ * \p flags is a OR'ed set of ::hwloc_restrict_flags_e.
  */
 HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
 

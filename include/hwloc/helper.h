@@ -202,8 +202,10 @@ hwloc_get_common_ancestor_obj (hwloc_topology_t topology __hwloc_attribute_unuse
   return obj1;
 }
 
-/** \brief Returns true if _obj_ is inside the subtree beginning
-    with \p subtree_root. */
+/** \brief Returns true if \p obj is inside the subtree beginning with \p subtree_root.
+ *
+ * \note This function assumes that both \p obj and \p subtree_root have a \p cpuset.
+ */
 static __hwloc_inline int __hwloc_attribute_pure
 hwloc_obj_is_in_subtree (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj, hwloc_obj_t subtree_root)
 {
@@ -230,13 +232,14 @@ static __hwloc_inline hwloc_obj_t
 hwloc_get_first_largest_obj_inside_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t set)
 {
   hwloc_obj_t obj = hwloc_get_root_obj(topology);
+  /* FIXME: what if !root->cpuset? */
   if (!hwloc_bitmap_intersects(obj->cpuset, set))
     return NULL;
   while (!hwloc_bitmap_isincluded(obj->cpuset, set)) {
     /* while the object intersects without being included, look at its children */
     hwloc_obj_t child = NULL;
     while ((child = hwloc_get_next_child(topology, obj, child)) != NULL) {
-      if (hwloc_bitmap_intersects(child->cpuset, set))
+      if (child->cpuset && hwloc_bitmap_intersects(child->cpuset, set))
 	break;
     }
     if (!child)
@@ -267,6 +270,7 @@ hwloc_get_next_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_cons
 					   unsigned depth, hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
+  /* no need to check next->cpuset because objects in levels always have a cpuset */
   while (next && !hwloc_bitmap_isincluded(next->cpuset, set))
     next = next->next_cousin;
   return next;
@@ -297,6 +301,7 @@ hwloc_get_obj_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_cpu
   unsigned count = 0;
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   while (obj) {
+    /* no need to check obj->cpuset because objects in levels always have a cpuset */
     if (hwloc_bitmap_isincluded(obj->cpuset, set)) {
       if (count == idx)
 	return obj;
@@ -331,6 +336,7 @@ hwloc_get_nbobjs_inside_cpuset_by_depth (hwloc_topology_t topology, hwloc_const_
   hwloc_obj_t obj = hwloc_get_obj_by_depth (topology, depth, 0);
   int count = 0;
   while (obj) {
+    /* no need to check obj->cpuset because objects in levels always have a cpuset */
     if (hwloc_bitmap_isincluded(obj->cpuset, set))
       count++;
     obj = obj->next_cousin;
@@ -398,6 +404,7 @@ hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t s
   if (hwloc_bitmap_iszero(set))
     return NULL;
 
+  /* FIXME: what if !root->cpuset? */
   if (!hwloc_bitmap_isincluded(set, current->cpuset))
     return NULL;
 
@@ -430,6 +437,7 @@ hwloc_get_next_obj_covering_cpuset_by_depth(hwloc_topology_t topology, hwloc_con
 					    unsigned depth, hwloc_obj_t prev)
 {
   hwloc_obj_t next = hwloc_get_next_obj_by_depth(topology, depth, prev);
+  /* no need to check next->cpuset because objects in levels always have a cpuset */
   while (next && !hwloc_bitmap_intersects(set, next->cpuset))
     next = next->next_cousin;
   return next;
@@ -481,15 +489,17 @@ hwloc_get_cache_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t
   return NULL;
 }
 
-/** \brief Get the first cache shared between an object and somebody else
+/** \brief Get the first cache shared between an object and somebody else.
  *
- * \return \c NULL if no cache matches
+ * \return \c NULL if no cache matches or if an invalid object is given.
  */
 static __hwloc_inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj)
 {
   hwloc_obj_t current = obj->parent;
-  while (current) {
+  if (!obj->cpuset)
+    return NULL;
+  while (current && current->cpuset) {
     if (!hwloc_bitmap_isequal(current->cpuset, obj->cpuset)
         && current->type == HWLOC_OBJ_CACHE)
       return current;
@@ -561,6 +571,7 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
   hwloc_obj_t obj = hwloc_get_root_obj(topology);
   int i;
 
+  /* FIXME: what if !root->cpuset? */
   for(i=0; i<nr; i++) {
     obj = hwloc_get_obj_inside_cpuset_by_type(topology, obj->cpuset, typev[i], idxv[i]);
     if (!obj)
@@ -598,6 +609,7 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
 {
   unsigned i;
 
+  /* FIXME: what if !root->cpuset? */
   if (!root->arity || n == 1 || root->depth >= until) {
     /* Got to the bottom, we can't split any more, put everything there.  */
     for (i=0; i<n; i++)
@@ -893,6 +905,7 @@ hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwlo
 	obj = NULL;
 	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
 		if (hwloc_bitmap_isset(nodeset, obj->os_index))
+			/* no need to check obj->cpuset because objects in levels always have a cpuset */
 			hwloc_bitmap_or(cpuset, cpuset, obj->cpuset);
 	}
 }
@@ -915,6 +928,7 @@ hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t
 	obj = NULL;
 	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
 		if (hwloc_bitmap_isset(nodeset, obj->os_index))
+			/* no need to check obj->cpuset because objects in levels always have a cpuset */
 			hwloc_bitmap_or(cpuset, cpuset, obj->cpuset);
 }
 
@@ -1002,7 +1016,7 @@ hwloc_get_distance_matrix_covering_obj_by_depth(hwloc_topology_t topology,
 						hwloc_obj_t obj, unsigned depth,
 						unsigned *firstp)
 {
-  while (obj) {
+  while (obj && obj->cpuset) {
     unsigned i;
     for(i=0; i<obj->distances_count; i++)
       if (obj->distances[i]->relative_depth == depth - obj->depth) {
