@@ -187,7 +187,7 @@ typedef enum {
 			  * any structure.
 			  */
 
-  HWLOC_OBJ_MISC, 	/**< \brief Miscellaneous objects.
+  HWLOC_OBJ_MISC,	/**< \brief Miscellaneous objects.
 			  * Objects without particular meaning, that can e.g. be
 			  * added by the application for its own use.
 			  */
@@ -637,7 +637,7 @@ enum hwloc_topology_flags_e {
    *
    * This flag should be combined with HWLOC_TOPOLOGY_FLAG_IO_DEVICES to enable
    * the detection of both common devices and of all useful bridges (bridges that
-   * that have at least one device behind them).
+   * have at least one device behind them).
    */
   HWLOC_TOPOLOGY_FLAG_IO_BRIDGES = (1<<3),
 
