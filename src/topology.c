@@ -1358,6 +1358,19 @@ hwloc_drop_useless_pci(hwloc_topology_t topology, hwloc_obj_t root)
   }
 }
 
+static void
+hwloc_propagate_bridge_depth(hwloc_topology_t topology, hwloc_obj_t root, unsigned depth)
+{
+  hwloc_obj_t child = root->first_child;
+  while (child) {
+    if (child->type == HWLOC_OBJ_BRIDGE) {
+      child->attr->bridge.depth = depth;
+      hwloc_propagate_bridge_depth(topology, child, depth+1);
+    }
+    child = child->next_sibling;
+  }
+}
+
 /*
  * Initialize handy pointers in the whole topology.
  * The topology only had first_child and next_sibling pointers.
@@ -1951,6 +1964,8 @@ hwloc_discover(struct hwloc_topology *topology)
 
       if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_IO))
         hwloc_drop_useless_pci(topology, topology->levels[0][0]);
+
+      hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
 
       hwloc_debug("%s", "\nNow reconnecting\n");
 
