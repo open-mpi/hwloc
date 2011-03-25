@@ -637,7 +637,7 @@ hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_root
     if (roots[i]->cpuset)
       tot_weight += hwloc_bitmap_weight(roots[i]->cpuset);
 
-  for (i = 0; i < n_roots; i++) {
+  for (i = 0; i < n_roots && tot_weight; i++) {
     /* Give to roots[i] a portion proportional to its weight */
     unsigned weight = roots[i]->cpuset ? hwloc_bitmap_weight(roots[i]->cpuset) : 0;
     unsigned chunk = (n * weight + tot_weight-1) / tot_weight;
