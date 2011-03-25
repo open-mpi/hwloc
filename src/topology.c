@@ -1318,41 +1318,54 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
   }
 }
 
+/* If WHOLE_IO is not set, we drop non-interesting devices,
+ * and bridges that have no children.
+ * If IO_BRIDGES is also not set, we also drop all bridges
+ * except the hostbridges.
+ */
 static void
-hwloc_drop_useless_pci(hwloc_topology_t topology, hwloc_obj_t root)
+hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
 {
   hwloc_obj_t child, *pchild;
 
-  /* remove useless children */
-  for_each_child_safe(child, root, pchild) {
-    if (child->type == HWLOC_OBJ_PCI_DEVICE) {
-      unsigned classid = child->attr->pcidev.class_id;
-      unsigned baseclass = classid >> 8;
-      if (baseclass != 0x03 /* PCI_BASE_CLASS_DISPLAY */
-	  && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
-	  && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
-	  && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */) {
-	unlink_and_free_object_and_children(pchild);
+  if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)) {
+    /* drop non-interesting devices */
+    for_each_child_safe(child, root, pchild) {
+      if (child->type == HWLOC_OBJ_PCI_DEVICE) {
+	unsigned classid = child->attr->pcidev.class_id;
+	unsigned baseclass = classid >> 8;
+	if (baseclass != 0x03 /* PCI_BASE_CLASS_DISPLAY */
+	    && baseclass != 0x02 /* PCI_BASE_CLASS_NETWORK */
+	    && baseclass != 0x01 /* PCI_BASE_CLASS_STORAGE */
+	    && classid != 0x0c06 /* PCI_CLASS_SERIAL_INFINIBAND */)
+	  unlink_and_free_object_and_children(pchild);
       }
     }
   }
 
-  /* look at remaining children */
+  /* look at remaining children, process recursively, and remove useless bridges */
   for_each_child_safe(child, root, pchild) {
-    hwloc_drop_useless_pci(topology, child);
-    /* drop non-hostbridges */
+    hwloc_drop_useless_io(topology, child);
+
     if (child->type == HWLOC_OBJ_BRIDGE) {
       hwloc_obj_t grandchildren = child->first_child;
+
       if (!grandchildren) {
-	*pchild = child->next_sibling;
-	hwloc_free_unlinked_object(child);
-      } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST
-		 && !(topology->flags & HWLOC_TOPOLOGY_FLAG_IO_BRIDGES)) {
-	/* insert grandchildren in place of child */
-	*pchild = grandchildren;
-	for( ; grandchildren->next_sibling != NULL ; grandchildren = grandchildren->next_sibling);
-	grandchildren->next_sibling = child->next_sibling;
-	hwloc_free_unlinked_object(child);
+	/* bridges with no children are removed if WHOLE_IO isn't given */
+	if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
+	  *pchild = child->next_sibling;
+	  hwloc_free_unlinked_object(child);
+	}
+
+      } else if (child->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_HOST) {
+	/* only hostbridges are kept if WHOLE_IO or IO_BRIDGE are not given */
+	if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_BRIDGES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
+	  /* insert grandchildren in place of child */
+	  *pchild = grandchildren;
+	  for( ; grandchildren->next_sibling != NULL ; grandchildren = grandchildren->next_sibling);
+	  grandchildren->next_sibling = child->next_sibling;
+	  hwloc_free_unlinked_object(child);
+	}
       }
     }
   }
@@ -1962,8 +1975,7 @@ hwloc_discover(struct hwloc_topology *topology)
     if (gotsome) {
       print_objects(topology, 0, topology->levels[0][0]);
 
-      if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_IO))
-        hwloc_drop_useless_pci(topology, topology->levels[0][0]);
+      hwloc_drop_useless_io(topology, topology->levels[0][0]);
 
       hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
 
