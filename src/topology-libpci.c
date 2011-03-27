@@ -115,6 +115,11 @@ hwloc_linux_lookup_dma_class(struct hwloc_topology *topology, struct hwloc_obj *
 {
   hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_DMA, "dma");
 }
+static void
+hwloc_linux_lookup_drm_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_GPU, "drm");
+}
 
 /* block class objects are in
  * host%d/target%d:%d:%d/%d:%d:%d:%d/
@@ -256,8 +261,8 @@ hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_topology *topology, struct hw
   hwloc_linux_lookup_net_class(topology, pcidev, pcidevpath);
   hwloc_linux_lookup_infiniband_class(topology, pcidev, pcidevpath);
   hwloc_linux_lookup_dma_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_drm_class(topology, pcidev, pcidevpath);
   hwloc_linux_lookup_block_class(topology, pcidev, pcidevpath);
-  /* FIXME: what about gpus? could try class "drm", but proprietary drivers won't appear there */
   }
 #endif /* HWLOC_LINUX_SYS */
 }

@@ -392,6 +392,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     case HWLOC_OBJ_OSDEV_NETWORK: return hwloc_snprintf(string, size, "Net");
     case HWLOC_OBJ_OSDEV_INFINIBAND: return hwloc_snprintf(string, size, "InfiniBand");
     case HWLOC_OBJ_OSDEV_DMA: return hwloc_snprintf(string, size, "DMA");
+    case HWLOC_OBJ_OSDEV_GPU: return hwloc_snprintf(string, size, "GPU");
     default:
       *string = '\0';
       return 0;
