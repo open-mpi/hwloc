@@ -245,6 +245,22 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     }
   }
 
+  else if (!strcmp(name, "osdev_type")) {
+    switch (obj->type) {
+    case HWLOC_OBJ_OS_DEVICE: {
+      unsigned osdev_type;
+      if (sscanf(value, "%u", &osdev_type) != 1)
+	fprintf(stderr, "ignoring invalid osdev_type format string %s\n", value);
+      else
+	obj->attr->osdev.type = osdev_type;
+      break;
+    }
+    default:
+      fprintf(stderr, "ignoring osdev_type attribute for non-osdev object\n");
+      break;
+    }
+  }
+
 
 
 
@@ -738,6 +754,10 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     xmlNewProp(node, BAD_CAST "pci_type", BAD_CAST tmp);
     sprintf(tmp, "%f", obj->attr->pcidev.linkspeed);
     xmlNewProp(node, BAD_CAST "pci_link_speed", BAD_CAST tmp);
+    break;
+  case HWLOC_OBJ_OS_DEVICE:
+    sprintf(tmp, "%u", obj->attr->osdev.type);
+    xmlNewProp(node, BAD_CAST "osdev_type", BAD_CAST tmp);
     break;
   default:
     break;

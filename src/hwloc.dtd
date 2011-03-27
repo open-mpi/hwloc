@@ -24,6 +24,7 @@
 <!ATTLIST object pci_busid CDATA "" >
 <!ATTLIST object pci_type CDATA "" >
 <!ATTLIST object pci_link_speed CDATA "0." >
+<!ATTLIST object osdev_type CDATA "" >
 
 <!ELEMENT page_type EMPTY>
 <!ATTLIST page_type size CDATA #REQUIRED>
