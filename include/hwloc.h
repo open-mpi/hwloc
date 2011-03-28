@@ -452,7 +452,7 @@ union hwloc_obj_attr_u {
       struct hwloc_pcidev_attr_s pci;
     } upstream;
     hwloc_obj_bridge_type_t upstream_type;
-    union hwloc_bridge_downstream_attr_s {
+    union hwloc_bridge_downstream_attr_u {
       struct hwloc_bridge_downstream_pci_attr_s {
 	unsigned short domain;
 	unsigned char secondary_bus, subordinate_bus;
