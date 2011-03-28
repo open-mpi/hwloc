@@ -523,6 +523,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_membinding.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_myriexpress.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_iodev.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_objects.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_openfabrics.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_sets.3 \
