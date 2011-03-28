@@ -1982,6 +1982,7 @@ hwloc_discover(struct hwloc_topology *topology)
       hwloc_debug("%s", "\nNow reconnecting\n");
 
       hwloc_connect_children(topology->levels[0][0]);
+      hwloc_connect_levels(topology);
 
       print_objects(topology, 0, topology->levels[0][0]);
     } else {
