@@ -26,6 +26,16 @@ int main(void)
 	   obj->attr->pcidev.class_id, obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
   }
 
+  obj = NULL;
+  while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
+    assert(obj->type == HWLOC_OBJ_OS_DEVICE);
+    printf("Found OS device %s\n", obj->name);
+  }
+
+  assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_BRIDGE));
+  assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_PCI_DEVICE));
+  assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_OS_DEVICE));
+
   hwloc_topology_destroy(topology);
 
   return 0;

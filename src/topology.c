@@ -794,7 +794,7 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
 
 /* Append I/O devices below this object to their list */
 static void
-append_pcidevs(hwloc_topology_t topology, hwloc_obj_t obj)
+append_iodevs(hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t child, *temp;
 
@@ -807,10 +807,19 @@ append_pcidevs(hwloc_topology_t topology, hwloc_obj_t obj)
     } else {
       topology->first_pcidev = topology->last_pcidev = obj;
     }
+  } else if (obj->type == HWLOC_OBJ_OS_DEVICE) {
+    /* Insert in the main osdev list */
+    if (topology->first_osdev) {
+      obj->prev_cousin = topology->last_osdev;
+      obj->prev_cousin->next_cousin = obj;
+      topology->last_osdev = obj;
+    } else {
+      topology->first_osdev = topology->last_osdev = obj;
+    }
   }
 
   for_each_child_safe(child, obj, temp)
-    append_pcidevs(topology, child);
+    append_iodevs(topology, child);
 }
 
 static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
@@ -1475,7 +1484,7 @@ hwloc_level_take_objects(hwloc_topology_t topology,
 	  remaining_objs[new_i++] = obj;
 	} else {
 	  ignored++;
-	  append_pcidevs(topology, obj);
+	  append_iodevs(topology, obj);
 	}
       }
     } else {
@@ -1485,7 +1494,7 @@ hwloc_level_take_objects(hwloc_topology_t topology,
 	remaining_objs[new_i++] = obj;
       } else {
 	ignored++;
-	append_pcidevs(topology, obj);
+	append_iodevs(topology, obj);
       }
     }
 
@@ -1520,9 +1529,9 @@ hwloc_connect_levels(hwloc_topology_t topology)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
   topology->type_depth[topology->levels[0][0]->type] = 0;
 
-  /* initialize special PCI device level */
-  topology->first_pcidev = NULL;
-  topology->last_pcidev = NULL;
+  /* initialize special I/O device levels */
+  topology->first_pcidev = topology->last_pcidev = NULL;
+  topology->first_osdev = topology->last_osdev = NULL;
 
   /* Start with children of the whole system.  */
   l = 0;
@@ -2153,8 +2162,8 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   root_obj->sibling_rank = 0;
   topology->levels[0][0] = root_obj;
 
-  topology->first_pcidev = NULL;
-  topology->last_pcidev = NULL;
+  topology->first_pcidev = topology->last_pcidev = NULL;
+  topology->first_osdev = topology->last_osdev = NULL;
 }
 
 int

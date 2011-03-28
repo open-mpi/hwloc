@@ -56,6 +56,18 @@ hwloc_get_next_pcidev(struct hwloc_topology *topology, struct hwloc_obj *prev)
   }
 }
 
+struct hwloc_obj *
+hwloc_get_next_osdev(struct hwloc_topology *topology, struct hwloc_obj *prev)
+{
+  if (prev) {
+    if (prev->type != HWLOC_OBJ_OS_DEVICE)
+      return NULL;
+    return prev->next_cousin;
+  } else {
+    return topology->first_osdev;
+  }
+}
+
 unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, unsigned max)
 {
   struct hwloc_obj *parent, *nextparent, **src_objs;

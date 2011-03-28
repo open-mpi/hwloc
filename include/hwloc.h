@@ -1762,12 +1762,21 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
 
 
 
-/** \defgroup hwlocality_pcidev Basic PCI Device Management
+/** \defgroup hwlocality_iodev Basic I/O Device Management
  * @{
  */
 
-/** \brief Get the next PCI device in the system */
+/** \brief Get the next PCI device in the system.
+ *
+ * \return the first PCI device if \p prev is \c NULL.
+ */
 HWLOC_DECLSPEC struct hwloc_obj * hwloc_get_next_pcidev(struct hwloc_topology *topology, struct hwloc_obj *prev);
+
+/** \brief Get the next OS device in the system.
+ *
+ * \return the first OS device if \p prev is \c NULL.
+ */
+HWLOC_DECLSPEC struct hwloc_obj * hwloc_get_next_osdev(struct hwloc_topology *topology, struct hwloc_obj *prev);
 
 /** @} */
 
