@@ -255,13 +255,23 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_REPLICATE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_STRICT.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_MEMBIND_THREAD.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_BRIDGE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_BRIDGE_HOST.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_BRIDGE_PCI.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CACHE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CORE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_GROUP.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MACHINE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_MISC.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_NODE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OS_DEVICE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_BLOCK.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_DMA.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_GPU.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_INFINIBAND.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_OSDEV_NETWORK.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PU.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_PCI_DEVICE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SOCKET.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES.3 \
@@ -419,8 +429,16 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_bridge_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_bridge_attr_s_hwloc_bridge_downstream_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_bridge_attr_s_hwloc_bridge_downstream_attr_s_hwloc_bridge_downstream_pci_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_bridge_attr_s_hwloc_bridge_upstream_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_cache_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_group_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_osdev_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_pcidev_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_bridge_type_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_osdev_type_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_get_info_by_name.3 \

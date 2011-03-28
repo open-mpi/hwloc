@@ -195,12 +195,20 @@ typedef enum {
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge.
 			  * Any bridge that connects the host or an I/O bus,
 			  * to another I/O bus.
+			  * Bridge objects have no CPU sets and no node sets.
+			  * They are not added to the topology unless I/O discovery
+			  * is enabled with hwloc_topology_set_flags().
 			  */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
+			  * These objects have no CPU sets and no node sets.
+			  * They are not added to the topology unless I/O discovery
+			  * is enabled with hwloc_topology_set_flags().
 			  */
-
   HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
-			 */
+			  * These objects have no CPU sets and no node sets.
+			  * They are not added to the topology unless I/O discovery
+			  * is enabled with hwloc_topology_set_flags().
+			  */
 
   HWLOC_OBJ_MAX         /**< \private Sentinel value */
 
@@ -213,6 +221,21 @@ typedef enum {
        WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
        *************************************************************** */
 } hwloc_obj_type_t;
+
+/** \brief Type of one side (upstream or downstream) of an I/O bridge. */
+typedef enum hwloc_obj_bridge_type_e {
+  HWLOC_OBJ_BRIDGE_HOST,	/**< \brief Host-side of a bridge, only possible upstream. */
+  HWLOC_OBJ_BRIDGE_PCI		/**< \brief PCI-side of a bridge. */
+} hwloc_obj_bridge_type_t;
+
+/** \brief Type of a OS device. */
+typedef enum hwloc_obj_osdev_type_e {
+  HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device. */
+  HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device. */
+  HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device. */
+  HWLOC_OBJ_OSDEV_INFINIBAND,	/**< \brief Operating system infiniband device. */
+  HWLOC_OBJ_OSDEV_DMA		/**< \brief Operating system dma device. */
+} hwloc_obj_osdev_type_t;
 
 /** \brief Compare the depth of two object types
  *
@@ -236,20 +259,6 @@ HWLOC_DECLSPEC int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t
 enum hwloc_compare_types_e {
     HWLOC_TYPE_UNORDERED = INT_MAX	/**< \brief Value returned by hwloc_compare_types when types can not be compared. \hideinitializer */
 };
-
-
-typedef enum hwloc_obj_bridge_type_e {
-  HWLOC_OBJ_BRIDGE_HOST,	/**< \brief Host-side of a bridge, only possible upstream. */
-  HWLOC_OBJ_BRIDGE_PCI		/**< \brief PCI-side of a bridge. */
-} hwloc_obj_bridge_type_t;
-
-typedef enum hwloc_obj_osdev_type_e {
-  HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device. */
-  HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device. */
-  HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device. */
-  HWLOC_OBJ_OSDEV_INFINIBAND,	/**< \brief Operating system infiniband device. */
-  HWLOC_OBJ_OSDEV_DMA		/**< \brief Operating system dma device. */
-} hwloc_obj_osdev_type_t;
 
 /** @} */
 
@@ -429,7 +438,7 @@ union hwloc_obj_attr_u {
     unsigned depth;			  /**< \brief Depth of group object */
   } group;
   /** \brief PCI Device specific Object Attributes */
-  struct hwloc_pcidev_attr_u {
+  struct hwloc_pcidev_attr_s {
     unsigned short domain;
     unsigned char bus, dev, func;
     unsigned short class_id;
@@ -438,13 +447,13 @@ union hwloc_obj_attr_u {
     float linkspeed; /* in GB/s */
   } pcidev;
   /** \brief Bridge specific Object Attribues */
-  struct hwloc_bridge_attr_u {
+  struct hwloc_bridge_attr_s {
     union hwloc_bridge_upstream_attr_u {
-      struct hwloc_pcidev_attr_u pci;
+      struct hwloc_pcidev_attr_s pci;
     } upstream;
     hwloc_obj_bridge_type_t upstream_type;
-    union hwloc_bridge_downstream_attr_u {
-      struct hwloc_bridge_downstream_pci_attr_u {
+    union hwloc_bridge_downstream_attr_s {
+      struct hwloc_bridge_downstream_pci_attr_s {
 	unsigned short domain;
 	unsigned char secondary_bus, subordinate_bus;
       } pci;
@@ -453,7 +462,7 @@ union hwloc_obj_attr_u {
     unsigned depth;
   } bridge;
   /** \brief OS Device specific Object Attributes */
-  struct hwloc_osdev_attr_u {
+  struct hwloc_osdev_attr_s {
     hwloc_obj_osdev_type_t type;
   } osdev;
 };
