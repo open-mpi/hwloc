@@ -1295,15 +1295,15 @@ Any application using the hwloc API should be prepared to check at
 compile-time whether some features are available in the currently
 installed hwloc distribution.
 
-To check whether hwloc is at least 1.1, you should use:
+To check whether hwloc is at least 1.2, you should use:
 \verbatim
 #include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00010100
+#if HWLOC_API_VERSION >= 0x00010200
 ...
 #endif
 \endverbatim
 
-One of the major changes in hwloc 1.1 is the addition of the bitmap
+One of the major changes in hwloc 1.1 was the addition of the bitmap
 API. It supersedes the now deprecated cpuset API which will be removed
 in a future hwloc release. It is strongly recommended to switch existing
 codes to the bitmap API. Keeping support for older hwloc versions is easy.
