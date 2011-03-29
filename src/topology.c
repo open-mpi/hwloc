@@ -319,7 +319,7 @@ enum hwloc_type_cmp_e {
    the B values are the corresponding indexes of obj_order_type.
 
    We can't use C99 syntax to initialize this in a little safer manner
-   -- bummer.  :-( 
+   -- bummer.  :-(
 
    *************************************************************
    *** DO NOT CHANGE THE ORDERING OF THIS ARRAY WITHOUT TRIPLE
@@ -337,8 +337,8 @@ static unsigned obj_type_order[] = {
     /* next entry is HWLOC_OBJ_GROUP */    2,
     /* next entry is HWLOC_OBJ_MISC */     11,
     /* next entry is HWLOC_OBJ_BRIDGE */   7,
-    /* next entry is HWLOC_OBJ_PCI_DEVICE */  8, 
-    /* next entry is HWLOC_OBJ_PCI_DEVICE */  9,
+    /* next entry is HWLOC_OBJ_PCI_DEVICE */  8,
+    /* next entry is HWLOC_OBJ_OS_DEVICE */   9
 };
 
 static const hwloc_obj_type_t obj_order_type[] = {
@@ -375,12 +375,12 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
   unsigned order2 = hwloc_get_type_order(type2);
 
   /* bridge and devices are only comparable with each others and with machine and system */
-  if ((type1 == HWLOC_OBJ_BRIDGE || type1 == HWLOC_OBJ_PCI_DEVICE)
-      && type2 != HWLOC_OBJ_BRIDGE && type2 != HWLOC_OBJ_PCI_DEVICE
+  if ((type1 == HWLOC_OBJ_BRIDGE || type1 == HWLOC_OBJ_PCI_DEVICE || type1 == HWLOC_OBJ_OS_DEVICE)
+      && type2 != HWLOC_OBJ_BRIDGE && type2 != HWLOC_OBJ_PCI_DEVICE && type2 != HWLOC_OBJ_OS_DEVICE
       && type2 != HWLOC_OBJ_SYSTEM && type2 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
-  if ((type2 == HWLOC_OBJ_BRIDGE || type2 == HWLOC_OBJ_PCI_DEVICE)
-      && type1 != HWLOC_OBJ_BRIDGE && type1 != HWLOC_OBJ_PCI_DEVICE
+  if ((type2 == HWLOC_OBJ_BRIDGE || type2 == HWLOC_OBJ_PCI_DEVICE || type2 == HWLOC_OBJ_OS_DEVICE)
+      && type1 != HWLOC_OBJ_BRIDGE && type1 != HWLOC_OBJ_PCI_DEVICE && type1 != HWLOC_OBJ_OS_DEVICE
       && type1 != HWLOC_OBJ_SYSTEM && type1 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
 
