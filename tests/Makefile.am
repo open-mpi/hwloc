@@ -40,7 +40,7 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_groups \
 	hwloc_insert_misc \
 	hwloc_topology_restrict \
-	hwloc_get_next_pcidev
+	hwloc_iodevs
 
 if HWLOC_HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma

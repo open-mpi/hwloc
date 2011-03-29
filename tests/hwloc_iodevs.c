@@ -17,6 +17,9 @@ int main(void)
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO);
+  assert(-1 == hwloc_topology_ignore_type(topology, HWLOC_OBJ_PCI_DEVICE));
+  assert(-1 == hwloc_topology_ignore_type_keep_structure(topology, HWLOC_OBJ_BRIDGE));
+  assert(-1 == hwloc_topology_ignore_type(topology, HWLOC_OBJ_OS_DEVICE));
   hwloc_topology_load(topology);
 
   obj = NULL;
@@ -29,15 +32,12 @@ int main(void)
   obj = NULL;
   while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
     assert(obj->type == HWLOC_OBJ_OS_DEVICE);
-    printf("Found OS device %s\n", obj->name);
+    printf("Found OS device %s subtype %d\n", obj->name, obj->attr->osdev.type);
   }
 
   assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_BRIDGE));
   assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_PCI_DEVICE));
   assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_OS_DEVICE));
-  assert(-1 == hwloc_topology_ignore_type(topology, HWLOC_OBJ_PCI_DEVICE));
-  assert(-1 == hwloc_topology_ignore_type_keep_structure(topology, HWLOC_OBJ_BRIDGE));
-  assert(-1 == hwloc_topology_ignore_type(topology, HWLOC_OBJ_OS_DEVICE));
   assert(hwloc_compare_types(HWLOC_OBJ_BRIDGE, HWLOC_OBJ_PCI_DEVICE) < 0);
   assert(hwloc_compare_types(HWLOC_OBJ_BRIDGE, HWLOC_OBJ_OS_DEVICE) < 0);
   assert(hwloc_compare_types(HWLOC_OBJ_PCI_DEVICE, HWLOC_OBJ_OS_DEVICE) < 0);
