@@ -195,17 +195,20 @@ typedef enum {
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge.
 			  * Any bridge that connects the host or an I/O bus,
 			  * to another I/O bus.
-			  * Bridge objects have no CPU sets and no node sets.
+			  * Bridge objects have neither CPU sets, nor node sets,
+			  * nor any level depth.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
-			  * These objects have no CPU sets and no node sets.
+			  * These objects have neither CPU sets, nor node sets,
+			  * nor any level depth.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  */
   HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
-			  * These objects have no CPU sets and no node sets.
+			  * These objects have neither CPU sets, nor node sets,
+			  * nor any level depth.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  */
@@ -924,6 +927,11 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  *
  * If type is absent but a similar type is acceptable, see also
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
+ *
+ * If an I/O object type is given, the function returns HWLOC_TYPE_DEPTH_UNKNOWN
+ * because I/O objects are not stored in levels as other CPU-related objects do.
+ * If you ever need to traverse the list of PCI or OS devices, you should use
+ * hwloc_get_next_pcidev() or hwloc_get_next_osdev().
  */
 HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
 
@@ -1777,11 +1785,17 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
 
 /** \brief Get the next PCI device in the system.
  *
+ * This is useful for enumerating PCI device objects because
+ * those are not available through a common level or depth.
+ *
  * \return the first PCI device if \p prev is \c NULL.
  */
 HWLOC_DECLSPEC struct hwloc_obj * hwloc_get_next_pcidev(struct hwloc_topology *topology, struct hwloc_obj *prev);
 
 /** \brief Get the next OS device in the system.
+ *
+ * This is useful for enumerating OS device objects because
+ * those are not available through a common level or depth.
  *
  * \return the first OS device if \p prev is \c NULL.
  */
