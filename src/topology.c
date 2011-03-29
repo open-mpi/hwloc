@@ -2311,6 +2311,12 @@ hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t typ
     /* we need the PU level */
     errno = EINVAL;
     return -1;
+  } else if (type == HWLOC_OBJ_PCI_DEVICE
+	     || type == HWLOC_OBJ_BRIDGE
+	     || type == HWLOC_OBJ_OS_DEVICE) {
+    /* I/O devices aren't in any level, use topology flags to ignore them */
+    errno = EINVAL;
+    return -1;
   }
 
   topology->ignored_types[type] = HWLOC_IGNORE_TYPE_ALWAYS;
@@ -2329,6 +2335,12 @@ hwloc_topology_ignore_type_keep_structure(struct hwloc_topology *topology, hwloc
     /* we need the PU level */
     errno = EINVAL;
     return -1;
+  } else if (type == HWLOC_OBJ_PCI_DEVICE
+	     || type == HWLOC_OBJ_BRIDGE
+	     || type == HWLOC_OBJ_OS_DEVICE) {
+    /* I/O devices aren't in any level, use topology flags to ignore them */
+    errno = EINVAL;
+    return -1;
   }
 
   topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
@@ -2340,7 +2352,10 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
 {
   unsigned type;
   for(type=0; type<HWLOC_OBJ_TYPE_MAX; type++)
-    if (type != HWLOC_OBJ_PU)
+    if (type != HWLOC_OBJ_PU
+	&& type != HWLOC_OBJ_PCI_DEVICE
+	&& type != HWLOC_OBJ_BRIDGE
+	&& type != HWLOC_OBJ_OS_DEVICE)
       topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }

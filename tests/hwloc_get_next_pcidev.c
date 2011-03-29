@@ -32,6 +32,9 @@ int main(void)
     printf("Found OS device %s\n", obj->name);
   }
 
+  assert(-1 == hwloc_topology_ignore_type(topology, HWLOC_OBJ_PCI_DEVICE));
+  assert(-1 == hwloc_topology_ignore_type_keep_structure(topology, HWLOC_OBJ_BRIDGE));
+  assert(-1 == hwloc_topology_ignore_type(topology, HWLOC_OBJ_OS_DEVICE));
   assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_BRIDGE));
   assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_PCI_DEVICE));
   assert(HWLOC_TYPE_DEPTH_UNKNOWN == hwloc_get_type_depth(topology, HWLOC_OBJ_OS_DEVICE));
