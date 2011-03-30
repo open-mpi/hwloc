@@ -59,6 +59,7 @@ typedef enum hwloc_backend_e {
 
 struct hwloc_topology {
   unsigned nb_levels;					/* Number of horizontal levels */
+  unsigned next_group_depth;				/* Depth of the next Group object that we may create */
   unsigned level_nbobjects[HWLOC_DEPTH_MAX]; 		/* Number of objects on each horizontal level */
   struct hwloc_obj **levels[HWLOC_DEPTH_MAX];		/* Direct access to levels, levels[l = 0 .. nblevels-1][0..level_nbobjects[l]] */
   unsigned long flags;
