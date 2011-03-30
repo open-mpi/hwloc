@@ -51,6 +51,7 @@ Version 1.2.0
   consisting in the entire topology.
 * Add --thissystem to lstopo.
 * Detect cache size on AIX. Thanks Christopher and IBM.
+* Add lstopo-win, a console-less lstopo variant on Windows.
 
 
 Version 1.1.1
