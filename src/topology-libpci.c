@@ -426,7 +426,7 @@ hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
 }
 
 static struct hwloc_obj *
-hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge)
+hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge, int *created)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   struct hwloc_obj *parent;
@@ -466,16 +466,34 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
  found:
   hwloc_debug_bitmap("Attaching hostbridge to cpuset %s\n", cpuset);
 
+  /* why not inserting a group and let the core remove it if useless?
+   * 1) we need to make sure that the group is above all objects
+   * with same cpuset (to avoid attaching to caches or so)
+   * 2) the merge-keep-structure code is already done when coming here
+   */
+
   /* attach the hostbridge now that it contains the right objects */
   parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
   /* if found nothing, attach to top */
   if (!parent)
     parent = topology->levels[0][0];
-  /* do not attach to the lowest object since it could be a cache or so,
-   * go up as long as the cpuset is the same
-   */
-  while (parent->parent && hwloc_bitmap_isequal(parent->cpuset, parent->parent->cpuset))
-    parent = parent->parent;
+  if (hwloc_bitmap_isequal(cpuset, parent->cpuset)) {
+    /* this object has the right cpuset, but it could be a cache or so,
+     * go up as long as the cpuset is the same
+     */
+    while (parent->parent && hwloc_bitmap_isequal(parent->cpuset, parent->parent->cpuset))
+      parent = parent->parent;
+  } else {
+    /* the object we found is too large, insert an intermediate group */
+    hwloc_obj_t group_obj = group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+    if (group_obj) {
+      group_obj->cpuset = hwloc_bitmap_dup(cpuset);
+      group_obj->attr->group.depth = topology->next_group_depth;
+      hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
+      parent = group_obj;
+      *created = 1;
+    }
+  }
 
   hwloc_bitmap_free(cpuset);
 
@@ -489,6 +507,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   struct pci_dev *pcidev;
   struct hwloc_obj fakehostbridge; /* temporary object covering the whole PCI hierarchy until its complete */
   unsigned current_hostbridge;
+  int createdgroups = 0;
 
   fakehostbridge.first_child = NULL;
   fakehostbridge.last_child = NULL;
@@ -661,9 +680,12 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 		current_domain, current_bus, current_subordinate);
 
     /* attach the hostbridge where it belongs */
-    parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge);
+    parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge, &createdgroups);
     hwloc_insert_object_by_parent(topology, parent, hostbridge);
   }
+
+  if (createdgroups)
+    topology->next_group_depth++;
 }
 
 #endif /* HWLOC_HAVE_LIBPCI */
