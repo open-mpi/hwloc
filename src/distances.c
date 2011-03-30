@@ -536,7 +536,6 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
 				   unsigned nbobjs,
 				   struct hwloc_obj **objs,
 				   float *_distances,
-				   int depth,
 				   int fromuser)
 {
   unsigned *groupids = NULL;
@@ -581,8 +580,7 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
           hwloc_obj_t group_obj;
           group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
           group_obj->cpuset = hwloc_bitmap_alloc();
-          hwloc_bitmap_zero(group_obj->cpuset);
-          group_obj->attr->group.depth = depth;
+          group_obj->attr->group.depth = topology->next_group_depth;
           for (j=0; j<nbobjs; j++)
               if (groupids[j] == i+1) {
                   hwloc_bitmap_or(group_obj->cpuset, group_obj->cpuset, objs[j]->cpuset);
@@ -622,7 +620,8 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
       }
 #endif
 
-      hwloc__setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, depth + 1, fromuser);
+      topology->next_group_depth++;
+      hwloc__setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, fromuser);
 
   inner_free:
       /* Safely free everything */
@@ -690,7 +689,7 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
     }
   }
 
-  hwloc__setup_groups_from_distances(topology, nbobjs, objs, _distances, 0, fromuser);
+  hwloc__setup_groups_from_distances(topology, nbobjs, objs, _distances, fromuser);
 }
 
 void

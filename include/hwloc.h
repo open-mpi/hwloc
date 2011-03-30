@@ -934,6 +934,9 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * If type is absent but a similar type is acceptable, see also
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  *
+ * If some objects of the given type exist in different levels, for instance
+ * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ *
  * If an I/O object type is given, the function returns HWLOC_TYPE_DEPTH_UNKNOWN
  * because I/O objects are not stored in levels as other CPU-related objects do.
  * If you ever need to traverse the list of PCI or OS devices, you should use

@@ -1,5 +1,5 @@
 # Copyright © 2009-2010 INRIA.  All rights reserved.
-# Copyright © 2009-2010 Université Bordeaux 1
+# Copyright © 2009-2011 Université Bordeaux 1
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 #
 # See COPYING in top-level directory.
@@ -31,6 +31,14 @@ lstopo_SOURCES += lstopo-windows.c
 endif
 lstopo_CFLAGS = $(HWLOC_CAIRO_CFLAGS) $(HWLOC_XML_CFLAGS) $(HWLOC_PCI_CFLAGS)
 lstopo_LDADD = $(LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS) $(HWLOC_PCI_LIBS)
+if HWLOC_BUILD_UTILS
+if HWLOC_HAVE_WINDOWS
+bin_PROGRAMS += lstopo-win
+lstopo_win_SOURCES = $(lstopo_SOURCES)
+lstopo_win_CFLAGS = $(lstopo_CFLAGS) -mwindows
+lstopo_win_LDADD = $(lstopo_LDADD)
+endif
+endif
 
 hwloc_calc_SOURCES = hwloc-calc.c hwloc-calc.h
 

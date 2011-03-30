@@ -1523,6 +1523,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
   memset(topology->levels+1, 0, (HWLOC_DEPTH_MAX-1)*sizeof(*topology->levels));
   memset(topology->level_nbobjects+1, 0,  (HWLOC_DEPTH_MAX-1)*sizeof(*topology->level_nbobjects));
   topology->nb_levels = 1;
+  /* don't touch next_group_depth, the Group objects are still here */
 
   /* initialize all depth to unknown */
   for (l=1; l < HWLOC_OBJ_TYPE_MAX; l++)
@@ -2147,6 +2148,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
 
   /* Only the System object on top by default */
   topology->nb_levels = 1; /* there's at least SYSTEM */
+  topology->next_group_depth = 0;
   topology->levels[0] = malloc (sizeof (struct hwloc_obj));
   topology->level_nbobjects[0] = 1;
   /* NULLify other levels so that we can detect and free old ones in hwloc_connect_levels() if needed */
