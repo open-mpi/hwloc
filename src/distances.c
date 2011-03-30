@@ -581,7 +581,6 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
           hwloc_obj_t group_obj;
           group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
           group_obj->cpuset = hwloc_bitmap_alloc();
-          hwloc_bitmap_zero(group_obj->cpuset);
           group_obj->attr->group.depth = depth;
           for (j=0; j<nbobjs; j++)
               if (groupids[j] == i+1) {
