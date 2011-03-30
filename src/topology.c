@@ -275,7 +275,6 @@ hwloc__setup_misc_level_from_distances(struct hwloc_topology *topology,
           hwloc_obj_t misc_obj;
           misc_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
           misc_obj->cpuset = hwloc_bitmap_alloc();
-          hwloc_bitmap_zero(misc_obj->cpuset);
           misc_obj->attr->group.depth = depth;
           for (j=0; j<nbobjs; j++)
               if (groupids[j] == i+1) {

@@ -237,7 +237,6 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       unsigned socketid = infos[i].socketid;
 
       socket_cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_zero(socket_cpuset);
       for (j = i; j < nbprocs; j++) {
         if (infos[j].socketid == socketid) {
           hwloc_bitmap_set(socket_cpuset, j);
@@ -269,7 +268,6 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       }
 
       core_cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_zero(core_cpuset);
       for (j = i; j < nbprocs; j++) {
 	if (infos[j].coreid == (unsigned) -1) {
 	  hwloc_bitmap_clr(cores_cpuset, j);
@@ -322,7 +320,6 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
           unsigned cacheid = infos[i].apicid / infos[i].cache[l].nbthreads_sharing;
 
           cache_cpuset = hwloc_bitmap_alloc();
-          hwloc_bitmap_zero(cache_cpuset);
           for (j = i; j < nbprocs; j++) {
             unsigned l2;
             for (l2 = 0; l2 < infos[j].numcaches; l2++) {
