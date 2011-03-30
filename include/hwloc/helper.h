@@ -1075,6 +1075,50 @@ hwloc_get_latency(hwloc_topology_t topology,
 
 
 
+/** \defgroup hwlocality_advanced_io Advanced I/O object traversal helpers
+ * @{
+ */
+
+/** \brief Find the PCI device object matching the PCI bus id
+ * given domain, bus device and function PCI bus id.
+ */
+static __inline hwloc_obj_t
+hwloc_get_pcidev_by_busid(hwloc_topology_t topology,
+			  unsigned domain, unsigned bus, unsigned dev, unsigned func)
+{
+  hwloc_obj_t obj = NULL;
+  while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
+    if (obj->attr->pcidev.domain == domain
+	&& obj->attr->pcidev.bus == bus
+	&& obj->attr->pcidev.dev == dev
+	&& obj->attr->pcidev.func == func)
+      return obj;
+  }
+  return NULL;
+}
+
+/** \brief Find the PCI device object matching the PCI bus id
+ * given as a string xxxx:yy:zz.t or yy:zz.t.
+ */
+static __inline hwloc_obj_t
+hwloc_get_pcidev_by_busidstring(hwloc_topology_t topology, const char *busid)
+{
+  unsigned domain = 0; /* default */
+  unsigned bus, dev, func;
+
+  if (sscanf(busid, "%x:%x.%x", &bus, &dev, &func) != 3
+      && sscanf(busid, "%x:%x:%x.%x", &domain, &bus, &dev, &func) != 4) {
+    errno = EINVAL;
+    return NULL;
+  }
+
+  return hwloc_get_pcidev_by_busid(topology, domain, bus, dev, func);
+}
+
+/** @} */
+
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
