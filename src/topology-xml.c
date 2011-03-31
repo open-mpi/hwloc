@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -305,7 +305,7 @@ static void
 hwloc__xml_import_distances_node(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, xmlNode *node)
 {
   unsigned long reldepth = 0, nbobjs = 0;
-  float latbase;
+  float latbase = 0;
   xmlAttr *attr = NULL;
   xmlNode *subnode;
 
@@ -318,7 +318,7 @@ hwloc__xml_import_distances_node(struct hwloc_topology *topology __hwloc_attribu
 	else if (!strcmp((char *) attr->name, "relative_depth"))
 	  reldepth = strtoul((char *) value, NULL, 10);
 	else if (!strcmp((char *) attr->name, "latency_base"))
-	  latbase = atof((char *) value);
+          latbase = (float) atof((char *) value);
 	else
 	  fprintf(stderr, "ignoring unknown distances attribute %s\n", (char *) attr->name);
       } else
@@ -360,7 +360,7 @@ hwloc__xml_import_distances_node(struct hwloc_topology *topology __hwloc_attribu
 	    const xmlChar *value = hwloc__xml_import_attr_value(attr);
 	    if (value) {
 	      if (!strcmp((char *) attr->name, "value")) {
-		float val = atof((char *) value);
+                float val = (float) atof((char *) value);
 		matrix[i] = val;
 		if (val > latmax)
 		  latmax = val;

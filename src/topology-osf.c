@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -303,7 +303,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
 	cursor = SET_CURSOR_INIT;
 	while ((radid2 = rad_foreach(radset2, 0, &cursor)) != RAD_NONE) {
 	  if (distances[radid*nbnodes+radid2] == RAD_DIST_REMOTE) {
-	    distances[radid*nbnodes+radid2] = distance;
+            distances[radid*nbnodes+radid2] = (float) distance;
 	    nfound++;
 	  }
 	}

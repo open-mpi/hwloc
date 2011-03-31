@@ -1,5 +1,6 @@
 /*
  * Copyright © 2011 INRIA.  All rights reserved.
+ * Copyright © 2011 Université Bordeaux 1.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -73,12 +74,12 @@ int main(void)
   for(i=0; i<3; i++) {
     node_indexes[i] = i;
     for(j=0; j<3; j++)
-      node_distances[i*3+j] = (i == j ? 10. : 20.);
+      node_distances[i*3+j] = (i == j ? 10.f : 20.f);
   }
   for(i=0; i<6; i++) {
     core_indexes[i] = i;
     for(j=0; j<6; j++)
-      core_distances[i*6+j] = (i == j ? 4. : 8.);
+      core_distances[i*6+j] = (i == j ? 4.f : 8.f);
   }
 
   hwloc_topology_init(&topology);
