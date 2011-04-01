@@ -803,8 +803,13 @@ enum hwloc_restrict_flags_e {
  *
  * Topology \p topology is modified so as to remove all objects that
  * are not included (or partially included) in the CPU set \p cpuset.
+ * All objects CPU and node sets are restricted accordingly.
  *
  * \p flags is a OR'ed set of ::hwloc_restrict_flags_e.
+ *
+ * \note This call may not be reverted by restricting back to a larger
+ * cpuset. Once dropped during restriction, objects may not be brought
+ * back, except by reloading the entire topology with hwloc_topology_load().
  */
 HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
 
