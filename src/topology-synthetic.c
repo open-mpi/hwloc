@@ -64,6 +64,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       next_pos = strchr(pos, ':');
       if (!next_pos) {
 	fprintf(stderr,"synthetic string doesn't have a `:' after object type at '%s'\n", pos);
+	errno = EINVAL;
 	return -1;
       }
       pos = next_pos + 1;
@@ -71,15 +72,18 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
     item = strtoul(pos, (char **)&next_pos, 0);
     if (next_pos == pos) {
       fprintf(stderr,"synthetic string doesn't have a number of objects at '%s'\n", pos);
+      errno = EINVAL;
       return -1;
     }
 
     if (count + 1 >= HWLOC_SYNTHETIC_MAX_DEPTH) {
       fprintf(stderr,"Too many synthetic levels, max %d\n", HWLOC_SYNTHETIC_MAX_DEPTH);
+      errno = EINVAL;
       return -1;
     }
     if (item > UINT_MAX) {
       fprintf(stderr,"Too big arity, max %u\n", UINT_MAX);
+      errno = EINVAL;
       return -1;
     }
 
@@ -90,6 +94,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 
   if (count <= 0) {
     fprintf(stderr,"synthetic string doesn't contain any object\n");
+    errno = EINVAL;
     return -1;
   }
 
@@ -121,6 +126,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
       case HWLOC_OBJ_PU:
 	if (nb_pu_levels) {
 	    fprintf(stderr,"synthetic string can not have several PU levels\n");
+	    errno = EINVAL;
 	    return -1;
 	}
 	nb_pu_levels++;
@@ -144,14 +150,17 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 
   if (nb_pu_levels > 1) {
     fprintf(stderr,"synthetic string can not have several PU levels\n");
+    errno = EINVAL;
     return -1;
   }
   if (nb_node_levels > 1) {
     fprintf(stderr,"synthetic string can not have several NUMA node levels\n");
+    errno = EINVAL;
     return -1;
   }
   if (nb_machine_levels > 1) {
     fprintf(stderr,"synthetic string can not have several machine levels\n");
+    errno = EINVAL;
     return -1;
   }
 

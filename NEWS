@@ -30,6 +30,8 @@ Version 1.1.2
 * Fix object levels ordering in synthetic topologies.
 * Fix potential incoherency between device tree and kernel information,
   when SMT is disabled on Power machines.
+* Fix and document the behavior of hwloc_topology_set_synthetic() in case
+  of invalid argument. Thanks to Guy Streeter for reporting the problem.
 * Add some verbose error message reporting when it looks like the OS
   gives erroneous information.
 * Do not include unistd.h and stdint.h in public headers on Windows.
