@@ -233,11 +233,16 @@ typedef enum hwloc_obj_bridge_type_e {
 
 /** \brief Type of a OS device. */
 typedef enum hwloc_obj_osdev_type_e {
-  HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device. */
-  HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device. */
-  HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device. */
-  HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device, for instance an InfiniBand HCA. */
-  HWLOC_OBJ_OSDEV_DMA		/**< \brief Operating system dma device. */
+  HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device.
+				  * For instance "sda" on Linux. */
+  HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
+				  * For instance the "card0" DRM device on Linux. */
+  HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device.
+				  * For instance the "eth0" interface on Linux. */
+  HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device.
+				  * For instance the "mlx4_0" InfiniBand HCA device on Linux. */
+  HWLOC_OBJ_OSDEV_DMA		/**< \brief Operating system dma engine device.
+				  * For instance the "dma0chan0" DMA channel on Linux. */
 } hwloc_obj_osdev_type_t;
 
 /** \brief Compare the depth of two object types
