@@ -108,9 +108,9 @@ hwloc_linux_lookup_net_class(struct hwloc_topology *topology, struct hwloc_obj *
   hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_NETWORK, "net");
 }
 static void
-hwloc_linux_lookup_infiniband_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+hwloc_linux_lookup_openfabrics_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
-  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_INFINIBAND, "infiniband");
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_OPENFABRICS, "infiniband");
 }
 static void
 hwloc_linux_lookup_dma_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
@@ -261,7 +261,7 @@ hwloc_pci_traverse_lookuposdevices_cb(struct hwloc_topology *topology, struct hw
 	   pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
 
   hwloc_linux_lookup_net_class(topology, pcidev, pcidevpath);
-  hwloc_linux_lookup_infiniband_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_openfabrics_class(topology, pcidev, pcidevpath);
   hwloc_linux_lookup_dma_class(topology, pcidev, pcidevpath);
   hwloc_linux_lookup_drm_class(topology, pcidev, pcidevpath);
   hwloc_linux_lookup_block_class(topology, pcidev, pcidevpath);

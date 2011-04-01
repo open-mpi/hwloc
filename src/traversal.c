@@ -402,7 +402,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     switch (obj->attr->osdev.type) {
     case HWLOC_OBJ_OSDEV_BLOCK: return hwloc_snprintf(string, size, "Block");
     case HWLOC_OBJ_OSDEV_NETWORK: return hwloc_snprintf(string, size, "Net");
-    case HWLOC_OBJ_OSDEV_INFINIBAND: return hwloc_snprintf(string, size, "InfiniBand");
+    case HWLOC_OBJ_OSDEV_OPENFABRICS: return hwloc_snprintf(string, size, "OpenFabrics");
     case HWLOC_OBJ_OSDEV_DMA: return hwloc_snprintf(string, size, "DMA");
     case HWLOC_OBJ_OSDEV_GPU: return hwloc_snprintf(string, size, "GPU");
     default:

@@ -236,7 +236,7 @@ typedef enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device. */
   HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device. */
   HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device. */
-  HWLOC_OBJ_OSDEV_INFINIBAND,	/**< \brief Operating system infiniband device. */
+  HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device, for instance an InfiniBand HCA. */
   HWLOC_OBJ_OSDEV_DMA		/**< \brief Operating system dma device. */
 } hwloc_obj_osdev_type_t;
 
