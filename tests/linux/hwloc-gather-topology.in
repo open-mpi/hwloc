@@ -17,7 +17,8 @@ lstopo="$abs_top_builddir/utils/lstopo"
 
 # make sure we use default numeric formats
 LANG=C
-export LANG
+LC_ALL=C
+export LANG LC_ALL
 
 error()
 {
