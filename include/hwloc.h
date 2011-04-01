@@ -610,12 +610,16 @@ HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topo
 /** \brief Enable synthetic topology.
  *
  * Gather topology information from the given \p description
- * which should be a comma separated string of numbers describing
+ * which should be a space-separated string of numbers describing
  * the arity of each level.
  * Each number may be prefixed with a type and a colon to enforce the type
  * of a level.  If only some level types are enforced, hwloc will try to
  * choose the other types according to usual topologies, but it may fail
  * and you may have to specify more level types manually.
+ *
+ * If \p description was properly parsed and describes a valid topology
+ * configuration, this function returns 0.
+ * Otherwise -1 is returned and errno is set to EINVAL.
  *
  * \note For conveniency, this backend provides empty binding hooks which just
  * return success.
