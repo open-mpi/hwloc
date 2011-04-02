@@ -822,6 +822,30 @@ following environment variables.
   backend, but still having binding functions actually do bind.
   </dd>
 
+<dt>HWLOC_IGNORE_DISTANCES=0</dt>
+  <dd>disables objects grouping based on distances.
+  By default, hwloc uses distance matrices between objects (either read
+  from the OS or given by the user) to find groups of close objects.
+  These groups are described by adding intermediate Group objects in the topology.
+  Setting this environment variable to 1 will disable this grouping.
+  </dd>
+
+<dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:X*Y</dt>
+<dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:X*Y*Z</dt>
+<dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:distance,...</dt>
+  <dd>sets a distance matrix for objects of the given type and physical indexes.
+  The type should be given as its case-sensitive stringified value
+  (e.g. <tt>NUMANode</tt>, <tt>Socket</tt>, <tt>Cache</tt>, <tt>Core</tt>, <tt>PU</tt>).
+  The variable value starts with a comma-separated list of the objects'
+  physical indexes. Distances are then specified after a colon.
+  <ul>
+  <li>If <tt>X*Y</tt> is given, X groups of Y close objects are specified.</li>
+  <li>If <tt>X*Y*Z</tt> is given, X groups of Y groups of Z close objects are specified.</li>
+  <li>Otherwise, the comma-separated list of distances should be given.
+  If N objects are considered, the i*N+j-th value gives the
+  distance from the i-th object to the j-th object.</li>
+  </dd>
+
 </dl>
 
 
