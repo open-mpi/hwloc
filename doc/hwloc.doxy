@@ -814,6 +814,14 @@ following environment variables.
   backend, but still having binding functions actually do bind.
   </dd>
 
+<dt>HWLOC_IGNORE_DISTANCES=0</dt>
+  <dd>disables objects grouping based on distances.
+  By default, hwloc uses distance matrices between objects (read
+  from the OS) to find groups of close objects.
+  These groups are described by adding intermediate Group objects in the topology.
+  Setting this environment variable to 1 will disable this grouping.
+  </dd>
+
 </dl>
 
 
