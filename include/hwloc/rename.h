@@ -397,9 +397,9 @@ extern "C" {
 
 #define hwloc_snprintf HWLOC_NAME(snprintf)
 #define hwloc_namecoloncmp HWLOC_NAME(namecoloncmp)
-#define hwloc_ffsl HWLOC_NAME(ffsl)
+/* FIXME: hwloc_ffsl may be a macro, but it may not be defined yet */
 #define hwloc_ffs32 HWLOC_NAME(ffs32)
-#define hwloc_flsl HWLOC_NAME(flsl)
+/* FIXME: hwloc_flsl may be a macro, but it may not be defined yet */
 #define hwloc_fls32 HWLOC_NAME(fls32)
 #define hwloc_weight_long HWLOC_NAME(weight_long)
 
