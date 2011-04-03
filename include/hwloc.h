@@ -1160,7 +1160,7 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 
 /** \brief Get the last CPU where the current process or thread ran.
  *
- * The operating may move some tasks from one processor
+ * The operating system may move some tasks from one processor
  * to another at any time according to their binding,
  * so this function may return something that is already
  * outdated.
@@ -1169,7 +1169,7 @@ HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_
 
 /** \brief Get the last CPU where a process ran.
  *
- * The operating may move some tasks from one processor
+ * The operating system may move some tasks from one processor
  * to another at any time according to their binding,
  * so this function may return something that is already
  * outdated.
