@@ -143,14 +143,18 @@ if HWLOC_DOXYGEN_BROKEN_SHORT_NAMES
 	-@mv -f $(DOX_DIR)/latex/tools.tex $(DOX_DIR)/latex/a00002.tex
 	-@mv -f $(DOX_DIR)/html/envvar.html $(DOX_DIR)/html/a00003.html
 	-@mv -f $(DOX_DIR)/latex/envvar.tex $(DOX_DIR)/latex/a00003.tex
-	-@mv -f $(DOX_DIR)/html/interoperability.html $(DOX_DIR)/html/a00004.html
-	-@mv -f $(DOX_DIR)/latex/interoperability.tex $(DOX_DIR)/latex/a00004.tex
-	-@mv -f $(DOX_DIR)/html/threadsafety.html $(DOX_DIR)/html/a00005.html
-	-@mv -f $(DOX_DIR)/latex/threadsafety.tex $(DOX_DIR)/latex/a00005.tex
-	-@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00006.html
-	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00006.tex
-	-@mv -f $(DOX_DIR)/html/switchfromplpa.html $(DOX_DIR)/html/a00007.html
-	-@mv -f $(DOX_DIR)/latex/switchfromplpa.tex $(DOX_DIR)/latex/a00007.tex
+	-@mv -f $(DOX_DIR)/html/cpu_mem_bind.html $(DOX_DIR)/html/a00004.html
+	-@mv -f $(DOX_DIR)/latex/cpu_mem_bind.tex $(DOX_DIR)/latex/a00004.tex
+	-@mv -f $(DOX_DIR)/html/interoperability.html $(DOX_DIR)/html/a00005.html
+	-@mv -f $(DOX_DIR)/latex/interoperability.tex $(DOX_DIR)/latex/a00005.tex
+	-@mv -f $(DOX_DIR)/html/threadsafety.html $(DOX_DIR)/html/a00006.html
+	-@mv -f $(DOX_DIR)/latex/threadsafety.tex $(DOX_DIR)/latex/a00006.tex
+	-@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00007.html
+	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00007.tex
+	-@mv -f $(DOX_DIR)/html/switchfromplpa.html $(DOX_DIR)/html/a00008.html
+	-@mv -f $(DOX_DIR)/latex/switchfromplpa.tex $(DOX_DIR)/latex/a00008.tex
+	-@mv -f $(DOX_DIR)/html/faq.html $(DOX_DIR)/html/a00009.html
+	-@mv -f $(DOX_DIR)/latex/faq.tex $(DOX_DIR)/latex/a00009.tex
 endif
 endif
 
