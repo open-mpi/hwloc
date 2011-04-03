@@ -152,7 +152,7 @@ HWLOC_DECLSPEC void hwloc_bitmap_from_ith_ulong(hwloc_bitmap_t bitmap, unsigned 
 /** \brief Add index \p id in bitmap \p bitmap */
 HWLOC_DECLSPEC void hwloc_bitmap_set(hwloc_bitmap_t bitmap, unsigned id);
 
-/** \brief Add indexess from \p begin to \p end in bitmap \p bitmap */
+/** \brief Add indexes from \p begin to \p end in bitmap \p bitmap. */
 HWLOC_DECLSPEC void hwloc_bitmap_set_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end);
 
 /** \brief Replace \p i -th subset of bitmap \p bitmap with unsigned long \p mask */
@@ -161,7 +161,7 @@ HWLOC_DECLSPEC void hwloc_bitmap_set_ith_ulong(hwloc_bitmap_t bitmap, unsigned i
 /** \brief Remove index \p id from bitmap \p bitmap */
 HWLOC_DECLSPEC void hwloc_bitmap_clr(hwloc_bitmap_t bitmap, unsigned id);
 
-/** \brief Remove index from \p begin to \p end in bitmap \p bitmap */
+/** \brief Remove indexes from \p begin to \p end in bitmap \p bitmap. */
 HWLOC_DECLSPEC void hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end);
 
 /** \brief Keep a single index among those set in bitmap \p bitmap
