@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -31,7 +31,7 @@
 static int
 hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  unsigned target;
+  unsigned target_cpu;
 
   /* The resulting binding is always strict */
 
@@ -100,10 +100,10 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     return -1;
   }
 
-  target = hwloc_bitmap_first(hwloc_set);
+  target_cpu = hwloc_bitmap_first(hwloc_set);
 
   if (processor_bind(idtype, id,
-		     (processorid_t) (target), NULL) != 0)
+		     (processorid_t) (target_cpu), NULL) != 0)
     return -1;
 
   return 0;

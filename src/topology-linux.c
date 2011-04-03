@@ -2086,7 +2086,6 @@ look_powerpc_device_tree(struct hwloc_topology *topology)
       uint32_t nthreads = cb / sizeof(threads[0]);
 
       if (NULL != threads) {
-        unsigned int i;
         cpuset = hwloc_bitmap_alloc();
         for (i = 0; i < nthreads; ++i) {
           if (hwloc_bitmap_isset(topology->levels[0][0]->complete_cpuset, ntohl(threads[i])))

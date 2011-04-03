@@ -1,7 +1,7 @@
 /* Example hwloc API program.
  *
  * Copyright © 2009-2010 INRIA
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  *
  * hwloc-hello.c
@@ -148,7 +148,7 @@ int main(void)
     n = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
     if (n) {
         void *m;
-        size_t size = 1024*1024;
+        size = 1024*1024;
 
         obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, n - 1);
         m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
