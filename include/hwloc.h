@@ -191,7 +191,8 @@ typedef enum {
 			  * Objects without particular meaning, that can e.g. be
 			  * added by the application for its own use.
 			  */
-  HWLOC_OBJ_MAX         /**< \private Sentinel value */
+
+  HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
 
     /* ***************************************************************
        WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
