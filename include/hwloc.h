@@ -45,7 +45,7 @@ extern "C" {
  */
 
 /** \brief Indicate at build time which hwloc API version is being used. */
-#define HWLOC_API_VERSION 0x00010200
+#define HWLOC_API_VERSION 0x00010300
 
 /** \brief Indicate at runtime which hwloc API version was used at build time. */
 HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
@@ -213,7 +213,7 @@ typedef enum {
 			  * is enabled with hwloc_topology_set_flags().
 			  */
 
-  HWLOC_OBJ_MAX         /**< \private Sentinel value */
+  HWLOC_OBJ_TYPE_MAX    /**< \private Sentinel value */
 
     /* ***************************************************************
        WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
@@ -713,12 +713,16 @@ HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topo
 /** \brief Enable synthetic topology.
  *
  * Gather topology information from the given \p description
- * which should be a comma separated string of numbers describing
+ * which should be a space-separated string of numbers describing
  * the arity of each level.
  * Each number may be prefixed with a type and a colon to enforce the type
  * of a level.  If only some level types are enforced, hwloc will try to
  * choose the other types according to usual topologies, but it may fail
  * and you may have to specify more level types manually.
+ *
+ * If \p description was properly parsed and describes a valid topology
+ * configuration, this function returns 0.
+ * Otherwise -1 is returned and errno is set to EINVAL.
  *
  * \note For conveniency, this backend provides empty binding hooks which just
  * return success.
@@ -911,8 +915,13 @@ enum hwloc_restrict_flags_e {
  *
  * Topology \p topology is modified so as to remove all objects that
  * are not included (or partially included) in the CPU set \p cpuset.
+ * All objects CPU and node sets are restricted accordingly.
  *
  * \p flags is a OR'ed set of ::hwloc_restrict_flags_e.
+ *
+ * \note This call may not be reverted by restricting back to a larger
+ * cpuset. Once dropped during restriction, objects may not be brought
+ * back, except by reloading the entire topology with hwloc_topology_load().
  */
 HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
 
@@ -1264,7 +1273,7 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 
 /** \brief Get the last CPU where the current process or thread ran.
  *
- * The operating may move some tasks from one processor
+ * The operating system may move some tasks from one processor
  * to another at any time according to their binding,
  * so this function may return something that is already
  * outdated.
@@ -1273,7 +1282,7 @@ HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_
 
 /** \brief Get the last CPU where a process ran.
  *
- * The operating may move some tasks from one processor
+ * The operating system may move some tasks from one processor
  * to another at any time according to their binding,
  * so this function may return something that is already
  * outdated.

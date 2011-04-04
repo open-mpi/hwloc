@@ -93,3 +93,13 @@ hwloc_bind_LDFLAGS = -lpthread
 endif !HWLOC_HAVE_WINDOWS
 
 endif HWLOC_BUILD_TESTS
+
+# ship the embedded test code but don't actually enter it automatically
+EXTRA_DIST = 	embedded/autogen.sh \
+		embedded/configure.ac \
+		embedded/Makefile.am \
+		embedded/do_test.c \
+		embedded/main.c \
+		embedded/run-embedded-tests.sh \
+		embedded/README.txt \
+		embedded/config/README.txt

@@ -4,7 +4,7 @@
 #
 # Copyright © 2009 CNRS
 # Copyright © 2009-2010 INRIA.  All rights reserved.
-# Copyright © 2009-2010 Université Bordeaux 1
+# Copyright © 2009-2011 Université Bordeaux 1
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
@@ -19,7 +19,9 @@ lstopo="$HWLOC_top_builddir/utils/lstopo"
 actual_output="$1"
 
 # make sure we use default numeric formats
-export LANG=C
+LANG=C
+LC_ALL=C
+export LANG LC_ALL
 
 error()
 {

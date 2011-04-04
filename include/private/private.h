@@ -39,8 +39,6 @@ enum hwloc_ignore_type_e {
   HWLOC_IGNORE_TYPE_ALWAYS
 };
 
-/* Maximal value of an object type */
-#define HWLOC_OBJ_TYPE_MAX (HWLOC_OBJ_OS_DEVICE+1)
 #define HWLOC_DEPTH_MAX 128
 
 typedef enum hwloc_backend_e {

@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -34,7 +34,7 @@
 static int
 hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_const_bitmap_t hwloc_set, int flags)
 {
-  unsigned target;
+  unsigned target_cpu;
 
   /* The resulting binding is always strict */
 
@@ -103,10 +103,10 @@ hwloc_solaris_set_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     return -1;
   }
 
-  target = hwloc_bitmap_first(hwloc_set);
+  target_cpu = hwloc_bitmap_first(hwloc_set);
 
   if (processor_bind(idtype, id,
-		     (processorid_t) (target), NULL) != 0)
+		     (processorid_t) (target_cpu), NULL) != 0)
     return -1;
 
   return 0;
@@ -421,11 +421,10 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
       float *distances = calloc(curlgrp*curlgrp, sizeof(float));
       unsigned *indexes;
       unsigned i, j;
-      hwloc_obj_type_t type = glob_lgrps[0]->type;
       for (i = 0; i < curlgrp; i++) {
 	indexes[i] = glob_lgrps[i]->os_index;
 	for (j = 0; j < curlgrp; j++)
-	  distances[i*curlgrp+j] = lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
+          distances[i*curlgrp+j] = (float) lgrp_latency_cookie(cookie, glob_lgrps[i]->os_index, glob_lgrps[j]->os_index, LGRP_LAT_CPU_TO_MEM);
       }
       hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, curlgrp, indexes, glob_lgrps, distances);
     }
