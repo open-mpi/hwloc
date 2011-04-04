@@ -56,9 +56,24 @@ extern "C" {
 #define HWLOC_OBJ_PU HWLOC_NAME_CAPS(OBJ_PU)
 #define HWLOC_OBJ_MISC HWLOC_NAME_CAPS(OBJ_MISC)
 #define HWLOC_OBJ_GROUP HWLOC_NAME_CAPS(OBJ_GROUP)
+#define HWLOC_OBJ_BRIDGE HWLOC_NAME_CAPS(OBJ_BRIDGE)
+#define HWLOC_OBJ_PCI_DEVICE HWLOC_NAME_CAPS(OBJ_PCI_DEVICE)
+#define HWLOC_OBJ_OS_DEVICE HWLOC_NAME_CAPS(OBJ_OS_DEVICE)
 #define HWLOC_OBJ_TYPE_MAX HWLOC_NAME_CAPS(OBJ_TYPE_MAX)
-
 #define hwloc_obj_type_t HWLOC_NAME(obj_type_t)
+
+#define hwloc_obj_bridge_type_e HWLOC_NAME(obj_bridge_type_e)
+#define hwloc_obj_bridge_type_t HWLOC_NAME(obj_bridge_type_t)
+#define HWLOC_OBJ_BRIDGE_HOST HWLOC_NAME_CAPS(OBJ_BRIDGE_HOST)
+#define HWLOC_OBJ_BRIDGE_PCI HWLOC_NAME_CAPS(OBJ_BRIDGE_PCI)
+
+#define hwloc_obj_osdev_type_e HWLOC_NAME(obj_osdev_type_e)
+#define hwloc_obj_osdev_type_t HWLOC_NAME(obj_osdev_type_t)
+#define HWLOC_OBJ_OSDEV_BLOCK HWLOC_NAME_CAPS(OBJ_OSDEV_BLOCK)
+#define HWLOC_OBJ_OSDEV_GPU HWLOC_NAME_CAPS(OBJ_OSDEV_GPU)
+#define HWLOC_OBJ_OSDEV_NETWORK HWLOC_NAME_CAPS(OBJ_OSDEV_NETWORK)
+#define HWLOC_OBJ_OSDEV_OPENFABRICS HWLOC_NAME_CAPS(OBJ_OSDEV_OPENFABRICS)
+#define HWLOC_OBJ_OSDEV_DMA HWLOC_NAME_CAPS(OBJ_OSDEV_DMA)
 
 #define hwloc_compare_types HWLOC_NAME(compare_types)
 
@@ -77,6 +92,9 @@ extern "C" {
 #define hwloc_obj_attr_u HWLOC_NAME(obj_attr_u)
 #define hwloc_cache_attr_s HWLOC_NAME(cache_attr_s)
 #define hwloc_group_attr_s HWLOC_NAME(group_attr_s)
+#define hwloc_pcidev_attr_s HWLOC_NAME(pcidev_attr_s)
+#define hwloc_bridge_attr_s HWLOC_NAME(bridge_attr_s)
+#define hwloc_osdev_attr_s HWLOC_NAME(osdev_attr_s)
 
 #define hwloc_topology_init HWLOC_NAME(topology_init)
 #define hwloc_topology_load HWLOC_NAME(topology_load)
@@ -90,6 +108,9 @@ extern "C" {
 
 #define HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM HWLOC_NAME_CAPS(TOPOLOGY_FLAG_WHOLE_SYSTEM)
 #define HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IS_THISSYSTEM)
+#define HWLOC_TOPOLOGY_FLAG_IO_DEVICES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IO_DEVICES)
+#define HWLOC_TOPOLOGY_FLAG_IO_BRIDGES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IO_BRIDGES)
+#define HWLOC_TOPOLOGY_FLAG_WHOLE_IO HWLOC_NAME_CAPS(TOPOLOGY_FLAG_WHOLE_IO)
 
 #define hwloc_topology_set_flags HWLOC_NAME(topology_set_flags)
 #define hwloc_topology_set_fsroot HWLOC_NAME(topology_set_fsroot)
@@ -113,6 +134,7 @@ extern "C" {
 #define hwloc_restrict_flags_e HWLOC_NAME(restrict_flags_e)
 #define HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_DISTANCES)
 #define HWLOC_RESTRICT_FLAG_ADAPT_MISC HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_MISC)
+#define HWLOC_RESTRICT_FLAG_ADAPT_IO HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_IO)
 #define hwloc_topology_restrict HWLOC_NAME(topology_restrict)
 
 #define hwloc_topology_get_depth HWLOC_NAME(topology_get_depth)
@@ -193,6 +215,8 @@ extern "C" {
 
 #define hwloc_get_next_pcidev HWLOC_NAME(get_next_pcidev)
 #define hwloc_get_next_osdev HWLOC_NAME(get_next_osdev)
+#define hwloc_get_pcidev_by_busid HWLOC_NAME(get_pcidev_by_busid)
+#define hwloc_get_pcidev_by_busidstring HWLOC_NAME(get_pcidev_by_busidstring)
 
 /* hwloc/bitmap.h */
 
@@ -468,6 +492,8 @@ extern "C" {
 
 #define hwloc_look_hpux HWLOC_NAME(look_hpux)
 #define hwloc_set_hpux_hooks HWLOC_NAME(set_hpux_hooks)
+
+#define hwloc_look_libpci HWLOC_NAME(look_libpci)
 
 #define hwloc_look_x86 HWLOC_NAME(look_x86)
 
