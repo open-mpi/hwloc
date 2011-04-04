@@ -100,4 +100,5 @@ EXTRA_DIST = 	embedded/autogen.sh \
 		embedded/do_test.c \
 		embedded/main.c \
 		embedded/run-embedded-tests.sh \
-		embedded/README.txt
+		embedded/README.txt \
+		embedded/config/README.txt
