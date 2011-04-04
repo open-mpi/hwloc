@@ -20,6 +20,7 @@ int main(void)
   int err = 0;
 
   hwloc_topology_init(&topology);
+  hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO);
   hwloc_topology_load(topology);
   assert(hwloc_topology_is_thissystem(topology));
   hwloc_topology_export_xmlbuffer(topology, &buf1, &size1);

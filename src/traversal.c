@@ -44,6 +44,30 @@ hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigne
   return topology->levels[depth][idx];
 }
 
+struct hwloc_obj *
+hwloc_get_next_pcidev(struct hwloc_topology *topology, struct hwloc_obj *prev)
+{
+  if (prev) {
+    if (prev->type != HWLOC_OBJ_PCI_DEVICE)
+      return NULL;
+    return prev->next_cousin;
+  } else {
+    return topology->first_pcidev;
+  }
+}
+
+struct hwloc_obj *
+hwloc_get_next_osdev(struct hwloc_topology *topology, struct hwloc_obj *prev)
+{
+  if (prev) {
+    if (prev->type != HWLOC_OBJ_OS_DEVICE)
+      return NULL;
+    return prev->next_cousin;
+  } else {
+    return topology->first_osdev;
+  }
+}
+
 unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, unsigned max)
 {
   struct hwloc_obj *parent, *nextparent, **src_objs;
@@ -157,6 +181,9 @@ hwloc_obj_type_string (hwloc_obj_type_t obj)
     case HWLOC_OBJ_SOCKET: return "Socket";
     case HWLOC_OBJ_CACHE: return "Cache";
     case HWLOC_OBJ_CORE: return "Core";
+    case HWLOC_OBJ_BRIDGE: return "Bridge";
+    case HWLOC_OBJ_PCI_DEVICE: return "PCIDev";
+    case HWLOC_OBJ_OS_DEVICE: return "OSDev";
     case HWLOC_OBJ_PU: return "PU";
     default: return "Unknown";
     }
@@ -174,7 +201,168 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
   if (!strcasecmp(string, "PU") || !strcasecmp(string, "proc") /* backward compatiliby with 0.9 */) return HWLOC_OBJ_PU;
+  if (!strcasecmp(string, "Bridge")) return HWLOC_OBJ_BRIDGE;
+  if (!strcasecmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
+  if (!strcasecmp(string, "OSDev")) return HWLOC_OBJ_OS_DEVICE;
   return (hwloc_obj_type_t) -1;
+}
+
+static const char *
+hwloc_pci_class_string(unsigned short class_id)
+{
+  switch ((class_id & 0xff00) >> 8) {
+    case 0x00:
+      switch (class_id) {
+	case 0x0001: return "VGA";
+      }
+      return "PCI";
+    case 0x01:
+      switch (class_id) {
+	case 0x0100: return "SCSI";
+	case 0x0101: return "IDE";
+	case 0x0102: return "Flop";
+	case 0x0103: return "IPI";
+	case 0x0104: return "RAID";
+	case 0x0105: return "ATA";
+	case 0x0106: return "SATA";
+	case 0x0107: return "SAS";
+      }
+      return "Stor";
+    case 0x02:
+      switch (class_id) {
+	case 0x0200: return "Ether";
+	case 0x0201: return "TokRn";
+	case 0x0202: return "FDDI";
+	case 0x0203: return "ATM";
+	case 0x0204: return "ISDN";
+	case 0x0205: return "WrdFip";
+	case 0x0206: return "PICMG";
+      }
+      return "Net";
+    case 0x03:
+      switch (class_id) {
+	case 0x0300: return "VGA";
+	case 0x0301: return "XGA";
+	case 0x0302: return "3D";
+      }
+      return "Disp";
+    case 0x04:
+      switch (class_id) {
+	case 0x0400: return "Video";
+	case 0x0401: return "Audio";
+	case 0x0402: return "Phone";
+	case 0x0403: return "Auddv";
+      }
+      return "MM";
+    case 0x05:
+      switch (class_id) {
+	case 0x0500: return "RAM";
+	case 0x0501: return "Flash";
+      }
+      return "Mem";
+    case 0x06:
+      switch (class_id) {
+	case 0x0600: return "Host";
+	case 0x0601: return "ISA";
+	case 0x0602: return "EISA";
+	case 0x0603: return "MC";
+	case 0x0604: return "PCI_B";
+	case 0x0605: return "PCMCIA";
+	case 0x0606: return "Nubus";
+	case 0x0607: return "CardBus";
+	case 0x0608: return "RACEway";
+	case 0x0609: return "PCI_SB";
+	case 0x060a: return "IB_B";
+      }
+      return "Bridg";
+    case 0x07:
+      switch (class_id) {
+	case 0x0700: return "Ser";
+	case 0x0701: return "Para";
+	case 0x0702: return "MSer";
+	case 0x0703: return "Modm";
+	case 0x0704: return "GPIB";
+	case 0x0705: return "SmrtCrd";
+      }
+      return "Comm";
+    case 0x08:
+      switch (class_id) {
+	case 0x0800: return "PIC";
+	case 0x0801: return "DMA";
+	case 0x0802: return "Time";
+	case 0x0803: return "RTC";
+	case 0x0804: return "HtPl";
+	case 0x0805: return "SD-HtPl";
+      }
+      return "Syst";
+    case 0x09:
+      switch (class_id) {
+	case 0x0900: return "Kbd";
+	case 0x0901: return "Pen";
+	case 0x0902: return "Mouse";
+	case 0x0903: return "Scan";
+	case 0x0904: return "Game";
+      }
+      return "In";
+    case 0x0a:
+      return "Dock";
+    case 0x0b:
+      switch (class_id) {
+	case 0x0b00: return "386";
+	case 0x0b01: return "486";
+	case 0x0b02: return "Pent";
+	case 0x0b10: return "Alpha";
+	case 0x0b20: return "PPC";
+	case 0x0b30: return "MIPS";
+	case 0x0b40: return "CoProc";
+      }
+      return "Proc";
+    case 0x0c:
+      switch (class_id) {
+	case 0x0c00: return "Firw";
+	case 0x0c01: return "ACCES";
+	case 0x0c02: return "SSA";
+	case 0x0c03: return "USB";
+	case 0x0c04: return "Fiber";
+	case 0x0c05: return "SMBus";
+	case 0x0c06: return "IB";
+	case 0x0c07: return "IPMI";
+	case 0x0c08: return "SERCOS";
+	case 0x0c09: return "CANBUS";
+      }
+      return "Ser";
+    case 0x0d:
+      switch (class_id) {
+	case 0x0d00: return "IRDA";
+	case 0x0d01: return "IR";
+	case 0x0d10: return "RF";
+	case 0x0d11: return "Blueth";
+	case 0x0d12: return "BroadB";
+	case 0x0d20: return "802.1a";
+	case 0x0d21: return "802.1b";
+      }
+      return "Wifi";
+    case 0x0e:
+      switch (class_id) {
+	case 0x0e00: return "I2O";
+      }
+      return "Intll";
+    case 0x0f:
+      switch (class_id) {
+	case 0x0f00: return "S-TV";
+	case 0x0f01: return "S-Aud";
+	case 0x0f02: return "S-Voice";
+	case 0x0f03: return "S-Data";
+      }
+      return "Satel";
+    case 0x10:
+      return "Crypt";
+    case 0x11:
+      return "Signl";
+    case 0xff:
+      return "Oth";
+  }
+  return "PCI";
 }
 
 #define hwloc_memory_size_printf_value(_size, _verbose) \
@@ -200,6 +388,28 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_GROUP:
 	  /* TODO: more pretty presentation? */
     return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->group.depth);
+  case HWLOC_OBJ_BRIDGE:
+    if (verbose)
+      return snprintf(string, size, "Bridge %s->%s",
+		      obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCI" : "Host",
+		      "PCI");
+    else
+      return snprintf(string, size, obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI ? "PCIBridge" : "HostBridge");
+  case HWLOC_OBJ_PCI_DEVICE:
+    return snprintf(string, size, "PCI %04x:%04x",
+		    obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id);
+  case HWLOC_OBJ_OS_DEVICE:
+    switch (obj->attr->osdev.type) {
+    case HWLOC_OBJ_OSDEV_BLOCK: return hwloc_snprintf(string, size, "Block");
+    case HWLOC_OBJ_OSDEV_NETWORK: return hwloc_snprintf(string, size, "Net");
+    case HWLOC_OBJ_OSDEV_OPENFABRICS: return hwloc_snprintf(string, size, "OpenFabrics");
+    case HWLOC_OBJ_OSDEV_DMA: return hwloc_snprintf(string, size, "DMA");
+    case HWLOC_OBJ_OSDEV_GPU: return hwloc_snprintf(string, size, "GPU");
+    default:
+      *string = '\0';
+      return 0;
+    }
+    break;
   default:
     if (size > 0)
       *string = '\0';
@@ -268,6 +478,39 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 			   prefix,
 			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
 			   hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose));
+    break;
+  case HWLOC_OBJ_BRIDGE:
+    if (verbose) {
+      char up[128], down[64];
+      /* upstream is PCI or HOST */
+      if (obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI) {
+        char linkspeed[64]= "";
+        if (obj->attr->pcidev.linkspeed)
+          snprintf(linkspeed, sizeof(linkspeed), "%slink=%.2fGB/s", separator, obj->attr->pcidev.linkspeed);
+	snprintf(up, sizeof(up), "busid=%04x:%02x:%02x.%01x%sid=%04x:%04x%sclass=%04x(%s)%s",
+		 obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
+		 obj->attr->pcidev.vendor_id, obj->attr->pcidev.device_id, separator,
+		 obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
+      } else
+        *up = '\0';
+      /* downstream is_PCI */
+      snprintf(down, sizeof(down), "buses=%04x:[%02x-%02x]",
+	       obj->attr->bridge.downstream.pci.domain, obj->attr->bridge.downstream.pci.secondary_bus, obj->attr->bridge.downstream.pci.subordinate_bus);
+      if (*up)
+	res = snprintf(string, size, "%s%s%s", up, separator, down);
+      else
+	res = snprintf(string, size, "%s", down);
+    }
+    break;
+  case HWLOC_OBJ_PCI_DEVICE:
+    if (verbose) {
+      char linkspeed[64]= "";
+      if (obj->attr->pcidev.linkspeed)
+        snprintf(linkspeed, sizeof(linkspeed), "%slink=%.2fGB/s", separator, obj->attr->pcidev.linkspeed);
+      res = snprintf(string, size, "busid=%04x:%02x:%02x.%01x%sclass=%04x(%s)%s",
+		     obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func, separator,
+		     obj->attr->pcidev.class_id, hwloc_pci_class_string(obj->attr->pcidev.class_id), linkspeed);
+    }
     break;
   default:
     break;

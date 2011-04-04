@@ -194,6 +194,9 @@ extern "C" {
 #define hwloc_alloc HWLOC_NAME(alloc)
 #define hwloc_free HWLOC_NAME(free)
 
+#define hwloc_get_next_pcidev HWLOC_NAME(get_next_pcidev)
+#define hwloc_get_next_osdev HWLOC_NAME(get_next_osdev)
+
 /* hwloc/bitmap.h */
 
 #define hwloc_bitmap HWLOC_NAME(bitmap)

@@ -67,6 +67,8 @@ struct hwloc_topology {
   int is_loaded;
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
 
+  struct hwloc_obj *first_pcidev, *last_pcidev, *first_osdev, *last_osdev;
+
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
   int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
   int (*set_thisthread_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
@@ -200,6 +202,10 @@ extern void hwloc_set_hpux_hooks(struct hwloc_topology *topology);
 #endif /* HWLOC_HPUX_SYS */
 
 extern void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs);
+
+#ifdef HWLOC_HAVE_LIBPCI
+extern void hwloc_look_libpci(struct hwloc_topology *topology);
+#endif /* HWLOC_HAVE_LIBPCI */
 
 extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *description);
 extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);

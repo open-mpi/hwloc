@@ -523,6 +523,31 @@ EOF])
       AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, `Define to 1 if you have pthread_getthrds_np')
     )
 
+    # PCI support
+    if test "x$enable_pci" != "xno"; then
+        HWLOC_PKG_CHECK_MODULES([PCI], [libpci], [pci_cleanup], [:], [
+          # manually check pciutils in case a old one without .pc is installed
+          AC_CHECK_HEADERS([pci/pci.h], [
+            AC_CHECK_LIB([pci], [pci_cleanup], [
+              HWLOC_PCI_LIBS="-lpci"
+              AC_SUBST(HWLOC_PCI_LIBS)
+              ], [enable_pci=no])
+            ], [enable_pci=no])
+        ])
+    fi
+    if test "x$enable_pci" != "xno"; then
+      AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no])
+      if test "x$enable_pci_caps" = "xyes"; then
+        AC_DEFINE([HWLOC_HAVE_PCI_FIND_CAP], [1], [Define to 1 if `libpci' has the `pci_find_cap' function.])
+      fi
+      HWLOC_REQUIRES="libpci $HWLOC_REQUIRES"
+      AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
+      AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
+    else
+      AC_SUBST([HWLOC_HAVE_LIBPCI], [0])
+    fi
+    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS"
+
     # XML support
     if test "x$enable_xml" != "xno"; then
         HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [xmlNewDoc], [:], [enable_xml="no"])
@@ -624,6 +649,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 		       [test "x$hwloc_have_cudart" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "x$enable_cairo" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_XML], [test "x$enable_xml" != "xno"])
+        AM_CONDITIONAL([HWLOC_HAVE_LIBPCI], [test "x$enable_pci" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_SET_MEMPOLICY], [test "x$enable_set_mempolicy" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_MBIND], [test "x$enable_mbind" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])

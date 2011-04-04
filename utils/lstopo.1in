@@ -104,6 +104,21 @@ This option requires the use of the actual current machine topology
 (or any other topology with \fB\-\-thissystem\fR or with
 HWLOC_THISSYSTEM set to 1 in the environment).
 .TP
+\fB\-\-no\-io\fB
+Do not show any I/O device or bridge.
+By default, common devices (GPUs, NICs, block devices, ...) and
+interesting bridges are shown.
+.TP
+\fB\-\-no\-bridges\fB
+Do not show any I/O bridge except hostbridges.
+By default, common devices (GPUs, NICs, block devices, ...) and
+interesting bridges are shown.
+.TP
+\fB\-\-whole\-io\fB
+Show all I/O devices and bridges.
+By default, only common devices (GPUs, NICs, block devices, ...) and
+interesting bridges are shown.
+.TP
 \fB\-\-thissystem\fR
 Assume that the selected backend provides the topology for the
 system on which we are running. 

@@ -59,6 +59,12 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     AC_ARG_ENABLE([xml],
                   AS_HELP_STRING([--disable-xml], 
 		                 [Disable the XML back-end of hwloc's lstopo command]))
+
+    # PCI?
+    AC_ARG_ENABLE([pci],
+                  AS_HELP_STRING([--disable-pci],
+                                 [Disable the PCI device discovery using libpci]))
+
 ])dnl
 
 #-----------------------------------------------------------------------

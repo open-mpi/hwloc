@@ -54,7 +54,9 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
       hwloc_obj_type_snprintf (type, sizeof(type), l, verbose_mode-1);
       fprintf(output, "%s", type);
     }
-    if (l->depth != 0 && idx != (unsigned)-1)
+    if (l->depth != 0 && idx != (unsigned)-1
+        && l->type != HWLOC_OBJ_PCI_DEVICE
+        && (l->type != HWLOC_OBJ_BRIDGE || l->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
       fprintf(output, "%s%u", indexprefix, idx);
     if (logical && l->os_index != (unsigned) -1 &&
 	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NODE))
@@ -69,7 +71,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 	      phys, separator, attr);
     }
     free(attr);
-    if (verbose_mode >= 2 && l->name && l->type != HWLOC_OBJ_MISC)
+    if ((l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2) && l->name && l->type != HWLOC_OBJ_MISC)
       fprintf(output, " \"%s\"", l->name);
   }
   if (!l->cpuset)
