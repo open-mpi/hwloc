@@ -1,4 +1,4 @@
-#!/bin/bash -o pipefail
+#!/bin/bash
 #
 # Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -7,6 +7,8 @@
 #
 #     ./run-embedded-tests.sh <tarball_name>
 #
+
+set -o pipefail
 
 tarball=$1
 if test "$tarball" = ""; then
