@@ -73,9 +73,6 @@ extern "C" {
 #define hwloc_obj_attr_u HWLOC_NAME(obj_attr_u)
 #define hwloc_cache_attr_s HWLOC_NAME(cache_attr_s)
 #define hwloc_group_attr_s HWLOC_NAME(group_attr_s)
-#define hwloc_memory_attr_s HWLOC_NAME(cache_memory_s)
-#define hwloc_machine_attr_s HWLOC_NAME(cache_machine_s)
-#define hwloc_misc_attr_s HWLOC_NAME(cache_misc_s)
 
 #define hwloc_topology_init HWLOC_NAME(topology_init)
 #define hwloc_topology_load HWLOC_NAME(topology_load)
