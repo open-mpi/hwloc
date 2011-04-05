@@ -590,21 +590,43 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       obj->attr->bridge.downstream.pci.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
     }
 
+/* starting from pciutils 2.2, pci_lookup_name() takes a variable number
+ * of arguments, and supports the PCI_LOOKUP_NO_NUMBERS flag.
+ */
+
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
+#ifdef HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_NO_NUMBERS,
-			      pcidev->vendor_id);
+			      pcidev->vendor_id
+#else
+			      PCI_LOOKUP_VENDOR,
+			      pcidev->vendor_id, 0, 0, 0
+#endif
+			      );
     if (resname)
       hwloc_add_object_info(obj, "PCIVendor", resname);
 
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
+#ifdef HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
-			      pcidev->vendor_id, pcidev->device_id);
+			      pcidev->vendor_id, pcidev->device_id
+#else
+			      PCI_LOOKUP_DEVICE,
+			      pcidev->vendor_id, pcidev->device_id, 0, 0
+#endif
+			      );
     if (resname)
       hwloc_add_object_info(obj, "PCIDevice", name);
 
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
+#ifdef HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
-			      pcidev->vendor_id, pcidev->device_id);
+			      pcidev->vendor_id, pcidev->device_id
+#else
+			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE,
+			      pcidev->vendor_id, pcidev->device_id, 0, 0
+#endif
+			      );
     if (resname)
       obj->name = strdup(resname);
     else

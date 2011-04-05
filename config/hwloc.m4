@@ -536,6 +536,7 @@ EOF])
         ])
     fi
     if test "x$enable_pci" != "xno"; then
+      AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
       AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no])
       if test "x$enable_pci_caps" = "xyes"; then
         AC_DEFINE([HWLOC_HAVE_PCI_FIND_CAP], [1], [Define to 1 if `libpci' has the `pci_find_cap' function.])
