@@ -1,5 +1,6 @@
 /*
  * Copyright © 2011 INRIA.  All rights reserved.
+ * Copyright © 2011 Université Bordeaux 1.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -16,12 +17,14 @@ const struct hwloc_topology_support *support;
 /* check that a bound process execs on a non-empty cpuset included in the binding */
 static int check(hwloc_const_cpuset_t set, int flags)
 {
-  hwloc_cpuset_t last = hwloc_bitmap_alloc();
+  hwloc_cpuset_t last;
   int ret;
 
   ret = hwloc_set_cpubind(topology, set, flags);
-  assert(!ret);
+  if (ret)
+    return 0;
 
+  last = hwloc_bitmap_alloc();
   ret = hwloc_get_last_cpu_location(topology, last, flags);
   assert(!ret);
   assert(!hwloc_bitmap_iszero(last));
