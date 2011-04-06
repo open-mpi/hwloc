@@ -526,27 +526,42 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     unsigned char headertype;
     unsigned os_index;
     unsigned isbridge;
+    unsigned domain;
+    unsigned device_class;
 
     /* cache what we need of the config space */
     pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE);
 
+    /* read some fields that may not always be available */
+#ifdef HWLOC_HAVE_PCIDEV_DOMAIN
+    domain = pcidev->domain;
+#else
+    domain = 0; /* default domain number */
+#endif
+#ifdef HWLOC_HAVE_PCIDEV_DEVICE_CLASS
+    device_class = pcidev->device_class;
+#else
+    HWLOC_BUILD_ASSERT(PCI_CLASS_DEVICE < CONFIG_SPACE_CACHESIZE);
+    device_class = config_space_cache[PCI_CLASS_DEVICE];
+#endif
+
     /* is this a bridge? */
     HWLOC_BUILD_ASSERT(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
     headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
-    isbridge = (pcidev->device_class == PCI_CLASS_BRIDGE_PCI
+    isbridge = (device_class == PCI_CLASS_BRIDGE_PCI
 		&& headertype == PCI_HEADER_TYPE_BRIDGE);
 
     /* might be useful for debugging (note that domain might be truncated) */
-    os_index = (pcidev->domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
+    os_index = (domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
 
     obj = hwloc_alloc_setup_object(isbridge ? HWLOC_OBJ_BRIDGE : HWLOC_OBJ_PCI_DEVICE, os_index);
-    obj->attr->pcidev.domain = pcidev->domain;
+    obj->attr->pcidev.domain = domain;
     obj->attr->pcidev.bus = pcidev->bus;
     obj->attr->pcidev.dev = pcidev->dev;
     obj->attr->pcidev.func = pcidev->func;
     obj->attr->pcidev.vendor_id = pcidev->vendor_id;
     obj->attr->pcidev.device_id = pcidev->device_id;
-    obj->attr->pcidev.class_id = pcidev->device_class;
+    obj->attr->pcidev.class_id = device_class;
     HWLOC_BUILD_ASSERT(PCI_REVISION_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
     HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_VENDOR_ID < CONFIG_SPACE_CACHESIZE);
@@ -582,10 +597,10 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       HWLOC_BUILD_ASSERT(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
       if (config_space_cache[PCI_PRIMARY_BUS] != pcidev->bus)
 	hwloc_debug("  %04x:%02x:%02x.%01x bridge with (ignored) invalid PCI_PRIMARY_BUS %02x\n",
-		    pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func, config_space_cache[PCI_PRIMARY_BUS]);
+		    domain, pcidev->bus, pcidev->dev, pcidev->func, config_space_cache[PCI_PRIMARY_BUS]);
       obj->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_PCI;
       obj->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
-      obj->attr->bridge.downstream.pci.domain = pcidev->domain;
+      obj->attr->bridge.downstream.pci.domain = domain;
       obj->attr->bridge.downstream.pci.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];
       obj->attr->bridge.downstream.pci.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
     }
@@ -633,8 +648,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       resname = "??";
 
     hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s\n",
-		pcidev->domain, pcidev->bus, pcidev->dev, pcidev->func,
-		pcidev->device_class, pcidev->vendor_id, pcidev->device_id,
+		domain, pcidev->bus, pcidev->dev, pcidev->func,
+		device_class, pcidev->vendor_id, pcidev->device_id,
 		resname);
 
     hwloc_pci_add_object(&fakehostbridge, obj);

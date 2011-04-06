@@ -541,6 +541,25 @@ EOF])
       if test "x$enable_pci_caps" = "xyes"; then
         AC_DEFINE([HWLOC_HAVE_PCI_FIND_CAP], [1], [Define to 1 if `libpci' has the `pci_find_cap' function.])
       fi
+
+      AC_MSG_CHECKING(whether struct pci_dev has a device_class field)
+      AC_TRY_COMPILE([#include <pci/pci.h>],
+	[int f(struct pci_dev *dev) { return dev->device_class; }],
+        [pcidev_device_class=yes], [pcidev_device_class=no])
+      AC_MSG_RESULT([$pcidev_device_class])
+      if test x$pcidev_device_class = xyes; then
+        AC_DEFINE([HWLOC_HAVE_PCIDEV_DEVICE_CLASS], [1], [Define to 1 if struct pci_dev has a `device_class' field.])
+      fi
+
+      AC_MSG_CHECKING(whether struct pci_dev has a domain field)
+      AC_TRY_COMPILE([#include <pci/pci.h>],
+	[int f(struct pci_dev *dev) { return dev->domain; }],
+        [pcidev_domain=yes], [pcidev_domain=no])
+      AC_MSG_RESULT([$pcidev_domain])
+      if test x$pcidev_domain = xyes; then
+        AC_DEFINE([HWLOC_HAVE_PCIDEV_DOMAIN], [1], [Define to 1 if struct pci_dev has a `domain' field.])
+      fi
+
       HWLOC_REQUIRES="libpci $HWLOC_REQUIRES"
       AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
       AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
