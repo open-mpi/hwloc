@@ -595,7 +595,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
  */
 
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
-#ifdef HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
+#if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_NO_NUMBERS,
 			      pcidev->vendor_id
 #else
@@ -607,7 +607,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       hwloc_add_object_info(obj, "PCIVendor", resname);
 
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
-#ifdef HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
+#if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
 			      pcidev->vendor_id, pcidev->device_id
 #else
@@ -619,7 +619,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       hwloc_add_object_info(obj, "PCIDevice", name);
 
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
-#ifdef HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
+#if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
 			      pcidev->vendor_id, pcidev->device_id
 #else
