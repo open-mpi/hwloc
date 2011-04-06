@@ -529,15 +529,15 @@ EOF])
           # manually check pciutils in case a old one without .pc is installed
           AC_CHECK_HEADERS([pci/pci.h], [
             AC_CHECK_LIB([pci], [pci_cleanup], [
-              HWLOC_PCI_LIBS="-lpci"
+              HWLOC_PCI_LIBS="-lpci -lz"
               AC_SUBST(HWLOC_PCI_LIBS)
-              ], [enable_pci=no])
+              ], [enable_pci=no], [-lz])
             ], [enable_pci=no])
         ])
     fi
     if test "x$enable_pci" != "xno"; then
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
-      AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no])
+      AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [-lz])
       if test "x$enable_pci_caps" = "xyes"; then
         AC_DEFINE([HWLOC_HAVE_PCI_FIND_CAP], [1], [Define to 1 if `libpci' has the `pci_find_cap' function.])
       fi
