@@ -542,7 +542,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
     device_class = pcidev->device_class;
 #else
     HWLOC_BUILD_ASSERT(PCI_CLASS_DEVICE < CONFIG_SPACE_CACHESIZE);
-    device_class = config_space_cache[PCI_CLASS_DEVICE];
+    device_class = config_space_cache[PCI_CLASS_DEVICE] | (config_space_cache[PCI_CLASS_DEVICE+1] << 8);
 #endif
 
     /* is this a bridge? */
