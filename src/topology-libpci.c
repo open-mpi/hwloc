@@ -461,7 +461,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
 #endif
 
   /* if we got nothing, assume the hostbridge is attached to the top of hierarchy */
-  hwloc_bitmap_fill(cpuset);
+  hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
 
  found:
   hwloc_debug_bitmap("Attaching hostbridge to cpuset %s\n", cpuset);
