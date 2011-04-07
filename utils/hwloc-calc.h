@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -27,7 +27,7 @@ typedef enum hwloc_mask_append_mode_e {
   HWLOC_MASK_APPEND_XOR
 } hwloc_mask_append_mode_t;
 
-static inline int
+static __hwloc_inline int
 hwloc_mask_append_cpuset(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
 		       hwloc_mask_append_mode_t mode, int verbose)
 {
@@ -67,7 +67,7 @@ hwloc_mask_append_cpuset(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
   return 0;
 }
 
-static inline hwloc_obj_t __hwloc_attribute_pure
+static __hwloc_inline hwloc_obj_t __hwloc_attribute_pure
 hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_bitmap_t rootset,
 					 unsigned depth, unsigned i, int logical)
 {
@@ -88,7 +88,7 @@ hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const
  * matches L2, L3Cache and Group4, and return the corresponding depth attribute if depthattrp isn't NULL.
  * only looks at the beginning of the string to allow truncated type names.
  */
-static inline int
+static __hwloc_inline int
 hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, unsigned *depthattrp)
 {
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
@@ -145,7 +145,7 @@ hwloc_mask_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
   return 0;
 }
 
-static inline int
+static __hwloc_inline int
 hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 		       hwloc_const_bitmap_t rootset, const char *string, int logical,
 		       hwloc_bitmap_t set, int verbose)
@@ -325,7 +325,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   return 0;
 }
 
-static inline int
+static __hwloc_inline int
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		     const char *arg, int logical, hwloc_bitmap_t set,
 		     int taskset, int verbose)
