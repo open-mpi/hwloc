@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -17,7 +17,7 @@
 
 extern void usage(const char *name, FILE *where);
 
-static inline void
+static __hwloc_inline void
 hwloc_utils_input_format_usage(FILE *where, int addspaces)
 {
 #ifdef HWLOC_HAVE_XML
@@ -56,7 +56,7 @@ enum hwloc_utils_input_format {
   HWLOC_UTILS_INPUT_SYNTHETIC
 };
 
-static inline enum hwloc_utils_input_format
+static __hwloc_inline enum hwloc_utils_input_format
 hwloc_utils_parse_input_format(const char *name, const char *callname)
 {
   if (!strncasecmp(name, "default", 3))
@@ -73,7 +73,7 @@ hwloc_utils_parse_input_format(const char *name, const char *callname)
   exit(EXIT_FAILURE);
 }
 
-static inline int
+static __hwloc_inline int
 hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
 				char **inputp, enum hwloc_utils_input_format *input_formatp,
 				const char *callname)
@@ -135,7 +135,7 @@ hwloc_utils_lookup_input_option(char *argv[], int argc, int *consumed_opts,
   return 0;
 }
 
-static inline int
+static __hwloc_inline int
 hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 				const char *input,
 				enum hwloc_utils_input_format input_format,

@@ -199,7 +199,7 @@ hwloc_opendirat(const char *path, int fsroot_fd)
 
 /* Static inline version of fopen so that we can use openat if we have
    it, but still preserve compiler parameter checking */
-static inline int
+static __hwloc_inline int
 hwloc_open(const char *p, int d __hwloc_attribute_unused)
 { 
 #ifdef HAVE_OPENAT
@@ -209,7 +209,7 @@ hwloc_open(const char *p, int d __hwloc_attribute_unused)
 #endif
 }
 
-static inline FILE *
+static __hwloc_inline FILE *
 hwloc_fopen(const char *p, const char *m, int d __hwloc_attribute_unused)
 { 
 #ifdef HAVE_OPENAT
@@ -221,7 +221,7 @@ hwloc_fopen(const char *p, const char *m, int d __hwloc_attribute_unused)
 
 /* Static inline version of access so that we can use openat if we have
    it, but still preserve compiler parameter checking */
-static inline int 
+static __hwloc_inline int 
 hwloc_access(const char *p, int m, int d __hwloc_attribute_unused)
 { 
 #ifdef HAVE_OPENAT
@@ -231,7 +231,7 @@ hwloc_access(const char *p, int m, int d __hwloc_attribute_unused)
 #endif
 }
 
-static inline int
+static __hwloc_inline int
 hwloc_stat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
 {
 #ifdef HAVE_OPENAT
@@ -243,7 +243,7 @@ hwloc_stat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
 
 /* Static inline version of opendir so that we can use openat if we have
    it, but still preserve compiler parameter checking */
-static inline DIR *
+static __hwloc_inline DIR *
 hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 { 
 #ifdef HAVE_OPENAT
