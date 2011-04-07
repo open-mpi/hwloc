@@ -455,7 +455,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   file = fopen(path, "r"); /* the libpci backend doesn't use sysfs.fsroot */
   err = hwloc_linux_parse_cpumap_file(file, cpuset);
   fclose(file);
-  if (!err)
+  if (!err && !hwloc_bitmap_iszero(cpuset))
     goto found;
   }
 #endif
