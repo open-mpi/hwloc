@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009      CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
  * See COPYING in top-level directory.
@@ -256,7 +256,7 @@ extern void hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char 
 extern void hwloc_add_uname_info(struct hwloc_topology *topology);
 
 /** \brief Return a locally-allocated stringified bitmap for printf-like calls. */
-static inline char *
+static __hwloc_inline char *
 hwloc_bitmap_printf_value(hwloc_const_bitmap_t bitmap)
 {
   char *buf;
@@ -264,7 +264,7 @@ hwloc_bitmap_printf_value(hwloc_const_bitmap_t bitmap)
   return buf;
 }
 
-static inline struct hwloc_obj *
+static __hwloc_inline struct hwloc_obj *
 hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
 {
   struct hwloc_obj *obj = malloc(sizeof(*obj));
@@ -293,7 +293,7 @@ extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
 /* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
  * and for which processors have ID PROC_PHYSIDS, and add them to the topology.
  * */
-static inline void
+static __hwloc_inline void
 hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
   struct hwloc_obj *obj;
@@ -327,7 +327,7 @@ int hwloc_free_mmap(hwloc_topology_t topology, void *addr, size_t len);
 
 /* Allocates unbound memory or fail, depending on whether STRICT is requested
  * or not */
-static inline void *
+static __hwloc_inline void *
 hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
 {
   if (flags & HWLOC_MEMBIND_STRICT)
