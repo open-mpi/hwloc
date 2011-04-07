@@ -528,16 +528,25 @@ EOF])
         HWLOC_PKG_CHECK_MODULES([PCI], [libpci], [pci_cleanup], [:], [
           # manually check pciutils in case a old one without .pc is installed
           AC_CHECK_HEADERS([pci/pci.h], [
-            AC_CHECK_LIB([pci], [pci_cleanup], [
-              HWLOC_PCI_LIBS="-lpci -lz"
-              AC_SUBST(HWLOC_PCI_LIBS)
-              ], [enable_pci=no], [-lz])
+	    # try first without -lz, it's not always needed (RHEL5, Debian Etch)
+	    AC_CHECK_LIB([pci], [pci_init], [
+	      HWLOC_PCI_LIBS="-lpci"
+	      AC_SUBST(HWLOC_PCI_LIBS)
+	      ], [
+	      # try again with -lz because it's needed sometimes (FC7)
+	      # don't try again with pci_init because the above result is cached
+	      AC_CHECK_LIB([pci], [pci_cleanup], [
+		HWLOC_PCI_ADDITIONAL_LIBS=-lz
+		HWLOC_PCI_LIBS="-lpci -lz"
+		AC_SUBST(HWLOC_PCI_LIBS)
+		], [enable_pci=no], [-lz])
+	      ])
             ], [enable_pci=no])
         ])
     fi
     if test "x$enable_pci" != "xno"; then
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
-      AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [-lz])
+      AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [$HWLOC_PCI_ADDITIONAL_LIBS])
       if test "x$enable_pci_caps" = "xyes"; then
         AC_DEFINE([HWLOC_HAVE_PCI_FIND_CAP], [1], [Define to 1 if `libpci' has the `pci_find_cap' function.])
       fi
