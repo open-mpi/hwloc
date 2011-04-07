@@ -156,7 +156,8 @@ path to pkg-config.
 _HWLOC_PKG_TEXT
 
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.])],
-		[$5])
+		[AC_MSG_RESULT([cannot check without pkg-config])
+		$5])
     else
         AC_MSG_RESULT([yes])
 
