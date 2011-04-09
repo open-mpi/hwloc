@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA.  All rights reserved.
+ * Copyright © 2009-2011 INRIA.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -207,7 +207,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   /* add PU objects */
   hwloc_setup_pu_level(topology, nprocs);
 
-  hwloc_add_object_info(topology->levels[0][0], "Backend", "Darwin");
+  hwloc_obj_add_info(topology->levels[0][0], "Backend", "Darwin");
 }
 
 void

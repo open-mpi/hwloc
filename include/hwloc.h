@@ -1104,6 +1104,8 @@ HWLOC_DECLSPEC int hwloc_obj_cpuset_snprintf(char * __hwloc_restrict str, size_t
 
 /** \brief Search the given key name in object infos and return the corresponding value.
  *
+ * If multiple keys match the given name, only the first one is returned.
+ *
  * \return \c NULL if no such key exists.
  */
 static __hwloc_inline char * __hwloc_attribute_pure
@@ -1115,6 +1117,15 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
       return obj->infos[i].value;
   return NULL;
 }
+
+/** \brief Add the given info name and value pair to the given object.
+ *
+ * The info is appended to the existing info array even if another key
+ * with the same name already exists.
+ *
+ * The input strings are copied before being added in the object infos.
+ */
+HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
 
 /** @} */
 

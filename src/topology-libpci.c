@@ -130,7 +130,7 @@ hwloc_linux_net_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
       char *eol = strchr(address, '\n');
       if (eol)
         *eol = 0;
-      hwloc_add_object_info(obj, "Address", address);
+      hwloc_obj_add_info(obj, "Address", address);
     }
   }
 }
@@ -653,7 +653,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 #endif
 			      );
     if (resname)
-      hwloc_add_object_info(obj, "PCIVendor", resname);
+      hwloc_obj_add_info(obj, "PCIVendor", resname);
 
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
@@ -665,7 +665,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 #endif
 			      );
     if (resname)
-      hwloc_add_object_info(obj, "PCIDevice", name);
+      hwloc_obj_add_info(obj, "PCIDevice", name);
 
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS

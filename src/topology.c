@@ -238,8 +238,7 @@ print_objects(struct hwloc_topology *topology __hwloc_attribute_unused, int inde
 #endif
 }
 
-void
-hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char *value)
+void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
 {
 #define OBJECT_INFO_ALLOC 8
   /* nothing allocated initially, (re-)allocate by multiple of 8 */

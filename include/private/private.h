@@ -249,9 +249,6 @@ extern int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
  */
 extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
-/* Insert name/value in the object infos array. name and value are copied by the callee. */
-extern void hwloc_add_object_info(hwloc_obj_t obj, const char *name, const char *value);
-
 /* Insert uname-specific names/values in the object infos array */
 extern void hwloc_add_uname_info(struct hwloc_topology *topology);
 

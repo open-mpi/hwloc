@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 INRIA.  All rights reserved.
+ * Copyright © 2009-2011 INRIA.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -91,10 +91,10 @@ void hwloc_add_uname_info(struct hwloc_topology *topology __hwloc_attribute_unus
   if (uname(&utsname) < 0)
     return;
 
-  hwloc_add_object_info(topology->levels[0][0], "OSName", utsname.sysname);
-  hwloc_add_object_info(topology->levels[0][0], "OSRelease", utsname.release);
-  hwloc_add_object_info(topology->levels[0][0], "OSVersion", utsname.version);
-  hwloc_add_object_info(topology->levels[0][0], "HostName", utsname.nodename);
-  hwloc_add_object_info(topology->levels[0][0], "Architecture", utsname.machine);
+  hwloc_obj_add_info(topology->levels[0][0], "OSName", utsname.sysname);
+  hwloc_obj_add_info(topology->levels[0][0], "OSRelease", utsname.release);
+  hwloc_obj_add_info(topology->levels[0][0], "OSVersion", utsname.version);
+  hwloc_obj_add_info(topology->levels[0][0], "HostName", utsname.nodename);
+  hwloc_obj_add_info(topology->levels[0][0], "Architecture", utsname.machine);
 #endif /* HAVE_UNAME */
 }

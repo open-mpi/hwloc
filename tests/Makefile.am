@@ -40,6 +40,7 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_groups \
 	hwloc_insert_misc \
 	hwloc_topology_restrict \
+	hwloc_obj_infos \
 	hwloc_iodevs
 
 if HWLOC_HAVE_LINUX_LIBNUMA

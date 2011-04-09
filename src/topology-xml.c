@@ -268,10 +268,10 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
    * deprecated (from 1.0)
    */
   else if (!strcmp(name, "dmi_board_vendor")) {
-    hwloc_add_object_info(obj, "DMIBoardVendor", strdup(value));
+    hwloc_obj_add_info(obj, "DMIBoardVendor", strdup(value));
   }
   else if (!strcmp(name, "dmi_board_name")) {
-    hwloc_add_object_info(obj, "DMIBoardName", strdup(value));
+    hwloc_obj_add_info(obj, "DMIBoardName", strdup(value));
   }
 
   /*************************
@@ -521,7 +521,7 @@ hwloc__xml_import_info_node(struct hwloc_topology *topology __hwloc_attribute_un
 
   if (infoname)
     /* empty strings are ignored by libxml */
-    hwloc_add_object_info(obj, infoname, infovalue ? infovalue : "");
+    hwloc_obj_add_info(obj, infoname, infovalue ? infovalue : "");
   else
     fprintf(stderr, "ignoring info attribute without name\n");
 }

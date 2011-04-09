@@ -2726,7 +2726,7 @@ hwloc__get_dmi_one_info(struct hwloc_topology *topology, hwloc_obj_t obj, const 
       if (tmp)
 	*tmp = '\0';
       hwloc_debug("found %s '%s'\n", hwloc_name, dmi_line);
-      hwloc_add_object_info(obj, hwloc_name, dmi_line);
+      hwloc_obj_add_info(obj, hwloc_name, dmi_line);
     }
   }
 }
@@ -2853,9 +2853,9 @@ hwloc_look_linux(struct hwloc_topology *topology)
     hwloc__get_dmi_info(topology, topology->levels[0][0]);
   }
 
-  hwloc_add_object_info(topology->levels[0][0], "Backend", "Linux");
+  hwloc_obj_add_info(topology->levels[0][0], "Backend", "Linux");
   if (cpuset_name) {
-    hwloc_add_object_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
+    hwloc_obj_add_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
     free(cpuset_name);
   }
 

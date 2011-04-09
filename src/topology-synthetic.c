@@ -336,6 +336,6 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
 
   hwloc_bitmap_free(cpuset);
 
-  hwloc_add_object_info(topology->levels[0][0], "Backend", "Synthetic");
+  hwloc_obj_add_info(topology->levels[0][0], "Backend", "Synthetic");
 }
 

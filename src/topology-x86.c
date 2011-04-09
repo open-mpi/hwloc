@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010 INRIA.  All rights reserved.
+ * Copyright © 2010-2011 INRIA.  All rights reserved.
  * Copyright © 2010 Université Bordeaux 1
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -522,7 +522,7 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
   }
 #endif
 
-  hwloc_add_object_info(topology->levels[0][0], "Backend", "x86");
+  hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
 
  free:
   if (NULL != infos) {

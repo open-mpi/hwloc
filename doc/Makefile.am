@@ -441,6 +441,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_bridge_type_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_osdev_type_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_add_info.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_cpuset_snprintf.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_get_info_by_name.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_info_s.3 \
