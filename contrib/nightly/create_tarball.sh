@@ -289,6 +289,9 @@ do_command "make distcheck"
 LD_LIBRARY_PATH=$save
 save=
 
+# chmod the whole directory, so that core files are accessible by others
+chmod a+rX -R .
+
 # move the resulting tarballs to the destdir
 gz="`/bin/ls hwloc*tar.gz`"
 bz2="`/bin/ls hwloc*tar.bz2`"
