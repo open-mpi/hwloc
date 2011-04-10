@@ -17,6 +17,14 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.1.3
+-------------
+
+* Miscellaneous
+  + Fix AMD cache discovery on freebsd when there is no L3 cache, thanks Andriy
+  Gapon for the fix.
+
+
 Version 1.1.2
 -------------
 * Fix a segfault in the distance-based grouping code when some objects

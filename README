@@ -465,7 +465,7 @@ int main(void)
  hwloc_topology_init(&topology);
 
  /* ... Optionally, put detection configuration here to ignore
-    some objects types, define a synthetic topology, etc....
+    some objects types, define a synthetic topology, etc....  
 
     The default is to detect all the objects of the machine that
     the caller is allowed to access.  See Configure Topology
@@ -684,5 +684,5 @@ Make sure to have had a look at those too!
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Feb 3 2011 11:24:26 for Hardware Locality (hwloc) by  doxygen
-1.7.2
+Generated on Thu Mar 31 2011 15:59:35 for Hardware Locality (hwloc) by  doxygen
+1.7.3
