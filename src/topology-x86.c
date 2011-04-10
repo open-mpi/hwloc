@@ -1,6 +1,6 @@
 /*
  * Copyright © 2010 INRIA.  All rights reserved.
- * Copyright © 2010 Université Bordeaux 1
+ * Copyright © 2010-2011 Université Bordeaux 1
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  *
@@ -61,10 +61,6 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
   unsigned cachenum;
   unsigned size = 0;
 
-  cachenum = infos->numcaches++;
-  infos->cache = realloc(infos->cache, infos->numcaches*sizeof(*infos->cache));
-  cache = &infos->cache[cachenum];
-
   if (level == 1)
     size = ((cpuid >> 24)) << 10;
   else if (level == 2)
@@ -73,6 +69,10 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
     size = ((cpuid >> 18)) << 19;
   if (!size)
     return;
+
+  cachenum = infos->numcaches++;
+  infos->cache = realloc(infos->cache, infos->numcaches*sizeof(*infos->cache));
+  cache = &infos->cache[cachenum];
 
   cache->type = 1;
   cache->level = level;
