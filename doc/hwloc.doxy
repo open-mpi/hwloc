@@ -1319,6 +1319,14 @@ applications to store private pointers. This field is kept intact as long
 as the object is valid, which means as long as topology objects are not
 modified by reloading or restricting the topology.
 
+Each object may also contain some <em>info</em> attributes
+(key name and value) that are setup by hwloc and may be extended
+by the user with <tt>hwloc_obj_add_info()</tt>.
+Contrary to the <tt>userdata</tt> field which is unique, multiple info
+attributes may exist for each object, even with the same name.
+These attributes are also exported to XML together with the topology.
+However only character strings may be used as key names and values.
+
 It is also possible to insert Misc objects with custom names anywhere
 in the topology (<tt>hwloc_topology_insert_misc_by_cpuset()</tt>)
 or as a leaf of the topology (<tt>hwloc_topology_insert_misc_by_parent()</tt>).
