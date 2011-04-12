@@ -26,6 +26,8 @@ Version 1.3.0
     documentation for details.
 * Minor API updates
   + Add hwloc_obj_add_info to customize object info attributes.
+* Discovery improvements
+  + Add associativity to the cache attributes.
 * Tools
   + lstopo now displays I/O devices by default. Several options are
     added to configure the I/O discovery.
