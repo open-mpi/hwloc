@@ -544,6 +544,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    }
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo[i].Cache.Size;
+	    obj->attr->cache.associativity = procInfo[i].Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo[i].Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo[i].Cache.LineSize;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
 	    break;
@@ -659,6 +660,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    }
 	  case HWLOC_OBJ_CACHE:
 	    obj->attr->cache.size = procInfo->Cache.CacheSize;
+	    obj->attr->cache.associativity = procInfo->Cache.Associativity;
+	    obj->attr->cache.associativity = procInfo->Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo->Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo->Cache.LineSize;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
 	    break;

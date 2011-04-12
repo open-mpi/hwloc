@@ -470,6 +470,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	break;
       case HWLOC_OBJ_CACHE:
 	obj->attr->cache.size = _system_configuration.L2_cache_size;
+	obj->attr->cache.associativity = _system_configuration.L2_cache_asc;
 	obj->attr->cache.linesize = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
 	break;
@@ -480,6 +481,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	hwloc_obj_t obj2 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, i);
 	obj2->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	obj2->attr->cache.size = _system_configuration.dcache_size;
+	obj2->attr->cache.associativity = _system_configuration.dcache_asc;
 	obj2->attr->cache.linesize = _system_configuration.dcache_line;
 	obj2->attr->cache.depth = 1;
 	hwloc_debug("Adding an L1 cache for core %d\n", i);

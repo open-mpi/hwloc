@@ -28,7 +28,7 @@ struct cacheinfo {
 
   unsigned linesize;
   unsigned linepart;
-  unsigned ways;
+  int ways;
   unsigned sets;
   unsigned size;
 };
@@ -82,10 +82,13 @@ static void fill_amd_cache(struct procinfo *infos, unsigned level, unsigned cpui
     cache->nbthreads_sharing = infos->max_log_proc;
   cache->linesize = cpuid & 0xff;
   cache->linepart = 0;
-  if (level == 1)
+  if (level == 1) {
     cache->ways = (cpuid >> 16) & 0xff;
-  else {
-    static const unsigned ways_tab[] = { 0, 1, 2, 0, 4, 0, 8, 0, 16, 0, 32, 48, 64, 96, 128, 0 };
+    if (cache->ways == 0xff)
+      /* Fully associative */
+      cache->ways = -1;
+  } else {
+    static const unsigned ways_tab[] = { 0, 1, 2, 0, 4, 0, 8, 0, 16, 0, 32, 48, 64, 96, 128, -1 };
     unsigned ways = (cpuid >> 12) & 0xf;
     cache->ways = ways_tab[ways];
   }
@@ -203,7 +206,11 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
       cache->linesize = linesize = (ebx & 0xfff) + 1;
       cache->linepart = linepart = ((ebx >> 12) & 0x3ff) + 1;
-      cache->ways = ways = ((ebx >> 22) & 0x3ff) + 1;
+      if (eax & (1 << 9))
+        /* Fully associative */
+        cache->ways = -1;
+      else
+        cache->ways = ways = ((ebx >> 22) & 0x3ff) + 1;
       cache->sets = sets = ecx + 1;
       cache->size = linesize * linepart * ways * sets;
 
@@ -421,6 +428,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
           cache->attr->cache.depth = level;
           cache->attr->cache.size = infos[i].cache[l].size;
           cache->attr->cache.linesize = infos[i].cache[l].linesize;
+          cache->attr->cache.associativity = infos[i].cache[l].ways;
           cache->cpuset = cache_cpuset;
           hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
               level, cacheid, cache_cpuset);

@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -32,6 +32,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   size_t size;
   int64_t l1cachesize;
+  int64_t cacheways[2];
   int64_t l2cachesize;
   int64_t cachelinesize;
   int64_t memsize;
@@ -97,6 +98,16 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 
   if (hwloc_get_sysctlbyname("hw.l2cachesize", &l2cachesize))
     l2cachesize = 0;
+
+  if (hwloc_get_sysctlbyname("machdep.cpu.cache.L1_associativity", &cacheways[0]))
+    cacheways[0] = 0;
+  else if (cacheways[0] == 0xff)
+    cacheways[0] = -1;
+
+  if (hwloc_get_sysctlbyname("machdep.cpu.cache.L2_associativity", &cacheways[1]))
+    cacheways[1] = 0;
+  else if (cacheways[1] == 0xff)
+    cacheways[1] = -1;
 
   if (hwloc_get_sysctlbyname("hw.cachelinesize", &cachelinesize))
     cachelinesize = 0;
@@ -174,6 +185,10 @@ hwloc_look_darwin(struct hwloc_topology *topology)
             obj->attr->cache.depth = i;
             obj->attr->cache.size = cachesize[i];
             obj->attr->cache.linesize = cachelinesize;
+            if (i <= sizeof(cacheways) / sizeof(cacheways[0]))
+              obj->attr->cache.associativity = cacheways[i-1];
+            else
+              obj->attr->cache.associativity = 0;
           } else {
             hwloc_debug_1arg_bitmap("node %u has cpuset %s\n",
                 j, obj->cpuset);
