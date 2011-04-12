@@ -468,11 +468,12 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   switch (obj->type) {
   case HWLOC_OBJ_CACHE:
     if (verbose)
-      res = hwloc_snprintf(tmp, tmplen, "%s%lu%s%sline=%u",
+      res = hwloc_snprintf(tmp, tmplen, "%s%lu%s%sline=%u%sways=%u",
 			   prefix,
 			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
 			   hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose),
-			   separator, obj->attr->cache.linesize);
+			   separator, obj->attr->cache.linesize,
+			   separator, obj->attr->cache.associativity);
     else
       res = hwloc_snprintf(tmp, tmplen, "%s%lu%s",
 			   prefix,

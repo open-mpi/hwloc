@@ -127,6 +127,14 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       fprintf(stderr, "ignoring cache_linesize attribute for non-cache object type\n");
   }
 
+  else if (!strcmp(name, "cache_associativity")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_CACHE)
+      obj->attr->cache.associativity = lvalue;
+    else
+      fprintf(stderr, "ignoring cache_associativity attribute for non-cache object type\n");
+  }
+
   else if (!strcmp(name, "local_memory"))
     obj->memory.local_memory = strtoull(value, NULL, 10);
 

@@ -2154,21 +2154,27 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   /* d-tlb-sets - ignore */
   /* d-tlb-size - ignore, always 0 on power6 */
   /* i-cache-* and i-tlb-* represent instruction cache, ignore */
-  uint32_t d_cache_line_size = 0, d_cache_size = 0;
+  uint32_t d_cache_line_size = 0, d_cache_size = 0, d_cache_sets = 0;
   struct hwloc_obj *c = NULL;
 
   hwloc_read_unit32be(cpu, "d-cache-line-size", &d_cache_line_size,
       topology->backend_params.sysfs.root_fd);
   hwloc_read_unit32be(cpu, "d-cache-size", &d_cache_size,
       topology->backend_params.sysfs.root_fd);
+  hwloc_read_unit32be(cpu, "d-cache-sets", &d_cache_sets,
+      topology->backend_params.sysfs.root_fd);
 
   if ( (0 == d_cache_line_size) && (0 == d_cache_size) )
+    return;
+
+  if ( (0 == d_cache_sets) )
     return;
 
   c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
   c->attr->cache.depth = level;
   c->attr->cache.linesize = d_cache_line_size;
   c->attr->cache.size = d_cache_size;
+  c->attr->cache.associativity = d_cache_size / d_cache_sets;
   c->cpuset = hwloc_bitmap_dup(cpuset);
   hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n", level, c->cpuset);
   hwloc_insert_object_by_cpuset(topology, c);
@@ -2452,6 +2458,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	hwloc_bitmap_t cacheset;
 	unsigned long kB = 0;
 	unsigned linesize = 0;
+	unsigned associativity = 0;
 	int depth; /* 0 for L1, .... */
 
 	/* get the cache level depth */
@@ -2499,6 +2506,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	  fclose(fd);
 	}
 
+	/* get the associativity */
+	sprintf(mappath, "%s/cpu%d/cache/index%d/ways_of_associativity", path, i, j);
+	fd = hwloc_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
+	if (fd) {
+	  if (fgets(str2,sizeof(str2), fd))
+	    associativity = atol(str2); /* in bytes */
+	  fclose(fd);
+	}
+
 	sprintf(mappath, "%s/cpu%d/cache/index%d/shared_cpu_map", path, i, j);
 	cacheset = hwloc_parse_cpumap(mappath, topology->backend_params.sysfs.root_fd);
         if (cacheset) {
@@ -2518,6 +2534,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
             cache->attr->cache.linesize = linesize;
+            cache->attr->cache.associativity = associativity;
             cache->cpuset = cacheset;
             hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n",
                        depth, cacheset);
