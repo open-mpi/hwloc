@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -446,7 +446,7 @@ int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_re
 {
   const char * current = string;
   char *next;
-  unsigned long begin = -1, val;
+  unsigned long begin = (unsigned long) -1, val;
 
   hwloc_bitmap_zero(set);
 
@@ -682,7 +682,7 @@ void hwloc_bitmap_from_ith_ulong(struct hwloc_bitmap_s *set, unsigned i, unsigne
 
 	hwloc_bitmap_reset_by_ulongs(set, i+1);
 	set->ulongs[i] = mask;
-	for(j=0; j<(unsigned) i; j++)
+	for(j=0; j<i; j++)
 		set->ulongs[j] = HWLOC_SUBBITMAP_ZERO;
 	set->infinite = 0;
 }
@@ -737,14 +737,14 @@ void hwloc_bitmap_set(struct hwloc_bitmap_s * set, unsigned cpu)
 	set->ulongs[index_] |= HWLOC_SUBBITMAP_CPU(cpu);
 }
 
-void hwloc_bitmap_set_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsigned endcpu)
+void hwloc_bitmap_set_range(struct hwloc_bitmap_s * set, unsigned begincpu, int endcpu)
 {
 	unsigned i;
 	unsigned beginset,endset;
 
 	HWLOC__BITMAP_CHECK(set);
 
-	if (endcpu == (unsigned) -1) {
+	if (endcpu == -1) {
 		set->infinite = 1;
 		/* keep endcpu == -1 since this unsigned is actually larger than anything else */
 	}
@@ -794,14 +794,14 @@ void hwloc_bitmap_clr(struct hwloc_bitmap_s * set, unsigned cpu)
 	set->ulongs[index_] &= ~HWLOC_SUBBITMAP_CPU(cpu);
 }
 
-void hwloc_bitmap_clr_range(struct hwloc_bitmap_s * set, unsigned begincpu, unsigned endcpu)
+void hwloc_bitmap_clr_range(struct hwloc_bitmap_s * set, unsigned begincpu, int endcpu)
 {
 	unsigned i;
 	unsigned beginset,endset;
 
 	HWLOC__BITMAP_CHECK(set);
 
-	if (endcpu == (unsigned) -1) {
+	if (endcpu == -1) {
 		set->infinite = 0;
 		/* keep endcpu == -1 since this unsigned is actually larger than anything else */
 	}
