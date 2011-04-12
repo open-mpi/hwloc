@@ -2174,7 +2174,7 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   c->attr->cache.depth = level;
   c->attr->cache.linesize = d_cache_line_size;
   c->attr->cache.size = d_cache_size;
-  c->attr->cache.associativity = d_cache_size / d_cache_sets;
+  c->attr->cache.associativity = d_cache_size / d_cache_sets / d_cache_line_size;
   c->cpuset = hwloc_bitmap_dup(cpuset);
   hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n", level, c->cpuset);
   hwloc_insert_object_by_cpuset(topology, c);
