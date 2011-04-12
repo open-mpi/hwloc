@@ -74,8 +74,8 @@ Version 1.2.0
 * Miscellaneous
   + Remove C99 usage from code base.
   + Rename hwloc-gather-topology.sh into hwloc-gather-topology
-  + Fix AMD cache discovery on freebsd when there is no L3 cache, thanks Andriy
-  Gapon for the fix.
+  + Fix AMD cache discovery on freebsd when there is no L3 cache, thanks
+    Andriy Gapon for the fix.
 
 
 Version 1.1.2

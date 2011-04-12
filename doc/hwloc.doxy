@@ -1312,6 +1312,18 @@ hello from a single thread on core #3
 \endverbatim
 
 
+\section faq_annotate How do I annotate the topology with private notes?
+
+Each hwloc object contains a <tt>userdata</tt> field that may be used by
+applications to store private pointers. This field is kept intact as long
+as the object is valid, which means as long as topology objects are not
+modified by reloading or restricting the topology.
+
+It is also possible to insert Misc objects with custom names anywhere
+in the topology (<tt>hwloc_topology_insert_misc_by_cpuset()</tt>)
+or as a leaf of the topology (<tt>hwloc_topology_insert_misc_by_parent()</tt>).
+
+
 \section faq_upgrade How do I handle API upgrades?
 
 The hwloc interface is extended with every new major release.
