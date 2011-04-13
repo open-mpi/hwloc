@@ -39,6 +39,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "  --taskset                 Manipulate taskset-specific cpuset strings\n");
+  fprintf(where, "  --restrict <cpuset>       Restrict the topology to processors listed in <cpuset>\n");
   hwloc_utils_input_format_usage(where, 10);
   fprintf(where, "  -v                        Show verbose messages\n");
   fprintf(where, "  --version                 Report version and exit\n");
@@ -185,6 +186,7 @@ int main(int argc, char *argv[])
   char *callname;
   int opt;
   int i;
+  int err;
   int ret = EXIT_SUCCESS;
 
   callname = argv[0];
@@ -205,6 +207,24 @@ int main(int argc, char *argv[])
       if (!strcmp(argv[1], "--help")) {
 	usage(callname, stdout);
 	return EXIT_SUCCESS;
+      }
+      if (!strcmp (argv[1], "--restrict")) {
+	hwloc_bitmap_t restrictset;
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	restrictset = hwloc_bitmap_alloc();
+	hwloc_bitmap_sscanf(restrictset, argv[2]);
+	err = hwloc_topology_restrict (topology, restrictset, 0);
+	if (err) {
+	  perror("Restricting the topology");
+	  /* fallthrough */
+	}
+	hwloc_bitmap_free(restrictset);
+	argv++;
+	argc--;
+	goto next;
       }
       if (!strcmp(argv[1], "--number-of") || !strcmp(argv[1], "-N")) {
 	if (argc <= 2) {
