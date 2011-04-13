@@ -727,6 +727,8 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
     xmlNewProp(node, BAD_CAST "depth", BAD_CAST tmp);
     sprintf(tmp, "%u", (unsigned) obj->attr->cache.linesize);
     xmlNewProp(node, BAD_CAST "cache_linesize", BAD_CAST tmp);
+    sprintf(tmp, "%d", (unsigned) obj->attr->cache.associativity);
+    xmlNewProp(node, BAD_CAST "cache_associativity", BAD_CAST tmp);
     break;
   case HWLOC_OBJ_GROUP:
     sprintf(tmp, "%u", obj->attr->group.depth);
