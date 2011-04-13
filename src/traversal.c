@@ -467,14 +467,21 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   res = 0;
   switch (obj->type) {
   case HWLOC_OBJ_CACHE:
-    if (verbose)
-      res = hwloc_snprintf(tmp, tmplen, "%s%lu%s%sline=%u%sways=%u",
+    if (verbose) {
+      char assoc[32];
+      if (obj->attr->cache.associativity == -1)
+	snprintf(assoc, sizeof(assoc), "%sfully-associative", separator);
+      else if (obj->attr->cache.associativity == 0)
+	*assoc = '\0';
+      else
+	snprintf(assoc, sizeof(assoc), "%sways=%d", separator, obj->attr->cache.associativity);
+      res = hwloc_snprintf(tmp, tmplen, "%s%lu%s%sline=%u%s",
 			   prefix,
 			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
 			   hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose),
 			   separator, obj->attr->cache.linesize,
-			   separator, obj->attr->cache.associativity);
-    else
+			   assoc);
+    } else
       res = hwloc_snprintf(tmp, tmplen, "%s%lu%s",
 			   prefix,
 			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
