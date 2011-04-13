@@ -19,6 +19,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "Options:\n");
   fprintf(where, "  --single         Singlify each output to a single CPU\n");
   fprintf(where, "  --taskset        Show taskset-specific cpuset strings\n");
+  fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
   hwloc_utils_input_format_usage(where, 0);
   fprintf(where, "  --ignore <type>  Ignore objects of the given type\n");
   fprintf(where, "  --from <type>    Distribute starting from objects of the given type\n");
@@ -37,10 +38,12 @@ int main(int argc, char *argv[])
   int taskset = 0;
   int singlify = 0;
   int verbose = 0;
+  char *restrictstring = NULL;
   hwloc_obj_type_t from_type = (hwloc_obj_type_t) -1, to_type = (hwloc_obj_type_t) -1;
   char **orig_argv = argv;
   hwloc_topology_t topology;
   int opt;
+  int err;
 
   hwloc_topology_init(&topology);
 
@@ -120,6 +123,16 @@ int main(int argc, char *argv[])
 	argv++;
 	goto next;
       }
+      else if (!strcmp (argv[0], "--restrict")) {
+	if (argc <= 2) {
+	  usage (callname, stdout);
+	  exit(EXIT_FAILURE);
+	}
+	restrictstring = strdup(argv[1]);
+	argc--;
+	argv++;
+	goto next;
+      }
       else if (!strcmp (argv[0], "--version")) {
           printf("%s %s\n", orig_argv[0], VERSION);
           exit(EXIT_SUCCESS);
@@ -162,6 +175,18 @@ int main(int argc, char *argv[])
     if (input)
       hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
     hwloc_topology_load(topology);
+
+    if (restrictstring) {
+      hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
+      hwloc_bitmap_sscanf(restrictset, restrictstring);
+      err = hwloc_topology_restrict (topology, restrictset, 0);
+      if (err) {
+	perror("Restricting the topology");
+	/* fallthrough */
+      }
+      hwloc_bitmap_free(restrictset);
+      free(restrictstring);
+    }
 
     if (from_type == (hwloc_obj_type_t) -1) {
       from_depth = 0;

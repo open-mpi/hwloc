@@ -67,6 +67,9 @@ on sockets and not to precise cores or caches.
 Distribute among objects of the given type.  This is equivalent to specifying
 both \fB\-\-from\fR and \fB\-\-to\fR at the same time.
 .TP
+\fB\-\-restrict\fR <cpuset>
+Restrict the topology to the given cpuset.
+.TP
 \fB\-\-version\fR
 Report version and exit.
 .
@@ -108,6 +111,14 @@ may be obtained with:
     0x00000f00
     0x000000f0
     0x0000f000
+
+To distribute only among the second socket, the topology should be restricted:
+
+    $ hwloc-distrib --restrict $(hwloc-calc socket:1) 4
+    0x00000010
+    0x00000020
+    0x00000040
+    0x00000080
 
 To get a single processor of each CPU masks (prevent migration in case
 of binding)
