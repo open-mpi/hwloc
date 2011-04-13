@@ -16,15 +16,18 @@
 void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
   fprintf(where, "Usage: hwloc-distrib [options] number\n");
-  fprintf(where, "Options:\n");
-  fprintf(where, "  --single         Singlify each output to a single CPU\n");
-  fprintf(where, "  --taskset        Show taskset-specific cpuset strings\n");
-  fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
-  hwloc_utils_input_format_usage(where, 0);
+  fprintf(where, "Distribution options:\n");
   fprintf(where, "  --ignore <type>  Ignore objects of the given type\n");
   fprintf(where, "  --from <type>    Distribute starting from objects of the given type\n");
   fprintf(where, "  --to <type>      Distribute down to objects of the given type\n");
   fprintf(where, "  --at <type>      Distribute among objects of the given type\n");
+  fprintf(where, "Input topology options:\n");
+  fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
+  hwloc_utils_input_format_usage(where, 0);
+  fprintf(where, "Formatting options:\n");
+  fprintf(where, "  --single         Singlify each output to a single CPU\n");
+  fprintf(where, "  --taskset        Show taskset-specific cpuset strings\n");
+  fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -v               Show verbose messages\n");
   fprintf(where, "  --version        Report version and exit\n");
 }
