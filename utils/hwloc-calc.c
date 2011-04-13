@@ -21,13 +21,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "Usage: hwloc-calc [options] <location> ...\n");
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-bind utility.\n");
-  fprintf(where, "Options:\n");
-  fprintf(where, "  -l --logical              Use logical object indexes (default)\n");
-  fprintf(where, "  -p --physical             Use physical object indexes\n");
-  fprintf(where, "  --li --logical-input      Use logical indexes for input (default)\n");
-  fprintf(where, "  --lo --logical-output     Use logical indexes for output (default)\n");
-  fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
-  fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
+  fprintf(where, "Conversion options:\n");
+  fprintf(where, "  [default]                 Report the combined input locations as a CPU set\n");
   fprintf(where, "  --number-of <type|depth>\n"
                  "  -N <type|depth>           Report the number of objects intersecting the CPU set\n");
   fprintf(where, "  --intersect <type|depth>\n"
@@ -37,10 +32,19 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 		 "                            display them as hierarchical combinations such as\n"
 		 "                            type1:index1.type2:index2...\n");
   fprintf(where, "  --largest                 Report the list of largest objects in the CPU set\n");
+  fprintf(where, "Formatting options:\n");
+  fprintf(where, "  -l --logical              Use logical object indexes (default)\n");
+  fprintf(where, "  -p --physical             Use physical object indexes\n");
+  fprintf(where, "  --li --logical-input      Use logical indexes for input (default)\n");
+  fprintf(where, "  --lo --logical-output     Use logical indexes for output (default)\n");
+  fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
+  fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "  --taskset                 Manipulate taskset-specific cpuset strings\n");
+  fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <cpuset>       Restrict the topology to processors listed in <cpuset>\n");
   hwloc_utils_input_format_usage(where, 10);
+  fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -v                        Show verbose messages\n");
   fprintf(where, "  --version                 Report version and exit\n");
 }
