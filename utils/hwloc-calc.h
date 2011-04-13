@@ -132,7 +132,7 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, unsigned *dep
   return 0;
 }
 
-static int
+static __hwloc_inline int
 hwloc_mask_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
 			hwloc_mask_append_mode_t mode, int verbose)
 {
@@ -143,6 +143,49 @@ hwloc_mask_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
     return 0;
   hwloc_mask_append_cpuset(set, obj->cpuset, mode, verbose);
   return 0;
+}
+
+static __hwloc_inline int
+hwloc_mask_append_pci_object(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
+{
+  hwloc_obj_t obj;
+  unsigned vendor, device, index_;
+
+  /* try to match a busid */
+  obj = hwloc_get_pcidev_by_busidstring(topology, string+4);
+  if (obj)
+    return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
+
+  /* try to match by vendor:device:index */
+  if (sscanf(string+4, "%x:%x:%u", &vendor, &device, &index_) == 3) {
+    obj = NULL;
+    while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
+      if (obj->attr->pcidev.vendor_id == vendor
+	  && obj->attr->pcidev.device_id == device) {
+	if (!index_--)
+	  return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
+      }
+    }
+  }
+
+  /* TODO: more matching variants? vendor/device names? class?
+   * but we don't want some ugly and unmaintainable code
+   */
+
+  fprintf(stderr, "invalid PCI device %s\n", string+4);
+  return -1;
+}
+
+static __hwloc_inline int
+hwloc_mask_append_os_object(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
+{
+  hwloc_obj_t obj = NULL;
+  while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
+    if (!strcmp(obj->name, string+3))
+      return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
+  }
+  fprintf(stderr, "invalid OS device %s\n", string+3);
+  return -1;
 }
 
 static __hwloc_inline int
@@ -159,43 +202,10 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   unsigned i,j;
   int err;
 
-  if (!hwloc_strncasecmp(string, "pci:", 4)) {
-    unsigned vendor, device, index_;
-
-    /* try to match a PCI device */
-    obj = hwloc_get_pcidev_by_busidstring(topology, string+4);
-    if (obj)
-      return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
-
-    /* try to match by vendor:device:index */
-    if (sscanf(string+4, "%x:%x:%u", &vendor, &device, &index_) == 3) {
-      obj = NULL;
-      while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
-	if (obj->attr->pcidev.vendor_id == vendor
-	    && obj->attr->pcidev.device_id == device) {
-	  if (!index_--)
-	    return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
-	}
-      }
-    }
-
-    /* TODO: more matching variants? vendor/device names? class?
-     * but we don't want some ugly and unmaintainable code
-     */
-
-    fprintf(stderr, "invalid PCI device %s\n", string+4);
-    return -1;
-
-  } else if (!hwloc_strncasecmp(string, "os:", 3)) {
-    /* try to match a OS device */
-    obj = NULL;
-    while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
-      if (!strcmp(obj->name, string+3))
-	return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
-    }
-    fprintf(stderr, "invalid OS device %s\n", string+3);
-    return -1;
-  }
+  if (!hwloc_strncasecmp(string, "pci:", 4))
+    return hwloc_mask_append_pci_object(topology, string, set, verbose);
+  else if (!hwloc_strncasecmp(string, "os:", 3))
+    return hwloc_mask_append_os_object(topology, string, set, verbose);
 
   sep = strchr(string, ':');
   if (!sep) {
