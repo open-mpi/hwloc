@@ -441,7 +441,7 @@ union hwloc_obj_attr_u {
     unsigned depth;			  /**< \brief Depth of cache */
     unsigned linesize;			  /**< \brief Cache-line size in bytes */
     int associativity;			  /**< \brief Ways of associativity,
-    					    *  -1 if fully associative */
+    					    *  -1 if fully associative, 0 if unknown */
   } cache;
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {

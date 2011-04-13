@@ -2167,17 +2167,17 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   if ( (0 == d_cache_line_size) && (0 == d_cache_size) )
     return;
 
-  if ( (0 == d_cache_sets) )
-    return;
-
   c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
   c->attr->cache.depth = level;
   c->attr->cache.linesize = d_cache_line_size;
   c->attr->cache.size = d_cache_size;
   if (d_cache_sets == 1)
-    c->attr->cache.associativity = 0;
-  else
+    /* likely wrong, make it unknown */
+    d_cache_sets = 0;
+  if (d_cache_sets)
     c->attr->cache.associativity = d_cache_size / (d_cache_sets * d_cache_line_size);
+  else
+    c->attr->cache.associativity = 0;
   c->cpuset = hwloc_bitmap_dup(cpuset);
   hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n", level, c->cpuset);
   hwloc_insert_object_by_cpuset(topology, c);
@@ -2461,7 +2461,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	hwloc_bitmap_t cacheset;
 	unsigned long kB = 0;
 	unsigned linesize = 0;
-	unsigned associativity = 0;
+	unsigned sets = 0, lines_per_tag = 1;
 	int depth; /* 0 for L1, .... */
 
 	/* get the cache level depth */
@@ -2509,12 +2509,22 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 	  fclose(fd);
 	}
 
-	/* get the associativity */
-	sprintf(mappath, "%s/cpu%d/cache/index%d/ways_of_associativity", path, i, j);
+	/* get the number of sets and lines per tag.
+	 * don't take the associativity directly in "ways_of_associativity" because
+	 * some archs (ia64, ppc) put 0 there when fully-associative, while others (x86) put something like -1 there.
+	 */
+	sprintf(mappath, "%s/cpu%d/cache/index%d/number_of_sets", path, i, j);
 	fd = hwloc_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
 	if (fd) {
 	  if (fgets(str2,sizeof(str2), fd))
-	    associativity = atol(str2); /* in bytes */
+	    sets = atol(str2);
+	  fclose(fd);
+	}
+	sprintf(mappath, "%s/cpu%d/cache/index%d/physical_line_partition", path, i, j);
+	fd = hwloc_fopen(mappath, "r", topology->backend_params.sysfs.root_fd);
+	if (fd) {
+	  if (fgets(str2,sizeof(str2), fd))
+	    lines_per_tag = atol(str2);
 	  fclose(fd);
 	}
 
@@ -2537,7 +2547,12 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
             cache->attr->cache.linesize = linesize;
-            cache->attr->cache.associativity = associativity;
+	    if (!sets)
+	      cache->attr->cache.associativity = 0; /* unknown */
+	    else if (sets == 1)
+	      cache->attr->cache.associativity = 0; /* likely wrong, make it unknown */
+	    else
+	      cache->attr->cache.associativity = (kB << 10) / linesize / lines_per_tag / sets;
             cache->cpuset = cacheset;
             hwloc_debug_1arg_bitmap("cache depth %d has cpuset %s\n",
                        depth, cacheset);
