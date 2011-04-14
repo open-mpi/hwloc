@@ -327,7 +327,7 @@ struct hwloc_obj {
   struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent */
 
   /* children array below this object */
-  unsigned arity;			/**< \brief Number of children *
+  unsigned arity;			/**< \brief Number of children */
   struct hwloc_obj **children;		/**< \brief Children, \c children[0 .. arity -1] */
   struct hwloc_obj *first_child;	/**< \brief First child */
   struct hwloc_obj *last_child;		/**< \brief Last child */
