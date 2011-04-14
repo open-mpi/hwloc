@@ -22,12 +22,14 @@ int main(void)
   assert(hwloc_bitmap_first(set) == -1);
   assert(hwloc_bitmap_last(set) == -1);
   assert(hwloc_bitmap_next(set, 0) == -1);
+  assert(hwloc_bitmap_next(set, -1) == -1);
   assert(hwloc_bitmap_weight(set) == 0);
 
   /* full set */
   hwloc_bitmap_fill(set);
   assert(hwloc_bitmap_first(set) == 0);
   assert(hwloc_bitmap_last(set) == -1);
+  assert(hwloc_bitmap_next(set, -1) == 0);
   assert(hwloc_bitmap_next(set, 0) == 1);
   assert(hwloc_bitmap_next(set, 1) == 2);
   assert(hwloc_bitmap_next(set, 2) == 3);
@@ -45,6 +47,7 @@ int main(void)
   hwloc_bitmap_set_range(set, 36, 59);
   assert(hwloc_bitmap_first(set) == 36);
   assert(hwloc_bitmap_last(set) == 59);
+  assert(hwloc_bitmap_next(set, -1) == 36);
   assert(hwloc_bitmap_next(set, 0) == 36);
   assert(hwloc_bitmap_next(set, 36) == 37);
   assert(hwloc_bitmap_next(set, 59) == -1);

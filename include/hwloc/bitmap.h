@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -182,7 +182,7 @@ HWLOC_DECLSPEC void hwloc_bitmap_set(hwloc_bitmap_t bitmap, unsigned id);
  *
  * If \p end is \c -1, the range is infinite.
  */
-HWLOC_DECLSPEC void hwloc_bitmap_set_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end);
+HWLOC_DECLSPEC void hwloc_bitmap_set_range(hwloc_bitmap_t bitmap, unsigned begin, int end);
 
 /** \brief Replace \p i -th subset of bitmap \p bitmap with unsigned long \p mask */
 HWLOC_DECLSPEC void hwloc_bitmap_set_ith_ulong(hwloc_bitmap_t bitmap, unsigned i, unsigned long mask);
@@ -194,7 +194,7 @@ HWLOC_DECLSPEC void hwloc_bitmap_clr(hwloc_bitmap_t bitmap, unsigned id);
  *
  * If \p end is \c -1, the range is infinite.
  */
-HWLOC_DECLSPEC void hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin, unsigned end);
+HWLOC_DECLSPEC void hwloc_bitmap_clr_range(hwloc_bitmap_t bitmap, unsigned begin, int end);
 
 /** \brief Keep a single index among those set in bitmap \p bitmap
  *
@@ -232,9 +232,11 @@ HWLOC_DECLSPEC int hwloc_bitmap_first(hwloc_const_bitmap_t bitmap) __hwloc_attri
 
 /** \brief Compute the next index in bitmap \p bitmap which is after index \p prev
  *
+ * If \p prev is -1, the first index is returned.
+ *
  * \return -1 if no index with higher index is bitmap.
  */
-HWLOC_DECLSPEC int hwloc_bitmap_next(hwloc_const_bitmap_t bitmap, unsigned prev) __hwloc_attribute_pure;
+HWLOC_DECLSPEC int hwloc_bitmap_next(hwloc_const_bitmap_t bitmap, int prev) __hwloc_attribute_pure;
 
 /** \brief Compute the last index (most significant bit) in bitmap \p bitmap
  *

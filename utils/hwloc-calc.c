@@ -141,7 +141,7 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
 static int hwloc_calc_type_depth(const char *string, hwloc_obj_type_t *typep, int *depthp)
 {
   hwloc_obj_type_t type = hwloc_obj_type_of_string(string);
-  unsigned depth = -1;
+  int depth = -1;
   if (type == (hwloc_obj_type_t) -1) {
     char *endptr;
     depth = strtoul(string, &endptr, 0);
