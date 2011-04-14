@@ -374,7 +374,7 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
 
 int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const struct hwloc_bitmap_s * __hwloc_restrict set)
 {
-  unsigned prev = (unsigned) -1;
+  int prev = -1;
   hwloc_bitmap_t reverse;
   ssize_t size = buflen;
   char *tmp = buf;
@@ -391,19 +391,19 @@ int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const
     tmp[0] = '\0';
 
   while (1) {
-    unsigned begin, end;
+    int begin, end;
 
     begin = hwloc_bitmap_next(set, prev);
-    if (begin == (unsigned) -1)
+    if (begin == -1)
       break;
     end = hwloc_bitmap_next(reverse, begin);
 
     if (end == begin+1) {
-      res = hwloc_snprintf(tmp, size, needcomma ? ",%u" : "%u", begin);
-    } else if (end == (unsigned) -1) {
-      res = hwloc_snprintf(tmp, size, needcomma ? ",%u-" : "%u-", begin);
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%d" : "%d", begin);
+    } else if (end == -1) {
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%d-" : "%d-", begin);
     } else {
-      res = hwloc_snprintf(tmp, size, needcomma ? ",%u-%u" : "%u-%u", begin, end-1);
+      res = hwloc_snprintf(tmp, size, needcomma ? ",%d-%d" : "%d-%d", begin, end-1);
     }
     if (res < 0) {
       hwloc_bitmap_free(reverse);
@@ -418,7 +418,7 @@ int hwloc_bitmap_list_snprintf(char * __hwloc_restrict buf, size_t buflen, const
     size -= res;
     needcomma = 1;
 
-    if (end == (unsigned) -1)
+    if (end == -1)
       break;
     else
       prev = end - 1;
@@ -446,7 +446,7 @@ int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_re
 {
   const char * current = string;
   char *next;
-  unsigned long begin = (unsigned long) -1, val;
+  long begin = -1, val;
 
   hwloc_bitmap_zero(set);
 
@@ -461,10 +461,10 @@ int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_re
     if (next == current)
       goto failed;
 
-    if (begin != (unsigned long) -1) {
+    if (begin != -1) {
       /* finishing a range */
       hwloc_bitmap_set_range(set, begin, val);
-      begin = (unsigned long) -1;
+      begin = -1;
 
     } else if (*next == '-') {
       /* starting a new range */
@@ -484,7 +484,7 @@ int hwloc_bitmap_list_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_re
 
     if (*next == '\0')
       break;
-    current = (const char*) next+1;
+    current = next+1;
   }
 
   return 0;
@@ -737,14 +737,15 @@ void hwloc_bitmap_set(struct hwloc_bitmap_s * set, unsigned cpu)
 	set->ulongs[index_] |= HWLOC_SUBBITMAP_CPU(cpu);
 }
 
-void hwloc_bitmap_set_range(struct hwloc_bitmap_s * set, unsigned begincpu, int endcpu)
+void hwloc_bitmap_set_range(struct hwloc_bitmap_s * set, unsigned begincpu, int _endcpu)
 {
 	unsigned i;
 	unsigned beginset,endset;
+	unsigned endcpu = (unsigned) _endcpu;
 
 	HWLOC__BITMAP_CHECK(set);
 
-	if (endcpu == -1) {
+	if (_endcpu == -1) {
 		set->infinite = 1;
 		/* keep endcpu == -1 since this unsigned is actually larger than anything else */
 	}
@@ -794,14 +795,15 @@ void hwloc_bitmap_clr(struct hwloc_bitmap_s * set, unsigned cpu)
 	set->ulongs[index_] &= ~HWLOC_SUBBITMAP_CPU(cpu);
 }
 
-void hwloc_bitmap_clr_range(struct hwloc_bitmap_s * set, unsigned begincpu, int endcpu)
+void hwloc_bitmap_clr_range(struct hwloc_bitmap_s * set, unsigned begincpu, int _endcpu)
 {
 	unsigned i;
 	unsigned beginset,endset;
+	unsigned endcpu = (unsigned) _endcpu;
 
 	HWLOC__BITMAP_CHECK(set);
 
-	if (endcpu == -1) {
+	if (_endcpu == -1) {
 		set->infinite = 0;
 		/* keep endcpu == -1 since this unsigned is actually larger than anything else */
 	}
@@ -1038,7 +1040,7 @@ int hwloc_bitmap_last(const struct hwloc_bitmap_s * set)
 	return -1;
 }
 
-int hwloc_bitmap_next(const struct hwloc_bitmap_s * set, unsigned prev_cpu)
+int hwloc_bitmap_next(const struct hwloc_bitmap_s * set, int prev_cpu)
 {
 	unsigned i = HWLOC_SUBBITMAP_INDEX(prev_cpu + 1);
 
@@ -1057,7 +1059,7 @@ int hwloc_bitmap_next(const struct hwloc_bitmap_s * set, unsigned prev_cpu)
 
 		/* if the prev cpu is in the same word as the possible next one,
 		   we need to mask out previous cpus */
-		if (HWLOC_SUBBITMAP_INDEX(prev_cpu) == i)
+		if (prev_cpu >= 0 && HWLOC_SUBBITMAP_INDEX((unsigned) prev_cpu) == i)
 			w &= ~HWLOC_SUBBITMAP_ULBIT_TO(HWLOC_SUBBITMAP_CPU_ULBIT(prev_cpu));
 
 		if (w)
