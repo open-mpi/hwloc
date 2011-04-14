@@ -200,9 +200,11 @@ HWLOC_DECLSPEC int hwloc_bitmap_first(hwloc_const_bitmap_t bitmap) __hwloc_attri
 
 /** \brief Compute the next index in bitmap \p bitmap which is after index \p prev
  *
+ * If \p prev is -1, the first index is returned.
+ *
  * \return -1 if no index with higher index is bitmap.
  */
-HWLOC_DECLSPEC int hwloc_bitmap_next(hwloc_const_bitmap_t bitmap, unsigned prev) __hwloc_attribute_pure;
+HWLOC_DECLSPEC int hwloc_bitmap_next(hwloc_const_bitmap_t bitmap, int prev) __hwloc_attribute_pure;
 
 /** \brief Compute the last index (most significant bit) in bitmap \p bitmap
  *

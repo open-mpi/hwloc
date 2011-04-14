@@ -902,7 +902,7 @@ int hwloc_bitmap_last(const struct hwloc_bitmap_s * set)
 	return -1;
 }
 
-int hwloc_bitmap_next(const struct hwloc_bitmap_s * set, unsigned prev_cpu)
+int hwloc_bitmap_next(const struct hwloc_bitmap_s * set, int prev_cpu)
 {
 	unsigned i = HWLOC_SUBBITMAP_INDEX(prev_cpu + 1);
 
@@ -921,7 +921,7 @@ int hwloc_bitmap_next(const struct hwloc_bitmap_s * set, unsigned prev_cpu)
 
 		/* if the prev cpu is in the same word as the possible next one,
 		   we need to mask out previous cpus */
-		if (HWLOC_SUBBITMAP_INDEX(prev_cpu) == i)
+		if (prev_cpu >= 0 && HWLOC_SUBBITMAP_INDEX((unsigned) prev_cpu) == i)
 			w &= ~HWLOC_SUBBITMAP_ULBIT_TO(HWLOC_SUBBITMAP_CPU_ULBIT(prev_cpu));
 
 		if (w)
