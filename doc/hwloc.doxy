@@ -656,17 +656,21 @@ Make sure to have had a look at those too!
   <dd>The number of children of an object.</dd>
 
 <dt>Sibling objects</dt>
-  <dd>Objects of the same type which have the same parent.</dd>
+  <dd>Objects which have the same parent. They usually have the same type
+  (and hence are cousins, as well), but they may not if the topology
+  is asymmetric.</dd>
 
 <dt>Sibling rank</dt>
-  <dd>Index to uniquely identify objects of the same type which have
+  <dd>Index to uniquely identify objects which have
   the same parent, and is always in the range [0, parent_arity).</dd>
 
 <dt>Cousin objects</dt>
-  <dd>Objects of the same type as the current object.</dd>
+  <dd>Objects of the same type (and depth) as the current object,
+  even if they do not have the same parent.</dd>
 
 <dt>Level</dt>
-  <dd>Set of objects of the same type.</dd>
+  <dd>Set of objects of the same type and depth. All these objects
+  are cousins.</dd>
 
 <dt>OS or physical index</dt>
   <dd>The index that the operating system (OS) uses to identify the
@@ -677,7 +681,7 @@ Make sure to have had a look at those too!
   <dd>Nesting level in the object tree, starting from the 0th object.</dd>
 
 <dt>Logical index</dt>
-  <dd>Index to uniquely identify objects of the same type.  It
+  <dd>Index to uniquely identify objects of the same type and depth.  It
   expresses proximity in a generic way.  This index is always linear
   and in the range [0, num_objs_same_type_same_level).  Think of it
   as ``cousin rank.'' The ordering is based on topology first, and
@@ -697,7 +701,7 @@ by showing the example of a machine with two dual core sockets (with no
 hardware threads); thus, a topology with 4 levels. Each box with rounded corner
 corresponds to one hwloc_obj_t, containing the values of the different integer
 fields (depth, logical_index, etc.), and arrows show to which other hwloc_obj_t
-pointers point to (first_child, parent, etc.)
+pointers point to (first_child, parent, etc.). The L2 cache of the last core is intentionally missing to show how asymmetric topologies are handled.
 
 \image html diagram.png
 \image latex diagram.eps width=\textwidth
@@ -705,6 +709,7 @@ pointers point to (first_child, parent, etc.)
 It should be noted that for PU objects, the logical index -- as
 computed linearly by hwloc -- is not the same as the OS index.
 
+See also \ref faq_asymmetric for more details.
 
 
 \page tools Command-Line Tools 
@@ -721,8 +726,8 @@ hierarchical topology map of the current system.  The output may be
 graphical or textual, and can also be exported to numerous file
 formats such as PDF, PNG, XML, and others.
 
-It can also display the processes currently bound to a part of the machine (--ps
-option).
+This command can also display the processes currently bound to a part
+of the machine (via the --ps option).
 
 Note that lstopo can read XML files and/or alternate chroot
 filesystems and display topological maps representing those systems
@@ -1310,6 +1315,39 @@ hello from first thread on core #3
 $ hwloc-bind core:3 --single -- echo "hello from a single thread on core #3"
 hello from a single thread on core #3
 \endverbatim
+
+
+\section faq_asymmetric What happens if my topology is asymmetric?
+
+hwloc supports asymmetric topologies even if most platforms are usually
+symmetric. For example, there may be different types of processors
+in a single machine, each with different numbers of cores, symmetric
+multithreading, or levels of caches.
+
+To understand how hwloc manages such cases, one should first remember
+the meaning of levels and cousin objects. All objects of the same type
+are gathered as horizontal levels with a given depth. They are also
+connected through the cousin pointers of the hwloc_obj structure.
+Some types, such as Caches or Groups, are usually annotated with a
+depth or level attribute (for instance L2 cache). In this case, this
+attribute is also taken in account when gathering objects as
+horizontal levels.  To be clear: there will be one level for L1
+caches, another level for L2 caches, etc.
+
+If the topology is asymmetric (e.g., if a cache is missing in one of
+the processors), a given horizontal level will still exist if there
+exist any objects of that type.  However, some branches of the overall
+tree may not have an object located in that horizontal level.  Note
+that this specific hole within one horizontal level does not imply
+anything for other levels.  All objects of the same type are gathered
+in horizontal levels even if their parents or children have different
+depths and types.
+
+Moreover, it is important to understand that a same parent object may
+have children of different types (and therefore, different
+depths). <strong>These children are therefore siblings (because they
+have the same parent), but they are <em>not</em> cousins (because they
+do not belong to the same horizontal levels).</strong>
 
 
 \section faq_annotate How do I annotate the topology with private notes?
