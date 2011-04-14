@@ -1320,8 +1320,8 @@ as the object is valid, which means as long as topology objects are not
 modified by reloading or restricting the topology.
 
 It is also possible to insert Misc objects with custom names anywhere
-in the topology (<tt>hwloc_topology_insert_misc_by_cpuset()</tt>)
-or as a leaf of the topology (<tt>hwloc_topology_insert_misc_by_parent()</tt>).
+in the topology (<tt>hwloc_topology_insert_misc_object_by_cpuset()</tt>)
+or as a leaf of the topology (<tt>hwloc_topology_insert_misc_object_by_parent()</tt>).
 
 
 \section faq_upgrade How do I handle API upgrades?
