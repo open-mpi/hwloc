@@ -656,17 +656,21 @@ Make sure to have had a look at those too!
   <dd>The number of children of an object.</dd>
 
 <dt>Sibling objects</dt>
-  <dd>Objects of the same type which have the same parent.</dd>
+  <dd>Objects which have the same parent. They usually have the same type
+  (hence are cousins as well), but it may not be the case if the topology
+  is asymmetric.</dd>
 
 <dt>Sibling rank</dt>
-  <dd>Index to uniquely identify objects of the same type which have
+  <dd>Index to uniquely identify objects which have
   the same parent, and is always in the range [0, parent_arity).</dd>
 
 <dt>Cousin objects</dt>
-  <dd>Objects of the same type as the current object.</dd>
+  <dd>Objects of the same type (and depth) as the current object,
+  even if they do not have the same parent.</dd>
 
 <dt>Level</dt>
-  <dd>Set of objects of the same type.</dd>
+  <dd>Set of objects of the same type and depth. All these objects
+  are cousins.</dd>
 
 <dt>OS or physical index</dt>
   <dd>The index that the operating system (OS) uses to identify the
@@ -677,7 +681,7 @@ Make sure to have had a look at those too!
   <dd>Nesting level in the object tree, starting from the 0th object.</dd>
 
 <dt>Logical index</dt>
-  <dd>Index to uniquely identify objects of the same type.  It
+  <dd>Index to uniquely identify objects of the same type and depth.  It
   expresses proximity in a generic way.  This index is always linear
   and in the range [0, num_objs_same_type_same_level).  Think of it
   as ``cousin rank.'' The ordering is based on topology first, and

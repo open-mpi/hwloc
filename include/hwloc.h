@@ -316,17 +316,18 @@ struct hwloc_obj {
 					 * could be a "cousin_rank" since it's the rank within the "cousin" list below */
   signed os_level;			/**< \brief OS-provided physical level, -1 if unknown or meaningless */
 
-  struct hwloc_obj *next_cousin;	/**< \brief Next object of same type */
-  struct hwloc_obj *prev_cousin;	/**< \brief Previous object of same type */
+  /* cousins are all objects of the same type (and depth) across the entire topology */
+  struct hwloc_obj *next_cousin;	/**< \brief Next object of same type and depth */
+  struct hwloc_obj *prev_cousin;	/**< \brief Previous object of same type and depth */
 
-  /* parent */
+  /* children of the same parent are siblings, even if they may have different type and depth */
   struct hwloc_obj *parent;		/**< \brief Parent, \c NULL if root (system object) */
   unsigned sibling_rank;		/**< \brief Index in parent's \c children[] array */
   struct hwloc_obj *next_sibling;	/**< \brief Next object below the same parent */
   struct hwloc_obj *prev_sibling;	/**< \brief Previous object below the same parent */
 
-  /* children */
-  unsigned arity;			/**< \brief Number of children */
+  /* children array below this object */
+  unsigned arity;			/**< \brief Number of children *
   struct hwloc_obj **children;		/**< \brief Children, \c children[0 .. arity -1] */
   struct hwloc_obj *first_child;	/**< \brief First child */
   struct hwloc_obj *last_child;		/**< \brief Last child */
