@@ -169,7 +169,7 @@ fi
 echo "*** Removing svn version numbers..."
 svn_r="r`svnversion .`"
 version_files="`find . -name VERSION`"
-release_date=`date '+%b %d, %Y'`
+release_date=`export LANG=; export LC_ALL=; export LC_TIME=; date '+%b %d, %Y'`
 for file in $version_files; do
     echo " - $file"
     sed -e 's/^want_svn=.*/want_svn=0/' \
