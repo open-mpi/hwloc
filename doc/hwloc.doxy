@@ -657,7 +657,7 @@ Make sure to have had a look at those too!
 
 <dt>Sibling objects</dt>
   <dd>Objects which have the same parent. They usually have the same type
-  (hence are cousins as well), but it may not be the case if the topology
+  (and hence are cousins, as well), but they may not if the topology
   is asymmetric.</dd>
 
 <dt>Sibling rank</dt>
@@ -701,7 +701,7 @@ by showing the example of a machine with two dual core sockets (with no
 hardware threads); thus, a topology with 4 levels. Each box with rounded corner
 corresponds to one hwloc_obj_t, containing the values of the different integer
 fields (depth, logical_index, etc.), and arrows show to which other hwloc_obj_t
-pointers point to (first_child, parent, etc.). The L2 cache of the last core is intentionally missing, to show how asymmetric topologies are handled.
+pointers point to (first_child, parent, etc.). The L2 cache of the last core is intentionally missing to show how asymmetric topologies are handled.
 
 \image html diagram.png
 \image latex diagram.eps width=\textwidth
@@ -726,8 +726,8 @@ hierarchical topology map of the current system.  The output may be
 graphical or textual, and can also be exported to numerous file
 formats such as PDF, PNG, XML, and others.
 
-It can also display the processes currently bound to a part of the machine (--ps
-option).
+This command can also display the processes currently bound to a part
+of the machine (via the --ps option).
 
 Note that lstopo can read XML files and/or alternate chroot
 filesystems and display topological maps representing those systems
@@ -1320,8 +1320,8 @@ hello from a single thread on core #3
 \section faq_asymmetric What happens if my topology is asymmetric?
 
 hwloc supports asymmetric topologies even if most platforms are usually
-symmetric. For instance, there may be different types of processors
-in a single machine, with different numbers of cores, symmetric
+symmetric. For example, there may be different types of processors
+in a single machine, each with different numbers of cores, symmetric
 multithreading, or levels of caches.
 
 To understand how hwloc manages such cases, one should first remember
@@ -1331,21 +1331,23 @@ connected through the cousin pointers of the hwloc_obj structure.
 Some types, such as Caches or Groups, are usually annotated with a
 depth or level attribute (for instance L2 cache). In this case, this
 attribute is also taken in account when gathering objects as
-horizontal levels.
-There will be one level for L1 caches, one level for L2 caches, etc.
+horizontal levels.  To be clear: there will be one level for L1
+caches, another level for L2 caches, etc.
 
-If the topology is asymmetric, for instance if a cache is missing in
-one of the processors, the horizontal level still exists, but it will
-not contain any object within this processor.
-This specific hole within one horizontal level does not imply anything
-for other levels.
-All objects of the same type are gathered in horizontal levels even
-if their parents or children have different depths and types.
+If the topology is asymmetric (e.g., if a cache is missing in one of
+the processors), a given horizontal level will still exist if there
+exist any objects of that type.  However, some branches of the overall
+tree may not have an object located in that horizontal level.  Note
+that this specific hole within one horizontal level does not imply
+anything for other levels.  All objects of the same type are gathered
+in horizontal levels even if their parents or children have different
+depths and types.
 
 Moreover, it is important to understand that a same parent object may
-have children of different types (hence different depths). These
-children are siblings (because they have the same parent) but they
-are not cousins (because they do not belong to the same horizontal levels).
+have children of different types (and therefore, different
+depths). <strong>These children are therefore siblings (because they
+have the same parent), but they are <em>not</em> cousins (because they
+do not belong to the same horizontal levels).</strong>
 
 
 \section faq_annotate How do I annotate the topology with private notes?
