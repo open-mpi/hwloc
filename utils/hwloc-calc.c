@@ -39,6 +39,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --lo --logical-output     Use logical indexes for output (default)\n");
   fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
   fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
+  fprintf(where, "  --sep <sep>               Use separator <sep> in the output\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
   fprintf(where, "  --taskset                 Manipulate taskset-specific cpuset strings\n");
   fprintf(where, "Input topology options:\n");
@@ -61,7 +62,7 @@ static int singlify = 0;
 static int taskset = 0;
 
 static void
-hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, hwloc_bitmap_t set, int level)
+hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, const char *sep, hwloc_bitmap_t set, int level)
 {
   hwloc_obj_t obj, prev = NULL;
   unsigned logi = 0;
@@ -71,11 +72,11 @@ hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, hwloc_
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
     snprintf(string, sizeof(string), "%s%s%s:%u", prefix, level ? "." : "", type, logicalo ? logi : obj->os_index);
     if (prev)
-      printf(" ");
+      printf("%s", sep);
     if (level != hiernblevels - 1) {
       hwloc_bitmap_t new = hwloc_bitmap_dup(set);
       hwloc_bitmap_and(new, new, obj->cpuset);
-      hwloc_calc_hierarch_output(topology, string, new, level+1);
+      hwloc_calc_hierarch_output(topology, string, sep, new, level+1);
       hwloc_bitmap_free(new);
     } else {
       printf("%s", string);
@@ -86,7 +87,7 @@ hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, hwloc_
 }
 
 static int
-hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
+hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set)
 {
   if (singlify)
     hwloc_bitmap_singlify(set);
@@ -94,6 +95,8 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
   if (showobjs) {
     hwloc_bitmap_t remaining = hwloc_bitmap_dup(set);
     int first = 1;
+    if (!sep)
+      sep = " ";
     while (!hwloc_bitmap_iszero(remaining)) {
       char type[64];
       unsigned idx;
@@ -105,9 +108,9 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
       idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
-        printf("%s%s", first ? "" : " ", type);
+        printf("%s%s", first ? "" : sep, type);
       else
-        printf("%s%s:%u", first ? "" : " ", type, idx);
+        printf("%s%s:%u", first ? "" : sep, type, idx);
       hwloc_bitmap_andnot(remaining, remaining, obj->cpuset);
       first = 0;
     }
@@ -121,15 +124,19 @@ hwloc_calc_output(hwloc_topology_t topology, hwloc_bitmap_t set)
     printf("%u\n", nb);
   } else if (intersectdepth != -1) {
     hwloc_obj_t proc, prev = NULL;
+    if (!sep)
+      sep = ",";
     while ((proc = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, intersectdepth, prev)) != NULL) {
       if (prev)
-	printf(",");
+	printf("%s", sep);
       printf("%u", logicalo ? proc->logical_index : proc->os_index);
       prev = proc;
     }
     printf("\n");
   } else if (hiernblevels) {
-    hwloc_calc_hierarch_output(topology, "", set, 0);
+    if (!sep)
+      sep = " ";
+    hwloc_calc_hierarch_output(topology, "", sep, set, 0);
     printf("\n");
   } else {
     char *string = NULL;
@@ -188,6 +195,7 @@ int main(int argc, char *argv[])
   hwloc_obj_type_t intersecttype = (hwloc_obj_type_t) -1;
   hwloc_obj_type_t *hiertype = NULL;
   char *callname;
+  char *outsep = NULL;
   int opt;
   int i;
   int err;
@@ -335,6 +343,16 @@ int main(int argc, char *argv[])
 	logicalo = 0;
 	goto next;
       }
+      if (!strcmp(argv[1], "--sep")) {
+	if (argc <= 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	outsep = argv[2];
+	argv++;
+	argc--;
+	goto next;
+      }
       if (!strcmp(argv[1], "--single")) {
 	singlify = 1;
 	goto next;
@@ -385,7 +403,7 @@ int main(int argc, char *argv[])
 
   if (cmdline_args) {
     /* process command-line arguments */
-    ret = hwloc_calc_output(topology, set);
+    ret = hwloc_calc_output(topology, outsep, set);
 
   } else {
     /* process stdin arguments line-by-line */
@@ -402,7 +420,7 @@ int main(int argc, char *argv[])
 	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, taskset, verbose) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
       }
-      hwloc_calc_output(topology, set);
+      hwloc_calc_output(topology, outsep, set);
     }
   }
 

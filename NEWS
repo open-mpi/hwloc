@@ -33,6 +33,7 @@ Version 1.3.0
     added to configure the I/O discovery.
   + hwloc-calc and hwloc-bind now accept I/O devices as input.
   + Add --restrict option to hwloc-calc and hwloc-distribute.
+  + Add --sep option to change the output field separator in hwloc-calc.
 
 
 Version 1.2.0
