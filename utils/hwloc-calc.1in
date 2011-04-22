@@ -80,8 +80,10 @@ while a comma is used to separate indexes
 Singlify the output to a single CPU.
 .TP
 \fB\-\-taskset\fR
-Manipulate CPU set strings in the format recognized by the taskset command-line
+Display CPU set strings in the format recognized by the taskset command-line
 program instead of hwloc-specific CPU set string format.
+This option has no impact on the format of input CPU set strings,
+both formats are always accepted.
 .TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.

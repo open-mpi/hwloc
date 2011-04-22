@@ -31,7 +31,7 @@ static void usage(FILE *where)
   fprintf(where, "  --get-last-cpu-location\n"
 		 "                 Retrieve the last processors where the current process ran\n");
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
-  fprintf(where, "  --taskset      Manipulate taskset-specific cpuset strings\n");
+  fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "  -v             Show verbose messages\n");
   fprintf(where, "  --version      Report version and exit\n");
 }
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 
     ret = hwloc_mask_process_arg(topology, depth, argv[0], logical,
 				 cpubind ? cpubind_set : membind_set,
-				 taskset, verbose);
+				 verbose);
     if (ret < 0) {
       if (verbose)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);

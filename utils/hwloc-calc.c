@@ -40,8 +40,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --pi --physical-input     Use physical indexes for input\n");
   fprintf(where, "  --po --physical-output    Use physical indexes for output\n");
   fprintf(where, "  --sep <sep>               Use separator <sep> in the output\n");
+  fprintf(where, "  --taskset                 Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "  --single                  Singlify the output to a single CPU\n");
-  fprintf(where, "  --taskset                 Manipulate taskset-specific cpuset strings\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <cpuset>       Restrict the topology to processors listed in <cpuset>\n");
   hwloc_utils_input_format_usage(where, 10);
@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
     }
 
     cmdline_args++;
-    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, taskset, verbose) < 0)
+    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0)
       fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
 
  next:
@@ -417,7 +417,7 @@ int main(int argc, char *argv[])
 	if (!token)
 	  break;
 	current = NULL;
-	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, taskset, verbose) < 0)
+	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, verbose) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
       }
       hwloc_calc_output(topology, outsep, set);

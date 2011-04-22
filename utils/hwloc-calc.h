@@ -338,7 +338,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 static __hwloc_inline int
 hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		     const char *arg, int logical, hwloc_bitmap_t set,
-		     int taskset, int verbose)
+		     int verbose)
 {
   char *colon;
   hwloc_mask_append_mode_t mode = HWLOC_MASK_APPEND_ADD;
@@ -366,17 +366,22 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
       err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_bitmap_free(newset);
 
-  } else if (taskset) {
-    /* try to parse as a list of integer starting with 0xf...f or 0x */
+  } else {
     char *tmp = (char*) arg;
     hwloc_bitmap_t newset;
-    if (strncasecmp(tmp, "0xf...f", 7) == 0) {
-      tmp += 7;
+    int taskset = ( strchr(tmp, ',') == NULL );
+
+    /* check the infinite prefix */
+    if (strncasecmp(tmp, "0xf...f,", 7+!taskset) == 0) {
+      tmp += 7+!taskset;
       if (0 == *tmp) {
         err = -1;
         goto out;
       }
-    } else {
+    }
+
+    if (taskset) {
+      /* check that the remaining is 0x followed by a huge hexadecimal number */
       if (strncasecmp(tmp, "0x", 2) != 0) {
         err = -1;
         goto out;
@@ -386,48 +391,39 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
         err = -1;
         goto out;
       }
-    }
-    if (strlen(tmp) != strspn(tmp, "0123456789abcdefABCDEF")) {
-      err = -1;
-      goto out;
-    }
-    newset = hwloc_bitmap_alloc();
-    hwloc_bitmap_taskset_sscanf(newset, arg);
-    err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
-    hwloc_bitmap_free(newset);
+      if (strlen(tmp) != strspn(tmp, "0123456789abcdefABCDEF")) {
+        err = -1;
+        goto out;
+      }
 
-  } else {
-    /* try to parse as a comma-separated list of integer with 0x as an optional prefix, and possibly starting with 0xf...f */
-    char *tmp = (char*) arg;
-    hwloc_bitmap_t newset;
-    if (strncasecmp(tmp, "0xf...f,", 8) == 0) {
-      tmp += 8;
-      if (0 == *tmp) {
-        err = -1;
-        goto out;
+    } else {
+      /* check that the remaining is a comma-separated list of hexadecimal integer with 0x as an optional prefix */
+      while (1) {
+	char *next = strchr(tmp, ',');
+	size_t len;
+	if (strncasecmp(tmp, "0x", 2) == 0) {
+	  tmp += 2;
+	  if (',' == *tmp || 0 == *tmp) {
+	    err = -1;
+	    goto out;
+	  }
+	}
+	len = next ? (size_t) (next-tmp) : strlen(tmp);
+	if (len != strspn(tmp, "0123456789abcdefABCDEF")) {
+	  err = -1;
+	  goto out;
+	}
+	if (!next)
+	  break;
+	tmp = next+1;
       }
     }
-    while (1) {
-      char *next = strchr(tmp, ',');
-      size_t len;
-      if (strncasecmp(tmp, "0x", 2) == 0) {
-        tmp += 2;
-        if (',' == *tmp || 0 == *tmp) {
-          err = -1;
-          goto out;
-        }
-      }
-      len = next ? (size_t) (next-tmp) : strlen(tmp);
-      if (len != strspn(tmp, "0123456789abcdefABCDEF")) {
-        err = -1;
-        goto out;
-      }
-      if (!next)
-        break;
-      tmp = next+1;
-    }
+
     newset = hwloc_bitmap_alloc();
-    hwloc_bitmap_sscanf(newset, arg);
+    if (taskset)
+      hwloc_bitmap_taskset_sscanf(newset, arg);
+    else
+      hwloc_bitmap_sscanf(newset, arg);
     err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_bitmap_free(newset);
   }
