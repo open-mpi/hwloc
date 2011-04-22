@@ -49,11 +49,24 @@ unsigned hwloc_get_api_version(void)
   return HWLOC_API_VERSION;
 }
 
+int hwloc_hide_errors(void)
+{
+  static int hide = 0;
+  static int checked = 0;
+  if (!checked) {
+    const char *envvar = getenv("HWLOC_HIDE_ERRORS");
+    if (envvar)
+      hide = atoi(envvar);
+    checked = 1;
+  }
+  return hide;
+}
+
 void hwloc_report_os_error(const char *msg, int line)
 {
     static int reported = 0;
 
-    if (!reported) {
+    if (!reported && !hwloc_hide_errors()) {
         fprintf(stderr, "****************************************************************************\n");
         fprintf(stderr, "* Hwloc has encountered what looks like an error from the operating system.\n");
         fprintf(stderr, "*\n");

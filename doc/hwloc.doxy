@@ -827,6 +827,15 @@ following environment variables.
   backend, but still having binding functions actually do bind.
   </dd>
 
+<dt>HWLOC_HIDE_ERRORS=0</dt>
+  <dd>disable verbose reporting of errors.
+  The hwloc library may issue warnings to the standard error stream
+  when it detects a problem during topology discovery, for instance
+  if the operating system (or user) gives contradictory topology
+  information.   Setting this environment variable to 1 removes the
+  actual displaying of these error messages.
+  </dd>
+
 <dt>HWLOC_IGNORE_DISTANCES=0</dt>
   <dd>disables objects grouping based on distances.
   By default, hwloc uses distance matrices between objects (either read

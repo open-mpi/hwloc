@@ -428,7 +428,7 @@ static void hwloc_report_user_distance_error(const char *msg, int line)
 {
     static int reported = 0;
 
-    if (!reported) {
+    if (!reported && !hwloc_hide_errors()) {
         fprintf(stderr, "****************************************************************************\n");
         fprintf(stderr, "* Hwloc has encountered what looks like an error from user-given distances.\n");
         fprintf(stderr, "*\n");

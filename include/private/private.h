@@ -229,11 +229,13 @@ extern void hwloc_look_synthetic (struct hwloc_topology *topology);
  */
 extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
 
+/* Error reporting */
+typedef void (*hwloc_report_error_t)(const char * msg, int line);
+extern void hwloc_report_os_error(const char * msg, int line);
+extern int hwloc_hide_errors(void);
 /*
  * Add an object to the topology and specify which error callback to use
  */
-typedef void (*hwloc_report_error_t)(const char * msg, int line);
-extern void hwloc_report_os_error(const char * msg, int line);
 extern int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
 
 /*
