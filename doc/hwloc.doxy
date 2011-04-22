@@ -851,6 +851,16 @@ following environment variables.
   distance from the i-th object to the j-th object.</li>
   </dd>
 
+<dt>HWLOC_PCI_&lt;domain&gt;_&lt;bus&gt;_LOCALCPUS=&lt;cpuset&gt;</dt>
+  <dd>changes the locality of I/O devices behind the specified PCI hostbridge.
+  If no I/O locality information is available or if the BIOS reports
+  incorrect information, it is possible to move a I/O device tree (the
+  entire set of objects behind a host bridge) near a custom set of
+  processors.
+  <tt>domain</tt> and <tt>bus</tt> are the PCI domain and primary bus
+  of the corresponding host bridge.
+  </ dd>
+
 </dl>
 
 
