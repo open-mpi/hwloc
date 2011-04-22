@@ -153,6 +153,13 @@ static void
 hwloc_linux_lookup_drm_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
   hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_GPU, "drm", NULL);
+
+  /* we could look at the "graphics" class too, but it doesn't help for proprietary drivers either */
+
+  /* GPU devices (even with a proprietary driver) seem to have a boot_vga field in their PCI device directory (since 2.6.30),
+   * so we could create a OS device for each PCI devices with such a field.
+   * boot_vga is actually created when class >> 8 == VGA (it contains 1 for boot vga device), so it's trivial anyway.
+   */
 }
 
 /* block class objects are in
