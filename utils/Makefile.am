@@ -8,7 +8,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 
-EXTRA_DIST = test-hwloc-distrib.output
+EXTRA_DIST = test-hwloc-calc.output test-hwloc-distrib.output
 
 noinst_HEADERS = misc.h
 
@@ -36,7 +36,7 @@ hwloc_calc_SOURCES = hwloc-calc.c hwloc-calc.h
 # call hwloc executables.
 if HWLOC_BUILD_TESTS
 if !HWLOC_HAVE_MINGW32
-TESTS = test-hwloc-distrib.sh
+TESTS = test-hwloc-calc.sh test-hwloc-distrib.sh
 endif !HWLOC_HAVE_MINGW32
 endif HWLOC_BUILD_TESTS
 
