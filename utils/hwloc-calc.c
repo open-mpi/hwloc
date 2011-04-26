@@ -414,10 +414,8 @@ int main(int argc, char *argv[])
       char *current, *tmpline;
 
       /* stop if line is empty */
-      if (!fgets(line, len, stdin)) {
-	free(line);
+      if (!fgets(line, len, stdin))
 	break;
-      }
 
       /* keep reading until we get EOL */
       tmpline = line;
@@ -441,8 +439,8 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
       }
       hwloc_calc_output(topology, outsep, set);
-      free(line);
     }
+    free(line);
   }
 
  out:
