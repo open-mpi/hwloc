@@ -407,10 +407,30 @@ int main(int argc, char *argv[])
 
   } else {
     /* process stdin arguments line-by-line */
-#define HWLOC_CALC_LINE_LEN 1024
-    char line[HWLOC_CALC_LINE_LEN];
-    while (fgets(line, sizeof(line), stdin)) {
-      char *current = line;
+#define HWLOC_CALC_LINE_LEN 64
+    size_t len = HWLOC_CALC_LINE_LEN;
+    char * line = malloc(len);
+    while (1) {
+      char *current, *tmpline;
+
+      /* stop if line is empty */
+      if (!fgets(line, len, stdin)) {
+	free(line);
+	break;
+      }
+
+      /* keep reading until we get EOL */
+      tmpline = line;
+      while (!strchr(tmpline, '\n')) {
+	line = realloc(line, len*2);
+	tmpline = line + len-1;
+	if (!fgets(tmpline, len+1, stdin))
+	  break;
+	len *= 2;
+      }
+
+      /* parse now that we got everything */
+      current = line;
       hwloc_bitmap_zero(set);
       while (1) {
 	char *token = strtok(current, " \n");
@@ -421,6 +441,7 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
       }
       hwloc_calc_output(topology, outsep, set);
+      free(line);
     }
   }
 
