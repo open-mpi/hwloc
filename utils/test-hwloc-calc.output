@@ -30,3 +30,7 @@ PU:22PU:23Core:6Core:7NUMANode:2
 
 33,34,35,36,37
 1foo2
+
+0x0000000b
+0x0000ff0f
+0x0000e03f
