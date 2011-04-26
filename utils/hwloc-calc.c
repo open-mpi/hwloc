@@ -333,6 +333,7 @@ int main(int argc, char *argv[])
     }
 
     if (input_changed && input) {
+      /* only update the input when actually using it */
       hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
       hwloc_topology_load(topology);
       depth = hwloc_topology_get_depth(topology);
@@ -366,6 +367,15 @@ int main(int argc, char *argv[])
     /* process stdin arguments line-by-line */
 #define HWLOC_CALC_LINE_LEN 1024
     char line[HWLOC_CALC_LINE_LEN];
+
+    if (input_changed && input) {
+      /* only update the input when actually using it */
+      hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+      hwloc_topology_load(topology);
+      depth = hwloc_topology_get_depth(topology);
+      input_changed = 0;
+    }
+
     while (fgets(line, sizeof(line), stdin)) {
       char *current = line;
       hwloc_bitmap_zero(set);
