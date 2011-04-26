@@ -58,6 +58,16 @@ set -e
   ./hwloc-calc --if synthetic --input "group:2 cache:2 pu:1" group:0 cache:3
   ./hwloc-calc --if synthetic --input "group:2 group:2 cache:2 cache:2 pu:1" Group2:1 Group1:0
   ./hwloc-calc --if synthetic --input "group:2 group:2 cache:2 cache:2 pu:1" l2:0-2 L1cache:13:3
+  echo
+  cat << EOF | ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4"
+pu:0
+core:0 core:15
+node:0 node:3
+0x0001 0x00002 0x000004 0x000000000008
+0x0000000000000000000000000000000000000000000000000000000000000000000000000000001
+0x1,0x0,0x0
+root
+EOF
 ) > "$file"
 diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-calc.output "$file"
 rm -rf "$tmp"
