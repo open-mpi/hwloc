@@ -106,7 +106,8 @@ else
     actual_source="$topology".tar.bz2
 fi
 
-actual_exclude="$HWLOC_top_srcdir/tests/linux/$topology".exclude
+# use an absolute path for tar options because tar is invoked from the temp directory
+actual_exclude="$HWLOC_top_srcdir/tests/linux/`basename $topology`".exclude
 [ -f "$actual_exclude" ] && tar_options="--exclude-from=$actual_exclude"
 
 result=1
