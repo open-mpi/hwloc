@@ -277,13 +277,17 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigned nbprocs)
 {
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
-  unsigned i, j, l, one, level;
+  unsigned i, j, l, level;
+  int one = -1;
 
   for (i = 0; i < nbprocs; i++)
     if (infos[i].present) {
       hwloc_bitmap_set(complete_cpuset, i);
       one = i;
     }
+
+  if (one == -1)
+    return;
 
   /* Look for sockets */
   {
