@@ -207,7 +207,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     fprintf(stderr, "ignoring invalid depth %u\n", depth);
     return -1;
   }
-  width = hwloc_get_nbobjs_by_depth(topology, depth);
+  width = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, rootset, depth);
 
   first = atoi(sep+1);
   amount = 1;
