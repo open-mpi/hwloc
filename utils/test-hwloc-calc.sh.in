@@ -29,6 +29,10 @@ set -e
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" 0xf ~0x3 0xff0 ^0xf0
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" core:0 pu:15 ~pu:0 ^pu:2
   echo
+  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:even
+  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" node:2-
+  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" core:12-
+  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:62:10
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" core:all.pu:1:2
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" core:odd.pu:0
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:6:2 core:3-4.pu:1-3 node:2.pu:14:2 node:3.core:3.pu:3
