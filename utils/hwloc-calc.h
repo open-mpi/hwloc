@@ -183,6 +183,47 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type, int d
 }
 
 static __hwloc_inline int
+hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
+			      const char *string, size_t typelen,
+			      hwloc_obj_type_t *typep,
+			      int verbose)
+{
+  char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
+  hwloc_obj_type_t type;
+  int depthattr;
+  int depth;
+  char *end;
+  int err;
+
+  if (typelen >= sizeof(typestring)) {
+    fprintf(stderr, "invalid type name %s\n", string);
+    return -1;
+  }
+  strncpy(typestring, string, typelen);
+  typestring[typelen] = '\0';
+
+  /* try to match a type name */
+  err = hwloc_obj_type_sscanf(typestring, &type, &depthattr);
+  if (!err) {
+    *typep = type;
+    return hwloc_calc_depth_of_type(topology, type, depthattr, verbose);
+  }
+
+  /* try to match a numeric depth */
+  depth = strtol(string, &end, 0);
+  if (end != &string[typelen]) {
+    fprintf(stderr, "invalid type name %s\n", string);
+    return -1;
+  }
+  if ((unsigned) depth >= topodepth) {
+    fprintf(stderr, "ignoring invalid depth %u\n", depth);
+    return -1;
+  }
+  *typep = (hwloc_obj_type_t) -1;
+  return depth;
+}
+
+static __hwloc_inline int
 hwloc_calc_parse_range(const char *string,
 		       int *firstp, int *amountp, int *stepp, int *wrapp,
 		       const char **dotp)
@@ -299,67 +340,42 @@ hwloc_mask_append_os_object(hwloc_topology_t topology, const char *string, hwloc
 }
 
 static __hwloc_inline int
-hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
-		       hwloc_const_bitmap_t rootset, const char *string, int logical,
-		       hwloc_bitmap_t set, int verbose)
+hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
+			       hwloc_const_bitmap_t rootset, int depth,
+			       const char *string, /* starts with indexes following the colon */
+			       int logical, hwloc_bitmap_t set, int verbose)
 {
   hwloc_obj_t obj;
-  hwloc_obj_type_t type;
-  int depthattr;
-  int depth;
   unsigned width;
-  size_t typelen;
-  const char *sep, *dot;
-  char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
+  const char *dot, *nextsep;
+  int nextdepth;
   int first, wrap, amount, step;
   unsigned i,j,err;
 
-  typelen = strspn(string, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-  
-  if (!typelen || string[typelen] != ':')
-    return -1;
-
-  if (typelen >= sizeof(typestring)) {
-    fprintf(stderr, "invalid type name %s\n", string);
-    return -1;
-  }
-  strncpy(typestring, string, typelen);
-  typestring[typelen] = '\0';
-  sep = &string[typelen];
-
-  /* try to match a type name */
-  err = hwloc_obj_type_sscanf(typestring, &type, &depthattr);
-  if (!err) {
-    depth = hwloc_calc_depth_of_type(topology, type, depthattr, verbose);
-    if (depth < 0) {
-      if (type == HWLOC_OBJ_PCI_DEVICE)
-	return hwloc_mask_append_pci_object(topology, sep+1, set, verbose);
-      else if (type == HWLOC_OBJ_OS_DEVICE)
-	return hwloc_mask_append_os_object(topology, sep+1, set, verbose);
-      else
-	return -1;
-    }
-
-  } else {
-    /* try to match a numeric depth */
-    char *end;
-    depth = strtol(typestring, &end, 0);
-    if (end == typestring) {
-      fprintf(stderr, "invalid type name %s\n", typestring);
-      return -1;
-    }
-    if ((unsigned) depth >= topodepth) {
-      fprintf(stderr, "ignoring invalid depth %u\n", depth);
-      return -1;
-    }
-  }
-
-  err = hwloc_calc_parse_range(sep+1,
+  err = hwloc_calc_parse_range(string,
 			       &first, &amount, &step, &wrap,
 			       &dot);
   if (err < 0)
     return -1;
   assert(amount != -1 || !wrap);
+
+  if (dot) {
+    /* parse the next string before calling ourself recursively */
+    size_t typelen;
+    hwloc_obj_type_t type;
+    const char *nextstring = dot+1;
+    typelen = strspn(nextstring, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+    if (!typelen || nextstring[typelen] != ':')
+      return -1;
+    nextsep = &nextstring[typelen];
+
+    nextdepth = hwloc_calc_parse_depth_prefix(topology, topodepth,
+					      nextstring, typelen,
+					      &type,
+					      verbose);
+    if (nextdepth < 0)
+      return -1;
+  }
 
   width = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, rootset, depth);
   if (amount == -1)
@@ -377,18 +393,19 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 	printf("using object #%u depth %u below cpuset %s\n",
 	       i, depth, s);
       else
-	fprintf(stderr, "object #%u depth %u (type %s) below cpuset %s does not exist\n",
-		i, depth, typestring, s);
+	fprintf(stderr, "object #%u depth %u below cpuset %s does not exist\n",
+		i, depth, s);
       free(s);
     }
     if (obj) {
-      if (dot)
-	hwloc_mask_append_object(topology, topodepth, obj->cpuset, dot+1, logical, set, verbose);
-      else
+      if (dot) {
+	hwloc_calc_append_object_range(topology, topodepth, obj->cpuset, nextdepth, nextsep+1, logical, set, verbose);
+      } else {
 	/* add to the temporary cpuset
 	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
 	 */
         hwloc_mask_append_cpuset(set, obj->cpuset, HWLOC_MASK_APPEND_ADD, verbose);
+      }
     }
   }
 
@@ -400,8 +417,8 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		     const char *arg, int logical, hwloc_bitmap_t set,
 		     int verbose)
 {
-  char *colon;
   hwloc_mask_append_mode_t mode = HWLOC_MASK_APPEND_ADD;
+  size_t typelen;
   int err;
 
   if (*arg == '~') {
@@ -418,15 +435,37 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
   if (!strcmp(arg, "all") || !strcmp(arg, "root"))
     return hwloc_mask_append_cpuset(set, hwloc_topology_get_topology_cpuset(topology), mode, verbose);
 
-  colon = strchr(arg, ':');
-  if (colon) {
-    hwloc_bitmap_t newset = hwloc_bitmap_alloc();
-    err = hwloc_mask_append_object(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), arg, logical, newset, verbose);
+  /* try to match a type/depth followed by a special character */
+  typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+  if (typelen && arg[typelen] == ':') {
+    const char *sep = &arg[typelen];
+    hwloc_obj_type_t type;
+    int depth;
+    hwloc_bitmap_t newset;
+
+    depth = hwloc_calc_parse_depth_prefix(topology, topodepth,
+					  arg, typelen,
+					  &type,
+					  verbose);
+    if (depth < 0) {
+      /* if we didn't find a depth but found a type, handle special cases */
+      if (type == HWLOC_OBJ_PCI_DEVICE)
+	return hwloc_mask_append_pci_object(topology, sep+1, set, verbose);
+      else if (type == HWLOC_OBJ_OS_DEVICE)
+	return hwloc_mask_append_os_object(topology, sep+1, set, verbose);
+      else
+	return -1;
+    }
+
+    /* look at indexes following this type/depth */
+    newset = hwloc_bitmap_alloc();
+    err = hwloc_calc_append_object_range(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), depth, sep+1, logical, newset, verbose);
     if (!err)
       err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
     hwloc_bitmap_free(newset);
 
   } else {
+    /* try to match a cpuset */
     char *tmp = (char*) arg;
     hwloc_bitmap_t newset;
     int taskset = ( strchr(tmp, ',') == NULL );
