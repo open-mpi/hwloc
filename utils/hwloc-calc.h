@@ -183,6 +183,66 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type, int d
 }
 
 static __hwloc_inline int
+hwloc_calc_parse_range(const char *string,
+		       int *firstp, int *amountp, int *stepp, int *wrapp,
+		       const char **dotp)
+{
+  const char *dash, *dot, *colon;
+  int first, amount, step, wrap;
+
+  dot = strchr(string, '.');
+  *dotp = dot;
+
+  if (!isdigit(*string)) {
+    if (!strncmp(string, "all", 3)) {
+      *firstp = 0;
+      *amountp = -1;
+      *stepp = 1;
+      *wrapp = 0;
+      return 0;
+    } else if (!strncmp(string, "odd", 3)) {
+      *firstp = 1;
+      *amountp = -1;
+      *stepp = 2;
+      *wrapp = 0;
+      return 0;
+    } else if (!strncmp(string, "even", 4)) {
+      *firstp = 0;
+      *amountp = -1;
+      *stepp = 2;
+      *wrapp = 0;
+      return 0;
+    } else
+      return -1;
+  }
+
+  first = atoi(string);
+  amount = 1;
+  step = 1;
+  wrap = 0;
+
+  dash = strchr(string, '-');
+  if (dash && (dash < dot || !dot)) {
+    if (*(dash+1) == '\0')
+      amount = -1;
+    else
+      amount = atoi(dash+1)-first+1;
+  } else {
+    colon = strchr(string, ':');
+    if (colon && (colon < dot || !dot)) {
+      amount = atoi(colon+1);
+      wrap = 1;
+    }
+  }
+
+  *firstp = first;
+  *amountp = amount;
+  *stepp = step;
+  *wrapp = wrap;
+  return 0;
+}
+
+static __hwloc_inline int
 hwloc_mask_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
 			hwloc_mask_append_mode_t mode, int verbose)
 {
@@ -248,10 +308,10 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   int depthattr;
   int depth;
   unsigned width;
-  const char *sep, *sep2, *sep3;
   size_t typelen;
+  const char *sep, *dot;
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
-  unsigned first, wrap, amount, step;
+  int first, wrap, amount, step;
   unsigned i,j,err;
 
   typelen = strspn(string, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
@@ -294,45 +354,19 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
     }
   }
 
+  err = hwloc_calc_parse_range(sep+1,
+			       &first, &amount, &step, &wrap,
+			       &dot);
+  if (err < 0)
+    return -1;
+  assert(amount != -1 || !wrap);
+
   width = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, rootset, depth);
+  if (amount == -1)
+    amount = (width-first+step-1)/step;
 
-  first = atoi(sep+1);
-  amount = 1;
-  step = 1;
-  wrap = 0;
-  if (!isdigit(*(sep+1))) {
-    if (!strncmp(sep+1, "all", 3)) {
-      first = 0;
-      amount = width;
-    } else if (!strncmp(sep+1, "odd", 3)) {
-      first = 1;
-      step = 2;
-      amount = (width+1)/2;
-    } else if (!strncmp(sep+1, "even", 4)) {
-      first = 0;
-      step = 2;
-      amount = (width+1)/2;
-    }
-  }
-
-  sep3 = strchr(sep+1, '.');
-
-  sep2 = strchr(sep+1, '-');
-  if (sep2 && (sep2 < sep3 || !sep3)) {
-    if (*(sep2+1) == '\0')
-      amount = width-first;
-    else
-      amount = atoi(sep2+1)-first+1;
-  } else {
-    sep2 = strchr(sep+1, ':');
-    if (sep2 && (sep2 < sep3 || !sep3)) {
-      amount = atoi(sep2+1);
-      wrap = 1;
-    }
-  }
-
-  for(i=first, j=0; j<amount; i+=step, j++) {
-    if (wrap && i==width)
+  for(i=first, j=0; j<(unsigned)amount; i+=step, j++) {
+    if (wrap && i>=width)
       i = 0;
 
     obj = hwloc_mask_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
@@ -348,8 +382,8 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
       free(s);
     }
     if (obj) {
-      if (sep3)
-	hwloc_mask_append_object(topology, topodepth, obj->cpuset, sep3+1, logical, set, verbose);
+      if (dot)
+	hwloc_mask_append_object(topology, topodepth, obj->cpuset, dot+1, logical, set, verbose);
       else
 	/* add to the temporary cpuset
 	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
