@@ -284,62 +284,6 @@ hwloc_calc_parse_range(const char *string,
 }
 
 static __hwloc_inline int
-hwloc_calc_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
-			hwloc_calc_append_mode_t mode, int verbose)
-{
-  while (obj && !obj->cpuset)
-    obj = obj->parent;
-  if (!obj)
-    /* do nothing */
-    return 0;
-  hwloc_calc_append_cpuset(set, obj->cpuset, mode, verbose);
-  return 0;
-}
-
-static __hwloc_inline int
-hwloc_calc_append_pci_object(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
-{
-  hwloc_obj_t obj;
-  unsigned vendor, device, index_;
-
-  /* try to match a busid */
-  obj = hwloc_get_pcidev_by_busidstring(topology, string);
-  if (obj)
-    return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
-
-  /* try to match by vendor:device:index */
-  if (sscanf(string, "%x:%x:%u", &vendor, &device, &index_) == 3) {
-    obj = NULL;
-    while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
-      if (obj->attr->pcidev.vendor_id == vendor
-	  && obj->attr->pcidev.device_id == device) {
-	if (!index_--)
-	  return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
-      }
-    }
-  }
-
-  /* TODO: more matching variants? vendor/device names? class?
-   * but we don't want some ugly and unmaintainable code
-   */
-
-  fprintf(stderr, "invalid PCI device %s\n", string);
-  return -1;
-}
-
-static __hwloc_inline int
-hwloc_calc_append_os_object(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
-{
-  hwloc_obj_t obj = NULL;
-  while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
-    if (!strcmp(obj->name, string))
-      return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
-  }
-  fprintf(stderr, "invalid OS device %s\n", string);
-  return -1;
-}
-
-static __hwloc_inline int
 hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
 			       hwloc_const_bitmap_t rootset, int depth,
 			       const char *string, /* starts with indexes following the colon */
@@ -413,6 +357,47 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
 }
 
 static __hwloc_inline int
+hwloc_calc_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
+			hwloc_calc_append_mode_t mode, int verbose)
+{
+  while (obj && !obj->cpuset)
+    obj = obj->parent;
+  if (!obj)
+    /* do nothing */
+    return 0;
+  hwloc_calc_append_cpuset(set, obj->cpuset, mode, verbose);
+  return 0;
+}
+
+static __hwloc_inline int
+hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
+{
+  hwloc_obj_t obj;
+  unsigned vendor, device, index_;
+
+  /* FIXME: handle the full index/range syntax */
+
+  /* try to match by vendor:device:index */
+  if (sscanf(string, "%x:%x:%u", &vendor, &device, &index_) == 3) {
+    obj = NULL;
+    while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
+      if (obj->attr->pcidev.vendor_id == vendor
+	  && obj->attr->pcidev.device_id == device) {
+	if (!index_--)
+	  return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
+      }
+    }
+  }
+
+  /* TODO: more matching variants? vendor/device names? class?
+   * but we don't want some ugly and unmaintainable code
+   */
+
+  fprintf(stderr, "invalid PCI device %s\n", string);
+  return -1;
+}
+
+static __hwloc_inline int
 hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		       const char *arg, int logical, hwloc_bitmap_t set,
 		       int verbose)
@@ -437,7 +422,7 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 
   /* try to match a type/depth followed by a special character */
   typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-  if (typelen && arg[typelen] == ':') {
+  if (typelen && (arg[typelen] == ':' || arg[typelen] == '=')) {
     const char *sep = &arg[typelen];
     hwloc_obj_type_t type;
     int depth;
@@ -449,11 +434,26 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 					  verbose);
     if (depth < 0) {
       /* if we didn't find a depth but found a type, handle special cases */
-      if (type == HWLOC_OBJ_PCI_DEVICE)
-	return hwloc_calc_append_pci_object(topology, sep+1, set, verbose);
-      else if (type == HWLOC_OBJ_OS_DEVICE)
-	return hwloc_calc_append_os_object(topology, sep+1, set, verbose);
-      else
+      hwloc_obj_t obj = NULL;
+      if (*sep == ':' && type == HWLOC_OBJ_PCI_DEVICE) {
+	/* FIXME: change to another syntax? */
+	return hwloc_calc_append_pci_object_range(topology, sep+1, set, verbose);
+      } else if (*sep == '=' && type == HWLOC_OBJ_PCI_DEVICE) {
+	/* try to match a busid */
+	obj = hwloc_get_pcidev_by_busidstring(topology, sep+1);
+	if (obj)
+	  return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
+	fprintf(stderr, "invalid PCI device %s\n", sep+1);
+	return -1;
+      } else if (*sep == '=' && type == HWLOC_OBJ_OS_DEVICE) {
+	/* try to match a OS device name */
+	while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
+	  if (!strcmp(obj->name, sep+1))
+	    return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
+	}
+	fprintf(stderr, "invalid OS device %s\n", sep+1);
+	return -1;
+      } else
 	return -1;
     }
 
