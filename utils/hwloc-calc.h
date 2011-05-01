@@ -133,6 +133,50 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
 }
 
 static __hwloc_inline int
+hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type, int depthattr, int verbose)
+{
+  int depth;
+  int i;
+
+  if (depthattr == -1) {
+    hwloc_obj_type_t realtype;
+    /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
+    depth = hwloc_get_type_or_above_depth(topology, type);
+    if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
+      fprintf(stderr, "type %s has multiple possible depths\n", hwloc_obj_type_string(type));
+      return -1;
+    } else if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
+      fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
+      return -1;
+    }
+    realtype = hwloc_get_depth_type(topology, depth);
+    if (type != realtype && verbose)
+      fprintf(stderr, "using type %s (depth %d) instead of %s\n",
+	      hwloc_obj_type_string(realtype), depth, hwloc_obj_type_string(type));
+    return depth;
+
+  } else {
+    /* matched a type with a depth attribute, look at the first object of each level to find the depth */
+    assert(type == HWLOC_OBJ_CACHE || type == HWLOC_OBJ_GROUP);
+    for(i=0; ; i++) {
+      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
+      if (!obj) {
+	fprintf(stderr, "type %s with custom depth %d does not exists\n", hwloc_obj_type_string(type), depthattr);
+	return -1;
+      }
+      if (obj->type == type
+	  && ((type == HWLOC_OBJ_CACHE && (unsigned) depthattr == obj->attr->cache.depth)
+	      || (type == HWLOC_OBJ_GROUP && (unsigned) depthattr == obj->attr->group.depth))) {
+	return i;
+      }
+    }
+  }
+
+  /* cannot come here, we'll exit above first */
+  return -1;
+}
+
+static __hwloc_inline int
 hwloc_mask_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
 			hwloc_mask_append_mode_t mode, int verbose)
 {
@@ -195,13 +239,13 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 {
   hwloc_obj_t obj;
   hwloc_obj_type_t type;
-  unsigned depth, width;
   int depthattr;
+  int depth;
+  unsigned width;
   char *sep, *sep2, *sep3;
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   unsigned first, wrap, amount, step;
-  unsigned i,j;
-  int err;
+  unsigned i,j,err;
 
   if (!hwloc_strncasecmp(string, "pci:", 4))
     return hwloc_mask_append_pci_object(topology, string, set, verbose);
@@ -223,52 +267,24 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   /* try to match a type name */
   err = hwloc_obj_type_sscanf(typestring, &type, &depthattr);
   if (!err) {
-    if (depthattr == -1) {
-      hwloc_obj_type_t realtype;
-      /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
-      depth = hwloc_get_type_or_above_depth(topology, type);
-      if (depth == (unsigned) HWLOC_TYPE_DEPTH_MULTIPLE) {
-	fprintf(stderr, "type %s has multiple possible depths\n", hwloc_obj_type_string(type));
-	return -1;
-      } else if (depth == (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN) {
-	fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
-	return -1;
-      }
-      realtype = hwloc_get_depth_type(topology, depth);
-      if (type != realtype && verbose)
-	fprintf(stderr, "using type %s (depth %d) instead of %s\n",
-		hwloc_obj_type_string(realtype), depth, hwloc_obj_type_string(type));
-    } else {
-      /* matched a type with a depth attribute, look at the first object of each level to find the depth */
-      assert(type == HWLOC_OBJ_CACHE || type == HWLOC_OBJ_GROUP);
-      for(i=0; ; i++) {
-	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
-	if (!obj) {
-	  fprintf(stderr, "type %s with custom depth %d does not exists\n", hwloc_obj_type_string(type), depthattr);
-	  return -1;
-	}
-	if (obj->type == type
-	    && ((type == HWLOC_OBJ_CACHE && (unsigned) depthattr == obj->attr->cache.depth)
-		|| (type == HWLOC_OBJ_GROUP && (unsigned) depthattr == obj->attr->group.depth))) {
-	  depth = i;
-	  break;
-	}
-      }
-    }
+    depth = hwloc_calc_depth_of_type(topology, type, depthattr, verbose);
+    if (depth < 0)
+      return -1;
+
   } else {
     /* try to match a numeric depth */
     char *end;
-    depth = strtol(string, &end, 0);
-    if (end == string) {
-      fprintf(stderr, "invalid type name %s\n", string);
+    depth = strtol(typestring, &end, 0);
+    if (end == typestring) {
+      fprintf(stderr, "invalid type name %s\n", typestring);
+      return -1;
+    }
+    if ((unsigned) depth >= topodepth) {
+      fprintf(stderr, "ignoring invalid depth %u\n", depth);
       return -1;
     }
   }
 
-  if (depth >= topodepth) {
-    fprintf(stderr, "ignoring invalid depth %u\n", depth);
-    return -1;
-  }
   width = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, rootset, depth);
 
   first = atoi(sep+1);
