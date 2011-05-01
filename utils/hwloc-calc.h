@@ -105,10 +105,14 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     type = HWLOC_OBJ_SOCKET;
   } else if (!hwloc_strncasecmp(string, "core", 2)) {
     type = HWLOC_OBJ_CORE;
-  } else if (!hwloc_strncasecmp(string, "pu", 1) || !hwloc_strncasecmp(string, "proc", 1) /* backward compat with 0.9 */) {
+  } else if (!hwloc_strncasecmp(string, "pu", 2) || !hwloc_strncasecmp(string, "proc", 2) /* backward compat with 0.9 */) {
     type = HWLOC_OBJ_PU;
   } else if (!hwloc_strncasecmp(string, "misc", 2)) {
     type = HWLOC_OBJ_MISC;
+  } else if (!hwloc_strncasecmp(string, "pci", 2)) {
+    type = HWLOC_OBJ_PCI_DEVICE;
+  } else if (!hwloc_strncasecmp(string, "os", 2)) {
+    type = HWLOC_OBJ_OS_DEVICE;
 
   /* types with depthattr */
   } else if (!hwloc_strncasecmp(string, "cache", 2)) {
@@ -141,6 +145,8 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type, int d
   if (depthattr == -1) {
     hwloc_obj_type_t realtype;
     /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
+    if (type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE || type == HWLOC_OBJ_BRIDGE)
+      return -1;
     depth = hwloc_get_type_or_above_depth(topology, type);
     if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
       fprintf(stderr, "type %s has multiple possible depths\n", hwloc_obj_type_string(type));
@@ -196,12 +202,12 @@ hwloc_mask_append_pci_object(hwloc_topology_t topology, const char *string, hwlo
   unsigned vendor, device, index_;
 
   /* try to match a busid */
-  obj = hwloc_get_pcidev_by_busidstring(topology, string+4);
+  obj = hwloc_get_pcidev_by_busidstring(topology, string);
   if (obj)
     return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
 
   /* try to match by vendor:device:index */
-  if (sscanf(string+4, "%x:%x:%u", &vendor, &device, &index_) == 3) {
+  if (sscanf(string, "%x:%x:%u", &vendor, &device, &index_) == 3) {
     obj = NULL;
     while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
       if (obj->attr->pcidev.vendor_id == vendor
@@ -216,7 +222,7 @@ hwloc_mask_append_pci_object(hwloc_topology_t topology, const char *string, hwlo
    * but we don't want some ugly and unmaintainable code
    */
 
-  fprintf(stderr, "invalid PCI device %s\n", string+4);
+  fprintf(stderr, "invalid PCI device %s\n", string);
   return -1;
 }
 
@@ -225,10 +231,10 @@ hwloc_mask_append_os_object(hwloc_topology_t topology, const char *string, hwloc
 {
   hwloc_obj_t obj = NULL;
   while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
-    if (!strcmp(obj->name, string+3))
+    if (!strcmp(obj->name, string))
       return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
   }
-  fprintf(stderr, "invalid OS device %s\n", string+3);
+  fprintf(stderr, "invalid OS device %s\n", string);
   return -1;
 }
 
@@ -242,34 +248,37 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   int depthattr;
   int depth;
   unsigned width;
-  char *sep, *sep2, *sep3;
+  const char *sep, *sep2, *sep3;
+  size_t typelen;
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   unsigned first, wrap, amount, step;
   unsigned i,j,err;
 
-  if (!hwloc_strncasecmp(string, "pci:", 4))
-    return hwloc_mask_append_pci_object(topology, string, set, verbose);
-  else if (!hwloc_strncasecmp(string, "os:", 3))
-    return hwloc_mask_append_os_object(topology, string, set, verbose);
-
-  sep = strchr(string, ':');
-  if (!sep) {
-    fprintf(stderr, "missing colon separator in argument %s\n", string);
+  typelen = strspn(string, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+  
+  if (!typelen || string[typelen] != ':')
     return -1;
-  }
-  if ((unsigned) (sep-string) >= sizeof(typestring)) {
+
+  if (typelen >= sizeof(typestring)) {
     fprintf(stderr, "invalid type name %s\n", string);
     return -1;
   }
-  strncpy(typestring, string, sep-string);
-  typestring[sep-string] = '\0';
+  strncpy(typestring, string, typelen);
+  typestring[typelen] = '\0';
+  sep = &string[typelen];
 
   /* try to match a type name */
   err = hwloc_obj_type_sscanf(typestring, &type, &depthattr);
   if (!err) {
     depth = hwloc_calc_depth_of_type(topology, type, depthattr, verbose);
-    if (depth < 0)
-      return -1;
+    if (depth < 0) {
+      if (type == HWLOC_OBJ_PCI_DEVICE)
+	return hwloc_mask_append_pci_object(topology, sep+1, set, verbose);
+      else if (type == HWLOC_OBJ_OS_DEVICE)
+	return hwloc_mask_append_os_object(topology, sep+1, set, verbose);
+      else
+	return -1;
+    }
 
   } else {
     /* try to match a numeric depth */
