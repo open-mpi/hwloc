@@ -89,10 +89,10 @@ hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const
  * only looks at the beginning of the string to allow truncated type names.
  */
 static __hwloc_inline int
-hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, unsigned *depthattrp)
+hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthattrp)
 {
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
-  unsigned depthattr = (unsigned) -1;
+  int depthattr = -1;
 
   /* types without depthattr */
   if (!strncasecmp(string, "system", 2)) {
@@ -195,7 +195,8 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
 {
   hwloc_obj_t obj;
   hwloc_obj_type_t type;
-  unsigned depth, width, depthattr;
+  unsigned depth, width;
+  int depthattr;
   char *sep, *sep2, *sep3;
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   unsigned first, wrap, amount, step;
@@ -222,7 +223,7 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
   /* try to match a type name */
   err = hwloc_obj_type_sscanf(typestring, &type, &depthattr);
   if (!err) {
-    if (depthattr == (unsigned) -1) {
+    if (depthattr == -1) {
       hwloc_obj_type_t realtype;
       /* matched a type without depth attribute, try to get the depth from the type if it exists and is unique */
       depth = hwloc_get_type_or_above_depth(topology, type);
@@ -243,12 +244,12 @@ hwloc_mask_append_object(hwloc_topology_t topology, unsigned topodepth,
       for(i=0; ; i++) {
 	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
 	if (!obj) {
-	  fprintf(stderr, "type %s with custom depth %u does not exists\n", hwloc_obj_type_string(type), depthattr);
+	  fprintf(stderr, "type %s with custom depth %d does not exists\n", hwloc_obj_type_string(type), depthattr);
 	  return -1;
 	}
 	if (obj->type == type
-	    && ((type == HWLOC_OBJ_CACHE && depthattr == obj->attr->cache.depth)
-		|| (type == HWLOC_OBJ_GROUP && depthattr == obj->attr->group.depth))) {
+	    && ((type == HWLOC_OBJ_CACHE && (unsigned) depthattr == obj->attr->cache.depth)
+		|| (type == HWLOC_OBJ_GROUP && (unsigned) depthattr == obj->attr->group.depth))) {
 	  depth = i;
 	  break;
 	}
