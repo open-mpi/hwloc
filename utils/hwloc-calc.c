@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
     }
 
     cmdline_args++;
-    if (hwloc_mask_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0)
+    if (hwloc_calc_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0)
       fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
 
  next:
@@ -445,7 +445,7 @@ int main(int argc, char *argv[])
 	if (!token)
 	  break;
 	current = NULL;
-	if (hwloc_mask_process_arg(topology, depth, token, logicali, set, verbose) < 0)
+	if (hwloc_calc_process_arg(topology, depth, token, logicali, set, verbose) < 0)
 	  fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
       }
       hwloc_calc_output(topology, outsep, set);

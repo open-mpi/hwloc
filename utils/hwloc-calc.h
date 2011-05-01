@@ -6,8 +6,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_MASK_H
-#define HWLOC_MASK_H
+#ifndef HWLOC_CALC_H
+#define HWLOC_CALC_H
 
 #include <private/private.h>
 #include <private/misc.h>
@@ -20,40 +20,40 @@
 #include <ctype.h>
 #include <assert.h>
 
-typedef enum hwloc_mask_append_mode_e {
-  HWLOC_MASK_APPEND_ADD,
-  HWLOC_MASK_APPEND_CLR,
-  HWLOC_MASK_APPEND_AND,
-  HWLOC_MASK_APPEND_XOR
-} hwloc_mask_append_mode_t;
+typedef enum hwloc_calc_append_mode_e {
+  HWLOC_CALC_APPEND_ADD,
+  HWLOC_CALC_APPEND_CLR,
+  HWLOC_CALC_APPEND_AND,
+  HWLOC_CALC_APPEND_XOR
+} hwloc_calc_append_mode_t;
 
 static __hwloc_inline int
-hwloc_mask_append_cpuset(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
-		       hwloc_mask_append_mode_t mode, int verbose)
+hwloc_calc_append_cpuset(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
+		       hwloc_calc_append_mode_t mode, int verbose)
 {
   char *s1, *s2;
   hwloc_bitmap_asprintf(&s1, newset);
   hwloc_bitmap_asprintf(&s2, set);
   switch (mode) {
-  case HWLOC_MASK_APPEND_ADD:
+  case HWLOC_CALC_APPEND_ADD:
     if (verbose)
       fprintf(stderr, "adding %s to %s\n",
           s1, s2);
     hwloc_bitmap_or(set, set, newset);
     break;
-  case HWLOC_MASK_APPEND_CLR:
+  case HWLOC_CALC_APPEND_CLR:
     if (verbose)
       fprintf(stderr, "clearing %s from %s\n",
           s1, s2);
     hwloc_bitmap_andnot(set, set, newset);
     break;
-  case HWLOC_MASK_APPEND_AND:
+  case HWLOC_CALC_APPEND_AND:
     if (verbose)
       fprintf(stderr, "and'ing %s from %s\n",
           s1, s2);
     hwloc_bitmap_and(set, set, newset);
     break;
-  case HWLOC_MASK_APPEND_XOR:
+  case HWLOC_CALC_APPEND_XOR:
     if (verbose)
       fprintf(stderr, "xor'ing %s from %s\n",
           s1, s2);
@@ -68,7 +68,7 @@ hwloc_mask_append_cpuset(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
 }
 
 static __hwloc_inline hwloc_obj_t __hwloc_attribute_pure
-hwloc_mask_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_bitmap_t rootset,
+hwloc_calc_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const_bitmap_t rootset,
 					 unsigned depth, unsigned i, int logical)
 {
   if (logical) {
@@ -284,20 +284,20 @@ hwloc_calc_parse_range(const char *string,
 }
 
 static __hwloc_inline int
-hwloc_mask_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
-			hwloc_mask_append_mode_t mode, int verbose)
+hwloc_calc_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
+			hwloc_calc_append_mode_t mode, int verbose)
 {
   while (obj && !obj->cpuset)
     obj = obj->parent;
   if (!obj)
     /* do nothing */
     return 0;
-  hwloc_mask_append_cpuset(set, obj->cpuset, mode, verbose);
+  hwloc_calc_append_cpuset(set, obj->cpuset, mode, verbose);
   return 0;
 }
 
 static __hwloc_inline int
-hwloc_mask_append_pci_object(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
+hwloc_calc_append_pci_object(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
 {
   hwloc_obj_t obj;
   unsigned vendor, device, index_;
@@ -305,7 +305,7 @@ hwloc_mask_append_pci_object(hwloc_topology_t topology, const char *string, hwlo
   /* try to match a busid */
   obj = hwloc_get_pcidev_by_busidstring(topology, string);
   if (obj)
-    return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
+    return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
 
   /* try to match by vendor:device:index */
   if (sscanf(string, "%x:%x:%u", &vendor, &device, &index_) == 3) {
@@ -314,7 +314,7 @@ hwloc_mask_append_pci_object(hwloc_topology_t topology, const char *string, hwlo
       if (obj->attr->pcidev.vendor_id == vendor
 	  && obj->attr->pcidev.device_id == device) {
 	if (!index_--)
-	  return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
+	  return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
       }
     }
   }
@@ -328,12 +328,12 @@ hwloc_mask_append_pci_object(hwloc_topology_t topology, const char *string, hwlo
 }
 
 static __hwloc_inline int
-hwloc_mask_append_os_object(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
+hwloc_calc_append_os_object(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
 {
   hwloc_obj_t obj = NULL;
   while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
     if (!strcmp(obj->name, string))
-      return hwloc_mask_append_iodev(set, obj, HWLOC_MASK_APPEND_ADD, verbose);
+      return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
   }
   fprintf(stderr, "invalid OS device %s\n", string);
   return -1;
@@ -385,7 +385,7 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
     if (wrap && i>=width)
       i = 0;
 
-    obj = hwloc_mask_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
+    obj = hwloc_calc_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
     if (verbose || !obj) {
       char *s;
       hwloc_bitmap_asprintf(&s, rootset);
@@ -404,7 +404,7 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
 	/* add to the temporary cpuset
 	 * and let the caller add/clear/and/xor for the actual final cpuset depending on cmdline options
 	 */
-        hwloc_mask_append_cpuset(set, obj->cpuset, HWLOC_MASK_APPEND_ADD, verbose);
+        hwloc_calc_append_cpuset(set, obj->cpuset, HWLOC_CALC_APPEND_ADD, verbose);
       }
     }
   }
@@ -413,27 +413,27 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
 }
 
 static __hwloc_inline int
-hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
-		     const char *arg, int logical, hwloc_bitmap_t set,
-		     int verbose)
+hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
+		       const char *arg, int logical, hwloc_bitmap_t set,
+		       int verbose)
 {
-  hwloc_mask_append_mode_t mode = HWLOC_MASK_APPEND_ADD;
+  hwloc_calc_append_mode_t mode = HWLOC_CALC_APPEND_ADD;
   size_t typelen;
   int err;
 
   if (*arg == '~') {
-    mode = HWLOC_MASK_APPEND_CLR;
+    mode = HWLOC_CALC_APPEND_CLR;
     arg++;
   } else if (*arg == 'x') {
-    mode = HWLOC_MASK_APPEND_AND;
+    mode = HWLOC_CALC_APPEND_AND;
     arg++;
   } else if (*arg == '^') {
-    mode = HWLOC_MASK_APPEND_XOR;
+    mode = HWLOC_CALC_APPEND_XOR;
     arg++;
   }
 
   if (!strcmp(arg, "all") || !strcmp(arg, "root"))
-    return hwloc_mask_append_cpuset(set, hwloc_topology_get_topology_cpuset(topology), mode, verbose);
+    return hwloc_calc_append_cpuset(set, hwloc_topology_get_topology_cpuset(topology), mode, verbose);
 
   /* try to match a type/depth followed by a special character */
   typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
@@ -450,9 +450,9 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
     if (depth < 0) {
       /* if we didn't find a depth but found a type, handle special cases */
       if (type == HWLOC_OBJ_PCI_DEVICE)
-	return hwloc_mask_append_pci_object(topology, sep+1, set, verbose);
+	return hwloc_calc_append_pci_object(topology, sep+1, set, verbose);
       else if (type == HWLOC_OBJ_OS_DEVICE)
-	return hwloc_mask_append_os_object(topology, sep+1, set, verbose);
+	return hwloc_calc_append_os_object(topology, sep+1, set, verbose);
       else
 	return -1;
     }
@@ -461,7 +461,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
     newset = hwloc_bitmap_alloc();
     err = hwloc_calc_append_object_range(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), depth, sep+1, logical, newset, verbose);
     if (!err)
-      err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
+      err = hwloc_calc_append_cpuset(set, newset, mode, verbose);
     hwloc_bitmap_free(newset);
 
   } else {
@@ -523,7 +523,7 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
       hwloc_bitmap_taskset_sscanf(newset, arg);
     else
       hwloc_bitmap_sscanf(newset, arg);
-    err = hwloc_mask_append_cpuset(set, newset, mode, verbose);
+    err = hwloc_calc_append_cpuset(set, newset, mode, verbose);
     hwloc_bitmap_free(newset);
   }
 
@@ -531,4 +531,4 @@ hwloc_mask_process_arg(hwloc_topology_t topology, unsigned topodepth,
   return err;
 }
 
-#endif /* HWLOC_MASK_H */
+#endif /* HWLOC_CALC_H */

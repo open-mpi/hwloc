@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    ret = hwloc_mask_process_arg(topology, depth, argv[0], logical,
+    ret = hwloc_calc_process_arg(topology, depth, argv[0], logical,
 				 cpubind ? cpubind_set : membind_set,
 				 verbose);
     if (ret < 0) {
