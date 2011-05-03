@@ -387,8 +387,8 @@ hwloc_calc_find_next_pci_object(hwloc_topology_t topology, int vendor, int devic
       if (!obj)
 	break;
     }
-    if ((int) obj->attr->pcidev.vendor_id == vendor
-	&& (int) obj->attr->pcidev.device_id == device)
+    if ((vendor == -1 || (int) obj->attr->pcidev.vendor_id == vendor)
+	&& (device == -1 || (int) obj->attr->pcidev.device_id == device))
       if (++i == index_)
         return obj;
   }
@@ -409,13 +409,18 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
 
   /* try to match by vendor:device */
   vendor = strtoul(current, &endp, 16);
-  if (endp == current || *endp != ':')
+  if (*endp != ':')
     goto failedvendordevice;
+  if (endp == current)
+    vendor = -1;
   current = endp+1;
 
   device = strtoul(current, &endp, 16);
-  if (endp == current || (*endp != ':' && *endp != '\0'))
+  if (*endp != ':' && *endp != '\0')
     goto failedvendordevice;
+  if (endp == current)
+    device = -1;
+
   if (*endp == '\0') {
     /* assume it's :0 */
     first = 0;
