@@ -369,26 +369,85 @@ hwloc_calc_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
   return 0;
 }
 
+static __hwloc_inline hwloc_obj_t
+hwloc_calc_find_next_pci_object(hwloc_topology_t topology, int vendor, int device,
+				hwloc_obj_t prev, unsigned index_, int wrap)
+{
+  unsigned i = 0;
+  hwloc_obj_t obj = prev;
+  while (1) {
+    obj = hwloc_get_next_pcidev(topology, obj);
+    if (obj == prev)
+      break; /* don't reuse the same object, even if wrap==1 */
+    if (!obj) {
+      if (!wrap)
+	break;
+      wrap = 0; /* wrap only once per call, to avoid infinite loops */
+      obj = hwloc_get_next_pcidev(topology, NULL);
+      if (!obj)
+	break;
+    }
+    if ((int) obj->attr->pcidev.vendor_id == vendor
+	&& (int) obj->attr->pcidev.device_id == device)
+      if (++i == index_)
+        return obj;
+  }
+  return NULL;
+}
+
 static __hwloc_inline int
 hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string, hwloc_bitmap_t set, int verbose)
 {
   hwloc_obj_t obj;
-  unsigned vendor, device, index_;
+  int vendor, device;
+  const char *current, *dot;
+  char *endp;
+  int first, wrap, amount, step;
+  int err, i, oldi, j;
 
-  /* FIXME: handle the full index/range syntax */
+  current = string;
 
-  /* try to match by vendor:device:index */
-  if (sscanf(string, "%x:%x:%u", &vendor, &device, &index_) == 3) {
-    obj = NULL;
-    while ((obj = hwloc_get_next_pcidev(topology, obj)) != NULL) {
-      if (obj->attr->pcidev.vendor_id == vendor
-	  && obj->attr->pcidev.device_id == device) {
-	if (!index_--)
-	  return hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
-      }
-    }
+  /* try to match by vendor:device */
+  vendor = strtoul(current, &endp, 16);
+  if (endp == current || *endp != ':')
+    goto failedvendordevice;
+  current = endp+1;
+
+  device = strtoul(current, &endp, 16);
+  if (endp == current || (*endp != ':' && *endp != '\0'))
+    goto failedvendordevice;
+  if (*endp == '\0') {
+    /* assume it's :0 */
+    first = 0;
+    step = 1;
+    amount = 1;
+    wrap = 0;
+  } else {
+    current = endp+1;
+    err = hwloc_calc_parse_range(current,
+				 &first, &amount, &step, &wrap,
+				 &dot);
+    if (err < 0 || dot)
+      goto failedvendordevice;
   }
 
+  obj = NULL;
+  for(oldi=-1, i=first, j=0; j<amount || amount == -1; oldi=i, i+=step, j++) {
+    obj = hwloc_calc_find_next_pci_object(topology, vendor, device, obj, i-oldi, wrap);
+    if (obj) {
+      if (verbose)
+	printf("using matching PCI object #%d bus id %04x:%02x:%02x.%01x\n", i,
+	       obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
+      hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
+    } else {
+      if (amount != -1)
+	fprintf(stderr, "no matching PCI object #%d\n", i);
+      break;
+    }
+  }
+  return 0;
+
+ failedvendordevice:
   /* TODO: more matching variants? vendor/device names? class?
    * but we don't want some ugly and unmaintainable code
    */
