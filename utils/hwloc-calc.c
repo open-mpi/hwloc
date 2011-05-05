@@ -20,7 +20,8 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
   fprintf(where, "Usage: hwloc-calc [options] <location> ...\n");
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
-  fprintf(where, "            as supported by the hwloc-bind utility.\n");
+  fprintf(where, "            as supported by the hwloc-bind utility, e.g:\n");
+  hwloc_calc_locations_usage(where);
   fprintf(where, "Conversion options:\n");
   fprintf(where, "  [default]                 Report the combined input locations as a CPU set\n");
   fprintf(where, "  --number-of <type|depth>\n"

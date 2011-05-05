@@ -602,4 +602,16 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
   return err;
 }
 
+static __hwloc_inline void
+hwloc_calc_locations_usage(FILE *where)
+{
+  fprintf (where, "    core:2-3        for the second and third core\n");
+  fprintf (where, "    node:1.pu:2       the third PU of the second NUMA node\n");
+  fprintf (where, "    0x12345678        a CPU set given a bitmask string\n");
+  fprintf (where, "    os=eth0           the operating system device named eth0\n");
+  fprintf (where, "    pci=0000:01:02.0  the PCI device with the given bus ID\n");
+  fprintf (where, "  with prefix ~ to remove, ^ for xor and x for intersection\n");
+  fprintf (where, "  (see Location Specification in hwloc(7) for details).\n");
+}
+
 #endif /* HWLOC_CALC_H */

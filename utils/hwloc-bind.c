@@ -17,7 +17,8 @@ static void usage(FILE *where)
 {
   fprintf(where, "Usage: hwloc-bind [options] <location> -- command ...\n");
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
-  fprintf(where, "            as supported by the hwloc-calc utility.\n");
+  fprintf(where, "            as supported by the hwloc-calc utility, e.g:\n");
+  hwloc_calc_locations_usage(where);
   fprintf(where, "Options:\n");
   fprintf(where, "  --cpubind      Use following arguments for cpu binding (default)\n");
   fprintf(where, "  --membind      Use following arguments for memory binding\n");
