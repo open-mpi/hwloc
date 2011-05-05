@@ -196,6 +196,16 @@ To display the physical index of a processor given by its logical index:
     $ hwloc-calc PU:2 --physical-output --intersect PU
     3
 
+To display the set of CPUs near network interface eth0:
+
+    $ hwloc-calc os=eth0
+    0x00005555
+
+To display the indexes of sockets near PCI device whose bus ID is 0000:01:02.0:
+
+    $ hwloc-calc pci=0000:01:02.0 --intersect Socket
+    1
+
 To display the list of per-socket cores that intersect the input:
 
     $ hwloc-calc 0x00003c00 --hierarchical socket.core

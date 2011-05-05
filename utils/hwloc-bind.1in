@@ -153,6 +153,14 @@ To run anywhere except on the first socket:
 
     hwloc-bind all ~socket:0 echo hello
 
+To run on a core near the network interface named eth0:
+
+    hwloc-bind os=eth0 echo hello
+
+To run on a core near the PCI device whose bus ID is 0000:01:02.0:
+
+    hwloc-bind pci=0000:01:02.0 echo hello
+
 To bind memory on second memory node and run on first node (when supported by the OS):
 
     hwloc-bind --cpubind node:1 --membind node:0 echo hello
