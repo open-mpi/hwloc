@@ -19,8 +19,9 @@
 
 hwloc provides command line tools and a C API to obtain the
 hierarchical map of key computing elements, such as: NUMA memory
-nodes, shared caches, processor sockets, processor cores, and
-processing units (logical processors or "threads").
+nodes, shared caches, processor sockets, processor cores,
+processing units (logical processors or "threads")
+and even I/O devices.
 hwloc also gathers various attributes such as
 cache and memory information, and is portable across a variety of
 different operating systems and platforms.
@@ -594,6 +595,7 @@ The documentation chapters include
 <li> \ref tools
 <li> \ref envvar
 <li> \ref cpu_mem_bind
+<li> \ref iodevices
 <li> \ref interoperability
 <li> \ref threadsafety
 <li> \ref embed
@@ -930,6 +932,43 @@ binding policy.
 See \ref hwlocality_cpubinding and \ref hwlocality_membinding for
 hwloc's API functions regarding CPU and memory binding, respectively.
 
+
+
+\page iodevices I/O devices
+
+hwloc usually manipulates processing units and memory but it can actually
+discover  I/O devices and report their locality as well.
+This is useful for placing I/O intensive applications on cores near the
+I/O devices they use.
+
+I/O discovery is disabled by default (except in lstopo) so as not to
+break legacy application by adding unexpected I/O objects to the topology.
+It can be enabled by passing flags such as <tt>HWLOC_TOPOLOGY_FLAG_IO_DEVICES</tt>
+to hwloc_topology_set_flags() before loading the topology.
+
+Note that I/O discovery requires significant help from the operating system.
+The pciutils library is needed to detect PCI devices and bridges,
+and the actual locality of these devices is only currently detected
+on Linux.
+
+When I/O discovery is enabled and supported, some additional objects
+(types <tt>HWLOC_OBJ_BRIDGE</tt>, <tt>HWLOC_OBJ_PCI_DEVICE</tt> and
+<tt>HWLOC_OBJ_OS_DEVICE</tt>)
+are added to the topology as a child of the object they are close to.
+For instance, if a I/O Hub is connected to a socket, the corresponding
+hwloc bridge object (and its PCI bridges and devices children) is inserted
+as a child of the corresponding hwloc socket object.
+These new objects have neither CPU sets nor node sets (NULL pointers) because
+they are not directly usable by the user.
+
+TODO what OS devices are
+
+TODO usual hierarchy
+
+TODO hwloc-bind/calc locations
+
+
+
 \page interoperability Interoperability With Other Software
 
 Although hwloc offers its own portable interface, it still may have to
@@ -973,6 +1012,8 @@ interface with dedicated helpers.
   hwloc/openfabrics-verbs.h helps interoperability with the
   OpenFabrics Verbs interface.  For example, it can return a list of
   processors near an OpenFabrics device.
+  Note that if I/O device discovery is enabled, such devices may also
+  appear as PCI objects and as OS objects in the topology.
  </dd>
 
 <dt>Myrinet Express</dt>
@@ -980,6 +1021,8 @@ interface with dedicated helpers.
   hwloc/myriexpress.h offers interoperability with the Myrinet
   Express interface.  It can return the list of processors near
   a Myrinet board managed by the MX driver.
+  Note that if I/O device discovery is enabled, such boards may also
+  appear as PCI objects in the topology.
  </dd>
 
 <dt>NVIDIA CUDA</dt>
@@ -987,6 +1030,8 @@ interface with dedicated helpers.
   hwloc/cuda.h and hwloc/cudart.h enable interoperability with
   NVIDIA CUDA Driver and Runtime interfaces. For instance, it may
   return the list of processors near NVIDIA GPUs.
+  Note that if I/O device discovery is enabled, GPUs may also
+  appear as PCI objects in the topology.
  </dd>
 
 <dt>Taskset command-line tool</dt>
