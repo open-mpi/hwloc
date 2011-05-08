@@ -934,16 +934,16 @@ hwloc's API functions regarding CPU and memory binding, respectively.
 
 
 
-\page iodevices I/O devices
+\page iodevices I/O Devices
 
 hwloc usually manipulates processing units and memory but it can actually
-discover  I/O devices and report their locality as well.
+discover I/O devices and report their locality as well.
 This is useful for placing I/O intensive applications on cores near the
 I/O devices they use.
 
 I/O discovery is disabled by default (except in lstopo) so as not to
 break legacy application by adding unexpected I/O objects to the topology.
-It can be enabled by passing flags such as <tt>HWLOC_TOPOLOGY_FLAG_IO_DEVICES</tt>
+It can be enabled by passing flags such as <tt>::HWLOC_TOPOLOGY_FLAG_IO_DEVICES</tt>
 to hwloc_topology_set_flags() before loading the topology.
 
 Note that I/O discovery requires significant help from the operating system.
@@ -952,20 +952,63 @@ and the actual locality of these devices is only currently detected
 on Linux.
 
 When I/O discovery is enabled and supported, some additional objects
-(types <tt>HWLOC_OBJ_BRIDGE</tt>, <tt>HWLOC_OBJ_PCI_DEVICE</tt> and
-<tt>HWLOC_OBJ_OS_DEVICE</tt>)
+(types <tt>::HWLOC_OBJ_BRIDGE</tt>, <tt>::HWLOC_OBJ_PCI_DEVICE</tt> and
+<tt>::HWLOC_OBJ_OS_DEVICE</tt>)
 are added to the topology as a child of the object they are close to.
 For instance, if a I/O Hub is connected to a socket, the corresponding
 hwloc bridge object (and its PCI bridges and devices children) is inserted
 as a child of the corresponding hwloc socket object.
+
 These new objects have neither CPU sets nor node sets (NULL pointers) because
-they are not directly usable by the user.
+they are not directly usable by the user applications.
+Moreover I/O hierarchies may be highly complex (asymmetric trees of bridges).
+So I/O objects are not placed in a level with a well-defined depth as
+regular objects do.
+Hence, they have no notion of cousins and their list may not be traversed with
+helpers such as hwloc_get_next_obj_by_depth() or hwloc_get_next_obj_by_type().
+However, hwloc offers some dedicated helpers such as hwloc_get_next_pcidev()
+and hwloc_get_next_iodev() for convenience (see \ref hwlocality_iodev and
+\ref hwlocality_advanced_io).
 
-TODO what OS devices are
+An I/O hierarchy is organized as follows:
+A hostbridge object ( <tt>::HWLOC_OBJ_BRIDGE</tt> object with upstream
+type <em>Host</em> and downstream type <em>PCI</em>) is attached below
+a regular object (usually the entire machine or a NUMA node).
+There may be multiple hostbridges in the machine, attached to
+different places, but all I/O devices are below one of them.
+Each hostbridge contains one or several children, either other bridges
+(usually PCI to PCI) or PCI devices (<tt>::HWLOC_OBJ_PCI_DEVICE</tt>).
+The number of bridges between the hostbridge and a PCI device depends
+on the machine and on the topology flags.
 
-TODO usual hierarchy
+Although each PCI device is uniquely identified by its bus ID
+(e.g. 0000:01:02.3), the application can hardly find out which
+PCI device is actually used when manipulating software handle
+(such as the <em>eth0</em> network interface or the <em>mlx4_0</em>
+OpenFabrics HCA).
+Therefore hwloc tries to add software devices (<tt>::HWLOC_OBJ_OS_DEVICE</tt>)
+below their PCI objects.
+This objects can be identified by their usual operating system-wide
+names, e.g. <em>eth0</em> or <em>mlx4_0</em>.
+However, this ability is currently only available on Linux for some
+classes of devices.
+It should especially be noted that proprietary graphics driver do not
+create any interesting software device for GPUs.
+See also \ref interoperability for managing these devices without
+considering them as hwloc objects.
 
-TODO hwloc-bind/calc locations
+I/O devices may be consulted by traversing the topology manually
+(looking for hostbridges), using dedicated helpers, or with the
+command-line tools.
+lstopo displays the interesting I/O devices by default.
+hwloc-calc and hwloc-bind may manipulate I/O devices specified
+by PCI bus ID or by OS device name.
+For instance, <tt>pci=0000:02:03.0</tt> (respectively <tt>os=eth0</tt>)
+is replaced by the set of CPUs that are close to this PCI device
+(respectively software device).
+This enables easy binding of I/O-intensive applications near the
+device they use.
+
 
 
 
