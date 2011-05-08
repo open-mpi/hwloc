@@ -120,6 +120,16 @@ example, "0xf...f,0x1" sets both the first bit and all bits starting
 with the 33rd.  The string "0xf...f" -- with no other specified values
 -- sets all bits.
 .
+.TP
+.B I/O devices:
+Locations may also be a PCI or OS object.
+The corresponding value is the set of CPUs that are close to the
+physical device.
+For example, "pci=02:03.1" is equivalent to the set of processors
+that are close to the hostbridge above PCI device with bus ID "02:03.1".
+"os=eth0" is equivalent to all processors close to the network
+interface whose software name is "eth0".
+.
 .PP
 Multiple locations can be specified on the hwloc-bind command line
 (delimited by whitespace); the first token of the execution command is
