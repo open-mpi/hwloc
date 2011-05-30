@@ -51,6 +51,7 @@ hwloc_cudart_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
   struct cudaDeviceProp prop;
   char path[HWLOC_CUDART_DEVICE_SYSFS_PATH_MAX];
   FILE *sysfile = NULL;
+  int pciDomainID = 0;
 
   cerr = cudaGetDeviceProperties(&prop, device);
   if (cerr) {
@@ -58,7 +59,11 @@ hwloc_cudart_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
     return -1;
   }
 
-  sprintf(path, "/sys/bus/pci/devices/0000:%02x:%02x.0/local_cpus", prop.pciBusID, prop.pciDeviceID);
+#if CUDART_VERSION >= 4000
+  pciDomainID = prop.pciDomainID;
+#endif
+
+  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.0/local_cpus", pciDomainID, prop.pciBusID, prop.pciDeviceID);
   sysfile = fopen(path, "r");
   if (!sysfile)
     return -1;

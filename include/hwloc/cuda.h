@@ -48,11 +48,19 @@ hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
   /* If we're on Linux, use the sysfs mechanism to get the local cpus */
 #define HWLOC_CUDA_DEVICE_SYSFS_PATH_MAX 128
   CUresult cres;
+  int domainid = 0;
   int deviceid;
   int busid;
   char path[HWLOC_CUDA_DEVICE_SYSFS_PATH_MAX];
   FILE *sysfile = NULL;
 
+#if CUDA_VERSION >= 4000
+  cres = cuDeviceGetAttribute(&domainid, CU_DEVICE_ATTRIBUTE_PCI_DOMAIN_ID, cudevice);
+  if (cres != CUDA_SUCCESS) {
+    errno = ENOSYS;
+    return -1;
+  } 
+#endif
   cres = cuDeviceGetAttribute(&busid, CU_DEVICE_ATTRIBUTE_PCI_BUS_ID, cudevice);
   if (cres != CUDA_SUCCESS) {
     errno = ENOSYS;
@@ -64,7 +72,7 @@ hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
     return -1;
   }
 
-  sprintf(path, "/sys/bus/pci/devices/0000:%02x:%02x.0/local_cpus", busid, deviceid);
+  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.0/local_cpus", domainid, busid, deviceid);
   sysfile = fopen(path, "r");
   if (!sysfile)
     return -1;
