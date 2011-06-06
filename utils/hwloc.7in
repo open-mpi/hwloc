@@ -153,7 +153,7 @@ xor'ed.
 current topology.
 .
 More complex operations may be performed by using
-.R hwloc-calc
+.IR hwloc-calc
 to compute intermediate values.
 .
 .SS Hwloc Objects
