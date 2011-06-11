@@ -81,6 +81,16 @@ onto certain cores or memory nodes. Several utility programs are also
 provided to ease command-line manipulation of topology objects,
 binding of processes, and so on.
 
+Perl bindings are available from Bernd Kallies
+<a href=http://search.cpan.org/~bka/Sys-Hwloc-0.10/>on CPAN:</a>
+
+Python bindings are available from Guy Streeter:
+<ul>
+<li><a href=http://people.redhat.com/streeter/>Fedora RPM and tarball</a>.</li>
+<li><a href=git://git.fedorahosted.org/python-hwloc.git>git tree</a>
+(<a href=http://git.fedorahosted.org/git/python-hwloc.git>html</a>).</li>
+</ul>
+
 \htmlonly
 </div><div class="section" id="installation">
 \endhtmlonly
