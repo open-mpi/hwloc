@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -27,7 +27,11 @@
 #endif /* HAVE_PUTWC */
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
-#include <curses.h>
+#ifdef HAVE_NCURSES_H
+#  include <ncurses.h>
+#else
+#  include <curses.h>
+#endif
 #include <term.h>
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 

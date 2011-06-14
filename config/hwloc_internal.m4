@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl Copyright (c) 2009 INRIA.  All rights reserved.
-dnl Copyright (c) 2009 Université Bordeaux 1
+dnl Copyright (c) 2009, 2011 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -261,7 +261,7 @@ EOF
     ])
     hwloc_old_LIBS="$LIBS"
     LIBS=
-    AC_CHECK_HEADERS([curses.h], [
+    AC_CHECK_HEADERS([ncurses.h curses.h], [
       AC_CHECK_HEADERS([term.h], [
         AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
             AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
