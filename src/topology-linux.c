@@ -2402,9 +2402,9 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
-      struct hwloc_obj *sock, *core, *thread;
-      hwloc_bitmap_t socketset, coreset, threadset, savedcoreset;
-      unsigned mysocketid, mycoreid;
+      struct hwloc_obj *sock, *core, *book, *thread;
+      hwloc_bitmap_t socketset, coreset, bookset, threadset, savedcoreset;
+      unsigned mysocketid, mycoreid, mybookid;
 
       /* look at the socket */
       mysocketid = 0; /* shut-up the compiler */
@@ -2439,6 +2439,23 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
                      mycoreid, coreset);
         hwloc_insert_object_by_cpuset(topology, core);
         coreset = NULL; /* don't free it */
+      }
+
+      /* look at the books */
+      mybookid = 0; /* shut-up the compiler */
+      sprintf(str, "%s/cpu%d/topology/book_id", path, i);
+      if (hwloc_parse_sysfs_unsigned(str, &mybookid, topology->backend_params.sysfs.root_fd) == 0) {
+
+        sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
+        bookset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
+        if (bookset && hwloc_bitmap_first(bookset) == i) {
+          book = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, mybookid);
+          book->cpuset = bookset;
+          hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
+                       mybookid, bookset);
+          hwloc_insert_object_by_cpuset(topology, book);
+          bookset = NULL; /* don't free it */
+        }
       }
 
       /* look at the thread */
