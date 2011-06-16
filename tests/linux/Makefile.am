@@ -45,7 +45,8 @@ sysfs_outputs = \
 		256ia64-64n2s2c.output \
 		4qs22-2s2t.output \
 		2s390-2c.output \
-		1alpha.output
+		1alpha.output \
+		2arm-2c.output
 
 # Each output `xyz.output' must have a corresponding tarball `xyz.tar.bz2'
 # or a corresponding `xyz.source' specifying which tarball to use
@@ -85,7 +86,8 @@ sysfs_tarballs = \
 		256ia64-64n2s2c.tar.bz2 \
 		4qs22-2s2t.tar.bz2 \
 		2s390-2c.tar.bz2 \
-		1alpha.tar.bz2
+		1alpha.tar.bz2 \
+		2arm-2c.tar.bz2
 
 # Each `xyz.output' may have a corresponding exclude `xyz.exclude'
 sysfs_excludes = \
