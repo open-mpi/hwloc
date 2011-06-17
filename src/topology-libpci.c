@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -19,6 +19,8 @@
 #include <fcntl.h>
 #include <string.h>
 #include <assert.h>
+#include <stdarg.h>
+#include <setjmp.h>
 #ifdef HWLOC_LINUX_SYS
 #include <hwloc/linux.h>
 #include <dirent.h>
@@ -541,6 +543,20 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   return parent;
 }
 
+/* Avoid letting libpci call exit(1) when no PCI bus is available. */
+static jmp_buf err_buf;
+static void
+hwloc_pci_error(char *msg, ...)
+{
+  va_list args;
+
+  va_start(args, msg);
+  fprintf(stderr, "pcilib: ");
+  vfprintf(stderr, msg, args);
+  fprintf(stderr, "\n");
+  longjmp(err_buf, 1);
+}
+
 void
 hwloc_look_libpci(struct hwloc_topology *topology)
 {
@@ -556,6 +572,13 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   hwloc_debug("%s", "\nScanning PCI buses...\n");
 
   pciaccess = pci_alloc();
+  pciaccess->error = hwloc_pci_error;
+
+  if (setjmp(err_buf)) {
+    pci_cleanup(pciaccess);
+    return;
+  }
+
   pci_init(pciaccess);
   pci_scan_bus(pciaccess);
 
