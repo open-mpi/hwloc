@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2010 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -16,12 +16,13 @@
 
 static void usage(char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [ options ] ... [ filename ]\n", name);
+  fprintf (where, "Usage: %s [ options ] ...\n", name);
   fprintf (where, "Options:\n");
   fprintf (where, "  -a             Show all processes, including those that are not bound\n");
   fprintf (where, "  -l --logical   Use logical object indexes (default)\n");
   fprintf (where, "  -p --physical  Use physical object indexes\n");
   fprintf (where, "  -c --cpuset    Show cpuset instead of objects\n");
+  fprintf (where, "  --whole-system Do not consider administration limitations\n");
 }
 
 int main(int argc, char *argv[])
@@ -30,6 +31,7 @@ int main(int argc, char *argv[])
   hwloc_topology_t topology;
   hwloc_obj_t root;
   hwloc_bitmap_t cpuset;
+  unsigned long flags = 0;
   int logical = 1;
   int show_cpuset = 0;
   DIR *dir;
@@ -55,6 +57,8 @@ int main(int argc, char *argv[])
       logical = 0;
     } else if (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cpuset")) {
       show_cpuset = 1;
+    } else if (!strcmp (argv[1], "--whole-system")) {
+      flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
     } else {
       fprintf (stderr, "Unrecognized option: %s\n", argv[1]);
       usage (callname, stderr);
@@ -67,6 +71,8 @@ int main(int argc, char *argv[])
   err = hwloc_topology_init(&topology);
   if (err)
     goto out;
+
+  hwloc_topology_set_flags(topology, flags);
 
   err = hwloc_topology_load(topology);
   if (err)
