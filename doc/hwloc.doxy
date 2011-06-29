@@ -56,6 +56,13 @@ and Kerrighed support)</li>
 <li>Microsoft Windows</li>
 </ul>
 
+Since it uses standard Operating System information, hwloc's support is
+mostly independant from the processor type (x86, powerpc, ...).
+
+To check whether hwloc works on a particular machine, just try to build it
+and run <tt>lstopo</tt>. If some things do not look right (e.g. bogus or missing
+cache information), see \ref bugs below.
+
 hwloc only reports the number of processors on unsupported operating
 systems; no topology information is available.
 
