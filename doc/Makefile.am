@@ -280,9 +280,12 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_TYPE_MAX.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES.3 \
-        $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_MISC.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_IO.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_MISC.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IO_BRIDGES.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IO_DEVICES.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_IO.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_MULTIPLE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_UNKNOWN.3 \
@@ -441,7 +444,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_group_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_osdev_attr_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_attr_u_hwloc_pcidev_attr_s.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_bridge_type_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_bridge_type_t.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_osdev_type_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_osdev_type_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distances_s.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_add_info.3 \
@@ -502,6 +507,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_distance_matrix.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_advanced_io.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_api_version.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_bitmap.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_configuration.3 \
