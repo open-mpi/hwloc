@@ -56,9 +56,13 @@ FILE *open_file(const char *filename, const char *mode)
   return fopen(filename, mode);
 }
 
-static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char * name)
+static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char * name)
 {
   hwloc_obj_t obj;
+
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+  if (hwloc_bitmap_iszero(cpuset))
+    return NULL;
 
   /* try to insert at exact position */
   obj = hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, name);
