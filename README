@@ -2,10 +2,10 @@ Introduction
 
 hwloc provides command line tools and a C API to obtain the hierarchical map of
 key computing elements, such as: NUMA memory nodes, shared caches, processor
-sockets, processor cores, and processing units (logical processors or
-"threads"). hwloc also gathers various attributes such as cache and memory
-information, and is portable across a variety of different operating systems
-and platforms.
+sockets, processor cores, processing units (logical processors or "threads")
+and even I/O devices. hwloc also gathers various attributes such as cache and
+memory information, and is portable across a variety of different operating
+systems and platforms.
 
 hwloc primarily aims at helping high-performance computing (HPC) applications,
 but is also applicable to any project seeking to exploit code and/or data
@@ -32,6 +32,16 @@ hwloc supports the following operating systems:
   * HP-UX
   * Microsoft Windows
 
+Since it uses standard Operating System information, hwloc's support is mostly
+independant from the processor type (x86, powerpc, ...) and just relies on the
+Operating System support. The only exception to this is kFreeBSD, which does
+not support topology information, and hwloc thus uses an x86-only CPUID-based
+backend (which could be used for other OSes too).
+
+To check whether hwloc works on a particular machine, just try to build it and
+run lstopo. If some things do not look right (e.g. bogus or missing cache
+information), see Questions and Bugs below.
+
 hwloc only reports the number of processors on unsupported operating systems;
 no topology information is available.
 
@@ -53,6 +63,13 @@ objects location on physical/logical processors. See the Programming Interface
 below. It may also be used to binding applications onto certain cores or memory
 nodes. Several utility programs are also provided to ease command-line
 manipulation of topology objects, binding of processes, and so on.
+
+Perl bindings are available from Bernd Kallies on CPAN:
+
+Python bindings are available from Guy Streeter:
+
+  * Fedora RPM and tarball.
+  * git tree (html).
 
 Installation
 
@@ -89,7 +106,7 @@ CLI Examples
 On a 4-socket 2-core machine with hyperthreading, the lstopo tool may show the
 following graphical output:
 
-                               dudley.png
+dudley.png
 
 Here's the equivalent output in textual form:
 
@@ -193,7 +210,7 @@ line), and only socket #0 is shown for brevity:
 On a 4-socket 2-core Opteron NUMA machine, the lstopo tool may show the
 following graphical output:
 
-                               hagrid.png
+hagrid.png
 
 Here's the equivalent output in textual form:
 
@@ -263,7 +280,7 @@ added and only PU #0 is shown for brevity:
 On a 2-socket quad-core Xeon (pre-Nehalem, with 2 dual-core dies into each
 socket):
 
-                               emmett.png
+emmett.png
 
 Here's the same output in textual form:
 
@@ -381,12 +398,12 @@ interfaces for them are usually available on the supported Operating Systems.
 Here's the graphical output from lstopo on this platform when Simultaneous
 Multi-Threading (SMT) is enabled:
 
-                           ppc64-with-smt.png
+ppc64-with-smt.png
 
 And here's the graphical output from lstopo on this platform when SMT is
 disabled:
 
-                          ppc64-without-smt.png
+ppc64-without-smt.png
 
 Notice that hwloc only sees half the PUs when SMT is disabled. PU #15, for
 example, seems to change location from NUMA node #0 to #1. In reality, no PUs
@@ -403,7 +420,7 @@ Note that upgrading the Linux kernel on the same PPC64 system mentioned above
 to 2.6.34, hwloc is able to discover all the topology information. The
 following picture shows the entire topology layout when SMT is enabled:
 
-                         ppc64-full-with-smt.png
+ppc64-full-with-smt.png
 
 Developers using the hwloc API or XML output for portable applications should
 therefore be extremely careful to not make any assumptions about the structure
@@ -425,7 +442,7 @@ core of the machine.
 /* Example hwloc API program.
  *
  * Copyright ? 2009-2010 INRIA.  All rights reserved.
- * Copyright ? 2009-2010 Universit? Bordeaux 1
+ * Copyright ? 2009-2011 Universit? Bordeaux 1
  * Copyright ? 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  *
@@ -573,7 +590,7 @@ int main(void)
  n = hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE);
  if (n) {
      void *m;
-     size_t size = 1024*1024;
+     size = 1024*1024;
 
      obj = hwloc_get_obj_by_type(topology, HWLOC_OBJ_NODE, n - 1);
      m = hwloc_alloc_membind_nodeset(topology, size, obj->nodeset,
@@ -651,7 +668,10 @@ the most recent version of the BIOS for your machine.
 
 If those things fail, contact us on the mailing list for additional help.
 Please attach the output of lstopo after having given the --enable-debug option
-to ./configure and rebuilt completely, to get debugging output.
+to ./configure and rebuilt completely, to get debugging output. Also attach the
+/proc + /sys tarball generated by the installed script hwloc-gather-topology.sh
+when submitting problems about Linux, or send the output of kstat cpu_info in
+the Solaris case, or the output of sysctl hw in the Darwin or BSD cases.
 
 History / Credits
 
@@ -675,6 +695,7 @@ The documentation chapters include
   * Command-Line Tools
   * Environment Variables
   * CPU and Memory Binding Overview
+  * I/O Devices
   * Interoperability With Other Software
   * Thread Safety
   * Embedding hwloc in Other Software
@@ -684,5 +705,5 @@ Make sure to have had a look at those too!
 
 -------------------------------------------------------------------------------
 
-Generated on Mon Mar 28 2011 16:07:18 for Hardware Locality (hwloc) by  doxygen
-1.7.3
+Generated on Mon Jul 4 2011 11:11:05 for Hardware Locality (hwloc) by  doxygen
+1.7.4

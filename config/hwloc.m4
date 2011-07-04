@@ -534,13 +534,19 @@ EOF])
 	    AC_CHECK_LIB([pci], [pci_init], [
 	      HWLOC_PCI_LIBS="-lpci"
 	      ], [
-	      # try again with -lz because it's needed sometimes (FC7)
-	      # don't try again with pci_init because the above result is cached
-	      AC_CHECK_LIB([pci], [pci_cleanup], [
-		HWLOC_PCI_ADDITIONAL_LIBS=-lz
-		HWLOC_PCI_LIBS="-lpci -lz"
-		], [hwloc_pci_happy=no], [-lz])
-	      ])
+              # try again with -lz because it's needed sometimes (FC7).
+              # don't use AC_CHECK_LIB again because the cache would
+              # return "no" without actually rechecking
+              AC_MSG_CHECKING([for pci_init in -lpci with -lz])
+              tmp_save_LIBS=$LIBS
+              LIBS="-lpci -lz $LIBS"
+              AC_LINK_IFELSE([AC_LANG_CALL([], [pci_init])],
+                             [HWLOC_PCI_LIBS="-lpci -lz"
+                              HWLOC_PCI_ADDITIONAL_LIBS="-lz"
+                              AC_MSG_RESULT(yes)],
+                             [hwloc_pci_happy=no
+                              AC_MSG_RESULT(no)])
+              LIBS=$tmp_save_LIBS])
             # Also check with pci_lookup_name, because that sometimes
             # requires -lresolv (RHEL5.6). don't use AC_CHECK_LIB twice
             # because the cache would return "no" without actually rechecking
