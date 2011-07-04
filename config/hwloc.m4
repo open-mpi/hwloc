@@ -542,14 +542,20 @@ EOF])
 		], [hwloc_pci_happy=no], [-lz])
 	      ])
             # Also check with pci_lookup_name, because that sometimes
-            # requires -lresolv
+            # requires -lresolv (RHEL5.6). don't use AC_CHECK_LIB twice
+            # because the cache would return "no" without actually rechecking
 	    AC_CHECK_LIB([pci], [pci_lookup_name], [],
                 [AC_CHECK_LIB([resolv], [inet_ntoa], 
-                    [AC_CHECK_LIB([pci], [pci_lookup_name],
-                        [HWLOC_PCI_LIBS="$HWLOC_PCI_LIBS -lresolv"
-                         HWLOC_PCI_ADDITIONAL_LIBS="$HWLOC_PCI_ADDITIONAL_LIBS -lresolv"],
-                        [hwloc_pci_happy=no],
-                        [-lresolv])],
+                    [AC_MSG_CHECKING([for pci_lookup_name in -lpci with -lresolv])
+                     tmp_save_LIBS=$LIBS
+                     LIBS="-lpci -lresolv $LIBS"
+                     AC_LINK_IFELSE([AC_LANG_CALL([], [pci_lookup_name])],
+                                    [HWLOC_PCI_LIBS="$HWLOC_PCI_LIBS -lresolv"
+                                     HWLOC_PCI_ADDITIONAL_LIBS="$HWLOC_PCI_ADDITIONAL_LIBS -lresolv"
+                                     AC_MSG_RESULT(yes)],
+                                    [hwloc_pci_happy=no
+                                     AC_MSG_RESULT(no)])
+                     LIBS=$tmp_save_LIBS],
                     [hwloc_pci_happy=no])])
             ], [hwloc_pci_happy=no])
         ])
