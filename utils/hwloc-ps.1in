@@ -42,6 +42,10 @@ By default, hwloc-ps lists only those currently-running processes that
 are bound; it displays their their identifier, command-line and
 binding.  The binding may be reported as objects or cpusets.
 .
+Process bindings are restricted to the currently available
+topology. If some processes are bound to processors that are not available
+to the current process, they are ignored.
+.
 The output is a plain list. If you wish to annotate the hierarchical
 topology with processes so as to see how they are actual distributed
 on the machine, you might want to use lstopo --ps instead (which also

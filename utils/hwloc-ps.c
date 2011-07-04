@@ -126,6 +126,10 @@ int main(int argc, char *argv[])
     if (hwloc_get_proc_cpubind(topology, pid, cpuset, 0))
       continue;
 
+    hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+    if (hwloc_bitmap_iszero(cpuset))
+      continue;
+
     if (hwloc_bitmap_isequal(cpuset, root->cpuset) && !show_all)
       continue;
 
