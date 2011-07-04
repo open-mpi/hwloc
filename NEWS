@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.2.1
 -------------
+* Improve support of AMD Bulldozer "Compute-Unit" modules by detecting
+  logical processors with different core IDs on Linux.
 * Fix build on AIX. Thanks to Carl Smith for reporting the problem.
 
 

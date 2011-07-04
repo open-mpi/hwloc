@@ -29,6 +29,7 @@ sysfs_outputs = \
 		16amd64-8n2c-cpusets.output \
 		16amd64-8n2c-cpusets.xml.output \
 		16amd64-8n2c-cpusets_noadmin.output \
+		16em64t-4s2cu2c.output \
 		16em64t-4s2c2t.output \
 		16em64t-4s2c2t-offlines.output \
 		16em64t-4s2c2t-offlines.xml.output \
@@ -69,6 +70,7 @@ sysfs_tarballs = \
 		16amd64-8n2c-cpusets.tar.bz2 \
 		16amd64-8n2c-cpusets.xml.source \
 		16amd64-8n2c-cpusets_noadmin.source \
+		16em64t-4s2cu2c.tar.bz2 \
 		16em64t-4s2c2t.tar.bz2 \
 		16em64t-4s2c2t-offlines.tar.bz2 \
 		16em64t-4s2c2t-offlines.xml.source \

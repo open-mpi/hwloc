@@ -2396,6 +2396,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       struct hwloc_obj *sock, *core, *thread;
       hwloc_bitmap_t socketset, coreset, threadset, savedcoreset;
       unsigned mysocketid, mycoreid;
+      int threadwithcoreid = 0;
 
       /* look at the socket */
       mysocketid = 0; /* shut-up the compiler */
@@ -2423,9 +2424,31 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
       sprintf(str, "%s/cpu%d/topology/thread_siblings", path, i);
       coreset = hwloc_parse_cpumap(str, topology->backend_params.sysfs.root_fd);
       savedcoreset = coreset; /* store it for later work-arounds */
-      if (coreset && hwloc_bitmap_first(coreset) == i) {
+
+      if (coreset && hwloc_bitmap_weight(coreset) > 1) {
+	/* check if this is hyperthreading or different coreids */
+	unsigned siblingid, siblingcoreid;
+	hwloc_bitmap_t set = hwloc_bitmap_dup(coreset);
+	hwloc_bitmap_clr(set, i);
+	siblingid = hwloc_bitmap_first(set);
+	siblingcoreid = mycoreid;
+	sprintf(str, "%s/cpu%d/topology/core_id", path, siblingid);
+	hwloc_parse_sysfs_unsigned(str, &siblingcoreid, topology->backend_params.sysfs.root_fd);
+	threadwithcoreid = (siblingcoreid != mycoreid);
+	hwloc_bitmap_free(set);
+      }
+
+
+      if (coreset && (hwloc_bitmap_first(coreset) == i || threadwithcoreid)) {
+	/* regular core */
         core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
-        core->cpuset = coreset;
+	if (threadwithcoreid) {
+	  /* amd multicore compute-unit, create one core per thread */
+	  core->cpuset = hwloc_bitmap_alloc();
+	  hwloc_bitmap_set(core->cpuset, i);
+	} else {
+	  core->cpuset = coreset;
+	}
         hwloc_debug_1arg_bitmap("os core %u has cpuset %s\n",
                      mycoreid, coreset);
         hwloc_insert_object_by_cpuset(topology, core);
