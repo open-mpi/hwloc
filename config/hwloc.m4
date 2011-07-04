@@ -548,7 +548,7 @@ EOF])
                 [AC_CHECK_LIB([resolv], [inet_ntoa], 
                     [AC_MSG_CHECKING([for pci_lookup_name in -lpci with -lresolv])
                      tmp_save_LIBS=$LIBS
-                     LIBS="-lpci -lresolv $LIBS"
+                     LIBS="-lpci -lresolv $LIBS $HWLOC_PCI_ADDITIONAL_LIBS"
                      AC_LINK_IFELSE([AC_LANG_CALL([], [pci_lookup_name])],
                                     [HWLOC_PCI_LIBS="$HWLOC_PCI_LIBS -lresolv"
                                      HWLOC_PCI_ADDITIONAL_LIBS="$HWLOC_PCI_ADDITIONAL_LIBS -lresolv"
