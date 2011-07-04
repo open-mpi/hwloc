@@ -509,6 +509,9 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
  found:
   hwloc_debug_bitmap("Attaching hostbridge to cpuset %s\n", cpuset);
 
+  /* restrict to the existing topology cpuset to avoid errors later */
+  hwloc_bitmap_and(cpuset, cpuset, topology->levels[0][0]->cpuset);
+
   /* why not inserting a group and let the core remove it if useless?
    * 1) we need to make sure that the group is above all objects
    * with same cpuset (to avoid attaching to caches or so)
@@ -517,9 +520,8 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
 
   /* attach the hostbridge now that it contains the right objects */
   parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
-  /* if found nothing, attach to top */
-  if (!parent)
-    parent = topology->levels[0][0];
+  /* in the worst case, we got the root object */
+
   if (hwloc_bitmap_isequal(cpuset, parent->cpuset)) {
     /* this object has the right cpuset, but it could be a cache or so,
      * go up as long as the cpuset is the same
