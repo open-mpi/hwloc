@@ -143,6 +143,22 @@ int main(void)
   width = hwloc_get_nbobjs_by_depth(topology, 4);
   assert(width == 32);
 
+  /* clear everything */
+  /* default 2*4*4 */
+  putenv("HWLOC_Core_DISTANCES=");
+  putenv("HWLOC_PU_DISTANCES=");
+  hwloc_topology_load(topology);
+  depth = hwloc_topology_get_depth(topology);
+  assert(depth == 4);
+  width = hwloc_get_nbobjs_by_depth(topology, 0);
+  assert(width == 1);
+  width = hwloc_get_nbobjs_by_depth(topology, 1);
+  assert(width == 2);
+  width = hwloc_get_nbobjs_by_depth(topology, 2);
+  assert(width == 8);
+  width = hwloc_get_nbobjs_by_depth(topology, 3);
+  assert(width == 32);
+
   hwloc_topology_destroy(topology);
 
   return 0;
