@@ -110,6 +110,11 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
   float *distances;
   unsigned nbobjs = 0, i, j, x, y, z;
 
+  if (!*string) {
+    hwloc_topology__set_distance_matrix(topology, type, 0, NULL, NULL, NULL);
+    return;
+  }
+
   /* count indexes */
   while (1) {
     size_t size = strspn(tmp, "0123456789");
@@ -210,6 +215,12 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
 {
   unsigned *_indexes;
   float *_distances;
+
+  if (!nbobjs && !indexes && !distances)
+    hwloc_topology__set_distance_matrix(topology, type, 0, NULL, NULL, NULL);
+
+  if (!nbobjs || !indexes || !distances)
+    return -1;
 
   if (hwloc_topology__check_distance_matrix(topology, type, nbobjs, indexes, NULL, distances) < 0)
     return -1;

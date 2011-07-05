@@ -876,7 +876,9 @@ following environment variables.
   <dd>sets a distance matrix for objects of the given type and physical indexes.
   The type should be given as its case-sensitive stringified value
   (e.g. <tt>NUMANode</tt>, <tt>Socket</tt>, <tt>Cache</tt>, <tt>Core</tt>, <tt>PU</tt>).
-  The variable value starts with a comma-separated list of the objects'
+  If the variable value is empty, the existing distance matrix for the given type
+  is removed.
+  Otherwise, the variable value starts with a comma-separated list of the objects'
   physical indexes. Distances are then specified after a colon.
   <ul>
   <li>If <tt>X*Y</tt> is given, X groups of Y close objects are specified.</li>
