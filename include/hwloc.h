@@ -760,6 +760,9 @@ HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restric
  * array. The \p distances matrix follows the same order.
  * The distance from object i to object j in the i*nbobjs+j.
  *
+ * If another distance matrix already exists for the given type,
+ * either because the user specified it or because the OS offers it,
+ * it will be replaced by the given one.
  * If \p nbobjs is \c 0, \p os_index is \c NULL and \p distances is \c NULL,
  * the existing distance matrix for the given type is removed.
  */

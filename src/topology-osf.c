@@ -313,7 +313,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
       }
     }
 
-    hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances);
+    hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
   }
   radsetdestroy(&radset2);
   radsetdestroy(&radset);

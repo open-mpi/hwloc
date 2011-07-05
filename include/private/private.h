@@ -113,6 +113,7 @@ struct hwloc_topology {
 		       * distance from i to j is stored in slot i*nbnodes+j.
 		       * will be copied into the main logical-index-ordered distance at the end of the discovery.
 		       */
+    int forced; /* set if the user forced a matrix to ignore the OS one */
   } os_distances[HWLOC_OBJ_TYPE_MAX];
 
   hwloc_backend_t backend_type;
@@ -337,7 +338,7 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
 extern void hwloc_topology_distances_init(struct hwloc_topology *topology);
 extern void hwloc_topology_distances_clear(struct hwloc_topology *topology);
 extern void hwloc_topology_distances_destroy(struct hwloc_topology *topology);
-extern void hwloc_topology__set_distance_matrix(struct hwloc_topology *topology, hwloc_obj_type_t type, unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances);
+extern void hwloc_topology__set_distance_matrix(struct hwloc_topology *topology, hwloc_obj_type_t type, unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances, int force);
 extern void hwloc_store_distances_from_env(struct hwloc_topology *topology);
 extern void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology);
 extern void hwloc_finalize_logical_distances(struct hwloc_topology *topology);

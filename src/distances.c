@@ -22,6 +22,7 @@ void hwloc_topology_distances_init(struct hwloc_topology *topology)
     topology->os_distances[i].objs = NULL;
     topology->os_distances[i].indexes = NULL;
     topology->os_distances[i].distances = NULL;
+    topology->os_distances[i].forced = 0;
   }
 }
 
@@ -58,8 +59,16 @@ void hwloc_topology_distances_destroy(struct hwloc_topology *topology)
  * the caller gives us those pointers, we take care of freeing them later and so on.
  */
 void hwloc_topology__set_distance_matrix(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_type_t type,
-					 unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances)
+					 unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances,
+					 int force)
 {
+  if (topology->os_distances[type].forced && !force) {
+    free(indexes);
+    free(objs);
+    free(distances);
+    return;
+  }
+
   free(topology->os_distances[type].indexes);
   free(topology->os_distances[type].objs);
   free(topology->os_distances[type].distances);
@@ -67,6 +76,7 @@ void hwloc_topology__set_distance_matrix(hwloc_topology_t __hwloc_restrict topol
   topology->os_distances[type].indexes = indexes;
   topology->os_distances[type].objs = objs;
   topology->os_distances[type].distances = distances;
+  topology->os_distances[type].forced = force;
 }
 
 /* make sure a user-given distance matrix is sane */
@@ -111,7 +121,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
   unsigned nbobjs = 0, i, j, x, y, z;
 
   if (!*string) {
-    hwloc_topology__set_distance_matrix(topology, type, 0, NULL, NULL, NULL);
+    hwloc_topology__set_distance_matrix(topology, type, 0, NULL, NULL, NULL, 1 /* force */);
     return;
   }
 
@@ -189,7 +199,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     return;
   }
 
-  hwloc_topology__set_distance_matrix(topology, type, nbobjs, indexes, NULL, distances);
+  hwloc_topology__set_distance_matrix(topology, type, nbobjs, indexes, NULL, distances, 1 /* force */);
 }
 
 /* take distances in the environment, store them as is in the topology.
@@ -217,7 +227,7 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
   float *_distances;
 
   if (!nbobjs && !indexes && !distances)
-    hwloc_topology__set_distance_matrix(topology, type, 0, NULL, NULL, NULL);
+    hwloc_topology__set_distance_matrix(topology, type, 0, NULL, NULL, NULL, 1 /* force */);
 
   if (!nbobjs || !indexes || !distances)
     return -1;
@@ -230,7 +240,7 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
   memcpy(_indexes, indexes, nbobjs*sizeof(unsigned));
   _distances = malloc(nbobjs*nbobjs*sizeof(float));
   memcpy(_distances, distances, nbobjs*nbobjs*sizeof(float));
-  hwloc_topology__set_distance_matrix(topology, type, nbobjs, _indexes, NULL, _distances);
+  hwloc_topology__set_distance_matrix(topology, type, nbobjs, _indexes, NULL, _distances, 1 /* force */);
 
   return 0;
 }

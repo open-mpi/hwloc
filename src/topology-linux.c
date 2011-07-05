@@ -2007,7 +2007,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
           hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, topology->backend_params.sysfs.root_fd);
       }
 
-      hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances);
+      hwloc_topology__set_distance_matrix(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
   }
 
  out:
