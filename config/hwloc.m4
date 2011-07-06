@@ -606,15 +606,21 @@ EOF])
     HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS"
 
     # XML support
+    hwloc_xml_happy=
     if test "x$enable_xml" != "xno"; then
-        HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [xmlNewDoc], [:], [enable_xml="no"])
+        HWLOC_PKG_CHECK_MODULES([XML], [libxml-2.0], [xmlNewDoc], 
+                                [hwloc_xml_happy=yes], 
+                                [hwloc_xml_happy=no])
     fi
-    if test "x$enable_xml" != "xno"; then
+    if test "x$hwloc_xml_happy" = "xyes"; then
         HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
         AC_DEFINE([HWLOC_HAVE_XML], [1], [Define to 1 if you have the `xml' library.])
         AC_SUBST([HWLOC_HAVE_XML], [1])
     else
         AC_SUBST([HWLOC_HAVE_XML], [0])
+	AS_IF([test "$enable_xml" = "yes"],
+              [AC_MSG_WARN([--enable-xml requested, but XML support was not found])
+               AC_MSG_ERROR([Cannot continue])])
     fi
     HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_XML_CFLAGS"    
 
