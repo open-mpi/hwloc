@@ -260,24 +260,27 @@ EOF
       AC_CHECK_FUNCS([nl_langinfo])
     ])
     hwloc_old_LIBS="$LIBS"
-    LIBS=
     chosen_curses=""
-    for curses in curses.h ncurses.h
+    for curses in ncurses.h curses.h
     do
-      echo checking curses support using $curses
-      hwloc_old_ac_includes_default="$ac_includes_default"
-      ac_includes_default="$ac_includes_default
+      for LIBS in "" -ltermcap -lncursesw -lncurses -lcurses
+      do
+        AC_MSG_CHECKING(curses support using $curses and $LIBS)
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <$curses>
-#include <term.h>"
-      AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
-        AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
-        AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
-                  [Define to 1 if you have a library providing the termcap interface])
-        chosen_curses=$curses
-      ])
-      # Empty cache for next try
-      unset ac_cv_search_tparm
-      ac_includes_default="$ac_includes_default"
+#include <term.h>
+]], [[tparm(NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0)]])], [
+          AC_MSG_RESULT(yes)
+          AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
+          AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
+                    [Define to 1 if you have a library providing the termcap interface])
+          chosen_curses=$curses
+        ], [
+          AC_MSG_RESULT(no)
+        ])
+        test "x$chosen_curses" != "x" && break
+      done
+      test "x$chosen_curses" != "x" && break
     done
     if test "$chosen_curses" = ncurses.h
     then
