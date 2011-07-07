@@ -261,19 +261,28 @@ EOF
     ])
     hwloc_old_LIBS="$LIBS"
     LIBS=
-    AC_CHECK_HEADERS([ncurses.h curses.h], [
-      AC_CHECK_HEADERS([term.h], [
-        hwloc_old_ac_includes_default="$ac_includes_default"
-        ac_includes_default="$ac_includes_default
+    chosen_curses=""
+    for curses in curses.h ncurses.h
+    do
+      echo checking curses support using $curses
+      hwloc_old_ac_includes_default="$ac_includes_default"
+      ac_includes_default="$ac_includes_default
+#include <$curses>
 #include <term.h>"
-        AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
-            AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
-            AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
-                      [Define to 1 if you have a library providing the termcap interface])
-          ])
-        ac_includes_default="$ac_includes_default"
-      ], [], [[#include <curses.h>]])
-    ])
+      AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
+        AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
+        AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
+                  [Define to 1 if you have a library providing the termcap interface])
+        chosen_curses=$curses
+      ])
+      # Empty cache for next try
+      unset ac_cv_search_tparm
+      ac_includes_default="$ac_includes_default"
+    done
+    if test "$chosen_curses" = ncurses.h
+    then
+      AC_DEFINE([HWLOC_USE_NCURSES_H], [1], [Define to 1 if ncurses.h works, preferred over curses.h])
+    fi
     LIBS="$hwloc_old_LIBS"
     unset hwloc_old_LIBS
 
