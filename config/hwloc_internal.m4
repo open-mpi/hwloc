@@ -261,13 +261,14 @@ EOF
     ])
     hwloc_old_LIBS="$LIBS"
     chosen_curses=""
-    for curses in ncurses.h curses.h
+    for curses in ncurses curses
     do
-      for LIBS in "" -ltermcap -lncursesw -lncurses -lcurses
+      for lib in "" -ltermcap -l${curses}w -l$curses
       do
-        AC_MSG_CHECKING(curses support using $curses and $LIBS)
+        AC_MSG_CHECKING(termcap support using $curses and $lib)
+        LIBS="$hwloc_old_LIBS $lib"
         AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-#include <$curses>
+#include <$curses.h>
 #include <term.h>
 ]], [[tparm(NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0)]])], [
           AC_MSG_RESULT(yes)
@@ -282,9 +283,9 @@ EOF
       done
       test "x$chosen_curses" != "x" && break
     done
-    if test "$chosen_curses" = ncurses.h
+    if test "$chosen_curses" = ncurses
     then
-      AC_DEFINE([HWLOC_USE_NCURSES_H], [1], [Define to 1 if ncurses.h works, preferred over curses.h])
+      AC_DEFINE([HWLOC_USE_NCURSES], [1], [Define to 1 if ncurses works, preferred over curses])
     fi
     LIBS="$hwloc_old_LIBS"
     unset hwloc_old_LIBS

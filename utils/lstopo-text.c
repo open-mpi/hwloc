@@ -27,7 +27,7 @@
 #endif /* HAVE_PUTWC */
 
 #ifdef HWLOC_HAVE_LIBTERMCAP
-#ifdef HWLOC_USE_NCURSES_H
+#ifdef HWLOC_USE_NCURSES
 #  include <ncurses.h>
 #else
 #  include <curses.h>
