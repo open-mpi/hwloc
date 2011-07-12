@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl Copyright (c) 2009 INRIA.  All rights reserved.
-dnl Copyright (c) 2009 Université Bordeaux 1
+dnl Copyright (c) 2009, 2011 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -254,20 +254,33 @@ EOF
       AC_CHECK_FUNCS([nl_langinfo])
     ])
     hwloc_old_LIBS="$LIBS"
-    LIBS=
-    AC_CHECK_HEADERS([curses.h], [
-      AC_CHECK_HEADERS([term.h], [
-        hwloc_old_ac_includes_default="$ac_includes_default"
-        ac_includes_default="$ac_includes_default
-#include <term.h>"
-        AC_SEARCH_LIBS([tparm], [termcap ncursesw ncurses curses], [
-            AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
-            AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
-                      [Define to 1 if you have a library providing the termcap interface])
-          ])
-        ac_includes_default="$ac_includes_default"
-      ], [], [[#include <curses.h>]])
-    ])
+    chosen_curses=""
+    for curses in ncurses curses
+    do
+      for lib in "" -ltermcap -l${curses}w -l$curses
+      do
+        AC_MSG_CHECKING(termcap support using $curses and $lib)
+        LIBS="$hwloc_old_LIBS $lib"
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <$curses.h>
+#include <term.h>
+]], [[tparm(NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0)]])], [
+          AC_MSG_RESULT(yes)
+          AC_SUBST([HWLOC_TERMCAP_LIBS], ["$LIBS"])
+          AC_DEFINE([HWLOC_HAVE_LIBTERMCAP], [1],
+                    [Define to 1 if you have a library providing the termcap interface])
+          chosen_curses=$curses
+        ], [
+          AC_MSG_RESULT(no)
+        ])
+        test "x$chosen_curses" != "x" && break
+      done
+      test "x$chosen_curses" != "x" && break
+    done
+    if test "$chosen_curses" = ncurses
+    then
+      AC_DEFINE([HWLOC_USE_NCURSES], [1], [Define to 1 if ncurses works, preferred over curses])
+    fi
     LIBS="$hwloc_old_LIBS"
     unset hwloc_old_LIBS
 
