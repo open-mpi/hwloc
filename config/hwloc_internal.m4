@@ -211,9 +211,12 @@ EOF
     hwloc_build_utils=yes
 
     # Cairo support
+    hwloc_cairo_happy=
     if test "x$enable_cairo" != "xno"; then
-      HWLOC_PKG_CHECK_MODULES([CAIRO], [cairo], [cairo_fill], [:], [enable_cairo=no])
-      if test "x$enable_cairo" != "xno"; then
+      HWLOC_PKG_CHECK_MODULES([CAIRO], [cairo], [cairo_fill],
+                              [hwloc_cairo_happy=yes],
+                              [hwloc_cairo_happy=no])
+      if test "x$hwloc_cairo_happy" = "xyes"; then
         AC_PATH_XTRA
 	CFLAGS_save=$CFLAGS
 	LIBS_save=$LIBS
@@ -232,6 +235,7 @@ EOF
         )
         if test "x$enable_X11" != "xyes"; then
           AC_MSG_WARN([X11 headers not found, Cairo/X11 back-end disabled])
+          hwloc_cairo_happy=no
         fi
 
 	CFLAGS=$CFLAGS_save
@@ -239,8 +243,12 @@ EOF
       fi
     fi
     
-    if test "x$enable_cairo" != "xno"; then
+    if test "x$hwloc_cairo_happy" = "xyes"; then
         AC_DEFINE([HWLOC_HAVE_CAIRO], [1], [Define to 1 if you have the `cairo' library.])
+    else
+        AS_IF([test "$enable_cairo" = "yes"],
+              [AC_MSG_WARN([--enable-cairo requested, but Cairo/X11 support was not found])
+               AC_MSG_ERROR([Cannot continue])])
     fi
 
     AC_CHECK_TYPES([wchar_t], [
