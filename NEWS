@@ -23,7 +23,10 @@ Version 1.2.1
   logical processors with different core IDs on Linux.
 * Fix hwloc-ps crash when listing processes from another Linux cpuset.
   Thanks to Carl Smith for reporting the problem.
-* Fix build on AIX. Thanks to Carl Smith for reporting the problem.
+* Fix build on AIX and Solaris. Thanks to Carl Smith for reporting the
+  problems.
+* Fix cache size detection on Darwin. Thanks to Erkcan Özcan for reporting
+  the problem.
 
 
 Version 1.2.0
