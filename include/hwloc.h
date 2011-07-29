@@ -894,10 +894,10 @@ HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restri
  * @{
  */
 
-/** \brief Returns the topology object at index \p index from depth \p depth */
+/** \brief Returns the topology object at logical index \p idx from depth \p depth */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned depth, unsigned idx) __hwloc_attribute_pure;
 
-/** \brief Returns the topology object at index \p index with type \p type
+/** \brief Returns the topology object at logical index \p idx with type \p type
  *
  * If no object for that type exists, \c NULL is returned.
  * If there are several levels with objects of that type, \c NULL is returned
