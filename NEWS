@@ -30,6 +30,7 @@ Version 1.2.1
 * Make configure fail if --enable-xml or --enable-cairo is given and
   proper support cannot be found. Thanks to Andreas Kupries for reporting
   the XML problem.
+* Minor documentation fixes.
 
 
 Version 1.2.0
