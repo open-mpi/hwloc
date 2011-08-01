@@ -687,13 +687,22 @@ Make sure to have had a look at those too!
   indexes are adjacent in the topology.  This index is always linear and in
   the range [0, num_objs_same_type_same_level-1].  Think of it as ``cousin
   rank.'' The ordering is based on topology first, and then on OS CPU numbers,
-  so it is stable across everything except firmware CPU renumbering.</dd>
+  so it is stable across everything except firmware CPU renumbering.
+  "Logical index" should not be confused with "Logical processor". A "Logical
+  processor" (which in hwloc we rather call "processing unit" to avoid the
+  confusion) has both a physical index (as chosen by BIOS/OS) and a logical
+  index (as computed by hwloc).
+  </dd>
 
 <dt>Logical processor</dt>
 <dt>Processing unit</dt>
   <dd>The smallest processing element that can be represented by a hwloc
   object. It may be a single-core processor, a core of a multicore
-  processor, or a single thread in SMT processor.</dd>
+  processor, or a single thread in SMT processor.
+  "Logical processor" should not be confused with "Logical index of a
+  processor". "Logical processor" is only one of the names which can be found in
+  various documentations to designate a processing unit.
+  </dd>
 
 </dl>
 
