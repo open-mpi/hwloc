@@ -4,7 +4,7 @@
 #
 # Copyright © 2009 CNRS
 # Copyright © 2009-2011 INRIA.  All rights reserved.
-# Copyright © 2009 Université Bordeaux 1
+# Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
 
@@ -26,8 +26,8 @@ set -e
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" all --taskset
   echo
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" 0xf
-  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" 0xf ~0x3 0xff0 ^0xf0
-  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" core:0 pu:15 ~pu:0 ^pu:2
+  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" 0xf ~0x3 0xff0 '^0xf0'
+  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" core:0 pu:15 ~pu:0 '^pu:2'
   echo
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:even
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" node:2-
