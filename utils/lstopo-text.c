@@ -634,8 +634,20 @@ text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, 
   struct display *disp = output;
   x /= (gridsize/2);
   y /= gridsize;
+
+#ifdef HAVE_PUTWC
+  {
+    size_t len = strlen(text) + 1;
+    wchar_t *wbuf = malloc(len * sizeof(wchar_t)), *wtext;
+    swprintf(wbuf, len, L"%s", text);
+    for (wtext = wbuf ; *wtext; wtext++)
+      put(disp, x++, y, *wtext, r, g, b, -1, -1, -1);
+    free(wbuf);
+  }
+#else
   for ( ; *text; text++)
     put(disp, x++, y, *text, r, g, b, -1, -1, -1);
+#endif
 }
 
 static struct draw_methods text_draw_methods = {
