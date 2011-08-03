@@ -31,6 +31,7 @@ Version 1.2.1
   proper support cannot be found. Thanks to Andreas Kupries for reporting
   the XML problem.
 * Minor documentation fixes.
+* Fix spurious L1 cache detection on AIX.
 
 
 Version 1.2.0

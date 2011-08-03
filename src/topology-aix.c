@@ -475,6 +475,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	break;
       case HWLOC_OBJ_GROUP:
 	obj->attr->group.depth = level;
+	break;
       case HWLOC_OBJ_CORE:
       {
 	hwloc_obj_t obj2 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, i);
