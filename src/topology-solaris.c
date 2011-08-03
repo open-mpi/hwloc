@@ -419,7 +419,7 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 #ifdef HAVE_LGRP_LATENCY_COOKIE
     {
       float *distances = calloc(curlgrp*curlgrp, sizeof(float));
-      unsigned *indexes;
+      unsigned *indexes = calloc(curlgrp,sizeof(unsigned));
       unsigned i, j;
       for (i = 0; i < curlgrp; i++) {
 	indexes[i] = glob_lgrps[i]->os_index;
