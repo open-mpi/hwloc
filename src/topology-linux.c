@@ -641,6 +641,7 @@ hwloc_linux_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwl
 
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
 #pragma weak pthread_setaffinity_np
+#pragma weak pthread_self
 
 static int
 hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
@@ -652,11 +653,15 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
     return -1;
   }
 
+  if (!pthread_self) {
+    /* ?! Application uses set_thread_cpubind, but doesn't link against libpthread ?! */
+    errno = ENOSYS;
+    return -1;
+  }
   if (tid == pthread_self())
     return hwloc_linux_set_tid_cpubind(topology, 0, hwloc_set);
 
   if (!pthread_setaffinity_np) {
-    /* ?! Application uses set_thread_cpubind, but doesn't link against libpthread ?! */
     errno = ENOSYS;
     return -1;
   }
@@ -735,6 +740,7 @@ hwloc_linux_set_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_c
 
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
 #pragma weak pthread_getaffinity_np
+#pragma weak pthread_self
 
 static int
 hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
@@ -746,11 +752,15 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
     return -1;
   }
 
+  if (!pthread_self) {
+    /* ?! Application uses set_thread_cpubind, but doesn't link against libpthread ?! */
+    errno = ENOSYS;
+    return -1;
+  }
   if (tid == pthread_self())
     return hwloc_linux_get_tid_cpubind(topology, 0, hwloc_set);
 
   if (!pthread_getaffinity_np) {
-    /* ?! Application uses get_thread_cpubind, but doesn't link against libpthread ?! */
     errno = ENOSYS;
     return -1;
   }
