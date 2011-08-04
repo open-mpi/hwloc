@@ -1175,6 +1175,9 @@ HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const 
  *
  * \note On some operating systems, CPU binding may have effects on memory binding, see
  * ::HWLOC_CPUBIND_NOMEMBIND
+ *
+ * Running lstopo --top can be a very convenient tool to check how binding
+ * actually happened.
  * @{
  */
 
