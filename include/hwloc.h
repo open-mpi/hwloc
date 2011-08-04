@@ -1044,6 +1044,9 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  *
  * \note On some operating systems, CPU binding may have effects on memory binding, see
  * ::HWLOC_CPUBIND_NOMEMBIND
+ *
+ * Running lstopo --top can be a very convenient tool to check how binding
+ * actually happened.
  * @{
  */
 
