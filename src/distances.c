@@ -166,7 +166,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     /* parse a comma separated list of distances */
     for(i=0; i<nbobjs*nbobjs; i++) {
       distances[i] = atof(tmp);
-      next = index(tmp, ',');
+      next = strchr(tmp, ',');
       if (next) {
         tmp = next+1;
       } else if (i!=nbobjs*nbobjs-1) {
