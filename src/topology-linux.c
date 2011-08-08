@@ -864,8 +864,12 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
     errno = ENOSYS;
     return -1;
   }
-  fgets(buf, sizeof(buf), file);
+  tmp = fgets(buf, sizeof(buf), file);
   fclose(file);
+  if (!tmp) {
+    errno = ENOSYS;
+    return -1;
+  }
 
   tmp = strrchr(buf, ')');
   if (!tmp) {
