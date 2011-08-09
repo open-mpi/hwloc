@@ -1016,7 +1016,8 @@ to hwloc_topology_set_flags() before loading the topology.
 Note that I/O discovery requires significant help from the operating system.
 The pciutils library is needed to detect PCI devices and bridges,
 and the actual locality of these devices is only currently detected
-on Linux.
+on Linux. Also, some operating systems require privileges for probing PCI
+devices, see \ref faq_privileged for details.
 
 When I/O discovery is enabled and supported, some additional objects
 (types <tt>::HWLOC_OBJ_BRIDGE</tt>, <tt>::HWLOC_OBJ_PCI_DEVICE</tt> and
