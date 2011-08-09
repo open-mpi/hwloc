@@ -29,6 +29,8 @@ Version 1.3.0
 * Discovery improvements
   + Add associativity to the cache attributes.
   + Add support for s390/z11 "books" on Linux.
+  + Add the HWLOC_GROUPING_ACCURACY environment variable to relax
+    distance-based grouping constraints.
   + Allow user-given distance matrices to remove or replace those
     discovered by the OS backend.
 * Tools
