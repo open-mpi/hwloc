@@ -1120,6 +1120,9 @@ typedef enum {
 HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
 
 /** \brief Get current process or thread binding
+ *
+ * Writes into \p set the cpuset which the process or thread (according to \e
+ * flags) was last bound to.
  */
 HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
