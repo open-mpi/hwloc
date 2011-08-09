@@ -734,7 +734,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
   char *env;
   float accuracy = 0.0;
 
-  env = getenv("HWLOC_DISTANCES_ACCURACY");
+  env = getenv("HWLOC_GROUPING_ACCURACY");
   if (env)
     accuracy = atof(env);
 
