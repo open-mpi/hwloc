@@ -885,6 +885,13 @@ following environment variables.
   Setting this environment variable to 1 will disable this grouping.
   </dd>
 
+<dt>HWLOC_GROUPING_ACCURACY=0</dt>
+  <dd>relax distance comparison during grouping.
+  By default, objects may be grouped if their distances form a minimal
+  distance graph. When setting this variable to 0.02, these distances
+  do not have to be strictly equal anymore, they may just be equal
+  with a 2% error.</dd>
+
 <dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:X*Y</dt>
 <dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:X*Y*Z</dt>
 <dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:distance,...</dt>
