@@ -925,6 +925,22 @@ following environment variables.
 
 </dl>
 
+<!-- not documented:
+ HWLOC_FORCE_FSROOT/XMLFILE/THISSYSTEM
+  force backend anyway (while variables without FORCE in their name do not
+  force the backend if the default was already changed)
+ HWLOC_LINUX_USE_CPUINFO
+  uses /proc/cpuinfo instead of sysfs.
+  may be useful in the doc for debugging?
+ HWLOC_DEBUG_CHECK
+  run sanity checks during discovery, as if --enable-debug was passed but
+  without debug messages
+  may be useful in the doc for debugging?
+ add a HWLOC_USE_x86_BACKEND?
+  to force testing of the x86 backend
+-->
+
+
 
 
 \page cpu_mem_bind CPU and Memory Binding Overview
