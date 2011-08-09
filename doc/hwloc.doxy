@@ -698,27 +698,42 @@ Make sure to have had a look at those too!
   <dd>Set of objects of the same type and depth. All these objects
   are cousins.</dd>
 
-<dt>OS or physical index</dt>
-  <dd>The index that the operating system (OS) uses to identify the
-  object.  This may be completely arbitrary, or it may depend on the
-  BIOS configuration.</dd>
-
 <dt>Depth</dt>
   <dd>Nesting level in the object tree, starting from the 0th object.</dd>
 
+<dt>OS or physical index</dt>
+  <dd>The index that the operating system (OS) uses to identify the
+  object.  This may be completely arbitrary, non-unique, non-contiguous, not
+  representative of logical proximity, and may depend on the BIOS
+  configuration. That is why hwloc almost never use them, only in the default
+  lstopo output (<tt>P#x</tt>) and cpuset masks.</dd>
+
 <dt>Logical index</dt>
-  <dd>Index to uniquely identify objects of the same type and depth.  It
-  expresses proximity in a generic way.  This index is always linear
-  and in the range [0, num_objs_same_type_same_level).  Think of it
-  as ``cousin rank.'' The ordering is based on topology first, and
-  then on OS CPU numbers, so it is stable across everything except
-  firmware CPU renumbering.</dd>
+  <dd>Index to uniquely identify objects of the same type and depth,
+  automatically computed by hwloc according to the topology.  It expresses
+  logical proximity in a generic way, i.e. objects which have adjacent logical
+  indexes are adjacent in the topology. That is why hwloc almost always use
+  it in its API, since it expresses logical proximity. They can be shown (as
+  <tt>L#x</tt>) by <tt>lstopo</tt> thanks to the <tt>-l</tt> option.  This index
+  is always linear and in
+  the range [0, num_objs_same_type_same_level-1].  Think of it as ``cousin
+  rank.'' The ordering is based on topology first, and then on OS CPU numbers,
+  so it is stable across everything except firmware CPU renumbering.
+  "Logical index" should not be confused with "Logical processor". A "Logical
+  processor" (which in hwloc we rather call "processing unit" to avoid the
+  confusion) has both a physical index (as chosen arbitrarily by BIOS/OS) and a logical
+  index (as computed according to logical proximity by hwloc).
+  </dd>
 
 <dt>Logical processor</dt>
 <dt>Processing unit</dt>
   <dd>The smallest processing element that can be represented by a hwloc
   object. It may be a single-core processor, a core of a multicore
-  processor, or a single thread in SMT processor.</dd>
+  processor, or a single thread in SMT processor.
+  "Logical processor" should not be confused with "Logical index of a
+  processor". "Logical processor" is only one of the names which can be found in
+  various documentations to designate a processing unit.
+  </dd>
 
 </dl>
 

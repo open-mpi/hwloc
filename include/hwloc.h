@@ -1014,10 +1014,10 @@ HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restri
  * @{
  */
 
-/** \brief Returns the topology object at index \p index from depth \p depth */
+/** \brief Returns the topology object at logical index \p idx from depth \p depth */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned depth, unsigned idx) __hwloc_attribute_pure;
 
-/** \brief Returns the topology object at index \p index with type \p type
+/** \brief Returns the topology object at logical index \p idx with type \p type
  *
  * If no object for that type exists, \c NULL is returned.
  * If there are several levels with objects of that type, \c NULL is returned
@@ -1175,6 +1175,9 @@ HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const 
  *
  * \note On some operating systems, CPU binding may have effects on memory binding, see
  * ::HWLOC_CPUBIND_NOMEMBIND
+ *
+ * Running lstopo --top can be a very convenient tool to check how binding
+ * actually happened.
  * @{
  */
 
@@ -1270,14 +1273,14 @@ HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
 HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
 #ifdef hwloc_thread_t
-/** \brief Bind a thread \p tid on cpus given in bitmap \p set
+/** \brief Bind a thread \p thread on cpus given in bitmap \p set
  *
  * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
  * Windows platforms
  *
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p flags.
  */
-HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_const_cpuset_t set, int flags);
+HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_const_cpuset_t set, int flags);
 #endif
 
 #ifdef hwloc_thread_t
