@@ -35,7 +35,8 @@ Version 1.2.1
 * Fix object distance detection on Solaris.
 * Add pthread_self weak symbol to ease static linking.
 * Minor documentation fixes.
-* Fix hwloc_get_last_cpu_location(THREAD) on Linux.
+* Fix hwloc_get_last_cpu_location(THREAD) on Linux. Thanks to Gabriele Fatigati
+  for reporting the problem.
 
 
 Version 1.2.0
