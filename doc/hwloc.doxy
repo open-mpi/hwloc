@@ -893,6 +893,14 @@ following environment variables.
   do not have to be strictly equal anymore, they may just be equal
   with a 2% error.</dd>
 
+<dt>HWLOC_GROUPING_VERBOSE=0</dt>
+  <dd>display some verbose messages during grouping.
+  If this variable is set to 1, some debug messages will be displayed
+  during distance-based grouping of objects even if debug was not specific
+  at configure time.
+  This is useful when trying to find an interesting distance grouping
+  accuracy.</dd>
+
 <dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:X*Y</dt>
 <dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:X*Y*Z</dt>
 <dt>HWLOC_&lt;type&gt;_DISTANCES=index,...:distance,...</dt>
