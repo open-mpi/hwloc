@@ -591,19 +591,13 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
 				  unsigned nbobjs,
 				  struct hwloc_obj **objs,
 				  float *_distances,
-				  float accuracy,
+				  unsigned nbaccuracies, float *accuracies,
 				  int fromuser,
 				  int needcheck)
 {
   unsigned *groupids = NULL;
-  unsigned nbgroups;
+  unsigned nbgroups = 0;
   unsigned i,j;
-
-  if (needcheck && hwloc__check_grouping_matrix(nbobjs, _distances, accuracy) < 0)
-    return;
-
-  hwloc_debug("trying to group %s objects into Group objects according to physical distances\n",
-	     hwloc_obj_type_string(objs[0]->type));
 
   if (nbobjs <= 2) {
       return;
@@ -614,10 +608,18 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
       return;
   }
 
-  nbgroups = hwloc_setup_group_from_min_distance(nbobjs, _distances, accuracy, groupids);
-  if (!nbgroups) {
-      goto outter_free;
+  hwloc_debug("trying to group %s objects into Group objects according to physical distances\n",
+	     hwloc_obj_type_string(objs[0]->type));
+
+  for(i=0; i<nbaccuracies; i++) {
+    if (needcheck && hwloc__check_grouping_matrix(nbobjs, _distances, accuracies[i]) < 0)
+      continue;
+    nbgroups = hwloc_setup_group_from_min_distance(nbobjs, _distances, accuracies[i], groupids);
+    if (nbgroups)
+      break;
   }
+  if (!nbgroups)
+    goto outter_free;
 
   /* For convenience, put these declarations inside a block.  It's a
      crying shame we can't use C99 syntax here, and have to do a bunch
@@ -681,7 +683,7 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
 #endif
 
       topology->next_group_depth++;
-      hwloc_setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, accuracy, fromuser, 0 /* no need to check generated matrix */);
+      hwloc_setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, nbaccuracies, accuracies, fromuser, 0 /* no need to check generated matrix */);
 
   inner_free:
       /* Safely free everything */
@@ -752,7 +754,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
       hwloc_setup_groups_from_distances(topology, nbobjs,
 					topology->os_distances[type].objs,
 					topology->os_distances[type].distances,
-					accuracy,
+					1, &accuracy,
 					topology->os_distances[type].indexes != NULL,
 					1 /* check the first matrice */);
     }
