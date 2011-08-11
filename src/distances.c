@@ -675,6 +675,30 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
   }
 }
 
+/* check that the matrix is ok */
+static int
+hwloc__check_grouping_matrix(unsigned nbobjs, float *_distances, float accuracy)
+{
+  unsigned i,j;
+  for(i=0; i<nbobjs; i++) {
+    for(j=i+1; j<nbobjs; j++) {
+      /* should be symmetric */
+      if (hwloc_compare_distances(DISTANCE(i, j), DISTANCE(j, i), accuracy)) {
+	hwloc_debug("distance matrix asymmetric ([%u,%u]=%f != [%u,%u]=%f), aborting\n",
+                    i, j, DISTANCE(i, j), j, i, DISTANCE(j, i));
+	return -1;
+      }
+      /* diagonal is smaller than everything else */
+      if (hwloc_compare_distances(DISTANCE(i, j), DISTANCE(i, i), accuracy) <= 0) {
+	hwloc_debug("distance to self not strictly minimal ([%u,%u]=%f <= [%u,%u]=%f), aborting\n",
+                    i, j, DISTANCE(i, j), i, i, DISTANCE(i, i));
+	return -1;
+      }
+    }
+  }
+  return 0;
+}
+
 /*
  * Look at object physical distances to group them.
  */
@@ -686,9 +710,8 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
 				  float accuracy,
 				  int fromuser)
 {
-  unsigned i,j;
-
 #ifdef HWLOC_DEBUG
+  unsigned i,j;
   hwloc_debug("%s", "trying to group objects using distance matrix:\n");
   hwloc_debug("%s", "  index");
   for(j=0; j<nbobjs; j++)
@@ -702,23 +725,8 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
   }
 #endif
 
-  /* check that the matrix is ok */
-  for(i=0; i<nbobjs; i++) {
-    for(j=i+1; j<nbobjs; j++) {
-      /* should be symmetric */
-      if (hwloc_compare_distances(DISTANCE(i, j), DISTANCE(j, i), accuracy)) {
-	hwloc_debug("distance matrix asymmetric ([%u,%u]=%f != [%u,%u]=%f), aborting\n",
-                    i, j, DISTANCE(i, j), j, i, DISTANCE(j, i));
-	return;
-      }
-      /* diagonal is smaller than everything else */
-      if (hwloc_compare_distances(DISTANCE(i, j), DISTANCE(i, i), accuracy) <= 0) {
-	hwloc_debug("distance to self not strictly minimal ([%u,%u]=%f <= [%u,%u]=%f), aborting\n",
-                    i, j, DISTANCE(i, j), i, i, DISTANCE(i, i));
-	return;
-      }
-    }
-  }
+  if (hwloc__check_grouping_matrix(nbobjs, _distances, accuracy) < 0)
+    return;
 
   hwloc__setup_groups_from_distances(topology, nbobjs, objs, _distances, accuracy, fromuser);
 }
