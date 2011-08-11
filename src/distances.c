@@ -559,21 +559,48 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
   return groupid-1;
 }
 
+/* check that the matrix is ok */
+static int
+hwloc__check_grouping_matrix(unsigned nbobjs, float *_distances, float accuracy)
+{
+  unsigned i,j;
+  for(i=0; i<nbobjs; i++) {
+    for(j=i+1; j<nbobjs; j++) {
+      /* should be symmetric */
+      if (hwloc_compare_distances(DISTANCE(i, j), DISTANCE(j, i), accuracy)) {
+	hwloc_debug("distance matrix asymmetric ([%u,%u]=%f != [%u,%u]=%f), aborting\n",
+                    i, j, DISTANCE(i, j), j, i, DISTANCE(j, i));
+	return -1;
+      }
+      /* diagonal is smaller than everything else */
+      if (hwloc_compare_distances(DISTANCE(i, j), DISTANCE(i, i), accuracy) <= 0) {
+	hwloc_debug("distance to self not strictly minimal ([%u,%u]=%f <= [%u,%u]=%f), aborting\n",
+                    i, j, DISTANCE(i, j), i, i, DISTANCE(i, i));
+	return -1;
+      }
+    }
+  }
+  return 0;
+}
+
 /*
- * Look at object physical distances to group them,
- * after having done some basic sanity checks.
+ * Look at object physical distances to group them.
  */
 static void
-hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
-				   unsigned nbobjs,
-				   struct hwloc_obj **objs,
-				   float *_distances,
-				   float accuracy,
-				   int fromuser)
+hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
+				  unsigned nbobjs,
+				  struct hwloc_obj **objs,
+				  float *_distances,
+				  float accuracy,
+				  int fromuser,
+				  int needcheck)
 {
   unsigned *groupids = NULL;
   unsigned nbgroups;
   unsigned i,j;
+
+  if (needcheck && hwloc__check_grouping_matrix(nbobjs, _distances, accuracy) < 0)
+    return;
 
   hwloc_debug("trying to group %s objects into Group objects according to physical distances\n",
 	     hwloc_obj_type_string(objs[0]->type));
@@ -643,18 +670,18 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
       hwloc_debug("%s", "generated new distance matrix between groups:\n");
       hwloc_debug("%s", "  index");
       for(j=0; j<nbgroups; j++)
-	hwloc_debug(" % 5d", (int) j); /* print index because os_index is -1 fro Groups */
+	hwloc_debug(" % 5d", (int) j); /* print index because os_index is -1 for Groups */
       hwloc_debug("%s", "\n");
       for(i=0; i<nbgroups; i++) {
 	hwloc_debug("  % 5d", (int) i);
 	for(j=0; j<nbgroups; j++)
-          hwloc_debug(" %2.3f", GROUP_DISTANCE(i, j));
+	  hwloc_debug(" %2.3f", GROUP_DISTANCE(i, j));
 	hwloc_debug("%s", "\n");
       }
 #endif
 
       topology->next_group_depth++;
-      hwloc__setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, accuracy, fromuser);
+      hwloc_setup_groups_from_distances(topology, nbgroups, groupobjs, (float*) groupdistances, accuracy, fromuser, 0 /* no need to check generated matrix */);
 
   inner_free:
       /* Safely free everything */
@@ -675,62 +702,6 @@ hwloc__setup_groups_from_distances(struct hwloc_topology *topology,
   }
 }
 
-/* check that the matrix is ok */
-static int
-hwloc__check_grouping_matrix(unsigned nbobjs, float *_distances, float accuracy)
-{
-  unsigned i,j;
-  for(i=0; i<nbobjs; i++) {
-    for(j=i+1; j<nbobjs; j++) {
-      /* should be symmetric */
-      if (hwloc_compare_distances(DISTANCE(i, j), DISTANCE(j, i), accuracy)) {
-	hwloc_debug("distance matrix asymmetric ([%u,%u]=%f != [%u,%u]=%f), aborting\n",
-                    i, j, DISTANCE(i, j), j, i, DISTANCE(j, i));
-	return -1;
-      }
-      /* diagonal is smaller than everything else */
-      if (hwloc_compare_distances(DISTANCE(i, j), DISTANCE(i, i), accuracy) <= 0) {
-	hwloc_debug("distance to self not strictly minimal ([%u,%u]=%f <= [%u,%u]=%f), aborting\n",
-                    i, j, DISTANCE(i, j), i, i, DISTANCE(i, i));
-	return -1;
-      }
-    }
-  }
-  return 0;
-}
-
-/*
- * Look at object physical distances to group them.
- */
-static void
-hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
-				  unsigned nbobjs,
-				  struct hwloc_obj **objs,
-				  float *_distances,
-				  float accuracy,
-				  int fromuser)
-{
-#ifdef HWLOC_DEBUG
-  unsigned i,j;
-  hwloc_debug("%s", "trying to group objects using distance matrix:\n");
-  hwloc_debug("%s", "  index");
-  for(j=0; j<nbobjs; j++)
-    hwloc_debug(" % 5d", (int) objs[j]->os_index);
-  hwloc_debug("%s", "\n");
-  for(i=0; i<nbobjs; i++) {
-    hwloc_debug("  % 5d", (int) objs[i]->os_index);
-    for(j=0; j<nbobjs; j++)
-      hwloc_debug(" %2.3f", DISTANCE(i, j));
-    hwloc_debug("%s", "\n");
-  }
-#endif
-
-  if (hwloc__check_grouping_matrix(nbobjs, _distances, accuracy) < 0)
-    return;
-
-  hwloc__setup_groups_from_distances(topology, nbobjs, objs, _distances, accuracy, fromuser);
-}
-
 void
 hwloc_group_by_distances(struct hwloc_topology *topology)
 {
@@ -738,6 +709,9 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
   hwloc_obj_type_t type;
   char *env;
   float accuracy = 0.0;
+#ifdef HWLOC_DEBUG
+  unsigned i,j;
+#endif
 
   env = getenv("HWLOC_GROUPING");
   if (env && !atoi(env))
@@ -760,11 +734,27 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
        * thanks to hwloc_convert_distances_indexes_into_objects()
        */
       assert(topology->os_distances[type].distances);
+
+#ifdef HWLOC_DEBUG
+      hwloc_debug("%s", "trying to group objects using distance matrix:\n");
+      hwloc_debug("%s", "  index");
+      for(j=0; j<nbobjs; j++)
+	hwloc_debug(" % 5d", (int) topology->os_distances[type].objs[j]->os_index);
+      hwloc_debug("%s", "\n");
+      for(i=0; i<nbobjs; i++) {
+	hwloc_debug("  % 5d", (int) topology->os_distances[type].objs[i]->os_index);
+	for(j=0; j<nbobjs; j++)
+	  hwloc_debug(" %2.3f", topology->os_distances[type].distances[i*nbobjs + j]);
+	hwloc_debug("%s", "\n");
+      }
+#endif
+
       hwloc_setup_groups_from_distances(topology, nbobjs,
 					topology->os_distances[type].objs,
 					topology->os_distances[type].distances,
 					accuracy,
-					topology->os_distances[type].indexes != NULL);
+					topology->os_distances[type].indexes != NULL,
+					1 /* check the first matrice */);
     }
   }
 }
