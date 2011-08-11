@@ -549,8 +549,8 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
     /* valid this group */
     groupid++;
     if (verbose)
-      fprintf(stderr, "Found transitive graph with %u objects with minimal distance %f\n",
-	      size, min_distance);
+      fprintf(stderr, "Found transitive graph with %u objects with minimal distance %f accuracy %f\n",
+	      size, min_distance, accuracy);
   }
 
   if (groupid == 2 && !skipped)
@@ -715,7 +715,8 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
   unsigned nbobjs;
   hwloc_obj_type_t type;
   char *env;
-  float accuracy = 0.0;
+  float accuracies[5] = { 0.0, 0.01, 0.02, 0.05, 0.1 };
+  unsigned nbaccuracies = 5;
   int verbose = 0;
 #ifdef HWLOC_DEBUG
   unsigned i,j;
@@ -729,8 +730,14 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
     return;
 
   env = getenv("HWLOC_GROUPING_ACCURACY");
-  if (env)
-    accuracy = atof(env);
+  if (!env) {
+    /* only use 0.0 */
+    nbaccuracies = 1;
+  } else if (strcmp(env, "try")) {
+    /* use the given value */
+    nbaccuracies = 1;
+    accuracies[0] = atof(env);
+  } /* otherwise try all values */
 
 #ifdef HWLOC_DEBUG
   verbose = 1;
@@ -768,7 +775,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
       hwloc_setup_groups_from_distances(topology, nbobjs,
 					topology->os_distances[type].objs,
 					topology->os_distances[type].distances,
-					1, &accuracy,
+					nbaccuracies, accuracies,
 					topology->os_distances[type].indexes != NULL,
 					1 /* check the first matrice */,
 					verbose);

@@ -887,11 +887,14 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_GROUPING_ACCURACY=0</dt>
+<dt>HWLOC_GROUPING_ACCURACY=try</dt>
   <dd>relax distance comparison during grouping.
   By default, objects may be grouped if their distances form a minimal
   distance graph. When setting this variable to 0.02, these distances
   do not have to be strictly equal anymore, they may just be equal
-  with a 2% error.</dd>
+  with a 2% error.
+  If set to <tt>try</tt>, hwloc will try to group with perfect accuracy
+  (0), then with 0.01, 0.02, 0.05 and finally 0.1.</dd>
 
 <dt>HWLOC_GROUPING_VERBOSE=0</dt>
   <dd>display some verbose messages during grouping.
