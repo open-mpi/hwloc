@@ -688,9 +688,6 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
 {
   unsigned i,j;
 
-  if (getenv("HWLOC_IGNORE_DISTANCES"))
-    return;
-
 #ifdef HWLOC_DEBUG
   hwloc_debug("%s", "trying to group objects using distance matrix:\n");
   hwloc_debug("%s", "  index");
@@ -733,6 +730,13 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
   hwloc_obj_type_t type;
   char *env;
   float accuracy = 0.0;
+
+  env = getenv("HWLOC_GROUPING");
+  if (env && !atoi(env))
+    return;
+  /* backward compat with v1.2 */
+  if (getenv("HWLOC_IGNORE_DISTANCES"))
+    return;
 
   env = getenv("HWLOC_GROUPING_ACCURACY");
   if (env)
