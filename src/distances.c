@@ -495,8 +495,8 @@ hwloc_setup_group_from_min_distance(unsigned nbobjs,
 
   /* find the minimal distance */
   for(i=0; i<nbobjs; i++)
-    for(j=i+1; j<nbobjs; j++)
-      if (DISTANCE(i, j) < min_distance) /* no accuracy here, we want the real minimal */
+    for(j=0; j<nbobjs; j++) /* check the entire matrix, it may not be perfectly symmetric depending on the accuracy */
+      if (i != j && DISTANCE(i, j) < min_distance) /* no accuracy here, we want the real minimal */
         min_distance = DISTANCE(i, j);
   hwloc_debug("found minimal distance %f between objects\n", min_distance);
 
