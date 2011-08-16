@@ -32,11 +32,11 @@ Version 1.2.1
   the XML problem.
 * Fix spurious L1 cache detection on AIX. Thanks to Hendryk Bockelmann
   for reporting the problem.
+* Fix hwloc_get_last_cpu_location(THREAD) on Linux. Thanks to Gabriele
+  Fatigati for reporting the problem.
 * Fix object distance detection on Solaris.
 * Add pthread_self weak symbol to ease static linking.
 * Minor documentation fixes.
-* Fix hwloc_get_last_cpu_location(THREAD) on Linux. Thanks to Gabriele Fatigati
-  for reporting the problem.
 
 
 Version 1.2.0
