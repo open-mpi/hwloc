@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -40,6 +40,7 @@ typedef int rsinfo_t;
 #define R_MAXPROCS 6
 #define R_L2CSDL 11
 #define R_CORESDL 12
+#define R_REF1SDL 13
 
 #define R_PROCS 6
 

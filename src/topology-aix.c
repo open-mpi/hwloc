@@ -509,6 +509,9 @@ hwloc_look_aix(struct hwloc_topology *topology)
   /* TODO: R_LGPGDEF/R_LGPGFREE for large pages */
 
   hwloc_debug("Note: SMPSDL is at %d\n", rs_getinfo(NULL, R_SMPSDL, 0));
+#ifdef R_REF1SDL
+  hwloc_debug("Note: REF1SDL is at %d\n", rs_getinfo(NULL, R_REF1SDL, 0));
+#endif
 
   for (i=0; i<=rs_getinfo(NULL, R_MAXSDL, 0); i++)
     {
