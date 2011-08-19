@@ -21,18 +21,20 @@ Version 1.3.0
 -------------
 * Major features
   + Add I/O devices and bridges to the topology using the pciutils
-    library. Only enabled after setting the relevant topology with
+    library. Only enabled after setting the relevant flag with
     hwloc_topology_set_flags() before hwloc_topology_load(). See the
-    documentation for details.
-* Minor API updates
-  + Add hwloc_obj_add_info to customize object info attributes.
+    I/O Devices section in the documentation for details.
 * Discovery improvements
   + Add associativity to the cache attributes.
   + Add support for s390/z11 "books" on Linux.
   + Add the HWLOC_GROUPING_ACCURACY environment variable to relax
-    distance-based grouping constraints.
+    distance-based grouping constraints. See the Environment Variables
+    section in the documentation for details about grouping behavior
+    and configuration.
   + Allow user-given distance matrices to remove or replace those
     discovered by the OS backend.
+* Minor API updates
+  + Add hwloc_obj_add_info to customize object info attributes.
 * Tools
   + lstopo now displays I/O devices by default. Several options are
     added to configure the I/O discovery.

@@ -894,14 +894,14 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_GROUPING_ACCURACY=0</dt>
-<dt>HWLOC_GROUPING_ACCURACY=try</dt>
   <dd>relax distance comparison during grouping.
   By default, objects may be grouped if their distances form a minimal
   distance graph. When setting this variable to 0.02, these distances
   do not have to be strictly equal anymore, they may just be equal
   with a 2% error.
-  If set to <tt>try</tt>, hwloc will try to group with perfect accuracy
-  (0), then with 0.01, 0.02, 0.05 and finally 0.1.</dd>
+  If set to <tt>try</tt> instead of a numerical value, hwloc will try
+  to group with perfect accuracy (0, the default), then with 0.01, 0.02,
+  0.05 and finally 0.1.</dd>
 
 <dt>HWLOC_GROUPING_VERBOSE=0</dt>
   <dd>display some verbose messages during grouping.
@@ -1054,7 +1054,7 @@ regular objects do.
 Hence, they have no notion of cousins and their list may not be traversed with
 helpers such as hwloc_get_next_obj_by_depth() or hwloc_get_next_obj_by_type().
 However, hwloc offers some dedicated helpers such as hwloc_get_next_pcidev()
-and hwloc_get_next_iodev() for convenience (see \ref hwlocality_iodev and
+and hwloc_get_next_osdev() for convenience (see \ref hwlocality_iodev and
 \ref hwlocality_advanced_io).
 
 An I/O hierarchy is organized as follows:
@@ -1080,7 +1080,8 @@ names, e.g. <em>eth0</em> or <em>mlx4_0</em>.
 However, this ability is currently only available on Linux for some
 classes of devices.
 It should especially be noted that proprietary graphics driver do not
-create any interesting software device for GPUs.
+create any interesting software device for GPUs, they should therefore
+be manipulated as PCI device objects.
 See also \ref interoperability for managing these devices without
 considering them as hwloc objects.
 
