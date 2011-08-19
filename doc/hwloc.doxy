@@ -876,7 +876,7 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_HIDE_ERRORS=0</dt>
-  <dd>disable verbose reporting of errors.
+  <dd>enables or disables verbose reporting of errors.
   The hwloc library may issue warnings to the standard error stream
   when it detects a problem during topology discovery, for instance
   if the operating system (or user) gives contradictory topology
@@ -885,7 +885,7 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_GROUPING=1</dt>
-  <dd>enable or disable objects grouping based on distances.
+  <dd>enables or disables objects grouping based on distances.
   By default, hwloc uses distance matrices between objects (either read
   from the OS or given by the user) to find groups of close objects.
   These groups are described by adding intermediate Group objects in the topology.
@@ -893,8 +893,8 @@ following environment variables.
   This variable supersedes the obsolete HWLOC_IGNORE_DISTANCES variable.
   </dd>
 
-<dt>HWLOC_GROUPING_ACCURACY=0</dt>
-  <dd>relax distance comparison during grouping.
+<dt>HWLOC_GROUPING_ACCURACY=0.05</dt>
+  <dd>relaxes distance comparison during grouping.
   By default, objects may be grouped if their distances form a minimal
   distance graph. When setting this variable to 0.02, these distances
   do not have to be strictly equal anymore, they may just be equal
@@ -904,7 +904,7 @@ following environment variables.
   0.05 and finally 0.1.</dd>
 
 <dt>HWLOC_GROUPING_VERBOSE=0</dt>
-  <dd>display some verbose messages during grouping.
+  <dd>enables or disables some verbose messages during grouping.
   If this variable is set to 1, some debug messages will be displayed
   during distance-based grouping of objects even if debug was not specific
   at configure time.
@@ -940,7 +940,7 @@ following environment variables.
   processors.
   <tt>domain</tt> and <tt>bus</tt> are the PCI domain and primary bus
   of the corresponding host bridge.
-  </ dd>
+  </dd>
 
 </dl>
 
