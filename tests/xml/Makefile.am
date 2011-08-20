@@ -12,6 +12,7 @@ xml_inputs = \
 	16amd64-8n2c-cpusets.xml \
 	16em64t-4s2c2t.xml \
 	16em64t-4s2c2t-offlines.xml \
+	24em64t-2n6c2t-pci.xml \
 	8em64t-2mi2ma2c.xml
 
 # Only run the tests if we're building standalone, because the tests
