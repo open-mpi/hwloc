@@ -1085,6 +1085,42 @@ be manipulated as PCI device objects.
 See also \ref interoperability for managing these devices without
 considering them as hwloc objects.
 
+The following picture shows a dual-socket dual-core host whose
+PCI bus is connected to the first socket and NUMA node.
+Six interesting PCI devices are shown, and four out of them were
+recognized as software devices (<em>eth0</em>, <em>eth1</em>,
+<em>sda</em>, and <em>sr0</em>).
+
+\image html devel09-pci.png
+\image latex devel09-pci.pdf "" width=\textwidth
+
+Here is the corresponding textual output:
+
+\verbatim
+Machine (24GB)
+  NUMANode L#0 (P#0 12GB)
+    Socket L#0 + L3 L#0 (8192KB)
+      L2 L#0 (256KB) + L1 L#0 (32KB) + Core L#0 + PU L#0 (P#0)
+      L2 L#1 (256KB) + L1 L#1 (32KB) + Core L#1 + PU L#1 (P#2)
+    HostBridge
+      PCIBridge
+        PCI 14e4:163b
+          Net "eth0"
+        PCI 14e4:163b
+          Net "eth1"
+      PCIBridge
+        PCI 1000:0060
+          Block "sda"
+      PCIBridge
+        PCI 102b:0532
+      PCI 8086:3a20
+      PCI 8086:3a26
+        Block "sr0"
+  NUMANode L#1 (P#1 12GB) + Socket L#1 + L3 L#1 (8192KB)
+    L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
+    L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
+\endverbatim
+
 I/O devices may be consulted by traversing the topology manually
 (looking for hostbridges), using dedicated helpers, or with the
 command-line tools.
