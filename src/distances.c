@@ -17,7 +17,7 @@
 void hwloc_topology_distances_init(struct hwloc_topology *topology)
 {
   unsigned i;
-  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
+  for (i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++) {
     /* no distances yet */
     topology->os_distances[i].nbobjs = 0;
     topology->os_distances[i].objs = NULL;
@@ -34,7 +34,7 @@ void hwloc_topology_distances_init(struct hwloc_topology *topology)
 void hwloc_topology_distances_clear(struct hwloc_topology *topology)
 {
   unsigned i;
-  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
+  for (i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++) {
     /* remove final distance matrices, but keep physically-ordered ones */
     free(topology->os_distances[i].objs);
     topology->os_distances[i].objs = NULL;
@@ -45,7 +45,7 @@ void hwloc_topology_distances_clear(struct hwloc_topology *topology)
 void hwloc_topology_distances_destroy(struct hwloc_topology *topology)
 {
   unsigned i;
-  for (i=0; i < HWLOC_OBJ_TYPE_MAX; i++) {
+  for (i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++) {
     /* remove final distance matrics AND physically-ordered ones */
     free(topology->os_distances[i].indexes);
     topology->os_distances[i].indexes = NULL;

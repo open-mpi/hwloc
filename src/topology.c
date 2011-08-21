@@ -1538,7 +1538,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
   /* don't touch next_group_depth, the Group objects are still here */
 
   /* initialize all depth to unknown */
-  for (l=0; l < HWLOC_OBJ_TYPE_MAX; l++)
+  for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
   topology->type_depth[topology->levels[0][0]->type] = 0;
 
@@ -2202,7 +2202,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->support.membind = malloc(sizeof(*topology->support.membind));
 
   /* Only ignore useless cruft by default */
-  for(i=0; i< HWLOC_OBJ_TYPE_MAX; i++)
+  for(i = HWLOC_OBJ_SYSTEM; i < HWLOC_OBJ_TYPE_MAX; i++)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
@@ -2365,7 +2365,7 @@ int
 hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
 {
   unsigned type;
-  for(type=0; type<HWLOC_OBJ_TYPE_MAX; type++)
+  for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
     if (type != HWLOC_OBJ_PU
 	&& type != HWLOC_OBJ_PCI_DEVICE
 	&& type != HWLOC_OBJ_BRIDGE
