@@ -1097,9 +1097,13 @@ considering them as hwloc objects.
 \section iodevices_consult Consulting I/O devices
 
 I/O devices may be consulted by traversing the topology manually
-(looking for hostbridges), using dedicated helpers, or with the
+(looking for hostbridges), by using dedicated helpers (see
+\ref hwlocality_iodev and \ref hwlocality_advanced_io), or with
 command-line tools.
-lstopo displays the interesting I/O devices by default.
+
+lstopo displays the interesting I/O devices by default
+(passing <tt>--no-io</tt> disables it).
+
 hwloc-calc and hwloc-bind may manipulate I/O devices specified
 by PCI bus ID or by OS device name.
 For instance, <tt>pci=0000:02:03.0</tt> (respectively <tt>os=eth0</tt>)
