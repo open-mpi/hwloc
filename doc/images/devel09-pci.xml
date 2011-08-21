@@ -85,10 +85,13 @@
           <info name="PCIVendor" value="Intel Corporation"/>
           <info name="PCIDevice" value="82801JI (ICH10 Family) 4 port SATA IDE Controller"/>
         </object>
-        <object type="PCIDev" os_level="-1" os_index="501" name="Intel Corporation 82801JI (ICH10 Family) 2 port SATA IDE Controller" pci_busid="0000:00:1f.5" pci_type="0101 [8086:3a26] [0028:008c] 00" pci_link_speed="0,000000">
-          <info name="PCIVendor" value="Intel Corporation"/>
-          <info name="PCIDevice" value="82801JI (ICH10 Family) 2 port SATA IDE Controller"/>
-          <object type="OSDev" os_level="-1" name="sr0" osdev_type="0"/>
+        <object type="PCIDev" os_level="-1" os_index="331776" name="Mellanox Technologies MT25418 [ConnectX IB DDR, PCIe 2.0 2.5GT/s]" pci_busid="0000:51:00.0" pci_type=
+"0c06 [15b3:634a] [00b3:004a] a0" pci_link_speed="0.000000">
+          <info name="PCIVendor" value="Mellanox Technologies"/>
+          <info name="PCIDevice" value="MT25418 [ConnectX IB DDR, PCIe 2.0 2.5GT/s]"/>
+          <object type="OSDev" os_level="-1" name="ib0" osdev_type="2"/>
+          <object type="OSDev" os_level="-1" name="ib1" osdev_type="2"/>
+          <object type="OSDev" os_level="-1" name="mlx4_0" osdev_type="2"/>
         </object>
       </object>
     </object>
