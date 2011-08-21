@@ -1538,7 +1538,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
   /* don't touch next_group_depth, the Group objects are still here */
 
   /* initialize all depth to unknown */
-  for (l=1; l < HWLOC_OBJ_TYPE_MAX; l++)
+  for (l=0; l < HWLOC_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
   topology->type_depth[topology->levels[0][0]->type] = 0;
 
