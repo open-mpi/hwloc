@@ -827,7 +827,7 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
  * @{
  */
 
-/** \brief Get the depth of the hierachical tree of objects.
+/** \brief Get the depth of the hierarchical tree of objects.
  *
  * This is the depth of HWLOC_OBJ_PU objects plus one.
  */
