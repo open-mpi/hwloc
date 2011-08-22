@@ -810,7 +810,18 @@ append_iodevs(hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t child, *temp;
 
-  if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
+  if (obj->type == HWLOC_OBJ_BRIDGE) {
+    obj->depth = HWLOC_TYPE_DEPTH_BRIDGE;
+    /* Insert in the main bridge list */
+    if (topology->first_bridge) {
+      obj->prev_cousin = topology->last_bridge;
+      obj->prev_cousin->next_cousin = obj;
+      topology->last_bridge = obj;
+    } else {
+      topology->first_bridge = topology->last_bridge = obj;
+    }
+  } else if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
+    obj->depth = HWLOC_TYPE_DEPTH_PCI_DEVICE;
     /* Insert in the main pcidev list */
     if (topology->first_pcidev) {
       obj->prev_cousin = topology->last_pcidev;
@@ -820,6 +831,7 @@ append_iodevs(hwloc_topology_t topology, hwloc_obj_t obj)
       topology->first_pcidev = topology->last_pcidev = obj;
     }
   } else if (obj->type == HWLOC_OBJ_OS_DEVICE) {
+    obj->depth = HWLOC_TYPE_DEPTH_OS_DEVICE;
     /* Insert in the main osdev list */
     if (topology->first_osdev) {
       obj->prev_cousin = topology->last_osdev;
@@ -1519,6 +1531,35 @@ hwloc_level_take_objects(hwloc_topology_t topology,
   return new_i;
 }
 
+static unsigned
+hwloc_build_level_from_list(struct hwloc_obj *first, struct hwloc_obj ***levelp)
+{
+  unsigned i, nb;
+  struct hwloc_obj * obj;
+
+  /* count */
+  obj = first;
+  i = 0;
+  while (obj) {
+    i++;
+    obj = obj->next_cousin;
+  }
+  nb = i;
+
+  /* allocate and fill level */
+  *levelp = malloc(nb * sizeof(struct hwloc_obj *));
+  obj = first;
+  i = 0;
+  while (obj) {
+    obj->logical_index = i;
+    (*levelp)[i] = obj;
+    i++;
+    obj = obj->next_cousin;
+  }
+
+  return nb;
+}
+
 /*
  * Do the remaining work that hwloc_connect_children() did not do earlier.
  */
@@ -1540,11 +1581,25 @@ hwloc_connect_levels(hwloc_topology_t topology)
   /* initialize all depth to unknown */
   for (l = HWLOC_OBJ_SYSTEM; l < HWLOC_OBJ_TYPE_MAX; l++)
     topology->type_depth[l] = HWLOC_TYPE_DEPTH_UNKNOWN;
+  /* initialize root type depth */
   topology->type_depth[topology->levels[0][0]->type] = 0;
 
-  /* initialize special I/O device levels */
+  /* initialize I/O special levels */
+  free(topology->bridge_level);
+  topology->bridge_level = NULL;
+  topology->bridge_nbobjects = 0;
+  topology->first_bridge = topology->last_bridge = NULL;
+  topology->type_depth[HWLOC_OBJ_BRIDGE] = HWLOC_TYPE_DEPTH_BRIDGE;
+  free(topology->pcidev_level);
+  topology->pcidev_level = NULL;
+  topology->pcidev_nbobjects = 0;
   topology->first_pcidev = topology->last_pcidev = NULL;
+  topology->type_depth[HWLOC_OBJ_PCI_DEVICE] = HWLOC_TYPE_DEPTH_PCI_DEVICE;
+  free(topology->osdev_level);
+  topology->osdev_level = NULL;
+  topology->osdev_nbobjects = 0;
   topology->first_osdev = topology->last_osdev = NULL;
+  topology->type_depth[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_DEPTH_OS_DEVICE;
 
   /* Start with children of the whole system.  */
   l = 0;
@@ -1651,6 +1706,10 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
   /* It's empty now.  */
   free(objs);
+
+  topology->bridge_nbobjects = hwloc_build_level_from_list(topology->first_bridge, &topology->bridge_level);
+  topology->pcidev_nbobjects = hwloc_build_level_from_list(topology->first_pcidev, &topology->pcidev_level);
+  topology->osdev_nbobjects = hwloc_build_level_from_list(topology->first_osdev, &topology->osdev_level);
 
   return 0;
 }
@@ -2165,6 +2224,12 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->level_nbobjects[0] = 1;
   /* NULLify other levels so that we can detect and free old ones in hwloc_connect_levels() if needed */
   memset(topology->levels+1, 0, (HWLOC_DEPTH_MAX-1)*sizeof(*topology->levels));
+  topology->bridge_level = NULL;
+  topology->pcidev_level = NULL;
+  topology->osdev_level = NULL;
+  topology->first_bridge = topology->last_bridge = NULL;
+  topology->first_pcidev = topology->last_pcidev = NULL;
+  topology->first_osdev = topology->last_osdev = NULL;
 
   /* Create the actual machine object, but don't touch its attributes yet
    * since the OS backend may still change the object into something else
@@ -2175,9 +2240,6 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   root_obj->logical_index = 0;
   root_obj->sibling_rank = 0;
   topology->levels[0][0] = root_obj;
-
-  topology->first_pcidev = topology->last_pcidev = NULL;
-  topology->first_osdev = topology->last_osdev = NULL;
 }
 
 int
@@ -2391,6 +2453,9 @@ hwloc_topology_clear (struct hwloc_topology *topology)
   hwloc_topology_clear_tree (topology, topology->levels[0][0]);
   for (l=0; l<topology->nb_levels; l++)
     free(topology->levels[l]);
+  free(topology->bridge_level);
+  free(topology->pcidev_level);
+  free(topology->osdev_level);
 }
 
 void

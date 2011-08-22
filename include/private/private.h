@@ -67,7 +67,15 @@ struct hwloc_topology {
   int is_loaded;
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
 
-  struct hwloc_obj *first_pcidev, *last_pcidev, *first_osdev, *last_osdev;
+  unsigned bridge_nbobjects;
+  struct hwloc_obj **bridge_level;
+  struct hwloc_obj *first_bridge, *last_bridge;
+  unsigned pcidev_nbobjects;
+  struct hwloc_obj **pcidev_level;
+  struct hwloc_obj *first_pcidev, *last_pcidev;
+  unsigned osdev_nbobjects;
+  struct hwloc_obj **osdev_level;
+  struct hwloc_obj *first_osdev, *last_osdev;
 
   int (*set_thisproc_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
   int (*get_thisproc_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);

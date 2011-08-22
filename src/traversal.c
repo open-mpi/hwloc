@@ -22,7 +22,16 @@ hwloc_obj_type_t
 hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
-    return (hwloc_obj_type_t) -1;
+    switch (depth) {
+    case HWLOC_TYPE_DEPTH_BRIDGE:
+      return HWLOC_OBJ_BRIDGE;
+    case HWLOC_TYPE_DEPTH_PCI_DEVICE:
+      return HWLOC_OBJ_PCI_DEVICE;
+    case HWLOC_TYPE_DEPTH_OS_DEVICE:
+      return HWLOC_OBJ_OS_DEVICE;
+    default:
+      return (hwloc_obj_type_t) -1;
+    }
   return topology->levels[depth][0]->type;
 }
 
@@ -30,7 +39,16 @@ unsigned
 hwloc_get_nbobjs_by_depth (struct hwloc_topology *topology, unsigned depth)
 {
   if (depth >= topology->nb_levels)
-    return 0;
+    switch (depth) {
+    case HWLOC_TYPE_DEPTH_BRIDGE:
+      return topology->bridge_nbobjects;
+    case HWLOC_TYPE_DEPTH_PCI_DEVICE:
+      return topology->pcidev_nbobjects;
+    case HWLOC_TYPE_DEPTH_OS_DEVICE:
+      return topology->osdev_nbobjects;
+    default:
+      return 0;
+    }
   return topology->level_nbobjects[depth];
 }
 
@@ -38,34 +56,19 @@ struct hwloc_obj *
 hwloc_get_obj_by_depth (struct hwloc_topology *topology, unsigned depth, unsigned idx)
 {
   if (depth >= topology->nb_levels)
-    return NULL;
+    switch (depth) {
+    case HWLOC_TYPE_DEPTH_BRIDGE:
+      return idx < topology->bridge_nbobjects ? topology->bridge_level[idx] : NULL;
+    case HWLOC_TYPE_DEPTH_PCI_DEVICE:
+      return idx < topology->pcidev_nbobjects ? topology->pcidev_level[idx] : NULL;
+    case HWLOC_TYPE_DEPTH_OS_DEVICE:
+      return idx < topology->osdev_nbobjects ? topology->osdev_level[idx] : NULL;
+    default:
+      return NULL;
+    }
   if (idx >= topology->level_nbobjects[depth])
     return NULL;
   return topology->levels[depth][idx];
-}
-
-struct hwloc_obj *
-hwloc_get_next_pcidev(struct hwloc_topology *topology, struct hwloc_obj *prev)
-{
-  if (prev) {
-    if (prev->type != HWLOC_OBJ_PCI_DEVICE)
-      return NULL;
-    return prev->next_cousin;
-  } else {
-    return topology->first_pcidev;
-  }
-}
-
-struct hwloc_obj *
-hwloc_get_next_osdev(struct hwloc_topology *topology, struct hwloc_obj *prev)
-{
-  if (prev) {
-    if (prev->type != HWLOC_OBJ_OS_DEVICE)
-      return NULL;
-    return prev->next_cousin;
-  } else {
-    return topology->first_osdev;
-  }
 }
 
 unsigned hwloc_get_closest_objs (struct hwloc_topology *topology, struct hwloc_obj *src, struct hwloc_obj **objs, unsigned max)

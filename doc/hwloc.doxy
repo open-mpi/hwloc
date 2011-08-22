@@ -1053,13 +1053,11 @@ as a child of the corresponding hwloc socket object.
 These new objects have neither CPU sets nor node sets (NULL pointers) because
 they are not directly usable by the user applications.
 Moreover I/O hierarchies may be highly complex (asymmetric trees of bridges).
-So I/O objects are not placed in a level with a well-defined depth as
-regular objects do.
-Hence, they have no notion of cousins and their list may not be traversed with
-helpers such as hwloc_get_next_obj_by_depth() or hwloc_get_next_obj_by_type().
+So I/O objects are placed in specific levels with custom depths.
+Their lists may still be traversed with regular helpers such as
+hwloc_get_next_obj_by_type().
 However, hwloc offers some dedicated helpers such as hwloc_get_next_pcidev()
-and hwloc_get_next_osdev() for convenience (see \ref hwlocality_iodev and
-\ref hwlocality_advanced_io).
+and hwloc_get_next_osdev() for convenience (see \ref hwlocality_advanced_io).
 
 An I/O hierarchy is organized as follows:
 A hostbridge object ( <tt>::HWLOC_OBJ_BRIDGE</tt> object with upstream
@@ -1097,9 +1095,8 @@ considering them as hwloc objects.
 \section iodevices_consult Consulting I/O devices
 
 I/O devices may be consulted by traversing the topology manually
-(looking for hostbridges), by using dedicated helpers (see
-\ref hwlocality_iodev and \ref hwlocality_advanced_io), or with
-command-line tools.
+(looking for hostbridges), by using dedicated helpers
+(see \ref hwlocality_advanced_io), or with command-line tools.
 
 lstopo displays the interesting I/O devices by default
 (passing <tt>--no-io</tt> disables it).

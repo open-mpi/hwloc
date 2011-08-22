@@ -195,20 +195,17 @@ typedef enum {
   HWLOC_OBJ_BRIDGE,	/**< \brief Bridge.
 			  * Any bridge that connects the host or an I/O bus,
 			  * to another I/O bus.
-			  * Bridge objects have neither CPU sets, nor node sets,
-			  * nor any level depth.
+			  * Bridge objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  */
   HWLOC_OBJ_PCI_DEVICE,	/**< \brief PCI device.
-			  * These objects have neither CPU sets, nor node sets,
-			  * nor any level depth.
+			  * These objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  */
   HWLOC_OBJ_OS_DEVICE,	/**< \brief Operating system device.
-			  * These objects have neither CPU sets, nor node sets,
-			  * nor any level depth.
+			  * These objects have neither CPU sets nor node sets.
 			  * They are not added to the topology unless I/O discovery
 			  * is enabled with hwloc_topology_set_flags().
 			  */
@@ -960,16 +957,21 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * If some objects of the given type exist in different levels, for instance
  * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
  *
- * If an I/O object type is given, the function returns HWLOC_TYPE_DEPTH_UNKNOWN
- * because I/O objects are not stored in levels as other CPU-related objects do.
- * If you ever need to traverse the list of PCI or OS devices, you should use
- * hwloc_get_next_pcidev() or hwloc_get_next_osdev().
+ * If an I/O object type is given, the function returns a virtual value
+ * because I/O objects are stored in special levels that are not CPU-related.
+ * This virtual depth may be passed to other hwloc functions such as
+ * hwloc_get_obj_by_depth() but it should not be considered as an actual
+ * depth by the application. In particular, it should not be compared with
+ * any other object depth or with the entire topology depth.
  */
 HWLOC_DECLSPEC int hwloc_get_type_depth (hwloc_topology_t topology, hwloc_obj_type_t type);
 
 enum hwloc_get_type_depth_e {
-    HWLOC_TYPE_DEPTH_UNKNOWN = -1, /**< \brief No object of given type exists in the topology. \hideinitializer */
-    HWLOC_TYPE_DEPTH_MULTIPLE = -2 /**< \brief Objects of given type exist at different depth in the topology. \hideinitializer */
+    HWLOC_TYPE_DEPTH_UNKNOWN = -1,    /**< \brief No object of given type exists in the topology. \hideinitializer */
+    HWLOC_TYPE_DEPTH_MULTIPLE = -2,   /**< \brief Objects of given type exist at different depth in the topology. \hideinitializer */
+    HWLOC_TYPE_DEPTH_BRIDGE = -3,     /**< \brief Virtual depth for bridge object level. \hideinitializer */
+    HWLOC_TYPE_DEPTH_PCI_DEVICE = -4, /**< \brief Virtual depth for PCI device object level. \hideinitializer */
+    HWLOC_TYPE_DEPTH_OS_DEVICE = -5   /**< \brief Virtual depth for software device object level. \hideinitializer */
 };
 
 /** \brief Returns the type of objects at depth \p depth.
@@ -1823,32 +1825,6 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, 
  * or hwloc_alloc_membind().
  */
 HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len);
-
-/** @} */
-
-
-
-/** \defgroup hwlocality_iodev Basic I/O Device Management
- * @{
- */
-
-/** \brief Get the next PCI device in the system.
- *
- * This is useful for enumerating PCI device objects because
- * those are not available through a common level or depth.
- *
- * \return the first PCI device if \p prev is \c NULL.
- */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_get_next_pcidev(struct hwloc_topology *topology, struct hwloc_obj *prev);
-
-/** \brief Get the next OS device in the system.
- *
- * This is useful for enumerating OS device objects because
- * those are not available through a common level or depth.
- *
- * \return the first OS device if \p prev is \c NULL.
- */
-HWLOC_DECLSPEC struct hwloc_obj * hwloc_get_next_osdev(struct hwloc_topology *topology, struct hwloc_obj *prev);
 
 /** @} */
 
