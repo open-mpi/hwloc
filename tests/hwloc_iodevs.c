@@ -26,7 +26,7 @@ int main(void)
 
   printf("Found %d bridges\n", hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_BRIDGE));
   obj = NULL;
-  while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_BRIDGE, obj)) != NULL) {
+  while ((obj = hwloc_get_next_bridge(topology, obj)) != NULL) {
     assert(obj->type == HWLOC_OBJ_BRIDGE);
     /* only host->pci and pci->pci bridge supported so far */
     if (obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST) {

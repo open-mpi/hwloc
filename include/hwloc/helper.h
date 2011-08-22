@@ -1137,6 +1137,51 @@ hwloc_get_next_osdev(hwloc_topology_t topology, hwloc_obj_t prev)
   return hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_OS_DEVICE, prev);
 }
 
+/** \brief Get the next bridge in the system.
+ *
+ * \return the first bridge if \p prev is \c NULL.
+ */
+static __inline hwloc_obj_t
+hwloc_get_next_bridge(hwloc_topology_t topology, hwloc_obj_t prev)
+{
+  return hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_BRIDGE, prev);
+}
+
+/* \brief Checks whether a given bridge covers a given PCI bus.
+ */
+static __inline int
+hwloc_bridge_covers_pcibus(hwloc_obj_t bridge,
+			   unsigned domain, unsigned bus)
+{
+  return bridge->type == HWLOC_OBJ_BRIDGE
+    && bridge->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI
+    && bridge->attr->bridge.downstream.pci.domain == domain
+    && bridge->attr->bridge.downstream.pci.secondary_bus <= bus
+    && bridge->attr->bridge.downstream.pci.subordinate_bus >= bus;
+}
+
+/** \brief Find the hostbridge that covers the given PCI bus.
+ *
+ * This is useful for finding the locality of a bus because
+ * it is the hostbridge parent cpuset.
+ */
+static __inline hwloc_obj_t
+hwloc_get_hostbridge_by_pcibus(hwloc_topology_t topology,
+			       unsigned domain, unsigned bus)
+{
+  hwloc_obj_t obj = NULL;
+  while ((obj = hwloc_get_next_bridge(topology, obj)) != NULL) {
+    if (hwloc_bridge_covers_pcibus(obj, domain, bus)) {
+      /* found bridge covering this pcibus, make sure it's a hostbridge */
+      assert(obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST);
+      assert(obj->parent->type != HWLOC_OBJ_BRIDGE);
+      assert(obj->parent->cpuset);
+      return obj;
+    }
+  }
+  return NULL;
+}
+
 /** @} */
 
 

@@ -343,6 +343,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_weight.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_xor.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_zero.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_bridge_covers_pcibus.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types.3 \
         $(DOX_MAN_DIR)/man3/hwloc_compare_types_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_const_bitmap_t.3 \
@@ -379,6 +380,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_cpubind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_first_largest_obj_inside_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_hostbridge_by_pcibus.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_largest_objs_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_last_cpu_location.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_membind.3 \
@@ -387,6 +389,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_inside_cpuset_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_bridge.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_child.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3 \

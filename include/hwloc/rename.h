@@ -218,6 +218,9 @@ extern "C" {
 #define hwloc_get_pcidev_by_busid HWLOC_NAME(get_pcidev_by_busid)
 #define hwloc_get_pcidev_by_busidstring HWLOC_NAME(get_pcidev_by_busidstring)
 #define hwloc_get_next_osdev HWLOC_NAME(get_next_osdev)
+#define hwloc_get_next_bridge HWLOC_NAME(get_next_bridge)
+#define hwloc_bridge_covers_pcibus HWLOC_NAME(bridge_covers_pcibus)
+#define hwloc_get_hostbridge_by_pcibus HWLOC_NAME(get_hostbridge_by_pcibus)
 
 /* hwloc/bitmap.h */
 
