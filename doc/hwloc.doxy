@@ -1092,13 +1092,27 @@ On the contrary some PCI devices may contain multiple software device
 See also \ref interoperability for managing these devices without
 considering them as hwloc objects.
 
-\section iodevices_consult Consulting I/O devices
+\section iodevices_consult Consulting I/O devices and binding
 
 I/O devices may be consulted by traversing the topology manually
-(looking for hostbridges), by using dedicated helpers
-(see \ref hwlocality_advanced_io), or with command-line tools.
+(with usual routines such as hwloc_get_obj_by_type()) or by using
+dedicated helpers (such as hwloc_get_pcidev_by_busid(), see
+\ref hwlocality_advanced_io).
 
-lstopo displays the interesting I/O devices by default
+I/O objects do not actually contain any locality information because
+their CPU sets and node sets are NULL.
+Their locality must be retrieved by walking up the object tree
+(through the <tt>parent</tt> link) until an non-I/O object is found
+(see hwloc_get_non_io_ancestor_obj()).
+This regular object should have non-NULL CPU sets and node sets
+which describe the processing units and memory that are immediately
+close to the I/O device.
+For instance the path from a OS device to its locality may go
+across a PCI device parent, one or several bridges, up to a
+a NUMA node with the same locality.
+
+Command-line tools are also aware of I/O devices.
+lstopo displays the interesting ones by default
 (passing <tt>--no-io</tt> disables it).
 
 hwloc-calc and hwloc-bind may manipulate I/O devices specified

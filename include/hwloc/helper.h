@@ -1081,6 +1081,23 @@ hwloc_get_latency(hwloc_topology_t topology,
  * @{
  */
 
+/** \brief Get the first non-I/O ancestor object.
+ *
+ * Given the I/O object \p ioobj, find the smallest non-I/O ancestor
+ * object. This regular object may then be used for binding because
+ * its locality is the same as \p ioobj.
+ */
+static __inline hwloc_obj_t
+hwloc_get_non_io_ancestor_obj(hwloc_topology_t topology __hwloc_attribute_unused,
+			      hwloc_obj_t ioobj)
+{
+  hwloc_obj_t obj = ioobj;
+  while (obj && !obj->cpuset) {
+    obj = obj->parent;
+  }
+  return obj;
+}
+
 /** \brief Get the next PCI device in the system.
  *
  * \return the first PCI device if \p prev is \c NULL.

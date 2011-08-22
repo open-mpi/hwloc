@@ -399,6 +399,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_osdev.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_pcidev.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_non_io_ancestor_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_array_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
