@@ -1147,6 +1147,9 @@ Indeed this OpenFabrics HCA PCI device object contains one
 one OpenFabrics software device (<em>mlx4_0</em>) and two virtual
 network interface software devices (<em>ib0</em> and <em>ib1</em>).
 
+PCI link speed is also reported for some bridges and devices
+because lstopo was privileged when it discovered the topology.
+
 
 Here is the corresponding textual output:
 
