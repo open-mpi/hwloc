@@ -121,7 +121,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
   float *distances;
   unsigned nbobjs = 0, i, j, x, y, z;
 
-  if (!*string) {
+  if (!strcmp(string, "none")) {
     hwloc_topology__set_distance_matrix(topology, type, 0, NULL, NULL, NULL, 1 /* force */);
     return;
   }
