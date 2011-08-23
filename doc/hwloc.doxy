@@ -920,8 +920,8 @@ following environment variables.
   If another distance matrix already exists for the given type,
   either because the user specified it or because the OS offers it,
   it will be replaced by the given one.
-  If the variable value is empty, the existing distance matrix for the given type
-  is removed.
+  If the variable value is <tt>none</tt>, the existing distance matrix for
+  the given type is removed.
   Otherwise, the variable value starts with a comma-separated list of the objects'
   physical indexes. Distances are then specified after a colon.
   <ul>

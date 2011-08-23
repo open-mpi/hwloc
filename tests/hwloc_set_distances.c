@@ -145,8 +145,8 @@ int main(void)
 
   /* clear everything */
   /* default 2*4*4 */
-  putenv("HWLOC_Core_DISTANCES=");
-  putenv("HWLOC_PU_DISTANCES=");
+  putenv("HWLOC_Core_DISTANCES=none");
+  putenv("HWLOC_PU_DISTANCES=none");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
