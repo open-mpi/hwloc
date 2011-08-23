@@ -109,7 +109,7 @@ int main(void)
   assert(width == 32);
 
   /* 2*4*4 and group 4cores as 2*2 and 4PUs as 2*2 */
-  putenv("HWLOC_PU_DISTANCES=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31:16*2");
+  putenv("HWLOC_PU_DISTANCES=0-31:16*2");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
@@ -128,7 +128,7 @@ int main(void)
 
   /* replace previous core distances with useless ones (grouping as the existing numa nodes) */
   /* 2*4*4 and group 4PUs as 2*2 */
-  putenv("HWLOC_Core_DISTANCES=0,1,2,3,4,5,6,7:2*4");
+  putenv("HWLOC_Core_DISTANCES=0-7:2*4");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 5);

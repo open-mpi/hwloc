@@ -126,35 +126,54 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
     return;
   }
 
-  /* count indexes */
-  while (1) {
-    size_t size = strspn(tmp, "0123456789");
-    if (tmp[size] != ',') {
-      /* last element */
-      tmp += size;
+  if (sscanf(string, "%u-%u:", &i, &j) == 2) {
+    /* range i-j */
+    printf("%u %u\n", i, j);
+    nbobjs = j-i+1;
+    indexes = calloc(nbobjs, sizeof(unsigned));
+    distances = calloc(nbobjs*nbobjs, sizeof(float));
+    /* make sure the user didn't give a veeeeery large range */
+    if (!indexes || !distances) {
+      free(indexes);
+      free(distances);
+      return;
+    }      
+    for(j=0; j<nbobjs; j++)
+      indexes[j] = j+i;
+    tmp = strchr(string, ':') + 1;
+
+  } else {
+    /* explicit list of indexes, count them */
+    while (1) {
+      size_t size = strspn(tmp, "0123456789");
+      if (tmp[size] != ',') {
+	/* last element */
+	tmp += size;
+	nbobjs++;
+	break;
+      }
+      /* another index */
+      tmp += size+1;
       nbobjs++;
-      break;
     }
-    /* another index */
-    tmp += size+1;
-    nbobjs++;
+
+    if (*tmp != ':') {
+      fprintf(stderr, "Ignoring %s distances from environment variable, missing colon\n",
+	      hwloc_obj_type_string(type));
+      return;
+    }
+
+    indexes = calloc(nbobjs, sizeof(unsigned));
+    distances = calloc(nbobjs*nbobjs, sizeof(float));
+    tmp = string;
+    
+    /* parse indexes */
+    for(i=0; i<nbobjs; i++) {
+      indexes[i] = strtoul(tmp, &next, 0);
+      tmp = next+1;
+    }
   }
 
-  if (*tmp != ':') {
-    fprintf(stderr, "Ignoring %s distances from environment variable, missing colon\n",
-	    hwloc_obj_type_string(type));
-    return;
-  }
-
-  indexes = calloc(nbobjs, sizeof(unsigned));
-  distances = calloc(nbobjs*nbobjs, sizeof(float));
-  tmp = string;
-
-  /* parse indexes */
-  for(i=0; i<nbobjs; i++) {
-    indexes[i] = strtoul(tmp, &next, 0);
-    tmp = next+1;
-  }
 
   /* parse distances */
   z=1; /* default if sscanf finds only 2 values below */
