@@ -1207,6 +1207,26 @@ hwloc_linux_find_kernel_max_numnodes(hwloc_topology_t topology __hwloc_attribute
 }
 
 static int
+hwloc_linux_membind_policy_to_hwloc(int linuxpolicy, hwloc_membind_policy_t *policy)
+{
+  switch (linuxpolicy) {
+  case MPOL_DEFAULT:
+    *policy = HWLOC_MEMBIND_FIRSTTOUCH;
+    return 0;
+  case MPOL_PREFERRED:
+  case MPOL_BIND:
+    *policy = HWLOC_MEMBIND_BIND;
+    return 0;
+  case MPOL_INTERLEAVE:
+    *policy = HWLOC_MEMBIND_INTERLEAVE;
+    return 0;
+  default:
+    errno = EINVAL;
+    return -1;
+  }
+}
+
+static int
 hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
 {
   unsigned max_os_index;
@@ -1232,26 +1252,90 @@ hwloc_linux_get_thisthread_membind(hwloc_topology_t topology, hwloc_nodeset_t no
     hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, linuxmask);
   }
 
-  switch (linuxpolicy) {
-  case MPOL_DEFAULT:
-    *policy = HWLOC_MEMBIND_FIRSTTOUCH;
-    break;
-  case MPOL_PREFERRED:
-  case MPOL_BIND:
-    *policy = HWLOC_MEMBIND_BIND;
-    break;
-  case MPOL_INTERLEAVE:
-    *policy = HWLOC_MEMBIND_INTERLEAVE;
-    break;
-  default:
-    errno = EINVAL;
+  err = hwloc_linux_membind_policy_to_hwloc(linuxpolicy, policy);
+  if (err < 0)
     goto out_with_mask;
-  }
 
   free(linuxmask);
   return 0;
 
  out_with_mask:
+  free(linuxmask);
+ out:
+  return -1;
+}
+
+static int
+hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t *policy, int flags __hwloc_attribute_unused)
+{
+  unsigned max_os_index;
+  unsigned long *linuxmask, *globallinuxmask;
+  int linuxpolicy, globallinuxpolicy;
+  int mixed = 0;
+  int full = 0;
+  int first = 1;
+  int pagesize = getpagesize();
+  char *tmpaddr;
+  int err;
+  unsigned i;
+
+  max_os_index = hwloc_linux_find_kernel_max_numnodes(topology);
+
+  linuxmask = malloc(max_os_index/HWLOC_BITS_PER_LONG * sizeof(long));
+  if (!linuxmask) {
+    errno = ENOMEM;
+    goto out;
+  }
+  globallinuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
+  if (!globallinuxmask) {
+    errno = ENOMEM;
+    goto out_with_masks;
+  }
+
+  for(tmpaddr = (char *)((unsigned long)addr & ~(pagesize-1));
+      tmpaddr < (char *)addr + len;
+      tmpaddr += pagesize) {
+    err = get_mempolicy(&linuxpolicy, linuxmask, max_os_index, tmpaddr, MPOL_F_ADDR);
+    if (err < 0)
+      goto out_with_masks;
+
+    /* use the first found policy. if we find a different one later, set mixed to 1 */
+    if (first)
+      globallinuxpolicy = linuxpolicy;
+    else if (globallinuxpolicy != linuxpolicy)
+      mixed = 1;
+
+    /* agregate masks, and set full to 1 if we ever find DEFAULT */
+    if (full || linuxpolicy == MPOL_DEFAULT) {
+      full = 1;
+    } else {
+      for(i=0; i<max_os_index/HWLOC_BITS_PER_LONG; i++)
+        globallinuxmask[i] |= linuxmask[i];
+    }
+
+    first = 0;
+  }
+
+  if (mixed) {
+    *policy = HWLOC_MEMBIND_MIXED;
+  } else {
+    err = hwloc_linux_membind_policy_to_hwloc(linuxpolicy, policy);
+    if (err < 0)
+      goto out_with_masks;
+  }
+
+  if (full) {
+    hwloc_bitmap_copy(nodeset, hwloc_topology_get_topology_nodeset(topology));
+  } else {
+    hwloc_linux_membind_mask_to_nodeset(topology, nodeset, max_os_index, globallinuxmask);
+  }
+
+  free(globallinuxmask);
+  free(linuxmask);
+  return 0;
+
+ out_with_masks:
+  free(globallinuxmask);
   free(linuxmask);
  out:
   return -1;
@@ -2985,6 +3069,7 @@ hwloc_set_linux_hooks(struct hwloc_topology *topology)
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
   topology->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
   topology->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
+  topology->get_area_membind = hwloc_linux_get_area_membind;
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 #ifdef HWLOC_HAVE_MBIND
   topology->set_area_membind = hwloc_linux_set_area_membind;
