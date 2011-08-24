@@ -167,6 +167,18 @@ int main(void)
 
   hwloc_topology_destroy(topology);
 
+  /* check that restricting exactly on a Misc object keeps things coherent */
+  printf("restricting to a Misc covering only the of the PU level\n");
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "pu:4");
+  hwloc_topology_load(topology);
+  hwloc_bitmap_zero(cpuset);
+  hwloc_bitmap_set_range(cpuset, 1, 2);
+  hwloc_topology_insert_misc_object_by_cpuset(topology, cpuset, "toto");
+  hwloc_topology_restrict(topology, cpuset, 0);
+  hwloc_topology_check(topology);
+  hwloc_topology_destroy(topology);
+
   hwloc_bitmap_free(cpuset);
 
   return 0;
