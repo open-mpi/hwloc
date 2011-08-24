@@ -1473,62 +1473,109 @@ find_same_type(hwloc_obj_t root, hwloc_obj_t obj)
   return 0;
 }
 
-static int
-hwloc_levels_ignore_object(hwloc_obj_t obj)
-{
-  return obj->type != HWLOC_OBJ_MISC
-	 && obj->type != HWLOC_OBJ_BRIDGE
-	 && obj->type != HWLOC_OBJ_PCI_DEVICE
-	 && obj->type != HWLOC_OBJ_OS_DEVICE;
-}
-
 /* traverse the array of current object and compare them with top_obj.
  * if equal, take the object and put its children into the remaining objs.
  * if not equal, put the object into the remaining objs.
  */
 static int
-hwloc_level_take_objects(hwloc_topology_t topology,
-			 hwloc_obj_t top_obj,
+hwloc_level_take_objects(hwloc_obj_t top_obj,
 			 hwloc_obj_t *current_objs, unsigned n_current_objs,
 			 hwloc_obj_t *taken_objs, unsigned n_taken_objs __hwloc_attribute_unused,
 			 hwloc_obj_t *remaining_objs, unsigned n_remaining_objs __hwloc_attribute_unused)
 {
   unsigned taken_i = 0;
   unsigned new_i = 0;
-  unsigned ignored = 0;
   unsigned i, j;
 
   for (i = 0; i < n_current_objs; i++)
     if (hwloc_type_cmp(top_obj, current_objs[i]) == HWLOC_TYPE_EQUAL) {
       /* Take it, add children.  */
       taken_objs[taken_i++] = current_objs[i];
-      for (j = 0; j < current_objs[i]->arity; j++) {
-	hwloc_obj_t obj = current_objs[i]->children[j];
-	if (hwloc_levels_ignore_object(obj)) {
-	  remaining_objs[new_i++] = obj;
-	} else {
-	  ignored++;
-	  append_iodevs(topology, obj);
-	}
-      }
+      for (j = 0; j < current_objs[i]->arity; j++)
+	remaining_objs[new_i++] = current_objs[i]->children[j];
     } else {
       /* Leave it.  */
-      hwloc_obj_t obj = current_objs[i];
-      if (hwloc_levels_ignore_object(obj)) {
-	remaining_objs[new_i++] = obj;
-      } else {
-	ignored++;
-	append_iodevs(topology, obj);
-      }
+      remaining_objs[new_i++] = current_objs[i];
     }
 
 #ifdef HWLOC_DEBUG
   /* Make sure we didn't mess up.  */
   assert(taken_i == n_taken_objs);
-  assert(new_i + ignored == n_current_objs - n_taken_objs + n_remaining_objs);
+  assert(new_i == n_current_objs - n_taken_objs + n_remaining_objs);
 #endif
 
   return new_i;
+}
+
+/* Given an input object, copy it or its interesting children into the output array.
+ * If new_obj is NULL, we're just counting interesting ohjects.
+ */
+static unsigned
+hwloc_level_filter_object(hwloc_topology_t topology,
+			  hwloc_obj_t *new_obj, hwloc_obj_t old)
+{
+  unsigned i, total;
+  if (old->type == HWLOC_OBJ_BRIDGE
+      || old->type == HWLOC_OBJ_PCI_DEVICE
+      || old->type == HWLOC_OBJ_OS_DEVICE) {
+    if (new_obj)
+      append_iodevs(topology, old);
+    return 0;
+  }
+  if (old->type != HWLOC_OBJ_MISC) {
+    if (new_obj)
+      *new_obj = old;
+    return 1;
+  }
+  for(i=0, total=0; i<old->arity; i++) {
+    int nb = hwloc_level_filter_object(topology, new_obj, old->children[i]);
+    if (new_obj)
+      new_obj += nb;
+    total += nb;
+  }
+  return total;
+}
+
+/* Replace an input array of objects with an input array containing
+ * only interesting objects for levels.
+ * Misc objects are removed, their interesting children are added.
+ * I/O devices are removed and queue to their own lists.
+ */
+static int
+hwloc_level_filter_objects(hwloc_topology_t topology,
+			   hwloc_obj_t **objs, unsigned *n_objs)
+{
+  hwloc_obj_t *old = *objs, *new;
+  unsigned nold = *n_objs, nnew, i;
+
+  /* anything to filter? */
+  for(i=0; i<nold; i++)
+    if (old[i]->type == HWLOC_OBJ_BRIDGE
+	|| old[i]->type == HWLOC_OBJ_PCI_DEVICE
+	|| old[i]->type == HWLOC_OBJ_OS_DEVICE
+	|| old[i]->type == HWLOC_OBJ_MISC)
+      break;
+  if (i==nold)
+    return 0;
+
+  /* count interesting objects and allocate the new array */
+  for(i=0, nnew=0; i<nold; i++)
+    nnew += hwloc_level_filter_object(topology, NULL, old[i]);
+  new = malloc(nnew * sizeof(hwloc_obj_t));
+  if (!new) {
+    free(old);
+    errno = ENOMEM;
+    return -1;
+  }
+  /* copy them now */
+  for(i=0, nnew=0; i<nold; i++)
+    nnew += hwloc_level_filter_object(topology, new+nnew, old[i]);
+
+  /* use the new array */
+  *objs = new;
+  *n_objs = nnew;
+  free(old);
+  return 0;
 }
 
 static unsigned
@@ -1569,6 +1616,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
   unsigned l, i=0;
   hwloc_obj_t *objs, *taken_objs, *new_objs, top_obj;
   unsigned n_objs, n_taken_objs, n_new_objs;
+  int err;
 
   /* reset non-root levels (root was initialized during init and will not change here) */
   for(l=1; l<HWLOC_DEPTH_MAX; l++)
@@ -1602,7 +1650,6 @@ hwloc_connect_levels(hwloc_topology_t topology)
   topology->type_depth[HWLOC_OBJ_OS_DEVICE] = HWLOC_TYPE_DEPTH_OS_DEVICE;
 
   /* Start with children of the whole system.  */
-  l = 0;
   n_objs = topology->levels[0][0]->arity;
   objs = malloc(n_objs * sizeof(objs[0]));
   if (!objs) {
@@ -1610,33 +1657,31 @@ hwloc_connect_levels(hwloc_topology_t topology)
     hwloc_topology_clear(topology);
     return -1;
   }
+  memcpy(objs, topology->levels[0][0]->children, n_objs*sizeof(objs[0]));
 
-  {
-    hwloc_obj_t dummy_taken_objs;
-    /* copy all root children that must go into levels,
-     * root will go into dummy_taken_objs but we don't need it anyway
-     * because it stays alone in first level.
-     */
-    n_objs = hwloc_level_take_objects(topology,
-				      topology->levels[0][0],
-				      topology->levels[0], 1,
-				      &dummy_taken_objs, 1,
-				      objs, n_objs);
-#ifdef HWLOC_DEBUG
-    assert(dummy_taken_objs == topology->levels[0][0]);
-#endif
+  /* Filter-out interesting objects */
+  err = hwloc_level_filter_objects(topology, &objs, &n_objs);
+  if (err < 0) {
+    errno = ENOMEM;
+    hwloc_topology_clear(topology);
+    return -1;
   }
 
   /* Keep building levels while there are objects left in OBJS.  */
   while (n_objs) {
+    /* At this point, the objs array contains only objects that may go into levels */
 
     /* First find which type of object is the topmost.
      * Don't use PU if there are other types since we want to keep PU at the bottom.
      */
+
+    /* Look for the first non-PU object, and use the first PU if we really find nothing else */
     for (i = 0; i < n_objs; i++)
       if (objs[i]->type != HWLOC_OBJ_PU)
         break;
     top_obj = i == n_objs ? objs[0] : objs[i];
+
+    /* See if this is actually the topmost object */
     for (i = 0; i < n_objs; i++) {
       if (hwloc_type_cmp(top_obj, objs[i]) != HWLOC_TYPE_EQUAL) {
 	if (find_same_type(objs[i], top_obj)) {
@@ -1664,8 +1709,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
     /* New list of pending objects.  */
     new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
 
-    n_new_objs = hwloc_level_take_objects(topology,
-					  top_obj,
+    n_new_objs = hwloc_level_take_objects(top_obj,
 					  objs, n_objs,
 					  taken_objs, n_taken_objs,
 					  new_objs, n_new_objs);
@@ -1702,6 +1746,14 @@ hwloc_connect_levels(hwloc_topology_t topology)
     topology->nb_levels++;
 
     free(objs);
+
+    /* Switch to new_objs, after filtering-out interesting objects */
+    err = hwloc_level_filter_objects(topology, &new_objs, &n_new_objs);
+    if (err < 0) {
+      errno = ENOMEM;
+      hwloc_topology_clear(topology);
+      return -1;
+    }
     objs = new_objs;
     n_objs = n_new_objs;
   }
