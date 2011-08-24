@@ -19,7 +19,7 @@ in v0.9.1).
 
 Version 1.2.2
 -------------
-* Fix build on AIX 5.2
+* Fix build on AIX 5.2, thanks Utpal Kumar Ray for the report.
 
 
 Version 1.2.1
