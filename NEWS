@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.2.2
+-------------
+* Fix build on AIX 5.2
+
+
 Version 1.2.1
 -------------
 * Improve support of AMD Bulldozer "Compute-Unit" modules by detecting
