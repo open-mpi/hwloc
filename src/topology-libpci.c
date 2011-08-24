@@ -134,6 +134,7 @@ hwloc_linux_net_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
         *eol = 0;
       hwloc_obj_add_info(obj, "Address", address);
     }
+    fclose(fd);
   }
 }
 static void
