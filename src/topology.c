@@ -1670,7 +1670,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
 					  taken_objs, n_taken_objs,
 					  new_objs, n_new_objs);
 
-    /* Ok, put numbers in the level.  */
+    /* Ok, put numbers in the level and link cousins.  */
     for (i = 0; i < n_taken_objs; i++) {
       taken_objs[i]->depth = topology->nb_levels;
       taken_objs[i]->logical_index = i;
@@ -1679,6 +1679,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
 	taken_objs[i-1]->next_cousin = taken_objs[i];
       }
     }
+    taken_objs[0]->prev_cousin = NULL;
+    taken_objs[n_taken_objs-1]->next_cousin = NULL;
 
     /* One more level!  */
     if (top_obj->type == HWLOC_OBJ_CACHE)
