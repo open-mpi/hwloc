@@ -381,19 +381,22 @@ static hwloc_obj_type_t hwloc_get_order_type(int order)
 }
 #endif
 
+static int hwloc_obj_type_is_io (hwloc_obj_type_t type)
+{
+  return type == HWLOC_OBJ_BRIDGE || type == HWLOC_OBJ_PCI_DEVICE || type == HWLOC_OBJ_OS_DEVICE;
+}
+
 int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 {
   unsigned order1 = hwloc_get_type_order(type1);
   unsigned order2 = hwloc_get_type_order(type2);
 
   /* bridge and devices are only comparable with each others and with machine and system */
-  if ((type1 == HWLOC_OBJ_BRIDGE || type1 == HWLOC_OBJ_PCI_DEVICE || type1 == HWLOC_OBJ_OS_DEVICE)
-      && type2 != HWLOC_OBJ_BRIDGE && type2 != HWLOC_OBJ_PCI_DEVICE && type2 != HWLOC_OBJ_OS_DEVICE
-      && type2 != HWLOC_OBJ_SYSTEM && type2 != HWLOC_OBJ_MACHINE)
+  if (hwloc_obj_type_is_io(type1)
+      && !hwloc_obj_type_is_io(type2) && type2 != HWLOC_OBJ_SYSTEM && type2 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
-  if ((type2 == HWLOC_OBJ_BRIDGE || type2 == HWLOC_OBJ_PCI_DEVICE || type2 == HWLOC_OBJ_OS_DEVICE)
-      && type1 != HWLOC_OBJ_BRIDGE && type1 != HWLOC_OBJ_PCI_DEVICE && type1 != HWLOC_OBJ_OS_DEVICE
-      && type1 != HWLOC_OBJ_SYSTEM && type1 != HWLOC_OBJ_MACHINE)
+  if (hwloc_obj_type_is_io(type2)
+      && !hwloc_obj_type_is_io(type1) && type1 != HWLOC_OBJ_SYSTEM && type1 != HWLOC_OBJ_MACHINE)
     return HWLOC_TYPE_UNORDERED;
 
   return order1 - order2;
@@ -992,9 +995,7 @@ add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
   hwloc_obj_t child, *temp;
 
   /* I/O devices (and their children) have no sets */
-  if (obj->type == HWLOC_OBJ_BRIDGE
-      || obj->type == HWLOC_OBJ_PCI_DEVICE
-      || obj->type == HWLOC_OBJ_OS_DEVICE)
+  if (hwloc_obj_type_is_io(obj->type))
     return;
 
   if (parent_has_sets || obj->cpuset) {
@@ -1051,9 +1052,7 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
 
   for_each_child_safe(child, obj, temp) {
     /* don't propagate nodesets in I/O objects, keep them NULL */
-    if (child->type == HWLOC_OBJ_BRIDGE
-        || child->type == HWLOC_OBJ_PCI_DEVICE
-        || child->type == HWLOC_OBJ_OS_DEVICE)
+    if (hwloc_obj_type_is_io(child->type))
       return;
 
     /* Propagate singleton nodesets down */
@@ -1085,9 +1084,7 @@ propagate_nodesets(hwloc_obj_t obj)
 
   for_each_child_safe(child, obj, temp) {
     /* don't propagate nodesets in I/O objects, keep them NULL */
-    if (child->type == HWLOC_OBJ_BRIDGE
-        || child->type == HWLOC_OBJ_PCI_DEVICE
-        || child->type == HWLOC_OBJ_OS_DEVICE)
+    if (hwloc_obj_type_is_io(child->type))
       continue;
 
     if (obj->nodeset) {
@@ -1240,8 +1237,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
     remove_empty(topology, pchild);
 
   if (obj->type != HWLOC_OBJ_NODE
-      && obj->type != HWLOC_OBJ_PCI_DEVICE
-      && obj->type != HWLOC_OBJ_BRIDGE
+      && !hwloc_obj_type_is_io(obj->type)
       && obj->cpuset /* FIXME: needed for PCI devices? */
       && hwloc_bitmap_iszero(obj->cpuset)) {
     /* Remove empty children */
@@ -1275,7 +1271,7 @@ restrict_object(hwloc_topology_t topology, unsigned long flags, hwloc_obj_t *pob
 
   if (obj->type == HWLOC_OBJ_MISC) {
     dropping = droppingparent && !(flags & HWLOC_RESTRICT_FLAG_ADAPT_MISC);
-  } else if (obj->type == HWLOC_OBJ_BRIDGE || obj->type == HWLOC_OBJ_PCI_DEVICE || obj->type == HWLOC_OBJ_OS_DEVICE) {
+  } else if (hwloc_obj_type_is_io(obj->type)) {
     dropping = droppingparent && !(flags & HWLOC_RESTRICT_FLAG_ADAPT_IO);
   } else {
     dropping = droppingparent || (obj->cpuset && hwloc_bitmap_iszero(obj->cpuset));
@@ -1515,9 +1511,7 @@ hwloc_level_filter_object(hwloc_topology_t topology,
 			  hwloc_obj_t *new_obj, hwloc_obj_t old)
 {
   unsigned i, total;
-  if (old->type == HWLOC_OBJ_BRIDGE
-      || old->type == HWLOC_OBJ_PCI_DEVICE
-      || old->type == HWLOC_OBJ_OS_DEVICE) {
+  if (hwloc_obj_type_is_io(old->type)) {
     if (new_obj)
       append_iodevs(topology, old);
     return 0;
@@ -1550,9 +1544,7 @@ hwloc_level_filter_objects(hwloc_topology_t topology,
 
   /* anything to filter? */
   for(i=0; i<nold; i++)
-    if (old[i]->type == HWLOC_OBJ_BRIDGE
-	|| old[i]->type == HWLOC_OBJ_PCI_DEVICE
-	|| old[i]->type == HWLOC_OBJ_OS_DEVICE
+    if (hwloc_obj_type_is_io(old[i]->type)
 	|| old[i]->type == HWLOC_OBJ_MISC)
       break;
   if (i==nold)
@@ -2441,9 +2433,7 @@ hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t typ
     /* we need the PU level */
     errno = EINVAL;
     return -1;
-  } else if (type == HWLOC_OBJ_PCI_DEVICE
-	     || type == HWLOC_OBJ_BRIDGE
-	     || type == HWLOC_OBJ_OS_DEVICE) {
+  } else if (hwloc_obj_type_is_io(type)) {
     /* I/O devices aren't in any level, use topology flags to ignore them */
     errno = EINVAL;
     return -1;
@@ -2465,9 +2455,7 @@ hwloc_topology_ignore_type_keep_structure(struct hwloc_topology *topology, hwloc
     /* we need the PU level */
     errno = EINVAL;
     return -1;
-  } else if (type == HWLOC_OBJ_PCI_DEVICE
-	     || type == HWLOC_OBJ_BRIDGE
-	     || type == HWLOC_OBJ_OS_DEVICE) {
+  } else if (hwloc_obj_type_is_io(type)) {
     /* I/O devices aren't in any level, use topology flags to ignore them */
     errno = EINVAL;
     return -1;
@@ -2483,9 +2471,7 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
   unsigned type;
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
     if (type != HWLOC_OBJ_PU
-	&& type != HWLOC_OBJ_PCI_DEVICE
-	&& type != HWLOC_OBJ_BRIDGE
-	&& type != HWLOC_OBJ_OS_DEVICE)
+	&& !hwloc_obj_type_is_io(type))
       topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }
