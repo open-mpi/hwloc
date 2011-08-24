@@ -2485,12 +2485,19 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
   return 0;
 }
 
+/* traverse the tree and free everything.
+ * only use first_child/next_sibling so that it works before load()
+ * and may be used when switching between backend.
+ */
 static void
 hwloc_topology_clear_tree (struct hwloc_topology *topology, struct hwloc_obj *root)
 {
-  unsigned i;
-  for(i=0; i<root->arity; i++)
-    hwloc_topology_clear_tree (topology, root->children[i]);
+  hwloc_obj_t child = root->first_child;
+  while (child) {
+    hwloc_obj_t nextchild = child->next_sibling;
+    hwloc_topology_clear_tree (topology, child);
+    child = nextchild;
+  }
   hwloc_free_unlinked_object (root);
 }
 
@@ -2510,9 +2517,9 @@ hwloc_topology_clear (struct hwloc_topology *topology)
 void
 hwloc_topology_destroy (struct hwloc_topology *topology)
 {
+  hwloc_backend_exit(topology);
   hwloc_topology_clear(topology);
   hwloc_topology_distances_destroy(topology);
-  hwloc_backend_exit(topology);
   free(topology->support.discovery);
   free(topology->support.cpubind);
   free(topology->support.membind);
