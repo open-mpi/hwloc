@@ -47,7 +47,7 @@ Version 1.3.0
   + Add --restrict option to hwloc-calc and hwloc-distribute.
   + Add --sep option to change the output field separator in hwloc-calc.
   + Add --whole-system option to hwloc-ps.
-* Fix build on AIX 5.2
+* Fix build on AIX 5.2, thanks Utpal Kumar Ray for the report.
 
 
 Version 1.2.1
