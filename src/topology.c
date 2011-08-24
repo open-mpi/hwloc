@@ -740,6 +740,9 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
   if (name)
     obj->name = strdup(name);
 
+  /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
+  obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
+
   obj->cpuset = hwloc_bitmap_dup(cpuset);
   /* initialize default cpusets, we'll adjust them later */
   obj->complete_cpuset = hwloc_bitmap_dup(cpuset);
@@ -788,6 +791,9 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
   hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
   if (name)
     obj->name = strdup(name);
+
+  /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
+  obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
 
   hwloc_insert_object_by_parent(topology, parent, obj);
 
@@ -1523,8 +1529,11 @@ hwloc_level_filter_object(hwloc_topology_t topology,
   }
   for(i=0, total=0; i<old->arity; i++) {
     int nb = hwloc_level_filter_object(topology, new_obj, old->children[i]);
-    if (new_obj)
+    if (new_obj) {
       new_obj += nb;
+      /* misc objects go in no level (needed here because insert_misc() not always involved e.g. during XML import) */
+      old->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
+    }
     total += nb;
   }
   return total;
@@ -2700,6 +2709,24 @@ hwloc__check_children(struct hwloc_obj *parent)
   }
 }
 
+static void
+hwloc__check_children_depth(struct hwloc_topology *topology, struct hwloc_obj *parent)
+{
+  hwloc_obj_t child = NULL;
+  while ((child = hwloc_get_next_child(topology, parent, child)) != NULL) {
+    if (child->type == HWLOC_OBJ_BRIDGE)
+      assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_BRIDGE);
+    else if (child->type == HWLOC_OBJ_PCI_DEVICE)
+      assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_PCI_DEVICE);
+    else if (child->type == HWLOC_OBJ_OS_DEVICE)
+      assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_OS_DEVICE);
+    else if (child->type == HWLOC_OBJ_MISC)
+      assert(child->depth == (unsigned) -1);
+    else if (parent->depth != (unsigned) -1);
+      assert(child->depth > parent->depth);
+  }
+}
+
 /* check a whole topology structure */
 void
 hwloc_topology_check(struct hwloc_topology *topology)
@@ -2795,6 +2822,11 @@ hwloc_topology_check(struct hwloc_topology *topology)
     /* bottom-level object must always be PU */
     assert(obj->type == HWLOC_OBJ_PU);
   }
+
+  /* check relative depths */
+  obj = hwloc_get_root_obj(topology);
+  assert(obj->depth == 0);
+  hwloc__check_children_depth(topology, obj);
 }
 
 const struct hwloc_topology_support *
