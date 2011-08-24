@@ -498,10 +498,12 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_init.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_parent.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_insert_topology.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_is_thissystem.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_membind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_custom.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_pid.3 \

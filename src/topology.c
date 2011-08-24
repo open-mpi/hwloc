@@ -82,6 +82,9 @@ void hwloc_report_os_error(const char *msg, int line)
 
 static void
 hwloc_topology_clear (struct hwloc_topology *topology);
+static void
+hwloc_topology_setup_defaults(struct hwloc_topology *topology);
+
 
 #if defined(HAVE_SYSCTLBYNAME)
 int hwloc_get_sysctlbyname(const char *name, int64_t *ret)
@@ -301,6 +304,53 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
   hwloc_bitmap_free(obj->complete_nodeset);
   hwloc_bitmap_free(obj->allowed_nodeset);
   free(obj);
+}
+
+static void
+hwloc__duplicate_objects(struct hwloc_topology *newtopology,
+			 struct hwloc_obj *newparent,
+			 struct hwloc_obj *src)
+{
+  hwloc_obj_t newobj;
+  hwloc_obj_t child;
+  unsigned i;
+
+  newobj = hwloc_alloc_setup_object(src->type, src->os_index);
+  if (src->name)
+    newobj->name = strdup(src->name);
+  newobj->userdata = src->userdata;
+
+  memcpy(&newobj->memory, &src->memory, sizeof(struct hwloc_obj_memory_s));
+  if (src->memory.page_types_len) {
+    size_t len = src->memory.page_types_len * sizeof(struct hwloc_obj_memory_page_type_s);
+    newobj->memory.page_types = malloc(len);
+    memcpy(newobj->memory.page_types, src->memory.page_types, len);
+  }
+
+  memcpy(newobj->attr, src->attr, sizeof(*newobj->attr));
+
+  newobj->cpuset = hwloc_bitmap_dup(src->cpuset);
+  newobj->nodeset = hwloc_bitmap_dup(src->nodeset);
+
+  if (src->distances_count) {
+    size_t len = src->distances_count * sizeof(struct hwloc_distances_s);
+    newobj->distances = malloc(len);
+    memcpy(newobj->distances, src->distances, len);
+    for(i=0; i<src->distances_count; i++) {
+      len = src->distances[i]->nbobjs * src->distances[i]->nbobjs * sizeof(float);
+      newobj->distances[i]->latency = malloc(len);
+      memcpy(newobj->distances[i]->latency, src->distances[i]->latency, len);
+    }
+  }
+
+  for(i=0; i<src->infos_count; i++)
+    hwloc_obj_add_info(newobj, src->infos[i].name, src->infos[i].value);
+
+  child = NULL;
+  while ((child = hwloc_get_next_child(newtopology, src, child)) != NULL)
+    hwloc__duplicate_objects(newtopology, newobj, child);
+
+  hwloc_insert_object_by_parent(newtopology, newparent, newobj);
 }
 
 /*
@@ -1893,6 +1943,8 @@ hwloc_discover(struct hwloc_topology *topology)
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     alloc_cpusets(topology->levels[0][0]);
     hwloc_look_synthetic(topology);
+  } else if (topology->backend_type == HWLOC_BACKEND_CUSTOM) {
+    /* nothing to do, just connect levels below */
 #ifdef HWLOC_HAVE_XML
   } else if (topology->backend_type == HWLOC_BACKEND_XML) {
     hwloc_look_xml(topology);
@@ -2332,6 +2384,40 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   return 0;
 }
 
+static int
+hwloc_backend_custom_init(struct hwloc_topology *topology)
+{
+  assert(topology->backend_type == HWLOC_BACKEND_NONE);
+
+  topology->levels[0][0]->type = HWLOC_OBJ_SYSTEM;
+  topology->is_thissystem = 0;
+  topology->backend_type = HWLOC_BACKEND_CUSTOM;
+  return 0;
+}
+
+int
+hwloc_topology_insert_topology(struct hwloc_topology *newtopology,
+			       struct hwloc_obj *newparent,
+			       struct hwloc_topology *oldtopology)
+{
+  if (newtopology->backend_type != HWLOC_BACKEND_CUSTOM)
+    return -1;
+
+  hwloc__duplicate_objects(newtopology, newparent, oldtopology->levels[0][0]);
+  return 0;
+}
+
+static void
+hwloc_backend_custom_exit(struct hwloc_topology *topology)
+{
+  assert(topology->backend_type == HWLOC_BACKEND_CUSTOM);
+
+  hwloc_topology_clear(topology); /* FIXME: works before load? are children properly connected yet? */
+  hwloc_topology_setup_defaults(topology);
+
+  topology->backend_type = HWLOC_BACKEND_NONE;
+}
+
 static void
 hwloc_backend_exit(struct hwloc_topology *topology)
 {
@@ -2348,6 +2434,9 @@ hwloc_backend_exit(struct hwloc_topology *topology)
 #endif
   case HWLOC_BACKEND_SYNTHETIC:
     hwloc_backend_synthetic_exit(topology);
+    break;
+  case HWLOC_BACKEND_CUSTOM:
+    hwloc_backend_custom_exit(topology);
     break;
   default:
     break;
@@ -2405,6 +2494,15 @@ hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
   errno = ENOSYS;
   return -1;
 #endif /* !HWLOC_HAVE_XML */
+}
+
+int
+hwloc_topology_set_custom(struct hwloc_topology *topology)
+{
+  /* cleanup existing backend */
+  hwloc_backend_exit(topology);
+
+  return hwloc_backend_custom_init(topology);
 }
 
 int

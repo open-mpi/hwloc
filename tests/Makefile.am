@@ -34,6 +34,7 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_get_last_cpu_location \
 	hwloc_object_userdata \
 	hwloc_synthetic \
+	hwloc_custom \
 	hwloc_is_thissystem \
 	hwloc_distances \
 	hwloc_set_distances \
