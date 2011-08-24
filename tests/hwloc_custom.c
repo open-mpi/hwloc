@@ -43,6 +43,10 @@ int main(void)
   hwloc_topology_insert_topology(global, sw22, local);
   hwloc_topology_insert_topology(global, sw22, local);
 
+  /* FIXME: allow to duplicate only part of a topology? (specify the source root too) */
+
+  /* FIXME: document all this. document which pointers are valid between objects at this time */
+
   hwloc_topology_destroy(local);
 
   printf("Building the global topology...\n");
@@ -52,6 +56,7 @@ int main(void)
   assert(hwloc_topology_get_depth(global) == 8);
   assert(hwloc_get_depth_type(global, 0) == HWLOC_OBJ_SYSTEM);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_SYSTEM) == 1);
+  /* FIXME: Misc go in no level, insert a Group instead? */
   assert(hwloc_get_depth_type(global, 1) == HWLOC_OBJ_MACHINE);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_MACHINE) == 8);
   assert(hwloc_get_depth_type(global, 2) == HWLOC_OBJ_NODE);
@@ -68,6 +73,8 @@ int main(void)
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_PU) == 256);
 
   hwloc_topology_destroy(global);
+
+  /* FIXME: check (with valgrind) that set_custom resets things fine before and after load */
 
   return 0;
 }

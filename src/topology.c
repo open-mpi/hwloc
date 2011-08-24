@@ -781,6 +781,8 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
   hwloc_obj_t obj, child;
   int err;
 
+  /* FIXME: only after load */
+
   if (hwloc_bitmap_iszero(cpuset))
     return NULL;
   if (!hwloc_bitmap_isincluded(cpuset, hwloc_topology_get_complete_cpuset(topology)))
@@ -841,6 +843,8 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
   hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
   if (name)
     obj->name = strdup(name);
+
+  /* FIXME: after load, or before load if custom*/
 
   /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
   obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
@@ -2403,6 +2407,8 @@ hwloc_topology_insert_topology(struct hwloc_topology *newtopology,
   if (newtopology->backend_type != HWLOC_BACKEND_CUSTOM)
     return -1;
 
+  /* FIXME only before load */
+
   hwloc__duplicate_objects(newtopology, newparent, oldtopology->levels[0][0]);
   return 0;
 }
@@ -2421,6 +2427,8 @@ hwloc_backend_custom_exit(struct hwloc_topology *topology)
 static void
 hwloc_backend_exit(struct hwloc_topology *topology)
 {
+  /* FIXME: if loaded, clear topology first */
+
   switch (topology->backend_type) {
 #ifdef HWLOC_LINUX_SYS
   case HWLOC_BACKEND_SYSFS:
