@@ -283,7 +283,7 @@ void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topolog
 	    /** move beginning of (i+1)th line */
 	    memmove(NEWPOS(i,0), OLDPOS(i+1,0), i*sizeof(*distances));
 	    /** move end of jth line + beginning of (j+1)th line */
-	    for(j=i; j<nbobjs-1; j++)
+	    for(j=i; j<nbobjs-2; j++)
 	      memmove(NEWPOS(j,i), OLDPOS(j+1,i+1), (nbobjs-1)*sizeof(*distances));
 	    /** move end of (nbobjs-2)th line */
 	    memmove(NEWPOS(nbobjs-2,i), OLDPOS(nbobjs-1,i+1), (nbobjs-i-1)*sizeof(*distances));
