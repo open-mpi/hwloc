@@ -32,8 +32,10 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
     doc = xmlReadFile(xmlpath, NULL, 0);
   else if (xmlbuffer)
     doc = xmlReadMemory(xmlbuffer, buflen, "", NULL, 0);
-  if (!doc)
+  if (!doc) {
+    errno = EINVAL;
     return -1;
+  }
 
   topology->backend_params.xml.doc = doc;
   topology->is_thissystem = 0;
@@ -825,7 +827,6 @@ hwloc__topology_prepare_export(hwloc_topology_t topology)
 {
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
-  xmlDtdPtr dtd = NULL;       /* DTD pointer */
 
   LIBXML_TEST_VERSION;
 
@@ -835,7 +836,7 @@ hwloc__topology_prepare_export(hwloc_topology_t topology)
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */
-  dtd = xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
+  (void) xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
 
   hwloc__xml_export_object (topology, hwloc_get_root_obj(topology), root_node);
 
@@ -844,11 +845,12 @@ hwloc__topology_prepare_export(hwloc_topology_t topology)
   return doc;
 }
 
-void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
   xmlDocPtr doc = hwloc__topology_prepare_export(topology);
-  xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+  int ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
+  return ret < 0 ? -1 : 0;
 }
 
 void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)

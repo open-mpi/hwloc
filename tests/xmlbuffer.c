@@ -10,8 +10,6 @@
 #include <libxml/xmlmemory.h>
 #include <hwloc.h>
 
-/* check the CUDA Driver API helpers */
-
 int main(void)
 {
   hwloc_topology_t topology;
