@@ -883,8 +883,10 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
 /** \brief Export the topology into an XML file.
  *
  * This file may be loaded later through hwloc_topology_set_xml().
+ *
+ * \return -1 if a failure occured.
  */
-HWLOC_DECLSPEC void hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
+HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
 
 /** \brief Export the topology into a newly-allocated XML memory buffer.
  *

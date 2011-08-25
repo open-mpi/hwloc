@@ -845,11 +845,12 @@ hwloc__topology_prepare_export(hwloc_topology_t topology)
   return doc;
 }
 
-void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
   xmlDocPtr doc = hwloc__topology_prepare_export(topology);
-  xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+  int ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
+  return ret < 0 ? -1 : 0;
 }
 
 void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
