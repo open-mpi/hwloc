@@ -34,6 +34,7 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_get_last_cpu_location \
 	hwloc_object_userdata \
 	hwloc_synthetic \
+	hwloc_backends \
 	hwloc_is_thissystem \
 	hwloc_distances \
 	hwloc_set_distances \
@@ -89,6 +90,7 @@ myriexpress_LDFLAGS = -lmyriexpress
 cuda_LDFLAGS = -lcuda
 cudart_LDFLAGS = -lcuda -lcudart
 xmlbuffer_LDFLAGS = $(HWLOC_XML_LIBS)
+hwloc_backends_LDFLAGS = $(HWLOC_XML_LIBS)
 if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
 endif !HWLOC_HAVE_WINDOWS
