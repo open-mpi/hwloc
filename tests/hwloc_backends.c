@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <assert.h>
 
@@ -24,11 +25,13 @@ int main(void)
 #ifdef HWLOC_HAVE_XML
   char *xmlbuf;
   int xmlbuflen;
-  printf("exporting topology topology to a XML buffer for later...\n");
+  char xmlfile[] = "hwloc_backends.tmpxml.XXXXXX";
+  printf("exporting topology topology to XML buffer and file for later...\n");
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
   hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen);
-  /* FIXME: export to a temporary file and use it below */
+  mktemp(xmlfile);
+  hwloc_topology_export_xml(topology, xmlfile);
   hwloc_topology_destroy(topology);
 #endif
 
@@ -36,7 +39,7 @@ int main(void)
   hwloc_topology_init(&topology);
 #ifdef HWLOC_HAVE_XML
   printf("switching to xml...\n");
-  hwloc_topology_set_xml(topology, "foo.xml"); /* libxml2 issues a warning */
+  hwloc_topology_set_xml(topology, xmlfile);
   printf("switching to xmlbuffer...\n");
   hwloc_topology_set_xmlbuffer(topology, xmlbuf, xmlbuflen);
 #endif
@@ -46,6 +49,9 @@ int main(void)
   hwloc_topology_set_fsroot(topology, "/");
 
 #ifdef HWLOC_HAVE_XML
+  printf("switching to xml and loading...\n");
+  hwloc_topology_set_xml(topology, xmlfile);
+  hwloc_topology_load(topology);
   printf("switching to xmlbuffer and loading...\n");
   hwloc_topology_set_xmlbuffer(topology, xmlbuf, xmlbuflen);
   hwloc_topology_load(topology);
@@ -64,6 +70,7 @@ int main(void)
 
 #ifdef HWLOC_HAVE_XML
   xmlFree(BAD_CAST xmlbuf);
+  unlink(xmlfile);
 #endif
 
   return 0;
