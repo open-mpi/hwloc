@@ -32,8 +32,10 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
     doc = xmlReadFile(xmlpath, NULL, 0);
   else if (xmlbuffer)
     doc = xmlReadMemory(xmlbuffer, buflen, "", NULL, 0);
-  if (!doc)
+  if (!doc) {
+    errno = EINVAL;
     return -1;
+  }
 
   topology->backend_params.xml.doc = doc;
   topology->is_thissystem = 0;

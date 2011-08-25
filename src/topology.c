@@ -2332,6 +2332,20 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   return 0;
 }
 
+int
+hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
+                       hwloc_pid_t pid __hwloc_attribute_unused)
+{
+  /* this does *not* change the backend */
+#ifdef HWLOC_LINUX_SYS
+  topology->pid = pid;
+  return 0;
+#else /* HWLOC_LINUX_SYS */
+  errno = ENOSYS;
+  return -1;
+#endif /* HWLOC_LINUX_SYS */
+}
+
 static void
 hwloc_backend_exit(struct hwloc_topology *topology)
 {
@@ -2371,17 +2385,6 @@ hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_pa
 #ifdef HWLOC_LINUX_SYS
   if (hwloc_backend_sysfs_init(topology, fsroot_path) < 0)
     return -1;
-#endif /* HWLOC_LINUX_SYS */
-
-  return 0;
-}
-
-int
-hwloc_topology_set_pid(struct hwloc_topology *topology __hwloc_attribute_unused,
-                       hwloc_pid_t pid __hwloc_attribute_unused)
-{
-#ifdef HWLOC_LINUX_SYS
-  topology->pid = pid;
   return 0;
 #else /* HWLOC_LINUX_SYS */
   errno = ENOSYS;
@@ -2402,10 +2405,10 @@ int
 hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
                        const char *xmlpath __hwloc_attribute_unused)
 {
-#ifdef HWLOC_HAVE_XML
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
+#ifdef HWLOC_HAVE_XML
   return hwloc_backend_xml_init(topology, xmlpath, NULL, 0);
 #else /* HWLOC_HAVE_XML */
   errno = ENOSYS;
@@ -2418,10 +2421,10 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology __hwloc_attribute_u
                              const char *xmlbuffer __hwloc_attribute_unused,
                              int size __hwloc_attribute_unused)
 {
-#ifdef HWLOC_HAVE_XML
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
+#ifdef HWLOC_HAVE_XML
   return hwloc_backend_xml_init(topology, NULL, xmlbuffer, size);
 #else /* HWLOC_HAVE_XML */
   errno = ENOSYS;
