@@ -827,7 +827,6 @@ hwloc__topology_prepare_export(hwloc_topology_t topology)
 {
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
-  xmlDtdPtr dtd = NULL;       /* DTD pointer */
 
   LIBXML_TEST_VERSION;
 
@@ -837,7 +836,7 @@ hwloc__topology_prepare_export(hwloc_topology_t topology)
   xmlDocSetRootElement(doc, root_node);
 
   /* Creates a DTD declaration. Isn't mandatory. */
-  dtd = xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
+  (void) xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
 
   hwloc__xml_export_object (topology, hwloc_get_root_obj(topology), root_node);
 
