@@ -2354,6 +2354,12 @@ hwloc_backend_exit(struct hwloc_topology *topology)
   }
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
+
+  if (topology->is_loaded) {
+    hwloc_topology_clear(topology);
+    hwloc_topology_setup_defaults(topology);
+    topology->is_loaded = 0;
+  }
 }
 
 int
