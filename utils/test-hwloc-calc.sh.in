@@ -18,7 +18,7 @@
   tmp=$TMPDIR/foo$$-$RANDOM
   (umask 077 && mkdir "$tmp")
 } || exit $?
-file="$tmp/test-hwloc-distrib.output"
+file="$tmp/test-hwloc-calc.output"
 
 set -e
 (
