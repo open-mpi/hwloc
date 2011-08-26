@@ -313,6 +313,7 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
 {
   hwloc_obj_t newobj;
   hwloc_obj_t child;
+  size_t len;
   unsigned i;
 
   newobj = hwloc_alloc_setup_object(src->type, src->os_index);
@@ -322,7 +323,7 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
 
   memcpy(&newobj->memory, &src->memory, sizeof(struct hwloc_obj_memory_s));
   if (src->memory.page_types_len) {
-    size_t len = src->memory.page_types_len * sizeof(struct hwloc_obj_memory_page_type_s);
+    len = src->memory.page_types_len * sizeof(struct hwloc_obj_memory_page_type_s);
     newobj->memory.page_types = malloc(len);
     memcpy(newobj->memory.page_types, src->memory.page_types, len);
   }
@@ -333,10 +334,13 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
   newobj->nodeset = hwloc_bitmap_dup(src->nodeset);
 
   if (src->distances_count) {
-    size_t len = src->distances_count * sizeof(struct hwloc_distances_s);
-    newobj->distances = malloc(len);
-    memcpy(newobj->distances, src->distances, len);
+    newobj->distances_count = src->distances_count;
+    newobj->distances = malloc(src->distances_count * sizeof(struct hwloc_distances_s *));
     for(i=0; i<src->distances_count; i++) {
+      newobj->distances[i] = malloc(sizeof(struct hwloc_distances_s));
+      /* ugly copy first */
+      memcpy(newobj->distances[i], src->distances[i], sizeof(struct hwloc_distances_s));
+      /* now duplicate matrices for real */
       len = src->distances[i]->nbobjs * src->distances[i]->nbobjs * sizeof(float);
       newobj->distances[i]->latency = malloc(len);
       memcpy(newobj->distances[i]->latency, src->distances[i]->latency, len);
