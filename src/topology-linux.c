@@ -1346,14 +1346,14 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
 int
 hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path __hwloc_attribute_unused)
 {
-#ifdef HAVE_OPENAT
-  int root;
+  int root = -1;
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
   if (!fsroot_path)
     fsroot_path = "/";
 
+#ifdef HAVE_OPENAT
   root = open(fsroot_path, O_RDONLY | O_DIRECTORY);
   if (root < 0)
     return -1;
@@ -1362,13 +1362,17 @@ hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_pat
     topology->is_thissystem = 0;
 
   topology->backend_params.sysfs.root_path = strdup(fsroot_path);
+#else
+  if (strcmp(fsroot_path, "/")) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  topology->backend_params.sysfs.root_path = NULL;
+#endif
   topology->backend_params.sysfs.root_fd = root;
   topology->backend_type = HWLOC_BACKEND_SYSFS;
   return 0;
-#else
-  errno = ENOSYS;
-  return -1;
-#endif
 }
 
 void

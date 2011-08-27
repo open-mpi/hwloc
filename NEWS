@@ -21,6 +21,7 @@ Version 1.4.0
 -------------
 * Implement hwloc_get_area_membind() on Linux.
 * hwloc_topology_export_xml() now return an integer.
+* Hide libxml2 error messages unless HWLOC_XML_VERBOSE=1.
 * Backend documentation enhancements.
 
 

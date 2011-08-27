@@ -169,7 +169,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     if (!strcmp(input, "-"))
       input = "/dev/stdin";
     if (hwloc_topology_set_xml(topology, input)) {
-      perror("Setting target XML file");
+      perror("Setting source XML file");
       return EXIT_FAILURE;
     }
 #else /* HWLOC_HAVE_XML */
@@ -181,7 +181,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
   case HWLOC_UTILS_INPUT_FSROOT:
 #ifdef HWLOC_LINUX_SYS
     if (hwloc_topology_set_fsroot(topology, input)) {
-      perror("Setting target filesystem root");
+      perror("Setting source filesystem root");
       return EXIT_FAILURE;
     }
 #else /* HWLOC_LINUX_SYS */

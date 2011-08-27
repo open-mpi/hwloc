@@ -8,6 +8,10 @@
 # See COPYING in top-level directory.
 #
 
+abs_top_builddir="@abs_top_builddir@"
+distrib="$abs_top_builddir/utils/hwloc-distrib"
+abs_top_srcdir="@abs_top_srcdir@"
+
 : ${TMPDIR=/tmp}
 {
   tmp=`
@@ -22,17 +26,17 @@ file="$tmp/test-hwloc-distrib.output"
 
 set -e
 (
-  ./hwloc-distrib --if synthetic --input "2 2 2" 2
+  $distrib --if synthetic --input "2 2 2" 2
   echo
-  ./hwloc-distrib --if synthetic --input "2 2 2" 4
+  $distrib --if synthetic --input "2 2 2" 4
   echo
-  ./hwloc-distrib --if synthetic --input "2 2 2" 8
+  $distrib --if synthetic --input "2 2 2" 8
   echo
-  ./hwloc-distrib --if synthetic --input "2 2 2" 13
+  $distrib --if synthetic --input "2 2 2" 13
   echo
-  ./hwloc-distrib --if synthetic --input "2 2 2" 16
+  $distrib --if synthetic --input "2 2 2" 16
   echo
-  ./hwloc-distrib --if synthetic --input "3 3 3" 4
+  $distrib --if synthetic --input "3 3 3" 4
 ) > "$file"
-diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-distrib.output "$file"
+diff @HWLOC_DIFF_U@ $abs_top_srcdir/utils/test-hwloc-distrib.output "$file"
 rm -rf "$tmp"
