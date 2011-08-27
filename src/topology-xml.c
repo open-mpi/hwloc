@@ -46,12 +46,17 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
   LIBXML_TEST_VERSION;
   hwloc_libxml2_disable_stderrwarnings();
 
+  errno = 0; /* set to 0 so that we know if libxml2 changed it */
+
   if (xmlpath)
     doc = xmlReadFile(xmlpath, NULL, 0);
   else if (xmlbuffer)
     doc = xmlReadMemory(xmlbuffer, buflen, "", NULL, 0);
+
   if (!doc) {
-    errno = EINVAL;
+    if (!errno)
+      /* libxml2 read the file fine, but it got an error during parsing */
+      errno = EINVAL;
     return -1;
   }
 
@@ -875,10 +880,20 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
   LIBXML_TEST_VERSION;
   hwloc_libxml2_disable_stderrwarnings();
 
+  errno = 0; /* set to 0 so that we know if libxml2 changed it */
+
   doc = hwloc__topology_prepare_export(topology);
   ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
-  return ret < 0 ? -1 : 0;
+
+  if (ret < 0) {
+    if (!errno)
+      /* libxml2 likely got an error before doing I/O */
+      errno = EINVAL;
+    return -1;
+  }
+
+  return 0;
 }
 
 /* this can be the first XML call */
