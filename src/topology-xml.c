@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <strings.h>
 
+/* this can be the first XML call */
 int
 hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen)
 {
@@ -43,6 +44,7 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
   return 0;
 }
 
+/* this canNOT be the first XML call */
 void
 hwloc_backend_xml_exit(struct hwloc_topology *topology)
 {
@@ -602,6 +604,7 @@ hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
     hwloc__xml_import_node(topology, NULL, node->children, 0);
 }
 
+/* this canNOT be the first XML call */
 void
 hwloc_look_xml(struct hwloc_topology *topology)
 {
@@ -652,6 +655,7 @@ hwloc_xml__check_distances(struct hwloc_topology *topology, hwloc_obj_t obj)
   }
 }
 
+/* this canNOT be the first XML call */
 void
 hwloc_xml_check_distances(struct hwloc_topology *topology)
 {
@@ -845,17 +849,24 @@ hwloc__topology_prepare_export(hwloc_topology_t topology)
   return doc;
 }
 
+/* this can be the first XML call */
 int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
-  xmlDocPtr doc = hwloc__topology_prepare_export(topology);
-  int ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+  xmlDocPtr doc;
+  int ret;
+  LIBXML_TEST_VERSION;
+  doc = hwloc__topology_prepare_export(topology);
+  ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
   return ret < 0 ? -1 : 0;
 }
 
+/* this can be the first XML call */
 void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
-  xmlDocPtr doc = hwloc__topology_prepare_export(topology);
+  xmlDocPtr doc;
+  LIBXML_TEST_VERSION;
+  doc = hwloc__topology_prepare_export(topology);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
 }
