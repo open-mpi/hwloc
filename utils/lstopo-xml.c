@@ -20,7 +20,10 @@ void output_xml(hwloc_topology_t topology, const char *filename, int logical __h
   if (!filename || !strcasecmp(filename, "-.xml"))
     filename = "-";
 
-  hwloc_topology_export_xml(topology, filename);
+  if (hwloc_topology_export_xml(topology, filename) < 0) {
+    fprintf(stderr, "Failed to export XML to %s (%s)\n", filename, strerror(errno));
+    return;
+  }
 }
 
 #endif /* HWLOC_HAVE_XML */
