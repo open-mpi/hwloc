@@ -19,6 +19,22 @@
 #include <assert.h>
 #include <strings.h>
 
+static void hwloc_libxml2_error_callback(void * ctx __hwloc_attribute_unused, const char * msg __hwloc_attribute_unused, ...) { /* do nothing */ }
+
+static void
+hwloc_libxml2_disable_stderrwarnings(void)
+{
+  static int first = 1;
+  if (first) {
+    static int verbose = 0;
+    char *env = getenv("HWLOC_XML_VERBOSE");
+    if (env)
+      verbose = atoi(env);
+    xmlSetGenericErrorFunc(NULL, verbose ? xmlGenericError : hwloc_libxml2_error_callback);
+    first = 0;
+  }
+}
+
 /* this can be the first XML call */
 int
 hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen)
@@ -28,6 +44,7 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
   LIBXML_TEST_VERSION;
+  hwloc_libxml2_disable_stderrwarnings();
 
   if (xmlpath)
     doc = xmlReadFile(xmlpath, NULL, 0);
@@ -854,7 +871,10 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
   xmlDocPtr doc;
   int ret;
+
   LIBXML_TEST_VERSION;
+  hwloc_libxml2_disable_stderrwarnings();
+
   doc = hwloc__topology_prepare_export(topology);
   ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
@@ -865,7 +885,10 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
   xmlDocPtr doc;
+
   LIBXML_TEST_VERSION;
+  hwloc_libxml2_disable_stderrwarnings();
+
   doc = hwloc__topology_prepare_export(topology);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
