@@ -14,6 +14,7 @@ bindir="@bindir@"
 lstopo="$abs_top_builddir/utils/lstopo"
 assembler="$abs_top_builddir/utils/hwloc-assembler"
 
+force=0
 show=0
 ssh=ssh
 lstopoopts=
@@ -35,6 +36,7 @@ usage()
 	echo "  --ssh <ssh>		Use the given ssh command (and options) to connect to remote hosts"
 	echo "  --lstopo-opts <opts>	Pass the given lstopo options when gathering remote topologies"
 	echo "  --show			Display the resulting topology before exit"
+	echo "  -f --force		Ignore failure to load a remote host topology"
 }
 
 while test $# -gt 0 ; do
@@ -47,8 +49,11 @@ while test $# -gt 0 ; do
 		lstopoopts="$2"
 		shift
 		;;
-	--show)
+	-s|--show)
 		show=1
+		;;
+	-f|--force)
+		force=1
 		;;
 	--*)
 		error "Unrecognized option: $1"
@@ -67,6 +72,7 @@ while test $# -gt 0 ; do
 			else
 				echo "failed!"
 				failedhosts="$failedhosts $1"
+				test $force -eq 0 && exit -1;
 			fi
 		fi
 		;;
@@ -81,12 +87,21 @@ if test -z "$output" ; then
 	exit 1
 fi
 
-"$assembler" "$output" $inputs
+test $force -eq 1 && assembleropts="$assembleropts -f"
+
+"$assembler" $assembleropts "$output" $inputs
+ret=$?
+
 rm -f $inputs
-echo "Assembled into $output"
+
+if test $ret -eq 0 ; then
+	echo "Assembled into $output"
+else
+	echo "Failed to assemble into $output"
+fi
 
 if test -n "$failedhosts" ; then
 	error "Failed to contact hosts:$failedhosts"
 fi
 
-if test $show -eq 1 ; then "$lstopo" -i "$output" ; fi
+if test $ret -eq 0 -a $show -eq 1 ; then "$lstopo" -i "$output" ; fi
