@@ -1,0 +1,92 @@
+#!/bin/sh
+#-*-sh-*-
+
+#
+# Copyright © 2011 INRIA.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
+abs_top_builddir="@abs_top_builddir@"
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+# this will be changed into $bindir/lstopo during make install
+lstopo="$abs_top_builddir/utils/lstopo"
+assembler="$abs_top_builddir/utils/hwloc-assembler"
+
+show=0
+ssh=ssh
+lstopoopts=
+inputs=
+failedhosts=
+output=
+
+error()
+{
+	echo $@ 2>&1
+}
+
+usage()
+{
+	echo "$0 |options] <output> <host1> <host2> ..."
+	echo "  Gathers the topology of remote hosts and assembles them into the"
+	echo "  <output> XML topology."
+	echo "Options:"
+	echo "  --ssh <ssh>		Use the given ssh command (and options) to connect to remote hosts"
+	echo "  --lstopo-opts <opts>	Pass the given lstopo options when gathering remote topologies"
+	echo "  --show			Display the resulting topology before exit"
+}
+
+while test $# -gt 0 ; do
+	case "$1" in
+	--ssh)
+		ssh="$2"
+		shift
+		;;
+	--lstopo-opts)
+		lstopoopts="$2"
+		shift
+		;;
+	--show)
+		show=1
+		;;
+	--*)
+		error "Unrecognized option: $1"
+		usage
+		exit 1
+		;;
+	*)
+		if test -z "$output" ; then
+			output="$1"
+		else
+			file=`mktemp`."$1".xml
+			echo -n "Exporting host $1 topology to $file ..."
+			if "$ssh" "$1" "$lstopo" "$lstopoopts" -.xml > $file 2>/dev/null ; then
+				echo "done"
+				inputs="$inputs $file"
+			else
+				echo "failed!"
+				failedhosts="$failedhosts $1"
+			fi
+		fi
+		;;
+	esac
+	shift
+done
+
+if test -z "$output" ; then
+	error "Missing output filename"
+	rm -f $inputs
+	usage
+	exit 1
+fi
+
+"$assembler" "$output" $inputs
+rm -f $inputs
+echo "Assembled into $output"
+
+if test -n "$failedhosts" ; then
+	error "Failed to contact hosts:$failedhosts"
+fi
+
+if test $show -eq 1 ; then "$lstopo" -i "$output" ; fi
