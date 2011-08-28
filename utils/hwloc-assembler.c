@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
   while (argc >= 1) {
     opt = 0;
-    if (!strcmp(argv[0], "-v")) {
+    if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
       verbose++;
     } else if (!strcmp(argv[0], "--")) {
       argc--;
