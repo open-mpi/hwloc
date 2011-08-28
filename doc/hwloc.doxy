@@ -627,6 +627,7 @@ The documentation chapters include
 <li> \ref envvar
 <li> \ref cpu_mem_bind
 <li> \ref iodevices
+<li> \ref multinode
 <li> \ref interoperability
 <li> \ref threadsafety
 <li> \ref embed
@@ -1191,6 +1192,45 @@ Machine (24GB)
     L2 L#2 (256KB) + L1 L#2 (32KB) + Core L#2 + PU L#2 (P#1)
     L2 L#3 (256KB) + L1 L#3 (32KB) + Core L#3 + PU L#3 (P#3)
 \endverbatim
+
+
+
+
+\page multinode Multi-node Topologies
+
+FIXME
+
+intro: usually single node, but also multinode because some
+algorithms need global view of the system
+
+cpusets and nodesets
+
+they are mostly meaningless because they are used to bind on a
+given OS, i.e. a single machine.
+objects containing multiple nodes (using above the machine level)
+contain no cpusets and no nodesets.
+the topology contains cpusets and nodesets that are only valid
+for binding when used on their corresponding machine.
+
+assembling with tools
+
+hwloc-assembler output.xml input1.xml input2.xml ...
+hwloc-assembler-remote output.xml host1 host2 ...
+hwloc-assembler-remote output.xml `cat machinefile | sort | uniq`
+(see also the tools page)
+
+FIXME add these to the tools page and reference here
+
+FIXME add manpages
+
+assembling in C
+
+set_custom to create empty topo ready for build
+add stuff until load with insert_topo and insert_misc
+those take a parent which must be the root or the result
+of insert_misc
+
+FIXME
 
 
 
