@@ -15,6 +15,7 @@ static void usage(char *name, FILE *where)
   fprintf (where, "Usage: %s [options] <output>.xml <input1>.xml <input2>.xml ...\n", name);
   fprintf (where, "Options:\n");
   fprintf (where, "  -v --verbose   Show verbose messages\n");
+  fprintf (where, "  -f --force     Ignore errors while reading input files\n");
 }
 
 int main(int argc, char *argv[])
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
   char *callname;
   char *output;
   int verbose = 0;
+  int force = 0;
   int opt;
   int i;
 
@@ -38,6 +40,8 @@ int main(int argc, char *argv[])
     opt = 0;
     if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
       verbose++;
+    } else if (!strcmp(argv[0], "-f") || !strcmp(argv[0], "--force")) {
+      force = 1;
     } else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
       usage(callname, stdout);
       exit(EXIT_SUCCESS);
@@ -75,7 +79,10 @@ int main(int argc, char *argv[])
     if (hwloc_topology_set_xml(input, argv[i])) {
       fprintf(stderr, "Failed to set source XML file %s (%s)\n", argv[i], strerror(errno));
       hwloc_topology_destroy(input);
-      continue;
+      if (force)
+	continue;
+      else
+	return EXIT_FAILURE;
     }
     hwloc_topology_load(input);
     hwloc_topology_insert_topology(topology, hwloc_get_root_obj(topology), input);
