@@ -128,7 +128,6 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
 
   if (sscanf(string, "%u-%u:", &i, &j) == 2) {
     /* range i-j */
-    printf("%u %u\n", i, j);
     nbobjs = j-i+1;
     indexes = calloc(nbobjs, sizeof(unsigned));
     distances = calloc(nbobjs*nbobjs, sizeof(float));
@@ -137,7 +136,7 @@ static void hwloc_get_type_distances_from_string(struct hwloc_topology *topology
       free(indexes);
       free(distances);
       return;
-    }      
+    }
     for(j=0; j<nbobjs; j++)
       indexes[j] = j+i;
     tmp = strchr(string, ':') + 1;
