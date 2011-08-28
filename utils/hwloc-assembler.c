@@ -69,7 +69,11 @@ int main(int argc, char *argv[])
     if (verbose)
       printf("Importing XML topology %s ...\n", argv[i]);
     hwloc_topology_init(&input);
-    hwloc_topology_set_xml(input, argv[i]);
+    if (hwloc_topology_set_xml(input, argv[i])) {
+      fprintf(stderr, "Failed to set source XML file %s (%s)\n", argv[i], strerror(errno));
+      hwloc_topology_destroy(input);
+      continue;
+    }
     hwloc_topology_load(input);
     hwloc_topology_insert_topology(topology, hwloc_get_root_obj(topology), input);
     hwloc_topology_destroy(input);
@@ -78,7 +82,10 @@ int main(int argc, char *argv[])
   if (verbose)
     printf("Assembling global topology...\n");
   hwloc_topology_load(topology);
-  hwloc_topology_export_xml(topology, output);
+  if (hwloc_topology_export_xml(topology, output) < 0) {
+    fprintf(stderr, "Failed to export XML to %s (%s)\n", output, strerror(errno));
+    return EXIT_FAILURE;
+  }
   hwloc_topology_destroy(topology);
   if (verbose)
     printf("Exported topology to XML file %s\n", output);
