@@ -49,7 +49,7 @@ int main(void)
       else
         distances[i+16*j] = distances[j+16*i] = 9;
   }
-  hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances);
+  assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances));
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
@@ -65,7 +65,7 @@ int main(void)
   assert(width == 16);
 
   /* revert to default 2*8*1 */
-  hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 0, NULL, NULL);
+  assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 0, NULL, NULL));
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
@@ -158,6 +158,12 @@ int main(void)
   assert(width == 8);
   width = hwloc_get_nbobjs_by_depth(topology, 3);
   assert(width == 32);
+
+  /* buggy tests */
+  assert(hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, NULL, NULL) < 0);
+  assert(hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 0, indexes, NULL) < 0);
+  indexes[1] = 0;
+  assert(hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances) < 0);
 
   hwloc_topology_destroy(topology);
 
