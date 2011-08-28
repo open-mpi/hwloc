@@ -38,6 +38,9 @@ int main(int argc, char *argv[])
     opt = 0;
     if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
       verbose++;
+    } else if (!strcmp(argv[0], "-h") || !strcmp(argv[0], "--help")) {
+      usage(callname, stdout);
+      exit(EXIT_SUCCESS);
     } else if (!strcmp(argv[0], "--")) {
       argc--;
       argv++;
