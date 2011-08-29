@@ -36,6 +36,7 @@
 #endif /* HWLOC_HAVE_LIBTERMCAP */
 
 #include "lstopo.h"
+#include "misc.h"
 
 #define indent(output, i) \
   fprintf (output, "%*s", (int) i, "");
@@ -179,34 +180,14 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
     unsigned depth;
 
     for (depth = 0; depth < topodepth; depth++) {
-      unsigned nbobjs;
-      unsigned i, j;
-
       distances = hwloc_get_whole_distance_matrix_by_depth(topology, depth);
       if (!distances || !distances->latency)
         continue;
-      nbobjs = distances->nbobjs;
-
       printf("latency matrix between %ss (depth %u) by %s indexes:\n",
 	     hwloc_obj_type_string(hwloc_get_depth_type(topology, depth)),
 	     depth,
 	     logical ? "logical" : "physical");
-      /* column header */
-      printf("  index");
-      for(j=0; j<nbobjs; j++)
-        printf(" % 5d",
-	       (int) (logical ? j : hwloc_get_obj_by_depth(topology, depth, j)->os_index));
-      printf("\n");
-      /* each line */
-      for(i=0; i<nbobjs; i++) {
-        /* row header */
-        printf("  % 5d",
-	       (int) (logical ? i : hwloc_get_obj_by_depth(topology, depth, i)->os_index));
-        /* each value */
-        for(j=0; j<nbobjs; j++)
-          printf(" %2.3f", distances->latency[i*nbobjs+j]);
-        printf("\n");
-      }
+      hwloc_utils_print_distance_matrix(topology, hwloc_get_root_obj(topology), distances->nbobjs, depth, distances->latency, logical);
     }
   }
 

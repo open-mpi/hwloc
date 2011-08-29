@@ -202,3 +202,35 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
   return 0;
 }
 
+static __hwloc_inline void
+hwloc_utils_print_distance_matrix(hwloc_topology_t topology, hwloc_obj_t root, unsigned nbobjs, unsigned reldepth, float *matrix, int logical)
+{
+  hwloc_obj_t objj, obji;
+  unsigned i, j;
+
+  /* column header */
+  printf("  index");
+  for(j=0, objj=NULL; j<nbobjs; j++) {
+    objj = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, root->depth+reldepth, objj);
+    printf(" % 5d",
+	   (int) (logical ? objj->logical_index : objj->os_index));
+  }
+  printf("\n");
+
+  /* each line */
+  for(i=0, obji=NULL; i<nbobjs; i++) {
+    obji = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, root->depth+reldepth, obji);
+    /* row header */
+    printf("  % 5d",
+	     (int) (logical ? obji->logical_index : obji->os_index));
+
+    /* row values */
+    for(j=0, objj=NULL; j<nbobjs; j++) {
+      objj = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, root->depth+reldepth, objj);
+      for(j=0; j<nbobjs; j++)
+	printf(" %2.3f", matrix[i*nbobjs+j]);
+      printf("\n");
+    }
+  }
+}
+

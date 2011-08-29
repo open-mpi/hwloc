@@ -27,6 +27,7 @@ Version 1.4.0
   when the topology contains some I/O or Misc objects.
 * Backend documentation enhancements.
 * lstopo -v -p now displays distance matrices with physical indexes.
+* Add hwloc-distances utility to list distances.
 
 
 Version 1.3.0
