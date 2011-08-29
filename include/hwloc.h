@@ -482,12 +482,12 @@ union hwloc_obj_attr_u {
  * containing object is the root object of the topology, then the
  * distances are available for all objects in the machine.
  *
- * The distance may be a memory latency, as defined by the ACPI SLIT
- * specification. If so, the \p latency pointer will not be \c NULL
- * and the pointed array will contain non-zero values.
+ * If the \p latency pointer is not \c NULL, the pointed array contains
+ * memory latencies (non-zero values), as defined by the ACPI SLIT
+ * specification.
  *
  * In the future, some other types of distances may be considered.
- * In these cases, \p latency will be \c NULL.
+ * In these cases, \p latency may be \c NULL.
  */
 struct hwloc_distances_s {
   unsigned relative_depth;	/**< \brief Relative depth of the considered objects
@@ -780,6 +780,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restric
  * array. The \p distances matrix follows the same order.
  * The distance from object i to object j in the i*nbobjs+j.
  *
+ * A single latency matrix may be defined for each type.
  * If another distance matrix already exists for the given type,
  * either because the user specified it or because the OS offers it,
  * it will be replaced by the given one.
