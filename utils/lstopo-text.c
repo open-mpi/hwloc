@@ -187,16 +187,21 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
         continue;
       nbobjs = distances->nbobjs;
 
-      printf("depth %u distance matrix:\n", depth);
+      printf("latency matrix between %ss (depth %u) by %s indexes:\n",
+	     hwloc_obj_type_string(hwloc_get_depth_type(topology, depth)),
+	     depth,
+	     logical ? "logical" : "physical");
       /* column header */
       printf("  index");
       for(j=0; j<nbobjs; j++)
-        printf(" % 5d", (int) j);
+        printf(" % 5d",
+	       (int) (logical ? j : hwloc_get_obj_by_depth(topology, depth, j)->os_index));
       printf("\n");
       /* each line */
       for(i=0; i<nbobjs; i++) {
         /* row header */
-        printf("  % 5d", (int) i);
+        printf("  % 5d",
+	       (int) (logical ? i : hwloc_get_obj_by_depth(topology, depth, i)->os_index));
         /* each value */
         for(j=0; j<nbobjs; j++)
           printf(" %2.3f", distances->latency[i*nbobjs+j]);
