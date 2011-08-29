@@ -377,13 +377,7 @@ hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
     hwloc_bitmap_or(set, set, objs[i]->cpuset);
   root = hwloc_get_obj_covering_cpuset(topology, set);
   assert(root);
-  if (!hwloc_bitmap_isequal(set, root->cpuset)) {
-    /* partial distance matrix not including all the children of a single object */
-    /* TODO insert an intermediate object (group?) covering only these children ? */
-    hwloc_bitmap_free(set);
-    return;
-  }
-  hwloc_bitmap_free(set);
+  assert(hwloc_bitmap_isequal(set, root->cpuset));
   relative_depth = objs[0]->depth - root->depth; /* this assume that we have distances between objects of the same level */
 
   /* get the logical index offset, it's the min of all logical indexes */
@@ -737,9 +731,11 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
   char *env;
   float accuracies[5] = { 0.0, 0.01, 0.02, 0.05, 0.1 };
   unsigned nbaccuracies = 5;
+  hwloc_obj_t group_obj;
   int verbose = 0;
+  unsigned i;
 #ifdef HWLOC_DEBUG
-  unsigned i,j;
+  unsigned j;
 #endif
 
   env = getenv("HWLOC_GROUPING");
@@ -799,6 +795,18 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
 					topology->os_distances[type].indexes != NULL,
 					1 /* check the first matrice */,
 					verbose);
+      /* add a final group object covering everybody so that the distance matrix can be stored somewhere.
+       * this group will be merged into a regular object if the matrix isn't strangely incomplete
+       */
+      group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+      group_obj->cpuset = hwloc_bitmap_alloc();
+      for(i=0; i<nbobjs; i++)
+	hwloc_bitmap_or(group_obj->cpuset, group_obj->cpuset, topology->os_distances[type].objs[i]->cpuset);
+      group_obj->attr->group.depth = topology->next_group_depth++;
+      hwloc_debug_1arg_bitmap("adding Group object (as root of distance matrix with %u objects) with cpuset %s\n",
+			      nbobjs, group_obj->cpuset);
+      hwloc__insert_object_by_cpuset(topology, group_obj,
+				     topology->os_distances[type].indexes != NULL ? hwloc_report_user_distance_error : hwloc_report_os_error);
     }
   }
 }
