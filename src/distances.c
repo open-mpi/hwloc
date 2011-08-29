@@ -490,7 +490,7 @@ static int hwloc_compare_distances(float a, float b, float accuracy)
 {
   if (accuracy != 0.0 && fabsf(a-b) < a * accuracy)
     return 0;
-  return (int)(a - b);
+  return a < b ? -1 : a == b ? 0 : 1;
 }
 
 /*
