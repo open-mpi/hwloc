@@ -56,7 +56,7 @@ man7_pages = hwloc.7
 EXTRA_DIST += $(man7_pages:.7=.7in)
 nodist_man_MANS = $(man7_pages)
 
-man1_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1 hwloc-ps.1
+man1_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1 hwloc-ps.1 hwloc-distances.1
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 
