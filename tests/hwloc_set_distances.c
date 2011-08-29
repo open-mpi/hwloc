@@ -64,6 +64,27 @@ int main(void)
   width = hwloc_get_nbobjs_by_depth(topology, 4);
   assert(width == 16);
 
+  /* play with accuracy */
+  distances[0] = 2.9; /* diagonal, instead of 3 (0.0333% error) */
+  distances[1] = 5.1; distances[16] = 5.2; /* smallest group, instead of 5 (0.02% error) */
+  assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances));
+  putenv("HWLOC_GROUPING_ACCURACY=0.1"); /* ok */
+  hwloc_topology_load(topology);
+  depth = hwloc_topology_get_depth(topology);
+  assert(depth == 6);
+  putenv("HWLOC_GROUPING_ACCURACY=try"); /* ok */
+  hwloc_topology_load(topology);
+  depth = hwloc_topology_get_depth(topology);
+  assert(depth == 6);
+  putenv("HWLOC_GROUPING_ACCURACY=0.01"); /* too small, cannot group */
+  hwloc_topology_load(topology);
+  depth = hwloc_topology_get_depth(topology);
+  assert(depth == 4);
+  putenv("HWLOC_GROUPING_ACCURACY=0"); /* full accuracy, cannot group */
+  hwloc_topology_load(topology);
+  depth = hwloc_topology_get_depth(topology);
+  assert(depth == 4);
+
   /* revert to default 2*8*1 */
   assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 0, NULL, NULL));
   hwloc_topology_load(topology);
