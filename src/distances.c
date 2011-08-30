@@ -663,10 +663,17 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
           group_obj->cpuset = hwloc_bitmap_alloc();
           group_obj->attr->group.depth = topology->next_group_depth;
           for (j=0; j<nbobjs; j++)
-              if (groupids[j] == i+1) {
-                  hwloc_bitmap_or(group_obj->cpuset, group_obj->cpuset, objs[j]->cpuset);
-                  groupsizes[i]++;
-              }
+	    if (groupids[j] == i+1) {
+	      /* assemble the group cpuset */
+	      hwloc_bitmap_or(group_obj->cpuset, group_obj->cpuset, objs[j]->cpuset);
+	      /* if one obj has a nodeset, assemble a group nodeset */
+	      if (objs[j]->nodeset) {
+		if (!group_obj->nodeset)
+		  group_obj->nodeset = hwloc_bitmap_alloc();
+		hwloc_bitmap_or(group_obj->nodeset, group_obj->nodeset, objs[j]->nodeset);
+	      }
+              groupsizes[i]++;
+            }
           hwloc_debug_1arg_bitmap("adding Group object with %u objects and cpuset %s\n",
                                   groupsizes[i], group_obj->cpuset);
           hwloc__insert_object_by_cpuset(topology, group_obj,
@@ -796,21 +803,26 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
 					1 /* check the first matrice */,
 					verbose);
 
-/* temporarily disabled because it breaks the 128ia64-17n4s2c linux test-topology. */
-#if 0
       /* add a final group object covering everybody so that the distance matrix can be stored somewhere.
        * this group will be merged into a regular object if the matrix isn't strangely incomplete
        */
       group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
-      group_obj->cpuset = hwloc_bitmap_alloc();
-      for(i=0; i<nbobjs; i++)
-	hwloc_bitmap_or(group_obj->cpuset, group_obj->cpuset, topology->os_distances[type].objs[i]->cpuset);
       group_obj->attr->group.depth = topology->next_group_depth++;
+      group_obj->cpuset = hwloc_bitmap_alloc();
+      for(i=0; i<nbobjs; i++) {
+        /* assemble the group cpuset */
+	hwloc_bitmap_or(group_obj->cpuset, group_obj->cpuset, topology->os_distances[type].objs[i]->cpuset);
+        /* if one obj has a nodeset, assemble a group nodeset */
+	if (topology->os_distances[type].objs[i]->nodeset) {
+	  if (!group_obj->nodeset)
+	    group_obj->nodeset = hwloc_bitmap_alloc();
+	  hwloc_bitmap_or(group_obj->nodeset, group_obj->nodeset, topology->os_distances[type].objs[i]->nodeset);
+	}
+      }
       hwloc_debug_1arg_bitmap("adding Group object (as root of distance matrix with %u objects) with cpuset %s\n",
 			      nbobjs, group_obj->cpuset);
       hwloc__insert_object_by_cpuset(topology, group_obj,
 				     topology->os_distances[type].indexes != NULL ? hwloc_report_user_distance_error : hwloc_report_os_error);
-#endif
     }
   }
 }
