@@ -795,6 +795,9 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
 					topology->os_distances[type].indexes != NULL,
 					1 /* check the first matrice */,
 					verbose);
+
+/* temporarily disabled because it breaks the 128ia64-17n4s2c linux test-topology. */
+#if 0
       /* add a final group object covering everybody so that the distance matrix can be stored somewhere.
        * this group will be merged into a regular object if the matrix isn't strangely incomplete
        */
@@ -807,6 +810,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
 			      nbobjs, group_obj->cpuset);
       hwloc__insert_object_by_cpuset(topology, group_obj,
 				     topology->os_distances[type].indexes != NULL ? hwloc_report_user_distance_error : hwloc_report_os_error);
+#endif
     }
   }
 }
