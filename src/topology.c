@@ -452,13 +452,24 @@ enum hwloc_obj_cmp_e {
 static int
 hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (!obj1->cpuset || hwloc_bitmap_iszero(obj1->cpuset)
-      || !obj2->cpuset || hwloc_bitmap_iszero(obj2->cpuset))
+  hwloc_bitmap_t set1, set2;
+
+  /* compare cpusets if possible, or fallback to nodeset, or return */
+  if (obj1->cpuset && !hwloc_bitmap_iszero(obj1->cpuset)
+      && obj2->cpuset && !hwloc_bitmap_iszero(obj2->cpuset)) {
+    set1 = obj1->cpuset;
+    set2 = obj2->cpuset;
+  } else if (obj1->nodeset && !hwloc_bitmap_iszero(obj1->nodeset)
+	     && obj2->nodeset && !hwloc_bitmap_iszero(obj2->nodeset)) {
+    set1 = obj1->nodeset;
+    set2 = obj2->nodeset;
+  } else {
     return HWLOC_OBJ_DIFFERENT;
+  }
 
-  if (hwloc_bitmap_isequal(obj1->cpuset, obj2->cpuset)) {
+  if (hwloc_bitmap_isequal(set1, set2)) {
 
-    /* Same cpuset, subsort by type to have a consistent ordering.  */
+    /* Same sets, subsort by type to have a consistent ordering.  */
 
     switch (hwloc_type_cmp(obj1, obj2)) {
       case HWLOC_TYPE_DEEPER:
@@ -478,7 +489,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
             return HWLOC_OBJ_EQUAL;
         }
 
-	/* Same level cpuset and type!  Let's hope it's coherent.  */
+	/* Same sets and types!  Let's hope it's coherent.  */
 	return HWLOC_OBJ_EQUAL;
     }
 
@@ -487,15 +498,15 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
   } else {
 
-    /* Different cpusets, sort by inclusion.  */
+    /* Different sets, sort by inclusion.  */
 
-    if (hwloc_bitmap_isincluded(obj1->cpuset, obj2->cpuset))
+    if (hwloc_bitmap_isincluded(set1, set2))
       return HWLOC_OBJ_INCLUDED;
 
-    if (hwloc_bitmap_isincluded(obj2->cpuset, obj1->cpuset))
+    if (hwloc_bitmap_isincluded(set2, set1))
       return HWLOC_OBJ_CONTAINS;
 
-    if (hwloc_bitmap_intersects(obj1->cpuset, obj2->cpuset))
+    if (hwloc_bitmap_intersects(set1, set2))
       return HWLOC_OBJ_INTERSECTS;
 
     return HWLOC_OBJ_DIFFERENT;
