@@ -110,6 +110,7 @@ struct hwloc_topology {
   struct hwloc_topology_support support;
 
   struct hwloc_os_distances_s {
+    hwloc_obj_type_t type;
     int nbobjs;
     unsigned *indexes; /* array of OS indexes before we can convert them into objs. always available.
 			*/
@@ -122,7 +123,9 @@ struct hwloc_topology {
 		       * will be copied into the main logical-index-ordered distance at the end of the discovery.
 		       */
     int forced; /* set if the user forced a matrix to ignore the OS one */
-  } os_distances[HWLOC_OBJ_TYPE_MAX];
+
+    struct hwloc_os_distances_s *prev, *next;
+  } *first_osdist, *last_osdist;
 
   hwloc_backend_t backend_type;
   union hwloc_backend_params_u {
