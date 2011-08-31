@@ -564,6 +564,37 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
           fprintf(stderr, "Different OS indexes\n");
           return -1;
         }
+	if (obj->distances_count) {
+	  if (child->distances_count) {
+	    child->distances_count += obj->distances_count;
+	    child->distances = realloc(child->distances, child->distances_count * sizeof(*child->distances));
+	    memcpy(child->distances + obj->distances_count, obj->distances, obj->distances_count * sizeof(*child->distances));
+	  } else {
+	    child->distances_count = obj->distances_count;
+	    child->distances = obj->distances;
+	  }
+	  obj->distances_count = 0;
+	  obj->distances = NULL;
+	}
+	if (obj->distances_count) {
+	  if (child->infos_count) {
+	    child->infos_count += obj->infos_count;
+	    child->infos = realloc(child->infos, child->infos_count * sizeof(*child->infos));
+	    memcpy(child->infos + obj->infos_count, obj->infos, obj->infos_count * sizeof(*child->infos));
+	  } else {
+	    child->infos_count = obj->infos_count;
+	    child->infos = obj->infos;
+	  }
+	  obj->infos_count = 0;
+	  obj->infos = NULL;
+	}
+	if (obj->name) {
+	  if (child->name)
+	    free(child->name);
+	  child->name = obj->name;
+	  obj->name = NULL;
+	}
+	assert(!obj->userdata); /* user could not set userdata here (we're before load() */
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
 	    /* Do not check these, it may change between calls */
