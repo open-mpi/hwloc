@@ -378,6 +378,7 @@ hwloc_setup_distances_from_os_matrix(struct hwloc_topology *topology,
   root = hwloc_get_obj_covering_cpuset(topology, set);
   assert(root);
   assert(hwloc_bitmap_isequal(set, root->cpuset));
+  hwloc_bitmap_free(set);
   relative_depth = objs[0]->depth - root->depth; /* this assume that we have distances between objects of the same level */
 
   /* get the logical index offset, it's the min of all logical indexes */
