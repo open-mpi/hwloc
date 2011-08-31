@@ -14,7 +14,7 @@
 
 void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
-  fprintf(where, "Usage: hwloc-distrib [options] number\n");
+  fprintf(where, "Usage: hwloc-distances [options] number\n");
   fprintf (where, "\nFormatting options:\n");
   fprintf (where, "  -l --logical          Display hwloc logical object indexes\n");
   fprintf (where, "                        (default for console output)\n");
@@ -127,15 +127,20 @@ int main(int argc, char *argv[])
     for(j=0; j<nbobjs; j++) {
       hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, j);
       unsigned k;
+      char roottypestring[32];
+      hwloc_obj_type_snprintf (roottypestring, sizeof(roottypestring), obj, 0);
       for(k=0; k<obj->distances_count; k++) {
 	struct hwloc_distances_s *distances = obj->distances[k];
 	if (!distances->latency)
 	  continue;
-	printf("Latency matrix between %u %ss (depth %u) by %s indexes:\n",
+	printf("Latency matrix between %u %ss (depth %u) by %s indexes (below %s%s%u):\n",
 	       distances->nbobjs,
 	       hwloc_obj_type_string(hwloc_get_depth_type(topology, i+distances->relative_depth)),
 	       i+distances->relative_depth,
-	       logical ? "logical" : "physical");
+	       logical ? "logical" : "physical",
+	       roottypestring,
+	       logical ? " L#" :  " P#",
+	       logical ? obj->logical_index : obj->os_index);
 	hwloc_utils_print_distance_matrix(topology, obj, distances->nbobjs, distances->relative_depth, distances->latency, logical);
       }
     }
