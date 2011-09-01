@@ -703,11 +703,16 @@ HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topo
  * Not using the main file-system root causes hwloc_topology_is_thissystem()
  * to return 0.
  *
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
  * \return -1 with errno set to ENOSYS on non-Linux and on Linux systems that
  * do not support it.
  * \return -1 with the appropriate errno if \p fsroot_path cannot be used.
  *
- * \note For conveniency, this backend provides empty binding hooks which just
+ * \note For convenience, this backend provides empty binding hooks which just
  * return success.  To have hwloc still actually call OS-specific hooks, the
  * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
  * file is really the underlying system.
@@ -718,8 +723,8 @@ HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict t
 
 /** \brief Enable synthetic topology.
  *
- * Gather topology information from the given \p description
- * which should be a space-separated string of numbers describing
+ * Gather topology information from the given \p description,
+ * a space-separated string of numbers describing
  * the arity of each level.
  * Each number may be prefixed with a type and a colon to enforce the type
  * of a level.  If only some level types are enforced, hwloc will try to
@@ -730,7 +735,12 @@ HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict t
  * configuration, this function returns 0.
  * Otherwise -1 is returned and errno is set to EINVAL.
  *
- * \note For conveniency, this backend provides empty binding hooks which just
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
+ * \note For convenience, this backend provides empty binding hooks which just
  * return success.
  *
  * \note The existing topology is cleared even on failure.
@@ -744,9 +754,14 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  * This file may have been generated earlier with hwloc_topology_export_xml()
  * or lstopo file.xml.
  *
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
  * \return -1 with errno set to EINVAL on failure to read the XML file.
  *
- * \note For conveniency, this backend provides empty binding hooks which just
+ * \note For convenience, this backend provides empty binding hooks which just
  * return success.  To have hwloc still actually call OS-specific hooks, the
  * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
  * file is really the underlying system.
@@ -755,15 +770,21 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
-/** \brief Enable XML based topology using a memory buffer instead of a file.
+/** \brief Enable XML based topology using a memory buffer (instead of
+ * a file, as with hwloc_topology_set_xml()).
  *
- * Gather topology information from the XML memory buffer given at \p buffer
- * and of length \p length.
- * This buffer may have been filled earlier with hwloc_topology_export_xmlbuffer().
+ * Gather topology information from the XML memory buffer given at \p
+ * buffer and of length \p size.  This buffer may have been filled
+ * earlier with hwloc_topology_export_xmlbuffer().
+ *
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
  *
  * \return -1 with errno set to EINVAL on failure to read the XML buffer.
  *
- * \note For conveniency, this backend provides empty binding hooks which just
+ * \note For convenience, this backend provides empty binding hooks which just
  * return success.  To have hwloc still actually call OS-specific hooks, the
  * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
  * file is really the underlying system.
