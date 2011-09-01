@@ -191,8 +191,10 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     break;
 
   case HWLOC_UTILS_INPUT_SYNTHETIC:
-    if (hwloc_topology_set_synthetic(topology, input))
+    if (hwloc_topology_set_synthetic(topology, input)) {
+      perror("Setting synthetic topology description");
       return EXIT_FAILURE;
+    }
     break;
 
   case HWLOC_UTILS_INPUT_DEFAULT:

@@ -470,8 +470,11 @@ main (int argc, char *argv[])
   if (merge)
     hwloc_topology_ignore_all_keep_structure(topology);
 
-  if (input)
-    hwloc_utils_enable_input_format(topology, input, input_format, verbose_mode > 1, callname);
+  if (input) {
+    err = hwloc_utils_enable_input_format(topology, input, input_format, verbose_mode > 1, callname);
+    if (err)
+      return err;
+  }
 
   if (pid != (hwloc_pid_t) -1 && pid != 0) {
     if (hwloc_topology_set_pid(topology, pid)) {

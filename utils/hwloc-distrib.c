@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
   char **orig_argv = argv;
   hwloc_topology_t topology;
   int opt;
+  int err;
 
   hwloc_topology_init(&topology);
 
@@ -159,8 +160,11 @@ int main(int argc, char *argv[])
 
     cpuset = malloc(n * sizeof(hwloc_bitmap_t));
 
-    if (input)
-      hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+    if (input) {
+      err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+      if (err)
+	return err;
+    }
     hwloc_topology_load(topology);
 
     if (from_type == (hwloc_obj_type_t) -1) {
