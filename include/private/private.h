@@ -346,15 +346,16 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
   return hwloc_alloc(topology, len);
 }
 
-extern void hwloc_topology_distances_init(struct hwloc_topology *topology);
-extern void hwloc_topology_distances_clear(struct hwloc_topology *topology);
-extern void hwloc_topology_distances_destroy(struct hwloc_topology *topology);
-extern void hwloc_topology__set_distance_matrix(struct hwloc_topology *topology, hwloc_obj_type_t type, unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances, int force);
-extern void hwloc_store_distances_from_env(struct hwloc_topology *topology);
-extern void hwloc_convert_distances_indexes_into_objects(struct hwloc_topology *topology);
-extern void hwloc_finalize_logical_distances(struct hwloc_topology *topology);
-extern void hwloc_restrict_distances(struct hwloc_topology *topology, unsigned long flags);
-extern void hwloc_free_logical_distances(struct hwloc_distances_s *dist);
+extern void hwloc_distances_init(struct hwloc_topology *topology);
+extern void hwloc_distances_clear(struct hwloc_topology *topology);
+extern void hwloc_distances_destroy(struct hwloc_topology *topology);
+extern void hwloc_distances_set(struct hwloc_topology *topology, hwloc_obj_type_t type, unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances, int force);
+extern void hwloc_distances_set_from_env(struct hwloc_topology *topology);
+extern void hwloc_distances_finalize_os(struct hwloc_topology *topology);
+extern void hwloc_distances_finalize_logical(struct hwloc_topology *topology);
+extern void hwloc_distances_restrict(struct hwloc_topology *topology, unsigned long flags);
+extern void hwloc_clear_object_distances(struct hwloc_obj *obj);
+extern void hwloc_clear_object_distances_one(struct hwloc_distances_s *distances);
 extern void hwloc_group_by_distances(struct hwloc_topology *topology);
 
 #endif /* HWLOC_PRIVATE_H */

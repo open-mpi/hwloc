@@ -263,17 +263,6 @@ void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
   obj->infos_count++;
 }
 
-static void
-hwloc_clear_object_distances(hwloc_obj_t obj)
-{
-  unsigned i;
-  for (i=0; i<obj->distances_count; i++)
-    hwloc_free_logical_distances(obj->distances[i]);
-  free(obj->distances);
-  obj->distances = NULL;
-  obj->distances_count = 0;
-}
-
 /* Free an object and all its content.  */
 void
 hwloc_free_unlinked_object(hwloc_obj_t obj)
@@ -2050,7 +2039,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /*
    * Group levels by distances
    */
-  hwloc_convert_distances_indexes_into_objects(topology);
+  hwloc_distances_finalize_os(topology);
   hwloc_group_by_distances(topology);
 
   /* First tweak a bit to clean the topology.  */
@@ -2171,7 +2160,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /*
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology
    */
-  hwloc_finalize_logical_distances(topology);
+  hwloc_distances_finalize_logical(topology);
 
 #  ifdef HWLOC_HAVE_XML
   if (topology->backend_type == HWLOC_BACKEND_XML)
@@ -2365,7 +2354,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
-  hwloc_topology_distances_init(topology);
+  hwloc_distances_init(topology);
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);
@@ -2556,7 +2545,7 @@ static void
 hwloc_topology_clear (struct hwloc_topology *topology)
 {
   unsigned l;
-  hwloc_topology_distances_clear(topology);
+  hwloc_distances_clear(topology);
   hwloc_topology_clear_tree (topology, topology->levels[0][0]);
   for (l=0; l<topology->nb_levels; l++)
     free(topology->levels[l]);
@@ -2570,7 +2559,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 {
   hwloc_backend_exit(topology);
   hwloc_topology_clear(topology);
-  hwloc_topology_distances_destroy(topology);
+  hwloc_distances_destroy(topology);
   free(topology->support.discovery);
   free(topology->support.cpubind);
   free(topology->support.membind);
@@ -2641,7 +2630,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* get distance matrix from the environment are store them (as indexes) in the topology.
    * indexes will be converted into objects later once the tree will be filled
    */
-  hwloc_store_distances_from_env(topology);
+  hwloc_distances_set_from_env(topology);
 
   /* actual topology discovery */
   err = hwloc_discover(topology);
@@ -2688,9 +2677,9 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_connect_children(topology->levels[0][0]);
   hwloc_connect_levels(topology);
   propagate_total_memory(topology->levels[0][0]);
-  hwloc_restrict_distances(topology, flags);
-  hwloc_convert_distances_indexes_into_objects(topology);
-  hwloc_finalize_logical_distances(topology);
+  hwloc_distances_restrict(topology, flags);
+  hwloc_distances_finalize_os(topology);
+  hwloc_distances_finalize_logical(topology);
   return 0;
 }
 
