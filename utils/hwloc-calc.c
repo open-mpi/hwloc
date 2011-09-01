@@ -378,7 +378,9 @@ int main(int argc, char *argv[])
 
     if (input_changed && input) {
       /* only update the input when actually using it */
-      hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+      err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+      if (err)
+	return err;
       hwloc_topology_load(topology);
       depth = hwloc_topology_get_depth(topology);
       input_changed = 0;
@@ -415,7 +417,9 @@ int main(int argc, char *argv[])
 
     if (input_changed && input) {
       /* only update the input when actually using it */
-      hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+      err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
+      if (err)
+        return err;
       hwloc_topology_load(topology);
       depth = hwloc_topology_get_depth(topology);
       input_changed = 0;
