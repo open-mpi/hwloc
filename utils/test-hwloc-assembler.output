@@ -48,11 +48,11 @@
     </object>
     <object type="Machine" os_level="-1" os_index="0" cpuset="0x00ffffff" complete_cpuset="0x00ffffff" online_cpuset="0x00ffffff" allowed_cpuset="0x00ffffff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" name="machine2">
       <info name="Backend" value="Synthetic"/>
-      <distances nbobjs="2" relative_depth="1" latency_base="23.000000">
+      <distances nbobjs="2" relative_depth="1" latency_base="5.290000">
+        <latency value="4.347826"/>
+        <latency value="14.782610"/>
         <latency value="1.000000"/>
-        <latency value="3.400000"/>
-        <latency value="0.230000"/>
-        <latency value="1.000000"/>
+        <latency value="4.347826"/>
       </distances>
       <object type="NUMANode" os_level="-1" os_index="0" cpuset="0x00000fff" complete_cpuset="0x00000fff" online_cpuset="0x00000fff" allowed_cpuset="0x00000fff" nodeset="0x00000001" complete_nodeset="0x00000001" allowed_nodeset="0x00000001" local_memory="1073741824">
         <page_type size="4096" count="262144"/>
