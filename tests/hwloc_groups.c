@@ -10,6 +10,8 @@
 #include <string.h>
 #include <assert.h>
 
+/* intensive testing of two grouping cases (2+1 and 2+2+1) */
+
 int main(void)
 {
   hwloc_topology_t topology;

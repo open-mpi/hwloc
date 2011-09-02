@@ -10,13 +10,13 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 
-EXTRA_DIST = test-hwloc-calc.output test-hwloc-distrib.output test-hwloc-assembler1.input test-hwloc-assembler2.input test-hwloc-assembler.output
+EXTRA_DIST = test-hwloc-assembler1.input test-hwloc-assembler2.input test-hwloc-assembler.output test-hwloc-calc.output test-hwloc-distances.output test-hwloc-distrib.output
 
 noinst_HEADERS = misc.h
 
 # Only build the utilities if we're building in standalone mode
 if HWLOC_BUILD_UTILS
-bin_PROGRAMS = lstopo hwloc-calc hwloc-bind hwloc-distrib hwloc-ps hwloc-assembler
+bin_PROGRAMS = lstopo hwloc-assembler hwloc-calc hwloc-bind hwloc-distances hwloc-distrib hwloc-ps
 endif
 
 lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c
@@ -48,7 +48,7 @@ bin_SCRIPTS = hwloc-assembler-remote
 # call hwloc executables.
 if HWLOC_BUILD_TESTS
 if !HWLOC_HAVE_MINGW32
-TESTS = test-hwloc-calc.sh test-hwloc-distrib.sh test-hwloc-assembler.sh
+TESTS = test-hwloc-assembler.sh test-hwloc-calc.sh test-hwloc-distances.sh test-hwloc-distrib.sh
 endif !HWLOC_HAVE_MINGW32
 endif HWLOC_BUILD_TESTS
 
@@ -58,7 +58,7 @@ man7_pages = hwloc.7
 EXTRA_DIST += $(man7_pages:.7=.7in)
 nodist_man_MANS = $(man7_pages)
 
-man1_pages = lstopo.1 hwloc-bind.1 hwloc-distrib.1 hwloc-calc.1 hwloc-ps.1
+man1_pages = lstopo.1 hwloc-bind.1 hwloc-calc.1 hwloc-distances.1 hwloc-distrib.1 hwloc-ps.1
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 

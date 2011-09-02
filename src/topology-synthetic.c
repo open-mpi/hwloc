@@ -148,6 +148,12 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
     }
   }
 
+  if (!nb_pu_levels) {
+    fprintf(stderr,"synthetic string missing ending number of PUs\n");
+    errno = EINVAL;
+    return -1;
+  }
+
   if (nb_pu_levels > 1) {
     fprintf(stderr,"synthetic string can not have several PU levels\n");
     errno = EINVAL;

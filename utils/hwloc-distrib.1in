@@ -10,7 +10,7 @@ hwloc-distrib \- Build a number of cpu masks distributed on the system
 .\"    Synopsis Section
 .\" **************************
 .SH SYNOPSIS
-.B topodistrib
+.B hwloc-distrib
 [\fIoptions\fR] \fI<integer>\fR
 .
 .\" **************************
@@ -44,6 +44,7 @@ by gathering another machine topology with hwloc-gather-topology.
 Simulate a fake hierarchy (instead of discovering the topology on the
 local machine). If <specification> is "node:2 pu:3", the topology will
 contain two NUMA nodes with 3 processing units in each of them.
+The <specification> string must end with a number of PUs.
 .TP
 \fB\-\-if\fR <format>, \fB\-\-input\-format\fR <format>
 Enforce the input in the given format, among \fBxml\fR, \fBfsroot\fR

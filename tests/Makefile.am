@@ -38,8 +38,8 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_backends \
 	hwloc_is_thissystem \
 	hwloc_distances \
-	hwloc_set_distances \
 	hwloc_groups \
+	hwloc_groups2 \
 	hwloc_insert_misc \
 	hwloc_topology_restrict \
 	hwloc_obj_infos \

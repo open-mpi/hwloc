@@ -266,17 +266,6 @@ void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
   obj->infos_count++;
 }
 
-static void
-hwloc_clear_object_distances(hwloc_obj_t obj)
-{
-  unsigned i;
-  for (i=0; i<obj->distances_count; i++)
-    hwloc_free_logical_distances(obj->distances[i]);
-  free(obj->distances);
-  obj->distances = NULL;
-  obj->distances_count = 0;
-}
-
 /* Free an object and all its content.  */
 void
 hwloc_free_unlinked_object(hwloc_obj_t obj)
@@ -506,13 +495,24 @@ enum hwloc_obj_cmp_e {
 static int
 hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (!obj1->cpuset || hwloc_bitmap_iszero(obj1->cpuset)
-      || !obj2->cpuset || hwloc_bitmap_iszero(obj2->cpuset))
+  hwloc_bitmap_t set1, set2;
+
+  /* compare cpusets if possible, or fallback to nodeset, or return */
+  if (obj1->cpuset && !hwloc_bitmap_iszero(obj1->cpuset)
+      && obj2->cpuset && !hwloc_bitmap_iszero(obj2->cpuset)) {
+    set1 = obj1->cpuset;
+    set2 = obj2->cpuset;
+  } else if (obj1->nodeset && !hwloc_bitmap_iszero(obj1->nodeset)
+	     && obj2->nodeset && !hwloc_bitmap_iszero(obj2->nodeset)) {
+    set1 = obj1->nodeset;
+    set2 = obj2->nodeset;
+  } else {
     return HWLOC_OBJ_DIFFERENT;
+  }
 
-  if (hwloc_bitmap_isequal(obj1->cpuset, obj2->cpuset)) {
+  if (hwloc_bitmap_isequal(set1, set2)) {
 
-    /* Same cpuset, subsort by type to have a consistent ordering.  */
+    /* Same sets, subsort by type to have a consistent ordering.  */
 
     switch (hwloc_type_cmp(obj1, obj2)) {
       case HWLOC_TYPE_DEEPER:
@@ -532,7 +532,7 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
             return HWLOC_OBJ_EQUAL;
         }
 
-	/* Same level cpuset and type!  Let's hope it's coherent.  */
+	/* Same sets and types!  Let's hope it's coherent.  */
 	return HWLOC_OBJ_EQUAL;
     }
 
@@ -541,15 +541,15 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
   } else {
 
-    /* Different cpusets, sort by inclusion.  */
+    /* Different sets, sort by inclusion.  */
 
-    if (hwloc_bitmap_isincluded(obj1->cpuset, obj2->cpuset))
+    if (hwloc_bitmap_isincluded(set1, set2))
       return HWLOC_OBJ_INCLUDED;
 
-    if (hwloc_bitmap_isincluded(obj2->cpuset, obj1->cpuset))
+    if (hwloc_bitmap_isincluded(set2, set1))
       return HWLOC_OBJ_CONTAINS;
 
-    if (hwloc_bitmap_intersects(obj1->cpuset, obj2->cpuset))
+    if (hwloc_bitmap_intersects(set1, set2))
       return HWLOC_OBJ_INTERSECTS;
 
     return HWLOC_OBJ_DIFFERENT;
@@ -607,6 +607,37 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
           fprintf(stderr, "Different OS indexes\n");
           return -1;
         }
+	if (obj->distances_count) {
+	  if (child->distances_count) {
+	    child->distances_count += obj->distances_count;
+	    child->distances = realloc(child->distances, child->distances_count * sizeof(*child->distances));
+	    memcpy(child->distances + obj->distances_count, obj->distances, obj->distances_count * sizeof(*child->distances));
+	  } else {
+	    child->distances_count = obj->distances_count;
+	    child->distances = obj->distances;
+	  }
+	  obj->distances_count = 0;
+	  obj->distances = NULL;
+	}
+	if (obj->infos_count) {
+	  if (child->infos_count) {
+	    child->infos_count += obj->infos_count;
+	    child->infos = realloc(child->infos, child->infos_count * sizeof(*child->infos));
+	    memcpy(child->infos + obj->infos_count, obj->infos, obj->infos_count * sizeof(*child->infos));
+	  } else {
+	    child->infos_count = obj->infos_count;
+	    child->infos = obj->infos;
+	  }
+	  obj->infos_count = 0;
+	  obj->infos = NULL;
+	}
+	if (obj->name) {
+	  if (child->name)
+	    free(child->name);
+	  child->name = obj->name;
+	  obj->name = NULL;
+	}
+	assert(!obj->userdata); /* user could not set userdata here (we're before load() */
 	switch(obj->type) {
 	  case HWLOC_OBJ_NODE:
 	    /* Do not check these, it may change between calls */
@@ -776,8 +807,6 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   }
 }
 
-static void
-hwloc_connect_children(hwloc_obj_t parent);
 /* Adds a misc object _after_ detection, and thus has to reconnect all the pointers */
 hwloc_obj_t
 hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
@@ -1484,7 +1513,7 @@ hwloc_propagate_bridge_depth(hwloc_topology_t topology, hwloc_obj_t root, unsign
  * The remaining fields (levels, cousins, logical_index, depth, ...) will
  * be setup later in hwloc_connect_levels().
  */
-static void
+void
 hwloc_connect_children(hwloc_obj_t parent)
 {
   unsigned n;
@@ -1669,7 +1698,7 @@ hwloc_build_level_from_list(struct hwloc_obj *first, struct hwloc_obj ***levelp)
 /*
  * Do the remaining work that hwloc_connect_children() did not do earlier.
  */
-static int
+int
 hwloc_connect_levels(hwloc_topology_t topology)
 {
   unsigned l, i=0;
@@ -2068,7 +2097,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /*
    * Group levels by distances
    */
-  hwloc_convert_distances_indexes_into_objects(topology);
+  hwloc_distances_finalize_os(topology);
   hwloc_group_by_distances(topology);
 
   /* First tweak a bit to clean the topology.  */
@@ -2189,13 +2218,7 @@ hwloc_discover(struct hwloc_topology *topology)
   /*
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology
    */
-  hwloc_finalize_logical_distances(topology);
-
-#  ifdef HWLOC_HAVE_XML
-  if (topology->backend_type == HWLOC_BACKEND_XML)
-    /* make sure the XML-imported distances are ok now that the tree is properly setup */
-    hwloc_xml_check_distances(topology);
-#  endif
+  hwloc_distances_finalize_logical(topology);
 
   /*
    * Now set binding hooks.
@@ -2383,7 +2406,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
     topology->ignored_types[i] = HWLOC_IGNORE_TYPE_NEVER;
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
-  hwloc_topology_distances_init(topology);
+  hwloc_distances_init(topology);
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);
@@ -2624,7 +2647,7 @@ static void
 hwloc_topology_clear (struct hwloc_topology *topology)
 {
   unsigned l;
-  hwloc_topology_distances_clear(topology);
+  hwloc_distances_clear(topology);
   hwloc_topology_clear_tree (topology, topology->levels[0][0]);
   for (l=0; l<topology->nb_levels; l++)
     free(topology->levels[l]);
@@ -2638,7 +2661,7 @@ hwloc_topology_destroy (struct hwloc_topology *topology)
 {
   hwloc_backend_exit(topology);
   hwloc_topology_clear(topology);
-  hwloc_topology_distances_destroy(topology);
+  hwloc_distances_destroy(topology);
   free(topology->support.discovery);
   free(topology->support.cpubind);
   free(topology->support.membind);
@@ -2709,7 +2732,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* get distance matrix from the environment are store them (as indexes) in the topology.
    * indexes will be converted into objects later once the tree will be filled
    */
-  hwloc_store_distances_from_env(topology);
+  hwloc_distances_set_from_env(topology);
 
   /* actual topology discovery */
   err = hwloc_discover(topology);
@@ -2756,9 +2779,9 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_connect_children(topology->levels[0][0]);
   hwloc_connect_levels(topology);
   propagate_total_memory(topology->levels[0][0]);
-  hwloc_restrict_distances(topology, flags);
-  hwloc_convert_distances_indexes_into_objects(topology);
-  hwloc_finalize_logical_distances(topology);
+  hwloc_distances_restrict(topology, flags);
+  hwloc_distances_finalize_os(topology);
+  hwloc_distances_finalize_logical(topology);
   return 0;
 }
 

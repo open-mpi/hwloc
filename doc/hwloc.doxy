@@ -832,6 +832,16 @@ relevant topology files of the current machine into a tarball
 later (possibly offline) for simulating or debugging a machine
 without actually running on it.
 
+\section cli_hwloc_distances hwloc-distances
+
+hwloc-distances displays all distance matrices attached to
+the topology. Note that lstopo may also display distance
+matrices in its verbose textual output. However lstopo only
+prints matrices that cover the entire topology while
+hwloc-distances also displays matrices that ignore part
+of the topology.
+
+
 
 
 \page envvar Environment Variables
