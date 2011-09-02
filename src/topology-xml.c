@@ -43,6 +43,8 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
+  topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
+
   LIBXML_TEST_VERSION;
   hwloc_libxml2_disable_stderrwarnings();
 
@@ -480,9 +482,9 @@ hwloc__xml_import_distances_node(struct hwloc_topology *topology __hwloc_attribu
   }
 
   if (nbobjs && reldepth && latbase) {
-    int idx = obj->distances_count;
     unsigned nbcells, i;
     float *matrix, latmax = 0;
+    struct hwloc_xml_imported_distances_s *distances;
 
     nbcells = 0;
     if (node->children)
@@ -494,13 +496,12 @@ hwloc__xml_import_distances_node(struct hwloc_topology *topology __hwloc_attribu
       return;
     }
 
-    obj->distances = realloc(obj->distances, (idx+1)*sizeof(*obj->distances));
-    obj->distances_count = idx+1;
-    obj->distances[idx] = malloc(sizeof(**obj->distances));
-    obj->distances[idx]->relative_depth = reldepth;
-    obj->distances[idx]->nbobjs = nbobjs;
-    obj->distances[idx]->latency = matrix = malloc(nbcells*sizeof(float));
-    obj->distances[idx]->latency_base = latbase;
+    distances = malloc(sizeof(*distances));
+    distances->root = obj;
+    distances->distances.relative_depth = reldepth;
+    distances->distances.nbobjs = nbobjs;
+    distances->distances.latency = matrix = malloc(nbcells*sizeof(float));
+    distances->distances.latency_base = latbase;
 
     i = 0;
     for(subnode = node->children; subnode; subnode = subnode->next)
@@ -525,8 +526,14 @@ hwloc__xml_import_distances_node(struct hwloc_topology *topology __hwloc_attribu
 	/* next matrix cell */
 	i++;
       }
+    distances->distances.latency_max = latmax;
 
-    obj->distances[idx]->latency_max = latmax;
+    if (topology->backend_params.xml.last_distances)
+      topology->backend_params.xml.last_distances->next = distances;
+    else
+      topology->backend_params.xml.first_distances = distances;
+    distances->prev = topology->backend_params.xml.last_distances;
+    distances->next = NULL;
   }
 }
 
@@ -626,6 +633,49 @@ hwloc__xml_import_topology_node(struct hwloc_topology *topology, xmlNode *node)
     hwloc__xml_import_node(topology, NULL, node->children, 0);
 }
 
+static void
+hwloc_xml__handle_distances(struct hwloc_topology *topology)
+{
+  struct hwloc_xml_imported_distances_s *xmldist, *next = topology->backend_params.xml.first_distances;
+
+  if (!next)
+    return;
+
+  /* connect things now because we need levels to check/build, they'll be reconnected properly later anyway */
+  hwloc_connect_children(topology->levels[0][0]);
+  hwloc_connect_levels(topology);
+
+  while ((xmldist = next) != NULL) {
+    hwloc_obj_t root = xmldist->root;
+    unsigned depth = root->depth + xmldist->distances.relative_depth;
+    unsigned nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, depth);
+    if (nbobjs != xmldist->distances.nbobjs) {
+      /* distances invalid, drop */
+      fprintf(stderr, "ignoring invalid distance matrix with %u objs instead of %u\n",
+	     xmldist->distances.nbobjs, nbobjs);
+      free(xmldist->distances.latency);
+    } else {
+      /* distances valid, add it to the internal OS distances list for grouping */
+      unsigned *indexes = malloc(nbobjs * sizeof(unsigned));
+      hwloc_obj_t child, *objs = malloc(nbobjs * sizeof(hwloc_obj_t));
+      unsigned j;
+      for(j=0, child = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, depth, NULL);
+	  j<nbobjs;
+	  j++, child = hwloc_get_next_obj_inside_cpuset_by_depth(topology, root->cpuset, depth, child)) {
+	indexes[j] = child->os_index;
+	objs[j] = child;
+      }
+      for(j=0; j<nbobjs*nbobjs; j++)
+	xmldist->distances.latency[j] *= xmldist->distances.latency_base;
+      hwloc_distances_set(topology, objs[0]->type, nbobjs, indexes, objs, xmldist->distances.latency, 0 /* XML cannot force */);
+    }
+
+    next = xmldist->next;
+    free(xmldist);
+  }
+  topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
+}
+
 /* this canNOT be the first XML call */
 void
 hwloc_look_xml(struct hwloc_topology *topology)
@@ -650,40 +700,9 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
   /* keep the "Backend" information intact */
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
-}
 
-static void
-hwloc_xml__check_distances(struct hwloc_topology *topology, hwloc_obj_t obj)
-{
-  hwloc_obj_t child;
-  unsigned i=0;
-  while (i<obj->distances_count) {
-    unsigned depth = obj->depth + obj->distances[i]->relative_depth;
-    unsigned nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, obj->cpuset, depth);
-    if (nbobjs != obj->distances[i]->nbobjs) {
-      fprintf(stderr, "ignoring invalid distance matrix with %u objs instead of %u\n",
-	      obj->distances[i]->nbobjs, nbobjs);
-      hwloc_clear_object_distances_one(obj->distances[i]);
-      memmove(&obj->distances[i], &obj->distances[i+1], (obj->distances_count-i-1)*sizeof(*obj->distances));
-      obj->distances_count--;
-    } else
-      i++;
-  }
-
-  child = obj->first_child;
-  while (child != NULL) {
-    hwloc_xml__check_distances(topology, child);
-    child = child->next_sibling;
-  }
-}
-
-/* this canNOT be the first XML call */
-void
-hwloc_xml_check_distances(struct hwloc_topology *topology)
-{
-  /* now that the topology tree has been properly setup,
-   * check that our distance matrice sizes make sense */
-  hwloc_xml__check_distances(topology, topology->levels[0][0]);
+  /* if we added some distances, we must check them, and make them groupable */
+  hwloc_xml__handle_distances(topology);
 }
 
 /******************************

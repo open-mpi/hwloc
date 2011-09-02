@@ -753,8 +753,6 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   }
 }
 
-static void
-hwloc_connect_children(hwloc_obj_t parent);
 /* Adds a misc object _after_ detection, and thus has to reconnect all the pointers */
 hwloc_obj_t
 hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
@@ -1457,7 +1455,7 @@ hwloc_propagate_bridge_depth(hwloc_topology_t topology, hwloc_obj_t root, unsign
  * The remaining fields (levels, cousins, logical_index, depth, ...) will
  * be setup later in hwloc_connect_levels().
  */
-static void
+void
 hwloc_connect_children(hwloc_obj_t parent)
 {
   unsigned n;
@@ -1642,7 +1640,7 @@ hwloc_build_level_from_list(struct hwloc_obj *first, struct hwloc_obj ***levelp)
 /*
  * Do the remaining work that hwloc_connect_children() did not do earlier.
  */
-static int
+int
 hwloc_connect_levels(hwloc_topology_t topology)
 {
   unsigned l, i=0;
@@ -2161,12 +2159,6 @@ hwloc_discover(struct hwloc_topology *topology)
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology
    */
   hwloc_distances_finalize_logical(topology);
-
-#  ifdef HWLOC_HAVE_XML
-  if (topology->backend_type == HWLOC_BACKEND_XML)
-    /* make sure the XML-imported distances are ok now that the tree is properly setup */
-    hwloc_xml_check_distances(topology);
-#  endif
 
   /*
    * Now set binding hooks.
