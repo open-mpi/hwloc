@@ -29,8 +29,8 @@ export LANG LC_ALL
 file="$tmp/test-hwloc-assembler.output"
 
 $assembler $file \
-	$abs_top_srcdir/utils/test-hwloc-assembler1.input \
-	$abs_top_srcdir/utils/test-hwloc-assembler2.input \
-	$abs_top_srcdir/utils/test-hwloc-assembler1.input
+	$abs_top_srcdir/utils/test-hwloc-assembler.input1 \
+	$abs_top_srcdir/utils/test-hwloc-assembler.input2 \
+	$abs_top_srcdir/utils/test-hwloc-assembler.input1
 diff @HWLOC_DIFF_U@ $abs_top_srcdir/utils/test-hwloc-assembler.output "$file"
 rm -rf "$tmp"
