@@ -587,7 +587,12 @@ HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned
  * Not using the main file-system root causes hwloc_topology_is_thissystem()
  * to return 0.
  *
- * \note For conveniency, this backend provides empty binding hooks which just
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
+ * \note For convenience, this backend provides empty binding hooks which just
  * return success.  To have hwloc still actually call OS-specific hooks, the
  * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
  * file is really the underlying system.
@@ -611,8 +616,8 @@ HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topo
 
 /** \brief Enable synthetic topology.
  *
- * Gather topology information from the given \p description
- * which should be a space-separated string of numbers describing
+ * Gather topology information from the given \p description,
+ * a space-separated string of numbers describing
  * the arity of each level.
  * Each number may be prefixed with a type and a colon to enforce the type
  * of a level.  If only some level types are enforced, hwloc will try to
@@ -623,7 +628,12 @@ HWLOC_DECLSPEC int hwloc_topology_set_pid(hwloc_topology_t __hwloc_restrict topo
  * configuration, this function returns 0.
  * Otherwise -1 is returned and errno is set to EINVAL.
  *
- * \note For conveniency, this backend provides empty binding hooks which just
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
+ * \note For convenience, this backend provides empty binding hooks which just
  * return success.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict description);
@@ -634,17 +644,29 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  * Setting the environment variable HWLOC_XMLFILE may also result in this behavior.
  * This file may have been generated earlier with lstopo file.xml.
  *
- * \note For conveniency, this backend provides empty binding hooks which just
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
+ *
+ * \note For convenience, this backend provides empty binding hooks which just
  * return success.  To have hwloc still actually call OS-specific hooks, the
  * HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM has to be set to assert that the loaded
  * file is really the underlying system.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict xmlpath);
 
-/** \brief Enable XML based topology using a memory buffer instead of a file.
+/** \brief Enable XML based topology using a memory buffer (instead of
+ * a file, as with hwloc_topology_set_xml()).
  *
- * Gather topology information from the XML memory buffer given at \p buffer
- * and of length \p length.
+ * Gather topology information from the XML memory buffer given at \p
+ * buffer and of length \p size.  This buffer may have been filled
+ * earlier with hwloc_topology_export_xmlbuffer().
+ *
+ * Note that this function does not actually load topology
+ * information; it just tells hwloc where to load it from.  You'll
+ * still need to invoke hwloc_topology_load() to actually load the
+ * topology information.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restrict topology, const char * __hwloc_restrict buffer, int size);
 
