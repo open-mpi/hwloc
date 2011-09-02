@@ -191,6 +191,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
   }
 
   topology->backend_type = HWLOC_BACKEND_SYNTHETIC;
+  topology->backend_params.synthetic.string = strdup(description);
   topology->backend_params.synthetic.arity[count-1] = 0;
   topology->is_thissystem = 0;
 
@@ -201,6 +202,7 @@ void
 hwloc_backend_synthetic_exit(struct hwloc_topology *topology)
 {
   assert(topology->backend_type == HWLOC_BACKEND_SYNTHETIC);
+  free(topology->backend_params.synthetic.string);
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
@@ -343,5 +345,6 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
   hwloc_bitmap_free(cpuset);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Synthetic");
+  hwloc_obj_add_info(topology->levels[0][0], "SyntheticDescription", topology->backend_params.synthetic.string);
 }
 

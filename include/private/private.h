@@ -154,6 +154,7 @@ struct hwloc_topology {
 #endif /* HWLOC_HAVE_XML */
     struct hwloc_backend_params_synthetic_s {
       /* synthetic backend parameters */
+      char *string;
 #define HWLOC_SYNTHETIC_MAX_DEPTH 128
       unsigned arity[HWLOC_SYNTHETIC_MAX_DEPTH];
       hwloc_obj_type_t type[HWLOC_SYNTHETIC_MAX_DEPTH];
