@@ -28,6 +28,8 @@ export LANG LC_ALL
 } || exit $?
 file="$tmp/test-hwloc-assembler.output"
 
+set -e
+
 $assembler $file \
 	$abs_top_srcdir/utils/test-hwloc-assembler.input1 \
 	$abs_top_srcdir/utils/test-hwloc-assembler.input2 \
