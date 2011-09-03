@@ -721,8 +721,10 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
    * of root_node node. */
   node = xmlNewChild(root_node, NULL, BAD_CAST "object", NULL);
   xmlNewProp(node, BAD_CAST "type", BAD_CAST hwloc_obj_type_string(obj->type));
-  sprintf(tmp, "%d", obj->os_level);
-  xmlNewProp(node, BAD_CAST "os_level", BAD_CAST tmp);
+  if (obj->os_level != -1) {
+    sprintf(tmp, "%d", obj->os_level);
+    xmlNewProp(node, BAD_CAST "os_level", BAD_CAST tmp);
+  }
   if (obj->os_index != (unsigned) -1) {
     sprintf(tmp, "%u", obj->os_index);
     xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
