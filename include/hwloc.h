@@ -553,7 +553,14 @@ HWLOC_DECLSPEC void hwloc_topology_destroy (hwloc_topology_t topology);
 
 /** \brief Run internal checks on a topology structure
  *
+ * The program aborts if an inconsistency is detected in the given topology.
+ *
  * \param topology is the topology to be checked
+ *
+ * \note This routine is only useful to developers.
+ *
+ * \note The input topology should have been previously loaded with
+ * hwloc_topology_load().
  */
 HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 
