@@ -33,6 +33,11 @@ Version 1.3.0
     and configuration.
   + Allow user-given distance matrices to remove or replace those
     discovered by the OS backend.
+* Make XML exporting symbols available even when XML support is disabled
+  + hwloc_topology_export_xml() and export_xmlbuffer() now return an
+    integer, e.g. an error if XML is not supported.
+  + Add hwloc_free_xmlbuffer() to free the buffer allocated by
+    hwloc_topology_export_xmlbuffer().
 * Minor API updates
   + Add hwloc_obj_add_info to customize object info attributes.
 * Tools

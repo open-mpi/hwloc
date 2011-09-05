@@ -844,19 +844,45 @@ hwloc__topology_prepare_export(hwloc_topology_t topology)
   return doc;
 }
 
-void hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
+int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
   xmlDocPtr doc = hwloc__topology_prepare_export(topology);
-  xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+  int ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
   xmlFreeDoc(doc);
+  return ret < 0 ? -1 : 0;
 }
 
-void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
+int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
   xmlDocPtr doc = hwloc__topology_prepare_export(topology);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
+
+  return 0;
 }
 
+void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer)
+{
+  xmlFree(BAD_CAST xmlbuffer);
+}
+
+#else /* HWLOC_HAVE_XML */
+
+int hwloc_topology_export_xml(hwloc_topology_t topology __hwloc_attribute_unused, const char *filename __hwloc_attribute_unused)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char **xmlbuffer __hwloc_attribute_unused, int *buflen __hwloc_attribute_unused)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer __hwloc_attribute_unused)
+{
+  /* nothing to do */
+}
 
 #endif /* HWLOC_HAVE_XML */
