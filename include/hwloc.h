@@ -922,8 +922,10 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  * \p xmlbuffer is allocated by the callee and should be freed with xmlFree later in the caller.
  *
  * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
+ *
+ * \return -1 if a failure occured.
  */
-HWLOC_DECLSPEC void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen);
+HWLOC_DECLSPEC int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen);
 
 /** \brief Add a MISC object to the topology
  *

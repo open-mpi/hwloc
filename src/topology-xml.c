@@ -918,7 +918,7 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 }
 
 /* this can be the first XML call */
-void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
+int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
   xmlDocPtr doc;
 
@@ -928,6 +928,8 @@ void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer
   doc = hwloc__topology_prepare_export(topology);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
+
+  return 0;
 }
 
 
