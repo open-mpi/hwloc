@@ -27,6 +27,8 @@ Version 1.4.0
 * Grouping by distances now also works when loading from XML.
 * hwloc_topology_export_xml() and export_xmlbuffer() now return an integer
   and may be called even if XML support is disabled (they return an error).
+  Also add hwloc_free_xmlbuffer() to free the buffer allocated by
+  hwloc_topology_export_xmlbuffer() without requiring XML support.
 * Improve XML-related error reporting.
 * Hide libxml2 error messages unless HWLOC_XML_VERBOSE=1.
 * Fix and/or document the behavior of most inline functions in hwloc/helper.h
