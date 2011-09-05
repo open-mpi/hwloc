@@ -17,6 +17,7 @@ sysfs_outputs = \
 		256ppc-8n8s4t.output \
 		256ppc-8n8s4t-nocache.output \
 		256ppc-8n8s4t-nosys.output \
+		32amd64-4s2n4c-cgroup.output \
 		32ppc-4n4c2c.output \
 		8amd64-4n2c.output  \
 		8em64t-4c2t.output \
@@ -60,6 +61,7 @@ sysfs_tarballs = \
 		256ppc-8n8s4t.tar.bz2 \
 		256ppc-8n8s4t-nocache.source \
 		256ppc-8n8s4t-nosys.source \
+		32amd64-4s2n4c-cgroup.tar.bz2 \
 		32ppc-4n4c2c.tar.bz2 \
 		8amd64-4n2c.tar.bz2  \
 		8em64t-4c2t.tar.bz2 \
