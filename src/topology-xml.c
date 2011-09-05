@@ -932,5 +932,18 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
   return 0;
 }
 
+#else /* HWLOC_HAVE_XML */
+
+int hwloc_topology_export_xml(hwloc_topology_t topology __hwloc_attribute_unused, const char *filename __hwloc_attribute_unused)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char **xmlbuffer __hwloc_attribute_unused, int *buflen __hwloc_attribute_unused)
+{
+  errno = ENOSYS;
+  return -1;
+}
 
 #endif /* HWLOC_HAVE_XML */
