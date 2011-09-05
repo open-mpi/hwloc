@@ -1272,13 +1272,13 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
     remove_empty(topology, pchild);
 
   if (obj->type != HWLOC_OBJ_NODE
+      && !obj->first_child /* only remove if all children were removed above, so that we don't remove parents of NUMAnode */
       && !hwloc_obj_type_is_io(obj->type)
-      && obj->cpuset /* FIXME: needed for PCI devices? */
       && hwloc_bitmap_iszero(obj->cpuset)) {
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
     print_object(topology, 0, obj);
-    unlink_and_free_object_and_children(pobj);
+    unlink_and_free_single_object(pobj);
   }
 }
 
