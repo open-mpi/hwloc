@@ -4,58 +4,63 @@
  */
 
 #include <hwloc.h>
-#include <private/autogen/config.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <assert.h>
-
-#ifdef HWLOC_HAVE_XML
-#include <libxml/xmlmemory.h>
-#endif
 
 /* mostly useful with valgrind, to check if backend cleanup properly */
 
 int main(void)
 {
   hwloc_topology_t topology;
-
-#ifdef HWLOC_HAVE_XML
   char *xmlbuf;
   int xmlbuflen;
   char xmlfile[] = "hwloc_backends.tmpxml.XXXXXX";
-  printf("exporting topology topology to XML buffer and file for later...\n");
+  int xmlbufok = 0, xmlfileok = 0;
+
+  printf("trying to export topology to XML buffer and file for later...\n");
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
-  hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen);
+  if (hwloc_topology_export_xmlbuffer(topology, &xmlbuf, &xmlbuflen) < 0)
+    printf("XML buffer export failed (%s), ignoring\n", strerror(errno));
+  else
+    xmlbufok = 1;
   mktemp(xmlfile);
-  hwloc_topology_export_xml(topology, xmlfile);
+  if (hwloc_topology_export_xml(topology, xmlfile) < 0)
+    printf("XML file export failed (%s), ignoring\n", strerror(errno));
+  else
+    xmlfileok = 1;
   hwloc_topology_destroy(topology);
-#endif
 
   printf("init...\n");
   hwloc_topology_init(&topology);
-#ifdef HWLOC_HAVE_XML
-  printf("switching to xml...\n");
-  hwloc_topology_set_xml(topology, xmlfile);
-  printf("switching to xmlbuffer...\n");
-  hwloc_topology_set_xmlbuffer(topology, xmlbuf, xmlbuflen);
-#endif
+  if (xmlfileok) {
+    printf("switching to xml...\n");
+    hwloc_topology_set_xml(topology, xmlfile);
+  }
+  if (xmlbufok) {
+    printf("switching to xmlbuffer...\n");
+    hwloc_topology_set_xmlbuffer(topology, xmlbuf, xmlbuflen);
+  }
   printf("switching to synthetic...\n");
   hwloc_topology_set_synthetic(topology, "machine:2 node:3 cache:2 pu:4");
   printf("switching sysfs fsroot...\n");
   hwloc_topology_set_fsroot(topology, "/");
 
-#ifdef HWLOC_HAVE_XML
-  printf("switching to xml and loading...\n");
-  hwloc_topology_set_xml(topology, xmlfile);
-  hwloc_topology_load(topology);
-  printf("switching to xmlbuffer and loading...\n");
-  hwloc_topology_set_xmlbuffer(topology, xmlbuf, xmlbuflen);
-  hwloc_topology_load(topology);
-#endif
+  if (xmlfileok) {
+    printf("switching to xml and loading...\n");
+    hwloc_topology_set_xml(topology, xmlfile);
+    hwloc_topology_load(topology);
+  }
+  if (xmlbufok) {
+    printf("switching to xmlbuffer and loading...\n");
+    hwloc_topology_set_xmlbuffer(topology, xmlbuf, xmlbuflen);
+    hwloc_topology_load(topology);
+  }
   printf("switching to synthetic and loading...\n");
   hwloc_topology_set_synthetic(topology, "machine:2 node:3 cache:2 pu:4");
   hwloc_topology_load(topology);
@@ -68,10 +73,10 @@ int main(void)
 
   hwloc_topology_destroy(topology);
 
-#ifdef HWLOC_HAVE_XML
-  xmlFree(BAD_CAST xmlbuf);
-  unlink(xmlfile);
-#endif
+  if (xmlbufok)
+    hwloc_free_xmlbuffer(topology, xmlbuf);
+  if (xmlfileok)
+    unlink(xmlfile);
 
   return 0;
 }
