@@ -43,8 +43,8 @@ int main(void)
     err = 1;
   }
 
-  xmlFree(BAD_CAST buf1);
-  xmlFree(BAD_CAST buf2);
+  hwloc_free_xmlbuffer(topology, buf1);
+  hwloc_free_xmlbuffer(topology, buf2);
 
   return err;
 }

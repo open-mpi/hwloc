@@ -292,19 +292,29 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
   return 0;
 }
 
+/* called when some objects have been removed because empty/ignored/cgroup/restrict,
+ * we must rebuild the list of objects from indexes (in hwloc_distances_finalize_os())
+ */
+void hwloc_distances_reset_os(struct hwloc_topology *topology)
+{
+  struct hwloc_os_distances_s * osdist;
+  for(osdist = topology->first_osdist; osdist; osdist = osdist->next) {
+    /* remove the objs array, we'll rebuild it from the indexes
+     * depending on remaining objects */
+    free(osdist->objs);
+    osdist->objs = NULL;
+  }
+}
+
+
 /* cleanup everything we created from distances so that we may rebuild them
  * at the end of restrict()
  */
 void hwloc_distances_restrict(struct hwloc_topology *topology, unsigned long flags)
 {
   if (flags & HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES) {
-    struct hwloc_os_distances_s * osdist;
-    for(osdist = topology->first_osdist; osdist; osdist = osdist->next) {
-      /* remove the objs array, we'll rebuild it from the indexes
-       * depending on remaining objects */
-      free(osdist->objs);
-      osdist->objs = NULL;
-    }
+    /* some objects may have been removed, clear objects arrays so that finalize_os rebuilds them properly */
+    hwloc_distances_reset_os(topology);
   } else {
     /* if not adapting distances, drop everything */
     hwloc_distances_destroy(topology);
@@ -439,6 +449,31 @@ void hwloc_distances_finalize_os(struct hwloc_topology *topology)
  * into exported logical distances attached to objects
  */
 
+static hwloc_obj_t
+hwloc_get_obj_covering_cpuset_nodeset(struct hwloc_topology *topology,
+				      hwloc_const_cpuset_t cpuset,
+				      hwloc_const_nodeset_t nodeset)
+{
+  hwloc_obj_t parent = hwloc_get_root_obj(topology), child;
+
+  assert(cpuset);
+  assert(nodeset);
+  assert(hwloc_bitmap_isincluded(cpuset, parent->cpuset));
+  assert(!nodeset || hwloc_bitmap_isincluded(nodeset, parent->nodeset));
+
+ trychildren:
+  child = parent->first_child;
+  while (child) {
+    if (hwloc_bitmap_isincluded(cpuset, child->cpuset)
+	&& (!child->nodeset || hwloc_bitmap_isincluded(nodeset, child->nodeset))) {
+      parent = child;
+      goto trychildren;
+    }
+    child = child->next_sibling;
+  }
+  return parent;
+}
+
 static void
 hwloc_distances__finalize_logical(struct hwloc_topology *topology,
 				  unsigned nbobjs,
@@ -448,18 +483,26 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
   float min = FLT_MAX, max = FLT_MIN;
   hwloc_obj_t root;
   float *matrix;
-  hwloc_cpuset_t set;
+  hwloc_cpuset_t cpuset;
+  hwloc_nodeset_t nodeset;
   unsigned relative_depth;
   int idx;
 
   /* find the root */
-  set = hwloc_bitmap_alloc();
-  for(i=0; i<nbobjs; i++)
-    hwloc_bitmap_or(set, set, objs[i]->cpuset);
-  root = hwloc_get_obj_covering_cpuset(topology, set);
+  cpuset = hwloc_bitmap_alloc();
+  nodeset = hwloc_bitmap_alloc();
+  for(i=0; i<nbobjs; i++) {
+    hwloc_bitmap_or(cpuset, cpuset, objs[i]->cpuset);
+    if (objs[i]->nodeset)
+      hwloc_bitmap_or(nodeset, nodeset, objs[i]->nodeset);
+  }
+  /* find the object covering cpuset AND nodeset (can't use hwloc_get_obj_covering_cpuset()) */
+  root = hwloc_get_obj_covering_cpuset_nodeset(topology, cpuset, nodeset);
   assert(root);
-  assert(hwloc_bitmap_isequal(set, root->cpuset));
-  hwloc_bitmap_free(set);
+  assert(hwloc_bitmap_isequal(cpuset, root->cpuset));
+  assert(hwloc_bitmap_isequal(nodeset, root->nodeset));
+  hwloc_bitmap_free(cpuset);
+  hwloc_bitmap_free(nodeset);
   relative_depth = objs[0]->depth - root->depth; /* this assume that we have distances between objects of the same level */
 
   /* get the logical index offset, it's the min of all logical indexes */

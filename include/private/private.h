@@ -155,6 +155,7 @@ struct hwloc_topology {
 #endif /* HWLOC_HAVE_XML */
     struct hwloc_backend_params_synthetic_s {
       /* synthetic backend parameters */
+      char *string;
 #define HWLOC_SYNTHETIC_MAX_DEPTH 128
       unsigned arity[HWLOC_SYNTHETIC_MAX_DEPTH];
       hwloc_obj_type_t type[HWLOC_SYNTHETIC_MAX_DEPTH];
@@ -359,6 +360,7 @@ extern void hwloc_distances_clear(struct hwloc_topology *topology);
 extern void hwloc_distances_destroy(struct hwloc_topology *topology);
 extern void hwloc_distances_set(struct hwloc_topology *topology, hwloc_obj_type_t type, unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances, int force);
 extern void hwloc_distances_set_from_env(struct hwloc_topology *topology);
+extern void hwloc_distances_reset_os(struct hwloc_topology *topology);
 extern void hwloc_distances_finalize_os(struct hwloc_topology *topology);
 extern void hwloc_distances_finalize_logical(struct hwloc_topology *topology);
 extern void hwloc_distances_restrict(struct hwloc_topology *topology, unsigned long flags);

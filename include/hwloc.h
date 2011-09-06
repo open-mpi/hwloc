@@ -553,7 +553,14 @@ HWLOC_DECLSPEC void hwloc_topology_destroy (hwloc_topology_t topology);
 
 /** \brief Run internal checks on a topology structure
  *
+ * The program aborts if an inconsistency is detected in the given topology.
+ *
  * \param topology is the topology to be checked
+ *
+ * \note This routine is only useful to developers.
+ *
+ * \note The input topology should have been previously loaded with
+ * hwloc_topology_load().
  */
 HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 
@@ -917,17 +924,23 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
  *
  * This file may be loaded later through hwloc_topology_set_xml().
  *
- * \return -1 if a failure occured.
+ * \return -1 if a failure occured or if XML is not supported.
  */
 HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
 
 /** \brief Export the topology into a newly-allocated XML memory buffer.
  *
- * \p xmlbuffer is allocated by the callee and should be freed with xmlFree later in the caller.
+ * \p xmlbuffer is allocated by the callee and should be freed with
+ * hwloc_free_xmlbuffer() later in the caller.
  *
  * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
+ *
+ * \return -1 if a failure occured or if XML is not supported.
  */
-HWLOC_DECLSPEC void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen);
+HWLOC_DECLSPEC int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen);
+
+/** \brief Free a buffer allocated by hwloc_topology_export_xmlbuffer() */
+HWLOC_DECLSPEC void hwloc_free_xmlbuffer(hwloc_topology_t topology, char *xmlbuffer);
 
 /** \brief Add a MISC object to the topology
  *

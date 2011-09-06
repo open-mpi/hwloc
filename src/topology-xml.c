@@ -721,8 +721,10 @@ hwloc__xml_export_object (hwloc_topology_t topology, hwloc_obj_t obj, xmlNodePtr
    * of root_node node. */
   node = xmlNewChild(root_node, NULL, BAD_CAST "object", NULL);
   xmlNewProp(node, BAD_CAST "type", BAD_CAST hwloc_obj_type_string(obj->type));
-  sprintf(tmp, "%d", obj->os_level);
-  xmlNewProp(node, BAD_CAST "os_level", BAD_CAST tmp);
+  if (obj->os_level != -1) {
+    sprintf(tmp, "%d", obj->os_level);
+    xmlNewProp(node, BAD_CAST "os_level", BAD_CAST tmp);
+  }
   if (obj->os_index != (unsigned) -1) {
     sprintf(tmp, "%u", obj->os_index);
     xmlNewProp(node, BAD_CAST "os_index", BAD_CAST tmp);
@@ -916,7 +918,7 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 }
 
 /* this can be the first XML call */
-void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
+int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
   xmlDocPtr doc;
 
@@ -926,7 +928,32 @@ void hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer
   doc = hwloc__topology_prepare_export(topology);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
   xmlFreeDoc(doc);
+
+  return 0;
 }
 
+void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer)
+{
+  xmlFree(BAD_CAST xmlbuffer);
+}
+
+#else /* HWLOC_HAVE_XML */
+
+int hwloc_topology_export_xml(hwloc_topology_t topology __hwloc_attribute_unused, const char *filename __hwloc_attribute_unused)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char **xmlbuffer __hwloc_attribute_unused, int *buflen __hwloc_attribute_unused)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer __hwloc_attribute_unused)
+{
+  /* nothing to do */
+}
 
 #endif /* HWLOC_HAVE_XML */

@@ -367,7 +367,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distributev.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_free.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_free.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_free_xmlbuffer.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_ancestor_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_ancestor_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_api_version.3 \

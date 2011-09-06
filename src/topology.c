@@ -720,7 +720,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 
       case HWLOC_OBJ_DIFFERENT:
 	/* Leave CHILD in CUR.  */
-	if (!put && hwloc_bitmap_compare_first(obj->cpuset, child->cpuset) < 0) {
+	if (!put && (!child->cpuset || hwloc_bitmap_compare_first(obj->cpuset, child->cpuset) < 0)) {
 	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
 	  *cur_children = obj;
 	  cur_children = &obj->next_sibling;
@@ -1330,13 +1330,13 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
     remove_empty(topology, pchild);
 
   if (obj->type != HWLOC_OBJ_NODE
+      && !obj->first_child /* only remove if all children were removed above, so that we don't remove parents of NUMAnode */
       && !hwloc_obj_type_is_io(obj->type)
-      && obj->cpuset /* FIXME: needed for PCI devices? */
       && hwloc_bitmap_iszero(obj->cpuset)) {
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
     print_object(topology, 0, obj);
-    unlink_and_free_object_and_children(pobj);
+    unlink_and_free_single_object(pobj);
   }
 }
 
@@ -2216,8 +2216,13 @@ hwloc_discover(struct hwloc_topology *topology)
   }
 
   /*
-   * Now that objects are numbered, take distance matrices from backends and put them in the main topology
+   * Now that objects are numbered, take distance matrices from backends and put them in the main topology.
+   *
+   * Some objects may have disappeared (in removed_empty or removed_ignored) since we setup os distances
+   * (hwloc_distances_finalize_os()) above. Reset them so as to not point to disappeared objects anymore.
    */
+  hwloc_distances_reset_os(topology);
+  hwloc_distances_finalize_os(topology);
   hwloc_distances_finalize_logical(topology);
 
   /*

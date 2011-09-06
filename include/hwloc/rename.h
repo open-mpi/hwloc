@@ -128,6 +128,7 @@ extern "C" {
 #define hwloc_topology_get_support HWLOC_NAME(topology_get_support)
 #define hwloc_topology_export_xml HWLOC_NAME(topology_export_xml)
 #define hwloc_topology_export_xmlbuffer HWLOC_NAME(topology_export_xmlbuffer)
+#define hwloc_free_xmlbuffer HWLOC_NAME(free_xmlbuffer)
 
 #define hwloc_topology_insert_misc_object_by_cpuset HWLOC_NAME(topology_insert_misc_object_by_cpuset)
 #define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
@@ -531,6 +532,7 @@ extern "C" {
 #define hwloc_distances_destroy HWLOC_NAME(distances_destroy)
 #define hwloc_distances_set HWLOC_NAME(distances_set)
 #define hwloc_distances_set_from_env HWLOC_NAME(distances_set_from_env)
+#define hwloc_distances_reset_os HWLOC_NAME(distances_reset_os)
 #define hwloc_distances_finalize_os HWLOC_NAME(distances_finalize_os)
 #define hwloc_distances_finalize_logical HWLOC_NAME(distances_finalize_logical)
 #define hwloc_distances_restrict HWLOC_NAME(distances_restrict)
