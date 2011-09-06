@@ -530,6 +530,7 @@ extern "C" {
 #define hwloc_distances_destroy HWLOC_NAME(distances_destroy)
 #define hwloc_distances_set HWLOC_NAME(distances_set)
 #define hwloc_distances_set_from_env HWLOC_NAME(distances_set_from_env)
+#define hwloc_distances_reset_os HWLOC_NAME(distances_reset_os)
 #define hwloc_distances_finalize_os HWLOC_NAME(distances_finalize_os)
 #define hwloc_distances_finalize_logical HWLOC_NAME(distances_finalize_logical)
 #define hwloc_distances_restrict HWLOC_NAME(distances_restrict)

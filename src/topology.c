@@ -2156,8 +2156,13 @@ hwloc_discover(struct hwloc_topology *topology)
   }
 
   /*
-   * Now that objects are numbered, take distance matrices from backends and put them in the main topology
+   * Now that objects are numbered, take distance matrices from backends and put them in the main topology.
+   *
+   * Some objects may have disappeared (in removed_empty or removed_ignored) since we setup os distances
+   * (hwloc_distances_finalize_os()) above. Reset them so as to not point to disappeared objects anymore.
    */
+  hwloc_distances_reset_os(topology);
+  hwloc_distances_finalize_os(topology);
   hwloc_distances_finalize_logical(topology);
 
   /*
