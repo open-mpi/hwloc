@@ -95,7 +95,7 @@ sysfs_tarballs = \
 		1alpha.tar.bz2 \
 		2arm-2c.tar.bz2
 
-# Each `xyz.output' may have a corresponding exclude `xyz.exclude'
+# Each output `xyz.output' may have a corresponding exclude `xyz.exclude'
 sysfs_excludes = \
 		256ppc-8n8s4t-nocache.exclude \
 		256ppc-8n8s4t-nosys.exclude
@@ -111,6 +111,11 @@ sysfs_options = \
 		16em64t-4s2c2t_merge.options \
 		16em64t-4s2c2t.xml.options
 
+# Each output `xyz.output' may have a corresponding `xyz.env'
+# modifying the environment of lsopo
+sysfs_envs = \
+		32amd64-4s2n4c-cgroup.env
+
 if HWLOC_BUILD_TESTS
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
@@ -119,7 +124,7 @@ endif HWLOC_HAVE_BUNZIPP
 endif HWLOC_HAVE_OPENAT
 endif HWLOC_BUILD_TESTS
 
-EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options)
+EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
 
 TESTS_ENVIRONMENT = $(builddir)/test-topology.sh
 
