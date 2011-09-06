@@ -18,6 +18,7 @@ sysfs_outputs = \
 		256ppc-8n8s4t-nocache.output \
 		256ppc-8n8s4t-nosys.output \
 		32amd64-4s2n4c-cgroup.output \
+		32amd64-4s2n4c-cgroup.xml.output \
 		32ppc-4n4c2c.output \
 		8amd64-4n2c.output  \
 		8em64t-4c2t.output \
@@ -62,6 +63,7 @@ sysfs_tarballs = \
 		256ppc-8n8s4t-nocache.source \
 		256ppc-8n8s4t-nosys.source \
 		32amd64-4s2n4c-cgroup.tar.bz2 \
+		32amd64-4s2n4c-cgroup.xml.source \
 		32ppc-4n4c2c.tar.bz2 \
 		8amd64-4n2c.tar.bz2  \
 		8em64t-4c2t.tar.bz2 \
@@ -109,12 +111,14 @@ sysfs_options = \
 		16em64t-4s2c2t-offlines_noadmin.options \
 		16em64t-4s2c2t_ncaches.options \
 		16em64t-4s2c2t_merge.options \
-		16em64t-4s2c2t.xml.options
+		16em64t-4s2c2t.xml.options \
+		32amd64-4s2n4c-cgroup.xml.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lsopo
 sysfs_envs = \
-		32amd64-4s2n4c-cgroup.env
+		32amd64-4s2n4c-cgroup.env \
+		32amd64-4s2n4c-cgroup.xml.env
 
 if HWLOC_BUILD_TESTS
 if HWLOC_HAVE_OPENAT
