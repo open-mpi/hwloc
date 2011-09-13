@@ -32,7 +32,6 @@ Version 1.4.0
 * Backend documentation enhancements.
 * lstopo -v -p now displays distance matrices with physical indexes.
 * Add hwloc-distances utility to list distances.
-* Support grouping from distances when imported from XML.
 
 
 Version 1.3.0
