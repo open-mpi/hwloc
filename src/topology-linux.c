@@ -2738,7 +2738,6 @@ struct hwloc_linux_cpuinfo_proc {
   long Lcore, Lsock;
 };
 
-#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 static int
 hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
 			  struct hwloc_linux_cpuinfo_proc ** Lprocs_p)
@@ -2827,9 +2826,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 {
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   /* P for physical/OS index, L for logical (e.g. in we order we get them, not in the final hwloc logical order) */
-  unsigned Lcore_to_Pcore[HWLOC_NBMAXCPUS];
-  unsigned Lcore_to_Psock[HWLOC_NBMAXCPUS]; /* needed because Lcore is equivalent to Pcore+Psock, not to Pcore alone */
-  unsigned Lsock_to_Psock[HWLOC_NBMAXCPUS];
+  unsigned *Lcore_to_Pcore;
+  unsigned *Lcore_to_Psock; /* needed because Lcore is equivalent to Pcore+Psock, not to Pcore alone */
+  unsigned *Lsock_to_Psock;
   unsigned numprocs;
   unsigned numsockets=0;
   unsigned numcores=0;
@@ -2845,6 +2844,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     return -1;
 
   /* initialize misc arrays, there can be at most numprocs entries */
+  Lcore_to_Pcore = malloc(numprocs * sizeof(*Lcore_to_Pcore));
+  Lcore_to_Psock = malloc(numprocs * sizeof(*Lcore_to_Psock));
+  Lsock_to_Psock = malloc(numprocs * sizeof(*Lsock_to_Psock));
   for (i = 0; i < numprocs; i++) {
     Lcore_to_Pcore[i] = -1;
     Lcore_to_Psock[i] = -1;
@@ -2952,6 +2954,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     hwloc_debug("%s", "\n");
   }
 
+  free(Lcore_to_Pcore);
+  free(Lcore_to_Psock);
+  free(Lsock_to_Psock);
   free(Lprocs);
 
   look_powerpc_device_tree(topology);
