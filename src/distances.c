@@ -292,10 +292,14 @@ int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topolog
   return 0;
 }
 
+/************************
+ * Restricting distances
+ */
+
 /* called when some objects have been removed because empty/ignored/cgroup/restrict,
  * we must rebuild the list of objects from indexes (in hwloc_distances_finalize_os())
  */
-void hwloc_distances_reset_os(struct hwloc_topology *topology)
+void hwloc_distances_restrict_os(struct hwloc_topology *topology)
 {
   struct hwloc_os_distances_s * osdist;
   for(osdist = topology->first_osdist; osdist; osdist = osdist->next) {
@@ -314,7 +318,7 @@ void hwloc_distances_restrict(struct hwloc_topology *topology, unsigned long fla
 {
   if (flags & HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES) {
     /* some objects may have been removed, clear objects arrays so that finalize_os rebuilds them properly */
-    hwloc_distances_reset_os(topology);
+    hwloc_distances_restrict_os(topology);
   } else {
     /* if not adapting distances, drop everything */
     hwloc_distances_destroy(topology);
