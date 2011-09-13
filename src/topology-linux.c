@@ -2770,7 +2770,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 
   if (!(fd=hwloc_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
     {
-      hwloc_debug("%s", "could not open /proc/cpuinfo\n");
+      hwloc_debug("could not open %s\n", path);
       return -1;
     }
 
@@ -2779,7 +2779,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 
   len = strlen(PHYSID) + 1 + 9 + 1 + 1;
   str = malloc(len);
-  hwloc_debug("%s", "\n\n * Topology extraction from /proc/cpuinfo *\n\n");
+  hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
   while (fgets(str,len,fd)!=NULL)
     {
 #      define getprocnb_begin(field, var)		     \
@@ -2789,14 +2789,14 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	var = strtoul(c,&endptr,0);			     \
 	if (endptr==c)							\
 	  {								\
-            hwloc_debug("%s", "no number in "field" field of /proc/cpuinfo\n"); \
+            hwloc_debug("no number in "field" field of %s\n", path); \
             hwloc_bitmap_free(cpuset);					\
             free(str);							\
             return -1;							\
 	  }								\
 	else if (var==ULONG_MAX)						\
 	  {								\
-            hwloc_debug("%s", "too big "field" number in /proc/cpuinfo\n"); \
+            hwloc_debug("too big "field" number in %s\n", path); \
             hwloc_bitmap_free(cpuset);					\
             free(str);							\
             return -1;							\
