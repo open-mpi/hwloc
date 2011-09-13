@@ -2727,46 +2727,29 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 }
 
 
-/* Look at Linux' /proc/cpuinfo */
-#      define PROCESSOR	"processor"
-#      define PACKAGEID "physical id"
-#      define COREID "core id"
+/* Gather Linux' cpuinfo into arrays */
 
 struct hwloc_linux_cpuinfo_proc {
+  /* set during hwloc_linux_parse_cpuinfo */
   unsigned long Pproc;
+  /* set during hwloc_linux_parse_cpuinfo or -1 if unknown*/
   long Pcore, Psock;
 };
 
 #define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 static int
-look_cpuinfo(struct hwloc_topology *topology, const char *path,
-	     hwloc_bitmap_t online_cpuset)
+hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
+			  struct hwloc_linux_cpuinfo_proc ** Lprocs_p,
+			  unsigned *Pproc_max_p)
 {
   FILE *fd;
   char *str = NULL;
   char *endptr;
   unsigned len;
-  /* P for physical/OS index, L for logical (e.g. in we order we get them, not in the final hwloc logical order) */
   unsigned allocated_Lprocs = 0;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
-  unsigned Pproc_to_Lcore[HWLOC_NBMAXCPUS];
-  unsigned Pproc_to_Lsock[HWLOC_NBMAXCPUS];
-  unsigned Pproc_to_Psock[HWLOC_NBMAXCPUS];
-  unsigned Lcore_to_Pcore[HWLOC_NBMAXCPUS];
-  unsigned Lcore_to_Psock[HWLOC_NBMAXCPUS];
-  unsigned Lsock_to_Psock[HWLOC_NBMAXCPUS];
-  unsigned numprocs=0;
-  unsigned numsockets=0;
-  unsigned numcores=0;
-  unsigned long Lproc;
-  unsigned Pproc_max=0;
-  unsigned missingsocket;
-  unsigned missingcore;
-  unsigned i;
-  hwloc_bitmap_t cpuset;
-  hwloc_obj_t obj;
-
-  /* parse the entire cpuinfo first, fill the Lprocs array and numprocs */
+  unsigned numprocs = 0;
+  unsigned Pproc_max = 0;
 
   if (!(fd=hwloc_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
     {
@@ -2774,6 +2757,9 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       return -1;
     }
 
+#      define PROCESSOR	"processor"
+#      define PACKAGEID "physical id" /* the longest one */
+#      define COREID "core id"
   len = strlen(PACKAGEID) + 1 + 9 + 1 + 1;
   str = malloc(len);
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
@@ -2831,6 +2817,36 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   fclose(fd);
   free(str);
 
+  *Lprocs_p = Lprocs;
+  *Pproc_max_p = Pproc_max;
+  return numprocs;
+}
+
+static int
+look_cpuinfo(struct hwloc_topology *topology, const char *path,
+	     hwloc_bitmap_t online_cpuset)
+{
+  struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
+  /* P for physical/OS index, L for logical (e.g. in we order we get them, not in the final hwloc logical order) */
+  unsigned Pproc_to_Lcore[HWLOC_NBMAXCPUS];
+  unsigned Pproc_to_Lsock[HWLOC_NBMAXCPUS];
+  unsigned Pproc_to_Psock[HWLOC_NBMAXCPUS];
+  unsigned Lcore_to_Pcore[HWLOC_NBMAXCPUS];
+  unsigned Lcore_to_Psock[HWLOC_NBMAXCPUS];
+  unsigned Lsock_to_Psock[HWLOC_NBMAXCPUS];
+  unsigned numprocs;
+  unsigned numsockets=0;
+  unsigned numcores=0;
+  unsigned long Lproc;
+  unsigned Pproc_max;
+  unsigned missingsocket;
+  unsigned missingcore;
+  unsigned i;
+  hwloc_bitmap_t cpuset;
+  hwloc_obj_t obj;
+
+  /* parse the entire cpuinfo first, fill the Lprocs array and numprocs */
+  numprocs = hwloc_linux_parse_cpuinfo(topology, path, &Lprocs, &Pproc_max);
   if (!numprocs)
     return -1;
 
