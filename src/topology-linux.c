@@ -2731,6 +2731,12 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 #      define PROCESSOR	"processor"
 #      define PACKAGEID "physical id"
 #      define COREID "core id"
+
+struct hwloc_linux_cpuinfo_proc {
+  unsigned long Pproc;
+  long Pcore, Psock;
+};
+
 #define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 static int
 look_cpuinfo(struct hwloc_topology *topology, const char *path,
@@ -2741,6 +2747,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   char *endptr;
   unsigned len;
   /* P for physical/OS index, L for logical (e.g. in we order we get them, not in the final hwloc logical order) */
+  unsigned allocated_Lprocs = 0;
+  struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   unsigned Pproc_to_Lcore[HWLOC_NBMAXCPUS];
   unsigned Pproc_to_Lsock[HWLOC_NBMAXCPUS];
   unsigned Pproc_to_Psock[HWLOC_NBMAXCPUS];
@@ -2750,15 +2758,83 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned numprocs=0;
   unsigned numsockets=0;
   unsigned numcores=0;
-  unsigned long Psock;
-  unsigned long Pcore;
-  unsigned long Pproc = (unsigned long) -1;
+  unsigned long Lproc;
   unsigned Pproc_max=0;
   unsigned missingsocket;
   unsigned missingcore;
   unsigned i;
   hwloc_bitmap_t cpuset;
   hwloc_obj_t obj;
+
+  /* parse the entire cpuinfo first, fill the Lprocs array and numprocs */
+
+  if (!(fd=hwloc_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
+    {
+      hwloc_debug("could not open %s\n", path);
+      return -1;
+    }
+
+  len = strlen(PACKAGEID) + 1 + 9 + 1 + 1;
+  str = malloc(len);
+  hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
+  while (fgets(str,len,fd)!=NULL)
+    {
+      unsigned long Psock, Pcore, Pproc;
+#      define getprocnb_begin(field, var)		     \
+      if ( !strncmp(field,str,strlen(field)))	     \
+	{						     \
+	char *c = strchr(str, ':')+1;		     \
+	var = strtoul(c,&endptr,0);			     \
+	if (endptr==c)							\
+	  {								\
+            hwloc_debug("no number in "field" field of %s\n", path); \
+            free(str);							\
+            return -1;							\
+	  }								\
+	else if (var==ULONG_MAX)						\
+	  {								\
+            hwloc_debug("too big "field" number in %s\n", path); \
+            free(str);							\
+            return -1;							\
+	  }								\
+	hwloc_debug(field " %lu\n", var)
+#      define getprocnb_end()			\
+      }
+      getprocnb_begin(PROCESSOR, Pproc);
+      numprocs++;
+      if (numprocs > allocated_Lprocs) {
+	if (!allocated_Lprocs)
+	  allocated_Lprocs = 8;
+	else
+	  allocated_Lprocs *= 2;
+	Lprocs = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
+      }
+      Lprocs[numprocs-1].Pproc = Pproc;
+      Lprocs[numprocs-1].Pcore = -1;
+      Lprocs[numprocs-1].Psock = -1;
+      if (Pproc >= Pproc_max)
+	Pproc_max = Pproc + 1;
+      getprocnb_end() else
+      getprocnb_begin(PACKAGEID, Psock);
+      Lprocs[numprocs-1].Psock = Psock;
+      getprocnb_end() else
+      getprocnb_begin(COREID, Pcore);
+      Lprocs[numprocs-1].Pcore = Pcore;
+      getprocnb_end()
+      if (str[strlen(str)-1]!='\n') {
+	/* ignore end of line */
+	if (fscanf(fd,"%*[^\n]") == EOF)
+	  break;
+	getc(fd);
+      }
+    }
+  fclose(fd);
+  free(str);
+
+  if (!numprocs)
+    return -1;
+
+  /* everything else now */
 
   for (i = 0; i < HWLOC_NBMAXCPUS; i++) {
     Pproc_to_Lcore[i] = -1;
@@ -2769,96 +2845,21 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     Lsock_to_Psock[i] = -1;
   }
 
-  if (!(fd=hwloc_fopen(path,"r", topology->backend_params.sysfs.root_fd)))
-    {
-      hwloc_debug("could not open %s\n", path);
-      return -1;
-    }
-
   cpuset = hwloc_bitmap_alloc();
-  /* Just record information and count number of sockets and cores */
 
-  len = strlen(PACKAGEID) + 1 + 9 + 1 + 1;
-  str = malloc(len);
-  hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
-  while (fgets(str,len,fd)!=NULL)
-    {
-#      define getprocnb_begin(field, var)		     \
-      if ( !strncmp(field,str,strlen(field)))	     \
-	{						     \
-	char *c = strchr(str, ':')+1;		     \
-	var = strtoul(c,&endptr,0);			     \
-	if (endptr==c)							\
-	  {								\
-            hwloc_debug("no number in "field" field of %s\n", path); \
-            hwloc_bitmap_free(cpuset);					\
-            free(str);							\
-            return -1;							\
-	  }								\
-	else if (var==ULONG_MAX)						\
-	  {								\
-            hwloc_debug("too big "field" number in %s\n", path); \
-            hwloc_bitmap_free(cpuset);					\
-            free(str);							\
-            return -1;							\
-	  }								\
-	hwloc_debug(field " %lu\n", var)
-#      define getprocnb_end()			\
-      }
-      getprocnb_begin(PROCESSOR, Pproc);
-      hwloc_bitmap_set(cpuset, Pproc);
-
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, Pproc);
-      obj->cpuset = hwloc_bitmap_alloc();
-      hwloc_bitmap_only(obj->cpuset, Pproc);
-
-      hwloc_debug_2args_bitmap("cpu %u (os %lu) has cpuset %s\n",
-			       numprocs, Pproc, obj->cpuset);
-      numprocs++;
-      hwloc_insert_object_by_cpuset(topology, obj);
-
-      getprocnb_end() else
-      getprocnb_begin(PACKAGEID, Psock);
-      Pproc_to_Psock[Pproc] = Psock;
-      for (i=0; i<numsockets; i++)
-	if (Psock == Lsock_to_Psock[i])
-	  break;
-      Pproc_to_Lsock[Pproc] = i;
-      hwloc_debug("%lu on socket %u (%lx)\n", Pproc, i, Psock);
-      if (i==numsockets)
-	Lsock_to_Psock[(numsockets)++] = Psock;
-      getprocnb_end() else
-      getprocnb_begin(COREID, Pcore);
-      for (i=0; i<numcores; i++)
-	if (Pcore == Lcore_to_Pcore[i] && Pproc_to_Psock[Pproc] == Lcore_to_Psock[i])
-	  break;
-      Pproc_to_Lcore[Pproc] = i;
-      if (i==numcores)
-	{
-	  Lcore_to_Psock[numcores] = Pproc_to_Psock[Pproc];
-	  Lcore_to_Pcore[numcores] = Pcore;
-	  (numcores)++;
-	}
-      getprocnb_end()
-	if (str[strlen(str)-1]!='\n')
-	  {
-            /* ignore end of line */
-	    if (fscanf(fd,"%*[^\n]") == EOF)
-	      break;
-	    getc(fd);
-	  }
-    }
-  fclose(fd);
-  free(str);
-
-  if (Pproc == (unsigned long) -1) {
-    hwloc_bitmap_free(cpuset);
-    return -1;
+  /* create PU objects */
+  for(Lproc=0; Lproc<numprocs; Lproc++) {
+    unsigned long Pproc = Lprocs[Lproc].Pproc;
+    hwloc_bitmap_set(cpuset, Pproc);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, Pproc);
+    obj->cpuset = hwloc_bitmap_alloc();
+    hwloc_bitmap_only(obj->cpuset, Pproc);
+    hwloc_debug_2args_bitmap("cpu %lu (os %lu) has cpuset %s\n",
+			     Lproc, Pproc, obj->cpuset);
+    hwloc_insert_object_by_cpuset(topology, obj);
   }
 
   topology->support.discovery->pu = 1;
-  /* setup the final number of procs */
-  Pproc_max = Pproc + 1;
   hwloc_bitmap_copy(online_cpuset, cpuset);
   hwloc_bitmap_free(cpuset);
 
@@ -2868,30 +2869,70 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_debug("%s", "\n * Topology summary *\n");
   hwloc_debug("%u processors (%u max id)\n", numprocs, Pproc_max);
 
+  /* prepare Socket arrays */
+  for(Lproc=0; Lproc<numprocs; Lproc++) {
+    long Psock = Lprocs[Lproc].Psock;
+    if (Psock != -1) {
+      unsigned long Pproc = Lprocs[Lproc].Pproc;
+      Pproc_to_Psock[Pproc] = Psock;
+      for (i=0; i<numsockets; i++)
+	if (Psock == Lsock_to_Psock[i])
+	  break;
+      Pproc_to_Lsock[Pproc] = i;
+      hwloc_debug("%lu on socket %u (%lx)\n", Pproc, i, Psock);
+      if (i==numsockets) {
+	Lsock_to_Psock[numsockets] = Psock;
+	numsockets++;
+      }
+    }
+  }
   /* Some buggy Linuxes don't provide numbers for processor 0, which makes us
    * provide bogus information. We should rather drop it. */
   missingsocket=0;
-  missingcore=0;
-  hwloc_bitmap_foreach_begin(Pproc, online_cpuset)
-    if (Pproc_to_Lsock[Pproc] == (unsigned) -1)
+  hwloc_bitmap_foreach_begin(i, online_cpuset)
+    if (Pproc_to_Lsock[i] == (unsigned) -1) {
       missingsocket=1;
-    if (Pproc_to_Lcore[Pproc] == (unsigned) -1)
-      missingcore=1;
-    if (missingcore && missingsocket)
-      /* No usable information, no need to continue */
       break;
+    }
   hwloc_bitmap_foreach_end();
-
+  /* create Socket objects */
   hwloc_debug("%u sockets%s\n", numsockets, missingsocket ? ", but some missing socket" : "");
   if (!missingsocket && numsockets>0)
     hwloc_setup_level(Pproc_max, numsockets, Lsock_to_Psock, Pproc_to_Lsock, topology, HWLOC_OBJ_SOCKET);
 
-  look_powerpc_device_tree(topology);
-
+  /* prepare Core arrays (depends on Socket arrays) */
+  for(Lproc=0; Lproc<numprocs; Lproc++) {
+    long Pcore = Lprocs[Lproc].Pcore;
+    if (Pcore != -1) {
+      unsigned long Pproc = Lprocs[Lproc].Pproc;
+      for (i=0; i<numcores; i++)
+	if (Pcore == Lcore_to_Pcore[i] && Pproc_to_Psock[Pproc] == Lcore_to_Psock[i])
+	  break;
+      Pproc_to_Lcore[Pproc] = i;
+      if (i==numcores) {
+	Lcore_to_Psock[numcores] = Pproc_to_Psock[Pproc];
+	Lcore_to_Pcore[numcores] = Pcore;
+	numcores++;
+      }
+    }
+  }
+  /* Some buggy Linuxes don't provide numbers for processor 0, which makes us
+   * provide bogus information. We should rather drop it. */
+  missingcore=0;
+  hwloc_bitmap_foreach_begin(i, online_cpuset)
+    if (Pproc_to_Lcore[i] == (unsigned) -1) {
+      missingcore=1;
+      break;
+    }
+  hwloc_bitmap_foreach_end();
+  /* create Core objects */
   hwloc_debug("%u cores%s\n", numcores, missingcore ? ", but some missing core" : "");
   if (!missingcore && numcores>0)
     hwloc_setup_level(Pproc_max, numcores, Lcore_to_Pcore, Pproc_to_Lcore, topology, HWLOC_OBJ_CORE);
 
+  free(Lprocs);
+
+  look_powerpc_device_tree(topology);
   return 0;
 }
 
