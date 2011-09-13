@@ -2734,6 +2734,8 @@ struct hwloc_linux_cpuinfo_proc {
   unsigned long Pproc;
   /* set during hwloc_linux_parse_cpuinfo or -1 if unknown*/
   long Pcore, Psock;
+  /* set later, or -1 if unknown */
+  long Lcore, Lsock;
 };
 
 #define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
@@ -2798,6 +2800,8 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
       Lprocs[numprocs-1].Pproc = Pproc;
       Lprocs[numprocs-1].Pcore = -1;
       Lprocs[numprocs-1].Psock = -1;
+      Lprocs[numprocs-1].Lcore = -1;
+      Lprocs[numprocs-1].Lsock = -1;
       if (Pproc >= Pproc_max)
 	Pproc_max = Pproc + 1;
       getprocnb_end() else
@@ -2894,6 +2898,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (Psock == Lsock_to_Psock[i])
 	  break;
       Pproc_to_Lsock[Pproc] = i;
+      Lprocs[Lproc].Lsock = i;
       hwloc_debug("%lu on socket %u (%lx)\n", Pproc, i, Psock);
       if (i==numsockets) {
 	Lsock_to_Psock[numsockets] = Psock;
@@ -2934,6 +2939,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	if (Pcore == Lcore_to_Pcore[i] && Pproc_to_Psock[Pproc] == Lcore_to_Psock[i])
 	  break;
       Pproc_to_Lcore[Pproc] = i;
+      Lprocs[Lproc].Lcore = i;
       if (i==numcores) {
 	Lcore_to_Psock[numcores] = Pproc_to_Psock[Pproc];
 	Lcore_to_Pcore[numcores] = Pcore;
