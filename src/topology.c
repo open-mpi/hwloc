@@ -1978,7 +1978,7 @@ hwloc_discover(struct hwloc_topology *topology)
 
 #    ifdef HWLOC_LINUX_SYS
 #      define HAVE_OS_SUPPORT
-    hwloc_look_linux(topology);
+    hwloc_look_linuxfs(topology);
 #    endif /* HWLOC_LINUX_SYS */
 
 #    ifdef HWLOC_AIX_SYS
@@ -2176,7 +2176,7 @@ hwloc_discover(struct hwloc_topology *topology)
 
   if (topology->is_thissystem) {
 #    ifdef HWLOC_LINUX_SYS
-    hwloc_set_linux_hooks(topology);
+    hwloc_set_linuxfs_hooks(topology);
 #    endif /* HWLOC_LINUX_SYS */
 
 #    ifdef HWLOC_AIX_SYS
@@ -2379,8 +2379,8 @@ hwloc_backend_exit(struct hwloc_topology *topology)
 {
   switch (topology->backend_type) {
 #ifdef HWLOC_LINUX_SYS
-  case HWLOC_BACKEND_SYSFS:
-    hwloc_backend_sysfs_exit(topology);
+  case HWLOC_BACKEND_LINUXFS:
+    hwloc_backend_linuxfs_exit(topology);
     break;
 #endif
 #ifdef HWLOC_HAVE_XML
@@ -2411,7 +2411,7 @@ hwloc_topology_set_fsroot(struct hwloc_topology *topology, const char *fsroot_pa
   hwloc_backend_exit(topology);
 
 #ifdef HWLOC_LINUX_SYS
-  if (hwloc_backend_sysfs_init(topology, fsroot_path) < 0)
+  if (hwloc_backend_linuxfs_init(topology, fsroot_path) < 0)
     return -1;
   return 0;
 #else /* HWLOC_LINUX_SYS */
@@ -2581,7 +2581,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
     char *fsroot_path_env = getenv("HWLOC_FORCE_FSROOT");
     if (fsroot_path_env) {
       hwloc_backend_exit(topology);
-      hwloc_backend_sysfs_init(topology, fsroot_path_env);
+      hwloc_backend_linuxfs_init(topology, fsroot_path_env);
     }
   }
 #endif
@@ -2600,7 +2600,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
     char *fsroot_path_env = getenv("HWLOC_FSROOT");
     if (fsroot_path_env)
-      hwloc_backend_sysfs_init(topology, fsroot_path_env);
+      hwloc_backend_linuxfs_init(topology, fsroot_path_env);
   }
 #endif
 #ifdef HWLOC_HAVE_XML
@@ -2619,7 +2619,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* if we haven't chosen the backend, set the OS-specific one if needed */
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
 #ifdef HWLOC_LINUX_SYS
-    if (hwloc_backend_sysfs_init(topology, "/") < 0)
+    if (hwloc_backend_linuxfs_init(topology, "/") < 0)
       return -1;
 #endif
   }

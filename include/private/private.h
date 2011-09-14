@@ -45,7 +45,7 @@ typedef enum hwloc_backend_e {
   HWLOC_BACKEND_NONE,
   HWLOC_BACKEND_SYNTHETIC,
 #ifdef HWLOC_LINUX_SYS
-  HWLOC_BACKEND_SYSFS,
+  HWLOC_BACKEND_LINUXFS,
 #endif
 #ifdef HWLOC_HAVE_XML
   HWLOC_BACKEND_XML,
@@ -130,11 +130,11 @@ struct hwloc_topology {
   hwloc_backend_t backend_type;
   union hwloc_backend_params_u {
 #ifdef HWLOC_LINUX_SYS
-    struct hwloc_backend_params_sysfs_s {
-      /* sysfs backend parameters */
+    struct hwloc_backend_params_linuxfs_s {
+      /* FS root parameters */
       char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-    } sysfs;
+    } linuxfs;
 #endif /* HWLOC_LINUX_SYS */
 #if defined(HWLOC_OSF_SYS) || defined(HWLOC_COMPILE_PORTS)
     struct hwloc_backend_params_osf {
@@ -174,10 +174,10 @@ extern int hwloc_connect_levels(hwloc_topology_t topology);
 
 
 #if defined(HWLOC_LINUX_SYS)
-extern void hwloc_look_linux(struct hwloc_topology *topology);
-extern void hwloc_set_linux_hooks(struct hwloc_topology *topology);
-extern int hwloc_backend_sysfs_init(struct hwloc_topology *topology, const char *fsroot_path);
-extern void hwloc_backend_sysfs_exit(struct hwloc_topology *topology);
+extern void hwloc_look_linuxfs(struct hwloc_topology *topology);
+extern void hwloc_set_linuxfs_hooks(struct hwloc_topology *topology);
+extern int hwloc_backend_linuxfs_init(struct hwloc_topology *topology, const char *fsroot_path);
+extern void hwloc_backend_linuxfs_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_LINUX_SYS */
 
 #ifdef HWLOC_HAVE_XML
