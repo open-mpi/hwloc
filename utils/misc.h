@@ -20,7 +20,7 @@ extern void usage(const char *name, FILE *where);
 static __hwloc_inline void
 hwloc_utils_input_format_usage(FILE *where, int addspaces)
 {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
   fprintf (where, "  --input <XML file>\n");
   fprintf (where, "  -i <XML file>   %*sRead topology from XML file <path>\n",
 	   addspaces, " ");
@@ -39,7 +39,7 @@ hwloc_utils_input_format_usage(FILE *where, int addspaces)
 	   addspaces, " ");
   fprintf (where, "  --input-format <format>\n");
   fprintf (where, "  --if <format>   %*sEnforce input format among "
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
 	   "xml, "
 #endif
 #ifdef HWLOC_LINUX_SYS
@@ -165,17 +165,17 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
 
   switch (input_format) {
   case HWLOC_UTILS_INPUT_XML:
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
     if (!strcmp(input, "-"))
       input = "/dev/stdin";
     if (hwloc_topology_set_xml(topology, input)) {
       perror("Setting source XML file");
       return EXIT_FAILURE;
     }
-#else /* HWLOC_HAVE_XML */
+#else /* HWLOC_HAVE_LIBXML2 */
     fprintf(stderr, "This installation of hwloc does not support XML, sorry.\n");
     exit(EXIT_FAILURE);
-#endif /* HWLOC_HAVE_XML */
+#endif /* HWLOC_HAVE_LIBXML2 */
     break;
 
   case HWLOC_UTILS_INPUT_FSROOT:

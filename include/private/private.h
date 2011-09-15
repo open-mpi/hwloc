@@ -141,9 +141,9 @@ struct hwloc_topology {
 #endif /* HWLOC_OSF_SYS */
     struct hwloc_backend_params_xml_s {
       /* xml backend parameters */
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
       void *doc;
-#endif /* HWLOC_HAVE_XML */
+#endif /* HWLOC_HAVE_LIBXML2 */
       char *buffer; /* only used when not using libxml2 */
       struct hwloc_xml_imported_distances_s {
 	hwloc_obj_t root;

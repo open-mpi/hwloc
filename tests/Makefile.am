@@ -68,9 +68,9 @@ if HWLOC_HAVE_CUDART
 check_PROGRAMS += cudart
 endif HWLOC_HAVE_CUDART
 
-if HWLOC_HAVE_XML
+if HWLOC_HAVE_LIBXML2
 check_PROGRAMS += xmlbuffer
-endif HWLOC_HAVE_XML
+endif HWLOC_HAVE_LIBXML2
 
 TESTS = $(check_PROGRAMS)
 
@@ -89,8 +89,8 @@ openfabrics_verbs_LDFLAGS = -libverbs
 myriexpress_LDFLAGS = -lmyriexpress
 cuda_LDFLAGS = -lcuda
 cudart_LDFLAGS = -lcuda -lcudart
-xmlbuffer_LDFLAGS = $(HWLOC_XML_LIBS)
-hwloc_backends_LDFLAGS = $(HWLOC_XML_LIBS)
+xmlbuffer_LDFLAGS = $(HWLOC_LIBXML2_LIBS)
+hwloc_backends_LDFLAGS = $(HWLOC_LIBXML2_LIBS)
 if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
 endif !HWLOC_HAVE_WINDOWS

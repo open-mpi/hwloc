@@ -18,9 +18,9 @@ xml_inputs = \
 # Only run the tests if we're building standalone, because the tests
 # call hwloc executables.
 if HWLOC_BUILD_TESTS
-if HWLOC_HAVE_XML
+if HWLOC_HAVE_LIBXML2
 TESTS = $(xml_inputs)
-endif HWLOC_HAVE_XML
+endif HWLOC_HAVE_LIBXML2
 endif HWLOC_BUILD_TESTS
 
 EXTRA_DIST = $(xml_inputs)

@@ -14,12 +14,12 @@
 #include <assert.h>
 #include <strings.h>
 
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #endif
 
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
 static void hwloc_libxml2_error_callback(void * ctx __hwloc_attribute_unused, const char * msg __hwloc_attribute_unused, ...) { /* do nothing */ }
 
 static void
@@ -45,7 +45,7 @@ hwloc_libxml2_disable_stderrwarnings(void)
 int
 hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
 {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
   char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
   if (!env || !atoi(env)) {
     xmlDoc *doc = NULL;
@@ -70,7 +70,7 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
     topology->backend_params.xml.buffer = NULL;
     topology->backend_params.xml.doc = doc;
   } else
-#endif /* HWLOC_HAVE_XML */
+#endif /* HWLOC_HAVE_LIBXML2 */
   if (xmlbuffer) {
     topology->backend_params.xml.buffer = malloc(xmlbuflen);
     memcpy(topology->backend_params.xml.buffer, xmlbuffer, xmlbuflen);
@@ -121,7 +121,7 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
 void
 hwloc_backend_xml_exit(struct hwloc_topology *topology)
 {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
   char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
   if (!env || !atoi(env)) {
     xmlFreeDoc((xmlDoc*)topology->backend_params.xml.doc);
@@ -414,7 +414,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
  ********* XML import (libxml2 routines) ********
  ************************************************/
 
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
 static void hwloc__libxml_import_node(struct hwloc_topology *topology, struct hwloc_obj *parent, xmlNode *node, int depth);
 
 static const xmlChar *
@@ -692,7 +692,7 @@ hwloc__libxml_import_topology_node(struct hwloc_topology *topology, xmlNode *nod
   if (node->children)
     hwloc__libxml_import_node(topology, NULL, node->children, 0);
 }
-#endif /* HWLOC_HAVE_XML */
+#endif /* HWLOC_HAVE_LIBXML2 */
 
 /***************************************************
  ********* XML import (NO-libxml2 routines) ********
@@ -1069,7 +1069,7 @@ hwloc_xml__handle_distances(struct hwloc_topology *topology)
 void
 hwloc_look_xml(struct hwloc_topology *topology)
 {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
   char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
   if (!env || !atoi(env)) {
     xmlNode* root_node;
@@ -1088,7 +1088,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
     if (root_node->next)
       fprintf(stderr, "ignoring non-first root nodes\n");
   } else
-#endif /* HWLOC_HAVE_XML */
+#endif /* HWLOC_HAVE_LIBXML2 */
   {
     char *buffer = topology->backend_params.xml.buffer;
     char *tag, *attr, *remaining;
@@ -1142,7 +1142,7 @@ typedef struct hwloc__xml_export_output_s {
   size_t remaining;
   unsigned indent;
   /* only useful if not using libxml */
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
   xmlNodePtr current_node;
 #endif
 } * hwloc__xml_export_output_t;
@@ -1163,7 +1163,7 @@ static void
 hwloc__xml_export_new_child(hwloc__xml_export_output_t output, const char *name)
 {
   if (output->use_libxml) {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
     output->current_node = xmlNewChild(output->current_node, NULL, BAD_CAST name, NULL);
 #else
     assert(0);
@@ -1222,7 +1222,7 @@ static void
 hwloc__xml_export_new_prop(hwloc__xml_export_output_t output, const char *name, const char *value)
 {
   if (output->use_libxml) {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
     xmlNewProp(output->current_node, BAD_CAST name, BAD_CAST value);
 #else
     assert(0);
@@ -1239,7 +1239,7 @@ static void
 hwloc__xml_export_end_props(hwloc__xml_export_output_t output)
 {
   if (output->use_libxml) {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
     /* nothing to do */
 #else
     assert(0);
@@ -1254,7 +1254,7 @@ static void
 hwloc__xml_export_end_child(hwloc__xml_export_output_t output, const char *name)
 {
   if (output->use_libxml) {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
     output->current_node = output->current_node->parent;
 #else
     assert(0);
@@ -1436,7 +1436,7 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
  ********* XML export (libxml2 routines) ********
  ************************************************/
 
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
 /* libxml2 specific export preparation */
 static xmlDocPtr
 hwloc__libxml2_prepare_export(hwloc_topology_t topology)
@@ -1462,7 +1462,7 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
 
   return doc;
 }
-#endif /* HWLOC_HAVE_XML */
+#endif /* HWLOC_HAVE_LIBXML2 */
 
 /***************************************************
  ********* XML export (NO-libxml2 routines) ********
@@ -1518,7 +1518,7 @@ hwloc__nolibxml_prepare_export(hwloc_topology_t topology, char **bufferp, int *b
 /* this can be the first XML call */
 int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
   char *env = getenv("HWLOC_NO_LIBXML_EXPORT");
   if (!env || !atoi(env)) {
     xmlDocPtr doc;
@@ -1565,7 +1565,7 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 /* this can be the first XML call */
 int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
   char *env = getenv("HWLOC_NO_LIBXML_EXPORT");
   if (!env || !atoi(env)) {
     xmlDocPtr doc = hwloc__libxml2_prepare_export(topology);
@@ -1581,7 +1581,7 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 
 void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer)
 {
-#ifdef HWLOC_HAVE_XML
+#ifdef HWLOC_HAVE_LIBXML2
   char *env = getenv("HWLOC_NO_LIBXML_EXPORT");
   if (!env || !atoi(env)) {
     xmlFree(BAD_CAST xmlbuffer);
