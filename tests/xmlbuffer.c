@@ -6,8 +6,6 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <libxml/xmlstring.h>
-#include <libxml/xmlmemory.h>
 #include <hwloc.h>
 
 int main(void)

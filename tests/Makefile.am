@@ -42,7 +42,8 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_insert_misc \
 	hwloc_topology_restrict \
 	hwloc_obj_infos \
-	hwloc_iodevs
+	hwloc_iodevs \
+	xmlbuffer
 
 if HWLOC_HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma
@@ -67,10 +68,6 @@ endif HWLOC_HAVE_CUDA
 if HWLOC_HAVE_CUDART
 check_PROGRAMS += cudart
 endif HWLOC_HAVE_CUDART
-
-if HWLOC_HAVE_LIBXML2
-check_PROGRAMS += xmlbuffer
-endif HWLOC_HAVE_LIBXML2
 
 TESTS = $(check_PROGRAMS)
 
