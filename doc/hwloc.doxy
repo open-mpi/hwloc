@@ -141,9 +141,11 @@ and build.
 
 The hwloc core may also benefit from the following development packages:
 <ul>
-<li>libxml2 for XML import/export (also needed for lstopo XML support).</li>
 <li>pciutils (libpci) for I/O discovery.</li>
 <li>libnuma for memory binding and migration support on Linux.</li>
+<li>libxml2 for full XML import/export support (otherwise, the
+    internal minimalistic parser will only be able to import
+    XML files that were exported by the same hwloc release).</li>
 </ul>
 
 
@@ -862,7 +864,7 @@ following environment variables.
 
 <dt>HWLOC_XML_VERBOSE=1</dt>
   <dd>enable XML verbose messages.
-  hwloc uses the libxml2 library for importing/exporting topologies
+  When available, hwloc uses the libxml2 library for importing/exporting topologies
   to XML files or buffers. This library can emit some error messages
   to the error output stream. Enabling these verbose messages within
   hwloc can be useful for understanding failures to parse input XML
