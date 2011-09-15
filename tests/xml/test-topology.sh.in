@@ -48,6 +48,8 @@ file="$tmp/lstopo_xml.output.xml"
 set -e
 $lstopo --if xml --input "$1" --of xml "$file"
 
+sed -r -e 'N;s@<([^ >]+)([^>]*)>[ \n]*</\1>@<\1\2/>@' -i "$file"
+
 if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
 then
     diff @HWLOC_DIFF_U@ "$1" "$file"
