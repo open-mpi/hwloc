@@ -1922,10 +1922,8 @@ hwloc_discover(struct hwloc_topology *topology)
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     alloc_cpusets(topology->levels[0][0]);
     hwloc_look_synthetic(topology);
-#ifdef HWLOC_HAVE_LIBXML2
   } else if (topology->backend_type == HWLOC_BACKEND_XML) {
     hwloc_look_xml(topology);
-#endif
   } else {
 
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
@@ -2125,11 +2123,9 @@ hwloc_discover(struct hwloc_topology *topology)
     if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
       /* TODO */
     }
-#ifdef HWLOC_HAVE_LIBXML2
     else if (topology->backend_type == HWLOC_BACKEND_XML) {
       /* TODO */
     }
-#endif
 #ifdef HWLOC_HAVE_LIBPCI
     else if (topology->is_thissystem) {
       hwloc_look_libpci(topology);
@@ -2383,11 +2379,9 @@ hwloc_backend_exit(struct hwloc_topology *topology)
     hwloc_backend_linuxfs_exit(topology);
     break;
 #endif
-#ifdef HWLOC_HAVE_LIBXML2
   case HWLOC_BACKEND_XML:
     hwloc_backend_xml_exit(topology);
     break;
-#endif
   case HWLOC_BACKEND_SYNTHETIC:
     hwloc_backend_synthetic_exit(topology);
     break;
@@ -2436,12 +2430,7 @@ hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
-#ifdef HWLOC_HAVE_LIBXML2
   return hwloc_backend_xml_init(topology, xmlpath, NULL, 0);
-#else /* HWLOC_HAVE_LIBXML2 */
-  errno = ENOSYS;
-  return -1;
-#endif /* !HWLOC_HAVE_LIBXML2 */
 }
 
 int
@@ -2452,12 +2441,7 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology __hwloc_attribute_u
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
-#ifdef HWLOC_HAVE_LIBXML2
   return hwloc_backend_xml_init(topology, NULL, xmlbuffer, size);
-#else /* HWLOC_HAVE_LIBXML2 */
-  errno = ENOSYS;
-  return -1;
-#endif /* !HWLOC_HAVE_LIBXML2 */
 }
 
 int
@@ -2585,7 +2569,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
     }
   }
 #endif
-#ifdef HWLOC_HAVE_LIBXML2
   {
     char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
     if (xmlpath_env) {
@@ -2593,7 +2576,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_xml_init(topology, xmlpath_env, NULL, 0);
     }
   }
-#endif
 
   /* only apply non-FORCE variables if we have not changed the backend yet */
 #ifdef HWLOC_LINUX_SYS
@@ -2603,13 +2585,11 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_linuxfs_init(topology, fsroot_path_env);
   }
 #endif
-#ifdef HWLOC_HAVE_LIBXML2
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
     char *xmlpath_env = getenv("HWLOC_XMLFILE");
     if (xmlpath_env)
       hwloc_backend_xml_init(topology, xmlpath_env, NULL, 0);
   }
-#endif
 
   /* always apply non-FORCE THISSYSTEM since it was explicitly designed to override setups from other backends */
   local_env = getenv("HWLOC_THISSYSTEM");
