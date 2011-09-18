@@ -73,7 +73,7 @@ do_run()
 
   if [ -n "@XMLLINT@" ]
   then
-    cp "$HWLOC_top_srcdir"/src/hwloc.dtd "$tmp/"
+    cp -f "$HWLOC_top_srcdir"/src/hwloc.dtd "$tmp/"
     @XMLLINT@ --valid "$file" > /dev/null
   fi
 
