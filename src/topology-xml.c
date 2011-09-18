@@ -19,6 +19,20 @@
 #include <libxml/tree.h>
 #endif
 
+static int
+hwloc__xml_verbose(void)
+{
+  static int first = 1;
+  static int verbose = 0;
+  if (first) {
+    char *env = getenv("HWLOC_XML_VERBOSE");
+    if (env)
+      verbose = atoi(env);
+    first = 0;
+  }
+  return verbose;
+}
+
 #ifdef HWLOC_HAVE_LIBXML2
 static void hwloc_libxml2_error_callback(void * ctx __hwloc_attribute_unused, const char * msg __hwloc_attribute_unused, ...) { /* do nothing */ }
 
@@ -27,11 +41,7 @@ hwloc_libxml2_disable_stderrwarnings(void)
 {
   static int first = 1;
   if (first) {
-    static int verbose = 0;
-    char *env = getenv("HWLOC_XML_VERBOSE");
-    if (env)
-      verbose = atoi(env);
-    xmlSetGenericErrorFunc(NULL, verbose ? xmlGenericError : hwloc_libxml2_error_callback);
+    xmlSetGenericErrorFunc(NULL, hwloc__xml_verbose() ? xmlGenericError : hwloc_libxml2_error_callback);
     first = 0;
   }
 }
@@ -180,7 +190,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     unsigned long long lvalue = strtoull(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_CACHE)
       obj->attr->cache.size = lvalue;
-    else
+    else if (hwloc__xml_verbose())
       fprintf(stderr, "ignoring cache_size attribute for non-cache object type\n");
   }
 
@@ -188,7 +198,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     unsigned long lvalue = strtoul(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_CACHE)
       obj->attr->cache.linesize = lvalue;
-    else
+    else if (hwloc__xml_verbose())
       fprintf(stderr, "ignoring cache_linesize attribute for non-cache object type\n");
   }
 
@@ -196,7 +206,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     unsigned long lvalue = strtoul(value, NULL, 10);
     if (obj->type == HWLOC_OBJ_CACHE)
       obj->attr->cache.associativity = lvalue;
-    else
+    else if (hwloc__xml_verbose())
       fprintf(stderr, "ignoring cache_associativity attribute for non-cache object type\n");
   }
 
@@ -216,7 +226,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	obj->attr->bridge.depth = lvalue;
 	break;
       default:
-	fprintf(stderr, "ignoring depth attribute for object type without depth\n");
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring depth attribute for object type without depth\n");
 	break;
     }
   }
@@ -228,7 +239,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       unsigned domain, bus, dev, func;
       if (sscanf(value, "%04x:%02x:%02x.%01x",
 		 &domain, &bus, &dev, &func) != 4) {
-	fprintf(stderr, "ignoring invalid pci_busid format string %s\n", value);
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring invalid pci_busid format string %s\n", value);
       } else {
 	obj->attr->pcidev.domain = domain;
 	obj->attr->pcidev.bus = bus;
@@ -238,7 +250,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       break;
     }
     default:
-      fprintf(stderr, "ignoring pci_busid attribute for non-PCI object\n");
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "ignoring pci_busid attribute for non-PCI object\n");
       break;
     }
   }
@@ -250,7 +263,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       unsigned classid, vendor, device, subvendor, subdevice, revision;
       if (sscanf(value, "%04x [%04x:%04x] [%04x:%04x] %02x",
 		 &classid, &vendor, &device, &subvendor, &subdevice, &revision) != 6) {
-	fprintf(stderr, "ignoring invalid pci_type format string %s\n", value);
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring invalid pci_type format string %s\n", value);
       } else {
 	obj->attr->pcidev.class_id = classid;
 	obj->attr->pcidev.vendor_id = vendor;
@@ -262,7 +276,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       break;
     }
     default:
-      fprintf(stderr, "ignoring pci_type attribute for non-PCI object\n");
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "ignoring pci_type attribute for non-PCI object\n");
       break;
     }
   }
@@ -275,7 +290,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       break;
     }
     default:
-      fprintf(stderr, "ignoring pci_link_speed attribute for non-PCI object\n");
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "ignoring pci_link_speed attribute for non-PCI object\n");
       break;
     }
   }
@@ -284,16 +300,18 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     switch (obj->type) {
     case HWLOC_OBJ_BRIDGE: {
       unsigned upstream_type, downstream_type;
-      if (sscanf(value, "%u-%u", &upstream_type, &downstream_type) != 2)
-	fprintf(stderr, "ignoring invalid bridge_type format string %s\n", value);
-      else {
+      if (sscanf(value, "%u-%u", &upstream_type, &downstream_type) != 2) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring invalid bridge_type format string %s\n", value);
+      } else {
 	obj->attr->bridge.upstream_type = upstream_type;
 	obj->attr->bridge.downstream_type = downstream_type;
       };
       break;
     }
     default:
-      fprintf(stderr, "ignoring bridge_type attribute for non-bridge object\n");
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "ignoring bridge_type attribute for non-bridge object\n");
       break;
     }
   }
@@ -304,7 +322,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       unsigned domain, secbus, subbus;
       if (sscanf(value, "%04x:[%02x-%02x]",
 		 &domain, &secbus, &subbus) != 3) {
-	fprintf(stderr, "ignoring invalid bridge_pci format string %s\n", value);
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring invalid bridge_pci format string %s\n", value);
       } else {
 	obj->attr->bridge.downstream.pci.domain = domain;
 	obj->attr->bridge.downstream.pci.secondary_bus = secbus;
@@ -313,7 +332,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       break;
     }
     default:
-      fprintf(stderr, "ignoring bridge_pci attribute for non-bridge object\n");
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "ignoring bridge_pci attribute for non-bridge object\n");
       break;
     }
   }
@@ -322,14 +342,16 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     switch (obj->type) {
     case HWLOC_OBJ_OS_DEVICE: {
       unsigned osdev_type;
-      if (sscanf(value, "%u", &osdev_type) != 1)
-	fprintf(stderr, "ignoring invalid osdev_type format string %s\n", value);
-      else
+      if (sscanf(value, "%u", &osdev_type) != 1) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring invalid osdev_type format string %s\n", value);
+      } else
 	obj->attr->osdev.type = osdev_type;
       break;
     }
     default:
-      fprintf(stderr, "ignoring osdev_type attribute for non-osdev object\n");
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "ignoring osdev_type attribute for non-osdev object\n");
       break;
     }
   }
@@ -362,7 +384,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	obj->memory.local_memory = lvalue << 10;
 	break;
       default:
-	fprintf(stderr, "ignoring memory_kB attribute for object type without memory\n");
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring memory_kB attribute for object type without memory\n");
 	break;
     }
   }
@@ -379,7 +402,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	obj->memory.page_types[0].size = lvalue << 10;
 	break;
       default:
-	fprintf(stderr, "ignoring huge_page_size_kB attribute for object type without huge pages\n");
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring huge_page_size_kB attribute for object type without huge pages\n");
 	break;
     }
   }
@@ -396,7 +420,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	obj->memory.page_types[0].count = lvalue;
 	break;
       default:
-	fprintf(stderr, "ignoring huge_page_free attribute for object type without huge pages\n");
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring huge_page_free attribute for object type without huge pages\n");
 	break;
     }
   }
@@ -406,7 +431,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 
 
 
-  else
+  else if (hwloc__xml_verbose())
     fprintf(stderr, "ignoring unknown object attribute %s\n", name);
 }
 
@@ -459,11 +484,13 @@ hwloc__xml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char 
 	      return 0;
 	    }
 	  } else {
-	    fprintf(stderr, "ignoring unexpected xml attr node type %u\n", subnode->type);
+	    if (hwloc__xml_verbose())
+	      fprintf(stderr, "ignoring unexpected xml attr node type %u\n", subnode->type);
 	  }
 	}
       } else {
-	fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
       }
     return -1;
 #else
@@ -549,9 +576,11 @@ hwloc__xml_import_find_child(hwloc__xml_import_state_t state,
 	return 1;
       } else if (child->type == XML_TEXT_NODE) {
 	if (child->content && child->content[0] != '\0' && child->content[0] != '\n')
-	  fprintf(stderr, "ignoring object text content %s\n", (const char*) child->content);
+	  if (hwloc__xml_verbose())
+	    fprintf(stderr, "ignoring object text content %s\n", (const char*) child->content);
       } else {
-	fprintf(stderr, "ignoring unexpected xml node type %u\n", child->type);
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring unexpected xml node type %u\n", child->type);
       }
     return 0;
 #else
@@ -869,8 +898,9 @@ hwloc_xml__handle_distances(struct hwloc_topology *topology)
     unsigned nbobjs = hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, depth);
     if (nbobjs != xmldist->distances.nbobjs) {
       /* distances invalid, drop */
-      fprintf(stderr, "ignoring invalid distance matrix with %u objs instead of %u\n",
-	     xmldist->distances.nbobjs, nbobjs);
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "ignoring invalid distance matrix with %u objs instead of %u\n",
+		xmldist->distances.nbobjs, nbobjs);
       free(xmldist->distances.latency);
     } else {
       /* distances valid, add it to the internal OS distances list for grouping */
@@ -909,17 +939,21 @@ hwloc_look_xml(struct hwloc_topology *topology)
     xmlDtd *dtd;
 
     dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
-    if (!dtd)
-      fprintf(stderr, "Loading XML topology without DTD\n");
-    else if (strcmp((char *) dtd->SystemID, "hwloc.dtd"))
-      fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
-	      (char *) dtd->SystemID, "hwloc.dtd");
+    if (!dtd) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "Loading XML topology without DTD\n");
+    } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")) {
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
+		(char *) dtd->SystemID, "hwloc.dtd");
+    }
 
     root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
 
     if (strcmp((const char *) root_node->name, "topology") && strcmp((const char *) root_node->name, "root")) {
       /* root node should be in "topology" class (or "root" if importing from < 1.0) */
-      fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
+      if (hwloc__xml_verbose())
+	fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
       return -1;
     }
 
@@ -978,6 +1012,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
  failed:
   if (state.use_libxml)
+    /* not only when verbose */
     fprintf(stderr, "Failed to parse XML input with the minimalistic parser. If it was not\n"
 	    "generated by hwloc, try enabling full XML support with libxml2.\n");
   return -1;
