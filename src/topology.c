@@ -1915,6 +1915,8 @@ static void alloc_cpusets(hwloc_obj_t obj)
   obj->allowed_nodeset = hwloc_bitmap_alloc_full();
 }
 
+static void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
+
 /* Main discovery loop */
 static int
 hwloc_discover(struct hwloc_topology *topology)
@@ -1923,7 +1925,10 @@ hwloc_discover(struct hwloc_topology *topology)
     alloc_cpusets(topology->levels[0][0]);
     hwloc_look_synthetic(topology);
   } else if (topology->backend_type == HWLOC_BACKEND_XML) {
-    hwloc_look_xml(topology);
+    if (hwloc_look_xml(topology) < 0) {
+      hwloc_topology_clear(topology);
+      return -1;
+    }
   } else {
 
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
