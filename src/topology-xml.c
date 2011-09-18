@@ -930,13 +930,21 @@ hwloc_look_xml(struct hwloc_topology *topology)
 {
   struct hwloc__xml_import_state_s state, childstate;
   char *tag;
+#ifdef HWLOC_HAVE_LIBXML2
+  char *env;
+#endif
   int ret;
 
+  state.use_libxml = 0;
+  state.parent = NULL;
+
 #ifdef HWLOC_HAVE_LIBXML2
-  char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
+  env = getenv("HWLOC_NO_LIBXML_IMPORT");
   if (!env || !atoi(env)) {
     xmlNode* root_node;
     xmlDtd *dtd;
+
+    state.use_libxml = 1;
 
     dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
     if (!dtd) {
@@ -954,10 +962,9 @@ hwloc_look_xml(struct hwloc_topology *topology)
       /* root node should be in "topology" class (or "root" if importing from < 1.0) */
       if (hwloc__xml_verbose())
 	fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
-      return -1;
+      goto failed;
     }
 
-    state.use_libxml = 1;
     state.libxml_node = root_node;
     state.libxml_child = root_node->children;
     state.libxml_attr = NULL;
@@ -979,14 +986,12 @@ hwloc_look_xml(struct hwloc_topology *topology)
 	goto failed;
 
     /* prepare parsing state */
-    state.use_libxml = 0;
     state.tagbuffer = buffer+10;
     state.tagname = "topology";
     state.attrbuffer = NULL;
   }
 
   state.closed = 0;
-  state.parent = NULL;
 
   /* find root object tag and import it */
   ret = hwloc__xml_import_find_child(&state, &childstate, &tag);
