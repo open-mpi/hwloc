@@ -1136,17 +1136,20 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
 typedef struct hwloc__xml_export_output_s {
   int use_libxml;
+
   /* only useful if not using libxml */
-  char *buffer;
-  size_t written;
-  size_t remaining;
-  unsigned indent;
+  char *buffer; /* (moving) buffer where to write */
+  size_t written; /* how many bytes were written (or would have be written if not truncated) */
+  size_t remaining; /* how many bytes are still available in the buffer */
+  unsigned indent; /* indentation level for the next line */
+
   /* only useful if not using libxml */
 #ifdef HWLOC_HAVE_LIBXML2
-  xmlNodePtr current_node;
+  xmlNodePtr current_node; /* current node to output */
 #endif
 } * hwloc__xml_export_output_t;
 
+/* NO-libxml helper: update output buffer */
 static void
 hwloc__xml_export_update_buffer(hwloc__xml_export_output_t output, int res)
 {
@@ -1175,6 +1178,7 @@ hwloc__xml_export_new_child(hwloc__xml_export_output_t output, const char *name)
   }
 }
 
+/* NO-libxml helper: escape string */
 static char *
 hwloc__xml_export_escape_string(const char *src)
 {
