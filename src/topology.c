@@ -877,7 +877,7 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
   if (name)
     obj->name = strdup(name);
 
-  /* FIXME: after load, or before load if custom*/
+  /* FIXME: after load only */
 
   /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
   obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
@@ -886,6 +886,19 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
 
   hwloc_connect_children(topology->levels[0][0]);
   /* no need to hwloc_connect_levels() since misc object are not in levels */
+
+  return obj;
+}
+
+hwloc_obj_t
+hwloc_custom_insert_group_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, int groupdepth)
+{
+  hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+  obj->attr->group.depth = groupdepth;
+
+  /* FIXME: custom only and before load only */
+
+  hwloc_insert_object_by_parent(topology, parent, obj);
 
   return obj;
 }

@@ -27,19 +27,19 @@ int main(void)
   printf("Inserting the local topology into the global one...\n");
   root = hwloc_get_root_obj(global);
 
-  sw1 = hwloc_topology_insert_misc_object_by_parent(global, root, "Switch");
-  sw11 = hwloc_topology_insert_misc_object_by_parent(global, sw1, "Switch");
+  sw1 = hwloc_custom_insert_group_object_by_parent(global, root, 0);
+  sw11 = hwloc_custom_insert_group_object_by_parent(global, sw1, 1);
   hwloc_custom_insert_topology(global, sw11, local);
   hwloc_custom_insert_topology(global, sw11, local);
-  sw12 = hwloc_topology_insert_misc_object_by_parent(global, sw1, "Switch");
+  sw12 = hwloc_custom_insert_group_object_by_parent(global, sw1, 1);
   hwloc_custom_insert_topology(global, sw12, local);
   hwloc_custom_insert_topology(global, sw12, local);
 
-  sw2 = hwloc_topology_insert_misc_object_by_parent(global, root, "Switch");
-  sw21 = hwloc_topology_insert_misc_object_by_parent(global, sw2, "Switch");
+  sw2 = hwloc_custom_insert_group_object_by_parent(global, root, 0);
+  sw21 = hwloc_custom_insert_group_object_by_parent(global, sw2, 1);
   hwloc_custom_insert_topology(global, sw21, local);
   hwloc_custom_insert_topology(global, sw21, local);
-  sw22 = hwloc_topology_insert_misc_object_by_parent(global, sw2, "Switch");
+  sw22 = hwloc_custom_insert_group_object_by_parent(global, sw2, 1);
   hwloc_custom_insert_topology(global, sw22, local);
   hwloc_custom_insert_topology(global, sw22, local);
 
@@ -53,23 +53,26 @@ int main(void)
   hwloc_topology_load(global);
   hwloc_topology_check(global);
 
-  assert(hwloc_topology_get_depth(global) == 8);
+  assert(hwloc_topology_get_depth(global) == 10);
   assert(hwloc_get_depth_type(global, 0) == HWLOC_OBJ_SYSTEM);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_SYSTEM) == 1);
-  /* FIXME: Misc go in no level, insert a Group instead? */
-  assert(hwloc_get_depth_type(global, 1) == HWLOC_OBJ_MACHINE);
+  assert(hwloc_get_depth_type(global, 1) == HWLOC_OBJ_GROUP);
+  assert(hwloc_get_nbobjs_by_depth(global, 1) == 2);
+  assert(hwloc_get_depth_type(global, 2) == HWLOC_OBJ_GROUP);
+  assert(hwloc_get_nbobjs_by_depth(global, 2) == 4);
+  assert(hwloc_get_depth_type(global, 3) == HWLOC_OBJ_MACHINE);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_MACHINE) == 8);
-  assert(hwloc_get_depth_type(global, 2) == HWLOC_OBJ_NODE);
+  assert(hwloc_get_depth_type(global, 4) == HWLOC_OBJ_NODE);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_NODE) == 16);
-  assert(hwloc_get_depth_type(global, 3) == HWLOC_OBJ_SOCKET);
+  assert(hwloc_get_depth_type(global, 5) == HWLOC_OBJ_SOCKET);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_SOCKET) == 32);
-  assert(hwloc_get_depth_type(global, 4) == HWLOC_OBJ_CACHE);
-  assert(hwloc_get_nbobjs_by_depth(global, 4) == 32);
-  assert(hwloc_get_depth_type(global, 5) == HWLOC_OBJ_CORE);
-  assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_CORE) == 64);
   assert(hwloc_get_depth_type(global, 6) == HWLOC_OBJ_CACHE);
-  assert(hwloc_get_nbobjs_by_depth(global, 6) == 128);
-  assert(hwloc_get_depth_type(global, 7) == HWLOC_OBJ_PU);
+  assert(hwloc_get_nbobjs_by_depth(global, 6) == 32);
+  assert(hwloc_get_depth_type(global, 7) == HWLOC_OBJ_CORE);
+  assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_CORE) == 64);
+  assert(hwloc_get_depth_type(global, 8) == HWLOC_OBJ_CACHE);
+  assert(hwloc_get_nbobjs_by_depth(global, 8) == 128);
+  assert(hwloc_get_depth_type(global, 9) == HWLOC_OBJ_PU);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_PU) == 256);
 
   hwloc_topology_destroy(global);

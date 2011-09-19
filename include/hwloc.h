@@ -805,7 +805,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restric
  * The topology then contains a single root object.
  * It may then be built by inserting other topologies with
  * hwloc_custom_insert_topology() or single objects with
- * hwloc_topology_insert_misc_object_by_parent().
+ * hwloc_custom_insert_group_object_by_parent().
  * hwloc_topology_load() must be called to finalize the new
  * topology as usual.
  */
@@ -1920,9 +1920,27 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * yet.
  *
  * \p newparent may be either the root of \p newtopology or an object
- * that was added through hwloc_topology_insert_misc_object_by_parent().
+ * that was added through hwloc_custom_insert_group_object_by_parent().
  */
 HWLOC_DECLSPEC int hwloc_custom_insert_topology(hwloc_topology_t newtopology, hwloc_obj_t newparent, hwloc_topology_t oldtopology);
+
+/** \brief Insert a new group object inside a custom topology
+ *
+ * An object with type ::HWLOC_OBJ_GROUP is inserted as a new child
+ * of object \p parent.
+ *
+ * \p groupdepth is the depth attribute to be given to the new object.
+ * It may for instance be 0 for top-level groups, 1 for their children,
+ * and so on.
+ *
+ * The custom topology \p newtopology must have been prepared with
+ * hwloc_topology_set_custom() and not loaded with hwloc_topology_load()
+ * yet.
+ *
+ * \p parent may be either the root of \p topology or an object that
+ * was added earlier through hwloc_custom_insert_group_object_by_parent().
+ */
+HWLOC_DECLSPEC hwloc_obj_t hwloc_custom_insert_group_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, int groupdepth);
 
 /** @} */
 

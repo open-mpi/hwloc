@@ -366,6 +366,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cuda_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_custom_insert_topology.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_custom_insert_group_object_by_parent.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distributev.3 \
         $(DOX_MAN_DIR)/man3/hwloc_free.3 \
