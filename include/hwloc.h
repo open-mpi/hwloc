@@ -804,7 +804,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restric
  *
  * The topology then contains a single root object.
  * It may then be built by inserting other topologies with
- * hwloc_topology_insert_topology() or single objects with
+ * hwloc_custom_insert_topology() or single objects with
  * hwloc_topology_insert_misc_object_by_parent().
  * hwloc_topology_load() must be called to finalize the new
  * topology as usual.
@@ -968,20 +968,6 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_top
  * \return the newly-created object
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
-
-/** \brief Insert an existing topology inside a custom topology
- *
- * Duplicate the existing topology \p oldtopology inside a new
- * custom topology \p newtopology as a leaf of object \p newparent.
- *
- * The custom topology \p newtopology must have been prepared with
- * hwloc_topology_set_custom() and not loaded with hwloc_topology_load()
- * yet.
- *
- * \p newparent may be either the root of \p newtopology or an object
- * that was added through hwloc_topology_insert_misc_object_by_parent().
- */
-HWLOC_DECLSPEC int hwloc_topology_insert_topology(hwloc_topology_t newtopology, hwloc_obj_t newparent, hwloc_topology_t oldtopology);
 
 /** \brief Flags to be given to hwloc_topology_restrict(). */
 enum hwloc_restrict_flags_e {
@@ -1910,6 +1896,33 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind(hwloc_topology_t topology, size_t len, 
  * or hwloc_alloc_membind().
  */
 HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len);
+
+/** @} */
+
+
+
+/** \defgroup hwlocality_custom Building Custom Topologies
+ *
+ * A custom topology may be initialized by calling hwloc_topology_set_custom()
+ * after hwloc_topology_init(). It may then be modified by inserting objects
+ * or entire topologies. Once done assembling, hwloc_topology_load() should
+ * be invoked as usual to finalize the topology.
+ * @{
+ */
+
+/** \brief Insert an existing topology inside a custom topology
+ *
+ * Duplicate the existing topology \p oldtopology inside a new
+ * custom topology \p newtopology as a leaf of object \p newparent.
+ *
+ * The custom topology \p newtopology must have been prepared with
+ * hwloc_topology_set_custom() and not loaded with hwloc_topology_load()
+ * yet.
+ *
+ * \p newparent may be either the root of \p newtopology or an object
+ * that was added through hwloc_topology_insert_misc_object_by_parent().
+ */
+HWLOC_DECLSPEC int hwloc_custom_insert_topology(hwloc_topology_t newtopology, hwloc_obj_t newparent, hwloc_topology_t oldtopology);
 
 /** @} */
 

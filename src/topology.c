@@ -2446,9 +2446,9 @@ hwloc_backend_custom_init(struct hwloc_topology *topology)
 }
 
 int
-hwloc_topology_insert_topology(struct hwloc_topology *newtopology,
-			       struct hwloc_obj *newparent,
-			       struct hwloc_topology *oldtopology)
+hwloc_custom_insert_topology(struct hwloc_topology *newtopology,
+			     struct hwloc_obj *newparent,
+			     struct hwloc_topology *oldtopology)
 {
   if (newtopology->backend_type != HWLOC_BACKEND_CUSTOM)
     return -1;

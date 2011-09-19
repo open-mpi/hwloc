@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	return EXIT_FAILURE;
     }
     hwloc_topology_load(input);
-    hwloc_topology_insert_topology(topology, hwloc_get_root_obj(topology), input);
+    hwloc_custom_insert_topology(topology, hwloc_get_root_obj(topology), input);
     hwloc_topology_destroy(input);
   }
 

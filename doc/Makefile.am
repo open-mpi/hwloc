@@ -365,6 +365,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset_strict.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cuda_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_custom_insert_topology.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distributev.3 \
         $(DOX_MAN_DIR)/man3/hwloc_free.3 \
@@ -499,7 +500,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_init.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_parent.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_insert_topology.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_is_thissystem.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_membind_support.3 \
@@ -523,6 +523,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_creation.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_cuda.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_cudart.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_custom.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_distances.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_glibc_sched.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_binding.3 \

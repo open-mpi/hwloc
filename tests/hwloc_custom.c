@@ -29,19 +29,19 @@ int main(void)
 
   sw1 = hwloc_topology_insert_misc_object_by_parent(global, root, "Switch");
   sw11 = hwloc_topology_insert_misc_object_by_parent(global, sw1, "Switch");
-  hwloc_topology_insert_topology(global, sw11, local);
-  hwloc_topology_insert_topology(global, sw11, local);
+  hwloc_custom_insert_topology(global, sw11, local);
+  hwloc_custom_insert_topology(global, sw11, local);
   sw12 = hwloc_topology_insert_misc_object_by_parent(global, sw1, "Switch");
-  hwloc_topology_insert_topology(global, sw12, local);
-  hwloc_topology_insert_topology(global, sw12, local);
+  hwloc_custom_insert_topology(global, sw12, local);
+  hwloc_custom_insert_topology(global, sw12, local);
 
   sw2 = hwloc_topology_insert_misc_object_by_parent(global, root, "Switch");
   sw21 = hwloc_topology_insert_misc_object_by_parent(global, sw2, "Switch");
-  hwloc_topology_insert_topology(global, sw21, local);
-  hwloc_topology_insert_topology(global, sw21, local);
+  hwloc_custom_insert_topology(global, sw21, local);
+  hwloc_custom_insert_topology(global, sw21, local);
   sw22 = hwloc_topology_insert_misc_object_by_parent(global, sw2, "Switch");
-  hwloc_topology_insert_topology(global, sw22, local);
-  hwloc_topology_insert_topology(global, sw22, local);
+  hwloc_custom_insert_topology(global, sw22, local);
+  hwloc_custom_insert_topology(global, sw22, local);
 
   /* FIXME: allow to duplicate only part of a topology? (specify the source root too) */
 
