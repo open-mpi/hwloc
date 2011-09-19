@@ -814,7 +814,10 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
   hwloc_obj_t obj, child;
   int err;
 
-  /* FIXME: only after load */
+  if (!topology->is_loaded) {
+    errno = EINVAL;
+    return NULL;
+  }
 
   if (hwloc_bitmap_iszero(cpuset))
     return NULL;
@@ -877,7 +880,10 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
   if (name)
     obj->name = strdup(name);
 
-  /* FIXME: after load only */
+  if (!topology->is_loaded) {
+    errno = EINVAL;
+    return NULL;
+  }
 
   /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
   obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
@@ -896,7 +902,10 @@ hwloc_custom_insert_group_object_by_parent(struct hwloc_topology *topology, hwlo
   hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
   obj->attr->group.depth = groupdepth;
 
-  /* FIXME: custom only and before load only */
+  if (topology->backend_type != HWLOC_BACKEND_CUSTOM || topology->is_loaded) {
+    errno = EINVAL;
+    return NULL;
+  }
 
   hwloc_insert_object_by_parent(topology, parent, obj);
 
@@ -2463,10 +2472,10 @@ hwloc_custom_insert_topology(struct hwloc_topology *newtopology,
 			     struct hwloc_obj *newparent,
 			     struct hwloc_topology *oldtopology)
 {
-  if (newtopology->backend_type != HWLOC_BACKEND_CUSTOM)
+  if (newtopology->backend_type != HWLOC_BACKEND_CUSTOM || newtopology->is_loaded || !oldtopology->is_loaded) {
+    errno = EINVAL;
     return -1;
-
-  /* FIXME only before load */
+  }
 
   hwloc__duplicate_objects(newtopology, newparent, oldtopology->levels[0][0]);
   return 0;
