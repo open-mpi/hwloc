@@ -226,9 +226,7 @@ void usage(const char *name, FILE *where)
 		  ", svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
-#ifdef HWLOC_HAVE_XML
 		  ", xml"
-#endif /* HWLOC_HAVE_XML */
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
   fprintf (where, "  -l --logical          Display hwloc logical object indexes\n");
@@ -599,11 +597,9 @@ main (int argc, char *argv[])
       break;
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
-#ifdef HWLOC_HAVE_XML
     case LSTOPO_OUTPUT_XML:
       output_xml(topology, filename, logical, legend, verbose_mode);
       break;
-#endif
     default:
       fprintf(stderr, "file format not supported\n");
       usage(callname, stderr);
