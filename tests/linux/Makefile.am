@@ -44,6 +44,7 @@ sysfs_outputs = \
 		48amd64-4d2n6c-sparse.output \
 		64fake-4n2s2ca2c2t.output \
 		96em64t-4n4d3ca2co.output \
+		96em64t-4n4d3ca2co-forcecpuinfo.output \
 		128ia64-17n4s2c.output \
 		256ia64-64n2s2c.output \
 		4qs22-2s2t.output \
@@ -89,6 +90,7 @@ sysfs_tarballs = \
 		48amd64-4d2n6c-sparse.tar.bz2 \
 		64fake-4n2s2ca2c2t.tar.bz2 \
 		96em64t-4n4d3ca2co.tar.bz2 \
+		96em64t-4n4d3ca2co-forcecpuinfo.source \
 		128ia64-17n4s2c.tar.bz2 \
 		256ia64-64n2s2c.tar.bz2 \
 		4qs22-2s2t.tar.bz2 \
@@ -118,7 +120,8 @@ sysfs_options = \
 # modifying the environment of lsopo
 sysfs_envs = \
 		32amd64-4s2n4c-cgroup.env \
-		32amd64-4s2n4c-cgroup.xml.env
+		32amd64-4s2n4c-cgroup.xml.env \
+		96em64t-4n4d3ca2co-forcecpuinfo.env
 
 if HWLOC_BUILD_TESTS
 if HWLOC_HAVE_OPENAT
