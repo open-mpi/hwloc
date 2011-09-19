@@ -817,6 +817,15 @@ following environment variables.
   the loaded file is really the underlying system.
   </dd>
 
+<dt>HWLOC_XML_VERBOSE=1</dt>
+  <dd>enable XML verbose messages.
+  hwloc uses the libxml2 library for importing/exporting topologies
+  to XML files or buffers. This library can emit some error messages
+  to the error output stream. Enabling these verbose messages within
+  hwloc can be useful for understanding failures to parse input XML
+  topologies.
+  </dd>
+
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
   <dd>switches to reading the topology from the specified
   Linux filesystem root instead of the main file-system root, as if

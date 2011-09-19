@@ -25,16 +25,13 @@ sources = \
         traversal.c \
         distances.c \
         topology-synthetic.c \
+        topology-xml.c \
         bind.c \
         cpuset.c \
         misc.c
 ldflags =
 
 # Conditionally add to the sources and ldflags
-
-if HWLOC_HAVE_XML
-sources += topology-xml.c
-endif HWLOC_HAVE_XML
 
 if HWLOC_HAVE_SOLARIS
 sources += topology-solaris.c
