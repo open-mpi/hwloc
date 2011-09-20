@@ -841,6 +841,21 @@ prints matrices that cover the entire topology while
 hwloc-distances also displays matrices that ignore part
 of the topology.
 
+\section cli_hwloc_assembler hwloc-assembler
+
+hwloc-assembler combines several XML topology files into a single
+multi-node XML topology.
+It may then be used later as input with hwloc_topology_set_xml()
+or with the HWLOC_XMLFILE environment variable.
+See \ref multinode for details.
+
+\section cli_hwloc_assembler_remote hwloc-assembler-remote
+
+hwloc-assembler-remote is a frontend to hwloc-assembler.
+It takes care of contacting the given list of remote hosts
+(through ssh) and retrieving their topologies as XML before
+assembling them with hwloc-assembler.
+
 
 
 
@@ -1223,7 +1238,6 @@ Those are assembled by making their own root objects (usually
 Machine object) children of higher objects.
 These higher objects include at least the root of the global
 topology (usually a System object).
-Some
 Some intermediate objects may also exists, for instance to
 represent switches in a large fabric.
 
@@ -1275,34 +1289,47 @@ following code:
   else
     return NULL;
 </pre>
-Some hwloc assembling scripts also add dedicated info attributes (see below).
+The hwloc assembler scripts (see below) also add <tt>AssemblerName</tt>
+and <tt>AssemblerIndex</tt> info attributes to the Machine objects to
+identify the corresponding host name and index during assembly.
 
+\section multinode_tools Assembling topologies with command-line tools
 
-FIXME
+One way to manipulate multinode topologies is to retrieve
+other nodes' topologies as XML files and combine them as a
+global XML topology.
+It may then be loaded with hwloc_topolohy_set_xml() or with
+the HWLOCXMLFILE environment variable.
 
-assembling with tools
+The hwloc-assembler and hwloc-assembler-remote utilities
+offer the ability to combine XML topologies or remote
+nodes' topologies (see \ref tools).
 
-hwloc-assembler output.xml input1.xml input2.xml ...
-hwloc-assembler-remote output.xml host1 host2 ...
-hwloc-assembler-remote output.xml `cat machinefile | sort | uniq`
-(see also the tools page)
+\section multinode_interface Assembling topologies with the programming interface
 
-add_infos to tag machines
+The hwloc programming interface offers the ability to build multinode
+topologies using the <em>custom<em> interface.
+A new multinode topology has to be initialized with hwloc_topology_init()
+and then set to custom with hwloc_topology_set_custom().
+Topologies and objects mat then be assembled.
+Later, the custom topology is finalized as usual with hwloc_topology_load().
 
-FIXME add these to the tools page and reference here
+A custom topology starts with a single root object of type System.
+It may be modified by inserting a new child object with
+hwloc_custom_insert_group_object_by_parent() or by duplicating
+another topology with hwloc_custom_insert_topology().
+Both of these operations require to specify the parent object
+in the custom topology where the insertion will take place.
+This parent may be either the root
+(returned by hwloc_get_root_obj())
+or an already-inserted object
+(returned by hwloc_custom_insert_group_object_by_parent()).
 
-FIXME add manpages
-
-assembling in C
-
-set_custom to create empty topo ready for build
-add stuff until load with insert_topo and insert_misc
-those take a parent which must be the root or the result
-of insert_misc
-
-add_info to tag machines
-
-FIXME
+Ideally, any existing object in the custom topology could be the parent.
+However, special care should be taken when traversing the topology
+to find such an object because most links between objects
+(children, siblings, cousins) are not setup until hwloc_topology_load()
+is invoked.
 
 
 

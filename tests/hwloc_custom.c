@@ -43,8 +43,6 @@ int main(void)
   hwloc_custom_insert_topology(global, sw22, local, NULL);
   hwloc_custom_insert_topology(global, sw22, local, NULL);
 
-  /* FIXME: document all this. document which pointers are valid between objects at this time */
-
   hwloc_topology_destroy(local);
 
   printf("Building the global topology...\n");
@@ -74,8 +72,6 @@ int main(void)
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_PU) == 256);
 
   hwloc_topology_destroy(global);
-
-  /* FIXME: check (with valgrind) that set_custom resets things fine before and after load */
 
   return 0;
 }
