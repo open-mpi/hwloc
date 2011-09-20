@@ -58,7 +58,8 @@ do_run()
   #     <foo .../>
   # even when spanning on multiple lines.
   # Also used in tests/xml/test-topology.sh.in
-  sed -r -n -e '1h;1!H;${;g;s@<([^ >]+)(|[^>]*[^/])>[ \n]*</\1>@<\1\2/>@g;p;}' -i "$file"
+  sed -n -e '1h;1!H;${;g;s@<\([^ >][^ >]*\)\([^>]*[^/]\)>\n *</\1>@<\1\2/>@g;p;}' "$file" > "$file".new
+  mv -f "$file".new "$file" 
 
   if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
   then
