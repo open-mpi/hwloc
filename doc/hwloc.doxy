@@ -1208,19 +1208,77 @@ Machine (24GB)
 
 \page multinode Multi-node Topologies
 
+hwloc is usually used for consulting and manipulating single machine
+topologies. This includes large systems as long as a single instance of
+the operating system manages the entire system. However it is sometimes
+desirable to have multiple independent nodes inside the same topology,
+for instance when applying algorithm to an entire cluster topology.
+hwloc therefore offers the ability to agregate multiple node topologies
+into a single global one.
+
+\section multinode_cpusets Multi-node Objects Specifities
+
+A multi-node topology contains several single-node topologies.
+Those are assembled by making their own root objects (usually
+Machine object) children of higher objects.
+These higher objects include at least the root of the global
+topology (usually a System object).
+Some
+Some intermediate objects may also exists, for instance to
+represent switches in a large fabric.
+
+There are actually three possible types of objects that have different
+properties with respect to cpusets, nodesets and binding.
+Indeed those cpusets and nodesets were designed for execution and memory
+binding within a single operating system. Binding on another system or
+across several different systems would be meaningless.
+
+<dl>
+<dt>Local objects</dt>
+<dd>
+ Any object that corresponds to the local machine may be manipulated
+ as usual.
+ Obviously, if the multi-node topology does not contain the local
+ machine topology, no such local object exists.
+</dd>
+<dt>Objects from other nodes</dt>
+<dd>
+ Any object that comes from inside another node is represented as
+ usual but its cpusets and nodesets should not be used for binding
+ since binding on another system makes no sense.
+</dd>
+<dt>Objects above single nodes</dt>
+<dd>
+ Any object above single-node topologies does not have any cpuset or
+ nodeset pointer because binding across multiple systems makes no sense.
+ This includes the glocal root object of a multi-node topology and possibly
+ some intermediate objects between this global root and the local root
+ of single-node topologies.
+</dd>
+</dl>
+
+It is important to keep this in mind before binding using multi-node
+topologies.
+To make sure binding on an object is possible, one should first check
+that its cpuset or nodeset pointer is not NULL.
+Then, it should check whether the object is indeed local.
+
+To find out which machine a given object correspond too, one may look
+at the info attributes of the parent Machine object. The <tt>HostName</tt>
+info is usually available in Machine objects, it may be retrieved with the
+following code:
+<pre>
+  hwloc_obj_t machine_obj;
+  obj = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_MACHINE, obj);
+  if (machine_obj)
+    return hwloc_obj_get_info_by_name(machine_obj, "HostName");
+  else
+    return NULL;
+</pre>
+Some hwloc assembling scripts also add dedicated info attributes (see below).
+
+
 FIXME
-
-intro: usually single node, but also multinode because some
-algorithms need global view of the system
-
-cpusets and nodesets
-
-they are mostly meaningless because they are used to bind on a
-given OS, i.e. a single machine.
-objects containing multiple nodes (using above the machine level)
-contain no cpusets and no nodesets.
-the topology contains cpusets and nodesets that are only valid
-for binding when used on their corresponding machine.
 
 assembling with tools
 
@@ -1228,6 +1286,8 @@ hwloc-assembler output.xml input1.xml input2.xml ...
 hwloc-assembler-remote output.xml host1 host2 ...
 hwloc-assembler-remote output.xml `cat machinefile | sort | uniq`
 (see also the tools page)
+
+add_infos to tag machines
 
 FIXME add these to the tools page and reference here
 
@@ -1239,6 +1299,8 @@ set_custom to create empty topo ready for build
 add stuff until load with insert_topo and insert_misc
 those take a parent which must be the root or the result
 of insert_misc
+
+add_info to tag machines
 
 FIXME
 
