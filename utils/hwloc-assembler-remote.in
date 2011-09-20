@@ -19,6 +19,7 @@ show=0
 ssh=ssh
 lstopoopts=
 inputs=
+inputopts=
 failedhosts=
 output=
 
@@ -69,6 +70,7 @@ while test $# -gt 0 ; do
 			if "$ssh" "$1" "$lstopo" "$lstopoopts" -.xml > $file 2>/dev/null ; then
 				echo "done"
 				inputs="$inputs $file"
+				inputopts="$inputs --name $1 $file"
 			else
 				echo "failed!"
 				rm "$file"
@@ -90,7 +92,8 @@ fi
 
 test $force -eq 1 && assembleropts="$assembleropts -f"
 
-"$assembler" $assembleropts "$output" $inputs
+echo "$assembler" $assembleropts "$output" $inputopts
+"$assembler" $assembleropts "$output" $inputopts
 ret=$?
 
 rm -f $inputs

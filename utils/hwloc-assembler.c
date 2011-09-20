@@ -12,10 +12,11 @@
 
 static void usage(char *name, FILE *where)
 {
-  fprintf (where, "Usage: %s [options] <output>.xml <input1>.xml <input2>.xml ...\n", name);
+  fprintf (where, "Usage: %s [options] <output>.xml [-n <name1] <input1>.xml [-n name2] <input2>.xml ...\n", name);
   fprintf (where, "Options:\n");
-  fprintf (where, "  -v --verbose   Show verbose messages\n");
-  fprintf (where, "  -f --force     Ignore errors while reading input files\n");
+  fprintf (where, "  -v --verbose      Show verbose messages\n");
+  fprintf (where, "  -f --force        Ignore errors while reading input files\n");
+  fprintf (where, "  -n --name <name>  Set the name of the next input topology\n");
 }
 
 int main(int argc, char *argv[])
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
   int verbose = 0;
   int force = 0;
   int opt;
-  int i;
+  int i, j;
 
   callname = strrchr(argv[0], '/');
   if (!callname)
@@ -71,10 +72,28 @@ int main(int argc, char *argv[])
   hwloc_topology_init(&topology);
   hwloc_topology_set_custom(topology);
 
-  for(i=0; i<argc; i++) {
+  for(i=0, j=0; i<argc; i++, j++) {
     hwloc_topology_t input;
-    if (verbose)
-      printf("Importing XML topology %s ...\n", argv[i]);
+    hwloc_obj_t root;
+    char index[10];
+    char *name = NULL;
+
+    if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--name")) {
+      if (i+2 >= argc) {
+	usage(callname, stderr);
+	exit(EXIT_FAILURE);
+      }
+      name = argv[i+1];
+      i+=2;
+    }
+
+    if (verbose) {
+      if (name)
+	printf("Importing XML topology %s with name %s ...\n", argv[i], name);
+      else
+	printf("Importing XML topology %s ...\n", argv[i]);
+    }
+
     hwloc_topology_init(&input);
     if (hwloc_topology_set_xml(input, argv[i])) {
       fprintf(stderr, "Failed to set source XML file %s (%s)\n", argv[i], strerror(errno));
@@ -85,6 +104,12 @@ int main(int argc, char *argv[])
 	return EXIT_FAILURE;
     }
     hwloc_topology_load(input);
+
+    root = hwloc_get_root_obj(input);
+    hwloc_obj_add_info(root, "AssemblerName", name ? name : argv[i]);
+    snprintf(index, sizeof(index), "%d", j);
+    hwloc_obj_add_info(root, "AssemblerIndex", index);
+
     hwloc_custom_insert_topology(topology, hwloc_get_root_obj(topology), input, NULL);
     hwloc_topology_destroy(input);
   }

@@ -25,6 +25,8 @@
       <info name="OSVersion" value="#1 SMP Sun Jul 24 02:24:44 UTC 2011"/>
       <info name="HostName" value="rhododendron"/>
       <info name="Architecture" value="x86_64"/>
+      <info name="AssemblerName" value="input1"/>
+      <info name="AssemblerIndex" value="0"/>
       <object type="Socket" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f">
         <object type="Cache" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f" cache_size="4194304" depth="3" cache_linesize="64" cache_associativity="8">
           <object type="Cache" cpuset="0x00000005" complete_cpuset="0x00000005" online_cpuset="0x00000005" allowed_cpuset="0x00000005" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8">
@@ -48,6 +50,8 @@
     </object>
     <object type="Machine" os_index="0" cpuset="0x00ffffff" complete_cpuset="0x00ffffff" online_cpuset="0x00ffffff" allowed_cpuset="0x00ffffff" nodeset="0x00000003" complete_nodeset="0x00000003" allowed_nodeset="0x00000003" name="machine2">
       <info name="Backend" value="Synthetic"/>
+      <info name="AssemblerName" value="input2"/>
+      <info name="AssemblerIndex" value="1"/>
       <distances nbobjs="2" relative_depth="1" latency_base="5.290000">
         <latency value="4.347826"/>
         <latency value="14.782610"/>
@@ -204,6 +208,8 @@
       <info name="OSVersion" value="#1 SMP Sun Jul 24 02:24:44 UTC 2011"/>
       <info name="HostName" value="rhododendron"/>
       <info name="Architecture" value="x86_64"/>
+      <info name="AssemblerName" value="input1again"/>
+      <info name="AssemblerIndex" value="2"/>
       <object type="Socket" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f">
         <object type="Cache" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f" cache_size="4194304" depth="3" cache_linesize="64" cache_associativity="8">
           <object type="Cache" cpuset="0x00000005" complete_cpuset="0x00000005" online_cpuset="0x00000005" allowed_cpuset="0x00000005" cache_size="262144" depth="2" cache_linesize="64" cache_associativity="8">
