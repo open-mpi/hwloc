@@ -56,6 +56,10 @@ while test $# -gt 0 ; do
 	-f|--force)
 		force=1
 		;;
+	-h)
+		usage
+		exit 0
+		;;
 	--*)
 		error "Unrecognized option: $1"
 		usage
