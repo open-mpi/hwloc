@@ -2470,14 +2470,15 @@ hwloc_backend_custom_init(struct hwloc_topology *topology)
 int
 hwloc_custom_insert_topology(struct hwloc_topology *newtopology,
 			     struct hwloc_obj *newparent,
-			     struct hwloc_topology *oldtopology)
+			     struct hwloc_topology *oldtopology,
+			     struct hwloc_obj *oldroot)
 {
   if (newtopology->backend_type != HWLOC_BACKEND_CUSTOM || newtopology->is_loaded || !oldtopology->is_loaded) {
     errno = EINVAL;
     return -1;
   }
 
-  hwloc__duplicate_objects(newtopology, newparent, oldtopology->levels[0][0]);
+  hwloc__duplicate_objects(newtopology, newparent, oldroot ? oldroot : oldtopology->levels[0][0]);
   return 0;
 }
 

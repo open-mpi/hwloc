@@ -1915,6 +1915,11 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * Duplicate the existing topology \p oldtopology inside a new
  * custom topology \p newtopology as a leaf of object \p newparent.
  *
+ * If \p oldroot is not \c NULL, duplicate \p oldroot and all its
+ * children instead of the entire \p oldtopology. Passing the root
+ * object of \p oldtopology in \p oldroot is equivalent to passing
+ * \c NULL.
+ *
  * The custom topology \p newtopology must have been prepared with
  * hwloc_topology_set_custom() and not loaded with hwloc_topology_load()
  * yet.
@@ -1922,7 +1927,7 @@ HWLOC_DECLSPEC int hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
  * \p newparent may be either the root of \p newtopology or an object
  * that was added through hwloc_custom_insert_group_object_by_parent().
  */
-HWLOC_DECLSPEC int hwloc_custom_insert_topology(hwloc_topology_t newtopology, hwloc_obj_t newparent, hwloc_topology_t oldtopology);
+HWLOC_DECLSPEC int hwloc_custom_insert_topology(hwloc_topology_t newtopology, hwloc_obj_t newparent, hwloc_topology_t oldtopology, hwloc_obj_t oldroot);
 
 /** \brief Insert a new group object inside a custom topology
  *

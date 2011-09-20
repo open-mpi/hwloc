@@ -29,21 +29,19 @@ int main(void)
 
   sw1 = hwloc_custom_insert_group_object_by_parent(global, root, 0);
   sw11 = hwloc_custom_insert_group_object_by_parent(global, sw1, 1);
-  hwloc_custom_insert_topology(global, sw11, local);
-  hwloc_custom_insert_topology(global, sw11, local);
+  hwloc_custom_insert_topology(global, sw11, local, NULL);
+  hwloc_custom_insert_topology(global, sw11, local, NULL);
   sw12 = hwloc_custom_insert_group_object_by_parent(global, sw1, 1);
-  hwloc_custom_insert_topology(global, sw12, local);
-  hwloc_custom_insert_topology(global, sw12, local);
+  hwloc_custom_insert_topology(global, sw12, local, NULL);
+  hwloc_custom_insert_topology(global, sw12, local, NULL);
 
   sw2 = hwloc_custom_insert_group_object_by_parent(global, root, 0);
   sw21 = hwloc_custom_insert_group_object_by_parent(global, sw2, 1);
-  hwloc_custom_insert_topology(global, sw21, local);
-  hwloc_custom_insert_topology(global, sw21, local);
+  hwloc_custom_insert_topology(global, sw21, local, NULL);
+  hwloc_custom_insert_topology(global, sw21, local, NULL);
   sw22 = hwloc_custom_insert_group_object_by_parent(global, sw2, 1);
-  hwloc_custom_insert_topology(global, sw22, local);
-  hwloc_custom_insert_topology(global, sw22, local);
-
-  /* FIXME: allow to duplicate only part of a topology? (specify the source root too) */
+  hwloc_custom_insert_topology(global, sw22, local, NULL);
+  hwloc_custom_insert_topology(global, sw22, local, NULL);
 
   /* FIXME: document all this. document which pointers are valid between objects at this time */
 
