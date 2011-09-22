@@ -727,9 +727,9 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, h
     if (hwloc__xml_import_next_attr(state, &attrname, &attrvalue) < 0)
       break;
     if (!strcmp(attrname, "size"))
-      size = strtoul(attrvalue, NULL, 10);
+      size = strtoull(attrvalue, NULL, 10);
     else if (!strcmp(attrname, "count"))
-      count = strtoul(attrvalue, NULL, 10);
+      count = strtoull(attrvalue, NULL, 10);
     else
       return -1;
   }

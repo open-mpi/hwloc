@@ -11,6 +11,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 # By default, it shows the output of `lstopo - -v'.
 sysfs_outputs = \
 		2amd64-2n.output \
+		2i386-2t-hugepagesizecount.xml.output \
 		2ps3-2t.output \
 		4ia64-4s.output \
 		4ppc-4c.output \
@@ -57,6 +58,8 @@ sysfs_outputs = \
 # or a corresponding `xyz.source' specifying which tarball to use
 sysfs_tarballs = \
 		2amd64-2n.tar.bz2 \
+		2i386-2t-hugepagesizecount.tar.bz2 \
+		2i386-2t-hugepagesizecount.xml.source \
 		2ps3-2t.tar.bz2 \
 		4ia64-4s.tar.bz2 \
 		4ppc-4c.tar.bz2 \
@@ -107,6 +110,7 @@ sysfs_excludes = \
 # Each output `xyz.output' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
 sysfs_options = \
+		2i386-2t-hugepagesizecount.xml.options \
 		16amd64-8n2c-cpusets.xml.options \
 		16amd64-8n2c-cpusets_noadmin.options \
 		16em64t-4s2c2t-offlines.xml.options \
@@ -119,6 +123,7 @@ sysfs_options = \
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lsopo
 sysfs_envs = \
+		2i386-2t-hugepagesizecount.xml.env \
 		32amd64-4s2n4c-cgroup.env \
 		32amd64-4s2n4c-cgroup.xml.env \
 		96em64t-4n4d3ca2co-forcecpuinfo.env

@@ -1891,6 +1891,7 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
   uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
   struct stat st;
   int has_sysfs_hugepages = 0;
+  char *pagesize_env = getenv("HWLOC_DEBUG_PAGESIZE");
   int types = 2;
   int err;
 
@@ -1900,15 +1901,20 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
     has_sysfs_hugepages = 1;
   }
 
-  if (topology->is_thissystem) {
+  if (topology->is_thissystem || pagesize_env) {
+    /* we cannot report any page_type info unless we have the page size.
+     * we'll take it either from the system if local, or from the debug env variable
+     */
     memory->page_types_len = types;
-    memory->page_types = malloc(types*sizeof(*memory->page_types));
-    memset(memory->page_types, 0, types*sizeof(*memory->page_types));
-    /* Try to get the hugepage size from sysconf in case we fail to get it from /proc/meminfo later */
+    memory->page_types = calloc(types, sizeof(*memory->page_types));
+  }
+
+  if (topology->is_thissystem) {
+    /* Get the page and hugepage sizes from sysconf */
 #ifdef HAVE__SC_LARGE_PAGESIZE
     memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-    memory->page_types[0].size = getpagesize();
+    memory->page_types[0].size = getpagesize(); /* might be overwritten later by /proc/meminfo or sysfs */
   }
 
   hwloc_parse_meminfo_info(topology, "/proc/meminfo", 0 /* no prefix */,
@@ -1931,6 +1937,17 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
         memory->page_types_len = 1;
       }
     }
+
+    if (pagesize_env) {
+      /* We cannot get the pagesize if not thissystem, use the env-given one to experience the code during make check */
+      memory->page_types[0].size = strtoull(pagesize_env, NULL, 10);
+      /* If failed, use 4kB */
+      if (!memory->page_types[0].size)
+	memory->page_types[0].size = 4096;
+    }
+    assert(memory->page_types[0].size); /* from sysconf if local or from the env */
+    assert(memory->page_types[1].size); /* from sysconf if local, or from /proc/meminfo, or from sysfs */
+
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
 }
