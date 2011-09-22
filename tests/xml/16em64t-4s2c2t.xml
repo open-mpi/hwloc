@@ -2,8 +2,9 @@
 <!DOCTYPE topology SYSTEM "hwloc.dtd">
 <topology>
   <object type="Machine" os_index="0" cpuset="0x0000ffff" complete_cpuset="0x0000ffff" online_cpuset="0x0000ffff" allowed_cpuset="0x0000ffff">
-    <page_type size="4096" count="500"/>
+    <page_type size="4096" count="8589934592"/>
     <page_type size="8192" count="0"/>
+    <page_type size="17179869184" count="1"/>
     <info name="infowithvalue" value="value"/>
     <info name="infowithoutvalue" value=""/>
     <object type="Socket" os_index="0" cpuset="0x00001111" complete_cpuset="0x00001111" online_cpuset="0x00001111" allowed_cpuset="0x00001111">
