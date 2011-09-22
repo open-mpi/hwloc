@@ -280,9 +280,9 @@ hwloc__xml_import_pagetype_node(struct hwloc_topology *topology __hwloc_attribut
       const xmlChar *value = hwloc__xml_import_attr_value(attr);
       if (value) {
 	if (!strcmp((char *) attr->name, "size"))
-	  size = strtoul((char *) value, NULL, 10);
+	  size = strtoull((char *) value, NULL, 10);
 	else if (!strcmp((char *) attr->name, "count"))
-	  count = strtoul((char *) value, NULL, 10);
+	  count = strtoull((char *) value, NULL, 10);
 	else
 	  fprintf(stderr, "ignoring unknown pagetype attribute %s\n", (char *) attr->name);
       }

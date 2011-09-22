@@ -772,7 +772,12 @@ static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
   const struct hwloc_obj_memory_page_type_s *a = _a;
   const struct hwloc_obj_memory_page_type_s *b = _b;
   /* consider 0 as larger so that 0-size page_type go to the end */
-  return b->size ? (int)(a->size - b->size) : -1;
+  if (!b->size)
+    return -1;
+  /* don't cast a-b in int since those are ullongs */
+  if (b->size == a->size)
+    return 0;
+  return a->size < b->size ? -1 : 1;
 }
 
 /* Propagate memory counts */
