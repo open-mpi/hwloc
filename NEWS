@@ -20,6 +20,15 @@ in v0.9.1).
 Version 1.2.2
 -------------
 * Fix build on AIX 5.2, thanks Utpal Kumar Ray for the report.
+* Fix XML import of very large page sizes or counts on 32bits platform,
+  thanks to Karsten Hopp for the RedHat ticket.
+* Fix crash when administrator limitations such as Linux cgroup require
+  to restrict distance matrices.
+* Fix the removal of objects such as AMD Magny-Cours dual-node sockets
+  in case of administrator restrictions.
+* Improve error reporting and messages in case of wrong synthetic topology
+  description.
+* Several other minor internal fixes and documentation improvements.
 
 
 Version 1.2.1
