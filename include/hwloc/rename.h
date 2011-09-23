@@ -229,7 +229,6 @@ extern "C" {
 
 /* hwloc/bitmap.h */
 
-#define hwloc_bitmap HWLOC_NAME(bitmap)
 #define hwloc_bitmap_s HWLOC_NAME(bitmap_s)
 #define hwloc_bitmap_t HWLOC_NAME(bitmap_t)
 #define hwloc_const_bitmap_t HWLOC_NAME(const_bitmap_t)
@@ -282,11 +281,6 @@ extern "C" {
 #define hwloc_bitmap_weight HWLOC_NAME(bitmap_weight)
 
 /* hwloc/cpuset.h -- deprecated but still available */
-
-#define hwloc_cpuset HWLOC_NAME(cpuset)
-#define hwloc_cpuset_s HWLOC_NAME(cpuset_s)
-#define hwloc_cpuset_t HWLOC_NAME(cpuset_t)
-#define hwloc_const_cpuset_t HWLOC_NAME(const_cpuset_t)
 
 #define hwloc_cpuset_alloc HWLOC_NAME(cpuset_alloc)
 #define hwloc_cpuset_free HWLOC_NAME(cpuset_free)
@@ -471,7 +465,6 @@ extern "C" {
 #define hwloc_xml_imported_distances_s HWLOC_NAME(xml_imported_distances_s)
 
 #define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)
-#define hwloc_setup_misc_level_from_distances HWLOC_NAME(setup_misc_level_from_distances)
 #define hwloc_get_sysctlbyname HWLOC_NAME(get_sysctlbyname)
 #define hwloc_get_sysctl HWLOC_NAME(get_sysctl)
 #define hwloc_fallback_nbprocessors HWLOC_NAME(fallback_nbprocessors)
@@ -484,7 +477,6 @@ extern "C" {
 #define hwloc_backend_linuxfs_exit HWLOC_NAME(backend_linuxfs_exit)
 
 #define hwloc_backend_xml_init HWLOC_NAME(backend_xml_init)
-#define hwloc_xml_check_distances HWLOC_NAME(xml_check_distances)
 #define hwloc_look_xml HWLOC_NAME(look_xml)
 #define hwloc_backend_xml_exit HWLOC_NAME(backend_xml_exit)
 
@@ -524,7 +516,6 @@ extern "C" {
 #define hwloc__insert_object_by_cpuset HWLOC_NAME(_insert_object_by_cpuset)
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
-#define hwloc_free_object HWLOC_NAME(free_object)
 #define hwloc_bitmap_printf_value HWLOC_NAME(bitmap_printf_value)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
