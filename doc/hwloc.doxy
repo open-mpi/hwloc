@@ -861,12 +861,14 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_XML_VERBOSE=1</dt>
-  <dd>enable XML verbose messages.
+<dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
+  <dd>enable verbose messages in the XML or synthetic topology backends.
   hwloc uses the libxml2 library for importing/exporting topologies
   to XML files or buffers. This library can emit some error messages
   to the error output stream. Enabling these verbose messages within
   hwloc can be useful for understanding failures to parse input XML
-  topologies.
+  topologies. Similarly, verbose messages in the synthetic topology
+  backend can help understand why the description string is invalid.
   </dd>
 
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>

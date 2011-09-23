@@ -48,8 +48,9 @@ int main(int argc, char *argv[])
   int opt;
   int err;
 
-  /* enable verbose XML */
+  /* enable verbose backends */
   putenv("HWLOC_XML_VERBOSE=1");
+  putenv("HWLOC_SYNTHETIC_VERBOSE=1");
 
   hwloc_topology_init(&topology);
 
