@@ -1,3 +1,6 @@
+all-local:
+	@echo Existing targets: 'needed' and 'useless'
+
 prepare:
 	@echo
 	@echo "###############################"
@@ -8,7 +11,7 @@ prepare:
 		-e '/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/s/HWLOC_/FOOBAR_/2'	\
 		-i $(abs_top_builddir)/include/hwloc/autogen/config.h $(abs_top_builddir)/include/private/autogen/config.h
 
-missing: prepare
+needed: prepare
 	@echo
 	@echo "###########################"
 	@echo Finding missing renaming...
@@ -29,3 +32,5 @@ useless: prepare
 			| grep -v rename.h: | grep -v .svn >/dev/null \
 			|| echo $$name; \
 			done
+
+EXTRA_DIST	=	main.c
