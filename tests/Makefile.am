@@ -97,7 +97,7 @@ endif !HWLOC_HAVE_WINDOWS
 
 endif HWLOC_BUILD_TESTS
 
-# ship the embedded test code but don't actually enter it automatically
+# ship the embedded and rename test code but don't actually enter it automatically
 EXTRA_DIST = 	embedded/autogen.sh \
 		embedded/configure.ac \
 		embedded/Makefile.am \
@@ -105,4 +105,6 @@ EXTRA_DIST = 	embedded/autogen.sh \
 		embedded/main.c \
 		embedded/run-embedded-tests.sh \
 		embedded/README.txt \
-		embedded/config/README.txt
+		embedded/config/README.txt \
+		rename/Makefile.in \
+		rename/main.c
