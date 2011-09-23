@@ -334,6 +334,9 @@ main (int argc, char *argv[])
   char *restrictstring = NULL;
   int opt;
 
+  /* enable verbose XML */
+  putenv("HWLOC_XML_VERBOSE=1");
+
 #ifdef HAVE_SETLOCALE
   setlocale(LC_ALL, "");
 #endif
