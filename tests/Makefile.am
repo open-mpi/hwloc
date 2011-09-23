@@ -8,7 +8,7 @@ AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 SUBDIRS = ports xml
-DIST_SUBDIRS = ports xml linux
+DIST_SUBDIRS = ports xml linux rename
 
 if HWLOC_HAVE_LINUX
 SUBDIRS += linux
@@ -97,7 +97,8 @@ endif !HWLOC_HAVE_WINDOWS
 
 endif HWLOC_BUILD_TESTS
 
-# ship the embedded and rename test code but don't actually enter it automatically
+# ship the embedded test code but don't actually let automake ever
+# look at it because we have another configure stuff in there
 EXTRA_DIST = 	embedded/autogen.sh \
 		embedded/configure.ac \
 		embedded/Makefile.am \
@@ -105,6 +106,4 @@ EXTRA_DIST = 	embedded/autogen.sh \
 		embedded/main.c \
 		embedded/run-embedded-tests.sh \
 		embedded/README.txt \
-		embedded/config/README.txt \
-		rename/Makefile.in \
-		rename/main.c
+		embedded/config/README.txt

@@ -1,9 +1,3 @@
-srcdir	=	@srcdir@
-abs_top_srcdir	=	@abs_top_srcdir@
-abs_top_builddir	=	@abs_top_builddir@
-
-all:
-
 prepare:
 	@echo
 	@echo "###############################"
