@@ -144,6 +144,9 @@ extern "C" {
 #define hwloc_get_type_depth_e HWLOC_NAME(get_type_depth_e)
 #define HWLOC_TYPE_DEPTH_UNKNOWN HWLOC_NAME_CAPS(TYPE_DEPTH_UNKNOWN)
 #define HWLOC_TYPE_DEPTH_MULTIPLE HWLOC_NAME_CAPS(TYPE_DEPTH_MULTIPLE)
+#define HWLOC_TYPE_DEPTH_BRIDGE HWLOC_NAME_CAPS(TYPE_DEPTH_BRIDGE)
+#define HWLOC_TYPE_DEPTH_PCI_DEVICE HWLOC_NAME_CAPS(TYPE_DEPTH_PCI_DEVICE)
+#define HWLOC_TYPE_DEPTH_OS_DEVICE HWLOC_NAME_CAPS(TYPE_DEPTH_OS_DEVICE)
 
 #define hwloc_get_depth_type HWLOC_NAME(get_depth_type)
 #define hwloc_get_nbobjs_by_depth HWLOC_NAME(get_nbobjs_by_depth)
@@ -295,6 +298,9 @@ extern "C" {
 #define hwloc_cpuset_zero HWLOC_NAME(cpuset_zero)
 #define hwloc_cpuset_fill HWLOC_NAME(cpuset_fill)
 #define hwloc_cpuset_from_ulong HWLOC_NAME(cpuset_from_ulong)
+#define hwloc_cpuset_taskset_snprintf HWLOC_NAME(cpuset_taskset_snprintf)
+#define hwloc_cpuset_taskset_asprintf HWLOC_NAME(cpuset_taskset_asprintf)
+#define hwloc_cpuset_taskset_sscanf HWLOC_NAME(cpuset_taskset_sscanf)
 
 #define hwloc_cpuset_from_ith_ulong HWLOC_NAME(cpuset_from_ith_ulong)
 #define hwloc_cpuset_to_ulong HWLOC_NAME(cpuset_to_ulong)
@@ -510,6 +516,7 @@ extern "C" {
 #define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
 #define hwloc_report_error_t HWLOC_NAME(report_error_t)
 #define hwloc_report_os_error HWLOC_NAME(report_os_error)
+#define hwloc_hide_errors HWLOC_NAME(hide_errors)
 #define hwloc__insert_object_by_cpuset HWLOC_NAME(_insert_object_by_cpuset)
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
