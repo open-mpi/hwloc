@@ -1302,24 +1302,30 @@ typedef enum {
                                    * support of CPU bindings, i.e. potentially
                                    * return -1 with errno set to ENOSYS in some
                                    * cases.
+                                   *
+                                   * This flag is only meaningful when
+                                   * used with functions that set the
+                                   * CPU binding.  It is ignored when
+                                   * used with functions that get CPU
+                                   * binding information.
                                    */
 } hwloc_cpubind_flags_t;
 
-/** \brief Bind current process or thread on cpus given in bitmap \p set
+/** \brief Bind current process or thread on cpus given in bitmap \p set.
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
 
-/** \brief Get current process or thread binding
+/** \brief Get current process or thread binding.
  *
  * Writes into \p set the cpuset which the process or thread (according to \e
  * flags) was last bound to.
  */
 HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
-/** \brief Bind a process \p pid on cpus given in bitmap \p set
+/** \brief Bind a process \p pid on cpus given in bitmap \p set.
  *
  * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
@@ -1328,17 +1334,21 @@ HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t s
  */
 HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int flags);
 
-/** \brief Get the current binding of process \p pid
+/** \brief Get the current binding of process \p pid.
  *
  * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
  * platforms
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
+ *
+ * \note As a special case on Linux, if a tid (thread ID) is supplied
+ * instead of a pid (process ID), the binding for that specific thread
+ * is returned.
  */
 HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
 #ifdef hwloc_thread_t
-/** \brief Bind a thread \p thread on cpus given in bitmap \p set
+/** \brief Bind a thread \p thread on cpus given in bitmap \p set.
  *
  * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
  * Windows platforms
@@ -1349,7 +1359,7 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 #endif
 
 #ifdef hwloc_thread_t
-/** \brief Get the current binding of thread \p tid
+/** \brief Get the current binding of thread \p tid.
  *
  * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
  * Windows platforms
@@ -1376,6 +1386,10 @@ HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_
  * outdated.
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
+ *
+ * \note As a special case on Linux, if a tid (thread ID) is supplied
+ * instead of a pid (process ID), the binding for that specific thread
+ * is returned.
  */
 HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
