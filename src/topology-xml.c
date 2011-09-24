@@ -805,6 +805,10 @@ hwloc__xml_import_distances(hwloc_topology_t topology __hwloc_attribute_unused, 
       if (val > latmax)
 	latmax = val;
 
+      ret = hwloc__xml_import_close_tag(&childstate);
+      if (ret < 0)
+	return -1;
+
       hwloc__xml_import_close_child(&childstate);
     }
 
