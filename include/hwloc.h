@@ -6,6 +6,36 @@
  * See COPYING in top-level directory.
  */
 
+/*=====================================================================
+ *                 PLEASE GO READ THE DOCUMENTATION!
+ *         ------------------------------------------------
+ *               $tarball_directory/doc/doxygen-doc/
+ *                                or                            
+ *           http://www.open-mpi.org/projects/hwloc/doc/
+ *=====================================================================
+ *
+ * FAIR WARNING: Do NOT expect to be able to figure out all the
+ * subtleties of hwloc by simply reading function prototypes and
+ * constant descrptions here in this file.
+ *
+ * Hwloc has wonderful documentation in both PDF and HTML formats for
+ * your reading pleasure.  The formal documentation explains a LOT of
+ * hwloc-specific concepts, provides definitions, and discusses the
+ * "big picture" for many of the things that you'll find here in this
+ * header file.
+ *
+ * The PDF/HTML documentation was generated via Doxygen; much of what
+ * you'll see in there is also here in this file.  BUT THERE IS A LOT
+ * THAT IS IN THE PDF/HTML THAT IS ***NOT*** IN hwloc.h!
+ *
+ * There are entire paragraph-length descriptions, discussions, and
+ * pretty prictures to explain subtle corner cases, provide concrete
+ * examples, etc.
+ *
+ * Please, go read the documentation.  :-)
+ *
+ *=====================================================================*/
+
 /** \file
  * \brief The hwloc API.
  *
@@ -905,7 +935,7 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
 
 
 
-/** \defgroup hwlocality_tinker Tinker with topologies.
+/** \defgroup hwlocality_tinker Tinker With Topologies.
  * @{
  */
 
@@ -995,8 +1025,13 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
 
 
 
-/** \defgroup hwlocality_information Get some Topology Information
+/** \defgroup hwlocality_information Get Some Topology Information
  * @{
+ *
+ * Be sure to see the figure in \ref termsanddefs that shows a
+ * complete topology tree, including depths, child/sibling/cousin
+ * relationships, and an example of an asymmetric topology where one
+ * socket has fewer caches than its peers.
  */
 
 /** \brief Get the depth of the hierarchical tree of objects.
@@ -1040,7 +1075,8 @@ enum hwloc_get_type_depth_e {
  */
 HWLOC_DECLSPEC hwloc_obj_type_t hwloc_get_depth_type (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
 
-/** \brief Returns the width of level at depth \p depth */
+/** \brief Returns the width of level at depth \p depth.
+ */
 HWLOC_DECLSPEC unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, unsigned depth) __hwloc_attribute_pure;
 
 /** \brief Returns the width of level type \p type
@@ -1074,6 +1110,11 @@ HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restri
 
 /** \defgroup hwlocality_traversal Retrieve Objects
  * @{
+ *
+ * Be sure to see the figure in \ref termsanddefs that shows a
+ * complete topology tree, including depths, child/sibling/cousin
+ * relationships, and an example of an asymmetric topology where one
+ * socket has fewer caches than its peers.
  */
 
 /** \brief Returns the topology object at logical index \p idx from depth \p depth */
