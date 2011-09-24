@@ -338,7 +338,11 @@ struct hwloc_obj {
 					 * may be \c NULL if no attribute value was found */
 
   /* global position */
-  unsigned depth;			/**< \brief Vertical index in the hierarchy */
+  unsigned depth;			/**< \brief Vertical index in the hierarchy.
+					 * If the topology is symmetric, this is equal to the
+					 * parent depth plus one, and also equal to the number
+					 * of parent/child links from the root object to here.
+					 */
   unsigned logical_index;		/**< \brief Horizontal index in the whole list of similar objects,
 					 * could be a "cousin_rank" since it's the rank within the "cousin" list below */
   signed os_level;			/**< \brief OS-provided physical level, -1 if unknown or meaningless */

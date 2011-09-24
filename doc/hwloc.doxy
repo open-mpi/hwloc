@@ -706,7 +706,14 @@ Make sure to have had a look at those too!
   are cousins.</dd>
 
 <dt>Depth</dt>
-  <dd>Nesting level in the object tree, starting from the 0th object.</dd>
+  <dd>Nesting level in the object tree, starting from the root object.
+  If the topology is symmetric, the depth of a child is equal to the
+  parent depth plus one, and an object depth is also equal to the number
+  of parent/child links between the root object and the given object.
+  If the topology is asymmetric, the difference between some parent
+  and child depths may be larger than one when some intermediate levels
+  (for instance caches) are missing in only some parts of the machine.
+  </dd>
 
 <dt>OS or physical index</dt>
   <dd>The index that the operating system (OS) uses to identify the
