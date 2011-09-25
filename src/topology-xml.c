@@ -43,8 +43,6 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
 
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
-  topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
-
   LIBXML_TEST_VERSION;
   hwloc_libxml2_disable_stderrwarnings();
 
@@ -673,7 +671,6 @@ hwloc_xml__handle_distances(struct hwloc_topology *topology)
     next = xmldist->next;
     free(xmldist);
   }
-  topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
 }
 
 /* this canNOT be the first XML call */
@@ -684,6 +681,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
   xmlDtd *dtd;
 
   topology->support.discovery->pu = 1;
+  topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
 
   dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
   if (!dtd)
@@ -703,6 +701,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
   /* if we added some distances, we must check them, and make them groupable */
   hwloc_xml__handle_distances(topology);
+  topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
 }
 
 /******************************
