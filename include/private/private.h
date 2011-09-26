@@ -47,9 +47,7 @@ typedef enum hwloc_backend_e {
 #ifdef HWLOC_LINUX_SYS
   HWLOC_BACKEND_LINUXFS,
 #endif
-#ifdef HWLOC_HAVE_XML
   HWLOC_BACKEND_XML,
-#endif
   /* This value is only here so that we can end the enum list without
      a comma (thereby preventing compiler warnings) */
   HWLOC_BACKEND_MAX
@@ -141,17 +139,18 @@ struct hwloc_topology {
       int nbnodes;
     } osf;
 #endif /* HWLOC_OSF_SYS */
-#ifdef HWLOC_HAVE_XML
     struct hwloc_backend_params_xml_s {
       /* xml backend parameters */
+#ifdef HWLOC_HAVE_LIBXML2
       void *doc;
+#endif /* HWLOC_HAVE_LIBXML2 */
+      char *buffer; /* only used when not using libxml2 */
       struct hwloc_xml_imported_distances_s {
 	hwloc_obj_t root;
 	struct hwloc_distances_s distances;
 	struct hwloc_xml_imported_distances_s *prev, *next;
       } *first_distances, *last_distances;
     } xml;
-#endif /* HWLOC_HAVE_XML */
     struct hwloc_backend_params_synthetic_s {
       /* synthetic backend parameters */
       char *string;
@@ -180,11 +179,9 @@ extern int hwloc_backend_linuxfs_init(struct hwloc_topology *topology, const cha
 extern void hwloc_backend_linuxfs_exit(struct hwloc_topology *topology);
 #endif /* HWLOC_LINUX_SYS */
 
-#ifdef HWLOC_HAVE_XML
 extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen);
-extern void hwloc_look_xml(struct hwloc_topology *topology);
+extern int hwloc_look_xml(struct hwloc_topology *topology);
 extern void hwloc_backend_xml_exit(struct hwloc_topology *topology);
-#endif /* HWLOC_HAVE_XML */
 
 #ifdef HWLOC_SOLARIS_SYS
 extern void hwloc_look_solaris(struct hwloc_topology *topology);

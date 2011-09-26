@@ -42,7 +42,8 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_insert_misc \
 	hwloc_topology_restrict \
 	hwloc_obj_infos \
-	hwloc_iodevs
+	hwloc_iodevs \
+	xmlbuffer
 
 if HWLOC_HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma
@@ -68,10 +69,6 @@ if HWLOC_HAVE_CUDART
 check_PROGRAMS += cudart
 endif HWLOC_HAVE_CUDART
 
-if HWLOC_HAVE_XML
-check_PROGRAMS += xmlbuffer
-endif HWLOC_HAVE_XML
-
 TESTS = $(check_PROGRAMS)
 
 # The library has a different name depending on whether we are
@@ -89,8 +86,8 @@ openfabrics_verbs_LDFLAGS = -libverbs
 myriexpress_LDFLAGS = -lmyriexpress
 cuda_LDFLAGS = -lcuda
 cudart_LDFLAGS = -lcuda -lcudart
-xmlbuffer_LDFLAGS = $(HWLOC_XML_LIBS)
-hwloc_backends_LDFLAGS = $(HWLOC_XML_LIBS)
+xmlbuffer_LDFLAGS = $(HWLOC_LIBXML2_LIBS)
+hwloc_backends_LDFLAGS = $(HWLOC_LIBXML2_LIBS)
 if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDFLAGS = -lpthread
 endif !HWLOC_HAVE_WINDOWS

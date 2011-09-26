@@ -5,12 +5,11 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
-#include <libxml/xmlstring.h>
-#include <libxml/xmlmemory.h>
 #include <hwloc.h>
 
-int main(void)
+static int one_test(void)
 {
   hwloc_topology_t topology;
   int size1, size2;
@@ -47,4 +46,39 @@ int main(void)
   hwloc_free_xmlbuffer(topology, buf2);
 
   return err;
+}
+
+int main(void)
+{
+  int err;
+
+  printf("using default import and export\n");
+  putenv("HWLOC_NO_LIBXML_IMPORT=0");
+  putenv("HWLOC_NO_LIBXML_EXPORT=0");
+  err = one_test();
+  if (err < 0)
+    return err;
+
+  printf("using minimalistic import and default export\n");
+  putenv("HWLOC_NO_LIBXML_IMPORT=1");
+  putenv("HWLOC_NO_LIBXML_EXPORT=0");
+  err = one_test();
+  if (err < 0)
+    return err;
+
+  printf("using default import and minimalistic export\n");
+  putenv("HWLOC_NO_LIBXML_IMPORT=0");
+  putenv("HWLOC_NO_LIBXML_EXPORT=1");
+  err = one_test();
+  if (err < 0)
+    return err;
+
+  printf("using minimalistic import and export\n");
+  putenv("HWLOC_NO_LIBXML_IMPORT=1");
+  putenv("HWLOC_NO_LIBXML_EXPORT=1");
+  err = one_test();
+  if (err < 0)
+    return err;
+
+  return 0;
 }

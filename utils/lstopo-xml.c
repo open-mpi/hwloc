@@ -8,8 +8,6 @@
 
 #include <private/autogen/config.h>
 
-#ifdef HWLOC_HAVE_XML
-
 #include <hwloc.h>
 #include <string.h>
 
@@ -25,5 +23,3 @@ void output_xml(hwloc_topology_t topology, const char *filename, int logical __h
     return;
   }
 }
-
-#endif /* HWLOC_HAVE_XML */

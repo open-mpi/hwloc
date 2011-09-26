@@ -50,6 +50,12 @@ test_topology ()
     then
 	result=1
     else
+        # copied from tests/xml/test-topology.sh.in
+	if grep '<?xml' "$expected_output" >/dev/null 2>&1 ; then
+	    sed -n -e '1h;1!H;${;g;s@<\([^ >][^ >]*\)\([^>]*[^/]\)>\n *</\1>@<\1\2/>@g;p;}' "$output" > "$output".new
+	    mv -f "$output".new "$output" 
+	fi
+	
 	if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
 	then
 	    diff -uBb "$expected_output" "$output"
@@ -78,10 +84,7 @@ test_eligible()
     local dir="$1"
     local output="$2"
 
-    needxml=0
-    grep '<?xml' "$output" >/dev/null 2>&1 && needxml=1
-
-    [ -d "$dir" -a -f "$output" -a \( "@HWLOC_HAVE_XML@" = 1 -o "$needxml" = 0 \) ]
+    [ -d "$dir" -a -f "$output" ]
 }
 
 
