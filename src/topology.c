@@ -2309,7 +2309,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   /* Only the System object on top by default */
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->next_group_depth = 0;
-  topology->levels[0] = malloc (sizeof (struct hwloc_obj));
+  topology->levels[0] = malloc (sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
   /* NULLify other levels so that we can detect and free old ones in hwloc_connect_levels() if needed */
   memset(topology->levels+1, 0, (HWLOC_DEPTH_MAX-1)*sizeof(*topology->levels));
@@ -2403,6 +2403,7 @@ hwloc_backend_exit(struct hwloc_topology *topology)
 
   if (topology->is_loaded) {
     hwloc_topology_clear(topology);
+    hwloc_distances_destroy(topology);
     hwloc_topology_setup_defaults(topology);
     topology->is_loaded = 0;
   }

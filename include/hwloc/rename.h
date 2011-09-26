@@ -144,6 +144,9 @@ extern "C" {
 #define hwloc_get_type_depth_e HWLOC_NAME(get_type_depth_e)
 #define HWLOC_TYPE_DEPTH_UNKNOWN HWLOC_NAME_CAPS(TYPE_DEPTH_UNKNOWN)
 #define HWLOC_TYPE_DEPTH_MULTIPLE HWLOC_NAME_CAPS(TYPE_DEPTH_MULTIPLE)
+#define HWLOC_TYPE_DEPTH_BRIDGE HWLOC_NAME_CAPS(TYPE_DEPTH_BRIDGE)
+#define HWLOC_TYPE_DEPTH_PCI_DEVICE HWLOC_NAME_CAPS(TYPE_DEPTH_PCI_DEVICE)
+#define HWLOC_TYPE_DEPTH_OS_DEVICE HWLOC_NAME_CAPS(TYPE_DEPTH_OS_DEVICE)
 
 #define hwloc_get_depth_type HWLOC_NAME(get_depth_type)
 #define hwloc_get_nbobjs_by_depth HWLOC_NAME(get_nbobjs_by_depth)
@@ -226,7 +229,6 @@ extern "C" {
 
 /* hwloc/bitmap.h */
 
-#define hwloc_bitmap HWLOC_NAME(bitmap)
 #define hwloc_bitmap_s HWLOC_NAME(bitmap_s)
 #define hwloc_bitmap_t HWLOC_NAME(bitmap_t)
 #define hwloc_const_bitmap_t HWLOC_NAME(const_bitmap_t)
@@ -280,11 +282,6 @@ extern "C" {
 
 /* hwloc/cpuset.h -- deprecated but still available */
 
-#define hwloc_cpuset HWLOC_NAME(cpuset)
-#define hwloc_cpuset_s HWLOC_NAME(cpuset_s)
-#define hwloc_cpuset_t HWLOC_NAME(cpuset_t)
-#define hwloc_const_cpuset_t HWLOC_NAME(const_cpuset_t)
-
 #define hwloc_cpuset_alloc HWLOC_NAME(cpuset_alloc)
 #define hwloc_cpuset_free HWLOC_NAME(cpuset_free)
 #define hwloc_cpuset_dup HWLOC_NAME(cpuset_dup)
@@ -295,6 +292,9 @@ extern "C" {
 #define hwloc_cpuset_zero HWLOC_NAME(cpuset_zero)
 #define hwloc_cpuset_fill HWLOC_NAME(cpuset_fill)
 #define hwloc_cpuset_from_ulong HWLOC_NAME(cpuset_from_ulong)
+#define hwloc_cpuset_taskset_snprintf HWLOC_NAME(cpuset_taskset_snprintf)
+#define hwloc_cpuset_taskset_asprintf HWLOC_NAME(cpuset_taskset_asprintf)
+#define hwloc_cpuset_taskset_sscanf HWLOC_NAME(cpuset_taskset_sscanf)
 
 #define hwloc_cpuset_from_ith_ulong HWLOC_NAME(cpuset_from_ith_ulong)
 #define hwloc_cpuset_to_ulong HWLOC_NAME(cpuset_to_ulong)
@@ -452,29 +452,31 @@ extern "C" {
 
 #define HWLOC_BACKEND_NONE HWLOC_NAME_CAPS(BACKEND_NONE)
 #define HWLOC_BACKEND_SYNTHETIC HWLOC_NAME_CAPS(BACKEND_SYNTHETIC)
-#define HWLOC_BACKEND_SYSFS HWLOC_NAME_CAPS(BACKEND_SYSFS)
+#define HWLOC_BACKEND_LINUXFS HWLOC_NAME_CAPS(BACKEND_LINUXFS)
 #define HWLOC_BACKEND_XML HWLOC_NAME_CAPS(BACKEND_XML)
 #define HWLOC_BACKEND_MAX HWLOC_NAME_CAPS(BACKEND_MAX)
 
 #define hwloc_backend_params_u HWLOC_NAME(backend_params_u)
-#define hwloc_backend_params_sysfs_s HWLOC_NAME(backend_params_sysfs_s)
+#define hwloc_backend_params_linuxfs_s HWLOC_NAME(backend_params_linuxfs_s)
 #define hwloc_backend_params_osf HWLOC_NAME(backend_params_osf)
 #define hwloc_backend_params_xml_s HWLOC_NAME(backend_params_xml_s)
 #define hwloc_backend_params_synthetic_s HWLOC_NAME(backend_params_synthetic_s)
 
+#define hwloc_xml_imported_distances_s HWLOC_NAME(xml_imported_distances_s)
+
 #define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)
-#define hwloc_setup_misc_level_from_distances HWLOC_NAME(setup_misc_level_from_distances)
 #define hwloc_get_sysctlbyname HWLOC_NAME(get_sysctlbyname)
 #define hwloc_get_sysctl HWLOC_NAME(get_sysctl)
 #define hwloc_fallback_nbprocessors HWLOC_NAME(fallback_nbprocessors)
+#define hwloc_connect_children HWLOC_NAME(connect_children)
+#define hwloc_connect_levels HWLOC_NAME(connect_levels)
 
-#define hwloc_look_linux HWLOC_NAME(look_linux)
-#define hwloc_set_linux_hooks HWLOC_NAME(set_linux_hooks)
-#define hwloc_backend_sysfs_init HWLOC_NAME(backend_sysfs_init)
-#define hwloc_backend_sysfs_exit HWLOC_NAME(backend_sysfs_exit)
+#define hwloc_look_linuxfs HWLOC_NAME(look_linuxfs)
+#define hwloc_set_linuxfs_hooks HWLOC_NAME(set_linuxfs_hooks)
+#define hwloc_backend_linuxfs_init HWLOC_NAME(backend_linuxfs_init)
+#define hwloc_backend_linuxfs_exit HWLOC_NAME(backend_linuxfs_exit)
 
 #define hwloc_backend_xml_init HWLOC_NAME(backend_xml_init)
-#define hwloc_xml_check_distances HWLOC_NAME(xml_check_distances)
 #define hwloc_look_xml HWLOC_NAME(look_xml)
 #define hwloc_backend_xml_exit HWLOC_NAME(backend_xml_exit)
 
@@ -510,10 +512,10 @@ extern "C" {
 #define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
 #define hwloc_report_error_t HWLOC_NAME(report_error_t)
 #define hwloc_report_os_error HWLOC_NAME(report_os_error)
+#define hwloc_hide_errors HWLOC_NAME(hide_errors)
 #define hwloc__insert_object_by_cpuset HWLOC_NAME(_insert_object_by_cpuset)
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
-#define hwloc_free_object HWLOC_NAME(free_object)
 #define hwloc_bitmap_printf_value HWLOC_NAME(bitmap_printf_value)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)

@@ -424,7 +424,7 @@ low-level routines for advanced programmers that want to manually
 manipulate objects and follow links between them.  Documentation for
 everything in hwloc.h are provided later in this document.  Developers
 should also look at hwloc/helper.h (and also in this document, which
-provides good higher-level topology traversal examples.
+provides good higher-level topology traversal examples).
 
 To precisely define the vocabulary used by hwloc, a \ref termsanddefs
 section is available and should probably be read first.  
@@ -710,20 +710,27 @@ Make sure to have had a look at those too!
   are cousins.</dd>
 
 <dt>Depth</dt>
-  <dd>Nesting level in the object tree, starting from the 0th object.</dd>
+  <dd>Nesting level in the object tree, starting from the root object.
+  If the topology is symmetric, the depth of a child is equal to the
+  parent depth plus one, and an object depth is also equal to the number
+  of parent/child links between the root object and the given object.
+  If the topology is asymmetric, the difference between some parent
+  and child depths may be larger than one when some intermediate levels
+  (for instance caches) are missing in only some parts of the machine.
+  </dd>
 
 <dt>OS or physical index</dt>
   <dd>The index that the operating system (OS) uses to identify the
   object.  This may be completely arbitrary, non-unique, non-contiguous, not
   representative of logical proximity, and may depend on the BIOS
-  configuration. That is why hwloc almost never use them, only in the default
+  configuration. That is why hwloc almost never uses them, only in the default
   lstopo output (<tt>P#x</tt>) and cpuset masks.</dd>
 
 <dt>Logical index</dt>
   <dd>Index to uniquely identify objects of the same type and depth,
   automatically computed by hwloc according to the topology.  It expresses
   logical proximity in a generic way, i.e. objects which have adjacent logical
-  indexes are adjacent in the topology. That is why hwloc almost always use
+  indexes are adjacent in the topology. That is why hwloc almost always uses
   it in its API, since it expresses logical proximity. They can be shown (as
   <tt>L#x</tt>) by <tt>lstopo</tt> thanks to the <tt>-l</tt> option.  This index
   is always linear and in
@@ -866,11 +873,14 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_XML_VERBOSE=1</dt>
-  <dd>enable XML verbose messages.
+<dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
+  <dd>enable verbose messages in the XML or synthetic topology backends.
   hwloc XML backends (see \ref xml) can emit some error messages to
-   the error output stream.
-   Enabling these verbose messages within hwloc can be useful for
-   understanding failures to parse input XML topologies.
+  the error output stream.
+  Enabling these verbose messages within hwloc can be useful for
+  understanding failures to parse input XML topologies.
+  Similarly, enabling verbose messages in the synthetic topology
+  backend can help understand why the description string is invalid.
   </dd>
 
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>

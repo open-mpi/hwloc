@@ -26,7 +26,8 @@ Version 1.4.0
   with NUMA nodes without any CPU.
 * Grouping by distances now also works when loading from XML.
 * Improve XML-related error reporting.
-* Hide libxml2 error messages unless HWLOC_XML_VERBOSE=1.
+* Hide XML or synthetic topology error messages unless HWLOC_XML_VERBOSE=1
+  or HWLOC_SYNTHETIC_VERBOSE=1.
 * Fix and/or document the behavior of most inline functions in hwloc/helper.h
   when the topology contains some I/O or Misc objects.
 * Backend documentation enhancements.

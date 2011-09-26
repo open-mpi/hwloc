@@ -382,6 +382,7 @@ EOF
         hwloc_config_prefix[tests/linux/gather/Makefile]
         hwloc_config_prefix[tests/xml/Makefile]
         hwloc_config_prefix[tests/ports/Makefile]
+        hwloc_config_prefix[tests/rename/Makefile]
         hwloc_config_prefix[tests/linux/hwloc-gather-topology]
         hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh]
         hwloc_config_prefix[tests/linux/test-topology.sh]
