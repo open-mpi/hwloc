@@ -50,12 +50,6 @@ test_topology ()
     then
 	result=1
     else
-        # copied from tests/xml/test-topology.sh.in
-	if grep '<?xml' "$expected_output" >/dev/null 2>&1 ; then
-	    sed -n -e '1h;1!H;${;g;s@<\([^ >][^ >]*\)\([^>]*[^/]\)>\n *</\1>@<\1\2/>@g;p;}' "$output" > "$output".new
-	    mv -f "$output".new "$output" 
-	fi
-	
 	if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
 	then
 	    diff -uBb "$expected_output" "$output"
