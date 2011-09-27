@@ -46,23 +46,41 @@ fi
 file="$tmp/lstopo_xml.output.xml"
 
 set -e
-$lstopo --if xml --input "$1" --of xml "$file"
 
-if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
-then
+do_run()
+{
+  $lstopo --if xml --input "$1" --of xml "$file"
+
+  if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
+  then
     diff @HWLOC_DIFF_U@ "$1" "$file"
-else
+  else
     if ! diff "$1" "$file" >/dev/null
     then
 	cp -f "$file" "$1"
 	echo "Updated $1"
     fi
-fi
+  fi
 
-if [ -n "@XMLLINT@" ]
-then
-    cp "$HWLOC_top_srcdir"/src/hwloc.dtd "$tmp/"
+  if [ -n "@XMLLINT@" ]
+  then
+    cp -f "$HWLOC_top_srcdir"/src/hwloc.dtd "$tmp/"
     @XMLLINT@ --valid "$file" > /dev/null
-fi
+  fi
+
+  rm "$file"
+}
+
+export HWLOC_NO_LIBXML_IMPORT
+export HWLOC_NO_LIBXML_EXPORT
+
+echo "Importing with default parser and reexporting with minimalistic implementation..."
+HWLOC_NO_LIBXML_IMPORT=0
+HWLOC_NO_LIBXML_EXPORT=1
+do_run "$1"
+echo "Importing with minimalistic parser and reexporting with default implementation..."
+HWLOC_NO_LIBXML_IMPORT=1
+HWLOC_NO_LIBXML_EXPORT=0
+do_run "$1"
 
 rm -rf "$tmp"

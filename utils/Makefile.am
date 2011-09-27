@@ -19,18 +19,15 @@ if HWLOC_BUILD_UTILS
 bin_PROGRAMS = lstopo hwloc-calc hwloc-bind hwloc-distrib hwloc-ps
 endif
 
-lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c
+lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-xml.c
 if HWLOC_HAVE_CAIRO
 lstopo_SOURCES += lstopo-cairo.c
-endif
-if HWLOC_HAVE_XML
-lstopo_SOURCES += lstopo-xml.c
 endif
 if HWLOC_HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
 endif
-lstopo_CFLAGS = $(HWLOC_CAIRO_CFLAGS) $(HWLOC_XML_CFLAGS) $(HWLOC_PCI_CFLAGS)
-lstopo_LDADD = $(LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_XML_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS) $(HWLOC_PCI_LIBS)
+lstopo_CFLAGS = $(HWLOC_CAIRO_CFLAGS) $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
+lstopo_LDADD = $(LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_LIBXML2_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS) $(HWLOC_PCI_LIBS)
 if HWLOC_BUILD_UTILS
 if HWLOC_HAVE_WINDOWS
 bin_PROGRAMS += lstopo-win

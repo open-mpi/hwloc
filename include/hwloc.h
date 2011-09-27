@@ -922,7 +922,7 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
  *
  * This file may be loaded later through hwloc_topology_set_xml().
  *
- * \return -1 if a failure occured or if XML is not supported.
+ * \return -1 if a failure occured.
  */
 HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
 
@@ -933,7 +933,7 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  *
  * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
  *
- * \return -1 if a failure occured or if XML is not supported.
+ * \return -1 if a failure occured.
  */
 HWLOC_DECLSPEC int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen);
 

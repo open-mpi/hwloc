@@ -78,10 +78,7 @@ test_eligible()
     local dir="$1"
     local output="$2"
 
-    needxml=0
-    grep '<?xml' "$output" >/dev/null 2>&1 && needxml=1
-
-    [ -d "$dir" -a -f "$output" -a \( "@HWLOC_HAVE_XML@" = 1 -o "$needxml" = 0 \) ]
+    [ -d "$dir" -a -f "$output" ]
 }
 
 
