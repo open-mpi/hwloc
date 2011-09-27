@@ -698,7 +698,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 #endif
 			      );
     if (resname)
-      hwloc_obj_add_info(obj, "PCIDevice", name);
+      hwloc_obj_add_info(obj, "PCIDevice", resname);
 
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
