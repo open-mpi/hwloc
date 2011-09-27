@@ -39,7 +39,7 @@ debug=
 want_success_mail=1
 
 # max length of logfile to send in an e-mail
-max_log_len=999999
+max_log_len=50
 
 # how many snapshots to keep in the destdir?
 max_snapshots=5
