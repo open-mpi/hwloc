@@ -969,7 +969,12 @@ static int hwloc_memory_page_type_compare(const void *_a, const void *_b)
   const struct hwloc_obj_memory_page_type_s *a = _a;
   const struct hwloc_obj_memory_page_type_s *b = _b;
   /* consider 0 as larger so that 0-size page_type go to the end */
-  return b->size ? (int)(a->size - b->size) : -1;
+  if (!b->size)
+    return -1;
+  /* don't cast a-b in int since those are ullongs */
+  if (b->size == a->size)
+    return 0;
+  return a->size < b->size ? -1 : 1;
 }
 
 /* Propagate memory counts */
@@ -1995,6 +2000,8 @@ static void alloc_cpusets(hwloc_obj_t obj)
   obj->allowed_nodeset = hwloc_bitmap_alloc_full();
 }
 
+static void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
+
 /* Main discovery loop */
 static int
 hwloc_discover(struct hwloc_topology *topology)
@@ -2004,10 +2011,11 @@ hwloc_discover(struct hwloc_topology *topology)
     hwloc_look_synthetic(topology);
   } else if (topology->backend_type == HWLOC_BACKEND_CUSTOM) {
     /* nothing to do, just connect levels below */
-#ifdef HWLOC_HAVE_XML
   } else if (topology->backend_type == HWLOC_BACKEND_XML) {
-    hwloc_look_xml(topology);
-#endif
+    if (hwloc_look_xml(topology) < 0) {
+      hwloc_topology_clear(topology);
+      return -1;
+    }
   } else {
 
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
@@ -2207,11 +2215,9 @@ hwloc_discover(struct hwloc_topology *topology)
     if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
       /* TODO */
     }
-#ifdef HWLOC_HAVE_XML
     else if (topology->backend_type == HWLOC_BACKEND_XML) {
       /* TODO */
     }
-#endif
 #ifdef HWLOC_HAVE_LIBPCI
     else if (topology->is_thissystem) {
       hwloc_look_libpci(topology);
@@ -2385,7 +2391,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   /* Only the System object on top by default */
   topology->nb_levels = 1; /* there's at least SYSTEM */
   topology->next_group_depth = 0;
-  topology->levels[0] = malloc (sizeof (struct hwloc_obj));
+  topology->levels[0] = malloc (sizeof (hwloc_obj_t));
   topology->level_nbobjects[0] = 1;
   /* NULLify other levels so that we can detect and free old ones in hwloc_connect_levels() if needed */
   memset(topology->levels+1, 0, (HWLOC_DEPTH_MAX-1)*sizeof(*topology->levels));
@@ -2504,11 +2510,9 @@ hwloc_backend_exit(struct hwloc_topology *topology)
     hwloc_backend_linuxfs_exit(topology);
     break;
 #endif
-#ifdef HWLOC_HAVE_XML
   case HWLOC_BACKEND_XML:
     hwloc_backend_xml_exit(topology);
     break;
-#endif
   case HWLOC_BACKEND_SYNTHETIC:
     hwloc_backend_synthetic_exit(topology);
     break;
@@ -2523,6 +2527,7 @@ hwloc_backend_exit(struct hwloc_topology *topology)
 
   if (topology->is_loaded) {
     hwloc_topology_clear(topology);
+    hwloc_distances_destroy(topology);
     hwloc_topology_setup_defaults(topology);
     topology->is_loaded = 0;
   }
@@ -2560,12 +2565,7 @@ hwloc_topology_set_xml(struct hwloc_topology *topology __hwloc_attribute_unused,
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
-#ifdef HWLOC_HAVE_XML
   return hwloc_backend_xml_init(topology, xmlpath, NULL, 0);
-#else /* HWLOC_HAVE_XML */
-  errno = ENOSYS;
-  return -1;
-#endif /* !HWLOC_HAVE_XML */
 }
 
 int
@@ -2585,12 +2585,7 @@ hwloc_topology_set_xmlbuffer(struct hwloc_topology *topology __hwloc_attribute_u
   /* cleanup existing backend */
   hwloc_backend_exit(topology);
 
-#ifdef HWLOC_HAVE_XML
   return hwloc_backend_xml_init(topology, NULL, xmlbuffer, size);
-#else /* HWLOC_HAVE_XML */
-  errno = ENOSYS;
-  return -1;
-#endif /* !HWLOC_HAVE_XML */
 }
 
 int
@@ -2718,7 +2713,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
     }
   }
 #endif
-#ifdef HWLOC_HAVE_XML
   {
     char *xmlpath_env = getenv("HWLOC_FORCE_XMLFILE");
     if (xmlpath_env) {
@@ -2726,7 +2720,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_xml_init(topology, xmlpath_env, NULL, 0);
     }
   }
-#endif
 
   /* only apply non-FORCE variables if we have not changed the backend yet */
 #ifdef HWLOC_LINUX_SYS
@@ -2736,13 +2729,11 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_linuxfs_init(topology, fsroot_path_env);
   }
 #endif
-#ifdef HWLOC_HAVE_XML
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
     char *xmlpath_env = getenv("HWLOC_XMLFILE");
     if (xmlpath_env)
       hwloc_backend_xml_init(topology, xmlpath_env, NULL, 0);
   }
-#endif
 
   /* always apply non-FORCE THISSYSTEM since it was explicitly designed to override setups from other backends */
   local_env = getenv("HWLOC_THISSYSTEM");

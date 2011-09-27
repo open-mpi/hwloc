@@ -141,9 +141,12 @@ and build.
 
 The hwloc core may also benefit from the following development packages:
 <ul>
-<li>libxml2 for XML import/export (also needed for lstopo XML support).</li>
 <li>pciutils (libpci) for I/O discovery.</li>
 <li>libnuma for memory binding and migration support on Linux.</li>
+<li>libxml2 for full XML import/export support (otherwise, the
+    internal minimalistic parser will only be able to import
+    XML files that were exported by the same hwloc release).
+    See \ref xml for details.</li>
 </ul>
 
 
@@ -421,7 +424,7 @@ low-level routines for advanced programmers that want to manually
 manipulate objects and follow links between them.  Documentation for
 everything in hwloc.h are provided later in this document.  Developers
 should also look at hwloc/helper.h (and also in this document, which
-provides good higher-level topology traversal examples.
+provides good higher-level topology traversal examples).
 
 To precisely define the vocabulary used by hwloc, a \ref termsanddefs
 section is available and should probably be read first.  
@@ -628,6 +631,7 @@ The documentation chapters include
 <li> \ref cpu_mem_bind
 <li> \ref iodevices
 <li> \ref multinode
+<li> \ref xml
 <li> \ref interoperability
 <li> \ref threadsafety
 <li> \ref embed
@@ -707,20 +711,27 @@ Make sure to have had a look at those too!
   are cousins.</dd>
 
 <dt>Depth</dt>
-  <dd>Nesting level in the object tree, starting from the 0th object.</dd>
+  <dd>Nesting level in the object tree, starting from the root object.
+  If the topology is symmetric, the depth of a child is equal to the
+  parent depth plus one, and an object depth is also equal to the number
+  of parent/child links between the root object and the given object.
+  If the topology is asymmetric, the difference between some parent
+  and child depths may be larger than one when some intermediate levels
+  (for instance caches) are missing in only some parts of the machine.
+  </dd>
 
 <dt>OS or physical index</dt>
   <dd>The index that the operating system (OS) uses to identify the
   object.  This may be completely arbitrary, non-unique, non-contiguous, not
   representative of logical proximity, and may depend on the BIOS
-  configuration. That is why hwloc almost never use them, only in the default
+  configuration. That is why hwloc almost never uses them, only in the default
   lstopo output (<tt>P#x</tt>) and cpuset masks.</dd>
 
 <dt>Logical index</dt>
   <dd>Index to uniquely identify objects of the same type and depth,
   automatically computed by hwloc according to the topology.  It expresses
   logical proximity in a generic way, i.e. objects which have adjacent logical
-  indexes are adjacent in the topology. That is why hwloc almost always use
+  indexes are adjacent in the topology. That is why hwloc almost always uses
   it in its API, since it expresses logical proximity. They can be shown (as
   <tt>L#x</tt>) by <tt>lstopo</tt> thanks to the <tt>-l</tt> option.  This index
   is always linear and in
@@ -874,15 +885,18 @@ following environment variables.
   return success.  To have hwloc still actually call OS-specific hooks,
   HWLOC_THISSYSTEM should be set 1 in the environment too, to assert that
   the loaded file is really the underlying system.
+  See also \ref xml.
   </dd>
 
 <dt>HWLOC_XML_VERBOSE=1</dt>
-  <dd>enable XML verbose messages.
-  hwloc uses the libxml2 library for importing/exporting topologies
-  to XML files or buffers. This library can emit some error messages
-  to the error output stream. Enabling these verbose messages within
-  hwloc can be useful for understanding failures to parse input XML
-  topologies.
+<dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
+  <dd>enable verbose messages in the XML or synthetic topology backends.
+  hwloc XML backends (see \ref xml) can emit some error messages to
+  the error output stream.
+  Enabling these verbose messages within hwloc can be useful for
+  understanding failures to parse input XML topologies.
+  Similarly, enabling verbose messages in the synthetic topology
+  backend can help understand why the description string is invalid.
   </dd>
 
 <dt>HWLOC_FSROOT=/path/to/linux/filesystem-root/</dt>
@@ -1334,6 +1348,61 @@ is invoked.
 
 
 
+\page xml Importing and exporting topologies from/to XML files
+
+hwloc offers the ability to export topologies to XML files and reload
+them later. This is for instance useful for loading topologies faster
+(see \ref faq_xml), manipulating other nodes' topology, or avoiding
+the need for privileged processes (see \ref faq_privileged).
+
+Topologies may be exported to XML files thanks to hwloc_topology_export_xml(),
+or to a XML memory buffer with hwloc_topology_export_xmlbuffer().
+The lstopo program can also serve as a XML topology export tool.
+
+XML topologies may then be reloaded later with hwloc_topology_set_xml()
+and hwloc_topology_set_xmlbuffer().
+The XMLFILE environment variable also tells hwloc to load the topology
+from the given XML file.
+
+\section xml_backends libxml2 and minimalistic XML backends
+
+hwloc offers two backends for importing/exporting XML.
+
+First, it can use the libxml2 library for importing/exporting XML
+files. It features full XML support, for instance when those files
+have to be manipulated by non-hwloc software (e.g. a XSLT parser).
+The libxml2 backend is enabled by default if libxml2 development
+headers are available.
+
+If libxml2 is not available at configure time,
+or if <tt>--disable-libxml2</tt> is passed, hwloc falls back to a
+custom backend.
+Contrary to the aforementioned full XML backend with libxml2, this
+minimalistic XML backend cannot be guaranteed to work with external
+programs.
+It should only be assumed to be compatible with the same hwloc
+release (even if using the libxml2 backend).
+Its advantage is however to always be available without requiring
+any external dependency.
+
+\section xml_errors XML import error management
+
+Importing XML files can fail at least because of file access errors,
+invalid XML syntax or non-hwloc-valid XML contents.
+
+Both backend cannot detect all these errors when the input XML
+file or buffer is selected (when hwloc_topology_set_xml() or
+hwloc_topology_set_xmlbuffer() is called).
+Some errors such non-hwloc-valid contents can only be detected
+later when loading the topology with hwloc_topology_load().
+
+It is therefore strongly recommended to check the return value of
+both hwloc_topology_set_xml() (or hwloc_topology_set_xmlbuffer())
+and hwloc_topology_load() to handle all these errors.
+
+
+
+
 \page interoperability Interoperability With Other Software
 
 Although hwloc offers its own portable interface, it still may have to
@@ -1666,6 +1735,7 @@ files or calling multiple functions of the operating system.
 It is also possible to manipulate such XML files with the C programming
 interface, and the import/export may also be directed to memory buffer
 (that may for instance be transmitted between applications through a socket).
+See also \ref xml.
 
 
 \section faq_privileged Does hwloc require privileged access?
@@ -1679,7 +1749,8 @@ and the entire PCI discovery on FreeBSD requires access to the
 
 To workaround this limitation, it is recommended to export the
 topology as a XML file generated by the administrator (with the
-lstopo program) and make it available to all users.
+lstopo program) and make it available to all users
+(see \ref xml).
 It will offer all discovery information to any application without
 requiring any privileged access anymore.
 Only the necessary hardware characteristics will be exported, no

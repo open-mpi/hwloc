@@ -478,7 +478,7 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 	*assoc = '\0';
       else
 	snprintf(assoc, sizeof(assoc), "%sways=%d", separator, obj->attr->cache.associativity);
-      res = hwloc_snprintf(tmp, tmplen, "%s%lu%s%sline=%u%s",
+      res = hwloc_snprintf(tmp, tmplen, "%ssize=%lu%s%slinesize=%u%s",
 			   prefix,
 			   (unsigned long) hwloc_memory_size_printf_value(obj->attr->cache.size, verbose),
 			   hwloc_memory_size_printf_unit(obj->attr->cache.size, verbose),

@@ -202,6 +202,10 @@ int main(int argc, char *argv[])
   int err;
   int ret = EXIT_SUCCESS;
 
+  /* enable verbose backends */
+  putenv("HWLOC_XML_VERBOSE=1");
+  putenv("HWLOC_SYNTHETIC_VERBOSE=1");
+
   callname = argv[0];
 
   set = hwloc_bitmap_alloc();

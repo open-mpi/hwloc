@@ -102,13 +102,13 @@ endif HWLOC_HAVE_CPUID
 # Installable library
 
 libhwloc_la_SOURCES = $(sources)
-libhwloc_la_LDFLAGS = $(ldflags) -version-number $(libhwloc_so_version) $(HWLOC_XML_LIBS) $(HWLOC_LINUX_LIBNUMA_LIBS) $(HWLOC_PCI_LIBS)
+libhwloc_la_LDFLAGS = $(ldflags) -version-number $(libhwloc_so_version) $(HWLOC_LIBXML2_LIBS) $(HWLOC_LINUX_LIBNUMA_LIBS) $(HWLOC_PCI_LIBS)
 
 # Embedded library (note the lack of a .so version number -- that
 # intentionally only appears in the installable library)
 
 libhwloc_embedded_la_SOURCES = $(sources)
-libhwloc_embedded_la_LDFLAGS = $(ldflags) $(HWLOC_XML_LIBS) $(HWLOC_LINUX_LIBNUMA_LIBS)
+libhwloc_embedded_la_LDFLAGS = $(ldflags) $(HWLOC_LIBXML2_LIBS) $(HWLOC_LINUX_LIBNUMA_LIBS)
 
 # XML data (only install if we're building in standalone mode)
 

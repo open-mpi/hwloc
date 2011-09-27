@@ -1891,6 +1891,7 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
   uint64_t meminfo_hugepages_count, meminfo_hugepages_size = 0;
   struct stat st;
   int has_sysfs_hugepages = 0;
+  char *pagesize_env = getenv("HWLOC_DEBUG_PAGESIZE");
   int types = 2;
   int err;
 
@@ -1900,15 +1901,20 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
     has_sysfs_hugepages = 1;
   }
 
-  if (topology->is_thissystem) {
+  if (topology->is_thissystem || pagesize_env) {
+    /* we cannot report any page_type info unless we have the page size.
+     * we'll take it either from the system if local, or from the debug env variable
+     */
     memory->page_types_len = types;
-    memory->page_types = malloc(types*sizeof(*memory->page_types));
-    memset(memory->page_types, 0, types*sizeof(*memory->page_types));
-    /* Try to get the hugepage size from sysconf in case we fail to get it from /proc/meminfo later */
+    memory->page_types = calloc(types, sizeof(*memory->page_types));
+  }
+
+  if (topology->is_thissystem) {
+    /* Get the page and hugepage sizes from sysconf */
 #ifdef HAVE__SC_LARGE_PAGESIZE
     memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-    memory->page_types[0].size = getpagesize();
+    memory->page_types[0].size = getpagesize(); /* might be overwritten later by /proc/meminfo or sysfs */
   }
 
   hwloc_parse_meminfo_info(topology, "/proc/meminfo", 0 /* no prefix */,
@@ -1931,6 +1937,17 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
         memory->page_types_len = 1;
       }
     }
+
+    if (pagesize_env) {
+      /* We cannot get the pagesize if not thissystem, use the env-given one to experience the code during make check */
+      memory->page_types[0].size = strtoull(pagesize_env, NULL, 10);
+      /* If failed, use 4kB */
+      if (!memory->page_types[0].size)
+	memory->page_types[0].size = 4096;
+    }
+    assert(memory->page_types[0].size); /* from sysconf if local or from the env */
+    assert(memory->page_types[1].size); /* from sysconf if local, or from /proc/meminfo, or from sysfs */
+
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
 }
@@ -2147,7 +2164,7 @@ hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
 
   file = hwloc_open(fname, root_fd);
   if (-1 == file) {
-      goto out;
+      goto out_no_close;
   }
   if (fstat(file, &fs)) {
     goto out;
@@ -2167,6 +2184,7 @@ hwloc_read_raw(const char *p, const char *p1, size_t *bytes_read, int root_fd)
 
  out:
   close(file);
+ out_no_close:
   if (NULL != fname) {
       free(fname);
   }
@@ -2883,7 +2901,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     if (Psock != -1) {
       unsigned long Pproc = Lprocs[Lproc].Pproc;
       for (i=0; i<numsockets; i++)
-	if (Psock == Lsock_to_Psock[i])
+	if ((unsigned) Psock == Lsock_to_Psock[i])
 	  break;
       Lprocs[Lproc].Lsock = i;
       hwloc_debug("%lu on socket %u (%lx)\n", Pproc, i, Psock);
@@ -2897,7 +2915,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
    * provide bogus information. We should rather drop it. */
   missingsocket=0;
   for(j=0; j<numprocs; j++)
-    if (Lprocs[i].Psock == (unsigned) -1) {
+    if (Lprocs[i].Psock == -1) {
       missingsocket=1;
       break;
     }
@@ -2908,7 +2926,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock_to_Psock[i]);
       obj->cpuset = hwloc_bitmap_alloc();
       for(j=0; j<numprocs; j++)
-	if (Lprocs[j].Lsock == i)
+	if ((unsigned) Lprocs[j].Lsock == i)
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
@@ -2921,7 +2939,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     long Pcore = Lprocs[Lproc].Pcore;
     if (Pcore != -1) {
       for (i=0; i<numcores; i++)
-	if (Pcore == Lcore_to_Pcore[i] && Lprocs[Lproc].Psock == Lcore_to_Psock[i])
+	if ((unsigned) Pcore == Lcore_to_Pcore[i] && (unsigned) Lprocs[Lproc].Psock == Lcore_to_Psock[i])
 	  break;
       Lprocs[Lproc].Lcore = i;
       if (i==numcores) {
@@ -2935,7 +2953,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
    * provide bogus information. We should rather drop it. */
   missingcore=0;
   for(j=0; j<numprocs; j++)
-    if (Lprocs[i].Pcore == (unsigned) -1) {
+    if (Lprocs[i].Pcore == -1) {
       missingcore=1;
       break;
     }
@@ -2946,7 +2964,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, Lcore_to_Pcore[i]);
       obj->cpuset = hwloc_bitmap_alloc();
       for(j=0; j<numprocs; j++)
-	if (Lprocs[j].Lcore == i)
+	if ((unsigned) Lprocs[j].Lcore == i)
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
       hwloc_debug_1arg_bitmap("Core %d has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);

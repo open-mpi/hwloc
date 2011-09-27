@@ -78,8 +78,9 @@ static __hwloc_inline int
 hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_cpuset_t hwlocset,
                                        const cpu_set_t *schedset, size_t schedsetsize)
 {
+  int cpu;
 #ifdef CPU_ZERO_S
-  int cpu, count;
+  int count;
 #endif
   hwloc_bitmap_zero(hwlocset);
 #ifdef CPU_ZERO_S
@@ -96,7 +97,6 @@ hwloc_cpuset_from_glibc_sched_affinity(hwloc_topology_t topology __hwloc_attribu
   /* sched.h does not support dynamic cpu_set_t (introduced in glibc 2.7),
    * assume we have a very old interface without CPU_COUNT (added in 2.6)
    */
-  int cpu;
   assert(schedsetsize == sizeof(cpu_set_t));
   for(cpu=0; cpu<CPU_SETSIZE; cpu++)
     if (CPU_ISSET(cpu, schedset))
