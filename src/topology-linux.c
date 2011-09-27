@@ -2901,7 +2901,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     if (Psock != -1) {
       unsigned long Pproc = Lprocs[Lproc].Pproc;
       for (i=0; i<numsockets; i++)
-	if (Psock == Lsock_to_Psock[i])
+	if ((unsigned) Psock == Lsock_to_Psock[i])
 	  break;
       Lprocs[Lproc].Lsock = i;
       hwloc_debug("%lu on socket %u (%lx)\n", Pproc, i, Psock);
@@ -2915,7 +2915,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
    * provide bogus information. We should rather drop it. */
   missingsocket=0;
   for(j=0; j<numprocs; j++)
-    if (Lprocs[i].Psock == (unsigned) -1) {
+    if (Lprocs[i].Psock == -1) {
       missingsocket=1;
       break;
     }
@@ -2926,7 +2926,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock_to_Psock[i]);
       obj->cpuset = hwloc_bitmap_alloc();
       for(j=0; j<numprocs; j++)
-	if (Lprocs[j].Lsock == i)
+	if ((unsigned) Lprocs[j].Lsock == i)
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
@@ -2939,7 +2939,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
     long Pcore = Lprocs[Lproc].Pcore;
     if (Pcore != -1) {
       for (i=0; i<numcores; i++)
-	if (Pcore == Lcore_to_Pcore[i] && Lprocs[Lproc].Psock == Lcore_to_Psock[i])
+	if ((unsigned) Pcore == Lcore_to_Pcore[i] && (unsigned) Lprocs[Lproc].Psock == Lcore_to_Psock[i])
 	  break;
       Lprocs[Lproc].Lcore = i;
       if (i==numcores) {
@@ -2953,7 +2953,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
    * provide bogus information. We should rather drop it. */
   missingcore=0;
   for(j=0; j<numprocs; j++)
-    if (Lprocs[i].Pcore == (unsigned) -1) {
+    if (Lprocs[i].Pcore == -1) {
       missingcore=1;
       break;
     }
@@ -2964,7 +2964,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, Lcore_to_Pcore[i]);
       obj->cpuset = hwloc_bitmap_alloc();
       for(j=0; j<numprocs; j++)
-	if (Lprocs[j].Lcore == i)
+	if ((unsigned) Lprocs[j].Lcore == i)
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
       hwloc_debug_1arg_bitmap("Core %d has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
