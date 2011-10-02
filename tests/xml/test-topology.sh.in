@@ -53,7 +53,7 @@ do_run()
 
   if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
   then
-    diff @HWLOC_DIFF_U@ "$1" "$file"
+    diff @HWLOC_DIFF_U@ @HWLOC_DIFF_W@ "$1" "$file"
   else
     if ! diff "$1" "$file" >/dev/null
     then
