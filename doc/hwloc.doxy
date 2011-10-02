@@ -393,7 +393,7 @@ low-level routines for advanced programmers that want to manually
 manipulate objects and follow links between them.  Documentation for
 everything in hwloc.h are provided later in this document.  Developers
 should also look at hwloc/helper.h (and also in this document, which
-provides good higher-level topology traversal examples.
+provides good higher-level topology traversal examples).
 
 To precisely define the vocabulary used by hwloc, a \ref termsanddefs
 section is available and should probably be read first.  
@@ -679,14 +679,14 @@ Make sure to have had a look at those too!
   <dd>The index that the operating system (OS) uses to identify the
   object.  This may be completely arbitrary, non-unique, non-contiguous, not
   representative of logical proximity, and may depend on the BIOS
-  configuration. That is why hwloc almost never use them, only in the default
+  configuration. That is why hwloc almost never uses them, only in the default
   lstopo output (<tt>P#x</tt>) and cpuset masks.</dd>
 
 <dt>Logical index</dt>
   <dd>Index to uniquely identify objects of the same type and depth,
   automatically computed by hwloc according to the topology.  It expresses
   logical proximity in a generic way, i.e. objects which have adjacent logical
-  indexes are adjacent in the topology. That is why hwloc almost always use
+  indexes are adjacent in the topology. That is why hwloc almost always uses
   it in its API, since it expresses logical proximity. They can be shown (as
   <tt>L#x</tt>) by <tt>lstopo</tt> thanks to the <tt>-l</tt> option.  This index
   is always linear and in
