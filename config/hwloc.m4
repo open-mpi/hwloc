@@ -758,6 +758,18 @@ AC_DEFUN([_HWLOC_CHECK_DIFF_U], [
   AC_MSG_RESULT([$HWLOC_DIFF_U])
 ])
 
+AC_DEFUN([_HWLOC_CHECK_DIFF_W], [
+  AC_MSG_CHECKING([whether diff accepts -w])
+  if diff -w /dev/null /dev/null 2> /dev/null
+  then
+    HWLOC_DIFF_W="-w"
+  else
+    HWLOC_DIFF_W=""
+  fi
+  AC_SUBST([HWLOC_DIFF_W])
+  AC_MSG_RESULT([$HWLOC_DIFF_W])
+])
+
 #-----------------------------------------------------------------------
 
 dnl HWLOC_CHECK_DECL
