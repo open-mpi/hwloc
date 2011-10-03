@@ -459,6 +459,10 @@ struct hwloc_obj {
 
   struct hwloc_obj_info_s *infos;	/**< \brief Array of stringified info type=name. */
   unsigned infos_count;			/**< \brief Size of infos array. */
+
+  int symmetric_subtree;		/**< \brief Set if the subtree of objects below this object is symmetric,
+					  * which means all children and their children have identical subtrees.
+					  */
 };
 /**
  * \brief Convenience typedef; a pointer to a struct hwloc_obj.
