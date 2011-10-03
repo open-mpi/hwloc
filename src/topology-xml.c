@@ -9,6 +9,7 @@
 #include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/private.h>
+#include <private/misc.h>
 #include <private/debug.h>
 
 #include <assert.h>
