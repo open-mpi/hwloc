@@ -390,9 +390,9 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
   if (attrlen > 0)
-    return hwloc_snprintf(text, textlen, "%s%s (%s)", typestr, indexstr, attrstr);
+    return snprintf(text, textlen, "%s%s (%s)", typestr, indexstr, attrstr);
   else
-    return hwloc_snprintf(text, textlen, "%s%s", typestr, indexstr);
+    return snprintf(text, textlen, "%s%s", typestr, indexstr);
 }
 
 static void
