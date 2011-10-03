@@ -29,6 +29,9 @@ Version 1.4.0
 * Hide synthetic topology error messages unless HWLOC_SYNTHETIC_VERBOSE=1.
 * Fix and/or document the behavior of most inline functions in hwloc/helper.h
   when the topology contains some I/O or Misc objects.
+* Add symmetric_subtree object attribute to ease assumptions when consulting
+  regular symmetric topologies.
+* Add synthetic exporting of symmetric topologies to lstopo.
 * Backend documentation enhancements.
 * lstopo -v -p now displays distance matrices with physical indexes.
 * Add hwloc-distances utility to list distances.
