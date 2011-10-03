@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -390,9 +390,9 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
   if (attrlen > 0)
-    return snprintf(text, textlen, "%s%s (%s)", typestr, indexstr, attrstr);
+    return hwloc_snprintf(text, textlen, "%s%s (%s)", typestr, indexstr, attrstr);
   else
-    return snprintf(text, textlen, "%s%s", typestr, indexstr);
+    return hwloc_snprintf(text, textlen, "%s%s", typestr, indexstr);
 }
 
 static void
