@@ -32,6 +32,8 @@ Version 1.4.0
 * Add symmetric_subtree object attribute to ease assumptions when consulting
   regular symmetric topologies.
 * Add synthetic exporting of symmetric topologies to lstopo.
+* Add hwloc_get_obj_index_inside_cpuset() to retrieve the "logical" index
+  of an object within a subtree of the topology.
 * Backend documentation enhancements.
 * lstopo -v -p now displays distance matrices with physical indexes.
 * Add hwloc-distances utility to list distances.

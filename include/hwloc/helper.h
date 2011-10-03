@@ -399,6 +399,28 @@ hwloc_get_nbobjs_inside_cpuset_by_type (hwloc_topology_t topology, hwloc_const_c
   return hwloc_get_nbobjs_inside_cpuset_by_depth(topology, set, depth);
 }
 
+/** \brief Return the logical index among the objects included in CPU set \p set.
+ *
+ * Consult all objects in the same level as \p obj and inside CPU set \p set
+ * in the logical order, and return the index of \p obj within them.
+ * If \p set covers the entire topology, this is the logical index of \p obj.
+ * Otherwise, this is similar to a logical index within the part of the topology
+ * defined by CPU set \p set.
+ */
+static __hwloc_inline int __hwloc_attribute_pure
+hwloc_get_obj_index_inside_cpuset (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set,
+				   hwloc_obj_t obj)
+{
+  int index = 0;
+  if (!hwloc_bitmap_isincluded(obj->cpuset, set))
+    return -1;
+  /* count how many objects are inside the cpuset on the way from us to the beginning of the level */
+  while ((obj = obj->prev_cousin) != NULL)
+    if (hwloc_bitmap_isincluded(obj->cpuset, set))
+      index++;
+  return index;
+}
+
 /** @} */
 
 
