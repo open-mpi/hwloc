@@ -71,7 +71,7 @@ while test $# -gt 0 ; do
 		else
 			file=`mktemp --tmpdir hwloc-assembler-remote.$1.XXXXXXXX.xml`
 			echo -n "Exporting host $1 topology to $file ..."
-			if "$ssh" "$1" "$lstopo" "$lstopoopts" -.xml > $file 2>/dev/null ; then
+			if "$ssh" "$1" "$lstopo" "$lstopoopts" -.xml > $file ; then
 				echo "done"
 				inputs="$inputs $file"
 				inputopts="$inputopts --name $1 $file"
