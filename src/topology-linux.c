@@ -2766,7 +2766,6 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
   hwloc_bitmap_free(cpuset);
 }
 
-
 /*
  * Ideally, here's we would gather the string following:
  * alpha: "cpu\t\t\t:" + "cpu model\t\t:"
@@ -2793,22 +2792,11 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
  * xtensa: "model\t\t:"
  */
 static int
-hwloc_linux_parse_cpuinfo_model(const char *str,
+hwloc_linux_parse_cpuinfo_model(const char *prefix, const char *value,
 				struct hwloc_linux_cpuinfo_proc *Lproc)
 {
-  unsigned stringlen;
-  char *c, *new;
-
-  if (!strncmp("model name", str, 10)) {
-    c = strchr(str, ':')+1;
-    c += strspn(c, "	 ");
-    stringlen = strcspn(c, "\n");
-    new = malloc(stringlen+1);
-    strncpy(new, c, stringlen);
-    new[stringlen] = 0;
-    Lproc->cpumodel = new;
-  }
-
+  if (!strcmp("model name", prefix))
+    Lproc->cpumodel = strdup(value);
   return 0;
 }
 
@@ -2836,60 +2824,81 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
   len = 128; /* vendor/model can be very long */
   str = malloc(len);
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
-  while (fgets(str,len,fd)!=NULL)
-    {
-      unsigned long Psock, Pcore, Pproc;
-#      define getprocnb_begin(field, var)		     \
-      if ( !strncmp(field,str,strlen(field)))	     \
-	{						     \
-	char *c = strchr(str, ':')+1;		     \
-	var = strtoul(c,&endptr,0);			     \
-	if (endptr==c)							\
-	  {								\
-            hwloc_debug("no number in "field" field of %s\n", path); \
-            free(str);							\
-            return -1;							\
-	  }								\
-	else if (var==ULONG_MAX)						\
-	  {								\
-            hwloc_debug("too big "field" number in %s\n", path); \
-            free(str);							\
-            return -1;							\
-	  }								\
-	hwloc_debug(field " %lu\n", var)
-#      define getprocnb_end()			\
-      }
-      getprocnb_begin(PROCESSOR, Pproc);
-      numprocs++;
-      if (numprocs > allocated_Lprocs) {
-	if (!allocated_Lprocs)
-	  allocated_Lprocs = 8;
-	else
-	  allocated_Lprocs *= 2;
-	Lprocs = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
-      }
-      Lprocs[numprocs-1].Pproc = Pproc;
-      Lprocs[numprocs-1].Pcore = -1;
-      Lprocs[numprocs-1].Psock = -1;
-      Lprocs[numprocs-1].Lcore = -1;
-      Lprocs[numprocs-1].Lsock = -1;
-      Lprocs[numprocs-1].cpumodel = NULL;
-      getprocnb_end() else
-      getprocnb_begin(PACKAGEID, Psock);
-      Lprocs[numprocs-1].Psock = Psock;
-      getprocnb_end() else
-      getprocnb_begin(COREID, Pcore);
-      Lprocs[numprocs-1].Pcore = Pcore;
-      getprocnb_end() else
-      hwloc_linux_parse_cpuinfo_model(str, &Lprocs[numprocs-1]);
+  while (fgets(str,len,fd)!=NULL) {
+    unsigned long Psock, Pcore, Pproc;
+    char *end, *dot, *prefix, *value;
+    int noend = 0;
 
-      if (str[strlen(str)-1]!='\n') {
-	/* ignore end of line */
-	if (fscanf(fd,"%*[^\n]") == EOF)
-	  break;
-	getc(fd);
-      }
+    /* remove the ending \n */
+    end = strchr(str, '\n');
+    if (end)
+      *end = 0;
+    else
+      noend = 1;
+    /* skip lines with no dot */
+    dot = strchr(str, ':');
+    if (!dot)
+      continue;
+    /* skip lines not starting with a letter */
+    if (*str > 'z' || *str < 'a')
+      continue;
+
+    /* mark the end of the prefix */
+    prefix = str;
+    end = dot;
+    while (end[-1] == ' ' || end[-1] == '	') end--; /* need a strrspn() */
+    *end = 0;
+    /* find beginning of value, its end is already marked */
+    value = dot+1 + strspn(dot+1, " 	");
+
+    /* defines for parsing numbers */
+#   define getprocnb_begin(field, var)					\
+    if (!strcmp(field,prefix)) {					\
+      var = strtoul(value,&endptr,0);					\
+      if (endptr==value) {						\
+	hwloc_debug("no number in "field" field of %s\n", path);	\
+	free(str);							\
+	return -1;							\
+      } else if (var==ULONG_MAX) {					\
+	hwloc_debug("too big "field" number in %s\n", path); 		\
+	free(str);							\
+	return -1;							\
+      }									\
+      hwloc_debug(field " %lu\n", var)
+#   define getprocnb_end()						\
     }
+    /* actually parse numbers */
+    getprocnb_begin(PROCESSOR, Pproc);
+    numprocs++;
+    if (numprocs > allocated_Lprocs) {
+      if (!allocated_Lprocs)
+	allocated_Lprocs = 8;
+      else
+        allocated_Lprocs *= 2;
+      Lprocs = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
+    }
+    Lprocs[numprocs-1].Pproc = Pproc;
+    Lprocs[numprocs-1].Pcore = -1;
+    Lprocs[numprocs-1].Psock = -1;
+    Lprocs[numprocs-1].Lcore = -1;
+    Lprocs[numprocs-1].Lsock = -1;
+    Lprocs[numprocs-1].cpumodel = NULL;
+    getprocnb_end() else
+    getprocnb_begin(PACKAGEID, Psock);
+    Lprocs[numprocs-1].Psock = Psock;
+    getprocnb_end() else
+    getprocnb_begin(COREID, Pcore);
+    Lprocs[numprocs-1].Pcore = Pcore;
+    getprocnb_end() else
+    hwloc_linux_parse_cpuinfo_model(prefix, value, &Lprocs[numprocs-1]);
+
+    if (noend) {
+      /* ignore end of line */
+      if (fscanf(fd,"%*[^\n]") == EOF)
+	break;
+      getc(fd);
+    }
+  }
   fclose(fd);
   free(str);
 
