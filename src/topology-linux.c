@@ -2766,37 +2766,56 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
   hwloc_bitmap_free(cpuset);
 }
 
+
 /*
- * Ideally, here's we would gather the string following:
- * alpha: "cpu\t\t\t:" + "cpu model\t\t:"
- * arm: "Processor\t:"
- * avr32: "chip type\t:"
- * blackfin: "model name\t:"
- * cris: "cpu\t\t:" + "cpu model\t:"
- * frv: "CPU-Core:" + "CPU:"
- * h8300: "CPU:"
- * ia64: "model name :"
- * m32r: "cpu family\t:"
- * m68k: "CPU:"
- * microblaze: "CPU-Family:" + "FPGA-Arch:" + "CPU-Ver:"
- * mips: "cpu model\t\t:"
- * mn10300: "cpu core   :" + "model name :"
- * openrisc: "CPU:"
- * parisc: "cpu family\t:" + "cpu\t\t:"
- * ppc: "cpu\t\t:"
- * sh: "cpu family\t:" + "cpu type\t:"
- * sparc: "cpu\t\t:"
- * tile: "model name\t:"
- * unicore32: "Processor\t:"
- * x86: "model name\t:"
- * xtensa: "model\t\t:"
+ * architecture properly detected:
+ * arm: "Processor\t:"				=> OK
+ * avr32: "chip type\t:"			=> OK
+ * blackfin: "model name\t:"			=> OK
+ * h8300: "CPU:"				=> OK
+ * ia64: "model name :"				=> OK
+ * m68k: "CPU:"					=> OK
+ * mips: "cpu model\t\t:"			=> OK
+ * openrisc: "CPU:"				=> OK
+ * ppc: "cpu\t\t:"				=> OK
+ * sparc: "cpu\t\t:"				=> OK
+ * tile: "model name\t:"			=> OK
+ * unicore32: "Processor\t:"			=> OK
+ * x86: "model name\t:"				=> OK
+ *
+ * cannot work:
+ * alpha: "cpu\t\t\t:" + "cpu model\t\t:"	=> no processor index lines anyway
+ *
+ * partially supported:
+ * cris: "cpu\t\t:" + "cpu model\t:"		=> only "cpu"
+ * frv: "CPU-Core:" + "CPU:"			=> only "CPU"
+ * mn10300: "cpu core   :" + "model name :"	=> only "model name"
+ * parisc: "cpu family\t:" + "cpu\t\t:"		=> only "cpu"
+ *
+ * not supported because of conflicts with other arch minor lines:
+ * m32r: "cpu family\t:"			=> KO (adding "cpu family" would break "blackfin")
+ * microblaze: "CPU-Family:"			=> KO
+ * sh: "cpu family\t:" + "cpu type\t:"		=> KO
+ * xtensa: "model\t\t:"				=> KO
  */
 static int
 hwloc_linux_parse_cpuinfo_model(const char *prefix, const char *value,
-				struct hwloc_linux_cpuinfo_proc *Lproc)
+				struct hwloc_linux_cpuinfo_proc *Lproc,
+				char **global_model)
 {
-  if (!strcmp("model name", prefix))
-    Lproc->cpumodel = strdup(value);
+  if (!strcmp("model name", prefix)
+      || !strcmp("Processor", prefix)
+      || !strcmp("chip type", prefix)
+      || !strcmp("cpu model", prefix)
+      || !strcasecmp("cpu", prefix)) {
+    if (Lproc) {
+      if (!Lproc->cpumodel)
+	Lproc->cpumodel = strdup(value);
+    } else {
+      if (!*global_model)
+	*global_model = strdup(value);
+    }
+  }
   return 0;
 }
 
@@ -2811,6 +2830,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned allocated_Lprocs = 0;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   unsigned numprocs = 0;
+  char *global_cpumodel = NULL;
 
   if (!(fd=hwloc_fopen(path,"r", topology->backend_params.linuxfs.root_fd)))
     {
@@ -2882,15 +2902,23 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
     Lprocs[numprocs-1].Psock = -1;
     Lprocs[numprocs-1].Lcore = -1;
     Lprocs[numprocs-1].Lsock = -1;
-    Lprocs[numprocs-1].cpumodel = NULL;
+    Lprocs[numprocs-1].cpumodel = global_cpumodel ? strdup(global_cpumodel) : NULL;
     getprocnb_end() else
     getprocnb_begin(PACKAGEID, Psock);
     Lprocs[numprocs-1].Psock = Psock;
     getprocnb_end() else
     getprocnb_begin(COREID, Pcore);
     Lprocs[numprocs-1].Pcore = Pcore;
-    getprocnb_end() else
-    hwloc_linux_parse_cpuinfo_model(prefix, value, &Lprocs[numprocs-1]);
+    getprocnb_end() else {
+      /* we can't assume that we already got a processor index line:
+       * alpha/frv/h8300/m68k/microblaze/sparc have no processor lines at all, only a global entry.
+       * tile has a global section with model name before the list of processor lines.
+       */
+      if (numprocs)
+	hwloc_linux_parse_cpuinfo_model(prefix, value, &Lprocs[numprocs-1], NULL);
+      else
+	hwloc_linux_parse_cpuinfo_model(prefix, value, NULL, &global_cpumodel);
+    }
 
     if (noend) {
       /* ignore end of line */
@@ -2901,6 +2929,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
   }
   fclose(fd);
   free(str);
+  free(global_cpumodel);
 
   *Lprocs_p = Lprocs;
   return numprocs;
