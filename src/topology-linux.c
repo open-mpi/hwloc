@@ -2481,7 +2481,8 @@ cont:
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
-look_sysfscpu(struct hwloc_topology *topology, const char *path)
+look_sysfscpu(struct hwloc_topology *topology, const char *path,
+	      struct hwloc_linux_cpuinfo_proc * cpuinfo_Lprocs, unsigned cpuinfo_numprocs)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
 #define CPU_TOPOLOGY_STR_LEN 128
@@ -2564,6 +2565,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
         hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
                      mysocketid, socketset);
         hwloc_insert_object_by_cpuset(topology, sock);
+	/* add cpuinfo */
+	if (cpuinfo_Lprocs) {
+	  for(j=0; j<(int) cpuinfo_numprocs; j++)
+	    if ((int) cpuinfo_Lprocs[j].Pproc == i
+		&& cpuinfo_Lprocs[j].cpumodel) {
+	      /* FIXME add to name as well? */
+	      hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel);
+	    }
+	}
         socketset = NULL; /* don't free it */
       }
       hwloc_bitmap_free(socketset);
@@ -3188,7 +3198,13 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
           hwloc_setup_pu_level(topology, 1);
       }
     } else {
-      look_sysfscpu(topology, "/sys/devices/system/cpu");
+      struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
+      unsigned numprocs = hwloc_linux_parse_cpuinfo(topology, "/proc/cpuinfo", &Lprocs);
+      if (numprocs < 0)
+	Lprocs = NULL;
+      look_sysfscpu(topology, "/sys/devices/system/cpu", Lprocs, numprocs);
+      if (Lprocs)
+	hwloc_linux_free_cpuinfo(Lprocs, numprocs);
     }
 
     /* Gather DMI info */
