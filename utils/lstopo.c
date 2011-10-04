@@ -226,7 +226,7 @@ void usage(const char *name, FILE *where)
 		  ", svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* HWLOC_HAVE_CAIRO */
-		  ", xml"
+		  ", xml, synthetic"
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
   fprintf (where, "  -l --logical          Display hwloc logical object indexes\n");
@@ -277,6 +277,7 @@ void usage(const char *name, FILE *where)
 enum output_format {
   LSTOPO_OUTPUT_DEFAULT,
   LSTOPO_OUTPUT_CONSOLE,
+  LSTOPO_OUTPUT_SYNTHETIC,
   LSTOPO_OUTPUT_TEXT,
   LSTOPO_OUTPUT_FIG,
   LSTOPO_OUTPUT_PNG,
@@ -293,6 +294,8 @@ parse_output_format(const char *name, char *callname)
     return LSTOPO_OUTPUT_DEFAULT;
   else if (!strncasecmp(name, "console", 3))
     return LSTOPO_OUTPUT_CONSOLE;
+  else if (!strcasecmp(name, "synthetic"))
+    return LSTOPO_OUTPUT_SYNTHETIC;
   else if (!strcasecmp(name, "txt"))
     return LSTOPO_OUTPUT_TEXT;
   else if (!strcasecmp(name, "fig"))
@@ -583,6 +586,9 @@ main (int argc, char *argv[])
 
     case LSTOPO_OUTPUT_CONSOLE:
       output_console(topology, filename, logical, legend, verbose_mode);
+      break;
+    case LSTOPO_OUTPUT_SYNTHETIC:
+      output_synthetic(topology, filename, logical, legend, verbose_mode);
       break;
     case LSTOPO_OUTPUT_TEXT:
       output_text(topology, filename, logical, legend, verbose_mode);

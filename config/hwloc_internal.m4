@@ -299,6 +299,7 @@ EOF
     unset hwloc_old_LIBS
 
     _HWLOC_CHECK_DIFF_U
+    _HWLOC_CHECK_DIFF_W
 
     # Only generate this if we're building the utilities
     AC_CONFIG_FILES(

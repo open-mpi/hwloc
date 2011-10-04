@@ -9,6 +9,7 @@
 #include <private/autogen/config.h>
 #include <hwloc.h>
 #include <private/private.h>
+#include <private/misc.h>
 #include <private/debug.h>
 
 #include <assert.h>
@@ -1068,7 +1069,7 @@ hwloc__xml_export_new_child(hwloc__xml_export_output_t output, const char *name)
     assert(0);
 #endif
   } else {
-    int res = snprintf(output->buffer, output->remaining, "%*s<%s", output->indent, "", name);
+    int res = hwloc_snprintf(output->buffer, output->remaining, "%*s<%s", output->indent, "", name);
     hwloc__xml_export_update_buffer(output, res);
     output->indent += 2;
   }
@@ -1129,7 +1130,7 @@ hwloc__xml_export_new_prop(hwloc__xml_export_output_t output, const char *name, 
 #endif
   } else {
     char *escaped = hwloc__xml_export_escape_string(value);
-    int res = snprintf(output->buffer, output->remaining, " %s=\"%s\"", name, escaped ? escaped : value);
+    int res = hwloc_snprintf(output->buffer, output->remaining, " %s=\"%s\"", name, escaped ? escaped : value);
     hwloc__xml_export_update_buffer(output, res);
     free(escaped);
   }
@@ -1145,7 +1146,7 @@ hwloc__xml_export_end_props(hwloc__xml_export_output_t output, unsigned nr_child
     assert(0);
 #endif
   } else {
-    int res = snprintf(output->buffer, output->remaining, nr_children ? ">\n" : "/>\n");
+    int res = hwloc_snprintf(output->buffer, output->remaining, nr_children ? ">\n" : "/>\n");
     hwloc__xml_export_update_buffer(output, res);
   }
 }
@@ -1163,7 +1164,7 @@ hwloc__xml_export_end_child(hwloc__xml_export_output_t output, const char *name,
     int res;
     output->indent -= 2;
     if (nr_children) {
-      res = snprintf(output->buffer, output->remaining, "%*s</%s>\n", output->indent, "", name);
+      res = hwloc_snprintf(output->buffer, output->remaining, "%*s</%s>\n", output->indent, "", name);
       hwloc__xml_export_update_buffer(output, res);
     }
   }
@@ -1383,7 +1384,7 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
   output.buffer = xmlbuffer;
   output.remaining = buflen;
 
-  res = snprintf(output.buffer, output.remaining,
+  res = hwloc_snprintf(output.buffer, output.remaining,
 		 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		 "<!DOCTYPE topology SYSTEM \"hwloc.dtd\">\n");
   hwloc__xml_export_update_buffer(&output, res);

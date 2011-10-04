@@ -1533,6 +1533,55 @@ hwloc_propagate_bridge_depth(hwloc_topology_t topology, hwloc_obj_t root, unsign
   }
 }
 
+static void
+hwloc_propagate_symmetric_subtree(hwloc_topology_t topology, hwloc_obj_t root)
+{
+  hwloc_obj_t child, *array;
+
+  /* assume we're not symmetric by default */
+  root->symmetric_subtree = 0;
+
+  /* if no child, we are symmetric */
+  if (!root->arity) {
+    root->symmetric_subtree = 1;
+    return;
+  }
+
+  /* look at children, and return if they are not symmetric */
+  child = NULL;
+  while ((child = hwloc_get_next_child(topology, root, child)) != NULL)
+    hwloc_propagate_symmetric_subtree(topology, child);
+  while ((child = hwloc_get_next_child(topology, root, child)) != NULL)
+    if (!child->symmetric_subtree)
+      return;
+
+  /* now check that children subtrees are identical.
+   * just walk down the first child in each tree and compare their depth and arities
+   */
+  array = malloc(root->arity * sizeof(*array));
+  memcpy(array, root->children, root->arity * sizeof(*array));
+  while (1) {
+    unsigned i;
+    /* check current level arities and depth */
+    for(i=1; i<root->arity; i++)
+      if (array[i]->depth != array[0]->depth
+	  || array[i]->arity != array[0]->arity) {
+      free(array);
+      return;
+    }
+    if (!array[0]->arity)
+      /* no more children level, we're ok */
+      break;
+    /* look at first child of each element now */
+    for(i=0; i<root->arity; i++)
+      array[i] = array[i]->first_child;
+  }
+  free(array);
+
+  /* everything went fine, we're symmetric */
+  root->symmetric_subtree = 1;
+}
+
 /*
  * Initialize handy pointers in the whole topology.
  * The topology only had first_child and next_sibling pointers.
@@ -1879,6 +1928,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
   topology->bridge_nbobjects = hwloc_build_level_from_list(topology->first_bridge, &topology->bridge_level);
   topology->pcidev_nbobjects = hwloc_build_level_from_list(topology->first_pcidev, &topology->pcidev_level);
   topology->osdev_nbobjects = hwloc_build_level_from_list(topology->first_osdev, &topology->osdev_level);
+
+  hwloc_propagate_symmetric_subtree(topology, topology->levels[0][0]);
 
   return 0;
 }

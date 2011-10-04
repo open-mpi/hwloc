@@ -20,7 +20,7 @@ typedef void output_method (struct hwloc_topology *topology, const char *output,
 
 FILE *open_file(const char *filename, const char *mode) __hwloc_attribute_malloc;
 
-extern output_method output_console, output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
+extern output_method output_console, output_synthetic, output_text, output_x11, output_fig, output_png, output_pdf, output_ps, output_svg, output_windows, output_xml;
 
 struct draw_methods {
   void* (*start) (void *output, int width, int height);

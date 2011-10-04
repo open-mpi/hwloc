@@ -247,6 +247,36 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
     fclose(output);
 }
 
+void output_synthetic(hwloc_topology_t topology, const char *filename, int logical __hwloc_attribute_unused, int legend __hwloc_attribute_unused, int verbose_mode __hwloc_attribute_unused)
+{
+  FILE *output;
+  hwloc_obj_t obj = hwloc_get_root_obj(topology);
+  int arity;
+
+  if (!filename || !strcmp(filename, "-"))
+    output = stdout;
+  else {
+    output = open_file(filename, "w");
+    if (!output) {
+      fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
+      return;
+    }
+  }
+
+  if (!obj->symmetric_subtree) {
+    fprintf(stderr, "Cannot output assymetric topology in synthetic format\n");
+    return;
+  }
+
+  arity = obj->arity;
+  while (arity) {
+    obj = obj->first_child;
+    fprintf(output, "%s:%u ", hwloc_obj_type_string(obj->type), arity);
+    arity = obj->arity;
+  }
+  fprintf(output, "\n");
+}
+
 /*
  * Pretty text output
  */

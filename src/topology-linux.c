@@ -1387,6 +1387,18 @@ hwloc_backend_linuxfs_exit(struct hwloc_topology *topology)
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
+/* cpuinfo array */
+struct hwloc_linux_cpuinfo_proc {
+  /* set during hwloc_linux_parse_cpuinfo */
+  unsigned long Pproc;
+  /* set during hwloc_linux_parse_cpuinfo or -1 if unknown*/
+  long Pcore, Psock;
+  /* set later, or -1 if unknown */
+  long Lcore, Lsock;
+  /* set during hwloc_linux_parse_cpuinfo or NULL if unknown */
+  char *cpumodel;
+};
+
 static int
 hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 {
@@ -2469,7 +2481,8 @@ cont:
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static void
-look_sysfscpu(struct hwloc_topology *topology, const char *path)
+look_sysfscpu(struct hwloc_topology *topology, const char *path,
+	      struct hwloc_linux_cpuinfo_proc * cpuinfo_Lprocs, unsigned cpuinfo_numprocs)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
 #define CPU_TOPOLOGY_STR_LEN 128
@@ -2552,6 +2565,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
         hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
                      mysocketid, socketset);
         hwloc_insert_object_by_cpuset(topology, sock);
+	/* add cpuinfo */
+	if (cpuinfo_Lprocs) {
+	  for(j=0; j<(int) cpuinfo_numprocs; j++)
+	    if ((int) cpuinfo_Lprocs[j].Pproc == i
+		&& cpuinfo_Lprocs[j].cpumodel) {
+	      /* FIXME add to name as well? */
+	      hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel);
+	    }
+	}
         socketset = NULL; /* don't free it */
       }
       hwloc_bitmap_free(socketset);
@@ -2745,16 +2767,51 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 }
 
 
-/* Gather Linux' cpuinfo into arrays */
-
-struct hwloc_linux_cpuinfo_proc {
-  /* set during hwloc_linux_parse_cpuinfo */
-  unsigned long Pproc;
-  /* set during hwloc_linux_parse_cpuinfo or -1 if unknown*/
-  long Pcore, Psock;
-  /* set later, or -1 if unknown */
-  long Lcore, Lsock;
-};
+/*
+ * architecture properly detected:
+ * arm: "Processor\t:"				=> OK
+ * avr32: "chip type\t:"			=> OK
+ * blackfin: "model name\t:"			=> OK
+ * h8300: "CPU:"				=> OK
+ * ia64: "model name :"				=> OK
+ * m68k: "CPU:"					=> OK
+ * mips: "cpu model\t\t:"			=> OK
+ * openrisc: "CPU:"				=> OK
+ * ppc: "cpu\t\t:"				=> OK
+ * sparc: "cpu\t\t:"				=> OK
+ * tile: "model name\t:"			=> OK
+ * unicore32: "Processor\t:"			=> OK
+ * x86: "model name\t:"				=> OK
+ *
+ * cannot work:
+ * alpha: "cpu\t\t\t:" + "cpu model\t\t:"	=> no processor index lines anyway
+ *
+ * partially supported:
+ * cris: "cpu\t\t:" + "cpu model\t:"		=> only "cpu"
+ * frv: "CPU-Core:" + "CPU:"			=> only "CPU"
+ * mn10300: "cpu core   :" + "model name :"	=> only "model name"
+ * parisc: "cpu family\t:" + "cpu\t\t:"		=> only "cpu"
+ *
+ * not supported because of conflicts with other arch minor lines:
+ * m32r: "cpu family\t:"			=> KO (adding "cpu family" would break "blackfin")
+ * microblaze: "CPU-Family:"			=> KO
+ * sh: "cpu family\t:" + "cpu type\t:"		=> KO
+ * xtensa: "model\t\t:"				=> KO
+ */
+static int
+hwloc_linux_parse_cpuinfo_model(const char *prefix, const char *value,
+				char **model)
+{
+  if (!strcmp("model name", prefix)
+      || !strcmp("Processor", prefix)
+      || !strcmp("chip type", prefix)
+      || !strcmp("cpu model", prefix)
+      || !strcasecmp("cpu", prefix)) {
+    if (!*model)
+	*model = strdup(value);
+  }
+  return 0;
+}
 
 static int
 hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
@@ -2767,6 +2824,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned allocated_Lprocs = 0;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   unsigned numprocs = 0;
+  char *global_cpumodel = NULL;
 
   if (!(fd=hwloc_fopen(path,"r", topology->backend_params.linuxfs.root_fd)))
     {
@@ -2777,65 +2835,104 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
 #      define PROCESSOR	"processor"
 #      define PACKAGEID "physical id" /* the longest one */
 #      define COREID "core id"
-  len = strlen(PACKAGEID) + 1 + 9 + 1 + 1;
+  len = 128; /* vendor/model can be very long */
   str = malloc(len);
   hwloc_debug("\n\n * Topology extraction from %s *\n\n", path);
-  while (fgets(str,len,fd)!=NULL)
-    {
-      unsigned long Psock, Pcore, Pproc;
-#      define getprocnb_begin(field, var)		     \
-      if ( !strncmp(field,str,strlen(field)))	     \
-	{						     \
-	char *c = strchr(str, ':')+1;		     \
-	var = strtoul(c,&endptr,0);			     \
-	if (endptr==c)							\
-	  {								\
-            hwloc_debug("no number in "field" field of %s\n", path); \
-            free(str);							\
-            return -1;							\
-	  }								\
-	else if (var==ULONG_MAX)						\
-	  {								\
-            hwloc_debug("too big "field" number in %s\n", path); \
-            free(str);							\
-            return -1;							\
-	  }								\
-	hwloc_debug(field " %lu\n", var)
-#      define getprocnb_end()			\
-      }
-      getprocnb_begin(PROCESSOR, Pproc);
-      numprocs++;
-      if (numprocs > allocated_Lprocs) {
-	if (!allocated_Lprocs)
-	  allocated_Lprocs = 8;
-	else
-	  allocated_Lprocs *= 2;
-	Lprocs = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
-      }
-      Lprocs[numprocs-1].Pproc = Pproc;
-      Lprocs[numprocs-1].Pcore = -1;
-      Lprocs[numprocs-1].Psock = -1;
-      Lprocs[numprocs-1].Lcore = -1;
-      Lprocs[numprocs-1].Lsock = -1;
-      getprocnb_end() else
-      getprocnb_begin(PACKAGEID, Psock);
-      Lprocs[numprocs-1].Psock = Psock;
-      getprocnb_end() else
-      getprocnb_begin(COREID, Pcore);
-      Lprocs[numprocs-1].Pcore = Pcore;
-      getprocnb_end()
-      if (str[strlen(str)-1]!='\n') {
-	/* ignore end of line */
-	if (fscanf(fd,"%*[^\n]") == EOF)
-	  break;
-	getc(fd);
-      }
+  while (fgets(str,len,fd)!=NULL) {
+    unsigned long Psock, Pcore, Pproc;
+    char *end, *dot, *prefix, *value;
+    int noend = 0;
+
+    /* remove the ending \n */
+    end = strchr(str, '\n');
+    if (end)
+      *end = 0;
+    else
+      noend = 1;
+    /* skip lines with no dot */
+    dot = strchr(str, ':');
+    if (!dot)
+      continue;
+    /* skip lines not starting with a letter */
+    if (*str > 'z' || *str < 'a')
+      continue;
+
+    /* mark the end of the prefix */
+    prefix = str;
+    end = dot;
+    while (end[-1] == ' ' || end[-1] == '	') end--; /* need a strrspn() */
+    *end = 0;
+    /* find beginning of value, its end is already marked */
+    value = dot+1 + strspn(dot+1, " 	");
+
+    /* defines for parsing numbers */
+#   define getprocnb_begin(field, var)					\
+    if (!strcmp(field,prefix)) {					\
+      var = strtoul(value,&endptr,0);					\
+      if (endptr==value) {						\
+	hwloc_debug("no number in "field" field of %s\n", path);	\
+	free(str);							\
+	return -1;							\
+      } else if (var==ULONG_MAX) {					\
+	hwloc_debug("too big "field" number in %s\n", path); 		\
+	free(str);							\
+	return -1;							\
+      }									\
+      hwloc_debug(field " %lu\n", var)
+#   define getprocnb_end()						\
     }
+    /* actually parse numbers */
+    getprocnb_begin(PROCESSOR, Pproc);
+    numprocs++;
+    if (numprocs > allocated_Lprocs) {
+      if (!allocated_Lprocs)
+	allocated_Lprocs = 8;
+      else
+        allocated_Lprocs *= 2;
+      Lprocs = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
+    }
+    Lprocs[numprocs-1].Pproc = Pproc;
+    Lprocs[numprocs-1].Pcore = -1;
+    Lprocs[numprocs-1].Psock = -1;
+    Lprocs[numprocs-1].Lcore = -1;
+    Lprocs[numprocs-1].Lsock = -1;
+    Lprocs[numprocs-1].cpumodel = global_cpumodel ? strdup(global_cpumodel) : NULL;
+    getprocnb_end() else
+    getprocnb_begin(PACKAGEID, Psock);
+    Lprocs[numprocs-1].Psock = Psock;
+    getprocnb_end() else
+    getprocnb_begin(COREID, Pcore);
+    Lprocs[numprocs-1].Pcore = Pcore;
+    getprocnb_end() else {
+      /* we can't assume that we already got a processor index line:
+       * alpha/frv/h8300/m68k/microblaze/sparc have no processor lines at all, only a global entry.
+       * tile has a global section with model name before the list of processor lines.
+       */
+      hwloc_linux_parse_cpuinfo_model(prefix, value, numprocs ? &Lprocs[numprocs-1].cpumodel : &global_cpumodel);
+    }
+
+    if (noend) {
+      /* ignore end of line */
+      if (fscanf(fd,"%*[^\n]") == EOF)
+	break;
+      getc(fd);
+    }
+  }
   fclose(fd);
   free(str);
+  free(global_cpumodel);
 
   *Lprocs_p = Lprocs;
   return numprocs;
+}
+
+static void
+hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned numprocs)
+{
+  unsigned i;
+  for(i=0; i<numprocs; i++)
+    free(Lprocs[i].cpumodel);
+  free(Lprocs);
 }
 
 static int
@@ -2924,10 +3021,18 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   if (!missingsocket && numsockets>0) {
     for (i = 0; i < numsockets; i++) {
       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock_to_Psock[i]);
+      char *cpumodel = NULL;
       obj->cpuset = hwloc_bitmap_alloc();
       for(j=0; j<numprocs; j++)
-	if ((unsigned) Lprocs[j].Lsock == i)
+	if ((unsigned) Lprocs[j].Lsock == i) {
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
+	  if (Lprocs[j].cpumodel && !cpumodel) /* use the first one, they should all be equal anyway */
+	    cpumodel = Lprocs[j].cpumodel;
+	}
+      if (cpumodel) {
+	/* FIXME add to name as well? */
+        hwloc_obj_add_info(obj, "CPUModel", cpumodel);
+      }
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
@@ -2975,7 +3080,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   free(Lcore_to_Pcore);
   free(Lcore_to_Psock);
   free(Lsock_to_Psock);
-  free(Lprocs);
+
+  hwloc_linux_free_cpuinfo(Lprocs, numprocs);
 
   look_powerpc_device_tree(topology);
   return 0;
@@ -3121,7 +3227,13 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
           hwloc_setup_pu_level(topology, 1);
       }
     } else {
-      look_sysfscpu(topology, "/sys/devices/system/cpu");
+      struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
+      unsigned numprocs = hwloc_linux_parse_cpuinfo(topology, "/proc/cpuinfo", &Lprocs);
+      if (numprocs < 0)
+	Lprocs = NULL;
+      look_sysfscpu(topology, "/sys/devices/system/cpu", Lprocs, numprocs);
+      if (Lprocs)
+	hwloc_linux_free_cpuinfo(Lprocs, numprocs);
     }
 
     /* Gather DMI info */

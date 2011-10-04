@@ -1,5 +1,5 @@
 Machine (P#0 local=1016272KB total=1016272KB Backend=Linux)
-  Socket L#0 (P#1)
+  Socket L#0 (P#1 CPUModel="Genuine Intel(R) CPU           @ 0000 @ 2.93GHz")
     L3Cache L#0 (size=8192KB linesize=64 ways=16)
       L2Cache L#0 (size=256KB linesize=64 ways=8)
         L1Cache L#0 (size=32KB linesize=64 ways=8)

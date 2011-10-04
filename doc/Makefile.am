@@ -408,6 +408,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_covering_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_index_inside_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_inside_cpuset_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_pcidev_by_busid.3 \
