@@ -1387,6 +1387,18 @@ hwloc_backend_linuxfs_exit(struct hwloc_topology *topology)
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
+/* cpuinfo array */
+struct hwloc_linux_cpuinfo_proc {
+  /* set during hwloc_linux_parse_cpuinfo */
+  unsigned long Pproc;
+  /* set during hwloc_linux_parse_cpuinfo or -1 if unknown*/
+  long Pcore, Psock;
+  /* set later, or -1 if unknown */
+  long Lcore, Lsock;
+  /* set during hwloc_linux_parse_cpuinfo or NULL if unknown */
+  char *cpumodel;
+};
+
 static int
 hwloc_parse_sysfs_unsigned(const char *mappath, unsigned *value, int fsroot_fd)
 {
@@ -2745,19 +2757,6 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 }
 
 
-/* Gather Linux' cpuinfo into arrays */
-
-struct hwloc_linux_cpuinfo_proc {
-  /* set during hwloc_linux_parse_cpuinfo */
-  unsigned long Pproc;
-  /* set during hwloc_linux_parse_cpuinfo or -1 if unknown*/
-  long Pcore, Psock;
-  /* set later, or -1 if unknown */
-  long Lcore, Lsock;
-  /* set during hwloc_linux_parse_cpuinfo or NULL if unknown */
-  char *cpumodel;
-};
-
 /*
  * Ideally, here's we would gather the string following:
  * alpha: "cpu\t\t\t:" + "cpu model\t\t:"
@@ -2886,6 +2885,15 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
 
   *Lprocs_p = Lprocs;
   return numprocs;
+}
+
+static void
+hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned numprocs)
+{
+  unsigned i;
+  for(i=0; i<numprocs; i++)
+    free(Lprocs[i].cpumodel);
+  free(Lprocs);
 }
 
 static int
@@ -3033,9 +3041,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   free(Lcore_to_Pcore);
   free(Lcore_to_Psock);
   free(Lsock_to_Psock);
-  for(i=0; i<numprocs; i++)
-    free(Lprocs[i].cpumodel);
-  free(Lprocs);
+
+  hwloc_linux_free_cpuinfo(Lprocs, numprocs);
 
   look_powerpc_device_tree(topology);
   return 0;
