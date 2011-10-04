@@ -2800,21 +2800,15 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
  */
 static int
 hwloc_linux_parse_cpuinfo_model(const char *prefix, const char *value,
-				struct hwloc_linux_cpuinfo_proc *Lproc,
-				char **global_model)
+				char **model)
 {
   if (!strcmp("model name", prefix)
       || !strcmp("Processor", prefix)
       || !strcmp("chip type", prefix)
       || !strcmp("cpu model", prefix)
       || !strcasecmp("cpu", prefix)) {
-    if (Lproc) {
-      if (!Lproc->cpumodel)
-	Lproc->cpumodel = strdup(value);
-    } else {
-      if (!*global_model)
-	*global_model = strdup(value);
-    }
+    if (!*model)
+	*model = strdup(value);
   }
   return 0;
 }
@@ -2914,10 +2908,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_topology *topology, const char *path,
        * alpha/frv/h8300/m68k/microblaze/sparc have no processor lines at all, only a global entry.
        * tile has a global section with model name before the list of processor lines.
        */
-      if (numprocs)
-	hwloc_linux_parse_cpuinfo_model(prefix, value, &Lprocs[numprocs-1], NULL);
-      else
-	hwloc_linux_parse_cpuinfo_model(prefix, value, NULL, &global_cpumodel);
+      hwloc_linux_parse_cpuinfo_model(prefix, value, numprocs ? &Lprocs[numprocs-1].cpumodel : &global_cpumodel);
     }
 
     if (noend) {
