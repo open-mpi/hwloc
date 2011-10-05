@@ -982,6 +982,7 @@ following environment variables.
   <li>Otherwise, the comma-separated list of distances should be given.
   If N objects are considered, the i*N+j-th value gives the
   distance from the i-th object to the j-th object.</li>
+  </ul>
 
   Note that distances are ignored in multi-node topologies.
   </dd>
