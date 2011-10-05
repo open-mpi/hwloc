@@ -211,7 +211,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
     hwloc_const_bitmap_t online = hwloc_topology_get_online_cpuset(topology);
     hwloc_const_bitmap_t allowed = hwloc_topology_get_allowed_cpuset(topology);
 
-    if (!hwloc_bitmap_isequal(topo, complete)) {
+    if (complete && !hwloc_bitmap_isequal(topo, complete)) {
       hwloc_bitmap_t unknown = hwloc_bitmap_alloc();
       char *unknownstr;
       hwloc_bitmap_copy(unknown, complete);
@@ -221,7 +221,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
       free(unknownstr);
       hwloc_bitmap_free(unknown);
     }
-    if (!hwloc_bitmap_isequal(online, complete)) {
+    if (complete && !hwloc_bitmap_isequal(online, complete)) {
       hwloc_bitmap_t offline = hwloc_bitmap_alloc();
       char *offlinestr;
       hwloc_bitmap_copy(offline, complete);
@@ -231,7 +231,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
       free(offlinestr);
       hwloc_bitmap_free(offline);
     }
-    if (!hwloc_bitmap_isequal(allowed, online)) {
+    if (complete && !hwloc_bitmap_isequal(allowed, online)) {
       if (!hwloc_bitmap_isincluded(online, allowed)) {
         hwloc_bitmap_t forbidden = hwloc_bitmap_alloc();
         char *forbiddenstr;
