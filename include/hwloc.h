@@ -863,6 +863,8 @@ HWLOC_DECLSPEC int hwloc_topology_set_custom(hwloc_topology_t topology);
  * it will be replaced by the given one.
  * If \p nbobjs is \c 0, \p os_index is \c NULL and \p distances is \c NULL,
  * the existing distance matrix for the given type is removed.
+ *
+ * \note Distance matrices are ignored in multi-node topologies.
  */
 HWLOC_DECLSPEC int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology,
 						      hwloc_obj_type_t type, unsigned nbobjs,

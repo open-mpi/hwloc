@@ -65,6 +65,7 @@ void hwloc_distances_set(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_t
 			 int force)
 {
   struct hwloc_os_distances_s *osdist, *next = topology->first_osdist;
+
   /* look for existing distances for the same type */
   while ((osdist = next) != NULL) {
     next = osdist->next;
@@ -415,10 +416,15 @@ hwloc_distances__finalize_os(struct hwloc_topology *topology, struct hwloc_os_di
 
 void hwloc_distances_finalize_os(struct hwloc_topology *topology)
 {
+  int dropall = !topology->levels[0][0]->cpuset; /* we don't support distances on multinode systems */
+
   struct hwloc_os_distances_s *osdist, *next = topology->first_osdist;
   while ((osdist = next) != NULL) {
     int err;
     next = osdist->next;
+
+    if (dropall)
+      goto drop;
 
     /* remove final distance matrics AND physically-ordered ones */
 
@@ -431,6 +437,7 @@ void hwloc_distances_finalize_os(struct hwloc_topology *topology)
       /* convert ok, switch to the next element */
       continue;
 
+   drop:
     /* remove this element */
     free(osdist->indexes);
     free(osdist->distances);

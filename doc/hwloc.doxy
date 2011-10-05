@@ -982,6 +982,8 @@ following environment variables.
   <li>Otherwise, the comma-separated list of distances should be given.
   If N objects are considered, the i*N+j-th value gives the
   distance from the i-th object to the j-th object.</li>
+
+  Note that distances are ignored in multi-node topologies.
   </dd>
 
 <dt>HWLOC_PCI_&lt;domain&gt;_&lt;bus&gt;_LOCALCPUS=&lt;cpuset&gt;</dt>
