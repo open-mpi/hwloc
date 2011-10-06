@@ -390,9 +390,10 @@ EOF
         hwloc_config_prefix[tests/xml/test-topology.sh]
         hwloc_config_prefix[utils/test-hwloc-calc.sh]
         hwloc_config_prefix[utils/test-hwloc-distances.sh]
-        hwloc_config_prefix[utils/test-hwloc-distrib.sh])
+        hwloc_config_prefix[utils/test-hwloc-distrib.sh]
+        hwloc_config_prefix[utils/test-hwloc-ls.sh])
 
-    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/hwloc-gather-topology ]hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh ]hwloc_config_prefix[utils/test-hwloc-calc.sh ]hwloc_config_prefix[utils/test-hwloc-distances.sh ]hwloc_config_prefix[utils/test-hwloc-distrib.sh])
+    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/hwloc-gather-topology ]hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh ]hwloc_config_prefix[utils/test-hwloc-calc.sh ]hwloc_config_prefix[utils/test-hwloc-distances.sh ]hwloc_config_prefix[utils/test-hwloc-distrib.sh ]hwloc_config_prefix[utils/test-hwloc-ls.sh])
 
     # These links are only needed in standalone mode.  It would
     # be nice to m4 foreach this somehow, but whenever I tried

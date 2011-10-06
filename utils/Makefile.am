@@ -43,7 +43,7 @@ hwloc_calc_SOURCES = hwloc-calc.c hwloc-calc.h
 # call hwloc executables.
 if HWLOC_BUILD_TESTS
 if !HWLOC_HAVE_MINGW32
-TESTS = test-hwloc-calc.sh test-hwloc-distrib.sh test-hwloc-distances.sh
+TESTS = test-hwloc-calc.sh test-hwloc-distrib.sh test-hwloc-distances.sh test-hwloc-ls.sh
 endif !HWLOC_HAVE_MINGW32
 endif HWLOC_BUILD_TESTS
 
