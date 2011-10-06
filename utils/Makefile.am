@@ -10,7 +10,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 
-EXTRA_DIST = test-hwloc-calc.output test-hwloc-distrib.output test-hwloc-distances.output
+EXTRA_DIST = test-hwloc-calc.output test-hwloc-distrib.output test-hwloc-distances.output test-hwloc-ls.output
 
 noinst_HEADERS = misc.h
 
