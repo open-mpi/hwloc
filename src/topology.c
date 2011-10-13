@@ -1387,7 +1387,9 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
   }
 }
 
-/* If WHOLE_IO is not set, we drop non-interesting devices,
+/*
+ * If IO_DEVICES and WHOLE_IO are not set, we drop everything.
+ * If WHOLE_IO is not set, we drop non-interesting devices,
  * and bridges that have no children.
  * If IO_BRIDGES is also not set, we also drop all bridges
  * except the hostbridges.
@@ -1396,6 +1398,14 @@ static void
 hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
 {
   hwloc_obj_t child, *pchild;
+
+  if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
+    /* drop all I/O children */
+    for_each_child_safe(child, root, pchild)
+      if (hwloc_obj_type_is_io(child->type))
+	unlink_and_free_object_and_children(pchild);
+    return;
+  }
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)) {
     /* drop non-interesting devices */
