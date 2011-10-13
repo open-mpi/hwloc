@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 INRIA.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -76,12 +76,16 @@ static void testmem(hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy,
   hwloc_membind_policy_t newpolicy;
   void *area;
   size_t area_size = 1024;
+
   result_set("Bind this singlethreaded process memory", hwloc_set_membind(topology, nodeset, policy, flags), (support->membind->set_thisproc_membind || support->membind->set_thisthread_membind) && expected);
   result_get("Get  this singlethreaded process memory", nodeset, new_nodeset, hwloc_get_membind(topology, new_nodeset, &newpolicy, flags), (support->membind->get_thisproc_membind || support->membind->get_thisthread_membind) && expected);
+
   result_set("Bind this thread memory", hwloc_set_membind(topology, nodeset, policy, flags | HWLOC_MEMBIND_THREAD), support->membind->set_thisproc_membind && expected);
   result_get("Get  this thread memory", nodeset, new_nodeset, hwloc_get_membind(topology, new_nodeset, &newpolicy, flags | HWLOC_MEMBIND_THREAD), support->membind->get_thisproc_membind && expected);
+
   result_set("Bind this whole process memory", hwloc_set_membind(topology, nodeset, policy, flags | HWLOC_MEMBIND_PROCESS), support->membind->set_thisproc_membind && expected);
   result_get("Get  this whole process memory", nodeset, new_nodeset, hwloc_get_membind(topology, new_nodeset, &newpolicy, flags | HWLOC_MEMBIND_PROCESS), support->membind->get_thisproc_membind && expected);
+
 #ifdef HWLOC_WIN_SYS
   result_set("Bind process memory", hwloc_set_proc_membind(topology, GetCurrentProcess(), nodeset, policy, flags), support->membind->set_proc_membind && expected);
   result_get("Get  process memory", nodeset, new_nodeset, hwloc_get_proc_membind(topology, GetCurrentProcess(), new_nodeset, &newpolicy, flags), support->membind->get_proc_membind && expected);
@@ -89,10 +93,19 @@ static void testmem(hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy,
   result_set("Bind process memory", hwloc_set_proc_membind(topology, getpid(), nodeset, policy, flags), support->membind->set_proc_membind && expected);
   result_get("Get  process memory", nodeset, new_nodeset, hwloc_get_proc_membind(topology, getpid(), new_nodeset, &newpolicy, flags), support->membind->get_proc_membind && expected);
 #endif /* !HWLOC_WIN_SYS */
+
   result_set("Bind area", hwloc_set_area_membind(topology, &new_nodeset, sizeof(new_nodeset), nodeset, policy, flags), support->membind->set_area_membind && expected);
   result_get("Get  area", nodeset, new_nodeset, hwloc_get_area_membind(topology, &new_nodeset, sizeof(new_nodeset), new_nodeset, &newpolicy, flags), support->membind->get_area_membind && expected);
+
   if (!(flags & HWLOC_MEMBIND_MIGRATE)) {
     result_set("Alloc bound area", (area = hwloc_alloc_membind(topology, area_size, nodeset, policy, flags)) == NULL, (support->membind->alloc_membind && expected) || !(flags & HWLOC_MEMBIND_STRICT));
+    if (area) {
+      memset(area, 0, area_size);
+      result_get("Get   bound area", nodeset, new_nodeset, hwloc_get_area_membind(topology, area, area_size, new_nodeset, &newpolicy, flags), support->membind->get_area_membind && expected);
+      result_get("Free  bound area", NULL, NULL, hwloc_free(topology, area, area_size), support->membind->alloc_membind && expected);
+    }
+
+    result_set("Alloc bound area through policy", (area = hwloc_alloc_membind_policy(topology, area_size, nodeset, policy, flags)) == NULL, (support->membind->set_thisproc_membind && expected) || !(flags & HWLOC_MEMBIND_STRICT));
     if (area) {
       memset(area, 0, area_size);
       result_get("Get   bound area", nodeset, new_nodeset, hwloc_get_area_membind(topology, area, area_size, new_nodeset, &newpolicy, flags), support->membind->get_area_membind && expected);

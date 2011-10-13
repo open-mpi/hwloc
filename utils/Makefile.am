@@ -10,7 +10,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 
-EXTRA_DIST = test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-assembler.output test-hwloc-calc.output test-hwloc-distances.output test-hwloc-distrib.output
+EXTRA_DIST = test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-assembler.output test-hwloc-calc.output test-hwloc-distances.output test-hwloc-distrib.output test-hwloc-ls.output
 
 noinst_HEADERS = misc.h
 
@@ -45,7 +45,7 @@ bin_SCRIPTS = hwloc-assembler-remote
 # call hwloc executables.
 if HWLOC_BUILD_TESTS
 if !HWLOC_HAVE_MINGW32
-TESTS = test-hwloc-assembler.sh test-hwloc-calc.sh test-hwloc-distances.sh test-hwloc-distrib.sh
+TESTS = test-hwloc-assembler.sh test-hwloc-calc.sh test-hwloc-distances.sh test-hwloc-distrib.sh test-hwloc-ls.sh
 endif !HWLOC_HAVE_MINGW32
 endif HWLOC_BUILD_TESTS
 

@@ -1467,7 +1467,9 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
   }
 }
 
-/* If WHOLE_IO is not set, we drop non-interesting devices,
+/*
+ * If IO_DEVICES and WHOLE_IO are not set, we drop everything.
+ * If WHOLE_IO is not set, we drop non-interesting devices,
  * and bridges that have no children.
  * If IO_BRIDGES is also not set, we also drop all bridges
  * except the hostbridges.
@@ -1476,6 +1478,14 @@ static void
 hwloc_drop_useless_io(hwloc_topology_t topology, hwloc_obj_t root)
 {
   hwloc_obj_t child, *pchild;
+
+  if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO))) {
+    /* drop all I/O children */
+    for_each_child_safe(child, root, pchild)
+      if (hwloc_obj_type_is_io(child->type))
+	unlink_and_free_object_and_children(pchild);
+    return;
+  }
 
   if (!(topology->flags & HWLOC_TOPOLOGY_FLAG_WHOLE_IO)) {
     /* drop non-interesting devices */
@@ -2057,6 +2067,8 @@ static void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 static int
 hwloc_discover(struct hwloc_topology *topology)
 {
+  int gotsomeio = 1;
+
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     alloc_cpusets(topology->levels[0][0]);
     hwloc_look_synthetic(topology);
@@ -2258,40 +2270,39 @@ hwloc_discover(struct hwloc_topology *topology)
    * and there.
    */
 
-  /* PCI */
-  if (topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)) {
-    int gotsome = 0;
-    hwloc_debug("%s", "\nLooking for PCI devices\n");
+  /* I/O devices */
 
-    if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
-      /* TODO */
-    }
-    else if (topology->backend_type == HWLOC_BACKEND_XML) {
-      /* TODO */
-    }
-#ifdef HWLOC_HAVE_LIBPCI
-    else if (topology->is_thissystem) {
-      hwloc_look_libpci(topology);
-      gotsome = 1;
-    }
+  /* see if the backend already imported some I/O devices */
+  if (topology->backend_type == HWLOC_BACKEND_XML
+      || topology->backend_type == HWLOC_BACKEND_SYNTHETIC)
+    gotsomeio = 1;
+  /* import from libpci if needed */
+  if (topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
+      && (topology->backend_type == HWLOC_BACKEND_NONE
+#ifdef HWLOC_LINUX_SYS
+	  || topology->backend_type == HWLOC_BACKEND_LINUXFS
 #endif
-
-    if (gotsome) {
+	  )) {
+    hwloc_debug("%s", "\nLooking for PCI devices\n");
+#ifdef HWLOC_HAVE_LIBPCI
+    if (topology->is_thissystem) {
+      hwloc_look_libpci(topology);
       print_objects(topology, 0, topology->levels[0][0]);
-
-      hwloc_drop_useless_io(topology, topology->levels[0][0]);
-
-      hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
-
-      hwloc_debug("%s", "\nNow reconnecting\n");
-
-      hwloc_connect_children(topology->levels[0][0]);
-      hwloc_connect_levels(topology);
-
-      print_objects(topology, 0, topology->levels[0][0]);
-    } else {
+      gotsomeio = 1;
+    } else
+#endif
+    {
       hwloc_debug("%s", "\nno PCI detection\n");
     }
+  }
+  /* if we got anything, filter interesting objects and update the tree */
+  if (gotsomeio) {
+    hwloc_drop_useless_io(topology, topology->levels[0][0]);
+    hwloc_debug("%s", "\nNow reconnecting\n");
+    hwloc_connect_children(topology->levels[0][0]);
+    hwloc_connect_levels(topology);
+    print_objects(topology, 0, topology->levels[0][0]);
+    hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
   }
 
   /*
