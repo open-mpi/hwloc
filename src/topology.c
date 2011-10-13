@@ -1987,6 +1987,8 @@ static void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 static int
 hwloc_discover(struct hwloc_topology *topology)
 {
+  int gotsomeio = 1;
+
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     alloc_cpusets(topology->levels[0][0]);
     hwloc_look_synthetic(topology);
@@ -2186,40 +2188,36 @@ hwloc_discover(struct hwloc_topology *topology)
    * and there.
    */
 
-  /* PCI */
-  if (topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)) {
-    int gotsome = 0;
+  /* I/O devices */
+
+  /* see if the backend already imported some I/O devices */
+  if (topology->backend_type == HWLOC_BACKEND_XML
+      || topology->backend_type == HWLOC_BACKEND_SYNTHETIC)
+    gotsomeio = 1;
+  /* import from libpci if needed */
+  if (topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
+      && (topology->backend_type == HWLOC_BACKEND_NONE
+	  || topology->backend_type == HWLOC_BACKEND_LINUXFS)) {
     hwloc_debug("%s", "\nLooking for PCI devices\n");
-
-    if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
-      /* TODO */
-    }
-    else if (topology->backend_type == HWLOC_BACKEND_XML) {
-      /* TODO */
-    }
 #ifdef HWLOC_HAVE_LIBPCI
-    else if (topology->is_thissystem) {
+    if (topology->is_thissystem) {
       hwloc_look_libpci(topology);
-      gotsome = 1;
-    }
+      print_objects(topology, 0, topology->levels[0][0]);
+      gotsomeio = 1;
+    } else
 #endif
-
-    if (gotsome) {
-      print_objects(topology, 0, topology->levels[0][0]);
-
-      hwloc_drop_useless_io(topology, topology->levels[0][0]);
-
-      hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
-
-      hwloc_debug("%s", "\nNow reconnecting\n");
-
-      hwloc_connect_children(topology->levels[0][0]);
-      hwloc_connect_levels(topology);
-
-      print_objects(topology, 0, topology->levels[0][0]);
-    } else {
+    {
       hwloc_debug("%s", "\nno PCI detection\n");
     }
+  }
+  /* if we got anything, filter interesting objects and update the tree */
+  if (gotsomeio) {
+    hwloc_drop_useless_io(topology, topology->levels[0][0]);
+    hwloc_debug("%s", "\nNow reconnecting\n");
+    hwloc_connect_children(topology->levels[0][0]);
+    hwloc_connect_levels(topology);
+    print_objects(topology, 0, topology->levels[0][0]);
+    hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
   }
 
   /*
