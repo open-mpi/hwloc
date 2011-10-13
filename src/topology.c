@@ -2197,7 +2197,10 @@ hwloc_discover(struct hwloc_topology *topology)
   /* import from libpci if needed */
   if (topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)
       && (topology->backend_type == HWLOC_BACKEND_NONE
-	  || topology->backend_type == HWLOC_BACKEND_LINUXFS)) {
+#ifdef HWLOC_LINUX_SYS
+	  || topology->backend_type == HWLOC_BACKEND_LINUXFS
+#endif
+	  )) {
     hwloc_debug("%s", "\nLooking for PCI devices\n");
 #ifdef HWLOC_HAVE_LIBPCI
     if (topology->is_thissystem) {
