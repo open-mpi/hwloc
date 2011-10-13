@@ -881,6 +881,7 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
     obj->name = strdup(name);
 
   if (!topology->is_loaded) {
+    hwloc_free_unlinked_object(obj);
     errno = EINVAL;
     return NULL;
   }
