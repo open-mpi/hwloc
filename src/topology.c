@@ -1360,6 +1360,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
   if (obj->type != HWLOC_OBJ_NODE
       && !obj->first_child /* only remove if all children were removed above, so that we don't remove parents of NUMAnode */
       && !hwloc_obj_type_is_io(obj->type)
+      && obj->cpuset /* don't remove if no cpuset at all, there's likely a good reason why it's different from having an empty cpuset */
       && hwloc_bitmap_iszero(obj->cpuset)) {
     /* Remove empty children */
     hwloc_debug("%s", "\nRemoving empty object ");
@@ -2556,7 +2557,7 @@ hwloc_backend_custom_exit(struct hwloc_topology *topology)
 {
   assert(topology->backend_type == HWLOC_BACKEND_CUSTOM);
 
-  hwloc_topology_clear(topology); /* FIXME: works before load? are children properly connected yet? */
+  hwloc_topology_clear(topology);
   hwloc_topology_setup_defaults(topology);
 
   topology->backend_type = HWLOC_BACKEND_NONE;
@@ -2565,8 +2566,6 @@ hwloc_backend_custom_exit(struct hwloc_topology *topology)
 static void
 hwloc_backend_exit(struct hwloc_topology *topology)
 {
-  /* FIXME: if loaded, clear topology first */
-
   switch (topology->backend_type) {
 #ifdef HWLOC_LINUX_SYS
   case HWLOC_BACKEND_LINUXFS:
