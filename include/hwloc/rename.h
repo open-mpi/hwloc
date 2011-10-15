@@ -118,6 +118,7 @@ extern "C" {
 #define hwloc_topology_set_synthetic HWLOC_NAME(topology_set_synthetic)
 #define hwloc_topology_set_xml HWLOC_NAME(topology_set_xml)
 #define hwloc_topology_set_xmlbuffer HWLOC_NAME(topology_set_xmlbuffer)
+#define hwloc_topology_set_custom HWLOC_NAME(topology_set_custom)
 #define hwloc_topology_set_distance_matrix HWLOC_NAME(topology_set_distance_matrix)
 
 #define hwloc_topology_discovery_support HWLOC_NAME(topology_discovery_support)
@@ -131,6 +132,9 @@ extern "C" {
 
 #define hwloc_topology_insert_misc_object_by_cpuset HWLOC_NAME(topology_insert_misc_object_by_cpuset)
 #define hwloc_topology_insert_misc_object_by_parent HWLOC_NAME(topology_insert_misc_object_by_parent)
+
+#define hwloc_custom_insert_topology HWLOC_NAME(custom_insert_topology)
+#define hwloc_custom_insert_group_object_by_parent HWLOC_NAME(custom_insert_group_object_by_parent)
 
 #define hwloc_restrict_flags_e HWLOC_NAME(restrict_flags_e)
 #define HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES HWLOC_NAME_CAPS(RESTRICT_FLAG_ADAPT_DISTANCES)

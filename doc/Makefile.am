@@ -148,16 +148,18 @@ if HWLOC_DOXYGEN_BROKEN_SHORT_NAMES
 	-@mv -f $(DOX_DIR)/latex/cpu_mem_bind.tex $(DOX_DIR)/latex/a00004.tex
 	-@mv -f $(DOX_DIR)/html/iodevices.html $(DOX_DIR)/html/a00005.html
 	-@mv -f $(DOX_DIR)/latex/iodevices.tex $(DOX_DIR)/latex/a00005.tex
-	-@mv -f $(DOX_DIR)/html/xml.html $(DOX_DIR)/html/a00006.html
-	-@mv -f $(DOX_DIR)/latex/xml.tex $(DOX_DIR)/latex/a00006.tex
-	-@mv -f $(DOX_DIR)/html/interoperability.html $(DOX_DIR)/html/a00007.html
-	-@mv -f $(DOX_DIR)/latex/interoperability.tex $(DOX_DIR)/latex/a00007.tex
-	-@mv -f $(DOX_DIR)/html/threadsafety.html $(DOX_DIR)/html/a00008.html
-	-@mv -f $(DOX_DIR)/latex/threadsafety.tex $(DOX_DIR)/latex/a00008.tex
-	-@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00009.html
-	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00009.tex
-	-@mv -f $(DOX_DIR)/html/faq.html $(DOX_DIR)/html/a00010.html
-	-@mv -f $(DOX_DIR)/latex/faq.tex $(DOX_DIR)/latex/a00010.tex
+	-@mv -f $(DOX_DIR)/html/multinode.html $(DOX_DIR)/html/a00006.html
+	-@mv -f $(DOX_DIR)/latex/multinode.tex $(DOX_DIR)/latex/a00006.tex
+	-@mv -f $(DOX_DIR)/html/xml.html $(DOX_DIR)/html/a00007.html
+	-@mv -f $(DOX_DIR)/latex/xml.tex $(DOX_DIR)/latex/a00007.tex
+	-@mv -f $(DOX_DIR)/html/interoperability.html $(DOX_DIR)/html/a00008.html
+	-@mv -f $(DOX_DIR)/latex/interoperability.tex $(DOX_DIR)/latex/a00008.tex
+	-@mv -f $(DOX_DIR)/html/threadsafety.html $(DOX_DIR)/html/a00009.html
+	-@mv -f $(DOX_DIR)/latex/threadsafety.tex $(DOX_DIR)/latex/a00009.tex
+	-@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00010.html
+	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00010.tex
+	-@mv -f $(DOX_DIR)/html/faq.html $(DOX_DIR)/html/a00011.html
+	-@mv -f $(DOX_DIR)/latex/faq.tex $(DOX_DIR)/latex/a00011.tex
 endif
 endif
 
@@ -367,6 +369,8 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_nodeset_strict.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cuda_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_custom_insert_topology.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_custom_insert_group_object_by_parent.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distributev.3 \
         $(DOX_MAN_DIR)/man3/hwloc_free.3 \
@@ -506,6 +510,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_membind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_custom.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_flags.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_fsroot.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_pid.3 \
@@ -524,6 +529,7 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_creation.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_cuda.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_cudart.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_custom.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_distances.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_glibc_sched.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_binding.3 \

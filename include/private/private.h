@@ -48,6 +48,7 @@ typedef enum hwloc_backend_e {
   HWLOC_BACKEND_LINUXFS,
 #endif
   HWLOC_BACKEND_XML,
+  HWLOC_BACKEND_CUSTOM,
   /* This value is only here so that we can end the enum list without
      a comma (thereby preventing compiler warnings) */
   HWLOC_BACKEND_MAX
