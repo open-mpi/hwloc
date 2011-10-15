@@ -2276,7 +2276,8 @@ hwloc_discover(struct hwloc_topology *topology)
 
   /* see if the backend already imported some I/O devices */
   if (topology->backend_type == HWLOC_BACKEND_XML
-      || topology->backend_type == HWLOC_BACKEND_SYNTHETIC)
+      || topology->backend_type == HWLOC_BACKEND_SYNTHETIC
+      || topology->backend_type == HWLOC_BACKEND_CUSTOM)
     gotsomeio = 1;
   /* import from libpci if needed */
   if (topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)

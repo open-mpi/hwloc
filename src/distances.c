@@ -65,7 +65,6 @@ void hwloc_distances_set(hwloc_topology_t __hwloc_restrict topology, hwloc_obj_t
 			 int force)
 {
   struct hwloc_os_distances_s *osdist, *next = topology->first_osdist;
-
   /* look for existing distances for the same type */
   while ((osdist = next) != NULL) {
     next = osdist->next;
