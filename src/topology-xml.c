@@ -577,7 +577,7 @@ hwloc__xml_import_find_child(hwloc__xml_import_state_t state,
 	if (child->content && child->content[0] != '\0' && child->content[0] != '\n')
 	  if (hwloc__xml_verbose())
 	    fprintf(stderr, "ignoring object text content %s\n", (const char*) child->content);
-      } else {
+      } else if (child->type != XML_COMMENT_NODE) {
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "ignoring unexpected xml node type %u\n", child->type);
       }
