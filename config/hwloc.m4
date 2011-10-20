@@ -574,6 +574,11 @@ EOF])
            AC_MSG_WARN([find appropriate support])
            AC_MSG_ERROR([Cannot continue])])
     if test "x$hwloc_pci_happy" = "xyes"; then
+      tmp_save_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS $HWLOC_PCI_CFLAGS"
+      tmp_save_LIBS="$LIBS"
+      LIBS="$LIBS $HWLOC_PCI_LIBS"
+      AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
       AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [$HWLOC_PCI_ADDITIONAL_LIBS])
       if test "x$enable_pci_caps" = "xyes"; then
@@ -601,6 +606,8 @@ EOF])
       HWLOC_REQUIRES="libpci $HWLOC_REQUIRES"
       AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
       AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
+      CFLAGS="$tmp_save_CFLAGS"
+      LIBS="$tmp_save_LIBS"
     else
       AC_SUBST([HWLOC_HAVE_LIBPCI], [0])
     fi
