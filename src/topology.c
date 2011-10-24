@@ -2735,8 +2735,10 @@ hwloc_topology_clear (struct hwloc_topology *topology)
   unsigned l;
   hwloc_distances_clear(topology);
   hwloc_topology_clear_tree (topology, topology->levels[0][0]);
-  for (l=0; l<topology->nb_levels; l++)
+  for (l=0; l<topology->nb_levels; l++) {
     free(topology->levels[l]);
+    topology->levels[l] = NULL;
+  }
   free(topology->bridge_level);
   free(topology->pcidev_level);
   free(topology->osdev_level);
