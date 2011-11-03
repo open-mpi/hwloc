@@ -24,7 +24,8 @@ Version 1.4.0
   for details.
 * Implement hwloc_get_area_membind() on Linux.
 * Add a group object above partial distance matrices to make sure
-  the matrices are always available in the final topology.
+  the matrices are available in the final topology, except when this
+  new object would contradict the existing hierarchy.
 * Fix some corner cases in object insertion, for instance when dealing
   with NUMA nodes without any CPU.
 * Grouping by distances now also works when loading from XML.
