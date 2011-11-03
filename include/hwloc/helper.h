@@ -1018,7 +1018,7 @@ hwloc_get_whole_distance_matrix_by_type(hwloc_topology_t topology, hwloc_obj_typ
 /** \brief Get distances for the given depth and covering some objects
  *
  * Return a distance matrix that describes depth \p depth and covers at
- * least object \p obj and all its ancestors.
+ * least object \p obj and all its children.
  *
  * When looking for the distance between some objects, a common ancestor should
  * be passed in \p obj.
