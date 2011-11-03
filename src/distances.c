@@ -513,6 +513,10 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
   assert(hwloc_bitmap_isequal(nodeset, root->nodeset));
   hwloc_bitmap_free(cpuset);
   hwloc_bitmap_free(nodeset);
+  if (root->depth >= objs[0]->depth) {
+    /* strange topology led us to find invalid relative depth, ignore */
+    return;
+  }
   relative_depth = objs[0]->depth - root->depth; /* this assume that we have distances between objects of the same level */
 
   /* get the logical index offset, it's the min of all logical indexes */
