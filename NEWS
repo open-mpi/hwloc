@@ -19,7 +19,8 @@ in v0.9.1).
 
 Version 1.3.1
 -------------
-* Fix some pciutils detection corner cases.
+* Fix pciutils detection with pkg-config when not installed in standard
+  directories.
 
 
 Version 1.3.0
