@@ -1088,7 +1088,7 @@ hwloc__xml_export_escape_string(const char *src)
     case '<':  strcpy(dst, "&lt;");   replen=4; break;
     case '>':  strcpy(dst, "&gt;");   replen=4; break;
     case '&':  strcpy(dst, "&amp;");  replen=5; break;
-    default: break;
+    default: assert(0);
     }
     dst+=replen; src++;
 
