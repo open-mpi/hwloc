@@ -1499,7 +1499,7 @@ static char *
 hwloc_strdup_mntpath(const char *escapedpath, size_t length)
 {
   char *path = malloc(length+1);
-  const char *src = escapedpath, *tmp = src;
+  const char *src = escapedpath, *tmp;
   char *dst = path;
 
   while ((tmp = strchr(src, '\\')) != NULL) {

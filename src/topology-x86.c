@@ -162,7 +162,6 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
   /* AMD doesn't actually provide 0x04 information */
   if (cpuid_type != amd && highest_cpuid >= 0x04) {
-    cachenum = 0;
     for (cachenum = 0; ; cachenum++) {
       unsigned type;
       eax = 0x04;
@@ -212,7 +211,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       else
         cache->ways = ways = ((ebx >> 22) & 0x3ff) + 1;
       cache->sets = sets = ecx + 1;
-      cache->size = linesize * linepart * ways * sets;
+      cache->size = linesize * linepart * ways * sets; /* FIXME: what if ways == -1 ? */
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %u linepart %u ways %u sets %u, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
       infos->max_nbthreads = infos->max_log_proc / infos->max_nbcores;

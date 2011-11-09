@@ -69,7 +69,7 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode-1);
     attr = malloc(len+1);
     *attr = '\0';
-    len = hwloc_obj_attr_snprintf (attr, len+1, l, " ", verbose_mode-1);
+    hwloc_obj_attr_snprintf (attr, len+1, l, " ", verbose_mode-1);
     if (*phys || *attr) {
       const char *separator = *phys != '\0' && *attr!= '\0' ? " " : "";
       fprintf(output, " (%s%s%s)",

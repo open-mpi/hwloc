@@ -113,8 +113,8 @@ hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pci
 	  fillinfo(topology, obj, path);
 	}
       }
+      closedir(dir);
     }
-    closedir(dir);
   }
 }
 
