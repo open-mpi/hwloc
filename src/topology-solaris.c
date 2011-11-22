@@ -3,6 +3,7 @@
  * Copyright © 2009-2011 INRIA.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -10,6 +11,7 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
+#include <private/solaris-chiptype.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -627,17 +629,31 @@ void
 hwloc_look_solaris(struct hwloc_topology *topology)
 {
   unsigned nbprocs = hwloc_fallback_nbprocessors (topology);
+  char *CPUType;
+  char *CPUModel;
 #ifdef HAVE_LIBLGRP
   hwloc_look_lgrp(topology);
 #endif /* HAVE_LIBLGRP */
 #ifdef HAVE_LIBKSTAT
   nbprocs = 0;
-  if (hwloc_look_kstat(topology))
+  if (hwloc_look_kstat(topology)) {
+    /* Set CPU Type and Model for machine. */
+    CPUType = hwloc_solaris_get_chip_type();
+    CPUModel = hwloc_solaris_get_chip_model();
+    hwloc_obj_add_info(topology->levels[0][0], "CPUType", CPUType);
+    hwloc_obj_add_info(topology->levels[0][0], "CPUModel", CPUModel);
     return;
+  }
 #endif /* HAVE_LIBKSTAT */
   hwloc_setup_pu_level(topology, nbprocs);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Solaris");
+
+  /* Set CPU Type and Model for machine. */
+  CPUType = hwloc_solaris_get_chip_type();
+  CPUModel = hwloc_solaris_get_chip_model();
+  hwloc_obj_add_info(topology->levels[0][0], "CPUType", CPUType);
+  hwloc_obj_add_info(topology->levels[0][0], "CPUModel", CPUModel);
 }
 
 void
