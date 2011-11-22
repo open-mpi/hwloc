@@ -84,7 +84,7 @@ AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
         case "$hwloc_c_vendor" in
         sun)
             # Check using Sun Studio -xldscope=hidden flag
-            hwloc_add=-xldscope-hidden
+            hwloc_add=-xldscope=hidden
             CFLAGS="$CFLAGS_orig $hwloc_add"
 
             AC_MSG_CHECKING([if $CC supports -xldscope])
