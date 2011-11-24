@@ -40,6 +40,9 @@ extern "C" {
  * If no object of this type is present on the underlying architecture, the
  * function returns the depth of the first "present" object typically found
  * inside \p type.
+ *
+ * If some objects of the given type exist in different levels, for instance
+ * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
  */
 static __hwloc_inline int __hwloc_attribute_pure
 hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
@@ -63,6 +66,9 @@ hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * If no object of this type is present on the underlying architecture, the
  * function returns the depth of the first "present" object typically
  * containing \p type.
+ *
+ * If some objects of the given type exist in different levels, for instance
+ * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
  */
 static __hwloc_inline int __hwloc_attribute_pure
 hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
