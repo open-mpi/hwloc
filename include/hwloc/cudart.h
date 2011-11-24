@@ -1,6 +1,6 @@
 /*
  * Copyright © 2010 INRIA.  All rights reserved.
- * Copyright © 2010 Université Bordeaux 1
+ * Copyright © 2010-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -19,6 +19,7 @@
 #include <hwloc.h>
 #include <hwloc/autogen/config.h>
 #include <hwloc/linux.h>
+#include <hwloc/helper.h>
 
 #include <cuda_runtime_api.h>
 
@@ -32,10 +33,37 @@ extern "C" {
  * @{
  */
 
+/** \brief Return the domain, bus and device IDs of device \p device.
+ */
+static __hwloc_inline int
+hwloc_cudart_get_device_pci_ids(hwloc_topology_t topology __hwloc_attribute_unused,
+			       int device, int *domain, int *bus, int *dev)
+{
+  cudaError_t cerr;
+  struct cudaDeviceProp prop;
+
+  cerr = cudaGetDeviceProperties(&prop, device);
+  if (cerr) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+#if CUDART_VERSION >= 4000
+  *domain = prop.pciDomainID;
+#else
+  *domain = 0;
+#endif
+
+  *bus = prop.pciBusID;
+  *dev = prop.pciDeviceID;
+
+  return 0;
+}
+
 /** \brief Get the CPU set of logical processors that are physically
- * close to device \p cudevice.
+ * close to device \p device.
  *
- * For the given CUDA Runtime API device \p cudevice, read the corresponding
+ * For the given CUDA Runtime API device \p device, read the corresponding
  * kernel-provided cpumap file and return the corresponding CPU set.
  * This function is currently only implemented in a meaningful way for
  * Linux; other systems will simply get a full cpuset.
@@ -47,23 +75,13 @@ hwloc_cudart_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
 #ifdef HWLOC_LINUX_SYS
   /* If we're on Linux, use the sysfs mechanism to get the local cpus */
 #define HWLOC_CUDART_DEVICE_SYSFS_PATH_MAX 128
-  cudaError_t cerr;
-  struct cudaDeviceProp prop;
   char path[HWLOC_CUDART_DEVICE_SYSFS_PATH_MAX];
   FILE *sysfile = NULL;
-  int pciDomainID = 0;
-
-  cerr = cudaGetDeviceProperties(&prop, device);
-  if (cerr) {
-    errno = ENOSYS;
+  int domain, bus, dev;
+  if (hwloc_cudart_get_device_pci_ids(topology, device, &domain, &bus, &dev))
     return -1;
-  }
 
-#if CUDART_VERSION >= 4000
-  pciDomainID = prop.pciDomainID;
-#endif
-
-  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.0/local_cpus", pciDomainID, prop.pciBusID, prop.pciDeviceID);
+  sprintf(path, "/sys/bus/pci/devices/%04x:%02x:%02x.0/local_cpus", domain, bus, dev);
   sysfile = fopen(path, "r");
   if (!sysfile)
     return -1;
@@ -76,6 +94,23 @@ hwloc_cudart_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unuse
   hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
 #endif
   return 0;
+}
+
+/** \brief Get the hwloc object for the PCI device corresponding
+ * to device \p device.
+ *
+ * For the given CUDA Runtime API device \p device, return the hwloc PCI
+ * object containing the device. Returns NULL if there is none.
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_cudart_get_device_pcidev(hwloc_topology_t topology, int device)
+{
+  int domain, bus, dev;
+
+  if (hwloc_cudart_get_device_pci_ids(topology, device, &domain, &bus, &dev))
+    return NULL;
+
+  return hwloc_get_pcidev_by_busid(topology, domain, bus, dev, 0);
 }
 
 /** @} */
