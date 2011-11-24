@@ -43,6 +43,8 @@ Version 1.4.0
 * Backend documentation enhancements.
 * lstopo -v -p now displays distance matrices with physical indexes.
 * Add hwloc-distances utility to list distances.
+* Add more NVIDIA CUDA helpers in cuda.h and cudart.h to find hwloc objects
+  corresponding to CUDA devices.
 
 
 Version 1.3.0
