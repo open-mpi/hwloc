@@ -251,7 +251,7 @@ RECURSE_BEGIN(obj, border) \
     } else { \
       unsigned found = 0; \
       /* Try to find a fitting rectangle */ \
-      for (rows = ceil(sqrt(numsubobjs)); rows >= ceil(pow(numsubobjs,0.33)) && rows > 1; rows--) { \
+      for (rows = floor(sqrt(numsubobjs)); rows >= ceil(pow(numsubobjs,0.33)) && rows > 1; rows--) { \
         columns = numsubobjs / rows; \
         if (columns > 1 && columns * rows == numsubobjs) { \
           found = 1; \
