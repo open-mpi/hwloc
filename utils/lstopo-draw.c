@@ -249,27 +249,38 @@ RECURSE_BEGIN(obj, border) \
       columns =  1; \
       rows = numsubobjs; \
     } else { \
-      /* Average object size */ \
-      unsigned obj_avgwidth = obj_totwidth / numsubobjs; \
-      unsigned obj_avgheight = obj_totheight / numsubobjs; \
-      /* Ideal total height for spreading that area with RATIO */ \
-      float idealtotheight = (float) sqrt(area/RATIO); \
-      float under_ratio, over_ratio; \
-      /* approximation of number of rows */ \
-      rows = idealtotheight / obj_avgheight; \
-      columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
-      /* Ratio obtained by underestimation */ \
-      under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
-      \
-      /* try to overestimate too */ \
-      rows++; \
-      columns = (numsubobjs + rows - 1) / rows; \
-      /* Ratio obtained by overestimation */ \
-      over_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
-      /* Did we actually preferred underestimation? (good row/column fit or good ratio) */ \
-      if (rows > 1 && prefer_ratio(under_ratio, over_ratio)) { \
-        rows--; \
+      unsigned found = 0; \
+      /* Try to find a fitting rectangle */ \
+      for (rows = ceil(sqrt(numsubobjs)); rows >= ceil(pow(numsubobjs,0.33)) && rows > 1; rows--) { \
+        columns = numsubobjs / rows; \
+        if (columns > 1 && columns * rows == numsubobjs) { \
+          found = 1; \
+          break; \
+        } \
+      } \
+      if (!found) { \
+        /* Average object size */ \
+        unsigned obj_avgwidth = obj_totwidth / numsubobjs; \
+        unsigned obj_avgheight = obj_totheight / numsubobjs; \
+        /* Ideal total height for spreading that area with RATIO */ \
+        float idealtotheight = (float) sqrt(area/RATIO); \
+        float under_ratio, over_ratio; \
+        /* approximation of number of rows */ \
+        rows = idealtotheight / obj_avgheight; \
+        columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
+        /* Ratio obtained by underestimation */ \
+        under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
+        \
+        /* try to overestimate too */ \
+        rows++; \
         columns = (numsubobjs + rows - 1) / rows; \
+        /* Ratio obtained by overestimation */ \
+        over_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
+        /* Did we actually preferred underestimation? (good row/column fit or good ratio) */ \
+        if (rows > 1 && prefer_ratio(under_ratio, over_ratio)) { \
+          rows--; \
+          columns = (numsubobjs + rows - 1) / rows; \
+        } \
       } \
     } \
     \
