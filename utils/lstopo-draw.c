@@ -832,7 +832,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   }
 
   if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
-    NETWORK_DRAW_BEGIN();
+    NETWORK_DRAW_END();
   else
     RECURSE_HORIZ(level, methods, gridsize, 0);
 
