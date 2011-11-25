@@ -474,7 +474,10 @@ hwloc_get_obj_covering_cpuset_nodeset(struct hwloc_topology *topology,
  trychildren:
   child = parent->first_child;
   while (child) {
-    if (hwloc_bitmap_isincluded(cpuset, child->cpuset)
+    /* look for a child with a cpuset containing ours.
+     * if it has a nodeset, it must also contain ours.
+     */
+    if (child->cpuset && hwloc_bitmap_isincluded(cpuset, child->cpuset)
 	&& (!child->nodeset || hwloc_bitmap_isincluded(nodeset, child->nodeset))) {
       parent = child;
       goto trychildren;
