@@ -154,3 +154,44 @@ LT_LANG([C])
 
 # Party on
 AC_OUTPUT
+
+# Create a comma-delimited list in an environment variable.
+# $1 = variable name
+# $2 = value to append
+append_env() {
+    # Tricky shell/m4 quoting here -- not for the meek.
+    var=[$]1
+    # Note: quotes *NOT* needed in this assignment
+    eval initial_value=\$$var
+
+    AS_IF([test "$initial_value" != ""], 
+          [new_value="$initial_value, [$]2"],
+          [new_value="[$]2]")
+    eval "[$]1=\"$new_value\""
+}
+
+# Show which optional support we'll be building
+hwloc_xml_status=basic
+AS_IF([test "$hwloc_libxml2_happy" = "yes"], [hwloc_xml_status=full])
+
+hwloc_numa_status=
+AS_IF([test "$enable_mbind" = "yes"],
+      [append_env hwloc_numa_status "binding"])
+AS_IF([test "$enable_set_mempolicy" = "yes"], 
+      [append_env hwloc_numa_status "set policy"])
+AS_IF([test "$enable_migrate_pages" = "yes"],
+      [append_env hwloc_numa_status "migrate pages"])
+AS_IF([test "$hwloc_numa_status" = ""], [hwloc_numa_status=none])
+
+cat <<EOF
+
+-----------------------------------------------------------------------------
+Hwloc optional build support status (more details can be found above):
+
+Probe / display PCI devices: $hwloc_pci_happy
+Graphical output (Cairo):    $hwloc_cairo_happy
+XML input / output:          $hwloc_xml_status
+Memory support:              $hwloc_numa_status
+-----------------------------------------------------------------------------
+
+EOF
