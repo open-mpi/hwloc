@@ -20,7 +20,9 @@
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
-
+#ifdef HAVE_SYS_UTSNAME_H
+#include <sys/utsname.h>
+#endif
 #include <string.h>
 
 #ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
@@ -133,6 +135,7 @@ struct hwloc_topology {
       /* FS root parameters */
       char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
+      struct utsname utsname; /* cached result of uname, used multiple times */
     } linuxfs;
 #endif /* HWLOC_LINUX_SYS */
 #if defined(HWLOC_OSF_SYS) || defined(HWLOC_COMPILE_PORTS)

@@ -14,6 +14,7 @@
 #include <private/private.h>
 #include <private/misc.h>
 #include <private/debug.h>
+#include <sys/utsname.h>
 
 #include <limits.h>
 #include <stdio.h>
@@ -2574,6 +2575,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	      hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel);
 	    }
 	}
+	if (topology->backend_params.linuxfs.utsname.machine[0] != '\0')
+	  hwloc_obj_add_info(sock, "CPUType", topology->backend_params.linuxfs.utsname.machine);
         socketset = NULL; /* don't free it */
       }
       hwloc_bitmap_free(socketset);
@@ -3033,6 +3036,8 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
 	/* FIXME add to name as well? */
         hwloc_obj_add_info(obj, "CPUModel", cpumodel);
       }
+      if (topology->backend_params.linuxfs.utsname.machine[0] != '\0')
+	hwloc_obj_add_info(obj, "CPUType", topology->backend_params.linuxfs.utsname.machine);
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
@@ -3143,6 +3148,10 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
   int err;
 
+  memset(&topology->backend_params.linuxfs.utsname, 0, sizeof(topology->backend_params.linuxfs.utsname));
+  if (topology->is_thissystem)
+    uname(&topology->backend_params.linuxfs.utsname);
+
   /* Gather the list of admin-disabled cpus and mems */
   hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, topology->backend_params.linuxfs.root_fd);
   if (cgroup_mntpnt || cpuset_mntpnt) {
@@ -3248,6 +3257,7 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
 
   /* gather uname info if fsroot wasn't changed */
   if (topology->is_thissystem)
+     /* FIXME: reuse topology->backend_params.linuxfs.utsname */
      hwloc_add_uname_info(topology);
 }
 

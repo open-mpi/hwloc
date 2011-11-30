@@ -39,7 +39,8 @@ Version 1.4.0
 * Add synthetic exporting of symmetric topologies to lstopo.
 * Add hwloc_get_obj_index_inside_cpuset() to retrieve the "logical" index
   of an object within a subtree of the topology.
-* Add a CPUModel info attribute to Socket objects on Linux and Solaris.
+* Add a CPUModel and CPUType info attribute to Socket objects on Linux
+  and Solaris.
 * Backend documentation enhancements.
 * lstopo -v -p now displays distance matrices with physical indexes.
 * Add hwloc-distances utility to list distances.
