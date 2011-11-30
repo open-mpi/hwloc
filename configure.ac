@@ -183,6 +183,7 @@ AS_IF([test "$enable_migrate_pages" = "yes"],
       [append_env hwloc_numa_status "migrate pages"])
 AS_IF([test "$hwloc_numa_status" = ""], [hwloc_numa_status=none])
 
+# Beginning of generic support
 cat <<EOF
 
 -----------------------------------------------------------------------------
@@ -191,7 +192,15 @@ Hwloc optional build support status (more details can be found above):
 Probe / display PCI devices: $hwloc_pci_happy
 Graphical output (Cairo):    $hwloc_cairo_happy
 XML input / output:          $hwloc_xml_status
+EOF
+
+# Linux specific support
+AS_IF([test "$hwloc_linux" = "yes"], [cat <<EOF
 Memory support:              $hwloc_numa_status
+EOF])
+
+# End of generic support
+cat <<EOF
 -----------------------------------------------------------------------------
 
 EOF
