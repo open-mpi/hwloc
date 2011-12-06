@@ -27,6 +27,7 @@ nodist_libhwloc_ports_la_SOURCES = \
         traversal.c \
         topology-synthetic.c \
         topology-solaris.c \
+        topology-solaris-chiptype.c \
         topology-aix.c \
         topology-osf.c \
         topology-windows.c \
