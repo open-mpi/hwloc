@@ -50,6 +50,12 @@ Version 1.4.0
 
 Version 1.3.1
 -------------
+* Fix pciutils detection with pkg-config when not installed in standard
+  directories.
+* Fix visibility options detection with the Solaris Studio compiler.
+  Thanks to Igor Galić and Terry Dontje for reporting the problems.
+* Print a short summary at the end of the configure output. Thanks to
+  Stefan Eilemann for the suggestion.
 * Minor fixes
   + Make hwloc's configure script properly obey $PKG_CONFIG.  Thanks
     to Nathan Phillip Brink for raising the issue.
