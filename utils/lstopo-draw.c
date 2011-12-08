@@ -242,10 +242,10 @@ RECURSE_BEGIN(obj, border) \
       obj_totheight += height + (separator); \
       area += (width + (separator)) * (height + (separator)); \
     } \
-    if (force_horiz) { \
+    if (force_orient[obj->type] == LSTOPO_ORIENT_HORIZ) { \
       rows =  1; \
       columns = numsubobjs; \
-    } else if (force_vert) { \
+    } else if (force_orient[obj->type] == LSTOPO_ORIENT_VERT) { \
       columns =  1; \
       rows = numsubobjs; \
     } else { \
@@ -380,7 +380,7 @@ prefer_vert(hwloc_topology_t topology, int logical, hwloc_obj_t level, void *out
   horiz_ratio = (float)totwidth / totheight;
   RECURSE_VERT(level, &null_draw_methods, separator, 0);
   vert_ratio = (float)totwidth / totheight;
-  return force_vert || (!force_horiz && prefer_ratio(vert_ratio, horiz_ratio));
+  return force_orient[level->type] == LSTOPO_ORIENT_VERT || (force_orient[level->type] != LSTOPO_ORIENT_HORIZ && prefer_ratio(vert_ratio, horiz_ratio));
 }
 
 static int
@@ -526,7 +526,7 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
 
   DYNA_CHECK();
 
-  RECURSE_HORIZ(level, &null_draw_methods, 0, gridsize);
+  RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
 
   if (hwloc_bitmap_isset(level->online_cpuset, level->os_index))
     if (!hwloc_bitmap_isset(level->allowed_cpuset, level->os_index))
@@ -555,7 +555,7 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
       methods->text(output, 0xff, 0xff, 0xff, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  RECURSE_HORIZ(level, methods, 0, gridsize);
+  RECURSE_RECT(level, methods, 0, gridsize);
 
   DYNA_SAVE();
 }
@@ -571,7 +571,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
 
   DYNA_CHECK();
 
-  RECURSE_HORIZ(level, &null_draw_methods, separator, 0);
+  RECURSE_RECT(level, &null_draw_methods, separator, 0);
 
   methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, totwidth, y, myheight - gridsize);
 
@@ -582,7 +582,7 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
     methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
-  RECURSE_HORIZ(level, methods, separator, 0);
+  RECURSE_RECT(level, methods, separator, 0);
 
   DYNA_SAVE();
 }
@@ -653,7 +653,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   DYNA_CHECK();
 
   /* Compute the size needed by sublevels */
-  RECURSE_HORIZ(level, &null_draw_methods, gridsize, gridsize);
+  RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
   /* Draw the epoxy box */
   methods->box(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR, depth, x, totwidth, y, totheight);
@@ -668,7 +668,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   }
 
   /* Restart, now really drawing sublevels */
-  RECURSE_HORIZ(level, methods, gridsize, gridsize);
+  RECURSE_RECT(level, methods, gridsize, gridsize);
 
   /* Save result for dynamic programming */
   DYNA_SAVE();

@@ -30,7 +30,15 @@ struct draw_methods {
   void (*text) (void *output, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text);
 };
 
-extern unsigned int gridsize, fontsize, force_horiz, force_vert;
+extern unsigned int gridsize, fontsize;
+
+enum lstopo_orient_e {
+  LSTOPO_ORIENT_NONE = 0,
+  LSTOPO_ORIENT_HORIZ,
+  LSTOPO_ORIENT_VERT
+};
+/* orientation of children within an object of the given type */
+extern enum lstopo_orient_e force_orient[];
 
 extern void *output_draw_start(struct draw_methods *draw_methods, int logical, int legend, struct hwloc_topology *topology, void *output);
 extern void output_draw(struct draw_methods *draw_methods, int logical, int legend, struct hwloc_topology *topology, void *output);

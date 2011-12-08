@@ -37,6 +37,7 @@ Version 1.4.0
 * Add symmetric_subtree object attribute to ease assumptions when consulting
   regular symmetric topologies.
 * Add synthetic exporting of symmetric topologies to lstopo.
+* lstopo --horiz and --vert can now be applied to some specific object types.
 * Add hwloc_get_obj_index_inside_cpuset() to retrieve the "logical" index
   of an object within a subtree of the topology.
 * Add a CPUModel and CPUType info attribute to Socket objects on Linux
