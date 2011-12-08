@@ -33,19 +33,20 @@
 # ----------------------------------
 AC_DEFUN([HWLOC_PKG_PROG_PKG_CONFIG],
 [m4_pattern_forbid([^_?PKG_[A-Z_]+$])
-m4_pattern_allow([^HWLOC_PKG_CONFIG(_PATH)?$])
-AC_ARG_VAR([HWLOC_PKG_CONFIG], [path to pkg-config utility])dnl
-if test "x$ac_cv_env_HWLOC_PKG_CONFIG_set" != "xset"; then
-	AC_PATH_TOOL([HWLOC_PKG_CONFIG], [pkg-config])
+m4_pattern_allow([^PKG_CONFIG(_PATH)?$])
+AC_ARG_VAR([PKG_CONFIG], [path to pkg-config utility])dnl
+
+if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
+	AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
 fi
-if test -n "$HWLOC_PKG_CONFIG"; then
+if test -n "$PKG_CONFIG"; then
 	HWLOC_pkg_min_version=m4_default([$1], [0.9.0])
 	AC_MSG_CHECKING([pkg-config is at least version $HWLOC_pkg_min_version])
-	if $HWLOC_PKG_CONFIG --atleast-pkgconfig-version $HWLOC_pkg_min_version; then
+	if $PKG_CONFIG --atleast-pkgconfig-version $HWLOC_pkg_min_version; then
 		AC_MSG_RESULT([yes])
 	else
 		AC_MSG_RESULT([no])
-		HWLOC_PKG_CONFIG=""
+		PKG_CONFIG=""
 	fi
 		
 fi[]dnl
