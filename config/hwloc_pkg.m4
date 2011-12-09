@@ -149,7 +149,7 @@ See the pkg-config man page for more details.])
 
 $HWLOCC_$1_PKG_ERRORS
 
-Consider adjusting the PKG_CONFIG environment variable if you
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
 installed software in a non-standard prefix.
 
 _HWLOC_PKG_TEXT
