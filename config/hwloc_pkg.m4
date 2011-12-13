@@ -147,7 +147,7 @@ See the pkg-config man page for more details.])
 	ifelse([$5], , [AC_MSG_ERROR(dnl
 [Package requirements ($2) were not met:
 
-$HWLOCC_$1_PKG_ERRORS
+$HWLOC_$1_PKG_ERRORS
 
 Consider adjusting the PKG_CONFIG_PATH environment variable if you
 installed software in a non-standard prefix.
