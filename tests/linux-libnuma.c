@@ -24,6 +24,12 @@ int main(void)
   unsigned long maxnode;
   int i;
 
+  if (numa_available() < 0)
+    /* libnuma has inconsistent behavior when the kernel isn't NUMA-aware.
+     * don't try to check everything precisely.
+     */
+    exit(77);
+
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
 

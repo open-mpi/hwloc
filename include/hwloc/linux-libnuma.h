@@ -10,6 +10,15 @@
  *
  * Applications that use both Linux libnuma and hwloc may want to
  * include this file so as to ease conversion between their respective types.
+ *
+ * This helper also offers a consistent behavior on non-NUMA machines
+ * or non-NUMA-aware kernels by assuming that the machines have a single
+ * NUMA node.
+ *
+ * \note The behavior of libnuma is undefined if the kernel is not NUMA-aware.
+ * (when CONFIG_NUMA is not set in the kernel configuration).
+ * This helper and libnuma may thus not be strictly compatible in this case,
+ * which may be detected by checking whether numa_available() returns -1.
  */
 
 #ifndef HWLOC_LINUX_LIBNUMA_H
