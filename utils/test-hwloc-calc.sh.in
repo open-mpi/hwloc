@@ -51,7 +51,7 @@ set -e
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:11:4 -H node.core.pu
   echo
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:12-37 --largest
-  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --largest --sep ""
+  ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --largest --sep "_"
   echo
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --single
   ./hwloc-calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --single --pulist
