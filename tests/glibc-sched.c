@@ -18,14 +18,19 @@
 int main(void)
 {
   hwloc_topology_t topology;
+#ifdef HWLOC_HAVE_CPU_SET
   unsigned depth;
   hwloc_bitmap_t hwlocset;
   cpu_set_t schedset;
   hwloc_obj_t obj;
   int err;
+#endif /* HWLOC_HAVE_CPU_SET */
 
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
+
+#ifdef HWLOC_HAVE_CPU_SET
+
   depth = hwloc_topology_get_depth(topology);
 
   hwlocset = hwloc_bitmap_dup(hwloc_topology_get_complete_cpuset(topology));
@@ -76,6 +81,8 @@ int main(void)
   hwloc_cpuset_from_glibc_sched_affinity(topology, hwlocset, &schedset, sizeof(schedset));
   assert(hwloc_bitmap_isequal(hwlocset, obj->cpuset));
   hwloc_bitmap_free(hwlocset);
+
+#endif /* HWLOC_HAVE_CPU_SET */
 
   hwloc_topology_destroy(topology);
   return 0;

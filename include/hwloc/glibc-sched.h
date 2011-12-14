@@ -21,7 +21,7 @@
 #include <hwloc/helper.h>
 #include <assert.h>
 
-#if !defined _GNU_SOURCE || !defined _SCHED_H || !defined CPU_SETSIZE
+#if !defined _GNU_SOURCE || !defined _SCHED_H || (!defined CPU_SETSIZE && !defined sched_priority)
 #error Please make sure to include sched.h before including glibc-sched.h, and define _GNU_SOURCE before any inclusion of sched.h
 #endif
 
