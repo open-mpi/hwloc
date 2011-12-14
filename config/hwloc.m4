@@ -376,6 +376,7 @@ EOF])
     fi
     
     _HWLOC_CHECK_DECL([sched_setaffinity], [
+      AC_DEFINE([HWLOC_HAVE_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides a prototype of sched_setaffinity()])
       AC_MSG_CHECKING([for old prototype of sched_setaffinity])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
@@ -383,7 +384,7 @@ EOF])
           #include <sched.h>
           static unsigned long mask;
           ]], [[ sched_setaffinity(0, (void*) &mask); ]])],
-        [AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype of sched_setaffinity()])
+        [AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype (without length) of sched_setaffinity()])
          AC_MSG_RESULT([yes])],
         [AC_MSG_RESULT([no])])
     ], , [[
