@@ -2230,8 +2230,10 @@ hwloc_discover(struct hwloc_topology *topology)
     DO(cpu,get_proc_cpubind);
     DO(cpu,set_thisthread_cpubind);
     DO(cpu,get_thisthread_cpubind);
+#ifdef hwloc_thread_t
     DO(cpu,set_thread_cpubind);
     DO(cpu,get_thread_cpubind);
+#endif
     DO(cpu,get_thisproc_last_cpu_location);
     DO(cpu,get_proc_last_cpu_location);
     DO(cpu,get_thisthread_last_cpu_location);
