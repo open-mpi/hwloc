@@ -23,6 +23,9 @@ Version 1.3.1
   directories.
 * Fix visibility options detection with the Solaris Studio compiler.
   Thanks to Igor Galić and Terry Dontje for reporting the problems.
+* Fix support for old Linux sched.h headers such as those found
+  on Red Hat 8. Thanks to Paul H. Hargrove for reporting the problems.
+* Fix inline and attribute support for Solaris compilers.
 * Print a short summary at the end of the configure output. Thanks to
   Stefan Eilemann for the suggestion.
 * Add --disable-libnuma configure option to disable libnuma-based
@@ -30,6 +33,8 @@ Version 1.3.1
   suggestion.
 * Make hwloc's configure script properly obey $PKG_CONFIG.  Thanks to
   Nathan Phillip Brink for raising the issue.
+* Silence some harmless pciutils warnings, thanks to Paul H. Hargrove
+  for reporting the problem.
 
 
 Version 1.3.0
