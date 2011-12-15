@@ -25,7 +25,8 @@ Version 1.3.1
   Thanks to Igor Galić and Terry Dontje for reporting the problems.
 * Fix support for old Linux sched.h headers such as those found
   on Red Hat 8. Thanks to Paul H. Hargrove for reporting the problems.
-* Fix inline and attribute support for Solaris compilers.
+* Fix inline and attribute support for Solaris compilers. Thanks to
+  Dave Love for reporting the problems.
 * Print a short summary at the end of the configure output. Thanks to
   Stefan Eilemann for the suggestion.
 * Add --disable-libnuma configure option to disable libnuma-based
