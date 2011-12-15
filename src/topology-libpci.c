@@ -560,6 +560,11 @@ hwloc_pci_error(char *msg, ...)
   longjmp(err_buf, 1);
 }
 
+static void
+hwloc_pci_warning(char *msg __hwloc_attribute_unused, ...)
+{
+}
+
 void
 hwloc_look_libpci(struct hwloc_topology *topology)
 {
@@ -576,6 +581,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   pciaccess = pci_alloc();
   pciaccess->error = hwloc_pci_error;
+  pciaccess->warning = hwloc_pci_warning;
 
   if (setjmp(err_buf)) {
     pci_cleanup(pciaccess);
