@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 #
-# Copyright (c) 2008 Cisco Systems, Inc.  All rights reserved.
-# See COPYING in top-level directory.
+# Copyright (c) 2008-2010 Cisco Systems, Inc.  All rights reserved.
 #
 # Dumb script to run through all the svn:ignore's in the tree and build
 # build a .hgignore file for Mercurial.  Do a few trivial things to
@@ -30,6 +29,8 @@ my @globals = qw/.libs
 *.dSYM
 *.S
 *.loT
+*.orig
+*.rej
 .git*
 .DS_Store
 stamp-h[1-9]
@@ -60,6 +61,17 @@ print "Thinking...\n"
 # Start at the top level
 process(".");
 
+# See if there's an .hgignore_local file.  If so, add its contents to the end.
+if (-f ".hgignore_local") {
+    open(IN, ".hgignore_local") || die "Can't open .hgignore_local";
+    while (<IN>) {
+        chomp;
+        push(@globals, $_);
+    }
+
+    close(IN);
+}
+
 # If there's an old .hgignore, delete it
 unlink(".hgignore")
     if (-f ".hgignore");
@@ -77,10 +89,6 @@ exit(0);
 # DFS-oriented recursive directory search
 sub process {
     my $dir = shift;
-
-    # Ensure we're in a svn-controlled directory
-    return
-        if (! -d "$dir/.svn");
 
     # Look at the svn:ignore property for this directory
     my $svn_ignore = `svn pg svn:ignore $dir 2> /dev/null`;
