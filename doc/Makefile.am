@@ -35,6 +35,8 @@ EXTRA_DIST = \
         doxygen.css \
         doxygen.cfg \
         images/diagram.fig \
+        images/devel09-pci.png \
+        images/devel09-pci.pdf \
         images/ppc64-with-smt.png \
         images/ppc64-with-smt.pdf \
         images/ppc64-without-smt.png \
