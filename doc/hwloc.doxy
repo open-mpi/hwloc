@@ -1325,7 +1325,7 @@ nodes' topologies (see \ref tools).
 \section multinode_interface Assembling topologies with the programming interface
 
 The hwloc programming interface offers the ability to build multinode
-topologies using the <em>custom<em> interface.
+topologies using the <em>custom</em> interface.
 A new multinode topology has to be initialized with hwloc_topology_init()
 and then set to custom with hwloc_topology_set_custom().
 Topologies and objects mat then be assembled.
