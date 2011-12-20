@@ -745,8 +745,9 @@ HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict t
  * expose the topology of the machine from the point of view of another
  * process.
  *
- * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
- * platforms
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
+ * 
  * \note -1 is returned and errno is set to ENOSYS on platforms that do not
  * support this feature.
  */
@@ -1347,8 +1348,8 @@ HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t s
 
 /** \brief Bind a process \p pid on cpus given in bitmap \p set.
  *
- * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
- * platforms
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
  */
@@ -1356,8 +1357,8 @@ HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
 
 /** \brief Get the current binding of process \p pid.
  *
- * \note hwloc_pid_t is pid_t on unix platforms, and HANDLE on native Windows
- * platforms
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
  *
@@ -1370,8 +1371,8 @@ HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
 #ifdef hwloc_thread_t
 /** \brief Bind a thread \p thread on cpus given in bitmap \p set.
  *
- * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
- * Windows platforms
+ * \note \p hwloc_thread_t is \p pthread_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  *
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p flags.
  */
@@ -1381,12 +1382,12 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 #ifdef hwloc_thread_t
 /** \brief Get the current binding of thread \p tid.
  *
- * \note hwloc_thread_t is pthread_t on unix platforms, and HANDLE on native
- * Windows platforms
+ * \note \p hwloc_thread_t is \p pthread_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  *
  * \note HWLOC_CPUBIND_PROCESS can not be used in \p flags.
  */
-HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_cpuset_t set, int flags);
+HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t set, int flags);
 #endif
 
 /** \brief Get the last CPU where the current process or thread ran.
@@ -1404,6 +1405,9 @@ HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_
  * to another at any time according to their binding,
  * so this function may return something that is already
  * outdated.
+ *
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  *
  * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
  *
@@ -1734,6 +1738,9 @@ HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t c
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
+ *
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  */
 HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
@@ -1742,6 +1749,9 @@ HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwl
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
+ *
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  */
 HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
 
@@ -1777,6 +1787,9 @@ HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.
+ *
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  */
 HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
 
@@ -1815,6 +1828,9 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwl
  *
  * If any other flags are specified, -1 is returned and errno is set
  * to EINVAL.
+ *
+ * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
+ * and \p HANDLE on native Windows platforms.
  */
 HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
