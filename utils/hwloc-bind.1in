@@ -28,12 +28,17 @@ Use following arguments for CPU binding (default).
 .TP
 \fB\-\-membind\fR
 Use following arguments for memory binding.
+If \fB\-\-mempolicy\fR is not also given,
+the default policy is bind.
 .TP
 \fB\-\-mempolicy\fR <policy>
 Change the memory binding policy.
 The available policies are default, firsttouch, bind, interleave
 replicate and nexttouch.
-If a binding set is given, the default policy is bind.
+This option is only meaningful when an actual binding is also given
+with \fB\-\-membind\fR.
+If \fB\-\-membind\fR is given without \fB\-\-mempolicy\fR,
+the default policy is bind.
 .TP
 \fB\-\-get\fR
 Report the current bindings.
