@@ -247,6 +247,10 @@ EOF])
             AC_MSG_RESULT([unknown -- assuming x86_64])
             ;;
         esac
+        ;;
+      *)
+        AC_MSG_RESULT([unknown])
+        ;;
     esac
     
     AC_CHECK_SIZEOF([unsigned long])
