@@ -464,22 +464,28 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
   return 0;
 }
 
-/* Callbacks for binding each process sub-tid */
-typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags);
+/* Callbacks for each process sub-tid */
+typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int idx);
 
 static int
-hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused, int flags __hwloc_attribute_unused)
+hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused)
 {
-  hwloc_bitmap_t cpuset = data;
-  return hwloc_linux_set_tid_cpubind(topology, tid, cpuset);
+  return hwloc_linux_set_tid_cpubind(topology, tid, (hwloc_bitmap_t) data);
 }
 
+struct hwloc_linux_foreach_proc_tid_get_cpubind_cb_data_s {
+  hwloc_bitmap_t cpuset;
+  hwloc_bitmap_t tidset;
+  int flags;
+};
+
 static int
-hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags)
+hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *_data, int idx)
 {
-  hwloc_bitmap_t *cpusets = data;
-  hwloc_bitmap_t cpuset = cpusets[0];
-  hwloc_bitmap_t tidset = cpusets[1];
+  struct hwloc_linux_foreach_proc_tid_get_cpubind_cb_data_s *data = _data;
+  hwloc_bitmap_t cpuset = data->cpuset;
+  hwloc_bitmap_t tidset = data->tidset;
+  int flags = data->flags;
 
   if (hwloc_linux_get_tid_cpubind(topology, tid, tidset))
     return -1;
@@ -509,7 +515,7 @@ hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid
 static int
 hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 			     pid_t pid, hwloc_linux_foreach_proc_tid_cb_t cb,
-			     void *data, int flags)
+			     void *data)
 {
   char taskdir_path[128];
   DIR *taskdir;
@@ -537,7 +543,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
  retry:
   /* apply the callback to all threads */
   for(i=0; i<nr; i++) {
-    err = cb(topology, tids[i], data, i, flags);
+    err = cb(topology, tids[i], data, i);
     if (err < 0)
       goto out_with_tids;
   }
@@ -564,25 +570,26 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 }
 
 static int
-hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags)
+hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   return hwloc_linux_foreach_proc_tid(topology, pid,
 				      hwloc_linux_foreach_proc_tid_set_cpubind_cb,
-				      (void*) hwloc_set, flags);
+				      (void*) hwloc_set);
 }
 
 static int
 hwloc_linux_get_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
 {
+  struct hwloc_linux_foreach_proc_tid_get_cpubind_cb_data_s data;
   hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
-  hwloc_bitmap_t cpusets[2];
   int ret;
 
-  cpusets[0] = hwloc_set;
-  cpusets[1] = tidset;
+  data.cpuset = hwloc_set;
+  data.tidset = tidset;
+  data.flags = flags;
   ret = hwloc_linux_foreach_proc_tid(topology, pid,
-					 hwloc_linux_foreach_proc_tid_get_cpubind_cb,
-					 (void*) cpusets, flags);
+				     hwloc_linux_foreach_proc_tid_get_cpubind_cb,
+				     (void*) &data);
   hwloc_bitmap_free(tidset);
   return ret;
 }
@@ -908,12 +915,17 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
   return 0;
 }
 
+struct hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb_data_s {
+  hwloc_bitmap_t cpuset;
+  hwloc_bitmap_t tidset;
+};
+
 static int
-hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx, int flags __hwloc_attribute_unused)
+hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb(hwloc_topology_t topology, pid_t tid, void *_data, int idx)
 {
-  hwloc_bitmap_t *cpusets = data;
-  hwloc_bitmap_t cpuset = cpusets[0];
-  hwloc_bitmap_t tidset = cpusets[1];
+  struct hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb_data_s *data = _data;
+  hwloc_bitmap_t cpuset = data->cpuset;
+  hwloc_bitmap_t tidset = data->tidset;
 
   if (hwloc_linux_get_tid_last_cpu_location(topology, tid, tidset))
     return -1;
@@ -927,17 +939,17 @@ hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb(hwloc_topology_t topology,
 }
 
 static int
-hwloc_linux_get_pid_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags)
+hwloc_linux_get_pid_last_cpu_location(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
+  struct hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb_data_s data;
   hwloc_bitmap_t tidset = hwloc_bitmap_alloc();
-  hwloc_bitmap_t cpusets[2];
   int ret;
 
-  cpusets[0] = hwloc_set;
-  cpusets[1] = tidset;
+  data.cpuset = hwloc_set;
+  data.tidset = tidset;
   ret = hwloc_linux_foreach_proc_tid(topology, pid,
 				     hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb,
-				     (void*) cpusets, flags);
+				     &data);
   hwloc_bitmap_free(tidset);
   return ret;
 }
