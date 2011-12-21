@@ -464,54 +464,9 @@ hwloc_linux_get_proc_tids(DIR *taskdir, unsigned *nr_tidsp, pid_t ** tidsp)
   return 0;
 }
 
-/* Callbacks for each process sub-tid */
+/* Per-tid callbacks */
 typedef int (*hwloc_linux_foreach_proc_tid_cb_t)(hwloc_topology_t topology, pid_t tid, void *data, int idx);
 
-static int
-hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused)
-{
-  return hwloc_linux_set_tid_cpubind(topology, tid, (hwloc_bitmap_t) data);
-}
-
-struct hwloc_linux_foreach_proc_tid_get_cpubind_cb_data_s {
-  hwloc_bitmap_t cpuset;
-  hwloc_bitmap_t tidset;
-  int flags;
-};
-
-static int
-hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *_data, int idx)
-{
-  struct hwloc_linux_foreach_proc_tid_get_cpubind_cb_data_s *data = _data;
-  hwloc_bitmap_t cpuset = data->cpuset;
-  hwloc_bitmap_t tidset = data->tidset;
-  int flags = data->flags;
-
-  if (hwloc_linux_get_tid_cpubind(topology, tid, tidset))
-    return -1;
-
-  /* reset the cpuset on first iteration */
-  if (!idx)
-    hwloc_bitmap_zero(cpuset);
-
-  if (flags & HWLOC_CPUBIND_STRICT) {
-    /* if STRICT, we want all threads to have the same binding */
-    if (!idx) {
-      /* this is the first thread, copy its binding */
-      hwloc_bitmap_copy(cpuset, tidset);
-    } else if (!hwloc_bitmap_isequal(cpuset, tidset)) {
-      /* this is not the first thread, and it's binding is different */
-      errno = EXDEV;
-      return -1;
-    }
-  } else {
-    /* if not STRICT, just OR all thread bindings */
-    hwloc_bitmap_or(cpuset, cpuset, tidset);
-  }
-  return 0;
-}
-
-/* Call the callback for each process tid. */
 static int
 hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 			     pid_t pid, hwloc_linux_foreach_proc_tid_cb_t cb,
@@ -569,12 +524,59 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
   return err;
 }
 
+/* Per-tid proc_set_cpubind callback and caller.
+ * Callback data is a hwloc_bitmap_t. */
+static int
+hwloc_linux_foreach_proc_tid_set_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *data, int idx __hwloc_attribute_unused)
+{
+  return hwloc_linux_set_tid_cpubind(topology, tid, (hwloc_bitmap_t) data);
+}
+
 static int
 hwloc_linux_set_pid_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   return hwloc_linux_foreach_proc_tid(topology, pid,
 				      hwloc_linux_foreach_proc_tid_set_cpubind_cb,
 				      (void*) hwloc_set);
+}
+
+/* Per-tid proc_get_cpubind callback data, callback function and caller */
+struct hwloc_linux_foreach_proc_tid_get_cpubind_cb_data_s {
+  hwloc_bitmap_t cpuset;
+  hwloc_bitmap_t tidset;
+  int flags;
+};
+
+static int
+hwloc_linux_foreach_proc_tid_get_cpubind_cb(hwloc_topology_t topology, pid_t tid, void *_data, int idx)
+{
+  struct hwloc_linux_foreach_proc_tid_get_cpubind_cb_data_s *data = _data;
+  hwloc_bitmap_t cpuset = data->cpuset;
+  hwloc_bitmap_t tidset = data->tidset;
+  int flags = data->flags;
+
+  if (hwloc_linux_get_tid_cpubind(topology, tid, tidset))
+    return -1;
+
+  /* reset the cpuset on first iteration */
+  if (!idx)
+    hwloc_bitmap_zero(cpuset);
+
+  if (flags & HWLOC_CPUBIND_STRICT) {
+    /* if STRICT, we want all threads to have the same binding */
+    if (!idx) {
+      /* this is the first thread, copy its binding */
+      hwloc_bitmap_copy(cpuset, tidset);
+    } else if (!hwloc_bitmap_isequal(cpuset, tidset)) {
+      /* this is not the first thread, and it's binding is different */
+      errno = EXDEV;
+      return -1;
+    }
+  } else {
+    /* if not STRICT, just OR all thread bindings */
+    hwloc_bitmap_or(cpuset, cpuset, tidset);
+  }
+  return 0;
 }
 
 static int
@@ -915,6 +917,7 @@ hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribut
   return 0;
 }
 
+/* Per-tid proc_get_last_cpu_location callback data, callback function and caller */
 struct hwloc_linux_foreach_proc_tid_get_last_cpu_location_cb_data_s {
   hwloc_bitmap_t cpuset;
   hwloc_bitmap_t tidset;
