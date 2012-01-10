@@ -1941,7 +1941,8 @@ hwloc_connect_levels(hwloc_topology_t topology)
   }
 
   /* It's empty now.  */
-  free(objs);
+  if (objs)
+    free(objs);
 
   topology->bridge_nbobjects = hwloc_build_level_from_list(topology->first_bridge, &topology->bridge_level);
   topology->pcidev_nbobjects = hwloc_build_level_from_list(topology->first_pcidev, &topology->pcidev_level);
