@@ -30,7 +30,8 @@ AC_DEFUN([HWLOC_SETUP_CORE],[
 ###
 ### Configuring hwloc core
 ###
-EOF])
+EOF
+])
 
     # If no prefix was defined, set a good value
     m4_ifval([$1], 
@@ -507,16 +508,17 @@ EOF])
     AC_CHECK_FUNC([sched_setaffinity], [hwloc_have_sched_setaffinity=yes])
     AC_CHECK_HEADERS([sys/cpuset.h],,,[[#include <sys/param.h>]])
     AC_SEARCH_LIBS([pthread_getthrds_np], [pthread],
-      AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, `Define to 1 if you have pthread_getthrds_np')
+      AC_DEFINE([HWLOC_HAVE_PTHREAD_GETTHRDS_NP], 1, 
+                [Define to 1 if you have pthread_getthrds_np])
     )
 
     # Linux libnuma support
     hwloc_linux_libnuma_happy=no
     if test "x$enable_libnuma" != "xno"; then
-        hwloc_linux_libnuma_happy=yes
         AC_CHECK_HEADERS([numaif.h], [
-            AC_CHECK_LIB([numa], [numa_available], [HWLOC_LINUX_LIBNUMA_LIBS="-lnuma"], [hwloc_linux_libnuma_happy=no])
-        ], [hwloc_linux_libnuma_happy=no])
+            AC_CHECK_LIB([numa], [numa_available], 
+                         [HWLOC_LINUX_LIBNUMA_LIBS="-lnuma"
+                          hwloc_linux_libnuma_happy=yes])])
     fi
     AC_SUBST(HWLOC_LINUX_LIBNUMA_LIBS)
     # If we asked for Linux libnuma support but couldn't deliver, fail
@@ -540,6 +542,49 @@ EOF])
 	enable_migrate_pages=yes
 	AC_DEFINE([HWLOC_HAVE_MIGRATE_PAGES], [1], [Define to 1 if migrate_pages is available.])
       ])
+
+      # If we think we have libnuma setup properly, then setup a test
+      # to run during config.status to check whether we can
+      # successfully link against libnuma with the generated libtool
+      # script (i.e., the generated libtool script won't exist until
+      # the end of config.status).  The issue is that libtool may have
+      # been set to compile statically, but libnuma.a may not exist
+      # (many distros apparently do not install it by default).
+      # Hence, configure tests with AC_CHECK_LIB and the like will
+      # succeed, but when libtool goes to actually link something, it
+      # will fail.  Doh!  So let's sneak a test into config.status to
+      # ensure that libtool can link successfully against libnuma.
+      AC_CONFIG_COMMANDS([check-libnuma-with-libtool],
+                         [builddir=`pwd`
+                          mkdir conf-test.$$
+                          cd conf-test.$$
+                          cat > numa-test.c <<EOF
+[#include <numa.h>
+int main(int argc, char **argv) {
+    char foo = *argv[0];
+    argc += (int) foo;
+    return numa_available();
+}]
+EOF
+                          "$builddir/libtool" --mode=compile $CC $CFLAGS -c numa-test.c && \
+                              "$builddir/libtool" --mode=link $CC $LDFLAGS numa-test.lo -o numa-test -lnuma
+                          if test "$?" != "0"; then
+                            libnuma_fail=1
+                          fi
+                          cd "$builddir"
+                          rm -rf conf-test.$$
+                          if test "$libnuma_fail" = "1"; then
+                            cat <<EOF
+=============================================================================
+ERROR: libnuma sux
+=============================================================================
+EOF
+                            exit 1
+                          fi
+                         ], 
+                         [CC="$CC"
+                          LDFLAGS="$LDFLAGS"
+                          CFLAGS="$CFLAGS"])
 
       LIBS="$tmp_save_LIBS"
     fi
@@ -588,6 +633,7 @@ EOF])
         ])
     fi
     AC_SUBST(HWLOC_PCI_LIBS)
+    HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS"
     # If we asked for pci support but couldn't deliver, fail
     AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no"],
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
