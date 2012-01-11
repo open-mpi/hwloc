@@ -588,6 +588,7 @@ EOF])
         ])
     fi
     AC_SUBST(HWLOC_PCI_LIBS)
+    HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS"
     # If we asked for pci support but couldn't deliver, fail
     AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no"],
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
