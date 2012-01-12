@@ -579,8 +579,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
       }
 
       for (procInfo = procInfoTotal;
-	   (void*) procInfo < (void*) ((unsigned long) procInfoTotal + length);
-	   procInfo = (void*) ((unsigned long) procInfo + procInfo->Size)) {
+	   (void*) procInfo < (void*) ((uintptr_t) procInfoTotal + length);
+	   procInfo = (void*) ((uintptr_t) procInfo + procInfo->Size)) {
         unsigned num, i;
         GROUP_AFFINITY *GroupMask;
 
