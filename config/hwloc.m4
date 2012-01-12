@@ -1,7 +1,7 @@
 dnl -*- Autoconf -*-
 dnl
 dnl Copyright (c) 2009-2010 INRIA.  All rights reserved.
-dnl Copyright (c) 2009-2011 Université Bordeaux 1
+dnl Copyright (c) 2009-2012 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
@@ -268,20 +268,6 @@ EOF])
     AS_IF([test "$HWLOC_VISIBILITY_CFLAGS" != ""],
           [AC_MSG_WARN(["$HWLOC_VISIBILITY_CFLAGS" has been added to the hwloc CFLAGS])])
 
-    #
-    # Check for inline compatibility support
-    #
-    AC_MSG_CHECKING([for inline compatibility keyword])
-    AC_TRY_COMPILE([static void __inline__ f(void) { }], [],
-      [__hwloc_inline=__inline__],
-      [AC_TRY_COMPILE([static void __inline f(void) {}], [],
-        [__hwloc_inline=__inline],
-        [__hwloc_inline=]
-      )]
-    )
-    AC_MSG_RESULT([$__hwloc_inline])
-    AC_DEFINE_UNQUOTED(__hwloc_inline, $__hwloc_inline, [Define this to a keyword that can safely replace inline in installed headers])
-    
     #
     # Now detect support
     #
