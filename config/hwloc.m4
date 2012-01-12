@@ -302,6 +302,8 @@ EOF])
     ])
     AC_CHECK_HEADERS([sys/mman.h])
     
+    old_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -D_WIN32_WINNT=0x0601"
     AC_CHECK_TYPES([KAFFINITY,
                     PROCESSOR_CACHE_TYPE,
                     CACHE_DESCRIPTOR,
@@ -318,6 +320,7 @@ EOF])
 		    PSAPI_WORKING_SET_EX_BLOCK,
 		    PSAPI_WORKING_SET_EX_INFORMATION],
                     [],[],[[#include <windows.h>]])
+    CPPFLAGS="$old_CPPFLAGS"
     AC_CHECK_LIB([gdi32], [main],
                  [HWLOC_LIBS="-lgdi32 $HWLOC_LIBS"
                   AC_DEFINE([HAVE_LIBGDI32], 1, [Define to 1 if we have -lgdi32])])
