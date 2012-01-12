@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 INRIA.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2010 IBM
  * See COPYING in top-level directory.
@@ -1937,7 +1937,7 @@ hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, float *dis
   fclose(fd);
 }
 
-static void
+static int
 look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *found)
 {
   unsigned osnode;
@@ -1963,11 +1963,13 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 	}
       closedir(dir);
     }
+  else
+    return -1;
 
   if (nbnodes <= 1)
     {
       hwloc_bitmap_free(nodeset);
-      return;
+      return 0;
     }
 
   /* For convenience, put these declarations inside a block. */
@@ -2037,6 +2039,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
 
  out:
   *found = nbnodes;
+  return 0;
 }
 
 /* Reads the entire file and returns bytes read if bytes_read != NULL
@@ -2363,7 +2366,7 @@ cont:
 }
 
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
-static void
+static int
 look_sysfscpu(struct hwloc_topology *topology, const char *path)
 {
   hwloc_bitmap_t cpuset; /* Set of cpus for which we have topology information */
@@ -2378,7 +2381,9 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
 
   /* fill the cpuset of interesting cpus */
   dir = hwloc_opendir(path, topology->backend_params.sysfs.root_fd);
-  if (dir) {
+  if (!dir)
+    return -1;
+  else {
     struct dirent *dirent;
     while ((dirent = readdir(dir)) != NULL) {
       unsigned long cpu;
@@ -2637,6 +2642,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
     look_powerpc_device_tree(topology);
 
   hwloc_bitmap_free(cpuset);
+
+  return 0;
 }
 
 
@@ -2920,7 +2927,8 @@ hwloc_look_linux(struct hwloc_topology *topology)
     hwloc_get_procfs_meminfo_info(topology, &topology->levels[0][0]->memory);
 
     /* Gather NUMA information. Must be after hwloc_get_procfs_meminfo_info so that the hugepage size is known */
-    look_sysfsnode(topology, "/sys/devices/system/node", &nbnodes);
+    if (look_sysfsnode(topology, "/sys/bus/node/devices", &nbnodes) < 0)
+      look_sysfsnode(topology, "/sys/devices/system/node", &nbnodes);
 
     /* if we found some numa nodes, the machine object has no local memory */
     if (nbnodes) {
@@ -2934,7 +2942,9 @@ hwloc_look_linux(struct hwloc_topology *topology)
     /* Gather the list of cpus now */
     if (getenv("HWLOC_LINUX_USE_CPUINFO")
 	|| (hwloc_access("/sys/devices/system/cpu/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
-	    && hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0)) {
+	    && hwloc_access("/sys/devices/system/cpu/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
+	    && hwloc_access("/sys/bus/cpu/devices/cpu0/topology/thread_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0
+	    && hwloc_access("/sys/bus/cpu/devices/cpu0/topology/core_siblings", R_OK, topology->backend_params.sysfs.root_fd) < 0)) {
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16)
 	 * or not containing anything interesting */
       err = look_cpuinfo(topology, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
@@ -2947,7 +2957,8 @@ hwloc_look_linux(struct hwloc_topology *topology)
           hwloc_setup_pu_level(topology, 1);
       }
     } else {
-      look_sysfscpu(topology, "/sys/devices/system/cpu");
+      if (look_sysfscpu(topology, "/sys/bus/cpu/devices") < 0)
+        look_sysfscpu(topology, "/sys/devices/system/cpu");
     }
 
     /* Gather DMI info */
