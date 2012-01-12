@@ -1,5 +1,5 @@
 # Copyright © 2009-2010 INRIA.  All rights reserved.
-# Copyright © 2009-2010 Université Bordeaux 1
+# Copyright © 2009-2010, 2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -95,9 +95,7 @@ if HWLOC_HAVE_MS_LIB
 endif HWLOC_HAVE_MS_LIB
 endif HWLOC_HAVE_WINDOWS
 
-if HWLOC_HAVE_CPUID
 sources += topology-x86.c
-endif HWLOC_HAVE_CPUID
 
 # Installable library
 

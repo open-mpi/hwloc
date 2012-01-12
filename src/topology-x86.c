@@ -1,6 +1,6 @@
 /*
  * Copyright © 2010-2011 INRIA.  All rights reserved.
- * Copyright © 2010-2011 Université Bordeaux 1
+ * Copyright © 2010-2012 Université Bordeaux 1
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  *
@@ -21,6 +21,7 @@
 #include <private/cpuid.h>
 #include <private/misc.h>
 
+#if defined(HWLOC_HAVE_CPUID)
 struct cacheinfo {
   unsigned type;
   unsigned level;
@@ -458,8 +459,9 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 #define AMD_EBX ('A' | ('u'<<8) | ('t'<<16) | ('h'<<24))
 #define AMD_EDX ('e' | ('n'<<8) | ('t'<<16) | ('i'<<24))
 #define AMD_ECX ('c' | ('A'<<8) | ('M'<<16) | ('D'<<24))
+#endif
 
-void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
+void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs __hwloc_attribute_unused)
 {
     /* This function must always be here, but it's ok if it's empty. */
 #if defined(HWLOC_HAVE_CPUID)
@@ -536,8 +538,10 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs)
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
 
+#if defined(HWLOC_HAVE_CPUID)
  free:
   if (NULL != infos) {
       free(infos);
   }
+#endif
 }
