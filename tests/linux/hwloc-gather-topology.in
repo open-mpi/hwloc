@@ -4,7 +4,7 @@
 #
 # Copyright © 2009 CNRS
 # Copyright © 2009-2010 INRIA.  All rights reserved.
-# Copyright © 2009-2011 Université Bordeaux 1
+# Copyright © 2009-2012 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
 
@@ -94,6 +94,8 @@ savedir() {
 cat << EOF | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 /sys/devices/system/cpu/
 /sys/devices/system/node/
+/sys/bus/cpu/devices/
+/sys/bus/node/devices/
 /sys/class/dmi/id/
 /sys/kernel/mm/hugepages/
 /proc/device-tree/cpus/
