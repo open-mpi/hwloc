@@ -25,6 +25,9 @@ and even I/O devices.
 hwloc also gathers various attributes such as
 cache and memory information, and is portable across a variety of
 different operating systems and platforms.
+Additionally it may assemble the topologies of multiple machines
+into a single one so as to let applications consult the topology
+of an entire fabric or cluster at once.
 
 hwloc primarily aims at helping high-performance computing (HPC)
 applications, but is also applicable to any project seeking to exploit
@@ -1243,9 +1246,9 @@ Machine (24GB)
 hwloc is usually used for consulting and manipulating single machine
 topologies. This includes large systems as long as a single instance of
 the operating system manages the entire system. However it is sometimes
-desirable to have multiple independent nodes inside the same topology,
-for instance when applying algorithm to an entire cluster topology.
-hwloc therefore offers the ability to agregate multiple node topologies
+desirable to have multiple independent hosts inside the same topology,
+for instance when applying algorithms to an entire cluster topology.
+hwloc therefore offers the ability to agregate multiple host topologies
 into a single global one.
 
 \section multinode_cpusets Multi-node Objects Specifities
@@ -1292,7 +1295,7 @@ It is important to keep this in mind before binding using multi-node
 topologies.
 To make sure binding on an object is possible, one should first check
 that its cpuset or nodeset pointer is not NULL.
-Then, it should check whether the object is indeed local.
+Then, one should check whether the object is indeed local.
 
 To find out which machine a given object correspond too, one may look
 at the info attributes of the parent Machine object. The <tt>HostName</tt>
