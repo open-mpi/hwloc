@@ -9,9 +9,10 @@
  */
 
 #include <private/solaris-chiptype.h>
-
 #include <stdlib.h>
 #include <strings.h>
+
+#ifdef HAVE_PICL_H
 #include <sys/systeminfo.h>
 #include <picl.h>
 
@@ -319,3 +320,11 @@ char *hwloc_solaris_get_chip_model(void) {
     return(dss_chip_model);
 }
 
+#else
+char* hwloc_solaris_get_chip_type(void) {
+  return NULL;
+}
+char *hwloc_solaris_get_chip_model(void) {
+  return NULL;
+}
+#endif

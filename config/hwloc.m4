@@ -326,6 +326,8 @@ EOF])
                     AC_DEFINE([HAVE_LIBKSTAT], 1, [Define to 1 if we have -lkstat])])
     ])
     
+    AC_CHECK_HEADERS([picl.h])
+
     AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
     		_SC_NPROCESSORS_CONF,
     		_SC_NPROC_ONLN,
