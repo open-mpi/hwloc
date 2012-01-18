@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright (c) 2009-2010 INRIA.  All rights reserved.
+dnl Copyright (c) 2009-2010 inria.  All rights reserved.
 dnl Copyright (c) 2009-2012 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
