@@ -1,5 +1,5 @@
 # Copyright © 2009-2010 inria.  All rights reserved.
-# Copyright © 2009, 2011 Université Bordeaux 1
+# Copyright © 2009, 2011-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -62,5 +62,6 @@ libhwloc_ports_la_CPPFLAGS = \
         -DHWLOC_WIN_SYS \
         -DHWLOC_DARWIN_SYS \
         -DHWLOC_FREEBSD_SYS -DHAVE_SYS_CPUSET_H \
-        -DHWLOC_HPUX_SYS
+        -DHWLOC_HPUX_SYS \
+        -DHWLOC_INSIDE_LIBHWLOC
 

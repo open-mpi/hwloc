@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009      CNRS
  * Copyright © 2009-2011 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
  * See COPYING in top-level directory.
@@ -260,6 +260,7 @@ extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc
 /* Insert uname-specific names/values in the object infos array */
 extern void hwloc_add_uname_info(struct hwloc_topology *topology);
 
+#ifdef HWLOC_INSIDE_LIBHWLOC
 /** \brief Return a locally-allocated stringified bitmap for printf-like calls. */
 static __hwloc_inline char *
 hwloc_bitmap_printf_value(hwloc_const_bitmap_t bitmap)
@@ -317,6 +318,7 @@ hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *p
     }
   hwloc_debug("%s", "\n");
 }
+#endif
 
 /* This can be used for the alloc field to get allocated data that can be freed by free() */
 void *hwloc_alloc_heap(hwloc_topology_t topology, size_t len);
