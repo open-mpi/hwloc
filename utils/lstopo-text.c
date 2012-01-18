@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -665,7 +665,7 @@ text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, 
   x /= (gridsize/2);
   y /= gridsize;
 
-#ifdef HAVE_PUTWC
+#if defined(HAVE_PUTWC) && !defined(__MINGW32__)
   {
     size_t len = strlen(text) + 1;
     wchar_t *wbuf = malloc(len * sizeof(wchar_t)), *wtext;
