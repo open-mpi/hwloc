@@ -790,7 +790,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
      }
 
      hwloc_bitmap_zero(hwloc_set);
-     for(cpu=0; cpu<(unsigned) last; cpu++)
+     for(cpu=0; cpu<=(unsigned) last; cpu++)
        if (CPU_ISSET_S(cpu, setsize, plinux_set))
 	 hwloc_bitmap_set(hwloc_set, cpu);
 
