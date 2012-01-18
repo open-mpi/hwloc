@@ -2969,6 +2969,7 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   unsigned *Lcore_to_Pcore;
   unsigned *Lcore_to_Psock; /* needed because Lcore is equivalent to Pcore+Psock, not to Pcore alone */
   unsigned *Lsock_to_Psock;
+  int _numprocs;
   unsigned numprocs;
   unsigned numsockets=0;
   unsigned numcores=0;
@@ -2979,9 +2980,10 @@ look_cpuinfo(struct hwloc_topology *topology, const char *path,
   hwloc_bitmap_t cpuset;
 
   /* parse the entire cpuinfo first, fill the Lprocs array and numprocs */
-  numprocs = hwloc_linux_parse_cpuinfo(topology, path, &Lprocs);
-  if (!numprocs)
+  _numprocs = hwloc_linux_parse_cpuinfo(topology, path, &Lprocs);
+  if (_numprocs <= 0)
     return -1;
+  numprocs = _numprocs;
 
   /* initialize misc arrays, there can be at most numprocs entries */
   Lcore_to_Pcore = malloc(numprocs * sizeof(*Lcore_to_Pcore));
@@ -3262,8 +3264,8 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
       }
     } else {
       struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
-      unsigned numprocs = hwloc_linux_parse_cpuinfo(topology, "/proc/cpuinfo", &Lprocs);
-      if (numprocs < 0)
+      int numprocs = hwloc_linux_parse_cpuinfo(topology, "/proc/cpuinfo", &Lprocs);
+      if (numprocs <= 0)
 	Lprocs = NULL;
       if (look_sysfscpu(topology, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
         look_sysfscpu(topology, "/sys/devices/system/cpu", Lprocs, numprocs);
