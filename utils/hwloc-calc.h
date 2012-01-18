@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -294,7 +294,8 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
   const char *dot, *nextsep;
   int nextdepth;
   int first, wrap, amount, step;
-  unsigned i,j,err;
+  unsigned i,j;
+  int err;
 
   err = hwloc_calc_parse_range(string,
 			       &first, &amount, &step, &wrap,
