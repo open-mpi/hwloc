@@ -94,7 +94,7 @@ install-exec-hook: install-man
 	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT) && $(LN_S) hwloc-calc$(EXEEXT) hwloc-mask$(EXEEXT)
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/hwloc-mask.1
 	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1 && $(LN_S) lstopo.1 hwloc-info.1 && $(LN_S) hwloc-calc.1 hwloc-mask.1
-	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' -i $(DESTDIR)$(bindir)/hwloc-assembler-remote
+	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' $(DESTDIR)$(bindir)/hwloc-assembler-remote > $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp && mv -f $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp $(DESTDIR)$(bindir)/hwloc-assembler-remote
 
 uninstall-local:
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-mask$(EXEEXT)
