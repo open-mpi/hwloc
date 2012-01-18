@@ -1974,7 +1974,8 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
 	memory->page_types[0].size = 4096;
     }
     assert(memory->page_types[0].size); /* from sysconf if local or from the env */
-    assert(memory->page_types[1].size); /* from sysconf if local, or from /proc/meminfo, or from sysfs */
+    /* memory->page_types[1].size from sysconf if local, or from /proc/meminfo, or from sysfs,
+     * may be 0 if no hugepage support in the kernel */
 
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
