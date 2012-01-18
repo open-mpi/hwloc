@@ -18,10 +18,11 @@
 #include <hwloc.h>
 #include <private/private.h>
 #include <private/debug.h>
-#include <private/cpuid.h>
 #include <private/misc.h>
 
 #if defined(HWLOC_HAVE_CPUID)
+#include <private/cpuid.h>
+
 struct cacheinfo {
   unsigned type;
   unsigned level;
