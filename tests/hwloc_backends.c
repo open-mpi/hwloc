@@ -41,11 +41,11 @@ int main(void)
   hwloc_topology_init(&topology2);
   if (xmlfileok) {
     printf("switching to xml...\n");
-    hwloc_topology_set_xml(topology2, xmlfile);
+    assert(!hwloc_topology_set_xml(topology2, xmlfile));
   }
   if (xmlbufok) {
     printf("switching to xmlbuffer...\n");
-    hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen);
+    assert(!hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen));
   }
   printf("switching to synthetic...\n");
   hwloc_topology_set_synthetic(topology2, "machine:2 node:3 cache:2 pu:4");
@@ -56,12 +56,12 @@ int main(void)
 
   if (xmlfileok) {
     printf("switching to xml and loading...\n");
-    hwloc_topology_set_xml(topology2, xmlfile);
+    assert(!hwloc_topology_set_xml(topology2, xmlfile));
     hwloc_topology_load(topology2);
   }
   if (xmlbufok) {
     printf("switching to xmlbuffer and loading...\n");
-    hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen);
+    assert(!hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen));
     hwloc_topology_load(topology2);
   }
   printf("switching to synthetic and loading...\n");
