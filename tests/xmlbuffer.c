@@ -25,7 +25,7 @@ static int one_test(void)
   printf("exported to buffer %p length %d\n", buf1, size1);
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_xmlbuffer(topology, buf1, size1);
+  assert(!hwloc_topology_set_xmlbuffer(topology, buf1, size1));
   hwloc_topology_load(topology);
   assert(!hwloc_topology_is_thissystem(topology));
   hwloc_topology_export_xmlbuffer(topology, &buf2, &size2);
