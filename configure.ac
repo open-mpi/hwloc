@@ -2,7 +2,7 @@
 #
 # Copyright © 2009      CNRS
 # Copyright © 2009-2010 inria.  All rights reserved.
-# Copyright © 2009, 2011      Université Bordeaux 1
+# Copyright © 2009, 2011-2012      Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 #
 # See COPYING in top-level directory.
@@ -14,7 +14,7 @@
 
 AC_INIT([hwloc], 
         [m4_normalize(esyscmd([config/hwloc_get_version.sh VERSION --base]))],
-        [http://www.open-mpi.org/community/help/], [hwloc])
+        [http://www.open-mpi.org/projects/hwloc/], [hwloc])
 AC_PREREQ(2.63)
 AC_CONFIG_AUX_DIR(./config)
 # Note that this directory must *exactly* match what was specified via

@@ -1,7 +1,7 @@
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
-AC_INIT([hwloc-embedded-test], [1.0], [http://www.open-mpi.org/community/help], [hwloc-embedded-test])
+AC_INIT([hwloc-embedded-test], [1.0], [http://www.open-mpi.org/projects/hwloc/], [hwloc-embedded-test])
 AC_PREREQ([2.63])
 AC_CONFIG_AUX_DIR([./config])
 AC_CONFIG_MACRO_DIR([./config])
