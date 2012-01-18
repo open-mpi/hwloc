@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 INRIA.  All rights reserved.
+ * Copyright © 2009-2011 inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -31,7 +31,7 @@ applications, but is also applicable to any project seeking to exploit
 code and/or data locality on modern computing platforms.
 
 *** Note that the hwloc project represents the merger of the
-libtopology project from INRIA and the Portable Linux Processor
+libtopology project from inria and the Portable Linux Processor
 Affinity (PLPA) sub-project from Open MPI.  <em>Both of these prior
 projects are now deprecated.</em> The first hwloc release was
 essentially a "re-branding" of the libtopology code base, but with
@@ -611,7 +611,7 @@ project. Because of functional and ideological overlap, these two code bases
 and ideas were merged and released under the name "hwloc" as an Open MPI
 sub-project.
 
-libtopology was initially developed by the INRIA Runtime Team-Project
+libtopology was initially developed by the inria Runtime Team-Project
 (http://runtime.bordeaux.inria.fr/) (headed by Raymond Namyst
 (http://dept-info.labri.fr/~namyst/). PLPA was initially developed by
 the Open MPI development team as a sub-project. Both are now deprecated

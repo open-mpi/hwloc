@@ -11,7 +11,7 @@
 #                         All rights reserved.
 # Copyright (c) 2006-2007 Cisco Systems, Inc.  All rights reserved.
 # and renamed/modified for hwloc:
-# Copyright (c) 2009 INRIA.  All rights reserved.
+# Copyright (c) 2009 inria.  All rights reserved.
 # Copyright (c) 2009-2010 Université Bordeaux 1
 # Copyright (c) 2010-2011 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.

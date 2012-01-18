@@ -1,6 +1,6 @@
 /* Example hwloc API program.
  *
- * Copyright © 2009-2010 INRIA.  All rights reserved.
+ * Copyright © 2009-2010 inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
