@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009 inria.  All rights reserved.
- * Copyright © 2009 Université Bordeaux 1
+ * Copyright © 2009, 2012 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -12,8 +12,10 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-  char *prog, *arch, *def, *name, *lib;
+  char *prog, *arch, *def, *version, *lib;
   char s[1024];
+  char name[16];
+  int current, age, revision;
 
   if (argc != 6) {
     fprintf(stderr,"bad number of arguments");
@@ -23,8 +25,14 @@ int main(int argc, char *argv[]) {
   prog = argv[1];
   arch = argv[2];
   def = argv[3];
-  name = argv[4];
+  version = argv[4];
   lib = argv[5];
+
+  if (sscanf(version, "%d:%d:%d", &current, &age, &revision) != 3)
+    exit(EXIT_FAILURE);
+
+  snprintf(name, sizeof(name), "libhwloc-%d", current - age);
+  printf("using soname %s\n", name);
 
   snprintf(s, sizeof(s), "\"%s\" /machine:%s /def:%s /name:%s /out:%s",
       prog, arch, def, name, lib);
