@@ -12,6 +12,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 sysfs_outputs = \
 		2amd64-2n.output \
 		2i386-2t-hugepagesizecount.xml.output \
+		2i386-2c-nohugepage.xml.output \
 		2ps3-2t.output \
 		4ia64-4s.output \
 		4ppc-4c.output \
@@ -60,6 +61,8 @@ sysfs_tarballs = \
 		2amd64-2n.tar.bz2 \
 		2i386-2t-hugepagesizecount.tar.bz2 \
 		2i386-2t-hugepagesizecount.xml.source \
+		2i386-2c-nohugepage.tar.bz2 \
+		2i386-2c-nohugepage.xml.source \
 		2ps3-2t.tar.bz2 \
 		4ia64-4s.tar.bz2 \
 		4ppc-4c.tar.bz2 \
@@ -111,6 +114,7 @@ sysfs_excludes = \
 # file modifying the behavior of lstopo
 sysfs_options = \
 		2i386-2t-hugepagesizecount.xml.options \
+		2i386-2c-nohugepage.xml.options \
 		16amd64-8n2c-cpusets.xml.options \
 		16amd64-8n2c-cpusets_noadmin.options \
 		16em64t-4s2c2t-offlines.xml.options \
