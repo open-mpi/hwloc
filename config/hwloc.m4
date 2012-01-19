@@ -664,6 +664,7 @@ EOF])
     CFLAGS="$CFLAGS -I$HWLOC_top_srcdir/include"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
+        #define __hwloc_inline
         #include <private/cpuid.h>
       ]], [[
         if (hwloc_have_cpuid()) {
