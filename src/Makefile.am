@@ -86,15 +86,15 @@ ldflags += -Xlinker --output-def -Xlinker .libs/libhwloc.def
 
 if HWLOC_HAVE_MS_LIB
 .libs/libhwloc.lib: libhwloc.la dolib
-	./dolib "$(HWLOC_MS_LIB)" X86 .libs/libhwloc.def $(libhwloc_so_version) .libs/libhwloc.lib
+	[ ! -r .libs/libhwloc.def ] || ./dolib "$(HWLOC_MS_LIB)" X86 .libs/libhwloc.def $(libhwloc_so_version) .libs/libhwloc.lib
 all-local: .libs/libhwloc.lib
 endif HWLOC_HAVE_MS_LIB
 
 install-exec-hook:
-	$(INSTALL) .libs/libhwloc.def $(DESTDIR)$(libdir)
+	[ ! -r .libs/libhwloc.def ] || $(INSTALL) .libs/libhwloc.def $(DESTDIR)$(libdir)
 if HWLOC_HAVE_MS_LIB
-	$(INSTALL) .libs/libhwloc.lib $(DESTDIR)$(libdir)
-	$(INSTALL) .libs/libhwloc.exp $(DESTDIR)$(libdir)
+	[ ! -r .libs/libhwloc.def ] || $(INSTALL) .libs/libhwloc.lib $(DESTDIR)$(libdir)
+	[ ! -r .libs/libhwloc.def ] || $(INSTALL) .libs/libhwloc.exp $(DESTDIR)$(libdir)
 endif HWLOC_HAVE_MS_LIB
 endif HWLOC_HAVE_WINDOWS
 
