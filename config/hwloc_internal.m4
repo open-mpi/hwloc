@@ -117,6 +117,8 @@ EOF
     AS_IF([test "x$DOXYGEN" != "x" -a "x$PDFLATEX" != "x" -a "x$MAKEINDEX" != "x" -a "x$FIG2DEV" != "x" -a "x$GS" != "x" -a "x$EPSTOPDF" != "x"],
                  [hwloc_generate_doxs=yes], [hwloc_generate_doxs=no])
     AC_MSG_RESULT([$hwloc_generate_doxs])
+    AS_IF([test "x$hwloc_generate_doxs" = xyes -a "x$HWLOC_DOXYGEN_VERSION" = x1.6.2],
+                 [hwloc_generate_doxs="no"; AC_MSG_WARN([doxygen 1.6.2 has broken short name support, disabling])])
     
     # Linux and OS X take different sed arguments.
     AC_PROG_SED

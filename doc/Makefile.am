@@ -140,31 +140,6 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	@mv $(DOX_MAN_DIR)/man3/hwloc* $(DOX_MAN_DIR)/man3/HWLOC* $(DOX_DIR)/man.tmp/
 	@rm -rf $(DOX_MAN_DIR)/man3
 	@mv $(DOX_DIR)/man.tmp $(DOX_MAN_DIR)/man3
-if HWLOC_DOXYGEN_BROKEN_SHORT_NAMES
-	@echo "Work-around buggy doxygen filenames..."
-	-@mv -f $(DOX_DIR)/html/termsanddefs.html $(DOX_DIR)/html/a00001.html
-	-@mv -f $(DOX_DIR)/latex/termsanddefs.tex $(DOX_DIR)/latex/a00001.tex
-	-@mv -f $(DOX_DIR)/html/tools.html $(DOX_DIR)/html/a00002.html
-	-@mv -f $(DOX_DIR)/latex/tools.tex $(DOX_DIR)/latex/a00002.tex
-	-@mv -f $(DOX_DIR)/html/envvar.html $(DOX_DIR)/html/a00003.html
-	-@mv -f $(DOX_DIR)/latex/envvar.tex $(DOX_DIR)/latex/a00003.tex
-	-@mv -f $(DOX_DIR)/html/cpu_mem_bind.html $(DOX_DIR)/html/a00004.html
-	-@mv -f $(DOX_DIR)/latex/cpu_mem_bind.tex $(DOX_DIR)/latex/a00004.tex
-	-@mv -f $(DOX_DIR)/html/iodevices.html $(DOX_DIR)/html/a00005.html
-	-@mv -f $(DOX_DIR)/latex/iodevices.tex $(DOX_DIR)/latex/a00005.tex
-	-@mv -f $(DOX_DIR)/html/multinode.html $(DOX_DIR)/html/a00006.html
-	-@mv -f $(DOX_DIR)/latex/multinode.tex $(DOX_DIR)/latex/a00006.tex
-	-@mv -f $(DOX_DIR)/html/xml.html $(DOX_DIR)/html/a00007.html
-	-@mv -f $(DOX_DIR)/latex/xml.tex $(DOX_DIR)/latex/a00007.tex
-	-@mv -f $(DOX_DIR)/html/interoperability.html $(DOX_DIR)/html/a00008.html
-	-@mv -f $(DOX_DIR)/latex/interoperability.tex $(DOX_DIR)/latex/a00008.tex
-	-@mv -f $(DOX_DIR)/html/threadsafety.html $(DOX_DIR)/html/a00009.html
-	-@mv -f $(DOX_DIR)/latex/threadsafety.tex $(DOX_DIR)/latex/a00009.tex
-	-@mv -f $(DOX_DIR)/html/embed.html $(DOX_DIR)/html/a00010.html
-	-@mv -f $(DOX_DIR)/latex/embed.tex $(DOX_DIR)/latex/a00010.tex
-	-@mv -f $(DOX_DIR)/html/faq.html $(DOX_DIR)/html/a00011.html
-	-@mv -f $(DOX_DIR)/latex/faq.tex $(DOX_DIR)/latex/a00011.tex
-endif
 endif
 
 #
