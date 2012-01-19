@@ -19,6 +19,9 @@
 #ifdef HAVE_SYS_CPUSET_H
 #include <sys/cpuset.h>
 #endif
+#ifdef HAVE_SYSCTL
+#include <sys/sysctl.h>
+#endif
 
 #include <hwloc.h>
 #include <private/private.h>
@@ -161,6 +164,16 @@ hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unu
 #endif
 #endif
 
+#ifdef HAVE_SYSCTL
+static void
+hwloc_freebsd_node_meminfo_info(struct hwloc_topology *topology)
+{
+       int mib[2] = { CTL_HW, HW_PHYSMEM };
+       size_t len = sizeof(topology->levels[0][0]->memory.local_memory);
+       sysctl(mib, 2, &topology->levels[0][0]->memory.local_memory, &len, NULL, 0);
+}
+#endif
+
 void
 hwloc_look_freebsd(struct hwloc_topology *topology)
 {
@@ -175,6 +188,9 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 
   hwloc_setup_pu_level(topology, nbprocs);
 
+#ifdef HAVE_SYSCTL
+  hwloc_freebsd_node_meminfo_info(topology);
+#endif
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "FreeBSD");
 }
 
