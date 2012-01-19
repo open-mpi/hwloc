@@ -2966,6 +2966,7 @@ hwloc__check_children_depth(struct hwloc_topology *topology, struct hwloc_obj *p
       assert(child->depth == (unsigned) -1);
     else if (parent->depth != (unsigned) -1)
       assert(child->depth > parent->depth);
+    hwloc__check_children_depth(topology, child);
   }
 }
 
