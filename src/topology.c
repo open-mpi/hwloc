@@ -2964,7 +2964,7 @@ hwloc__check_children_depth(struct hwloc_topology *topology, struct hwloc_obj *p
       assert(child->depth == (unsigned) HWLOC_TYPE_DEPTH_OS_DEVICE);
     else if (child->type == HWLOC_OBJ_MISC)
       assert(child->depth == (unsigned) -1);
-    else if (parent->depth != (unsigned) -1);
+    else if (parent->depth != (unsigned) -1)
       assert(child->depth > parent->depth);
   }
 }
