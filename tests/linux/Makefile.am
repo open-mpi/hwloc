@@ -14,6 +14,7 @@ sysfs_outputs = \
 		2i386-2t-hugepagesizecount.xml.output \
 		2i386-2c-nohugepage.xml.output \
 		2ps3-2t.output \
+		4em64t-2c2t-ignore-reorder.output \
 		4ia64-4s.output \
 		4ppc-4c.output \
 		256ppc-8n8s4t.output \
@@ -64,6 +65,7 @@ sysfs_tarballs = \
 		2i386-2c-nohugepage.tar.bz2 \
 		2i386-2c-nohugepage.xml.source \
 		2ps3-2t.tar.bz2 \
+		4em64t-2c2t-ignore-reorder.tar.bz2 \
 		4ia64-4s.tar.bz2 \
 		4ppc-4c.tar.bz2 \
 		256ppc-8n8s4t.tar.bz2 \
@@ -115,6 +117,7 @@ sysfs_excludes = \
 sysfs_options = \
 		2i386-2t-hugepagesizecount.xml.options \
 		2i386-2c-nohugepage.xml.options \
+		4em64t-2c2t-ignore-reorder.options \
 		16amd64-8n2c-cpusets.xml.options \
 		16amd64-8n2c-cpusets_noadmin.options \
 		16em64t-4s2c2t-offlines.xml.options \
