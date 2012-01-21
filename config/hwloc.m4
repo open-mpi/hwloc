@@ -637,6 +637,7 @@ EOF])
                AC_MSG_ERROR([Cannot continue])])
     fi
     HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CFLAGS"    
+    HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LIBXML2_LIBS"
 
     # Setup HWLOC's C, CPP, and LD flags, and LIBS
     AC_SUBST(HWLOC_REQUIRES)
