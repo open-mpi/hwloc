@@ -85,19 +85,14 @@ AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
         sun)
             # Check using Sun Studio -xldscope=hidden flag
             hwloc_add=-xldscope=hidden
-            CFLAGS="$CFLAGS_orig $hwloc_add"
+            CFLAGS="$CFLAGS_orig $hwloc_add -errwarn=%all"
 
             AC_MSG_CHECKING([if $CC supports -xldscope])
             AC_LINK_IFELSE([AC_LANG_PROGRAM([[
                 __attribute__((visibility("default"))) int foo;
                 ]],[[int i;]])],
                 [],
-                [AS_IF([test -s conftest.err],
-                       [$GREP -iq visibility conftest.err
-                        # If we find "visibility" in the stderr, then
-                        # assume it doesn't work
-                        AS_IF([test "$?" = "0"], [hwloc_add=])])
-                ])
+                [hwloc_add=])
             AS_IF([test "$hwloc_add" = ""],
                   [AC_MSG_RESULT([no])],
                   [AC_MSG_RESULT([yes])])
@@ -106,19 +101,14 @@ AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
         *)
             # Check using -fvisibility=hidden
             hwloc_add=-fvisibility=hidden
-	    CFLAGS="$CFLAGS_orig $hwloc_add"
+	    CFLAGS="$CFLAGS_orig $hwloc_add -Werror"
 
             AC_MSG_CHECKING([if $CC supports -fvisibility])
             AC_LINK_IFELSE([AC_LANG_PROGRAM([[
                 __attribute__((visibility("default"))) int foo;
                 ]],[[int i;]])],
                 [],
-                [AS_IF([test -s conftest.err],
-                       [$GREP -iq visibility conftest.err
-                        # If we find "visibility" in the stderr, then
-                        # assume it doesn't work
-                        AS_IF([test "$?" = "0"], [hwloc_add=])])
-                ])
+                [hwloc_add=])
             AS_IF([test "$hwloc_add" = ""],
                   [AC_MSG_RESULT([no])],
                   [AC_MSG_RESULT([yes])])
