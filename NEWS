@@ -60,6 +60,8 @@ Version 1.4.0
   + Fix several Windows build issues.
   + Fix inline keyword definition in public headers.
   + Fix dependencies in the embedded library.
+  + Improve visibility support detection. Thanks to Dave Love for providing
+    the patch.
   + Remove references to internal symbols in the tools.
 
 
