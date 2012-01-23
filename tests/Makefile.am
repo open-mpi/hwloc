@@ -1,5 +1,5 @@
 # Copyright © 2009-2011 inria.  All rights reserved.
-# Copyright © 2009-2011 Université Bordeaux 1
+# Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -86,9 +86,7 @@ myriexpress_LDADD = $(LDADD) -lmyriexpress
 cuda_LDADD = $(LDADD) -lcuda
 cudart_LDADD = $(LDADD) -lcuda -lcudart
 xmlbuffer_LDADD = $(LDADD) $(HWLOC_LIBXML2_LIBS)
-if !HWLOC_HAVE_WINDOWS
 hwloc_bind_LDADD = $(LDADD) -lpthread
-endif !HWLOC_HAVE_WINDOWS
 
 endif HWLOC_BUILD_TESTS
 
