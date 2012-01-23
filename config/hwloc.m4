@@ -234,16 +234,19 @@ EOF])
           4)
             AC_DEFINE(HWLOC_X86_32_ARCH, 1, [Define to 1 on x86_32])
             hwloc_x86_32=yes
+	    HWLOC_MS_LIB_ARCH=X86
             AC_MSG_RESULT([x86_32])
             ;;
           8)
             AC_DEFINE(HWLOC_X86_64_ARCH, 1, [Define to 1 on x86_64])
             hwloc_x86_64=yes
+	    HWLOC_MS_LIB_ARCH=X64
             AC_MSG_RESULT([x86_64])
             ;;
           *)
             AC_DEFINE(HWLOC_X86_64_ARCH, 1, [Define to 1 on x86_64])
             hwloc_x86_64=yes
+	    HWLOC_MS_LIB_ARCH=X64
             AC_MSG_RESULT([unknown -- assuming x86_64])
             ;;
         esac
@@ -252,6 +255,7 @@ EOF])
         AC_MSG_RESULT([unknown])
         ;;
     esac
+    AC_SUBST(HWLOC_MS_LIB_ARCH)
     
     AC_CHECK_SIZEOF([unsigned long])
     AC_DEFINE_UNQUOTED([HWLOC_SIZEOF_UNSIGNED_LONG], $ac_cv_sizeof_unsigned_long, [The size of `unsigned long', as computed by sizeof])
