@@ -83,7 +83,7 @@ ldflags += -Xlinker --output-def -Xlinker .libs/libhwloc.def
 
 if HWLOC_HAVE_MS_LIB
 .libs/libhwloc.lib: libhwloc.la dolib
-	[ ! -r .libs/libhwloc.def ] || ./dolib "$(HWLOC_MS_LIB)" X86 .libs/libhwloc.def libhwloc-$(HWLOC_SOVERSION) .libs/libhwloc.lib
+	[ ! -r .libs/libhwloc.def ] || ./dolib "$(HWLOC_MS_LIB)" $(HWLOC_MS_LIB_ARCH) .libs/libhwloc.def libhwloc-$(HWLOC_SOVERSION) .libs/libhwloc.lib
 all-local: .libs/libhwloc.lib
 endif HWLOC_HAVE_MS_LIB
 
