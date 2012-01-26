@@ -48,7 +48,7 @@ Version 1.4.0
 * Backends
   + Implement hwloc_get_area_membind() on Linux.
   + Honor I/O topology flags when importing from XML.
-  + Further improve XML-related error reporting.
+  + Further improve XML-related error checking and reporting.
   + Hide synthetic topology error messages unless HWLOC_SYNTHETIC_VERBOSE=1.
 * Tools
   + Add synthetic exporting of symmetric topologies to lstopo.
@@ -59,6 +59,16 @@ Version 1.4.0
   + Fix and/or document the behavior of most inline functions in hwloc/helper.h
     when the topology contains some I/O or Misc objects.
   + Backend documentation enhancements.
+* Bug fixes
+  + Fix missing last bit in hwloc_linux_get_thread_cpubind().
+    Thanks to Carolina Gómez-Tostón Gutiérrez for reporting the issue.
+  + Fix FreeBSD build without cpuid support.
+  + Fix several Windows build issues.
+  + Fix inline keyword definition in public headers.
+  + Fix dependencies in the embedded library.
+  + Improve visibility support detection. Thanks to Dave Love for providing
+    the patch.
+  + Remove references to internal symbols in the tools.
 
 
 Version 1.3.1
