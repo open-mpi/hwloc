@@ -269,7 +269,7 @@ EOF
     ], [], [[#include <wchar.h>]])
 
     AC_CHECK_HEADERS([locale.h], [
-      AC_CHECK_FUNCS([setlocale])
+      AC_CHECK_FUNCS([setlocale uselocale])
     ])
     AC_CHECK_HEADERS([langinfo.h], [
       AC_CHECK_FUNCS([nl_langinfo])
