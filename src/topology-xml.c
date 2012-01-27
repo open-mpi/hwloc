@@ -17,6 +17,9 @@
 #ifdef HAVE_USELOCALE
 #include "locale.h"
 #endif
+#ifdef HAVE_XLOCALE
+#include "xlocale.h"
+#endif
 #ifdef HWLOC_HAVE_LIBXML2
 #include <libxml/parser.h>
 #include <libxml/tree.h>
