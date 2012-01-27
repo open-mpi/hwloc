@@ -17,7 +17,7 @@
 #ifdef HAVE_USELOCALE
 #include "locale.h"
 #endif
-#ifdef HAVE_XLOCALE
+#ifdef HAVE_XLOCALE_H
 #include "xlocale.h"
 #endif
 #ifdef HWLOC_HAVE_LIBXML2
