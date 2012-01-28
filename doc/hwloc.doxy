@@ -1370,6 +1370,11 @@ and hwloc_topology_set_xmlbuffer().
 The XMLFILE environment variable also tells hwloc to load the topology
 from the given XML file.
 
+\note XML topology files are not localized. They use a dot as a
+decimal separator. Therefore any exported topology can be
+reloaded on any other machine without requiring to change the
+locale.
+
 \section xml_backends libxml2 and minimalistic XML backends
 
 hwloc offers two backends for importing/exporting XML.
