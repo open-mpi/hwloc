@@ -11,10 +11,12 @@ abs_top_builddir="@abs_top_builddir@"
 assembler="$abs_top_builddir/utils/hwloc-assembler"
 abs_top_srcdir="@abs_top_srcdir@"
 
-# make sure we use default numeric formats
-LANG=C
-LC_ALL=C
-export LANG LC_ALL
+if test x@HWLOC_XML_LOCALIZED@ = x1; then
+  # make sure we use default numeric formats
+  LANG=C
+  LC_ALL=C
+  export LANG LC_ALL
+fi
 
 : ${TMPDIR=/tmp}
 {

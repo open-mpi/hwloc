@@ -268,9 +268,12 @@ EOF
       AC_CHECK_FUNCS([putwc])
     ], [], [[#include <wchar.h>]])
 
+    HWLOC_XML_LOCALIZED=1
     AC_CHECK_HEADERS([locale.h xlocale.h], [
-      AC_CHECK_FUNCS([setlocale uselocale])
+      AC_CHECK_FUNCS([setlocale])
+      AC_CHECK_FUNCS([uselocale], [HWLOC_XML_LOCALIZED=0])
     ])
+    AC_SUBST([HWLOC_XML_LOCALIZED])
     AC_CHECK_HEADERS([langinfo.h], [
       AC_CHECK_FUNCS([nl_langinfo])
     ])
