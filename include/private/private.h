@@ -388,7 +388,7 @@ extern void hwloc_group_by_distances(struct hwloc_topology *topology);
   }                                    \
 } while(0)
 #else /* HAVE_USELOCALE */
-#define hwloc_localeswitch_declare
+#define hwloc_localeswitch_declare int __dummy_nolocale __hwloc_attribute_unused
 #define hwloc_localeswitch_init()
 #define hwloc_localeswitch_fini()
 #endif /* HAVE_USELOCALE */
