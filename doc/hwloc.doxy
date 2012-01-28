@@ -984,7 +984,8 @@ following environment variables.
   <li>If <tt>X*Y*Z</tt> is given, X groups of Y groups of Z close objects are specified.</li>
   <li>Otherwise, the comma-separated list of distances should be given.
   If N objects are considered, the i*N+j-th value gives the
-  distance from the i-th object to the j-th object.</li>
+  distance from the i-th object to the j-th object.
+  These distance values must use a dot as a decimal separator.</li>
   </ul>
 
   Note that distances are ignored in multi-node topologies.
