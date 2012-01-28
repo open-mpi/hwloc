@@ -370,4 +370,28 @@ extern void hwloc_clear_object_distances(struct hwloc_obj *obj);
 extern void hwloc_clear_object_distances_one(struct hwloc_distances_s *distances);
 extern void hwloc_group_by_distances(struct hwloc_topology *topology);
 
+#ifdef HAVE_USELOCALE
+#include "locale.h"
+#ifdef HAVE_XLOCALE_H
+#include "xlocale.h"
+#endif
+#define hwloc_localeswitch_declare locale_t __old_locale, __new_locale
+#define hwloc_localeswitch_init() do {                     \
+  __new_locale = newlocale(LC_ALL_MASK, "C", (locale_t)0); \
+  if (__new_locale != (locale_t)0)                         \
+    __old_locale = uselocale(__new_locale);                \
+} while (0)
+#define hwloc_localeswitch_fini() do { \
+  if (__new_locale != (locale_t)0) {   \
+    uselocale(__old_locale);           \
+    freelocale(__new_locale);          \
+  }                                    \
+} while(0)
+#else /* HAVE_USELOCALE */
+#define hwloc_localeswitch_declare
+#define hwloc_localeswitch_init()
+#define hwloc_localeswitch_fini()
+#endif /* HAVE_USELOCALE */
+
+
 #endif /* HWLOC_PRIVATE_H */
