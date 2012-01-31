@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2011 Université Bordeaux 1
+ * Copyright © 2010-2012 Université Bordeaux 1
  * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
  *
  * See COPYING in top-level directory.
@@ -52,21 +52,20 @@ static __hwloc_inline int hwloc_have_cpuid(void) { return 1; }
 static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx)
 {
   asm(
-#ifdef HWLOC_X86_32_ARCH 
+#ifdef HWLOC_X86_32_ARCH
   "push %%ebx\n\t"
+#else
+  "push %%rbx\n\t"
 #endif
   "cpuid\n\t"
-#ifdef HWLOC_X86_32_ARCH 
+#ifdef HWLOC_X86_32_ARCH
   "mov %%ebx,%1\n\t"
   "pop %%ebx\n\t"
-#endif
-  : "+a" (*eax),
-#ifdef HWLOC_X86_32_ARCH 
-    "=r" (*ebx),
 #else
-    "=b" (*ebx),
+  "mov %%ebx,%1\n\t"
+  "pop %%rbx\n\t"
 #endif
-    "+c" (*ecx), "=d" (*edx));
+  : "+a" (*eax), "=r" (*ebx), "+c" (*ecx), "=d" (*edx));
 }
 
 #endif /* HWLOC_PRIVATE_CPUID_H */
