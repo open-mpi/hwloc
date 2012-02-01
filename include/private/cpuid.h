@@ -51,11 +51,14 @@ static __hwloc_inline int hwloc_have_cpuid(void) { return 1; }
 
 static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx)
 {
+#ifdef HWLOC_X86_64_ARCH
+  unsigned long sav_ebx;
+#endif
   asm(
 #ifdef HWLOC_X86_32_ARCH
   "push %%ebx\n\t"
 #else
-  "push %%rbx\n\t"
+  "mov %%rbx,%2\n\t"
 #endif
   "cpuid\n\t"
 #ifdef HWLOC_X86_32_ARCH
@@ -63,9 +66,9 @@ static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *e
   "pop %%ebx\n\t"
 #else
   "mov %%ebx,%1\n\t"
-  "pop %%rbx\n\t"
+  "mov %2,%%rbx\n\t"
 #endif
-  : "+a" (*eax), "=r" (*ebx), "+c" (*ecx), "=d" (*edx));
+  : "+a" (*eax), "=r" (*ebx), "=r"(sav_ebx), "+c" (*ecx), "=d" (*edx));
 }
 
 #endif /* HWLOC_PRIVATE_CPUID_H */
