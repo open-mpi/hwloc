@@ -17,6 +17,26 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.3.2
+-------------
+* Fix missing last bit in hwloc_linux_get_thread_cpubind().
+  Thanks to Carolina Gómez-Tostón Gutiérrez for reporting the issue.
+* Fix build with -mcmodel=medium. Thanks to Devendar Bureddy for reporting
+  the issue.
+* Fix build with Solaris Studio 12 compiler when XML is disabled.
+  Thanks to Paul H. Hargrove for reporting the problem.
+* Fix installation with old GNU sed, for instance on Red Hat 8.
+  Thanks to Paul H. Hargrove for reporting the problem.
+* Fix FreeBSD build without cpuid support.
+* Fix several Windows build issues.
+* Fix inline keyword definition in public headers.
+* Fix dependencies in the embedded library.
+* Improve visibility support detection. Thanks to Dave Love for providing
+  the patch.
+* Remove references to internal symbols in the tools.
+* Further improve XML-related error checking and reporting.
+
+
 Version 1.3.1
 -------------
 * Fix pciutils detection with pkg-config when not installed in standard
