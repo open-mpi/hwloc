@@ -324,7 +324,9 @@ EOF])
                    [HWLOC_LIBS="-lkstat $HWLOC_LIBS"
                     AC_DEFINE([HAVE_LIBKSTAT], 1, [Define to 1 if we have -lkstat])])
     ])
-    
+    AC_CHECK_LIB([m], [fabsf],
+                 [HWLOC_LIBS="-lm $HWLOC_LIBS"])
+
     AC_CHECK_DECLS([_SC_NPROCESSORS_ONLN,
     		_SC_NPROCESSORS_CONF,
     		_SC_NPROC_ONLN,
