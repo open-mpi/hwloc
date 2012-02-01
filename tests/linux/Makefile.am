@@ -144,6 +144,6 @@ TESTS_ENVIRONMENT = $(builddir)/test-topology.sh
 bin_SCRIPTS = hwloc-gather-topology
 
 install-exec-hook:
-	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' -i $(DESTDIR)$(bindir)/hwloc-gather-topology
+	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' $(DESTDIR)$(bindir)/hwloc-gather-topology > $(DESTDIR)$(bindir)/hwloc-gather-topology.tmp && mv -f $(DESTDIR)$(bindir)/hwloc-gather-topology.tmp $(DESTDIR)$(bindir)/hwloc-gather-topology
 
 SUBDIRS = gather
