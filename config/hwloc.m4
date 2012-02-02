@@ -446,6 +446,19 @@ EOF])
         AC_DEFINE([HWLOC_HAVE_DECL_FFS], [1], [Define to 1 if function `ffs' is declared by system headers])
       ])
       AC_DEFINE([HWLOC_HAVE_FFS], [1], [Define to 1 if you have the `ffs' function.])
+      if ( $CC --version | grep gccfss ) >/dev/null 2>&1 ; then
+        dnl May be broken due to
+        dnl    https://forums.oracle.com/forums/thread.jspa?threadID=1997328
+        dnl TODO: a more selective test, since bug may be version dependent.
+        dnl We can't use AC_TRY_LINK because the failure does not appear until
+        dnl run/load time and there is currently no precedent for AC_TRY_RUN
+        dnl use in hwloc.  --PHH
+	dnl For now, we're going with "all gccfss compilers are broken". 
+	dnl Better to be safe and correct; it's not like this is
+	dnl performance-critical code, after all.
+        AC_DEFINE([HWLOC_HAVE_BROKEN_FFS], [1], 
+                  [Define to 1 if your `ffs' function is known to be broken.])
+      fi
     ])
     AC_CHECK_FUNCS([ffsl], [
       _HWLOC_CHECK_DECL([ffsl],[
