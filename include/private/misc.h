@@ -46,7 +46,14 @@ int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
  * ffsl helpers.
  */
 
-#ifdef __GNUC__
+#if defined(HWLOC_HAVE_BROKEN_FFS)
+
+/* System has a broken ffs().
+ * We must check the before __GNUC__ or HWLOC_HAVE_FFSL
+ */
+#    define HWLOC_NO_FFS
+
+#elif defined(__GNUC__)
 
 #  if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 4))
      /* Starting from 3.4, gcc has a long variant.  */
@@ -75,6 +82,13 @@ extern int ffs(int) __hwloc_attribute_const;
 
 #else /* no ffs implementation */
 
+#    define HWLOC_NO_FFS
+
+#endif
+
+#ifdef HWLOC_NO_FFS
+
+/* no ffs or it is known to be broken */
 static __hwloc_inline int __hwloc_attribute_const
 hwloc_ffsl(unsigned long x)
 {
@@ -114,9 +128,7 @@ hwloc_ffsl(unsigned long x)
 	return i;
 }
 
-#endif
-
-#ifdef HWLOC_NEED_FFSL
+#elif defined(HWLOC_NEED_FFSL)
 
 /* We only have an int ffs(int) implementation, build a long one.  */
 
