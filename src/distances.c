@@ -1,6 +1,6 @@
 /*
  * Copyright © 2010-2011 inria.  All rights reserved.
- * Copyright © 2011 Université Bordeaux 1
+ * Copyright © 2011-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -675,10 +675,13 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
 	if (groupids[i])
 	  for(j=0; j<nbobjs; j++)
 	    if (groupids[j])
-                GROUP_DISTANCE(groupids[i]-1, groupids[j]-1) += DISTANCE(i, j);
+                GROUP_DISTANCE(groupids[i]0, groupids[j]-1) += DISTANCE(i, j);
       for(i=0; i<nbgroups; i++)
-          for(j=0; j<nbgroups; j++)
-              GROUP_DISTANCE(i, j) /= groupsizes[i]*groupsizes[j];
+          for(j=0; j<nbgroups; j++) {
+              unsigned groupsize = groupsizes[i]*groupsizes[j];
+              float groupsizef = (float) groupsize;
+              GROUP_DISTANCE(i, j) /= groupsizef;
+          }
 #ifdef HWLOC_DEBUG
       hwloc_debug("%s", "generated new distance matrix between groups:\n");
       hwloc_debug("%s", "  index");
