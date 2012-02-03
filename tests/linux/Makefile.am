@@ -30,6 +30,7 @@ sysfs_outputs = \
 		8ia64-2n2s2c.output \
 		8ia64-2s2c2t.output \
 		8ia64-4s2c.output \
+		16amd64-4n4c-cgroup-distance-merge.output \
 		16amd64-8n2c.output \
 		16amd64-8n2c-cpusets.output \
 		16amd64-8n2c-cpusets.xml.output \
@@ -81,6 +82,7 @@ sysfs_tarballs = \
 		8ia64-2n2s2c.tar.bz2 \
 		8ia64-2s2c2t.tar.bz2 \
 		8ia64-4s2c.tar.bz2 \
+		16amd64-4n4c-cgroup-distance-merge.tar.bz2 \
 		16amd64-8n2c.tar.bz2 \
 		16amd64-8n2c-cpusets.tar.bz2 \
 		16amd64-8n2c-cpusets.xml.source \
@@ -118,6 +120,7 @@ sysfs_options = \
 		2i386-2t-hugepagesizecount.xml.options \
 		2i386-2c-nohugepage.xml.options \
 		4em64t-2c2t-ignore-reorder.options \
+		16amd64-4n4c-cgroup-distance-merge.options \
 		16amd64-8n2c-cpusets.xml.options \
 		16amd64-8n2c-cpusets_noadmin.options \
 		16em64t-4s2c2t-offlines.xml.options \
