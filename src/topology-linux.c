@@ -1945,7 +1945,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
   DIR *dir;
   struct dirent *dirent;
   hwloc_obj_t node;
-  hwloc_bitmap_t nodeset = hwloc_bitmap_alloc();
+  hwloc_bitmap_t nodeset;
 
   *found = 0;
 
@@ -1953,6 +1953,7 @@ look_sysfsnode(struct hwloc_topology *topology, const char *path, unsigned *foun
   dir = hwloc_opendir(path, topology->backend_params.sysfs.root_fd);
   if (dir)
     {
+      nodeset = hwloc_bitmap_alloc();
       while ((dirent = readdir(dir)) != NULL)
 	{
 	  if (strncmp(dirent->d_name, "node", 4))
@@ -2377,14 +2378,14 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path)
   FILE *fd;
   unsigned caches_added;
 
-  cpuset = hwloc_bitmap_alloc();
-
   /* fill the cpuset of interesting cpus */
   dir = hwloc_opendir(path, topology->backend_params.sysfs.root_fd);
   if (!dir)
     return -1;
   else {
     struct dirent *dirent;
+    cpuset = hwloc_bitmap_alloc();
+
     while ((dirent = readdir(dir)) != NULL) {
       unsigned long cpu;
       char online[2];
