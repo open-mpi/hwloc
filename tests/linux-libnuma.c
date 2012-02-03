@@ -188,8 +188,11 @@ int main(void)
   assert(!maxnode);
   hwloc_bitmap_free(set);
 
-  /* convert first node between cpuset/nodeset and libnuma */
+  /* convert first node (with CPU and memory) between cpuset/nodeset and libnuma */
   node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, NULL);
+  while (node && (!node->memory.local_memory || hwloc_bitmap_iszero(node->cpuset)))
+    /* skip nodes with no cpus or no memory because libnuma doesn't the same before for nodemask and bitmask there */
+    node = node->next_sibling;
   if (node) {
     /* convert first node between cpuset and libnuma */
     hwloc_cpuset_to_linux_libnuma_nodemask(topology, node->cpuset, &nodemask);
