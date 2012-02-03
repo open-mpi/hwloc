@@ -1374,7 +1374,7 @@ typedef enum {
                                    */
 } hwloc_cpubind_flags_t;
 
-/** \brief Bind current process or thread on cpus given in bitmap \p set.
+/** \brief Bind current process or thread on cpus given in physical bitmap \p set.
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
@@ -1383,12 +1383,12 @@ HWLOC_DECLSPEC int hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_cpus
 
 /** \brief Get current process or thread binding.
  *
- * Writes into \p set the cpuset which the process or thread (according to \e
+ * Writes into \p set the physical cpuset which the process or thread (according to \e
  * flags) was last bound to.
  */
 HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
-/** \brief Bind a process \p pid on cpus given in bitmap \p set.
+/** \brief Bind a process \p pid on cpus given in physical bitmap \p set.
  *
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
@@ -1397,7 +1397,7 @@ HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t s
  */
 HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int flags);
 
-/** \brief Get the current binding of process \p pid.
+/** \brief Get the current physical binding of process \p pid.
  *
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
@@ -1411,7 +1411,7 @@ HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
 HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
 #ifdef hwloc_thread_t
-/** \brief Bind a thread \p thread on cpus given in bitmap \p set.
+/** \brief Bind a thread \p thread on cpus given in physical bitmap \p set.
  *
  * \note \p hwloc_thread_t is \p pthread_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
@@ -1422,7 +1422,7 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 #endif
 
 #ifdef hwloc_thread_t
-/** \brief Get the current binding of thread \p tid.
+/** \brief Get the current physical binding of thread \p tid.
  *
  * \note \p hwloc_thread_t is \p pthread_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
@@ -1432,7 +1432,7 @@ HWLOC_DECLSPEC int hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thr
 HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t thread, hwloc_cpuset_t set, int flags);
 #endif
 
-/** \brief Get the last CPU where the current process or thread ran.
+/** \brief Get the last physical CPU where the current process or thread ran.
  *
  * The operating system may move some tasks from one processor
  * to another at any time according to their binding,
@@ -1441,7 +1441,7 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  */
 HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
-/** \brief Get the last CPU where a process ran.
+/** \brief Get the last physical CPU where a process ran.
  *
  * The operating system may move some tasks from one processor
  * to another at any time according to their binding,
@@ -1658,7 +1658,7 @@ typedef enum {
 } hwloc_membind_flags_t;
 
 /** \brief Set the default memory binding policy of the current
- * process or thread to prefer the NUMA node(s) specified by \p nodeset
+ * process or thread to prefer the NUMA node(s) specified by physical \p nodeset
  *
  * If neither HWLOC_MEMBIND_PROCESS nor HWLOC_MEMBIND_THREAD is
  * specified, the current process is assumed to be single-threaded.
@@ -1672,7 +1672,7 @@ typedef enum {
 HWLOC_DECLSPEC int hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Set the default memory binding policy of the current
- * process or thread to prefer the NUMA node(s) near the specified \p
+ * process or thread to prefer the NUMA node(s) near the specified physical \p
  * cpuset
  *
  * If neither HWLOC_MEMBIND_PROCESS nor HWLOC_MEMBIND_THREAD is
@@ -1686,7 +1686,7 @@ HWLOC_DECLSPEC int hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_co
  */
 HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
 
-/** \brief Query the default memory binding policy and locality of the
+/** \brief Query the default memory binding policy and physical locality of the
  * current process or thread.
  *
  * This function has two output parameters: \p nodeset and \p policy.
@@ -1728,7 +1728,7 @@ HWLOC_DECLSPEC int hwloc_set_membind(hwloc_topology_t topology, hwloc_const_cpus
  */
 HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Query the default memory binding policy and locality of the
+/** \brief Query the default memory binding policy and physical locality of the
  * current process or thread (the locality is returned in \p cpuset as
  * CPUs near the locality's actual NUMA node(s)).
  *
@@ -1776,7 +1776,7 @@ HWLOC_DECLSPEC int hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_no
 HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Set the default memory binding policy of the specified
- * process to prefer the NUMA node(s) specified by \p nodeset
+ * process to prefer the NUMA node(s) specified by physical \p nodeset
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
@@ -1787,7 +1787,7 @@ HWLOC_DECLSPEC int hwloc_get_membind(hwloc_topology_t topology, hwloc_cpuset_t c
 HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Set the default memory binding policy of the specified
- * process to prefer the NUMA node(s) near the specified \p cpuset
+ * process to prefer the NUMA node(s) near the specified physical \p cpuset
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
@@ -1797,7 +1797,7 @@ HWLOC_DECLSPEC int hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwl
  */
 HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
 
-/** \brief Query the default memory binding policy and locality of the
+/** \brief Query the default memory binding policy and physical locality of the
  * specified process.
  *
  * This function has two output parameters: \p nodeset and \p policy.
@@ -1835,7 +1835,7 @@ HWLOC_DECLSPEC int hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t
  */
 HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Query the default memory binding policy and locality of the
+/** \brief Query the default memory binding policy and physical locality of the
  * specified process (the locality is returned in \p cpuset as CPUs
  * near the locality's actual NUMA node(s)).
  *
@@ -1877,7 +1877,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwl
 HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t cpuset, hwloc_membind_policy_t * policy, int flags);
 
 /** \brief Bind the already-allocated memory identified by (addr, len)
- * to the NUMA node(s) in \p nodeset.
+ * to the NUMA node(s) in physical \p nodeset.
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
@@ -1885,14 +1885,14 @@ HWLOC_DECLSPEC int hwloc_get_proc_membind(hwloc_topology_t topology, hwloc_pid_t
 HWLOC_DECLSPEC int hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags);
 
 /** \brief Bind the already-allocated memory identified by (addr, len)
- * to the NUMA node(s) near \p cpuset.
+ * to the NUMA node(s) near physical \p cpuset.
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * \return -1 with errno set to EXDEV if the binding cannot be enforced
  */
 HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags);
 
-/** \brief Query the NUMA node(s) and binding policy of the memory
+/** \brief Query the physical NUMA node(s) and binding policy of the memory
  * identified by (\p addr, \p len ).
  *
  * This function has two output parameters: \p nodeset and \p policy.
@@ -1916,7 +1916,7 @@ HWLOC_DECLSPEC int hwloc_set_area_membind(hwloc_topology_t topology, const void 
  */
 HWLOC_DECLSPEC int hwloc_get_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags);
 
-/** \brief Query the CPUs near the NUMA node(s) and binding policy of
+/** \brief Query the CPUs near the physical NUMA node(s) and binding policy of
  * the memory identified by (\p addr, \p len ).
  *
  * This function has two output parameters: \p cpuset and \p policy.
@@ -1951,7 +1951,7 @@ HWLOC_DECLSPEC int hwloc_get_area_membind(hwloc_topology_t topology, const void 
  */
 HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
 
-/** \brief Allocate some memory on the given nodeset \p nodeset
+/** \brief Allocate some memory on the given physical nodeset \p nodeset
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * and HWLOC_MEMBIND_STRICT is given
@@ -1962,7 +1962,7 @@ HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
  */
 HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags) __hwloc_attribute_malloc;
 
-/** \brief Allocate some memory on memory nodes near the given cpuset \p cpuset
+/** \brief Allocate some memory on memory nodes near the given physical cpuset \p cpuset
  *
  * \return -1 with errno set to ENOSYS if the action is not supported
  * and HWLOC_MEMBIND_STRICT is given
