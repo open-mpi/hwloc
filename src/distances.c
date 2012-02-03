@@ -512,8 +512,10 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
   /* find the object covering cpuset AND nodeset (can't use hwloc_get_obj_covering_cpuset()) */
   root = hwloc_get_obj_covering_cpuset_nodeset(topology, cpuset, nodeset);
   assert(root);
-  assert(hwloc_bitmap_isequal(cpuset, root->cpuset));
-  assert(hwloc_bitmap_isequal(nodeset, root->nodeset));
+  /* ideally, root has the exact cpuset and nodeset.
+   * but ignoring or other things that remove objects may cause the object array to reduce */
+  assert(hwloc_bitmap_isincluded(cpuset, root->cpuset));
+  assert(hwloc_bitmap_isincluded(nodeset, root->nodeset));
   hwloc_bitmap_free(cpuset);
   hwloc_bitmap_free(nodeset);
   if (root->depth >= objs[0]->depth) {
