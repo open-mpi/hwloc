@@ -675,7 +675,7 @@ hwloc_setup_groups_from_distances(struct hwloc_topology *topology,
 	if (groupids[i])
 	  for(j=0; j<nbobjs; j++)
 	    if (groupids[j])
-                GROUP_DISTANCE(groupids[i]0, groupids[j]-1) += DISTANCE(i, j);
+                GROUP_DISTANCE(groupids[i]-1, groupids[j]-1) += DISTANCE(i, j);
       for(i=0; i<nbgroups; i++)
           for(j=0; j<nbgroups; j++) {
               unsigned groupsize = groupsizes[i]*groupsizes[j];
