@@ -16,7 +16,7 @@
 int main(void)
 {
   hwloc_topology_t topology;
-  hwloc_bitmap_t set, set2, nocpunomemnodeset, nocpubutmemnodeset;
+  hwloc_bitmap_t set, set2, nocpunomemnodeset, nocpubutmemnodeset, nomembutcpunodeset, nomembutcpucpuset;
   hwloc_obj_t node;
   struct bitmask *bitmask, *bitmask2;
   nodemask_t nodemask, nodemask2;
@@ -37,6 +37,8 @@ int main(void)
   set = hwloc_bitmap_alloc();
   nocpunomemnodeset = hwloc_bitmap_alloc();
   nocpubutmemnodeset = hwloc_bitmap_alloc();
+  nomembutcpunodeset = hwloc_bitmap_alloc();
+  nomembutcpucpuset = hwloc_bitmap_alloc();
   /* gather all nodes if any, or the whole system if no nodes */
   if (hwloc_get_nbobjs_by_type(topology, HWLOC_OBJ_NODE)) {
     node = NULL;
@@ -47,6 +49,9 @@ int main(void)
 	  hwloc_bitmap_set(nocpubutmemnodeset, node->os_index);
 	else
 	  hwloc_bitmap_set(nocpunomemnodeset, node->os_index);
+      } else if (!node->memory.local_memory) {
+	hwloc_bitmap_set(nomembutcpunodeset, node->os_index);
+	hwloc_bitmap_or(nomembutcpucpuset, nomembutcpucpuset, node->cpuset);
       }
     }
   } else {
@@ -55,6 +60,8 @@ int main(void)
 
   set2 = hwloc_bitmap_alloc();
   hwloc_cpuset_from_linux_libnuma_bitmask(topology, set2, numa_all_nodes_ptr);
+  /* numa_all_nodes_ptr doesn't contain NODES with CPU but no memory */
+  hwloc_bitmap_or(set2, set2, nomembutcpucpuset);
   assert(hwloc_bitmap_isequal(set, set2));
   hwloc_bitmap_free(set2);
 
@@ -89,6 +96,8 @@ int main(void)
   hwloc_nodeset_from_linux_libnuma_bitmask(topology, set2, numa_all_nodes_ptr);
   /* numa_all_nodes_ptr doesn't contain NODES with no CPU and no memory */
   hwloc_bitmap_foreach_begin(i, nocpunomemnodeset) { hwloc_bitmap_set(set2, i); } hwloc_bitmap_foreach_end();
+  /* numa_all_nodes_ptr doesn't contain NODES with CPU but no memory */
+  hwloc_bitmap_or(set2, set2, nomembutcpunodeset);
   assert(hwloc_bitmap_isequal(set, set2));
   hwloc_bitmap_free(set2);
 
@@ -295,6 +304,8 @@ int main(void)
     hwloc_bitmap_free(set);
   }
 
+  hwloc_bitmap_free(nomembutcpucpuset);
+  hwloc_bitmap_free(nomembutcpunodeset);
   hwloc_bitmap_free(nocpubutmemnodeset);
   hwloc_bitmap_free(nocpunomemnodeset);
 
