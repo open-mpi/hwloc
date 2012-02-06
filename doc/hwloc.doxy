@@ -1319,8 +1319,8 @@ identify the corresponding host name and index during assembly.
 One way to manipulate multinode topologies is to retrieve
 other nodes' topologies as XML files and combine them as a
 global XML topology.
-It may then be loaded with hwloc_topolohy_set_xml() or with
-the HWLOCXMLFILE environment variable.
+It may then be loaded with hwloc_topology_set_xml() or with
+the HWLOC_XMLFILE environment variable.
 
 The hwloc-assembler and hwloc-assembler-remote utilities
 offer the ability to combine XML topologies or remote
