@@ -1352,6 +1352,58 @@ to find such an object because most links between objects
 (children, siblings, cousins) are not setup until hwloc_topology_load()
 is invoked.
 
+\section multinode_example Example of assembly with the programming interface
+
+If the topologies of two hosts have been previously gathered in XML
+files <tt>host1.xml</tt> and <tt>host2.xml</tt>, the global topology
+may be assembled with the following code.
+
+<pre>
+hwloc_topology_t host1, host2, global;
+
+/* initialize global topology */
+hwloc_topology_init(&global);
+hwloc_topology_set_custom(global);
+
+/* insert host1 entire topology below the global topology root */
+hwloc_topology_init(&host1);
+hwloc_topology_load(host1);
+hwloc_custom_insert_topology(global, hwloc_get_root_obj(global),
+                             host1, NULL);
+hwloc_topology_destroy(host1);
+
+/* insert host2 entire topology below the global topology root */
+hwloc_topology_init(&host2);
+hwloc_topology_load(host2);
+hwloc_custom_insert_topology(global, hwloc_get_root_obj(global),
+                             host2, NULL);
+hwloc_topology_destroy(host2);
+
+/* load and play with the global topology */
+hwloc_topology_load(global);
+...
+</pre>
+
+If a intermediate object such as a switch should be inserted
+above one of the host topologies:
+<pre>
+...
+/* insert a switch object below the global topology root */
+hwloc_obj_t sw =
+   hwloc_custom_insert_group_object_by_parent(global,
+                              hwloc_get_root_obj(global), 0);
+
+/* insert host2 entire topology below the switch */
+hwloc_topology_init(&host2);
+hwloc_topology_load(host2);
+hwloc_custom_insert_topology(global, switch, host2, NULL);
+hwloc_topology_destroy(host2);
+
+/* load and play with the global topology */
+hwloc_topology_load(global);
+...
+</pre>
+
 
 
 
