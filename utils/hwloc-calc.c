@@ -109,9 +109,9 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
       idx = logicalo ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
-        printf("%s%s", first ? "" : sep, type);
+        printf("%s%s", first ? (const char *) "" : sep, type);
       else
-        printf("%s%s:%u", first ? "" : sep, type, idx);
+        printf("%s%s:%u", first ? (const char *) "" : sep, type, idx);
       hwloc_bitmap_andnot(remaining, remaining, obj->cpuset);
       first = 0;
     }

@@ -1134,7 +1134,7 @@ hwloc__xml_export_new_prop(hwloc__xml_export_output_t output, const char *name, 
 #endif
   } else {
     char *escaped = hwloc__xml_export_escape_string(value);
-    int res = hwloc_snprintf(output->buffer, output->remaining, " %s=\"%s\"", name, escaped ? escaped : value);
+    int res = hwloc_snprintf(output->buffer, output->remaining, " %s=\"%s\"", name, escaped ? (const char *) escaped : value);
     hwloc__xml_export_update_buffer(output, res);
     free(escaped);
   }
