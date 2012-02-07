@@ -2742,7 +2742,7 @@ hwloc_topology_ignore_all_keep_structure(struct hwloc_topology *topology)
   unsigned type;
   for(type = HWLOC_OBJ_SYSTEM; type < HWLOC_OBJ_TYPE_MAX; type++)
     if (type != HWLOC_OBJ_PU
-	&& !hwloc_obj_type_is_io(type))
+	&& !hwloc_obj_type_is_io((hwloc_obj_type_t) type))
       topology->ignored_types[type] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
   return 0;
 }

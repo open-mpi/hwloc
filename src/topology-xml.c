@@ -302,8 +302,8 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "ignoring invalid bridge_type format string %s\n", value);
       } else {
-	obj->attr->bridge.upstream_type = upstream_type;
-	obj->attr->bridge.downstream_type = downstream_type;
+	obj->attr->bridge.upstream_type = (hwloc_obj_bridge_type_t) upstream_type;
+	obj->attr->bridge.downstream_type = (hwloc_obj_bridge_type_t) downstream_type;
       };
       break;
     }
@@ -344,7 +344,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
 	if (hwloc__xml_verbose())
 	  fprintf(stderr, "ignoring invalid osdev_type format string %s\n", value);
       } else
-	obj->attr->osdev.type = osdev_type;
+	obj->attr->osdev.type = (hwloc_obj_osdev_type_t) osdev_type;
       break;
     }
     default:
