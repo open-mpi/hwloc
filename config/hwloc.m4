@@ -272,6 +272,23 @@ EOF])
     AS_IF([test "$HWLOC_VISIBILITY_CFLAGS" != ""],
           [AC_MSG_WARN(["$HWLOC_VISIBILITY_CFLAGS" has been added to the hwloc CFLAGS])])
 
+    # make sure the compiler returns an error code when function arg count is wrong,
+    # otherwise sched_setaffinity checks may fail
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+        extern int one_arg(int x);
+        extern int two_arg(int x, int y);
+        int foo(void) { return one_arg(1, 2) + two_arg(3); }
+    ]])], [
+        AC_MSG_WARN([Your C compiler does not consider incorrect argument counts to be a fatal error.])
+        if test "$hwloc_check_compiler_vendor_result" = "ibm"; then
+            AC_MSG_WARN([For XLC you may try appending '-qhalt=-e' to the value of CFLAGS.])
+            AC_MSG_WARN([Alternatively you may configure with a different compiler.])
+        else
+            AC_MSG_WARN([Please report this failure, and configure using a different C compiler if possible.])
+        fi
+        AC_MSG_ERROR([Cannot continue.])
+    ])
+
     #
     # Now detect support
     #
