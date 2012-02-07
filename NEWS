@@ -27,6 +27,12 @@ Version 1.3.2
   Thanks to Paul H. Hargrove for reporting the problem.
 * Fix installation with old GNU sed, for instance on Red Hat 8.
   Thanks to Paul H. Hargrove for reporting the problem.
+* Fix PCI locality when Linux cgroups restrict the available CPUs.
+* Fix floating point issue when grouping by distance on mips64 architecture.
+  Thanks to Paul H. Hargrove for reporting the problem.
+* Fix conversion from/to Linux libnuma when some NUMA nodes have no memory.
+* Fix support for gccfss compilers with broken ffs() support.
+  Thanks to Paul H. Hargrove for reporting the problem and providing a patch.
 * Fix FreeBSD build without cpuid support.
 * Fix several Windows build issues.
 * Fix inline keyword definition in public headers.
@@ -34,6 +40,8 @@ Version 1.3.2
 * Improve visibility support detection. Thanks to Dave Love for providing
   the patch.
 * Remove references to internal symbols in the tools.
+* Fix installation on systems with limited command-line size.
+  Thanks to Paul H. Hargrove for reporting the problem.
 * Further improve XML-related error checking and reporting.
 
 
