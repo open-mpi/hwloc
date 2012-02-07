@@ -31,12 +31,15 @@ Version 1.3.2
 * Fix floating point issue when grouping by distance on mips64 architecture.
   Thanks to Paul H. Hargrove for reporting the problem.
 * Fix conversion from/to Linux libnuma when some NUMA nodes have no memory.
-* Fix support for gccfss compilers with broken ffs() support.
-  Thanks to Paul H. Hargrove for reporting the problem and providing a patch.
+* Fix support for gccfss compilers with broken ffs() support. Thanks to
+  Paul H. Hargrove for reporting the problem and providing a patch.
 * Fix FreeBSD build without cpuid support.
 * Fix several Windows build issues.
 * Fix inline keyword definition in public headers.
 * Fix dependencies in the embedded library.
+* Detect when a compiler such as xlc may not report compile errors
+  properly, causing some configure checks to be wrong. Thanks to
+  Paul H. Hargrove for reporting the problem and providing a patch.
 * Improve visibility support detection. Thanks to Dave Love for providing
   the patch.
 * Remove references to internal symbols in the tools.
