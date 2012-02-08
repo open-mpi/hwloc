@@ -1,5 +1,5 @@
 # Copyright © 2009-2010 INRIA
-# Copyright © 2009-2010, 2012 Université Bordeaux 1
+# Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 
 AM_CFLAGS = $(HWLOC_CFLAGS)
@@ -99,7 +99,7 @@ endif HWLOC_HAVE_CPUID
 # Installable library
 
 libhwloc_la_SOURCES = $(sources)
-libhwloc_la_LDFLAGS = $(ldflags) -version-info $(libhwloc_so_version) $(HWLOC_XML_LIBS) $(HWLOC_LINUX_LIBNUMA_LIBS)
+libhwloc_la_LDFLAGS = $(ldflags) -version-number $(libhwloc_so_version) $(HWLOC_XML_LIBS) $(HWLOC_LINUX_LIBNUMA_LIBS)
 
 # Embedded library (note the lack of a .so version number -- that
 # intentionally only appears in the installable library)
