@@ -261,6 +261,7 @@ EOF])
     #
     # Check for compiler attributes and visibility
     #
+    _HWLOC_C_COMPILER_VENDOR([hwloc_c_vendor])
     _HWLOC_CHECK_ATTRIBUTES
     _HWLOC_CHECK_VISIBILITY
     HWLOC_CFLAGS="$HWLOC_FLAGS $HWLOC_VISIBILITY_CFLAGS"
