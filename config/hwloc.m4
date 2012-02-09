@@ -470,9 +470,9 @@ EOF])
         dnl We can't use AC_TRY_LINK because the failure does not appear until
         dnl run/load time and there is currently no precedent for AC_TRY_RUN
         dnl use in hwloc.  --PHH
-	dnl For now, we're going with "all gccfss compilers are broken". 
-	dnl Better to be safe and correct; it's not like this is
-	dnl performance-critical code, after all.
+        dnl For now, we're going with "all gccfss compilers are broken". 
+        dnl Better to be safe and correct; it's not like this is
+        dnl performance-critical code, after all.
         AC_DEFINE([HWLOC_HAVE_BROKEN_FFS], [1], 
                   [Define to 1 if your `ffs' function is known to be broken.])
       fi
