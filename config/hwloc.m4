@@ -5,7 +5,7 @@ dnl Copyright (c) 2009-2012 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
 dnl                         Corporation.  All rights reserved.
-dnl Copyright (c) 2004-2005 The Regents of the University of California.
+dnl Copyright (c) 2004-2012 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
 dnl                         University of Stuttgart.  All rights reserved.
@@ -268,21 +268,41 @@ EOF])
     AS_IF([test "$HWLOC_VISIBILITY_CFLAGS" != ""],
           [AC_MSG_WARN(["$HWLOC_VISIBILITY_CFLAGS" has been added to the hwloc CFLAGS])])
 
-    # make sure the compiler returns an error code when function arg count is wrong,
-    # otherwise sched_setaffinity checks may fail
+    # Make sure the compiler returns an error code when function arg
+    # count is wrong, otherwise sched_setaffinity checks may fail.
+    HWLOC_STRICT_ARGS_CFLAGS=
+    hwloc_args_check=0
+    AC_MSG_CHECKING([whether the C compiler rejects function calls with too many arguments])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
         extern int one_arg(int x);
+        int foo(void) { return one_arg(1, 2); }
+      ]])],
+      [AC_MSG_RESULT([no])],
+      [hwloc_args_check=1
+       AC_MSG_RESULT([yes])])
+    AC_MSG_CHECKING([whether the C compiler rejects function calls with too few arguments])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
         extern int two_arg(int x, int y);
-        int foo(void) { return one_arg(1, 2) + two_arg(3); }
-    ]])], [
-        AC_MSG_WARN([Your C compiler does not consider incorrect argument counts to be a fatal error.])
-        if test "$hwloc_check_compiler_vendor_result" = "ibm"; then
-            AC_MSG_WARN([For XLC you may try appending '-qhalt=-e' to the value of CFLAGS.])
-            AC_MSG_WARN([Alternatively you may configure with a different compiler.])
-        else
-            AC_MSG_WARN([Please report this failure, and configure using a different C compiler if possible.])
-        fi
-        AC_MSG_ERROR([Cannot continue.])
+        int foo(void) { return two_arg(3); }
+      ]])],
+      [AC_MSG_RESULT([no])],
+      [hwloc_args_check=`expr $hwloc_args_check + 1`
+       AC_MSG_RESULT([yes])])
+    AS_IF([test "$hwloc_args_check" != "2"],[
+         AC_MSG_WARN([Your C compiler does not consider incorrect argument counts to be a fatal error.])
+        case "$hwloc_c_vendor" in
+        ibm)
+            HWLOC_STRICT_ARGS_CFLAGS="-qhalt=e"
+            ;;
+        *)
+            HWLOC_STRICT_ARGS_CFLAGS=FAIL
+            AC_MSG_WARN([Please report this warning and configure using a different C compiler if possible.])
+            ;;
+        esac
+        AS_IF([test "$HWLOC_STRICT_ARGS_CFLAGS" != "FAIL"],[
+            AC_MSG_WARN([Configure will append '$HWLOC_STRICT_ARGS_CFLAGS' to the value of CFLAGS when needed.])
+             AC_MSG_WARN([Alternatively you may configure with a different compiler.])
+        ])
     ])
 
     #
@@ -389,16 +409,24 @@ EOF])
     
     _HWLOC_CHECK_DECL([sched_setaffinity], [
       AC_DEFINE([HWLOC_HAVE_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides a prototype of sched_setaffinity()])
+      AS_IF([test "$HWLOC_STRICT_ARGS_CFLAGS" = "FAIL"],[
+        AC_MSG_WARN([Support for sched_setaffinity() requires a C compiler which])
+        AC_MSG_WARN([considers incorrect argument counts to be a fatal error.])
+        AC_MSG_ERROR([Cannot continue.])
+      ])
       AC_MSG_CHECKING([for old prototype of sched_setaffinity])
+      hwloc_save_CFLAGS=$CFLAGS
+      CFLAGS="$CFLAGS $HWLOC_STRICT_ARGS_CFLAGS"
       AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-          #define _GNU_SOURCE
-          #include <sched.h>
-          static unsigned long mask;
-          ]], [[ sched_setaffinity(0, (void*) &mask); ]])],
-        [AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype (without length) of sched_setaffinity()])
-         AC_MSG_RESULT([yes])],
-        [AC_MSG_RESULT([no])])
+          AC_LANG_PROGRAM([[
+              #define _GNU_SOURCE
+              #include <sched.h>
+              static unsigned long mask;
+              ]], [[ sched_setaffinity(0, (void*) &mask); ]])],
+          [AC_DEFINE([HWLOC_HAVE_OLD_SCHED_SETAFFINITY], [1], [Define to 1 if glibc provides the old prototype (without length) of sched_setaffinity()])
+           AC_MSG_RESULT([yes])],
+          [AC_MSG_RESULT([no])])
+      CFLAGS=$hwloc_save_CFLAGS
     ], , [[
 #define _GNU_SOURCE
 #include <sched.h>
