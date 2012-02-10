@@ -298,6 +298,9 @@ EOF])
         ibm)
             HWLOC_STRICT_ARGS_CFLAGS="-qhalt=e"
             ;;
+        intel)
+            HWLOC_STRICT_ARGS_CFLAGS="-we140"
+            ;;
         *)
             HWLOC_STRICT_ARGS_CFLAGS=FAIL
             AC_MSG_WARN([Please report this warning and configure using a different C compiler if possible.])
