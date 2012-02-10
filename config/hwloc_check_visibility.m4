@@ -90,7 +90,7 @@ AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
             AC_MSG_CHECKING([if $CC supports -xldscope])
             AC_LINK_IFELSE([AC_LANG_PROGRAM([[
                 __attribute__((visibility("default"))) int foo;
-                ]],[[int i;]])],
+                ]],[[fprintf(stderr, "Hello, world\n");]])],
                 [],
                 [hwloc_add=])
             AS_IF([test "$hwloc_add" = ""],
@@ -106,7 +106,7 @@ AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
             AC_MSG_CHECKING([if $CC supports -fvisibility])
             AC_LINK_IFELSE([AC_LANG_PROGRAM([[
                 __attribute__((visibility("default"))) int foo;
-                ]],[[int i;]])],
+                ]],[[fprintf(stderr, "Hello, world\n");]])],
                 [],
                 [AS_IF([test -s conftest.err],
                        [$GREP -iq visibility conftest.err
