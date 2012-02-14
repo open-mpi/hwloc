@@ -17,7 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
-Version 1.4.0
+Version 1.4.1 (contains all v1.3.2 changes)
+-------------
+
+
+Version 1.4.0 (does not contain all v1.3.2 changes)
 -------------
 * Major features
   + Add "custom" interface and "assembler" tools to build multi-node
@@ -63,6 +67,37 @@ Version 1.4.0
   + Improve visibility support detection. Thanks to Dave Love for providing
     the patch.
   + Remove references to internal symbols in the tools.
+
+
+Version 1.3.2
+-------------
+* Fix missing last bit in hwloc_linux_get_thread_cpubind().
+  Thanks to Carolina Gómez-Tostón Gutiérrez for reporting the issue.
+* Fix build with -mcmodel=medium. Thanks to Devendar Bureddy for reporting
+  the issue.
+* Fix build with Solaris Studio 12 compiler when XML is disabled.
+  Thanks to Paul H. Hargrove for reporting the problem.
+* Fix installation with old GNU sed, for instance on Red Hat 8.
+  Thanks to Paul H. Hargrove for reporting the problem.
+* Fix PCI locality when Linux cgroups restrict the available CPUs.
+* Fix floating point issue when grouping by distance on mips64 architecture.
+  Thanks to Paul H. Hargrove for reporting the problem.
+* Fix conversion from/to Linux libnuma when some NUMA nodes have no memory.
+* Fix support for gccfss compilers with broken ffs() support. Thanks to
+  Paul H. Hargrove for reporting the problem and providing a patch.
+* Fix FreeBSD build without cpuid support.
+* Fix several Windows build issues.
+* Fix inline keyword definition in public headers.
+* Fix dependencies in the embedded library.
+* Detect when a compiler such as xlc may not report compile errors
+  properly, causing some configure checks to be wrong. Thanks to
+  Paul H. Hargrove for reporting the problem and providing a patch.
+* Improve visibility support detection. Thanks to Dave Love for providing
+  the patch.
+* Remove references to internal symbols in the tools.
+* Fix installation on systems with limited command-line size.
+  Thanks to Paul H. Hargrove for reporting the problem.
+* Further improve XML-related error checking and reporting.
 
 
 Version 1.3.1
