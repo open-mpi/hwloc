@@ -85,13 +85,13 @@ AC_DEFUN([_HWLOC_CHECK_VISIBILITY],[
         sun)
             # Check using Sun Studio -xldscope=hidden flag
             hwloc_add=-xldscope=hidden
-            CFLAGS="$CFLAGS_orig $hwloc_add"
+            CFLAGS="$CFLAGS_orig $hwloc_add -errwarn=%all"
             ;;
 
         *)
             # Check using -fvisibility=hidden
             hwloc_add=-fvisibility=hidden
-            CFLAGS="$CFLAGS_orig $hwloc_add"
+            CFLAGS="$CFLAGS_orig $hwloc_add -Werror"
             ;;
         esac
 
