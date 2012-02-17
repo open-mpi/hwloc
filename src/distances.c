@@ -511,7 +511,28 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
   }
   /* find the object covering cpuset AND nodeset (can't use hwloc_get_obj_covering_cpuset()) */
   root = hwloc_get_obj_covering_cpuset_nodeset(topology, cpuset, nodeset);
-  assert(root);
+  if (!root) {
+    /* should not happen, ignore the distance matrix and report an error. */
+    if (!hwloc_hide_errors()) {
+      char *a, *b;
+      hwloc_bitmap_asprintf(&a, cpuset);
+      hwloc_bitmap_asprintf(&b, nodeset);
+      fprintf(stderr, "****************************************************************************\n");
+      fprintf(stderr, "* Hwloc has encountered an error when adding a distance matrix to the topology.\n");
+      fprintf(stderr, "*\n");
+      fprintf(stderr, "* hwloc_distances__finalize_logical() could not find any object covering\n");
+      fprintf(stderr, "* cpuset %s and nodeset %s\n", a, b);
+      fprintf(stderr, "*\n");
+      fprintf(stderr, "* Please report this error message to the hwloc user's mailing list,\n");
+      fprintf(stderr, "* along with the output from the hwloc-gather-topology.sh script.\n");
+      fprintf(stderr, "****************************************************************************\n");
+      free(a);
+      free(b);
+    }
+    hwloc_bitmap_free(cpuset);
+    hwloc_bitmap_free(nodeset);
+    return;
+  }
   /* ideally, root has the exact cpuset and nodeset.
    * but ignoring or other things that remove objects may cause the object array to reduce */
   assert(hwloc_bitmap_isincluded(cpuset, root->cpuset));
