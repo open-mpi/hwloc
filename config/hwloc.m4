@@ -744,7 +744,7 @@ EOF])
     # Try to compile the cpuid inlines
     AC_MSG_CHECKING([for cpuid])
     old_CPPFLAGS="$CPPFLAGS"
-    CFLAGS="$CFLAGS -I$HWLOC_top_srcdir/include"
+    CPPFLAGS="$CPPFLAGS -I$HWLOC_top_srcdir/include"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
         #define __hwloc_inline
