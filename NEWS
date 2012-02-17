@@ -21,6 +21,8 @@ Version 1.4.1
 -------------
 * This release contains all changes from v1.3.2.
 * Fix some overzealous assertions in the distance grouping code.
+* Workaround BIOS reporting empty I/O locality in cuda and openfabrics
+  helpers on Linux. Thanks to Albert Solernou for reporting the problem.
 
 
 Version 1.4.0 (does not contain all v1.3.2 changes)

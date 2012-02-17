@@ -92,6 +92,8 @@ hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
     return -1;
 
   hwloc_linux_parse_cpumap_file(sysfile, set);
+  if (hwloc_bitmap_iszero(set))
+    hwloc_bitmap_copy(set, hwloc_topology_get_complete_cpuset(topology));
 
   fclose(sysfile);
 #else
