@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -216,7 +216,9 @@ hwloc_nodeset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_nodeset
  *
  * \return newly allocated struct bitmask.
  */
-static __hwloc_inline struct bitmask * __hwloc_attribute_malloc
+static __hwloc_inline struct bitmask *
+hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset) __hwloc_attribute_malloc;
+static __hwloc_inline struct bitmask *
 hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset)
 {
   int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
@@ -247,7 +249,9 @@ hwloc_cpuset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_cpu
  *
  * \return newly allocated struct bitmask.
  */
-static __hwloc_inline struct bitmask * __hwloc_attribute_malloc
+static __hwloc_inline struct bitmask *
+hwloc_nodeset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset) __hwloc_attribute_malloc;
+static __hwloc_inline struct bitmask *
 hwloc_nodeset_to_linux_libnuma_bitmask(hwloc_topology_t topology, hwloc_const_nodeset_t nodeset)
 {
   int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
