@@ -630,12 +630,7 @@ man3_linux_libnuma_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_bitmask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nodeset_from_linux_libnuma_bitmask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_bitmask.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_nodeset_from_linux_libnuma_nodemask.3 \
-        $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_nodemask.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_nodemask.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nodeset_to_linux_libnuma_bitmask.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cpuset_to_linux_libnuma_nodemask.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_nodeset_to_linux_libnuma_nodemask.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_from_linux_libnuma_ulongs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nodeset_from_linux_libnuma_ulongs.3 \

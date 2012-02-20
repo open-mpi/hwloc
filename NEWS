@@ -24,6 +24,9 @@ Version 1.5.0
   + XML topology files do not depend on the locale anymore. Float numbers
     such as NUMA distances or PCI link speeds now always use a dot as a
     decimal separator.
+* API
+  + Remove Linux libnuma conversion helpers for the deprecated and
+    broken nodemask_t interface.
 
 
 Version 1.4.1

@@ -395,10 +395,6 @@ extern "C" {
 #define hwloc_nodeset_to_linux_libnuma_bitmask HWLOC_NAME(nodeset_to_linux_libnuma_bitmask)
 #define hwloc_cpuset_from_linux_libnuma_bitmask HWLOC_NAME(cpuset_from_linux_libnuma_bitmask)
 #define hwloc_nodeset_from_linux_libnuma_bitmask HWLOC_NAME(nodeset_from_linux_libnuma_bitmask)
-#define hwloc_cpuset_to_linux_libnuma_nodemask HWLOC_NAME(cpuset_to_linux_libnuma_nodemask)
-#define hwloc_nodeset_to_linux_libnuma_nodemask HWLOC_NAME(nodeset_to_linux_libnuma_nodemask)
-#define hwloc_cpuset_from_linux_libnuma_nodemask HWLOC_NAME(cpuset_from_linux_libnuma_nodemask)
-#define hwloc_nodeset_from_linux_libnuma_nodemask HWLOC_NAME(nodeset_from_linux_libnuma_nodemask)
 
 /* linux.h */
 

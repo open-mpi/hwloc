@@ -1494,7 +1494,7 @@ interface with dedicated helpers.
 <dt>Linux libnuma</dt>
  <dd>
   hwloc/linux-libnuma.h provides conversion helpers between hwloc CPU
-  sets and libnuma-specific types, such as nodemasks and bitmasks.  It
+  sets and libnuma-specific types, such as  bitmasks.  It
   helps you use libnuma memory-binding functions with hwloc CPU sets.
  </dd>
 
