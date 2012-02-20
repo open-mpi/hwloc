@@ -19,7 +19,6 @@ int main(void)
   hwloc_bitmap_t set, set2, nocpunomemnodeset, nocpubutmemnodeset, nomembutcpunodeset, nomembutcpucpuset;
   hwloc_obj_t node;
   struct bitmask *bitmask, *bitmask2;
-  nodemask_t nodemask, nodemask2;
   unsigned long mask;
   unsigned long maxnode;
   int i;
@@ -65,22 +64,11 @@ int main(void)
   assert(hwloc_bitmap_isequal(set, set2));
   hwloc_bitmap_free(set2);
 
-  set2 = hwloc_bitmap_alloc();
-  hwloc_cpuset_from_linux_libnuma_nodemask(topology, set2, &numa_all_nodes);
-  assert(hwloc_bitmap_isequal(set, set2));
-  hwloc_bitmap_free(set2);
-
   bitmask = hwloc_cpuset_to_linux_libnuma_bitmask(topology, set);
   /* numa_all_nodes_ptr contains NODES with no CPU but with memory */
   hwloc_bitmap_foreach_begin(i, nocpubutmemnodeset) { numa_bitmask_setbit(bitmask, i); } hwloc_bitmap_foreach_end();
   assert(numa_bitmask_equal(bitmask, numa_all_nodes_ptr));
   numa_bitmask_free(bitmask);
-
-  hwloc_cpuset_to_linux_libnuma_nodemask(topology, set, &nodemask);
-  /* numa_all_nodes contains NODES with no CPU (with or without memory) */
-  hwloc_bitmap_foreach_begin(i, nocpubutmemnodeset) { nodemask_set(&nodemask, i); } hwloc_bitmap_foreach_end();
-  hwloc_bitmap_foreach_begin(i, nocpunomemnodeset) { nodemask_set(&nodemask, i); } hwloc_bitmap_foreach_end();
-  assert(!memcmp(&nodemask, &numa_all_nodes, sizeof(nodemask_t)));
 
   hwloc_bitmap_free(set);
 
@@ -101,27 +89,13 @@ int main(void)
   assert(hwloc_bitmap_isequal(set, set2));
   hwloc_bitmap_free(set2);
 
-  set2 = hwloc_bitmap_alloc();
-  hwloc_nodeset_from_linux_libnuma_nodemask(topology, set2, &numa_all_nodes);
-  assert(hwloc_bitmap_isequal(set, set2));
-  hwloc_bitmap_free(set2);
-
   bitmask = hwloc_nodeset_to_linux_libnuma_bitmask(topology, set);
   assert(numa_bitmask_equal(bitmask, numa_all_nodes_ptr));
   numa_bitmask_free(bitmask);
 
-  hwloc_nodeset_to_linux_libnuma_nodemask(topology, set, &nodemask);
-  assert(!memcmp(&nodemask, &numa_all_nodes, sizeof(nodemask_t)));
-
   hwloc_bitmap_free(set);
 
   /* convert empty stuff between cpuset and libnuma */
-  nodemask_zero(&nodemask);
-  set = hwloc_bitmap_alloc();
-  hwloc_cpuset_from_linux_libnuma_nodemask(topology, set, &nodemask);
-  assert(hwloc_bitmap_iszero(set));
-  hwloc_bitmap_free(set);
-
   bitmask = numa_bitmask_alloc(1);
   set = hwloc_bitmap_alloc();
   hwloc_cpuset_from_linux_libnuma_bitmask(topology, set, bitmask);
@@ -144,12 +118,6 @@ int main(void)
   hwloc_bitmap_free(set);
 
   set = hwloc_bitmap_alloc();
-  hwloc_cpuset_to_linux_libnuma_nodemask(topology, set, &nodemask);
-  nodemask_zero(&nodemask2);
-  assert(nodemask_equal(&nodemask, &nodemask2));
-  hwloc_bitmap_free(set);
-
-  set = hwloc_bitmap_alloc();
   maxnode = sizeof(mask)*8;
   hwloc_cpuset_to_linux_libnuma_ulongs(topology, set, &mask, &maxnode);
   assert(!mask);
@@ -157,12 +125,6 @@ int main(void)
   hwloc_bitmap_free(set);
 
   /* convert empty stuff between nodeset and libnuma */
-  nodemask_zero(&nodemask);
-  set = hwloc_bitmap_alloc();
-  hwloc_nodeset_from_linux_libnuma_nodemask(topology, set, &nodemask);
-  assert(hwloc_bitmap_iszero(set));
-  hwloc_bitmap_free(set);
-
   bitmask = numa_bitmask_alloc(1);
   set = hwloc_bitmap_alloc();
   hwloc_nodeset_from_linux_libnuma_bitmask(topology, set, bitmask);
@@ -185,12 +147,6 @@ int main(void)
   hwloc_bitmap_free(set);
 
   set = hwloc_bitmap_alloc();
-  hwloc_nodeset_to_linux_libnuma_nodemask(topology, set, &nodemask);
-  nodemask_zero(&nodemask2);
-  assert(nodemask_equal(&nodemask, &nodemask2));
-  hwloc_bitmap_free(set);
-
-  set = hwloc_bitmap_alloc();
   maxnode = sizeof(mask)*8;
   hwloc_nodeset_to_linux_libnuma_ulongs(topology, set, &mask, &maxnode);
   assert(!mask);
@@ -200,20 +156,14 @@ int main(void)
   /* convert first node (with CPU and memory) between cpuset/nodeset and libnuma */
   node = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, NULL);
   while (node && (!node->memory.local_memory || hwloc_bitmap_iszero(node->cpuset)))
-    /* skip nodes with no cpus or no memory because libnuma doesn't the same before for nodemask and bitmask there */
+    /* skip nodes with no cpus or no memory to avoid strange libnuma behaviors */
     node = node->next_sibling;
   if (node) {
     /* convert first node between cpuset and libnuma */
-    hwloc_cpuset_to_linux_libnuma_nodemask(topology, node->cpuset, &nodemask);
-    assert(nodemask_isset(&nodemask, node->os_index));
-    nodemask_clr(&nodemask, node->os_index);
-    nodemask_zero(&nodemask2);
-    assert(nodemask_equal(&nodemask, &nodemask2));
-
     bitmask = hwloc_cpuset_to_linux_libnuma_bitmask(topology, node->cpuset);
     assert(numa_bitmask_isbitset(bitmask, node->os_index));
     numa_bitmask_clearbit(bitmask, node->os_index);
-    bitmask2 = numa_bitmask_alloc(1);
+    bitmask2 = numa_bitmask_alloc(node->os_index + 1);
     assert(numa_bitmask_equal(bitmask, bitmask2));
     numa_bitmask_free(bitmask);
     numa_bitmask_free(bitmask2);
@@ -225,19 +175,12 @@ int main(void)
       assert(!mask);
     } else {
       assert(maxnode = node->os_index + 1);
-      assert(mask == (1U<<node->os_index));
+      assert(mask == (1UL << node->os_index));
     }
 
     set = hwloc_bitmap_alloc();
-    nodemask_zero(&nodemask);
-    nodemask_set(&nodemask, node->os_index);
-    hwloc_cpuset_from_linux_libnuma_nodemask(topology, set, &nodemask);
-    assert(hwloc_bitmap_isequal(set, node->cpuset));
-    hwloc_bitmap_free(set);
-
-    set = hwloc_bitmap_alloc();
-    bitmask = numa_bitmask_alloc(1);
-    numa_bitmask_setbit(bitmask, 0);
+    bitmask = numa_bitmask_alloc(node->os_index + 1);
+    numa_bitmask_setbit(bitmask, node->os_index);
     hwloc_cpuset_from_linux_libnuma_bitmask(topology, set, bitmask);
     numa_bitmask_free(bitmask);
     assert(hwloc_bitmap_isequal(set, node->cpuset));
@@ -247,23 +190,17 @@ int main(void)
     if (node->os_index >= sizeof(mask)*8) {
       mask = 0;
     } else {
-      mask = 1 << node->os_index;
+      mask = 1UL << node->os_index;
     }
-    hwloc_cpuset_from_linux_libnuma_ulongs(topology, set, &mask, 1);
+    hwloc_cpuset_from_linux_libnuma_ulongs(topology, set, &mask, node->os_index + 1);
     assert(hwloc_bitmap_isequal(set, node->cpuset));
     hwloc_bitmap_free(set);
 
     /* convert first node between nodeset and libnuma */
-    hwloc_nodeset_to_linux_libnuma_nodemask(topology, node->nodeset, &nodemask);
-    assert(nodemask_isset(&nodemask, node->os_index));
-    nodemask_clr(&nodemask, node->os_index);
-    nodemask_zero(&nodemask2);
-    assert(nodemask_equal(&nodemask, &nodemask2));
-
     bitmask = hwloc_nodeset_to_linux_libnuma_bitmask(topology, node->nodeset);
     assert(numa_bitmask_isbitset(bitmask, node->os_index));
     numa_bitmask_clearbit(bitmask, node->os_index);
-    bitmask2 = numa_bitmask_alloc(1);
+    bitmask2 = numa_bitmask_alloc(node->os_index + 1);
     assert(numa_bitmask_equal(bitmask, bitmask2));
     numa_bitmask_free(bitmask);
     numa_bitmask_free(bitmask2);
@@ -275,19 +212,12 @@ int main(void)
       assert(!mask);
     } else {
       assert(maxnode = node->os_index + 1);
-      assert(mask == (1U<<node->os_index));
+      assert(mask == (1UL << node->os_index));
     }
 
     set = hwloc_bitmap_alloc();
-    nodemask_zero(&nodemask);
-    nodemask_set(&nodemask, node->os_index);
-    hwloc_nodeset_from_linux_libnuma_nodemask(topology, set, &nodemask);
-    assert(hwloc_bitmap_isequal(set, node->nodeset));
-    hwloc_bitmap_free(set);
-
-    set = hwloc_bitmap_alloc();
-    bitmask = numa_bitmask_alloc(1);
-    numa_bitmask_setbit(bitmask, 0);
+    bitmask = numa_bitmask_alloc(node->os_index + 1);
+    numa_bitmask_setbit(bitmask, node->os_index);
     hwloc_nodeset_from_linux_libnuma_bitmask(topology, set, bitmask);
     numa_bitmask_free(bitmask);
     assert(hwloc_bitmap_isequal(set, node->nodeset));
@@ -297,9 +227,9 @@ int main(void)
     if (node->os_index >= sizeof(mask)*8) {
       mask = 0;
     } else {
-      mask = 1 << node->os_index;
+      mask = 1UL << node->os_index;
     }
-    hwloc_nodeset_from_linux_libnuma_ulongs(topology, set, &mask, 1);
+    hwloc_nodeset_from_linux_libnuma_ulongs(topology, set, &mask, node->os_index + 1);
     assert(hwloc_bitmap_isequal(set, node->nodeset));
     hwloc_bitmap_free(set);
   }
