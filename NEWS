@@ -23,6 +23,8 @@ Version 1.4.1
 * Fix some overzealous assertions in the distance grouping code.
 * Workaround BIOS reporting empty I/O locality in cuda and openfabrics
   helpers on Linux. Thanks to Albert Solernou for reporting the problem.
+* Fix helpers converting from Linux libnuma to hwloc (hwloc/linux-libnuma.h)
+  in case of out-of-order NUMA node ids.
 
 
 Version 1.4.0 (does not contain all v1.3.2 changes)
