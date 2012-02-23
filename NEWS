@@ -26,6 +26,7 @@ Version 1.4.1
   helpers on Linux. Thanks to Albert Solernou for reporting the problem.
 * Fix helpers converting from Linux libnuma to hwloc (hwloc/linux-libnuma.h)
   in case of out-of-order NUMA node ids.
+* Install a valgrind suppressions file hwloc-valgrind.supp.
 
 
 Version 1.4.0 (does not contain all v1.3.2 changes)
