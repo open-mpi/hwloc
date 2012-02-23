@@ -38,6 +38,8 @@ static void result_get(const char *msg, hwloc_const_bitmap_t expected, hwloc_con
     hwloc_bitmap_asprintf(&expected_s, expected);
     hwloc_bitmap_asprintf(&result_s, result);
     printf("%-40s: expected %s, got %s\n", msg, expected_s, result_s);
+    free(expected_s);
+    free(result_s);
   }
 }
 
