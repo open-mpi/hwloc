@@ -21,6 +21,7 @@ Version 1.4.1
 -------------
 * This release contains all changes from v1.3.2.
 * Fix some overzealous assertions in the distance grouping code.
+* Fix memory leaks in some get_membind() functions.
 * Workaround BIOS reporting empty I/O locality in cuda and openfabrics
   helpers on Linux. Thanks to Albert Solernou for reporting the problem.
 * Fix helpers converting from Linux libnuma to hwloc (hwloc/linux-libnuma.h)
