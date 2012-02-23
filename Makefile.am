@@ -22,6 +22,11 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hwloc.pc
 endif
 
+# Only install the valgrind suppressions file if we're building in standalone mode
+if HWLOC_BUILD_STANDALONE
+dist_pkgdata_DATA = contrib/hwloc-valgrind.supp
+endif
+
 #
 # "make distcheck" requires that tarballs are able to be able to "make
 # dist", so we have to include config/distscript.csh.
