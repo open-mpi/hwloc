@@ -1917,9 +1917,9 @@ HWLOC_DECLSPEC void *hwloc_alloc(hwloc_topology_t topology, size_t len);
 
 /** \brief Allocate some memory on the given physical nodeset \p nodeset
  *
- * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return NULL with errno set to ENOSYS if the action is not supported
  * and HWLOC_MEMBIND_STRICT is given
- * \return -1 with errno set to EXDEV if the binding cannot be enforced
+ * \return NULL with errno set to EXDEV if the binding cannot be enforced
  * and HWLOC_MEMBIND_STRICT is given
  *
  * \note The allocated memory should be freed with hwloc_free().
@@ -1928,9 +1928,9 @@ HWLOC_DECLSPEC void *hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size
 
 /** \brief Allocate some memory on memory nodes near the given physical cpuset \p cpuset
  *
- * \return -1 with errno set to ENOSYS if the action is not supported
+ * \return NULL with errno set to ENOSYS if the action is not supported
  * and HWLOC_MEMBIND_STRICT is given
- * \return -1 with errno set to EXDEV if the binding cannot be enforced
+ * \return NULL with errno set to EXDEV if the binding cannot be enforced
  * and HWLOC_MEMBIND_STRICT is given
  *
  * \note The allocated memory should be freed with hwloc_free().

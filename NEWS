@@ -17,11 +17,6 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
-Version 1.3.3
--------------
-* Bug fixes:
-  + Fix hwloc_alloc_membind, thanks Karl Napf for reporting the issue.
-
 Version 1.3.2
 -------------
 * Fix missing last bit in hwloc_linux_get_thread_cpubind().
