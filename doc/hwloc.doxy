@@ -1956,6 +1956,29 @@ in the topology (<tt>hwloc_topology_insert_misc_object_by_cpuset()</tt>)
 or as a leaf of the topology (<tt>hwloc_topology_insert_misc_object_by_parent()</tt>).
 
 
+\section faq_valgrind Why does Valgrind complain about hwloc memory leaks?
+
+If you are debugging your application with Valgrind, you want to
+avoid memory leak reports that are caused by hwloc and not by your
+program.
+
+hwloc itself is often checked with Valgrind to make sure it does
+not leak memory.
+However some global variables in hwloc dependencies are never freed.
+For instance libz allocates its global state once at startup and
+never frees it so that it may be reused later.
+Some libxml2 global state is also never freed because hwloc does not
+know whether it can safely ask libxml2 to free it (the application may
+also be using libxml2 outside of hwloc).
+
+These unfreed variables cause leak reports in Valgrind.
+hwloc installs a Valgrind <em>suppressions</em> file to hide them.
+You should pass the following command-line option to Valgrind to use it:
+<pre>
+  --suppressions=/path/to/hwloc-valgrind.supp
+</pre>
+
+
 \section faq_upgrade How do I handle API upgrades?
 
 The hwloc interface is extended with every new major release.
