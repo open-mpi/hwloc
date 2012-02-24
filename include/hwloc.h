@@ -1536,7 +1536,10 @@ typedef enum {
                                          * Pages are individually
                                          * bound to the local NUMA
                                          * node of the first thread
-                                         * that touches it.
+                                         * that touches it. If there is not
+                                         * enough memory on the node, allocation
+                                         * may be done in the specified cpuset
+                                         * before allocating on other nodes.
                                          * \hideinitializer */
   HWLOC_MEMBIND_BIND =		2,	/**< \brief Allocate memory on the specified nodes.
 					 * \hideinitializer */
