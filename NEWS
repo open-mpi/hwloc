@@ -28,7 +28,7 @@ Version 1.5.0
   + Remove Linux libnuma conversion helpers for the deprecated and
     broken nodemask_t interface.
 * Bug fixes:
-  + Fix hwloc_alloc_membind.
+  + Fix hwloc_alloc_membind, thanks Karl Napf for reporting the issue.
 
 
 Version 1.4.1
