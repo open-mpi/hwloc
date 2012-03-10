@@ -46,6 +46,7 @@ sysfs_outputs = \
 		16em64t-2m4c2t.output \
 		16ia64-8n2s.output \
 		48amd64-4d2n6c-sparse.output \
+		64amd64-4s2n4ca2co.output \
 		64fake-4n2s2ca2c2t.output \
 		96em64t-4n4d3ca2co.output \
 		96em64t-4n4d3ca2co-forcecpuinfo.output \
@@ -98,6 +99,7 @@ sysfs_tarballs = \
 		16em64t-4s2c2t.xml.source \
 		16ia64-8n2s.tar.bz2 \
 		48amd64-4d2n6c-sparse.tar.bz2 \
+		64amd64-4s2n4ca2co.tar.bz2 \
 		64fake-4n2s2ca2c2t.tar.bz2 \
 		96em64t-4n4d3ca2co.tar.bz2 \
 		96em64t-4n4d3ca2co-forcecpuinfo.source \
@@ -128,7 +130,8 @@ sysfs_options = \
 		16em64t-4s2c2t_ncaches.options \
 		16em64t-4s2c2t_merge.options \
 		16em64t-4s2c2t.xml.options \
-		32amd64-4s2n4c-cgroup.xml.options
+		32amd64-4s2n4c-cgroup.xml.options \
+		64amd64-4s2n4ca2co.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lsopo
