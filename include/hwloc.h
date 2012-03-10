@@ -256,7 +256,8 @@ typedef enum {
 typedef enum hwloc_obj_cache_type_e {
   HWLOC_OBJ_CACHE_UNIFIED,      /**< \brief Unified cache. */
   HWLOC_OBJ_CACHE_DATA,         /**< \brief Data cache. */
-  HWLOC_OBJ_CACHE_INSTRUCTION   /**< \brief Instruction cache. */
+  HWLOC_OBJ_CACHE_INSTRUCTION   /**< \brief Instruction cache.
+				  * Only used when the HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
 } hwloc_obj_cache_type_t;
 
 /** \brief Type of one side (upstream or downstream) of an I/O bridge. */
@@ -724,7 +725,14 @@ enum hwloc_topology_flags_e {
    * and bridges (even those that have no device behind them) using the libpci
    * backend.
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<4)
+  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<4),
+
+  /* \brief Detect instruction caches.
+   *
+   * This flag enables detection of all caches, except of only Data and
+   * Unified caches.
+   */
+  HWLOC_TOPOLOGY_FLAG_ICACHES = (1<<5)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
