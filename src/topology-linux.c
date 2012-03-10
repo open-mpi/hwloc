@@ -2706,10 +2706,8 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	      type = HWLOC_OBJ_CACHE_DATA;
 	    else if (!strncmp(str2, "Unified", 7))
 	      type = HWLOC_OBJ_CACHE_UNIFIED;
-#if 0 /* FIXME */
 	    else if (!strncmp(str2, "Instruction", 11))
 	      type = HWLOC_OBJ_CACHE_INSTRUCTION;
-#endif
 	    else
 	      continue;
 	  } else {
