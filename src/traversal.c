@@ -373,6 +373,16 @@ hwloc_pci_class_string(unsigned short class_id)
 #define hwloc_memory_size_printf_unit(_size, _verbose) \
   ((_size) < (10ULL<<20) || _verbose ? "KB" : (_size) < (10ULL<<30) ? "MB" : "GB")
 
+static const char* hwloc_obj_cache_type_letter(hwloc_obj_cache_type_t type)
+{
+  switch (type) {
+  case HWLOC_OBJ_CACHE_UNIFIED: return "";
+  case HWLOC_OBJ_CACHE_DATA: return "d";
+  case HWLOC_OBJ_CACHE_INSTRUCTION: return "i";
+  default: return "unknown";
+  }
+}
+
 int
 hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, int verbose)
 {
@@ -387,7 +397,9 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
   case HWLOC_OBJ_PU:
     return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_CACHE:
-    return hwloc_snprintf(string, size, "L%u%s", obj->attr->cache.depth, verbose ? hwloc_obj_type_string(type): "");
+    return hwloc_snprintf(string, size, "L%u%s%s", obj->attr->cache.depth,
+			  verbose ? hwloc_obj_cache_type_letter(obj->attr->cache.type) : "",
+			  verbose ? hwloc_obj_type_string(type): "");
   case HWLOC_OBJ_GROUP:
 	  /* TODO: more pretty presentation? */
     return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->group.depth);

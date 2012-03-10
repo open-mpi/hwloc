@@ -62,6 +62,12 @@ extern "C" {
 #define HWLOC_OBJ_TYPE_MAX HWLOC_NAME_CAPS(OBJ_TYPE_MAX)
 #define hwloc_obj_type_t HWLOC_NAME(obj_type_t)
 
+#define hwloc_obj_cache_type_e HWLOC_NAME(obj_cache_type_e)
+#define hwloc_obj_cache_type_t HWLOC_NAME(obj_cache_type_t)
+#define HWLOC_OBJ_CACHE_UNIFIED HWLOC_NAME_CAPS(OBJ_CACHE_UNIFIED)
+#define HWLOC_OBJ_CACHE_DATA HWLOC_NAME_CAPS(OBJ_CACHE_DATA)
+#define HWLOC_OBJ_CACHE_INSTRUCTION HWLOC_NAME_CAPS(OBJ_CACHE_INSTRUCTION)
+
 #define hwloc_obj_bridge_type_e HWLOC_NAME(obj_bridge_type_e)
 #define hwloc_obj_bridge_type_t HWLOC_NAME(obj_bridge_type_t)
 #define HWLOC_OBJ_BRIDGE_HOST HWLOC_NAME_CAPS(OBJ_BRIDGE_HOST)

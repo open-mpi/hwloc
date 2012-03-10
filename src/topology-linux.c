@@ -2317,7 +2317,7 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   /* d-cache-size - to read, in bytes */ 
   /* d-tlb-sets - ignore */
   /* d-tlb-size - ignore, always 0 on power6 */
-  /* i-cache-* and i-tlb-* represent instruction cache, ignore */
+  /* i-cache-* and i-tlb-* represent instruction cache, ignore FIXME icache */
   uint32_t d_cache_line_size = 0, d_cache_size = 0, d_cache_sets = 0;
   struct hwloc_obj *c = NULL;
 
@@ -2335,6 +2335,7 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   c->attr->cache.depth = level;
   c->attr->cache.linesize = d_cache_line_size;
   c->attr->cache.size = d_cache_size;
+  c->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
   if (d_cache_sets == 1)
     /* likely wrong, make it unknown */
     d_cache_sets = 0;
@@ -2681,6 +2682,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	unsigned linesize = 0;
 	unsigned sets = 0, lines_per_tag = 1;
 	int depth; /* 0 for L1, .... */
+	hwloc_obj_cache_type_t type = HWLOC_OBJ_CACHE_UNIFIED; /* default */
 
 	/* get the cache level depth */
 	sprintf(mappath, "%s/cpu%d/cache/index%d/level", path, i, j);
@@ -2694,13 +2696,21 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
 	} else
 	  continue;
 
-	/* ignore Instruction caches */
+	/* cache type */
 	sprintf(mappath, "%s/cpu%d/cache/index%d/type", path, i, j);
 	fd = hwloc_fopen(mappath, "r", topology->backend_params.linuxfs.root_fd);
 	if (fd) {
 	  if (fgets(str2, sizeof(str2), fd)) {
 	    fclose(fd);
-	    if (!strncmp(str2, "Instruction", 11))
+	    if (!strncmp(str2, "Data", 4))
+	      type = HWLOC_OBJ_CACHE_DATA;
+	    else if (!strncmp(str2, "Unified", 7))
+	      type = HWLOC_OBJ_CACHE_UNIFIED;
+#if 0 /* FIXME */
+	    else if (!strncmp(str2, "Instruction", 11))
+	      type = HWLOC_OBJ_CACHE_INSTRUCTION;
+#endif
+	    else
 	      continue;
 	  } else {
 	    fclose(fd);
@@ -2765,6 +2775,7 @@ look_sysfscpu(struct hwloc_topology *topology, const char *path,
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
             cache->attr->cache.linesize = linesize;
+	    cache->attr->cache.type = type;
 	    if (!sets)
 	      cache->attr->cache.associativity = 0; /* unknown */
 	    else if (sets == 1)

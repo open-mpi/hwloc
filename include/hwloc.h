@@ -189,7 +189,7 @@ typedef enum {
 			  * In the physical meaning, i.e. that you can add
 			  * or remove physically.
 			  */
-  HWLOC_OBJ_CACHE,	/**< \brief Data cache.
+  HWLOC_OBJ_CACHE,	/**< \brief Cache.
 			  * Can be L1, L2, L3, ...
 			  */
   HWLOC_OBJ_CORE,	/**< \brief Core.
@@ -251,6 +251,13 @@ typedef enum {
        WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
        *************************************************************** */
 } hwloc_obj_type_t;
+
+/** \brief Cache type. */
+typedef enum hwloc_obj_cache_type_e {
+  HWLOC_OBJ_CACHE_UNIFIED,      /**< \brief Unified cache. */
+  HWLOC_OBJ_CACHE_DATA,         /**< \brief Data cache. */
+  HWLOC_OBJ_CACHE_INSTRUCTION   /**< \brief Instruction cache. */
+} hwloc_obj_cache_type_t;
 
 /** \brief Type of one side (upstream or downstream) of an I/O bridge. */
 typedef enum hwloc_obj_bridge_type_e {
@@ -478,6 +485,7 @@ union hwloc_obj_attr_u {
     unsigned linesize;			  /**< \brief Cache-line size in bytes */
     int associativity;			  /**< \brief Ways of associativity,
     					    *  -1 if fully associative, 0 if unknown */
+    hwloc_obj_cache_type_t type;          /**< \brief Cache type */
   } cache;
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {

@@ -434,6 +434,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
           cache->attr->cache.size = infos[i].cache[l].size;
           cache->attr->cache.linesize = infos[i].cache[l].linesize;
           cache->attr->cache.associativity = infos[i].cache[l].ways;
+	  cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* FIXME */
           cache->cpuset = cache_cpuset;
           hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
               level, cacheid, cache_cpuset);

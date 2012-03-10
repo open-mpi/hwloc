@@ -271,6 +271,11 @@ man3_types_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_SYSTEM.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_TYPE_MAX.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_t.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CACHE_UNIFIED.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CACHE_DATA.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CACHE_INSTRUCTION.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_cache_type_e.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_cache_type_t.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_BRIDGE_HOST.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_BRIDGE_PCI.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_bridge_type_e.3 \

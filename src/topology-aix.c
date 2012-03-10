@@ -481,6 +481,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj->attr->cache.associativity = _system_configuration.L2_cache_asc;
 	obj->attr->cache.linesize = 0; /* TODO: ? */
 	obj->attr->cache.depth = 2;
+	obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* FIXME? */
 	break;
       case HWLOC_OBJ_GROUP:
 	obj->attr->group.depth = level;
@@ -493,6 +494,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj2->attr->cache.associativity = _system_configuration.dcache_asc;
 	obj2->attr->cache.linesize = _system_configuration.dcache_line;
 	obj2->attr->cache.depth = 1;
+	obj2->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
 	hwloc_debug("Adding an L1 cache for core %d\n", i);
 	hwloc_insert_object_by_cpuset(topology, obj2);
 	break;

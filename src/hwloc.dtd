@@ -10,6 +10,7 @@
 <!ATTLIST object cache_size CDATA "0" >
 <!ATTLIST object cache_linesize CDATA "0" >
 <!ATTLIST object cache_associativity CDATA "0" >
+<!ATTLIST object cache_type CDATA "0" >
 <!ATTLIST object huge_page_size_kB CDATA "0" >
 <!ATTLIST object huge_page_free CDATA "0" >
 <!ATTLIST object depth CDATA "-1" >

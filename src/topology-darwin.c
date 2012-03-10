@@ -189,6 +189,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
               obj->attr->cache.associativity = cacheways[i-1];
             else
               obj->attr->cache.associativity = 0;
+	    obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* FIXME */
           } else {
             hwloc_debug_1arg_bitmap("node %u has cpuset %s\n",
                 j, obj->cpuset);

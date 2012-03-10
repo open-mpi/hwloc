@@ -547,6 +547,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    obj->attr->cache.associativity = procInfo[i].Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo[i].Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo[i].Cache.LineSize;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
+	    obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* FIXME */
 	    break;
 	  case HWLOC_OBJ_GROUP:
 	    obj->attr->group.depth = procInfo[i].Relationship == RelationGroup;
