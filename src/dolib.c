@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   version = argv[4];
   lib = argv[5];
 
-  if (sscanf(version, "%d:%d:%d", &current, &age, &revision) != 3)
+  if (sscanf(version, "%d:%d:%d", &current, &revision, &age) != 3)
     exit(EXIT_FAILURE);
 
   snprintf(name, sizeof(name), "libhwloc-%d", current - age);
