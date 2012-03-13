@@ -398,7 +398,7 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_CACHE:
     return hwloc_snprintf(string, size, "L%u%s%s", obj->attr->cache.depth,
-			  verbose ? hwloc_obj_cache_type_letter(obj->attr->cache.type) : "",
+			  hwloc_obj_cache_type_letter(obj->attr->cache.type),
 			  verbose ? hwloc_obj_type_string(type): "");
   case HWLOC_OBJ_GROUP:
 	  /* TODO: more pretty presentation? */
