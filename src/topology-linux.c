@@ -2307,6 +2307,37 @@ look_powerpc_device_tree_discover_cache(device_tree_cpus_t *cpus,
 }
 
 static void
+try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
+				    unsigned int level, hwloc_obj_cache_type_t type,
+				    uint32_t cache_line_size, uint32_t cache_size, uint32_t cache_sets,
+				    hwloc_bitmap_t cpuset)
+{
+  struct hwloc_obj *c = NULL;
+
+  if ( (0 == cache_line_size) && (0 == cache_size) )
+    return;
+
+  c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+  c->attr->cache.depth = level;
+  c->attr->cache.linesize = cache_line_size;
+  c->attr->cache.size = cache_size;
+  c->attr->cache.type = type;
+  if (cache_sets == 1)
+    /* likely wrong, make it unknown */
+    cache_sets = 0;
+  if (cache_sets)
+    c->attr->cache.associativity = cache_size / (cache_sets * cache_line_size);
+  else
+    c->attr->cache.associativity = 0;
+  c->cpuset = hwloc_bitmap_dup(cpuset);
+  hwloc_debug_2args_bitmap("cache (%s) depth %d has cpuset %s\n",
+			   type == HWLOC_OBJ_CACHE_UNIFIED ? "unified" : (type == HWLOC_OBJ_CACHE_DATA ? "data" : "instruction"),
+			   level, c->cpuset);
+  hwloc_insert_object_by_cpuset(topology, c);
+
+}
+
+static void
 try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   const char *cpu, unsigned int level, hwloc_bitmap_t cpuset)
 {
@@ -2320,7 +2351,6 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   /* d-tlb-size - ignore, always 0 on power6 */
   /* i-tlb-*, same */
   uint32_t d_cache_line_size = 0, d_cache_size = 0, d_cache_sets = 0;
-  struct hwloc_obj *c = NULL;
   char unified_path[1024];
   struct stat statbuf;
   int unified;
@@ -2335,24 +2365,8 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   hwloc_read_unit32be(cpu, "d-cache-sets", &d_cache_sets,
       topology->backend_params.linuxfs.root_fd);
 
-  if ( (0 == d_cache_line_size) && (0 == d_cache_size) )
-    return;
-
-  c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
-  c->attr->cache.depth = level;
-  c->attr->cache.linesize = d_cache_line_size;
-  c->attr->cache.size = d_cache_size;
-  c->attr->cache.type = unified ? HWLOC_OBJ_CACHE_UNIFIED : HWLOC_OBJ_CACHE_DATA;
-  if (d_cache_sets == 1)
-    /* likely wrong, make it unknown */
-    d_cache_sets = 0;
-  if (d_cache_sets)
-    c->attr->cache.associativity = d_cache_size / (d_cache_sets * d_cache_line_size);
-  else
-    c->attr->cache.associativity = 0;
-  c->cpuset = hwloc_bitmap_dup(cpuset);
-  hwloc_debug_2args_bitmap("cache (%s) depth %d has cpuset %s\n", unified ? "unified" : "data", level, c->cpuset);
-  hwloc_insert_object_by_cpuset(topology, c);
+  try__add_cache_from_device_tree_cpu(topology, level, unified ? HWLOC_OBJ_CACHE_UNIFIED : HWLOC_OBJ_CACHE_DATA,
+				      d_cache_line_size, d_cache_size, d_cache_sets, cpuset);
 }
 
 /* 
