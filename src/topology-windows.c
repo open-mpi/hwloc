@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -177,13 +177,15 @@ typedef struct _PSAPI_WORKING_SET_EX_INFORMATION {
 static int
 hwloc_win_set_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_thread_t thread, hwloc_const_bitmap_t hwloc_set, int flags)
 {
+  DWORD mask;
+
   if (flags & HWLOC_CPUBIND_NOMEMBIND) {
     errno = ENOSYS;
     return -1;
   }
   /* TODO: groups SetThreadGroupAffinity */
   /* The resulting binding is always strict */
-  DWORD mask = hwloc_bitmap_to_ulong(hwloc_set);
+  mask = hwloc_bitmap_to_ulong(hwloc_set);
   if (!SetThreadAffinityMask(thread, mask))
     return -1;
   return 0;
@@ -219,6 +221,7 @@ hwloc_win_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_nodeset_
 static int
 hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_pid_t proc, hwloc_const_bitmap_t hwloc_set, int flags)
 {
+  DWORD mask;
   if (flags & HWLOC_CPUBIND_NOMEMBIND) {
     errno = ENOSYS;
     return -1;
@@ -226,7 +229,7 @@ hwloc_win_set_proc_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, h
   /* TODO: groups, hard: has to manually bind all threads into the other group,
    * and the bind the process inside the group */
   /* The resulting binding is always strict */
-  DWORD mask = hwloc_bitmap_to_ulong(hwloc_set);
+  mask = hwloc_bitmap_to_ulong(hwloc_set);
   if (!SetProcessAffinityMask(proc, mask))
     return -1;
   return 0;
@@ -411,39 +414,48 @@ hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, c
 {
   SYSTEM_INFO SystemInfo;
   DWORD page_size;
+  uintptr_t start;
+  unsigned nb;
 
   GetSystemInfo(&SystemInfo);
   page_size = SystemInfo.dwPageSize;
 
-  uintptr_t start = (((uintptr_t) addr) / page_size) * page_size;
-  unsigned nb = (((uintptr_t) addr + len - start) + page_size - 1) / page_size;
+  start = (((uintptr_t) addr) / page_size) * page_size;
+  nb = (((uintptr_t) addr + len - start) + page_size - 1) / page_size;
 
   if (!nb)
     nb = 1;
 
   {
-    PSAPI_WORKING_SET_EX_INFORMATION pv[nb];
+    PSAPI_WORKING_SET_EX_INFORMATION *pv;
     unsigned i;
+
+    pv = calloc(nb, sizeof(*pv));
 
     for (i = 0; i < nb; i++)
       pv[i].VirtualAddress = (void*) (start + i * page_size);
-    if (!QueryWorkingSetExProc(GetCurrentProcess(), &pv, sizeof(pv)))
+    if (!QueryWorkingSetExProc(GetCurrentProcess(), pv, nb * sizeof(*pv))) {
+      free(pv);
       return -1;
+    }
     *policy = HWLOC_MEMBIND_BIND;
     if (flags & HWLOC_MEMBIND_STRICT) {
       unsigned node = pv[0].VirtualAttributes.Node;
       for (i = 1; i < nb; i++) {
 	if (pv[i].VirtualAttributes.Node != node) {
 	  errno = EXDEV;
+          free(pv);
 	  return -1;
 	}
       }
       hwloc_bitmap_only(nodeset, node);
+      free(pv);
       return 0;
     }
     hwloc_bitmap_zero(nodeset);
     for (i = 0; i < nb; i++)
       hwloc_bitmap_set(nodeset, pv[i].VirtualAttributes.Node);
+    free(pv);
     return 0;
   }
 }
