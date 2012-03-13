@@ -1914,11 +1914,12 @@ To understand how hwloc manages such cases, one should first remember
 the meaning of levels and cousin objects. All objects of the same type
 are gathered as horizontal levels with a given depth. They are also
 connected through the cousin pointers of the hwloc_obj structure.
-Some types, such as Caches or Groups, are usually annotated with a
-depth or level attribute (for instance L2 cache). In this case, this
-attribute is also taken in account when gathering objects as
-horizontal levels.  To be clear: there will be one level for L1
-caches, another level for L2 caches, etc.
+Some types, such as Caches or Groups, are annotated with a depth or
+level attribute (for instance L2 cache or Group1). Moreover caches
+have a type attribute (for instance L1i or L1d). Such
+attributes are also taken in account when gathering objects as
+horizontal levels.  To be clear: there will be one level for L1i
+caches, another level for L1d caches, another one for L2, etc.
 
 If the topology is asymmetric (e.g., if a cache is missing in one of
 the processors), a given horizontal level will still exist if there

@@ -190,7 +190,7 @@ typedef enum {
 			  * or remove physically.
 			  */
   HWLOC_OBJ_CACHE,	/**< \brief Cache.
-			  * Can be L1, L2, L3, ...
+			  * Can be L1i, L1d, L2, L3, ...
 			  */
   HWLOC_OBJ_CORE,	/**< \brief Core.
 			  * A computation unit (may be shared by several
@@ -1087,8 +1087,9 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * If type is absent but a similar type is acceptable, see also
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  *
- * If some objects of the given type exist in different levels, for instance
- * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ * If some objects of the given type exist in different levels,
+ * for instance L1 and L2 caches, or L1i and L1d caches,
+ * the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
  *
  * If an I/O object type is given, the function returns a virtual value
  * because I/O objects are stored in special levels that are not CPU-related.
@@ -1199,7 +1200,7 @@ HWLOC_DECLSPEC hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) _
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *
  * It differs from hwloc_obj_type_string() because it prints type attributes such
- * as cache depth.
+ * as cache depth and type.
  *
  * If \p size is 0, \p string may safely be \c NULL.
  *
