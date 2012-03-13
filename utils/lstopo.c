@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -289,9 +289,9 @@ enum output_format {
 static enum output_format
 parse_output_format(const char *name, char *callname)
 {
-  if (!strncasecmp(name, "default", 3))
+  if (!hwloc_strncasecmp(name, "default", 3))
     return LSTOPO_OUTPUT_DEFAULT;
-  else if (!strncasecmp(name, "console", 3))
+  else if (!hwloc_strncasecmp(name, "console", 3))
     return LSTOPO_OUTPUT_CONSOLE;
   else if (!strcasecmp(name, "synthetic"))
     return LSTOPO_OUTPUT_SYNTHETIC;
