@@ -89,10 +89,11 @@ hwloc_calc_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const
  * only looks at the beginning of the string to allow truncated type names.
  */
 static __hwloc_inline int
-hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthattrp)
+hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthattrp, hwloc_obj_cache_type_t *cachetypeattrp)
 {
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
   int depthattr = -1;
+  hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
 
   /* types without depthattr */
   if (!strncasecmp(string, "system", 2)) {
@@ -120,6 +121,10 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
   } else if ((string[0] == 'l' || string[0] == 'L') && string[1] >= '0' && string[1] <= '9') {
     type = HWLOC_OBJ_CACHE;
     depthattr = atoi(string+1);
+    if (string[2] == 'd')
+      cachetypeattr = HWLOC_OBJ_CACHE_DATA;
+    else if (string[2] == 'i')
+      cachetypeattr = HWLOC_OBJ_CACHE_INSTRUCTION;
   } else if (!hwloc_strncasecmp(string, "group", 1)) {
     int length;
     type = HWLOC_OBJ_GROUP;
@@ -132,12 +137,16 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
   *typep = type;
   if (depthattrp)
     *depthattrp = depthattr;
+  if (cachetypeattrp)
+    *cachetypeattrp = cachetypeattr;
 
   return 0;
 }
 
 static __hwloc_inline int
-hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type, int depthattr, int verbose)
+hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
+			 int depthattr, hwloc_obj_cache_type_t cachetype /* -1 if not specified */,
+			 int verbose)
 {
   int depth;
   int i;
@@ -163,19 +172,37 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type, int d
 
   } else {
     /* matched a type with a depth attribute, look at the first object of each level to find the depth */
-    assert(type == HWLOC_OBJ_CACHE || type == HWLOC_OBJ_GROUP);
-    for(i=0; ; i++) {
-      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
-      if (!obj) {
-	fprintf(stderr, "type %s with custom depth %d does not exists\n", hwloc_obj_type_string(type), depthattr);
+    if (type == HWLOC_OBJ_GROUP)
+      for(i=0; ; i++) {
+	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
+	if (!obj) {
+	  fprintf(stderr, "Group with custom depth %d does not exist\n",
+		  depthattr);
+	  return -1;
+	}
+	if (obj->type == type
+	    && (unsigned) depthattr == obj->attr->group.depth)
+	  return i;
+      }
+    else if (type == HWLOC_OBJ_CACHE)
+      for(i=0; ; i++) {
+	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
+	if (!obj) {
+	  fprintf(stderr, "Cache with custom depth %d and %s type does not exist\n",
+		  depthattr,
+		  cachetype == (hwloc_obj_cache_type_t) -1 ? "any" :
+		  (cachetype == HWLOC_OBJ_CACHE_UNIFIED ? "unified" :
+		   (cachetype == HWLOC_OBJ_CACHE_DATA ?  "data" : "instruction"))
+		  );
 	return -1;
       }
       if (obj->type == type
-	  && ((type == HWLOC_OBJ_CACHE && (unsigned) depthattr == obj->attr->cache.depth)
-	      || (type == HWLOC_OBJ_GROUP && (unsigned) depthattr == obj->attr->group.depth))) {
+	  && (unsigned) depthattr == obj->attr->cache.depth
+	  && (cachetype == (hwloc_obj_cache_type_t) -1 || cachetype == obj->attr->cache.type))
 	return i;
       }
-    }
+    else
+      assert(0);
   }
 
   /* cannot come here, we'll exit above first */
@@ -190,6 +217,7 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
 {
   char typestring[20+1]; /* large enough to store all type names, even with a depth attribute */
   hwloc_obj_type_t type;
+  hwloc_obj_cache_type_t cachetypeattr;
   int depthattr;
   int depth;
   char *end;
@@ -203,10 +231,10 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
   typestring[typelen] = '\0';
 
   /* try to match a type name */
-  err = hwloc_obj_type_sscanf(typestring, &type, &depthattr);
+  err = hwloc_obj_type_sscanf(typestring, &type, &depthattr, &cachetypeattr);
   if (!err) {
     *typep = type;
-    return hwloc_calc_depth_of_type(topology, type, depthattr, verbose);
+    return hwloc_calc_depth_of_type(topology, type, depthattr, cachetypeattr, verbose);
   }
 
   /* try to match a numeric depth */
