@@ -6,6 +6,6 @@ Machine (P#0 local=280840KB total=280840KB Backend=Linux)
       PU L#1 (P#1)
 depth 0:	1 Machine (type #1)
  depth 1:	1 Socket (type #3)
-  depth 2:	2 Cores (type #5)
-   depth 3:	2 PUs (type #6)
+  depth 2:	2 Core (type #5)
+   depth 3:	2 PU (type #6)
 Topology not from this system

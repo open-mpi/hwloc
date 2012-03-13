@@ -28,8 +28,8 @@ System (P#0 total=2032544KB Backend=Linux) "Kerrighed"
         PU L#14 (P#27)
         PU L#15 (P#31)
 depth 0:	1 System (type #0)
- depth 1:	2 Machines (type #1)
-  depth 2:	2 Sockets (type #3)
-   depth 3:	8 Cores (type #5)
-    depth 4:	16 PUs (type #6)
+ depth 1:	2 Machine (type #1)
+  depth 2:	2 Socket (type #3)
+   depth 3:	8 Core (type #5)
+    depth 4:	16 PU (type #6)
 Topology not from this system

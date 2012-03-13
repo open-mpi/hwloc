@@ -167,24 +167,26 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
   if (verbose_mode > 1 || !verbose_mode) {
     unsigned depth, nbobjs;
     for (depth = 0; depth < topodepth; depth++) {
-      hwloc_obj_type_t type = hwloc_get_depth_type (topology, depth);
+      hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, 0);
+      char type[64];
       nbobjs = hwloc_get_nbobjs_by_depth (topology, depth);
       indent(output, depth);
-      fprintf (output, "depth %u:\t%u %s%s (type #%u)\n",
-	       depth, nbobjs, hwloc_obj_type_string (type), nbobjs>1?"s":"", type);
+      hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
+      fprintf (output, "depth %u:\t%u %s (type #%u)\n",
+	       depth, nbobjs, type, obj->type);
     }
     nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_BRIDGE);
     if (nbobjs)
-      fprintf (output, "Special depth %d:\t%u %s%s (type #%u)\n",
-	       HWLOC_TYPE_DEPTH_BRIDGE, nbobjs, "Bridge", nbobjs>1?"s":"", HWLOC_OBJ_BRIDGE);
+      fprintf (output, "Special depth %d:\t%u %s (type #%u)\n",
+	       HWLOC_TYPE_DEPTH_BRIDGE, nbobjs, "Bridge", HWLOC_OBJ_BRIDGE);
     nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_PCI_DEVICE);
     if (nbobjs)
-      fprintf (output, "Special depth %d:\t%u %s%s (type #%u)\n",
-	       HWLOC_TYPE_DEPTH_PCI_DEVICE, nbobjs, "PCI Device", nbobjs>1?"s":"", HWLOC_OBJ_PCI_DEVICE);
+      fprintf (output, "Special depth %d:\t%u %s (type #%u)\n",
+	       HWLOC_TYPE_DEPTH_PCI_DEVICE, nbobjs, "PCI Device", HWLOC_OBJ_PCI_DEVICE);
     nbobjs = hwloc_get_nbobjs_by_depth (topology, HWLOC_TYPE_DEPTH_OS_DEVICE);
     if (nbobjs)
-      fprintf (output, "Special depth %d:\t%u %s%s (type #%u)\n",
-	       HWLOC_TYPE_DEPTH_OS_DEVICE, nbobjs, "OS Device", nbobjs>1?"s":"", HWLOC_OBJ_OS_DEVICE);
+      fprintf (output, "Special depth %d:\t%u %s (type #%u)\n",
+	       HWLOC_TYPE_DEPTH_OS_DEVICE, nbobjs, "OS Device", HWLOC_OBJ_OS_DEVICE);
   }
 
   if (verbose_mode > 1) {
