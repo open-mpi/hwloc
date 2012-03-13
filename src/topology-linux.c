@@ -2351,6 +2351,7 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   /* d-tlb-size - ignore, always 0 on power6 */
   /* i-tlb-*, same */
   uint32_t d_cache_line_size = 0, d_cache_size = 0, d_cache_sets = 0;
+  uint32_t i_cache_line_size = 0, i_cache_size = 0, i_cache_sets = 0;
   char unified_path[1024];
   struct stat statbuf;
   int unified;
@@ -2364,7 +2365,16 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
       topology->backend_params.linuxfs.root_fd);
   hwloc_read_unit32be(cpu, "d-cache-sets", &d_cache_sets,
       topology->backend_params.linuxfs.root_fd);
+  hwloc_read_unit32be(cpu, "i-cache-line-size", &i_cache_line_size,
+      topology->backend_params.linuxfs.root_fd);
+  hwloc_read_unit32be(cpu, "i-cache-size", &i_cache_size,
+      topology->backend_params.linuxfs.root_fd);
+  hwloc_read_unit32be(cpu, "i-cache-sets", &i_cache_sets,
+      topology->backend_params.linuxfs.root_fd);
 
+  if (!unified)
+    try__add_cache_from_device_tree_cpu(topology, level, HWLOC_OBJ_CACHE_INSTRUCTION,
+					i_cache_line_size, i_cache_size, i_cache_sets, cpuset);
   try__add_cache_from_device_tree_cpu(topology, level, unified ? HWLOC_OBJ_CACHE_UNIFIED : HWLOC_OBJ_CACHE_DATA,
 				      d_cache_line_size, d_cache_size, d_cache_sets, cpuset);
 }
