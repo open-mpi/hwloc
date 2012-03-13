@@ -1,5 +1,5 @@
 # Copyright © 2009-2011 inria.  All rights reserved.
-# Copyright © 2009-2011 Université Bordeaux 1
+# Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -717,12 +717,22 @@ endif
 #
 
 if HWLOC_BUILD_TESTS
-TESTS = hwloc-hello
+TESTS = hwloc-hello hwloc-hello-cpp
 check_PROGRAMS = $(TESTS)
 endif HWLOC_BUILD_TESTS
 
+hwloc-hello-cpp.cpp: $(srcdir)/hwloc-hello.c
+	cp -f $< $@
+
+clean-local:
+	rm -f hwloc-hello-cpp.cpp
+
 hwloc_hello_LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 hwloc_hello_DEPENDENCIES = $(hwloc_hello_LDADD)
+
+hwloc_hello_cpp_SOURCES = hwloc-hello-cpp.cpp
+hwloc_hello_cpp_LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
+hwloc_hello_cpp_DEPENDENCIES = $(hwloc_hello_LDADD)
 
 #
 # Only remove the actual generated documentation files for maintainers

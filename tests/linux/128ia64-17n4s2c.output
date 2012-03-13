@@ -337,10 +337,10 @@ Machine (P#0 total=1609512816KB Backend=Linux)
         PU L#127 (P#127)
   NUMANode L#16 (P#16 local=1020176KB total=1020176KB)
 depth 0:	1 Machine (type #1)
- depth 1:	17 NUMANodes (type #2)
-  depth 2:	64 Sockets (type #3)
-   depth 3:	128 Cores (type #5)
-    depth 4:	128 PUs (type #6)
+ depth 1:	17 NUMANode (type #2)
+  depth 2:	64 Socket (type #3)
+   depth 3:	128 Core (type #5)
+    depth 4:	128 PU (type #6)
 latency matrix between NUMANodes (depth 1) by logical indexes:
   index     0     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16
       0 1.000 1.700 1.700 1.700 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 2.000 1.400

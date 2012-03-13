@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -55,13 +55,13 @@ enum hwloc_utils_input_format {
 static __hwloc_inline enum hwloc_utils_input_format
 hwloc_utils_parse_input_format(const char *name, const char *callname)
 {
-  if (!strncasecmp(name, "default", 3))
+  if (!hwloc_strncasecmp(name, "default", 3))
     return HWLOC_UTILS_INPUT_DEFAULT;
-  else if (!strncasecmp(name, "xml", 1))
+  else if (!hwloc_strncasecmp(name, "xml", 1))
     return HWLOC_UTILS_INPUT_XML;
-  else if (!strncasecmp(name, "fsroot", 1))
+  else if (!hwloc_strncasecmp(name, "fsroot", 1))
     return HWLOC_UTILS_INPUT_FSROOT;
-  else if (!strncasecmp(name, "synthetic", 1))
+  else if (!hwloc_strncasecmp(name, "synthetic", 1))
     return HWLOC_UTILS_INPUT_SYNTHETIC;
 
   fprintf(stderr, "input format `%s' not supported\n", name);

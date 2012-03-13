@@ -150,31 +150,42 @@ else
     exit 1
 fi
 
-#
-# Do svn up and all that
-#
-echo "*** Removing old VERSION files..."
-find . -name VERSION -exec rm -f {} \; -print
+if test -d .svn ; then
+    #
+    # Do svn up and all that
+    #
+    echo "*** Removing old VERSION files..."
+    find . -name VERSION -exec rm -f {} \; -print
 
-echo "*** Running svn up..."
-svn up
-if test ! "$?" = "0"; then
-    echo "SVN update failed.  Aborting"
-    exit 1
-fi
+    echo "*** Running svn up..."
+    svn up
+    if test ! "$?" = "0"; then
+        echo "SVN update failed.  Aborting"
+        exit 1
+    fi
+else if test -d .git ; then
+    echo "*** Git reverting VERSION files..."
+    find . -name VERSION | xargs git diff | patch -p1 -R
+else
+    echo "*** Cannot revert VERSION files outside of svn/git"
+fi fi
 
 #
-# Ditch "svn" from all version numbers
+# Ditch "svn/git" from all version numbers
 #
 echo "*** Removing svn version numbers..."
-svn_r="r`svnversion .`"
+if test -d .svn ; then
+  rev="r`svnversion .`"
+else if test -d .git ; then
+  rev=git
+fi fi
 version_files="`find . -name VERSION`"
 release_date=`export LANG=; export LC_ALL=; export LC_TIME=; date '+%b %d, %Y'`
 for file in $version_files; do
     echo " - $file"
     sed -e 's/^want_repo_rev=.*/want_repo_rev=0/' \
         -e "s/^date=.*/date=\"$release_date\"/" \
-        -e 's/^repo_rev=.*/'repo_rev=$svn_r/ $file > $file.new
+        -e 's/^repo_rev=.*/'repo_rev=$rev/ $file > $file.new
     cp -f $file.new $file
     rm $file.new
 done
@@ -215,4 +226,13 @@ if test "$1" != "-greekonly" -a "$1" != "--greekonly"; then
 fi
 
 # Put the VERSION and README files back the way they were
-svn revert VERSION README
+if test -d .svn ; then
+    svn revert VERSION README
+else if test -d .git ; then
+    git diff VERSION README | patch -p1 -R
+else
+    echo "*** Cannot revert VERSION and README files changes ***"
+fi
+    echo
+    echo "*** Remember that these tarballs weren't generated from SVN ***"
+fi

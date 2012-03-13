@@ -85,7 +85,7 @@ AC_SUBST([libhwloc_so_version])
 # Setup the header file
 AH_TOP([/* -*- c -*-
  *
- * Copyright © 2009 CNRS, inria., Université Bordeaux 1  All rights reserved.
+ * Copyright © 2009, 2012 CNRS, inria., Université Bordeaux 1  All rights reserved.
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
  * 
@@ -108,6 +108,7 @@ AH_BOTTOM([
 
 CFLAGS_save="$CFLAGS"
 AC_PROG_CC
+AC_PROG_CXX
 AM_PROG_CC_C_O
 CFLAGS="$CFLAGS_save"
 

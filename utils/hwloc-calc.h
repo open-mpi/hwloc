@@ -96,7 +96,7 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
   hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
 
   /* types without depthattr */
-  if (!strncasecmp(string, "system", 2)) {
+  if (!hwloc_strncasecmp(string, "system", 2)) {
     type = HWLOC_OBJ_SYSTEM;
   } else if (!hwloc_strncasecmp(string, "machine", 2)) {
     type = HWLOC_OBJ_MACHINE;
@@ -571,7 +571,7 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
     int taskset = ( strchr(tmp, ',') == NULL );
 
     /* check the infinite prefix */
-    if (strncasecmp(tmp, "0xf...f,", 7+!taskset) == 0) {
+    if (hwloc_strncasecmp(tmp, "0xf...f,", 7+!taskset) == 0) {
       tmp += 7+!taskset;
       if (0 == *tmp) {
         err = -1;
@@ -581,7 +581,7 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 
     if (taskset) {
       /* check that the remaining is 0x followed by a huge hexadecimal number */
-      if (strncasecmp(tmp, "0x", 2) != 0) {
+      if (hwloc_strncasecmp(tmp, "0x", 2) != 0) {
         err = -1;
         goto out;
       }
@@ -600,7 +600,7 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
       while (1) {
 	char *next = strchr(tmp, ',');
 	size_t len;
-	if (strncasecmp(tmp, "0x", 2) == 0) {
+        if (hwloc_strncasecmp(tmp, "0x", 2) == 0) {
 	  tmp += 2;
 	  if (',' == *tmp || 0 == *tmp) {
 	    err = -1;

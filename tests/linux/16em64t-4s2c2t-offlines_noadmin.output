@@ -41,12 +41,12 @@ Machine (P#0 Backend=Linux) cpuset=0x00009fdb
           Core L#6 (P#0) cpuset=0x00000400
             PU L#11 (P#10) cpuset=0x00000400
 depth 0:	1 Machine (type #1)
- depth 1:	4 Sockets (type #3)
-  depth 2:	4 Caches (type #4)
-   depth 3:	7 Caches (type #4)
-    depth 4:	7 Caches (type #4)
-     depth 5:	7 Cores (type #5)
-      depth 6:	12 PUs (type #6)
+ depth 1:	4 Socket (type #3)
+  depth 2:	4 L3Cache (type #4)
+   depth 3:	7 L2Cache (type #4)
+    depth 4:	7 L1dCache (type #4)
+     depth 5:	7 Core (type #5)
+      depth 6:	12 PU (type #6)
 4 processors not represented in topology: 0x00006024
 4 processors offline: 0x00006024
 4 processors allowed but not online: 0x00006024

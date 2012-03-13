@@ -260,14 +260,14 @@ Machine (P#0 total=100661148KB DMIProductName=DRACHMA DMIProductVersion="Rev 2" 
               Core L#47 (P#5)
                 PU L#47 (P#47)
 depth 0:	1 Machine (type #1)
- depth 1:	4 Sockets (type #3)
-  depth 2:	8 NUMANodes (type #2)
-   depth 3:	8 Caches (type #4)
-    depth 4:	48 Caches (type #4)
-     depth 5:	48 Caches (type #4)
-      depth 6:	48 Caches (type #4)
-       depth 7:	48 Cores (type #5)
-        depth 8:	48 PUs (type #6)
+ depth 1:	4 Socket (type #3)
+  depth 2:	8 NUMANode (type #2)
+   depth 3:	8 L3Cache (type #4)
+    depth 4:	48 L2Cache (type #4)
+     depth 5:	48 L1dCache (type #4)
+      depth 6:	48 L1iCache (type #4)
+       depth 7:	48 Core (type #5)
+        depth 8:	48 PU (type #6)
 latency matrix between NUMANodes (depth 2) by logical indexes:
   index     0     1     2     3     4     5     6     7
       0 1.000 1.600 1.600 2.200 1.600 2.200 1.600 2.200
