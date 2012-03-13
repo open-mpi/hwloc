@@ -464,6 +464,9 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
     else if (obj1->attr->cache.type > obj2->attr->cache.type)
       /* consider icache deeper than dcache and dcache deeper than unified */
       return HWLOC_TYPE_DEEPER;
+    else if (obj1->attr->cache.type < obj2->attr->cache.type)
+      /* consider icache deeper than dcache and dcache deeper than unified */
+      return HWLOC_TYPE_HIGHER;
   }
 
   /* Group objects have the same types but can have different depths.  */
