@@ -247,7 +247,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-caches           Do not show caches\n");
   fprintf (where, "  --no-useless-caches   Do not show caches which do not have a hierarchical\n"
                   "                        impact\n");
-  fprintf (where, "  --icaches             Show instruction caches\n");
+  fprintf (where, "  --no-icaches          Do not show instruction caches\n");
   fprintf (where, "  --merge               Do not show levels that do not have a hierarchical\n"
                   "                        impact\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
@@ -325,7 +325,7 @@ main (int argc, char *argv[])
   int verbose_mode = LSTOPO_VERBOSE_MODE_DEFAULT;
   hwloc_topology_t topology;
   const char *filename = NULL;
-  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES | HWLOC_TOPOLOGY_FLAG_ICACHES;
   int merge = 0;
   int ignorecache = 0;
   char * callname;
@@ -402,8 +402,8 @@ main (int argc, char *argv[])
 	ignorecache = 2;
       else if (!strcmp (argv[1], "--no-useless-caches"))
 	ignorecache = 1;
-      else if (!strcmp (argv[1], "--icaches"))
-	flags |= HWLOC_TOPOLOGY_FLAG_ICACHES;
+      else if (!strcmp (argv[1], "--no-icaches"))
+	flags &= ~HWLOC_TOPOLOGY_FLAG_ICACHES;
       else if (!strcmp (argv[1], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
       else if (!strcmp (argv[1], "--no-io"))

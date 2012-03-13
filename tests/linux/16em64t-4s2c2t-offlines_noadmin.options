@@ -1,1 +1,1 @@
-- -v --whole-system --cpuset
+- -v --whole-system --cpuset --no-icaches
