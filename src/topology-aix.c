@@ -497,6 +497,8 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj2->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
 	hwloc_debug("Adding an L1 cache for core %d\n", i);
 	hwloc_insert_object_by_cpuset(topology, obj2);
+	/* FIXME _system_configuration.icache_size/asc/line for L1i,
+	 * or L1u if _system_configuration.cache_attrib & (1<<30) */
 	break;
       }
       default:
