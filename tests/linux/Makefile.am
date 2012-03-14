@@ -130,8 +130,7 @@ sysfs_options = \
 		16em64t-4s2c2t_ncaches.options \
 		16em64t-4s2c2t_merge.options \
 		16em64t-4s2c2t.xml.options \
-		32amd64-4s2n4c-cgroup.xml.options \
-		64amd64-4s2n4ca2co.options
+		32amd64-4s2n4c-cgroup.xml.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
 # modifying the environment of lsopo
