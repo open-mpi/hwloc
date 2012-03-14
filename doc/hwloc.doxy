@@ -1301,14 +1301,14 @@ To find out which machine a given object correspond too, one may look
 at the info attributes of the parent Machine object. The <tt>HostName</tt>
 info is usually available in Machine objects, it may be retrieved with the
 following code:
-<pre>
+\verbatim
   hwloc_obj_t machine_obj;
   obj = hwloc_get_ancestor_obj_by_type(topology, HWLOC_OBJ_MACHINE, obj);
   if (machine_obj)
     return hwloc_obj_get_info_by_name(machine_obj, "HostName");
   else
     return NULL;
-</pre>
+\endverbatim
 The hwloc assembler scripts (see below) also add <tt>AssemblerName</tt>
 and <tt>AssemblerIndex</tt> info attributes to the Machine objects to
 identify the corresponding host name and index during assembly.
@@ -1357,7 +1357,7 @@ If the topologies of two hosts have been previously gathered in XML
 files <tt>host1.xml</tt> and <tt>host2.xml</tt>, the global topology
 may be assembled with the following code.
 
-<pre>
+\verbatim
 hwloc_topology_t host1, host2, global;
 
 /* initialize global topology */
@@ -1381,11 +1381,11 @@ hwloc_topology_destroy(host2);
 /* load and play with the global topology */
 hwloc_topology_load(global);
 ...
-</pre>
+\endverbatim
 
 If a intermediate object such as a switch should be inserted
 above one of the host topologies:
-<pre>
+\verbatim
 ...
 /* insert a switch object below the global topology root */
 hwloc_obj_t sw =
@@ -1401,7 +1401,7 @@ hwloc_topology_destroy(host2);
 /* load and play with the global topology */
 hwloc_topology_load(global);
 ...
-</pre>
+\endverbatim
 
 
 
@@ -1968,9 +1968,9 @@ also be using libxml2 outside of hwloc).
 These unfreed variables cause leak reports in Valgrind.
 hwloc installs a Valgrind <em>suppressions</em> file to hide them.
 You should pass the following command-line option to Valgrind to use it:
-<pre>
+\verbatim
   --suppressions=/path/to/hwloc-valgrind.supp
-</pre>
+\endverbatim
 
 
 \section faq_upgrade How do I handle API upgrades?
