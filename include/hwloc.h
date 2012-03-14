@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1090,6 +1090,8 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * If some objects of the given type exist in different levels,
  * for instance L1 and L2 caches, or L1i and L1d caches,
  * the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ * See hwloc_get_cache_type_depth() in hwloc/helper.h to better handle this
+ * case.
  *
  * If an I/O object type is given, the function returns a virtual value
  * because I/O objects are stored in special levels that are not CPU-related.

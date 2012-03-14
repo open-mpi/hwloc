@@ -545,6 +545,7 @@ man3_helper_find_coverings_DATA = \
 man3_helper_find_cachedir = $(man3dir)
 man3_helper_find_cache_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_cache_type_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_covering_obj.3
 

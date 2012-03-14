@@ -362,6 +362,7 @@ extern "C" {
 #define hwloc_get_obj_covering_cpuset HWLOC_NAME(get_obj_covering_cpuset)
 #define hwloc_get_next_obj_covering_cpuset_by_depth HWLOC_NAME(get_next_obj_covering_cpuset_by_depth)
 #define hwloc_get_next_obj_covering_cpuset_by_type HWLOC_NAME(get_next_obj_covering_cpuset_by_type)
+#define hwloc_get_cache_type_depth HWLOC_NAME(get_cache_type_depth)
 #define hwloc_get_cache_covering_cpuset HWLOC_NAME(get_cache_covering_cpuset)
 #define hwloc_get_shared_cache_covering_obj HWLOC_NAME(get_shared_cache_covering_obj)
 #define hwloc_get_closest_objs HWLOC_NAME(get_closest_objs)

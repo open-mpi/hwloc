@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -577,6 +577,55 @@ hwloc_get_next_obj_covering_cpuset_by_type(hwloc_topology_t topology, hwloc_cons
 /** \defgroup hwlocality_helper_find_cache Cache-specific Finding Helpers
  * @{
  */
+
+/** \brief Find the depth of cache objects matching cache depth and type.
+ *
+ * Return the depth of the topology level that contains cache objects
+ * whose attributes match \p cachedepth and \p cachetype. This function
+ * intends to disambiguate the case where hwloc_get_type_depth() returns
+ * \p HWLOC_TYPE_DEPTH_MULTIPLE.
+ *
+ * If no cache level matches, \p HWLOC_TYPE_DEPTH_UNKNOWN is returned.
+ *
+ * If \p cachetype is \p HWLOC_OBJ_CACHE_UNIFIED, the depth of the
+ * unique matching unified cache level is returned.
+ *
+ * If \p cachetype is \p HWLOC_OBJ_CACHE_DATA or \p HWLOC_OBJ_CACHE_INSTRUCTION,
+ * either a matching cache, or a unified cache is returned.
+ *
+ * If \p cachetype is \c -1, it is ignored and multiple levels may
+ * match. The function returns either the depth of a uniquely matching
+ * level or \p HWLOC_TYPE_DEPTH_MULTIPLE.
+ */
+static __hwloc_inline int
+hwloc_get_cache_type_depth (hwloc_topology_t topology,
+			    unsigned cachelevel, hwloc_obj_cache_type_t cachetype)
+{
+  int depth;
+  int found = HWLOC_TYPE_DEPTH_UNKNOWN;
+  for (depth=0; ; depth++) {
+    hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, 0);
+    if (!obj)
+      break;
+    if (obj->type != HWLOC_OBJ_CACHE || obj->attr->cache.depth != cachelevel)
+      /* doesn't match, try next depth */
+      continue;
+    if (cachetype == (hwloc_obj_cache_type_t) -1) {
+      if (found != HWLOC_TYPE_DEPTH_UNKNOWN) {
+	/* second match, return MULTIPLE */
+        return HWLOC_TYPE_DEPTH_MULTIPLE;
+      }
+      /* first match, mark it as found */
+      found = depth;
+      continue;
+    }
+    if (obj->attr->cache.type == cachetype || obj->attr->cache.type == HWLOC_OBJ_CACHE_UNIFIED)
+      /* exact match (either unified is alone, or we match instruction or data), return immediately */
+      return depth;
+  }
+  /* went to the bottom, return what we found */
+  return found;
+}
 
 /** \brief Get the first cache covering a cpuset \p set
  *
