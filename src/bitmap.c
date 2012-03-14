@@ -319,7 +319,7 @@ int hwloc_bitmap_sscanf(struct hwloc_bitmap_s *set, const char * __hwloc_restric
   if (!strncmp("0xf...f", current, 7)) {
     current += 7;
     if (*current != ',') {
-      /* special case for infinite/full cpuset */
+      /* special case for infinite/full bitmap */
       hwloc_bitmap_fill(set);
       return 0;
     }
