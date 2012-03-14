@@ -729,8 +729,8 @@ enum hwloc_topology_flags_e {
 
   /* \brief Detect instruction caches.
    *
-   * This flag enables detection of all caches, except of only Data and
-   * Unified caches.
+   * This flag enables detection of Instruction caches,
+   * instead of only Data and Unified caches.
    */
   HWLOC_TOPOLOGY_FLAG_ICACHES = (1<<5)
 };
