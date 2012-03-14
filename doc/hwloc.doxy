@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1986,30 +1986,25 @@ Any application using the hwloc API should be prepared to check at
 compile-time whether some features are available in the currently
 installed hwloc distribution.
 
-To check whether hwloc is at least 1.2, you should use:
+To check whether the hwloc version is at least 1.5, you should use:
 \verbatim
 #include <hwloc.h>
-#if HWLOC_API_VERSION >= 0x00010200
+#if HWLOC_API_VERSION >= 0x00010500
 ...
 #endif
 \endverbatim
 
-One of the major changes in hwloc 1.1 was the addition of the bitmap
-API. It supersedes the now deprecated cpuset API which will be removed
-in a future hwloc release. It is strongly recommended to switch existing
-codes to the bitmap API. Keeping support for older hwloc versions is easy.
-For instance, if your code uses <tt>hwloc_cpuset_alloc</tt>, you should use
-<tt>hwloc_bitmap_alloc</tt> instead and add the following code to one of your
-common headers:
+One important change in hwloc 1.5 is the removal of the deprecated
+cpuset API, which was superseded by the new bitmap API since hwloc 1.1.
+If your code must work with very old hwloc releases, you should use
+the latest bitmap API anyway. Then, use something similar to the
+following code to support old cpuset-only hwloc versions:
 \verbatim
 #include <hwloc.h>
 #if HWLOC_API_VERSION < 0x00010100
 #define hwloc_bitmap_alloc hwloc_cpuset_alloc
 #endif
 \endverbatim
-
-Similarly, the hwloc 1.0 interface may be detected by comparing
-<tt>HWLOC_API_VERSION</tt> with <tt>0x00010000</tt>.
 
 hwloc 0.9 did not define any <tt>HWLOC_API_VERSION</tt> but this very old
 release probably does not deserve support from your application anymore.
