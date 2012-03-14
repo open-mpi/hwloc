@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -184,24 +184,14 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
 	    && (unsigned) depthattr == obj->attr->group.depth)
 	  return i;
       }
-    else if (type == HWLOC_OBJ_CACHE)
-      for(i=0; ; i++) {
-	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
-	if (!obj) {
-	  fprintf(stderr, "Cache with custom depth %d and %s type does not exist\n",
-		  depthattr,
-		  cachetype == (hwloc_obj_cache_type_t) -1 ? "any" :
-		  (cachetype == HWLOC_OBJ_CACHE_UNIFIED ? "unified" :
-		   (cachetype == HWLOC_OBJ_CACHE_DATA ?  "data" : "instruction"))
-		  );
-	return -1;
-      }
-      if (obj->type == type
-	  && (unsigned) depthattr == obj->attr->cache.depth
-	  && (cachetype == (hwloc_obj_cache_type_t) -1 || cachetype == obj->attr->cache.type))
-	return i;
-      }
-    else
+    else if (type == HWLOC_OBJ_CACHE) {
+      depth = hwloc_get_cache_type_depth(topology, depthattr, cachetype);
+      if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+	fprintf(stderr, "Cache with custom depth %d and type %d does not exist\n", depthattr, cachetype);
+      else if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+	fprintf(stderr, "Cache with custom depth %d and type %d has multiple possible depths\n", depthattr, cachetype);
+      return depth;
+    } else
       assert(0);
   }
 
