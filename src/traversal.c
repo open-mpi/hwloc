@@ -203,7 +203,7 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "Socket")) return HWLOC_OBJ_SOCKET;
   if (!strcasecmp(string, "Cache")) return HWLOC_OBJ_CACHE;
   if (!strcasecmp(string, "Core")) return HWLOC_OBJ_CORE;
-  if (!strcasecmp(string, "PU") || !strcasecmp(string, "proc") /* backward compatiliby with 0.9 */) return HWLOC_OBJ_PU;
+  if (!strcasecmp(string, "PU")) return HWLOC_OBJ_PU;
   if (!strcasecmp(string, "Bridge")) return HWLOC_OBJ_BRIDGE;
   if (!strcasecmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
   if (!strcasecmp(string, "OSDev")) return HWLOC_OBJ_OS_DEVICE;

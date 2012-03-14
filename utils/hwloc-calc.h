@@ -105,7 +105,7 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     type = HWLOC_OBJ_SOCKET;
   } else if (!hwloc_strncasecmp(string, "core", 2)) {
     type = HWLOC_OBJ_CORE;
-  } else if (!hwloc_strncasecmp(string, "pu", 2) || !hwloc_strncasecmp(string, "proc", 2) /* backward compat with 0.9 */) {
+  } else if (!hwloc_strncasecmp(string, "pu", 2)) {
     type = HWLOC_OBJ_PU;
   } else if (!hwloc_strncasecmp(string, "misc", 2)) {
     type = HWLOC_OBJ_MISC;

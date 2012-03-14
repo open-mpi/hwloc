@@ -33,6 +33,8 @@ Version 1.5.0
     compatibility wrappers are now gone.
   + Remove Linux libnuma conversion helpers for the deprecated and
     broken nodemask_t interface.
+* Misc
+  + Remove support for "Proc" type name, it was superseded by "PU" in v1.0.
 
 
 Version 1.4.1
