@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2011 inria.  All rights reserved.
+Copyright © 2009-2012 inria.  All rights reserved.
 Copyright © 2009-2012 Université Bordeaux 1
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -25,6 +25,12 @@ Version 1.5.0
     such as NUMA distances or PCI link speeds now always use a dot as a
     decimal separator.
 * API
+  + Increase HWLOC_API_VERSION to 0x00010500 so that API changes may be
+    detected at build-time.
+  + Remove the old cpuset interface (hwloc/cpuset.h) which is deprecated and
+    superseded by the bitmap API (hwloc/bitmap.h) since v1.1.
+    hwloc_cpuset and nodeset types are still defined, but all hwloc_cpuset_*
+    compatibility wrappers are now gone.
   + Remove Linux libnuma conversion helpers for the deprecated and
     broken nodemask_t interface.
 

@@ -62,7 +62,6 @@
  */
 
 #include <hwloc/bitmap.h>
-#include <hwloc/cpuset.h>
 
 
 #ifdef __cplusplus
