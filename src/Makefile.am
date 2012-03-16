@@ -28,7 +28,7 @@ sources = \
         topology-synthetic.c \
         topology-xml.c \
         bind.c \
-        cpuset.c \
+        bitmap.c \
         misc.c
 ldflags =
 

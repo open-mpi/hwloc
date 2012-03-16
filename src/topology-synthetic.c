@@ -57,7 +57,7 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *descri
 	type = HWLOC_OBJ_CORE;
       else if (!hwloc_namecoloncmp(pos, "caches", 2))
 	type = HWLOC_OBJ_CACHE;
-      else if (!hwloc_namecoloncmp(pos, "pus", 1) || !hwloc_namecoloncmp(pos, "procs", 1) /* backward compatiblity with 0.9 */)
+      else if (!hwloc_namecoloncmp(pos, "pus", 1))
 	type = HWLOC_OBJ_PU;
       else if (!hwloc_namecoloncmp(pos, "misc", 2))
 	type = HWLOC_OBJ_MISC;
