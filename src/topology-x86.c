@@ -207,13 +207,14 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
       cache->linesize = linesize = (ebx & 0xfff) + 1;
       cache->linepart = linepart = ((ebx >> 12) & 0x3ff) + 1;
+      ways = ((ebx >> 22) & 0x3ff) + 1;
       if (eax & (1 << 9))
         /* Fully associative */
         cache->ways = -1;
       else
-        cache->ways = ways = ((ebx >> 22) & 0x3ff) + 1;
+        cache->ways = ways;
       cache->sets = sets = ecx + 1;
-      cache->size = linesize * linepart * ways * sets; /* FIXME: what if ways == -1 ? */
+      cache->size = linesize * linepart * ways * sets;
 
       hwloc_debug("cache %u type %u L%u t%u c%u linesize %u linepart %u ways %u sets %u, size %uKB\n", cachenum, cache->type, cache->level, cache->nbthreads_sharing, infos->max_nbcores, linesize, linepart, ways, sets, cache->size >> 10);
       infos->max_nbthreads = infos->max_log_proc / infos->max_nbcores;
