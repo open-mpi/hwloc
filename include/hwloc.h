@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -188,8 +188,8 @@ typedef enum {
 			  * In the physical meaning, i.e. that you can add
 			  * or remove physically.
 			  */
-  HWLOC_OBJ_CACHE,	/**< \brief Data cache.
-			  * Can be L1, L2, L3, ...
+  HWLOC_OBJ_CACHE,	/**< \brief Cache.
+			  * Can be L1i, L1d, L2, L3, ...
 			  */
   HWLOC_OBJ_CORE,	/**< \brief Core.
 			  * A computation unit (may be shared by several
@@ -250,6 +250,14 @@ typedef enum {
        WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
        *************************************************************** */
 } hwloc_obj_type_t;
+
+/** \brief Cache type. */
+typedef enum hwloc_obj_cache_type_e {
+  HWLOC_OBJ_CACHE_UNIFIED,      /**< \brief Unified cache. */
+  HWLOC_OBJ_CACHE_DATA,         /**< \brief Data cache. */
+  HWLOC_OBJ_CACHE_INSTRUCTION   /**< \brief Instruction cache.
+				  * Only used when the HWLOC_TOPOLOGY_FLAG_ICACHES topology flag is set. */
+} hwloc_obj_cache_type_t;
 
 /** \brief Type of one side (upstream or downstream) of an I/O bridge. */
 typedef enum hwloc_obj_bridge_type_e {
@@ -477,6 +485,7 @@ union hwloc_obj_attr_u {
     unsigned linesize;			  /**< \brief Cache-line size in bytes */
     int associativity;			  /**< \brief Ways of associativity,
     					    *  -1 if fully associative, 0 if unknown */
+    hwloc_obj_cache_type_t type;          /**< \brief Cache type */
   } cache;
   /** \brief Group-specific Object Attributes */
   struct hwloc_group_attr_s {
@@ -715,7 +724,14 @@ enum hwloc_topology_flags_e {
    * and bridges (even those that have no device behind them) using the libpci
    * backend.
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<4)
+  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<4),
+
+  /* \brief Detect instruction caches.
+   *
+   * This flag enables detection of Instruction caches,
+   * instead of only Data and Unified caches.
+   */
+  HWLOC_TOPOLOGY_FLAG_ICACHES = (1<<5)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.
@@ -1070,8 +1086,11 @@ HWLOC_DECLSPEC unsigned hwloc_topology_get_depth(hwloc_topology_t __hwloc_restri
  * If type is absent but a similar type is acceptable, see also
  * hwloc_get_type_or_below_depth() and hwloc_get_type_or_above_depth().
  *
- * If some objects of the given type exist in different levels, for instance
- * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ * If some objects of the given type exist in different levels,
+ * for instance L1 and L2 caches, or L1i and L1d caches,
+ * the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ * See hwloc_get_cache_type_depth() in hwloc/helper.h to better handle this
+ * case.
  *
  * If an I/O object type is given, the function returns a virtual value
  * because I/O objects are stored in special levels that are not CPU-related.
@@ -1182,7 +1201,7 @@ HWLOC_DECLSPEC hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) _
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *
  * It differs from hwloc_obj_type_string() because it prints type attributes such
- * as cache depth.
+ * as cache depth and type.
  *
  * If \p size is 0, \p string may safely be \c NULL.
  *

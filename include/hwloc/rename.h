@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2011 inria.  All rights reserved.
+ * Copyright © 2010-2012 inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -62,6 +62,12 @@ extern "C" {
 #define HWLOC_OBJ_TYPE_MAX HWLOC_NAME_CAPS(OBJ_TYPE_MAX)
 #define hwloc_obj_type_t HWLOC_NAME(obj_type_t)
 
+#define hwloc_obj_cache_type_e HWLOC_NAME(obj_cache_type_e)
+#define hwloc_obj_cache_type_t HWLOC_NAME(obj_cache_type_t)
+#define HWLOC_OBJ_CACHE_UNIFIED HWLOC_NAME_CAPS(OBJ_CACHE_UNIFIED)
+#define HWLOC_OBJ_CACHE_DATA HWLOC_NAME_CAPS(OBJ_CACHE_DATA)
+#define HWLOC_OBJ_CACHE_INSTRUCTION HWLOC_NAME_CAPS(OBJ_CACHE_INSTRUCTION)
+
 #define hwloc_obj_bridge_type_e HWLOC_NAME(obj_bridge_type_e)
 #define hwloc_obj_bridge_type_t HWLOC_NAME(obj_bridge_type_t)
 #define HWLOC_OBJ_BRIDGE_HOST HWLOC_NAME_CAPS(OBJ_BRIDGE_HOST)
@@ -111,6 +117,7 @@ extern "C" {
 #define HWLOC_TOPOLOGY_FLAG_IO_DEVICES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IO_DEVICES)
 #define HWLOC_TOPOLOGY_FLAG_IO_BRIDGES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_IO_BRIDGES)
 #define HWLOC_TOPOLOGY_FLAG_WHOLE_IO HWLOC_NAME_CAPS(TOPOLOGY_FLAG_WHOLE_IO)
+#define HWLOC_TOPOLOGY_FLAG_ICACHES HWLOC_NAME_CAPS(TOPOLOGY_FLAG_ICACHES)
 
 #define hwloc_topology_set_flags HWLOC_NAME(topology_set_flags)
 #define hwloc_topology_set_fsroot HWLOC_NAME(topology_set_fsroot)
@@ -310,6 +317,7 @@ extern "C" {
 #define hwloc_get_obj_covering_cpuset HWLOC_NAME(get_obj_covering_cpuset)
 #define hwloc_get_next_obj_covering_cpuset_by_depth HWLOC_NAME(get_next_obj_covering_cpuset_by_depth)
 #define hwloc_get_next_obj_covering_cpuset_by_type HWLOC_NAME(get_next_obj_covering_cpuset_by_type)
+#define hwloc_get_cache_type_depth HWLOC_NAME(get_cache_type_depth)
 #define hwloc_get_cache_covering_cpuset HWLOC_NAME(get_cache_covering_cpuset)
 #define hwloc_get_shared_cache_covering_obj HWLOC_NAME(get_shared_cache_covering_obj)
 #define hwloc_get_closest_objs HWLOC_NAME(get_closest_objs)

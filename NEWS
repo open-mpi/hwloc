@@ -24,15 +24,28 @@ Version 1.5.0
   + XML topology files do not depend on the locale anymore. Float numbers
     such as NUMA distances or PCI link speeds now always use a dot as a
     decimal separator.
+  + Add instruction caches detection on Linux.
 * API
   + Increase HWLOC_API_VERSION to 0x00010500 so that API changes may be
     detected at build-time.
+  + Add a cache type attribute describind Data, Instruction and Unified
+    caches. Caches with different types but same depth (for instance L1d
+    and L1i) are placed on different levels.
+  + Add hwloc_get_cache_type_depth() to retrieve the hwloc level depth of
+    of the given cache depth and type, for instance L1i or L2.
+    It helps  disambiguating the case where hwloc_get_type_depth() returns
+    HWLOC_TYPE_DEPTH_MULTIPLE.
+  + Instruction caches are ignored unless HWLOC_TOPOLOGY_FLAG_ICACHES is
+    passed to hwloc_topology_set_flags() before load.
   + Remove the old cpuset interface (hwloc/cpuset.h) which is deprecated and
     superseded by the bitmap API (hwloc/bitmap.h) since v1.1.
     hwloc_cpuset and nodeset types are still defined, but all hwloc_cpuset_*
     compatibility wrappers are now gone.
   + Remove Linux libnuma conversion helpers for the deprecated and
     broken nodemask_t interface.
+* Tools
+  + Instruction caches are enabled in lstopo by default. User --no-icaches
+    to disable them.
 * Misc
   + Remove support for "Proc" type name, it was superseded by "PU" in v1.0.
 

@@ -1,4 +1,4 @@
-# Copyright © 2009-2010 inria.  All rights reserved.
+# Copyright © 2009-2012 inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -46,6 +46,7 @@ sysfs_outputs = \
 		16em64t-2m4c2t.output \
 		16ia64-8n2s.output \
 		48amd64-4d2n6c-sparse.output \
+		64amd64-4s2n4ca2co.output \
 		64fake-4n2s2ca2c2t.output \
 		96em64t-4n4d3ca2co.output \
 		96em64t-4n4d3ca2co-forcecpuinfo.output \
@@ -98,6 +99,7 @@ sysfs_tarballs = \
 		16em64t-4s2c2t.xml.source \
 		16ia64-8n2s.tar.bz2 \
 		48amd64-4d2n6c-sparse.tar.bz2 \
+		64amd64-4s2n4ca2co.tar.bz2 \
 		64fake-4n2s2ca2c2t.tar.bz2 \
 		96em64t-4n4d3ca2co.tar.bz2 \
 		96em64t-4n4d3ca2co-forcecpuinfo.source \

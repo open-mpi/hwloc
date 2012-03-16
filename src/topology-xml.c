@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -206,6 +206,19 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
       obj->attr->cache.associativity = lvalue;
     else if (hwloc__xml_verbose())
       fprintf(stderr, "ignoring cache_associativity attribute for non-cache object type\n");
+  }
+
+  else if (!strcmp(name, "cache_type")) {
+    unsigned long lvalue = strtoul(value, NULL, 10);
+    if (obj->type == HWLOC_OBJ_CACHE) {
+      if (lvalue == HWLOC_OBJ_CACHE_UNIFIED
+	  || lvalue == HWLOC_OBJ_CACHE_DATA
+	  || lvalue == HWLOC_OBJ_CACHE_INSTRUCTION)
+	obj->attr->cache.type = (hwloc_obj_cache_type_t) lvalue;
+      else
+	fprintf(stderr, "ignoring invalid cache_type attribute %ld\n", lvalue);
+    } else if (hwloc__xml_verbose())
+      fprintf(stderr, "ignoring cache_type attribute for non-cache object type\n");
   }
 
   else if (!strcmp(name, "local_memory"))
@@ -1241,6 +1254,8 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
     hwloc__xml_export_new_prop(output, "cache_linesize", tmp);
     sprintf(tmp, "%d", (unsigned) obj->attr->cache.associativity);
     hwloc__xml_export_new_prop(output, "cache_associativity", tmp);
+    sprintf(tmp, "%d", (unsigned) obj->attr->cache.type);
+    hwloc__xml_export_new_prop(output, "cache_type", tmp);
     break;
   case HWLOC_OBJ_GROUP:
     sprintf(tmp, "%u", obj->attr->group.depth);

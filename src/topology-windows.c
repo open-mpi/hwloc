@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -559,6 +559,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    obj->attr->cache.associativity = procInfo[i].Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo[i].Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo[i].Cache.LineSize;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
+	    obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* FIXME */
 	    break;
 	  case HWLOC_OBJ_GROUP:
 	    obj->attr->group.depth = procInfo[i].Relationship == RelationGroup;
