@@ -5,7 +5,9 @@ key computing elements, such as: NUMA memory nodes, shared caches, processor
 sockets, processor cores, processing units (logical processors or "threads")
 and even I/O devices. hwloc also gathers various attributes such as cache and
 memory information, and is portable across a variety of different operating
-systems and platforms.
+systems and platforms. Additionally it may assemble the topologies of multiple
+machines into a single one so as to let applications consult the topology of an
+entire fabric or cluster at once.
 
 hwloc primarily aims at helping high-performance computing (HPC) applications,
 but is also applicable to any project seeking to exploit code and/or data
@@ -716,5 +718,5 @@ Make sure to have had a look at those too!
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Oct 20 2011 10:28:29 for Hardware Locality (hwloc) by  doxygen
-1.7.4
+Generated on Fri Mar 16 2012 00:39:11 for Hardware Locality (hwloc) by   
+doxygen 1.7.6.1
