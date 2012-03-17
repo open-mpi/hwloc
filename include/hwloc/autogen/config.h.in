@@ -38,7 +38,7 @@
 #ifdef HWLOC_HAVE_ATTRIBUTE_UNUSED
 #define __HWLOC_HAVE_ATTRIBUTE_UNUSED HWLOC_HAVE_ATTRIBUTE_UNUSED 
 #elif defined(__GNUC__)
-# define __HWLOC_HAVE_ATTRIBUTE_UNUSED (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+# define __HWLOC_HAVE_ATTRIBUTE_UNUSED ((defined(__cplusplus) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR >= 4))) || (!defined(__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))))
 #else
 # define __HWLOC_HAVE_ATTRIBUTE_UNUSED 0
 #endif
@@ -51,7 +51,7 @@
 #ifdef HWLOC_HAVE_ATTRIBUTE_MALLOC
 #define __HWLOC_HAVE_ATTRIBUTE_MALLOC HWLOC_HAVE_ATTRIBUTE_MALLOC 
 #elif defined(__GNUC__)
-# define __HWLOC_HAVE_ATTRIBUTE_MALLOC (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
+# define __HWLOC_HAVE_ATTRIBUTE_MALLOC ((defined(__cplusplus) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR >= 4))) || (!defined(__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))))
 #else
 # define __HWLOC_HAVE_ATTRIBUTE_MALLOC 0
 #endif
@@ -64,7 +64,7 @@
 #ifdef HWLOC_HAVE_ATTRIBUTE_CONST
 #define __HWLOC_HAVE_ATTRIBUTE_CONST HWLOC_HAVE_ATTRIBUTE_CONST 
 #elif defined(__GNUC__)
-# define __HWLOC_HAVE_ATTRIBUTE_CONST (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+# define __HWLOC_HAVE_ATTRIBUTE_CONST ((defined(__cplusplus) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR >= 4))) || (!defined(__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))))
 #else
 # define __HWLOC_HAVE_ATTRIBUTE_CONST 0
 #endif
@@ -77,7 +77,7 @@
 #ifdef HWLOC_HAVE_ATTRIBUTE_PURE
 #define __HWLOC_HAVE_ATTRIBUTE_PURE HWLOC_HAVE_ATTRIBUTE_PURE 
 #elif defined(__GNUC__)
-# define __HWLOC_HAVE_ATTRIBUTE_PURE (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))
+# define __HWLOC_HAVE_ATTRIBUTE_PURE ((defined(__cplusplus) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR >= 4))) || (!defined(__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96))))
 #else
 # define __HWLOC_HAVE_ATTRIBUTE_PURE 0
 #endif
@@ -90,7 +90,7 @@
 #ifdef HWLOC_HAVE_ATTRIBUTE_DEPRECATED
 #define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED HWLOC_HAVE_ATTRIBUTE_DEPRECATED 
 #elif defined(__GNUC__)
-# define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 3))
+# define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED ((defined(__cplusplus) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR >= 4))) || (!defined(__cplusplus) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 3))))
 #else
 # define __HWLOC_HAVE_ATTRIBUTE_DEPRECATED 0
 #endif
