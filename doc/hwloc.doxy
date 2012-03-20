@@ -1080,7 +1080,7 @@ hwloc's API functions regarding CPU and memory binding, respectively.
 
 \page iodevices I/O Devices
 
-hwloc usually manipulates processing units and memory but it can actually
+hwloc usually manipulates processing units and memory but it can also
 discover I/O devices and report their locality as well.
 This is useful for placing I/O intensive applications on cores near the
 I/O devices they use.
