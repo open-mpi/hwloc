@@ -25,6 +25,7 @@
 #include <hwloc/linux.h>
 #include <dirent.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #endif
 
 #define CONFIG_SPACE_CACHESIZE 256
@@ -123,6 +124,7 @@ static void
 hwloc_linux_net_class_fillinfos(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, const char *osdevpath)
 {
   FILE *fd;
+  struct stat st;
   char path[256];
   snprintf(path, sizeof(path), "%s/address", osdevpath);
   fd = fopen(path, "r");
@@ -135,6 +137,25 @@ hwloc_linux_net_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
       hwloc_obj_add_info(obj, "Address", address);
     }
     fclose(fd);
+  }
+  snprintf(path, sizeof(path), "%s/device/infiniband", osdevpath);
+  if (!stat(path, &st)) {
+    snprintf(path, sizeof(path), "%s/dev_id", osdevpath);
+    fd = fopen(path, "r");
+    if (fd) {
+      char hexid[16];
+      if (fgets(hexid, sizeof(hexid), fd)) {
+	char *eoid;
+	unsigned long port;
+	port = strtoul(hexid, &eoid, 0);
+	if (eoid != hexid) {
+	  char portstr[16];
+	  snprintf(portstr, sizeof(portstr), "%ld", port+1);
+	  hwloc_obj_add_info(obj, "Port", portstr);
+	}
+      }
+      fclose(fd);
+    }
   }
 }
 static void
