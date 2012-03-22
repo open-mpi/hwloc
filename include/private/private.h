@@ -370,4 +370,8 @@ extern void hwloc_clear_object_distances(struct hwloc_obj *obj);
 extern void hwloc_clear_object_distances_one(struct hwloc_distances_s *distances);
 extern void hwloc_group_by_distances(struct hwloc_topology *topology);
 
+#if !HAVE_DECL_FABSF
+#define fabsf(f) fabs((double)(f))
+#endif
+
 #endif /* HWLOC_PRIVATE_H */
