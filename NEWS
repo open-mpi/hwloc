@@ -21,6 +21,10 @@ Version 1.4.2
 -------------
 * Fix build on Solaris 9 and earlier when fabsf() is not a compiler
   built-in. Thanks to Thanks to Igor Galić for reporting the problem.
+* Make installed scripts executable. Thanks to Jirka Hladky for reporting
+  the problem.
+* Fix libtool revision management when building for Windows.
+
 
 
 Version 1.4.1
