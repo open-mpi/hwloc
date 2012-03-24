@@ -20,10 +20,12 @@ in v0.9.1).
 Version 1.4.2
 -------------
 * Fix build on Solaris 9 and earlier when fabsf() is not a compiler
-  built-in. Thanks to Thanks to Igor Galić for reporting the problem.
+  built-in. Thanks to Igor Galić for reporting the problem.
 * Make installed scripts executable. Thanks to Jirka Hladky for reporting
   the problem.
-* Fix libtool revision management when building for Windows.
+* Fix libtool revision management when building for Windows. This fix was
+  also released as hwloc v1.4.1.1 Windows builds. Thanks to Hartmut Kaiser
+  for reporting the problem.
 
 
 
