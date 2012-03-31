@@ -448,14 +448,14 @@ static __hwloc_inline int
 hwloc_get_obj_index_inside_cpuset (hwloc_topology_t topology __hwloc_attribute_unused, hwloc_const_cpuset_t set,
 				   hwloc_obj_t obj)
 {
-  int index = 0;
+  int idx = 0;
   if (!hwloc_bitmap_isincluded(obj->cpuset, set))
     return -1;
   /* count how many objects are inside the cpuset on the way from us to the beginning of the level */
   while ((obj = obj->prev_cousin) != NULL)
     if (hwloc_bitmap_isincluded(obj->cpuset, set))
-      index++;
-  return index;
+      idx++;
+  return idx;
 }
 
 /** @} */
