@@ -322,7 +322,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       if (infos[one].otherids[level] != UINT_MAX) {
 	hwloc_bitmap_t unknowns_cpuset = hwloc_bitmap_dup(complete_cpuset);
 	hwloc_bitmap_t unknown_cpuset;
-	hwloc_obj_t unknown;
+	hwloc_obj_t unknown_obj;
 
 	while ((i = hwloc_bitmap_first(unknowns_cpuset)) != (unsigned) -1) {
 	  unsigned unknownid = infos[i].otherids[level];
@@ -334,12 +334,12 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 	      hwloc_bitmap_clr(unknowns_cpuset, j);
 	    }
 	  }
-	  unknown = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, unknownid);
-	  unknown->cpuset = unknown_cpuset;
-	  unknown->os_level = level;
+	  unknown_obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, unknownid);
+	  unknown_obj->cpuset = unknown_cpuset;
+	  unknown_obj->os_level = level;
 	  hwloc_debug_2args_bitmap("os unknown%d %u has cpuset %s\n",
 	      level, unknownid, unknown_cpuset);
-	  hwloc_insert_object_by_cpuset(topology, unknown);
+	  hwloc_insert_object_by_cpuset(topology, unknown_obj);
 	}
 	hwloc_bitmap_free(unknowns_cpuset);
       }
