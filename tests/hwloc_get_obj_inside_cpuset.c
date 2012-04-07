@@ -22,7 +22,7 @@ main (void)
 {
   hwloc_topology_t topology;
   hwloc_obj_t obj, root;
-  int err, index;
+  int err, idx;
 
   err = hwloc_topology_init (&topology);
   if (err)
@@ -71,22 +71,22 @@ main (void)
   root = hwloc_get_obj_by_depth(topology, 2, 1);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_PU, 0);
   assert(obj == hwloc_get_obj_by_depth(topology, 5, 4*5*6));
-  index = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
-  assert(index == 0);
+  idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
+  assert(idx == 0);
 
   /* check third core of third socket */
   root = hwloc_get_obj_by_depth(topology, 2, 2);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_CORE, 2);
   assert(obj == hwloc_get_obj_by_depth(topology, 4, 2*4*5+2));
-  index = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
-  assert(index == 2);
+  idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
+  assert(idx == 2);
 
   /* check first socket of second node */
   root = hwloc_get_obj_by_depth(topology, 1, 1);
   obj = hwloc_get_obj_inside_cpuset_by_type(topology, root->cpuset, HWLOC_OBJ_SOCKET, 0);
   assert(obj == hwloc_get_obj_by_depth(topology, 2, 3));
-  index = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
-  assert(index == 0);
+  idx = hwloc_get_obj_index_inside_cpuset(topology, root->cpuset, obj);
+  assert(idx == 0);
 
   /* there is no node inside sockets */
   root = hwloc_get_obj_by_depth(topology, 2, 0);
