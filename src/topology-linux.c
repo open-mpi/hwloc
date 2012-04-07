@@ -3166,6 +3166,17 @@ hwloc__get_dmi_info(struct hwloc_topology *topology, hwloc_obj_t obj)
   hwloc__get_dmi_one_info(topology, obj, "sys_vendor", "DMISysVendor");
 }
 
+static void
+hwloc_linux_fallback_pu_level(struct hwloc_topology *topology)
+{
+  if (topology->is_thissystem)
+    hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
+  else
+    /* fsys-root but not this system, no way, assume there's just 1
+     * processor :/ */
+    hwloc_setup_pu_level(topology, 1);
+}
+
 void
 hwloc_look_linuxfs(struct hwloc_topology *topology)
 {
@@ -3256,21 +3267,18 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
 	/* revert to reading cpuinfo only if /sys/.../topology unavailable (before 2.6.16)
 	 * or not containing anything interesting */
       err = look_cpuinfo(topology, "/proc/cpuinfo", topology->levels[0][0]->online_cpuset);
-      if (err < 0) {
-        if (topology->is_thissystem)
-          hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
-        else
-          /* fsys-root but not this system, no way, assume there's just 1
-           * processor :/ */
-          hwloc_setup_pu_level(topology, 1);
-      }
+      if (err < 0)
+	hwloc_linux_fallback_pu_level(topology);
+
     } else {
       struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
       int numprocs = hwloc_linux_parse_cpuinfo(topology, "/proc/cpuinfo", &Lprocs);
       if (numprocs <= 0)
 	Lprocs = NULL;
       if (look_sysfscpu(topology, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
-        look_sysfscpu(topology, "/sys/devices/system/cpu", Lprocs, numprocs);
+        if (look_sysfscpu(topology, "/sys/devices/system/cpu", Lprocs, numprocs) < 0)
+	  /* sysfs but we failed to read cpu topology, fallback */
+	  hwloc_linux_fallback_pu_level(topology);
       if (Lprocs)
 	hwloc_linux_free_cpuinfo(Lprocs, numprocs);
     }
