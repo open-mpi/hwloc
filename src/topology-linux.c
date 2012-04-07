@@ -3310,7 +3310,15 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
       if (numprocs <= 0)
 	Lprocs = NULL;
       if (look_sysfscpu(topology, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
-        look_sysfscpu(topology, "/sys/devices/system/cpu", Lprocs, numprocs);
+        if (look_sysfscpu(topology, "/sys/devices/system/cpu", Lprocs, numprocs) < 0) {
+	  /* sysfs but we failed to read cpu topology, fallback */
+          if (topology->is_thissystem)
+            hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
+          else
+            /* fsys-root but not this system, no way, assume there's just 1
+             * processor :/ */
+            hwloc_setup_pu_level(topology, 1);
+        }
       if (Lprocs)
 	hwloc_linux_free_cpuinfo(Lprocs, numprocs);
     }
