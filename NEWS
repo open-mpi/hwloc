@@ -37,6 +37,8 @@ Version 1.5.0
     HWLOC_TYPE_DEPTH_MULTIPLE.
   + Instruction caches are ignored unless HWLOC_TOPOLOGY_FLAG_ICACHES is
     passed to hwloc_topology_set_flags() before load.
+  + Add more OpenFabrics helpers in openfabrics-verbs.h to find hwloc objects
+    corresponding to OpenFabrics devices.
   + Remove the old cpuset interface (hwloc/cpuset.h) which is deprecated and
     superseded by the bitmap API (hwloc/bitmap.h) since v1.1.
     hwloc_cpuset and nodeset types are still defined, but all hwloc_cpuset_*

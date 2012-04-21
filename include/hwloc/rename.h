@@ -368,6 +368,8 @@ extern "C" {
 /* openfabrics-verbs.h */
 
 #define hwloc_ibv_get_device_cpuset HWLOC_NAME(ibv_get_device_cpuset)
+#define hwloc_ibv_get_device_osdev HWLOC_NAME(ibv_get_device_osdev)
+#define hwloc_ibv_get_device_pcidev HWLOC_NAME(ibv_get_device_pcidev)
 
 /* myriexpress.h */
 

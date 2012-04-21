@@ -72,6 +72,40 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
   return 0;
 }
 
+/** \brief Get the hwloc OS device object corresponding to the OpenFabrics
+ * device \p ibdev.
+ *
+ * For the given OpenFabrics device \p ibdev, return the hwloc OS
+ * device object describing the device. Returns NULL if there is none.
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_ibv_get_device_osdev(hwloc_topology_t topology,
+			   struct ibv_device *ibdev)
+{
+	const char *name = ibv_get_device_name(ibdev);
+	hwloc_obj_t osdev = NULL;
+	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
+		if (HWLOC_OBJ_OSDEV_OPENFABRICS == osdev->attr->osdev.type
+		    && osdev->name && !strcmp(name, osdev->name))
+			return osdev;
+	}
+	return NULL;
+}
+
+/** \brief Get the hwloc PCI device object corresponding to the OpenFabrics
+ * device \p ibdev.
+ *
+ * For the given OpenFabrics device \p ibdev, return the hwloc PCI
+ * object containing the device. Returns NULL if there is none.
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_ibv_get_device_pcidev(hwloc_topology_t topology,
+			    struct ibv_device *ibdev)
+{
+	hwloc_obj_t osdev = hwloc_ibv_get_device_osdev(topology, ibdev);
+	return osdev ? osdev->parent : NULL;
+}
+
 /** @} */
 
 
