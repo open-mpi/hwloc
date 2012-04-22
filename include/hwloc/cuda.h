@@ -108,6 +108,8 @@ hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
  *
  * For the given CUDA Runtime API device \p cudevice, return the hwloc PCI
  * object containing the device. Returns NULL if there is none.
+ *
+ * IO devices detection must be enabled in topology \p topology.
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_cuda_get_device_pcidev(hwloc_topology_t topology, CUdevice cudevice)
