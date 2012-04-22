@@ -1482,6 +1482,12 @@ application uses or otherwise depends on such a library, it may
 optionally include the corresponding hwloc helper to extend the hwloc
 interface with dedicated helpers.
 
+Most of these helpers use structures that are specific to these external
+libraries and only meaningful on the local machine. If so, the helper
+requires the input topology to match the current machine.
+Some helpers also require I/O device discovery to be supported and
+enabled for the current topology.
+
 <dl>
 
 <dt>Linux specific features</dt>

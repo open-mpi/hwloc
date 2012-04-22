@@ -51,6 +51,9 @@ Version 1.5.0
     to disable them.
 * Misc
   + Remove support for "Proc" type name, it was superseded by "PU" in v1.0.
+  + Document requirements for interoperability helpers: I/O devices discovery
+    is required for some of them; the topology must match the current host
+    for most of them.
 
 
 Version 1.4.1

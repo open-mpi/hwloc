@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010 inria.  All rights reserved.
+ * Copyright © 2010-2012 inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -36,12 +36,19 @@ extern "C" {
  *
  * For the given Myrinet Express board index \p id, read the
  * OS-provided NUMA node and return the corresponding CPU set.
+ *
+ * Topology \p topology must match the current machine.
  */
 static __hwloc_inline int
 hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
 				 unsigned id, hwloc_cpuset_t set)
 {
   uint32_t in, out;
+
+  if (!hwloc_topology_is_thissystem(topology)) {
+    errno = EINVAL;
+    return -1;
+  }
 
   in = id;
   if (mx_get_info(NULL, MX_NUMA_NODE, &in, sizeof(in), &out, sizeof(out)) != MX_SUCCESS) {
@@ -69,6 +76,8 @@ hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
  *
  * For the given Myrinet Express endpoint \p endpoint, read the
  * OS-provided NUMA node and return the corresponding CPU set.
+ *
+ * Topology \p topology must match the current machine.
  */
 static __hwloc_inline int
 hwloc_mx_endpoint_get_device_cpuset(hwloc_topology_t topology,

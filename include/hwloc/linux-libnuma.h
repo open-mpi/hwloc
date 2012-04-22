@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2012 inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
@@ -14,6 +14,8 @@
  * This helper also offers a consistent behavior on non-NUMA machines
  * or non-NUMA-aware kernels by assuming that the machines have a single
  * NUMA node.
+ *
+ * \note Topology \p topology must match the current machine.
  *
  * \note The behavior of libnuma is undefined if the kernel is not NUMA-aware.
  * (when CONFIG_NUMA is not set in the kernel configuration).
