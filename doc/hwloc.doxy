@@ -915,7 +915,8 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_THISSYSTEM=1</dt>
-  <dd>enforces the return value of hwloc_topology_is_thissystem().
+  <dd>enforces the return value of hwloc_topology_is_thissystem(), as if
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM was set with hwloc_topology_set_flags().
   It means that it makes hwloc assume that the selected backend provides the
   topology for the system on which we are running, even if it is not the
   OS-specific backend but the XML backend for instance.
@@ -1423,6 +1424,12 @@ and hwloc_topology_set_xmlbuffer().
 The XMLFILE environment variable also tells hwloc to load the topology
 from the given XML file.
 
+\note Loading XML topologies disables binding because the loaded
+topology may not correspond to the physical machine that loads it.
+This behavior may be reverted by asserting that loaded file really
+matches the underlying system with the HWLOC_THISSYSTEM environment
+variable or the HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM topology flag.
+
 \note XML topology files are not localized. They use a dot as a
 decimal separator. Therefore any exported topology can be
 reloaded on any other machine without requiring to change the
@@ -1800,6 +1807,9 @@ Thus rediscovering the whole topology again and again may look useless.
 For this purpose, hwloc offers XML import/export features. It lets you
 save the discovered topology to a file (for instance with the lstopo program)
 and reload it later by setting the HWLOC_XMLFILE environment variable.
+The HWLOC_THISSYSTEM environment variable should also be set to 1 to
+assert that loaded file is really the underlying system.
+
 Loading a XML topology is usually much faster than querying multiple
 files or calling multiple functions of the operating system.
 It is also possible to manipulate such XML files with the C programming
