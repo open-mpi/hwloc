@@ -654,7 +654,7 @@ man3_openfabricsdir = $(man3dir)
 man3_openfabrics_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_openfabrics.3 \
         $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_osdev.3
+        $(DOX_MAN_DIR)/man3/hwloc_ibv_name_get_device_osdev.3
 
 # end of manpages(3) if HWLOC_BUILD_DOXYGEN
 endif
