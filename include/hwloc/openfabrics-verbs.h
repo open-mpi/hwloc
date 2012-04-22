@@ -77,6 +77,9 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
  *
  * For the given OpenFabrics device \p ibdev, return the hwloc OS
  * device object describing the device. Returns NULL if there is none.
+ *
+ * \note The corresponding PCI device object can be obtained by looking
+ * at the OS device parent object.
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_ibv_get_device_osdev(hwloc_topology_t topology,
@@ -90,20 +93,6 @@ hwloc_ibv_get_device_osdev(hwloc_topology_t topology,
 			return osdev;
 	}
 	return NULL;
-}
-
-/** \brief Get the hwloc PCI device object corresponding to the OpenFabrics
- * device \p ibdev.
- *
- * For the given OpenFabrics device \p ibdev, return the hwloc PCI
- * object containing the device. Returns NULL if there is none.
- */
-static __hwloc_inline hwloc_obj_t
-hwloc_ibv_get_device_pcidev(hwloc_topology_t topology,
-			    struct ibv_device *ibdev)
-{
-	hwloc_obj_t osdev = hwloc_ibv_get_device_osdev(topology, ibdev);
-	return osdev ? osdev->parent : NULL;
 }
 
 /** @} */
