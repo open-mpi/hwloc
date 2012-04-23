@@ -177,9 +177,6 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       type = eax & 0x1f;
       if (type == 0)
 	break;
-      if (type == 2)
-	/* TODO: Instruction cache */
-	continue;
       infos->numcaches++;
 
       cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
@@ -196,9 +193,6 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
       if (type == 0)
 	break;
-      if (type == 2)
-	/* TODO: Instruction cache */
-	continue;
 
       cache->type = type;
       cache->level = (eax >> 5) & 0x7;
@@ -252,9 +246,6 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
       if (type == 0)
 	break;
-      if (type == 2)
-	/* TODO: Instruction cache */
-	continue;
       infos->numcaches++;
     }
 
@@ -271,12 +262,8 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
       if (type == 0)
 	break;
-      if (type == 2)
-	/* TODO: Instruction cache */
-	continue;
 
       cache->type = type;
-
       cache->level = (eax >> 5) & 0x7;
       cache->nbthreads_sharing = ((eax >> 14) & 0xfff) + 1;
       infos->max_nbcores = ((eax >> 26) & 0x3f) + 1;
@@ -355,7 +342,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigned nbprocs)
 {
   hwloc_bitmap_t complete_cpuset = hwloc_bitmap_alloc();
-  unsigned i, j, l, level;
+  unsigned i, j, l, level, type;
   int one = -1;
 
   for (i = 0; i < nbprocs; i++)
@@ -538,59 +525,73 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       if (infos[i].cache[j].level > level)
         level = infos[i].cache[j].level;
 
+  /* Look for known types */
   while (level > 0) {
-    /* Look for caches at level level */
-    {
-      hwloc_bitmap_t caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
-      hwloc_bitmap_t cache_cpuset;
-      hwloc_obj_t cache;
+    for (type = 1; type <= 3; type++) {
+      /* Look for caches of that type at level level */
+      {
+	hwloc_bitmap_t caches_cpuset = hwloc_bitmap_dup(complete_cpuset);
+	hwloc_bitmap_t cache_cpuset;
+	hwloc_obj_t cache;
 
-      while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
-        unsigned socketid = infos[i].socketid;
+	while ((i = hwloc_bitmap_first(caches_cpuset)) != (unsigned) -1) {
+	  unsigned socketid = infos[i].socketid;
 
-        for (l = 0; l < infos[i].numcaches; l++) {
-          if (infos[i].cache[l].level == level)
-            break;
-        }
-        if (l == infos[i].numcaches) {
-          /* no cache Llevel in i, odd */
-          hwloc_bitmap_clr(caches_cpuset, i);
-          continue;
-        }
+	  for (l = 0; l < infos[i].numcaches; l++) {
+	    if (infos[i].cache[l].level == level && infos[i].cache[l].type == type)
+	      break;
+	  }
+	  if (l == infos[i].numcaches) {
+	    /* no cache Llevel of that type in i */
+	    hwloc_bitmap_clr(caches_cpuset, i);
+	    continue;
+	  }
 
-        {
-          unsigned cacheid = infos[i].apicid / infos[i].cache[l].nbthreads_sharing;
+	  /* Found a matching cache, now look for others sharing it */
+	  {
+	    unsigned cacheid = infos[i].apicid / infos[i].cache[l].nbthreads_sharing;
 
-          cache_cpuset = hwloc_bitmap_alloc();
-          for (j = i; j < nbprocs; j++) {
-            unsigned l2;
-            for (l2 = 0; l2 < infos[j].numcaches; l2++) {
-              if (infos[j].cache[l2].level == level)
-                break;
-            }
-            if (l2 == infos[j].numcaches) {
-              /* no cache Llevel in j, odd */
-              hwloc_bitmap_clr(caches_cpuset, j);
-              continue;
-            }
-            if (infos[j].socketid == socketid && infos[j].apicid / infos[j].cache[l2].nbthreads_sharing == cacheid) {
-              hwloc_bitmap_set(cache_cpuset, j);
-              hwloc_bitmap_clr(caches_cpuset, j);
-            }
-          }
-          cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, cacheid);
-          cache->attr->cache.depth = level;
-          cache->attr->cache.size = infos[i].cache[l].size;
-          cache->attr->cache.linesize = infos[i].cache[l].linesize;
-          cache->attr->cache.associativity = infos[i].cache[l].ways;
-	  cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* FIXME */
-          cache->cpuset = cache_cpuset;
-          hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
-              level, cacheid, cache_cpuset);
-          hwloc_insert_object_by_cpuset(topology, cache);
-        }
+	    cache_cpuset = hwloc_bitmap_alloc();
+	    for (j = i; j < nbprocs; j++) {
+	      unsigned l2;
+	      for (l2 = 0; l2 < infos[j].numcaches; l2++) {
+		if (infos[j].cache[l2].level == level && infos[j].cache[l2].type == type)
+		  break;
+	      }
+	      if (l2 == infos[j].numcaches) {
+		/* no cache Llevel of that type in j */
+		hwloc_bitmap_clr(caches_cpuset, j);
+		continue;
+	      }
+	      if (infos[j].socketid == socketid && infos[j].apicid / infos[j].cache[l2].nbthreads_sharing == cacheid) {
+		hwloc_bitmap_set(cache_cpuset, j);
+		hwloc_bitmap_clr(caches_cpuset, j);
+	      }
+	    }
+	    cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, cacheid);
+	    cache->attr->cache.depth = level;
+	    cache->attr->cache.size = infos[i].cache[l].size;
+	    cache->attr->cache.linesize = infos[i].cache[l].linesize;
+	    cache->attr->cache.associativity = infos[i].cache[l].ways;
+	    switch (infos[i].cache[l].type) {
+	      case 1:
+		cache->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
+		break;
+	      case 2:
+		cache->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+		break;
+	      case 3:
+		cache->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+		break;
+	    }
+	    cache->cpuset = cache_cpuset;
+	    hwloc_debug_2args_bitmap("os L%u cache %u has cpuset %s\n",
+		level, cacheid, cache_cpuset);
+	    hwloc_insert_object_by_cpuset(topology, cache);
+	  }
+	}
+	hwloc_bitmap_free(caches_cpuset);
       }
-      hwloc_bitmap_free(caches_cpuset);
     }
     level--;
   }
