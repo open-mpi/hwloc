@@ -28,7 +28,9 @@ Version 1.4.2
   for reporting the problem.
 * Add Port info attribute to network OS devices inside OpenFabrics PCI
   devices so as to identify which interface corresponds to which port.
-
+* Document requirements for interoperability helpers: I/O devices discovery
+  is required for some of them; the topology must match the current host
+  for most of them.
 
 
 Version 1.4.1
