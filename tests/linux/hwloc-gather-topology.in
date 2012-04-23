@@ -65,6 +65,14 @@ savefile() {
   cat "$file" > "$dest/$file" 2>/dev/null
 }
 
+savelink() {
+  local dest="$1"
+  local file="$2"
+  dir=`dirname "$file"`
+  mkdir -p "$dest/$dir" 2>/dev/null
+  cp -P "$file" "$dest/$file"
+}
+
 # Gather the following list of files
 cat << EOF | while read -r path ; do savefile "$destdir/$basename" "$path" ; done
 /proc/cpuinfo
@@ -87,6 +95,10 @@ savedir() {
   # gather all files now
   find "$path" -type f 2>/dev/null | while read -r file ; do
     savefile "$dest" "$file"
+  done
+  # gather symlinks
+  find "$path" -type l 2>/dev/null | while read -r link ; do
+    savelink "$dest" "$link"
   done
 }
 
