@@ -403,7 +403,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       unsigned nodeid = infos[i].nodeid;
 
       if (nodeid == (unsigned)-1) {
-        hwloc_bitmap_clr(node_cpuset, i);
+        hwloc_bitmap_clr(nodes_cpuset, i);
 	continue;
       }
 
@@ -439,7 +439,7 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       unsigned unitid = infos[i].unitid;
 
       if (unitid == (unsigned)-1) {
-        hwloc_bitmap_clr(unit_cpuset, i);
+        hwloc_bitmap_clr(units_cpuset, i);
 	continue;
       }
 
