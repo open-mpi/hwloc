@@ -476,6 +476,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
   DIR *taskdir;
   pid_t *tids, *newtids;
   unsigned i, nr, newnr, failed, failed_errno;
+  unsigned retrynr = 0;
   int err;
 
   if (pid)
@@ -517,6 +518,12 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
     free(tids);
     tids = newtids;
     nr = newnr;
+    if (++retrynr > 10) {
+      /* we tried 10 times, it didn't work, the application is probably creating/destroying many threads, stop trying */
+      errno = EAGAIN;
+      err = -1;
+      goto out_with_tids;
+    }
     goto retry;
   }
   /* if all threads failed, return the last errno. */
