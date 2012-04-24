@@ -475,7 +475,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
   char taskdir_path[128];
   DIR *taskdir;
   pid_t *tids, *newtids;
-  unsigned i, nr, newnr;
+  unsigned i, nr, newnr, failed, failed_errno;
   int err;
 
   if (pid)
@@ -497,21 +497,33 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 
  retry:
   /* apply the callback to all threads */
+  failed=0;
   for(i=0; i<nr; i++) {
     err = cb(topology, tids[i], data, i);
-    if (err < 0)
-      goto out_with_tids;
+    if (err < 0) {
+      failed++;
+      failed_errno = errno;
+    }
   }
 
-  /* re-read the list of thread and retry if it changed in the meantime */
+  /* re-read the list of thread */
   err = hwloc_linux_get_proc_tids(taskdir, &newnr, &newtids);
   if (err < 0)
     goto out_with_tids;
-  if (newnr != nr || memcmp(newtids, tids, nr*sizeof(pid_t))) {
+  /* retry if the list changed in the meantime, or we failed for *some* threads only.
+   * if we're really unlucky, all threads changed but we got the same set of tids. no way to support this.
+   */
+  if (newnr != nr || memcmp(newtids, tids, nr*sizeof(pid_t)) || (failed && failed != nr)) {
     free(tids);
     tids = newtids;
     nr = newnr;
     goto retry;
+  }
+  /* if all threads failed, return the last errno. */
+  if (failed) {
+    err = -1;
+    errno = failed_errno;
+    goto out_with_tids;
   }
 
   err = 0;
