@@ -7,6 +7,9 @@
 
 #include <private/autogen/config.h>
 #include <hwloc.h>
+#ifdef HWLOC_LINUX_SYS
+#include <hwloc/linux.h>
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,13 +28,15 @@ static void usage(char *name, FILE *where)
   fprintf (where, "  -l --logical   Use logical object indexes (default)\n");
   fprintf (where, "  -p --physical  Use physical object indexes\n");
   fprintf (where, "  -c --cpuset    Show cpuset instead of objects\n");
+  fprintf (where, "  -t --threads   Show threads\n");
   fprintf (where, "  --whole-system Do not consider administration limitations\n");
 }
 
 static void print_task(hwloc_topology_t topology,
-		       long pid, const char *name, hwloc_bitmap_t cpuset)
+		       long pid, const char *name, hwloc_bitmap_t cpuset,
+		       int thread)
 {
-  printf("%ld\t", pid);
+  printf("%s%ld\t", thread ? " " : "", pid);
 
   if (show_cpuset) {
     char *cpuset_str = NULL;
@@ -70,6 +75,7 @@ int main(int argc, char *argv[])
   DIR *dir;
   struct dirent *dirent;
   int show_all = 0;
+  int show_threads = 0;
   char *callname;
   int err;
   int opt;
@@ -90,6 +96,12 @@ int main(int argc, char *argv[])
       logical = 0;
     } else if (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cpuset")) {
       show_cpuset = 1;
+    } else if (!strcmp(argv[1], "-t") || !strcmp(argv[1], "--threads")) {
+#ifdef HWLOC_LINUX_SYS
+      show_threads = 1;
+#else
+      fprintf (stderr, "Listing threads is currently only supported on Linux\n");
+#endif
     } else if (!strcmp (argv[1], "--whole-system")) {
       flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
     } else {
@@ -130,6 +142,10 @@ int main(int argc, char *argv[])
     long pid;
     char *end;
     char name[64] = "";
+    /* management of threads */
+    unsigned boundthreads = 0, i;
+    long *tids = NULL; /* NULL if process is not threaded */
+    hwloc_bitmap_t *tidcpusets = NULL;
 
     pid = strtol(dirent->d_name, &end, 10);
     if (*end)
@@ -161,6 +177,65 @@ int main(int argc, char *argv[])
     }
 #endif /* HWLOC_LINUX_SYS */
 
+    if (show_threads) {
+#ifdef HWLOC_LINUX_SYS
+      /* check if some threads must be displayed */
+      unsigned pathlen = 6 + strlen(dirent->d_name) + 1 + 4 + 1;
+      char *path;
+      DIR *taskdir;
+
+      path = malloc(pathlen);
+      snprintf(path, pathlen, "/proc/%s/task", dirent->d_name);
+      taskdir = opendir(path);
+      if (taskdir) {
+	struct dirent *taskdirent;
+	long tid;
+	char *end;
+	unsigned n = 0;
+	/* count threads */
+	while ((taskdirent = readdir(taskdir))) {
+	  tid = strtol(taskdirent->d_name, &end, 10);
+	  if (*end)
+	    /* Not a number */
+	    continue;
+	  n++;
+	}
+	if (n > 1) {
+	  /* if there's more than one thread, see if some are bound */
+	  tids = malloc(n * sizeof(*tids));
+	  tidcpusets = calloc(n+1, sizeof(*tidcpusets));
+	  if (tids && tidcpusets) {
+	    /* reread the directory but gather info now */
+	    rewinddir(taskdir);
+	    i = 0;
+	    while ((taskdirent = readdir(taskdir))) {
+	      tid = strtol(taskdirent->d_name, &end, 10);
+	      if (*end)
+		/* Not a number */
+		continue;
+	      if (hwloc_linux_get_tid_cpubind(topology, tid, cpuset))
+		continue;
+	      hwloc_bitmap_and(cpuset, cpuset, topocpuset);
+	      tids[i] = tid;
+	      tidcpusets[i] = hwloc_bitmap_dup(cpuset);
+	      i++;
+	      if (hwloc_bitmap_iszero(cpuset))
+		continue;
+	      if (hwloc_bitmap_isequal(cpuset, topocpuset) && !show_all)
+		continue;
+	      boundthreads++;
+	    }
+	  } else {
+	    /* failed to alloc, behave as if there were no threads */
+	    free(tids); tids = NULL;
+	    free(tidcpusets); tidcpusets = NULL;
+	  }
+	}
+	closedir(taskdir);
+      }
+#endif /* HWLOC_LINUX_SYS */
+    }
+
     if (hwloc_get_proc_cpubind(topology, pid, cpuset, 0))
       continue;
 
@@ -168,10 +243,22 @@ int main(int argc, char *argv[])
     if (hwloc_bitmap_iszero(cpuset))
       continue;
 
-    if (hwloc_bitmap_isequal(cpuset, topocpuset) && !show_all)
+    /* don't print anything if the process isn't bound and if no threads are bound and if not showing all */
+    if (hwloc_bitmap_isequal(cpuset, topocpuset) && (!tids || !boundthreads) && !show_all)
       continue;
 
-    print_task(topology, pid, name, cpuset);
+    /* print the process */
+    print_task(topology, pid, name, cpuset, 0);
+    if (tids)
+      /* print each tid we found (it's tidcpuset isn't NULL anymore) */
+      for(i=0; tidcpusets[i] != NULL; i++) {
+	print_task(topology, tids[i], "", tidcpusets[i], 1);
+	hwloc_bitmap_free(tidcpusets[i]);
+      }
+
+    /* free threads stuff */
+    free(tidcpusets);
+    free(tids);
   }
 
   err = 0;
