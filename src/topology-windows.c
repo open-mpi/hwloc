@@ -502,10 +502,11 @@ hwloc_look_windows(struct hwloc_topology *topology)
 
       for (i = 0; i < length / sizeof(*procInfo); i++) {
 
-        /* Ignore non-data caches */
-	if (procInfo[i].Relationship == RelationCache
-		&& procInfo[i].Cache.Type != CacheUnified
-		&& procInfo[i].Cache.Type != CacheData)
+        /* Ignore unknown caches */
+	if (procInfo->Relationship == RelationCache
+		&& procInfo->Cache.Type != CacheUnified
+		&& procInfo->Cache.Type != CacheData
+		&& procInfo->Cache.Type != CacheInstruction)
 	  continue;
 
 	id = -1;
@@ -559,7 +560,17 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    obj->attr->cache.associativity = procInfo[i].Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo[i].Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo[i].Cache.LineSize;
 	    obj->attr->cache.depth = procInfo[i].Cache.Level;
-	    obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* FIXME */
+	    switch (procInfo->Cache.Type) {
+	      case CacheUnified:
+		obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+		break;
+	      case CacheData:
+		obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
+		break;
+	      case CacheInstruction:
+		obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+		break;
+	    }
 	    break;
 	  case HWLOC_OBJ_GROUP:
 	    obj->attr->group.depth = procInfo[i].Relationship == RelationGroup;
@@ -597,10 +608,11 @@ hwloc_look_windows(struct hwloc_topology *topology)
         unsigned num, i;
         GROUP_AFFINITY *GroupMask;
 
-        /* Ignore non-data caches */
+        /* Ignore unknown caches */
 	if (procInfo->Relationship == RelationCache
 		&& procInfo->Cache.Type != CacheUnified
-		&& procInfo->Cache.Type != CacheData)
+		&& procInfo->Cache.Type != CacheData
+		&& procInfo->Cache.Type != CacheInstruction)
 	  continue;
 
 	id = -1;
@@ -677,6 +689,17 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	    obj->attr->cache.associativity = procInfo->Cache.Associativity == CACHE_FULLY_ASSOCIATIVE ? -1 : procInfo->Cache.Associativity ;
 	    obj->attr->cache.linesize = procInfo->Cache.LineSize;
 	    obj->attr->cache.depth = procInfo->Cache.Level;
+	    switch (procInfo->Cache.Type) {
+	      case CacheUnified:
+		obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+		break;
+	      case CacheData:
+		obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
+		break;
+	      case CacheInstruction:
+		obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+		break;
+	    }
 	    break;
 	  default:
 	    break;
