@@ -37,7 +37,7 @@ Version 1.5.0
     HWLOC_TYPE_DEPTH_MULTIPLE.
   + Instruction caches are ignored unless HWLOC_TOPOLOGY_FLAG_ICACHES is
     passed to hwloc_topology_set_flags() before load.
-  + Add hwloc_ibv_name_get_device_osdev() OpenFabrics helper in
+  + Add hwloc_ibv_get_device_osdev_by_name() OpenFabrics helper in
     openfabrics-verbs.h to find the hwloc OS device object corresponding to
     an OpenFabrics device.
   + Remove the old cpuset interface (hwloc/cpuset.h) which is deprecated and

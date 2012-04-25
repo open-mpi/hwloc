@@ -96,8 +96,8 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
  * at the OS device parent object.
  */
 static __hwloc_inline hwloc_obj_t
-hwloc_ibv_name_get_device_osdev(hwloc_topology_t topology,
-				const char *ibname)
+hwloc_ibv_get_device_osdev_by_name(hwloc_topology_t topology,
+				   const char *ibname)
 {
 	hwloc_obj_t osdev = NULL;
 	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
