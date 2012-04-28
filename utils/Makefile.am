@@ -60,9 +60,6 @@ EXTRA_DIST += $(man7_pages:.7=.7in)
 nodist_man_MANS = $(man7_pages)
 
 man1_pages = lstopo.1 hwloc-bind.1 hwloc-calc.1 hwloc-distances.1 hwloc-distrib.1 hwloc-ps.1 hwloc-assembler.1 hwloc-assembler-remote.1
-if HWLOC_HAVE_CAIRO
-man1_pages += lstopo-gui.1
-endif
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 
@@ -101,12 +98,14 @@ install-exec-hook: install-man
 	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT) && $(LN_S) hwloc-calc$(EXEEXT) hwloc-mask$(EXEEXT)
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/hwloc-mask.1
 	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1 && $(LN_S) lstopo.1 hwloc-info.1 && $(LN_S) hwloc-calc.1 hwloc-mask.1
+	rm -f $(DESTDIR)$(man1dir)/lstopo-gui.1
+	test -f $(DESTDIR)$(bindir)/lstopo-gui && cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 lstopo-gui.1 || true
 	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' $(DESTDIR)$(bindir)/hwloc-assembler-remote > $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp && mv -f $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp $(DESTDIR)$(bindir)/hwloc-assembler-remote
 	chmod +x $(DESTDIR)$(bindir)/hwloc-assembler-remote
 
 uninstall-local:
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-mask$(EXEEXT)
-	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/hwloc-mask.1
+	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/hwloc-mask.1 $(DESTDIR)$(man1dir)/lstopo-gui.1
 
 distclean-local:
 	rm -f $(nodist_man_MANS)
