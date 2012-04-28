@@ -53,6 +53,7 @@ Version 1.5.0
   + Instruction caches are enabled in lstopo by default. User --no-icaches
     to disable them.
   + Add -t/--threads to show threads in hwloc-ps.
+  + Remove hwloc-mask symlinks, it was replaced by hwloc-calc in v1.0.
 * Misc
   + Remove support for "Proc" type name, it was superseded by "PU" in v1.0.
   + Assert hwloc_is_thissystem() in several I/O related helpers.
