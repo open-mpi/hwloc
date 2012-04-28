@@ -40,12 +40,6 @@ Version 1.5.0
   + Add hwloc_ibv_get_device_osdev_by_name() OpenFabrics helper in
     openfabrics-verbs.h to find the hwloc OS device object corresponding to
     an OpenFabrics device.
-  + Remove the old cpuset interface (hwloc/cpuset.h) which is deprecated and
-    superseded by the bitmap API (hwloc/bitmap.h) since v1.1.
-    hwloc_cpuset and nodeset types are still defined, but all hwloc_cpuset_*
-    compatibility wrappers are now gone.
-  + Remove Linux libnuma conversion helpers for the deprecated and
-    broken nodemask_t interface.
 * Tools
   + lstopo is now built without graphical support to avoid dependencies on
     external libraries such as Cairo and X11. Graphical outputs are now
@@ -53,9 +47,16 @@ Version 1.5.0
   + Instruction caches are enabled in lstopo by default. User --no-icaches
     to disable them.
   + Add -t/--threads to show threads in hwloc-ps.
+* Removal of obsolete components
+  + Remove the old cpuset interface (hwloc/cpuset.h) which is deprecated and
+    superseded by the bitmap API (hwloc/bitmap.h) since v1.1.
+    hwloc_cpuset and nodeset types are still defined, but all hwloc_cpuset_*
+    compatibility wrappers are now gone.
+  + Remove Linux libnuma conversion helpers for the deprecated and
+    broken nodemask_t interface.
+  + Remove support for "Proc" type name, it was superseded by "PU" in v1.0.
   + Remove hwloc-mask symlinks, it was replaced by hwloc-calc in v1.0.
 * Misc
-  + Remove support for "Proc" type name, it was superseded by "PU" in v1.0.
   + Assert hwloc_is_thissystem() in several I/O related helpers.
   + Limit the number of retries when operating on all threads within a
     process on Linux if the list of threads is heavily getting modified.
