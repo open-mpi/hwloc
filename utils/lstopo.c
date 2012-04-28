@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#ifdef HWLOC_HAVE_CAIRO
+#ifdef LSTOPO_HAVE_CAIRO
 #include <cairo.h>
 #endif
 
@@ -211,7 +211,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Usage: %s [ options ] ... [ filename.format ]\n\n", name);
   fprintf (where, "See lstopo(1) for more details.\n\n");
   fprintf (where, "Supported output file formats: console, txt, fig"
-#ifdef HWLOC_HAVE_CAIRO
+#ifdef LSTOPO_HAVE_CAIRO
 #if CAIRO_HAS_PDF_SURFACE
 		  ", pdf"
 #endif /* CAIRO_HAS_PDF_SURFACE */
@@ -224,7 +224,7 @@ void usage(const char *name, FILE *where)
 #if CAIRO_HAS_SVG_SURFACE
 		  ", svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
-#endif /* HWLOC_HAVE_CAIRO */
+#endif /* LSTOPO_HAVE_CAIRO */
 		  ", xml, synthetic"
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
@@ -591,7 +591,7 @@ main (int argc, char *argv[])
 
   switch (output_format) {
     case LSTOPO_OUTPUT_DEFAULT:
-#ifdef HWLOC_HAVE_CAIRO
+#ifdef LSTOPO_HAVE_CAIRO
 #if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
       if (getenv("DISPLAY")) {
         if (logical == -1)
@@ -599,7 +599,7 @@ main (int argc, char *argv[])
         output_x11(topology, NULL, logical, legend, verbose_mode);
       } else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
-#endif /* HWLOC_HAVE_CAIRO */
+#endif /* LSTOPO_HAVE_CAIRO */
 #ifdef HWLOC_WIN_SYS
       {
         if (logical == -1)
@@ -627,7 +627,7 @@ main (int argc, char *argv[])
     case LSTOPO_OUTPUT_FIG:
       output_fig(topology, filename, logical, legend, verbose_mode);
       break;
-#ifdef HWLOC_HAVE_CAIRO
+#ifdef LSTOPO_HAVE_CAIRO
 # if CAIRO_HAS_PNG_FUNCTIONS
     case LSTOPO_OUTPUT_PNG:
       output_png(topology, filename, logical, legend, verbose_mode);
@@ -648,7 +648,7 @@ main (int argc, char *argv[])
       output_svg(topology, filename, logical, legend, verbose_mode);
       break;
 #endif /* CAIRO_HAS_SVG_SURFACE */
-#endif /* HWLOC_HAVE_CAIRO */
+#endif /* LSTOPO_HAVE_CAIRO */
     case LSTOPO_OUTPUT_XML:
       output_xml(topology, filename, logical, legend, verbose_mode);
       break;

@@ -1,4 +1,4 @@
-# Copyright © 2009-2010 inria.  All rights reserved.
+# Copyright © 2009-2012 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux 1
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 #
@@ -20,20 +20,24 @@ bin_PROGRAMS = lstopo hwloc-assembler hwloc-calc hwloc-bind hwloc-distances hwlo
 endif
 
 lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-xml.c
-if HWLOC_HAVE_CAIRO
-lstopo_SOURCES += lstopo-cairo.c
-endif
 if HWLOC_HAVE_WINDOWS
 lstopo_SOURCES += lstopo-windows.c
 endif
-lstopo_CFLAGS = $(HWLOC_CAIRO_CFLAGS) $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
-lstopo_LDADD = $(LDADD) $(HWLOC_CAIRO_LIBS) -lm $(HWLOC_TERMCAP_LIBS) $(HWLOC_X11_LIBS)
+lstopo_CFLAGS = $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
+lstopo_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 if HWLOC_BUILD_UTILS
 if HWLOC_HAVE_WINDOWS
 bin_PROGRAMS += lstopo-win
 lstopo_win_SOURCES = $(lstopo_SOURCES)
 lstopo_win_CFLAGS = $(lstopo_CFLAGS) -mwindows
 lstopo_win_LDADD = $(lstopo_LDADD)
+endif
+if HWLOC_HAVE_CAIRO
+bin_PROGRAMS += lstopo-gui
+lstopo_gui_SOURCES = $(lstopo_SOURCES) lstopo-cairo.c
+lstopo_gui_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_CAIRO
+lstopo_gui_CFLAGS = $(lstopo_CFLAGS) $(HWLOC_CAIRO_CFLAGS)
+lstopo_gui_LDADD = $(lstopo_LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_X11_LIBS)
 endif
 endif
 
@@ -56,6 +60,9 @@ EXTRA_DIST += $(man7_pages:.7=.7in)
 nodist_man_MANS = $(man7_pages)
 
 man1_pages = lstopo.1 hwloc-bind.1 hwloc-calc.1 hwloc-distances.1 hwloc-distrib.1 hwloc-ps.1 hwloc-assembler.1 hwloc-assembler-remote.1
+if HWLOC_HAVE_CAIRO
+man1_pages += lstopo-gui.1
+endif
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 
