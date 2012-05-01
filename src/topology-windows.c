@@ -172,6 +172,18 @@ typedef struct _PSAPI_WORKING_SET_EX_INFORMATION {
 } PSAPI_WORKING_SET_EX_INFORMATION;
 #endif
 
+static void hwloc_bitmap_set_ith_ULONG_PTR(hwloc_bitmap_t set, unsigned i, ULONG_PTR mask)
+{
+	/* ULONG_PTR is 64/32bits depending on the arch
+	 * while unsigned long is always 32bits */
+#if SIZEOF_VOID_P == 8
+	hwloc_bitmap_set_ith_ulong(set, 2*i, mask & 0xffffffff);
+	hwloc_bitmap_set_ith_ulong(set, 2*i+1, mask >> 32);
+#else
+	hwloc_bitmap_set_ith_ulong(set, i, mask);
+#endif
+}
+
 /* TODO: SetThreadIdealProcessor */
 
 static int
@@ -533,14 +545,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	obj = hwloc_alloc_setup_object(type, id);
         obj->cpuset = hwloc_bitmap_alloc();
 	hwloc_debug("%s#%u mask %lx\n", hwloc_obj_type_string(type), id, procInfo[i].ProcessorMask);
-	/* ProcessorMask is a ULONG_PTR (64/32bits depending on the arch)
-	 * while unsigned long is always 32bits */
-#if SIZEOF_VOID_P == 8
-	hwloc_bitmap_set_ith_ulong(obj->cpuset, 0, procInfo[i].ProcessorMask & 0xffffffff);
-	hwloc_bitmap_set_ith_ulong(obj->cpuset, 1, procInfo[i].ProcessorMask >> 32);
-#else
-	hwloc_bitmap_set_ith_ulong(obj->cpuset, 0, procInfo[i].ProcessorMask);
-#endif
+	/* ProcessorMask is a ULONG_PTR */
+	hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, 0, procInfo[i].ProcessorMask);
 	hwloc_debug_2args_bitmap("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
 
 	switch (type) {
@@ -655,14 +661,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	      mask = procInfo->Group.GroupInfo[id].ActiveProcessorMask;
 	      hwloc_debug("group %u %d cpus mask %lx\n", id,
                   procInfo->Group.GroupInfo[id].ActiveProcessorCount, mask);
-	      /* KAFFINITY is ULONG_PTR (64/32bits depending on the arch)
-	       * while unsigned long is always 32bits */
-#if SIZEOF_VOID_P == 8
-	      hwloc_bitmap_set_ith_ulong(obj->cpuset, 2*id, mask & 0xffffffff);
-	      hwloc_bitmap_set_ith_ulong(obj->cpuset, 2*id+1, mask >> 32);
-#else
-	      hwloc_bitmap_set_ith_ulong(obj->cpuset, id, mask);
-#endif
+	      /* KAFFINITY is ULONG_PTR */
+	      hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, id, mask);
 	      hwloc_debug_2args_bitmap("group %u %d bitmap %s\n", id, procInfo->Group.GroupInfo[id].ActiveProcessorCount, obj->cpuset);
 	      hwloc_insert_object_by_cpuset(topology, obj);
 	    }
@@ -677,14 +677,8 @@ hwloc_look_windows(struct hwloc_topology *topology)
         obj->cpuset = hwloc_bitmap_alloc();
         for (i = 0; i < num; i++) {
           hwloc_debug("%s#%u %d: mask %d:%lx\n", hwloc_obj_type_string(type), id, i, GroupMask[i].Group, GroupMask[i].Mask);
-	  /* GROUP_AFFINITY.Mask is KAFFINITY, which is ULONG_PTR (64/32bits depending on the arch)
-	   * while unsigned long is always 32bits */
-#if SIZEOF_VOID_P == 8
-          hwloc_bitmap_set_ith_ulong(obj->cpuset, 2*GroupMask[i].Group, GroupMask[i].Mask & 0xffffffff);
-          hwloc_bitmap_set_ith_ulong(obj->cpuset, 2*GroupMask[i].Group+1, GroupMask[i].Mask >> 32);
-#else
-          hwloc_bitmap_set_ith_ulong(obj->cpuset, GroupMask[i].Group, GroupMask[i].Mask);
-#endif
+	  /* GROUP_AFFINITY.Mask is KAFFINITY, which is ULONG_PTR */
+	  hwloc_bitmap_set_ith_ULONG_PTR(obj->cpuset, GroupMask[i].Group, GroupMask[i].Mask);
         }
 	hwloc_debug("%s#%u bitmap %s\n", hwloc_obj_type_string(type), id, obj->cpuset);
 
