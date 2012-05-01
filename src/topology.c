@@ -564,6 +564,30 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
   }
 }
 
+/* format must contain a single %s where to print obj infos */
+static void
+hwloc___insert_object_by_cpuset_report_error(hwloc_report_error_t report_error, const char *fmt, hwloc_obj_t obj, int line)
+{
+	char typestr[64];
+	char objstr[512];
+	char msg[640];
+	char *cpusetstr;
+
+	hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
+	hwloc_bitmap_asprintf(&cpusetstr, obj->cpuset);
+	if (obj->os_index != (unsigned) -1)
+	  snprintf(objstr, sizeof(objstr), "%s P#%u cpuset %s",
+		   typestr, obj->os_index, cpusetstr);
+	else
+	  snprintf(objstr, sizeof(objstr), "%s cpuset %s",
+		   typestr, cpusetstr);
+	free(cpusetstr);
+
+	snprintf(msg, sizeof(msg), fmt,
+		 objstr);
+	report_error(msg, line);
+}
+
 /*
  * How to insert objects into the topology.
  *
@@ -678,7 +702,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
       case HWLOC_OBJ_INCLUDED:
 	if (container) {
           if (report_error)
-            report_error("object included in several different objects!", __LINE__);
+	    hwloc___insert_object_by_cpuset_report_error(report_error, "object (%s) included in several different objects!", obj, __LINE__);
 	  /* We can't handle that.  */
 	  return -1;
 	}
@@ -687,7 +711,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	break;
       case HWLOC_OBJ_INTERSECTS:
         if (report_error)
-          report_error("object intersection without inclusion!", __LINE__);
+          hwloc___insert_object_by_cpuset_report_error(report_error, "object (%s) intersection without inclusion!", obj, __LINE__);
 	/* We can't handle that.  */
 	return -1;
       case HWLOC_OBJ_CONTAINS:
