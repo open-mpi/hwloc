@@ -21,6 +21,8 @@ Version 1.4.2
 -------------
 * Fix build on Solaris 9 and earlier when fabsf() is not a compiler
   built-in. Thanks to Igor Galić for reporting the problem.
+* Fix support for more than 32 processors on Windows. Thanks to Hartmut
+  Kaiser for reporting the problem.
 * Fix process-wide binding and cpulocation routines on Linux when some
   threads disappear in the meantime. Thanks to Vlad Roubtsov for reporting
   the issue.
