@@ -71,3 +71,15 @@ if HWLOC_BUILD_STANDALONE
 doc readme:
 	$(MAKE) -C doc readme
 endif HWLOC_BUILD_STANDALONE
+
+#
+# Winball specific rules, to be manually run after make install
+#
+if HWLOC_BUILD_STANDALONE
+.PHONY: install-winball
+install-winball:
+	sed -e 's/$$/'$$'\015'/ < $(srcdir)/README > $(prefix)/README.txt
+	sed -e 's/$$/'$$'\015'/ < $(srcdir)/NEWS > $(prefix)/NEWS.txt
+	sed -e 's/$$/'$$'\015'/ < $(srcdir)/COPYING > $(prefix)/COPYING.txt
+	$(RM) $(pkgconfigdir)/hwloc.pc
+endif HWLOC_BUILD_STANDALONE

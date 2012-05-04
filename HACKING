@@ -62,14 +62,10 @@ Notes to developers:
   "make check".
 
 - For the windows zipball, make sure you have Microsoft's lib tool in
-  PATH, to pass --enable-static to ./configure, and remember to copy README and
-  NEWS at the root of the zip into README.txt and NEWS.txt files with CRLF:
-
-  sed -e 's/$/'$'\015'/ < README > $prefix/README.txt
-  sed -e 's/$/'$'\015'/ < NEWS > $prefix/NEWS.txt
-  sed -e 's/$/'$'\015'/ < COPYING > $prefix/COPYING.txt
-
-  Also, remove hwloc.pc, it does not make sense in a zipball.
+  PATH, to pass --enable-static to ./configure.
+  And run "make install-winball" after "make install" to add NEWS.txt,
+  README.txt and COPYING.txt with CRLF. It also removes hwloc.pc, which
+  does not make sense in a zipball.
 
 - For the 64bit version on windows, pass --host=x86_64-w64-mingw32 to
   ./configure to use mingw-64
