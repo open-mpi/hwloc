@@ -330,6 +330,8 @@ EOF
 
     hwloc_build_tests=yes
 
+    AC_CHECK_LIB([pthread], [pthread_self], [hwloc_have_pthread=yes])
+
     # linux-libnuma.h testing requires libnuma with numa_bitmask_alloc()
     AC_CHECK_DECL([numa_bitmask_alloc], [hwloc_have_linux_libnuma=yes], [],
     	      [#include <numa.h>])

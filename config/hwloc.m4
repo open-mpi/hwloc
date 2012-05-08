@@ -802,6 +802,8 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
                        [test "x$hwloc_have_linux_libnuma" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_SCHED_SETAFFINITY],
                        [test "x$hwloc_have_sched_setaffinity" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_PTHREAD],
+                       [test "x$hwloc_have_pthread" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBIBVERBS], 
                        [test "x$hwloc_have_libibverbs" = "xyes"])
 	AM_CONDITIONAL([HWLOC_HAVE_CUDA],

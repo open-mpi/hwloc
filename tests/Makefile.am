@@ -89,7 +89,10 @@ cuda_LDADD = $(LDADD) -lcuda
 cudart_LDADD = $(LDADD) -lcuda -lcudart
 xmlbuffer_LDADD = $(LDADD) $(HWLOC_LIBXML2_LIBS)
 hwloc_backends_LDADD = $(LDADD) $(HWLOC_LIBXML2_LIBS)
-hwloc_bind_LDADD = $(LDADD) -lpthread
+hwloc_bind_LDADD = $(LDADD)
+if HWLOC_HAVE_PTHREAD
+hwloc_bind_LDADD += -lpthread
+endif
 
 endif HWLOC_BUILD_TESTS
 
