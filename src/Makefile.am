@@ -85,9 +85,13 @@ export LC_MESSAGES
 ldflags += -Xlinker --output-def -Xlinker .libs/libhwloc.def
 
 if HWLOC_HAVE_MS_LIB
-.libs/libhwloc.lib: libhwloc.la dolib
-	[ ! -r .libs/libhwloc.def ] || ./dolib "$(HWLOC_MS_LIB)" $(HWLOC_MS_LIB_ARCH) .libs/libhwloc.def $(libhwloc_so_version) .libs/libhwloc.lib
+dolib$(EXEEXT): dolib.c
+	$(CC_FOR_BUILD) $< -o $@
+.libs/libhwloc.lib: libhwloc.la dolib$(EXEEXT)
+	[ ! -r .libs/libhwloc.def ] || ./dolib$(EXEEXT) "$(HWLOC_MS_LIB)" $(HWLOC_MS_LIB_ARCH) .libs/libhwloc.def $(libhwloc_so_version) .libs/libhwloc.lib
 all-local: .libs/libhwloc.lib
+clean-local:
+	$(RM) dolib$(EXEEXT)
 endif HWLOC_HAVE_MS_LIB
 
 install-exec-hook:
