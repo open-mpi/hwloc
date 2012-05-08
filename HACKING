@@ -61,15 +61,6 @@ Notes to developers:
 - Check tarballs by configuring and building them and then running
   "make check".
 
-- For the windows zipball, make sure you have Microsoft's lib tool in
-  PATH, to pass --enable-static to ./configure.
-  And run "make install-winball" after "make install" to add NEWS.txt,
-  README.txt and COPYING.txt with CRLF. It also removes hwloc.pc, which
-  does not make sense in a zipball.
-
-- For the 64bit version on windows, pass --host=x86_64-w64-mingw32 to
-  ./configure to use mingw-64
-
 - make maintainer-clean can be used to properly remove the generated
   documentations.
 
@@ -83,3 +74,68 @@ Notes to developers:
   shell$ make V=1
   /bin/sh ../libtool  --tag=CC   --mode=compile gcc [...] -c -o topology.lo topology.c
 
+
+Building the Windows zipballs on Windows with MinGW:
+
+- Install prerequisites:
+  - Visual C++ Express, currently available at:
+     http://www.microsoft.com/visualstudio/en-us/products/2010-editions/express)
+  - mingw-w64-bin_i686-mingw_<date>.zip if building a 64bits zipball:
+     http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Automated%20Builds/
+  - mingw-w32-bin_i686-mingw_<date>.zip If building a 32bits zipball,
+     or if building a 64bits zipball on a 32bits Windows:
+     http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Automated%20Builds/
+  - MSYS-<date>.zip
+     http://sourceforge.net/projects/mingw-w64/files/External%20binary%20packages%20%28Win64%20hosted%29/MSYS%20%2832-bit%29/
+  Unpack all these ZIPs in a path that does not contain spaces,
+  to avoid problems later.
+
+- Launch msys.bat (in the root directory of the extracted MSYS ZIP).
+
+- Your path must contain:
+  - The bin directory of the extracted MinGW ZIP
+    (it contains <arch>-gcc)
+  - The <arch>/lib directory of the extracted MinGW ZIP
+    (it contains libgcc*.DLL, needed for C++ tests during make check)
+  - Visual C++ Express bin and IDE directories
+  - The bin directory of the non-cross-compiling MinGW ZIP
+    when building a 64bits zipball on a 32bits Windows
+- Examples of PATH (depends on where ZIPs were extracted and were Visual Studio was installed):
+  - For a 32bits zipball:
+    $ PATH=/c/hwloc/mingw32/bin:/c/hwloc/mingw32/i686-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
+  - For a 64bits zipball:
+    $ PATH=/c/hwloc/mingw64/bin:/c/hwloc/mingw64/x86_64-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
+  - For a 64bits zipball on a 32bits Windows:
+    $ PATH=/c/hwloc/mingw64/bin:/c/hwloc/mingw32/bin:/c/hwloc/mingw32/i686-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH
+- Check that running "lib", "link" and "cl" finds the right tools (installed by Visual Studio)
+  and displays their usage output (list of command-line options).
+
+- Download a hwloc tarball (building from SVN requires autotools, doxygen, LaTeX, etc.),
+  extract it and enter the directory.
+
+- Set the install prefix to what the zipball name must be:
+  $ prefix=$PWD/hwloc-win<size>-build-<version>
+- Configure
+  - For a 32bits zipball:
+    $ ./configure --prefix=$prefix --enable-static --host=i686-w64-mingw32
+  - For a 64bits zipball:
+    $ ./configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32
+  - For a 64bits zipball on a 32bits Windows:
+    $ ./configure --prefix=$prefix --enable-static --host=x86_64-w64-mingw32 CC_FOR_BUILD=i686-w64-mingw32-gcc
+
+- Build
+  $ make
+- If not building a 64bits zipball on a 32bits machine, test things:
+  $ make check
+  If your Windows is not configured in English, some failure may occur in tests/xml
+  because floats are localized.
+
+- Install
+  $ make install
+- Add some text files and remove pkg-config file
+  $ make install-winball
+- Create the zipball
+  $ zip -r hwloc-win<size>-build-<version>.zip hwloc-win<size>-build-<version>
+
+- Compare the contents of the new zipball with a previous one.
+  Make sure the .lib file was generated.
