@@ -24,7 +24,7 @@ Version 1.5.0
   + XML topology files do not depend on the locale anymore. Float numbers
     such as NUMA distances or PCI link speeds now always use a dot as a
     decimal separator.
-  + Add instruction caches detection on Linux.
+  + Add instruction caches detection on Linux, Windows and Darwin.
 * API
   + Increase HWLOC_API_VERSION to 0x00010500 so that API changes may be
     detected at build-time.
@@ -60,6 +60,29 @@ Version 1.5.0
   + Assert hwloc_is_thissystem() in several I/O related helpers.
   + Limit the number of retries when operating on all threads within a
     process on Linux if the list of threads is heavily getting modified.
+
+
+Version 1.4.2
+-------------
+* Fix build on Solaris 9 and earlier when fabsf() is not a compiler
+  built-in. Thanks to Igor Galić for reporting the problem.
+* Fix support for more than 32 processors on Windows. Thanks to Hartmut
+  Kaiser for reporting the problem.
+* Fix process-wide binding and cpulocation routines on Linux when some
+  threads disappear in the meantime. Thanks to Vlad Roubtsov for reporting
+  the issue.
+* Make installed scripts executable. Thanks to Jirka Hladky for reporting
+  the problem.
+* Fix libtool revision management when building for Windows. This fix was
+  also released as hwloc v1.4.1.1 Windows builds. Thanks to Hartmut Kaiser
+  for reporting the problem.
+* Fix the __hwloc_inline keyword in public headers when compiling with a
+  C++ compiler.
+* Add Port info attribute to network OS devices inside OpenFabrics PCI
+  devices so as to identify which interface corresponds to which port.
+* Document requirements for interoperability helpers: I/O devices discovery
+  is required for some of them; the topology must match the current host
+  for most of them.
 
 
 Version 1.4.1
