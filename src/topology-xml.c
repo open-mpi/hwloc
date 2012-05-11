@@ -991,7 +991,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
     /* prepare parsing state */
     state.tagbuffer = buffer+10;
-    state.tagname = "topology";
+    state.tagname = (char *) "topology";
     state.attrbuffer = NULL;
   }
 
