@@ -21,6 +21,7 @@ dnl See COPYING in top-level directory.
 # 4. If non-empty, print the announcement banner
 #
 AC_DEFUN([HWLOC_SETUP_CORE],[
+    AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
     AC_REQUIRE([AC_CANONICAL_TARGET])
     AC_REQUIRE([AC_PROG_CC])
 
@@ -141,7 +142,6 @@ EOF])
     fi
 
     # Enample system extensions for O_DIRECTORY, fdopen, fssl, etc.
-    AC_USE_SYSTEM_EXTENSIONS
     AH_VERBATIM([USE_HPUX_SYSTEM_EXTENSIONS],
 [/* Enable extensions on HP-UX. */
 #ifndef _HPUX_SOURCE
