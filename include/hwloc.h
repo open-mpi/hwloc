@@ -1462,6 +1462,12 @@ HWLOC_DECLSPEC int hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thr
  * to another at any time according to their binding,
  * so this function may return something that is already
  * outdated.
+ *
+ * \p flags can include either HWLOC_CPUBIND_PROCESS or HWLOC_CPUBIND_THREAD to
+ * specify whether the query should be for the whole process (union of all CPUs
+ * on which all threads are running), or only the current thread. If the
+ * process is single-threaded, flags can be set to zero to let hwloc use
+ * whichever method is available on the underlying OS.
  */
 HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
 
@@ -1475,11 +1481,9 @@ HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
  *
- * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
- *
  * \note As a special case on Linux, if a tid (thread ID) is supplied
- * instead of a pid (process ID), the binding for that specific thread
- * is returned.
+ * instead of a pid (process ID) and HWLOC_CPUBIND_THREAD is passed in flags,
+ * the binding for that specific thread is returned.
  */
 HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
