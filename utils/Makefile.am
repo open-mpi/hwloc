@@ -96,7 +96,7 @@ endif HWLOC_HAVE_LINUX
 
 install-exec-hook: install-man
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
-	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT)
+	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo-no-graphics$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo-no-graphics$(EXEEXT) hwloc-info$(EXEEXT)
 if !HWLOC_HAVE_WINDOWS
 if !HWLOC_HAVE_CAIRO
 	rm -f $(DESTDIR)$(bindir)/lstopo
