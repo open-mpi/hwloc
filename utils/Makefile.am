@@ -97,6 +97,12 @@ endif HWLOC_HAVE_LINUX
 install-exec-hook: install-man
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
 	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT)
+if !HWLOC_HAVE_WINDOWS
+if !HWLOC_HAVE_CAIRO
+	rm -f $(DESTDIR)$(bindir)/lstopo
+	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo-no-graphics$(EXEEXT) lstopo$(EXEEXT) || true
+endif
+endif
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1
 	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1 && $(LN_S) lstopo.1 hwloc-info.1
 	rm -f $(DESTDIR)$(man1dir)/lstopo-no-graphics.1
@@ -106,6 +112,11 @@ install-exec-hook: install-man
 
 uninstall-local:
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
+if !HWLOC_HAVE_WINDOWS
+if !HWLOC_HAVE_CAIRO
+	rm -f $(DESTDIR)$(bindir)/lstopo$(EXEEXT)
+endif
+endif
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/lstopo-no-graphics.1
 
 distclean-local:

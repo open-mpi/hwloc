@@ -42,8 +42,9 @@ Version 1.5.0
     an OpenFabrics device.
 * Tools
   + Add lstopo-no-graphics, a lstopo built without graphical support to
-    avoid dependencies on external libraries such as Cairo and X11. Graphical
-    outputs are only available in the original lstopo program.
+    avoid dependencies on external libraries such as Cairo and X11. When
+    supported, graphical outputs are only available in the original lstopo
+    program.
   + Instruction caches are enabled in lstopo by default. User --no-icaches
     to disable them.
   + Add -t/--threads to show threads in hwloc-ps.
