@@ -20,22 +20,23 @@ bin_PROGRAMS = lstopo-no-graphics hwloc-assembler hwloc-calc hwloc-bind hwloc-di
 endif
 
 lstopo_no_graphics_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-xml.c
-if HWLOC_HAVE_WINDOWS
-lstopo_no_graphics_SOURCES += lstopo-windows.c
-endif
 lstopo_no_graphics_CFLAGS = $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 if HWLOC_BUILD_UTILS
 if HWLOC_HAVE_WINDOWS
-bin_PROGRAMS += lstopo-win
-lstopo_win_SOURCES = $(lstopo_no_graphics_SOURCES)
-lstopo_win_CFLAGS = $(lstopo_no_graphics_CFLAGS) -mwindows
-lstopo_win_LDADD = $(lstopo_no_graphics_LDADD)
+bin_PROGRAMS += lstopo lstopo-win
+lstopo_SOURCES = $(lstopo_no_graphics_SOURCES) lstopo-windows.c
+lstopo_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_GRAPHICS
+lstopo_LDADD = $(lstopo_no_graphics_LDADD)
+lstopo_win_SOURCES = $(lstopo_SOURCES)
+lstopo_win_CPPFLAGS = $(lstopo_CPPFLAGS)
+lstopo_win_CFLAGS = $(lstopo_CFLAGS) -mwindows
+lstopo_win_LDADD = $(lstopo_LDADD)
 endif
 if HWLOC_HAVE_CAIRO
 bin_PROGRAMS += lstopo
 lstopo_SOURCES = $(lstopo_no_graphics_SOURCES) lstopo-cairo.c
-lstopo_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_CAIRO
+lstopo_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_GRAPHICS
 lstopo_CFLAGS = $(lstopo_no_graphics_CFLAGS) $(HWLOC_CAIRO_CFLAGS)
 lstopo_LDADD = $(lstopo_no_graphics_LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_X11_LIBS)
 endif
