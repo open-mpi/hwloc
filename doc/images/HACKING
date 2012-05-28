@@ -1,3 +1,3 @@
 To update PNG file, run
   export LANG=C
-  lstopo-gui -i XXXX.xml --no-legend --whole-system XXXX.png
+  lstopo -i XXXX.xml --no-legend --whole-system XXXX.png

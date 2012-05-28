@@ -41,9 +41,9 @@ Version 1.5.0
     openfabrics-verbs.h to find the hwloc OS device object corresponding to
     an OpenFabrics device.
 * Tools
-  + lstopo is now built without graphical support to avoid dependencies on
-    external libraries such as Cairo and X11. Graphical outputs are now
-    available in lstopo-gui which supports the same command line options.
+  + Add lstopo-no-graphics, a lstopo built without graphical support to
+    avoid dependencies on external libraries such as Cairo and X11. Graphical
+    outputs are only available in the original lstopo program.
   + Instruction caches are enabled in lstopo by default. User --no-icaches
     to disable them.
   + Add -t/--threads to show threads in hwloc-ps.
