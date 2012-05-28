@@ -224,7 +224,7 @@ EOF
     hwloc_build_utils=yes
 
     # Cairo support
-    hwloc_cairo_happy=
+    hwloc_cairo_happy=no
     if test "x$enable_cairo" != "xno"; then
       HWLOC_PKG_CHECK_MODULES([CAIRO], [cairo], [cairo_fill],
                               [hwloc_cairo_happy=yes],
