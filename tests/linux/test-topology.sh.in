@@ -14,7 +14,7 @@
 
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 HWLOC_top_builddir="@HWLOC_top_builddir@"
-lstopo="$HWLOC_top_builddir/utils/lstopo"
+lstopo="$HWLOC_top_builddir/utils/lstopo-no-graphics"
 
 actual_output="$1"
 
