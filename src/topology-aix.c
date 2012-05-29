@@ -166,6 +166,24 @@ hwloc_aix_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
 #endif /* HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
 #endif /* R_THREAD */
 
+static int
+hwloc_aix_get_thisthread_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+{
+  cpu_t cpu;
+
+  if (topology->pid) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  cpu = mycpu();
+  if (cpu < 0)
+    return -1;
+
+  hwloc_bitmap_only(hwloc_set, cpu);
+  return 0;
+}
+
 #ifdef P_DEFAULT
 
 static int
@@ -615,7 +633,8 @@ hwloc_set_aix_hooks(struct hwloc_topology *topology)
   topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
   topology->get_thisthread_cpubind = hwloc_aix_get_thisthread_cpubind;
 #endif /* R_THREAD */
-  /* TODO: get_last_cpu_location: use mycpu() */
+  topology->get_thisthread_last_cpu_location = hwloc_aix_get_thisthread_last_cpu_location;
+  /* TODO: get_thisproc_last_cpu_location on top of thisthread? */
 #ifdef P_DEFAULT
   topology->set_proc_membind = hwloc_aix_set_proc_membind;
   topology->get_proc_membind = hwloc_aix_get_proc_membind;

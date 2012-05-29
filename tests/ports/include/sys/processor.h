@@ -21,4 +21,6 @@ typedef short cpu_t;
 #define PROCESSOR_CLASS_ANY ((cpu_t)(-1))
 extern int bindprocessor(int What, int Who, cpu_t Where); 
 
+extern cpu_t mycpu(void);
+
 #endif /* HWLOC_PORT_SYS_PROCESSOR_H */
