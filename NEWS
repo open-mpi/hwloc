@@ -24,7 +24,7 @@ Version 1.5.0
   + XML topology files do not depend on the locale anymore. Float numbers
     such as NUMA distances or PCI link speeds now always use a dot as a
     decimal separator.
-  + Add instruction caches detection on Linux, Windows and Darwin.
+  + Add instruction caches detection on Linux, AIX, Windows and Darwin.
 * API
   + Increase HWLOC_API_VERSION to 0x00010500 so that API changes may be
     detected at build-time.

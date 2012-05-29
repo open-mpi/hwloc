@@ -488,17 +488,34 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	break;
       case HWLOC_OBJ_CORE:
       {
-	hwloc_obj_t obj2 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, i);
+	hwloc_obj_t obj2, obj3;
+	obj2 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, i);
 	obj2->cpuset = hwloc_bitmap_dup(obj->cpuset);
 	obj2->attr->cache.size = _system_configuration.dcache_size;
 	obj2->attr->cache.associativity = _system_configuration.dcache_asc;
 	obj2->attr->cache.linesize = _system_configuration.dcache_line;
 	obj2->attr->cache.depth = 1;
-	obj2->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
-	hwloc_debug("Adding an L1 cache for core %d\n", i);
-	hwloc_insert_object_by_cpuset(topology, obj2);
-	/* FIXME _system_configuration.icache_size/asc/line for L1i,
-	 * or L1u if _system_configuration.cache_attrib & (1<<30) */
+	if (_system_configuration.cache_attrib & (1<<30)) {
+	  /* Unified cache */
+	  obj2->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
+	  hwloc_debug("Adding an L1u cache for core %d\n", i);
+	  hwloc_insert_object_by_cpuset(topology, obj2);
+	} else {
+	  /* Separate Instruction and Data caches */
+	  obj2->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
+	  hwloc_debug("Adding an L1d cache for core %d\n", i);
+	  hwloc_insert_object_by_cpuset(topology, obj2);
+
+	  obj3 = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, i);
+	  obj3->cpuset = hwloc_bitmap_dup(obj->cpuset);
+	  obj3->attr->cache.size = _system_configuration.icache_size;
+	  obj3->attr->cache.associativity = _system_configuration.icache_asc;
+	  obj3->attr->cache.linesize = _system_configuration.icache_line;
+	  obj3->attr->cache.depth = 1;
+	  obj3->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
+	  hwloc_debug("Adding an L1i cache for core %d\n", i);
+	  hwloc_insert_object_by_cpuset(topology, obj3);
+	}
 	break;
       }
       default:
