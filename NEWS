@@ -45,6 +45,9 @@ Version 1.5.0
     avoid dependencies on external libraries such as Cairo and X11. When
     supported, graphical outputs are only available in the original lstopo
     program.
+    - Packagers splitting lstopo and lstopo-no-graphics into different
+      packages are advised to use the alternatives system so that lstopo
+      points to the best available binary.
   + Instruction caches are enabled in lstopo by default. User --no-icaches
     to disable them.
   + Add -t/--threads to show threads in hwloc-ps.
