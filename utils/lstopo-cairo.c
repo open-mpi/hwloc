@@ -8,7 +8,6 @@
 
 #include <private/autogen/config.h>
 
-#ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
 
 #if CAIRO_HAS_PDF_SURFACE
@@ -525,5 +524,3 @@ output_svg(hwloc_topology_t topology, const char *filename, int logical, int leg
     fclose(output);
 }
 #endif /* CAIRO_HAS_SVG_SURFACE */
-
-#endif /* CAIRO */
