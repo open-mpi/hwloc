@@ -16,28 +16,29 @@ noinst_HEADERS = misc.h
 
 # Only build the utilities if we're building in standalone mode
 if HWLOC_BUILD_UTILS
-bin_PROGRAMS = lstopo hwloc-assembler hwloc-calc hwloc-bind hwloc-distances hwloc-distrib hwloc-ps
+bin_PROGRAMS = lstopo-no-graphics hwloc-assembler hwloc-calc hwloc-bind hwloc-distances hwloc-distrib hwloc-ps
 endif
 
-lstopo_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-xml.c
-if HWLOC_HAVE_WINDOWS
-lstopo_SOURCES += lstopo-windows.c
-endif
-lstopo_CFLAGS = $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
-lstopo_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
+lstopo_no_graphics_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-xml.c
+lstopo_no_graphics_CFLAGS = $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
+lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 if HWLOC_BUILD_UTILS
 if HWLOC_HAVE_WINDOWS
-bin_PROGRAMS += lstopo-win
+bin_PROGRAMS += lstopo lstopo-win
+lstopo_SOURCES = $(lstopo_no_graphics_SOURCES) lstopo-windows.c
+lstopo_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_GRAPHICS
+lstopo_LDADD = $(lstopo_no_graphics_LDADD)
 lstopo_win_SOURCES = $(lstopo_SOURCES)
+lstopo_win_CPPFLAGS = $(lstopo_CPPFLAGS)
 lstopo_win_CFLAGS = $(lstopo_CFLAGS) -mwindows
 lstopo_win_LDADD = $(lstopo_LDADD)
 endif
 if HWLOC_HAVE_CAIRO
-bin_PROGRAMS += lstopo-gui
-lstopo_gui_SOURCES = $(lstopo_SOURCES) lstopo-cairo.c
-lstopo_gui_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_CAIRO
-lstopo_gui_CFLAGS = $(lstopo_CFLAGS) $(HWLOC_CAIRO_CFLAGS)
-lstopo_gui_LDADD = $(lstopo_LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_X11_LIBS)
+bin_PROGRAMS += lstopo
+lstopo_SOURCES = $(lstopo_no_graphics_SOURCES) lstopo-cairo.c
+lstopo_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_GRAPHICS
+lstopo_CFLAGS = $(lstopo_no_graphics_CFLAGS) $(HWLOC_CAIRO_CFLAGS)
+lstopo_LDADD = $(lstopo_no_graphics_LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_X11_LIBS)
 endif
 endif
 
@@ -95,17 +96,28 @@ endif HWLOC_HAVE_LINUX
 
 install-exec-hook: install-man
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
-	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo$(EXEEXT) hwloc-info$(EXEEXT)
+	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo-no-graphics$(EXEEXT) hwloc-ls$(EXEEXT) && $(LN_S) lstopo-no-graphics$(EXEEXT) hwloc-info$(EXEEXT)
+if !HWLOC_HAVE_WINDOWS
+if !HWLOC_HAVE_CAIRO
+	rm -f $(DESTDIR)$(bindir)/lstopo
+	cd $(DESTDIR)$(bindir) && $(LN_S) lstopo-no-graphics$(EXEEXT) lstopo$(EXEEXT) || true
+endif
+endif
 	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1
 	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 hwloc-ls.1 && $(LN_S) lstopo.1 hwloc-info.1
-	rm -f $(DESTDIR)$(man1dir)/lstopo-gui.1
-	test -f $(DESTDIR)$(bindir)/lstopo-gui && cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 lstopo-gui.1 || true
+	rm -f $(DESTDIR)$(man1dir)/lstopo-no-graphics.1
+	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 lstopo-no-graphics.1
 	$(SED) -e 's/abs_top_builddir\/utils/bindir/' -e '/abs_top_builddir/d' $(DESTDIR)$(bindir)/hwloc-assembler-remote > $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp && mv -f $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp $(DESTDIR)$(bindir)/hwloc-assembler-remote
 	chmod +x $(DESTDIR)$(bindir)/hwloc-assembler-remote
 
 uninstall-local:
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT) $(DESTDIR)$(bindir)/hwloc-info$(EXEEXT)
-	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/lstopo-gui.1
+if !HWLOC_HAVE_WINDOWS
+if !HWLOC_HAVE_CAIRO
+	rm -f $(DESTDIR)$(bindir)/lstopo$(EXEEXT)
+endif
+endif
+	rm -f $(DESTDIR)$(man1dir)/hwloc-ls.1 $(DESTDIR)$(man1dir)/hwloc-info.1 $(DESTDIR)$(man1dir)/lstopo-no-graphics.1
 
 distclean-local:
 	rm -f $(nodist_man_MANS)

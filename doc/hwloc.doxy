@@ -66,7 +66,7 @@ not support topology information, and hwloc thus uses an x86-only CPUID-based
 backend (which could be used for other OSes too).
 
 To check whether hwloc works on a particular machine, just try to build it
-and run <tt>lstopo</tt> or <tt>lstopo-gui</tt>. If some things do not look right
+and run <tt>lstopo</tt> or <tt>lstopo-no-graphics</tt>. If some things do not look right
 (e.g. bogus or missing cache information), see \ref bugs below.
 
 hwloc only reports the number of processors on unsupported operating
@@ -139,7 +139,7 @@ shell$ make install
 The hwloc command-line tool "lstopo" produces human-readable topology
 maps, as mentioned above.  It can also export maps to the "fig" file
 format.  Support for PDF, Postscript, and PNG exporting is provided if
-the "Cairo" development package can be found in "lstopo-gui" when hwloc
+the "Cairo" development package can be found in "lstopo" when hwloc
 is configured and build.
 
 The hwloc core may also benefit from the following development packages:
@@ -158,7 +158,7 @@ The hwloc core may also benefit from the following development packages:
 \endhtmlonly
 \section cli_examples CLI Examples
 
-On a 4-socket 2-core machine with hyperthreading, the \c lstopo-gui tool
+On a 4-socket 2-core machine with hyperthreading, the \c lstopo tool
 may show the following graphical output:
 
 \image html dudley.png
@@ -267,7 +267,7 @@ tag is on a single line), and only socket #0 is shown for brevity:
 </topology>
 \endverbatim
 
-On a 4-socket 2-core Opteron NUMA machine, the \c lstopo-gui tool may show
+On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may show
 the following graphical output:
 
 \image html hagrid.png
@@ -475,13 +475,13 @@ hwlocality_membinding provide more information on which hwloc binding functions
 should be preferred because interfaces for them are usually available on the
 supported Operating Systems.
 
-Here's the graphical output from lstopo-gui on this platform when
+Here's the graphical output from lstopo on this platform when
 Simultaneous Multi-Threading (SMT) is enabled:
 
 \image html ppc64-with-smt.png
 \image latex ppc64-with-smt.pdf "" width=\textwidth
 
-And here's the graphical output from lstopo-gui on this platform when SMT is
+And here's the graphical output from lstopo on this platform when SMT is
 disabled:
 
 \image html ppc64-without-smt.png
@@ -782,17 +782,17 @@ command line utilities. Each of them is fully documented in its own
 manual page; the following is a summary of the available command line
 tools.
 
-\section cli_lstopo lstopo and lstopo-gui
+\section cli_lstopo lstopo and lstopo-no-graphics
 
 lstopo (also known as hwloc-info and hwloc-ls) displays the
 hierarchical topology map of the current system.  The output may be
 graphical or textual, and can also be exported to numerous file
 formats such as PDF, PNG, XML, and others.
 
-lstopo and lstopo-gui accept the same command-line options.
-However graphical outputs are only available in lstopo-gui.
+lstopo and lstopo-no-graphics accept the same command-line options.
+However graphical outputs are only available in lstopo.
 Textual outputs (those that do not depend on heavy external libraries
-such as Cairo) are supported in both lstopo and lstopo-gui.
+such as Cairo) are supported in both lstopo and lstopo-no-graphics.
 
 This command can also display the processes currently bound to a part
 of the machine (via the --ps option).

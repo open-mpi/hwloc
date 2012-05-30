@@ -2,14 +2,14 @@
 #-*-sh-*-
 
 #
-# Copyright © 2010 inria.  All rights reserved.
+# Copyright © 2012 Inria.  All rights reserved.
 # Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
 
 abs_top_builddir="@abs_top_builddir@"
-lstopo="$abs_top_builddir/utils/lstopo"
+lstopo="$abs_top_builddir/utils/lstopo-no-graphics"
 gather="$abs_top_builddir/tests/linux/hwloc-gather-topology"
 
 # make sure we use default numeric formats

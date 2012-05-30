@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2010 inria.  All rights reserved.
+# Copyright © 2009-2012 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
@@ -13,7 +13,7 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
 # this will be changed into $bindir/lstopo during make install
-lstopo="$abs_top_builddir/utils/lstopo"
+lstopo="$abs_top_builddir/utils/lstopo-no-graphics"
 
 # make sure we use default numeric formats
 LANG=C

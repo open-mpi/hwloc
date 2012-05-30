@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -19,8 +19,10 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#ifdef LSTOPO_HAVE_CAIRO
+#ifdef LSTOPO_HAVE_GRAPHICS
+#ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
+#endif
 #endif
 
 #ifdef HAVE_SETLOCALE
@@ -211,7 +213,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Usage: %s [ options ] ... [ filename.format ]\n\n", name);
   fprintf (where, "See lstopo(1) for more details.\n\n");
   fprintf (where, "Supported output file formats: console, txt, fig"
-#ifdef LSTOPO_HAVE_CAIRO
+#ifdef LSTOPO_HAVE_GRAPHICS
 #if CAIRO_HAS_PDF_SURFACE
 		  ", pdf"
 #endif /* CAIRO_HAS_PDF_SURFACE */
@@ -224,7 +226,7 @@ void usage(const char *name, FILE *where)
 #if CAIRO_HAS_SVG_SURFACE
 		  ", svg"
 #endif /* CAIRO_HAS_SVG_SURFACE */
-#endif /* LSTOPO_HAVE_CAIRO */
+#endif /* LSTOPO_HAVE_GRAPHICS */
 		  ", xml, synthetic"
 		  "\n");
   fprintf (where, "\nFormatting options:\n");
@@ -591,7 +593,7 @@ main (int argc, char *argv[])
 
   switch (output_format) {
     case LSTOPO_OUTPUT_DEFAULT:
-#ifdef LSTOPO_HAVE_CAIRO
+#ifdef LSTOPO_HAVE_GRAPHICS
 #if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
       if (getenv("DISPLAY")) {
         if (logical == -1)
@@ -599,14 +601,15 @@ main (int argc, char *argv[])
         output_x11(topology, NULL, logical, legend, verbose_mode);
       } else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
-#endif /* LSTOPO_HAVE_CAIRO */
 #ifdef HWLOC_WIN_SYS
       {
         if (logical == -1)
           logical = 0;
         output_windows(topology, NULL, logical, legend, verbose_mode);
       }
-#else
+#endif
+#endif /* !LSTOPO_HAVE_GRAPHICS */
+#if !defined HWLOC_WIN_SYS || !defined LSTOPO_HAVE_GRAPHICS
       {
         if (logical == -1)
           logical = 1;
@@ -627,7 +630,7 @@ main (int argc, char *argv[])
     case LSTOPO_OUTPUT_FIG:
       output_fig(topology, filename, logical, legend, verbose_mode);
       break;
-#ifdef LSTOPO_HAVE_CAIRO
+#ifdef LSTOPO_HAVE_GRAPHICS
 # if CAIRO_HAS_PNG_FUNCTIONS
     case LSTOPO_OUTPUT_PNG:
       output_png(topology, filename, logical, legend, verbose_mode);
@@ -648,7 +651,7 @@ main (int argc, char *argv[])
       output_svg(topology, filename, logical, legend, verbose_mode);
       break;
 #endif /* CAIRO_HAS_SVG_SURFACE */
-#endif /* LSTOPO_HAVE_CAIRO */
+#endif /* LSTOPO_HAVE_GRAPHICS */
     case LSTOPO_OUTPUT_XML:
       output_xml(topology, filename, logical, legend, verbose_mode);
       break;

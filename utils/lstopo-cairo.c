@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -8,7 +8,6 @@
 
 #include <private/autogen/config.h>
 
-#ifdef HWLOC_HAVE_CAIRO
 #include <cairo.h>
 
 #if CAIRO_HAS_PDF_SURFACE
@@ -525,5 +524,3 @@ output_svg(hwloc_topology_t topology, const char *filename, int logical, int leg
     fclose(output);
 }
 #endif /* CAIRO_HAS_SVG_SURFACE */
-
-#endif /* CAIRO */

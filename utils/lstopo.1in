@@ -1,11 +1,11 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2012 inria.  All rights reserved.
+.\" Copyright © 2009-2012 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH LSTOPO "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
 .SH NAME
-lstopo, lstopo-gui \- Show the topology of the system (note that hwloc-bind(1)
+lstopo, lstopo-no-graphics \- Show the topology of the system (note that hwloc-bind(1)
 provides a detailed explanation of the hwloc system; it should be read
 before reading this man page).
 .
@@ -18,7 +18,7 @@ before reading this man page).
 [ \fIoptions \fR]... [ \fIfilename \fR]
 .
 .PP
-.B lstopo-gui
+.B lstopo-no-graphics
 [ \fIoptions \fR]... [ \fIfilename \fR]
 .
 .\" **************************
@@ -172,14 +172,14 @@ Report version and exit.
 .\" **************************
 .SH DESCRIPTION
 .
-lstopo and lstopo-gui are capable of displaying a topological map of
+lstopo and lstopo-no-graphics are capable of displaying a topological map of
 the system in a variety of different output formats.  The only difference
-between lstopo and lstopo-gui is that graphical outputs are not
+between lstopo and lstopo-no-graphics is that graphical outputs are only
 supported by lstopo, to reduce dependencies on external libraries.
 .
 .PP
 If no filename is specified and the DISPLAY environment variable is set,
-lstopo-gui displays the map in a graphical window.  If no filename is
+lstopo displays the map in a graphical window.  If no filename is
 specified and the DISPLAY environment variable is
 .I not
 set, a text summary is displayed.
@@ -228,23 +228,23 @@ Output a representation of the map that can be loaded in Xfig.
 .
 .TP
 .B pdf
-If lstopo-gui was compiled with the proper
-support, lstopo-gui outputs a PDF representation of the map.
+If lstopo was compiled with the proper
+support, lstopo outputs a PDF representation of the map.
 .
 .TP
 .B ps
-If lstopo-gui was compiled with the proper
-support, lstopo-gui outputs a Postscript representation of the map.
+If lstopo was compiled with the proper
+support, lstopo outputs a Postscript representation of the map.
 .
 .TP
 .B png
-If lstopo-gui was compiled with the proper
-support, lstopo-gui outputs a PNG representation of the map.
+If lstopo was compiled with the proper
+support, lstopo outputs a PNG representation of the map.
 .
 .TP
 .B svg
-If lstopo-gui was compiled with the proper
-support, lstopo-gui outputs an SVG representation of the map.
+If lstopo was compiled with the proper
+support, lstopo outputs an SVG representation of the map.
 .
 .TP
 .B synthetic
@@ -331,20 +331,20 @@ topology (lstopo is not able to render that yet).
 .
 To display the machine topology in textual mode:
 
-    lstopo
+    lstopo-no-graphics
 
 To display the machine topology in pseudo-graphical mode:
 
-    lstopo -.txt
+    lstopo-no-graphics -.txt
 
 To display in graphical mode (assuming that the DISPLAY environment
 variable is set to a relevant value):
 
-    lstopo-gui
+    lstopo
 
 To export the topology to a PNG file:
 
-    lstopo-gui file.png
+    lstopo file.png
 
 To export an XML file on a machine and later display the corresponding
 graphical output on another machine:
