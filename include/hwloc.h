@@ -1493,10 +1493,18 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
 
 /** \defgroup hwlocality_membinding Memory binding
  *
- * \note Not all operating systems support all ways to bind existing
- * allocated memory (e.g., migration), future memory allocation,
- * explicit memory allocation, etc.  Using a binding flag or policy
- * that is not supported by the underlying OS will cause hwloc's
+ * Memory binding can be done three ways:
+ *
+ * - explicit memory allocation thanks to hwloc_alloc_membind and friends: the
+ *   binding will have effect on the memory allocated by these functions.
+ * - implicit memory binding through binding policy: hwloc_set_membind and
+ *   friends only define the current policy of the process, which will be
+ *   applied to the subsequent calls to malloc() and friends.
+ * - migration of existing memory ranges, thanks to hwloc_set_area_membind()
+ *   and friends, which move already-allocated data.
+ *
+ * \note Not all operating systems support all three ways Using a binding flag
+ * or policy that is not supported by the underlying OS will cause hwloc's
  * binding functions to fail and return -1.  errno will be set to
  * ENOSYS when the system does support the specified action or policy
  * (e.g., some systems only allow binding memory on a per-thread
