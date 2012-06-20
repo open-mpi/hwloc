@@ -402,7 +402,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 	 * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
 	 * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
 	 */
-        float lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8 * 128/130; /* Gbit/s per lane */
+        float lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
         obj->attr->pcidev.linkspeed = lanespeed * width / 8; /* GB/s */
       }
     }
