@@ -443,6 +443,8 @@ extern "C" {
 #define hwloc_set_linuxfs_hooks HWLOC_NAME(set_linuxfs_hooks)
 #define hwloc_backend_linuxfs_init HWLOC_NAME(backend_linuxfs_init)
 #define hwloc_backend_linuxfs_exit HWLOC_NAME(backend_linuxfs_exit)
+#define hwloc_linuxfs_pci_lookup_osdevices HWLOC_NAME(linuxfs_pci_lookup_osdevices)
+#define hwloc_linuxfs_get_pcidev_cpuset HWLOC_NAME(linuxfs_get_pcidev_cpuset)
 
 #define hwloc_backend_xml_init HWLOC_NAME(backend_xml_init)
 #define hwloc_look_xml HWLOC_NAME(look_xml)

@@ -3394,3 +3394,303 @@ hwloc_set_linuxfs_hooks(struct hwloc_topology *topology)
   topology->support.membind->migrate_membind = 1;
 #endif
 }
+
+/*
+ * Linux PCI callback
+ *
+ * Does not support changing the fsroot
+ */
+
+static hwloc_obj_t
+hwloc_linux_add_os_device(struct hwloc_topology *topology, struct hwloc_obj *pcidev, hwloc_obj_osdev_type_t type, const char *name)
+{
+  struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
+  obj->name = strdup(name);
+  obj->logical_index = -1;
+  obj->attr->osdev.type = type;
+
+  hwloc_insert_object_by_parent(topology, pcidev, obj);
+
+  return obj;
+}
+
+typedef void (*hwloc_linux_class_fillinfos_t)(struct hwloc_topology *topology, struct hwloc_obj *osdev, const char *osdevpath);
+
+/* look for objects of the given class below a sysfs directory */
+static void
+hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *devicepath,
+			  hwloc_obj_osdev_type_t type, const char *classname,
+			  hwloc_linux_class_fillinfos_t fillinfo)
+{
+  size_t classnamelen = strlen(classname);
+  char path[256];
+  DIR *dir;
+  struct dirent *dirent;
+  hwloc_obj_t obj;
+
+  snprintf(path, sizeof(path), "%s/%s", devicepath, classname);
+  dir = opendir(path);
+  if (dir) {
+    /* modern sysfs: <device>/<class>/<name> */
+    while ((dirent = readdir(dir)) != NULL) {
+      if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+	continue;
+      obj = hwloc_linux_add_os_device(topology, pcidev, type, dirent->d_name);
+      if (fillinfo) {
+	snprintf(path, sizeof(path), "%s/%s/%s", devicepath, classname, dirent->d_name);
+	fillinfo(topology, obj, path);
+      }
+    }
+    closedir(dir);
+  } else {
+    /* deprecated sysfs: <device>/<class>:<name> */
+    dir = opendir(devicepath);
+    if (dir) {
+      while ((dirent = readdir(dir)) != NULL) {
+	if (strncmp(dirent->d_name, classname, classnamelen) || dirent->d_name[classnamelen] != ':')
+	  continue;
+	obj = hwloc_linux_add_os_device(topology, pcidev, type, dirent->d_name + classnamelen+1);
+	if (fillinfo) {
+	  snprintf(path, sizeof(path), "%s/%s", devicepath, dirent->d_name);
+	  fillinfo(topology, obj, path);
+	}
+      }
+      closedir(dir);
+    }
+  }
+}
+
+/* class objects that are immediately below pci devices */
+static void
+hwloc_linux_net_class_fillinfos(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, const char *osdevpath)
+{
+  FILE *fd;
+  struct stat st;
+  char path[256];
+  snprintf(path, sizeof(path), "%s/address", osdevpath);
+  fd = fopen(path, "r");
+  if (fd) {
+    char address[128];
+    if (fgets(address, sizeof(address), fd)) {
+      char *eol = strchr(address, '\n');
+      if (eol)
+        *eol = 0;
+      hwloc_obj_add_info(obj, "Address", address);
+    }
+    fclose(fd);
+  }
+  snprintf(path, sizeof(path), "%s/device/infiniband", osdevpath);
+  if (!stat(path, &st)) {
+    snprintf(path, sizeof(path), "%s/dev_id", osdevpath);
+    fd = fopen(path, "r");
+    if (fd) {
+      char hexid[16];
+      if (fgets(hexid, sizeof(hexid), fd)) {
+	char *eoid;
+	unsigned long port;
+	port = strtoul(hexid, &eoid, 0);
+	if (eoid != hexid) {
+	  char portstr[16];
+	  snprintf(portstr, sizeof(portstr), "%ld", port+1);
+	  hwloc_obj_add_info(obj, "Port", portstr);
+	}
+      }
+      fclose(fd);
+    }
+  }
+}
+static void
+hwloc_linux_lookup_net_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_NETWORK, "net", hwloc_linux_net_class_fillinfos);
+}
+static void
+hwloc_linux_lookup_openfabrics_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_OPENFABRICS, "infiniband", NULL);
+}
+static void
+hwloc_linux_lookup_dma_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_DMA, "dma", NULL);
+}
+static void
+hwloc_linux_lookup_drm_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_GPU, "drm", NULL);
+
+  /* we could look at the "graphics" class too, but it doesn't help for proprietary drivers either */
+
+  /* GPU devices (even with a proprietary driver) seem to have a boot_vga field in their PCI device directory (since 2.6.30),
+   * so we could create a OS device for each PCI devices with such a field.
+   * boot_vga is actually created when class >> 8 == VGA (it contains 1 for boot vga device), so it's trivial anyway.
+   */
+}
+
+/* block class objects are in
+ * host%d/target%d:%d:%d/%d:%d:%d:%d/
+ * or
+ * host%d/port-%d:%d/end_device-%d:%d/target%d:%d:%d/%d:%d:%d:%d/
+ * or
+ * ide%d/%d.%d/
+ * below pci devices */
+static void
+hwloc_linux_lookup_host_block_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, char *path, size_t pathlen)
+{
+  DIR *hostdir, *portdir, *targetdir;
+  struct dirent *hostdirent, *portdirent, *targetdirent;
+  int dummy;
+  hostdir = opendir(path);
+  if (!hostdir)
+    return;
+  while ((hostdirent = readdir(hostdir)) != NULL) {
+    if (sscanf(hostdirent->d_name, "port-%d:%d", &dummy, &dummy) == 2)
+    {
+      /* found host%d/port-%d:%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], hostdirent->d_name);
+      pathlen += 1+strlen(hostdirent->d_name);
+      portdir = opendir(path);
+      if (!portdir)
+	continue;
+      while ((portdirent = readdir(portdir)) != NULL) {
+	if (sscanf(portdirent->d_name, "end_device-%d:%d", &dummy, &dummy) == 2) {
+	  /* found host%d/port-%d:%d/end_device-%d:%d */
+	  path[pathlen] = '/';
+	  strcpy(&path[pathlen+1], portdirent->d_name);
+	  pathlen += 1+strlen(portdirent->d_name);
+	  hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
+	  pathlen -= 1+strlen(portdirent->d_name);
+	  path[pathlen] = '\0';
+	}
+      }
+      closedir(portdir);
+      /* restore parent path */
+      pathlen -= 1+strlen(hostdirent->d_name);
+      path[pathlen] = '\0';
+      continue;
+    } else if (sscanf(hostdirent->d_name, "target%d:%d:%d", &dummy, &dummy, &dummy) == 3) {
+      /* found host%d/target%d:%d:%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], hostdirent->d_name);
+      pathlen += 1+strlen(hostdirent->d_name);
+      targetdir = opendir(path);
+      if (!targetdir)
+	continue;
+      while ((targetdirent = readdir(targetdir)) != NULL) {
+	if (sscanf(targetdirent->d_name, "%d:%d:%d:%d", &dummy, &dummy, &dummy, &dummy) != 4)
+	  continue;
+	/* found host%d/target%d:%d:%d/%d:%d:%d:%d */
+	path[pathlen] = '/';
+	strcpy(&path[pathlen+1], targetdirent->d_name);
+	pathlen += 1+strlen(targetdirent->d_name);
+	/* lookup block class for real */
+	hwloc_linux_class_readdir(topology, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", NULL);
+	/* restore parent path */
+	pathlen -= 1+strlen(targetdirent->d_name);
+	path[pathlen] = '\0';
+      }
+      closedir(targetdir);
+      /* restore parent path */
+      pathlen -= 1+strlen(hostdirent->d_name);
+      path[pathlen] = '\0';
+    }
+  }
+  closedir(hostdir);
+}
+
+static void
+hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  size_t pathlen;
+  DIR *devicedir, *hostdir;
+  struct dirent *devicedirent, *hostdirent;
+  char path[256];
+  int dummy;
+
+  strcpy(path, pcidevpath);
+  pathlen = strlen(path);
+
+  devicedir = opendir(pcidevpath);
+  if (!devicedir)
+    return;
+  while ((devicedirent = readdir(devicedir)) != NULL) {
+    if (sscanf(devicedirent->d_name, "ide%d", &dummy) == 1) {
+      /* found ide%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], devicedirent->d_name);
+      pathlen += 1+strlen(devicedirent->d_name);
+      hostdir = opendir(path);
+      if (!hostdir)
+	continue;
+      while ((hostdirent = readdir(hostdir)) != NULL) {
+	if (sscanf(hostdirent->d_name, "%d.%d", &dummy, &dummy) == 2) {
+	  /* found ide%d/%d.%d */
+	  path[pathlen] = '/';
+	  strcpy(&path[pathlen+1], hostdirent->d_name);
+	  pathlen += 1+strlen(hostdirent->d_name);
+	  /* lookup block class for real */
+	  hwloc_linux_class_readdir(topology, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", NULL);
+	  /* restore parent path */
+	  pathlen -= 1+strlen(hostdirent->d_name);
+	  path[pathlen] = '\0';
+	}
+      }
+    } else if (sscanf(devicedirent->d_name, "host%d", &dummy) == 1) {
+      /* found host%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], devicedirent->d_name);
+      pathlen += 1+strlen(devicedirent->d_name);
+      hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
+      /* restore parent path */
+      pathlen -= 1+strlen(devicedirent->d_name);
+      path[pathlen] = '\0';
+    }
+  }
+  closedir(devicedir);
+}
+
+void
+hwloc_linuxfs_pci_lookup_osdevices(struct hwloc_topology *topology, struct hwloc_obj *pcidev)
+{
+  char pcidevpath[256];
+
+  /* this should not be called if the backend isn't the real OS one */
+  assert(!topology->backend_params.linuxfs.root_path
+	 || !strcmp(topology->backend_params.linuxfs.root_path, "/"));
+
+  snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
+	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
+	   pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
+
+  hwloc_linux_lookup_net_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_openfabrics_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_dma_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_drm_class(topology, pcidev, pcidevpath);
+  hwloc_linux_lookup_block_class(topology, pcidev, pcidevpath);
+}
+
+int
+hwloc_linuxfs_get_pcidev_cpuset(struct hwloc_topology *topology __hwloc_attribute_unused,
+				struct hwloc_obj *pcidev, hwloc_bitmap_t cpuset)
+{
+  char path[256];
+  FILE *file;
+  int err;
+
+  /* this should not be called if the backend isn't the real OS one */
+  assert(!topology->backend_params.linuxfs.root_path
+	 || !strcmp(topology->backend_params.linuxfs.root_path, "/"));
+
+  snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
+	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
+	   pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
+  file = fopen(path, "r"); /* the libpci backend doesn't use sysfs.fsroot */
+  if (file) {
+    err = hwloc_linux_parse_cpumap_file(file, cpuset);
+    fclose(file);
+    if (!err && !hwloc_bitmap_iszero(cpuset))
+      return 0;
+  }
+  return -1;
+}
