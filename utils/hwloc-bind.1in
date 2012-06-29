@@ -192,6 +192,12 @@ This returns a string describing the memory binding, such as "0x000000f0
 (interleave)".  Note that if the system does not contain any NUMA
 nodes, the reported string will indicate that the process is bound to
 the entire system memory (e.g., "0xf...f").
+.SH HINT
+To check what the result actually is, use
+
+    hwloc-bind blabla -- lstopo --pid 0
+
+lstopo will graphically show where it is bound to by hwloc-bind.
 .
 .\" **************************
 .\"    Return value section
