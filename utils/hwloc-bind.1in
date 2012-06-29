@@ -193,9 +193,9 @@ This returns a string describing the memory binding, such as "0x000000f0
 nodes, the reported string will indicate that the process is bound to
 the entire system memory (e.g., "0xf...f").
 .SH HINT
-To check what the result actually is, use
+To check what the result actually is, use for instance
 
-    hwloc-bind blabla -- lstopo --pid 0
+    hwloc-bind core:2 -- lstopo --pid 0
 
 lstopo will graphically show where it is bound to by hwloc-bind.
 .
