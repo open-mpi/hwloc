@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2010 inria.  All rights reserved.
+.\" Copyright © 2009-2012 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -193,10 +193,11 @@ This returns a string describing the memory binding, such as "0x000000f0
 nodes, the reported string will indicate that the process is bound to
 the entire system memory (e.g., "0xf...f").
 .SH HINT
-To check what the result actually is, use for instance
+If the graphics-enabled lstopo is available, use for instance
 
     hwloc-bind core:2 -- lstopo --pid 0
 
+to check what the result of your binding command actually is.
 lstopo will graphically show where it is bound to by hwloc-bind.
 .
 .\" **************************

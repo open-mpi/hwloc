@@ -135,8 +135,11 @@ a custom topology such as an XML file.
 .TP
 \fB\-\-pid\fR <pid>
 Detect topology as seen by process <pid>, i.e. as if process <pid> did the
-discovery itself, and show its current binding. Note that this can for instance
-change the set of allowed processors. If 0 is given as pid, the current binding for the lstopo process will be shown.
+discovery itself.
+Note that this can for instance change the set of allowed processors.
+Also show this process current CPU binding in the graphical output
+(in Green, see the COLORS section below).
+If 0 is given as pid, the current binding for the lstopo process will be shown.
 .TP
 \fB\-\-ps\fR \fB\-\-top\fR
 Show existing processes as misc objects in the output. To avoid uselessly
@@ -212,9 +215,12 @@ be used with "\-\-of" or as a filename suffix.
 .TP
 .B default
 Send the output to a window or to the console depending on the environment.
+.
 .TP
 .B console
 Send a text summary to stdout.
+No color annotation for binding, unallowed or offline processors
+is shown in this mode; see the COLORS section, below.
 .
 .TP
 .B txt
@@ -289,11 +295,13 @@ Individual CPUs are colored in the semi-graphical and graphical output
 formats to indicate different characteristics:
 .TP
 Green
-The CPU is in the current CPU binding mask.
+The topology is reported as seen by a specific process (see \fB\-\-pid\fR),
+and the given CPU is in this process CPU binding mask.
 .TP
 White
-The CPU is in the allowed set (see below), but it is not in the
-current CPU binding mask.
+The CPU is in the allowed set (see below).
+If the topology is reported as seen by a specific process (see \fB\-\-pid\fR),
+the given CPU is also not in this process CPU binding mask.
 .TP
 Red
 The CPU is not in the allowed set (see below).
@@ -313,6 +321,10 @@ set.  Hence, invoking lstopo in different contexts and/or as different
 users may display different colors for the same individual CPUs (e.g.,
 running lstopo in one context may show a specific CPU as red, but
 running lstopo in a different context may show the same CPU as white).
+.PP
+Some lstopo output modes, e.g. the console mode (default non-graphical output),
+do not support colors at all.
+The above characteristics are not shown in this case.
 .
 .\" **************************
 .\"    Layout Section
