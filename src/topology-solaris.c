@@ -616,7 +616,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
   if (look_chips) {
     struct hwloc_obj *obj;
-    unsigned j;
+    unsigned j,k;
     hwloc_debug("%d Sockets\n", numsockets);
     for (j = 0; j < numsockets; j++) {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock_to_Psock[j]);
@@ -624,18 +624,46 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	hwloc_obj_add_info(obj, "CPUType", CPUType);
       if (CPUModel)
 	hwloc_obj_add_info(obj, "CPUModel", CPUModel);
-      hwloc_object_cpuset_from_array(obj, j, Pproc_to_Lsock, procid_max);
+      obj->cpuset = hwloc_bitmap_alloc();
+      for(k=0; k<procid_max; k++)
+	if (Pproc_to_Lsock[k] == j)
+	  hwloc_bitmap_set(obj->cpuset, k);
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
     hwloc_debug("%s", "\n");
   }
 
-  if (look_cores)
-    hwloc_setup_level(procid_max, numcores, Lcore_to_Pcore, Pproc_to_Lcore, topology, HWLOC_OBJ_CORE);
-
-  if (numprocs)
-    hwloc_setup_level(procid_max, numprocs, Lproc_to_Pproc, Pproc_to_Lproc, topology, HWLOC_OBJ_PU);
+  if (look_cores) {
+    struct hwloc_obj *obj;
+    unsigned j,k;
+    hwloc_debug("%d Cores\n", numcores);
+    for (j = 0; j < numcores; j++) {
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, Lcore_to_Pcore[j]);
+      obj->cpuset = hwloc_bitmap_alloc();
+      for(k=0; k<procid_max; k++)
+	if (Pproc_to_Lcore[k] == j)
+	  hwloc_bitmap_set(obj->cpuset, k);
+      hwloc_debug_1arg_bitmap("Core %d has cpuset %s\n", j, obj->cpuset);
+      hwloc_insert_object_by_cpuset(topology, obj);
+    }
+    hwloc_debug("%s", "\n");
+  }
+  if (numprocs) {
+    struct hwloc_obj *obj;
+    unsigned j,k;
+    hwloc_debug("%d PUs\n", numcores);
+    for (j = 0; j < numprocs; j++) {
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, Lproc_to_Pproc[j]);
+      obj->cpuset = hwloc_bitmap_alloc();
+      for(k=0; k<procid_max; k++)
+	if (Pproc_to_Lproc[k] == j)
+	  hwloc_bitmap_set(obj->cpuset, k);
+      hwloc_debug_1arg_bitmap("PU %d has cpuset %s\n", j, obj->cpuset);
+      hwloc_insert_object_by_cpuset(topology, obj);
+    }
+    hwloc_debug("%s", "\n");
+  }
 
   kstat_close(kc);
 
