@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -438,7 +438,6 @@ hwloc_look_lgrp(struct hwloc_topology *topology)
 
 #ifdef HAVE_LIBKSTAT
 #include <kstat.h>
-#define HWLOC_NBMAXCPUS 1024 /* FIXME: drop */
 static int
 hwloc_look_kstat(struct hwloc_topology *topology)
 {
@@ -452,41 +451,47 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   unsigned look_cores = 1, look_chips = 1;
 
   unsigned Pproc_max = 0;
+  unsigned Pproc_alloc = 256;
   struct hwloc_solaris_Pproc {
     unsigned Lsock, Psock, Lcore, Lproc;
-  } Pproc[HWLOC_NBMAXCPUS];
+  } * Pproc = malloc(Pproc_alloc * sizeof(*Pproc));
 
   unsigned Lproc_num = 0;
+  unsigned Lproc_alloc = 256;
   struct hwloc_solaris_Lproc {
     unsigned Pproc;
-  } Lproc[HWLOC_NBMAXCPUS];
+  } * Lproc = malloc(Lproc_alloc * sizeof(*Lproc));
 
   unsigned Lcore_num = 0;
+  unsigned Lcore_alloc = 256;
   struct hwloc_solaris_Lcore {
     unsigned Pcore, Psock;
-  } Lcore[HWLOC_NBMAXCPUS];
+  } * Lcore = malloc(Lcore_alloc * sizeof(*Lcore));
 
   unsigned Lsock_num = 0;
+  unsigned Lsock_alloc = 256;
   struct hwloc_solaris_Lsock {
     unsigned Psock;
-  } Lsock[HWLOC_NBMAXCPUS];
+  } * Lsock = malloc(Lsock_alloc * sizeof(*Lsock));
 
   unsigned sockid, coreid, cpuid;
   unsigned i;
 
-  for (cpuid = 0; cpuid < HWLOC_NBMAXCPUS; cpuid++)
-    {
-      Pproc[cpuid].Lproc = -1;
-      Pproc[cpuid].Lsock = -1;
-      Pproc[cpuid].Psock = -1;
-      Pproc[cpuid].Lcore = -1;
-    }
+  for (i = 0; i < Pproc_alloc; i++) {
+    Pproc[i].Lproc = -1;
+    Pproc[i].Lsock = -1;
+    Pproc[i].Psock = -1;
+    Pproc[i].Lcore = -1;
+  }
 
-  if (!kc)
-    {
-      hwloc_debug("kstat_open failed: %s\n", strerror(errno));
-      return 0;
-    }
+  if (!kc) {
+    hwloc_debug("kstat_open failed: %s\n", strerror(errno));
+    free(Pproc);
+    free(Lproc);
+    free(Lcore);
+    free(Lsock);
+    return 0;
+  }
 
   for (ksp = kc->kc_chain; ksp; ksp = ksp->ks_next)
     {
@@ -494,11 +499,6 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	continue;
 
       cpuid = ksp->ks_instance;
-      if (cpuid > HWLOC_NBMAXCPUS)
-	{
-	  fprintf(stderr,"CPU id too big: %u\n", cpuid);
-	  continue;
-	}
 
       if (kstat_read(kc, ksp, NULL) == -1)
 	{
@@ -507,7 +507,23 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	}
 
       hwloc_debug("cpu%u\n", cpuid);
+
+      if (cpuid >= Pproc_alloc) {
+	Pproc_alloc *= 2;
+	Pproc = realloc(Pproc, Pproc_alloc * sizeof(*Pproc));
+	for(i = Pproc_alloc/2; i < Pproc_alloc; i++) {
+	  Pproc[i].Lproc = -1;
+	  Pproc[i].Lsock = -1;
+	  Pproc[i].Psock = -1;
+	  Pproc[i].Lcore = -1;
+	}
+      }
       Pproc[cpuid].Lproc = Lproc_num;
+
+      if (Lproc_num >= Lproc_alloc) {
+	Lproc_alloc *= 2;
+	Lproc = realloc(Lproc, Lproc_alloc * sizeof(*Lproc));
+      }
       Lproc[Lproc_num].Pproc = cpuid;
       Lproc_num++;
 
@@ -565,8 +581,13 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    break;
 	Pproc[cpuid].Lsock = i;
 	hwloc_debug("%u on socket %u (%u)\n", cpuid, i, sockid);
-	if (i == Lsock_num)
+	if (i == Lsock_num) {
+	  if (Lsock_num == Lsock_alloc) {
+	    Lsock_alloc *= 2;
+	    Lsock = realloc(Lsock, Lsock_alloc * sizeof(*Lsock));
+	  }
 	  Lsock[Lsock_num++].Psock = sockid;
+	}
       } while(0);
 
       if (look_cores) do {
@@ -606,11 +627,14 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    break;
 	Pproc[cpuid].Lcore = i;
 	hwloc_debug("%u on core %u (%u)\n", cpuid, i, coreid);
-	if (i == Lcore_num)
-	  {
-	    Lcore[Lcore_num].Psock = Pproc[cpuid].Psock;
-	    Lcore[Lcore_num++].Pcore = coreid;
+	if (i == Lcore_num) {
+	  if (Lcore_num == Lcore_alloc) {
+	    Lcore_alloc *= 2;
+	    Lcore = realloc(Lcore, Lcore_alloc * sizeof(*Lcore));
 	  }
+	  Lcore[Lcore_num].Psock = Pproc[cpuid].Psock;
+	  Lcore[Lcore_num++].Pcore = coreid;
+	}
       } while(0);
 
       /* Note: there is also clog_id for the Thread ID (not unique) and
@@ -670,6 +694,11 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   }
 
   kstat_close(kc);
+
+  free(Pproc);
+  free(Lproc);
+  free(Lcore);
+  free(Lsock);
 
   return Lproc_num > 0;
 }

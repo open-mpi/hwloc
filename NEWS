@@ -20,6 +20,7 @@ in v0.9.1).
 Version 1.5.0
 -------------
 * Backends
+  + Do not limit the number of processors to 1024 on Solaris anymore.
   + Gather total machine memory on FreeBSD.
   + XML topology files do not depend on the locale anymore. Float numbers
     such as NUMA distances or PCI link speeds now always use a dot as a
