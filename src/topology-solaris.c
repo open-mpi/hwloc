@@ -452,30 +452,30 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   unsigned look_cores = 1, look_chips = 1;
 
   unsigned numsockets = 0;
-  unsigned proc_physids[HWLOC_NBMAXCPUS];
-  unsigned proc_osphysids[HWLOC_NBMAXCPUS];
-  unsigned osphysids[HWLOC_NBMAXCPUS];
-
   unsigned numcores = 0;
-  unsigned proc_coreids[HWLOC_NBMAXCPUS];
-  unsigned oscoreids[HWLOC_NBMAXCPUS];
-
-  unsigned core_osphysids[HWLOC_NBMAXCPUS];
-
   unsigned numprocs = 0;
-  unsigned proc_procids[HWLOC_NBMAXCPUS];
-  unsigned osprocids[HWLOC_NBMAXCPUS];
 
-  unsigned physid, coreid, cpuid;
+  unsigned Pproc_to_Lsock[HWLOC_NBMAXCPUS];
+  unsigned Pproc_to_Psock[HWLOC_NBMAXCPUS];
+  unsigned Pproc_to_Lcore[HWLOC_NBMAXCPUS];
+  unsigned Pproc_to_Lproc[HWLOC_NBMAXCPUS];
+  unsigned Lproc_to_Pproc[HWLOC_NBMAXCPUS];
+
+  unsigned Lsock_to_Psock[HWLOC_NBMAXCPUS];
+
+  unsigned Lcore_to_Pcore[HWLOC_NBMAXCPUS];
+  unsigned Lcore_to_Psock[HWLOC_NBMAXCPUS];
+
+  unsigned sockid, coreid, cpuid;
   unsigned procid_max = 0;
   unsigned i;
 
   for (cpuid = 0; cpuid < HWLOC_NBMAXCPUS; cpuid++)
     {
-      proc_procids[cpuid] = -1;
-      proc_physids[cpuid] = -1;
-      proc_osphysids[cpuid] = -1;
-      proc_coreids[cpuid] = -1;
+      Pproc_to_Lproc[cpuid] = -1;
+      Pproc_to_Lsock[cpuid] = -1;
+      Pproc_to_Psock[cpuid] = -1;
+      Pproc_to_Lcore[cpuid] = -1;
     }
 
   if (!kc)
@@ -503,8 +503,8 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	}
 
       hwloc_debug("cpu%u\n", cpuid);
-      proc_procids[cpuid] = numprocs;
-      osprocids[numprocs] = cpuid;
+      Pproc_to_Lproc[cpuid] = numprocs;
+      Lproc_to_Pproc[numprocs] = cpuid;
       numprocs++;
 
       if (cpuid >= procid_max)
@@ -537,17 +537,17 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	  }
 	switch (stat->data_type) {
 	  case KSTAT_DATA_INT32:
-	    physid = stat->value.i32;
+	    sockid = stat->value.i32;
 	    break;
 	  case KSTAT_DATA_UINT32:
-	    physid = stat->value.ui32;
+	    sockid = stat->value.ui32;
 	    break;
 #ifdef _INT64_TYPE
 	  case KSTAT_DATA_UINT64:
-	    physid = stat->value.ui64;
+	    sockid = stat->value.ui64;
 	    break;
 	  case KSTAT_DATA_INT64:
-	    physid = stat->value.i64;
+	    sockid = stat->value.i64;
 	    break;
 #endif
 	  default:
@@ -555,14 +555,14 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    look_chips = 0;
 	    continue;
 	}
-	proc_osphysids[cpuid] = physid;
+	Pproc_to_Psock[cpuid] = sockid;
 	for (i = 0; i < numsockets; i++)
-	  if (physid == osphysids[i])
+	  if (sockid == Lsock_to_Psock[i])
 	    break;
-	proc_physids[cpuid] = i;
-	hwloc_debug("%u on socket %u (%u)\n", cpuid, i, physid);
+	Pproc_to_Lsock[cpuid] = i;
+	hwloc_debug("%u on socket %u (%u)\n", cpuid, i, sockid);
 	if (i == numsockets)
-	  osphysids[numsockets++] = physid;
+	  Lsock_to_Psock[numsockets++] = sockid;
       } while(0);
 
       if (look_cores) do {
@@ -598,14 +598,14 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    continue;
 	}
 	for (i = 0; i < numcores; i++)
-	  if (coreid == oscoreids[i] && proc_osphysids[cpuid] == core_osphysids[i])
+	  if (coreid == Lcore_to_Pcore[i] && Pproc_to_Psock[cpuid] == Lcore_to_Psock[i])
 	    break;
-	proc_coreids[cpuid] = i;
+	Pproc_to_Lcore[cpuid] = i;
 	hwloc_debug("%u on core %u (%u)\n", cpuid, i, coreid);
 	if (i == numcores)
 	  {
-	    core_osphysids[numcores] = proc_osphysids[cpuid];
-	    oscoreids[numcores++] = coreid;
+	    Lcore_to_Psock[numcores] = Pproc_to_Psock[cpuid];
+	    Lcore_to_Pcore[numcores++] = coreid;
 	  }
       } while(0);
 
@@ -619,12 +619,12 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     unsigned j;
     hwloc_debug("%d Sockets\n", numsockets);
     for (j = 0; j < numsockets; j++) {
-      obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, osphysids[j]);
+      obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock_to_Psock[j]);
       if (CPUType)
 	hwloc_obj_add_info(obj, "CPUType", CPUType);
       if (CPUModel)
 	hwloc_obj_add_info(obj, "CPUModel", CPUModel);
-      hwloc_object_cpuset_from_array(obj, j, proc_physids, procid_max);
+      hwloc_object_cpuset_from_array(obj, j, Pproc_to_Lsock, procid_max);
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", j, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
@@ -632,10 +632,10 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   }
 
   if (look_cores)
-    hwloc_setup_level(procid_max, numcores, oscoreids, proc_coreids, topology, HWLOC_OBJ_CORE);
+    hwloc_setup_level(procid_max, numcores, Lcore_to_Pcore, Pproc_to_Lcore, topology, HWLOC_OBJ_CORE);
 
   if (numprocs)
-    hwloc_setup_level(procid_max, numprocs, osprocids, proc_procids, topology, HWLOC_OBJ_PU);
+    hwloc_setup_level(procid_max, numprocs, Lproc_to_Pproc, Pproc_to_Lproc, topology, HWLOC_OBJ_PU);
 
   kstat_close(kc);
 
