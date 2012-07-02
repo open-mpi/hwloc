@@ -451,25 +451,27 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   kstat_named_t *stat;
   unsigned look_cores = 1, look_chips = 1;
 
-  unsigned numsockets = 0;
-  unsigned numcores = 0;
-  unsigned numprocs = 0;
-
+  unsigned Pproc_max = 0;
   struct hwloc_solaris_Pproc {
     unsigned Lsock, Psock, Lcore, Lproc;
   } Pproc[HWLOC_NBMAXCPUS];
+
+  unsigned Lproc_num = 0;
   struct hwloc_solaris_Lproc {
     unsigned Pproc;
   } Lproc[HWLOC_NBMAXCPUS];
+
+  unsigned Lcore_num = 0;
   struct hwloc_solaris_Lcore {
     unsigned Pcore, Psock;
   } Lcore[HWLOC_NBMAXCPUS];
+
+  unsigned Lsock_num = 0;
   struct hwloc_solaris_Lsock {
     unsigned Psock;
   } Lsock[HWLOC_NBMAXCPUS];
 
   unsigned sockid, coreid, cpuid;
-  unsigned procid_max = 0;
   unsigned i;
 
   for (cpuid = 0; cpuid < HWLOC_NBMAXCPUS; cpuid++)
@@ -505,12 +507,12 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	}
 
       hwloc_debug("cpu%u\n", cpuid);
-      Pproc[cpuid].Lproc = numprocs;
-      Lproc[numprocs].Pproc = cpuid;
-      numprocs++;
+      Pproc[cpuid].Lproc = Lproc_num;
+      Lproc[Lproc_num].Pproc = cpuid;
+      Lproc_num++;
 
-      if (cpuid >= procid_max)
-        procid_max = cpuid + 1;
+      if (cpuid >= Pproc_max)
+        Pproc_max = cpuid + 1;
 
       stat = (kstat_named_t *) kstat_data_lookup(ksp, "state");
       if (!stat)
@@ -530,7 +532,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	stat = (kstat_named_t *) kstat_data_lookup(ksp, "chip_id");
 	if (!stat)
 	  {
-	    if (numsockets)
+	    if (Lsock_num)
 	      fprintf(stderr, "could not read socket id for CPU%u: %s\n", cpuid, strerror(errno));
 	    else
 	      hwloc_debug("could not read socket id for CPU%u: %s\n", cpuid, strerror(errno));
@@ -558,13 +560,13 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    continue;
 	}
 	Pproc[cpuid].Psock = sockid;
-	for (i = 0; i < numsockets; i++)
+	for (i = 0; i < Lsock_num; i++)
 	  if (sockid == Lsock[i].Psock)
 	    break;
 	Pproc[cpuid].Lsock = i;
 	hwloc_debug("%u on socket %u (%u)\n", cpuid, i, sockid);
-	if (i == numsockets)
-	  Lsock[numsockets++].Psock = sockid;
+	if (i == Lsock_num)
+	  Lsock[Lsock_num++].Psock = sockid;
       } while(0);
 
       if (look_cores) do {
@@ -572,7 +574,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	stat = (kstat_named_t *) kstat_data_lookup(ksp, "core_id");
 	if (!stat)
 	  {
-	    if (numcores)
+	    if (Lcore_num)
 	      fprintf(stderr, "could not read core id for CPU%u: %s\n", cpuid, strerror(errno));
 	    else
 	      hwloc_debug("could not read core id for CPU%u: %s\n", cpuid, strerror(errno));
@@ -599,15 +601,15 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 	    look_cores = 0;
 	    continue;
 	}
-	for (i = 0; i < numcores; i++)
+	for (i = 0; i < Lcore_num; i++)
 	  if (coreid == Lcore[i].Pcore && Pproc[cpuid].Psock == Lcore[i].Psock)
 	    break;
 	Pproc[cpuid].Lcore = i;
 	hwloc_debug("%u on core %u (%u)\n", cpuid, i, coreid);
-	if (i == numcores)
+	if (i == Lcore_num)
 	  {
-	    Lcore[numcores].Psock = Pproc[cpuid].Psock;
-	    Lcore[numcores++].Pcore = coreid;
+	    Lcore[Lcore_num].Psock = Pproc[cpuid].Psock;
+	    Lcore[Lcore_num++].Pcore = coreid;
 	  }
       } while(0);
 
@@ -619,15 +621,15 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   if (look_chips) {
     struct hwloc_obj *obj;
     unsigned j,k;
-    hwloc_debug("%d Sockets\n", numsockets);
-    for (j = 0; j < numsockets; j++) {
+    hwloc_debug("%d Sockets\n", Lsock_num);
+    for (j = 0; j < Lsock_num; j++) {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock[j].Psock);
       if (CPUType)
 	hwloc_obj_add_info(obj, "CPUType", CPUType);
       if (CPUModel)
 	hwloc_obj_add_info(obj, "CPUModel", CPUModel);
       obj->cpuset = hwloc_bitmap_alloc();
-      for(k=0; k<procid_max; k++)
+      for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lsock == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", j, obj->cpuset);
@@ -639,11 +641,11 @@ hwloc_look_kstat(struct hwloc_topology *topology)
   if (look_cores) {
     struct hwloc_obj *obj;
     unsigned j,k;
-    hwloc_debug("%d Cores\n", numcores);
-    for (j = 0; j < numcores; j++) {
+    hwloc_debug("%d Cores\n", Lcore_num);
+    for (j = 0; j < Lcore_num; j++) {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, Lcore[j].Pcore);
       obj->cpuset = hwloc_bitmap_alloc();
-      for(k=0; k<procid_max; k++)
+      for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lcore == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
       hwloc_debug_1arg_bitmap("Core %d has cpuset %s\n", j, obj->cpuset);
@@ -651,14 +653,14 @@ hwloc_look_kstat(struct hwloc_topology *topology)
     }
     hwloc_debug("%s", "\n");
   }
-  if (numprocs) {
+  if (Lproc_num) {
     struct hwloc_obj *obj;
     unsigned j,k;
-    hwloc_debug("%d PUs\n", numprocs);
-    for (j = 0; j < numprocs; j++) {
+    hwloc_debug("%d PUs\n", Lproc_num);
+    for (j = 0; j < Lproc_num; j++) {
       obj = hwloc_alloc_setup_object(HWLOC_OBJ_PU, Lproc[j].Pproc);
       obj->cpuset = hwloc_bitmap_alloc();
-      for(k=0; k<procid_max; k++)
+      for(k=0; k<Pproc_max; k++)
 	if (Pproc[k].Lproc == j)
 	  hwloc_bitmap_set(obj->cpuset, k);
       hwloc_debug_1arg_bitmap("PU %d has cpuset %s\n", j, obj->cpuset);
@@ -669,7 +671,7 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 
   kstat_close(kc);
 
-  return numprocs > 0;
+  return Lproc_num > 0;
 }
 #endif /* LIBKSTAT */
 
