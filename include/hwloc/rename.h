@@ -489,7 +489,6 @@ extern "C" {
 #define hwloc_bitmap_printf_value HWLOC_NAME(bitmap_printf_value)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
-#define hwloc_setup_level HWLOC_NAME(setup_level)
 
 #define hwloc_alloc_heap HWLOC_NAME(alloc_heap)
 #define hwloc_alloc_mmap HWLOC_NAME(alloc_mmap)

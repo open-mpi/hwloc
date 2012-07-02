@@ -302,39 +302,6 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
 }
 
 extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
-
-#define hwloc_object_cpuset_from_array(l, _value, _array, _max) do {	\
-		struct hwloc_obj *__l = (l);				\
-		unsigned int *__a = (_array);				\
-		int k;							\
-		__l->cpuset = hwloc_bitmap_alloc();			\
-		for(k=0; k<_max; k++)					\
-			if (__a[k] == _value)				\
-				hwloc_bitmap_set(__l->cpuset, k);	\
-	} while (0)
-
-/* Configures an array of NUM objects of type TYPE with physical IDs OSPHYSIDS
- * and for which processors have ID PROC_PHYSIDS, and add them to the topology.
- * */
-static __hwloc_inline void
-hwloc_setup_level(int procid_max, unsigned num, unsigned *osphysids, unsigned *proc_physids, struct hwloc_topology *topology, hwloc_obj_type_t type)
-{
-  struct hwloc_obj *obj;
-  unsigned j;
-
-  hwloc_debug("%d %s\n", num, hwloc_obj_type_string(type));
-
-  for (j = 0; j < num; j++)
-    {
-      obj = hwloc_alloc_setup_object(type, osphysids[j]);
-      hwloc_object_cpuset_from_array(obj, j, proc_physids, procid_max);
-      hwloc_debug_2args_bitmap("%s %d has cpuset %s\n",
-		 hwloc_obj_type_string(type),
-		 j, obj->cpuset);
-      hwloc_insert_object_by_cpuset(topology, obj);
-    }
-  hwloc_debug("%s", "\n");
-}
 #endif
 
 /* This can be used for the alloc field to get allocated data that can be freed by free() */
