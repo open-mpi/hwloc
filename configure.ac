@@ -110,6 +110,9 @@ CFLAGS_save="$CFLAGS"
 AC_PROG_CC
 AM_PROG_CC_C_O
 CFLAGS="$CFLAGS_save"
+# This did not exist pre AM 1.11.x (where x is somewhere >0 and <3),
+# but it is necessary in AM 1.12.x.
+ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 # Define hwloc's configure arguments
 HWLOC_DEFINE_ARGS
