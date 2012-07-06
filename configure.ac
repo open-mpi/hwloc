@@ -42,6 +42,7 @@ m4_ifdef([LT_PREREQ], [],
 LT_PREREQ([2.2.6])
 
 AC_LANG([C])
+AC_USE_SYSTEM_EXTENSIONS
 
 # Make configure depend on the VERSION file, since it's used in AC_INIT
 AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
@@ -113,7 +114,7 @@ AM_PROG_CC_C_O
 CFLAGS="$CFLAGS_save"
 # This did not exist pre AM 1.11.x (where x is somewhere >0 and <3),
 # but it is necessary in AM 1.12.x.
-ifdef([AM_PROG_AR], [AM_PROG_AR])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 AC_ARG_VAR(CC_FOR_BUILD,[build system C compiler])
 AS_IF([test -z "$CC_FOR_BUILD"],[
