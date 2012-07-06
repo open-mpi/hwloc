@@ -20,6 +20,7 @@ in v0.9.1).
 Version 1.4.3
 -------------
 * Fix PCIe 3.0 link speed computation.
+* Fix importing of escaped characters with the minimalistic XML backend.
 
 
 Version 1.4.2

@@ -513,30 +513,31 @@ hwloc__xml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char 
     len = 0; escaped = 0;
     while (value[len+escaped] != '\"') {
       if (value[len+escaped] == '&') {
-	if (!strcmp(&value[1+len+escaped], "#10;")) {
+	if (!strncmp(&value[1+len+escaped], "#10;", 4)) {
 	  escaped += 4;
-	  value[1+len] = '\n';
-	} else if (!strcmp(&value[1+len+escaped], "#13;")) {
+	  value[len] = '\n';
+	} else if (!strncmp(&value[1+len+escaped], "#13;", 4)) {
 	  escaped += 4;
-	  value[1+len] = '\r';
-	} else if (!strcmp(&value[1+len+escaped], "#9;")) {
+	  value[len] = '\r';
+	} else if (!strncmp(&value[1+len+escaped], "#9;", 3)) {
 	  escaped += 3;
-	  value[1+len] = '\t';
-	} else if (!strcmp(&value[1+len+escaped], "quot;")) {
+	  value[len] = '\t';
+	} else if (!strncmp(&value[1+len+escaped], "quot;", 5)) {
 	  escaped += 5;
-	  value[1+len] = '\"';
-	} else if (!strcmp(&value[1+len+escaped], "lt;")) {
+	  value[len] = '\"';
+	} else if (!strncmp(&value[1+len+escaped], "lt;", 3)) {
 	  escaped += 3;
-	  value[1+len] = '<';
-	} else if (!strcmp(&value[1+len+escaped], "gt;")) {
+	  value[len] = '<';
+	} else if (!strncmp(&value[1+len+escaped], "gt;", 3)) {
 	  escaped += 3;
-	  value[1+len] = '>';
-	} else if (!strcmp(&value[1+len+escaped], "amp;")) {
+	  value[len] = '>';
+	} else if (!strncmp(&value[1+len+escaped], "amp;", 4)) {
 	  escaped += 4;
-	  value[1+len] = '&';
+	  value[len] = '&';
 	} else {
 	  return -1;
 	}
+      } else {
 	value[len] = value[len+escaped];
       }
       len++;
