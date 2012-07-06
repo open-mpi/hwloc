@@ -981,6 +981,10 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
  * This file may be loaded later through hwloc_topology_set_xml().
  *
  * \return -1 if a failure occured.
+ *
+ * \note Only printable characters may be exported to XML string attributes.
+ * Any other character, especially any non-ASCII character, will be silently
+ * dropped.
  */
 HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
 
@@ -992,6 +996,10 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  * This memory buffer may be loaded later through hwloc_topology_set_xmlbuffer().
  *
  * \return -1 if a failure occured.
+ *
+ * \note Only printable characters may be exported to XML string attributes.
+ * Any other character, especially any non-ASCII character, will be silently
+ * dropped.
  */
 HWLOC_DECLSPEC int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen);
 
@@ -1008,6 +1016,9 @@ HWLOC_DECLSPEC void hwloc_free_xmlbuffer(hwloc_topology_t topology, char *xmlbuf
  *
  * \return the newly-created object.
  * \return \c NULL if the insertion conflicts with the existing topology tree.
+ *
+ * \note If \p name contains some non-printable characters, they will
+ * be dropped when exporting to XML, see hwloc_topology_export_xml().
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, const char *name);
 
@@ -1022,6 +1033,9 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_cpuset(hwloc_top
  * However, the new leaf object will not have any \p cpuset.
  *
  * \return the newly-created object
+ *
+ * \note If \p name contains some non-printable characters, they will
+ * be dropped when exporting to XML, see hwloc_topology_export_xml().
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, const char *name);
 
@@ -1282,6 +1296,9 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
  * with the same name already exists.
  *
  * The input strings are copied before being added in the object infos.
+ *
+ * \note If \p value contains some non-printable characters, they will
+ * be dropped when exporting to XML, see hwloc_topology_export_xml().
  */
 HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value);
 

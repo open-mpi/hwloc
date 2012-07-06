@@ -1137,6 +1137,22 @@ hwloc__xml_export_escape_string(const char *src)
   return escaped;
 }
 
+/* strdup and remove ugly chars from random string */
+static char*
+hwloc__xml_export_safestrdup(const char *old)
+{
+  char *new = malloc(strlen(old)+1);
+  char *dst = new;
+  const char *src = old;
+  while (*src) {
+    if ((*src >= 32 && *src <= 126) || *src == '\t' || *src == '\n' || *src == '\r')
+      *(dst++) = *src;
+    src++;
+  }
+  *dst = '\0';
+  return new;
+}
+
 static void
 hwloc__xml_export_new_prop(hwloc__xml_export_output_t output, const char *name, const char *value)
 {
@@ -1242,8 +1258,11 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
     free(cpuset);
   }
 
-  if (obj->name)
-    hwloc__xml_export_new_prop(output, "name", obj->name);
+  if (obj->name) {
+    char *name = hwloc__xml_export_safestrdup(obj->name);
+    hwloc__xml_export_new_prop(output, "name", name);
+    free(name);
+  }
 
   switch (obj->type) {
   case HWLOC_OBJ_CACHE:
@@ -1319,11 +1338,15 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
   }
 
   for(i=0; i<obj->infos_count; i++) {
+    char *name = hwloc__xml_export_safestrdup(obj->infos[i].name);
+    char *value = hwloc__xml_export_safestrdup(obj->infos[i].value);
     hwloc__xml_export_new_child(output, "info");
-    hwloc__xml_export_new_prop(output, "name", obj->infos[i].name);
-    hwloc__xml_export_new_prop(output, "value", obj->infos[i].value);
+    hwloc__xml_export_new_prop(output, "name", name);
+    hwloc__xml_export_new_prop(output, "value", value);
     hwloc__xml_export_end_props(output, 0);
     hwloc__xml_export_end_child(output, "info", 0);
+    free(name);
+    free(value);
   }
 
   for(i=0; i<obj->distances_count; i++) {
