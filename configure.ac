@@ -111,6 +111,9 @@ AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_CC_C_O
 CFLAGS="$CFLAGS_save"
+# This did not exist pre AM 1.11.x (where x is somewhere >0 and <3),
+# but it is necessary in AM 1.12.x.
+ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 AC_ARG_VAR(CC_FOR_BUILD,[build system C compiler])
 AS_IF([test -z "$CC_FOR_BUILD"],[
