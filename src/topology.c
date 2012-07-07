@@ -2447,6 +2447,9 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   topology->set_thread_cpubind = NULL;
   topology->get_thread_cpubind = NULL;
 #endif
+  topology->get_thisproc_last_cpu_location = NULL;
+  topology->get_proc_last_cpu_location = NULL;
+  topology->get_thisthread_last_cpu_location = NULL;
   topology->set_thisproc_membind = NULL;
   topology->get_thisproc_membind = NULL;
   topology->set_thisthread_membind = NULL;
