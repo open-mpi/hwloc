@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -27,7 +27,7 @@
 #include <private/private.h>
 #include <private/debug.h>
 
-#ifdef HAVE_SYS_CPUSET_H
+#if defined(HAVE_SYS_CPUSET_H) && defined(HAVE_CPUSET_SETAFFINITY)
 static void
 hwloc_freebsd_bsd2hwloc(hwloc_bitmap_t hwloc_cpuset, const cpuset_t *cpuset)
 {
@@ -197,7 +197,7 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 void
 hwloc_set_freebsd_hooks(struct hwloc_topology *topology)
 {
-#ifdef HAVE_SYS_CPUSET_H
+#if defined(HAVE_SYS_CPUSET_H) && defined(HAVE_CPUSET_SETAFFINITY)
   topology->set_thisproc_cpubind = hwloc_freebsd_set_thisproc_cpubind;
   topology->get_thisproc_cpubind = hwloc_freebsd_get_thisproc_cpubind;
   topology->set_thisthread_cpubind = hwloc_freebsd_set_thisthread_cpubind;
