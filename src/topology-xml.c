@@ -473,41 +473,8 @@ typedef struct hwloc__xml_import_state_s {
 } * hwloc__xml_import_state_t;
 
 static int
-hwloc__xml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
+hwloc__nolibxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
 {
-  if (state->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    xmlAttr *attr;
-    if (state->libxml_attr)
-      attr = state->libxml_attr->next;
-    else
-      attr = state->libxml_node->properties;
-    for (; attr; attr = attr->next)
-      if (attr->type == XML_ATTRIBUTE_NODE) {
-	/* use the first valid attribute content */
-	xmlNode *subnode;
-	for (subnode = attr->children; subnode; subnode = subnode->next) {
-	  if (subnode->type == XML_TEXT_NODE) {
-	    if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
-	      *namep = (char *) attr->name;
-	      *valuep = (char *) subnode->content;
-	      state->libxml_attr = attr;
-	      return 0;
-	    }
-	  } else {
-	    if (hwloc__xml_verbose())
-	      fprintf(stderr, "ignoring unexpected xml attr node type %u\n", subnode->type);
-	  }
-	}
-      } else {
-	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
-      }
-#else
-    assert(0);
-#endif
-    return -1;
-  } else {
     int namelen;
     size_t len, escaped;
     char *buffer, *value, *end;
@@ -562,46 +529,19 @@ hwloc__xml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char 
     end = &value[len+escaped+1]; /* skip the ending " */
     state->attrbuffer = hwloc__nolibxml_import_ignore_spaces(end);
     return 0;
-  }
 }
 
 static int
-hwloc__xml_import_find_child(hwloc__xml_import_state_t state,
-			     hwloc__xml_import_state_t childstate,
-			     char **tagp)
+hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
+				  hwloc__xml_import_state_t childstate,
+				  char **tagp)
 {
-  childstate->parent = state;
-  childstate->use_libxml = state->use_libxml;
-
-  if (state->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    xmlNode *child;
-    if (!state->libxml_child)
-      return 0;
-    child = state->libxml_child->next;
-    for (; child; child = child->next)
-      if (child->type == XML_ELEMENT_NODE) {
-	state->libxml_child = childstate->libxml_node = child;
-	childstate->libxml_child = child->children;
-	childstate->libxml_attr = NULL;
-	*tagp = (char*) child->name;
-	return 1;
-      } else if (child->type == XML_TEXT_NODE) {
-	if (child->content && child->content[0] != '\0' && child->content[0] != '\n')
-	  if (hwloc__xml_verbose())
-	    fprintf(stderr, "ignoring object text content %s\n", (const char*) child->content);
-      } else if (child->type != XML_COMMENT_NODE) {
-	if (hwloc__xml_verbose())
-	  fprintf(stderr, "ignoring unexpected xml node type %u\n", child->type);
-      }
-#else
-    assert(0);
-#endif
-    return 0;
-  } else {
     char *buffer = state->tagbuffer;
     char *end;
     int namelen;
+
+    childstate->parent = state;
+    childstate->use_libxml = state->use_libxml;
 
     /* auto-closed tags have no children */
     if (state->closed)
@@ -646,21 +586,11 @@ hwloc__xml_import_find_child(hwloc__xml_import_state_t state,
     buffer[namelen] = '\0';
     childstate->attrbuffer = buffer+namelen+1;
     return 1;
-  }
 }
 
-/* look for an explicit closing tag </name> */
 static int
-hwloc__xml_import_close_tag(hwloc__xml_import_state_t state)
+hwloc__nolibxml_import_close_tag(hwloc__xml_import_state_t state)
 {
-  if (state->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    /* nothing */
-#else
-    assert(0);
-#endif
-    return 0;
-  } else {
     char *buffer = state->tagbuffer;
     char *end;
 
@@ -685,6 +615,124 @@ hwloc__xml_import_close_tag(hwloc__xml_import_state_t state)
     if (buffer[0] != '/' || strcmp(buffer+1, state->tagname) )
       return -1;
     return 0;
+}
+
+static void
+hwloc__nolibxml_import_close_child(hwloc__xml_import_state_t state)
+{
+    state->parent->tagbuffer = state->tagbuffer;
+}
+
+#ifdef HWLOC_HAVE_LIBXML2
+static int
+hwloc__libxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
+{
+    xmlAttr *attr;
+    if (state->libxml_attr)
+      attr = state->libxml_attr->next;
+    else
+      attr = state->libxml_node->properties;
+    for (; attr; attr = attr->next)
+      if (attr->type == XML_ATTRIBUTE_NODE) {
+	/* use the first valid attribute content */
+	xmlNode *subnode;
+	for (subnode = attr->children; subnode; subnode = subnode->next) {
+	  if (subnode->type == XML_TEXT_NODE) {
+	    if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
+	      *namep = (char *) attr->name;
+	      *valuep = (char *) subnode->content;
+	      state->libxml_attr = attr;
+	      return 0;
+	    }
+	  } else {
+	    if (hwloc__xml_verbose())
+	      fprintf(stderr, "ignoring unexpected xml attr node type %u\n", subnode->type);
+	  }
+	}
+      } else {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring unexpected xml attr type %u\n", attr->type);
+      }
+    return -1;
+}
+
+static int
+hwloc__libxml_import_find_child(hwloc__xml_import_state_t state,
+				hwloc__xml_import_state_t childstate,
+				char **tagp)
+{
+    xmlNode *child;
+    childstate->parent = state;
+    childstate->use_libxml = state->use_libxml;
+    if (!state->libxml_child)
+      return 0;
+    child = state->libxml_child->next;
+    for (; child; child = child->next)
+      if (child->type == XML_ELEMENT_NODE) {
+	state->libxml_child = childstate->libxml_node = child;
+	childstate->libxml_child = child->children;
+	childstate->libxml_attr = NULL;
+	*tagp = (char*) child->name;
+	return 1;
+      } else if (child->type == XML_TEXT_NODE) {
+	if (child->content && child->content[0] != '\0' && child->content[0] != '\n')
+	  if (hwloc__xml_verbose())
+	    fprintf(stderr, "ignoring object text content %s\n", (const char*) child->content);
+      } else if (child->type != XML_COMMENT_NODE) {
+	if (hwloc__xml_verbose())
+	  fprintf(stderr, "ignoring unexpected xml node type %u\n", child->type);
+      }
+
+    return 0;
+}
+#endif /* HWLOC_HAVE_LIBXML2 */
+
+static int
+hwloc__xml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
+{
+  if (state->use_libxml) {
+#ifdef HWLOC_HAVE_LIBXML2
+    return hwloc__libxml_import_next_attr(state, namep, valuep);
+#else
+    assert(0);
+    return -1;
+#endif
+  } else {
+    return hwloc__nolibxml_import_next_attr(state, namep, valuep);
+  }
+}
+
+static int
+hwloc__xml_import_find_child(hwloc__xml_import_state_t state,
+			     hwloc__xml_import_state_t childstate,
+			     char **tagp)
+{
+  if (state->use_libxml) {
+#ifdef HWLOC_HAVE_LIBXML2
+    return hwloc__libxml_import_find_child(state, childstate, tagp);
+#else
+    assert(0);
+    return -1;
+#endif
+  } else {
+    return hwloc__nolibxml_import_find_child(state, childstate, tagp);
+  }
+}
+
+/* look for an explicit closing tag </name> */
+static int
+hwloc__xml_import_close_tag(hwloc__xml_import_state_t state)
+{
+  if (state->use_libxml) {
+#ifdef HWLOC_HAVE_LIBXML2
+    /* nothing */
+    return 0;
+#else
+    assert(0);
+    return -1;
+#endif
+  } else {
+    return hwloc__nolibxml_import_close_tag(state);
   }
 }
 
@@ -698,7 +746,7 @@ hwloc__xml_import_close_child(hwloc__xml_import_state_t state)
     assert(0);
 #endif
   } else {
-    state->parent->tagbuffer = state->tagbuffer;
+    hwloc__nolibxml_import_close_child(state);
   }
 }
 
