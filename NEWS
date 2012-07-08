@@ -21,6 +21,7 @@ Version 1.4.3
 -------------
 * Fix PCIe 3.0 link speed computation.
 * Fix importing of escaped characters with the minimalistic XML backend.
+* Fix a memory leak in the x86 backend.
 
 
 Version 1.4.2

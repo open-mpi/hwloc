@@ -288,8 +288,10 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       one = i;
     }
 
-  if (one == -1)
+  if (one == -1) {
+    hwloc_bitmap_free(complete_cpuset);
     return;
+  }
 
   /* Look for sockets */
   {
@@ -451,6 +453,8 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
     if (infos[i].otherids)
       free(infos[i].otherids);
   }
+
+  hwloc_bitmap_free(complete_cpuset);
 }
 
 #define INTEL_EBX ('G' | ('e'<<8) | ('n'<<16) | ('u'<<24))
