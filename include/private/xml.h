@@ -20,18 +20,10 @@ typedef struct hwloc__xml_import_state_s {
   int (*close_tag)(struct hwloc__xml_import_state_s * state); /* look for an explicit closing tag </name> */
   void (*close_child)(struct hwloc__xml_import_state_s * state);
 
-  /* only useful if not using libxml */
-  char *tagbuffer; /* buffer containing the next tag */
-  char *attrbuffer; /* buffer containing the next attribute of the current node */
-  char *tagname; /* tag name of the current node */
-  int closed; /* set if the current node is auto-closing */
-
-  /* only useful if using libxml */
-#ifdef HWLOC_HAVE_LIBXML2
-  xmlNode *libxml_node; /* current libxml node, always valid */
-  xmlNode *libxml_child; /* last processed child, or NULL if none yet */
-  xmlAttr *libxml_attr; /* last processed attribute, or NULL if none yet */
-#endif
+  /* opaque data used to store backend-specific data.
+   * statically allocated to allow stack-allocation by the common code without knowing actual backend needs.
+   */
+  char data[32];
 } * hwloc__xml_import_state_t;
 
 typedef struct hwloc__xml_export_output_s {

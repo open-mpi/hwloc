@@ -20,6 +20,13 @@
  * Import routines *
  *******************/
 
+typedef struct hwloc__nolibxml_import_state_data_s {
+  char *tagbuffer; /* buffer containing the next tag */
+  char *attrbuffer; /* buffer containing the next attribute of the current node */
+  char *tagname; /* tag name of the current node */
+  int closed; /* set if the current node is auto-closing */
+} * hwloc__nolibxml_import_state_data_t;
+
 static char *
 hwloc__nolibxml_import_ignore_spaces(char *buffer)
 {
@@ -29,12 +36,13 @@ hwloc__nolibxml_import_ignore_spaces(char *buffer)
 static int
 hwloc__nolibxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
 {
+  hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
   int namelen;
   size_t len, escaped;
   char *buffer, *value, *end;
 
   /* find the beginning of an attribute */
-  buffer = hwloc__nolibxml_import_ignore_spaces(state->attrbuffer);
+  buffer = hwloc__nolibxml_import_ignore_spaces(nstate->attrbuffer);
   namelen = strspn(buffer, "abcdefghijklmnopqrstuvwxyz_");
   if (buffer[namelen] != '=' || buffer[namelen+1] != '\"')
     return -1;
@@ -81,7 +89,7 @@ hwloc__nolibxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, 
 
   /* find next attribute */
   end = &value[len+escaped+1]; /* skip the ending " */
-  state->attrbuffer = hwloc__nolibxml_import_ignore_spaces(end);
+  nstate->attrbuffer = hwloc__nolibxml_import_ignore_spaces(end);
   return 0;
 }
 
@@ -90,7 +98,9 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
 				  hwloc__xml_import_state_t childstate,
 				  char **tagp)
 {
-  char *buffer = state->tagbuffer;
+  hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
+  hwloc__nolibxml_import_state_data_t nchildstate = (void*) childstate->data;
+  char *buffer = nstate->tagbuffer;
   char *end;
   int namelen;
 
@@ -101,7 +111,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
   childstate->close_child = state->close_child;
 
   /* auto-closed tags have no children */
-  if (state->closed)
+  if (nstate->closed)
     return 0;
 
   /* find the beginning of the tag */
@@ -115,21 +125,21 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
     return 0;
 
   /* normal tag */
-  *tagp = childstate->tagname = buffer;
+  *tagp = nchildstate->tagname = buffer;
 
   /* find the end, mark it and return it */
   end = strchr(buffer, '>');
   if (!end)
     return -1;
   end[0] = '\0';
-  childstate->tagbuffer = end+1;
+  nchildstate->tagbuffer = end+1;
 
   /* handle auto-closing tags */
   if (end[-1] == '/') {
-    childstate->closed = 1;
+    nchildstate->closed = 1;
     end[-1] = '\0';
   } else
-    childstate->closed = 0;
+    nchildstate->closed = 0;
 
   /* find attributes */
   namelen = strspn(buffer, "abcdefghijklmnopqrstuvwxyz_");
@@ -141,18 +151,19 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
 
   /* found a space, likely starting attributes */
   buffer[namelen] = '\0';
-  childstate->attrbuffer = buffer+namelen+1;
+  nchildstate->attrbuffer = buffer+namelen+1;
   return 1;
 }
 
 static int
 hwloc__nolibxml_import_close_tag(hwloc__xml_import_state_t state)
 {
-  char *buffer = state->tagbuffer;
+  hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
+  char *buffer = nstate->tagbuffer;
   char *end;
 
   /* auto-closed tags need nothing */
-  if (state->closed)
+  if (nstate->closed)
     return 0;
 
   /* find the beginning of the tag */
@@ -166,10 +177,10 @@ hwloc__nolibxml_import_close_tag(hwloc__xml_import_state_t state)
   if (!end)
     return -1;
   end[0] = '\0';
-  state->tagbuffer = end+1;
+  nstate->tagbuffer = end+1;
 
   /* if closing tag, return nothing */
-  if (buffer[0] != '/' || strcmp(buffer+1, state->tagname) )
+  if (buffer[0] != '/' || strcmp(buffer+1, nstate->tagname) )
     return -1;
   return 0;
 }
@@ -177,14 +188,19 @@ hwloc__nolibxml_import_close_tag(hwloc__xml_import_state_t state)
 static void
 hwloc__nolibxml_import_close_child(hwloc__xml_import_state_t state)
 {
-  state->parent->tagbuffer = state->tagbuffer;
+  hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
+  hwloc__nolibxml_import_state_data_t nparent = (void*) state->parent->data;
+  nparent->tagbuffer = nstate->tagbuffer;
 }
 
 static int
 hwloc_nolibxml_look(struct hwloc_topology *topology,
 		    struct hwloc__xml_import_state_s *state)
 {
+  hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
   char *buffer = topology->backend_params.xml.data;
+
+  assert(sizeof(*nstate) <= sizeof(state->data));
 
   /* skip headers */
   while (!strncmp(buffer, "<?xml ", 6) || !strncmp(buffer, "<!DOCTYPE ", 10)) {
@@ -203,10 +219,10 @@ hwloc_nolibxml_look(struct hwloc_topology *topology,
   state->close_tag = hwloc__nolibxml_import_close_tag;
   state->close_child = hwloc__nolibxml_import_close_child;
   state->parent = NULL;
-  state->closed = 0;
-  state->tagbuffer = buffer+10;
-  state->tagname = (char *) "topology";
-  state->attrbuffer = NULL;
+  nstate->closed = 0;
+  nstate->tagbuffer = buffer+10;
+  nstate->tagname = (char *) "topology";
+  nstate->attrbuffer = NULL;
   return 0; /* success */
 
  failed:

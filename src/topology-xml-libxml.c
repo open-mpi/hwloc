@@ -36,14 +36,22 @@ hwloc_libxml2_disable_stderrwarnings(void)
  * Import routines *
  *******************/
 
+typedef struct hwloc__libxml_import_state_data_s {
+  xmlNode *node; /* current libxml node, always valid */
+  xmlNode *child; /* last processed child, or NULL if none yet */
+  xmlAttr *attr; /* last processed attribute, or NULL if none yet */
+} * hwloc__libxml_import_state_data_t;
+
 static int
 hwloc__libxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
 {
+  hwloc__libxml_import_state_data_t lstate = (void*) state->data;
+
   xmlAttr *attr;
-  if (state->libxml_attr)
-    attr = state->libxml_attr->next;
+  if (lstate->attr)
+    attr = lstate->attr->next;
   else
-    attr = state->libxml_node->properties;
+    attr = lstate->node->properties;
   for (; attr; attr = attr->next)
     if (attr->type == XML_ATTRIBUTE_NODE) {
       /* use the first valid attribute content */
@@ -53,7 +61,7 @@ hwloc__libxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, ch
 	  if (subnode->content && subnode->content[0] != '\0' && subnode->content[0] != '\n') {
 	    *namep = (char *) attr->name;
 	    *valuep = (char *) subnode->content;
-	    state->libxml_attr = attr;
+	    lstate->attr = attr;
 	    return 0;
 	  }
 	} else {
@@ -73,20 +81,22 @@ hwloc__libxml_import_find_child(hwloc__xml_import_state_t state,
 				hwloc__xml_import_state_t childstate,
 				char **tagp)
 {
+  hwloc__libxml_import_state_data_t lstate = (void*) state->data;
+  hwloc__libxml_import_state_data_t lchildstate = (void*) childstate->data;
   xmlNode *child;
   childstate->parent = state;
   childstate->next_attr = state->next_attr;
   childstate->find_child = state->find_child;
   childstate->close_tag = state->close_tag;
   childstate->close_child = state->close_child;
-  if (!state->libxml_child)
+  if (!lstate->child)
     return 0;
-  child = state->libxml_child->next;
+  child = lstate->child->next;
   for (; child; child = child->next)
     if (child->type == XML_ELEMENT_NODE) {
-      state->libxml_child = childstate->libxml_node = child;
-      childstate->libxml_child = child->children;
-      childstate->libxml_attr = NULL;
+      lstate->child = lchildstate->node = child;
+      lchildstate->child = child->children;
+      lchildstate->attr = NULL;
       *tagp = (char*) child->name;
       return 1;
     } else if (child->type == XML_TEXT_NODE) {
@@ -117,8 +127,11 @@ static int
 hwloc_libxml_look(struct hwloc_topology *topology,
 		  struct hwloc__xml_import_state_s *state)
 {
+  hwloc__libxml_import_state_data_t lstate = (void*) state->data;
   xmlNode* root_node;
   xmlDtd *dtd;
+
+  assert(sizeof(*lstate) <= sizeof(state->data));
 
   dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.data);
   if (!dtd) {
@@ -144,9 +157,9 @@ hwloc_libxml_look(struct hwloc_topology *topology,
   state->close_tag = hwloc__libxml_import_close_tag;
   state->close_child = hwloc__libxml_import_close_child;
   state->parent = NULL;
-  state->libxml_node = root_node;
-  state->libxml_child = root_node->children;
-  state->libxml_attr = NULL;
+  lstate->node = root_node;
+  lstate->child = root_node->children;
+  lstate->attr = NULL;
   return 0; /* success */
 
  failed:
