@@ -1479,6 +1479,42 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
 
   return doc;
 }
+
+static int
+hwloc_libxml_export_file(hwloc_topology_t topology, const char *filename)
+{
+  xmlDocPtr doc;
+  int ret;
+
+  errno = 0; /* set to 0 so that we know if libxml2 changed it */
+
+  doc = hwloc__libxml2_prepare_export(topology);
+  ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+  xmlFreeDoc(doc);
+
+  if (ret < 0) {
+    if (!errno)
+      /* libxml2 likely got an error before doing I/O */
+      errno = EINVAL;
+    return ret;
+  }
+  return 0;
+}
+
+static int
+hwloc_libxml_export_buffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
+{
+  xmlDocPtr doc = hwloc__libxml2_prepare_export(topology);
+  xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
+  xmlFreeDoc(doc);
+  return 0;
+}
+
+static void
+hwloc_libxml_free_buffer(void *xmlbuffer)
+{
+  xmlFree(BAD_CAST xmlbuffer);
+}
 #endif /* HWLOC_HAVE_LIBXML2 */
 
 /***************************************************
@@ -1513,8 +1549,8 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
   return output.written+1;
 }
 
-static void
-hwloc__nolibxml_prepare_export(hwloc_topology_t topology, char **bufferp, int *buflenp)
+static int
+hwloc_nolibxml_export_buffer(hwloc_topology_t topology, char **bufferp, int *buflenp)
 {
   char *buffer;
   size_t bufferlen, res;
@@ -1530,6 +1566,43 @@ hwloc__nolibxml_prepare_export(hwloc_topology_t topology, char **bufferp, int *b
 
   *bufferp = buffer;
   *buflenp = res;
+  return 0;
+}
+
+static int
+hwloc_nolibxml_export_file(hwloc_topology_t topology, const char *filename)
+{
+  FILE *file;
+  char *buffer;
+  int bufferlen;
+  int ret;
+
+  ret = hwloc_nolibxml_export_buffer(topology, &buffer, &bufferlen);
+  if (ret < 0)
+    return -1;
+
+  if (!strcmp(filename, "-")) {
+    file = stdout;
+  } else {
+    file = fopen(filename, "w");
+    if (!file) {
+      free(buffer);
+      return -1;
+    }
+  }
+
+  fwrite(buffer, bufferlen-1 /* don't write the ending \0 */, 1, file);
+  free(buffer);
+
+  if (file != stdout)
+    fclose(file);
+  return 0;
+}
+
+static void
+hwloc_nolibxml_free_buffer(void *xmlbuffer)
+{
+  free(xmlbuffer);
 }
 
 /**********************************
@@ -1540,6 +1613,7 @@ hwloc__nolibxml_prepare_export(hwloc_topology_t topology, char **bufferp, int *b
 int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
   hwloc_localeswitch_declare;
+  int ret;
 #ifdef HWLOC_HAVE_LIBXML2
   char *env;
 #endif
@@ -1549,56 +1623,22 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 #ifdef HWLOC_HAVE_LIBXML2
   env = getenv("HWLOC_NO_LIBXML_EXPORT");
   if (!env || !atoi(env)) {
-    xmlDocPtr doc;
-    int ret;
-
-    errno = 0; /* set to 0 so that we know if libxml2 changed it */
-
-    doc = hwloc__libxml2_prepare_export(topology);
-    ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
-    xmlFreeDoc(doc);
-
-    if (ret < 0) {
-      if (!errno)
-	/* libxml2 likely got an error before doing I/O */
-	errno = EINVAL;
-      goto out;
-    }
+    ret = hwloc_libxml_export_file(topology, filename);
   } else
 #endif
   {
-    FILE *file;
-    char *buffer;
-    int bufferlen;
-
-    if (!strcmp(filename, "-")) {
-      file = stdout;
-    } else {
-      file = fopen(filename, "w");
-      if (!file)
-        goto out;
-    }
-
-    hwloc__nolibxml_prepare_export(topology, &buffer, &bufferlen);
-    fwrite(buffer, bufferlen-1 /* don't write the ending \0 */, 1, file);
-    free(buffer);
-
-    if (file != stdout)
-      fclose(file);
+    ret = hwloc_nolibxml_export_file(topology, filename);
   }
 
   hwloc_localeswitch_fini();
-  return 0;
-
-out:
-  hwloc_localeswitch_fini();
-  return -1;
+  return ret;
 }
 
 /* this can be the first XML call */
 int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
   hwloc_localeswitch_declare;
+  int ret;
 #ifdef HWLOC_HAVE_LIBXML2
   char *env;
 #endif
@@ -1608,17 +1648,15 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 #ifdef HWLOC_HAVE_LIBXML2
   env = getenv("HWLOC_NO_LIBXML_EXPORT");
   if (!env || !atoi(env)) {
-    xmlDocPtr doc = hwloc__libxml2_prepare_export(topology);
-    xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
-    xmlFreeDoc(doc);
+    ret = hwloc_libxml_export_buffer(topology, xmlbuffer, buflen);
   } else
 #endif
   {
-    hwloc__nolibxml_prepare_export(topology, xmlbuffer, buflen);
+    ret = hwloc_nolibxml_export_buffer(topology, xmlbuffer, buflen);
   }
 
   hwloc_localeswitch_fini();
-  return 0;
+  return ret;
 }
 
 void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer)
@@ -1626,10 +1664,10 @@ void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, ch
 #ifdef HWLOC_HAVE_LIBXML2
   char *env = getenv("HWLOC_NO_LIBXML_EXPORT");
   if (!env || !atoi(env)) {
-    xmlFree(BAD_CAST xmlbuffer);
+    hwloc_libxml_free_buffer(xmlbuffer);
   } else
 #endif
   {
-    free(xmlbuffer);
+    hwloc_nolibxml_free_buffer(xmlbuffer);
   }
 }
