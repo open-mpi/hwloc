@@ -309,8 +309,8 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
 {
   hwloc_obj_t obj;
   unsigned width;
-  const char *dot, *nextsep;
-  int nextdepth;
+  const char *dot, *nextsep = NULL;
+  int nextdepth = -1;
   int first, wrap, amount, step;
   unsigned i,j;
   int err;
@@ -507,7 +507,7 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
   typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
   if (typelen && (arg[typelen] == ':' || arg[typelen] == '=')) {
     const char *sep = &arg[typelen];
-    hwloc_obj_type_t type;
+    hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
     int depth;
     hwloc_bitmap_t newset;
 
