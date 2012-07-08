@@ -184,7 +184,7 @@ static int
 hwloc_nolibxml_look(struct hwloc_topology *topology,
 		    struct hwloc__xml_import_state_s *state)
 {
-  char *buffer = topology->backend_params.xml.buffer;
+  char *buffer = topology->backend_params.xml.data;
 
   /* skip headers */
   while (!strncmp(buffer, "<?xml ", 6) || !strncmp(buffer, "<!DOCTYPE ", 10)) {
@@ -228,15 +228,15 @@ hwloc_nolibxml_look_failed(struct hwloc_topology *topology __hwloc_attribute_unu
 static void
 hwloc_nolibxml_backend_exit(struct hwloc_topology *topology)
 {
-  free(topology->backend_params.xml.buffer);
+  free(topology->backend_params.xml.data);
 }
 
 int
 hwloc_nolibxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
 {
   if (xmlbuffer) {
-    topology->backend_params.xml.buffer = malloc(xmlbuflen);
-    memcpy(topology->backend_params.xml.buffer, xmlbuffer, xmlbuflen);
+    topology->backend_params.xml.data = malloc(xmlbuflen);
+    memcpy(topology->backend_params.xml.data, xmlbuffer, xmlbuflen);
   } else {
     FILE * file;
     size_t buflen = 4096, offset, readlen;
@@ -267,7 +267,7 @@ hwloc_nolibxml_backend_init(struct hwloc_topology *topology, const char *xmlpath
 
     fclose(file);
 
-    topology->backend_params.xml.buffer = buffer;
+    topology->backend_params.xml.data = buffer;
     /* buflen = offset+1; */
   }
 

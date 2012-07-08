@@ -120,7 +120,7 @@ hwloc_libxml_look(struct hwloc_topology *topology,
   xmlNode* root_node;
   xmlDtd *dtd;
 
-  dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
+  dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.data);
   if (!dtd) {
     if (hwloc__xml_verbose())
       fprintf(stderr, "Loading XML topology without DTD\n");
@@ -130,7 +130,7 @@ hwloc_libxml_look(struct hwloc_topology *topology,
 	      (char *) dtd->SystemID, "hwloc.dtd");
   }
 
-  root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
+  root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.data);
 
   if (strcmp((const char *) root_node->name, "topology") && strcmp((const char *) root_node->name, "root")) {
     /* root node should be in "topology" class (or "root" if importing from < 1.0) */
@@ -160,7 +160,7 @@ hwloc_libxml_look(struct hwloc_topology *topology,
 static void
 hwloc_libxml_backend_exit(struct hwloc_topology *topology)
 {
-  xmlFreeDoc((xmlDoc*)topology->backend_params.xml.doc);
+  xmlFreeDoc((xmlDoc*)topology->backend_params.xml.data);
 }
 
 int
@@ -188,8 +188,7 @@ hwloc_libxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, 
   topology->backend_params.xml.look = hwloc_libxml_look;
   topology->backend_params.xml.look_failed = NULL;
   topology->backend_params.xml.backend_exit = hwloc_libxml_backend_exit;
-  topology->backend_params.xml.buffer = NULL;
-  topology->backend_params.xml.doc = doc;
+  topology->backend_params.xml.data = doc;
   return 0;
 }
 

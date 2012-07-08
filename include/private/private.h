@@ -150,10 +150,7 @@ struct hwloc_topology {
       int (*look)(struct hwloc_topology *topology, struct hwloc__xml_import_state_s *state);
       void (*look_failed)(struct hwloc_topology *topology);
       void (*backend_exit)(struct hwloc_topology *topology);
-#ifdef HWLOC_HAVE_LIBXML2
-      void *doc;
-#endif /* HWLOC_HAVE_LIBXML2 */
-      char *buffer; /* only used when not using libxml2 */
+      void *data; /* libxml2 doc, or nolibxml buffer */
       struct hwloc_xml_imported_distances_s {
 	hwloc_obj_t root;
 	struct hwloc_distances_s distances;
