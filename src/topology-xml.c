@@ -1118,7 +1118,10 @@ hwloc_look_xml(struct hwloc_topology *topology)
  ************************************************/
 
 typedef struct hwloc__xml_export_output_s {
-  int use_libxml;
+  void (*new_child)(struct hwloc__xml_export_output_s *output, const char *name);
+  void (*new_prop)(struct hwloc__xml_export_output_s *output, const char *name, const char *value);
+  void (*end_props)(struct hwloc__xml_export_output_s *output, unsigned nr_children);
+  void (*end_child)(struct hwloc__xml_export_output_s *output, const char *name, unsigned nr_children);
 
   /* only useful if not using libxml */
   char *buffer; /* (moving) buffer where to write */
@@ -1142,22 +1145,6 @@ hwloc__xml_export_update_buffer(hwloc__xml_export_output_t output, int res)
       res = output->remaining>0 ? output->remaining-1 : 0;
     output->buffer += res;
     output->remaining -= res;
-  }
-}
-
-static void
-hwloc__xml_export_new_child(hwloc__xml_export_output_t output, const char *name)
-{
-  if (output->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    output->current_node = xmlNewChild(output->current_node, NULL, BAD_CAST name, NULL);
-#else
-    assert(0);
-#endif
-  } else {
-    int res = hwloc_snprintf(output->buffer, output->remaining, "%*s<%s", output->indent, "", name);
-    hwloc__xml_export_update_buffer(output, res);
-    output->indent += 2;
   }
 }
 
@@ -1222,55 +1209,66 @@ hwloc__xml_export_safestrdup(const char *old)
 }
 
 static void
-hwloc__xml_export_new_prop(hwloc__xml_export_output_t output, const char *name, const char *value)
+hwloc__nolibxml_export_new_child(hwloc__xml_export_output_t output, const char *name)
 {
-  if (output->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    xmlNewProp(output->current_node, BAD_CAST name, BAD_CAST value);
-#else
-    assert(0);
-#endif
-  } else {
+    int res = hwloc_snprintf(output->buffer, output->remaining, "%*s<%s", output->indent, "", name);
+    hwloc__xml_export_update_buffer(output, res);
+    output->indent += 2;
+}
+
+static void
+hwloc__nolibxml_export_new_prop(hwloc__xml_export_output_t output, const char *name, const char *value)
+{
     char *escaped = hwloc__xml_export_escape_string(value);
     int res = hwloc_snprintf(output->buffer, output->remaining, " %s=\"%s\"", name, escaped ? (const char *) escaped : value);
     hwloc__xml_export_update_buffer(output, res);
     free(escaped);
-  }
 }
 
 static void
-hwloc__xml_export_end_props(hwloc__xml_export_output_t output, unsigned nr_children)
+hwloc__nolibxml_export_end_props(hwloc__xml_export_output_t output, unsigned nr_children)
 {
-  if (output->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    /* nothing to do */
-#else
-    assert(0);
-#endif
-  } else {
     int res = hwloc_snprintf(output->buffer, output->remaining, nr_children ? ">\n" : "/>\n");
     hwloc__xml_export_update_buffer(output, res);
-  }
 }
 
 static void
-hwloc__xml_export_end_child(hwloc__xml_export_output_t output, const char *name, unsigned nr_children)
+hwloc__nolibxml_export_end_child(hwloc__xml_export_output_t output, const char *name, unsigned nr_children)
 {
-  if (output->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    output->current_node = output->current_node->parent;
-#else
-    assert(0);
-#endif
-  } else {
     int res;
     output->indent -= 2;
     if (nr_children) {
       res = hwloc_snprintf(output->buffer, output->remaining, "%*s</%s>\n", output->indent, "", name);
       hwloc__xml_export_update_buffer(output, res);
     }
-  }
 }
+
+#ifdef HWLOC_HAVE_LIBXML2
+static void
+hwloc__libxml_export_new_child(hwloc__xml_export_output_t output, const char *name)
+{
+    output->current_node = xmlNewChild(output->current_node, NULL, BAD_CAST name, NULL);
+}
+
+static void
+hwloc__libxml_export_new_prop(hwloc__xml_export_output_t output, const char *name, const char *value)
+{
+    xmlNewProp(output->current_node, BAD_CAST name, BAD_CAST value);
+}
+
+static void
+hwloc__libxml_export_end_props(hwloc__xml_export_output_t output __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused)
+{
+    /* nothing to do */
+}
+
+static void
+hwloc__libxml_export_end_child(hwloc__xml_export_output_t output, const char *name __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused)
+{
+    output->current_node = output->current_node->parent;
+}
+
+#endif
 
 static void
 hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t topology, hwloc_obj_t obj)
@@ -1280,86 +1278,86 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
   unsigned nr_children = obj->memory.page_types_len + obj->infos_count + obj->distances_count + obj->arity;
   unsigned i;
 
-  hwloc__xml_export_new_child(output, "object");
-  hwloc__xml_export_new_prop(output, "type", hwloc_obj_type_string(obj->type));
+  output->new_child(output, "object");
+  output->new_prop(output, "type", hwloc_obj_type_string(obj->type));
   if (obj->os_level != -1) {
     sprintf(tmp, "%d", obj->os_level);
-    hwloc__xml_export_new_prop(output, "os_level", tmp);
+    output->new_prop(output, "os_level", tmp);
   }
   if (obj->os_index != (unsigned) -1) {
     sprintf(tmp, "%u", obj->os_index);
-    hwloc__xml_export_new_prop(output, "os_index", tmp);
+    output->new_prop(output, "os_index", tmp);
   }
   if (obj->cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->cpuset);
-    hwloc__xml_export_new_prop(output, "cpuset", cpuset);
+    output->new_prop(output, "cpuset", cpuset);
     free(cpuset);
   }
   if (obj->complete_cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->complete_cpuset);
-    hwloc__xml_export_new_prop(output, "complete_cpuset", cpuset);
+    output->new_prop(output, "complete_cpuset", cpuset);
     free(cpuset);
   }
   if (obj->online_cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->online_cpuset);
-    hwloc__xml_export_new_prop(output, "online_cpuset", cpuset);
+    output->new_prop(output, "online_cpuset", cpuset);
     free(cpuset);
   }
   if (obj->allowed_cpuset) {
     hwloc_bitmap_asprintf(&cpuset, obj->allowed_cpuset);
-    hwloc__xml_export_new_prop(output, "allowed_cpuset", cpuset);
+    output->new_prop(output, "allowed_cpuset", cpuset);
     free(cpuset);
   }
   if (obj->nodeset && !hwloc_bitmap_isfull(obj->nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->nodeset);
-    hwloc__xml_export_new_prop(output, "nodeset", cpuset);
+    output->new_prop(output, "nodeset", cpuset);
     free(cpuset);
   }
   if (obj->complete_nodeset && !hwloc_bitmap_isfull(obj->complete_nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->complete_nodeset);
-    hwloc__xml_export_new_prop(output, "complete_nodeset", cpuset);
+    output->new_prop(output, "complete_nodeset", cpuset);
     free(cpuset);
   }
   if (obj->allowed_nodeset && !hwloc_bitmap_isfull(obj->allowed_nodeset)) {
     hwloc_bitmap_asprintf(&cpuset, obj->allowed_nodeset);
-    hwloc__xml_export_new_prop(output, "allowed_nodeset", cpuset);
+    output->new_prop(output, "allowed_nodeset", cpuset);
     free(cpuset);
   }
 
   if (obj->name) {
     char *name = hwloc__xml_export_safestrdup(obj->name);
-    hwloc__xml_export_new_prop(output, "name", name);
+    output->new_prop(output, "name", name);
     free(name);
   }
 
   switch (obj->type) {
   case HWLOC_OBJ_CACHE:
     sprintf(tmp, "%llu", (unsigned long long) obj->attr->cache.size);
-    hwloc__xml_export_new_prop(output, "cache_size", tmp);
+    output->new_prop(output, "cache_size", tmp);
     sprintf(tmp, "%u", obj->attr->cache.depth);
-    hwloc__xml_export_new_prop(output, "depth", tmp);
+    output->new_prop(output, "depth", tmp);
     sprintf(tmp, "%u", (unsigned) obj->attr->cache.linesize);
-    hwloc__xml_export_new_prop(output, "cache_linesize", tmp);
+    output->new_prop(output, "cache_linesize", tmp);
     sprintf(tmp, "%d", (unsigned) obj->attr->cache.associativity);
-    hwloc__xml_export_new_prop(output, "cache_associativity", tmp);
+    output->new_prop(output, "cache_associativity", tmp);
     sprintf(tmp, "%d", (unsigned) obj->attr->cache.type);
-    hwloc__xml_export_new_prop(output, "cache_type", tmp);
+    output->new_prop(output, "cache_type", tmp);
     break;
   case HWLOC_OBJ_GROUP:
     sprintf(tmp, "%u", obj->attr->group.depth);
-    hwloc__xml_export_new_prop(output, "depth", tmp);
+    output->new_prop(output, "depth", tmp);
     break;
   case HWLOC_OBJ_BRIDGE:
     sprintf(tmp, "%u-%u", obj->attr->bridge.upstream_type, obj->attr->bridge.downstream_type);
-    hwloc__xml_export_new_prop(output, "bridge_type", tmp);
+    output->new_prop(output, "bridge_type", tmp);
     sprintf(tmp, "%u", obj->attr->bridge.depth);
-    hwloc__xml_export_new_prop(output, "depth", tmp);
+    output->new_prop(output, "depth", tmp);
     if (obj->attr->bridge.downstream_type == HWLOC_OBJ_BRIDGE_PCI) {
       sprintf(tmp, "%04x:[%02x-%02x]",
 	      (unsigned) obj->attr->bridge.downstream.pci.domain,
 	      (unsigned) obj->attr->bridge.downstream.pci.secondary_bus,
 	      (unsigned) obj->attr->bridge.downstream.pci.subordinate_bus);
-      hwloc__xml_export_new_prop(output, "bridge_pci", tmp);
+      output->new_prop(output, "bridge_pci", tmp);
     }
     if (obj->attr->bridge.upstream_type != HWLOC_OBJ_BRIDGE_PCI)
       break;
@@ -1370,19 +1368,19 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
 	    (unsigned) obj->attr->pcidev.bus,
 	    (unsigned) obj->attr->pcidev.dev,
 	    (unsigned) obj->attr->pcidev.func);
-    hwloc__xml_export_new_prop(output, "pci_busid", tmp);
+    output->new_prop(output, "pci_busid", tmp);
     sprintf(tmp, "%04x [%04x:%04x] [%04x:%04x] %02x",
 	    (unsigned) obj->attr->pcidev.class_id,
 	    (unsigned) obj->attr->pcidev.vendor_id, (unsigned) obj->attr->pcidev.device_id,
 	    (unsigned) obj->attr->pcidev.subvendor_id, (unsigned) obj->attr->pcidev.subdevice_id,
 	    (unsigned) obj->attr->pcidev.revision);
-    hwloc__xml_export_new_prop(output, "pci_type", tmp);
+    output->new_prop(output, "pci_type", tmp);
     sprintf(tmp, "%f", obj->attr->pcidev.linkspeed);
-    hwloc__xml_export_new_prop(output, "pci_link_speed", tmp);
+    output->new_prop(output, "pci_link_speed", tmp);
     break;
   case HWLOC_OBJ_OS_DEVICE:
     sprintf(tmp, "%u", obj->attr->osdev.type);
-    hwloc__xml_export_new_prop(output, "osdev_type", tmp);
+    output->new_prop(output, "osdev_type", tmp);
     break;
   default:
     break;
@@ -1390,29 +1388,29 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
 
   if (obj->memory.local_memory) {
     sprintf(tmp, "%llu", (unsigned long long) obj->memory.local_memory);
-    hwloc__xml_export_new_prop(output, "local_memory", tmp);
+    output->new_prop(output, "local_memory", tmp);
   }
 
-  hwloc__xml_export_end_props(output, nr_children);
+  output->end_props(output, nr_children);
 
   for(i=0; i<obj->memory.page_types_len; i++) {
-    hwloc__xml_export_new_child(output, "page_type");
+    output->new_child(output, "page_type");
     sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].size);
-    hwloc__xml_export_new_prop(output, "size", tmp);
+    output->new_prop(output, "size", tmp);
     sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].count);
-    hwloc__xml_export_new_prop(output, "count", tmp);
-    hwloc__xml_export_end_props(output, 0);
-    hwloc__xml_export_end_child(output, "page_type", 0);
+    output->new_prop(output, "count", tmp);
+    output->end_props(output, 0);
+    output->end_child(output, "page_type", 0);
   }
 
   for(i=0; i<obj->infos_count; i++) {
     char *name = hwloc__xml_export_safestrdup(obj->infos[i].name);
     char *value = hwloc__xml_export_safestrdup(obj->infos[i].value);
-    hwloc__xml_export_new_child(output, "info");
-    hwloc__xml_export_new_prop(output, "name", name);
-    hwloc__xml_export_new_prop(output, "value", value);
-    hwloc__xml_export_end_props(output, 0);
-    hwloc__xml_export_end_child(output, "info", 0);
+    output->new_child(output, "info");
+    output->new_prop(output, "name", name);
+    output->new_prop(output, "value", value);
+    output->end_props(output, 0);
+    output->end_child(output, "info", 0);
     free(name);
     free(value);
   }
@@ -1420,22 +1418,22 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
   for(i=0; i<obj->distances_count; i++) {
     unsigned nbobjs = obj->distances[i]->nbobjs;
     unsigned j;
-    hwloc__xml_export_new_child(output, "distances");
+    output->new_child(output, "distances");
     sprintf(tmp, "%u", nbobjs);
-    hwloc__xml_export_new_prop(output, "nbobjs", tmp);
+    output->new_prop(output, "nbobjs", tmp);
     sprintf(tmp, "%u", obj->distances[i]->relative_depth);
-    hwloc__xml_export_new_prop(output, "relative_depth", tmp);
+    output->new_prop(output, "relative_depth", tmp);
     sprintf(tmp, "%f", obj->distances[i]->latency_base);
-    hwloc__xml_export_new_prop(output, "latency_base", tmp);
-    hwloc__xml_export_end_props(output, nbobjs*nbobjs);
+    output->new_prop(output, "latency_base", tmp);
+    output->end_props(output, nbobjs*nbobjs);
     for(j=0; j<nbobjs*nbobjs; j++) {
-      hwloc__xml_export_new_child(output, "latency");
+      output->new_child(output, "latency");
       sprintf(tmp, "%f", obj->distances[i]->latency[j]);
-      hwloc__xml_export_new_prop(output, "value", tmp);
-      hwloc__xml_export_end_props(output, 0);
-      hwloc__xml_export_end_child(output, "latency", 0);
+      output->new_prop(output, "value", tmp);
+      output->end_props(output, 0);
+      output->end_child(output, "latency", 0);
     }
-    hwloc__xml_export_end_child(output, "distances", nbobjs*nbobjs);
+    output->end_child(output, "distances", nbobjs*nbobjs);
   }
 
   if (obj->arity) {
@@ -1444,7 +1442,7 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
       hwloc__xml_export_object (output, topology, obj->children[x]);
   }
 
-  hwloc__xml_export_end_child(output, "object", nr_children);
+  output->end_child(output, "object", nr_children);
 }
 
 /************************************************
@@ -1471,7 +1469,11 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
   /* Creates a DTD declaration. Isn't mandatory. */
   (void) xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
 
-  output.use_libxml = 1;
+  output.new_child = hwloc__libxml_export_new_child;
+  output.end_child = hwloc__libxml_export_end_child;
+  output.new_prop = hwloc__libxml_export_new_prop;
+  output.end_props = hwloc__libxml_export_end_props;
+
   output.current_node = root_node;
   hwloc__xml_export_object (&output, topology, hwloc_get_root_obj(topology));
 
@@ -1489,7 +1491,11 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
   struct hwloc__xml_export_output_s output;
   int res;
 
-  output.use_libxml = 0;
+  output.new_child = hwloc__nolibxml_export_new_child;
+  output.end_child = hwloc__nolibxml_export_end_child;
+  output.new_prop = hwloc__nolibxml_export_new_prop;
+  output.end_props = hwloc__nolibxml_export_end_props;
+
   output.indent = 0;
   output.written = 0;
   output.buffer = xmlbuffer;
@@ -1499,10 +1505,10 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 		 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		 "<!DOCTYPE topology SYSTEM \"hwloc.dtd\">\n");
   hwloc__xml_export_update_buffer(&output, res);
-  hwloc__xml_export_new_child(&output, "topology");
-  hwloc__xml_export_end_props(&output, 1);
+  hwloc__nolibxml_export_new_child(&output, "topology");
+  hwloc__nolibxml_export_end_props(&output, 1);
   hwloc__xml_export_object (&output, topology, hwloc_get_root_obj(topology));
-  hwloc__xml_export_end_child(&output, "topology", 1);
+  hwloc__nolibxml_export_end_child(&output, "topology", 1);
 
   return output.written+1;
 }
