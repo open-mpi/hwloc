@@ -178,9 +178,9 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       if (type == 0)
 	break;
       infos->numcaches++;
-
-      cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
     }
+
+    cache = infos->cache = malloc(infos->numcaches * sizeof(*infos->cache));
 
     for (cachenum = 0; ; cachenum++) {
       unsigned linesize, linepart, ways, sets;
