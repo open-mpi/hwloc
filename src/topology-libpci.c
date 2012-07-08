@@ -395,14 +395,16 @@ hwloc_look_libpci(struct hwloc_topology *topology)
       if (cap->addr + PCI_EXP_LNKSTA >= CONFIG_SPACE_CACHESIZE) {
         fprintf(stderr, "cannot read PCI_EXP_LNKSTA cap at %d (only %d cached)\n", cap->addr + PCI_EXP_LNKSTA, CONFIG_SPACE_CACHESIZE);
       } else {
-        unsigned linksta = * (unsigned*) &config_space_cache[cap->addr + PCI_EXP_LNKSTA];
-        unsigned speed = linksta & PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
-        unsigned width = (linksta & PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
+        unsigned linksta, speed, width;
+        float lanespeed;
+        memcpy(&linksta, &config_space_cache[cap->addr + PCI_EXP_LNKSTA], 4);
+        speed = linksta & PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
+        width = (linksta & PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
 	/* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
 	 * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
 	 * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
 	 */
-        float lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
+        lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
         obj->attr->pcidev.linkspeed = lanespeed * width / 8; /* GB/s */
       }
     }
