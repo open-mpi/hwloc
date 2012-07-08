@@ -51,36 +51,19 @@ hwloc_libxml2_disable_stderrwarnings(void)
  ******** Backend Init/Exit ********
  ***********************************/
 
-/* this can be the first XML call */
-int
-hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
+static int hwloc_nolibxml_look(struct hwloc_topology *topology,
+			       struct hwloc__xml_import_state_s *state);
+static void hwloc_nolibxml_look_failed(struct hwloc_topology *topology);
+
+static void
+hwloc_nolibxml_backend_exit(struct hwloc_topology *topology)
 {
-#ifdef HWLOC_HAVE_LIBXML2
-  char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
-  if (!env || !atoi(env)) {
-    xmlDoc *doc = NULL;
+  free(topology->backend_params.xml.buffer);
+}
 
-    LIBXML_TEST_VERSION;
-    hwloc_libxml2_disable_stderrwarnings();
-
-    errno = 0; /* set to 0 so that we know if libxml2 changed it */
-
-    if (xmlpath)
-      doc = xmlReadFile(xmlpath, NULL, 0);
-    else if (xmlbuffer)
-      doc = xmlReadMemory(xmlbuffer, xmlbuflen, "", NULL, 0);
-
-    if (!doc) {
-      if (!errno)
-	/* libxml2 read the file fine, but it got an error during parsing */
-      errno = EINVAL;
-      return -1;
-    }
-
-    topology->backend_params.xml.buffer = NULL;
-    topology->backend_params.xml.doc = doc;
-  } else
-#endif /* HWLOC_HAVE_LIBXML2 */
+static int
+hwloc_nolibxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
+{
   if (xmlbuffer) {
     topology->backend_params.xml.buffer = malloc(xmlbuflen);
     memcpy(topology->backend_params.xml.buffer, xmlbuffer, xmlbuflen);
@@ -118,6 +101,70 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
     /* buflen = offset+1; */
   }
 
+  topology->backend_params.xml.look = hwloc_nolibxml_look;
+  topology->backend_params.xml.look_failed = hwloc_nolibxml_look_failed;
+  topology->backend_params.xml.backend_exit = hwloc_nolibxml_backend_exit;
+  return 0;
+}
+
+#ifdef HWLOC_HAVE_LIBXML2
+static int hwloc_libxml_look(struct hwloc_topology *topology,
+			     struct hwloc__xml_import_state_s *state);
+
+static void
+hwloc_libxml_backend_exit(struct hwloc_topology *topology)
+{
+  xmlFreeDoc((xmlDoc*)topology->backend_params.xml.doc);
+}
+
+static int
+hwloc_libxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
+{
+  xmlDoc *doc = NULL;
+
+  LIBXML_TEST_VERSION;
+  hwloc_libxml2_disable_stderrwarnings();
+
+  errno = 0; /* set to 0 so that we know if libxml2 changed it */
+
+  if (xmlpath)
+    doc = xmlReadFile(xmlpath, NULL, 0);
+  else if (xmlbuffer)
+    doc = xmlReadMemory(xmlbuffer, xmlbuflen, "", NULL, 0);
+
+  if (!doc) {
+    if (!errno)
+      /* libxml2 read the file fine, but it got an error during parsing */
+    errno = EINVAL;
+    return -1;
+  }
+
+  topology->backend_params.xml.look = hwloc_libxml_look;
+  topology->backend_params.xml.look_failed = NULL;
+  topology->backend_params.xml.backend_exit = hwloc_libxml_backend_exit;
+  topology->backend_params.xml.buffer = NULL;
+  topology->backend_params.xml.doc = doc;
+  return 0;
+}
+#endif
+
+/* this can be the first XML call */
+int
+hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
+{
+  int ret;
+#ifdef HWLOC_HAVE_LIBXML2
+  char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
+  if (!env || !atoi(env)) {
+    ret = hwloc_libxml_backend_init(topology, xmlpath, xmlbuffer, xmlbuflen);
+  } else
+#endif /* HWLOC_HAVE_LIBXML2 */
+  {
+    ret = hwloc_nolibxml_backend_init(topology, xmlpath, xmlbuffer, xmlbuflen);
+  }
+  if (ret < 0)
+    return ret;
+
   topology->is_thissystem = 0;
   assert(topology->backend_type == HWLOC_BACKEND_NONE);
   topology->backend_type = HWLOC_BACKEND_XML;
@@ -129,17 +176,8 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
 void
 hwloc_backend_xml_exit(struct hwloc_topology *topology)
 {
-#ifdef HWLOC_HAVE_LIBXML2
-  char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
-  if (!env || !atoi(env)) {
-    xmlFreeDoc((xmlDoc*)topology->backend_params.xml.doc);
-  } else
-#endif
-  {
-    assert(topology->backend_params.xml.buffer);
-    free(topology->backend_params.xml.buffer);
-  }
   assert(topology->backend_type == HWLOC_BACKEND_XML);
+  topology->backend_params.xml.backend_exit(topology);
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
@@ -945,88 +983,105 @@ hwloc_xml__handle_distances(struct hwloc_topology *topology)
   }
 }
 
+#ifdef HWLOC_HAVE_LIBXML2
+static int
+hwloc_libxml_look(struct hwloc_topology *topology,
+		  struct hwloc__xml_import_state_s *state)
+{
+  xmlNode* root_node;
+  xmlDtd *dtd;
+
+  dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
+  if (!dtd) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "Loading XML topology without DTD\n");
+  } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
+	      (char *) dtd->SystemID, "hwloc.dtd");
+  }
+
+  root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
+
+  if (strcmp((const char *) root_node->name, "topology") && strcmp((const char *) root_node->name, "root")) {
+    /* root node should be in "topology" class (or "root" if importing from < 1.0) */
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
+    goto failed;
+  }
+
+  state->next_attr = hwloc__libxml_import_next_attr;
+  state->find_child = hwloc__libxml_import_find_child;
+  state->close_tag = hwloc__libxml_import_close_tag;
+  state->close_child = hwloc__libxml_import_close_child;
+  state->parent = NULL;
+  state->libxml_node = root_node;
+  state->libxml_child = root_node->children;
+  state->libxml_attr = NULL;
+  return 0; /* success */
+
+ failed:
+  return -1; /* failed */
+}
+#endif /* HWLOC_HAVE_LIBXML2 */
+
+static int
+hwloc_nolibxml_look(struct hwloc_topology *topology,
+		    struct hwloc__xml_import_state_s *state)
+{
+  char *buffer = topology->backend_params.xml.buffer;
+
+  /* skip headers */
+  while (!strncmp(buffer, "<?xml ", 6) || !strncmp(buffer, "<!DOCTYPE ", 10)) {
+    buffer = strchr(buffer, '\n');
+    if (!buffer)
+      goto failed;
+    buffer++;
+  }
+
+  /* find topology tag */
+  if (strncmp(buffer, "<topology>", 10))
+    goto failed;
+
+  state->next_attr = hwloc__nolibxml_import_next_attr;
+  state->find_child = hwloc__nolibxml_import_find_child;
+  state->close_tag = hwloc__nolibxml_import_close_tag;
+  state->close_child = hwloc__nolibxml_import_close_child;
+  state->parent = NULL;
+  state->closed = 0;
+  state->tagbuffer = buffer+10;
+  state->tagname = (char *) "topology";
+  state->attrbuffer = NULL;
+  return 0; /* success */
+
+ failed:
+  return -1; /* failed */
+}
+
+static void
+hwloc_nolibxml_look_failed(struct hwloc_topology *topology __hwloc_attribute_unused)
+{
+  /* not only when verbose */
+  fprintf(stderr, "Failed to parse XML input with the minimalistic parser. If it was not\n"
+	  "generated by hwloc, try enabling full XML support with libxml2.\n");
+}
+
 /* this canNOT be the first XML call */
 int
 hwloc_look_xml(struct hwloc_topology *topology)
 {
   struct hwloc__xml_import_state_s state, childstate;
   char *tag;
-  int use_libxml;
-#ifdef HWLOC_HAVE_LIBXML2
-  char *env;
-#endif
   hwloc_localeswitch_declare;
   int ret;
 
   hwloc_localeswitch_init();
 
-  use_libxml = 0;
-  state.next_attr = hwloc__nolibxml_import_next_attr;
-  state.find_child = hwloc__nolibxml_import_find_child;
-  state.close_tag = hwloc__nolibxml_import_close_tag;
-  state.close_child = hwloc__nolibxml_import_close_child;
-  state.parent = NULL;
-
   topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
 
-#ifdef HWLOC_HAVE_LIBXML2
-  env = getenv("HWLOC_NO_LIBXML_IMPORT");
-  if (!env || !atoi(env)) {
-    xmlNode* root_node;
-    xmlDtd *dtd;
-
-    use_libxml = 1;
-    state.next_attr = hwloc__libxml_import_next_attr;
-    state.find_child = hwloc__libxml_import_find_child;
-    state.close_tag = hwloc__libxml_import_close_tag;
-    state.close_child = hwloc__libxml_import_close_child;
-
-    dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
-    if (!dtd) {
-      if (hwloc__xml_verbose())
-	fprintf(stderr, "Loading XML topology without DTD\n");
-    } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")) {
-      if (hwloc__xml_verbose())
-	fprintf(stderr, "Loading XML topology with wrong DTD SystemID (%s instead of %s)\n",
-		(char *) dtd->SystemID, "hwloc.dtd");
-    }
-
-    root_node = xmlDocGetRootElement((xmlDoc*) topology->backend_params.xml.doc);
-
-    if (strcmp((const char *) root_node->name, "topology") && strcmp((const char *) root_node->name, "root")) {
-      /* root node should be in "topology" class (or "root" if importing from < 1.0) */
-      if (hwloc__xml_verbose())
-	fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
-      goto failed;
-    }
-
-    state.libxml_node = root_node;
-    state.libxml_child = root_node->children;
-    state.libxml_attr = NULL;
-  } else
-#endif /* HWLOC_HAVE_LIBXML2 */
-  {
-    char *buffer = topology->backend_params.xml.buffer;
-
-    /* skip headers */
-    while (!strncmp(buffer, "<?xml ", 6) || !strncmp(buffer, "<!DOCTYPE ", 10)) {
-      buffer = strchr(buffer, '\n');
-      if (!buffer)
-	goto failed;
-      buffer++;
-    }
-
-    /* find topology tag */
-    if (strncmp(buffer, "<topology>", 10))
-	goto failed;
-
-    /* prepare parsing state */
-    state.tagbuffer = buffer+10;
-    state.tagname = (char *) "topology";
-    state.attrbuffer = NULL;
-  }
-
-  state.closed = 0;
+  ret = topology->backend_params.xml.look(topology, &state);
+  if (ret < 0)
+    goto failed;
 
   /* find root object tag and import it */
   ret = state.find_child(&state, &childstate, &tag);
@@ -1052,10 +1107,8 @@ hwloc_look_xml(struct hwloc_topology *topology)
   return 0;
 
  failed:
-  if (!use_libxml)
-    /* not only when verbose */
-    fprintf(stderr, "Failed to parse XML input with the minimalistic parser. If it was not\n"
-	    "generated by hwloc, try enabling full XML support with libxml2.\n");
+  if (topology->backend_params.xml.look_failed)
+    topology->backend_params.xml.look_failed(topology);
   hwloc_localeswitch_fini();
   return -1;
 }

@@ -56,6 +56,8 @@ typedef enum hwloc_backend_e {
   HWLOC_BACKEND_MAX
 } hwloc_backend_t;
 
+struct hwloc__xml_import_state_s;
+
 struct hwloc_topology {
   unsigned nb_levels;					/* Number of horizontal levels */
   unsigned next_group_depth;				/* Depth of the next Group object that we may create */
@@ -145,6 +147,9 @@ struct hwloc_topology {
 #endif /* HWLOC_OSF_SYS */
     struct hwloc_backend_params_xml_s {
       /* xml backend parameters */
+      int (*look)(struct hwloc_topology *topology, struct hwloc__xml_import_state_s *state);
+      void (*look_failed)(struct hwloc_topology *topology);
+      void (*backend_exit)(struct hwloc_topology *topology);
 #ifdef HWLOC_HAVE_LIBXML2
       void *doc;
 #endif /* HWLOC_HAVE_LIBXML2 */
