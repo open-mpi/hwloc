@@ -25,6 +25,7 @@ noinst_HEADERS = \
         private/private.h \
         private/debug.h \
         private/misc.h \
+        private/xml.h \
         private/cpuid.h
 
 if HWLOC_HAVE_LINUX

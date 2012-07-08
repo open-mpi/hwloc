@@ -406,6 +406,17 @@ extern "C" {
 #define hwloc_have_cpuid HWLOC_NAME(have_cpuid)
 #define hwloc_cpuid HWLOC_NAME(cpuid)
 
+/* private/xml.h */
+#define hwloc_nolibxml_backend_init HWLOC_NAME(nolibxml_backend_init)
+#define hwloc_nolibxml_export_file HWLOC_NAME(nolibxml_export_file)
+#define hwloc_nolibxml_export_buffer HWLOC_NAME(nolibxml_export_buffer)
+#define hwloc_nolibxml_free_buffer HWLOC_NAME(nolibxml_free_buffer)
+
+#define hwloc_libxml_backend_init HWLOC_NAME(libxml_backend_init)
+#define hwloc_libxml_export_file HWLOC_NAME(libxml_export_file)
+#define hwloc_libxml_export_buffer HWLOC_NAME(libxml_export_buffer)
+#define hwloc_libxml_free_buffer HWLOC_NAME(libxml_free_buffer)
+
 /* private/private.h */
 
 #define hwloc_ignore_type_e HWLOC_NAME(ignore_type_e)

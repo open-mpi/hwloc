@@ -27,12 +27,17 @@ sources = \
         distances.c \
         topology-synthetic.c \
         topology-xml.c \
+        topology-xml-nolibxml.c \
         bind.c \
         bitmap.c \
         misc.c
 ldflags =
 
 # Conditionally add to the sources and ldflags
+
+if HWLOC_HAVE_LIBXML2
+sources += topology-xml-libxml.c
+endif HWLOC_HAVE_LIBXML2
 
 if HWLOC_HAVE_LIBPCI
 sources += topology-libpci.c
