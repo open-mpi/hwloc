@@ -209,16 +209,22 @@ hwloc_libxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, 
  * Export routines *
  *******************/
 
+typedef struct hwloc__libxml_export_output_data_s {
+  xmlNodePtr current_node; /* current node to output */
+} * hwloc__libxml_export_output_data_t;
+
 static void
 hwloc__libxml_export_new_child(hwloc__xml_export_output_t output, const char *name)
 {
-  output->current_node = xmlNewChild(output->current_node, NULL, BAD_CAST name, NULL);
+  hwloc__libxml_export_output_data_t ldata = output->data;
+  ldata->current_node = xmlNewChild(ldata->current_node, NULL, BAD_CAST name, NULL);
 }
 
 static void
 hwloc__libxml_export_new_prop(hwloc__xml_export_output_t output, const char *name, const char *value)
 {
-  xmlNewProp(output->current_node, BAD_CAST name, BAD_CAST value);
+  hwloc__libxml_export_output_data_t ldata = output->data;
+  xmlNewProp(ldata->current_node, BAD_CAST name, BAD_CAST value);
 }
 
 static void
@@ -230,13 +236,15 @@ hwloc__libxml_export_end_props(hwloc__xml_export_output_t output __hwloc_attribu
 static void
 hwloc__libxml_export_end_child(hwloc__xml_export_output_t output, const char *name __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused)
 {
-  output->current_node = output->current_node->parent;
+  hwloc__libxml_export_output_data_t ldata = output->data;
+  ldata->current_node = ldata->current_node->parent;
 }
 
 static xmlDocPtr
 hwloc__libxml2_prepare_export(hwloc_topology_t topology)
 {
   struct hwloc__xml_export_output_s output;
+  struct hwloc__libxml_export_output_data_s data;
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
 
@@ -255,8 +263,8 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
   output.end_child = hwloc__libxml_export_end_child;
   output.new_prop = hwloc__libxml_export_new_prop;
   output.end_props = hwloc__libxml_export_end_props;
-
-  output.current_node = root_node;
+  output.data = &data;
+  data.current_node = root_node;
   hwloc__xml_export_object (&output, topology, hwloc_get_root_obj(topology));
 
   return doc;

@@ -32,16 +32,8 @@ typedef struct hwloc__xml_export_output_s {
   void (*end_props)(struct hwloc__xml_export_output_s *output, unsigned nr_children);
   void (*end_child)(struct hwloc__xml_export_output_s *output, const char *name, unsigned nr_children);
 
-  /* only useful if not using libxml */
-  char *buffer; /* (moving) buffer where to write */
-  size_t written; /* how many bytes were written (or would have be written if not truncated) */
-  size_t remaining; /* how many bytes are still available in the buffer */
-  unsigned indent; /* indentation level for the next line */
-
-  /* only useful if not using libxml */
-#ifdef HWLOC_HAVE_LIBXML2
-  xmlNodePtr current_node; /* current node to output */
-#endif
+  /* allocated by the backend (a single output is needed for the entire export) */
+  void *data;
 } * hwloc__xml_export_output_t;
 
 extern void hwloc__xml_export_object (hwloc__xml_export_output_t output, struct hwloc_topology *topology, struct hwloc_obj *obj);
