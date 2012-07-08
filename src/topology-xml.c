@@ -456,7 +456,11 @@ hwloc__nolibxml_import_ignore_spaces(char *buffer)
 
 typedef struct hwloc__xml_import_state_s {
   struct hwloc__xml_import_state_s *parent;
-  int use_libxml;
+
+  int (*next_attr)(struct hwloc__xml_import_state_s * state, char **namep, char **valuep);
+  int (*find_child)(struct hwloc__xml_import_state_s * state, struct hwloc__xml_import_state_s * childstate, char **tagp);
+  int (*close_tag)(struct hwloc__xml_import_state_s * state); /* look for an explicit closing tag </name> */
+  void (*close_child)(struct hwloc__xml_import_state_s * state);
 
   /* only useful if not using libxml */
   char *tagbuffer; /* buffer containing the next tag */
@@ -541,7 +545,10 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
     int namelen;
 
     childstate->parent = state;
-    childstate->use_libxml = state->use_libxml;
+    childstate->next_attr = state->next_attr;
+    childstate->find_child = state->find_child;
+    childstate->close_tag = state->close_tag;
+    childstate->close_child = state->close_child;
 
     /* auto-closed tags have no children */
     if (state->closed)
@@ -663,7 +670,10 @@ hwloc__libxml_import_find_child(hwloc__xml_import_state_t state,
 {
     xmlNode *child;
     childstate->parent = state;
-    childstate->use_libxml = state->use_libxml;
+    childstate->next_attr = state->next_attr;
+    childstate->find_child = state->find_child;
+    childstate->close_tag = state->close_tag;
+    childstate->close_child = state->close_child;
     if (!state->libxml_child)
       return 0;
     child = state->libxml_child->next;
@@ -685,70 +695,18 @@ hwloc__libxml_import_find_child(hwloc__xml_import_state_t state,
 
     return 0;
 }
-#endif /* HWLOC_HAVE_LIBXML2 */
 
 static int
-hwloc__xml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
+hwloc__libxml_import_close_tag(hwloc__xml_import_state_t state __hwloc_attribute_unused)
 {
-  if (state->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    return hwloc__libxml_import_next_attr(state, namep, valuep);
-#else
-    assert(0);
-    return -1;
-#endif
-  } else {
-    return hwloc__nolibxml_import_next_attr(state, namep, valuep);
-  }
-}
-
-static int
-hwloc__xml_import_find_child(hwloc__xml_import_state_t state,
-			     hwloc__xml_import_state_t childstate,
-			     char **tagp)
-{
-  if (state->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    return hwloc__libxml_import_find_child(state, childstate, tagp);
-#else
-    assert(0);
-    return -1;
-#endif
-  } else {
-    return hwloc__nolibxml_import_find_child(state, childstate, tagp);
-  }
-}
-
-/* look for an explicit closing tag </name> */
-static int
-hwloc__xml_import_close_tag(hwloc__xml_import_state_t state)
-{
-  if (state->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    /* nothing */
-    return 0;
-#else
-    assert(0);
-    return -1;
-#endif
-  } else {
-    return hwloc__nolibxml_import_close_tag(state);
-  }
+  return 0;
 }
 
 static void
-hwloc__xml_import_close_child(hwloc__xml_import_state_t state)
+hwloc__libxml_import_close_child(hwloc__xml_import_state_t state __hwloc_attribute_unused)
 {
-  if (state->use_libxml) {
-#ifdef HWLOC_HAVE_LIBXML2
-    /* nothing */
-#else
-    assert(0);
-#endif
-  } else {
-    hwloc__nolibxml_import_close_child(state);
-  }
 }
+#endif /* HWLOC_HAVE_LIBXML2 */
 
 static int
 hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj,
@@ -759,7 +717,7 @@ hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
 
   while (1) {
     char *attrname, *attrvalue;
-    if (hwloc__xml_import_next_attr(state, &attrname, &attrvalue) < 0)
+    if (state->next_attr(state, &attrname, &attrvalue) < 0)
       break;
     if (!strcmp(attrname, "name"))
       infoname = attrvalue;
@@ -773,7 +731,7 @@ hwloc__xml_import_info(hwloc_topology_t topology __hwloc_attribute_unused, hwloc
     /* empty strings are ignored by libxml */
     hwloc_obj_add_info(obj, infoname, infovalue ? infovalue : "");
 
-  return hwloc__xml_import_close_tag(state);
+  return state->close_tag(state);
 }
 
 static int
@@ -784,7 +742,7 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, h
 
   while (1) {
     char *attrname, *attrvalue;
-    if (hwloc__xml_import_next_attr(state, &attrname, &attrvalue) < 0)
+    if (state->next_attr(state, &attrname, &attrvalue) < 0)
       break;
     if (!strcmp(attrname, "size"))
       size = strtoull(attrvalue, NULL, 10);
@@ -802,7 +760,7 @@ hwloc__xml_import_pagetype(hwloc_topology_t topology __hwloc_attribute_unused, h
     obj->memory.page_types[idx].count = count;
   }
 
-  return hwloc__xml_import_close_tag(state);
+  return state->close_tag(state);
 }
 
 static int
@@ -816,7 +774,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology __hwloc_attribute_unused, 
 
   while (1) {
     char *attrname, *attrvalue;
-    if (hwloc__xml_import_next_attr(state, &attrname, &attrvalue) < 0)
+    if (state->next_attr(state, &attrname, &attrvalue) < 0)
       break;
     if (!strcmp(attrname, "nbobjs"))
       nbobjs = strtoul(attrvalue, NULL, 10);
@@ -845,7 +803,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology __hwloc_attribute_unused, 
       char *attrname, *attrvalue;
       float val;
 
-      ret = hwloc__xml_import_find_child(state, &childstate, &tag);
+      ret = state->find_child(state, &childstate, &tag);
       if (ret <= 0 || strcmp(tag, "latency")) {
 	/* a latency child is needed */
 	free(distances->distances.latency);
@@ -853,7 +811,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology __hwloc_attribute_unused, 
 	return -1;
       }
 
-      ret = hwloc__xml_import_next_attr(&childstate, &attrname, &attrvalue);
+      ret = state->next_attr(&childstate, &attrname, &attrvalue);
       if (ret < 0 || strcmp(attrname, "value")) {
 	free(distances->distances.latency);
 	free(distances);
@@ -865,11 +823,11 @@ hwloc__xml_import_distances(hwloc_topology_t topology __hwloc_attribute_unused, 
       if (val > latmax)
 	latmax = val;
 
-      ret = hwloc__xml_import_close_tag(&childstate);
+      ret = state->close_tag(&childstate);
       if (ret < 0)
 	return -1;
 
-      hwloc__xml_import_close_child(&childstate);
+      state->close_child(&childstate);
     }
 
     distances->distances.latency_max = latmax;
@@ -882,7 +840,7 @@ hwloc__xml_import_distances(hwloc_topology_t topology __hwloc_attribute_unused, 
     distances->next = NULL;
   }
 
-  return hwloc__xml_import_close_tag(state);
+  return state->close_tag(state);
 }
 
 static int
@@ -892,7 +850,7 @@ hwloc__xml_import_object(hwloc_topology_t topology, hwloc_obj_t obj,
   /* process attributes */
   while (1) {
     char *attrname, *attrvalue;
-    if (hwloc__xml_import_next_attr(state, &attrname, &attrvalue) < 0)
+    if (state->next_attr(state, &attrname, &attrvalue) < 0)
       break;
     if (!strcmp(attrname, "type")) {
       obj->type = hwloc_obj_type_of_string(attrvalue);
@@ -912,7 +870,7 @@ hwloc__xml_import_object(hwloc_topology_t topology, hwloc_obj_t obj,
     char *tag;
     int ret;
 
-    ret = hwloc__xml_import_find_child(state, &childstate, &tag);
+    ret = state->find_child(state, &childstate, &tag);
     if (ret < 0)
       return -1;
     if (!ret)
@@ -934,10 +892,10 @@ hwloc__xml_import_object(hwloc_topology_t topology, hwloc_obj_t obj,
     if (ret < 0)
       return ret;
 
-    hwloc__xml_import_close_child(&childstate);
+    state->close_child(&childstate);
   }
 
-  return hwloc__xml_import_close_tag(state);
+  return state->close_tag(state);
 }
 
 /***********************************
@@ -993,6 +951,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
 {
   struct hwloc__xml_import_state_s state, childstate;
   char *tag;
+  int use_libxml;
 #ifdef HWLOC_HAVE_LIBXML2
   char *env;
 #endif
@@ -1001,7 +960,11 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
   hwloc_localeswitch_init();
 
-  state.use_libxml = 0;
+  use_libxml = 0;
+  state.next_attr = hwloc__nolibxml_import_next_attr;
+  state.find_child = hwloc__nolibxml_import_find_child;
+  state.close_tag = hwloc__nolibxml_import_close_tag;
+  state.close_child = hwloc__nolibxml_import_close_child;
   state.parent = NULL;
 
   topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
@@ -1012,7 +975,11 @@ hwloc_look_xml(struct hwloc_topology *topology)
     xmlNode* root_node;
     xmlDtd *dtd;
 
-    state.use_libxml = 1;
+    use_libxml = 1;
+    state.next_attr = hwloc__libxml_import_next_attr;
+    state.find_child = hwloc__libxml_import_find_child;
+    state.close_tag = hwloc__libxml_import_close_tag;
+    state.close_child = hwloc__libxml_import_close_child;
 
     dtd = xmlGetIntSubset((xmlDoc*) topology->backend_params.xml.doc);
     if (!dtd) {
@@ -1062,16 +1029,16 @@ hwloc_look_xml(struct hwloc_topology *topology)
   state.closed = 0;
 
   /* find root object tag and import it */
-  ret = hwloc__xml_import_find_child(&state, &childstate, &tag);
+  ret = state.find_child(&state, &childstate, &tag);
   if (ret < 0 || !ret || strcmp(tag, "object"))
     goto failed;
   ret = hwloc__xml_import_object(topology, topology->levels[0][0], &childstate);
   if (ret < 0)
     goto failed;
-  hwloc__xml_import_close_child(&childstate);
+  state.close_child(&childstate);
 
   /* find end of topology tag */
-  hwloc__xml_import_close_tag(&state);
+  state.close_tag(&state);
 
   /* keep the "Backend" information intact */
   /* we could add "BackendSource=XML" to notify that XML was used between the actual backend and here */
@@ -1085,7 +1052,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
   return 0;
 
  failed:
-  if (!state.use_libxml)
+  if (!use_libxml)
     /* not only when verbose */
     fprintf(stderr, "Failed to parse XML input with the minimalistic parser. If it was not\n"
 	    "generated by hwloc, try enabling full XML support with libxml2.\n");
