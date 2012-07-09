@@ -8,6 +8,8 @@
 #define HWLOC_PORT_SYS_THREAD_H
 
 typedef long tid_t;
+typedef uint64_t tid64_t;
+
 tid_t thread_self(void);
 struct __pthrdsinfo {
   tid_t __pi_tid;
