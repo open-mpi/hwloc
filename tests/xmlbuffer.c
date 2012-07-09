@@ -48,8 +48,10 @@ static int one_test(void)
   assert(!hwloc_topology_set_xmlbuffer(topology, buf1, size1));
   hwloc_topology_load(topology);
   assert(!hwloc_topology_is_thissystem(topology));
-  assert(!strcmp(hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "UglyString"), s));
-  assert(!strcmp(hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "UberUglyString"), "xy"));
+  if (strcmp(hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "UglyString"), s))
+    assert(0);
+  if (strcmp(hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "UberUglyString"), "xy"))
+    assert(0);
   hwloc_topology_export_xmlbuffer(topology, &buf2, &size2);
   hwloc_topology_destroy(topology);
   printf("re-exported to buffer %p length %d\n", buf2, size2);

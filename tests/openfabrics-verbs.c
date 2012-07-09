@@ -56,7 +56,8 @@ int main(void)
 	printf("found OS object subtype %u lindex %u name %s\n",
 	       (unsigned) os->attr->osdev.type, os->logical_index, os->name);
 	assert(os->attr->osdev.type == HWLOC_OBJ_OSDEV_OPENFABRICS);
-	assert(!strcmp(ibv_get_device_name(dev), os->name));
+	if (strcmp(ibv_get_device_name(dev), os->name))
+	  assert(0);
       }
     }
     hwloc_bitmap_free(set);

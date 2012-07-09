@@ -45,7 +45,8 @@ int main(void)
   hwloc_bitmap_asprintf(&string, obj->cpuset);
   fprintf(stderr, "covering object of %s is %s, expected %s\n",
 	  GIVEN_CPUSET_STRING, string, EXPECTED_CPUSET_STRING);
-  assert(!strcmp(EXPECTED_CPUSET_STRING, string));
+  if (strcmp(EXPECTED_CPUSET_STRING, string))
+    assert(0);
   free(string);
 
   hwloc_bitmap_sscanf(set, GIVEN_LARGESPLIT_CPUSET_STRING);

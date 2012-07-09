@@ -21,8 +21,8 @@ static void check_cpuset(hwloc_bitmap_t set, const char *expected)
   char *string = NULL;
 
   hwloc_bitmap_asprintf(&string, set);
-  if (expected)
-    assert(!strcmp(string, expected));
+  if (expected && strcmp(string, expected))
+    assert(0);
   hwloc_bitmap_sscanf(set2, string);
   free(string);
   assert(hwloc_bitmap_isequal(set, set2));

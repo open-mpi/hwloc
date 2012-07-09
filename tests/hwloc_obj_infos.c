@@ -32,8 +32,10 @@ int main(void)
   assert(!hwloc_obj_get_info_by_name(obj, NAME2));
   hwloc_obj_add_info(obj, NAME2, VALUE2);
 
-  assert(!strcmp(hwloc_obj_get_info_by_name(obj, NAME1), VALUE1));
-  assert(!strcmp(hwloc_obj_get_info_by_name(obj, NAME2), VALUE2));
+  if (strcmp(hwloc_obj_get_info_by_name(obj, NAME1), VALUE1))
+    assert(0);
+  if (strcmp(hwloc_obj_get_info_by_name(obj, NAME2), VALUE2))
+    assert(0);
 
   hwloc_topology_destroy(topology);
 
