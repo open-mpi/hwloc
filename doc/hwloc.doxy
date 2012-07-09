@@ -271,7 +271,7 @@ On a 4-socket 2-core Opteron NUMA machine, the \c lstopo tool may show
 the following graphical output:
 
 \image html hagrid.png
-\image latex hagrid.png width=\textwidth
+\image latex hagrid.png "" width=\textwidth
 
 Here's the equivalent output in textual form:
 
@@ -767,7 +767,7 @@ fields (depth, logical_index, etc.), and arrows show to which other hwloc_obj_t
 pointers point to (first_child, parent, etc.). The L2 cache of the last core is intentionally missing to show how asymmetric topologies are handled.
 
 \image html diagram.png
-\image latex diagram.eps width=\textwidth
+\image latex diagram.eps "" width=\textwidth
 
 It should be noted that for PU objects, the logical index -- as
 computed linearly by hwloc -- is not the same as the OS index.
