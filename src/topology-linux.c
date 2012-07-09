@@ -3656,8 +3656,10 @@ hwloc_linuxfs_pci_lookup_osdevices(struct hwloc_topology *topology, struct hwloc
   char pcidevpath[256];
 
   /* this should not be called if the backend isn't the real OS one */
-  assert(!topology->backend_params.linuxfs.root_path
-	 || !strcmp(topology->backend_params.linuxfs.root_path, "/"));
+  if (topology->backend_params.linuxfs.root_path) {
+    assert(strlen(topology->backend_params.linuxfs.root_path) == 1);
+    assert(topology->backend_params.linuxfs.root_path[0] == '/');
+  }
 
   snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
 	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
@@ -3679,8 +3681,10 @@ hwloc_linuxfs_get_pcidev_cpuset(struct hwloc_topology *topology __hwloc_attribut
   int err;
 
   /* this should not be called if the backend isn't the real OS one */
-  assert(!topology->backend_params.linuxfs.root_path
-	 || !strcmp(topology->backend_params.linuxfs.root_path, "/"));
+  if (topology->backend_params.linuxfs.root_path) {
+    assert(strlen(topology->backend_params.linuxfs.root_path) == 1);
+    assert(topology->backend_params.linuxfs.root_path[0] == '/');
+  }
 
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
 	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
