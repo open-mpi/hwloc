@@ -52,6 +52,7 @@ libhwloc_ports_la_SOURCES = \
         include/radset.h \
         include/cpuset.h \
         include/numa.h \
+        include/procinfo.h \
         include/pthread_np.h
 
 libhwloc_ports_la_CPPFLAGS = \
