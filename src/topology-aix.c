@@ -33,7 +33,7 @@
 #include <sys/systemcfg.h>
 
 static int
-hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, pid_t pid, hwloc_const_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   rsethandle_t rad;
   int res;
@@ -58,9 +58,14 @@ hwloc_aix_set_sth_cpubind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
   hwloc_bitmap_foreach_end();
 
   res = ra_attachrset(what, who, rad, 0);
-  /* TODO: we may get EPERM because there's a binding set by bindprocessor() earlier.
-   * We could unbind() with bindprocessor(PROCESSOR_CLASS_ANY)
-   * and try ra_attachset() again. */
+  if (res < 0 && errno == EPERM) {
+    /* EPERM may mean that one thread has ben bound with bindprocessor().
+     * Unbind the entire process (we can't unbind individual threads)
+     * and try again.
+     */
+    bindprocessor(BINDPROCESS, pid, PROCESSOR_CLASS_ANY);
+    res = ra_attachrset(what, who, rad, 0);
+  }
 
   rs_free(rad);
   return res;
@@ -164,7 +169,7 @@ hwloc_aix_set_thisproc_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t h
 {
   rsid_t who;
   who.at_pid = getpid();
-  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, flags);
+  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, who.at_pid, hwloc_set, flags);
 }
 
 static int
@@ -187,7 +192,7 @@ hwloc_aix_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t
 {
   rsid_t who;
   who.at_tid = thread_self();
-  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, flags);
+  return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, getpid(), hwloc_set, flags);
 }
 
 static int
@@ -210,7 +215,7 @@ hwloc_aix_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
 {
   rsid_t who;
   who.at_pid = pid;
-  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, hwloc_set, flags);
+  return hwloc_aix_set_sth_cpubind(topology, R_PROCESS, who, pid, hwloc_set, flags);
 }
 
 static int
@@ -238,7 +243,7 @@ hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
     return -1;
   {
     rsid_t who = { .at_tid = info.__pi_tid };
-    return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, hwloc_set, flags);
+    return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, getpid(), hwloc_set, flags);
   }
 }
 
@@ -332,7 +337,7 @@ hwloc_aix_prepare_membind(hwloc_topology_t topology, rsethandle_t *rad, hwloc_co
 }
 
 static int
-hwloc_aix_set_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy, int flags)
+hwloc_aix_set_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, pid_t pid, hwloc_const_bitmap_t nodeset, hwloc_membind_policy_t policy, int flags)
 {
   rsethandle_t rad;
   int res;
@@ -355,6 +360,14 @@ hwloc_aix_set_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     return -1;
 
   res = ra_attachrset(what, who, rad, 0);
+  if (res < 0 && errno == EPERM) {
+    /* EPERM may mean that one thread has ben bound with bindprocessor().
+     * Unbind the entire process (we can't unbind individual threads)
+     * and try again.
+     */
+    bindprocessor(BINDPROCESS, pid, PROCESSOR_CLASS_ANY);
+    res = ra_attachrset(what, who, rad, 0);
+  }
 
   rs_free(rad);
   return res;
@@ -408,7 +421,7 @@ hwloc_aix_set_thisproc_membind(hwloc_topology_t topology, hwloc_const_bitmap_t h
 {
   rsid_t who;
   who.at_pid = getpid();
-  return hwloc_aix_set_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
+  return hwloc_aix_set_sth_membind(topology, R_PROCESS, who, who.at_pid, hwloc_set, policy, flags);
 }
 
 static int
@@ -425,7 +438,7 @@ hwloc_aix_set_thisthread_membind(hwloc_topology_t topology, hwloc_const_bitmap_t
 {
   rsid_t who;
   who.at_tid = thread_self();
-  return hwloc_aix_set_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
+  return hwloc_aix_set_sth_membind(topology, R_THREAD, who, getpid(), hwloc_set, policy, flags);
 }
 
 static int
@@ -442,7 +455,7 @@ hwloc_aix_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_con
 {
   rsid_t who;
   who.at_pid = pid;
-  return hwloc_aix_set_sth_membind(topology, R_PROCESS, who, hwloc_set, policy, flags);
+  return hwloc_aix_set_sth_membind(topology, R_PROCESS, who, pid, hwloc_set, policy, flags);
 }
 
 static int
@@ -465,7 +478,7 @@ hwloc_aix_set_thread_membind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   {
     rsid_t who;
     who.at_tid = info.__pi_tid;
-    return hwloc_aix_set_sth_membind(topology, R_THREAD, who, hwloc_set, policy, flags);
+    return hwloc_aix_set_sth_membind(topology, R_THREAD, who, getpid(), hwloc_set, policy, flags);
   }
 }
 
@@ -515,7 +528,17 @@ hwloc_aix_set_area_membind(hwloc_topology_t topology, const void *addr, size_t l
 
   subrange.su_policy = aix_policy;
 
-  ret = ra_attachrset(R_SUBRANGE, rsid, subrange.su_rsid.at_rset, 0);
+  res = ra_attachrset(R_SUBRANGE, rsid, subrange.su_rsid.at_rset, 0);
+  if (res < 0 && errno == EPERM) {
+    /* EPERM may mean that one thread has ben bound with bindprocessor().
+     * Unbind the entire process (we can't unbind individual threads)
+     * and try again.
+     * FIXME: actually check that this EPERM can happen
+     */
+    bindprocessor(BINDPROCESS, getpid(), PROCESSOR_CLASS_ANY);
+    res = ra_attachrset(R_SUBRANGE, rsid, subrange.su_rsid.at_rset, 0);
+  }
+
   rs_free(subrange.su_rsid.at_rset);
   return ret;
 }

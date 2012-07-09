@@ -27,10 +27,10 @@ Version 1.5.0
     decimal separator.
   + Add instruction caches detection on Linux, AIX, Windows and Darwin.
   + Add get_last_cpu_location() support for the current thread on AIX.
-  + Support get_cpubind() on AIX when threads or processes were bound
-    with the bindprocessor() system call. Thanks to Hendryk Bockelmann
-    for reporting the issue and testing patches, and to Farid Parpia for
-    explaining the AIX binding interfaces.
+  + Support binding on AIX when threads or processes were bound with
+    bindprocessor(). Thanks to Hendryk Bockelmann for reporting the issue
+    and testing patches, and to Farid Parpia for explaining the binding
+    interfaces.
 * API
   + Increase HWLOC_API_VERSION to 0x00010500 so that API changes may be
     detected at build-time.
