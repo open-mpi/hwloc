@@ -96,7 +96,7 @@ out:
 }
 
 static int
-hwloc_aix_get_pid_getthrds_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+hwloc_aix_get_pid_getthrds_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t pid, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
 #if HWLOC_BITS_PER_LONG == 64
   struct thrdentry64 thread_info;
@@ -126,7 +126,7 @@ hwloc_aix_get_pid_getthrds_cpubind(hwloc_topology_t topology, pid_t pid, hwloc_b
 }
 
 static int
-hwloc_aix_get_tid_getthrds_cpubind(hwloc_topology_t topology, tid_t tid, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+hwloc_aix_get_tid_getthrds_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, tid_t tid, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
 #if HWLOC_BITS_PER_LONG == 64
   struct thrdentry64 thread_info;
