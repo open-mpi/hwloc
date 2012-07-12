@@ -346,7 +346,7 @@ extern void hwloc_group_by_distances(struct hwloc_topology *topology);
 #ifdef HAVE_XLOCALE_H
 #include "xlocale.h"
 #endif
-#define hwloc_localeswitch_declare locale_t __old_locale, __new_locale
+#define hwloc_localeswitch_declare locale_t __old_locale = (locale_t)0, __new_locale
 #define hwloc_localeswitch_init() do {                     \
   __new_locale = newlocale(LC_ALL_MASK, "C", (locale_t)0); \
   if (__new_locale != (locale_t)0)                         \
