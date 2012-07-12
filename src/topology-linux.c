@@ -475,7 +475,7 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
   char taskdir_path[128];
   DIR *taskdir;
   pid_t *tids, *newtids;
-  unsigned i, nr, newnr, failed, failed_errno;
+  unsigned i, nr, newnr, failed = 0, failed_errno = 0;
   unsigned retrynr = 0;
   int err;
 
@@ -1305,7 +1305,7 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
 {
   unsigned max_os_index;
   unsigned long *linuxmask, *globallinuxmask;
-  int linuxpolicy, globallinuxpolicy;
+  int linuxpolicy, globallinuxpolicy = 0;
   int mixed = 0;
   int full = 0;
   int first = 1;
