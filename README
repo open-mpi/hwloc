@@ -41,8 +41,8 @@ not support topology information, and hwloc thus uses an x86-only CPUID-based
 backend (which could be used for other OSes too).
 
 To check whether hwloc works on a particular machine, just try to build it and
-run lstopo. If some things do not look right (e.g. bogus or missing cache
-information), see Questions and Bugs below.
+run lstopo or lstopo-no-graphics. If some things do not look right (e.g. bogus
+or missing cache information), see Questions and Bugs below.
 
 hwloc only reports the number of processors on unsupported operating systems;
 no topology information is available.
@@ -100,7 +100,7 @@ shell$ make install
 The hwloc command-line tool "lstopo" produces human-readable topology maps, as
 mentioned above. It can also export maps to the "fig" file format. Support for
 PDF, Postscript, and PNG exporting is provided if the "Cairo" development
-package can be found when hwloc is configured and build.
+package can be found in "lstopo" when hwloc is configured and build.
 
 The hwloc core may also benefit from the following development packages:
 
@@ -452,9 +452,9 @@ core of the machine.
 
 /* Example hwloc API program.
  *
- * Copyright ? 2009-2010 inria.  All rights reserved.
- * Copyright ? 2009-2011 Universit? Bordeaux 1
- * Copyright ? 2009-2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright (c) 2009-2010 inria.  All rights reserved.
+ * Copyright (c) 2009-2011 Universit?eacute; Bordeaux 1
+ * Copyright (c) 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  *
  * hwloc-hello.c
@@ -465,7 +465,7 @@ core of the machine.
 #include <stdio.h>
 #include <string.h>
 
-static void print_children(hwloc_topology_t topology, hwloc_obj_t obj,
+static void print_children(hwloc_topology_t topology, hwloc_obj_t obj, 
                         int depth)
 {
  char string[128];
@@ -514,7 +514,7 @@ int main(void)
   *****************************************************************/
  for (depth = 0; depth < topodepth; depth++) {
      printf("*** Objects at level %d\n", depth);
-     for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth);
+     for (i = 0; i < hwloc_get_nbobjs_by_depth(topology, depth); 
           i++) {
          hwloc_obj_snprintf(string, sizeof(string), topology,
                     hwloc_get_obj_by_depth(topology, depth, i),
@@ -538,7 +538,7 @@ int main(void)
  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
      printf("*** The number of sockets is unknown\n");
  } else {
-     printf("*** %u socket(s)\n",
+     printf("*** %u socket(s)\n", 
             hwloc_get_nbobjs_by_depth(topology, depth));
  }
 
@@ -556,7 +556,7 @@ int main(void)
      levels++;
      size += obj->attr->cache.size;
    }
- printf("*** Logical processor 0 has %d caches totaling %luKB\n",
+ printf("*** Logical processor 0 has %d caches totaling %luKB\n", 
         levels, size / 1024);
 
  /*****************************************************************
@@ -718,5 +718,5 @@ Make sure to have had a look at those too!
 
 -------------------------------------------------------------------------------
 
-Generated on Fri Mar 16 2012 00:39:11 for Hardware Locality (hwloc) by   
-doxygen 1.7.6.1
+Generated on Wed Jul 18 2012 08:55:23 for Hardware Locality (hwloc) by   
+doxygen 1.8.1.2
