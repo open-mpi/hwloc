@@ -525,7 +525,7 @@ The following small C example (named ``hwloc-hello.c'') prints the
 topology of the machine and bring the process to the first logical processor
 of the second core of the machine.
 
-\verbinclude hwloc-hello.c
+\include hwloc-hello.c
 
 hwloc provides a \c pkg-config executable to obtain relevant compiler
 and linker flags.  For example, it can be used thusly to compile
