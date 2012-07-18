@@ -14,6 +14,7 @@ DOX_MAN_DIR = $(DOX_DIR)/man
 DOX_LATEX_DIR = $(DOX_DIR)/latex
 DOX_A4PDF = doxygen-doc/$(PACKAGE)-a4.pdf
 DOX_LETTERPDF = doxygen-doc/$(PACKAGE)-letter.pdf
+DOX_HTML_README = $(DOX_HTML_DIR)/readme.tmp.html
 DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 
 #
@@ -34,6 +35,7 @@ BUILT_IMAGES = images/diagram.png images/diagram.eps
 
 EXTRA_DIST = \
         hwloc.doxy \
+        README.sed \
         doxygen.css \
         doxygen.cfg \
         images/diagram.fig \
@@ -746,7 +748,8 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
     $(DOX_MAN_DIR) \
     $(DOX_LATEX_DIR) \
     $(DOX_A4PDF) \
-    $(DOX_LETTERPDF)
+    $(DOX_LETTERPDF) \
+    $(DOX_HTML_README)
 
 #
 # Rules for creating the top-level README file.  There does not appear
@@ -760,8 +763,12 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
 
 if HWLOC_BUILD_README
 doc readme: all $(HWLOC_top_srcdir)/README
-$(HWLOC_top_srcdir)/README: $(DOX_HTML_DIR)
-	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_DIR)/index.html | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
+$(HWLOC_top_srcdir)/README: $(DOX_HTML_README)
+	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_README) | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
+	rm -f $(DOX_HTML_README)
+$(DOX_HTML_README): $(DOX_HTML_DIR)
+	rm -f $@
+	sed -n -f $(srcdir)/README.sed $(DOX_HTML_DIR)/index.html > $@
 else
 doc readme: no-build-readme
 $(HWLOC_top_srcdir)/README: no-build-readme
