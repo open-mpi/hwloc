@@ -724,7 +724,7 @@ check_PROGRAMS = $(TESTS)
 endif HWLOC_BUILD_TESTS
 
 hwloc-hello-cpp.cpp: $(srcdir)/hwloc-hello.c
-	cp -f $< $@
+	cp -f $(srcdir)/hwloc-hello.c $@
 
 clean-local:
 	rm -f hwloc-hello-cpp.cpp
