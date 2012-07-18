@@ -338,7 +338,8 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   pcidev = pciaccess->devices;
   while (pcidev) {
-    char name[128], *resname;
+    char name[128];
+    const char *resname;
     u8 config_space_cache[CONFIG_SPACE_CACHESIZE];
     struct hwloc_obj *obj;
     unsigned char headertype;
