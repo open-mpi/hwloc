@@ -94,8 +94,8 @@ onto certain cores or memory nodes. Several utility programs are also
 provided to ease command-line manipulation of topology objects,
 binding of processes, and so on.
 
-Perl bindings are available from Bernd Kallies
-<a href=http://search.cpan.org/~bka/Sys-Hwloc-0.10/>on CPAN:</a>
+Perl bindings are available from Bernd Kallies on
+<a href=http://search.cpan.org/~bka/Sys-Hwloc-0.10/>CPAN</a>.
 
 Python bindings are available from Guy Streeter:
 <ul>
