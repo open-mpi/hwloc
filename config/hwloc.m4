@@ -316,6 +316,10 @@ EOF])
     #
     # Now detect support
     #
+
+    AC_CHECK_HEADERS([unistd.h])
+    AC_CHECK_HEADERS([dirent.h])
+    AC_CHECK_HEADERS([strings.h])
     
     hwloc_strncasecmp=strncmp
     AC_CHECK_FUNCS([strncasecmp], [

@@ -10,7 +10,9 @@
 #include <hwloc-calc.h>
 #include <hwloc.h>
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
 
 static void usage(FILE *where)

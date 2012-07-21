@@ -21,8 +21,12 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sched.h>

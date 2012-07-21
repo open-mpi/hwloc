@@ -7,7 +7,9 @@
 
 /* Wrapper to avoid msys' tendency to turn / into \ and : into ;  */
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
