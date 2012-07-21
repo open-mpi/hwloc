@@ -307,7 +307,7 @@ HWLOC_DECLSPEC void hwloc_bitmap_xor (hwloc_bitmap_t res, hwloc_const_bitmap_t b
 
 /** \brief Negate bitmap \p bitmap and store the result in bitmap \p res
  *
- * \p res can be the same as \p bitmap1 or \p bitmap2
+ * \p res can be the same as \p bitmap
  */
 HWLOC_DECLSPEC void hwloc_bitmap_not (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap);
 
