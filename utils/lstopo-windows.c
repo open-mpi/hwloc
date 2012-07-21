@@ -197,14 +197,14 @@ WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 static void *
 windows_start(void *output_ __hwloc_attribute_unused, int width, int height)
 {
-  WNDCLASS wndclass = {
-    .hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH),
-    .hCursor = LoadCursor(NULL, IDC_SIZEALL),
-    .hIcon = LoadIcon(NULL, IDI_APPLICATION),
-    .lpfnWndProc = WndProc,
-    .lpszClassName = "lstopo",
-  };
+  WNDCLASS wndclass;
   HWND toplevel;
+
+  wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
+  wndclass.hCursor = LoadCursor(NULL, IDC_SIZEALL);
+  wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+  wndclass.lpfnWndProc = WndProc;
+  wndclass.lpszClassName = "lstopo";
 
   win_width = width + 2*GetSystemMetrics(SM_CXSIZEFRAME);
   win_height = height + 2*GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION);
@@ -293,12 +293,12 @@ void
 output_windows (hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
   HWND toplevel;
+  MSG msg;
   the_topology = topology;
   the_logical = logical;
   the_legend = legend;
   toplevel = output_draw_start(&windows_draw_methods, logical, legend, topology, NULL);
   UpdateWindow(toplevel);
-  MSG msg;
   while (!finish && GetMessage(&msg, NULL, 0, 0)) {
     TranslateMessage(&msg);
     DispatchMessage(&msg);
