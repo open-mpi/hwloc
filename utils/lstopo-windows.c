@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009 inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -200,6 +200,7 @@ windows_start(void *output_ __hwloc_attribute_unused, int width, int height)
   WNDCLASS wndclass;
   HWND toplevel;
 
+  memset(&wndclass, 0, sizeof(wndclass);
   wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
   wndclass.hCursor = LoadCursor(NULL, IDC_SIZEALL);
   wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
