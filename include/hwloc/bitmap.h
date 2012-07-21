@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2011 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -281,19 +281,34 @@ do { \
  * Combining bitmaps.
  */
 
-/** \brief Or bitmaps \p bitmap1 and \p bitmap2 and store the result in bitmap \p res */
+/** \brief Or bitmaps \p bitmap1 and \p bitmap2 and store the result in bitmap \p res
+ *
+ * \p res can be the same as \p bitmap1 or \p bitmap2
+ */
 HWLOC_DECLSPEC void hwloc_bitmap_or (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
 
-/** \brief And bitmaps \p bitmap1 and \p bitmap2 and store the result in bitmap \p res */
+/** \brief And bitmaps \p bitmap1 and \p bitmap2 and store the result in bitmap \p res
+ *
+ * \p res can be the same as \p bitmap1 or \p bitmap2
+ */
 HWLOC_DECLSPEC void hwloc_bitmap_and (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
 
-/** \brief And bitmap \p bitmap1 and the negation of \p bitmap2 and store the result in bitmap \p res */
+/** \brief And bitmap \p bitmap1 and the negation of \p bitmap2 and store the result in bitmap \p res
+ *
+ * \p res can be the same as \p bitmap1 or \p bitmap2
+ */
 HWLOC_DECLSPEC void hwloc_bitmap_andnot (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
 
-/** \brief Xor bitmaps \p bitmap1 and \p bitmap2 and store the result in bitmap \p res */
+/** \brief Xor bitmaps \p bitmap1 and \p bitmap2 and store the result in bitmap \p res
+ *
+ * \p res can be the same as \p bitmap1 or \p bitmap2
+ */
 HWLOC_DECLSPEC void hwloc_bitmap_xor (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap1, hwloc_const_bitmap_t bitmap2);
 
-/** \brief Negate bitmap \p bitmap and store the result in bitmap \p res */
+/** \brief Negate bitmap \p bitmap and store the result in bitmap \p res
+ *
+ * \p res can be the same as \p bitmap1 or \p bitmap2
+ */
 HWLOC_DECLSPEC void hwloc_bitmap_not (hwloc_bitmap_t res, hwloc_const_bitmap_t bitmap);
 
 
