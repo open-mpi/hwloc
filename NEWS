@@ -74,6 +74,7 @@ Version 1.5.0
   + Fix importing of escaped characters with the minimalistic XML backend.
   + Assert hwloc_is_thissystem() in several I/O related helpers.
   + Fix some memory leaks in the x86 backend for FreeBSD.
+  + Minor fixes to ease native builds on Windows.
   + Limit the number of retries when operating on all threads within a
     process on Linux if the list of threads is heavily getting modified.
 

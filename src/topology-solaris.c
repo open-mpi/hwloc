@@ -15,8 +15,12 @@
 
 #include <stdio.h>
 #include <errno.h>
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/processor.h>
 #include <sys/procset.h>

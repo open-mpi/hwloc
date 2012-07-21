@@ -11,7 +11,9 @@
 
 #include "misc.h"
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {

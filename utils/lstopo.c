@@ -15,7 +15,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
+#endif
 #include <fcntl.h>
 #include <assert.h>
 
@@ -86,6 +88,7 @@ static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset,
 
 static void add_process_objects(hwloc_topology_t topology)
 {
+#ifdef HAVE_DIRENT_H
   hwloc_obj_t root;
   hwloc_bitmap_t cpuset;
 #ifdef HWLOC_LINUX_SYS
@@ -206,6 +209,7 @@ static void add_process_objects(hwloc_topology_t topology)
   hwloc_bitmap_free(task_cpuset);
 #endif /* HWLOC_LINUX_SYS */
   closedir(dir);
+#endif /* HAVE_DIRENT_H */
 }
 
 void usage(const char *name, FILE *where)
