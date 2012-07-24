@@ -1,5 +1,5 @@
 # Copyright © 2009-2012 Inria.  All rights reserved.
-# Copyright © 2009-2011 Université Bordeaux 1
+# Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 #
 # See COPYING in top-level directory.
@@ -23,22 +23,24 @@ lstopo_no_graphics_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lsto
 lstopo_no_graphics_CFLAGS = $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 if HWLOC_BUILD_UTILS
+lstopo_SOURCES = $(lstopo_no_graphics_SOURCES)
+lstopo_CPPFLAGS = $(AM_CPPFLAGS)
+lstopo_LDADD = $(lstopo_no_graphics_LDADD)
+if HWLOC_HAVE_CAIRO
+bin_PROGRAMS += lstopo
+lstopo_SOURCES += lstopo-cairo.c
+lstopo_CPPFLAGS += -DLSTOPO_HAVE_GRAPHICS
+lstopo_CFLAGS = $(lstopo_no_graphics_CFLAGS) $(HWLOC_CAIRO_CFLAGS)
+lstopo_LDADD += $(HWLOC_CAIRO_LIBS) $(HWLOC_X11_LIBS)
+endif
 if HWLOC_HAVE_WINDOWS
 bin_PROGRAMS += lstopo lstopo-win
-lstopo_SOURCES = $(lstopo_no_graphics_SOURCES) lstopo-windows.c
-lstopo_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_GRAPHICS
-lstopo_LDADD = $(lstopo_no_graphics_LDADD)
+lstopo_SOURCES += lstopo-windows.c
+lstopo_CPPFLAGS += -DLSTOPO_HAVE_GRAPHICS
 lstopo_win_SOURCES = $(lstopo_SOURCES)
 lstopo_win_CPPFLAGS = $(lstopo_CPPFLAGS)
 lstopo_win_CFLAGS = $(lstopo_CFLAGS) -mwindows
 lstopo_win_LDADD = $(lstopo_LDADD)
-endif
-if HWLOC_HAVE_CAIRO
-bin_PROGRAMS += lstopo
-lstopo_SOURCES = $(lstopo_no_graphics_SOURCES) lstopo-cairo.c
-lstopo_CPPFLAGS = $(AM_CPPFLAGS) -DLSTOPO_HAVE_GRAPHICS
-lstopo_CFLAGS = $(lstopo_no_graphics_CFLAGS) $(HWLOC_CAIRO_CFLAGS)
-lstopo_LDADD = $(lstopo_no_graphics_LDADD) $(HWLOC_CAIRO_LIBS) $(HWLOC_X11_LIBS)
 endif
 endif
 
