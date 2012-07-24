@@ -16,6 +16,10 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9 (as initially released as "libtopology", then re-branded to "hwloc"
 in v0.9.1).
 
+Version 1.6.0
+-------------
+* Tools
+  + Fix command-line pid support in windows tools.
 
 Version 1.5.0
 -------------
