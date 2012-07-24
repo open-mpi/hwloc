@@ -584,6 +584,9 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	      case CacheInstruction:
 		obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
 		break;
+	      default:
+		hwloc_free_unlinked_object(obj);
+		continue;
 	    }
 	    break;
 	  case HWLOC_OBJ_GROUP:
@@ -717,6 +720,9 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	      case CacheInstruction:
 		obj->attr->cache.type = HWLOC_OBJ_CACHE_INSTRUCTION;
 		break;
+	      default:
+		hwloc_free_unlinked_object(obj);
+		continue;
 	    }
 	    break;
 	  default:
