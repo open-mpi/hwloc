@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -533,9 +533,9 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
       methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
     else {
       hwloc_bitmap_t bind = hwloc_bitmap_alloc();
-      if (pid != (hwloc_pid_t) -1 && pid != 0)
+      if (pid_number != -1 && pid_number != 0)
         hwloc_get_proc_cpubind(topology, pid, bind, 0);
-      else if (pid == 0)
+      else if (pid_number == 0)
         hwloc_get_cpubind(topology, bind, 0);
       if (bind && hwloc_bitmap_isset(bind, level->os_index))
         methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);

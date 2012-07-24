@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2010 inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -14,6 +14,7 @@
 extern hwloc_obj_type_t show_only;
 extern int show_cpuset;
 extern int taskset;
+extern int pid_number;
 extern hwloc_pid_t pid;
 
 typedef void output_method (struct hwloc_topology *topology, const char *output, int logical, int legend, int verbose_mode);

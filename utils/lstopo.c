@@ -43,7 +43,8 @@ unsigned int gridsize = 10;
 enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX];
 unsigned int legend = 1;
 unsigned int top = 0;
-hwloc_pid_t pid = (hwloc_pid_t) -1;
+int pid_number = -1;
+hwloc_pid_t pid;
 
 FILE *open_file(const char *filename, const char *mode)
 {
@@ -114,17 +115,20 @@ static void add_process_objects(hwloc_topology_t topology)
 #endif /* HWLOC_LINUX_SYS */
 
   while ((dirent = readdir(dir))) {
-    long local_pid;
+    long local_pid_number;
+    hwloc_pid_t local_pid;
     char *end;
     char name[64];
     int proc_cpubind;
 
-    local_pid = strtol(dirent->d_name, &end, 10);
+    local_pid_number = strtol(dirent->d_name, &end, 10);
     if (*end)
       /* Not a number */
       continue;
 
-    snprintf(name, sizeof(name), "%ld", local_pid);
+    snprintf(name, sizeof(name), "%ld", local_pid_number);
+
+    local_pid = hwloc_pid_from_number(local_pid_number, 0);
 
     proc_cpubind = hwloc_get_proc_cpubind(topology, local_pid, cpuset, 0) != -1;
 
@@ -153,7 +157,7 @@ static void add_process_objects(hwloc_topology_t topology)
         cmd[n] = 0;
         if ((c = strchr(cmd, ' ')))
           *c = 0;
-        snprintf(name, sizeof(name), "%ld %s", local_pid, cmd);
+        snprintf(name, sizeof(name), "%ld %s", local_pid_number, cmd);
       }
     }
 
@@ -485,7 +489,7 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	pid = atoi(argv[2]); opt = 1;
+	pid_number = atoi(argv[2]); opt = 1;
       } else if (!strcmp (argv[1], "--ps") || !strcmp (argv[1], "--top"))
         top = 1;
       else if (!strcmp (argv[1], "--version")) {
@@ -529,7 +533,8 @@ main (int argc, char *argv[])
       return err;
   }
 
-  if (pid != (hwloc_pid_t) -1 && pid != 0) {
+  if (pid_number != -1 && pid_number != 0) {
+    pid = hwloc_pid_from_number(pid_number, 0);
     if (hwloc_topology_set_pid(topology, pid)) {
       perror("Setting target pid");
       return EXIT_FAILURE;
@@ -546,7 +551,7 @@ main (int argc, char *argv[])
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     if (!strcmp (restrictstring, "binding")) {
-      if (pid != (hwloc_pid_t) -1 && pid != 0)
+      if (pid_number != -1 && pid_number != 0)
 	hwloc_get_proc_cpubind(topology, pid, restrictset, HWLOC_CPUBIND_PROCESS);
       else
 	hwloc_get_cpubind(topology, restrictset, HWLOC_CPUBIND_PROCESS);

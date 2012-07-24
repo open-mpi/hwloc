@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2012 inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -15,9 +15,11 @@
 #endif
 #include <errno.h>
 
-static void usage(FILE *where)
+#include "misc.h"
+
+void usage(const char *name, FILE *where)
 {
-  fprintf(where, "Usage: hwloc-bind [options] <location> -- command ...\n");
+  fprintf(where, "Usage: %s [options] <location> -- command ...\n", name);
   fprintf(where, " <location> may be a space-separated list of cpusets or objects\n");
   fprintf(where, "            as supported by the hwloc-calc utility, e.g:\n");
   hwloc_calc_locations_usage(where);
@@ -56,7 +58,8 @@ int main(int argc, char *argv[])
   int membind_flags = 0;
   int opt;
   int ret;
-  hwloc_pid_t pid = 0;
+  int pid_number = 0;
+  hwloc_pid_t pid;
   char **orig_argv = argv;
 
   cpubind_set = hwloc_bitmap_alloc();
@@ -86,7 +89,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp(argv[0], "--help")) {
-	usage(stdout);
+        usage("hwloc-bind", stdout);
 	return EXIT_SUCCESS;
       }
       else if (!strcmp(argv[0], "--single")) {
@@ -100,10 +103,10 @@ int main(int argc, char *argv[])
       }
       else if (!strcmp(argv[0], "--pid")) {
         if (argc < 2) {
-          usage (stderr);
+          usage ("hwloc-bind", stderr);
           exit(EXIT_FAILURE);
         }
-        pid = atoi(argv[1]);
+        pid_number = atoi(argv[1]);
         opt = 1;
         goto next;
       }
@@ -154,7 +157,7 @@ int main(int argc, char *argv[])
 	  membind_policy = HWLOC_MEMBIND_NEXTTOUCH;
 	else {
 	  fprintf(stderr, "Unrecognized memory binding policy %s\n", argv[1]);
-          usage (stderr);
+          usage ("hwloc-bind", stderr);
           exit(EXIT_FAILURE);
 	}
 	opt = 1;
@@ -162,7 +165,7 @@ int main(int argc, char *argv[])
       }
 
       fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
-      usage(stderr);
+      usage("hwloc-bind", stderr);
       return EXIT_FAILURE;
     }
 
@@ -180,26 +183,28 @@ int main(int argc, char *argv[])
     argv += opt+1;
   }
 
+  pid = hwloc_pid_from_number(pid_number, !(get_binding || get_last_cpu_location));
+
   if (get_binding || get_last_cpu_location) {
     char *s;
     const char *policystr = NULL;
     int err;
     if (cpubind) {
       if (get_last_cpu_location) {
-	if (pid)
+	if (pid_number)
 	  err = hwloc_get_proc_last_cpu_location(topology, pid, cpubind_set, 0);
 	else
 	  err = hwloc_get_last_cpu_location(topology, cpubind_set, 0);
       } else {
-	if (pid)
+	if (pid_number)
 	  err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
 	else
 	  err = hwloc_get_cpubind(topology, cpubind_set, 0);
       }
       if (err) {
 	const char *errmsg = strerror(errno);
-	if (pid)
-	  fprintf(stderr, "hwloc_get_proc_%s %ld failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", (long) pid, errno, errmsg);
+	if (pid_number)
+	  fprintf(stderr, "hwloc_get_proc_%s %d failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", pid_number, errno, errmsg);
 	else
 	  fprintf(stderr, "hwloc_get_%s failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", errno, errmsg);
 	return EXIT_FAILURE;
@@ -210,14 +215,14 @@ int main(int argc, char *argv[])
 	hwloc_bitmap_asprintf(&s, cpubind_set);
     } else {
       hwloc_membind_policy_t policy;
-      if (pid)
+      if (pid_number)
 	err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, 0);
       else
 	err = hwloc_get_membind(topology, membind_set, &policy, 0);
       if (err) {
 	const char *errmsg = strerror(errno);
-        if (pid)
-          fprintf(stderr, "hwloc_get_proc_membind %ld failed (errno %d %s)\n", (long) pid, errno, errmsg);
+        if (pid_number)
+          fprintf(stderr, "hwloc_get_proc_membind %d failed (errno %d %s)\n", pid_number, errno, errmsg);
         else
 	  fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
 	return EXIT_FAILURE;
@@ -253,7 +258,7 @@ int main(int argc, char *argv[])
     }
     if (single)
       hwloc_bitmap_singlify(membind_set);
-    if (pid)
+    if (pid_number)
       ret = hwloc_set_proc_membind(topology, pid, membind_set, membind_policy, membind_flags);
     else
       ret = hwloc_set_membind(topology, membind_set, membind_policy, membind_flags);
@@ -262,8 +267,8 @@ int main(int argc, char *argv[])
       const char *errmsg = strerror(bind_errno);
       char *s;
       hwloc_bitmap_asprintf(&s, membind_set);
-      if (pid)
-        fprintf(stderr, "hwloc_set_proc_membind %s %ld failed (errno %d %s)\n", s, (long) pid, bind_errno, errmsg);
+      if (pid_number)
+        fprintf(stderr, "hwloc_set_proc_membind %s %d failed (errno %d %s)\n", s, pid_number, bind_errno, errmsg);
       else
         fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
@@ -279,7 +284,7 @@ int main(int argc, char *argv[])
     }
     if (single)
       hwloc_bitmap_singlify(cpubind_set);
-    if (pid)
+    if (pid_number)
       ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, cpubind_flags);
     else
       ret = hwloc_set_cpubind(topology, cpubind_set, cpubind_flags);
@@ -288,8 +293,8 @@ int main(int argc, char *argv[])
       const char *errmsg = strerror(bind_errno);
       char *s;
       hwloc_bitmap_asprintf(&s, cpubind_set);
-      if (pid)
-        fprintf(stderr, "hwloc_set_proc_cpubind %s %ld failed (errno %d %s)\n", s, (long) pid, bind_errno, errmsg);
+      if (pid_number)
+        fprintf(stderr, "hwloc_set_proc_cpubind %s %d failed (errno %d %s)\n", s, pid_number, bind_errno, errmsg);
       else
         fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
@@ -301,7 +306,7 @@ int main(int argc, char *argv[])
 
   hwloc_topology_destroy(topology);
 
-  if (pid)
+  if (pid_number)
     return EXIT_SUCCESS;
 
   if (0 == argc) {

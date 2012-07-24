@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2010 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -19,10 +19,12 @@
 #endif
 #include <fcntl.h>
 
+#include "misc.h"
+
 static int show_cpuset = 0;
 static int logical = 1;
 
-static void usage(char *name, FILE *where)
+void usage(const char *name, FILE *where)
 {
   fprintf (where, "Usage: %s [ options ] ...\n", name);
   fprintf (where, "Options:\n");
@@ -35,10 +37,10 @@ static void usage(char *name, FILE *where)
 }
 
 static void print_task(hwloc_topology_t topology,
-		       long pid, const char *name, hwloc_bitmap_t cpuset,
+		       long pid_number, const char *name, hwloc_bitmap_t cpuset,
 		       int thread)
 {
-  printf("%s%ld\t", thread ? " " : "", pid);
+  printf("%s%ld\t", thread ? " " : "", pid_number);
 
   if (show_cpuset) {
     char *cpuset_str = NULL;
@@ -141,7 +143,8 @@ int main(int argc, char *argv[])
     goto out_with_dir;
 
   while ((dirent = readdir(dir))) {
-    long pid;
+    long pid_number;
+    hwloc_pid_t pid;
     char *end;
     char name[64] = "";
     /* management of threads */
@@ -149,10 +152,12 @@ int main(int argc, char *argv[])
     long *tids = NULL; /* NULL if process is not threaded */
     hwloc_bitmap_t *tidcpusets = NULL;
 
-    pid = strtol(dirent->d_name, &end, 10);
+    pid_number = strtol(dirent->d_name, &end, 10);
     if (*end)
       /* Not a number */
       continue;
+
+    pid = hwloc_pid_from_number(pid_number, 0);
 
 #ifdef HWLOC_LINUX_SYS
     {
@@ -250,7 +255,7 @@ int main(int argc, char *argv[])
       continue;
 
     /* print the process */
-    print_task(topology, pid, name, cpuset, 0);
+    print_task(topology, pid_number, name, cpuset, 0);
     if (tids)
       /* print each tid we found (it's tidcpuset isn't NULL anymore) */
       for(i=0; tidcpusets[i] != NULL; i++) {
