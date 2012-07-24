@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -49,7 +49,7 @@ typedef int HANDLE;
 #define PAGE_EXECUTE_READWRITE	0x0040
 
 WINAPI HINSTANCE LoadLibrary(LPCSTR);
-WINAPI void *GetProcAddress(HINSTANCE, LPCSTR);
+WINAPI FARPROC GetProcAddress(HINSTANCE, LPCSTR);
 WINAPI DWORD GetLastError(void);
 
 DWORD_PTR WINAPI SetThreadAffinityMask(HANDLE hThread, DWORD_PTR dwThreadAffinityMask);
