@@ -21,6 +21,7 @@ Version 1.6.0
 * Tools
   + Fix command-line pid support in windows tools.
 
+
 Version 1.5.0
 -------------
 * Backends
@@ -73,8 +74,12 @@ Version 1.5.0
   + Remove support for "Proc" type name, it was superseded by "PU" in v1.0.
   + Remove hwloc-mask symlinks, it was replaced by hwloc-calc in v1.0.
 * Misc
+  + Fix PCIe 3.0 link speed computation.
   + Non-printable characters are dropped from strings during XML export.
+  + Fix importing of escaped characters with the minimalistic XML backend.
   + Assert hwloc_is_thissystem() in several I/O related helpers.
+  + Fix some memory leaks in the x86 backend for FreeBSD.
+  + Minor fixes to ease native builds on Windows.
   + Limit the number of retries when operating on all threads within a
     process on Linux if the list of threads is heavily getting modified.
 
