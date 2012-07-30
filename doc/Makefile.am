@@ -720,10 +720,8 @@ endif
 # Make sure that the documentation example works
 #
 
-if HWLOC_BUILD_TESTS
 TESTS = hwloc-hello hwloc-hello-cpp
 check_PROGRAMS = $(TESTS)
-endif HWLOC_BUILD_TESTS
 
 hwloc-hello-cpp.cpp: $(srcdir)/hwloc-hello.c
 	cp -f $(srcdir)/hwloc-hello.c $@

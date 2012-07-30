@@ -16,7 +16,6 @@ endif HWLOC_HAVE_LINUX
 
 LDADD =
 
-if HWLOC_BUILD_TESTS
 check_PROGRAMS = hwloc_bitmap \
 	hwloc_bitmap_string \
 	hwloc_get_closest_objs \
@@ -93,8 +92,6 @@ hwloc_bind_LDADD = $(LDADD)
 if HWLOC_HAVE_PTHREAD
 hwloc_bind_LDADD += -lpthread
 endif
-
-endif HWLOC_BUILD_TESTS
 
 # ship the embedded test code but don't actually let automake ever
 # look at it because we have another configure stuff in there

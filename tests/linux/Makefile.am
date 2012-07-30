@@ -140,13 +140,11 @@ sysfs_envs = \
 		32amd64-4s2n4c-cgroup.xml.env \
 		96em64t-4n4d3ca2co-forcecpuinfo.env
 
-if HWLOC_BUILD_TESTS
 if HWLOC_HAVE_OPENAT
 if HWLOC_HAVE_BUNZIPP
 TESTS = $(sysfs_outputs)
 endif HWLOC_HAVE_BUNZIPP
 endif HWLOC_HAVE_OPENAT
-endif HWLOC_BUILD_TESTS
 
 EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
 

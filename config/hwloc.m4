@@ -848,7 +848,6 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_X86_32], [test "x$hwloc_x86_32" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_X86_64], [test "x$hwloc_x86_64" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_CPUID], [test "x$hwloc_have_cpuid" = "xyes"])
-        AM_CONDITIONAL([HWLOC_BUILD_TESTS], [test "$hwloc_build_tests" = "yes"])
     ])
     hwloc_did_am_conditionals=yes
 ])dnl

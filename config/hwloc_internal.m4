@@ -326,8 +326,6 @@ AC_DEFUN([HWLOC_SETUP_TESTS],[
 ###
 EOF
 
-    hwloc_build_tests=yes
-
     AC_CHECK_LIB([pthread], [pthread_self], [hwloc_have_pthread=yes])
 
     # linux-libnuma.h testing requires libnuma with numa_bitmask_alloc()

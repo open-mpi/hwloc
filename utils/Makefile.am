@@ -47,11 +47,9 @@ bin_SCRIPTS = hwloc-assembler-remote
 
 # Only run the tests if we're building standalone, because the tests
 # call hwloc executables.
-if HWLOC_BUILD_TESTS
 if !HWLOC_HAVE_MINGW32
 TESTS = test-hwloc-assembler.sh test-hwloc-calc.sh test-hwloc-distances.sh test-hwloc-distrib.sh test-hwloc-ls.sh
 endif !HWLOC_HAVE_MINGW32
-endif HWLOC_BUILD_TESTS
 
 # Only install man pages if we're building in standalone mode
 man7_pages = hwloc.7
