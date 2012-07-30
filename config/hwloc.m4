@@ -388,6 +388,8 @@ EOF])
     		_SC_NPROCESSORS_CONF,
     		_SC_NPROC_ONLN,
     		_SC_NPROC_CONF,
+    		_SC_PAGESIZE,
+    		_SC_PAGE_SIZE,
     		_SC_LARGE_PAGESIZE],,[:],[[#include <unistd.h>]])
     
     AC_HAVE_HEADERS([mach/mach_host.h])

@@ -613,7 +613,7 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj->memory.page_types_len = 2;
 	obj->memory.page_types = malloc(2*sizeof(*obj->memory.page_types));
 	memset(obj->memory.page_types, 0, 2*sizeof(*obj->memory.page_types));
-	obj->memory.page_types[0].size = getpagesize();
+	obj->memory.page_types[0].size = hwloc_getpagesize();
 #ifdef HAVE__SC_LARGE_PAGESIZE
 	obj->memory.page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif

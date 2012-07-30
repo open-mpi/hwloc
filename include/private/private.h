@@ -17,6 +17,9 @@
 #include <hwloc/bitmap.h>
 #include <private/debug.h>
 #include <sys/types.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
@@ -366,6 +369,16 @@ extern void hwloc_group_by_distances(struct hwloc_topology *topology);
 
 #if !HAVE_DECL_FABSF
 #define fabsf(f) fabs((double)(f))
+#endif
+
+#if HAVE_DECL__SC_PAGE_SIZE
+#define hwloc_getpagesize() sysconf(_SC_PAGE_SIZE)
+#elif HAVE_DECL__SC_PAGESIZE
+#define hwloc_getpagesize() sysconf(_SC_PAGESIZE)
+#elif defined HAVE_GETPAGESIZE
+#define hwloc_getpagesize() getpagesize()
+#else
+#undef hwloc_getpagesize
 #endif
 
 #endif /* HWLOC_PRIVATE_H */

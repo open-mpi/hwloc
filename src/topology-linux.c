@@ -1313,7 +1313,7 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
   int mixed = 0;
   int full = 0;
   int first = 1;
-  int pagesize = getpagesize();
+  int pagesize = hwloc_getpagesize();
   char *tmpaddr;
   int err;
   unsigned i;
@@ -1914,7 +1914,7 @@ hwloc_get_kerrighed_node_meminfo_info(struct hwloc_topology *topology, unsigned 
 #ifdef HAVE__SC_LARGE_PAGESIZE
     memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-    memory->page_types[0].size = getpagesize();
+    memory->page_types[0].size = hwloc_getpagesize();
   }
 
   snprintf(path, sizeof(path), "/proc/nodes/node%lu/meminfo", node);
@@ -1965,7 +1965,7 @@ hwloc_get_procfs_meminfo_info(struct hwloc_topology *topology, struct hwloc_obj_
 #ifdef HAVE__SC_LARGE_PAGESIZE
     memory->page_types[1].size = sysconf(_SC_LARGE_PAGESIZE);
 #endif
-    memory->page_types[0].size = getpagesize(); /* might be overwritten later by /proc/meminfo or sysfs */
+    memory->page_types[0].size = hwloc_getpagesize(); /* might be overwritten later by /proc/meminfo or sysfs */
   }
 
   hwloc_parse_meminfo_info(topology, "/proc/meminfo", 0 /* no prefix */,
@@ -2057,7 +2057,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
       }
     }
     /* update what's remaining as normal pages */
-    memory->page_types[0].size = getpagesize();
+    memory->page_types[0].size = hwloc_getpagesize();
     memory->page_types[0].count = remaining_local_memory / memory->page_types[0].size;
   }
 }
