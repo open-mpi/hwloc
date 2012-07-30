@@ -84,7 +84,6 @@ dox_inputs = $(DOX_CONFIG) \
 # building standalone.
 #
 
-if HWLOC_BUILD_DOXYGEN
 BUILT_SOURCES = $(BUILT_IMAGES)
 
 images/diagram.png: $(srcdir)/images/diagram.fig
@@ -102,7 +101,6 @@ images/diagram.eps: $(srcdir)/images/diagram.fig
 	    exit 1; \
 	fi
 	$(FIG2DEV) -L eps $< $@
-endif
 
 #
 # Rules for running doxygen.  It depends on the built images and the
@@ -111,7 +109,6 @@ endif
 # of nested structurre/union declarations.
 #
 
-if HWLOC_BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
@@ -142,13 +139,10 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	@mv $(DOX_MAN_DIR)/man3/hwloc* $(DOX_MAN_DIR)/man3/HWLOC* $(DOX_DIR)/man.tmp/
 	@rm -rf $(DOX_MAN_DIR)/man3
 	@mv $(DOX_DIR)/man.tmp $(DOX_MAN_DIR)/man3
-endif
 
 #
 # Rules for building the PDF
 #
-
-if HWLOC_BUILD_DOXYGEN
 
 # The Doxygen config is set to generate a4 latex -- no transformation
 # is necessary.
@@ -189,7 +183,6 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 	   fi; \
 	done; \
 	mv letter-refman.pdf $(DOCDIR)/$(DOX_LETTERPDF)
-endif
 
 #
 # Note that we want to use our own doxygen.css file; not the one that
@@ -202,12 +195,10 @@ endif
 # pre-bundled in a tarball).
 #
 
-if HWLOC_BUILD_DOXYGEN
 all-local: $(DOX_TAG)
 	if test -d $(DOX_HTML_DIR) -a -f $(DOX_HTML_DIR)/doxygen.css; then \
 	    cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR); \
 	fi
-endif
 
 #
 # Un/install the generated PDF and man pages (just like BUILD_DOXYGEN,
@@ -658,10 +649,8 @@ man3_openfabrics_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_osdev_by_name.3
 
-# end of manpages(3) if HWLOC_BUILD_DOXYGEN
+# end of manpages(3) if HWLOC_INSTALL_DOXYGEN
 endif
-
-if HWLOC_BUILD_DOXYGEN
 
 # Put in these rules to force the generation of the man pages and get
 # all the dependencies right.  Additionally, this forces a
@@ -714,7 +703,6 @@ $(DOX_MAN_DIR): $(DOX_TAG)
 # built at the same time during a parallel build (e.g., "make -j X").
 # So arbitrarily make the A4 PDF dependent upon the Letter PDF.
 $(DOX_A4PDF): $(DOX_TAG) $(DOX_LETTERPDF)
-endif
 
 #
 # Make sure that the documentation example works
