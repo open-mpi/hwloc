@@ -221,8 +221,6 @@ AC_DEFUN([HWLOC_SETUP_UTILS],[
 ###
 EOF
 
-    hwloc_build_utils=yes
-
     # Cairo support
     hwloc_cairo_happy=no
     if test "x$enable_cairo" != "xno"; then

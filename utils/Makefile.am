@@ -4,6 +4,8 @@
 #
 # See COPYING in top-level directory.
 
+# This makefile is only reached when building in standalone mode
+
 AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
@@ -14,15 +16,11 @@ EXTRA_DIST = test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-
 
 noinst_HEADERS = misc.h
 
-# Only build the utilities if we're building in standalone mode
-if HWLOC_BUILD_UTILS
 bin_PROGRAMS = lstopo-no-graphics hwloc-assembler hwloc-calc hwloc-bind hwloc-distances hwloc-distrib hwloc-ps
-endif
 
 lstopo_no_graphics_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-xml.c
 lstopo_no_graphics_CFLAGS = $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
-if HWLOC_BUILD_UTILS
 lstopo_SOURCES = $(lstopo_no_graphics_SOURCES)
 lstopo_CPPFLAGS = $(AM_CPPFLAGS)
 lstopo_LDADD = $(lstopo_no_graphics_LDADD)
@@ -42,7 +40,6 @@ lstopo_win_CPPFLAGS = $(lstopo_CPPFLAGS)
 lstopo_win_CFLAGS = $(lstopo_CFLAGS) -mwindows
 lstopo_win_LDADD = $(lstopo_LDADD)
 endif
-endif
 
 hwloc_calc_SOURCES = hwloc-calc.c hwloc-calc.h
 
@@ -57,7 +54,6 @@ endif !HWLOC_HAVE_MINGW32
 endif HWLOC_BUILD_TESTS
 
 # Only install man pages if we're building in standalone mode
-if HWLOC_BUILD_UTILS
 man7_pages = hwloc.7
 EXTRA_DIST += $(man7_pages:.7=.7in)
 nodist_man_MANS = $(man7_pages)
@@ -123,4 +119,3 @@ endif
 
 distclean-local:
 	rm -f $(nodist_man_MANS)
-endif
