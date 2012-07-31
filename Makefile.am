@@ -9,7 +9,10 @@ ACLOCAL_AMFLAGS = -I ./config
 
 SUBDIRS = src include
 if HWLOC_BUILD_STANDALONE
-SUBDIRS += utils tests doc
+SUBDIRS += utils tests
+if HWLOC_BUILD_DOXYGEN
+SUBDIRS += doc
+endif
 endif
 
 # Do not let automake automatically add the non-standalone dirs to the
