@@ -2137,7 +2137,7 @@ static void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 static int
 hwloc_discover(struct hwloc_topology *topology)
 {
-  int gotsomeio = 1;
+  int gotsomeio = 0;
 
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     alloc_cpusets(topology->levels[0][0]);
