@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2009-2012 Inria.  All rights reserved.
+ * See COPYING in top-level directory.
+ */
+
 #ifndef PRIVATE_XML_H
 #define PRIVATE_XML_H 1
 
