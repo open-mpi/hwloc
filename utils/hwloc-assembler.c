@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
   argv++;
 
   hwloc_topology_init(&topology);
+  hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES);
   hwloc_topology_set_custom(topology);
 
   for(i=0, j=0; i<argc; i++, j++) {
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
     }
 
     hwloc_topology_init(&input);
+    hwloc_topology_set_flags(input, HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES);
     if (hwloc_topology_set_xml(input, argv[i])) {
       fprintf(stderr, "Failed to set source XML file %s (%s)\n", argv[i], strerror(errno));
       hwloc_topology_destroy(input);
