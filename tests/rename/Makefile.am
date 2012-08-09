@@ -16,7 +16,7 @@ needed: prepare
 	@echo "###########################"
 	@echo Finding missing renaming...
 	@echo
-	cpp $(srcdir)/main.c -I $(abs_top_srcdir)/include -I $(abs_top_builddir)/include \
+	cpp $(CPPFLAGS) $(srcdir)/main.c -I $(abs_top_srcdir)/include -I $(abs_top_builddir)/include \
 		| egrep -i '(^| |\*)hwloc_'
 
 useless: prepare

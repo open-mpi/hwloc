@@ -17,3 +17,4 @@
 #include "private/debug.h"
 #include "private/misc.h"
 #include "private/private.h"
+#include "private/xml.h"
