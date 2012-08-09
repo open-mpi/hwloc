@@ -313,6 +313,7 @@ extern "C" {
 #define hwloc_get_obj_inside_cpuset_by_type HWLOC_NAME(get_obj_inside_cpuset_by_type)
 #define hwloc_get_nbobjs_inside_cpuset_by_depth HWLOC_NAME(get_nbobjs_inside_cpuset_by_depth)
 #define hwloc_get_nbobjs_inside_cpuset_by_type HWLOC_NAME(get_nbobjs_inside_cpuset_by_type)
+#define hwloc_get_obj_index_inside_cpuset HWLOC_NAME(get_obj_index_inside_cpuset)
 #define hwloc_get_child_covering_cpuset HWLOC_NAME(get_child_covering_cpuset)
 #define hwloc_get_obj_covering_cpuset HWLOC_NAME(get_obj_covering_cpuset)
 #define hwloc_get_next_obj_covering_cpuset_by_depth HWLOC_NAME(get_next_obj_covering_cpuset_by_depth)
@@ -407,6 +408,15 @@ extern "C" {
 #define hwloc_cpuid HWLOC_NAME(cpuid)
 
 /* private/xml.h */
+
+#define hwloc__xml_verbose HWLOC_NAME(_xml_verbose)
+
+#define hwloc__xml_import_state_s HWLOC_NAME(_xml_import_state_s)
+#define hwloc__xml_import_state_t HWLOC_NAME(_xml_import_state_t)
+#define hwloc__xml_export_output_s HWLOC_NAME(_xml_export_output_s)
+#define hwloc__xml_export_output_t HWLOC_NAME(_xml_export_output_t)
+#define hwloc__xml_export_object HWLOC_NAME(_xml_export_object)
+
 #define hwloc_nolibxml_backend_init HWLOC_NAME(nolibxml_backend_init)
 #define hwloc_nolibxml_export_file HWLOC_NAME(nolibxml_export_file)
 #define hwloc_nolibxml_export_buffer HWLOC_NAME(nolibxml_export_buffer)
@@ -433,6 +443,7 @@ extern "C" {
 #define HWLOC_BACKEND_SYNTHETIC HWLOC_NAME_CAPS(BACKEND_SYNTHETIC)
 #define HWLOC_BACKEND_LINUXFS HWLOC_NAME_CAPS(BACKEND_LINUXFS)
 #define HWLOC_BACKEND_XML HWLOC_NAME_CAPS(BACKEND_XML)
+#define HWLOC_BACKEND_CUSTOM HWLOC_NAME_CAPS(BACKEND_CUSTOM)
 #define HWLOC_BACKEND_MAX HWLOC_NAME_CAPS(BACKEND_MAX)
 
 #define hwloc_backend_params_u HWLOC_NAME(backend_params_u)
