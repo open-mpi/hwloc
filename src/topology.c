@@ -2131,8 +2131,6 @@ static void alloc_cpusets(hwloc_obj_t obj)
   obj->allowed_nodeset = hwloc_bitmap_alloc_full();
 }
 
-static void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
-
 /* Main discovery loop */
 static int
 hwloc_discover(struct hwloc_topology *topology)
