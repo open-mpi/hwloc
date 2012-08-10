@@ -305,9 +305,10 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
   /* do not allocate the cpuset here, let the caller do it */
   return obj;
 }
-
-extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
 #endif
+
+/* Free obj and its attributes assuming it doesn't have any children/parent anymore */
+extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
 
 /* This can be used for the alloc field to get allocated data that can be freed by free() */
 void *hwloc_alloc_heap(hwloc_topology_t topology, size_t len);
