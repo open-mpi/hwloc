@@ -549,6 +549,10 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
   }
   relative_depth = objs[0]->depth - root->depth; /* this assume that we have distances between objects of the same level */
 
+  if (nbobjs != hwloc_get_nbobjs_inside_cpuset_by_depth(topology, root->cpuset, root->depth + relative_depth))
+    /* the root does not cover the right number of objects, maybe we failed to insert a root (bad intersect or so). */
+    return;
+
   /* get the logical index offset, it's the min of all logical indexes */
   minl = UINT_MAX;
   for(i=0; i<nbobjs; i++)
