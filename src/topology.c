@@ -1902,7 +1902,6 @@ hwloc_connect_levels(hwloc_topology_t topology)
   /* Filter-out interesting objects */
   err = hwloc_level_filter_objects(topology, &objs, &n_objs);
   if (err < 0) {
-    errno = ENOMEM;
     hwloc_topology_clear(topology);
     return -1;
   }
@@ -1993,7 +1992,6 @@ hwloc_connect_levels(hwloc_topology_t topology)
     /* Switch to new_objs, after filtering-out interesting objects */
     err = hwloc_level_filter_objects(topology, &new_objs, &n_new_objs);
     if (err < 0) {
-      errno = ENOMEM;
       hwloc_topology_clear(topology);
       return -1;
     }
