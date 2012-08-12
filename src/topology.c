@@ -1894,17 +1894,14 @@ hwloc_connect_levels(hwloc_topology_t topology)
   objs = malloc(n_objs * sizeof(objs[0]));
   if (!objs) {
     errno = ENOMEM;
-    hwloc_topology_clear(topology);
     return -1;
   }
   memcpy(objs, topology->levels[0][0]->children, n_objs*sizeof(objs[0]));
 
   /* Filter-out interesting objects */
   err = hwloc_level_filter_objects(topology, &objs, &n_objs);
-  if (err < 0) {
-    hwloc_topology_clear(topology);
+  if (err < 0)
     return -1;
-  }
 
   /* Keep building levels while there are objects left in OBJS.  */
   while (n_objs) {
@@ -1991,10 +1988,9 @@ hwloc_connect_levels(hwloc_topology_t topology)
 
     /* Switch to new_objs, after filtering-out interesting objects */
     err = hwloc_level_filter_objects(topology, &new_objs, &n_new_objs);
-    if (err < 0) {
-      hwloc_topology_clear(topology);
+    if (err < 0)
       return -1;
-    }
+
     objs = new_objs;
     n_objs = n_new_objs;
   }
@@ -2141,10 +2137,8 @@ hwloc_discover(struct hwloc_topology *topology)
   } else if (topology->backend_type == HWLOC_BACKEND_CUSTOM) {
     /* nothing to do, just connect levels below */
   } else if (topology->backend_type == HWLOC_BACKEND_XML) {
-    if (hwloc_look_xml(topology) < 0) {
-      hwloc_topology_clear(topology);
+    if (hwloc_look_xml(topology) < 0)
       return -1;
-    }
   } else {
 
   /* Raw detection, from coarser levels to finer levels for more efficiency.  */
@@ -2367,7 +2361,8 @@ hwloc_discover(struct hwloc_topology *topology)
     hwloc_drop_useless_io(topology, topology->levels[0][0]);
     hwloc_debug("%s", "\nNow reconnecting\n");
     hwloc_connect_children(topology->levels[0][0]);
-    hwloc_connect_levels(topology);
+    if (hwloc_connect_levels(topology) < 0)
+      return -1;
     print_objects(topology, 0, topology->levels[0][0]);
     hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
   }
@@ -2878,7 +2873,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
 #ifdef HWLOC_LINUX_SYS
     if (hwloc_backend_linuxfs_init(topology, "/") < 0)
-      return -1;
+      goto out;
 #endif
   }
 
@@ -2890,7 +2885,7 @@ hwloc_topology_load (struct hwloc_topology *topology)
   /* actual topology discovery */
   err = hwloc_discover(topology);
   if (err < 0)
-    return err;
+    goto out;
 
   /* enforce THISSYSTEM if given in a FORCE variable */
   local_env = getenv("HWLOC_FORCE_THISSYSTEM");
@@ -2904,6 +2899,10 @@ hwloc_topology_load (struct hwloc_topology *topology)
 
   topology->is_loaded = 1;
   return 0;
+
+ out:
+  hwloc_topology_clear(topology);
+  return -1;
 }
 
 int
