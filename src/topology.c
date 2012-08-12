@@ -2915,7 +2915,7 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
 
   /* make sure we'll keep something in the topology */
   if (!hwloc_bitmap_intersects(cpuset, topology->levels[0][0]->cpuset)) {
-    errno = EINVAL;
+    errno = EINVAL; /* easy failure, just don't touch the topology */
     return -1;
   }
 
@@ -2932,12 +2932,21 @@ hwloc_topology_restrict(struct hwloc_topology *topology, hwloc_const_cpuset_t cp
   hwloc_bitmap_free(droppednodeset);
 
   hwloc_connect_children(topology->levels[0][0]);
-  hwloc_connect_levels(topology); /* FIXME handle errors: reinit if ENOMEM, change nothing if AGAIN */
+  if (hwloc_connect_levels(topology) < 0)
+    goto out;
+
   propagate_total_memory(topology->levels[0][0]);
   hwloc_distances_restrict(topology, flags);
   hwloc_distances_finalize_os(topology);
   hwloc_distances_finalize_logical(topology);
   return 0;
+
+ out:
+  /* unrecoverable failure, re-init the topology */
+   hwloc_topology_clear(topology);
+   hwloc_distances_destroy(topology);
+   hwloc_topology_setup_defaults(topology);
+   return -1;
 }
 
 int
