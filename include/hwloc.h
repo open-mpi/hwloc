@@ -587,6 +587,9 @@ HWLOC_DECLSPEC int hwloc_topology_init (hwloc_topology_t *topologyp);
  *
  * \return 0 on success, -1 on error.
  *
+ * \note On failure, the topology is reinitialized. It should be either
+ * destroyed with hwloc_topology_destroy() or configured and loaded again.
+ * 
  * \sa hwlocality_configuration
  */
 HWLOC_DECLSPEC int hwloc_topology_load(hwloc_topology_t topology);
