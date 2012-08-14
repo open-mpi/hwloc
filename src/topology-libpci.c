@@ -12,8 +12,6 @@
 #include <private/debug.h>
 #include <private/misc.h>
 
-#ifdef HWLOC_HAVE_LIBPCI
-
 #include <pci/pci.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -545,5 +543,3 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   if (createdgroups)
     topology->next_group_depth++;
 }
-
-#endif /* HWLOC_HAVE_LIBPCI */
