@@ -340,7 +340,10 @@ man3_xmlexport_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_xmlexport.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_export_xmlbuffer.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_free_xmlbuffer.3
+        $(DOX_MAN_DIR)/man3/hwloc_free_xmlbuffer.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata_export_callback.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_export_obj_userdata.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata_import_callback.3
 
 man3_tinkerdir = $(man3dir)
 man3_tinker_DATA = \

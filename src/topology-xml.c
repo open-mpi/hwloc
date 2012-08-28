@@ -504,6 +504,36 @@ hwloc__xml_import_distances(hwloc_topology_t topology __hwloc_attribute_unused, 
 }
 
 static int
+hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, hwloc_obj_t obj,
+			   hwloc__xml_import_state_t state)
+{
+  size_t length = 0;
+  char *name = NULL; /* optional */
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "length"))
+      length = strtoul(attrvalue, NULL, 10);
+    else if (!strcmp(attrname, "name"))
+      name = attrvalue;
+    else
+      return -1;
+  }
+
+  if (length) {
+    char *buffer;
+    int ret = state->get_content(state, &buffer, length);
+    if (ret < 0)
+      return -1;
+    if (ret && topology->userdata_import_cb)
+      topology->userdata_import_cb(topology, obj, name, buffer, length);
+  }
+  return state->close_tag(state);
+}
+
+static int
 hwloc__xml_import_object(hwloc_topology_t topology, hwloc_obj_t obj,
 			 hwloc__xml_import_state_t state)
 {
@@ -546,6 +576,8 @@ hwloc__xml_import_object(hwloc_topology_t topology, hwloc_obj_t obj,
       ret = hwloc__xml_import_info(topology, obj, &childstate);
     } else if (!strcmp(tag, "distances")) {
       ret = hwloc__xml_import_distances(topology, obj, &childstate);
+    } else if (!strcmp(tag, "userdata")) {
+      ret = hwloc__xml_import_userdata(topology, obj, &childstate);
     } else
       ret = -1;
 
@@ -656,6 +688,18 @@ hwloc_look_xml(struct hwloc_topology *topology)
  ********* XML export (common routines) *********
  ************************************************/
 
+#define HWLOC_XML_CHAR_VALID(c) (((c) >= 32 && (c) <= 126) || (c) == '\t' || (c) == '\n' || (c) == '\r')
+
+static int
+hwloc__xml_export_check_buffer(const char *buf, size_t length)
+{
+  unsigned i;
+  for(i=0; i<length; i++)
+    if (!HWLOC_XML_CHAR_VALID(buf[i]))
+      return -1;
+  return 0;
+}
+
 /* strdup and remove ugly chars from random string */
 static char*
 hwloc__xml_export_safestrdup(const char *old)
@@ -664,7 +708,7 @@ hwloc__xml_export_safestrdup(const char *old)
   char *dst = new;
   const char *src = old;
   while (*src) {
-    if ((*src >= 32 && *src <= 126) || *src == '\t' || *src == '\n' || *src == '\r')
+    if (HWLOC_XML_CHAR_VALID(*src))
       *(dst++) = *src;
     src++;
   }
@@ -838,6 +882,9 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
     output->end_object(output, "distances", nbobjs*nbobjs, 0);
   }
 
+  if (obj->userdata && topology->userdata_export_cb)
+    topology->userdata_export_cb((void*) output, topology, obj);
+
   if (obj->arity) {
     unsigned x;
     for (x=0; x<obj->arity; x++)
@@ -912,4 +959,43 @@ void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, ch
   {
     hwloc_nolibxml_free_buffer(xmlbuffer);
   }
+}
+
+void
+hwloc_topology_set_userdata_export_callback(hwloc_topology_t topology,
+					    void (*export)(void *reserved, struct hwloc_topology *topology, struct hwloc_obj *obj))
+{
+  topology->userdata_export_cb = export;
+}
+
+int
+hwloc_export_obj_userdata(void *reserved,
+			  struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj __hwloc_attribute_unused,
+			  const char *name, const void *buffer, size_t length)
+{
+  hwloc__xml_export_output_t output = reserved;
+  char tmp[255];
+
+  if (hwloc__xml_export_check_buffer(name, strlen(name)) < 0
+      || hwloc__xml_export_check_buffer(buffer, length) < 0) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  output->new_child(output, "userdata");
+  if (name)
+    output->new_prop(output, "name", name);
+  sprintf(tmp, "%lu", (unsigned long) length);
+  output->new_prop(output, "length", tmp);
+  output->end_props(output, 0, 1);
+  output->add_content(output, buffer, length);
+  output->end_object(output, "userdata", 0, 1);
+  return 0;
+}
+
+void
+hwloc_topology_set_userdata_import_callback(hwloc_topology_t topology,
+					    void (*import)(struct hwloc_topology *topology, struct hwloc_obj *obj, const char *name, const void *buffer, size_t length))
+{
+  topology->userdata_import_cb = import;
 }

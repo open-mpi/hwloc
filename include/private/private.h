@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009      CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  *
@@ -114,6 +114,9 @@ struct hwloc_topology {
   int (*free_membind)(hwloc_topology_t topology, void *addr, size_t len);
 
   struct hwloc_topology_support support;
+
+  void (*userdata_export_cb)(void *reserved, struct hwloc_topology *topology, struct hwloc_obj *obj);
+  void (*userdata_import_cb)(struct hwloc_topology *topology, struct hwloc_obj *obj, const char *name, const void *buffer, size_t length);
 
   struct hwloc_os_distances_s {
     hwloc_obj_type_t type;

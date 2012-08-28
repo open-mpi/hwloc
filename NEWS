@@ -18,6 +18,11 @@ in v0.9.1).
 
 Version 1.6.0
 -------------
+* XML
+  + Add hwloc_topology_set_userdata_import/export_callback() and
+    hwloc_export_obj_userdata() to let applications specify how to
+    save/restore what they placed in the userdata private pointer field
+    of hwloc objects.
 * Tools
   + Fix command-line pid support in windows tools.
 

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2569,6 +2569,9 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->ignored_types[HWLOC_OBJ_GROUP] = HWLOC_IGNORE_TYPE_KEEP_STRUCTURE;
 
   hwloc_distances_init(topology);
+
+  topology->userdata_export_cb = NULL;
+  topology->userdata_import_cb = NULL;
 
   /* Make the topology look like something coherent but empty */
   hwloc_topology_setup_defaults(topology);
