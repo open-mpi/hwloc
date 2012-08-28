@@ -1,0 +1,39 @@
+#!/bin/sh
+#-*-sh-*-
+
+#
+# Copyright © 2009-2012 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
+abs_top_builddir="@abs_top_builddir@"
+annotate="$abs_top_builddir/utils/hwloc-annotate"
+abs_top_srcdir="@abs_top_srcdir@"
+
+if test x@HWLOC_XML_LOCALIZED@ = x1; then
+  # make sure we use default numeric formats
+  LANG=C
+  LC_ALL=C
+  export LANG LC_ALL
+fi
+
+: ${TMPDIR=/tmp}
+{
+  tmp=`
+    (umask 077 && mktemp -d "$TMPDIR/fooXXXXXX") 2>/dev/null
+  ` &&
+  test -n "$tmp" && test -d "$tmp"
+} || {
+  tmp=$TMPDIR/foo$$-$RANDOM
+  (umask 077 && mkdir "$tmp")
+} || exit $?
+file="$tmp/test-hwloc-annotate.output"
+
+set -e
+
+$annotate $abs_top_srcdir/utils/test-hwloc-annotate.input $file all info Foo Bar
+$annotate --ci $file $file Core:all info Foo2 Bar2
+$annotate --ci $file $file L2Cache:0 none
+
+diff @HWLOC_DIFF_U@ $abs_top_srcdir/utils/test-hwloc-annotate.output "$file"
+rm -rf "$tmp"
