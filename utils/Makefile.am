@@ -16,7 +16,7 @@ EXTRA_DIST = test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-
 
 noinst_HEADERS = misc.h
 
-bin_PROGRAMS = lstopo-no-graphics hwloc-assembler hwloc-calc hwloc-bind hwloc-distances hwloc-distrib hwloc-ps
+bin_PROGRAMS = lstopo-no-graphics hwloc-annotate hwloc-assembler hwloc-calc hwloc-bind hwloc-distances hwloc-distrib hwloc-ps
 
 lstopo_no_graphics_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-xml.c
 lstopo_no_graphics_CFLAGS = $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
@@ -56,7 +56,7 @@ man7_pages = hwloc.7
 EXTRA_DIST += $(man7_pages:.7=.7in)
 nodist_man_MANS = $(man7_pages)
 
-man1_pages = lstopo.1 hwloc-bind.1 hwloc-calc.1 hwloc-distances.1 hwloc-distrib.1 hwloc-ps.1 hwloc-assembler.1 hwloc-assembler-remote.1
+man1_pages = lstopo.1 hwloc-annotate.1 hwloc-bind.1 hwloc-calc.1 hwloc-distances.1 hwloc-distrib.1 hwloc-ps.1 hwloc-assembler.1 hwloc-assembler-remote.1
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
 

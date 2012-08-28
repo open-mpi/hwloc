@@ -816,6 +816,13 @@ prints matrices that cover the entire topology while
 hwloc-distances also displays matrices that ignore part
 of the topology.
 
+\section cli_hwloc_annotate hwloc-annotate
+
+hwloc-annotate may add object attributes such as string
+information.
+It reads an input topology from a XML file and outputs
+the annotated topology as another XML file.
+
 \section cli_hwloc_assembler hwloc-assembler
 
 hwloc-assembler combines several XML topology files into a single

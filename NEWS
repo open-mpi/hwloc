@@ -24,6 +24,8 @@ Version 1.6.0
     save/restore what they placed in the userdata private pointer field
     of hwloc objects.
 * Tools
+  + Add hwloc-annotate program to add string info attributes to XML
+    topologies.
   + Fix command-line pid support in windows tools.
 
 
