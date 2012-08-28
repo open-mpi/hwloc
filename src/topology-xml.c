@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -793,7 +793,7 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
     output->new_prop(output, "local_memory", tmp);
   }
 
-  output->end_props(output, nr_children);
+  output->end_props(output, nr_children, 0);
 
   for(i=0; i<obj->memory.page_types_len; i++) {
     output->new_child(output, "page_type");
@@ -801,8 +801,8 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
     output->new_prop(output, "size", tmp);
     sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].count);
     output->new_prop(output, "count", tmp);
-    output->end_props(output, 0);
-    output->end_child(output, "page_type", 0);
+    output->end_props(output, 0, 0);
+    output->end_object(output, "page_type", 0, 0);
   }
 
   for(i=0; i<obj->infos_count; i++) {
@@ -811,8 +811,8 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
     output->new_child(output, "info");
     output->new_prop(output, "name", name);
     output->new_prop(output, "value", value);
-    output->end_props(output, 0);
-    output->end_child(output, "info", 0);
+    output->end_props(output, 0, 0);
+    output->end_object(output, "info", 0, 0);
     free(name);
     free(value);
   }
@@ -827,15 +827,15 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
     output->new_prop(output, "relative_depth", tmp);
     sprintf(tmp, "%f", obj->distances[i]->latency_base);
     output->new_prop(output, "latency_base", tmp);
-    output->end_props(output, nbobjs*nbobjs);
+    output->end_props(output, nbobjs*nbobjs, 0);
     for(j=0; j<nbobjs*nbobjs; j++) {
       output->new_child(output, "latency");
       sprintf(tmp, "%f", obj->distances[i]->latency[j]);
       output->new_prop(output, "value", tmp);
-      output->end_props(output, 0);
-      output->end_child(output, "latency", 0);
+      output->end_props(output, 0, 0);
+      output->end_object(output, "latency", 0, 0);
     }
-    output->end_child(output, "distances", nbobjs*nbobjs);
+    output->end_object(output, "distances", nbobjs*nbobjs, 0);
   }
 
   if (obj->arity) {
@@ -844,7 +844,7 @@ hwloc__xml_export_object (hwloc__xml_export_output_t output, hwloc_topology_t to
       hwloc__xml_export_object (output, topology, obj->children[x]);
   }
 
-  output->end_child(output, "object", nr_children);
+  output->end_object(output, "object", nr_children, 0);
 }
 
 /**********************************

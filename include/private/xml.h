@@ -24,6 +24,7 @@ typedef struct hwloc__xml_import_state_s {
   int (*find_child)(struct hwloc__xml_import_state_s * state, struct hwloc__xml_import_state_s * childstate, char **tagp);
   int (*close_tag)(struct hwloc__xml_import_state_s * state); /* look for an explicit closing tag </name> */
   void (*close_child)(struct hwloc__xml_import_state_s * state);
+  int (*get_content)(struct hwloc__xml_import_state_s * state, char **beginp, size_t expected_length);
 
   /* opaque data used to store backend-specific data.
    * statically allocated to allow stack-allocation by the common code without knowing actual backend needs.
@@ -34,8 +35,9 @@ typedef struct hwloc__xml_import_state_s {
 typedef struct hwloc__xml_export_output_s {
   void (*new_child)(struct hwloc__xml_export_output_s *output, const char *name);
   void (*new_prop)(struct hwloc__xml_export_output_s *output, const char *name, const char *value);
-  void (*end_props)(struct hwloc__xml_export_output_s *output, unsigned nr_children);
-  void (*end_child)(struct hwloc__xml_export_output_s *output, const char *name, unsigned nr_children);
+  void (*end_props)(struct hwloc__xml_export_output_s *output, unsigned nr_children, int has_content);
+  void (*add_content)(struct hwloc__xml_export_output_s *output, const char *buffer, size_t length);
+  void (*end_object)(struct hwloc__xml_export_output_s *output, const char *name, unsigned nr_children, int has_content);
 
   /* allocated by the backend (a single output is needed for the entire export) */
   void *data;
