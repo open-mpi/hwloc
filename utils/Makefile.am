@@ -12,7 +12,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 
-EXTRA_DIST = test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-assembler.output test-hwloc-calc.output test-hwloc-distances.output test-hwloc-distrib.output test-hwloc-ls.output
+EXTRA_DIST = test-hwloc-annotate.input test-hwloc-annotate.output test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-assembler.output test-hwloc-calc.output test-hwloc-distances.output test-hwloc-distrib.output test-hwloc-ls.output
 
 noinst_HEADERS = misc.h
 
