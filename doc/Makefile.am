@@ -1,4 +1,4 @@
-# Copyright © 2009-2012 inria.  All rights reserved.
+# Copyright © 2009-2012 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -335,12 +335,16 @@ man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_support.3
 
+man3_xmlexportdir = $(man3dir)
+man3_xmlexport_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_xmlexport.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_export_xmlbuffer.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_free_xmlbuffer.3
+
 man3_tinkerdir = $(man3dir)
 man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_tinker.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_export_xml.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_export_xmlbuffer.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_free_xmlbuffer.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_insert_misc_object_by_parent.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES.3 \

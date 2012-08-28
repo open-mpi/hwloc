@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -975,7 +975,7 @@ HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(h
 
 
 
-/** \defgroup hwlocality_tinker Tinker With Topologies.
+/** \defgroup hwlocality_xmlexport Exporting Topologies to XML.
  * @{
  */
 
@@ -1008,6 +1008,14 @@ HWLOC_DECLSPEC int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, ch
 
 /** \brief Free a buffer allocated by hwloc_topology_export_xmlbuffer() */
 HWLOC_DECLSPEC void hwloc_free_xmlbuffer(hwloc_topology_t topology, char *xmlbuffer);
+
+/** @} */
+
+
+
+/** \defgroup hwlocality_tinker Tinker With Topologies.
+ * @{
+ */
 
 /** \brief Add a MISC object to the topology
  *
