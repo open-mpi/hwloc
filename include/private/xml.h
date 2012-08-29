@@ -32,18 +32,22 @@ typedef struct hwloc__xml_import_state_s {
   char data[32];
 } * hwloc__xml_import_state_t;
 
-typedef struct hwloc__xml_export_output_s {
-  void (*new_child)(struct hwloc__xml_export_output_s *output, const char *name);
-  void (*new_prop)(struct hwloc__xml_export_output_s *output, const char *name, const char *value);
-  void (*end_props)(struct hwloc__xml_export_output_s *output, unsigned nr_children, int has_content);
-  void (*add_content)(struct hwloc__xml_export_output_s *output, const char *buffer, size_t length);
-  void (*end_object)(struct hwloc__xml_export_output_s *output, const char *name, unsigned nr_children, int has_content);
+typedef struct hwloc__xml_export_state_s {
+  struct hwloc__xml_export_state_s *parent;
 
-  /* allocated by the backend (a single output is needed for the entire export) */
-  void *data;
-} * hwloc__xml_export_output_t;
+  void (*new_child)(struct hwloc__xml_export_state_s *parentstate, struct hwloc__xml_export_state_s *state, const char *name);
+  void (*new_prop)(struct hwloc__xml_export_state_s *state, const char *name, const char *value);
+  void (*end_props)(struct hwloc__xml_export_state_s *state, unsigned nr_children, int has_content);
+  void (*add_content)(struct hwloc__xml_export_state_s *state, const char *buffer, size_t length);
+  void (*end_object)(struct hwloc__xml_export_state_s *state, const char *name, unsigned nr_children, int has_content);
 
-extern void hwloc__xml_export_object (hwloc__xml_export_output_t output, struct hwloc_topology *topology, struct hwloc_obj *obj);
+  /* opaque data used to store backend-specific data.
+   * statically allocated to allow stack-allocation by the common code without knowing actual backend needs.
+   */
+  char data[32];
+} * hwloc__xml_export_state_t;
+
+extern void hwloc__xml_export_object (hwloc__xml_export_state_t state, struct hwloc_topology *topology, struct hwloc_obj *obj);
 
 extern int hwloc_nolibxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen);
 extern int hwloc_nolibxml_export_file(struct hwloc_topology *topology, const char *filename);

@@ -232,51 +232,63 @@ hwloc_libxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, 
  * Export routines *
  *******************/
 
-typedef struct hwloc__libxml_export_output_data_s {
+typedef struct hwloc__libxml_export_state_data_s {
   xmlNodePtr current_node; /* current node to output */
-} * hwloc__libxml_export_output_data_t;
+} * hwloc__libxml_export_state_data_t;
 
 static void
-hwloc__libxml_export_new_child(hwloc__xml_export_output_t output, const char *name)
+hwloc__libxml_export_new_child(hwloc__xml_export_state_t parentstate,
+			       hwloc__xml_export_state_t state,
+			       const char *name)
 {
-  hwloc__libxml_export_output_data_t ldata = output->data;
-  ldata->current_node = xmlNewChild(ldata->current_node, NULL, BAD_CAST name, NULL);
+  hwloc__libxml_export_state_data_t lpdata = (void *) parentstate->data;
+  hwloc__libxml_export_state_data_t ldata = (void *) state->data;
+
+  state->parent = parentstate;
+  state->new_child = parentstate->new_child;
+  state->new_prop = parentstate->new_prop;
+  state->end_props = parentstate->end_props;
+  state->add_content = parentstate->add_content;
+  state->end_object = parentstate->end_object;
+
+  ldata->current_node = xmlNewChild(lpdata->current_node, NULL, BAD_CAST name, NULL);
 }
 
 static void
-hwloc__libxml_export_new_prop(hwloc__xml_export_output_t output, const char *name, const char *value)
+hwloc__libxml_export_new_prop(hwloc__xml_export_state_t state, const char *name, const char *value)
 {
-  hwloc__libxml_export_output_data_t ldata = output->data;
+  hwloc__libxml_export_state_data_t ldata = (void *) state->data;
   xmlNewProp(ldata->current_node, BAD_CAST name, BAD_CAST value);
 }
 
 static void
-hwloc__libxml_export_end_props(hwloc__xml_export_output_t output __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
+hwloc__libxml_export_end_props(hwloc__xml_export_state_t state __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
 {
   /* nothing to do */
 }
 
 static void
-hwloc__libxml_export_end_object(hwloc__xml_export_output_t output, const char *name __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
+hwloc__libxml_export_end_object(hwloc__xml_export_state_t state __hwloc_attribute_unused, const char *name __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
 {
-  hwloc__libxml_export_output_data_t ldata = output->data;
-  ldata->current_node = ldata->current_node->parent;
+  /* nothing to do */
 }
 
 static void
-hwloc__libxml_export_add_content(hwloc__xml_export_output_t output, const char *buffer, size_t length)
+hwloc__libxml_export_add_content(hwloc__xml_export_state_t state, const char *buffer, size_t length)
 {
-  hwloc__libxml_export_output_data_t ldata = output->data;
+  hwloc__libxml_export_state_data_t ldata = (void *) state->data;
   xmlNodeAddContentLen(ldata->current_node, BAD_CAST buffer, length);
 }
 
 static xmlDocPtr
 hwloc__libxml2_prepare_export(hwloc_topology_t topology)
 {
-  struct hwloc__xml_export_output_s output;
-  struct hwloc__libxml_export_output_data_s data;
+  struct hwloc__xml_export_state_s state;
+  hwloc__libxml_export_state_data_t data = (void *) state.data;
   xmlDocPtr doc = NULL;       /* document pointer */
   xmlNodePtr root_node = NULL; /* root pointer */
+
+  assert(sizeof(*data) <= sizeof(state.data));
 
   LIBXML_TEST_VERSION;
   hwloc_libxml2_disable_stderrwarnings();
@@ -289,14 +301,15 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
   /* Creates a DTD declaration. Isn't mandatory. */
   (void) xmlCreateIntSubset(doc, BAD_CAST "topology", NULL, BAD_CAST "hwloc.dtd");
 
-  output.new_child = hwloc__libxml_export_new_child;
-  output.new_prop = hwloc__libxml_export_new_prop;
-  output.end_props = hwloc__libxml_export_end_props;
-  output.add_content = hwloc__libxml_export_add_content;
-  output.end_object = hwloc__libxml_export_end_object;
-  output.data = &data;
-  data.current_node = root_node;
-  hwloc__xml_export_object (&output, topology, hwloc_get_root_obj(topology));
+  state.new_child = hwloc__libxml_export_new_child;
+  state.new_prop = hwloc__libxml_export_new_prop;
+  state.end_props = hwloc__libxml_export_end_props;
+  state.add_content = hwloc__libxml_export_add_content;
+  state.end_object = hwloc__libxml_export_end_object;
+
+  data->current_node = root_node;
+
+  hwloc__xml_export_object (&state, topology, hwloc_get_root_obj(topology));
 
   return doc;
 }

@@ -325,17 +325,15 @@ hwloc_nolibxml_backend_init(struct hwloc_topology *topology, const char *xmlpath
  * Export routines *
  *******************/
 
-typedef struct hwloc__nolibxml_export_output_data_s {
-  struct hwloc__xml_export_output_s generic;
-
+typedef struct hwloc__nolibxml_export_state_data_s {
   char *buffer; /* (moving) buffer where to write */
   size_t written; /* how many bytes were written (or would have be written if not truncated) */
   size_t remaining; /* how many bytes are still available in the buffer */
   unsigned indent; /* indentation level for the next line */
-} * hwloc__nolibxml_export_output_data_t;
+} * hwloc__nolibxml_export_state_data_t;
 
 static void
-hwloc__nolibxml_export_update_buffer(hwloc__nolibxml_export_output_data_t ndata, int res)
+hwloc__nolibxml_export_update_buffer(hwloc__nolibxml_export_state_data_t ndata, int res)
 {
   if (res >= 0) {
     ndata->written += res;
@@ -390,18 +388,33 @@ hwloc__nolibxml_export_escape_string(const char *src)
 }
 
 static void
-hwloc__nolibxml_export_new_child(hwloc__xml_export_output_t output, const char *name)
+hwloc__nolibxml_export_new_child(hwloc__xml_export_state_t parentstate,
+				 hwloc__xml_export_state_t state,
+				 const char *name)
 {
-  hwloc__nolibxml_export_output_data_t ndata = output->data;
-  int res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%*s<%s", ndata->indent, "", name);
+  hwloc__nolibxml_export_state_data_t npdata = (void *) parentstate->data;
+  hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
+  int res;
+
+  state->parent = parentstate;
+  state->new_child = parentstate->new_child;
+  state->new_prop = parentstate->new_prop;
+  state->end_props = parentstate->end_props;
+  state->add_content = parentstate->add_content;
+  state->end_object = parentstate->end_object;
+
+  ndata->buffer = npdata->buffer;
+  ndata->written = npdata->written;
+  ndata->remaining = npdata->remaining;
+  ndata->indent = npdata->indent + 2;
+  res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%*s<%s", npdata->indent, "", name);
   hwloc__nolibxml_export_update_buffer(ndata, res);
-  ndata->indent += 2;
 }
 
 static void
-hwloc__nolibxml_export_new_prop(hwloc__xml_export_output_t output, const char *name, const char *value)
+hwloc__nolibxml_export_new_prop(hwloc__xml_export_state_t state, const char *name, const char *value)
 {
-  hwloc__nolibxml_export_output_data_t ndata = output->data;
+  hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
   char *escaped = hwloc__nolibxml_export_escape_string(value);
   int res = hwloc_snprintf(ndata->buffer, ndata->remaining, " %s=\"%s\"", name, escaped ? (const char *) escaped : value);
   hwloc__nolibxml_export_update_buffer(ndata, res);
@@ -409,33 +422,38 @@ hwloc__nolibxml_export_new_prop(hwloc__xml_export_output_t output, const char *n
 }
 
 static void
-hwloc__nolibxml_export_end_props(hwloc__xml_export_output_t output, unsigned nr_children, int has_content)
+hwloc__nolibxml_export_end_props(hwloc__xml_export_state_t state, unsigned nr_children, int has_content)
 {
-  hwloc__nolibxml_export_output_data_t ndata = output->data;
+  hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
   int res = hwloc_snprintf(ndata->buffer, ndata->remaining,
 			   has_content ? ">" : (nr_children ? ">\n" : "/>\n"));
   hwloc__nolibxml_export_update_buffer(ndata, res);
 }
 
 static void
-hwloc__nolibxml_export_end_object(hwloc__xml_export_output_t output, const char *name, unsigned nr_children, int has_content)
+hwloc__nolibxml_export_end_object(hwloc__xml_export_state_t state, const char *name, unsigned nr_children, int has_content)
 {
-  hwloc__nolibxml_export_output_data_t ndata = output->data;
+  hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
+  hwloc__nolibxml_export_state_data_t npdata = (void *) state->parent->data;
   int res;
-  ndata->indent -= 2;
+
   if (has_content) {
     res = hwloc_snprintf(ndata->buffer, ndata->remaining, "</%s>\n", name);
     hwloc__nolibxml_export_update_buffer(ndata, res);
   } else if (nr_children) {
-    res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%*s</%s>\n", ndata->indent, "", name);
+    res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%*s</%s>\n", npdata->indent, "", name);
     hwloc__nolibxml_export_update_buffer(ndata, res);
   }
+
+  npdata->buffer = ndata->buffer;
+  npdata->written = ndata->written;
+  npdata->remaining = ndata->remaining;
 }
 
 static void
-hwloc__nolibxml_export_add_content(hwloc__xml_export_output_t output, const char *buffer, size_t length)
+hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *buffer, size_t length)
 {
-  hwloc__nolibxml_export_output_data_t ndata = output->data;
+  hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
   int res = hwloc_snprintf(ndata->buffer, ndata->remaining, buffer, length);
   hwloc__nolibxml_export_update_buffer(ndata, res);
 }
@@ -443,32 +461,33 @@ hwloc__nolibxml_export_add_content(hwloc__xml_export_output_t output, const char
 static size_t
 hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int buflen)
 {
-  struct hwloc__xml_export_output_s output;
-  struct hwloc__nolibxml_export_output_data_s ndata;
+  struct hwloc__xml_export_state_s state, childstate;
+  hwloc__nolibxml_export_state_data_t ndata = (void *) &state.data;
   int res;
 
-  output.new_child = hwloc__nolibxml_export_new_child;
-  output.new_prop = hwloc__nolibxml_export_new_prop;
-  output.end_props = hwloc__nolibxml_export_end_props;
-  output.add_content = hwloc__nolibxml_export_add_content;
-  output.end_object = hwloc__nolibxml_export_end_object;
-  output.data = &ndata;
+  assert(sizeof(*ndata) <= sizeof(state.data));
 
-  ndata.indent = 0;
-  ndata.written = 0;
-  ndata.buffer = xmlbuffer;
-  ndata.remaining = buflen;
+  state.new_child = hwloc__nolibxml_export_new_child;
+  state.new_prop = hwloc__nolibxml_export_new_prop;
+  state.end_props = hwloc__nolibxml_export_end_props;
+  state.add_content = hwloc__nolibxml_export_add_content;
+  state.end_object = hwloc__nolibxml_export_end_object;
 
-  res = hwloc_snprintf(ndata.buffer, ndata.remaining,
+  ndata->indent = 0;
+  ndata->written = 0;
+  ndata->buffer = xmlbuffer;
+  ndata->remaining = buflen;
+
+  res = hwloc_snprintf(ndata->buffer, ndata->remaining,
 		 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		 "<!DOCTYPE topology SYSTEM \"hwloc.dtd\">\n");
-  hwloc__nolibxml_export_update_buffer(&ndata, res);
-  hwloc__nolibxml_export_new_child(&output, "topology");
-  hwloc__nolibxml_export_end_props(&output, 1, 0);
-  hwloc__xml_export_object (&output, topology, hwloc_get_root_obj(topology));
-  hwloc__nolibxml_export_end_object(&output, "topology", 1, 0);
+  hwloc__nolibxml_export_update_buffer(ndata, res);
+  hwloc__nolibxml_export_new_child(&state, &childstate, "topology");
+  hwloc__nolibxml_export_end_props(&childstate, 1, 0);
+  hwloc__xml_export_object (&childstate, topology, hwloc_get_root_obj(topology));
+  hwloc__nolibxml_export_end_object(&childstate, "topology", 1, 0);
 
-  return ndata.written+1;
+  return ndata->written+1;
 }
 
 int
