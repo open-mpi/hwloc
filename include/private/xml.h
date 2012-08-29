@@ -37,9 +37,8 @@ typedef struct hwloc__xml_export_state_s {
 
   void (*new_child)(struct hwloc__xml_export_state_s *parentstate, struct hwloc__xml_export_state_s *state, const char *name);
   void (*new_prop)(struct hwloc__xml_export_state_s *state, const char *name, const char *value);
-  void (*end_props)(struct hwloc__xml_export_state_s *state, unsigned nr_children, int has_content);
   void (*add_content)(struct hwloc__xml_export_state_s *state, const char *buffer, size_t length);
-  void (*end_object)(struct hwloc__xml_export_state_s *state, const char *name, unsigned nr_children, int has_content);
+  void (*end_object)(struct hwloc__xml_export_state_s *state, const char *name);
 
   /* opaque data used to store backend-specific data.
    * statically allocated to allow stack-allocation by the common code without knowing actual backend needs.

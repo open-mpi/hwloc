@@ -247,7 +247,6 @@ hwloc__libxml_export_new_child(hwloc__xml_export_state_t parentstate,
   state->parent = parentstate;
   state->new_child = parentstate->new_child;
   state->new_prop = parentstate->new_prop;
-  state->end_props = parentstate->end_props;
   state->add_content = parentstate->add_content;
   state->end_object = parentstate->end_object;
 
@@ -262,13 +261,7 @@ hwloc__libxml_export_new_prop(hwloc__xml_export_state_t state, const char *name,
 }
 
 static void
-hwloc__libxml_export_end_props(hwloc__xml_export_state_t state __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
-{
-  /* nothing to do */
-}
-
-static void
-hwloc__libxml_export_end_object(hwloc__xml_export_state_t state __hwloc_attribute_unused, const char *name __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
+hwloc__libxml_export_end_object(hwloc__xml_export_state_t state __hwloc_attribute_unused, const char *name __hwloc_attribute_unused)
 {
   /* nothing to do */
 }
@@ -303,7 +296,6 @@ hwloc__libxml2_prepare_export(hwloc_topology_t topology)
 
   state.new_child = hwloc__libxml_export_new_child;
   state.new_prop = hwloc__libxml_export_new_prop;
-  state.end_props = hwloc__libxml_export_end_props;
   state.add_content = hwloc__libxml_export_add_content;
   state.end_object = hwloc__libxml_export_end_object;
 

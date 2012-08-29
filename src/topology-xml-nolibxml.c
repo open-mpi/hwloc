@@ -408,7 +408,6 @@ hwloc__nolibxml_export_new_child(hwloc__xml_export_state_t parentstate,
   state->parent = parentstate;
   state->new_child = parentstate->new_child;
   state->new_prop = parentstate->new_prop;
-  state->end_props = parentstate->end_props;
   state->add_content = parentstate->add_content;
   state->end_object = parentstate->end_object;
 
@@ -435,13 +434,7 @@ hwloc__nolibxml_export_new_prop(hwloc__xml_export_state_t state, const char *nam
 }
 
 static void
-hwloc__nolibxml_export_end_props(hwloc__xml_export_state_t state __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
-{
-  /* nothing to do */
-}
-
-static void
-hwloc__nolibxml_export_end_object(hwloc__xml_export_state_t state, const char *name, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
+hwloc__nolibxml_export_end_object(hwloc__xml_export_state_t state, const char *name)
 {
   hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
   hwloc__nolibxml_export_state_data_t npdata = (void *) state->parent->data;
@@ -490,7 +483,6 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 
   state.new_child = hwloc__nolibxml_export_new_child;
   state.new_prop = hwloc__nolibxml_export_new_prop;
-  state.end_props = hwloc__nolibxml_export_end_props;
   state.add_content = hwloc__nolibxml_export_add_content;
   state.end_object = hwloc__nolibxml_export_end_object;
 
@@ -507,9 +499,8 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
 		 "<!DOCTYPE topology SYSTEM \"hwloc.dtd\">\n");
   hwloc__nolibxml_export_update_buffer(ndata, res);
   hwloc__nolibxml_export_new_child(&state, &childstate, "topology");
-  hwloc__nolibxml_export_end_props(&childstate, 1, 0);
   hwloc__xml_export_object (&childstate, topology, hwloc_get_root_obj(topology));
-  hwloc__nolibxml_export_end_object(&childstate, "topology", 1, 0);
+  hwloc__nolibxml_export_end_object(&childstate, "topology");
 
   return ndata->written+1;
 }

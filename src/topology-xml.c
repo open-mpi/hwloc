@@ -722,7 +722,6 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   struct hwloc__xml_export_state_s state;
   char *cpuset = NULL;
   char tmp[255];
-  unsigned nr_children = obj->memory.page_types_len + obj->infos_count + obj->distances_count + obj->arity;
   unsigned i;
 
   parentstate->new_child(parentstate, &state, "object");
@@ -839,8 +838,6 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_prop(&state, "local_memory", tmp);
   }
 
-  state.end_props(&state, nr_children, 0);
-
   for(i=0; i<obj->memory.page_types_len; i++) {
     struct hwloc__xml_export_state_s childstate;
     state.new_child(&state, &childstate, "page_type");
@@ -848,8 +845,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     childstate.new_prop(&childstate, "size", tmp);
     sprintf(tmp, "%llu", (unsigned long long) obj->memory.page_types[i].count);
     childstate.new_prop(&childstate, "count", tmp);
-    childstate.end_props(&childstate, 0, 0);
-    childstate.end_object(&childstate, "page_type", 0, 0);
+    childstate.end_object(&childstate, "page_type");
   }
 
   for(i=0; i<obj->infos_count; i++) {
@@ -859,8 +855,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     state.new_child(&state, &childstate, "info");
     childstate.new_prop(&childstate, "name", name);
     childstate.new_prop(&childstate, "value", value);
-    childstate.end_props(&childstate, 0, 0);
-    childstate.end_object(&childstate, "info", 0, 0);
+    childstate.end_object(&childstate, "info");
     free(name);
     free(value);
   }
@@ -876,16 +871,14 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
     childstate.new_prop(&childstate, "relative_depth", tmp);
     sprintf(tmp, "%f", obj->distances[i]->latency_base);
     childstate.new_prop(&childstate, "latency_base", tmp);
-    childstate.end_props(&childstate, nbobjs*nbobjs, 0);
     for(j=0; j<nbobjs*nbobjs; j++) {
       struct hwloc__xml_export_state_s greatchildstate;
       childstate.new_child(&childstate, &greatchildstate, "latency");
       sprintf(tmp, "%f", obj->distances[i]->latency[j]);
       greatchildstate.new_prop(&greatchildstate, "value", tmp);
-      greatchildstate.end_props(&greatchildstate, 0, 0);
-      greatchildstate.end_object(&greatchildstate, "latency", 0, 0);
+      greatchildstate.end_object(&greatchildstate, "latency");
     }
-    childstate.end_object(&childstate, "distances", nbobjs*nbobjs, 0);
+    childstate.end_object(&childstate, "distances");
   }
 
   if (obj->userdata && topology->userdata_export_cb)
@@ -897,7 +890,7 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
       hwloc__xml_export_object (&state, topology, obj->children[x]);
   }
 
-  state.end_object(&state, "object", nr_children, 0);
+  state.end_object(&state, "object");
 }
 
 /**********************************
@@ -994,9 +987,8 @@ hwloc_export_obj_userdata(void *reserved,
     state.new_prop(&state, "name", name);
   sprintf(tmp, "%lu", (unsigned long) length);
   state.new_prop(&state, "length", tmp);
-  state.end_props(&state, 0, 1);
   state.add_content(&state, buffer, length);
-  state.end_object(&state, "userdata", 0, 1);
+  state.end_object(&state, "userdata");
   return 0;
 }
 
