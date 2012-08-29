@@ -976,7 +976,7 @@ hwloc_export_obj_userdata(void *reserved,
   hwloc__xml_export_output_t output = reserved;
   char tmp[255];
 
-  if (hwloc__xml_export_check_buffer(name, strlen(name)) < 0
+  if ((name && hwloc__xml_export_check_buffer(name, strlen(name)) < 0)
       || hwloc__xml_export_check_buffer(buffer, length) < 0) {
     errno = EINVAL;
     return -1;
