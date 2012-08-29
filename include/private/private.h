@@ -385,4 +385,17 @@ extern void hwloc_group_by_distances(struct hwloc_topology *topology);
 #undef hwloc_getpagesize
 #endif
 
+/* encode src buffer into target buffer.
+ * targsize must be at least 4*((srclength+2)/3)+1.
+ * target will be 0-terminated.
+ */
+extern int hwloc_encode_to_base64(const char *src, size_t srclength, char *target, size_t targsize);
+/* decode src buffer into target buffer.
+ * src is 0-terminated.
+ * targsize must be at least srclength*3/4+1 (srclength not including \0)
+ * but only srclength*3/4 characters will be meaningful
+ * (the next one may be partially written during decoding, but it should be ignored).
+ */
+extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsize);
+
 #endif /* HWLOC_PRIVATE_H */

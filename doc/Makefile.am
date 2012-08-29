@@ -343,6 +343,7 @@ man3_xmlexport_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_free_xmlbuffer.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata_export_callback.3 \
         $(DOX_MAN_DIR)/man3/hwloc_export_obj_userdata.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_export_obj_userdata_base64.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata_import_callback.3
 
 man3_tinkerdir = $(man3dir)

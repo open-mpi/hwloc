@@ -19,10 +19,10 @@ in v0.9.1).
 Version 1.6.0
 -------------
 * XML
-  + Add hwloc_topology_set_userdata_import/export_callback() and
-    hwloc_export_obj_userdata() to let applications specify how to
-    save/restore what they placed in the userdata private pointer field
-    of hwloc objects.
+  + Add hwloc_topology_set_userdata_import/export_callback(),
+    hwloc_export_obj_userdata() and _userdata_base64() to let
+    applications specify how to save/restore what they placed in
+    the userdata private pointer field of hwloc objects.
 * Tools
   + Add hwloc-annotate program to add string info attributes to XML
     topologies.

@@ -54,3 +54,4 @@
 <!ELEMENT userdata (#PCDATA)>
 <!ATTLIST userdata name CDATA "" >
 <!ATTLIST userdata length CDATA "0" >
+<!ATTLIST userdata encoding CDATA "" >

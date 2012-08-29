@@ -1034,7 +1034,8 @@ HWLOC_DECLSPEC void hwloc_free_xmlbuffer(hwloc_topology_t topology, char *xmlbuf
  *
  * \p export_cb is invoked during XML export for each object whose
  * \p userdata pointer is not \c NULL.
- * The callback should use hwloc_export_obj_userdata() to actually export
+ * The callback should use hwloc_export_obj_userdata() or
+ * hwloc_export_obj_userdata_base64() to actually export
  * something to XML (possibly multiple times per object).
  *
  * \p export_cb may be set to \c NULL if userdata should not be exported to XML.
@@ -1062,11 +1063,27 @@ HWLOC_DECLSPEC void hwloc_topology_set_userdata_export_callback(hwloc_topology_t
  * If a non-printable character is passed in \p name or \p buffer,
  * the function returns -1 with errno set to EINVAL.
  *
- * If exporting binary data, the application should first encode
- * into printable characters only. It should also take care of portability
- * issues if planning to reimport on a different platform.
+ * If exporting binary data, the application should first encode into
+ * printable characters only (or use hwloc_export_obj_userdata_base64()).
+ * It should also take care of portability issues if the export may
+ * be reimported on a different architecture.
  */
 HWLOC_DECLSPEC int hwloc_export_obj_userdata(void *reserved, hwloc_topology_t topology, hwloc_obj_t obj, const char *name, const void *buffer, size_t length);
+
+/** \brief Encode and export some object userdata to XML
+ *
+ * This function is similar to hwloc_export_obj_userdata() but it encodes
+ * the input buffer into printable characters before exporting.
+ * On import, decoding is automatically performed before the data is given
+ * to the import() callback if any.
+ *
+ * This function may only be called from within the export() callback passed
+ * to hwloc_topology_set_userdata_export_callback().
+ *
+ * The function does not take care of portability issues if the export
+ * may be reimported on a different architecture.
+ */
+HWLOC_DECLSPEC int hwloc_export_obj_userdata_base64(void *reserved, hwloc_topology_t topology, hwloc_obj_t obj, const char *name, const void *buffer, size_t length);
 
 /** \brief Set the application-specific callback for importing userdata
  *

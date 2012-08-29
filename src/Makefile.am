@@ -28,6 +28,7 @@ sources = \
         topology-synthetic.c \
         topology-xml.c \
         topology-xml-nolibxml.c \
+        base64.c \
         bind.c \
         bitmap.c \
         misc.c

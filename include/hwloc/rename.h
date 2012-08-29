@@ -138,6 +138,7 @@ extern "C" {
 #define hwloc_free_xmlbuffer HWLOC_NAME(free_xmlbuffer)
 #define hwloc_topology_set_userdata_export_callback HWLOC_NAME(topology_set_userdata_import_callback)
 #define hwloc_export_obj_userdata HWLOC_NAME(export_obj_userdata)
+#define hwloc_export_obj_userdata_base64 HWLOC_NAME(export_obj_userdata_base64)
 #define hwloc_topology_set_userdata_import_callback HWLOC_NAME(topology_set_userdata_export_callback)
 
 #define hwloc_topology_insert_misc_object_by_cpuset HWLOC_NAME(topology_insert_misc_object_by_cpuset)
@@ -533,6 +534,9 @@ extern "C" {
 #define hwloc_clear_object_distances HWLOC_NAME(clear_object_distances)
 #define hwloc_clear_object_distances_one HWLOC_NAME(clear_object_distances_one)
 #define hwloc_group_by_distances HWLOC_NAME(group_by_distances)
+
+#define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
+#define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)
 
 #endif /* HWLOC_SYM_TRANSFORM */
 
