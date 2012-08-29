@@ -110,6 +110,7 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
   childstate->close_tag = state->close_tag;
   childstate->close_child = state->close_child;
   childstate->get_content = state->get_content;
+  childstate->close_content = state->close_content;
 
   /* auto-closed tags have no children */
   if (nstate->closed)
@@ -216,8 +217,17 @@ hwloc__nolibxml_import_get_content(hwloc__xml_import_state_t state,
   if (length != expected_length)
     return -1;
   nstate->tagbuffer = end;
+  *end = '\0'; /* mark as 0-terminated for now */
   *beginp = buffer;
   return 1;
+}
+
+static void
+hwloc__nolibxml_import_close_content(hwloc__xml_import_state_t state)
+{
+  /* put back the '<' that we overwrote to 0-terminate the content */
+  hwloc__nolibxml_import_state_data_t nstate = (void*) state->data;
+  *nstate->tagbuffer = '<';
 }
 
 static int
@@ -246,6 +256,7 @@ hwloc_nolibxml_look(struct hwloc_topology *topology,
   state->close_tag = hwloc__nolibxml_import_close_tag;
   state->close_child = hwloc__nolibxml_import_close_child;
   state->get_content = hwloc__nolibxml_import_get_content;
+  state->close_content = hwloc__nolibxml_import_close_content;
   state->parent = NULL;
   nstate->closed = 0;
   nstate->tagbuffer = buffer+10;

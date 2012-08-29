@@ -529,6 +529,7 @@ hwloc__xml_import_userdata(hwloc_topology_t topology __hwloc_attribute_unused, h
       return -1;
     if (ret && topology->userdata_import_cb)
       topology->userdata_import_cb(topology, obj, name, buffer, length);
+    state->close_content(state);
   }
   return state->close_tag(state);
 }

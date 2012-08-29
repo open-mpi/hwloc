@@ -25,6 +25,7 @@ typedef struct hwloc__xml_import_state_s {
   int (*close_tag)(struct hwloc__xml_import_state_s * state); /* look for an explicit closing tag </name> */
   void (*close_child)(struct hwloc__xml_import_state_s * state);
   int (*get_content)(struct hwloc__xml_import_state_s * state, char **beginp, size_t expected_length);
+  void (*close_content)(struct hwloc__xml_import_state_s * state);
 
   /* opaque data used to store backend-specific data.
    * statically allocated to allow stack-allocation by the common code without knowing actual backend needs.

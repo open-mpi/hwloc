@@ -1084,8 +1084,7 @@ HWLOC_DECLSPEC int hwloc_export_obj_userdata(void *reserved, hwloc_topology_t to
  *
  * \p import_cb may be \c NULL if userdata should be ignored during import.
  *
- * \note \p buffer contains \p length characters but it is not guaranteed
- * to be null-terminated ('\0').
+ * \note \p buffer contains \p length characters followed by a null byte ('\0').
  *
  * \note This function should be called before hwloc_topology_load().
  */

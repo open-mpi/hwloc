@@ -90,6 +90,7 @@ hwloc__libxml_import_find_child(hwloc__xml_import_state_t state,
   childstate->close_tag = state->close_tag;
   childstate->close_child = state->close_child;
   childstate->get_content = state->get_content;
+  childstate->close_content = state->close_content;
   if (!lstate->child)
     return 0;
   child = lstate->child->next;
@@ -145,6 +146,12 @@ hwloc__libxml_import_get_content(hwloc__xml_import_state_t state,
   return 1;
 }
 
+static void
+hwloc__libxml_import_close_content(hwloc__xml_import_state_t state __hwloc_attribute_unused)
+{
+  /* nothing to do */
+}
+
 static int
 hwloc_libxml_look(struct hwloc_topology *topology,
 		  struct hwloc__xml_import_state_s *state)
@@ -179,6 +186,7 @@ hwloc_libxml_look(struct hwloc_topology *topology,
   state->close_tag = hwloc__libxml_import_close_tag;
   state->close_child = hwloc__libxml_import_close_child;
   state->get_content = hwloc__libxml_import_get_content;
+  state->close_content = hwloc__libxml_import_close_content;
   state->parent = NULL;
   lstate->node = root_node;
   lstate->child = root_node->children;
