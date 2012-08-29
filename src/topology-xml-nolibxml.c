@@ -330,6 +330,8 @@ typedef struct hwloc__nolibxml_export_state_data_s {
   size_t written; /* how many bytes were written (or would have be written if not truncated) */
   size_t remaining; /* how many bytes are still available in the buffer */
   unsigned indent; /* indentation level for the next line */
+  unsigned nr_children;
+  unsigned has_content;
 } * hwloc__nolibxml_export_state_data_t;
 
 static void
@@ -396,6 +398,13 @@ hwloc__nolibxml_export_new_child(hwloc__xml_export_state_t parentstate,
   hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
   int res;
 
+  assert(!npdata->has_content);
+  if (!npdata->nr_children) {
+    res = hwloc_snprintf(npdata->buffer, npdata->remaining, ">\n");
+    hwloc__nolibxml_export_update_buffer(npdata, res);
+  }
+  npdata->nr_children++;
+
   state->parent = parentstate;
   state->new_child = parentstate->new_child;
   state->new_prop = parentstate->new_prop;
@@ -407,6 +416,10 @@ hwloc__nolibxml_export_new_child(hwloc__xml_export_state_t parentstate,
   ndata->written = npdata->written;
   ndata->remaining = npdata->remaining;
   ndata->indent = npdata->indent + 2;
+
+  ndata->nr_children = 0;
+  ndata->has_content = 0;
+
   res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%*s<%s", npdata->indent, "", name);
   hwloc__nolibxml_export_update_buffer(ndata, res);
 }
@@ -422,28 +435,27 @@ hwloc__nolibxml_export_new_prop(hwloc__xml_export_state_t state, const char *nam
 }
 
 static void
-hwloc__nolibxml_export_end_props(hwloc__xml_export_state_t state, unsigned nr_children, int has_content)
+hwloc__nolibxml_export_end_props(hwloc__xml_export_state_t state __hwloc_attribute_unused, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
 {
-  hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
-  int res = hwloc_snprintf(ndata->buffer, ndata->remaining,
-			   has_content ? ">" : (nr_children ? ">\n" : "/>\n"));
-  hwloc__nolibxml_export_update_buffer(ndata, res);
+  /* nothing to do */
 }
 
 static void
-hwloc__nolibxml_export_end_object(hwloc__xml_export_state_t state, const char *name, unsigned nr_children, int has_content)
+hwloc__nolibxml_export_end_object(hwloc__xml_export_state_t state, const char *name, unsigned nr_children __hwloc_attribute_unused, int has_content __hwloc_attribute_unused)
 {
   hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
   hwloc__nolibxml_export_state_data_t npdata = (void *) state->parent->data;
   int res;
 
-  if (has_content) {
+  assert (!(ndata->has_content && ndata->nr_children));
+  if (ndata->has_content) {
     res = hwloc_snprintf(ndata->buffer, ndata->remaining, "</%s>\n", name);
-    hwloc__nolibxml_export_update_buffer(ndata, res);
-  } else if (nr_children) {
+  } else if (ndata->nr_children) {
     res = hwloc_snprintf(ndata->buffer, ndata->remaining, "%*s</%s>\n", npdata->indent, "", name);
-    hwloc__nolibxml_export_update_buffer(ndata, res);
+  } else {
+    res = hwloc_snprintf(ndata->buffer, ndata->remaining, "/>\n");
   }
+  hwloc__nolibxml_export_update_buffer(ndata, res);
 
   npdata->buffer = ndata->buffer;
   npdata->written = ndata->written;
@@ -454,7 +466,16 @@ static void
 hwloc__nolibxml_export_add_content(hwloc__xml_export_state_t state, const char *buffer, size_t length)
 {
   hwloc__nolibxml_export_state_data_t ndata = (void *) state->data;
-  int res = hwloc_snprintf(ndata->buffer, ndata->remaining, buffer, length);
+  int res;
+
+  assert(!ndata->nr_children);
+  if (!ndata->has_content) {
+    res = hwloc_snprintf(ndata->buffer, ndata->remaining, ">");
+    hwloc__nolibxml_export_update_buffer(ndata, res);
+  }
+  ndata->has_content = 1;
+
+  res = hwloc_snprintf(ndata->buffer, ndata->remaining, buffer, length);
   hwloc__nolibxml_export_update_buffer(ndata, res);
 }
 
@@ -477,6 +498,9 @@ hwloc___nolibxml_prepare_export(hwloc_topology_t topology, char *xmlbuffer, int 
   ndata->written = 0;
   ndata->buffer = xmlbuffer;
   ndata->remaining = buflen;
+
+  ndata->nr_children = 1; /* don't close a non-existing previous tag when opening the topology tag */
+  ndata->has_content = 0;
 
   res = hwloc_snprintf(ndata->buffer, ndata->remaining,
 		 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"

@@ -44,7 +44,7 @@ typedef struct hwloc__xml_export_state_s {
   /* opaque data used to store backend-specific data.
    * statically allocated to allow stack-allocation by the common code without knowing actual backend needs.
    */
-  char data[32];
+  char data[40];
 } * hwloc__xml_export_state_t;
 
 extern void hwloc__xml_export_object (hwloc__xml_export_state_t state, struct hwloc_topology *topology, struct hwloc_obj *obj);
