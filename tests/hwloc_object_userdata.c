@@ -15,6 +15,10 @@
 
 /* check that object userdata is properly initialized */
 
+#define RANDOMSTRINGLENGTH 128
+#define RANDOMSTRINGTESTS 9
+static char *randomstring;
+
 static void check(hwloc_topology_t topology)
 {
   unsigned depth;
@@ -32,9 +36,17 @@ static void export_cb(void *reserved, hwloc_topology_t topo, hwloc_obj_t obj)
 {
   char tmp[17];
   int err;
+  unsigned i;
+
   sprintf(tmp, "%016llx", (unsigned long long) (uintptr_t) obj->userdata);
   err = hwloc_export_obj_userdata(reserved, topo, obj, "MyName", tmp, 16);
   assert(err >= 0);
+
+  for(i=0; i<RANDOMSTRINGTESTS; i++) {
+    sprintf(tmp, "Encoded%d", i);
+    err = hwloc_export_obj_userdata_base64(reserved, topo, obj, tmp, randomstring+(i+1)/2, RANDOMSTRINGLENGTH-i);
+    assert(err >= 0);
+  }
 }
 
 static void import_cb(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_t obj, const char *name, const void *buffer, size_t length)
@@ -43,31 +55,40 @@ static void import_cb(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_
   char tmp[17];
   uint64_t val;
 
-  err = strcmp("MyName", name);
-  assert(!err);
+  if (!strcmp("MyName", name)) {
+    assert(length == 16);
+    memcpy(tmp, buffer, 16);
+    tmp[16] = '\0';
+    
+    val = strtoull(buffer, NULL, 0);
 
-  assert(length == 16);
-  memcpy(tmp, buffer, 16);
-  tmp[16] = '\0';
+    switch (val) {
+    case 0x1:
+      assert(obj->type == HWLOC_OBJ_MACHINE);
+      obj->userdata = (void *)(uintptr_t) 0x4;
+      break;
+    case 0x2:
+      assert(obj->type == HWLOC_OBJ_CACHE);
+      obj->userdata = (void *)(uintptr_t) 0x5;
+      break;
+    case 0x3:
+      assert(obj->type == HWLOC_OBJ_PU);
+      obj->userdata = (void *)(uintptr_t) 0x6;
+      break;
+    default:
+      assert(0);
+    }
 
-  val = strtoull(buffer, NULL, 0);
-
-  switch (val) {
-  case 0x1:
-    assert(obj->type == HWLOC_OBJ_MACHINE);
-    obj->userdata = (void *)(uintptr_t) 0x4;
-    break;
-  case 0x2:
-    assert(obj->type == HWLOC_OBJ_CACHE);
-    obj->userdata = (void *)(uintptr_t) 0x5;
-    break;
-  case 0x3:
-    assert(obj->type == HWLOC_OBJ_PU);
-    obj->userdata = (void *)(uintptr_t) 0x6;
-    break;
-  default:
+  } else if (!strncmp("Encoded", name, 7)) {
+    unsigned i = atoi(name+7);
+    assert(i >= 0);
+    assert(i <= RANDOMSTRINGTESTS-1);
+    assert(RANDOMSTRINGLENGTH-i == (unsigned) length);
+    err = memcmp(buffer, randomstring+(i+1)/2, length);
+    assert(!err);
+    
+  } else
     assert(0);
-  }
 }
 
 int main(void)
@@ -76,6 +97,9 @@ int main(void)
   hwloc_obj_t obj1, obj2, obj3;
   char *xmlbuf;
   int xmlbuflen;
+
+  randomstring = malloc(RANDOMSTRINGLENGTH);
+  /* keep it uninitialized, we want binary data */
 
   /* check the real topology */
   hwloc_topology_init(&topology);
@@ -129,5 +153,7 @@ int main(void)
   hwloc_topology_destroy(reimport);
 
   hwloc_topology_destroy(topology);
+
+  free(randomstring);
   return 0;
 }
