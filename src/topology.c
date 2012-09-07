@@ -387,7 +387,7 @@ enum hwloc_type_cmp_e {
    *** CHECKING ITS CORRECTNESS!
    *************************************************************
    */
-static unsigned obj_type_order[] = {
+static const unsigned obj_type_order[] = {
     /* first entry is HWLOC_OBJ_SYSTEM */  0,
     /* next entry is HWLOC_OBJ_MACHINE */  1,
     /* next entry is HWLOC_OBJ_NODE */     3,
