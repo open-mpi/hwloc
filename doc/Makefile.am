@@ -227,6 +227,9 @@ if HWLOC_INSTALL_DOXYGEN
 # in _DATA suffix names, because AM won't allow us to do things like
 # man3_extra_MANS = ...group...
 
+# When adding a new _DATA line below, remember to add it to the
+# list of dependencies too.
+
 man3_MANS = \
         $(DOX_MAN_DIR)/man3/hwlocality_api_version.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_API_VERSION.3 \
@@ -667,6 +670,8 @@ endif
 # *first* before we can try to process/install man pages, the HTML,
 # run pdflatex, .etc.).
 
+# The list below should match the list of _DATA lines above
+
 $(man3_MANS): $(DOX_TAG)
 $(man3_topology_DATA): $(DOX_TAG)
 $(man3_sets_DATA): $(DOX_TAG)
@@ -674,6 +679,7 @@ $(man3_types_DATA): $(DOX_TAG)
 $(man3_objects_DATA): $(DOX_TAG)
 $(man3_creation_DATA): $(DOX_TAG)
 $(man3_configuration_DATA): $(DOX_TAG)
+$(man3_xmlexport_DATA): $(DOX_TAG)
 $(man3_tinker_DATA): $(DOX_TAG)
 $(man3_information_DATA): $(DOX_TAG)
 $(man3_traversal_DATA): $(DOX_TAG)
@@ -685,8 +691,8 @@ $(man3_bitmap_DATA): $(DOX_TAG)
 $(man3_helper_types_DATA): $(DOX_TAG)
 $(man3_helper_traversal_basic_DATA): $(DOX_TAG)
 $(man3_helper_find_inside_DATA): $(DOX_TAG)
-$(man3_helper_find_coverings_DATA): $(DOX_TAG)
 $(man3_helper_find_covering_DATA): $(DOX_TAG)
+$(man3_helper_find_coverings_DATA): $(DOX_TAG)
 $(man3_helper_find_cache_DATA): $(DOX_TAG)
 $(man3_helper_traversal_DATA): $(DOX_TAG)
 $(man3_helper_binding_DATA): $(DOX_TAG)
