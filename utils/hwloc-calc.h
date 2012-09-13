@@ -38,25 +38,25 @@ hwloc_calc_append_cpuset(hwloc_bitmap_t set, hwloc_const_bitmap_t newset,
   hwloc_bitmap_asprintf(&s2, set);
   switch (mode) {
   case HWLOC_CALC_APPEND_ADD:
-    if (verbose)
+    if (verbose > 0)
       fprintf(stderr, "adding %s to %s\n",
           s1, s2);
     hwloc_bitmap_or(set, set, newset);
     break;
   case HWLOC_CALC_APPEND_CLR:
-    if (verbose)
+    if (verbose > 0)
       fprintf(stderr, "clearing %s from %s\n",
           s1, s2);
     hwloc_bitmap_andnot(set, set, newset);
     break;
   case HWLOC_CALC_APPEND_AND:
-    if (verbose)
+    if (verbose > 0)
       fprintf(stderr, "and'ing %s from %s\n",
           s1, s2);
     hwloc_bitmap_and(set, set, newset);
     break;
   case HWLOC_CALC_APPEND_XOR:
-    if (verbose)
+    if (verbose > 0)
       fprintf(stderr, "xor'ing %s from %s\n",
           s1, s2);
     hwloc_bitmap_xor(set, set, newset);
@@ -160,14 +160,16 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
       return -1;
     depth = hwloc_get_type_or_above_depth(topology, type);
     if (depth == HWLOC_TYPE_DEPTH_MULTIPLE) {
-      fprintf(stderr, "type %s has multiple possible depths\n", hwloc_obj_type_string(type));
+      if (verbose >= 0)
+	fprintf(stderr, "type %s has multiple possible depths\n", hwloc_obj_type_string(type));
       return -1;
     } else if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-      fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
+      if (verbose >= 0)
+	fprintf(stderr, "type %s isn't available\n", hwloc_obj_type_string(type));
       return -1;
     }
     realtype = hwloc_get_depth_type(topology, depth);
-    if (type != realtype && verbose)
+    if (type != realtype && verbose > 0)
       fprintf(stderr, "using type %s (depth %d) instead of %s\n",
 	      hwloc_obj_type_string(realtype), depth, hwloc_obj_type_string(type));
     return depth;
@@ -178,8 +180,9 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
       for(i=0; ; i++) {
 	hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, i, 0);
 	if (!obj) {
-	  fprintf(stderr, "Group with custom depth %d does not exist\n",
-		  depthattr);
+	  if (verbose >= 0)
+	    fprintf(stderr, "Group with custom depth %d does not exist\n",
+		    depthattr);
 	  return -1;
 	}
 	if (obj->type == type
@@ -188,10 +191,12 @@ hwloc_calc_depth_of_type(hwloc_topology_t topology, hwloc_obj_type_t type,
       }
     else if (type == HWLOC_OBJ_CACHE) {
       depth = hwloc_get_cache_type_depth(topology, depthattr, cachetype);
-      if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
-	fprintf(stderr, "Cache with custom depth %d and type %d does not exist\n", depthattr, cachetype);
-      else if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
-	fprintf(stderr, "Cache with custom depth %d and type %d has multiple possible depths\n", depthattr, cachetype);
+      if (verbose >= 0) {
+	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN)
+	  fprintf(stderr, "Cache with custom depth %d and type %d does not exist\n", depthattr, cachetype);
+	else if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+	  fprintf(stderr, "Cache with custom depth %d and type %d has multiple possible depths\n", depthattr, cachetype);
+      }
       return depth;
     } else
       assert(0);
@@ -216,7 +221,8 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
   int err;
 
   if (typelen >= sizeof(typestring)) {
-    fprintf(stderr, "invalid type name %s\n", string);
+    if (verbose >= 0)
+      fprintf(stderr, "invalid type name %s\n", string);
     return -1;
   }
   strncpy(typestring, string, typelen);
@@ -232,11 +238,13 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
   /* try to match a numeric depth */
   depth = strtol(string, &end, 0);
   if (end != &string[typelen]) {
-    fprintf(stderr, "invalid type name %s\n", string);
+    if (verbose >= 0)
+      fprintf(stderr, "invalid type name %s\n", string);
     return -1;
   }
   if ((unsigned) depth >= topodepth) {
-    fprintf(stderr, "ignoring invalid depth %u\n", depth);
+    if (verbose >= 0)
+      fprintf(stderr, "ignoring invalid depth %u\n", depth);
     return -1;
   }
   *typep = (hwloc_obj_type_t) -1;
@@ -351,7 +359,7 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
       i = 0;
 
     obj = hwloc_calc_get_obj_inside_cpuset_by_depth(topology, rootset, depth, i, logical);
-    if (verbose || !obj) {
+    if (verbose > 0 || (!obj && verbose >= 0)) {
       char *s;
       hwloc_bitmap_asprintf(&s, rootset);
       if (obj)
@@ -461,13 +469,14 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
   for(oldi=-1, i=first, j=0; j<amount || amount == -1; oldi=i, i+=step, j++) {
     obj = hwloc_calc_find_next_pci_object(topology, vendor, device, obj, i-oldi, wrap);
     if (obj) {
-      if (verbose)
+      if (verbose > 0)
 	printf("using matching PCI object #%d bus id %04x:%02x:%02x.%01x\n", i,
 	       obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
       hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
     } else {
       if (amount != -1)
-	fprintf(stderr, "no matching PCI object #%d\n", i);
+	if (verbose >= 0)
+	  fprintf(stderr, "no matching PCI object #%d\n", i);
       break;
     }
   }
@@ -478,7 +487,8 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
    * but we don't want some ugly and unmaintainable code
    */
 
-  fprintf(stderr, "invalid PCI device %s\n", string);
+  if (verbose >= 0)
+    fprintf(stderr, "invalid PCI device %s\n", string);
   return -1;
 }
 
@@ -534,7 +544,8 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 	obj = hwloc_get_pcidev_by_busidstring(topology, sep+1);
 	if (obj)
 	  return hwloc_calc_append_iodev(set, obj, mode, verbose);
-	fprintf(stderr, "invalid PCI device %s\n", sep+1);
+	if (verbose >= 0)
+	  fprintf(stderr, "invalid PCI device %s\n", sep+1);
 	return -1;
       } else if (*sep == '=' && type == HWLOC_OBJ_OS_DEVICE) {
 	/* try to match a OS device name */
@@ -542,7 +553,8 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 	  if (!strcmp(obj->name, sep+1))
 	    return hwloc_calc_append_iodev(set, obj, mode, verbose);
 	}
-	fprintf(stderr, "invalid OS device %s\n", sep+1);
+	if (verbose >= 0)
+	  fprintf(stderr, "invalid OS device %s\n", sep+1);
 	return -1;
       } else
 	return -1;
