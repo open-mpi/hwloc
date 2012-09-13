@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
 	  break;
 	current = NULL;
 	if (hwloc_calc_process_arg(topology, depth, token, logicali, set, verbose) < 0)
-	  fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
+	  fprintf(stderr, "ignored unrecognized argument %s\n", token);
       }
       hwloc_calc_output(topology, outsep, set);
     }
