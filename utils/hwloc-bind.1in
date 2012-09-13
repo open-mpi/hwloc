@@ -73,6 +73,9 @@ program instead of hwloc-specific CPU set string format.
 This option has no impact on the format of input CPU set strings,
 both formats are always accepted.
 .TP
+\fB\-f\fR \fB\-\-force\fR
+Launch the executable even if binding failed.
+.TP
 \fB\-v\fR \fB\-\-verbose\fR
 Verbose output.
 .TP
@@ -88,6 +91,10 @@ hwloc-bind execs an executable (with optional command line arguments)
 that is bound to the specified location (or list of locations).  Upon
 successful execution, hwloc-bind simply sets bindings and then execs
 the executable over itself.
+.
+If binding fails, or if the binding set is empty, and \fB\-\-force\fR
+was not given, hwloc-bind returns with an error instead of launching
+the executable.
 .
 .PP
 .B NOTE:

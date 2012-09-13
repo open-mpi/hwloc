@@ -26,6 +26,8 @@ Version 1.6.0
 * Tools
   + Add hwloc-annotate program to add string info attributes to XML
     topologies.
+  + hwloc-bind now exits with an error if binding fails; the executable
+    is not launched unless binding suceeeded or --force was given.
   + Fix command-line pid support in windows tools.
   + All programs accept --verbose as a synonym to -v.
 
