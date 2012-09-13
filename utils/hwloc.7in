@@ -149,7 +149,7 @@ to the current list.  If prefixed with "^", the given location will be
 xor'ed.
 .
 .PP
-"all" and "root" are a special location consisting in the entire
+"all" and "root" are special locations consisting in the entire
 current topology.
 .
 More complex operations may be performed by using
@@ -159,7 +159,7 @@ to compute intermediate values.
 .SS Hwloc Objects
 .
 .PP
-Objects can be any of the following strings
+Objects in tuples can be any of the following strings
 .
 (listed from "biggest" to "smallest"):
 .
@@ -176,6 +176,12 @@ can directly access.
 .B socket
 Typically a physical package or chip, it is a grouping of one or more
 processors.
+.
+.TP
+.B cache
+A cache memory. If several kinds of caches exist in the system,
+a specific one may be identified by its level (e.g. \fBl1cache\fR)
+and optionally by its type (e.g. \fBl1icache\fR).
 .
 .TP
 .B core
@@ -196,6 +202,9 @@ The additional
 .B system
 type can be used when several machines form an overall single system image
 (SSI), such as Kerrighed.
+.PP
+I/O devices are not listed here since they are not identified using
+tuples as explained in \fBLocation Specification\fR.
 .
 .PP
 Finally, note that an object can be denoted by its numeric "depth" in
