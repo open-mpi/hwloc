@@ -213,25 +213,28 @@ int main(int argc, char *argv[])
   depth = hwloc_topology_get_depth(topology);
 
   callname = argv[0];
+  /* skip argv[0], handle options */
+  argv++;
+  argc--;
 
-  while (argc >= 2) {
-    if (*argv[1] == '-') {
-      if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--verbose")) {
+  while (argc >= 1) {
+    if (*argv[0] == '-') {
+      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
         verbose = 1;
         goto next;
       }
-      if (!strcmp(argv[1], "--help")) {
+      if (!strcmp(argv[0], "--help")) {
 	usage(callname, stdout);
 	return EXIT_SUCCESS;
       }
-      if (!strcmp (argv[1], "--restrict")) {
+      if (!strcmp (argv[0], "--restrict")) {
 	hwloc_bitmap_t restrictset;
-	if (argc <= 2) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
 	restrictset = hwloc_bitmap_alloc();
-	hwloc_bitmap_sscanf(restrictset, argv[2]);
+	hwloc_bitmap_sscanf(restrictset, argv[1]);
 	err = hwloc_topology_restrict (topology, restrictset, 0);
 	if (err) {
 	  perror("Restricting the topology");
@@ -242,27 +245,13 @@ int main(int argc, char *argv[])
 	argc--;
 	goto next;
       }
-      if (!strcmp(argv[1], "--number-of") || !strcmp(argv[1], "-N")) {
-	if (argc <= 2) {
+      if (!strcmp(argv[0], "--number-of") || !strcmp(argv[0], "-N")) {
+	if (argc < 2) {
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
 	}
-	if (hwloc_calc_type_depth(argv[2], &numberoftype, &numberofdepth) < 0) {
-	  fprintf(stderr, "unrecognized --number-of type or depth %s\n", argv[2]);
-	  usage(callname, stderr);
-	  return EXIT_SUCCESS;
-	}
-	argv++;
-	argc--;
-	goto next;
-      }
-      if (!strcmp(argv[1], "--intersect") || !strcmp(argv[1], "-I")) {
-	if (argc <= 2) {
-	  usage(callname, stderr);
-	  return EXIT_SUCCESS;
-	}
-	if (hwloc_calc_type_depth(argv[2], &intersecttype, &intersectdepth) < 0) {
-	  fprintf(stderr, "unrecognized --intersect type or depth %s\n", argv[2]);
+	if (hwloc_calc_type_depth(argv[1], &numberoftype, &numberofdepth) < 0) {
+	  fprintf(stderr, "unrecognized --number-of type or depth %s\n", argv[1]);
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
 	}
@@ -270,14 +259,28 @@ int main(int argc, char *argv[])
 	argc--;
 	goto next;
       }
-      if (!strcmp(argv[1], "--hierarchical") || !strcmp(argv[1], "-H")) {
+      if (!strcmp(argv[0], "--intersect") || !strcmp(argv[0], "-I")) {
+	if (argc < 2) {
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
+	}
+	if (hwloc_calc_type_depth(argv[1], &intersecttype, &intersectdepth) < 0) {
+	  fprintf(stderr, "unrecognized --intersect type or depth %s\n", argv[1]);
+	  usage(callname, stderr);
+	  return EXIT_SUCCESS;
+	}
+	argv++;
+	argc--;
+	goto next;
+      }
+      if (!strcmp(argv[0], "--hierarchical") || !strcmp(argv[0], "-H")) {
 	char *tmp, *next;
-	if (argc <= 2) {
+	if (argc < 2) {
 	  usage(callname, stderr);
 	  return EXIT_SUCCESS;
 	}
 	hiernblevels = 1;
-	tmp = argv[2];
+	tmp = argv[1];
         while (1) {
 	  tmp = strchr(tmp, '.');
 	  if (!tmp)
@@ -287,7 +290,7 @@ int main(int argc, char *argv[])
         }
 	hiertype = malloc(hiernblevels * sizeof(hwloc_obj_type_t));
 	hierdepth = malloc(hiernblevels * sizeof(int));
-	tmp = argv[2];
+	tmp = argv[1];
 	for(i=0; i<hiernblevels; i++) {
 	  next = strchr(tmp, '.');
 	  if (next)
@@ -303,69 +306,69 @@ int main(int argc, char *argv[])
 	argc--;
 	goto next;
       }
-      if (!strcasecmp(argv[1], "--pulist") || !strcmp(argv[1], "--proclist")) {
+      if (!strcasecmp(argv[0], "--pulist") || !strcmp(argv[0], "--proclist")) {
 	/* backward compat with 1.0 */
 	intersecttype = HWLOC_OBJ_PU;
         goto next;
       }
-      if (!strcmp(argv[1], "--nodelist")) {
+      if (!strcmp(argv[0], "--nodelist")) {
 	/* backward compat with 1.0 */
 	intersecttype = HWLOC_OBJ_NODE;
         goto next;
       }
-      if (!strcmp(argv[1], "--largest")  || !strcmp(argv[1], "--objects") /* backward compat with 1.0 */) {
+      if (!strcmp(argv[0], "--largest")  || !strcmp(argv[0], "--objects") /* backward compat with 1.0 */) {
 	showobjs = 1;
         goto next;
       }
-      if (!strcmp(argv[1], "--version")) {
+      if (!strcmp(argv[0], "--version")) {
         printf("%s %s\n", callname, VERSION);
         exit(EXIT_SUCCESS);
       }
-      if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--logical")) {
+      if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
 	logicali = 1;
 	logicalo = 1;
 	goto next;
       }
-      if (!strcmp(argv[1], "--li") || !strcmp(argv[1], "--logical-input")) {
+      if (!strcmp(argv[0], "--li") || !strcmp(argv[0], "--logical-input")) {
 	logicali = 1;
 	goto next;
       }
-      if (!strcmp(argv[1], "--lo") || !strcmp(argv[1], "--logical-output")) {
+      if (!strcmp(argv[0], "--lo") || !strcmp(argv[0], "--logical-output")) {
 	logicalo = 1;
 	goto next;
       }
-      if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--physical")) {
+      if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
 	logicali = 0;
 	logicalo = 0;
 	goto next;
       }
-      if (!strcmp(argv[1], "--pi") || !strcmp(argv[1], "--physical-input")) {
+      if (!strcmp(argv[0], "--pi") || !strcmp(argv[0], "--physical-input")) {
 	logicali = 0;
 	goto next;
       }
-      if (!strcmp(argv[1], "--po") || !strcmp(argv[1], "--physical-output")) {
+      if (!strcmp(argv[0], "--po") || !strcmp(argv[0], "--physical-output")) {
 	logicalo = 0;
 	goto next;
       }
-      if (!strcmp(argv[1], "--sep")) {
-	if (argc <= 2) {
+      if (!strcmp(argv[0], "--sep")) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	outsep = argv[2];
+	outsep = argv[1];
 	argv++;
 	argc--;
 	goto next;
       }
-      if (!strcmp(argv[1], "--single")) {
+      if (!strcmp(argv[0], "--single")) {
 	singlify = 1;
 	goto next;
       }
-      if (!strcmp(argv[1], "--taskset")) {
+      if (!strcmp(argv[0], "--taskset")) {
 	taskset = 1;
 	goto next;
       }
-      if (hwloc_utils_lookup_input_option(argv+1, argc, &opt,
+      if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					  &input, &input_format,
 					  callname)) {
 	argv += opt;
@@ -374,7 +377,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
 
-      fprintf (stderr, "Unrecognized option: %s\n", argv[1]);
+      fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage(callname, stderr);
       return EXIT_FAILURE;
     }
@@ -390,8 +393,8 @@ int main(int argc, char *argv[])
     }
 
     cmdline_args++;
-    if (hwloc_calc_process_arg(topology, depth, argv[1], logicali, set, verbose) < 0)
-      fprintf(stderr, "ignored unrecognized argument %s\n", argv[1]);
+    if (hwloc_calc_process_arg(topology, depth, argv[0], logicali, set, verbose) < 0)
+      fprintf(stderr, "ignored unrecognized argument %s\n", argv[0]);
 
  next:
     argc--;

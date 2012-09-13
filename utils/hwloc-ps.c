@@ -89,27 +89,30 @@ int main(int argc, char *argv[])
     callname = argv[0];
   else
     callname++;
+  /* skip argv[0], handle options */
+  argc--;
+  argv++;
 
-  while (argc >= 2) {
+  while (argc >= 1) {
     opt = 0;
-    if (!strcmp(argv[1], "-a"))
+    if (!strcmp(argv[0], "-a"))
       show_all = 1;
-    else if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--logical")) {
+    else if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
       logical = 1;
-    } else if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--physical")) {
+    } else if (!strcmp(argv[0], "-p") || !strcmp(argv[0], "--physical")) {
       logical = 0;
-    } else if (!strcmp(argv[1], "-c") || !strcmp(argv[1], "--cpuset")) {
+    } else if (!strcmp(argv[0], "-c") || !strcmp(argv[0], "--cpuset")) {
       show_cpuset = 1;
-    } else if (!strcmp(argv[1], "-t") || !strcmp(argv[1], "--threads")) {
+    } else if (!strcmp(argv[0], "-t") || !strcmp(argv[0], "--threads")) {
 #ifdef HWLOC_LINUX_SYS
       show_threads = 1;
 #else
       fprintf (stderr, "Listing threads is currently only supported on Linux\n");
 #endif
-    } else if (!strcmp (argv[1], "--whole-system")) {
+    } else if (!strcmp (argv[0], "--whole-system")) {
       flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
     } else {
-      fprintf (stderr, "Unrecognized option: %s\n", argv[1]);
+      fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
       usage (callname, stderr);
       exit(EXIT_FAILURE);
     }

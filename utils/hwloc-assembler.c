@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
     callname = argv[0];
   else
     callname++;
+  /* skip argv[0], handle options */
   argc--;
   argv++;
 

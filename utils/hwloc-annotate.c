@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
 	putenv("HWLOC_XML_VERBOSE=1");
 
 	callname = argv[0];
+	/* skip argv[0], handle options */
 	argc--;
 	argv++;
 

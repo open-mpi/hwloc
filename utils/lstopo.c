@@ -365,86 +365,89 @@ main (int argc, char *argv[])
     callname = argv[0];
   else
     callname++;
+  /* skip argv[0], handle options */
+  argc--;
+  argv++;
 
   err = hwloc_topology_init (&topology);
   if (err)
     return EXIT_FAILURE;
 
-  while (argc >= 2)
+  while (argc >= 1)
     {
       opt = 0;
-      if (!strcmp (argv[1], "-v") || !strcmp (argv[1], "--verbose")) {
+      if (!strcmp (argv[0], "-v") || !strcmp (argv[0], "--verbose")) {
 	verbose_mode++;
-      } else if (!strcmp (argv[1], "-s") || !strcmp (argv[1], "--silent")) {
+      } else if (!strcmp (argv[0], "-s") || !strcmp (argv[0], "--silent")) {
 	verbose_mode--;
-      } else if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
+      } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
-      } else if (!strcmp (argv[1], "-l") || !strcmp (argv[1], "--logical"))
+      } else if (!strcmp (argv[0], "-l") || !strcmp (argv[0], "--logical"))
 	logical = 1;
-      else if (!strcmp (argv[1], "-p") || !strcmp (argv[1], "--physical"))
+      else if (!strcmp (argv[0], "-p") || !strcmp (argv[0], "--physical"))
 	logical = 0;
-      else if (!strcmp (argv[1], "-c") || !strcmp (argv[1], "--cpuset"))
+      else if (!strcmp (argv[0], "-c") || !strcmp (argv[0], "--cpuset"))
 	show_cpuset = 1;
-      else if (!strcmp (argv[1], "-C") || !strcmp (argv[1], "--cpuset-only"))
+      else if (!strcmp (argv[0], "-C") || !strcmp (argv[0], "--cpuset-only"))
 	show_cpuset = 2;
-      else if (!strcmp (argv[1], "--taskset")) {
+      else if (!strcmp (argv[0], "--taskset")) {
 	taskset = 1;
 	if (!show_cpuset)
 	  show_cpuset = 1;
-      } else if (!strcmp (argv[1], "--only")) {
-	if (argc <= 2) {
+      } else if (!strcmp (argv[0], "--only")) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-        show_only = hwloc_obj_type_of_string(argv[2]);
+        show_only = hwloc_obj_type_of_string(argv[1]);
 	opt = 1;
       }
-      else if (!strcmp (argv[1], "--ignore")) {
-	if (argc <= 2) {
+      else if (!strcmp (argv[0], "--ignore")) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-        hwloc_topology_ignore_type(topology, hwloc_obj_type_of_string(argv[2]));
+        hwloc_topology_ignore_type(topology, hwloc_obj_type_of_string(argv[1]));
 	opt = 1;
       }
-      else if (!strcmp (argv[1], "--no-caches"))
+      else if (!strcmp (argv[0], "--no-caches"))
 	ignorecache = 2;
-      else if (!strcmp (argv[1], "--no-useless-caches"))
+      else if (!strcmp (argv[0], "--no-useless-caches"))
 	ignorecache = 1;
-      else if (!strcmp (argv[1], "--no-icaches"))
+      else if (!strcmp (argv[0], "--no-icaches"))
 	flags &= ~HWLOC_TOPOLOGY_FLAG_ICACHES;
-      else if (!strcmp (argv[1], "--whole-system"))
+      else if (!strcmp (argv[0], "--whole-system"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
-      else if (!strcmp (argv[1], "--no-io"))
+      else if (!strcmp (argv[0], "--no-io"))
 	flags &= ~(HWLOC_TOPOLOGY_FLAG_IO_DEVICES | HWLOC_TOPOLOGY_FLAG_IO_BRIDGES);
-      else if (!strcmp (argv[1], "--no-bridges"))
+      else if (!strcmp (argv[0], "--no-bridges"))
 	flags &= ~(HWLOC_TOPOLOGY_FLAG_IO_BRIDGES);
-      else if (!strcmp (argv[1], "--whole-io"))
+      else if (!strcmp (argv[0], "--whole-io"))
 	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_IO;
-      else if (!strcmp (argv[1], "--merge"))
+      else if (!strcmp (argv[0], "--merge"))
 	merge = 1;
-      else if (!strcmp (argv[1], "--thissystem"))
+      else if (!strcmp (argv[0], "--thissystem"))
 	flags |= HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM;
-      else if (!strcmp (argv[1], "--restrict")) {
-	if (argc <= 2) {
+      else if (!strcmp (argv[0], "--restrict")) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	restrictstring = strdup(argv[2]);
+	restrictstring = strdup(argv[1]);
 	opt = 1;
       }
 
-      else if (!strcmp (argv[1], "--horiz"))
+      else if (!strcmp (argv[0], "--horiz"))
 	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  force_orient[i] = LSTOPO_ORIENT_HORIZ;
-      else if (!strcmp (argv[1], "--vert"))
+      else if (!strcmp (argv[0], "--vert"))
 	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  force_orient[i] = LSTOPO_ORIENT_VERT;
-      else if (!strncmp (argv[1], "--horiz=", 8)
-	       || !strncmp (argv[1], "--vert=", 7)) {
-	enum lstopo_orient_e orient = (argv[1][2] == 'h') ? LSTOPO_ORIENT_HORIZ : LSTOPO_ORIENT_VERT;
-	char *tmp = argv[1] + ((argv[1][2] == 'h') ? 8 : 7);
+      else if (!strncmp (argv[0], "--horiz=", 8)
+	       || !strncmp (argv[0], "--vert=", 7)) {
+	enum lstopo_orient_e orient = (argv[0][2] == 'h') ? LSTOPO_ORIENT_HORIZ : LSTOPO_ORIENT_VERT;
+	char *tmp = argv[0] + ((argv[0][2] == 'h') ? 8 : 7);
 	while (tmp) {
 	  char *end = strchr(tmp, ',');
 	  hwloc_obj_type_t type;
@@ -459,56 +462,56 @@ main (int argc, char *argv[])
         }
       }
 
-      else if (!strcmp (argv[1], "--fontsize")) {
-	if (argc <= 2) {
+      else if (!strcmp (argv[0], "--fontsize")) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	fontsize = atoi(argv[2]);
+	fontsize = atoi(argv[1]);
 	opt = 1;
       }
-      else if (!strcmp (argv[1], "--gridsize")) {
-	if (argc <= 2) {
+      else if (!strcmp (argv[0], "--gridsize")) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	gridsize = atoi(argv[2]);
+	gridsize = atoi(argv[1]);
 	opt = 1;
       }
-      else if (!strcmp (argv[1], "--no-legend")) {
+      else if (!strcmp (argv[0], "--no-legend")) {
 	legend = 0;
       }
 
-      else if (hwloc_utils_lookup_input_option(argv+1, argc-1, &opt,
+      else if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					       &input, &input_format,
 					       callname)) {
 	/* nothing to do anymore */
 
-      } else if (!strcmp (argv[1], "--pid")) {
-	if (argc <= 2) {
+      } else if (!strcmp (argv[0], "--pid")) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	pid_number = atoi(argv[2]); opt = 1;
-      } else if (!strcmp (argv[1], "--ps") || !strcmp (argv[1], "--top"))
+	pid_number = atoi(argv[1]); opt = 1;
+      } else if (!strcmp (argv[0], "--ps") || !strcmp (argv[0], "--top"))
         top = 1;
-      else if (!strcmp (argv[1], "--version")) {
+      else if (!strcmp (argv[0], "--version")) {
           printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
-      } else if (!strcmp (argv[1], "--output-format") || !strcmp (argv[1], "--of")) {
-	if (argc <= 2) {
+      } else if (!strcmp (argv[0], "--output-format") || !strcmp (argv[0], "--of")) {
+	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-        output_format = parse_output_format(argv[2], callname);
+        output_format = parse_output_format(argv[1], callname);
         opt = 1;
       } else {
 	if (filename) {
-	  fprintf (stderr, "Unrecognized option: %s\n", argv[1]);
+	  fprintf (stderr, "Unrecognized option: %s\n", argv[0]);
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	} else
-	  filename = argv[1];
+	  filename = argv[0];
       }
       argc -= opt+1;
       argv += opt+1;
