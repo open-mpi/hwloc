@@ -38,6 +38,7 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
   fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
   fprintf(where, "  -f --force     Launch the command even if binding failed\n");
+  fprintf(where, "  -q --quiet     Hide non-fatal error messages\n");
   fprintf(where, "  -v --verbose   Show verbose messages\n");
   fprintf(where, "  --version      Report version and exit\n");
 }
@@ -89,7 +90,11 @@ int main(int argc, char *argv[])
 
     if (*argv[0] == '-') {
       if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
-	verbose = 1;
+	verbose++;
+	goto next;
+      }
+      else if (!strcmp(argv[0], "-q") || !strcmp(argv[0], "--quiet")) {
+	verbose--;
 	goto next;
       }
       else if (!strcmp(argv[0], "--help")) {
@@ -181,7 +186,7 @@ int main(int argc, char *argv[])
 				 working_on_cpubind ? cpubind_set : membind_set,
 				 verbose);
     if (ret < 0) {
-      if (verbose)
+      if (verbose > 0)
 	fprintf(stderr, "assuming the command starts at %s\n", argv[0]);
       break;
     }
@@ -263,11 +268,12 @@ int main(int argc, char *argv[])
 
   if (got_membind) {
     if (hwloc_bitmap_iszero(membind_set)) {
-      fprintf(stderr, "cannot membind to empty set\n");
+      if (verbose >= 0)
+	fprintf(stderr, "cannot membind to empty set\n");
       if (!force)
 	goto failed_binding;
     }
-    if (verbose) {
+    if (verbose > 0) {
       char *s;
       hwloc_bitmap_asprintf(&s, membind_set);
       fprintf(stderr, "binding on memory set %s\n", s);
@@ -279,7 +285,7 @@ int main(int argc, char *argv[])
       ret = hwloc_set_proc_membind(topology, pid, membind_set, membind_policy, membind_flags);
     else
       ret = hwloc_set_membind(topology, membind_set, membind_policy, membind_flags);
-    if (ret) {
+    if (ret && verbose >= 0) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
       char *s;
@@ -289,18 +295,19 @@ int main(int argc, char *argv[])
       else
         fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
-      if (!force)
-	goto failed_binding;
     }
+    if (ret && !force)
+      goto failed_binding;
   }
 
   if (got_cpubind) {
     if (hwloc_bitmap_iszero(cpubind_set)) {
-      fprintf(stderr, "cannot cpubind to empty set\n");
+      if (verbose >= 0)
+	fprintf(stderr, "cannot cpubind to empty set\n");
       if (!force)
 	goto failed_binding;
     }
-    if (verbose) {
+    if (verbose > 0) {
       char *s;
       hwloc_bitmap_asprintf(&s, cpubind_set);
       fprintf(stderr, "binding on cpu set %s\n", s);
@@ -312,7 +319,7 @@ int main(int argc, char *argv[])
       ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, cpubind_flags);
     else
       ret = hwloc_set_cpubind(topology, cpubind_set, cpubind_flags);
-    if (ret) {
+    if (ret && verbose >= 0) {
       int bind_errno = errno;
       const char *errmsg = strerror(bind_errno);
       char *s;
@@ -322,9 +329,9 @@ int main(int argc, char *argv[])
       else
         fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
       free(s);
-      if (!force)
-	goto failed_binding;
     }
+    if (ret && !force)
+      goto failed_binding;
   }
 
   hwloc_bitmap_free(cpubind_set);

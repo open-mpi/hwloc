@@ -28,6 +28,8 @@ Version 1.6.0
     topologies.
   + hwloc-bind now exits with an error if binding fails; the executable
     is not launched unless binding suceeeded or --force was given.
+  + Add --quiet to hwloc-calc and hwloc-bind to hide non-fatal error
+    messages.
   + Fix command-line pid support in windows tools.
   + All programs accept --verbose as a synonym to -v.
 
