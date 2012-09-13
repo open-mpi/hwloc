@@ -149,7 +149,7 @@ to the current list.  If prefixed with "^", the given location will be
 xor'ed.
 .
 .PP
-"all" and "root" are a special locations consisting in the entire
+"all" and "root" are special locations consisting in the entire
 current topology.
 .
 More complex operations may be performed by using
