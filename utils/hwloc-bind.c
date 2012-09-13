@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
   int ret;
   int pid_number = 0;
   hwloc_pid_t pid;
-  char **orig_argv = argv;
+  char *callname;
 
   cpubind_set = hwloc_bitmap_alloc();
   membind_set = hwloc_bitmap_alloc();
@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
 
+  callname = argv[0];
   /* skip argv[0], handle options */
   argv++;
   argc--;
@@ -111,7 +112,7 @@ int main(int argc, char *argv[])
         goto next;
       }
       else if (!strcmp (argv[0], "--version")) {
-          printf("%s %s\n", orig_argv[0], VERSION);
+          printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
       }
       if (!strcmp(argv[0], "-l") || !strcmp(argv[0], "--logical")) {
@@ -310,14 +311,14 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 
   if (0 == argc) {
-    fprintf(stderr, "%s: nothing to do!\n", orig_argv[0]);
+    fprintf(stderr, "%s: nothing to do!\n", callname);
     return EXIT_FAILURE;
   }
 
   ret = execvp(argv[0], argv);
   if (ret) {
       fprintf(stderr, "%s: Failed to launch executable \"%s\"\n", 
-              orig_argv[0], argv[0]);
+              callname, argv[0]);
       perror("execvp");
   }
   return EXIT_FAILURE;

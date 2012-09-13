@@ -191,7 +191,6 @@ int main(int argc, char *argv[])
   unsigned depth;
   hwloc_bitmap_t set;
   int cmdline_args = 0;
-  char **orig_argv = argv;
   hwloc_obj_type_t numberoftype = (hwloc_obj_type_t) -1;
   hwloc_obj_type_t intersecttype = (hwloc_obj_type_t) -1;
   hwloc_obj_type_t *hiertype = NULL;
@@ -206,14 +205,14 @@ int main(int argc, char *argv[])
   putenv("HWLOC_XML_VERBOSE=1");
   putenv("HWLOC_SYNTHETIC_VERBOSE=1");
 
-  callname = argv[0];
-
   set = hwloc_bitmap_alloc();
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES);
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
+
+  callname = argv[0];
 
   while (argc >= 2) {
     if (*argv[1] == '-') {
@@ -319,7 +318,7 @@ int main(int argc, char *argv[])
         goto next;
       }
       if (!strcmp(argv[1], "--version")) {
-        printf("%s %s\n", orig_argv[0], VERSION);
+        printf("%s %s\n", callname, VERSION);
         exit(EXIT_SUCCESS);
       }
       if (!strcmp(argv[1], "-l") || !strcmp(argv[1], "--logical")) {

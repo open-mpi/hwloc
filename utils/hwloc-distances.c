@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
 
   hwloc_topology_init(&topology);
 
-  /* skip argv[0], handle options */
   callname = argv[0];
+  /* skip argv[0], handle options */
   argv++;
   argc--;
 

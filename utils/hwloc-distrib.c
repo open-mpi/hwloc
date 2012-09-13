@@ -45,7 +45,6 @@ int main(int argc, char *argv[])
   int verbose = 0;
   char *restrictstring = NULL;
   hwloc_obj_type_t from_type = (hwloc_obj_type_t) -1, to_type = (hwloc_obj_type_t) -1;
-  char **orig_argv = argv;
   hwloc_topology_t topology;
   int opt;
   int err;
@@ -56,8 +55,8 @@ int main(int argc, char *argv[])
 
   hwloc_topology_init(&topology);
 
-  /* skip argv[0], handle options */
   callname = argv[0];
+  /* skip argv[0], handle options */
   argv++;
   argc--;
 
@@ -143,7 +142,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--version")) {
-          printf("%s %s\n", orig_argv[0], VERSION);
+          printf("%s %s\n", callname, VERSION);
           exit(EXIT_SUCCESS);
       }
 
