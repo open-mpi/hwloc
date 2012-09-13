@@ -27,6 +27,7 @@ Version 1.6.0
   + Add hwloc-annotate program to add string info attributes to XML
     topologies.
   + Fix command-line pid support in windows tools.
+  + All programs accept --verbose as a synonym to -v.
 
 
 Version 1.5.0

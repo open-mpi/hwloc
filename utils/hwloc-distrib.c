@@ -30,7 +30,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --single         Singlify each output to a single CPU\n");
   fprintf(where, "  --taskset        Show taskset-specific cpuset strings\n");
   fprintf(where, "Miscellaneous options:\n");
-  fprintf(where, "  -v               Show verbose messages\n");
+  fprintf(where, "  -v --verbose     Show verbose messages\n");
   fprintf(where, "  --version        Report version and exit\n");
 }
 
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	taskset = 1;
 	goto next;
       }
-      if (!strcmp(argv[0], "-v")) {
+      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
 	verbose = 1;
 	goto next;
       }

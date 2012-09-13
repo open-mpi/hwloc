@@ -26,7 +26,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
   hwloc_utils_input_format_usage(where, 0);
   fprintf(where, "Miscellaneous options:\n");
-  fprintf(where, "  -v               Show verbose messages\n");
+  fprintf(where, "  -v --verbose     Show verbose messages\n");
   fprintf(where, "  --version        Report version and exit\n");
 }
 
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 	usage(callname, stdout);
 	return EXIT_SUCCESS;
       }
-      if (!strcmp(argv[0], "-v")) {
+      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
 	verbose++;
 	goto next;
       }

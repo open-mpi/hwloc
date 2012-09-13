@@ -37,7 +37,7 @@ void usage(const char *name, FILE *where)
 		 "                 Retrieve the last processors where the current process ran\n");
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
   fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
-  fprintf(where, "  -v             Show verbose messages\n");
+  fprintf(where, "  -v --verbose   Show verbose messages\n");
   fprintf(where, "  --version      Report version and exit\n");
 }
 
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     opt = 0;
 
     if (*argv[0] == '-') {
-      if (!strcmp(argv[0], "-v")) {
+      if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
 	verbose = 1;
 	goto next;
       }
