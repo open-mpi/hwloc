@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011 inria.  All rights reserved.
+ * Copyright © 2011-2012 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
