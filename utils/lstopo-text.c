@@ -164,7 +164,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
     fprintf(output, "\n");
   }
 
-  if (verbose_mode > 1 || !verbose_mode) {
+  if ((verbose_mode > 1 || !verbose_mode) && show_only == (hwloc_obj_type_t)-1) {
     unsigned depth, nbobjs;
     for (depth = 0; depth < topodepth; depth++) {
       hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, 0);
@@ -189,7 +189,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
 	       HWLOC_TYPE_DEPTH_OS_DEVICE, nbobjs, "OS Device", HWLOC_OBJ_OS_DEVICE);
   }
 
-  if (verbose_mode > 1) {
+  if (verbose_mode > 1 && show_only == (hwloc_obj_type_t)-1) {
     const struct hwloc_distances_s * distances;
     unsigned depth;
 
@@ -205,7 +205,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
     }
   }
 
-  if (verbose_mode > 1) {
+  if (verbose_mode > 1 && show_only == (hwloc_obj_type_t)-1) {
     hwloc_const_bitmap_t complete = hwloc_topology_get_complete_cpuset(topology);
     hwloc_const_bitmap_t topo = hwloc_topology_get_topology_cpuset(topology);
     hwloc_const_bitmap_t online = hwloc_topology_get_online_cpuset(topology);
