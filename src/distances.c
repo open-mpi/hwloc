@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2011 inria.  All rights reserved.
+ * Copyright © 2010-2012 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -221,7 +221,7 @@ static void hwloc_distances__set_from_string(struct hwloc_topology *topology,
   } else {
     /* parse a comma separated list of distances */
     for(i=0; i<nbobjs*nbobjs; i++) {
-      distances[i] = atof(tmp);
+      distances[i] = (float) atof(tmp);
       next = strchr(tmp, ',');
       if (next) {
         tmp = next+1;
@@ -931,7 +931,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
   unsigned nbobjs;
   struct hwloc_os_distances_s * osdist;
   char *env;
-  float accuracies[5] = { 0.0, 0.01, 0.02, 0.05, 0.1 };
+  float accuracies[5] = { 0.0f, 0.01f, 0.02f, 0.05f, 0.1f };
   unsigned nbaccuracies = 5;
   hwloc_obj_t group_obj;
   int verbose = 0;
@@ -954,7 +954,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
   } else if (strcmp(env, "try")) {
     /* use the given value */
     nbaccuracies = 1;
-    accuracies[0] = atof(env);
+    accuracies[0] = (float) atof(env);
   } /* otherwise try all values */
 
 #ifdef HWLOC_DEBUG

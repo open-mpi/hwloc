@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -251,7 +251,9 @@ RECURSE_BEGIN(obj, border) \
     } else { \
       unsigned found = 0; \
       /* Try to find a fitting rectangle */ \
-      for (rows = floor(sqrt(numsubobjs)); rows >= ceil(pow(numsubobjs,0.33)) && rows > 1; rows--) { \
+      for (rows = (unsigned) floor(sqrt(numsubobjs)); \
+	   rows >= (unsigned) ceil(pow(numsubobjs,0.33)) && rows > 1; \
+	   rows--) { \
         columns = numsubobjs / rows; \
         if (columns > 1 && columns * rows == numsubobjs) { \
           found = 1; \
@@ -266,7 +268,7 @@ RECURSE_BEGIN(obj, border) \
         float idealtotheight = (float) sqrt(area/RATIO); \
         float under_ratio, over_ratio; \
         /* approximation of number of rows */ \
-        rows = idealtotheight / obj_avgheight; \
+        rows = (unsigned) (idealtotheight / obj_avgheight); \
         columns = rows ? (numsubobjs + rows - 1) / rows : 1; \
         /* Ratio obtained by underestimation */ \
         under_ratio = (float) (columns * obj_avgwidth) / (rows * obj_avgheight); \
