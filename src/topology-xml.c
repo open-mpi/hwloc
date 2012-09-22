@@ -218,7 +218,7 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
     switch (obj->type) {
     case HWLOC_OBJ_PCI_DEVICE:
     case HWLOC_OBJ_BRIDGE: {
-      obj->attr->pcidev.linkspeed = atof(value);
+      obj->attr->pcidev.linkspeed = (float) atof(value);
       break;
     }
     default:
