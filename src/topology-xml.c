@@ -60,6 +60,7 @@ void
 hwloc_backend_xml_exit(struct hwloc_topology *topology)
 {
   assert(topology->backend_type == HWLOC_BACKEND_XML);
+  topology->is_thissystem = 1;
   topology->backend_params.xml.backend_exit(topology);
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
