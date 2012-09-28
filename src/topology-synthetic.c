@@ -219,6 +219,7 @@ void
 hwloc_backend_synthetic_exit(struct hwloc_topology *topology)
 {
   assert(topology->backend_type == HWLOC_BACKEND_SYNTHETIC);
+  topology->is_thissystem = 1;
   free(topology->backend_params.synthetic.string);
   topology->backend_type = HWLOC_BACKEND_NONE;
 }

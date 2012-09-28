@@ -2625,6 +2625,7 @@ hwloc_backend_custom_exit(struct hwloc_topology *topology)
 {
   assert(topology->backend_type == HWLOC_BACKEND_CUSTOM);
 
+  topology->is_thissystem = 1;
   hwloc_topology_clear(topology);
   hwloc_distances_clear(topology);
   hwloc_topology_setup_defaults(topology);
