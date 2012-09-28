@@ -28,6 +28,7 @@ int main(void)
   printf("trying to export topology to XML buffer and file for later...\n");
   hwloc_topology_init(&topology1);
   hwloc_topology_load(topology1);
+  assert(hwloc_topology_is_thissystem(topology1));
   if (hwloc_topology_export_xmlbuffer(topology1, &xmlbuf, &xmlbuflen) < 0)
     printf("XML buffer export failed (%s), ignoring\n", strerror(errno));
   else
@@ -60,24 +61,29 @@ int main(void)
     printf("switching to xml and loading...\n");
     assert(!hwloc_topology_set_xml(topology2, xmlfile));
     hwloc_topology_load(topology2);
+    assert(!hwloc_topology_is_thissystem(topology2));
   }
   if (xmlbufok) {
     printf("switching to xmlbuffer and loading...\n");
     assert(!hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen));
     hwloc_topology_load(topology2);
+    assert(!hwloc_topology_is_thissystem(topology2));
   }
   printf("switching to synthetic and loading...\n");
   hwloc_topology_set_synthetic(topology2, "machine:2 node:3 cache:2 pu:4");
   hwloc_topology_load(topology2);
+  assert(!hwloc_topology_is_thissystem(topology2));
   printf("switching to custom and loading...\n");
   hwloc_topology_set_custom(topology2);
   sw = hwloc_custom_insert_group_object_by_parent(topology2, hwloc_get_root_obj(topology2), 0);
   assert(sw);
   hwloc_custom_insert_topology(topology2, sw, topology1, NULL);
   hwloc_topology_load(topology2);
+  assert(!hwloc_topology_is_thissystem(topology2));
   printf("switching sysfs fsroot and loading...\n");
   hwloc_topology_set_fsroot(topology2, "/");
   hwloc_topology_load(topology2);
+  assert(hwloc_topology_is_thissystem(topology2));
 
   printf("switching to synthetic...\n");
   hwloc_topology_set_synthetic(topology2, "machine:2 node:3 cache:2 pu:4");
