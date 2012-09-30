@@ -1423,6 +1423,7 @@ hwloc_backend_linuxfs_exit(struct hwloc_topology *topology)
   free(topology->backend_params.linuxfs.root_path);
   topology->backend_params.linuxfs.root_path = NULL;
 #endif
+  topology->is_thissystem = 1;
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
