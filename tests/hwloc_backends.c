@@ -54,7 +54,9 @@ int main(void)
   hwloc_topology_set_synthetic(topology2, "machine:2 node:3 cache:2 pu:4");
   printf("switching to custom...\n");
   hwloc_topology_set_custom(topology2);
-  printf("switching sysfs fsroot...\n");
+  printf("switching sysfs fsroot to // ...\n");
+  hwloc_topology_set_fsroot(topology2, "//"); /* valid path that won't be recognized as '/' */
+  printf("switching sysfs fsroot to / ...\n");
   hwloc_topology_set_fsroot(topology2, "/");
 
   if (xmlfileok) {
@@ -80,7 +82,11 @@ int main(void)
   hwloc_custom_insert_topology(topology2, sw, topology1, NULL);
   hwloc_topology_load(topology2);
   assert(!hwloc_topology_is_thissystem(topology2));
-  printf("switching sysfs fsroot and loading...\n");
+  printf("switching sysfs fsroot to // and loading...\n");
+  hwloc_topology_set_fsroot(topology2, "//"); /* valid path that won't be recognized as '/' */
+  hwloc_topology_load(topology2);
+  assert(!hwloc_topology_is_thissystem(topology2));
+  printf("switching sysfs fsroot to / and loading...\n");
   hwloc_topology_set_fsroot(topology2, "/");
   hwloc_topology_load(topology2);
   assert(hwloc_topology_is_thissystem(topology2));
