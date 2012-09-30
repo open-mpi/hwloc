@@ -24,6 +24,7 @@ int main(void)
   char xmlfile[] = "hwloc_backends.tmpxml.XXXXXX";
   int xmlbufok = 0, xmlfileok = 0;
   hwloc_obj_t sw;
+  int err;
 
   printf("trying to export topology to XML buffer and file for later...\n");
   hwloc_topology_init(&topology1);
@@ -83,13 +84,13 @@ int main(void)
   hwloc_topology_load(topology2);
   assert(!hwloc_topology_is_thissystem(topology2));
   printf("switching sysfs fsroot to // and loading...\n");
-  hwloc_topology_set_fsroot(topology2, "//"); /* valid path that won't be recognized as '/' */
+  err = hwloc_topology_set_fsroot(topology2, "//"); /* valid path that won't be recognized as '/' */
   hwloc_topology_load(topology2);
-  assert(!hwloc_topology_is_thissystem(topology2));
+  assert(!hwloc_topology_is_thissystem(topology2) == !err); /* thissystem only changed if set_fsroot worked (i.e. on Linux) */
   printf("switching sysfs fsroot to / and loading...\n");
   hwloc_topology_set_fsroot(topology2, "/");
   hwloc_topology_load(topology2);
-  assert(hwloc_topology_is_thissystem(topology2));
+  assert(hwloc_topology_is_thissystem(topology2)); /* on Linux, '/' is recognized as thissystem. on !Linux, set_fsroot() failed and we went back to the default backend */
 
   printf("switching to synthetic...\n");
   hwloc_topology_set_synthetic(topology2, "machine:2 node:3 cache:2 pu:4");
