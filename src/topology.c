@@ -2392,9 +2392,6 @@ hwloc_discover(struct hwloc_topology *topology)
    * hooks.
    */
 
-  if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
-    topology->is_thissystem = 1;
-
   if (topology->is_thissystem) {
 #    ifdef HWLOC_LINUX_SYS
     hwloc_set_linuxfs_hooks(topology);
@@ -2842,6 +2839,15 @@ hwloc_topology_load (struct hwloc_topology *topology)
     topology->is_loaded = 0;
   }
 
+  /* Apply is_thissystem topology flag before we enforce envvar backends.
+   * If the application changed the backend with set_foo(),
+   * it may use set_flags() update the is_thissystem flag here.
+   * If it changes the backend with environment variables below,
+   * it may use HWLOC_THISSYSTEM envvar below as well.
+   */
+  if (topology->flags & HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM)
+    topology->is_thissystem = 1;
+
   /* enforce backend anyway if a FORCE variable was given */
 #ifdef HWLOC_LINUX_SYS
   {
@@ -2874,11 +2880,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
       hwloc_backend_xml_init(topology, xmlpath_env, NULL, 0);
   }
 
-  /* always apply non-FORCE THISSYSTEM since it was explicitly designed to override setups from other backends */
-  local_env = getenv("HWLOC_THISSYSTEM");
-  if (local_env)
-    topology->is_thissystem = atoi(local_env);
-
   /* if we haven't chosen the backend, set the OS-specific one if needed */
   if (topology->backend_type == HWLOC_BACKEND_NONE) {
 #ifdef HWLOC_LINUX_SYS
@@ -2886,6 +2887,10 @@ hwloc_topology_load (struct hwloc_topology *topology)
       return -1;
 #endif
   }
+
+  local_env = getenv("HWLOC_THISSYSTEM");
+  if (local_env)
+    topology->is_thissystem = atoi(local_env);
 
   /* get distance matrix from the environment are store them (as indexes) in the topology.
    * indexes will be converted into objects later once the tree will be filled
@@ -2896,11 +2901,6 @@ hwloc_topology_load (struct hwloc_topology *topology)
   err = hwloc_discover(topology);
   if (err < 0)
     return err;
-
-  /* enforce THISSYSTEM if given in a FORCE variable */
-  local_env = getenv("HWLOC_FORCE_THISSYSTEM");
-  if (local_env)
-    topology->is_thissystem = atoi(local_env);
 
 #ifndef HWLOC_DEBUG
   if (getenv("HWLOC_DEBUG_CHECK"))

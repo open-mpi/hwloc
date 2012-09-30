@@ -20,6 +20,8 @@ in v0.9.1).
 Version 1.5.1
 -------------
 * Do not disable I/O devices or instruction caches in hwloc-assembler output.
+* Fix some corner cases in the management the thissystem flag with respect
+  to topology flags and environment variables.
 
 
 Version 1.5.0
