@@ -68,7 +68,11 @@ static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *e
   "mov %%ebx,%1\n\t"
   "mov %2,%%rbx\n\t"
 #endif
-  : "+a" (*eax), "=r" (*ebx), "=r"(sav_ebx), "+c" (*ecx), "=d" (*edx));
+  : "+a" (*eax), "=r" (*ebx),
+#ifdef HWLOC_X86_64_ARCH
+    "=r"(sav_ebx),
+#endif
+    "+c" (*ecx), "=d" (*edx));
 }
 
 #endif /* HWLOC_PRIVATE_CPUID_H */
