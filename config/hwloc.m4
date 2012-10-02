@@ -230,7 +230,7 @@ EOF])
     #
     AC_MSG_CHECKING([which CPU support to include])
     case ${target} in
-      i*86-*-*|x86_64-*-*)
+      i*86-*-*|x86_64-*-*|amd64-*-*)
         case ${ac_cv_sizeof_void_p} in
           4)
             AC_DEFINE(HWLOC_X86_32_ARCH, 1, [Define to 1 on x86_32])
