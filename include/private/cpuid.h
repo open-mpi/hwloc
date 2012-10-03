@@ -53,26 +53,24 @@ static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *e
 {
 #ifdef HWLOC_X86_64_ARCH
   unsigned long sav_ebx;
-#endif
   asm(
-#ifdef HWLOC_X86_32_ARCH
-  "push %%ebx\n\t"
-#else
   "mov %%rbx,%2\n\t"
-#endif
   "cpuid\n\t"
-#ifdef HWLOC_X86_32_ARCH
-  "mov %%ebx,%1\n\t"
-  "pop %%ebx\n\t"
-#else
   "mov %%ebx,%1\n\t"
   "mov %2,%%rbx\n\t"
-#endif
-  : "+a" (*eax), "=r" (*ebx),
-#ifdef HWLOC_X86_64_ARCH
-    "=r"(sav_ebx),
-#endif
+  : "+a" (*eax), "=m" (*ebx), "=r"(sav_ebx),
     "+c" (*ecx), "=d" (*edx));
+#elif defined(HWLOC_X86_32_ARCH)
+  asm(
+  "push %%ebx\n\t"
+  "cpuid\n\t"
+  "mov %%ebx,%1\n\t"
+  "pop %%ebx\n\t"
+  : "+a" (*eax), "=m" (*ebx),
+    "+c" (*ecx), "=d" (*edx));
+#else
+#error unknown architecture
+#endif
 }
 
 #endif /* HWLOC_PRIVATE_CPUID_H */
