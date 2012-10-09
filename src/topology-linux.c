@@ -3544,6 +3544,7 @@ hwloc_linux_lookup_host_block_class(struct hwloc_topology *topology, struct hwlo
 {
   DIR *hostdir, *portdir, *targetdir;
   struct dirent *hostdirent, *portdirent, *targetdirent;
+  size_t hostdlen, portdlen, targetdlen;
   int dummy;
   hostdir = opendir(path);
   if (!hostdir)
@@ -3554,7 +3555,7 @@ hwloc_linux_lookup_host_block_class(struct hwloc_topology *topology, struct hwlo
       /* found host%d/port-%d:%d */
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], hostdirent->d_name);
-      pathlen += 1+strlen(hostdirent->d_name);
+      pathlen += hostdlen = 1+strlen(hostdirent->d_name);
       portdir = opendir(path);
       if (!portdir)
 	continue;
@@ -3563,23 +3564,23 @@ hwloc_linux_lookup_host_block_class(struct hwloc_topology *topology, struct hwlo
 	  /* found host%d/port-%d:%d/end_device-%d:%d */
 	  path[pathlen] = '/';
 	  strcpy(&path[pathlen+1], portdirent->d_name);
-	  pathlen += 1+strlen(portdirent->d_name);
+	  pathlen += portdlen = 1+strlen(portdirent->d_name);
 	  hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
 	  /* restore parent path */
-	  pathlen -= 1+strlen(portdirent->d_name);
+	  pathlen -= portdlen;
 	  path[pathlen] = '\0';
 	}
       }
       closedir(portdir);
       /* restore parent path */
-      pathlen -= 1+strlen(hostdirent->d_name);
+      pathlen -= hostdlen;
       path[pathlen] = '\0';
       continue;
     } else if (sscanf(hostdirent->d_name, "target%d:%d:%d", &dummy, &dummy, &dummy) == 3) {
       /* found host%d/target%d:%d:%d */
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], hostdirent->d_name);
-      pathlen += 1+strlen(hostdirent->d_name);
+      pathlen += hostdlen = 1+strlen(hostdirent->d_name);
       targetdir = opendir(path);
       if (!targetdir)
 	continue;
@@ -3589,16 +3590,16 @@ hwloc_linux_lookup_host_block_class(struct hwloc_topology *topology, struct hwlo
 	/* found host%d/target%d:%d:%d/%d:%d:%d:%d */
 	path[pathlen] = '/';
 	strcpy(&path[pathlen+1], targetdirent->d_name);
-	pathlen += 1+strlen(targetdirent->d_name);
+	pathlen += targetdlen = 1+strlen(targetdirent->d_name);
 	/* lookup block class for real */
 	hwloc_linux_class_readdir(topology, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", NULL);
 	/* restore parent path */
-	pathlen -= 1+strlen(targetdirent->d_name);
+	pathlen -= targetdlen;
 	path[pathlen] = '\0';
       }
       closedir(targetdir);
       /* restore parent path */
-      pathlen -= 1+strlen(hostdirent->d_name);
+      pathlen -= hostdlen;
       path[pathlen] = '\0';
     }
   }
@@ -3611,6 +3612,7 @@ hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj
   size_t pathlen;
   DIR *devicedir, *hostdir;
   struct dirent *devicedirent, *hostdirent;
+  size_t devicedlen, hostdlen;
   char path[256];
   int dummy;
 
@@ -3625,7 +3627,7 @@ hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj
       /* found ide%d */
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += 1+strlen(devicedirent->d_name);
+      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
       hostdir = opendir(path);
       if (!hostdir)
 	continue;
@@ -3634,31 +3636,31 @@ hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj
 	  /* found ide%d/%d.%d */
 	  path[pathlen] = '/';
 	  strcpy(&path[pathlen+1], hostdirent->d_name);
-	  pathlen += 1+strlen(hostdirent->d_name);
+	  pathlen += hostdlen = 1+strlen(hostdirent->d_name);
 	  /* lookup block class for real */
 	  hwloc_linux_class_readdir(topology, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", NULL);
 	  /* restore parent path */
-	  pathlen -= 1+strlen(hostdirent->d_name);
+	  pathlen -= hostdlen;
 	  path[pathlen] = '\0';
 	}
       }
       /* restore parent path */
-      pathlen -= 1+strlen(devicedirent->d_name);
+      pathlen -= devicedlen;
       path[pathlen] = '\0';
     } else if (sscanf(devicedirent->d_name, "host%d", &dummy) == 1) {
       /* found host%d */
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += 1+strlen(devicedirent->d_name);
+      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
       hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
       /* restore parent path */
-      pathlen -= 1+strlen(devicedirent->d_name);
+      pathlen -= devicedlen;
       path[pathlen] = '\0';
     } else if (sscanf(devicedirent->d_name, "ata%d", &dummy) == 1) {
       /* found ata%d */
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += 1+strlen(devicedirent->d_name);
+      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
       hostdir = opendir(path);
       if (!hostdir)
 	continue;
@@ -3667,16 +3669,16 @@ hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj
 	  /* found ata%d/host%d */
 	  path[pathlen] = '/';
 	  strcpy(&path[pathlen+1], hostdirent->d_name);
-	  pathlen += 1+strlen(hostdirent->d_name);
+	  pathlen += hostdlen = 1+strlen(hostdirent->d_name);
 	  /* lookup block class for real */
           hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
 	  /* restore parent path */
-	  pathlen -= 1+strlen(hostdirent->d_name);
+	  pathlen -= hostdlen;
 	  path[pathlen] = '\0';
 	}
       }
       /* restore parent path */
-      pathlen -= 1+strlen(devicedirent->d_name);
+      pathlen -= devicedlen;
       path[pathlen] = '\0';
     }
   }
