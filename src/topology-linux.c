@@ -3654,6 +3654,30 @@ hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj
       /* restore parent path */
       pathlen -= 1+strlen(devicedirent->d_name);
       path[pathlen] = '\0';
+    } else if (sscanf(devicedirent->d_name, "ata%d", &dummy) == 1) {
+      /* found ata%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], devicedirent->d_name);
+      pathlen += 1+strlen(devicedirent->d_name);
+      hostdir = opendir(path);
+      if (!hostdir)
+	continue;
+      while ((hostdirent = readdir(hostdir)) != NULL) {
+	if (sscanf(hostdirent->d_name, "host%d", &dummy) == 1) {
+	  /* found ata%d/host%d */
+	  path[pathlen] = '/';
+	  strcpy(&path[pathlen+1], hostdirent->d_name);
+	  pathlen += 1+strlen(hostdirent->d_name);
+	  /* lookup block class for real */
+          hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
+	  /* restore parent path */
+	  pathlen -= 1+strlen(hostdirent->d_name);
+	  path[pathlen] = '\0';
+	}
+      }
+      /* restore parent path */
+      pathlen -= 1+strlen(devicedirent->d_name);
+      path[pathlen] = '\0';
     }
   }
   closedir(devicedir);
