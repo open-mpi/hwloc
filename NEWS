@@ -19,6 +19,10 @@ in v0.9.1).
 
 Version 1.5.1
 -------------
+* Properly detect block OS devices on Linux kernel 3.3 and later.
+  Thanks to Guy Streeter for reporting the problem and testing the fix.
+* Make sure we do not miss some block OS devices on old Linux kernels
+  when a single PCI device has multiple IDE hosts/devices behind it.
 * Do not disable I/O devices or instruction caches in hwloc-assembler output.
 * Fix some corner cases in the management the thissystem flag with respect
   to topology flags and environment variables.
