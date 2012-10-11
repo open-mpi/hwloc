@@ -58,16 +58,16 @@ static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *e
   "cpuid\n\t"
   "mov %%ebx,%1\n\t"
   "mov %2,%%rbx\n\t"
-  : "+a" (*eax), "=m" (*ebx), "=r"(sav_ebx),
-    "+c" (*ecx), "=d" (*edx));
+  : "+a" (*eax), "=m" (*ebx), "&=r"(sav_ebx),
+    "+c" (*ecx), "&=d" (*edx));
 #elif defined(HWLOC_X86_32_ARCH)
   asm(
   "push %%ebx\n\t"
   "cpuid\n\t"
   "mov %%ebx,%1\n\t"
   "pop %%ebx\n\t"
-  : "+a" (*eax), "=m" (*ebx),
-    "+c" (*ecx), "=d" (*edx));
+  : "+a" (*eax), "&=m" (*ebx),
+    "+c" (*ecx), "&=d" (*edx));
 #else
 #error unknown architecture
 #endif
