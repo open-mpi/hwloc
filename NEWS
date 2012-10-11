@@ -19,13 +19,16 @@ in v0.9.1).
 
 Version 1.5.1
 -------------
-* Properly detect block OS devices on Linux kernel 3.3 and later.
+* Fix block OS device detection on Linux kernel 3.3 and later.
   Thanks to Guy Streeter for reporting the problem and testing the fix.
+* Fix the cpuid code in the x86 backend (for FreeBSD). Thanks to
+  Sebastian Kuzminsky for reporting problems and testing patches.
+* Fix 64bit detection on FreeBSD.
+* Fix some corner cases in the management of the thissystem flag with
+  respect to topology flags and environment variables.
 * Make sure we do not miss some block OS devices on old Linux kernels
   when a single PCI device has multiple IDE hosts/devices behind it.
 * Do not disable I/O devices or instruction caches in hwloc-assembler output.
-* Fix some corner cases in the management the thissystem flag with respect
-  to topology flags and environment variables.
 
 
 Version 1.5.0
