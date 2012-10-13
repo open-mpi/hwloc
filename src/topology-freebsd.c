@@ -178,13 +178,28 @@ void
 hwloc_look_freebsd(struct hwloc_topology *topology)
 {
   unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
+#ifdef HAVE_CPUSET_SETID
+  cpusetid_t setid;
+#endif
 
 #ifdef HAVE__SC_LARGE_PAGESIZE
   topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
 #endif
 
   hwloc_set_freebsd_hooks(topology);
+
+  /* temporary make all cpus available during x86 discovery */
+#ifdef HAVE_CPUSET_SETID
+  cpuset_getid(CPU_LEVEL_CPUSET, CPU_WHICH_PID, -1, &setid);
+  cpuset_setid(CPU_WHICH_PID, -1, 0);
+#endif
+
   hwloc_look_x86(topology, nbprocs);
+
+  /* restore initial cpuset */
+#ifdef HAVE_CPUSET_SETID
+  cpuset_setid(CPU_WHICH_PID, -1, setid);
+#endif
 
   hwloc_setup_pu_level(topology, nbprocs);
 
