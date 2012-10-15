@@ -3504,6 +3504,102 @@ hwloc_linux_net_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
     }
   }
 }
+
+static void
+hwloc_linux_infiniband_class_fillinfos(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, const char *osdevpath)
+{
+  FILE *fd;
+  char path[256];
+  unsigned i,j;
+
+  snprintf(path, sizeof(path), "%s/node_guid", osdevpath);
+  fd = fopen(path, "r");
+  if (fd) {
+    char guidvalue[20];
+    if (fgets(guidvalue, sizeof(guidvalue), fd)) {
+      size_t len;
+      len = strspn(guidvalue, "0123456789abcdefx:");
+      assert(len == 19);
+      guidvalue[len] = '\0';
+      hwloc_obj_add_info(obj, "NodeGUID", guidvalue);
+    }
+    fclose(fd);
+  }
+
+  snprintf(path, sizeof(path), "%s/sys_image_guid", osdevpath);
+  fd = fopen(path, "r");
+  if (fd) {
+    char guidvalue[20];
+    if (fgets(guidvalue, sizeof(guidvalue), fd)) {
+      size_t len;
+      len = strspn(guidvalue, "0123456789abcdefx:");
+      assert(len == 19);
+      guidvalue[len] = '\0';
+      hwloc_obj_add_info(obj, "SysImageGUID", guidvalue);
+    }
+    fclose(fd);
+  }
+
+  for(i=1; ; i++) {
+    snprintf(path, sizeof(path), "%s/ports/%u/lid", osdevpath, i);
+    fd = fopen(path, "r");
+    if (fd) {
+      char lidvalue[11];
+      if (fgets(lidvalue, sizeof(lidvalue), fd)) {
+	char lidname[32];
+	size_t len;
+	len = strspn(lidvalue, "0123456789abcdefx");
+	lidvalue[len] = '\0';
+	snprintf(lidname, sizeof(lidname), "Port%uLID", i);
+	hwloc_obj_add_info(obj, lidname, lidvalue);
+      }
+      fclose(fd);
+    } else {
+      /* no such port */
+      break;
+    }
+
+    snprintf(path, sizeof(path), "%s/ports/%u/lid_mask_count", osdevpath, i);
+    fd = fopen(path, "r");
+    if (fd) {
+      char lidvalue[11];
+      if (fgets(lidvalue, sizeof(lidvalue), fd)) {
+	char lidname[32];
+	size_t len;
+	len = strspn(lidvalue, "0123456789");
+	lidvalue[len] = '\0';
+	snprintf(lidname, sizeof(lidname), "Port%uLMC", i);
+	hwloc_obj_add_info(obj, lidname, lidvalue);
+      }
+      fclose(fd);
+    }
+
+    for(j=0; ; j++) {
+      snprintf(path, sizeof(path), "%s/ports/%u/gids/%u", osdevpath, i, j);
+      fd = fopen(path, "r");
+      if (fd) {
+	char gidvalue[40];
+	if (fgets(gidvalue, sizeof(gidvalue), fd)) {
+	  char gidname[32];
+	  size_t len;
+	  len = strspn(gidvalue, "0123456789abcdefx:");
+	  assert(len == 39);
+	  gidvalue[len] = '\0';
+	  if (strncmp(gidvalue+20, "0000:0000:0000:0000", 19)) {
+	    /* only keep initialized GIDs */
+	    snprintf(gidname, sizeof(gidname), "Port%uGID%u", i, j);
+	    hwloc_obj_add_info(obj, gidname, gidvalue);
+	  }
+	}
+	fclose(fd);
+      } else {
+	/* no such port */
+	break;
+      }
+    }
+  }
+}
+
 static void
 hwloc_linux_lookup_net_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
@@ -3512,7 +3608,7 @@ hwloc_linux_lookup_net_class(struct hwloc_topology *topology, struct hwloc_obj *
 static void
 hwloc_linux_lookup_openfabrics_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
-  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_OPENFABRICS, "infiniband", NULL);
+  hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_OPENFABRICS, "infiniband", hwloc_linux_infiniband_class_fillinfos);
 }
 static void
 hwloc_linux_lookup_dma_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)

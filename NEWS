@@ -35,6 +35,9 @@ Version 1.6.0
     messages.
   + Fix command-line pid support in windows tools.
   + All programs accept --verbose as a synonym to -v.
+* Misc
+  + Add some GUID- and LID-related info attributes to OpenFabrics
+    OS devices.
 
 
 Version 1.5.0
