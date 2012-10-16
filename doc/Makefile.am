@@ -721,7 +721,10 @@ endif
 #
 
 if HWLOC_BUILD_TESTS
-TESTS = hwloc-hello hwloc-hello-cpp
+TESTS = hwloc-hello
+if HWLOC_HAVE_CXX
+TESTS += hwloc-hello-cpp
+endif HWLOC_HAVE_CXX
 check_PROGRAMS = $(TESTS)
 endif HWLOC_BUILD_TESTS
 
