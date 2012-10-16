@@ -382,6 +382,19 @@ EOF
 
     AC_CHECK_PROGS(BUNZIPP, bunzip2, false)
 
+    AC_MSG_CHECKING(if CXX works)
+    AC_LANG_PUSH([C++])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <iostream>
+using namespace std;
+int foo(void) {
+  cout << "test" << endl;
+  return 0;
+}
+	]])], [hwloc_have_cxx=yes], [hwloc_have_cxx=no])
+    AC_LANG_POP([C++])
+    AC_MSG_RESULT([$hwloc_have_cxx])
+
     _HWLOC_CHECK_DIFF_U
 
     # Only generate these files if we're making the tests

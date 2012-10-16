@@ -722,7 +722,11 @@ $(DOX_A4PDF): $(DOX_TAG) $(DOX_LETTERPDF)
 # Make sure that the documentation example works
 #
 
-TESTS = hwloc-hello hwloc-hello-cpp
+TESTS = hwloc-hello
+if HWLOC_HAVE_CXX
+TESTS += hwloc-hello-cpp
+endif HWLOC_HAVE_CXX
+
 check_PROGRAMS = $(TESTS)
 
 hwloc-hello-cpp.cpp: $(srcdir)/hwloc-hello.c
