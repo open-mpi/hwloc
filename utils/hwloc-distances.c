@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--restrict")) {
-	if (argc <= 2) {
+	if (argc < 2) {
 	  usage (callname, stdout);
 	  exit(EXIT_FAILURE);
 	}

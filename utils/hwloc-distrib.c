@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--ignore")) {
-	if (argc <= 2) {
+	if (argc < 2) {
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--from")) {
-	if (argc <= 2) {
+	if (argc < 2) {
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--to")) {
-	if (argc <= 2) {
+	if (argc < 2) {
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--at")) {
-	if (argc <= 2) {
+	if (argc < 2) {
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--restrict")) {
-	if (argc <= 2) {
+	if (argc < 2) {
 	  usage (callname, stdout);
 	  exit(EXIT_FAILURE);
 	}

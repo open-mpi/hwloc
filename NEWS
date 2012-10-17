@@ -26,6 +26,8 @@ Version 1.5.1
 * Fix 64bit detection on FreeBSD.
 * Fix some corner cases in the management of the thissystem flag with
   respect to topology flags and environment variables.
+* Fix some corner cases in command-line parsing checks in hwloc-distrib
+  and hwloc-distances.
 * Make sure we do not miss some block OS devices on old Linux kernels
   when a single PCI device has multiple IDE hosts/devices behind it.
 * Do not disable I/O devices or instruction caches in hwloc-assembler output.
