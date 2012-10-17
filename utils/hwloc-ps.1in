@@ -41,6 +41,12 @@ thread is bound.
 .TP
 \fB\-\-whole\-system\fR
 Do not consider administration limitations.
+.TP
+\fB\-\-pid\-cmd <cmd>\fR
+Append the output of the given command to each PID line.
+For each displayed process ID, execute the command \fI<cmd> <pid>\fR
+and append \fBthe first line\fR of its output to the regular hwloc-ps
+line.
 .
 .\" **************************
 .\"    Description Section
@@ -95,6 +101,20 @@ it only appears in the thread-aware output:
      4761	PU:0		
      4762	PU:2		
      4765	PU:1		
+
+To display the binding of already running MPI processes (launched by
+Open MPI) and append their MPI rank (in MPI_COMM_WORLD) to each line:
+
+    $ utils/hwloc-ps --pid-cmd myscript
+    29093	L1dCache:0	myprogram	OMPI_COMM_WORLD_RANK=0
+    29094	L1dCache:2	myprogram	OMPI_COMM_WORLD_RANK=1
+    29095	L1dCache:1	myprogram	OMPI_COMM_WORLD_RANK=2
+    29096	L1dCache:3	myprogram	OMPI_COMM_WORLD_RANK=3
+
+where \fBmyscript\fR is a bash script doing:
+
+    #!/bin/sh
+    cat /proc/$1/environ 2>/dev/null | xargs --null --max-args=1 echo | grep OMPI_COMM_WORLD_RANK
 
 .\" **************************
 .\"    See also section

@@ -35,6 +35,9 @@ Version 1.6.0
     messages.
   + Fix command-line pid support in windows tools.
   + All programs accept --verbose as a synonym to -v.
+  + Add --pid-cmd to hwloc-ps to append the output of a command to each
+    PID line. May be used for showing Open MPI process ranks, see the
+    hwloc-ps(1) manpage for details.
 * Misc
   + Add some GUID- and LID-related info attributes to OpenFabrics
     OS devices.
