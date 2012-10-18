@@ -558,7 +558,7 @@ hwloc_nolibxml_export_file(hwloc_topology_t topology, const char *filename)
     }
   }
 
-  ret = fwrite(buffer, bufferlen-1 /* don't write the ending \0 */, 1, file);
+  ret = fwrite(buffer, 1, bufferlen-1 /* don't write the ending \0 */, file);
   if (ret == bufferlen-1) {
     ret = 0;
   } else {
