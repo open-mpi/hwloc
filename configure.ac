@@ -147,6 +147,13 @@ AS_IF([test "$hwloc_mode" = "standalone"],
        HWLOC_SETUP_UTILS
        HWLOC_SETUP_TESTS])
 
+cat <<EOF
+
+###
+### Performing final hwloc configuration
+###
+EOF
+
 # Run the AM_CONDITIONALs
 HWLOC_DO_AM_CONDITIONALS
 
