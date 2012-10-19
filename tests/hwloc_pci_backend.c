@@ -7,11 +7,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <string.h>
-#include <errno.h>
 #include <assert.h>
 
 /* check whether the PCI backend behaves as expected wrt to thissystem, XML, flags, ... */
@@ -45,7 +40,6 @@ int main(void)
   char *xmlbuf;
   int xmlbuflen;
   int nb, nbnormal, nbwhole;
-  int err;
 
   hwloc_topology_init(&topology);
   hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO);
