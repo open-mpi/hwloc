@@ -965,6 +965,10 @@ append_iodevs(hwloc_topology_t topology, hwloc_obj_t obj)
 {
   hwloc_obj_t child, *temp;
 
+  /* make sure we don't have remaining stale pointers from a previous load */
+  obj->next_cousin = NULL;
+  obj->prev_cousin = NULL;
+
   if (obj->type == HWLOC_OBJ_BRIDGE) {
     obj->depth = HWLOC_TYPE_DEPTH_BRIDGE;
     /* Insert in the main bridge list */
