@@ -35,6 +35,7 @@ check_PROGRAMS = hwloc_bitmap \
 	hwloc_synthetic \
 	hwloc_custom \
 	hwloc_backends \
+	hwloc_pci_backend \
 	hwloc_is_thissystem \
 	hwloc_distances \
 	hwloc_groups \
