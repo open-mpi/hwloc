@@ -20,6 +20,7 @@ in v0.9.1).
 Version 1.5.2
 -------------
 * Fix some DIR descriptor leaks on Linux.
+* Fix I/O device lists when some were filtered out after a XML import.
 
 
 Version 1.5.1
