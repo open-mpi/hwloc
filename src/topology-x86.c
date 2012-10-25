@@ -53,6 +53,7 @@ struct procinfo {
   unsigned levels;
   unsigned numcaches;
   struct cacheinfo *cache;
+  char cpumodel[3*4*4+1];
 };
 
 enum cpuid_type {
@@ -129,6 +130,21 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   infos->coreid = (unsigned) -1;
   infos->threadid = (unsigned) -1;
   hwloc_debug("phys %u thread %u\n", infos->socketid, infos->logprocid);
+
+  if (highest_ext_cpuid >= 0x80000004) {
+    unsigned regs[4];
+    regs[0] = 0x80000002;
+    hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+    memcpy(infos->cpumodel, regs, 4*4);
+    regs[0] = 0x80000003;
+    hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+    memcpy(infos->cpumodel + 4*4, regs, 4*4);
+    regs[0] = 0x80000004;
+    hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+    memcpy(infos->cpumodel + 4*4*2, regs, 4*4);
+    infos->cpumodel[3*4*4] = 0;
+  } else
+    infos->cpumodel[0] = 0;
 
   /* Intel doesn't actually provide 0x80000008 information */
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000008) {
@@ -374,6 +390,12 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       }
       socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, socketid);
       socket->cpuset = socket_cpuset;
+      if (infos[i].cpumodel[0]) {
+        const char *c = infos[i].cpumodel;
+        while (*c == ' ')
+          c++;
+        hwloc_obj_add_info(socket, "CPUModel", c);
+      }
       hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
           socketid, socket_cpuset);
       hwloc_insert_object_by_cpuset(topology, socket);
