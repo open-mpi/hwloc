@@ -21,6 +21,8 @@ Version 1.6.0
 * Backends
   + Fix detection on FreeBSD in case of cpuset restriction. Thanks to
     Sebastian Kuzminsky for reporting the problem.
+  + Add CPUModel detection on Darwin and x86/FreeBSD.
+    Thanks to Robin Scher for providing ways to implement this.
 * XML
   + Add hwloc_topology_set_userdata_import/export_callback(),
     hwloc_export_obj_userdata() and _userdata_base64() to let

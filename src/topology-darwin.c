@@ -36,6 +36,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   int64_t l2cachesize;
   int64_t cachelinesize;
   int64_t memsize;
+  char cpumodel[64];
 
   if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
     return;
@@ -43,6 +44,10 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   topology->support.discovery->pu = 1;
 
   hwloc_debug("%u procs\n", nprocs);
+
+  size = sizeof(cpumodel);
+  if (sysctlbyname("machdep.cpu.brand_string", cpumodel, &size, NULL, 0))
+    cpumodel[0] = '\0';
 
   if (!hwloc_get_sysctlbyname("hw.packages", &_npackages) && _npackages > 0) {
     unsigned npackages = _npackages;
@@ -70,6 +75,9 @@ hwloc_look_darwin(struct hwloc_topology *topology)
 
         hwloc_debug_1arg_bitmap("package %u has cpuset %s\n",
                    i, obj->cpuset);
+
+	if (cpumodel[0] != '\0')
+	  hwloc_obj_add_info(obj, "CPUModel", cpumodel);
         hwloc_insert_object_by_cpuset(topology, obj);
       }
 
