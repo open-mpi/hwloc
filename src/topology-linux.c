@@ -346,6 +346,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
     size_t setsize = CPU_ALLOC_SIZE(nr_cpus);
     int err = sched_getaffinity(0, setsize, set); /* always works, unless setsize is too small */
     CPU_FREE(set);
+    nr_cpus = setsize * 8; /* that's the value that was actually tested */
     if (!err)
       /* found it */
       return nr_cpus;
