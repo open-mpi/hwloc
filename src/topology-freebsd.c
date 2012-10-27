@@ -206,7 +206,6 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 #ifdef HAVE_SYSCTL
   hwloc_freebsd_node_meminfo_info(topology);
 #endif
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "FreeBSD");
 }
 
 void

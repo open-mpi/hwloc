@@ -740,12 +740,12 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs __hwloc_at
   hwloc_bitmap_free(orig_cpuset);
 #endif
 
-  hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
-
 #if defined(HWLOC_HAVE_CPUID)
  free:
   if (NULL != infos) {
       free(infos);
   }
 #endif
+
+  hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
 }
