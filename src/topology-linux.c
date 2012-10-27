@@ -333,7 +333,8 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 static int
 hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
 {
-  static int nr_cpus = -1;
+  static int _nr_cpus = -1;
+  int nr_cpus = _nr_cpus;
 
   if (nr_cpus != -1)
     /* already computed */
@@ -349,7 +350,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
     nr_cpus = setsize * 8; /* that's the value that was actually tested */
     if (!err)
       /* found it */
-      return nr_cpus;
+      return _nr_cpus = nr_cpus;
     nr_cpus *= 2;
   }
 }
