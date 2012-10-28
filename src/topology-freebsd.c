@@ -175,15 +175,9 @@ hwloc_freebsd_node_meminfo_info(struct hwloc_topology *topology)
 #endif
 
 void
-hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
-			struct hwloc_topology_support *support __hwloc_attribute_unused);
-
-void
 hwloc_look_freebsd(struct hwloc_topology *topology)
 {
   unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
-
-  hwloc_set_freebsd_hooks(&topology->binding_hooks, &topology->support);
 
   hwloc_look_x86(topology, nbprocs);
 

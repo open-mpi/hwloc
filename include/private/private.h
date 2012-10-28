@@ -185,6 +185,9 @@ extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
 extern void hwloc_connect_children(hwloc_obj_t obj);
 extern int hwloc_connect_levels(hwloc_topology_t topology);
 
+/* set native OS binding hooks */
+extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);
+/* set either native OS binding hooks (if thissystem), or dummy ones */
 extern void hwloc_set_binding_hooks(struct hwloc_topology *topology);
 
 #if defined(HWLOC_LINUX_SYS)

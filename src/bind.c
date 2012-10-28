@@ -690,7 +690,7 @@ static void hwloc_set_dummy_hooks(struct hwloc_binding_hooks *hooks,
   hooks->free_membind = dontfree_membind;
 }
 
-static void
+void
 hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support)
 {
 #    ifdef HWLOC_LINUX_SYS
