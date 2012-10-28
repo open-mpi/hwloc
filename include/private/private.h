@@ -185,6 +185,7 @@ extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
 extern void hwloc_connect_children(hwloc_obj_t obj);
 extern int hwloc_connect_levels(hwloc_topology_t topology);
 
+extern void hwloc_set_binding_hooks(struct hwloc_topology *topology);
 
 #if defined(HWLOC_LINUX_SYS)
 extern void hwloc_look_linuxfs(struct hwloc_topology *topology);

@@ -465,6 +465,8 @@ extern "C" {
 #define hwloc_connect_children HWLOC_NAME(connect_children)
 #define hwloc_connect_levels HWLOC_NAME(connect_levels)
 
+#define hwloc_set_binding_hooks HWLOC_NAME(set_binding_hooks)
+
 #define hwloc_look_linuxfs HWLOC_NAME(look_linuxfs)
 #define hwloc_set_linuxfs_hooks HWLOC_NAME(set_linuxfs_hooks)
 #define hwloc_backend_linuxfs_init HWLOC_NAME(backend_linuxfs_init)
