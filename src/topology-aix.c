@@ -742,47 +742,48 @@ hwloc_look_aix(struct hwloc_topology *topology)
 }
 
 void
-hwloc_set_aix_hooks(struct hwloc_topology *topology)
+hwloc_set_aix_hooks(struct hwloc_binding_hooks *hooks,
+		    struct hwloc_topology_support *support __hwloc_attribute_unused)
 {
-  topology->set_proc_cpubind = hwloc_aix_set_proc_cpubind;
-  topology->get_proc_cpubind = hwloc_aix_get_proc_cpubind;
+  hooks->set_proc_cpubind = hwloc_aix_set_proc_cpubind;
+  hooks->get_proc_cpubind = hwloc_aix_get_proc_cpubind;
 #ifdef R_THREAD
 #ifdef HWLOC_HAVE_PTHREAD_GETTHRDS_NP
-  topology->set_thread_cpubind = hwloc_aix_set_thread_cpubind;
-  topology->get_thread_cpubind = hwloc_aix_get_thread_cpubind;
+  hooks->set_thread_cpubind = hwloc_aix_set_thread_cpubind;
+  hooks->get_thread_cpubind = hwloc_aix_get_thread_cpubind;
 #endif /* HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
 #endif /* R_THREAD */
-  topology->set_thisproc_cpubind = hwloc_aix_set_thisproc_cpubind;
-  topology->get_thisproc_cpubind = hwloc_aix_get_thisproc_cpubind;
+  hooks->set_thisproc_cpubind = hwloc_aix_set_thisproc_cpubind;
+  hooks->get_thisproc_cpubind = hwloc_aix_get_thisproc_cpubind;
 #ifdef R_THREAD
-  topology->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
-  topology->get_thisthread_cpubind = hwloc_aix_get_thisthread_cpubind;
+  hooks->set_thisthread_cpubind = hwloc_aix_set_thisthread_cpubind;
+  hooks->get_thisthread_cpubind = hwloc_aix_get_thisthread_cpubind;
 #endif /* R_THREAD */
-  topology->get_thisthread_last_cpu_location = hwloc_aix_get_thisthread_last_cpu_location;
+  hooks->get_thisthread_last_cpu_location = hwloc_aix_get_thisthread_last_cpu_location;
   /* TODO: get_last_cpu_location: mycpu() only works for the current thread? */
 #ifdef P_DEFAULT
-  topology->set_proc_membind = hwloc_aix_set_proc_membind;
-  topology->get_proc_membind = hwloc_aix_get_proc_membind;
+  hooks->set_proc_membind = hwloc_aix_set_proc_membind;
+  hooks->get_proc_membind = hwloc_aix_get_proc_membind;
 #ifdef R_THREAD
 #if 0 /* def HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
   /* Does it really make sense to set the memory binding of another thread? */
-  topology->set_thread_membind = hwloc_aix_set_thread_membind;
-  topology->get_thread_membind = hwloc_aix_get_thread_membind;
+  hooks->set_thread_membind = hwloc_aix_set_thread_membind;
+  hooks->get_thread_membind = hwloc_aix_get_thread_membind;
 #endif /* HWLOC_HAVE_PTHREAD_GETTHRDS_NP */
 #endif /* R_THREAD */
-  topology->set_thisproc_membind = hwloc_aix_set_thisproc_membind;
-  topology->get_thisproc_membind = hwloc_aix_get_thisproc_membind;
+  hooks->set_thisproc_membind = hwloc_aix_set_thisproc_membind;
+  hooks->get_thisproc_membind = hwloc_aix_get_thisproc_membind;
 #ifdef R_THREAD
-  topology->set_thisthread_membind = hwloc_aix_set_thisthread_membind;
-  topology->get_thisthread_membind = hwloc_aix_get_thisthread_membind;
+  hooks->set_thisthread_membind = hwloc_aix_set_thisthread_membind;
+  hooks->get_thisthread_membind = hwloc_aix_get_thisthread_membind;
 #endif /* R_THREAD */
-  /* topology->set_area_membind = hwloc_aix_set_area_membind; */
+  /* hooks->set_area_membind = hwloc_aix_set_area_membind; */
   /* get_area_membind is not available */
-  topology->alloc_membind = hwloc_aix_alloc_membind;
-  topology->alloc = hwloc_alloc_mmap;
-  topology->free_membind = hwloc_free_mmap;
-  topology->support.membind->firsttouch_membind = 1;
-  topology->support.membind->bind_membind = 1;
-  topology->support.membind->interleave_membind = 1;
+  hooks->alloc_membind = hwloc_aix_alloc_membind;
+  hooks->alloc = hwloc_alloc_mmap;
+  hooks->free_membind = hwloc_free_mmap;
+  support->membind->firsttouch_membind = 1;
+  support->membind->bind_membind = 1;
+  support->membind->interleave_membind = 1;
 #endif /* P_DEFAULT */
 }

@@ -67,16 +67,16 @@ hwloc_set_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t set, int flags
     return -1;
 
   if (flags & HWLOC_CPUBIND_PROCESS) {
-    if (topology->set_thisproc_cpubind)
-      return topology->set_thisproc_cpubind(topology, set, flags);
+    if (topology->binding_hooks.set_thisproc_cpubind)
+      return topology->binding_hooks.set_thisproc_cpubind(topology, set, flags);
   } else if (flags & HWLOC_CPUBIND_THREAD) {
-    if (topology->set_thisthread_cpubind)
-      return topology->set_thisthread_cpubind(topology, set, flags);
+    if (topology->binding_hooks.set_thisthread_cpubind)
+      return topology->binding_hooks.set_thisthread_cpubind(topology, set, flags);
   } else {
-    if (topology->set_thisproc_cpubind)
-      return topology->set_thisproc_cpubind(topology, set, flags);
-    else if (topology->set_thisthread_cpubind)
-      return topology->set_thisthread_cpubind(topology, set, flags);
+    if (topology->binding_hooks.set_thisproc_cpubind)
+      return topology->binding_hooks.set_thisproc_cpubind(topology, set, flags);
+    else if (topology->binding_hooks.set_thisthread_cpubind)
+      return topology->binding_hooks.set_thisthread_cpubind(topology, set, flags);
   }
 
   errno = ENOSYS;
@@ -87,16 +87,16 @@ int
 hwloc_get_cpubind(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
 {
   if (flags & HWLOC_CPUBIND_PROCESS) {
-    if (topology->get_thisproc_cpubind)
-      return topology->get_thisproc_cpubind(topology, set, flags);
+    if (topology->binding_hooks.get_thisproc_cpubind)
+      return topology->binding_hooks.get_thisproc_cpubind(topology, set, flags);
   } else if (flags & HWLOC_CPUBIND_THREAD) {
-    if (topology->get_thisthread_cpubind)
-      return topology->get_thisthread_cpubind(topology, set, flags);
+    if (topology->binding_hooks.get_thisthread_cpubind)
+      return topology->binding_hooks.get_thisthread_cpubind(topology, set, flags);
   } else {
-    if (topology->get_thisproc_cpubind)
-      return topology->get_thisproc_cpubind(topology, set, flags);
-    else if (topology->get_thisthread_cpubind)
-      return topology->get_thisthread_cpubind(topology, set, flags);
+    if (topology->binding_hooks.get_thisproc_cpubind)
+      return topology->binding_hooks.get_thisproc_cpubind(topology, set, flags);
+    else if (topology->binding_hooks.get_thisthread_cpubind)
+      return topology->binding_hooks.get_thisthread_cpubind(topology, set, flags);
   }
 
   errno = ENOSYS;
@@ -110,8 +110,8 @@ hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_b
   if (!set)
     return -1;
 
-  if (topology->set_proc_cpubind)
-    return topology->set_proc_cpubind(topology, pid, set, flags);
+  if (topology->binding_hooks.set_proc_cpubind)
+    return topology->binding_hooks.set_proc_cpubind(topology, pid, set, flags);
 
   errno = ENOSYS;
   return -1;
@@ -120,8 +120,8 @@ hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_b
 int
 hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int flags)
 {
-  if (topology->get_proc_cpubind)
-    return topology->get_proc_cpubind(topology, pid, set, flags);
+  if (topology->binding_hooks.get_proc_cpubind)
+    return topology->binding_hooks.get_proc_cpubind(topology, pid, set, flags);
 
   errno = ENOSYS;
   return -1;
@@ -135,8 +135,8 @@ hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_co
   if (!set)
     return -1;
 
-  if (topology->set_thread_cpubind)
-    return topology->set_thread_cpubind(topology, tid, set, flags);
+  if (topology->binding_hooks.set_thread_cpubind)
+    return topology->binding_hooks.set_thread_cpubind(topology, tid, set, flags);
 
   errno = ENOSYS;
   return -1;
@@ -145,8 +145,8 @@ hwloc_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_co
 int
 hwloc_get_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t tid, hwloc_bitmap_t set, int flags)
 {
-  if (topology->get_thread_cpubind)
-    return topology->get_thread_cpubind(topology, tid, set, flags);
+  if (topology->binding_hooks.get_thread_cpubind)
+    return topology->binding_hooks.get_thread_cpubind(topology, tid, set, flags);
 
   errno = ENOSYS;
   return -1;
@@ -157,16 +157,16 @@ int
 hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t set, int flags)
 {
   if (flags & HWLOC_CPUBIND_PROCESS) {
-    if (topology->get_thisproc_last_cpu_location)
-      return topology->get_thisproc_last_cpu_location(topology, set, flags);
+    if (topology->binding_hooks.get_thisproc_last_cpu_location)
+      return topology->binding_hooks.get_thisproc_last_cpu_location(topology, set, flags);
   } else if (flags & HWLOC_CPUBIND_THREAD) {
-    if (topology->get_thisthread_last_cpu_location)
-      return topology->get_thisthread_last_cpu_location(topology, set, flags);
+    if (topology->binding_hooks.get_thisthread_last_cpu_location)
+      return topology->binding_hooks.get_thisthread_last_cpu_location(topology, set, flags);
   } else {
-    if (topology->get_thisproc_last_cpu_location)
-      return topology->get_thisproc_last_cpu_location(topology, set, flags);
-    else if (topology->get_thisthread_last_cpu_location)
-      return topology->get_thisthread_last_cpu_location(topology, set, flags);
+    if (topology->binding_hooks.get_thisproc_last_cpu_location)
+      return topology->binding_hooks.get_thisproc_last_cpu_location(topology, set, flags);
+    else if (topology->binding_hooks.get_thisthread_last_cpu_location)
+      return topology->binding_hooks.get_thisthread_last_cpu_location(topology, set, flags);
   }
 
   errno = ENOSYS;
@@ -176,8 +176,8 @@ hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_bitmap_t set, int f
 int
 hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_bitmap_t set, int flags)
 {
-  if (topology->get_proc_last_cpu_location)
-    return topology->get_proc_last_cpu_location(topology, pid, set, flags);
+  if (topology->binding_hooks.get_proc_last_cpu_location)
+    return topology->binding_hooks.get_proc_last_cpu_location(topology, pid, set, flags);
 
   errno = ENOSYS;
   return -1;
@@ -265,16 +265,16 @@ hwloc_set_membind_nodeset(hwloc_topology_t topology, hwloc_const_nodeset_t nodes
     return -1;
 
   if (flags & HWLOC_MEMBIND_PROCESS) {
-    if (topology->set_thisproc_membind)
-      return topology->set_thisproc_membind(topology, nodeset, policy, flags);
+    if (topology->binding_hooks.set_thisproc_membind)
+      return topology->binding_hooks.set_thisproc_membind(topology, nodeset, policy, flags);
   } else if (flags & HWLOC_MEMBIND_THREAD) {
-    if (topology->set_thisthread_membind)
-      return topology->set_thisthread_membind(topology, nodeset, policy, flags);
+    if (topology->binding_hooks.set_thisthread_membind)
+      return topology->binding_hooks.set_thisthread_membind(topology, nodeset, policy, flags);
   } else {
-    if (topology->set_thisproc_membind)
-      return topology->set_thisproc_membind(topology, nodeset, policy, flags);
-    else if (topology->set_thisthread_membind)
-      return topology->set_thisthread_membind(topology, nodeset, policy, flags);
+    if (topology->binding_hooks.set_thisproc_membind)
+      return topology->binding_hooks.set_thisproc_membind(topology, nodeset, policy, flags);
+    else if (topology->binding_hooks.set_thisthread_membind)
+      return topology->binding_hooks.set_thisthread_membind(topology, nodeset, policy, flags);
   }
 
   errno = ENOSYS;
@@ -300,16 +300,16 @@ int
 hwloc_get_membind_nodeset(hwloc_topology_t topology, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
   if (flags & HWLOC_MEMBIND_PROCESS) {
-    if (topology->get_thisproc_membind)
-      return topology->get_thisproc_membind(topology, nodeset, policy, flags);
+    if (topology->binding_hooks.get_thisproc_membind)
+      return topology->binding_hooks.get_thisproc_membind(topology, nodeset, policy, flags);
   } else if (flags & HWLOC_MEMBIND_THREAD) {
-    if (topology->get_thisthread_membind)
-      return topology->get_thisthread_membind(topology, nodeset, policy, flags);
+    if (topology->binding_hooks.get_thisthread_membind)
+      return topology->binding_hooks.get_thisthread_membind(topology, nodeset, policy, flags);
   } else {
-    if (topology->get_thisproc_membind)
-      return topology->get_thisproc_membind(topology, nodeset, policy, flags);
-    else if (topology->get_thisthread_membind)
-      return topology->get_thisthread_membind(topology, nodeset, policy, flags);
+    if (topology->binding_hooks.get_thisproc_membind)
+      return topology->binding_hooks.get_thisproc_membind(topology, nodeset, policy, flags);
+    else if (topology->binding_hooks.get_thisthread_membind)
+      return topology->binding_hooks.get_thisthread_membind(topology, nodeset, policy, flags);
   }
 
   errno = ENOSYS;
@@ -339,8 +339,8 @@ hwloc_set_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc
   if (!nodeset)
     return -1;
 
-  if (topology->set_proc_membind)
-    return topology->set_proc_membind(topology, pid, nodeset, policy, flags);
+  if (topology->binding_hooks.set_proc_membind)
+    return topology->binding_hooks.set_proc_membind(topology, pid, nodeset, policy, flags);
 
   errno = ENOSYS;
   return -1;
@@ -365,8 +365,8 @@ hwloc_set_proc_membind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_c
 int
 hwloc_get_proc_membind_nodeset(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
-  if (topology->get_proc_membind)
-    return topology->get_proc_membind(topology, pid, nodeset, policy, flags);
+  if (topology->binding_hooks.get_proc_membind)
+    return topology->binding_hooks.get_proc_membind(topology, pid, nodeset, policy, flags);
 
   errno = ENOSYS;
   return -1;
@@ -395,8 +395,8 @@ hwloc_set_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size
   if (!nodeset)
     return -1;
 
-  if (topology->set_area_membind)
-    return topology->set_area_membind(topology, addr, len, nodeset, policy, flags);
+  if (topology->binding_hooks.set_area_membind)
+    return topology->binding_hooks.set_area_membind(topology, addr, len, nodeset, policy, flags);
 
   errno = ENOSYS;
   return -1;
@@ -420,8 +420,8 @@ hwloc_set_area_membind(hwloc_topology_t topology, const void *addr, size_t len, 
 int
 hwloc_get_area_membind_nodeset(hwloc_topology_t topology, const void *addr, size_t len, hwloc_nodeset_t nodeset, hwloc_membind_policy_t * policy, int flags)
 {
-  if (topology->get_area_membind)
-    return topology->get_area_membind(topology, addr, len, nodeset, policy, flags);
+  if (topology->binding_hooks.get_area_membind)
+    return topology->binding_hooks.get_area_membind(topology, addr, len, nodeset, policy, flags);
 
   errno = ENOSYS;
   return -1;
@@ -487,8 +487,8 @@ hwloc_free_mmap(hwloc_topology_t topology __hwloc_attribute_unused, void *addr, 
 void *
 hwloc_alloc(hwloc_topology_t topology, size_t len)
 {
-  if (topology->alloc)
-    return topology->alloc(topology, len);
+  if (topology->binding_hooks.alloc)
+    return topology->binding_hooks.alloc(topology, len);
   return hwloc_alloc_heap(topology, len);
 }
 
@@ -504,13 +504,13 @@ hwloc_alloc_membind_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_n
     goto fallback;
   }
 
-  if (topology->alloc_membind)
-    return topology->alloc_membind(topology, len, nodeset, policy, flags);
-  else if (topology->set_area_membind) {
+  if (topology->binding_hooks.alloc_membind)
+    return topology->binding_hooks.alloc_membind(topology, len, nodeset, policy, flags);
+  else if (topology->binding_hooks.set_area_membind) {
     p = hwloc_alloc(topology, len);
     if (!p)
       return NULL;
-    if (topology->set_area_membind(topology, p, len, nodeset, policy, flags) && flags & HWLOC_MEMBIND_STRICT) {
+    if (topology->binding_hooks.set_area_membind(topology, p, len, nodeset, policy, flags) && flags & HWLOC_MEMBIND_STRICT) {
       int error = errno;
       free(p);
       errno = error;
@@ -550,7 +550,7 @@ hwloc_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t 
 int
 hwloc_free(hwloc_topology_t topology, void *addr, size_t len)
 {
-  if (topology->free_membind)
-    return topology->free_membind(topology, addr, len);
+  if (topology->binding_hooks.free_membind)
+    return topology->binding_hooks.free_membind(topology, addr, len);
   return hwloc_free_heap(topology, addr, len);
 }

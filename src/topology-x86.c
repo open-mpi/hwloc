@@ -724,39 +724,39 @@ void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs __hwloc_at
 
   orig_cpuset = hwloc_bitmap_alloc();
 
-  if (topology->get_thisthread_cpubind && topology->set_thisthread_cpubind) {
-    if (!topology->get_thisthread_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
+  if (topology->binding_hooks.get_thisthread_cpubind && topology->binding_hooks.set_thisthread_cpubind) {
+    if (!topology->binding_hooks.get_thisthread_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
       for (i = 0; i < nbprocs; i++) {
         hwloc_bitmap_only(cpuset, i);
         hwloc_debug("binding to CPU%d\n", i);
-        if (topology->set_thisthread_cpubind(topology, cpuset, HWLOC_CPUBIND_STRICT)) {
+        if (topology->binding_hooks.set_thisthread_cpubind(topology, cpuset, HWLOC_CPUBIND_STRICT)) {
           hwloc_debug("could not bind to CPU%d: %s\n", i, strerror(errno));
           continue;
         }
         look_proc(&infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
       }
       hwloc_bitmap_free(cpuset);
-      topology->set_thisthread_cpubind(topology, orig_cpuset, 0);
+      topology->binding_hooks.set_thisthread_cpubind(topology, orig_cpuset, 0);
       hwloc_bitmap_free(orig_cpuset);
       summarize(topology, infos, nbprocs);
       goto out_with_os_state;
     }
   }
-  if (topology->get_thisproc_cpubind && topology->set_thisproc_cpubind) {
-    if (!topology->get_thisproc_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
+  if (topology->binding_hooks.get_thisproc_cpubind && topology->binding_hooks.set_thisproc_cpubind) {
+    if (!topology->binding_hooks.get_thisproc_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
       for (i = 0; i < nbprocs; i++) {
         hwloc_bitmap_only(cpuset, i);
         hwloc_debug("binding to CPU%d\n", i);
-        if (topology->set_thisproc_cpubind(topology, cpuset, HWLOC_CPUBIND_STRICT)) {
+        if (topology->binding_hooks.set_thisproc_cpubind(topology, cpuset, HWLOC_CPUBIND_STRICT)) {
           hwloc_debug("could not bind to CPU%d: %s\n", i, strerror(errno));
           continue;
         }
         look_proc(&infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
       }
       hwloc_bitmap_free(cpuset);
-      topology->set_thisproc_cpubind(topology, orig_cpuset, 0);
+      topology->binding_hooks.set_thisproc_cpubind(topology, orig_cpuset, 0);
       hwloc_bitmap_free(orig_cpuset);
       summarize(topology, infos, nbprocs);
       goto out_with_os_state;

@@ -2389,61 +2389,62 @@ hwloc_discover(struct hwloc_topology *topology)
 
   if (topology->is_thissystem) {
 #    ifdef HWLOC_LINUX_SYS
-    hwloc_set_linuxfs_hooks(topology);
+    hwloc_set_linuxfs_hooks(&topology->binding_hooks, &topology->support);
 #    endif /* HWLOC_LINUX_SYS */
 
 #    ifdef HWLOC_AIX_SYS
-    hwloc_set_aix_hooks(topology);
+    hwloc_set_aix_hooks(&topology->binding_hooks, &topology->support);
 #    endif /* HWLOC_AIX_SYS */
 
 #    ifdef HWLOC_OSF_SYS
-    hwloc_set_osf_hooks(topology);
+    hwloc_set_osf_hooks(&topology->binding_hooks, &topology->support);
 #    endif /* HWLOC_OSF_SYS */
 
 #    ifdef HWLOC_SOLARIS_SYS
-    hwloc_set_solaris_hooks(topology);
+    hwloc_set_solaris_hooks(&topology->binding_hooks, &topology->support);
 #    endif /* HWLOC_SOLARIS_SYS */
 
 #    ifdef HWLOC_WIN_SYS
-    hwloc_set_windows_hooks(topology);
+    hwloc_set_windows_hooks(&topology->binding_hooks, &topology->support);
 #    endif /* HWLOC_WIN_SYS */
 
 #    ifdef HWLOC_DARWIN_SYS
-    hwloc_set_darwin_hooks(topology);
+    hwloc_set_darwin_hooks(&topology->binding_hooks, &topology->support);
 #    endif /* HWLOC_DARWIN_SYS */
 
 #    ifdef HWLOC_FREEBSD_SYS
-    hwloc_set_freebsd_hooks(topology);
+    hwloc_set_freebsd_hooks(&topology->binding_hooks, &topology->support);
 #    endif /* HWLOC_FREEBSD_SYS */
 
 #    ifdef HWLOC_HPUX_SYS
-    hwloc_set_hpux_hooks(topology);
+    hwloc_set_hpux_hooks(&topology->binding_hooks, &topology->support);
 #    endif /* HWLOC_HPUX_SYS */
   } else {
-    topology->set_thisproc_cpubind = dontset_thisproc_cpubind;
-    topology->get_thisproc_cpubind = dontget_thisproc_cpubind;
-    topology->set_thisthread_cpubind = dontset_thisthread_cpubind;
-    topology->get_thisthread_cpubind = dontget_thisthread_cpubind;
-    topology->set_proc_cpubind = dontset_proc_cpubind;
-    topology->get_proc_cpubind = dontget_proc_cpubind;
+    /* not this system, use dummy binding hooks that do nothing (but don't return ENOSYS) */
+    topology->binding_hooks.set_thisproc_cpubind = dontset_thisproc_cpubind;
+    topology->binding_hooks.get_thisproc_cpubind = dontget_thisproc_cpubind;
+    topology->binding_hooks.set_thisthread_cpubind = dontset_thisthread_cpubind;
+    topology->binding_hooks.get_thisthread_cpubind = dontget_thisthread_cpubind;
+    topology->binding_hooks.set_proc_cpubind = dontset_proc_cpubind;
+    topology->binding_hooks.get_proc_cpubind = dontget_proc_cpubind;
 #ifdef hwloc_thread_t
-    topology->set_thread_cpubind = dontset_thread_cpubind;
-    topology->get_thread_cpubind = dontget_thread_cpubind;
+    topology->binding_hooks.set_thread_cpubind = dontset_thread_cpubind;
+    topology->binding_hooks.get_thread_cpubind = dontget_thread_cpubind;
 #endif
-    topology->get_thisproc_last_cpu_location = dontget_thisproc_cpubind; /* cpubind instead of last_cpu_location is ok */
-    topology->get_thisthread_last_cpu_location = dontget_thisthread_cpubind; /* cpubind instead of last_cpu_location is ok */
-    topology->get_proc_last_cpu_location = dontget_proc_cpubind; /* cpubind instead of last_cpu_location is ok */
+    topology->binding_hooks.get_thisproc_last_cpu_location = dontget_thisproc_cpubind; /* cpubind instead of last_cpu_location is ok */
+    topology->binding_hooks.get_thisthread_last_cpu_location = dontget_thisthread_cpubind; /* cpubind instead of last_cpu_location is ok */
+    topology->binding_hooks.get_proc_last_cpu_location = dontget_proc_cpubind; /* cpubind instead of last_cpu_location is ok */
     /* TODO: get_thread_last_cpu_location */
-    topology->set_thisproc_membind = dontset_thisproc_membind;
-    topology->get_thisproc_membind = dontget_thisproc_membind;
-    topology->set_thisthread_membind = dontset_thisthread_membind;
-    topology->get_thisthread_membind = dontget_thisthread_membind;
-    topology->set_proc_membind = dontset_proc_membind;
-    topology->get_proc_membind = dontget_proc_membind;
-    topology->set_area_membind = dontset_area_membind;
-    topology->get_area_membind = dontget_area_membind;
-    topology->alloc_membind = dontalloc_membind;
-    topology->free_membind = dontfree_membind;
+    topology->binding_hooks.set_thisproc_membind = dontset_thisproc_membind;
+    topology->binding_hooks.get_thisproc_membind = dontget_thisproc_membind;
+    topology->binding_hooks.set_thisthread_membind = dontset_thisthread_membind;
+    topology->binding_hooks.get_thisthread_membind = dontget_thisthread_membind;
+    topology->binding_hooks.set_proc_membind = dontset_proc_membind;
+    topology->binding_hooks.get_proc_membind = dontget_proc_membind;
+    topology->binding_hooks.set_area_membind = dontset_area_membind;
+    topology->binding_hooks.get_area_membind = dontget_area_membind;
+    topology->binding_hooks.alloc_membind = dontalloc_membind;
+    topology->binding_hooks.free_membind = dontfree_membind;
   }
 
   /* if not is_thissystem, set_cpubind is fake
@@ -2452,7 +2453,7 @@ hwloc_discover(struct hwloc_topology *topology)
    */
   if (topology->is_thissystem) {
 #define DO(which,kind) \
-    if (topology->kind) \
+    if (topology->binding_hooks.kind) \
       topology->support.which##bind->kind = 1;
     DO(cpu,set_thisproc_cpubind);
     DO(cpu,get_thisproc_cpubind);
@@ -2490,30 +2491,7 @@ hwloc_topology_setup_defaults(struct hwloc_topology *topology)
   struct hwloc_obj *root_obj;
 
   /* reset support */
-  topology->set_thisproc_cpubind = NULL;
-  topology->get_thisproc_cpubind = NULL;
-  topology->set_thisthread_cpubind = NULL;
-  topology->get_thisthread_cpubind = NULL;
-  topology->set_proc_cpubind = NULL;
-  topology->get_proc_cpubind = NULL;
-#ifdef hwloc_thread_t
-  topology->set_thread_cpubind = NULL;
-  topology->get_thread_cpubind = NULL;
-#endif
-  topology->get_thisproc_last_cpu_location = NULL;
-  topology->get_proc_last_cpu_location = NULL;
-  topology->get_thisthread_last_cpu_location = NULL;
-  topology->set_thisproc_membind = NULL;
-  topology->get_thisproc_membind = NULL;
-  topology->set_thisthread_membind = NULL;
-  topology->get_thisthread_membind = NULL;
-  topology->set_proc_membind = NULL;
-  topology->get_proc_membind = NULL;
-  topology->set_area_membind = NULL;
-  topology->get_area_membind = NULL;
-  topology->alloc = NULL;
-  topology->alloc_membind = NULL;
-  topology->free_membind = NULL;
+  memset(&topology->binding_hooks, 0, sizeof(topology->binding_hooks));
   memset(topology->support.discovery, 0, sizeof(*topology->support.discovery));
   memset(topology->support.cpubind, 0, sizeof(*topology->support.cpubind));
   memset(topology->support.membind, 0, sizeof(*topology->support.membind));

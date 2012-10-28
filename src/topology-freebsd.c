@@ -175,11 +175,15 @@ hwloc_freebsd_node_meminfo_info(struct hwloc_topology *topology)
 #endif
 
 void
+hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
+			struct hwloc_topology_support *support __hwloc_attribute_unused);
+
+void
 hwloc_look_freebsd(struct hwloc_topology *topology)
 {
   unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
 
-  hwloc_set_freebsd_hooks(topology);
+  hwloc_set_freebsd_hooks(&topology->binding_hooks, &topology->support);
 
   hwloc_look_x86(topology, nbprocs);
 
@@ -192,21 +196,22 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 }
 
 void
-hwloc_set_freebsd_hooks(struct hwloc_topology *topology)
+hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
+			struct hwloc_topology_support *support __hwloc_attribute_unused)
 {
 #if defined(HAVE_SYS_CPUSET_H) && defined(HAVE_CPUSET_SETAFFINITY)
-  topology->set_thisproc_cpubind = hwloc_freebsd_set_thisproc_cpubind;
-  topology->get_thisproc_cpubind = hwloc_freebsd_get_thisproc_cpubind;
-  topology->set_thisthread_cpubind = hwloc_freebsd_set_thisthread_cpubind;
-  topology->get_thisthread_cpubind = hwloc_freebsd_get_thisthread_cpubind;
-  topology->set_proc_cpubind = hwloc_freebsd_set_proc_cpubind;
-  topology->get_proc_cpubind = hwloc_freebsd_get_proc_cpubind;
+  hooks->set_thisproc_cpubind = hwloc_freebsd_set_thisproc_cpubind;
+  hooks->get_thisproc_cpubind = hwloc_freebsd_get_thisproc_cpubind;
+  hooks->set_thisthread_cpubind = hwloc_freebsd_set_thisthread_cpubind;
+  hooks->get_thisthread_cpubind = hwloc_freebsd_get_thisthread_cpubind;
+  hooks->set_proc_cpubind = hwloc_freebsd_set_proc_cpubind;
+  hooks->get_proc_cpubind = hwloc_freebsd_get_proc_cpubind;
 #ifdef hwloc_thread_t
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
-  topology->set_thread_cpubind = hwloc_freebsd_set_thread_cpubind;
+  hooks->set_thread_cpubind = hwloc_freebsd_set_thread_cpubind;
 #endif
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
-  topology->get_thread_cpubind = hwloc_freebsd_get_thread_cpubind;
+  hooks->get_thread_cpubind = hwloc_freebsd_get_thread_cpubind;
 #endif
 #endif
 #endif

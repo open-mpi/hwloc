@@ -726,27 +726,28 @@ hwloc_look_solaris(struct hwloc_topology *topology)
 }
 
 void
-hwloc_set_solaris_hooks(struct hwloc_topology *topology)
+hwloc_set_solaris_hooks(struct hwloc_binding_hooks *hooks,
+			struct hwloc_topology_support *support __hwloc_attribute_unused)
 {
-  topology->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
-  topology->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
-  topology->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
+  hooks->set_proc_cpubind = hwloc_solaris_set_proc_cpubind;
+  hooks->set_thisproc_cpubind = hwloc_solaris_set_thisproc_cpubind;
+  hooks->set_thisthread_cpubind = hwloc_solaris_set_thisthread_cpubind;
 #ifdef HAVE_LIBLGRP
-  topology->get_proc_cpubind = hwloc_solaris_get_proc_cpubind;
-  topology->get_thisproc_cpubind = hwloc_solaris_get_thisproc_cpubind;
-  topology->get_thisthread_cpubind = hwloc_solaris_get_thisthread_cpubind;
-  topology->set_proc_membind = hwloc_solaris_set_proc_membind;
-  topology->set_thisproc_membind = hwloc_solaris_set_thisproc_membind;
-  topology->set_thisthread_membind = hwloc_solaris_set_thisthread_membind;
-  topology->get_proc_membind = hwloc_solaris_get_proc_membind;
-  topology->get_thisproc_membind = hwloc_solaris_get_thisproc_membind;
-  topology->get_thisthread_membind = hwloc_solaris_get_thisthread_membind;
+  hooks->get_proc_cpubind = hwloc_solaris_get_proc_cpubind;
+  hooks->get_thisproc_cpubind = hwloc_solaris_get_thisproc_cpubind;
+  hooks->get_thisthread_cpubind = hwloc_solaris_get_thisthread_cpubind;
+  hooks->set_proc_membind = hwloc_solaris_set_proc_membind;
+  hooks->set_thisproc_membind = hwloc_solaris_set_thisproc_membind;
+  hooks->set_thisthread_membind = hwloc_solaris_set_thisthread_membind;
+  hooks->get_proc_membind = hwloc_solaris_get_proc_membind;
+  hooks->get_thisproc_membind = hwloc_solaris_get_thisproc_membind;
+  hooks->get_thisthread_membind = hwloc_solaris_get_thisthread_membind;
 #endif /* HAVE_LIBLGRP */
 #ifdef MADV_ACCESS_LWP 
-  topology->set_area_membind = hwloc_solaris_set_area_membind;
-  topology->support.membind->firsttouch_membind = 1;
-  topology->support.membind->bind_membind = 1;
-  topology->support.membind->interleave_membind = 1;
-  topology->support.membind->nexttouch_membind = 1;
+  hooks->set_area_membind = hwloc_solaris_set_area_membind;
+  support->membind->firsttouch_membind = 1;
+  support->membind->bind_membind = 1;
+  support->membind->interleave_membind = 1;
+  support->membind->nexttouch_membind = 1;
 #endif
 }

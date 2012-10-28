@@ -3366,39 +3366,40 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
 }
 
 void
-hwloc_set_linuxfs_hooks(struct hwloc_topology *topology)
+hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
+			struct hwloc_topology_support *support __hwloc_attribute_unused)
 {
-  topology->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
-  topology->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
-  topology->set_thisproc_cpubind = hwloc_linux_set_thisproc_cpubind;
-  topology->get_thisproc_cpubind = hwloc_linux_get_thisproc_cpubind;
-  topology->set_proc_cpubind = hwloc_linux_set_proc_cpubind;
-  topology->get_proc_cpubind = hwloc_linux_get_proc_cpubind;
+  hooks->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
+  hooks->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
+  hooks->set_thisproc_cpubind = hwloc_linux_set_thisproc_cpubind;
+  hooks->get_thisproc_cpubind = hwloc_linux_get_thisproc_cpubind;
+  hooks->set_proc_cpubind = hwloc_linux_set_proc_cpubind;
+  hooks->get_proc_cpubind = hwloc_linux_get_proc_cpubind;
 #if HAVE_DECL_PTHREAD_SETAFFINITY_NP
-  topology->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
+  hooks->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
 #if HAVE_DECL_PTHREAD_GETAFFINITY_NP
-  topology->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
+  hooks->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
-  topology->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
-  topology->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
-  topology->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
+  hooks->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
+  hooks->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
+  hooks->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
 #ifdef HWLOC_HAVE_SET_MEMPOLICY
-  topology->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
-  topology->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
-  topology->get_area_membind = hwloc_linux_get_area_membind;
+  hooks->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
+  hooks->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
+  hooks->get_area_membind = hwloc_linux_get_area_membind;
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
 #ifdef HWLOC_HAVE_MBIND
-  topology->set_area_membind = hwloc_linux_set_area_membind;
-  topology->alloc_membind = hwloc_linux_alloc_membind;
-  topology->alloc = hwloc_alloc_mmap;
-  topology->free_membind = hwloc_free_mmap;
-  topology->support.membind->firsttouch_membind = 1;
-  topology->support.membind->bind_membind = 1;
-  topology->support.membind->interleave_membind = 1;
+  hooks->set_area_membind = hwloc_linux_set_area_membind;
+  hooks->alloc_membind = hwloc_linux_alloc_membind;
+  hooks->alloc = hwloc_alloc_mmap;
+  hooks->free_membind = hwloc_free_mmap;
+  support->membind->firsttouch_membind = 1;
+  support->membind->bind_membind = 1;
+  support->membind->interleave_membind = 1;
 #endif /* HWLOC_HAVE_MBIND */
 #if (defined HWLOC_HAVE_MIGRATE_PAGES) || ((defined HWLOC_HAVE_MBIND) && (defined MPOL_MF_MOVE))
-  topology->support.membind->migrate_membind = 1;
+  support->membind->migrate_membind = 1;
 #endif
 }
 
