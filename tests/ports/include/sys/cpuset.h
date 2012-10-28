@@ -11,10 +11,15 @@
 typedef long cpuset_t;
 typedef int cpulevel_t;
 typedef int cpuwhich_t;
+typedef int cpusetid_t;
 
+#define CPU_LEVEL_CPUSET 2
 #define CPU_LEVEL_WHICH 3
 #define CPU_WHICH_TID 1
 #define CPU_WHICH_PID 2
+
+int cpuset_setid(cpuwhich_t which, id_t id, cpusetid_t setid);
+int cpuset_getid(cpulevel_t level, cpuwhich_t which, id_t id, cpusetid_t *setid);
 
 #undef CPU_SETSIZE
 #define CPU_SETSIZE (sizeof(cpuset_t) * CHAR_BIT)
