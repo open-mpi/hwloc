@@ -469,6 +469,7 @@ extern "C" {
 #define hwloc_topology_setup_defaults HWLOC_NAME(topology_setup_defaults)
 #define hwloc_topology_clear HWLOC_NAME(topology_clear)
 
+#define hwloc_binding_hooks HWLOC_NAME(binding_hooks)
 #define hwloc_set_native_binding_hooks HWLOC_NAME(set_native_binding_hooks)
 #define hwloc_set_binding_hooks HWLOC_NAME(set_binding_hooks)
 
