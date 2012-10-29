@@ -186,6 +186,9 @@ extern unsigned hwloc_fallback_nbprocessors(struct hwloc_topology *topology);
 extern void hwloc_connect_children(hwloc_obj_t obj);
 extern int hwloc_connect_levels(hwloc_topology_t topology);
 
+extern void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
+extern void hwloc_topology_clear(struct hwloc_topology *topology);
+
 /* set native OS binding hooks */
 extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);
 /* set either native OS binding hooks (if thissystem), or dummy ones */
@@ -248,6 +251,11 @@ extern void hwloc_look_libpci(struct hwloc_topology *topology);
 extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *description);
 extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);
 extern void hwloc_look_synthetic (struct hwloc_topology *topology);
+
+extern int hwloc_look_noos(struct hwloc_topology *topology);
+
+extern int hwloc_backend_custom_init(struct hwloc_topology *topology);
+extern void hwloc_backend_custom_exit(struct hwloc_topology *topology);
 
 /*
  * Add an object to the topology.
@@ -319,6 +327,9 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
 
 /* Free obj and its attributes assuming it doesn't have any children/parent anymore */
 extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
+
+/* Duplicate src and its children under newparent in newtopology */
+extern void hwloc__duplicate_objects(struct hwloc_topology *newtopology, struct hwloc_obj *newparent, struct hwloc_obj *src);
 
 /* This can be used for the alloc field to get allocated data that can be freed by free() */
 void *hwloc_alloc_heap(hwloc_topology_t topology, size_t len);

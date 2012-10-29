@@ -26,6 +26,8 @@ sources = \
         traversal.c \
         distances.c \
         topology-synthetic.c \
+        topology-custom.c \
+        topology-noos.c \
         topology-xml.c \
         topology-xml-nolibxml.c \
         base64.c \

@@ -466,6 +466,9 @@ extern "C" {
 #define hwloc_connect_children HWLOC_NAME(connect_children)
 #define hwloc_connect_levels HWLOC_NAME(connect_levels)
 
+#define hwloc_topology_setup_defaults HWLOC_NAME(topology_setup_defaults)
+#define hwloc_topology_clear HWLOC_NAME(topology_clear)
+
 #define hwloc_set_native_binding_hooks HWLOC_NAME(set_native_binding_hooks)
 #define hwloc_set_binding_hooks HWLOC_NAME(set_binding_hooks)
 
@@ -509,6 +512,11 @@ extern "C" {
 #define hwloc_backend_synthetic_exit HWLOC_NAME(backend_synthetic_exit)
 #define hwloc_look_synthetic  HWLOC_NAME(look_synthetic )
 
+#define hwloc_look_noos HWLOC_NAME(look_noos)
+
+#define hwloc_backend_custom_init HWLOC_NAME(backend_custom_init)
+#define hwloc_backend_custom_exit HWLOC_NAME(backend_custom_exit)
+
 #define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
 #define hwloc_report_error_t HWLOC_NAME(report_error_t)
 #define hwloc_report_os_error HWLOC_NAME(report_os_error)
@@ -519,6 +527,7 @@ extern "C" {
 #define hwloc_bitmap_printf_value HWLOC_NAME(bitmap_printf_value)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
+#define hwloc__duplicate_objects HWLOC_NAME(_duplicate_objects)
 
 #define hwloc_alloc_heap HWLOC_NAME(alloc_heap)
 #define hwloc_alloc_mmap HWLOC_NAME(alloc_mmap)
