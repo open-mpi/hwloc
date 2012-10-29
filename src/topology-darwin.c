@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2012 inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -78,10 +78,13 @@ hwloc_look_darwin(struct hwloc_topology *topology)
         hwloc_debug_1arg_bitmap("package %u has cpuset %s\n",
                    i, obj->cpuset);
 
-	if (cpumodel[0] != '\0')
-	  hwloc_obj_add_info(obj, "CPUModel", cpumodel);
+        if (cpumodel[0] != '\0')
+          hwloc_obj_add_info(obj, "CPUModel", cpumodel);
         hwloc_insert_object_by_cpuset(topology, obj);
       }
+    else
+      if (cpumodel[0] != '\0')
+        hwloc_obj_add_info(topology->levels[0][0], "CPUModel", cpumodel);
 
     if (!hwloc_get_sysctlbyname("machdep.cpu.cores_per_package", &_cores_per_package) && _cores_per_package > 0) {
       unsigned cores_per_package = _cores_per_package;
@@ -101,7 +104,9 @@ hwloc_look_darwin(struct hwloc_topology *topology)
           hwloc_insert_object_by_cpuset(topology, obj);
         }
     }
-  }
+  } else
+    if (cpumodel[0] != '\0')
+      hwloc_obj_add_info(topology->levels[0][0], "CPUModel", cpumodel);
 
   if (hwloc_get_sysctlbyname("hw.l1dcachesize", &l1dcachesize))
     l1dcachesize = 0;
