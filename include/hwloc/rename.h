@@ -458,6 +458,7 @@ extern "C" {
 
 #define hwloc_xml_imported_distances_s HWLOC_NAME(xml_imported_distances_s)
 
+#define hwloc_alloc_obj_cpusets HWLOC_NAME(alloc_obj_cpusets)
 #define hwloc_setup_pu_level HWLOC_NAME(setup_pu_level)
 #define hwloc_get_sysctlbyname HWLOC_NAME(get_sysctlbyname)
 #define hwloc_get_sysctl HWLOC_NAME(get_sysctl)

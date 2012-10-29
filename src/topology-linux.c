@@ -3251,6 +3251,8 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
   int err;
 
+  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+
   memset(&topology->backend_params.linuxfs.utsname, 0, sizeof(topology->backend_params.linuxfs.utsname));
   if (topology->is_thissystem)
     uname(&topology->backend_params.linuxfs.utsname);

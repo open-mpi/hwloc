@@ -2012,7 +2012,7 @@ hwloc_connect_levels(hwloc_topology_t topology)
   return 0;
 }
 
-static void alloc_cpusets(hwloc_obj_t obj)
+void hwloc_alloc_obj_cpusets(hwloc_obj_t obj)
 {
   obj->cpuset = hwloc_bitmap_alloc_full();
   obj->complete_cpuset = hwloc_bitmap_alloc();
@@ -2030,7 +2030,6 @@ hwloc_discover(struct hwloc_topology *topology)
   int gotsomeio = 0;
 
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
-    alloc_cpusets(topology->levels[0][0]);
     hwloc_look_synthetic(topology);
   } else if (topology->backend_type == HWLOC_BACKEND_CUSTOM) {
     /* nothing to do, just connect levels below */
@@ -2081,8 +2080,6 @@ hwloc_discover(struct hwloc_topology *topology)
    * Here, we only allocate cpusets for the root object.
    */
 
-    alloc_cpusets(topology->levels[0][0]);
-
   /* Each OS type should also fill the bind functions pointers, at least the
    * set_cpubind one
    */
@@ -2128,16 +2125,11 @@ hwloc_discover(struct hwloc_topology *topology)
 #    endif /* HWLOC_HPUX_SYS */
 
 #    ifndef HAVE_OS_SUPPORT
+    hwloc_alloc_obj_cpusets(topology->levels[0][0]);
     hwloc_setup_pu_level(topology, hwloc_fallback_nbprocessors(topology));
-#    endif /* Unsupported OS */
-
-
-#    ifndef HWLOC_LINUX_SYS
-    if (topology->is_thissystem) {
-      /* gather uname info, except for Linux, which does it internally depending on load options */
+    if (topology->is_thissystem)
       hwloc_add_uname_info(topology);
-    }
-#    endif
+#    endif /* Unsupported OS */
   }
 
   /*

@@ -38,6 +38,8 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   int64_t memsize;
   char cpumodel[64];
 
+  hwloc_alloc_obj_cpusets(topology->levels[0][0]);
+
   if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
     return;
   nprocs = _nprocs;
@@ -253,6 +255,8 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   hwloc_setup_pu_level(topology, nprocs);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Darwin");
+  if (topology->is_thissystem)
+    hwloc_add_uname_info(topology);
 }
 
 void
