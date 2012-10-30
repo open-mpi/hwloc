@@ -2736,6 +2736,7 @@ hwloc__check_children(struct hwloc_obj *parent)
 
   /* checks for all children */
   for(j=1; j<parent->arity; j++) {
+    assert(parent->children[j]->parent == parent);
     assert(parent->children[j]->sibling_rank == j);
     assert(parent->children[j-1]->next_sibling == parent->children[j]);
     assert(parent->children[j]->prev_sibling == parent->children[j-1]);
@@ -2788,6 +2789,7 @@ hwloc_topology_check(struct hwloc_topology *topology)
   assert(hwloc_get_nbobjs_by_depth(topology, 0) == 1);
   obj = hwloc_get_root_obj(topology);
   assert(obj);
+  assert(!obj->parent);
 
   depth = hwloc_topology_get_depth(topology);
 
