@@ -1502,6 +1502,10 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
     /* Parent can be ignored in favor of the child.  */
     hwloc_debug("%s", "\nIgnoring parent ");
     print_object(topology, 0, parent);
+    if (parent == topology->levels[0][0]) {
+      child->parent = NULL;
+      child->depth = 0;
+    }
     *pparent = child;
     child->next_sibling = parent->next_sibling;
     hwloc_free_unlinked_object(parent);
