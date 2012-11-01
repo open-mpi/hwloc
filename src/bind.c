@@ -698,7 +698,7 @@ hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_t
 #    endif /* HWLOC_LINUX_SYS */
 
 #    ifdef HWLOC_AIX_SYS
-    hwloc_set_aix_hooks(hooks, support ;
+    hwloc_set_aix_hooks(hooks, support);
 #    endif /* HWLOC_AIX_SYS */
 
 #    ifdef HWLOC_OSF_SYS
