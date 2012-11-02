@@ -21,6 +21,7 @@ Version 1.5.2
 -------------
 * Fix some DIR descriptor leaks on Linux.
 * Fix I/O device lists when some were filtered out after a XML import.
+* Add missing Backend string info on Solaris in most cases.
 
 
 Version 1.5.1
