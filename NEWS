@@ -41,6 +41,9 @@ Version 1.6.0
     PID line. May be used for showing Open MPI process ranks, see the
     hwloc-ps(1) manpage for details.
 * Misc
+  + When merging objects with HWLOC_IGNORE_TYPE_KEEP_STRUCTURE or
+    lstopo --merge, compare object types before deciding which one of two
+    identical object to remove (e.g. keep sockets in favor of caches).
   + Add some GUID- and LID-related info attributes to OpenFabrics
     OS devices.
 

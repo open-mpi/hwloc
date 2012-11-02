@@ -411,6 +411,33 @@ static const hwloc_obj_type_t obj_order_type[] = {
   HWLOC_OBJ_MISC,
 };
 
+/* priority to be used when merging identical parent/children object
+ * (in merge_useless_child), keep the highest priority one.
+ *
+ * Always keep Machine/PU/PCIDev/OSDev
+ * then System/Node
+ * then Core
+ * then Socket
+ * then Cache
+ * then always drop Group/Misc/Bridge.
+ *
+ * Some type won't actually ever be involved in such merging.
+ */
+static const int obj_type_priority[] = {
+  /* first entry is HWLOC_OBJ_SYSTEM */     80,
+  /* next entry is HWLOC_OBJ_MACHINE */     100,
+  /* next entry is HWLOC_OBJ_NODE */        80,
+  /* next entry is HWLOC_OBJ_SOCKET */      40,
+  /* next entry is HWLOC_OBJ_CACHE */       20,
+  /* next entry is HWLOC_OBJ_CORE */        60,
+  /* next entry is HWLOC_OBJ_PU */          100,
+  /* next entry is HWLOC_OBJ_GROUP */       0,
+  /* next entry is HWLOC_OBJ_MISC */        0,
+  /* next entry is HWLOC_OBJ_BRIDGE */      0,
+  /* next entry is HWLOC_OBJ_PCI_DEVICE */  100,
+  /* next entry is HWLOC_OBJ_OS_DEVICE */   100
+};
+
 static unsigned __hwloc_attribute_const
 hwloc_get_type_order(hwloc_obj_type_t type)
 {
@@ -1488,6 +1515,7 @@ static void
 merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
 {
   hwloc_obj_t parent = *pparent, child, *pchild;
+  int replacechild = 0, replaceparent = 0;
 
   for_each_child_safe(child, parent, pchild)
     merge_useless_child(topology, pchild);
@@ -1497,9 +1525,25 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
     /* There are no or several children, it's useful to keep them.  */
     return;
 
-  /* TODO: have a preference order?  */
-  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
+  /* Check whether parent and/or child can be replaced */
+  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE)
     /* Parent can be ignored in favor of the child.  */
+    replaceparent = 1;
+  if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE)
+    /* Child can be ignored in favor of the parent.  */    
+    replacechild = 1;
+
+  /* Decide which one to actually replace */
+  if (replaceparent && replacechild) {
+    /* If both may be replaced, look at obj_type_priority */
+    if (obj_type_priority[parent->type] > obj_type_priority[child->type])
+      replaceparent = 0;
+    else
+      replacechild = 0;
+  }
+
+  if (replaceparent) {
+    /* Replace parent with child */
     hwloc_debug("%s", "\nIgnoring parent ");
     print_object(topology, 0, parent);
     if (parent == topology->levels[0][0]) {
@@ -1509,8 +1553,9 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
     *pparent = child;
     child->next_sibling = parent->next_sibling;
     hwloc_free_unlinked_object(parent);
-  } else if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
-    /* Child can be ignored in favor of the parent.  */
+
+  } else if (replacechild) {
+    /* Replace child with parent */
     hwloc_debug("%s", "\nIgnoring child ");
     print_object(topology, 0, child);
     parent->first_child = child->first_child;
