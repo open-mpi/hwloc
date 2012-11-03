@@ -452,7 +452,6 @@ extern "C" {
 
 #define hwloc_backend_params_u HWLOC_NAME(backend_params_u)
 #define hwloc_backend_params_linuxfs_s HWLOC_NAME(backend_params_linuxfs_s)
-#define hwloc_backend_params_osf HWLOC_NAME(backend_params_osf)
 #define hwloc_backend_params_xml_s HWLOC_NAME(backend_params_xml_s)
 #define hwloc_backend_params_synthetic_s HWLOC_NAME(backend_params_synthetic_s)
 

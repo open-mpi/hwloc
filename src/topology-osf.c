@@ -41,7 +41,7 @@
  */
 
 static int
-prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_bitmap_t hwloc_set)
+prepare_radset(hwloc_topology_t topology __hwloc_attribute_unused, radset_t *radset, hwloc_const_bitmap_t hwloc_set)
 {
   unsigned cpu;
   cpuset_t target_cpuset;
@@ -49,6 +49,7 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_bitmap_t
   radid_t radid;
   int ret = 0;
   int ret_errno = 0;
+  int nbnodes = rad_get_num();
 
   cpusetcreate(&target_cpuset);
   cpuemptyset(target_cpuset);
@@ -58,7 +59,7 @@ prepare_radset(hwloc_topology_t topology, radset_t *radset, hwloc_const_bitmap_t
 
   cpusetcreate(&cpuset);
   cpusetcreate(&xor_cpuset);
-  for (radid = 0; radid < topology->backend_params.osf.nbnodes; radid++) {
+  for (radid = 0; radid < nbnodes; radid++) {
     cpuemptyset(cpuset);
     if (rad_get_cpus(radid, cpuset)==-1) {
       fprintf(stderr,"rad_get_cpus(%d) failed: %s\n",radid,strerror(errno));
@@ -250,7 +251,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
 
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
-  topology->backend_params.osf.nbnodes = nbnodes = rad_get_num();
+  nbnodes = rad_get_num();
 
   cpusetcreate(&cpuset);
   radsetcreate(&radset);

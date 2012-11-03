@@ -148,11 +148,6 @@ struct hwloc_topology {
       struct utsname utsname; /* cached result of uname, used multiple times */
     } linuxfs;
 #endif /* HWLOC_LINUX_SYS */
-#if defined(HWLOC_OSF_SYS) || defined(HWLOC_COMPILE_PORTS)
-    struct hwloc_backend_params_osf {
-      int nbnodes;
-    } osf;
-#endif /* HWLOC_OSF_SYS */
     struct hwloc_backend_params_xml_s {
       /* xml backend parameters */
       int (*look)(struct hwloc_topology *topology, struct hwloc__xml_import_state_s *state);
