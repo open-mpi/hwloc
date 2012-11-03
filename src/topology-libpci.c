@@ -19,8 +19,6 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <setjmp.h>
-#ifdef HWLOC_LINUX_SYS
-#endif
 
 #define CONFIG_SPACE_CACHESIZE 256
 
