@@ -132,7 +132,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   hwloc_debug("phys %u thread %u\n", infos->socketid, infos->logprocid);
 
   if (highest_ext_cpuid >= 0x80000004) {
-    unsigned regs[4];
+    unsigned regs[4] = { 0 };
     regs[0] = 0x80000002;
     hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
     memcpy(infos->cpumodel, regs, 4*4);
