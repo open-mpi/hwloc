@@ -53,7 +53,6 @@ static int one_test(void)
   if (strcmp(hwloc_obj_get_info_by_name(hwloc_get_root_obj(topology), "UberUglyString"), "xy"))
     assert(0);
   hwloc_topology_export_xmlbuffer(topology, &buf2, &size2);
-  hwloc_topology_destroy(topology);
   printf("re-exported to buffer %p length %d\n", buf2, size2);
 
   if (strcmp(buf1, buf2)) {
@@ -68,6 +67,8 @@ static int one_test(void)
 
   hwloc_free_xmlbuffer(topology, buf1);
   hwloc_free_xmlbuffer(topology, buf2);
+
+  hwloc_topology_destroy(topology);
 
   return err;
 }
