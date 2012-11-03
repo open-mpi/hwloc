@@ -256,6 +256,7 @@ extern int hwloc_look_noos(struct hwloc_topology *topology);
 
 extern int hwloc_backend_custom_init(struct hwloc_topology *topology);
 extern void hwloc_backend_custom_exit(struct hwloc_topology *topology);
+extern int hwloc_look_custom(struct hwloc_topology *topology);
 
 /*
  * Add an object to the topology.

@@ -14,11 +14,20 @@ int main(void)
 {
   hwloc_topology_t local, global;
   hwloc_obj_t sw1, sw2, sw11, sw12, sw21, sw22, root;
+  int err;
 
   printf("Loading the local topology...\n");
   hwloc_topology_init(&local);
   hwloc_topology_set_synthetic(local, "n:2 s:2 ca:1 core:2 ca:2 pu:2");
   hwloc_topology_load(local);
+
+  printf("Try to create an empty custom topology...\n");
+  hwloc_topology_init(&global);
+  hwloc_topology_set_custom(global);
+  err = hwloc_topology_load(global);
+  assert(err == -1);
+  assert(errno == EINVAL);
+  hwloc_topology_destroy(global);
 
   printf("Creating a custom topology...\n");
   hwloc_topology_init(&global);

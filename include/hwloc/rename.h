@@ -517,6 +517,7 @@ extern "C" {
 
 #define hwloc_backend_custom_init HWLOC_NAME(backend_custom_init)
 #define hwloc_backend_custom_exit HWLOC_NAME(backend_custom_exit)
+#define hwloc_look_custom HWLOC_NAME(look_custom)
 
 #define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
 #define hwloc_report_error_t HWLOC_NAME(report_error_t)

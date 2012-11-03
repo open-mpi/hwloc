@@ -2059,7 +2059,8 @@ hwloc_discover(struct hwloc_topology *topology)
   if (topology->backend_type == HWLOC_BACKEND_SYNTHETIC) {
     hwloc_look_synthetic(topology);
   } else if (topology->backend_type == HWLOC_BACKEND_CUSTOM) {
-    /* nothing to do, just connect levels below */
+    if (hwloc_look_custom(topology) < 0)
+      return -1;
   } else if (topology->backend_type == HWLOC_BACKEND_XML) {
     if (hwloc_look_xml(topology) < 0)
       return -1;

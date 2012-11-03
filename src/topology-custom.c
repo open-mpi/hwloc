@@ -49,6 +49,16 @@ hwloc_custom_insert_topology(struct hwloc_topology *newtopology,
   return 0;
 }
 
+int
+hwloc_look_custom(struct hwloc_topology *topology)
+{
+  if (!topology->levels[0][0]->first_child) {
+    errno = EINVAL;
+    return -1;
+  }
+  return 0;
+}
+
 void
 hwloc_backend_custom_exit(struct hwloc_topology *topology)
 {
