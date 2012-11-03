@@ -7,6 +7,7 @@
 #define PRIVATE_XML_H 1
 
 struct hwloc_topology;
+struct hwloc_xml_backend_data_s;
 struct hwloc_obj;
 
 #include <sys/types.h>
@@ -49,13 +50,13 @@ typedef struct hwloc__xml_export_state_s {
 
 extern void hwloc__xml_export_object (hwloc__xml_export_state_t state, struct hwloc_topology *topology, struct hwloc_obj *obj);
 
-extern int hwloc_nolibxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen);
+extern int hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata, const char *xmlpath, const char *xmlbuffer, int xmlbuflen);
 extern int hwloc_nolibxml_export_file(struct hwloc_topology *topology, const char *filename);
 extern int hwloc_nolibxml_export_buffer(struct hwloc_topology *topology, char **xmlbuffer, int *buflen);
 extern void hwloc_nolibxml_free_buffer(void *xmlbuffer);
 
 #ifdef HWLOC_HAVE_LIBXML2
-extern int hwloc_libxml_backend_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int xmlbuflen);
+extern int hwloc_libxml_backend_init(struct hwloc_xml_backend_data_s *bdata, const char *xmlpath, const char *xmlbuffer, int xmlbuflen);
 extern int hwloc_libxml_export_file(struct hwloc_topology *topology, const char *filename);
 extern int hwloc_libxml_export_buffer(struct hwloc_topology *topology, char **xmlbuffer, int *buflen);
 extern void hwloc_libxml_free_buffer(void *xmlbuffer);

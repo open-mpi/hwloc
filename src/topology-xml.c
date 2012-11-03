@@ -39,11 +39,11 @@ hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, con
 #ifdef HWLOC_HAVE_LIBXML2
   char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
   if (!env || !atoi(env)) {
-    ret = hwloc_libxml_backend_init(topology, xmlpath, xmlbuffer, xmlbuflen);
+    ret = hwloc_libxml_backend_init(&topology->backend_params.xml, xmlpath, xmlbuffer, xmlbuflen);
   } else
 #endif /* HWLOC_HAVE_LIBXML2 */
   {
-    ret = hwloc_nolibxml_backend_init(topology, xmlpath, xmlbuffer, xmlbuflen);
+    ret = hwloc_nolibxml_backend_init(&topology->backend_params.xml, xmlpath, xmlbuffer, xmlbuflen);
   }
   if (ret < 0)
     return ret;
@@ -61,7 +61,7 @@ hwloc_backend_xml_exit(struct hwloc_topology *topology)
 {
   assert(topology->backend_type == HWLOC_BACKEND_XML);
   topology->is_thissystem = 1;
-  topology->backend_params.xml.backend_exit(topology);
+  topology->backend_params.xml.backend_exit(&topology->backend_params.xml);
   topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
@@ -675,7 +675,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
   topology->backend_params.xml.first_distances = topology->backend_params.xml.last_distances = NULL;
 
-  ret = topology->backend_params.xml.look(topology, &state);
+  ret = topology->backend_params.xml.look_init(&topology->backend_params.xml, &state);
   if (ret < 0)
     goto failed;
 
@@ -704,7 +704,7 @@ hwloc_look_xml(struct hwloc_topology *topology)
 
  failed:
   if (topology->backend_params.xml.look_failed)
-    topology->backend_params.xml.look_failed(topology);
+    topology->backend_params.xml.look_failed(&topology->backend_params.xml);
   hwloc_localeswitch_fini();
   return -1;
 }
