@@ -3243,7 +3243,7 @@ hwloc_linux_fallback_pu_level(struct hwloc_topology *topology)
     hwloc_setup_pu_level(topology, 1);
 }
 
-void
+int
 hwloc_look_linuxfs(struct hwloc_topology *topology)
 {
   DIR *nodes_dir;
@@ -3365,6 +3365,8 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
   if (topology->is_thissystem)
      /* FIXME: reuse topology->backend_params.linuxfs.utsname */
      hwloc_add_uname_info(topology);
+
+  return 1;
 }
 
 void

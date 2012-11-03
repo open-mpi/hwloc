@@ -237,7 +237,7 @@ hwloc_osf_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_nodes
   return ptr;
 }
 
-void
+int
 hwloc_look_osf(struct hwloc_topology *topology)
 {
   cpu_cursor_t cursor;
@@ -332,6 +332,7 @@ hwloc_look_osf(struct hwloc_topology *topology)
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "OSF");
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology);
+  return 1;
 }
 
 void

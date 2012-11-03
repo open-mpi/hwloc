@@ -308,7 +308,7 @@ hwloc_pci_warning(char *msg __hwloc_attribute_unused, ...)
 {
 }
 
-void
+int
 hwloc_look_libpci(struct hwloc_topology *topology)
 {
   struct pci_access *pciaccess;
@@ -328,7 +328,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   if (setjmp(err_buf)) {
     pci_cleanup(pciaccess);
-    return;
+    return -1;
   }
 
   pci_init(pciaccess);
@@ -482,7 +482,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   if (!fakehostbridge.first_child)
     /* found nothing, exit */
-    return;
+    return 0;
 
   /* walk the hierarchy, set bridge depth and lookup OS devices */
   hwloc_pci_traverse(topology, &fakehostbridge, hwloc_pci_traverse_setbridgedepth_cb);
@@ -542,4 +542,6 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   if (createdgroups)
     topology->next_group_depth++;
+
+  return 1;
 }

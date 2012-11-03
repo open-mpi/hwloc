@@ -472,7 +472,7 @@ hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, c
   }
 }
 
-void
+int
 hwloc_look_windows(struct hwloc_topology *topology)
 {
   BOOL (WINAPI *GetLogicalProcessorInformationProc)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
@@ -510,7 +510,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	if (GetLogicalProcessorInformationProc(procInfo, &length))
 	  break;
 	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-	  return;
+	  return -1;
 	procInfo = realloc(procInfo, length);
       }
 
@@ -617,7 +617,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
 	if (GetLogicalProcessorInformationExProc(RelationAll, procInfoTotal, &length))
 	  break;
 	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-	  return;
+	  return -1;
         procInfoTotal = realloc(procInfoTotal, length);
       }
 
@@ -742,6 +742,7 @@ hwloc_look_windows(struct hwloc_topology *topology)
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Windows");
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology);
+  return 1;
 }
 
 void

@@ -22,7 +22,7 @@
 #include <private/private.h>
 #include <private/debug.h>
 
-void
+int
 hwloc_look_darwin(struct hwloc_topology *topology)
 {
   int64_t _nprocs;
@@ -41,7 +41,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
   if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)
-    return;
+    return -1;
   nprocs = _nprocs;
   topology->support.discovery->pu = 1;
 
@@ -262,6 +262,7 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Darwin");
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology);
+  return 1;
 }
 
 void

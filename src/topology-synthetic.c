@@ -343,7 +343,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   return first_cpu;
 }
 
-void
+int
 hwloc_look_synthetic(struct hwloc_topology *topology)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
@@ -369,5 +369,5 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "Synthetic");
   hwloc_obj_add_info(topology->levels[0][0], "SyntheticDescription", topology->backend_params.synthetic.string);
+  return 1;
 }
-

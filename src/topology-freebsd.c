@@ -174,7 +174,7 @@ hwloc_freebsd_node_meminfo_info(struct hwloc_topology *topology)
 }
 #endif
 
-void
+int
 hwloc_look_freebsd(struct hwloc_topology *topology)
 {
   unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
@@ -192,6 +192,7 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 
   if (topology->is_thissystem)
     hwloc_add_uname_info(topology);
+  return 1;
 }
 
 void

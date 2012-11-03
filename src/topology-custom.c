@@ -56,7 +56,8 @@ hwloc_look_custom(struct hwloc_topology *topology)
     errno = EINVAL;
     return -1;
   }
-  return 0;
+
+  return 1;
 }
 
 void
