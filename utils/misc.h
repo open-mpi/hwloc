@@ -158,6 +158,7 @@ hwloc_utils_enable_input_format(struct hwloc_topology *topology,
     } else {
       fprintf (stderr, "Unrecognized input file: %s\n", input);
       usage (callname, stderr);
+      return EXIT_FAILURE;
     }
   }
 
