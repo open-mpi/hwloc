@@ -12,6 +12,9 @@ abs_top_builddir="@abs_top_builddir@"
 ls="$abs_top_builddir/utils/lstopo-no-graphics"
 abs_top_srcdir="@abs_top_srcdir@"
 
+HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+export HWLOC_PLUGINS_PATH
+
 : ${TMPDIR=/tmp}
 {
   tmp=`

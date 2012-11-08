@@ -16,6 +16,8 @@ endif HWLOC_HAVE_LINUX
 
 LDADD =
 
+TESTS_ENVIRONMENT = $(builddir)/wrapper.sh
+
 check_PROGRAMS = hwloc_list_components \
 	hwloc_bitmap \
 	hwloc_bitmap_string \

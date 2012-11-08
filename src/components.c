@@ -18,6 +18,9 @@ static struct hwloc_disc_component * hwloc_disc_components = NULL;
 static unsigned hwloc_components_users = 0; /* first one initializes, last ones destroys */
 
 static int hwloc_components_verbose = 0;
+#ifdef HWLOC_HAVE_PLUGINS
+static int hwloc_plugins_verbose = 0;
+#endif
 
 #ifdef HWLOC_WIN_SYS
 /* Basic mutex on top of InterlockedCompareExchange() on windows,
@@ -44,6 +47,164 @@ static pthread_mutex_t hwloc_components_mutex = PTHREAD_MUTEX_INITIALIZER;
 #error No mutex implementation available
 #endif
 
+
+#ifdef HWLOC_HAVE_PLUGINS
+
+#include <ltdl.h>
+
+/* array of pointers to dynamically loaded plugins */
+static struct hwloc__plugin_desc {
+  char *name;
+  struct hwloc_component *component;
+  lt_dlhandle handle;
+  struct hwloc__plugin_desc *next;
+} *hwloc_plugins = NULL;
+
+static int
+hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
+{
+  const char *basename;
+  lt_dlhandle handle;
+  char *componentsymbolname = NULL;
+  struct hwloc_component *component;
+  struct hwloc__plugin_desc *desc;
+
+  if (hwloc_plugins_verbose)
+    fprintf(stderr, "Plugin dlforeach found `%s'\n", filename);
+
+  basename = strrchr(filename, '/');
+  if (!basename)
+    basename = filename;
+  else
+    basename++;
+
+  /* dlopen and get the component structure */
+  handle = lt_dlopenext(filename);
+  if (!handle) {
+    if (hwloc_plugins_verbose)
+      fprintf(stderr, "Failed to load plugin: %s\n", lt_dlerror());
+    goto out;
+  }
+  componentsymbolname = malloc(6+strlen(basename)+10+1);
+  sprintf(componentsymbolname, "%s_component", basename);
+  component = lt_dlsym(handle, componentsymbolname);
+  if (!component) {
+    if (hwloc_plugins_verbose)
+      fprintf(stderr, "Failed to find component symbol `%s'\n",
+	      componentsymbolname);
+    goto out_with_handle;
+  }
+  if (component->abi != HWLOC_COMPONENT_ABI) {
+    if (hwloc_plugins_verbose)
+      fprintf(stderr, "Plugin symbol ABI %u instead of %u\n",
+	      component->abi, HWLOC_COMPONENT_ABI);
+    goto out_with_handle;
+  }
+  if (hwloc_plugins_verbose)
+    fprintf(stderr, "Plugin contains expected symbol `%s'\n",
+	    componentsymbolname);
+  free(componentsymbolname);
+  componentsymbolname = NULL;
+
+  if (HWLOC_COMPONENT_TYPE_DISC == component->type) {
+    if (strncmp(basename, "hwloc_", 6)) {
+      if (hwloc_plugins_verbose)
+	fprintf(stderr, "Plugin name `%s' doesn't match its type DISCOVERY\n", basename);
+      goto out_with_handle;
+    }
+  } else if (HWLOC_COMPONENT_TYPE_XML == component->type) {
+    if (strncmp(basename, "hwloc_xml_", 10)) {
+      if (hwloc_plugins_verbose)
+	fprintf(stderr, "Plugin name `%s' doesn't match its type XML\n", basename);
+      goto out_with_handle;
+    }
+  } else {
+    if (hwloc_plugins_verbose)
+      fprintf(stderr, "Plugin name `%s' has invalid type %u\n",
+	      basename, (unsigned) component->type);
+    goto out_with_handle;
+  }
+
+  /* allocate a plugin_desc and queue it */
+  desc = malloc(sizeof(*desc));
+  if (!desc)
+    goto out_with_handle;
+  desc->name = strdup(basename);
+  desc->component = component;
+  desc->handle = handle;
+  if (hwloc_plugins_verbose)
+    fprintf(stderr, "Plugin descriptor `%s' ready\n", basename);
+
+  desc->next = hwloc_plugins;
+  hwloc_plugins = desc;
+  if (hwloc_plugins_verbose)
+    fprintf(stderr, "Plugin descriptor `%s' queued\n", basename);
+  return 0;
+
+ out_with_handle:
+  lt_dlclose(handle);
+  free(componentsymbolname); /* NULL if already freed */
+ out:
+  return 0;
+}
+
+static void
+hwloc_plugins_exit(void)
+{
+  struct hwloc__plugin_desc *desc, *next;
+
+  if (hwloc_plugins_verbose)
+    fprintf(stderr, "Closing all plugins\n");
+
+  desc = hwloc_plugins;
+  while (desc) {
+    next = desc->next;
+    lt_dlclose(desc->handle);
+    free(desc->name);
+    free(desc);
+    desc = next;
+  }
+  hwloc_plugins = NULL;
+
+  lt_dlexit();
+}
+
+static int
+hwloc_plugins_init(void)
+{
+  char *verboseenv;
+  char *path = HWLOC_PLUGINS_DIR;
+  char *env;
+  int err;
+
+  verboseenv = getenv("HWLOC_PLUGINS_VERBOSE");
+  hwloc_plugins_verbose = verboseenv ? atoi(verboseenv) : 0;
+
+  err = lt_dlinit();
+  if (err)
+    goto out;
+
+  env = getenv("HWLOC_PLUGINS_PATH");
+  if (env)
+    path = env;
+
+  hwloc_plugins = NULL;
+
+  if (hwloc_plugins_verbose)
+    fprintf(stderr, "Starting plugin dlforeach in %s\n", path);
+  err = lt_dlforeachfile(path, hwloc__dlforeach_cb, NULL);
+  if (err)
+    goto out_with_init;
+
+  return 0;
+
+ out_with_init:
+  hwloc_plugins_exit();
+ out:
+  return -1;
+}
+
+#endif /* HWLOC_HAVE_PLUGINS */
 
 static const char *
 hwloc_disc_component_type_string(hwloc_disc_component_type_t type)
@@ -91,6 +252,9 @@ hwloc_disc_component_register(struct hwloc_disc_component *component)
 void
 hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
 {
+#ifdef HWLOC_HAVE_PLUGINS
+  struct hwloc__plugin_desc *desc;
+#endif
   char *verboseenv;
   unsigned i;
 
@@ -104,6 +268,10 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
   verboseenv = getenv("HWLOC_COMPONENTS_VERBOSE");
   hwloc_components_verbose = verboseenv ? atoi(verboseenv) : 0;
 
+#ifdef HWLOC_HAVE_PLUGINS
+  hwloc_plugins_init();
+#endif
+
   /* hwloc_static_components is created by configure in static-components.h */
   for(i=0; NULL != hwloc_static_components[i]; i++)
     if (HWLOC_COMPONENT_TYPE_DISC == hwloc_static_components[i]->type)
@@ -112,6 +280,17 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
       hwloc_xml_callbacks_register(hwloc_static_components[i]->data);
     else
       assert(0);
+
+  /* dynamic plugins */
+#ifdef HWLOC_HAVE_PLUGINS
+  for(desc = hwloc_plugins; NULL != desc; desc = desc->next)
+    if (HWLOC_COMPONENT_TYPE_DISC == desc->component->type)
+      hwloc_disc_component_register(desc->component->data);
+    else if (HWLOC_COMPONENT_TYPE_XML == desc->component->type)
+      hwloc_xml_callbacks_register(desc->component->data);
+    else
+      assert(0);
+#endif
 
   HWLOC_COMPONENTS_UNLOCK();
 
@@ -273,6 +452,10 @@ hwloc_components_destroy_all(struct hwloc_topology *topology __hwloc_attribute_u
 
   hwloc_disc_components = NULL;
   hwloc_xml_callbacks_reset();
+
+#ifdef HWLOC_HAVE_PLUGINS
+  hwloc_plugins_exit();
+#endif
 
   HWLOC_COMPONENTS_UNLOCK();
 }

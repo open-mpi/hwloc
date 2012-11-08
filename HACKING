@@ -87,6 +87,8 @@ Building the Windows zipballs on Windows with MinGW:
      http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Automated%20Builds/
   - MSYS-<date>.zip
      http://sourceforge.net/projects/mingw-w64/files/External%20binary%20packages%20%28Win64%20hosted%29/MSYS%20%2832-bit%29/
+  - findutils-<version>-bin.zip
+     http://sourceforge.net/projects/ezwinports/files/
   Unpack all these ZIPs in a path that does not contain spaces,
   to avoid problems later.
 
@@ -100,6 +102,8 @@ Building the Windows zipballs on Windows with MinGW:
   - Visual C++ Express bin and IDE directories
   - The bin directory of the non-cross-compiling MinGW ZIP
     when building a 64bits zipball on a 32bits Windows
+  - The bin directory of the findutils ZIP to find the "find" command
+    (the Windows find command cannot be used)
 - Examples of PATH (depends on where ZIPs were extracted and were Visual Studio was installed):
   - For a 32bits zipball:
     $ PATH=/c/hwloc/mingw32/bin:/c/hwloc/mingw32/i686-w64-mingw32/lib:”/c/Program Files/Microsoft Visual Studio 10.0/VC/bin”:”/c/Program Files/Microsoft Visual Studio 10.0/Common7/IDE”:$PATH

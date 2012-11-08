@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2011 inria.  All rights reserved.
+# Copyright © 2009-2012 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
@@ -10,6 +10,9 @@
 abs_top_builddir="@abs_top_builddir@"
 assembler="$abs_top_builddir/utils/hwloc-assembler"
 abs_top_srcdir="@abs_top_srcdir@"
+
+HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+export HWLOC_PLUGINS_PATH
 
 if test x@HWLOC_XML_LOCALIZED@ = x1; then
   # make sure we use default numeric formats

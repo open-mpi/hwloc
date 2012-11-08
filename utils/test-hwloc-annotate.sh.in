@@ -10,6 +10,9 @@ abs_top_builddir="@abs_top_builddir@"
 annotate="$abs_top_builddir/utils/hwloc-annotate"
 abs_top_srcdir="@abs_top_srcdir@"
 
+HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+export HWLOC_PLUGINS_PATH
+
 if test x@HWLOC_XML_LOCALIZED@ = x1; then
   # make sure we use default numeric formats
   LANG=C

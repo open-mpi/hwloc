@@ -19,6 +19,11 @@ else
 noinst_LTLIBRARIES = libhwloc_embedded.la
 endif
 
+pluginsdir = $(libdir)/hwloc
+plugins_LTLIBRARIES = 
+plugins_ldflags = -module -avoid-version
+AM_CPPFLAGS += -DHWLOC_PLUGINS_DIR=\"$(pluginsdir)\"
+
 # Sources and ldflags
 
 sources = \
@@ -40,11 +45,25 @@ ldflags =
 # Conditionally add to the sources and ldflags
 
 if HWLOC_HAVE_LIBXML2
+if HWLOC_XML_LIBXML_BUILD_STATIC
 sources += topology-xml-libxml.c
+else
+plugins_LTLIBRARIES += hwloc_xml_libxml.la
+hwloc_xml_libxml_la_SOURCES = topology-xml-libxml.c
+hwloc_xml_libxml_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_LIBXML2_CFLAGS)
+hwloc_xml_libxml_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_LIBXML2_LIBS)
+endif
 endif HWLOC_HAVE_LIBXML2
 
 if HWLOC_HAVE_LIBPCI
+if HWLOC_LIBPCI_BUILD_STATIC
 sources += topology-libpci.c
+else
+plugins_LTLIBRARIES += hwloc_libpci.la
+hwloc_libpci_la_SOURCES = topology-libpci.c
+hwloc_libpci_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_PCI_CFLAGS)
+hwloc_libpci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCI_LIBS)
+endif
 endif HWLOC_HAVE_LIBPCI
 
 if HWLOC_HAVE_SOLARIS
@@ -119,6 +138,15 @@ endif HWLOC_HAVE_WINDOWS
 libhwloc_la_SOURCES = $(sources)
 libhwloc_la_LDFLAGS = $(ldflags) -version-info $(libhwloc_so_version) $(HWLOC_LIBS)
 
+if HWLOC_HAVE_PLUGINS
+AM_CPPFLAGS += $(LTDLINCL)
+libhwloc_la_LDFLAGS += -export-dynamic
+libhwloc_la_LIBADD = $(LIBLTDL)
+libhwloc_la_DEPENDENCIES = $(LTDLDEPS)
+
+SUBDIRS = libltdl
+endif
+
 # Embedded library (note the lack of a .so version number -- that
 # intentionally only appears in the installable library).  Also note
 # the lack of _LDFLAGS -- all libs are added by the upper layer (via
@@ -135,3 +163,9 @@ EXTRA_DIST += hwloc.dtd
 endif
 
 DISTCLEANFILES = static-components.h
+
+if HWLOC_HAVE_PLUGINS
+check_LTLIBRARIES = hwloc_fake.la
+hwloc_fake_la_SOURCES = topology-fake.c
+hwloc_fake_la_LDFLAGS = $(plugins_ldflags) -rpath /nowhere # force libtool to build a shared-library even it's check-only
+endif

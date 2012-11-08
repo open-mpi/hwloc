@@ -1,4 +1,4 @@
-# Copyright © 2012      inria.  All rights reserved.
+# Copyright © 2012      Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 # suppressions file to be passed to valgrind with
@@ -28,4 +28,29 @@
    fun:xmlNewRMutex
    ...
    fun:xmlDictCreate
+}
+
+# ltdl dlopen global state?
+{
+   ltdl_dlopen_malloc
+   Memcheck:Leak
+   fun:malloc
+   fun:_dl_map_object_deps
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+}
+
+# lt_dlforeachfile abusing paths
+{
+   fun:lt_dlforeachfile_path
+   Memcheck:Addr8
+   fun:_wordcopy_fwd_dest_aligned
+   fun:__GI_memmove
+   fun:argz_insert
+   ...
+   fun:lt_dlforeachfile
 }

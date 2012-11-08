@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2010 inria.  All rights reserved.
+# Copyright © 2009-2012 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 #
@@ -166,8 +166,15 @@ LIBS="$HWLOC_EMBEDDED_LIBS $LIBS"
 # Compiler support -- we don't need that stuff.
 AM_ENABLE_SHARED
 AM_DISABLE_STATIC
-AM_PROG_LIBTOOL([win32-dll])
+AM_PROG_LIBTOOL([dlopen win32-dll])
 LT_LANG([C])
+LT_CONFIG_LTDL_DIR([src/libltdl])
+LTDL_INIT([recursive convenience])
+AC_CONFIG_FILES([src/libltdl/Makefile])
+
+# Workarounds for libtool LT_CONFIG_H bug
+#CPPFLAGS="$CPPFLAGS -I$HWLOC_top_builddir"
+AC_CONFIG_COMMANDS_PRE([LT_CONFIG_H=`expr "$LT_CONFIG_H" : '.*/\(.*\)'`])
 
 # Party on
 AC_OUTPUT
@@ -200,6 +207,7 @@ Hwloc optional build support status (more details can be found above):
 Probe / display PCI devices: $hwloc_pci_happy
 Graphical output (Cairo):    $hwloc_cairo_happy
 XML input / output:          $hwloc_xml_status
+Plugin support:              $hwloc_have_plugins
 EOF
 
 # Linux specific support

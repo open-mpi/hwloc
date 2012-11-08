@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2011 inria.  All rights reserved.
+# Copyright © 2009-2012 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
@@ -11,6 +11,9 @@
 abs_top_builddir="@abs_top_builddir@"
 calc="$abs_top_builddir/utils/hwloc-calc"
 abs_top_srcdir="@abs_top_srcdir@"
+
+HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+export HWLOC_PLUGINS_PATH
 
 : ${TMPDIR=/tmp}
 {

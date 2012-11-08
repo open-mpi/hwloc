@@ -47,6 +47,9 @@ bin_SCRIPTS = hwloc-assembler-remote
 
 if !HWLOC_HAVE_MINGW32
 TESTS = test-hwloc-annotate.sh test-hwloc-assembler.sh test-hwloc-calc.sh test-hwloc-distances.sh test-hwloc-distrib.sh test-hwloc-ls.sh
+if HWLOC_HAVE_PLUGINS
+TESTS += test-fake-plugin.sh
+endif HWLOC_HAVE_PLUGINS
 endif !HWLOC_HAVE_MINGW32
 
 # Only install man pages if we're building in standalone mode

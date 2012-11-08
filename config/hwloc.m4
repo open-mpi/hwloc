@@ -676,7 +676,6 @@ EOF])
         ])
     fi
     AC_SUBST(HWLOC_PCI_LIBS)
-    HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS"
     # If we asked for pci support but couldn't deliver, fail
     AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no"],
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
@@ -719,10 +718,11 @@ EOF])
       LIBS="$tmp_save_LIBS"
 
       hwloc_components="$hwloc_components libpci"
+      hwloc_libpci_component_maybeplugin=1
     else
       AC_SUBST([HWLOC_HAVE_LIBPCI], [0])
     fi
-    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS"
+    # don't add LIBS/CFLAGS yet, depends on plugins
 
     # libxml2 support
     hwloc_libxml2_happy=
@@ -737,14 +737,14 @@ EOF])
         AC_SUBST([HWLOC_HAVE_LIBXML2], [1])
 
         hwloc_components="$hwloc_components xml_libxml"
+        hwloc_xml_libxml_component_maybeplugin=1
     else
         AC_SUBST([HWLOC_HAVE_LIBXML2], [0])
 	AS_IF([test "$enable_libxml2" = "yes"],
               [AC_MSG_WARN([--enable-libxml2 requested, but libxml2 was not found])
                AC_MSG_ERROR([Cannot continue])])
     fi
-    HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CFLAGS"    
-    HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LIBXML2_LIBS"
+    # don't add LIBS/CFLAGS yet, depends on plugins
 
     # Try to compile the cpuid inlines
     AC_MSG_CHECKING([for cpuid])
@@ -801,16 +801,50 @@ EOF])
     # Now enable registration of listed components
     #
 
+    # Plugin support
+    AC_MSG_CHECKING([if plugin support is enabled])
+    # Plugins (even core support) are totally disabled by default
+    AS_IF([test "x$enable_plugins" = "x"], [enable_plugins=no])
+    # libltdl doesn't work on AIX as of 2.4.2
+    AS_IF([test "x$enable_plugins" = "xyes" -a "x$hwloc_aix" = "xyes"],
+      [AC_MSG_WARN([libltdl does not work on AIX, plugins support cannot be enabled.])
+       AC_MSG_ERROR([Cannot continue])])
+    # posix linkers don't work well with plugins and windows dll constraints
+    AS_IF([test "x$enable_plugins" = "xyes" -a "x$hwloc_windows" = "xyes"],
+      [AC_MSG_WARN([Plugins not supported on non-native Windows build, plugins support cannot be enabled.])
+       AC_MSG_ERROR([Cannot continue])])
+
+    AS_IF([test "x$enable_plugins" != "xno"], [hwloc_have_plugins=yes], [hwloc_have_plugins=no])
+    AC_MSG_RESULT([$hwloc_have_plugins])
+    AS_IF([test "x$hwloc_have_plugins" = "xyes"],
+          [AC_DEFINE([HWLOC_HAVE_PLUGINS], 1, [Define to 1 if the hwloc library should support dynamically-loaded plugins])])
+
     # Static components output file
     hwloc_static_components_dir=${HWLOC_top_builddir}/src
     mkdir -p ${hwloc_static_components_dir}
     hwloc_static_components_file=${hwloc_static_components_dir}/static-components.h
     rm -f ${hwloc_static_components_file}
 
-    hwloc_static_components="$hwloc_components"
+    # Make $enable_plugins easier to use (it contains either "yes" (all) or a list of <name>)
+    HWLOC_PREPARE_FILTER_COMPONENTS([$enable_plugins])
+    # Now we have some hwloc_<name>_component_wantplugin=1
+
+    # See which core components want plugin and support it
+    HWLOC_FILTER_COMPONENTS
+    # Now we have some hwloc_<name>_component=plugin/static
+    # and hwloc_static/plugin_components
     AC_MSG_CHECKING([components to build statically])
     AC_MSG_RESULT($hwloc_static_components)
     HWLOC_LIST_STATIC_COMPONENTS([$hwloc_static_components_file], [$hwloc_static_components])
+    AC_MSG_CHECKING([components to build as plugins])
+    AC_MSG_RESULT([$hwloc_plugin_components])
+
+    AS_IF([test "$hwloc_libpci_component" = "static"],
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS"])
+    AS_IF([test "$hwloc_xml_libxml_component" = "static"],
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LIBXML2_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CFLAGS"])
 
     #
     # Setup HWLOC's C, CPP, and LD flags, and LIBS
@@ -916,6 +950,10 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_X86_32], [test "x$hwloc_x86_32" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_X86_64], [test "x$hwloc_x86_64" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_CPUID], [test "x$hwloc_have_cpuid" = "xyes"])
+
+        AM_CONDITIONAL([HWLOC_HAVE_PLUGINS], [test "x$hwloc_have_plugins" = "xyes"])
+        AM_CONDITIONAL([HWLOC_LIBPCI_BUILD_STATIC], [test "x$hwloc_libpci_component" = "xstatic"])
+        AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 
         AM_CONDITIONAL([HWLOC_HAVE_CXX], [test "x$hwloc_have_cxx" = "xyes"])
     ])

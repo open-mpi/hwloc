@@ -16,6 +16,9 @@ HWLOC_top_builddir="@HWLOC_top_builddir@"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 lstopo="@HWLOC_top_builddir@/utils/lstopo-no-graphics"
 
+HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+export HWLOC_PLUGINS_PATH
+
 if test x@HWLOC_XML_LOCALIZED@ = x1; then
   # make sure we use default numeric formats
   LANG=C
