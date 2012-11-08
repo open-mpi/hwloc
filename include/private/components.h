@@ -37,6 +37,7 @@ struct hwloc_disc_component {
 
   unsigned priority; /* used to sort topology->components, higher priority first.
 		      * 50 for native OS components,
+		      * 45 for x86,
 		      * 40 for no-OS fallback,
 		      * 30 for global components (xml/synthetic/custom),
 		      * 20 for libpci, likely less for other additional components.
@@ -192,6 +193,8 @@ HWLOC_DECLSPEC extern const struct hwloc_component hwloc_libpci_component;
 #endif /* HWLOC_HAVE_LIBPCI */
 
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_synthetic_component;
+
+HWLOC_DECLSPEC extern const struct hwloc_component hwloc_x86_component;
 
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_noos_component;
 

@@ -83,6 +83,10 @@ if HWLOC_HAVE_FREEBSD
 sources += topology-freebsd.c
 endif HWLOC_HAVE_FREEBSD
 
+if HWLOC_HAVE_CPUID
+sources += topology-x86.c
+endif HWLOC_HAVE_CPUID
+
 if HWLOC_HAVE_GCC
 ldflags += -no-undefined
 endif HWLOC_HAVE_GCC
@@ -109,8 +113,6 @@ if HWLOC_HAVE_MS_LIB
 	[ ! -r .libs/libhwloc.def ] || $(INSTALL) .libs/libhwloc.exp $(DESTDIR)$(libdir)
 endif HWLOC_HAVE_MS_LIB
 endif HWLOC_HAVE_WINDOWS
-
-sources += topology-x86.c
 
 # Installable library
 

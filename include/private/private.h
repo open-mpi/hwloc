@@ -176,8 +176,6 @@ extern void hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *binding_hooks, s
 extern void hwloc_set_hpux_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_HPUX_SYS */
 
-extern void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs);
-
 /*
  * Add an object to the topology.
  * It is sorted along the tree of other objects according to the inclusion of

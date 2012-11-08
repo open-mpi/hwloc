@@ -476,6 +476,7 @@ extern "C" {
 #define hwloc_hpux_component HWLOC_NAME(hpux_component)
 #define hwloc_synthetic_component HWLOC_NAME(synthetic_component)
 #define hwloc_custom_component HWLOC_NAME(custom_component)
+#define hwloc_x86_component HWLOC_NAME(x86_component)
 #define hwloc_noos_component HWLOC_NAME(noos_component)
 #define hwloc_libpci_component HWLOC_NAME(libpci_component)
 
@@ -517,8 +518,6 @@ extern "C" {
 #define hwloc_set_darwin_hooks HWLOC_NAME(set_darwin_hooks)
 #define hwloc_set_freebsd_hooks HWLOC_NAME(set_freebsd_hooks)
 #define hwloc_set_hpux_hooks HWLOC_NAME(set_hpux_hooks)
-
-#define hwloc_look_x86 HWLOC_NAME(look_x86)
 
 #define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
 #define hwloc_report_error_t HWLOC_NAME(report_error_t)

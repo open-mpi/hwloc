@@ -746,6 +746,31 @@ EOF])
     HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CFLAGS"    
     HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LIBXML2_LIBS"
 
+    # Try to compile the cpuid inlines
+    AC_MSG_CHECKING([for cpuid])
+    old_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -I$HWLOC_top_srcdir/include"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+        #include <stdio.h>
+        #define __hwloc_inline
+        #include <private/cpuid.h>
+      ]], [[
+        if (hwloc_have_cpuid()) {
+          unsigned eax = 0, ebx, ecx = 0, edx;
+          hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+          printf("highest cpuid %x\n", eax);
+          return 0;
+        }
+      ]])],
+      [AC_MSG_RESULT([yes])
+       AC_DEFINE(HWLOC_HAVE_CPUID, 1, [Define to 1 if you have cpuid])
+       hwloc_have_cpuid=yes],
+      [AC_MSG_RESULT([no])])
+    if test "x$hwloc_have_cpuid" = xyes; then
+      hwloc_components="$hwloc_components x86"
+    fi
+    CPPFLAGS="$old_CPPFLAGS"
+
     # Components require pthread_mutex, see if it needs -lpthread
     hwloc_pthread_mutex_happy=no
     # Try without explicit -lpthread first
@@ -816,28 +841,6 @@ EOF])
     AC_SUBST(HWLOC_EMBEDDED_CPPFLAGS)
     AC_SUBST(HWLOC_EMBEDDED_LDADD)
     AC_SUBST(HWLOC_EMBEDDED_LIBS)
-
-    # Try to compile the cpuid inlines
-    AC_MSG_CHECKING([for cpuid])
-    old_CPPFLAGS="$CPPFLAGS"
-    CPPFLAGS="$CPPFLAGS -I$HWLOC_top_srcdir/include"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-        #include <stdio.h>
-        #define __hwloc_inline
-        #include <private/cpuid.h>
-      ]], [[
-        if (hwloc_have_cpuid()) {
-          unsigned eax = 0, ebx, ecx = 0, edx;
-          hwloc_cpuid(&eax, &ebx, &ecx, &edx);
-          printf("highest cpuid %x\n", eax);
-          return 0;
-        }
-      ]])],
-      [AC_MSG_RESULT([yes])
-       AC_DEFINE(HWLOC_HAVE_CPUID, 1, [Define to 1 if you have cpuid])
-       hwloc_have_cpuid=yes],
-      [AC_MSG_RESULT([no])])
-    CPPFLAGS="$old_CPPFLAGS"
 
     # Always generate these files
     AC_CONFIG_FILES(
