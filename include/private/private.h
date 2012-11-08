@@ -141,7 +141,7 @@ struct hwloc_topology {
   hwloc_backend_t backend_type;
   union hwloc_backend_params_u {
 #ifdef HWLOC_LINUX_SYS
-    struct hwloc_backend_params_linuxfs_s {
+    struct hwloc_linux_backend_data_s {
       /* FS root parameters */
       char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
       int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
