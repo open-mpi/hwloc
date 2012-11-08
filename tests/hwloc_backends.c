@@ -64,17 +64,20 @@ int main(void)
     printf("switching to xml and loading...\n");
     assert(!hwloc_topology_set_xml(topology2, xmlfile));
     hwloc_topology_load(topology2);
+    hwloc_topology_check(topology2);
     assert(!hwloc_topology_is_thissystem(topology2));
   }
   if (xmlbufok) {
     printf("switching to xmlbuffer and loading...\n");
     assert(!hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen));
     hwloc_topology_load(topology2);
+    hwloc_topology_check(topology2);
     assert(!hwloc_topology_is_thissystem(topology2));
   }
   printf("switching to synthetic and loading...\n");
   hwloc_topology_set_synthetic(topology2, "machine:2 node:3 cache:2 pu:4");
   hwloc_topology_load(topology2);
+  hwloc_topology_check(topology2);
   assert(!hwloc_topology_is_thissystem(topology2));
   printf("switching to custom and loading...\n");
   hwloc_topology_set_custom(topology2);
@@ -82,14 +85,18 @@ int main(void)
   assert(sw);
   hwloc_custom_insert_topology(topology2, sw, topology1, NULL);
   hwloc_topology_load(topology2);
+  hwloc_topology_check(topology2);
   assert(!hwloc_topology_is_thissystem(topology2));
   printf("switching sysfs fsroot to // and loading...\n");
   err = hwloc_topology_set_fsroot(topology2, "//"); /* valid path that won't be recognized as '/' */
   hwloc_topology_load(topology2);
+  hwloc_topology_check(topology2);
+  hwloc_topology_check(topology2);
   assert(!hwloc_topology_is_thissystem(topology2) == !err); /* thissystem only changed if set_fsroot worked (i.e. on Linux) */
   printf("switching sysfs fsroot to / and loading...\n");
   hwloc_topology_set_fsroot(topology2, "/");
   hwloc_topology_load(topology2);
+  hwloc_topology_check(topology2);
   assert(hwloc_topology_is_thissystem(topology2)); /* on Linux, '/' is recognized as thissystem. on !Linux, set_fsroot() failed and we went back to the default backend */
 
   printf("switching to synthetic...\n");
