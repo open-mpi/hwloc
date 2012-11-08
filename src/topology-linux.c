@@ -3827,14 +3827,14 @@ hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj
 }
 
 int
-hwloc_linuxfs_pci_lookup_osdevices(struct hwloc_topology *topology, struct hwloc_obj *pcidev)
+hwloc_linux_backend_notify_new_object(struct hwloc_topology *topology, struct hwloc_obj *obj)
 {
   struct hwloc_linux_backend_data_s *data = &topology->backend_params.linuxfs;
   char pcidevpath[256];
   int res = 0;
 
   /* this callback is only used in the libpci backend for now */
-  assert(pcidev->type == HWLOC_OBJ_PCI_DEVICE);
+  assert(obj->type == HWLOC_OBJ_PCI_DEVICE);
 
   /* this should not be called if the backend isn't the real OS one */
   if (data->root_path) {
@@ -3843,20 +3843,20 @@ hwloc_linuxfs_pci_lookup_osdevices(struct hwloc_topology *topology, struct hwloc
   }
 
   snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
-	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
-	   pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
+	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
+	   obj->attr->pcidev.dev, obj->attr->pcidev.func);
 
-  res += hwloc_linux_lookup_net_class(topology, pcidev, pcidevpath);
-  res += hwloc_linux_lookup_openfabrics_class(topology, pcidev, pcidevpath);
-  res += hwloc_linux_lookup_dma_class(topology, pcidev, pcidevpath);
-  res += hwloc_linux_lookup_drm_class(topology, pcidev, pcidevpath);
-  res += hwloc_linux_lookup_block_class(topology, pcidev, pcidevpath);
+  res += hwloc_linux_lookup_net_class(topology, obj, pcidevpath);
+  res += hwloc_linux_lookup_openfabrics_class(topology, obj, pcidevpath);
+  res += hwloc_linux_lookup_dma_class(topology, obj, pcidevpath);
+  res += hwloc_linux_lookup_drm_class(topology, obj, pcidevpath);
+  res += hwloc_linux_lookup_block_class(topology, obj, pcidevpath);
   return res;
 }
 
 int
-hwloc_linuxfs_get_pcidev_cpuset(struct hwloc_topology *topology __hwloc_attribute_unused,
-				struct hwloc_obj *pcidev, hwloc_bitmap_t cpuset)
+hwloc_linux_backend_get_obj_cpuset(struct hwloc_topology *topology __hwloc_attribute_unused,
+				   struct hwloc_obj *obj, hwloc_bitmap_t cpuset)
 {
   struct hwloc_linux_backend_data_s *data = &topology->backend_params.linuxfs;
   char path[256];
@@ -3864,8 +3864,8 @@ hwloc_linuxfs_get_pcidev_cpuset(struct hwloc_topology *topology __hwloc_attribut
   int err;
 
   /* this callback is only used in the libpci backend for now */
-  assert(pcidev->type == HWLOC_OBJ_PCI_DEVICE
-	 || (pcidev->type == HWLOC_OBJ_BRIDGE && pcidev->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI));
+  assert(obj->type == HWLOC_OBJ_PCI_DEVICE
+	 || (obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI));
 
   /* this should not be called if the backend isn't the real OS one */
   if (data->root_path) {
@@ -3874,8 +3874,8 @@ hwloc_linuxfs_get_pcidev_cpuset(struct hwloc_topology *topology __hwloc_attribut
   }
 
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
-	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus,
-	   pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func);
+	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
+	   obj->attr->pcidev.dev, obj->attr->pcidev.func);
   file = fopen(path, "r"); /* the libpci backend doesn't use sysfs.fsroot */
   if (file) {
     err = hwloc_linux_parse_cpumap_file(file, cpuset);

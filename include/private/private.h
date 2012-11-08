@@ -194,8 +194,8 @@ extern int hwloc_look_linuxfs(struct hwloc_topology *topology);
 extern void hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 extern int hwloc_backend_linuxfs_init(struct hwloc_topology *topology, const char *fsroot_path);
 extern void hwloc_backend_linuxfs_exit(struct hwloc_topology *topology);
-extern int hwloc_linuxfs_pci_lookup_osdevices(struct hwloc_topology *topology, struct hwloc_obj *pcidev);
-extern int hwloc_linuxfs_get_pcidev_cpuset(struct hwloc_topology *topology, struct hwloc_obj *pcidev, hwloc_bitmap_t cpuset);
+extern int hwloc_linux_backend_notify_new_object(struct hwloc_topology *topology, struct hwloc_obj *obj);
+extern int hwloc_linux_backend_get_obj_cpuset(struct hwloc_topology *topology, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
 #endif /* HWLOC_LINUX_SYS */
 
 extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen);

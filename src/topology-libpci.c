@@ -63,7 +63,7 @@ hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
     return;
 
 #ifdef HWLOC_LINUX_SYS
-  hwloc_linuxfs_pci_lookup_osdevices(topology, pcidev);
+  hwloc_linux_backend_notify_new_object(topology, pcidev);
 #endif
 }
 
@@ -247,7 +247,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
   } else {
     /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
 #ifdef HWLOC_LINUX_SYS
-    err = hwloc_linuxfs_get_pcidev_cpuset(topology, hostbridge->first_child, cpuset);
+    err = hwloc_linux_backend_get_obj_cpuset(topology, hostbridge->first_child, cpuset);
 #else
     err = -1;
 #endif
