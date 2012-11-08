@@ -160,7 +160,7 @@ struct hwloc_topology {
 	struct hwloc_xml_imported_distances_s *prev, *next;
       } *first_distances, *last_distances;
     } xml;
-    struct hwloc_backend_params_synthetic_s {
+    struct hwloc_synthetic_backend_data_s {
       /* synthetic backend parameters */
       char *string;
 #define HWLOC_SYNTHETIC_MAX_DEPTH 128

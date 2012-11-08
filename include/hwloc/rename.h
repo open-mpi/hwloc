@@ -453,7 +453,7 @@ extern "C" {
 #define hwloc_backend_params_u HWLOC_NAME(backend_params_u)
 #define hwloc_linux_backend_data_s HWLOC_NAME(linux_backend_data_s)
 #define hwloc_xml_backend_data_s HWLOC_NAME(xml_backend_data_s)
-#define hwloc_backend_params_synthetic_s HWLOC_NAME(backend_params_synthetic_s)
+#define hwloc_synthetic_backend_data_s HWLOC_NAME(synthetic_backend_data_s)
 
 #define hwloc_xml_imported_distances_s HWLOC_NAME(xml_imported_distances_s)
 
