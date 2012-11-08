@@ -1,4 +1,4 @@
-# Copyright © 2009-2011 inria.  All rights reserved.
+# Copyright © 2009-2012 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -16,7 +16,8 @@ endif HWLOC_HAVE_LINUX
 
 LDADD =
 
-check_PROGRAMS = hwloc_bitmap \
+check_PROGRAMS = hwloc_list_components \
+	hwloc_bitmap \
 	hwloc_bitmap_string \
 	hwloc_get_closest_objs \
 	hwloc_get_obj_covering_cpuset \

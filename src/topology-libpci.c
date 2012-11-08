@@ -57,14 +57,12 @@ static void
 hwloc_pci_traverse_lookuposdevices_cb(void * cbdata,
 				      struct hwloc_obj *pcidev, int depth __hwloc_attribute_unused)
 {
-  struct hwloc_topology *topology = cbdata;
+  struct hwloc_backend *backend = cbdata;
 
   if (pcidev->type == HWLOC_OBJ_BRIDGE)
     return;
 
-#ifdef HWLOC_LINUX_SYS
-  hwloc_linux_backend_notify_new_object(topology, pcidev);
-#endif
+  hwloc_backends_notify_new_object(backend, pcidev);
 }
 
 static void
@@ -228,7 +226,8 @@ hwloc_pci_add_object(struct hwloc_obj *root, struct hwloc_obj *new)
 }
 
 static struct hwloc_obj *
-hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_obj *hostbridge, int *created)
+hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_backend *backend,
+				 struct hwloc_obj *hostbridge, int *created)
 {
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   struct hwloc_obj *parent;
@@ -245,12 +244,10 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_o
     hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
     hwloc_bitmap_sscanf(cpuset, env);
   } else {
-    /* get the hostbridge cpuset. it's not a PCI device, so we use its first child locality info */
-#ifdef HWLOC_LINUX_SYS
-    err = hwloc_linux_backend_get_obj_cpuset(topology, hostbridge->first_child, cpuset);
-#else
-    err = -1;
-#endif
+    /* get the hostbridge cpuset by acking the OS backend.
+     * it's not a PCI device, so we use its first child locality info.
+     */
+    err = hwloc_backends_get_obj_cpuset(backend, hostbridge->first_child, cpuset);
     if (err < 0)
       /* if we got nothing, assume the hostbridge is attached to the top of hierarchy */
       hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
@@ -311,9 +308,10 @@ hwloc_pci_warning(char *msg __hwloc_attribute_unused, ...)
 {
 }
 
-int
-hwloc_look_libpci(struct hwloc_topology *topology)
+static int
+hwloc_look_libpci(struct hwloc_backend *backend)
 {
+  struct hwloc_topology *topology = backend->topology;
   struct pci_access *pciaccess;
   struct pci_dev *pcidev;
   struct hwloc_obj fakehostbridge; /* temporary object covering the whole PCI hierarchy until its complete */
@@ -497,7 +495,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   /* walk the hierarchy, set bridge depth and lookup OS devices */
   hwloc_pci_traverse(NULL, &fakehostbridge, hwloc_pci_traverse_setbridgedepth_cb);
-  hwloc_pci_traverse(topology, &fakehostbridge, hwloc_pci_traverse_lookuposdevices_cb);
+  hwloc_pci_traverse(backend, &fakehostbridge, hwloc_pci_traverse_lookuposdevices_cb);
 
   /*
    * fakehostbridge lists all objects connected to any upstream bus in the machine.
@@ -547,7 +545,7 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 		current_domain, current_bus, current_subordinate);
 
     /* attach the hostbridge where it belongs */
-    parent = hwloc_pci_find_hostbridge_parent(topology, hostbridge, &createdgroups);
+    parent = hwloc_pci_find_hostbridge_parent(topology, backend, hostbridge, &createdgroups);
     hwloc_insert_object_by_parent(topology, parent, hostbridge);
   }
 
@@ -556,3 +554,36 @@ hwloc_look_libpci(struct hwloc_topology *topology)
 
   return 1;
 }
+
+static struct hwloc_backend *
+hwloc_libpci_component_instantiate(struct hwloc_disc_component *component,
+				   const void *_data1 __hwloc_attribute_unused,
+				   const void *_data2 __hwloc_attribute_unused,
+				   const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+
+  /* thissystem may not be fully initialized yet, we'll check flags in discover() */
+
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    return NULL;
+  backend->discover = hwloc_look_libpci;
+  return backend;
+}
+
+static struct hwloc_disc_component hwloc_libpci_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL,
+  "libpci",
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  hwloc_libpci_component_instantiate,
+  20,
+  NULL
+};
+
+const struct hwloc_component hwloc_libpci_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_libpci_disc_component
+};

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -18,14 +18,23 @@
 #include <strings.h>
 #endif
 
-/* Read from DESCRIPTION a series of integers describing a symmetrical
-   topology and update `topology->synthetic_description' accordingly.  On
+struct hwloc_synthetic_backend_data_s {
+  /* synthetic backend parameters */
+  char *string;
+#define HWLOC_SYNTHETIC_MAX_DEPTH 128
+  unsigned arity[HWLOC_SYNTHETIC_MAX_DEPTH];
+  hwloc_obj_type_t type[HWLOC_SYNTHETIC_MAX_DEPTH];
+  unsigned id[HWLOC_SYNTHETIC_MAX_DEPTH];
+  unsigned depth[HWLOC_SYNTHETIC_MAX_DEPTH]; /* For cache/misc */
+};
+
+/* Read from description a series of integers describing a symmetrical
+   topology and update the hwloc_synthetic_backend_data_s accordingly.  On
    success, return zero.  */
-int
-hwloc_backend_synthetic_init(struct hwloc_topology *topology,
+static int
+hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 			     const char *description)
 {
-  struct hwloc_synthetic_backend_data_s *data = &topology->backend_params.synthetic;
   const char *pos, *next_pos;
   unsigned long item, count;
   unsigned i;
@@ -37,8 +46,6 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology,
 
   if (env)
     verbose = atoi(env);
-
-  assert(topology->backend_type == HWLOC_BACKEND_NONE);
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
 #define HWLOC_OBJ_TYPE_UNKNOWN ((hwloc_obj_type_t) -1)
@@ -209,22 +216,10 @@ hwloc_backend_synthetic_init(struct hwloc_topology *topology,
       data->depth[i] = cache_depth--;
   }
 
-  topology->backend_type = HWLOC_BACKEND_SYNTHETIC;
   data->string = strdup(description);
   data->arity[count-1] = 0;
-  topology->is_thissystem = 0;
 
   return 0;
-}
-
-void
-hwloc_backend_synthetic_exit(struct hwloc_topology *topology)
-{
-  struct hwloc_synthetic_backend_data_s *data = &topology->backend_params.synthetic;
-  assert(topology->backend_type == HWLOC_BACKEND_SYNTHETIC);
-  topology->is_thissystem = 1;
-  free(data->string);
-  topology->backend_type = HWLOC_BACKEND_NONE;
 }
 
 /*
@@ -347,10 +342,11 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   return first_cpu;
 }
 
-int
-hwloc_look_synthetic(struct hwloc_topology *topology)
+static int
+hwloc_look_synthetic(struct hwloc_backend *backend)
 {
-  struct hwloc_synthetic_backend_data_s *data = &topology->backend_params.synthetic;
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_synthetic_backend_data_s *data = backend->private_data;
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
   unsigned first_cpu = 0, i;
 
@@ -378,3 +374,71 @@ hwloc_look_synthetic(struct hwloc_topology *topology)
   hwloc_obj_add_info(topology->levels[0][0], "SyntheticDescription", data->string);
   return 1;
 }
+
+static void
+hwloc_synthetic_backend_disable(struct hwloc_backend *backend)
+{
+  struct hwloc_synthetic_backend_data_s *data = backend->private_data;
+  free(data->string);
+  free(data);
+}
+
+static struct hwloc_backend *
+hwloc_synthetic_component_instantiate(struct hwloc_disc_component *component,
+				      const void *_data1,
+				      const void *_data2 __hwloc_attribute_unused,
+				      const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+  struct hwloc_synthetic_backend_data_s *data;
+  int err;
+
+  if (!_data1) {
+    errno = EINVAL;
+    goto out;
+  }
+
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    goto out;
+
+  data = malloc(sizeof(*data));
+  if (!data) {
+    errno = ENOMEM;
+    goto out_with_backend;
+  }
+
+  err = hwloc_backend_synthetic_init(data, (const char *) _data1);
+  if (err < 0)
+    goto out_with_data;
+
+  backend->private_data = data;
+  backend->discover = hwloc_look_synthetic;
+  backend->disable = hwloc_synthetic_backend_disable;
+  backend->is_thissystem = 0;
+
+  return backend;
+
+ out_with_data:
+  free(data);
+ out_with_backend:
+  free(backend);
+ out:
+  return NULL;
+}
+
+static struct hwloc_disc_component hwloc_synthetic_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  "synthetic",
+  HWLOC_DISC_COMPONENT_TYPE_CPU | HWLOC_DISC_COMPONENT_TYPE_GLOBAL | HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL,
+  hwloc_synthetic_component_instantiate,
+  30,
+  NULL
+};
+
+const struct hwloc_component hwloc_synthetic_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_synthetic_disc_component
+};

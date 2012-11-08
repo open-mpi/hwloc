@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -674,9 +674,10 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
   rs_free(rad);
 }
 
-int
-hwloc_look_aix(struct hwloc_topology *topology)
+static int
+hwloc_look_aix(struct hwloc_backend *backend)
 {
+  struct hwloc_topology *topology = backend->topology;
   int i;
 
   if (topology->levels[0][0]->cpuset)
@@ -797,3 +798,33 @@ hwloc_set_aix_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->interleave_membind = 1;
 #endif /* P_DEFAULT */
 }
+
+static struct hwloc_backend *
+hwloc_aix_component_instantiate(struct hwloc_disc_component *component,
+				const void *_data1 __hwloc_attribute_unused,
+				const void *_data2 __hwloc_attribute_unused,
+				const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    return NULL;
+  backend->discover = hwloc_look_aix;
+  return backend;
+}
+
+static struct hwloc_disc_component hwloc_aix_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_CPU,
+  "aix",
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  hwloc_aix_component_instantiate,
+  50,
+  NULL
+};
+
+const struct hwloc_component hwloc_aix_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_aix_disc_component
+};

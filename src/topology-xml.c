@@ -27,46 +27,31 @@ hwloc__xml_verbose(void)
   return verbose;
 }
 
-/***********************************
- ******** Backend Init/Exit ********
- ***********************************/
+/*********************************
+ ********* XML callbacks *********
+ *********************************/
 
-/* this can be the first XML call */
-int
-hwloc_backend_xml_init(struct hwloc_topology *topology,
-		       const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
-{
-  struct hwloc_xml_backend_data_s *data = &topology->backend_params.xml;
-  int ret;
-#ifdef HWLOC_HAVE_LIBXML2
-  char *env = getenv("HWLOC_NO_LIBXML_IMPORT");
-  if (!env || !atoi(env)) {
-    ret = hwloc_libxml_backend_init(data, xmlpath, xmlbuffer, xmlbuflen);
-  } else
-#endif /* HWLOC_HAVE_LIBXML2 */
-  {
-    ret = hwloc_nolibxml_backend_init(data, xmlpath, xmlbuffer, xmlbuflen);
-  }
-  if (ret < 0)
-    return ret;
+/* set when registering nolibxml and libxml components.
+ * modifications protected by the components mutex.
+ * read by the common XML code in topology-xml.c to jump to the right XML backend.
+ */
+static struct hwloc_xml_callbacks *hwloc_nolibxml_callbacks = NULL, *hwloc_libxml_callbacks = NULL;
 
-  topology->is_thissystem = 0;
-  assert(topology->backend_type == HWLOC_BACKEND_NONE);
-  topology->backend_type = HWLOC_BACKEND_XML;
-
-  return 0;
-}
-
-/* this canNOT be the first XML call */
 void
-hwloc_backend_xml_exit(struct hwloc_topology *topology)
+hwloc_xml_callbacks_register(struct hwloc_xml_component *comp)
 {
-  struct hwloc_xml_backend_data_s *data = &topology->backend_params.xml;
-  assert(topology->backend_type == HWLOC_BACKEND_XML);
-  topology->is_thissystem = 1;
-  data->backend_exit(data);
-  topology->backend_type = HWLOC_BACKEND_NONE;
+  if (!hwloc_nolibxml_callbacks)
+    hwloc_nolibxml_callbacks = comp->nolibxml_callbacks;
+  if (!hwloc_libxml_callbacks)
+    hwloc_libxml_callbacks = comp->libxml_callbacks;
 }
+
+void
+hwloc_xml_callbacks_reset(void)
+{
+  hwloc_nolibxml_callbacks = NULL;
+  hwloc_libxml_callbacks = NULL;
+}			       
 
 /************************************************
  ********* XML import (common routines) *********
@@ -670,10 +655,11 @@ hwloc_xml__handle_distances(struct hwloc_topology *topology,
 }
 
 /* this canNOT be the first XML call */
-int
-hwloc_look_xml(struct hwloc_topology *topology)
+static int
+hwloc_look_xml(struct hwloc_backend *backend)
 {
-  struct hwloc_xml_backend_data_s *data = &topology->backend_params.xml;
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_xml_backend_data_s *data = backend->private_data;
   struct hwloc__xml_import_state_s state, childstate;
   char *tag;
   hwloc_localeswitch_declare;
@@ -936,22 +922,23 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
 int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 {
   hwloc_localeswitch_declare;
-  int ret;
-#ifdef HWLOC_HAVE_LIBXML2
   char *env;
-#endif
+  int force_nolibxml;
+  int ret;
+
+  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    errno = ENOSYS;
+    return -1;
+  }
 
   hwloc_localeswitch_init();
 
-#ifdef HWLOC_HAVE_LIBXML2
   env = getenv("HWLOC_NO_LIBXML_EXPORT");
-  if (!env || !atoi(env)) {
-    ret = hwloc_libxml_export_file(topology, filename);
-  } else
-#endif
-  {
-    ret = hwloc_nolibxml_export_file(topology, filename);
-  }
+  force_nolibxml = (env && atoi(env));
+  if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
+    ret = hwloc_nolibxml_callbacks->export_file(topology, filename);
+  else
+    ret = hwloc_libxml_callbacks->export_file(topology, filename);
 
   hwloc_localeswitch_fini();
   return ret;
@@ -961,22 +948,23 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
   hwloc_localeswitch_declare;
-  int ret;
-#ifdef HWLOC_HAVE_LIBXML2
   char *env;
-#endif
+  int force_nolibxml;
+  int ret;
+
+  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    errno = ENOSYS;
+    return -1;
+  }
 
   hwloc_localeswitch_init();
 
-#ifdef HWLOC_HAVE_LIBXML2
   env = getenv("HWLOC_NO_LIBXML_EXPORT");
-  if (!env || !atoi(env)) {
-    ret = hwloc_libxml_export_buffer(topology, xmlbuffer, buflen);
-  } else
-#endif
-  {
-    ret = hwloc_nolibxml_export_buffer(topology, xmlbuffer, buflen);
-  }
+  force_nolibxml = (env && atoi(env));
+  if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
+    ret = hwloc_nolibxml_callbacks->export_buffer(topology, xmlbuffer, buflen);
+  else
+    ret = hwloc_libxml_callbacks->export_buffer(topology, xmlbuffer, buflen);
 
   hwloc_localeswitch_fini();
   return ret;
@@ -984,15 +972,20 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 
 void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer)
 {
-#ifdef HWLOC_HAVE_LIBXML2
-  char *env = getenv("HWLOC_NO_LIBXML_EXPORT");
-  if (!env || !atoi(env)) {
-    hwloc_libxml_free_buffer(xmlbuffer);
-  } else
-#endif
-  {
-    hwloc_nolibxml_free_buffer(xmlbuffer);
+  char *env;
+  int force_nolibxml;
+
+  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    errno = ENOSYS;
+    return ;
   }
+
+  env = getenv("HWLOC_NO_LIBXML_EXPORT");
+  force_nolibxml = (env && atoi(env));
+  if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
+    hwloc_nolibxml_callbacks->free_buffer(xmlbuffer);
+  else
+    hwloc_libxml_callbacks->free_buffer(xmlbuffer);
 }
 
 void
@@ -1073,3 +1066,90 @@ hwloc_topology_set_userdata_import_callback(hwloc_topology_t topology,
 {
   topology->userdata_import_cb = import;
 }
+
+/***************************************
+ ************ XML component ************
+ ***************************************/
+
+static void
+hwloc_xml_backend_disable(struct hwloc_backend *backend)
+{
+  struct hwloc_xml_backend_data_s *data = backend->private_data;
+  data->backend_exit(data);
+  free(data);
+}
+
+static struct hwloc_backend *
+hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
+				const void *_data1,
+				const void *_data2,
+				const void *_data3)
+{
+  struct hwloc_xml_backend_data_s *data;
+  struct hwloc_backend *backend;
+  char *env;
+  int force_nolibxml;
+  const char * xmlpath = (const char *) _data1;
+  const char * xmlbuffer = (const char *) _data2;
+  int xmlbuflen = (int)(uintptr_t) _data3;
+  int err;
+
+  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    errno = ENOSYS;
+    goto out;
+  }
+
+  if (!xmlpath && !xmlbuffer) {
+    errno = EINVAL;
+    goto out;
+  }
+
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    goto out;
+
+  data = malloc(sizeof(*data));
+  if (!data) {
+    errno = ENOMEM;
+    goto out_with_backend;
+  }
+
+  backend->private_data = data;
+  backend->discover = hwloc_look_xml;
+  backend->disable = hwloc_xml_backend_disable;
+  backend->is_thissystem = 0;
+
+  env = getenv("HWLOC_NO_LIBXML_IMPORT");
+  force_nolibxml = (env && atoi(env));
+  if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
+    err = hwloc_nolibxml_callbacks->backend_init(data, xmlpath, xmlbuffer, xmlbuflen);
+  else
+    err = hwloc_libxml_callbacks->backend_init(data, xmlpath, xmlbuffer, xmlbuflen);
+  if (err < 0)
+    goto out_with_data;
+
+  return backend;
+
+ out_with_data:
+  free(data);
+ out_with_backend:
+  free(backend);
+ out:
+  return NULL;
+}
+
+static struct hwloc_disc_component hwloc_xml_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  "xml",
+  HWLOC_DISC_COMPONENT_TYPE_CPU | HWLOC_DISC_COMPONENT_TYPE_GLOBAL | HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL,
+  hwloc_xml_component_instantiate,
+  30,
+  NULL
+};
+
+const struct hwloc_component hwloc_xml_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_xml_disc_component
+};

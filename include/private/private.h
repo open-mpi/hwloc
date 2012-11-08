@@ -15,6 +15,7 @@
 #include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/bitmap.h>
+#include <private/components.h>
 #include <private/debug.h>
 #include <sys/types.h>
 #ifdef HAVE_UNISTD_H
@@ -45,21 +46,6 @@ enum hwloc_ignore_type_e {
 };
 
 #define HWLOC_DEPTH_MAX 128
-
-typedef enum hwloc_backend_e {
-  HWLOC_BACKEND_NONE,
-  HWLOC_BACKEND_SYNTHETIC,
-#ifdef HWLOC_LINUX_SYS
-  HWLOC_BACKEND_LINUXFS,
-#endif
-  HWLOC_BACKEND_XML,
-  HWLOC_BACKEND_CUSTOM,
-  /* This value is only here so that we can end the enum list without
-     a comma (thereby preventing compiler warnings) */
-  HWLOC_BACKEND_MAX
-} hwloc_backend_t;
-
-struct hwloc__xml_import_state_s;
 
 struct hwloc_topology {
   unsigned nb_levels;					/* Number of horizontal levels */
@@ -138,40 +124,9 @@ struct hwloc_topology {
     struct hwloc_os_distances_s *prev, *next;
   } *first_osdist, *last_osdist;
 
-  hwloc_backend_t backend_type;
-  union hwloc_backend_params_u {
-#ifdef HWLOC_LINUX_SYS
-    struct hwloc_linux_backend_data_s {
-      /* FS root parameters */
-      char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-      int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-      struct utsname utsname; /* cached result of uname, used multiple times */
-    } linuxfs;
-#endif /* HWLOC_LINUX_SYS */
-    struct hwloc_xml_backend_data_s {
-      /* xml backend parameters */
-      int (*look_init)(struct hwloc_xml_backend_data_s *bdata, struct hwloc__xml_import_state_s *state);
-      void (*look_failed)(struct hwloc_xml_backend_data_s *bdata);
-      void (*backend_exit)(struct hwloc_xml_backend_data_s *bdata);
-      void *data; /* libxml2 doc, or nolibxml buffer */
-      struct hwloc_xml_imported_distances_s {
-	hwloc_obj_t root;
-	struct hwloc_distances_s distances;
-	struct hwloc_xml_imported_distances_s *prev, *next;
-      } *first_distances, *last_distances;
-    } xml;
-    struct hwloc_synthetic_backend_data_s {
-      /* synthetic backend parameters */
-      char *string;
-#define HWLOC_SYNTHETIC_MAX_DEPTH 128
-      unsigned arity[HWLOC_SYNTHETIC_MAX_DEPTH];
-      hwloc_obj_type_t type[HWLOC_SYNTHETIC_MAX_DEPTH];
-      unsigned id[HWLOC_SYNTHETIC_MAX_DEPTH];
-      unsigned depth[HWLOC_SYNTHETIC_MAX_DEPTH]; /* For cache/misc */
-    } synthetic;
-  } backend_params;
+  /* list of enabled backends. */
+  struct hwloc_backend * backends;
 };
-
 
 extern void hwloc_alloc_obj_cpusets(hwloc_obj_t obj);
 extern void hwloc_setup_pu_level(struct hwloc_topology *topology, unsigned nb_pus);
@@ -190,68 +145,38 @@ extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, st
 extern void hwloc_set_binding_hooks(struct hwloc_topology *topology);
 
 #if defined(HWLOC_LINUX_SYS)
-extern int hwloc_look_linuxfs(struct hwloc_topology *topology);
 extern void hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
-extern int hwloc_backend_linuxfs_init(struct hwloc_topology *topology, const char *fsroot_path);
-extern void hwloc_backend_linuxfs_exit(struct hwloc_topology *topology);
-extern int hwloc_linux_backend_notify_new_object(struct hwloc_topology *topology, struct hwloc_obj *obj);
-extern int hwloc_linux_backend_get_obj_cpuset(struct hwloc_topology *topology, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
 #endif /* HWLOC_LINUX_SYS */
 
-extern int hwloc_backend_xml_init(struct hwloc_topology *topology, const char *xmlpath, const char *xmlbuffer, int buflen);
-extern int hwloc_look_xml(struct hwloc_topology *topology);
-extern void hwloc_backend_xml_exit(struct hwloc_topology *topology);
-
 #ifdef HWLOC_SOLARIS_SYS
-extern int hwloc_look_solaris(struct hwloc_topology *topology);
 extern void hwloc_set_solaris_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_SOLARIS_SYS */
 
 #ifdef HWLOC_AIX_SYS
-extern int hwloc_look_aix(struct hwloc_topology *topology);
 extern void hwloc_set_aix_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_AIX_SYS */
 
 #ifdef HWLOC_OSF_SYS
-extern int hwloc_look_osf(struct hwloc_topology *topology);
 extern void hwloc_set_osf_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_OSF_SYS */
 
 #ifdef HWLOC_WIN_SYS
-extern int hwloc_look_windows(struct hwloc_topology *topology);
 extern void hwloc_set_windows_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_WIN_SYS */
 
 #ifdef HWLOC_DARWIN_SYS
-extern int hwloc_look_darwin(struct hwloc_topology *topology);
 extern void hwloc_set_darwin_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_DARWIN_SYS */
 
 #ifdef HWLOC_FREEBSD_SYS
-extern int hwloc_look_freebsd(struct hwloc_topology *topology);
 extern void hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_FREEBSD_SYS */
 
 #ifdef HWLOC_HPUX_SYS
-extern int hwloc_look_hpux(struct hwloc_topology *topology);
 extern void hwloc_set_hpux_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_HPUX_SYS */
 
 extern void hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs);
-
-#ifdef HWLOC_HAVE_LIBPCI
-extern int hwloc_look_libpci(struct hwloc_topology *topology);
-#endif /* HWLOC_HAVE_LIBPCI */
-
-extern int hwloc_backend_synthetic_init(struct hwloc_topology *topology, const char *description);
-extern void hwloc_backend_synthetic_exit(struct hwloc_topology *topology);
-extern int hwloc_look_synthetic (struct hwloc_topology *topology);
-
-extern int hwloc_look_noos(struct hwloc_topology *topology);
-
-extern int hwloc_backend_custom_init(struct hwloc_topology *topology);
-extern void hwloc_backend_custom_exit(struct hwloc_topology *topology);
-extern int hwloc_look_custom(struct hwloc_topology *topology);
 
 /*
  * Add an object to the topology.
@@ -269,16 +194,16 @@ extern int hwloc_look_custom(struct hwloc_topology *topology);
  *
  * In case of error, hwloc_report_os_error() is called.
  */
-extern void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
+HWLOC_DECLSPEC void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
 
 /* Error reporting */
 typedef void (*hwloc_report_error_t)(const char * msg, int line);
-extern void hwloc_report_os_error(const char * msg, int line);
-extern int hwloc_hide_errors(void);
+HWLOC_DECLSPEC void hwloc_report_os_error(const char * msg, int line);
+HWLOC_DECLSPEC int hwloc_hide_errors(void);
 /*
  * Add an object to the topology and specify which error callback to use
  */
-extern int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
+HWLOC_DECLSPEC int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
 
 /*
  * Insert an object somewhere in the topology.
@@ -291,7 +216,7 @@ extern int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc
  *
  * Remember to call topology_connect() afterwards to fix handy pointers.
  */
-extern void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
+HWLOC_DECLSPEC void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
 
 /* Insert uname-specific names/values in the object infos array */
 extern void hwloc_add_uname_info(struct hwloc_topology *topology);

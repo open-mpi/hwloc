@@ -13,7 +13,8 @@ hwloc_custom_insert_group_object_by_parent(struct hwloc_topology *topology, hwlo
   hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
   obj->attr->group.depth = groupdepth;
 
-  if (topology->backend_type != HWLOC_BACKEND_CUSTOM || topology->is_loaded) {
+  /* must be called between set_custom() and load(), so there's a single backend, the custom one */
+  if (topology->is_loaded || !topology->backends || !topology->backends->is_custom) {
     errno = EINVAL;
     return NULL;
   }
@@ -24,23 +25,18 @@ hwloc_custom_insert_group_object_by_parent(struct hwloc_topology *topology, hwlo
 }
 
 int
-hwloc_backend_custom_init(struct hwloc_topology *topology)
-{
-  assert(topology->backend_type == HWLOC_BACKEND_NONE);
-
-  topology->levels[0][0]->type = HWLOC_OBJ_SYSTEM;
-  topology->is_thissystem = 0;
-  topology->backend_type = HWLOC_BACKEND_CUSTOM;
-  return 0;
-}
-
-int
 hwloc_custom_insert_topology(struct hwloc_topology *newtopology,
 			     struct hwloc_obj *newparent,
 			     struct hwloc_topology *oldtopology,
 			     struct hwloc_obj *oldroot)
 {
-  if (newtopology->backend_type != HWLOC_BACKEND_CUSTOM || newtopology->is_loaded || !oldtopology->is_loaded) {
+  /* must be called between set_custom() and load(), so there's a single backend, the custom one */
+  if (newtopology->is_loaded || !newtopology->backends || !newtopology->backends->is_custom) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (!oldtopology->is_loaded) {
     errno = EINVAL;
     return -1;
   }
@@ -49,9 +45,11 @@ hwloc_custom_insert_topology(struct hwloc_topology *newtopology,
   return 0;
 }
 
-int
-hwloc_look_custom(struct hwloc_topology *topology)
+static int
+hwloc_look_custom(struct hwloc_backend *backend)
 {
+  struct hwloc_topology *topology = backend->topology;
+
   assert(!topology->levels[0][0]->cpuset);
 
   if (!topology->levels[0][0]->first_child) {
@@ -59,18 +57,38 @@ hwloc_look_custom(struct hwloc_topology *topology)
     return -1;
   }
 
+  topology->levels[0][0]->type = HWLOC_OBJ_SYSTEM;
   return 1;
 }
 
-void
-hwloc_backend_custom_exit(struct hwloc_topology *topology)
+static struct hwloc_backend *
+hwloc_custom_component_instantiate(struct hwloc_disc_component *component,
+				   const void *_data1 __hwloc_attribute_unused,
+				   const void *_data2 __hwloc_attribute_unused,
+				   const void *_data3 __hwloc_attribute_unused)
 {
-  assert(topology->backend_type == HWLOC_BACKEND_CUSTOM);
-
-  topology->is_thissystem = 1;
-  hwloc_topology_clear(topology);
-  hwloc_distances_clear(topology);
-  hwloc_topology_setup_defaults(topology);
-
-  topology->backend_type = HWLOC_BACKEND_NONE;
+  struct hwloc_backend *backend;
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    return NULL;
+  backend->discover = hwloc_look_custom;
+  backend->is_custom = 1;
+  backend->is_thissystem = 0;
+  return backend;
 }
+
+static struct hwloc_disc_component hwloc_custom_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  "custom",
+  HWLOC_DISC_COMPONENT_TYPE_CPU | HWLOC_DISC_COMPONENT_TYPE_GLOBAL | HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL,
+  hwloc_custom_component_instantiate,
+  30,
+  NULL
+};
+
+const struct hwloc_component hwloc_custom_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_custom_disc_component
+};

@@ -708,9 +708,10 @@ hwloc_look_kstat(struct hwloc_topology *topology)
 }
 #endif /* LIBKSTAT */
 
-int
-hwloc_look_solaris(struct hwloc_topology *topology)
+static int
+hwloc_look_solaris(struct hwloc_backend *backend)
 {
+  struct hwloc_topology *topology = backend->topology;
   unsigned nbprocs = hwloc_fallback_nbprocessors (topology);
   int alreadypus = 0;
 
@@ -763,3 +764,33 @@ hwloc_set_solaris_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->nexttouch_membind = 1;
 #endif
 }
+
+static struct hwloc_backend *
+hwloc_solaris_component_instantiate(struct hwloc_disc_component *component,
+				    const void *_data1 __hwloc_attribute_unused,
+				    const void *_data2 __hwloc_attribute_unused,
+				    const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    return NULL;
+  backend->discover = hwloc_look_solaris;
+  return backend;
+}
+
+static struct hwloc_disc_component hwloc_solaris_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_CPU,
+  "solaris",
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  hwloc_solaris_component_instantiate,
+  50,
+  NULL
+};
+
+const struct hwloc_component hwloc_solaris_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_solaris_disc_component
+};

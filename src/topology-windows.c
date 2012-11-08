@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -472,9 +472,10 @@ hwloc_win_get_area_membind(hwloc_topology_t topology __hwloc_attribute_unused, c
   }
 }
 
-int
-hwloc_look_windows(struct hwloc_topology *topology)
+static int
+hwloc_look_windows(struct hwloc_backend *backend)
 {
+  struct hwloc_topology *topology = backend->topology;
   BOOL (WINAPI *GetLogicalProcessorInformationProc)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION Buffer, PDWORD ReturnLength);
   BOOL (WINAPI *GetLogicalProcessorInformationExProc)(LOGICAL_PROCESSOR_RELATIONSHIP relationship, PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX Buffer, PDWORD ReturnLength);
   BOOL (WINAPI *GetNumaAvailableMemoryNodeProc)(UCHAR Node, PULONGLONG AvailableBytes);
@@ -777,3 +778,33 @@ hwloc_set_windows_hooks(struct hwloc_binding_hooks *hooks,
   if (!hwloc_win_get_QueryWorkingSetExProc())
     hooks->get_area_membind = hwloc_win_get_area_membind;
 }
+
+static struct hwloc_backend *
+hwloc_windows_component_instantiate(struct hwloc_disc_component *component,
+				    const void *_data1 __hwloc_attribute_unused,
+				    const void *_data2 __hwloc_attribute_unused,
+				    const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    return NULL;
+  backend->discover = hwloc_look_windows;
+  return backend;
+}
+
+static struct hwloc_disc_component hwloc_windows_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_CPU,
+  "windows",
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  hwloc_windows_component_instantiate,
+  50,
+  NULL
+};
+
+const struct hwloc_component hwloc_windows_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_windows_disc_component
+};

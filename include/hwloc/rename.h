@@ -417,19 +417,70 @@ extern "C" {
 
 #define hwloc__xml_import_state_s HWLOC_NAME(_xml_import_state_s)
 #define hwloc__xml_import_state_t HWLOC_NAME(_xml_import_state_t)
+#define hwloc_xml_backend_data_s HWLOC_NAME(xml_backend_data_s)
 #define hwloc__xml_export_state_s HWLOC_NAME(_xml_export_state_s)
 #define hwloc__xml_export_state_t HWLOC_NAME(_xml_export_state_t)
 #define hwloc__xml_export_object HWLOC_NAME(_xml_export_object)
 
-#define hwloc_nolibxml_backend_init HWLOC_NAME(nolibxml_backend_init)
-#define hwloc_nolibxml_export_file HWLOC_NAME(nolibxml_export_file)
-#define hwloc_nolibxml_export_buffer HWLOC_NAME(nolibxml_export_buffer)
-#define hwloc_nolibxml_free_buffer HWLOC_NAME(nolibxml_free_buffer)
+#define hwloc_xml_callbacks HWLOC_NAME(xml_callbacks)
+#define hwloc_xml_component HWLOC_NAME(xml_component)
+#define hwloc_xml_callbacks_register HWLOC_NAME(xml_callbacks_register)
+#define hwloc_xml_callbacks_reset HWLOC_NAME(xml_callbacks_reset)
 
-#define hwloc_libxml_backend_init HWLOC_NAME(libxml_backend_init)
-#define hwloc_libxml_export_file HWLOC_NAME(libxml_export_file)
-#define hwloc_libxml_export_buffer HWLOC_NAME(libxml_export_buffer)
-#define hwloc_libxml_free_buffer HWLOC_NAME(libxml_free_buffer)
+/* private/components.h */
+
+#define HWLOC_DISC_COMPONENT_TYPE_CPU HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_CPU)
+#define HWLOC_DISC_COMPONENT_TYPE_GLOBAL HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_GLOBAL)
+#define HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_ADDITIONAL)
+#define HWLOC_DISC_COMPONENT_TYPE_MAX HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_MAX)
+
+#define hwloc_disc_component_type_e HWLOC_NAME(disc_component_type_e)
+#define hwloc_disc_component_type_t HWLOC_NAME(disc_component_type_t)
+#define hwloc_disc_component HWLOC_NAME(disc_component)
+
+#define hwloc_disc_component_force_enable HWLOC_NAME(disc_component_force_enable)
+#define hwloc_disc_components_enable_others HWLOC_NAME(disc_components_instantiate_others)
+
+#define hwloc_backend HWLOC_NAME(backend)
+#define hwloc_backend_alloc HWLOC_NAME(backend_alloc)
+#define hwloc_backend_enable HWLOC_NAME(backend_enable)
+#define hwloc_backends_reset HWLOC_NAME(backends_reset)
+#define hwloc_backends_disable_all HWLOC_NAME(backends_disable_all)
+#define hwloc_backends_is_thissystem HWLOC_NAME(backends_is_thissystem)
+#define hwloc_backends_get_obj_cpuset HWLOC_NAME(backends_get_obj_cpuset)
+#define hwloc_backends_notify_new_object HWLOC_NAME(backends_notify_new_object)
+
+#define hwloc_backend_flag_e HWLOC_NAME(backend_flag_e)
+#define HWLOC_BACKEND_FLAG_NEED_LEVELS HWLOC_NAME_CAPS(BACKEND_FLAG_NEED_LEVELS)
+
+#define hwloc_components_init HWLOC_NAME(components_init)
+#define hwloc_components_destroy_all HWLOC_NAME(components_destroy_all)
+
+#define HWLOC_COMPONENT_TYPE_DISC HWLOC_NAME_CAPS(COMPONENT_TYPE_DISC)
+#define HWLOC_COMPONENT_TYPE_XML HWLOC_NAME_CAPS(COMPONENT_TYPE_XML)
+#define HWLOC_COMPONENT_TYPE_MAX HWLOC_NAME_CAPS(COMPONENT_TYPE_MAX)
+
+#define hwloc_component_type_e HWLOC_NAME(component_type_e)
+#define hwloc_component_type_t HWLOC_NAME(component_type_t)
+
+#define hwloc_component HWLOC_NAME(component)
+
+#define hwloc_linux_component HWLOC_NAME(linux_component)
+#define hwloc_xml_component HWLOC_NAME(xml_component)
+#define hwloc_solaris_component HWLOC_NAME(solaris_component)
+#define hwloc_aix_component HWLOC_NAME(aix_component)
+#define hwloc_osf_component HWLOC_NAME(osf_component)
+#define hwloc_windows_component HWLOC_NAME(windows_component)
+#define hwloc_darwin_component HWLOC_NAME(darwin_component)
+#define hwloc_freebsd_component HWLOC_NAME(freebsd_component)
+#define hwloc_hpux_component HWLOC_NAME(hpux_component)
+#define hwloc_synthetic_component HWLOC_NAME(synthetic_component)
+#define hwloc_custom_component HWLOC_NAME(custom_component)
+#define hwloc_noos_component HWLOC_NAME(noos_component)
+#define hwloc_libpci_component HWLOC_NAME(libpci_component)
+
+#define hwloc_xml_nolibxml_component HWLOC_NAME(xml_nolibxml_component)
+#define hwloc_xml_libxml_component HWLOC_NAME(xml_libxml_component)
 
 /* private/private.h */
 
@@ -440,20 +491,6 @@ extern "C" {
 #define HWLOC_IGNORE_TYPE_ALWAYS HWLOC_NAME_CAPS(IGNORE_TYPE_ALWAYS)
 
 #define hwloc_os_distances_s HWLOC_NAME(os_distances_s)
-#define hwloc_backend_e HWLOC_NAME(backend_e)
-#define hwloc_backend_t HWLOC_NAME(backend_t)
-
-#define HWLOC_BACKEND_NONE HWLOC_NAME_CAPS(BACKEND_NONE)
-#define HWLOC_BACKEND_SYNTHETIC HWLOC_NAME_CAPS(BACKEND_SYNTHETIC)
-#define HWLOC_BACKEND_LINUXFS HWLOC_NAME_CAPS(BACKEND_LINUXFS)
-#define HWLOC_BACKEND_XML HWLOC_NAME_CAPS(BACKEND_XML)
-#define HWLOC_BACKEND_CUSTOM HWLOC_NAME_CAPS(BACKEND_CUSTOM)
-#define HWLOC_BACKEND_MAX HWLOC_NAME_CAPS(BACKEND_MAX)
-
-#define hwloc_backend_params_u HWLOC_NAME(backend_params_u)
-#define hwloc_linux_backend_data_s HWLOC_NAME(linux_backend_data_s)
-#define hwloc_xml_backend_data_s HWLOC_NAME(xml_backend_data_s)
-#define hwloc_synthetic_backend_data_s HWLOC_NAME(synthetic_backend_data_s)
 
 #define hwloc_xml_imported_distances_s HWLOC_NAME(xml_imported_distances_s)
 
@@ -472,51 +509,16 @@ extern "C" {
 #define hwloc_set_native_binding_hooks HWLOC_NAME(set_native_binding_hooks)
 #define hwloc_set_binding_hooks HWLOC_NAME(set_binding_hooks)
 
-#define hwloc_look_linuxfs HWLOC_NAME(look_linuxfs)
 #define hwloc_set_linuxfs_hooks HWLOC_NAME(set_linuxfs_hooks)
-#define hwloc_backend_linuxfs_init HWLOC_NAME(backend_linuxfs_init)
-#define hwloc_backend_linuxfs_exit HWLOC_NAME(backend_linuxfs_exit)
-#define hwloc_linux_backend_notify_new_object HWLOC_NAME(linux_backend_notify_new_object)
-#define hwloc_linux_backend_get_obj_cpuset HWLOC_NAME(linux_backend_get_obj_cpuset)
-
-#define hwloc_backend_xml_init HWLOC_NAME(backend_xml_init)
-#define hwloc_look_xml HWLOC_NAME(look_xml)
-#define hwloc_backend_xml_exit HWLOC_NAME(backend_xml_exit)
-
-#define hwloc_look_solaris HWLOC_NAME(look_solaris)
 #define hwloc_set_solaris_hooks HWLOC_NAME(set_solaris_hooks)
-
-#define hwloc_look_aix HWLOC_NAME(look_aix)
 #define hwloc_set_aix_hooks HWLOC_NAME(set_aix_hooks)
-
-#define hwloc_look_osf HWLOC_NAME(look_osf)
 #define hwloc_set_osf_hooks HWLOC_NAME(set_osf_hooks)
-
-#define hwloc_look_windows HWLOC_NAME(look_windows)
 #define hwloc_set_windows_hooks HWLOC_NAME(set_windows_hooks)
-
-#define hwloc_look_darwin HWLOC_NAME(look_darwin)
 #define hwloc_set_darwin_hooks HWLOC_NAME(set_darwin_hooks)
-
-#define hwloc_look_freebsd HWLOC_NAME(look_freebsd)
 #define hwloc_set_freebsd_hooks HWLOC_NAME(set_freebsd_hooks)
-
-#define hwloc_look_hpux HWLOC_NAME(look_hpux)
 #define hwloc_set_hpux_hooks HWLOC_NAME(set_hpux_hooks)
 
-#define hwloc_look_libpci HWLOC_NAME(look_libpci)
-
 #define hwloc_look_x86 HWLOC_NAME(look_x86)
-
-#define hwloc_backend_synthetic_init HWLOC_NAME(backend_synthetic_init)
-#define hwloc_backend_synthetic_exit HWLOC_NAME(backend_synthetic_exit)
-#define hwloc_look_synthetic  HWLOC_NAME(look_synthetic )
-
-#define hwloc_look_noos HWLOC_NAME(look_noos)
-
-#define hwloc_backend_custom_init HWLOC_NAME(backend_custom_init)
-#define hwloc_backend_custom_exit HWLOC_NAME(backend_custom_exit)
-#define hwloc_look_custom HWLOC_NAME(look_custom)
 
 #define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
 #define hwloc_report_error_t HWLOC_NAME(report_error_t)

@@ -259,6 +259,12 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 #endif
 }
 
+struct hwloc_linux_backend_data_s {
+  char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
+  int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
+  struct utsname utsname; /* cached result of uname, used multiple times */
+};
+
 int
 hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_const_bitmap_t hwloc_set __hwloc_attribute_unused)
 {
@@ -1392,54 +1398,6 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
 }
 
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
-
-int
-hwloc_backend_linuxfs_init(struct hwloc_topology *topology,
-			   const char *fsroot_path __hwloc_attribute_unused)
-{
-  struct hwloc_linux_backend_data_s *data = &topology->backend_params.linuxfs;
-  int root = -1;
-
-  assert(topology->backend_type == HWLOC_BACKEND_NONE);
-
-  if (!fsroot_path)
-    fsroot_path = "/";
-
-#ifdef HAVE_OPENAT
-  root = open(fsroot_path, O_RDONLY | O_DIRECTORY);
-  if (root < 0)
-    return -1;
-
-  if (strcmp(fsroot_path, "/"))
-    topology->is_thissystem = 0;
-
-  data->root_path = strdup(fsroot_path);
-#else
-  if (strcmp(fsroot_path, "/")) {
-    errno = ENOSYS;
-    return -1;
-  }
-
-  data->root_path = NULL;
-#endif
-  data->root_fd = root;
-  topology->backend_type = HWLOC_BACKEND_LINUXFS;
-  return 0;
-}
-
-void
-hwloc_backend_linuxfs_exit(struct hwloc_topology *topology)
-{
-  struct hwloc_linux_backend_data_s *data = &topology->backend_params.linuxfs;
-  assert(topology->backend_type == HWLOC_BACKEND_LINUXFS);
-#ifdef HAVE_OPENAT
-  close(data->root_fd);
-  free(data->root_path);
-  data->root_path = NULL;
-#endif
-  topology->is_thissystem = 1;
-  topology->backend_type = HWLOC_BACKEND_NONE;
-}
 
 /* cpuinfo array */
 struct hwloc_linux_cpuinfo_proc {
@@ -3269,10 +3227,11 @@ hwloc_linux_fallback_pu_level(struct hwloc_topology *topology)
     hwloc_setup_pu_level(topology, 1);
 }
 
-int
-hwloc_look_linuxfs(struct hwloc_topology *topology)
+static int
+hwloc_look_linuxfs(struct hwloc_backend *backend)
 {
-  struct hwloc_linux_backend_data_s *data = &topology->backend_params.linuxfs;
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
   DIR *nodes_dir;
   unsigned nbnodes;
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
@@ -3835,10 +3794,12 @@ hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj
   return res;
 }
 
-int
-hwloc_linux_backend_notify_new_object(struct hwloc_topology *topology, struct hwloc_obj *obj)
+static int
+hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc_backend *caller __hwloc_attribute_unused,
+				      struct hwloc_obj *obj)
 {
-  struct hwloc_linux_backend_data_s *data = &topology->backend_params.linuxfs;
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
   char pcidevpath[256];
   int res = 0;
 
@@ -3846,6 +3807,9 @@ hwloc_linux_backend_notify_new_object(struct hwloc_topology *topology, struct hw
   assert(obj->type == HWLOC_OBJ_PCI_DEVICE);
 
   /* this should not be called if the backend isn't the real OS one */
+#ifdef HWLOC_DEBUG
+  assert(!strcmp(backend->component->name, "linux"));
+#endif
   if (data->root_path) {
     assert(strlen(data->root_path) == 1);
     assert(data->root_path[0] == '/');
@@ -3863,11 +3827,12 @@ hwloc_linux_backend_notify_new_object(struct hwloc_topology *topology, struct hw
   return res;
 }
 
-int
-hwloc_linux_backend_get_obj_cpuset(struct hwloc_topology *topology __hwloc_attribute_unused,
+static int
+hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
+				   struct hwloc_backend *caller __hwloc_attribute_unused,
 				   struct hwloc_obj *obj, hwloc_bitmap_t cpuset)
 {
-  struct hwloc_linux_backend_data_s *data = &topology->backend_params.linuxfs;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
   char path[256];
   FILE *file;
   int err;
@@ -3877,6 +3842,9 @@ hwloc_linux_backend_get_obj_cpuset(struct hwloc_topology *topology __hwloc_attri
 	 || (obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI));
 
   /* this should not be called if the backend isn't the real OS one */
+#ifdef HWLOC_DEBUG
+  assert(!strcmp(backend->component->name, "linux"));
+#endif
   if (data->root_path) {
     assert(strlen(data->root_path) == 1);
     assert(data->root_path[0] == '/');
@@ -3894,3 +3862,90 @@ hwloc_linux_backend_get_obj_cpuset(struct hwloc_topology *topology __hwloc_attri
   }
   return -1;
 }
+
+static void
+hwloc_linux_backend_disable(struct hwloc_backend *backend)
+{
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+#ifdef HAVE_OPENAT
+  close(data->root_fd);
+  free(data->root_path);
+  data->root_path = NULL;
+#endif
+  free(data);
+}
+
+static struct hwloc_backend *
+hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
+				  const void *_data1,
+				  const void *_data2 __hwloc_attribute_unused,
+				  const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+  struct hwloc_linux_backend_data_s *data;
+  const char * fsroot_path = _data1;
+  int root = -1;
+
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    goto out;
+
+  data = malloc(sizeof(*data));
+  if (!data) {
+    errno = ENOMEM;
+    goto out_with_backend;
+  }
+
+  backend->private_data = data;
+  backend->discover = hwloc_look_linuxfs;
+  backend->get_obj_cpuset = hwloc_linux_backend_get_obj_cpuset;
+  backend->notify_new_object = hwloc_linux_backend_notify_new_object;
+  backend->disable = hwloc_linux_backend_disable;
+
+  if (!fsroot_path)
+    fsroot_path = "/";
+
+#ifdef HAVE_OPENAT
+  root = open(fsroot_path, O_RDONLY | O_DIRECTORY);
+  if (root < 0)
+    goto out_with_data;
+
+  if (strcmp(fsroot_path, "/"))
+    backend->is_thissystem = 0;
+
+  data->root_path = strdup(fsroot_path);
+#else
+  if (strcmp(fsroot_path, "/")) {
+    errno = ENOSYS;
+    goto out_with_data;
+  }
+
+  data->root_path = NULL;
+#endif
+  data->root_fd = root;
+
+  return backend;
+
+ out_with_data:
+  free(data);
+ out_with_backend:
+  free(backend);
+ out:
+  return NULL;
+}
+
+static struct hwloc_disc_component hwloc_linux_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_CPU,
+  "linux",
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  hwloc_linux_component_instantiate,
+  50,
+  NULL
+};
+
+const struct hwloc_component hwloc_linux_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_linux_disc_component
+};

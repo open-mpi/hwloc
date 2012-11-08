@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -161,9 +161,10 @@ hwloc_hpux_alloc_membind(hwloc_topology_t topology, size_t len, hwloc_const_node
 }
 #endif /* MAP_MEM_FIRST_TOUCH */
 
-int
-hwloc_look_hpux(struct hwloc_topology *topology)
+static int
+hwloc_look_hpux(struct hwloc_backend *backend)
 {
+  struct hwloc_topology *topology = backend->topology;
   int has_numa = sysconf(_SC_CCNUMA_SUPPORT) == 1;
   hwloc_obj_t *nodes = NULL, obj;
   spu_t currentcpu;
@@ -272,3 +273,33 @@ hwloc_set_hpux_hooks(struct hwloc_binding_hooks *hooks,
   support->membind->interleave_membind = 1;
 #endif /* MAP_MEM_FIRST_TOUCH */
 }
+
+static struct hwloc_backend *
+hwloc_hpux_component_instantiate(struct hwloc_disc_component *component,
+				 const void *_data1 __hwloc_attribute_unused,
+				 const void *_data2 __hwloc_attribute_unused,
+				 const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    return NULL;
+  backend->discover = hwloc_look_hpux;
+  return backend;
+}
+
+static struct hwloc_disc_component hwloc_hpux_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_CPU,
+  "hpux",
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  hwloc_hpux_component_instantiate,
+  50,
+  NULL
+};
+
+const struct hwloc_component hwloc_hpux_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_hpux_disc_component
+};
