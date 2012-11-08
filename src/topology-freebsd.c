@@ -179,6 +179,10 @@ hwloc_look_freebsd(struct hwloc_topology *topology)
 {
   unsigned nbprocs = hwloc_fallback_nbprocessors(topology);
 
+  if (topology->levels[0][0]->cpuset)
+    /* somebody discovered things */
+    return 0;
+
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
   hwloc_look_x86(topology, nbprocs);

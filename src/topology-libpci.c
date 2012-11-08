@@ -320,6 +320,14 @@ hwloc_look_libpci(struct hwloc_topology *topology)
   unsigned current_hostbridge;
   int createdgroups = 0;
 
+  if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+    return 0;
+
+  if (!topology->is_thissystem) {
+    hwloc_debug("%s", "\nno PCI detection (not thissystem)\n");
+    return 0;
+  }
+
   fakehostbridge.first_child = NULL;
   fakehostbridge.last_child = NULL;
 

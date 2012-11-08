@@ -38,6 +38,10 @@ hwloc_look_darwin(struct hwloc_topology *topology)
   int64_t memsize;
   char cpumodel[64];
 
+  if (topology->levels[0][0]->cpuset)
+    /* somebody discovered things */
+    return 0;
+
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
   if (hwloc_get_sysctlbyname("hw.ncpu", &_nprocs) || _nprocs <= 0)

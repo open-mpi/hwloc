@@ -52,6 +52,8 @@ hwloc_custom_insert_topology(struct hwloc_topology *newtopology,
 int
 hwloc_look_custom(struct hwloc_topology *topology)
 {
+  assert(!topology->levels[0][0]->cpuset);
+
   if (!topology->levels[0][0]->first_child) {
     errno = EINVAL;
     return -1;

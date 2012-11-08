@@ -3269,6 +3269,10 @@ hwloc_look_linuxfs(struct hwloc_topology *topology)
   char *cpuset_mntpnt, *cgroup_mntpnt, *cpuset_name = NULL;
   int err;
 
+  if (topology->levels[0][0]->cpuset)
+    /* somebody discovered things */
+    return 0;
+
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
   memset(&data->utsname, 0, sizeof(data->utsname));
@@ -3829,6 +3833,9 @@ hwloc_linuxfs_pci_lookup_osdevices(struct hwloc_topology *topology, struct hwloc
   char pcidevpath[256];
   int res = 0;
 
+  /* this callback is only used in the libpci backend for now */
+  assert(pcidev->type == HWLOC_OBJ_PCI_DEVICE);
+
   /* this should not be called if the backend isn't the real OS one */
   if (data->root_path) {
     assert(strlen(data->root_path) == 1);
@@ -3855,6 +3862,10 @@ hwloc_linuxfs_get_pcidev_cpuset(struct hwloc_topology *topology __hwloc_attribut
   char path[256];
   FILE *file;
   int err;
+
+  /* this callback is only used in the libpci backend for now */
+  assert(pcidev->type == HWLOC_OBJ_PCI_DEVICE
+	 || (pcidev->type == HWLOC_OBJ_BRIDGE && pcidev->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI));
 
   /* this should not be called if the backend isn't the real OS one */
   if (data->root_path) {

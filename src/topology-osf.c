@@ -249,6 +249,10 @@ hwloc_look_osf(struct hwloc_topology *topology)
   struct hwloc_obj *obj;
   unsigned distance;
 
+  if (topology->levels[0][0]->cpuset)
+    /* somebody discovered things */
+    return 0;
+
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
   nbnodes = rad_get_num();
