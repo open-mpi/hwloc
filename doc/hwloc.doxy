@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2012 Inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -593,6 +593,7 @@ The documentation chapters include
 <li> \ref xml
 <li> \ref interoperability
 <li> \ref threadsafety
+<li> \ref plugins
 <li> \ref embed
 <li> \ref faq
 </ul>
@@ -968,6 +969,45 @@ following environment variables.
   processors.
   <tt>domain</tt> and <tt>bus</tt> are the PCI domain and primary bus
   of the corresponding host bridge.
+  </dd>
+
+<dt>HWLOC_PLUGINS_PATH=/path/to/hwloc/plugins/:...</dt>
+  <dd>changes the default search directory for plugins.
+  By default, <tt>$libdir/hwloc</tt> is used.
+  The variable may contain several colon-separated directories.
+  </dd>
+
+<dt>HWLOC_PLUGINS_VERBOSE=1</dt>
+  <dd>display verbose information about plugins.
+  List which directories are scanned, which files are loaded,
+  and which components are successfully loaded.
+  </dd>
+
+<dt>HWLOC_COMPONENTS=list,of,components</dt>
+  <dd>forces a list of components to enable.
+  Enable the given comma-separated list of components
+   (if they do not conflict with each other).
+  Once the end of the list is reached, hwloc falls back to
+  enabling the remaining components (sorted by priority) that do not
+  conflict with the already enabled ones.
+  If <tt>stop</tt> is met, the enabling loop immediately stops, no
+  more component is enabled.
+  If the variable is set to an empty string, no specific component is
+  loaded first, all components are loaded in priority order,
+  this is strictly identical to not specifying any variable.
+  The <tt>xml</tt> component name may be followed by a XML file to
+  load (<tt>xml=file.xml</tt>).
+  The synthetic component may be followed by a synthetic topology
+  description (<tt>synthetic=node:2 pu:3</tt>).
+  See \ref plugins for details.
+  </dd>
+
+<dt>HWLOC_COMPONENTS_VERBOSE=1</dt>
+  <dd>display verbose information about components.
+  Display messages when components are registered or enabled.
+  This is the recommended way to list the available components
+  with their priority
+  (all of them are <em>registered</em> at startup).
   </dd>
 
 </dl>
@@ -1589,6 +1629,151 @@ For reference, \ref hwloc_topology_t modification operations include
   threads are only read the current topology.  </dd>
 
 </dl>
+
+
+
+\page plugins Components and plugins
+
+hwloc is organized in components that are responsible for discovering
+objects.
+Depending on the topology configuration, some components will be used,
+some will be ignored.
+The usual default is to enable the native operating system component,
+(e.g. <tt>linux</tt> or <tt>solaris</tt>) and the
+<tt>libpci</tt> additional component.
+If available, an architecture-specific component (such as <tt>x86</tt>)
+may also improve the topology detection.
+
+If a XML topology is loaded, the <tt>xml</tt> discovery  component
+will be used instead of all other components.
+It internally uses a specific class of components for the actual XML
+import/export routines (<tt>xml_libxml</tt> and <tt>xml_nolibxml</tt>)
+but these will not be discussed here.
+
+\section plugins_default Components enabled by default
+
+The hwloc core contains a list of components sorted by priority.
+Each one is enabled as long as it does not conflict with the
+previously enabled ones.
+This includes native operating system components,
+architecture-specific ones, and if available, I/O components
+such as <tt>libpci</tt>.
+
+Usually the native operating system component
+(when it exists, e.g. <tt>linux</tt> or <tt>aix</tt>)
+is enabled first.
+Then hwloc looks for an architecture specific component
+(e.g. <tt>x86</tt>).
+Finally these also exist a basic component (<tt>no_os</tt>)
+that just tries to discover the number of PUs in the system.
+
+Each component discovers as much topology information as possible.
+Most of them, including most native OS components, do nothing
+unless the topology is still empty.
+Some others, such as <tt>x86</tt> and <tt>libpci</tt>,
+can complete and annotate what other backends still earlier.
+
+Default priorities ensure that clever components are invoked first.
+Native operating system components have higher priorities,
+and are therefore invoked first, because they likely offer
+very detailed topology information.
+If needed, it will be later extended by architecture-specific
+information (e.g. from the <tt>x86</tt> component).
+
+If any configuration function such as hwloc_topology_set_xml()
+is used before loading the topology, the corresponding component
+is enabled first.
+Then, as usual, hwloc enables any other component (based on
+priorities) that does not conflict.
+
+Certain components that manage a virtual topology, for instance XML
+topology import, synthetic topology description, or custom building,
+conflict with all other components.
+Therefore, one of them may only be loaded
+(e.g. with <tt>hwloc_topology_set_xml()</tt>)
+if no other component is enabled.
+
+The environment variable <tt>HWLOC_COMPONENTS_VERBOSE</tt>
+may be set to get verbose messages about component registration
+(including their priority) and enabling.
+
+\section plugins_select Selecting which components to use
+
+Aside from topology configuration function such as
+<tt>hwloc_topology_set_custom()</tt>, the default priority order may
+be changed through the  <tt>HWLOC_COMPONENTS</tt> environment
+variable (component names must be separated by commas).
+
+Specifying <tt>x86</tt> in this variable will cause the <tt>x86</tt>
+component to take precedence over any other component,
+including the native operating system component.
+It is therefore loaded first, before hwloc tries to load all remaining
+non-conflicting components.
+In this case, <tt>x86</tt> would take care of discovering everything
+it supports, instead of only completing what the native OS information.
+This may be useful if the native component is buggy on some platforms.
+
+It is possible to prevent all remaining components from being loaded
+by placing <tt>stop</tt> in the environment variable.
+Only the components listed before this keyword will be enabled.
+
+Certain component names (<tt>xml</tt> and <tt>synthetic</tt>)
+accept an argument (e.g. <tt>xml=file.xml</tt>).
+These arguments behave exactly as if the corresponding string had
+been passed to <tt>hwloc_topology_set_xml()</tt>
+or <tt>hwloc_topology_set_synthetic()</tt>.
+
+\section plugins_config Building components as plugins
+
+Components may optionally be built as plugins so that the hwloc core
+library does not directly depend on their dependencies (for instance
+the <tt>libpci</tt> library).
+Plugin support may be enabled with the <tt>--enable-plugins</tt>
+configure option.
+All components buildable as plugins will then be built as plugins.
+The configure option may be given a comma-separated list of component
+names to specify the exact list of components to build as plugins.
+
+Plugins are built as independent dynamic libraries that are installed
+in <tt>$libdir/hwloc</tt>.
+All plugins found in this directory are loaded during
+<tt>topology_init()</tt>.
+A specific list of directories (colon-separated) to scan may be
+specified in the <tt>HWLOC_PLUGINS_PATH</tt> environment variable.
+
+Plugin filenames must start with <tt>hwloc_</tt>.
+For instance the <tt>libpci</tt> plugin is usually built as
+<tt>hwloc_libpci.so</tt>.
+
+Note that loading a plugin just means that the corresponding component
+is registered to the hwloc core.
+Components are then only enabled if the topology configuration
+requests it.
+
+\section plugins_adding Adding new discovery components and plugins
+
+Each new discovery component requires a new <tt>hwloc_component</tt>
+structure to be exported to the hwloc core with name
+<tt>hwloc_&lt;name&gt;_component</tt>.
+The configure script should then be modified to add
+<tt>&lt;name&gt;</tt> to the <tt>hwloc_components</tt>
+variable so that the component is actually available runtime.
+
+If the new component may be built as a plugin, the configure script
+should also define <tt>hwloc_&lt;name&gt;_component_maybeplugin=1</tt>.
+If the configure scripts decides to enable the component as a plugin,
+the variable <tt>hwloc_&lt;name&gt;_component</tt>
+will be set to <tt>plugin</tt>.
+The build system may then use this variable to actually
+change the way the component is built.
+
+The component structure contains a data field that points to an
+<tt>hwloc_disc_component</tt> which defines an <tt>instantiate</tt>
+callback.
+This function is invoked when this component is actually used by a topology.
+It creates a <tt>backend</tt> structure that usually contains a
+<tt>discover</tt> and/or <tt>notify_new_object</tt> callback taking
+care of the actual topology discovery.
 
 
 

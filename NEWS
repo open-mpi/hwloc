@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2012 inria.  All rights reserved.
+Copyright © 2009-2012 Inria.  All rights reserved.
 Copyright © 2009-2012 Université Bordeaux 1
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -18,11 +18,20 @@ in v0.9.1).
 
 Version 1.6.0
 -------------
+* Major changes
+  + Reorganize the backend infrastructure to support dynamically
+    loaded plugins (not supported on AIX and Windows, disabled
+    by default on others).
+  + Add --enable-plugins configure options to build libxml2
+    and libpci support as separated modules. See the plugins
+    documentation for details.
 * Backends
   + Fix detection on FreeBSD in case of cpuset restriction. Thanks to
     Sebastian Kuzminsky for reporting the problem.
   + Add CPUModel detection on Darwin and x86/FreeBSD.
     Thanks to Robin Scher for providing ways to implement this.
+  + The x86 backend now adds CPUModel info attributes to socket objects
+    created by other backends that do not natively support this attribute.
 * XML
   + Add hwloc_topology_set_userdata_import/export_callback(),
     hwloc_export_obj_userdata() and _userdata_base64() to let
