@@ -56,6 +56,7 @@ static pthread_mutex_t hwloc_components_mutex = PTHREAD_MUTEX_INITIALIZER;
 static struct hwloc__plugin_desc {
   char *name;
   struct hwloc_component *component;
+  char *filename;
   lt_dlhandle handle;
   struct hwloc__plugin_desc *next;
 } *hwloc_plugins = NULL;
@@ -130,6 +131,7 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   if (!desc)
     goto out_with_handle;
   desc->name = strdup(basename);
+  desc->filename = strdup(filename);
   desc->component = component;
   desc->handle = handle;
   if (hwloc_plugins_verbose)
@@ -161,6 +163,7 @@ hwloc_plugins_exit(void)
     next = desc->next;
     lt_dlclose(desc->handle);
     free(desc->name);
+    free(desc->filename);
     free(desc);
     desc = next;
   }
@@ -218,7 +221,8 @@ hwloc_disc_component_type_string(hwloc_disc_component_type_t type)
 }
 
 static int
-hwloc_disc_component_register(struct hwloc_disc_component *component)
+hwloc_disc_component_register(struct hwloc_disc_component *component,
+			      const char *filename)
 {
   struct hwloc_disc_component **prev;
 
@@ -233,8 +237,9 @@ hwloc_disc_component_register(struct hwloc_disc_component *component)
     prev = &((*prev)->next);
   }
   if (hwloc_components_verbose)
-    fprintf(stderr, "Registered %s component `%s' with priority %u\n",
-	    hwloc_disc_component_type_string(component->type), component->name, component->priority);
+    fprintf(stderr, "Registered %s component `%s' with priority %u (%s%s)\n",
+	    hwloc_disc_component_type_string(component->type), component->name, component->priority,
+	    filename ? "from plugin " : "statically build", filename ? filename : "");
 
   prev = &hwloc_disc_components;
   while (NULL != *prev) {
@@ -275,7 +280,7 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
   /* hwloc_static_components is created by configure in static-components.h */
   for(i=0; NULL != hwloc_static_components[i]; i++)
     if (HWLOC_COMPONENT_TYPE_DISC == hwloc_static_components[i]->type)
-      hwloc_disc_component_register(hwloc_static_components[i]->data);
+      hwloc_disc_component_register(hwloc_static_components[i]->data, NULL);
     else if (HWLOC_COMPONENT_TYPE_XML == hwloc_static_components[i]->type)
       hwloc_xml_callbacks_register(hwloc_static_components[i]->data);
     else
@@ -285,7 +290,7 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
 #ifdef HWLOC_HAVE_PLUGINS
   for(desc = hwloc_plugins; NULL != desc; desc = desc->next)
     if (HWLOC_COMPONENT_TYPE_DISC == desc->component->type)
-      hwloc_disc_component_register(desc->component->data);
+      hwloc_disc_component_register(desc->component->data, desc->filename);
     else if (HWLOC_COMPONENT_TYPE_XML == desc->component->type)
       hwloc_xml_callbacks_register(desc->component->data);
     else
