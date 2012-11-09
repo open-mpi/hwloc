@@ -711,7 +711,7 @@ EOF])
         AC_DEFINE([HWLOC_HAVE_PCIDEV_DOMAIN], [1], [Define to 1 if struct pci_dev has a `domain' field.])
       fi
 
-      HWLOC_REQUIRES="libpci $HWLOC_REQUIRES"
+      HWLOC_PCI_REQUIRES=libpci
       AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
       AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
       CFLAGS="$tmp_save_CFLAGS"
@@ -722,7 +722,7 @@ EOF])
     else
       AC_SUBST([HWLOC_HAVE_LIBPCI], [0])
     fi
-    # don't add LIBS/CFLAGS yet, depends on plugins
+    # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
     # libxml2 support
     hwloc_libxml2_happy=
@@ -732,7 +732,7 @@ EOF])
                                 [hwloc_libxml2_happy=no])
     fi
     if test "x$hwloc_libxml2_happy" = "xyes"; then
-        HWLOC_REQUIRES="libxml-2.0 $HWLOC_REQUIRES"
+        HWLOC_LIBXML2_REQUIRES="libxml-2.0"
         AC_DEFINE([HWLOC_HAVE_LIBXML2], [1], [Define to 1 if you have the `libxml2' library.])
         AC_SUBST([HWLOC_HAVE_LIBXML2], [1])
 
@@ -744,7 +744,7 @@ EOF])
               [AC_MSG_WARN([--enable-libxml2 requested, but libxml2 was not found])
                AC_MSG_ERROR([Cannot continue])])
     fi
-    # don't add LIBS/CFLAGS yet, depends on plugins
+    # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
     # Try to compile the cpuid inlines
     AC_MSG_CHECKING([for cpuid])
@@ -841,10 +841,12 @@ EOF])
 
     AS_IF([test "$hwloc_libpci_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS"])
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_PCI_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_xml_libxml_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LIBXML2_LIBS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CFLAGS"])
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_LIBXML2_REQUIRES $HWLOC_REQUIRES"])
 
     #
     # Setup HWLOC's C, CPP, and LD flags, and LIBS
