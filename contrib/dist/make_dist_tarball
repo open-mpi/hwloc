@@ -11,6 +11,7 @@
 # Copyright (c) 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
 # Copyright © 2008-2010  Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2012 Inria.  All rights reserved.
 # $COPYRIGHT$
 # 
 # Additional copyrights may follow
@@ -93,7 +94,7 @@ make_tarball() {
     cd doc
     rm -rf doxygen-doc
     rm -f success
-    (make doc 2>&1 && touch success) | tee config.out
+    (make doc 2>&1 && touch success) | tee doc.out
     if test ! -f success; then 
         echo "Making doxygen docs failed.  Aborting"
         exit 1
@@ -105,11 +106,12 @@ make_tarball() {
     echo "*** Making README..."
     rm -rf ../README
     rm -f success
-    (make readme 2>&1 && touch success) | tee config.out
+    (make readme 2>&1 && touch success) | tee readme.out
     if test ! -f success; then 
         echo "Making README failed.  Aborting"
         exit 1
     fi
+    rm -f success
     cd ..
 
     #
