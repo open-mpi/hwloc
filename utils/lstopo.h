@@ -47,4 +47,28 @@ extern void output_draw(struct draw_methods *draw_methods, int logical, int lege
 int rgb_to_color(int r, int g, int b) __hwloc_attribute_const;
 int declare_color(int r, int g, int b);
 
+static __hwloc_inline int lstopo_pu_offline(hwloc_obj_t l)
+{
+  return !hwloc_bitmap_isset(l->online_cpuset, l->os_index);
+}
+
+static __hwloc_inline int lstopo_pu_forbidden(hwloc_obj_t l)
+{
+  return !hwloc_bitmap_isset(l->allowed_cpuset, l->os_index);
+}
+
+static __hwloc_inline int lstopo_pu_running(hwloc_topology_t topology, hwloc_obj_t l)
+{
+  hwloc_bitmap_t bind = hwloc_bitmap_alloc();
+  int res;
+  if (pid_number != -1 && pid_number != 0)
+    hwloc_get_proc_cpubind(topology, pid, bind, 0);
+  else if (pid_number == 0)
+    hwloc_get_cpubind(topology, bind, 0);
+  res = bind && hwloc_bitmap_isset(bind, l->os_index);
+  hwloc_bitmap_free(bind);
+  return res;
+}
+
+
 #endif /* UTILS_LSTOPO_H */

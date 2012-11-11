@@ -530,23 +530,14 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
 
-  if (hwloc_bitmap_isset(level->online_cpuset, level->os_index))
-    if (!hwloc_bitmap_isset(level->allowed_cpuset, level->os_index))
-      methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
-    else {
-      hwloc_bitmap_t bind = hwloc_bitmap_alloc();
-      if (pid_number != -1 && pid_number != 0)
-        hwloc_get_proc_cpubind(topology, pid, bind, 0);
-      else if (pid_number == 0)
-        hwloc_get_cpubind(topology, bind, 0);
-      if (bind && hwloc_bitmap_isset(bind, level->os_index))
-        methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);
-      else
-        methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
-      hwloc_bitmap_free(bind);
-    }
-  else
+  if (lstopo_pu_offline(level))
     methods->box(output, OFFLINE_R_COLOR, OFFLINE_G_COLOR, OFFLINE_B_COLOR, depth, x, *retwidth, y, *retheight);
+  else if (lstopo_pu_forbidden(level))
+    methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
+  else if (lstopo_pu_running(topology, level))
+    methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);
+  else
+    methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
 
   if (fontsize) {
     char text[64];
