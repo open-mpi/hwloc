@@ -19,36 +19,38 @@ in v0.9.1).
 Version 1.6.0
 -------------
 * Major changes
-  + Reorganize the backend infrastructure to support dynamically
-    loaded plugins (not supported on AIX and Windows, disabled
-    by default on others).
-  + Add --enable-plugins configure options to build libxml2
-    and libpci support as separated modules. See the plugins
-    documentation for details.
+  + Reorganize the backend infrastructure to support dynamic selection
+    of components and dynamic loading of plugins. For details, see the
+    new documentation section Components and plugins.
+    - The HWLOC_COMPONENTS variable lets one replace the default discovery
+      components.
+    - Plugins are not supported on AIX and Windows, disabled by default
+      on others, enabled with --enable-plugins. libxml2 and libpci support
+      may be built as separated modules.
 * Backends
-  + Fix detection on FreeBSD in case of cpuset restriction. Thanks to
-    Sebastian Kuzminsky for reporting the problem.
   + Add CPUModel detection on Darwin and x86/FreeBSD.
     Thanks to Robin Scher for providing ways to implement this.
   + The x86 backend now adds CPUModel info attributes to socket objects
     created by other backends that do not natively support this attribute.
+  + Fix detection on FreeBSD in case of cpuset restriction. Thanks to
+    Sebastian Kuzminsky for reporting the problem.
 * XML
   + Add hwloc_topology_set_userdata_import/export_callback(),
     hwloc_export_obj_userdata() and _userdata_base64() to let
-    applications specify how to save/restore what they placed in
-    the userdata private pointer field of hwloc objects.
+    applications specify how to save/restore the custom data they placed
+    in the userdata private pointer field of hwloc objects.
 * Tools
   + Add hwloc-annotate program to add string info attributes to XML
     topologies.
+  + Add --pid-cmd to hwloc-ps to append the output of a command to each
+    PID line. May be used for showing Open MPI process ranks, see the
+    hwloc-ps(1) manpage for details.
   + hwloc-bind now exits with an error if binding fails; the executable
     is not launched unless binding suceeeded or --force was given.
   + Add --quiet to hwloc-calc and hwloc-bind to hide non-fatal error
     messages.
   + Fix command-line pid support in windows tools.
   + All programs accept --verbose as a synonym to -v.
-  + Add --pid-cmd to hwloc-ps to append the output of a command to each
-    PID line. May be used for showing Open MPI process ranks, see the
-    hwloc-ps(1) manpage for details.
 * Misc
   + When merging objects with HWLOC_IGNORE_TYPE_KEEP_STRUCTURE or
     lstopo --merge, compare object types before deciding which one of two
