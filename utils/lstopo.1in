@@ -137,8 +137,9 @@ a custom topology such as an XML file.
 Detect topology as seen by process <pid>, i.e. as if process <pid> did the
 discovery itself.
 Note that this can for instance change the set of allowed processors.
-Also show this process current CPU binding in the graphical output
-(in Green, see the COLORS section below).
+Also show this process current CPU binding by marking the corresponding
+PUs (in Green in the graphical output, see the COLORS section below,
+or by appending \fI(binding)\fR to the verbose text output).
 If 0 is given as pid, the current binding for the lstopo process will be shown.
 .TP
 \fB\-\-ps\fR \fB\-\-top\fR
@@ -219,8 +220,8 @@ Send the output to a window or to the console depending on the environment.
 .TP
 .B console
 Send a text summary to stdout.
-No color annotation for binding, unallowed or offline processors
-is shown in this mode; see the COLORS section, below.
+Binding, unallowed or offline processors are only annotated in this mode
+if verbose; see the COLORS section, below.
 .
 .TP
 .B txt
@@ -324,7 +325,8 @@ running lstopo in a different context may show the same CPU as white).
 .PP
 Some lstopo output modes, e.g. the console mode (default non-graphical output),
 do not support colors at all.
-The above characteristics are not shown in this case.
+The console mode displays the above characteristics by appending text
+to each PU line if verbose messages are enabled.
 .
 .\" **************************
 .\"    Layout Section

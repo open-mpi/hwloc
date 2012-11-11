@@ -46,7 +46,7 @@
  */
 
 static void
-output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
+output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
   char type[32], *attr, phys[32] = "";
   unsigned idx = logical ? l->logical_index : l->os_index;
@@ -92,6 +92,16 @@ output_console_obj (hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
     fprintf(output, "%s", cpusetstr);
     free(cpusetstr);
   }
+
+  /* annotate if the PU is forbidden/offline/running */
+  if (l->type == HWLOC_OBJ_PU && verbose_mode >= 2) {
+    if (lstopo_pu_offline(l))
+      printf(" (offline)");
+    else if (lstopo_pu_forbidden(l))
+      printf(" (forbidden)");
+    else if (lstopo_pu_running(topology, l))
+      printf(" (running)");
+  }
 }
 
 /* Recursively output topology in a console fashion */
@@ -111,7 +121,7 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
     indent (output, 2*i);
     i++;
   }
-  output_console_obj(l, output, logical, verbose_mode);
+  output_console_obj(topology, l, output, logical, verbose_mode);
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
@@ -125,7 +135,7 @@ output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical
 {
   unsigned x;
   if (show_only == l->type) {
-    output_console_obj (l, output, logical, verbose_mode);
+    output_console_obj (topology, l, output, logical, verbose_mode);
     fprintf (output, "\n");
   }
   for (x=0; x<l->arity; x++)
