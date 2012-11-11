@@ -58,6 +58,8 @@ Version 1.6.0
   + Only add CPUType socket attributes on Solaris/Sparc. Other cases
     don't report reliable information (Solaris/x86), and a replacement
     is available as the Architecture string info in the Machine object.
+  + Document object attributes and string infos in a new Attributes
+    section in the documentation.
 
 
 Version 1.5.1

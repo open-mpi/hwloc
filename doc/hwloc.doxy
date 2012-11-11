@@ -590,6 +590,7 @@ The documentation chapters include
 <li> \ref cpu_mem_bind
 <li> \ref iodevices
 <li> \ref multinode
+<li> \ref attributes
 <li> \ref xml
 <li> \ref interoperability
 <li> \ref threadsafety
@@ -820,7 +821,7 @@ of the topology.
 \section cli_hwloc_annotate hwloc-annotate
 
 hwloc-annotate may add object attributes such as string
-information.
+information (see \ref attributes_custom for details).
 It reads an input topology from a XML file and outputs
 the annotated topology as another XML file.
 
@@ -1412,6 +1413,89 @@ hwloc_topology_destroy(host2);
 hwloc_topology_load(global);
 ...
 \endverbatim
+
+
+
+
+\page attributes Object attributes
+
+\section attributes_normal Normal attributes
+
+hwloc objects have many attributes.
+The ::hwloc_obj structure contains a common set of attributes that
+are available for object types, for instance their <tt>type</tt> or
+<tt>logical_index</tt>.
+
+Each object also contains an <tt>attr</tt> field that, if non NULL,
+points to a union ::hwloc_obj_attr_u of type-specific attribute
+structures.
+For instance, a Cache object <tt>obj</tt> contains cache-specific
+information in <tt>obj->attr->cache</tt>, such as its size and
+associativity.
+See ::hwloc_obj_attr_u for details.
+
+\section attributes_info Custom string infos
+
+Aside from the <tt>name</tt> field of each object, hwloc annotates
+many objects with string attributes that are made of a key and a
+value.
+Each object contains a list of such pairs that may be consulted
+manually (looking at the object <tt>infos</tt> array field)
+or using the hwloc_obj_get_info_by_name().
+The user may additionally add new key-value pairs to any object using
+::hwloc_obj_add_info() or the \ref cli_hwloc_annotate program.
+
+Here is a non-exhaustive list of attributes that may be automatically
+added by hwloc (with the usual corresponding object in parentheses).
+Note that these attributes heavily depend on the ability of the
+operating system to report them.
+Many of them will therefore be missing on some OS.
+<dl>
+<dt>OSName, OSRelease, OSVersion, HostName, Architecture
+(Machine object)</dt>
+<dd>The operating system name, release, version, the hostname and the
+architecture name, as reported by the Unix <tt>uname</tt> command.
+</dd>
+<dt>Backend (Machine object or topology root object)</dt>
+<dd>The name of the hwloc backend/component that filled the topology.
+If several components were combined, multiple Backend keys may exist,
+with different values, for instance <tt>x86</tt>, <tt>Linux</tt>
+and <tt>libpci</tt>.
+</dd>
+<dt>LinuxCgroup (Machine object)</dt>
+<dd>The name the Linux control group where the calling process is
+placed.
+</dd>
+<dt>SyntheticDescription (topology root object)</dt>
+<dd>The description string that was given to hwloc to build this
+synthetic topology.
+</dd>
+<dt>CPUModel, CPUType (Socket or Machine)</dt>
+<dd>The processor model name,
+and a more-general processor type name when applicable (Solaris/Sparc).
+These attributes are usually added to Socket objects.
+However, when hwloc cannot detect the number of sockets but still
+knows their (same) model, the attribute may be added to the Machine
+object instead.
+</dd>
+<dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
+<dd>The vendor and device names of the PCI device.
+</dd>
+<dt>DMIBoardVendor, DMIBoardName, etc. (Machine object)</dt>
+<dd>DMI hardware information such as the motherboard and chassis
+models and vendors, the BIOS revision, etc.,
+as reported by Linux under <tt>/sys/class/dmi/id/</tt>.
+</dd>
+<dt>Address, Port (Network interface OS devices)</dt>
+<dd>The MAC address and the port number of a software network
+interface, such as <tt>eth4</tt> on Linux.
+</dd>
+<dt>NodeGUID, SysImageGUID, Port3LID, Port4LMC, Port5GID6
+(OpenFabrics OS devices)</dt>
+<dd>The node GUID and GUID mask, the LID and LID mask count of a given
+port, and a GID of a port.
+</dd>
+</dl>
 
 
 
@@ -2122,7 +2206,8 @@ and <tt>hwloc_topology_set_userdata_import_callback()</tt>.
 
 Each object may also contain some <em>info</em> attributes
 (key name and value) that are setup by hwloc during discovery
-and that may be extended by the user with <tt>hwloc_obj_add_info()</tt>.
+and that may be extended by the user with
+<tt>hwloc_obj_add_info()</tt> (see also \ref attributes).
 Contrary to the <tt>userdata</tt> field which is unique, multiple info
 attributes may exist for each object, even with the same name.
 These attributes are always exported to XML.
