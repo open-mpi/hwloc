@@ -55,6 +55,9 @@ Version 1.6.0
     identical object to remove (e.g. keep sockets in favor of caches).
   + Add some GUID- and LID-related info attributes to OpenFabrics
     OS devices.
+  + Only add CPUType socket attributes on Solaris/Sparc. Other cases
+    don't report reliable information (Solaris/x86), and a replacement
+    is available as the Architecture string info in the Machine object.
 
 
 Version 1.5.1

@@ -294,7 +294,13 @@ char* hwloc_solaris_get_chip_type(void) {
   picl_shutdown();
 
   if (called_cpu_probe) {
+#if (defined HWLOC_X86_64_ARCH) || (defined HWLOC_X86_32_ARCH)
+      /* PICL returns some corrupted chip_type strings on x86,
+       * and CPUType only used on Sparc anyway, at least for now.
+       * So we just ignore this attribute on x86. */
+#else
       strncpy(chip_type, dss_chip_type, PICL_PROPNAMELEN_MAX);
+#endif
   } else {
       /* no picl information on machine available */
       sysinfo(SI_HW_PROVIDER, chip_type, PICL_PROPNAMELEN_MAX);
