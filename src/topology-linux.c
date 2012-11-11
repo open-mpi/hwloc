@@ -14,7 +14,6 @@
 #include <private/private.h>
 #include <private/misc.h>
 #include <private/debug.h>
-#include <sys/utsname.h>
 
 #include <limits.h>
 #include <stdio.h>
@@ -262,7 +261,6 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 struct hwloc_linux_backend_data_s {
   char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-  struct utsname utsname; /* cached result of uname, used multiple times */
 };
 
 int
@@ -2636,8 +2634,6 @@ look_sysfscpu(struct hwloc_topology *topology,
 	      hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel);
 	    }
 	}
-	if (data->utsname.machine[0] != '\0')
-	  hwloc_obj_add_info(sock, "CPUType", data->utsname.machine);
         socketset = NULL; /* don't free it */
       }
       hwloc_bitmap_free(socketset);
@@ -3111,8 +3107,6 @@ look_cpuinfo(struct hwloc_topology *topology,
 	/* FIXME add to name as well? */
         hwloc_obj_add_info(obj, "CPUModel", cpumodel);
       }
-      if (data->utsname.machine[0] != '\0')
-	hwloc_obj_add_info(obj, "CPUType", data->utsname.machine);
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }
@@ -3243,10 +3237,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
-  memset(&data->utsname, 0, sizeof(data->utsname));
-  if (topology->is_thissystem)
-    uname(&data->utsname);
-
   /* Gather the list of admin-disabled cpus and mems */
   hwloc_find_linux_cpuset_mntpnt(&cgroup_mntpnt, &cpuset_mntpnt, data->root_fd);
   if (cgroup_mntpnt || cpuset_mntpnt) {
@@ -3353,7 +3343,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
   /* gather uname info if fsroot wasn't changed */
   if (topology->is_thissystem)
-     /* FIXME: reuse data->utsname */
      hwloc_add_uname_info(topology);
 
   return 1;
