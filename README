@@ -38,7 +38,8 @@ Since it uses standard Operating System information, hwloc's support is mostly
 independant from the processor type (x86, powerpc, ...) and just relies on the
 Operating System support. The only exception to this is kFreeBSD, which does
 not support topology information, and hwloc thus uses an x86-only CPUID-based
-backend (which could be used for other OSes too).
+backend (which can be used for other OSes too, see the Components and plugins
+section).
 
 To check whether hwloc works on a particular machine, just try to build it and
 run lstopo or lstopo-no-graphics. If some things do not look right (e.g. bogus
@@ -110,6 +111,10 @@ The hwloc core may also benefit from the following development packages:
  minimalistic parser will only be able to import XML files that were
  exported by the same hwloc release). See Importing and exporting topologies
  from/to XML files for details.
+
+libpci and libxml2 support may be statically built inside the main hwloc
+library, or as separate dynamically-loaded plugins (see the Components and
+plugins section).
 
 CLI Examples
 
@@ -664,9 +669,11 @@ The documentation chapters include
   * CPU and Memory Binding Overview
   * I/O Devices
   * Multi-node Topologies
+  * Object attributes
   * Importing and exporting topologies from/to XML files
   * Interoperability With Other Software
   * Thread Safety
+  * Components and plugins
   * Embedding hwloc in Other Software
   * Frequently Asked Questions
 
@@ -674,5 +681,5 @@ Make sure to have had a look at those too!
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Aug 2 2012 14:40:13 for Hardware Locality (hwloc) by   doxygen
-1.8.1.2
+Generated on Mon Nov 12 2012 03:01:54 for Hardware Locality (hwloc) by   
+doxygen 1.8.1.2

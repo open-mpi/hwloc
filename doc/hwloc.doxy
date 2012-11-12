@@ -63,7 +63,7 @@ Since it uses standard Operating System information, hwloc's support is mostly
 independant from the processor type (x86, powerpc, ...) and just relies on the
 Operating System support. The only exception to this is kFreeBSD, which does
 not support topology information, and hwloc thus uses an x86-only CPUID-based
-backend (which could be used for other OSes too).
+backend (which can be used for other OSes too, see the \ref plugins section).
 
 To check whether hwloc works on a particular machine, just try to build it
 and run <tt>lstopo</tt> or <tt>lstopo-no-graphics</tt>. If some things do not look right
@@ -151,6 +151,10 @@ The hwloc core may also benefit from the following development packages:
     XML files that were exported by the same hwloc release).
     See \ref xml for details.</li>
 </ul>
+libpci and libxml2 support may be statically built inside the main
+hwloc library, or as separate dynamically-loaded plugins
+(see the \ref plugins section).
+
 
 
 \htmlonly
@@ -1548,6 +1552,14 @@ release (even if using the libxml2 backend).
 Its advantage is however to always be available without requiring
 any external dependency.
 
+If libxml2 is available but the core hwloc library should not directly
+depend on it, the libxml2 support may be built as a dynamicall-loaded
+plugin.
+One should pass <tt>--enable-plugins</tt> to enable plugin support
+(when supported) and build as plugins all component that support it.
+Or pass <tt>--enable-plugins=xml_libxml</tt> to only build this
+libxml2 support as a plugin.
+
 \section xml_errors XML import error management
 
 Importing XML files can fail at least because of file access errors,
@@ -1732,7 +1744,7 @@ If a XML topology is loaded, the <tt>xml</tt> discovery  component
 will be used instead of all other components.
 It internally uses a specific class of components for the actual XML
 import/export routines (<tt>xml_libxml</tt> and <tt>xml_nolibxml</tt>)
-but these will not be discussed here.
+but these will not be discussed here (see \ref xml_backends).
 
 \section plugins_default Components enabled by default
 
@@ -1832,7 +1844,7 @@ For instance the <tt>libpci</tt> plugin is usually built as
 Note that loading a plugin just means that the corresponding component
 is registered to the hwloc core.
 Components are then only enabled if the topology configuration
-requests it.
+requests it, as explained in the previous sections.
 
 \section plugins_adding Adding new discovery components and plugins
 
@@ -1841,7 +1853,7 @@ structure to be exported to the hwloc core with name
 <tt>hwloc_&lt;name&gt;_component</tt>.
 The configure script should then be modified to add
 <tt>&lt;name&gt;</tt> to the <tt>hwloc_components</tt>
-variable so that the component is actually available runtime.
+variable so that the component is actually available at runtime.
 
 If the new component may be built as a plugin, the configure script
 should also define <tt>hwloc_&lt;name&gt;_component_maybeplugin=1</tt>.
@@ -1858,6 +1870,7 @@ This function is invoked when this component is actually used by a topology.
 It creates a <tt>backend</tt> structure that usually contains a
 <tt>discover</tt> and/or <tt>notify_new_object</tt> callback taking
 care of the actual topology discovery.
+
 
 
 

@@ -24,9 +24,10 @@ Version 1.6.0
     new documentation section Components and plugins.
     - The HWLOC_COMPONENTS variable lets one replace the default discovery
       components.
-    - Plugins are not supported on AIX and Windows, disabled by default
-      on others, enabled with --enable-plugins. libxml2 and libpci support
-      may be built as separated modules.
+    - Dynamic loading of plugins may be enabled with --enable-plugins
+      (except on AIX and Windows). It will build libxml2 and libpci
+      support as separated modules. This helps reducing the dependencies
+      of the core hwloc library when distributed as a binary package.
 * Backends
   + Add CPUModel detection on Darwin and x86/FreeBSD.
     Thanks to Robin Scher for providing ways to implement this.
