@@ -1028,8 +1028,6 @@ following environment variables.
   run sanity checks during discovery, as if --enable-debug was passed but
   without debug messages
   may be useful in the doc for debugging?
- add a HWLOC_USE_x86_BACKEND?
-  to force testing of the x86 backend
 -->
 
 
