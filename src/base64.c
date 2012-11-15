@@ -131,9 +131,9 @@ int
 hwloc_encode_to_base64(const char *src, size_t srclength, char *target, size_t targsize)
 {
 	size_t datalength = 0;
-	u_char input[3];
-	u_char output[4];
-	u_int i;
+	unsigned char input[3];
+	unsigned char output[4];
+	unsigned int i;
 
 	while (2 < srclength) {
 		input[0] = *src++;
@@ -190,7 +190,7 @@ hwloc_encode_to_base64(const char *src, size_t srclength, char *target, size_t t
 int
 hwloc_decode_from_base64(char const *src, char *target, size_t targsize)
 {
-	u_int tarindex, state;
+	unsigned int tarindex, state;
 	int ch;
 	char *pos;
 
