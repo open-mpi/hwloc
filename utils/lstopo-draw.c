@@ -501,7 +501,10 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
           speed = subobjs[i]->attr->bridge.upstream.pci.linkspeed;
         if (speed != 0.) {
           char text[4];
-          snprintf(text, sizeof(text), "%0.1f", subobjs[i]->attr->pcidev.linkspeed);
+          if (speed >= 10.)
+	    snprintf(text, sizeof(text), "%.0f", subobjs[i]->attr->pcidev.linkspeed);
+	  else
+	    snprintf(text, sizeof(text), "%0.1f", subobjs[i]->attr->pcidev.linkspeed);
           methods->text(output, 0, 0, 0, fontsize, depth-1, x + 2*gridsize + gridsize, y + totheight, text);
         }
       }
