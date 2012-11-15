@@ -22,6 +22,8 @@ Version 1.5.2
 * Fix some DIR descriptor leaks on Linux.
 * Fix I/O device lists when some were filtered out after a XML import.
 * Add missing Backend string info on Solaris in most cases.
+* Fix the removal of I/O objects when importing a I/O-enabled XML topology
+  without any I/O topology flag.
 
 
 Version 1.5.1
