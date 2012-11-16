@@ -54,7 +54,17 @@ set -e
 
 do_run()
 {
-  $lstopo --if xml --input "$1" --of xml "$file"
+  local dirname=`dirname $1`
+  local basename="${dirname}/"`basename $1 .xml`
+
+  local source="$1"
+  local source_file="${basename}.source"
+  test -f "$source_file" && source="${dirname}/"`cat $source_file`
+
+  local options_file="${basename}.options"
+  test -f "$options_file" && opts=`cat $options_file`
+
+  $lstopo --if xml --input "$source" --of xml "$file" $opts
 
   if [ "$HWLOC_UPDATE_TEST_TOPOLOGY_OUTPUT" != 1 ]
   then
