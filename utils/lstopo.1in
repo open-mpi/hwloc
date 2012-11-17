@@ -255,9 +255,13 @@ support, lstopo outputs an SVG representation of the map.
 .
 .TP
 .B synthetic
-If the topology is symmetric, lstopo outputs a synthetic description
-string. This output may be reused as an input synthetic topology
+If the topology is symmetric
+(which requires that the root object has its symmetric_subtree field set),
+lstopo outputs a synthetic description string.
+This output may be reused as an input synthetic topology
 description later.
+Note that I/O devices often cause topology asymmetry.
+Adding \-\-no\-io may then be useful when the synthetic export fails.
 .
 .TP
 .B xml
