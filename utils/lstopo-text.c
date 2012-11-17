@@ -278,7 +278,8 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int logic
   }
 
   if (!obj->symmetric_subtree) {
-    fprintf(stderr, "Cannot output assymetric topology in synthetic format\n");
+    fprintf(stderr, "Cannot output assymetric topology in synthetic format.\n");
+    fprintf(stderr, "Adding --no-io may help making the topology symmetric.\n");
     return;
   }
 
