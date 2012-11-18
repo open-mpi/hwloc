@@ -804,6 +804,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_fsroot(hwloc_topology_t __hwloc_restrict t
  * of a level.  If only some level types are enforced, hwloc will try to
  * choose the other types according to usual topologies, but it may fail
  * and you may have to specify more level types manually.
+ * See also the \ref synthetic.
  *
  * If \p description was properly parsed and describes a valid topology
  * configuration, this function returns 0.

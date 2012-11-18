@@ -63,6 +63,7 @@ Version 1.6.0
     is available as the Architecture string info in the Machine object.
   + Document object attributes and string infos in a new Attributes
     section in the documentation.
+  + Add a section about Synthetic topologies in the documentation.
 
 
 Version 1.5.1
