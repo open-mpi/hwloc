@@ -826,7 +826,7 @@ of the topology.
 \section cli_hwloc_annotate hwloc-annotate
 
 hwloc-annotate may add object attributes such as string
-information (see \ref attributes_custom for details).
+information (see \ref attributes_info for details).
 It reads an input topology from a XML file and outputs
 the annotated topology as another XML file.
 
