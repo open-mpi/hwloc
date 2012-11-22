@@ -691,7 +691,7 @@ Make sure to have had a look at those too!
   object.  This may be completely arbitrary, non-unique, non-contiguous, not
   representative of logical proximity, and may depend on the BIOS
   configuration. That is why hwloc almost never uses them, only in the default
-  lstopo output (<tt>P#x</tt>) and cpuset masks.</dd>
+  lstopo output (<tt>P\#x</tt>) and cpuset masks.</dd>
 
 <dt>Logical index</dt>
   <dd>Index to uniquely identify objects of the same type and depth,
@@ -699,7 +699,7 @@ Make sure to have had a look at those too!
   logical proximity in a generic way, i.e. objects which have adjacent logical
   indexes are adjacent in the topology. That is why hwloc almost always uses
   it in its API, since it expresses logical proximity. They can be shown (as
-  <tt>L#x</tt>) by <tt>lstopo</tt> thanks to the <tt>-l</tt> option.  This index
+  <tt>L\#x</tt>) by <tt>lstopo</tt> thanks to the <tt>-l</tt> option.  This index
   is always linear and in
   the range [0, num_objs_same_type_same_level-1].  Think of it as ``cousin
   rank.'' The ordering is based on topology first, and then on OS CPU numbers,
