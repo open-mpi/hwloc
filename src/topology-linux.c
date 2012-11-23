@@ -2315,7 +2315,7 @@ try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
 {
   struct hwloc_obj *c = NULL;
 
-  if ( (0 == cache_line_size) && (0 == cache_size) )
+  if (0 == cache_size)
     return;
 
   c = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
@@ -2326,7 +2326,7 @@ try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
   if (cache_sets == 1)
     /* likely wrong, make it unknown */
     cache_sets = 0;
-  if (cache_sets)
+  if (cache_sets && cache_line_size)
     c->attr->cache.associativity = cache_size / (cache_sets * cache_line_size);
   else
     c->attr->cache.associativity = 0;
