@@ -277,10 +277,11 @@ int main(int argc, char *argv[])
       sprintf(cmd, "%s %u", pidcmd, pid);
       file = popen(cmd, "r");
       if (file) {
-	fgets(pidoutput, sizeof(pidoutput), file);
-	end = strchr(pidoutput, '\n');
-	if (end)
-	  *end = '\0';
+	if (fgets(pidoutput, sizeof(pidoutput), file)) {
+	  end = strchr(pidoutput, '\n');
+	  if (end)
+	    *end = '\0';
+	}
 	pclose(file);
       }
       free(cmd);
