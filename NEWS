@@ -53,6 +53,10 @@ Version 1.6.0
   + Fix command-line pid support in windows tools.
   + All programs accept --verbose as a synonym to -v.
 * Misc
+  + Fix some DIR descriptor leaks on Linux.
+  + Fix I/O device lists when some were filtered out after a XML import.
+  + Fix the removal of I/O objects when importing a I/O-enabled XML topology
+    without any I/O topology flag.
   + When merging objects with HWLOC_IGNORE_TYPE_KEEP_STRUCTURE or
     lstopo --merge, compare object types before deciding which one of two
     identical object to remove (e.g. keep sockets in favor of caches).
@@ -61,6 +65,7 @@ Version 1.6.0
   + Only add CPUType socket attributes on Solaris/Sparc. Other cases
     don't report reliable information (Solaris/x86), and a replacement
     is available as the Architecture string info in the Machine object.
+  + Add missing Backend string info on Solaris in most cases.
   + Document object attributes and string infos in a new Attributes
     section in the documentation.
   + Add a section about Synthetic topologies in the documentation.
