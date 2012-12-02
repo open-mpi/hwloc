@@ -710,14 +710,19 @@ Make sure to have had a look at those too!
   index (as computed according to logical proximity by hwloc).
   </dd>
 
-<dt>Logical processor</dt>
 <dt>Processing unit</dt>
   <dd>The smallest processing element that can be represented by a hwloc
   object. It may be a single-core processor, a core of a multicore
-  processor, or a single thread in SMT processor.
+  processor, or a single thread in a SMT processor.
+  hwloc's PU acronym stands for Processing Unit.
+  </dd>
+
+<!-- don't use a single <dd> for both PU and logicalproc <dt> because
+ it may be rendered poorly (big vfill between the <dt> lines -->
+<dt>Logical processor</dt>
+  <dd>Synonym of "Processing unit".
   "Logical processor" should not be confused with "Logical index of a
-  processor". "Logical processor" is only one of the names which can be found in
-  various documentations to designate a processing unit.
+  processor".
   </dd>
 
 </dl>
