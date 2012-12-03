@@ -19,10 +19,12 @@ endif
 # distribution tarball if we're building in embedded mode.
 DIST_SUBDIRS = $(SUBDIRS)
 
-# Only install the pkg file if we're building in standalone mode
+# Only install the pkg file if we're building in standalone mode (and not on Windows)
 if HWLOC_BUILD_STANDALONE
+if !HWLOC_HAVE_WINDOWS
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = hwloc.pc
+endif
 endif
 
 # Only install the valgrind suppressions file if we're building in standalone mode
@@ -75,14 +77,16 @@ doc readme:
 	$(MAKE) -C doc readme
 endif HWLOC_BUILD_STANDALONE
 
-#
-# Winball specific rules, to be manually run after make install
-#
 if HWLOC_BUILD_STANDALONE
-.PHONY: install-winball
-install-winball:
-	sed -e 's/$$/'$$'\015'/ < $(srcdir)/README > $(prefix)/README.txt
-	sed -e 's/$$/'$$'\015'/ < $(srcdir)/NEWS > $(prefix)/NEWS.txt
-	sed -e 's/$$/'$$'\015'/ < $(srcdir)/COPYING > $(prefix)/COPYING.txt
-	$(RM) $(pkgconfigdir)/hwloc.pc
+if HWLOC_HAVE_WINDOWS
+#
+# Winball specific rules
+#
+install-data-local:
+	sed -e 's/$$/'$$'\015'/ < $(srcdir)/README > $(DESTDIR)$(prefix)/README.txt
+	sed -e 's/$$/'$$'\015'/ < $(srcdir)/NEWS > $(DESTDIR)$(prefix)/NEWS.txt
+	sed -e 's/$$/'$$'\015'/ < $(srcdir)/COPYING > $(DESTDIR)$(prefix)/COPYING.txt
+uninstall-local:
+	rm -f $(DESTDIR)$(prefix)/README.txt $(DESTDIR)$(prefix)/NEWS.txt $(DESTDIR)$(prefix)/COPYING.txt
+endif HWLOC_HAVE_WINDOWS
 endif HWLOC_BUILD_STANDALONE

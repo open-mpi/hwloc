@@ -136,8 +136,6 @@ Building the Windows zipballs on Windows with MinGW:
 
 - Install
   $ make install
-- Add some text files and remove pkg-config file
-  $ make install-winball
 - Create the zipball
   $ zip -r hwloc-win<size>-build-<version>.zip hwloc-win<size>-build-<version>
 

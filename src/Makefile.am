@@ -110,7 +110,10 @@ if HWLOC_HAVE_GCC
 ldflags += -no-undefined
 endif HWLOC_HAVE_GCC
 
+
 if HWLOC_HAVE_WINDOWS
+# Windows specific rules
+
 LC_MESSAGES=C
 export LC_MESSAGES
 ldflags += -Xlinker --output-def -Xlinker .libs/libhwloc.def
@@ -131,7 +134,16 @@ if HWLOC_HAVE_MS_LIB
 	[ ! -r .libs/libhwloc.def ] || $(INSTALL) .libs/libhwloc.lib $(DESTDIR)$(libdir)
 	[ ! -r .libs/libhwloc.def ] || $(INSTALL) .libs/libhwloc.exp $(DESTDIR)$(libdir)
 endif HWLOC_HAVE_MS_LIB
+
+uninstall-local:
+	rm -f $(DESTDIR)$(libdir)/libhwloc.def
+if HWLOC_HAVE_MS_LIB
+	rm -f $(DESTDIR)$(libdir)/libhwloc.lib $(DESTDIR)$(libdir)/libhwloc.exp
+endif HWLOC_HAVE_MS_LIB
+
+# End of Windows specific rules
 endif HWLOC_HAVE_WINDOWS
+
 
 # Installable library
 
