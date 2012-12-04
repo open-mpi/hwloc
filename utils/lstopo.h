@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -11,11 +11,11 @@
 
 #include <hwloc.h>
 
-extern hwloc_obj_type_t show_only;
-extern int show_cpuset;
-extern int taskset;
-extern int pid_number;
-extern hwloc_pid_t pid;
+extern hwloc_obj_type_t lstopo_show_only;
+extern int lstopo_show_cpuset;
+extern int lstopo_show_taskset;
+extern int lstopo_pid_number;
+extern hwloc_pid_t lstopo_pid;
 
 typedef void output_method (struct hwloc_topology *topology, const char *output, int logical, int legend, int verbose_mode);
 
@@ -61,9 +61,9 @@ static __hwloc_inline int lstopo_pu_running(hwloc_topology_t topology, hwloc_obj
 {
   hwloc_bitmap_t bind = hwloc_bitmap_alloc();
   int res;
-  if (pid_number != -1 && pid_number != 0)
-    hwloc_get_proc_cpubind(topology, pid, bind, 0);
-  else if (pid_number == 0)
+  if (lstopo_pid_number != -1 && lstopo_pid_number != 0)
+    hwloc_get_proc_cpubind(topology, lstopo_pid, bind, 0);
+  else if (lstopo_pid_number == 0)
     hwloc_get_cpubind(topology, bind, 0);
   res = bind && hwloc_bitmap_isset(bind, l->os_index);
   hwloc_bitmap_free(bind);
