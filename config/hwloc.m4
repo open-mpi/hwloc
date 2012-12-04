@@ -729,8 +729,8 @@ EOF])
     if test "x$enable_opencl" != "xno"; then
         hwloc_opencl_happy=yes
         AC_CHECK_HEADERS([CL/cl_ext.h], [
-	  AC_CHECK_LIB([OpenCL], [clGetDeviceIDs], [HWLOC_OPENCL_LIBS="-lOpenCL"], [hwloc_pci_happy=no])
-        ], [hwloc_pci_happy=no])
+	  AC_CHECK_LIB([OpenCL], [clGetDeviceIDs], [HWLOC_OPENCL_LIBS="-lOpenCL"], [hwloc_opencl_happy=no])
+        ], [hwloc_opencl_happy=no])
     fi
     AC_SUBST(HWLOC_OPENCL_LIBS)
     # If we asked for opencl support but couldn't deliver, fail
