@@ -585,6 +585,10 @@ main (int argc, char *argv[])
       char *dot = strrchr(filename, '.');
       if (dot)
         output_format = parse_output_format(dot+1, callname);
+      else {
+	fprintf(stderr, "Cannot infer output type for file `%s' without any extension, using default output.\n", filename);
+	filename = NULL;
+      }
     }
   }
 
