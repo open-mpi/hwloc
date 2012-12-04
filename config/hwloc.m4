@@ -733,23 +733,26 @@ EOF])
         ], [hwloc_opencl_happy=no])
     fi
     AC_SUBST(HWLOC_OPENCL_LIBS)
+    # Check if required extensions are available
+    if test "x$hwloc_opencl_happy" = "xyes"; then
+      tmp_save_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS $HWLOC_OPENCL_CFLAGS"
+      tmp_save_LIBS="$LIBS"
+      LIBS="$LIBS $HWLOC_OPENCL_LIBS"
+      AC_CHECK_DECLS([CL_DEVICE_TOPOLOGY_AMD],[hwloc_opencl_amd_happy=yes],[:],[[#include <CL/cl_ext.h>]])
+      CFLAGS="$tmp_save_CFLAGS"
+      LIBS="$tmp_save_LIBS"
+      # We can't do anything without CL_DEVICE_TOPOLOGY_AMD so far, so disable OpenCL entirely if not found
+      test "x$hwloc_opencl_amd_happy" != "xyes" && hwloc_opencl_happy=no
+    fi
     # If we asked for opencl support but couldn't deliver, fail
     AS_IF([test "$enable_opencl" = "yes" -a "$hwloc_opencl_happy" = "no"],
           [AC_MSG_WARN([Specified --enable-opencl switch, but could not])
            AC_MSG_WARN([find appropriate support])
            AC_MSG_ERROR([Cannot continue])])
     if test "x$hwloc_opencl_happy" = "xyes"; then
-      tmp_save_CFLAGS="$CFLAGS"
-      CFLAGS="$CFLAGS $HWLOC_OPENCL_CFLAGS"
-      tmp_save_LIBS="$LIBS"
-      LIBS="$LIBS $HWLOC_OPENCL_LIBS"
-      AC_CHECK_DECLS([CL_DEVICE_TOPOLOGY_AMD],,[:],[[#include <CL/cl_ext.h>]])
-
       AC_DEFINE([HWLOC_HAVE_OPENCL], [1], [Define to 1 if you have the `OpenCL' library.])
       AC_SUBST([HWLOC_HAVE_OPENCL], [1])
-      CFLAGS="$tmp_save_CFLAGS"
-      LIBS="$tmp_save_LIBS"
-
       hwloc_components="$hwloc_components opencl"
       hwloc_opencl_component_maybeplugin=1
     else
