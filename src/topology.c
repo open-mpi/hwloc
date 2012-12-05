@@ -503,6 +503,9 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 
   /* Group objects have the same types but can have different depths.  */
   if (type1 == HWLOC_OBJ_GROUP) {
+    if (obj1->attr->group.depth == (unsigned) -1
+	|| obj1->attr->group.depth == (unsigned) -1)
+      return HWLOC_TYPE_EQUAL;
     if (obj1->attr->group.depth < obj2->attr->group.depth)
       return HWLOC_TYPE_DEEPER;
     else if (obj1->attr->group.depth > obj2->attr->group.depth)

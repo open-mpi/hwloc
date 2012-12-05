@@ -402,7 +402,10 @@ hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
 			  verbose ? hwloc_obj_type_string(type): "");
   case HWLOC_OBJ_GROUP:
 	  /* TODO: more pretty presentation? */
-    return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->group.depth);
+    if (obj->attr->group.depth != (unsigned) -1)
+      return hwloc_snprintf(string, size, "%s%u", hwloc_obj_type_string(type), obj->attr->group.depth);
+    else
+      return hwloc_snprintf(string, size, "%s", hwloc_obj_type_string(type));
   case HWLOC_OBJ_BRIDGE:
     if (verbose)
       return snprintf(string, size, "Bridge %s->%s",
