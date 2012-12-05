@@ -1003,7 +1003,7 @@ hwloc_group_by_distances(struct hwloc_topology *topology)
        * this group will be merged into a regular object if the matrix isn't strangely incomplete
        */
       group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
-      group_obj->attr->group.depth = topology->next_group_depth++;
+      group_obj->attr->group.depth = (unsigned) -1;
       group_obj->cpuset = hwloc_bitmap_alloc();
       for(i=0; i<nbobjs; i++) {
 	/* assemble the group cpuset */

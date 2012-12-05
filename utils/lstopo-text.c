@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2012 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -51,7 +51,7 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
   char type[32], *attr, phys[32] = "";
   unsigned idx = logical ? l->logical_index : l->os_index;
   const char *indexprefix = logical ? " L#" :  " P#";
-  if (show_cpuset < 2) {
+  if (lstopo_show_cpuset < 2) {
     int len;
     if (l->type == HWLOC_OBJ_MISC && l->name)
       fprintf(output, "%s", l->name);
@@ -81,11 +81,11 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
   }
   if (!l->cpuset)
     return;
-  if (show_cpuset == 1)
+  if (lstopo_show_cpuset == 1)
     fprintf(output, " cpuset=");
-  if (show_cpuset) {
+  if (lstopo_show_cpuset) {
     char *cpusetstr;
-    if (taskset)
+    if (lstopo_show_taskset)
       hwloc_bitmap_taskset_asprintf(&cpusetstr, l->cpuset);
     else
       hwloc_bitmap_asprintf(&cpusetstr, l->cpuset);
@@ -109,7 +109,7 @@ static void
 output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, FILE *output, int i, int logical, int verbose_mode)
 {
   unsigned x;
-  int group_identical = (verbose_mode <= 1) && !show_cpuset;
+  int group_identical = (verbose_mode <= 1) && !lstopo_show_cpuset;
   if (group_identical
       && parent && parent->arity == 1
       && l->cpuset && parent->cpuset && hwloc_bitmap_isequal(l->cpuset, parent->cpuset)) {
@@ -134,7 +134,7 @@ static void
 output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical, int verbose_mode)
 {
   unsigned x;
-  if (show_only == l->type) {
+  if (lstopo_show_only == l->type) {
     output_console_obj (topology, l, output, logical, verbose_mode);
     fprintf (output, "\n");
   }
@@ -165,16 +165,16 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
    * if verbose_mode > 1, print both.
    */
 
-  if (show_only != (hwloc_obj_type_t)-1) {
+  if (lstopo_show_only != (hwloc_obj_type_t)-1) {
     if (verbose_mode > 1)
-      fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(show_only));
+      fprintf(output, "Only showing %s objects\n", hwloc_obj_type_string(lstopo_show_only));
     output_only (topology, hwloc_get_root_obj(topology), output, logical, verbose_mode);
   } else if (verbose_mode >= 1) {
     output_topology (topology, hwloc_get_root_obj(topology), NULL, output, 0, logical, verbose_mode);
     fprintf(output, "\n");
   }
 
-  if ((verbose_mode > 1 || !verbose_mode) && show_only == (hwloc_obj_type_t)-1) {
+  if ((verbose_mode > 1 || !verbose_mode) && lstopo_show_only == (hwloc_obj_type_t)-1) {
     unsigned depth, nbobjs;
     for (depth = 0; depth < topodepth; depth++) {
       hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, 0);
@@ -199,7 +199,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
 	       HWLOC_TYPE_DEPTH_OS_DEVICE, nbobjs, "OS Device", HWLOC_OBJ_OS_DEVICE);
   }
 
-  if (verbose_mode > 1 && show_only == (hwloc_obj_type_t)-1) {
+  if (verbose_mode > 1 && lstopo_show_only == (hwloc_obj_type_t)-1) {
     const struct hwloc_distances_s * distances;
     unsigned depth;
 
@@ -215,7 +215,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
     }
   }
 
-  if (verbose_mode > 1 && show_only == (hwloc_obj_type_t)-1) {
+  if (verbose_mode > 1 && lstopo_show_only == (hwloc_obj_type_t)-1) {
     hwloc_const_bitmap_t complete = hwloc_topology_get_complete_cpuset(topology);
     hwloc_const_bitmap_t topo = hwloc_topology_get_topology_cpuset(topology);
     hwloc_const_bitmap_t online = hwloc_topology_get_online_cpuset(topology);

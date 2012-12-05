@@ -168,6 +168,7 @@ extern "C" {
 #define hwloc_get_nbobjs_by_type HWLOC_NAME(get_nbobjs_by_type)
 
 #define hwloc_topology_is_thissystem HWLOC_NAME(topology_is_thissystem)
+#define hwloc_topology_get_flags HWLOC_NAME(topology_get_flags)
 
 #define hwloc_get_obj_by_depth HWLOC_NAME(get_obj_by_depth )
 #define hwloc_get_obj_by_type HWLOC_NAME(get_obj_by_type )
@@ -465,24 +466,6 @@ extern "C" {
 
 #define hwloc_component HWLOC_NAME(component)
 
-#define hwloc_linux_component HWLOC_NAME(linux_component)
-#define hwloc_xml_component HWLOC_NAME(xml_component)
-#define hwloc_solaris_component HWLOC_NAME(solaris_component)
-#define hwloc_aix_component HWLOC_NAME(aix_component)
-#define hwloc_osf_component HWLOC_NAME(osf_component)
-#define hwloc_windows_component HWLOC_NAME(windows_component)
-#define hwloc_darwin_component HWLOC_NAME(darwin_component)
-#define hwloc_freebsd_component HWLOC_NAME(freebsd_component)
-#define hwloc_hpux_component HWLOC_NAME(hpux_component)
-#define hwloc_synthetic_component HWLOC_NAME(synthetic_component)
-#define hwloc_custom_component HWLOC_NAME(custom_component)
-#define hwloc_x86_component HWLOC_NAME(x86_component)
-#define hwloc_noos_component HWLOC_NAME(noos_component)
-#define hwloc_libpci_component HWLOC_NAME(libpci_component)
-
-#define hwloc_xml_nolibxml_component HWLOC_NAME(xml_nolibxml_component)
-#define hwloc_xml_libxml_component HWLOC_NAME(xml_libxml_component)
-
 /* private/private.h */
 
 #define hwloc_ignore_type_e HWLOC_NAME(ignore_type_e)
@@ -526,7 +509,6 @@ extern "C" {
 #define hwloc__insert_object_by_cpuset HWLOC_NAME(_insert_object_by_cpuset)
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
-#define hwloc_bitmap_printf_value HWLOC_NAME(bitmap_printf_value)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
 #define hwloc__duplicate_objects HWLOC_NAME(_duplicate_objects)
@@ -552,6 +534,11 @@ extern "C" {
 
 #define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
 #define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)
+
+/* private/solaris-chiptype.h */
+
+#define hwloc_solaris_get_chip_type HWLOC_NAME(solaris_get_chip_type)
+#define hwloc_solaris_get_chip_model HWLOC_NAME(solaris_get_chip_model)
 
 #endif /* HWLOC_SYM_TRANSFORM */
 

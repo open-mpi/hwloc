@@ -3797,7 +3797,10 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
 
   /* this should not be called if the backend isn't the real OS one */
 #ifdef HWLOC_DEBUG
-  assert(!strcmp(backend->component->name, "linux"));
+  {
+    int cmp = strcmp(backend->component->name, "linux");
+    assert(!cmp);
+  }
 #endif
   if (data->root_path) {
     assert(strlen(data->root_path) == 1);
@@ -3832,7 +3835,10 @@ hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
 
   /* this should not be called if the backend isn't the real OS one */
 #ifdef HWLOC_DEBUG
-  assert(!strcmp(backend->component->name, "linux"));
+  {
+    int cmp = strcmp(backend->component->name, "linux");
+    assert(!cmp);
+  }
 #endif
   if (data->root_path) {
     assert(strlen(data->root_path) == 1);

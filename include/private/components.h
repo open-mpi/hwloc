@@ -107,7 +107,7 @@ HWLOC_DECLSPEC struct hwloc_backend * hwloc_backend_alloc(struct hwloc_disc_comp
 HWLOC_DECLSPEC int hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *backend);
 
 /* Compute the topology is_thissystem flag based on enabled backends */
-HWLOC_DECLSPEC void hwloc_backends_is_thissystem(struct hwloc_topology *topology);
+extern void hwloc_backends_is_thissystem(struct hwloc_topology *topology);
 
 /* Used by backends discovery callbacks to request information from others.
  */
@@ -149,64 +149,6 @@ struct hwloc_component {
   unsigned long flags; /* unused for now */
   void * data;
 };
-
-/****************************************
- * Misc component registration routines *
- ****************************************/
-
-#if defined(HWLOC_LINUX_SYS)
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_linux_component;
-#endif /* HWLOC_LINUX_SYS */
-
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_xml_component;
-
-#ifdef HWLOC_SOLARIS_SYS
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_solaris_component;
-#endif /* HWLOC_SOLARIS_SYS */
-
-#ifdef HWLOC_AIX_SYS
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_aix_component;
-#endif /* HWLOC_AIX_SYS */
-
-#ifdef HWLOC_OSF_SYS
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_osf_component;
-#endif /* HWLOC_OSF_SYS */
-
-#ifdef HWLOC_WIN_SYS
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_windows_component;
-#endif /* HWLOC_WIN_SYS */
-
-#ifdef HWLOC_DARWIN_SYS
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_darwin_component;
-#endif /* HWLOC_DARWIN_SYS */
-
-#ifdef HWLOC_FREEBSD_SYS
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_freebsd_component;
-#endif /* HWLOC_FREEBSD_SYS */
-
-#ifdef HWLOC_HPUX_SYS
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_hpux_component;
-#endif /* HWLOC_HPUX_SYS */
-
-#ifdef HWLOC_HAVE_LIBPCI
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_libpci_component;
-#endif /* HWLOC_HAVE_LIBPCI */
-
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_opencl_component;
-
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_synthetic_component;
-
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_x86_component;
-
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_noos_component;
-
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_custom_component;
-
-
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_xml_nolibxml_component;
-#ifdef HWLOC_HAVE_LIBXML2
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_xml_libxml_component;
-#endif
 
 #endif /* PRIVATE_COMPONENTS_H */
 
