@@ -7,6 +7,7 @@
  */
 
 #include <private/autogen/config.h>
+#include <private/private.h>
 #include <private/misc.h>
 
 #include <stdarg.h>
@@ -14,6 +15,7 @@
 #include <sys/utsname.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <errno.h>
 #include <ctype.h>
