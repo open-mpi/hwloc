@@ -393,6 +393,40 @@ extern "C" {
 #define hwloc_cudart_get_device_cpuset HWLOC_NAME(cudart_get_device_cpuset)
 #define hwloc_cudart_get_device_pcidev HWLOC_NAME(cudart_get_device_pcidev)
 
+/* hwloc/plugins.h */
+
+#define hwloc_disc_component_type_e HWLOC_NAME(disc_component_type_e)
+#define HWLOC_DISC_COMPONENT_TYPE_CPU HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_CPU)
+#define HWLOC_DISC_COMPONENT_TYPE_GLOBAL HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_GLOBAL)
+#define HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_ADDITIONAL)
+#define HWLOC_DISC_COMPONENT_TYPE_MAX HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_MAX)
+#define hwloc_disc_component_type_t HWLOC_NAME(disc_component_type_t)
+#define hwloc_disc_component HWLOC_NAME(disc_component)
+
+#define hwloc_backend HWLOC_NAME(backend)
+#define hwloc_backend_flag_e HWLOC_NAME(backend_flag_e)
+#define HWLOC_BACKEND_FLAG_NEED_LEVELS HWLOC_NAME_CAPS(BACKEND_FLAG_NEED_LEVELS)
+
+#define hwloc_backend_alloc HWLOC_NAME(backend_alloc)
+#define hwloc_backend_enable HWLOC_NAME(backend_enable)
+#define hwloc_backends_get_obj_cpuset HWLOC_NAME(backends_get_obj_cpuset)
+#define hwloc_backends_notify_new_object HWLOC_NAME(backends_notify_new_object)
+
+#define hwloc_component_type_e HWLOC_NAME(component_type_e)
+#define HWLOC_COMPONENT_TYPE_DISC HWLOC_NAME_CAPS(COMPONENT_TYPE_DISC)
+#define HWLOC_COMPONENT_TYPE_XML HWLOC_NAME_CAPS(COMPONENT_TYPE_XML)
+#define HWLOC_COMPONENT_TYPE_MAX HWLOC_NAME_CAPS(COMPONENT_TYPE_MAX)
+#define hwloc_component_type_t HWLOC_NAME(component_type_t)
+#define hwloc_component HWLOC_NAME(component)
+
+#define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
+#define hwloc_report_error_t HWLOC_NAME(report_error_t)
+#define hwloc_report_os_error HWLOC_NAME(report_os_error)
+#define hwloc_hide_errors HWLOC_NAME(hide_errors)
+#define hwloc__insert_object_by_cpuset HWLOC_NAME(_insert_object_by_cpuset)
+#define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
+#define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
+
 /* private/debug.h */
 
 #define hwloc_debug HWLOC_NAME(debug)
@@ -430,41 +464,15 @@ extern "C" {
 
 /* private/components.h */
 
-#define HWLOC_DISC_COMPONENT_TYPE_CPU HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_CPU)
-#define HWLOC_DISC_COMPONENT_TYPE_GLOBAL HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_GLOBAL)
-#define HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_ADDITIONAL)
-#define HWLOC_DISC_COMPONENT_TYPE_MAX HWLOC_NAME_CAPS(DISC_COMPONENT_TYPE_MAX)
-
-#define hwloc_disc_component_type_e HWLOC_NAME(disc_component_type_e)
-#define hwloc_disc_component_type_t HWLOC_NAME(disc_component_type_t)
-#define hwloc_disc_component HWLOC_NAME(disc_component)
-
 #define hwloc_disc_component_force_enable HWLOC_NAME(disc_component_force_enable)
 #define hwloc_disc_components_enable_others HWLOC_NAME(disc_components_instantiate_others)
 
-#define hwloc_backend HWLOC_NAME(backend)
-#define hwloc_backend_alloc HWLOC_NAME(backend_alloc)
-#define hwloc_backend_enable HWLOC_NAME(backend_enable)
 #define hwloc_backends_reset HWLOC_NAME(backends_reset)
 #define hwloc_backends_disable_all HWLOC_NAME(backends_disable_all)
 #define hwloc_backends_is_thissystem HWLOC_NAME(backends_is_thissystem)
-#define hwloc_backends_get_obj_cpuset HWLOC_NAME(backends_get_obj_cpuset)
-#define hwloc_backends_notify_new_object HWLOC_NAME(backends_notify_new_object)
-
-#define hwloc_backend_flag_e HWLOC_NAME(backend_flag_e)
-#define HWLOC_BACKEND_FLAG_NEED_LEVELS HWLOC_NAME_CAPS(BACKEND_FLAG_NEED_LEVELS)
 
 #define hwloc_components_init HWLOC_NAME(components_init)
 #define hwloc_components_destroy_all HWLOC_NAME(components_destroy_all)
-
-#define HWLOC_COMPONENT_TYPE_DISC HWLOC_NAME_CAPS(COMPONENT_TYPE_DISC)
-#define HWLOC_COMPONENT_TYPE_XML HWLOC_NAME_CAPS(COMPONENT_TYPE_XML)
-#define HWLOC_COMPONENT_TYPE_MAX HWLOC_NAME_CAPS(COMPONENT_TYPE_MAX)
-
-#define hwloc_component_type_e HWLOC_NAME(component_type_e)
-#define hwloc_component_type_t HWLOC_NAME(component_type_t)
-
-#define hwloc_component HWLOC_NAME(component)
 
 /* private/private.h */
 
@@ -502,14 +510,7 @@ extern "C" {
 #define hwloc_set_freebsd_hooks HWLOC_NAME(set_freebsd_hooks)
 #define hwloc_set_hpux_hooks HWLOC_NAME(set_hpux_hooks)
 
-#define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
-#define hwloc_report_error_t HWLOC_NAME(report_error_t)
-#define hwloc_report_os_error HWLOC_NAME(report_os_error)
-#define hwloc_hide_errors HWLOC_NAME(hide_errors)
-#define hwloc__insert_object_by_cpuset HWLOC_NAME(_insert_object_by_cpuset)
-#define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_add_uname_info HWLOC_NAME(add_uname_info)
-#define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_free_unlinked_object HWLOC_NAME(free_unlinked_object)
 #define hwloc__duplicate_objects HWLOC_NAME(_duplicate_objects)
 

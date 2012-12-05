@@ -11,6 +11,7 @@ INPUT          = \
 		@top_srcdir@/include/hwloc.h \
 		@top_srcdir@/include/hwloc/helper.h \
 		@top_srcdir@/include/hwloc/bitmap.h \
+		@top_srcdir@/include/hwloc/plugins.h \
 		@top_srcdir@/include/hwloc/glibc-sched.h \
 		@top_srcdir@/include/hwloc/linux.h \
 		@top_srcdir@/include/hwloc/linux-libnuma.h \

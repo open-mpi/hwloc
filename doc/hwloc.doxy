@@ -1971,6 +1971,11 @@ It creates a <tt>backend</tt> structure that usually contains a
 <tt>discover</tt> and/or <tt>notify_new_object</tt> callback taking
 care of the actual topology discovery.
 
+The relevant types and functions are declared in the hwloc/plugins.h header.
+Components are supposed to only use hwloc public headers (hwloc.h and
+anything under the hwloc subdirectory) and nothing from the private
+subdirectory in the source tree.
+
 
 
 

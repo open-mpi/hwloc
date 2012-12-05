@@ -8,7 +8,7 @@
 
 #include <private/autogen/config.h>
 #include <hwloc.h>
-#include <private/components.h>
+#include <hwloc/plugins.h>
 #include <private/private.h>
 #include <private/xml.h>
 #include <private/debug.h>

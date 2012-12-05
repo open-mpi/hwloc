@@ -5,8 +5,9 @@
 
 #include <private/autogen/config.h>
 #include <hwloc.h>
-#include <private/misc.h>
-#include <private/private.h>
+#include <hwloc/plugins.h>
+
+/* private headers allowed for convenience because this plugin is built within hwloc */
 #include <private/misc.h>
 #include <private/debug.h>
 
@@ -171,10 +172,10 @@ hwloc_opencl_backend_notify_new_object(struct hwloc_backend *backend, struct hwl
   struct hwloc_opencl_backend_data_s *data = backend->private_data;
   unsigned i;
 
-  if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
 
-  if (!topology->is_thissystem) {
+  if (!hwloc_topology_is_thissystem(topology)) {
     hwloc_debug("%s", "\nno OpenCL detection (not thissystem)\n");
     return 0;
   }
@@ -283,6 +284,10 @@ static struct hwloc_disc_component hwloc_opencl_disc_component = {
   19, /* after libpci */
   NULL
 };
+
+#ifdef HWLOC_INSIDE_PLUGIN
+HWLOC_DECLSPEC extern const struct hwloc_component hwloc_opencl_component;
+#endif
 
 const struct hwloc_component hwloc_opencl_component = {
   HWLOC_COMPONENT_ABI,

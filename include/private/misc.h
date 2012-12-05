@@ -6,7 +6,7 @@
  * See COPYING in top-level directory.
  */
 
-/* Misc internals routines.  */
+/* Misc macros and inlines.  */
 
 #ifndef HWLOC_PRIVATE_MISC_H
 #define HWLOC_PRIVATE_MISC_H

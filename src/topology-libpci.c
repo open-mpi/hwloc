@@ -8,7 +8,9 @@
 #include <private/autogen/config.h>
 #include <hwloc.h>
 #include <hwloc/helper.h>
-#include <private/private.h>
+#include <hwloc/plugins.h>
+
+/* private headers allowed for convenience because this plugin is built within hwloc */
 #include <private/debug.h>
 #include <private/misc.h>
 
@@ -575,6 +577,10 @@ static struct hwloc_disc_component hwloc_libpci_disc_component = {
   20,
   NULL
 };
+
+#ifdef HWLOC_INSIDE_PLUGIN
+HWLOC_DECLSPEC extern const struct hwloc_component hwloc_libpci_component;
+#endif
 
 const struct hwloc_component hwloc_libpci_component = {
   HWLOC_COMPONENT_ABI,
