@@ -210,15 +210,6 @@ HWLOC_DECLSPEC void hwloc_insert_object_by_parent(struct hwloc_topology *topolog
 extern void hwloc_add_uname_info(struct hwloc_topology *topology);
 
 #ifdef HWLOC_INSIDE_LIBHWLOC
-/** \brief Return a locally-allocated stringified bitmap for printf-like calls. */
-static __hwloc_inline char *
-hwloc_bitmap_printf_value(hwloc_const_bitmap_t bitmap)
-{
-  char *buf;
-  hwloc_bitmap_asprintf(&buf, bitmap);
-  return buf;
-}
-
 static __hwloc_inline struct hwloc_obj *
 hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
 {
