@@ -3,6 +3,16 @@
  * See COPYING in top-level directory.
  */
 
+
+#ifdef HWLOC_INSIDE_PLUGIN
+/*
+ * these declarations are internal only, they are not available to plugins
+ * (many functions below are internal static symbols).
+ */
+#error This file should not be used in plugins
+#endif
+
+
 #ifndef PRIVATE_COMPONENTS_H
 #define PRIVATE_COMPONENTS_H 1
 

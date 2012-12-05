@@ -8,6 +8,16 @@
  * $HEADER$
  */
 
+
+#ifdef HWLOC_INSIDE_PLUGIN
+/*
+ * these declarations are internal only, they are not available to plugins
+ * (functions below are internal static symbols).
+ */
+#error This file should not be used in plugins
+#endif
+
+
 #ifndef HWLOC_PRIVATE_SOLARIS_CHIPTYPE_H
 #define HWLOC_PRIVATE_SOLARIS_CHIPTYPE_H
 
