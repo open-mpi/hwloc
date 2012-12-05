@@ -13,7 +13,6 @@
 
 #include <hwloc/autogen/config.h>
 #include <private/autogen/config.h>
-#include <private/private.h>
 
 #ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
 # if HWLOC_HAVE_ATTRIBUTE_FORMAT
