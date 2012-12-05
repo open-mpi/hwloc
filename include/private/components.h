@@ -107,7 +107,7 @@ HWLOC_DECLSPEC struct hwloc_backend * hwloc_backend_alloc(struct hwloc_disc_comp
 HWLOC_DECLSPEC int hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *backend);
 
 /* Compute the topology is_thissystem flag based on enabled backends */
-HWLOC_DECLSPEC void hwloc_backends_is_thissystem(struct hwloc_topology *topology);
+extern void hwloc_backends_is_thissystem(struct hwloc_topology *topology);
 
 /* Used by backends discovery callbacks to request information from others.
  */
