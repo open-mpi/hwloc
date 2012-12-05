@@ -8,7 +8,9 @@
 
 #include <private/autogen/config.h>
 #include <hwloc.h>
-#include <private/components.h>
+#include <hwloc/plugins.h>
+
+/* private headers allowed because this plugin is built within hwloc */
 #include <private/xml.h>
 #include <private/debug.h>
 

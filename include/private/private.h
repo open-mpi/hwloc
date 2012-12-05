@@ -166,64 +166,8 @@ extern void hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *binding_hooks, s
 extern void hwloc_set_hpux_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_HPUX_SYS */
 
-/*
- * Add an object to the topology.
- * It is sorted along the tree of other objects according to the inclusion of
- * cpusets, to eventually be added as a child of the smallest object including
- * this object.
- *
- * If the cpuset is empty, the type of the object (and maybe some attributes)
- * must be enough to find where to insert the object. This is especially true
- * for NUMA nodes with memory and no CPUs.
- *
- * The given object should not have children.
- *
- * This shall only be called before levels are built.
- *
- * In case of error, hwloc_report_os_error() is called.
- */
-HWLOC_DECLSPEC void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
-
-/* Error reporting */
-typedef void (*hwloc_report_error_t)(const char * msg, int line);
-HWLOC_DECLSPEC void hwloc_report_os_error(const char * msg, int line);
-HWLOC_DECLSPEC int hwloc_hide_errors(void);
-/*
- * Add an object to the topology and specify which error callback to use
- */
-HWLOC_DECLSPEC int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
-
-/*
- * Insert an object somewhere in the topology.
- *
- * It is added as the last child of the given parent.
- * The cpuset is completely ignored, so strange objects such as I/O devices should
- * preferably be inserted with this.
- *
- * The given object may have children.
- *
- * Remember to call topology_connect() afterwards to fix handy pointers.
- */
-HWLOC_DECLSPEC void hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, hwloc_obj_t obj);
-
 /* Insert uname-specific names/values in the object infos array */
 extern void hwloc_add_uname_info(struct hwloc_topology *topology);
-
-#ifdef HWLOC_INSIDE_LIBHWLOC
-static __hwloc_inline struct hwloc_obj *
-hwloc_alloc_setup_object(hwloc_obj_type_t type, signed idx)
-{
-  struct hwloc_obj *obj = malloc(sizeof(*obj));
-  memset(obj, 0, sizeof(*obj));
-  obj->type = type;
-  obj->os_index = idx;
-  obj->os_level = -1;
-  obj->attr = malloc(sizeof(*obj->attr));
-  memset(obj->attr, 0, sizeof(*obj->attr));
-  /* do not allocate the cpuset here, let the caller do it */
-  return obj;
-}
-#endif
 
 /* Free obj and its attributes assuming it doesn't have any children/parent anymore */
 extern void hwloc_free_unlinked_object(hwloc_obj_t obj);
