@@ -14,28 +14,8 @@
 #include <hwloc/autogen/config.h>
 #include <private/autogen/config.h>
 
-#ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
-# if HWLOC_HAVE_ATTRIBUTE_FORMAT
-#  define __hwloc_attribute_format(type, str, arg)  __attribute__((__format__(type, str, arg)))
-# else
-#  define __hwloc_attribute_format(type, str, arg)
-# endif
-#else
-# define __hwloc_attribute_format(type, str, arg)
-#endif
-
-/* On some systems, snprintf returns the size of written data, not the actually
- * required size.  hwloc_snprintf always report the actually required size. */
-extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
-
-/* Check whether needle matches the beginning of haystack, at least n, and up
- * to a colon or \0 */
-extern int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
-
 /* Compile-time assertion */
 #define HWLOC_BUILD_ASSERT(condition) ((void)sizeof(char[1 - 2*!(condition)]))
-
-
 
 #define HWLOC_BITS_PER_LONG (HWLOC_SIZEOF_UNSIGNED_LONG * 8)
 #define HWLOC_BITS_PER_INT (HWLOC_SIZEOF_UNSIGNED_INT * 8)

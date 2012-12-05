@@ -316,4 +316,22 @@ extern int hwloc_encode_to_base64(const char *src, size_t srclength, char *targe
  */
 extern int hwloc_decode_from_base64(char const *src, char *target, size_t targsize);
 
+/* Check whether needle matches the beginning of haystack, at least n, and up
+ * to a colon or \0 */
+extern int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n);
+
+#ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
+# if HWLOC_HAVE_ATTRIBUTE_FORMAT
+#  define __hwloc_attribute_format(type, str, arg)  __attribute__((__format__(type, str, arg)))
+# else
+#  define __hwloc_attribute_format(type, str, arg)
+# endif
+#else
+# define __hwloc_attribute_format(type, str, arg)
+#endif
+
+/* On some systems, snprintf returns the size of written data, not the actually
+ * required size.  hwloc_snprintf always report the actually required size. */
+extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
+
 #endif /* HWLOC_PRIVATE_H */
