@@ -475,16 +475,18 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 static enum hwloc_type_cmp_e
 hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
+  hwloc_obj_type_t type1 = obj1->type;
+  hwloc_obj_type_t type2 = obj2->type;
   int compare;
 
-  compare = hwloc_compare_types(obj1->type, obj2->type);
+  compare = hwloc_compare_types(type1, type2);
   if (compare > 0)
     return HWLOC_TYPE_DEEPER;
   if (compare < 0)
     return HWLOC_TYPE_HIGHER;
 
   /* Caches have the same types but can have different depths.  */
-  if (obj1->type == HWLOC_OBJ_CACHE) {
+  if (type1 == HWLOC_OBJ_CACHE) {
     if (obj1->attr->cache.depth < obj2->attr->cache.depth)
       return HWLOC_TYPE_DEEPER;
     else if (obj1->attr->cache.depth > obj2->attr->cache.depth)
@@ -498,7 +500,7 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
   }
 
   /* Group objects have the same types but can have different depths.  */
-  if (obj1->type == HWLOC_OBJ_GROUP) {
+  if (type1 == HWLOC_OBJ_GROUP) {
     if (obj1->attr->group.depth < obj2->attr->group.depth)
       return HWLOC_TYPE_DEEPER;
     else if (obj1->attr->group.depth > obj2->attr->group.depth)
@@ -506,7 +508,7 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
   }
 
   /* Bridges objects have the same types but can have different depths.  */
-  if (obj1->type == HWLOC_OBJ_BRIDGE) {
+  if (type1 == HWLOC_OBJ_BRIDGE) {
     if (obj1->attr->bridge.depth < obj2->attr->bridge.depth)
       return HWLOC_TYPE_DEEPER;
     else if (obj1->attr->bridge.depth > obj2->attr->bridge.depth)
