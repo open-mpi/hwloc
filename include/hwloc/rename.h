@@ -553,6 +553,11 @@ extern "C" {
 #define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
 #define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)
 
+/* private/solaris-chiptype.h */
+
+#define hwloc_solaris_get_chip_type HWLOC_NAME(solaris_get_chip_type)
+#define hwloc_solaris_get_chip_model HWLOC_NAME(solaris_get_chip_model)
+
 #endif /* HWLOC_SYM_TRANSFORM */
 
 
