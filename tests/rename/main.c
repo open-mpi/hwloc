@@ -5,6 +5,7 @@
 #include "hwloc.h"
 #include "hwloc/bitmap.h"
 #include "hwloc/helper.h"
+#include "hwloc/plugins.h"
 
 /* enable those that have the right dependencies on your machine */
 //#include "hwloc/cuda.h"
