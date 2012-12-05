@@ -3,7 +3,7 @@ Machine (P#0 total=100661164KB DMIProductName=H8QG6 DMIProductVersion=1234567890
     Socket L#0 (P#0 total=33552300KB CPUModel="AMD Opteron(tm) Processor 6134")
       NUMANode L#0 (P#0 local=16775084KB total=16775084KB)
         L3Cache L#0 (size=5118KB linesize=64 ways=48)
-          Group3 L#0
+          Group2 L#0
             L2Cache L#0 (size=512KB linesize=64 ways=16)
               L1dCache L#0 (size=64KB linesize=64 ways=2)
                 L1iCache L#0 (size=64KB linesize=64 ways=2)
@@ -14,7 +14,7 @@ Machine (P#0 total=100661164KB DMIProductName=H8QG6 DMIProductVersion=1234567890
                 L1iCache L#1 (size=64KB linesize=64 ways=2)
                   Core L#1 (P#1)
                     PU L#1 (P#1)
-          Group3 L#1
+          Group2 L#1
             L2Cache L#2 (size=512KB linesize=64 ways=16)
               L1dCache L#2 (size=64KB linesize=64 ways=2)
                 L1iCache L#2 (size=64KB linesize=64 ways=2)
@@ -52,7 +52,7 @@ depth 0:	1 Machine (type #1)
   depth 2:	4 Socket (type #3)
    depth 3:	8 NUMANode (type #2)
     depth 4:	2 L3Cache (type #4)
-     depth 5:	2 Group3 (type #7)
+     depth 5:	2 Group2 (type #7)
       depth 6:	6 L2Cache (type #4)
        depth 7:	6 L1dCache (type #4)
         depth 8:	6 L1iCache (type #4)
