@@ -7,7 +7,6 @@
 #define PRIVATE_XML_H 1
 
 #include <hwloc.h>
-#include <private/private.h>
 
 #include <sys/types.h>
 
