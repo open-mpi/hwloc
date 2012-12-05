@@ -29,16 +29,6 @@
 #endif
 #include <string.h>
 
-#ifdef HWLOC_HAVE_ATTRIBUTE_FORMAT
-# if HWLOC_HAVE_ATTRIBUTE_FORMAT
-#  define __hwloc_attribute_format(type, str, arg)  __attribute__((__format__(type, str, arg)))
-# else
-#  define __hwloc_attribute_format(type, str, arg)
-# endif
-#else
-# define __hwloc_attribute_format(type, str, arg)
-#endif
-
 enum hwloc_ignore_type_e {
   HWLOC_IGNORE_TYPE_NEVER = 0,
   HWLOC_IGNORE_TYPE_KEEP_STRUCTURE,
