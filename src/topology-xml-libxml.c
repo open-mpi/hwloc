@@ -368,6 +368,10 @@ static struct hwloc_xml_component hwloc_libxml_xml_component = {
   &hwloc_xml_libxml_callbacks
 };
 
+#ifdef HWLOC_INSIDE_PLUGIN
+HWLOC_DECLSPEC extern const struct hwloc_component hwloc_xml_libxml_component;
+#endif
+
 const struct hwloc_component hwloc_xml_libxml_component = {
   HWLOC_COMPONENT_ABI,
   HWLOC_COMPONENT_TYPE_XML,

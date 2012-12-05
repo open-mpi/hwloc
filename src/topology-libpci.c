@@ -578,6 +578,10 @@ static struct hwloc_disc_component hwloc_libpci_disc_component = {
   NULL
 };
 
+#ifdef HWLOC_INSIDE_PLUGIN
+HWLOC_DECLSPEC extern const struct hwloc_component hwloc_libpci_component;
+#endif
+
 const struct hwloc_component hwloc_libpci_component = {
   HWLOC_COMPONENT_ABI,
   HWLOC_COMPONENT_TYPE_DISC,
