@@ -256,7 +256,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
   hwloc_debug_bitmap("Attaching hostbridge to cpuset %s\n", cpuset);
 
   /* restrict to the existing topology cpuset to avoid errors later */
-  hwloc_bitmap_and(cpuset, cpuset, topology->levels[0][0]->cpuset);
+  hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
 
   /* if the remaining cpuset is empty, take the root */
   if (hwloc_bitmap_iszero(cpuset))
@@ -321,7 +321,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
   if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
 
-  if (!topology->is_thissystem) {
+  if (!hwloc_topology_is_thissystem(topology)) {
     hwloc_debug("%s", "\nno PCI detection (not thissystem)\n");
     return 0;
   }
