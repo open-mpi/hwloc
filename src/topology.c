@@ -480,6 +480,8 @@ hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
   int compare;
 
   compare = hwloc_compare_types(type1, type2);
+  if (compare == HWLOC_TYPE_UNORDERED)
+    return HWLOC_TYPE_EQUAL; /* we cannot do better */
   if (compare > 0)
     return HWLOC_TYPE_DEEPER;
   if (compare < 0)
