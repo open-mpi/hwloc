@@ -475,9 +475,12 @@ int hwloc_compare_types (hwloc_obj_type_t type1, hwloc_obj_type_t type2)
 static enum hwloc_type_cmp_e
 hwloc_type_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
 {
-  if (hwloc_compare_types(obj1->type, obj2->type) > 0)
+  int compare;
+
+  compare = hwloc_compare_types(obj1->type, obj2->type);
+  if (compare > 0)
     return HWLOC_TYPE_DEEPER;
-  if (hwloc_compare_types(obj1->type, obj2->type) < 0)
+  if (compare < 0)
     return HWLOC_TYPE_HIGHER;
 
   /* Caches have the same types but can have different depths.  */
