@@ -21,6 +21,8 @@ Version 1.7.0
 -------------
 * API
   + Add hwloc_topology_get_flags().
+  + Add hwloc/plugins.h for building external plugins.
+    See the Adding new discovery components and plugins section.
 
 
 Version 1.6.0
