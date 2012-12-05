@@ -168,6 +168,7 @@ extern "C" {
 #define hwloc_get_nbobjs_by_type HWLOC_NAME(get_nbobjs_by_type)
 
 #define hwloc_topology_is_thissystem HWLOC_NAME(topology_is_thissystem)
+#define hwloc_topology_get_flags HWLOC_NAME(topology_get_flags)
 
 #define hwloc_get_obj_by_depth HWLOC_NAME(get_obj_by_depth )
 #define hwloc_get_obj_by_type HWLOC_NAME(get_obj_by_type )

@@ -316,7 +316,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
   struct hwloc_obj fakehostbridge; /* temporary object covering the whole PCI hierarchy until its complete */
   unsigned current_hostbridge;
 
-  if (!(topology->flags & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
 
   if (!hwloc_topology_is_thissystem(topology)) {

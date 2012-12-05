@@ -676,6 +676,7 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t top
 /** \brief Flags to be set onto a topology context before load.
  *
  * Flags should be given to hwloc_topology_set_flags().
+ * They may also be returned by hwloc_topology_get_flags().
  */
 enum hwloc_topology_flags_e {
   HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
@@ -748,6 +749,8 @@ enum hwloc_topology_flags_e {
  *
  * If this function is called multiple times, the last invokation will erase
  * and replace the set of flags that was previously set.
+ *
+ * The flags set in a topology may be retrieved with hwloc_topology_get_flags()
  */
 HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long flags);
 
@@ -1299,6 +1302,14 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
  * a XML topology file, or a synthetic topology).
  */
 HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology) __hwloc_attribute_pure;
+
+/** \brief Get OR'ed flags of a topology.
+ *
+ * Get the OR'ed set of ::hwloc_topology_flags_e of a topology.
+ *
+ * \return the flags previously set with hwloc_topology_set_flags().
+ */
+HWLOC_DECLSPEC unsigned long hwloc_topology_get_flags (hwloc_topology_t topology);
 
 /** @} */
 

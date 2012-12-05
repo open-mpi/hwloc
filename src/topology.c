@@ -2461,6 +2461,12 @@ hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
   return 0;
 }
 
+unsigned long
+hwloc_topology_get_flags (struct hwloc_topology *topology)
+{
+  return topology->flags;
+}
+
 int
 hwloc_topology_ignore_type(struct hwloc_topology *topology, hwloc_obj_type_t type)
 {
