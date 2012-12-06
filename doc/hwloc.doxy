@@ -139,17 +139,26 @@ shell$ make install
 The hwloc command-line tool "lstopo" produces human-readable topology
 maps, as mentioned above.  It can also export maps to the "fig" file
 format.  Support for PDF, Postscript, and PNG exporting is provided if
-the "Cairo" development package can be found in "lstopo" when hwloc
+the "Cairo" development package (usually <tt>cairo-devel</tt> or
+<tt>libcairo2-dev</tt>) can be found in "lstopo" when hwloc
 is configured and build.
 
 The hwloc core may also benefit from the following development packages:
 <ul>
-<li>pciutils (libpci) for I/O discovery.</li>
-<li>libnuma for memory binding and migration support on Linux.</li>
+<li>pciutils (libpci) for I/O discovery.
+    The relevant development package is usually <tt>pciutils-devel</tt>
+    or <tt>libpci-dev</tt>.
+</li>
+<li>libnuma for memory binding and migration support on Linux
+    (<tt>numactl-devel</tt> or <tt>libnuma-dev</tt> package).
+</li>
 <li>libxml2 for full XML import/export support (otherwise, the
     internal minimalistic parser will only be able to import
     XML files that were exported by the same hwloc release).
-    See \ref xml for details.</li>
+    See \ref xml for details.
+    The relevant development package is usually <tt>libxml2-devel</tt>
+    or <tt>libxml2-dev</tt>.
+</li>
 </ul>
 libpci and libxml2 support may be statically built inside the main
 hwloc library, or as separate dynamically-loaded plugins
@@ -756,6 +765,8 @@ lstopo (also known as hwloc-info and hwloc-ls) displays the
 hierarchical topology map of the current system.  The output may be
 graphical or textual, and can also be exported to numerous file
 formats such as PDF, PNG, XML, and others.
+Advanced graphical outputs require the "Cairo" development package
+(usually <tt>cairo-devel</tt> or <tt>libcairo2-dev</tt>).
 
 lstopo and lstopo-no-graphics accept the same command-line options.
 However graphical outputs are only available in lstopo.
@@ -1113,7 +1124,8 @@ It can be enabled by passing flags such as <tt>::HWLOC_TOPOLOGY_FLAG_IO_DEVICES<
 to hwloc_topology_set_flags() before loading the topology.
 
 Note that I/O discovery requires significant help from the operating system.
-The pciutils library is needed to detect PCI devices and bridges,
+The pciutils library (the development package is usually <tt>pciutils-devel</tt>
+or <tt>libpci-dev</tt>) is needed to detect PCI devices and bridges,
 and the actual locality of these devices is only currently detected
 on Linux. Also, some operating systems require privileges for probing PCI
 devices, see \ref faq_privileged for details.
@@ -1544,7 +1556,8 @@ First, it can use the libxml2 library for importing/exporting XML
 files. It features full XML support, for instance when those files
 have to be manipulated by non-hwloc software (e.g. a XSLT parser).
 The libxml2 backend is enabled by default if libxml2 development
-headers are available.
+headers are available (the relevant development package is usually
+<tt>libxml2-devel</tt> or <tt>libxml2-dev</tt>).
 
 If libxml2 is not available at configure time,
 or if <tt>--disable-libxml2</tt> is passed, hwloc falls back to a
