@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_SYS_CPUSET_H
-#define HWLOC_PORT_SYS_CPUSET_H
+#ifndef HWLOC_PORT_FREEBSD_SYS_CPUSET_H
+#define HWLOC_PORT_FREEBSD_SYS_CPUSET_H
 
 #include <limits.h>
 
@@ -33,4 +33,4 @@ int cpuset_getid(cpulevel_t level, cpuwhich_t which, id_t id, cpusetid_t *setid)
 int cpuset_getaffinity(cpulevel_t level, cpuwhich_t which, id_t id, size_t size, cpuset_t *cpuset);
 int cpuset_setaffinity(cpulevel_t level, cpuwhich_t which, id_t id, size_t size, const cpuset_t *cpuset);
 
-#endif /* HWLOC_PORT_SYS_CPUSET_H */
+#endif /* HWLOC_PORT_FREEBSD_SYS_CPUSET_H */

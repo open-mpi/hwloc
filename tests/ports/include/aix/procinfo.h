@@ -4,6 +4,7 @@
  */
 
 #ifndef HWLOC_PORT_AIX_PROCINFO_H
+#define HWLOC_PORT_AIX_PROCINFO_H
 
 #include <sys/thread.h>
 #include <sys/processor.h>

@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_CPUSET_H
-#define HWLOC_PORT_CPUSET_H
+#ifndef HWLOC_PORT_OSF_CPUSET_H
+#define HWLOC_PORT_OSF_CPUSET_H
 
 typedef int cpu_cursor_t;
 #define SET_CURSOR_INIT -1
@@ -21,4 +21,4 @@ int cpuaddset(cpuset_t set, cpuid_t cpuid );
 cpuid_t cpu_foreach(cpuset_t cpuset, int flags, cpu_cursor_t *cursor);
 int cpusetdestroy(cpuset_t *set);
 
-#endif /* HWLOC_PORT_CPUSET_H */
+#endif /* HWLOC_PORT_OSF_CPUSET_H */

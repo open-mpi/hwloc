@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_NUMA_H
-#define HWLOC_PORT_NUMA_H
+#ifndef HWLOC_PORT_OSF_NUMA_H
+#define HWLOC_PORT_OSF_NUMA_H
 
 #include "sys/types.h"
 #include "radset.h"
@@ -24,6 +24,4 @@ typedef struct {
 void *nmmap(void *addr, size_t len, int prot, unsigned long flags, int filedes, off_t off, memalloc_attr_t *attr );
 int nmadvise(const void *addr, long len, int behavior, memalloc_attr_t *attr);
 
-
-
-#endif /* HWLOC_PORT_NUMA_H */
+#endif /* HWLOC_PORT_OSF_NUMA_H */

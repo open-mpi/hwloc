@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_SYS_LGRP_USER_H
-#define HWLOC_PORT_SYS_LGRP_USER_H
+#ifndef HWLOC_PORT_SOLARIS_SYS_LGRP_USER_H
+#define HWLOC_PORT_SOLARIS_SYS_LGRP_USER_H
 
 #include <sys/processor.h>
 
@@ -58,4 +58,4 @@ int lgrp_fini(lgrp_cookie_t cookie);
 #define MADV_ACCESS_LWP     7
 #define MADV_ACCESS_MANY    8
 
-#endif /* HWLOC_PORT_SYS_LGRP_USER_H */
+#endif /* HWLOC_PORT_SOLARIS_SYS_LGRP_USER_H */
