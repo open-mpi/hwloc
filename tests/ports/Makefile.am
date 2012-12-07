@@ -10,7 +10,14 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 SRC = $(HWLOC_top_srcdir)/src
 
 if HWLOC_HAVE_LINUX
-check_LTLIBRARIES = libhwloc-ports.la
+check_LTLIBRARIES = \
+	libhwloc-aix-port.la \
+	libhwloc-darwin-port.la \
+	libhwloc-freebsd-port.la \
+	libhwloc-hpux-port.la \
+	libhwloc-osf-port.la \
+	libhwloc-solaris-port.la \
+	libhwloc-windows-port.la
 endif HWLOC_HAVE_LINUX
 
 # Note that AC_CONFIG_LINKS sets up the sym links for the files in
@@ -20,47 +27,57 @@ endif HWLOC_HAVE_LINUX
 # referencing the files via $HWLOC_top_srcdir/src/foo.c because of
 # dependencies issues when using the Automake option "subdir-objects".
 # We nodist these because they're created by configure.
-nodist_libhwloc_ports_la_SOURCES = \
-        topology-solaris.c \
-        topology-solaris-chiptype.c \
-        topology-aix.c \
-        topology-osf.c \
-        topology-windows.c \
-        topology-darwin.c \
-        topology-freebsd.c \
-        topology-hpux.c
 
-libhwloc_ports_la_SOURCES = \
-        include/windows.h \
-        include/kstat.h \
-        include/picl.h \
-        include/sys/rset.h \
-        include/sys/lgrp_user.h \
-        include/sys/sysctl.h \
-        include/sys/procset.h \
-        include/sys/processor.h \
-        include/sys/thread.h \
-        include/sys/mpctl.h \
-        include/sys/cpuset.h \
-        include/sys/systemcfg.h \
-        include/sys/systeminfo.h \
-        include/radset.h \
-        include/cpuset.h \
-        include/numa.h \
-        include/procinfo.h \
-        include/pthread_np.h
-
-libhwloc_ports_la_CPPFLAGS = \
+common_CPPFLAGS = \
         $(HWLOC_CPPFLAGS) \
         -I$(HWLOC_top_srcdir)/include \
         -I$(HWLOC_top_srcdir)/tests/ports/include \
         -DHWLOC_COMPILE_PORTS \
-        -DHWLOC_SOLARIS_SYS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT -DHAVE_LGRP_LATENCY_COOKIE \
-        -DHWLOC_AIX_SYS \
-        -DHWLOC_OSF_SYS \
-        -DHWLOC_WIN_SYS \
-        -DHWLOC_DARWIN_SYS \
-        -DHWLOC_FREEBSD_SYS -DHAVE_SYS_CPUSET_H -DHAVE_CPUSET_SETID \
-        -DHWLOC_HPUX_SYS \
         -DHWLOC_INSIDE_LIBHWLOC
 
+nodist_libhwloc_aix_port_la_SOURCES = topology-aix.c
+libhwloc_aix_port_la_SOURCES = \
+	include/procinfo.h \
+	include/sys/rset.h \
+	include/sys/systemcfg.h \
+	include/sys/thread.h
+libhwloc_aix_port_la_CPPFLAGS = $(common_CPPFLAGS) \
+        -DHWLOC_AIX_SYS
+
+nodist_libhwloc_darwin_port_la_SOURCES = topology-darwin.c
+libhwloc_darwin_port_la_CPPFLAGS = $(common_CPPFLAGS) \
+        -DHWLOC_DARWIN_SYS
+
+nodist_libhwloc_freebsd_port_la_SOURCES = topology-freebsd.c
+libhwloc_freebsd_port_la_SOURCES = \
+	include/pthread_np.h \
+	include/sys/cpuset.h
+libhwloc_freebsd_port_la_CPPFLAGS = $(common_CPPFLAGS) \
+        -DHWLOC_FREEBSD_SYS -DHAVE_SYS_CPUSET_H -DHAVE_CPUSET_SETID
+
+nodist_libhwloc_hpux_port_la_SOURCES = topology-hpux.c
+libhwloc_hpux_port_la_SOURCES = \
+	include/sys/mpctl.h
+libhwloc_hpux_port_la_CPPFLAGS = $(common_CPPFLAGS) \
+        -DHWLOC_HPUX_SYS
+
+nodist_libhwloc_osf_port_la_SOURCES = topology-osf.c
+libhwloc_osf_port_la_SOURCES = \
+	include/cpuset.h \
+	include/numa.h \
+	include/radset.h
+libhwloc_osf_port_la_CPPFLAGS = $(common_CPPFLAGS) \
+        -DHWLOC_OSF_SYS
+
+nodist_libhwloc_solaris_port_la_SOURCES = topology-solaris.c topology-solaris-chiptype.c
+libhwloc_solaris_port_la_SOURCES = include/kstat.h include/picl.h include/sys/lgrp_user.h include/sys/procset.h include/sys/systeminfo.h
+libhwloc_solaris_port_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-DHWLOC_SOLARIS_SYS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT -DHAVE_LGRP_LATENCY_COOKIE
+
+nodist_libhwloc_windows_port_la_SOURCES = topology-windows.c
+libhwloc_windows_port_la_SOURCES = include/windows.h
+libhwloc_windows_port_la_CPPFLAGS = $(common_CPPFLAGS) \
+        -DHWLOC_WIN_SYS
+	
+#        include/sys/sysctl.h
+#        include/sys/processor.h
