@@ -721,6 +721,10 @@ hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_t
     hwloc_set_freebsd_hooks(hooks, support);
 #    endif /* HWLOC_FREEBSD_SYS */
 
+#    ifdef HWLOC_NETBSD_SYS
+    hwloc_set_netbsd_hooks(hooks, support);
+#    endif /* HWLOC_NETBSD_SYS */
+
 #    ifdef HWLOC_HPUX_SYS
     hwloc_set_hpux_hooks(hooks, support);
 #    endif /* HWLOC_HPUX_SYS */

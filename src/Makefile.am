@@ -102,6 +102,11 @@ if HWLOC_HAVE_FREEBSD
 sources += topology-freebsd.c
 endif HWLOC_HAVE_FREEBSD
 
+if HWLOC_HAVE_NETBSD
+sources += topology-netbsd.c
+ldflags += -lpthread
+endif HWLOC_HAVE_NETBSD
+
 if HWLOC_HAVE_CPUID
 sources += topology-x86.c
 endif HWLOC_HAVE_CPUID

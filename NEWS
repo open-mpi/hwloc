@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.7.0
 -------------
+* Backends
+  + Add NetBSD support, thanks to Aleksej Saushev.
 * API
   + Add hwloc_topology_get_flags().
   + Add hwloc/plugins.h for building external plugins.
