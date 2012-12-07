@@ -58,9 +58,10 @@ libhwloc_port_darwin_la_CPPFLAGS = $(common_CPPFLAGS) \
 
 nodist_libhwloc_port_freebsd_la_SOURCES = topology-freebsd.c
 libhwloc_port_freebsd_la_SOURCES = \
+	include/freebsd/pthread.h \
 	include/freebsd/pthread_np.h \
 	include/freebsd/sys/cpuset.h \
-        include/freebsd/sys/sysctl.h
+	include/freebsd/sys/sysctl.h
 libhwloc_port_freebsd_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-I$(HWLOC_top_srcdir)/tests/ports/include/freebsd \
 	-DHWLOC_FREEBSD_SYS \
