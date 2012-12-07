@@ -187,9 +187,6 @@ hwloc_look_freebsd(struct hwloc_backend *backend)
   }
 
   /* Add FreeBSD specific information */
-#ifdef HAVE__SC_LARGE_PAGESIZE
-  topology->levels[0][0]->attr->machine.huge_page_size_kB = sysconf(_SC_LARGE_PAGESIZE);
-#endif
 #ifdef HAVE_SYSCTL
   hwloc_freebsd_node_meminfo_info(topology);
 #endif
