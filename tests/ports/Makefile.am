@@ -15,6 +15,7 @@ check_LTLIBRARIES = \
 	libhwloc-port-darwin.la \
 	libhwloc-port-freebsd.la \
 	libhwloc-port-hpux.la \
+	libhwloc-port-netbsd.la \
 	libhwloc-port-osf.la \
 	libhwloc-port-solaris.la \
 	libhwloc-port-windows.la
@@ -67,6 +68,14 @@ libhwloc_port_hpux_la_SOURCES = \
 libhwloc_port_hpux_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-I$(HWLOC_top_srcdir)/tests/ports/include/hpux \
 	-DHWLOC_HPUX_SYS
+
+nodist_libhwloc_port_netbsd_la_SOURCES = topology-netbsd.c
+libhwloc_port_netbsd_la_SOURCES = \
+	include/netbsd/pthread.h \
+	include/netbsd/sched.h
+libhwloc_port_netbsd_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/netbsd \
+	-DHWLOC_NETBSD_SYS
 
 nodist_libhwloc_port_osf_la_SOURCES = topology-osf.c
 libhwloc_port_osf_la_SOURCES = \
