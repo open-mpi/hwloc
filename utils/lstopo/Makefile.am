@@ -27,7 +27,8 @@ lstopo_no_graphics_SOURCES = \
         lstopo-fig.c \
         lstopo-ascii.c \
         lstopo-text.c \
-        lstopo-xml.c
+        lstopo-xml.c \
+	lstopo-native-svg.c
 
 lstopo_no_graphics_CFLAGS =
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)

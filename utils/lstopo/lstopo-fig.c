@@ -66,7 +66,7 @@ fig_declare_color(void *loutput_, int r, int g, int b)
 }
 
 static void
-fig_box(void *loutput_, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height)
+fig_box(void *loutput_, int r, int g, int b, unsigned depth, unsigned x, unsigned width, unsigned y, unsigned height,hwloc_obj_t level)
 {
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;
@@ -99,7 +99,7 @@ fig_line(void *loutput_, int r, int g, int b, unsigned depth, unsigned x1, unsig
 }
 
 static void
-fig_text(void *loutput_, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text)
+fig_text(void *loutput_, int r, int g, int b, int size, unsigned depth, unsigned x, unsigned y, const char *text,hwloc_obj_t level)
 {
   struct lstopo_output *loutput = loutput_;
   FILE *file = loutput->file;

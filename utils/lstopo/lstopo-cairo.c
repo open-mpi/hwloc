@@ -58,7 +58,7 @@ struct lstopo_cairo_output {
 
 /* Cairo methods */
 static void
-topo_cairo_box(void *_output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height)
+topo_cairo_box(void *output, int r, int g, int b, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned width, unsigned y, unsigned height,hwloc_obj_t level)
 {
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;
@@ -111,7 +111,7 @@ topo_cairo_line(void *_output, int r, int g, int b, unsigned depth __hwloc_attri
 }
 
 static void
-topo_cairo_text(void *_output, int r, int g, int b, int fontsize, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text)
+topo_cairo_text(void *output, int r, int g, int b, int fontsize, unsigned depth __hwloc_attribute_unused, unsigned x, unsigned y, const char *text,hwloc_obj_t level)
 {
   struct lstopo_cairo_output *coutput = _output;
   cairo_t *c = coutput->context;

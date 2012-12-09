@@ -3,3 +3,5 @@
 # See COPYING in top-level directory.
 
 SUBDIRS = hwloc lstopo
+
+	lstopo-native-svg.c
