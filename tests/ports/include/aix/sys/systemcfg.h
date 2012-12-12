@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_SYS_SYSTEMCFG_H
-#define HWLOC_PORT_SYS_SYSTEMCFG_H
+#ifndef HWLOC_PORT_AIX_SYS_SYSTEMCFG_H
+#define HWLOC_PORT_AIX_SYS_SYSTEMCFG_H
 
 struct {
   int dcache_size;
@@ -18,4 +18,4 @@ struct {
   int cache_attrib;
 } _system_configuration;
 
-#endif /* HWLOC_PORT_SYS_SYSTEMCFG_H */
+#endif /* HWLOC_PORT_AIX_SYS_SYSTEMCFG_H */

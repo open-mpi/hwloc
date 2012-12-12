@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_SYS_PROCSET_H
-#define HWLOC_PORT_SYS_PROCSET_H
+#ifndef HWLOC_PORT_SOLARIS_SYS_PROCSET_H
+#define HWLOC_PORT_SOLARIS_SYS_PROCSET_H
 
 typedef enum idtype {
   P_PID,
@@ -13,4 +13,4 @@ typedef enum idtype {
   P_MYID
 } idtype_t;
 
-#endif /* HWLOC_PORT_SYS_PROCSET_H */
+#endif /* HWLOC_PORT_SOLARIS_SYS_PROCSET_H */

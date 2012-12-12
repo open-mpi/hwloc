@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_KSTAT_H
-#define HWLOC_PORT_KSTAT_H
+#ifndef HWLOC_PORT_SOLARIS_KSTAT_H
+#define HWLOC_PORT_SOLARIS_KSTAT_H
 
 #include <inttypes.h>
 
@@ -43,4 +43,4 @@ kid_t kstat_read(kstat_ctl_t *, kstat_t *, void *);
 void *kstat_data_lookup(kstat_t *, char *);
 int kstat_close(kstat_ctl_t *);
 
-#endif /* HWLOC_PORT_KSTAT_H */
+#endif /* HWLOC_PORT_SOLARIS_KSTAT_H */

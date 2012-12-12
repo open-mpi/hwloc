@@ -3,8 +3,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_PICL_H
-#define HWLOC_PORT_PICL_H
+#ifndef HWLOC_PORT_SOLARIS_PICL_H
+#define HWLOC_PORT_SOLARIS_PICL_H
 
 #include <stdint.h>
 #include <string.h>
@@ -45,5 +45,4 @@ extern int picl_get_next_by_row(picl_prophdl_t thish, picl_prophdl_t *proph);
 extern int picl_get_next_by_col(picl_prophdl_t thish, picl_prophdl_t *proph);
 extern int picl_walk_tree_by_class(picl_nodehdl_t rooth, const char *classname, void *c_args, int (*callback_fn)(picl_nodehdl_t hdl, void *args));
 
-#endif /* HWLOC_PORT_PICL_H */
-
+#endif /* HWLOC_PORT_SOLARIS_PICL_H */

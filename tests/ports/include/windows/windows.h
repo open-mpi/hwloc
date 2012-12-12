@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_WINDOWS_H
-#define HWLOC_PORT_WINDOWS_H
+#ifndef HWLOC_PORT_WINDOWS_WINDOWS_H
+#define HWLOC_PORT_WINDOWS_WINDOWS_H
 
 #include <inttypes.h>
 
@@ -69,4 +69,4 @@ typedef struct _SYSTEM_INFO {
 
 void WINAPI GetSystemInfo(LPSYSTEM_INFO lpSystemInfo);
 
-#endif /* HWLOC_PORT_WINDOWS_H */
+#endif /* HWLOC_PORT_WINDOWS_WINDOWS_H */

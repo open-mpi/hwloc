@@ -4,8 +4,8 @@
  * See COPYING in top-level directory.
  */
 
-#ifndef HWLOC_PORT_SYS_RSET_H
-#define HWLOC_PORT_SYS_RSET_H
+#ifndef HWLOC_PORT_AIX_SYS_RSET_H
+#define HWLOC_PORT_AIX_SYS_RSET_H
 
 #include <stdint.h>
 
@@ -92,4 +92,4 @@ int ra_getrset (rstype_t rstype, rsid_t rsid, unsigned int flags, rsethandle_t r
 void * ra_mmap(void *addr, off64_t len, int prot, int flags, int fildes, off64_t off, rstype_t rstype, rsid_t rsid, unsigned int att_flags);
 
 
-#endif /* HWLOC_PORT_SYS_RSET_H */
+#endif /* HWLOC_PORT_AIX_SYS_RSET_H */

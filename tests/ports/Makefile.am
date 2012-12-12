@@ -1,4 +1,4 @@
-# Copyright © 2009-2010 inria.  All rights reserved.
+# Copyright © 2009-2012 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -10,7 +10,15 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 SRC = $(HWLOC_top_srcdir)/src
 
 if HWLOC_HAVE_LINUX
-check_LTLIBRARIES = libhwloc-ports.la
+check_LTLIBRARIES = \
+	libhwloc-port-aix.la \
+	libhwloc-port-darwin.la \
+	libhwloc-port-freebsd.la \
+	libhwloc-port-hpux.la \
+	libhwloc-port-netbsd.la \
+	libhwloc-port-osf.la \
+	libhwloc-port-solaris.la \
+	libhwloc-port-windows.la
 endif HWLOC_HAVE_LINUX
 
 # Note that AC_CONFIG_LINKS sets up the sym links for the files in
@@ -20,47 +28,98 @@ endif HWLOC_HAVE_LINUX
 # referencing the files via $HWLOC_top_srcdir/src/foo.c because of
 # dependencies issues when using the Automake option "subdir-objects".
 # We nodist these because they're created by configure.
-nodist_libhwloc_ports_la_SOURCES = \
-        topology-solaris.c \
-        topology-solaris-chiptype.c \
-        topology-aix.c \
-        topology-osf.c \
-        topology-windows.c \
-        topology-darwin.c \
-        topology-freebsd.c \
-        topology-hpux.c
 
-libhwloc_ports_la_SOURCES = \
-        include/windows.h \
-        include/kstat.h \
-        include/picl.h \
-        include/sys/rset.h \
-        include/sys/lgrp_user.h \
-        include/sys/sysctl.h \
-        include/sys/procset.h \
-        include/sys/processor.h \
-        include/sys/thread.h \
-        include/sys/mpctl.h \
-        include/sys/cpuset.h \
-        include/sys/systemcfg.h \
-        include/sys/systeminfo.h \
-        include/radset.h \
-        include/cpuset.h \
-        include/numa.h \
-        include/procinfo.h \
-        include/pthread_np.h
+common_CPPFLAGS = \
+	$(HWLOC_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/include \
+	-DHWLOC_COMPILE_PORTS \
+	-DHWLOC_INSIDE_LIBHWLOC
 
-libhwloc_ports_la_CPPFLAGS = \
-        $(HWLOC_CPPFLAGS) \
-        -I$(HWLOC_top_srcdir)/include \
-        -I$(HWLOC_top_srcdir)/tests/ports/include \
-        -DHWLOC_COMPILE_PORTS \
-        -DHWLOC_SOLARIS_SYS -DHAVE_LIBLGRP -DHAVE_LIBKSTAT -DHAVE_LGRP_LATENCY_COOKIE \
-        -DHWLOC_AIX_SYS \
-        -DHWLOC_OSF_SYS \
-        -DHWLOC_WIN_SYS \
-        -DHWLOC_DARWIN_SYS \
-        -DHWLOC_FREEBSD_SYS -DHAVE_SYS_CPUSET_H -DHAVE_CPUSET_SETID \
-        -DHWLOC_HPUX_SYS \
-        -DHWLOC_INSIDE_LIBHWLOC
+nodist_libhwloc_port_aix_la_SOURCES = topology-aix.c
+libhwloc_port_aix_la_SOURCES = \
+	include/aix/procinfo.h \
+	include/aix/sys/processor.h \
+	include/aix/sys/rset.h \
+	include/aix/sys/systemcfg.h \
+	include/aix/sys/thread.h
+libhwloc_port_aix_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/aix \
+	-DHWLOC_AIX_SYS \
+	-DHWLOC_HAVE_PTHREAD_GETTHRDS_NP \
+	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
 
+nodist_libhwloc_port_darwin_la_SOURCES = topology-darwin.c
+libhwloc_port_darwin_la_SOURCES = \
+	include/darwin/sys/sysctl.h
+libhwloc_port_darwin_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/darwin \
+	-DHWLOC_DARWIN_SYS \
+	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+
+nodist_libhwloc_port_freebsd_la_SOURCES = topology-freebsd.c
+libhwloc_port_freebsd_la_SOURCES = \
+	include/freebsd/pthread.h \
+	include/freebsd/pthread_np.h \
+	include/freebsd/sys/cpuset.h \
+	include/freebsd/sys/sysctl.h
+libhwloc_port_freebsd_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/freebsd \
+	-DHWLOC_FREEBSD_SYS \
+	-DHAVE_PTHREAD_NP_H \
+	-DHAVE_SYS_CPUSET_H \
+	-DHAVE_SYSCTL \
+	-DHAVE_CPUSET_SETAFFINITY \
+	-Dhwloc_thread_t=pthread_t \
+	-DHAVE_DECL_PTHREAD_SETAFFINITY_NP=1 \
+	-DHAVE_DECL_PTHREAD_GETAFFINITY_NP=1 \
+	-DHAVE_CPUSET_SETID
+
+nodist_libhwloc_port_hpux_la_SOURCES = topology-hpux.c
+libhwloc_port_hpux_la_SOURCES = \
+	include/hpux/sys/mpctl.h
+libhwloc_port_hpux_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/hpux \
+	-DHWLOC_HPUX_SYS
+
+nodist_libhwloc_port_netbsd_la_SOURCES = topology-netbsd.c
+libhwloc_port_netbsd_la_SOURCES = \
+	include/netbsd/pthread.h \
+	include/netbsd/sched.h
+libhwloc_port_netbsd_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/netbsd \
+	-DHWLOC_NETBSD_SYS
+
+nodist_libhwloc_port_osf_la_SOURCES = topology-osf.c
+libhwloc_port_osf_la_SOURCES = \
+	include/osf/cpuset.h \
+	include/osf/numa.h \
+	include/osf/radset.h
+libhwloc_port_osf_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/osf \
+	-DHWLOC_OSF_SYS \
+	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+
+nodist_libhwloc_port_solaris_la_SOURCES = topology-solaris.c topology-solaris-chiptype.c
+libhwloc_port_solaris_la_SOURCES = \
+	include/solaris/kstat.h \
+	include/solaris/picl.h \
+	include/solaris/sys/lgrp_user.h \
+	include/solaris/sys/processor.h \
+	include/solaris/sys/procset.h \
+	include/solaris/sys/systeminfo.h
+libhwloc_port_solaris_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/solaris \
+	-DHWLOC_SOLARIS_SYS \
+	-DHAVE_LIBLGRP \
+	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33 \
+	-DHAVE_LGRP_LATENCY_COOKIE \
+	-DHAVE_LIBKSTAT \
+	-DHAVE_PICL_H
+
+nodist_libhwloc_port_windows_la_SOURCES = topology-windows.c
+libhwloc_port_windows_la_SOURCES = \
+	include/windows/windows.h
+libhwloc_port_windows_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/windows \
+	-DHWLOC_WIN_SYS \
+	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33

@@ -172,6 +172,10 @@ extern void hwloc_set_darwin_hooks(struct hwloc_binding_hooks *binding_hooks, st
 extern void hwloc_set_freebsd_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_FREEBSD_SYS */
 
+#ifdef HWLOC_NETBSD_SYS
+extern void hwloc_set_netbsd_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
+#endif /* HWLOC_NETBSD_SYS */
+
 #ifdef HWLOC_HPUX_SYS
 extern void hwloc_set_hpux_hooks(struct hwloc_binding_hooks *binding_hooks, struct hwloc_topology_support *support);
 #endif /* HWLOC_HPUX_SYS */
