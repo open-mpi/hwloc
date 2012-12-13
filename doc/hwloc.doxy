@@ -1025,6 +1025,12 @@ following environment variables.
   See \ref plugins for details.
   </dd>
 
+<dt>HWLOC_COMPONENTS=^list,of,components,to,exclude</dt>
+  <dd>If the variable starts with <tt>^</tt>, it defines a list of
+  components to exclude.
+  See \ref plugins for details.
+  </dd>
+
 <dt>HWLOC_COMPONENTS_VERBOSE=1</dt>
   <dd>display verbose information about components.
   Display messages when components are registered or enabled.
@@ -1931,6 +1937,12 @@ accept an argument (e.g. <tt>xml=file.xml</tt>).
 These arguments behave exactly as if the corresponding string had
 been passed to <tt>hwloc_topology_set_xml()</tt>
 or <tt>hwloc_topology_set_synthetic()</tt>.
+
+Finally, the <tt>HWLOC_COMPONENTS</tt> environment variable
+may start with <tt>^</tt> to exclude some components instead
+of enabling them.
+For instance, passing <tt>^libpci</tt> will load all usual
+components except the <tt>libpci</tt> one.
 
 \section plugins_config Building components as plugins
 

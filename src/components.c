@@ -393,7 +393,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   }
 
   env = getenv("HWLOC_COMPONENTS");
-  if (env) {
+  if (env && '^' != env[0]) {
     size_t s;
 
     while (*env) {
@@ -437,7 +437,24 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   if (tryall) {
     comp = hwloc_disc_components;
     while (NULL != comp) {
+      if (env && '^' == env[0]) {
+	char *curenv = env+1;
+	while (*curenv) {
+	  size_t s = strcspn(curenv, ",");
+	  if (s && !strncmp(curenv, comp->name, s)) {
+	    if (hwloc_components_verbose)
+	      fprintf(stderr, "Excluding %s component `%s' because of HWLOC_COMPONENT environment variable\n",
+	    hwloc_disc_component_type_string(comp->type), comp->name);
+	    goto next;
+	  }
+	  curenv += s;
+	  if (*curenv)
+	    /* Skip comma */
+	    curenv++;
+	}
+      }
       hwloc_disc_component_try_enable(topology, comp, NULL, &excludes, 0 /* defaults, not envvar forced */, 0 /* defaults don't need warnings on conflicts */);
+next:
       comp = comp->next;
     }
   }
