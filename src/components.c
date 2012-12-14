@@ -458,6 +458,19 @@ next:
       comp = comp->next;
     }
   }
+
+  if (hwloc_components_verbose) {
+    /* print a summary */
+    struct hwloc_backend *backend = topology->backends;
+    int first = 1;
+    printf("Final list of enabled components: ");
+    while (backend != NULL) {
+      printf("%s%s", first ? "" : ",", backend->component->name);
+      backend = backend->next;
+      first = 0;
+    }
+    printf("\n");
+  }
 }
 
 void
