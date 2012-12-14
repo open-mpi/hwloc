@@ -355,7 +355,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
   int err;
 
   if ((*excludes) & comp->type) {
-    if (hwloc_components_verbose)
+    if (hwloc_components_verbose || verbose_errors)
       fprintf(stderr, "Excluding %s component `%s', conflicts with excludes 0x%x\n",
 	      hwloc_disc_component_type_string(comp->type), comp->name, *excludes);
     return -1;
@@ -418,7 +418,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 
 	comp = hwloc_disc_component_find(-1, env);
 	if (comp) {
-	  hwloc_disc_component_try_enable(topology, comp, arg, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings on conflicts */);
+	  hwloc_disc_component_try_enable(topology, comp, arg, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings */);
 	} else {
 	  fprintf(stderr, "Cannot find component `%s'\n", env);
 	}
