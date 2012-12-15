@@ -20,6 +20,7 @@ struct hwloc_nvml_backend_data_s {
     char serial[64];
     char uuid[64];
     unsigned pcidomain, pcibus, pcidev, pcifunc;
+    float maxlinkspeed;
   } * devices;
 };
 
@@ -70,6 +71,22 @@ hwloc_nvml_query_devices(struct hwloc_nvml_backend_data_s *data)
     ret = nvmlDeviceGetSerial(device, info->serial, sizeof(info->serial));
     info->uuid[0] = '\0';
     ret = nvmlDeviceGetUUID(device, info->uuid, sizeof(info->uuid));
+
+    info->maxlinkspeed = 0.0f;
+#if HAVE_DECL_NVMLDEVICEGETMAXPCIELINKGENERATION
+    {
+      unsigned maxwidth = 0, maxgen = 0;
+      float lanespeed;
+      nvmlDeviceGetMaxPcieLinkWidth(device, &maxwidth);
+      nvmlDeviceGetMaxPcieLinkGeneration(device, &maxgen);
+      /* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
+       * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
+       * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
+       */
+      lanespeed = maxgen <= 2 ? 2.5 * maxgen * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
+      info->maxlinkspeed = lanespeed * maxwidth / 8; /* GB/s */
+    }
+#endif
 
     /* validate this device */
     data->nr_devices++;
@@ -139,6 +156,11 @@ hwloc_nvml_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc
       hwloc_obj_add_info(osdev, "UUID", info->uuid);
 
     hwloc_insert_object_by_parent(topology, pcidev, osdev);
+
+    if (info->maxlinkspeed != 0.0f)
+      /* we found the max link speed, replace the current link speed found by libpci (or none) */
+      pcidev->attr->pcidev.linkspeed = info->maxlinkspeed;
+
     return 1;
   }
 

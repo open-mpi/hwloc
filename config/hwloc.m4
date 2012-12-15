@@ -738,6 +738,15 @@ EOF])
 	  AC_CHECK_LIB([nvidia-ml], [nvmlInit], [HWLOC_NVML_LIBS="-lnvidia-ml"], [hwloc_nvml_happy=no])
         ], [hwloc_nvml_happy=no])
     fi
+    if test "x$hwloc_nvml_happy" = "xyes"; then
+      tmp_save_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS $HWLOC_NVML_CFLAGS"
+      tmp_save_LIBS="$LIBS"
+      LIBS="$LIBS $HWLOC_NVML_LIBS"
+      AC_CHECK_DECLS([nvmlDeviceGetMaxPcieLinkGeneration],,[:],[[#include <nvml.h>]])
+      CFLAGS="$tmp_save_CFLAGS"
+      LIBS="$tmp_save_LIBS"
+    fi
     AC_SUBST(HWLOC_NVML_LIBS)
     # If we asked for nvml support but couldn't deliver, fail
     AS_IF([test "$enable_nvml" = "yes" -a "$hwloc_nvml_happy" = "no"],
