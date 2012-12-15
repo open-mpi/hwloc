@@ -1335,7 +1335,7 @@ To make sure binding on an object is possible, one should first check
 that its cpuset or nodeset pointer is not NULL.
 Then, one should check whether the object is indeed local.
 
-To find out which machine a given object correspond too, one may look
+To find out which machine a given object corresponds to, one may look
 at the info attributes of the parent Machine object. The <tt>HostName</tt>
 info is usually available in Machine objects, it may be retrieved with the
 following code:
