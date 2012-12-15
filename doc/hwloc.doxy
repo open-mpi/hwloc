@@ -2224,6 +2224,24 @@ interface, and the import/export may also be directed to memory buffer
 See also \ref xml.
 
 
+\section faq_slow_lstopo Why is lstopo slow?
+
+lstopo enables most hwloc discovery flags by default so that the output
+topology is as precise as possible (while hwloc disables many of them
+by default).
+This includes I/O device discovery through libpci as well as external
+libraries such as NVML.
+To speed up lstopo, you may disable such features with command-line
+options such as <tt>--no-io</tt>.
+
+When NVIDIA GPU probing is enabled with NVML, one should make sure that
+the <em>Persistent</em> mode is enabled (with <tt>nvidia-smi -pm 1</tt>)
+to avoid significant GPU initialization overhead.
+
+If loading topologies is slow because the machine contains tons of
+processors, one should also consider using XML (see \ref faq_xml).
+
+
 \section faq_privileged Does hwloc require privileged access?
 
 hwloc discovers the topology by querying the operating system.
