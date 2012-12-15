@@ -1191,8 +1191,8 @@ supported.
 Those include:
 <ul>
 <li>
- <em>nvml0</em> OS device objects from the <tt>nvml</tt>
- component using the NVIDIA Management Library.
+ <em>nvml0</em>, <em>nvml1</em>, ... OS device objects from
+ the <tt>nvml</tt> component using the NVIDIA Management Library.
 </li>
 </ul>
 
@@ -1790,7 +1790,7 @@ enabled for the current topology.
   hwloc/nvml.h enable interoperability with the NVIDIA NVML interface.
   It may return the list of processors near a NVIDIA GPU given as
   a nvmlDevice_t.
-  It may also return the correspond OS device hwloc object for further
+  It may also return the corresponding OS device hwloc object for further
   information.
  </dd>
 
