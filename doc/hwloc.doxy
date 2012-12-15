@@ -1171,18 +1171,35 @@ on the machine and on the topology flags.
 Although each PCI device is uniquely identified by its bus ID
 (e.g. 0000:01:02.3), the application can hardly find out which
 PCI device is actually used when manipulating software handle
-(such as the <em>eth0</em> network interface or the <em>mlx4_0</em>
-OpenFabrics HCA).
-Therefore hwloc tries to add software devices (<tt>::HWLOC_OBJ_OS_DEVICE</tt>)
-below their PCI objects.
-These objects can be identified by their usual operating system-wide
-names, e.g. <em>eth0</em> or <em>mlx4_0</em>.
+(such as the <em>eth0</em> network interface,
+ the <em>sda</em> hard drive,
+ or the <em>mlx4_0</em> OpenFabrics HCA).
+Therefore hwloc tries to add software devices
+(<tt>::HWLOC_OBJ_OS_DEVICE</tt>) below their PCI objects.
+
+hwloc first tries to discover the corresponding names,
+e.g. <em>eth0</em>, <em>sda</em> or <em>mlx4_0</em>,
+from the operating system.
 However, this ability is currently only available on Linux for some
 classes of devices.
-It should especially be noted that proprietary graphics driver
-currently do not create any interesting software device for GPUs,
-they should therefore be manipulated as PCI device objects.
-On the contrary some PCI devices may contain multiple software device
+
+hwloc then tries to discover software devices through additional
+I/O components using external libraries.
+For instance proprietary graphics drivers do not offer any OS name,
+but hwloc may still create one OS object per software handle when
+supported.
+Those include:
+<ul>
+<li>
+ <em>nvml0</em> OS device objects from the <tt>nvml</tt>
+ component using the NVIDIA Management Library.
+</li>
+</ul>
+
+When none of the above strategies is supported and enabled,
+hwloc cannot place any OS object inside PCI objects.
+
+Note that some PCI devices may contain multiple software devices
 (see the example below).
 
 See also \ref interoperability for managing these devices without
@@ -1766,6 +1783,15 @@ enabled for the current topology.
   return the list of processors near NVIDIA GPUs.
   Note that if I/O device discovery is enabled, GPUs may also
   appear as PCI objects in the topology.
+ </dd>
+
+<dt>NVIDIA Management Library (NVML)</dt>
+ <dd>
+  hwloc/nvml.h enable interoperability with the NVIDIA NVML interface.
+  It may return the list of processors near a NVIDIA GPU given as
+  a nvmlDevice_t.
+  It may also return the correspond OS device hwloc object for further
+  information.
  </dd>
 
 <dt>Taskset command-line tool</dt>
