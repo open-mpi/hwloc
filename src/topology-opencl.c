@@ -93,7 +93,7 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
     struct hwloc_opencl_device_info_s *info = &data->devices[data->nr_devices];
     cl_platform_id platform_id = 0;
     cl_device_type type;
-#if HAVE_DECL_CL_DEVICE_TOPOLOGY_AMD
+#ifdef CL_DEVICE_TOPOLOGY_AMD
     cl_device_topology_amd amdtopo;
 #endif
 
@@ -133,7 +133,7 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
     info->platformdeviceidx = curpfdvidx;
     curpfdvidx++;
 
-#if HAVE_DECL_CL_DEVICE_TOPOLOGY_AMD
+#ifdef CL_DEVICE_TOPOLOGY_AMD
     clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
     if (CL_SUCCESS != clret)
       continue;
