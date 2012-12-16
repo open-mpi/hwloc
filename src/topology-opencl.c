@@ -104,7 +104,11 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
     clGetPlatformInfo(platform_id, CL_PLATFORM_NAME, sizeof(info->platformname), info->platformname, NULL);
 
     info->devicename[0] = '\0';
+#ifdef CL_DEVICE_BOARD_NAME_AMD
+    clGetDeviceInfo(device_ids[i], CL_DEVICE_BOARD_NAME_AMD, sizeof(info->devicename), info->devicename, NULL);
+#else
     clGetDeviceInfo(device_ids[i], CL_DEVICE_NAME, sizeof(info->devicename), info->devicename, NULL);
+#endif
     info->devicevendor[0] = '\0';
     clGetDeviceInfo(device_ids[i], CL_DEVICE_VENDOR, sizeof(info->devicevendor), info->devicevendor, NULL);
 
@@ -218,6 +222,11 @@ hwloc_opencl_backend_notify_new_object(struct hwloc_backend *backend, struct hwl
     hwloc_obj_add_info(osdev, "Backend", "OpenCL");
     hwloc_obj_add_info(osdev, "OpenCLDeviceType", info->devicetype);
 
+    if (info->devicevendor[0] != '\0')
+      hwloc_obj_add_info(osdev, "Vendor", info->devicevendor);
+    if (info->devicename[0] != '\0')
+      hwloc_obj_add_info(osdev, "Name", info->devicename);
+
     snprintf(buffer, sizeof(buffer), "%u", info->platformidx);
     hwloc_obj_add_info(osdev, "OpenCLPlatformIndex", buffer);
     if (info->platformname[0] != '\0')
@@ -225,10 +234,6 @@ hwloc_opencl_backend_notify_new_object(struct hwloc_backend *backend, struct hwl
 
     snprintf(buffer, sizeof(buffer), "%u", info->platformdeviceidx);
     hwloc_obj_add_info(osdev, "OpenCLPlatformDeviceIndex", buffer);
-    if (info->devicevendor[0] != '\0')
-      hwloc_obj_add_info(osdev, "OpenCLDeviceVendor", info->devicevendor);
-    if (info->devicename[0] != '\0')
-      hwloc_obj_add_info(osdev, "OpenCLDeviceName", info->devicename);
 
     hwloc_insert_object_by_parent(topology, pcidev, osdev);
     return 1;
