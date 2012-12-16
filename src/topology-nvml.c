@@ -149,6 +149,7 @@ hwloc_nvml_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
 
     hwloc_obj_add_info(osdev, "Backend", "NVML");
+    hwloc_obj_add_info(osdev, "Vendor", "NVIDIA Corporation");
     hwloc_obj_add_info(osdev, "Name", info->name);
     if (info->serial[0] != '\0')
       hwloc_obj_add_info(osdev, "Serial", info->serial);
