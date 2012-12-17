@@ -33,7 +33,7 @@ extern "C" {
 /** \brief Get the CPU set of logical processors that are physically
  * close to NVML device \p device.
  *
- * For the given NVML device \p idx, read the corresponding
+ * For the given NVML device \p device, read the corresponding
  * kernel-provided cpumap file and return the corresponding CPU set.
  * This function is currently only implemented in a meaningful way for
  * Linux; other systems will simply get a full cpuset.
@@ -51,8 +51,8 @@ hwloc_nvml_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
 {
 #ifdef HWLOC_LINUX_SYS
   /* If we're on Linux, use the sysfs mechanism to get the local cpus */
-#define HWLOC_CUDA_DEVICE_SYSFS_PATH_MAX 128
-  char path[HWLOC_CUDA_DEVICE_SYSFS_PATH_MAX];
+#define HWLOC_NVML_DEVICE_SYSFS_PATH_MAX 128
+  char path[HWLOC_NVML_DEVICE_SYSFS_PATH_MAX];
   FILE *sysfile = NULL;
   nvmlReturn_t nvres;
   nvmlPciInfo_t pci;
@@ -87,7 +87,7 @@ hwloc_nvml_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
 
 /** \brief Get the hwloc object for the PCI device corresponding to NVML device \p device.
  *
- * For the given NVML device \p idx, return the hwloc OS device
+ * For the given NVML device \p device, return the hwloc OS device
  * corresponding to the NVML device. Returns NULL if there is none.
  *
  * PCI and NVML components must be enabled in the topology,
