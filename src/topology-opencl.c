@@ -66,7 +66,7 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
   /* how many devices, total? */
   tmp = 0;
   for(i=0; i<nr_platforms; i++) {
-    clret = clGetDeviceIDs(platform_ids[i], CL_DEVICE_TYPE_ALL, i, NULL, &nr_devices);
+    clret = clGetDeviceIDs(platform_ids[i], CL_DEVICE_TYPE_ALL, 0, NULL, &nr_devices);
     if (CL_SUCCESS != clret)
       goto out_with_platform_ids;
     tmp += nr_devices;
