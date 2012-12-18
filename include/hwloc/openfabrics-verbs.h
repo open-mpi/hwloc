@@ -38,12 +38,14 @@ extern "C" {
 /** \brief Get the CPU set of logical processors that are physically
  * close to device \p ibdev.
  *
- * For the given OpenFabrics device \p ibdev, read the corresponding
- * kernel-provided cpumap file and return the corresponding CPU set.
+ * Return the CPU set describing the locality of the OpenFabrics
+ * device \p ibdev.
+ *
+ * Topology \p topology and device \p ibdev must match the local machine.
+ * IO devices detection is not needed in the topology.
+ *
  * This function is currently only implemented in a meaningful way for
  * Linux; other systems will simply get a full cpuset.
- *
- * Topology \p topology must match the current machine.
  */
 static __hwloc_inline int
 hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
@@ -82,15 +84,13 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
 /** \brief Get the hwloc OS device object corresponding to the OpenFabrics
  * device named \p ibname.
  *
- * For the OpenFabrics device whose name is \p ibname, return the hwloc OS
- * device object describing the device. Returns NULL if there is none.
- *
+ * Return the OS device object describing the OpenFabrics device whose
+ * name is \p ibname. Returns NULL if there is none.
  * The name \p ibname is usually obtained from ibv_get_device_name().
  *
- * IO devices detection must be enabled in topology \p topology.
- *
- * The topology does not necessary have to match the current machine.
- * For instance the topology may be an XML import of a remote host.
+ * The topology \p topology does not necessary have to match the current
+ * machine. For instance the topology may be an XML import of a remote host.
+ * IO devices detection must be enabled in this topology.
  *
  * \note The corresponding PCI device object can be obtained by looking
  * at the OS device parent object.
@@ -106,6 +106,29 @@ hwloc_ibv_get_device_osdev_by_name(hwloc_topology_t topology,
 			return osdev;
 	}
 	return NULL;
+}
+
+/** \brief Get the hwloc OS device object corresponding to the OpenFabrics
+ * device \p ibdev.
+ *
+ * Return the OS device object describing the OpenFabrics device \p ibdev.
+ * Returns NULL if there is none.
+ *
+ * Topology \p topology and device \p ibdev must match the local machine.
+ * IO devices detection must be enabled in the topology.
+ *
+ * \note The corresponding PCI device object can be obtained by looking
+ * at the OS device parent object.
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_ibv_get_device_osdev(hwloc_topology_t topology,
+			   struct ibv_device *ibdev)
+{
+	if (!hwloc_topology_is_thissystem(topology)) {
+		errno = EINVAL;
+		return NULL;
+	}
+	return hwloc_ibv_get_device_osdev_by_name(topology, ibv_get_device_name(ibdev));
 }
 
 /** @} */

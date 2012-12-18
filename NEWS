@@ -25,6 +25,9 @@ Version 1.7.0
   + Add hwloc_topology_get_flags().
   + Add hwloc/plugins.h for building external plugins.
     See the Adding new discovery components and plugins section.
+* Interoperability
+  + Add hwloc_ibv_get_device_osdev() and clarify the requirements
+    of the OpenFabrics Verbs helpers in hwloc/openfabrics-verbs.h.
 * Misc
   + The HWLOC_COMPONENTS may now start with '^' to only define a list of
     components to exclude.
