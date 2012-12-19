@@ -65,6 +65,10 @@ if HWLOC_HAVE_MYRIEXPRESS
 check_PROGRAMS += myriexpress
 endif HWLOC_HAVE_MYRIEXPRESS
 
+if HWLOC_HAVE_OPENCL
+check_PROGRAMS += opencl
+endif HWLOC_HAVE_OPENCL
+
 if HWLOC_HAVE_CUDA
 check_PROGRAMS += cuda
 endif HWLOC_HAVE_CUDA
@@ -88,6 +92,7 @@ LDADD += $(HWLOC_top_builddir)/src/$(hwloc_lib)
 linux_libnuma_LDADD = $(LDADD) -lnuma
 openfabrics_verbs_LDADD = $(LDADD) -libverbs
 myriexpress_LDADD = $(LDADD) -lmyriexpress
+opencl_LDADD = $(LDADD) -lOpenCL
 cuda_LDADD = $(LDADD) -lcuda
 cudart_LDADD = $(LDADD) -lcuda -lcudart
 xmlbuffer_LDADD = $(LDADD) $(HWLOC_LIBXML2_LIBS)
