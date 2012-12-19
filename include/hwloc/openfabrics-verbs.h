@@ -42,7 +42,12 @@ extern "C" {
  * device \p ibdev.
  *
  * Topology \p topology and device \p ibdev must match the local machine.
- * IO devices detection is not needed in the topology.
+ * I/O devices detection is not needed in the topology.
+ *
+ * The function only returns the locality of the device.
+ * If more information about the device is needed, OS objects should
+ * be used instead, see hwloc_ibv_get_device_osdev()
+ * and hwloc_ibv_get_device_osdev_by_name().
  *
  * This function is currently only implemented in a meaningful way for
  * Linux; other systems will simply get a full cpuset.
@@ -88,9 +93,9 @@ hwloc_ibv_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
  * name is \p ibname. Returns NULL if there is none.
  * The name \p ibname is usually obtained from ibv_get_device_name().
  *
- * The topology \p topology does not necessary have to match the current
+ * The topology \p topology does not necessarily have to match the current
  * machine. For instance the topology may be an XML import of a remote host.
- * IO devices detection must be enabled in this topology.
+ * I/O devices detection must be enabled in the topology.
  *
  * \note The corresponding PCI device object can be obtained by looking
  * at the OS device parent object.
@@ -115,7 +120,9 @@ hwloc_ibv_get_device_osdev_by_name(hwloc_topology_t topology,
  * Returns NULL if there is none.
  *
  * Topology \p topology and device \p ibdev must match the local machine.
- * IO devices detection must be enabled in the topology.
+ * I/O devices detection must be enabled in the topology.
+ * If not, the locality of the object may still be found using
+ * hwloc_ibv_get_device_cpuset().
  *
  * \note The corresponding PCI device object can be obtained by looking
  * at the OS device parent object.
