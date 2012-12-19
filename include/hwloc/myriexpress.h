@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2012 inria.  All rights reserved.
+ * Copyright © 2010-2012 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -34,10 +34,14 @@ extern "C" {
 /** \brief Get the CPU set of logical processors that are physically
  * close the MX board \p id.
  *
- * For the given Myrinet Express board index \p id, read the
- * OS-provided NUMA node and return the corresponding CPU set.
+ * Return the CPU set describing the locality of the Myrinet Express
+ * board whose index is \p id.
  *
- * Topology \p topology must match the current machine.
+ * Topology \p topology and device \p id must match the local machine.
+ * I/O devices detection is not needed in the topology.
+ *
+ * The function only returns the locality of the device.
+ * No additional information about the device is available.
  */
 static __hwloc_inline int
 hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
@@ -72,12 +76,16 @@ hwloc_mx_board_get_device_cpuset(hwloc_topology_t topology,
 }
 
 /** \brief Get the CPU set of logical processors that are physically
- * close to endpoint \p endpoint.
+ * close the MX endpoint \p endpoint.
  *
- * For the given Myrinet Express endpoint \p endpoint, read the
- * OS-provided NUMA node and return the corresponding CPU set.
+ * Return the CPU set describing the locality of the Myrinet Express
+ * board that runs the MX endpoint \p endpoint.
  *
- * Topology \p topology must match the current machine.
+ * Topology \p topology and device \p id must match the local machine.
+ * I/O devices detection is not needed in the topology.
+ *
+ * The function only returns the locality of the endpoint.
+ * No additional information about the endpoint or device is available.
  */
 static __hwloc_inline int
 hwloc_mx_endpoint_get_device_cpuset(hwloc_topology_t topology,
