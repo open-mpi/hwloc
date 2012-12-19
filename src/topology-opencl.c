@@ -214,7 +214,7 @@ hwloc_opencl_backend_notify_new_object(struct hwloc_backend *backend, struct hwl
       continue;
 
     osdev = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
-    snprintf(buffer, sizeof(buffer), "opencl%d", i);
+    snprintf(buffer, sizeof(buffer), "opencl%dp%d", info->platformdeviceidx, info->platformidx);
     osdev->name = strdup(buffer);
     osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU; /* FIXME info->devicetype == "GPU" since we only have locality for AMD so far */
