@@ -1219,6 +1219,33 @@ is replaced by the set of CPUs that are close to this PCI device
 This enables easy binding of I/O-intensive applications near the
 device they use.
 
+\section iodevices_osdev Common OS devices
+
+Here is a list of OS device objects commonly created by hwloc
+components when I/O discovery is enabled and supported.
+
+<ul>
+<li>Hard disks (HWLOC_OBJ_OSDEV_BLOCK)
+ <ul>
+ <li><em>sda</em> (Linux component)</li>
+ </ul>
+</li>
+<li>Network interfaces (HWLOC_OBJ_OSDEV_NETWORK)
+ <ul>
+ <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
+ </ul>
+</li>
+<li>OpenFabrics HCAs (HWLOC_OBJ_OSDEV_OPENFABRICS)
+ <ul>
+ <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
+ </ul>
+<li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
+ <ul>
+ <li><em>dma0chan0</em> (Linux component)</li>
+ </ul>
+</li>
+</ul>
+
 \section iodevices_examples Examples
 
 The following picture shows a dual-socket dual-core host whose
