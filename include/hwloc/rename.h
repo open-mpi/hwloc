@@ -398,6 +398,7 @@ extern "C" {
 
 #define hwloc_nvml_get_device_cpuset HWLOC_NAME(nvml_get_device_cpuset)
 #define hwloc_nvml_get_device_osdev HWLOC_NAME(nvml_get_device_osdev)
+#define hwloc_nvml_get_device_osdev_by_index HWLOC_NAME(nvml_get_device_osdev_by_index)
 
 /* hwloc/plugins.h */
 

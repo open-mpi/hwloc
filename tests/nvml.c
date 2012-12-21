@@ -38,7 +38,7 @@ int main(void)
 
   for(i=0; i<count; i++) {
     hwloc_bitmap_t set;
-    hwloc_obj_t osdev;
+    hwloc_obj_t osdev, osdev2, ancestor;
     const char *value;
 
     nvres = nvmlDeviceGetHandleByIndex(i, &device);
@@ -47,20 +47,12 @@ int main(void)
       continue;
     }
 
-    set = hwloc_bitmap_alloc();
-    err = hwloc_nvml_get_device_cpuset(topology, device, set);
-    if (err < 0) {
-      printf("failed to get cpuset for device %d\n", i);
-    } else {
-      char *cpuset_string = NULL;
-      hwloc_bitmap_asprintf(&cpuset_string, set);
-      printf("got cpuset %s for device %d\n", cpuset_string, i);
-      free(cpuset_string);
-    }
-    hwloc_bitmap_free(set);
-
     osdev = hwloc_nvml_get_device_osdev(topology, device);
     assert(osdev);
+    osdev2 = hwloc_nvml_get_device_osdev_by_index(topology, i);
+    assert(osdev2 == osdev);
+
+    ancestor = hwloc_get_non_io_ancestor_obj(topology, osdev);
 
     printf("found OSDev %s\n", osdev->name);
     err = strncmp(osdev->name, "nvml", 4);
@@ -73,6 +65,19 @@ int main(void)
 
     value = hwloc_obj_get_info_by_name(osdev, "Name");
     printf("found OSDev name %s\n", value);
+
+    set = hwloc_bitmap_alloc();
+    err = hwloc_nvml_get_device_cpuset(topology, device, set);
+    if (err < 0) {
+      printf("failed to get cpuset for device %d\n", i);
+    } else {
+      char *cpuset_string = NULL;
+      hwloc_bitmap_asprintf(&cpuset_string, set);
+      printf("got cpuset %s for device %d\n", cpuset_string, i);
+      free(cpuset_string);
+      assert(hwloc_bitmap_isequal(set, ancestor->cpuset));
+    }
+    hwloc_bitmap_free(set);
   }
 
   hwloc_topology_destroy(topology);

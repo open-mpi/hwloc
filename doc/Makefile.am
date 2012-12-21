@@ -634,7 +634,8 @@ man3_cuda_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_pcidev.3 \
         $(DOX_MAN_DIR)/man3/hwlocality_nvml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev.3
+        $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev_by_index.3
 
 man3_glibc_scheddir = $(man3dir)
 man3_glibc_sched_DATA = \
