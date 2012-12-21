@@ -1256,6 +1256,11 @@ components when I/O discovery is enabled and supported.
  <ul>
  <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
  </ul>
+<li>GPUs (HWLOC_OBJ_OSDEV_GPU)
+ <ul>
+ <li><em>nvml0</em> (NVML component)</li>
+ </ul>
+</li>
 <li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
  <ul>
  <li><em>dma0chan0</em> (Linux component)</li>
@@ -2086,6 +2091,14 @@ environment variable (see \ref envvar).
  PCI object discovery uses the external pciutils library (aka libpci),
  see \ref iodevices.
  <b>It may be built as a plugin</b>.
+</dd>
+<dt>nvml</dt>
+<dd>
+ Probing the NVIDIA Management Library creates OS device objects
+ such as <em>nvml0</em> that are useful for batch schedulers.
+ It also detects the actual PCIe link bandwidth without depending
+ on power management state and without requiring administrator
+ privileges.
 </dd>
 <dt>synthetic</dt>
 <dd>
