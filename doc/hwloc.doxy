@@ -1239,6 +1239,7 @@ components when I/O discovery is enabled and supported.
  <ul>
  <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
  </ul>
+</li>
 <li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
  <ul>
  <li><em>dma0chan0</em> (Linux component)</li>
