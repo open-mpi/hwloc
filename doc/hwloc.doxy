@@ -1256,6 +1256,7 @@ components when I/O discovery is enabled and supported.
  <ul>
  <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
  </ul>
+</li>
 <li>GPUs (HWLOC_OBJ_OSDEV_GPU)
  <ul>
  <li><em>nvml0</em> (NVML component)</li>
