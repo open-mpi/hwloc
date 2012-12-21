@@ -71,6 +71,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(HWLOC_top_srcdir)/include/hwloc/linux-libnuma.h \
        $(HWLOC_top_srcdir)/include/hwloc/cuda.h \
        $(HWLOC_top_srcdir)/include/hwloc/cudart.h \
+       $(HWLOC_top_srcdir)/include/hwloc/nvml.h \
        $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h \
        $(HWLOC_top_srcdir)/include/hwloc/myriexpress.h
 
@@ -630,7 +631,11 @@ man3_cuda_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_cudart.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_pci_ids.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_pcidev.3
+        $(DOX_MAN_DIR)/man3/hwloc_cudart_get_device_pcidev.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_nvml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_cpuset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev_by_index.3
 
 man3_glibc_scheddir = $(man3dir)
 man3_glibc_sched_DATA = \

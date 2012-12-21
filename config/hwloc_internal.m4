@@ -65,6 +65,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--disable-pci],
                                  [Disable the PCI device discovery using libpci]))
 
+    # NVML?
+    AC_ARG_ENABLE([nvml],
+                  AS_HELP_STRING([--disable-nvml],
+                                 [Disable the NVML device discovery]))
+
     # Linux libnuma
     AC_ARG_ENABLE([libnuma],
                   AS_HELP_STRING([--disable-libnuma],

@@ -1171,18 +1171,35 @@ on the machine and on the topology flags.
 Although each PCI device is uniquely identified by its bus ID
 (e.g. 0000:01:02.3), the application can hardly find out which
 PCI device is actually used when manipulating software handle
-(such as the <em>eth0</em> network interface or the <em>mlx4_0</em>
-OpenFabrics HCA).
-Therefore hwloc tries to add software devices (<tt>::HWLOC_OBJ_OS_DEVICE</tt>)
-below their PCI objects.
-These objects can be identified by their usual operating system-wide
-names, e.g. <em>eth0</em> or <em>mlx4_0</em>.
+(such as the <em>eth0</em> network interface,
+ the <em>sda</em> hard drive,
+ or the <em>mlx4_0</em> OpenFabrics HCA).
+Therefore hwloc tries to add software devices
+(<tt>::HWLOC_OBJ_OS_DEVICE</tt>) below their PCI objects.
+
+hwloc first tries to discover the corresponding names,
+e.g. <em>eth0</em>, <em>sda</em> or <em>mlx4_0</em>,
+from the operating system.
 However, this ability is currently only available on Linux for some
 classes of devices.
-It should especially be noted that proprietary graphics driver
-currently do not create any interesting software device for GPUs,
-they should therefore be manipulated as PCI device objects.
-On the contrary some PCI devices may contain multiple software device
+
+hwloc then tries to discover software devices through additional
+I/O components using external libraries.
+For instance proprietary graphics drivers do not offer any OS name,
+but hwloc may still create one OS object per software handle when
+supported.
+Those include:
+<ul>
+<li>
+ <em>nvml0</em>, <em>nvml1</em>, ... OS device objects from
+ the <tt>nvml</tt> component using the NVIDIA Management Library.
+</li>
+</ul>
+
+When none of the above strategies is supported and enabled,
+hwloc cannot place any OS object inside PCI objects.
+
+Note that some PCI devices may contain multiple software devices
 (see the example below).
 
 See also \ref interoperability for managing these devices without
@@ -1238,6 +1255,11 @@ components when I/O discovery is enabled and supported.
 <li>OpenFabrics HCAs (HWLOC_OBJ_OSDEV_OPENFABRICS)
  <ul>
  <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
+ </ul>
+</li>
+<li>GPUs (HWLOC_OBJ_OSDEV_GPU)
+ <ul>
+ <li><em>nvml0</em> (NVML component)</li>
  </ul>
 </li>
 <li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
@@ -1796,6 +1818,15 @@ enabled for the current topology.
   appear as PCI objects in the topology.
  </dd>
 
+<dt>NVIDIA Management Library (NVML)</dt>
+ <dd>
+  hwloc/nvml.h enable interoperability with the NVIDIA NVML interface.
+  It may return the list of processors near a NVIDIA GPU given as
+  a nvmlDevice_t.
+  It may also return the corresponding OS device hwloc object for further
+  information.
+ </dd>
+
 <dt>Taskset command-line tool</dt>
  <dd>
   The taskset command-line tool is widely used for binding
@@ -2062,6 +2093,14 @@ environment variable (see \ref envvar).
  see \ref iodevices.
  <b>It may be built as a plugin</b>.
 </dd>
+<dt>nvml</dt>
+<dd>
+ Probing the NVIDIA Management Library creates OS device objects
+ such as <em>nvml0</em> that are useful for batch schedulers.
+ It also detects the actual PCIe link bandwidth without depending
+ on power management state and without requiring administrator
+ privileges.
+</dd>
 <dt>synthetic</dt>
 <dd>
  Synthetic topology support (see \ref synthetic) is always built statically.
@@ -2284,6 +2323,24 @@ It is also possible to manipulate such XML files with the C programming
 interface, and the import/export may also be directed to memory buffer
 (that may for instance be transmitted between applications through a socket).
 See also \ref xml.
+
+
+\section faq_slow_lstopo Why is lstopo slow?
+
+lstopo enables most hwloc discovery flags by default so that the output
+topology is as precise as possible (while hwloc disables many of them
+by default).
+This includes I/O device discovery through libpci as well as external
+libraries such as NVML.
+To speed up lstopo, you may disable such features with command-line
+options such as <tt>--no-io</tt>.
+
+When NVIDIA GPU probing is enabled with NVML, one should make sure that
+the <em>Persistent</em> mode is enabled (with <tt>nvidia-smi -pm 1</tt>)
+to avoid significant GPU initialization overhead.
+
+If loading topologies is slow because the machine contains tons of
+processors, one should also consider using XML (see \ref faq_xml).
 
 
 \section faq_privileged Does hwloc require privileged access?

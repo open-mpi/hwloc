@@ -17,6 +17,7 @@ include_hwloc_HEADERS = \
         hwloc/openfabrics-verbs.h \
         hwloc/cuda.h \
         hwloc/cudart.h \
+        hwloc/nvml.h \
         hwloc/plugins.h \
         hwloc/rename.h
 include_hwloc_autogendir = $(includedir)/hwloc/autogen
