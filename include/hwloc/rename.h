@@ -394,6 +394,11 @@ extern "C" {
 #define hwloc_cudart_get_device_cpuset HWLOC_NAME(cudart_get_device_cpuset)
 #define hwloc_cudart_get_device_pcidev HWLOC_NAME(cudart_get_device_pcidev)
 
+/* nvml.h */
+
+#define hwloc_nvml_get_device_cpuset HWLOC_NAME(nvml_get_device_cpuset)
+#define hwloc_nvml_get_device_osdev HWLOC_NAME(nvml_get_device_osdev)
+
 /* hwloc/plugins.h */
 
 #define hwloc_disc_component_type_e HWLOC_NAME(disc_component_type_e)
