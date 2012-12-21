@@ -18,6 +18,7 @@ INPUT          = \
 		@top_srcdir@/include/hwloc/opencl.h \
 		@top_srcdir@/include/hwloc/cuda.h \
 		@top_srcdir@/include/hwloc/cudart.h \
+		@top_srcdir@/include/hwloc/nvml.h \
 		@top_srcdir@/include/hwloc/openfabrics-verbs.h \
 		@top_srcdir@/include/hwloc/myriexpress.h
 

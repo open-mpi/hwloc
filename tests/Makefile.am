@@ -77,6 +77,10 @@ if HWLOC_HAVE_CUDART
 check_PROGRAMS += cudart
 endif HWLOC_HAVE_CUDART
 
+if HWLOC_HAVE_NVML
+check_PROGRAMS += nvml
+endif HWLOC_HAVE_NVML
+
 TESTS = $(check_PROGRAMS)
 
 # The library has a different name depending on whether we are
@@ -95,6 +99,7 @@ myriexpress_LDADD = $(LDADD) -lmyriexpress
 opencl_LDADD = $(LDADD) -lOpenCL
 cuda_LDADD = $(LDADD) -lcuda
 cudart_LDADD = $(LDADD) -lcuda -lcudart
+nvml_LDADD = $(LDADD) -lnvidia-ml
 xmlbuffer_LDADD = $(LDADD) $(HWLOC_LIBXML2_LIBS)
 hwloc_backends_LDADD = $(LDADD) $(HWLOC_LIBXML2_LIBS)
 hwloc_bind_LDADD = $(LDADD)

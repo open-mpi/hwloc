@@ -766,6 +766,39 @@ EOF])
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
+    # NVML support
+    hwloc_nvml_happy=no
+    if test "x$enable_nvml" != "xno"; then
+	hwloc_nvml_happy=yes
+	AC_CHECK_HEADERS([nvml.h], [
+	  AC_CHECK_LIB([nvidia-ml], [nvmlInit], [HWLOC_NVML_LIBS="-lnvidia-ml"], [hwloc_nvml_happy=no])
+        ], [hwloc_nvml_happy=no])
+    fi
+    if test "x$hwloc_nvml_happy" = "xyes"; then
+      tmp_save_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS $HWLOC_NVML_CFLAGS"
+      tmp_save_LIBS="$LIBS"
+      LIBS="$LIBS $HWLOC_NVML_LIBS"
+      AC_CHECK_DECLS([nvmlDeviceGetMaxPcieLinkGeneration],,[:],[[#include <nvml.h>]])
+      CFLAGS="$tmp_save_CFLAGS"
+      LIBS="$tmp_save_LIBS"
+    fi
+    AC_SUBST(HWLOC_NVML_LIBS)
+    # If we asked for nvml support but couldn't deliver, fail
+    AS_IF([test "$enable_nvml" = "yes" -a "$hwloc_nvml_happy" = "no"],
+	  [AC_MSG_WARN([Specified --enable-nvml switch, but could not])
+	   AC_MSG_WARN([find appropriate support])
+	   AC_MSG_ERROR([Cannot continue])])
+    if test "x$hwloc_nvml_happy" = "xyes"; then
+      AC_DEFINE([HWLOC_HAVE_NVML], [1], [Define to 1 if you have the `NVML' library.])
+      AC_SUBST([HWLOC_HAVE_NVML], [1])
+      hwloc_components="$hwloc_components nvml"
+      hwloc_nvml_component_maybeplugin=1
+    else
+      AC_SUBST([HWLOC_HAVE_NVML], [0])
+    fi
+    # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
+
     # libxml2 support
     hwloc_libxml2_happy=
     if test "x$enable_libxml2" != "xno"; then
@@ -889,6 +922,10 @@ EOF])
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_OPENCL_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_OPENCL_REQUIRES $HWLOC_REQUIRES"])
+    AS_IF([test "$hwloc_nvml_component" = "static"],
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_NVML_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_NVML_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_NVML_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_xml_libxml_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LIBXML2_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CFLAGS"
@@ -974,6 +1011,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "$hwloc_cairo_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBPCI], [test "$hwloc_pci_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_OPENCL], [test "$hwloc_opencl_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_SET_MEMPOLICY], [test "x$enable_set_mempolicy" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_MBIND], [test "x$enable_mbind" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
@@ -1004,6 +1042,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_PLUGINS], [test "x$hwloc_have_plugins" = "xyes"])
         AM_CONDITIONAL([HWLOC_LIBPCI_BUILD_STATIC], [test "x$hwloc_libpci_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_OPENCL_BUILD_STATIC], [test "x$hwloc_opencl_component" = "xstatic"])
+        AM_CONDITIONAL([HWLOC_NVML_BUILD_STATIC], [test "x$hwloc_nvml_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 
         AM_CONDITIONAL([HWLOC_HAVE_CXX], [test "x$hwloc_have_cxx" = "xyes"])

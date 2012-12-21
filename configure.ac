@@ -202,6 +202,7 @@ AS_IF([test "$hwloc_libxml2_happy" = "yes"], [hwloc_xml_status=full])
 hwloc_probeio_list=
 test "x$hwloc_pci_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list PCI"
 test "x$hwloc_opencl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list OpenCL"
+test "x$hwloc_nvml_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list NVML"
 test "x$hwloc_probeio_list" = "x" && hwloc_probeio_list=" no"
 
 # Beginning of generic support

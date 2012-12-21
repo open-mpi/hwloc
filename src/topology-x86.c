@@ -123,11 +123,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     infos->max_log_proc = 1;
   hwloc_debug("APIC ID 0x%02x max_log_proc %u\n", infos->apicid, infos->max_log_proc);
   infos->socketid = infos->apicid / infos->max_log_proc;
-  infos->nodeid = (unsigned) -1;
-  infos->unitid = (unsigned) -1;
   infos->logprocid = infos->apicid % infos->max_log_proc;
-  infos->coreid = (unsigned) -1;
-  infos->threadid = (unsigned) -1;
   hwloc_debug("phys %u thread %u\n", infos->socketid, infos->logprocid);
 
   if (highest_ext_cpuid >= 0x80000004) {
@@ -746,9 +742,16 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
   if (!hwloc_have_cpuid())
     goto out;
 
-  infos = malloc(sizeof(struct procinfo) * nbprocs);
+  infos = calloc(nbprocs, sizeof(struct procinfo));
   if (NULL == infos)
     goto out;
+  for (i = 0; i < nbprocs; i++) {
+    infos[i].nodeid = (unsigned) -1;
+    infos[i].socketid = (unsigned) -1;
+    infos[i].unitid = (unsigned) -1;
+    infos[i].coreid = (unsigned) -1;
+    infos[i].threadid = (unsigned) -1;
+  }
 
   eax = 0x00;
   hwloc_cpuid(&eax, &ebx, &ecx, &edx);
