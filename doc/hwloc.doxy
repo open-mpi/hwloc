@@ -1236,6 +1236,33 @@ is replaced by the set of CPUs that are close to this PCI device
 This enables easy binding of I/O-intensive applications near the
 device they use.
 
+\section iodevices_osdev Common OS devices
+
+Here is a list of OS device objects commonly created by hwloc
+components when I/O discovery is enabled and supported.
+
+<ul>
+<li>Hard disks (HWLOC_OBJ_OSDEV_BLOCK)
+ <ul>
+ <li><em>sda</em> (Linux component)</li>
+ </ul>
+</li>
+<li>Network interfaces (HWLOC_OBJ_OSDEV_NETWORK)
+ <ul>
+ <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
+ </ul>
+</li>
+<li>OpenFabrics HCAs (HWLOC_OBJ_OSDEV_OPENFABRICS)
+ <ul>
+ <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
+ </ul>
+<li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
+ <ul>
+ <li><em>dma0chan0</em> (Linux component)</li>
+ </ul>
+</li>
+</ul>
+
 \section iodevices_examples Examples
 
 The following picture shows a dual-socket dual-core host whose
@@ -1352,7 +1379,7 @@ To make sure binding on an object is possible, one should first check
 that its cpuset or nodeset pointer is not NULL.
 Then, one should check whether the object is indeed local.
 
-To find out which machine a given object correspond too, one may look
+To find out which machine a given object corresponds to, one may look
 at the info attributes of the parent Machine object. The <tt>HostName</tt>
 info is usually available in Machine objects, it may be retrieved with the
 following code:
@@ -2026,6 +2053,66 @@ The relevant types and functions are declared in the hwloc/plugins.h header.
 Components are supposed to only use hwloc public headers (hwloc.h and
 anything under the hwloc subdirectory) and nothing from the private
 subdirectory in the source tree.
+
+\section plugins_list Existing components and plugins
+
+All components distributed within hwloc are listed below.
+The list of actually available components may be listed
+at running with the <tt>HWLOC_COMPONENTS_VERBOSE</tt>
+environment variable (see \ref envvar).
+
+<dl>
+
+<dt>aix, darwin, freebsd, hpux, linux, netbsd, osf, solaris, windows</dt>
+<dd>
+ Each officially supported operating system has its own native component,
+ which is statically built when supported, and which is used by default.
+</dd>
+<dt>x86</dt>
+<dd>
+ The x86 architecture (either 32 or 64 bits) has its own component
+ that may complete or replace the previously-found CPU information.
+ It is statically built when supported.
+</dd>
+<dt>no_os</dt>
+<dd>
+ A basic component that just tries to detect the number of processing
+ units in the system. It mostly serves on operating systems that are
+ not natively supported.
+ It is always statically built.
+</dd>
+<dt>libpci</dt>
+<dd>
+ PCI object discovery uses the external pciutils library (aka libpci),
+ see \ref iodevices.
+ <b>It may be built as a plugin</b>.
+</dd>
+<dt>synthetic</dt>
+<dd>
+ Synthetic topology support (see \ref synthetic) is always built statically.
+</dd>
+<dt>custom</dt>
+<dd>
+ Custom topology support (see \ref multinode) is always built statically.
+</dd>
+<dt>xml</dt>
+<dd>
+ XML topology import (see \ref xml) is always built statically.
+ It internally uses one of the XML backends (see \ref xml_backends).
+ <ul>
+ <li><b>xml_nolibxml</b> is a basic and hwloc-specific XML import/export.
+  It is always statically built.
+ </li>
+ <li><b>xml_libxml</b> relies on the external libxml2 library for
+  provinding a feature-complete XML import/export.
+  <b>It may be built as a plugin</b>.
+ </li>
+</dd>
+<dt>fake</dt>
+<dd>
+ A dummy plugin that does nothing but is used for debugging plugin support.
+</dd>
+</dl>
 
 
 
