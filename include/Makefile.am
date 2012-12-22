@@ -15,6 +15,7 @@ include_hwloc_HEADERS = \
         hwloc/helper.h \
         hwloc/myriexpress.h \
         hwloc/openfabrics-verbs.h \
+        hwloc/opencl.h \
         hwloc/cuda.h \
         hwloc/cudart.h \
         hwloc/nvml.h \

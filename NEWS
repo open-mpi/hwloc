@@ -21,6 +21,9 @@ Version 1.7.0
 -------------
 * Backends
   + Add NetBSD support, thanks to Aleksej Saushev.
+  + Add a OpenCL component, buildable as a plugin. It adds OS devices
+    such as opencl0p0 for each OpenCL device on the AMD OpenCL
+    implementation.
   + Add a NVML component, buildable as a plugin. It adds OS devices
     such as nvml0 for each NVIDIA GPU, and improves the discovery of
     their PCIe link speed.
@@ -28,6 +31,8 @@ Version 1.7.0
   + Add hwloc_topology_get_flags().
   + Add hwloc/plugins.h for building external plugins.
     See the Adding new discovery components and plugins section.
+  + Add hwloc/opencl.h to retrieve the locality or OS device for
+    AMD GPU devices or indexes.
   + Add hwloc/nvml.h to retrieve the locality or OS device for NVML
     devices or indexes.
 * Interoperability

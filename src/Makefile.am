@@ -66,6 +66,17 @@ hwloc_libpci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCI_LIBS)
 endif
 endif HWLOC_HAVE_LIBPCI
 
+if HWLOC_HAVE_OPENCL
+if HWLOC_OPENCL_BUILD_STATIC
+sources += topology-opencl.c
+else
+plugins_LTLIBRARIES += hwloc_opencl.la
+hwloc_opencl_la_SOURCES = topology-opencl.c
+hwloc_opencl_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_OPENCL_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_opencl_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_OPENCL_LIBS)
+endif
+endif HWLOC_HAVE_OPENCL
+
 if HWLOC_HAVE_NVML
 if HWLOC_NVML_BUILD_STATIC
 sources += topology-nvml.c

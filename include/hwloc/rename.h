@@ -382,6 +382,12 @@ extern "C" {
 #define hwloc_mx_board_get_device_cpuset HWLOC_NAME(mx_board_get_device_cpuset)
 #define hwloc_mx_endpoint_get_device_cpuset HWLOC_NAME(mx_endpoint_get_device_cpuset)
 
+/* opencl.h */
+
+#define hwloc_opencl_get_device_cpuset HWLOC_NAME(opencl_get_device_cpuset)
+#define hwloc_opencl_get_device_osdev HWLOC_NAME(opencl_get_device_osdev)
+#define hwloc_opencl_get_device_osdev_by_index HWLOC_NAME(opencl_get_device_osdev_by_index)
+
 /* cuda.h */
 
 #define hwloc_cuda_get_device_pci_ids HWLOC_NAME(cuda_get_device_pci_ids)
