@@ -1838,7 +1838,7 @@ enabled for the current topology.
  <dd>
   hwloc/nvml.h enable interoperability with the NVIDIA NVML interface.
   It may return the list of processors near a NVIDIA GPU given as
-  a nvmlDevice_t.
+  a <tt>nvmlDevice_t</tt>.
   It may also return the corresponding OS device hwloc object for further
   information.
  </dd>
@@ -2116,6 +2116,7 @@ environment variable (see \ref envvar).
  or <em>opencl3p1</em> (fourth device of the second platform).
  Only the AMD OpenCL implementation currently offers locality
  information.
+ <b>It may be built as a plugin</b>.
 </dd>
 <dt>nvml</dt>
 <dd>
@@ -2124,6 +2125,7 @@ environment variable (see \ref envvar).
  It also detects the actual PCIe link bandwidth without depending
  on power management state and without requiring administrator
  privileges.
+ <b>It may be built as a plugin</b>.
 </dd>
 <dt>synthetic</dt>
 <dd>
@@ -2369,6 +2371,11 @@ increase the discovery time.
 Forcing the <tt>DISPLAY</tt> environment variable to the remote X server
 display (usually <tt>:0</tt>) instead of only setting the <tt>COMPUTE</tt>
 variable may avoid this.
+
+Also remember that these components may be disabled at build-time with
+configure flags such as <tt>--disable-opencl</tt> or <tt>--disable-nvml</tt>,
+and at runtime with the environment variable
+<tt>HWLOC_COMPONENTS=^opencl,nvml</tt>.
 
 If loading topologies is slow because the machine contains tons of
 processors, one should also consider using XML (see \ref faq_xml).
