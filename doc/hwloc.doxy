@@ -145,12 +145,16 @@ is configured and build.
 
 The hwloc core may also benefit from the following development packages:
 <ul>
+<li>libnuma for memory binding and migration support on Linux
+    (<tt>numactl-devel</tt> or <tt>libnuma-dev</tt> package).
+</li>
 <li>pciutils (libpci) for I/O discovery.
     The relevant development package is usually <tt>pciutils-devel</tt>
     or <tt>libpci-dev</tt>.
 </li>
-<li>libnuma for memory binding and migration support on Linux
-    (<tt>numactl-devel</tt> or <tt>libnuma-dev</tt> package).
+<li>the AMD OpenCL implementation for OpenCL device discovery.
+</li>
+<li>the NVIDIA Tesla Development Kit for NVML device discovery.
 </li>
 <li>libxml2 for full XML import/export support (otherwise, the
     internal minimalistic parser will only be able to import
@@ -1193,6 +1197,7 @@ Those include:
 <li>
  <em>opencl0p0</em>, <em>opencl1p0</em>, ... os device objects from
  the <tt>opencl</tt> component using an OpenCL implementation.
+</li>
 <li>
  <em>nvml0</em>, <em>nvml1</em>, ... OS device objects from
  the <tt>nvml</tt> component using the NVIDIA Management Library.
@@ -1802,8 +1807,8 @@ enabled for the current topology.
   hwloc/openfabrics-verbs.h helps interoperability with the
   OpenFabrics Verbs interface.  For example, it can return a list of
   processors near an OpenFabrics device.
-  Note that if I/O device discovery is enabled, such devices may also
-  appear as PCI objects and as OS objects in the topology.
+  It may also return the corresponding OS device hwloc object for further
+  information (if I/O device discovery is enabled).
  </dd>
 
 <dt>Myrinet Express</dt>
@@ -1822,7 +1827,7 @@ enabled for the current topology.
   It may return the list of processors near an AMD/ATI GPU given as
   a <tt>cl_device_id</tt>.
   It may also return the corresponding OS device hwloc object for further
-  information.
+  information (if I/O device discovery is enabled).
  </dd>
 
 <dt>NVIDIA CUDA</dt>
@@ -1840,7 +1845,7 @@ enabled for the current topology.
   It may return the list of processors near a NVIDIA GPU given as
   a <tt>nvmlDevice_t</tt>.
   It may also return the corresponding OS device hwloc object for further
-  information.
+  information (if I/O device discovery is enabled).
  </dd>
 
 <dt>Taskset command-line tool</dt>
