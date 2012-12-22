@@ -1191,6 +1191,9 @@ supported.
 Those include:
 <ul>
 <li>
+ <em>opencl0p0</em>, <em>opencl1p0</em>, ... os device objects from
+ the <tt>opencl</tt> component using an OpenCL implementation.
+<li>
  <em>nvml0</em>, <em>nvml1</em>, ... OS device objects from
  the <tt>nvml</tt> component using the NVIDIA Management Library.
 </li>
@@ -1259,6 +1262,9 @@ components when I/O discovery is enabled and supported.
 </li>
 <li>GPUs (HWLOC_OBJ_OSDEV_GPU)
  <ul>
+ <li><em>opencl0p0</em> for the first device of the first OpenCL platform,
+  <em>opencl3p1</em> for the fourth device of the second OpenCL platform
+  (OpenCL component)</li>
  <li><em>nvml0</em> (NVML component)</li>
  </ul>
 </li>
@@ -1809,6 +1815,16 @@ enabled for the current topology.
   appear as PCI objects in the topology.
  </dd>
 
+<dt>AMD OpenCL</dt>
+ <dd>
+  hwloc/opencl.h enable interoperability with the OpenCL interface.
+  Only the AMD implementation currently offers locality information.
+  It may return the list of processors near an AMD/ATI GPU given as
+  a <tt>cl_device_id</tt>.
+  It may also return the corresponding OS device hwloc object for further
+  information.
+ </dd>
+
 <dt>NVIDIA CUDA</dt>
  <dd>
   hwloc/cuda.h and hwloc/cudart.h enable interoperability with
@@ -2093,6 +2109,14 @@ environment variable (see \ref envvar).
  see \ref iodevices.
  <b>It may be built as a plugin</b>.
 </dd>
+<dt>opencl</dt>
+<dd>
+ The OpenCL component creates OS device objects such as
+ <em>opencl0p0</em> (first device of the first OpenCL platform)
+ or <em>opencl3p1</em> (fourth device of the second platform).
+ Only the AMD OpenCL implementation currently offers locality
+ information.
+</dd>
 <dt>nvml</dt>
 <dd>
  Probing the NVIDIA Management Library creates OS device objects
@@ -2338,6 +2362,13 @@ options such as <tt>--no-io</tt>.
 When NVIDIA GPU probing is enabled with NVML, one should make sure that
 the <em>Persistent</em> mode is enabled (with <tt>nvidia-smi -pm 1</tt>)
 to avoid significant GPU initialization overhead.
+
+When AMD GPU discovery is enabled with OpenCL and hwloc is used remotely
+over ssh, some spurious round-trips on the network may significantly
+increase the discovery time.
+Forcing the <tt>DISPLAY</tt> environment variable to the remote X server
+display (usually <tt>:0</tt>) instead of only setting the <tt>COMPUTE</tt>
+variable may avoid this.
 
 If loading topologies is slow because the machine contains tons of
 processors, one should also consider using XML (see \ref faq_xml).
