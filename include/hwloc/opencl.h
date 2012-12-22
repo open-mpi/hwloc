@@ -164,6 +164,8 @@ hwloc_opencl_get_device_osdev(hwloc_topology_t topology __hwloc_attribute_unused
 	osdev = NULL;
 	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
 		hwloc_obj_t pcidev = osdev->parent;
+		if (strncmp(osdev->name, "opencl", 6))
+			continue;
 		if (pcidev
 		    && pcidev->type == HWLOC_OBJ_PCI_DEVICE
 		    && pcidev->attr->pcidev.domain == 0
