@@ -38,6 +38,13 @@ Version 1.7.0
 * Interoperability
   + Add hwloc_ibv_get_device_osdev() and clarify the requirements
     of the OpenFabrics Verbs helpers in hwloc/openfabrics-verbs.h.
+* Documentation
+  + Add new document sections "Existing components and plugins"
+    and "Common OS devices".
+  + Add a new FAQ entry "Why is lstopo slow?" about lstopo slowness
+    issues because of GPUs.
+  + Clarify the documentation of inline helpers in hwloc/myriexpress.h
+    and hwloc/openfabrics-verbs.h.
 * Misc
   + The HWLOC_COMPONENTS may now start with '^' to only define a list of
     components to exclude.
