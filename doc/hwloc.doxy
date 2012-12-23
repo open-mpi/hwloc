@@ -1574,6 +1574,17 @@ object instead.
 <dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
 </dd>
+<dt>GPUVendor, GPUModel (GPU OS devices)</dt>
+<dd>The vendor and model names of the GPU device.
+</dd>
+<dt>OpenCLDeviceType, OpenCLPlatformIndex, OpenCLPlatformName, OpenCLPlatformDeviceIndex (OpenCL GPU OS devices)</dt>
+<dd>The type of OpenCL device,
+ the OpenCL platform index and name,
+ and the index of the device within the platform.
+</dd>
+<dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
+<dd>The UUID and Serial of NVIDIA GPUs.
+</dd>
 <dt>DMIBoardVendor, DMIBoardName, etc. (Machine object)</dt>
 <dd>DMI hardware information such as the motherboard and chassis
 models and vendors, the BIOS revision, etc.,

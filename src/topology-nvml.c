@@ -149,12 +149,12 @@ hwloc_nvml_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
 
     hwloc_obj_add_info(osdev, "Backend", "NVML");
-    hwloc_obj_add_info(osdev, "Vendor", "NVIDIA Corporation");
-    hwloc_obj_add_info(osdev, "Name", info->name);
+    hwloc_obj_add_info(osdev, "GPUVendor", "NVIDIA Corporation");
+    hwloc_obj_add_info(osdev, "GPUModel", info->name);
     if (info->serial[0] != '\0')
-      hwloc_obj_add_info(osdev, "Serial", info->serial);
+      hwloc_obj_add_info(osdev, "NVIDIASerial", info->serial);
     if (info->uuid[0] != '\0')
-      hwloc_obj_add_info(osdev, "UUID", info->uuid);
+      hwloc_obj_add_info(osdev, "NVIDIAUUID", info->uuid);
 
     hwloc_insert_object_by_parent(topology, pcidev, osdev);
 

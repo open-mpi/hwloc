@@ -117,11 +117,11 @@ hwloc_cuda_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc
     cuda_device->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
 
     hwloc_obj_add_info(cuda_device, "Backend", "CUDA");
-    hwloc_obj_add_info(cuda_device, "Vendor", "NVIDIA Corporation");
+    hwloc_obj_add_info(cuda_device, "GPUVendor", "NVIDIA Corporation");
 
     cures = cudaGetDeviceProperties(&prop, info->idx);
     if (!cures)
-      hwloc_obj_add_info(cuda_device, "Name", prop.name);
+      hwloc_obj_add_info(cuda_device, "GPUModel", prop.name);
 
     hwloc_insert_object_by_parent(topology, pcidev, cuda_device);
     return 1;

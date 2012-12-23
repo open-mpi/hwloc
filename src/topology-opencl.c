@@ -223,9 +223,9 @@ hwloc_opencl_backend_notify_new_object(struct hwloc_backend *backend, struct hwl
     hwloc_obj_add_info(osdev, "OpenCLDeviceType", info->devicetype);
 
     if (info->devicevendor[0] != '\0')
-      hwloc_obj_add_info(osdev, "Vendor", info->devicevendor);
+      hwloc_obj_add_info(osdev, "GPUVendor", info->devicevendor);
     if (info->devicename[0] != '\0')
-      hwloc_obj_add_info(osdev, "Name", info->devicename);
+      hwloc_obj_add_info(osdev, "GPUModel", info->devicename);
 
     snprintf(buffer, sizeof(buffer), "%u", info->platformidx);
     hwloc_obj_add_info(osdev, "OpenCLPlatformIndex", buffer);
