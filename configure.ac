@@ -86,7 +86,7 @@ AC_SUBST([libhwloc_so_version])
 # Setup the header file
 AH_TOP([/* -*- c -*-
  *
- * Copyright © 2009, 2012 CNRS, inria., Université Bordeaux 1  All rights reserved.
+ * Copyright © 2009, 2011, 2012 CNRS, inria., Université Bordeaux 1  All rights reserved.
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
  * 
@@ -202,6 +202,7 @@ AS_IF([test "$hwloc_libxml2_happy" = "yes"], [hwloc_xml_status=full])
 hwloc_probeio_list=
 test "x$hwloc_pci_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list PCI"
 test "x$hwloc_opencl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list OpenCL"
+test "x$hwloc_have_cudart" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list CUDA"
 test "x$hwloc_nvml_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list NVML"
 test "x$hwloc_probeio_list" = "x" && hwloc_probeio_list=" no"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2012 inria.  All rights reserved.
+ * Copyright © 2010-2012 Inria.  All rights reserved.
  * Copyright © 2010-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -33,15 +33,17 @@ extern "C" {
  * @{
  */
 
-/** \brief Return the domain, bus and device IDs of device \p cudevice.
+/** \brief Return the domain, bus and device IDs of the CUDA device \p cudevice.
+ *
+ * Device \p cudevice must match the local machine.
  */
 static __hwloc_inline int
 hwloc_cuda_get_device_pci_ids(hwloc_topology_t topology __hwloc_attribute_unused,
-			       CUdevice cudevice, int *domain, int *bus, int *dev)
+			      CUdevice cudevice, int *domain, int *bus, int *dev)
 {
   CUresult cres;
 
-#if CUDA_VERSION >= 4000
+#ifdef CU_DEVICE_ATTRIBUTE_PCI_DOMAIN_ID
   cres = cuDeviceGetAttribute(domain, CU_DEVICE_ATTRIBUTE_PCI_DOMAIN_ID, cudevice);
   if (cres != CUDA_SUCCESS) {
     errno = ENOSYS;
@@ -67,12 +69,18 @@ hwloc_cuda_get_device_pci_ids(hwloc_topology_t topology __hwloc_attribute_unused
 /** \brief Get the CPU set of logical processors that are physically
  * close to device \p cudevice.
  *
- * For the given CUDA Driver API device \p cudevice, read the corresponding
- * kernel-provided cpumap file and return the corresponding CPU set.
+ * Return the CPU set describing the locality of the CUDA device \p cudevice.
+ *
+ * Topology \p topology and device \p cudevice must match the local machine.
+ * I/O devices detection and the CUDA component are not needed in the topology.
+ *
+ * The function only returns the locality of the device.
+ * If more information about the device is needed, OS objects should
+ * be used instead, see hwloc_cuda_get_device_osdev()
+ * and hwloc_cuda_get_device_osdev_by_index().
+ *
  * This function is currently only implemented in a meaningful way for
  * Linux; other systems will simply get a full cpuset.
- *
- * Topology \p topology must match the current machine.
  */
 static __hwloc_inline int
 hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
@@ -110,13 +118,15 @@ hwloc_cuda_get_device_cpuset(hwloc_topology_t topology __hwloc_attribute_unused,
   return 0;
 }
 
-/** \brief Get the hwloc object for the PCI device corresponding
- * to device \p cudevice.
+/** \brief Get the hwloc PCI device object corresponding to the
+ * CUDA device \p cudevice.
  *
- * For the given CUDA Runtime API device \p cudevice, return the hwloc PCI
- * object containing the device. Returns NULL if there is none.
+ * Return the PCI device object describing the CUDA device \p cudevice.
+ * Return NULL if there is none.
  *
- * IO devices detection must be enabled in topology \p topology.
+ * Topology \p topology and device \p cudevice must match the local machine.
+ * I/O devices detection must be enabled in topology \p topology.
+ * The CUDA component is not needed in the topology.
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_cuda_get_device_pcidev(hwloc_topology_t topology, CUdevice cudevice)
@@ -127,6 +137,74 @@ hwloc_cuda_get_device_pcidev(hwloc_topology_t topology, CUdevice cudevice)
     return NULL;
 
   return hwloc_get_pcidev_by_busid(topology, domain, bus, dev, 0);
+}
+
+/** \brief Get the hwloc OS device object corresponding to CUDA device \p cudevice.
+ *
+ * Return the hwloc OS device object that describes the given
+ * CUDA device \p cudevice. Return NULL if there is none.
+ *
+ * Topology \p topology and device \p cudevice must match the local machine.
+ * I/O devices detection and the NVML component must be enabled in the topology.
+ * If not, the locality of the object may still be found using
+ * hwloc_cuda_get_device_cpuset().
+ *
+ * \note The corresponding hwloc PCI device may be found by looking
+ * at the result parent pointer.
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_cuda_get_device_osdev(hwloc_topology_t topology, CUdevice cudevice)
+{
+	hwloc_obj_t osdev = NULL;
+	int domain, bus, dev;
+
+	if (hwloc_cuda_get_device_pci_ids(topology, cudevice, &domain, &bus, &dev))
+		return NULL;
+
+	osdev = NULL;
+	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
+		hwloc_obj_t pcidev = osdev->parent;
+		if (strncmp(osdev->name, "cuda", 4))
+			continue;
+		if (pcidev
+		    && pcidev->type == HWLOC_OBJ_PCI_DEVICE
+		    && (int) pcidev->attr->pcidev.domain == domain
+		    && (int) pcidev->attr->pcidev.bus == bus
+		    && (int) pcidev->attr->pcidev.dev == dev
+		    && pcidev->attr->pcidev.func == 0)
+			return osdev;
+	}
+
+	return NULL;
+}
+
+/** \brief Get the hwloc OS device object corresponding to the
+ * CUDA device whose index is \p idx.
+ *
+ * Return the OS device object describing the CUDA device whose
+ * index is \p idx. Return NULL if there is none.
+ *
+ * The topology \p topology does not necessarily have to match the current
+ * machine. For instance the topology may be an XML import of a remote host.
+ * I/O devices detection and the CUDA component must be enabled in the topology.
+ *
+ * \note The corresponding PCI device object can be obtained by looking
+ * at the OS device parent object.
+ *
+ * \note This function is identical to hwloc_cudart_get_device_osdev_by_index().
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_cuda_get_device_osdev_by_index(hwloc_topology_t topology, unsigned idx)
+{
+	hwloc_obj_t osdev = NULL;
+	while ((osdev = hwloc_get_next_osdev(topology, osdev)) != NULL) {
+		if (HWLOC_OBJ_OSDEV_GPU == osdev->attr->osdev.type
+		    && osdev->name
+		    && !strncmp("cuda", osdev->name, 4)
+		    && atoi(osdev->name + 4) == (int) idx)
+			return osdev;
+	}
+	return NULL;
 }
 
 /** @} */

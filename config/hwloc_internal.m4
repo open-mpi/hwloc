@@ -9,7 +9,7 @@ dnl Copyright (c) 2004-2005 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
 dnl                         University of Stuttgart.  All rights reserved.
-dnl Copyright ©  2010 inria.  All rights reserved.
+dnl Copyright © 2010-2012 Inria.  All rights reserved.
 dnl Copyright © 2006-2011 Cisco Systems, Inc.  All rights reserved.
 dnl
 dnl See COPYING in top-level directory.
@@ -69,6 +69,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     AC_ARG_ENABLE([opencl],
                   AS_HELP_STRING([--disable-opencl],
                                  [Disable the OpenCL device discovery]))
+
+    # CUDA?
+    AC_ARG_ENABLE([cuda],
+                  AS_HELP_STRING([--disable-cuda],
+                                 [Disable the CUDA device discovery using libcudart]))
 
     # NVML?
     AC_ARG_ENABLE([nvml],
@@ -362,36 +367,6 @@ EOF
                                       [AC_DEFINE([HAVE_MYRIEXPRESS], 1, [Define to 1 if we have -lmyriexpress])
                                        hwloc_have_myriexpress=yes])],
                         [AC_MSG_RESULT(no)])])])
-
-    AC_CHECK_HEADERS([cuda.h], [
-      AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <cuda.h>
-#ifndef CUDA_VERSION
-#error CUDA_VERSION undefined
-#elif CUDA_VERSION < 3020
-#error CUDA_VERSION too old
-#endif]], [[int i = 3;]])],
-       [AC_MSG_RESULT(yes)
-        AC_CHECK_LIB([cuda], [cuInit],
-		     [AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
-		      hwloc_have_cuda=yes])],
-       [AC_MSG_RESULT(no)])])
-
-    AC_CHECK_HEADERS([cuda_runtime_api.h], [
-      AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <cuda_runtime_api.h>
-#ifndef CUDART_VERSION
-#error CUDART_VERSION undefined
-#elif CUDART_VERSION < 3020
-#error CUDART_VERSION too old
-#endif]], [[int i = 3;]])],
-       [AC_MSG_RESULT(yes)
-        AC_CHECK_LIB([cudart], [cudaGetDeviceCount],
-		     [AC_DEFINE([HAVE_CUDART], 1, [Define to 1 if we have -lcudart])
-		      hwloc_have_cudart=yes])],
-       [AC_MSG_RESULT(no)])])
 
     AC_CHECK_PROGS(XMLLINT, [xmllint])
 

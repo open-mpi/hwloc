@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010 inria.  All rights reserved.
+ * Copyright © 2010-2012 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -34,16 +34,38 @@ int main(void)
   printf("cuDeviceGetCount found %d devices\n", count);
 
   hwloc_topology_init(&topology);
+  hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_IO_DEVICES);
   hwloc_topology_load(topology);
 
   for(i=0; i<count; i++) {
     hwloc_bitmap_t set;
+    hwloc_obj_t osdev, osdev2, ancestor;
+    const char *value;
 
     cres = cuDeviceGet(&device, i);
     if (cres != CUDA_SUCCESS) {
       printf("failed to get device %d\n", i);
       continue;
     }
+
+    osdev = hwloc_cuda_get_device_osdev(topology, device);
+    assert(osdev);
+    osdev2 = hwloc_cuda_get_device_osdev_by_index(topology, i);
+    assert(osdev == osdev2);
+
+    ancestor = hwloc_get_non_io_ancestor_obj(topology, osdev);
+
+    printf("found OSDev %s\n", osdev->name);
+    err = strncmp(osdev->name, "cuda", 4);
+    assert(!err);
+    assert(atoi(osdev->name+4) == (int) i);
+
+    value = hwloc_obj_get_info_by_name(osdev, "Backend");
+    err = strcmp(value, "CUDA");
+    assert(!err);
+
+    value = hwloc_obj_get_info_by_name(osdev, "Name");
+    printf("found OSDev name %s\n", value);
 
     set = hwloc_bitmap_alloc();
     err = hwloc_cuda_get_device_cpuset(topology, device, set);
@@ -53,6 +75,7 @@ int main(void)
       char *cpuset_string = NULL;
       hwloc_bitmap_asprintf(&cpuset_string, set);
       printf("got cpuset %s for device %d\n", cpuset_string, i);
+      assert(hwloc_bitmap_isequal(set, ancestor->cpuset));
       free(cpuset_string);
     }
     hwloc_bitmap_free(set);

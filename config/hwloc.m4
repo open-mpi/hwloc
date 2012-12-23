@@ -766,6 +766,56 @@ EOF])
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
+    # CUDA support
+    hwloc_have_cuda=no
+    hwloc_have_cudart=no
+    if test "x$enable_cuda" != "xno"; then
+      AC_CHECK_HEADERS([cuda.h], [
+        AC_MSG_CHECKING(if CUDA_VERSION >= 3020)
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <cuda.h>
+#ifndef CUDA_VERSION
+#error CUDA_VERSION undefined
+#elif CUDA_VERSION < 3020
+#error CUDA_VERSION too old
+#endif]], [[int i = 3;]])],
+         [AC_MSG_RESULT(yes)
+          AC_CHECK_LIB([cuda], [cuInit],
+                       [AC_DEFINE([HAVE_CUDA], 1, [Define to 1 if we have -lcuda])
+                        hwloc_have_cuda=yes])],
+         [AC_MSG_RESULT(no)])])
+
+      AC_CHECK_HEADERS([cuda_runtime_api.h], [
+        AC_MSG_CHECKING(if CUDART_VERSION >= 3020)
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <cuda_runtime_api.h>
+#ifndef CUDART_VERSION
+#error CUDART_VERSION undefined
+#elif CUDART_VERSION < 3020
+#error CUDART_VERSION too old
+#endif]], [[int i = 3;]])],
+         [AC_MSG_RESULT(yes)
+          AC_CHECK_LIB([cudart], [cudaGetDeviceProperties], [
+            HWLOC_CUDA_LIBS="-lcudart"
+            AC_SUBST(HWLOC_CUDA_LIBS)
+            hwloc_have_cudart=yes
+            AC_DEFINE([HWLOC_HAVE_CUDART], [1], [Define to 1 if you have the `cudart' SDK.])
+          ])
+        ])
+      ])
+
+      AS_IF([test "$enable_cuda" = "yes" -a "$hwloc_have_cudart" = "no"],
+            [AC_MSG_WARN([Specified --enable-cuda switch, but could not])
+             AC_MSG_WARN([find appropriate support])
+             AC_MSG_ERROR([Cannote continue])])
+
+      if test "x$hwloc_have_cudart" = "xyes"; then
+	hwloc_components="$hwloc_components cuda"
+        hwloc_cuda_component_maybeplugin=1
+      fi
+    fi
+    # don't add LIBS/CFLAGS yet, depends on plugins
+
     # NVML support
     hwloc_nvml_happy=no
     if test "x$enable_nvml" != "xno"; then
@@ -922,6 +972,10 @@ EOF])
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_OPENCL_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_OPENCL_REQUIRES $HWLOC_REQUIRES"])
+    AS_IF([test "$hwloc_cuda_component" = "static"],
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_CUDA_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_CUDA_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_CUDA_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_nvml_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_NVML_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_NVML_CFLAGS"
@@ -1042,6 +1096,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_PLUGINS], [test "x$hwloc_have_plugins" = "xyes"])
         AM_CONDITIONAL([HWLOC_LIBPCI_BUILD_STATIC], [test "x$hwloc_libpci_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_OPENCL_BUILD_STATIC], [test "x$hwloc_opencl_component" = "xstatic"])
+        AM_CONDITIONAL([HWLOC_CUDA_BUILD_STATIC], [test "x$hwloc_cuda_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_NVML_BUILD_STATIC], [test "x$hwloc_nvml_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_XML_LIBXML_BUILD_STATIC], [test "x$hwloc_xml_libxml_component" = "xstatic"])
 

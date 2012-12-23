@@ -24,6 +24,8 @@ Version 1.7.0
   + Add a OpenCL component, buildable as a plugin. It adds OS devices
     such as opencl0p0 for each OpenCL device on the AMD OpenCL
     implementation.
+  + Add a CUDA component, buildable as a plugin. It adds OS devices
+    such as cuda0 for each NVIDIA GPU.
   + Add a NVML component, buildable as a plugin. It adds OS devices
     such as nvml0 for each NVIDIA GPU, and improves the discovery of
     their PCIe link speed.
@@ -35,6 +37,8 @@ Version 1.7.0
     AMD GPU devices or indexes.
   + Add hwloc/nvml.h to retrieve the locality or OS device for NVML
     devices or indexes.
+  + Add new helpers in hwloc/cuda.h and hwloc/cudart.h to convert
+    between CUDA devices or indexes and hwloc OS devices.
 * Interoperability
   + Add hwloc_ibv_get_device_osdev() and clarify the requirements
     of the OpenFabrics Verbs helpers in hwloc/openfabrics-verbs.h.

@@ -1199,6 +1199,10 @@ Those include:
  the <tt>opencl</tt> component using an OpenCL implementation.
 </li>
 <li>
+ <em>cuda0</em>, <em>cuda1</em>, ... OS device objects from
+ the <tt>cuda</tt> component using the NVIDIA CUDA Library.
+</li>
+<li>
  <em>nvml0</em>, <em>nvml1</em>, ... OS device objects from
  the <tt>nvml</tt> component using the NVIDIA Management Library.
 </li>
@@ -1270,6 +1274,7 @@ components when I/O discovery is enabled and supported.
  <li><em>opencl0p0</em> for the first device of the first OpenCL platform,
   <em>opencl3p1</em> for the fourth device of the second OpenCL platform
   (OpenCL component)</li>
+ <li><em>cuda0</em> (CUDA component)</li>
  <li><em>nvml0</em> (NVML component)</li>
  </ul>
 </li>
@@ -1835,8 +1840,8 @@ enabled for the current topology.
   hwloc/cuda.h and hwloc/cudart.h enable interoperability with
   NVIDIA CUDA Driver and Runtime interfaces. For instance, it may
   return the list of processors near NVIDIA GPUs.
-  Note that if I/O device discovery is enabled, GPUs may also
-  appear as PCI objects in the topology.
+  It may also return the corresponding OS device hwloc object for further
+  information (if I/O device discovery is enabled).
  </dd>
 
 <dt>NVIDIA Management Library (NVML)</dt>
@@ -2123,6 +2128,12 @@ environment variable (see \ref envvar).
  information.
  <b>It may be built as a plugin</b>.
 </dd>
+<dt>cuda</dt>
+<dd>
+ This component creates OS device objects such as <em>cuda0</em>
+ that correspond to NVIDIA GPUs used with CUDA library.
+ <b>It may be built as a plugin</b>.
+</dd>
 <dt>nvml</dt>
 <dd>
  Probing the NVIDIA Management Library creates OS device objects
@@ -2366,7 +2377,7 @@ libraries such as NVML.
 To speed up lstopo, you may disable such features with command-line
 options such as <tt>--no-io</tt>.
 
-When NVIDIA GPU probing is enabled with NVML, one should make sure that
+When NVIDIA GPU probing is enabled with CUDA or NVML, one should make sure that
 the <em>Persistent</em> mode is enabled (with <tt>nvidia-smi -pm 1</tt>)
 to avoid significant GPU initialization overhead.
 
@@ -2378,9 +2389,9 @@ display (usually <tt>:0</tt>) instead of only setting the <tt>COMPUTE</tt>
 variable may avoid this.
 
 Also remember that these components may be disabled at build-time with
-configure flags such as <tt>--disable-opencl</tt> or <tt>--disable-nvml</tt>,
+configure flags such as <tt>--disable-opencl</tt>, <tt>--disable-cuda</tt> or <tt>--disable-nvml</tt>,
 and at runtime with the environment variable
-<tt>HWLOC_COMPONENTS=^opencl,nvml</tt>.
+<tt>HWLOC_COMPONENTS=^opencl,cuda,nvml</tt>.
 
 If loading topologies is slow because the machine contains tons of
 processors, one should also consider using XML (see \ref faq_xml).

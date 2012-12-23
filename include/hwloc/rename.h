@@ -393,12 +393,15 @@ extern "C" {
 #define hwloc_cuda_get_device_pci_ids HWLOC_NAME(cuda_get_device_pci_ids)
 #define hwloc_cuda_get_device_cpuset HWLOC_NAME(cuda_get_device_cpuset)
 #define hwloc_cuda_get_device_pcidev HWLOC_NAME(cuda_get_device_pcidev)
+#define hwloc_cuda_get_device_osdev HWLOC_NAME(cuda_get_device_osdev)
+#define hwloc_cuda_get_device_osdev_by_index HWLOC_NAME(cuda_get_device_osdev_by_index)
 
 /* cudart.h */
 
 #define hwloc_cudart_get_device_pci_ids HWLOC_NAME(cudart_get_device_pci_ids)
 #define hwloc_cudart_get_device_cpuset HWLOC_NAME(cudart_get_device_cpuset)
 #define hwloc_cudart_get_device_pcidev HWLOC_NAME(cudart_get_device_pcidev)
+#define hwloc_cudart_get_device_osdev_by_index HWLOC_NAME(cudart_get_device_osdev_by_index)
 
 /* nvml.h */
 

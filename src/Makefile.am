@@ -1,5 +1,5 @@
 # Copyright © 2009-2012 Inria.  All rights reserved.
-# Copyright © 2009-2010, 2012 Université Bordeaux 1
+# Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2012 Oracle and/or its affiliates.  All rights reserved.
 # See COPYING in top-level directory.
@@ -76,6 +76,17 @@ hwloc_opencl_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_OPENCL_CFLAGS) -DHWLOC_INSIDE_PLUG
 hwloc_opencl_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_OPENCL_LIBS)
 endif
 endif HWLOC_HAVE_OPENCL
+
+if HWLOC_HAVE_CUDART
+if HWLOC_CUDA_BUILD_STATIC
+sources += topology-cuda.c
+else
+plugins_LTLIBRARIES += hwloc_cuda.la
+hwloc_cuda_la_SOURCES = topology-cuda.c
+hwloc_cuda_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_CUDA_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_cuda_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_CUDA_LIBS)
+endif
+endif HWLOC_HAVE_CUDART
 
 if HWLOC_HAVE_NVML
 if HWLOC_NVML_BUILD_STATIC
