@@ -443,7 +443,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	  size_t s = strcspn(curenv, ",");
 	  if (s && !strncmp(curenv, comp->name, s)) {
 	    if (hwloc_components_verbose)
-	      fprintf(stderr, "Excluding %s component `%s' because of HWLOC_COMPONENT environment variable\n",
+	      fprintf(stderr, "Excluding %s component `%s' because of HWLOC_COMPONENTS environment variable\n",
 	    hwloc_disc_component_type_string(comp->type), comp->name);
 	    goto next;
 	  }
