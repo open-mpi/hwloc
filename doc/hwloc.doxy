@@ -154,6 +154,8 @@ The hwloc core may also benefit from the following development packages:
 </li>
 <li>the AMD OpenCL implementation for OpenCL device discovery.
 </li>
+<li>the NVIDIA CUDA Toolkit for CUDA device discovery.
+</li>
 <li>the NVIDIA Tesla Development Kit for NVML device discovery.
 </li>
 <li>libxml2 for full XML import/export support (otherwise, the
