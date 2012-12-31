@@ -21,25 +21,27 @@ Version 1.7.0
 -------------
 * Backends
   + Add NetBSD support, thanks to Aleksej Saushev.
-  + Add a OpenCL component, buildable as a plugin. It adds OS devices
-    such as opencl0p0 for each OpenCL device on the AMD OpenCL
-    implementation.
-  + Add a CUDA component, buildable as a plugin. It adds OS devices
-    such as cuda0 for each NVIDIA GPU.
-  + Add a NVML component, buildable as a plugin. It adds OS devices
-    such as nvml0 for each NVIDIA GPU, and improves the discovery of
-    their PCIe link speed.
+  + Add three GPU detection components: opencl (for the AMD OpenCL
+    implemenation), cuda and nvml (for NVIDIA GPUs).
+    - They add OS devices such as opencl0p0, cuda0 and nvml0 inside the
+      corresponding PCI devices with some string info attributes.
+    - The nvml component also improves the discovery of NVIDIA GPU
+      PCIe link speed.
+    - They may be built as plugins.
+    - They may be disabled with --disable-opencl/cuda/nvml.
+    See the I/O Devices, Components and Plugins, and FAQ documentation
+    sections for details.
 * API
   + Add hwloc_topology_get_flags().
   + Add hwloc/plugins.h for building external plugins.
     See the Adding new discovery components and plugins section.
+* Interoperability
   + Add hwloc/opencl.h to retrieve the locality or OS device for
     AMD GPU devices or indexes.
   + Add hwloc/nvml.h to retrieve the locality or OS device for NVML
     devices or indexes.
   + Add new helpers in hwloc/cuda.h and hwloc/cudart.h to convert
     between CUDA devices or indexes and hwloc OS devices.
-* Interoperability
   + Add hwloc_ibv_get_device_osdev() and clarify the requirements
     of the OpenFabrics Verbs helpers in hwloc/openfabrics-verbs.h.
 * Documentation
