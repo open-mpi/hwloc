@@ -16,10 +16,12 @@ bug fixes (and other actions) for each version of hwloc since version
 0.9 (as initially released as "libtopology", then re-branded to "hwloc"
 in v0.9.1).
 
+
 Version 1.6.1
 -------------
 * Fix some crash or buggy detection in the x86 backend when Linux
   cgroups/cpusets restrict the available CPUs.
+* Some documentation improvements.
 
 
 Version 1.6.0
