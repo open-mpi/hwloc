@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1181,7 +1181,8 @@ PCI device is actually used when manipulating software handle
  the <em>sda</em> hard drive,
  or the <em>mlx4_0</em> OpenFabrics HCA).
 Therefore hwloc tries to add software devices
-(<tt>::HWLOC_OBJ_OS_DEVICE</tt>) below their PCI objects.
+(<tt>::HWLOC_OBJ_OS_DEVICE</tt>, also known as OS devices)
+below their PCI objects.
 
 hwloc first tries to discover the corresponding names,
 e.g. <em>eth0</em>, <em>sda</em> or <em>mlx4_0</em>,
@@ -1194,25 +1195,48 @@ I/O components using external libraries.
 For instance proprietary graphics drivers do not offer any OS name,
 but hwloc may still create one OS object per software handle when
 supported.
-Those include:
+For instance the <tt>opencl</tt> and <tt>cuda</tt> components may
+add some <em>opencl0p0</em> and <em>cuda0</em> OS device objects.
+
+Here is a list of OS device objects commonly created by hwloc
+components when I/O discovery is enabled and supported.
+
 <ul>
-<li>
- <em>opencl0p0</em>, <em>opencl1p0</em>, ... os device objects from
- the <tt>opencl</tt> component using an OpenCL implementation.
+<li>Hard disks (HWLOC_OBJ_OSDEV_BLOCK)
+ <ul>
+ <li><em>sda</em> (Linux component)</li>
+ </ul>
 </li>
-<li>
- <em>cuda0</em>, <em>cuda1</em>, ... OS device objects from
- the <tt>cuda</tt> component using the NVIDIA CUDA Library.
+<li>Network interfaces (HWLOC_OBJ_OSDEV_NETWORK)
+ <ul>
+ <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
+ </ul>
 </li>
-<li>
- <em>nvml0</em>, <em>nvml1</em>, ... OS device objects from
- the <tt>nvml</tt> component using the NVIDIA Management Library.
+<li>OpenFabrics HCAs (HWLOC_OBJ_OSDEV_OPENFABRICS)
+ <ul>
+ <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
+ </ul>
+</li>
+<li>GPUs (HWLOC_OBJ_OSDEV_GPU)
+ <ul>
+ <li><em>opencl0p0</em> for the first device of the first OpenCL platform,
+  <em>opencl3p1</em> for the fourth device of the second OpenCL platform
+  (OpenCL component)</li>
+ <li><em>cuda0</em> for the first NVIDIA CUDA device
+  (CUDA component, using the NVIDIA CUDA Library)</li>
+ <li><em>nvml0</em> for the first NVML device
+  (NVML component, using the NVIDIA Management Library)</li>
+ </ul>
+</li>
+<li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
+ <ul>
+ <li><em>dma0chan0</em> (Linux component)</li>
+ </ul>
 </li>
 </ul>
 
 When none of the above strategies is supported and enabled,
 hwloc cannot place any OS object inside PCI objects.
-
 Note that some PCI devices may contain multiple software devices
 (see the example below).
 
@@ -1249,43 +1273,6 @@ is replaced by the set of CPUs that are close to this PCI device
 (respectively software device).
 This enables easy binding of I/O-intensive applications near the
 device they use.
-
-\section iodevices_osdev_list Common OS devices
-
-Here is a list of OS device objects commonly created by hwloc
-components when I/O discovery is enabled and supported.
-
-<ul>
-<li>Hard disks (HWLOC_OBJ_OSDEV_BLOCK)
- <ul>
- <li><em>sda</em> (Linux component)</li>
- </ul>
-</li>
-<li>Network interfaces (HWLOC_OBJ_OSDEV_NETWORK)
- <ul>
- <li><em>eth0</em>, <em>wlan0</em>, <em>ib0</em> (Linux component)</li>
- </ul>
-</li>
-<li>OpenFabrics HCAs (HWLOC_OBJ_OSDEV_OPENFABRICS)
- <ul>
- <li><em>mlx4_0</em>, <em>qib0</em> (Linux component)</li>
- </ul>
-</li>
-<li>GPUs (HWLOC_OBJ_OSDEV_GPU)
- <ul>
- <li><em>opencl0p0</em> for the first device of the first OpenCL platform,
-  <em>opencl3p1</em> for the fourth device of the second OpenCL platform
-  (OpenCL component)</li>
- <li><em>cuda0</em> (CUDA component)</li>
- <li><em>nvml0</em> (NVML component)</li>
- </ul>
-</li>
-<li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
- <ul>
- <li><em>dma0chan0</em> (Linux component)</li>
- </ul>
-</li>
-</ul>
 
 \section iodevices_examples Examples
 
