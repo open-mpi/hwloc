@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
@@ -69,6 +69,15 @@ set -e
   $calc --if synthetic --input "group:2 cache:2 pu:1" group:0 cache:3
   $calc --if synthetic --input "group:2 group:2 cache:2 cache:2 pu:1" Group2:1 Group1:0
   $calc --if synthetic --input "group:2 group:2 cache:2 cache:2 pu:1" l2:0-2 L1cache:13:3
+  echo
+  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os=eth6 os=eth4
+  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os=sdc os=sr0 ~os=sda
+  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:1000:0062:3:2
+  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:14e4:1639:1
+  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:14e4:1639:2-5
+  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:62:00.1 pci=0000:02:00.1
+  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:62:00.1 xpci=0000:02:00.0
+  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:02:00.0 xpci=0000:02:00.1
   echo
   cat << EOF | $calc --if synthetic --input "node:4 core:4 pu:4"
 pu:0
