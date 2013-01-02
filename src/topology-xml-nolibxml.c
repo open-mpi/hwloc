@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -296,7 +296,7 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
   } else {
     FILE * file;
     size_t buflen = 4096, offset, readlen;
-    char *buffer = malloc(buflen+1);
+    char *buffer;
     size_t ret;
 
     if (!strcmp(xmlpath, "-"))
@@ -305,6 +305,12 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
     file = fopen(xmlpath, "r");
     if (!file)
       return -1;
+
+    buffer = malloc(buflen+1);
+    if (!buffer) {
+      fclose(file);
+      return -1;
+    }
 
     offset = 0; readlen = buflen;
     while (1) {
