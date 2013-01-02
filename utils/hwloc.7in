@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2012 Inria.  All rights reserved.
+.\" Copyright © 2010-2013 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -125,13 +125,15 @@ with the 33rd.  The string "0xf...f" -- with no other specified values
 Locations may also be a PCI or OS object.
 The corresponding value is the set of CPUs that are close to the
 physical device.
-For example, "pci=02:03.1" is equivalent to the set of processors
+.
+For example, "\fBpci=02:03.1\fR" is equivalent to the set of processors
 that are close to the hostbridge above PCI device with bus ID "02:03.1".
-"os=eth0" is equivalent to all processors close to the network
+.
+"\fBos=eth0\fR" is equivalent to all processors close to the network
 interface whose software name is "eth0".
 .
 .PP
-Multiple locations can be specified on the hwloc-bind command line
+Multiple locations can be specified on the command lines
 (delimited by whitespace); the first token of the execution command is
 assumed to either follow "--" (if specified) or the first token that
 is unrecognized as a location.

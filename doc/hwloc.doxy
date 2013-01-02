@@ -1268,9 +1268,16 @@ lstopo displays the interesting ones by default
 
 hwloc-calc and hwloc-bind may manipulate I/O devices specified
 by PCI bus ID or by OS device name.
-For instance, <tt>pci=0000:02:03.0</tt> (respectively <tt>os=eth0</tt>)
-is replaced by the set of CPUs that are close to this PCI device
-(respectively software device).
+<ul>
+<li>
+ <tt>pci=0000:02:03.0</tt> is replaced by the set
+ of CPUs that are close to the PCI device whose bus ID is given.
+</li>
+<li>
+ <tt>os=eth0</tt> is replaced by CPUs that are close to the I/O
+ device whose software handle is called <tt>eth0</tt>.
+</li>
+</ul>
 This enables easy binding of I/O-intensive applications near the
 device they use.
 
