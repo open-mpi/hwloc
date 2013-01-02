@@ -58,4 +58,4 @@ date="Unreleased developer copy"
 # 2. Version numbers are described in the Libtool current:revision:age
 # format.
 
-libhwloc_so_version=7:0:2
+libhwloc_so_version=7:1:2
