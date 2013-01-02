@@ -15,6 +15,9 @@
 
 #include <string.h>
 #include <assert.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 /*******************
  * Import routines *
@@ -295,7 +298,8 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
     memcpy(bdata->data, xmlbuffer, xmlbuflen);
   } else {
     FILE * file;
-    size_t buflen = 4096, offset, readlen;
+    size_t buflen, offset, readlen;
+    struct stat statbuf;
     char *buffer;
     size_t ret;
 
@@ -306,7 +310,13 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
     if (!file)
       return -1;
 
-    buffer = malloc(buflen+1);
+    /* find the required buffer size for regular files, or use 4k when unknown, we'll realloc later if needed */
+    buflen = 4096;
+    if (!stat(xmlpath, &statbuf))
+      if (S_ISREG(statbuf.st_mode))
+	buflen = statbuf.st_size+1; /* one additional byte so that the first fread() gets EOF too */
+
+    buffer = malloc(buflen+1); /* one more byte for the ending \0 */
     if (!buffer) {
       fclose(file);
       return -1;
