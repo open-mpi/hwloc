@@ -334,6 +334,10 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
 
       buflen *= 2;
       buffer = realloc(buffer, buflen+1);
+      if (!buffer) {
+	fclose(file);
+	return -1;
+      }
       readlen = buflen/2;
     }
 
