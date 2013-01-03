@@ -1028,6 +1028,9 @@ following environment variables.
   load (<tt>xml=file.xml</tt>).
   The synthetic component may be followed by a synthetic topology
   description (<tt>synthetic=node:2 pu:3</tt>).
+  This variable does not take precedence over the application
+  selecting components with functions such as
+  hwloc_topology_set_xml().
   See \ref plugins for details.
   </dd>
 
@@ -2006,9 +2009,10 @@ may be set to get verbose messages about component registration
 
 \section plugins_select Selecting which components to use
 
-Aside from topology configuration function such as
-<tt>hwloc_topology_set_custom()</tt>, the default priority order may
-be changed through the  <tt>HWLOC_COMPONENTS</tt> environment
+Once topology configuration functions such as
+<tt>hwloc_topology_set_custom()</tt> have been taken care of,
+the priority order of the remaining components may be changed
+through the  <tt>HWLOC_COMPONENTS</tt> environment
 variable (component names must be separated by commas).
 
 Specifying <tt>x86</tt> in this variable will cause the <tt>x86</tt>
