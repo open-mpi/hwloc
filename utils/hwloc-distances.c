@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -16,12 +16,10 @@
 
 void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
-  fprintf(where, "Usage: hwloc-distances [options] number\n");
-  fprintf (where, "\nFormatting options:\n");
-  fprintf (where, "  -l --logical          Display hwloc logical object indexes\n");
-  fprintf (where, "                        (default for console output)\n");
-  fprintf (where, "  -p --physical         Display physical object indexes\n");
-  fprintf (where, "                        (default for graphical output)\n");
+  fprintf(where, "Usage: hwloc-distances [options]\n");
+  fprintf(where, "Formatting options:\n");
+  fprintf(where, "  -l --logical     Display hwloc logical object indexes (default)\n");
+  fprintf(where, "  -p --physical    Display physical object indexes\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
   hwloc_utils_input_format_usage(where, 0);
