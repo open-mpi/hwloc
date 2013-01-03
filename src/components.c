@@ -382,14 +382,16 @@ void
 hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 {
   struct hwloc_disc_component *comp;
+  struct hwloc_backend *backend;
   unsigned excludes = 0;
   int tryall = 1;
   char *env;
 
-  /* we have either no backends, or a single one, use its exclude */
-  if (topology->backends) {
-    excludes = topology->backends->component->excludes;
-    assert(!topology->backends->next);
+  /* compute current excludes */
+  backend = topology->backends;
+  while (backend) {
+    excludes |= backend->component->excludes;
+    backend = backend->next;
   }
 
   env = getenv("HWLOC_COMPONENTS");
