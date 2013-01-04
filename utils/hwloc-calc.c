@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -186,6 +186,7 @@ static int hwloc_calc_check_type_depth(hwloc_topology_t topology, hwloc_obj_type
 int main(int argc, char *argv[])
 {
   hwloc_topology_t topology;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES;
   char *input = NULL;
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   int input_changed = 0;
@@ -209,7 +210,7 @@ int main(int argc, char *argv[])
   set = hwloc_bitmap_alloc();
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES);
+  hwloc_topology_set_flags(topology, flags);
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
 
@@ -389,6 +390,9 @@ int main(int argc, char *argv[])
 
     if (input_changed && input) {
       /* only update the input when actually using it */
+      hwloc_topology_destroy(topology);
+      hwloc_topology_init(&topology);
+      hwloc_topology_set_flags(topology, flags);
       err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
       if (err)
 	return err;
@@ -428,6 +432,9 @@ int main(int argc, char *argv[])
 
     if (input_changed && input) {
       /* only update the input when actually using it */
+      hwloc_topology_destroy(topology);
+      hwloc_topology_init(&topology);
+      hwloc_topology_set_flags(topology, flags);
       err = hwloc_utils_enable_input_format(topology, input, input_format, verbose, callname);
       if (err)
         return err;
