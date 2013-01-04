@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012 Inria.  All rights reserved.
+ * Copyright © 2012-2013 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -59,22 +59,30 @@ int main(void)
   hwloc_topology_set_fsroot(topology2, "//"); /* valid path that won't be recognized as '/' */
   printf("switching sysfs fsroot to / ...\n");
   hwloc_topology_set_fsroot(topology2, "/");
+  hwloc_topology_destroy(topology2);
 
   if (xmlfileok) {
     printf("switching to xml and loading...\n");
+    hwloc_topology_init(&topology2);
     assert(!hwloc_topology_set_xml(topology2, xmlfile));
     hwloc_topology_load(topology2);
     hwloc_topology_check(topology2);
     assert(!hwloc_topology_is_thissystem(topology2));
+    hwloc_topology_destroy(topology2);
   }
+
   if (xmlbufok) {
     printf("switching to xmlbuffer and loading...\n");
+    hwloc_topology_init(&topology2);
     assert(!hwloc_topology_set_xmlbuffer(topology2, xmlbuf, xmlbuflen));
     hwloc_topology_load(topology2);
     hwloc_topology_check(topology2);
     assert(!hwloc_topology_is_thissystem(topology2));
+    hwloc_topology_destroy(topology2);
   }
+
   printf("switching to custom and loading...\n");
+  hwloc_topology_init(&topology2);
   hwloc_topology_set_custom(topology2);
   sw = hwloc_custom_insert_group_object_by_parent(topology2, hwloc_get_root_obj(topology2), 0);
   assert(sw);
@@ -82,26 +90,35 @@ int main(void)
   hwloc_topology_load(topology2);
   hwloc_topology_check(topology2);
   assert(!hwloc_topology_is_thissystem(topology2));
-  /* don't try fsroot here because it fails on !linux, we would revert back to custom, which requires some insert to make the topology valid */
+  hwloc_topology_destroy(topology2);
+
   printf("switching to synthetic and loading...\n");
+  hwloc_topology_init(&topology2);
   hwloc_topology_set_synthetic(topology2, "machine:2 node:3 cache:2 pu:4");
   hwloc_topology_load(topology2);
   hwloc_topology_check(topology2);
   assert(!hwloc_topology_is_thissystem(topology2));
+  hwloc_topology_destroy(topology2);
+
   printf("switching sysfs fsroot to // and loading...\n");
-  hwloc_topology_set_fsroot(topology2, "//"); /* valid path that won't be recognized as '/' */
+  hwloc_topology_init(&topology2);
+  err = hwloc_topology_set_fsroot(topology2, "//"); /* '//' isn't recognized as the normal fsroot on Linux, and it fails and falls back to normal topology on !Linux */
   hwloc_topology_load(topology2);
   hwloc_topology_check(topology2);
-  assert(!hwloc_topology_is_thissystem(topology2)); /* earlier fsroot worked, or we're still synthetic */
+  assert(!hwloc_topology_is_thissystem(topology2) == !err);
+  hwloc_topology_destroy(topology2);
+
   printf("switching sysfs fsroot to / and loading...\n");
+  hwloc_topology_init(&topology2);
   err = hwloc_topology_set_fsroot(topology2, "/");
   hwloc_topology_load(topology2);
   hwloc_topology_check(topology2);
-  assert(hwloc_topology_is_thissystem(topology2) == !err); /* on Linux, '/' is recognized as thissystem. on !Linux, set_fsroot() failed and we went back to synthetic */
+  assert(hwloc_topology_is_thissystem(topology2)); /* '/' is recognized as the normal fsroot on Linux, and it fails and falls back to normal topology on !Linux */
+  hwloc_topology_destroy(topology2);
 
   printf("switching to synthetic...\n");
+  hwloc_topology_init(&topology2);
   hwloc_topology_set_synthetic(topology2, "machine:2 node:3 cache:2 pu:4");
-
   hwloc_topology_destroy(topology2);
 
 
