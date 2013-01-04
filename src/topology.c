@@ -2573,6 +2573,15 @@ hwloc_topology_load (struct hwloc_topology *topology)
   int err;
 
   if (topology->is_loaded) {
+    static int deprecated_warning = 0;
+    if (!deprecated_warning) {
+      if (!getenv("HWLOC_HIDE_DEPRECATED")) {
+	fprintf(stderr, "*** hwloc_topology_load() was called multiple times on the same topology.\n");
+	fprintf(stderr, "*** This non-documented behavior will not be supported in future releases.\n");
+	fprintf(stderr, "*** Set HWLOC_HIDE_DEPRECATED in the environment to hide this message.\n");
+      }
+      deprecated_warning = 1;
+    }
     hwloc_topology_clear(topology);
     hwloc_distances_clear(topology);
     hwloc_topology_setup_defaults(topology);
