@@ -901,6 +901,7 @@ EOF])
     # Try without explicit -lpthread first
     AC_CHECK_FUNC([pthread_mutex_lock],
       [hwloc_pthread_mutex_happy=yes
+       HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE -lpthread"
       ],
       [AC_MSG_CHECKING([fot pthread_mutex_lock with -lpthread])
        # Try again with explicit -lpthread, but don't use AC_CHECK_FUNC to avoid the cache
@@ -909,7 +910,6 @@ EOF])
        AC_LINK_IFELSE([AC_LANG_CALL([], [pthread_mutex_lock])],
          [hwloc_pthread_mutex_happy=yes
           HWLOC_LIBS="$HWLOC_LIBS -lpthread"
-	  HWLOC_REQUIRES="$HWLOC_REQUIRES libpthread"
          ])
        AC_MSG_RESULT([$hwloc_pthread_mutex_happy])
        LIBS="$tmp_save_LIBS"
@@ -995,6 +995,7 @@ EOF])
     HWLOC_LDFLAGS='-L$(HWLOC_top_builddir)/src'
     AC_SUBST(HWLOC_LDFLAGS)
     AC_SUBST(HWLOC_LIBS)
+    AC_SUBST(HWLOC_LIBS_PRIVATE)
 
     # Set these values explicitly for embedded builds.  Exporting
     # these values through *_EMBEDDED_* values gives us the freedom to
