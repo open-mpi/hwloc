@@ -176,6 +176,14 @@ AC_CONFIG_FILES([src/libltdl/Makefile])
 #CPPFLAGS="$CPPFLAGS -I$HWLOC_top_builddir"
 AC_CONFIG_COMMANDS_PRE([LT_CONFIG_H=`expr "$LT_CONFIG_H" : '.*/\(.*\)'`])
 
+# Add libltdl static-build dependencies to hwloc.pc
+if test "x$hwloc_have_plugins" = xyes; then
+  if test "x$with_included_ltdl" = xno; then
+    HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE $LIBLTDL"
+  fi
+  HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE $lt_cv_dlopen_libs"
+fi
+
 # Party on
 AC_OUTPUT
 
