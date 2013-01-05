@@ -184,6 +184,10 @@ if test "x$hwloc_have_plugins" = xyes; then
   HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE $lt_cv_dlopen_libs"
 fi
 
+# Is ltdl included?
+AM_CONDITIONAL([HWLOC_LTDL_INCLUDED], [test "x$with_included_ltdl" = xyes])
+
+
 # Party on
 AC_OUTPUT
 

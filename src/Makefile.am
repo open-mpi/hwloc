@@ -189,12 +189,13 @@ libhwloc_la_SOURCES = $(sources)
 libhwloc_la_LDFLAGS = $(ldflags) -version-info $(libhwloc_so_version) $(HWLOC_LIBS)
 
 if HWLOC_HAVE_PLUGINS
+if HWLOC_LTDL_INCLUDED
 AM_CPPFLAGS += $(LTDLINCL)
 libhwloc_la_LDFLAGS += -export-dynamic
 libhwloc_la_LIBADD = $(LIBLTDL)
 libhwloc_la_DEPENDENCIES = $(LTDLDEPS)
-
 SUBDIRS = libltdl
+endif
 endif
 
 # Embedded library (note the lack of a .so version number -- that
