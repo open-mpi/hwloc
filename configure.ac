@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 #
 # Copyright © 2009      CNRS
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 #
@@ -175,6 +175,14 @@ AC_CONFIG_FILES([src/libltdl/Makefile])
 # Workarounds for libtool LT_CONFIG_H bug
 #CPPFLAGS="$CPPFLAGS -I$HWLOC_top_builddir"
 AC_CONFIG_COMMANDS_PRE([LT_CONFIG_H=`expr "$LT_CONFIG_H" : '.*/\(.*\)'`])
+
+# Add libltdl static-build dependencies to hwloc.pc
+if test "x$hwloc_have_plugins" = xyes; then
+  if test "x$with_included_ltdl" = xno; then
+    HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE $LIBLTDL"
+  fi
+  HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE $lt_cv_dlopen_libs"
+fi
 
 # Party on
 AC_OUTPUT

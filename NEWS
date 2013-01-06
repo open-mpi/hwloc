@@ -21,6 +21,8 @@ Version 1.6.1
 -------------
 * Fix some crash or buggy detection in the x86 backend when Linux
   cgroups/cpusets restrict the available CPUs.
+* Fix the pkg-config output with --libs --static.
+  Thanks to Erik Schnetter for reporting one of the problems.
 * Calling hwloc_topology_load() multiple times on the same topology
   is officially deprecated. hwloc will warn in such cases.
 * Add some documentation about existing plugins/components, package
