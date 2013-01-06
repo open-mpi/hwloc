@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -594,7 +594,9 @@ HWLOC_DECLSPEC int hwloc_topology_init (hwloc_topology_t *topologyp);
  *
  * \note On failure, the topology is reinitialized. It should be either
  * destroyed with hwloc_topology_destroy() or configured and loaded again.
- * 
+ *
+ * \note This function may be called only once per topology.
+ *
  * \sa hwlocality_configuration
  */
 HWLOC_DECLSPEC int hwloc_topology_load(hwloc_topology_t topology);
@@ -1199,7 +1201,7 @@ enum hwloc_restrict_flags_e {
  *
  * \note This call may not be reverted by restricting back to a larger
  * cpuset. Once dropped during restriction, objects may not be brought
- * back, except by reloading the entire topology with hwloc_topology_load().
+ * back, except by loading another topology with hwloc_topology_load().
  *
  * \return 0 on success.
  *

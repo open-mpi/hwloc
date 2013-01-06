@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011 inria.  All rights reserved.
+ * Copyright © 2011-2013 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -26,10 +26,9 @@ int main(void)
   unsigned depth;
   unsigned width;
 
+  /* default 2*8*1 */
   hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
-
-  /* default 2*8*1 */
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
@@ -41,8 +40,11 @@ int main(void)
   assert(width == 16);
   width = hwloc_get_nbobjs_by_depth(topology, 3);
   assert(width == 16);
+  hwloc_topology_destroy(topology);
 
   /* 2*8*1 and group 8cores as 2*2*2 */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
   for(i=0; i<16; i++) {
     indexes[i] = i;
     for(j=0; j<16; j++)
@@ -69,29 +71,51 @@ int main(void)
   assert(width == 8);
   width = hwloc_get_nbobjs_by_depth(topology, 4);
   assert(width == 16);
+  hwloc_topology_destroy(topology);
 
   /* play with accuracy */
   distances[0] = 2.9; /* diagonal, instead of 3 (0.0333% error) */
   distances[1] = 5.1; distances[16] = 5.2; /* smallest group, instead of 5 (0.02% error) */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
   assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances));
   putenv("HWLOC_GROUPING_ACCURACY=0.1"); /* ok */
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
+  hwloc_topology_destroy(topology);
+
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
+  assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances));
   putenv("HWLOC_GROUPING_ACCURACY=try"); /* ok */
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 6);
+  hwloc_topology_destroy(topology);
+
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
+  assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances));
   putenv("HWLOC_GROUPING_ACCURACY=0.01"); /* too small, cannot group */
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
+  hwloc_topology_destroy(topology);
+
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
+  assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances));
   putenv("HWLOC_GROUPING_ACCURACY=0"); /* full accuracy, cannot group */
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
   assert(depth == 4);
+  hwloc_topology_destroy(topology);
 
   /* revert to default 2*8*1 */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:8 pu:1");
+  assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances));
   assert(!hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 0, NULL, NULL));
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
@@ -104,8 +128,10 @@ int main(void)
   assert(width == 16);
   width = hwloc_get_nbobjs_by_depth(topology, 3);
   assert(width == 16);
+  hwloc_topology_destroy(topology);
 
   /* default 2*4*4 */
+  hwloc_topology_init(&topology);
   hwloc_topology_set_synthetic(topology, "node:2 core:4 pu:4");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
@@ -118,8 +144,11 @@ int main(void)
   assert(width == 8);
   width = hwloc_get_nbobjs_by_depth(topology, 3);
   assert(width == 32);
+  hwloc_topology_destroy(topology);
 
   /* 2*4*4 and group 4cores as 2*2 */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:4 pu:4");
   putenv("HWLOC_Core_DISTANCES=0,1,2,3,4,5,6,7:4*2");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
@@ -134,8 +163,11 @@ int main(void)
   assert(width == 8);
   width = hwloc_get_nbobjs_by_depth(topology, 4);
   assert(width == 32);
+  hwloc_topology_destroy(topology);
 
   /* 2*4*4 and group 4cores as 2*2 and 4PUs as 2*2 */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:4 pu:4");
   putenv("HWLOC_PU_DISTANCES=0-31:16*2");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
@@ -152,9 +184,12 @@ int main(void)
   assert(width == 16);
   width = hwloc_get_nbobjs_by_depth(topology, 5);
   assert(width == 32);
+  hwloc_topology_destroy(topology);
 
   /* replace previous core distances with useless ones (grouping as the existing numa nodes) */
   /* 2*4*4 and group 4PUs as 2*2 */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:4 pu:4");
   putenv("HWLOC_Core_DISTANCES=0-7:2*4");
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
@@ -169,9 +204,12 @@ int main(void)
   assert(width == 16);
   width = hwloc_get_nbobjs_by_depth(topology, 4);
   assert(width == 32);
+  hwloc_topology_destroy(topology);
 
   /* clear everything */
   /* default 2*4*4 */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:4 pu:4");
   putenv("HWLOC_Core_DISTANCES=none");
   putenv("HWLOC_PU_DISTANCES=none");
   hwloc_topology_load(topology);
@@ -185,13 +223,15 @@ int main(void)
   assert(width == 8);
   width = hwloc_get_nbobjs_by_depth(topology, 3);
   assert(width == 32);
+  hwloc_topology_destroy(topology);
 
   /* buggy tests */
+  hwloc_topology_init(&topology);
+  hwloc_topology_set_synthetic(topology, "node:2 core:4 pu:4");
   assert(hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, NULL, NULL) < 0);
   assert(hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 0, indexes, NULL) < 0);
   indexes[1] = 0;
   assert(hwloc_topology_set_distance_matrix(topology, HWLOC_OBJ_CORE, 16, indexes, distances) < 0);
-
   hwloc_topology_destroy(topology);
 
   return 0;

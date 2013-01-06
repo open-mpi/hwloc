@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2012 Inria.  All rights reserved.
+Copyright © 2009-2013 Inria.  All rights reserved.
 Copyright © 2009-2012 Université Bordeaux 1
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -21,6 +21,8 @@ Version 1.6.1
 -------------
 * Fix some crash or buggy detection in the x86 backend when Linux
   cgroups/cpusets restrict the available CPUs.
+* Calling hwloc_topology_load() multiple times on the same topology
+  is officially deprecated. hwloc will warn in such cases.
 * Add some documentation about existing plugins/components, package
   dependencies, and I/O devices specification on the command-line.
 

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1837,12 +1837,9 @@ For reference, \ref hwloc_topology_t modification operations include
   <dd><tt>hwloc_topology_ignore*</tt>, <tt>hwloc_topology_set*</tt>
   (see \ref hwlocality_configuration) do not modify the topology
   directly, but they do modify internal structures describing the
-  behavior of the next invocation of <tt>hwloc_topology_load()</tt>.
+  behavior of the upcoming invocation of <tt>hwloc_topology_load()</tt>.
   Hence, all of these functions should not be used concurrently.
-
-  Note that these functions do not modify the current topology until
-  it is actually reloaded; it is possible to use them while other
-  threads are only read the current topology.  </dd>
+  </dd>
 
 </dl>
 
@@ -2388,7 +2385,7 @@ do not belong to the same horizontal levels).</strong>
 Each hwloc object contains a <tt>userdata</tt> field that may be used by
 applications to store private pointers. This field is only valid
 during the lifetime of these container object and topology.
-It becomes invalid as soon the topology is reloaded or destroyed,
+It becomes invalid as soon the topology is destroyed,
 or as soon as the object disappears, for instance when restricting
 the topology.
 The userdata field is not exported/imported to/from XML by default since
