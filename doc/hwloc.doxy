@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2013 Inria.  All rights reserved.
- * Copyright © 2009-2012 Université Bordeaux 1
+ * Copyright © 2009-2013 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -53,7 +53,8 @@ and Kerrighed support)</li>
 <li>Solaris</li>
 <li>AIX</li>
 <li>Darwin / OS X</li>
-<li>FreeBSD and its variants (such as kFreeBSD/GNU), and NetBSD</li>
+<li>FreeBSD and its variants (such as kFreeBSD/GNU)</li>
+<li>NetBSD</li>
 <li>OSF/1 (a.k.a., Tru64)</li>
 <li>HP-UX</li>
 <li>Microsoft Windows</li>
