@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -148,17 +148,27 @@ static foo_draw get_type_fun(hwloc_obj_type_t type);
 #define RECURSE_BEGIN(obj, border) do { \
   hwloc_obj_t *subobjs = obj->children; \
   unsigned numsubobjs = obj->arity; \
+  unsigned numignoredsubobjs = 0; \
   unsigned width, height; \
   unsigned maxwidth __hwloc_attribute_unused, maxheight __hwloc_attribute_unused; \
+  unsigned i; \
   maxwidth = maxheight = 0; \
   totwidth = (border) + mywidth; \
   totheight = (border) + myheight; \
+  /* Count objects to ignore */ \
+  if (lstopo_ignore_pus) { \
+    for (i = 0; i < numsubobjs; i++) \
+      if (subobjs[i]->type == HWLOC_OBJ_PU) \
+        numignoredsubobjs++; \
+    numsubobjs -= numignoredsubobjs; \
+  } \
   if (numsubobjs) { \
-    unsigned i; \
 
 #define RECURSE_FOR() \
     /* Iterate over subobjects */ \
-    for (i = 0; i < numsubobjs; i++) { \
+    for (i = 0; i < numsubobjs+numignoredsubobjs; i++) { \
+      if (lstopo_ignore_pus && subobjs[i]->type == HWLOC_OBJ_PU) \
+	continue; \
 
       /* Recursive call */
 #define RECURSE_CALL_FUN(methods) \
@@ -588,7 +598,7 @@ core_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
 {
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
-  unsigned textwidth = 5*fontsize;
+  unsigned textwidth = fontsize ? 8*fontsize : gridsize;
 
   DYNA_CHECK();
 

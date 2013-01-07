@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2012 Inria.  All rights reserved.
+Copyright © 2009-2013 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux 1
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -54,6 +54,8 @@ Version 1.7.0
 * Misc
   + The HWLOC_COMPONENTS variable now excludes the components whose
     names are prefixed with '-'.
+  + lstopo --ignore PU now works when displaying the topology in
+    graphical and textual mode (not when exporting to XML).
 
 
 Version 1.6.0

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -39,6 +39,7 @@ hwloc_pid_t lstopo_pid;
 hwloc_obj_type_t lstopo_show_only = (hwloc_obj_type_t) -1;
 int lstopo_show_cpuset = 0;
 int lstopo_show_taskset = 0;
+int lstopo_ignore_pus = 0;
 
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
@@ -406,11 +407,16 @@ main (int argc, char *argv[])
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--ignore")) {
+	hwloc_obj_type_t type;
 	if (argc < 2) {
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-        hwloc_topology_ignore_type(topology, hwloc_obj_type_of_string(argv[1]));
+	type = hwloc_obj_type_of_string(argv[1]);
+	if (type == HWLOC_OBJ_PU)
+	  lstopo_ignore_pus = 1;
+	else
+	  hwloc_topology_ignore_type(topology, type);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--no-caches"))

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -11,6 +11,7 @@
 
 #include <hwloc.h>
 
+extern int lstopo_ignore_pus;
 extern hwloc_obj_type_t lstopo_show_only;
 extern int lstopo_show_cpuset;
 extern int lstopo_show_taskset;

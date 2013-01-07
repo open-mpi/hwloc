@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2012 Inria.  All rights reserved.
+.\" Copyright © 2009-2013 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -89,6 +89,10 @@ Only show objects of the given type in the textual output.
 .TP
 \fB\-\-ignore\fR <type>
 Ignore all objects of type <type> in the topology.
+hwloc supports ignoring any type except PUs and I/O devices.
+However lstopo still offers PU ignoring by hiding PU objects
+in the graphical and textual outputs.
+Note that PU may not be ignored in the XML output.
 .TP
 \fB\-\-no\-caches\fR
 Do not show caches.

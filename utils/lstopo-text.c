@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -125,7 +125,8 @@ output_topology (hwloc_topology_t topology, hwloc_obj_t l, hwloc_obj_t parent, F
   if (l->arity || (!i && !l->arity))
     {
       for (x=0; x<l->arity; x++)
-	output_topology (topology, l->children[x], l, output, i, logical, verbose_mode);
+	if (l->children[x]->type != HWLOC_OBJ_PU || !lstopo_ignore_pus)
+	  output_topology (topology, l->children[x], l, output, i, logical, verbose_mode);
   }
 }
 
