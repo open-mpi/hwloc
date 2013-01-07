@@ -52,8 +52,8 @@ Version 1.7.0
   + Clarify the documentation of inline helpers in hwloc/myriexpress.h
     and hwloc/openfabrics-verbs.h.
 * Misc
-  + The HWLOC_COMPONENTS may now start with '^' to only define a list of
-    components to exclude.
+  + The HWLOC_COMPONENTS variable now excludes the components whose
+    names are prefixed with '-'.
 
 
 Version 1.6.0
