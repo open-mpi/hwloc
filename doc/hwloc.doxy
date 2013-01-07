@@ -1200,7 +1200,7 @@ For instance proprietary graphics drivers do not offer any OS name,
 but hwloc may still create one OS object per software handle when
 supported.
 For instance the <tt>opencl</tt> and <tt>cuda</tt> components may
-add some <em>opencl0p0</em> and <em>cuda0</em> OS device objects.
+add some <em>opencl0d0</em> and <em>cuda0</em> OS device objects.
 
 Here is a list of OS device objects commonly created by hwloc
 components when I/O discovery is enabled and supported.
@@ -1223,8 +1223,8 @@ components when I/O discovery is enabled and supported.
 </li>
 <li>GPUs (HWLOC_OBJ_OSDEV_GPU)
  <ul>
- <li><em>opencl0p0</em> for the first device of the first OpenCL platform,
-  <em>opencl3p1</em> for the fourth device of the second OpenCL platform
+ <li><em>opencl0d0</em> for the first device of the first OpenCL platform,
+  <em>opencl1d3</em> for the fourth device of the second OpenCL platform
   (OpenCL component)</li>
  <li><em>cuda0</em> for the first NVIDIA CUDA device
   (CUDA component, using the NVIDIA CUDA Library)</li>
@@ -2131,8 +2131,8 @@ environment variable (see \ref envvar).
 <dt>opencl</dt>
 <dd>
  The OpenCL component creates OS device objects such as
- <em>opencl0p0</em> (first device of the first OpenCL platform)
- or <em>opencl3p1</em> (fourth device of the second platform).
+ <em>opencl0d0</em> (first device of the first OpenCL platform)
+ or <em>opencl1d3</em> (fourth device of the second platform).
  Only the AMD OpenCL implementation currently offers locality
  information.
  <b>It may be built as a plugin</b>.

@@ -1,6 +1,6 @@
 Copyright © 2009 CNRS
 Copyright © 2009-2012 Inria.  All rights reserved.
-Copyright © 2009-2012 Université Bordeaux 1
+Copyright © 2009-2013 Université Bordeaux 1
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
 $COPYRIGHT$
@@ -23,7 +23,7 @@ Version 1.7.0
   + Add NetBSD support, thanks to Aleksej Saushev.
   + Add three GPU detection components: opencl (for the AMD OpenCL
     implemenation), cuda and nvml (for NVIDIA GPUs).
-    - They add OS devices such as opencl0p0, cuda0 and nvml0 inside the
+    - They add OS devices such as opencl0d0, cuda0 and nvml0 inside the
       corresponding PCI devices with some string info attributes.
     - The nvml component also improves the discovery of NVIDIA GPU
       PCIe link speed.

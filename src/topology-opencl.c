@@ -56,6 +56,7 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
   clret = clGetPlatformIDs(0, NULL, &nr_platforms);
   if (CL_SUCCESS != clret || !nr_platforms)
     goto out;
+  hwloc_debug("%u OpenCL platforms\n", nr_platforms);
   platform_ids = malloc(nr_platforms * sizeof(*platform_ids));
   if (!platform_ids)
     goto out;
@@ -72,6 +73,7 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
     tmp += nr_devices;
   }
   nr_total_devices = tmp;
+  hwloc_debug("%u OpenCL devices total\n", nr_total_devices);
   /* allocate structs */
   device_ids = malloc(nr_total_devices * sizeof(*device_ids));
   data->devices = malloc(nr_total_devices * sizeof(*data->devices));
@@ -89,13 +91,15 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
   /* query individual devices */
   curpfidx = 0;
   curpfdvidx = 0;
-  for(i=0; i<nr_devices; i++) {
+  for(i=0; i<nr_total_devices; i++) {
     struct hwloc_opencl_device_info_s *info = &data->devices[data->nr_devices];
     cl_platform_id platform_id = 0;
     cl_device_type type;
 #ifdef CL_DEVICE_TOPOLOGY_AMD
     cl_device_topology_amd amdtopo;
 #endif
+
+    hwloc_debug("Looking device %p\n", device_ids[i]);
 
     info->platformname[0] = '\0';
     clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_PLATFORM, sizeof(platform_id), &platform_id, NULL);
@@ -128,6 +132,8 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
       break;
     }
 
+    hwloc_debug("platform %s device %s vendor %s type %s\n", info->platformname, info->devicename, info->devicevendor, info->devicetype);
+
     /* find our indexes */
     while (platform_id != platform_ids[curpfidx]) {
       curpfidx++;
@@ -137,18 +143,26 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
     info->platformdeviceidx = curpfdvidx;
     curpfdvidx++;
 
+    hwloc_debug("This is opencl%dd%d\n", info->platformidx, info->platformdeviceidx);
+
 #ifdef CL_DEVICE_TOPOLOGY_AMD
     clret = clGetDeviceInfo(device_ids[i], CL_DEVICE_TOPOLOGY_AMD, sizeof(amdtopo), &amdtopo, NULL);
-    if (CL_SUCCESS != clret)
+    if (CL_SUCCESS != clret) {
+      hwloc_debug("no AMD-specific device information: %d\n", clret);
       continue;
-    if (CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD != amdtopo.raw.type)
+    }
+    if (CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD != amdtopo.raw.type) {
+      hwloc_debug("not a PCIe device: %u\n", amdtopo.raw.type);
       continue;
+    }
 
     info->type = HWLOC_OPENCL_DEVICE_AMD;
     info->specific.amd.pcidomain = 0;
     info->specific.amd.pcibus = amdtopo.pcie.bus;
     info->specific.amd.pcidev = amdtopo.pcie.device;
     info->specific.amd.pcifunc = amdtopo.pcie.function;
+
+    hwloc_debug("OpenCL device on PCI 0000:%02x:%02x.%u\n", amdtopo.pcie.bus, amdtopo.pcie.device, amdtopo.pcie.function);
 
     /* validate this device */
     data->nr_devices++;
@@ -214,7 +228,7 @@ hwloc_opencl_backend_notify_new_object(struct hwloc_backend *backend, struct hwl
       continue;
 
     osdev = hwloc_alloc_setup_object(HWLOC_OBJ_OS_DEVICE, -1);
-    snprintf(buffer, sizeof(buffer), "opencl%dp%d", info->platformdeviceidx, info->platformidx);
+    snprintf(buffer, sizeof(buffer), "opencl%dd%d", info->platformidx, info->platformdeviceidx);
     osdev->name = strdup(buffer);
     osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU; /* FIXME info->devicetype == "GPU" since we only have locality for AMD so far */
