@@ -230,6 +230,19 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
 {
   struct hwloc_disc_component **prev;
 
+  if (!strcmp(component->name, HWLOC_COMPONENT_STOP_NAME)) {
+    if (hwloc_components_verbose)
+      fprintf(stderr, "Cannot register component with reserved name `" HWLOC_COMPONENT_STOP_NAME "'\n");
+    return -1;
+  }
+  if (strchr(component->name, HWLOC_COMPONENT_EXCLUDE_CHAR)
+      || strcspn(component->name, HWLOC_COMPONENT_SEPS) != strlen(component->name)) {
+    if (hwloc_components_verbose)
+      fprintf(stderr, "Cannot register component with name `%s' containing reserved characters `%c" HWLOC_COMPONENT_SEPS "'\n",
+	      component->name, HWLOC_COMPONENT_EXCLUDE_CHAR);
+    return -1;
+  }
+
   prev = &hwloc_disc_components;
   while (NULL != *prev) {
     if (!strcmp((*prev)->name, component->name)) {
