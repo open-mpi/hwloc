@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2012 Inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2011, 2013 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -246,7 +246,8 @@ hwloc_aix_set_thread_cpubind(hwloc_topology_t topology, hwloc_thread_t pthread, 
   if ((errno = pthread_getthrds_np(&pthread, PTHRDSINFO_QUERY_TID, &info, sizeof(info), NULL, &size)))
     return -1;
   {
-    rsid_t who = { .at_tid = info.__pi_tid };
+    rsid_t who;
+    who.at_tid = info.__pi_tid;
     return hwloc_aix_set_sth_cpubind(topology, R_THREAD, who, getpid(), hwloc_set, flags);
   }
 }

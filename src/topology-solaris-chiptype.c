@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2009-2010 Oracle and/or its affiliates.  All rights reserved. 
+ * Copyright (c) 2013 Université Bordeaux 1.  All rights reserved.
  *
  * $COPYRIGHT$
  * 
@@ -9,6 +10,7 @@
  */
 
 #include <private/autogen/config.h>
+#include <hwloc/autogen/config.h>
 #include <private/solaris-chiptype.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -191,14 +193,14 @@ PICL_WALK_TERMINATE to stop picl_walk_tree_by_class from traversing the tree.
 Note that PICL_PTYPE_UNSIGNED_INT and PICL_PTYPE_INT can either be 4-bytes
 or 8-bytes.
 *****************************************************************************/
-static int probe_cpu(picl_nodehdl_t node_hdl, void* dummy_arg) {
+static int probe_cpu(picl_nodehdl_t node_hdl, void* dummy_arg __hwloc_attribute_unused) {
 
   picl_prophdl_t  p_hdl;
   picl_prophdl_t  table_hdl;
   picl_propinfo_t p_info;
   long long       long_long_val;
   unsigned int    uint_val;
-  int             index;
+  unsigned int    index;
   int             int_val;
   int             val;
   char            string_val[PICL_PROPNAMELEN_MAX];
