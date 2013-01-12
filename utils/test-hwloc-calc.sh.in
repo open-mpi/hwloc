@@ -55,7 +55,9 @@ set -e
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:2-3 --hierarchical node.pu
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:3-6 -H node.core --sep foo
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:3-6 -H core.pu
+  $calc --if synthetic --input "node:4 core:4 pu:4" -I pu `$calc --if synthetic --input "node:4 core:4 pu:4" pu:3-6 -H core.pu`
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:11:4 -H node.core.pu
+  $calc --if synthetic --input "node:4 core:4 pu:4" -I pu `$calc --if synthetic --input "node:4 core:4 pu:4" pu:11:4 -H node.core.pu`
   echo
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:12-37 --largest
   $calc --if synthetic --input "node:4 core:4 pu:4" pu:22-47 --largest --sep "_"

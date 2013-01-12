@@ -21,10 +21,12 @@
 1
 2,3
 
-NUMANode:0.PU:0 NUMANode:0.PU:1
+NUMANode:0.PU:2 NUMANode:0.PU:3
 NUMANode:0.Core:0fooNUMANode:0.Core:1
-Core:0.PU:0 Core:1.PU:0 Core:1.PU:1 Core:1.PU:2
-NUMANode:0.Core:0.PU:0 NUMANode:0.Core:1.PU:0 NUMANode:0.Core:1.PU:1 NUMANode:0.Core:1.PU:2
+Core:0.PU:3 Core:1.PU:0 Core:1.PU:1 Core:1.PU:2
+3,4,5,6
+NUMANode:0.Core:2.PU:3 NUMANode:0.Core:3.PU:0 NUMANode:0.Core:3.PU:1 NUMANode:0.Core:3.PU:2
+11,12,13,14
 
 Core:3 NUMANode:1 Core:8 PU:36 PU:37
 PU:22_PU:23_Core:6_Core:7_NUMANode:2
