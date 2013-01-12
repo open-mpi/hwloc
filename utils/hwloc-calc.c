@@ -64,25 +64,30 @@ static int singlify = 0;
 static int taskset = 0;
 
 static void
-hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, const char *sep, hwloc_bitmap_t set, int level)
+hwloc_calc_hierarch_output(hwloc_topology_t topology, const char *prefix, const char *sep, hwloc_obj_t root, hwloc_bitmap_t set, int level)
 {
   hwloc_obj_t obj, prev = NULL;
   unsigned logi = 0;
-  while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, set, hierdepth[level], prev)) != NULL) {
+  int first = 1;
+  while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, root->cpuset, hierdepth[level], prev)) != NULL) {
     char string[256];
     char type[32];
+    if (!hwloc_bitmap_intersects(set, obj->cpuset))
+     goto next;
     hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
     snprintf(string, sizeof(string), "%s%s%s:%u", prefix, level ? "." : "", type, logicalo ? logi : obj->os_index);
-    if (prev)
+    if (!first)
       printf("%s", sep);
+    first = 0;
     if (level != hiernblevels - 1) {
       hwloc_bitmap_t new = hwloc_bitmap_dup(set);
       hwloc_bitmap_and(new, new, obj->cpuset);
-      hwloc_calc_hierarch_output(topology, string, sep, new, level+1);
+      hwloc_calc_hierarch_output(topology, string, sep, obj, new, level+1);
       hwloc_bitmap_free(new);
     } else {
       printf("%s", string);
     }
+next:
     prev = obj;
     logi++;
   }
@@ -138,7 +143,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
   } else if (hiernblevels) {
     if (!sep)
       sep = " ";
-    hwloc_calc_hierarch_output(topology, "", sep, set, 0);
+    hwloc_calc_hierarch_output(topology, "", sep, hwloc_get_root_obj(topology), set, 0);
     printf("\n");
   } else {
     char *string = NULL;
