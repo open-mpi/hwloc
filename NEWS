@@ -58,6 +58,20 @@ Version 1.7.0
     graphical and textual mode (not when exporting to XML).
 
 
+Version 1.6.1
+-------------
+* Fix some crash or buggy detection in the x86 backend when Linux
+  cgroups/cpusets restrict the available CPUs.
+* Fix the pkg-config output with --libs --static.
+  Thanks to Erik Schnetter for reporting one of the problems.
+* Fix the output of hwloc-calc -H --hierarchical when using logical
+  indexes in the output.
+* Calling hwloc_topology_load() multiple times on the same topology
+  is officially deprecated. hwloc will warn in such cases.
+* Add some documentation about existing plugins/components, package
+  dependencies, and I/O devices specification on the command-line.
+
+
 Version 1.6.0
 -------------
 * Major changes
