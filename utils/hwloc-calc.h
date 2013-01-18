@@ -493,6 +493,52 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
 }
 
 static __hwloc_inline int
+hwloc_calc_process_type_arg(hwloc_topology_t topology, unsigned topodepth,
+			    const char *arg, size_t typelen,
+			    int logical, hwloc_bitmap_t set, int verbose)
+{
+  const char *sep = &arg[typelen];
+  hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
+  int depth;
+
+  depth = hwloc_calc_parse_depth_prefix(topology, topodepth,
+					arg, typelen,
+					&type,
+					verbose);
+  if (depth < 0) {
+    /* if we didn't find a depth but found a type, handle special cases */
+    hwloc_obj_t obj = NULL;
+    if (*sep == ':' && type == HWLOC_OBJ_PCI_DEVICE) {
+      /* FIXME: change to another syntax? */
+      return hwloc_calc_append_pci_object_range(topology, sep+1, set, verbose);
+
+    } else if (*sep == '=' && type == HWLOC_OBJ_PCI_DEVICE) {
+      /* try to match a busid */
+      obj = hwloc_get_pcidev_by_busidstring(topology, sep+1);
+      if (obj)
+	return hwloc_calc_append_iodev(set, obj, verbose);
+      if (verbose >= 0)
+	fprintf(stderr, "invalid PCI device %s\n", sep+1);
+      return -1;
+
+    } else if (*sep == '=' && type == HWLOC_OBJ_OS_DEVICE) {
+      /* try to match a OS device name */
+      while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
+	if (!strcmp(obj->name, sep+1))
+	  return hwloc_calc_append_iodev(set, obj, verbose);
+      }
+      if (verbose >= 0)
+	fprintf(stderr, "invalid OS device %s\n", sep+1);
+      return -1;
+    } else
+      return -1;
+  }
+
+  /* look at indexes following this type/depth */
+  return hwloc_calc_append_object_range(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), depth, sep+1, logical, set, verbose);
+}
+
+static __hwloc_inline int
 hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
 		       const char *arg, int logical, hwloc_bitmap_t set,
 		       int verbose)
@@ -518,64 +564,9 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
   /* try to match a type/depth followed by a special character */
   typelen = strspn(arg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
   if (typelen && (arg[typelen] == ':' || arg[typelen] == '=')) {
-    const char *sep = &arg[typelen];
-    hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
-    int depth;
-    hwloc_bitmap_t newset;
-
-    depth = hwloc_calc_parse_depth_prefix(topology, topodepth,
-					  arg, typelen,
-					  &type,
-					  verbose);
-    if (depth < 0) {
-      /* if we didn't find a depth but found a type, handle special cases */
-      hwloc_obj_t obj = NULL;
-      if (*sep == ':' && type == HWLOC_OBJ_PCI_DEVICE) {
-	/* FIXME: change to another syntax? */
-	/* agregate the whole range in newset before applying it to set */
-	newset = hwloc_bitmap_alloc();
-	err = hwloc_calc_append_pci_object_range(topology, sep+1, newset, verbose);
-	if (!err)
-	  err = hwloc_calc_append_cpuset(set, newset, mode, verbose);
-	hwloc_bitmap_free(newset);
-	return err;
-      } else if (*sep == '=' && type == HWLOC_OBJ_PCI_DEVICE) {
-	/* try to match a busid */
-	obj = hwloc_get_pcidev_by_busidstring(topology, sep+1);
-	if (obj) {
-	  newset = hwloc_bitmap_alloc();
-	  err = hwloc_calc_append_iodev(newset, obj, verbose);
-	  if (!err)
-	    err = hwloc_calc_append_cpuset(set, newset, mode, verbose);
-	  hwloc_bitmap_free(newset);
-	  return err;
-        }
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid PCI device %s\n", sep+1);
-	return -1;
-      } else if (*sep == '=' && type == HWLOC_OBJ_OS_DEVICE) {
-	/* try to match a OS device name */
-	while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
-	  if (!strcmp(obj->name, sep+1)) {
-	    newset = hwloc_bitmap_alloc();
-	    err = hwloc_calc_append_iodev(newset, obj, verbose);
-	    if (!err)
-	      err = hwloc_calc_append_cpuset(set, newset, mode, verbose);
-	    hwloc_bitmap_free(newset);
-	    return err;
-	  }
-	}
-	if (verbose >= 0)
-	  fprintf(stderr, "invalid OS device %s\n", sep+1);
-	return -1;
-      } else
-	return -1;
-    }
-
-    /* look at indexes following this type/depth */
-    /* agregate the whole range in newset before applying it to set */
-    newset = hwloc_bitmap_alloc();
-    err = hwloc_calc_append_object_range(topology, topodepth, hwloc_topology_get_complete_cpuset(topology), depth, sep+1, logical, newset, verbose);
+    /* process type/depth */
+    hwloc_bitmap_t newset = hwloc_bitmap_alloc();
+    err = hwloc_calc_process_type_arg(topology, topodepth, arg, typelen, logical, newset, verbose);
     if (!err)
       err = hwloc_calc_append_cpuset(set, newset, mode, verbose);
     hwloc_bitmap_free(newset);
