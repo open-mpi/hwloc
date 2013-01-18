@@ -505,7 +505,8 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
 
   taskdir = opendir(taskdir_path);
   if (!taskdir) {
-    errno = ENOSYS;
+    if (errno == ENOENT)
+      errno = EINVAL;
     err = -1;
     goto out;
   }
