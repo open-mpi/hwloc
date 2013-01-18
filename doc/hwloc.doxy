@@ -768,7 +768,7 @@ tools.
 
 \section cli_lstopo lstopo and lstopo-no-graphics
 
-lstopo (also known as hwloc-info and hwloc-ls) displays the
+lstopo (also known as hwloc-ls) displays the
 hierarchical topology map of the current system.  The output may be
 graphical or textual, and can also be exported to numerous file
 formats such as PDF, PNG, XML, and others.
@@ -813,6 +813,13 @@ may be composed to generate complex combinations.
 Note that hwloc-calc can also generate lists of logical processors or
 NUMA nodes that are convenient to pass to some external tools such as
 taskset or numactl.
+
+\section cli_hwloc_info hwloc-info
+
+hwloc-info dumps information about the given objects.
+It is intended to be used with tools such as grep for filtering
+certain attribute lines.
+When no object is specified, hwloc-info prints a summary of the topology.
 
 \section cli_hwloc_distrib hwloc-distrib
 

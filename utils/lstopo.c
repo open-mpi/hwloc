@@ -578,12 +578,6 @@ main (int argc, char *argv[])
     free(restrictstring);
   }
 
-  if (!filename && !strcmp(callname,"hwloc-info")) {
-    /* behave kind-of plpa-info */
-    filename = "-";
-    verbose_mode--;
-  }
-
   /* if the output format wasn't enforced, look at the filename */
   if (filename && output_format == LSTOPO_OUTPUT_DEFAULT) {
     if (!strcmp(filename, "-")

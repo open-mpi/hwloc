@@ -44,6 +44,9 @@ Version 1.7.0
     between CUDA devices or indexes and hwloc OS devices.
   + Add hwloc_ibv_get_device_osdev() and clarify the requirements
     of the OpenFabrics Verbs helpers in hwloc/openfabrics-verbs.h.
+* Tools
+  + hwloc-info is not only a synonym of lstopo -s anymore, it also
+    dumps information about objects given on the command-line.
 * Documentation
   + Add a section "Existing components and plugins".
   + Add a list of common OS devices in section "Software devices".
