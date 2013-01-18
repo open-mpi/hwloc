@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -387,14 +387,14 @@ hwloc_calc_append_object_range(hwloc_topology_t topology, unsigned topodepth,
 
 static __hwloc_inline int
 hwloc_calc_append_iodev(hwloc_bitmap_t set, hwloc_obj_t obj,
-			hwloc_calc_append_mode_t mode, int verbose)
+			int verbose)
 {
   while (obj && !obj->cpuset)
     obj = obj->parent;
   if (!obj)
     /* do nothing */
     return 0;
-  hwloc_calc_append_cpuset(set, obj->cpuset, mode, verbose);
+  hwloc_calc_append_cpuset(set, obj->cpuset, HWLOC_CALC_APPEND_ADD, verbose);
   return 0;
 }
 
@@ -472,7 +472,7 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
       if (verbose > 0)
 	printf("using matching PCI object #%d bus id %04x:%02x:%02x.%01x\n", i,
 	       obj->attr->pcidev.domain, obj->attr->pcidev.bus, obj->attr->pcidev.dev, obj->attr->pcidev.func);
-      hwloc_calc_append_iodev(set, obj, HWLOC_CALC_APPEND_ADD, verbose);
+      hwloc_calc_append_iodev(set, obj, verbose);
     } else {
       if (amount != -1)
 	if (verbose >= 0)
@@ -542,16 +542,28 @@ hwloc_calc_process_arg(hwloc_topology_t topology, unsigned topodepth,
       } else if (*sep == '=' && type == HWLOC_OBJ_PCI_DEVICE) {
 	/* try to match a busid */
 	obj = hwloc_get_pcidev_by_busidstring(topology, sep+1);
-	if (obj)
-	  return hwloc_calc_append_iodev(set, obj, mode, verbose);
+	if (obj) {
+	  newset = hwloc_bitmap_alloc();
+	  err = hwloc_calc_append_iodev(newset, obj, verbose);
+	  if (!err)
+	    err = hwloc_calc_append_cpuset(set, newset, mode, verbose);
+	  hwloc_bitmap_free(newset);
+	  return err;
+        }
 	if (verbose >= 0)
 	  fprintf(stderr, "invalid PCI device %s\n", sep+1);
 	return -1;
       } else if (*sep == '=' && type == HWLOC_OBJ_OS_DEVICE) {
 	/* try to match a OS device name */
 	while ((obj = hwloc_get_next_osdev(topology, obj)) != NULL) {
-	  if (!strcmp(obj->name, sep+1))
-	    return hwloc_calc_append_iodev(set, obj, mode, verbose);
+	  if (!strcmp(obj->name, sep+1)) {
+	    newset = hwloc_bitmap_alloc();
+	    err = hwloc_calc_append_iodev(newset, obj, verbose);
+	    if (!err)
+	      err = hwloc_calc_append_cpuset(set, newset, mode, verbose);
+	    hwloc_bitmap_free(newset);
+	    return err;
+	  }
 	}
 	if (verbose >= 0)
 	  fprintf(stderr, "invalid OS device %s\n", sep+1);
