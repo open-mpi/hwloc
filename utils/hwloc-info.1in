@@ -58,11 +58,22 @@ Include additional detail.
 \fB\-s\fR \fB\-\-silent\fR
 Reduce the amount of details to show.
 .TP
+\fB\-\-ancestors\fR
+Display information about the object as well as
+about all its ancestors up to the root of the topology.
+.TP
+\fB\-\-ancestor\fR <type>
+Only display the object ancestors that match the given type.
+.TP
 \fB\-n\fR
 When outputting object information, prefix each line with the index
 of the considered object within the input.
 For instance, if three cores were given in input, the output
 lines will be prefixed with "0: ", "1: " or "2: ".
+If \fB\-\-ancestor\fR is also used, the prefix will be "X.Y: "
+where X is the index of the considered object within the input,
+and Y is the parent index (0 for the object itself, increasing
+towards the root of the topology).
 .TP
 \fB\-\-whole\-system\fR
 Do not consider administration limitations.

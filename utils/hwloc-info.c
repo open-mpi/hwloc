@@ -22,6 +22,8 @@ static int pid_number = -1;
 static hwloc_pid_t pid;
 static int verbose_mode = 0;
 static int logical = 1;
+static int show_ancestors = 0;
+static hwloc_obj_type_t show_ancestor_type = (hwloc_obj_type_t) -1;
 static int show_index_prefix = 0;
 static int current_obj;
 
@@ -31,6 +33,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "\nOutput options:\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
   fprintf (where, "  -s --silent           Reduce the amount of details to show\n");
+  fprintf (where, "  --ancestors           Display the chain of ancestor objects up to the root\n");
+  fprintf (where, "  --ancestor <type>     Only display the ancestor of the given type\n");
   fprintf (where, "  -n                    Prefix each line with the index of the considered object\n");
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
@@ -189,8 +193,41 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
     snprintf(prefix, sizeof(prefix), "%u: ", current_obj);
 
   hwloc_obj_type_snprintf(objs, sizeof(objs), obj, 1);
-  printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
-  hwloc_info_show_obj(obj, prefix, verbose);
+
+  if (show_ancestors) {
+    char parents[128];
+    unsigned level = 0;
+    hwloc_obj_t parent = obj;
+    while (parent) {
+      if (show_index_prefix)
+	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
+      hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
+      if (level)
+	printf("%s%s L#%u = parent #%u of %s L#%u\n",
+	       prefix, parents, parent->logical_index, level, objs, obj->logical_index);
+      else
+	printf("%s%s L#%u\n", prefix, parents, parent->logical_index);
+      hwloc_info_show_obj(parent, prefix, verbose);
+      parent = parent->parent;
+      level++;
+    }
+  } else if (show_ancestor_type != (hwloc_obj_type_t) -1) {
+    char parents[128];
+    hwloc_obj_t parent = obj;
+    while (parent) {
+      if (parent->type == show_ancestor_type) {
+	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
+	printf("%s%s L#%u = parent of %s L#%u\n",
+	       prefix, parents, parent->logical_index, objs, obj->logical_index);
+	hwloc_info_show_obj(parent, prefix, verbose);
+	break;
+      }
+      parent = parent->parent;
+    }
+  } else {
+    printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
+    hwloc_info_show_obj(obj, prefix, verbose);
+  }
 
   current_obj++;
 }
@@ -241,6 +278,21 @@ main (int argc, char *argv[])
       }
       else if (!strcmp (argv[0], "-n"))
 	show_index_prefix = 1;
+      else if (!strcmp (argv[0], "--ancestors"))
+	show_ancestors = 1;
+      else if (!strcmp (argv[0], "--ancestor")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	show_ancestor_type = hwloc_obj_type_of_string(argv[1]);
+        if (show_ancestor_type == (hwloc_obj_type_t) -1) {
+          fprintf(stderr, "unrecognized --ancestor type %s\n", argv[1]);
+          usage(callname, stderr);
+          return EXIT_SUCCESS;
+        }
+	opt = 1;
+      }
       else if (!strcmp (argv[0], "--no-icaches"))
 	flags &= ~HWLOC_TOPOLOGY_FLAG_ICACHES;
       else if (!strcmp (argv[0], "--whole-system"))
