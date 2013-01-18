@@ -12,7 +12,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
 LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 
-EXTRA_DIST = test-hwloc-annotate.input test-hwloc-annotate.output test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-assembler.output test-hwloc-calc.output test-hwloc-distances.output test-hwloc-distrib.output test-hwloc-ls.output
+EXTRA_DIST = test-hwloc-annotate.input test-hwloc-annotate.output test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-assembler.output test-hwloc-calc.output test-hwloc-distances.output test-hwloc-distrib.output test-hwloc-info.output test-hwloc-ls.output
 
 noinst_HEADERS = misc.h
 
@@ -46,7 +46,7 @@ hwloc_calc_SOURCES = hwloc-calc.c hwloc-calc.h
 bin_SCRIPTS = hwloc-assembler-remote
 
 if !HWLOC_HAVE_MINGW32
-TESTS = test-hwloc-annotate.sh test-hwloc-assembler.sh test-hwloc-calc.sh test-hwloc-distances.sh test-hwloc-distrib.sh test-hwloc-ls.sh
+TESTS = test-hwloc-annotate.sh test-hwloc-assembler.sh test-hwloc-calc.sh test-hwloc-distances.sh test-hwloc-distrib.sh test-hwloc-info.sh test-hwloc-ls.sh
 if HWLOC_HAVE_PLUGINS
 TESTS += test-fake-plugin.sh
 endif HWLOC_HAVE_PLUGINS
