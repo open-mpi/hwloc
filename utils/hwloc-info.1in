@@ -21,8 +21,9 @@ hwloc-info \- Show some information about some objects or about a topology
 [ \fIoptions \fR]...
 .
 .PP
-Note that hwloc(7) provides a detailed explanation of the hwloc system; it
-should be read before reading this man page
+Note that hwloc(7) provides a detailed explanation of the hwloc system
+and of valid <object> formats;
+it should be read before reading this man page.
 .
 .\" **************************
 .\"    Options Section
@@ -135,6 +136,10 @@ hwloc-info displays information about the specified object.
 It is intended to be used with tools such as grep for filtering
 certain attribute lines.
 When no object is specified, hwloc-info prints a summary of the topology.
+.
+Objects may be specified as location tuples, as explained in hwloc(7).
+However hexadecimal bitmasks are not accepted since they may correspond
+to multiple objects.
 .
 .PP
 .B NOTE:
