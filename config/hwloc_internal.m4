@@ -361,12 +361,12 @@ EOF
     AC_CHECK_HEADERS([myriexpress.h], [
       AC_MSG_CHECKING(if MX_NUMA_NODE exists)
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <myriexpress.h>]],
-                                         [[int a = MX_NUMA_NODE;]],
+                                         [[int a = MX_NUMA_NODE;]])],
                         [AC_MSG_RESULT(yes)
                          AC_CHECK_LIB([myriexpress], [mx_get_info],
                                       [AC_DEFINE([HAVE_MYRIEXPRESS], 1, [Define to 1 if we have -lmyriexpress])
                                        hwloc_have_myriexpress=yes])],
-                        [AC_MSG_RESULT(no)])])])
+                        [AC_MSG_RESULT(no)])])
 
     AC_CHECK_PROGS(XMLLINT, [xmllint])
 
