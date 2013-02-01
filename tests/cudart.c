@@ -22,7 +22,7 @@ int main(void)
   cerr = cudaGetDeviceCount(&count);
   if (cerr) {
     printf("cudaGetDeviceCount failed %d\n", cerr);
-    return -1;
+    return 0;
   }
   printf("cudaGetDeviceCount found %d devices\n", count);
 
