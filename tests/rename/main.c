@@ -8,8 +8,10 @@
 #include "hwloc/plugins.h"
 
 /* enable those that have the right dependencies on your machine */
+//#include "hwloc/opencl.h"
 //#include "hwloc/cuda.h"
 //#include "hwloc/cudart.h"
+//#include "hwloc/nvml.h"
 #include "hwloc/glibc-sched.h"
 #include "hwloc/linux.h"
 #include "hwloc/linux-libnuma.h"
