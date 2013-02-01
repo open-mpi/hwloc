@@ -59,7 +59,7 @@ _useless:
 
 useless: prepare _useless restore
 
-_needed: prepare
+_needed:
 	@echo "# Finding needed renaming"
 	@echo "# using $(TEST_CPPFLAGS)"
 	@cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I $(abs_top_srcdir)/include -I $(abs_top_builddir)/include \
