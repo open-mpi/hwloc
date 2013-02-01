@@ -61,6 +61,7 @@ useless: prepare _useless restore
 
 _needed: prepare
 	@echo "# Finding needed renaming"
+	@echo "# using $(TEST_CPPFLAGS)"
 	@cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I $(abs_top_srcdir)/include -I $(abs_top_builddir)/include \
 		| egrep -i '(^| |\*)hwloc_'
 	@echo "# done"
