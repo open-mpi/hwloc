@@ -7,16 +7,33 @@
 #include "hwloc/helper.h"
 #include "hwloc/plugins.h"
 
-/* enable those that have the right dependencies on your machine */
-//#include "hwloc/opencl.h"
-//#include "hwloc/cuda.h"
-//#include "hwloc/cudart.h"
-//#include "hwloc/nvml.h"
-#include "hwloc/glibc-sched.h"
+#if HWLOC_TEST_RENAME_LINUX
 #include "hwloc/linux.h"
+#endif
+#if HWLOC_TEST_RENAME_LINUX_LIBNUMA
 #include "hwloc/linux-libnuma.h"
-//#include "hwloc/myriexpress.h"
-//#include "hwloc/openfabrics-verbs.h"
+#endif
+#if HWLOC_TEST_RENAME_GLIBC_SCHED
+#include "hwloc/glibc-sched.h"
+#endif
+#if HWLOC_TEST_RENAME_MYRIEXPRESS
+#include "hwloc/myriexpress.h"
+#endif
+#if HWLOC_TEST_RENAME_OPENFABRICS_VERBS
+#include "hwloc/openfabrics-verbs.h"
+#endif
+#if HWLOC_TEST_RENAME_OPENCL
+#include "hwloc/opencl.h"
+#endif
+#if HWLOC_TEST_RENAME_CUDA
+#include "hwloc/cuda.h"
+#endif
+#if HWLOC_TEST_RENAME_CUDART
+#include "hwloc/cudart.h"
+#endif
+#if HWLOC_TEST_RENAME_NVML
+#include "hwloc/nvml.h"
+#endif
 
 #include "private/autogen/config.h"
 #include "private/components.h"

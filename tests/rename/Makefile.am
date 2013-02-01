@@ -1,5 +1,34 @@
 all-local: prepare _needed _useless restore
 
+TEST_CPPFLAGS =
+if HWLOC_HAVE_LINUX
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_LINUX=1
+endif HWLOC_HAVE_LINUX
+if HWLOC_HAVE_LINUX_LIBNUMA
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_LINUX_LIBNUMA=1
+endif HWLOC_HAVE_LINUX_LIBNUMA
+if HWLOC_HAVE_SCHED_SETAFFINITY
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_GLIBC_SCHED=1
+endif HWLOC_HAVE_SCHED_SETAFFINITY
+if HWLOC_HAVE_LIBIBVERBS
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_OPENFABRICS_VERBS=1
+endif HWLOC_HAVE_LIBIBVERBS
+if HWLOC_HAVE_MYRIEXPRESS
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_MYRIEXPRESS=1
+endif HWLOC_HAVE_MYRIEXPRESS
+if HWLOC_HAVE_OPENCL
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_OPENCL=1
+endif HWLOC_HAVE_OPENCL
+if HWLOC_HAVE_CUDA
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_CUDA=1
+endif HWLOC_HAVE_CUDA
+if HWLOC_HAVE_CUDART
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_CUDART=1
+endif HWLOC_HAVE_CUDART
+if HWLOC_HAVE_NVML
+TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_NVML=1
+endif HWLOC_HAVE_NVML
+
 prepare:
 	@echo "# Enabling renaming in headers"
 	@sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
@@ -32,7 +61,7 @@ useless: prepare _useless restore
 
 _needed: prepare
 	@echo "# Finding needed renaming"
-	@cpp $(CPPFLAGS) $(srcdir)/main.c -I $(abs_top_srcdir)/include -I $(abs_top_builddir)/include \
+	@cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I $(abs_top_srcdir)/include -I $(abs_top_builddir)/include \
 		| egrep -i '(^| |\*)hwloc_'
 	@echo "# done"
 
