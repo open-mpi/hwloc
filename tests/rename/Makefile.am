@@ -1,4 +1,4 @@
-all-local: prepare _missing _useless restore
+all-local: prepare _needed _useless restore
 
 prepare:
 	@echo "# Enabling renaming in headers"
@@ -30,12 +30,12 @@ _useless:
 
 useless: prepare _useless restore
 
-_missing: prepare
-	@echo "# Finding missing renaming"
+_needed: prepare
+	@echo "# Finding needed renaming"
 	@cpp $(CPPFLAGS) $(srcdir)/main.c -I $(abs_top_srcdir)/include -I $(abs_top_builddir)/include \
 		| egrep -i '(^| |\*)hwloc_'
 	@echo "# done"
 
-missing: prepare _missing restore
+needed: prepare _needed restore
 
 EXTRA_DIST	=	main.c
