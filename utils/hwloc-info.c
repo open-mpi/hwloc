@@ -24,6 +24,8 @@ static int verbose_mode = 0;
 static int logical = 1;
 static int show_ancestors = 0;
 static hwloc_obj_type_t show_ancestor_type = (hwloc_obj_type_t) -1;
+static int show_ancestor_attrdepth = -1;
+static hwloc_obj_cache_type_t show_ancestor_attrcachetype = (hwloc_obj_cache_type_t) -1;
 static int show_index_prefix = 0;
 static int current_obj;
 
@@ -218,12 +220,24 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
     hwloc_obj_t parent = obj;
     while (parent) {
       if (parent->type == show_ancestor_type) {
+	if (parent->type == HWLOC_OBJ_GROUP
+	    && show_ancestor_attrdepth != -1
+	    && show_ancestor_attrdepth != (int) parent->attr->group.depth)
+	  goto next;
+	if (parent->type == HWLOC_OBJ_CACHE
+	    && show_ancestor_attrdepth != -1
+	    && show_ancestor_attrdepth != (int) parent->attr->cache.depth)
+	  goto next;
+	if (parent->type == HWLOC_OBJ_CACHE
+	    && show_ancestor_attrcachetype != (hwloc_obj_cache_type_t) -1
+	    && show_ancestor_attrcachetype != parent->attr->cache.type)
+	  goto next;
 	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
 	printf("%s%s L#%u = parent of %s L#%u\n",
 	       prefix, parents, parent->logical_index, objs, obj->logical_index);
 	hwloc_info_show_obj(parent, parents, prefix, verbose);
-	break;
       }
+next:
       parent = parent->parent;
     }
   } else {
@@ -287,8 +301,8 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	show_ancestor_type = hwloc_obj_type_of_string(argv[1]);
-        if (show_ancestor_type == (hwloc_obj_type_t) -1) {
+	err = hwloc_obj_type_sscanf(argv[1], &show_ancestor_type, &show_ancestor_attrdepth, &show_ancestor_attrcachetype);
+        if (err < 0) {
           fprintf(stderr, "unrecognized --ancestor type %s\n", argv[1]);
           usage(callname, stderr);
           return EXIT_SUCCESS;
