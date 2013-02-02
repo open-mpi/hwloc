@@ -231,3 +231,28 @@ NUMANode L#0 = parent of PU L#9
  nodeset = 0x00000001
  complete nodeset = 0x00000001
  allowed nodeset = 0x00000001
+
+L2Cache L#3 = parent of PU L#12
+ type = Cache
+ full type = L2Cache
+ logical index = 3
+ os index = 3
+ depth = 3
+ sibling rank = 1
+ children = 2
+ cpuset = 0x0000f000
+ complete cpuset = 0x0000f000
+ online cpuset = 0x0000f000
+ allowed cpuset = 0x0000f000
+ nodeset = 0x00000001
+ complete nodeset = 0x00000001
+ allowed nodeset = 0x00000001
+ attr cache depth = 2
+ attr cache type = Unified
+ attr cache size = 4194304
+ attr cache line size = 64
+
+L1dCache:3
+L1dCache:4
+L1dCache:4
+L1dCache:5

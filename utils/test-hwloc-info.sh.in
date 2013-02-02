@@ -36,6 +36,10 @@ set -e
   $info --if synthetic --input "node:2 core:3 pu:4" -n --ancestors pu:10-11
   echo
   $info --if synthetic --input "node:2 core:3 pu:4" --ancestor node pu:7-9
+  echo
+  $info --if synthetic --input "node:2 core:2 ca:2 ca:2 pu:2" --ancestor l2 pu:12
+  echo
+  $info --if synthetic --input "node:2 core:2 ca:2 ca:2 pu:2" --ancestor l1 -s pu:7-10
 ) > "$file"
 diff @HWLOC_DIFF_U@ $abs_top_srcdir/utils/test-hwloc-info.output "$file"
 rm -rf "$tmp"
