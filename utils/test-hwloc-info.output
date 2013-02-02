@@ -4,6 +4,8 @@ depth 0:	1 Machine (type #1)
    depth 3:	24 PU (type #6)
 
 Core L#2
+ type = Core
+ full type = Core
  logical index = 2
  os index = 2
  depth = 2
@@ -17,6 +19,8 @@ Core L#2
  complete nodeset = 0x00000001
  allowed nodeset = 0x00000001
 Core L#3
+ type = Core
+ full type = Core
  logical index = 3
  os index = 3
  depth = 2
@@ -30,6 +34,8 @@ Core L#3
  complete nodeset = 0x00000002
  allowed nodeset = 0x00000002
 Core L#4
+ type = Core
+ full type = Core
  logical index = 4
  os index = 4
  depth = 2
@@ -44,6 +50,8 @@ Core L#4
  allowed nodeset = 0x00000002
 
 0.0: PU L#10
+0.0:  type = PU
+0.0:  full type = PU
 0.0:  logical index = 10
 0.0:  os index = 10
 0.0:  depth = 3
@@ -57,6 +65,8 @@ Core L#4
 0.0:  complete nodeset = 0x00000001
 0.0:  allowed nodeset = 0x00000001
 0.1: Core L#2 = parent #1 of PU L#10
+0.1:  type = Core
+0.1:  full type = Core
 0.1:  logical index = 2
 0.1:  os index = 2
 0.1:  depth = 2
@@ -70,6 +80,8 @@ Core L#4
 0.1:  complete nodeset = 0x00000001
 0.1:  allowed nodeset = 0x00000001
 0.2: NUMANode L#0 = parent #2 of PU L#10
+0.2:  type = NUMANode
+0.2:  full type = NUMANode
 0.2:  logical index = 0
 0.2:  os index = 0
 0.2:  depth = 1
@@ -85,6 +97,8 @@ Core L#4
 0.2:  complete nodeset = 0x00000001
 0.2:  allowed nodeset = 0x00000001
 0.3: Machine L#0 = parent #3 of PU L#10
+0.3:  type = Machine
+0.3:  full type = Machine
 0.3:  logical index = 0
 0.3:  os index = 0
 0.3:  depth = 0
@@ -101,6 +115,8 @@ Core L#4
 0.3:  info Backend = Synthetic
 0.3:  info SyntheticDescription = node:2 core:3 pu:4
 1.0: PU L#11
+1.0:  type = PU
+1.0:  full type = PU
 1.0:  logical index = 11
 1.0:  os index = 11
 1.0:  depth = 3
@@ -114,6 +130,8 @@ Core L#4
 1.0:  complete nodeset = 0x00000001
 1.0:  allowed nodeset = 0x00000001
 1.1: Core L#2 = parent #1 of PU L#11
+1.1:  type = Core
+1.1:  full type = Core
 1.1:  logical index = 2
 1.1:  os index = 2
 1.1:  depth = 2
@@ -127,6 +145,8 @@ Core L#4
 1.1:  complete nodeset = 0x00000001
 1.1:  allowed nodeset = 0x00000001
 1.2: NUMANode L#0 = parent #2 of PU L#11
+1.2:  type = NUMANode
+1.2:  full type = NUMANode
 1.2:  logical index = 0
 1.2:  os index = 0
 1.2:  depth = 1
@@ -142,6 +162,8 @@ Core L#4
 1.2:  complete nodeset = 0x00000001
 1.2:  allowed nodeset = 0x00000001
 1.3: Machine L#0 = parent #3 of PU L#11
+1.3:  type = Machine
+1.3:  full type = Machine
 1.3:  logical index = 0
 1.3:  os index = 0
 1.3:  depth = 0
@@ -159,6 +181,8 @@ Core L#4
 1.3:  info SyntheticDescription = node:2 core:3 pu:4
 
 NUMANode L#0 = parent of PU L#7
+ type = NUMANode
+ full type = NUMANode
  logical index = 0
  os index = 0
  depth = 1
@@ -174,6 +198,8 @@ NUMANode L#0 = parent of PU L#7
  complete nodeset = 0x00000001
  allowed nodeset = 0x00000001
 NUMANode L#0 = parent of PU L#8
+ type = NUMANode
+ full type = NUMANode
  logical index = 0
  os index = 0
  depth = 1
@@ -189,6 +215,8 @@ NUMANode L#0 = parent of PU L#8
  complete nodeset = 0x00000001
  allowed nodeset = 0x00000001
 NUMANode L#0 = parent of PU L#9
+ type = NUMANode
+ full type = NUMANode
  logical index = 0
  os index = 0
  depth = 1
