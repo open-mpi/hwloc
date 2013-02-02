@@ -59,10 +59,12 @@ void usage(const char *name, FILE *where)
 }
 
 static void
-hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int verbose __hwloc_attribute_unused)
+hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int verbose)
 {
   char s[128];
   unsigned i;
+  if (verbose < 0)
+    return;
   printf("%s type = %s\n", prefix, hwloc_obj_type_string(obj->type));
   printf("%s full type = %s\n", prefix, type);
   printf("%s logical index = %u\n", prefix, obj->logical_index);
@@ -206,7 +208,9 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
       if (show_index_prefix)
 	snprintf(prefix, sizeof(prefix), "%u.%u: ", current_obj, level);
       hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
-      if (level)
+      if (verbose < 0)
+	printf("%s%s:%u\n", prefix, parents, parent->logical_index);
+      else if (level)
 	printf("%s%s L#%u = parent #%u of %s L#%u\n",
 	       prefix, parents, parent->logical_index, level, objs, obj->logical_index);
       else
@@ -233,15 +237,21 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
 	    && show_ancestor_attrcachetype != parent->attr->cache.type)
 	  goto next;
 	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
-	printf("%s%s L#%u = parent of %s L#%u\n",
-	       prefix, parents, parent->logical_index, objs, obj->logical_index);
+	if (verbose < 0)
+	  printf("%s%s:%u\n", prefix, parents, parent->logical_index);
+	else
+	  printf("%s%s L#%u = parent of %s L#%u\n",
+		 prefix, parents, parent->logical_index, objs, obj->logical_index);
 	hwloc_info_show_obj(parent, parents, prefix, verbose);
       }
 next:
       parent = parent->parent;
     }
   } else {
-    printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
+    if (verbose < 0)
+      printf("%s%s:%u\n", prefix, objs, obj->logical_index);
+    else
+      printf("%s%s L#%u\n", prefix, objs, obj->logical_index);
     hwloc_info_show_obj(obj, objs, prefix, verbose);
   }
 
