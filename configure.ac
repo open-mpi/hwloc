@@ -227,13 +227,19 @@ Hwloc optional build support status (more details can be found above):
 Probe / display I/O devices:$hwloc_probeio_list
 Graphical output (Cairo):    $hwloc_cairo_happy
 XML input / output:          $hwloc_xml_status
-Plugin support:              $hwloc_have_plugins
 EOF
 
 # Linux specific support
 AS_IF([test "$hwloc_linux" = "yes"], [cat <<EOF
 libnuma memory support:      $hwloc_linux_libnuma_happy
 EOF])
+
+# Plugin support
+hwloc_plugin_summary=$hwloc_have_plugins
+test "x$hwloc_plugin_components" != "x" && hwloc_plugin_summary="yes ("`echo $hwloc_plugin_components`")" # echo removes the starting space
+cat <<EOF
+Plugin support:              $hwloc_plugin_summary
+EOF
 
 # End of generic support
 cat <<EOF
