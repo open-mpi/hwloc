@@ -1845,7 +1845,7 @@ enabled for the current topology.
 
 <dt>AMD OpenCL</dt>
  <dd>
-  hwloc/opencl.h enable interoperability with the OpenCL interface.
+  hwloc/opencl.h enables interoperability with the OpenCL interface.
   Only the AMD implementation currently offers locality information.
   It may return the list of processors near an AMD/ATI GPU given as
   a <tt>cl_device_id</tt>.
@@ -1864,7 +1864,7 @@ enabled for the current topology.
 
 <dt>NVIDIA Management Library (NVML)</dt>
  <dd>
-  hwloc/nvml.h enable interoperability with the NVIDIA NVML interface.
+  hwloc/nvml.h enables interoperability with the NVIDIA NVML interface.
   It may return the list of processors near a NVIDIA GPU given as
   a <tt>nvmlDevice_t</tt>.
   It may also return the corresponding OS device hwloc object for further
