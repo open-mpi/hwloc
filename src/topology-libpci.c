@@ -21,11 +21,13 @@
 #include <stdarg.h>
 #include <setjmp.h>
 
-#ifdef HWLOC_HAVE_LIBPCIACCESS
-#include <pciaccess.h>
-#undef HWLOC_HAVE_LIBPCI
+#if (defined HWLOC_HAVE_LIBPCIACCESS) && (defined HWLOC_HAVE_LIBPCI)
+#error Cannot have both LIBPCI and LIBPCIACCESS enabled simultaneously
 #endif
 
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+#include <pciaccess.h>
+#endif
 #ifdef HWLOC_HAVE_LIBPCI
 #include <pci/pci.h>
 #endif
