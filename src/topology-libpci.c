@@ -674,6 +674,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
   }
 
 #ifdef HWLOC_HAVE_LIBPCIACCESS
+  pci_iterator_destroy(iter);
   pci_system_cleanup();
 #endif
 #ifdef HWLOC_HAVE_LIBPCI
