@@ -509,6 +509,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 #endif
 
 #ifdef HWLOC_HAVE_LIBPCIACCESS
+    pci_device_probe(pcidev);
     pci_device_cfg_read(pcidev, config_space_cache, 0, CONFIG_SPACE_CACHESIZE_TRY, &got);
     config_space_cachesize = got;
 #endif
