@@ -646,7 +646,7 @@ EOF])
       if test x$hwloc_pci_happy = xyes; then hwloc_pci_lib=pciaccess; fi
     fi
     # PCI support with pciutils instead of pciaccess
-    if test "x$enable_pci" != "xno" -a "x$hwloc_pci" != "xpciaccess"; then
+    if test "x$enable_pci" != "xno" -a "x$hwloc_pci_lib" != "xpciaccess"; then
         hwloc_pci_happy=yes
         HWLOC_PKG_CHECK_MODULES([PCI], [libpci], [pci_cleanup], [:], [
           # manually check pciutils in case a old one without .pc is installed
