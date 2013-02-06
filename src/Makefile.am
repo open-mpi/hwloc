@@ -1,4 +1,4 @@
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2012 Oracle and/or its affiliates.  All rights reserved.
@@ -61,8 +61,8 @@ sources += topology-libpci.c
 else
 plugins_LTLIBRARIES += hwloc_libpci.la
 hwloc_libpci_la_SOURCES = topology-libpci.c
-hwloc_libpci_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_PCI_CFLAGS) -DHWLOC_INSIDE_PLUGIN
-hwloc_libpci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCI_LIBS)
+hwloc_libpci_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_PCI_CFLAGS) $(HWLOC_PCIACCESS_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_libpci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCI_LIBS) $(HWLOC_PCIACCESS_LIBS)
 endif
 endif HWLOC_HAVE_LIBPCI
 

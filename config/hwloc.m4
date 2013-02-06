@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2012 Inria.  All rights reserved.
+dnl Copyright © 2009-2013 Inria.  All rights reserved.
 dnl Copyright (c) 2009-2012 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -640,8 +640,13 @@ EOF])
 
     # PCI support
     hwloc_pci_happy=no
-    if test "x$enable_pci" != "xno"; then
-        hwloc_pci_happy=yes
+    if test "x$enable_pci" != xno; then
+      hwloc_pci_happy=yes
+      HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_system_init], [:], [hwloc_pci_happy=no])
+      if test x$hwloc_pci_happy = xyes; then hwloc_pci_lib=pciaccess; fi
+    fi
+    # PCI support with pciutils instead of pciaccess
+    if test "x$enable_pci" != "xno" -a "x$hwloc_pci" = "xpciaccess"; then
         HWLOC_PKG_CHECK_MODULES([PCI], [libpci], [pci_cleanup], [:], [
           # manually check pciutils in case a old one without .pc is installed
           AC_CHECK_HEADERS([pci/pci.h], [
@@ -680,6 +685,7 @@ EOF])
                     [hwloc_pci_happy=no])])
             ], [hwloc_pci_happy=no])
         ])
+        if test x$hwloc_pci_happy = xyes; then hwloc_pci_lib=pciutils; fi
     fi
     AC_SUBST(HWLOC_PCI_LIBS)
     # If we asked for pci support but couldn't deliver, fail
@@ -687,11 +693,24 @@ EOF])
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
            AC_MSG_WARN([find appropriate support])
            AC_MSG_ERROR([Cannot continue])])
-    if test "x$hwloc_pci_happy" = "xyes"; then
+    # pciaccess specific enabling
+    if test "x$hwloc_pci_lib" = "xpciaccess"; then
+      HWLOC_PCIACCESS_REQUIRES=pciaccess
+      AC_DEFINE([HWLOC_HAVE_LIBPCIACCESS], [1], [Define to 1 if you have the `libpciaccess' library.])
+      AC_SUBST([HWLOC_HAVE_LIBPCIACCESS], [1])
+
+      hwloc_components="$hwloc_components libpci"
+      hwloc_libpci_component_maybeplugin=1
+    else
+      AC_SUBST([HWLOC_HAVE_LIBPCIACCESS], [0])
+    fi
+    # pciutils specific checks and enabling
+    if test "x$hwloc_pci_lib" = "xpciutils"; then
       tmp_save_CFLAGS="$CFLAGS"
       CFLAGS="$CFLAGS $HWLOC_PCI_CFLAGS"
       tmp_save_LIBS="$LIBS"
       LIBS="$LIBS $HWLOC_PCI_LIBS"
+
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
       AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [$HWLOC_PCI_ADDITIONAL_LIBS])
@@ -717,16 +736,19 @@ EOF])
         AC_DEFINE([HWLOC_HAVE_PCIDEV_DOMAIN], [1], [Define to 1 if struct pci_dev has a `domain' field.])
       fi
 
-      HWLOC_PCI_REQUIRES=libpci
-      AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
-      AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
       CFLAGS="$tmp_save_CFLAGS"
       LIBS="$tmp_save_LIBS"
 
-      hwloc_components="$hwloc_components libpci"
-      hwloc_libpci_component_maybeplugin=1
+      HWLOC_PCI_REQUIRES=libpci
+      AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
+      AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
     else
       AC_SUBST([HWLOC_HAVE_LIBPCI], [0])
+    fi
+    # final common PCI enabling
+    if test "x$hwloc_pci_happy" = "xyes"; then
+      hwloc_components="$hwloc_components libpci"
+      hwloc_libpci_component_maybeplugin=1
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
@@ -965,9 +987,9 @@ EOF])
     AC_MSG_RESULT([$hwloc_plugin_components])
 
     AS_IF([test "$hwloc_libpci_component" = "static"],
-          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS"
-           HWLOC_REQUIRES="$HWLOC_PCI_REQUIRES $HWLOC_REQUIRES"])
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS $HWLOC_PCIACCESS_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS $HWLOC_PCIACCESS_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_PCI_REQUIRES $HWLOC_PCIACCESS_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_opencl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_OPENCL_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CFLAGS"
