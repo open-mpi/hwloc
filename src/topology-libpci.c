@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2012 Inria.  All rights reserved.
- * Copyright © 2009-2011 Université Bordeaux 1
+ * Copyright © 2009-2011, 2013 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
 
@@ -14,7 +14,6 @@
 #include <private/debug.h>
 #include <private/misc.h>
 
-#include <pci/pci.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
@@ -22,7 +21,91 @@
 #include <stdarg.h>
 #include <setjmp.h>
 
-#define CONFIG_SPACE_CACHESIZE 256
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+#include <pciaccess.h>
+#undef HWLOC_HAVE_LIBPCI
+#endif
+
+#ifdef HWLOC_HAVE_LIBPCI
+#include <pci/pci.h>
+#endif
+
+#ifndef PCI_HEADER_TYPE
+#define PCI_HEADER_TYPE 0x0e
+#endif
+#ifndef PCI_HEADER_TYPE_BRIDGE
+#define PCI_HEADER_TYPE_BRIDGE 1
+#endif
+
+#ifndef PCI_CLASS_DEVICE
+#define PCI_CLASS_DEVICE 0x0a
+#endif
+#ifndef PCI_CLASS_BRIDGE_PCI
+#define PCI_CLASS_BRIDGE_PCI 0x0604
+#endif
+
+#ifndef PCI_REVISION_ID
+#define PCI_REVISION_ID 0x08
+#endif
+
+#ifndef PCI_SUBSYSTEM_VENDOR_ID
+#define PCI_SUBSYSTEM_VENDOR_ID 0x2c
+#endif
+#ifndef PCI_SUBSYSTEM_ID
+#define PCI_SUBSYSTEM_ID 0x2e
+#endif
+
+#ifndef PCI_PRIMARY_BUS
+#define PCI_PRIMARY_BUS 0x18
+#endif
+#ifndef PCI_SECONDARY_BUS
+#define PCI_SECONDARY_BUS 0x19
+#endif
+#ifndef PCI_SUBORDINATE_BUS
+#define PCI_SUBORDINATE_BUS 0x1a
+#endif
+
+#ifndef PCI_EXP_LNKSTA
+#define PCI_EXP_LNKSTA 18
+#endif
+
+#ifndef PCI_EXP_LNKSTA_SPEED
+#define PCI_EXP_LNKSTA_SPEED 0x000f
+#endif
+#ifndef PCI_EXP_LNKSTA_WIDTH
+#define PCI_EXP_LNKSTA_WIDTH 0x03f0
+#endif
+
+#ifndef PCI_CAP_ID_EXP
+#define PCI_CAP_ID_EXP 0x10
+#endif
+
+#ifndef PCI_CAP_NORMAL
+#define PCI_CAP_NORMAL 1
+#endif
+
+#ifndef PCI_STATUS
+#define PCI_STATUS 0x06
+#endif
+
+#ifndef PCI_CAPABILITY_LIST
+#define PCI_CAPABILITY_LIST 0x34
+#endif
+
+#ifndef PCI_STATUS_CAP_LIST
+#define PCI_STATUS_CAP_LIST 0x10
+#endif
+
+#ifndef PCI_CAP_LIST_ID
+#define PCI_CAP_LIST_ID 0
+#endif
+
+#ifndef PCI_CAP_LIST_NEXT
+#define PCI_CAP_LIST_NEXT 1
+#endif
+
+#define CONFIG_SPACE_CACHESIZE_TRY 256
+#define CONFIG_SPACE_CACHESIZE 64
 
 static void
 hwloc_pci_traverse_print_cb(void * cbdata __hwloc_attribute_unused,
@@ -290,6 +373,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
   return parent;
 }
 
+#ifdef HWLOC_HAVE_LIBPCI
 /* Avoid letting libpci call exit(1) when no PCI bus is available. */
 static jmp_buf err_buf;
 static void
@@ -308,15 +392,59 @@ static void
 hwloc_pci_warning(char *msg __hwloc_attribute_unused, ...)
 {
 }
+#endif
+
+#ifndef HWLOC_HAVE_PCI_FIND_CAP
+static unsigned
+hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap)
+{
+  unsigned char seen[256] = { 0 };
+  unsigned char ptr;
+
+  if (!(config[PCI_STATUS] & PCI_STATUS_CAP_LIST))
+    return 0;
+
+  for (ptr = config[PCI_CAPABILITY_LIST] & ~3;
+       ptr;
+       ptr = config[ptr + PCI_CAP_LIST_NEXT] & ~3) {
+    unsigned char id;
+
+    if (ptr >= config_size)
+      return 0;
+
+    /* Looped around! */
+    if (seen[ptr])
+      return 0;
+    seen[ptr] = 1;
+
+    id = config[ptr + PCI_CAP_LIST_ID];
+    if (id == cap)
+      return ptr;
+    if (id == 0xff)
+      break;
+
+    if (ptr + PCI_CAP_LIST_NEXT >= config_size)
+      return 0;
+  }
+  return 0;
+}
+#endif
 
 static int
 hwloc_look_libpci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
-  struct pci_access *pciaccess;
-  struct pci_dev *pcidev;
   struct hwloc_obj fakehostbridge; /* temporary object covering the whole PCI hierarchy until its complete */
   unsigned current_hostbridge;
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+  int ret;
+  struct pci_device_iterator *iter;
+  struct pci_device *pcidev;
+#endif
+#ifdef HWLOC_HAVE_LIBPCI
+  struct pci_access *pciaccess;
+  struct pci_dev *pcidev;
+#endif
 
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
@@ -331,6 +459,16 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 
   hwloc_debug("%s", "\nScanning PCI buses...\n");
 
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+  ret = pci_system_init();
+  if (ret) {
+    hwloc_debug("%s", "Can not initialize libpciaccess\n");
+    return -1;
+  }
+
+  iter = pci_slot_match_iterator_create(NULL);
+#endif
+#ifdef HWLOC_HAVE_LIBPCI
   pciaccess = pci_alloc();
   pciaccess->error = hwloc_pci_error;
   pciaccess->warning = hwloc_pci_warning;
@@ -343,20 +481,43 @@ hwloc_look_libpci(struct hwloc_backend *backend)
   pci_init(pciaccess);
   pci_scan_bus(pciaccess);
 
-  pcidev = pciaccess->devices;
-  while (pcidev) {
-    char name[128];
+#endif
+
+#ifdef HWLOC_HAVE_LIBPCI
+  for (pcidev = pciaccess->devices;
+       pcidev;
+       pcidev = pcidev->next)
+#endif
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+  for (pcidev = pci_device_next(iter);
+       pcidev;
+       pcidev = pci_device_next(iter))
+#endif
+  {
     const char *resname;
-    u8 config_space_cache[CONFIG_SPACE_CACHESIZE];
+    unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE_TRY];
+    unsigned config_space_cachesize = CONFIG_SPACE_CACHESIZE_TRY;
     struct hwloc_obj *obj;
     unsigned char headertype;
     unsigned os_index;
     unsigned isbridge;
     unsigned domain;
     unsigned device_class;
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+    pciaddr_t got;
+#endif
+#ifdef HWLOC_HAVE_LIBPCI
+    char name[128];
+#endif
 
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+    pci_device_cfg_read(pcidev, config_space_cache, 0, CONFIG_SPACE_CACHESIZE_TRY, &got);
+    config_space_cachesize = got;
+#endif
+#ifdef HWLOC_HAVE_LIBPCI
     /* cache what we need of the config space */
-    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE);
+    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE_TRY);
+#endif
 
     /* read some fields that may not always be available */
 #ifdef HWLOC_HAVE_PCIDEV_DOMAIN
@@ -364,11 +525,16 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 #else
     domain = 0; /* default domain number */
 #endif
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+    device_class = pcidev->device_class >> 8;
+#endif
+#ifdef HWLOC_HAVE_LIBPCI
 #ifdef HWLOC_HAVE_PCIDEV_DEVICE_CLASS
     device_class = pcidev->device_class;
 #else
     HWLOC_BUILD_ASSERT(PCI_CLASS_DEVICE < CONFIG_SPACE_CACHESIZE);
     device_class = config_space_cache[PCI_CLASS_DEVICE] | (config_space_cache[PCI_CLASS_DEVICE+1] << 8);
+#endif
 #endif
 
     /* is this a bridge? */
@@ -396,16 +562,24 @@ hwloc_look_libpci(struct hwloc_backend *backend)
     obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
 
     obj->attr->pcidev.linkspeed = 0; /* unknown */
-#ifdef HWLOC_HAVE_PCI_FIND_CAP
     {
+#ifdef HWLOC_HAVE_PCI_FIND_CAP
     struct pci_cap *cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
-    if (cap) {
-      if (cap->addr + PCI_EXP_LNKSTA >= CONFIG_SPACE_CACHESIZE) {
-        fprintf(stderr, "cannot read PCI_EXP_LNKSTA cap at %d (only %d cached)\n", cap->addr + PCI_EXP_LNKSTA, CONFIG_SPACE_CACHESIZE);
+    unsigned offset;
+    if (cap)
+    {
+      offset = cap->addr;
+#else
+    unsigned offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, PCI_CAP_ID_EXP);
+    if (offset > 0)
+    {
+#endif /* HWLOC_HAVE_PCI_FIND_CAP */
+      if (offset + PCI_EXP_LNKSTA + 4 >= config_space_cachesize) {
+        fprintf(stderr, "cannot read PCI_EXP_LNKSTA cap at %d (only %d cached)\n", offset + PCI_EXP_LNKSTA, CONFIG_SPACE_CACHESIZE);
       } else {
         unsigned linksta, speed, width;
         float lanespeed;
-        memcpy(&linksta, &config_space_cache[cap->addr + PCI_EXP_LNKSTA], 4);
+        memcpy(&linksta, &config_space_cache[offset + PCI_EXP_LNKSTA], 4);
         speed = linksta & PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
         width = (linksta & PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
 	/* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
@@ -417,7 +591,6 @@ hwloc_look_libpci(struct hwloc_backend *backend)
       }
     }
     }
-#endif /* HWLOC_HAVE_PCI_FIND_CAP */
 
     if (isbridge) {
       HWLOC_BUILD_ASSERT(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
@@ -437,6 +610,10 @@ hwloc_look_libpci(struct hwloc_backend *backend)
  * of arguments, and supports the PCI_LOOKUP_NO_NUMBERS flag.
  */
 
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+    resname = pci_device_get_vendor_name(pcidev);
+#endif
+#ifdef HWLOC_HAVE_LIBPCI
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_NO_NUMBERS,
@@ -446,9 +623,14 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 			      pcidev->vendor_id, 0, 0, 0
 #endif
 			      );
+#endif
     if (resname)
       hwloc_obj_add_info(obj, "PCIVendor", resname);
 
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+    resname = pci_device_get_device_name(pcidev);
+#endif
+#ifdef HWLOC_HAVE_LIBPCI
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
@@ -458,9 +640,11 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 			      pcidev->vendor_id, pcidev->device_id, 0, 0
 #endif
 			      );
+#endif
     if (resname)
       hwloc_obj_add_info(obj, "PCIDevice", resname);
 
+#ifdef HWLOC_HAVE_LIBPCI
     resname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
@@ -474,6 +658,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
       obj->name = strdup(resname);
     else
       resname = "??";
+#endif
 
     hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s\n",
 		domain, pcidev->bus, pcidev->dev, pcidev->func,
@@ -481,10 +666,14 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 		resname);
 
     hwloc_pci_add_object(&fakehostbridge, obj);
-    pcidev = pcidev->next;
   }
 
+#ifdef HWLOC_HAVE_LIBPCIACCESS
+  pci_system_cleanup();
+#endif
+#ifdef HWLOC_HAVE_LIBPCI
   pci_cleanup(pciaccess);
+#endif
 
   hwloc_debug("%s", "\nPCI hierarchy after basic scan:\n");
   hwloc_pci_traverse(NULL, &fakehostbridge, hwloc_pci_traverse_print_cb);
