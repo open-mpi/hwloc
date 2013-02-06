@@ -423,7 +423,7 @@ hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap
     if (id == 0xff)
       break;
 
-    if (ptr + PCI_CAP_LIST_NEXT >= config_size)
+    if (ptr + PCI_CAP_LIST_NEXT >= (unsigned char) config_size)
       return 0;
   }
   return 0;
