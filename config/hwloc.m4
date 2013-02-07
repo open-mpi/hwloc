@@ -642,7 +642,7 @@ EOF])
     hwloc_pci_happy=no
     if test "x$enable_pci" != xno; then
       hwloc_pci_happy=yes
-      HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_system_init], [:], [hwloc_pci_happy=no])
+      HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [:], [hwloc_pci_happy=no])
       if test x$hwloc_pci_happy = xyes; then hwloc_pci_lib=pciaccess; fi
     fi
     # PCI support with pciutils instead of pciaccess
