@@ -506,6 +506,10 @@ hwloc_look_libpci(struct hwloc_backend *backend)
     unsigned domain;
     unsigned device_class;
     char name[128];
+    unsigned offset;
+#ifdef HWLOC_HAVE_PCI_FIND_CAP
+    struct pci_cap *cap;
+#endif
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     pciaddr_t got;
 #endif
@@ -563,18 +567,13 @@ hwloc_look_libpci(struct hwloc_backend *backend)
     obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
 
     obj->attr->pcidev.linkspeed = 0; /* unknown */
-    {
 #ifdef HWLOC_HAVE_PCI_FIND_CAP
-    struct pci_cap *cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
-    unsigned offset;
-    if (cap)
-    {
-      offset = cap->addr;
+    cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
+    offset = cap ? cap->addr : 0;
 #else
-    unsigned offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, PCI_CAP_ID_EXP);
-    if (offset > 0)
-    {
+    offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, PCI_CAP_ID_EXP);
 #endif /* HWLOC_HAVE_PCI_FIND_CAP */
+    if (offset > 0) {
       if (offset + PCI_EXP_LNKSTA + 4 >= config_space_cachesize) {
         fprintf(stderr, "cannot read PCI_EXP_LNKSTA cap at %d (only %d cached)\n", offset + PCI_EXP_LNKSTA, CONFIG_SPACE_CACHESIZE);
       } else {
@@ -590,7 +589,6 @@ hwloc_look_libpci(struct hwloc_backend *backend)
         lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
         obj->attr->pcidev.linkspeed = lanespeed * width / 8; /* GB/s */
       }
-    }
     }
 
     if (isbridge) {
