@@ -525,7 +525,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 #endif
 
     /* read some fields that may not always be available */
-#ifdef HWLOC_HAVE_PCIDEV_DOMAIN
+#if (defined HWLOC_HAVE_LIBPCIACCESS) || (defined HWLOC_HAVE_PCIDEV_DOMAIN)
     domain = pcidev->domain;
 #else
     domain = 0; /* default domain number */
