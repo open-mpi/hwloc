@@ -698,12 +698,9 @@ EOF])
     if test "x$hwloc_pci_lib" = "xpciaccess"; then
       HWLOC_PCIACCESS_REQUIRES=pciaccess
       AC_DEFINE([HWLOC_HAVE_LIBPCIACCESS], [1], [Define to 1 if you have the `libpciaccess' library.])
-      AC_SUBST([HWLOC_HAVE_LIBPCIACCESS], [1])
 
       hwloc_components="$hwloc_components libpci"
       hwloc_libpci_component_maybeplugin=1
-    else
-      AC_SUBST([HWLOC_HAVE_LIBPCIACCESS], [0])
     fi
     # pciutils specific checks and enabling
     if test "x$hwloc_pci_lib" = "xpciutils"; then
@@ -742,9 +739,6 @@ EOF])
 
       HWLOC_PCI_REQUIRES=libpci
       AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
-      AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
-    else
-      AC_SUBST([HWLOC_HAVE_LIBPCI], [0])
     fi
     # final common PCI enabling
     if test "x$hwloc_pci_happy" = "xyes"; then
@@ -1087,7 +1081,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 		       [test "x$hwloc_have_cudart" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBXML2], [test "$hwloc_libxml2_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "$hwloc_cairo_happy" = "yes"])
-        AM_CONDITIONAL([HWLOC_HAVE_LIBPCI], [test "$hwloc_pci_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_PCI], [test "$hwloc_pci_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_OPENCL], [test "$hwloc_opencl_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_NVML], [test "$hwloc_nvml_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_SET_MEMPOLICY], [test "x$enable_set_mempolicy" != "xno"])

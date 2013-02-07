@@ -55,7 +55,7 @@ hwloc_xml_libxml_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_LIBXML2_LIBS)
 endif
 endif HWLOC_HAVE_LIBXML2
 
-if HWLOC_HAVE_LIBPCI
+if HWLOC_HAVE_PCI
 if HWLOC_LIBPCI_BUILD_STATIC
 sources += topology-libpci.c
 else
@@ -64,7 +64,7 @@ hwloc_libpci_la_SOURCES = topology-libpci.c
 hwloc_libpci_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_PCI_CFLAGS) $(HWLOC_PCIACCESS_CFLAGS) -DHWLOC_INSIDE_PLUGIN
 hwloc_libpci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCI_LIBS) $(HWLOC_PCIACCESS_LIBS)
 endif
-endif HWLOC_HAVE_LIBPCI
+endif HWLOC_HAVE_PCI
 
 if HWLOC_HAVE_OPENCL
 if HWLOC_OPENCL_BUILD_STATIC
