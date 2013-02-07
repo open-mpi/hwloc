@@ -23,12 +23,13 @@
 
 #if (defined HWLOC_HAVE_LIBPCIACCESS) && (defined HWLOC_HAVE_LIBPCI)
 #error Cannot have both LIBPCI and LIBPCIACCESS enabled simultaneously
+#elif (!defined HWLOC_HAVE_LIBPCIACCESS) && (!defined HWLOC_HAVE_LIBPCI)
+#error Cannot have neither LIBPCI nor LIBPCIACCESS enabled simultaneously
 #endif
 
 #ifdef HWLOC_HAVE_LIBPCIACCESS
 #include <pciaccess.h>
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
+#else /* HWLOC_HAVE_LIBPCI */
 #include <pci/pci.h>
 #endif
 
@@ -442,8 +443,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
+#else /* HWLOC_HAVE_LIBPCI */
   struct pci_access *pciaccess;
   struct pci_dev *pcidev;
 #endif
@@ -461,6 +461,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 
   hwloc_debug("%s", "\nScanning PCI buses...\n");
 
+  /* initialize PCI scanning */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
   ret = pci_system_init();
   if (ret) {
@@ -469,8 +470,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
   }
 
   iter = pci_slot_match_iterator_create(NULL);
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
+#else /* HWLOC_HAVE_LIBPCI */
   pciaccess = pci_alloc();
   pciaccess->error = hwloc_pci_error;
   pciaccess->warning = hwloc_pci_warning;
@@ -482,18 +482,17 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 
   pci_init(pciaccess);
   pci_scan_bus(pciaccess);
-
 #endif
 
-#ifdef HWLOC_HAVE_LIBPCI
-  for (pcidev = pciaccess->devices;
-       pcidev;
-       pcidev = pcidev->next)
-#endif
+  /* iterate over devices */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
   for (pcidev = pci_device_next(iter);
        pcidev;
        pcidev = pci_device_next(iter))
+#else /* HWLOC_HAVE_LIBPCI */
+  for (pcidev = pciaccess->devices;
+       pcidev;
+       pcidev = pcidev->next)
 #endif
   {
     const char *vendorname, *devicename, *fullname;
@@ -514,26 +513,26 @@ hwloc_look_libpci(struct hwloc_backend *backend)
     pciaddr_t got;
 #endif
 
+    /* cache what we need of the config space */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     pci_device_probe(pcidev);
     pci_device_cfg_read(pcidev, config_space_cache, 0, CONFIG_SPACE_CACHESIZE_TRY, &got);
     config_space_cachesize = got;
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
-    /* cache what we need of the config space */
+#else /* HWLOC_HAVE_LIBPCI */
     pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE_TRY);
 #endif
 
-    /* read some fields that may not always be available */
+    /* try to read the domain */
 #if (defined HWLOC_HAVE_LIBPCIACCESS) || (defined HWLOC_HAVE_PCIDEV_DOMAIN)
     domain = pcidev->domain;
 #else
     domain = 0; /* default domain number */
 #endif
+
+    /* try to read the device_class */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     device_class = pcidev->device_class >> 8;
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
+#else /* HWLOC_HAVE_LIBPCI */
 #ifdef HWLOC_HAVE_PCIDEV_DEVICE_CLASS
     device_class = pcidev->device_class;
 #else
@@ -611,8 +610,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     vendorname = pci_device_get_vendor_name(pcidev);
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
+#else /* HWLOC_HAVE_LIBPCI */
     vendorname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_NO_NUMBERS,
@@ -622,14 +620,13 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 			      pcidev->vendor_id, 0, 0, 0
 #endif
 			      );
-#endif
+#endif /* HWLOC_HAVE_LIBPCI */
     if (vendorname)
       hwloc_obj_add_info(obj, "PCIVendor", vendorname);
 
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     devicename = pci_device_get_device_name(pcidev);
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
+#else /* HWLOC_HAVE_LIBPCI */
     devicename = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
@@ -639,7 +636,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 			      pcidev->vendor_id, pcidev->device_id, 0, 0
 #endif
 			      );
-#endif
+#endif /* HWLOC_HAVE_LIBPCI */
     if (devicename)
       hwloc_obj_add_info(obj, "PCIDevice", devicename);
 
@@ -650,8 +647,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 	     devicename ? devicename : "");
     fullname = name;
     obj->name = strdup(name);
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
+#else /* HWLOC_HAVE_LIBPCI */
     fullname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
 			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
@@ -665,7 +661,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
       obj->name = strdup(fullname);
     else
       fullname = "??";
-#endif
+#endif /* HWLOC_HAVE_LIBPCI */
     hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s\n",
 		domain, pcidev->bus, pcidev->dev, pcidev->func,
 		device_class, pcidev->vendor_id, pcidev->device_id,
@@ -674,11 +670,11 @@ hwloc_look_libpci(struct hwloc_backend *backend)
     hwloc_pci_add_object(&fakehostbridge, obj);
   }
 
+  /* finalize device scanning */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
   pci_iterator_destroy(iter);
   pci_system_cleanup();
-#endif
-#ifdef HWLOC_HAVE_LIBPCI
+#else /* HWLOC_HAVE_LIBPCI */
   pci_cleanup(pciaccess);
 #endif
 
