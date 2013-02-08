@@ -488,13 +488,13 @@ nextcomp:
     /* print a summary */
     int first = 1;
     backend = topology->backends;
-    printf("Final list of enabled components: ");
+    fprintf(stderr, "Final list of enabled components: ");
     while (backend != NULL) {
-      printf("%s%s", first ? "" : ",", backend->component->name);
+      fprintf(stderr, "%s%s", first ? "" : ",", backend->component->name);
       backend = backend->next;
       first = 0;
     }
-    printf("\n");
+    fprintf(stderr, "\n");
   }
 }
 

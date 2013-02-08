@@ -102,7 +102,7 @@ int main(void)
   check_distances(3, 6);
 
   /* restrict to everything, will do nothing */
-  printf("restricting to nothing, does nothing\n");
+  printf("restricting to everything, does nothing\n");
   hwloc_bitmap_fill(cpuset);
   err = hwloc_topology_restrict(topology, cpuset, HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES);
   assert(!err);
