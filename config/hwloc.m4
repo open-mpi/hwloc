@@ -640,7 +640,7 @@ EOF])
 
     # PCI support
     hwloc_pci_happy=no
-    if test "x$enable_pci" != xno; then
+    if test "x$enable_pci" != xno -a "x$enable_libpci" != "xyes"; then
       hwloc_pci_happy=yes
       HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [:], [hwloc_pci_happy=no])
       if test x$hwloc_pci_happy = xyes; then hwloc_pci_lib=pciaccess; fi
@@ -686,11 +686,20 @@ EOF])
                     [hwloc_pci_happy=no])])
             ], [hwloc_pci_happy=no])
         ])
-        if test x$hwloc_pci_happy = xyes; then hwloc_pci_lib=pciutils; fi
+        if test x$hwloc_pci_happy = xyes; then
+	  # pciutils could be used, but we don't want to force use it since it may GPL-taint hwloc
+	  if test x$enable_libpci = xyes; then
+	    hwloc_pci_lib=pciutils
+	  else
+	    # user didn't explicit request pciutils, disable PCI and warn the user
+	    hwloc_pci_happy=no
+	    hwloc_warn_may_use_libpci=yes
+	  fi
+	fi
     fi
     AC_SUBST(HWLOC_PCI_LIBS)
     # If we asked for pci support but couldn't deliver, fail
-    AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no"],
+    AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no" -a "$hwloc_warn_may_use_libpci" != "yes"],
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
            AC_MSG_WARN([find appropriate support])
            AC_MSG_ERROR([Cannot continue])])
