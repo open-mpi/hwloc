@@ -149,9 +149,12 @@ The hwloc core may also benefit from the following development packages:
 <li>libnuma for memory binding and migration support on Linux
     (<tt>numactl-devel</tt> or <tt>libnuma-dev</tt> package).
 </li>
-<li>pciutils (libpci) for I/O discovery.
-    The relevant development package is usually <tt>pciutils-devel</tt>
-    or <tt>libpci-dev</tt>.
+<li>libpciaccess for I/O discovery.
+    The relevant development package is usually <tt>libpciaccess-devel</tt>
+    or <tt>libpciaccess-dev</tt>.
+    libpci (from pciutils, development package <tt>pciutils-devel</tt> or
+    <tt>libpci-dev</tt>) may be used instead if <tt>--enable-libpci</tt>
+    is given at configure, but its GPL license may taint hwloc.
 </li>
 <li>the AMD OpenCL implementation for OpenCL device discovery.
 </li>
@@ -167,7 +170,7 @@ The hwloc core may also benefit from the following development packages:
     or <tt>libxml2-dev</tt>.
 </li>
 </ul>
-libpci and libxml2 support may be statically built inside the main
+PCI and libxml2 support may be statically built inside the main
 hwloc library, or as separate dynamically-loaded plugins
 (see the \ref plugins section).
 
@@ -1147,8 +1150,9 @@ It can be enabled by passing flags such as <tt>::HWLOC_TOPOLOGY_FLAG_IO_DEVICES<
 to hwloc_topology_set_flags() before loading the topology.
 
 Note that I/O discovery requires significant help from the operating system.
-The pciutils library (the development package is usually <tt>pciutils-devel</tt>
-or <tt>libpci-dev</tt>) is needed to detect PCI devices and bridges,
+The pciaccess library (the development package is usually <tt>libpciaccess-devel</tt>
+or <tt>libpciaccess-dev</tt>) is needed to detect PCI devices and bridges
+(libpci/pciutils may be used instead if a GPL dependency is acceptable),
 and the actual locality of these devices is only currently detected
 on Linux. Also, some operating systems require privileges for probing PCI
 devices, see \ref faq_privileged for details.
@@ -2131,7 +2135,8 @@ environment variable (see \ref envvar).
 </dd>
 <dt>libpci</dt>
 <dd>
- PCI object discovery uses the external pciutils library (aka libpci),
+ PCI object discovery uses the external pciaccess library (aka libpciaccess),
+ or optionally the pciutils library (libpci),
  see \ref iodevices.
  <b>It may be built as a plugin</b>.
 </dd>
@@ -2388,7 +2393,7 @@ See also \ref xml.
 lstopo enables most hwloc discovery flags by default so that the output
 topology is as precise as possible (while hwloc disables many of them
 by default).
-This includes I/O device discovery through libpci as well as external
+This includes I/O device discovery through PCI libraries as well as external
 libraries such as NVML.
 To speed up lstopo, you may disable such features with command-line
 options such as <tt>--no-io</tt>.
