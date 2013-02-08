@@ -9,6 +9,8 @@
 #include <private/private.h>
 #include <private/debug.h>
 
+#include <stdlib.h>
+#include <sys/utsname.h>
 #include <spi/include/kernel/location.h>
 
 static int
@@ -118,7 +120,21 @@ hwloc_bgq_component_instantiate(struct hwloc_disc_component *component,
 				const void *_data2 __hwloc_attribute_unused,
 				const void *_data3 __hwloc_attribute_unused)
 {
+  struct utsname utsname;
   struct hwloc_backend *backend;
+  char *env;
+  int err;
+
+  env = getenv("HWLOC_FORCE_BGQ");
+  if (!env || !atoi(env)) {
+    err = uname(&utsname);
+    if (err || strcmp(utsname.sysname, "CNK") || strcmp(utsname.machine, "BGQ")) {
+      fprintf(stderr, "*** Found unexpected uname sysname `%s' machine `%s', disabling BGQ backend.\n", utsname.sysname, utsname.machine);
+      fprintf(stderr, "*** Set HWLOC_FORCE_BGQ=1 in the environment to enforce the BGQ backend.\n");
+      return NULL;
+    }
+  }
+
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
