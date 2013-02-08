@@ -149,15 +149,21 @@ hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t i
     return -1;
   }
 
+  /* first check if processor_bind() was used to bind to a single processor rather than to an lgroup */
+  if ( processor_bind(idtype, id, PBIND_QUERY, &binding) == 0 && binding != PBIND_NONE ) {
+    hwloc_bitmap_only(hwloc_set, binding);
+    return 0;
+  }
+
+  /* if not, check lgroups */
   hwloc_bitmap_zero(hwloc_set);
   n = hwloc_get_nbobjs_by_depth(topology, depth);
-
   for (i = 0; i < n; i++) {
     hwloc_obj_t obj = hwloc_get_obj_by_depth(topology, depth, i);
     lgrp_affinity_t aff = lgrp_affinity_get(idtype, id, obj->os_index);
 
     if (aff == LGRP_AFF_STRONG)
-      hwloc_bitmap_or(hwloc_set, hwloc_set, obj->cpuset);      
+      hwloc_bitmap_or(hwloc_set, hwloc_set, obj->cpuset);
   }
 
   if (hwloc_bitmap_iszero(hwloc_set))
