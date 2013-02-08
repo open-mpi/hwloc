@@ -10,6 +10,7 @@
 #include <sys/procset.h>
 typedef int processorid_t;
 #define PBIND_NONE -1
+#define PBIND_QUERY -2
 
 extern int processor_bind(idtype_t idtype, id_t id, processorid_t processorid, processorid_t *obind);
 

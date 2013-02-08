@@ -140,6 +140,7 @@ hwloc_solaris_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitm
 static int
 hwloc_solaris_get_sth_cpubind(hwloc_topology_t topology, idtype_t idtype, id_t id, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
+  processorid_t binding;
   int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
   int n;
   int i;
