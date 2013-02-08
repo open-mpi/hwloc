@@ -9,6 +9,8 @@
 #include <private/private.h>
 #include <private/debug.h>
 
+#include <spi/include/kernel/location.h>
+
 static int
 hwloc_look_bgq(struct hwloc_backend *backend)
 {
@@ -91,10 +93,23 @@ hwloc_look_bgq(struct hwloc_backend *backend)
   return 1;
 }
 
+static int
+hwloc_bgq_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+{
+  if (topology->pid) {
+    errno = ENOSYS;
+    return -1;
+  }
+  hwloc_bitmap_only(hwloc_set, Kernel_ProcessorID());
+  return 0;
+}
+
 void
 hwloc_set_bgq_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
 		    struct hwloc_topology_support *support __hwloc_attribute_unused)
 {
+  hooks->get_thisthread_cpubind = hwloc_bgq_get_thisthread_cpubind;
+  hooks->get_thisthread_last_cpu_location = hwloc_bgq_get_thisthread_cpubind;
 }
 
 static struct hwloc_backend *
