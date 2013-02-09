@@ -50,7 +50,8 @@ libhwloc_port_aix_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
 
 nodist_libhwloc_port_bgq_la_SOURCES = topology-bgq.c
-libhwloc_port_bgq_la_SOURCES =
+libhwloc_port_bgq_la_SOURCES = \
+	include/bgq/spi/include/kernel/location.h
 libhwloc_port_bgq_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-I$(HWLOC_top_srcdir)/tests/ports/include/bgq \
 	-DHWLOC_BGQ_SYS
