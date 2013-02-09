@@ -10,6 +10,7 @@
 #include <private/debug.h>
 
 #include <stdlib.h>
+#include <pthread.h>
 #include <sys/utsname.h>
 #include <spi/include/kernel/location.h>
 #include <spi/include/kernel/process.h>
@@ -108,6 +109,31 @@ hwloc_look_bgq(struct hwloc_backend *backend)
 }
 
 static int
+hwloc_bgq_get_thread_cpubind(hwloc_topology_t topology, pthread_t thread, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
+{
+  unsigned pu;
+  cpu_set_t bg_set;
+  int err;
+
+  if (topology->pid) {
+    errno = ENOSYS;
+    return -1;
+  }
+  err = pthread_getaffinity_np(thread, sizeof(bg_set), &bg_set);
+  if (err) {
+    errno = err;
+    return -1;
+  }
+  for(pu=0; pu<64; pu++)
+    if (CPU_ISSET(pu, &bg_set)) {
+      /* the binding cannot contain multiple PUs */
+      hwloc_bitmap_only(hwloc_set, pu);
+      break;
+    }
+  return 0;
+}
+
+static int
 hwloc_bgq_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc_set, int flags __hwloc_attribute_unused)
 {
   if (topology->pid) {
@@ -118,12 +144,54 @@ hwloc_bgq_get_thisthread_cpubind(hwloc_topology_t topology, hwloc_bitmap_t hwloc
   return 0;
 }
 
+static int
+hwloc_bgq_set_thread_cpubind(hwloc_topology_t topology, pthread_t thread, hwloc_const_bitmap_t hwloc_set, int flags)
+{
+  unsigned pu;
+  cpu_set_t bg_set;
+  int err;
+
+  if (topology->pid) {
+    errno = ENOSYS;
+    return -1;
+  }
+  /* the binding cannot contain multiple PUs.
+   * keep the first PU only, and error out if STRICT.
+   */
+  if (hwloc_bitmap_weight(hwloc_set) != 1) {
+    if ((flags & HWLOC_CPUBIND_STRICT)) {
+      errno = ENOSYS;
+      return -1;
+    }
+  }
+  pu = hwloc_bitmap_first(hwloc_set);
+  CPU_ZERO(&bg_set);
+  CPU_SET(pu, &bg_set);
+  err = pthread_setaffinity_np(thread, sizeof(bg_set), &bg_set);
+  if (err) {
+    errno = err;
+    return -1;
+  }
+  return 0;
+}
+
+static int
+hwloc_bgq_set_thisthread_cpubind(hwloc_topology_t topology, hwloc_const_bitmap_t hwloc_set, int flags)
+{
+  return hwloc_bgq_set_thread_cpubind(topology, pthread_self(), hwloc_set, flags);
+}
+
 void
 hwloc_set_bgq_hooks(struct hwloc_binding_hooks *hooks __hwloc_attribute_unused,
 		    struct hwloc_topology_support *support __hwloc_attribute_unused)
 {
+  hooks->set_thisthread_cpubind = hwloc_bgq_set_thisthread_cpubind;
+  hooks->set_thread_cpubind = hwloc_bgq_set_thread_cpubind;
   hooks->get_thisthread_cpubind = hwloc_bgq_get_thisthread_cpubind;
+  hooks->get_thread_cpubind = hwloc_bgq_get_thread_cpubind;
+  /* threads cannot be bound to more than one PU, so get_last_cpu_location == get_cpubind */
   hooks->get_thisthread_last_cpu_location = hwloc_bgq_get_thisthread_cpubind;
+  /* hooks->get_thread_last_cpu_location = hwloc_bgq_get_thread_cpubind; */
 }
 
 static struct hwloc_backend *
