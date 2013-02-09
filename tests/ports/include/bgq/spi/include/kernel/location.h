@@ -9,5 +9,6 @@
 #include <stdint.h>
 
 uint32_t Kernel_ProcessorID( void );
+uint32_t Kernel_MyTcoord( void );
 
 #endif /* HWLOC_PORT_BGQ_KERNEL_LOCATION_H */

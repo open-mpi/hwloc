@@ -51,7 +51,8 @@ libhwloc_port_aix_la_CPPFLAGS = $(common_CPPFLAGS) \
 
 nodist_libhwloc_port_bgq_la_SOURCES = topology-bgq.c
 libhwloc_port_bgq_la_SOURCES = \
-	include/bgq/spi/include/kernel/location.h
+	include/bgq/spi/include/kernel/location.h \
+	include/bgq/spi/include/kernel/process.h
 libhwloc_port_bgq_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-I$(HWLOC_top_srcdir)/tests/ports/include/bgq \
 	-DHWLOC_BGQ_SYS

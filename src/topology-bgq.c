@@ -12,12 +12,14 @@
 #include <stdlib.h>
 #include <sys/utsname.h>
 #include <spi/include/kernel/location.h>
+#include <spi/include/kernel/process.h>
 
 static int
 hwloc_look_bgq(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   unsigned i;
+  char *env;
 
   if (!topology->levels[0][0]->cpuset) {
     /* Nobody created objects yet, setup everything */
@@ -29,6 +31,16 @@ hwloc_look_bgq(struct hwloc_backend *backend)
     hwloc_alloc_obj_cpusets(topology->levels[0][0]);
     /* mark the 17th core (OS-reserved) as disallowed */
     hwloc_bitmap_clr_range(topology->levels[0][0]->allowed_cpuset, (HWLOC_BGQ_CORES-1)*4, HWLOC_BGQ_CORES*4-1);
+
+    env = getenv("BG_THREADMODEL");
+    if (!env || atoi(env) != 2) {
+      /* process cannot use cores/threads outside of its Kernel_ThreadMask() */
+      uint64_t bgmask = Kernel_ThreadMask(Kernel_MyTcoord());
+      /* the mask is reversed, manually reverse it */
+      for(i=0; i<64; i++)
+	if (((bgmask >> i) & 1) == 0)
+	  hwloc_bitmap_clr(topology->levels[0][0]->allowed_cpuset, 63-i);
+    }
 
     /* a single memory bank */
     set = hwloc_bitmap_alloc();
