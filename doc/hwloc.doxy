@@ -58,6 +58,7 @@ and Kerrighed support)</li>
 <li>OSF/1 (a.k.a., Tru64)</li>
 <li>HP-UX</li>
 <li>Microsoft Windows</li>
+<li>IBM BlueGene/Q Compute Node Kernel (CNK)</li>
 </ul>
 
 Since it uses standard Operating System information, hwloc's support is mostly
@@ -2628,5 +2629,21 @@ following code to support old cpuset-only hwloc versions:
 
 hwloc 0.9 did not define any <tt>HWLOC_API_VERSION</tt> but this very old
 release probably does not deserve support from your application anymore.
+
+
+\section faq_bgq How do I build hwloc for BlueGene/Q?
+
+IBM BlueGene/Q machines run a standard Linux on the I/O node and a
+custom CNK (<em>Compute Node Kernel</em>) on the compute nodes.
+To run on the compute node, hwloc must be cross-compiled from the I/O
+node with the following configuration line:
+\verbatim
+./configure --host=powerpc64-bgq-linux --disable-shared --enable-static \
+  CPPFLAGS='-I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk/'
+\endverbatim
+
+CPPFLAGS may have to be updated if your platform headers are installed
+in a different directory.
+
 
 */
