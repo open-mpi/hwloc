@@ -20,6 +20,9 @@ in v0.9.1).
 Version 1.7.0
 -------------
 * Backends
+  + Add BlueGene/Q support. See the FAQ in the documentation for details.
+    Thanks to Jeff Hammond, Christopher Samuel and Erik Schnetter for
+    their help.
   + Add NetBSD support, thanks to Aleksej Saushev.
   + Add three GPU detection components: opencl (for the AMD OpenCL
     implemenation), cuda and nvml (for NVIDIA GPUs).
