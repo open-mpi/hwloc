@@ -2123,6 +2123,12 @@ environment variable (see \ref envvar).
  that may complete or replace the previously-found CPU information.
  It is statically built when supported.
 </dd>
+<dt>bgq</dt>
+<dd>
+ This component is specific to IBM BlueGene/Q compute node (running CNK).
+ It is built and enabled by default when <tt>--host=powerpc64-bgq-linux</tt>
+ is passed to configure (see \ref faq_bgq).
+</dd>
 <dt>no_os</dt>
 <dd>
  A basic component that just tries to detect the number of processing
