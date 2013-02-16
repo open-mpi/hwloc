@@ -3387,10 +3387,10 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 #endif
 }
 
-/*
- * Linux PCI callback
- *
- * Does not support changing the fsroot
+/****************************************
+ ***** Linux PCI backend callbacks ******
+ ****************************************
+ * Do not support changing the fsroot (use sysfs)
  */
 
 static hwloc_obj_t
@@ -3408,7 +3408,9 @@ hwloc_linux_add_os_device(struct hwloc_topology *topology, struct hwloc_obj *pci
 
 typedef void (*hwloc_linux_class_fillinfos_t)(struct hwloc_topology *topology, struct hwloc_obj *osdev, const char *osdevpath);
 
-/* look for objects of the given class below a sysfs directory */
+/* class objects that are immediately below pci devices:
+ * look for objects of the given classname below a sysfs (pcidev) directory
+ */
 static int
 hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *devicepath,
 			  hwloc_obj_osdev_type_t type, const char *classname,
@@ -3457,7 +3459,9 @@ hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pci
   return res;
 }
 
-/* class objects that are immediately below pci devices */
+/*
+ * look for net objects below a pcidev in sysfs
+ */
 static void
 hwloc_linux_net_class_fillinfos(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, const char *osdevpath)
 {
@@ -3497,6 +3501,15 @@ hwloc_linux_net_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
   }
 }
 
+static int
+hwloc_linux_lookup_net_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  return hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_NETWORK, "net", hwloc_linux_net_class_fillinfos);
+}
+
+/*
+ * look for infiniband objects below a pcidev in sysfs
+ */
 static void
 hwloc_linux_infiniband_class_fillinfos(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, const char *osdevpath)
 {
@@ -3593,20 +3606,19 @@ hwloc_linux_infiniband_class_fillinfos(struct hwloc_topology *topology __hwloc_a
 }
 
 static int
-hwloc_linux_lookup_net_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
-{
-  return hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_NETWORK, "net", hwloc_linux_net_class_fillinfos);
-}
-static int
 hwloc_linux_lookup_openfabrics_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
   return hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_OPENFABRICS, "infiniband", hwloc_linux_infiniband_class_fillinfos);
 }
+
+/* look for dma objects below a pcidev in sysfs */
 static int
 hwloc_linux_lookup_dma_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
   return hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_DMA, "dma", NULL);
 }
+
+/* look for drm objects below a pcidev in sysfs */
 static int
 hwloc_linux_lookup_drm_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
@@ -3619,6 +3631,10 @@ hwloc_linux_lookup_drm_class(struct hwloc_topology *topology, struct hwloc_obj *
    * boot_vga is actually created when class >> 8 == VGA (it contains 1 for boot vga device), so it's trivial anyway.
    */
 }
+
+/*
+ * look for block objects below a pcidev in sysfs
+ */
 
 /* block class objects are in
  * host%d/target%d:%d:%d/%d:%d:%d:%d/
@@ -3784,6 +3800,9 @@ hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj
   return res;
 }
 
+/*
+ * backend callback for inserting objects inside a pci device
+ */
 static int
 hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc_backend *caller __hwloc_attribute_unused,
 				      struct hwloc_obj *obj)
@@ -3820,6 +3839,9 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
   return res;
 }
 
+/*
+ * backend callback for retrieving the location of a pci device
+ */
 static int
 hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
 				   struct hwloc_backend *caller __hwloc_attribute_unused,
@@ -3858,6 +3880,10 @@ hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
   }
   return -1;
 }
+
+/*******************************
+ ******* Linux component *******
+ *******************************/
 
 static void
 hwloc_linux_backend_disable(struct hwloc_backend *backend)
