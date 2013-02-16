@@ -125,3 +125,21 @@
    ...
    obj:*libatiadl*
 }
+
+# 
+{
+   libpciaccess_device_name_leak
+   Memcheck:Leak
+   ...
+   fun:pci_device_get_device_name
+   fun:hwloc_look_libpci
+}
+{
+   libpciaccess_leak
+   Memcheck:Leak
+   ...
+   obj:*libpciaccess*
+   ...
+   fun:hwloc_look_libpci
+}
+

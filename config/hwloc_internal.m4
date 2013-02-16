@@ -63,7 +63,10 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
     # PCI?
     AC_ARG_ENABLE([pci],
                   AS_HELP_STRING([--disable-pci],
-                                 [Disable the PCI device discovery using libpci]))
+                                 [Disable the PCI device discovery]))
+    AC_ARG_ENABLE([libpci],
+		  AS_HELP_STRING([--enable-libpci],
+				 [Use libpci for PCI support. Note that hwloc may be tainted by the pciutils GPL license.]))
 
     # OpenCL?
     AC_ARG_ENABLE([opencl],
