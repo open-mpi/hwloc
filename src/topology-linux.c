@@ -37,6 +37,17 @@
 #include <numaif.h>
 #endif
 
+struct hwloc_linux_backend_data_s {
+  char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
+  int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
+};
+
+
+
+/***************************
+ * Misc Abstraction layers *
+ ***************************/
+
 #if !(defined HWLOC_HAVE_SCHED_SETAFFINITY) && (defined HWLOC_HAVE__SYSCALL3)
 /* libc doesn't have support for sched_setaffinity, build system call
  * ourselves: */
@@ -258,10 +269,11 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 #endif
 }
 
-struct hwloc_linux_backend_data_s {
-  char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-  int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-};
+
+
+/*****************************
+ ******* CpuBind Hooks *******
+ *****************************/
 
 int
 hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid __hwloc_attribute_unused, hwloc_const_bitmap_t hwloc_set __hwloc_attribute_unused)
@@ -1024,6 +1036,11 @@ hwloc_linux_get_thisthread_last_cpu_location(hwloc_topology_t topology, hwloc_bi
 }
 
 
+
+/***************************
+ ****** Membind hooks ******
+ ***************************/
+
 #if defined HWLOC_HAVE_SET_MEMPOLICY || defined HWLOC_HAVE_MBIND
 static int
 hwloc_linux_membind_policy_from_hwloc(int *linuxpolicy, hwloc_membind_policy_t policy, int flags)
@@ -1397,6 +1414,50 @@ hwloc_linux_get_area_membind(hwloc_topology_t topology, const void *addr, size_t
 }
 
 #endif /* HWLOC_HAVE_SET_MEMPOLICY */
+
+void
+hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
+			struct hwloc_topology_support *support __hwloc_attribute_unused)
+{
+  hooks->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
+  hooks->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
+  hooks->set_thisproc_cpubind = hwloc_linux_set_thisproc_cpubind;
+  hooks->get_thisproc_cpubind = hwloc_linux_get_thisproc_cpubind;
+  hooks->set_proc_cpubind = hwloc_linux_set_proc_cpubind;
+  hooks->get_proc_cpubind = hwloc_linux_get_proc_cpubind;
+#if HAVE_DECL_PTHREAD_SETAFFINITY_NP
+  hooks->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
+#endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
+#if HAVE_DECL_PTHREAD_GETAFFINITY_NP
+  hooks->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
+#endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
+  hooks->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
+  hooks->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
+  hooks->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
+#ifdef HWLOC_HAVE_SET_MEMPOLICY
+  hooks->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
+  hooks->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
+  hooks->get_area_membind = hwloc_linux_get_area_membind;
+#endif /* HWLOC_HAVE_SET_MEMPOLICY */
+#ifdef HWLOC_HAVE_MBIND
+  hooks->set_area_membind = hwloc_linux_set_area_membind;
+  hooks->alloc_membind = hwloc_linux_alloc_membind;
+  hooks->alloc = hwloc_alloc_mmap;
+  hooks->free_membind = hwloc_free_mmap;
+  support->membind->firsttouch_membind = 1;
+  support->membind->bind_membind = 1;
+  support->membind->interleave_membind = 1;
+#endif /* HWLOC_HAVE_MBIND */
+#if (defined HWLOC_HAVE_MIGRATE_PAGES) || ((defined HWLOC_HAVE_MBIND) && (defined MPOL_MF_MOVE))
+  support->membind->migrate_membind = 1;
+#endif
+}
+
+
+
+/*******************************************
+ *** Misc Helpers for Topology Discovery ***
+ *******************************************/
 
 /* cpuinfo array */
 struct hwloc_linux_cpuinfo_proc {
@@ -2071,113 +2132,60 @@ hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, float *dis
   fclose(fd);
 }
 
-static int
-look_sysfsnode(struct hwloc_topology *topology,
-	       struct hwloc_linux_backend_data_s *data,
-	       const char *path, unsigned *found)
+static void
+hwloc__get_dmi_one_info(struct hwloc_linux_backend_data_s *data,
+			hwloc_obj_t obj, const char *sysfs_name, const char *hwloc_name)
 {
-  unsigned osnode;
-  unsigned nbnodes = 0;
-  DIR *dir;
-  struct dirent *dirent;
-  hwloc_obj_t node;
-  hwloc_bitmap_t nodeset;
+  char sysfs_path[128];
+  char dmi_line[64];
+  char *tmp;
+  FILE *fd;
 
-  *found = 0;
+  snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/dmi/id/%s", sysfs_name);
 
-  /* Get the list of nodes first */
-  dir = hwloc_opendir(path, data->root_fd);
-  if (dir)
-    {
-      nodeset = hwloc_bitmap_alloc();
-      while ((dirent = readdir(dir)) != NULL)
-	{
-	  if (strncmp(dirent->d_name, "node", 4))
-	    continue;
-	  osnode = strtoul(dirent->d_name+4, NULL, 0);
-	  hwloc_bitmap_set(nodeset, osnode);
-	  nbnodes++;
-	}
-      closedir(dir);
+  dmi_line[0] = '\0';
+  fd = hwloc_fopen(sysfs_path, "r", data->root_fd);
+  if (fd) {
+    tmp = fgets(dmi_line, sizeof(dmi_line), fd);
+    fclose (fd);
+    if (tmp && dmi_line[0] != '\0') {
+      tmp = strchr(dmi_line, '\n');
+      if (tmp)
+	*tmp = '\0';
+      hwloc_debug("found %s '%s'\n", hwloc_name, dmi_line);
+      hwloc_obj_add_info(obj, hwloc_name, dmi_line);
     }
-  else
-    return -1;
-
-  if (nbnodes <= 1)
-    {
-      hwloc_bitmap_free(nodeset);
-      return 0;
-    }
-
-  /* For convenience, put these declarations inside a block. */
-
-  {
-      hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
-      float * distances = calloc(nbnodes*nbnodes, sizeof(float));
-      unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
-      unsigned index_;
-
-      if (NULL == indexes || NULL == distances || NULL == nodes) {
-          free(nodes);
-          free(indexes);
-          free(distances);
-          goto out;
-      }
-
-      /* Get node indexes now. We need them in order since Linux groups
-       * sparse distances but keep them in order in the sysfs distance files.
-       */
-      index_ = 0;
-      hwloc_bitmap_foreach_begin (osnode, nodeset) {
-	indexes[index_] = osnode;
-	index_++;
-      } hwloc_bitmap_foreach_end();
-      hwloc_bitmap_free(nodeset);
-
-#ifdef HWLOC_DEBUG
-      hwloc_debug("%s", "numa distance indexes: ");
-      for (index_ = 0; index_ < nbnodes; index_++) {
-	hwloc_debug(" %u", indexes[index_]);
-      }
-      hwloc_debug("%s", "\n");
-#endif
-
-      /* Get actual distances now */
-      for (index_ = 0; index_ < nbnodes; index_++) {
-          char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
-          hwloc_bitmap_t cpuset;
-	  osnode = indexes[index_];
-
-          sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
-          cpuset = hwloc_parse_cpumap(nodepath, data->root_fd);
-          if (!cpuset)
-              continue;
-
-          node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
-          node->cpuset = cpuset;
-          node->nodeset = hwloc_bitmap_alloc();
-          hwloc_bitmap_set(node->nodeset, osnode);
-
-          hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->memory);
-
-          hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
-                                  osnode, node->cpuset);
-          hwloc_insert_object_by_cpuset(topology, node);
-          nodes[index_] = node;
-
-	  /* Linux nodeX/distance file contains distance from X to other localities (from ACPI SLIT table or so),
-	   * store them in slots X*N...X*N+N-1 */
-          sprintf(nodepath, "%s/node%u/distance", path, osnode);
-          hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, data->root_fd);
-      }
-
-      hwloc_distances_set(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
   }
-
- out:
-  *found = nbnodes;
-  return 0;
 }
+
+static void
+hwloc__get_dmi_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
+{
+  hwloc__get_dmi_one_info(data, obj, "product_name", "DMIProductName");
+  hwloc__get_dmi_one_info(data, obj, "product_version", "DMIProductVersion");
+  hwloc__get_dmi_one_info(data, obj, "product_serial", "DMIProductSerial");
+  hwloc__get_dmi_one_info(data, obj, "product_uuid", "DMIProductUUID");
+  hwloc__get_dmi_one_info(data, obj, "board_vendor", "DMIBoardVendor");
+  hwloc__get_dmi_one_info(data, obj, "board_name", "DMIBoardName");
+  hwloc__get_dmi_one_info(data, obj, "board_version", "DMIBoardVersion");
+  hwloc__get_dmi_one_info(data, obj, "board_serial", "DMIBoardSerial");
+  hwloc__get_dmi_one_info(data, obj, "board_asset_tag", "DMIBoardAssetTag");
+  hwloc__get_dmi_one_info(data, obj, "chassis_vendor", "DMIChassisVendor");
+  hwloc__get_dmi_one_info(data, obj, "chassis_type", "DMIChassisType");
+  hwloc__get_dmi_one_info(data, obj, "chassis_version", "DMIChassisVersion");
+  hwloc__get_dmi_one_info(data, obj, "chassis_serial", "DMIChassisSerial");
+  hwloc__get_dmi_one_info(data, obj, "chassis_asset_tag", "DMIChassisAssetTag");
+  hwloc__get_dmi_one_info(data, obj, "bios_vendor", "DMIBIOSVendor");
+  hwloc__get_dmi_one_info(data, obj, "bios_version", "DMIBIOSVersion");
+  hwloc__get_dmi_one_info(data, obj, "bios_date", "DMIBIOSDate");
+  hwloc__get_dmi_one_info(data, obj, "sys_vendor", "DMISysVendor");
+}
+
+
+
+/***********************************
+ ****** Device tree Discovery ******
+ ***********************************/
 
 /* Reads the entire file and returns bytes read if bytes_read != NULL
  * Returned pointer can be freed by using free().  */
@@ -2536,6 +2544,120 @@ cont:
   free(cpus.p);
 }
 
+
+
+/**************************************
+ ****** Sysfs Topology Discovery ******
+ **************************************/
+
+static int
+look_sysfsnode(struct hwloc_topology *topology,
+	       struct hwloc_linux_backend_data_s *data,
+	       const char *path, unsigned *found)
+{
+  unsigned osnode;
+  unsigned nbnodes = 0;
+  DIR *dir;
+  struct dirent *dirent;
+  hwloc_obj_t node;
+  hwloc_bitmap_t nodeset;
+
+  *found = 0;
+
+  /* Get the list of nodes first */
+  dir = hwloc_opendir(path, data->root_fd);
+  if (dir)
+    {
+      nodeset = hwloc_bitmap_alloc();
+      while ((dirent = readdir(dir)) != NULL)
+	{
+	  if (strncmp(dirent->d_name, "node", 4))
+	    continue;
+	  osnode = strtoul(dirent->d_name+4, NULL, 0);
+	  hwloc_bitmap_set(nodeset, osnode);
+	  nbnodes++;
+	}
+      closedir(dir);
+    }
+  else
+    return -1;
+
+  if (nbnodes <= 1)
+    {
+      hwloc_bitmap_free(nodeset);
+      return 0;
+    }
+
+  /* For convenience, put these declarations inside a block. */
+
+  {
+      hwloc_obj_t * nodes = calloc(nbnodes, sizeof(hwloc_obj_t));
+      float * distances = calloc(nbnodes*nbnodes, sizeof(float));
+      unsigned *indexes = calloc(nbnodes, sizeof(unsigned));
+      unsigned index_;
+
+      if (NULL == indexes || NULL == distances || NULL == nodes) {
+          free(nodes);
+          free(indexes);
+          free(distances);
+          goto out;
+      }
+
+      /* Get node indexes now. We need them in order since Linux groups
+       * sparse distances but keep them in order in the sysfs distance files.
+       */
+      index_ = 0;
+      hwloc_bitmap_foreach_begin (osnode, nodeset) {
+	indexes[index_] = osnode;
+	index_++;
+      } hwloc_bitmap_foreach_end();
+      hwloc_bitmap_free(nodeset);
+
+#ifdef HWLOC_DEBUG
+      hwloc_debug("%s", "numa distance indexes: ");
+      for (index_ = 0; index_ < nbnodes; index_++) {
+	hwloc_debug(" %u", indexes[index_]);
+      }
+      hwloc_debug("%s", "\n");
+#endif
+
+      /* Get actual distances now */
+      for (index_ = 0; index_ < nbnodes; index_++) {
+          char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
+          hwloc_bitmap_t cpuset;
+	  osnode = indexes[index_];
+
+          sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
+          cpuset = hwloc_parse_cpumap(nodepath, data->root_fd);
+          if (!cpuset)
+              continue;
+
+          node = hwloc_alloc_setup_object(HWLOC_OBJ_NODE, osnode);
+          node->cpuset = cpuset;
+          node->nodeset = hwloc_bitmap_alloc();
+          hwloc_bitmap_set(node->nodeset, osnode);
+
+          hwloc_sysfs_node_meminfo_info(topology, data, path, osnode, &node->memory);
+
+          hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
+                                  osnode, node->cpuset);
+          hwloc_insert_object_by_cpuset(topology, node);
+          nodes[index_] = node;
+
+	  /* Linux nodeX/distance file contains distance from X to other localities (from ACPI SLIT table or so),
+	   * store them in slots X*N...X*N+N-1 */
+          sprintf(nodepath, "%s/node%u/distance", path, osnode);
+          hwloc_parse_node_distance(nodepath, nbnodes, distances+index_*nbnodes, data->root_fd);
+      }
+
+      hwloc_distances_set(topology, HWLOC_OBJ_NODE, nbnodes, indexes, nodes, distances, 0 /* OS cannot force */);
+  }
+
+ out:
+  *found = nbnodes;
+  return 0;
+}
+
 /* Look at Linux' /sys/devices/system/cpu/cpu%d/topology/ */
 static int
 look_sysfscpu(struct hwloc_topology *topology,
@@ -2837,6 +2959,11 @@ look_sysfscpu(struct hwloc_topology *topology,
   return 0;
 }
 
+
+
+/****************************************
+ ****** cpuinfo Topology Discovery ******
+ ****************************************/
 
 /*
  * architecture properly detected:
@@ -3162,54 +3289,11 @@ look_cpuinfo(struct hwloc_topology *topology,
   return 0;
 }
 
-static void
-hwloc__get_dmi_one_info(struct hwloc_linux_backend_data_s *data,
-			hwloc_obj_t obj, const char *sysfs_name, const char *hwloc_name)
-{
-  char sysfs_path[128];
-  char dmi_line[64];
-  char *tmp;
-  FILE *fd;
 
-  snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/dmi/id/%s", sysfs_name);
 
-  dmi_line[0] = '\0';
-  fd = hwloc_fopen(sysfs_path, "r", data->root_fd);
-  if (fd) {
-    tmp = fgets(dmi_line, sizeof(dmi_line), fd);
-    fclose (fd);
-    if (tmp && dmi_line[0] != '\0') {
-      tmp = strchr(dmi_line, '\n');
-      if (tmp)
-	*tmp = '\0';
-      hwloc_debug("found %s '%s'\n", hwloc_name, dmi_line);
-      hwloc_obj_add_info(obj, hwloc_name, dmi_line);
-    }
-  }
-}
-
-static void
-hwloc__get_dmi_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
-{
-  hwloc__get_dmi_one_info(data, obj, "product_name", "DMIProductName");
-  hwloc__get_dmi_one_info(data, obj, "product_version", "DMIProductVersion");
-  hwloc__get_dmi_one_info(data, obj, "product_serial", "DMIProductSerial");
-  hwloc__get_dmi_one_info(data, obj, "product_uuid", "DMIProductUUID");
-  hwloc__get_dmi_one_info(data, obj, "board_vendor", "DMIBoardVendor");
-  hwloc__get_dmi_one_info(data, obj, "board_name", "DMIBoardName");
-  hwloc__get_dmi_one_info(data, obj, "board_version", "DMIBoardVersion");
-  hwloc__get_dmi_one_info(data, obj, "board_serial", "DMIBoardSerial");
-  hwloc__get_dmi_one_info(data, obj, "board_asset_tag", "DMIBoardAssetTag");
-  hwloc__get_dmi_one_info(data, obj, "chassis_vendor", "DMIChassisVendor");
-  hwloc__get_dmi_one_info(data, obj, "chassis_type", "DMIChassisType");
-  hwloc__get_dmi_one_info(data, obj, "chassis_version", "DMIChassisVersion");
-  hwloc__get_dmi_one_info(data, obj, "chassis_serial", "DMIChassisSerial");
-  hwloc__get_dmi_one_info(data, obj, "chassis_asset_tag", "DMIChassisAssetTag");
-  hwloc__get_dmi_one_info(data, obj, "bios_vendor", "DMIBIOSVendor");
-  hwloc__get_dmi_one_info(data, obj, "bios_version", "DMIBIOSVersion");
-  hwloc__get_dmi_one_info(data, obj, "bios_date", "DMIBIOSDate");
-  hwloc__get_dmi_one_info(data, obj, "sys_vendor", "DMISysVendor");
-}
+/*************************************
+ ****** Main Topology Discovery ******
+ *************************************/
 
 static void
 hwloc_linux_fallback_pu_level(struct hwloc_topology *topology)
@@ -3349,43 +3433,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   return 1;
 }
 
-void
-hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
-			struct hwloc_topology_support *support __hwloc_attribute_unused)
-{
-  hooks->set_thisthread_cpubind = hwloc_linux_set_thisthread_cpubind;
-  hooks->get_thisthread_cpubind = hwloc_linux_get_thisthread_cpubind;
-  hooks->set_thisproc_cpubind = hwloc_linux_set_thisproc_cpubind;
-  hooks->get_thisproc_cpubind = hwloc_linux_get_thisproc_cpubind;
-  hooks->set_proc_cpubind = hwloc_linux_set_proc_cpubind;
-  hooks->get_proc_cpubind = hwloc_linux_get_proc_cpubind;
-#if HAVE_DECL_PTHREAD_SETAFFINITY_NP
-  hooks->set_thread_cpubind = hwloc_linux_set_thread_cpubind;
-#endif /* HAVE_DECL_PTHREAD_SETAFFINITY_NP */
-#if HAVE_DECL_PTHREAD_GETAFFINITY_NP
-  hooks->get_thread_cpubind = hwloc_linux_get_thread_cpubind;
-#endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
-  hooks->get_thisthread_last_cpu_location = hwloc_linux_get_thisthread_last_cpu_location;
-  hooks->get_thisproc_last_cpu_location = hwloc_linux_get_thisproc_last_cpu_location;
-  hooks->get_proc_last_cpu_location = hwloc_linux_get_proc_last_cpu_location;
-#ifdef HWLOC_HAVE_SET_MEMPOLICY
-  hooks->set_thisthread_membind = hwloc_linux_set_thisthread_membind;
-  hooks->get_thisthread_membind = hwloc_linux_get_thisthread_membind;
-  hooks->get_area_membind = hwloc_linux_get_area_membind;
-#endif /* HWLOC_HAVE_SET_MEMPOLICY */
-#ifdef HWLOC_HAVE_MBIND
-  hooks->set_area_membind = hwloc_linux_set_area_membind;
-  hooks->alloc_membind = hwloc_linux_alloc_membind;
-  hooks->alloc = hwloc_alloc_mmap;
-  hooks->free_membind = hwloc_free_mmap;
-  support->membind->firsttouch_membind = 1;
-  support->membind->bind_membind = 1;
-  support->membind->interleave_membind = 1;
-#endif /* HWLOC_HAVE_MBIND */
-#if (defined HWLOC_HAVE_MIGRATE_PAGES) || ((defined HWLOC_HAVE_MBIND) && (defined MPOL_MF_MOVE))
-  support->membind->migrate_membind = 1;
-#endif
-}
+
 
 /****************************************
  ***** Linux PCI backend callbacks ******
@@ -3880,6 +3928,8 @@ hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
   }
   return -1;
 }
+
+
 
 /*******************************
  ******* Linux component *******
