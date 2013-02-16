@@ -172,6 +172,12 @@ EOF])
     #
     AC_MSG_CHECKING([which OS support to include])
     case ${target} in
+      powerpc64-bgq-linux*) # must be before Linux
+	AC_DEFINE(HWLOC_BGQ_SYS, 1, [Define to 1 on BlueGene/Q])
+	hwloc_bgq=yes
+	AC_MSG_RESULT([bgq])
+	hwloc_components="$hwloc_components bgq"
+	;;
       *-*-linux*)
         AC_DEFINE(HWLOC_LINUX_SYS, 1, [Define to 1 on Linux])
         hwloc_linux=yes
@@ -833,7 +839,7 @@ EOF])
       AS_IF([test "$enable_cuda" = "yes" -a "$hwloc_have_cudart" = "no"],
             [AC_MSG_WARN([Specified --enable-cuda switch, but could not])
              AC_MSG_WARN([find appropriate support])
-             AC_MSG_ERROR([Cannote continue])])
+             AC_MSG_ERROR([Cannot continue])])
 
       if test "x$hwloc_have_cudart" = "xyes"; then
 	hwloc_components="$hwloc_components cuda"
@@ -1105,6 +1111,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
                        [test "x$hwloc_install_doxs" = "xyes"])
 
         AM_CONDITIONAL([HWLOC_HAVE_LINUX], [test "x$hwloc_linux" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_BGQ], [test "x$hwloc_bgq" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_IRIX], [test "x$hwloc_irix" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_DARWIN], [test "x$hwloc_darwin" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_FREEBSD], [test "x$hwloc_freebsd" = "xyes"])

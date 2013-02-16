@@ -12,6 +12,7 @@ SRC = $(HWLOC_top_srcdir)/src
 if HWLOC_HAVE_LINUX
 check_LTLIBRARIES = \
 	libhwloc-port-aix.la \
+	libhwloc-port-bgq.la \
 	libhwloc-port-darwin.la \
 	libhwloc-port-freebsd.la \
 	libhwloc-port-hpux.la \
@@ -47,6 +48,14 @@ libhwloc_port_aix_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-DHWLOC_AIX_SYS \
 	-DHWLOC_HAVE_PTHREAD_GETTHRDS_NP \
 	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+
+nodist_libhwloc_port_bgq_la_SOURCES = topology-bgq.c
+libhwloc_port_bgq_la_SOURCES = \
+	include/bgq/spi/include/kernel/location.h \
+	include/bgq/spi/include/kernel/process.h
+libhwloc_port_bgq_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/bgq \
+	-DHWLOC_BGQ_SYS
 
 nodist_libhwloc_port_darwin_la_SOURCES = topology-darwin.c
 libhwloc_port_darwin_la_SOURCES = \

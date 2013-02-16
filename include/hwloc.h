@@ -270,7 +270,9 @@ typedef enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device.
 				  * For instance "sda" on Linux. */
   HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
-				  * For instance the "card0" DRM device on Linux. */
+				  * For instance "opencl0d0" for a OpenCL device,
+				  * "cuda0" for a CUDA device,
+				  * "card0" for a Linux DRM device. */
   HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device.
 				  * For instance the "eth0" interface on Linux. */
   HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device.
