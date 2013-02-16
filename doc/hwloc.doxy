@@ -154,7 +154,7 @@ discovery:
 
 <ol>
 <li> libpciaccess.  The relevant development package is usually
-<tt>libpciaccess-devel</tt>.  This package is preferred by hwloc
+<tt>libpciaccess-dev</tt>.  This package is preferred by hwloc
 because it uses the BSD license, and is therefore license-compatible
 with hwloc.  Unfortunately, libpciaccess is not pre-installed on most
 systems, and must be obtained from
