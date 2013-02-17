@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2010 IBM
@@ -3478,6 +3478,40 @@ hwloc_linux_add_os_device(struct hwloc_topology *topology, struct hwloc_obj *pci
 
 typedef void (*hwloc_linux_class_fillinfos_t)(struct hwloc_topology *topology, struct hwloc_obj *osdev, const char *osdevpath);
 
+/* cannot be used in fsroot-aware code, would have to move to a per-topology variable */
+static int hwloc_linux_deprecated_classlinks_model = -2; /* -2 if never tried, -1 if unknown, 0 if new (device contains class/name), 1 if old (device contains class:name) */
+
+static void
+hwloc_linux_check_deprecated_classlinks_model(void)
+{
+  DIR *dir;
+  struct dirent *dirent;
+  char path[128];
+  struct stat st;
+
+  hwloc_linux_deprecated_classlinks_model = -1;
+
+  dir = opendir("/sys/class/net");
+  if (!dir)
+    return;
+  while ((dirent = readdir(dir)) != NULL) {
+    if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, "..") || !strcmp(dirent->d_name, "lo"))
+      continue;
+    snprintf(path, sizeof(path), "/sys/class/net/%s/device/net/%s", dirent->d_name, dirent->d_name);
+    if (stat(path, &st) == 0) {
+      hwloc_linux_deprecated_classlinks_model = 0;
+      goto out;
+    }
+    snprintf(path, sizeof(path), "/sys/class/net/%s/device/net:%s", dirent->d_name, dirent->d_name);
+    if (stat(path, &st) == 0) {
+      hwloc_linux_deprecated_classlinks_model = 1;
+      goto out;
+    }
+  }
+out:
+  closedir(dir);
+}
+
 /* class objects that are immediately below pci devices:
  * look for objects of the given classname below a sysfs (pcidev) directory
  */
@@ -3493,28 +3527,38 @@ hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pci
   hwloc_obj_t obj;
   int res = 0;
 
-  snprintf(path, sizeof(path), "%s/%s", devicepath, classname);
-  dir = opendir(path);
-  if (dir) {
+  if (hwloc_linux_deprecated_classlinks_model == -2)
+    hwloc_linux_check_deprecated_classlinks_model();
+
+  if (hwloc_linux_deprecated_classlinks_model != 1) {
     /* modern sysfs: <device>/<class>/<name> */
-    while ((dirent = readdir(dir)) != NULL) {
-      if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
-	continue;
-      obj = hwloc_linux_add_os_device(topology, pcidev, type, dirent->d_name);
-      if (fillinfo) {
-	snprintf(path, sizeof(path), "%s/%s/%s", devicepath, classname, dirent->d_name);
-	fillinfo(topology, obj, path);
+    snprintf(path, sizeof(path), "%s/%s", devicepath, classname);
+    dir = opendir(path);
+    if (dir) {
+      hwloc_linux_deprecated_classlinks_model = 0;
+      while ((dirent = readdir(dir)) != NULL) {
+	if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+	  continue;
+	obj = hwloc_linux_add_os_device(topology, pcidev, type, dirent->d_name);
+	if (fillinfo) {
+	  snprintf(path, sizeof(path), "%s/%s/%s", devicepath, classname, dirent->d_name);
+	  fillinfo(topology, obj, path);
+	}
+	res++;
       }
-      res++;
+      closedir(dir);
+      return res;
     }
-    closedir(dir);
-  } else {
+  }
+
+  if (hwloc_linux_deprecated_classlinks_model != 0) {
     /* deprecated sysfs: <device>/<class>:<name> */
     dir = opendir(devicepath);
     if (dir) {
       while ((dirent = readdir(dir)) != NULL) {
 	if (strncmp(dirent->d_name, classname, classnamelen) || dirent->d_name[classnamelen] != ':')
 	  continue;
+	hwloc_linux_deprecated_classlinks_model = 1;
 	obj = hwloc_linux_add_os_device(topology, pcidev, type, dirent->d_name + classnamelen+1);
 	if (fillinfo) {
 	  snprintf(path, sizeof(path), "%s/%s", devicepath, dirent->d_name);
@@ -3523,10 +3567,11 @@ hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pci
 	res++;
       }
       closedir(dir);
+      return res;
     }
   }
 
-  return res;
+  return 0;
 }
 
 /*
