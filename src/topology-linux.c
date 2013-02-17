@@ -3170,20 +3170,26 @@ hwloc__get_dmi_one_info(struct hwloc_linux_backend_data_s *data,
   char *tmp;
   FILE *fd;
 
-  snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/dmi/id/%s", sysfs_name);
+  snprintf(sysfs_path, sizeof(sysfs_path), "/sys/devices/virtual/dmi/id/%s", sysfs_name);
+  fd = hwloc_fopen(sysfs_path, "r", data->root_fd);
+  if (!fd) {
+    /* old path */
+    snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/dmi/id/%s", sysfs_name);
+    fd = hwloc_fopen(sysfs_path, "r", data->root_fd);
+    if (!fd)
+      return;
+  }
 
   dmi_line[0] = '\0';
-  fd = hwloc_fopen(sysfs_path, "r", data->root_fd);
-  if (fd) {
-    tmp = fgets(dmi_line, sizeof(dmi_line), fd);
-    fclose (fd);
-    if (tmp && dmi_line[0] != '\0') {
-      tmp = strchr(dmi_line, '\n');
-      if (tmp)
-	*tmp = '\0';
-      hwloc_debug("found %s '%s'\n", hwloc_name, dmi_line);
-      hwloc_obj_add_info(obj, hwloc_name, dmi_line);
-    }
+  tmp = fgets(dmi_line, sizeof(dmi_line), fd);
+  fclose (fd);
+
+  if (tmp && dmi_line[0] != '\0') {
+    tmp = strchr(dmi_line, '\n');
+    if (tmp)
+      *tmp = '\0';
+    hwloc_debug("found %s '%s'\n", hwloc_name, dmi_line);
+    hwloc_obj_add_info(obj, hwloc_name, dmi_line);
   }
 }
 
