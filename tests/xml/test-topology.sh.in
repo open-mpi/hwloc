@@ -54,14 +54,14 @@ set -e
 
 do_run()
 {
-  local dirname=`dirname $1`
-  local basename="${dirname}/"`basename $1 .xml`
+  dirname=`dirname $1`
+  basename="${dirname}/"`basename $1 .xml`
 
-  local source="$1"
-  local source_file="${basename}.source"
+  source="$1"
+  source_file="${basename}.source"
   test -f "$source_file" && source="${dirname}/"`cat $source_file`
 
-  local options_file="${basename}.options"
+  options_file="${basename}.options"
   test -f "$options_file" && opts=`cat $options_file`
 
   $lstopo --if xml --input "$source" --of xml "$file" $opts
