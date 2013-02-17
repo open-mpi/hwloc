@@ -109,6 +109,7 @@ cat << EOF | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 /sys/bus/cpu/devices/
 /sys/bus/node/devices/
 /sys/class/dmi/id/
+/sys/devices/virtual/dmi/id/
 /sys/kernel/mm/hugepages/
 /proc/device-tree/cpus/
 EOF
