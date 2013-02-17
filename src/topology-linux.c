@@ -2134,22 +2134,18 @@ hwloc_parse_node_distance(const char *distancepath, unsigned nbnodes, float *dis
 
 static void
 hwloc__get_dmi_one_info(struct hwloc_linux_backend_data_s *data,
-			hwloc_obj_t obj, const char *sysfs_name, const char *hwloc_name)
+			hwloc_obj_t obj,
+			char *path, unsigned pathlen,
+			const char *dmi_name, const char *hwloc_name)
 {
-  char sysfs_path[128];
   char dmi_line[64];
   char *tmp;
   FILE *fd;
 
-  snprintf(sysfs_path, sizeof(sysfs_path), "/sys/devices/virtual/dmi/id/%s", sysfs_name);
-  fd = hwloc_fopen(sysfs_path, "r", data->root_fd);
-  if (!fd) {
-    /* old path */
-    snprintf(sysfs_path, sizeof(sysfs_path), "/sys/class/dmi/id/%s", sysfs_name);
-    fd = hwloc_fopen(sysfs_path, "r", data->root_fd);
-    if (!fd)
-      return;
-  }
+  strcpy(path+pathlen, dmi_name);
+  fd = hwloc_fopen(path, "r", data->root_fd);
+  if (!fd)
+    return;
 
   dmi_line[0] = '\0';
   tmp = fgets(dmi_line, sizeof(dmi_line), fd);
@@ -2167,24 +2163,44 @@ hwloc__get_dmi_one_info(struct hwloc_linux_backend_data_s *data,
 static void
 hwloc__get_dmi_info(struct hwloc_linux_backend_data_s *data, hwloc_obj_t obj)
 {
-  hwloc__get_dmi_one_info(data, obj, "product_name", "DMIProductName");
-  hwloc__get_dmi_one_info(data, obj, "product_version", "DMIProductVersion");
-  hwloc__get_dmi_one_info(data, obj, "product_serial", "DMIProductSerial");
-  hwloc__get_dmi_one_info(data, obj, "product_uuid", "DMIProductUUID");
-  hwloc__get_dmi_one_info(data, obj, "board_vendor", "DMIBoardVendor");
-  hwloc__get_dmi_one_info(data, obj, "board_name", "DMIBoardName");
-  hwloc__get_dmi_one_info(data, obj, "board_version", "DMIBoardVersion");
-  hwloc__get_dmi_one_info(data, obj, "board_serial", "DMIBoardSerial");
-  hwloc__get_dmi_one_info(data, obj, "board_asset_tag", "DMIBoardAssetTag");
-  hwloc__get_dmi_one_info(data, obj, "chassis_vendor", "DMIChassisVendor");
-  hwloc__get_dmi_one_info(data, obj, "chassis_type", "DMIChassisType");
-  hwloc__get_dmi_one_info(data, obj, "chassis_version", "DMIChassisVersion");
-  hwloc__get_dmi_one_info(data, obj, "chassis_serial", "DMIChassisSerial");
-  hwloc__get_dmi_one_info(data, obj, "chassis_asset_tag", "DMIChassisAssetTag");
-  hwloc__get_dmi_one_info(data, obj, "bios_vendor", "DMIBIOSVendor");
-  hwloc__get_dmi_one_info(data, obj, "bios_version", "DMIBIOSVersion");
-  hwloc__get_dmi_one_info(data, obj, "bios_date", "DMIBIOSDate");
-  hwloc__get_dmi_one_info(data, obj, "sys_vendor", "DMISysVendor");
+  char path[128];
+  unsigned pathlen;
+  DIR *dir;
+
+  strcpy(path, "/sys/devices/virtual/dmi/id");
+  dir = hwloc_opendir(path, data->root_fd);
+  if (dir) {
+    pathlen = 27;
+  } else {
+    strcpy(path, "/sys/class/dmi/id");
+    dir = hwloc_opendir(path, data->root_fd);
+    if (dir)
+      pathlen = 17;
+    else
+      return;
+  }
+  closedir(dir);
+
+  path[pathlen++] = '/';
+
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "product_name", "DMIProductName");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "product_version", "DMIProductVersion");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "product_serial", "DMIProductSerial");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "product_uuid", "DMIProductUUID");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "board_vendor", "DMIBoardVendor");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "board_name", "DMIBoardName");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "board_version", "DMIBoardVersion");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "board_serial", "DMIBoardSerial");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "board_asset_tag", "DMIBoardAssetTag");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "chassis_vendor", "DMIChassisVendor");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "chassis_type", "DMIChassisType");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "chassis_version", "DMIChassisVersion");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "chassis_serial", "DMIChassisSerial");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "chassis_asset_tag", "DMIChassisAssetTag");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "bios_vendor", "DMIBIOSVendor");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "bios_version", "DMIBIOSVersion");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "bios_date", "DMIBIOSDate");
+  hwloc__get_dmi_one_info(data, obj, path, pathlen, "sys_vendor", "DMISysVendor");
 }
 
 
