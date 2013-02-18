@@ -175,6 +175,7 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
     case HWLOC_OBJ_OSDEV_NETWORK: printf("%s attr osdev type = Network\n", prefix); break;
     case HWLOC_OBJ_OSDEV_OPENFABRICS: printf("%s attr osdev type = Openfabrics\n", prefix); break;
     case HWLOC_OBJ_OSDEV_DMA: printf("%s attr osdev type = DMA\n", prefix); break;
+    case HWLOC_OBJ_OSDEV_COPROC: printf("%s attr osdev type = Co-Processor\n", prefix); break;
     }
     break;
   default:

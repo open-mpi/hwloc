@@ -40,6 +40,8 @@
 struct hwloc_linux_backend_data_s {
   char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
+
+  unsigned mic_id_max; /* -1 if not tried yet, 0 if none to lookup, maxid+1 otherwise */
 };
 
 
@@ -3830,6 +3832,111 @@ hwloc_linux_lookup_host_block_class(struct hwloc_topology *topology, struct hwlo
   return res;
 }
 
+static void
+hwloc_linux_mic_class_fillinfos(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, const char *osdevpath)
+{
+  FILE *fd;
+  char path[256];
+
+  snprintf(path, sizeof(path), "%s/family", osdevpath);
+  fd = fopen(path, "r");
+  if (fd) {
+    char family[64];
+    if (fgets(family, sizeof(family), fd)) {
+      char *eol = strchr(family, '\n');
+      if (eol)
+        *eol = 0;
+      hwloc_obj_add_info(obj, "MICFamily", family);
+    }
+    fclose(fd);
+  }
+
+  snprintf(path, sizeof(path), "%s/active_cores", osdevpath);
+  fd = fopen(path, "r");
+  if (fd) {
+    char counts[10];
+    if (fgets(counts, sizeof(counts), fd)) {
+      unsigned long count = strtoul(counts, NULL, 16);
+      hwloc_debug("%d cores\n", count);
+    }
+    fclose(fd);
+  }
+
+  snprintf(path, sizeof(path), "%s/memsize", osdevpath);
+  fd = fopen(path, "r");
+  if (fd) {
+    char counts[10];
+    if (fgets(counts, sizeof(counts), fd)) {
+      unsigned long count = strtoul(counts, NULL, 16);
+      hwloc_debug("MIC %d kB\n", count);
+    }
+    fclose(fd);
+  }
+}
+
+static int
+hwloc_linux_lookup_mic_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  return hwloc_linux_class_readdir(topology, pcidev, pcidevpath, HWLOC_OBJ_OSDEV_COPROC, "mic", hwloc_linux_mic_class_fillinfos);
+}
+
+static int
+hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend, struct hwloc_obj *pcidev)
+{
+  struct hwloc_topology *topology = backend->topology;
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  char path[256];
+  struct stat st;
+  hwloc_obj_t obj;
+  unsigned idx;
+  int res = 0;
+
+  if (!data->mic_id_max)
+    /* already tried, nothing to do */
+    return 0;
+
+  if (data->mic_id_max == (unsigned) -1) {
+    /* never tried, find out the max id */
+    DIR *dir;
+    struct dirent *dirent;
+
+    /* make sure we never do this lookup again */
+    data->mic_id_max = 0;
+
+    /* read the entire class and find the max id of mic%u dirents */
+    dir = opendir("/sys/devices/virtual/mic");
+    if (!dir) {
+      dir = opendir("/sys/class/mic");
+      if (!dir)
+	return 0;
+    }
+    while ((dirent = readdir(dir)) != NULL) {
+      if (!strcmp(dirent->d_name, ".") || !strcmp(dirent->d_name, ".."))
+	continue;
+      if (sscanf(dirent->d_name, "mic%u", &idx) != 1)
+	continue;
+      if (idx >= data->mic_id_max)
+	data->mic_id_max = idx+1;
+    }
+    closedir(dir);
+  }
+
+  /* now iterate over the mic ids and see if one matches our pcidev */
+  for(idx=0; idx<data->mic_id_max; idx++) {
+    snprintf(path, sizeof(path), "/sys/class/mic/mic%u/pci_%02x:%02x.%02x",
+	     idx, pcidev->attr->pcidev.bus,  pcidev->attr->pcidev.dev,  pcidev->attr->pcidev.func);
+    if (stat(path, &st) < 0)
+      continue;
+    snprintf(path, sizeof(path), "mic%u", idx);
+    obj = hwloc_linux_add_os_device(topology, pcidev, HWLOC_OBJ_OSDEV_COPROC, path);
+    snprintf(path, sizeof(path), "/sys/class/mic/mic%u", idx);
+    hwloc_linux_mic_class_fillinfos(topology, obj, path);
+    res++;
+  }
+
+  return res;
+}
+
 static int
 hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
 {
@@ -3925,7 +4032,7 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_linux_backend_data_s *data = backend->private_data;
   char pcidevpath[256];
-  int res = 0;
+  int res = 0, mic;
 
   /* this callback is only used in the libpci backend for now */
   assert(obj->type == HWLOC_OBJ_PCI_DEVICE);
@@ -3951,6 +4058,14 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
   res += hwloc_linux_lookup_dma_class(topology, obj, pcidevpath);
   res += hwloc_linux_lookup_drm_class(topology, obj, pcidevpath);
   res += hwloc_linux_lookup_block_class(topology, obj, pcidevpath);
+  res += mic = hwloc_linux_lookup_mic_class(topology, obj, pcidevpath);
+
+  /* hwloc_linux_lookup_mic_class may find nothing because pcidev sysfs directories
+   * do not have mic/mic%u symlinks to mic devices. if so, try from the mic class.
+   */
+  if (!mic)
+    res += hwloc_linux_directlookup_mic_class(backend, obj);
+
   return res;
 }
 
@@ -4062,6 +4177,8 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   data->root_path = NULL;
 #endif
   data->root_fd = root;
+
+  data->mic_id_max = -1; /* not initialized */
 
   return backend;
 

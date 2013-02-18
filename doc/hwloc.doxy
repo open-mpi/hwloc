@@ -1266,6 +1266,12 @@ components when I/O discovery is enabled and supported.
   (NVML component, using the NVIDIA Management Library)</li>
  </ul>
 </li>
+<li>Co-Processors (HWLOC_OBJ_OSDEV_COPROC)
+ <ul>
+ <li><em>mic0</em> for the first Intel Xeon Phi (MIC) coprocessor
+  (Linux component)</li>
+ </ul>
+</li>
 <li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
  <ul>
  <li><em>dma0chan0</em> (Linux component)</li>
@@ -1618,6 +1624,9 @@ object instead.
 </dd>
 <dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
 <dd>The UUID and Serial of NVIDIA GPUs.
+</dd>
+<dt>MICFamily</dt>
+<dd>The family of an Intel Xeon Phi (MIC) coprocessor.
 </dd>
 <dt>DMIBoardVendor, DMIBoardName, etc. (Machine object)</dt>
 <dd>DMI hardware information such as the motherboard and chassis

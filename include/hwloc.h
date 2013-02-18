@@ -277,8 +277,10 @@ typedef enum hwloc_obj_osdev_type_e {
 				  * For instance the "eth0" interface on Linux. */
   HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device.
 				  * For instance the "mlx4_0" InfiniBand HCA device on Linux. */
-  HWLOC_OBJ_OSDEV_DMA		/**< \brief Operating system dma engine device.
+  HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma engine device.
 				  * For instance the "dma0chan0" DMA channel on Linux. */
+  HWLOC_OBJ_OSDEV_COPROC	/**< \brief Operating system co-processor device.
+				  * For instance "mic0" on Linux. */
 } hwloc_obj_osdev_type_t;
 
 /** \brief Compare the depth of two object types
