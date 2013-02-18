@@ -51,6 +51,7 @@ int main(void)
       hwloc_bitmap_t set;
       hwloc_obj_t osdev, osdev2, ancestor;
       const char *value;
+      unsigned p, d;
 
       osdev = hwloc_opencl_get_device_osdev(topology, device_ids[j]);
       osdev2 = hwloc_opencl_get_device_osdev_by_index(topology, i, j);
@@ -76,9 +77,10 @@ int main(void)
       hwloc_bitmap_free(set);
 
       printf("found OSDev %s\n", osdev->name);
-      err = strncmp(osdev->name, "opencl", 6);
-      assert(!err);
-      assert(atoi(osdev->name+6) == (int) count);
+      err = sscanf(osdev->name, "opencl%ud%u", &p, &d);
+      assert(err == 2);
+      assert(p == i);
+      assert(d == j);
 
       value = hwloc_obj_get_info_by_name(osdev, "Backend");
       err = strcmp(value, "OpenCL");
