@@ -86,8 +86,8 @@ int main(void)
       err = strcmp(value, "OpenCL");
       assert(!err);
 
-      value = hwloc_obj_get_info_by_name(osdev, "Name");
-      printf("found OSDev name %s\n", value);
+      value = hwloc_obj_get_info_by_name(osdev, "GPUModel");
+      printf("found OSDev model %s\n", value);
 
       count++;
     }
