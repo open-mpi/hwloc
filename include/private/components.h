@@ -188,9 +188,9 @@ HWLOC_DECLSPEC extern const struct hwloc_component hwloc_freebsd_component;
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_hpux_component;
 #endif /* HWLOC_HPUX_SYS */
 
-#ifdef HWLOC_HAVE_LIBPCI
+#if (defined HWLOC_HAVE_LIBPCI) || (defined HWLOC_HAVE_LIBPCIACCESS)
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_libpci_component;
-#endif /* HWLOC_HAVE_LIBPCI */
+#endif /* HWLOC_HAVE_LIBPCI || HWLOC_HAVE_LIBPCIACCESS */
 
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_synthetic_component;
 

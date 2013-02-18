@@ -145,9 +145,14 @@ is configured and build.
 
 The hwloc core may also benefit from the following development packages:
 <ul>
-<li>pciutils (libpci) for I/O discovery.
-    The relevant development package is usually <tt>pciutils-devel</tt>
-    or <tt>libpci-dev</tt>.
+<li>Hwloc can use one of two different libraries for I/O device
+discovery:
+<ol>
+<li> libpciaccess (BSD).  The relevant development package is usually
+<tt>libpciaccess-devel</tt> or <tt>libpciaccess-dev</tt>.  </li>
+<li>libpci, from the pciutils package (GPL). The relevant development
+package is usually <tt>pciutils-devel</tt> or <tt>libpci-dev</tt>.  
+</ol>
 </li>
 <li>libnuma for memory binding and migration support on Linux
     (<tt>numactl-devel</tt> or <tt>libnuma-dev</tt> package).
@@ -160,11 +165,30 @@ The hwloc core may also benefit from the following development packages:
     or <tt>libxml2-dev</tt>.
 </li>
 </ul>
-libpci and libxml2 support may be statically built inside the main
-hwloc library, or as separate dynamically-loaded plugins
-(see the \ref plugins section).
 
+PCI and XML support may be statically built inside the main hwloc
+library, or as separate dynamically-loaded plugins (see the \ref
+plugins section).
 
+Note that because of the possibility of GPL taint (remember that hwloc
+is BSD-licensed), hwloc's <tt>configure</tt> script will prefer
+<tt>libpciaccess</tt> to the <tt>pciutils</tt> package.  Indeed, if
+<tt>libpciaccess</tt> is not found, hwloc will not use
+<tt>pciutils</tt> unless it is specifically requested via the
+<tt>--enable-libpci</tt> flag is provided.
+
+Also note that if you install supplemental libraries in non-standard
+locations, hwloc's configure script may not be able to find them
+without some help.  You may need to specify additional CPPFLAGS,
+LDFLAGS, or PKG_CONFIG_PATH values on the configure command line.
+
+For example, if libpciaccess was installed into /opt/pciaccess,
+hwloc's configure script may not find it be default.  Try adding
+PKG_CONFIG_PATH to the ./configure command line, like this:
+
+\verbatim
+./configure PKG_CONFIG_PATH=/opt/pciaccess/lib/pkgconfig ...
+\endverbatim
 
 \htmlonly
 </div><div class="section" id="cli_examples">
@@ -1124,8 +1148,9 @@ It can be enabled by passing flags such as <tt>::HWLOC_TOPOLOGY_FLAG_IO_DEVICES<
 to hwloc_topology_set_flags() before loading the topology.
 
 Note that I/O discovery requires significant help from the operating system.
-The pciutils library (the development package is usually <tt>pciutils-devel</tt>
-or <tt>libpci-dev</tt>) is needed to detect PCI devices and bridges,
+The pciaccess library (the development package is usually <tt>libpciaccess-devel</tt>
+or <tt>libpciaccess-dev</tt>) is needed to detect PCI devices and bridges
+(libpci/pciutils may be used instead if a GPL dependency is acceptable),
 and the actual locality of these devices is only currently detected
 on Linux. Also, some operating systems require privileges for probing PCI
 devices, see \ref faq_privileged for details.
@@ -2017,7 +2042,8 @@ environment variable (see \ref envvar).
 </dd>
 <dt>libpci</dt>
 <dd>
- PCI object discovery uses the external pciutils library (aka libpci),
+ PCI object discovery uses the external pciaccess library (aka libpciaccess),
+ or optionally the pciutils library (libpci),
  see \ref iodevices.
  <b>It may be built as a plugin</b>.
 </dd>

@@ -38,10 +38,10 @@ $ls
   $ls --taskset -v > $tmp/test.taskset
   $ls --merge > $tmp/test.merge
 
-@HWLOC_HAVE_LIBPCI_TRUE@  $ls --no-io > $tmp/test.no-io
-@HWLOC_HAVE_LIBPCI_TRUE@  $ls --no-bridges > $tmp/test.no-bridges
-@HWLOC_HAVE_LIBPCI_TRUE@  $ls --whole-io > $tmp/test.whole-io
-@HWLOC_HAVE_LIBPCI_TRUE@  $ls -v --whole-io > $tmp/test.wholeio_verbose
+@HWLOC_HAVE_PCI_TRUE@  $ls --no-io > $tmp/test.no-io
+@HWLOC_HAVE_PCI_TRUE@  $ls --no-bridges > $tmp/test.no-bridges
+@HWLOC_HAVE_PCI_TRUE@  $ls --whole-io > $tmp/test.whole-io
+@HWLOC_HAVE_PCI_TRUE@  $ls -v --whole-io > $tmp/test.wholeio_verbose
 
   $ls --whole-system > $tmp/test.whole-system
   $ls --ps > $tmp/test.

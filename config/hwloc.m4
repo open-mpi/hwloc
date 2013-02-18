@@ -634,7 +634,13 @@ EOF])
 
     # PCI support
     hwloc_pci_happy=no
-    if test "x$enable_pci" != "xno"; then
+    if test "x$enable_pci" != xno -a "x$enable_libpci" != "xyes"; then
+      hwloc_pci_happy=yes
+      HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [:], [hwloc_pci_happy=no])
+      if test x$hwloc_pci_happy = xyes; then hwloc_pci_lib=pciaccess; fi
+    fi
+    # PCI support with pciutils instead of pciaccess
+    if test "x$enable_pci" != "xno" -a "x$hwloc_pci_lib" != "xpciaccess"; then
         hwloc_pci_happy=yes
         HWLOC_PKG_CHECK_MODULES([PCI], [libpci], [pci_cleanup], [:], [
           # manually check pciutils in case a old one without .pc is installed
@@ -674,18 +680,35 @@ EOF])
                     [hwloc_pci_happy=no])])
             ], [hwloc_pci_happy=no])
         ])
+        if test x$hwloc_pci_happy = xyes; then
+	  # pciutils could be used, but we don't want to force use it since it may GPL-taint hwloc
+	  if test x$enable_libpci = xyes; then
+	    hwloc_pci_lib=pciutils
+	  else
+	    # user didn't explicit request pciutils, disable PCI and warn the user
+	    hwloc_pci_happy=no
+	    hwloc_warn_may_use_libpci=yes
+	  fi
+	fi
     fi
     AC_SUBST(HWLOC_PCI_LIBS)
     # If we asked for pci support but couldn't deliver, fail
-    AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no"],
+    AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no" -a "$hwloc_warn_may_use_libpci" != "yes"],
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
            AC_MSG_WARN([find appropriate support])
            AC_MSG_ERROR([Cannot continue])])
-    if test "x$hwloc_pci_happy" = "xyes"; then
+    # pciaccess specific enabling
+    if test "x$hwloc_pci_lib" = "xpciaccess"; then
+      HWLOC_PCIACCESS_REQUIRES=pciaccess
+      AC_DEFINE([HWLOC_HAVE_LIBPCIACCESS], [1], [Define to 1 if you have the `libpciaccess' library.])
+    fi
+    # pciutils specific checks and enabling
+    if test "x$hwloc_pci_lib" = "xpciutils"; then
       tmp_save_CFLAGS="$CFLAGS"
       CFLAGS="$CFLAGS $HWLOC_PCI_CFLAGS"
       tmp_save_LIBS="$LIBS"
       LIBS="$LIBS $HWLOC_PCI_LIBS"
+
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
       AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [$HWLOC_PCI_ADDITIONAL_LIBS])
@@ -711,16 +734,16 @@ EOF])
         AC_DEFINE([HWLOC_HAVE_PCIDEV_DOMAIN], [1], [Define to 1 if struct pci_dev has a `domain' field.])
       fi
 
-      HWLOC_PCI_REQUIRES=libpci
-      AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
-      AC_SUBST([HWLOC_HAVE_LIBPCI], [1])
       CFLAGS="$tmp_save_CFLAGS"
       LIBS="$tmp_save_LIBS"
 
+      HWLOC_PCI_REQUIRES=libpci
+      AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
+    fi
+    # final common PCI enabling
+    if test "x$hwloc_pci_happy" = "xyes"; then
       hwloc_components="$hwloc_components libpci"
       hwloc_libpci_component_maybeplugin=1
-    else
-      AC_SUBST([HWLOC_HAVE_LIBPCI], [0])
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
@@ -840,9 +863,9 @@ EOF])
     AC_MSG_RESULT([$hwloc_plugin_components])
 
     AS_IF([test "$hwloc_libpci_component" = "static"],
-          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS"
-           HWLOC_REQUIRES="$HWLOC_PCI_REQUIRES $HWLOC_REQUIRES"])
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS $HWLOC_PCIACCESS_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS $HWLOC_PCIACCESS_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_PCI_REQUIRES $HWLOC_PCIACCESS_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_xml_libxml_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_LIBXML2_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_LIBXML2_CFLAGS"
@@ -927,7 +950,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 		       [test "x$hwloc_have_cudart" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_LIBXML2], [test "$hwloc_libxml2_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_CAIRO], [test "$hwloc_cairo_happy" = "yes"])
-        AM_CONDITIONAL([HWLOC_HAVE_LIBPCI], [test "$hwloc_pci_happy" = "yes"])
+        AM_CONDITIONAL([HWLOC_HAVE_PCI], [test "$hwloc_pci_happy" = "yes"])
         AM_CONDITIONAL([HWLOC_HAVE_SET_MEMPOLICY], [test "x$enable_set_mempolicy" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_MBIND], [test "x$enable_mbind" != "xno"])
         AM_CONDITIONAL([HWLOC_HAVE_BUNZIPP], [test "x$BUNZIPP" != "xfalse"])
