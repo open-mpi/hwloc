@@ -713,9 +713,6 @@ EOF])
     if test "x$hwloc_pci_lib" = "xpciaccess"; then
       HWLOC_PCIACCESS_REQUIRES=pciaccess
       AC_DEFINE([HWLOC_HAVE_LIBPCIACCESS], [1], [Define to 1 if you have the `libpciaccess' library.])
-
-      hwloc_components="$hwloc_components libpci"
-      hwloc_libpci_component_maybeplugin=1
     fi
     # pciutils specific checks and enabling
     if test "x$hwloc_pci_lib" = "xpciutils"; then
