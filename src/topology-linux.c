@@ -3851,13 +3851,27 @@ hwloc_linux_mic_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
     fclose(fd);
   }
 
+  snprintf(path, sizeof(path), "%s/sku", osdevpath);
+  fd = fopen(path, "r");
+  if (fd) {
+    char sku[64];
+    if (fgets(sku, sizeof(sku), fd)) {
+      char *eol = strchr(sku, '\n');
+      if (eol)
+        *eol = 0;
+      hwloc_obj_add_info(obj, "MICSKU", sku);
+    }
+    fclose(fd);
+  }
+
   snprintf(path, sizeof(path), "%s/active_cores", osdevpath);
   fd = fopen(path, "r");
   if (fd) {
-    char counts[10];
-    if (fgets(counts, sizeof(counts), fd)) {
-      unsigned long count = strtoul(counts, NULL, 16);
-      hwloc_debug("%d cores\n", count);
+    char string[10];
+    if (fgets(string, sizeof(string), fd)) {
+      unsigned long count = strtoul(string, NULL, 16);
+      snprintf(string, sizeof(string), "%u", count);
+      hwloc_obj_add_info(obj, "MICActiveCores", string);
     }
     fclose(fd);
   }
@@ -3865,10 +3879,11 @@ hwloc_linux_mic_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
   snprintf(path, sizeof(path), "%s/memsize", osdevpath);
   fd = fopen(path, "r");
   if (fd) {
-    char counts[10];
-    if (fgets(counts, sizeof(counts), fd)) {
-      unsigned long count = strtoul(counts, NULL, 16);
-      hwloc_debug("MIC %d kB\n", count);
+    char string[20];
+    if (fgets(string, sizeof(string), fd)) {
+      unsigned long count = strtoul(string, NULL, 16);
+      snprintf(string, sizeof(string), "%lu", count);
+      hwloc_obj_add_info(obj, "MICMemorySize", string);
     }
     fclose(fd);
   }
