@@ -20,6 +20,7 @@ include_hwloc_HEADERS = \
         hwloc/cudart.h \
         hwloc/nvml.h \
         hwloc/plugins.h \
+        hwloc/gl.h \
         hwloc/rename.h
 include_hwloc_autogendir = $(includedir)/hwloc/autogen
 nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h 

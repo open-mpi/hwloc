@@ -166,6 +166,8 @@ package is usually <tt>pciutils-devel</tt> or <tt>libpci-dev</tt>.
 </li>
 <li>the NVIDIA Tesla Development Kit for NVML device discovery.
 </li>
+<li>the NV-CONTROL X extension library (NVCtrl) for NVIDIA display discovery.
+</li>
 <li>libxml2 for full XML import/export support (otherwise, the
     internal minimalistic parser will only be able to import
     XML files that were exported by the same hwloc release).
@@ -1264,6 +1266,8 @@ components when I/O discovery is enabled and supported.
   (CUDA component, using the NVIDIA CUDA Library)</li>
  <li><em>nvml0</em> for the first NVML device
   (NVML component, using the NVIDIA Management Library)</li>
+ <li><em>:0.0</em> for the first display
+  (GL component, using the NV-CONTROL X extension library, NVCtrl)</li>
  </ul>
 </li>
 <li>DMA engine channel (HWLOC_OBJ_OSDEV_DMA)
@@ -1898,6 +1902,16 @@ enabled for the current topology.
   information (if I/O device discovery is enabled).
  </dd>
 
+<dt>NVIDIA displays</dt>
+ <dd>
+  hwloc/gl.h enables interoperability with NVIDIA displays
+  using the NV-CONTROL X extension (NVCtrl library).
+  If I/O device discovery is enabled, it may return the OS device
+  hwloc object that corresponds to a given display
+  given as a name such as <em>:0.0</em>
+  or given as a port/device pair (server/screen).
+ </dd>
+
 <dt>Taskset command-line tool</dt>
  <dd>
   The taskset command-line tool is widely used for binding
@@ -2191,6 +2205,15 @@ environment variable (see \ref envvar).
  It also detects the actual PCIe link bandwidth without depending
  on power management state and without requiring administrator
  privileges.
+ <b>It may be built as a plugin</b>.
+</dd>
+<dt>gl</dt>
+<dd>
+ Probing the NV-CONTROL X extension (NVCtrl library) creates OS
+ device objects such as <em>:0.0</em> corresponding to NVIDIA
+ displays.
+ They are useful for graphical applications that need to place
+ computation and/or data near a rendering GPU.
  <b>It may be built as a plugin</b>.
 </dd>
 <dt>synthetic</dt>

@@ -61,6 +61,10 @@ if HWLOC_HAVE_LIBIBVERBS
 check_PROGRAMS += openfabrics-verbs
 endif HWLOC_HAVE_LIBIBVERBS
 
+if HWLOC_HAVE_GL
+check_PROGRAMS += gl
+endif HWLOC_HAVE_GL
+
 if HWLOC_HAVE_MYRIEXPRESS
 check_PROGRAMS += myriexpress
 endif HWLOC_HAVE_MYRIEXPRESS

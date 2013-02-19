@@ -24,16 +24,17 @@ Version 1.7.0
     Thanks to Jeff Hammond, Christopher Samuel and Erik Schnetter for
     their help.
   + Add NetBSD support, thanks to Aleksej Saushev.
-  + Add three GPU detection components: opencl (for the AMD OpenCL
-    implemenation), cuda and nvml (for NVIDIA GPUs).
-    - They add OS devices such as opencl0d0, cuda0 and nvml0 inside the
+  + Add four GPU detection components: opencl (for the AMD OpenCL
+    implementation), cuda and nvml (for NVIDIA GPUs), GL (for NVIDIA displays).
+    - They add OS devices such as opencl0d0, cuda0, nvml0 and :0.0 inside the
       corresponding PCI devices with some string info attributes.
     - The nvml component also improves the discovery of NVIDIA GPU
       PCIe link speed.
     - They may be built as plugins.
-    - They may be disabled with --disable-opencl/cuda/nvml.
+    - They may be disabled with --disable-opencl/cuda/nvml/gl.
     See the I/O Devices, Components and Plugins, and FAQ documentation
     sections for details.
+    Thanks to Marwan Abdellah and Stefan Eilemann for helping.
 * API
   + Add hwloc_topology_get_flags().
   + Add hwloc/plugins.h for building external plugins.

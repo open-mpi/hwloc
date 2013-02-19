@@ -34,6 +34,9 @@
 #if HWLOC_TEST_RENAME_NVML
 #include "hwloc/nvml.h"
 #endif
+#if HWLOC_TEST_RENAME_GL
+#include "hwloc/gl.h"
+#endif
 
 #include "private/autogen/config.h"
 #include "private/components.h"
