@@ -404,6 +404,8 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
         lstopo_show_only = hwloc_obj_type_of_string(argv[1]);
+	if (lstopo_show_only == (hwloc_obj_type_t) -1)
+	  fprintf(stderr, "Unsupported type `%s' passed to --only, ignoring.\n", argv[1]);
 	opt = 1;
       }
       else if (!strcmp (argv[0], "--ignore")) {
@@ -413,7 +415,9 @@ main (int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	type = hwloc_obj_type_of_string(argv[1]);
-	if (type == HWLOC_OBJ_PU)
+	if (type == (hwloc_obj_type_t) -1)
+	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
+	else if (type == HWLOC_OBJ_PU)
 	  lstopo_ignore_pus = 1;
 	else
 	  hwloc_topology_ignore_type(topology, type);
@@ -464,6 +468,8 @@ main (int argc, char *argv[])
 	  type = hwloc_obj_type_of_string(tmp);
 	  if (type != (hwloc_obj_type_t) -1)
 	    force_orient[type] = orient;
+	  else
+	    fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
 	  if (!end)
 	    break;
 	  tmp = end+1;
