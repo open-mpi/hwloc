@@ -120,6 +120,7 @@ The hwloc core may also benefit from the following development packages:
   * the AMD OpenCL implementation for OpenCL device discovery.
   * the NVIDIA CUDA Toolkit for CUDA device discovery.
   * the NVIDIA Tesla Development Kit for NVML device discovery.
+  * the NV-CONTROL X extension library (NVCtrl) for NVIDIA display discovery.
   * libxml2 for full XML import/export support (otherwise, the internal
  minimalistic parser will only be able to import XML files that were
  exported by the same hwloc release). See Importing and exporting topologies
@@ -713,5 +714,5 @@ Make sure to have had a look at those too!
 
 -------------------------------------------------------------------------------
 
-Generated on Mon Feb 18 2013 21:56:49 for Hardware Locality (hwloc) by   
-doxygen 1.8.2
+Generated on Tue Feb 19 2013 21:57:05 for Hardware Locality (hwloc) by   
+doxygen 1.8.3.1
