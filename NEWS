@@ -24,26 +24,29 @@ Version 1.7.0
     Thanks to Jeff Hammond, Christopher Samuel and Erik Schnetter for
     their help.
   + Add NetBSD support, thanks to Aleksej Saushev.
-  + Add four GPU detection components: opencl (for the AMD OpenCL
-    implementation), cuda and nvml (for NVIDIA GPUs), GL (for NVIDIA displays).
-    - They add OS devices such as opencl0d0, cuda0, nvml0 and :0.0 inside the
-      corresponding PCI devices with some string info attributes.
-    - The nvml component also improves the discovery of NVIDIA GPU
-      PCIe link speed.
-    - They may be built as plugins.
-    - They may be disabled with --disable-opencl/cuda/nvml/gl.
+  + Add 4 new I/O device detection components:
+    - "opencl" which adds OS devices such as "opencl0d0" for each OpenCL
+      GPU device of the AMD implementation.
+    - "cuda" which adds OS devices such as "cuda0" for NVIDIA CUDA-capable
+      capable GPGPUs.
+    - "nvml" which adds OS devices such as "nvml0" for NVIDIA GPUs, and
+      also improves the discovery of their PCIe link speed.
+    - "gl" which adds OS devices such as ":0.0" for NVIDIA X11 displays.
+      Thanks to Marwan Abdellah and Stefan Eilemann for helping.
+    These new OS devices have some string info attributes such as GPUModel
+    to better identify them.
+    All of these new components may be built as plugins. They may also be
+    disabled entirely by passing --disable-opencl/cuda/nvml/gl to configure.
     See the I/O Devices, Components and Plugins, and FAQ documentation
     sections for details.
-    Thanks to Marwan Abdellah and Stefan Eilemann for helping.
 * API
   + Add hwloc_topology_get_flags().
   + Add hwloc/plugins.h for building external plugins.
     See the Adding new discovery components and plugins section.
 * Interoperability
-  + Add hwloc/opencl.h to retrieve the locality or OS device for
-    AMD GPU devices or indexes.
-  + Add hwloc/nvml.h to retrieve the locality or OS device for NVML
-    devices or indexes.
+  + Add hwloc/opencl.h, hwloc/nvml.h and hwloc/gl.h to retrieve the
+    locality of OS devices that correspond to AMD OpenCL GPU devices
+    or indexes, to NVML devices or indexes, or to NVIDIA X11 displays.
   + Add new helpers in hwloc/cuda.h and hwloc/cudart.h to convert
     between CUDA devices or indexes and hwloc OS devices.
   + Add hwloc_ibv_get_device_osdev() and clarify the requirements
