@@ -194,7 +194,7 @@ physical number output instead:
 
     $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU machine:0`
     $ echo $GOMP_CPU_AFFINITY
-    0,2,1,3
+    0,4,1,5,2,6,3,7
 
 To display the list of NUMA nodes, by physical indexes, that intersect a given (physical) CPU mask:
 
@@ -249,6 +249,16 @@ To synthetize a set of cores into largest objects on a 2-node 2-socket 2-core ma
 To get the set of first threads of all cores:
 
     $ hwloc-calc core:all.pu:0
+
+This can also be very useful in order to make GNU OpenMP use exactly one thread
+per core, and in logical core order:
+
+    $ export OMP_NUM_THREADS=`hwloc-calc --number-of core machine:0`
+    $ echo $OMP_NUM_THREADS
+    4
+    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU core:all.pu:0`
+    $ echo $GOMP_CPU_AFFINITY
+    0,2,1,3
 
 .
 .\" **************************
