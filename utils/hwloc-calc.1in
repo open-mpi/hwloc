@@ -37,7 +37,7 @@ Use OS/physical indexes instead of logical indexes for input.
 \fB\-\-li\fR \fB\-\-logical\-input\fR
 Use logical indexes instead of physical/OS indexes for input (default).
 .TP
-\fB\-\-po\fR \fB\-\-physical\-input\fR
+\fB\-\-po\fR \fB\-\-physical\-output\fR
 Use OS/physical indexes instead of logical indexes for output.
 .TP
 \fB\-\-lo\fR \fB\-\-logical\-output\fR
@@ -192,7 +192,7 @@ socket:
 To bind GNU OpenMP threads logically over the whole machine, we need to use
 physical number output instead:
 
-    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical --intersect PU machine:0`
+    $ export GOMP_CPU_AFFINITY=`hwloc-calc --physical-output --intersect PU machine:0`
     $ echo $GOMP_CPU_AFFINITY
     0,2,1,3
 
