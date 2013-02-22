@@ -169,13 +169,7 @@ hwloc_info_show_obj(hwloc_obj_t obj, const char *type, const char *prefix, int v
       printf("%s attr PCI linkspeed = %f GB/s\n", prefix, obj->attr->pcidev.linkspeed);
     break;
   case HWLOC_OBJ_OS_DEVICE:
-    switch (obj->attr->osdev.type) {
-    case HWLOC_OBJ_OSDEV_BLOCK: printf("%s attr osdev type = Block\n", prefix); break;
-    case HWLOC_OBJ_OSDEV_GPU: printf("%s attr osdev type = GPU\n", prefix); break;
-    case HWLOC_OBJ_OSDEV_NETWORK: printf("%s attr osdev type = Network\n", prefix); break;
-    case HWLOC_OBJ_OSDEV_OPENFABRICS: printf("%s attr osdev type = Openfabrics\n", prefix); break;
-    case HWLOC_OBJ_OSDEV_DMA: printf("%s attr osdev type = DMA\n", prefix); break;
-    }
+    printf("%s attr osdev type = %s\n", prefix, type);
     break;
   default:
     /* nothing to show */
