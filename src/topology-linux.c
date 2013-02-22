@@ -3870,7 +3870,7 @@ hwloc_linux_mic_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
     char string[10];
     if (fgets(string, sizeof(string), fd)) {
       unsigned long count = strtoul(string, NULL, 16);
-      snprintf(string, sizeof(string), "%u", count);
+      snprintf(string, sizeof(string), "%lu", count);
       hwloc_obj_add_info(obj, "MICActiveCores", string);
     }
     fclose(fd);
