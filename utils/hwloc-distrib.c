@@ -92,11 +92,16 @@ int main(int argc, char *argv[])
 	goto next;
       }
       else if (!strcmp (argv[0], "--ignore")) {
+	hwloc_obj_type_t type;
 	if (argc < 2) {
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	hwloc_topology_ignore_type(topology, hwloc_obj_type_of_string(argv[1]));
+	type = hwloc_obj_type_of_string(argv[1]);
+	if (type != (hwloc_obj_type_t) -1)
+	  hwloc_topology_ignore_type(topology, type);
+	else
+	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	argc--;
 	argv++;
 	goto next;
@@ -107,6 +112,8 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	from_type = hwloc_obj_type_of_string(argv[1]);
+	if (from_type == (hwloc_obj_type_t) -1)
+	  fprintf(stderr, "Unsupported type `%s' passed to --from, ignoring.\n", argv[1]);
 	argc--;
 	argv++;
 	goto next;
@@ -117,6 +124,8 @@ int main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	to_type = hwloc_obj_type_of_string(argv[1]);
+	if (to_type == (hwloc_obj_type_t) -1)
+	  fprintf(stderr, "Unsupported type `%s' passed to --to, ignoring.\n", argv[1]);
 	argc--;
 	argv++;
 	goto next;

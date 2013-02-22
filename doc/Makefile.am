@@ -1,4 +1,4 @@
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -644,7 +644,11 @@ man3_cuda_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_nvml.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev_by_index.3
+        $(DOX_MAN_DIR)/man3/hwloc_nvml_get_device_osdev_by_index.3 \
+        $(DOX_MAN_DIR)/man3/hwlocality_gl.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_osdev_by_port_device.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_osdev_by_name.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_gl_get_display_by_osdev.3
 
 man3_glibc_scheddir = $(man3dir)
 man3_glibc_sched_DATA = \

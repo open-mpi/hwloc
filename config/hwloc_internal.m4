@@ -83,6 +83,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--disable-nvml],
                                  [Disable the NVML device discovery]))
 
+    # GL/Display
+    AC_ARG_ENABLE([gl],
+		  AS_HELP_STRING([--disable-gl],
+				 [Disable the GL display device discovery]))
+
     # Linux libnuma
     AC_ARG_ENABLE([libnuma],
                   AS_HELP_STRING([--disable-libnuma],

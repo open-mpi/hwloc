@@ -63,8 +63,8 @@ int main(void)
     err = strcmp(value, "NVML");
     assert(!err);
 
-    value = hwloc_obj_get_info_by_name(osdev, "Name");
-    printf("found OSDev name %s\n", value);
+    value = hwloc_obj_get_info_by_name(osdev, "GPUModel");
+    printf("found OSDev model %s\n", value);
 
     set = hwloc_bitmap_alloc();
     err = hwloc_nvml_get_device_cpuset(topology, device, set);

@@ -271,7 +271,7 @@ typedef enum hwloc_obj_osdev_type_e {
 				  * For instance "sda" on Linux. */
   HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
 				  * For instance "opencl0d0" for a OpenCL device,
-				  * "cuda0" for a CUDA device,
+				  * "cuda0" for a CUDA device, ":0.0" for a GL display,
 				  * "card0" for a Linux DRM device. */
   HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device.
 				  * For instance the "eth0" interface on Linux. */

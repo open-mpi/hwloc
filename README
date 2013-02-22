@@ -34,6 +34,7 @@ hwloc supports the following operating systems:
   * OSF/1 (a.k.a., Tru64)
   * HP-UX
   * Microsoft Windows
+  * IBM BlueGene/Q Compute Node Kernel (CNK)
 
 Since it uses standard Operating System information, hwloc's support is mostly
 independant from the processor type (x86, powerpc, ...) and just relies on the
@@ -109,40 +110,37 @@ The hwloc core may also benefit from the following development packages:
 
   * libnuma for memory binding and migration support on Linux (numactl-devel or
  libnuma-dev package).
-  * Hwloc can use one of two different libraries for I/O device discovery:
+  * hwloc can use one of two different libraries for I/O device discovery:
 
-  1. libpciaccess. The relevant development package is usually
-     libpciaccess-devel. This package is preferred by hwloc because it uses
-     the BSD license, and is therefore license-compatible with hwloc.
-     Unfortunately, libpciaccess is not pre-installed on most systems, and
-     must be obtained from http://xorg.freedesktop.org/archive/individual/
-     lib/.
-
-  2. pciutils (libpci). The relevant development package is usually
-     pciutils-devel or libpci-dev. Unfortunately, while the libpci library
-     from the pciutils package is pre-installed (or readily available) on
-     many platforms, it is licensed under the GPL. Hence, if hwloc is
-     configured to build/link against libpci, the hwloc library and binaries
-     will be tainted with GPL (this has serious implications for 3rd parties
-     developing tools that link against libhwloc!)
+  1. libpciaccess (BSD). The relevant development package is usually
+     libpciaccess-devel or libpciaccess-dev.
+  2. libpci, from the pciutils package (GPL). The relevant development
+     package is usually pciutils-devel or libpci-dev.
 
   * the AMD OpenCL implementation for OpenCL device discovery.
   * the NVIDIA CUDA Toolkit for CUDA device discovery.
   * the NVIDIA Tesla Development Kit for NVML device discovery.
+  * the NV-CONTROL X extension library (NVCtrl) for NVIDIA display discovery.
   * libxml2 for full XML import/export support (otherwise, the internal
  minimalistic parser will only be able to import XML files that were
  exported by the same hwloc release). See Importing and exporting topologies
  from/to XML files for details. The relevant development package is usually
  libxml2-devel or libxml2-dev.
 
-PCI and libxml2 support may be statically built inside the main hwloc library,
-or as separate dynamically-loaded plugins (see the Components and plugins
+PCI and XML support may be statically built inside the main hwloc library, or
+as separate dynamically-loaded plugins (see the Components and plugins
 section).
 
-Note that if you install supplemental libraries (e.g., libpciaccess) in
-non-standard locations, then hwloc's configure script may not be able to find
-them without some help. You may need to specify additional CPPFLAGS, LDFLAGS,
-or PKG_CONFIG_PATH values on the configure command line.
+Note that because of the possibility of GPL taint (remember that hwloc is
+BSD-licensed), hwloc's configure script will prefer libpciaccess to the
+pciutils package. Indeed, if libpciaccess is not found, hwloc will not use
+pciutils unless it is specifically requested via the --enable-libpci flag is
+provided.
+
+Also note that if you install supplemental libraries in non-standard locations,
+hwloc's configure script may not be able to find them without some help. You
+may need to specify additional CPPFLAGS, LDFLAGS, or PKG_CONFIG_PATH values on
+the configure command line.
 
 For example, if libpciaccess was installed into /opt/pciaccess, hwloc's
 configure script may not find it be default. Try adding PKG_CONFIG_PATH to the
@@ -716,5 +714,5 @@ Make sure to have had a look at those too!
 
 -------------------------------------------------------------------------------
 
-Generated on Sat Feb 16 2013 08:47:07 for Hardware Locality (hwloc) by   
-doxygen 1.8.3
+Generated on Tue Feb 19 2013 21:57:05 for Hardware Locality (hwloc) by   
+doxygen 1.8.3.1
