@@ -104,8 +104,6 @@ opencl_LDADD = $(LDADD) -lOpenCL
 cuda_LDADD = $(LDADD) -lcuda
 cudart_LDADD = $(LDADD) -lcuda -lcudart
 nvml_LDADD = $(LDADD) -lnvidia-ml
-xmlbuffer_LDADD = $(LDADD) $(HWLOC_LIBXML2_LIBS)
-hwloc_backends_LDADD = $(LDADD) $(HWLOC_LIBXML2_LIBS)
 hwloc_bind_LDADD = $(LDADD)
 if HWLOC_HAVE_PTHREAD
 hwloc_bind_LDADD += -lpthread
