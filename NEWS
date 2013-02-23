@@ -29,6 +29,8 @@ Version 1.5.2 (some of these changes are in v1.6.2 but not in v1.6)
   without any I/O topology flag.
 * Fix the output of hwloc-calc -H --hierarchical when using logical
   indexes in the output.
+* Fix the pkg-config output with --libs --static.
+  Thanks to Erik Schnetter for reporting one of the problems.
 
 
 Version 1.5.1
