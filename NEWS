@@ -17,8 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
-Version 1.5.2
+Version 1.5.2 (some of these changes are in v1.6.2 but not in v1.6)
 -------------
+* Fix get_cpubind on Solaris when bound to a single PU with
+  processor_bind(). Thanks to Eugene Loh for reporting the problem
+  and providing a patch.
 * Fix some DIR descriptor leaks on Linux.
 * Fix I/O device lists when some were filtered out after a XML import.
 * Add missing Backend string info on Solaris in most cases.
