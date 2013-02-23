@@ -27,6 +27,8 @@ Version 1.5.2 (some of these changes are in v1.6.2 but not in v1.6)
 * Add missing Backend string info on Solaris in most cases.
 * Fix the removal of I/O objects when importing a I/O-enabled XML topology
   without any I/O topology flag.
+* Fix the output of hwloc-calc -H --hierarchical when using logical
+  indexes in the output.
 
 
 Version 1.5.1
