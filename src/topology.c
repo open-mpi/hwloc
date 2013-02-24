@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2111,7 +2111,7 @@ hwloc_discover(struct hwloc_topology *topology)
     else if (topology->backend_type == HWLOC_BACKEND_XML) {
       /* TODO */
     }
-#ifdef HWLOC_HAVE_LIBPCI
+#if (defined HWLOC_HAVE_LIBPCI) || (defined HWLOC_HAVE_LIBPCIACCESS)
     else if (topology->is_thissystem) {
       hwloc_look_libpci(topology);
       gotsome = 1;

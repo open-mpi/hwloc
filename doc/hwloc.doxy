@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2011 inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -141,14 +141,38 @@ and build.
 
 The hwloc core may also benefit from the following development packages:
 <ul>
-<li>pciutils (libpci) for I/O discovery.</li>
 <li>libnuma for memory binding and migration support on Linux.</li>
 <li>libxml2 for full XML import/export support (otherwise, the
     internal minimalistic parser will only be able to import
     XML files that were exported by the same hwloc release).
     See \ref xml for details.</li>
+<li>hwloc can use one of two different libraries for I/O device
+discovery:
+ <ol>
+ <li>libpciaccess (BSD).</li>
+ <li>libpci, from the pciutils package (GPL).</li>
+ </ol></li>
 </ul>
 
+Note that because of the possibility of GPL taint (remember that hwloc
+is BSD-licensed), hwloc's <tt>configure</tt> script will prefer
+<tt>libpciaccess</tt> to the <tt>pciutils</tt> package.  Indeed, if
+<tt>libpciaccess</tt> is not found, hwloc will not use
+<tt>pciutils</tt> unless it is specifically requested via the
+<tt>--enable-libpci</tt> flag is provided.
+
+Also note that if you install supplemental libraries in non-standard
+locations, hwloc's configure script may not be able to find them
+without some help.  You may need to specify additional CPPFLAGS,
+LDFLAGS, or PKG_CONFIG_PATH values on the configure command line.
+ 
+For example, if libpciaccess was installed into /opt/pciaccess,
+hwloc's configure script may not find it be default.  Try adding
+PKG_CONFIG_PATH to the ./configure command line, like this:
+
+\verbatim
+./configure PKG_CONFIG_PATH=/opt/pciaccess/lib/pkgconfig ...
+\endverbatim
 
 \htmlonly
 </div><div class="section" id="cli_examples">
