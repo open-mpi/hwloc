@@ -702,6 +702,13 @@ EOF])
 	    hwloc_pci_happy=no
 	    hwloc_warn_may_use_libpci=yes
 	  fi
+	else
+	  # pciutils not found, error out if it was requested
+	  if test x$enable_libpci = xyes; then
+	    AC_MSG_WARN([Specified --enable-libpci switch, but could not])
+	    AC_MSG_WARN([find appropriate support])
+	    AC_MSG_ERROR([Cannot continue])
+	  fi
 	fi
     fi
     AC_SUBST(HWLOC_PCI_LIBS)
