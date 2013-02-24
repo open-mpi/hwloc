@@ -19,6 +19,10 @@ in v0.9.1).
 
 Version 1.5.2 (some of these changes are in v1.6.2 but not in v1.6)
 -------------
+* Use libpciaccess instead of pciutils/libpci by default for I/O discovery.
+  pciutils/libpci is only used if --enable-libpci is given to configure
+  because its GPL license may taint hwloc. See the Installation section
+  in the documentation for details.
 * Fix get_cpubind on Solaris when bound to a single PU with
   processor_bind(). Thanks to Eugene Loh for reporting the problem
   and providing a patch.

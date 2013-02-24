@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
@@ -35,10 +35,10 @@ $ls
   $ls --taskset -v > $tmp/test.taskset
   $ls --merge > $tmp/test.merge
 
-@HWLOC_HAVE_LIBPCI_TRUE@  $ls --no-io > $tmp/test.no-io
-@HWLOC_HAVE_LIBPCI_TRUE@  $ls --no-bridges > $tmp/test.no-bridges
-@HWLOC_HAVE_LIBPCI_TRUE@  $ls --whole-io > $tmp/test.whole-io
-@HWLOC_HAVE_LIBPCI_TRUE@  $ls -v --whole-io > $tmp/test.wholeio_verbose
+@HWLOC_HAVE_PCI_TRUE@  $ls --no-io > $tmp/test.no-io
+@HWLOC_HAVE_PCI_TRUE@  $ls --no-bridges > $tmp/test.no-bridges
+@HWLOC_HAVE_PCI_TRUE@  $ls --whole-io > $tmp/test.whole-io
+@HWLOC_HAVE_PCI_TRUE@  $ls -v --whole-io > $tmp/test.wholeio_verbose
 
   $ls --whole-system > $tmp/test.whole-system
   $ls --ps > $tmp/test.
