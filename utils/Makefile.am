@@ -19,7 +19,7 @@ noinst_HEADERS = misc.h
 bin_PROGRAMS = lstopo-no-graphics hwloc-annotate hwloc-assembler hwloc-calc hwloc-bind hwloc-distances hwloc-distrib hwloc-info hwloc-ps
 
 lstopo_no_graphics_SOURCES = lstopo.h lstopo.c lstopo-color.c lstopo-text.c lstopo-draw.c lstopo-fig.c lstopo-xml.c
-lstopo_no_graphics_CFLAGS = $(HWLOC_LIBXML2_CFLAGS) $(HWLOC_PCI_CFLAGS)
+lstopo_no_graphics_CFLAGS = 
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 lstopo_SOURCES = $(lstopo_no_graphics_SOURCES)
 lstopo_CPPFLAGS = $(AM_CPPFLAGS)

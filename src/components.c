@@ -404,6 +404,8 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
   int tryall = 1;
   char *env;
 
+  env = getenv("HWLOC_COMPONENTS");
+
   /* compute current excludes */
   backend = topology->backends;
   while (backend) {
@@ -411,57 +413,61 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
     backend = backend->next;
   }
 
-  env = getenv("HWLOC_COMPONENTS");
+  /* enable explicitly listed components */
   if (env) {
+    char *curenv = env;
     size_t s;
 
-    while (*env) {
-      s = strcspn(env, HWLOC_COMPONENT_SEPS);
+    while (*curenv) {
+      s = strcspn(curenv, HWLOC_COMPONENT_SEPS);
       if (s) {
 	char *arg;
 	char c;
 
-	if (env[0] == HWLOC_COMPONENT_EXCLUDE_CHAR)
+	if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR)
 	  goto nextname;
 
-	/* save the last char and replace with \0 */
-	c = env[s];
-	env[s] = '\0';
-
-	if (!strcmp(env, HWLOC_COMPONENT_STOP_NAME)) {
+	if (!strncmp(curenv, HWLOC_COMPONENT_STOP_NAME, s)) {
 	  tryall = 0;
 	  break;
 	}
 
-	arg = strchr(env, '=');
+	/* save the last char and replace with \0 */
+	c = curenv[s];
+	curenv[s] = '\0';
+
+	arg = strchr(curenv, '=');
 	if (arg) {
 	  *arg = '\0';
 	  arg++;
 	}
 
-	comp = hwloc_disc_component_find(-1, env);
+	comp = hwloc_disc_component_find(-1, curenv);
 	if (comp) {
 	  hwloc_disc_component_try_enable(topology, comp, arg, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings */);
 	} else {
-	  fprintf(stderr, "Cannot find component `%s'\n", env);
+	  fprintf(stderr, "Cannot find component `%s'\n", curenv);
 	}
 
-	/* restore last char */
-	env[s] = c;
+	/* restore last char (the second loop below needs env to be unmodified) */
+	curenv[s] = c;
       }
 
 nextname:
-      env += s;
-      if (*env)
+      curenv += s;
+      if (*curenv)
 	/* Skip comma */
-	env++;
+	curenv++;
     }
   }
 
+  /* env is still the same, the above loop didn't modify it */
+
+  /* now enable remaining components (except the explicitly '-'-listed ones) */
   if (tryall) {
     comp = hwloc_disc_components;
-    env = getenv("HWLOC_COMPONENTS");
     while (NULL != comp) {
+      /* check if this component was explicitly excluded in env */
       if (env) {
 	char *curenv = env;
 	while (*curenv) {
