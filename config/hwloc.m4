@@ -655,12 +655,12 @@ EOF])
     # PCI support with pciutils instead of pciaccess
     if test "x$enable_pci" != "xno" -a "x$hwloc_pci_lib" != "xpciaccess"; then
         hwloc_pci_happy=yes
-        HWLOC_PKG_CHECK_MODULES([PCI], [libpci], [pci_cleanup], [:], [
+        HWLOC_PKG_CHECK_MODULES([PCIUTILS], [libpci], [pci_cleanup], [:], [
           # manually check pciutils in case a old one without .pc is installed
           AC_CHECK_HEADERS([pci/pci.h], [
 	    # try first without -lz, it's not always needed (RHEL5, Debian Etch)
 	    AC_CHECK_LIB([pci], [pci_init], [
-	      HWLOC_PCI_LIBS="-lpci"
+	      HWLOC_PCIUTILS_LIBS="-lpci"
 	      ], [
               # try again with -lz because it's needed sometimes (FC7).
               # don't use AC_CHECK_LIB again because the cache would
@@ -669,8 +669,8 @@ EOF])
               tmp_save_LIBS=$LIBS
               LIBS="-lpci -lz $LIBS"
               AC_LINK_IFELSE([AC_LANG_CALL([], [pci_init])],
-                             [HWLOC_PCI_LIBS="-lpci -lz"
-                              HWLOC_PCI_ADDITIONAL_LIBS="-lz"
+                             [HWLOC_PCIUTILS_LIBS="-lpci -lz"
+                              HWLOC_PCIUTILS_ADDITIONAL_LIBS="-lz"
                               AC_MSG_RESULT(yes)],
                              [hwloc_pci_happy=no
                               AC_MSG_RESULT(no)])
@@ -682,10 +682,10 @@ EOF])
                 [AC_CHECK_LIB([resolv], [inet_ntoa], 
                     [AC_MSG_CHECKING([for pci_lookup_name in -lpci with -lresolv])
                      tmp_save_LIBS=$LIBS
-                     LIBS="-lpci -lresolv $LIBS $HWLOC_PCI_ADDITIONAL_LIBS"
+                     LIBS="-lpci -lresolv $LIBS $HWLOC_PCIUTILS_ADDITIONAL_LIBS"
                      AC_LINK_IFELSE([AC_LANG_CALL([], [pci_lookup_name])],
-                                    [HWLOC_PCI_LIBS="$HWLOC_PCI_LIBS -lresolv"
-                                     HWLOC_PCI_ADDITIONAL_LIBS="$HWLOC_PCI_ADDITIONAL_LIBS -lresolv"
+                                    [HWLOC_PCIUTILS_LIBS="$HWLOC_PCIUTILS_LIBS -lresolv"
+                                     HWLOC_PCIUTILS_ADDITIONAL_LIBS="$HWLOC_PCIUTILS_ADDITIONAL_LIBS -lresolv"
                                      AC_MSG_RESULT(yes)],
                                     [hwloc_pci_happy=no
                                      AC_MSG_RESULT(no)])
@@ -711,7 +711,7 @@ EOF])
 	  fi
 	fi
     fi
-    AC_SUBST(HWLOC_PCI_LIBS)
+    AC_SUBST(HWLOC_PCIUTILS_LIBS)
     # If we asked for pci support but couldn't deliver, fail
     AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no" -a "$hwloc_warn_may_use_libpci" != "yes"],
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
@@ -725,13 +725,13 @@ EOF])
     # pciutils specific checks and enabling
     if test "x$hwloc_pci_lib" = "xpciutils"; then
       tmp_save_CFLAGS="$CFLAGS"
-      CFLAGS="$CFLAGS $HWLOC_PCI_CFLAGS"
+      CFLAGS="$CFLAGS $HWLOC_PCIUTILS_CFLAGS"
       tmp_save_LIBS="$LIBS"
-      LIBS="$LIBS $HWLOC_PCI_LIBS"
+      LIBS="$LIBS $HWLOC_PCIUTILS_LIBS"
 
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
       AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
-      AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [$HWLOC_PCI_ADDITIONAL_LIBS])
+      AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [$HWLOC_PCIUTILS_ADDITIONAL_LIBS])
       if test "x$enable_pci_caps" = "xyes"; then
         AC_DEFINE([HWLOC_HAVE_PCI_FIND_CAP], [1], [Define to 1 if `libpci' has the `pci_find_cap' function.])
       fi
@@ -757,7 +757,7 @@ EOF])
       CFLAGS="$tmp_save_CFLAGS"
       LIBS="$tmp_save_LIBS"
 
-      HWLOC_PCI_REQUIRES=libpci
+      HWLOC_PCIUTILS_REQUIRES=libpci
       AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
     fi
     # final common PCI enabling
@@ -1045,9 +1045,9 @@ EOF])
     AC_MSG_RESULT([$hwloc_plugin_components])
 
     AS_IF([test "$hwloc_libpci_component" = "static"],
-          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCI_LIBS $HWLOC_PCIACCESS_LIBS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCI_CFLAGS $HWLOC_PCIACCESS_CFLAGS"
-           HWLOC_REQUIRES="$HWLOC_PCI_REQUIRES $HWLOC_PCIACCESS_REQUIRES $HWLOC_REQUIRES"])
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCIUTILS_LIBS $HWLOC_PCIACCESS_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCIUTILS_CFLAGS $HWLOC_PCIACCESS_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_PCIUTILS_REQUIRES $HWLOC_PCIACCESS_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_opencl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_OPENCL_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CFLAGS"
