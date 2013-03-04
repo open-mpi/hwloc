@@ -762,8 +762,8 @@ EOF])
     fi
     # final common PCI enabling
     if test "x$hwloc_pci_happy" = "xyes"; then
-      hwloc_components="$hwloc_components libpci"
-      hwloc_libpci_component_maybeplugin=1
+      hwloc_components="$hwloc_components pci"
+      hwloc_pci_component_maybeplugin=1
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
@@ -1044,7 +1044,7 @@ EOF])
     AC_MSG_CHECKING([components to build as plugins])
     AC_MSG_RESULT([$hwloc_plugin_components])
 
-    AS_IF([test "$hwloc_libpci_component" = "static"],
+    AS_IF([test "$hwloc_pci_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCIUTILS_LIBS $HWLOC_PCIACCESS_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCIUTILS_CFLAGS $HWLOC_PCIACCESS_CFLAGS"
            HWLOC_REQUIRES="$HWLOC_PCIUTILS_REQUIRES $HWLOC_PCIACCESS_REQUIRES $HWLOC_REQUIRES"])
@@ -1182,7 +1182,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
         AM_CONDITIONAL([HWLOC_HAVE_CPUID], [test "x$hwloc_have_cpuid" = "xyes"])
 
         AM_CONDITIONAL([HWLOC_HAVE_PLUGINS], [test "x$hwloc_have_plugins" = "xyes"])
-        AM_CONDITIONAL([HWLOC_LIBPCI_BUILD_STATIC], [test "x$hwloc_libpci_component" = "xstatic"])
+        AM_CONDITIONAL([HWLOC_PCI_BUILD_STATIC], [test "x$hwloc_pci_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_OPENCL_BUILD_STATIC], [test "x$hwloc_opencl_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_CUDA_BUILD_STATIC], [test "x$hwloc_cuda_component" = "xstatic"])
         AM_CONDITIONAL([HWLOC_NVML_BUILD_STATIC], [test "x$hwloc_nvml_component" = "xstatic"])

@@ -434,7 +434,7 @@ hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap
 #endif
 
 static int
-hwloc_look_libpci(struct hwloc_backend *backend)
+hwloc_look_pci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_obj fakehostbridge; /* temporary object covering the whole PCI hierarchy until its complete */
@@ -745,7 +745,7 @@ hwloc_look_libpci(struct hwloc_backend *backend)
 }
 
 static struct hwloc_backend *
-hwloc_libpci_component_instantiate(struct hwloc_disc_component *component,
+hwloc_pci_component_instantiate(struct hwloc_disc_component *component,
 				   const void *_data1 __hwloc_attribute_unused,
 				   const void *_data2 __hwloc_attribute_unused,
 				   const void *_data3 __hwloc_attribute_unused)
@@ -757,26 +757,26 @@ hwloc_libpci_component_instantiate(struct hwloc_disc_component *component,
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
-  backend->discover = hwloc_look_libpci;
+  backend->discover = hwloc_look_pci;
   return backend;
 }
 
-static struct hwloc_disc_component hwloc_libpci_disc_component = {
+static struct hwloc_disc_component hwloc_pci_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL,
-  "libpci",
+  "pci",
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
-  hwloc_libpci_component_instantiate,
+  hwloc_pci_component_instantiate,
   20,
   NULL
 };
 
 #ifdef HWLOC_INSIDE_PLUGIN
-HWLOC_DECLSPEC extern const struct hwloc_component hwloc_libpci_component;
+HWLOC_DECLSPEC extern const struct hwloc_component hwloc_pci_component;
 #endif
 
-const struct hwloc_component hwloc_libpci_component = {
+const struct hwloc_component hwloc_pci_component = {
   HWLOC_COMPONENT_ABI,
   HWLOC_COMPONENT_TYPE_DISC,
   0,
-  &hwloc_libpci_disc_component
+  &hwloc_pci_disc_component
 };

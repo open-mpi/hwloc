@@ -66,6 +66,7 @@ Version 1.7.0
     names are prefixed with '-'.
   + lstopo --ignore PU now works when displaying the topology in
     graphical and textual mode (not when exporting to XML).
+  + The `libpci' component is now called `pci'.
 
 
 Version 1.6.2
