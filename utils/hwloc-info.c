@@ -41,11 +41,9 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Object filtering options:\n");
   fprintf (where, "  --restrict <cpuset>   Restrict the topology to processors listed in <cpuset>\n");
   fprintf (where, "  --restrict binding    Restrict the topology to the current process binding\n");
-#ifdef HWLOC_HAVE_LIBPCI
   fprintf (where, "  --no-io               Do not show any I/O device or bridge\n");
   fprintf (where, "  --no-bridges          Do not any I/O bridge except hostbridges\n");
   fprintf (where, "  --whole-io            Show all I/O devices and bridges\n");
-#endif
   fprintf (where, "Input options:\n");
   hwloc_utils_input_format_usage(where, 6);
   fprintf (where, "  --thissystem          Assume that the input topology provides the topology\n"
