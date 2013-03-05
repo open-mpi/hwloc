@@ -39,6 +39,7 @@ Version 1.7.0
     disabled entirely by passing --disable-opencl/cuda/nvml/gl to configure.
     See the I/O Devices, Components and Plugins, and FAQ documentation
     sections for details.
+  + Improve cache detection on AIX.
 * API
   + Add hwloc_topology_get_flags().
   + Add hwloc/plugins.h for building external plugins.
