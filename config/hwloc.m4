@@ -758,7 +758,7 @@ EOF])
       LIBS="$tmp_save_LIBS"
 
       HWLOC_PCIUTILS_REQUIRES=libpci
-      AC_DEFINE([HWLOC_HAVE_LIBPCI], [1], [Define to 1 if you have the `libpci' library.])
+      AC_DEFINE([HWLOC_HAVE_PCIUTILS], [1], [Define to 1 if you have the pciutils `libpci' library.])
     fi
     # final common PCI enabling
     if test "x$hwloc_pci_happy" = "xyes"; then
