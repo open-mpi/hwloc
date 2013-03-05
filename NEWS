@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.6.3
 -------------
+* Make sure I/O options always appear in lstopo usage, not only when
+  using pciutils/libpci.
 
 
 Version 1.6.2
