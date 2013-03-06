@@ -20,6 +20,7 @@ check_LTLIBRARIES = \
 	libhwloc-port-osf.la \
 	libhwloc-port-solaris.la \
 	libhwloc-port-windows.la \
+	libhwloc-port-opencl.la \
 	libhwloc-port-nvml.la
 endif HWLOC_HAVE_LINUX
 
@@ -133,6 +134,12 @@ libhwloc_port_windows_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-I$(HWLOC_top_srcdir)/tests/ports/include/windows \
 	-DHWLOC_WIN_SYS \
 	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+
+nodist_libhwloc_port_opencl_la_SOURCES = topology-opencl.c
+libhwloc_port_opencl_la_SOURCES = \
+	include/opencl/CL/cl_ext.h
+libhwloc_port_opencl_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/opencl
 
 nodist_libhwloc_port_nvml_la_SOURCES = topology-nvml.c
 libhwloc_port_nvml_la_SOURCES = \
