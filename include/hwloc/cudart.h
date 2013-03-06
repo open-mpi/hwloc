@@ -21,7 +21,6 @@
 #include <hwloc/linux.h>
 #include <hwloc/helper.h>
 
-#include <cuda.h>
 #include <cuda_runtime_api.h>
 
 
