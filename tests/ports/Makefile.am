@@ -19,7 +19,8 @@ check_LTLIBRARIES = \
 	libhwloc-port-netbsd.la \
 	libhwloc-port-osf.la \
 	libhwloc-port-solaris.la \
-	libhwloc-port-windows.la
+	libhwloc-port-windows.la \
+	libhwloc-port-nvml.la
 endif HWLOC_HAVE_LINUX
 
 # Note that AC_CONFIG_LINKS sets up the sym links for the files in
@@ -132,3 +133,9 @@ libhwloc_port_windows_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-I$(HWLOC_top_srcdir)/tests/ports/include/windows \
 	-DHWLOC_WIN_SYS \
 	-DHAVE__SC_LARGE_PAGESIZE -D_SC_LARGE_PAGESIZE=33
+
+nodist_libhwloc_port_nvml_la_SOURCES = topology-nvml.c
+libhwloc_port_nvml_la_SOURCES = \
+	include/nvml/nvml.h
+libhwloc_port_nvml_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/nvml
