@@ -22,7 +22,8 @@ check_LTLIBRARIES = \
 	libhwloc-port-windows.la \
 	libhwloc-port-opencl.la \
 	libhwloc-port-cuda.la \
-	libhwloc-port-nvml.la
+	libhwloc-port-nvml.la \
+	libhwloc-port-gl.la
 endif HWLOC_HAVE_LINUX
 
 # Note that AC_CONFIG_LINKS sets up the sym links for the files in
@@ -153,3 +154,11 @@ libhwloc_port_nvml_la_SOURCES = \
 	include/nvml/nvml.h
 libhwloc_port_nvml_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-I$(HWLOC_top_srcdir)/tests/ports/include/nvml
+
+nodist_libhwloc_port_gl_la_SOURCES = topology-gl.c
+libhwloc_port_gl_la_SOURCES = \
+	include/gl/X11/Xlib.h \
+	include/gl/NVCtrl/NVCtrl.h \
+	include/gl/NVCtrl/NVCtrlLib.h
+libhwloc_port_gl_la_CPPFLAGS = $(common_CPPFLAGS) \
+	-I$(HWLOC_top_srcdir)/tests/ports/include/gl
