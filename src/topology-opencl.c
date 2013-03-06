@@ -234,7 +234,7 @@ hwloc_opencl_backend_notify_new_object(struct hwloc_backend *backend, struct hwl
     osdev->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
     osdev->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
-    hwloc_obj_add_info(obj, "CoProcType", "OpenCL");
+    hwloc_obj_add_info(osdev, "CoProcType", "OpenCL");
     hwloc_obj_add_info(osdev, "Backend", "OpenCL");
     hwloc_obj_add_info(osdev, "OpenCLDeviceType", info->devicetype);
 
