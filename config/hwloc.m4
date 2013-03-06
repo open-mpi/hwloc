@@ -892,24 +892,12 @@ EOF])
     	hwloc_gl_happy=yes								
 
         AC_CHECK_HEADERS([X11/Xlib.h], [
-          AC_CHECK_LIB([X11], [XOpenDisplay], [:], [
-            AC_MSG_WARN([XOpenDisplay not found, GL backend disabled])
-            hwloc_gl_happy=no
-          ])
-        ], [
-          AC_MSG_WARN([X11 headers not found, GL backend disabled])
-          hwloc_gl_happy=no
-        ])
+          AC_CHECK_LIB([X11], [XOpenDisplay], [:], [hwloc_gl_happy=no])
+        ], [hwloc_gl_happy=no])
        
         AC_CHECK_HEADERS([NVCtrl/NVCtrl.h], [
-          AC_CHECK_LIB([XNVCtrl], [XNVCTRLQueryTargetAttribute], [:], [
-            AC_MSG_WARN([XNVCTRLQueryTargetAttribute not found, GL backend disabled])
-            hwloc_gl_happy=no
-          ], [-lXext])
-        ], [
-          AC_MSG_WARN([NVCtrl headers not found, GL backend disabled])
-          hwloc_gl_happy=no
-        ])
+          AC_CHECK_LIB([XNVCtrl], [XNVCTRLQueryTargetAttribute], [:], [hwloc_gl_happy=no], [-lXext])
+        ], [hwloc_gl_happy=no])
 
         if test "x$hwloc_gl_happy" = "xyes"; then
             AC_DEFINE([HWLOC_HAVE_GL], [1], [Define to 1 if you have the GL module components.])
