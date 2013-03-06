@@ -270,15 +270,18 @@ typedef enum hwloc_obj_osdev_type_e {
   HWLOC_OBJ_OSDEV_BLOCK,	/**< \brief Operating system block device.
 				  * For instance "sda" on Linux. */
   HWLOC_OBJ_OSDEV_GPU,		/**< \brief Operating system GPU device.
-				  * For instance "opencl0d0" for a OpenCL device,
-				  * "cuda0" for a CUDA device, ":0.0" for a GL display,
+				  * For instance ":0.0" for a GL display,
 				  * "card0" for a Linux DRM device. */
   HWLOC_OBJ_OSDEV_NETWORK,	/**< \brief Operating system network device.
 				  * For instance the "eth0" interface on Linux. */
   HWLOC_OBJ_OSDEV_OPENFABRICS,	/**< \brief Operating system openfabrics device.
 				  * For instance the "mlx4_0" InfiniBand HCA device on Linux. */
-  HWLOC_OBJ_OSDEV_DMA		/**< \brief Operating system dma engine device.
+  HWLOC_OBJ_OSDEV_DMA,		/**< \brief Operating system dma engine device.
 				  * For instance the "dma0chan0" DMA channel on Linux. */
+  HWLOC_OBJ_OSDEV_COPROC	/**< \brief Operating system co-processor device.
+				  * For instance "mic0" for a Xeon Phi (MIC) on Linux,
+				  * "opencl0d0" for a OpenCL device,
+				  * "cuda0" for a CUDA device. */
 } hwloc_obj_osdev_type_t;
 
 /** \brief Compare the depth of two object types
