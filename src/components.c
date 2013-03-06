@@ -424,6 +424,20 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	char *arg;
 	char c;
 
+	/* replace libpci with pci for backward compatibility with v1.6 */
+	if (!strncmp(curenv, "libpci", s)) {
+	  curenv[0] = curenv[1] = curenv[2] = *HWLOC_COMPONENT_SEPS;
+	  curenv += 3;
+	  s -= 3;
+	} else if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, "libpci", s-1)) {
+	  curenv[3] = curenv[0];
+	  curenv[0] = curenv[1] = curenv[2] = *HWLOC_COMPONENT_SEPS;
+	  curenv += 3;
+	  s -= 3;
+	  /* skip this name, it's a negated one */
+	  goto nextname;
+	}
+
 	if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR)
 	  goto nextname;
 

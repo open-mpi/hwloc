@@ -56,13 +56,13 @@ endif
 endif HWLOC_HAVE_LIBXML2
 
 if HWLOC_HAVE_PCI
-if HWLOC_LIBPCI_BUILD_STATIC
-sources += topology-libpci.c
+if HWLOC_PCI_BUILD_STATIC
+sources += topology-pci.c
 else
-plugins_LTLIBRARIES += hwloc_libpci.la
-hwloc_libpci_la_SOURCES = topology-libpci.c
-hwloc_libpci_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_PCI_CFLAGS) $(HWLOC_PCIACCESS_CFLAGS) -DHWLOC_INSIDE_PLUGIN
-hwloc_libpci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCI_LIBS) $(HWLOC_PCIACCESS_LIBS)
+plugins_LTLIBRARIES += hwloc_pci.la
+hwloc_pci_la_SOURCES = topology-pci.c
+hwloc_pci_la_CFLAGS = $(AM_CFLAGS) $(HWLOC_PCIUTILS_CFLAGS) $(HWLOC_PCIACCESS_CFLAGS) -DHWLOC_INSIDE_PLUGIN
+hwloc_pci_la_LDFLAGS = $(plugins_ldflags) $(HWLOC_PCIUTILS_LIBS) $(HWLOC_PCIACCESS_LIBS)
 endif
 endif HWLOC_HAVE_PCI
 

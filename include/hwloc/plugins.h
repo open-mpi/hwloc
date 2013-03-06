@@ -46,7 +46,7 @@ struct hwloc_disc_component {
 		      * 45 for x86,
 		      * 40 for no-OS fallback,
 		      * 30 for global components (xml/synthetic/custom),
-		      * 20 for libpci, likely less for other additional components.
+		      * 20 for pci, likely less for other additional components.
 		      */
   struct hwloc_disc_component * next; /* used internally to list components by priority on topology->components */
 };
@@ -75,7 +75,7 @@ struct hwloc_backend {
    * maybe NULL if type is HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL. */
   int (*discover)(struct hwloc_backend *backend);
 
-  /* used by the libpci backend to retrieve pci device locality from the OS/cpu backend */
+  /* used by the pci backend to retrieve pci device locality from the OS/cpu backend */
   int (*get_obj_cpuset)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset); /* may be NULL */
 
   /* used by additional backends to notify other backend when new objects are added.

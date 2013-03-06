@@ -491,7 +491,7 @@ union hwloc_obj_attr_u {
   struct hwloc_cache_attr_s {
     hwloc_uint64_t size;			  /**< \brief Size of cache in bytes */
     unsigned depth;			  /**< \brief Depth of cache (e.g., L1, L2, ...etc.) */
-    unsigned linesize;			  /**< \brief Cache-line size in bytes */
+    unsigned linesize;			  /**< \brief Cache-line size in bytes. 0 if unknown */
     int associativity;			  /**< \brief Ways of associativity,
     					    *  -1 if fully associative, 0 if unknown */
     hwloc_obj_cache_type_t type;          /**< \brief Cache type */

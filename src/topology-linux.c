@@ -2955,7 +2955,7 @@ look_sysfscpu(struct hwloc_topology *topology,
             cache->attr->cache.depth = depth+1;
             cache->attr->cache.linesize = linesize;
 	    cache->attr->cache.type = type;
-	    if (!sets)
+	    if (!linesize || !lines_per_tag || !sets)
 	      cache->attr->cache.associativity = 0; /* unknown */
 	    else if (sets == 1)
 	      cache->attr->cache.associativity = 0; /* likely wrong, make it unknown */

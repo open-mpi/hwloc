@@ -39,6 +39,7 @@ Version 1.7.0
     disabled entirely by passing --disable-opencl/cuda/nvml/gl to configure.
     See the I/O Devices, Components and Plugins, and FAQ documentation
     sections for details.
+  + Improve cache detection on AIX.
 * API
   + Add hwloc_topology_get_flags().
   + Add hwloc/plugins.h for building external plugins.
@@ -66,6 +67,8 @@ Version 1.7.0
     names are prefixed with '-'.
   + lstopo --ignore PU now works when displaying the topology in
     graphical and textual mode (not when exporting to XML).
+  + The `libpci' component is now called `pci' but the old name is still
+    accepted in the HWLOC_COMPONENTS variable for backward compatibility.
 
 
 Version 1.6.2
@@ -148,6 +151,26 @@ Version 1.6.0
   + Add a section about Synthetic topologies in the documentation.
 
 
+Version 1.5.2 (some of these changes are in v1.6.2 but not in v1.6)
+-------------
+* Use libpciaccess instead of pciutils/libpci by default for I/O discovery.
+  pciutils/libpci is only used if --enable-libpci is given to configure
+  because its GPL license may taint hwloc. See the Installation section
+  in the documentation for details.
+* Fix get_cpubind on Solaris when bound to a single PU with
+  processor_bind(). Thanks to Eugene Loh for reporting the problem
+  and providing a patch.
+* Fix some DIR descriptor leaks on Linux.
+* Fix I/O device lists when some were filtered out after a XML import.
+* Add missing Backend string info on Solaris in most cases.
+* Fix the removal of I/O objects when importing a I/O-enabled XML topology
+  without any I/O topology flag.
+* Fix the output of hwloc-calc -H --hierarchical when using logical
+  indexes in the output.
+* Fix the pkg-config output with --libs --static.
+  Thanks to Erik Schnetter for reporting one of the problems.
+
+
 Version 1.5.1
 -------------
 * Fix block OS device detection on Linux kernel 3.3 and later.
@@ -224,6 +247,20 @@ Version 1.5.0
   + Minor fixes to ease native builds on Windows.
   + Limit the number of retries when operating on all threads within a
     process on Linux if the list of threads is heavily getting modified.
+
+
+Version 1.4.3
+-------------
+* This release is only meant to fix the pciutils license issue when upgrading
+  to hwloc v1.5 or later is not possible. It contains several other minor
+  fixes but ignores many of them that are only in v1.5 or later.
+* Use libpciaccess instead of pciutils/libpci by default for I/O discovery.
+  pciutils/libpci is only used if --enable-libpci is given to configure
+  because its GPL license may taint hwloc. See the Installation section
+  in the documentation for details.
+* Fix PCIe 3.0 link speed computation.
+* Fix importing of escaped characters with the minimalistic XML backend.
+* Fix a memory leak in the x86 backend.
 
 
 Version 1.4.2
@@ -310,6 +347,17 @@ Version 1.4.0 (does not contain all v1.3.2 changes)
   + Improve visibility support detection. Thanks to Dave Love for providing
     the patch.
   + Remove references to internal symbols in the tools.
+
+
+Version 1.3.3
+-------------
+* This release is only meant to fix the pciutils license issue when upgrading
+  to hwloc v1.4 or later is not possible. It contains several other minor
+  fixes but ignores many of them that are only in v1.4 or later.
+* Use libpciaccess instead of pciutils/libpci by default for I/O discovery.
+  pciutils/libpci is only used if --enable-libpci is given to configure
+  because its GPL license may taint hwloc. See the Installation section
+  in the documentation for details.
 
 
 Version 1.3.2
