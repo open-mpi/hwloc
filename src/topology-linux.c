@@ -3838,6 +3838,8 @@ hwloc_linux_mic_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
   FILE *fd;
   char path[256];
 
+  hwloc_obj_add_info(obj, "CoProcType", "MIC");
+
   snprintf(path, sizeof(path), "%s/family", osdevpath);
   fd = fopen(path, "r");
   if (fd) {

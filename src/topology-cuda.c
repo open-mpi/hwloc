@@ -114,8 +114,9 @@ hwloc_cuda_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc
     snprintf(cuda_name, sizeof(cuda_name), "cuda%d", info->idx);
     cuda_device->name = strdup(cuda_name);
     cuda_device->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
-    cuda_device->attr->osdev.type = HWLOC_OBJ_OSDEV_GPU;
+    cuda_device->attr->osdev.type = HWLOC_OBJ_OSDEV_COPROC;
 
+    hwloc_obj_add_info(obj, "CoProcType", "CUDA");
     hwloc_obj_add_info(cuda_device, "Backend", "CUDA");
     hwloc_obj_add_info(cuda_device, "GPUVendor", "NVIDIA Corporation");
 

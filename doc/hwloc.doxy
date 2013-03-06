@@ -1259,11 +1259,6 @@ components when I/O discovery is enabled and supported.
 </li>
 <li>GPUs (HWLOC_OBJ_OSDEV_GPU)
  <ul>
- <li><em>opencl0d0</em> for the first device of the first OpenCL platform,
-  <em>opencl1d3</em> for the fourth device of the second OpenCL platform
-  (OpenCL component)</li>
- <li><em>cuda0</em> for the first NVIDIA CUDA device
-  (CUDA component, using the NVIDIA CUDA Library)</li>
  <li><em>nvml0</em> for the first NVML device
   (NVML component, using the NVIDIA Management Library)</li>
  <li><em>:0.0</em> for the first display
@@ -1272,6 +1267,11 @@ components when I/O discovery is enabled and supported.
 </li>
 <li>Co-Processors (HWLOC_OBJ_OSDEV_COPROC)
  <ul>
+ <li><em>opencl0d0</em> for the first device of the first OpenCL platform,
+  <em>opencl1d3</em> for the fourth device of the second OpenCL platform
+  (OpenCL component)</li>
+ <li><em>cuda0</em> for the first NVIDIA CUDA device
+  (CUDA component, using the NVIDIA CUDA Library)</li>
  <li><em>mic0</em> for the first Intel Xeon Phi (MIC) coprocessor
   (Linux component)</li>
  </ul>
@@ -1618,7 +1618,10 @@ object instead.
 <dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
 </dd>
-<dt>GPUVendor, GPUModel (GPU OS devices)</dt>
+<dt>CoProcType (Co-Processor OS devices)</dt>
+<dd>The type of co-processor, for instance MIC, CUDA or OpenCL
+</dd>
+<dt>GPUVendor, GPUModel (GPU or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
 </dd>
 <dt>OpenCLDeviceType, OpenCLPlatformIndex, OpenCLPlatformName, OpenCLPlatformDeviceIndex (OpenCL GPU OS devices)</dt>
@@ -2194,7 +2197,7 @@ environment variable (see \ref envvar).
 </dd>
 <dt>opencl</dt>
 <dd>
- The OpenCL component creates OS device objects such as
+ The OpenCL component creates co-processor OS device objects such as
  <em>opencl0d0</em> (first device of the first OpenCL platform)
  or <em>opencl1d3</em> (fourth device of the second platform).
  Only the AMD OpenCL implementation currently offers locality
@@ -2203,7 +2206,7 @@ environment variable (see \ref envvar).
 </dd>
 <dt>cuda</dt>
 <dd>
- This component creates OS device objects such as <em>cuda0</em>
+ This component creates co-processor OS device objects such as <em>cuda0</em>
  that correspond to NVIDIA GPUs used with CUDA library.
  <b>It may be built as a plugin</b>.
 </dd>
