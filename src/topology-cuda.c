@@ -13,7 +13,6 @@
 #include <private/misc.h>
 #include <private/debug.h>
 
-#include <cuda.h>
 #include <cuda_runtime_api.h>
 
 struct hwloc_cuda_backend_data_s {
