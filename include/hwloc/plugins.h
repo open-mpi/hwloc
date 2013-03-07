@@ -23,15 +23,20 @@ struct hwloc_backend;
 
 /** \brief Discovery component type */
 typedef enum hwloc_disc_component_type_e {
-  HWLOC_DISC_COMPONENT_TYPE_CPU = (1<<0),        /**< \brief CPU-only discovery through the OS, or generic no-OS support.
-						  * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL = (1<<1),     /**< \brief xml, synthetic or custom,
-						  * platform-specific components such as bgq.
-						  * Anything the discovers CPU and everything else.
-						  * No additional backend is used.
-						  * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL = (1<<2), /**< \brief PCI, etc.
-						  * \hideinitializer */
+  /** \brief CPU-only discovery through the OS, or generic no-OS support.
+   * \hideinitializer */
+  HWLOC_DISC_COMPONENT_TYPE_CPU = (1<<0),
+
+  /** \brief xml, synthetic or custom,
+   * platform-specific components such as bgq.
+   * Anything the discovers CPU and everything else.
+   * No additional backend is used.
+   * \hideinitializer */
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL = (1<<1),
+
+  /** \brief PCI, etc.
+   * \hideinitializer */
+  HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL = (1<<2),
 
   HWLOC_DISC_COMPONENT_TYPE_MAX /**< \private Sentinel value. */
 } hwloc_disc_component_type_t;
@@ -42,24 +47,33 @@ typedef enum hwloc_disc_component_type_e {
  * They are registered by generic components, either statically-built or as plugins.
  */
 struct hwloc_disc_component {
-  hwloc_disc_component_type_t type;      /**< \brief Discovery component type */
-  const char *name;                      /**< \brief Name */
-  unsigned excludes;                     /**< \brief Component types to exclude, as an OR'ed set of (1<<HWLOC_DISC_COMPONENT_TYPE_*) */
-  struct hwloc_backend * (*instantiate)(struct hwloc_disc_component *component, const void *data1, const void *data2, const void *data3);
-                                         /**< \brief Instantiate callback to create a backend from the component */
-  unsigned priority;                     /**< \brief Component priority.
-					  * used to sort topology->components, higher priority first.
-					  * 50 for native OS (or platform) components,
-					  * 45 for x86,
-					  * 40 for no-OS fallback,
-					  * 30 for global components (xml/synthetic/custom),
-					  * 20 for pci, likely less for other additional components.
-					  */
+  /** \brief Discovery component type */
+  hwloc_disc_component_type_t type;
 
-  struct hwloc_disc_component * next; /**< \private Used internally to list components by priority on topology->components
-				       * (the component structure is usually read-only,
-				       *  the core copies it before using this field for queueing)
-				       */
+  /** \brief Name */
+  const char *name;
+
+  /** \brief Component types to exclude, as an OR'ed set of (1<<HWLOC_DISC_COMPONENT_TYPE_*) */
+  unsigned excludes;
+
+  /** \brief Instantiate callback to create a backend from the component */
+  struct hwloc_backend * (*instantiate)(struct hwloc_disc_component *component, const void *data1, const void *data2, const void *data3);
+
+  /** \brief Component priority.
+   * used to sort topology->components, higher priority first.
+   * 50 for native OS (or platform) components,
+   * 45 for x86,
+   * 40 for no-OS fallback,
+   * 30 for global components (xml/synthetic/custom),
+   * 20 for pci, likely less for other additional components.
+   */
+  unsigned priority;
+
+  /** \private Used internally to list components by priority on topology->components
+   * (the component structure is usually read-only,
+   *  the core copies it before using this field for queueing)
+   */
+  struct hwloc_disc_component * next;
 };
 
 /** @} */
@@ -82,48 +96,56 @@ struct hwloc_disc_component {
  * before enabling the backend with hwloc_backend_enable().
  */
 struct hwloc_backend {
-  struct hwloc_disc_component * component; /**< \private Reserved for the core, set by hwloc_backend_alloc() */
-  struct hwloc_topology * topology;        /**< \private Reserved for the core, set by hwloc_backend_enable() */
+  /** \private Reserved for the core, set by hwloc_backend_alloc() */
+  struct hwloc_disc_component * component;
+  /** \private Reserved for the core, set by hwloc_backend_enable() */
+  struct hwloc_topology * topology;
 
-  unsigned long flags;                     /**< \brief Backend flags, as an OR'ed set of HWLOC_BACKEND_FLAG_* */
+  /** \brief Backend flags, as an OR'ed set of HWLOC_BACKEND_FLAG_* */
+  unsigned long flags;
 
+  /** \brief Main discovery callback.
+   * returns > 0 if it modified the topology tree, -1 on error, 0 otherwise.
+   * May be NULL if type is HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL. */
   int (*discover)(struct hwloc_backend *backend);
-                                           /**< \brief Main discovery callback.
-					    * returns > 0 if it modified the topology tree, -1 on error, 0 otherwise.
-					    * May be NULL if type is HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL. */
-
+  
+  /** \brief Callback used by the PCI backend to retrieve PCI device locality from the OS/cpu backend.
+   * May be NULL. */
   int (*get_obj_cpuset)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
-                                           /**< \brief Callback used by the PCI backend to retrieve PCI device locality from the OS/cpu backend.
-					    * may be NULL. */
 
+  /** \brief Callback used by additional backends to notify other backend when new objects are added.
+   * returns > 0 if it modified the topology tree, 0 otherwise.
+   * May be NULL. */
   int (*notify_new_object)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj);
-                                           /**< \brief Callback used by additional backends to notify other backend when new objects are added.
-					    * returns > 0 if it modified the topology tree, 0 otherwise.
-					    * may be NULL. */
 
+  /** \brief Callback for freeing the private_data.
+   * May be NULL.
+   */
   void (*disable)(struct hwloc_backend *backend);
-                                           /**< \brief Callback for freeing the private_data.
-					    * May be NULL.
-					    */
+  /** \brief Backend private data. */
+  void * private_data;
 
-  void * private_data;                     /**< \brief Backend private data. */
+  /** \brief Backend-specific 'is_custom' property.
+   * Shortcut on !strcmp(..->component->name, "custom").
+   * Only the custom component should touch this. */
+  int is_custom; 
 
-  int is_custom;                           /**< \brief Backend-specific 'is_custom' property.
-					    * Shortcut on !strcmp(..->component->name, "custom").
-					    * Only the custom component should touch this. */
+  /** \brief Backend-specific 'is_thissystem' property.
+   * Set to 0 or 1 if the backend should enforce the thissystem flag when it gets enabled.
+   * Set to -1 if the backend doesn't care (default). */
+  int is_thissystem;
 
-  int is_thissystem;                       /**< \brief Backend-specific 'is_thissystem' property.
-					    * Set to 0 or 1 if the backend should enforce the thissystem flag when it gets enabled.
-					    * Set to -1 if the backend doesn't care (default). */
-
-  int envvar_forced;                       /**< \private Reserved for the core. Set to 1 if forced through envvar, 0 otherwise. */
-  struct hwloc_backend * next;             /**< \private Reserved for the core. Used internally to list backends topology->backends. */
+  /** \private Reserved for the core. Set to 1 if forced through envvar, 0 otherwise. */
+  int envvar_forced;
+  /** \private Reserved for the core. Used internally to list backends topology->backends. */
+  struct hwloc_backend * next;
 };
 
 /** \brief Backend flags */
 enum hwloc_backend_flag_e {
-  HWLOC_BACKEND_FLAG_NEED_LEVELS = (1<<0) /**< \brief Levels should be reconnected before this backend discover() is used.
-					   * \hideinitializer */
+  /** \brief Levels should be reconnected before this backend discover() is used.
+   * \hideinitializer */
+  HWLOC_BACKEND_FLAG_NEED_LEVELS = (1<<0)
 };
 
 /** \brief Allocate a backend structure, set good default values, initialize backend->component and topology, etc.
@@ -156,8 +178,12 @@ HWLOC_DECLSPEC int hwloc_backends_notify_new_object(struct hwloc_backend *caller
 
 /** \brief Generic component type */
 typedef enum hwloc_component_type_e {
-  HWLOC_COMPONENT_TYPE_DISC,	/**< \brief The data field must point to a struct hwloc_disc_component. \hideinitializer */
-  HWLOC_COMPONENT_TYPE_XML,	/**< \brief The data field must point to a struct hwloc_xml_component. \hideinitializer */
+  /** \brief The data field must point to a struct hwloc_disc_component. */
+  HWLOC_COMPONENT_TYPE_DISC,
+
+  /** \brief The data field must point to a struct hwloc_xml_component. */
+  HWLOC_COMPONENT_TYPE_XML,
+
   HWLOC_COMPONENT_TYPE_MAX /**< \private Sentinel value. */
 } hwloc_component_type_t;
 
@@ -167,10 +193,17 @@ typedef enum hwloc_component_type_e {
  * or dynamically loaded as a plugin.
  */
 struct hwloc_component {
-  unsigned abi;                   /**< \brief Component ABI version, set to HWLOC_COMPONENT_ABI */
-  hwloc_component_type_t type;    /**< \brief Component type */
-  unsigned long flags;            /**< \brief Component flags, unused for now */
-  void * data;                    /**< \brief Component data, pointing to a struct hwloc_disc_component or struct hwloc_xml_component. */
+  /** \brief Component ABI version, set to HWLOC_COMPONENT_ABI */
+  unsigned abi;
+
+  /** \brief Component type */
+  hwloc_component_type_t type;
+
+  /** \brief Component flags, unused for now */
+  unsigned long flags;        
+
+  /** \brief Component data, pointing to a struct hwloc_disc_component or struct hwloc_xml_component. */
+  void * data;                
 };
 
 /** @} */
