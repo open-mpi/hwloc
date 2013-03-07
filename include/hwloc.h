@@ -686,19 +686,17 @@ HWLOC_DECLSPEC int hwloc_topology_ignore_all_keep_structure(hwloc_topology_t top
  * They may also be returned by hwloc_topology_get_flags().
  */
 enum hwloc_topology_flags_e {
-  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
- /**< \brief Detect the whole system, ignore reservations and offline settings.
-   * \hideinitializer
+ /** \brief Detect the whole system, ignore reservations and offline settings.
    *
    * Gather all resources, even if some were disabled by the administrator.
    * For instance, ignore Linux Cpusets and gather all processors and memory nodes,
    * and ignore the fact that some resources may be offline.
-   */
-
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
- /**< \brief Assume that the selected backend provides the topology for the
-   * system on which we are running.
    * \hideinitializer
+   */
+  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
+
+ /** \brief Assume that the selected backend provides the topology for the
+   * system on which we are running.
    *
    * This forces hwloc_topology_is_thissystem to return 1, i.e. makes hwloc assume that
    * the selected backend provides the topology for the system on which we are running,
@@ -713,7 +711,9 @@ enum hwloc_topology_flags_e {
    * This can be used for efficiency reasons to first detect the topology once,
    * save it to an XML file, and quickly reload it later through the XML
    * backend, but still having binding functions actually do bind.
+   * \hideinitializer
    */
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
 
   /** \brief Detect PCI devices.
    *
@@ -723,6 +723,7 @@ enum hwloc_topology_flags_e {
    * objects to an I/O subsystem) will be added to the topology.
    * Uncommon devices and other bridges (such as PCI-to-PCI bridges) will be
    * ignored.
+   * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_IO_DEVICES = (1<<2),
 
@@ -731,6 +732,7 @@ enum hwloc_topology_flags_e {
    * This flag should be combined with HWLOC_TOPOLOGY_FLAG_IO_DEVICES to enable
    * the detection of both common devices and of all useful bridges (bridges that
    * have at least one device behind them).
+   * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_IO_BRIDGES = (1<<3),
 
@@ -739,6 +741,7 @@ enum hwloc_topology_flags_e {
    * This flag enables detection of all I/O devices (even the uncommon ones)
    * and bridges (even those that have no device behind them) using the libpci
    * backend.
+   * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<4),
 
@@ -746,6 +749,7 @@ enum hwloc_topology_flags_e {
    *
    * This flag enables detection of Instruction caches,
    * instead of only Data and Unified caches.
+   * \hideinitializer
    */
   HWLOC_TOPOLOGY_FLAG_ICACHES = (1<<5)
 };
