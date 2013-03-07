@@ -2146,7 +2146,7 @@ The component structure contains a data field that points to an
 <tt>hwloc_disc_component</tt> which defines an <tt>instantiate</tt>
 callback.
 This function is invoked when this component is actually used by a topology.
-It creates a <tt>backend</tt> structure that usually contains a
+It creates a <tt>hwloc_backend</tt> structure that usually contains a
 <tt>discover</tt> and/or <tt>notify_new_object</tt> callback taking
 care of the actual topology discovery.
 
