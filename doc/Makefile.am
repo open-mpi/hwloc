@@ -73,6 +73,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(HWLOC_top_srcdir)/include/hwloc/cuda.h \
        $(HWLOC_top_srcdir)/include/hwloc/cudart.h \
        $(HWLOC_top_srcdir)/include/hwloc/nvml.h \
+       $(HWLOC_top_srcdir)/include/hwloc/gl.h \
        $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h \
        $(HWLOC_top_srcdir)/include/hwloc/myriexpress.h
 
