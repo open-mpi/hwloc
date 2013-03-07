@@ -230,6 +230,7 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
 {
   struct hwloc_disc_component **prev;
 
+  /* check that the component name is valid */
   if (!strcmp(component->name, HWLOC_COMPONENT_STOP_NAME)) {
     if (hwloc_components_verbose)
       fprintf(stderr, "Cannot register component with reserved name `" HWLOC_COMPONENT_STOP_NAME "'\n");
@@ -240,6 +241,17 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
     if (hwloc_components_verbose)
       fprintf(stderr, "Cannot register component with name `%s' containing reserved characters `%c" HWLOC_COMPONENT_SEPS "'\n",
 	      component->name, HWLOC_COMPONENT_EXCLUDE_CHAR);
+    return -1;
+  }
+  /* check that the component type is valid */
+  switch ((unsigned) component->type) {
+  case HWLOC_DISC_COMPONENT_TYPE_CPU:
+  case HWLOC_DISC_COMPONENT_TYPE_GLOBAL:
+  case HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL:
+    break;
+  default:
+    fprintf(stderr, "Cannot register discovery component `%s' with unknown type %u\n",
+	    component->name, (unsigned) component->type);
     return -1;
   }
 
