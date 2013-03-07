@@ -718,7 +718,7 @@ enum hwloc_topology_flags_e {
   /** \brief Detect PCI devices.
    *
    * By default, I/O devices are ignored. This flag enables I/O device
-   * detection using the libpci backend. Only the common PCI devices (GPUs,
+   * detection using the pci backend. Only the common PCI devices (GPUs,
    * NICs, block devices, ...) and host bridges (objects that connect the host
    * objects to an I/O subsystem) will be added to the topology.
    * Uncommon devices and other bridges (such as PCI-to-PCI bridges) will be
@@ -739,7 +739,7 @@ enum hwloc_topology_flags_e {
   /** \brief Detect the whole PCI hierarchy.
    *
    * This flag enables detection of all I/O devices (even the uncommon ones)
-   * and bridges (even those that have no device behind them) using the libpci
+   * and bridges (even those that have no device behind them) using the pci
    * backend.
    * \hideinitializer
    */

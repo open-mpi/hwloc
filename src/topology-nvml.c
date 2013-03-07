@@ -159,7 +159,7 @@ hwloc_nvml_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc
     hwloc_insert_object_by_parent(topology, pcidev, osdev);
 
     if (info->maxlinkspeed != 0.0f)
-      /* we found the max link speed, replace the current link speed found by libpci (or none) */
+      /* we found the max link speed, replace the current link speed found by pci (or none) */
       pcidev->attr->pcidev.linkspeed = info->maxlinkspeed;
 
     return 1;
@@ -212,7 +212,7 @@ static struct hwloc_disc_component hwloc_nvml_disc_component = {
   "nvml",
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_nvml_component_instantiate,
-  18, /* after libpci, and after cuda since likely less useful */
+  18, /* after pci, and after cuda since likely less useful */
   NULL
 };
 
