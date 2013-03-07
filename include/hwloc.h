@@ -322,7 +322,8 @@ struct hwloc_obj_memory_s {
   hwloc_uint64_t total_memory; /**< \brief Total memory (in bytes) in this object and its children */
   hwloc_uint64_t local_memory; /**< \brief Local memory (in bytes) */
 
-  unsigned page_types_len; /**< \brief Size of array \p page_types */
+  /** \brief Size of array \p page_types */
+  unsigned page_types_len;
   /** \brief Array of local memory page types, \c NULL if no local memory and \p page_types is 0.
    *
    * The array is sorted by increasing \p size fields.
@@ -490,7 +491,7 @@ typedef struct hwloc_obj * hwloc_obj_t;
 union hwloc_obj_attr_u {
   /** \brief Cache-specific Object Attributes */
   struct hwloc_cache_attr_s {
-    hwloc_uint64_t size;			  /**< \brief Size of cache in bytes */
+    hwloc_uint64_t size;		  /**< \brief Size of cache in bytes */
     unsigned depth;			  /**< \brief Depth of cache (e.g., L1, L2, ...etc.) */
     unsigned linesize;			  /**< \brief Cache-line size in bytes. 0 if unknown */
     int associativity;			  /**< \brief Ways of associativity,
