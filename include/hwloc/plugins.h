@@ -36,9 +36,7 @@ typedef enum hwloc_disc_component_type_e {
 
   /** \brief PCI, etc.
    * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL = (1<<2),
-
-  HWLOC_DISC_COMPONENT_TYPE_MAX /**< \private Sentinel value. */
+  HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL = (1<<2)
 } hwloc_disc_component_type_t;
 
 /** \brief Discovery component structure
@@ -182,9 +180,7 @@ typedef enum hwloc_component_type_e {
   HWLOC_COMPONENT_TYPE_DISC,
 
   /** \brief The data field must point to a struct hwloc_xml_component. */
-  HWLOC_COMPONENT_TYPE_XML,
-
-  HWLOC_COMPONENT_TYPE_MAX /**< \private Sentinel value. */
+  HWLOC_COMPONENT_TYPE_XML
 } hwloc_component_type_t;
 
 /** \brief Generic component structure
