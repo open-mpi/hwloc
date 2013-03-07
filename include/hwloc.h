@@ -694,7 +694,7 @@ enum hwloc_topology_flags_e {
    * and ignore the fact that some resources may be offline.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1<<0),
+  HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM = (1UL<<0),
 
  /** \brief Assume that the selected backend provides the topology for the
    * system on which we are running.
@@ -714,7 +714,7 @@ enum hwloc_topology_flags_e {
    * backend, but still having binding functions actually do bind.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1<<1),
+  HWLOC_TOPOLOGY_FLAG_IS_THISSYSTEM = (1UL<<1),
 
   /** \brief Detect PCI devices.
    *
@@ -726,7 +726,7 @@ enum hwloc_topology_flags_e {
    * ignored.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_IO_DEVICES = (1<<2),
+  HWLOC_TOPOLOGY_FLAG_IO_DEVICES = (1UL<<2),
 
   /** \brief Detect PCI bridges.
    *
@@ -735,7 +735,7 @@ enum hwloc_topology_flags_e {
    * have at least one device behind them).
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_IO_BRIDGES = (1<<3),
+  HWLOC_TOPOLOGY_FLAG_IO_BRIDGES = (1UL<<3),
 
   /** \brief Detect the whole PCI hierarchy.
    *
@@ -744,7 +744,7 @@ enum hwloc_topology_flags_e {
    * backend.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1<<4),
+  HWLOC_TOPOLOGY_FLAG_WHOLE_IO = (1UL<<4),
 
   /** \brief Detect instruction caches.
    *
@@ -752,7 +752,7 @@ enum hwloc_topology_flags_e {
    * instead of only Data and Unified caches.
    * \hideinitializer
    */
-  HWLOC_TOPOLOGY_FLAG_ICACHES = (1<<5)
+  HWLOC_TOPOLOGY_FLAG_ICACHES = (1UL<<5)
 };
 
 /** \brief Set OR'ed flags to non-yet-loaded topology.

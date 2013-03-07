@@ -106,7 +106,7 @@ struct hwloc_backend {
    * returns > 0 if it modified the topology tree, -1 on error, 0 otherwise.
    * May be NULL if type is HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL. */
   int (*discover)(struct hwloc_backend *backend);
-  
+
   /** \brief Callback used by the PCI backend to retrieve PCI device locality from the OS/cpu backend.
    * May be NULL. */
   int (*get_obj_cpuset)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
@@ -143,7 +143,7 @@ struct hwloc_backend {
 enum hwloc_backend_flag_e {
   /** \brief Levels should be reconnected before this backend discover() is used.
    * \hideinitializer */
-  HWLOC_BACKEND_FLAG_NEED_LEVELS = (1<<0)
+  HWLOC_BACKEND_FLAG_NEED_LEVELS = (1UL<<0)
 };
 
 /** \brief Allocate a backend structure, set good default values, initialize backend->component and topology, etc.
@@ -196,10 +196,10 @@ struct hwloc_component {
   hwloc_component_type_t type;
 
   /** \brief Component flags, unused for now */
-  unsigned long flags;        
+  unsigned long flags;
 
   /** \brief Component data, pointing to a struct hwloc_disc_component or struct hwloc_xml_component. */
-  void * data;                
+  void * data;
 };
 
 /** @} */
