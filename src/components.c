@@ -307,23 +307,35 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
 #endif
 
   /* hwloc_static_components is created by configure in static-components.h */
-  for(i=0; NULL != hwloc_static_components[i]; i++)
+  for(i=0; NULL != hwloc_static_components[i]; i++) {
+    if (hwloc_static_components[i]->flags) {
+      fprintf(stderr, "Ignoring static component with invalid flags %lx\n",
+	      hwloc_static_components[i]->flags);
+      continue;
+    }
     if (HWLOC_COMPONENT_TYPE_DISC == hwloc_static_components[i]->type)
       hwloc_disc_component_register(hwloc_static_components[i]->data, NULL);
     else if (HWLOC_COMPONENT_TYPE_XML == hwloc_static_components[i]->type)
       hwloc_xml_callbacks_register(hwloc_static_components[i]->data);
     else
       assert(0);
+  }
 
   /* dynamic plugins */
 #ifdef HWLOC_HAVE_PLUGINS
-  for(desc = hwloc_plugins; NULL != desc; desc = desc->next)
+  for(desc = hwloc_plugins; NULL != desc; desc = desc->next) {
+    if (desc->component->flags) {
+      fprintf(stderr, "Ignoring plugin `%s' component with invalid flags %lx\n",
+	      desc->name, desc->component->flags);
+      continue;
+    }
     if (HWLOC_COMPONENT_TYPE_DISC == desc->component->type)
       hwloc_disc_component_register(desc->component->data, desc->filename);
     else if (HWLOC_COMPONENT_TYPE_XML == desc->component->type)
       hwloc_xml_callbacks_register(desc->component->data);
     else
       assert(0);
+  }
 #endif
 
   HWLOC_COMPONENTS_UNLOCK();
