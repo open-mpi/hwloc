@@ -18,6 +18,7 @@ struct {
   int cache_attrib;
 } _system_configuration;
 
+#define __power_pc() 1
 #define __power_4() 1
 #define __power_5() 1
 #define __power_6() 1

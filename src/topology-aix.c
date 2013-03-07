@@ -36,6 +36,9 @@
 #include <sys/mman.h>
 #include <sys/systemcfg.h>
 
+#ifndef __power_pc
+#define __power_pc() 0
+#endif
 #ifndef __power_4
 #define __power_4() 0
 #endif
@@ -638,8 +641,9 @@ look_rset(int sdl, hwloc_obj_type_t type, struct hwloc_topology *topology, int l
 	obj->attr->cache.associativity = _system_configuration.L2_cache_asc;
 
 	obj->attr->cache.linesize = 0; /* unknown by default */
-	if (__power_4() || __power_5() || __power_6() || __power_7())
-		obj->attr->cache.linesize = 128;
+	if (__power_pc())
+	  if (__power_4() || __power_5() || __power_6() || __power_7())
+	    obj->attr->cache.linesize = 128;
 
 	obj->attr->cache.depth = 2;
 	obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED; /* OK for power[4567], unknown for others */
