@@ -1186,21 +1186,23 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_topology_insert_misc_object_by_parent(hwloc_top
 
 /** \brief Flags to be given to hwloc_topology_restrict(). */
 enum hwloc_restrict_flags_e {
-  HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES = (1<<0),
- /**< \brief Adapt distance matrices according to objects being removed during restriction.
+  /** \brief Adapt distance matrices according to objects being removed during restriction.
    * If this flag is not set, distance matrices are removed.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_ADAPT_MISC = (1<<1),
- /**< \brief Move Misc objects to ancestors if their parents are removed during restriction.
+  HWLOC_RESTRICT_FLAG_ADAPT_DISTANCES = (1<<0),
+
+  /** \brief Move Misc objects to ancestors if their parents are removed during restriction.
    * If this flag is not set, Misc objects are removed when their parents are removed.
    * \hideinitializer
    */
-  HWLOC_RESTRICT_FLAG_ADAPT_IO = (1<<2)
- /**< \brief Move I/O objects to ancestors if their parents are removed during restriction.
+  HWLOC_RESTRICT_FLAG_ADAPT_MISC = (1<<1),
+
+  /** \brief Move I/O objects to ancestors if their parents are removed during restriction.
    * If this flag is not set, I/O devices and bridges are removed when their parents are removed.
    * \hideinitializer
    */
+  HWLOC_RESTRICT_FLAG_ADAPT_IO = (1<<2)
 };
 
 /** \brief Restrict the topology to the given CPU set.
@@ -1522,59 +1524,55 @@ HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const 
  * description of errors that can occur.
  */
 typedef enum {
-  HWLOC_CPUBIND_PROCESS = (1<<0), /**< \brief Bind all threads of the current
-                                   * (possibly) multithreaded process.
-                                   * \hideinitializer */
-  HWLOC_CPUBIND_THREAD = (1<<1),  /**< \brief Bind current thread of current process.
-                                   * \hideinitializer */
-  HWLOC_CPUBIND_STRICT = (1<<2),  /**< \brief Request for strict binding from the OS.
-                                   * \hideinitializer
-                                   *
-                                   * By default, when the designated CPUs are
-                                   * all busy while other CPUs are idle, operating systems
-                                   * may execute the thread/process on those
-                                   * other CPUs instead of the designated CPUs,
-                                   * to let them progress anyway.  Strict
-                                   * binding means that the thread/process will
-                                   * _never_ execute on other cpus than the
-                                   * designated CPUs, even when those are busy
-                                   * with other tasks and other CPUs are idle.
-                                   *
-                                   * \note Depending on the operating system,
-                                   * strict binding may not be
-                                   * possible (e.g., the OS does not implement it) or not
-                                   * allowed (e.g., for an administrative reasons), and the
-                                   * function will fail in that case.
-				   *
-				   * When retrieving the binding of a process,
-				   * this flag checks whether all its threads
-				   * actually have the same binding.
-				   * If the flag is not given, the binding of
-				   * each thread will be accumulated.
-				   *
-				   * \note This flag is meaningless when retrieving
-				   * the binding of a thread.
-                                   */
-  HWLOC_CPUBIND_NOMEMBIND = (1<<3)/**< \brief Avoid any effect on memory binding
-                                   * \hideinitializer
-                                   *
-                                   * On some operating systems, some CPU binding function
-                                   * would also bind the memory on the
-                                   * corresponding NUMA node.  It is often not
-                                   * a problem for the application, but if it
-                                   * is, setting this flag will make hwloc
-                                   * avoid using OS functions that would also
-                                   * bind memory.  This will however reduce the
-                                   * support of CPU bindings, i.e. potentially
-                                   * return -1 with errno set to ENOSYS in some
-                                   * cases.
-                                   *
-                                   * This flag is only meaningful when
-                                   * used with functions that set the
-                                   * CPU binding.  It is ignored when
-                                   * used with functions that get CPU
-                                   * binding information.
-                                   */
+  /** \brief Bind all threads of the current (possibly) multithreaded process.
+   * \hideinitializer */
+  HWLOC_CPUBIND_PROCESS = (1<<0),
+
+  /** \brief Bind current thread of current process.
+   * \hideinitializer */
+  HWLOC_CPUBIND_THREAD = (1<<1),
+
+  /** \brief Request for strict binding from the OS.
+   *
+   * By default, when the designated CPUs are all busy while other
+   * CPUs are idle, operating systems may execute the thread/process
+   * on those other CPUs instead of the designated CPUs, to let them
+   * progress anyway.  Strict binding means that the thread/process
+   * will _never_ execute on other cpus than the designated CPUs, even
+   * when those are busy with other tasks and other CPUs are idle.
+   *
+   * \note Depending on the operating system, strict binding may not
+   * be possible (e.g., the OS does not implement it) or not allowed
+   * (e.g., for an administrative reasons), and the function will fail
+   * in that case.
+   *
+   * When retrieving the binding of a process, this flag checks
+   * whether all its threads  actually have the same binding. If the
+   * flag is not given, the binding of each thread will be
+   * accumulated.
+   *
+   * \note This flag is meaningless when retrieving the binding of a
+   * thread.
+   * \hideinitializer
+   */
+  HWLOC_CPUBIND_STRICT = (1<<2),
+
+  /** \brief Avoid any effect on memory binding
+   *
+   * On some operating systems, some CPU binding function would also
+   * bind the memory on the corresponding NUMA node.  It is often not
+   * a problem for the application, but if it is, setting this flag
+   * will make hwloc avoid using OS functions that would also bind
+   * memory.  This will however reduce the support of CPU bindings,
+   * i.e. potentially return -1 with errno set to ENOSYS in some
+   * cases.
+   *
+   * This flag is only meaningful when used with functions that set
+   * the CPU binding.  It is ignored when used with functions that get
+   * CPU binding information.
+   * \hideinitializer
+   */
+  HWLOC_CPUBIND_NOMEMBIND = (1<<3)
 } hwloc_cpubind_flags_t;
 
 /** \brief Bind current process or thread on cpus given in physical bitmap \p set.
@@ -1734,76 +1732,58 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  * description of errors that can occur.
  */
 typedef enum {
-  HWLOC_MEMBIND_DEFAULT =	0,	/**< \brief Reset the memory allocation policy to the system default.
-					 * \hideinitializer */
-  HWLOC_MEMBIND_FIRSTTOUCH =	1,	/**< \brief Allocate memory
-                                         * but do not immediately bind
-                                         * it to a specific locality.
-                                         * Instead, each page in the
-                                         * allocation is bound only
-                                         * when it is first touched.
-                                         * Pages are individually
-                                         * bound to the local NUMA
-                                         * node of the first thread
-                                         * that touches it. If there is not
-                                         * enough memory on the node, allocation
-                                         * may be done in the specified cpuset
-                                         * before allocating on other nodes.
-                                         * \hideinitializer */
-  HWLOC_MEMBIND_BIND =		2,	/**< \brief Allocate memory on the specified nodes.
-					 * \hideinitializer */
-  HWLOC_MEMBIND_INTERLEAVE =	3,	/**< \brief Allocate memory on
-                                         * the given nodes in an
-                                         * interleaved / round-robin
-                                         * manner.  The precise layout
-                                         * of the memory across
-                                         * multiple NUMA nodes is
-                                         * OS/system specific.
-                                         * Interleaving can be useful
-                                         * when threads distributed across
-                                         * the specified NUMA nodes
-                                         * will all be accessing the whole
-                                         * memory range concurrently, since
-                                         * the interleave will then balance
-                                         * the memory references.
-                                         * \hideinitializer */
-  HWLOC_MEMBIND_REPLICATE =	4,	/**< \brief Replicate memory
-					 * on the given nodes; reads
-					 * from this memory will
-					 * attempt to be serviced from
-					 * the NUMA node local to the
-					 * reading thread.
-					 * Replicating can be useful
-					 * when multiple threads from
-					 * the specified NUMA nodes
-					 * will be sharing the same
-					 * read-only data.
-                                         *
-                                         * This policy can only be
-					 * used with existing memory
-					 * allocations (i.e., the
-					 * hwloc_set_*membind*()
-					 * functions); it cannot be
-					 * used with functions that
-					 * allocate new memory (i.e.,
-					 * the hwloc_alloc*()
-					 * functions).
-					 * \hideinitializer */
-  HWLOC_MEMBIND_NEXTTOUCH =	5,	/**< \brief For each page bound
-                                         * with this policy, by next time
-                                         * it is touched (and next time only),
-                                         * it is moved from
-                                         * its current location to the
-                                         * local NUMA node of the
-                                         * thread where the memory
-                                         * reference occurred (if it
-                                         * needs to be moved at all).
-					 * \hideinitializer */
-  HWLOC_MEMBIND_MIXED = -1              /**< \brief Returned by hwloc_get_membind*()
-                                         * functions when multiple threads or
-                                         * parts of a memory area have
-                                         * differing memory binding policies.
-                                         * \hideinitializer */
+  /** \brief Reset the memory allocation policy to the system default.
+   * \hideinitializer */
+  HWLOC_MEMBIND_DEFAULT =	0,
+
+  /** \brief Allocate memory
+   * but do not immediately bind it to a specific locality. Instead,
+   * each page in the allocation is bound only when it is first
+   * touched. Pages are individually bound to the local NUMA node of
+   * the first thread that touches it. If there is not enough memory
+   * on the node, allocation may be done in the specified cpuset
+   * before allocating on other nodes.
+   * \hideinitializer */
+  HWLOC_MEMBIND_FIRSTTOUCH =	1,
+
+  /** \brief Allocate memory on the specified nodes.
+   * \hideinitializer */
+  HWLOC_MEMBIND_BIND =		2,
+
+  /** \brief Allocate memory on the given nodes in an interleaved
+   * / round-robin manner.  The precise layout of the memory across
+   * multiple NUMA nodes is OS/system specific. Interleaving can be
+   * useful when threads distributed across the specified NUMA nodes
+   * will all be accessing the whole memory range concurrently, since
+   * the interleave will then balance the memory references.
+   * \hideinitializer */
+  HWLOC_MEMBIND_INTERLEAVE =	3,
+
+  /** \brief Replicate memory on the given nodes; reads from this
+   * memory will attempt to be serviced from the NUMA node local to
+   * the reading thread. Replicating can be useful when multiple
+   * threads from the specified NUMA nodes will be sharing the same
+   * read-only data.
+   *
+   * This policy can only be used with existing memory allocations
+   * (i.e., the hwloc_set_*membind*() functions); it cannot be used
+   * with functions that allocate new memory (i.e., the hwloc_alloc*()
+   * functions).
+   * \hideinitializer */
+  HWLOC_MEMBIND_REPLICATE =	4,
+
+  /** \brief For each page bound with this policy, by next time
+   * it is touched (and next time only), it is moved from its current
+   * location to the local NUMA node of the thread where the memory
+   * reference occurred (if it needs to be moved at all).
+   * \hideinitializer */
+  HWLOC_MEMBIND_NEXTTOUCH =	5,
+
+  /** \brief Returned by hwloc_get_membind*() functions when multiple
+   * threads or parts of a memory area have differing memory binding
+   * policies.
+   * \hideinitializer */
+  HWLOC_MEMBIND_MIXED = -1             
 } hwloc_membind_policy_t;
 
 /** \brief Memory binding flags.
@@ -1818,61 +1798,43 @@ typedef enum {
  * description of errors that can occur.
  */
 typedef enum {
-  HWLOC_MEMBIND_PROCESS =       (1<<0), /**< \brief Set policy for all
-                                         * threads of the specified
-                                         * (possibly multithreaded)
-                                         * process.  This flag is
-                                         * mutually exclusive with
-                                         * HWLOC_MEMBIND_THREAD.
-                                         * \hideinitializer */
-  HWLOC_MEMBIND_THREAD =        (1<<1), /**< \brief Set policy for a
-                                         * specific thread of the
-                                         * current process.  This flag
-                                         * is mutually exclusive with
-                                         * HWLOC_MEMBIND_PROCESS.
-                                         * \hideinitializer */
-  HWLOC_MEMBIND_STRICT =        (1<<2), /**< Request strict binding
-                                         * from the OS.  The function
-                                         * will fail if the binding
-                                         * can not be guaranteed /
-                                         * completely enforced.
-                                         *
-                                         * This flag has slightly
-                                         * different meanings
-                                         * depending on which function
-                                         * it is used with.  
-                                         * \hideinitializer  */
-  HWLOC_MEMBIND_MIGRATE =       (1<<3), /**< \brief Migrate existing
-                                         * allocated memory.  If the
-                                         * memory cannot be migrated
-                                         * and the
-                                         * HWLOC_MEMBIND_STRICT flag
-                                         * is passed, an error will be
-                                         * returned.
-                                         * \hideinitializer  */
-  HWLOC_MEMBIND_NOCPUBIND =     (1<<4)  /**< \brief Avoid any effect
-                                         * on CPU binding.
-                                         *
-                                         * On some operating systems,
-                                         * some underlying memory
-                                         * binding functions also bind
-                                         * the application to the
-                                         * corresponding CPU(s).
-                                         * Using this flag will cause
-                                         * hwloc to avoid using OS
-                                         * functions that could
-                                         * potentially affect CPU
-                                         * bindings.  Note, however,
-                                         * that using NOCPUBIND may
-                                         * reduce hwloc's overall
-                                         * memory binding support.
-                                         * Specifically: some of
-                                         * hwloc's memory binding
-                                         * functions may fail with
-                                         * errno set to ENOSYS when
-                                         * used with NOCPUBIND.
-                                         * \hideinitializer
-                                         */
+  /** \brief Set policy for all threads of the specified (possibly
+   * multithreaded) process.  This flag is mutually exclusive with
+   * HWLOC_MEMBIND_THREAD.
+   * \hideinitializer */
+  HWLOC_MEMBIND_PROCESS =       (1<<0),
+
+ /** \brief Set policy for a specific thread of the current process.
+  * This flag is mutually exclusive with HWLOC_MEMBIND_PROCESS.
+  * \hideinitializer */
+  HWLOC_MEMBIND_THREAD =        (1<<1),
+
+ /** Request strict binding from the OS.  The function will fail if
+  * the binding can not be guaranteed / completely enforced.
+  *
+  * This flag has slightly different meanings depending on which
+  * function it is used with.  
+  * \hideinitializer  */
+  HWLOC_MEMBIND_STRICT =        (1<<2),
+
+ /** \brief Migrate existing allocated memory.  If the memory cannot
+  * be migrated and the HWLOC_MEMBIND_STRICT flag is passed, an error
+  * will be returned.
+  * \hideinitializer  */
+  HWLOC_MEMBIND_MIGRATE =       (1<<3),
+
+  /** \brief Avoid any effect on CPU binding.
+   *
+   * On some operating systems, some underlying memory binding
+   * functions also bind the application to the corresponding CPU(s).
+   * Using this flag will cause hwloc to avoid using OS functions that
+   * could potentially affect CPU bindings.  Note, however, that using
+   * NOCPUBIND may reduce hwloc's overall memory binding
+   * support. Specifically: some of hwloc's memory binding functions
+   * may fail with errno set to ENOSYS when used with NOCPUBIND.
+   * \hideinitializer
+   */
+  HWLOC_MEMBIND_NOCPUBIND =     (1<<4)
 } hwloc_membind_flags_t;
 
 /** \brief Set the default memory binding policy of the current
