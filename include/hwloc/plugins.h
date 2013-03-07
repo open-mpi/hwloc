@@ -18,17 +18,19 @@ struct hwloc_backend;
  * Discovery components *
  ************************/
 
-/* Discovery components taking care of the discovery.
- * They are registered by generic components, either static or plugins.
+/* This is the major kind of components, taking care of the discovery.
+ * They are registered by generic components, either statically-built or as plugins.
  */
 
 typedef enum hwloc_disc_component_type_e {
   HWLOC_DISC_COMPONENT_TYPE_CPU = (1<<0), /* CPU-only discovery through the OS, or generic no-OS support.
 					   */
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL = (1<<1), /* xml, synthetic or custom.
-					      * no additional backend is used.
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL = (1<<1), /* xml, synthetic or custom,
+					      * platform-specific components such as bgq.
+					      * Anything the discovers CPU and everything else.
+					      * No additional backend is used.
 					      */
-  HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL = (1<<2), /* pci, etc.
+  HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL = (1<<2), /* PCI, etc.
 						  */
   /* This value is only here so that we can end the enum list without
      a comma (thereby preventing compiler warnings) */
@@ -42,13 +44,15 @@ struct hwloc_disc_component {
   struct hwloc_backend * (*instantiate)(struct hwloc_disc_component *component, const void *data1, const void *data2, const void *data3);
 
   unsigned priority; /* used to sort topology->components, higher priority first.
-		      * 50 for native OS components,
+		      * 50 for native OS (or platform) components,
 		      * 45 for x86,
 		      * 40 for no-OS fallback,
 		      * 30 for global components (xml/synthetic/custom),
 		      * 20 for pci, likely less for other additional components.
 		      */
-  struct hwloc_disc_component * next; /* used internally to list components by priority on topology->components */
+  struct hwloc_disc_component * next; /* used internally to list components by priority on topology->components
+				       * (the component structure is usually read-only,
+				       *  the core copies it before using this field for queueing) */
 };
 
 /************
@@ -68,37 +72,48 @@ struct hwloc_backend {
   struct hwloc_disc_component * component; /* Reserved for the core, set by hwloc_backend_alloc() */
   struct hwloc_topology * topology; /* Reserved for the core, set by hwloc_backend_enable() */
 
-  unsigned long flags; /* OR'ed set of HWLOC_BACKEND_FLAG_* */
+  /* OR'ed set of HWLOC_BACKEND_FLAG_* */
+  unsigned long flags;
 
   /* main discovery callback.
    * returns > 0 if it modified the topology tree, -1 on error, 0 otherwise.
-   * maybe NULL if type is HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL. */
+   * may be NULL if type is HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL. */
   int (*discover)(struct hwloc_backend *backend);
 
-  /* used by the pci backend to retrieve pci device locality from the OS/cpu backend */
-  int (*get_obj_cpuset)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset); /* may be NULL */
+  /* used by the PCI backend to retrieve PCI device locality from the OS/cpu backend.
+   * may be NULL. */
+  int (*get_obj_cpuset)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
 
   /* used by additional backends to notify other backend when new objects are added.
-   * returns > 0 if it modified the topology tree, 0 otherwise. */
-  int (*notify_new_object)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj); /* may be NULL */
+   * returns > 0 if it modified the topology tree, 0 otherwise.
+   * may be NULL. */
+  int (*notify_new_object)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj);
 
-  void (*disable)(struct hwloc_backend *backend); /* may be NULL */
+  /* Used for free the private_date.
+   * May be NULL.
+   */
+  void (*disable)(struct hwloc_backend *backend);
   void * private_data;
-  int is_custom; /* shortcut on !strcmp(..->component->name, "custom") */
-  int is_thissystem; /* -1 if doesn't matter, 0 or 1 if should enforce thissystem when enabling */
 
-  int envvar_forced; /* 1 if forced through envvar, 0 otherwise */
+  /* Backend-specific 'is_custom' property.
+   * Shortcut on !strcmp(..->component->name, "custom").
+   * Only the custom component should touch this. */
+  int is_custom;
 
-  struct hwloc_backend * next; /* Used internally to list backends topology->backends.
-				* Reserved for the core.
-				*/
+  /* Backend-specific 'is_thissystem' property.
+   * Set to 0 or 1 if the backend should enforce the thissystem flag when it gets enabled.
+   * Set to -1 if the backend doesn't care (default). */
+  int is_thissystem;
+
+  int envvar_forced; /* Reserved for the core. Set to 1 if forced through envvar, 0 otherwise. */
+  struct hwloc_backend * next; /* Reserved for the core. Used internally to list backends topology->backends. */
 };
 
 enum hwloc_backend_flag_e {
   HWLOC_BACKEND_FLAG_NEED_LEVELS = (1<<0) /* Levels should be reconnected before this backend discover() is used */
 };
 
-/* Allocate a backend structure, set good default values, initialize backend->component.
+/* Allocate a backend structure, set good default values, initialize backend->component and topology, etc.
  * The caller will then modify whatever needed, and call hwloc_backend_enable().
  */
 HWLOC_DECLSPEC struct hwloc_backend * hwloc_backend_alloc(struct hwloc_disc_component *component);
@@ -119,7 +134,7 @@ HWLOC_DECLSPEC int hwloc_backends_notify_new_object(struct hwloc_backend *caller
  * Generic components *
  **********************/
 
-/* Generic components structure, either static listed by configure in static-components.h
+/* Generic components structure, either statically listed by configure in static-components.h
  * or dynamically loaded as a plugin.
  */
 
@@ -132,10 +147,10 @@ typedef enum hwloc_component_type_e {
 } hwloc_component_type_t;
 
 struct hwloc_component {
-  unsigned abi;
+  unsigned abi; /* HWLOC_COMPONENT_ABI */
   hwloc_component_type_t type;
   unsigned long flags; /* unused for now */
-  void * data;
+  void * data; /* points to a struct hwloc_disc_component or struct hwloc_xml_component. */
 };
 
 /*******************************************
@@ -160,7 +175,9 @@ struct hwloc_component {
  */
 HWLOC_DECLSPEC void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
 
-/* Error reporting */
+/*
+ * Error reporting
+ */
 typedef void (*hwloc_report_error_t)(const char * msg, int line);
 HWLOC_DECLSPEC void hwloc_report_os_error(const char * msg, int line);
 HWLOC_DECLSPEC int hwloc_hide_errors(void);
