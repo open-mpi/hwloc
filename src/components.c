@@ -220,7 +220,7 @@ hwloc_disc_component_type_string(hwloc_disc_component_type_t type)
   case HWLOC_DISC_COMPONENT_TYPE_CPU: return "cpu";
   case HWLOC_DISC_COMPONENT_TYPE_GLOBAL: return "global";
   case HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL: return "additional";
-  default: return "Unknown";
+  default: return "**unknown**";
   }
 }
 
@@ -233,13 +233,13 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
   /* check that the component name is valid */
   if (!strcmp(component->name, HWLOC_COMPONENT_STOP_NAME)) {
     if (hwloc_components_verbose)
-      fprintf(stderr, "Cannot register component with reserved name `" HWLOC_COMPONENT_STOP_NAME "'\n");
+      fprintf(stderr, "Cannot register discovery component with reserved name `" HWLOC_COMPONENT_STOP_NAME "'\n");
     return -1;
   }
   if (strchr(component->name, HWLOC_COMPONENT_EXCLUDE_CHAR)
       || strcspn(component->name, HWLOC_COMPONENT_SEPS) != strlen(component->name)) {
     if (hwloc_components_verbose)
-      fprintf(stderr, "Cannot register component with name `%s' containing reserved characters `%c" HWLOC_COMPONENT_SEPS "'\n",
+      fprintf(stderr, "Cannot register discovery component with name `%s' containing reserved characters `%c" HWLOC_COMPONENT_SEPS "'\n",
 	      component->name, HWLOC_COMPONENT_EXCLUDE_CHAR);
     return -1;
   }
@@ -259,14 +259,14 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
   while (NULL != *prev) {
     if (!strcmp((*prev)->name, component->name)) {
       if (hwloc_components_verbose)
-	fprintf(stderr, "Multiple `%s' components, only registering the first one\n",
+	fprintf(stderr, "Multiple `%s' discovery components, only registering the first one\n",
 		component->name);
       return -1;
     }
     prev = &((*prev)->next);
   }
   if (hwloc_components_verbose)
-    fprintf(stderr, "Registered %s component `%s' with priority %u (%s%s)\n",
+    fprintf(stderr, "Registered %s discovery component `%s' with priority %u (%s%s)\n",
 	    hwloc_disc_component_type_string(component->type), component->name, component->priority,
 	    filename ? "from plugin " : "statically build", filename ? filename : "");
 
@@ -385,7 +385,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
 
   if ((*excludes) & comp->type) {
     if (hwloc_components_verbose || verbose_errors)
-      fprintf(stderr, "Excluding %s component `%s', conflicts with excludes 0x%x\n",
+      fprintf(stderr, "Excluding %s discovery component `%s', conflicts with excludes 0x%x\n",
 	      hwloc_disc_component_type_string(comp->type), comp->name, *excludes);
     return -1;
   }
@@ -393,7 +393,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
   backend = comp->instantiate(comp, comparg, NULL, NULL);
   if (!backend) {
     if (verbose_errors)
-      fprintf(stderr, "Failed to instantiate component `%s'\n", comp->name);
+      fprintf(stderr, "Failed to instantiate discovery component `%s'\n", comp->name);
     return -1;
   }
 
@@ -472,7 +472,7 @@ hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 	if (comp) {
 	  hwloc_disc_component_try_enable(topology, comp, arg, &excludes, 1 /* envvar forced */, 1 /* envvar forced need warnings */);
 	} else {
-	  fprintf(stderr, "Cannot find component `%s'\n", curenv);
+	  fprintf(stderr, "Cannot find discovery component `%s'\n", curenv);
 	}
 
 	/* restore last char (the second loop below needs env to be unmodified) */
@@ -500,7 +500,7 @@ nextname:
 	  size_t s = strcspn(curenv, HWLOC_COMPONENT_SEPS);
 	  if (curenv[0] == HWLOC_COMPONENT_EXCLUDE_CHAR && !strncmp(curenv+1, comp->name, s-1)) {
 	    if (hwloc_components_verbose)
-	      fprintf(stderr, "Excluding %s component `%s' because of HWLOC_COMPONENTS environment variable\n",
+	      fprintf(stderr, "Excluding %s discovery component `%s' because of HWLOC_COMPONENTS environment variable\n",
 	    hwloc_disc_component_type_string(comp->type), comp->name);
 	    goto nextcomp;
 	  }
@@ -520,7 +520,7 @@ nextcomp:
     /* print a summary */
     int first = 1;
     backend = topology->backends;
-    fprintf(stderr, "Final list of enabled components: ");
+    fprintf(stderr, "Final list of enabled discovery components: ");
     while (backend != NULL) {
       fprintf(stderr, "%s%s", first ? "" : ",", backend->component->name);
       backend = backend->next;
@@ -591,7 +591,7 @@ hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *back
   while (NULL != *pprev) {
     if ((*pprev)->component == backend->component) {
       if (hwloc_components_verbose)
-	fprintf(stderr, "Cannot enable %s component `%s' twice\n",
+	fprintf(stderr, "Cannot enable %s discovery component `%s' twice\n",
 		hwloc_disc_component_type_string(backend->component->type), backend->component->name);
       hwloc_backend_disable(backend);
       errno = EBUSY;
@@ -601,7 +601,7 @@ hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *back
   }
 
   if (hwloc_components_verbose)
-    fprintf(stderr, "Enabling %s component `%s'\n",
+    fprintf(stderr, "Enabling %s discovery component `%s'\n",
 	    hwloc_disc_component_type_string(backend->component->type), backend->component->name);
 
   /* enqueue at the end */
@@ -699,7 +699,7 @@ hwloc_backends_disable_all(struct hwloc_topology *topology)
   while (NULL != (backend = topology->backends)) {
     struct hwloc_backend *next = backend->next;
     if (hwloc_components_verbose)
-      fprintf(stderr, "Disabling %s component `%s'\n",
+      fprintf(stderr, "Disabling %s discovery component `%s'\n",
 	      hwloc_disc_component_type_string(backend->component->type), backend->component->name);
     hwloc_backend_disable(backend);
     topology->backends = next;
