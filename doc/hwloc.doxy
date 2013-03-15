@@ -926,7 +926,7 @@ following environment variables.
 
 <dt>HWLOC_XML_VERBOSE=1</dt>
 <dt>HWLOC_SYNTHETIC_VERBOSE=1</dt>
-  <dd>enable verbose messages in the XML or synthetic topology backends.
+  <dd>enables verbose messages in the XML or synthetic topology backends.
   hwloc XML backends (see \ref xml) can emit some error messages to
   the error output stream.
   Enabling these verbose messages within hwloc can be useful for
@@ -1043,7 +1043,7 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_PLUGINS_VERBOSE=1</dt>
-  <dd>display verbose information about plugins.
+  <dd>displays verbose information about plugins.
   List which directories are scanned, which files are loaded,
   and which components are successfully loaded.
   </dd>
@@ -1071,13 +1071,12 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_COMPONENTS=-list,of,components,to,exclude</dt>
-  <dd>If the variable starts with <tt>-</tt>, it defines a list of
-  components to exclude.
+  <dd>defines a list of components to exclude if the value starts with <tt>-</tt>.
   See \ref plugins for details.
   </dd>
 
 <dt>HWLOC_COMPONENTS_VERBOSE=1</dt>
-  <dd>display verbose information about components.
+  <dd>displays verbose information about components.
   Display messages when components are registered or enabled.
   This is the recommended way to list the available components
   with their priority
@@ -1094,7 +1093,7 @@ following environment variables.
   uses /proc/cpuinfo instead of sysfs.
   may be useful in the doc for debugging?
  HWLOC_DEBUG_CHECK
-  run sanity checks during discovery, as if --enable-debug was passed but
+  runs sanity checks during discovery, as if --enable-debug was passed but
   without debug messages
   may be useful in the doc for debugging?
 -->
