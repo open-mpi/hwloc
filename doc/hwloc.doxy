@@ -1096,6 +1096,18 @@ following environment variables.
   runs sanity checks during discovery, as if --enable-debug was passed but
   without debug messages
   may be useful in the doc for debugging?
+ HWLOC_HIDE_DEPRECATED
+  hides some warnings about deprecated features.
+  listed in those warnings so no need to document it
+ HWLOC_FORCE_BGQ
+  makes the bgq component run even if it doesn't recognize the running platform as a BGQ/CNK
+ HWLOC_DEBUG_FAKE_COMPONENT
+  enables debugging message to check that the fake component gets loaded
+ HWLOC_DEBUG_PAGESIZE
+  forces the page size in the Linux code for debugging in topology chroots 
+ HWLOC_NO_LIBXML_EXPORT
+ HWLOC_NO_LIBXML_IMPORT
+  forces the use of the nolibxml XML backend instead of libxml2 if available
 -->
 
 
