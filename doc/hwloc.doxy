@@ -2155,18 +2155,18 @@ will be set to <tt>plugin</tt>.
 The build system may then use this variable to actually
 change the way the component is built.
 
-The component structure contains a data field that points to an
-<tt>hwloc_disc_component</tt> which defines an <tt>instantiate</tt>
+The component structure contains a <tt>data</tt> field that points to an
+<tt>hwloc_disc_component</tt> which defines an <tt>instantiate()</tt>
 callback.
 This function is invoked when this component is actually used by a topology.
-It creates a <tt>hwloc_backend</tt> structure that usually contains a
-<tt>discover</tt> and/or <tt>notify_new_object</tt> callback taking
+It creates a <tt>hwloc_backend</tt> structure that usually contains
+<tt>discover()</tt> and/or <tt>notify_new_object()</tt> callbacks taking
 care of the actual topology discovery.
 
 The relevant types and functions are declared in the hwloc/plugins.h header.
 Components are supposed to only use hwloc public headers (hwloc.h and
-anything under the hwloc subdirectory) and nothing from the private
-subdirectory in the source tree.
+anything under the <tt>include/hwloc</tt> subdirectory) and nothing from the
+<tt>include/private</tt> subdirectory in the source tree.
 
 \section plugins_list Existing components and plugins
 
