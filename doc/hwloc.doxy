@@ -1630,12 +1630,14 @@ object instead.
 <dd>The vendor and device names of the PCI device.
 </dd>
 <dt>CoProcType (Co-Processor OS devices)</dt>
-<dd>The type of co-processor, for instance MIC, CUDA or OpenCL.
+<dd>The type of co-processor, for instance <tt>"MIC"</tt>, <tt>"CUDA"</tt>
+ or <tt>"OpenCL"</tt>.
 </dd>
 <dt>GPUVendor, GPUModel (GPU or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
 </dd>
-<dt>OpenCLDeviceType, OpenCLPlatformIndex, OpenCLPlatformName, OpenCLPlatformDeviceIndex (OpenCL GPU OS devices)</dt>
+<dt>OpenCLDeviceType, OpenCLPlatformIndex,
+<dt>OpenCLPlatformName, OpenCLPlatformDeviceIndex (OpenCL GPU OS devices)</dt>
 <dd>The type of OpenCL device,
  the OpenCL platform index and name,
  and the index of the device within the platform.
