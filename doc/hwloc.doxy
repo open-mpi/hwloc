@@ -1932,7 +1932,7 @@ enabled for the current topology.
   hwloc/gl.h enables interoperability with NVIDIA displays
   using the NV-CONTROL X extension (NVCtrl library).
   If I/O device discovery is enabled, it may return the OS device
-  hwloc object that corresponds to a given display
+  hwloc object that corresponds to a display
   given as a name such as <em>:0.0</em>
   or given as a port/device pair (server/screen).
  </dd>
