@@ -2368,7 +2368,6 @@ try__add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
 			   type == HWLOC_OBJ_CACHE_UNIFIED ? "unified" : (type == HWLOC_OBJ_CACHE_DATA ? "data" : "instruction"),
 			   level, c->cpuset);
   hwloc_insert_object_by_cpuset(topology, c);
-
 }
 
 static void
@@ -2495,7 +2494,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
         hwloc_debug("%s has no \"reg\" property, skipping\n", cpu);
       } else {
         struct hwloc_obj *core = NULL;
-        add_device_tree_cpus_node(&cpus, cpuset, l2_cache, phandle, dirent->d_name); 
+        add_device_tree_cpus_node(&cpus, cpuset, l2_cache, phandle, dirent->d_name);
 
         /* Add core */
         core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, reg);
