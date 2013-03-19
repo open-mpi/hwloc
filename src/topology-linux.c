@@ -2770,7 +2770,6 @@ look_sysfscpu(struct hwloc_topology *topology,
         sock->cpuset = socketset;
         hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
                      mysocketid, socketset);
-        hwloc_insert_object_by_cpuset(topology, sock);
 	/* add cpuinfo */
 	if (cpuinfo_Lprocs) {
 	  for(j=0; j<(int) cpuinfo_numprocs; j++)
@@ -2780,6 +2779,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 	      hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel);
 	    }
 	}
+        hwloc_insert_object_by_cpuset(topology, sock);
         socketset = NULL; /* don't free it */
       }
       hwloc_bitmap_free(socketset);
@@ -3386,7 +3386,6 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       machine->cpuset = machine_online_set;
       hwloc_debug_1arg_bitmap("machine number %lu has cpuset %s\n",
 		 node, machine_online_set);
-      hwloc_insert_object_by_cpuset(topology, machine);
 
       /* Get the machine memory attributes */
       hwloc_get_kerrighed_node_meminfo_info(topology, data, node, &machine->memory);
@@ -3394,6 +3393,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       /* Gather DMI info */
       /* FIXME: get the right DMI info of each machine */
       hwloc__get_dmi_info(data, machine);
+
+      hwloc_insert_object_by_cpuset(topology, machine);
     }
     closedir(nodes_dir);
   } else {
