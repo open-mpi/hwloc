@@ -3475,6 +3475,7 @@ hwloc_linux_add_os_device(struct hwloc_topology *topology, struct hwloc_obj *pci
   obj->attr->osdev.type = type;
 
   hwloc_insert_object_by_parent(topology, pcidev, obj);
+  /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
 
   return obj;
 }

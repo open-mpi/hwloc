@@ -20,6 +20,7 @@ hwloc_custom_insert_group_object_by_parent(struct hwloc_topology *topology, hwlo
   }
 
   hwloc_insert_object_by_parent(topology, parent, obj);
+  /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
 
   return obj;
 }

@@ -585,6 +585,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     if (!strcmp(tag, "object")) {
       hwloc_obj_t childobj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
       hwloc_insert_object_by_parent(topology, obj, childobj);
+      /* insert_object_by_parent() doesn't merge during insert, so childobj is still valid */
       ret = hwloc__xml_import_object(topology, data, childobj, &childstate);
     } else if (!strcmp(tag, "page_type")) {
       ret = hwloc__xml_import_pagetype(topology, obj, &childstate);
