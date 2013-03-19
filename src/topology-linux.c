@@ -2647,7 +2647,7 @@ look_sysfsnode(struct hwloc_topology *topology,
       for (index_ = 0; index_ < nbnodes; index_++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
-          hwloc_obj_t node;
+          hwloc_obj_t node, res_obj;
 
 	  osnode = indexes[index_];
 
@@ -2665,7 +2665,9 @@ look_sysfsnode(struct hwloc_topology *topology,
 
           hwloc_debug_1arg_bitmap("os node %u has cpuset %s\n",
                                   osnode, node->cpuset);
-          hwloc_insert_object_by_cpuset(topology, node);
+          res_obj = hwloc_insert_object_by_cpuset(topology, node);
+          assert(node == res_obj); /* if we got merged, somebody else added NODEs earlier, things went wrong?! */
+
           nodes[index_] = node;
 
 	  /* Linux nodeX/distance file contains distance from X to other localities (from ACPI SLIT table or so),

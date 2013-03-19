@@ -226,8 +226,12 @@ struct hwloc_component {
  * This shall only be called before levels are built.
  *
  * In case of error, hwloc_report_os_error() is called.
+ *
+ * Returns the object on success.
+ * Returns NULL and frees obj on error.
+ * Returns another object and frees obj if it was merged with an identical pre-existing object.
  */
-HWLOC_DECLSPEC void hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
+HWLOC_DECLSPEC struct hwloc_obj *hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj);
 
 /** \brief Type of error callbacks during object insertion */
 typedef void (*hwloc_report_error_t)(const char * msg, int line);
@@ -235,8 +239,12 @@ typedef void (*hwloc_report_error_t)(const char * msg, int line);
 HWLOC_DECLSPEC void hwloc_report_os_error(const char * msg, int line);
 /** \brief Check whether insertion errors are hidden */
 HWLOC_DECLSPEC int hwloc_hide_errors(void);
-/** \brief Add an object to the topology and specify which error callback to use */
-HWLOC_DECLSPEC int hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
+
+/** \brief Add an object to the topology and specify which error callback to use.
+ *
+ * Aside from the error callback selection, this function is identical to hwloc_insert_object_by_cpuset()
+ */
+HWLOC_DECLSPEC struct hwloc_obj *hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj, hwloc_report_error_t report_error);
 
 /** \brief Insert an object somewhere in the topology.
  *

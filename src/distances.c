@@ -850,7 +850,7 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
       memset(&(groupsizes[0]), 0, sizeof(groupsizes[0]) * nbgroups);
       for(i=0; i<nbgroups; i++) {
           /* create the Group object */
-          hwloc_obj_t group_obj;
+          hwloc_obj_t group_obj, res_obj;
           group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
           group_obj->cpuset = hwloc_bitmap_alloc();
           group_obj->attr->group.depth = topology->next_group_depth;
@@ -868,8 +868,10 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
             }
           hwloc_debug_1arg_bitmap("adding Group object with %u objects and cpuset %s\n",
                                   groupsizes[i], group_obj->cpuset);
-          hwloc__insert_object_by_cpuset(topology, group_obj,
-					 fromuser ? hwloc_report_user_distance_error : hwloc_report_os_error);
+          res_obj = hwloc__insert_object_by_cpuset(topology, group_obj,
+						   fromuser ? hwloc_report_user_distance_error : hwloc_report_os_error);
+          assert(res_obj == group_obj); /* somebody else created groups here, things went wrong ?! */
+
           groupobjs[i] = group_obj;
       }
 

@@ -645,8 +645,12 @@ hwloc___insert_object_by_cpuset_report_error(hwloc_report_error_t report_error, 
 #define check_sizes(new, old, field)
 #endif
 
-/* Try to insert OBJ in CUR, recurse if needed */
-static int
+/* Try to insert OBJ in CUR, recurse if needed.
+ * Returns the object if it was inserted,
+ * the remaining object it was merged,
+ * NULL if failed to insert.
+ */
+static struct hwloc_obj *
 hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur, hwloc_obj_t obj,
 			        hwloc_report_error_t report_error)
 {
@@ -656,7 +660,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   /* Make sure we haven't gone too deep.  */
   if (!hwloc_bitmap_isincluded(obj->cpuset, cur->cpuset)) {
     fprintf(stderr,"recursion has gone too deep?!\n");
-    return -1;
+    return NULL;
   }
 
   /* Check whether OBJ is included in some child.  */
@@ -667,12 +671,12 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
         merge_index(obj, child, os_level, signed);
 	if (obj->os_level != child->os_level) {
           fprintf(stderr, "Different OS level\n");
-          return -1;
+          return NULL;
         }
         merge_index(obj, child, os_index, unsigned);
 	if (obj->os_index != child->os_index) {
           fprintf(stderr, "Different OS indexes\n");
-          return -1;
+          return NULL;
         }
 	if (obj->distances_count) {
 	  if (child->distances_count) {
@@ -733,13 +737,13 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	    break;
 	}
 	/* Already present, no need to insert.  */
-	return -1;
+	return child;
       case HWLOC_OBJ_INCLUDED:
 	if (container) {
           if (report_error)
 	    hwloc___insert_object_by_cpuset_report_error(report_error, "object (%s) included in several different objects!", obj, __LINE__);
 	  /* We can't handle that.  */
-	  return -1;
+	  return NULL;
 	}
 	/* This child contains OBJ.  */
 	container = child;
@@ -748,7 +752,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
         if (report_error)
           hwloc___insert_object_by_cpuset_report_error(report_error, "object (%s) intersection without inclusion!", obj, __LINE__);
 	/* We can't handle that.  */
-	return -1;
+	return NULL;
       case HWLOC_OBJ_CONTAINS:
 	/* OBJ will be above CHILD.  */
 	break;
@@ -822,32 +826,33 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
   *obj_children = NULL;
   *cur_children = NULL;
 
-  return 0;
+  return obj;
 }
 
 /* insertion routine that lets you change the error reporting callback */
-int
+struct hwloc_obj *
 hwloc__insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj,
 			       hwloc_report_error_t report_error)
 {
-  int ret;
+  struct hwloc_obj *result;
   /* Start at the top.  */
   /* Add the cpuset to the top */
   hwloc_bitmap_or(topology->levels[0][0]->complete_cpuset, topology->levels[0][0]->complete_cpuset, obj->cpuset);
   if (obj->nodeset)
     hwloc_bitmap_or(topology->levels[0][0]->complete_nodeset, topology->levels[0][0]->complete_nodeset, obj->nodeset);
-  ret = hwloc___insert_object_by_cpuset(topology, topology->levels[0][0], obj, report_error);
-  if (ret < 0)
+  result = hwloc___insert_object_by_cpuset(topology, topology->levels[0][0], obj, report_error);
+  if (result != obj)
+    /* either failed to insert, or got merged, free the original object */
     hwloc_free_unlinked_object(obj);
-  return ret;
+  return result;
 }
 
 /* the default insertion routine warns in case of error.
  * it's used by most backends */
-void
+struct hwloc_obj *
 hwloc_insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t obj)
 {
-  hwloc__insert_object_by_cpuset(topology, obj, hwloc_report_os_error);
+  return hwloc__insert_object_by_cpuset(topology, obj, hwloc_report_os_error);
 }
 
 void
@@ -879,7 +884,6 @@ hwloc_obj_t
 hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwloc_const_bitmap_t cpuset, const char *name)
 {
   hwloc_obj_t obj, child;
-  int err;
 
   if (!topology->is_loaded) {
     errno = EINVAL;
@@ -904,8 +908,8 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
   obj->allowed_cpuset = hwloc_bitmap_dup(cpuset);
   obj->online_cpuset = hwloc_bitmap_dup(cpuset);
 
-  err = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
-  if (err < 0)
+  obj = hwloc__insert_object_by_cpuset(topology, obj, NULL /* do not show errors on stdout */);
+  if (!obj)
     return NULL;
 
   hwloc_connect_children(topology->levels[0][0]);
