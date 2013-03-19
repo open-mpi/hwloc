@@ -2582,7 +2582,6 @@ look_sysfsnode(struct hwloc_topology *topology,
   unsigned nbnodes = 0;
   DIR *dir;
   struct dirent *dirent;
-  hwloc_obj_t node;
   hwloc_bitmap_t nodeset;
 
   *found = 0;
@@ -2648,6 +2647,8 @@ look_sysfsnode(struct hwloc_topology *topology,
       for (index_ = 0; index_ < nbnodes; index_++) {
           char nodepath[SYSFS_NUMA_NODE_PATH_LEN];
           hwloc_bitmap_t cpuset;
+          hwloc_obj_t node;
+
 	  osnode = indexes[index_];
 
           sprintf(nodepath, "%s/node%u/cpumap", path, osnode);
@@ -2752,7 +2753,6 @@ look_sysfscpu(struct hwloc_topology *topology,
   caches_added = 0;
   hwloc_bitmap_foreach_begin(i, cpuset)
     {
-      struct hwloc_obj *sock, *core, *book, *thread;
       hwloc_bitmap_t socketset, coreset, bookset, threadset, savedcoreset;
       unsigned mysocketid, mycoreid, mybookid;
       int threadwithcoreid = 0;
@@ -2766,7 +2766,7 @@ look_sysfscpu(struct hwloc_topology *topology,
       socketset = hwloc_parse_cpumap(str, data->root_fd);
       if (socketset && hwloc_bitmap_first(socketset) == i) {
         /* first cpu in this socket, add the socket */
-        sock = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
+        struct hwloc_obj *sock = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, mysocketid);
         sock->cpuset = socketset;
         hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
                      mysocketid, socketset);
@@ -2809,7 +2809,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
       if (coreset && (hwloc_bitmap_first(coreset) == i || threadwithcoreid)) {
 	/* regular core */
-        core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
+        struct hwloc_obj *core = hwloc_alloc_setup_object(HWLOC_OBJ_CORE, mycoreid);
 	if (threadwithcoreid) {
 	  /* amd multicore compute-unit, create one core per thread */
 	  core->cpuset = hwloc_bitmap_alloc();
@@ -2831,7 +2831,7 @@ look_sysfscpu(struct hwloc_topology *topology,
         sprintf(str, "%s/cpu%d/topology/book_siblings", path, i);
         bookset = hwloc_parse_cpumap(str, data->root_fd);
         if (bookset && hwloc_bitmap_first(bookset) == i) {
-          book = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, mybookid);
+          struct hwloc_obj *book = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, mybookid);
           book->cpuset = bookset;
           hwloc_debug_1arg_bitmap("os book %u has cpuset %s\n",
                        mybookid, bookset);
@@ -2840,23 +2840,22 @@ look_sysfscpu(struct hwloc_topology *topology,
         }
       }
 
+      {
       /* look at the thread */
+      struct hwloc_obj *thread = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
       threadset = hwloc_bitmap_alloc();
       hwloc_bitmap_only(threadset, i);
-
-      /* add the thread */
-      thread = hwloc_alloc_setup_object(HWLOC_OBJ_PU, i);
       thread->cpuset = threadset;
       hwloc_debug_1arg_bitmap("thread %d has cpuset %s\n",
 		 i, threadset);
       hwloc_insert_object_by_cpuset(topology, thread);
+      }
 
       /* look at the caches */
       for(j=0; j<10; j++) {
 #define SHARED_CPU_MAP_STRLEN 128
 	char mappath[SHARED_CPU_MAP_STRLEN];
 	char str2[20]; /* enough for a level number (one digit) or a type (Data/Instruction/Unified) */
-	struct hwloc_obj *cache;
 	hwloc_bitmap_t cacheset;
 	unsigned long kB = 0;
 	unsigned linesize = 0;
@@ -2949,7 +2948,7 @@ look_sysfscpu(struct hwloc_topology *topology,
 
           if (hwloc_bitmap_first(cacheset) == i) {
             /* first cpu in this cache, add the cache */
-            cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
+            struct hwloc_obj *cache = hwloc_alloc_setup_object(HWLOC_OBJ_CACHE, -1);
             cache->attr->cache.size = kB << 10;
             cache->attr->cache.depth = depth+1;
             cache->attr->cache.linesize = linesize;
