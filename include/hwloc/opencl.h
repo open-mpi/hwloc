@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012 Inria.  All rights reserved.
+ * Copyright © 2012-2013 Inria.  All rights reserved.
  * Copyright © 2013 Université Bordeaux 1.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -19,8 +19,10 @@
 
 #include <hwloc.h>
 #include <hwloc/autogen/config.h>
-#include <hwloc/linux.h>
 #include <hwloc/helper.h>
+#ifdef HWLOC_LINUX_SYS
+#include <hwloc/linux.h>
+#endif
 
 #include <CL/cl.h>
 #include <CL/cl_ext.h>

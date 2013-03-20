@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2012 Inria.  All rights reserved.
+ * Copyright © 2010-2013 Inria.  All rights reserved.
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -17,7 +17,6 @@
 
 #include <hwloc.h>
 #include <hwloc/autogen/config.h>
-#include <hwloc/linux.h>
 
 #include <myriexpress.h>
 

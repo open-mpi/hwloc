@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012 Inria.  All rights reserved.
+ * Copyright © 2012-2013 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -15,8 +15,10 @@
 
 #include <hwloc.h>
 #include <hwloc/autogen/config.h>
-#include <hwloc/linux.h>
 #include <hwloc/helper.h>
+#ifdef HWLOC_LINUX_SYS
+#include <hwloc/linux.h>
+#endif
 
 #include <nvml.h>
 
