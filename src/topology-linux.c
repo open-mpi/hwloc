@@ -2073,7 +2073,7 @@ hwloc_sysfs_node_meminfo_info(struct hwloc_topology *topology,
 
   sprintf(meminfopath, "%s/node%d/meminfo", syspath, node);
   hwloc_parse_meminfo_info(data, meminfopath,
-			   hwloc_snprintf(NULL, 0, "Node %d ", node),
+			   snprintf(NULL, 0, "Node %d ", node),
 			   &memory->local_memory,
 			   &meminfo_hugepages_count, NULL /* no hugepage size in node-specific meminfo */,
 			   memory->page_types == NULL);
