@@ -1998,10 +1998,15 @@ hwloc_connect_levels(hwloc_topology_t topology)
     /* New level.  */
     taken_objs = malloc((n_taken_objs + 1) * sizeof(taken_objs[0]));
     /* New list of pending objects.  */
-    if (n_objs - n_taken_objs + n_new_objs)
+    if (n_objs - n_taken_objs + n_new_objs) {
       new_objs = malloc((n_objs - n_taken_objs + n_new_objs) * sizeof(new_objs[0]));
-    else
+    } else {
+#ifdef HWLOC_DEBUG
+      assert(!n_new_objs);
+      assert(n_objs == n_taken_objs);
+#endif
       new_objs = NULL;
+    }
 
     n_new_objs = hwloc_level_take_objects(top_obj,
 					  objs, n_objs,
