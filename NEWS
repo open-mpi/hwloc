@@ -21,6 +21,8 @@ Version 1.6.3
 -------------
 * Make sure I/O options always appear in lstopo usage, not only when
   using pciutils/libpci.
+* Remove some unneeded Linux specific includes from some interoperability
+  headers.
 
 
 Version 1.6.2

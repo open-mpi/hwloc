@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -21,7 +21,9 @@
 
 #include <hwloc.h>
 #include <hwloc/autogen/config.h>
+#ifdef HWLOC_LINUX_SYS
 #include <hwloc/linux.h>
+#endif
 
 #include <infiniband/verbs.h>
 
