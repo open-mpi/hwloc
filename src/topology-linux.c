@@ -3278,8 +3278,10 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
       node = strtoul(dirent->d_name+4, NULL, 0);
       snprintf(path, sizeof(path), "/proc/nodes/node%lu/cpuinfo", node);
       err = look_cpuinfo(topology, data, path, machine_online_set);
-      if (err < 0)
+      if (err < 0) {
+        hwloc_bitmap_free(machine_online_set);
         continue;
+      }
       hwloc_bitmap_or(topology->levels[0][0]->online_cpuset, topology->levels[0][0]->online_cpuset, machine_online_set);
       machine = hwloc_alloc_setup_object(HWLOC_OBJ_MACHINE, node);
       machine->cpuset = machine_online_set;

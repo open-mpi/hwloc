@@ -25,6 +25,8 @@ Version 1.6.3
   headers.
 * Fix some inconsistencies in hwloc-distrib and hwloc-assembler-remote
   manpages. Thanks to Guy Streeter for the report.
+* Fix some memory leaks in Linux/Kerrighed and custom topologies error
+  cases.
 
 
 Version 1.6.2

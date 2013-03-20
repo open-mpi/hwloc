@@ -10,8 +10,7 @@
 hwloc_obj_t
 hwloc_custom_insert_group_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t parent, int groupdepth)
 {
-  hwloc_obj_t obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
-  obj->attr->group.depth = groupdepth;
+  hwloc_obj_t obj;
 
   /* must be called between set_custom() and load(), so there's a single backend, the custom one */
   if (topology->is_loaded || !topology->backends || !topology->backends->is_custom) {
@@ -19,6 +18,8 @@ hwloc_custom_insert_group_object_by_parent(struct hwloc_topology *topology, hwlo
     return NULL;
   }
 
+  obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+  obj->attr->group.depth = groupdepth;
   hwloc_insert_object_by_parent(topology, parent, obj);
 
   return obj;
