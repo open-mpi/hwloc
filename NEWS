@@ -23,6 +23,8 @@ Version 1.6.3
   using pciutils/libpci.
 * Remove some unneeded Linux specific includes from some interoperability
   headers.
+* Fix some inconsistencies in hwloc-distrib and hwloc-assembler-remote
+  manpages. Thanks to Guy Streeter for the report.
 
 
 Version 1.6.2
