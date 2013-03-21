@@ -1922,12 +1922,12 @@ hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
       hpfd = hwloc_fopen(path, "r", data->root_fd);
       if (hpfd) {
         if (fgets(line, sizeof(line), hpfd)) {
-          fclose(hpfd);
           /* these are the actual total amount of huge pages */
           memory->page_types[index_].count = strtoull(line, NULL, 0);
           *remaining_local_memory -= memory->page_types[index_].count * memory->page_types[index_].size;
           index_++;
         }
+	fclose(hpfd);
       }
     }
     closedir(dir);
