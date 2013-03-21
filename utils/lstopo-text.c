@@ -257,6 +257,12 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int logic
   hwloc_obj_t obj = hwloc_get_root_obj(topology);
   int arity;
 
+  if (!obj->symmetric_subtree) {
+    fprintf(stderr, "Cannot output assymetric topology in synthetic format.\n");
+    fprintf(stderr, "Adding --no-io may help making the topology symmetric.\n");
+    return;
+  }
+
   if (!filename || !strcmp(filename, "-"))
     output = stdout;
   else {
@@ -267,12 +273,6 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int logic
     }
   }
 
-  if (!obj->symmetric_subtree) {
-    fprintf(stderr, "Cannot output assymetric topology in synthetic format.\n");
-    fprintf(stderr, "Adding --no-io may help making the topology symmetric.\n");
-    return;
-  }
-
   arity = obj->arity;
   while (arity) {
     obj = obj->first_child;
@@ -280,6 +280,9 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int logic
     arity = obj->arity;
   }
   fprintf(output, "\n");
+
+  if (output != stdout)
+    fclose(output);
 }
 
 /*
