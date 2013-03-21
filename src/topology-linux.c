@@ -2869,11 +2869,12 @@ look_sysfscpu(struct hwloc_topology *topology,
 	sprintf(mappath, "%s/cpu%d/cache/index%d/level", path, i, j);
 	fd = hwloc_fopen(mappath, "r", data->root_fd);
 	if (fd) {
-	  if (fgets(str2,sizeof(str2), fd))
+	  char *res = fgets(str2,sizeof(str2), fd);
+	  fclose(fd);
+	  if (res)
 	    depth = strtoul(str2, NULL, 10)-1;
 	  else
 	    continue;
-	  fclose(fd);
 	} else
 	  continue;
 
