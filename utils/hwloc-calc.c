@@ -109,6 +109,7 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
       unsigned idx;
       hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
       if (!obj) {
+        hwloc_bitmap_free(remaining);
         fprintf(stderr, "No object included in this cpuset\n");
         return EXIT_FAILURE;
       }
