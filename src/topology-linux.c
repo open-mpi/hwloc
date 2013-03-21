@@ -1094,6 +1094,7 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
 
   linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
   if (!linuxmask) {
+    hwloc_bitmap_free(linux_nodeset);
     errno = ENOMEM;
     return -1;
   }
