@@ -2624,6 +2624,7 @@ look_sysfsnode(struct hwloc_topology *topology,
           free(nodes);
           free(indexes);
           free(distances);
+          hwloc_bitmap_free(nodeset);
           goto out;
       }
 
