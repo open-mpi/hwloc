@@ -2508,8 +2508,8 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
 
         hwloc_bitmap_free(cpuset);
       }
-      free(device_type);
     }
+    free(device_type);
 cont:
     free(cpu);
   }
