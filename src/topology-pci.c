@@ -362,7 +362,7 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
       parent = parent->parent;
   } else {
     /* the object we found is too large, insert an intermediate group */
-    hwloc_obj_t group_obj = group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+    hwloc_obj_t group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
     if (group_obj) {
       group_obj->cpuset = hwloc_bitmap_dup(cpuset);
       group_obj->attr->group.depth = (unsigned) -1;
