@@ -544,7 +544,10 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
       goto out_with_tids;
     }
     goto retry;
+  } else {
+    free(newtids);
   }
+
   /* if all threads failed, return the last errno. */
   if (failed) {
     err = -1;
@@ -553,7 +556,6 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
   }
 
   err = 0;
-  free(newtids);
  out_with_tids:
   free(tids);
  out_with_dir:
@@ -1074,6 +1076,7 @@ hwloc_linux_membind_mask_from_nodeset(hwloc_topology_t topology __hwloc_attribut
 
   linuxmask = calloc(max_os_index/HWLOC_BITS_PER_LONG, sizeof(long));
   if (!linuxmask) {
+    hwloc_bitmap_free(linux_nodeset);
     errno = ENOMEM;
     return -1;
   }
@@ -1858,12 +1861,12 @@ hwloc_parse_hugepages_info(struct hwloc_linux_backend_data_s *data,
       hpfd = hwloc_fopen(path, "r", data->root_fd);
       if (hpfd) {
         if (fgets(line, sizeof(line), hpfd)) {
-          fclose(hpfd);
           /* these are the actual total amount of huge pages */
           memory->page_types[index_].count = strtoull(line, NULL, 0);
           *remaining_local_memory -= memory->page_types[index_].count * memory->page_types[index_].size;
           index_++;
         }
+	fclose(hpfd);
       }
     }
     closedir(dir);
@@ -2120,6 +2123,7 @@ look_sysfsnode(struct hwloc_topology *topology,
           free(nodes);
           free(indexes);
           free(distances);
+          hwloc_bitmap_free(nodeset);
           goto out;
       }
 
@@ -2247,6 +2251,7 @@ hwloc_read_unit32be(const char *p, const char *p1, uint32_t *buf, int root_fd)
   uint32_t *tmp = hwloc_read_raw(p, p1, &cb, root_fd);
   if (sizeof(*buf) != cb) {
     errno = EINVAL;
+    free(tmp); /* tmp is either NULL or contains useless things */
     return -1;
   }
   *buf = htonl(*tmp);
@@ -2474,8 +2479,8 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
 
         hwloc_bitmap_free(cpuset);
       }
-      free(device_type);
     }
+    free(device_type);
 cont:
     free(cpu);
   }
@@ -2722,11 +2727,12 @@ look_sysfscpu(struct hwloc_topology *topology,
 	sprintf(mappath, "%s/cpu%d/cache/index%d/level", path, i, j);
 	fd = hwloc_fopen(mappath, "r", data->root_fd);
 	if (fd) {
-	  if (fgets(str2,sizeof(str2), fd))
+	  char *res = fgets(str2,sizeof(str2), fd);
+	  fclose(fd);
+	  if (res)
 	    depth = strtoul(str2, NULL, 10)-1;
 	  else
 	    continue;
-	  fclose(fd);
 	} else
 	  continue;
 
@@ -2942,12 +2948,10 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
       var = strtoul(value,&endptr,0);					\
       if (endptr==value) {						\
 	hwloc_debug("no number in "field" field of %s\n", path);	\
-	free(str);							\
-	return -1;							\
+	goto err;							\
       } else if (var==ULONG_MAX) {					\
 	hwloc_debug("too big "field" number in %s\n", path); 		\
-	free(str);							\
-	return -1;							\
+	goto err;							\
       }									\
       hwloc_debug(field " %lu\n", var)
 #   define getprocnb_end()						\
@@ -2995,6 +2999,13 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 
   *Lprocs_p = Lprocs;
   return numprocs;
+
+ err:
+  fclose(fd);
+  free(str);
+  free(global_cpumodel);
+  free(Lprocs);
+  return -1;
 }
 
 static void
