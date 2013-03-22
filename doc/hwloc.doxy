@@ -1899,6 +1899,14 @@ enabled for the current topology.
   appear as PCI objects in the topology.
  </dd>
 
+<dt>Intel Xeon Phi (MIC)</dt>
+ <dd>
+  hwloc/intel-mic.h helps interoperability with Intel Xeon Phi (MIC)
+  coprocessors by returning the list of processors near these devices.
+  It may also return the corresponding OS device hwloc object for further
+  information (if I/O device discovery is enabled).
+ </dd>
+
 <dt>AMD OpenCL</dt>
  <dd>
   hwloc/opencl.h enables interoperability with the OpenCL interface.

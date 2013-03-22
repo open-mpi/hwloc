@@ -47,7 +47,8 @@ check_PROGRAMS = hwloc_list_components \
 	hwloc_topology_restrict \
 	hwloc_obj_infos \
 	hwloc_iodevs \
-	xmlbuffer
+	xmlbuffer \
+	intel-mic
 
 if HWLOC_HAVE_LINUX_LIBNUMA
 check_PROGRAMS += linux-libnuma

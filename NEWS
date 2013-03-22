@@ -49,9 +49,10 @@ Version 1.7.0
   + Add hwloc/plugins.h for building external plugins.
     See the Adding new discovery components and plugins section.
 * Interoperability
-  + Add hwloc/opencl.h, hwloc/nvml.h and hwloc/gl.h to retrieve the
-    locality of OS devices that correspond to AMD OpenCL GPU devices
-    or indexes, to NVML devices or indexes, or to NVIDIA X11 displays.
+  + Add hwloc/opencl.h, hwloc/nvml.h, hwloc/gl.h and hwloc/intel-mic.h
+    to retrieve the locality of OS devices that correspond to AMD OpenCL
+    GPU devices or indexes, to NVML devices or indexes, to NVIDIA X11
+    displays, or to Intel Xeon Phi (MIC) device indexes.
   + Add new helpers in hwloc/cuda.h and hwloc/cudart.h to convert
     between CUDA devices or indexes and hwloc OS devices.
   + Add hwloc_ibv_get_device_osdev() and clarify the requirements
