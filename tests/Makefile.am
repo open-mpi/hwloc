@@ -48,6 +48,7 @@ check_PROGRAMS = hwloc_list_components \
 	hwloc_obj_infos \
 	hwloc_iodevs \
 	xmlbuffer \
+	gl \
 	intel-mic
 
 if HWLOC_HAVE_LINUX_LIBNUMA
@@ -61,10 +62,6 @@ endif HWLOC_HAVE_SCHED_SETAFFINITY
 if HWLOC_HAVE_LIBIBVERBS
 check_PROGRAMS += openfabrics-verbs
 endif HWLOC_HAVE_LIBIBVERBS
-
-if HWLOC_HAVE_GL
-check_PROGRAMS += gl
-endif HWLOC_HAVE_GL
 
 if HWLOC_HAVE_MYRIEXPRESS
 check_PROGRAMS += myriexpress
