@@ -35,6 +35,7 @@
 #include "hwloc/nvml.h"
 #endif
 #include "hwloc/gl.h"
+#include "hwloc/intel-mic.h"
 
 #include "private/autogen/config.h"
 #include "private/components.h"
