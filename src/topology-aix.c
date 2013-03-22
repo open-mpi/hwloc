@@ -416,6 +416,7 @@ hwloc_aix_get_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     goto out;
 
   hwloc_set = hwloc_bitmap_alloc();
+
   maxcpus = rs_getinfo(rset, R_MAXPROCS, 0);
   for (cpu = 0; cpu < maxcpus; cpu++)
     if (rs_op(RS_TESTRESOURCE, rset, NULL, R_PROCS, cpu) == 1)
@@ -428,6 +429,8 @@ hwloc_aix_get_sth_membind(hwloc_topology_t topology, rstype_t what, rsid_t who, 
     if (hwloc_bitmap_isincluded(obj->cpuset, hwloc_set))
       hwloc_bitmap_set(nodeset, obj->os_index);
   }
+
+  hwloc_bitmap_free(hwloc_set);
 
   *policy = HWLOC_MEMBIND_DEFAULT;
   res = 0;
