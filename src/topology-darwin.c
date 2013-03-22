@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2012 Inria.  All rights reserved.
- * Copyright © 2009-2012 Université Bordeaux 1
+ * Copyright © 2009-2013 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -182,7 +182,6 @@ hwloc_look_darwin(struct hwloc_backend *backend)
       for (i = 0; i < n && cacheconfig[i]; i++)
         hwloc_debug(" %"PRIu64"(%"PRIu64"kB)", cacheconfig[i], cachesize[i] / 1024);
 
-      cacheconfig[i] = cacheconfig32[i];
       /* Now we know how many caches there are */
       n = i;
       hwloc_debug("\n%u cache levels\n", n - 1);
