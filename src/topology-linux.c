@@ -559,7 +559,10 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
       goto out_with_tids;
     }
     goto retry;
+  } else {
+    free(newtids);
   }
+
   /* if all threads failed, return the last errno. */
   if (failed) {
     err = -1;
@@ -568,7 +571,6 @@ hwloc_linux_foreach_proc_tid(hwloc_topology_t topology,
   }
 
   err = 0;
-  free(newtids);
  out_with_tids:
   free(tids);
  out_with_dir:
