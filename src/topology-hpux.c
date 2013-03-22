@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2012 Inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010, 2013 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -216,7 +216,8 @@ hwloc_look_hpux(struct hwloc_backend *backend)
     if (nodes) {
       /* Add this cpu to its node */
       currentnode = mpctl(MPC_SPUTOLDOM, currentcpu, 0);
-      if ((ldom_t) nodes[i]->os_index != currentnode)
+      /* Hopefully it's just the same as previous cpu */
+      if (i >= nbnodes || (ldom_t) nodes[i]->os_index != currentnode)
         for (i = 0; i < nbnodes; i++)
           if ((ldom_t) nodes[i]->os_index == currentnode)
             break;
