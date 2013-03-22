@@ -51,7 +51,12 @@ struct hwloc_disc_component {
   /** \brief Name */
   const char *name;
 
-  /** \brief Component types to exclude, as an OR'ed set of HWLOC_DISC_COMPONENT_TYPE_* */
+  /** \brief Component types to exclude, as an OR'ed set of HWLOC_DISC_COMPONENT_TYPE_*.
+   *
+   * This should thus always include HWLOC_DISC_COMPONENT_TYPE_GLOBAL, even for
+   * an ADDITIONAL component.
+   * For a GLOBAL component, this should include all other types.
+   */
   unsigned excludes;
 
   /** \brief Instantiate callback to create a backend from the component */
