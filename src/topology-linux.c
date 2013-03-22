@@ -3098,12 +3098,10 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
       var = strtoul(value,&endptr,0);					\
       if (endptr==value) {						\
 	hwloc_debug("no number in "field" field of %s\n", path);	\
-	free(str);							\
-	return -1;							\
+	goto err;							\
       } else if (var==ULONG_MAX) {					\
 	hwloc_debug("too big "field" number in %s\n", path); 		\
-	free(str);							\
-	return -1;							\
+	goto err;							\
       }									\
       hwloc_debug(field " %lu\n", var)
 #   define getprocnb_end()						\
@@ -3151,6 +3149,13 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 
   *Lprocs_p = Lprocs;
   return numprocs;
+
+ err:
+  fclose(fd);
+  free(str);
+  free(global_cpumodel);
+  free(Lprocs);
+  return -1;
 }
 
 static void
