@@ -68,7 +68,7 @@ int main(void)
 	assert(!err);
 
 	assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_GPU);
-   
+
 	if (!firstgpu)
 	  firstgpu = osdev;
 	lastgpu = osdev;
@@ -93,12 +93,13 @@ int main(void)
     printf("GPU %s (PCI %04x:%02x:%02x.%01x) is connected to DISPLAY:%u.%u close to %s\n",
 	   osdev->name,
 	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus, pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func,
-	   0, 0, cpuset_string);
+	   port, device, cpuset_string);
     free(cpuset_string);
   }
 
   /* Case 4: Get the last GPU connected to a valid display, specified by its name */
   if (lastgpu) {
+    assert(sscanf(lastgpu->name, ":%u.%u", &port, &device) == 2);
     osdev = hwloc_gl_get_display_osdev_by_name(topology, lastgpu->name);
     assert(osdev == lastgpu);
     pcidev = osdev->parent;
@@ -107,7 +108,7 @@ int main(void)
     printf("GPU %s (PCI %04x:%02x:%02x.%01x) is connected to DISPLAY:%u.%u close to %s\n",
 	   osdev->name,
 	   pcidev->attr->pcidev.domain, pcidev->attr->pcidev.bus, pcidev->attr->pcidev.dev, pcidev->attr->pcidev.func,
-	   0, 0, cpuset_string);
+	   port, device, cpuset_string);
     free(cpuset_string);
   }
 
