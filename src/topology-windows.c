@@ -519,6 +519,8 @@ hwloc_look_windows(struct hwloc_backend *backend)
 	procInfo = realloc(procInfo, length);
       }
 
+      assert(!length || procInfo);
+
       for (i = 0; i < length / sizeof(*procInfo); i++) {
 
         /* Ignore unknown caches */
