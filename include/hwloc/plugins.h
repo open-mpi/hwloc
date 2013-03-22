@@ -51,7 +51,7 @@ struct hwloc_disc_component {
   /** \brief Name */
   const char *name;
 
-  /** \brief Component types to exclude, as an OR'ed set of (1<<HWLOC_DISC_COMPONENT_TYPE_*) */
+  /** \brief Component types to exclude, as an OR'ed set of HWLOC_DISC_COMPONENT_TYPE_* */
   unsigned excludes;
 
   /** \brief Instantiate callback to create a backend from the component */
