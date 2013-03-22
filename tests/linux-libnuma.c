@@ -174,7 +174,7 @@ int main(void)
       assert(!maxnode);
       assert(!mask);
     } else {
-      assert(maxnode = node->os_index + 1);
+      assert(maxnode == node->os_index + 1);
       assert(mask == (1UL << node->os_index));
     }
 
