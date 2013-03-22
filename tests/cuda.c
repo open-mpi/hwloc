@@ -64,6 +64,12 @@ int main(void)
     err = strcmp(value, "CUDA");
     assert(!err);
 
+    assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_COPROC);
+
+    value = hwloc_obj_get_info_by_name(osdev, "CoProcType");
+    err = strcmp(value, "CUDA");
+    assert(!err);
+    
     value = hwloc_obj_get_info_by_name(osdev, "GPUModel");
     printf("found OSDev model %s\n", value);
 

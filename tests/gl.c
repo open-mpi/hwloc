@@ -66,6 +66,9 @@ int main(void)
       if (!err) {
 	err = strcmp(backend, "GL");
 	assert(!err);
+
+	assert(osdev->attr->osdev.type == HWLOC_OBJ_OSDEV_GPU);
+   
 	if (!firstgpu)
 	  firstgpu = osdev;
 	lastgpu = osdev;
