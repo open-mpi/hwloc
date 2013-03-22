@@ -107,11 +107,11 @@ struct hwloc_backend {
    * May be NULL if type is HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL. */
   int (*discover)(struct hwloc_backend *backend);
 
-  /** \brief Callback used by the PCI backend to retrieve PCI device locality from the OS/cpu backend.
+  /** \brief Callback used by the PCI backend to retrieve the locality of a PCI object from the OS/cpu backend.
    * May be NULL. */
   int (*get_obj_cpuset)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
 
-  /** \brief Callback used by additional backends to notify other backend when new objects are added.
+  /** \brief Callback called by additional backends to notify this backend that a new object was added.
    * returns > 0 if it modified the topology tree, 0 otherwise.
    * May be NULL. */
   int (*notify_new_object)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj);
@@ -154,10 +154,10 @@ HWLOC_DECLSPEC struct hwloc_backend * hwloc_backend_alloc(struct hwloc_disc_comp
 /** \brief Enable a previously allocated and setup backend. */
 HWLOC_DECLSPEC int hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *backend);
 
-/** \brief Used by backends discovery callbacks to request information from others. */
+/** \brief Used by backends discovery callbacks to request information from others (i.e. call their get_obj_cpuset method) */
 HWLOC_DECLSPEC int hwloc_backends_get_obj_cpuset(struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
 
-/** \brief Used by backends discovery callbacks to notify other backends (all but caller)
+/** \brief Used by backends discovery callbacks to notify other backends (all but caller) through the notify_new_object method
  * that they are adding a new object.
  */
 HWLOC_DECLSPEC int hwloc_backends_notify_new_object(struct hwloc_backend *caller, struct hwloc_obj *obj);
