@@ -55,7 +55,7 @@ struct hwloc_disc_component {
    *
    * This should thus always include HWLOC_DISC_COMPONENT_TYPE_GLOBAL, even for
    * an ADDITIONAL component.
-   * For a GLOBAL component, this should include all other types.
+   * For a GLOBAL component, this should include all other types (~0).
    */
   unsigned excludes;
 

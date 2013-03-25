@@ -1147,7 +1147,7 @@ hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
 static struct hwloc_disc_component hwloc_xml_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   "xml",
-  HWLOC_DISC_COMPONENT_TYPE_CPU | HWLOC_DISC_COMPONENT_TYPE_GLOBAL | HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL,
+  ~0,
   hwloc_xml_component_instantiate,
   30,
   NULL

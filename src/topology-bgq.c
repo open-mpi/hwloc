@@ -225,7 +225,7 @@ hwloc_bgq_component_instantiate(struct hwloc_disc_component *component,
 static struct hwloc_disc_component hwloc_bgq_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   "bgq",
-  HWLOC_DISC_COMPONENT_TYPE_CPU | HWLOC_DISC_COMPONENT_TYPE_GLOBAL | HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL,
+  ~0,
   hwloc_bgq_component_instantiate,
   50,
   NULL
