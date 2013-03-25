@@ -219,7 +219,7 @@ hwloc_disc_component_type_string(hwloc_disc_component_type_t type)
   switch (type) {
   case HWLOC_DISC_COMPONENT_TYPE_CPU: return "cpu";
   case HWLOC_DISC_COMPONENT_TYPE_GLOBAL: return "global";
-  case HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL: return "additional";
+  case HWLOC_DISC_COMPONENT_TYPE_MISC: return "misc";
   default: return "**unknown**";
   }
 }
@@ -247,7 +247,7 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
   switch ((unsigned) component->type) {
   case HWLOC_DISC_COMPONENT_TYPE_CPU:
   case HWLOC_DISC_COMPONENT_TYPE_GLOBAL:
-  case HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL:
+  case HWLOC_DISC_COMPONENT_TYPE_MISC:
     break;
   default:
     fprintf(stderr, "Cannot register discovery component `%s' with unknown type %u\n",

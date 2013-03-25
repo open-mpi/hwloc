@@ -2029,7 +2029,7 @@ Depending on the topology configuration, some components will be used,
 some will be ignored.
 The usual default is to enable the native operating system component,
 (e.g. <tt>linux</tt> or <tt>solaris</tt>) and the
-<tt>libpci</tt> additional component.
+<tt>libpci</tt> miscellaneous component.
 If available, an architecture-specific component (such as <tt>x86</tt>)
 may also improve the topology detection.
 

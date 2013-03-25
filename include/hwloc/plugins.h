@@ -30,13 +30,13 @@ typedef enum hwloc_disc_component_type_e {
   /** \brief xml, synthetic or custom,
    * platform-specific components such as bgq.
    * Anything the discovers CPU and everything else.
-   * No additional backend is used.
+   * No misc backend is used.
    * \hideinitializer */
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL = (1<<1),
 
   /** \brief PCI, etc.
    * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL = (1<<2)
+  HWLOC_DISC_COMPONENT_TYPE_MISC = (1<<2)
 } hwloc_disc_component_type_t;
 
 /** \brief Discovery component structure
@@ -54,7 +54,7 @@ struct hwloc_disc_component {
   /** \brief Component types to exclude, as an OR'ed set of HWLOC_DISC_COMPONENT_TYPE_*.
    *
    * This should thus always include HWLOC_DISC_COMPONENT_TYPE_GLOBAL, even for
-   * an ADDITIONAL component.
+   * a MISC component.
    * For a GLOBAL component, this should include all other types (~0).
    */
   unsigned excludes;
@@ -68,7 +68,7 @@ struct hwloc_disc_component {
    * 45 for x86,
    * 40 for no-OS fallback,
    * 30 for global components (xml/synthetic/custom),
-   * 20 for pci, likely less for other additional components.
+   * 20 for pci, likely less for other misc components.
    */
   unsigned priority;
 
@@ -109,14 +109,14 @@ struct hwloc_backend {
 
   /** \brief Main discovery callback.
    * returns > 0 if it modified the topology tree, -1 on error, 0 otherwise.
-   * May be NULL if type is HWLOC_DISC_COMPONENT_TYPE_ADDITIONAL. */
+   * May be NULL if type is HWLOC_DISC_COMPONENT_TYPE_MISC. */
   int (*discover)(struct hwloc_backend *backend);
 
   /** \brief Callback used by the PCI backend to retrieve the locality of a PCI object from the OS/cpu backend.
    * May be NULL. */
   int (*get_obj_cpuset)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
 
-  /** \brief Callback called by additional backends to notify this backend that a new object was added.
+  /** \brief Callback called by backends to notify this backend that a new object was added.
    * returns > 0 if it modified the topology tree, 0 otherwise.
    * May be NULL. */
   int (*notify_new_object)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj);

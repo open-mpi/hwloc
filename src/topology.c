@@ -2255,7 +2255,7 @@ next_cpubackend:
   propagate_total_memory(topology->levels[0][0]);
 
   /*
-   * Discovery with additional backends
+   * Additional discovery with other backends
    */
   backend = topology->backends;
   while (NULL != backend) {
