@@ -48,7 +48,9 @@ struct hwloc_disc_component {
   /** \brief Discovery component type */
   hwloc_disc_component_type_t type;
 
-  /** \brief Name */
+  /** \brief Name.
+   * If this component is built as a plugin, this name does not have to match the plugin filename.
+   */
   const char *name;
 
   /** \brief Component types to exclude, as an OR'ed set of HWLOC_DISC_COMPONENT_TYPE_*.
@@ -61,11 +63,14 @@ struct hwloc_disc_component {
    */
   unsigned excludes;
 
-  /** \brief Instantiate callback to create a backend from the component */
+  /** \brief Instantiate callback to create a backend from the component.
+   * Parameters data1, data2, data3 are NULL except for components
+   * that have special enabling routines such as hwloc_topology_set_xml(). */
   struct hwloc_backend * (*instantiate)(struct hwloc_disc_component *component, const void *data1, const void *data2, const void *data3);
 
   /** \brief Component priority.
-   * used to sort topology->components, higher priority first.
+   * Used to sort topology->components, higher priority first.
+   * Also used to decide between two components with the same name.
    *
    * Usual values are
    * 50 for native OS (or platform) components,
@@ -163,11 +168,21 @@ HWLOC_DECLSPEC struct hwloc_backend * hwloc_backend_alloc(struct hwloc_disc_comp
 /** \brief Enable a previously allocated and setup backend. */
 HWLOC_DECLSPEC int hwloc_backend_enable(struct hwloc_topology *topology, struct hwloc_backend *backend);
 
-/** \brief Used by backends discovery callbacks to request information from others (i.e. call their get_obj_cpuset method) */
+/** \brief Used by backends discovery callbacks to request locality information from others.
+ *
+ * Traverse the list of enabled backends until one has a
+ * get_obj_cpuset() method, and call it.
+ */
 HWLOC_DECLSPEC int hwloc_backends_get_obj_cpuset(struct hwloc_backend *caller, struct hwloc_obj *obj, hwloc_bitmap_t cpuset);
 
-/** \brief Used by backends discovery callbacks to notify other backends (all but caller) through the notify_new_object method
- * that they are adding a new object.
+/** \brief Used by backends discovery callbacks to notify other
+ * backends of new objects.
+ *
+ * Traverse the list of enabled backends (all but caller) and invoke
+ * their notify_new_object() method to notify them that a new object
+ * just got added to the topology.
+ *
+ * Currently only used for notifying of new PCI device objects.
  */
 HWLOC_DECLSPEC int hwloc_backends_notify_new_object(struct hwloc_backend *caller, struct hwloc_obj *obj);
 
