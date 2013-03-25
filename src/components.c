@@ -262,10 +262,20 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
   prev = &hwloc_disc_components;
   while (NULL != *prev) {
     if (!strcmp((*prev)->name, component->name)) {
-      if (hwloc_components_verbose)
-	fprintf(stderr, "Multiple `%s' discovery components, only registering the first one\n",
-		component->name);
-      return -1;
+      /* if two components have the same name, only keep the highest priority one */
+      if ((*prev)->priority < component->priority) {
+	/* drop the existing component */
+	if (hwloc_components_verbose)
+	  fprintf(stderr, "Dropping previously registered discovery component `%s', priority %u lower than new one %u\n",
+		  (*prev)->name, (*prev)->priority, component->priority);
+	*prev = (*prev)->next;
+      } else {
+	/* drop the new one */
+	if (hwloc_components_verbose)
+	  fprintf(stderr, "Ignoring new discovery component `%s', priority %u lower than previously registered one %u\n",
+		  component->name, component->priority, (*prev)->priority);
+	return -1;
+      }
     }
     prev = &((*prev)->next);
   }
