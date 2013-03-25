@@ -105,9 +105,30 @@ struct hwloc_backend {
   struct hwloc_disc_component * component;
   /** \private Reserved for the core, set by hwloc_backend_enable() */
   struct hwloc_topology * topology;
+  /** \private Reserved for the core. Set to 1 if forced through envvar, 0 otherwise. */
+  int envvar_forced;
+  /** \private Reserved for the core. Used internally to list backends topology->backends. */
+  struct hwloc_backend * next;
 
   /** \brief Backend flags, as an OR'ed set of HWLOC_BACKEND_FLAG_* */
   unsigned long flags;
+
+  /** \brief Backend-specific 'is_custom' property.
+   * Shortcut on !strcmp(..->component->name, "custom").
+   * Only the custom component should touch this. */
+  int is_custom;
+
+  /** \brief Backend-specific 'is_thissystem' property.
+   * Set to 0 or 1 if the backend should enforce the thissystem flag when it gets enabled.
+   * Set to -1 if the backend doesn't care (default). */
+  int is_thissystem;
+
+  /** \brief Backend private data, or NULL if none. */
+  void * private_data;
+  /** \brief Callback for freeing the private_data.
+   * May be NULL.
+   */
+  void (*disable)(struct hwloc_backend *backend);
 
   /** \brief Main discovery callback.
    * returns > 0 if it modified the topology tree, -1 on error, 0 otherwise.
@@ -122,28 +143,6 @@ struct hwloc_backend {
    * returns > 0 if it modified the topology tree, 0 otherwise.
    * May be NULL. */
   int (*notify_new_object)(struct hwloc_backend *backend, struct hwloc_backend *caller, struct hwloc_obj *obj);
-
-  /** \brief Callback for freeing the private_data.
-   * May be NULL.
-   */
-  void (*disable)(struct hwloc_backend *backend);
-  /** \brief Backend private data. */
-  void * private_data;
-
-  /** \brief Backend-specific 'is_custom' property.
-   * Shortcut on !strcmp(..->component->name, "custom").
-   * Only the custom component should touch this. */
-  int is_custom; 
-
-  /** \brief Backend-specific 'is_thissystem' property.
-   * Set to 0 or 1 if the backend should enforce the thissystem flag when it gets enabled.
-   * Set to -1 if the backend doesn't care (default). */
-  int is_thissystem;
-
-  /** \private Reserved for the core. Set to 1 if forced through envvar, 0 otherwise. */
-  int envvar_forced;
-  /** \private Reserved for the core. Used internally to list backends topology->backends. */
-  struct hwloc_backend * next;
 };
 
 /** \brief Backend flags */
@@ -177,9 +176,6 @@ HWLOC_DECLSPEC int hwloc_backends_notify_new_object(struct hwloc_backend *caller
 /** \defgroup hwlocality_generic_components Generic components
  * @{
  */
-
-/** \brief Current component and plugin ABI version */
-#define HWLOC_COMPONENT_ABI 1
 
 /** \brief Generic component type */
 typedef enum hwloc_component_type_e {
