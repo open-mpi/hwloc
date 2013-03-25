@@ -66,11 +66,14 @@ struct hwloc_disc_component {
 
   /** \brief Component priority.
    * used to sort topology->components, higher priority first.
+   *
+   * Usual values are
    * 50 for native OS (or platform) components,
    * 45 for x86,
    * 40 for no-OS fallback,
    * 30 for global components (xml/synthetic/custom),
-   * 20 for pci, likely less for other misc components.
+   * 20 for pci,
+   * 10 for other misc components (opencl etc.).
    */
   unsigned priority;
 
