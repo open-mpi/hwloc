@@ -72,7 +72,7 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   lt_dlhandle handle;
   char *componentsymbolname = NULL;
   struct hwloc_component *component;
-  struct hwloc__plugin_desc *desc;
+  struct hwloc__plugin_desc *desc, **prevdesc;
 
   if (hwloc_plugins_verbose)
     fprintf(stderr, "Plugin dlforeach found `%s'\n", filename);
@@ -138,11 +138,15 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
   desc->filename = strdup(filename);
   desc->component = component;
   desc->handle = handle;
+  desc->next = NULL;
   if (hwloc_plugins_verbose)
     fprintf(stderr, "Plugin descriptor `%s' ready\n", basename);
 
-  desc->next = hwloc_plugins;
-  hwloc_plugins = desc;
+  /* append to the list */
+  prevdesc = &hwloc_plugins;
+  while (*prevdesc)
+    prevdesc = &((*prevdesc)->next);
+  *prevdesc = desc;
   if (hwloc_plugins_verbose)
     fprintf(stderr, "Plugin descriptor `%s' queued\n", basename);
   return 0;
