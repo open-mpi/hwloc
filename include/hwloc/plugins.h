@@ -30,7 +30,7 @@ typedef enum hwloc_disc_component_type_e {
   /** \brief xml, synthetic or custom,
    * platform-specific components such as bgq.
    * Anything the discovers CPU and everything else.
-   * No misc backend is used.
+   * No misc backend is expected to complement a global component.
    * \hideinitializer */
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL = (1<<1),
 
@@ -53,9 +53,11 @@ struct hwloc_disc_component {
 
   /** \brief Component types to exclude, as an OR'ed set of HWLOC_DISC_COMPONENT_TYPE_*.
    *
-   * This should thus always include HWLOC_DISC_COMPONENT_TYPE_GLOBAL, even for
-   * a MISC component.
-   * For a GLOBAL component, this should include all other types (~0).
+   * For a GLOBAL component, this usually includes all other types (~0).
+   *
+   * Other components only exclude types that may bring conflicting
+   * topology information. MISC components should likely not be excluded
+   * since they usually bring non-primary additional information.
    */
   unsigned excludes;
 
