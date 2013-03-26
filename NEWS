@@ -25,8 +25,8 @@ Version 1.7.0
     and Erik Schnetter for their help.
   + Add NetBSD support, thanks to Aleksej Saushev.
 * New I/O device discovery
-  + Add co-processor OS devices such as "mic0" for Intel Xeon Phi on Linux.
-    Thanks to Jerome Vienne for helping.
+  + Add co-processor OS devices such as "mic0" for Intel Xeon Phi (MIC)
+    on Linux. Thanks to Jerome Vienne for helping.
   + Add co-processor OS devices such as "cuda0" for NVIDIA CUDA-capable GPUs.
   + Add co-processor OS devices such as "opencl0d0" for OpenCL GPU devices
     on the AMD OpenCL implementation.
