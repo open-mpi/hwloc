@@ -10,6 +10,7 @@
 
 #include <private/autogen/config.h>
 #include <private/solaris-chiptype.h>
+#include <hwloc.h>
 #include <stdlib.h>
 #include <strings.h>
 
