@@ -8,11 +8,11 @@
 # See COPYING in top-level directory.
 #
 
-abs_top_builddir="@abs_top_builddir@"
-calc="$abs_top_builddir/utils/hwloc-calc"
-abs_top_srcdir="@abs_top_srcdir@"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+calc="$HWLOC_top_builddir/utils/hwloc-calc"
+HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
-HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH
 
 : ${TMPDIR=/tmp}
@@ -72,14 +72,14 @@ set -e
   $calc --if synthetic --input "group:2 group:2 cache:2 cache:2 pu:1" Group2:1 Group1:0
   $calc --if synthetic --input "group:2 group:2 cache:2 cache:2 pu:1" l2:0-2 L1cache:13:3
   echo
-  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os=eth6 os=eth4
-  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os=sdc os=sr0 ~os=sda
-  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:1000:0062:3:2
-  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:14e4:1639:1
-  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:14e4:1639:2-5
-  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:62:00.1 pci=0000:02:00.1
-  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:62:00.1 xpci=0000:02:00.0
-  $calc --if xml --input $abs_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:02:00.0 xpci=0000:02:00.1
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os=eth6 os=eth4
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml os=sdc os=sr0 ~os=sda
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:1000:0062:3:2
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:14e4:1639:1
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci:14e4:1639:2-5
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:62:00.1 pci=0000:02:00.1
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:62:00.1 xpci=0000:02:00.0
+  $calc --if xml --input $HWLOC_top_srcdir/tests/xml/96em64t-4n4d3ca2co-pci.xml pci=0000:02:00.0 xpci=0000:02:00.1
   echo
   cat << EOF | $calc --if synthetic --input "node:4 core:4 pu:4"
 pu:0
@@ -91,5 +91,5 @@ node:0 node:3
 root
 EOF
 ) > "$file"
-diff @HWLOC_DIFF_U@ $abs_top_srcdir/utils/test-hwloc-calc.output "$file"
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-calc.output "$file"
 rm -rf "$tmp"

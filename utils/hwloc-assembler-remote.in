@@ -2,17 +2,17 @@
 #-*-sh-*-
 
 #
-# Copyright © 2011 inria.  All rights reserved.
+# Copyright © 2011-2013 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
-abs_top_builddir="@abs_top_builddir@"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
 # this will be changed into $bindir/lstopo during make install
-locallstopo="$abs_top_builddir/utils/lstopo"
-assembler="$abs_top_builddir/utils/hwloc-assembler"
+locallstopo="$HWLOC_top_builddir/utils/lstopo"
+assembler="$HWLOC_top_builddir/utils/hwloc-assembler"
 
 force=0
 show=0

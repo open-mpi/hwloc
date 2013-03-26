@@ -2,15 +2,15 @@
 #-*-sh-*-
 
 #
-# Copyright © 2012 Inria.  All rights reserved.
+# Copyright © 2012-2013 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
-abs_top_builddir="@abs_top_builddir@"
-distances="$abs_top_builddir/utils/hwloc-distances"
-abs_top_srcdir="@abs_top_srcdir@"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+distances="$HWLOC_top_builddir/utils/hwloc-distances"
+HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
-HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH
 
 # make sure we use default numeric formats
@@ -62,5 +62,5 @@ set -e
   HWLOC_NUMANode_DISTANCES=none
   echo
 ) > "$file"
-diff @HWLOC_DIFF_U@ $abs_top_srcdir/utils/test-hwloc-distances.output "$file"
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-distances.output "$file"
 rm -rf "$tmp"

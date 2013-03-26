@@ -2,16 +2,16 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
 
-abs_top_builddir="@abs_top_builddir@"
-assembler="$abs_top_builddir/utils/hwloc-assembler"
-abs_top_srcdir="@abs_top_srcdir@"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+assembler="$HWLOC_top_builddir/utils/hwloc-assembler"
+HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
-HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH
 
 if test x@HWLOC_XML_LOCALIZED@ = x1; then
@@ -36,8 +36,8 @@ file="$tmp/test-hwloc-assembler.output"
 set -e
 
 $assembler $file \
-	--name input1 $abs_top_srcdir/utils/test-hwloc-assembler.input1 \
-	--name input2 $abs_top_srcdir/utils/test-hwloc-assembler.input2 \
-	--name input1again $abs_top_srcdir/utils/test-hwloc-assembler.input1
-diff @HWLOC_DIFF_U@ $abs_top_srcdir/utils/test-hwloc-assembler.output "$file"
+	--name input1 $HWLOC_top_srcdir/utils/test-hwloc-assembler.input1 \
+	--name input2 $HWLOC_top_srcdir/utils/test-hwloc-assembler.input2 \
+	--name input1again $HWLOC_top_srcdir/utils/test-hwloc-assembler.input1
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-assembler.output "$file"
 rm -rf "$tmp"

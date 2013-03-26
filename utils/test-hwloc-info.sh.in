@@ -8,11 +8,11 @@
 # See COPYING in top-level directory.
 #
 
-abs_top_builddir="@abs_top_builddir@"
-info="$abs_top_builddir/utils/hwloc-info"
-abs_top_srcdir="@abs_top_srcdir@"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+info="$HWLOC_top_builddir/utils/hwloc-info"
+HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
-HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH
 
 : ${TMPDIR=/tmp}
@@ -41,5 +41,5 @@ set -e
   echo
   $info --if synthetic --input "node:2 core:2 ca:2 ca:2 pu:2" --ancestor l1 -s pu:7-10
 ) > "$file"
-diff @HWLOC_DIFF_U@ $abs_top_srcdir/utils/test-hwloc-info.output "$file"
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-info.output "$file"
 rm -rf "$tmp"

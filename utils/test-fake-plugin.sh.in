@@ -2,15 +2,15 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
 
-abs_top_builddir="@abs_top_builddir@"
-lstopo="$abs_top_builddir/utils/lstopo-no-graphics"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+lstopo="$HWLOC_top_builddir/utils/lstopo-no-graphics"
 
-HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH
 
 HWLOC_DEBUG_FAKE_COMPONENT=1

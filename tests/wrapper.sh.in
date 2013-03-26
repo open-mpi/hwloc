@@ -2,13 +2,13 @@
 #-*-sh-*-
 
 #
-# Copyright © 2012 Inria.  All rights reserved.
+# Copyright © 2012-2013 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
-abs_top_builddir="@abs_top_builddir@"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
 
-HWLOC_PLUGINS_PATH=${abs_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH
 
 "$@"
