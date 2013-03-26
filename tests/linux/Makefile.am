@@ -148,7 +148,7 @@ endif HWLOC_HAVE_OPENAT
 
 EXTRA_DIST = $(sysfs_outputs) $(sysfs_tarballs) $(sysfs_excludes) $(sysfs_options) $(sysfs_envs)
 
-TESTS_ENVIRONMENT = $(builddir)/test-topology.sh
+LOG_COMPILER = $(builddir)/test-topology.sh
 
 
 bin_SCRIPTS = hwloc-gather-topology

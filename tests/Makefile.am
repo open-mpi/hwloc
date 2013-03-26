@@ -1,4 +1,4 @@
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -16,7 +16,7 @@ endif HWLOC_HAVE_LINUX
 
 LDADD =
 
-TESTS_ENVIRONMENT = $(builddir)/wrapper.sh
+LOG_COMPILER = $(builddir)/wrapper.sh
 
 check_PROGRAMS = hwloc_list_components \
 	hwloc_bitmap \

@@ -1,4 +1,4 @@
-# Copyright © 2009 inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -37,4 +37,4 @@ TESTS = $(xml_inputs)
 
 EXTRA_DIST = $(xml_inputs) $(xml_source) $(xml_options)
 
-TESTS_ENVIRONMENT = $(HWLOC_top_builddir)/tests/xml/test-topology.sh
+LOG_COMPILER = $(HWLOC_top_builddir)/tests/xml/test-topology.sh
