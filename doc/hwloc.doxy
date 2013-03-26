@@ -178,8 +178,8 @@ package is usually <tt>pciutils-devel</tt> or <tt>libpci-dev</tt>.
 </ul>
 
 PCI and XML support may be statically built inside the main hwloc
-library, or as separate dynamically-loaded plugins (see the \ref
-plugins section).
+library, or as separate dynamically-loaded plugins (see the
+\ref plugins section).
 
 Note that because of the possibility of GPL taint (remember that hwloc
 is BSD-licensed), hwloc's <tt>configure</tt> script will prefer
@@ -437,8 +437,9 @@ To precisely define the vocabulary used by hwloc, a \ref termsanddefs
 section is available and should probably be read first.  
 
 Each hwloc object contains a cpuset describing the list of processing
-units that it contains.  These bitmaps may be used for \ref
-hwlocality_cpubinding and \ref hwlocality_membinding.  hwloc offers an extensive
+units that it contains.  These bitmaps may be used for
+\ref hwlocality_cpubinding and \ref hwlocality_membinding.
+hwloc offers an extensive
 bitmap manipulation interface in hwloc/bitmap.h.
 
 Moreover, hwloc also comes with additional helpers for
@@ -474,8 +475,8 @@ memory bindings, some others provide only interfaces for a limited number of
 kinds of CPU and memory binding, and some do not provide any binding interface
 at all.  Hwloc's binding functions would then simply return the ENOSYS error
 (Function not implemented), meaning that the underlying Operating System
-does not provide any interface for them. \ref hwlocality_cpubinding and \ref
-hwlocality_membinding provide more information on which hwloc binding functions
+does not provide any interface for them. \ref hwlocality_cpubinding and
+\ref hwlocality_membinding provide more information on which hwloc binding functions
 should be preferred because interfaces for them are usually available on the
 supported Operating Systems.
 
@@ -1964,13 +1965,13 @@ enabled for the current topology.
 \page threadsafety Thread Safety
 
 Like most libraries that mainly fill data structures, hwloc is not
-thread safe but rather reentrant: all state is held in a \ref
-hwloc_topology_t instance without mutex protection.  That means, for
+thread safe but rather reentrant: all state is held in a
+\ref hwloc_topology_t instance without mutex protection.  That means, for
 example, that two threads can safely operate on and modify two
 different \ref hwloc_topology_t instances, but they should not
 simultaneously invoke functions that modify the <em>same</em>
-instance.  Similarly, one thread should not modify a \ref
-hwloc_topology_t instance while another thread is reading or
+instance.  Similarly, one thread should not modify a
+\ref hwloc_topology_t instance while another thread is reading or
 traversing it.  However, two threads can safely read or traverse the
 same \ref hwloc_topology_t instance concurrently.
 
@@ -1997,8 +1998,8 @@ For reference, \ref hwloc_topology_t modification operations include
   after these functions return.  </dd>
 
 <dt>Runtime topology modifications</dt>
-  <dd><tt>hwloc_topology_insert_misc_object_by_*</tt> (see \ref
-  hwlocality_tinker) may modify the topology significantly by adding
+  <dd><tt>hwloc_topology_insert_misc_object_by_*</tt> (see
+  \ref hwlocality_tinker) may modify the topology significantly by adding
   objects inside the tree, changing the topology depth, etc.
   <tt>hwloc_topology_restrict</tt> modifies the topology even more
   dramatically by removing some objects.
