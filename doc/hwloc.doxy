@@ -1050,12 +1050,14 @@ following environment variables.
   </dd>
 
 <dt>HWLOC_COMPONENTS=list,of,components</dt>
-  <dd>forces a list of components to enable.
-  Enable the given comma-separated list of components
-   (if they do not conflict with each other).
+  <dd>forces a list of components to enable or disable.
+  Enable or disable the given comma-separated list of components
+  (if they do not conflict with each other). Component names prefixed with
+  <tt>-</tt> are disabled.
   Once the end of the list is reached, hwloc falls back to
   enabling the remaining components (sorted by priority) that do not
-  conflict with the already enabled ones.
+  conflict with the already enabled ones, and unless explicitly disabled in the
+  list.
   If <tt>stop</tt> is met, the enabling loop immediately stops, no
   more component is enabled.
   If the variable is set to an empty string, no specific component is
@@ -1068,11 +1070,6 @@ following environment variables.
   This variable does not take precedence over the application
   selecting components with functions such as
   hwloc_topology_set_xml().
-  See \ref plugins for details.
-  </dd>
-
-<dt>HWLOC_COMPONENTS=-list,of,components,to,exclude</dt>
-  <dd>defines a list of components to exclude if the value starts with <tt>-</tt>.
   See \ref plugins for details.
   </dd>
 
@@ -1609,7 +1606,7 @@ architecture name, as reported by the Unix <tt>uname</tt> command.
 <dd>The name of the hwloc backend/component that filled the topology.
 If several components were combined, multiple Backend keys may exist,
 with different values, for instance <tt>x86</tt>, <tt>Linux</tt>
-and <tt>libpci</tt>.
+and <tt>pci</tt>.
 </dd>
 <dt>LinuxCgroup (Machine object)</dt>
 <dd>The name the Linux control group where the calling process is
@@ -2030,7 +2027,7 @@ Depending on the topology configuration, some components will be used,
 some will be ignored.
 The usual default is to enable the native operating system component,
 (e.g. <tt>linux</tt> or <tt>solaris</tt>) and the
-<tt>libpci</tt> miscellaneous component.
+<tt>pci</tt> miscellaneous component.
 If available, an architecture-specific component (such as <tt>x86</tt>)
 may also improve the topology detection.
 
@@ -2047,7 +2044,7 @@ Each one is enabled as long as it does not conflict with the
 previously enabled ones.
 This includes native operating system components,
 architecture-specific ones, and if available, I/O components
-such as <tt>libpci</tt>.
+such as <tt>pci</tt>.
 
 Usually the native operating system component
 (when it exists, e.g. <tt>linux</tt> or <tt>aix</tt>)
@@ -2060,7 +2057,7 @@ that just tries to discover the number of PUs in the system.
 Each component discovers as much topology information as possible.
 Most of them, including most native OS components, do nothing
 unless the topology is still empty.
-Some others, such as <tt>x86</tt> and <tt>libpci</tt>,
+Some others, such as <tt>x86</tt> and <tt>pci</tt>,
 can complete and annotate what other backends still earlier.
 
 Default priorities ensure that clever components are invoked first.
@@ -2104,6 +2101,11 @@ In this case, <tt>x86</tt> would take care of discovering everything
 it supports, instead of only completing what the native OS information.
 This may be useful if the native component is buggy on some platforms.
 
+It is possible to prevent some components from being loaded by prefixing their
+name with <tt>-</tt> in the list. For instance <tt>x86,-pci</tt> will load the
+<tt>x86</tt> component, then let hwloc load all the usual components except
+<tt>pci</tt>.
+
 It is possible to prevent all remaining components from being loaded
 by placing <tt>stop</tt> in the environment variable.
 Only the components listed before this keyword will be enabled.
@@ -2113,12 +2115,6 @@ accept an argument (e.g. <tt>xml=file.xml</tt>).
 These arguments behave exactly as if the corresponding string had
 been passed to <tt>hwloc_topology_set_xml()</tt>
 or <tt>hwloc_topology_set_synthetic()</tt>.
-
-Finally, the <tt>HWLOC_COMPONENTS</tt> environment variable
-may start with <tt>-</tt> to exclude some components instead
-of enabling them.
-For instance, passing <tt>-libpci</tt> will load all usual
-components except the <tt>libpci</tt> one.
 
 \section plugins_load Loading components from plugins
 
@@ -2227,7 +2223,7 @@ environment variable (see \ref envvar).
  not natively supported.
  It is always statically built.
 </dd>
-<dt>libpci</dt>
+<dt>pci</dt>
 <dd>
  PCI object discovery uses the external pciaccess library (aka libpciaccess),
  or optionally the pciutils library (libpci),
