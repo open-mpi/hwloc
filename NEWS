@@ -73,6 +73,14 @@ Version 1.7.0
     names are prefixed with '-'.
   + lstopo --ignore PU now works when displaying the topology in
     graphical and textual mode (not when exporting to XML).
+  + Make sure I/O options always appear in lstopo usage, not only when
+    using pciutils/libpci.
+  + Remove some unneeded Linux specific includes from some interoperability
+    headers.
+  + Fix some inconsistencies in hwloc-distrib and hwloc-assembler-remote
+    manpages. Thanks to Guy Streeter for the report.
+  + Fix a memory leak on AIX when getting memory binding.
+  + Fix many small memory leaks on Linux.
   + The `libpci' component is now called `pci' but the old name is still
     accepted in the HWLOC_COMPONENTS variable for backward compatibility.
 
