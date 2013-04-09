@@ -1876,7 +1876,7 @@ enabled for the current topology.
  <dd>
   hwloc/glibc-sched.h offers conversion routines between Glibc and
   hwloc CPU sets in order to use hwloc with functions such as
-  sched_setaffinity().
+  sched_getaffinity() or pthread_attr_setaffinity_np().
  </dd>
 
 <dt>OpenFabrics Verbs</dt>
