@@ -153,10 +153,10 @@ The hwloc core may also benefit from the following development packages:
 <li>hwloc can use one of two different libraries for I/O device
 discovery:
 <ol>
-<li> libpciaccess (BSD).  The relevant development package is usually
+<li>libpciaccess (BSD).  The relevant development package is usually
 <tt>libpciaccess-devel</tt> or <tt>libpciaccess-dev</tt>.  </li>
 <li>libpci, from the pciutils package (GPL). The relevant development
-package is usually <tt>pciutils-devel</tt> or <tt>libpci-dev</tt>.  
+package is usually <tt>pciutils-devel</tt> or <tt>libpci-dev</tt>.  </li>
 </ol>
 </li>
 
