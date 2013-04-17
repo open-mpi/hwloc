@@ -4251,6 +4251,8 @@ static int
 hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
+  hwloc_obj_t hostbridges = NULL; /* temporary list */
+  unsigned current_hostbridge = 0;
   DIR *dir;
   struct dirent *dirent;
   int res = 0;
@@ -4276,7 +4278,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 
   while ((dirent = readdir(dir)) != NULL) {
     unsigned domain, bus, dev, func;
-    hwloc_obj_t obj, parent;
+    hwloc_obj_t obj, hostbridge, *pchild;
     hwloc_bitmap_t cpuset;
     unsigned os_index;
     char envname[256], *env;
@@ -4359,6 +4361,70 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
       }
     }
 
+    /* find a hostbridge with same cpuset and domain or create one */
+    hostbridge = hostbridges;
+    while (hostbridge
+	   && (!hwloc_bitmap_isequal(hostbridge->cpuset, cpuset)
+	       || hostbridge->attr->bridge.downstream.pci.domain != domain))
+      hostbridge = hostbridge->next_sibling;
+    if (hostbridge) {
+      /* reuse a former hostbridge */
+      hwloc_bitmap_free(cpuset);
+      /* extend its bus if needed */
+      if (bus < hostbridge->attr->bridge.downstream.pci.secondary_bus)
+	hostbridge->attr->bridge.downstream.pci.secondary_bus = bus;
+      if (bus > hostbridge->attr->bridge.downstream.pci.subordinate_bus)
+	hostbridge->attr->bridge.downstream.pci.subordinate_bus = bus;
+    } else {
+      /* allocate a new hostbridge */
+      hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, current_hostbridge++);
+      hostbridge->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_HOST;
+      hostbridge->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
+      hostbridge->attr->bridge.downstream.pci.domain = domain;
+      hostbridge->attr->bridge.downstream.pci.secondary_bus = bus;
+      hostbridge->attr->bridge.downstream.pci.subordinate_bus = bus;
+      /* temporary set a cpuset and queue it until all devices are discovered */
+      hostbridge->cpuset = cpuset; /* will need to be cleared before real insert */
+      hostbridge->next_sibling = hostbridges; /* will need to be cleared before real insert */
+      hostbridges = hostbridge;
+    }
+
+    /* place the device under the bridge. */
+    pchild = &hostbridge->first_child;
+    while (*pchild) {
+      if ((*pchild)->attr->pcidev.domain > domain
+	  || (((*pchild)->attr->pcidev.domain == domain)
+	      && ((*pchild)->attr->pcidev.bus > bus))
+	  || (((*pchild)->attr->pcidev.domain == domain)
+	      && ((*pchild)->attr->pcidev.bus == bus)
+	      && ((*pchild)->attr->pcidev.dev > dev))
+	  || (((*pchild)->attr->pcidev.domain == domain)
+	      && ((*pchild)->attr->pcidev.bus == bus)
+	      && ((*pchild)->attr->pcidev.dev == dev)
+	      && (*pchild)->attr->pcidev.func > func))
+	break;
+      pchild = &((*pchild)->next_sibling);
+    }
+    obj->next_sibling = *pchild;
+    *pchild = obj;
+
+    hwloc_backends_notify_new_object(backend, obj);
+
+    res++;
+  }
+
+  closedir(dir);
+
+  /* now that pcidevs are below hostbridges, insert these bridges */
+  while (hostbridges) {
+    hwloc_obj_t parent, hostbridge = hostbridges;
+    hwloc_cpuset_t cpuset = hostbridge->cpuset;
+
+    /* clear the bridge temporary info that hwloc core doesn't want */
+    hostbridge->cpuset = NULL;
+    hostbridges = hostbridge->next_sibling;
+    hostbridge->next_sibling = NULL;
+
     /* restrict to the existing topology cpuset to avoid errors later */
     hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
 
@@ -4366,7 +4432,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     if (hwloc_bitmap_iszero(cpuset))
       hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
 
-    /* attach the pci device */
+    /* attach the hostbridge */
 
     parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
     /* in the worst case, we got the root object */
@@ -4389,13 +4455,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 
     hwloc_bitmap_free(cpuset);
 
-    hwloc_insert_object_by_parent(topology, parent, obj);
-    hwloc_backends_notify_new_object(backend, obj);
-
-    res++;
+    hwloc_insert_object_by_parent(topology, parent, hostbridge);
   }
-
-  closedir(dir);
 
   return res;
 }
