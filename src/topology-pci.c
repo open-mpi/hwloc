@@ -761,9 +761,9 @@ hwloc_pci_component_instantiate(struct hwloc_disc_component *component,
 }
 
 static struct hwloc_disc_component hwloc_pci_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_MISC,
+  HWLOC_DISC_COMPONENT_TYPE_PCI,
   "pci",
-  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_COMPONENT_TYPE_PCI | HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_pci_component_instantiate,
   20,
   NULL
