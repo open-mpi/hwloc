@@ -150,7 +150,7 @@ The hwloc core may also benefit from the following development packages:
 <li>libnuma for memory binding and migration support on Linux
     (<tt>numactl-devel</tt> or <tt>libnuma-dev</tt> package).
 </li>
-<li>hwloc can use one of two different libraries for I/O device
+<li>hwloc can use one of two different libraries for full I/O device
 discovery:
 <ol>
 <li>libpciaccess (BSD).  The relevant development package is usually
@@ -158,6 +158,8 @@ discovery:
 <li>libpci, from the pciutils package (GPL). The relevant development
 package is usually <tt>pciutils-devel</tt> or <tt>libpci-dev</tt>.  </li>
 </ol>
+On Linux, a minimalistic PCI discovery may still be performed
+even if none of the above libraries can be used.
 </li>
 
 <li>the AMD OpenCL implementation for OpenCL device discovery.
@@ -1185,11 +1187,17 @@ to hwloc_topology_set_flags() before loading the topology.
 
 Note that I/O discovery requires significant help from the operating system.
 The pciaccess library (the development package is usually <tt>libpciaccess-devel</tt>
-or <tt>libpciaccess-dev</tt>) is needed to detect PCI devices and bridges
+or <tt>libpciaccess-dev</tt>) is needed to fully detect PCI devices and bridges
 (libpci/pciutils may be used instead if a GPL dependency is acceptable),
 and the actual locality of these devices is only currently detected
 on Linux. Also, some operating systems require privileges for probing PCI
 devices, see \ref faq_privileged for details.
+
+On Linux, a minimalistic PCI discovery may still be performed even
+if neither <tt>libpciaccess</tt> nor <tt>pciutils</tt> can be used.
+It only probes PCI devices and guesses hostbridges, and it also
+misses some attributes such as PCI device names, hardware revision
+or link speed.
 
 \section iodevices_hierarchy I/O object hierarchy
 
@@ -2229,6 +2237,13 @@ environment variable (see \ref envvar).
  or optionally the pciutils library (libpci),
  see \ref iodevices.
  <b>It may be built as a plugin</b>.
+</dd>
+<dt>linuxpci</dt>
+<dd>
+ This component can probe PCI devices on Linux without the help of external
+ libraries such as libpciaccess. Its priority is lower than the pci component
+ since it does not detect bridges (only guesses fake hostbridges)
+ and misses some device attributes.
 </dd>
 <dt>opencl</dt>
 <dd>

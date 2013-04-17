@@ -19,7 +19,10 @@ in v0.9.1).
 
 Version 1.8.0
 -------------
-
+* New components
+  + Add the "linuxpci" component to fallback to basic PCI discovery on
+    Linux when full discovery with libpciaccess or libpci isn't available.
+    It misses bridges and some device attributes.
 * Misc
   + Add --with-hwloc-plugins-path to specify the install/load directories
     of plugins.
