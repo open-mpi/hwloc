@@ -210,9 +210,16 @@ append_env() {
 if test x$hwloc_warn_may_use_libpci = xyes; then
   echo
   echo "***********************************************************************"
-  echo "PCI support could not be enabled because libpciaccess is not available."
+  if test "x$hwloc_linuxpci_happy" = "xyes"; then
+    echo "Full PCI support could not be enabled because libpciaccess is not available."
+  else
+    echo "PCI support could not be enabled because libpciaccess is not available."
+  fi
   echo "libpci could be used instead but hwloc may be tainted by the GPL"
   echo "license of pciutils. Add --enable-libpci to enable it."
+  if test "x$hwloc_linuxpci_happy" = "xyes"; then
+    echo "Only minimalistic Linux-specific PCI (linuxpci component) is enabled for now."
+  fi
   echo "***********************************************************************"
 fi
 
@@ -222,13 +229,15 @@ AS_IF([test "$hwloc_libxml2_happy" = "yes"], [hwloc_xml_status=full])
 
 # Prepare the I/O summary
 hwloc_probeio_list=
-test "x$hwloc_pci_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list PCI"
+test "x$hwloc_pci_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list PCI(full)"
+test "x$hwloc_pci_happy" = "xno" -a "x$hwloc_linuxpci_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list PCI(basic)"
 test "x$hwloc_opencl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list OpenCL"
 test "x$hwloc_have_cudart" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list CUDA"
 test "x$hwloc_nvml_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list NVML"
 test "x$hwloc_gl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list GL"
 # if anything but PCI, that anything will be useless
-test "x$hwloc_pci_happy" != "xyes" && test "x$hwloc_probeio_list" != "x" && hwloc_probeio_list="$hwloc_probeio_list (cannot work without PCI)"
+test "x$hwloc_pci_happy" != "xyes" && test "x$hwloc_linuxpci_happy" != "xyes" \
+ && test "x$hwloc_probeio_list" != "x" && hwloc_probeio_list="$hwloc_probeio_list (cannot work without PCI)"
 # if nothing, say "no"
 test "x$hwloc_probeio_list" = "x" && hwloc_probeio_list=" no"
 

@@ -4237,3 +4237,200 @@ const struct hwloc_component hwloc_linux_component = {
   0,
   &hwloc_linux_disc_component
 };
+
+
+
+
+#ifdef HWLOC_HAVE_LINUXPCI
+
+/***********************************
+ ******* Linux PCI component *******
+ ***********************************/
+
+static int
+hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
+{
+  struct hwloc_topology *topology = backend->topology;
+  DIR *dir;
+  struct dirent *dirent;
+  int res = 0;
+  int err;
+
+  if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
+    return 0;
+
+  /* TODO we could make this work:
+   * - find the linux backend private_data and reuse its root_fd
+   * - update all the above OS device code to support root_fd
+   * - make hwloc_linux_deprecated_classlinks_model a per-topology variable
+   * - update hwloc-gather-topology to gather PCI devices and their device symlinked-directory (and maybe more)
+   */
+  if (!hwloc_topology_is_thissystem(topology)) {
+    hwloc_debug("%s", "\nno PCI detection (not thissystem)\n");
+    return 0;
+  }
+
+  dir = opendir("/sys/bus/pci/devices/");
+  if (!dir)
+    return 0;
+
+  while ((dirent = readdir(dir)) != NULL) {
+    unsigned domain, bus, dev, func;
+    hwloc_obj_t obj, parent;
+    hwloc_bitmap_t cpuset;
+    unsigned os_index;
+    char envname[256], *env;
+    char path[64];
+    char value[16];
+    FILE *file;
+
+    if (sscanf(dirent->d_name, "%04x:%02x:%02x.%01x", &domain, &bus, &dev, &func) != 4)
+      continue;
+
+    os_index = (domain << 20) + (bus << 12) + (dev << 4) + func;
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
+    if (!obj)
+      break;
+
+    obj->attr->pcidev.domain = domain;
+    obj->attr->pcidev.bus = bus;
+    obj->attr->pcidev.dev = dev;
+    obj->attr->pcidev.func = func;
+
+    /* default (unknown) values */
+    obj->attr->pcidev.vendor_id = 0;
+    obj->attr->pcidev.device_id = 0;
+    obj->attr->pcidev.class_id = 0;
+    obj->attr->pcidev.revision = 0;
+    obj->attr->pcidev.subvendor_id = 0;
+    obj->attr->pcidev.subdevice_id = 0;
+    obj->attr->pcidev.linkspeed = 0;
+
+    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/vendor", dirent->d_name);
+    file = fopen(path, "r");
+    if (file) {
+      fread(value, sizeof(value), 1, file);
+      fclose(file);
+      obj->attr->pcidev.vendor_id = strtoul(value, NULL, 16);
+    }
+    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/device", dirent->d_name);
+    file = fopen(path, "r");
+    if (file) {
+      fread(value, sizeof(value), 1, file);
+      fclose(file);
+      obj->attr->pcidev.device_id = strtoul(value, NULL, 16);
+    }
+    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/class", dirent->d_name);
+    file = fopen(path, "r");
+    if (file) {
+      fread(value, sizeof(value), 1, file);
+      fclose(file);
+      obj->attr->pcidev.class_id = strtoul(value, NULL, 16) >> 8;
+    }
+    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_vendor", dirent->d_name);
+    file = fopen(path, "r");
+    if (file) {
+      fread(value, sizeof(value), 1, file);
+      fclose(file);
+      obj->attr->pcidev.subvendor_id = strtoul(value, NULL, 16);
+    }
+    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_device", dirent->d_name);
+    file = fopen(path, "r");
+    if (file) {
+      fread(value, sizeof(value), 1, file);
+      fclose(file);
+      obj->attr->pcidev.subdevice_id = strtoul(value, NULL, 16);
+    }
+
+    cpuset = hwloc_bitmap_alloc();
+    snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS", domain, bus);
+    env = getenv(envname);
+    if (env) {
+      hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
+      hwloc_bitmap_sscanf(cpuset, env);
+    } else {
+      snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/local_cpus", dirent->d_name);
+      file = fopen(path, "r");
+      if (file) {
+	err = hwloc_linux_parse_cpumap_file(file, cpuset);
+	fclose(file);
+	if (err < 0)
+	  hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
+      }
+    }
+
+    /* restrict to the existing topology cpuset to avoid errors later */
+    hwloc_bitmap_and(cpuset, cpuset, hwloc_topology_get_topology_cpuset(topology));
+
+    /* if the remaining cpuset is empty, take the root */
+    if (hwloc_bitmap_iszero(cpuset))
+      hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
+
+    /* attach the pci device */
+
+    parent = hwloc_get_obj_covering_cpuset(topology, cpuset);
+    /* in the worst case, we got the root object */
+
+    if (hwloc_bitmap_isequal(cpuset, parent->cpuset)) {
+      /* this object has the right cpuset, but it could be a cache or so,
+       * go up as long as the cpuset is the same
+       */
+      while (parent->parent && hwloc_bitmap_isequal(parent->cpuset, parent->parent->cpuset))
+	parent = parent->parent;
+    } else {
+      /* the object we found is too large, insert an intermediate group */
+      hwloc_obj_t group_obj = hwloc_alloc_setup_object(HWLOC_OBJ_GROUP, -1);
+      if (group_obj) {
+	group_obj->cpuset = hwloc_bitmap_dup(cpuset);
+	group_obj->attr->group.depth = (unsigned) -1;
+	parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
+      }
+    }
+
+    hwloc_bitmap_free(cpuset);
+
+    hwloc_insert_object_by_parent(topology, parent, obj);
+    hwloc_backends_notify_new_object(backend, obj);
+
+    res++;
+  }
+
+  closedir(dir);
+
+  return res;
+}
+
+static struct hwloc_backend *
+hwloc_linuxpci_component_instantiate(struct hwloc_disc_component *component,
+				     const void *_data1 __hwloc_attribute_unused,
+				     const void *_data2 __hwloc_attribute_unused,
+				     const void *_data3 __hwloc_attribute_unused)
+{
+  struct hwloc_backend *backend;
+
+  /* thissystem may not be fully initialized yet, we'll check flags in discover() */
+
+  backend = hwloc_backend_alloc(component);
+  if (!backend)
+    return NULL;
+  backend->discover = hwloc_look_linuxfs_pci;
+  return backend;
+}
+
+static struct hwloc_disc_component hwloc_linuxpci_disc_component = {
+  HWLOC_DISC_COMPONENT_TYPE_PCI,
+  "linuxpci",
+  HWLOC_DISC_COMPONENT_TYPE_PCI | HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  hwloc_linuxpci_component_instantiate,
+  19, /* after pci */
+  NULL
+};
+
+const struct hwloc_component hwloc_linuxpci_component = {
+  HWLOC_COMPONENT_ABI,
+  HWLOC_COMPONENT_TYPE_DISC,
+  0,
+  &hwloc_linuxpci_disc_component
+};
+
+#endif /* HWLOC_HAVE_LINUXPCI */
