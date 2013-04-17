@@ -17,6 +17,14 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.8.0
+-------------
+
+* Misc
+  + Add --with-hwloc-plugins-path to specify the install/load directories
+    of plugins.
+
+
 Version 1.7.0
 -------------
 * New operating system backends
