@@ -216,7 +216,6 @@ hwloc_alloc_or_fail(hwloc_topology_t topology, size_t len, int flags)
 }
 
 extern void hwloc_distances_init(struct hwloc_topology *topology);
-extern void hwloc_distances_clear(struct hwloc_topology *topology);
 extern void hwloc_distances_destroy(struct hwloc_topology *topology);
 extern void hwloc_distances_set(struct hwloc_topology *topology, hwloc_obj_type_t type, unsigned nbobjs, unsigned *indexes, hwloc_obj_t *objs, float *distances, int force);
 extern void hwloc_distances_set_from_env(struct hwloc_topology *topology);

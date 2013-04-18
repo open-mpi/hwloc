@@ -546,7 +546,6 @@ extern "C" {
 #define hwloc_alloc_or_fail HWLOC_NAME(alloc_or_fail)
 
 #define hwloc_distances_init HWLOC_NAME(distances_init)
-#define hwloc_distances_clear HWLOC_NAME(distances_clear)
 #define hwloc_distances_destroy HWLOC_NAME(distances_destroy)
 #define hwloc_distances_set HWLOC_NAME(distances_set)
 #define hwloc_distances_set_from_env HWLOC_NAME(distances_set_from_env)

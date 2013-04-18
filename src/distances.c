@@ -23,20 +23,6 @@ void hwloc_distances_init(struct hwloc_topology *topology)
   topology->first_osdist = topology->last_osdist = NULL;
 }
 
-/* called when reloading a topology.
- * keep initial parameters (from set_distances and environment),
- * but drop what was generated during previous load().
- */
-void hwloc_distances_clear(struct hwloc_topology *topology)
-{
-  struct hwloc_os_distances_s * osdist;
-  for(osdist = topology->first_osdist; osdist; osdist = osdist->next) {
-    /* remove final distance matrices, but keep physically-ordered ones */
-    free(osdist->objs);
-    osdist->objs = NULL;
-  }
-}
-
 /* called during topology destroy */
 void hwloc_distances_destroy(struct hwloc_topology * topology)
 {
