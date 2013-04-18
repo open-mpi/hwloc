@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -2466,6 +2466,11 @@ hwloc_topology_set_custom(struct hwloc_topology *topology)
 int
 hwloc_topology_set_flags (struct hwloc_topology *topology, unsigned long flags)
 {
+  if (topology->is_loaded) {
+    /* actually harmless */
+    errno = EBUSY;
+    return -1;
+  }
   topology->flags = flags;
   return 0;
 }
@@ -2564,7 +2569,7 @@ hwloc_topology_clear (struct hwloc_topology *topology)
 void
 hwloc_topology_destroy (struct hwloc_topology *topology)
 {
-  hwloc_backends_disable_all(topology); /* calls distances_clear(), so must stay before distances_destroy() */
+  hwloc_backends_disable_all(topology);
   hwloc_components_destroy_all(topology);
 
   hwloc_topology_clear(topology);
@@ -2582,20 +2587,8 @@ hwloc_topology_load (struct hwloc_topology *topology)
   int err;
 
   if (topology->is_loaded) {
-    static int deprecated_warning = 0;
-    if (!deprecated_warning) {
-      if (!getenv("HWLOC_HIDE_DEPRECATED")) {
-	fprintf(stderr, "*** hwloc_topology_load() was called multiple times on the same topology.\n");
-	fprintf(stderr, "*** This non-documented behavior will not be supported in future releases.\n");
-	fprintf(stderr, "*** Set HWLOC_HIDE_DEPRECATED in the environment to hide this message.\n");
-      }
-      deprecated_warning = 1;
-    }
-    hwloc_topology_clear(topology);
-    hwloc_distances_clear(topology);
-    hwloc_topology_setup_defaults(topology);
-    topology->is_thissystem = 1;
-    topology->is_loaded = 0;
+    errno = EBUSY;
+    return -1;
   }
 
   /* enforce backend anyway if a FORCE variable was given */

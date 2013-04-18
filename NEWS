@@ -26,6 +26,8 @@ Version 1.8.0
 * Misc
   + Add --with-hwloc-plugins-path to specify the install/load directories
     of plugins.
+  + Calling hwloc_topology_load() or hwloc_topology_set_*() on an already
+    loaded topology now returns an error.
 
 
 Version 1.7.0
