@@ -493,7 +493,6 @@ extern "C" {
 #define hwloc_disc_component_force_enable HWLOC_NAME(disc_component_force_enable)
 #define hwloc_disc_components_enable_others HWLOC_NAME(disc_components_instantiate_others)
 
-#define hwloc_backends_reset HWLOC_NAME(backends_reset)
 #define hwloc_backends_disable_all HWLOC_NAME(backends_disable_all)
 #define hwloc_backends_is_thissystem HWLOC_NAME(backends_is_thissystem)
 

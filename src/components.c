@@ -399,7 +399,7 @@ hwloc_disc_component_force_enable(struct hwloc_topology *topology,
   if (backend) {
     backend->envvar_forced = envvar_forced;
     if (topology->backends)
-      hwloc_backends_reset(topology);
+      hwloc_backends_disable_all(topology);
     return hwloc_backend_enable(topology, backend);
   } else
     return -1;
@@ -745,10 +745,4 @@ hwloc_backends_disable_all(struct hwloc_topology *topology)
     topology->backends = next;
   }
   topology->backends = NULL;
-}
-
-void
-hwloc_backends_reset(struct hwloc_topology *topology)
-{
-  hwloc_backends_disable_all(topology);
 }

@@ -29,8 +29,6 @@ extern void hwloc_disc_components_enable_others(struct hwloc_topology *topology)
 /* Compute the topology is_thissystem flag based on enabled backends */
 extern void hwloc_backends_is_thissystem(struct hwloc_topology *topology);
 
-/* Reset the list of currently enabled backend */
-extern void hwloc_backends_reset(struct hwloc_topology *topology);
 /* Disable and destroy all backends used by a topology */
 extern void hwloc_backends_disable_all(struct hwloc_topology *topology);
 
