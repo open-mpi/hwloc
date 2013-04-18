@@ -2749,4 +2749,16 @@ CPPFLAGS may have to be updated if your platform headers are installed
 in a different directory.
 
 
+\section faq_netbsd_bind How to get useful topology information on NetBSD?
+
+The NetBSD (and FreeBSD) backend uses x86-specific topology discovery
+(through the x86 component).
+This implementation requires CPU binding so as to query topology
+information from each individual logical processor.
+This means that hwloc cannot find any useful topology information
+unless user-level process binding is allowed by the NetBSD kernel.
+The <tt>security.models.extensions.user_set_cpu_affinity</tt>
+sysctl variable must be set to 1 to do so.
+Otherwise, only the number of logical processors will be detected.
+
 */
