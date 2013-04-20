@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.7.1
 -------------
+* Fix GL component build with old NVCtrl releases.
+  Thanks to Jirka Hladky for reporting the problem.
 * Add a FAQ entry "How to get useful topology information on NetBSD?"
   in the documentation.
 

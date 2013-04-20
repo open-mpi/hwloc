@@ -85,12 +85,16 @@ hwloc_gl_query_devices(struct hwloc_gl_backend_data_s *data)
       gpu_number = ptr_binary_data[1];
       free(ptr_binary_data);
 
+#ifdef NV_CTRL_PCI_DOMAIN
       /* Gets the ID's of the GPU defined by gpu_number
        * For further details, see the <NVCtrl/NVCtrlLib.h> */
       err = XNVCTRLQueryTargetAttribute(display, NV_CTRL_TARGET_TYPE_GPU, gpu_number, 0,
                                         NV_CTRL_PCI_DOMAIN, &nv_ctrl_pci_domain);
       if (!err)
         continue;
+#else
+      nv_ctrl_pci_domain = 0;
+#endif
 
       err = XNVCTRLQueryTargetAttribute(display, NV_CTRL_TARGET_TYPE_GPU, gpu_number, 0,
                                         NV_CTRL_PCI_BUS, &nv_ctrl_pci_bus);
@@ -99,11 +103,6 @@ hwloc_gl_query_devices(struct hwloc_gl_backend_data_s *data)
 
       err = XNVCTRLQueryTargetAttribute(display, NV_CTRL_TARGET_TYPE_GPU, gpu_number, 0,
                                         NV_CTRL_PCI_DEVICE, &nv_ctrl_pci_device);
-      if (!err)
-        continue;
-
-      err = XNVCTRLQueryTargetAttribute(display, NV_CTRL_TARGET_TYPE_GPU, gpu_number, 0,
-                                        NV_CTRL_PCI_DOMAIN, &nv_ctrl_pci_domain);
       if (!err)
         continue;
 
