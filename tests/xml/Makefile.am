@@ -17,13 +17,17 @@ xml_inputs = \
 	32em64t-2n8c2t-pci-noio.xml \
 	32em64t-2n8c2t-pci-normalio.xml \
 	32em64t-2n8c2t-pci-wholeio.xml \
-	96em64t-4n4d3ca2co-pci.xml
+	96em64t-4n4d3ca2co-pci.xml \
+	192em64t-12gr2n8c2t-distancegroups.xml \
+	192em64t-24n8c2t-nodistancegroups.xml \
+	192em64t-24n8c2t-distancegroups.xml
 
 # Each output `xyz.source' may have a corresponding `xyz.source'
 # file modifying its source file
 xml_source = \
 	32em64t-2n8c2t-pci-noio.source \
-	32em64t-2n8c2t-pci-normalio.source
+	32em64t-2n8c2t-pci-normalio.source \
+	192em64t-24n8c2t-distancegroups.source
 
 # Each output `xyz.xml' may have a corresponding `xyz.options'
 # file modifying the behavior of lstopo
@@ -34,6 +38,7 @@ xml_options = \
 # Each output `xyz.xml' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 xml_envs = \
+	192em64t-24n8c2t-nodistancegroups.env
 
 # Only run the tests if we're building standalone, because the tests
 # call hwloc executables.
