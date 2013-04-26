@@ -870,9 +870,8 @@ hwloc__groups_by_distances(struct hwloc_topology *topology,
                                   groupsizes[i], group_obj->cpuset);
           res_obj = hwloc__insert_object_by_cpuset(topology, group_obj,
 						   fromuser ? hwloc_report_user_distance_error : hwloc_report_os_error);
-          assert(res_obj == group_obj); /* somebody else created groups here, things went wrong ?! */
-
-          groupobjs[i] = group_obj;
+	  /* res_obj may be different from group_objs if we got groups from XML import before grouping */
+          groupobjs[i] = res_obj;
       }
 
       /* factorize distances */
