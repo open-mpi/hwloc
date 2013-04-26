@@ -62,7 +62,7 @@ test -f "$source_file" && source="${dirname}/"`cat $source_file`
 options_file="${dirname}/${basename}.options"
 test -f "$options_file" && opts=`cat $options_file`
 
-test -f "${dirname}/${basename}.env" && source "${dirname}/${basename}.env"
+test -f "${dirname}/${basename}.env" && . "${dirname}/${basename}.env"
 
 do_run()
 {
