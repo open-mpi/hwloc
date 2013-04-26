@@ -31,10 +31,14 @@ xml_options = \
 	32em64t-2n8c2t-pci-noio.options \
 	32em64t-2n8c2t-pci-wholeio.options
 
+# Each output `xyz.xml' may have a corresponding `xyz.env'
+# modifying the environment of lstopo
+xml_envs = \
+
 # Only run the tests if we're building standalone, because the tests
 # call hwloc executables.
 TESTS = $(xml_inputs)
 
-EXTRA_DIST = $(xml_inputs) $(xml_source) $(xml_options)
+EXTRA_DIST = $(xml_inputs) $(xml_source) $(xml_options) $(xml_envs)
 
 LOG_COMPILER = $(HWLOC_top_builddir)/tests/xml/test-topology.sh

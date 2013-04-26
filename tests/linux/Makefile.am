@@ -133,7 +133,7 @@ sysfs_options = \
 		32amd64-4s2n4c-cgroup.xml.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
-# modifying the environment of lsopo
+# modifying the environment of lstopo
 sysfs_envs = \
 		2i386-2t-hugepagesizecount.xml.env \
 		32amd64-4s2n4c-cgroup.env \
