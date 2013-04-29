@@ -26,6 +26,7 @@ Version 1.7.1
   for reporting the problem.
 * Add a FAQ entry "How to get useful topology information on NetBSD?"
   in the documentation.
+* Somes fixes in the renaming code for embedding.
 
 
 Version 1.7.0
