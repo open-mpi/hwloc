@@ -143,9 +143,10 @@ hwloc_fallback_nbprocessors(struct hwloc_topology *topology) {
   host_info(mach_host_self(), HOST_BASIC_INFO, (integer_t*) &info, &count);
   n = info.avail_cpus;
 #elif defined(HAVE_SYSCTLBYNAME)
-  int64_t n;
-  if (hwloc_get_sysctlbyname("hw.ncpu", &n))
-    n = -1;
+  int64_t nn;
+  if (hwloc_get_sysctlbyname("hw.ncpu", &nn))
+    nn = -1;
+  n = nn;
 #elif defined(HAVE_SYSCTL) && HAVE_DECL_CTL_HW && HAVE_DECL_HW_NCPU
   static int name[2] = {CTL_HW, HW_NPCU};
   if (hwloc_get_sysctl(name, sizeof(name)/sizeof(*name)), &n)
