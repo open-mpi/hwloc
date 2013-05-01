@@ -1,6 +1,6 @@
 /*
  * Copyright © 2010-2012 Inria.  All rights reserved.
- * Copyright © 2010-2012 Université Bordeaux 1
+ * Copyright © 2010-2013 Université Bordeaux 1
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  *
@@ -735,7 +735,8 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
   memset(&hooks, 0, sizeof(hooks));
   support.membind = &memsupport;
   hwloc_set_native_binding_hooks(&hooks, &support);
-  if (!(hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind)
+  if (nbprocs > 1 &&
+      !(hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind)
    && !(hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind))
     goto out;
 
@@ -814,6 +815,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
       goto out_with_os_state;
     }
   }
+
   if (hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind) {
     if (!hooks.get_thisproc_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
       hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
@@ -834,6 +836,13 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
       goto out_with_os_state;
     }
   }
+
+  if (nbprocs == 1) {
+    look_proc(&infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
+    summarize(topology, infos, nbprocs, fulldiscovery);
+    ret = fulldiscovery;
+  }
+
   hwloc_bitmap_free(orig_cpuset);
 
 out_with_os_state:
