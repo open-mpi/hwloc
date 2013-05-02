@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2011 inria.  All rights reserved.
+ * Copyright © 2010-2013 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -522,13 +522,17 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
       hwloc_bitmap_asprintf(&a, cpuset);
       hwloc_bitmap_asprintf(&b, nodeset);
       fprintf(stderr, "****************************************************************************\n");
-      fprintf(stderr, "* Hwloc has encountered an error when adding a distance matrix to the topology.\n");
+      fprintf(stderr, "* hwloc has encountered an error when adding a distance matrix to the topology.\n");
       fprintf(stderr, "*\n");
       fprintf(stderr, "* hwloc_distances__finalize_logical() could not find any object covering\n");
       fprintf(stderr, "* cpuset %s and nodeset %s\n", a, b);
       fprintf(stderr, "*\n");
       fprintf(stderr, "* Please report this error message to the hwloc user's mailing list,\n");
+#ifdef HWLOC_LINUX_SYS
       fprintf(stderr, "* along with the output from the hwloc-gather-topology.sh script.\n");
+#else
+      fprintf(stderr, "* along with any relevant topology information from your platform.\n");
+#endif
       fprintf(stderr, "****************************************************************************\n");
       free(a);
       free(b);
@@ -656,7 +660,7 @@ static void hwloc_report_user_distance_error(const char *msg, int line)
 
     if (!reported && !hwloc_hide_errors()) {
         fprintf(stderr, "****************************************************************************\n");
-        fprintf(stderr, "* Hwloc has encountered what looks like an error from user-given distances.\n");
+        fprintf(stderr, "* hwloc has encountered what looks like an error from user-given distances.\n");
         fprintf(stderr, "*\n");
         fprintf(stderr, "* %s\n", msg);
         fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
