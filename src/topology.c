@@ -867,8 +867,26 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
   hwloc_obj_t *current;
 
   /* Append to the end of the list */
-  for (current = &parent->first_child; *current; current = &(*current)->next_sibling)
-    ;
+  for (current = &parent->first_child; *current; current = &(*current)->next_sibling) {
+    hwloc_bitmap_t curcpuset = (*current)->cpuset;
+    if (obj->cpuset && (!curcpuset || hwloc_bitmap_compare_first(obj->cpuset, curcpuset) < 0)) {
+      static int reported = 0;
+      if (!reported && !hwloc_hide_errors()) {
+	char *a, *b;
+	hwloc_bitmap_asprintf(&a, curcpuset);
+	hwloc_bitmap_asprintf(&b, obj->cpuset);
+        fprintf(stderr, "****************************************************************************\n");
+        fprintf(stderr, "* hwloc has encountered an out-of-order topology discovery.\n");
+        fprintf(stderr, "* An object with cpuset %s was inserted after object with %s\n", b, a);
+        fprintf(stderr, "* Please check that your input topology (XML file, etc.) is valid.\n");
+        fprintf(stderr, "****************************************************************************\n");
+	free(a);
+	free(b);
+        reported = 1;
+      }
+    }
+  }
+
   *current = obj;
   obj->next_sibling = NULL;
   obj->first_child = NULL;
