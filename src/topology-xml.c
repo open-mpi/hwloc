@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -570,6 +570,12 @@ hwloc__xml_import_object(hwloc_topology_t topology,
     }
   }
 
+  if (obj->parent) {
+    /* root->parent is NULL, and root is already inserted */
+    hwloc_insert_object_by_parent(topology, obj->parent /* filled by the caller */, obj);
+    /* insert_object_by_parent() doesn't merge during insert, so obj is still valid */
+  }
+
   /* process subnodes */
   while (1) {
     struct hwloc__xml_import_state_s childstate;
@@ -584,8 +590,7 @@ hwloc__xml_import_object(hwloc_topology_t topology,
 
     if (!strcmp(tag, "object")) {
       hwloc_obj_t childobj = hwloc_alloc_setup_object(HWLOC_OBJ_TYPE_MAX, -1);
-      hwloc_insert_object_by_parent(topology, obj, childobj);
-      /* insert_object_by_parent() doesn't merge during insert, so childobj is still valid */
+      childobj->parent = obj; /* store the parent pointer for use in insert() below */
       ret = hwloc__xml_import_object(topology, data, childobj, &childstate);
     } else if (!strcmp(tag, "page_type")) {
       ret = hwloc__xml_import_pagetype(topology, obj, &childstate);
