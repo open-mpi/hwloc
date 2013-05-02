@@ -72,13 +72,17 @@ void hwloc_report_os_error(const char *msg, int line)
 
     if (!reported && !hwloc_hide_errors()) {
         fprintf(stderr, "****************************************************************************\n");
-        fprintf(stderr, "* Hwloc has encountered what looks like an error from the operating system.\n");
+        fprintf(stderr, "* hwloc has encountered what looks like an error from the operating system.\n");
         fprintf(stderr, "*\n");
         fprintf(stderr, "* %s\n", msg);
         fprintf(stderr, "* Error occurred in topology.c line %d\n", line);
         fprintf(stderr, "*\n");
         fprintf(stderr, "* Please report this error message to the hwloc user's mailing list,\n");
+#ifdef HWLOC_LINUX_SYS
         fprintf(stderr, "* along with the output from the hwloc-gather-topology.sh script.\n");
+#else
+	fprintf(stderr, "* along with any relevant topology information from your platform.\n");
+#endif
         fprintf(stderr, "****************************************************************************\n");
         reported = 1;
     }
