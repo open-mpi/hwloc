@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -783,16 +783,16 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
 static __hwloc_inline void
 hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *root, unsigned n_roots, hwloc_cpuset_t *cpuset, unsigned n, unsigned until);
 static __hwloc_inline void
-hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cpuset, unsigned n, unsigned until)
+hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *set, unsigned n, unsigned until)
 {
   unsigned i;
   if (!root->arity || n == 1 || root->depth >= until) {
     /* Got to the bottom, we can't split any more, put everything there.  */
     for (i=0; i<n; i++)
-      cpuset[i] = hwloc_bitmap_dup(root->cpuset);
+      set[i] = hwloc_bitmap_dup(root->cpuset);
     return;
   }
-  hwloc_distributev(topology, root->children, root->arity, cpuset, n, until);
+  hwloc_distributev(topology, root->children, root->arity, set, n, until);
 }
 
 /** \brief Distribute \p n items over the topology under \p roots
@@ -803,11 +803,11 @@ hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *cp
  * \note This function requires the \p roots objects to have a CPU set.
  */
 static __hwloc_inline void
-hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *cpuset, unsigned n, unsigned until)
+hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *set, unsigned n, unsigned until)
 {
   unsigned i;
   unsigned tot_weight;
-  hwloc_cpuset_t *cpusetp = cpuset;
+  hwloc_cpuset_t *cpusetp = set;
 
   tot_weight = 0;
   for (i = 0; i < n_roots; i++)
@@ -850,12 +850,12 @@ hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_
  * This is similar to hwloc_alloc_membind_policy_nodeset, but for a given cpuset.
  */
 static __hwloc_inline void *
-hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t cpuset, hwloc_membind_policy_t policy, int flags)
+hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)
 {
-  void *p = hwloc_alloc_membind(topology, len, cpuset, policy, flags);
+  void *p = hwloc_alloc_membind(topology, len, set, policy, flags);
   if (p)
     return p;
-  hwloc_set_membind(topology, cpuset, policy, flags);
+  hwloc_set_membind(topology, set, policy, flags);
   p = hwloc_alloc(topology, len);
   if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
     /* Enforce the binding by touching the data */
@@ -1029,13 +1029,13 @@ hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
  * Otherwise \p nodeset will be entirely filled.
  */
 static __hwloc_inline void
-hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset)
+hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;
 
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN) {
-		 if (hwloc_bitmap_iszero(cpuset))
+		 if (hwloc_bitmap_iszero(_cpuset))
 			hwloc_bitmap_zero(nodeset);
 		else
 			/* Assume the whole system */
@@ -1045,7 +1045,7 @@ hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, 
 
 	hwloc_bitmap_zero(nodeset);
 	obj = NULL;
-	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, cpuset, depth, obj)) != NULL)
+	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, _cpuset, depth, obj)) != NULL)
 		hwloc_bitmap_set(nodeset, obj->os_index);
 }
 
@@ -1057,7 +1057,7 @@ hwloc_cpuset_to_nodeset(hwloc_topology_t topology, hwloc_const_cpuset_t cpuset, 
  * nodeset.
  */
 static __hwloc_inline void
-hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpuset_t cpuset, hwloc_nodeset_t nodeset)
+hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpuset_t _cpuset, hwloc_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;
@@ -1065,7 +1065,7 @@ hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpus
 		return;
 	hwloc_bitmap_zero(nodeset);
 	obj = NULL;
-	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, cpuset, depth, obj)) != NULL)
+	while ((obj = hwloc_get_next_obj_covering_cpuset_by_depth(topology, _cpuset, depth, obj)) != NULL)
 		hwloc_bitmap_set(nodeset, obj->os_index);
 }
 
@@ -1078,26 +1078,26 @@ hwloc_cpuset_to_nodeset_strict(struct hwloc_topology *topology, hwloc_const_cpus
  * This is useful for manipulating memory binding sets.
  */
 static __hwloc_inline void
-hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset)
+hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;
 
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN ) {
 		if (hwloc_bitmap_iszero(nodeset))
-			hwloc_bitmap_zero(cpuset);
+			hwloc_bitmap_zero(_cpuset);
 		else
 			/* Assume the whole system */
-			hwloc_bitmap_fill(cpuset);
+			hwloc_bitmap_fill(_cpuset);
 		return;
 	}
 
-	hwloc_bitmap_zero(cpuset);
+	hwloc_bitmap_zero(_cpuset);
 	obj = NULL;
 	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL) {
 		if (hwloc_bitmap_isset(nodeset, obj->os_index))
 			/* no need to check obj->cpuset because objects in levels always have a cpuset */
-			hwloc_bitmap_or(cpuset, cpuset, obj->cpuset);
+			hwloc_bitmap_or(_cpuset, _cpuset, obj->cpuset);
 	}
 }
 
@@ -1109,18 +1109,18 @@ hwloc_cpuset_from_nodeset(hwloc_topology_t topology, hwloc_cpuset_t cpuset, hwlo
  * cpuset.
  */
 static __hwloc_inline void
-hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t cpuset, hwloc_const_nodeset_t nodeset)
+hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t _cpuset, hwloc_const_nodeset_t nodeset)
 {
 	int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_NODE);
 	hwloc_obj_t obj;
 	if (depth == HWLOC_TYPE_DEPTH_UNKNOWN )
 		return;
-	hwloc_bitmap_zero(cpuset);
+	hwloc_bitmap_zero(_cpuset);
 	obj = NULL;
 	while ((obj = hwloc_get_next_obj_by_depth(topology, depth, obj)) != NULL)
 		if (hwloc_bitmap_isset(nodeset, obj->os_index))
 			/* no need to check obj->cpuset because objects in levels always have a cpuset */
-			hwloc_bitmap_or(cpuset, cpuset, obj->cpuset);
+			hwloc_bitmap_or(_cpuset, _cpuset, obj->cpuset);
 }
 
 /** @} */
