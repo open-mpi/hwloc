@@ -11,6 +11,9 @@
 #include <private/private.h>
 #include <private/misc.h>
 #include <private/debug.h>
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif /* HAVE_STRINGS_H */
 
 int
 hwloc_get_type_depth (struct hwloc_topology *topology, hwloc_obj_type_t type)
