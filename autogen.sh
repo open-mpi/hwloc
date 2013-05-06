@@ -1,2 +1,2 @@
 :
-autoreconf -ivf
+autoreconf ${autoreconf_args:-"-ivf"}
