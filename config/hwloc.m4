@@ -444,7 +444,28 @@ EOF])
       #include <sys/param.h>
       #endif
     ])
-    AC_CHECK_FUNCS([sysctl sysctlbyname])
+
+    # Do a full link test instead of just using AC_CHECK_FUNCS, which
+    # just checks to see if the symbol exists or not.  For example,
+    # the prototype of sysctl uses u_int, which on some platforms
+    # (such as FreeBSD) is only defined under __BSD_VISIBLE, __USE_BSD
+    # or other similar definitions.  So while the symbols "sysctl" and
+    # "sysctlbyname" might still be available in libc (which autoconf
+    # checks for), they might not be actually usable.
+    AC_TRY_LINK([
+               #include <stdio.h>
+               #include <sys/types.h>
+               #include <sys/sysctl.h>
+               ],
+                [return sysctl(NULL,0,NULL,NULL,NULL,0);],
+                AC_DEFINE([HAVE_SYSCTL],[1],[Define to '1' if sysctl is present and usable]))
+    AC_TRY_LINK([
+               #include <stdio.h>
+               #include <sys/types.h>
+               #include <sys/sysctl.h>
+               ],
+                [return sysctlbyname(NULL,NULL,NULL,NULL,0);],
+                AC_DEFINE([HAVE_SYSCTLBYNAME],[1],[Define to '1' if sysctlbyname is present and usable]))
 
     case ${target} in
       *-*-mingw*|*-*-cygwin*)
