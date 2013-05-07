@@ -1251,7 +1251,10 @@ dnl number of arguments (10). Success means the compiler couldn't really check.
 AC_DEFUN([_HWLOC_CHECK_DECL], [
   AC_MSG_CHECKING([whether function $1 is declared])
   AC_REQUIRE([AC_PROG_CC])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT([$4])],[$1(1,2,3,4,5,6,7,8,9,10);])],
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+       [AC_INCLUDES_DEFAULT([$4])
+       $1(int,long,int,long,int,long,int,long,int,long);],
+       [$1(1,2,3,4,5,6,7,8,9,10);])],
     [AC_MSG_RESULT([no])
      $3],
     [AC_MSG_RESULT([yes])
