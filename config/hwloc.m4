@@ -445,6 +445,8 @@ EOF])
       #endif
     ])
 
+    AC_CHECK_DECLS([strtoull], [], [], [AC_INCLUDES_DEFAULT])
+
     # Do a full link test instead of just using AC_CHECK_FUNCS, which
     # just checks to see if the symbol exists or not.  For example,
     # the prototype of sysctl uses u_int, which on some platforms
