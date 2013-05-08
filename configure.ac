@@ -166,6 +166,10 @@ LIBS="$HWLOC_EMBEDDED_LIBS $LIBS"
 # Compiler support -- we don't need that stuff.
 AM_ENABLE_SHARED
 AM_DISABLE_STATIC
+# Tell libtool that we don't need Fortran or C++ support.
+FC=no
+F77=no
+CXX=no
 AM_PROG_LIBTOOL([dlopen win32-dll])
 LT_LANG([C])
 LT_CONFIG_LTDL_DIR([src/libltdl])
