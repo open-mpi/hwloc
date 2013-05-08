@@ -189,7 +189,11 @@ if test "x$hwloc_have_plugins" = xyes; then
 fi
 
 # Is ltdl included?
-AM_CONDITIONAL([HWLOC_LTDL_INCLUDED], [test "x$with_included_ltdl" = xyes])
+HWLOC_LTDL_SUBDIR=
+AS_IF([test "x$with_included_ltdl" = xyes],
+      [HWLOC_LIBLTDL_SUBDIR=libltdl])
+AC_SUBST(HWLOC_LIBLTDL_SUBDIR)
+dnl AM_CONDITIONAL([HWLOC_LTDL_INCLUDED], [test "x$with_included_ltdl" = xyes])
 
 
 # Party on
