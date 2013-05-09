@@ -27,6 +27,10 @@ Version 1.7.1
 * Remove spurious Group objects when loading XML topologies with I/O
   objects and NUMA distances. Thanks to Elena Elkina for reporting the
   problem and testing patches.
+* Fix embedding breakage caused by libltdl and document why enabling
+  plugins when embedding hwloc in another project may be dangerous. See
+  details in documentation section Embedding hwloc in Other Software.
+  Thanks to Pavan Balaji for reporting the problem.
 * Add a FAQ entry "How to get useful topology information on NetBSD?"
   in the documentation.
 * Somes fixes in the renaming code for embedding.
