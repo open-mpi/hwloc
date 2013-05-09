@@ -1040,12 +1040,6 @@ EOF])
     AS_IF([test "x$enable_plugins" = "xyes" -a "x$hwloc_windows" = "xyes"],
       [AC_MSG_WARN([Plugins not supported on non-native Windows build, plugins support cannot be enabled.])
        AC_MSG_ERROR([Cannot continue])])
-    # plugins are not supported in embedded mode (indeed, all the LTDL
-    # setup stuff is up in hwloc's private configure.ac -- not down
-    # here in hwloc.m4)
-    AS_IF([test "x$enable_plugins" = "xyes" -a "$hwloc_mode" = "embedded"],
-          [AC_MSG_WARN([Embedded mode not supported with plugins])
-           AC_MSG_ERROR([Cannot continue])])
 
     AC_ARG_WITH([hwloc-plugins-path],
 		AC_HELP_STRING([--with-hwloc-plugins-path=dir:...],

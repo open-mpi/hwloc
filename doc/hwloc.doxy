@@ -2147,6 +2147,9 @@ is registered to the hwloc core.
 Components are then only enabled if the topology configuration
 requests it, as explained in the previous sections.
 
+Also note that plugins should carefully be enabled and used when
+embedding hwloc in another project, see \ref embed for details.
+
 \section plugins_adding Adding new discovery components and plugins
 
 The types and functions cited below are declared in the hwloc/plugins.h header.
@@ -2337,6 +2340,17 @@ Automake / Libtool tool chain to build your software.  If you do this,
 you can directly integrate hwloc's m4 configure macro into your
 configure script.  You can then invoke hwloc's configuration tests and
 build setup by calling an m4 macro (see below).
+
+Although hwloc dynamic shared object plugins may be used in embedded
+mode, the embedder project will have to manually setup libltdl in its
+build system so that hwloc can load its plugins at run time.
+Also, embedders should be aware of complications that can arise due to
+public and private linker namespaces (e.g., if the embedder project is
+loaded into a private namespace and then hwloc tries to dynamically
+load its plugins, such loading may fail since the hwloc plugins can't
+find the hwloc symbols they need).
+The embedder project is <b>strongly</b> advised not to use hwloc's
+dynamically loading plugins / libltdl capability.
 
 \section embedding_m4 Using hwloc's M4 Embedding Capabilities
 
