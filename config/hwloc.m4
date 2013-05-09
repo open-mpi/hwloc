@@ -439,6 +439,8 @@ EOF])
       #include <sys/param.h>
       #endif
     ])
+    AC_CHECK_DECLS([strtoull], [], [], [AC_INCLUDES_DEFAULT])
+
     AC_CHECK_FUNCS([sysctl sysctlbyname])
 
     case ${target} in

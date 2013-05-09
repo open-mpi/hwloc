@@ -19,7 +19,7 @@
 #ifdef HAVE_SYS_CPUSET_H
 #include <sys/cpuset.h>
 #endif
-#ifdef HAVE_SYSCTL
+#ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
 
