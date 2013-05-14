@@ -973,7 +973,7 @@ EOF])
       [hwloc_pthread_mutex_happy=yes
        HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE -lpthread"
       ],
-      [AC_MSG_CHECKING([fot pthread_mutex_lock with -lpthread])
+      [AC_MSG_CHECKING([for pthread_mutex_lock with -lpthread])
        # Try again with explicit -lpthread, but don't use AC_CHECK_FUNC to avoid the cache
        tmp_save_LIBS=$LIBS
        LIBS="$LIBS -lpthread"
