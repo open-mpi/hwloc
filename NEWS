@@ -19,21 +19,22 @@ in v0.9.1).
 
 Version 1.7.1
 -------------
+* Fix a failed assertion in the distance grouping code when loading a XML
+  file that already contains some groups.
+  Thanks to Laercio Lima Pilla for reporting the problem.
+* Remove unexpected Group objects when loading XML topologies with I/O
+  objects and NUMA distances.
+  Thanks to Elena Elkina for reporting the problem and testing patches.
 * Fix GL component build with old NVCtrl releases.
   Thanks to Jirka Hladky for reporting the problem.
-* Fix an failed assertion in the distance grouping code when loading
-  a XML that already contains some groups. Thanks to Laercio Lima Pilla
-  for reporting the problem.
-* Remove spurious Group objects when loading XML topologies with I/O
-  objects and NUMA distances. Thanks to Elena Elkina for reporting the
-  problem and testing patches.
-* Fix embedding breakage caused by libltdl and document why enabling
-  plugins when embedding hwloc in another project may be dangerous. See
-  details in documentation section Embedding hwloc in Other Software.
+* Fix embedding breakage caused by libltdl.
   Thanks to Pavan Balaji for reporting the problem.
+* Document issues when enabling plugins while embedding hwloc in another
+  project, in the documentation section Embedding hwloc in Other Software.
 * Add a FAQ entry "How to get useful topology information on NetBSD?"
   in the documentation.
 * Somes fixes in the renaming code for embedding.
+* Miscellaneous minor build fixes.
 
 
 Version 1.7.0
