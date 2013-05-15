@@ -344,4 +344,44 @@ hwloc_weight_long(unsigned long w)
 unsigned long long int strtoull(const char *nptr, char **endptr, int base);
 #endif
 
+#define HWLOC_PCI_CAPABILITY_LIST 0x34
+#define HWLOC_PCI_STATUS_CAP_LIST 0x10
+#define HWLOC_PCI_CAP_LIST_ID 0
+#define HWLOC_PCI_CAP_LIST_NEXT 1
+#define HWLOC_PCI_STATUS 0x06
+
+static __hwloc_inline unsigned
+hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap)
+{
+  unsigned char seen[256] = { 0 };
+  unsigned char ptr;
+
+  if (!(config[HWLOC_PCI_STATUS] & HWLOC_PCI_STATUS_CAP_LIST))
+    return 0;
+
+  for (ptr = config[HWLOC_PCI_CAPABILITY_LIST] & ~3;
+       ptr;
+       ptr = config[ptr + HWLOC_PCI_CAP_LIST_NEXT] & ~3) {
+    unsigned char id;
+
+    if (ptr >= config_size)
+      break;
+
+    /* Looped around! */
+    if (seen[ptr])
+      break;
+    seen[ptr] = 1;
+
+    id = config[ptr + HWLOC_PCI_CAP_LIST_ID];
+    if (id == cap)
+      return ptr;
+    if (id == 0xff)
+      break;
+
+    if (ptr + (unsigned) HWLOC_PCI_CAP_LIST_NEXT >= config_size)
+      break;
+  }
+  return 0;
+}
+
 #endif /* HWLOC_PRIVATE_MISC_H */

@@ -87,26 +87,6 @@
 #define PCI_CAP_NORMAL 1
 #endif
 
-#ifndef PCI_STATUS
-#define PCI_STATUS 0x06
-#endif
-
-#ifndef PCI_CAPABILITY_LIST
-#define PCI_CAPABILITY_LIST 0x34
-#endif
-
-#ifndef PCI_STATUS_CAP_LIST
-#define PCI_STATUS_CAP_LIST 0x10
-#endif
-
-#ifndef PCI_CAP_LIST_ID
-#define PCI_CAP_LIST_ID 0
-#endif
-
-#ifndef PCI_CAP_LIST_NEXT
-#define PCI_CAP_LIST_NEXT 1
-#endif
-
 #define CONFIG_SPACE_CACHESIZE_TRY 256
 #define CONFIG_SPACE_CACHESIZE 64
 
@@ -393,42 +373,6 @@ hwloc_pci_error(char *msg, ...)
 static void
 hwloc_pci_warning(char *msg __hwloc_attribute_unused, ...)
 {
-}
-#endif
-
-#ifndef HWLOC_HAVE_PCI_FIND_CAP
-static unsigned
-hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap)
-{
-  unsigned char seen[256] = { 0 };
-  unsigned char ptr;
-
-  if (!(config[PCI_STATUS] & PCI_STATUS_CAP_LIST))
-    return 0;
-
-  for (ptr = config[PCI_CAPABILITY_LIST] & ~3;
-       ptr;
-       ptr = config[ptr + PCI_CAP_LIST_NEXT] & ~3) {
-    unsigned char id;
-
-    if (ptr >= config_size)
-      return 0;
-
-    /* Looped around! */
-    if (seen[ptr])
-      return 0;
-    seen[ptr] = 1;
-
-    id = config[ptr + PCI_CAP_LIST_ID];
-    if (id == cap)
-      return ptr;
-    if (id == 0xff)
-      break;
-
-    if (ptr + (unsigned) PCI_CAP_LIST_NEXT >= config_size)
-      return 0;
-  }
-  return 0;
 }
 #endif
 
