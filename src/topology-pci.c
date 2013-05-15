@@ -68,17 +68,6 @@
 #define PCI_SUBORDINATE_BUS 0x1a
 #endif
 
-#ifndef PCI_EXP_LNKSTA
-#define PCI_EXP_LNKSTA 18
-#endif
-
-#ifndef PCI_EXP_LNKSTA_SPEED
-#define PCI_EXP_LNKSTA_SPEED 0x000f
-#endif
-#ifndef PCI_EXP_LNKSTA_WIDTH
-#define PCI_EXP_LNKSTA_WIDTH 0x03f0
-#endif
-
 #ifndef PCI_CAP_ID_EXP
 #define PCI_CAP_ID_EXP 0x10
 #endif
@@ -515,23 +504,9 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #else
     offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, PCI_CAP_ID_EXP);
 #endif /* HWLOC_HAVE_PCI_FIND_CAP */
-    if (offset > 0) {
-      if (offset + PCI_EXP_LNKSTA + 4 >= config_space_cachesize) {
-        fprintf(stderr, "cannot read PCI_EXP_LNKSTA cap at %d (only %d cached)\n", offset + PCI_EXP_LNKSTA, CONFIG_SPACE_CACHESIZE);
-      } else {
-        unsigned linksta, speed, width;
-        float lanespeed;
-        memcpy(&linksta, &config_space_cache[offset + PCI_EXP_LNKSTA], 4);
-        speed = linksta & PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
-        width = (linksta & PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
-	/* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
-	 * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
-	 * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
-	 */
-        lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
-        obj->attr->pcidev.linkspeed = lanespeed * width / 8; /* GB/s */
-      }
-    }
+    if (offset > 0)
+      hwloc_pci_find_linkspeed(config_space_cache, config_space_cachesize, offset,
+			       &obj->attr->pcidev.linkspeed);
 
     if (isbridge) {
       HWLOC_BUILD_ASSERT(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);

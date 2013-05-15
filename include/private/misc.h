@@ -384,4 +384,30 @@ hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap
   return 0;
 }
 
+#define HWLOC_PCI_EXP_LNKSTA 0x12
+#define HWLOC_PCI_EXP_LNKSTA_SPEED 0x000f
+#define HWLOC_PCI_EXP_LNKSTA_WIDTH 0x03f0
+
+static __hwloc_inline int
+hwloc_pci_find_linkspeed(const unsigned char *config, size_t config_size,
+			 unsigned offset, float *linkspeed)
+{
+  unsigned linksta, speed, width;
+  float lanespeed;
+
+  if (offset + HWLOC_PCI_EXP_LNKSTA + 4 >= config_size)
+    return -1;
+
+  memcpy(&linksta, &config[offset + HWLOC_PCI_EXP_LNKSTA], 4);
+  speed = linksta & HWLOC_PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
+  width = (linksta & HWLOC_PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
+  /* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
+   * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
+   * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
+   */
+  lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
+  *linkspeed = lanespeed * width / 8; /* GB/s */
+  return 0;
+}
+
 #endif /* HWLOC_PRIVATE_MISC_H */

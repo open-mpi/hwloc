@@ -468,12 +468,8 @@ extern "C" {
 #define hwloc_fls32 HWLOC_NAME(fls32)
 #define hwloc_weight_long HWLOC_NAME(weight_long)
 
-#define HWLOC_PCI_CAPABILITY_LIST HWLOC_NAME_CAPS(PCI_CAPABILITY_LIST)
-#define HWLOC_PCI_STATUS_CAP_LIST HWLOC_NAME_CAPS(PCI_STATUS_CAP_LIST)
-#define HWLOC_PCI_CAP_LIST_ID HWLOC_NAME_CAPS(PCI_CAP_LIST_ID)
-#define HWLOC_PCI_CAP_LIST_NEXT HWLOC_NAME_CAPS(PCI_CAP_LIST_NEXT)
-#define HWLOC_PCI_STATUS HWLOC_NAME_CAPS(PCI_STATUS)
 #define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
+#define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
 
 /* private/cpuid.h */
 
