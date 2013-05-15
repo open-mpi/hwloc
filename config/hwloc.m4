@@ -1015,6 +1015,19 @@ EOF])
       [AC_MSG_WARN([Plugins not supported on non-native Windows build, plugins support cannot be enabled.])
        AC_MSG_ERROR([Cannot continue])])
 
+    # If we want plugins, look for ltdl.h and libltdl
+    if test "x$hwloc_have_plugins" = xyes; then
+      AC_CHECK_HEADER([ltdl.h], [],
+	[AC_MSG_WARN([Plugin support requested, but could not find ltdl.h])
+	 AC_MSG_ERROR([Cannot continue])])
+      AC_CHECK_LIB([ltdl], [lt_dlopenext],
+	[HWLOC_LIBS="$HWLOC_LIBS -lltdl"],
+	[AC_MSG_WARN([Plugin support requested, but could not find libltdl])
+	 AC_MSG_ERROR([Cannot continue])])
+      # Add libltdl static-build dependencies to hwloc.pc
+      HWLOC_CHECK_LTDL_DEPS
+    fi
+
     # Static components output file
     hwloc_static_components_dir=${HWLOC_top_builddir}/src
     mkdir -p ${hwloc_static_components_dir}
@@ -1239,3 +1252,72 @@ AC_DEFUN([_HWLOC_CHECK_DECLS], [
     [Define to 1 if you have the declaration of `$1', and to 0 if you don't])
 ])
 
+#-----------------------------------------------------------------------
+
+dnl HWLOC_CHECK_LTDL_DEPS
+dnl
+dnl Add ltdl dependencies to HWLOC_LIBS_PRIVATE
+AC_DEFUN([HWLOC_CHECK_LTDL_DEPS], [
+  # save variables that we'll modify below
+  save_lt_cv_dlopen="$lt_cv_dlopen"
+  save_lt_cv_dlopen_libs="$lt_cv_dlopen_libs"
+  save_lt_cv_dlopen_self="$lt_cv_dlopen_self"
+  ###########################################################
+  # code stolen from LT_SYS_DLOPEN_SELF in libtool.m4
+  case $host_os in
+  beos*)
+    lt_cv_dlopen="load_add_on"
+    lt_cv_dlopen_libs=
+    lt_cv_dlopen_self=yes
+    ;;
+
+  mingw* | pw32* | cegcc*)
+    lt_cv_dlopen="LoadLibrary"
+    lt_cv_dlopen_libs=
+    ;;
+
+  cygwin*)
+    lt_cv_dlopen="dlopen"
+    lt_cv_dlopen_libs=
+    ;;
+
+  darwin*)
+  # if libdl is installed we need to link against it
+    AC_CHECK_LIB([dl], [dlopen],
+                [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-ldl"],[
+    lt_cv_dlopen="dyld"
+    lt_cv_dlopen_libs=
+    lt_cv_dlopen_self=yes
+    ])
+    ;;
+
+  *)
+    AC_CHECK_FUNC([shl_load],
+          [lt_cv_dlopen="shl_load"],
+      [AC_CHECK_LIB([dld], [shl_load],
+            [lt_cv_dlopen="shl_load" lt_cv_dlopen_libs="-ldld"],
+        [AC_CHECK_FUNC([dlopen],
+              [lt_cv_dlopen="dlopen"],
+          [AC_CHECK_LIB([dl], [dlopen],
+                [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-ldl"],
+            [AC_CHECK_LIB([svld], [dlopen],
+                  [lt_cv_dlopen="dlopen" lt_cv_dlopen_libs="-lsvld"],
+              [AC_CHECK_LIB([dld], [dld_link],
+                    [lt_cv_dlopen="dld_link" lt_cv_dlopen_libs="-ldld"])
+              ])
+            ])
+          ])
+        ])
+      ])
+    ;;
+  esac
+  # end of code stolen from LT_SYS_DLOPEN_SELF in libtool.m4
+  ###########################################################
+
+  HWLOC_LIBS_PRIVATE="$HWLOC_LIBS_PRIVATE $lt_cv_dlopen_libs"
+
+  # restore modified variable in case the actual libtool code uses them
+  lt_cv_dlopen="$save_lt_cv_dlopen"
+  lt_cv_dlopen_libs="$save_lt_cv_dlopen_libs"
+  lt_cv_dlopen_self="$save_lt_cv_dlopen_self"
+])

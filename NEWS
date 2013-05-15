@@ -29,6 +29,7 @@ Version 1.7.1
   Thanks to Jirka Hladky for reporting the problem.
 * Fix embedding breakage caused by libltdl.
   Thanks to Pavan Balaji for reporting the problem.
+* Always use the system-wide libltdl instead of shipping one inside hwloc.
 * Document issues when enabling plugins while embedding hwloc in another
   project, in the documentation section Embedding hwloc in Other Software.
 * Add a FAQ entry "How to get useful topology information on NetBSD?"

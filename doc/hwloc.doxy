@@ -175,6 +175,10 @@ package is usually <tt>pciutils-devel</tt> or <tt>libpci-dev</tt>.  </li>
     The relevant development package is usually <tt>libxml2-devel</tt>
     or <tt>libxml2-dev</tt>.
 </li>
+<li>libtool's ltdl library for dynamic plugin loading.
+  The relevant development package is usually <tt>libtool-ltdl-devel</tt>
+  or <tt>libltdl-dev</tt>.
+</li>
 </ul>
 
 PCI and XML support may be statically built inside the main hwloc
