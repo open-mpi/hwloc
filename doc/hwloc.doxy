@@ -1200,8 +1200,7 @@ devices, see \ref faq_privileged for details.
 On Linux, a minimalistic PCI discovery may still be performed even
 if neither <tt>libpciaccess</tt> nor <tt>pciutils</tt> can be used.
 It only probes PCI devices and guesses hostbridges, and it also
-misses some attributes such as PCI device names, hardware revision
-or link speed.
+misses PCI device names.
 
 \section iodevices_hierarchy I/O object hierarchy
 
@@ -2250,7 +2249,7 @@ environment variable (see \ref envvar).
  This component can probe PCI devices on Linux without the help of external
  libraries such as libpciaccess. Its priority is lower than the pci component
  since it does not detect bridges (only guesses fake hostbridges)
- and misses some device attributes.
+ and misses device names.
 </dd>
 <dt>opencl</dt>
 <dd>

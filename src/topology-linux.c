@@ -4247,6 +4247,9 @@ const struct hwloc_component hwloc_linux_component = {
  ******* Linux PCI component *******
  ***********************************/
 
+#define HWLOC_PCI_REVISION_ID 0x08
+#define HWLOC_PCI_CAP_ID_EXP 0x10
+
 static int
 hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 {
@@ -4358,6 +4361,29 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 	fclose(file);
 	if (err < 0)
 	  hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
+      }
+    }
+
+    snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
+    file = fopen(path, "r");
+    if (file) {
+#define CONFIG_SPACE_CACHESIZE_TRY 256
+      unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE_TRY];
+      unsigned config_space_cachesize = CONFIG_SPACE_CACHESIZE_TRY;
+      unsigned offset;
+
+      config_space_cachesize = fread(config_space_cache, 1, CONFIG_SPACE_CACHESIZE_TRY, file);
+      fclose(file);
+      if (config_space_cachesize >= 64) {
+	/* cannot do anything without base config space */
+
+	/* get the revision */
+	obj->attr->pcidev.revision = config_space_cache[HWLOC_PCI_REVISION_ID];
+
+	/* try to get the link speed */
+	offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, HWLOC_PCI_CAP_ID_EXP);
+	if (offset > 0)
+	  hwloc_pci_find_linkspeed(config_space_cache, config_space_cachesize, offset, &obj->attr->pcidev.linkspeed);
       }
     }
 
