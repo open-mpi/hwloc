@@ -26,6 +26,8 @@ Version 1.7.1
   objects and NUMA distances.
   Thanks to Elena Elkina for reporting the problem and testing patches.
 * Fix PCI link speed discovery when using libpciaccess.
+* Fix invalid libpciaccess virtual function device/vendor IDs when using
+  SR-IOV PCI devices on Linux.
 * Fix GL component build with old NVCtrl releases.
   Thanks to Jirka Hladky for reporting the problem.
 * Fix embedding breakage caused by libltdl.
