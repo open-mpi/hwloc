@@ -1,4 +1,5 @@
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2013 Inria.  All rights reserved.
 # See COPYING in top-level directory.
 
 AC_INIT([hwloc-embedded-test], [1.0], [http://www.open-mpi.org/projects/hwloc/], [hwloc-embedded-test])
@@ -28,6 +29,8 @@ cat <<EOF
 === Done configuring hwloc (embedded mode)
 
 EOF
+
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 AM_ENABLE_SHARED
 AM_DISABLE_STATIC
