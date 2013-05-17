@@ -425,7 +425,7 @@ hwloc_disc_component_try_enable(struct hwloc_topology *topology,
 
   backend = comp->instantiate(comp, comparg, NULL, NULL);
   if (!backend) {
-    if (verbose_errors)
+    if (hwloc_components_verbose || verbose_errors)
       fprintf(stderr, "Failed to instantiate discovery component `%s'\n", comp->name);
     return -1;
   }
