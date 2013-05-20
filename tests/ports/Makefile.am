@@ -80,6 +80,7 @@ libhwloc_port_freebsd_la_CPPFLAGS = $(common_CPPFLAGS) \
 	-DHWLOC_FREEBSD_SYS \
 	-DHAVE_PTHREAD_NP_H \
 	-DHAVE_SYS_CPUSET_H \
+	-DHAVE_SYS_SYSCTL_H \
 	-DHAVE_SYSCTL \
 	-DHAVE_CPUSET_SETAFFINITY \
 	-Dhwloc_thread_t=pthread_t \
