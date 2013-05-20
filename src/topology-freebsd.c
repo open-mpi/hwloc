@@ -164,7 +164,7 @@ hwloc_freebsd_get_thread_cpubind(hwloc_topology_t topology __hwloc_attribute_unu
 #endif
 #endif
 
-#ifdef HAVE_SYSCTL
+#if (defined HAVE_SYSCTL) && (defined HAVE_SYS_SYSCTL_H)
 static void
 hwloc_freebsd_node_meminfo_info(struct hwloc_topology *topology)
 {
@@ -187,7 +187,7 @@ hwloc_look_freebsd(struct hwloc_backend *backend)
   }
 
   /* Add FreeBSD specific information */
-#ifdef HAVE_SYSCTL
+#if (defined HAVE_SYSCTL) && (defined HAVE_SYS_SYSCTL_H)
   hwloc_freebsd_node_meminfo_info(topology);
 #endif
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "FreeBSD");
