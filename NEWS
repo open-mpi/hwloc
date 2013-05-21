@@ -30,6 +30,30 @@ Version 1.8.0
     loaded topology now returns an error.
 
 
+Version 1.7.1
+-------------
+* Fix a failed assertion in the distance grouping code when loading a XML
+  file that already contains some groups.
+  Thanks to Laercio Lima Pilla for reporting the problem.
+* Remove unexpected Group objects when loading XML topologies with I/O
+  objects and NUMA distances.
+  Thanks to Elena Elkina for reporting the problem and testing patches.
+* Fix PCI link speed discovery when using libpciaccess.
+* Fix invalid libpciaccess virtual function device/vendor IDs when using
+  SR-IOV PCI devices on Linux.
+* Fix GL component build with old NVCtrl releases.
+  Thanks to Jirka Hladky for reporting the problem.
+* Fix embedding breakage caused by libltdl.
+  Thanks to Pavan Balaji for reporting the problem.
+* Always use the system-wide libltdl instead of shipping one inside hwloc.
+* Document issues when enabling plugins while embedding hwloc in another
+  project, in the documentation section Embedding hwloc in Other Software.
+* Add a FAQ entry "How to get useful topology information on NetBSD?"
+  in the documentation.
+* Somes fixes in the renaming code for embedding.
+* Miscellaneous minor build fixes.
+
+
 Version 1.7.0
 -------------
 * New operating system backends
