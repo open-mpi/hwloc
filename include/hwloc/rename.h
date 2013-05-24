@@ -462,10 +462,12 @@ extern "C" {
 
 #define hwloc_snprintf HWLOC_NAME(snprintf)
 #define hwloc_namecoloncmp HWLOC_NAME(namecoloncmp)
-/* FIXME: hwloc_ffsl may be a macro, but it may not be defined yet */
+#define hwloc_ffsl_manual HWLOC_NAME(ffsl_manual)
 #define hwloc_ffs32 HWLOC_NAME(ffs32)
-/* FIXME: hwloc_flsl may be a macro, but it may not be defined yet */
+#define hwloc_ffsl_from_ffs32 HWLOC_NAME(ffsl_from_ffs32)
+#define hwloc_flsl_manual HWLOC_NAME(flsl_manual)
 #define hwloc_fls32 HWLOC_NAME(fls32)
+#define hwloc_flsl_from_fls32 HWLOC_NAME(flsl_from_fls32)
 #define hwloc_weight_long HWLOC_NAME(weight_long)
 
 #define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
