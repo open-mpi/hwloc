@@ -47,23 +47,24 @@ include/private/autogen/config.h: $(HWLOC_top_builddir)/include/private/autogen/
 
 useless:
 	@echo "# Finding useless renaming"
-	@grep '^#define' $(HWLOC_top_srcdir)/include/hwloc/rename.h \
+	@if grep '^#define' $(HWLOC_top_srcdir)/include/hwloc/rename.h \
 		| awk '{print $$2}' \
 		| egrep -v '(HWLOC_RENAME_H|HWLOC_MUNGE_NAME|HWLOC_NAME)' \
 		| while read name ; do \
 			grep $$name -rwH $(HWLOC_top_srcdir)/include/ \
 			| grep -v rename.h: | grep -v .svn >/dev/null \
 			|| echo $$name; \
-			done
+			done \
+	 | grep '' ; then false ; else true ; fi
 	@echo "# done"
 
 # hwloc_uint64_t is ignored because it's always a typedef
 needed: dirs include/hwloc/autogen/config.h include/private/autogen/config.h
 	@echo "# Finding needed renaming"
 	@echo "# using $(TEST_CPPFLAGS)"
-	@cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I include -I $(HWLOC_top_srcdir)/include -I $(HWLOC_top_builddir)/include \
+	@if cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I include -I $(HWLOC_top_srcdir)/include -I $(HWLOC_top_builddir)/include \
 		| grep -vw hwloc_uint64_t \
-		| egrep -i '(^| |\*)hwloc_'
+		| egrep -i '(^| |\*)hwloc_' ; then false ; else true ; fi
 	@echo "# done"
 
 clean-local:
