@@ -1,4 +1,4 @@
-all-local: prepare _needed _useless restore
+all-local: needed useless
 
 TEST_CPPFLAGS =
 if HWLOC_HAVE_LINUX
@@ -29,23 +29,23 @@ if HWLOC_HAVE_NVML
 TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_NVML=1
 endif HWLOC_HAVE_NVML
 
-prepare:
-	@echo "# Enabling renaming in headers"
+.PHONY	=	dirs
+dirs:
+	@mkdir -p include/hwloc/autogen include/private/autogen
+
+include/hwloc/autogen/config.h: $(HWLOC_top_builddir)/include/hwloc/autogen/config.h
 	@sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
 		-e '/^#define HWLOC_SYM_PREFIX hwloc_/s/hwloc_/foobar_/1'	\
 		-e '/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/s/HWLOC_/FOOBAR_/2'	\
-		-i $(HWLOC_top_builddir)/include/hwloc/autogen/config.h $(HWLOC_top_builddir)/include/private/autogen/config.h
-	@echo "# done"
+		$< > $@
 
-restore:
-	@echo "# Restoring original headers"
-	@sed	-e '/^#define HWLOC_SYM_TRANSFORM 1/s/1/0/'			\
-		-e '/^#define HWLOC_SYM_PREFIX foobar_/s/foobar_/hwloc_/1'	\
-		-e '/^#define HWLOC_SYM_PREFIX_CAPS FOOBAR_/s/FOOBAR_/HWLOC_/2'	\
-		-i $(HWLOC_top_builddir)/include/hwloc/autogen/config.h $(HWLOC_top_builddir)/include/private/autogen/config.h
-	@echo "# done"
+include/private/autogen/config.h: $(HWLOC_top_builddir)/include/private/autogen/config.h
+	@sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
+		-e '/^#define HWLOC_SYM_PREFIX hwloc_/s/hwloc_/foobar_/1'	\
+		-e '/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/s/HWLOC_/FOOBAR_/2'	\
+		$< > $@
 
-_useless:
+useless:
 	@echo "# Finding useless renaming"
 	@grep '^#define' $(HWLOC_top_srcdir)/include/hwloc/rename.h \
 		| awk '{print $$2}' \
@@ -57,17 +57,16 @@ _useless:
 			done
 	@echo "# done"
 
-useless: prepare _useless restore
-
 # hwloc_uint64_t is ignored because it's always a typedef
-_needed:
+needed: dirs include/hwloc/autogen/config.h include/private/autogen/config.h
 	@echo "# Finding needed renaming"
 	@echo "# using $(TEST_CPPFLAGS)"
-	@cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I $(HWLOC_top_srcdir)/include -I $(HWLOC_top_builddir)/include \
+	@cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I include -I $(HWLOC_top_srcdir)/include -I $(HWLOC_top_builddir)/include \
 		| grep -vw hwloc_uint64_t \
 		| egrep -i '(^| |\*)hwloc_'
 	@echo "# done"
 
-needed: prepare _needed restore
+clean-local:
+	rm -rf include
 
 EXTRA_DIST	=	main.c
