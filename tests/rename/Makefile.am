@@ -59,10 +59,12 @@ _useless:
 
 useless: prepare _useless restore
 
+# hwloc_uint64_t is ignored because it's always a typedef
 _needed:
 	@echo "# Finding needed renaming"
 	@echo "# using $(TEST_CPPFLAGS)"
 	@cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I $(HWLOC_top_srcdir)/include -I $(HWLOC_top_builddir)/include \
+		| grep -vw hwloc_uint64_t \
 		| egrep -i '(^| |\*)hwloc_'
 	@echo "# done"
 
