@@ -29,18 +29,17 @@ if HWLOC_HAVE_NVML
 TEST_CPPFLAGS += -DHWLOC_TEST_RENAME_NVML=1
 endif HWLOC_HAVE_NVML
 
-.PHONY	=	dirs
 dirs:
-	@mkdir -p include/hwloc/autogen include/private/autogen
+	mkdir -p include/hwloc/autogen include/private/autogen
 
 include/hwloc/autogen/config.h: $(HWLOC_top_builddir)/include/hwloc/autogen/config.h
-	@sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
+	sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
 		-e '/^#define HWLOC_SYM_PREFIX hwloc_/s/hwloc_/foobar_/1'	\
 		-e '/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/s/HWLOC_/FOOBAR_/2'	\
 		$< > $@
 
 include/private/autogen/config.h: $(HWLOC_top_builddir)/include/private/autogen/config.h
-	@sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
+	sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
 		-e '/^#define HWLOC_SYM_PREFIX hwloc_/s/hwloc_/foobar_/1'	\
 		-e '/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/s/HWLOC_/FOOBAR_/2'	\
 		$< > $@
