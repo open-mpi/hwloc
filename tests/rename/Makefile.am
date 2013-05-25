@@ -33,16 +33,16 @@ dirs:
 	mkdir -p include/hwloc/autogen include/private/autogen
 
 include/hwloc/autogen/config.h: $(HWLOC_top_builddir)/include/hwloc/autogen/config.h
-	sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
-		-e '/^#define HWLOC_SYM_PREFIX hwloc_/s/hwloc_/foobar_/1'	\
-		-e '/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/s/HWLOC_/FOOBAR_/2'	\
-		$< > $@
+	sed	-e 's/^#define HWLOC_SYM_TRANSFORM 0/#define HWLOC_SYM_TRANSFORM 1/'                    \
+		-e 's/^#define HWLOC_SYM_PREFIX hwloc_/#define HWLOC_SYM_PREFIX foobar_/'               \
+		-e 's/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/#define HWLOC_SYM_PREFIX_CAPS FOOBAR_/'     \
+		$(HWLOC_top_builddir)/include/hwloc/autogen/config.h > include/hwloc/autogen/config.h
 
 include/private/autogen/config.h: $(HWLOC_top_builddir)/include/private/autogen/config.h
-	sed	-e '/^#define HWLOC_SYM_TRANSFORM 0/s/0/1/'			\
-		-e '/^#define HWLOC_SYM_PREFIX hwloc_/s/hwloc_/foobar_/1'	\
-		-e '/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/s/HWLOC_/FOOBAR_/2'	\
-		$< > $@
+	sed	-e 's/^#define HWLOC_SYM_TRANSFORM 0/#define HWLOC_SYM_TRANSFORM 1/'                    \
+		-e 's/^#define HWLOC_SYM_PREFIX hwloc_/#define HWLOC_SYM_PREFIX foobar_/'               \
+		-e 's/^#define HWLOC_SYM_PREFIX_CAPS HWLOC_/#define HWLOC_SYM_PREFIX_CAPS FOOBAR_/'     \
+		$(HWLOC_top_builddir)/include/private/autogen/config.h > include/private/autogen/config.h
 
 useless:
 	@echo "# Finding useless renaming"
@@ -57,11 +57,14 @@ useless:
 	 | grep '' ; then false ; else true ; fi
 	@echo "# done"
 
-# hwloc_uint64_t is ignored because it's always a typedef
+# hwloc_uint64_t is ignored because it's always a typedef.
+# we have to manually concat a##b because some cpp let gcc do it (at least cpp 4.2.1 on OpenBSD 5.2).
 needed: dirs include/hwloc/autogen/config.h include/private/autogen/config.h
 	@echo "# Finding needed renaming"
 	@echo "# using $(TEST_CPPFLAGS)"
-	@if cpp $(CPPFLAGS) $(TEST_CPPFLAGS) $(srcdir)/main.c -I include -I $(HWLOC_top_srcdir)/include -I $(HWLOC_top_builddir)/include \
+	@if cpp $(CPPFLAGS) $(TEST_CPPFLAGS) -Iinclude -I$(HWLOC_top_srcdir)/include -I$(HWLOC_top_builddir)/include $(srcdir)/main.c \
+		| sed -e 's/foobar_ ##   hwloc_ ## /foobar_hwloc_/g' \
+		| sed -e 's/FOOBAR_ ##   hwloc_ ## /FOOBAR_hwloc_/g' \
 		| grep -vw hwloc_uint64_t \
 		| egrep -i '(^| |\*)hwloc_' ; then false ; else true ; fi
 	@echo "# done"

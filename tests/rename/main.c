@@ -1,3 +1,7 @@
+/* don't let assert() stringify some hwloc names that would not
+ * renamed afterwards, and wouldn't be easy to filter out */
+#define NDEBUG 1
+
 #define _GNU_SOURCE 1
 #include "sched.h"
 
