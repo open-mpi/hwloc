@@ -201,7 +201,8 @@ if test x$hwloc_warn_may_use_libpci = xyes; then
   echo "libpci could be used instead but hwloc may be tainted by the GPL"
   echo "license of pciutils. Add --enable-libpci to enable it."
   if test "x$hwloc_linuxpci_happy" = "xyes"; then
-    echo "Only minimalistic Linux-specific PCI (linuxpci component) is enabled for now."
+    echo "Only the Linux-specific PCI (linuxpci component) is enabled for now."
+    echo "It misses bridges and device names."
   fi
   echo "***********************************************************************"
 fi

@@ -158,7 +158,7 @@ discovery:
 <li>libpci, from the pciutils package (GPL). The relevant development
 package is usually <tt>pciutils-devel</tt> or <tt>libpci-dev</tt>.  </li>
 </ol>
-On Linux, a minimalistic PCI discovery may still be performed
+On Linux, PCI discovery may still be performed
 even if none of the above libraries can be used.
 </li>
 
@@ -1197,10 +1197,10 @@ and the actual locality of these devices is only currently detected
 on Linux. Also, some operating systems require privileges for probing PCI
 devices, see \ref faq_privileged for details.
 
-On Linux, a minimalistic PCI discovery may still be performed even
+On Linux, PCI discovery may still be performed even
 if neither <tt>libpciaccess</tt> nor <tt>pciutils</tt> can be used.
-It only probes PCI devices and guesses hostbridges, and it also
-misses PCI device names.
+It really probes PCI devices while hostbridges are only guessed.
+And it also misses PCI device names.
 
 \section iodevices_hierarchy I/O object hierarchy
 
