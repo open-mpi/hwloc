@@ -1546,6 +1546,21 @@ restrict_object_nodeset(hwloc_topology_t topology, hwloc_obj_t *pobj, hwloc_node
   for_each_child_safe(child, obj, pchild)
     restrict_object_nodeset(topology, pchild, droppednodeset);
 }
+
+/* we don't want to merge groups that were inserted explicitly with the custom interface */
+static int
+can_merge_group(hwloc_topology_t topology, hwloc_obj_t obj)
+{
+  const char *value;
+  /* custom-inserted groups are in custom topologies and have no cpusets,
+   * don't bother calling hwloc_obj_get_info_by_name() and strcmp() uselessly.
+   */
+  if (!topology->backends->is_custom || obj->cpuset)
+    return 1;
+  value = hwloc_obj_get_info_by_name(obj, "Backend");
+  return (!value) || strcmp(value, "Custom");
+}
+
 /*
  * Merge with the only child if either the parent or the child has a type to be
  * ignored while keeping structure
@@ -1578,12 +1593,16 @@ merge_useless_child(hwloc_topology_t topology, hwloc_obj_t *pparent)
   child->next_sibling = NULL;
 
   /* Check whether parent and/or child can be replaced */
-  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE)
-    /* Parent can be ignored in favor of the child.  */
-    replaceparent = 1;
-  if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE)
-    /* Child can be ignored in favor of the parent.  */
-    replacechild = 1;
+  if (topology->ignored_types[parent->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
+    if (parent->type != HWLOC_OBJ_GROUP || can_merge_group(topology, parent))
+      /* Parent can be ignored in favor of the child.  */
+      replaceparent = 1;
+  }
+  if (topology->ignored_types[child->type] == HWLOC_IGNORE_TYPE_KEEP_STRUCTURE) {
+    if (child->type != HWLOC_OBJ_GROUP || can_merge_group(topology, child))
+      /* Child can be ignored in favor of the parent.  */
+      replacechild = 1;
+  }
 
   /* Decide which one to actually replace */
   if (replaceparent && replacechild) {

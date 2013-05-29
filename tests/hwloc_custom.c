@@ -48,9 +48,9 @@ int main(void)
   sw21 = hwloc_custom_insert_group_object_by_parent(global, sw2, 1);
   hwloc_custom_insert_topology(global, sw21, local, NULL);
   hwloc_custom_insert_topology(global, sw21, local, NULL);
+  hwloc_custom_insert_topology(global, sw21, local, NULL);
   sw22 = hwloc_custom_insert_group_object_by_parent(global, sw2, 1);
-  hwloc_custom_insert_topology(global, sw22, local, NULL);
-  hwloc_custom_insert_topology(global, sw22, local, NULL);
+  hwloc_custom_insert_topology(global, sw22, local, NULL); /* only one to check that it won't get merged */
 
   hwloc_topology_destroy(local);
 
@@ -64,7 +64,7 @@ int main(void)
   assert(hwloc_get_depth_type(global, 1) == HWLOC_OBJ_GROUP);
   assert(hwloc_get_nbobjs_by_depth(global, 1) == 2);
   assert(hwloc_get_depth_type(global, 2) == HWLOC_OBJ_GROUP);
-  assert(hwloc_get_nbobjs_by_depth(global, 2) == 4);
+  assert(hwloc_get_nbobjs_by_depth(global, 2) == 4); /* the last group of this level shouldn't be merged */
   assert(hwloc_get_depth_type(global, 3) == HWLOC_OBJ_MACHINE);
   assert(hwloc_get_nbobjs_by_type(global, HWLOC_OBJ_MACHINE) == 8);
   assert(hwloc_get_depth_type(global, 4) == HWLOC_OBJ_NODE);

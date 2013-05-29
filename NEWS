@@ -24,6 +24,8 @@ Version 1.8.0
     Linux when full discovery with libpciaccess or libpci isn't available.
     It misses bridges and device names.
 * Misc
+  + Never merge Group objects that were added explicitly by the user with
+    hwloc_custom_insert_group_object_by_parent().
   + Add --with-hwloc-plugins-path to specify the install/load directories
     of plugins.
   + Calling hwloc_topology_load() or hwloc_topology_set_*() on an already
