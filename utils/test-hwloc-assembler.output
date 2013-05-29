@@ -2,6 +2,7 @@
 <!DOCTYPE topology SYSTEM "hwloc.dtd">
 <topology>
   <object type="System" os_index="0">
+    <info name="Backend" value="Custom"/>
     <object type="Machine" os_index="0" cpuset="0x0000000f" complete_cpuset="0x0000000f" online_cpuset="0x0000000f" allowed_cpuset="0x0000000f" name="machine1" local_memory="4014239744">
       <page_type size="4096" count="980039"/>
       <page_type size="2097152" count="0"/>
