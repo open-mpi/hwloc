@@ -688,6 +688,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	    child->distances_count += obj->distances_count;
 	    child->distances = realloc(child->distances, child->distances_count * sizeof(*child->distances));
 	    memcpy(child->distances + obj->distances_count, obj->distances, obj->distances_count * sizeof(*child->distances));
+	    free(obj->distances);
 	  } else {
 	    child->distances_count = obj->distances_count;
 	    child->distances = obj->distances;
