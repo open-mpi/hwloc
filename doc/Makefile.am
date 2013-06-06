@@ -1,5 +1,5 @@
 # Copyright © 2009-2013 Inria.  All rights reserved.
-# Copyright © 2009-2012 Université Bordeaux 1
+# Copyright © 2009-2013 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -116,11 +116,8 @@ endif
 # of nested structurre/union declarations.
 #
 
-if HWLOC_BUILD_DOXYGEN
-$(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
-	rm -fr $(DOX_DIR)
-	$(DOXYGEN) $(DOX_CONFIG)
-	-$(SED_I) -e 's/__hwloc_restrict/restrict/g' \
+RENAME_SED = \
+	$(SED_I) -e 's/__hwloc_restrict/restrict/g' \
 	          -e 's/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g' \
 	          -e 's/__hwloc_attribute_unused//g' \
 	          -e 's/\\_\\-\\_\\-hwloc\\_\\-attribute\\_\\-unused//g' \
@@ -135,7 +132,13 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	          -e 's/HWLOC_DECLSPEC//g' \
 	          -e 's/HWLOC\\_\\-DECLSPEC//g' \
 	          -e 's/__hwloc_inline/inline/g' \
-	          -e 's/\\_\\-\\_\\-hwloc\\_\\-inline/inline/g' \
+	          -e 's/\\_\\-\\_\\-hwloc\\_\\-inline/inline/g'
+
+if HWLOC_BUILD_DOXYGEN
+$(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
+	rm -fr $(DOX_DIR)
+	$(DOXYGEN) $(DOX_CONFIG)
+	-$(RENAME_SED) \
 		$(DOX_DIR)/html/*.html $(DOX_DIR)/latex/*.tex $(DOX_DIR)/man/man3/*.3
 	@echo "Work-around spurious leading _ in doxygen filenames..."
 	-(cd $(DOX_DIR)/man/man3 ; \
@@ -148,6 +151,9 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	@rm -rf $(DOX_MAN_DIR)/man3
 	@mv $(DOX_DIR)/man.tmp $(DOX_MAN_DIR)/man3
 endif
+
+www-doc-sed:
+	-$(RENAME_SED) www.open-mpi.org/html/*.php
 
 #
 # Rules for building the PDF
