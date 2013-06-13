@@ -15,6 +15,8 @@ hwloc_fake_component_instantiate(struct hwloc_disc_component *component __hwloc_
 				 const void *_data2 __hwloc_attribute_unused,
 				 const void *_data3 __hwloc_attribute_unused)
 {
+  if (hwloc_plugin_check_namespace("fake", "hwloc_backend_alloc") < 0)
+    return NULL;
   if (getenv("HWLOC_DEBUG_FAKE_COMPONENT"))
     printf("fake component instantiated\n");
   return NULL;

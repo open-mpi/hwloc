@@ -13,7 +13,10 @@
 struct hwloc_backend;
 
 #include <hwloc.h>
-
+#ifdef HWLOC_INSIDE_PLUGIN
+/* needed for hwloc_plugin_check_namespace() */
+#include <ltdl.h>
+#endif
 
 
 
@@ -296,6 +299,49 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed os_index)
   memset(obj->attr, 0, sizeof(*obj->attr));
   /* do not allocate the cpuset here, let the caller do it */
   return obj;
+}
+
+/** \brief Make sure that plugins can lookup core symbols.
+ *
+ * This is a sanity check to avoid lazy-lookup failures when libhwloc
+ * is loaded within a plugin, and later tries to load its own plugins.
+ * This may fail (and abort the program) if libhwloc symbols are in a
+ * private namespace.
+ *
+ * Plugins should call this function as an early sanity check to avoid
+ * later crashes if lazy symbol resolution is used by the upper layer that
+ * loaded hwloc (e.g. OpenCL implementations using dlopen with RTLD_LAZY).
+ *
+ * \note The build system must define HWLOC_INSIDE_PLUGIN if and only if
+ * building the caller as a plugin.
+ */
+static __hwloc_inline int
+hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, const char *symbol __hwloc_attribute_unused)
+{
+#ifdef HWLOC_INSIDE_PLUGIN
+  lt_dlhandle handle;
+  void *sym;
+  handle = lt_dlopen(NULL);
+  if (!handle)
+    /* cannot check, assume things will work */
+    return 0;
+  sym = lt_dlsym(handle, symbol);
+  lt_dlclose(handle);
+  if (!sym) {
+    static int verboseenv_checked = 0;
+    static int verboseenv_value = 0;
+    if (!verboseenv_checked) {
+      char *verboseenv = getenv("HWLOC_PLUGINS_VERBOSE");
+      verboseenv_value = atoi(verboseenv);
+      verboseenv_checked = 1;
+    }
+    if (verboseenv_value)
+      fprintf(stderr, "Plugin `%s' disabling itself because it cannot find the `%s' core symbol.\n",
+	      pluginname, symbol);
+    return -1;
+  }
+#endif /* HWLOC_INSIDE_PLUGIN */
+  return 0;
 }
 
 /** @} */

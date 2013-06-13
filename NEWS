@@ -24,6 +24,8 @@ Version 1.8.0
     Linux when full discovery with libpciaccess or libpci isn't available.
     It misses bridges and device names.
 * Misc
+  + Add a sanity check during dynamic plugin loading to prevent some
+    crashes when hwloc is dynamically loaded by another plugin mechanisms.
   + Never merge Group objects that were added explicitly by the user with
     hwloc_custom_insert_group_object_by_parent().
   + Add --with-hwloc-plugins-path to specify the install/load directories

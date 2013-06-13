@@ -185,6 +185,9 @@ hwloc_nvml_component_instantiate(struct hwloc_disc_component *component,
   struct hwloc_backend *backend;
   struct hwloc_nvml_backend_data_s *data;
 
+  if (hwloc_plugin_check_namespace(component->name, "hwloc_backend_alloc") < 0)
+    return NULL;
+
   /* thissystem may not be fully initialized yet, we'll check flags in discover() */
 
   backend = hwloc_backend_alloc(component);
