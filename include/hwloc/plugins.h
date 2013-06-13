@@ -301,6 +301,14 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed os_index)
   return obj;
 }
 
+/** \brief Setup object cpusets/nodesets by OR'ing its children.
+ *
+ * Used when adding an object late in the topology, after propagating sets up and down.
+ * The caller should use this after inserting by cpuset (which means the cpusets is already OK).
+ * Typical case: PCI backend adding a hostbridge parent.
+ */
+HWLOC_DECLSPEC int hwloc_fill_object_sets(hwloc_obj_t obj);
+
 /** \brief Make sure that plugins can lookup core symbols.
  *
  * This is a sanity check to avoid lazy-lookup failures when libhwloc

@@ -1232,6 +1232,50 @@ add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
     add_default_object_sets(child, obj->cpuset != NULL);
 }
 
+/* Setup object cpusets/nodesets by OR'ing its children. */
+HWLOC_DECLSPEC int
+hwloc_fill_object_sets(hwloc_obj_t obj)
+{
+  hwloc_obj_t child;
+  assert(obj->cpuset != NULL);
+  child = obj->first_child;
+  while (child) {
+    assert(child->cpuset != NULL);
+    if (child->complete_cpuset) {
+      if (!obj->complete_cpuset)
+	obj->complete_cpuset = hwloc_bitmap_alloc();
+      hwloc_bitmap_or(obj->complete_cpuset, obj->complete_cpuset, child->complete_cpuset);
+    }
+    if (child->online_cpuset) {
+      if (!obj->online_cpuset)
+	obj->online_cpuset = hwloc_bitmap_alloc();
+      hwloc_bitmap_or(obj->online_cpuset, obj->online_cpuset, child->online_cpuset);
+    }
+    if (child->allowed_cpuset) {
+      if (!obj->allowed_cpuset)
+	obj->allowed_cpuset = hwloc_bitmap_alloc();
+      hwloc_bitmap_or(obj->allowed_cpuset, obj->allowed_cpuset, child->allowed_cpuset);
+    }
+    if (child->nodeset) {
+      if (!obj->nodeset)
+	obj->nodeset = hwloc_bitmap_alloc();
+      hwloc_bitmap_or(obj->nodeset, obj->nodeset, child->nodeset);
+    }
+    if (child->complete_nodeset) {
+      if (!obj->complete_nodeset)
+	obj->complete_nodeset = hwloc_bitmap_alloc();
+      hwloc_bitmap_or(obj->complete_nodeset, obj->complete_nodeset, child->complete_nodeset);
+    }
+    if (child->allowed_nodeset) {
+      if (!obj->allowed_nodeset)
+	obj->allowed_nodeset = hwloc_bitmap_alloc();
+      hwloc_bitmap_or(obj->allowed_nodeset, obj->allowed_nodeset, child->allowed_nodeset);
+    }
+    child = child->next_sibling;
+  }
+  return 0;
+}
+
 /* Propagate nodesets up and down */
 static void
 propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
