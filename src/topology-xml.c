@@ -946,10 +946,17 @@ int hwloc_topology_export_xml(hwloc_topology_t topology, const char *filename)
 
   env = getenv("HWLOC_NO_LIBXML_EXPORT");
   force_nolibxml = (env && atoi(env));
+retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
     ret = hwloc_nolibxml_callbacks->export_file(topology, filename);
-  else
+  else {
     ret = hwloc_libxml_callbacks->export_file(topology, filename);
+    if (ret < 0 && errno == ENOSYS) {
+      hwloc_libxml_callbacks = NULL;
+      goto retry;
+    }
+  }
+
 
   hwloc_localeswitch_fini();
   return ret;
@@ -972,10 +979,16 @@ int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, char **xmlbuffer,
 
   env = getenv("HWLOC_NO_LIBXML_EXPORT");
   force_nolibxml = (env && atoi(env));
+retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
     ret = hwloc_nolibxml_callbacks->export_buffer(topology, xmlbuffer, buflen);
-  else
+  else {
     ret = hwloc_libxml_callbacks->export_buffer(topology, xmlbuffer, buflen);
+    if (ret < 0 && errno == ENOSYS) {
+      hwloc_libxml_callbacks = NULL;
+      goto retry;
+    }
+  }
 
   hwloc_localeswitch_fini();
   return ret;
@@ -1132,10 +1145,16 @@ hwloc_xml_component_instantiate(struct hwloc_disc_component *component,
 
   env = getenv("HWLOC_NO_LIBXML_IMPORT");
   force_nolibxml = (env && atoi(env));
+retry:
   if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
     err = hwloc_nolibxml_callbacks->backend_init(data, xmlpath, xmlbuffer, xmlbuflen);
-  else
+  else {
     err = hwloc_libxml_callbacks->backend_init(data, xmlpath, xmlbuffer, xmlbuflen);
+    if (err < 0 && errno == ENOSYS) {
+      hwloc_libxml_callbacks = NULL;
+      goto retry;
+    }
+  }
   if (err < 0)
     goto out_with_data;
 
