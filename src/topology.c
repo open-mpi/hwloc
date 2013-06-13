@@ -2317,10 +2317,6 @@ next_cpubackend:
   if (hwloc_connect_levels(topology) < 0)
     return -1;
 
-  /* accumulate children memory in total_memory fields (only once parent is set) */
-  hwloc_debug("%s", "\nPropagate total memory up\n");
-  propagate_total_memory(topology->levels[0][0]);
-
   /*
    * Additional discovery with other backends
    */
@@ -2370,6 +2366,10 @@ next_noncpubackend:
     if (hwloc_connect_levels(topology) < 0)
       return -1;
   }
+
+  /* accumulate children memory in total_memory fields (only once parent is set) */
+  hwloc_debug("%s", "\nPropagate total memory up\n");
+  propagate_total_memory(topology->levels[0][0]);
 
   /*
    * Now that objects are numbered, take distance matrices from backends and put them in the main topology.
