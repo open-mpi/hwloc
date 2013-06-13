@@ -446,6 +446,8 @@ extern "C" {
 #define hwloc_component_type_t HWLOC_NAME(component_type_t)
 #define hwloc_component HWLOC_NAME(component)
 
+#define hwloc_plugin_check_namespace HWLOC_NAME(plugin_check_namespace)
+
 #define hwloc_insert_object_by_cpuset HWLOC_NAME(insert_object_by_cpuset)
 #define hwloc_report_error_t HWLOC_NAME(report_error_t)
 #define hwloc_report_os_error HWLOC_NAME(report_os_error)
