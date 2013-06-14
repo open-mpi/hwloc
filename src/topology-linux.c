@@ -3557,7 +3557,7 @@ hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pci
      */
     err = lstat(path, &st);
     if (err < 0 || !S_ISDIR(st.st_mode))
-      return 0;
+      goto trydeprecated;
 
     dir = opendir(path);
     if (dir) {
@@ -3577,6 +3577,7 @@ hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pci
     }
   }
 
+trydeprecated:
   if (hwloc_linux_deprecated_classlinks_model != 0) {
     /* deprecated sysfs: <device>/<class>:<name> */
     dir = opendir(devicepath);
