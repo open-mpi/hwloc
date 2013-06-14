@@ -3856,6 +3856,91 @@ hwloc_linux_lookup_host_block_class(struct hwloc_topology *topology, struct hwlo
   return res;
 }
 
+static int
+hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
+{
+  size_t pathlen;
+  DIR *devicedir, *hostdir;
+  struct dirent *devicedirent, *hostdirent;
+  size_t devicedlen, hostdlen;
+  char path[256];
+  int dummy;
+  int res = 0;
+
+  strcpy(path, pcidevpath);
+  pathlen = strlen(path);
+
+  devicedir = opendir(pcidevpath);
+  if (!devicedir)
+    return 0;
+
+  while ((devicedirent = readdir(devicedir)) != NULL) {
+    if (sscanf(devicedirent->d_name, "ide%d", &dummy) == 1) {
+      /* found ide%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], devicedirent->d_name);
+      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
+      hostdir = opendir(path);
+      if (!hostdir)
+	continue;
+      while ((hostdirent = readdir(hostdir)) != NULL) {
+	if (sscanf(hostdirent->d_name, "%d.%d", &dummy, &dummy) == 2) {
+	  /* found ide%d/%d.%d */
+	  path[pathlen] = '/';
+	  strcpy(&path[pathlen+1], hostdirent->d_name);
+	  pathlen += hostdlen = 1+strlen(hostdirent->d_name);
+	  /* lookup block class for real */
+	  res += hwloc_linux_class_readdir(topology, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", NULL);
+	  /* restore parent path */
+	  pathlen -= hostdlen;
+	  path[pathlen] = '\0';
+	}
+      }
+      closedir(hostdir);
+      /* restore parent path */
+      pathlen -= devicedlen;
+      path[pathlen] = '\0';
+    } else if (sscanf(devicedirent->d_name, "host%d", &dummy) == 1) {
+      /* found host%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], devicedirent->d_name);
+      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
+      res += hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
+      /* restore parent path */
+      pathlen -= devicedlen;
+      path[pathlen] = '\0';
+    } else if (sscanf(devicedirent->d_name, "ata%d", &dummy) == 1) {
+      /* found ata%d */
+      path[pathlen] = '/';
+      strcpy(&path[pathlen+1], devicedirent->d_name);
+      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
+      hostdir = opendir(path);
+      if (!hostdir)
+	continue;
+      while ((hostdirent = readdir(hostdir)) != NULL) {
+	if (sscanf(hostdirent->d_name, "host%d", &dummy) == 1) {
+	  /* found ata%d/host%d */
+	  path[pathlen] = '/';
+	  strcpy(&path[pathlen+1], hostdirent->d_name);
+	  pathlen += hostdlen = 1+strlen(hostdirent->d_name);
+	  /* lookup block class for real */
+          res += hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
+	  /* restore parent path */
+	  pathlen -= hostdlen;
+	  path[pathlen] = '\0';
+	}
+      }
+      closedir(hostdir);
+      /* restore parent path */
+      pathlen -= devicedlen;
+      path[pathlen] = '\0';
+    }
+  }
+  closedir(devicedir);
+
+  return res;
+}
+
 static void
 hwloc_linux_mic_class_fillinfos(struct hwloc_topology *topology __hwloc_attribute_unused, struct hwloc_obj *obj, const char *osdevpath)
 {
@@ -3974,91 +4059,6 @@ hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend, struct hwloc_o
     hwloc_linux_mic_class_fillinfos(topology, obj, path);
     res++;
   }
-
-  return res;
-}
-
-static int
-hwloc_linux_lookup_block_class(struct hwloc_topology *topology, struct hwloc_obj *pcidev, const char *pcidevpath)
-{
-  size_t pathlen;
-  DIR *devicedir, *hostdir;
-  struct dirent *devicedirent, *hostdirent;
-  size_t devicedlen, hostdlen;
-  char path[256];
-  int dummy;
-  int res = 0;
-
-  strcpy(path, pcidevpath);
-  pathlen = strlen(path);
-
-  devicedir = opendir(pcidevpath);
-  if (!devicedir)
-    return 0;
-
-  while ((devicedirent = readdir(devicedir)) != NULL) {
-    if (sscanf(devicedirent->d_name, "ide%d", &dummy) == 1) {
-      /* found ide%d */
-      path[pathlen] = '/';
-      strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
-      hostdir = opendir(path);
-      if (!hostdir)
-	continue;
-      while ((hostdirent = readdir(hostdir)) != NULL) {
-	if (sscanf(hostdirent->d_name, "%d.%d", &dummy, &dummy) == 2) {
-	  /* found ide%d/%d.%d */
-	  path[pathlen] = '/';
-	  strcpy(&path[pathlen+1], hostdirent->d_name);
-	  pathlen += hostdlen = 1+strlen(hostdirent->d_name);
-	  /* lookup block class for real */
-	  res += hwloc_linux_class_readdir(topology, pcidev, path, HWLOC_OBJ_OSDEV_BLOCK, "block", NULL);
-	  /* restore parent path */
-	  pathlen -= hostdlen;
-	  path[pathlen] = '\0';
-	}
-      }
-      closedir(hostdir);
-      /* restore parent path */
-      pathlen -= devicedlen;
-      path[pathlen] = '\0';
-    } else if (sscanf(devicedirent->d_name, "host%d", &dummy) == 1) {
-      /* found host%d */
-      path[pathlen] = '/';
-      strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
-      res += hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
-      /* restore parent path */
-      pathlen -= devicedlen;
-      path[pathlen] = '\0';
-    } else if (sscanf(devicedirent->d_name, "ata%d", &dummy) == 1) {
-      /* found ata%d */
-      path[pathlen] = '/';
-      strcpy(&path[pathlen+1], devicedirent->d_name);
-      pathlen += devicedlen = 1+strlen(devicedirent->d_name);
-      hostdir = opendir(path);
-      if (!hostdir)
-	continue;
-      while ((hostdirent = readdir(hostdir)) != NULL) {
-	if (sscanf(hostdirent->d_name, "host%d", &dummy) == 1) {
-	  /* found ata%d/host%d */
-	  path[pathlen] = '/';
-	  strcpy(&path[pathlen+1], hostdirent->d_name);
-	  pathlen += hostdlen = 1+strlen(hostdirent->d_name);
-	  /* lookup block class for real */
-          res += hwloc_linux_lookup_host_block_class(topology, pcidev, path, pathlen);
-	  /* restore parent path */
-	  pathlen -= hostdlen;
-	  path[pathlen] = '\0';
-	}
-      }
-      closedir(hostdir);
-      /* restore parent path */
-      pathlen -= devicedlen;
-      path[pathlen] = '\0';
-    }
-  }
-  closedir(devicedir);
 
   return res;
 }
