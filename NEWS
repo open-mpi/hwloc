@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.7.2
+-------------
+* Do not create invalid block OS devices on very old Linux kernel such
+  as RHEL4 2.6.9.
+
+
 Version 1.7.1
 -------------
 * Fix a failed assertion in the distance grouping code when loading a XML

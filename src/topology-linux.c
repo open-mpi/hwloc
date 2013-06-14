@@ -3542,14 +3542,23 @@ hwloc_linux_class_readdir(struct hwloc_topology *topology, struct hwloc_obj *pci
   DIR *dir;
   struct dirent *dirent;
   hwloc_obj_t obj;
-  int res = 0;
+  int res = 0, err;
 
   if (hwloc_linux_deprecated_classlinks_model == -2)
     hwloc_linux_check_deprecated_classlinks_model();
 
   if (hwloc_linux_deprecated_classlinks_model != 1) {
     /* modern sysfs: <device>/<class>/<name> */
+    struct stat st;
     snprintf(path, sizeof(path), "%s/%s", devicepath, classname);
+
+    /* some very host kernel (2.6.9/RHEL4) have <device>/<class> symlink without any way to find <name>.
+     * make sure <device>/<class> is a directory to avoid this case.
+     */
+    err = lstat(path, &st);
+    if (err < 0 || !S_ISDIR(st.st_mode))
+      return 0;
+
     dir = opendir(path);
     if (dir) {
       hwloc_linux_deprecated_classlinks_model = 0;
