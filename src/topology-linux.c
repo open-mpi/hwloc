@@ -259,6 +259,16 @@ hwloc_stat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
 #endif
 }
 
+static __hwloc_inline int
+hwloc_lstat(const char *p, struct stat *st, int d __hwloc_attribute_unused)
+{
+#ifdef HAVE_OPENAT
+    return hwloc_fstatat(p, st, AT_SYMLINK_NOFOLLOW, d);
+#else
+    return lstat(p, st);
+#endif
+}
+
 /* Static inline version of opendir so that we can use openat if we have
    it, but still preserve compiler parameter checking */
 static __hwloc_inline DIR *
@@ -3540,6 +3550,7 @@ hwloc_linux_class_readdir(struct hwloc_backend *backend,
 			  hwloc_linux_class_fillinfos_t fillinfo)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
   size_t classnamelen = strlen(classname);
   char path[256];
   DIR *dir;
@@ -3558,11 +3569,11 @@ hwloc_linux_class_readdir(struct hwloc_backend *backend,
     /* some very host kernel (2.6.9/RHEL4) have <device>/<class> symlink without any way to find <name>.
      * make sure <device>/<class> is a directory to avoid this case.
      */
-    err = lstat(path, &st);
+    err = hwloc_lstat(path, &st, root_fd);
     if (err < 0 || !S_ISDIR(st.st_mode))
       goto trydeprecated;
 
-    dir = opendir(path);
+    dir = hwloc_opendir(path, root_fd);
     if (dir) {
       data->deprecated_classlinks_model = 0;
       while ((dirent = readdir(dir)) != NULL) {
@@ -3583,7 +3594,7 @@ hwloc_linux_class_readdir(struct hwloc_backend *backend,
 trydeprecated:
   if (data->deprecated_classlinks_model != 0) {
     /* deprecated sysfs: <device>/<class>:<name> */
-    dir = opendir(devicepath);
+    dir = hwloc_opendir(devicepath, root_fd);
     if (dir) {
       while ((dirent = readdir(dir)) != NULL) {
 	if (strncmp(dirent->d_name, classname, classnamelen) || dirent->d_name[classnamelen] != ':')
@@ -3608,14 +3619,16 @@ trydeprecated:
  * look for net objects below a pcidev in sysfs
  */
 static void
-hwloc_linux_net_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused,
+hwloc_linux_net_class_fillinfos(struct hwloc_backend *backend,
 				struct hwloc_obj *obj, const char *osdevpath)
 {
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
   FILE *fd;
   struct stat st;
   char path[256];
   snprintf(path, sizeof(path), "%s/address", osdevpath);
-  fd = fopen(path, "r");
+  fd = hwloc_fopen(path, "r", root_fd);
   if (fd) {
     char address[128];
     if (fgets(address, sizeof(address), fd)) {
@@ -3627,9 +3640,9 @@ hwloc_linux_net_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_
     fclose(fd);
   }
   snprintf(path, sizeof(path), "%s/device/infiniband", osdevpath);
-  if (!stat(path, &st)) {
+  if (!hwloc_stat(path, &st, root_fd)) {
     snprintf(path, sizeof(path), "%s/dev_id", osdevpath);
-    fd = fopen(path, "r");
+    fd = hwloc_fopen(path, "r", root_fd);
     if (fd) {
       char hexid[16];
       if (fgets(hexid, sizeof(hexid), fd)) {
@@ -3658,15 +3671,17 @@ hwloc_linux_lookup_net_class(struct hwloc_backend *backend,
  * look for infiniband objects below a pcidev in sysfs
  */
 static void
-hwloc_linux_infiniband_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused,
+hwloc_linux_infiniband_class_fillinfos(struct hwloc_backend *backend,
 				       struct hwloc_obj *obj, const char *osdevpath)
 {
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
   FILE *fd;
   char path[256];
   unsigned i,j;
 
   snprintf(path, sizeof(path), "%s/node_guid", osdevpath);
-  fd = fopen(path, "r");
+  fd = hwloc_fopen(path, "r", root_fd);
   if (fd) {
     char guidvalue[20];
     if (fgets(guidvalue, sizeof(guidvalue), fd)) {
@@ -3680,7 +3695,7 @@ hwloc_linux_infiniband_class_fillinfos(struct hwloc_backend *backend __hwloc_att
   }
 
   snprintf(path, sizeof(path), "%s/sys_image_guid", osdevpath);
-  fd = fopen(path, "r");
+  fd = hwloc_fopen(path, "r", root_fd);
   if (fd) {
     char guidvalue[20];
     if (fgets(guidvalue, sizeof(guidvalue), fd)) {
@@ -3695,7 +3710,7 @@ hwloc_linux_infiniband_class_fillinfos(struct hwloc_backend *backend __hwloc_att
 
   for(i=1; ; i++) {
     snprintf(path, sizeof(path), "%s/ports/%u/lid", osdevpath, i);
-    fd = fopen(path, "r");
+    fd = hwloc_fopen(path, "r", root_fd);
     if (fd) {
       char lidvalue[11];
       if (fgets(lidvalue, sizeof(lidvalue), fd)) {
@@ -3713,7 +3728,7 @@ hwloc_linux_infiniband_class_fillinfos(struct hwloc_backend *backend __hwloc_att
     }
 
     snprintf(path, sizeof(path), "%s/ports/%u/lid_mask_count", osdevpath, i);
-    fd = fopen(path, "r");
+    fd = hwloc_fopen(path, "r", root_fd);
     if (fd) {
       char lidvalue[11];
       if (fgets(lidvalue, sizeof(lidvalue), fd)) {
@@ -3729,7 +3744,7 @@ hwloc_linux_infiniband_class_fillinfos(struct hwloc_backend *backend __hwloc_att
 
     for(j=0; ; j++) {
       snprintf(path, sizeof(path), "%s/ports/%u/gids/%u", osdevpath, i, j);
-      fd = fopen(path, "r");
+      fd = hwloc_fopen(path, "r", root_fd);
       if (fd) {
 	char gidvalue[40];
 	if (fgets(gidvalue, sizeof(gidvalue), fd)) {
@@ -3798,13 +3813,15 @@ static int
 hwloc_linux_lookup_host_block_class(struct hwloc_backend *backend,
 				    struct hwloc_obj *pcidev, char *path, size_t pathlen)
 {
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
   DIR *hostdir, *portdir, *targetdir;
   struct dirent *hostdirent, *portdirent, *targetdirent;
   size_t hostdlen, portdlen, targetdlen;
   int dummy;
   int res = 0;
 
-  hostdir = opendir(path);
+  hostdir = hwloc_opendir(path, root_fd);
   if (!hostdir)
     return 0;
 
@@ -3815,7 +3832,7 @@ hwloc_linux_lookup_host_block_class(struct hwloc_backend *backend,
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], hostdirent->d_name);
       pathlen += hostdlen = 1+strlen(hostdirent->d_name);
-      portdir = opendir(path);
+      portdir = hwloc_opendir(path, root_fd);
       if (!portdir)
 	continue;
       while ((portdirent = readdir(portdir)) != NULL) {
@@ -3840,7 +3857,7 @@ hwloc_linux_lookup_host_block_class(struct hwloc_backend *backend,
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], hostdirent->d_name);
       pathlen += hostdlen = 1+strlen(hostdirent->d_name);
-      targetdir = opendir(path);
+      targetdir = hwloc_opendir(path, root_fd);
       if (!targetdir)
 	continue;
       while ((targetdirent = readdir(targetdir)) != NULL) {
@@ -3871,6 +3888,8 @@ static int
 hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
 			       struct hwloc_obj *pcidev, const char *pcidevpath)
 {
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
   size_t pathlen;
   DIR *devicedir, *hostdir;
   struct dirent *devicedirent, *hostdirent;
@@ -3882,7 +3901,7 @@ hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
   strcpy(path, pcidevpath);
   pathlen = strlen(path);
 
-  devicedir = opendir(pcidevpath);
+  devicedir = hwloc_opendir(pcidevpath, root_fd);
   if (!devicedir)
     return 0;
 
@@ -3892,7 +3911,7 @@ hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], devicedirent->d_name);
       pathlen += devicedlen = 1+strlen(devicedirent->d_name);
-      hostdir = opendir(path);
+      hostdir = hwloc_opendir(path, root_fd);
       if (!hostdir)
 	continue;
       while ((hostdirent = readdir(hostdir)) != NULL) {
@@ -3926,7 +3945,7 @@ hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
       path[pathlen] = '/';
       strcpy(&path[pathlen+1], devicedirent->d_name);
       pathlen += devicedlen = 1+strlen(devicedirent->d_name);
-      hostdir = opendir(path);
+      hostdir = hwloc_opendir(path, root_fd);
       if (!hostdir)
 	continue;
       while ((hostdirent = readdir(hostdir)) != NULL) {
@@ -3954,16 +3973,18 @@ hwloc_linux_lookup_block_class(struct hwloc_backend *backend,
 }
 
 static void
-hwloc_linux_mic_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_unused,
+hwloc_linux_mic_class_fillinfos(struct hwloc_backend *backend,
 				struct hwloc_obj *obj, const char *osdevpath)
 {
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
   FILE *fd;
   char path[256];
 
   hwloc_obj_add_info(obj, "CoProcType", "MIC");
 
   snprintf(path, sizeof(path), "%s/family", osdevpath);
-  fd = fopen(path, "r");
+  fd = hwloc_fopen(path, "r", root_fd);
   if (fd) {
     char family[64];
     if (fgets(family, sizeof(family), fd)) {
@@ -3976,7 +3997,7 @@ hwloc_linux_mic_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_
   }
 
   snprintf(path, sizeof(path), "%s/sku", osdevpath);
-  fd = fopen(path, "r");
+  fd = hwloc_fopen(path, "r", root_fd);
   if (fd) {
     char sku[64];
     if (fgets(sku, sizeof(sku), fd)) {
@@ -3989,7 +4010,7 @@ hwloc_linux_mic_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_
   }
 
   snprintf(path, sizeof(path), "%s/active_cores", osdevpath);
-  fd = fopen(path, "r");
+  fd = hwloc_fopen(path, "r", root_fd);
   if (fd) {
     char string[10];
     if (fgets(string, sizeof(string), fd)) {
@@ -4001,7 +4022,7 @@ hwloc_linux_mic_class_fillinfos(struct hwloc_backend *backend __hwloc_attribute_
   }
 
   snprintf(path, sizeof(path), "%s/memsize", osdevpath);
-  fd = fopen(path, "r");
+  fd = hwloc_fopen(path, "r", root_fd);
   if (fd) {
     char string[20];
     if (fgets(string, sizeof(string), fd)) {
@@ -4025,6 +4046,7 @@ hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend,
 				   struct hwloc_obj *pcidev)
 {
   struct hwloc_linux_backend_data_s *data = backend->private_data;
+  int root_fd = data->root_fd;
   char path[256];
   struct stat st;
   hwloc_obj_t obj;
@@ -4044,7 +4066,7 @@ hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend,
     data->mic_id_max = 0;
 
     /* read the entire class and find the max id of mic%u dirents */
-    dir = opendir("/sys/devices/virtual/mic");
+    dir = hwloc_opendir("/sys/devices/virtual/mic", root_fd);
     if (!dir) {
       dir = opendir("/sys/class/mic");
       if (!dir)
@@ -4065,7 +4087,7 @@ hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend,
   for(idx=0; idx<data->mic_id_max; idx++) {
     snprintf(path, sizeof(path), "/sys/class/mic/mic%u/pci_%02x:%02x.%02x",
 	     idx, pcidev->attr->pcidev.bus,  pcidev->attr->pcidev.dev,  pcidev->attr->pcidev.func);
-    if (stat(path, &st) < 0)
+    if (hwloc_stat(path, &st, root_fd) < 0)
       continue;
     snprintf(path, sizeof(path), "mic%u", idx);
     obj = hwloc_linux_add_os_device(backend, pcidev, HWLOC_OBJ_OSDEV_COPROC, path);
@@ -4084,16 +4106,11 @@ static int
 hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc_backend *caller __hwloc_attribute_unused,
 				      struct hwloc_obj *obj)
 {
-  struct hwloc_linux_backend_data_s *data = backend->private_data;
   char pcidevpath[256];
   int res = 0, mic;
 
   /* this callback is only used in the libpci backend for now */
   assert(obj->type == HWLOC_OBJ_PCI_DEVICE);
-
-  if (!data->is_real_fsroot)
-    /* not supported for now */
-    return 0;
 
   snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
 	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
@@ -4286,11 +4303,6 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     root_fd = dup(root_fd);
   else
     root_fd = open("/", O_RDONLY | O_DIRECTORY);
-
-  /* TODO we could make all this work:
-   * - update all the above OS device code to support root_fd
-   * - update hwloc-gather-topology to gather PCI devices and their device symlinked-directory (and maybe more)
-   */
 
   dir = hwloc_opendir("/sys/bus/pci/devices/", root_fd);
   if (!dir)
