@@ -50,7 +50,7 @@ tmpdir=`mktemp -d`
 export HWLOC_THISSYSTEM=0
 
 echo "Saving current system topology to XML..."
-if ! "$lstopo" "$tmpdir/save.xml" ; then
+if ! "$lstopo" --no-io "$tmpdir/save.xml" ; then
     error "Failed"
     exit 1
 fi
@@ -69,7 +69,7 @@ fi
 export HWLOC_FSROOT="$tmpdir/save"
 
 echo "Saving tarball topology to XML..."
-if ! "$lstopo" "$tmpdir/save2.xml" ; then
+if ! "$lstopo" --no-io "$tmpdir/save2.xml" ; then
     error "Failed"
     exit 1
 fi
