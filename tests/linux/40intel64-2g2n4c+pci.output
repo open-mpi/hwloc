@@ -231,7 +231,7 @@
           </object>
         </object>
       </object>
-      <object type="Bridge" os_index="1" bridge_type="0-1" depth="0" bridge_pci="0000:[00-09]">
+      <object type="Bridge" bridge_type="0-1" depth="0" bridge_pci="0000:[00-09]">
         <object type="PCIDev" os_index="0" pci_busid="0000:00:00.0" pci_type="0600 [8086:3407] [1028:02d3] 22" pci_link_speed="0.000000"/>
         <object type="PCIDev" os_index="48" pci_busid="0000:00:03.0" pci_type="0604 [8086:340a] [0000:0000] 22" pci_link_speed="0.000000"/>
         <object type="PCIDev" os_index="80" pci_busid="0000:00:05.0" pci_type="0604 [8086:340c] [0000:0000] 22" pci_link_speed="0.000000"/>
@@ -477,7 +477,7 @@
           </object>
         </object>
       </object>
-      <object type="Bridge" os_index="0" bridge_type="0-1" depth="0" bridge_pci="0000:[40-43]">
+      <object type="Bridge" bridge_type="0-1" depth="0" bridge_pci="0000:[40-43]">
         <object type="PCIDev" os_index="262160" pci_busid="0000:40:01.0" pci_type="0604 [8086:3408] [0000:0000] 22" pci_link_speed="0.000000"/>
         <object type="PCIDev" os_index="262192" pci_busid="0000:40:03.0" pci_type="0604 [8086:340a] [0000:0000] 22" pci_link_speed="0.000000"/>
         <object type="PCIDev" os_index="262224" pci_busid="0000:40:05.0" pci_type="0604 [8086:340c] [0000:0000] 22" pci_link_speed="0.000000"/>

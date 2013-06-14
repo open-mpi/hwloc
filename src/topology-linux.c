@@ -4278,7 +4278,6 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_backend *tmpbackend;
   hwloc_obj_t hostbridges = NULL; /* temporary list */
-  unsigned current_hostbridge = 0;
   int root_fd = -1;
   DIR *dir;
   struct dirent *dirent;
@@ -4432,7 +4431,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 	hostbridge->attr->bridge.downstream.pci.subordinate_bus = bus;
     } else {
       /* allocate a new hostbridge */
-      hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, current_hostbridge++);
+      hostbridge = hwloc_alloc_setup_object(HWLOC_OBJ_BRIDGE, -1);
       hostbridge->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_HOST;
       hostbridge->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
       hostbridge->attr->bridge.downstream.pci.domain = domain;
