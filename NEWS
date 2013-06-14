@@ -34,6 +34,9 @@ Version 1.8.0
     of plugins.
   + Calling hwloc_topology_load() or hwloc_topology_set_*() on an already
     loaded topology now returns an error.
+  + hwloc-gather-topology may now gather I/O-related files on Linux when
+    --io is given. Only the linuxpci component supports discovering I/O
+    objects from these extended tarballs.
 
 
 Version 1.7.1
