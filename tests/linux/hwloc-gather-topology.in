@@ -34,6 +34,10 @@ usage()
    echo "  $0 /tmp/\$(uname -n)"
 }
 
+if test $# -lt 1 ; then
+  usage
+  exit 1
+fi
 name="$1"; shift
 if [ -z "$name" -o x`echo $name | cut -c1` = x- ] ; then
   [ x$name != x -a x$name != x-h -a x$name != x--help ] && echo "Unrecognized option: $name"
