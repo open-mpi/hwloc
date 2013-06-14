@@ -55,14 +55,6 @@ int main(void)
   nbwhole = get_nb_pcidev(HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO, 1, NULL, 0);
   assert(nbwhole >= nbnormal); /* will get at least as much objects */
 
-  /* with HWLOC_THISSYSTEM=0, won't get any object */
-  nb = get_nb_pcidev(0, 0, NULL, 0);
-  assert(!nb);
-  nb = get_nb_pcidev(HWLOC_TOPOLOGY_FLAG_IO_DEVICES, 0, NULL, 0);
-  assert(!nb);
-  nb = get_nb_pcidev(HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO, 0, NULL, 0);
-  assert(!nb);
-
   /* XML with with HWLOC_THISSYSTEM=1, should get as many object as a native load */
   nb = get_nb_pcidev(0, 1, xmlbuf, xmlbuflen);
   assert(!nb);
@@ -78,6 +70,16 @@ int main(void)
   assert(nb == nbnormal);
   nb = get_nb_pcidev(HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO, 0, xmlbuf, xmlbuflen);
   assert(nb == nbwhole);
+
+  /* make sure we don't use linuxpci backend, it works fine when HWLOC_THISSYSTEM=0 */
+  putenv("HWLOC_COMPONENTS=-linuxpci");
+  /* with HWLOC_THISSYSTEM=0, won't get any object */
+  nb = get_nb_pcidev(0, 0, NULL, 0);
+  assert(!nb);
+  nb = get_nb_pcidev(HWLOC_TOPOLOGY_FLAG_IO_DEVICES, 0, NULL, 0);
+  assert(!nb);
+  nb = get_nb_pcidev(HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO, 0, NULL, 0);
+  assert(!nb);
 
   hwloc_free_xmlbuffer(topology, xmlbuf);
   hwloc_topology_destroy(topology);
