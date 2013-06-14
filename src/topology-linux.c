@@ -4079,12 +4079,6 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
   assert(obj->type == HWLOC_OBJ_PCI_DEVICE);
 
   /* this should not be called if the backend isn't the real OS one */
-#ifdef HWLOC_DEBUG
-  {
-    int cmp = strcmp(backend->component->name, "linux");
-    assert(!cmp);
-  }
-#endif
   assert(data->is_real_fsroot);
 
   snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
@@ -4125,12 +4119,6 @@ hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
 	 || (obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI));
 
   /* this should not be called if the backend isn't the real OS one */
-#ifdef HWLOC_DEBUG
-  {
-    int cmp = strcmp(backend->component->name, "linux");
-    assert(!cmp);
-  }
-#endif
   assert(data->is_real_fsroot);
 
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
