@@ -38,9 +38,8 @@
 #endif
 
 struct hwloc_linux_backend_data_s {
-  char *root_path; /* The path of the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
-
+  int is_real_fsroot; /* Boolean saying whether root_fd points to the real filesystem root of the system */
   unsigned mic_id_max; /* -1 if not tried yet, 0 if none to lookup, maxid+1 otherwise */
 };
 
@@ -4086,10 +4085,7 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
     assert(!cmp);
   }
 #endif
-  if (data->root_path) {
-    assert(strlen(data->root_path) == 1);
-    assert(data->root_path[0] == '/');
-  }
+  assert(data->is_real_fsroot);
 
   snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
 	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
@@ -4135,10 +4131,7 @@ hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
     assert(!cmp);
   }
 #endif
-  if (data->root_path) {
-    assert(strlen(data->root_path) == 1);
-    assert(data->root_path[0] == '/');
-  }
+  assert(data->is_real_fsroot);
 
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
 	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
@@ -4165,8 +4158,6 @@ hwloc_linux_backend_disable(struct hwloc_backend *backend)
   struct hwloc_linux_backend_data_s *data = backend->private_data;
 #ifdef HAVE_OPENAT
   close(data->root_fd);
-  free(data->root_path);
-  data->root_path = NULL;
 #endif
   free(data);
 }
@@ -4198,6 +4189,8 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   backend->notify_new_object = hwloc_linux_backend_notify_new_object;
   backend->disable = hwloc_linux_backend_disable;
 
+  /* default values */
+  data->is_real_fsroot = 1;
   if (!fsroot_path)
     fsroot_path = "/";
 
@@ -4206,17 +4199,16 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   if (root < 0)
     goto out_with_data;
 
-  if (strcmp(fsroot_path, "/"))
+  if (strcmp(fsroot_path, "/")) {
     backend->is_thissystem = 0;
+    data->is_real_fsroot = 0;
+  }
 
-  data->root_path = strdup(fsroot_path);
 #else
   if (strcmp(fsroot_path, "/")) {
     errno = ENOSYS;
     goto out_with_data;
   }
-
-  data->root_path = NULL;
 #endif
   data->root_fd = root;
 
