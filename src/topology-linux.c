@@ -4078,8 +4078,9 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
   /* this callback is only used in the libpci backend for now */
   assert(obj->type == HWLOC_OBJ_PCI_DEVICE);
 
-  /* this should not be called if the backend isn't the real OS one */
-  assert(data->is_real_fsroot);
+  if (!data->is_real_fsroot)
+    /* not supported for now */
+    return 0;
 
   snprintf(pcidevpath, sizeof(pcidevpath), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/",
 	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
@@ -4244,8 +4245,10 @@ static int
 hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
+  struct hwloc_backend *tmpbackend;
   hwloc_obj_t hostbridges = NULL; /* temporary list */
   unsigned current_hostbridge = 0;
+  int root_fd = -1;
   DIR *dir;
   struct dirent *dirent;
   int res = 0;
@@ -4254,20 +4257,31 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
 
-  /* TODO we could make this work:
-   * - find the linux backend private_data and reuse its root_fd
+  /* hackily find the linux backend to steal its fsroot */
+  tmpbackend = topology->backends;
+  while (tmpbackend) {
+    if (tmpbackend->component == &hwloc_linux_disc_component) {
+      root_fd = ((struct hwloc_linux_backend_data_s *) tmpbackend->private_data)->root_fd;
+      hwloc_debug("linuxpci backend stole linux backend root_fd %d\n", root_fd);
+      break;
+    }
+    tmpbackend = tmpbackend->next;
+  }
+  /* take our own descriptor, either pointing to linux fsroot, or to / if not found */
+  if (root_fd >= 0)
+    root_fd = dup(root_fd);
+  else
+    root_fd = open("/", O_RDONLY | O_DIRECTORY);
+
+  /* TODO we could make all this work:
    * - update all the above OS device code to support root_fd
    * - make hwloc_linux_deprecated_classlinks_model a per-topology variable
    * - update hwloc-gather-topology to gather PCI devices and their device symlinked-directory (and maybe more)
    */
-  if (!hwloc_topology_is_thissystem(topology)) {
-    hwloc_debug("%s", "\nno PCI detection (not thissystem)\n");
-    return 0;
-  }
 
-  dir = opendir("/sys/bus/pci/devices/");
+  dir = hwloc_opendir("/sys/bus/pci/devices/", root_fd);
   if (!dir)
-    return 0;
+    goto out_with_rootfd;
 
   while ((dirent = readdir(dir)) != NULL) {
     unsigned domain, bus, dev, func;
@@ -4302,35 +4316,35 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     obj->attr->pcidev.linkspeed = 0;
 
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/vendor", dirent->d_name);
-    file = fopen(path, "r");
+    file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
       obj->attr->pcidev.vendor_id = strtoul(value, NULL, 16);
     }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/device", dirent->d_name);
-    file = fopen(path, "r");
+    file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
       obj->attr->pcidev.device_id = strtoul(value, NULL, 16);
     }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/class", dirent->d_name);
-    file = fopen(path, "r");
+    file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
       obj->attr->pcidev.class_id = strtoul(value, NULL, 16) >> 8;
     }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_vendor", dirent->d_name);
-    file = fopen(path, "r");
+    file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
       obj->attr->pcidev.subvendor_id = strtoul(value, NULL, 16);
     }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_device", dirent->d_name);
-    file = fopen(path, "r");
+    file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
@@ -4345,7 +4359,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
       hwloc_bitmap_sscanf(cpuset, env);
     } else {
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/local_cpus", dirent->d_name);
-      file = fopen(path, "r");
+      file = hwloc_fopen(path, "r", root_fd);
       if (file) {
 	err = hwloc_linux_parse_cpumap_file(file, cpuset);
 	fclose(file);
@@ -4355,7 +4369,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     }
 
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
-    file = fopen(path, "r");
+    file = hwloc_fopen(path, "r", root_fd);
     if (file) {
 #define CONFIG_SPACE_CACHESIZE_TRY 256
       unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE_TRY];
@@ -4477,6 +4491,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     hwloc_insert_object_by_parent(topology, parent, hostbridge);
   }
 
+ out_with_rootfd:
+  close(root_fd);
   return res;
 }
 
