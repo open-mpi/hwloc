@@ -2199,13 +2199,11 @@ hwloc_discover(struct hwloc_topology *topology)
   unsigned discoveries = 0;
   unsigned need_reconnect = 0;
 
-  /* Raw detection, from coarser levels to finer levels for more efficiency.  */
-
-  /* hwloc_look_* functions should use hwloc_obj_add to add objects initialized
-   * through hwloc_alloc_setup_object. For node levels, nodeset, memory_Kb and
-   * huge_page_free must be initialized. For cache levels, memory_kB and
-   * attr->cache.depth must be initialized. For misc levels, attr->misc.depth
-   * must be initialized.
+  /* discover() callbacks should use hwloc_insert to add objects initialized
+   * through hwloc_alloc_setup_object.
+   * For node levels, nodeset and memory must be initialized.
+   * For cache levels, memory and type/depth must be initialized.
+   * For group levels, depth must be initialized.
    */
 
   /* There must be at least a PU object for each logical processor, at worse
@@ -2237,12 +2235,6 @@ hwloc_discover(struct hwloc_topology *topology)
    * If such field doesn't exist yet, it can be allocated, and initialized to
    * zero (for complete), or to full (for online and allowed). The values are
    * automatically propagated to the whole tree after detection.
-   *
-   * Here, we only allocate cpusets for the root object.
-   */
-
-  /* Each OS type should also fill the bind functions pointers, at least the
-   * set_cpubind one
    */
 
   /*
