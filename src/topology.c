@@ -899,7 +899,7 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
 
   if (hwloc_bitmap_iszero(cpuset))
     return NULL;
-  if (!hwloc_bitmap_isincluded(cpuset, hwloc_topology_get_complete_cpuset(topology)))
+  if (!hwloc_bitmap_isincluded(cpuset, hwloc_topology_get_topology_cpuset(topology)))
     return NULL;
 
   obj = hwloc_alloc_setup_object(HWLOC_OBJ_MISC, -1);
