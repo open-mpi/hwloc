@@ -2283,7 +2283,8 @@ next_cpubackend:
   hwloc_distances_finalize_os(topology);
   hwloc_group_by_distances(topology);
 
-  /* First tweak a bit to clean the topology.  */
+  /* Update objects cpusets and nodesets now that the CPU/GLOBAL backend populated PUs and nodes */
+
   hwloc_debug("%s", "\nRestrict topology cpusets to existing PU and NODE objects\n");
   collect_proc_cpuset(topology->levels[0][0], NULL);
 
@@ -2315,48 +2316,22 @@ next_cpubackend:
     print_objects(topology, 0, topology->levels[0][0]);
   }
 
-  hwloc_debug("%s", "\nRemoving ignored objects\n");
-  remove_ignored(topology, &topology->levels[0][0]);
-
-  print_objects(topology, 0, topology->levels[0][0]);
-
-  hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
-  remove_empty(topology, &topology->levels[0][0]);
-
-  if (!topology->levels[0][0]) {
-    fprintf(stderr, "Topology became empty, aborting!\n");
-    abort();
-  }
-
-  print_objects(topology, 0, topology->levels[0][0]);
-
-  hwloc_debug("%s", "\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
-  merge_useless_child(topology, &topology->levels[0][0]);
-
-  print_objects(topology, 0, topology->levels[0][0]);
-
   hwloc_debug("%s", "\nAdd default object sets\n");
   add_default_object_sets(topology->levels[0][0], 0);
 
+  /* Now connect handy pointers to make remaining discovery easier. */
   hwloc_debug("%s", "\nOk, finished tweaking, now connect\n");
-
-  /* Now connect handy pointers.  */
-
   hwloc_connect_children(topology->levels[0][0]);
-
-  need_reconnect = 0;
-
-  print_objects(topology, 0, topology->levels[0][0]);
-
-  /* Explore the resulting topology level by level.  */
-
   if (hwloc_connect_levels(topology) < 0)
     return -1;
+  print_objects(topology, 0, topology->levels[0][0]);
 
   /*
    * Additional discovery with other backends
    */
+
   backend = topology->backends;
+  need_reconnect = 0;
   while (NULL != backend) {
     int err;
     if (backend->component->type == HWLOC_DISC_COMPONENT_TYPE_CPU
@@ -2389,19 +2364,32 @@ next_noncpubackend:
   if (gotsomeio) {
     hwloc_drop_useless_io(topology, topology->levels[0][0]);
     hwloc_debug("%s", "\nNow reconnecting\n");
-    hwloc_connect_children(topology->levels[0][0]);
-    if (hwloc_connect_levels(topology) < 0)
-      return -1;
-    need_reconnect = 0;
     print_objects(topology, 0, topology->levels[0][0]);
     hwloc_propagate_bridge_depth(topology, topology->levels[0][0], 0);
   }
 
-  if (need_reconnect) {
-    hwloc_connect_children(topology->levels[0][0]);
-    if (hwloc_connect_levels(topology) < 0)
-      return -1;
+  /* Removed some stuff */
+
+  hwloc_debug("%s", "\nRemoving ignored objects\n");
+  remove_ignored(topology, &topology->levels[0][0]);
+  print_objects(topology, 0, topology->levels[0][0]);
+
+  hwloc_debug("%s", "\nRemoving empty objects except numa nodes and PCI devices\n");
+  remove_empty(topology, &topology->levels[0][0]);
+  if (!topology->levels[0][0]) {
+    fprintf(stderr, "Topology became empty, aborting!\n");
+    abort();
   }
+  print_objects(topology, 0, topology->levels[0][0]);
+
+  hwloc_debug("%s", "\nRemoving objects whose type has HWLOC_IGNORE_TYPE_KEEP_STRUCTURE and have only one child or are the only child\n");
+  merge_useless_child(topology, &topology->levels[0][0]);
+  print_objects(topology, 0, topology->levels[0][0]);
+
+  /* Reconnect things after all these changes */
+  hwloc_connect_children(topology->levels[0][0]);
+  if (hwloc_connect_levels(topology) < 0)
+    return -1;
 
   /* accumulate children memory in total_memory fields (only once parent is set) */
   hwloc_debug("%s", "\nPropagate total memory up\n");
