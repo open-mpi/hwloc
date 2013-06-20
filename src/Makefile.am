@@ -33,6 +33,7 @@ sources = \
         components.c \
         bind.c \
         bitmap.c \
+        pci-common.c \
         misc.c \
         base64.c \
         topology-noos.c \

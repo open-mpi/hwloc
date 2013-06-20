@@ -455,6 +455,7 @@ extern "C" {
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_fill_object_sets HWLOC_NAME(fill_object_sets)
+#define hwloc_insert_pci_device_list HWLOC_NAME(insert_pci_device_list)
 
 /* private/debug.h */
 

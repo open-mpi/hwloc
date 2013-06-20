@@ -305,6 +305,16 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed os_index)
  */
 HWLOC_DECLSPEC int hwloc_fill_object_sets(hwloc_obj_t obj);
 
+/** \brief Insert a list of PCI devices and bridges in the backend topology.
+ *
+ * Insert a list of objects (either PCI device or bridges) starting at first_obj
+ * (linked by next_sibling in the topology, and ending with NULL).
+ * Objects are placed under the right bridges, and the remaining upstream bridges
+ * are then inserted in the topology by calling the get_obj_cpuset() callback to
+ * find their locality.
+ */
+HWLOC_DECLSPEC int hwloc_insert_pci_device_list(struct hwloc_backend *backend, struct hwloc_obj *first_obj);
+
 /** \brief Make sure that plugins can lookup core symbols.
  *
  * This is a sanity check to avoid lazy-lookup failures when libhwloc
