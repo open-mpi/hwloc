@@ -4315,6 +4315,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   while ((dirent = readdir(dir)) != NULL) {
     unsigned domain, bus, dev, func;
     hwloc_obj_t obj, hostbridge, *pchild;
+    struct hwloc_pcidev_attr_s *attr;
     hwloc_bitmap_t cpuset;
     unsigned os_index;
     char envname[256], *env;
@@ -4329,55 +4330,56 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
     if (!obj)
       break;
+    attr = &obj->attr->pcidev;
 
-    obj->attr->pcidev.domain = domain;
-    obj->attr->pcidev.bus = bus;
-    obj->attr->pcidev.dev = dev;
-    obj->attr->pcidev.func = func;
+    attr->domain = domain;
+    attr->bus = bus;
+    attr->dev = dev;
+    attr->func = func;
 
     /* default (unknown) values */
-    obj->attr->pcidev.vendor_id = 0;
-    obj->attr->pcidev.device_id = 0;
-    obj->attr->pcidev.class_id = 0;
-    obj->attr->pcidev.revision = 0;
-    obj->attr->pcidev.subvendor_id = 0;
-    obj->attr->pcidev.subdevice_id = 0;
-    obj->attr->pcidev.linkspeed = 0;
+    attr->vendor_id = 0;
+    attr->device_id = 0;
+    attr->class_id = 0;
+    attr->revision = 0;
+    attr->subvendor_id = 0;
+    attr->subdevice_id = 0;
+    attr->linkspeed = 0;
 
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/vendor", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
-      obj->attr->pcidev.vendor_id = strtoul(value, NULL, 16);
+      attr->vendor_id = strtoul(value, NULL, 16);
     }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/device", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
-      obj->attr->pcidev.device_id = strtoul(value, NULL, 16);
+      attr->device_id = strtoul(value, NULL, 16);
     }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/class", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
-      obj->attr->pcidev.class_id = strtoul(value, NULL, 16) >> 8;
+      attr->class_id = strtoul(value, NULL, 16) >> 8;
     }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_vendor", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
-      obj->attr->pcidev.subvendor_id = strtoul(value, NULL, 16);
+      attr->subvendor_id = strtoul(value, NULL, 16);
     }
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_device", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
       fread(value, sizeof(value), 1, file);
       fclose(file);
-      obj->attr->pcidev.subdevice_id = strtoul(value, NULL, 16);
+      attr->subdevice_id = strtoul(value, NULL, 16);
     }
 
     cpuset = hwloc_bitmap_alloc();
@@ -4411,12 +4413,12 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 	/* cannot do anything without base config space */
 
 	/* get the revision */
-	obj->attr->pcidev.revision = config_space_cache[HWLOC_PCI_REVISION_ID];
+	attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
 
 	/* try to get the link speed */
 	offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, HWLOC_PCI_CAP_ID_EXP);
 	if (offset > 0)
-	  hwloc_pci_find_linkspeed(config_space_cache, config_space_cachesize, offset, &obj->attr->pcidev.linkspeed);
+	  hwloc_pci_find_linkspeed(config_space_cache, config_space_cachesize, offset, &attr->linkspeed);
       }
     }
 
