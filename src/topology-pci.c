@@ -375,6 +375,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
   struct hwloc_obj fakehostbridge; /* temporary object covering the whole PCI hierarchy until its complete */
   unsigned current_hostbridge;
 #ifdef HWLOC_HAVE_LIBPCIACCESS
+  int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
 #else /* HWLOC_HAVE_PCIUTILS */
@@ -402,7 +403,12 @@ hwloc_look_pci(struct hwloc_backend *backend)
 
   /* initialize PCI scanning */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
-  /* pci_system_init() called in instantiate() */
+  ret = pci_system_init();
+  if (ret) {
+    hwloc_debug("%s", "Can not initialize libpciaccess\n");
+    return -1;
+  }
+
   iter = pci_slot_match_iterator_create(NULL);
 #else /* HWLOC_HAVE_PCIUTILS */
   pciaccess = pci_alloc();
@@ -638,9 +644,9 @@ hwloc_look_pci(struct hwloc_backend *backend)
   /* finalize device scanning */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
   pci_iterator_destroy(iter);
+  pci_system_cleanup();
 #else /* HWLOC_HAVE_PCIUTILS */
   pci_cleanup(pciaccess);
-  /* pci_system_cleanup() called in backend_disable() */
 #endif
 
   hwloc_debug("%s", "\nPCI hierarchy after basic scan:\n");
@@ -709,12 +715,6 @@ hwloc_look_pci(struct hwloc_backend *backend)
   return 1;
 }
 
-static void
-hwloc_pci_backend_disable(struct hwloc_backend *backend __hwloc_attribute_unused)
-{
-  pci_system_cleanup();
-}
-
 static struct hwloc_backend *
 hwloc_pci_component_instantiate(struct hwloc_disc_component *component,
 				   const void *_data1 __hwloc_attribute_unused,
@@ -722,30 +722,17 @@ hwloc_pci_component_instantiate(struct hwloc_disc_component *component,
 				   const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
-#ifdef HWLOC_HAVE_LIBPCIACCESS
-  int ret;
-#endif
 
   if (hwloc_plugin_check_namespace(component->name, "hwloc_backend_alloc") < 0)
     return NULL;
 
   /* thissystem may not be fully initialized yet, we'll check flags in discover() */
 
-#ifdef HWLOC_HAVE_LIBPCIACCESS
-  /* some rhel/fc libpciaccess failed for non-root because of a buggy patch, detect them early to work around the issue */
-  ret = pci_system_init();
-  if (ret) {
-    hwloc_debug("%s", "libpciaccess init failed, disabling component so that others may be tried\n");
-    return NULL;
-  }
-#endif
-
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
   backend->flags = HWLOC_BACKEND_FLAG_NEED_LEVELS;
   backend->discover = hwloc_look_pci;
-  backend->disable = hwloc_pci_backend_disable;
   return backend;
 }
 
