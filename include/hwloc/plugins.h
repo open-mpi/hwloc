@@ -39,11 +39,7 @@ typedef enum hwloc_disc_component_type_e {
 
   /** \brief OpenCL, Cuda, etc.
    * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_MISC = (1<<2),
-
-  /** \brief PCI.
-   * \hideinitializer */
-  HWLOC_DISC_COMPONENT_TYPE_PCI = (1<<3)
+  HWLOC_DISC_COMPONENT_TYPE_MISC = (1<<2)
 } hwloc_disc_component_type_t;
 
 /** \brief Discovery component structure

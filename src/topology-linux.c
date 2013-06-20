@@ -4544,7 +4544,7 @@ hwloc_linuxpci_component_instantiate(struct hwloc_disc_component *component,
 }
 
 static struct hwloc_disc_component hwloc_linuxpci_disc_component = {
-  HWLOC_DISC_COMPONENT_TYPE_PCI,
+  HWLOC_DISC_COMPONENT_TYPE_MISC,
   "linuxpci",
   HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_linuxpci_component_instantiate,
