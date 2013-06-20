@@ -214,7 +214,7 @@ AS_IF([test "$hwloc_libxml2_happy" = "yes"], [hwloc_xml_status=full])
 # Prepare the I/O summary
 hwloc_probeio_list=
 test "x$hwloc_pci_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list PCI(full)"
-test "x$hwloc_pci_happy" = "xno" -a "x$hwloc_linuxpci_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list PCI(basic)"
+test "x$hwloc_pci_happy" = "xno" -a "x$hwloc_linuxpci_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list PCI(linux)"
 test "x$hwloc_opencl_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list OpenCL"
 test "x$hwloc_have_cudart" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list CUDA"
 test "x$hwloc_nvml_happy" = "xyes" && hwloc_probeio_list="$hwloc_probeio_list NVML"
