@@ -20,9 +20,8 @@ in v0.9.1).
 Version 1.8.0
 -------------
 * New components
-  + Add the "linuxpci" component to fallback to basic PCI discovery on
-    Linux when full discovery with libpciaccess or libpci isn't available.
-    It misses bridges and device names.
+  + Add the "linuxpci" component that always works on Linux even when
+    libpciaccess and libpci isn't available. It only misses device names.
 * Misc
   + Fix the initialisation of cpusets and nodesets in Group objects added
     when inserting PCI hostbridges.
