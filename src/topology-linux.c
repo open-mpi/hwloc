@@ -4287,6 +4287,11 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
 
+  if (hwloc_get_next_pcidev(topology, NULL)) {
+    hwloc_debug("%s", "PCI objects already added, ignoring linuxpci backend.\n");
+    return 0;
+  }
+
   /* hackily find the linux backend to steal its fsroot */
   tmpbackend = topology->backends;
   while (tmpbackend) {
@@ -4533,6 +4538,7 @@ hwloc_linuxpci_component_instantiate(struct hwloc_disc_component *component,
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
+  backend->flags = HWLOC_BACKEND_FLAG_NEED_LEVELS;
   backend->discover = hwloc_look_linuxfs_pci;
   return backend;
 }
@@ -4540,7 +4546,7 @@ hwloc_linuxpci_component_instantiate(struct hwloc_disc_component *component,
 static struct hwloc_disc_component hwloc_linuxpci_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_PCI,
   "linuxpci",
-  HWLOC_DISC_COMPONENT_TYPE_PCI | HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_linuxpci_component_instantiate,
   19, /* after pci */
   NULL

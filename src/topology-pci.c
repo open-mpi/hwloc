@@ -385,6 +385,12 @@ hwloc_look_pci(struct hwloc_backend *backend)
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
 
+  if (hwloc_get_next_pcidev(topology, NULL)) {
+    hwloc_debug("%s", "PCI objects already added, ignoring pci backend.\n");
+    return 0;
+  }
+  printf("doing pci discovery\n");
+
   if (!hwloc_topology_is_thissystem(topology)) {
     hwloc_debug("%s", "\nno PCI detection (not thissystem)\n");
     return 0;
@@ -738,6 +744,7 @@ hwloc_pci_component_instantiate(struct hwloc_disc_component *component,
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
+  backend->flags = HWLOC_BACKEND_FLAG_NEED_LEVELS;
   backend->discover = hwloc_look_pci;
   backend->disable = hwloc_pci_backend_disable;
   return backend;
@@ -746,7 +753,7 @@ hwloc_pci_component_instantiate(struct hwloc_disc_component *component,
 static struct hwloc_disc_component hwloc_pci_disc_component = {
   HWLOC_DISC_COMPONENT_TYPE_PCI,
   "pci",
-  HWLOC_DISC_COMPONENT_TYPE_PCI | HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
+  HWLOC_DISC_COMPONENT_TYPE_GLOBAL,
   hwloc_pci_component_instantiate,
   20,
   NULL
