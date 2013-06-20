@@ -503,6 +503,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
     unsigned isbridge;
     unsigned domain;
     unsigned device_class;
+    unsigned short tmp16;
     char name[128];
     unsigned offset;
 #ifdef HWLOC_HAVE_PCI_FIND_CAP
@@ -559,10 +560,13 @@ hwloc_look_pci(struct hwloc_backend *backend)
     obj->attr->pcidev.class_id = device_class;
     HWLOC_BUILD_ASSERT(PCI_REVISION_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
+
+    memcpy(&tmp16, &config_space_cache[PCI_SUBSYSTEM_VENDOR_ID], sizeof(tmp16));
     HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_VENDOR_ID < CONFIG_SPACE_CACHESIZE);
-    obj->attr->pcidev.subvendor_id = config_space_cache[PCI_SUBSYSTEM_VENDOR_ID];
+    obj->attr->pcidev.subvendor_id = tmp16;
+    memcpy(&tmp16, &config_space_cache[PCI_SUBSYSTEM_ID], sizeof(tmp16));
     HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
-    obj->attr->pcidev.subdevice_id = config_space_cache[PCI_SUBSYSTEM_ID];
+    obj->attr->pcidev.subdevice_id = tmp16;
 
     obj->attr->pcidev.linkspeed = 0; /* unknown */
 #ifdef HWLOC_HAVE_PCI_FIND_CAP
