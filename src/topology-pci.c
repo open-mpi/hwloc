@@ -389,7 +389,6 @@ hwloc_look_pci(struct hwloc_backend *backend)
     hwloc_debug("%s", "PCI objects already added, ignoring pci backend.\n");
     return 0;
   }
-  printf("doing pci discovery\n");
 
   if (!hwloc_topology_is_thissystem(topology)) {
     hwloc_debug("%s", "\nno PCI detection (not thissystem)\n");
