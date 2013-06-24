@@ -455,7 +455,10 @@ extern "C" {
 #define hwloc_insert_object_by_parent HWLOC_NAME(insert_object_by_parent)
 #define hwloc_alloc_setup_object HWLOC_NAME(alloc_setup_object)
 #define hwloc_fill_object_sets HWLOC_NAME(fill_object_sets)
+
 #define hwloc_insert_pci_device_list HWLOC_NAME(insert_pci_device_list)
+#define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
+#define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
 
 /* private/debug.h */
 
@@ -472,9 +475,6 @@ extern "C" {
 #define hwloc_fls32 HWLOC_NAME(fls32)
 #define hwloc_flsl_from_fls32 HWLOC_NAME(flsl_from_fls32)
 #define hwloc_weight_long HWLOC_NAME(weight_long)
-
-#define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
-#define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
 
 /* private/cpuid.h */
 

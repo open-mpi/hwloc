@@ -359,3 +359,69 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
 
   return 1;
 }
+
+#define HWLOC_PCI_CAPABILITY_LIST 0x34
+#define HWLOC_PCI_STATUS_CAP_LIST 0x10
+#define HWLOC_PCI_CAP_LIST_ID 0
+#define HWLOC_PCI_CAP_LIST_NEXT 1
+#define HWLOC_PCI_STATUS 0x06
+
+unsigned
+hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap)
+{
+  unsigned char seen[256] = { 0 };
+  unsigned char ptr;
+
+  if (!(config[HWLOC_PCI_STATUS] & HWLOC_PCI_STATUS_CAP_LIST))
+    return 0;
+
+  for (ptr = config[HWLOC_PCI_CAPABILITY_LIST] & ~3;
+       ptr;
+       ptr = config[ptr + HWLOC_PCI_CAP_LIST_NEXT] & ~3) {
+    unsigned char id;
+
+    if (ptr >= config_size)
+      break;
+
+    /* Looped around! */
+    if (seen[ptr])
+      break;
+    seen[ptr] = 1;
+
+    id = config[ptr + HWLOC_PCI_CAP_LIST_ID];
+    if (id == cap)
+      return ptr;
+    if (id == 0xff)
+      break;
+
+    if (ptr + (unsigned) HWLOC_PCI_CAP_LIST_NEXT >= config_size)
+      break;
+  }
+  return 0;
+}
+
+#define HWLOC_PCI_EXP_LNKSTA 0x12
+#define HWLOC_PCI_EXP_LNKSTA_SPEED 0x000f
+#define HWLOC_PCI_EXP_LNKSTA_WIDTH 0x03f0
+
+int
+hwloc_pci_find_linkspeed(const unsigned char *config, size_t config_size,
+			 unsigned offset, float *linkspeed)
+{
+  unsigned linksta, speed, width;
+  float lanespeed;
+
+  if (offset + HWLOC_PCI_EXP_LNKSTA + 4 >= config_size)
+    return -1;
+
+  memcpy(&linksta, &config[offset + HWLOC_PCI_EXP_LNKSTA], 4);
+  speed = linksta & HWLOC_PCI_EXP_LNKSTA_SPEED; /* PCIe generation */
+  width = (linksta & HWLOC_PCI_EXP_LNKSTA_WIDTH) >> 4; /* how many lanes */
+  /* PCIe Gen1 = 2.5GT/s signal-rate per lane with 8/10 encoding    = 0.25GB/s data-rate per lane
+   * PCIe Gen2 = 5  GT/s signal-rate per lane with 8/10 encoding    = 0.5 GB/s data-rate per lane
+   * PCIe Gen3 = 8  GT/s signal-rate per lane with 128/130 encoding = 1   GB/s data-rate per lane
+   */
+  lanespeed = speed <= 2 ? 2.5 * speed * 0.8 : 8.0 * 128/130; /* Gbit/s per lane */
+  *linkspeed = lanespeed * width / 8; /* GB/s */
+  return 0;
+}

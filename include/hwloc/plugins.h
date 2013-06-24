@@ -315,6 +315,12 @@ HWLOC_DECLSPEC int hwloc_fill_object_sets(hwloc_obj_t obj);
  */
 HWLOC_DECLSPEC int hwloc_insert_pci_device_list(struct hwloc_backend *backend, struct hwloc_obj *first_obj);
 
+/** \brief Return the offset of the given capability in the PCI config space buffer */
+HWLOC_DECLSPEC unsigned hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap);
+
+/** \brief Fill linkspeed by reading the PCI config space where PCI_CAP_ID_EXP is at position offset */
+HWLOC_DECLSPEC int hwloc_pci_find_linkspeed(const unsigned char *config, size_t config_size, unsigned offset, float *linkspeed);
+
 /** \brief Make sure that plugins can lookup core symbols.
  *
  * This is a sanity check to avoid lazy-lookup failures when libhwloc
