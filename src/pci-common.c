@@ -425,3 +425,42 @@ hwloc_pci_find_linkspeed(const unsigned char *config, size_t config_size,
   *linkspeed = lanespeed * width / 8; /* GB/s */
   return 0;
 }
+
+#define HWLOC_PCI_HEADER_TYPE 0x0e
+#define HWLOC_PCI_HEADER_TYPE_BRIDGE 1
+#define HWLOC_PCI_CLASS_BRIDGE_PCI 0x0604
+#define HWLOC_PCI_PRIMARY_BUS 0x18
+#define HWLOC_PCI_SECONDARY_BUS 0x19
+#define HWLOC_PCI_SUBORDINATE_BUS 0x1a
+
+int
+hwloc_pci_prepare_bridge(hwloc_obj_t obj,
+			 const unsigned char *config, size_t config_size __hwloc_attribute_unused)
+{
+  unsigned char headertype;
+  unsigned isbridge;
+  struct hwloc_pcidev_attr_s *pattr = &obj->attr->pcidev;
+  struct hwloc_bridge_attr_s *battr;
+
+  headertype = config[HWLOC_PCI_HEADER_TYPE] & 0x7f;
+  isbridge = (pattr->class_id == HWLOC_PCI_CLASS_BRIDGE_PCI
+	      && headertype == HWLOC_PCI_HEADER_TYPE_BRIDGE);
+
+  if (!isbridge)
+    return 0;
+
+  battr = &obj->attr->bridge;
+
+  if (config[HWLOC_PCI_PRIMARY_BUS] != pattr->bus)
+    hwloc_debug("  %04x:%02x:%02x.%01x bridge with (ignored) invalid PCI_PRIMARY_BUS %02x\n",
+		pattr->domain, pattr->bus, pattr->dev, pattr->func, config[HWLOC_PCI_PRIMARY_BUS]);
+
+  obj->type = HWLOC_OBJ_BRIDGE;
+  battr->upstream_type = HWLOC_OBJ_BRIDGE_PCI;
+  battr->downstream_type = HWLOC_OBJ_BRIDGE_PCI;
+  battr->downstream.pci.domain = pattr->domain;
+  battr->downstream.pci.secondary_bus = config[HWLOC_PCI_SECONDARY_BUS];
+  battr->downstream.pci.subordinate_bus = config[HWLOC_PCI_SUBORDINATE_BUS];
+
+  return 0;
+}

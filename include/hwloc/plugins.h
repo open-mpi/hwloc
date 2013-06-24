@@ -321,6 +321,9 @@ HWLOC_DECLSPEC unsigned hwloc_pci_find_cap(const unsigned char *config, size_t c
 /** \brief Fill linkspeed by reading the PCI config space where PCI_CAP_ID_EXP is at position offset */
 HWLOC_DECLSPEC int hwloc_pci_find_linkspeed(const unsigned char *config, size_t config_size, unsigned offset, float *linkspeed);
 
+/** \brief Modify the PCI device object into a bridge and fill its attribute if a bridge is found in the PCI config space */
+HWLOC_DECLSPEC int hwloc_pci_prepare_bridge(hwloc_obj_t obj, const unsigned char *config, size_t config_size);
+
 /** \brief Make sure that plugins can lookup core symbols.
  *
  * This is a sanity check to avoid lazy-lookup failures when libhwloc

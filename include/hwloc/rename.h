@@ -459,6 +459,7 @@ extern "C" {
 #define hwloc_insert_pci_device_list HWLOC_NAME(insert_pci_device_list)
 #define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
 #define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
+#define hwloc_pci_prepare_bridge HWLOC_NAME(pci_prepare_bridge)
 
 /* private/debug.h */
 

@@ -4271,12 +4271,6 @@ const struct hwloc_component hwloc_linux_component = {
 
 #define HWLOC_PCI_REVISION_ID 0x08
 #define HWLOC_PCI_CAP_ID_EXP 0x10
-#define PCI_HEADER_TYPE 0x0e
-#define PCI_HEADER_TYPE_BRIDGE 1
-#define PCI_CLASS_BRIDGE_PCI 0x0604
-#define PCI_PRIMARY_BUS 0x18
-#define PCI_SECONDARY_BUS 0x19
-#define PCI_SUBORDINATE_BUS 0x1a
 #define PCI_CLASS_NOT_DEFINED 0x0000
 
 static int
@@ -4305,8 +4299,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     if (tmpbackend->component == &hwloc_linux_disc_component) {
       root_fd = ((struct hwloc_linux_backend_data_s *) tmpbackend->private_data)->root_fd;
       hwloc_debug("linuxpci backend stole linux backend root_fd %d\n", root_fd);
-      break;
-    }
+      break;    }
     tmpbackend = tmpbackend->next;
   }
   /* take our own descriptor, either pointing to linux fsroot, or to / if not found */
@@ -4413,8 +4406,6 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
       unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE_TRY];
       unsigned config_space_cachesize = CONFIG_SPACE_CACHESIZE_TRY;
       unsigned offset;
-      unsigned char headertype;
-      unsigned isbridge;
 
       config_space_cachesize = fread(config_space_cache, 1, CONFIG_SPACE_CACHESIZE_TRY, file);
       fclose(file);
@@ -4422,22 +4413,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 	/* cannot do anything without base config space */
 
 	/* is this a bridge? */
-	headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
-	isbridge = (obj->attr->pcidev.class_id == PCI_CLASS_BRIDGE_PCI
-		    && headertype == PCI_HEADER_TYPE_BRIDGE);
-
-	if (isbridge) {
-	  struct hwloc_bridge_attr_s *battr = &obj->attr->bridge;
-	  if (config_space_cache[PCI_PRIMARY_BUS] != attr->bus)
-	    hwloc_debug("  %04x:%02x:%02x.%01x bridge with (ignored) invalid PCI_PRIMARY_BUS %02x\n",
-			attr->domain, attr->bus, attr->dev, attr->func, config_space_cache[PCI_PRIMARY_BUS]);
-	  obj->type = HWLOC_OBJ_BRIDGE;
-	  battr->upstream_type = HWLOC_OBJ_BRIDGE_PCI;
-	  battr->downstream_type = HWLOC_OBJ_BRIDGE_PCI;
-	  battr->downstream.pci.domain = domain;
-	  battr->downstream.pci.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];
-	  battr->downstream.pci.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
-	}
+	hwloc_pci_prepare_bridge(obj, config_space_cache, config_space_cachesize);
 
 	/* get the revision */
 	attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];

@@ -168,9 +168,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE_TRY];
     unsigned config_space_cachesize = CONFIG_SPACE_CACHESIZE_TRY;
     struct hwloc_obj *obj;
-    unsigned char headertype;
     unsigned os_index;
-    unsigned isbridge;
     unsigned domain;
     unsigned device_class;
     unsigned short tmp16;
@@ -211,16 +209,10 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
 #endif
 
-    /* is this a bridge? */
-    HWLOC_BUILD_ASSERT(PCI_HEADER_TYPE < CONFIG_SPACE_CACHESIZE);
-    headertype = config_space_cache[PCI_HEADER_TYPE] & 0x7f;
-    isbridge = (device_class == PCI_CLASS_BRIDGE_PCI
-		&& headertype == PCI_HEADER_TYPE_BRIDGE);
-
     /* might be useful for debugging (note that domain might be truncated) */
     os_index = (domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
 
-    obj = hwloc_alloc_setup_object(isbridge ? HWLOC_OBJ_BRIDGE : HWLOC_OBJ_PCI_DEVICE, os_index);
+    obj = hwloc_alloc_setup_object(HWLOC_OBJ_PCI_DEVICE, os_index);
     obj->attr->pcidev.domain = domain;
     obj->attr->pcidev.bus = pcidev->bus;
     obj->attr->pcidev.dev = pcidev->dev;
@@ -294,19 +286,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
       hwloc_pci_find_linkspeed(config_space_cache, config_space_cachesize, offset,
 			       &obj->attr->pcidev.linkspeed);
 
-    if (isbridge) {
-      HWLOC_BUILD_ASSERT(PCI_PRIMARY_BUS < CONFIG_SPACE_CACHESIZE);
-      HWLOC_BUILD_ASSERT(PCI_SECONDARY_BUS < CONFIG_SPACE_CACHESIZE);
-      HWLOC_BUILD_ASSERT(PCI_SUBORDINATE_BUS < CONFIG_SPACE_CACHESIZE);
-      if (config_space_cache[PCI_PRIMARY_BUS] != pcidev->bus)
-	hwloc_debug("  %04x:%02x:%02x.%01x bridge with (ignored) invalid PCI_PRIMARY_BUS %02x\n",
-		    domain, pcidev->bus, pcidev->dev, pcidev->func, config_space_cache[PCI_PRIMARY_BUS]);
-      obj->attr->bridge.upstream_type = HWLOC_OBJ_BRIDGE_PCI;
-      obj->attr->bridge.downstream_type = HWLOC_OBJ_BRIDGE_PCI;
-      obj->attr->bridge.downstream.pci.domain = domain;
-      obj->attr->bridge.downstream.pci.secondary_bus = config_space_cache[PCI_SECONDARY_BUS];
-      obj->attr->bridge.downstream.pci.subordinate_bus = config_space_cache[PCI_SUBORDINATE_BUS];
-    }
+    hwloc_pci_prepare_bridge(obj, config_space_cache, config_space_cachesize);
 
 /* starting from pciutils 2.2, pci_lookup_name() takes a variable number
  * of arguments, and supports the PCI_LOOKUP_NO_NUMBERS flag.
