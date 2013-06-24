@@ -4271,7 +4271,7 @@ const struct hwloc_component hwloc_linux_component = {
 
 #define HWLOC_PCI_REVISION_ID 0x08
 #define HWLOC_PCI_CAP_ID_EXP 0x10
-#define PCI_CLASS_NOT_DEFINED 0x0000
+#define HWLOC_PCI_CLASS_NOT_DEFINED 0x0000
 
 static int
 hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
@@ -4340,7 +4340,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     /* default (unknown) values */
     attr->vendor_id = 0;
     attr->device_id = 0;
-    attr->class_id = PCI_CLASS_NOT_DEFINED;
+    attr->class_id = HWLOC_PCI_CLASS_NOT_DEFINED;
     attr->revision = 0;
     attr->subvendor_id = 0;
     attr->subdevice_id = 0;
