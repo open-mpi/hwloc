@@ -1165,11 +1165,18 @@ add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
   if (hwloc_obj_type_is_io(obj->type))
     return;
 
-  if (parent_has_sets || obj->cpuset) {
-    /* if the parent has non-NULL sets, or if the object has non-NULL cpusets,
-     * it must have non-NULL nodesets
-     */
+  if (parent_has_sets && obj->type != HWLOC_OBJ_MISC) {
+    /* non-MISC object must have cpuset if parent has one. */
     assert(obj->cpuset);
+  }
+
+  /* other sets must be consistent with main cpuset:
+   * check cpusets and add nodesets if needed.
+   *
+   * MISC may have no sets at all (if added by parent), or usual ones (if added by cpuset),
+   * but that's not easy to detect, so just make sure sets are consistent as usual.
+   */
+  if (obj->cpuset) {
     assert(obj->online_cpuset);
     assert(obj->complete_cpuset);
     assert(obj->allowed_cpuset);
@@ -1180,9 +1187,9 @@ add_default_object_sets(hwloc_obj_t obj, int parent_has_sets)
     if (!obj->allowed_nodeset)
       obj->allowed_nodeset = hwloc_bitmap_alloc_full();
   } else {
-    /* parent has no sets and object has NULL cpusets,
-     * it must have NULL nodesets
-     */
+    assert(!obj->online_cpuset);
+    assert(!obj->complete_cpuset);
+    assert(!obj->allowed_cpuset);
     assert(!obj->nodeset);
     assert(!obj->complete_nodeset);
     assert(!obj->allowed_nodeset);
@@ -1432,7 +1439,7 @@ remove_empty(hwloc_topology_t topology, hwloc_obj_t *pobj)
 
   if (obj->type != HWLOC_OBJ_NODE
       && !obj->first_child /* only remove if all children were removed above, so that we don't remove parents of NUMAnode */
-      && !hwloc_obj_type_is_io(obj->type)
+      && !hwloc_obj_type_is_io(obj->type) && obj->type != HWLOC_OBJ_MISC
       && obj->cpuset /* don't remove if no cpuset at all, there's likely a good reason why it's different from having an empty cpuset */
       && hwloc_bitmap_iszero(obj->cpuset)) {
     /* Remove empty children */
