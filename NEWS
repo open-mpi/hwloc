@@ -22,6 +22,8 @@ Version 1.7.2
 * Do not create invalid block OS devices on very old Linux kernel such
   as RHEL4 2.6.9.
 * Fix PCI subvendor/device IDs.
+* Fix the management of Misc objects inserted by parent.
+  Thanks to Jirka Hladky for reporting the problem.
 
 
 Version 1.7.1
