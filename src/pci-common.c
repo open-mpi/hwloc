@@ -360,17 +360,21 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
   return 1;
 }
 
-#define HWLOC_PCI_CAPABILITY_LIST 0x34
+#define HWLOC_PCI_STATUS 0x06
 #define HWLOC_PCI_STATUS_CAP_LIST 0x10
+#define HWLOC_PCI_CAPABILITY_LIST 0x34
 #define HWLOC_PCI_CAP_LIST_ID 0
 #define HWLOC_PCI_CAP_LIST_NEXT 1
-#define HWLOC_PCI_STATUS 0x06
 
 unsigned
 hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap)
 {
   unsigned char seen[256] = { 0 };
   unsigned char ptr;
+
+  /* check whether PCI_STATUS and PCI_CAPABILITY_LIST offsets are OK */
+  if (HWLOC_PCI_CAPABILITY_LIST >= config_size)
+    return 0;
 
   if (!(config[HWLOC_PCI_STATUS] & HWLOC_PCI_STATUS_CAP_LIST))
     return 0;
@@ -380,7 +384,7 @@ hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap
        ptr = config[ptr + HWLOC_PCI_CAP_LIST_NEXT] & ~3) {
     unsigned char id;
 
-    if (ptr >= config_size)
+    if (ptr + (unsigned) HWLOC_PCI_CAP_LIST_ID >= config_size)
       break;
 
     /* Looped around! */
@@ -411,7 +415,7 @@ hwloc_pci_find_linkspeed(const unsigned char *config, size_t config_size,
   unsigned linksta, speed, width;
   float lanespeed;
 
-  if (offset + HWLOC_PCI_EXP_LNKSTA + 4 >= config_size)
+  if (offset + HWLOC_PCI_EXP_LNKSTA + 3 >= config_size)
     return -1;
 
   memcpy(&linksta, &config[offset + HWLOC_PCI_EXP_LNKSTA], 4);
@@ -441,6 +445,10 @@ hwloc_pci_prepare_bridge(hwloc_obj_t obj,
   unsigned isbridge;
   struct hwloc_pcidev_attr_s *pattr = &obj->attr->pcidev;
   struct hwloc_bridge_attr_s *battr;
+
+  /* largest offset we'll access in config_space is PCI_SUBORDINATE_BUS */
+  if (HWLOC_PCI_SUBORDINATE_BUS >= config_size)
+    return 0;
 
   headertype = config[HWLOC_PCI_HEADER_TYPE] & 0x7f;
   isbridge = (pattr->class_id == HWLOC_PCI_CLASS_BRIDGE_PCI
