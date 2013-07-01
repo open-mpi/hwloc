@@ -557,8 +557,10 @@ main (int argc, char *argv[])
   }
 
   err = hwloc_topology_load (topology);
-  if (err)
+  if (err) {
+    fprintf(stderr, "hwloc_topology_load() failed (%s).\n", strerror(errno));
     return EXIT_FAILURE;
+  }
 
   if (top)
     add_process_objects(topology);

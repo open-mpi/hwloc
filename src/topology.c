@@ -2280,7 +2280,7 @@ next_cpubackend:
   }
 
   if (!discoveries) {
-    hwloc_debug("%s", "No CPU backend enabled\n");
+    hwloc_debug("%s", "No CPU backend enabled or no discovery succeeded\n");
     errno = EINVAL;
     return -1;
   }
