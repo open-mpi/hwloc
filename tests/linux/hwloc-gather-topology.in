@@ -136,7 +136,6 @@ if [ x$gatherio = x1 ]; then
 /sys/class/infiniband/
 /sys/class/net/
 /sys/class/mic/
-/sys/devices/virtual/mic/
 EOF
  ls -d /sys/devices/pci* | sed -e 's@$@/@' | while read -r path ; do savedir "$destdir/$basename" "$path" ; done
 fi
