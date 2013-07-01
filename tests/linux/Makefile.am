@@ -45,6 +45,7 @@ sysfs_outputs = \
 		16em64t-4s2c2t.xml.output \
 		16em64t-2m4c2t.output \
 		16ia64-8n2s.output \
+		24em64t-2n6c2t+2mic.olddriver.output \
 		40intel64-2g2n4c+pci.output \
 		48amd64-4d2n6c-sparse.output \
 		64amd64-4s2n4ca2co.output \
@@ -99,6 +100,7 @@ sysfs_tarballs = \
 		16em64t-4s2c2t_ncaches.source \
 		16em64t-4s2c2t.xml.source \
 		16ia64-8n2s.tar.bz2 \
+		24em64t-2n6c2t+2mic.olddriver.tar.bz2 \
 		40intel64-2g2n4c+pci.tar.bz2 \
 		48amd64-4d2n6c-sparse.tar.bz2 \
 		64amd64-4s2n4ca2co.tar.bz2 \
@@ -133,6 +135,7 @@ sysfs_options = \
 		16em64t-4s2c2t_merge.options \
 		16em64t-4s2c2t.xml.options \
 		32amd64-4s2n4c-cgroup.xml.options \
+		24em64t-2n6c2t+2mic.olddriver.options \
 		40intel64-2g2n4c+pci.options
 
 # Each output `xyz.output' may have a corresponding `xyz.env'
