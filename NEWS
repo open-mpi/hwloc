@@ -24,6 +24,7 @@ Version 1.7.2
 * Fix PCI subvendor/device IDs.
 * Fix the management of Misc objects inserted by parent.
   Thanks to Jirka Hladky for reporting the problem.
+* Improve verbose error messages when failing to load from XML.
 
 
 Version 1.7.1

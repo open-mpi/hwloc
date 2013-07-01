@@ -706,6 +706,8 @@ hwloc_look_xml(struct hwloc_backend *backend)
  failed:
   if (data->look_failed)
     data->look_failed(data);
+  if (hwloc__xml_verbose())
+    fprintf(stderr, "XML component discovery failed.\n");
  err:
   hwloc_localeswitch_fini();
   return -1;
