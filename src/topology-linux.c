@@ -4149,13 +4149,10 @@ hwloc_linux_backend_get_obj_cpuset(struct hwloc_backend *backend,
   assert(obj->type == HWLOC_OBJ_PCI_DEVICE
 	 || (obj->type == HWLOC_OBJ_BRIDGE && obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_PCI));
 
-  /* this should not be called if the backend isn't the real OS one */
-  assert(data->is_real_fsroot);
-
   snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/local_cpus",
 	   obj->attr->pcidev.domain, obj->attr->pcidev.bus,
 	   obj->attr->pcidev.dev, obj->attr->pcidev.func);
-  file = fopen(path, "r"); /* the libpci backend doesn't use sysfs.fsroot */
+  file = hwloc_fopen(path, "r", data->root_fd);
   if (file) {
     err = hwloc_linux_parse_cpumap_file(file, cpuset);
     fclose(file);
