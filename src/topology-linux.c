@@ -41,7 +41,8 @@ struct hwloc_linux_backend_data_s {
   int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int is_real_fsroot; /* Boolean saying whether root_fd points to the real filesystem root of the system */
   int deprecated_classlinks_model; /* -2 if never tried, -1 if unknown, 0 if new (device contains class/name), 1 if old (device contains class:name) */
-  unsigned mic_id_max; /* -1 if not tried yet, 0 if none to lookup, maxid+1 otherwise */
+  int mic_need_directlookup; /* if not tried yet, 0 if not needed, 1 if needed */
+  unsigned mic_directlookup_id_max; /* -1 if not tried yet, 0 if none to lookup, maxid+1 otherwise */
 };
 
 
@@ -4053,17 +4054,17 @@ hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend,
   unsigned idx;
   int res = 0;
 
-  if (!data->mic_id_max)
+  if (!data->mic_directlookup_id_max)
     /* already tried, nothing to do */
     return 0;
 
-  if (data->mic_id_max == (unsigned) -1) {
+  if (data->mic_directlookup_id_max == (unsigned) -1) {
     /* never tried, find out the max id */
     DIR *dir;
     struct dirent *dirent;
 
     /* make sure we never do this lookup again */
-    data->mic_id_max = 0;
+    data->mic_directlookup_id_max = 0;
 
     /* read the entire class and find the max id of mic%u dirents */
     dir = hwloc_opendir("/sys/devices/virtual/mic", root_fd);
@@ -4077,14 +4078,14 @@ hwloc_linux_directlookup_mic_class(struct hwloc_backend *backend,
 	continue;
       if (sscanf(dirent->d_name, "mic%u", &idx) != 1)
 	continue;
-      if (idx >= data->mic_id_max)
-	data->mic_id_max = idx+1;
+      if (idx >= data->mic_directlookup_id_max)
+	data->mic_directlookup_id_max = idx+1;
     }
     closedir(dir);
   }
 
   /* now iterate over the mic ids and see if one matches our pcidev */
-  for(idx=0; idx<data->mic_id_max; idx++) {
+  for(idx=0; idx<data->mic_directlookup_id_max; idx++) {
     snprintf(path, sizeof(path), "/sys/class/mic/mic%u/pci_%02x:%02x.%02x",
 	     idx, pcidev->attr->pcidev.bus,  pcidev->attr->pcidev.dev,  pcidev->attr->pcidev.func);
     if (hwloc_stat(path, &st, root_fd) < 0)
@@ -4106,8 +4107,9 @@ static int
 hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc_backend *caller __hwloc_attribute_unused,
 				      struct hwloc_obj *obj)
 {
+  struct hwloc_linux_backend_data_s *data = backend->private_data;
   char pcidevpath[256];
-  int res = 0, mic;
+  int res = 0;
 
   /* this callback is only used in the libpci backend for now */
   assert(obj->type == HWLOC_OBJ_PCI_DEVICE);
@@ -4121,13 +4123,23 @@ hwloc_linux_backend_notify_new_object(struct hwloc_backend *backend, struct hwlo
   res += hwloc_linux_lookup_dma_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_drm_class(backend, obj, pcidevpath);
   res += hwloc_linux_lookup_block_class(backend, obj, pcidevpath);
-  res += mic = hwloc_linux_lookup_mic_class(backend, obj, pcidevpath);
 
-  /* hwloc_linux_lookup_mic_class may find nothing because pcidev sysfs directories
-   * do not have mic/mic%u symlinks to mic devices. if so, try from the mic class.
-   */
-  if (!mic)
+  if (data->mic_need_directlookup == -1) {
+    struct stat st;
+    if (hwloc_stat("/sys/class/mic/mic0", &st, data->root_fd) == 0
+	&& hwloc_stat("/sys/class/mic/mic0/device/mic/mic0", &st, data->root_fd) == -1)
+      /* hwloc_linux_lookup_mic_class will fail because pcidev sysfs directories
+       * do not have mic/mic%u symlinks to mic devices (old mic driver).
+       * if so, try from the mic class.
+       */
+      data->mic_need_directlookup = 1;
+    else
+      data->mic_need_directlookup = 0;
+  }
+  if (data->mic_need_directlookup)
     res += hwloc_linux_directlookup_mic_class(backend, obj);
+  else
+    res += hwloc_linux_lookup_mic_class(backend, obj, pcidevpath);
 
   return res;
 }
@@ -4229,7 +4241,8 @@ hwloc_linux_component_instantiate(struct hwloc_disc_component *component,
   data->root_fd = root;
 
   data->deprecated_classlinks_model = -2; /* never tried */
-  data->mic_id_max = -1; /* not initialized */
+  data->mic_need_directlookup = -1; /* not initialized */
+  data->mic_directlookup_id_max = -1; /* not initialized */
 
   return backend;
 
