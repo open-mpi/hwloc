@@ -1228,6 +1228,9 @@ propagate_nodeset(hwloc_obj_t obj, hwloc_obj_t sys)
     /* don't propagate nodesets in I/O objects, keep them NULL */
     if (hwloc_obj_type_is_io(child->type))
       return;
+    /* don't propagate nodesets in Misc inserted by parent (no nodeset if no cpuset) */
+    if (child->type == HWLOC_OBJ_MISC && !child->cpuset)
+      return;
 
     /* Propagate singleton nodesets down */
     if (parent_weight == 1) {
