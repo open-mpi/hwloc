@@ -904,6 +904,11 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
     next_child = child->next_sibling;
     hwloc_insert_object_by_parent(topology, parent, child);
   }
+
+  if (obj->type == HWLOC_OBJ_MISC) {
+    /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
+    obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
+  }
 }
 
 /* Adds a misc object _after_ detection, and thus has to reconnect all the pointers */
@@ -926,7 +931,7 @@ hwloc_topology_insert_misc_object_by_cpuset(struct hwloc_topology *topology, hwl
   if (name)
     obj->name = strdup(name);
 
-  /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
+  /* misc objects go in no level */
   obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
 
   obj->cpuset = hwloc_bitmap_dup(cpuset);
@@ -983,9 +988,6 @@ hwloc_topology_insert_misc_object_by_parent(struct hwloc_topology *topology, hwl
     errno = EINVAL;
     return NULL;
   }
-
-  /* misc objects go in no level (needed here because level building doesn't see Misc objects inside I/O trees) */
-  obj->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
 
   hwloc_insert_object_by_parent(topology, parent, obj);
 
@@ -1943,8 +1945,6 @@ hwloc_level_filter_object(hwloc_topology_t topology,
     int nb = hwloc_level_filter_object(topology, new_obj, old->children[i]);
     if (new_obj) {
       new_obj += nb;
-      /* misc objects go in no level (needed here because insert_misc() not always involved e.g. during XML import) */
-      old->depth = (unsigned) HWLOC_TYPE_DEPTH_UNKNOWN;
     }
     total += nb;
   }
