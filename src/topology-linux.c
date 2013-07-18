@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2013 Inria.  All rights reserved.
- * Copyright © 2009-2012 Université Bordeaux 1
+ * Copyright © 2009-2013 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2010 IBM
  * See COPYING in top-level directory.
@@ -283,6 +283,47 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 }
 
 
+static int
+hwloc_linux_parse_cpuset_file(FILE *file, hwloc_bitmap_t set)
+{
+  unsigned long start, stop;
+
+  /* reset to zero first */
+  hwloc_bitmap_zero(set);
+
+  while (fscanf(file, "%lu", &start) == 1)
+  {
+    int c = fgetc(file);
+
+    stop = start;
+
+    if (c == '-') {
+      /* Range */
+      if (fscanf(file, "%lu", &stop) != 1) {
+        /* Expected a number here */
+        errno = EINVAL;
+        return -1;
+      }
+      c = fgetc(file);
+    }
+
+    if (c == EOF || c == '\n') {
+      hwloc_bitmap_set_range(set, start, stop);
+      break;
+    }
+
+    if (c != ',') {
+      /* Expected EOF, EOL, or a comma */
+      errno = EINVAL;
+      return -1;
+    }
+
+    hwloc_bitmap_set_range(set, start, stop);
+  }
+
+  return 0;
+}
+
 
 /*****************************
  ******* CpuBind Hooks *******
@@ -364,6 +405,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
 {
   static int _nr_cpus = -1;
   int nr_cpus = _nr_cpus;
+  FILE *possible;
 
   if (nr_cpus != -1)
     /* already computed */
@@ -375,6 +417,20 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
   if (nr_cpus <= 0)
     /* start from scratch, the topology isn't ready yet (complete_cpuset is missing (-1) or empty (0))*/
     nr_cpus = 1;
+
+  possible = fopen("/sys/devices/system/cpu/possible", "r");
+  if (possible) {
+    hwloc_bitmap_t possible_bitmap = hwloc_bitmap_alloc();
+    if (hwloc_linux_parse_cpuset_file(possible, possible_bitmap) == 0) {
+      int max_possible = hwloc_bitmap_last(possible_bitmap);
+
+      hwloc_debug_bitmap("possible CPUs are %s\n", possible_bitmap);
+
+      if (nr_cpus < max_possible + 1)
+        nr_cpus = max_possible + 1;
+    }
+    fclose(possible);
+  }
 
   while (1) {
     cpu_set_t *set = CPU_ALLOC(nr_cpus);
