@@ -26,6 +26,40 @@ extern "C" {
 #endif
 
 static __hwloc_inline int
+hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
+{
+  int depth = hwloc_get_type_depth(topology, type);
+
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
+    return depth;
+
+  /* find the highest existing level with type order >= */
+  for(depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU); ; depth--)
+    if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) < 0)
+      return depth+1;
+
+  /* Shouldn't ever happen, as there is always a SYSTEM level with lower order and known depth.  */
+  /* abort(); */
+}
+
+static __hwloc_inline int
+hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
+{
+  int depth = hwloc_get_type_depth(topology, type);
+
+  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
+    return depth;
+
+  /* find the lowest existing level with type order <= */
+  for(depth = 0; ; depth++)
+    if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) > 0)
+      return depth-1;
+
+  /* Shouldn't ever happen, as there is always a PU level with higher order and known depth.  */
+  /* abort(); */
+}
+
+static __hwloc_inline int
 hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type)
 {
   int depth = hwloc_get_type_depth(topology, type);
@@ -45,6 +79,32 @@ hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigne
   if (depth == HWLOC_TYPE_DEPTH_MULTIPLE)
     return NULL;
   return hwloc_get_obj_by_depth(topology, depth, idx);
+}
+
+static __hwloc_inline hwloc_obj_t
+hwloc_get_next_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_obj_t prev)
+{
+  if (!prev)
+    return hwloc_get_obj_by_depth (topology, depth, 0);
+  if (prev->depth != depth)
+    return NULL;
+  return prev->next_cousin;
+}
+
+static __hwloc_inline hwloc_obj_t
+hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
+			    hwloc_obj_t prev)
+{
+  int depth = hwloc_get_type_depth(topology, type);
+  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
+    return NULL;
+  return hwloc_get_next_obj_by_depth (topology, depth, prev);
+}
+
+static __hwloc_inline hwloc_obj_t
+hwloc_get_root_obj (hwloc_topology_t topology)
+{
+  return hwloc_get_obj_by_depth (topology, 0, 0);
 }
 
 static __hwloc_inline const char *

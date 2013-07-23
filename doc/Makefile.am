@@ -379,9 +379,9 @@ man3_tinker_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_restrict_flags_e.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_restrict.3
 
-man3_informationdir = $(man3dir)
-man3_information_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_information.3 \
+man3_levelsdir = $(man3dir)
+man3_levels_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_levels.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_type_depth_e.3 \
@@ -390,15 +390,16 @@ man3_information_DATA = \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_BRIDGE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_PCI_DEVICE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_TYPE_DEPTH_OS_DEVICE.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_depth_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_nbobjs_by_type.3 \
-
-man3_traversaldir = $(man3dir)
-man3_traversal_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_traversal.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_root_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3
 
 man3_conversiondir = $(man3dir)
 man3_conversion_DATA = \
@@ -520,20 +521,11 @@ man3_bitmap_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_xor.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_zero.3
 
-man3_helper_typesdir = $(man3dir)
-man3_helper_types_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_helper_types.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_type_or_above_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_type_or_below_depth.3
-
 man3_helper_traversal_basicdir = $(man3dir)
 man3_helper_traversal_basic_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal_basic.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_root_obj.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_ancestor_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_ancestor_obj_by_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_pu_obj_by_os_index.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_child.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
@@ -719,14 +711,12 @@ $(man3_creation_DATA): $(DOX_TAG)
 $(man3_configuration_DATA): $(DOX_TAG)
 $(man3_xmlexport_DATA): $(DOX_TAG)
 $(man3_tinker_DATA): $(DOX_TAG)
-$(man3_information_DATA): $(DOX_TAG)
-$(man3_traversal_DATA): $(DOX_TAG)
+$(man3_levels_DATA): $(DOX_TAG)
 $(man3_conversion_DATA): $(DOX_TAG)
 $(man3_cpubinding_DATA): $(DOX_TAG)
 $(man3_membinding_DATA): $(DOX_TAG)
 $(man3_custom_DATA): $(DOX_TAG)
 $(man3_bitmap_DATA): $(DOX_TAG)
-$(man3_helper_types_DATA): $(DOX_TAG)
 $(man3_helper_traversal_basic_DATA): $(DOX_TAG)
 $(man3_helper_find_inside_DATA): $(DOX_TAG)
 $(man3_helper_find_covering_DATA): $(DOX_TAG)

@@ -26,75 +26,6 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_helper_types Object Type Helpers
- * @{
- *
- * Be sure to see the figure in \ref termsanddefs that shows a
- * complete topology tree, including depths, child/sibling/cousin
- * relationships, and an example of an asymmetric topology where one
- * socket has fewer caches than its peers.
- */
-
-/** \brief Returns the depth of objects of type \p type or below
- *
- * If no object of this type is present on the underlying architecture, the
- * function returns the depth of the first "present" object typically found
- * inside \p type.
- *
- * If some objects of the given type exist in different levels, for instance
- * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
- */
-static __hwloc_inline int
-hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
-static __hwloc_inline int
-hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
-{
-  int depth = hwloc_get_type_depth(topology, type);
-
-  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
-    return depth;
-
-  /* find the highest existing level with type order >= */
-  for(depth = hwloc_get_type_depth(topology, HWLOC_OBJ_PU); ; depth--)
-    if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) < 0)
-      return depth+1;
-
-  /* Shouldn't ever happen, as there is always a SYSTEM level with lower order and known depth.  */
-  /* abort(); */
-}
-
-/** \brief Returns the depth of objects of type \p type or above
- *
- * If no object of this type is present on the underlying architecture, the
- * function returns the depth of the first "present" object typically
- * containing \p type.
- *
- * If some objects of the given type exist in different levels, for instance
- * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
- */
-static __hwloc_inline int
-hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
-static __hwloc_inline int
-hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
-{
-  int depth = hwloc_get_type_depth(topology, type);
-
-  if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
-    return depth;
-
-  /* find the lowest existing level with type order <= */
-  for(depth = 0; ; depth++)
-    if (hwloc_compare_types(hwloc_get_depth_type(topology, depth), type) > 0)
-      return depth-1;
-
-  /* Shouldn't ever happen, as there is always a PU level with higher order and known depth.  */
-  /* abort(); */
-}
-
-/** @} */
-
-
-
 /** \defgroup hwlocality_helper_traversal_basic Basic Traversal Helpers
  * @{
  *
@@ -103,20 +34,6 @@ hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type)
  * relationships, and an example of an asymmetric topology where one
  * socket has fewer caches than its peers.
  */
-
-/** \brief Returns the top-object of the topology-tree.
- *
- * Its type is typically ::HWLOC_OBJ_MACHINE but it could be different
- * for complex topologies.  This function replaces the old deprecated
- * hwloc_get_system_obj().
- */
-static __hwloc_inline hwloc_obj_t
-hwloc_get_root_obj (hwloc_topology_t topology) __hwloc_attribute_pure;
-static __hwloc_inline hwloc_obj_t
-hwloc_get_root_obj (hwloc_topology_t topology)
-{
-  return hwloc_get_obj_by_depth (topology, 0, 0);
-}
 
 /** \brief Returns the ancestor object of \p obj at depth \p depth. */
 static __hwloc_inline hwloc_obj_t
@@ -142,36 +59,6 @@ hwloc_get_ancestor_obj_by_type (hwloc_topology_t topology __hwloc_attribute_unus
   while (ancestor && ancestor->type != type)
     ancestor = ancestor->parent;
   return ancestor;
-}
-
-/** \brief Returns the next object at depth \p depth.
- *
- * If \p prev is \c NULL, return the first object at depth \p depth.
- */
-static __hwloc_inline hwloc_obj_t
-hwloc_get_next_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_obj_t prev)
-{
-  if (!prev)
-    return hwloc_get_obj_by_depth (topology, depth, 0);
-  if (prev->depth != depth)
-    return NULL;
-  return prev->next_cousin;
-}
-
-/** \brief Returns the next object of type \p type.
- *
- * If \p prev is \c NULL, return the first object at type \p type.  If
- * there are multiple or no depth for given type, return \c NULL and
- * let the caller fallback to hwloc_get_next_obj_by_depth().
- */
-static __hwloc_inline hwloc_obj_t
-hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
-		   hwloc_obj_t prev)
-{
-  int depth = hwloc_get_type_depth(topology, type);
-  if (depth == HWLOC_TYPE_DEPTH_UNKNOWN || depth == HWLOC_TYPE_DEPTH_MULTIPLE)
-    return NULL;
-  return hwloc_get_next_obj_by_depth (topology, depth, prev);
 }
 
 /** \brief Returns the object of type ::HWLOC_OBJ_PU with \p os_index.

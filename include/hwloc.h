@@ -1245,7 +1245,7 @@ HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict top
 
 
 
-/** \defgroup hwlocality_information Get Some Topology Information
+/** \defgroup hwlocality_levels Object levels, depths and types
  * @{
  *
  * Be sure to see the figure in \ref termsanddefs that shows a
@@ -1292,6 +1292,30 @@ enum hwloc_get_type_depth_e {
     HWLOC_TYPE_DEPTH_OS_DEVICE = -5   /**< \brief Virtual depth for software device object level. \hideinitializer */
 };
 
+/** \brief Returns the depth of objects of type \p type or below
+ *
+ * If no object of this type is present on the underlying architecture, the
+ * function returns the depth of the first "present" object typically found
+ * inside \p type.
+ *
+ * If some objects of the given type exist in different levels, for instance
+ * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ */
+static __hwloc_inline int
+hwloc_get_type_or_below_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
+
+/** \brief Returns the depth of objects of type \p type or above
+ *
+ * If no object of this type is present on the underlying architecture, the
+ * function returns the depth of the first "present" object typically
+ * containing \p type.
+ *
+ * If some objects of the given type exist in different levels, for instance
+ * L1 and L2 caches, the function returns HWLOC_TYPE_DEPTH_MULTIPLE.
+ */
+static __hwloc_inline int
+hwloc_get_type_or_above_depth (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
+
 /** \brief Returns the type of objects at depth \p depth.
  *
  * \return -1 if depth \p depth does not exist.
@@ -1310,18 +1334,14 @@ HWLOC_DECLSPEC unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, un
 static __hwloc_inline int
 hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
 
-/** @} */
-
-
-
-/** \defgroup hwlocality_traversal Retrieve Objects
- * @{
+/** \brief Returns the top-object of the topology-tree.
  *
- * Be sure to see the figure in \ref termsanddefs that shows a
- * complete topology tree, including depths, child/sibling/cousin
- * relationships, and an example of an asymmetric topology where one
- * socket has fewer caches than its peers.
+ * Its type is typically ::HWLOC_OBJ_MACHINE but it could be different
+ * for complex topologies.  This function replaces the old deprecated
+ * hwloc_get_system_obj().
  */
+static __hwloc_inline hwloc_obj_t
+hwloc_get_root_obj (hwloc_topology_t topology) __hwloc_attribute_pure;
 
 /** \brief Returns the topology object at logical index \p idx from depth \p depth */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, unsigned depth, unsigned idx) __hwloc_attribute_pure;
@@ -1334,6 +1354,23 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_get_obj_by_depth (hwloc_topology_t topology, un
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type, unsigned idx) __hwloc_attribute_pure;
+
+/** \brief Returns the next object at depth \p depth.
+ *
+ * If \p prev is \c NULL, return the first object at depth \p depth.
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_get_next_obj_by_depth (hwloc_topology_t topology, unsigned depth, hwloc_obj_t prev);
+
+/** \brief Returns the next object of type \p type.
+ *
+ * If \p prev is \c NULL, return the first object at type \p type.  If
+ * there are multiple or no depth for given type, return \c NULL and
+ * let the caller fallback to hwloc_get_next_obj_by_depth().
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
+			    hwloc_obj_t prev);
 
 /** @} */
 
