@@ -86,21 +86,6 @@ HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
 
 
 
-/** \defgroup hwlocality_topology Topology context
- * @{
- */
-
-struct hwloc_topology;
-/** \brief Topology context
- *
- * To be initialized with hwloc_topology_init() and built with hwloc_topology_load().
- */
-typedef struct hwloc_topology * hwloc_topology_t;
-
-/** @} */
-
-
-
 /** \defgroup hwlocality_sets Object sets (hwloc_cpuset_t and hwloc_nodeset_t)
  *
  * Hwloc uses bitmaps to represent two distinct kinds of object sets:
@@ -579,9 +564,16 @@ struct hwloc_obj_info_s {
 
 
 
-/** \defgroup hwlocality_creation Create and Destroy Topologies
+/** \defgroup hwlocality_creation Topology Creation and Destruction
  * @{
  */
+
+struct hwloc_topology;
+/** \brief Topology context
+ *
+ * To be initialized with hwloc_topology_init() and built with hwloc_topology_load().
+ */
+typedef struct hwloc_topology * hwloc_topology_t;
 
 /** \brief Allocate a topology context.
  *

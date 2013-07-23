@@ -255,11 +255,6 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_API_VERSION.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_api_version.3
 
-man3_topologydir = $(man3dir)
-man3_topology_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_topology.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_t.3
-
 man3_setsdir = $(man3dir)
 man3_sets_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_sets.3 \
@@ -327,6 +322,7 @@ man3_objects_DATA = \
 man3_creationdir = $(man3dir)
 man3_creation_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_creation.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_init.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_load.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_destroy.3 \
@@ -716,7 +712,6 @@ if HWLOC_BUILD_DOXYGEN
 # The list below should match the list of _DATA lines above
 
 $(man3_MANS): $(DOX_TAG)
-$(man3_topology_DATA): $(DOX_TAG)
 $(man3_sets_DATA): $(DOX_TAG)
 $(man3_types_DATA): $(DOX_TAG)
 $(man3_objects_DATA): $(DOX_TAG)
