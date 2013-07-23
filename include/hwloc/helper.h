@@ -640,7 +640,7 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
 
 
 
-/** \defgroup hwlocality_helper_binding Binding Helpers
+/** \defgroup hwlocality_helper_distribute Distributing items over a topology
  * @{
  */
 
@@ -702,44 +702,6 @@ hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_root
     tot_weight -= weight;
     n -= chunk;
   }
-}
-
-/** \brief Allocate some memory on the given nodeset \p nodeset
- *
- * This is similar to hwloc_alloc_membind except that it is allowed to change
- * the current memory binding policy, thus providing more binding support, at
- * the expense of changing the current state.
- */
-static __hwloc_inline void *
-hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
-{
-  void *p = hwloc_alloc_membind_nodeset(topology, len, nodeset, policy, flags);
-  if (p)
-    return p;
-  hwloc_set_membind_nodeset(topology, nodeset, policy, flags);
-  p = hwloc_alloc(topology, len);
-  if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
-    /* Enforce the binding by touching the data */
-    memset(p, 0, len);
-  return p;
-}
-
-/** \brief Allocate some memory on the memory nodes near given cpuset \p cpuset
- *
- * This is similar to hwloc_alloc_membind_policy_nodeset, but for a given cpuset.
- */
-static __hwloc_inline void *
-hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)
-{
-  void *p = hwloc_alloc_membind(topology, len, set, policy, flags);
-  if (p)
-    return p;
-  hwloc_set_membind(topology, set, policy, flags);
-  p = hwloc_alloc(topology, len);
-  if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
-    /* Enforce the binding by touching the data */
-    memset(p, 0, len);
-  return p;
 }
 
 /** @} */

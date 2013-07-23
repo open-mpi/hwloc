@@ -117,6 +117,34 @@ hwloc_obj_get_info_by_name(hwloc_obj_t obj, const char *name)
   return NULL;
 }
 
+static __hwloc_inline void *
+hwloc_alloc_membind_policy_nodeset(hwloc_topology_t topology, size_t len, hwloc_const_nodeset_t nodeset, hwloc_membind_policy_t policy, int flags)
+{
+  void *p = hwloc_alloc_membind_nodeset(topology, len, nodeset, policy, flags);
+  if (p)
+    return p;
+  hwloc_set_membind_nodeset(topology, nodeset, policy, flags);
+  p = hwloc_alloc(topology, len);
+  if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
+    /* Enforce the binding by touching the data */
+    memset(p, 0, len);
+  return p;
+}
+
+static __hwloc_inline void *
+hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cpuset_t set, hwloc_membind_policy_t policy, int flags)
+{
+  void *p = hwloc_alloc_membind(topology, len, set, policy, flags);
+  if (p)
+    return p;
+  hwloc_set_membind(topology, set, policy, flags);
+  p = hwloc_alloc(topology, len);
+  if (p && policy != HWLOC_MEMBIND_FIRSTTOUCH)
+    /* Enforce the binding by touching the data */
+    memset(p, 0, len);
+  return p;
+}
+
 
 #ifdef __cplusplus
 } /* extern "C" */

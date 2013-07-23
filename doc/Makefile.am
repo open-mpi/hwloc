@@ -440,6 +440,8 @@ man3_membinding_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_alloc.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_nodeset.3  \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_free.3
 
 man3_tinkerdir = $(man3dir)
@@ -566,13 +568,11 @@ man3_helper_find_misc_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_array_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_by_type.3
 
-man3_helper_bindingdir = $(man3dir)
-man3_helper_binding_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_helper_binding.3 \
+man3_helper_distributedir = $(man3dir)
+man3_helper_distribute_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_distribute.3 \
         $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_distributev.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3
+        $(DOX_MAN_DIR)/man3/hwloc_distributev.3
 
 man3_helper_topology_setsdir = $(man3dir)
 man3_helper_topology_sets_DATA = \
