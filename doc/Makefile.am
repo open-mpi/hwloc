@@ -548,11 +548,7 @@ man3_helper_find_coveringdir = $(man3dir)
 man3_helper_find_covering_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_covering.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_child_covering_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_obj_covering_cpuset.3
-
-man3_helper_find_coveringsdir = $(man3dir)
-man3_helper_find_coverings_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_helper_find_coverings.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_obj_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_covering_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_covering_cpuset_by_type.3
 
@@ -720,7 +716,6 @@ $(man3_bitmap_DATA): $(DOX_TAG)
 $(man3_helper_traversal_basic_DATA): $(DOX_TAG)
 $(man3_helper_find_inside_DATA): $(DOX_TAG)
 $(man3_helper_find_covering_DATA): $(DOX_TAG)
-$(man3_helper_find_coverings_DATA): $(DOX_TAG)
 $(man3_helper_find_cache_DATA): $(DOX_TAG)
 $(man3_helper_traversal_DATA): $(DOX_TAG)
 $(man3_helper_binding_DATA): $(DOX_TAG)

@@ -349,7 +349,7 @@ hwloc_get_obj_index_inside_cpuset (hwloc_topology_t topology __hwloc_attribute_u
 
 
 
-/** \defgroup hwlocality_helper_find_covering Finding a single Object covering at least CPU set
+/** \defgroup hwlocality_helper_find_covering Finding Objects covering at least CPU set
  * @{
  */
 
@@ -400,15 +400,6 @@ hwloc_get_obj_covering_cpuset (hwloc_topology_t topology, hwloc_const_cpuset_t s
     current = child;
   }
 }
-
-
-/** @} */
-
-
-
-/** \defgroup hwlocality_helper_find_coverings Finding a set of similar Objects covering at least a CPU set
- * @{
- */
 
 /** \brief Iterate through same-depth objects covering at least CPU set \p set
  *
