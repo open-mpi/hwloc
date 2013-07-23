@@ -41,6 +41,7 @@
  *
  * See hwloc/bitmap.h for bitmap specific macros.
  * See hwloc/helper.h for high-level topology traversal helpers.
+ * See hwloc/inlines.h for the actual inline code of some functions below.
  */
 
 #ifndef HWLOC_H

@@ -432,12 +432,13 @@ And the same output in XML (line breaks added, only PU #0 shown):
 
 \section interface Programming Interface
 
-The basic interface is available in hwloc.h.  It essentially offers
-low-level routines for advanced programmers that want to manually
-manipulate objects and follow links between them.  Documentation for
-everything in hwloc.h are provided later in this document.  Developers
-should also look at hwloc/helper.h (and also in this document, which
-provides good higher-level topology traversal examples).
+The basic interface is available in hwloc.h.
+Some higher-level functions are available in hwloc/helper.h to reduce
+the need to manually manipulate objects and follow links between them.
+Documentation for all these is provided later in this document.
+Developers may also want to look at hwloc/inlines.h which contains the
+actual inline code of some hwloc.h routines, and at this document,
+which provides good higher-level topology traversal examples.
 
 To precisely define the vocabulary used by hwloc, a \ref termsanddefs
 section is available and should probably be read first.  
