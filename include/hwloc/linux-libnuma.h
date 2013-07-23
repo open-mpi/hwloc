@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_linux_libnuma_ulongs Helpers for manipulating Linux libnuma unsigned long masks
+/** \defgroup hwlocality_linux_libnuma_ulongs Interoperability with Linux libnuma unsigned long masks
  * @{
  */
 
@@ -198,7 +198,7 @@ hwloc_nodeset_from_linux_libnuma_ulongs(hwloc_topology_t topology, hwloc_nodeset
 
 
 
-/** \defgroup hwlocality_linux_libnuma_bitmask Helpers for manipulating Linux libnuma bitmask
+/** \defgroup hwlocality_linux_libnuma_bitmask Interoperability with Linux libnuma bitmask
  * @{
  */
 

@@ -31,7 +31,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_intel_mic Intel Xeon Phi (MIC) Specific Functions
+/** \defgroup hwlocality_intel_mic Interoperability with Intel Xeon Phi (MIC)
  * @{
  */
 

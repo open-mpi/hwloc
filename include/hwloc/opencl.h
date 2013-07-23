@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_opencl OpenCL Specific Functions
+/** \defgroup hwlocality_opencl Interoperability with OpenCL
  * @{
  */
 

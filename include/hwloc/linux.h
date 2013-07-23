@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * See COPYING in top-level directory.
  */
@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_linux Linux-only helpers
+/** \defgroup hwlocality_linux Linux-specific helpers
  *
  * This includes helpers for manipulating linux kernel cpumap files, and hwloc
  * equivalents of the Linux sched_setaffinity and sched_getaffinity system calls.

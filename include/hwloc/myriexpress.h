@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_myriexpress Myrinet Express-Specific Functions
+/** \defgroup hwlocality_myriexpress Interoperability with Myrinet Express
  * @{
  */
 

@@ -20,7 +20,7 @@ struct hwloc_backend;
 
 
 
-/** \defgroup hwlocality_disc_components Discovery components
+/** \defgroup hwlocality_disc_components Components and Plugins: Discovery components
  * @{
  */
 
@@ -97,7 +97,7 @@ struct hwloc_disc_component {
 
 
 
-/** \defgroup hwlocality_disc_backends Discovery backends
+/** \defgroup hwlocality_disc_backends Components and Plugins: Discovery backends
  * @{
  */
 
@@ -194,7 +194,7 @@ HWLOC_DECLSPEC int hwloc_backends_notify_new_object(struct hwloc_backend *caller
 
 
 
-/** \defgroup hwlocality_generic_components Generic components
+/** \defgroup hwlocality_generic_components Components and Plugins: Generic components
  * @{
  */
 
@@ -231,7 +231,7 @@ struct hwloc_component {
 
 
 
-/** \defgroup hwlocality_components_core_funcs Core functions to be used by components
+/** \defgroup hwlocality_components_core_funcs Components and Plugins: Core functions to be used by components
  * @{
  */
 

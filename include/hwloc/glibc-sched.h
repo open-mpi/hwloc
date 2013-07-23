@@ -36,7 +36,7 @@ extern "C" {
 #ifdef HWLOC_HAVE_CPU_SET
 
 
-/** \defgroup hwlocality_glibc_sched Helpers for manipulating glibc sched affinity
+/** \defgroup hwlocality_glibc_sched Interoperability with glibc sched affinity
  * @{
  */
 

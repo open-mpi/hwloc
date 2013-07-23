@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_nvml NVIDIA Management Library Specific Functions
+/** \defgroup hwlocality_nvml Interoperability with the NVIDIA Management Library
  * @{
  */
 

@@ -31,7 +31,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_cudart CUDA Runtime API Specific Functions
+/** \defgroup hwlocality_cudart Interoperability with the CUDA Runtime API
  * @{
  */
 

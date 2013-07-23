@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_gl OpenGL display specific functions
+/** \defgroup hwlocality_gl Interoperability with OpenGL displays
  * @{
  */
 
