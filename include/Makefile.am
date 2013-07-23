@@ -13,6 +13,7 @@ include_hwlocdir = $(includedir)/hwloc
 include_hwloc_HEADERS = \
         hwloc/bitmap.h \
         hwloc/helper.h \
+        hwloc/inlines.h \
         hwloc/myriexpress.h \
         hwloc/openfabrics-verbs.h \
         hwloc/opencl.h \

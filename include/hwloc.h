@@ -2224,5 +2224,8 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_custom_insert_group_object_by_parent(hwloc_topo
 /* high-level helpers */
 #include <hwloc/helper.h>
 
+/* inline code of some functions above */
+#include <hwloc/inlines.h>
+
 
 #endif /* HWLOC_H */
