@@ -574,17 +574,13 @@ man3_helper_binding_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy.3 \
         $(DOX_MAN_DIR)/man3/hwloc_alloc_membind_policy_nodeset.3
 
-man3_helper_cpusetdir = $(man3dir)
-man3_helper_cpuset_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_helper_cpuset.3 \
+man3_helper_topology_setsdir = $(man3dir)
+man3_helper_topology_sets_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_topology_sets.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_allowed_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_complete_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_online_cpuset.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_get_topology_cpuset.3
-
-man3_helper_nodesetdir = $(man3dir)
-man3_helper_nodeset_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_helper_nodeset.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_topology_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_allowed_nodeset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_complete_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_get_topology_nodeset.3

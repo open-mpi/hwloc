@@ -746,7 +746,7 @@ hwloc_alloc_membind_policy(hwloc_topology_t topology, size_t len, hwloc_const_cp
 
 
 
-/** \defgroup hwlocality_helper_cpuset Cpuset Helpers
+/** \defgroup hwlocality_helper_topology_sets CPU and node sets of entire topologies
  * @{
  */
 /** \brief Get complete CPU set
@@ -818,13 +818,6 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
   return hwloc_get_root_obj(topology)->allowed_cpuset;
 }
 
-/** @} */
-
-
-
-/** \defgroup hwlocality_helper_nodeset Nodeset Helpers
- * @{
- */
 /** \brief Get complete node set
  *
  * \return the complete node set of memory of the system. If the
@@ -881,7 +874,7 @@ hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology)
 
 
 
-/** \defgroup hwlocality_helper_nodeset_convert Conversion between cpuset and nodeset 
+/** \defgroup hwlocality_helper_nodeset_convert Converting between CPU sets and node sets
  *
  * There are two semantics for converting cpusets to nodesets depending on how
  * non-NUMA machines are handled.
