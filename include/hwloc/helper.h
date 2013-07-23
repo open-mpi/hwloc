@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 
-/** \defgroup hwlocality_helper_find_inside Finding Objects Inside a CPU set
+/** \defgroup hwlocality_helper_find_inside Finding Objects inside a CPU set
  * @{
  */
 
@@ -961,7 +961,7 @@ hwloc_cpuset_from_nodeset_strict(struct hwloc_topology *topology, hwloc_cpuset_t
 
 
 
-/** \defgroup hwlocality_distances Distances
+/** \defgroup hwlocality_distances Manipulating Distances
  * @{
  */
 
@@ -1100,7 +1100,7 @@ hwloc_get_latency(hwloc_topology_t topology,
 
 
 
-/** \defgroup hwlocality_advanced_io Advanced I/O object traversal helpers
+/** \defgroup hwlocality_advanced_io Finding I/O objects
  * @{
  */
 

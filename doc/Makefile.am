@@ -255,9 +255,9 @@ man3_MANS = \
         $(DOX_MAN_DIR)/man3/HWLOC_API_VERSION.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_api_version.3
 
-man3_setsdir = $(man3dir)
-man3_sets_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_sets.3 \
+man3_object_setsdir = $(man3dir)
+man3_object_sets_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_object_sets.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_const_bitmap_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_cpuset_t.3 \
@@ -265,9 +265,9 @@ man3_sets_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_nodeset_t.3 \
         $(DOX_MAN_DIR)/man3/hwloc_const_nodeset_t.3
 
-man3_typesdir = $(man3dir)
-man3_types_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_types.3 \
+man3_object_typesdir = $(man3dir)
+man3_object_types_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_object_types.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_BRIDGE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CACHE.3 \
         $(DOX_MAN_DIR)/man3/HWLOC_OBJ_CORE.3 \
@@ -379,9 +379,9 @@ man3_levels_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_by_type.3
 
-man3_conversiondir = $(man3dir)
-man3_conversion_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_conversion.3 \
+man3_object_stringsdir = $(man3dir)
+man3_object_strings_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_object_strings.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_of_string.3 \
         $(DOX_MAN_DIR)/man3/hwloc_obj_type_snprintf.3 \

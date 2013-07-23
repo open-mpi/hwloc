@@ -86,7 +86,7 @@ HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
 
 
 
-/** \defgroup hwlocality_sets Object sets (hwloc_cpuset_t and hwloc_nodeset_t)
+/** \defgroup hwlocality_object_sets Object Sets (hwloc_cpuset_t and hwloc_nodeset_t)
  *
  * Hwloc uses bitmaps to represent two distinct kinds of object sets:
  * CPU sets (::hwloc_cpuset_t) and NUMA node sets (::hwloc_nodeset_t).
@@ -138,7 +138,7 @@ typedef hwloc_const_bitmap_t hwloc_const_nodeset_t;
 
 
 
-/** \defgroup hwlocality_types Topology Object Types
+/** \defgroup hwlocality_object_types Object Types
  * @{
  */
 
@@ -299,7 +299,7 @@ enum hwloc_compare_types_e {
 
 
 
-/** \defgroup hwlocality_objects Topology Objects
+/** \defgroup hwlocality_objects Object Structure and Attributes
  * @{
  */
 
@@ -1163,7 +1163,7 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
 
 
 
-/** \defgroup hwlocality_conversion Object/String Conversion
+/** \defgroup hwlocality_object_strings Manipulating Object Type, Sets and Attributes as Strings
  * @{
  */
 
