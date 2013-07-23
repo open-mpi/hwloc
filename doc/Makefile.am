@@ -521,16 +521,6 @@ man3_bitmap_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_xor.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bitmap_zero.3
 
-man3_helper_traversal_basicdir = $(man3dir)
-man3_helper_traversal_basic_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal_basic.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_ancestor_obj_by_depth.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_ancestor_obj_by_type.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_pu_obj_by_os_index.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_next_child.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3
-
 man3_helper_find_insidedir = $(man3dir)
 man3_helper_find_inside_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_inside.3 \
@@ -552,6 +542,14 @@ man3_helper_find_covering_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_covering_cpuset_by_depth.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_obj_covering_cpuset_by_type.3
 
+man3_helper_ancestorsdir = $(man3dir)
+man3_helper_ancestors_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_ancestors.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_ancestor_obj_by_depth.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_ancestor_obj_by_type.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_common_ancestor_obj.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_obj_is_in_subtree.3
+
 man3_helper_find_cachedir = $(man3dir)
 man3_helper_find_cache_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_find_cache.3 \
@@ -559,9 +557,11 @@ man3_helper_find_cache_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_get_cache_covering_cpuset.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_shared_cache_covering_obj.3
 
-man3_helper_traversaldir = $(man3dir)
-man3_helper_traversal_DATA = \
-        $(DOX_MAN_DIR)/man3/hwlocality_helper_traversal.3 \
+man3_helper_find_miscdir = $(man3dir)
+man3_helper_find_misc_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_helper_find_misc.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_pu_obj_by_os_index.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_get_next_child.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_closest_objs.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_array_by_type.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_obj_below_by_type.3
@@ -713,11 +713,11 @@ $(man3_tinker_DATA): $(DOX_TAG)
 $(man3_custom_DATA): $(DOX_TAG)
 $(man3_xmlexport_DATA): $(DOX_TAG)
 $(man3_bitmap_DATA): $(DOX_TAG)
-$(man3_helper_traversal_basic_DATA): $(DOX_TAG)
+$(man3_helper_ancestors_DATA): $(DOX_TAG)
 $(man3_helper_find_inside_DATA): $(DOX_TAG)
 $(man3_helper_find_covering_DATA): $(DOX_TAG)
 $(man3_helper_find_cache_DATA): $(DOX_TAG)
-$(man3_helper_traversal_DATA): $(DOX_TAG)
+$(man3_helper_misc_DATA): $(DOX_TAG)
 $(man3_helper_binding_DATA): $(DOX_TAG)
 $(man3_helper_cpuset_DATA): $(DOX_TAG)
 $(man3_helper_nodeset_DATA): $(DOX_TAG)
