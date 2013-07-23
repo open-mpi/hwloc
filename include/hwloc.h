@@ -625,9 +625,9 @@ HWLOC_DECLSPEC void hwloc_topology_check(hwloc_topology_t topology);
 
 
 
-/** \defgroup hwlocality_configuration Configure Topology Detection
+/** \defgroup hwlocality_configuration Topology Detection Configuration and Query
  *
- * These functions can optionally be called between hwloc_topology_init() and
+ * Several functions can optionally be called between hwloc_topology_init() and
  * hwloc_topology_load() to configure how the detection should be performed,
  * e.g. to ignore some objects types, define a synthetic topology, etc.
  *
@@ -760,6 +760,14 @@ enum hwloc_topology_flags_e {
  * The flags set in a topology may be retrieved with hwloc_topology_get_flags()
  */
 HWLOC_DECLSPEC int hwloc_topology_set_flags (hwloc_topology_t topology, unsigned long flags);
+
+/** \brief Get OR'ed flags of a topology.
+ *
+ * Get the OR'ed set of ::hwloc_topology_flags_e of a topology.
+ *
+ * \return the flags previously set with hwloc_topology_set_flags().
+ */
+HWLOC_DECLSPEC unsigned long hwloc_topology_get_flags (hwloc_topology_t topology);
 
 /** \brief Change which pid the topology is viewed from
  *
@@ -928,6 +936,15 @@ HWLOC_DECLSPEC int hwloc_topology_set_custom(hwloc_topology_t topology);
 HWLOC_DECLSPEC int hwloc_topology_set_distance_matrix(hwloc_topology_t __hwloc_restrict topology,
 						      hwloc_obj_type_t type, unsigned nbobjs,
 						      unsigned *os_index, float *distances);
+
+/** \brief Does the topology context come from this system?
+ *
+ * \return 1 if this topology context was built using the system
+ * running this program.
+ * \return 0 instead (for instance if using another file-system root,
+ * a XML topology file, or a synthetic topology).
+ */
+HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology) __hwloc_attribute_pure;
 
 /** \brief Flags describing actual discovery support for this topology. */
 struct hwloc_topology_discovery_support {
@@ -1292,23 +1309,6 @@ HWLOC_DECLSPEC unsigned hwloc_get_nbobjs_by_depth (hwloc_topology_t topology, un
  */
 static __hwloc_inline int
 hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type) __hwloc_attribute_pure;
-
-/** \brief Does the topology context come from this system?
- *
- * \return 1 if this topology context was built using the system
- * running this program.
- * \return 0 instead (for instance if using another file-system root,
- * a XML topology file, or a synthetic topology).
- */
-HWLOC_DECLSPEC int hwloc_topology_is_thissystem(hwloc_topology_t  __hwloc_restrict topology) __hwloc_attribute_pure;
-
-/** \brief Get OR'ed flags of a topology.
- *
- * Get the OR'ed set of ::hwloc_topology_flags_e of a topology.
- *
- * \return the flags previously set with hwloc_topology_set_flags().
- */
-HWLOC_DECLSPEC unsigned long hwloc_topology_get_flags (hwloc_topology_t topology);
 
 /** @} */
 
