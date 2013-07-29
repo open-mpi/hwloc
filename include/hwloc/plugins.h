@@ -325,8 +325,11 @@ HWLOC_DECLSPEC unsigned hwloc_pci_find_cap(const unsigned char *config, size_t c
  */
 HWLOC_DECLSPEC int hwloc_pci_find_linkspeed(const unsigned char *config, unsigned offset, float *linkspeed);
 
-/** \brief Modify the PCI device object into a bridge and fill its attribute if a bridge is found in the PCI config space */
-HWLOC_DECLSPEC int hwloc_pci_prepare_bridge(hwloc_obj_t obj, const unsigned char *config, size_t config_size);
+/** \brief Modify the PCI device object into a bridge and fill its attribute if a bridge is found in the PCI config space.
+ *
+ * This function requires 64 bytes of common configuration header at the beginning of config.
+ */
+HWLOC_DECLSPEC int hwloc_pci_prepare_bridge(hwloc_obj_t obj, const unsigned char *config);
 
 /** \brief Make sure that plugins can lookup core symbols.
  *

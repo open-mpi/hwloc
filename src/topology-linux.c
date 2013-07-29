@@ -4479,7 +4479,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 	/* cannot do anything without base config space */
 
 	/* is this a bridge? */
-	hwloc_pci_prepare_bridge(obj, config_space_cache, config_space_cachesize);
+	if (config_space_cachesize >= 64)
+	  hwloc_pci_prepare_bridge(obj, config_space_cache);
 
 	/* get the revision */
 	attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];

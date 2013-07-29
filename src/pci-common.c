@@ -436,16 +436,12 @@ hwloc_pci_find_linkspeed(const unsigned char *config,
 
 int
 hwloc_pci_prepare_bridge(hwloc_obj_t obj,
-			 const unsigned char *config, size_t config_size __hwloc_attribute_unused)
+			 const unsigned char *config)
 {
   unsigned char headertype;
   unsigned isbridge;
   struct hwloc_pcidev_attr_s *pattr = &obj->attr->pcidev;
   struct hwloc_bridge_attr_s *battr;
-
-  /* largest offset we'll access in config_space is PCI_SUBORDINATE_BUS */
-  if (HWLOC_PCI_SUBORDINATE_BUS >= config_size)
-    return 0;
 
   headertype = config[HWLOC_PCI_HEADER_TYPE] & 0x7f;
   isbridge = (pattr->class_id == HWLOC_PCI_CLASS_BRIDGE_PCI
