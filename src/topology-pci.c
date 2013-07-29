@@ -275,9 +275,8 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
     }
 
-    if (offset > 0)
-      hwloc_pci_find_linkspeed(config_space_cache, config_space_cachesize, offset,
-			       &obj->attr->pcidev.linkspeed);
+    if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= config_space_cachesize)
+      hwloc_pci_find_linkspeed(config_space_cache, offset, &obj->attr->pcidev.linkspeed);
 
     hwloc_pci_prepare_bridge(obj, config_space_cache, config_space_cachesize);
 

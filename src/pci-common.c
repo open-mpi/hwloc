@@ -409,14 +409,11 @@ hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap
 #define HWLOC_PCI_EXP_LNKSTA_WIDTH 0x03f0
 
 int
-hwloc_pci_find_linkspeed(const unsigned char *config, size_t config_size,
+hwloc_pci_find_linkspeed(const unsigned char *config,
 			 unsigned offset, float *linkspeed)
 {
   unsigned linksta, speed, width;
   float lanespeed;
-
-  if (offset + HWLOC_PCI_EXP_LNKSTA + 3 >= config_size)
-    return -1;
 
   memcpy(&linksta, &config[offset + HWLOC_PCI_EXP_LNKSTA], 4);
   speed = linksta & HWLOC_PCI_EXP_LNKSTA_SPEED; /* PCIe generation */

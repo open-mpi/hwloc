@@ -4486,8 +4486,8 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
 
 	/* try to get the link speed */
 	offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, HWLOC_PCI_CAP_ID_EXP);
-	if (offset > 0)
-	  hwloc_pci_find_linkspeed(config_space_cache, config_space_cachesize, offset, &attr->linkspeed);
+	if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= config_space_cachesize)
+	  hwloc_pci_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
       }
     }
 
