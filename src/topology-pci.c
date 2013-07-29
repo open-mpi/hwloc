@@ -221,7 +221,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
     cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
     offset = cap ? cap->addr : 0;
 #else
-    offset = hwloc_pci_find_cap(config_space_cache, CONFIG_SPACE_CACHESIZE, PCI_CAP_ID_EXP);
+    offset = hwloc_pci_find_cap(config_space_cache, PCI_CAP_ID_EXP);
 #endif /* HWLOC_HAVE_PCI_FIND_CAP */
 
     if (0xffff == pcidev->vendor_id && 0xffff == pcidev->device_id) {

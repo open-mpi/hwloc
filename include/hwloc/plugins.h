@@ -315,8 +315,11 @@ HWLOC_DECLSPEC int hwloc_fill_object_sets(hwloc_obj_t obj);
  */
 HWLOC_DECLSPEC int hwloc_insert_pci_device_list(struct hwloc_backend *backend, struct hwloc_obj *first_obj);
 
-/** \brief Return the offset of the given capability in the PCI config space buffer */
-HWLOC_DECLSPEC unsigned hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap);
+/** \brief Return the offset of the given capability in the PCI config space buffer
+ *
+ * This function requires a 256-bytes config space. Unknown/unavailable bytes should be set to 0xff.
+ */
+HWLOC_DECLSPEC unsigned hwloc_pci_find_cap(const unsigned char *config, unsigned cap);
 
 /** \brief Fill linkspeed by reading the PCI config space where PCI_CAP_ID_EXP is at position offset.
  *

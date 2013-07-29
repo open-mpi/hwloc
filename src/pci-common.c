@@ -367,25 +367,18 @@ hwloc_insert_pci_device_list(struct hwloc_backend *backend,
 #define HWLOC_PCI_CAP_LIST_NEXT 1
 
 unsigned
-hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap)
+hwloc_pci_find_cap(const unsigned char *config, unsigned cap)
 {
   unsigned char seen[256] = { 0 };
-  unsigned char ptr;
-
-  /* check whether PCI_STATUS and PCI_CAPABILITY_LIST offsets are OK */
-  if (HWLOC_PCI_CAPABILITY_LIST >= config_size)
-    return 0;
+  unsigned char ptr; /* unsigned char to make sure we stay within the 256-byte config space */
 
   if (!(config[HWLOC_PCI_STATUS] & HWLOC_PCI_STATUS_CAP_LIST))
     return 0;
 
   for (ptr = config[HWLOC_PCI_CAPABILITY_LIST] & ~3;
-       ptr;
+       ptr; /* exit if next is 0 */
        ptr = config[ptr + HWLOC_PCI_CAP_LIST_NEXT] & ~3) {
     unsigned char id;
-
-    if (ptr + (unsigned) HWLOC_PCI_CAP_LIST_ID >= config_size)
-      break;
 
     /* Looped around! */
     if (seen[ptr])
@@ -395,10 +388,7 @@ hwloc_pci_find_cap(const unsigned char *config, size_t config_size, unsigned cap
     id = config[ptr + HWLOC_PCI_CAP_LIST_ID];
     if (id == cap)
       return ptr;
-    if (id == 0xff)
-      break;
-
-    if (ptr + (unsigned) HWLOC_PCI_CAP_LIST_NEXT >= config_size)
+    if (id == 0xff) /* exit if id is 0 or 0xff */
       break;
   }
   return 0;
