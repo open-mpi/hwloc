@@ -76,8 +76,7 @@
 #define PCI_CAP_NORMAL 1
 #endif
 
-#define CONFIG_SPACE_CACHESIZE_TRY 256
-#define CONFIG_SPACE_CACHESIZE 64
+#define CONFIG_SPACE_CACHESIZE 256
 
 
 #ifdef HWLOC_HAVE_PCIUTILS
@@ -165,8 +164,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
   {
     const char *vendorname, *devicename, *fullname;
-    unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE_TRY];
-    unsigned config_space_cachesize = CONFIG_SPACE_CACHESIZE_TRY;
+    unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
     struct hwloc_obj *obj;
     unsigned os_index;
     unsigned domain;
@@ -177,17 +175,14 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #ifdef HWLOC_HAVE_PCI_FIND_CAP
     struct pci_cap *cap;
 #endif
-#ifdef HWLOC_HAVE_LIBPCIACCESS
-    pciaddr_t got;
-#endif
 
-    /* cache what we need of the config space */
+    /* initialize the config space in case we fail to read it (missing permissions, etc). */
+    memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     pci_device_probe(pcidev);
-    pci_device_cfg_read(pcidev, config_space_cache, 0, CONFIG_SPACE_CACHESIZE_TRY, &got);
-    config_space_cachesize = got;
+    pci_device_cfg_read(pcidev, config_space_cache, 0, CONFIG_SPACE_CACHESIZE, NULL);
 #else /* HWLOC_HAVE_PCIUTILS */
-    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE_TRY);
+    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE); /* doesn't even tell how much it actually reads */
 #endif
 
     /* try to read the domain */
@@ -204,7 +199,6 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #ifdef HWLOC_HAVE_PCIDEV_DEVICE_CLASS
     device_class = pcidev->device_class;
 #else
-    HWLOC_BUILD_ASSERT(PCI_CLASS_DEVICE < CONFIG_SPACE_CACHESIZE);
     device_class = config_space_cache[PCI_CLASS_DEVICE] | (config_space_cache[PCI_CLASS_DEVICE+1] << 8);
 #endif
 #endif
@@ -220,7 +214,6 @@ hwloc_look_pci(struct hwloc_backend *backend)
     obj->attr->pcidev.vendor_id = pcidev->vendor_id;
     obj->attr->pcidev.device_id = pcidev->device_id;
     obj->attr->pcidev.class_id = device_class;
-    HWLOC_BUILD_ASSERT(PCI_REVISION_ID < CONFIG_SPACE_CACHESIZE);
     obj->attr->pcidev.revision = config_space_cache[PCI_REVISION_ID];
 
     obj->attr->pcidev.linkspeed = 0; /* unknown */
@@ -228,7 +221,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
     cap = pci_find_cap(pcidev, PCI_CAP_ID_EXP, PCI_CAP_NORMAL);
     offset = cap ? cap->addr : 0;
 #else
-    offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, PCI_CAP_ID_EXP);
+    offset = hwloc_pci_find_cap(config_space_cache, CONFIG_SPACE_CACHESIZE, PCI_CAP_ID_EXP);
 #endif /* HWLOC_HAVE_PCI_FIND_CAP */
 
     if (0xffff == pcidev->vendor_id && 0xffff == pcidev->device_id) {
@@ -245,7 +238,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
        *
        * TODO:
        *  If PF has CAP_ID_PCIX or CAP_ID_EXP (offset>0),
-       *  look for extended capability PCI_EXT_CAP_ID_SRIOV,
+       *  look for extended capability PCI_EXT_CAP_ID_SRIOV (need extended config space (more than 256 bytes)),
        *  then read the VF device ID after it (PCI_IOV_DID bytes later).
        *  Needs access to extended config space (needs root on Linux).
        * TODO:
@@ -275,18 +268,15 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
     }
 
-    if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= config_space_cachesize)
+    if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE)
       hwloc_pci_find_linkspeed(config_space_cache, offset, &obj->attr->pcidev.linkspeed);
 
-    if (config_space_cachesize >= 64)
-      hwloc_pci_prepare_bridge(obj, config_space_cache);
+    hwloc_pci_prepare_bridge(obj, config_space_cache);
 
     if (obj->type == HWLOC_OBJ_PCI_DEVICE) {
       memcpy(&tmp16, &config_space_cache[PCI_SUBSYSTEM_VENDOR_ID], sizeof(tmp16));
-      HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_VENDOR_ID < CONFIG_SPACE_CACHESIZE);
       obj->attr->pcidev.subvendor_id = tmp16;
       memcpy(&tmp16, &config_space_cache[PCI_SUBSYSTEM_ID], sizeof(tmp16));
-      HWLOC_BUILD_ASSERT(PCI_SUBSYSTEM_ID < CONFIG_SPACE_CACHESIZE);
       obj->attr->pcidev.subdevice_id = tmp16;
     } else {
       /* TODO:

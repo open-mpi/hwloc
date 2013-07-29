@@ -4468,28 +4468,25 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
-#define CONFIG_SPACE_CACHESIZE_TRY 256
-      unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE_TRY];
-      unsigned config_space_cachesize = CONFIG_SPACE_CACHESIZE_TRY;
+#define CONFIG_SPACE_CACHESIZE 256
+      unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
       unsigned offset;
 
-      config_space_cachesize = fread(config_space_cache, 1, CONFIG_SPACE_CACHESIZE_TRY, file);
+      /* initialize the config space in case we fail to read it (missing permissions, etc). */
+      memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
+      (void) fread(config_space_cache, 1, CONFIG_SPACE_CACHESIZE, file);
       fclose(file);
-      if (config_space_cachesize >= 64) {
-	/* cannot do anything without base config space */
 
-	/* is this a bridge? */
-	if (config_space_cachesize >= 64)
-	  hwloc_pci_prepare_bridge(obj, config_space_cache);
+      /* is this a bridge? */
+      hwloc_pci_prepare_bridge(obj, config_space_cache);
 
-	/* get the revision */
-	attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
+      /* get the revision */
+      attr->revision = config_space_cache[HWLOC_PCI_REVISION_ID];
 
-	/* try to get the link speed */
-	offset = hwloc_pci_find_cap(config_space_cache, config_space_cachesize, HWLOC_PCI_CAP_ID_EXP);
-	if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= config_space_cachesize)
-	  hwloc_pci_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
-      }
+      /* try to get the link speed */
+      offset = hwloc_pci_find_cap(config_space_cache, CONFIG_SPACE_CACHESIZE, HWLOC_PCI_CAP_ID_EXP);
+      if (offset > 0 && offset + 20 /* size of PCI express block up to link status */ <= CONFIG_SPACE_CACHESIZE)
+	hwloc_pci_find_linkspeed(config_space_cache, offset, &attr->linkspeed);
     }
 
     if (first_obj)
