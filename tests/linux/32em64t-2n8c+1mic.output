@@ -250,6 +250,7 @@
             <object type="OSDev" name="mlx4_0" osdev_type="3">
               <info name="NodeGUID" value="0002:c903:00f9:bfa0"/>
               <info name="SysImageGUID" value="0002:c903:00f9:bfa3"/>
+              <info name="Port1State" value="4"/>
               <info name="Port1LID" value="0x3a4"/>
               <info name="Port1LMC" value="0"/>
               <info name="Port1GID0" value="fe80:0000:0000:0000:0002:c903:00f9:bfa1"/>

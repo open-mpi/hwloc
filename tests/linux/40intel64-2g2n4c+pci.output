@@ -492,6 +492,7 @@
             <object type="OSDev" name="qib0" osdev_type="3">
               <info name="NodeGUID" value="0011:7500:0077:cfc8"/>
               <info name="SysImageGUID" value="0011:7500:0077:cfc8"/>
+              <info name="Port1State" value="4"/>
               <info name="Port1LID" value="0x12a"/>
               <info name="Port1LMC" value="0"/>
               <info name="Port1GID0" value="fe80:0000:0000:0000:0011:7500:0077:cfc8"/>
