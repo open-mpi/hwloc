@@ -36,6 +36,8 @@ Version 1.8.0
   + hwloc-gather-topology may now gather I/O-related files on Linux when
     --io is given. Only the linuxpci component supports discovering I/O
     objects from these extended tarballs.
+  + hwloc-info supports "root" and "all" special locations for dumping
+    information about the root object.
 * Documentation
   + hwloc.h and hwloc/helper.h have been reorganized to clarify the
     documentation sections. The actual online code has moved out of hwloc.h
