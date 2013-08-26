@@ -23,6 +23,11 @@ hwloc-annotate \- Add info attributes to a XML topology
 .SH OPTIONS
 .
 .TP 10
+\fB\-\-ri\fR
+Remove all info attributes that exist with the same name before adding the new one.
+This option is only accepted in "info" mode.
+If the info value is omitted, existing infos are replaced with nothing.
+.TP
 \fB\-\-ci\fR
 Clear the existing info attributes in the target objects before annotating.
 If no new annotation has to be added after clearing, \fImode\fR should be

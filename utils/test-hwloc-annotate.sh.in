@@ -37,6 +37,10 @@ set -e
 $annotate $HWLOC_top_srcdir/utils/test-hwloc-annotate.input $file all info Foo Bar
 $annotate --ci $file $file Core:all info Foo2 Bar2
 $annotate --ci $file $file L2Cache:0 none
+$annotate --ri $file $file socket:all info Foo
+$annotate $file $file socket:0 info Foo2 Bar
+$annotate $file $file socket:0 info Foo2 Bar2
+$annotate --ri $file $file socket:0 info Foo2 Bar3
 
 diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-annotate.output "$file"
 rm -rf "$tmp"

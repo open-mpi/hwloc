@@ -21,15 +21,17 @@ static void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 	fprintf(where, "    none\n");
         fprintf(where, "Options:\n");
 	fprintf(where, "  --ci\tClear existing infos\n");
+	fprintf(where, "  --ri\tReplace or remove existing infos with same name (annotation must be info)\n");
 }
 
 static char *infoname = NULL, *infovalue = NULL;
 
 static int clearinfos = 0;
+static int replaceinfos = 0;
 
 static void apply(hwloc_obj_t obj)
 {
-	unsigned i;
+	unsigned i,j;
 	if (clearinfos) {
 		/* this may be considered dangerous, applications should not modify objects directly */
 		for(i=0; i<obj->infos_count; i++) {
@@ -40,8 +42,33 @@ static void apply(hwloc_obj_t obj)
 		obj->infos = NULL;
 		obj->infos_count = 0;
 	}
-	if (infoname)
-		hwloc_obj_add_info(obj, infoname, infovalue);
+	if (infoname) {
+		if (replaceinfos) {
+			/* this may be considered dangerous, applications should not modify objects directly */
+			for(i=0, j=0; i<obj->infos_count; i++) {
+				if (!strcmp(infoname, obj->infos[i].name)) {
+					/* remove info */
+					free(obj->infos[i].name);
+					free(obj->infos[i].value);
+					obj->infos[i].name = NULL;
+				} else {
+					if (i != j) {
+						/* shift info to where it belongs */
+						obj->infos[j].name = obj->infos[i].name;
+						obj->infos[j].value = obj->infos[i].value;
+					}
+					j++;
+				}
+			}
+			obj->infos_count = j;
+			if (!j) {
+				free(obj->infos);
+				obj->infos = NULL;
+			}
+		}
+		if (infovalue)
+			hwloc_obj_add_info(obj, infoname, infovalue);
+	}
 }
 
 static void apply_recursive(hwloc_obj_t obj)
@@ -68,6 +95,8 @@ int main(int argc, char *argv[])
 	while (argc && *argv[0] == '-') {
 		if (!strcmp(argv[0], "--ci"))
 			clearinfos = 1;
+		else if (!strcmp(argv[0], "--ri"))
+			replaceinfos = 1;
 		else {
 			fprintf(stderr, "Unrecognized options: %s\n", argv[0]);
 			usage(callname, stderr);
@@ -92,17 +121,23 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	if (!strcmp(argv[0], "info")) {
-		if (argc < 3) {
+		if (argc < 2 || (!replaceinfos && argc < 3)) {
 			usage(callname, stderr);
 			exit(EXIT_FAILURE);
 		}
 		infoname = argv[1];
-		infovalue = argv[2];
+		infovalue = argc >= 3 ? argv[2] : NULL;
 
 	} else if (!strcmp(argv[0], "none")) {
 		/* do nothing (maybe clear) */
 	} else {
 		fprintf(stderr, "Unrecognized annotation type: %s\n", argv[0]);
+		usage(callname, stderr);
+		exit(EXIT_FAILURE);
+	}
+
+	if (replaceinfos && !infoname) {
+		fprintf(stderr, "--ri missing a info name\n");
 		usage(callname, stderr);
 		exit(EXIT_FAILURE);
 	}
