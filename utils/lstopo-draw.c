@@ -90,6 +90,14 @@
 #define BRIDGE_G_COLOR 0xff
 #define BRIDGE_B_COLOR 0xff
 
+struct style {
+  struct stylecolor { int r, g, b; }
+	bg,	/* main box background color */
+	t,	/* main text color */
+	bg2,	/* other box background color */
+	t2;	/* other text color */
+};
+
 /* preferred width/height compromise */
 #define RATIO (4.f/3.f)
 
@@ -416,6 +424,159 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
     return snprintf(text, textlen, "%s%s", typestr, indexstr);
 }
 
+static struct draw_methods getmax_draw_methods;
+
+static void
+lstopo_set_object_color(struct draw_methods *methods, hwloc_topology_t topology,
+			hwloc_obj_t obj, int arg, /* PU status (0=normal, 1=running, 2=forbidden, 3=offline)
+						   * Machine status (0=normal, 1=displayed as a root/System) */
+			struct style *s)
+{
+  int forcer, forceg, forceb, forcet;
+  const char *style;
+
+  /* no need to deal with colors when computing max sizes */
+  if (methods == &getmax_draw_methods)
+    return;
+
+  memset(s, 0, sizeof(*s));
+
+  switch (obj->type) {
+
+  case HWLOC_OBJ_MACHINE:
+    if (arg == 0) {
+      s->bg.r = MACHINE_R_COLOR;
+      s->bg.g = MACHINE_G_COLOR;
+      s->bg.b = MACHINE_B_COLOR;
+      break;
+    }
+    assert(arg == 1); /* Machine printed as a System (when root) */
+    /* fallthrough */
+  case HWLOC_OBJ_SYSTEM:
+    s->bg.r = SYSTEM_R_COLOR;
+    s->bg.g = SYSTEM_G_COLOR;
+    s->bg.b = SYSTEM_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_GROUP:
+    s->bg.r = MISC_R_COLOR;
+    s->bg.g = MISC_G_COLOR;
+    s->bg.b = MISC_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_MISC:
+    s->bg.r = MISC_R_COLOR;
+    s->bg.g = MISC_G_COLOR;
+    s->bg.b = MISC_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_NODE:
+    s->bg.r = NODE_R_COLOR;
+    s->bg.g = NODE_G_COLOR;
+    s->bg.b = NODE_B_COLOR;
+    s->bg2.r = MEMORY_R_COLOR;
+    s->bg2.g = MEMORY_G_COLOR;
+    s->bg2.b = MEMORY_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_SOCKET:
+    s->bg.r = SOCKET_R_COLOR;
+    s->bg.g = SOCKET_G_COLOR;
+    s->bg.b = SOCKET_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_CORE:
+    s->bg.r = CORE_R_COLOR;
+    s->bg.g = CORE_G_COLOR;
+    s->bg.b = CORE_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_CACHE:
+    s->bg.r = CACHE_R_COLOR;
+    s->bg.g = CACHE_G_COLOR;
+    s->bg.b = CACHE_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_PU:
+    switch (arg) {
+    case 0:
+      s->bg.r = THREAD_R_COLOR;
+      s->bg.g = THREAD_G_COLOR;
+      s->bg.b = THREAD_B_COLOR;
+      break;
+    case 1:
+      s->bg.r = RUNNING_R_COLOR;
+      s->bg.g = RUNNING_G_COLOR;
+      s->bg.b = RUNNING_B_COLOR;
+      break;
+    case 2:
+      s->bg.r = FORBIDDEN_R_COLOR;
+      s->bg.g = FORBIDDEN_G_COLOR;
+      s->bg.b = FORBIDDEN_B_COLOR;
+      break;
+    case 3:
+      s->bg.r = OFFLINE_R_COLOR;
+      s->bg.g = OFFLINE_G_COLOR;
+      s->bg.b = OFFLINE_B_COLOR;
+      s->t.r = s->t.g = s->t.b = 0xff;
+      break;
+    default:
+      assert(0);
+    }
+    break;
+
+  case HWLOC_OBJ_BRIDGE:
+    s->bg.r = BRIDGE_R_COLOR;
+    s->bg.g = BRIDGE_G_COLOR;
+    s->bg.b = BRIDGE_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_PCI_DEVICE:
+    s->bg.r = PCI_DEVICE_R_COLOR;
+    s->bg.g = PCI_DEVICE_G_COLOR;
+    s->bg.b = PCI_DEVICE_B_COLOR;
+    break;
+
+  case HWLOC_OBJ_OS_DEVICE:
+    s->bg.r = OS_DEVICE_R_COLOR;
+    s->bg.g = OS_DEVICE_G_COLOR;
+    s->bg.b = OS_DEVICE_B_COLOR;
+    break;
+
+  default:
+    assert(0);
+  }
+
+  style = hwloc_obj_get_info_by_name(obj, "lstopoStyle");
+  if (style)
+    while (*style != '\0') {
+      if (sscanf(style, "%02x%02x%02x", &forcer, &forceg, &forceb) == 3
+	  || sscanf(style, "Background=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
+	s->bg.r = forcer & 255;
+	s->bg.g = forceg & 255;
+	s->bg.b = forceb & 255;
+	s->t.r = s->t.g = s->t.b = (s->bg.r + s->bg.g + s->bg.b < 0xff) ? 0xff : 0;
+      } else if (sscanf(style, "Background2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
+	s->bg2.r = forcer & 255;
+	s->bg2.g = forceg & 255;
+	s->bg2.b = forceb & 255;
+	s->t2.r = s->t2.g = s->t2.b = (s->bg2.r + s->bg2.g + s->bg2.b < 0xff) ? 0xff : 0;
+      } else if (sscanf(style, "Text=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
+	s->t.r = forcer & 255;
+	s->t.g = forceg & 255;
+	s->t.b = forceb & 255;
+      } else if (sscanf(style, "Text2=#%02x%02x%02x", &forcer, &forceg, &forceb) == 3) {
+	s->t2.r = forcer & 255;
+	s->t2.g = forceg & 255;
+	s->t2.b = forceb & 255;
+      }
+      style = strchr(style, ';');
+      if (!style)
+	break;
+      style++;
+    }
+}
+
 static void
 pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_methods *methods, int logical, hwloc_obj_t level, void *output, unsigned depth, unsigned x, unsigned *retwidth, unsigned y, unsigned *retheight)
 {
@@ -424,6 +585,7 @@ pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_
   unsigned myheight = textheight;
   unsigned mywidth = 0;
   unsigned totwidth, totheight;
+  struct style style;
   char text[64];
   int n;
 
@@ -436,10 +598,11 @@ pci_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  methods->box(output, PCI_DEVICE_R_COLOR, PCI_DEVICE_G_COLOR, PCI_DEVICE_B_COLOR, depth, x, *retwidth, y, *retheight);
+  lstopo_set_object_color(methods, topology, level, 0, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
 
   if (fontsize)
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
 
   RECURSE_RECT(level, methods, gridsize, gridsize);
 
@@ -452,6 +615,7 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
   unsigned textwidth = 0;
   unsigned totheight = gridsize;
   unsigned totwidth = gridsize;
+  struct style style;
   int n;
 
   if (fontsize) {
@@ -464,10 +628,11 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
   *retwidth = totwidth;
   *retheight = totheight;
 
-  methods->box(output, OS_DEVICE_R_COLOR, OS_DEVICE_G_COLOR, OS_DEVICE_B_COLOR, depth, x, *retwidth, y, *retheight);
+  lstopo_set_object_color(methods, topology, level, 0, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
 
   if (fontsize)
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
 }
 
 static void
@@ -479,13 +644,15 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   unsigned speedwidth = fontsize ? fontsize + gridsize : 0;
   unsigned mywidth = 2*gridsize + gridsize + speedwidth;
   unsigned totwidth, totheight;
+  struct style style;
 
   DYNA_CHECK();
 
   RECURSE_VERT(level, &null_draw_methods, gridsize, 0);
 
   /* Square and left link */
-  methods->box(output, BRIDGE_R_COLOR, BRIDGE_G_COLOR, BRIDGE_B_COLOR, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
+  lstopo_set_object_color(methods, topology, level, 0, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, gridsize, y + PCI_HEIGHT/2 - gridsize/2, gridsize);
   methods->line(output, 0, 0, 0, depth, x + gridsize, y + PCI_HEIGHT/2, x + 2*gridsize, y + PCI_HEIGHT/2);
 
   if (level->arity > 0) {
@@ -515,7 +682,7 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
 	    snprintf(text, sizeof(text), "%.0f", subobjs[i]->attr->pcidev.linkspeed);
 	  else
 	    snprintf(text, sizeof(text), "%0.1f", subobjs[i]->attr->pcidev.linkspeed);
-          methods->text(output, 0, 0, 0, fontsize, depth-1, x + 2*gridsize + gridsize, y + totheight, text);
+          methods->text(output, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-1, x + 2*gridsize + gridsize, y + totheight, text);
         }
       }
     RECURSE_END_VERT(gridsize, 0);
@@ -538,27 +705,28 @@ pu_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, hw
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned textwidth = fontsize ? 6*fontsize : gridsize;
   unsigned mywidth = 0, totwidth;
+  struct style style;
+  int colorarg;
 
   DYNA_CHECK();
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
 
   if (lstopo_pu_offline(level))
-    methods->box(output, OFFLINE_R_COLOR, OFFLINE_G_COLOR, OFFLINE_B_COLOR, depth, x, *retwidth, y, *retheight);
+    colorarg = 3;
   else if (lstopo_pu_forbidden(level))
-    methods->box(output, FORBIDDEN_R_COLOR, FORBIDDEN_G_COLOR, FORBIDDEN_B_COLOR, depth, x, *retwidth, y, *retheight);
+    colorarg = 2;
   else if (lstopo_pu_running(topology, level))
-    methods->box(output, RUNNING_R_COLOR, RUNNING_G_COLOR, RUNNING_B_COLOR, depth, x, *retwidth, y, *retheight);
+    colorarg = 1;
   else
-    methods->box(output, THREAD_R_COLOR, THREAD_G_COLOR, THREAD_B_COLOR, depth, x, *retwidth, y, *retheight);
+    colorarg = 0;
+  lstopo_set_object_color(methods, topology, level, colorarg, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
 
   if (fontsize) {
     char text[64];
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    if (hwloc_bitmap_isset(level->online_cpuset, level->os_index))
-      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
-    else
-      methods->text(output, 0xff, 0xff, 0xff, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
   RECURSE_RECT(level, methods, 0, gridsize);
@@ -574,18 +742,20 @@ cache_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
   unsigned textwidth = fontsize ? ((logical ? level->logical_index : level->os_index) == (unsigned) -1 ? 8*fontsize : 10*fontsize) : 0;
   /* Do not separate objects when in L1 (SMT) */
   unsigned separator = level->attr->cache.depth > 1 ? gridsize : 0;
+  struct style style;
 
   DYNA_CHECK();
 
   RECURSE_RECT(level, &null_draw_methods, separator, 0);
 
-  methods->box(output, CACHE_R_COLOR, CACHE_G_COLOR, CACHE_B_COLOR, depth, x, totwidth, y, myheight - gridsize);
+  lstopo_set_object_color(methods, topology, level, 0, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, myheight - gridsize);
 
   if (fontsize) {
     char text[64];
 
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
   RECURSE_RECT(level, methods, separator, 0);
@@ -599,17 +769,19 @@ core_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = fontsize ? 8*fontsize : gridsize;
+  struct style style;
 
   DYNA_CHECK();
 
   RECURSE_RECT(level, &null_draw_methods, 0, gridsize);
 
-  methods->box(output, CORE_R_COLOR, CORE_G_COLOR, CORE_B_COLOR, depth, x, totwidth, y, totheight);
+  lstopo_set_object_color(methods, topology, level, 0, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
   RECURSE_RECT(level, methods, 0, gridsize);
@@ -623,17 +795,19 @@ socket_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = 6*fontsize;
+  struct style style;
 
   DYNA_CHECK();
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  methods->box(output, SOCKET_R_COLOR, SOCKET_G_COLOR, SOCKET_B_COLOR, depth, x, totwidth, y, totheight);
+  lstopo_set_object_color(methods, topology, level, 0, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
   RECURSE_RECT(level, methods, gridsize, gridsize);
@@ -654,6 +828,7 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   unsigned totwidth;
   /* Width of the heading text, thus minimal width */
   unsigned textwidth = 16*fontsize;
+  struct style style;
 
   /* Check whether dynamic programming can save us time */
   DYNA_CHECK();
@@ -661,16 +836,17 @@ node_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   /* Compute the size needed by sublevels */
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
+  lstopo_set_object_color(methods, topology, level, 0 /* node */, &style);
   /* Draw the epoxy box */
-  methods->box(output, NODE_R_COLOR, NODE_G_COLOR, NODE_B_COLOR, depth, x, totwidth, y, totheight);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
   /* Draw the memory box */
-  methods->box(output, MEMORY_R_COLOR, MEMORY_G_COLOR, MEMORY_B_COLOR, depth-1, x + gridsize, totwidth - 2 * gridsize, y + gridsize, myheight - gridsize);
+  methods->box(output, style.bg2.r, style.bg2.g, style.bg2.b, depth-1, x + gridsize, totwidth - 2 * gridsize, y + gridsize, myheight - gridsize);
 
   if (fontsize) {
     char text[64];
     /* Output text */
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    methods->text(output, 0, 0, 0, fontsize, depth-2, x + 2 * gridsize, y + 2 * gridsize, text);
+    methods->text(output, style.t2.r, style.t2.g, style.t2.b, fontsize, depth-2, x + 2 * gridsize, y + 2 * gridsize, text);
   }
 
   /* Restart, now really drawing sublevels */
@@ -686,17 +862,19 @@ machine_draw(hwloc_topology_t topology, struct draw_methods *methods, int logica
   unsigned myheight = (fontsize ? (fontsize + gridsize) : 0), totheight;
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = 8*fontsize;
+  struct style style;
 
   DYNA_CHECK();
 
   RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  methods->box(output, MACHINE_R_COLOR, MACHINE_G_COLOR, MACHINE_B_COLOR, depth, x, totwidth, y, totheight);
+  lstopo_set_object_color(methods, topology, level, 0 /* machine */, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
   RECURSE_RECT(level, methods, gridsize, gridsize);
@@ -752,6 +930,7 @@ system_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = 10*fontsize;
   int vert = prefer_vert(topology, logical, level, output, depth, x, y, gridsize);
+  struct style style;
 
   DYNA_CHECK();
 
@@ -760,12 +939,13 @@ system_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   else
     RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  methods->box(output, SYSTEM_R_COLOR, SYSTEM_G_COLOR, SYSTEM_B_COLOR, depth, x, totwidth, y, totheight);
+  lstopo_set_object_color(methods, topology, level, 1 /* system */, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     char text[64];
     lstopo_obj_snprintf(text, sizeof(text), level, logical);
-    methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+    methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
   }
 
   if (level->arity > 1 && (level->children[0]->type == HWLOC_OBJ_MACHINE || !level->children[0]->cpuset))
@@ -783,6 +963,7 @@ group_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = level->name ? strlen(level->name) * fontsize : 6*fontsize;
   int vert = prefer_vert(topology, logical, level, output, depth, x, y, gridsize);
+  struct style style;
 
   DYNA_CHECK();
 
@@ -798,15 +979,16 @@ group_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical,
   else
     RECURSE_RECT(level, &null_draw_methods, gridsize, gridsize);
 
-  methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, totwidth, y, totheight);
+  lstopo_set_object_color(methods, topology, level, 0, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, totheight);
 
   if (fontsize) {
     if (level->name) {
-      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
+      methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
     } else {
       char text[64];
       lstopo_obj_snprintf(text, sizeof(text), level, logical);
-      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+      methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
     }
   }
 
@@ -826,6 +1008,7 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   unsigned mywidth = 0, totwidth;
   unsigned textwidth = level->name ? strlen(level->name) * fontsize : 6*fontsize;
   int vert = prefer_vert(topology, logical, level, output, depth, x, y, gridsize);
+  struct style style;
 
   DYNA_CHECK();
 
@@ -834,15 +1017,16 @@ misc_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical, 
   else
     RECURSE_HORIZ(level, &null_draw_methods, gridsize, 0);
 
-  methods->box(output, MISC_R_COLOR, MISC_G_COLOR, MISC_B_COLOR, depth, x, totwidth, y, boxheight);
+  lstopo_set_object_color(methods, topology, level, 0, &style);
+  methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, totwidth, y, boxheight);
 
   if (fontsize) {
     if (level->name) {
-      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
+      methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
     } else {
       char text[64];
       lstopo_obj_snprintf(text, sizeof(text), level, logical);
-      methods->text(output, 0, 0, 0, fontsize, depth-1, x + gridsize, y + gridsize, text);
+      methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, text);
     }
   }
 

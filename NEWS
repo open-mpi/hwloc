@@ -35,6 +35,9 @@ Version 1.8.0
     loaded topology now returns an error.
   + hwloc-annotate now supports --ri to remove/replace info attributes with
     a given name.
+  + Object colors in the graphical output of lstopo may be changed by adding
+    a "lstopoStyle" info attribute. See CUSTOM COLORS in the lstopo(1) manpage
+    for details. Thanks to Jirka Hladky for discussing the idea.
   + hwloc-gather-topology may now gather I/O-related files on Linux when
     --io is given. Only the linuxpci component supports discovering I/O
     objects from these extended tarballs.

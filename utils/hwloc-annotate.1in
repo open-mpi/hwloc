@@ -96,6 +96,10 @@ and modify the input XML directly:
 
     $ hwloc-annotate file.xml file.xml root info infoname infovalue
 
+Change socket objects to green with red text in the lstopo graphical output:
+
+    $ hwloc-annotate topo.xml topo.xml socket:all info lstopoStyle "Background=#00ff00;Text=#ff0000"
+    $ lstopo -i topo.xml
 .
 .\" **************************
 .\" Return value section

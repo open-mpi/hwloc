@@ -1673,6 +1673,16 @@ port, and a GID of a port.
 </dd>
 </dl>
 
+Here is a non-exhaustive list of user-provided info attributes
+that have a special meaning:
+<dl>
+<dt>lstopoStyle</dt>
+<dd>Enforces the style of an object (background and text colors)
+ in the graphical output of lstopo.
+ See CUSTOM COLORS in the lstopo(1) manpage for details.
+</dd>
+</dl>
+
 
 
 
