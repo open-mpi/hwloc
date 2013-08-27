@@ -1654,8 +1654,9 @@ object instead.
 <dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
 <dd>The UUID and Serial of NVIDIA GPUs.
 </dd>
-<dt>MICFamily</dt>
-<dd>The family of an Intel Xeon Phi (MIC) coprocessor.
+<dt>MICFamily, MICSKU, MICActiveCores, MICMemorySize</dt>
+<dd>The family, SKU (model), number of active cores, and memory size (in kB)
+ of an Intel Xeon Phi (MIC) coprocessor.
 </dd>
 <dt>DMIBoardVendor, DMIBoardName, etc. (Machine object)</dt>
 <dd>DMI hardware information such as the motherboard and chassis
