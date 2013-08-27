@@ -263,6 +263,7 @@
               <info name="CoProcType" value="MIC"/>
               <info name="MICFamily" value="Knights Corner"/>
               <info name="MICSKU" value="ES2-P/A/X 1750"/>
+              <info name="MICSerialNumber" value="ADKC23500189"/>
               <info name="MICActiveCores" value="61"/>
               <info name="MICMemorySize" value="8126464"/>
             </object>
