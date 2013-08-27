@@ -3947,6 +3947,19 @@ hwloc_linux_mic_class_fillinfos(struct hwloc_topology *topology __hwloc_attribut
     fclose(fd);
   }
 
+  snprintf(path, sizeof(path), "%s/serialnumber", osdevpath);
+  fd = fopen(path, "r");
+  if (fd) {
+    char sn[64];
+    if (fgets(sn, sizeof(sn), fd)) {
+      char *eol = strchr(sn, '\n');
+      if (eol)
+        *eol = 0;
+      hwloc_obj_add_info(obj, "MICSerialNumber", sn);
+    }
+    fclose(fd);
+  }
+
   snprintf(path, sizeof(path), "%s/active_cores", osdevpath);
   fd = fopen(path, "r");
   if (fd) {
