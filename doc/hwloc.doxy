@@ -1654,8 +1654,9 @@ object instead.
 <dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
 <dd>The UUID and Serial of NVIDIA GPUs.
 </dd>
-<dt>MICFamily, MICSKU, MICActiveCores, MICMemorySize</dt>
-<dd>The family, SKU (model), number of active cores, and memory size (in kB)
+<dt>MICFamily, MICSKU, MICSerialNumber, MICActiveCores, MICMemorySize</dt>
+<dd>The family, SKU (model), serial number,
+ number of active cores, and memory size (in kB)
  of an Intel Xeon Phi (MIC) coprocessor.
 </dd>
 <dt>DMIBoardVendor, DMIBoardName, etc. (Machine object)</dt>
