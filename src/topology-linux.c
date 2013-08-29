@@ -3744,6 +3744,22 @@ hwloc_linux_infiniband_class_fillinfos(struct hwloc_topology *topology __hwloc_a
   }
 
   for(i=1; ; i++) {
+    snprintf(path, sizeof(path), "%s/ports/%u/state", osdevpath, i);
+    fd = hwloc_fopen(path, "r", root_fd);
+    if (fd) {
+      char statevalue[2];
+      if (fgets(statevalue, sizeof(statevalue), fd)) {
+	char statename[32];
+	statevalue[1] = '\0'; /* only keep the first byte/digit */
+	snprintf(statename, sizeof(statename), "Port%uState", i);
+	hwloc_obj_add_info(obj, statename, statevalue);
+      }
+      fclose(fd);
+    } else {
+      /* no such port */
+      break;
+    }
+
     snprintf(path, sizeof(path), "%s/ports/%u/lid", osdevpath, i);
     fd = fopen(path, "r");
     if (fd) {
@@ -3757,9 +3773,6 @@ hwloc_linux_infiniband_class_fillinfos(struct hwloc_topology *topology __hwloc_a
 	hwloc_obj_add_info(obj, lidname, lidvalue);
       }
       fclose(fd);
-    } else {
-      /* no such port */
-      break;
     }
 
     snprintf(path, sizeof(path), "%s/ports/%u/lid_mask_count", osdevpath, i);
