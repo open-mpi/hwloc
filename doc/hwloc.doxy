@@ -1668,10 +1668,12 @@ as reported by Linux under <tt>/sys/class/dmi/id/</tt>.
 <dd>The MAC address and the port number of a software network
 interface, such as <tt>eth4</tt> on Linux.
 </dd>
-<dt>NodeGUID, SysImageGUID, Port3LID, Port4LMC, Port5GID6
+<dt>NodeGUID, SysImageGUID, Port1State, Port2LID, Port2LMC, Port3GID1
 (OpenFabrics OS devices)</dt>
-<dd>The node GUID and GUID mask, the LID and LID mask count of a given
-port, and a GID of a port.
+<dd>The node GUID and GUID mask,
+the state of a port #1 (value is 4 when active),
+the LID and LID mask count of port #2,
+and GID #1 of port #3.
 </dd>
 </dl>
 
