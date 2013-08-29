@@ -3745,7 +3745,7 @@ hwloc_linux_infiniband_class_fillinfos(struct hwloc_topology *topology __hwloc_a
 
   for(i=1; ; i++) {
     snprintf(path, sizeof(path), "%s/ports/%u/state", osdevpath, i);
-    fd = hwloc_fopen(path, "r", root_fd);
+    fd = fopen(path, "r");
     if (fd) {
       char statevalue[2];
       if (fgets(statevalue, sizeof(statevalue), fd)) {
