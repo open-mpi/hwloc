@@ -302,7 +302,6 @@ extern "C" {
 #define hwloc_get_type_or_below_depth HWLOC_NAME(get_type_or_below_depth)
 #define hwloc_get_type_or_above_depth HWLOC_NAME(get_type_or_above_depth)
 #define hwloc_get_root_obj HWLOC_NAME(get_root_obj)
-#define hwloc_get_system_obj HWLOC_NAME(get_system_obj)
 #define hwloc_get_ancestor_obj_by_depth HWLOC_NAME(get_ancestor_obj_by_depth)
 #define hwloc_get_ancestor_obj_by_type HWLOC_NAME(get_ancestor_obj_by_type)
 #define hwloc_get_next_obj_by_depth HWLOC_NAME(get_next_obj_by_depth)

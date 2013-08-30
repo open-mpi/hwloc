@@ -1125,8 +1125,7 @@ hwloc_get_nbobjs_by_type (hwloc_topology_t topology, hwloc_obj_type_t type) __hw
 /** \brief Returns the top-object of the topology-tree.
  *
  * Its type is typically ::HWLOC_OBJ_MACHINE but it could be different
- * for complex topologies.  This function replaces the old deprecated
- * hwloc_get_system_obj().
+ * for complex topologies.
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_root_obj (hwloc_topology_t topology) __hwloc_attribute_pure;
