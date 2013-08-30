@@ -44,10 +44,12 @@ Version 1.8.0
     crashes when hwloc is dynamically loaded by another plugin mechanisms.
   + Add --with-hwloc-plugins-path to specify the install/load directories
     of plugins.
-* Documentation
+* API
   + hwloc.h and hwloc/helper.h have been reorganized to clarify the
-    documentation sections. The actual online code has moved out of hwloc.h
+    documentation sections. The actual inline code has moved out of hwloc.h
     into the new hwloc/inlines.h.
+  + Deprecated functions are now in hwloc/deprecated.h, and not in the
+    official documentation anymore.
 
 Version 1.7.1
 -------------

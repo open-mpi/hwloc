@@ -178,7 +178,6 @@ extern "C" {
 #define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
 #define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
 #define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
-#define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
 #define hwloc_obj_get_info_by_name HWLOC_NAME(obj_get_info_by_name)
 #define hwloc_obj_add_info HWLOC_NAME(obj_add_info)
@@ -459,6 +458,10 @@ extern "C" {
 #define hwloc_pci_find_cap HWLOC_NAME(pci_find_cap)
 #define hwloc_pci_find_linkspeed HWLOC_NAME(pci_find_linkspeed)
 #define hwloc_pci_prepare_bridge HWLOC_NAME(pci_prepare_bridge)
+
+/* hwloc/deprecated.h */
+
+#define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 
 /* private/debug.h */
 

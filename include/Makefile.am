@@ -23,7 +23,8 @@ include_hwloc_HEADERS = \
         hwloc/plugins.h \
         hwloc/gl.h \
         hwloc/intel-mic.h \
-        hwloc/rename.h
+        hwloc/rename.h \
+        hwloc/deprecated.h
 include_hwloc_autogendir = $(includedir)/hwloc/autogen
 nodist_include_hwloc_autogen_HEADERS = hwloc/autogen/config.h 
 

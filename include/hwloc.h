@@ -1203,30 +1203,6 @@ HWLOC_DECLSPEC int hwloc_obj_type_snprintf(char * __hwloc_restrict string, size_
 HWLOC_DECLSPEC int hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t obj, const char * __hwloc_restrict separator,
 				   int verbose);
 
-/** \brief Stringify a given topology object into a human-readable form.
- *
- * \note This function is deprecated in favor of hwloc_obj_type_snprintf()
- * and hwloc_obj_attr_snprintf() since it is not very flexible and
- * only prints physical/OS indexes.
- *
- * Fill string \p string up to \p size characters with the description
- * of topology object \p obj in topology \p topology.
- *
- * If \p verbose is set, a longer description is used. Otherwise a
- * short description is used.
- *
- * \p indexprefix is used to prefix the \p os_index attribute number of
- * the object in the description. If \c NULL, the \c # character is used.
- *
- * If \p size is 0, \p string may safely be \c NULL.
- *
- * \return the number of character that were actually written if not truncating,
- * or that would have been written (not including the ending \\0).
- */
-HWLOC_DECLSPEC int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t size,
-			     hwloc_topology_t topology, hwloc_obj_t obj,
-			     const char * __hwloc_restrict indexprefix, int verbose);
-
 /** \brief Stringify the cpuset containing a set of objects.
  *
  * If \p size is 0, \p string may safely be \c NULL.
@@ -2247,5 +2223,7 @@ HWLOC_DECLSPEC void hwloc_topology_set_userdata_import_callback(hwloc_topology_t
 /* inline code of some functions above */
 #include <hwloc/inlines.h>
 
+/* deprecated headers */
+#include <hwloc/deprecated.h>
 
 #endif /* HWLOC_H */
