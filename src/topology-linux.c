@@ -430,6 +430,7 @@ hwloc_linux_find_kernel_nr_cpus(hwloc_topology_t topology)
         nr_cpus = max_possible + 1;
     }
     fclose(possible);
+    hwloc_bitmap_free(possible_bitmap);
   }
 
   while (1) {
