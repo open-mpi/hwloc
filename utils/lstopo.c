@@ -41,6 +41,9 @@ int lstopo_show_cpuset = 0;
 int lstopo_show_taskset = 0;
 int lstopo_ignore_pus = 0;
 
+char **lstopo_append_legends = NULL;
+unsigned lstopo_append_legends_nr = 0;
+
 unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX];
@@ -280,6 +283,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --horiz[=<type,...>]  Horizontal graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --vert[=<type,...>]   Vertical graphical layout instead of nearly 4/3 ratio\n");
   fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
+  fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "Miscellaneous options:\n");
   fprintf (where, "  --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "  --version             Report version and exit\n");
@@ -493,6 +497,16 @@ main (int argc, char *argv[])
       else if (!strcmp (argv[0], "--no-legend")) {
 	legend = 0;
       }
+      else if (!strcmp (argv[0], "--append-legend")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	lstopo_append_legends = realloc(lstopo_append_legends, (lstopo_append_legends_nr+1) * sizeof(lstopo_append_legends));
+	lstopo_append_legends[lstopo_append_legends_nr] = strdup(argv[1]);
+	lstopo_append_legends_nr++;
+	opt = 1;
+      }
 
       else if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					       &input, &input_format,
@@ -686,6 +700,10 @@ main (int argc, char *argv[])
   }
 
   hwloc_topology_destroy (topology);
+
+  for(i=0; i<lstopo_append_legends_nr; i++)
+    free(lstopo_append_legends[i]);
+  free(lstopo_append_legends);
 
   return EXIT_SUCCESS;
 }

@@ -17,6 +17,8 @@ extern int lstopo_show_cpuset;
 extern int lstopo_show_taskset;
 extern int lstopo_pid_number;
 extern hwloc_pid_t lstopo_pid;
+extern char ** lstopo_append_legends;
+extern unsigned lstopo_append_legends_nr;
 
 typedef void output_method (struct hwloc_topology *topology, const char *output, int logical, int legend, int verbose_mode);
 

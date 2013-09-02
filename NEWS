@@ -33,6 +33,9 @@ Version 1.8.0
     a given name.
   + hwloc-info supports "root" and "all" special locations for dumping
     information about the root object.
+  + lstopo now supports --append-legend to append custom lines of text
+    to the legend in the graphical output. Thanks to Jirka Hladky for
+    discussing the idea.
 * Misc
   + Calling hwloc_topology_load() or hwloc_topology_set_*() on an already
     loaded topology now returns an error.
