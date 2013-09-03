@@ -54,6 +54,19 @@ Version 1.8.0
   + Deprecated functions are now in hwloc/deprecated.h, and not in the
     official documentation anymore.
 
+
+Version 1.7.2
+-------------
+* Do not create invalid block OS devices on very old Linux kernel such
+  as RHEL4 2.6.9.
+* Fix PCI subvendor/device IDs.
+* Fix the management of Misc objects inserted by parent.
+  Thanks to Jirka Hladky for reporting the problem.
+* Add a Port<n>State into attribute to OpenFabrics OS devices.
+* Add a MICSerialNumber info attribute to Xeon PHI/MIC OS devices.
+* Improve verbose error messages when failing to load from XML.
+
+
 Version 1.7.1
 -------------
 * Fix a failed assertion in the distance grouping code when loading a XML
