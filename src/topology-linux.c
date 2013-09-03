@@ -272,48 +272,6 @@ hwloc_opendir(const char *p, int d __hwloc_attribute_unused)
 }
 
 
-static int
-hwloc_linux_parse_cpuset_file(FILE *file, hwloc_bitmap_t set)
-{
-  unsigned long start, stop;
-
-  /* reset to zero first */
-  hwloc_bitmap_zero(set);
-
-  while (fscanf(file, "%lu", &start) == 1)
-  {
-    int c = fgetc(file);
-
-    stop = start;
-
-    if (c == '-') {
-      /* Range */
-      if (fscanf(file, "%lu", &stop) != 1) {
-        /* Expected a number here */
-        errno = EINVAL;
-        return -1;
-      }
-      c = fgetc(file);
-    }
-
-    if (c == EOF || c == '\n') {
-      hwloc_bitmap_set_range(set, start, stop);
-      break;
-    }
-
-    if (c != ',') {
-      /* Expected EOF, EOL, or a comma */
-      errno = EINVAL;
-      return -1;
-    }
-
-    hwloc_bitmap_set_range(set, start, stop);
-  }
-
-  return 0;
-}
-
-
 /*****************************
  ******* CpuBind Hooks *******
  *****************************/
@@ -383,6 +341,47 @@ hwloc_linux_set_tid_cpubind(hwloc_topology_t topology __hwloc_attribute_unused, 
 }
 
 #if defined(HWLOC_HAVE_CPU_SET_S) && !defined(HWLOC_HAVE_OLD_SCHED_SETAFFINITY)
+static int
+hwloc_linux_parse_cpuset_file(FILE *file, hwloc_bitmap_t set)
+{
+  unsigned long start, stop;
+
+  /* reset to zero first */
+  hwloc_bitmap_zero(set);
+
+  while (fscanf(file, "%lu", &start) == 1)
+  {
+    int c = fgetc(file);
+
+    stop = start;
+
+    if (c == '-') {
+      /* Range */
+      if (fscanf(file, "%lu", &stop) != 1) {
+        /* Expected a number here */
+        errno = EINVAL;
+        return -1;
+      }
+      c = fgetc(file);
+    }
+
+    if (c == EOF || c == '\n') {
+      hwloc_bitmap_set_range(set, start, stop);
+      break;
+    }
+
+    if (c != ',') {
+      /* Expected EOF, EOL, or a comma */
+      errno = EINVAL;
+      return -1;
+    }
+
+    hwloc_bitmap_set_range(set, start, stop);
+  }
+
+  return 0;
+}
+
 /*
  * On some kernels, sched_getaffinity requires the output size to be larger
  * than the kernel cpu_set size (defined by CONFIG_NR_CPUS).
