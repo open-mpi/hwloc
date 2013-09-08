@@ -4375,7 +4375,6 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
   DIR *dir;
   struct dirent *dirent;
   int res = 0;
-  int err;
 
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
@@ -4408,9 +4407,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     unsigned domain, bus, dev, func;
     hwloc_obj_t obj;
     struct hwloc_pcidev_attr_s *attr;
-    hwloc_bitmap_t cpuset;
     unsigned os_index;
-    char envname[256], *env;
     char path[64];
     char value[16];
     FILE *file;
@@ -4472,23 +4469,6 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
       fread(value, sizeof(value), 1, file);
       fclose(file);
       attr->subdevice_id = strtoul(value, NULL, 16);
-    }
-
-    cpuset = hwloc_bitmap_alloc();
-    snprintf(envname, sizeof(envname), "HWLOC_PCI_%04x_%02x_LOCALCPUS", domain, bus);
-    env = getenv(envname);
-    if (env) {
-      hwloc_debug("Overriding localcpus using %s in the environment\n", envname);
-      hwloc_bitmap_sscanf(cpuset, env);
-    } else {
-      snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/local_cpus", dirent->d_name);
-      file = hwloc_fopen(path, "r", root_fd);
-      if (file) {
-	err = hwloc_linux_parse_cpumap_file(file, cpuset);
-	fclose(file);
-	if (err < 0)
-	  hwloc_bitmap_copy(cpuset, hwloc_topology_get_topology_cpuset(topology));
-      }
     }
 
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/config", dirent->d_name);
