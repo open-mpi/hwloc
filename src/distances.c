@@ -527,6 +527,9 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
     hwloc_bitmap_free(nodeset);
     return;
   }
+  /* don't attach to Misc objects */
+  while (root->type == HWLOC_OBJ_MISC)
+    root = root->parent;
   /* ideally, root has the exact cpuset and nodeset.
    * but ignoring or other things that remove objects may cause the object array to reduce */
   assert(hwloc_bitmap_isincluded(cpuset, root->cpuset));
