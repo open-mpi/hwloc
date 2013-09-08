@@ -502,7 +502,7 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	lstopo_append_legends = realloc(lstopo_append_legends, (lstopo_append_legends_nr+1) * sizeof(lstopo_append_legends));
+	lstopo_append_legends = realloc(lstopo_append_legends, (lstopo_append_legends_nr+1) * sizeof(*lstopo_append_legends));
 	lstopo_append_legends[lstopo_append_legends_nr] = strdup(argv[1]);
 	lstopo_append_legends_nr++;
 	opt = 1;
