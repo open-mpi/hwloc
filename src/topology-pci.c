@@ -285,10 +285,11 @@ hwloc_look_pci(struct hwloc_backend *backend)
        */
     }
 
-/* starting from pciutils 2.2, pci_lookup_name() takes a variable number
- * of arguments, and supports the PCI_LOOKUP_NO_NUMBERS flag.
- */
+    /* starting from pciutils 2.2, pci_lookup_name() takes a variable number
+     * of arguments, and supports the PCI_LOOKUP_NO_NUMBERS flag.
+     */
 
+    /* get the vendor name */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     vendorname = pci_device_get_vendor_name(pcidev);
 #else /* HWLOC_HAVE_PCIUTILS */
@@ -302,9 +303,10 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
 			      );
 #endif /* HWLOC_HAVE_PCIUTILS */
-    if (vendorname)
+    if (vendorname && *vendorname)
       hwloc_obj_add_info(obj, "PCIVendor", vendorname);
 
+    /* get the device name */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     devicename = pci_device_get_device_name(pcidev);
 #else /* HWLOC_HAVE_PCIUTILS */
@@ -318,16 +320,18 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
 			      );
 #endif /* HWLOC_HAVE_PCIUTILS */
-    if (devicename)
+    if (devicename && *devicename)
       hwloc_obj_add_info(obj, "PCIDevice", devicename);
 
+    /* generate or get the fullname */
 #ifdef HWLOC_HAVE_LIBPCIACCESS
     snprintf(name, sizeof(name), "%s%s%s",
 	     vendorname ? vendorname : "",
 	     vendorname && devicename ? " " : "",
 	     devicename ? devicename : "");
     fullname = name;
-    obj->name = strdup(name);
+    if (*name)
+      obj->name = strdup(name);
 #else /* HWLOC_HAVE_PCIUTILS */
     fullname = pci_lookup_name(pciaccess, name, sizeof(name),
 #if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
@@ -338,15 +342,13 @@ hwloc_look_pci(struct hwloc_backend *backend)
 			      pcidev->vendor_id, pcidev->device_id, 0, 0
 #endif
 			      );
-    if (fullname)
+    if (fullname && *fullname)
       obj->name = strdup(fullname);
-    else
-      fullname = "??";
 #endif /* HWLOC_HAVE_PCIUTILS */
     hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s\n",
 		domain, pcidev->bus, pcidev->dev, pcidev->func,
 		device_class, pcidev->vendor_id, pcidev->device_id,
-		fullname);
+		fullname && *fullname ? fullname : "??");
 
     /* queue the object for now */
     if (first_obj)
