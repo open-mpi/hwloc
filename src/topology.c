@@ -324,7 +324,12 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
   memcpy(newobj->attr, src->attr, sizeof(*newobj->attr));
 
   newobj->cpuset = hwloc_bitmap_dup(src->cpuset);
+  newobj->complete_cpuset = hwloc_bitmap_dup(src->complete_cpuset);
+  newobj->allowed_cpuset = hwloc_bitmap_dup(src->allowed_cpuset);
+  newobj->online_cpuset = hwloc_bitmap_dup(src->online_cpuset);
   newobj->nodeset = hwloc_bitmap_dup(src->nodeset);
+  newobj->complete_nodeset = hwloc_bitmap_dup(src->complete_nodeset);
+  newobj->allowed_nodeset = hwloc_bitmap_dup(src->allowed_nodeset);
 
   if (src->distances_count) {
     newobj->distances_count = src->distances_count;
