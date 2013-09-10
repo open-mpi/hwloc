@@ -50,6 +50,9 @@ hwloc__nolibxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, 
   size_t len, escaped;
   char *buffer, *value, *end;
 
+  if (!nstate->attrbuffer)
+    return -1;
+
   /* find the beginning of an attribute */
   buffer = hwloc__nolibxml_import_ignore_spaces(nstate->attrbuffer);
   namelen = strspn(buffer, "abcdefghijklmnopqrstuvwxyz_");
@@ -154,8 +157,12 @@ hwloc__nolibxml_import_find_child(hwloc__xml_import_state_t state,
 
   /* find attributes */
   namelen = strspn(buffer, "abcdefghijklmnopqrstuvwxyz_");
-  /* cannot be without attributes */
-  assert(buffer[namelen] != '\0');
+
+  if (buffer[namelen] == '\0') {
+    /* no attributes */
+    nchildstate->attrbuffer = NULL;
+    return 1;
+  }
 
   if (buffer[namelen] != ' ')
     return -1;
