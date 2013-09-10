@@ -66,6 +66,7 @@ dox_inputs = $(DOX_CONFIG) \
        $(HWLOC_top_srcdir)/include/hwloc.h \
        $(HWLOC_top_srcdir)/include/hwloc/helper.h \
        $(HWLOC_top_srcdir)/include/hwloc/bitmap.h \
+       $(HWLOC_top_srcdir)/include/hwloc/diff.h \
        $(HWLOC_top_srcdir)/include/hwloc/plugins.h \
        $(HWLOC_top_srcdir)/include/hwloc/glibc-sched.h \
        $(HWLOC_top_srcdir)/include/hwloc/linux.h \
@@ -612,6 +613,28 @@ man3_helper_advanced_io_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_get_next_bridge.3 \
         $(DOX_MAN_DIR)/man3/hwloc_bridge_covers_pcibus.3 \
         $(DOX_MAN_DIR)/man3/hwloc_get_hostbridge_by_pcibus.3
+
+man3_diffdir = $(man3dir)
+man3_diff_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_diff.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_obj_attr_type_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_obj_attr_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_type_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_DIFF_OBJ_ATTR.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_u.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_build.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_apply_flags_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_apply.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_destroy.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_load_xml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_export_xml.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_load_xmlbuffer.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_diff_export_xmlbuffer.3
 
 man3_cudadir = $(man3dir)
 man3_cuda_DATA = \
