@@ -2030,6 +2030,15 @@ enum hwloc_restrict_flags_e {
  */
 HWLOC_DECLSPEC int hwloc_topology_restrict(hwloc_topology_t __hwloc_restrict topology, hwloc_const_cpuset_t cpuset, unsigned long flags);
 
+/** \brief Duplicate a topology.
+ *
+ * The entire topology structure as well as its objects
+ * are duplicated into a new one.
+ *
+ * This is useful for keeping a backup while modifying a topology.
+ */
+HWLOC_DECLSPEC int hwloc_topology_dup(hwloc_topology_t *newtopology, hwloc_topology_t oldtopology);
+
 /** @} */
 
 

@@ -355,6 +355,96 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
   hwloc_insert_object_by_parent(newtopology, newparent, newobj);
 }
 
+int
+hwloc_topology_dup(hwloc_topology_t *newp,
+		   hwloc_topology_t old)
+{
+  hwloc_topology_t new;
+  hwloc_obj_t newroot;
+  hwloc_obj_t oldroot = hwloc_get_root_obj(old);
+  unsigned i;
+
+  if (!old->is_loaded) {
+    errno = -EINVAL;
+    return -1;
+  }
+
+  hwloc_topology_init(&new);
+
+  new->flags = old->flags;
+  memcpy(new->ignored_types, old->ignored_types, sizeof(old->ignored_types));
+  new->is_thissystem = old->is_thissystem;
+  new->is_loaded = 1;
+  new->pid = old->pid;
+
+  memcpy(&new->binding_hooks, &old->binding_hooks, sizeof(old->binding_hooks));
+
+  memcpy(new->support.discovery, old->support.discovery, sizeof(*old->support.discovery));
+  memcpy(new->support.cpubind, old->support.cpubind, sizeof(*old->support.cpubind));
+  memcpy(new->support.membind, old->support.membind, sizeof(*old->support.membind));
+
+  new->userdata_export_cb = old->userdata_export_cb;
+  new->userdata_import_cb = old->userdata_import_cb;
+
+  newroot = hwloc_get_root_obj(new);
+  hwloc__duplicate_object(newroot, oldroot);
+  for(i=0; i<oldroot->arity; i++)
+    hwloc__duplicate_objects(new, newroot, oldroot->children[i]);
+
+  if (old->first_osdist) {
+    struct hwloc_os_distances_s *olddist = old->first_osdist;
+    while (olddist) {
+      struct hwloc_os_distances_s *newdist = malloc(sizeof(*newdist));
+      newdist->type = olddist->type;
+      newdist->nbobjs = olddist->nbobjs;
+      newdist->indexes = malloc(newdist->nbobjs * sizeof(*newdist->indexes));
+      memcpy(newdist->indexes, olddist->indexes, newdist->nbobjs * sizeof(*newdist->indexes));
+      newdist->objs = NULL; /* will be recomputed when needed */
+      newdist->distances = malloc(newdist->nbobjs * newdist->nbobjs * sizeof(*newdist->distances));
+      memcpy(newdist->distances, olddist->distances, newdist->nbobjs * newdist->nbobjs * sizeof(*newdist->distances));
+
+      newdist->forced = olddist->forced;
+      if (new->first_osdist) {
+	new->last_osdist->next = newdist;
+	newdist->prev = new->last_osdist;
+      } else {
+	new->first_osdist = newdist;
+	newdist->prev = NULL;
+      }
+      new->last_osdist = newdist;
+      newdist->next = NULL;
+
+      olddist = olddist->next;
+    }
+  } else
+    new->first_osdist = old->last_osdist = NULL;
+
+  /* no need to duplicate backends, topology is already loaded */
+  new->backends = NULL;
+
+
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
+#endif
+    hwloc_topology_check(new);
+
+  hwloc_connect_children(new->levels[0][0]);
+  if (hwloc_connect_levels(new) < 0)
+    goto out;
+
+  hwloc_distances_finalize_os(new);
+  hwloc_distances_finalize_logical(new);
+
+  *newp = new;
+  return 0;
+
+ out:
+  hwloc_topology_clear(new);
+  hwloc_distances_destroy(new);
+  hwloc_topology_setup_defaults(new);
+  return -1;
+}
+
 /*
  * How to compare objects based on types.
  *

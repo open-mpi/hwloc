@@ -22,6 +22,8 @@ Version 1.8.0
 * New components
   + Add the "linuxpci" component that always works on Linux even when
     libpciaccess and libpci isn't available. It only misses device names.
+* API
+  + Add hwloc_topology_dup() for duplicating an entire topology.
 * Tools
   + Object colors in the graphical output of lstopo may be changed by adding
     a "lstopoStyle" info attribute. See CUSTOM COLORS in the lstopo(1) manpage
