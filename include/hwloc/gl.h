@@ -9,9 +9,6 @@
  *
  * Applications that use both hwloc and OpenGL may want to include
  * this file so as to get topology information for OpenGL displays.
- *
- * Only the NVIDIA display locality information is currently available,
- * using the NV-CONTROL X11 extension and the NVCtrl library.
  */
 
 #ifndef HWLOC_GL_H
@@ -29,6 +26,13 @@ extern "C" {
 
 
 /** \defgroup hwlocality_gl Interoperability with OpenGL displays
+ *
+ * This interface offers ways to retrieve topology information about
+ * OpenGL displays.
+ *
+ * Only the NVIDIA display locality information is currently available,
+ * using the NV-CONTROL X11 extension and the NVCtrl library.
+ *
  * @{
  */
 

@@ -29,6 +29,10 @@ extern "C" {
 
 
 /** \defgroup hwlocality_nvml Interoperability with the NVIDIA Management Library
+ *
+ * This interface offers ways to retrieve topology information about
+ * devices managed by the NVIDIA Management Library (NVML).
+ *
  * @{
  */
 

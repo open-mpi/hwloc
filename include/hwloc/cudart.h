@@ -32,6 +32,10 @@ extern "C" {
 
 
 /** \defgroup hwlocality_cudart Interoperability with the CUDA Runtime API
+ *
+ * This interface offers ways to retrieve topology information about
+ * CUDA devices when using the CUDA Runtime API.
+ *
  * @{
  */
 

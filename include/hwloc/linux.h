@@ -26,7 +26,7 @@ extern "C" {
 
 /** \defgroup hwlocality_linux Linux-specific helpers
  *
- * This includes helpers for manipulating linux kernel cpumap files, and hwloc
+ * This includes helpers for manipulating Linux kernel cpumap files, and hwloc
  * equivalents of the Linux sched_setaffinity and sched_getaffinity system calls.
  *
  * @{

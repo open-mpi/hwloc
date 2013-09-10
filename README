@@ -110,12 +110,15 @@ The hwloc core may also benefit from the following development packages:
 
   * libnuma for memory binding and migration support on Linux (numactl-devel or
  libnuma-dev package).
-  * hwloc can use one of two different libraries for I/O device discovery:
+  * hwloc can use one of two different libraries for full I/O device discovery:
 
   1. libpciaccess (BSD). The relevant development package is usually
      libpciaccess-devel or libpciaccess-dev.
   2. libpci, from the pciutils package (GPL). The relevant development
      package is usually pciutils-devel or libpci-dev.
+
+ On Linux, PCI discovery may still be performed even if none of the above
+ libraries can be used.
 
   * the AMD OpenCL implementation for OpenCL device discovery.
   * the NVIDIA CUDA Toolkit for CUDA device discovery.
@@ -126,6 +129,8 @@ The hwloc core may also benefit from the following development packages:
  exported by the same hwloc release). See Importing and exporting topologies
  from/to XML files for details. The relevant development package is usually
  libxml2-devel or libxml2-dev.
+  * libtool's ltdl library for dynamic plugin loading. The relevant development
+ package is usually libtool-ltdl-devel or libltdl-dev.
 
 PCI and XML support may be statically built inside the main hwloc library, or
 as separate dynamically-loaded plugins (see the Components and plugins
@@ -351,12 +356,12 @@ And the same output in XML (line breaks added, only PU #0 shown):
 
 Programming Interface
 
-The basic interface is available in hwloc.h. It essentially offers low-level
-routines for advanced programmers that want to manually manipulate objects and
-follow links between them. Documentation for everything in hwloc.h are provided
-later in this document. Developers should also look at hwloc/helper.h (and also
-in this document, which provides good higher-level topology traversal
-examples).
+The basic interface is available in hwloc.h. Some higher-level functions are
+available in hwloc/helper.h to reduce the need to manually manipulate objects
+and follow links between them. Documentation for all these is provided later in
+this document. Developers may also want to look at hwloc/inlines.h which
+contains the actual inline code of some hwloc.h routines, and at this document,
+which provides good higher-level topology traversal examples.
 
 To precisely define the vocabulary used by hwloc, a Terms and Definitions
 section is available and should probably be read first.
@@ -714,5 +719,5 @@ Make sure to have had a look at those too!
 
 -------------------------------------------------------------------------------
 
-Generated on Thu Mar 7 2013 08:08:07 for Hardware Locality (hwloc) by   doxygen
-1.8.3.1
+Generated on Tue Sep 10 2013 15:47:42 for Hardware Locality (hwloc) by   
+doxygen 1.8.4

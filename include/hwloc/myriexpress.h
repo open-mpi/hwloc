@@ -27,6 +27,10 @@ extern "C" {
 
 
 /** \defgroup hwlocality_myriexpress Interoperability with Myrinet Express
+ *
+ * This interface offers ways to retrieve topology information about
+ * Myrinet Express hardware.
+ *
  * @{
  */
 

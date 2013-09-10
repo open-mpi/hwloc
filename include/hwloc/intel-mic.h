@@ -32,6 +32,10 @@ extern "C" {
 
 
 /** \defgroup hwlocality_intel_mic Interoperability with Intel Xeon Phi (MIC)
+ *
+ * This interface offers ways to retrieve topology information about
+ * Intel Xeon Phi (MIC) devices.
+ *
  * @{
  */
 

@@ -9,9 +9,6 @@
  *
  * Applications that use both hwloc and OpenCL may want to
  * include this file so as to get topology information for OpenCL devices.
- *
- * Only the AMD OpenCL interface currently offers useful locality information
- * about its devices.
  */
 
 #ifndef HWLOC_OPENCL_H
@@ -36,6 +33,13 @@ extern "C" {
 
 
 /** \defgroup hwlocality_opencl Interoperability with OpenCL
+ *
+ * This interface offers ways to retrieve topology information about
+ * OpenCL devices.
+ *
+ * Only the AMD OpenCL interface currently offers useful locality information
+ * about its devices.
+ *
  * @{
  */
 

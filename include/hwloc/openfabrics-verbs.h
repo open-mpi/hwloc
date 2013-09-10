@@ -34,6 +34,10 @@ extern "C" {
 
 
 /** \defgroup hwlocality_openfabrics Interoperability with OpenFabrics
+ *
+ * This interface offers ways to retrieve topology information about
+ * OpenFabrics devices.
+ *
  * @{
  */
 
