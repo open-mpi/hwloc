@@ -27,6 +27,7 @@ Version 1.8.0
     many similar topologies.
   + Add hwloc_topology_dup() for duplicating an entire topology.
 * Tools
+  + Add hwloc-diff and hwloc-patch tools together with the new diff API.
   + Object colors in the graphical output of lstopo may be changed by adding
     a "lstopoStyle" info attribute. See CUSTOM COLORS in the lstopo(1) manpage
     for details. Thanks to Jirka Hladky for discussing the idea.

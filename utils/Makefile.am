@@ -29,9 +29,11 @@ bin_PROGRAMS = \
 	hwloc-assembler \
 	hwloc-bind \
 	hwloc-calc \
+	hwloc-diff \
 	hwloc-distances \
 	hwloc-distrib \
 	hwloc-info \
+	hwloc-patch \
 	hwloc-ps
 
 lstopo_no_graphics_SOURCES = \
@@ -42,6 +44,7 @@ lstopo_no_graphics_SOURCES = \
 	lstopo-fig.c \
 	lstopo-text.c \
 	lstopo-xml.c
+
 lstopo_no_graphics_CFLAGS = 
 lstopo_no_graphics_LDADD = $(LDADD) -lm $(HWLOC_TERMCAP_LIBS)
 lstopo_SOURCES = $(lstopo_no_graphics_SOURCES)
@@ -96,9 +99,11 @@ man1_pages = \
 	hwloc-assembler-remote.1 \
 	hwloc-bind.1 \
 	hwloc-calc.1 \
+	hwloc-diff.1 \
 	hwloc-distances.1 \
 	hwloc-distrib.1 \
 	hwloc-info.1 \
+	hwloc-patch.1 \
 	hwloc-ps.1
 EXTRA_DIST += $(man1_pages:.1=.1in)
 nodist_man_MANS += $(man1_pages)
