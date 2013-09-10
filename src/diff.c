@@ -97,9 +97,9 @@ static int hwloc_append_diff_obj_attr_string(hwloc_obj_t obj,
 
 static int hwloc_append_diff_obj_attr_uint64(hwloc_obj_t obj,
 					     hwloc_topology_diff_obj_attr_type_t type,
-					     uint64_t index,
-					     uint64_t oldvalue,
-					     uint64_t newvalue,
+					     hwloc_uint64_t index,
+					     hwloc_uint64_t oldvalue,
+					     hwloc_uint64_t newvalue,
 					     hwloc_topology_diff_t *firstdiffp,
 					     hwloc_topology_diff_t *lastdiffp)
 {
@@ -314,9 +314,9 @@ hwloc_apply_diff_one(hwloc_topology_t topology,
 		switch (obj_attr->diff.generic.type) {
 		case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE: {
 			hwloc_obj_t tmpobj;
-			uint64_t oldvalue = reverse ? obj_attr->diff.uint64.newvalue : obj_attr->diff.uint64.oldvalue;
-			uint64_t newvalue = reverse ? obj_attr->diff.uint64.oldvalue : obj_attr->diff.uint64.newvalue;
-			uint64_t valuediff = newvalue - oldvalue;
+			hwloc_uint64_t oldvalue = reverse ? obj_attr->diff.uint64.newvalue : obj_attr->diff.uint64.oldvalue;
+			hwloc_uint64_t newvalue = reverse ? obj_attr->diff.uint64.oldvalue : obj_attr->diff.uint64.newvalue;
+			hwloc_uint64_t valuediff = newvalue - oldvalue;
 			if (obj->memory.local_memory != oldvalue)
 				return -1;
 			obj->memory.local_memory = newvalue;

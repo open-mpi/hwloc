@@ -81,9 +81,9 @@ union hwloc_topology_diff_obj_attr_u {
   struct hwloc_topology_diff_obj_attr_uint64_s {
     /* used for storing integer attributes */
     hwloc_topology_diff_obj_attr_type_t type;
-    uint64_t index; /* not used for SIZE */
-    uint64_t oldvalue;
-    uint64_t newvalue;
+    hwloc_uint64_t index; /* not used for SIZE */
+    hwloc_uint64_t oldvalue;
+    hwloc_uint64_t newvalue;
   } uint64;
 
   /** \brief String attribute modification with an optional name */
