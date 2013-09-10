@@ -45,6 +45,7 @@ check_PROGRAMS = hwloc_list_components \
 	hwloc_groups2 \
 	hwloc_insert_misc \
 	hwloc_topology_restrict \
+	hwloc_topology_dup \
 	hwloc_obj_infos \
 	hwloc_iodevs \
 	xmlbuffer \
