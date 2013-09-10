@@ -422,18 +422,17 @@ hwloc_topology_dup(hwloc_topology_t *newp,
   /* no need to duplicate backends, topology is already loaded */
   new->backends = NULL;
 
-
-#ifndef HWLOC_DEBUG
-  if (getenv("HWLOC_DEBUG_CHECK"))
-#endif
-    hwloc_topology_check(new);
-
   hwloc_connect_children(new->levels[0][0]);
   if (hwloc_connect_levels(new) < 0)
     goto out;
 
   hwloc_distances_finalize_os(new);
   hwloc_distances_finalize_logical(new);
+
+#ifndef HWLOC_DEBUG
+  if (getenv("HWLOC_DEBUG_CHECK"))
+#endif
+    hwloc_topology_check(new);
 
   *newp = new;
   return 0;
