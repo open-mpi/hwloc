@@ -2232,6 +2232,9 @@ HWLOC_DECLSPEC void hwloc_topology_set_userdata_import_callback(hwloc_topology_t
 /* inline code of some functions above */
 #include <hwloc/inlines.h>
 
+/* topology diffs */
+#include <hwloc/diff.h>
+
 /* deprecated headers */
 #include <hwloc/deprecated.h>
 

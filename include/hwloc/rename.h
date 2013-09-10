@@ -349,6 +349,36 @@ extern "C" {
 #define hwloc_get_distance_matrix_covering_obj_by_depth HWLOC_NAME(get_distance_matrix_covering_obj_by_depth)
 #define hwloc_get_latency HWLOC_NAME(get_latency)
 
+/* diff.h */
+
+#define hwloc_topology_diff_obj_attr_type_e HWLOC_NAME(topology_diff_obj_attr_type_e)
+#define hwloc_topology_diff_obj_attr_type_t HWLOC_NAME(topology_diff_obj_attr_type_t)
+#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE)
+#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME)
+#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO)
+#define hwloc_topology_diff_obj_attr_u HWLOC_NAME(topology_diff_obj_attr_u)
+#define hwloc_topology_diff_obj_attr_generic_s HWLOC_NAME(topology_diff_obj_attr_generic_s)
+#define hwloc_topology_diff_obj_attr_uint64_s HWLOC_NAME(topology_diff_obj_attr_uint64_s)
+#define hwloc_topology_diff_obj_attr_string_s HWLOC_NAME(topology_diff_obj_attr_string_s)
+#define hwloc_topology_diff_type_e HWLOC_NAME(topology_diff_type_e)
+#define hwloc_topology_diff_type_t HWLOC_NAME(topology_diff_type_t)
+#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_OBJ_ATTR)
+#define HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX)
+#define hwloc_topology_diff_u HWLOC_NAME(topology_diff_u)
+#define hwloc_topology_diff_t HWLOC_NAME(topology_diff_t)
+#define hwloc_topology_diff_generic_s HWLOC_NAME(topology_diff_generic_s)
+#define hwloc_topology_diff_obj_attr_s HWLOC_NAME(topology_diff_obj_attr_s)
+#define hwloc_topology_diff_too_complex_s HWLOC_NAME(topology_diff_too_complex_s)
+#define hwloc_topology_diff_build HWLOC_NAME(topology_diff_build)
+#define hwloc_topology_diff_apply_flags_e HWLOC_NAME(topology_diff_apply_flags_e)
+#define HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE)
+#define hwloc_topology_diff_apply HWLOC_NAME(topology_diff_apply)
+#define hwloc_topology_diff_destroy HWLOC_NAME(topology_diff_destroy)
+#define hwloc_topology_diff_load_xml HWLOC_NAME(topology_diff_load_xml)
+#define hwloc_topology_diff_export_xml HWLOC_NAME(topology_diff_export_xml)
+#define hwloc_topology_diff_load_xmlbuffer HWLOC_NAME(topology_diff_load_xmlbuffer)
+#define hwloc_topology_diff_export_xmlbuffer HWLOC_NAME(topology_diff_export_xmlbuffer)
+
 /* glibc-sched.h */
 
 #define hwloc_cpuset_to_glibc_sched_affinity HWLOC_NAME(cpuset_to_glibc_sched_affinity)
@@ -491,10 +521,12 @@ extern "C" {
 
 #define hwloc__xml_import_state_s HWLOC_NAME(_xml_import_state_s)
 #define hwloc__xml_import_state_t HWLOC_NAME(_xml_import_state_t)
+#define hwloc__xml_import_diff HWLOC_NAME(_xml_import_diff)
 #define hwloc_xml_backend_data_s HWLOC_NAME(xml_backend_data_s)
 #define hwloc__xml_export_state_s HWLOC_NAME(_xml_export_state_s)
 #define hwloc__xml_export_state_t HWLOC_NAME(_xml_export_state_t)
 #define hwloc__xml_export_object HWLOC_NAME(_xml_export_object)
+#define hwloc__xml_export_diff HWLOC_NAME(_xml_export_diff)
 
 #define hwloc_xml_callbacks HWLOC_NAME(xml_callbacks)
 #define hwloc_xml_component HWLOC_NAME(xml_component)

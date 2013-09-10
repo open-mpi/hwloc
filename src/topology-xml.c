@@ -718,6 +718,26 @@ hwloc_look_xml(struct hwloc_backend *backend)
   return -1;
 }
 
+/* this can be the first XML call */
+int
+hwloc_topology_diff_load_xml(hwloc_topology_t topology __hwloc_attribute_unused,
+			     const char *xmlpath,
+			     hwloc_topology_diff_t *firstdiffp, char **refnamep)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+/* this can be the first XML call */
+int
+hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused,
+				   const char *xmlbuffer, int buflen,
+				   hwloc_topology_diff_t *firstdiffp, char **refnamep)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
 /************************************************
  ********* XML export (common routines) *********
  ************************************************/
@@ -994,6 +1014,26 @@ retry:
 
   hwloc_localeswitch_fini();
   return ret;
+}
+
+/* this can be the first XML call */
+int
+hwloc_topology_diff_export_xml(hwloc_topology_t topology __hwloc_attribute_unused,
+			       hwloc_topology_diff_t diff, const char *refname,
+			       const char *filename)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+/* this can be the first XML call */
+int
+hwloc_topology_diff_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused,
+				     hwloc_topology_diff_t diff, const char *refname,
+				     char **xmlbuffer, int *buflen)
+{
+  errno = ENOSYS;
+  return -1;
 }
 
 void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer)

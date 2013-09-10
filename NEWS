@@ -23,6 +23,8 @@ Version 1.8.0
   + Add the "linuxpci" component that always works on Linux even when
     libpciaccess and libpci isn't available. It only misses device names.
 * API
+  + Add the topology difference API in hwloc/diff.h for manipulating
+    many similar topologies.
   + Add hwloc_topology_dup() for duplicating an entire topology.
 * Tools
   + Object colors in the graphical output of lstopo may be changed by adding

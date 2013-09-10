@@ -1,4 +1,4 @@
-# Copyright © 2009-2012 Inria.  All rights reserved.
+# Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -14,6 +14,7 @@ include_hwloc_HEADERS = \
         hwloc/bitmap.h \
         hwloc/helper.h \
         hwloc/inlines.h \
+        hwloc/diff.h \
         hwloc/myriexpress.h \
         hwloc/openfabrics-verbs.h \
         hwloc/opencl.h \
