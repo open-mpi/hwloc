@@ -331,19 +331,7 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
   newobj->complete_nodeset = hwloc_bitmap_dup(src->complete_nodeset);
   newobj->allowed_nodeset = hwloc_bitmap_dup(src->allowed_nodeset);
 
-  if (src->distances_count) {
-    newobj->distances_count = src->distances_count;
-    newobj->distances = malloc(src->distances_count * sizeof(struct hwloc_distances_s *));
-    for(i=0; i<src->distances_count; i++) {
-      newobj->distances[i] = malloc(sizeof(struct hwloc_distances_s));
-      /* ugly copy first */
-      memcpy(newobj->distances[i], src->distances[i], sizeof(struct hwloc_distances_s));
-      /* now duplicate matrices for real */
-      len = src->distances[i]->nbobjs * src->distances[i]->nbobjs * sizeof(float);
-      newobj->distances[i]->latency = malloc(len);
-      memcpy(newobj->distances[i]->latency, src->distances[i]->latency, len);
-    }
-  }
+  /* don't duplicate distances, they'll be recreated at the end of the topology build */
 
   for(i=0; i<src->infos_count; i++)
     hwloc_obj_add_info(newobj, src->infos[i].name, src->infos[i].value);
