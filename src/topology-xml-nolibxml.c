@@ -304,6 +304,60 @@ hwloc_nolibxml_backend_exit(struct hwloc_xml_backend_data_s *bdata)
 }
 
 static int
+hwloc_nolibxml_read_file(const char *xmlpath, char **bufferp, size_t *buflenp)
+{
+  FILE * file;
+  size_t buflen, offset, readlen;
+  struct stat statbuf;
+  char *buffer;
+  size_t ret;
+
+  if (!strcmp(xmlpath, "-"))
+    xmlpath = "/dev/stdin";
+
+  file = fopen(xmlpath, "r");
+  if (!file)
+    goto out;
+
+  /* find the required buffer size for regular files, or use 4k when unknown, we'll realloc later if needed */
+  buflen = 4096;
+  if (!stat(xmlpath, &statbuf))
+    if (S_ISREG(statbuf.st_mode))
+      buflen = statbuf.st_size+1; /* one additional byte so that the first fread() gets EOF too */
+
+  buffer = malloc(buflen+1); /* one more byte for the ending \0 */
+  if (!buffer)
+    goto out_with_file;
+
+  offset = 0; readlen = buflen;
+  while (1) {
+    ret = fread(buffer+offset, 1, readlen, file);
+
+    offset += ret;
+    buffer[offset] = 0;
+
+    if (ret != readlen)
+      break;
+
+    buflen *= 2;
+    buffer = realloc(buffer, buflen+1);
+    if (!buffer)
+      goto out_with_file;
+    readlen = buflen/2;
+  }
+
+  fclose(file);
+  *bufferp = buffer;
+  *buflenp = offset+1;
+  return 0;
+
+ out_with_file:
+  fclose(file);
+ out:
+  return -1;
+}
+
+static int
 hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
 			    const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
 {
@@ -321,54 +375,9 @@ hwloc_nolibxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
     memcpy(nbdata->buffer, xmlbuffer, xmlbuflen);
 
   } else {
-    FILE * file;
-    size_t buflen, offset, readlen;
-    struct stat statbuf;
-    char *buffer;
-    size_t ret;
-
-    if (!strcmp(xmlpath, "-"))
-      xmlpath = "/dev/stdin";
-
-    file = fopen(xmlpath, "r");
-    if (!file)
+    int err = hwloc_nolibxml_read_file(xmlpath, &nbdata->buffer, &nbdata->buflen);
+    if (err < 0)
       goto out_with_nbdata;
-
-    /* find the required buffer size for regular files, or use 4k when unknown, we'll realloc later if needed */
-    buflen = 4096;
-    if (!stat(xmlpath, &statbuf))
-      if (S_ISREG(statbuf.st_mode))
-	buflen = statbuf.st_size+1; /* one additional byte so that the first fread() gets EOF too */
-
-    buffer = malloc(buflen+1); /* one more byte for the ending \0 */
-    if (!buffer) {
-      fclose(file);
-      goto out_with_nbdata;
-    }
-
-    offset = 0; readlen = buflen;
-    while (1) {
-      ret = fread(buffer+offset, 1, readlen, file);
-
-      offset += ret;
-      buffer[offset] = 0;
-
-      if (ret != readlen)
-        break;
-
-      buflen *= 2;
-      buffer = realloc(buffer, buflen+1);
-      if (!buffer) {
-	fclose(file);
-	goto out_with_nbdata;
-      }
-      readlen = buflen/2;
-    }
-
-    fclose(file);
-
-    nbdata->buffer = buffer;
-    nbdata->buflen = offset+1;
   }
 
   /* allocate a temporary copy buffer that we may modify during parsing */
