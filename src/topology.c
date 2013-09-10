@@ -300,17 +300,16 @@ hwloc_free_unlinked_object(hwloc_obj_t obj)
   free(obj);
 }
 
-void
-hwloc__duplicate_objects(struct hwloc_topology *newtopology,
-			 struct hwloc_obj *newparent,
-			 struct hwloc_obj *src)
+static void
+hwloc__duplicate_object(struct hwloc_obj *newobj,
+			struct hwloc_obj *src)
 {
-  hwloc_obj_t newobj;
-  hwloc_obj_t child;
   size_t len;
   unsigned i;
 
-  newobj = hwloc_alloc_setup_object(src->type, src->os_index);
+  newobj->type = src->type;
+  newobj->os_index = src->os_index;
+
   if (src->name)
     newobj->name = strdup(src->name);
   newobj->userdata = src->userdata;
@@ -343,6 +342,18 @@ hwloc__duplicate_objects(struct hwloc_topology *newtopology,
 
   for(i=0; i<src->infos_count; i++)
     hwloc_obj_add_info(newobj, src->infos[i].name, src->infos[i].value);
+}
+
+void
+hwloc__duplicate_objects(struct hwloc_topology *newtopology,
+			 struct hwloc_obj *newparent,
+			 struct hwloc_obj *src)
+{
+  hwloc_obj_t newobj;
+  hwloc_obj_t child;
+
+  newobj = hwloc_alloc_setup_object(src->type, src->os_index);
+  hwloc__duplicate_object(newobj, src);
 
   child = NULL;
   while ((child = hwloc_get_next_child(newtopology, src, child)) != NULL)
