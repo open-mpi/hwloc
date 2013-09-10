@@ -405,6 +405,86 @@ out:
   return -1;
 }
 
+static int
+hwloc_nolibxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbuflen,
+			   hwloc_topology_diff_t *firstdiffp, char **refnamep)
+{
+  struct hwloc__xml_import_state_s state, childstate;
+  hwloc__nolibxml_import_state_data_t nstate = (void*) state.data;
+  char *refname = NULL;
+  char *buffer, *tmp, *tag;
+  size_t buflen;
+  int ret;
+
+  assert(sizeof(*nstate) <= sizeof(state.data));
+
+  if (xmlbuffer) {
+    buffer = malloc(xmlbuflen);
+    if (!buffer)
+      goto out;
+    memcpy(buffer, xmlbuffer, xmlbuflen);
+    buflen = xmlbuflen;
+
+  } else {
+    ret = hwloc_nolibxml_read_file(xmlpath, &buffer, &buflen);
+    if (ret < 0)
+      goto out;
+  }
+
+  /* skip headers */
+  tmp = buffer;
+  while (!strncmp(tmp, "<?xml ", 6) || !strncmp(tmp, "<!DOCTYPE ", 10)) {
+    tmp = strchr(tmp, '\n');
+    if (!tmp)
+      goto out_with_buffer;
+    tmp++;
+  }
+
+  state.next_attr = hwloc__nolibxml_import_next_attr;
+  state.find_child = hwloc__nolibxml_import_find_child;
+  state.close_tag = hwloc__nolibxml_import_close_tag;
+  state.close_child = hwloc__nolibxml_import_close_child;
+  state.get_content = hwloc__nolibxml_import_get_content;
+  state.close_content = hwloc__nolibxml_import_close_content;
+  state.parent = NULL;
+  nstate->closed = 0;
+  nstate->tagbuffer = tmp;
+  nstate->tagname = NULL;
+  nstate->attrbuffer = NULL;
+
+  /* find root */
+  ret = hwloc__nolibxml_import_find_child(&state, &childstate, &tag);
+  if (ret < 0)
+    goto out_with_buffer;
+  if (strcmp(tag, "topologydiff"))
+    goto out_with_buffer;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (hwloc__nolibxml_import_next_attr(&childstate, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "refname")) {
+      free(refname);
+      refname = strdup(attrvalue);
+    } else
+      return -1;
+  }
+
+  ret = hwloc__xml_import_diff(&childstate, firstdiffp);
+  if (refnamep && !ret)
+    *refnamep = refname;
+  else
+    free(refname);
+
+  free(buffer);
+  return ret;
+
+out_with_buffer:
+  free(buffer);
+out:
+  return -1;
+}
+
 /*******************
  * Export routines *
  *******************/
@@ -646,6 +726,98 @@ hwloc_nolibxml_export_file(hwloc_topology_t topology, const char *filename)
   return ret;
 }
 
+static size_t
+hwloc___nolibxml_prepare_export_diff(hwloc_topology_diff_t diff, const char *refname, char *xmlbuffer, int buflen)
+{
+  struct hwloc__xml_export_state_s state, childstate;
+  hwloc__nolibxml_export_state_data_t ndata = (void *) &state.data;
+  int res;
+
+  assert(sizeof(*ndata) <= sizeof(state.data));
+
+  state.new_child = hwloc__nolibxml_export_new_child;
+  state.new_prop = hwloc__nolibxml_export_new_prop;
+  state.add_content = hwloc__nolibxml_export_add_content;
+  state.end_object = hwloc__nolibxml_export_end_object;
+
+  ndata->indent = 0;
+  ndata->written = 0;
+  ndata->buffer = xmlbuffer;
+  ndata->remaining = buflen;
+
+  ndata->nr_children = 1; /* don't close a non-existing previous tag when opening the topology tag */
+  ndata->has_content = 0;
+
+  res = hwloc_snprintf(ndata->buffer, ndata->remaining,
+		 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		 "<!DOCTYPE topologydiff SYSTEM \"hwloc.dtd\">\n");
+  hwloc__nolibxml_export_update_buffer(ndata, res);
+  hwloc__nolibxml_export_new_child(&state, &childstate, "topologydiff");
+  if (refname)
+    hwloc__nolibxml_export_new_prop(&childstate, "refname", refname);
+  hwloc__xml_export_diff (&childstate, diff);
+  hwloc__nolibxml_export_end_object(&childstate, "topologydiff");
+
+  return ndata->written+1;
+}
+
+static int
+hwloc_nolibxml_export_diff_buffer(hwloc_topology_diff_t diff, const char *refname, char **bufferp, int *buflenp)
+{
+  char *buffer;
+  size_t bufferlen, res;
+
+  bufferlen = 16384; /* random guess for large enough default */
+  buffer = malloc(bufferlen);
+  res = hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, bufferlen);
+
+  if (res > bufferlen) {
+    buffer = realloc(buffer, res);
+    hwloc___nolibxml_prepare_export_diff(diff, refname, buffer, res);
+  }
+
+  *bufferp = buffer;
+  *buflenp = res;
+  return 0;
+}
+
+static int
+hwloc_nolibxml_export_diff_file(hwloc_topology_diff_t diff, const char *refname, const char *filename)
+{
+  FILE *file;
+  char *buffer;
+  int bufferlen;
+  int ret;
+
+  ret = hwloc_nolibxml_export_diff_buffer(diff, refname, &buffer, &bufferlen);
+  if (ret < 0)
+    return -1;
+
+  if (!strcmp(filename, "-")) {
+    file = stdout;
+  } else {
+    file = fopen(filename, "w");
+    if (!file) {
+      free(buffer);
+      return -1;
+    }
+  }
+
+  ret = fwrite(buffer, 1, bufferlen-1 /* don't write the ending \0 */, file);
+  if (ret == bufferlen-1) {
+    ret = 0;
+  } else {
+    errno = ferror(file);
+    ret = -1;
+  }
+
+  free(buffer);
+
+  if (file != stdout)
+    fclose(file);
+  return ret;
+}
+
 static void
 hwloc_nolibxml_free_buffer(void *xmlbuffer)
 {
@@ -660,7 +832,10 @@ static struct hwloc_xml_callbacks hwloc_xml_nolibxml_callbacks = {
   hwloc_nolibxml_backend_init,
   hwloc_nolibxml_export_file,
   hwloc_nolibxml_export_buffer,
-  hwloc_nolibxml_free_buffer
+  hwloc_nolibxml_free_buffer,
+  hwloc_nolibxml_import_diff,
+  hwloc_nolibxml_export_diff_file,
+  hwloc_nolibxml_export_diff_buffer
 };
 
 static struct hwloc_xml_component hwloc_nolibxml_xml_component = {

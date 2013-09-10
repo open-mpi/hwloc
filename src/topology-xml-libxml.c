@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -198,6 +198,94 @@ hwloc_libxml_look_init(struct hwloc_xml_backend_data_s *bdata,
   return -1; /* failed */
 }
 
+static int
+hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbuflen, hwloc_topology_diff_t *firstdiffp, char **refnamep)
+{
+  struct hwloc__xml_import_state_s state;
+  hwloc__libxml_import_state_data_t lstate = (void*) state.data;
+  char *refname = NULL;
+  xmlDoc *doc = NULL;
+  xmlNode* root_node;
+  xmlDtd *dtd;
+  int ret;
+
+  assert(sizeof(*lstate) <= sizeof(state.data));
+
+  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  LIBXML_TEST_VERSION;
+  hwloc_libxml2_disable_stderrwarnings();
+
+  errno = 0; /* set to 0 so that we know if libxml2 changed it */
+
+  if (xmlpath)
+    doc = xmlReadFile(xmlpath, NULL, 0);
+  else if (xmlbuffer)
+    doc = xmlReadMemory(xmlbuffer, xmlbuflen, "", NULL, 0);
+
+  if (!doc) {
+    if (!errno)
+      /* libxml2 read the file fine, but it got an error during parsing */
+    errno = EINVAL;
+    return -1;
+  }
+
+  dtd = xmlGetIntSubset(doc);
+  if (!dtd) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "Loading XML topologydiff without DTD\n");
+  } else if (strcmp((char *) dtd->SystemID, "hwloc.dtd")) {
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "Loading XML topologydiff with wrong DTD SystemID (%s instead of %s)\n",
+	      (char *) dtd->SystemID, "hwloc.dtd");
+  }
+
+  root_node = xmlDocGetRootElement(doc);
+
+  if (strcmp((const char *) root_node->name, "topologydiff")) {
+    /* root node should be in "topologydiff" class */
+    if (hwloc__xml_verbose())
+      fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
+    goto failed;
+  }
+
+  state.next_attr = hwloc__libxml_import_next_attr;
+  state.find_child = hwloc__libxml_import_find_child;
+  state.close_tag = hwloc__libxml_import_close_tag;
+  state.close_child = hwloc__libxml_import_close_child;
+  state.get_content = hwloc__libxml_import_get_content;
+  state.close_content = hwloc__libxml_import_close_content;
+  state.parent = NULL;
+  lstate->node = root_node;
+  lstate->child = root_node->children;
+  lstate->attr = NULL;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state.next_attr(&state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "refname")) {
+      free(refname);
+      refname = strdup(attrvalue);
+    } else
+      return -1;
+  }
+
+  ret = hwloc__xml_import_diff(&state, firstdiffp);
+  if (refnamep && !ret)
+    *refnamep = refname;
+  else
+    free(refname);
+
+  return ret;
+
+ failed:
+  return -1; /* failed */
+}
+
 /********************
  * Backend routines *
  ********************/
@@ -363,6 +451,83 @@ hwloc_libxml_export_buffer(hwloc_topology_t topology, char **xmlbuffer, int *buf
   return 0;
 }
 
+static xmlDocPtr
+hwloc__libxml2_prepare_export_diff(hwloc_topology_diff_t diff, const char *refname)
+{
+  struct hwloc__xml_export_state_s state;
+  hwloc__libxml_export_state_data_t data = (void *) state.data;
+  xmlDocPtr doc = NULL;       /* document pointer */
+  xmlNodePtr root_node = NULL; /* root pointer */
+
+  assert(sizeof(*data) <= sizeof(state.data));
+
+  LIBXML_TEST_VERSION;
+  hwloc_libxml2_disable_stderrwarnings();
+
+  /* Creates a new document, a node and set it as a root node. */
+  doc = xmlNewDoc(BAD_CAST "1.0");
+  root_node = xmlNewNode(NULL, BAD_CAST "topologydiff");
+  if (refname)
+    xmlNewProp(root_node, BAD_CAST "refname", BAD_CAST refname);
+  xmlDocSetRootElement(doc, root_node);
+
+  /* Creates a DTD declaration. Isn't mandatory. */
+  (void) xmlCreateIntSubset(doc, BAD_CAST "topologydiff", NULL, BAD_CAST "hwloc.dtd");
+
+  state.new_child = hwloc__libxml_export_new_child;
+  state.new_prop = hwloc__libxml_export_new_prop;
+  state.add_content = hwloc__libxml_export_add_content;
+  state.end_object = hwloc__libxml_export_end_object;
+
+  data->current_node = root_node;
+
+  hwloc__xml_export_diff (&state, diff);
+
+  return doc;
+}
+
+static int
+hwloc_libxml_export_diff_file(hwloc_topology_diff_t diff, const char *refname, const char *filename)
+{
+  xmlDocPtr doc;
+  int ret;
+
+  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  errno = 0; /* set to 0 so that we know if libxml2 changed it */
+
+  doc = hwloc__libxml2_prepare_export_diff(diff, refname);
+  ret = xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+  xmlFreeDoc(doc);
+
+  if (ret < 0) {
+    if (!errno)
+      /* libxml2 likely got an error before doing I/O */
+      errno = EINVAL;
+    return ret;
+  }
+  return 0;
+}
+
+static int
+hwloc_libxml_export_diff_buffer(hwloc_topology_diff_t diff, const char *refname, char **xmlbuffer, int *buflen)
+{
+  xmlDocPtr doc;
+
+  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  doc = hwloc__libxml2_prepare_export_diff(diff, refname);
+  xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
+  xmlFreeDoc(doc);
+  return 0;
+}
+
 static void
 hwloc_libxml_free_buffer(void *xmlbuffer)
 {
@@ -377,7 +542,10 @@ static struct hwloc_xml_callbacks hwloc_xml_libxml_callbacks = {
   hwloc_libxml_backend_init,
   hwloc_libxml_export_file,
   hwloc_libxml_export_buffer,
-  hwloc_libxml_free_buffer
+  hwloc_libxml_free_buffer,
+  hwloc_libxml_import_diff,
+  hwloc_libxml_export_diff_file,
+  hwloc_libxml_export_diff_buffer
 };
 
 static struct hwloc_xml_component hwloc_libxml_xml_component = {

@@ -612,6 +612,136 @@ hwloc__xml_import_object(hwloc_topology_t topology,
   return state->close_tag(state);
 }
 
+static int
+hwloc__xml_import_diff_one(hwloc__xml_import_state_t state,
+			   hwloc_topology_diff_t *firstdiffp,
+			   hwloc_topology_diff_t *lastdiffp)
+{
+  char *type_s = NULL;
+  char *obj_depth_s = NULL;
+  char *obj_index_s = NULL;
+  char *obj_attr_type_s = NULL;
+/* char *obj_attr_index_s = NULL; unused for now */
+  char *obj_attr_name_s = NULL;
+  char *obj_attr_oldvalue_s = NULL;
+  char *obj_attr_newvalue_s = NULL;
+
+  while (1) {
+    char *attrname, *attrvalue;
+    if (state->next_attr(state, &attrname, &attrvalue) < 0)
+      break;
+    if (!strcmp(attrname, "type"))
+      type_s = attrvalue;
+    else if (!strcmp(attrname, "obj_depth"))
+      obj_depth_s = attrvalue;
+    else if (!strcmp(attrname, "obj_index"))
+      obj_index_s = attrvalue;
+    else if (!strcmp(attrname, "obj_attr_type"))
+      obj_attr_type_s = attrvalue;
+    else if (!strcmp(attrname, "obj_attr_index"))
+      { /* obj_attr_index_s = attrvalue; unused for now */ }
+    else if (!strcmp(attrname, "obj_attr_name"))
+      obj_attr_name_s = attrvalue;
+    else if (!strcmp(attrname, "obj_attr_oldvalue"))
+      obj_attr_oldvalue_s = attrvalue;
+    else if (!strcmp(attrname, "obj_attr_newvalue"))
+      obj_attr_newvalue_s = attrvalue;
+    else
+      return -1;
+  }
+
+  if (type_s) {
+    switch (atoi(type_s)) {
+    default:
+      break;
+    case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR: {
+      /* object attribute diff */
+      hwloc_topology_diff_obj_attr_type_t obj_attr_type;
+      hwloc_topology_diff_t diff;
+
+      /* obj_attr mandatory generic attributes */
+      if (!obj_depth_s || !obj_index_s || !obj_attr_type_s)
+	break;
+
+      /* obj_attr mandatory attributes common to all subtypes */
+      if (!obj_attr_oldvalue_s || !obj_attr_newvalue_s)
+	break;
+
+      /* mandatory attributes for obj_attr_info subtype */
+      obj_attr_type = atoi(obj_attr_type_s);
+      if (obj_attr_type == HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO && !obj_attr_name_s)
+	break;
+
+      /* now we know we have everything we need */
+      diff = malloc(sizeof(*diff));
+      if (!diff)
+	return -1;
+      diff->obj_attr.type = HWLOC_TOPOLOGY_DIFF_OBJ_ATTR;
+      diff->obj_attr.obj_depth = atoi(obj_depth_s);
+      diff->obj_attr.obj_index = atoi(obj_index_s);
+      memset(&diff->obj_attr.diff, 0, sizeof(diff->obj_attr.diff));
+      diff->obj_attr.diff.generic.type = obj_attr_type;
+
+      switch (atoi(obj_attr_type_s)) {
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE:
+	diff->obj_attr.diff.uint64.oldvalue = strtoull(obj_attr_oldvalue_s, NULL, 0);
+	diff->obj_attr.diff.uint64.newvalue = strtoull(obj_attr_newvalue_s, NULL, 0);
+	break;
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO:
+	diff->obj_attr.diff.string.name = strdup(obj_attr_name_s);
+	/* fallthrough */
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
+	diff->obj_attr.diff.string.oldvalue = strdup(obj_attr_oldvalue_s);
+	diff->obj_attr.diff.string.newvalue = strdup(obj_attr_newvalue_s);
+	break;
+      }
+
+      if (*firstdiffp)
+	(*lastdiffp)->generic.next = diff;
+      else
+        *firstdiffp = diff;
+      *lastdiffp = diff;
+      diff->generic.next = NULL;
+    }
+    }
+  }
+
+  return state->close_tag(state);
+}
+
+int
+hwloc__xml_import_diff(hwloc__xml_import_state_t state,
+		       hwloc_topology_diff_t *firstdiffp)
+{
+  hwloc_topology_diff_t firstdiff = NULL, lastdiff = NULL;
+  *firstdiffp = NULL;
+
+  while (1) {
+    struct hwloc__xml_import_state_s childstate;
+    char *tag;
+    int ret;
+
+    ret = state->find_child(state, &childstate, &tag);
+    if (ret < 0)
+      return -1;
+    if (!ret)
+      break;
+
+    if (!strcmp(tag, "diff")) {
+      ret = hwloc__xml_import_diff_one(&childstate, &firstdiff, &lastdiff);
+    } else
+      ret = -1;
+
+    if (ret < 0)
+      return ret;
+
+    state->close_child(&childstate);
+  }
+
+  *firstdiffp = firstdiff;
+  return 0;
+}
+
 /***********************************
  ********* main XML import *********
  ***********************************/
@@ -724,8 +854,35 @@ hwloc_topology_diff_load_xml(hwloc_topology_t topology __hwloc_attribute_unused,
 			     const char *xmlpath,
 			     hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
-  errno = ENOSYS;
-  return -1;
+  hwloc_localeswitch_declare;
+  char *env;
+  int force_nolibxml;
+  int ret;
+
+  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  hwloc_localeswitch_init();
+
+  *firstdiffp = NULL;
+
+  env = getenv("HWLOC_NO_LIBXML_IMPORT");
+  force_nolibxml = (env && atoi(env));
+retry:
+  if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
+    ret = hwloc_nolibxml_callbacks->import_diff(xmlpath, NULL, 0, firstdiffp, refnamep);
+  else {
+    ret = hwloc_libxml_callbacks->import_diff(xmlpath, NULL, 0, firstdiffp, refnamep);
+    if (ret < 0 && errno == ENOSYS) {
+      hwloc_libxml_callbacks = NULL;
+      goto retry;
+    }
+  }
+
+  hwloc_localeswitch_fini();
+  return ret;
 }
 
 /* this can be the first XML call */
@@ -734,8 +891,35 @@ hwloc_topology_diff_load_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_u
 				   const char *xmlbuffer, int buflen,
 				   hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
-  errno = ENOSYS;
-  return -1;
+  hwloc_localeswitch_declare;
+  char *env;
+  int force_nolibxml;
+  int ret;
+
+  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  hwloc_localeswitch_init();
+
+  *firstdiffp = NULL;
+
+  env = getenv("HWLOC_NO_LIBXML_IMPORT");
+  force_nolibxml = (env && atoi(env));
+retry:
+  if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
+    ret = hwloc_nolibxml_callbacks->import_diff(NULL, xmlbuffer, buflen, firstdiffp, refnamep);
+  else {
+    ret = hwloc_libxml_callbacks->import_diff(NULL, xmlbuffer, buflen, firstdiffp, refnamep);
+    if (ret < 0 && errno == ENOSYS) {
+      hwloc_libxml_callbacks = NULL;
+      goto retry;
+    }
+  }
+
+  hwloc_localeswitch_fini();
+  return ret;
 }
 
 /************************************************
@@ -947,6 +1131,56 @@ hwloc__xml_export_object (hwloc__xml_export_state_t parentstate, hwloc_topology_
   state.end_object(&state, "object");
 }
 
+void
+hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_diff_t diff)
+{
+  while (diff) {
+    struct hwloc__xml_export_state_s state;
+    char tmp[255];
+
+    parentstate->new_child(parentstate, &state, "diff");
+
+    sprintf(tmp, "%u", diff->generic.type);
+    state.new_prop(&state, "type", tmp);
+
+    switch (diff->generic.type) {
+    case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR:
+      sprintf(tmp, "%d", diff->obj_attr.obj_depth);
+      state.new_prop(&state, "obj_depth", tmp);
+      sprintf(tmp, "%u", diff->obj_attr.obj_index);
+      state.new_prop(&state, "obj_index", tmp);
+
+      sprintf(tmp, "%u", diff->obj_attr.diff.generic.type);
+      state.new_prop(&state, "obj_attr_type", tmp);
+
+      switch (diff->obj_attr.diff.generic.type) {
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE:
+	sprintf(tmp, "%llu", (unsigned long long) diff->obj_attr.diff.uint64.index);
+	state.new_prop(&state, "obj_attr_index", tmp);
+	sprintf(tmp, "%llu", (unsigned long long) diff->obj_attr.diff.uint64.oldvalue);
+	state.new_prop(&state, "obj_attr_oldvalue", tmp);
+	sprintf(tmp, "%llu", (unsigned long long) diff->obj_attr.diff.uint64.newvalue);
+	state.new_prop(&state, "obj_attr_newvalue", tmp);
+	break;
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME:
+      case HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO:
+	if (diff->obj_attr.diff.string.name)
+	  state.new_prop(&state, "obj_attr_name", diff->obj_attr.diff.string.name);
+	state.new_prop(&state, "obj_attr_oldvalue", diff->obj_attr.diff.string.oldvalue);
+	state.new_prop(&state, "obj_attr_newvalue", diff->obj_attr.diff.string.newvalue);
+	break;
+      }
+
+      break;
+    default:
+      assert(0);
+    }
+    state.end_object(&state, "diff");
+
+    diff = diff->generic.next;
+  }
+}
+
 /**********************************
  ********* main XML export ********
  **********************************/
@@ -978,7 +1212,6 @@ retry:
       goto retry;
     }
   }
-
 
   hwloc_localeswitch_fini();
   return ret;
@@ -1022,8 +1255,43 @@ hwloc_topology_diff_export_xml(hwloc_topology_t topology __hwloc_attribute_unuse
 			       hwloc_topology_diff_t diff, const char *refname,
 			       const char *filename)
 {
-  errno = ENOSYS;
-  return -1;
+  hwloc_localeswitch_declare;
+  hwloc_topology_diff_t tmpdiff;
+  char *env;
+  int force_nolibxml;
+  int ret;
+
+  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  tmpdiff = diff;
+  while (tmpdiff) {
+    if (tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX) {
+      errno = EINVAL;
+      return -1;
+    }
+    tmpdiff = tmpdiff->generic.next;
+  }
+
+  hwloc_localeswitch_init();
+
+  env = getenv("HWLOC_NO_LIBXML_EXPORT");
+  force_nolibxml = (env && atoi(env));
+retry:
+  if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
+    ret = hwloc_nolibxml_callbacks->export_diff_file(diff, refname, filename);
+  else {
+    ret = hwloc_libxml_callbacks->export_diff_file(diff, refname, filename);
+    if (ret < 0 && errno == ENOSYS) {
+      hwloc_libxml_callbacks = NULL;
+      goto retry;
+    }
+  }
+
+  hwloc_localeswitch_fini();
+  return ret;
 }
 
 /* this can be the first XML call */
@@ -1032,8 +1300,43 @@ hwloc_topology_diff_export_xmlbuffer(hwloc_topology_t topology __hwloc_attribute
 				     hwloc_topology_diff_t diff, const char *refname,
 				     char **xmlbuffer, int *buflen)
 {
-  errno = ENOSYS;
-  return -1;
+  hwloc_localeswitch_declare;
+  hwloc_topology_diff_t tmpdiff;
+  char *env;
+  int force_nolibxml;
+  int ret;
+
+  if (!hwloc_libxml_callbacks && !hwloc_nolibxml_callbacks) {
+    errno = ENOSYS;
+    return -1;
+  }
+
+  tmpdiff = diff;
+  while (tmpdiff) {
+    if (tmpdiff->generic.type == HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX) {
+      errno = EINVAL;
+      return -1;
+    }
+    tmpdiff = tmpdiff->generic.next;
+  }
+
+  hwloc_localeswitch_init();
+
+  env = getenv("HWLOC_NO_LIBXML_EXPORT");
+  force_nolibxml = (env && atoi(env));
+retry:
+  if (!hwloc_libxml_callbacks || (hwloc_nolibxml_callbacks && force_nolibxml))
+    ret = hwloc_nolibxml_callbacks->export_diff_buffer(diff, refname, xmlbuffer, buflen);
+  else {
+    ret = hwloc_libxml_callbacks->export_diff_buffer(diff, refname, xmlbuffer, buflen);
+    if (ret < 0 && errno == ENOSYS) {
+      hwloc_libxml_callbacks = NULL;
+      goto retry;
+    }
+  }
+
+  hwloc_localeswitch_fini();
+  return ret;
 }
 
 void hwloc_free_xmlbuffer(hwloc_topology_t topology __hwloc_attribute_unused, char *xmlbuffer)

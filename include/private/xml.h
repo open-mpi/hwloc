@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -27,6 +27,8 @@ typedef struct hwloc__xml_import_state_s {
    */
   char data[32];
 } * hwloc__xml_import_state_t;
+
+HWLOC_DECLSPEC int hwloc__xml_import_diff(hwloc__xml_import_state_t state, hwloc_topology_diff_t *firstdiffp);
 
 struct hwloc_xml_backend_data_s {
   /* xml backend parameters */
@@ -57,6 +59,8 @@ typedef struct hwloc__xml_export_state_s {
 
 HWLOC_DECLSPEC void hwloc__xml_export_object (hwloc__xml_export_state_t state, struct hwloc_topology *topology, struct hwloc_obj *obj);
 
+HWLOC_DECLSPEC void hwloc__xml_export_diff(hwloc__xml_export_state_t parentstate, hwloc_topology_diff_t diff);
+
 /******************
  * XML components *
  ******************/
@@ -66,6 +70,9 @@ struct hwloc_xml_callbacks {
   int (*export_file)(struct hwloc_topology *topology, const char *filename);
   int (*export_buffer)(struct hwloc_topology *topology, char **xmlbuffer, int *buflen);
   void (*free_buffer)(void *xmlbuffer);
+  int (*import_diff)(const char *xmlpath, const char *xmlbuffer, int xmlbuflen, hwloc_topology_diff_t *diff, char **refnamep);
+  int (*export_diff_file)(union hwloc_topology_diff_u *diff, const char *refname, const char *filename);
+  int (*export_diff_buffer)(union hwloc_topology_diff_u *diff, const char *refname, char **xmlbuffer, int *buflen);
 };
 
 struct hwloc_xml_component {
