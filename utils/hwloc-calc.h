@@ -96,6 +96,7 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
   hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
   int depthattr = -1;
   hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
+  char *end;
 
   /* types without depthattr */
   if (!hwloc_strncasecmp(string, "system", 2)) {
@@ -122,17 +123,29 @@ hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthatt
     type = HWLOC_OBJ_CACHE;
   } else if ((string[0] == 'l' || string[0] == 'L') && string[1] >= '0' && string[1] <= '9') {
     type = HWLOC_OBJ_CACHE;
-    depthattr = atoi(string+1);
-    if (string[2] == 'd')
+    depthattr = strtol(string+1, &end, 10);
+    if (*end == 'd') {
       cachetypeattr = HWLOC_OBJ_CACHE_DATA;
-    else if (string[2] == 'i')
+      end++;
+    } else if (*end == 'i') {
       cachetypeattr = HWLOC_OBJ_CACHE_INSTRUCTION;
+      end++;
+    } else if (*end == 'u') {
+      cachetypeattr = HWLOC_OBJ_CACHE_UNIFIED;
+      end++;
+    }
+    if (*end && hwloc_strncasecmp(end, "cache", 2))
+      return -1;
+
   } else if (!hwloc_strncasecmp(string, "group", 1)) {
     int length;
     type = HWLOC_OBJ_GROUP;
     length = strcspn(string, "0123456789");
-    if (string[length] != '\0')
-      depthattr = atoi(string+length);
+    if (string[length] != '\0') {
+      depthattr = strtol(string+length, &end, 10);
+      if (*end)
+	return -1;
+    }
   } else
     return -1;
 
@@ -252,15 +265,29 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
 }
 
 static __hwloc_inline int
-hwloc_calc_parse_range(const char *string,
+hwloc_calc_parse_range(const char *_string,
 		       int *firstp, int *amountp, int *stepp, int *wrapp,
 		       const char **dotp)
 {
-  const char *dash, *dot, *colon;
-  int first, amount, step, wrap;
+  char string[65];
+  size_t len;
+  char *dot, *end, *end2;
+  long first, last, amount;
+  int wrap;
 
-  dot = strchr(string, '.');
+  dot = strchr(_string, '.');
   *dotp = dot;
+  if (dot) {
+    len = dot - _string;
+  } else {
+    len = strlen(_string);
+  }
+  if (len >= sizeof(string)) {
+    fprintf(stderr, "invalid range `%s', too long\n", string);
+    return -1;
+  }
+  memcpy(string, _string, len);
+  string[len] = '\0';
 
   if (!isdigit(*string)) {
     if (!strncmp(string, "all", 3)) {
@@ -281,32 +308,49 @@ hwloc_calc_parse_range(const char *string,
       *stepp = 2;
       *wrapp = 0;
       return 0;
-    } else
+    } else {
+      fprintf(stderr, "unrecognized range keyword `%s'\n", string);
       return -1;
+    }
   }
 
-  first = atoi(string);
+  first = strtol(string, &end, 10);
   amount = 1;
-  step = 1;
   wrap = 0;
 
-  dash = strchr(string, '-');
-  if (dash && (dash < dot || !dot)) {
-    if (*(dash+1) == '\0')
+  if (*end == '-') {
+    last = strtol(end+1, &end2, 10);
+    if (*end2) {
+      fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
+      return -1;
+    } else if (end2 == end+1) {
+      /* X- */
       amount = -1;
-    else
-      amount = atoi(dash+1)-first+1;
-  } else {
-    colon = strchr(string, ':');
-    if (colon && (colon < dot || !dot)) {
-      amount = atoi(colon+1);
-      wrap = 1;
+    } else {
+      /* X-Y */
+      amount = last-first+1;
     }
+
+  } else if (*end == ':') {
+    /* X:Y */
+    wrap = 1;
+    amount = strtol(end+1, &end2, 10);
+    if (*end2) {
+      fprintf(stderr, "invalid character at `%s' after range at `%s'\n", end2, string);
+      return -1;
+    } else if (end2 == end+1) {
+      fprintf(stderr, "missing width at `%s' in range at `%s'\n", end2, string);
+      return -1;
+    }
+
+  } else if (*end) {
+    fprintf(stderr, "invalid character at `%s' after index at `%s'\n", end, string);
+    return -1;
   }
 
   *firstp = first;
   *amountp = amount;
-  *stepp = step;
+  *stepp = 1;
   *wrapp = wrap;
   return 0;
 }
