@@ -49,7 +49,7 @@ hwloc supports the following operating systems:
 <ul>
 <li>Linux (including old kernels not having sysfs topology
 information, with knowledge of cpusets, offline CPUs, ScaleMP vSMP,
-and Kerrighed support)</li>
+NumaScale NumaConnect, and Kerrighed support)</li>
 <li>Solaris</li>
 <li>AIX</li>
 <li>Darwin / OS X</li>
