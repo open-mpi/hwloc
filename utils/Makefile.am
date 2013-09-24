@@ -16,6 +16,7 @@ EXTRA_DIST = \
 	test-hwloc-annotate.input test-hwloc-annotate.output \
 	test-hwloc-assembler.input1 test-hwloc-assembler.input2 test-hwloc-assembler.output \
 	test-hwloc-calc.output \
+	test-hwloc-compress-dir.input.tar.gz test-hwloc-compress-dir.output.tar.gz \
 	test-hwloc-diffpatch.input1 test-hwloc-diffpatch.input2 \
 	test-hwloc-distances.output \
 	test-hwloc-distrib.output \
@@ -79,6 +80,7 @@ TESTS = \
 	test-hwloc-annotate.sh \
 	test-hwloc-assembler.sh \
 	test-hwloc-calc.sh \
+	test-hwloc-compress-dir.sh \
 	test-hwloc-diffpatch.sh \
 	test-hwloc-distances.sh \
 	test-hwloc-distrib.sh \
