@@ -28,6 +28,8 @@ Version 1.8.0
   + Add hwloc_topology_dup() for duplicating an entire topology.
 * Tools
   + Add hwloc-diff and hwloc-patch tools together with the new diff API.
+  + Add hwloc-compress-dir to compress an entire directory of XML files
+    using hwloc-diff.
   + Object colors in the graphical output of lstopo may be changed by adding
     a "lstopoStyle" info attribute. See CUSTOM COLORS in the lstopo(1) manpage
     for details. Thanks to Jirka Hladky for discussing the idea.

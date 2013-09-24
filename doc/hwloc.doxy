@@ -903,6 +903,12 @@ and outputs it to another XML file.
 hwloc-patch reads such a difference file and applies to
 another topology.
 
+\section cli_hwloc_compressdir hwloc-compress-dir
+
+hwloc-compress-dir compresses an entire directory of XML
+files by using hwloc-diff to save the differences between
+topologies instead of entire topologies.
+
 \section cli_hwloc_assembler hwloc-assembler
 
 hwloc-assembler combines several XML topology files into a single

@@ -72,7 +72,7 @@ hwloc_calc_SOURCES = \
 	hwloc-calc.h \
 	hwloc-calc.c
 
-bin_SCRIPTS = hwloc-assembler-remote
+bin_SCRIPTS = hwloc-assembler-remote hwloc-compress-dir
 
 if !HWLOC_HAVE_MINGW32
 TESTS = \
@@ -101,6 +101,7 @@ man1_pages = \
 	hwloc-assembler-remote.1 \
 	hwloc-bind.1 \
 	hwloc-calc.1 \
+	hwloc-compress-dir.1 \
 	hwloc-diff.1 \
 	hwloc-distances.1 \
 	hwloc-distrib.1 \
@@ -154,7 +155,8 @@ endif
 	rm -f $(DESTDIR)$(man1dir)/lstopo-no-graphics.1
 	cd $(DESTDIR)$(man1dir) && $(LN_S) lstopo.1 lstopo-no-graphics.1
 	$(SED) -e 's/HWLOC_top_builddir\/utils/bindir/' -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/hwloc-assembler-remote > $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp && mv -f $(DESTDIR)$(bindir)/hwloc-assembler-remote.tmp $(DESTDIR)$(bindir)/hwloc-assembler-remote
-	chmod +x $(DESTDIR)$(bindir)/hwloc-assembler-remote
+	$(SED) -e 's/HWLOC_top_builddir\/utils/bindir/' -e '/HWLOC_top_builddir/d' $(DESTDIR)$(bindir)/hwloc-compress-dir > $(DESTDIR)$(bindir)/hwloc-compress-dir.tmp && mv -f $(DESTDIR)$(bindir)/hwloc-compress-dir.tmp $(DESTDIR)$(bindir)/hwloc-compress-dir
+	chmod +x $(DESTDIR)$(bindir)/hwloc-assembler-remote $(DESTDIR)$(bindir)/hwloc-compress-dir
 
 uninstall-local:
 	rm -f $(DESTDIR)$(bindir)/hwloc-ls$(EXEEXT)

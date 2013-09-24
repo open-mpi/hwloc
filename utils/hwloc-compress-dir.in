@@ -1,0 +1,110 @@
+#!/bin/sh
+#-*-sh-*-
+
+#
+# Copyright © 2013 Inria.  All rights reserved.
+# See COPYING in top-level directory.
+#
+
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+# this will be changed into $bindir/lstopo during make install
+localhwlocdiff="$HWLOC_top_builddir/utils/hwloc-diff"
+
+verbose=0
+
+error()
+{
+	echo $@ 2>&1
+}
+
+usage()
+{
+	echo "$0 [options] <inputdir> <outputdir>"
+	echo "  Compress topologies from <inputdir> into <outputdir>"
+	echo "Options:"
+	echo "  -v --verbose		Display verbose messages"
+}
+
+while test $# -gt 2 ; do
+	case "$1" in
+	-v|--verbose)
+		verbose=1
+		;;
+	-h)
+		usage
+		exit 0
+		;;
+	-*)
+		error "Unrecognized option: $1"
+		usage
+		exit 1
+		;;
+	esac
+	shift
+done
+
+if test $# -lt 2 ; then
+    usage
+    exit 1
+fi
+
+inputdir="$1"
+test x`echo $inputdir | sed -e 's/^\///'` = x$inputdir && inputdir="$PWD/$inputdir"
+outputdir="$2"
+test x`echo $outputdir | sed -e 's/^\///'` = x$outputdir && outputdir="$PWD/$outputdir"
+
+if ! cd "$outputdir" ; then
+    echo "Cannot enter output directory $outputdir"
+    exit 1
+fi
+
+alreadycompressed=0
+alreadynoncompressed=0
+newlycompressed=0
+newlynoncompressed=0
+
+inputs=`ls -1 "$inputdir"`
+for input in $inputs ; do
+    name=`echo $input | sed -e 's/.xml$//'`
+
+    if test "x${name}.xml" != "x$input"; then
+	test x$verbose = x1 && echo "Ignoring non-XML file $input"
+	continue
+    fi
+    if test -f "$outputdir/${name}.xml" ; then
+	test x$verbose = x1 && echo "$name already non-compressed, skipping"
+	alreadynoncompressed=`expr $alreadynoncompressed + 1`
+	continue
+    fi
+    if test -f  "$outputdir/${name}.diff.xml" ; then
+	test x$verbose = x1 && echo "$name already compressed, skipping"
+	alreadycompressed=`expr $alreadycompressed + 1`
+	continue
+    fi
+
+    found=
+    outputs=`ls -1 "$outputdir"`
+    for output in $outputs ; do
+	outputname=`echo $output | sed -e 's/.xml$//' | sed -e 's/.diff$//'`
+	test -f "${outputdir}/${outputname}.diff.xml" && continue
+
+	if $localhwlocdiff "$outputdir/${outputname}.xml" "$inputdir/${name}.xml" "$outputdir/${name}.diff.xml" >/dev/null 2>/dev/null; then
+	    echo "Compressed $name on top of $outputname"
+	    newlycompressed=`expr $newlycompressed + 1`
+	    found=1
+	    break
+	fi
+    done
+
+    if test x$found = x ; then
+	echo "Could not compress $name, keeping non-compressed"
+	newlynoncompressed=`expr $newlynoncompressed + 1`
+	cp "$inputdir/${name}.xml" "$outputdir/${name}.xml"
+    fi
+done
+
+echo "Compressed $newlycompressed new topologies ($alreadycompressed were already compressed)"
+echo "Kept $newlynoncompressed new topologies non-compressed ($alreadynoncompressed were already non-compressed)"
