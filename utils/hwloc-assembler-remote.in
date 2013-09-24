@@ -31,7 +31,7 @@ error()
 
 usage()
 {
-	echo "$0 |options] <output> <host1> <host2> ..."
+	echo "$0 [options] <output> <host1> <host2> ..."
 	echo "  Gathers the topology of remote hosts and assembles them into the"
 	echo "  <output> XML topology."
 	echo "Options:"
@@ -66,7 +66,7 @@ while test $# -gt 0 ; do
 		usage
 		exit 0
 		;;
-	--*)
+	-*)
 		error "Unrecognized option: $1"
 		usage
 		exit 1
