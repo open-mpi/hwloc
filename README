@@ -87,8 +87,8 @@ It just happens to be hosted as part of the overall Open MPI project.
 Nightly development snapshots are available on the web site. Additionally, the
 code can be directly checked out of Subversion:
 
-shell$ svn checkout http://svn.open-mpi.org/svn/hwloc/trunk hwloc-trunk
-shell$ cd hwloc-trunk
+shell$ git clone https://github.com/open-mpi/hwloc.git
+shell$ cd hwloc
 shell$ ./autogen.sh
 
 Note that GNU Autoconf >=2.63, Automake >=1.10 and Libtool >=2.2.6 are required
@@ -660,7 +660,7 @@ Questions and Bugs
 
 Questions should be sent to the devel mailing list (http://www.open-mpi.org/
 community/lists/hwloc.php). Bug reports should be reported in the tracker (
-https://svn.open-mpi.org/trac/hwloc/).
+https://git.open-mpi.org/trac/hwloc/).
 
 If hwloc discovers an incorrect topology for your machine, the very first thing
 you should check is to ensure that you have the most recent updates installed
