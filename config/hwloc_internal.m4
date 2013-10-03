@@ -116,7 +116,7 @@ AC_DEFUN([HWLOC_SETUP_DOCS],[
 EOF
 
     AC_MSG_CHECKING([if this is a developer build])
-    AS_IF([test ! -d "$srcdir/.svn" -a ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
+    AS_IF([test ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
           [AC_MSG_RESULT([no (doxygen generation is optional)])],
           [AC_MSG_RESULT([yes])])
     
@@ -203,7 +203,7 @@ EOF
     AC_MSG_CHECKING([whether to enable "picky" compiler mode])
     hwloc_want_picky=0
     AS_IF([test "$hwloc_c_vendor" = "gnu"],
-          [AS_IF([test -d "$srcdir/.svn" -o -d "$srcdir/.hg" -o -d "$srcdir/.git"],
+          [AS_IF([test -d "$srcdir/.hg" -o -d "$srcdir/.git"],
                  [hwloc_want_picky=1])])
     if test "$enable_picky" = "yes"; then
         if test "$GCC" = "yes"; then

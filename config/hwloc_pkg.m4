@@ -31,7 +31,7 @@
 
 # HWLOC_PKG_PROG_PKG_CONFIG([MIN-VERSION])
 # ----------------------------------
-# hwloc note: Per https://svn.open-mpi.org/trac/hwloc/ticket/55, keep
+# hwloc note: Per https://git.open-mpi.org/trac/hwloc/ticket/55, keep
 # the environment variable $PKG_CONFIG (vs. renaming it
 # $HWLOC_PKG_CONFIG).  Short explanation: $PKG_CONFIG is a well-known
 # environment variable that can be set by users to override what these

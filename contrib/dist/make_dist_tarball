@@ -10,7 +10,7 @@
 #                         University of Stuttgart.  All rights reserved.
 # Copyright (c) 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
-# Copyright © 2008-2010  Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2008-2013  Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2012-2013 Inria.  All rights reserved.
 # $COPYRIGHT$
 # 
@@ -18,6 +18,10 @@
 # 
 # $HEADER$
 #
+
+#########################################################################
+# Make greek and non-greek distribution (i.e., non-snapshot) tarballs
+#########################################################################
 
 #
 # Version of auto tools that we want
@@ -145,52 +149,29 @@ check_gnu_version libtool $LT_TARGET_VERSION
 # Verify that we're in a top hwloc dir
 #
 echo "*** Checking to ensure in top-level HWLOC directory..."
-if test -f VERSION -a -f configure.ac -a -f config/hwloc.m4; then
+if test -f VERSION -a -f configure.ac -a -f config/hwloc.m4 -a -d .git; then
     happy=1
 else
-    echo "Do not appear to be in a hwloc top directory.  Abort!"
+    echo "Do not appear to be in a hwloc git clone top directory.  Abort!"
     exit 1
 fi
 
-if test -d .svn ; then
-    #
-    # Do svn up and all that
-    #
-    echo "*** Removing old VERSION files..."
-    find . -name VERSION -exec rm -f {} \; -print
-
-    echo "*** Running svn up..."
-    svn up
-    if test ! "$?" = "0"; then
-        echo "SVN update failed.  Aborting"
-        exit 1
-    fi
-else if test -d .git ; then
-    echo "*** Git reverting VERSION files..."
-    find . -name VERSION | xargs git diff | patch -p1 -R
-else
-    echo "*** Cannot revert VERSION files outside of svn/git"
-fi fi
+#
+# Set VERSION to not build a snapshot
+#
+echo "*** Git reverting VERSION files..."
+git diff VERSION | patch -p1 -R
 
 #
-# Ditch "svn/git" from all version numbers
+# Substitute in the release date and disable snapshot build
 #
-echo "*** Removing svn version numbers..."
-if test -d .svn ; then
-  rev="r`svnversion .`"
-else if test -d .git ; then
-  rev=git
-fi fi
-version_files="`find . -name VERSION`"
+echo "*** Substituting in release date and disabling snapshot..."
 release_date=`export LANG=; export LC_ALL=; export LC_TIME=; date '+%b %d, %Y'`
-for file in $version_files; do
-    echo " - $file"
-    sed -e 's/^want_repo_rev=.*/want_repo_rev=0/' \
-        -e "s/^date=.*/date=\"$release_date\"/" \
-        -e 's/^repo_rev=.*/'repo_rev=$rev/ $file > $file.new
-    cp -f $file.new $file
-    rm $file.new
-done
+sed -e "s/^date=.*/date=\"$release_date\"/" \
+    -e "s/^snapshot=.*/snapshot=0/" \
+    VERSION > VERSION.new
+cp -f VERSION.new VERSION
+rm -f VERSION.new
 
 #
 # Make 2 tarballs:
@@ -201,10 +182,10 @@ done
 # unless the user specifically said --greekonly, then only make the
 # greek tarball.  Making both tarballs at once allows us to guarantee
 # to have two tarballs -- one greek and one not -- that have exactly
-# the same SVN r number (as opposed to, for example, running this
+# the same git describe (as opposed to, for example, running this
 # script to make a greek tarball, then running it again to make a
 # non-greek tarball -- there is a race condition that someone could
-# commit in the meantime and change the SVN r number in the 2nd
+# commit in the meantime and change the git describe number in the 2nd
 # tarball)
 #
 
@@ -217,24 +198,13 @@ make_tarball
 
 if test "$1" != "-greekonly" -a "$1" != "--greekonly"; then
     echo "*** REMOVING ALL GREEK FROM VERSION NUMBERS!!"
-    for file in $version_files; do
-        echo " - $file"
-        sed -e 's/^greek=.*/greek=/' $file > $file.new
-        cp -f $file.new $file
-        rm $file.new
-    done
+    sed -e 's/^greek=.*/greek=/' VERSION > VERSION.new
+    cp -f VERSION.new VERSION
+    rm -f VERSION.new
     echo "Making non-greek tarball"
     make_tarball
 fi
 
 # Put the VERSION and README files back the way they were
-if test -d .svn ; then
-    svn revert VERSION README
-else if test -d .git ; then
-    git diff VERSION README | patch -p1 -R
-else
-    echo "*** Cannot revert VERSION and README files changes ***"
-fi
-    echo
-    echo "*** Remember that these tarballs weren't generated from SVN ***"
-fi
+echo "*** Reverting VERSION and README files"
+git diff VERSION README | patch -p1 -R
