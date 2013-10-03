@@ -3,6 +3,7 @@ Makefile
 .deps
 .libs
 test-suite.log
+*~
 
 /config/ar-lib
 /config/argz.m4
@@ -46,6 +47,8 @@ test-suite.log
 /doc/*.o
 /doc/*.log
 /doc/*.trs
+/doc/doc.out
+/doc/readme.out
 
 /src/static-components.h
 /src/*.lo
@@ -125,6 +128,10 @@ test-suite.log
 /utils/hwloc-bind.1
 /utils/hwloc-calc
 /utils/hwloc-calc.1
+/utils/hwloc-compress-dir
+/utils/hwloc-compress-dir.1
+/utils/hwloc-diff
+/utils/hwloc-diff.1
 /utils/hwloc-distances
 /utils/hwloc-distances.1
 /utils/hwloc-distrib
@@ -132,6 +139,8 @@ test-suite.log
 /utils/hwloc-gather-topology.1
 /utils/hwloc-info
 /utils/hwloc-info.1
+/utils/hwloc-patch
+/utils/hwloc-patch.1
 /utils/hwloc-ps
 /utils/hwloc-ps.1
 /utils/hwloc.7
@@ -142,9 +151,12 @@ test-suite.log
 /utils/test-hwloc-annotate.sh
 /utils/test-hwloc-assembler.sh
 /utils/test-hwloc-calc.sh
+/utils/test-hwloc-compress-dir.sh
+/utils/test-hwloc-diffpatch.sh
 /utils/test-hwloc-distances.sh
 /utils/test-hwloc-distrib.sh
 /utils/test-hwloc-info.sh
 /utils/test-hwloc-ls.sh
 /utils/test-*.sh.log
 /utils/test-*.sh.trs
+
