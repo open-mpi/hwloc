@@ -74,7 +74,7 @@ do_build() {
 print Got tarball: $tarball
 
 # Get the version
-ver=`echo $tarball | sed -e 's/^.*hwloc-//' -e 's/.tar.*$//'`
+ver=`echo $tarball | sed -e 's/^.*hwloc-//' -e 's/\.tar\..*$//'`
 print Got version: $ver
 
 # Extract
