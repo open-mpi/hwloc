@@ -13,7 +13,7 @@
 #
 
 AC_INIT([hwloc], 
-        [m4_normalize(esyscmd([config/hwloc_get_version.sh VERSION --base]))],
+        [m4_normalize(esyscmd([config/hwloc_get_version.sh VERSION --version]))],
         [http://www.open-mpi.org/projects/hwloc/], [hwloc])
 AC_PREREQ(2.63)
 AC_CONFIG_AUX_DIR(./config)
@@ -50,29 +50,20 @@ AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
 # Get the version of hwloc that we are installing
 AC_MSG_CHECKING([for hwloc version])
 HWLOC_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION`"
-HWLOC_MAJOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --major`"
-HWLOC_MINOR_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --minor`"
-HWLOC_RELEASE_VERSION="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release`"
-HWLOC_REPO_REV="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --repo-rev`"
+if test "$?" != "0"; then
+    AC_MSG_ERROR([Cannot continue])
+fi
 HWLOC_RELEASE_DATE="`$srcdir/config/hwloc_get_version.sh $srcdir/VERSION --release-date`"
 AC_SUBST(HWLOC_VERSION)
-AC_SUBST(HWLOC_SVN_R)
 AC_SUBST(HWLOC_RELEASE_DATE)
-AC_DEFINE_UNQUOTED([HWLOC_MAJOR_VERSION], [$HWLOC_MAJOR_VERSION],
-    [Major version of hwloc])
-AC_DEFINE_UNQUOTED([HWLOC_MINOR_VERSION], [$HWLOC_MINOR_VERSION],
-    [Minor version of hwloc])
-AC_DEFINE_UNQUOTED([HWLOC_RELEASE_VERSION], [$HWLOC_RELEASE_VERSION],
-    [Release version of hwloc])
 AC_MSG_RESULT([$HWLOC_VERSION])
 
 # Override/fixup the version numbers set by AC_INIT, since on
 # developer builds, there's no good way to know what the version is
 # before running configure :(.  We only use the base version number
-# (ie, no svn r numbers) for the version set in AC_INIT.  This will
-# always match reality because we add the VERSION file (the only way
-# to change the major.minor.release{greek}) into the configure
-# dependencies.
+# for the version set in AC_INIT.  This will always match reality
+# because we add the VERSION file (the only way to change the
+# major.minor.release{greek}) into the configure dependencies.
 
 PACKAGE_VERSION="$HWLOC_VERSION"
 PACKAGE_STRING="${PACKAGE_NAME} ${PACKAGE_VERSION}"
