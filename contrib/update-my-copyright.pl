@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #
-# Copyright (c) 2010-2011 Cisco Systems, Inc.  All rights reserved.
+# Copyright (c) 2010-2013 Cisco Systems, Inc.  All rights reserved.
 # Copyright (c) 2011 inria.  All rights reserved.
 # $COPYRIGHT$
 #
@@ -19,8 +19,7 @@
 # More details:
 #
 # This is a simple script to traverse the tree looking for added and
-# changed files (via "svn st ." or "hg st .", depending on what meta
-# directory is found in this tree).  Note that the search starts in
+# changed files (via "git status").  Note that the search starts in
 # the current directory -- not the top-level directory.
 #
 # All added and changed files are examined.  If the special "See
@@ -83,15 +82,10 @@ chdir($start);
 print "==> Top-level hwloc dir: $top\n";
 print "==> Current directory: $start\n";
 
-# Are we hg or svn?  If we're both hg and svn, assume svn.
 my $cmd;
-$cmd = "svn st ."
-    if (-d "$top/.svn");
-$cmd = "hg st ."
-    if (-d "$top/.hg" && ! -d "$top/.svn");
 $cmd = "git status . | sed -n -e 's/^\#[ 	]*modified:[ 	]*/M /p' -e 's/^\#[ 	]* new file:[ 	]*/A /p'"
     if (-d "$top/.git" && ! -d "$top/.svn");
-die "Can't find SVN, HG or GIT meta dirs" 
+die "Can't find git meta dir"
     if (!defined($cmd));
 
 # Run the command, parsing the output.  Make a list of files that are
