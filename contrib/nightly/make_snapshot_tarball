@@ -168,7 +168,7 @@ do_command "git checkout $gitbranch"
 
 # Find the "git describe" string for this branch (remove a leading "hwloc-"
 # prefix, if there is one).
-describe=`git describe --always | sed -e s/^hwloc-//`
+describe=`git describe --tags --always | sed -e s/^hwloc-//`
 if test -n "$debug"; then
     echo "** found $gitbranch describe: $describe"
 fi
@@ -201,11 +201,11 @@ if test -n "$debug"; then
     echo "** making snapshot for describe: $describe"
 fi
 
-# Ensure that VERSION is set to indicate that it wants a snapshot, but
-# don't specify the snapshot version string (because "make dist"
-# [i.e., config/distscript.csh] will insert the actual value).
+# Ensure that VERSION is set to indicate that it wants a snapshot, and
+# insert the actual value that we want (so that hwloc_get_version.sh
+# will report exactly that version).
 sed -e 's/^snapshot=.*/snapshot=1/' \
-    -e 's/^snapshot_version=.*/snapshot_version=/' \
+    -e 's/^snapshot_version=.*/snapshot_version='$describe/ \
     VERSION > VERSION.new
 cp -f VERSION.new VERSION
 rm -f VERSION.new

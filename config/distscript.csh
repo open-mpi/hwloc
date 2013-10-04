@@ -47,34 +47,6 @@ else
     set vpath_msg=no
 endif
 
-# Check the VERSION file.  If snapshot=1 and snapshot_version is
-# empty, then ensure that we're in a source tree and fill in
-# snapshot_version with an appropriate value (note: this case happens
-# when a developer just does "make dist" from a git clone/developer
-# tree, and doesn't use the contrib/nightly/make_nightly_snapshot
-# script, which will edit VERSION before running "make dist").
-if (-d .git || -d ../.git) then
-    set snapshot="`grep '^snapshot\s*=' ${distdir}/VERSION | cut -d= -f2`"
-    set snapshot_version="`grep '^snapshot_version\s*=' ${distdir}/VERSION | cut -d= -f2`"
-
-    # Update VERSION is $snapshot==1 and $snapshot_version is empty.
-    if ("$snapshot" == "1" && "$snapshot_version" == "") then
-        set describe=`git describe --always | sed -e s/^hwloc-// | grep -v fatal`
-        # Safety: if git describe failed, then assign "unknown" (I'm
-        # not sure how this can happen; just being defensive)
-        if ("$describe" == "") then
-            describe="unknown"
-        endif
-
-        sed -e 's/^snapshot_version\s*=.*/snapshot_version='$describe'/' "${distdir}/VERSION" > "${distdir}/version.new"
-        cp "${distdir}/version.new" "${distdir}/VERSION"
-        rm -f "${distdir}/version.new"
-        # Reset the timestamp to preserve AM dependencies
-        touch -r "${srcdir}/VERSION" "${distdir}/VERSION"
-        echo "*** Updated VERSION file with snapshot version: $describe"
-    endif
-endif
-
 set start=`date`
 cat <<EOF
  
