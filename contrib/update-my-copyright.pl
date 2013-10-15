@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
 # Copyright (c) 2010-2013 Cisco Systems, Inc.  All rights reserved.
-# Copyright (c) 2011 inria.  All rights reserved.
+# Copyright (c) 2011-2013 Inria.  All rights reserved.
 # $COPYRIGHT$
 #
 
@@ -83,7 +83,7 @@ print "==> Top-level hwloc dir: $top\n";
 print "==> Current directory: $start\n";
 
 my $cmd;
-$cmd = "git status . | sed -n -e 's/^\#[ 	]*modified:[ 	]*/M /p' -e 's/^\#[ 	]* new file:[ 	]*/A /p'"
+$cmd = "LANG=C git status . | sed -n -e 's/^\#[ 	]*modified:[ 	]*/M /p' -e 's/^\#[ 	]* new file:[ 	]*/A /p'"
     if (-d "$top/.git" && ! -d "$top/.svn");
 die "Can't find git meta dir"
     if (!defined($cmd));
