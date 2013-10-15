@@ -45,6 +45,9 @@ Version 1.8.0
     discussing the idea.
   + hwloc-calc and friends have a more robust parsing of locations given
     on the command-line and they report useful error messages about it.
+  + Add --whole-system to hwloc-bind, hwloc-calc, hwloc-distances and
+    hwloc-distrib, and add --restrict to hwloc-bind for uniformity among
+    tools.
 * Misc
   + Calling hwloc_topology_load() or hwloc_topology_set_*() on an already
     loaded topology now returns an error.

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -37,6 +37,10 @@ void usage(const char *name, FILE *where)
 		 "                 Retrieve the last processors where the current process ran\n");
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
   fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
+  fprintf(where, "Input topology options:\n");
+  fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
+  fprintf(where, "  --whole-system   Do not consider administration limitations\n");
+  fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -f --force     Launch the command even if binding failed\n");
   fprintf(where, "  -q --quiet     Hide non-fatal error messages\n");
   fprintf(where, "  -v --verbose   Show verbose messages\n");
@@ -52,6 +56,7 @@ int main(int argc, char *argv[])
   int working_on_cpubind = 1; /* membind if 0 */
   int get_binding = 0;
   int get_last_cpu_location = 0;
+  unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES;
   int force = 0;
   int single = 0;
   int verbose = 0;
@@ -70,7 +75,7 @@ int main(int argc, char *argv[])
   membind_set = hwloc_bitmap_alloc();
 
   hwloc_topology_init(&topology);
-  hwloc_topology_set_flags(topology, HWLOC_TOPOLOGY_FLAG_WHOLE_IO|HWLOC_TOPOLOGY_FLAG_ICACHES);
+  hwloc_topology_set_flags(topology, flags);
   hwloc_topology_load(topology);
   depth = hwloc_topology_get_depth(topology);
 
@@ -174,6 +179,34 @@ int main(int argc, char *argv[])
           exit(EXIT_FAILURE);
 	}
 	opt = 1;
+	goto next;
+      }
+      else if (!strcmp (argv[0], "--whole-system")) {
+	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+	hwloc_topology_destroy(topology);
+	hwloc_topology_init(&topology);
+	hwloc_topology_set_flags(topology, flags);
+	hwloc_topology_load(topology);
+	depth = hwloc_topology_get_depth(topology);
+	goto next;
+      }
+      else if (!strcmp (argv[0], "--restrict")) {
+	hwloc_bitmap_t restrictset;
+	int err;
+	if (argc < 2) {
+	  usage (callname, stdout);
+	  exit(EXIT_FAILURE);
+	}
+	restrictset = hwloc_bitmap_alloc();
+	hwloc_bitmap_sscanf(restrictset, argv[1]);
+	err = hwloc_topology_restrict (topology, restrictset, 0);
+	if (err) {
+	  perror("Restricting the topology");
+	  /* fallthrough */
+	}
+	hwloc_bitmap_free(restrictset);
+	argc--;
+	argv++;
 	goto next;
       }
 

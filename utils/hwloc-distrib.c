@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2013 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -25,6 +25,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --at <type>      Distribute among objects of the given type\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
+  fprintf(where, "  --whole-system   Do not consider administration limitations\n");
   hwloc_utils_input_format_usage(where, 0);
   fprintf(where, "Formatting options:\n");
   fprintf(where, "  --single         Singlify each output to a single CPU\n");
@@ -46,6 +47,7 @@ int main(int argc, char *argv[])
   char *restrictstring = NULL;
   hwloc_obj_type_t from_type = (hwloc_obj_type_t) -1, to_type = (hwloc_obj_type_t) -1;
   hwloc_topology_t topology;
+  unsigned long flags = 0;
   int opt;
   int err;
 
@@ -78,6 +80,10 @@ int main(int argc, char *argv[])
       }
       if (!strcmp(argv[0], "-v") || !strcmp(argv[0], "--verbose")) {
 	verbose = 1;
+	goto next;
+      }
+      if (!strcmp (argv[0], "--whole-system")) {
+	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
 	goto next;
       }
       if (!strcmp(argv[0], "--help")) {
@@ -194,6 +200,7 @@ int main(int argc, char *argv[])
       if (err)
 	return err;
     }
+    hwloc_topology_set_flags(topology, flags);
     hwloc_topology_load(topology);
 
     if (restrictstring) {

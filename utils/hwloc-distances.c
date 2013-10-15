@@ -22,6 +22,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  -p --physical    Display physical object indexes\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
+  fprintf(where, "  --whole-system   Do not consider administration limitations\n");
   hwloc_utils_input_format_usage(where, 0);
   fprintf(where, "Miscellaneous options:\n");
   fprintf(where, "  -v --verbose     Show verbose messages\n");
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
   enum hwloc_utils_input_format input_format = HWLOC_UTILS_INPUT_DEFAULT;
   char *restrictstring = NULL;
   hwloc_topology_t topology;
+  unsigned long flags = 0;
   unsigned i, depth;
   int logical = 1;
   int verbose = 0;
@@ -76,6 +78,10 @@ int main(int argc, char *argv[])
 	logical = 0;
 	goto next;
       }
+      if (!strcmp (argv[0], "--whole-system")) {
+	flags |= HWLOC_TOPOLOGY_FLAG_WHOLE_SYSTEM;
+	goto next;
+      }
       if (hwloc_utils_lookup_input_option(argv, argc, &opt,
 					  &input, &input_format,
 					  callname)) {
@@ -113,6 +119,7 @@ int main(int argc, char *argv[])
     if (err)
       return err;
   }
+  hwloc_topology_set_flags(topology, flags);
   hwloc_topology_load(topology);
 
   if (restrictstring) {
