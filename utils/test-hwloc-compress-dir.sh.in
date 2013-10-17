@@ -36,9 +36,14 @@ set -e
 (cd "$tmp" && gunzip -c $HWLOC_top_srcdir/utils/test-hwloc-compress-dir.input.tar.gz | tar xf -)
 (cd "$tmp" && gunzip -c $HWLOC_top_srcdir/utils/test-hwloc-compress-dir.output.tar.gz | tar xf -)
 (cd "$tmp" && mkdir test-hwloc-compress-dir.newoutput)
+(cd "$tmp" && mkdir test-hwloc-compress-dir.newoutput2)
 
 $compress "$tmp/test-hwloc-compress-dir.input" "$tmp/test-hwloc-compress-dir.newoutput"
 
 diff @HWLOC_DIFF_U@ -r "$tmp/test-hwloc-compress-dir.output" "$tmp/test-hwloc-compress-dir.newoutput"
+
+$compress -R "$tmp/test-hwloc-compress-dir.newoutput" "$tmp/test-hwloc-compress-dir.newoutput2"
+
+diff @HWLOC_DIFF_U@ -r "$tmp/test-hwloc-compress-dir.input" "$tmp/test-hwloc-compress-dir.newoutput2"
 
 rm -rf "$tmp"
