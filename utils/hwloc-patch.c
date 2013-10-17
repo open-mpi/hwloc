@@ -9,13 +9,14 @@
 
 static void usage(const char *callname __hwloc_attribute_unused, FILE *where)
 {
-	fprintf(where, "Usage: hwloc-patch [options] <old.xml> [ <diff.xml> | - ] [<output.xml>]\n");
+	fprintf(where, "Usage: hwloc-patch [options] [<old.xml> | refname] [<diff.xml> | -] [<output.xml>]\n");
 	fprintf(where, "Options:\n");
 	fprintf(where, "  -R --reverse     Reverse the sense of the difference\n");
 	fprintf(where, "  --version        Report version and exit\n");
 }
 
-static int hwloc_diff_read(hwloc_topology_t topo, const char *inputdiff, hwloc_topology_diff_t *firstdiffp)
+static int hwloc_diff_read(hwloc_topology_t topo, const char *inputdiff,
+			   hwloc_topology_diff_t *firstdiffp, char **refnamep)
 {
 	size_t buflen, offset, readlen;
 	char *buffer;
@@ -23,7 +24,7 @@ static int hwloc_diff_read(hwloc_topology_t topo, const char *inputdiff, hwloc_t
 	int err;
 
 	if (strcmp(inputdiff, "-"))
-		return hwloc_topology_diff_load_xml(topo, inputdiff, firstdiffp, NULL);
+		return hwloc_topology_diff_load_xml(topo, inputdiff, firstdiffp, refnamep);
 
 	buflen = 4096;
 	buffer = malloc(buflen+1); /* one more byte for the ending \0 */
@@ -47,7 +48,7 @@ static int hwloc_diff_read(hwloc_topology_t topo, const char *inputdiff, hwloc_t
 		readlen = buflen/2;
 	}
 
-	err = hwloc_topology_diff_load_xmlbuffer(topo, buffer, offset+1, firstdiffp, NULL);
+	err = hwloc_topology_diff_load_xmlbuffer(topo, buffer, offset+1, firstdiffp, refnamep);
 	free(buffer);
 	return err;
 
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
 	hwloc_topology_diff_t firstdiff = NULL;
 	unsigned long flags = HWLOC_TOPOLOGY_FLAG_WHOLE_IO | HWLOC_TOPOLOGY_FLAG_ICACHES;
 	unsigned long patchflags = 0;
-	char *callname, *input, *inputdiff, *output = NULL;
+	char *callname, *input, *inputdiff, *output = NULL, *refname = NULL;
 	int err;
 
 	putenv("HWLOC_XML_VERBOSE=1");
@@ -101,20 +102,42 @@ int main(int argc, char *argv[])
 		argv++;
 	}
 
+	/* load a temporary topology so that we can play with diffs */
 	hwloc_topology_init(&topo);
-	hwloc_topology_set_flags(topo, flags);
-	err = hwloc_topology_set_xml(topo, input);
-	if (err < 0) {
-		fprintf(stderr, "Failed to load XML topology %s\n", input);
-		goto out;
-	}
 	hwloc_topology_load(topo);
 
-	err = hwloc_diff_read(topo, inputdiff, &firstdiff);
+	/* load the diff and get the refname */
+	err = hwloc_diff_read(topo, inputdiff, &firstdiff, &refname);
 	if (err < 0) {
 		fprintf(stderr, "Failed to load XML topology diff %s\n", inputdiff);
 		goto out_with_topo;
 	}
+
+	/* switch to the actual input topology */
+	hwloc_topology_destroy(topo);
+	hwloc_topology_init(&topo);
+	hwloc_topology_set_flags(topo, flags);
+	if (!strcmp(input, "refname")) {
+		/* use the diff refname as input */
+		if (!refname) {
+			fprintf(stderr, "Couldn't find the reference topology name from the input diff %s\n", inputdiff);
+			goto out_with_diff;
+		}
+		err = hwloc_topology_set_xml(topo, refname);
+		if (err < 0) {
+			fprintf(stderr, "Failed to load XML topology %s (from input diff %s refname)\n", refname, inputdiff);
+			goto out;
+		}
+	} else {
+		/* use the given input */
+		err = hwloc_topology_set_xml(topo, input);
+		if (err < 0) {
+			fprintf(stderr, "Failed to load XML topology %s\n", input);
+			goto out;
+		}
+	}
+
+	hwloc_topology_load(topo);
 
 	err = hwloc_topology_diff_apply(topo, firstdiff, patchflags);
 	if (err < 0) {

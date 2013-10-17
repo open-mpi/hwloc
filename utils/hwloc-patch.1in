@@ -13,13 +13,13 @@ hwloc-patch \- Apply a topology difference to an existing XML topology
 .PP
 .B hwloc-patch
 [\fIoptions\fR]
-\fI<topology.xml>\fR
+\fI[<topology.xml> | refname]\fR
 \fI[<diff.xml> | -]\fR
 \fI<output.xml>\fR
 .PP
 .B hwloc-patch
 [\fIoptions\fR]
-\fI<topology.xml>\fR
+\fI[<topology.xml> | refname]\fR
 \fI[<diff.xml> | -]\fR
 .
 .\" **************************
@@ -44,16 +44,22 @@ hwloc-patch loads the difference between two topologies from a XML file
 existing topology, generating a new, modified one.
 .
 .PP
+The XML difference may have been computed earlier with hwloc-diff
+or hwloc-compress-dir.
+.
+.PP
 If <output.xml> is given, the new, modified topology is stored in that
 new file. Otherwise, <topology.xml> is modified in place.
 .
 .PP
-If - is used instead of <diff.xml>, the topology difference is read from
-the standard input.
+If \fBrefname\fR is given instead of <topology.xml>, the input topology filename
+is automatically guessed by reading the refname field of the XML diff file.
+By default hwloc-diff generates XML diffs with the right reference topology
+filename (without any path prefix).
 .
 .PP
-The XML difference may have been computed earlier with hwloc-diff
-or hwloc-compress-dir.
+If \fB-\fR is given instead of <diff.xml>, the topology difference is read from
+the standard input.
 .
 .PP
 .B NOTE:
@@ -72,6 +78,10 @@ hwloc-patch's operation is best described through several examples.
 Apply a XML topology difference file to an existing topology:
 
     $ hwloc-patch fourmi023.xml diff.xml fourmi023-new.xml
+
+Apply a XML topology difference file whole refname field contains the right input topology:
+
+    $ hwloc-patch refname diff.xml fourmi023-new.xml
 
 Apply a XML topology from the standard intput:
 
