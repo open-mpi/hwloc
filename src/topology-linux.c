@@ -3398,6 +3398,29 @@ look_cpuinfo(struct hwloc_topology *topology,
  *************************************/
 
 static void
+hwloc__linux_get_mic_sn(struct hwloc_topology *topology, struct hwloc_linux_backend_data_s *data)
+{
+  FILE *file;
+  char line[64], *tmp, *end;
+  file = hwloc_fopen("/proc/elog", "r", data->root_fd);
+  if (!file)
+    return;
+  if (!fgets(line, sizeof(line), file))
+    goto out_with_file;
+  if (strncmp(line, "Card ", 5))
+    goto out_with_file;
+  tmp = line + 5;
+  end = strchr(tmp, ':');
+  if (!end)
+    goto out_with_file;
+  *end = '\0';
+  hwloc_obj_add_info(hwloc_get_root_obj(topology), "MICSerialNumber", tmp);
+
+ out_with_file:
+  fclose(file);
+}
+
+static void
 hwloc_linux_fallback_pu_level(struct hwloc_topology *topology)
 {
   if (topology->is_thissystem)
@@ -3530,6 +3553,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
     hwloc_obj_add_info(topology->levels[0][0], "LinuxCgroup", cpuset_name);
     free(cpuset_name);
   }
+
+  hwloc__linux_get_mic_sn(topology, data);
 
   /* gather uname info if fsroot wasn't changed */
   if (topology->is_thissystem)

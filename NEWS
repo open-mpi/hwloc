@@ -59,6 +59,9 @@ Version 1.8.0
     crashes when hwloc is dynamically loaded by another plugin mechanisms.
   + Add --with-hwloc-plugins-path to specify the install/load directories
     of plugins.
+  + Add the MICSerialNumber info attribute to the root object when running
+    hwloc inside a Xeon Phi to match the same attribute in the MIC OS device
+    when running in the host.
 * API
   + hwloc.h and hwloc/helper.h have been reorganized to clarify the
     documentation sections. The actual inline code has moved out of hwloc.h
