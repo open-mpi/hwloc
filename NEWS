@@ -21,15 +21,17 @@ Version 1.8.0
 -------------
 * New components
   + Add the "linuxpci" component that always works on Linux even when
-    libpciaccess and libpci isn't available. It only misses device names.
+    libpciaccess and libpci aren't available (and even with a modified
+    file-system root). By default the old "pci" component runs first
+    because "linuxpci" lacks device names (obj->name is always NULL).
 * API
   + Add the topology difference API in hwloc/diff.h for manipulating
     many similar topologies.
   + Add hwloc_topology_dup() for duplicating an entire topology.
 * Tools
   + Add hwloc-diff and hwloc-patch tools together with the new diff API.
-  + Add hwloc-compress-dir to compress an entire directory of XML files
-    using hwloc-diff.
+  + Add hwloc-compress-dir to (de)compress an entire directory of XML files
+    using hwloc-diff and hwloc-patch.
   + Object colors in the graphical output of lstopo may be changed by adding
     a "lstopoStyle" info attribute. See CUSTOM COLORS in the lstopo(1) manpage
     for details. Thanks to Jirka Hladky for discussing the idea.
@@ -50,7 +52,7 @@ Version 1.8.0
     tools.
 * Misc
   + Calling hwloc_topology_load() or hwloc_topology_set_*() on an already
-    loaded topology now returns an error.
+    loaded topology now returns an error (deprecated since release 1.6.1).
   + Fix the initialisation of cpusets and nodesets in Group objects added
     when inserting PCI hostbridges.
   + Never merge Group objects that were added explicitly by the user with
