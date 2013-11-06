@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2013 Inria.  All rights reserved.
- * Copyright © 2009-2012 Université Bordeaux 1
+ * Copyright © 2009-2013 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -432,7 +432,7 @@ lstopo_set_object_color(struct draw_methods *methods, hwloc_topology_t topology,
 						   * Machine status (0=normal, 1=displayed as a root/System) */
 			struct style *s)
 {
-  int forcer, forceg, forceb, forcet;
+  unsigned forcer, forceg, forceb;
   const char *style;
 
   /* no need to deal with colors when computing max sizes */
