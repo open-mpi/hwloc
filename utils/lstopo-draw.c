@@ -645,6 +645,7 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
   unsigned mywidth = 2*gridsize + gridsize + speedwidth;
   unsigned totwidth, totheight;
   struct style style;
+  unsigned center;
 
   DYNA_CHECK();
 
@@ -659,7 +660,6 @@ bridge_draw(hwloc_topology_t topology, struct draw_methods *methods, int logical
     unsigned bottom = 0, top = 0;
     RECURSE_BEGIN(level, 0);
     RECURSE_FOR()
-      unsigned center;
       RECURSE_CALL_FUN(methods);
 
       /* Line to PCI device */
