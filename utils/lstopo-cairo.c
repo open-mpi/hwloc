@@ -22,7 +22,7 @@
 #include <cairo-svg.h>
 #endif /* CAIRO_HAS_SVG_SURFACE */
 
-#ifndef HWLOC_HAVE_X11
+#ifndef HWLOC_HAVE_X11_KEYSYM
 /* In case X11 headers aren't availble, forcefully disable Cairo/Xlib.  */
 # undef CAIRO_HAS_XLIB_SURFACE
 # define CAIRO_HAS_XLIB_SURFACE 0

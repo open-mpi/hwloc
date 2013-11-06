@@ -618,7 +618,7 @@ main (int argc, char *argv[])
   switch (output_format) {
     case LSTOPO_OUTPUT_DEFAULT:
 #ifdef LSTOPO_HAVE_GRAPHICS
-#if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11
+#if CAIRO_HAS_XLIB_SURFACE && defined HWLOC_HAVE_X11_KEYSYM
       if (getenv("DISPLAY")) {
         if (logical == -1)
           logical = 0;
