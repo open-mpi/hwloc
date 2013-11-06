@@ -914,15 +914,39 @@ EOF])
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
+    # X11 support
+    AC_PATH_XTRA
+
+    CPPFLAGS_save=$CPPFLAGS
+    LIBS_save=$LIBS
+
+    CPPFLAGS="$CPPFLAGS $X_CFLAGS"
+    LIBS="$LIBS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS"
+    AC_CHECK_HEADERS([X11/Xlib.h],
+        [AC_CHECK_LIB([X11], [XOpenDisplay],
+            [
+             # the GL backend just needs XOpenDisplay
+             hwloc_enable_X11=yes
+             # lstopo needs more
+             AC_CHECK_HEADERS([X11/Xutil.h],
+                [AC_CHECK_HEADERS([X11/keysym.h],
+                    [AC_DEFINE([HWLOC_HAVE_X11_KEYSYM], [1], [Define to 1 if X11 headers including Xutil.h and keysym.h are available.])])
+                     AC_SUBST([HWLOC_X11_LIBS], ["-lX11"])
+                ])
+            ])
+         ])
+    CPPFLAGS=$CPPFLAGS_save
+    LIBS=$LIBS_save
+
     # GL Support 
     hwloc_gl_happy=no
     if test "x$enable_gl" != "xno"; then
-    	hwloc_gl_happy=yes								
+	hwloc_gl_happy=yes
 
-        AC_CHECK_HEADERS([X11/Xlib.h], [
-          AC_CHECK_LIB([X11], [XOpenDisplay], [:], [hwloc_gl_happy=no])
-        ], [hwloc_gl_happy=no])
-       
+	AS_IF([test "$hwloc_enable_X11" != "yes"],
+              [AC_MSG_WARN([X11 not found; GL disabled])
+               hwloc_gl_happy=no])
+
         AC_CHECK_HEADERS([NVCtrl/NVCtrl.h], [
           AC_CHECK_LIB([XNVCtrl], [XNVCTRLQueryTargetAttribute], [:], [hwloc_gl_happy=no], [-lXext])
         ], [hwloc_gl_happy=no])
