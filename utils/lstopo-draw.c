@@ -427,7 +427,8 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
 static struct draw_methods getmax_draw_methods;
 
 static void
-lstopo_set_object_color(struct draw_methods *methods, hwloc_topology_t topology,
+lstopo_set_object_color(struct draw_methods *methods,
+			hwloc_topology_t topology __hwloc_attribute_unused,
 			hwloc_obj_t obj, int arg, /* PU status (0=normal, 1=running, 2=forbidden, 3=offline)
 						   * Machine status (0=normal, 1=displayed as a root/System) */
 			struct style *s)
