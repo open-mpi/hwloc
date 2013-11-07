@@ -21,8 +21,10 @@ int main(void)
   char *buf1, *buf2;
   int buflen1, buflen2, err;
 
-  hwloc_topology_init(&topology);
-  hwloc_topology_load(topology);
+  err = hwloc_topology_init(&topology);
+  assert(!err);
+  err = hwloc_topology_load(topology);
+  assert(!err);
   hwloc_topology_check(topology);
 
   /* insert by cpuset below root */
@@ -56,11 +58,17 @@ int main(void)
   hwloc_topology_check(topology);
 
   /* export, reimport and check things are in consistent state */
-  hwloc_topology_export_xmlbuffer(topology, &buf1, &buflen1);
-  hwloc_topology_init(&reload);
-  hwloc_topology_set_xmlbuffer(reload, buf1, buflen1);
-  hwloc_topology_load(reload);
-  hwloc_topology_export_xmlbuffer(reload, &buf2, &buflen2);
+  err = hwloc_topology_export_xmlbuffer(topology, &buf1, &buflen1);
+  assert(!err);
+  err = hwloc_topology_init(&reload);
+  assert(!err);
+  err = hwloc_topology_set_xmlbuffer(reload, buf1, buflen1);
+  assert(!err);
+  err = hwloc_topology_load(reload);
+  assert(!err);
+  hwloc_topology_check(reload);
+  err = hwloc_topology_export_xmlbuffer(reload, &buf2, &buflen2);
+  assert(!err);
   assert(buflen1 == buflen2);
   err = strcmp(buf1, buf2);
   assert(!err);
