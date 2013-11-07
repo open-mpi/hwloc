@@ -47,4 +47,6 @@ $patch -R $HWLOC_top_srcdir/utils/test-hwloc-diffpatch.input2 $diffoutput $outpu
 
 diff -u $HWLOC_top_srcdir/utils/test-hwloc-diffpatch.input1 "$output2"
 diff -u $HWLOC_top_srcdir/utils/test-hwloc-diffpatch.input2 "$output1"
+
+cd ..
 rm -rf "$tmp"
