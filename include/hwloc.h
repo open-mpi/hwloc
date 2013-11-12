@@ -911,6 +911,9 @@ HWLOC_DECLSPEC int hwloc_topology_set_xmlbuffer(hwloc_topology_t __hwloc_restric
  * \note If nothing is inserted in the topology,
  * hwloc_topology_load() will fail with errno set to EINVAL.
  *
+ * \note The cpuset and nodeset of the root object are NULL because
+ * these sets are meaningless when assembling multiple topologies.
+ *
  * \note On success, the custom component replaces the previously enabled
  * component (if any), but the topology is not actually modified until
  * hwloc_topology_load().
@@ -2068,6 +2071,9 @@ HWLOC_DECLSPEC int hwloc_topology_dup(hwloc_topology_t *newtopology, hwloc_topol
  *
  * \p newparent may be either the root of \p newtopology or an object
  * that was added through hwloc_custom_insert_group_object_by_parent().
+ *
+ * \note The cpuset and nodeset of the \p newparent object are not
+ * modified based on the contents of \p oldtopology.
  */
 HWLOC_DECLSPEC int hwloc_custom_insert_topology(hwloc_topology_t newtopology, hwloc_obj_t newparent, hwloc_topology_t oldtopology, hwloc_obj_t oldroot);
 
@@ -2086,6 +2092,11 @@ HWLOC_DECLSPEC int hwloc_custom_insert_topology(hwloc_topology_t newtopology, hw
  *
  * \p parent may be either the root of \p topology or an object that
  * was added earlier through hwloc_custom_insert_group_object_by_parent().
+ *
+ * \note The cpuset and nodeset of the new group object are NULL because
+ * these sets are meaningless when assembling multiple topologies.
+ *
+ * \note The cpuset and nodeset of the \p parent object are not modified.
  */
 HWLOC_DECLSPEC hwloc_obj_t hwloc_custom_insert_group_object_by_parent(hwloc_topology_t topology, hwloc_obj_t parent, int groupdepth);
 
