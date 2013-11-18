@@ -32,7 +32,7 @@ extern "C" {
  *
  * <em>Both CPU and node sets are always indexed by OS physical number.</em>
  *
- * \note CPU sets and nodesets are described in \ref hwlocality_sets.
+ * \note CPU sets and nodesets are described in \ref hwlocality_object_sets.
  *
  * A bitmap may be of infinite size.
  * @{

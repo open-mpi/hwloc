@@ -1485,7 +1485,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  *
  * Each hwloc memory binding function is available in two forms: one
  * that takes a CPU set argument and another that takes a NUMA memory
- * node set argument (see \ref hwlocality_sets and \ref
+ * node set argument (see \ref hwlocality_object_sets and \ref
  * hwlocality_bitmap for a discussion of CPU sets and NUMA memory node
  * sets).  The names of the latter form end with _nodeset.  It is also
  * possible to convert between CPU set and node set using
