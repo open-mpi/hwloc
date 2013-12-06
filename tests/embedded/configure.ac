@@ -13,6 +13,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_LANG([C])
 
 AC_PROG_CC
+AM_PROG_CC_C_O
 
 cat <<EOF
 
