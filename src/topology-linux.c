@@ -974,7 +974,7 @@ hwloc_linux_get_thread_cpubind(hwloc_topology_t topology, pthread_t tid, hwloc_b
 }
 #endif /* HAVE_DECL_PTHREAD_GETAFFINITY_NP */
 
-static int
+int
 hwloc_linux_get_tid_last_cpu_location(hwloc_topology_t topology __hwloc_attribute_unused, pid_t tid, hwloc_bitmap_t set)
 {
   /* read /proc/pid/stat.

@@ -400,6 +400,7 @@ extern "C" {
 #define hwloc_linux_parse_cpumap_file HWLOC_NAME(linux_parse_cpumap_file)
 #define hwloc_linux_set_tid_cpubind HWLOC_NAME(linux_set_tid_cpubind)
 #define hwloc_linux_get_tid_cpubind HWLOC_NAME(linux_get_tid_cpubind)
+#define hwloc_linux_get_tid_last_cpu_location HWLOC_NAME(linux_get_tid_last_cpu_location)
 
 /* openfabrics-verbs.h */
 
