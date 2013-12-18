@@ -1368,7 +1368,11 @@ HWLOC_DECLSPEC int hwloc_get_cpubind(hwloc_topology_t topology, hwloc_cpuset_t s
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
  *
- * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
+ * \note As a special case on Linux, if a tid (thread ID) is supplied
+ * instead of a pid (process ID) and HWLOC_CPUBIND_THREAD is passed in flags,
+ * the binding is applied to that specific thread.
+ *
+ * \note On non-Linux systems, HWLOC_CPUBIND_THREAD can not be used in \p flags.
  */
 HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_const_cpuset_t set, int flags);
 
@@ -1377,11 +1381,11 @@ HWLOC_DECLSPEC int hwloc_set_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t
  * \note \p hwloc_pid_t is \p pid_t on Unix platforms,
  * and \p HANDLE on native Windows platforms.
  *
- * \note HWLOC_CPUBIND_THREAD can not be used in \p flags.
- *
  * \note As a special case on Linux, if a tid (thread ID) is supplied
- * instead of a pid (process ID), the binding for that specific thread
- * is returned.
+ * instead of a pid (process ID) and HWLOC_CPUBIND_THREAD is passed in flags,
+ * the binding for that specific thread is returned.
+ *
+ * \note On non-Linux systems, HWLOC_CPUBIND_THREAD can not be used in \p flags.
  */
 HWLOC_DECLSPEC int hwloc_get_proc_cpubind(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
@@ -1434,7 +1438,9 @@ HWLOC_DECLSPEC int hwloc_get_last_cpu_location(hwloc_topology_t topology, hwloc_
  *
  * \note As a special case on Linux, if a tid (thread ID) is supplied
  * instead of a pid (process ID) and HWLOC_CPUBIND_THREAD is passed in flags,
- * the binding for that specific thread is returned.
+ * the last CPU location of that specific thread is returned.
+ *
+ * \note On non-Linux systems, HWLOC_CPUBIND_THREAD can not be used in \p flags.
  */
 HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, hwloc_pid_t pid, hwloc_cpuset_t set, int flags);
 
