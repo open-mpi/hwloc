@@ -43,6 +43,9 @@ HWLOC_DECLSPEC int hwloc_linux_parse_cpumap_file(FILE *file, hwloc_cpuset_t set)
  *
  * The behavior is exactly the same as the Linux sched_setaffinity system call,
  * but uses a hwloc cpuset.
+ *
+ * \note This is equivalent to calling hwloc_set_proc_cpubind() with
+ * HWLOC_CPUBIND_THREAD as flags.
  */
 HWLOC_DECLSPEC int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_const_cpuset_t set);
 
@@ -50,6 +53,9 @@ HWLOC_DECLSPEC int hwloc_linux_set_tid_cpubind(hwloc_topology_t topology, pid_t 
  *
  * The behavior is exactly the same as the Linux sched_getaffinity system call,
  * but uses a hwloc cpuset.
+ *
+ * \note This is equivalent to calling hwloc_get_proc_cpubind() with
+ * HWLOC_CPUBIND_THREAD as flags.
  */
 HWLOC_DECLSPEC int hwloc_linux_get_tid_cpubind(hwloc_topology_t topology, pid_t tid, hwloc_cpuset_t set);
 
