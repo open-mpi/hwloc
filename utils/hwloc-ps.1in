@@ -39,6 +39,12 @@ If \fB\-a\fR is given as well, list all threads within each process.
 Otherwise, show all threads inside each process where at least one
 thread is bound.
 .TP
+\fB\-e\fR \fB\-\-get\-last\-cpu\-location\fR
+Report  the last processors where the process/thread ran.
+Note that the result may already be outdated when reported
+since the operating system may move the tasks to other processors
+at any time according to the binding.
+.TP
 \fB\-\-whole\-system\fR
 Do not consider administration limitations.
 .TP
