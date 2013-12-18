@@ -25,6 +25,7 @@ Version 1.9.0
 * Tools
   + Add -e or --get-last-cpu-location to hwloc-ps to report where
     processes/threads run instead of where they are bound.
+  + Add -e as a synonym to --get-last-cpu-location in hwloc-bind.
 
 
 Version 1.8.0

@@ -33,7 +33,7 @@ void usage(const char *name, FILE *where)
   fprintf(where, "  --single       Bind on a single CPU to prevent migration\n");
   fprintf(where, "  --strict       Require strict binding\n");
   fprintf(where, "  --get          Retrieve current process binding\n");
-  fprintf(where, "  --get-last-cpu-location\n"
+  fprintf(where, "  -e --get-last-cpu-location\n"
 		 "                 Retrieve the last processors where the current process ran\n");
   fprintf(where, "  --pid <pid>    Operate on process <pid>\n");
   fprintf(where, "  --taskset      Use taskset-specific format when displaying cpuset strings\n");
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         taskset = 1;
         goto next;
       }
-      else if (!strncmp (argv[0], "--get-last-cpu-location", 10)) {
+      else if (!strcmp (argv[0], "-e") || !strncmp (argv[0], "--get-last-cpu-location", 10)) {
 	get_last_cpu_location = 1;
 	goto next;
       }
