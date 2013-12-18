@@ -58,6 +58,9 @@ static void print_task(hwloc_topology_t topology,
       char type[64];
       unsigned idx;
       hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
+      /* don't show a cache if there's something equivalent and nicer */
+      while (obj->type == HWLOC_OBJ_CACHE && obj->arity == 1)
+	obj = obj->first_child;
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
       idx = logical ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
