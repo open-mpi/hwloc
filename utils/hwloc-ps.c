@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 
   support = hwloc_topology_get_support(topology);
 
-  if (!support->cpubind->get_thisproc_cpubind)
+  if (!support->cpubind->get_proc_cpubind)
     goto out_with_topology;
 
   topocpuset = hwloc_topology_get_topology_cpuset(topology);
