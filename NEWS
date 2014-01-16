@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.8.1
+-------------
+* Work around buggy BIOS reporting duplicate NUMA nodes on Linux.
+  Thanks to Jeff Becker for reporting the problem and testing the patch.
+
+
 Version 1.8.0
 -------------
 * New components
