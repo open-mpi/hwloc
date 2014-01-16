@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -768,12 +768,22 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
       case HWLOC_OBJ_EQUAL:
         merge_index(obj, child, os_level, signed);
 	if (obj->os_level != child->os_level) {
-          fprintf(stderr, "Different OS level\n");
+	  static int reported = 0;
+	  if (!reported && !hwloc_hide_errors()) {
+	    fprintf(stderr, "Cannot merge similar %s objects with different OS levels %u and %u\n",
+		    hwloc_obj_type_string(obj->type), child->os_level, obj->os_level);
+	    reported = 1;
+	  }
           return NULL;
         }
         merge_index(obj, child, os_index, unsigned);
 	if (obj->os_index != child->os_index) {
-          fprintf(stderr, "Different OS indexes\n");
+	  static int reported = 0;
+	  if (!reported && !hwloc_hide_errors()) {
+	    fprintf(stderr, "Cannot merge similar %s objects with different OS indexes %u and %u\n",
+		    hwloc_obj_type_string(obj->type), child->os_index, obj->os_index);
+	    reported = 1;
+	  }
           return NULL;
         }
 	if (obj->distances_count) {
