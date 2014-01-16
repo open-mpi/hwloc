@@ -1,4 +1,4 @@
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2011 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -26,6 +26,7 @@ sysfs_outputs = \
 		8amd64-4n2c.output  \
 		8em64t-4c2t.output \
 		8em64t-2s2ca2c.output \
+		8em64t-2s2ca2c-buggynuma.output \
 		8em64t-2s4c-heterogeneous.output \
 		8ia64-2n2s2c.output \
 		8ia64-2s2c2t.output \
@@ -82,6 +83,7 @@ sysfs_tarballs = \
 		8amd64-4n2c.tar.bz2  \
 		8em64t-4c2t.tar.bz2 \
 		8em64t-2s2ca2c.tar.bz2 \
+		8em64t-2s2ca2c-buggynuma.tar.bz2 \
 		8em64t-2s4c-heterogeneous.tar.bz2 \
 		8ia64-2n2s2c.tar.bz2 \
 		8ia64-2s2c2t.tar.bz2 \
