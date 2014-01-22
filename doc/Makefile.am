@@ -201,6 +201,13 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 	   fi; \
 	done; \
 	mv letter-refman.pdf $(DOCDIR)/$(DOX_LETTERPDF)
+
+else
+$(DOX_A4PDF) $(DOX_LETTERPDF): no-build-pdfs
+no-build-pdfs:
+	@echo "ERROR: You do not have the 'doxygen' executable (or any related dependency) to build the PDF docs."
+	@echo "ERROR: Cannot continue."
+	@exit 1
 endif
 
 #

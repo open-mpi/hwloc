@@ -42,29 +42,11 @@ EXTRA_DIST = \
         config/distscript.csh
 
 if HWLOC_BUILD_STANDALONE
-#
-# Double check that we generated both the doxygen docs and a new copy
-# of the top-level README file.
-#
-cannot-dist:
-	@echo "ERROR: Did not build both of the doxygen docs and README."
-	@echo "ERROR: This tarball is not complete!"
-	@echo "ERROR: Cowardly refusing to complete successfully..."
-	@exit 1
-
-# Refuse to make dist if we can't make the doxygen stuff (note that
-# BUILD_DOXYGEN will automatically be false if we're not building
-# standalone).
-if !HWLOC_BUILD_DOXYGEN
-dist-hook: cannot-dist
-else
-if !HWLOC_BUILD_README
-dist-hook: cannot-dist
-else
 dist-hook:
 	csh "$(top_srcdir)/config/distscript.csh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
-endif HWLOC_BUILD_README
-endif HWLOC_BUILD_DOXYGEN
+
+# make sure configure/make-dist during distcheck gets doxygen force-enabled
+AM_DISTCHECK_CONFIGURE_FLAGS = --enable-doxygen
 endif HWLOC_BUILD_STANDALONE
 
 #
