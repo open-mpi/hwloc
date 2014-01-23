@@ -24,9 +24,6 @@ DOX_TAG = $(DOX_DIR)/$(PACKAGE).tag
 # time they build after a checkout (or if something in the docs
 # changes, etc.).
 #
-# Note that by listing directories in EXTRA_DIST, we pick up the whole
-# tree (e.g., everything in the man and latex directories).
-#
 
 # images already available in repository
 PREBUILT_IMAGES = images/dudley.png images/emmett.png images/hagrid.png
@@ -202,12 +199,6 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 	done; \
 	mv letter-refman.pdf $(DOCDIR)/$(DOX_LETTERPDF)
 
-else
-# PDFs are missing, cannot rebuild them
-$(DOX_A4PDF) $(DOX_LETTERPDF):
-	@echo "ERROR: You do not have the 'doxygen' executable (or any related dependency) to build the PDF docs."
-	@echo "ERROR: Cannot continue."
-	@exit 1
 endif
 
 #
@@ -235,7 +226,7 @@ endif
 #
 
 if HWLOC_INSTALL_DOXYGEN
-dist_pdf_DATA = $(DOX_A4PDF) $(DOX_LETTERPDF)
+pdf_DATA = $(DOX_A4PDF) $(DOX_LETTERPDF)
 endif
 
 #
