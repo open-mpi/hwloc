@@ -1,4 +1,4 @@
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2013 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -203,8 +203,8 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 	mv letter-refman.pdf $(DOCDIR)/$(DOX_LETTERPDF)
 
 else
-$(DOX_A4PDF) $(DOX_LETTERPDF): no-build-pdfs
-no-build-pdfs:
+# PDFs are missing, cannot rebuild them
+$(DOX_A4PDF) $(DOX_LETTERPDF):
 	@echo "ERROR: You do not have the 'doxygen' executable (or any related dependency) to build the PDF docs."
 	@echo "ERROR: Cannot continue."
 	@exit 1
