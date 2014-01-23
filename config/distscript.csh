@@ -10,7 +10,7 @@
 #                         University of Stuttgart.  All rights reserved.
 # Copyright (c) 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
-# Copyright © 2010 inria.  All rights reserved.
+# Copyright © 2010-2014   Inria.  All rights reserved.
 # Copyright © 2009-2013 Cisco Systems, Inc.  All rights reserved.
 # $COPYRIGHT$
 # 
@@ -39,14 +39,6 @@ endif
 
 #========================================================================
 
-if ("$srcdir" != "$builddir") then
-    set vpath=1
-    set vpath_msg=yes
-else
-    set vpath=0
-    set vpath_msg=no
-endif
-
 set start=`date`
 cat <<EOF
  
@@ -54,7 +46,6 @@ Creating hwloc distribution
 In directory: `pwd`
 Srcdir: $srcdir
 Builddir: $builddir
-VPATH: $vpath_msg
 Version: $HWLOC_VERSION
 Started: $start
  
@@ -68,50 +59,11 @@ if (! -d "$distdir") then
     exit 1
 endif
 
-#
-# VPATH builds only work if the srcdir has valid docs already built.
-# If we're VPATH and the srcdir doesn't have valid docs, then fail.
-#
-
-if ($vpath == 1 && ! -d $srcdir/doc/doxygen-doc) then
-    echo "*** This is a VPATH 'make dist', but the srcdir does not already"
-    echo "*** have a doxygen-doc tree built.  hwloc's config/distscript.csh"
-    echo "*** requores the docs to be built in the srcdir before executing"
-    echo "*** 'make dist' in a VPATH build."
+if (! -d $srcdir/doc/doxygen-doc) then
+    echo "*** The srcdir does not already have a doxygen-doc tree built."
+    echo "*** hwloc's config/distscript.csh requires the docs to be built"
+    echo "*** in the srcdir before executing 'make dist'."
     exit 1
-endif
-
-#
-# If we're not VPATH, force the generation of new doxygen documentation
-#
-
-if ($vpath == 0) then
-    # Not VPATH
-    echo "*** Making new doxygen documentation (doxygen-doc tree)"
-    echo "*** Directory: srcdir: $srcdir, distdir: $distdir, pwd: `pwd`"
-    cd doc
-    # We're still in the src tree, so kill any previous doxygen-docs
-    # tree and make a new one.
-    chmod -R a=rwx doxygen-doc
-    rm -rf doxygen-doc
-    make
-    if ($status != 0) then
-        echo ERROR: generating doxygen docs failed
-        echo ERROR: cannot continue
-        exit 1
-    endif
-
-    # Make new README file
-    echo "*** Making new README"
-    make readme
-    if ($status != 0) then
-        echo ERROR: generating new README failed
-        echo ERROR: cannot continue
-        exit 1
-    endif
-else
-    echo "*** This is a VPATH build; assuming that the doxygen docs and REAME"
-    echo "*** are current in the srcdir (i.e., we'll just copy those)"
 endif
 
 echo "*** Copying doxygen-doc tree to dist..."

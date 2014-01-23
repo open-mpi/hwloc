@@ -1,4 +1,4 @@
-# Copyright © 2009      inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009      Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -44,9 +44,6 @@ EXTRA_DIST = \
 if HWLOC_BUILD_STANDALONE
 dist-hook:
 	csh "$(top_srcdir)/config/distscript.csh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
-
-# make sure configure/make-dist during distcheck gets doxygen force-enabled
-AM_DISTCHECK_CONFIGURE_FLAGS = --enable-doxygen
 endif HWLOC_BUILD_STANDALONE
 
 #
