@@ -51,6 +51,10 @@ EXTRA_DIST = \
         $(PREBUILT_IMAGES) \
         $(BUILT_IMAGES)
 
+
+
+if HWLOC_BUILD_DOXYGEN
+
 #
 # Files where the doxygen inputs live (i.e., dependencies).  Make the
 # generated tagfile depend on these files, which will force them to be
@@ -87,7 +91,6 @@ dox_inputs = $(DOX_CONFIG) \
 # building standalone.
 #
 
-if HWLOC_BUILD_DOXYGEN
 BUILT_SOURCES = $(BUILT_IMAGES)
 
 images/diagram.png: $(srcdir)/images/diagram.fig
@@ -105,7 +108,6 @@ images/diagram.eps: $(srcdir)/images/diagram.fig
 	    exit 1; \
 	fi
 	$(FIG2DEV) -L eps $< $@
-endif
 
 #
 # Rules for running doxygen.  It depends on the built images and the
@@ -132,7 +134,6 @@ RENAME_SED = \
 	          -e 's/__hwloc_inline/inline/g' \
 	          -e 's/\\_\\-\\_\\-hwloc\\_\\-inline/inline/g'
 
-if HWLOC_BUILD_DOXYGEN
 $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	rm -fr $(DOX_DIR)
 	$(DOXYGEN) $(DOX_CONFIG)
@@ -148,7 +149,6 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	@mv $(DOX_MAN_DIR)/man3/hwloc* $(DOX_MAN_DIR)/man3/HWLOC* $(DOX_DIR)/man.tmp/
 	@rm -rf $(DOX_MAN_DIR)/man3
 	@mv $(DOX_DIR)/man.tmp $(DOX_MAN_DIR)/man3
-endif
 
 www-doc-sed:
 	-$(RENAME_SED) www.open-mpi.org/html/*.php
@@ -156,8 +156,6 @@ www-doc-sed:
 #
 # Rules for building the PDF
 #
-
-if HWLOC_BUILD_DOXYGEN
 
 # The Doxygen config is set to generate a4 latex -- no transformation
 # is necessary.
@@ -199,8 +197,6 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 	done; \
 	mv letter-refman.pdf $(DOCDIR)/$(DOX_LETTERPDF)
 
-endif
-
 #
 # Note that we want to use our own doxygen.css file; not the one that
 # doxygen installs in the HTML directory.  So manually copy it over.
@@ -212,12 +208,16 @@ endif
 # pre-bundled in a tarball).
 #
 
-if HWLOC_BUILD_DOXYGEN
 all-local: $(DOX_TAG)
 	if test -d $(DOX_HTML_DIR) -a -f $(DOX_HTML_DIR)/doxygen.css; then \
 	    cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR); \
 	fi
-endif
+
+endif HWLOC_BUILD_DOXYGEN
+
+
+
+if HWLOC_INSTALL_DOXYGEN
 
 #
 # Un/install the generated PDF and man pages (just like BUILD_DOXYGEN,
@@ -225,17 +225,13 @@ endif
 # standalone mode).
 #
 
-if HWLOC_INSTALL_DOXYGEN
 pdf_DATA = $(DOX_A4PDF) $(DOX_LETTERPDF)
-endif
 
 #
 # Install the HWLOC_* and hwloc_* man pages.  It would be great to
 # figure out how to not have to list every installable man page here
 # in the Makefile.am...  :-(
 #
-
-if HWLOC_INSTALL_DOXYGEN
 
 # We have so many man pages that if we put them all in man3_MANS, we
 # exceed the maximum command line length on some systems (during "make
@@ -703,7 +699,10 @@ man3_openfabrics_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_ibv_get_device_osdev_by_name.3
 
 # end of manpages(3) if HWLOC_BUILD_DOXYGEN
-endif
+
+endif HWLOC_INSTALL_DOXYGEN
+
+
 
 if HWLOC_BUILD_DOXYGEN
 
@@ -757,7 +756,10 @@ $(DOX_MAN_DIR): $(DOX_TAG)
 # built at the same time during a parallel build (e.g., "make -j X").
 # So arbitrarily make the A4 PDF dependent upon the Letter PDF.
 $(DOX_A4PDF): $(DOX_TAG) $(DOX_LETTERPDF)
-endif
+
+endif HWLOC_BUILD_DOXYGEN
+
+
 
 #
 # Make sure that the documentation example works
@@ -823,10 +825,3 @@ no-build-readme:
 	@echo "ERROR: Cannot continue."
 	@exit 1
 endif
-
-#DOCUPLOADHOST=sync.bordeaux.inria.fr
-#DOCUPLOADOPTS=
-#doc-upload: @DX_DOCDIR@/html
-#	echo FIXME
-#	false
-#	rsync -avz --delete --chmod=ug+rwX,o+rX $(DOCUPLOADOPTS) @DX_DOCDIR@/html/ $(DOCUPLOADHOST):/web/runtime/libtopology/doc/
