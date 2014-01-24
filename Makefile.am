@@ -47,13 +47,12 @@ dist-hook:
 endif HWLOC_BUILD_STANDALONE
 
 #
-# Build the top-level README file
+# Build the documenation and top-level README file
 #
-
 if HWLOC_BUILD_STANDALONE
 .PHONY: doc readme
 doc readme:
-	$(MAKE) -C doc readme
+	$(MAKE) -C doc
 endif HWLOC_BUILD_STANDALONE
 
 if HWLOC_BUILD_STANDALONE

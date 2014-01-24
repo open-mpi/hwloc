@@ -208,12 +208,21 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 # pre-bundled in a tarball).
 #
 
-all-local: $(DOX_TAG)
+all-local-html: $(DOX_TAG)
 	if test -d $(DOX_HTML_DIR) -a -f $(DOX_HTML_DIR)/doxygen.css; then \
 	    cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR); \
 	fi
 
-endif HWLOC_BUILD_DOXYGEN
+doc: $(DOX_TAG)
+
+else !HWLOC_BUILD_DOXYGEN
+
+# When we don't have doxygen, nothing to do
+all-local-html:
+doc:
+
+endif !HWLOC_BUILD_DOXYGEN
+# there are also a bunch of doxygen-build-dependencies later in this file
 
 
 
@@ -798,6 +807,8 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
     $(DOX_LETTERPDF) \
     $(DOX_HTML_README)
 
+if HWLOC_BUILD_README
+
 #
 # Rules for creating the top-level README file.  There does not appear
 # to be an easy way to know if AC_PATH_PROG found something in
@@ -807,21 +818,19 @@ MAINTAINERCLEANFILES = $(DOX_TAG) \
 # Just like BUILD_DOXYGEN, BUILD_README will automatically be false if
 # we're not building standalone.
 #
-
-if HWLOC_BUILD_README
-doc readme: all $(HWLOC_top_srcdir)/README
+readme: $(HWLOC_top_srcdir)/README
 $(HWLOC_top_srcdir)/README: $(DOX_HTML_README)
 	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_README) | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
 	rm -f $(DOX_HTML_README)
 $(DOX_HTML_README): $(DOX_HTML_DIR)
-	rm -f $@
+	rm $@
 	sed -n -f $(srcdir)/README.sed $(DOX_HTML_DIR)/index.html > $@
-else
-doc readme: no-build-readme
-$(HWLOC_top_srcdir)/README: no-build-readme
 
-no-build-readme:
-	@echo "ERROR: You do not have the 'w3m' or 'lynx' executables to build the README, or do not have the 'doxygen' executable to build the docs."
-	@echo "ERROR: Cannot continue."
-	@exit 1
+else
+
+# When we don't have what's needed to build the README, nothing to do
+readme: doc
+
 endif
+
+all-local: doc readme all-local-html
