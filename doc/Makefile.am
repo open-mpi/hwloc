@@ -116,6 +116,17 @@ images/diagram.eps: $(srcdir)/images/diagram.fig
 # of nested structurre/union declarations.
 #
 
+#
+# Note that we want to use our own doxygen.css file; not the one that
+# doxygen installs in the HTML directory.  So manually copy it over.
+# Be a little clever: only copy the doxygen.css file over if it exists
+# in DOX_HTML_DIR (which is in the build tree).  If the html tree
+# doesn't exist in the build tree, then we're using an html tree in
+# the source tree, and we don't need to copy over the doxygen.css
+# because we didn't build the html tree (e.g., the html tree came
+# pre-bundled in a tarball).
+#
+
 RENAME_SED = \
 	$(SED_I) -e 's/__hwloc_restrict/restrict/g' \
 	          -e 's/\\_\\-\\_\\-hwloc\\_\\-restrict/restrict/g' \
@@ -149,6 +160,10 @@ $(DOX_TAG): $(BUILT_SOURCES) $(dox_inputs) $(PREBUILT_IMAGES)
 	@mv $(DOX_MAN_DIR)/man3/hwloc* $(DOX_MAN_DIR)/man3/HWLOC* $(DOX_DIR)/man.tmp/
 	@rm -rf $(DOX_MAN_DIR)/man3
 	@mv $(DOX_DIR)/man.tmp $(DOX_MAN_DIR)/man3
+	@echo "Copying custom doxygen.css..."
+	if test -d $(DOX_HTML_DIR) -a -f $(DOX_HTML_DIR)/doxygen.css; then \
+	    cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR); \
+	fi
 
 www-doc-sed:
 	-$(RENAME_SED) www.open-mpi.org/html/*.php
@@ -197,28 +212,11 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 	done; \
 	mv letter-refman.pdf $(DOCDIR)/$(DOX_LETTERPDF)
 
-#
-# Note that we want to use our own doxygen.css file; not the one that
-# doxygen installs in the HTML directory.  So manually copy it over.
-# Be a little clever: only copy the doxygen.css file over if it exists
-# in DOX_HTML_DIR (which is in the build tree).  If the html tree
-# doesn't exist in the build tree, then we're using an html tree in
-# the source tree, and we don't need to copy over the doxygen.css
-# because we didn't build the html tree (e.g., the html tree came
-# pre-bundled in a tarball).
-#
-
-all-local-html: $(DOX_TAG)
-	if test -d $(DOX_HTML_DIR) -a -f $(DOX_HTML_DIR)/doxygen.css; then \
-	    cp -f $(srcdir)/doxygen.css $(DOX_HTML_DIR); \
-	fi
-
 doc: $(DOX_TAG)
 
 else !HWLOC_BUILD_DOXYGEN
 
 # When we don't have doxygen, nothing to do
-all-local-html:
 doc:
 
 endif !HWLOC_BUILD_DOXYGEN
@@ -831,4 +829,4 @@ readme: doc
 
 endif
 
-all-local: doc readme all-local-html
+all-local: doc readme
