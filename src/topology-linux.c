@@ -1537,7 +1537,11 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
 /* cpuinfo model */
 struct hwloc_linux_cpumodel {
   /* NULL if unknown */
+  char *vendor;
   char *model;
+  /* 0 if unknown, actual value stored + 1 */
+  unsigned modelnumber;
+  unsigned familynumber;
 };
 
 /* cpuinfo array */
@@ -2889,10 +2893,23 @@ look_sysfscpu(struct hwloc_topology *topology,
 	/* add cpuinfo */
 	if (cpuinfo_Lprocs) {
 	  for(j=0; j<(int) cpuinfo_numprocs; j++)
-	    if ((int) cpuinfo_Lprocs[j].Pproc == i
-		&& cpuinfo_Lprocs[j].cpumodel.model) {
-	      /* FIXME add to name as well? */
-	      hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel.model);
+	    if ((int) cpuinfo_Lprocs[j].Pproc == i) {
+	      char number[8];
+	      if (cpuinfo_Lprocs[j].cpumodel.vendor) {
+		hwloc_obj_add_info(sock, "CPUVendor", cpuinfo_Lprocs[j].cpumodel.vendor);
+	      }
+	      if (cpuinfo_Lprocs[j].cpumodel.model) {
+		/* FIXME add to name as well? */
+		hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel.model);
+	      }
+	      if (cpuinfo_Lprocs[j].cpumodel.modelnumber) {
+		snprintf(number, sizeof(number), "%u", cpuinfo_Lprocs[j].cpumodel.modelnumber-1);
+		hwloc_obj_add_info(sock, "CPUModelNumber", number);
+	      }
+	      if (cpuinfo_Lprocs[j].cpumodel.familynumber) {
+		snprintf(number, sizeof(number), "%u", cpuinfo_Lprocs[j].cpumodel.familynumber-1);
+		hwloc_obj_add_info(sock, "CPUFamilyNumber", number);
+	      }
 	    }
 	}
         hwloc_insert_object_by_cpuset(topology, sock);
@@ -3139,12 +3156,26 @@ static int
 hwloc_linux_parse_cpuinfo_model_x86(const char *prefix, const char *value,
 				    struct hwloc_linux_cpumodel *cpumodel)
 {
+  if (!cpumodel->vendor)
+    if (!strcmp("vendor_id", prefix)) {
+      cpumodel->vendor = strdup(value);
+      return 0;
+    }
   if (!cpumodel->model)
-    if (!strcmp("model name", prefix))
+    if (!strcmp("model name", prefix)) {
       cpumodel->model = strdup(value);
-  /* vendor_id  : GenuineIntel */
-  /* cpu family : 6 */
-  /* model      : 46 */
+      return 0;
+    }
+  if (!cpumodel->modelnumber)
+    if (!strcmp("model", prefix)) {
+      cpumodel->modelnumber = atoi(value)+1;
+      return 0;
+    }
+  if (!cpumodel->familynumber)
+    if (!strcmp("cpu family", prefix)) {
+      cpumodel->familynumber = atoi(value)+1;
+      return 0;
+    }
   return 0;
 }
 
@@ -3152,12 +3183,26 @@ static int
 hwloc_linux_parse_cpuinfo_model_ia64(const char *prefix, const char *value,
 				     struct hwloc_linux_cpumodel *cpumodel)
 {
+  if (!cpumodel->vendor)
+    if (!strcmp("vendor", prefix)) {
+      cpumodel->vendor = strdup(value);
+      return 0;
+    }
   if (!cpumodel->model)
-    if (!strcmp("model name", prefix))
+    if (!strcmp("model name", prefix)) {
       cpumodel->model = strdup(value);
-  /* vendor     : GenuineIntel */
-  /* family     : 32 */
-  /* model      : 1 */
+      return 0;
+    }
+  if (!cpumodel->modelnumber)
+    if (!strcmp("model", prefix)) {
+      cpumodel->modelnumber = atoi(value)+1;
+      return 0;
+    }
+  if (!cpumodel->familynumber)
+    if (!strcmp("family", prefix)) {
+      cpumodel->familynumber = atoi(value)+1;
+      return 0;
+    }
   return 0;
 }
 
@@ -3276,7 +3321,10 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     Lprocs[numprocs-1].Psock = -1;
     Lprocs[numprocs-1].Lcore = -1;
     Lprocs[numprocs-1].Lsock = -1;
+    Lprocs[numprocs-1].cpumodel.vendor = global_cpumodel.vendor ? strdup(global_cpumodel.vendor) : NULL;
     Lprocs[numprocs-1].cpumodel.model = global_cpumodel.model ? strdup(global_cpumodel.model) : NULL;
+    Lprocs[numprocs-1].cpumodel.modelnumber = global_cpumodel.modelnumber;
+    Lprocs[numprocs-1].cpumodel.familynumber = global_cpumodel.familynumber;
     getprocnb_end() else
     getprocnb_begin(PACKAGEID, Psock);
     Lprocs[numprocs-1].Psock = Psock;
@@ -3319,6 +3367,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   fclose(fd);
   free(str);
   free(global_cpumodel.model);
+  free(global_cpumodel.vendor);
 
   *Lprocs_p = Lprocs;
   return numprocs;
@@ -3327,6 +3376,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   fclose(fd);
   free(str);
   free(global_cpumodel.model);
+  free(global_cpumodel.vendor);
   free(Lprocs);
   return -1;
 }
@@ -3335,8 +3385,10 @@ static void
 hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned numprocs)
 {
   unsigned i;
-  for(i=0; i<numprocs; i++)
+  for(i=0; i<numprocs; i++) {
     free(Lprocs[i].cpumodel.model);
+    free(Lprocs[i].cpumodel.vendor);
+  }
   free(Lprocs);
 }
 
@@ -3429,18 +3481,33 @@ look_cpuinfo(struct hwloc_topology *topology,
   if (!missingsocket && numsockets>0) {
     for (i = 0; i < numsockets; i++) {
       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock_to_Psock[i]);
-      char *cpumodel = NULL;
+      int donecpuvendor = 0, donecpumodel = 0, donecpumodelnumber = 0, donecpufamilynumber = 0;
       obj->cpuset = hwloc_bitmap_alloc();
       for(j=0; j<numprocs; j++)
 	if ((unsigned) Lprocs[j].Lsock == i) {
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
-	  if (Lprocs[j].cpumodel.model && !cpumodel) /* use the first one, they should all be equal anyway */
-	    cpumodel = Lprocs[j].cpumodel.model;
+	  if (Lprocs[j].cpumodel.vendor && !donecpuvendor) {
+	    /* use the first one, they should all be equal anyway */
+	    hwloc_obj_add_info(obj, "CPUVendor", Lprocs[j].cpumodel.vendor);
+	    donecpuvendor = 1;
+	  }
+	  if (Lprocs[j].cpumodel.model && !donecpumodel) {
+	    hwloc_obj_add_info(obj, "CPUModel", Lprocs[j].cpumodel.model);
+	    donecpumodel = 1;
+	  }
+	  if (Lprocs[j].cpumodel.modelnumber && !donecpumodelnumber) {
+	    char number[8];
+	    snprintf(number, sizeof(number), "%u", Lprocs[j].cpumodel.modelnumber-1);
+	    hwloc_obj_add_info(obj, "CPUModelNumber", number);
+	    donecpumodelnumber = 1;
+	  }
+	  if (Lprocs[j].cpumodel.familynumber && !donecpufamilynumber) {
+	    char number[8];
+	    snprintf(number, sizeof(number), "%u", Lprocs[j].cpumodel.familynumber-1);
+	    hwloc_obj_add_info(obj, "CPUFamilyNumber", number);
+	    donecpufamilynumber = 1;
+	  }
 	}
-      if (cpumodel) {
-	/* FIXME add to name as well? */
-        hwloc_obj_add_info(obj, "CPUModel", cpumodel);
-      }
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", i, obj->cpuset);
       hwloc_insert_object_by_cpuset(topology, obj);
     }

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1644,7 +1644,7 @@ synthetic topology.
 <dd>The processor vendor name, model name, model number, family number
 and a more-general processor type name.
 CPUVendor, CPUModelNumber and CPUFamilyNumber are currently only
-added for x86 processors.
+added for x86 processors, and for ia64 on Linux.
 CPUType is only added on Solaris/Sparc.
 These attributes are usually added to Socket objects.
 However, when hwloc cannot detect the number of sockets but still
