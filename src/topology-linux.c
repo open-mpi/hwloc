@@ -1534,6 +1534,12 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
  *** Misc Helpers for Topology Discovery ***
  *******************************************/
 
+/* cpuinfo model */
+struct hwloc_linux_cpumodel {
+  /* NULL if unknown */
+  char *model;
+};
+
 /* cpuinfo array */
 struct hwloc_linux_cpuinfo_proc {
   /* set during hwloc_linux_parse_cpuinfo */
@@ -1542,8 +1548,8 @@ struct hwloc_linux_cpuinfo_proc {
   long Pcore, Psock;
   /* set later, or -1 if unknown */
   long Lcore, Lsock;
-  /* set during hwloc_linux_parse_cpuinfo or NULL if unknown */
-  char *cpumodel;
+  /* set during hwloc_linux_parse_cpuinfo */
+  struct hwloc_linux_cpumodel cpumodel;
 };
 
 static int
@@ -2884,9 +2890,9 @@ look_sysfscpu(struct hwloc_topology *topology,
 	if (cpuinfo_Lprocs) {
 	  for(j=0; j<(int) cpuinfo_numprocs; j++)
 	    if ((int) cpuinfo_Lprocs[j].Pproc == i
-		&& cpuinfo_Lprocs[j].cpumodel) {
+		&& cpuinfo_Lprocs[j].cpumodel.model) {
 	      /* FIXME add to name as well? */
-	      hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel);
+	      hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel.model);
 	    }
 	}
         hwloc_insert_object_by_cpuset(topology, sock);
@@ -3131,15 +3137,15 @@ look_sysfscpu(struct hwloc_topology *topology,
  */
 static int
 hwloc_linux_parse_cpuinfo_model(const char *prefix, const char *value,
-				char **model)
+				struct hwloc_linux_cpumodel *cpumodel)
 {
   if (!strcmp("model name", prefix)
       || !strcmp("Processor", prefix)
       || !strcmp("chip type", prefix)
       || !strcmp("cpu model", prefix)
       || !strcasecmp("cpu", prefix)) {
-    if (!*model)
-	*model = strdup(value);
+    if (!cpumodel->model)
+      cpumodel->model = strdup(value);
   }
   return 0;
 }
@@ -3156,7 +3162,9 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   unsigned allocated_Lprocs = 0;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   unsigned numprocs = 0;
-  char *global_cpumodel = NULL;
+  struct hwloc_linux_cpumodel global_cpumodel;
+
+  memset(&global_cpumodel, 0, sizeof(global_cpumodel));
 
   if (!(fd=hwloc_fopen(path,"r", data->root_fd)))
     {
@@ -3226,7 +3234,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     Lprocs[numprocs-1].Psock = -1;
     Lprocs[numprocs-1].Lcore = -1;
     Lprocs[numprocs-1].Lsock = -1;
-    Lprocs[numprocs-1].cpumodel = global_cpumodel ? strdup(global_cpumodel) : NULL;
+    Lprocs[numprocs-1].cpumodel.model = global_cpumodel.model ? strdup(global_cpumodel.model) : NULL;
     getprocnb_end() else
     getprocnb_begin(PACKAGEID, Psock);
     Lprocs[numprocs-1].Psock = Psock;
@@ -3250,7 +3258,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   }
   fclose(fd);
   free(str);
-  free(global_cpumodel);
+  free(global_cpumodel.model);
 
   *Lprocs_p = Lprocs;
   return numprocs;
@@ -3258,7 +3266,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
  err:
   fclose(fd);
   free(str);
-  free(global_cpumodel);
+  free(global_cpumodel.model);
   free(Lprocs);
   return -1;
 }
@@ -3268,7 +3276,7 @@ hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned nump
 {
   unsigned i;
   for(i=0; i<numprocs; i++)
-    free(Lprocs[i].cpumodel);
+    free(Lprocs[i].cpumodel.model);
   free(Lprocs);
 }
 
@@ -3366,8 +3374,8 @@ look_cpuinfo(struct hwloc_topology *topology,
       for(j=0; j<numprocs; j++)
 	if ((unsigned) Lprocs[j].Lsock == i) {
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
-	  if (Lprocs[j].cpumodel && !cpumodel) /* use the first one, they should all be equal anyway */
-	    cpumodel = Lprocs[j].cpumodel;
+	  if (Lprocs[j].cpumodel.model && !cpumodel) /* use the first one, they should all be equal anyway */
+	    cpumodel = Lprocs[j].cpumodel.model;
 	}
       if (cpumodel) {
 	/* FIXME add to name as well? */
