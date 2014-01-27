@@ -3136,17 +3136,58 @@ look_sysfscpu(struct hwloc_topology *topology,
  * xtensa: "model\t\t:"				=> KO
  */
 static int
-hwloc_linux_parse_cpuinfo_model(const char *prefix, const char *value,
-				struct hwloc_linux_cpumodel *cpumodel)
+hwloc_linux_parse_cpuinfo_model_x86(const char *prefix, const char *value,
+				    struct hwloc_linux_cpumodel *cpumodel)
 {
-  if (!strcmp("model name", prefix)
-      || !strcmp("Processor", prefix)
-      || !strcmp("chip type", prefix)
-      || !strcmp("cpu model", prefix)
-      || !strcasecmp("cpu", prefix)) {
-    if (!cpumodel->model)
+  if (!cpumodel->model)
+    if (!strcmp("model name", prefix))
       cpumodel->model = strdup(value);
-  }
+  /* vendor_id  : GenuineIntel */
+  /* cpu family : 6 */
+  /* model      : 46 */
+  return 0;
+}
+
+static int
+hwloc_linux_parse_cpuinfo_model_ia64(const char *prefix, const char *value,
+				     struct hwloc_linux_cpumodel *cpumodel)
+{
+  if (!cpumodel->model)
+    if (!strcmp("model name", prefix))
+      cpumodel->model = strdup(value);
+  /* vendor     : GenuineIntel */
+  /* family     : 32 */
+  /* model      : 1 */
+  return 0;
+}
+
+static int
+hwloc_linux_parse_cpuinfo_model_arm(const char *prefix, const char *value,
+				    struct hwloc_linux_cpumodel *cpumodel)
+{
+  if (!cpumodel->model)
+    if (!strcmp("Processor", prefix) /* old kernels with one Processor header */
+	|| !strcmp("model name", prefix) /* new kernels with one model name per core */)
+      cpumodel->model = strdup(value);
+  /* CPU implementer	: 0x56 */
+  /* CPU architecture: 7 */
+  /* CPU variant	: 0x1 */
+  /* CPU part	: 0x581 */
+  /* CPU revision	: 1 */
+  return 0;
+}
+
+static int
+hwloc_linux_parse_cpuinfo_model_default(const char *prefix, const char *value,
+					struct hwloc_linux_cpumodel *cpumodel)
+{
+  if (!cpumodel->model)
+    if (!strcmp("model name", prefix)
+	|| !strcmp("Processor", prefix)
+	|| !strcmp("chip type", prefix)
+	|| !strcmp("cpu model", prefix)
+	|| !strcasecmp("cpu", prefix))
+      cpumodel->model = strdup(value);
   return 0;
 }
 
@@ -3163,6 +3204,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   unsigned numprocs = 0;
   struct hwloc_linux_cpumodel global_cpumodel;
+  int (*parse_cpuinfo_model)(const char *, const char *, struct hwloc_linux_cpumodel *) = NULL;
 
   memset(&global_cpumodel, 0, sizeof(global_cpumodel));
 
@@ -3242,11 +3284,29 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     getprocnb_begin(COREID, Pcore);
     Lprocs[numprocs-1].Pcore = Pcore;
     getprocnb_end() else {
+
+      /* architecture specific or default routine for parsing cpumodel */
+      if (!parse_cpuinfo_model) {
+	parse_cpuinfo_model = hwloc_linux_parse_cpuinfo_model_default;
+	if (*data->utsname.machine) {
+	  /* x86_32 x86_64 k1om => x86 */
+	  if (!strcmp(data->utsname.machine, "x86_64")
+	      || (data->utsname.machine[0] == 'i' && !strcmp(data->utsname.machine+2, "86"))
+	      || !strcmp(data->utsname.machine, "k1om"))
+	    parse_cpuinfo_model = hwloc_linux_parse_cpuinfo_model_x86;
+	  /* ia64 */
+	  else if (!strcmp(data->utsname.machine, "ia64"))
+	    parse_cpuinfo_model = hwloc_linux_parse_cpuinfo_model_ia64;
+	  /* arm */
+	  else if (!strncmp(data->utsname.machine, "arm", 3))
+	    parse_cpuinfo_model = hwloc_linux_parse_cpuinfo_model_arm;
+	}
+      }
       /* we can't assume that we already got a processor index line:
        * alpha/frv/h8300/m68k/microblaze/sparc have no processor lines at all, only a global entry.
        * tile has a global section with model name before the list of processor lines.
        */
-      hwloc_linux_parse_cpuinfo_model(prefix, value, numprocs ? &Lprocs[numprocs-1].cpumodel : &global_cpumodel);
+      parse_cpuinfo_model(prefix, value, numprocs ? &Lprocs[numprocs-1].cpumodel : &global_cpumodel);
     }
 
     if (noend) {
