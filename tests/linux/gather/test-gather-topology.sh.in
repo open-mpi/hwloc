@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2012-2013 Inria.  All rights reserved.
+# Copyright © 2012-2014 Inria.  All rights reserved.
 # Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
@@ -67,6 +67,8 @@ if ! ( cd "$tmpdir" && tar xfj save.tar.bz2 ) ; then
      exit 1
 fi
 export HWLOC_FSROOT="$tmpdir/save"
+
+rm -f "$tmpdir/save/proc/hwloc-nofile-info"
 
 echo "Saving tarball topology to XML..."
 if ! "$lstopo" --no-io "$tmpdir/save2.xml" ; then

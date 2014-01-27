@@ -3,7 +3,7 @@
 
 #
 # Copyright © 2009 CNRS
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
@@ -21,6 +21,12 @@ LC_ALL=C
 export LANG LC_ALL
 
 gatherio=0
+
+if [ ! -x "$lstopo" ]
+then
+    error "Could not find lstopo executable in the install or build dir."
+    exit 1
+fi
 
 error()
 {
@@ -158,17 +164,18 @@ cat /proc/mounts | while read -r dummy1 mntpath mnttype mntopts dummy2 ; do
   [ x$mnttype = xcgroup ] && echo $mntopts | grep -w cpuset >/dev/null && savemntpnt "$mntpath"
 done
 
+# export /proc/hwloc-nofile-info during lstopo (needs HWLOC_DUMP_NOFILE_INFO with HWLOC_THISSYSTEM=1)
+export HWLOC_DUMP_NOFILE_INFO="$destdir/$basename/proc/hwloc-nofile-info"
+"$lstopo" - >/dev/null
+# disable HWLOC_DUMP_NOFILE_INFO for next lstopo invocation
+export HWLOC_DUMP_NOFILE_INFO=
+
 # Create the archive and keep the tree in /tmp for testing
 ( cd "$destdir/" && tar cfj "$basename.tar.bz2" "$basename" )
 mv "$destdir/$basename.tar.bz2" "$dirname/$basename.tar.bz2"
 echo "Hierarchy gathered in $dirname/$basename.tar.bz2 and kept in $destdir/$basename/"
 
 # Generate the output as well
-if [ ! -x "$lstopo" ]
-then
-    error "Could not find lstopo executable in the install or build dir."
-    exit 1
-fi
 # we need "Topology not from this system" in the output so as to make test-topology.sh happy
 export HWLOC_THISSYSTEM=0
 "$lstopo" - -v > "$dirname/$basename.output"

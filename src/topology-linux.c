@@ -40,6 +40,9 @@
 struct hwloc_linux_backend_data_s {
   int root_fd; /* The file descriptor for the file system root, used when browsing, e.g., Linux' sysfs and procfs. */
   int is_real_fsroot; /* Boolean saying whether root_fd points to the real filesystem root of the system */
+
+  struct utsname utsname; /* fields contain \0 when unknown */
+
   int deprecated_classlinks_model; /* -2 if never tried, -1 if unknown, 0 if new (device contains class/name), 1 if old (device contains class:name) */
   int mic_need_directlookup; /* if not tried yet, 0 if not needed, 1 if needed */
   unsigned mic_directlookup_id_max; /* -1 if not tried yet, 0 if none to lookup, maxid+1 otherwise */
@@ -3464,6 +3467,78 @@ hwloc_linux_fallback_pu_level(struct hwloc_topology *topology)
     hwloc_setup_pu_level(topology, 1);
 }
 
+static void
+hwloc_gather_system_info(struct hwloc_topology *topology,
+			 struct hwloc_linux_backend_data_s *data)
+{
+  FILE *file;
+  char line[128]; /* enough for utsname fields */
+  char *env;
+
+  /* initialize to something sane */
+  memset(&data->utsname, 0, sizeof(data->utsname));
+
+  /* read thissystem info */
+  if (topology->is_thissystem)
+    uname(&data->utsname);
+
+  /* overwrite with optional /proc/hwloc-nofile-info */
+  file = hwloc_fopen("/proc/hwloc-nofile-info", "r", data->root_fd);
+  if (file) {
+    while (fgets(line, sizeof(line), file)) {
+      char *tmp = strchr(line, '\n');
+      if (!strncmp("OSName: ", line, 8)) {
+	if (tmp)
+	  *tmp = '\0';
+	strncpy(data->utsname.sysname, line+8, sizeof(data->utsname.sysname));
+	data->utsname.sysname[sizeof(data->utsname.sysname)-1] = '\0';
+      } else if (!strncmp("OSRelease: ", line, 11)) {
+	if (tmp)
+	  *tmp = '\0';
+	strncpy(data->utsname.release, line+11, sizeof(data->utsname.release));
+	data->utsname.release[sizeof(data->utsname.release)-1] = '\0';
+      } else if (!strncmp("OSVersion: ", line, 11)) {
+	if (tmp)
+	  *tmp = '\0';
+	strncpy(data->utsname.version, line+11, sizeof(data->utsname.version));
+	data->utsname.version[sizeof(data->utsname.version)-1] = '\0';
+      } else if (!strncmp("HostName: ", line, 10)) {
+	if (tmp)
+	  *tmp = '\0';
+	strncpy(data->utsname.nodename, line+10, sizeof(data->utsname.nodename));
+	data->utsname.nodename[sizeof(data->utsname.nodename)-1] = '\0';
+      } else if (!strncmp("Architecture: ", line, 14)) {
+	if (tmp)
+	  *tmp = '\0';
+	strncpy(data->utsname.machine, line+14, sizeof(data->utsname.machine));
+	data->utsname.machine[sizeof(data->utsname.machine)-1] = '\0';
+      } else {
+	hwloc_debug("ignored /proc/hwloc-nofile-info line %s\n", line);
+	/* ignored */
+      }
+    }
+    fclose(file);
+  }
+
+  env = getenv("HWLOC_DUMP_NOFILE_INFO");
+  if (env && *env) {
+    file = fopen(env, "w");
+    if (file) {
+      if (*data->utsname.sysname)
+	fprintf(file, "OSName: %s\n", data->utsname.sysname);
+      if (*data->utsname.release)
+	fprintf(file, "OSRelease: %s\n", data->utsname.release);
+      if (*data->utsname.version)
+	fprintf(file, "OSVersion: %s\n", data->utsname.version);
+      if (*data->utsname.nodename)
+	fprintf(file, "HostName: %s\n", data->utsname.nodename);
+      if (*data->utsname.machine)
+	fprintf(file, "Architecture: %s\n", data->utsname.machine);
+      fclose(file);
+    }
+  }
+}
+
 static int
 hwloc_look_linuxfs(struct hwloc_backend *backend)
 {
@@ -3477,6 +3552,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
   if (topology->levels[0][0]->cpuset)
     /* somebody discovered things */
     return 0;
+
+  hwloc_gather_system_info(topology, data);
 
   hwloc_alloc_obj_cpusets(topology->levels[0][0]);
 
@@ -3589,9 +3666,8 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
   hwloc__linux_get_mic_sn(topology, data);
 
-  /* gather uname info if fsroot wasn't changed */
-  if (topology->is_thissystem)
-    hwloc_add_uname_info(topology, NULL);
+  /* data->utsname was filled with real uname or \0, we can safely pass it */
+  hwloc_add_uname_info(topology, &data->utsname);
 
   return 1;
 }
