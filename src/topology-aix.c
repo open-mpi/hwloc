@@ -773,7 +773,7 @@ hwloc_look_aix(struct hwloc_backend *backend)
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "AIX");
   if (topology->is_thissystem)
-    hwloc_add_uname_info(topology);
+    hwloc_add_uname_info(topology, NULL);
   return 1;
 }
 

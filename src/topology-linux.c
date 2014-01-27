@@ -3591,7 +3591,7 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
   /* gather uname info if fsroot wasn't changed */
   if (topology->is_thissystem)
-     hwloc_add_uname_info(topology);
+    hwloc_add_uname_info(topology, NULL);
 
   return 1;
 }

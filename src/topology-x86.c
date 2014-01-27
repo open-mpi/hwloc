@@ -934,7 +934,7 @@ fulldiscovery:
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
 
 #ifdef HAVE_UNAME
-  hwloc_add_uname_info(topology); /* we already know is_thissystem() is true */
+  hwloc_add_uname_info(topology, NULL); /* we already know is_thissystem() is true */
 #else
   /* uname isn't available, manually setup the "Architecture" info */
 #ifdef HWLOC_X86_64_ARCH
