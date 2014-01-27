@@ -10,7 +10,7 @@
 #                         University of Stuttgart.  All rights reserved.
 # Copyright (c) 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
-# Copyright © 2006-2013 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2006-2014 Cisco Systems, Inc.  All rights reserved.
 # $COPYRIGHT$
 #
 # Additional copyrights may follow
@@ -215,6 +215,10 @@ do_command "./autogen.sh"
 
 # do config
 do_command "./configure"
+
+# because of the doxygen setup, we now much run "make doc" before we
+# run "make dist".
+do_command "make doc"
 
 # Do make distcheck (which will invoke config/distscript.csh to set
 # the right values in VERSION).  distcheck does many things; we need
