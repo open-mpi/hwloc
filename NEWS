@@ -19,6 +19,9 @@ in v0.9.1).
 
 Version 1.8.1
 -------------
+* Fix the cpuid code on Windows 64bits so that the x86 backend gets
+  enabled as expected and can populate CPU information.
+  Thanks to Robin Scher for reporting the problem.
 * Work around buggy BIOS reporting duplicate NUMA nodes on Linux.
   Thanks to Jeff Becker for reporting the problem and testing the patch.
 
