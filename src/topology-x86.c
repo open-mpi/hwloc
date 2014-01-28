@@ -52,7 +52,10 @@ struct procinfo {
   unsigned levels;
   unsigned numcaches;
   struct cacheinfo *cache;
+  char cpuvendor[13];
   char cpumodel[3*4*4+1];
+  unsigned cpumodelnumber;
+  unsigned cpufamilynumber;
 };
 
 enum cpuid_type {
@@ -111,6 +114,8 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   unsigned eax, ebx, ecx = 0, edx;
   unsigned cachenum;
   struct cacheinfo *cache;
+  unsigned regs[4];
+  unsigned _model, _extendedmodel, _family, _extendedfamily;
 
   infos->present = 1;
 
@@ -126,8 +131,30 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   infos->logprocid = infos->apicid % infos->max_log_proc;
   hwloc_debug("phys %u thread %u\n", infos->socketid, infos->logprocid);
 
+  memset(regs, 0, sizeof(regs));
+  regs[0] = 0;
+  hwloc_cpuid(&regs[0], &regs[1], &regs[3], &regs[2]);
+  memcpy(infos->cpuvendor, regs+1, 4*3);
+  infos->cpuvendor[12] = '\0';
+
+  memset(regs, 0, sizeof(regs));
+  regs[0] = 1;
+  hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+  _model          = (regs[0]>>4) & 0xf;
+  _extendedmodel  = (regs[0]>>16) & 0xf;
+  _family         = (regs[0]>>8) & 0xf;
+  _extendedfamily = (regs[0]>>20) & 0xff;
+  if (!strncmp(infos->cpuvendor, "Genu", 4)
+      || (!strncmp(infos->cpuvendor, "Auth", 4) && _family == 0xf)) {
+    infos->cpufamilynumber = _family + _extendedfamily;
+    infos->cpumodelnumber = _model + (_extendedmodel << 4);
+  } else {
+    infos->cpufamilynumber = _family;
+    infos->cpumodelnumber = _model;
+  }
+
   if (highest_ext_cpuid >= 0x80000004) {
-    unsigned regs[4] = { 0 };
+    memset(regs, 0, sizeof(regs));
     regs[0] = 0x80000002;
     hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
     memcpy(infos->cpumodel, regs, 4*4);
@@ -349,6 +376,23 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     infos->otherids = NULL;
 }
 
+static void
+hwloc_x86_add_cpuinfos(hwloc_obj_t obj, struct procinfo *info, int nodup)
+{
+  char number[8];
+  hwloc_obj_add_info_nodup(obj, "CPUVendor", info->cpuvendor, nodup);
+  if (info->cpumodel[0]) {
+    const char *c = info->cpumodel;
+    while (*c == ' ')
+      c++;
+    hwloc_obj_add_info_nodup(obj, "CPUModel", c, nodup);
+  }
+  snprintf(number, sizeof(number), "%u", info->cpumodelnumber);
+  hwloc_obj_add_info_nodup(obj, "CPUModelNumber", number, nodup);
+  snprintf(number, sizeof(number), "%u", info->cpufamilynumber);
+  hwloc_obj_add_info_nodup(obj, "CPUFamilyNumber", number, nodup);
+}
+
 /* Analyse information stored in infos, and build/annotate topology levels accordingly */
 static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigned nbprocs,
 		      int fulldiscovery)
@@ -392,12 +436,9 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
       }
       socket = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, socketid);
       socket->cpuset = socket_cpuset;
-      if (infos[i].cpumodel[0]) {
-        const char *c = infos[i].cpumodel;
-        while (*c == ' ')
-          c++;
-        hwloc_obj_add_info(socket, "CPUModel", c);
-      }
+
+      hwloc_x86_add_cpuinfos(socket, &infos[i], 0);
+
       hwloc_debug_1arg_bitmap("os socket %u has cpuset %s\n",
           socketid, socket_cpuset);
       hwloc_insert_object_by_cpuset(topology, socket);
@@ -430,33 +471,22 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
 	  }
 	}
       }
-      if (!hwloc_obj_get_info_by_name(socket, "CPUModel")) {
-	/* add a CPUModel info */
-	for(i=0; i<nbprocs; i++)
-	  /* if there's a single socket, it's the one we want.
-	   * if the index is ok, it's the one we want.
-	   * if the index is unknown but all sockets have the same id, that's fine
-	   */
-	  if (nbsockets == 1 || infos[i].socketid == socket->os_index || (same && socket->os_index == (unsigned) -1)) {
-	    if (infos[i].cpumodel[0]) {
-	      const char *c = infos[i].cpumodel;
-	      while (*c == ' ')
-		c++;
-	      hwloc_obj_add_info(socket, "CPUModel", c);
-	    }
-	    break;
-	  }
+      for(i=0; i<nbprocs; i++) {
+	/* if there's a single socket, it's the one we want.
+	 * if the index is ok, it's the one we want.
+	 * if the index is unknown but all sockets have the same id, that's fine
+	 */
+	if (nbsockets == 1 || infos[i].socketid == socket->os_index || (same && socket->os_index == (unsigned) -1)) {
+	  hwloc_x86_add_cpuinfos(socket, &infos[i], 1);
+	  break;
+	}
       }
     }
   }
   /* If there was no socket, annotate the Machine instead */
   if ((!nbsockets) && infos[0].cpumodel[0]) {
-    const char *c = infos[0].cpumodel;
-    while (*c == ' ')
-      c++;
-    hwloc_obj_add_info(hwloc_get_root_obj(topology), "CPUModel", c);
+    hwloc_x86_add_cpuinfos(hwloc_get_root_obj(topology), &infos[0], 1);
   }
-
 
   /* Look for Numa nodes inside sockets */
   if (fulldiscovery) {
