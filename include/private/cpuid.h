@@ -1,6 +1,7 @@
 /*
  * Copyright © 2010-2012 Université Bordeaux 1
  * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2014 Inria.  All rights reserved.
  *
  * See COPYING in top-level directory.
  */
@@ -54,7 +55,7 @@ static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *e
   /* Note: gcc might want to use bx or the stack for %1 addressing, so we can't
    * use them :/ */
 #ifdef HWLOC_X86_64_ARCH
-  unsigned long sav_rbx;
+  hwloc_uint64_t sav_rbx;
   asm(
   "mov %%rbx,%2\n\t"
   "cpuid\n\t"
