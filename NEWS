@@ -22,6 +22,8 @@ Version 1.8.1
 * Fix the cpuid code on Windows 64bits so that the x86 backend gets
   enabled as expected and can populate CPU information.
   Thanks to Robin Scher for reporting the problem.
+* Add CPUVendor/CPUModelNumber/CPUFamilyNumber attributes when running
+  on x86 architecture. Thanks to Ralph Castain for the suggestion.
 * Work around buggy BIOS reporting duplicate NUMA nodes on Linux.
   Thanks to Jeff Becker for reporting the problem and testing the patch.
 

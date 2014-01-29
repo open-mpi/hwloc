@@ -271,6 +271,13 @@ void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
   obj->infos_count++;
 }
 
+void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *value, int nodup)
+{
+  if (nodup && hwloc_obj_get_info_by_name(obj, name))
+    return;
+  hwloc_obj_add_info(obj, name, value);
+}
+
 /* Free an object and all its content.  */
 void
 hwloc_free_unlinked_object(hwloc_obj_t obj)
