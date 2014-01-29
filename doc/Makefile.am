@@ -819,7 +819,10 @@ if HWLOC_BUILD_README
 readme: $(HWLOC_top_srcdir)/README
 $(HWLOC_top_srcdir)/README: $(DOX_TAG)
 	sed -n -f $(srcdir)/README.sed $(DOX_HTML_DIR)/index.html > $(DOX_HTML_README)
-	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_README) | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' > $@
+	LC_ALL=C $(HWLOC_W3_GENERATOR) $(DOX_HTML_README) \
+	 | $(SED) -n -e 's/^   //' -e '/^Introduction$$/,$$p' \
+	 | $(SED) -e '/^--*-$$/,$$ d' \
+	 > $@
 	rm -f $(DOX_HTML_README)
 
 else

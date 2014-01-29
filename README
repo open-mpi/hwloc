@@ -25,7 +25,8 @@ using PLPA has already switched to hwloc.
 hwloc supports the following operating systems:
 
   * Linux (including old kernels not having sysfs topology information, with
- knowledge of cpusets, offline CPUs, ScaleMP vSMP, and Kerrighed support)
+ knowledge of cpusets, offline CPUs, ScaleMP vSMP, NumaScale NumaConnect,
+ and Kerrighed support)
   * Solaris
   * AIX
   * Darwin / OS X
@@ -717,7 +718,3 @@ The documentation chapters include
 
 Make sure to have had a look at those too!
 
--------------------------------------------------------------------------------
-
-Generated on Tue Sep 10 2013 16:08:12 for Hardware Locality (hwloc) by   
-doxygen 1.8.4
