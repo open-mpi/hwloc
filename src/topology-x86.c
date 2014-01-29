@@ -896,6 +896,17 @@ fulldiscovery:
     hwloc_setup_pu_level(topology, nbprocs);
 
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "x86");
+
+#ifdef HAVE_UNAME
+  hwloc_add_uname_info(topology); /* we already know is_thissystem() is true */
+#else
+  /* uname isn't available, manually setup the "Architecture" info */
+#ifdef HWLOC_X86_64_ARCH
+  hwloc_obj_add_info(topology->levels[0][0], "Architecture", "x86_64");
+#else
+  hwloc_obj_add_info(topology->levels[0][0], "Architecture", "x86");
+#endif
+#endif
   return 1;
 }
 
