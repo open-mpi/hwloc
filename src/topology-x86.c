@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2013 Inria.  All rights reserved.
+ * Copyright © 2010-2014 Inria.  All rights reserved.
  * Copyright © 2010-2013 Université Bordeaux 1
  * Copyright © 2010-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -684,6 +684,41 @@ static void summarize(hwloc_topology_t topology, struct procinfo *infos, unsigne
   hwloc_bitmap_free(complete_cpuset);
 }
 
+static int
+look_procs(struct hwloc_topology *topology, unsigned nbprocs, struct procinfo *infos, int fulldiscovery,
+	   unsigned highest_cpuid, unsigned highest_ext_cpuid, unsigned *features, enum cpuid_type cpuid_type,
+	   int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags),
+	   int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags))
+{
+  hwloc_bitmap_t orig_cpuset = hwloc_bitmap_alloc();
+  hwloc_bitmap_t set;
+  unsigned i;
+
+  if (get_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
+    hwloc_bitmap_free(orig_cpuset);
+    return -1;
+  }
+
+  set = hwloc_bitmap_alloc();
+
+  for (i = 0; i < nbprocs; i++) {
+    hwloc_bitmap_only(set, i);
+    hwloc_debug("binding to CPU%d\n", i);
+    if (set_cpubind(topology, set, HWLOC_CPUBIND_STRICT)) {
+      hwloc_debug("could not bind to CPU%d: %s\n", i, strerror(errno));
+      continue;
+    }
+    look_proc(&infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
+  }
+
+  set_cpubind(topology, orig_cpuset, 0);
+  hwloc_bitmap_free(set);
+  hwloc_bitmap_free(orig_cpuset);
+
+  summarize(topology, infos, nbprocs, fulldiscovery);
+  return fulldiscovery; /* success, but objects added only if fulldiscovery */
+}
+
 #if defined HWLOC_FREEBSD_SYS && defined HAVE_CPUSET_SETID
 #include <sys/param.h>
 #include <sys/cpuset.h>
@@ -718,7 +753,6 @@ static
 int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldiscovery)
 {
   unsigned eax, ebx, ecx = 0, edx;
-  hwloc_bitmap_t orig_cpuset;
   unsigned i;
   unsigned highest_cpuid;
   unsigned highest_ext_cpuid;
@@ -793,57 +827,29 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
 
   hwloc_x86_os_state_save(&os_state);
 
-  orig_cpuset = hwloc_bitmap_alloc();
-
   if (hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind) {
-    if (!hooks.get_thisthread_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
-      hwloc_bitmap_t set = hwloc_bitmap_alloc();
-      for (i = 0; i < nbprocs; i++) {
-        hwloc_bitmap_only(set, i);
-        hwloc_debug("binding to CPU%d\n", i);
-        if (hooks.set_thisthread_cpubind(topology, set, HWLOC_CPUBIND_STRICT)) {
-          hwloc_debug("could not bind to CPU%d: %s\n", i, strerror(errno));
-          continue;
-        }
-        look_proc(&infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
-      }
-      hwloc_bitmap_free(set);
-      hooks.set_thisthread_cpubind(topology, orig_cpuset, 0);
-      hwloc_bitmap_free(orig_cpuset);
-      summarize(topology, infos, nbprocs, fulldiscovery);
-      ret = fulldiscovery; /* success, but objects added only if fulldiscovery */
-      goto out_with_os_state;
+    /* trying binding the current thread only */
+    ret = look_procs(topology, nbprocs, infos, fulldiscovery,
+		     highest_cpuid, highest_ext_cpuid, features, cpuid_type,
+		     hooks.get_thisthread_cpubind, hooks.set_thisthread_cpubind);
+    if (ret < 0) {
+      /* fallback trying to bind the entire process */
+      if (hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind)
+	ret = look_procs(topology, nbprocs, infos, fulldiscovery,
+			 highest_cpuid, highest_ext_cpuid, features, cpuid_type,
+			 hooks.get_thisproc_cpubind, hooks.set_thisproc_cpubind);
     }
-  }
-
-  if (hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind) {
-    if (!hooks.get_thisproc_cpubind(topology, orig_cpuset, HWLOC_CPUBIND_STRICT)) {
-      hwloc_bitmap_t set = hwloc_bitmap_alloc();
-      for (i = 0; i < nbprocs; i++) {
-        hwloc_bitmap_only(set, i);
-        hwloc_debug("binding to CPU%d\n", i);
-        if (hooks.set_thisproc_cpubind(topology, set, HWLOC_CPUBIND_STRICT)) {
-          hwloc_debug("could not bind to CPU%d: %s\n", i, strerror(errno));
-          continue;
-        }
-        look_proc(&infos[i], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
-      }
-      hwloc_bitmap_free(set);
-      hooks.set_thisproc_cpubind(topology, orig_cpuset, 0);
-      hwloc_bitmap_free(orig_cpuset);
-      summarize(topology, infos, nbprocs, fulldiscovery);
-      ret = fulldiscovery; /* success, but objects added only if fulldiscovery */
+    if (ret >= 0)
+      /* success, we're done */
       goto out_with_os_state;
-    }
   }
 
   if (nbprocs == 1) {
+    /* only one processor, no need to bind */
     look_proc(&infos[0], highest_cpuid, highest_ext_cpuid, features, cpuid_type);
     summarize(topology, infos, nbprocs, fulldiscovery);
     ret = fulldiscovery;
   }
-
-  hwloc_bitmap_free(orig_cpuset);
 
 out_with_os_state:
   hwloc_x86_os_state_restore(&os_state);
