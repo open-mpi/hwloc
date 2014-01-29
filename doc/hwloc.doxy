@@ -1640,9 +1640,12 @@ placed.
 <dd>The description string that was given to hwloc to build this
 synthetic topology.
 </dd>
-<dt>CPUModel, CPUType (Socket or Machine)</dt>
-<dd>The processor model name,
-and a more-general processor type name when applicable (Solaris/Sparc).
+<dt>CPUVendor, CPUModel, CPUModelNumber, CPUFamilyNumber, CPUType (Socket or Machine)</dt>
+<dd>The processor vendor name, model name, model number, family number
+and a more-general processor type name.
+CPUVendor, CPUModelNumber and CPUFamilyNumber are currently only
+added for x86 processors.
+CPUType is only added on Solaris/Sparc.
 These attributes are usually added to Socket objects.
 However, when hwloc cannot detect the number of sockets but still
 knows their (same) model, the attribute may be added to the Machine
