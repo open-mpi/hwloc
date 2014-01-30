@@ -23,15 +23,26 @@ Version 1.9.0
   + Add hwloc_linux_get_tid_last_cpu_location() for retrieving the
     last CPU where a Linux thread given by TID ran.
 * Backends
-  + Add CPUVendor, CPUModelNumber and CPUFamilyNumber info attributes
-    for x86, ia64 and Xeon Phi sockets on Linux.
-    Requested by Ralph Castain.
+  + Add CPUVendor, CPUModelNumber and CPUFamilyNumber info attributes for
+    x86, ia64 and Xeon Phi sockets on Linux, to extend the x86-specific
+    support added in v1.8.1. Requested by Ralph Castain.
 * Tools
   + Add -e or --get-last-cpu-location to hwloc-ps to report where
     processes/threads run instead of where they are bound.
   + hwloc-ps reports locations as likely-more-useful objects such as Cores
     or Sockets instead of Caches when possible.
   + Add -e as a synonym to --get-last-cpu-location in hwloc-bind.
+
+
+Version 1.8.1
+-------------
+* Fix the cpuid code on Windows 64bits so that the x86 backend gets
+  enabled as expected and can populate CPU information.
+  Thanks to Robin Scher for reporting the problem.
+* Add CPUVendor/CPUModelNumber/CPUFamilyNumber attributes when running
+  on x86 architecture. Thanks to Ralph Castain for the suggestion.
+* Work around buggy BIOS reporting duplicate NUMA nodes on Linux.
+  Thanks to Jeff Becker for reporting the problem and testing the patch.
 
 
 Version 1.8.0
