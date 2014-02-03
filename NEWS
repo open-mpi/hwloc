@@ -20,6 +20,9 @@ in v0.9.1).
 Version 1.9.0
 -------------
 * API
+  + Add hwloc_obj_type_sscanf() to extend hwloc_obj_type_of_string() with
+    type-specific attributes such as Cache/Group depth and Cache type.
+    hwloc_obj_type_of_string() is moved to hwloc/deprecated.h.
   + Add hwloc_linux_get_tid_last_cpu_location() for retrieving the
     last CPU where a Linux thread given by TID ran.
 * Backends

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -83,79 +83,6 @@ hwloc_calc_get_obj_inside_cpuset_by_depth(hwloc_topology_t topology, hwloc_const
     }
     return NULL;
   }
-}
-
-/* extended version of hwloc_obj_type_of_string()
- *
- * matches L2, L3Cache and Group4, and return the corresponding depth attribute if depthattrp isn't NULL.
- * only looks at the beginning of the string to allow truncated type names.
- */
-static __hwloc_inline int
-hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthattrp, hwloc_obj_cache_type_t *cachetypeattrp)
-{
-  hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
-  int depthattr = -1;
-  hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
-  char *end;
-
-  /* types without depthattr */
-  if (!hwloc_strncasecmp(string, "system", 2)) {
-    type = HWLOC_OBJ_SYSTEM;
-  } else if (!hwloc_strncasecmp(string, "machine", 2)) {
-    type = HWLOC_OBJ_MACHINE;
-  } else if (!hwloc_strncasecmp(string, "node", 1)) {
-    type = HWLOC_OBJ_NODE;
-  } else if (!hwloc_strncasecmp(string, "socket", 2)) {
-    type = HWLOC_OBJ_SOCKET;
-  } else if (!hwloc_strncasecmp(string, "core", 2)) {
-    type = HWLOC_OBJ_CORE;
-  } else if (!hwloc_strncasecmp(string, "pu", 2)) {
-    type = HWLOC_OBJ_PU;
-  } else if (!hwloc_strncasecmp(string, "misc", 2)) {
-    type = HWLOC_OBJ_MISC;
-  } else if (!hwloc_strncasecmp(string, "pci", 2)) {
-    type = HWLOC_OBJ_PCI_DEVICE;
-  } else if (!hwloc_strncasecmp(string, "os", 2)) {
-    type = HWLOC_OBJ_OS_DEVICE;
-
-  /* types with depthattr */
-  } else if (!hwloc_strncasecmp(string, "cache", 2)) {
-    type = HWLOC_OBJ_CACHE;
-  } else if ((string[0] == 'l' || string[0] == 'L') && string[1] >= '0' && string[1] <= '9') {
-    type = HWLOC_OBJ_CACHE;
-    depthattr = strtol(string+1, &end, 10);
-    if (*end == 'd') {
-      cachetypeattr = HWLOC_OBJ_CACHE_DATA;
-      end++;
-    } else if (*end == 'i') {
-      cachetypeattr = HWLOC_OBJ_CACHE_INSTRUCTION;
-      end++;
-    } else if (*end == 'u') {
-      cachetypeattr = HWLOC_OBJ_CACHE_UNIFIED;
-      end++;
-    }
-    if (*end && hwloc_strncasecmp(end, "cache", 2))
-      return -1;
-
-  } else if (!hwloc_strncasecmp(string, "group", 1)) {
-    int length;
-    type = HWLOC_OBJ_GROUP;
-    length = strcspn(string, "0123456789");
-    if (string[length] != '\0') {
-      depthattr = strtol(string+length, &end, 10);
-      if (*end)
-	return -1;
-    }
-  } else
-    return -1;
-
-  *typep = type;
-  if (depthattrp)
-    *depthattrp = depthattr;
-  if (cachetypeattrp)
-    *cachetypeattrp = cachetypeattr;
-
-  return 0;
 }
 
 static __hwloc_inline int
@@ -242,7 +169,7 @@ hwloc_calc_parse_depth_prefix(hwloc_topology_t topology, unsigned topodepth,
   typestring[typelen] = '\0';
 
   /* try to match a type name */
-  err = hwloc_obj_type_sscanf(typestring, &type, &depthattr, &cachetypeattr);
+  err = hwloc_obj_type_sscanf(typestring, &type, &depthattr, &cachetypeattr, sizeof(cachetypeattr));
   if (!err) {
     *typep = type;
     return hwloc_calc_depth_of_type(topology, type, depthattr, cachetypeattr, verbose);

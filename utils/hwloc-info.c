@@ -303,7 +303,7 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	err = hwloc_obj_type_sscanf(argv[1], &show_ancestor_type, &show_ancestor_attrdepth, &show_ancestor_attrcachetype);
+	err = hwloc_obj_type_sscanf(argv[1], &show_ancestor_type, &show_ancestor_attrdepth, &show_ancestor_attrcachetype, sizeof(show_ancestor_attrcachetype));
         if (err < 0) {
           fprintf(stderr, "unrecognized --ancestor type %s\n", argv[1]);
           usage(callname, stderr);

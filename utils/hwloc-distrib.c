@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -103,11 +103,10 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	type = hwloc_obj_type_of_string(argv[1]);
-	if (type != (hwloc_obj_type_t) -1)
-	  hwloc_topology_ignore_type(topology, type);
-	else
+	if (hwloc_obj_type_sscanf(argv[1], &type, NULL, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
+	else
+	  hwloc_topology_ignore_type(topology, type);
 	argc--;
 	argv++;
 	goto next;
@@ -117,8 +116,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	from_type = hwloc_obj_type_of_string(argv[1]);
-	if (from_type == (hwloc_obj_type_t) -1)
+	if (hwloc_obj_type_sscanf(argv[1], &from_type, NULL, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --from, ignoring.\n", argv[1]);
 	argc--;
 	argv++;
@@ -129,8 +127,7 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	to_type = hwloc_obj_type_of_string(argv[1]);
-	if (to_type == (hwloc_obj_type_t) -1)
+	if (hwloc_obj_type_sscanf(argv[1], &to_type, NULL, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --to, ignoring.\n", argv[1]);
 	argc--;
 	argv++;
@@ -141,7 +138,9 @@ int main(int argc, char *argv[])
 	  usage(callname, stdout);
 	  exit(EXIT_FAILURE);
 	}
-	from_type = to_type = hwloc_obj_type_of_string(argv[1]);
+	if (hwloc_obj_type_sscanf(argv[1], &to_type, NULL, NULL, 0) < 0)
+	  fprintf(stderr, "Unsupported type `%s' passed to --at, ignoring.\n", argv[1]);
+	from_type = to_type;
 	argc--;
 	argv++;
 	goto next;

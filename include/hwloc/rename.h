@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
- * Copyright © 2010-2013 Inria.  All rights reserved.
+ * Copyright © 2010-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -176,7 +176,7 @@ extern "C" {
 #define hwloc_get_obj_by_type HWLOC_NAME(get_obj_by_type )
 
 #define hwloc_obj_type_string HWLOC_NAME(obj_type_string )
-#define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
+#define hwloc_obj_type_sscanf HWLOC_NAME(obj_type_sscanf)
 #define hwloc_obj_type_snprintf HWLOC_NAME(obj_type_snprintf )
 #define hwloc_obj_attr_snprintf HWLOC_NAME(obj_attr_snprintf )
 #define hwloc_obj_cpuset_snprintf HWLOC_NAME(obj_cpuset_snprintf)
@@ -493,6 +493,7 @@ extern "C" {
 
 /* hwloc/deprecated.h */
 
+#define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
 #define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
 
 /* private/debug.h */

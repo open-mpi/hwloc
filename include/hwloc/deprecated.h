@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -20,6 +20,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** \brief Return an object type from the string
+ *
+ * \return -1 if unrecognized.
+ */
+HWLOC_DECLSPEC hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) __hwloc_attribute_pure;
 
 /** \brief Stringify a given topology object into a human-readable form.
  *

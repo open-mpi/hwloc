@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -211,6 +211,74 @@ hwloc_obj_type_of_string (const char * string)
   if (!strcasecmp(string, "PCIDev")) return HWLOC_OBJ_PCI_DEVICE;
   if (!strcasecmp(string, "OSDev")) return HWLOC_OBJ_OS_DEVICE;
   return (hwloc_obj_type_t) -1;
+}
+
+int
+hwloc_obj_type_sscanf(const char *string, hwloc_obj_type_t *typep, int *depthattrp, void *typeattrp, size_t typeattrsize)
+{
+  hwloc_obj_type_t type = (hwloc_obj_type_t) -1;
+  int depthattr = -1;
+  hwloc_obj_cache_type_t cachetypeattr = (hwloc_obj_cache_type_t) -1; /* unspecified */
+  char *end;
+
+  /* types without depthattr */
+  if (!hwloc_strncasecmp(string, "system", 2)) {
+    type = HWLOC_OBJ_SYSTEM;
+  } else if (!hwloc_strncasecmp(string, "machine", 2)) {
+    type = HWLOC_OBJ_MACHINE;
+  } else if (!hwloc_strncasecmp(string, "node", 1)
+	     || !hwloc_strncasecmp(string, "numa", 1)) { /* matches node and numanode */
+    type = HWLOC_OBJ_NODE;
+  } else if (!hwloc_strncasecmp(string, "socket", 2)) {
+    type = HWLOC_OBJ_SOCKET;
+  } else if (!hwloc_strncasecmp(string, "core", 2)) {
+    type = HWLOC_OBJ_CORE;
+  } else if (!hwloc_strncasecmp(string, "pu", 2)) {
+    type = HWLOC_OBJ_PU;
+  } else if (!hwloc_strncasecmp(string, "misc", 2)) {
+    type = HWLOC_OBJ_MISC;
+  } else if (!hwloc_strncasecmp(string, "bridge", 2)) {
+    type = HWLOC_OBJ_BRIDGE;
+  } else if (!hwloc_strncasecmp(string, "pci", 2)) {
+    type = HWLOC_OBJ_PCI_DEVICE;
+  } else if (!hwloc_strncasecmp(string, "os", 2)) {
+    type = HWLOC_OBJ_OS_DEVICE;
+
+  /* types with depthattr */
+  } else if (!hwloc_strncasecmp(string, "cache", 2)) {
+    type = HWLOC_OBJ_CACHE;
+
+  } else if ((string[0] == 'l' || string[0] == 'L') && string[1] >= '0' && string[1] <= '9') {
+    type = HWLOC_OBJ_CACHE;
+    depthattr = strtol(string+1, &end, 10);
+    if (*end == 'd') {
+      cachetypeattr = HWLOC_OBJ_CACHE_DATA;
+    } else if (*end == 'i') {
+      cachetypeattr = HWLOC_OBJ_CACHE_INSTRUCTION;
+    } else if (*end == 'u') {
+      cachetypeattr = HWLOC_OBJ_CACHE_UNIFIED;
+    }
+
+  } else if (!hwloc_strncasecmp(string, "group", 2)) {
+    int length;
+    type = HWLOC_OBJ_GROUP;
+    length = strcspn(string, "0123456789");
+    if (length <= 5 && !hwloc_strncasecmp(string, "group", length)
+	&& string[length] >= '0' && string[length] <= '9') {
+      depthattr = strtol(string+length, &end, 10);
+    }
+  } else
+    return -1;
+
+  *typep = type;
+  if (depthattrp)
+    *depthattrp = depthattr;
+  if (typeattrp) {
+    if (type == HWLOC_OBJ_CACHE && sizeof(hwloc_obj_cache_type_t) <= typeattrsize)
+      memcpy(typeattrp, &cachetypeattr, sizeof(hwloc_obj_cache_type_t));
+  }
+
+  return 0;
 }
 
 static const char *

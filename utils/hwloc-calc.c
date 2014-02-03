@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -161,9 +161,9 @@ hwloc_calc_output(hwloc_topology_t topology, const char *sep, hwloc_bitmap_t set
 
 static int hwloc_calc_type_depth(const char *string, hwloc_obj_type_t *typep, int *depthp)
 {
-  hwloc_obj_type_t type = hwloc_obj_type_of_string(string);
+  hwloc_obj_type_t type = (hwloc_obj_type_t) -1; /* in case we match a depth */
   int depth = -1;
-  if (type == (hwloc_obj_type_t) -1) {
+  if (hwloc_obj_type_sscanf(string, &type, NULL, NULL, 0) < 0) {
     char *endptr;
     depth = strtoul(string, &endptr, 0);
     if (*endptr)

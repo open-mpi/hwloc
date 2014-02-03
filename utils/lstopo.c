@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -405,8 +405,7 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-        lstopo_show_only = hwloc_obj_type_of_string(argv[1]);
-	if (lstopo_show_only == (hwloc_obj_type_t) -1)
+        if (hwloc_obj_type_sscanf(argv[1], &lstopo_show_only, NULL, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --only, ignoring.\n", argv[1]);
 	opt = 1;
       }
@@ -416,8 +415,7 @@ main (int argc, char *argv[])
 	  usage (callname, stderr);
 	  exit(EXIT_FAILURE);
 	}
-	type = hwloc_obj_type_of_string(argv[1]);
-	if (type == (hwloc_obj_type_t) -1)
+	if (hwloc_obj_type_sscanf(argv[1], &type, NULL, NULL, 0) < 0)
 	  fprintf(stderr, "Unsupported type `%s' passed to --ignore, ignoring.\n", argv[1]);
 	else if (type == HWLOC_OBJ_PU)
 	  lstopo_ignore_pus = 1;
@@ -467,11 +465,10 @@ main (int argc, char *argv[])
 	  hwloc_obj_type_t type;
 	  if (end)
 	    *end = '\0';
-	  type = hwloc_obj_type_of_string(tmp);
-	  if (type != (hwloc_obj_type_t) -1)
-	    force_orient[type] = orient;
-	  else
+	  if (hwloc_obj_type_sscanf(tmp, &type, NULL, NULL, 0) < 0)
 	    fprintf(stderr, "Unsupported type `%s' passed to %s, ignoring.\n", tmp, argv[0]);
+	  else
+	    force_orient[type] = orient;
 	  if (!end)
 	    break;
 	  tmp = end+1;

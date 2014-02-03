@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -1173,11 +1173,36 @@ hwloc_get_next_obj_by_type (hwloc_topology_t topology, hwloc_obj_type_t type,
 /** \brief Return a stringified topology object type */
 HWLOC_DECLSPEC const char * hwloc_obj_type_string (hwloc_obj_type_t type) __hwloc_attribute_const;
 
-/** \brief Return an object type from the string
+/** \brief Return an object type and attributes from a type string.
  *
- * \return -1 if unrecognized.
+ * Convert strings such as "socket" or "cache" into the corresponding types.
+ * Matching is case-insensitive, and only the first letters are actually
+ * required to match.
+ *
+ * Types that have specific attributes, for instance caches and groups,
+ * may be returned in \p depthattrp and \p typeattrp. They are ignored
+ * when these pointers are \c NULL.
+ *
+ * For instance "L2i" or "L2iCache" would return
+ * type HWLOC_OBJ_CACHE in \p typep, 2 in \p depthattrp,
+ * and HWLOC_OBJ_CACHE_TYPE_INSTRUCTION in \p typeattrp
+ * (this last pointer should point to a hwloc_obj_cache_type_t).
+ * "Group3" would return type HWLOC_OBJ_GROUP type and 3 in \p depthattrp.
+ * Attributes that are not specified in the string (for instance "Group"
+ * without a depth, or "L2Cache" without a cache type) are set to -1.
+ *
+ * \p typeattrd is only filled if the size specified in \p typeattrsize
+ * is large enough. It is currently only used for caches, and the required
+ * size is at least the size of hwloc_obj_cache_type_t.
+ *
+ * \return 0 if a type was correctly identified, otherwise -1.
+ *
+ * \note This is an extended version of the now deprecated hwloc_obj_type_of_string()
  */
-HWLOC_DECLSPEC hwloc_obj_type_t hwloc_obj_type_of_string (const char * string) __hwloc_attribute_pure;
+HWLOC_DECLSPEC int hwloc_obj_type_sscanf(const char *string,
+					 hwloc_obj_type_t *typep,
+					 int *depthattrp,
+					 void *typeattrp, size_t typeattrsize);
 
 /** \brief Stringify the type of a given topology object into a human-readable form.
  *
