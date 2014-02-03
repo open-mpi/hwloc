@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2013 Inria.  All rights reserved.
+.\" Copyright © 2010-2014 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
 .TH HWLOC-DISTRIB "1" "#HWLOC_DATE#" "#PACKAGE_VERSION#" "#PACKAGE_NAME#"
@@ -62,7 +62,8 @@ above.
 Distribute down to objects of the given type instead of down to the bottom of
 the topology hierarchy, i.e. ignoring the structure given by objects below.
 This may be useful if some latitude is desired for the binding, e.g. just bind
-on sockets and not to precise cores or caches.
+several processes to each socket without specifying a single core for each
+of them.
 .TP
 \fB\-\-at\fR <type>
 Distribute among objects of the given type.  This is equivalent to specifying
