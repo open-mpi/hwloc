@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -25,7 +25,8 @@ struct hwloc_synthetic_backend_data_s {
   unsigned arity[HWLOC_SYNTHETIC_MAX_DEPTH];
   hwloc_obj_type_t type[HWLOC_SYNTHETIC_MAX_DEPTH];
   unsigned id[HWLOC_SYNTHETIC_MAX_DEPTH];
-  unsigned depth[HWLOC_SYNTHETIC_MAX_DEPTH]; /* For cache/misc */
+  unsigned depth[HWLOC_SYNTHETIC_MAX_DEPTH]; /* For caches/groups */
+  hwloc_obj_cache_type_t cachetype[HWLOC_SYNTHETIC_MAX_DEPTH]; /* For caches */
 };
 
 /* Read from description a series of integers describing a symmetrical
@@ -50,6 +51,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   for (pos = description, count = 1; *pos; pos = next_pos) {
 #define HWLOC_OBJ_TYPE_UNKNOWN ((hwloc_obj_type_t) -1)
     hwloc_obj_type_t type = HWLOC_OBJ_TYPE_UNKNOWN;
+    int typedepth = -1;
+    hwloc_obj_cache_type_t cachetype = (hwloc_obj_cache_type_t) -1;
 
     while (*pos == ' ')
       pos++;
@@ -58,24 +61,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       break;
 
     if (*pos < '0' || *pos > '9') {
-      if (!hwloc_namecoloncmp(pos, "machines", 2)) {
-	type = HWLOC_OBJ_MACHINE;
-      } else if (!hwloc_namecoloncmp(pos, "nodes", 1))
-	type = HWLOC_OBJ_NODE;
-      else if (!hwloc_namecoloncmp(pos, "sockets", 1))
-	type = HWLOC_OBJ_SOCKET;
-      else if (!hwloc_namecoloncmp(pos, "cores", 2))
-	type = HWLOC_OBJ_CORE;
-      else if (!hwloc_namecoloncmp(pos, "caches", 2))
-	type = HWLOC_OBJ_CACHE;
-      else if (!hwloc_namecoloncmp(pos, "pus", 1))
-	type = HWLOC_OBJ_PU;
-      else if (!hwloc_namecoloncmp(pos, "misc", 2))
-	type = HWLOC_OBJ_MISC;
-      else if (!hwloc_namecoloncmp(pos, "group", 2))
-	type = HWLOC_OBJ_GROUP;
-      else if (verbose)
-        fprintf(stderr, "Synthetic string with unknown object type `%s'\n", pos);
+      if (hwloc_obj_type_sscanf(pos, &type, &typedepth, &cachetype, sizeof(cachetype)) < 0) {
+	if (verbose)
+	  fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
+	errno = EINVAL;
+	return -1;
+      }
 
       next_pos = strchr(pos, ':');
       if (!next_pos) {
@@ -109,6 +100,8 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 
     data->arity[count-1] = (unsigned)item;
     data->type[count] = type;
+    data->depth[count] = (unsigned) typedepth;
+    data->cachetype[count] = cachetype;
     count++;
   }
 
@@ -210,10 +203,15 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   for (i=0; i<count; i++) {
     hwloc_obj_type_t type = data->type[i];
 
-    if (type == HWLOC_OBJ_GROUP)
-      data->depth[i] = group_depth--;
-    else if (type == HWLOC_OBJ_CACHE)
-      data->depth[i] = cache_depth--;
+    if (type == HWLOC_OBJ_GROUP) {
+      if (data->depth[i] == (unsigned)-1)
+	data->depth[i] = group_depth--;
+    } else if (type == HWLOC_OBJ_CACHE) {
+      if (data->depth[i] == (unsigned)-1)
+	data->depth[i] = cache_depth--;
+      if (data->cachetype[i] == (hwloc_obj_cache_type_t) -1)
+	data->cachetype[i] = data->depth[i] == 1 ? HWLOC_OBJ_CACHE_DATA : HWLOC_OBJ_CACHE_UNIFIED;
+    }
   }
 
   data->string = strdup(description);
@@ -317,14 +315,13 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_CACHE:
       obj->attr->cache.depth = data->depth[level];
       obj->attr->cache.linesize = 64;
+      obj->attr->cache.type = data->cachetype[level];
       if (obj->attr->cache.depth == 1) {
 	/* 32Kb in L1d */
 	obj->attr->cache.size = 32*1024;
-	obj->attr->cache.type = HWLOC_OBJ_CACHE_DATA;
       } else {
 	/* *4 at each level, starting from 1MB for L2, unified */
 	obj->attr->cache.size = 256*1024 << (2*obj->attr->cache.depth);
-	obj->attr->cache.type = HWLOC_OBJ_CACHE_UNIFIED;
       }
       break;
     case HWLOC_OBJ_CORE:

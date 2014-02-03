@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -275,8 +275,10 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int logic
 
   arity = obj->arity;
   while (arity) {
+    char types[64];
     obj = obj->first_child;
-    fprintf(output, "%s:%u ", hwloc_obj_type_string(obj->type), arity);
+    hwloc_obj_type_snprintf(types, sizeof(types), obj, 1);
+    fprintf(output, "%s:%u ", types, arity);
     arity = obj->arity;
   }
   fprintf(output, "\n");
