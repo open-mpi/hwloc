@@ -192,7 +192,7 @@ hwloc_look_freebsd(struct hwloc_backend *backend)
 #endif
   hwloc_obj_add_info(topology->levels[0][0], "Backend", "FreeBSD");
   if (topology->is_thissystem)
-    hwloc_add_uname_info(topology);
+    hwloc_add_uname_info(topology, NULL);
   return 1;
 }
 

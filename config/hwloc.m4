@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright © 2009-2013 Inria.  All rights reserved.
+dnl Copyright © 2009-2014 Inria.  All rights reserved.
 dnl Copyright (c) 2009-2012 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -995,8 +995,23 @@ EOF])
     AC_MSG_CHECKING([for cpuid])
     old_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$CPPFLAGS -I$HWLOC_top_srcdir/include"
+    # We need hwloc_uint64_t but we can't use hwloc/autogen/config.h before configure ends.
+    # So pass #include/#define manually here for now.
+    CPUID_CHECK_HEADERS=
+    CPUID_CHECK_DEFINE=
+    if test "x$hwloc_windows" = xyes; then
+      CPUID_CHECK_HEADERS="#include <windows.h>"
+      CPUID_CHECK_DEFINE="#define hwloc_uint64_t DWORDLONG"
+    else
+      CPUID_CHECK_DEFINE="#define hwloc_uint64_t uint64_t"
+      if test "x$ac_cv_header_stdint_h" = xyes; then
+        CPUID_CHECK_HEADERS="#include <stdint.h>"
+      fi
+    fi
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
+        $CPUID_CHECK_HEADERS
+        $CPUID_CHECK_DEFINE
         #define __hwloc_inline
         #include <private/cpuid.h>
       ]], [[

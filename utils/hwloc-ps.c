@@ -33,6 +33,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  -p --physical    Use physical object indexes\n");
   fprintf (where, "  -c --cpuset      Show cpuset instead of objects\n");
   fprintf (where, "  -t --threads     Show threads\n");
+  fprintf (where, "  -e --get-last-cpu-location\n");
+  fprintf (where, "                   Retrieve the last processors where the tasks ran\n");
   fprintf (where, "  --pid-cmd <cmd>  Append the output of <cmd> <pid> to each PID line\n");
   fprintf (where, "  --whole-system   Do not consider administration limitations\n");
 }
@@ -56,6 +58,9 @@ static void print_task(hwloc_topology_t topology,
       char type[64];
       unsigned idx;
       hwloc_obj_t obj = hwloc_get_first_largest_obj_inside_cpuset(topology, remaining);
+      /* don't show a cache if there's something equivalent and nicer */
+      while (obj->type == HWLOC_OBJ_CACHE && obj->arity == 1)
+	obj = obj->first_child;
       hwloc_obj_type_snprintf(type, sizeof(type), obj, 1);
       idx = logical ? obj->logical_index : obj->os_index;
       if (idx == (unsigned) -1)
@@ -82,6 +87,7 @@ int main(int argc, char *argv[])
   struct dirent *dirent;
   int show_all = 0;
   int show_threads = 0;
+  int get_last_cpu_location = 0;
   char *callname;
   char *pidcmd = NULL;
   int err;
@@ -106,6 +112,8 @@ int main(int argc, char *argv[])
       logical = 0;
     } else if (!strcmp(argv[0], "-c") || !strcmp(argv[0], "--cpuset")) {
       show_cpuset = 1;
+    } else if (!strcmp(argv[0], "-e") || !strncmp(argv[0], "--get-last-cpu-location", 10)) {
+      get_last_cpu_location = 1;
     } else if (!strcmp(argv[0], "-t") || !strcmp(argv[0], "--threads")) {
 #ifdef HWLOC_LINUX_SYS
       show_threads = 1;
@@ -142,8 +150,13 @@ int main(int argc, char *argv[])
 
   support = hwloc_topology_get_support(topology);
 
-  if (!support->cpubind->get_thisproc_cpubind)
-    goto out_with_topology;
+  if (get_last_cpu_location) {
+    if (!support->cpubind->get_proc_last_cpu_location)
+      goto out_with_topology;
+  } else {
+    if (!support->cpubind->get_proc_cpubind)
+      goto out_with_topology;
+  }
 
   topocpuset = hwloc_topology_get_topology_cpuset(topology);
 
@@ -233,8 +246,13 @@ int main(int argc, char *argv[])
 	      if (*end)
 		/* Not a number */
 		continue;
-	      if (hwloc_linux_get_tid_cpubind(topology, tid, cpuset))
-		continue;
+	      if (get_last_cpu_location) {
+		if (hwloc_linux_get_tid_last_cpu_location(topology, tid, cpuset))
+		  continue;
+	      } else {
+		if (hwloc_linux_get_tid_cpubind(topology, tid, cpuset))
+		  continue;
+	      }
 	      hwloc_bitmap_and(cpuset, cpuset, topocpuset);
 	      tids[i] = tid;
 	      tidcpusets[i] = hwloc_bitmap_dup(cpuset);
@@ -256,8 +274,13 @@ int main(int argc, char *argv[])
 #endif /* HWLOC_LINUX_SYS */
     }
 
-    if (hwloc_get_proc_cpubind(topology, pid, cpuset, 0))
-      continue;
+    if (get_last_cpu_location) {
+      if (hwloc_get_proc_last_cpu_location(topology, pid, cpuset, 0))
+	continue;
+    } else {
+      if (hwloc_get_proc_cpubind(topology, pid, cpuset, 0))
+	continue;
+    }
 
     hwloc_bitmap_and(cpuset, cpuset, topocpuset);
     if (hwloc_bitmap_iszero(cpuset))

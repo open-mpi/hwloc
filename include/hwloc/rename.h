@@ -353,17 +353,17 @@ extern "C" {
 
 #define hwloc_topology_diff_obj_attr_type_e HWLOC_NAME(topology_diff_obj_attr_type_e)
 #define hwloc_topology_diff_obj_attr_type_t HWLOC_NAME(topology_diff_obj_attr_type_t)
-#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE)
-#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME)
-#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO)
+#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_SIZE HWLOC_NAME_CAPS(TOPOLOGY_DIFF_OBJ_ATTR_SIZE)
+#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_NAME HWLOC_NAME_CAPS(TOPOLOGY_DIFF_OBJ_ATTR_NAME)
+#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR_INFO HWLOC_NAME_CAPS(TOPOLOGY_DIFF_OBJ_ATTR_INFO)
 #define hwloc_topology_diff_obj_attr_u HWLOC_NAME(topology_diff_obj_attr_u)
 #define hwloc_topology_diff_obj_attr_generic_s HWLOC_NAME(topology_diff_obj_attr_generic_s)
 #define hwloc_topology_diff_obj_attr_uint64_s HWLOC_NAME(topology_diff_obj_attr_uint64_s)
 #define hwloc_topology_diff_obj_attr_string_s HWLOC_NAME(topology_diff_obj_attr_string_s)
 #define hwloc_topology_diff_type_e HWLOC_NAME(topology_diff_type_e)
 #define hwloc_topology_diff_type_t HWLOC_NAME(topology_diff_type_t)
-#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_OBJ_ATTR)
-#define HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX)
+#define HWLOC_TOPOLOGY_DIFF_OBJ_ATTR HWLOC_NAME_CAPS(TOPOLOGY_DIFF_OBJ_ATTR)
+#define HWLOC_TOPOLOGY_DIFF_TOO_COMPLEX HWLOC_NAME_CAPS(TOPOLOGY_DIFF_TOO_COMPLEX)
 #define hwloc_topology_diff_u HWLOC_NAME(topology_diff_u)
 #define hwloc_topology_diff_t HWLOC_NAME(topology_diff_t)
 #define hwloc_topology_diff_generic_s HWLOC_NAME(topology_diff_generic_s)
@@ -371,7 +371,7 @@ extern "C" {
 #define hwloc_topology_diff_too_complex_s HWLOC_NAME(topology_diff_too_complex_s)
 #define hwloc_topology_diff_build HWLOC_NAME(topology_diff_build)
 #define hwloc_topology_diff_apply_flags_e HWLOC_NAME(topology_diff_apply_flags_e)
-#define HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE HWLOC_NAME_CAPS(HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE)
+#define HWLOC_TOPOLOGY_DIFF_APPLY_REVERSE HWLOC_NAME_CAPS(TOPOLOGY_DIFF_APPLY_REVERSE)
 #define hwloc_topology_diff_apply HWLOC_NAME(topology_diff_apply)
 #define hwloc_topology_diff_destroy HWLOC_NAME(topology_diff_destroy)
 #define hwloc_topology_diff_load_xml HWLOC_NAME(topology_diff_load_xml)
@@ -400,6 +400,7 @@ extern "C" {
 #define hwloc_linux_parse_cpumap_file HWLOC_NAME(linux_parse_cpumap_file)
 #define hwloc_linux_set_tid_cpubind HWLOC_NAME(linux_set_tid_cpubind)
 #define hwloc_linux_get_tid_cpubind HWLOC_NAME(linux_get_tid_cpubind)
+#define hwloc_linux_get_tid_last_cpu_location HWLOC_NAME(linux_get_tid_last_cpu_location)
 
 /* openfabrics-verbs.h */
 
@@ -606,6 +607,8 @@ extern "C" {
 
 #define hwloc_encode_to_base64 HWLOC_NAME(encode_to_base64)
 #define hwloc_decode_from_base64 HWLOC_NAME(decode_from_base64)
+
+#define hwloc_obj_add_info_nodup HWLOC_NAME(obj_add_info_nodup)
 
 /* private/solaris-chiptype.h */
 

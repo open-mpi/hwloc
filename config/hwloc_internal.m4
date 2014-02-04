@@ -1,6 +1,6 @@
 dnl -*- Autoconf -*-
 dnl
-dnl Copyright (c) 2009-2012 Inria.  All rights reserved.
+dnl Copyright (c) 2009-2014 Inria.  All rights reserved.
 dnl Copyright (c) 2009, 2011 Université Bordeaux 1
 dnl Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
 dnl                         University Research and Technology
@@ -117,8 +117,10 @@ EOF
 
     AC_MSG_CHECKING([if this is a developer build])
     AS_IF([test ! -d "$srcdir/.hg" -a ! -d "$srcdir/.git"],
-          [AC_MSG_RESULT([no (doxygen generation is optional)])],
-          [AC_MSG_RESULT([yes])])
+          [AC_MSG_RESULT([no (doxygen generation is optional)])
+	   test "x$enable_doxygen" = x && enable_doxygen=no],
+          [AC_MSG_RESULT([yes])
+	   test "x$enable_doxygen" = x && enable_doxygen=yes])
     
     # Generating the doxygen output requires a few tools.  If we
     # don't have all of them, refuse the build the docs.
