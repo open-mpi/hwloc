@@ -18,15 +18,21 @@
 #include <strings.h>
 #endif
 
+struct hwloc_synthetic_level_data_s {
+  unsigned arity;
+  hwloc_obj_type_t type;
+  unsigned depth; /* For caches/groups */
+  hwloc_obj_cache_type_t cachetype; /* For caches */
+
+  /* used while filling the topology */
+  unsigned next_os_index; /* id of the next object for that level */
+};
+
 struct hwloc_synthetic_backend_data_s {
   /* synthetic backend parameters */
   char *string;
 #define HWLOC_SYNTHETIC_MAX_DEPTH 128
-  unsigned arity[HWLOC_SYNTHETIC_MAX_DEPTH];
-  hwloc_obj_type_t type[HWLOC_SYNTHETIC_MAX_DEPTH];
-  unsigned id[HWLOC_SYNTHETIC_MAX_DEPTH];
-  unsigned depth[HWLOC_SYNTHETIC_MAX_DEPTH]; /* For caches/groups */
-  hwloc_obj_cache_type_t cachetype[HWLOC_SYNTHETIC_MAX_DEPTH]; /* For caches */
+  struct hwloc_synthetic_level_data_s level[HWLOC_SYNTHETIC_MAX_DEPTH];
 };
 
 /* Read from description a series of integers describing a symmetrical
@@ -98,10 +104,10 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       return -1;
     }
 
-    data->arity[count-1] = (unsigned)item;
-    data->type[count] = type;
-    data->depth[count] = (unsigned) typedepth;
-    data->cachetype[count] = cachetype;
+    data->level[count-1].arity = (unsigned)item;
+    data->level[count].type = type;
+    data->level[count].depth = (unsigned) typedepth;
+    data->level[count].cachetype = cachetype;
     count++;
   }
 
@@ -113,15 +119,16 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   }
 
   for(i=count-1; i>0; i--) {
+    struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
     hwloc_obj_type_t type;
 
-    type = data->type[i];
+    type = curlevel->type;
 
     if (type == HWLOC_OBJ_TYPE_UNKNOWN) {
       if (i == count-1)
 	type = HWLOC_OBJ_PU;
       else {
-	switch (data->type[i+1]) {
+	switch (data->level[i+1].type) {
 	case HWLOC_OBJ_PU: type = HWLOC_OBJ_CORE; break;
 	case HWLOC_OBJ_CORE: type = HWLOC_OBJ_CACHE; break;
 	case HWLOC_OBJ_CACHE: type = HWLOC_OBJ_SOCKET; break;
@@ -134,7 +141,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	  assert(0);
 	}
       }
-      data->type[i] = type;
+      curlevel->type = type;
     }
     switch (type) {
       case HWLOC_OBJ_PU:
@@ -190,9 +197,9 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   }
 
   if (nb_machine_levels)
-    data->type[0] = HWLOC_OBJ_SYSTEM;
+    data->level[0].type = HWLOC_OBJ_SYSTEM;
   else {
-    data->type[0] = HWLOC_OBJ_MACHINE;
+    data->level[0].type = HWLOC_OBJ_MACHINE;
     nb_machine_levels++;
   }
 
@@ -201,21 +208,22 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     cache_depth = 2;
 
   for (i=0; i<count; i++) {
-    hwloc_obj_type_t type = data->type[i];
+    struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
+    hwloc_obj_type_t type = curlevel->type;
 
     if (type == HWLOC_OBJ_GROUP) {
-      if (data->depth[i] == (unsigned)-1)
-	data->depth[i] = group_depth--;
+      if (curlevel->depth == (unsigned)-1)
+	curlevel->depth = group_depth--;
     } else if (type == HWLOC_OBJ_CACHE) {
-      if (data->depth[i] == (unsigned)-1)
-	data->depth[i] = cache_depth--;
-      if (data->cachetype[i] == (hwloc_obj_cache_type_t) -1)
-	data->cachetype[i] = data->depth[i] == 1 ? HWLOC_OBJ_CACHE_DATA : HWLOC_OBJ_CACHE_UNIFIED;
+      if (curlevel->depth == (unsigned)-1)
+	curlevel->depth = cache_depth--;
+      if (curlevel->cachetype == (hwloc_obj_cache_type_t) -1)
+	curlevel->cachetype = curlevel->depth == 1 ? HWLOC_OBJ_CACHE_DATA : HWLOC_OBJ_CACHE_UNIFIED;
     }
   }
 
   data->string = strdup(description);
-  data->arity[count-1] = 0;
+  data->level[count-1].arity = 0;
 
   return 0;
 }
@@ -236,7 +244,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 {
   hwloc_obj_t obj;
   unsigned i;
-  hwloc_obj_type_t type = data->type[level];
+  struct hwloc_synthetic_level_data_s *curlevel = &data->level[level];
+  hwloc_obj_type_t type = curlevel->type;
 
   /* pre-hooks */
   switch (type) {
@@ -269,13 +278,13 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
   }
 
-  obj = hwloc_alloc_setup_object(type, data->id[level]++);
+  obj = hwloc_alloc_setup_object(type, curlevel->next_os_index++);
   obj->cpuset = hwloc_bitmap_alloc();
 
-  if (!data->arity[level]) {
+  if (!curlevel->arity) {
     hwloc_bitmap_set(obj->cpuset, first_cpu++);
   } else {
-    for (i = 0; i < data->arity[level]; i++)
+    for (i = 0; i < curlevel->arity; i++)
       first_cpu = hwloc__look_synthetic(topology, data, level + 1, first_cpu, obj->cpuset);
   }
 
@@ -291,7 +300,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_MISC:
       break;
     case HWLOC_OBJ_GROUP:
-      obj->attr->group.depth = data->depth[level];
+      obj->attr->group.depth = curlevel->depth;
       break;
     case HWLOC_OBJ_SYSTEM:
     case HWLOC_OBJ_BRIDGE:
@@ -313,9 +322,9 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_SOCKET:
       break;
     case HWLOC_OBJ_CACHE:
-      obj->attr->cache.depth = data->depth[level];
+      obj->attr->cache.depth = curlevel->depth;
       obj->attr->cache.linesize = 64;
-      obj->attr->cache.type = data->cachetype[level];
+      obj->attr->cache.type = curlevel->cachetype;
       if (obj->attr->cache.depth == 1) {
 	/* 32Kb in L1d */
 	obj->attr->cache.size = 32*1024;
@@ -353,16 +362,16 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
 
   topology->support.discovery->pu = 1;
 
-  /* start with id=0 for each level */
-  for (i = 0; data->arity[i] > 0; i++)
-    data->id[i] = 0;
+  /* start with os_index 0 for each level */
+  for (i = 0; data->level[i].arity > 0; i++)
+    data->level[i].next_os_index = 0;
   /* ... including the last one */
-  data->id[i] = 0;
+  data->level[i].next_os_index = 0;
 
   /* update first level type according to the synthetic type array */
-  topology->levels[0][0]->type = data->type[0];
+  topology->levels[0][0]->type = data->level[0].type;
 
-  for (i = 0; i < data->arity[0]; i++)
+  for (i = 0; i < data->level[0].arity; i++)
     first_cpu = hwloc__look_synthetic(topology, data, 1, first_cpu, cpuset);
 
   hwloc_bitmap_free(cpuset);
