@@ -23,7 +23,7 @@ struct hwloc_synthetic_level_data_s {
   hwloc_obj_type_t type;
   unsigned depth; /* For caches/groups */
   hwloc_obj_cache_type_t cachetype; /* For caches */
-
+  hwloc_uint64_t memorysize; /* For caches/memory */
   /* used while filling the topology */
   unsigned next_os_index; /* id of the next object for that level */
 };
@@ -34,6 +34,45 @@ struct hwloc_synthetic_backend_data_s {
 #define HWLOC_SYNTHETIC_MAX_DEPTH 128
   struct hwloc_synthetic_level_data_s level[HWLOC_SYNTHETIC_MAX_DEPTH];
 };
+
+static int
+hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
+				  struct hwloc_synthetic_level_data_s *curlevel,
+				  int verbose)
+{
+  hwloc_obj_type_t type = curlevel->type;
+  const char *next_pos;
+  hwloc_uint64_t memorysize = 0;
+
+  next_pos = (const char *) strchr(attrs, ')');
+  if (!next_pos) {
+    if (verbose)
+      fprintf(stderr, "Missing attribute closing bracket in synthetic string doesn't have a number of objects at '%s'\n", attrs);
+    errno = EINVAL;
+    return -1;
+  }
+
+  while (')' != *attrs) {
+    if (HWLOC_OBJ_CACHE == type && !strncmp("size=", attrs, 5)) {
+      memorysize = strtoull(attrs+5, (char**) &attrs, 0);
+
+    } else if (HWLOC_OBJ_CACHE != type && !strncmp("memory=", attrs, 7)) {
+      memorysize = strtoull(attrs+7, (char**) &attrs, 0);
+
+    } else {
+      if (verbose)
+	fprintf(stderr, "Unknown attribute at '%s'\n", attrs);
+      errno = EINVAL;
+      return -1;
+    }
+    if (' ' == *attrs)
+      attrs++;
+  }
+
+  curlevel->memorysize = memorysize;
+  *next_posp = next_pos+1;
+  return 0;
+}
 
 /* Read from description a series of integers describing a symmetrical
    topology and update the hwloc_synthetic_backend_data_s accordingly.  On
@@ -50,9 +89,12 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   int nb_pu_levels = 0;
   int verbose = 0;
   char *env = getenv("HWLOC_SYNTHETIC_VERBOSE");
+  int err;
 
   if (env)
     verbose = atoi(env);
+
+  /* FIXME parse root attributes */
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
 #define HWLOC_OBJ_TYPE_UNKNOWN ((hwloc_obj_type_t) -1)
@@ -83,12 +125,24 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       }
       pos = next_pos + 1;
     }
+    data->level[count].type = type;
+    data->level[count].depth = (unsigned) typedepth;
+    data->level[count].cachetype = cachetype;
+
     item = strtoul(pos, (char **)&next_pos, 0);
     if (next_pos == pos) {
       if (verbose)
 	fprintf(stderr,"Synthetic string doesn't have a number of objects at '%s'\n", pos);
       errno = EINVAL;
       return -1;
+    }
+    data->level[count-1].arity = (unsigned)item;
+
+    data->level[count].memorysize = 0;
+    if (*next_pos == '(') {
+      err = hwloc_synthetic_parse_level_attrs(next_pos+1, &next_pos, &data->level[count], verbose);
+      if (err < 0)
+	return err;
     }
 
     if (count + 1 >= HWLOC_SYNTHETIC_MAX_DEPTH) {
@@ -104,10 +158,6 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       return -1;
     }
 
-    data->level[count-1].arity = (unsigned)item;
-    data->level[count].type = type;
-    data->level[count].depth = (unsigned) typedepth;
-    data->level[count].cachetype = cachetype;
     count++;
   }
 
@@ -207,14 +257,26 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     if (type == HWLOC_OBJ_GROUP) {
       if (curlevel->depth == (unsigned)-1)
 	curlevel->depth = group_depth--;
+
     } else if (type == HWLOC_OBJ_CACHE) {
       if (curlevel->depth == (unsigned)-1)
 	curlevel->depth = cache_depth--;
       if (curlevel->cachetype == (hwloc_obj_cache_type_t) -1)
 	curlevel->cachetype = curlevel->depth == 1 ? HWLOC_OBJ_CACHE_DATA : HWLOC_OBJ_CACHE_UNIFIED;
+      if (!curlevel->memorysize) {
+	if (1 == curlevel->depth)
+	  /* 32Kb in L1 */
+	  curlevel->memorysize = 32*1024;
+	else
+	  /* *4 at each level, starting from 1MB for L2, unified */
+	  curlevel->memorysize = 256*1024 << (2*curlevel->depth);
+      }
+
+    } else if (type == HWLOC_OBJ_NODE && !curlevel->memorysize) {
+      /* 1GB in memory nodes. */
+      curlevel->memorysize = 1024*1024*1024;
     }
   }
-
   data->string = strdup(description);
   data->level[count-1].arity = 0;
 
@@ -304,13 +366,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
     case HWLOC_OBJ_MACHINE:
       break;
     case HWLOC_OBJ_NODE:
-      /* 1GB in memory nodes, 256k 4k-pages.  */
-      obj->memory.local_memory = 1024*1024*1024;
-      obj->memory.page_types_len = 1;
-      obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-      memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
-      obj->memory.page_types[0].size = 4096;
-      obj->memory.page_types[0].count = 256*1024;
       break;
     case HWLOC_OBJ_SOCKET:
       break;
@@ -318,13 +373,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       obj->attr->cache.depth = curlevel->depth;
       obj->attr->cache.linesize = 64;
       obj->attr->cache.type = curlevel->cachetype;
-      if (obj->attr->cache.depth == 1) {
-	/* 32Kb in L1d */
-	obj->attr->cache.size = 32*1024;
-      } else {
-	/* *4 at each level, starting from 1MB for L2, unified */
-	obj->attr->cache.size = 256*1024 << (2*obj->attr->cache.depth);
-      }
+      obj->attr->cache.size = curlevel->memorysize;
       break;
     case HWLOC_OBJ_CORE:
       break;
@@ -334,6 +383,14 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       /* Should never happen */
       assert(0);
       break;
+  }
+  if (curlevel->memorysize && HWLOC_OBJ_CACHE != type) {
+    obj->memory.local_memory = curlevel->memorysize;
+    obj->memory.page_types_len = 1;
+    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+    memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
+    obj->memory.page_types[0].size = 4096;
+    obj->memory.page_types[0].count = curlevel->memorysize / 4096;
   }
 
   hwloc_insert_object_by_cpuset(topology, obj);
