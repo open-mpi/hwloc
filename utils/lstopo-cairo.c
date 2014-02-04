@@ -1,7 +1,7 @@
 /*
  * Copyright © 2009 CNRS
  * Copyright © 2009-2012 Inria.  All rights reserved.
- * Copyright © 2009-2010 Université Bordeaux 1
+ * Copyright © 2009-2010, 2014 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
@@ -181,6 +181,8 @@ x11_start(void *output __hwloc_attribute_unused, int width, int height)
 
   root = RootWindow(dpy, scr);
   disp->top = top = XCreateSimpleWindow(dpy, root, 0, 0, screen_width, screen_height, 0, WhitePixel(dpy, scr), WhitePixel(dpy, scr));
+  XStoreName(dpy, top, "lstopo");
+  XSetIconName(dpy, top, "lstopo");
   XSelectInput(dpy,top, StructureNotifyMask);
   XMapWindow(dpy, top);
 
