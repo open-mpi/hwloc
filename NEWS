@@ -17,6 +17,12 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.8.2
+-------------
+* Don't mix total and local memory when displaying verbose object attributes
+  with hwloc_obj_attr_snprintf() or in lstopo.
+
+
 Version 1.8.1
 -------------
 * Fix the cpuid code on Windows 64bits so that the x86 backend gets
