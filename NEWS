@@ -43,6 +43,8 @@ Version 1.8.1
   on x86 architecture. Thanks to Ralph Castain for the suggestion.
 * Work around buggy BIOS reporting duplicate NUMA nodes on Linux.
   Thanks to Jeff Becker for reporting the problem and testing the patch.
+* Add a name to the lstopo graphical window. Thanks to Michael Prokop
+  for reporting the issue.
 
 
 Version 1.8.0
