@@ -458,10 +458,10 @@ hwloc_obj_attr_snprintf(char * __hwloc_restrict string, size_t size, hwloc_obj_t
     if (obj->memory.local_memory)
       res = hwloc_snprintf(tmp, tmplen, "%slocal=%lu%s%stotal=%lu%s",
 			   prefix,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
+			   (unsigned long) hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
 			   hwloc_memory_size_printf_unit(obj->memory.total_memory, verbose),
 			   separator,
-			   (unsigned long) hwloc_memory_size_printf_value(obj->memory.local_memory, verbose),
+			   (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, verbose),
 			   hwloc_memory_size_printf_unit(obj->memory.local_memory, verbose));
     else if (obj->memory.total_memory)
       res = hwloc_snprintf(tmp, tmplen, "%stotal=%lu%s",
