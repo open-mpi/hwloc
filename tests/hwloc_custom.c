@@ -1,5 +1,5 @@
 /*
- * Copyright © 2011 inria.  All rights reserved.
+ * Copyright © 2011-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -18,7 +18,7 @@ int main(void)
 
   printf("Loading the local topology...\n");
   hwloc_topology_init(&local);
-  hwloc_topology_set_synthetic(local, "n:2 s:2 ca:1 core:2 ca:2 pu:2");
+  hwloc_topology_set_synthetic(local, "node:2 socket:2 cache:1 core:2 cache:2 pu:2");
   hwloc_topology_load(local);
 
   printf("Try to create an empty custom topology...\n");

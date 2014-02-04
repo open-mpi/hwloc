@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2010 inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -30,7 +30,7 @@ main (void)
   if (err)
     return EXIT_FAILURE;
 
-  hwloc_topology_set_synthetic (topology, "node:3 socket:3 core:3 proc:3");
+  hwloc_topology_set_synthetic (topology, "node:3 socket:3 core:3 pu:3");
 
   err = hwloc_topology_load (topology);
   if (err)
