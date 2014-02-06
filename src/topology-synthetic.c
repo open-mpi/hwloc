@@ -20,10 +20,18 @@
 
 struct hwloc_synthetic_level_data_s {
   unsigned arity;
+  unsigned long totalwidth;
   hwloc_obj_type_t type;
   unsigned depth; /* For caches/groups */
   hwloc_obj_cache_type_t cachetype; /* For caches */
   hwloc_uint64_t memorysize; /* For caches/memory */
+
+  /* the indexes= attribute before parsing */
+  const char *index_string;
+  unsigned long index_string_length;
+  /* the array of explicit indexes */
+  unsigned *index_array;
+
   /* used while filling the topology */
   unsigned next_os_index; /* id of the next object for that level */
 };
@@ -35,6 +43,57 @@ struct hwloc_synthetic_backend_data_s {
   struct hwloc_synthetic_level_data_s level[HWLOC_SYNTHETIC_MAX_DEPTH];
 };
 
+static void
+hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *data,
+				      unsigned curleveldepth,
+				      int verbose)
+{
+  struct hwloc_synthetic_level_data_s *curlevel = &data->level[curleveldepth];
+  unsigned long total = curlevel->totalwidth;
+  const char *attr = curlevel->index_string;
+  unsigned *array;
+  unsigned long i;
+
+  if (!attr)
+    return;
+
+  array = malloc(total * sizeof(*array));
+  if (!array) {
+    if (verbose)
+      fprintf(stderr, "Failed to allocate synthetic index array of size %lu\n", total);
+    goto out;
+  }
+
+  for(i=0; i<total; i++) {
+    const char *next;
+    unsigned idx = strtoul(attr, (char **) &next, 10);
+    if (next == attr) {
+      if (verbose)
+	fprintf(stderr, "Failed to read synthetic index #%lu at '%s'\n", i, attr);
+      goto out_with_index_array;
+    }
+
+    array[i] = idx;
+    if (i != total-1) {
+      if (*next != ',') {
+	if (verbose)
+	  fprintf(stderr, "Missing comma after synthetic index #%lu at '%s'\n", i, attr);
+	goto out_with_index_array;
+      }
+      attr = next+1;
+    } else {
+      attr = next;
+    }
+  }
+  curlevel->index_array = array;
+  return;
+
+ out_with_index_array:
+  free(array);
+ out:
+  return;
+}
+
 static int
 hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
 				  struct hwloc_synthetic_level_data_s *curlevel,
@@ -43,6 +102,8 @@ hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
   hwloc_obj_type_t type = curlevel->type;
   const char *next_pos;
   hwloc_uint64_t memorysize = 0;
+  const char *index_string = NULL;
+  unsigned long index_string_length = 0;
 
   next_pos = (const char *) strchr(attrs, ')');
   if (!next_pos) {
@@ -59,17 +120,32 @@ hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
     } else if (HWLOC_OBJ_CACHE != type && !strncmp("memory=", attrs, 7)) {
       memorysize = strtoull(attrs+7, (char**) &attrs, 0);
 
+    } else if (!strncmp("indexes=", attrs, 8)) {
+      index_string = attrs+8;
+      attrs += 8;
+      index_string_length = strspn(attrs, "0123456789,");
+      attrs += index_string_length;
+
     } else {
       if (verbose)
 	fprintf(stderr, "Unknown attribute at '%s'\n", attrs);
       errno = EINVAL;
       return -1;
     }
+
     if (' ' == *attrs)
       attrs++;
+    else if (')' != *attrs) {
+      if (verbose)
+	fprintf(stderr, "Missing parameter separator at '%s'\n", attrs);
+      errno = EINVAL;
+      return -1;
+    }
   }
 
   curlevel->memorysize = memorysize;
+  curlevel->index_string = index_string;
+  curlevel->index_string_length = index_string_length;
   *next_posp = next_pos+1;
   return 0;
 }
@@ -90,12 +166,16 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   int verbose = 0;
   char *env = getenv("HWLOC_SYNTHETIC_VERBOSE");
   int err;
+  unsigned long totalarity = 1;
 
   if (env)
     verbose = atoi(env);
 
   /* default values before we add root attributes */
+  data->level[0].totalwidth = 1;
   data->level[0].type = HWLOC_OBJ_MACHINE;
+  data->level[0].index_string = NULL;
+  data->level[0].index_array = NULL;
   data->level[0].memorysize = 0;
   if (*description == '(') {
     err = hwloc_synthetic_parse_level_attrs(description+1, &description, &data->level[0], verbose);
@@ -109,6 +189,9 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     int typedepth = -1;
     hwloc_obj_cache_type_t cachetype = (hwloc_obj_cache_type_t) -1;
 
+    /* initialize parent arity to 0 so that the levels are not infinite */
+    data->level[count-1].arity = 0;
+
     while (*pos == ' ')
       pos++;
 
@@ -120,7 +203,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	if (verbose)
 	  fprintf(stderr, "Synthetic string with unknown object type at '%s'\n", pos);
 	errno = EINVAL;
-	return -1;
+	goto error;
       }
 
       next_pos = strchr(pos, ':');
@@ -128,7 +211,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
 	if (verbose)
 	  fprintf(stderr,"Synthetic string doesn't have a `:' after object type at '%s'\n", pos);
 	errno = EINVAL;
-	return -1;
+	goto error;
       }
       pos = next_pos + 1;
     }
@@ -141,28 +224,32 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       if (verbose)
 	fprintf(stderr,"Synthetic string doesn't have a number of objects at '%s'\n", pos);
       errno = EINVAL;
-      return -1;
+      goto error;
     }
     data->level[count-1].arity = (unsigned)item;
 
+    totalarity *= item;
+    data->level[count].totalwidth = totalarity;
+    data->level[count].index_string = NULL;
+    data->level[count].index_array = NULL;
     data->level[count].memorysize = 0;
     if (*next_pos == '(') {
       err = hwloc_synthetic_parse_level_attrs(next_pos+1, &next_pos, &data->level[count], verbose);
       if (err < 0)
-	return err;
+	goto error;
     }
 
     if (count + 1 >= HWLOC_SYNTHETIC_MAX_DEPTH) {
       if (verbose)
 	fprintf(stderr,"Too many synthetic levels, max %d\n", HWLOC_SYNTHETIC_MAX_DEPTH);
       errno = EINVAL;
-      return -1;
+      goto error;
     }
     if (item > UINT_MAX) {
       if (verbose)
 	fprintf(stderr,"Too big arity, max %u\n", UINT_MAX);
       errno = EINVAL;
-      return -1;
+      goto error;
     }
 
     count++;
@@ -172,7 +259,7 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     if (verbose)
       fprintf(stderr, "Synthetic string doesn't contain any object\n");
     errno = EINVAL;
-    return -1;
+    goto error;
   }
 
   for(i=count-1; i>0; i--) {
@@ -283,11 +370,22 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
       /* 1GB in memory nodes. */
       curlevel->memorysize = 1024*1024*1024;
     }
+
+    hwloc_synthetic_process_level_indexes(data, i, verbose);
   }
+
   data->string = strdup(description);
   data->level[count-1].arity = 0;
-
   return 0;
+
+ error:
+  for(i=0; i<HWLOC_SYNTHETIC_MAX_DEPTH; i++) {
+    struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
+    free(curlevel->index_array);
+    if (!curlevel->arity)
+      break;
+  }
+  return -1;
 }
 
 static void
@@ -390,6 +488,8 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   }
 
   os_index = curlevel->next_os_index++;
+  if (curlevel->index_array)
+    os_index = curlevel->index_array[os_index];
   obj = hwloc_alloc_setup_object(type, os_index);
   obj->cpuset = hwloc_bitmap_alloc();
 
@@ -450,6 +550,13 @@ static void
 hwloc_synthetic_backend_disable(struct hwloc_backend *backend)
 {
   struct hwloc_synthetic_backend_data_s *data = backend->private_data;
+  unsigned i;
+  for(i=0; i<HWLOC_SYNTHETIC_MAX_DEPTH; i++) {
+    struct hwloc_synthetic_level_data_s *curlevel = &data->level[i];
+    free(curlevel->index_array);
+    if (!curlevel->arity)
+      break;
+  }
   free(data->string);
   free(data);
 }
