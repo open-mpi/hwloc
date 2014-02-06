@@ -1087,8 +1087,8 @@ following environment variables.
   this is strictly identical to not specifying any variable.
   The <tt>xml</tt> component name may be followed by a XML file to
   load (<tt>xml=file.xml</tt>).
-  The synthetic component may be followed by a synthetic topology
-  description (<tt>synthetic=node:2 pu:3</tt>).
+  The synthetic component may be followed by a basic synthetic topology
+  description (<tt>synthetic=node:2 pu:3</tt>, see \ref synthetic).
   This variable does not take precedence over the application
   selecting components with functions such as
   hwloc_topology_set_xml().
@@ -1776,6 +1776,12 @@ decimal separator. Therefore any exported topology can be
 reloaded on any other machine without requiring to change the
 locale.
 
+\note XML exports contain all details about the platform. It means
+that two very similar nodes still have different XML exports
+(e.g. some serial numbers or MAC addresses are different).
+If a less precise exporting/importing is required, one may want to
+look at \ref synthetic instead.
+
 \section xml_backends libxml2 and minimalistic XML backends
 
 hwloc offers two backends for importing/exporting XML.
@@ -1850,6 +1856,11 @@ Machine (2048MB)
 Replacing <tt>-</tt> with <tt>file.xml</tt> in this command line
 will export this topology to XML as usual.
 
+\note Synthetic topologies offer a very basic way to export a
+topology and reimport it on another machine. It is a lot less
+precise than XML but may still be enough when only the hierarchy
+of resources matters.
+
 \section synthetic_string Synthetic description string
 
 Each item in the description string gives the type of the level and
@@ -1871,10 +1882,35 @@ A Machine object is used by default, and a System object replaces it
 if a Machine level is specified in the string.
 
 Cache level depths are automatically chosen by hwloc (only a L2 first,
-then a L1 under it, then L3 above, then L4 etc.).
+then a L1 under it, then L3 above, then L4 etc.) unless they are specified.
 Memory and cache sizes are also automatically chosen.
 The only way to modifying them is to export to XML and manually modify
 the file.
+
+Each item may be followed parentheses containing a list of
+space-separated attributes. For instance:
+<ul>
+<li>
+ <tt>L2iCache:2(size=32768)</tt> specifies 2 children
+ of 32kB level-2 instruction caches.
+</li>
+<li>
+ <tt>NUMANode:3(memory=16777216)</tt> specifies 3 NUMA nodes with 16MB each.
+</li>
+<li>
+ <tt>PU:2(indexes=0,2,1,3)</tt> specifies 2 PU children and the
+ full list of OS indexes among the entire set of 4 PU objects.
+</li>
+<li>
+ <tt>PU:2(indexes=numa:core)</tt> specifies 2 PU children whose
+ OS indexes are interleaved by NUMA node first and then by socket.
+</li>
+<li>
+ Attributes in parentheses at the very beginning of the description
+ apply to the root object.
+</li>
+</ul>
+
 
 \section synthetic_use Loading a synthetic topology
 
@@ -1895,10 +1931,10 @@ topology flag.
 
 \section synthetic_export Exporting a topology as a synthetic string
 
-lstopo may export a topology as a synthetic string by forcing its
-output format. 
-It offers a convenient way to quickly describe the contents of a
-machine.
+The function ::hwloc_topology_export_synthetic() may export
+a topology as a synthetic string.
+It offers a convenient way to quickly describe the contents of a machine.
+The lstopo tool may also perform such an export by forcing the output format.
 
 \verbatim
 $ lstopo --of synthetic --no-io
@@ -1907,8 +1943,8 @@ Socket:1 Cache:1 Cache:2 Cache:1 Cache:1 Core:1 PU:2
 
 The exported string may be passed back to hwloc for recreating
 another similar topology.
-The entire tree will be similar, but cache types and memory sizes
-may be different from the originals.
+The entire tree will be similar, but some special attributes such
+processort types may be missing.
 
 Such an export is only possible if the topology is totally symmetric,
 which means the <tt>symmetric_subtree</tt> field of the root object
@@ -1917,7 +1953,7 @@ This usually implies that I/O objects are disabled since attaching I/O
 busses often cause the topology to become assymetric.
 Passing <tt>--no-io</tt> to lstopo is therefore often useful to make
 synthetic export work (as well as not passing any I/O topology flag
-when using ::hwloc_topology_set_synthetic() manually).
+before exporting with ::hwloc_topology_export_synthetic()).
 
 
 

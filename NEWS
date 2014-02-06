@@ -23,7 +23,16 @@ Version 1.10.0
   + hwloc_distrib() does not ignore any objects anymore when there are
     too many of them. They get merged with others instead.
     Thanks to Tim Creech for reporting the issue.
+  + Add hwloc_topology_export_synthetic() to export a topology to a
+    synthetic string without using lstopo. See the Synthetic topologies
+    section in the documentation.
 * Misc
+  + Synthetic topology descriptions may now specify attributes such as
+    memory sizes and OS indexes. See the Synthetic topologies section
+    in the documentation.
+    - lstopo now exports in this fully-detailed format by default.
+      The new option --export-synthetic-flags may be used to revert
+      back the old format.
   + Clarify that memory sizes shown in lstopo are local by default
     unless specified (total memory added in the root object).
   + Add --disable-cpuid configure flag to work around buggy processor
