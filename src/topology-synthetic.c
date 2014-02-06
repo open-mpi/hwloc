@@ -94,7 +94,14 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   if (env)
     verbose = atoi(env);
 
-  /* FIXME parse root attributes */
+  /* default values before we add root attributes */
+  data->level[0].type = HWLOC_OBJ_MACHINE;
+  data->level[0].memorysize = 0;
+  if (*description == '(') {
+    err = hwloc_synthetic_parse_level_attrs(description+1, &description, &data->level[0], verbose);
+    if (err < 0)
+      return err;
+  }
 
   for (pos = description, count = 1; *pos; pos = next_pos) {
 #define HWLOC_OBJ_TYPE_UNKNOWN ((hwloc_obj_type_t) -1)
@@ -283,6 +290,54 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
   return 0;
 }
 
+static void
+hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
+				 hwloc_obj_t obj)
+{
+  switch (obj->type) {
+  case HWLOC_OBJ_MISC:
+    break;
+  case HWLOC_OBJ_GROUP:
+    obj->attr->group.depth = curlevel->depth;
+    break;
+  case HWLOC_OBJ_BRIDGE:
+  case HWLOC_OBJ_PCI_DEVICE:
+  case HWLOC_OBJ_OS_DEVICE:
+    abort();
+    break;
+  case HWLOC_OBJ_SYSTEM:
+    break;
+  case HWLOC_OBJ_MACHINE:
+    break;
+  case HWLOC_OBJ_NODE:
+    break;
+  case HWLOC_OBJ_SOCKET:
+    break;
+  case HWLOC_OBJ_CACHE:
+    obj->attr->cache.depth = curlevel->depth;
+    obj->attr->cache.linesize = 64;
+    obj->attr->cache.type = curlevel->cachetype;
+    obj->attr->cache.size = curlevel->memorysize;
+    break;
+  case HWLOC_OBJ_CORE:
+    break;
+  case HWLOC_OBJ_PU:
+    break;
+  case HWLOC_OBJ_TYPE_MAX:
+    /* Should never happen */
+    assert(0);
+    break;
+  }
+  if (curlevel->memorysize && HWLOC_OBJ_CACHE != obj->type) {
+    obj->memory.local_memory = curlevel->memorysize;
+    obj->memory.page_types_len = 1;
+    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
+    memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
+    obj->memory.page_types[0].size = 4096;
+    obj->memory.page_types[0].count = curlevel->memorysize / 4096;
+  }
+}
+
 /*
  * Recursively build objects whose cpu start at first_cpu
  * - level gives where to look in the type, arity and id arrays
@@ -350,48 +405,7 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
 
   hwloc_bitmap_or(parent_cpuset, parent_cpuset, obj->cpuset);
 
-  /* post-hooks */
-  switch (type) {
-    case HWLOC_OBJ_MISC:
-      break;
-    case HWLOC_OBJ_GROUP:
-      obj->attr->group.depth = curlevel->depth;
-      break;
-    case HWLOC_OBJ_SYSTEM:
-    case HWLOC_OBJ_BRIDGE:
-    case HWLOC_OBJ_PCI_DEVICE:
-    case HWLOC_OBJ_OS_DEVICE:
-      abort();
-      break;
-    case HWLOC_OBJ_MACHINE:
-      break;
-    case HWLOC_OBJ_NODE:
-      break;
-    case HWLOC_OBJ_SOCKET:
-      break;
-    case HWLOC_OBJ_CACHE:
-      obj->attr->cache.depth = curlevel->depth;
-      obj->attr->cache.linesize = 64;
-      obj->attr->cache.type = curlevel->cachetype;
-      obj->attr->cache.size = curlevel->memorysize;
-      break;
-    case HWLOC_OBJ_CORE:
-      break;
-    case HWLOC_OBJ_PU:
-      break;
-    case HWLOC_OBJ_TYPE_MAX:
-      /* Should never happen */
-      assert(0);
-      break;
-  }
-  if (curlevel->memorysize && HWLOC_OBJ_CACHE != type) {
-    obj->memory.local_memory = curlevel->memorysize;
-    obj->memory.page_types_len = 1;
-    obj->memory.page_types = malloc(sizeof(*obj->memory.page_types));
-    memset(obj->memory.page_types, 0, sizeof(*obj->memory.page_types));
-    obj->memory.page_types[0].size = 4096;
-    obj->memory.page_types[0].count = curlevel->memorysize / 4096;
-  }
+  hwloc_synthetic__post_look_hooks(curlevel, obj);
 
   hwloc_insert_object_by_cpuset(topology, obj);
 
@@ -420,6 +434,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
 
   /* update first level type according to the synthetic type array */
   topology->levels[0][0]->type = data->level[0].type;
+  hwloc_synthetic__post_look_hooks(&data->level[0], topology->levels[0][0]);
 
   for (i = 0; i < data->level[0].arity; i++)
     first_cpu = hwloc__look_synthetic(topology, data, 1, first_cpu, cpuset);
