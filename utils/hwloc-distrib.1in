@@ -69,6 +69,10 @@ of them.
 Distribute among objects of the given type.  This is equivalent to specifying
 both \fB\-\-from\fR and \fB\-\-to\fR at the same time.
 .TP
+\fB\-\-reverse\fR
+Distribute by starting with the last objects first,
+and singlify CPU sets by keeping the last bit (instead of the first bit).
+.TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
 .TP

@@ -23,6 +23,7 @@ void usage(const char *callname __hwloc_attribute_unused, FILE *where)
   fprintf(where, "  --from <type>    Distribute starting from objects of the given type\n");
   fprintf(where, "  --to <type>      Distribute down to objects of the given type\n");
   fprintf(where, "  --at <type>      Distribute among objects of the given type\n");
+  fprintf(where, "  --reverse        Distribute by starting from last objects\n");
   fprintf(where, "Input topology options:\n");
   fprintf(where, "  --restrict <set> Restrict the topology to processors listed in <set>\n");
   fprintf(where, "  --whole-system   Do not consider administration limitations\n");
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
   hwloc_obj_type_t from_type = (hwloc_obj_type_t) -1, to_type = (hwloc_obj_type_t) -1;
   hwloc_topology_t topology;
   unsigned long flags = 0;
+  unsigned long dflags = 0;
   int opt;
   int err;
 
@@ -143,6 +145,10 @@ int main(int argc, char *argv[])
 	from_type = to_type;
 	argc--;
 	argv++;
+	goto next;
+      }
+      else if (!strcmp (argv[0], "--reverse")) {
+	dflags |= HWLOC_DISTRIB_FLAG_REVERSE;
 	goto next;
       }
       else if (!strcmp (argv[0], "--restrict")) {
@@ -249,12 +255,18 @@ int main(int argc, char *argv[])
       for (i = 0; i < chunks; i++)
         roots[i] = hwloc_get_obj_by_depth(topology, from_depth, i);
 
-      hwloc_distributev(topology, roots, chunks, cpuset, n, to_depth);
+      hwloc_distrib(topology, roots, chunks, cpuset, n, to_depth, dflags);
 
       for (i = 0; (long) i < n; i++) {
 	char *str = NULL;
-	if (singlify)
-	  hwloc_bitmap_singlify(cpuset[i]);
+	if (singlify) {
+	  if (dflags & HWLOC_DISTRIB_FLAG_REVERSE) {
+	    unsigned last = hwloc_bitmap_last(cpuset[i]);
+	    hwloc_bitmap_only(cpuset[i], last);
+	  } else {
+	    hwloc_bitmap_singlify(cpuset[i]);
+	  }
+	}
 	if (taskset)
 	  hwloc_bitmap_taskset_asprintf(&str, cpuset[i]);
 	else
