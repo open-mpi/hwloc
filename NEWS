@@ -25,6 +25,8 @@ Version 1.9.0
     hwloc_obj_type_of_string() is moved to hwloc/deprecated.h.
   + Add hwloc_linux_get_tid_last_cpu_location() for retrieving the
     last CPU where a Linux thread given by TID ran.
+  + Add hwloc_distrib() to extend the old hwloc_distribute[v]() functions.
+    hwloc_distribute[v]() is moved to hwloc/deprecated.h.
 * Backends
   + Add CPUVendor, CPUModelNumber and CPUFamilyNumber info attributes for
     x86, ia64 and Xeon Phi sockets on Linux, to extend the x86-specific

@@ -51,6 +51,39 @@ HWLOC_DECLSPEC int hwloc_obj_snprintf(char * __hwloc_restrict string, size_t siz
 				      hwloc_topology_t topology, hwloc_obj_t obj,
 				      const char * __hwloc_restrict indexprefix, int verbose);
 
+/** \brief Distribute \p n items over the topology under \p root
+ *
+ * Array \p cpuset will be filled with \p n cpusets recursively distributed
+ * linearly over the topology under \p root, down to depth \p until (which can
+ * be INT_MAX to distribute down to the finest level).
+ *
+ * This is typically useful when an application wants to distribute \p n
+ * threads over a machine, giving each of them as much private cache as
+ * possible and keeping them locally in number order.
+ *
+ * The caller may typically want to also call hwloc_bitmap_singlify()
+ * before binding a thread so that it does not move at all.
+ *
+ * \note This function requires the \p root object to have a CPU set.
+ */
+static __hwloc_inline void
+hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *set, unsigned n, unsigned until)
+{
+  hwloc_distrib(topology, &root, 1, set, n, until, 0);
+}
+
+/** \brief Distribute \p n items over the topology under \p roots
+ *
+ * This is the same as hwloc_distribute, but takes an array of roots instead of
+ * just one root.
+ *
+ * \note This function requires the \p roots objects to have a CPU set.
+ */
+static __hwloc_inline void
+hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *set, unsigned n, unsigned until)
+{
+  hwloc_distrib(topology, roots, n_roots, set, n, until, 0);
+}
 
 #ifdef __cplusplus
 } /* extern "C" */

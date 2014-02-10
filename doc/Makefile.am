@@ -573,8 +573,9 @@ man3_helper_find_misc_DATA = \
 man3_helper_distributedir = $(man3dir)
 man3_helper_distribute_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_helper_distribute.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_distribute.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_distributev.3
+        $(DOX_MAN_DIR)/man3/hwloc_distrib_flags_e.3 \
+        $(DOX_MAN_DIR)/man3/HWLOC_DISTRIB_FLAG_REVERSE.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_distrib.3
 
 man3_helper_topology_setsdir = $(man3dir)
 man3_helper_topology_sets_DATA = \

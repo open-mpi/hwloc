@@ -329,8 +329,9 @@ extern "C" {
 #define hwloc_get_closest_objs HWLOC_NAME(get_closest_objs)
 #define hwloc_get_obj_below_by_type HWLOC_NAME(get_obj_below_by_type)
 #define hwloc_get_obj_below_array_by_type HWLOC_NAME(get_obj_below_array_by_type)
-#define hwloc_distributev HWLOC_NAME(distributev)
-#define hwloc_distribute HWLOC_NAME(distribute)
+#define hwloc_distrib_flags_e HWLOC_NAME(distrib_flags_e)
+#define HWLOC_DISTRIB_FLAG_REVERSE HWLOC_NAME_CAPS(DISTRIB_FLAG_REVERSE)
+#define hwloc_distrib HWLOC_NAME(distrib)
 #define hwloc_alloc_membind_policy HWLOC_NAME(alloc_membind_policy)
 #define hwloc_alloc_membind_policy_nodeset HWLOC_NAME(alloc_membind_policy_nodeset)
 #define hwloc_topology_get_complete_cpuset HWLOC_NAME(topology_get_complete_cpuset)
@@ -495,6 +496,8 @@ extern "C" {
 
 #define hwloc_obj_type_of_string HWLOC_NAME(obj_type_of_string )
 #define hwloc_obj_snprintf HWLOC_NAME(obj_snprintf)
+#define hwloc_distributev HWLOC_NAME(distributev)
+#define hwloc_distribute HWLOC_NAME(distribute)
 
 /* private/debug.h */
 

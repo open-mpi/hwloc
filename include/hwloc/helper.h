@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -644,11 +644,23 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
  * @{
  */
 
-/** \brief Distribute \p n items over the topology under \p root
+/** \brief Flags to be given to hwloc_distrib().
+ */
+enum hwloc_distrib_flags_e {
+  /** \brief Distrib in reverse order, starting from the last objects.
+   * \hideinitializer
+   */
+  HWLOC_DISTRIB_FLAG_REVERSE = (1UL<<0)
+};
+
+/** \brief Distribute \p n items over the topology under \p roots
  *
- * Array \p cpuset will be filled with \p n cpusets recursively distributed
- * linearly over the topology under \p root, down to depth \p until (which can
- * be INT_MAX to distribute down to the finest level).
+ * Array \p set will be filled with \p n cpusets recursively distributed
+ * linearly over the topology under objects \p roots, down to depth \p until
+ * (which can be INT_MAX to distribute down to the finest level).
+ *
+ * \p n_roots is usually 1 and \p roots only contains the topology root object
+ * so as to distribute over the entire topology.
  *
  * This is typically useful when an application wants to distribute \p n
  * threads over a machine, giving each of them as much private cache as
@@ -657,36 +669,28 @@ hwloc_get_obj_below_array_by_type (hwloc_topology_t topology, int nr, hwloc_obj_
  * The caller may typically want to also call hwloc_bitmap_singlify()
  * before binding a thread so that it does not move at all.
  *
- * \note This function requires the \p root object to have a CPU set.
- */
-static __hwloc_inline void
-hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *root, unsigned n_roots, hwloc_cpuset_t *cpuset, unsigned n, unsigned until);
-static __hwloc_inline void
-hwloc_distribute(hwloc_topology_t topology, hwloc_obj_t root, hwloc_cpuset_t *set, unsigned n, unsigned until)
-{
-  unsigned i;
-  if (!root->arity || n == 1 || root->depth >= until) {
-    /* Got to the bottom, we can't split any more, put everything there.  */
-    for (i=0; i<n; i++)
-      set[i] = hwloc_bitmap_dup(root->cpuset);
-    return;
-  }
-  hwloc_distributev(topology, root->children, root->arity, set, n, until);
-}
-
-/** \brief Distribute \p n items over the topology under \p roots
- *
- * This is the same as hwloc_distribute, but takes an array of roots instead of
- * just one root.
+ * \p flags should be 0 or a OR'ed set of ::hwloc_distrib_flags_e.
  *
  * \note This function requires the \p roots objects to have a CPU set.
+ *
+ * \note This function replaces the now deprecated hwloc_distribute()
+ * and hwloc_distributev() functions.
  */
-static __hwloc_inline void
-hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_roots, hwloc_cpuset_t *set, unsigned n, unsigned until)
+static __hwloc_inline int
+hwloc_distrib(hwloc_topology_t topology,
+	      hwloc_obj_t *roots, unsigned n_roots,
+	      hwloc_cpuset_t *set,
+	      unsigned n,
+	      unsigned until, unsigned long flags)
 {
   unsigned i;
   unsigned tot_weight;
   hwloc_cpuset_t *cpusetp = set;
+
+  if (flags & ~HWLOC_DISTRIB_FLAG_REVERSE) {
+    errno = EINVAL;
+    return -1;
+  }
 
   tot_weight = 0;
   for (i = 0; i < n_roots; i++)
@@ -694,14 +698,25 @@ hwloc_distributev(hwloc_topology_t topology, hwloc_obj_t *roots, unsigned n_root
       tot_weight += hwloc_bitmap_weight(roots[i]->cpuset);
 
   for (i = 0; i < n_roots && tot_weight; i++) {
-    /* Give to roots[i] a portion proportional to its weight */
-    unsigned weight = roots[i]->cpuset ? hwloc_bitmap_weight(roots[i]->cpuset) : 0;
+    /* Give to roots[] a portion proportional to its weight */
+    hwloc_obj_t root = roots[flags & HWLOC_DISTRIB_FLAG_REVERSE ? n_roots-1-i : i];
+    unsigned weight = root->cpuset ? hwloc_bitmap_weight(root->cpuset) : 0;
     unsigned chunk = (n * weight + tot_weight-1) / tot_weight;
-    hwloc_distribute(topology, roots[i], cpusetp, chunk, until);
+    if (!root->arity || chunk == 1 || root->depth >= until) {
+      /* Got to the bottom, we can't split any more, put everything there.  */
+      unsigned j;
+      for (j=0; j<n; j++)
+	cpusetp[j] = hwloc_bitmap_dup(root->cpuset);
+    } else {
+      /* Still more to distribute, recurse into children */
+      hwloc_distrib(topology, root->children, root->arity, cpusetp, chunk, until, flags);
+    }
     cpusetp += chunk;
     tot_weight -= weight;
     n -= chunk;
   }
+
+  return 0;
 }
 
 /** @} */
