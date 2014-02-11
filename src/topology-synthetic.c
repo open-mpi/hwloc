@@ -145,12 +145,6 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     }
     switch (type) {
       case HWLOC_OBJ_PU:
-	if (nb_pu_levels) {
-	  if (verbose)
-	    fprintf(stderr, "Synthetic string can not have several PU levels\n");
-	  errno = EINVAL;
-	  return -1;
-	}
 	nb_pu_levels++;
 	break;
       case HWLOC_OBJ_CACHE:
@@ -176,7 +170,6 @@ hwloc_backend_synthetic_init(struct hwloc_synthetic_backend_data_s *data,
     errno = EINVAL;
     return -1;
   }
-
   if (nb_pu_levels > 1) {
     if (verbose)
       fprintf(stderr, "Synthetic string can not have several PU levels\n");
