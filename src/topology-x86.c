@@ -779,6 +779,20 @@ static void hwloc_x86_os_state_restore(hwloc_x86_os_state_t *state __hwloc_attri
 #define AMD_EDX ('e' | ('n'<<8) | ('t'<<16) | ('i'<<24))
 #define AMD_ECX ('c' | ('A'<<8) | ('M'<<16) | ('D'<<24))
 
+/* fake cpubind for when nbprocs=1 and no binding support */
+static int fake_get_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
+			    hwloc_cpuset_t set __hwloc_attribute_unused,
+			    int flags __hwloc_attribute_unused)
+{
+  return 0;
+}
+static int fake_set_cpubind(hwloc_topology_t topology __hwloc_attribute_unused,
+			    hwloc_const_cpuset_t set __hwloc_attribute_unused,
+			    int flags __hwloc_attribute_unused)
+{
+  return 0;
+}
+
 static
 int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldiscovery)
 {
@@ -812,8 +826,8 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
     /* we need binding support if there are multiple PUs */
     if (nbprocs > 1)
       goto out;
-    get_cpubind = NULL;
-    set_cpubind = NULL;
+    get_cpubind = fake_get_cpubind;
+    set_cpubind = fake_set_cpubind;
   }
 
   infos = calloc(nbprocs, sizeof(struct procinfo));
