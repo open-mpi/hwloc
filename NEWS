@@ -21,6 +21,7 @@ Version 1.8.2
 -------------
 * Don't mix total and local memory when displaying verbose object attributes
   with hwloc_obj_attr_snprintf() or in lstopo.
+* Fix a memory leak in the diff interface when adding a "too complex" entry.
 
 
 Version 1.8.1
