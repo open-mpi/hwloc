@@ -794,15 +794,27 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
   struct hwloc_binding_hooks hooks;
   struct hwloc_topology_support support;
   struct hwloc_topology_membind_support memsupport __hwloc_attribute_unused;
+  int (*get_cpubind)(hwloc_topology_t topology, hwloc_cpuset_t set, int flags);
+  int (*set_cpubind)(hwloc_topology_t topology, hwloc_const_cpuset_t set, int flags);
   int ret = -1;
 
+  /* check if binding works */
   memset(&hooks, 0, sizeof(hooks));
   support.membind = &memsupport;
   hwloc_set_native_binding_hooks(&hooks, &support);
-  if (nbprocs > 1 &&
-      !(hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind)
-   && !(hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind))
-    goto out;
+  if (hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind) {
+    get_cpubind = hooks.get_thisproc_cpubind;
+    set_cpubind = hooks.set_thisproc_cpubind;
+  } else if (hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind) {
+    get_cpubind = hooks.get_thisthread_cpubind;
+    set_cpubind = hooks.set_thisthread_cpubind;
+  } else {
+    /* we need binding support if there are multiple PUs */
+    if (nbprocs > 1)
+      goto out;
+    get_cpubind = NULL;
+    set_cpubind = NULL;
+  }
 
   infos = calloc(nbprocs, sizeof(struct procinfo));
   if (NULL == infos)
@@ -854,22 +866,12 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
 
   hwloc_x86_os_state_save(&os_state);
 
-  if (hooks.get_thisthread_cpubind && hooks.set_thisthread_cpubind) {
-    /* trying binding the current thread only */
-    ret = look_procs(topology, nbprocs, infos, fulldiscovery,
-		     highest_cpuid, highest_ext_cpuid, features, cpuid_type,
-		     hooks.get_thisthread_cpubind, hooks.set_thisthread_cpubind);
-    if (ret < 0) {
-      /* fallback trying to bind the entire process */
-      if (hooks.get_thisproc_cpubind && hooks.set_thisproc_cpubind)
-	ret = look_procs(topology, nbprocs, infos, fulldiscovery,
-			 highest_cpuid, highest_ext_cpuid, features, cpuid_type,
-			 hooks.get_thisproc_cpubind, hooks.set_thisproc_cpubind);
-    }
-    if (ret >= 0)
-      /* success, we're done */
-      goto out_with_os_state;
-  }
+  ret = look_procs(topology, nbprocs, infos, fulldiscovery,
+		   highest_cpuid, highest_ext_cpuid, features, cpuid_type,
+		   get_cpubind, set_cpubind);
+  if (ret >= 0)
+    /* success, we're done */
+    goto out_with_os_state;
 
   if (nbprocs == 1) {
     /* only one processor, no need to bind */
