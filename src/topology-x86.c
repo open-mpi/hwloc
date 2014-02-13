@@ -830,6 +830,9 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
     set_cpubind = fake_set_cpubind;
   }
 
+  if (!hwloc_have_cpuid())
+    goto out;
+
   infos = calloc(nbprocs, sizeof(struct procinfo));
   if (NULL == infos)
     goto out;
@@ -966,10 +969,6 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
 				const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
-
-  if (!hwloc_have_cpuid())
-    return NULL;
-
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;
