@@ -20,7 +20,7 @@
 #include <private/debug.h>
 #include <private/misc.h>
 
-#include <private/cpuid.h>
+#include <private/cpuid-x86.h>
 
 #define has_topoext(features) ((features)[6] & (1 << 22))
 
@@ -120,7 +120,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   infos->present = 1;
 
   eax = 0x01;
-  hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+  hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
   infos->apicid = ebx >> 24;
   if (edx & (1 << 28))
     infos->max_log_proc = 1 << hwloc_flsl(((ebx >> 16) & 0xff) - 1);
@@ -133,13 +133,13 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
 
   memset(regs, 0, sizeof(regs));
   regs[0] = 0;
-  hwloc_cpuid(&regs[0], &regs[1], &regs[3], &regs[2]);
+  hwloc_x86_cpuid(&regs[0], &regs[1], &regs[3], &regs[2]);
   memcpy(infos->cpuvendor, regs+1, 4*3);
   infos->cpuvendor[12] = '\0';
 
   memset(regs, 0, sizeof(regs));
   regs[0] = 1;
-  hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+  hwloc_x86_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
   _model          = (regs[0]>>4) & 0xf;
   _extendedmodel  = (regs[0]>>16) & 0xf;
   _family         = (regs[0]>>8) & 0xf;
@@ -156,13 +156,13 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   if (highest_ext_cpuid >= 0x80000004) {
     memset(regs, 0, sizeof(regs));
     regs[0] = 0x80000002;
-    hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+    hwloc_x86_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
     memcpy(infos->cpumodel, regs, 4*4);
     regs[0] = 0x80000003;
-    hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+    hwloc_x86_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
     memcpy(infos->cpumodel + 4*4, regs, 4*4);
     regs[0] = 0x80000004;
-    hwloc_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
+    hwloc_x86_cpuid(&regs[0], &regs[1], &regs[2], &regs[3]);
     memcpy(infos->cpumodel + 4*4*2, regs, 4*4);
     infos->cpumodel[3*4*4] = 0;
   } else
@@ -172,7 +172,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000008) {
     unsigned coreidsize;
     eax = 0x80000008;
-    hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+    hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
     coreidsize = (ecx >> 12) & 0xf;
     hwloc_debug("core ID size: %u\n", coreidsize);
     if (!coreidsize) {
@@ -196,7 +196,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     unsigned apic_id, node_id, nodes_per_proc, unit_id, cores_per_unit;
 
     eax = 0x8000001e;
-    hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+    hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
     infos->apicid = apic_id = eax;
     infos->nodeid = node_id = ecx & 0xff;
     nodes_per_proc = ((ecx >> 8) & 7) + 1;
@@ -211,7 +211,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       unsigned type;
       eax = 0x8000001d;
       ecx = cachenum;
-      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
       type = eax & 0x1f;
       if (type == 0)
 	break;
@@ -225,7 +225,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       unsigned type;
       eax = 0x8000001d;
       ecx = cachenum;
-      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
 
       type = eax & 0x1f;
 
@@ -257,14 +257,14 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     /* Intel doesn't actually provide 0x80000005 information */
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000005) {
       eax = 0x80000005;
-      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
       fill_amd_cache(infos, 1, ecx);
     }
 
     /* Intel doesn't actually provide 0x80000006 information */
     if (cpuid_type != intel && highest_ext_cpuid >= 0x80000006) {
       eax = 0x80000006;
-      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
       fill_amd_cache(infos, 2, ecx);
       fill_amd_cache(infos, 3, edx);
     }
@@ -276,7 +276,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       unsigned type;
       eax = 0x04;
       ecx = cachenum;
-      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
 
       type = eax & 0x1f;
 
@@ -294,7 +294,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       unsigned type;
       eax = 0x04;
       ecx = cachenum;
-      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
 
       type = eax & 0x1f;
 
@@ -333,7 +333,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
     for (level = 0; ; level++) {
       ecx = level;
       eax = 0x0b;
-      hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+      hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
       if (!eax && !ebx)
         break;
     }
@@ -343,7 +343,7 @@ static void look_proc(struct procinfo *infos, unsigned highest_cpuid, unsigned h
       for (level = 0; ; level++) {
 	ecx = level;
 	eax = 0x0b;
-	hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+	hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
 	if (!eax && !ebx)
 	  break;
 	apic_nextshift = eax & 0x1f;
@@ -830,7 +830,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
     set_cpubind = fake_set_cpubind;
   }
 
-  if (!hwloc_have_cpuid())
+  if (!hwloc_have_x86_cpuid())
     goto out;
 
   infos = calloc(nbprocs, sizeof(struct procinfo));
@@ -845,7 +845,7 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
   }
 
   eax = 0x00;
-  hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+  hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
   highest_cpuid = eax;
   if (ebx == INTEL_EBX && ecx == INTEL_ECX && edx == INTEL_EDX)
     cpuid_type = intel;
@@ -858,25 +858,25 @@ int hwloc_look_x86(struct hwloc_topology *topology, unsigned nbprocs, int fulldi
   }
 
   eax = 0x01;
-  hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+  hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
   features[0] = edx;
   features[4] = ecx;
 
   eax = 0x80000000;
-  hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+  hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
   highest_ext_cpuid = eax;
 
   hwloc_debug("highest extended cpuid %x\n", highest_ext_cpuid);
 
   if (highest_cpuid >= 0x7) {
     eax = 0x7;
-    hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+    hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
     features[9] = ebx;
   }
 
   if (cpuid_type != intel && highest_ext_cpuid >= 0x80000001) {
     eax = 0x80000001;
-    hwloc_cpuid(&eax, &ebx, &ecx, &edx);
+    hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
     features[1] = edx;
     features[6] = ecx;
   }
@@ -969,6 +969,7 @@ hwloc_x86_component_instantiate(struct hwloc_disc_component *component,
 				const void *_data3 __hwloc_attribute_unused)
 {
   struct hwloc_backend *backend;
+
   backend = hwloc_backend_alloc(component);
   if (!backend)
     return NULL;

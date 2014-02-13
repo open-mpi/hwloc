@@ -991,8 +991,8 @@ EOF])
     fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
-    # Try to compile the cpuid inlines
-    AC_MSG_CHECKING([for cpuid])
+    # Try to compile the x86 cpuid inlines
+    AC_MSG_CHECKING([for x86 cpuid])
     old_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$CPPFLAGS -I$HWLOC_top_srcdir/include"
     # We need hwloc_uint64_t but we can't use hwloc/autogen/config.h before configure ends.
@@ -1000,33 +1000,33 @@ EOF])
     CPUID_CHECK_HEADERS=
     CPUID_CHECK_DEFINE=
     if test "x$hwloc_windows" = xyes; then
-      CPUID_CHECK_HEADERS="#include <windows.h>"
-      CPUID_CHECK_DEFINE="#define hwloc_uint64_t DWORDLONG"
+      X86_CPUID_CHECK_HEADERS="#include <windows.h>"
+      X86_CPUID_CHECK_DEFINE="#define hwloc_uint64_t DWORDLONG"
     else
-      CPUID_CHECK_DEFINE="#define hwloc_uint64_t uint64_t"
+      X86_CPUID_CHECK_DEFINE="#define hwloc_uint64_t uint64_t"
       if test "x$ac_cv_header_stdint_h" = xyes; then
-        CPUID_CHECK_HEADERS="#include <stdint.h>"
+        X86_CPUID_CHECK_HEADERS="#include <stdint.h>"
       fi
     fi
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
-        $CPUID_CHECK_HEADERS
-        $CPUID_CHECK_DEFINE
+        $X86_CPUID_CHECK_HEADERS
+        $X86_CPUID_CHECK_DEFINE
         #define __hwloc_inline
-        #include <private/cpuid.h>
+        #include <private/cpuid-x86.h>
       ]], [[
-        if (hwloc_have_cpuid()) {
+        if (hwloc_have_x86_cpuid()) {
           unsigned eax = 0, ebx, ecx = 0, edx;
-          hwloc_cpuid(&eax, &ebx, &ecx, &edx);
-          printf("highest cpuid %x\n", eax);
+          hwloc_x86_cpuid(&eax, &ebx, &ecx, &edx);
+          printf("highest x86 cpuid %x\n", eax);
           return 0;
         }
       ]])],
       [AC_MSG_RESULT([yes])
-       AC_DEFINE(HWLOC_HAVE_CPUID, 1, [Define to 1 if you have cpuid])
-       hwloc_have_cpuid=yes],
+       AC_DEFINE(HWLOC_HAVE_X86_CPUID, 1, [Define to 1 if you have x86 cpuid])
+       hwloc_have_x86_cpuid=yes],
       [AC_MSG_RESULT([no])])
-    if test "x$hwloc_have_cpuid" = xyes; then
+    if test "x$hwloc_have_x86_cpuid" = xyes; then
       hwloc_components="$hwloc_components x86"
     fi
     CPPFLAGS="$old_CPPFLAGS"
@@ -1256,7 +1256,7 @@ AC_DEFUN([HWLOC_DO_AM_CONDITIONALS],[
 
         AM_CONDITIONAL([HWLOC_HAVE_X86_32], [test "x$hwloc_x86_32" = "xyes"])
         AM_CONDITIONAL([HWLOC_HAVE_X86_64], [test "x$hwloc_x86_64" = "xyes"])
-        AM_CONDITIONAL([HWLOC_HAVE_CPUID], [test "x$hwloc_have_cpuid" = "xyes"])
+        AM_CONDITIONAL([HWLOC_HAVE_X86_CPUID], [test "x$hwloc_have_x86_cpuid" = "xyes"])
 
         AM_CONDITIONAL([HWLOC_HAVE_PLUGINS], [test "x$hwloc_have_plugins" = "xyes"])
         AM_CONDITIONAL([HWLOC_PCI_BUILD_STATIC], [test "x$hwloc_pci_component" = "xstatic"])

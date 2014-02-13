@@ -1,4 +1,4 @@
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2012 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011-2012 Oracle and/or its affiliates.  All rights reserved.
@@ -157,9 +157,9 @@ sources += topology-netbsd.c
 ldflags += -lpthread
 endif HWLOC_HAVE_NETBSD
 
-if HWLOC_HAVE_CPUID
+if HWLOC_HAVE_X86_CPUID
 sources += topology-x86.c
-endif HWLOC_HAVE_CPUID
+endif HWLOC_HAVE_X86_CPUID
 
 if HWLOC_HAVE_GCC
 ldflags += -no-undefined

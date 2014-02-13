@@ -1,4 +1,4 @@
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 # Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -35,7 +35,7 @@ noinst_HEADERS = \
         private/misc.h \
         private/xml.h \
         private/components.h \
-        private/cpuid.h
+        private/cpuid-x86.h
 
 if HWLOC_HAVE_LINUX
 include_hwloc_HEADERS += \

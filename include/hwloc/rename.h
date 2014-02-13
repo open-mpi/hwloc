@@ -512,10 +512,10 @@ extern "C" {
 #define hwloc_flsl_from_fls32 HWLOC_NAME(flsl_from_fls32)
 #define hwloc_weight_long HWLOC_NAME(weight_long)
 
-/* private/cpuid.h */
+/* private/cpuid-x86.h */
 
-#define hwloc_have_cpuid HWLOC_NAME(have_cpuid)
-#define hwloc_cpuid HWLOC_NAME(cpuid)
+#define hwloc_have_x86_cpuid HWLOC_NAME(have_x86_cpuid)
+#define hwloc_x86_cpuid HWLOC_NAME(x86_cpuid)
 
 /* private/xml.h */
 
