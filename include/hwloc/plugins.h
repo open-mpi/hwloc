@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Inria.  All rights reserved.
+ * Copyright © 2013-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -305,35 +305,6 @@ hwloc_alloc_setup_object(hwloc_obj_type_t type, signed os_index)
  */
 HWLOC_DECLSPEC int hwloc_fill_object_sets(hwloc_obj_t obj);
 
-/** \brief Insert a list of PCI devices and bridges in the backend topology.
- *
- * Insert a list of objects (either PCI device or bridges) starting at first_obj
- * (linked by next_sibling in the topology, and ending with NULL).
- * Objects are placed under the right bridges, and the remaining upstream bridges
- * are then inserted in the topology by calling the get_obj_cpuset() callback to
- * find their locality.
- */
-HWLOC_DECLSPEC int hwloc_insert_pci_device_list(struct hwloc_backend *backend, struct hwloc_obj *first_obj);
-
-/** \brief Return the offset of the given capability in the PCI config space buffer
- *
- * This function requires a 256-bytes config space. Unknown/unavailable bytes should be set to 0xff.
- */
-HWLOC_DECLSPEC unsigned hwloc_pci_find_cap(const unsigned char *config, unsigned cap);
-
-/** \brief Fill linkspeed by reading the PCI config space where PCI_CAP_ID_EXP is at position offset.
- *
- * Needs 20 bytes of EXP capability block starting at offset in the config space
- * for registers up to link status.
- */
-HWLOC_DECLSPEC int hwloc_pci_find_linkspeed(const unsigned char *config, unsigned offset, float *linkspeed);
-
-/** \brief Modify the PCI device object into a bridge and fill its attribute if a bridge is found in the PCI config space.
- *
- * This function requires 64 bytes of common configuration header at the beginning of config.
- */
-HWLOC_DECLSPEC int hwloc_pci_prepare_bridge(hwloc_obj_t obj, const unsigned char *config);
-
 /** \brief Make sure that plugins can lookup core symbols.
  *
  * This is a sanity check to avoid lazy-lookup failures when libhwloc
@@ -376,6 +347,44 @@ hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, co
 #endif /* HWLOC_INSIDE_PLUGIN */
   return 0;
 }
+
+/** @} */
+
+
+
+
+/** \defgroup hwlocality_components_pci_funcs Components and Plugins: PCI functions to be used by components
+ * @{
+ */
+
+/** \brief Insert a list of PCI devices and bridges in the backend topology.
+ *
+ * Insert a list of objects (either PCI device or bridges) starting at first_obj
+ * (linked by next_sibling in the topology, and ending with NULL).
+ * Objects are placed under the right bridges, and the remaining upstream bridges
+ * are then inserted in the topology by calling the get_obj_cpuset() callback to
+ * find their locality.
+ */
+HWLOC_DECLSPEC int hwloc_insert_pci_device_list(struct hwloc_backend *backend, struct hwloc_obj *first_obj);
+
+/** \brief Return the offset of the given capability in the PCI config space buffer
+ *
+ * This function requires a 256-bytes config space. Unknown/unavailable bytes should be set to 0xff.
+ */
+HWLOC_DECLSPEC unsigned hwloc_pci_find_cap(const unsigned char *config, unsigned cap);
+
+/** \brief Fill linkspeed by reading the PCI config space where PCI_CAP_ID_EXP is at position offset.
+ *
+ * Needs 20 bytes of EXP capability block starting at offset in the config space
+ * for registers up to link status.
+ */
+HWLOC_DECLSPEC int hwloc_pci_find_linkspeed(const unsigned char *config, unsigned offset, float *linkspeed);
+
+/** \brief Modify the PCI device object into a bridge and fill its attribute if a bridge is found in the PCI config space.
+ *
+ * This function requires 64 bytes of common configuration header at the beginning of config.
+ */
+HWLOC_DECLSPEC int hwloc_pci_prepare_bridge(hwloc_obj_t obj, const unsigned char *config);
 
 /** @} */
 
