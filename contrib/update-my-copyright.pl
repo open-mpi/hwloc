@@ -195,7 +195,7 @@ foreach my $f (@files) {
     my $newf = "$f.new-copyright";
     unlink($newf);
     open(FILE, ">$newf") || die "Can't open file: $newf";
-    print FILE join(//, @lines);
+    print FILE join("", @lines);
     close(FILE);
 
     # Now replace the old one
