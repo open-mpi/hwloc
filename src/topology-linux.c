@@ -4708,7 +4708,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/vendor", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
-      read = fread(value, sizeof(value), 1, file);
+      read = fread(value, 1, sizeof(value), file);
       fclose(file);
       if (read)
         attr->vendor_id = strtoul(value, NULL, 16);
@@ -4716,7 +4716,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/device", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
-      read = fread(value, sizeof(value), 1, file);
+      read = fread(value, 1, sizeof(value), file);
       fclose(file);
       if (read)
         attr->device_id = strtoul(value, NULL, 16);
@@ -4724,7 +4724,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/class", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
-      read = fread(value, sizeof(value), 1, file);
+      read = fread(value, 1, sizeof(value), file);
       fclose(file);
       if (read)
         attr->class_id = strtoul(value, NULL, 16) >> 8;
@@ -4732,7 +4732,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_vendor", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
-      read = fread(value, sizeof(value), 1, file);
+      read = fread(value, 1, sizeof(value), file);
       fclose(file);
       if (read)
         attr->subvendor_id = strtoul(value, NULL, 16);
@@ -4740,7 +4740,7 @@ hwloc_look_linuxfs_pci(struct hwloc_backend *backend)
     snprintf(path, sizeof(path), "/sys/bus/pci/devices/%s/subsystem_device", dirent->d_name);
     file = hwloc_fopen(path, "r", root_fd);
     if (file) {
-      read = fread(value, sizeof(value), 1, file);
+      read = fread(value, 1, sizeof(value), file);
       fclose(file);
       if (read)
         attr->subdevice_id = strtoul(value, NULL, 16);
