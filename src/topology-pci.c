@@ -249,21 +249,26 @@ hwloc_look_pci(struct hwloc_backend *backend)
       char path[64];
       char value[16];
       FILE *file;
+      size_t read;
+
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/vendor",
 	       domain, pcidev->bus, pcidev->dev, pcidev->func);
       file = fopen(path, "r");
       if (file) {
-	fread(value, sizeof(value), 1, file);
+	read = fread(value, sizeof(value), 1, file);
 	fclose(file);
-	obj->attr->pcidev.vendor_id = strtoul(value, NULL, 16);
+	if (read)
+	  obj->attr->pcidev.vendor_id = strtoul(value, NULL, 16);
       }
+
       snprintf(path, sizeof(path), "/sys/bus/pci/devices/%04x:%02x:%02x.%01x/device",
 	       domain, pcidev->bus, pcidev->dev, pcidev->func);
       file = fopen(path, "r");
       if (file) {
-	fread(value, sizeof(value), 1, file);
+	read = fread(value, sizeof(value), 1, file);
 	fclose(file);
-	obj->attr->pcidev.device_id = strtoul(value, NULL, 16);
+	if (read)
+	  obj->attr->pcidev.device_id = strtoul(value, NULL, 16);
       }
 #endif
     }
