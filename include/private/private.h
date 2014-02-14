@@ -139,6 +139,10 @@ extern int hwloc_connect_levels(hwloc_topology_t topology);
 extern void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 extern void hwloc_topology_clear(struct hwloc_topology *topology);
 
+extern void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
+extern void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);
+extern void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count);
+
 /* set native OS binding hooks */
 extern void hwloc_set_native_binding_hooks(struct hwloc_binding_hooks *hooks, struct hwloc_topology_support *support);
 /* set either native OS binding hooks (if thissystem), or dummy ones */

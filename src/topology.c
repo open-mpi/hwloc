@@ -259,39 +259,76 @@ print_objects(struct hwloc_topology *topology __hwloc_attribute_unused, int inde
 #endif
 }
 
-void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
+void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count)
 {
+  unsigned i;
+  for(i=0; i<count; i++) {
+    free(infos[i].name);
+    free(infos[i].value);
+  }
+  free(infos);
+}
+
+void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value)
+{
+  unsigned count = *countp;
+  struct hwloc_obj_info_s *infos = *infosp;
 #define OBJECT_INFO_ALLOC 8
   /* nothing allocated initially, (re-)allocate by multiple of 8 */
-  unsigned alloccount = (obj->infos_count + 1 + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
-  if (obj->infos_count != alloccount)
-    obj->infos = realloc(obj->infos, alloccount*sizeof(*obj->infos));
-  obj->infos[obj->infos_count].name = strdup(name);
-  obj->infos[obj->infos_count].value = strdup(value);
-  obj->infos_count++;
+  unsigned alloccount = (count + 1 + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
+  if (count != alloccount)
+    infos = realloc(infos, alloccount*sizeof(*infos));
+  infos[count].name = strdup(name);
+  infos[count].value = strdup(value);
+  *infosp = infos;
+  *countp = count+1;
+}
+
+void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp,
+		       struct hwloc_obj_info_s **src_infosp, unsigned *src_countp)
+{
+  unsigned dst_count = *dst_countp;
+  struct hwloc_obj_info_s *dst_infos = *dst_infosp;
+  unsigned src_count = *src_countp;
+  struct hwloc_obj_info_s *src_infos = *src_infosp;
+  unsigned i;
+#define OBJECT_INFO_ALLOC 8
+  /* nothing allocated initially, (re-)allocate by multiple of 8 */
+  unsigned alloccount = (dst_count + src_count + (OBJECT_INFO_ALLOC-1)) & ~(OBJECT_INFO_ALLOC-1);
+  if (dst_count != alloccount)
+    dst_infos = realloc(dst_infos, alloccount*sizeof(*dst_infos));
+  for(i=0; i<src_count; i++, dst_count++) {
+    dst_infos[dst_count].name = src_infos[i].name;
+    dst_infos[dst_count].value = src_infos[i].value;
+  }
+  *dst_infosp = dst_infos;
+  *dst_countp = dst_count;
+  free(src_infos);
+  *src_infosp = NULL;
+  *src_countp = 0;
+}
+
+void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const char *value)
+{
+  hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
 
 void hwloc_obj_add_info_nodup(hwloc_obj_t obj, const char *name, const char *value, int nodup)
 {
   if (nodup && hwloc_obj_get_info_by_name(obj, name))
     return;
-  hwloc_obj_add_info(obj, name, value);
+  hwloc__add_info(&obj->infos, &obj->infos_count, name, value);
 }
 
 /* Free an object and all its content.  */
 void
 hwloc_free_unlinked_object(hwloc_obj_t obj)
 {
-  unsigned i;
   switch (obj->type) {
   default:
     break;
   }
-  for(i=0; i<obj->infos_count; i++) {
-    free(obj->infos[i].name);
-    free(obj->infos[i].value);
-  }
-  free(obj->infos);
+  hwloc__free_infos(obj->infos, obj->infos_count);
   hwloc_clear_object_distances(obj);
   free(obj->memory.page_types);
   free(obj->attr);
@@ -341,7 +378,7 @@ hwloc__duplicate_object(struct hwloc_obj *newobj,
   /* don't duplicate distances, they'll be recreated at the end of the topology build */
 
   for(i=0; i<src->infos_count; i++)
-    hwloc_obj_add_info(newobj, src->infos[i].name, src->infos[i].value);
+    hwloc__add_info(&newobj->infos, &newobj->infos_count, src->infos[i].name, src->infos[i].value);
 }
 
 void
