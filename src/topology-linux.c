@@ -3190,6 +3190,39 @@ hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
 }
 
 static int
+hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
+			      struct hwloc_obj_info_s **infos, unsigned *infos_count)
+{
+  /* common fields */
+  if (!strcmp("cpu", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUModel", value);
+  } else if (!strcmp("platform", prefix)) {
+    hwloc__add_info(infos, infos_count, "PlatformName", value);
+  } else if (!strcmp("model", prefix)) {
+    hwloc__add_info(infos, infos_count, "PlatformModel", value);
+  }
+  /* platform-specific fields */
+  else if (!strcasecmp("vendor", prefix)) {
+    hwloc__add_info(infos, infos_count, "Vendor", value);
+  } else if (!strcmp("Board", prefix)
+	     || !strcmp("Board ID", prefix)) {
+    hwloc__add_info(infos, infos_count, "Board", value);
+  } else if (!strcasecmp("Machine", prefix)) {
+    hwloc__add_info(infos, infos_count, "Machine", value);
+  } else if (!strcmp("family", prefix)) {
+    hwloc__add_info(infos, infos_count, "Family", value);
+  } else if (!strcasecmp("Revision", prefix)
+	     || !strcmp("Hardware rev", prefix)) {
+    hwloc__add_info(infos, infos_count, "Revision", value);
+  } else if (!strcmp("SVR", prefix)) {
+    hwloc__add_info(infos, infos_count, "SVR", value);
+  } else if (!strcmp("PVR", prefix)) {
+    hwloc__add_info(infos, infos_count, "PVR", value);
+  }
+  return 0;
+}
+
+static int
 hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
 				  struct hwloc_obj_info_s **infos, unsigned *infos_count)
 {
@@ -3317,6 +3350,9 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 	  /* arm */
 	  else if (!strncmp(data->utsname.machine, "arm", 3))
 	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
+	  else if (!strncmp(data->utsname.machine, "ppc", 3)
+		   || !strncmp(data->utsname.machine, "power", 5))
+	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ppc;
 	}
       }
       /* we can't assume that we already got a processor index line:

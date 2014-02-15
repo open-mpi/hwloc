@@ -1,4 +1,4 @@
-Machine (P#0 Backend=Linux)
+Machine (P#0 PlatformName=PS3 PlatformModel=SonyPS3 Backend=Linux Architecture=ppc)
   Core L#0
     PU L#0 (P#0)
     PU L#1 (P#1)

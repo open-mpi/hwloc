@@ -1,4 +1,4 @@
-Machine (P#0 local=514318208KB total=514318208KB Backend=Linux)
+Machine (P#0 local=514318208KB total=514318208KB PlatformName=pSeries PlatformModel=IBM,9179-MHB Machine="CHRP IBM,9179-MHB" Backend=Linux Architecture=ppc)
   L3Cache L#0 (size=4096KB linesize=128)
     L2Cache L#0 (size=256KB linesize=128 ways=8)
       L1dCache L#0 (size=32KB linesize=128 ways=8)
