@@ -1534,16 +1534,6 @@ hwloc_set_linuxfs_hooks(struct hwloc_binding_hooks *hooks,
  *** Misc Helpers for Topology Discovery ***
  *******************************************/
 
-/* cpuinfo model */
-struct hwloc_linux_cpumodel {
-  /* NULL if unknown */
-  char *vendor;
-  char *model;
-  /* 0 if unknown, actual value stored + 1 */
-  unsigned modelnumber;
-  unsigned familynumber;
-};
-
 /* cpuinfo array */
 struct hwloc_linux_cpuinfo_proc {
   /* set during hwloc_linux_parse_cpuinfo */
@@ -1552,8 +1542,10 @@ struct hwloc_linux_cpuinfo_proc {
   long Pcore, Psock;
   /* set later, or -1 if unknown */
   long Lcore, Lsock;
-  /* set during hwloc_linux_parse_cpuinfo */
-  struct hwloc_linux_cpumodel cpumodel;
+
+  /* custom info, set during hwloc_linux_parse_cpuinfo */
+  struct hwloc_obj_info_s *infos;
+  unsigned infos_count;
 };
 
 static int
@@ -2894,22 +2886,8 @@ look_sysfscpu(struct hwloc_topology *topology,
 	if (cpuinfo_Lprocs) {
 	  for(j=0; j<(int) cpuinfo_numprocs; j++)
 	    if ((int) cpuinfo_Lprocs[j].Pproc == i) {
-	      char number[8];
-	      if (cpuinfo_Lprocs[j].cpumodel.vendor) {
-		hwloc_obj_add_info(sock, "CPUVendor", cpuinfo_Lprocs[j].cpumodel.vendor);
-	      }
-	      if (cpuinfo_Lprocs[j].cpumodel.model) {
-		/* FIXME add to name as well? */
-		hwloc_obj_add_info(sock, "CPUModel", cpuinfo_Lprocs[j].cpumodel.model);
-	      }
-	      if (cpuinfo_Lprocs[j].cpumodel.modelnumber) {
-		snprintf(number, sizeof(number), "%u", cpuinfo_Lprocs[j].cpumodel.modelnumber-1);
-		hwloc_obj_add_info(sock, "CPUModelNumber", number);
-	      }
-	      if (cpuinfo_Lprocs[j].cpumodel.familynumber) {
-		snprintf(number, sizeof(number), "%u", cpuinfo_Lprocs[j].cpumodel.familynumber-1);
-		hwloc_obj_add_info(sock, "CPUFamilyNumber", number);
-	      }
+	      hwloc__move_infos(&sock->infos, &sock->infos_count,
+				&cpuinfo_Lprocs[j].infos, &cpuinfo_Lprocs[j].infos_count);
 	    }
 	}
         hwloc_insert_object_by_cpuset(topology, sock);
@@ -3153,67 +3131,45 @@ look_sysfscpu(struct hwloc_topology *topology,
  * xtensa: "model\t\t:"				=> KO
  */
 static int
-hwloc_linux_parse_cpuinfo_model_x86(const char *prefix, const char *value,
-				    struct hwloc_linux_cpumodel *cpumodel)
+hwloc_linux_parse_cpuinfo_x86(const char *prefix, const char *value,
+			      struct hwloc_obj_info_s **infos, unsigned *infos_count)
 {
-  if (!cpumodel->vendor)
-    if (!strcmp("vendor_id", prefix)) {
-      cpumodel->vendor = strdup(value);
-      return 0;
-    }
-  if (!cpumodel->model)
-    if (!strcmp("model name", prefix)) {
-      cpumodel->model = strdup(value);
-      return 0;
-    }
-  if (!cpumodel->modelnumber)
-    if (!strcmp("model", prefix)) {
-      cpumodel->modelnumber = atoi(value)+1;
-      return 0;
-    }
-  if (!cpumodel->familynumber)
-    if (!strcmp("cpu family", prefix)) {
-      cpumodel->familynumber = atoi(value)+1;
-      return 0;
-    }
+  if (!strcmp("vendor_id", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUVendor", value);
+  } else if (!strcmp("model name", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUModel", value);
+  } else if (!strcmp("model", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
+  } else if (!strcmp("cpu family", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
+  }
   return 0;
 }
 
 static int
-hwloc_linux_parse_cpuinfo_model_ia64(const char *prefix, const char *value,
-				     struct hwloc_linux_cpumodel *cpumodel)
+hwloc_linux_parse_cpuinfo_ia64(const char *prefix, const char *value,
+			       struct hwloc_obj_info_s **infos, unsigned *infos_count)
 {
-  if (!cpumodel->vendor)
-    if (!strcmp("vendor", prefix)) {
-      cpumodel->vendor = strdup(value);
-      return 0;
-    }
-  if (!cpumodel->model)
-    if (!strcmp("model name", prefix)) {
-      cpumodel->model = strdup(value);
-      return 0;
-    }
-  if (!cpumodel->modelnumber)
-    if (!strcmp("model", prefix)) {
-      cpumodel->modelnumber = atoi(value)+1;
-      return 0;
-    }
-  if (!cpumodel->familynumber)
-    if (!strcmp("family", prefix)) {
-      cpumodel->familynumber = atoi(value)+1;
-      return 0;
-    }
+  if (!strcmp("vendor", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUVendor", value);
+  } else if (!strcmp("model name", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUModel", value);
+  } else if (!strcmp("model", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUModelNumber", value);
+  } else if (!strcmp("family", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUFamilyNumber", value);
+  }
   return 0;
 }
 
 static int
-hwloc_linux_parse_cpuinfo_model_arm(const char *prefix, const char *value,
-				    struct hwloc_linux_cpumodel *cpumodel)
+hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
+			      struct hwloc_obj_info_s **infos, unsigned *infos_count)
 {
-  if (!cpumodel->model)
-    if (!strcmp("Processor", prefix) /* old kernels with one Processor header */
-	|| !strcmp("model name", prefix) /* new kernels with one model name per core */)
-      cpumodel->model = strdup(value);
+  if (!strcmp("Processor", prefix) /* old kernels with one Processor header */
+      || !strcmp("model name", prefix) /* new kernels with one model name per core */) {
+    hwloc__add_info(infos, infos_count, "CPUModel", value);
+  }
   /* CPU implementer	: 0x56 */
   /* CPU architecture: 7 */
   /* CPU variant	: 0x1 */
@@ -3223,23 +3179,23 @@ hwloc_linux_parse_cpuinfo_model_arm(const char *prefix, const char *value,
 }
 
 static int
-hwloc_linux_parse_cpuinfo_model_default(const char *prefix, const char *value,
-					struct hwloc_linux_cpumodel *cpumodel)
+hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
+				  struct hwloc_obj_info_s **infos, unsigned *infos_count)
 {
-  if (!cpumodel->model)
-    if (!strcmp("model name", prefix)
-	|| !strcmp("Processor", prefix)
-	|| !strcmp("chip type", prefix)
-	|| !strcmp("cpu model", prefix)
-	|| !strcasecmp("cpu", prefix))
-      cpumodel->model = strdup(value);
+  if (!strcmp("model name", prefix)
+      || !strcmp("Processor", prefix)
+      || !strcmp("chip type", prefix)
+      || !strcmp("cpu model", prefix)
+      || !strcasecmp("cpu", prefix))
+    hwloc__add_info(infos, infos_count, "CPUModel", value);
   return 0;
 }
 
 static int
 hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
 			  const char *path,
-			  struct hwloc_linux_cpuinfo_proc ** Lprocs_p)
+			  struct hwloc_linux_cpuinfo_proc ** Lprocs_p,
+			  struct hwloc_obj_info_s **global_infos, unsigned *global_infos_count)
 {
   FILE *fd;
   char *str = NULL;
@@ -3248,10 +3204,8 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   unsigned allocated_Lprocs = 0;
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   unsigned numprocs = 0;
-  struct hwloc_linux_cpumodel global_cpumodel;
-  int (*parse_cpuinfo_model)(const char *, const char *, struct hwloc_linux_cpumodel *) = NULL;
-
-  memset(&global_cpumodel, 0, sizeof(global_cpumodel));
+  int curproc = -1;
+  int (*parse_cpuinfo_func)(const char *, const char *, struct hwloc_obj_info_s **, unsigned *) = NULL;
 
   if (!(fd=hwloc_fopen(path,"r", data->root_fd)))
     {
@@ -3276,12 +3230,18 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
       *end = 0;
     else
       noend = 1;
+    /* if empty line, skip and reset curproc */
+    if (!*str) {
+      curproc = -1;
+      continue;
+    }
     /* skip lines with no dot */
     dot = strchr(str, ':');
     if (!dot)
       continue;
     /* skip lines not starting with a letter */
-    if (*str > 'z' || *str < 'a')
+    if ((*str > 'z' || *str < 'a')
+	&& (*str > 'Z' || *str < 'A'))
       continue;
 
     /* mark the end of the prefix */
@@ -3308,7 +3268,7 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
     }
     /* actually parse numbers */
     getprocnb_begin(PROCESSOR, Pproc);
-    numprocs++;
+    curproc = numprocs++;
     if (numprocs > allocated_Lprocs) {
       if (!allocated_Lprocs)
 	allocated_Lprocs = 8;
@@ -3316,45 +3276,45 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
         allocated_Lprocs *= 2;
       Lprocs = realloc(Lprocs, allocated_Lprocs * sizeof(*Lprocs));
     }
-    Lprocs[numprocs-1].Pproc = Pproc;
-    Lprocs[numprocs-1].Pcore = -1;
-    Lprocs[numprocs-1].Psock = -1;
-    Lprocs[numprocs-1].Lcore = -1;
-    Lprocs[numprocs-1].Lsock = -1;
-    Lprocs[numprocs-1].cpumodel.vendor = global_cpumodel.vendor ? strdup(global_cpumodel.vendor) : NULL;
-    Lprocs[numprocs-1].cpumodel.model = global_cpumodel.model ? strdup(global_cpumodel.model) : NULL;
-    Lprocs[numprocs-1].cpumodel.modelnumber = global_cpumodel.modelnumber;
-    Lprocs[numprocs-1].cpumodel.familynumber = global_cpumodel.familynumber;
+    Lprocs[curproc].Pproc = Pproc;
+    Lprocs[curproc].Pcore = -1;
+    Lprocs[curproc].Psock = -1;
+    Lprocs[curproc].Lcore = -1;
+    Lprocs[curproc].Lsock = -1;
+    Lprocs[curproc].infos = NULL;
+    Lprocs[curproc].infos_count = 0;
     getprocnb_end() else
     getprocnb_begin(PACKAGEID, Psock);
-    Lprocs[numprocs-1].Psock = Psock;
+    Lprocs[curproc].Psock = Psock;
     getprocnb_end() else
     getprocnb_begin(COREID, Pcore);
-    Lprocs[numprocs-1].Pcore = Pcore;
+    Lprocs[curproc].Pcore = Pcore;
     getprocnb_end() else {
 
       /* architecture specific or default routine for parsing cpumodel */
-      if (!parse_cpuinfo_model) {
-	parse_cpuinfo_model = hwloc_linux_parse_cpuinfo_model_default;
+      if (!parse_cpuinfo_func) {
+	parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_generic;
 	if (*data->utsname.machine) {
 	  /* x86_32 x86_64 k1om => x86 */
 	  if (!strcmp(data->utsname.machine, "x86_64")
 	      || (data->utsname.machine[0] == 'i' && !strcmp(data->utsname.machine+2, "86"))
 	      || !strcmp(data->utsname.machine, "k1om"))
-	    parse_cpuinfo_model = hwloc_linux_parse_cpuinfo_model_x86;
+	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_x86;
 	  /* ia64 */
 	  else if (!strcmp(data->utsname.machine, "ia64"))
-	    parse_cpuinfo_model = hwloc_linux_parse_cpuinfo_model_ia64;
+	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_ia64;
 	  /* arm */
 	  else if (!strncmp(data->utsname.machine, "arm", 3))
-	    parse_cpuinfo_model = hwloc_linux_parse_cpuinfo_model_arm;
+	    parse_cpuinfo_func = hwloc_linux_parse_cpuinfo_arm;
 	}
       }
       /* we can't assume that we already got a processor index line:
        * alpha/frv/h8300/m68k/microblaze/sparc have no processor lines at all, only a global entry.
        * tile has a global section with model name before the list of processor lines.
        */
-      parse_cpuinfo_model(prefix, value, numprocs ? &Lprocs[numprocs-1].cpumodel : &global_cpumodel);
+      parse_cpuinfo_func(prefix, value,
+			 curproc >= 0 ? &Lprocs[curproc].infos : global_infos,
+			 curproc >= 0 ? &Lprocs[curproc].infos_count : global_infos_count);
     }
 
     if (noend) {
@@ -3366,8 +3326,6 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
   }
   fclose(fd);
   free(str);
-  free(global_cpumodel.model);
-  free(global_cpumodel.vendor);
 
   *Lprocs_p = Lprocs;
   return numprocs;
@@ -3375,21 +3333,22 @@ hwloc_linux_parse_cpuinfo(struct hwloc_linux_backend_data_s *data,
  err:
   fclose(fd);
   free(str);
-  free(global_cpumodel.model);
-  free(global_cpumodel.vendor);
   free(Lprocs);
   return -1;
 }
 
 static void
-hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned numprocs)
+hwloc_linux_free_cpuinfo(struct hwloc_linux_cpuinfo_proc * Lprocs, unsigned numprocs,
+			 struct hwloc_obj_info_s *global_infos, unsigned global_infos_count)
 {
-  unsigned i;
-  for(i=0; i<numprocs; i++) {
-    free(Lprocs[i].cpumodel.model);
-    free(Lprocs[i].cpumodel.vendor);
+  if (Lprocs) {
+    unsigned i;
+    for(i=0; i<numprocs; i++) {
+      hwloc__free_infos(Lprocs[i].infos, Lprocs[i].infos_count);
+    }
+    free(Lprocs);
   }
-  free(Lprocs);
+  hwloc__free_infos(global_infos, global_infos_count);
 }
 
 static int
@@ -3398,6 +3357,8 @@ look_cpuinfo(struct hwloc_topology *topology,
 	     const char *path, hwloc_bitmap_t online_cpuset)
 {
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
+  struct hwloc_obj_info_s *global_infos = NULL;
+  unsigned global_infos_count = NULL;
   /* P for physical/OS index, L for logical (e.g. in we order we get them, not in the final hwloc logical order) */
   unsigned *Lcore_to_Pcore;
   unsigned *Lcore_to_Psock; /* needed because Lcore is equivalent to Pcore+Psock, not to Pcore alone */
@@ -3413,7 +3374,7 @@ look_cpuinfo(struct hwloc_topology *topology,
   hwloc_bitmap_t cpuset;
 
   /* parse the entire cpuinfo first, fill the Lprocs array and numprocs */
-  _numprocs = hwloc_linux_parse_cpuinfo(data, path, &Lprocs);
+  _numprocs = hwloc_linux_parse_cpuinfo(data, path, &Lprocs, &global_infos, &global_infos_count);
   if (_numprocs <= 0)
     return -1;
   numprocs = _numprocs;
@@ -3481,31 +3442,14 @@ look_cpuinfo(struct hwloc_topology *topology,
   if (!missingsocket && numsockets>0) {
     for (i = 0; i < numsockets; i++) {
       struct hwloc_obj *obj = hwloc_alloc_setup_object(HWLOC_OBJ_SOCKET, Lsock_to_Psock[i]);
-      int donecpuvendor = 0, donecpumodel = 0, donecpumodelnumber = 0, donecpufamilynumber = 0;
+      int doneinfos = 0;
       obj->cpuset = hwloc_bitmap_alloc();
       for(j=0; j<numprocs; j++)
 	if ((unsigned) Lprocs[j].Lsock == i) {
 	  hwloc_bitmap_set(obj->cpuset, Lprocs[j].Pproc);
-	  if (Lprocs[j].cpumodel.vendor && !donecpuvendor) {
-	    /* use the first one, they should all be equal anyway */
-	    hwloc_obj_add_info(obj, "CPUVendor", Lprocs[j].cpumodel.vendor);
-	    donecpuvendor = 1;
-	  }
-	  if (Lprocs[j].cpumodel.model && !donecpumodel) {
-	    hwloc_obj_add_info(obj, "CPUModel", Lprocs[j].cpumodel.model);
-	    donecpumodel = 1;
-	  }
-	  if (Lprocs[j].cpumodel.modelnumber && !donecpumodelnumber) {
-	    char number[8];
-	    snprintf(number, sizeof(number), "%u", Lprocs[j].cpumodel.modelnumber-1);
-	    hwloc_obj_add_info(obj, "CPUModelNumber", number);
-	    donecpumodelnumber = 1;
-	  }
-	  if (Lprocs[j].cpumodel.familynumber && !donecpufamilynumber) {
-	    char number[8];
-	    snprintf(number, sizeof(number), "%u", Lprocs[j].cpumodel.familynumber-1);
-	    hwloc_obj_add_info(obj, "CPUFamilyNumber", number);
-	    donecpufamilynumber = 1;
+	  if (!doneinfos) {
+	    hwloc__move_infos(&obj->infos, &obj->infos_count, &Lprocs[j].infos, &Lprocs[j].infos_count);
+	    doneinfos = 1;
 	  }
 	}
       hwloc_debug_1arg_bitmap("Socket %d has cpuset %s\n", i, obj->cpuset);
@@ -3513,6 +3457,10 @@ look_cpuinfo(struct hwloc_topology *topology,
     }
     hwloc_debug("%s", "\n");
   }
+
+  /* setup root info */
+  hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
+		    &global_infos, &global_infos_count);
 
   /* fill Lprocs[].Lcore, Lcore_to_Psock and Lcore_to_Pcore */
   for(Lproc=0; Lproc<numprocs; Lproc++) {
@@ -3556,7 +3504,7 @@ look_cpuinfo(struct hwloc_topology *topology,
   free(Lcore_to_Psock);
   free(Lsock_to_Psock);
 
-  hwloc_linux_free_cpuinfo(Lprocs, numprocs);
+  hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
 
   look_powerpc_device_tree(topology, data);
   return 0;
@@ -3778,15 +3726,18 @@ hwloc_look_linuxfs(struct hwloc_backend *backend)
 
     } else {
       struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
-      int numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs);
+      struct hwloc_obj_info_s *global_infos = NULL;
+      unsigned global_infos_count = 0;
+      int numprocs = hwloc_linux_parse_cpuinfo(data, "/proc/cpuinfo", &Lprocs, &global_infos, &global_infos_count);
       if (numprocs <= 0)
 	Lprocs = NULL;
       if (look_sysfscpu(topology, data, "/sys/bus/cpu/devices", Lprocs, numprocs) < 0)
         if (look_sysfscpu(topology, data, "/sys/devices/system/cpu", Lprocs, numprocs) < 0)
 	  /* sysfs but we failed to read cpu topology, fallback */
 	  hwloc_linux_fallback_pu_level(topology);
-      if (Lprocs)
-	hwloc_linux_free_cpuinfo(Lprocs, numprocs);
+      hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
+			&global_infos, &global_infos_count);
+      hwloc_linux_free_cpuinfo(Lprocs, numprocs, global_infos, global_infos_count);
     }
 
     /* Gather DMI info */

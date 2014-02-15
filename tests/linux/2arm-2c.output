@@ -1,4 +1,4 @@
-Machine (P#0 local=280840KB total=280840KB Backend=Linux)
+Machine (P#0 local=280840KB total=280840KB CPUModel="ARMv7 Processor rev 1 (v7l)" Backend=Linux)
   Socket L#0 (P#3)
     Core L#0 (P#0)
       PU L#0 (P#0)
