@@ -3169,12 +3169,23 @@ hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
   if (!strcmp("Processor", prefix) /* old kernels with one Processor header */
       || !strcmp("model name", prefix) /* new kernels with one model name per core */) {
     hwloc__add_info(infos, infos_count, "CPUModel", value);
+  } else if (!strcmp("CPU implementer", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUImplementer", value);
+  } else if (!strcmp("CPU architecture", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUArchitecture", value);
+  } else if (!strcmp("CPU variant", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUVariant", value);
+  } else if (!strcmp("CPU part", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPUPart", value);
+  } else if (!strcmp("CPU revision", prefix)) {
+    hwloc__add_info(infos, infos_count, "CPURevision", value);
+  } else if (!strcmp("Hardware", prefix)) {
+    hwloc__add_info(infos, infos_count, "HardwareName", value);
+  } else if (!strcmp("Revision", prefix)) {
+    hwloc__add_info(infos, infos_count, "HardwareRevision", value);
+  } else if (!strcmp("Serial", prefix)) {
+    hwloc__add_info(infos, infos_count, "HardwareSerial", value);
   }
-  /* CPU implementer	: 0x56 */
-  /* CPU architecture: 7 */
-  /* CPU variant	: 0x1 */
-  /* CPU part	: 0x581 */
-  /* CPU revision	: 1 */
   return 0;
 }
 

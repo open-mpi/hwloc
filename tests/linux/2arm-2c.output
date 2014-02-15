@@ -1,4 +1,4 @@
-Machine (P#0 local=280840KB total=280840KB CPUModel="ARMv7 Processor rev 1 (v7l)" Backend=Linux)
+Machine (P#0 local=280840KB total=280840KB CPUModel="ARMv7 Processor rev 1 (v7l)" CPUImplementer=0x41 CPUArchitecture=7 CPUVariant=0x2 CPUPart=0xc09 CPURevision=1 HardwareName="ST-Ericsson MOP500 platform" HardwareRevision=0000 HardwareSerial=0000000000000000 Backend=Linux Architecture=arm)
   Socket L#0 (P#3)
     Core L#0 (P#0)
       PU L#0 (P#0)
