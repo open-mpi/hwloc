@@ -53,7 +53,7 @@ FILE *open_file(const char *filename, const char *mode)
 {
   const char *extn;
 
-  if (!filename)
+  if (!filename || !strcmp(filename, "-"))
     return stdout;
 
   extn = strrchr(filename, '.');
