@@ -148,7 +148,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
   unsigned topodepth;
   FILE *output;
 
-  output = open_file(filename, "w");
+  output = open_output(filename);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
@@ -259,7 +259,7 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int logic
     return;
   }
 
-  output = open_file(filename, "w");
+  output = open_output(filename);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
@@ -690,7 +690,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int logical, i
   char *tmp;
 #endif
 
-  output = open_file(filename, "w");
+  output = open_output(filename);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;

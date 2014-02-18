@@ -52,7 +52,7 @@ static int logical = -1;
 static unsigned int legend = 1;
 static unsigned int top = 0;
 
-FILE *open_file(const char *filename, const char *mode)
+FILE *open_output(const char *filename)
 {
   const char *extn;
 
@@ -63,7 +63,7 @@ FILE *open_file(const char *filename, const char *mode)
   if (filename[0] == '-' && extn == filename + 1)
     return stdout;
 
-  return fopen(filename, mode);
+  return fopen(filename, "w");
 }
 
 static hwloc_obj_t insert_task(hwloc_topology_t topology, hwloc_cpuset_t cpuset, const char * name)
