@@ -44,6 +44,8 @@ Version 1.9.0
   + Add --reverse to hwloc-distrib to distribute using last objects first
     and singlify into last bits first. Thanks to Jirka Hladky for the
     suggestion.
+  + lstopo does not overwrite output files by default anymore.
+    Pass -f or --force to enforce it.
 
 
 Version 1.8.1

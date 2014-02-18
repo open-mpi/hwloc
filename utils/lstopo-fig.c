@@ -116,9 +116,9 @@ static struct draw_methods fig_draw_methods = {
 };
 
 void
-output_fig (hwloc_topology_t topology, const char *filename, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
+output_fig (hwloc_topology_t topology, const char *filename, int overwrite, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
-  FILE *output = open_output(filename);
+  FILE *output = open_output(filename, overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;

@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009 inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -291,7 +291,7 @@ struct draw_methods windows_draw_methods = {
 };
 
 void
-output_windows (hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
+output_windows (hwloc_topology_t topology, const char *filename __hwloc_attribute_unused, int overwrite __hwloc_attribute_unused, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
   HWND toplevel;
   MSG msg;

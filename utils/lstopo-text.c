@@ -143,12 +143,12 @@ output_only (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int logical
     output_only (topology, l->children[x], output, logical, verbose_mode);
 }
 
-void output_console(hwloc_topology_t topology, const char *filename, int logical, int legend __hwloc_attribute_unused, int verbose_mode)
+void output_console(hwloc_topology_t topology, const char *filename, int overwrite, int logical, int legend __hwloc_attribute_unused, int verbose_mode)
 {
   unsigned topodepth;
   FILE *output;
 
-  output = open_output(filename);
+  output = open_output(filename, overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
@@ -247,7 +247,7 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
     fclose(output);
 }
 
-void output_synthetic(hwloc_topology_t topology, const char *filename, int logical __hwloc_attribute_unused, int legend __hwloc_attribute_unused, int verbose_mode __hwloc_attribute_unused)
+void output_synthetic(hwloc_topology_t topology, const char *filename, int overwrite, int logical __hwloc_attribute_unused, int legend __hwloc_attribute_unused, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output;
   hwloc_obj_t obj = hwloc_get_root_obj(topology);
@@ -259,7 +259,7 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int logic
     return;
   }
 
-  output = open_output(filename);
+  output = open_output(filename, overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;
@@ -678,7 +678,7 @@ static struct draw_methods text_draw_methods = {
   text_text,
 };
 
-void output_text(hwloc_topology_t topology, const char *filename, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
+void output_text(hwloc_topology_t topology, const char *filename, int overwrite, int logical, int legend, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output;
   struct display *disp;
@@ -690,7 +690,7 @@ void output_text(hwloc_topology_t topology, const char *filename, int logical, i
   char *tmp;
 #endif
 
-  output = open_output(filename);
+  output = open_output(filename, overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
     return;

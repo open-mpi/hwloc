@@ -19,6 +19,7 @@
 #include <dirent.h>
 #endif
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <assert.h>
 
 #ifdef LSTOPO_HAVE_GRAPHICS
@@ -48,13 +49,15 @@ unsigned int fontsize = 10;
 unsigned int gridsize = 10;
 enum lstopo_orient_e force_orient[HWLOC_OBJ_TYPE_MAX];
 
+static int overwrite = 0;
 static int logical = -1;
 static unsigned int legend = 1;
 static unsigned int top = 0;
 
-FILE *open_output(const char *filename)
+FILE *open_output(const char *filename, int overwrite)
 {
   const char *extn;
+  struct stat st;
 
   if (!filename || !strcmp(filename, "-"))
     return stdout;
@@ -62,6 +65,11 @@ FILE *open_output(const char *filename)
   extn = strrchr(filename, '.');
   if (filename[0] == '-' && extn == filename + 1)
     return stdout;
+
+  if (!stat(filename, &st) && !overwrite) {
+    errno = EEXIST;
+    return NULL;
+  }
 
   return fopen(filename, "w");
 }
@@ -251,6 +259,7 @@ void usage(const char *name, FILE *where)
   fprintf (where, "Output options:\n");
   fprintf (where, "  --output-format <format>\n");
   fprintf (where, "  --of <format>         Force the output to use the given format\n");
+  fprintf (where, "  -f --force            Overwrite the output file if it exists\n");
   fprintf (where, "Textual output options:\n");
   fprintf (where, "  --only <type>         Only show objects of the given type in the textual output\n");
   fprintf (where, "  -v --verbose          Include additional details\n");
@@ -388,7 +397,9 @@ main (int argc, char *argv[])
       } else if (!strcmp (argv[0], "-h") || !strcmp (argv[0], "--help")) {
 	usage(callname, stdout);
         exit(EXIT_SUCCESS);
-      } else if (!strcmp (argv[0], "-l") || !strcmp (argv[0], "--logical"))
+      } else if (!strcmp (argv[0], "-f") || !strcmp (argv[0], "--force"))
+	overwrite = 1;
+      else if (!strcmp (argv[0], "-l") || !strcmp (argv[0], "--logical"))
 	logical = 1;
       else if (!strcmp (argv[0], "-p") || !strcmp (argv[0], "--physical"))
 	logical = 0;
@@ -633,14 +644,14 @@ main (int argc, char *argv[])
       if (getenv("DISPLAY")) {
         if (logical == -1)
           logical = 0;
-        output_x11(topology, NULL, logical, legend, verbose_mode);
+        output_x11(topology, NULL, overwrite, logical, legend, verbose_mode);
       } else
 #endif /* CAIRO_HAS_XLIB_SURFACE */
 #ifdef HWLOC_WIN_SYS
       {
         if (logical == -1)
           logical = 0;
-        output_windows(topology, NULL, logical, legend, verbose_mode);
+        output_windows(topology, NULL, overwrite, logical, legend, verbose_mode);
       }
 #endif
 #endif /* !LSTOPO_HAVE_GRAPHICS */
@@ -648,47 +659,47 @@ main (int argc, char *argv[])
       {
         if (logical == -1)
           logical = 1;
-        output_console(topology, NULL, logical, legend, verbose_mode);
+        output_console(topology, NULL, overwrite, logical, legend, verbose_mode);
       }
 #endif
       break;
 
     case LSTOPO_OUTPUT_CONSOLE:
-      output_console(topology, filename, logical, legend, verbose_mode);
+      output_console(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
     case LSTOPO_OUTPUT_SYNTHETIC:
-      output_synthetic(topology, filename, logical, legend, verbose_mode);
+      output_synthetic(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
     case LSTOPO_OUTPUT_TEXT:
-      output_text(topology, filename, logical, legend, verbose_mode);
+      output_text(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
     case LSTOPO_OUTPUT_FIG:
-      output_fig(topology, filename, logical, legend, verbose_mode);
+      output_fig(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
 #ifdef LSTOPO_HAVE_GRAPHICS
 # if CAIRO_HAS_PNG_FUNCTIONS
     case LSTOPO_OUTPUT_PNG:
-      output_png(topology, filename, logical, legend, verbose_mode);
+      output_png(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
 # endif /* CAIRO_HAS_PNG_FUNCTIONS */
 # if CAIRO_HAS_PDF_SURFACE
     case LSTOPO_OUTPUT_PDF:
-      output_pdf(topology, filename, logical, legend, verbose_mode);
+      output_pdf(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
 # endif /* CAIRO_HAS_PDF_SURFACE */
 # if CAIRO_HAS_PS_SURFACE
     case LSTOPO_OUTPUT_PS:
-      output_ps(topology, filename, logical, legend, verbose_mode);
+      output_ps(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
 #endif /* CAIRO_HAS_PS_SURFACE */
 #if CAIRO_HAS_SVG_SURFACE
     case LSTOPO_OUTPUT_SVG:
-      output_svg(topology, filename, logical, legend, verbose_mode);
+      output_svg(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
 #endif /* CAIRO_HAS_SVG_SURFACE */
 #endif /* LSTOPO_HAVE_GRAPHICS */
     case LSTOPO_OUTPUT_XML:
-      output_xml(topology, filename, logical, legend, verbose_mode);
+      output_xml(topology, filename, overwrite, logical, legend, verbose_mode);
       break;
     default:
       fprintf(stderr, "file format not supported\n");
