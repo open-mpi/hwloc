@@ -2151,6 +2151,8 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_custom_insert_group_object_by_parent(hwloc_topo
  * \note Only printable characters may be exported to XML string attributes.
  * Any other character, especially any non-ASCII character, will be silently
  * dropped.
+ *
+ * \note If \p name is "-", the XML output is sent to the standard output.
  */
 HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const char *xmlpath);
 
