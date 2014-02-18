@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -148,14 +148,10 @@ void output_console(hwloc_topology_t topology, const char *filename, int logical
   unsigned topodepth;
   FILE *output;
 
-  if (!filename || !strcmp(filename, "-"))
-    output = stdout;
-  else {
-    output = open_file(filename, "w"); 
-    if (!output) {
-      fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-      return;
-    }
+  output = open_file(filename, "w");
+  if (!output) {
+    fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
+    return;
   }
 
   topodepth = hwloc_topology_get_depth(topology);
@@ -263,14 +259,10 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int logic
     return;
   }
 
-  if (!filename || !strcmp(filename, "-"))
-    output = stdout;
-  else {
-    output = open_file(filename, "w");
-    if (!output) {
-      fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-      return;
-    }
+  output = open_file(filename, "w");
+  if (!output) {
+    fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
+    return;
   }
 
   arity = obj->arity;
@@ -696,14 +688,10 @@ void output_text(hwloc_topology_t topology, const char *filename, int logical, i
   char *tmp;
 #endif
 
-  if (!filename || !strcmp(filename, "-"))
-    output = stdout;
-  else {
-    output = open_file(filename, "w"); 
-    if (!output) {
-      fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-      return;
-    }
+  output = open_file(filename, "w");
+  if (!output) {
+    fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
+    return;
   }
 
   /* Try to use utf-8 characters */

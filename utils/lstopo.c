@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2012 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -56,7 +56,7 @@ FILE *open_file(const char *filename, const char *mode)
 {
   const char *extn;
 
-  if (!filename)
+  if (!filename || !strcmp(filename, "-"))
     return stdout;
 
   extn = strrchr(filename, '.');

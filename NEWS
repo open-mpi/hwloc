@@ -1,5 +1,5 @@
 Copyright © 2009 CNRS
-Copyright © 2009-2013 Inria.  All rights reserved.
+Copyright © 2009-2014 Inria.  All rights reserved.
 Copyright © 2009-2013 Université Bordeaux 1
 Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 
@@ -22,6 +22,8 @@ Version 1.8.2
 * Don't mix total and local memory when displaying verbose object attributes
   with hwloc_obj_attr_snprintf() or in lstopo.
 * Fix a memory leak in the diff interface when adding a "too complex" entry.
+* Fix lstopo export to stdout when specifying a Cairo-based output type
+  with --of.
 
 
 Version 1.8.1
