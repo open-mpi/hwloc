@@ -55,6 +55,8 @@ my @tokens;
 push(@tokens, "See COPYING in top-level directory");
 push(@tokens, "\\\$COPYRIGHT\\\$");
 
+my $commit = $ARGV[0];
+
 # Override the defaults if some values are set in the environment
 $my_search_name = $ENV{HWLOC_COPYRIGHT_SEARCH_NAME}
     if (defined($ENV{HWLOC_COPYRIGHT_SEARCH_NAME}));
@@ -83,8 +85,13 @@ print "==> Top-level hwloc dir: $top\n";
 print "==> Current directory: $start\n";
 
 my $cmd;
-$cmd = "LANG=C git status . | sed -n -r -e 's/^\#?[ 	]*(modified|new file)[ 	]*:[ 	]+(.+)/\\2/p'"
-    if (-d "$top/.git");
+if (-d "$top/.git") {
+    if ($commit) {
+	$cmd = "LANG=C git show --stat --pretty=format: $commit | sed -n -r -e 's/^[ 	]*([^ ].*[^ ])[ 	]*\\|[ 	]*[0-9]+[ 	]*\\+.*/\\1/p'"
+    } else {
+	$cmd = "LANG=C git status . | sed -n -r -e 's/^\#?[ 	]*(modified|new file)[ 	]*:[ 	]+(.+)/\\2/p'"
+    }
+}
 die "Can't find git meta dir"
     if (!defined($cmd));
 
