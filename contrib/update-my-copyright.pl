@@ -83,8 +83,8 @@ print "==> Top-level hwloc dir: $top\n";
 print "==> Current directory: $start\n";
 
 my $cmd;
-$cmd = "LANG=C git status . | sed -n -r -e 's/^\#?[ 	]*modified:[ 	]*/M /p' -e 's/^\#?[ 	]* new file:[ 	]*/A /p'"
-    if (-d "$top/.git" && ! -d "$top/.svn");
+$cmd = "LANG=C git status . | sed -n -r -e 's/^\#?[ 	]*(modified|new file)[ 	]*:[ 	]+(.+)/\\2/p'"
+    if (-d "$top/.git");
 die "Can't find git meta dir"
     if (!defined($cmd));
 
@@ -95,12 +95,7 @@ open(CMD, "$cmd|") || die "Can't run command";
 my @files;
 while (<CMD>) {
     chomp;
-    if ($_ =~ /^M/ || $_ =~ /^A/) {
-        my ($state, $filename, $extra) = split(/\s+/, $_);
-        $filename = $extra
-            if ($filename eq "+");
-        push(@files, $filename);
-    }
+    push (@files, $_);
 }
 close(CMD);
 
