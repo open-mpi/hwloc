@@ -3405,7 +3405,7 @@ look_cpuinfo(struct hwloc_topology *topology,
 {
   struct hwloc_linux_cpuinfo_proc * Lprocs = NULL;
   struct hwloc_obj_info_s *global_infos = NULL;
-  unsigned global_infos_count = NULL;
+  unsigned global_infos_count = 0;
   /* P for physical/OS index, L for logical (e.g. in we order we get them, not in the final hwloc logical order) */
   unsigned *Lcore_to_Pcore;
   unsigned *Lcore_to_Psock; /* needed because Lcore is equivalent to Pcore+Psock, not to Pcore alone */
