@@ -1638,7 +1638,7 @@ object instead.
 <dt>GPUVendor, GPUModel (GPU or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
 </dd>
-<dt>OpenCLDeviceType, OpenCLPlatformIndex,
+<dt>OpenCLDeviceType, OpenCLPlatformIndex,</dt>
 <dt>OpenCLPlatformName, OpenCLPlatformDeviceIndex (OpenCL GPU OS devices)</dt>
 <dd>The type of OpenCL device,
  the OpenCL platform index and name,
