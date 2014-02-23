@@ -3238,8 +3238,15 @@ hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
       || !strcmp("Processor", prefix)
       || !strcmp("chip type", prefix)
       || !strcmp("cpu model", prefix)
-      || !strcasecmp("cpu", prefix))
-    hwloc__add_info(infos, infos_count, "CPUModel", value);
+      || !strcasecmp("cpu", prefix)) {
+    /* keep the last one, assume it's more precise than the first one.
+     * we should have the Architecture keypair for basic information anyway.
+     */
+    char **valuep = hwloc__find_info_slot(infos, infos_count, "CPUModel");
+    if (*valuep)
+      free(*valuep);
+    *valuep = strdup(value);
+  }
   return 0;
 }
 
