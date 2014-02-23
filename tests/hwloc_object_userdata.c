@@ -81,7 +81,6 @@ static void import_cb(hwloc_topology_t topo __hwloc_attribute_unused, hwloc_obj_
 
   } else if (!strncmp("Encoded", name, 7)) {
     unsigned i = atoi(name+7);
-    assert(i >= 0);
     assert(i <= RANDOMSTRINGTESTS-1);
     assert(RANDOMSTRINGLENGTH-i == (unsigned) length);
     err = memcmp(buffer, randomstring+(i+1)/2, length);
