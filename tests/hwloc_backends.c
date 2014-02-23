@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012-2013 Inria.  All rights reserved.
+ * Copyright © 2012-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -34,7 +34,7 @@ int main(void)
     printf("XML buffer export failed (%s), ignoring\n", strerror(errno));
   else
     xmlbufok = 1;
-  mktemp(xmlfile);
+  mkstemp(xmlfile);
   if (hwloc_topology_export_xml(topology1, xmlfile) < 0)
     printf("XML file export failed (%s), ignoring\n", strerror(errno));
   else
