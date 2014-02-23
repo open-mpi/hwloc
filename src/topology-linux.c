@@ -3099,37 +3099,6 @@ look_sysfscpu(struct hwloc_topology *topology,
  ****** cpuinfo Topology Discovery ******
  ****************************************/
 
-/*
- * architecture properly detected:
- * arm: "Processor\t:"				=> OK
- * avr32: "chip type\t:"			=> OK
- * blackfin: "model name\t:"			=> OK
- * h8300: "CPU:"				=> OK
- * ia64: "model name :"				=> OK
- * m68k: "CPU:"					=> OK
- * mips: "cpu model\t\t:"			=> OK
- * openrisc: "CPU:"				=> OK
- * ppc: "cpu\t\t:"				=> OK
- * sparc: "cpu\t\t:"				=> OK
- * tile: "model name\t:"			=> OK
- * unicore32: "Processor\t:"			=> OK
- * x86: "model name\t:"				=> OK
- *
- * cannot work:
- * alpha: "cpu\t\t\t:" + "cpu model\t\t:"	=> no processor index lines anyway
- *
- * partially supported:
- * cris: "cpu\t\t:" + "cpu model\t:"		=> only "cpu"
- * frv: "CPU-Core:" + "CPU:"			=> only "CPU"
- * mn10300: "cpu core   :" + "model name :"	=> only "model name"
- * parisc: "cpu family\t:" + "cpu\t\t:"		=> only "cpu"
- *
- * not supported because of conflicts with other arch minor lines:
- * m32r: "cpu family\t:"			=> KO (adding "cpu family" would break "blackfin")
- * microblaze: "CPU-Family:"			=> KO
- * sh: "cpu family\t:" + "cpu type\t:"		=> KO
- * xtensa: "model\t\t:"				=> KO
- */
 static int
 hwloc_linux_parse_cpuinfo_x86(const char *prefix, const char *value,
 			      struct hwloc_obj_info_s **infos, unsigned *infos_count,
@@ -3229,6 +3198,28 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
   return 0;
 }
 
+/*
+ * avr32: "chip type\t:"			=> OK
+ * blackfin: "model name\t:"			=> OK
+ * h8300: "CPU:"				=> OK
+ * m68k: "CPU:"					=> OK
+ * mips: "cpu model\t\t:"			=> OK
+ * openrisc: "CPU:"				=> OK
+ * sparc: "cpu\t\t:"				=> OK
+ * tile: "model name\t:"			=> OK
+ * unicore32: "Processor\t:"			=> OK
+ * alpha: "cpu\t\t\t: Alpha" + "cpu model\t\t:"	=> "cpu" overwritten by "cpu model", no processor indexes
+ * cris: "cpu\t\t:" + "cpu model\t:"		=> only "cpu"
+ * frv: "CPU-Core:" + "CPU:"			=> only "CPU"
+ * mn10300: "cpu core   :" + "model name :"	=> only "model name"
+ * parisc: "cpu family\t:" + "cpu\t\t:"		=> only "cpu"
+ *
+ * not supported because of conflicts with other arch minor lines:
+ * m32r: "cpu family\t:"			=> KO (adding "cpu family" would break "blackfin")
+ * microblaze: "CPU-Family:"			=> KO
+ * sh: "cpu family\t:" + "cpu type\t:"		=> KO
+ * xtensa: "model\t\t:"				=> KO
+ */
 static int
 hwloc_linux_parse_cpuinfo_generic(const char *prefix, const char *value,
 				  struct hwloc_obj_info_s **infos, unsigned *infos_count,
