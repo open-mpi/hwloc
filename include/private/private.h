@@ -140,6 +140,7 @@ extern void hwloc_topology_setup_defaults(struct hwloc_topology *topology);
 extern void hwloc_topology_clear(struct hwloc_topology *topology);
 
 extern void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name, const char *value);
+extern char ** hwloc__find_info_slot(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name);
 extern void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp, struct hwloc_obj_info_s **src_infosp, unsigned *src_countp);
 extern void hwloc__free_infos(struct hwloc_obj_info_s *infos, unsigned count);
 

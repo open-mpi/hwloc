@@ -279,9 +279,20 @@ void hwloc__add_info(struct hwloc_obj_info_s **infosp, unsigned *countp, const c
   if (count != alloccount)
     infos = realloc(infos, alloccount*sizeof(*infos));
   infos[count].name = strdup(name);
-  infos[count].value = strdup(value);
+  infos[count].value = value ? strdup(value) : NULL;
   *infosp = infos;
   *countp = count+1;
+}
+
+char ** hwloc__find_info_slot(struct hwloc_obj_info_s **infosp, unsigned *countp, const char *name)
+{
+  unsigned i;
+  for(i=0; i<*countp; i++) {
+    if (!strcmp((*infosp)[i].name, name))
+      return &(*infosp)[i].value;
+  }
+  hwloc__add_info(infosp, countp, name, NULL);
+  return &(*infosp)[*countp-1].value;
 }
 
 void hwloc__move_infos(struct hwloc_obj_info_s **dst_infosp, unsigned *dst_countp,
