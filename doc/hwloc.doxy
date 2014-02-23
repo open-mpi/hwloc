@@ -1640,16 +1640,34 @@ placed.
 <dd>The description string that was given to hwloc to build this
 synthetic topology.
 </dd>
-<dt>CPUVendor, CPUModel, CPUModelNumber, CPUFamilyNumber, CPUType (Socket or Machine)</dt>
-<dd>The processor vendor name, model name, model number, family number
-and a more-general processor type name.
-CPUVendor, CPUModelNumber and CPUFamilyNumber are currently only
-added for x86 processors, and for ia64 on Linux.
-CPUType is only added on Solaris/Sparc.
-These attributes are usually added to Socket objects.
-However, when hwloc cannot detect the number of sockets but still
-knows their (same) model, the attribute may be added to the Machine
-object instead.
+<dt>CPUModel (Socket or Machine)</dt>
+<dd>The processor model name.
+Usually added to Socket objects, but can be in Machine instead if
+hwloc failed to discover any socket.
+</dd>
+<dt>CPUType (Socket)</dt>
+<dd>
+A Solaris-specific general processor type name, such as "i86pc".
+</dd>
+<dt>CPUVendor, CPUModelNumber, CPUFamilyNumber (Socket or Machine)</dt>
+<dd>The processor vendor name, model number, and family number.
+Currently available for x86 and Xeon Phi processors on most systems,
+and for ia64 processors on Linux.
+Usually added to Socket objects, but can be in Machine instead if
+hwloc failed to discover any socket.
+</dd>
+<dt>CPURevision (Socket)</dt>
+<dd>
+A POWER/PowerPC-specific general processor revision number,
+currently only available on Linux.
+</dd>
+<dt>PlatformName, PlatformModel, PlatformVendor, PlatformBoardID, PlatformRevision,</dt>
+<dt> SystemVersionRegister, ProcessorVersionRegister (Machine)</dt>
+<dd>Some POWER/PowerPC-specific attributes describing the platform
+and processor.
+Currently only available on Linux.
+Usually added to Socket objects, but can be in Machine instead if
+hwloc failed to discover any socket.
 </dd>
 <dt>PCIVendor, PCIDevice (PCI devices and bridges)</dt>
 <dd>The vendor and device names of the PCI device.
@@ -1661,7 +1679,7 @@ object instead.
 <dt>GPUVendor, GPUModel (GPU or Co-Processor OS devices)</dt>
 <dd>The vendor and model names of the GPU device.
 </dd>
-<dt>OpenCLDeviceType, OpenCLPlatformIndex,
+<dt>OpenCLDeviceType, OpenCLPlatformIndex,</dt>
 <dt>OpenCLPlatformName, OpenCLPlatformDeviceIndex (OpenCL GPU OS devices)</dt>
 <dd>The type of OpenCL device,
  the OpenCL platform index and name,
@@ -1670,7 +1688,7 @@ object instead.
 <dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
 <dd>The UUID and Serial of NVIDIA GPUs.
 </dd>
-<dt>CUDAMultiProcessors, CUDACoresPerMP</dt>
+<dt>CUDAMultiProcessors, CUDACoresPerMP,</dt>
 <dt>CUDATotalMemorySize, CUDAL2CacheSize, CUDASharedMemorySizePerMP (CUDA OS devices)</dt>
 <dd>
  The number of shared multiprocessors, the number of cores per
