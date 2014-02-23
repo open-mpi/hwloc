@@ -3195,7 +3195,7 @@ hwloc_linux_parse_cpuinfo_arm(const char *prefix, const char *value,
 static int
 hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
 			      struct hwloc_obj_info_s **infos, unsigned *infos_count,
-			      int is_global __hwloc_attribute_unused)
+			      int is_global)
 {
   /* common fields */
   if (!strcmp("cpu", prefix)) {
@@ -3207,22 +3207,25 @@ hwloc_linux_parse_cpuinfo_ppc(const char *prefix, const char *value,
   }
   /* platform-specific fields */
   else if (!strcasecmp("vendor", prefix)) {
-    hwloc__add_info(infos, infos_count, "Vendor", value);
+    hwloc__add_info(infos, infos_count, "PlatformVendor", value);
+  } else if (!strcmp("Board ID", prefix)) {
+    hwloc__add_info(infos, infos_count, "PlatformBoardID", value);
   } else if (!strcmp("Board", prefix)
-	     || !strcmp("Board ID", prefix)) {
-    hwloc__add_info(infos, infos_count, "Board", value);
-  } else if (!strcasecmp("Machine", prefix)) {
-    hwloc__add_info(infos, infos_count, "Machine", value);
-  } else if (!strcmp("family", prefix)) {
-    hwloc__add_info(infos, infos_count, "Family", value);
+	     || !strcasecmp("Machine", prefix)) {
+    /* machine and board are similar (and often more precise) than model above */
+    char **valuep = hwloc__find_info_slot(infos, infos_count, "PlatformModel");
+    if (*valuep)
+      free(*valuep);
+    *valuep = strdup(value);
   } else if (!strcasecmp("Revision", prefix)
 	     || !strcmp("Hardware rev", prefix)) {
-    hwloc__add_info(infos, infos_count, "Revision", value);
+    hwloc__add_info(infos, infos_count, is_global ? "PlatformRevision" : "CPURevision", value);
   } else if (!strcmp("SVR", prefix)) {
-    hwloc__add_info(infos, infos_count, "SVR", value);
+    hwloc__add_info(infos, infos_count, "SystemVersionRegister", value);
   } else if (!strcmp("PVR", prefix)) {
-    hwloc__add_info(infos, infos_count, "PVR", value);
+    hwloc__add_info(infos, infos_count, "ProcessorVersionRegister", value);
   }
+  /* don't match 'board*' because there's also "board l2" on some platforms */
   return 0;
 }
 
