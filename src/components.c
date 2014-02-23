@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2012 Université Bordeau 1
  * See COPYING in top-level directory.
  */
@@ -90,7 +90,7 @@ hwloc__dlforeach_cb(const char *filename, void *_data __hwloc_attribute_unused)
       fprintf(stderr, "Failed to load plugin: %s\n", lt_dlerror());
     goto out;
   }
-  componentsymbolname = malloc(6+strlen(basename)+10+1);
+  componentsymbolname = malloc(strlen(basename)+10+1);
   sprintf(componentsymbolname, "%s_component", basename);
   component = lt_dlsym(handle, componentsymbolname);
   if (!component) {
