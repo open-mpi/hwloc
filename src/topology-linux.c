@@ -3438,7 +3438,15 @@ look_cpuinfo(struct hwloc_topology *topology,
 
   /* parse the entire cpuinfo first, fill the Lprocs array and numprocs */
   _numprocs = hwloc_linux_parse_cpuinfo(data, path, &Lprocs, &global_infos, &global_infos_count);
+
+
+  /* setup root info */
+  hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
+		    &global_infos, &global_infos_count);
+
+
   if (_numprocs <= 0)
+    /* found no processor */
     return -1;
   numprocs = _numprocs;
 
@@ -3520,10 +3528,6 @@ look_cpuinfo(struct hwloc_topology *topology,
     }
     hwloc_debug("%s", "\n");
   }
-
-  /* setup root info */
-  hwloc__move_infos(&hwloc_get_root_obj(topology)->infos, &hwloc_get_root_obj(topology)->infos_count,
-		    &global_infos, &global_infos_count);
 
   /* fill Lprocs[].Lcore, Lcore_to_Psock and Lcore_to_Pcore */
   for(Lproc=0; Lproc<numprocs; Lproc++) {
