@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2013 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -618,11 +618,68 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
   unsigned totwidth = gridsize;
   struct style style;
   int n;
+  unsigned nmorelines = 0, i;
+  char morelines[3][64];
 
   if (fontsize) {
+    if (HWLOC_OBJ_OSDEV_COPROC == level->attr->osdev.type) {
+      const char *coproctype = hwloc_obj_get_info_by_name(level, "CoProcType");
+
+      if (!strcmp(coproctype, "CUDA")) {
+	const char *value, *value2, *value3;
+
+	value = hwloc_obj_get_info_by_name(level, "CUDATotalMemorySize");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
+		   mb >= 10240 ? "%llu GB" : "%llu MB",
+		   mb >= 10240 ? mb/1024 : mb);
+	  nmorelines++;
+	}
+
+	value = hwloc_obj_get_info_by_name(level, "CUDAL2CacheSize");
+	if (value) {
+	  unsigned long long kb = strtoull(value, NULL, 10);
+	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
+		   kb >= 10240 ? "L2 (%llu MB)" : "L2 (%llu kB)",
+		   kb >= 10240 ? kb/1024 : kb);
+	  nmorelines++;
+	}
+
+	value = hwloc_obj_get_info_by_name(level, "CUDAMultiProcessors");
+	value2 = hwloc_obj_get_info_by_name(level, "CUDACoresPerMP");
+	value3 = hwloc_obj_get_info_by_name(level, "CUDASharedMemorySizePerMP");
+	if (value && value2 && value3) {
+	  snprintf(morelines[nmorelines], sizeof(morelines[0]), "%s MP x (%s cores + %s kB)", value, value2, value3);
+	  nmorelines++;
+	}
+
+      } else if (!strcmp(coproctype, "MIC")) {
+	const char *value;
+	value = hwloc_obj_get_info_by_name(level, "MICActiveCores");
+	if (value) {
+	  snprintf(morelines[nmorelines], sizeof(morelines[0]), "%s cores", value);
+	  nmorelines++;
+	}
+	value = hwloc_obj_get_info_by_name(level, "MICMemorySize");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
+		   mb >= 10240 ? "%llu GB" : "%llu MB",
+		   mb >= 10240 ? mb/1024 : mb);
+	  nmorelines++;
+	}
+      }
+    }
+
     n = strlen(level->name);
+    for(i=0; i<nmorelines; i++) {
+      int nn = strlen(morelines[i]);
+      if (nn > n)
+	n = nn;
+    }
     textwidth = (n * fontsize * 3) / 4;
-    totheight = gridsize + fontsize + gridsize;
+    totheight = gridsize + (fontsize + gridsize)*(nmorelines+1);
     totwidth = gridsize + textwidth + gridsize;
   }
 
@@ -632,8 +689,11 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
   lstopo_set_object_color(methods, topology, level, 0, &style);
   methods->box(output, style.bg.r, style.bg.g, style.bg.b, depth, x, *retwidth, y, *retheight);
 
-  if (fontsize)
+  if (fontsize) {
     methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + gridsize, level->name);
+    for(i=0; i<nmorelines; i++)
+      methods->text(output, style.t.r, style.t.g, style.t.b, fontsize, depth-1, x + gridsize, y + (i+2)*gridsize + (i+1)*fontsize, morelines[i]);
+  }
 }
 
 static void
