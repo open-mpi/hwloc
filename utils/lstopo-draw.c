@@ -628,7 +628,7 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
       if (!strcmp(coproctype, "CUDA")) {
 	const char *value, *value2, *value3;
 
-	value = hwloc_obj_get_info_by_name(level, "CUDATotalMemorySize");
+	value = hwloc_obj_get_info_by_name(level, "CUDAGlobalMemorySize");
 	if (value) {
 	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
 	  snprintf(morelines[nmorelines], sizeof(morelines[0]),

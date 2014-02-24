@@ -1689,10 +1689,10 @@ hwloc failed to discover any socket.
 <dd>The UUID and Serial of NVIDIA GPUs.
 </dd>
 <dt>CUDAMultiProcessors, CUDACoresPerMP,</dt>
-<dt>CUDATotalMemorySize, CUDAL2CacheSize, CUDASharedMemorySizePerMP (CUDA OS devices)</dt>
+<dt>CUDAGlobalMemorySize, CUDAL2CacheSize, CUDASharedMemorySizePerMP (CUDA OS devices)</dt>
 <dd>
  The number of shared multiprocessors, the number of cores per
- multiprocessor, the total memory size, the global L2 cache size,
+ multiprocessor, the global memory size, the (global) L2 cache size,
  and size of the shared memory in each multiprocessor of a CUDA device.
  Sizes are in kB.
 </dd>

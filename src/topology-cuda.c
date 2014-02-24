@@ -151,7 +151,7 @@ hwloc_cuda_backend_notify_new_object(struct hwloc_backend *backend, struct hwloc
       hwloc_obj_add_info(cuda_device, "GPUModel", prop.name);
 
     snprintf(number, sizeof(number), "%llu", ((unsigned long long) prop.totalGlobalMem) >> 10);
-    hwloc_obj_add_info(cuda_device, "CUDATotalMemorySize", number);
+    hwloc_obj_add_info(cuda_device, "CUDAGlobalMemorySize", number);
 
     snprintf(number, sizeof(number), "%llu", ((unsigned long long) prop.l2CacheSize) >> 10);
     hwloc_obj_add_info(cuda_device, "CUDAL2CacheSize", number);
