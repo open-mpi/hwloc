@@ -604,6 +604,20 @@ hwloc_obj_cmp(hwloc_obj_t obj1, hwloc_obj_t obj2)
   }
 }
 
+/* Compare object cpusets based on complete_cpuset if defined (always correctly ordered),
+ * or fallback to the main cpusets (only correctly ordered during early insert before disallowed/offline bits are cleared).
+ *
+ * This is the sane way to compare object among a horizontal level.
+ */
+static int
+hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2)
+{
+  if (obj1->complete_cpuset && obj2->complete_cpuset)
+    return hwloc_bitmap_compare_first(obj1->complete_cpuset, obj2->complete_cpuset);
+  else
+    return hwloc_bitmap_compare_first(obj1->cpuset, obj2->cpuset);
+}
+
 /* format must contain a single %s where to print obj infos */
 static void
 hwloc___insert_object_by_cpuset_report_error(hwloc_report_error_t report_error, const char *fmt, hwloc_obj_t obj, int line)
@@ -798,7 +812,7 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 
       case HWLOC_OBJ_DIFFERENT:
 	/* Leave CHILD in CUR.  */
-	if (!put && (!child->cpuset || hwloc_bitmap_compare_first(obj->cpuset, child->cpuset) < 0)) {
+	if (!put && (!child->cpuset || hwloc__object_cpusets_compare_first(obj, child) < 0)) {
 	  /* Sort children by cpuset: put OBJ before CHILD in CUR's children.  */
 	  *cur_children = obj;
 	  cur_children = &obj->next_sibling;
@@ -1402,7 +1416,7 @@ reorder_children(hwloc_obj_t parent)
     prev = &parent->first_child;
     while (*prev
 	   && (!child->cpuset || !(*prev)->cpuset
-	       || hwloc_bitmap_compare_first(child->cpuset, (*prev)->cpuset) > 0))
+	       || hwloc__object_cpusets_compare_first(child, *prev) > 0))
       prev = &((*prev)->next_sibling);
     /* enqueue */
     child->next_sibling = *prev;
@@ -2777,7 +2791,6 @@ hwloc_topology_get_depth(struct hwloc_topology *topology)
 static void
 hwloc__check_children(struct hwloc_obj *parent)
 {
-  hwloc_bitmap_t remaining_parent_set;
   unsigned j;
 
   if (!parent->arity) {
@@ -2802,24 +2815,16 @@ hwloc__check_children(struct hwloc_obj *parent)
   assert(parent->last_child == parent->children[parent->arity-1]);
   assert(parent->last_child->next_sibling == NULL);
 
+  /* check that parent->cpuset == exclusive OR of children
+   * (can be wrong for complete_cpuset since disallowed/offline/unknown PUs can be removed)
+   */
   if (parent->cpuset) {
-    remaining_parent_set = hwloc_bitmap_dup(parent->cpuset);
+    hwloc_bitmap_t remaining_parent_set = hwloc_bitmap_dup(parent->cpuset);
     for(j=0; j<parent->arity; j++) {
       if (!parent->children[j]->cpuset)
 	continue;
-      /* check that child cpuset is included in the parent */
+      /* check that child cpuset is included in the reminder of the parent */
       assert(hwloc_bitmap_isincluded(parent->children[j]->cpuset, remaining_parent_set));
-#if !defined(NDEBUG)
-      /* check that children are correctly ordered (see below), empty ones may be anywhere */
-      if (!hwloc_bitmap_iszero(parent->children[j]->cpuset)) {
-        int firstchild = hwloc_bitmap_first(parent->children[j]->cpuset);
-        int firstparent = hwloc_bitmap_first(remaining_parent_set);
-        assert(firstchild == firstparent);
-      }
-#endif
-      /* clear previously used parent cpuset bits so that we actually checked above
-       * that children cpusets do not intersect and are ordered properly
-       */
       hwloc_bitmap_andnot(remaining_parent_set, remaining_parent_set, parent->children[j]->cpuset);
     }
     if (parent->type == HWLOC_OBJ_PU) {
@@ -2834,6 +2839,23 @@ hwloc__check_children(struct hwloc_obj *parent)
       assert(hwloc_bitmap_iszero(remaining_parent_set));
     }
     hwloc_bitmap_free(remaining_parent_set);
+  }
+
+  /* check that children complete_cpuset are properly ordered, empty ones may be anywhere
+   * (can be wrong for main cpuset since removed PUs can break the ordering).
+   */
+  if (parent->complete_cpuset) {
+    int firstchild;
+    int prev_firstchild = -1; /* -1 works fine with first comparisons below */
+    for(j=0; j<parent->arity; j++) {
+      if (!parent->children[j]->complete_cpuset
+	  || hwloc_bitmap_iszero(parent->children[j]->complete_cpuset))
+	continue;
+
+      firstchild = hwloc_bitmap_first(parent->children[j]->complete_cpuset);
+      assert(prev_firstchild < firstchild);
+      prev_firstchild = firstchild;
+    }
   }
 
   /* checks for all children */
