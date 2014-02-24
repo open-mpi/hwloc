@@ -51,6 +51,10 @@ Version 1.9.0
     in the graphical output.
   + lstopo does not overwrite output files by default anymore.
     Pass -f or --force to enforce it.
+* Misc
+  + Fix some overzealous assertions and warnings about the ordering of
+    objects on a level with respect to cpusets. The ordering is only
+    guaranteed for complete cpusets (based on the first bit in sets).
 
 
 Version 1.8.1
