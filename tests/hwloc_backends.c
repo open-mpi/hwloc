@@ -3,6 +3,7 @@
  * See COPYING in top-level directory.
  */
 
+#include <private/autogen/config.h> /* for HWLOC_WIN_SYS */
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -13,6 +14,10 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+
+#ifdef HWLOC_WIN_SYS
+#define mkstemp mktemp
+#endif
 
 /* mostly useful with valgrind, to check if backend cleanup properly */
 
