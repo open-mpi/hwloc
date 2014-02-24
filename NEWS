@@ -36,6 +36,8 @@ Version 1.9.0
   + Add CUDA info attributes describing the number of multiprocessors and
     cores and the size of the global, shared and L2 cache memories in CUDA
     OS devices.
+  + Add OpenCL info attributes describing the number of compute units and
+    the global memory size in OpenCL OS devices.
   + The synthetic backend now accepts extended types such as L2Cache, L1i or
     Group3. lstopo also exports synthetic strings using these extended types.
 * Tools

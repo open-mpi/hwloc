@@ -1,5 +1,5 @@
 /*
- * Copyright © 2012 Inria.  All rights reserved.
+ * Copyright © 2012-2014 Inria.  All rights reserved.
  * Copyright © 2013 Université Bordeaux 1.  All right reserved.
  * See COPYING in top-level directory.
  */
@@ -29,6 +29,9 @@ struct hwloc_opencl_backend_data_s {
     char devicename[64];
     char devicevendor[64];
     char devicetype[64];
+
+    unsigned computeunits;
+    unsigned long long globalmemsize;
 
     union hwloc_opencl_device_info_u {
       struct hwloc_opencl_device_info_amd_s {
@@ -99,6 +102,8 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
 #ifdef CL_DEVICE_TOPOLOGY_AMD
     cl_device_topology_amd amdtopo;
 #endif
+    cl_ulong globalmemsize;
+    cl_uint computeunits;
 
     hwloc_debug("Looking device %p\n", device_ids[i]);
 
@@ -132,6 +137,12 @@ hwloc_opencl_query_devices(struct hwloc_opencl_backend_data_s *data)
       strcpy(info->devicetype, "Unknown");
       break;
     }
+
+    clGetDeviceInfo(device_ids[i], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(globalmemsize), &globalmemsize, NULL);
+    info->globalmemsize = globalmemsize / 1024;
+
+    clGetDeviceInfo(device_ids[i], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(computeunits), &computeunits, NULL);
+    info->computeunits = computeunits;
 
     hwloc_debug("platform %s device %s vendor %s type %s\n", info->platformname, info->devicename, info->devicevendor, info->devicetype);
 
@@ -250,6 +261,12 @@ hwloc_opencl_backend_notify_new_object(struct hwloc_backend *backend, struct hwl
 
     snprintf(buffer, sizeof(buffer), "%u", info->platformdeviceidx);
     hwloc_obj_add_info(osdev, "OpenCLPlatformDeviceIndex", buffer);
+
+    snprintf(buffer, sizeof(buffer), "%u", info->computeunits);
+    hwloc_obj_add_info(osdev, "OpenCLComputeUnits", buffer);
+
+    snprintf(buffer, sizeof(buffer), "%llu", info->globalmemsize);
+    hwloc_obj_add_info(osdev, "OpenCLGlobalMemorySize", buffer);
 
     hwloc_insert_object_by_parent(topology, pcidev, osdev);
     return 1;

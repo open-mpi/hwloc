@@ -1685,6 +1685,9 @@ hwloc failed to discover any socket.
  the OpenCL platform index and name,
  and the index of the device within the platform.
 </dd>
+<dt>OpenCLComputeUnits, OpenCLGlobalMemorySize</dt>
+<dd>The number of compute units and global memory size (in kB) of a OpenCL device.
+</dd>
 <dt>NVIDIAUUID, NVIDIASerial (NVML GPU OS devices)</dt>
 <dd>The UUID and Serial of NVIDIA GPUs.
 </dd>

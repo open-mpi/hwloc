@@ -669,6 +669,23 @@ os_device_draw(hwloc_topology_t topology __hwloc_attribute_unused, struct draw_m
 		   mb >= 10240 ? mb/1024 : mb);
 	  nmorelines++;
 	}
+
+      } else if (!strcmp(coproctype, "OpenCL")) {
+	const char *value;
+	value = hwloc_obj_get_info_by_name(level, "OpenCLComputeUnits");
+	if (value) {
+	  unsigned long long cu = strtoull(value, NULL, 10);
+	  snprintf(morelines[nmorelines], sizeof(morelines[0]), "%llu compute units", cu);
+	  nmorelines++;
+	}
+	value = hwloc_obj_get_info_by_name(level, "OpenCLGlobalMemorySize");
+	if (value) {
+	  unsigned long long mb = strtoull(value, NULL, 10) / 1024;
+	  snprintf(morelines[nmorelines], sizeof(morelines[0]),
+		   mb >= 10240 ? "%llu GB" : "%llu MB",
+		   mb >= 10240 ? mb/1024 : mb);
+	  nmorelines++;
+	}
       }
     }
 
