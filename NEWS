@@ -24,6 +24,7 @@ Version 1.8.2
 * Fix a memory leak in the diff interface when adding a "too complex" entry.
 * Fix lstopo export to stdout when specifying a Cairo-based output type
   with --of.
+* Fix some memory leaks when importing xml diffs.
 
 
 Version 1.8.1
