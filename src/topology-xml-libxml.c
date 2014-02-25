@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -230,7 +230,7 @@ hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbufl
     if (!errno)
       /* libxml2 read the file fine, but it got an error during parsing */
     errno = EINVAL;
-    return -1;
+    goto out;
   }
 
   dtd = xmlGetIntSubset(doc);
@@ -249,7 +249,7 @@ hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbufl
     /* root node should be in "topologydiff" class */
     if (hwloc__xml_verbose())
       fprintf(stderr, "ignoring object of class `%s' not at the top the xml hierarchy\n", (const char *) root_node->name);
-    goto failed;
+    goto out_with_doc;
   }
 
   state.next_attr = hwloc__libxml_import_next_attr;
@@ -271,7 +271,7 @@ hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbufl
       free(refname);
       refname = strdup(attrvalue);
     } else
-      return -1;
+      goto out_with_doc;
   }
 
   ret = hwloc__xml_import_diff(&state, firstdiffp);
@@ -280,9 +280,12 @@ hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbufl
   else
     free(refname);
 
+  xmlFreeDoc(doc);
   return ret;
 
- failed:
+out_with_doc:
+  xmlFreeDoc(doc);
+out:
   return -1; /* failed */
 }
 
