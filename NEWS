@@ -41,6 +41,10 @@ Version 1.9.0
   + The synthetic backend now accepts extended types such as L2Cache, L1i or
     Group3. lstopo also exports synthetic strings using these extended types.
 * Tools
+  + lstopo does not overwrite output files by default anymore.
+    Pass -f or --force to enforce it.
+  + lstopo now displays OpenCL, CUDA and Xeon Phi numbers of cores and
+    memory sizes in the graphical output.
   + Add -e or --get-last-cpu-location to hwloc-ps to report where
     processes/threads run instead of where they are bound.
   + hwloc-ps reports locations as likely-more-useful objects such as Cores
@@ -49,10 +53,6 @@ Version 1.9.0
   + Add --reverse to hwloc-distrib to distribute using last objects first
     and singlify into last bits first. Thanks to Jirka Hladky for the
     suggestion.
-  + lstopo now displays CUDA and Xeon Phi numbers of cores and memory sizes
-    in the graphical output.
-  + lstopo does not overwrite output files by default anymore.
-    Pass -f or --force to enforce it.
 * Misc
   + Fix some overzealous assertions and warnings about the ordering of
     objects on a level with respect to cpusets. The ordering is only
