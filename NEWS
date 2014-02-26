@@ -53,6 +53,8 @@ Version 1.9.0
   + Add --reverse to hwloc-distrib to distribute using last objects first
     and singlify into last bits first. Thanks to Jirka Hladky for the
     suggestion.
+  + hwloc-info now reports unified caches when looking for data or instruction
+    cache ancestor objects.
 * Misc
   + Fix some overzealous assertions and warnings about the ordering of
     objects on a level with respect to cpusets. The ordering is only

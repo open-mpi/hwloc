@@ -226,6 +226,7 @@ hwloc_calc_process_arg_info_cb(void *_data __hwloc_attribute_unused,
 	  goto next;
 	if (parent->type == HWLOC_OBJ_CACHE
 	    && show_ancestor_attrcachetype != (hwloc_obj_cache_type_t) -1
+	    && parent->attr->cache.type != HWLOC_OBJ_CACHE_UNIFIED
 	    && show_ancestor_attrcachetype != parent->attr->cache.type)
 	  goto next;
 	hwloc_obj_type_snprintf(parents, sizeof(parents), parent, 1);
