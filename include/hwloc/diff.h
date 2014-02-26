@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Inria.  All rights reserved.
+ * Copyright © 2013-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -43,6 +43,13 @@ extern "C" {
  * More complex differences such as adding or removing objects cannot
  * be represented in the difference structures and therefore return
  * errors.
+ *
+ * It means that there is no need to apply the difference when
+ * looking at the tree organization (how many levels, how many
+ * objects per level, what kind of objects, CPU and node sets, etc)
+ * and when binding to objects.
+ * However the difference must be applied when looking at object
+ * attributes such as memory sizes and info attributes.
  *
  * @{
  */
