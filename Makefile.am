@@ -27,9 +27,9 @@ pkgconfig_DATA = hwloc.pc
 endif
 endif
 
-# Only install the valgrind suppressions file if we're building in standalone mode
+# Only install the valgrind suppressions and visual studio files if we're building in standalone mode
 if HWLOC_BUILD_STANDALONE
-dist_pkgdata_DATA = contrib/hwloc-valgrind.supp
+dist_pkgdata_DATA = contrib/hwloc-valgrind.supp contrib/windows
 endif
 
 #

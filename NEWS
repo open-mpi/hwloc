@@ -56,6 +56,8 @@ Version 1.9.0
   + hwloc-info now reports unified caches when looking for data or instruction
     cache ancestor objects.
 * Misc
+  + Add experimental Visual Studio support under contrib/windows.
+    Thanks to Eloi Gaudry for his help and for providing the first draft.
   + Fix some overzealous assertions and warnings about the ordering of
     objects on a level with respect to cpusets. The ordering is only
     guaranteed for complete cpusets (based on the first bit in sets).
