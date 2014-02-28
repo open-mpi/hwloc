@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2013 Inria.  All rights reserved.
+ * Copyright © 2010-2014 Inria.  All rights reserved.
  * Copyright © 2011-2012 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -515,7 +515,7 @@ hwloc_distances__finalize_logical(struct hwloc_topology *topology,
       fprintf(stderr, "*\n");
       fprintf(stderr, "* Please report this error message to the hwloc user's mailing list,\n");
 #ifdef HWLOC_LINUX_SYS
-      fprintf(stderr, "* along with the output from the hwloc-gather-topology.sh script.\n");
+      fprintf(stderr, "* along with the output from the hwloc-gather-topology script.\n");
 #else
       fprintf(stderr, "* along with any relevant topology information from your platform.\n");
 #endif
