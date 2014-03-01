@@ -766,28 +766,21 @@ hwloc__object_cpusets_compare_first(hwloc_obj_t obj1, hwloc_obj_t obj2)
     return hwloc_bitmap_compare_first(obj1->cpuset, obj2->cpuset);
 }
 
-/* format must contain a single %s where to print obj infos */
+/* format the obj info to print in error messages */
 static void
-hwloc___insert_object_by_cpuset_report_error(hwloc_report_error_t report_error, const char *fmt, hwloc_obj_t obj, int line)
+hwloc__report_error_format_obj(char *buf, size_t buflen, hwloc_obj_t obj)
 {
 	char typestr[64];
-	char objstr[512];
-	char msg[640];
 	char *cpusetstr;
-
 	hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
 	hwloc_bitmap_asprintf(&cpusetstr, obj->cpuset);
 	if (obj->os_index != (unsigned) -1)
-	  snprintf(objstr, sizeof(objstr), "%s P#%u cpuset %s",
+	  snprintf(buf, buflen, "%s (P#%u cpuset %s)",
 		   typestr, obj->os_index, cpusetstr);
 	else
-	  snprintf(objstr, sizeof(objstr), "%s cpuset %s",
+	  snprintf(buf, buflen, "%s (cpuset %s)",
 		   typestr, cpusetstr);
 	free(cpusetstr);
-
-	snprintf(msg, sizeof(msg), fmt,
-		 objstr);
-	report_error(msg, line);
 }
 
 /*
@@ -919,8 +912,17 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	return child;
       case HWLOC_OBJ_INCLUDED:
 	if (container) {
-          if (report_error)
-	    hwloc___insert_object_by_cpuset_report_error(report_error, "object (%s) included in several different objects!", obj, __LINE__);
+          if (report_error) {
+	    char containerstr[512];
+	    char childstr[512];
+	    char objstr[512];
+	    char msg[2048];
+	    hwloc__report_error_format_obj(containerstr, sizeof(containerstr), container);
+	    hwloc__report_error_format_obj(childstr, sizeof(childstr), child);
+	    hwloc__report_error_format_obj(objstr, sizeof(objstr), obj);
+	    snprintf(msg, sizeof(msg), "%s included in both %s and %s!", objstr, containerstr, childstr);
+	    report_error(msg, __LINE__);
+	  }
 	  /* We can't handle that.  */
 	  return NULL;
 	}
@@ -928,8 +930,15 @@ hwloc___insert_object_by_cpuset(struct hwloc_topology *topology, hwloc_obj_t cur
 	container = child;
 	break;
       case HWLOC_OBJ_INTERSECTS:
-        if (report_error)
-          hwloc___insert_object_by_cpuset_report_error(report_error, "object (%s) intersection without inclusion!", obj, __LINE__);
+        if (report_error) {
+	  char childstr[512];
+	  char objstr[512];
+	  char msg[1024];
+	  hwloc__report_error_format_obj(objstr, sizeof(objstr), obj);
+	  hwloc__report_error_format_obj(childstr, sizeof(childstr), child);
+	  snprintf(msg, sizeof(msg), "%s intersects with %s without inclusion!", objstr, childstr);
+	  report_error(msg, __LINE__);
+	}
 	/* We can't handle that.  */
 	return NULL;
       case HWLOC_OBJ_CONTAINS:
