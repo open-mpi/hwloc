@@ -570,7 +570,7 @@ main (int argc, char *argv[])
       return err;
   }
 
-  if (lstopo_pid_number != -1 && lstopo_pid_number != 0) {
+  if (lstopo_pid_number > 0) {
     lstopo_pid = hwloc_pid_from_number(lstopo_pid_number, 0);
     if (hwloc_topology_set_pid(topology, lstopo_pid)) {
       perror("Setting target pid");
@@ -590,7 +590,7 @@ main (int argc, char *argv[])
   if (restrictstring) {
     hwloc_bitmap_t restrictset = hwloc_bitmap_alloc();
     if (!strcmp (restrictstring, "binding")) {
-      if (lstopo_pid_number != -1 && lstopo_pid_number != 0)
+      if (lstopo_pid_number > 0)
 	hwloc_get_proc_cpubind(topology, lstopo_pid, restrictset, HWLOC_CPUBIND_PROCESS);
       else
 	hwloc_get_cpubind(topology, restrictset, HWLOC_CPUBIND_PROCESS);
