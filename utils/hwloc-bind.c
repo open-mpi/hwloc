@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
   int membind_flags = 0;
   int opt;
   int ret;
-  int pid_number = 0;
+  int pid_number = -1;
   hwloc_pid_t pid;
   char *callname;
 
@@ -233,7 +233,12 @@ int main(int argc, char *argv[])
     argv += opt+1;
   }
 
-  pid = hwloc_pid_from_number(pid_number, !(get_binding || get_last_cpu_location));
+  if (pid_number > 0) {
+    pid = hwloc_pid_from_number(pid_number, !(get_binding || get_last_cpu_location));
+    /* no need to set_pid()
+     * the doc just says we're operating on pid, not that we're retrieving the topo/cpuset as seen from inside pid
+     */
+  }
 
   if (get_binding || get_last_cpu_location) {
     char *s;
@@ -241,19 +246,19 @@ int main(int argc, char *argv[])
     int err;
     if (working_on_cpubind) {
       if (get_last_cpu_location) {
-	if (pid_number)
+	if (pid_number > 0)
 	  err = hwloc_get_proc_last_cpu_location(topology, pid, cpubind_set, 0);
 	else
 	  err = hwloc_get_last_cpu_location(topology, cpubind_set, 0);
       } else {
-	if (pid_number)
+	if (pid_number > 0)
 	  err = hwloc_get_proc_cpubind(topology, pid, cpubind_set, 0);
 	else
 	  err = hwloc_get_cpubind(topology, cpubind_set, 0);
       }
       if (err) {
 	const char *errmsg = strerror(errno);
-	if (pid_number)
+	if (pid_number > 0)
 	  fprintf(stderr, "hwloc_get_proc_%s %d failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", pid_number, errno, errmsg);
 	else
 	  fprintf(stderr, "hwloc_get_%s failed (errno %d %s)\n", get_last_cpu_location ? "last_cpu_location" : "cpubind", errno, errmsg);
@@ -265,13 +270,13 @@ int main(int argc, char *argv[])
 	hwloc_bitmap_asprintf(&s, cpubind_set);
     } else {
       hwloc_membind_policy_t policy;
-      if (pid_number)
+      if (pid_number > 0)
 	err = hwloc_get_proc_membind(topology, pid, membind_set, &policy, 0);
       else
 	err = hwloc_get_membind(topology, membind_set, &policy, 0);
       if (err) {
 	const char *errmsg = strerror(errno);
-        if (pid_number)
+        if (pid_number > 0)
           fprintf(stderr, "hwloc_get_proc_membind %d failed (errno %d %s)\n", pid_number, errno, errmsg);
         else
 	  fprintf(stderr, "hwloc_get_membind failed (errno %d %s)\n", errno, errmsg);
@@ -314,7 +319,7 @@ int main(int argc, char *argv[])
     }
     if (single)
       hwloc_bitmap_singlify(membind_set);
-    if (pid_number)
+    if (pid_number > 0)
       ret = hwloc_set_proc_membind(topology, pid, membind_set, membind_policy, membind_flags);
     else
       ret = hwloc_set_membind(topology, membind_set, membind_policy, membind_flags);
@@ -323,7 +328,7 @@ int main(int argc, char *argv[])
       const char *errmsg = strerror(bind_errno);
       char *s;
       hwloc_bitmap_asprintf(&s, membind_set);
-      if (pid_number)
+      if (pid_number > 0)
         fprintf(stderr, "hwloc_set_proc_membind %s %d failed (errno %d %s)\n", s, pid_number, bind_errno, errmsg);
       else
         fprintf(stderr, "hwloc_set_membind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
@@ -348,7 +353,7 @@ int main(int argc, char *argv[])
     }
     if (single)
       hwloc_bitmap_singlify(cpubind_set);
-    if (pid_number)
+    if (pid_number > 0)
       ret = hwloc_set_proc_cpubind(topology, pid, cpubind_set, cpubind_flags);
     else
       ret = hwloc_set_cpubind(topology, cpubind_set, cpubind_flags);
@@ -357,7 +362,7 @@ int main(int argc, char *argv[])
       const char *errmsg = strerror(bind_errno);
       char *s;
       hwloc_bitmap_asprintf(&s, cpubind_set);
-      if (pid_number)
+      if (pid_number > 0)
         fprintf(stderr, "hwloc_set_proc_cpubind %s %d failed (errno %d %s)\n", s, pid_number, bind_errno, errmsg);
       else
         fprintf(stderr, "hwloc_set_cpubind %s failed (errno %d %s)\n", s, bind_errno, errmsg);
@@ -372,7 +377,7 @@ int main(int argc, char *argv[])
 
   hwloc_topology_destroy(topology);
 
-  if (pid_number)
+  if (pid_number > 0)
     return EXIT_SUCCESS;
 
   if (0 == argc) {
