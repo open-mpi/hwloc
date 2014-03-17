@@ -27,9 +27,9 @@ pkgconfig_DATA = hwloc.pc
 endif
 endif
 
-# Only install the valgrind suppressions and visual studio files if we're building in standalone mode
+# Only install the valgrind suppressions file if we're building in standalone mode
 if HWLOC_BUILD_STANDALONE
-dist_pkgdata_DATA = contrib/hwloc-valgrind.supp contrib/windows
+dist_pkgdata_DATA = contrib/hwloc-valgrind.supp
 endif
 
 #
@@ -40,6 +40,11 @@ EXTRA_DIST = \
         README VERSION COPYING AUTHORS \
         config/hwloc_get_version.sh \
         config/distscript.csh
+
+# Only install entire visual studio subdirectory if we're building in standalone mode
+if HWLOC_BUILD_STANDALONE
+EXTRA_DIST += contrib/windows
+endif
 
 if HWLOC_BUILD_STANDALONE
 dist-hook:
