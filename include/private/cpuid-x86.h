@@ -11,7 +11,7 @@
 #ifndef HWLOC_PRIVATE_CPUID_X86_H
 #define HWLOC_PRIVATE_CPUID_X86_H
 
-#ifdef HWLOC_X86_32_ARCH
+#if (defined HWLOC_X86_32_ARCH) && (!defined HWLOC_HAVE_MSVC_CPUIDEX)
 static __hwloc_inline int hwloc_have_x86_cpuid(void)
 {
   int ret;
@@ -45,13 +45,21 @@ static __hwloc_inline int hwloc_have_x86_cpuid(void)
       : "=r" (ret), "=&r" (tmp), "=&r" (tmp2));
   return ret;
 }
-#endif /* HWLOC_X86_32_ARCH */
-#ifdef HWLOC_X86_64_ARCH
+#endif /* !defined HWLOC_X86_32_ARCH && !defined HWLOC_HAVE_MSVC_CPUIDEX*/
+#if (defined HWLOC_X86_64_ARCH) || (defined HWLOC_HAVE_MSVC_CPUIDEX)
 static __hwloc_inline int hwloc_have_x86_cpuid(void) { return 1; }
 #endif /* HWLOC_X86_64_ARCH */
 
 static __hwloc_inline void hwloc_x86_cpuid(unsigned *eax, unsigned *ebx, unsigned *ecx, unsigned *edx)
 {
+#ifdef HWLOC_HAVE_MSVC_CPUIDEX
+  int regs[4];
+  __cpuidex(regs, *eax, *ecx);
+  *eax = regs[0];
+  *ebx = regs[1];
+  *ecx = regs[2];
+  *edx = regs[3];
+#else /* HWLOC_HAVE_MSVC_CPUIDEX */
   /* Note: gcc might want to use bx or the stack for %1 addressing, so we can't
    * use them :/ */
 #ifdef HWLOC_X86_64_ARCH
@@ -75,6 +83,7 @@ static __hwloc_inline void hwloc_x86_cpuid(unsigned *eax, unsigned *ebx, unsigne
 #else
 #error unknown architecture
 #endif
+#endif /* HWLOC_HAVE_MSVC_CPUIDEX */
 }
 
 #endif /* HWLOC_PRIVATE_X86_CPUID_H */
