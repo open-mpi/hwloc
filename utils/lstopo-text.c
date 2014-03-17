@@ -655,7 +655,7 @@ text_text(void *output, int r, int g, int b, int size __hwloc_attribute_unused, 
   x /= (gridsize/2);
   y /= gridsize;
 
-#if defined(HAVE_PUTWC) && !defined(__MINGW32__)
+#if defined(HAVE_PUTWC) && !defined(__MINGW32__) && !defined(_MSC_VER)
   {
     size_t len = strlen(text) + 1;
     wchar_t *wbuf = malloc(len * sizeof(wchar_t)), *wtext;
