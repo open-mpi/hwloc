@@ -212,7 +212,7 @@ $(DOX_LETTERPDF): $(DOX_TAG)
 	done; \
 	mv letter-refman.pdf $(DOCDIR)/$(DOX_LETTERPDF)
 
-doc: $(DOX_TAG)
+doc: $(DOX_TAG) $(DOX_LETTERPDF) $(DOX_A4PDF)
 
 else !HWLOC_BUILD_DOXYGEN
 
