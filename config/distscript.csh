@@ -68,11 +68,11 @@ endif
 
 echo "*** Copying doxygen-doc tree to dist..."
 echo "*** Directory: srcdir: $srcdir, distdir: $distdir, pwd: `pwd`"
-chmod -R a=rwx $distdir/doc/doxygen-doc
-echo rm -rf $distdir/doc/doxygen-doc
-rm -rf $distdir/doc/doxygen-doc
-echo cp -rpf $srcdir/doc/doxygen-doc $distdir/doc
-cp -rpf $srcdir/doc/doxygen-doc $distdir/doc
+chmod -R a=rwx $distdir/doc/doxygen-doc/
+echo rm -rf $distdir/doc/doxygen-doc/
+rm -rf $distdir/doc/doxygen-doc/
+echo cp -rpf $srcdir/doc/doxygen-doc/ $distdir/doc
+cp -rpf $srcdir/doc/doxygen-doc/ $distdir/doc
 
 echo "*** Copying new README"
 ls -lf $distdir/README
