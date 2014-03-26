@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Inria.  All rights reserved.
+ * Copyright © 2013-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -209,8 +209,9 @@ hwloc_bgq_component_instantiate(struct hwloc_disc_component *component,
   if (!env || !atoi(env)) {
     err = uname(&utsname);
     if (err || strcmp(utsname.sysname, "CNK") || strcmp(utsname.machine, "BGQ")) {
-      fprintf(stderr, "*** Found unexpected uname sysname `%s' machine `%s', disabling BGQ backend.\n", utsname.sysname, utsname.machine);
-      fprintf(stderr, "*** Set HWLOC_FORCE_BGQ=1 in the environment to enforce the BGQ backend.\n");
+      fprintf(stderr, "*** Found unexpected uname sysname `%s' machine `%s'\n", utsname.sysname, utsname.machine);
+      fprintf(stderr, "*** The BGQ backend is only enabled on compute nodes by default (sysname=CNK machine=BGQ)\n");
+      fprintf(stderr, "*** Set HWLOC_FORCE_BGQ=1 in the environment to enforce the BGQ backend anyway.\n");
       return NULL;
     }
   }
