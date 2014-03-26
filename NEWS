@@ -27,6 +27,8 @@ Version 1.9.0
     last CPU where a Linux thread given by TID ran.
   + Add hwloc_distrib() to extend the old hwloc_distribute[v]() functions.
     hwloc_distribute[v]() is moved to hwloc/deprecated.h.
+  + Don't mix total and local memory when displaying verbose object attributes
+    with hwloc_obj_attr_snprintf() or in lstopo.
 * Backends
   + Add CPUVendor, CPUModelNumber and CPUFamilyNumber info attributes for
     x86, ia64 and Xeon Phi sockets on Linux, to extend the x86-specific
@@ -41,26 +43,35 @@ Version 1.9.0
   + The synthetic backend now accepts extended types such as L2Cache, L1i or
     Group3. lstopo also exports synthetic strings using these extended types.
 * Tools
-  + lstopo does not overwrite output files by default anymore.
-    Pass -f or --force to enforce it.
-  + lstopo now displays OpenCL, CUDA and Xeon Phi numbers of cores and
-    memory sizes in the graphical output.
-  + Add -e or --get-last-cpu-location to hwloc-ps to report where
-    processes/threads run instead of where they are bound.
-  + hwloc-ps reports locations as likely-more-useful objects such as Cores
-    or Sockets instead of Caches when possible.
-  + Add -e as a synonym to --get-last-cpu-location in hwloc-bind.
-  + Add --reverse to hwloc-distrib to distribute using last objects first
-    and singlify into last bits first. Thanks to Jirka Hladky for the
-    suggestion.
-  + hwloc-info now reports unified caches when looking for data or instruction
-    cache ancestor objects.
+  + lstopo
+    - Do not overwrite output files by default anymore.
+      Pass -f or --force to enforce it.
+    - Display OpenCL, CUDA and Xeon Phi numbers of cores and memory sizes
+      in the graphical output.
+    - Fix export to stdout when specifying a Cairo-based output type
+      with --of.
+  + hwloc-ps
+    - Add -e or --get-last-cpu-location to report where processes/threads
+      run instead of where they are bound.
+    - Report locations as likely-more-useful objects such as Cores or Sockets
+      instead of Caches when possible.
+  + hwloc-bind
+    - Fix failure on Windows when not using --pid.
+    - Add -e as a synonym to --get-last-cpu-location.
+  + hwloc-distrib
+    - Add --reverse to distribute using last objects first and singlify
+      into last bits first. Thanks to Jirka Hladky for the suggestion.
+  + hwloc-info
+    - Report unified caches when looking for data or instruction cache
+      ancestor objects.
 * Misc
   + Add experimental Visual Studio support under contrib/windows.
     Thanks to Eloi Gaudry for his help and for providing the first draft.
   + Fix some overzealous assertions and warnings about the ordering of
     objects on a level with respect to cpusets. The ordering is only
     guaranteed for complete cpusets (based on the first bit in sets).
+  + Fix some memory leaks when importing xml diffs and when exporting a
+    "too complex" entry.
 
 
 Version 1.8.1
