@@ -27,6 +27,8 @@ Version 1.9.0
     last CPU where a Linux thread given by TID ran.
   + Add hwloc_distrib() to extend the old hwloc_distribute[v]() functions.
     hwloc_distribute[v]() is moved to hwloc/deprecated.h.
+  + Don't mix total and local memory when displaying verbose object attributes
+    with hwloc_obj_attr_snprintf() or in lstopo.
 * Backends
   + Add CPUVendor, CPUModelNumber and CPUFamilyNumber info attributes for
     x86, ia64 and Xeon Phi sockets on Linux, to extend the x86-specific
@@ -55,12 +57,17 @@ Version 1.9.0
     suggestion.
   + hwloc-info now reports unified caches when looking for data or instruction
     cache ancestor objects.
+  + Fix lstopo export to stdout when specifying a Cairo-based output type
+    with --of.
+  + Fix hwloc-bind failure on Windows when not using --pid.
 * Misc
   + Add experimental Visual Studio support under contrib/windows.
     Thanks to Eloi Gaudry for his help and for providing the first draft.
   + Fix some overzealous assertions and warnings about the ordering of
     objects on a level with respect to cpusets. The ordering is only
     guaranteed for complete cpusets (based on the first bit in sets).
+  + Fix some memory leaks when importing xml diffs and when exporting a
+    "too complex" entry.
 
 
 Version 1.8.1
