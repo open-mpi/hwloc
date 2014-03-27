@@ -1,6 +1,6 @@
 # Copyright © 2009      inria.  All rights reserved.
 # Copyright © 2009      Université Bordeaux 1
-# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
 # Note that the -I directory must *exactly* match what was specified
@@ -62,7 +62,7 @@ if !HWLOC_BUILD_README
 dist-hook: cannot-dist
 else
 dist-hook:
-	csh "$(top_srcdir)/config/distscript.csh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
+	env LS_COLORS= csh "$(top_srcdir)/config/distscript.csh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
 endif HWLOC_BUILD_README
 endif HWLOC_BUILD_DOXYGEN
 endif HWLOC_BUILD_STANDALONE
