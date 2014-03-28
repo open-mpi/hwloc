@@ -1,6 +1,6 @@
 /*
  * Copyright © 2012-2013 Blue Brain Project, BBP/EPFL. All rights reserved.
- * Copyright © 2012-2013 Inria.  All rights reserved.
+ * Copyright © 2012-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -218,9 +218,6 @@ hwloc_gl_component_instantiate(struct hwloc_disc_component *component,
   struct hwloc_backend *backend;
   struct hwloc_gl_backend_data_s *data;
 
-  if (hwloc_plugin_check_namespace(component->name, "hwloc_backend_alloc") < 0)
-    return NULL;
-
   /* thissystem may not be fully initialized yet, we'll check flags in discover() */
 
   backend = hwloc_backend_alloc(component);
@@ -251,12 +248,23 @@ static struct hwloc_disc_component hwloc_gl_disc_component = {
   NULL
 };
 
+static int
+hwloc_gl_component_init(unsigned long flags)
+{
+  if (flags)
+    return -1;
+  if (hwloc_plugin_check_namespace("gl", "hwloc_backend_alloc") < 0)
+    return -1;
+  return 0;
+}
+
 #ifdef HWLOC_INSIDE_PLUGIN
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_gl_component;
 #endif
 
 const struct hwloc_component hwloc_gl_component = {
   HWLOC_COMPONENT_ABI,
+  hwloc_gl_component_init, NULL,
   HWLOC_COMPONENT_TYPE_DISC,
   0,
   &hwloc_gl_disc_component

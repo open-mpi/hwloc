@@ -4644,6 +4644,7 @@ static struct hwloc_disc_component hwloc_linux_disc_component = {
 
 const struct hwloc_component hwloc_linux_component = {
   HWLOC_COMPONENT_ABI,
+  NULL, NULL,
   HWLOC_COMPONENT_TYPE_DISC,
   0,
   &hwloc_linux_disc_component
@@ -4844,6 +4845,7 @@ static struct hwloc_disc_component hwloc_linuxpci_disc_component = {
 
 const struct hwloc_component hwloc_linuxpci_component = {
   HWLOC_COMPONENT_ABI,
+  NULL, NULL,
   HWLOC_COMPONENT_TYPE_DISC,
   0,
   &hwloc_linuxpci_disc_component

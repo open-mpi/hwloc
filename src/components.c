@@ -26,6 +26,12 @@ static int hwloc_components_verbose = 0;
 static int hwloc_plugins_verbose = 0;
 #endif
 
+/* hwloc_components_mutex serializes:
+ * - loading/unloading plugins, and modifications of the hwloc_plugins list
+ * - calls to ltdl, including in hwloc_check_plugin_namespace()
+ * - registration of components with hwloc_disc_component_register()
+ *   and hwloc_xml_callbacks_register()
+ */
 #ifdef HWLOC_WIN_SYS
 /* Basic mutex on top of InterlockedCompareExchange() on windows,
  * Far from perfect, but easy to maintain, and way enough given that this code will never be needed for real. */
@@ -297,6 +303,9 @@ hwloc_disc_component_register(struct hwloc_disc_component *component,
 
 #include <static-components.h>
 
+static void (**hwloc_component_finalize_cbs)(unsigned long);
+static unsigned hwloc_component_finalize_cb_count;
+
 void
 hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
 {
@@ -320,6 +329,23 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
   hwloc_plugins_init();
 #endif
 
+  hwloc_component_finalize_cbs = NULL;
+  hwloc_component_finalize_cb_count = 0;
+  /* count the max number of finalize callbacks */
+  for(i=0; NULL != hwloc_static_components[i]; i++)
+    hwloc_component_finalize_cb_count++;
+#ifdef HWLOC_HAVE_PLUGINS
+  for(desc = hwloc_plugins; NULL != desc; desc = desc->next)
+    hwloc_component_finalize_cb_count++;
+#endif
+  if (hwloc_component_finalize_cb_count) {
+    hwloc_component_finalize_cbs = calloc(hwloc_component_finalize_cb_count,
+					  sizeof(*hwloc_component_finalize_cbs));
+    assert(hwloc_component_finalize_cbs);
+    /* forget that max number and recompute the real one below */
+    hwloc_component_finalize_cb_count = 0;
+  }
+
   /* hwloc_static_components is created by configure in static-components.h */
   for(i=0; NULL != hwloc_static_components[i]; i++) {
     if (hwloc_static_components[i]->flags) {
@@ -327,6 +353,18 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
 	      hwloc_static_components[i]->flags);
       continue;
     }
+
+    /* initialize the component */
+    if (hwloc_static_components[i]->init && hwloc_static_components[i]->init(0) < 0) {
+      if (hwloc_components_verbose)
+	fprintf(stderr, "Ignoring static component, failed to initialize\n");
+      continue;
+    }
+    /* queue ->finalize() callback if any */
+    if (hwloc_static_components[i]->finalize)
+      hwloc_component_finalize_cbs[hwloc_component_finalize_cb_count++] = hwloc_static_components[i]->finalize;
+
+    /* register for real now */
     if (HWLOC_COMPONENT_TYPE_DISC == hwloc_static_components[i]->type)
       hwloc_disc_component_register(hwloc_static_components[i]->data, NULL);
     else if (HWLOC_COMPONENT_TYPE_XML == hwloc_static_components[i]->type)
@@ -343,6 +381,18 @@ hwloc_components_init(struct hwloc_topology *topology __hwloc_attribute_unused)
 	      desc->name, desc->component->flags);
       continue;
     }
+
+    /* initialize the component */
+    if (desc->component->init && desc->component->init(0) < 0) {
+      if (hwloc_components_verbose)
+	fprintf(stderr, "Ignoring plugin `%s', failed to initialize\n", desc->name);
+      continue;
+    }
+    /* queue ->finalize() callback if any */
+    if (desc->component->finalize)
+      hwloc_component_finalize_cbs[hwloc_component_finalize_cb_count++] = desc->component->finalize;
+
+    /* register for real now */
     if (HWLOC_COMPONENT_TYPE_DISC == desc->component->type)
       hwloc_disc_component_register(desc->component->data, desc->filename);
     else if (HWLOC_COMPONENT_TYPE_XML == desc->component->type)
@@ -564,12 +614,20 @@ nextcomp:
 void
 hwloc_components_destroy_all(struct hwloc_topology *topology __hwloc_attribute_unused)
 {
+  unsigned i;
+
   HWLOC_COMPONENTS_LOCK();
   assert(0 != hwloc_components_users);
   if (0 != --hwloc_components_users) {
     HWLOC_COMPONENTS_UNLOCK();
     return;
   }
+
+  for(i=0; i<hwloc_component_finalize_cb_count; i++)
+    hwloc_component_finalize_cbs[hwloc_component_finalize_cb_count-i-1](0);
+  free(hwloc_component_finalize_cbs);
+  hwloc_component_finalize_cbs = NULL;
+  hwloc_component_finalize_cb_count = 0;
 
   /* no need to unlink/free the list of components, they'll be unloaded below */
 

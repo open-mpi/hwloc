@@ -989,6 +989,7 @@ static struct hwloc_disc_component hwloc_x86_disc_component = {
 
 const struct hwloc_component hwloc_x86_component = {
   HWLOC_COMPONENT_ABI,
+  NULL, NULL,
   HWLOC_COMPONENT_TYPE_DISC,
   0,
   &hwloc_x86_disc_component

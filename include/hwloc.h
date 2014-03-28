@@ -81,7 +81,7 @@ extern "C" {
 HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
 
 /** \brief Current component and plugin ABI version (see hwloc/plugins.h) */
-#define HWLOC_COMPONENT_ABI 3
+#define HWLOC_COMPONENT_ABI 4
 
 /** @} */
 

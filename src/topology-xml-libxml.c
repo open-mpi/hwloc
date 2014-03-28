@@ -211,11 +211,6 @@ hwloc_libxml_import_diff(const char *xmlpath, const char *xmlbuffer, int xmlbufl
 
   assert(sizeof(*lstate) <= sizeof(state.data));
 
-  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   LIBXML_TEST_VERSION;
   hwloc_libxml2_disable_stderrwarnings();
 
@@ -304,11 +299,6 @@ hwloc_libxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
 			  const char *xmlpath, const char *xmlbuffer, int xmlbuflen)
 {
   xmlDoc *doc = NULL;
-
-  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
 
   LIBXML_TEST_VERSION;
   hwloc_libxml2_disable_stderrwarnings();
@@ -418,11 +408,6 @@ hwloc_libxml_export_file(hwloc_topology_t topology, const char *filename)
   xmlDocPtr doc;
   int ret;
 
-  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   errno = 0; /* set to 0 so that we know if libxml2 changed it */
 
   doc = hwloc__libxml2_prepare_export(topology);
@@ -442,11 +427,6 @@ static int
 hwloc_libxml_export_buffer(hwloc_topology_t topology, char **xmlbuffer, int *buflen)
 {
   xmlDocPtr doc;
-
-  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
 
   doc = hwloc__libxml2_prepare_export(topology);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
@@ -495,11 +475,6 @@ hwloc_libxml_export_diff_file(hwloc_topology_diff_t diff, const char *refname, c
   xmlDocPtr doc;
   int ret;
 
-  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
-
   errno = 0; /* set to 0 so that we know if libxml2 changed it */
 
   doc = hwloc__libxml2_prepare_export_diff(diff, refname);
@@ -519,11 +494,6 @@ static int
 hwloc_libxml_export_diff_buffer(hwloc_topology_diff_t diff, const char *refname, char **xmlbuffer, int *buflen)
 {
   xmlDocPtr doc;
-
-  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0) {
-    errno = ENOSYS;
-    return -1;
-  }
 
   doc = hwloc__libxml2_prepare_export_diff(diff, refname);
   xmlDocDumpFormatMemoryEnc(doc, (xmlChar **)xmlbuffer, buflen, "UTF-8", 1);
@@ -556,12 +526,23 @@ static struct hwloc_xml_component hwloc_libxml_xml_component = {
   &hwloc_xml_libxml_callbacks
 };
 
+static int
+hwloc_xml_libxml_component_init(unsigned long flags)
+{
+  if (flags)
+    return -1;
+  if (hwloc_plugin_check_namespace("xml_libxml", "hwloc__xml_verbose") < 0)
+    return -1;
+  return 0;
+}
+
 #ifdef HWLOC_INSIDE_PLUGIN
 HWLOC_DECLSPEC extern const struct hwloc_component hwloc_xml_libxml_component;
 #endif
 
 const struct hwloc_component hwloc_xml_libxml_component = {
   HWLOC_COMPONENT_ABI,
+  hwloc_xml_libxml_component_init, NULL,
   HWLOC_COMPONENT_TYPE_XML,
   0,
   &hwloc_libxml_xml_component

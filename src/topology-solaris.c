@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2011 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2011      Oracle and/or its affiliates.  All rights reserved.
@@ -797,6 +797,7 @@ static struct hwloc_disc_component hwloc_solaris_disc_component = {
 
 const struct hwloc_component hwloc_solaris_component = {
   HWLOC_COMPONENT_ABI,
+  NULL, NULL,
   HWLOC_COMPONENT_TYPE_DISC,
   0,
   &hwloc_solaris_disc_component

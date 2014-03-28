@@ -2,7 +2,7 @@
 #-*-sh-*-
 
 #
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
@@ -32,6 +32,8 @@ set -e
 
 $lstopo > $file
 
-grep "fake component instantiated" $file
+grep "fake component initialized" $file \
+&& grep "fake component instantiated" $file \
+&& grep "fake component finalized" $file
 
 rm -rf "$tmp"

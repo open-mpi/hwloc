@@ -216,6 +216,38 @@ struct hwloc_component {
   /** \brief Component ABI version, set to HWLOC_COMPONENT_ABI */
   unsigned abi;
 
+  /** \brief Process-wide component initialization callback.
+   *
+   * This optional callback is called when the component is registered
+   * to the hwloc core (after loading the plugin).
+   *
+   * When the component is built as a plugin, this callback
+   * should call hwloc_check_plugin_namespace()
+   * and return an negative error code on error.
+   *
+   * \p flags is always 0 for now.
+   *
+   * \return 0 on success, or a negative code on error.
+   *
+   * \node If the component uses ltdl for loading its own plugins,
+   * it should load/unload them only in init() and finalize(),
+   * to avoid race conditions with hwloc's use of ltdl.
+   */
+  int (*init)(unsigned long flags);
+
+  /** \brief Process-wide component termination callback.
+   *
+   * This optional callback is called after unregistering the component
+   * from the hwloc core (before unloading the plugin).
+   *
+   * \p flags is always 0 for now.
+   *
+   * \note If the component uses ltdl for loading its own plugins,
+   * it should load/unload them only in init() and finalize(),
+   * to avoid race conditions with hwloc's use of ltdl.
+   */
+  void (*finalize)(unsigned long flags);
+
   /** \brief Component type */
   hwloc_component_type_t type;
 
@@ -312,12 +344,19 @@ HWLOC_DECLSPEC int hwloc_fill_object_sets(hwloc_obj_t obj);
  * This may fail (and abort the program) if libhwloc symbols are in a
  * private namespace.
  *
- * Plugins should call this function as an early sanity check to avoid
+ * \return 0 on success.
+ * \return -1 if the plugin cannot be successfully loaded. The caller
+ * plugin init() callback should return a negative error code as well.
+ *
+ * Plugins should call this function in their init() callback to avoid
  * later crashes if lazy symbol resolution is used by the upper layer that
  * loaded hwloc (e.g. OpenCL implementations using dlopen with RTLD_LAZY).
  *
  * \note The build system must define HWLOC_INSIDE_PLUGIN if and only if
  * building the caller as a plugin.
+ *
+ * \note This function should remain inline so plugins can call it even
+ * when they cannot find libhwloc symbols.
  */
 static __hwloc_inline int
 hwloc_plugin_check_namespace(const char *pluginname __hwloc_attribute_unused, const char *symbol __hwloc_attribute_unused)

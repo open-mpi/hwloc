@@ -23,6 +23,12 @@ Version 1.10.0
   + hwloc_distrib() does not ignore any objects anymore when there are
     too many of them. They get merged with others instead.
     Thanks to Tim Creech for reporting the issue.
+* Misc
+  + Fix a racy use of libltdl when manipulating multiple topologies in
+    different threads.
+    Thanks to Andra Hugo for reporting the issue and testing patches.
+  + The plugin ABI has changed, this release will not load plugins
+    built against previous hwloc releases.
 
 
 Version 1.9.0
