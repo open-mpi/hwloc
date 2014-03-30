@@ -17,6 +17,14 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.10.0
+--------------
+* API
+  + hwloc_distrib() does not ignore any objects anymore when there are
+    too many of them. They get merged with others instead.
+    Thanks to Tim Creech for reporting the issue.
+
+
 Version 1.9.0
 -------------
 * API
