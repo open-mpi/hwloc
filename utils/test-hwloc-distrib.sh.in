@@ -46,6 +46,14 @@ set -e
   $distrib --if synthetic --input "3 3 3" 4 --reverse
   echo
   $distrib --if synthetic --input "3 3 3" 4 --reverse --single
+  echo
+  $distrib --if synthetic --input "4 4" 2
+  echo
+  $distrib --if synthetic --input "4 4" 2 --single
+  echo
+  $distrib --if synthetic --input "4 4" 2 --reverse --single
+  echo
+  $distrib --if synthetic --input "4 4 4 4" 19
 ) > "$file"
 diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-distrib.output "$file"
 rm -rf "$tmp"
