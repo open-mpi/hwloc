@@ -1,6 +1,6 @@
 /*
  * Copyright © 2009 CNRS
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2010, 2012 Université Bordeaux 1
  * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
   int opt;
   int ret;
   int pid_number = -1;
-  hwloc_pid_t pid;
+  hwloc_pid_t pid = 0; /* only valid when pid_number > 0, but gcc-4.8 still reports uninitialized warnings */
   char *callname;
 
   cpubind_set = hwloc_bitmap_alloc();
