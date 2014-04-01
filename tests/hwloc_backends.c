@@ -27,7 +27,7 @@ int main(void)
   char *xmlbuf;
   int xmlbuflen;
   char xmlfile[] = "hwloc_backends.tmpxml.XXXXXX";
-  int xmlbufok = 0, xmlfileok = 0;
+  int xmlbufok = 0, xmlfileok = 0, xmlfilefd;
   hwloc_obj_t sw;
   int err;
 
@@ -39,8 +39,8 @@ int main(void)
     printf("XML buffer export failed (%s), ignoring\n", strerror(errno));
   else
     xmlbufok = 1;
-  mkstemp(xmlfile);
-  if (hwloc_topology_export_xml(topology1, xmlfile) < 0)
+  xmlfilefd = mkstemp(xmlfile);
+  if (xmlfilefd < 0 || hwloc_topology_export_xml(topology1, xmlfile) < 0)
     printf("XML file export failed (%s), ignoring\n", strerror(errno));
   else
     xmlfileok = 1;
@@ -129,8 +129,10 @@ int main(void)
 
   if (xmlbufok)
     hwloc_free_xmlbuffer(topology1, xmlbuf);
-  if (xmlfileok)
+  if (xmlfilefd >= 0) {
     unlink(xmlfile);
+    close(xmlfilefd);
+  }
   hwloc_topology_destroy(topology1);
 
   return 0;
