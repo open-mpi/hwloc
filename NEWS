@@ -17,6 +17,11 @@ bug fixes (and other actions) for each version of hwloc since version
 in v0.9.1).
 
 
+Version 1.9.1
+-------------
+* Fix -f in lstopo manpage. Thanks to Jirka Hladky for reporting the issue.
+
+
 Version 1.9.0
 -------------
 * API
