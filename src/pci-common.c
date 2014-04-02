@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2013 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -268,6 +268,9 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
       if (parent == group_obj)
 	/* if didn't get merged, setup its sets */
 	hwloc_fill_object_sets(group_obj);
+      if (!parent)
+	/* Failed to insert the parent, maybe a conflicting cpuset, attach to the root object instead */
+	parent = hwloc_get_root_obj(topology);
     }
   }
 

@@ -19,6 +19,8 @@ in v0.9.1).
 
 Version 1.9.1
 -------------
+* Fix a crash when the PCI locality is invalid. Attach to the root object
+  instead. Thanks to Nicolas Denoyelle for reporting the issue.
 * Fix -f in lstopo manpage. Thanks to Jirka Hladky for reporting the issue.
 
 
