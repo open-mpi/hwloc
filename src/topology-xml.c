@@ -284,10 +284,10 @@ hwloc__xml_import_object_attr(struct hwloc_topology *topology __hwloc_attribute_
    * deprecated (from 1.0)
    */
   else if (!strcmp(name, "dmi_board_vendor")) {
-    hwloc_obj_add_info(obj, "DMIBoardVendor", strdup(value));
+    hwloc_obj_add_info(obj, "DMIBoardVendor", value);
   }
   else if (!strcmp(name, "dmi_board_name")) {
-    hwloc_obj_add_info(obj, "DMIBoardName", strdup(value));
+    hwloc_obj_add_info(obj, "DMIBoardName", value);
   }
 
   /*************************
