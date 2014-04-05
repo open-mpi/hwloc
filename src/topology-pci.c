@@ -367,6 +367,9 @@ hwloc_pci_find_hostbridge_parent(struct hwloc_topology *topology, struct hwloc_b
       group_obj->cpuset = hwloc_bitmap_dup(cpuset);
       group_obj->attr->group.depth = (unsigned) -1;
       parent = hwloc__insert_object_by_cpuset(topology, group_obj, hwloc_report_os_error);
+      if (!parent)
+	/* Failed to insert the parent, maybe a conflicting cpuset, attach to the root object instead */
+	parent = hwloc_get_root_obj(topology);
     }
   }
 
