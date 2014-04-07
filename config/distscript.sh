@@ -69,7 +69,7 @@ fi
 # Trivial helper function
 doit() {
     echo $*
-    $*
+    eval $*
 }
 
 echo "*** Copying doxygen-doc tree to dist..."
@@ -77,7 +77,26 @@ echo "*** Directory: srcdir: $srcdir, distdir: $distdir, pwd: `pwd`"
 doit mkdir -p $distdir/doc/doxygen-doc
 doit chmod -R a=rwx $distdir/doc/doxygen-doc
 doit rm -rf $distdir/doc/doxygen-doc
-doit cp -rpf $srcdir/doc/doxygen-doc $distdir/doc
+
+# We want to copy the entire directory tree to the distdir.  In some
+# cases, doxygen-doc may be a sym link, so we want the copy to follow
+# the sym links.  It's a bit of a portability nightmare, so try a few
+# different ways...
+# This seems to work on OS X and Linux (but not Solaris)
+doit "tar c -C $srcdir -h -f - doc/doxygen-doc | tar x -C $distdir -f -"
+if test ! -d $distdir/doc/doxygen-doc; then
+    # This seems to work on Linux and Solaris
+    doit cp -rpf $srcdir/doc/doxygen-doc/ $distdir/doc
+fi
+if test ! -d $distdir/doc/doxygen-doc; then
+    # This seems to work on OS X (probably redundant, but we know it works)
+    doit cp -rpf $srcdir/doc/doxygen-doc $distdir/doc
+fi
+# If we still failed, just error out
+if test ! -d $distdir/doc/doxygen-doc; then
+    echo "ERROR: Cannot seem to copy a directory to the distdir :-("
+    exit 1
+fi
 
 echo "*** Copying new README"
 ls -lf $distdir/README
