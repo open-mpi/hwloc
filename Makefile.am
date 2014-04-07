@@ -34,12 +34,12 @@ endif
 
 #
 # "make distcheck" requires that tarballs are able to be able to "make
-# dist", so we have to include config/distscript.csh.
+# dist", so we have to include config/distscript.sh.
 #
 EXTRA_DIST = \
         README VERSION COPYING AUTHORS \
         config/hwloc_get_version.sh \
-        config/distscript.csh
+        config/distscript.sh
 
 # Only install entire visual studio subdirectory if we're building in standalone mode
 if HWLOC_BUILD_STANDALONE
@@ -48,7 +48,7 @@ endif
 
 if HWLOC_BUILD_STANDALONE
 dist-hook:
-	env LS_COLORS= csh "$(top_srcdir)/config/distscript.csh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
+	sh "$(top_srcdir)/config/distscript.sh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
 endif HWLOC_BUILD_STANDALONE
 
 #
