@@ -77,7 +77,7 @@ echo "*** Directory: srcdir: $srcdir, distdir: $distdir, pwd: `pwd`"
 doit mkdir -p $distdir/doc/doxygen-doc
 doit chmod -R a=rwx $distdir/doc/doxygen-doc
 doit rm -rf $distdir/doc/doxygen-doc
-doit cp -rpf $srcdir/doc/doxygen-doc/ $distdir/doc
+doit cp -rpf $srcdir/doc/doxygen-doc $distdir/doc
 
 echo "*** Copying new README"
 ls -lf $distdir/README
