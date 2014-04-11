@@ -2473,7 +2473,7 @@ try_add_cache_from_device_tree_cpu(struct hwloc_topology *topology,
 				      d_cache_line_size, d_cache_size, d_cache_sets, cpuset);
 }
 
-/* 
+/*
  * Discovers L1/L2/L3 cache information on IBM PowerPC systems for old kernels (RHEL5.*)
  * which provide NUMA nodes information without any details
  */
@@ -2482,18 +2482,27 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
 			 struct hwloc_linux_backend_data_s *data)
 {
   device_tree_cpus_t cpus;
-  const char ofroot[] = "/proc/device-tree/cpus";
+  const char *ofroot;
+  size_t ofrootlen;
   unsigned int i;
   int root_fd = data->root_fd;
-  DIR *dt = hwloc_opendir(ofroot, root_fd);
+  DIR *dt;
   struct dirent *dirent;
+
+  ofroot = "/sys/firmware/devicetree/base/cpus";
+  ofrootlen = 34;
+  dt = hwloc_opendir(ofroot, root_fd);
+  if (NULL == dt) {
+    ofroot = "/proc/device-tree/cpus";
+    ofrootlen = 22;
+    dt = hwloc_opendir(ofroot, root_fd);
+    if (NULL == dt)
+      return;
+  }
 
   cpus.n = 0;
   cpus.p = NULL;
   cpus.allocated = 0;
-
-  if (NULL == dt)
-    return;
 
   while (NULL != (dirent = readdir(dt))) {
     struct stat statbuf;
@@ -2506,7 +2515,7 @@ look_powerpc_device_tree(struct hwloc_topology *topology,
     if ('.' == dirent->d_name[0])
       continue;
 
-    len = sizeof(ofroot) + 1 + strlen(dirent->d_name) + 1;
+    len = ofrootlen + 1 + strlen(dirent->d_name) + 1;
     cpu = malloc(len);
     if (NULL == cpu) {
       continue;
@@ -2606,7 +2615,7 @@ cont:
       char *cpu;
       unsigned len;
 
-      len = sizeof(ofroot) + 1 + strlen(cpus.p[i].name) + 1;
+      len = ofrootlen + 1 + strlen(cpus.p[i].name) + 1;
       cpu = malloc(len);
       if (NULL == cpu) {
           return;
