@@ -97,6 +97,7 @@ cat << EOF | while read -r path ; do savefile "$destdir/$basename" "$path" ; don
 /proc/mounts
 /proc/stat
 /proc/self/cpuset
+/proc/self/cgroup
 EOF
 
 # Get all files from the given directory
