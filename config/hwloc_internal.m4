@@ -55,6 +55,11 @@ AC_DEFUN([HWLOC_DEFINE_ARGS],[
                   AS_HELP_STRING([--disable-cairo], 
                                  [Disable the Cairo back-end of hwloc's lstopo command]))
 
+    # CPUID
+    AC_ARG_ENABLE([cpuid],
+		  AS_HELP_STRING([--disable-cpuid],
+				 [Disable the cpuid-based architecture specific support (x86 component)]))
+
     # XML using libxml2?
     AC_ARG_ENABLE([libxml2],
                   AS_HELP_STRING([--disable-libxml2], 

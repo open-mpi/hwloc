@@ -24,6 +24,9 @@ Version 1.10.0
     too many of them. They get merged with others instead.
     Thanks to Tim Creech for reporting the issue.
 * Misc
+  + Add --disable-cpuid configure flag to work around buggy processor
+    simulators reporting invalid CPUID information.
+    Thanks for Andrew Friedley for reporting the issue.
   + Fix a racy use of libltdl when manipulating multiple topologies in
     different threads.
     Thanks to Andra Hugo for reporting the issue and testing patches.
