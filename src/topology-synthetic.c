@@ -346,16 +346,17 @@ hwloc_synthetic__post_look_hooks(struct hwloc_synthetic_level_data_s *curlevel,
  * - generated cpus should be added to parent_cpuset.
  * - next cpu number to be used should be returned.
  */
-static unsigned
+static void
 hwloc__look_synthetic(struct hwloc_topology *topology,
 		      struct hwloc_synthetic_backend_data_s *data,
-		      int level, unsigned first_cpu,
+		      int level,
 		      hwloc_bitmap_t parent_cpuset)
 {
   hwloc_obj_t obj;
   unsigned i;
   struct hwloc_synthetic_level_data_s *curlevel = &data->level[level];
   hwloc_obj_type_t type = curlevel->type;
+  unsigned os_index;
 
   /* pre-hooks */
   switch (type) {
@@ -388,19 +389,20 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
       break;
   }
 
-  obj = hwloc_alloc_setup_object(type, curlevel->next_os_index++);
+  os_index = curlevel->next_os_index++;
+  obj = hwloc_alloc_setup_object(type, os_index);
   obj->cpuset = hwloc_bitmap_alloc();
 
   if (!curlevel->arity) {
-    hwloc_bitmap_set(obj->cpuset, first_cpu++);
+    hwloc_bitmap_set(obj->cpuset, os_index);
   } else {
     for (i = 0; i < curlevel->arity; i++)
-      first_cpu = hwloc__look_synthetic(topology, data, level + 1, first_cpu, obj->cpuset);
+      hwloc__look_synthetic(topology, data, level + 1, obj->cpuset);
   }
 
   if (type == HWLOC_OBJ_NODE) {
     obj->nodeset = hwloc_bitmap_alloc();
-    hwloc_bitmap_set(obj->nodeset, obj->os_index);
+    hwloc_bitmap_set(obj->nodeset, os_index);
   }
 
   hwloc_bitmap_or(parent_cpuset, parent_cpuset, obj->cpuset);
@@ -408,8 +410,6 @@ hwloc__look_synthetic(struct hwloc_topology *topology,
   hwloc_synthetic__post_look_hooks(curlevel, obj);
 
   hwloc_insert_object_by_cpuset(topology, obj);
-
-  return first_cpu;
 }
 
 static int
@@ -418,7 +418,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_synthetic_backend_data_s *data = backend->private_data;
   hwloc_bitmap_t cpuset = hwloc_bitmap_alloc();
-  unsigned first_cpu = 0, i;
+  unsigned i;
 
   assert(!topology->levels[0][0]->cpuset);
 
@@ -437,7 +437,7 @@ hwloc_look_synthetic(struct hwloc_backend *backend)
   hwloc_synthetic__post_look_hooks(&data->level[0], topology->levels[0][0]);
 
   for (i = 0; i < data->level[0].arity; i++)
-    first_cpu = hwloc__look_synthetic(topology, data, 1, first_cpu, cpuset);
+    hwloc__look_synthetic(topology, data, 1, cpuset);
 
   hwloc_bitmap_free(cpuset);
 
