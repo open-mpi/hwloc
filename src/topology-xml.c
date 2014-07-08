@@ -1405,7 +1405,7 @@ hwloc_export_obj_userdata_base64(void *reserved,
   hwloc__xml_export_state_t state = reserved;
   size_t encoded_length;
   char *encoded_buffer;
-  int ret;
+  int ret __hwloc_attribute_unused;
 
   if (name && hwloc__xml_export_check_buffer(name, strlen(name)) < 0) {
     errno = EINVAL;

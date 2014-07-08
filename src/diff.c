@@ -98,7 +98,7 @@ static int hwloc_append_diff_obj_attr_string(hwloc_obj_t obj,
 
 static int hwloc_append_diff_obj_attr_uint64(hwloc_obj_t obj,
 					     hwloc_topology_diff_obj_attr_type_t type,
-					     hwloc_uint64_t index,
+					     hwloc_uint64_t idx,
 					     hwloc_uint64_t oldvalue,
 					     hwloc_uint64_t newvalue,
 					     hwloc_topology_diff_t *firstdiffp,
@@ -118,7 +118,7 @@ static int hwloc_append_diff_obj_attr_uint64(hwloc_obj_t obj,
 	newdiff->obj_attr.obj_depth = obj->depth;
 	newdiff->obj_attr.obj_index = obj->logical_index;
 	newdiff->obj_attr.diff.uint64.type = type;
-	newdiff->obj_attr.diff.uint64.index = index;
+	newdiff->obj_attr.diff.uint64.index = idx;
 	newdiff->obj_attr.diff.uint64.oldvalue = oldvalue;
 	newdiff->obj_attr.diff.uint64.newvalue = newvalue;
 	hwloc_append_diff(newdiff, firstdiffp, lastdiffp);
