@@ -1055,17 +1055,17 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
     if (obj->cpuset && (!curcpuset || hwloc__object_cpusets_compare_first(obj, *current) < 0)) {
       static int reported = 0;
       if (!reported && !hwloc_hide_errors()) {
-	char *a = "NULL", *b;
+	char *a = NULL, *b;
 	if (curcpuset)
 	  hwloc_bitmap_asprintf(&a, curcpuset);
 	hwloc_bitmap_asprintf(&b, obj->cpuset);
         fprintf(stderr, "****************************************************************************\n");
         fprintf(stderr, "* hwloc has encountered an out-of-order topology discovery.\n");
-        fprintf(stderr, "* An object with (complete) cpuset %s was inserted after object with %s\n", b, a);
+        fprintf(stderr, "* An object with (complete) cpuset %s was inserted after object with %s\n",
+		b, a ? a : "no cpuset");
         fprintf(stderr, "* Please check that your input topology (XML file, etc.) is valid.\n");
         fprintf(stderr, "****************************************************************************\n");
-	if (curcpuset)
-	  free(a);
+	free(a);
 	free(b);
 	reported = 1;
       }
