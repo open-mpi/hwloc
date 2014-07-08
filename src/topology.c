@@ -1065,7 +1065,8 @@ hwloc_insert_object_by_parent(struct hwloc_topology *topology, hwloc_obj_t paren
 		b, a ? a : "no cpuset");
         fprintf(stderr, "* Please check that your input topology (XML file, etc.) is valid.\n");
         fprintf(stderr, "****************************************************************************\n");
-	free(a);
+	if (a)
+	  free(a);
 	free(b);
 	reported = 1;
       }
