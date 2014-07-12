@@ -1,4 +1,4 @@
-# Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
@@ -38,7 +38,9 @@ xml_options = \
 # Each output `xyz.xml' may have a corresponding `xyz.env'
 # modifying the environment of lstopo
 xml_envs = \
-	192em64t-24n8c2t-nodistancegroups.env
+	192em64t-12gr2n8c2t-distancegroups.env \
+	192em64t-24n8c2t-nodistancegroups.env \
+	192em64t-24n8c2t-distancegroups.env
 
 # Only run the tests if we're building standalone, because the tests
 # call hwloc executables.
