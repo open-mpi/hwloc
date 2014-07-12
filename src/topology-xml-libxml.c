@@ -41,7 +41,7 @@ typedef struct hwloc__libxml_import_state_data_s {
   xmlNode *node; /* current libxml node, always valid */
   xmlNode *child; /* last processed child, or NULL if none yet */
   xmlAttr *attr; /* last processed attribute, or NULL if none yet */
-} * hwloc__libxml_import_state_data_t;
+} __hwloc_attribute_may_alias * hwloc__libxml_import_state_data_t;
 
 static int
 hwloc__libxml_import_next_attr(hwloc__xml_import_state_t state, char **namep, char **valuep)
@@ -330,7 +330,7 @@ hwloc_libxml_backend_init(struct hwloc_xml_backend_data_s *bdata,
 
 typedef struct hwloc__libxml_export_state_data_s {
   xmlNodePtr current_node; /* current node to output */
-} * hwloc__libxml_export_state_data_t;
+} __hwloc_attribute_may_alias * hwloc__libxml_export_state_data_t;
 
 static void
 hwloc__libxml_export_new_child(hwloc__xml_export_state_t parentstate,

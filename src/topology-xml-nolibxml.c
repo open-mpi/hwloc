@@ -36,7 +36,7 @@ typedef struct hwloc__nolibxml_import_state_data_s {
   char *attrbuffer; /* buffer containing the next attribute of the current node */
   char *tagname; /* tag name of the current node */
   int closed; /* set if the current node is auto-closing */
-} * hwloc__nolibxml_import_state_data_t;
+} __hwloc_attribute_may_alias * hwloc__nolibxml_import_state_data_t;
 
 static char *
 hwloc__nolibxml_import_ignore_spaces(char *buffer)
@@ -498,7 +498,7 @@ typedef struct hwloc__nolibxml_export_state_data_s {
   unsigned indent; /* indentation level for the next line */
   unsigned nr_children;
   unsigned has_content;
-} * hwloc__nolibxml_export_state_data_t;
+} __hwloc_attribute_may_alias * hwloc__nolibxml_export_state_data_t;
 
 static void
 hwloc__nolibxml_export_update_buffer(hwloc__nolibxml_export_state_data_t ndata, int res)
