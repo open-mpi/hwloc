@@ -1009,7 +1009,9 @@ following environment variables.
   with a 2% error.
   If set to <tt>try</tt> instead of a numerical value, hwloc will try
   to group with perfect accuracy (0, the default), then with 0.01, 0.02,
-  0.05 and finally 0.1.</dd>
+  0.05 and finally 0.1.
+  Numbers given in this environment variable should always use a dot
+  as a decimal mark (for instance 0.01 instead of 0,01).</dd>
 
 <dt>HWLOC_GROUPING_VERBOSE=0</dt>
   <dd>enables or disables some verbose messages during grouping.
