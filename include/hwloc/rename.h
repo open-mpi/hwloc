@@ -514,6 +514,7 @@ extern "C" {
 #define hwloc_fls32 HWLOC_NAME(fls32)
 #define hwloc_flsl_from_fls32 HWLOC_NAME(flsl_from_fls32)
 #define hwloc_weight_long HWLOC_NAME(weight_long)
+#define hwloc_strncasecmp HWLOC_NAME(strncasecmp)
 
 /* private/cpuid-x86.h */
 
