@@ -411,6 +411,7 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
   char typestr[32];
   char indexstr[32]= "";
   char attrstr[256];
+  char totmemstr[64] = "";
   int attrlen;
   hwloc_obj_type_snprintf(typestr, sizeof(typestr), obj, 0);
   if (idx != (unsigned)-1 && obj->depth != 0
@@ -418,10 +419,15 @@ lstopo_obj_snprintf(char *text, size_t textlen, hwloc_obj_t obj, int logical)
       && (obj->type != HWLOC_OBJ_BRIDGE || obj->attr->bridge.upstream_type == HWLOC_OBJ_BRIDGE_HOST))
     snprintf(indexstr, sizeof(indexstr), "%s%u", indexprefix, idx);
   attrlen = hwloc_obj_attr_snprintf(attrstr, sizeof(attrstr), obj, " ", 0);
+  /* display the root total_memory if different from the local_memory (already shown) */
+  if (!obj->parent && obj->memory.total_memory > obj->memory.local_memory)
+    snprintf(totmemstr, sizeof(totmemstr), " (%lu%s total)",
+             (unsigned long) hwloc_memory_size_printf_value(obj->memory.total_memory, 0),
+             hwloc_memory_size_printf_unit(obj->memory.total_memory, 0));
   if (attrlen > 0)
-    return snprintf(text, textlen, "%s%s (%s)", typestr, indexstr, attrstr);
+    return snprintf(text, textlen, "%s%s (%s)%s", typestr, indexstr, attrstr, totmemstr);
   else
-    return snprintf(text, textlen, "%s%s", typestr, indexstr);
+    return snprintf(text, textlen, "%s%s%s", typestr, indexstr, totmemstr);
 }
 
 static struct draw_methods getmax_draw_methods;

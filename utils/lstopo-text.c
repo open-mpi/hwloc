@@ -7,6 +7,7 @@
  */
 
 #include <private/autogen/config.h>
+#include <private/private.h>
 #include <hwloc.h>
 
 #include <stdlib.h>
@@ -66,6 +67,7 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
     if (logical && l->os_index != (unsigned) -1 &&
 	(verbose_mode >= 2 || l->type == HWLOC_OBJ_PU || l->type == HWLOC_OBJ_NODE))
       snprintf(phys, sizeof(phys), "P#%u", l->os_index);
+    /* display attributes */
     len = hwloc_obj_attr_snprintf (NULL, 0, l, " ", verbose_mode-1);
     attr = malloc(len+1);
     *attr = '\0';
@@ -76,6 +78,13 @@ output_console_obj (hwloc_topology_t topology, hwloc_obj_t l, FILE *output, int 
 	      phys, separator, attr);
     }
     free(attr);
+    /* display the root total_memory if not verbose (already shown)
+     * and different from the local_memory (already shown) */
+    if (verbose_mode == 1 && !l->parent && l->memory.total_memory > l->memory.local_memory)
+      fprintf(output, " (%lu%s total)",
+	      (unsigned long) hwloc_memory_size_printf_value(l->memory.total_memory, 0),
+	      hwloc_memory_size_printf_unit(l->memory.total_memory, 0));
+    /* append the name */
     if ((l->type == HWLOC_OBJ_OS_DEVICE || verbose_mode >= 2) && l->name && l->type != HWLOC_OBJ_MISC)
       fprintf(output, " \"%s\"", l->name);
   }
