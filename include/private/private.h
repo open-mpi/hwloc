@@ -299,6 +299,11 @@ extern int hwloc_namecoloncmp(const char *haystack, const char *needle, size_t n
 # define __hwloc_attribute_format(type, str, arg)
 #endif
 
+#define hwloc_memory_size_printf_value(_size, _verbose) \
+  ((_size) < (10ULL<<20) || _verbose ? (((_size)>>9)+1)>>1 : (_size) < (10ULL<<30) ? (((_size)>>19)+1)>>1 : (((_size)>>29)+1)>>1)
+#define hwloc_memory_size_printf_unit(_size, _verbose) \
+  ((_size) < (10ULL<<20) || _verbose ? "KB" : (_size) < (10ULL<<30) ? "MB" : "GB")
+
 /* On some systems, snprintf returns the size of written data, not the actually
  * required size.  hwloc_snprintf always report the actually required size. */
 extern int hwloc_snprintf(char *str, size_t size, const char *format, ...) __hwloc_attribute_format(printf, 3, 4);
