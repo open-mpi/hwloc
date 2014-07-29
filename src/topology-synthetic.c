@@ -29,7 +29,7 @@ struct hwloc_synthetic_level_data_s {
   /* the indexes= attribute before parsing */
   const char *index_string;
   unsigned long index_string_length;
-  /* the array of explicit indexes */
+  /* the array of explicit indexes after parsing */
   unsigned *index_array;
 
   /* used while filling the topology */
@@ -51,7 +51,13 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
   struct hwloc_synthetic_level_data_s *curlevel = &data->level[curleveldepth];
   unsigned long total = curlevel->totalwidth;
   const char *attr = curlevel->index_string;
-  unsigned *array;
+  unsigned long length = curlevel->index_string_length;
+  unsigned *array = NULL;
+  struct hwloc_synthetic_intlv_loop_s {
+    unsigned step;
+    unsigned nb;
+    unsigned level_depth;
+  } * loops = NULL;
   unsigned long i;
 
   if (!attr)
@@ -64,31 +70,131 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
     goto out;
   }
 
-  for(i=0; i<total; i++) {
-    const char *next;
-    unsigned idx = strtoul(attr, (char **) &next, 10);
-    if (next == attr) {
+  i = strspn(attr, "0123456789,");
+  if (i == length) {
+    /* explicit array of indexes */
+
+    for(i=0; i<total; i++) {
+      const char *next;
+      unsigned idx = strtoul(attr, (char **) &next, 10);
+      if (next == attr) {
+	if (verbose)
+	  fprintf(stderr, "Failed to read synthetic index #%lu at '%s'\n", i, attr);
+	goto out_with_array;
+      }
+
+      array[i] = idx;
+      if (i != total-1) {
+	if (*next != ',') {
+	  if (verbose)
+	    fprintf(stderr, "Missing comma after synthetic index #%lu at '%s'\n", i, attr);
+	  goto out_with_array;
+	}
+	attr = next+1;
+      } else {
+	attr = next;
+      }
+    }
+    curlevel->index_array = array;
+
+  } else {
+    /* interleaving */
+    unsigned nr_loops = 1, cur_loop;
+    unsigned minstep = total;
+    unsigned long nbs = 1;
+    unsigned step, nb;
+    unsigned j, mul;
+    const char *tmp;
+
+    tmp = attr;
+    while (tmp) {
+      tmp = strchr(tmp, ':');
+      if (!tmp || tmp >= attr+length)
+	break;
+      nr_loops++;
+      tmp++;
+    }
+    /* nr_loops colon-separated fields, but we may need one more at the end */
+    loops = malloc((nr_loops+1)*sizeof(*loops));
+    if (!loops) {
       if (verbose)
-	fprintf(stderr, "Failed to read synthetic index #%lu at '%s'\n", i, attr);
-      goto out_with_index_array;
+	fprintf(stderr, "Failed to allocate synthetic index interleave loop array of size %u\n", nr_loops);
+      goto out_with_array;
     }
 
-    array[i] = idx;
-    if (i != total-1) {
-      if (*next != ',') {
+    tmp = attr;
+    cur_loop = 0;
+    while (tmp) {
+      char *tmp2, *tmp3;
+      step = (unsigned) strtol(tmp, &tmp2, 0);
+      if (tmp2 == tmp || *tmp2 != '*') {
 	if (verbose)
-	  fprintf(stderr, "Missing comma after synthetic index #%lu at '%s'\n", i, attr);
-	goto out_with_index_array;
+	  fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number before '*'\n", tmp);
+	goto out_with_loops;
       }
-      attr = next+1;
-    } else {
-      attr = next;
+      tmp2++;
+      nb = (unsigned) strtol(tmp2, &tmp3, 0);
+      if (tmp3 == tmp2 || (*tmp3 && *tmp3 != ':' && *tmp3 != ')' && *tmp3 != ' ')) {
+	if (verbose)
+	  fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number between '*' and ':'\n", tmp);
+	goto out_with_loops;
+      }
+      loops[cur_loop].step = step;
+      loops[cur_loop].nb = nb;
+      if (step < minstep)
+	minstep = step;
+      nbs *= nb;
+      cur_loop++;
+      if (*tmp3 == ')' || *tmp3 == ' ')
+	break;
+      tmp = (const char*) (tmp3+1);
     }
+
+    if (nbs != total) {
+      /* one loop of total/nbs steps is missing, add it if it's just the smallest one */
+      if (minstep == total/nbs) {
+	loops[nr_loops].step = 1;
+	loops[nr_loops].nb = total/nbs;
+	nr_loops++;
+      } else {
+	if (verbose)
+	  fprintf(stderr, "Invalid index interleaving total width %lu instead of %lu\n", nbs, total);
+	goto out_with_loops;
+      }
+    }
+
+    /* generate the array of indexes */
+    mul = 1;
+    for(i=0; i<nr_loops; i++) {
+      unsigned step = loops[i].step;
+      unsigned nb = loops[i].nb;
+      for(j=0; j<total; j++)
+	array[j] += ((j / step) % nb) * mul;
+      mul *= nb;
+    }
+
+    /* check that we have the right values (cannot pass total, cannot give duplicate 0) */
+    for(j=0; j<total; j++) {
+      if (array[j] >= total) {
+	if (verbose)
+	  fprintf(stderr, "Invalid index interleaving generates out-of-range index %u\n", array[j]);
+	goto out_with_loops;
+      }
+      if (!array[j] && j) {
+	if (verbose)
+	  fprintf(stderr, "Invalid index interleaving generates duplicate index values\n");
+	goto out_with_loops;
+      }
+    }
+    free(loops);
+    curlevel->index_array = array;
   }
-  curlevel->index_array = array;
+
   return;
 
- out_with_index_array:
+ out_with_loops:
+  free(loops);
+ out_with_array:
   free(array);
  out:
   return;
@@ -123,7 +229,7 @@ hwloc_synthetic_parse_level_attrs(const char *attrs, const char **next_posp,
     } else if (!strncmp("indexes=", attrs, 8)) {
       index_string = attrs+8;
       attrs += 8;
-      index_string_length = strspn(attrs, "0123456789,");
+      index_string_length = strcspn(attrs, " )");
       attrs += index_string_length;
 
     } else {
