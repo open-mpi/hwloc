@@ -402,7 +402,7 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
   int vendor, device;
   const char *current, *dot;
   char *endp;
-  int first, wrap, amount, step;
+  int first = 0, step = 1, amount = 1, wrap = 0; /* assume the index suffix is `:0' by default */
   int err, i, oldi, j;
 
   current = string;
@@ -421,13 +421,7 @@ hwloc_calc_append_pci_object_range(hwloc_topology_t topology, const char *string
   if (endp == current)
     device = -1;
 
-  if (*endp == '\0') {
-    /* assume it's :0 */
-    first = 0;
-    step = 1;
-    amount = 1;
-    wrap = 0;
-  } else {
+  if (*endp != '\0') {
     current = endp+1;
     err = hwloc_calc_parse_range(current,
 				 &first, &amount, &step, &wrap,
