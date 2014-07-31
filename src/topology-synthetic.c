@@ -63,7 +63,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
   if (!attr)
     return;
 
-  array = malloc(total * sizeof(*array));
+  array = calloc(total, sizeof(*array));
   if (!array) {
     if (verbose)
       fprintf(stderr, "Failed to allocate synthetic index array of size %lu\n", total);
@@ -102,7 +102,6 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
     unsigned nr_loops = 1, cur_loop;
     unsigned minstep = total;
     unsigned long nbs = 1;
-    unsigned step, nb;
     unsigned j, mul;
     const char *tmp;
 
@@ -122,32 +121,106 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
       goto out_with_array;
     }
 
-    tmp = attr;
-    cur_loop = 0;
-    while (tmp) {
-      char *tmp2, *tmp3;
-      step = (unsigned) strtol(tmp, &tmp2, 0);
-      if (tmp2 == tmp || *tmp2 != '*') {
-	if (verbose)
-	  fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number before '*'\n", tmp);
-	goto out_with_loops;
+    if (*attr >= '0' && *attr <= '9') {
+      /* interleaving as x*y:z*t:... */
+      unsigned step, nb;
+
+      tmp = attr;
+      cur_loop = 0;
+      while (tmp) {
+	char *tmp2, *tmp3;
+	step = (unsigned) strtol(tmp, &tmp2, 0);
+	if (tmp2 == tmp || *tmp2 != '*') {
+	  if (verbose)
+	    fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number before '*'\n", tmp);
+	  goto out_with_loops;
+	}
+	tmp2++;
+	nb = (unsigned) strtol(tmp2, &tmp3, 0);
+	if (tmp3 == tmp2 || (*tmp3 && *tmp3 != ':' && *tmp3 != ')' && *tmp3 != ' ')) {
+	  if (verbose)
+	    fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number between '*' and ':'\n", tmp);
+	  goto out_with_loops;
+	}
+	loops[cur_loop].step = step;
+	loops[cur_loop].nb = nb;
+	if (step < minstep)
+	  minstep = step;
+	nbs *= nb;
+	cur_loop++;
+	if (*tmp3 == ')' || *tmp3 == ' ')
+	  break;
+	tmp = (const char*) (tmp3+1);
       }
-      tmp2++;
-      nb = (unsigned) strtol(tmp2, &tmp3, 0);
-      if (tmp3 == tmp2 || (*tmp3 && *tmp3 != ':' && *tmp3 != ')' && *tmp3 != ' ')) {
-	if (verbose)
-	  fprintf(stderr, "Failed to read synthetic index interleaving loop '%s' without number between '*' and ':'\n", tmp);
-	goto out_with_loops;
+
+    } else {
+      /* interleaving as type1:type2:... */
+      hwloc_obj_type_t type;
+      hwloc_obj_cache_type_t cachetypeattr;
+      int depthattr;
+      int err;
+
+      /* find level depths for each interleaving loop */
+      tmp = attr;
+      cur_loop = 0;
+      while (tmp) {
+	err = hwloc_obj_type_sscanf(tmp, &type, &depthattr, &cachetypeattr, sizeof(cachetypeattr));
+	if (err < 0) {
+	  if (verbose)
+	    fprintf(stderr, "Failed to read synthetic index interleaving loop type '%s'\n", tmp);
+	  goto out_with_loops;
+	}
+	for(i=0; i<curleveldepth; i++) {
+	  if (type != data->level[i].type)
+	    continue;
+	  if ((type == HWLOC_OBJ_GROUP || type == HWLOC_OBJ_CACHE)
+	      && depthattr != -1
+	      && (unsigned) depthattr != data->level[i].depth)
+	    continue;
+	  if (type == HWLOC_OBJ_CACHE
+	      && cachetypeattr != (hwloc_obj_cache_type_t) -1
+	      && cachetypeattr != data->level[i].cachetype)
+	    continue;
+	  loops[cur_loop].level_depth = i;
+	  break;
+	}
+	if (i == curleveldepth) {
+	  if (verbose)
+	    fprintf(stderr, "Failed to find level for synthetic index interleaving loop type '%s' above '%s'\n",
+		    tmp, hwloc_obj_type_string(curlevel->type));
+	  goto out_with_loops;
+	}
+	tmp = strchr(tmp, ':');
+	if (!tmp || tmp > attr+length)
+	  break;
+	tmp++;
+	cur_loop++;
       }
-      loops[cur_loop].step = step;
-      loops[cur_loop].nb = nb;
-      if (step < minstep)
-	minstep = step;
-      nbs *= nb;
-      cur_loop++;
-      if (*tmp3 == ')' || *tmp3 == ' ')
-	break;
-      tmp = (const char*) (tmp3+1);
+
+      /* compute actual loop step/nb */
+      for(cur_loop=0; cur_loop<nr_loops; cur_loop++) {
+	unsigned mydepth = loops[cur_loop].level_depth;
+	unsigned prevdepth = 0;
+	unsigned step, nb;
+	for(i=0; i<nr_loops; i++) {
+	  if (loops[i].level_depth == mydepth && i != cur_loop) {
+	    if (verbose)
+	      fprintf(stderr, "Invalid duplicate interleaving loop type in synthetic index '%s'\n", attr);
+	    goto out_with_loops;
+	  }
+	  if (loops[i].level_depth < mydepth
+	      && loops[i].level_depth > prevdepth)
+	    prevdepth = loops[i].level_depth;
+	}
+	step = curlevel->totalwidth / data->level[mydepth].totalwidth; /* number of objects below us */
+	nb = data->level[mydepth].totalwidth / data->level[prevdepth].totalwidth; /* number of us within parent */
+
+	loops[cur_loop].step = step;
+	loops[cur_loop].nb = nb;
+	if (step < minstep)
+	  minstep = step;
+	nbs *= nb;
+      }
     }
 
     if (nbs != total) {
@@ -186,6 +259,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
 	goto out_with_loops;
       }
     }
+
     free(loops);
     curlevel->index_array = array;
   }
