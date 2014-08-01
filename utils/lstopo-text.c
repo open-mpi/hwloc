@@ -259,33 +259,45 @@ void output_console(hwloc_topology_t topology, const char *filename, int overwri
 void output_synthetic(hwloc_topology_t topology, const char *filename, int overwrite, int logical __hwloc_attribute_unused, int legend __hwloc_attribute_unused, int verbose_mode __hwloc_attribute_unused)
 {
   FILE *output;
-  hwloc_obj_t obj = hwloc_get_root_obj(topology);
-  int arity;
+  int length;
+  char sbuffer[1024];
+  char * dbuffer = NULL;
+  unsigned long flags = 0;
 
-  if (!obj->symmetric_subtree) {
+  if (!hwloc_get_root_obj(topology)->symmetric_subtree) {
     fprintf(stderr, "Cannot output assymetric topology in synthetic format.\n");
     fprintf(stderr, "Adding --no-io may help making the topology symmetric.\n");
     return;
   }
 
+  length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), flags);
+  if (length < 0)
+    return;
+
+  if (length >= sizeof(sbuffer)) {
+    dbuffer = malloc(length+1 /* \0 */);
+    if (!dbuffer)
+      return;
+
+    length = hwloc_topology_export_synthetic(topology, dbuffer, length+1, flags);
+    if (length < 0)
+      goto out;
+  }
+
   output = open_output(filename, overwrite);
   if (!output) {
     fprintf(stderr, "Failed to open %s for writing (%s)\n", filename, strerror(errno));
-    return;
+    goto out;
   }
 
-  arity = obj->arity;
-  while (arity) {
-    char types[64];
-    obj = obj->first_child;
-    hwloc_obj_type_snprintf(types, sizeof(types), obj, 1);
-    fprintf(output, "%s:%u ", types, arity);
-    arity = obj->arity;
-  }
-  fprintf(output, "\n");
+  fprintf(output, "%s\n", dbuffer ? dbuffer : sbuffer);
 
   if (output != stdout)
     fclose(output);
+
+ out:
+  if (dbuffer)
+    free(dbuffer);
 }
 
 /*

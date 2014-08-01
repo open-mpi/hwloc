@@ -451,6 +451,11 @@ man3_xmlexport_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_export_obj_userdata_base64.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata_import_callback.3
 
+man3_syntheticexportdir = $(man3dir)
+man3_syntheticexport_DATA = \
+        $(DOX_MAN_DIR)/man3/hwlocality_syntheticexport.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_export_synthetic.3
+
 man3_bitmapdir = $(man3dir)
 man3_bitmap_DATA = \
         $(DOX_MAN_DIR)/man3/hwlocality_bitmap.3 \
@@ -714,6 +719,7 @@ $(man3_membinding_DATA): $(DOX_TAG)
 $(man3_tinker_DATA): $(DOX_TAG)
 $(man3_custom_DATA): $(DOX_TAG)
 $(man3_xmlexport_DATA): $(DOX_TAG)
+$(man3_syntheticexport_DATA): $(DOX_TAG)
 $(man3_bitmap_DATA): $(DOX_TAG)
 $(man3_helper_find_inside_DATA): $(DOX_TAG)
 $(man3_helper_find_covering_DATA): $(DOX_TAG)

@@ -2264,6 +2264,54 @@ HWLOC_DECLSPEC void hwloc_topology_set_userdata_import_callback(hwloc_topology_t
 /** @} */
 
 
+/** \defgroup hwlocality_syntheticexport Exporting Topologies to Synthetic
+ * @{
+ */
+
+/** \brief Flags for exporting synthetic topologies.
+ *
+ * Flags to be given as a OR'ed set to hwloc_topology_export_synthetic().
+ */
+enum hwloc_topology_export_synthetic_flags_e {
+ /** \brief Export extended types such as L2dcache as basic types such as Cache.
+  *
+  * This is required if loading the synthetic description with hwloc < 1.9.
+  * \hideinitializer
+  */
+ HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES = (1UL<<0),
+
+ /** \brief Do not export level attributes.
+  *
+  * Ignore level attributes such as memory/cache sizes or PU indexes.
+  * This is required if loading the synthetic description with hwloc < 1.10.
+  * \hideinitializer
+  */
+ HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS = (1UL<<1)
+};
+
+/** \brief Export the topology as a synthetic string.
+ *
+ * At most \p buflen characters will be written in \p buffer,
+ * including the terminating \0.
+ *
+ * This exported string may be given back to hwloc_topology_set_synthetic().
+ *
+ * \p flags is a OR'ed set of hwloc_topology_export_synthetic_flags_e.
+ *
+ * \return The number of characters that were written,
+ * not including the terminating \0.
+ *
+ * \return -1 if the topology could not be exported,
+ * for instance if it is not symmetric.
+ *
+ * \note A 1024-byte buffer should be large enough for exporting
+ * topologies in the vast majority of cases.
+ */
+  HWLOC_DECLSPEC int hwloc_topology_export_synthetic(hwloc_topology_t topology, char *buffer, size_t buflen, unsigned long flags);
+
+/** @} */
+
+
 
 #ifdef __cplusplus
 } /* extern "C" */

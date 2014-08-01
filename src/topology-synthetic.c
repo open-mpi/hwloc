@@ -43,6 +43,12 @@ struct hwloc_synthetic_backend_data_s {
   struct hwloc_synthetic_level_data_s level[HWLOC_SYNTHETIC_MAX_DEPTH];
 };
 
+struct hwloc_synthetic_intlv_loop_s {
+  unsigned step;
+  unsigned nb;
+  unsigned level_depth;
+};
+
 static void
 hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *data,
 				      unsigned curleveldepth,
@@ -53,11 +59,7 @@ hwloc_synthetic_process_level_indexes(struct hwloc_synthetic_backend_data_s *dat
   const char *attr = curlevel->index_string;
   unsigned long length = curlevel->index_string_length;
   unsigned *array = NULL;
-  struct hwloc_synthetic_intlv_loop_s {
-    unsigned step;
-    unsigned nb;
-    unsigned level_depth;
-  } * loops = NULL;
+  struct hwloc_synthetic_intlv_loop_s * loops = NULL;
   unsigned long i;
 
   if (!attr)
@@ -801,3 +803,255 @@ const struct hwloc_component hwloc_synthetic_component = {
   0,
   &hwloc_synthetic_disc_component
 };
+
+static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topology,
+						   hwloc_obj_t obj,
+						   char *buffer, size_t buflen)
+{
+  unsigned depth = obj->depth;
+  unsigned total = topology->level_nbobjects[depth];
+  unsigned step = 1;
+  unsigned nr_loops = 0;
+  struct hwloc_synthetic_intlv_loop_s *loops = NULL;
+  hwloc_obj_t cur;
+  unsigned i, j;
+  ssize_t tmplen = buflen;
+  char *tmp = buffer;
+  int res, ret = 0;
+
+  /* must start with 0 */
+  if (obj->os_index)
+    goto exportall;
+
+  while (step != total) {
+    /* must be a divider of the total */
+    if (total % step)
+      goto exportall;
+
+    /* look for os_index == step */
+    for(i=1; i<total; i++)
+      if (topology->levels[depth][i]->os_index == step)
+	break;
+    if (i == total)
+      goto exportall;
+    for(j=2; j<total/i; j++)
+      if (topology->levels[depth][i*j]->os_index != step*j)
+	break;
+
+    nr_loops++;
+    loops = realloc(loops, nr_loops*sizeof(*loops));
+    if (!loops)
+      goto exportall;
+    loops[nr_loops-1].step = i;
+    loops[nr_loops-1].nb = j;
+    step *= j;
+  }
+
+  /* check this interleaving */
+  for(i=0; i<total; i++) {
+    unsigned ind = 0;
+    unsigned mul = 1;
+    for(j=0; j<nr_loops; j++) {
+      ind += (i / loops[j].step) % loops[j].nb * mul;
+      mul *= loops[j].nb;
+    }
+    if (topology->levels[depth][i]->os_index != ind)
+      goto exportall;
+  }
+
+  /* success, print it */
+  for(j=0; j<nr_loops; j++) {
+    res = hwloc_snprintf(tmp, tmplen, "%u*%u%s", loops[j].step, loops[j].nb,
+			 j == nr_loops-1 ? ")" : ":");
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= tmplen)
+      res = tmplen>0 ? tmplen - 1 : 0;
+    tmp += res;
+    tmplen -= res;
+  }
+
+  if (loops)
+    free(loops);
+
+  return ret;
+
+ exportall:
+  if (loops)
+    free(loops);
+
+  /* dump all indexes */
+  cur = obj;
+  while (cur) {
+    res = snprintf(tmp, tmplen, "%u%s", cur->os_index,
+		   cur->next_cousin ? "," : ")");
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= tmplen)
+      res = tmplen>0 ? tmplen - 1 : 0;
+    tmp += res;
+    tmplen -= res;
+    cur = cur->next_cousin;
+  }
+  return ret;
+}
+
+static int hwloc_topology_export_synthetic_obj_attr(struct hwloc_topology * topology,
+						    hwloc_obj_t obj,
+						    char *buffer, size_t buflen)
+{
+  const char * separator = " ";
+  const char * prefix = "(";
+  char cachesize[64] = "";
+  char memsize[64] = "";
+  int needindexes = 0;
+
+  if (HWLOC_OBJ_CACHE == obj->type && obj->attr->cache.size) {
+    snprintf(cachesize, sizeof(cachesize), "%ssize=%llu",
+	     prefix, (unsigned long long) obj->attr->cache.size);
+    prefix = separator;
+  }
+  if (obj->memory.local_memory) {
+    snprintf(memsize, sizeof(memsize), "%smemory=%llu",
+	     prefix, (unsigned long long) obj->memory.local_memory);
+    prefix = separator;
+  }
+  if (obj->type == HWLOC_OBJ_PU || obj->type == HWLOC_OBJ_NODE) {
+    hwloc_obj_t cur = obj;
+    while (cur) {
+      if (cur->os_index != cur->logical_index) {
+	needindexes = 1;
+	break;
+      }
+      cur = cur->next_cousin;
+    }
+  }
+  if (*cachesize || *memsize || needindexes) {
+    ssize_t tmplen = buflen;
+    char *tmp = buffer;
+    int res, ret = 0;
+
+    res = hwloc_snprintf(tmp, tmplen, "%s%s%s", cachesize, memsize, needindexes ? "" : ")");
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= tmplen)
+      res = tmplen>0 ? tmplen - 1 : 0;
+    tmp += res;
+    tmplen -= res;
+
+    if (needindexes) {
+      res = snprintf(tmp, tmplen, "%sindexes=", prefix);
+      if (res < 0)
+	return -1;
+      ret += res;
+      if (res >= tmplen)
+	res = tmplen>0 ? tmplen - 1 : 0;
+      tmp += res;
+      tmplen -= res;
+
+      res = hwloc_topology_export_synthetic_indexes(topology, obj, tmp, tmplen);
+      if (res < 0)
+	return -1;
+      ret += res;
+      if (res >= tmplen)
+	res = tmplen>0 ? tmplen - 1 : 0;
+      tmp += res;
+      tmplen -= res;
+    }
+    return ret;
+  } else {
+    return 0;
+  }
+}
+
+int
+hwloc_topology_export_synthetic(struct hwloc_topology * topology,
+				char *buffer, size_t buflen,
+				unsigned long flags)
+{
+  hwloc_obj_t obj = hwloc_get_root_obj(topology);
+  ssize_t tmplen = buflen;
+  char *tmp = buffer;
+  int res, ret = 0;
+   int arity;
+  const char * separator = " ";
+  const char * prefix = "";
+
+  if (flags & ~(HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES|HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  /* TODO: add a flag to ignore symmetric_subtree and I/Os.
+   * just assume things are symmetric with the left branches of the tree.
+   * but the number of objects per level may be wrong, what to do with OS index array in this case?
+   * only allow ignoring symmetric_subtree if the level width remains OK?
+   */
+
+  /* TODO: add a root object by default, with a prefix such as tree=
+   * so that we can backward-compatibly recognize whether there's a root or not.
+   * and add a flag to disable it.
+   */
+
+  /* TODO: flag to force all indexes, not only for PU and NUMA? */
+
+  if (!obj->symmetric_subtree) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
+    /* root attributes */
+    res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (ret > 0)
+      prefix = separator;
+    if (res >= tmplen)
+      res = tmplen>0 ? tmplen - 1 : 0;
+    tmp += res;
+    tmplen -= res;
+  }
+
+  arity = obj->arity;
+  while (arity) {
+    /* for each level */
+    obj = obj->first_child;
+    if (flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_EXTENDED_TYPES) {
+      res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, hwloc_obj_type_string(obj->type), arity);
+    } else {
+      char types[64];
+      hwloc_obj_type_snprintf(types, sizeof(types), obj, 1);
+      res = hwloc_snprintf(tmp, tmplen, "%s%s:%u", prefix, types, arity);
+    }
+    if (res < 0)
+      return -1;
+    ret += res;
+    if (res >= tmplen)
+      res = tmplen>0 ? tmplen - 1 : 0;
+    tmp += res;
+    tmplen -= res;
+
+    if (!(flags & HWLOC_TOPOLOGY_EXPORT_SYNTHETIC_FLAG_NO_ATTRS)) {
+      /* obj attributes */
+      res = hwloc_topology_export_synthetic_obj_attr(topology, obj, tmp, tmplen);
+      if (res < 0)
+	return -1;
+      ret += res;
+      if (res >= tmplen)
+	res = tmplen>0 ? tmplen - 1 : 0;
+      tmp += res;
+      tmplen -= res;
+    }
+
+    /* next level */
+    prefix = separator;
+    arity = obj->arity;
+  }
+
+  return ret;
+}
