@@ -41,6 +41,7 @@ hwloc_obj_type_t lstopo_show_only = (hwloc_obj_type_t) -1;
 int lstopo_show_cpuset = 0;
 int lstopo_show_taskset = 0;
 int lstopo_ignore_pus = 0;
+unsigned long lstopo_export_synthetic_flags = 0;
 
 char **lstopo_append_legends = NULL;
 unsigned lstopo_append_legends_nr = 0;
@@ -294,6 +295,8 @@ void usage(const char *name, FILE *where)
   fprintf (where, "  --no-legend           Remove the text legend at the bottom\n");
   fprintf (where, "  --append-legend <s>   Append a new line of text at the bottom of the legend\n");
   fprintf (where, "Miscellaneous options:\n");
+  fprintf (where, "  --export-synthetic-flags <n>\n"
+		  "                        Set flags during the synthetic topology export\n");
   fprintf (where, "  --ps --top            Display processes within the hierarchy\n");
   fprintf (where, "  --version             Report version and exit\n");
 }
@@ -460,7 +463,14 @@ main (int argc, char *argv[])
 	restrictstring = strdup(argv[1]);
 	opt = 1;
       }
-
+      else if (!strcmp (argv[0], "--export-synthetic-flags")) {
+	if (argc < 2) {
+	  usage (callname, stderr);
+	  exit(EXIT_FAILURE);
+	}
+	lstopo_export_synthetic_flags = (unsigned long) strtoull(argv[1], NULL, 0);
+	opt = 1;
+      }
       else if (!strcmp (argv[0], "--horiz"))
 	for(i=0; i<HWLOC_OBJ_TYPE_MAX; i++)
 	  force_orient[i] = LSTOPO_ORIENT_HORIZ;

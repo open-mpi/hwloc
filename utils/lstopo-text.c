@@ -262,7 +262,6 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int overw
   int length;
   char sbuffer[1024];
   char * dbuffer = NULL;
-  unsigned long flags = 0;
 
   if (!hwloc_get_root_obj(topology)->symmetric_subtree) {
     fprintf(stderr, "Cannot output assymetric topology in synthetic format.\n");
@@ -270,7 +269,7 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int overw
     return;
   }
 
-  length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), flags);
+  length = hwloc_topology_export_synthetic(topology, sbuffer, sizeof(sbuffer), lstopo_export_synthetic_flags);
   if (length < 0)
     return;
 
@@ -279,7 +278,7 @@ void output_synthetic(hwloc_topology_t topology, const char *filename, int overw
     if (!dbuffer)
       return;
 
-    length = hwloc_topology_export_synthetic(topology, dbuffer, length+1, flags);
+    length = hwloc_topology_export_synthetic(topology, dbuffer, length+1, lstopo_export_synthetic_flags);
     if (length < 0)
       goto out;
   }
