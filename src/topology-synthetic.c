@@ -863,8 +863,10 @@ static int hwloc_topology_export_synthetic_indexes(struct hwloc_topology * topol
   for(j=0; j<nr_loops; j++) {
     res = hwloc_snprintf(tmp, tmplen, "%u*%u%s", loops[j].step, loops[j].nb,
 			 j == nr_loops-1 ? ")" : ":");
-    if (res < 0)
+    if (res < 0) {
+      free(loops);
       return -1;
+    }
     ret += res;
     if (res >= tmplen)
       res = tmplen>0 ? tmplen - 1 : 0;
