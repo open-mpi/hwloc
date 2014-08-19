@@ -858,7 +858,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_synthetic(hwloc_topology_t __hwloc_restric
  * \return -1 with errno set to EINVAL on failure to read the XML file.
  *
  * \note See also hwloc_topology_set_userdata_import_callback()
- * for importing application-specific userdata.
+ * for importing application-specific object userdata.
  *
  * \note For convenience, this backend provides empty binding hooks which just
  * return success.  To have hwloc still actually call OS-specific hooks, the
@@ -886,7 +886,7 @@ HWLOC_DECLSPEC int hwloc_topology_set_xml(hwloc_topology_t __hwloc_restrict topo
  * \return -1 with errno set to EINVAL on failure to read the XML buffer.
  *
  * \note See also hwloc_topology_set_userdata_import_callback()
- * for importing application-specific userdata.
+ * for importing application-specific object userdata.
  *
  * \note For convenience, this backend provides empty binding hooks which just
  * return success.  To have hwloc still actually call OS-specific hooks, the
@@ -2146,7 +2146,7 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_custom_insert_group_object_by_parent(hwloc_topo
  * \return -1 if a failure occured.
  *
  * \note See also hwloc_topology_set_userdata_export_callback()
- * for exporting application-specific userdata.
+ * for exporting application-specific object userdata.
  *
  * \note Only printable characters may be exported to XML string attributes.
  * Any other character, especially any non-ASCII character, will be silently
@@ -2166,7 +2166,7 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  * \return -1 if a failure occured.
  *
  * \note See also hwloc_topology_set_userdata_export_callback()
- * for exporting application-specific userdata.
+ * for exporting application-specific object userdata.
  *
  * \note Only printable characters may be exported to XML string attributes.
  * Any other character, especially any non-ASCII character, will be silently
@@ -2177,7 +2177,7 @@ HWLOC_DECLSPEC int hwloc_topology_export_xmlbuffer(hwloc_topology_t topology, ch
 /** \brief Free a buffer allocated by hwloc_topology_export_xmlbuffer() */
 HWLOC_DECLSPEC void hwloc_free_xmlbuffer(hwloc_topology_t topology, char *xmlbuffer);
 
-/** \brief Set the application-specific callback for exporting userdata
+/** \brief Set the application-specific callback for exporting object userdata
  *
  * The object userdata pointer is not exported to XML by default because hwloc
  * does not know what it contains.
