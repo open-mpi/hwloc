@@ -1,5 +1,5 @@
 # Copyright © 2009-2013 Inria.  All rights reserved.
-# Copyright © 2009-2012 Université Bordeaux 1
+# Copyright © 2009-2012, 2014 Université Bordeaux 1
 # Copyright © 2009-2011 Cisco Systems, Inc.  All rights reserved.
 #
 # See COPYING in top-level directory.
@@ -121,6 +121,9 @@ EXTRA_DIST += $(hgt_page:.1=.1in)
 if HWLOC_HAVE_LINUX
 nodist_man_MANS += $(hgt_page)
 endif HWLOC_HAVE_LINUX
+
+APPLICATIONSdir = @datarootdir@/applications
+dist_APPLICATIONS_DATA = hwloc-ls.desktop
 
 .1in.1:
 	@ echo Creating $@ man page...
