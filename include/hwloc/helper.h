@@ -733,7 +733,7 @@ hwloc_distrib(hwloc_topology_t topology,
  * returned.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
- * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
+ * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
  */
 static __hwloc_inline hwloc_const_cpuset_t
 hwloc_topology_get_complete_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
@@ -751,7 +751,7 @@ hwloc_topology_get_complete_cpuset(hwloc_topology_t topology)
  * systems, NULL is returned.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
- * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
+ * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
  */
 static __hwloc_inline hwloc_const_cpuset_t
 hwloc_topology_get_topology_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
@@ -768,7 +768,7 @@ hwloc_topology_get_topology_cpuset(hwloc_topology_t topology)
  * returned.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
- * changed or freed; hwloc_cpuset_dup must be used to obtain a local copy.
+ * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
  */
 static __hwloc_inline hwloc_const_cpuset_t
 hwloc_topology_get_online_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
@@ -785,7 +785,7 @@ hwloc_topology_get_online_cpuset(hwloc_topology_t topology)
  * returned.
  *
  * \note The returned cpuset is not newly allocated and should thus not be
- * changed or freed, hwloc_cpuset_dup must be used to obtain a local copy.
+ * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
  */
 static __hwloc_inline hwloc_const_cpuset_t
 hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology) __hwloc_attribute_pure;
@@ -802,7 +802,7 @@ hwloc_topology_get_allowed_cpuset(hwloc_topology_t topology)
  * returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
- * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
+ * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
  */
 static __hwloc_inline hwloc_const_nodeset_t
 hwloc_topology_get_complete_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
@@ -820,7 +820,7 @@ hwloc_topology_get_complete_nodeset(hwloc_topology_t topology)
  * systems, NULL is returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
- * changed or freed; hwloc_nodeset_dup must be used to obtain a local copy.
+ * changed or freed; hwloc_bitmap_dup() must be used to obtain a local copy.
  */
 static __hwloc_inline hwloc_const_nodeset_t
 hwloc_topology_get_topology_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
@@ -837,7 +837,7 @@ hwloc_topology_get_topology_nodeset(hwloc_topology_t topology)
  * returned.
  *
  * \note The returned nodeset is not newly allocated and should thus not be
- * changed or freed, hwloc_nodeset_dup must be used to obtain a local copy.
+ * changed or freed, hwloc_bitmap_dup() must be used to obtain a local copy.
  */
 static __hwloc_inline hwloc_const_nodeset_t
 hwloc_topology_get_allowed_nodeset(hwloc_topology_t topology) __hwloc_attribute_pure;
