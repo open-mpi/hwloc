@@ -334,7 +334,8 @@ man3_configuration_DATA = \
         $(DOX_MAN_DIR)/man3/hwloc_topology_cpubind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_membind_support.3 \
         $(DOX_MAN_DIR)/man3/hwloc_topology_support.3 \
-        $(DOX_MAN_DIR)/man3/hwloc_topology_get_support.3
+        $(DOX_MAN_DIR)/man3/hwloc_topology_set_userdata.3 \
+        $(DOX_MAN_DIR)/man3/hwloc_topology_get_userdata.3
 
 man3_levelsdir = $(man3dir)
 man3_levels_DATA = \

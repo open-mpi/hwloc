@@ -1032,6 +1032,25 @@ struct hwloc_topology_support {
 /** \brief Retrieve the topology support. */
 HWLOC_DECLSPEC const struct hwloc_topology_support *hwloc_topology_get_support(hwloc_topology_t __hwloc_restrict topology);
 
+/** \brief Set the topology-specific userdata pointer.
+ *
+ * Each topology may store one application-given private data pointer.
+ * It is initialized to \c NULL.
+ * hwloc will never modify it.
+ *
+ * Use it as you wish, after hwloc_topology_init() and until hwloc_topolog_destroy().
+ *
+ * This pointer is not exported to XML.
+ */
+HWLOC_DECLSPEC void hwloc_topology_set_userdata(hwloc_topology_t topology, const void *userdata);
+
+/** \brief Retrieve the topology-specific userdata pointer.
+ *
+ * Retrieve the application-given private data pointer that was
+ * previously set with hwloc_topology_set_userdata().
+ */
+HWLOC_DECLSPEC void * hwloc_topology_get_userdata(hwloc_topology_t topology);
+
 /** @} */
 
 
@@ -2148,6 +2167,8 @@ HWLOC_DECLSPEC hwloc_obj_t hwloc_custom_insert_group_object_by_parent(hwloc_topo
  * \note See also hwloc_topology_set_userdata_export_callback()
  * for exporting application-specific object userdata.
  *
+ * \note The topology-specific userdata pointer is ignored when exporting to XML.
+ *
  * \note Only printable characters may be exported to XML string attributes.
  * Any other character, especially any non-ASCII character, will be silently
  * dropped.
@@ -2167,6 +2188,8 @@ HWLOC_DECLSPEC int hwloc_topology_export_xml(hwloc_topology_t topology, const ch
  *
  * \note See also hwloc_topology_set_userdata_export_callback()
  * for exporting application-specific object userdata.
+ *
+ * \note The topology-specific userdata pointer is ignored when exporting to XML.
  *
  * \note Only printable characters may be exported to XML string attributes.
  * Any other character, especially any non-ASCII character, will be silently
@@ -2192,6 +2215,8 @@ HWLOC_DECLSPEC void hwloc_free_xmlbuffer(hwloc_topology_t topology, char *xmlbuf
  * something to XML (possibly multiple times per object).
  *
  * \p export_cb may be set to \c NULL if userdata should not be exported to XML.
+ *
+ * \note The topology-specific userdata pointer is ignored when exporting to XML.
  */
 HWLOC_DECLSPEC void hwloc_topology_set_userdata_export_callback(hwloc_topology_t topology,
 								void (*export_cb)(void *reserved, hwloc_topology_t topology, hwloc_obj_t obj));
@@ -2257,6 +2282,8 @@ HWLOC_DECLSPEC int hwloc_export_obj_userdata_base64(void *reserved, hwloc_topolo
  * \note \p buffer contains \p length characters followed by a null byte ('\0').
  *
  * \note This function should be called before hwloc_topology_load().
+ *
+ * \note The topology-specific userdata pointer is ignored when importing from XML.
  */
 HWLOC_DECLSPEC void hwloc_topology_set_userdata_import_callback(hwloc_topology_t topology,
 								void (*import_cb)(hwloc_topology_t topology, hwloc_obj_t obj, const char *name, const void *buffer, size_t length));

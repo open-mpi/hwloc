@@ -1,5 +1,5 @@
 /*
- * Copyright © 2009-2012 Inria.  All rights reserved.
+ * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009 Université Bordeaux 1
  * Copyright © 2011 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
@@ -104,10 +104,12 @@ int main(void)
   hwloc_topology_init(&topology);
   hwloc_topology_load(topology);
   check(topology);
+  assert(hwloc_topology_get_userdata(topology) == NULL);
   hwloc_topology_destroy(topology);
 
   /* check a synthetic topology */
   hwloc_topology_init(&topology);
+  hwloc_topology_set_userdata(topology, (void *)(uintptr_t)0x987654);
   hwloc_topology_set_synthetic(topology, "6 5 4 3 2");
   hwloc_topology_load(topology);
   check(topology);
@@ -151,6 +153,7 @@ int main(void)
   assert(obj3->userdata == (void *)(uintptr_t) 0x6);
   hwloc_topology_destroy(reimport);
 
+  assert(hwloc_topology_get_userdata(topology) == (void *)(uintptr_t)0x987654);
   hwloc_topology_destroy(topology);
 
   free(randomstring);

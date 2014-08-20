@@ -58,6 +58,7 @@ struct hwloc_topology {
   int is_thissystem;
   int is_loaded;
   hwloc_pid_t pid;                                      /* Process ID the topology is view from, 0 for self */
+  void *userdata;
 
   unsigned bridge_nbobjects;
   struct hwloc_obj **bridge_level;

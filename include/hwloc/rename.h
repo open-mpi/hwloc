@@ -134,6 +134,9 @@ extern "C" {
 #define hwloc_topology_membind_support HWLOC_NAME(topology_membind_support)
 #define hwloc_topology_support HWLOC_NAME(topology_support)
 #define hwloc_topology_get_support HWLOC_NAME(topology_get_support)
+#define hwloc_topology_set_userdata HWLOC_NAME(topology_set_userdata)
+#define hwloc_topology_get_userdata HWLOC_NAME(topology_get_userdata)
+
 #define hwloc_topology_export_xml HWLOC_NAME(topology_export_xml)
 #define hwloc_topology_export_xmlbuffer HWLOC_NAME(topology_export_xmlbuffer)
 #define hwloc_free_xmlbuffer HWLOC_NAME(free_xmlbuffer)

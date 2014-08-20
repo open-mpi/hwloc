@@ -2664,6 +2664,7 @@ hwloc_topology_init (struct hwloc_topology **topologyp)
   topology->flags = 0;
   topology->is_thissystem = 1;
   topology->pid = 0;
+  topology->userdata = NULL;
 
   topology->support.discovery = malloc(sizeof(*topology->support.discovery));
   topology->support.cpubind = malloc(sizeof(*topology->support.cpubind));
@@ -3192,4 +3193,14 @@ const struct hwloc_topology_support *
 hwloc_topology_get_support(struct hwloc_topology * topology)
 {
   return &topology->support;
+}
+
+void hwloc_topology_set_userdata(struct hwloc_topology * topology, const void *userdata)
+{
+  topology->userdata = (void *) userdata;
+}
+
+void * hwloc_topology_get_userdata(struct hwloc_topology * topology)
+{
+  return topology->userdata;
 }
