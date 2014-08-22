@@ -24,6 +24,8 @@ Version 1.9.1
 * Fix -f in lstopo manpage. Thanks to Jirka Hladky for reporting the issue.
 * Fix hwloc_obj_type_sscanf() and others when strncasecmp() is not properly
   available. Thanks to Nick Papior Andersen for reporting the problem.
+* Mark Linux file descriptors as close-on-exec to avoid leaks on exec.
+* Fix some minor memory leaks.
 
 
 Version 1.9.0
