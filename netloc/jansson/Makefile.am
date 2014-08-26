@@ -17,5 +17,6 @@ dvi-local:
 
 if GCC
 # These flags are gcc specific
-export AM_CFLAGS = -Wall -Wextra -Wdeclaration-after-statement
+# NETLOC: take out -Wdeclaration-after-statement
+export AM_CFLAGS = -Wall -Wextra
 endif
