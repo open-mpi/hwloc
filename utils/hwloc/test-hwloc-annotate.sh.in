@@ -3,14 +3,17 @@
 
 #
 # Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
-HWLOC_top_builddir="@HWLOC_top_builddir@"
-annotate="$HWLOC_top_builddir/utils/hwloc/hwloc-annotate"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+srcdir="$HWLOC_top_srcdir/utils/hwloc"
+builddir="$HWLOC_top_builddir/utils/hwloc"
+annotate="$builddir/hwloc-annotate"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
 export HWLOC_PLUGINS_PATH
 
 if test x@HWLOC_XML_LOCALIZED@ = x1; then
@@ -34,7 +37,7 @@ file="$tmp/test-hwloc-annotate.output"
 
 set -e
 
-$annotate $HWLOC_top_srcdir/utils/hwloc/test-hwloc-annotate.input $file all info Foo Bar
+$annotate $srcdir/test-hwloc-annotate.input $file all info Foo Bar
 $annotate --ci $file $file Core:all info Foo2 Bar2
 $annotate --ci $file $file L2Cache:0 none
 $annotate --ri $file $file socket:all info Foo
@@ -42,5 +45,5 @@ $annotate $file $file socket:0 info Foo2 Bar
 $annotate $file $file socket:0 info Foo2 Bar2
 $annotate --ri $file $file socket:0 info Foo2 Bar3
 
-diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-annotate.output "$file"
+diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-annotate.output "$file"
 rm -rf "$tmp"

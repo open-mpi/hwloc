@@ -903,7 +903,7 @@ EOF])
 	AC_MSG_CHECKING([for x86 cpuid])
 	old_CPPFLAGS="$CPPFLAGS"
 	CPPFLAGS="$CPPFLAGS -I$HWLOC_top_srcdir/include"
-	# We need hwloc_uint64_t but we can't use hwloc/autogen/config.h before configure ends.
+	# We need hwloc_uint64_t but we can't use autogen/config.h before configure ends.
 	# So pass #include/#define manually here for now.
 	CPUID_CHECK_HEADERS=
 	CPUID_CHECK_DEFINE=
@@ -1012,7 +1012,7 @@ EOF])
     AC_SUBST(HWLOC_PLUGINS_DIR)
 
     # Static components output file
-    hwloc_static_components_dir=${HWLOC_top_builddir}/src
+    hwloc_static_components_dir=${HWLOC_top_builddir}/hwloc
     mkdir -p ${hwloc_static_components_dir}
     hwloc_static_components_file=${hwloc_static_components_dir}/static-components.h
     rm -f ${hwloc_static_components_file}
@@ -1078,7 +1078,7 @@ EOF])
     AS_IF([test "$hwloc_mode" = "embedded"],
           [HWLOC_EMBEDDED_CFLAGS=$HWLOC_CFLAGS
            HWLOC_EMBEDDED_CPPFLAGS=$HWLOC_CPPFLAGS
-           HWLOC_EMBEDDED_LDADD='$(HWLOC_top_builddir)/src/libhwloc_embedded.la'
+           HWLOC_EMBEDDED_LDADD='$(HWLOC_top_builddir)/hwloc/libhwloc_embedded.la'
            HWLOC_EMBEDDED_LIBS=$HWLOC_LIBS
            HWLOC_LIBS=])
     AC_SUBST(HWLOC_EMBEDDED_CFLAGS)
@@ -1090,7 +1090,7 @@ EOF])
     AC_CONFIG_FILES(
         hwloc_config_prefix[Makefile]
         hwloc_config_prefix[include/Makefile]
-        hwloc_config_prefix[src/Makefile ]
+        hwloc_config_prefix[hwloc/Makefile ]
     )
 
     # Cleanup

@@ -1,6 +1,6 @@
 # Copyright © 2009-2014 Inria.  All rights reserved.
 # Copyright © 2009-2013 Université Bordeaux 1
-# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
@@ -62,24 +62,26 @@ if HWLOC_BUILD_DOXYGEN
 # change.
 #
 
+hwloc_include_dir = $(HWLOC_top_srcdir)/include
+
 dox_inputs = $(DOX_CONFIG) \
        $(srcdir)/hwloc.doxy \
-       $(HWLOC_top_srcdir)/include/hwloc.h \
-       $(HWLOC_top_srcdir)/include/hwloc/helper.h \
-       $(HWLOC_top_srcdir)/include/hwloc/bitmap.h \
-       $(HWLOC_top_srcdir)/include/hwloc/diff.h \
-       $(HWLOC_top_srcdir)/include/hwloc/plugins.h \
-       $(HWLOC_top_srcdir)/include/hwloc/glibc-sched.h \
-       $(HWLOC_top_srcdir)/include/hwloc/linux.h \
-       $(HWLOC_top_srcdir)/include/hwloc/linux-libnuma.h \
-       $(HWLOC_top_srcdir)/include/hwloc/opencl.h \
-       $(HWLOC_top_srcdir)/include/hwloc/cuda.h \
-       $(HWLOC_top_srcdir)/include/hwloc/cudart.h \
-       $(HWLOC_top_srcdir)/include/hwloc/nvml.h \
-       $(HWLOC_top_srcdir)/include/hwloc/gl.h \
-       $(HWLOC_top_srcdir)/include/hwloc/intel-mic.h \
-       $(HWLOC_top_srcdir)/include/hwloc/openfabrics-verbs.h \
-       $(HWLOC_top_srcdir)/include/hwloc/myriexpress.h
+       $(hwloc_include_dir)/hwloc.h \
+       $(hwloc_include_dir)/hwloc/helper.h \
+       $(hwloc_include_dir)/hwloc/bitmap.h \
+       $(hwloc_include_dir)/hwloc/diff.h \
+       $(hwloc_include_dir)/hwloc/plugins.h \
+       $(hwloc_include_dir)/hwloc/glibc-sched.h \
+       $(hwloc_include_dir)/hwloc/linux.h \
+       $(hwloc_include_dir)/hwloc/linux-libnuma.h \
+       $(hwloc_include_dir)/hwloc/opencl.h \
+       $(hwloc_include_dir)/hwloc/cuda.h \
+       $(hwloc_include_dir)/hwloc/cudart.h \
+       $(hwloc_include_dir)/hwloc/nvml.h \
+       $(hwloc_include_dir)/hwloc/gl.h \
+       $(hwloc_include_dir)/hwloc/intel-mic.h \
+       $(hwloc_include_dir)/hwloc/openfabrics-verbs.h \
+       $(hwloc_include_dir)/hwloc/myriexpress.h
 
 #
 # Create the images that we need for the PDF output and the HTML
@@ -773,7 +775,7 @@ if HWLOC_BUILD_README
 # Rules for creating the top-level README file.  There does not appear
 # to be an easy way to know if AC_PATH_PROG found something in
 # configure.ac (!), so put a run-time check here to see if we have
-# w3c.  
+# w3c.
 #
 # Just like BUILD_DOXYGEN, BUILD_README will automatically be false if
 # we're not building standalone.

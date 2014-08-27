@@ -3,7 +3,7 @@
 # Copyright © 2009      CNRS
 # Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux 1
-# Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -89,7 +89,7 @@ AC_SUBST([libhwloc_so_version])
 AH_TOP([/* -*- c -*-
  *
  * Copyright © 2009, 2011, 2012 CNRS, inria., Université Bordeaux 1  All rights reserved.
- * Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
+ * Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow

@@ -7,7 +7,17 @@
 # via AC_CONFIG_MACRO_DIR in configure.ac.
 ACLOCAL_AMFLAGS = -I ./config
 
-SUBDIRS = src include
+#
+# "make distcheck" requires that tarballs are able to be able to "make
+# dist", so we have to include config/distscript.sh.
+#
+EXTRA_DIST = \
+        README VERSION COPYING AUTHORS \
+        config/hwloc_get_version.sh \
+        config/distscript.sh
+
+SUBDIRS = include hwloc
+
 if HWLOC_BUILD_STANDALONE
 SUBDIRS += utils tests
 # We need doc/ if HWLOC_BUILD_DOXYGEN, or during make install if HWLOC_INSTALL_DOXYGEN.
@@ -27,21 +37,14 @@ pkgconfig_DATA = hwloc.pc
 endif
 endif
 
-# Only install the valgrind suppressions file if we're building in standalone mode
+# Only install the valgrind suppressions file if we're building in
+# standalone mode
 if HWLOC_BUILD_STANDALONE
 dist_pkgdata_DATA = contrib/hwloc-valgrind.supp
 endif
 
-#
-# "make distcheck" requires that tarballs are able to be able to "make
-# dist", so we have to include config/distscript.sh.
-#
-EXTRA_DIST = \
-        README VERSION COPYING AUTHORS \
-        config/hwloc_get_version.sh \
-        config/distscript.sh
-
-# Only install entire visual studio subdirectory if we're building in standalone mode
+# Only install entire visual studio subdirectory if we're building in
+# standalone mode
 if HWLOC_BUILD_STANDALONE
 EXTRA_DIST += contrib/windows
 endif
@@ -49,15 +52,6 @@ endif
 if HWLOC_BUILD_STANDALONE
 dist-hook:
 	sh "$(top_srcdir)/config/distscript.sh" "$(top_srcdir)" "$(distdir)" "$(HWLOC_VERSION)"
-endif HWLOC_BUILD_STANDALONE
-
-#
-# Build the documenation and top-level README file
-#
-if HWLOC_BUILD_STANDALONE
-.PHONY: doc readme
-doc readme:
-	$(MAKE) -C doc
 endif HWLOC_BUILD_STANDALONE
 
 if HWLOC_BUILD_STANDALONE
@@ -72,4 +66,13 @@ install-data-local:
 uninstall-local:
 	rm -f $(DESTDIR)$(prefix)/README.txt $(DESTDIR)$(prefix)/NEWS.txt $(DESTDIR)$(prefix)/COPYING.txt
 endif HWLOC_HAVE_WINDOWS
+endif HWLOC_BUILD_STANDALONE
+
+#
+# Build the documenation and top-level README file
+#
+if HWLOC_BUILD_STANDALONE
+.PHONY: doc readme
+doc readme:
+	$(MAKE) -C doc
 endif HWLOC_BUILD_STANDALONE
