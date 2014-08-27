@@ -380,16 +380,17 @@ int foo(void) {
     # Only generate these files if we're making the tests
     AC_CONFIG_FILES(
         hwloc_config_prefix[tests/Makefile]
-        hwloc_config_prefix[tests/linux/Makefile]
-        hwloc_config_prefix[tests/linux/gather/Makefile]
-        hwloc_config_prefix[tests/xml/Makefile]
-        hwloc_config_prefix[tests/ports/Makefile]
-        hwloc_config_prefix[tests/rename/Makefile]
-        hwloc_config_prefix[tests/linux/hwloc-gather-topology]
-        hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh]
-        hwloc_config_prefix[tests/linux/test-topology.sh]
-        hwloc_config_prefix[tests/xml/test-topology.sh]
-        hwloc_config_prefix[tests/wrapper.sh]
+        hwloc_config_prefix[tests/hwloc/Makefile]
+        hwloc_config_prefix[tests/hwloc/linux/Makefile]
+        hwloc_config_prefix[tests/hwloc/linux/gather/Makefile]
+        hwloc_config_prefix[tests/hwloc/xml/Makefile]
+        hwloc_config_prefix[tests/hwloc/ports/Makefile]
+        hwloc_config_prefix[tests/hwloc/rename/Makefile]
+        hwloc_config_prefix[tests/hwloc/linux/hwloc-gather-topology]
+        hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh]
+        hwloc_config_prefix[tests/hwloc/linux/test-topology.sh]
+        hwloc_config_prefix[tests/hwloc/xml/test-topology.sh]
+        hwloc_config_prefix[tests/hwloc/wrapper.sh]
         hwloc_config_prefix[utils/hwloc/hwloc-assembler-remote]
         hwloc_config_prefix[utils/hwloc/hwloc-compress-dir]
         hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh]
@@ -403,7 +404,24 @@ int foo(void) {
         hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh]
         hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh])
 
-    AC_CONFIG_COMMANDS([chmoding-scripts], [chmod +x ]hwloc_config_prefix[tests/linux/test-topology.sh ]hwloc_config_prefix[tests/xml/test-topology.sh ]hwloc_config_prefix[tests/linux/hwloc-gather-topology ]hwloc_config_prefix[tests/linux/gather/test-gather-topology.sh ]hwloc_config_prefix[tests/wrapper.sh ]hwloc_config_prefix[utils/hwloc/hwloc-assembler-remote ]hwloc_config_prefix[utils/hwloc/hwloc-compress-dir ]hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-assembler.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-distances.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh ]hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh ]hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh ]hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh])
+    AC_CONFIG_COMMANDS([chmoding-scripts], [
+chmod +x ]hwloc_config_prefix[tests/hwloc/linux/test-topology.sh \
+      ]hwloc_config_prefix[tests/hwloc/xml/test-topology.sh \
+      ]hwloc_config_prefix[tests/hwloc/linux/hwloc-gather-topology \
+      ]hwloc_config_prefix[tests/hwloc/linux/gather/test-gather-topology.sh \
+      ]hwloc_config_prefix[tests/hwloc/wrapper.sh \
+      ]hwloc_config_prefix[utils/hwloc/hwloc-assembler-remote \
+      ]hwloc_config_prefix[utils/hwloc/hwloc-compress-dir \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-annotate.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-assembler.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-calc.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-compress-dir.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-diffpatch.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-distances.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-distrib.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-hwloc-info.sh \
+      ]hwloc_config_prefix[utils/hwloc/test-fake-plugin.sh \
+      ]hwloc_config_prefix[utils/lstopo/test-hwloc-ls.sh])
 
     # These links are only needed in standalone mode.  It would
     # be nice to m4 foreach this somehow, but whenever I tried
@@ -412,19 +430,19 @@ int foo(void) {
     # built in standalone mode, only generate them in
     # standalone mode.
     AC_CONFIG_LINKS(
-	hwloc_config_prefix[tests/ports/topology-solaris.c]:hwloc_config_prefix[src/topology-solaris.c]
-	hwloc_config_prefix[tests/ports/topology-solaris-chiptype.c]:hwloc_config_prefix[src/topology-solaris-chiptype.c]
-	hwloc_config_prefix[tests/ports/topology-aix.c]:hwloc_config_prefix[src/topology-aix.c]
-	hwloc_config_prefix[tests/ports/topology-osf.c]:hwloc_config_prefix[src/topology-osf.c]
-	hwloc_config_prefix[tests/ports/topology-windows.c]:hwloc_config_prefix[src/topology-windows.c]
-	hwloc_config_prefix[tests/ports/topology-darwin.c]:hwloc_config_prefix[src/topology-darwin.c]
-	hwloc_config_prefix[tests/ports/topology-freebsd.c]:hwloc_config_prefix[src/topology-freebsd.c]
-	hwloc_config_prefix[tests/ports/topology-netbsd.c]:hwloc_config_prefix[src/topology-netbsd.c]
-	hwloc_config_prefix[tests/ports/topology-hpux.c]:hwloc_config_prefix[src/topology-hpux.c]
-	hwloc_config_prefix[tests/ports/topology-bgq.c]:hwloc_config_prefix[src/topology-bgq.c]
-	hwloc_config_prefix[tests/ports/topology-opencl.c]:hwloc_config_prefix[src/topology-opencl.c]
-	hwloc_config_prefix[tests/ports/topology-cuda.c]:hwloc_config_prefix[src/topology-cuda.c]
-	hwloc_config_prefix[tests/ports/topology-nvml.c]:hwloc_config_prefix[src/topology-nvml.c]
-	hwloc_config_prefix[tests/ports/topology-gl.c]:hwloc_config_prefix[src/topology-gl.c])
+	hwloc_config_prefix[tests/hwloc/ports/topology-solaris.c]:hwloc_config_prefix[hwloc/topology-solaris.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-solaris-chiptype.c]:hwloc_config_prefix[hwloc/topology-solaris-chiptype.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-aix.c]:hwloc_config_prefix[hwloc/topology-aix.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-osf.c]:hwloc_config_prefix[hwloc/topology-osf.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-windows.c]:hwloc_config_prefix[hwloc/topology-windows.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-darwin.c]:hwloc_config_prefix[hwloc/topology-darwin.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-freebsd.c]:hwloc_config_prefix[hwloc/topology-freebsd.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-netbsd.c]:hwloc_config_prefix[hwloc/topology-netbsd.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-hpux.c]:hwloc_config_prefix[hwloc/topology-hpux.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-bgq.c]:hwloc_config_prefix[hwloc/topology-bgq.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-opencl.c]:hwloc_config_prefix[hwloc/topology-opencl.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-cuda.c]:hwloc_config_prefix[hwloc/topology-cuda.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-nvml.c]:hwloc_config_prefix[hwloc/topology-nvml.c]
+	hwloc_config_prefix[tests/hwloc/ports/topology-gl.c]:hwloc_config_prefix[hwloc/topology-gl.c])
     ])
 ])dnl

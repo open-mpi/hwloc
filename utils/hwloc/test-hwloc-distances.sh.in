@@ -3,14 +3,17 @@
 
 #
 # Copyright © 2012-2013 Inria.  All rights reserved.
+# Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #
 
-HWLOC_top_builddir="@HWLOC_top_builddir@"
-distances="$HWLOC_top_builddir/utils/hwloc/hwloc-distances"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
+HWLOC_top_builddir="@HWLOC_top_builddir@"
+srcdir="$HWLOC_top_srcdir/utils/hwloc"
+builddir="$HWLOC_top_builddir/utils/hwloc"
+distances="$builddir/hwloc-distances"
 
-HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
+HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/hwloc
 export HWLOC_PLUGINS_PATH
 
 # make sure we use default numeric formats
@@ -62,5 +65,5 @@ set -e
   HWLOC_NUMANode_DISTANCES=none
   echo
 ) > "$file"
-diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-distances.output "$file"
+diff @HWLOC_DIFF_U@ $srcdir/test-hwloc-distances.output "$file"
 rm -rf "$tmp"

@@ -11,7 +11,7 @@ AM_CFLAGS = $(HWLOC_CFLAGS)
 AM_CPPFLAGS = $(HWLOC_CPPFLAGS)
 AM_LDFLAGS = $(HWLOC_LDFLAGS)
 
-LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
+LDADD = $(HWLOC_top_builddir)/hwloc/libhwloc.la
 DEPENDENCIES = $(LDADD)
 
 TESTS = hwloc-hello
