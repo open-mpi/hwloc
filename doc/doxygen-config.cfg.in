@@ -1,4 +1,4 @@
-# Copyright © 2010-2013 Inria.  All rights reserved.
+# Copyright © 2010-2014 Inria.  All rights reserved.
 # Copyright © 2009 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 
@@ -6,6 +6,7 @@
 
 PROJECT_NUMBER = @PACKAGE_VERSION@
 
+# no need to input hwloc.doxy and netloc.doxy, those are included from main.doxy
 INPUT          = \
 		@top_srcdir@/doc/main.doxy \
 		@top_srcdir@/doc/hwloc.doxy \

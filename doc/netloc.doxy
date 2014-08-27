@@ -8,7 +8,8 @@
  *
  * $HEADER$
  */
-/*! \mainpage Network Locality
+
+/*! \page netloc_intro Network Locality (netloc) Introduction
 
 <h1 class="sub">Portable abstraction of network topologies for high-performance computing</h1>
 
@@ -17,9 +18,9 @@
 
 <!-- ********************************************* -->
 \htmlonly
-<div class="section" id="introduction">
+<div class="section" id="netloc_introduction">
 \endhtmlonly
-\section Introduction
+\section netloc_introduction Netloc Introduction
 
 The Portable Network Locality (netloc) software package provides network
 topology discovery tools, and an abstract representation of those networks
@@ -79,53 +80,24 @@ Below are the supported OpenFlow controllers:
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="installation">
+</div><div class="section" id="netloc_installation">
 \endhtmlonly
-\section installation Installation
+\section netloc_installation Netloc Installation
 
-The typical installation follows the following pattern:
+The generic installation procedure for both hwloc and netloc
+is described in \ref common_installation.
 
-\verbatim
-shell$ ./configure [options...]
-shell$ make
-shell$ make install
-\endverbatim
-
-
-\subsection configuration Configure Parameters
-
-There are a few configuration options available. See ./configure --help for
-a complete list.
-
-\verbatim
- --prefix=<directory>
-   Install netloc into the base directory specified.
-
- --with-jansson=<directory>
-   Installation directory of the Jansson JSON parsing library.
-   http://www.digip.org/jansson/
-
- --with-hwloc=<directory>
-   Installation directory of the hwloc library.
-   http://www.open-mpi.org/projects/hwloc/
-\endverbatim
-
-A small number of API unit tests and testing data have been made available
-as part of this distribution. To compile these tests use the following
-command:
-
-\verbatim
-shell$ make check
-shell$ cd tests
-# Run all of the programs compiled in this directory
-\endverbatim
+Note that netloc is currently not supported on as many platform as
+the original hwloc project.
+netlow is enabled by default when supported, or can be disabled
+by passing <tt>--disable-netloc</tt> to the configure command-line.
 
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="interface">
+</div><div class="section" id="netloc_interface">
 \endhtmlonly
-\section interface Programming Interface
+\section netloc_interface Netloc Programming Interface
 
 The netloc model separates network topology discovery mechanism from the
 mechanism for querying that network topology data via the netloc API. The
@@ -146,9 +118,9 @@ Follow the link(s) below that best suit your intended use of netloc:
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="bugs">
+</div><div class="section" id="netloc_bugs">
 \endhtmlonly
-\section bugs Questions and Bugs
+\section netloc_bugs Netloc Questions and Bugs
 
 Questions should be sent to the netloc users and/or developers mailing list
 (http://www.open-mpi.org/community/lists/netloc.php).
@@ -159,7 +131,7 @@ Bug reports should be reported in the tracker
 <!-- ********************************************* -->
 <!-- ********************************************* -->
 <!-- ********************************************* -->
-\page apiuser End-User API
+\page netloc_apiuser Netloc End-User API
 
 There are a series of steps that a user must move through to gain access to the
 network topology information.
@@ -167,21 +139,21 @@ network topology information.
   <li> Run a netloc Reader tool to generate the \c .ndat file containing the
   network information (\ref apicli). You will need to know the directory in
   which the \c .ndat files are contained.
-  <li> Access \ref apiusermetadata <br>
+  <li> Access \ref netloc_apiusermetadata <br>
   This provides a lightweight discovery mechanism for choosing the network(s)
   about which to gather more detailed information.
-  <li> Access the \ref apiusertopo <br>
+  <li> Access the \ref netloc_apiusertopo <br>
   This opaque handle provides access to the detailed topology information.
-  <li> Use the \ref apiuserquery <br>
+  <li> Use the \ref netloc_apiuserquery <br>
   This interfaces allow you to access various components of the network
   topology including nodes, edges, and paths.
 </ol>
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apiusermetadata">
+</div><div class="section" id="netloc_apiusermetadata">
 \endhtmlonly
-\section apiusermetadata Network Metadata
+\section netloc_apiusermetadata Netloc Network Metadata
 
 The following interfaces allow the application to find available network
 information and choose the subset of those networks for further investigation.
@@ -222,13 +194,13 @@ they
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apiusertopo">
+</div><div class="section" id="netloc_apiusertopo">
 \endhtmlonly
-\section apiusertopo Network Topology Handle
+\section netloc_apiusertopo Netloc Network Topology Handle
 
-The following interfaces attach a topology handle to a specific network
-discovered during the metadata discovery process (\ref apiusermetadata).
-they
+The following interfaces attach a topology handle to a specific
+network discovered during the metadata discovery process (\ref
+netloc_apiusermetadata).  they
 <ul>
  <li> \ref netloc_attach : Attach to a specific network.
  <li> \ref netloc_detach : Detach from the network.
@@ -236,7 +208,8 @@ they
  with this topology.
 </ul>
 
-(Note the code below is continued from the \ref apiusermetadata section.)
+(Note the code below is continued from the \ref netloc_apiusermetadata
+section.)
 \code
     netloc_topology_t topology;
 
@@ -260,9 +233,9 @@ they
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apiuserquery">
+</div><div class="section" id="netloc_apiuserquery">
 \endhtmlonly
-\section apiuserquery Network Topology Query Interfaces
+\section netloc_apiuserquery Netloc Network Topology Query Interfaces
 
 The following interfaces query the network topology using the netloc topology
 handle.
@@ -303,7 +276,8 @@ this collection.
  beginning of the collection.
 </ul>
 
-(Note the code below assumes a topology handle is attached, per \ref apiusertopo section.)
+(Note the code below assumes a topology handle is attached, per \ref
+netloc_apiusertopo section.)
 \code
     netloc_topology_t topology;
     // Assume that the 'topology' handle is attached to a network.
@@ -348,9 +322,9 @@ this collection.
 <!-- ********************************************* -->
 
 \htmlonly
-</div><div class="section" id="apiuserexample">
+</div><div class="section" id="netloc_apiuserexample">
 \endhtmlonly
-\section apiuserexample Example Programs
+\section netloc_apiuserexample Netloc Example Programs
 
 The following small C example (named ``netloc_hello.c'') accesses a specific
 network and searches for a specific node by its physical identifier (e.g., MAC
@@ -374,7 +348,7 @@ nodes in all of the network topologies discovered.
 <!-- ********************************************* -->
 <!-- ********************************************* -->
 <!-- ********************************************* -->
-\page apicli Command Line Tools and Network Readers
+\page netloc_apicli Netloc Command Line Tools and Network Readers
 
 <!-- ********************************************* -->
 
@@ -545,11 +519,11 @@ for a complete list.
 
 Below is the <a href="http://json-schema.org/">JSON schema</a> for the input file.
 
-\verbinclude "../tools/reader_static/netloc_reader_static_schema.json"
+\verbinclude "../utils/netloc_reader_static/netloc_reader_static_schema.json"
 
 Below is an example of the expected format of the JSON input file with two nodes and one swich.
 
-\verbinclude "../tools/reader_static/example-2-nodes.json"
+\verbinclude "../utils/netloc_reader_static/example-2-nodes.json"
 
 
 
@@ -823,7 +797,7 @@ for a complete list.
 <!-- ********************************************* -->
 <!-- ********************************************* -->
 <!-- ********************************************* -->
-\page apireader Reader (Data Collection) API
+\page netloc_apireader Netloc Reader (Data Collection) API
 
 There are a series of steps that a developer will need to go through to create
 a new netloc reader. The basic steps are below.
@@ -831,37 +805,37 @@ a new netloc reader. The basic steps are below.
   <li> Access the node and edge information from your network. The remainder of
   this section assumes that you have this information and are trying to convert
   it into netloc .ndat files.
-  <li> \ref apireader_phase1 :<br>
+  <li> \ref netloc_apireader_phase1 :<br>
   Setup the network information on the \ref netloc_network_t handle.
-  <li> \ref apireader_phase2 :<br>
+  <li> \ref netloc_apireader_phase2 :<br>
   Setup a data collection handle (\ref netloc_data_collection_handle_t)
   associated with that network along with the output directory for the .ndat
   files.
-  <li> \ref apireader_phase3 :<br>
+  <li> \ref netloc_apireader_phase3 :<br>
   Create a \ref netloc_node_t object for each addressable network endpoint
   (e.g., MAC Address, GUID) in the system.
-  <li> \ref apireader_phase4 :<br>
+  <li> \ref netloc_apireader_phase4 :<br>
   Add the \ref netloc_node_t object to the collection.
-  <li> \ref apireader_phase5 :<br>
+  <li> \ref netloc_apireader_phase5 :<br>
   Create a \ref netloc_edge_t object for each unidirectional edge between
   \ref netloc_node_t objects.
-  <li> \ref apireader_phase6 :<br>
+  <li> \ref netloc_apireader_phase6 :<br>
   Add the \ref netloc_edge_t object to the source \ref netloc_node_t
   object.
-  <li> \ref apireader_phase7 :<br>
+  <li> \ref netloc_apireader_phase7 :<br>
   Compute the shortest physical paths between all nodes.
-  <li> \ref apireader_phase8 :<br>
+  <li> \ref netloc_apireader_phase8 :<br>
   Append logical paths between all nodes.
-  <li> \ref apireader_phase9 :<br>
+  <li> \ref netloc_apireader_phase9 :<br>
   Close the data collection handle to write the data to the .ndat files in
   the specified output directory.
 </ol>
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase1">
+</div><div class="section" id="netloc_apireader_phase1">
 \endhtmlonly
-\section apireader_phase1 Setup Network Information
+\section netloc_apireader_phase1 Setup Network Information
 
 The following interfaces are useful in setting up the network information.
 Note that the network information pertains to a single network type and subnet.
@@ -886,9 +860,9 @@ they
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase2">
+</div><div class="section" id="netloc_apireader_phase2">
 \endhtmlonly
-\section apireader_phase2 Setup Data Collection Handle
+\section netloc_apireader_phase2 Setup Data Collection Handle
 
 The following interfaces are useful in setting up the data collection handle
 and associating it with the network information.
@@ -911,9 +885,9 @@ they
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase3">
+</div><div class="section" id="netloc_apireader_phase3">
 \endhtmlonly
-\section apireader_phase3 Create netloc Nodes
+\section netloc_apireader_phase3 Create netloc Nodes
 
 The following interfaces are useful in creating a \ref netloc_node_t for each
 addressable network endpoing (e.g., MAC address, GUID).
@@ -941,9 +915,9 @@ they
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase4">
+</div><div class="section" id="netloc_apireader_phase4">
 \endhtmlonly
-\section apireader_phase4 Add the Node to the collection
+\section netloc_apireader_phase4 Add the Node to the collection
 
 The following interfaces are useful in adding the \ref netloc_node_t object to
 the data collection.
@@ -961,9 +935,9 @@ they
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase5">
+</div><div class="section" id="netloc_apireader_phase5">
 \endhtmlonly
-\section apireader_phase5 Create edges between the nodes
+\section netloc_apireader_phase5 Create edges between the nodes
 
 The following interfaces are useful in creating \ref netloc_edge_t objects
 representing the links between nodes.
@@ -995,9 +969,9 @@ they
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase6">
+</div><div class="section" id="netloc_apireader_phase6">
 \endhtmlonly
-\section apireader_phase6 Add the edges to the collection
+\section netloc_apireader_phase6 Add the edges to the collection
 
 The following interfaces are useful in adding the \ref netloc_edge_t objects to
 the data collection. Note that the edge is always associated with the source
@@ -1025,9 +999,9 @@ node.
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase7">
+</div><div class="section" id="netloc_apireader_phase7">
 \endhtmlonly
-\section apireader_phase7 (Optional) Physical Paths
+\section netloc_apireader_phase7 (Optional) Physical Paths
 
 The following interfaces are useful in constructing the physical path
 information between nodes. Note that all of the nodes and edges must be
@@ -1075,9 +1049,9 @@ attached to the data collection handle before this will work.
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase8">
+</div><div class="section" id="netloc_apireader_phase8">
 \endhtmlonly
-\section apireader_phase8 (Optional) Logical Paths
+\section netloc_apireader_phase8 (Optional) Logical Paths
 
 The following interfaces are useful in constructing the logical path
 information between nodes.
@@ -1100,9 +1074,9 @@ information between nodes.
 
 <!-- ********************************************* -->
 \htmlonly
-</div><div class="section" id="apireader_phase9">
+</div><div class="section" id="netloc_apireader_phase9">
 \endhtmlonly
-\section apireader_phase9 Close the data collection
+\section netloc_apireader_phase9 Close the data collection
 
 The following interfaces are useful in closing the data collection. This will
 write the data to the .ndat files in the directory specified on the data
@@ -1125,7 +1099,7 @@ collection handle.
 <!-- ********************************************* -->
 <!-- ********************************************* -->
 <!-- ********************************************* -->
-\page termsanddefs Terms and Definitions
+\page netloc_termsanddefs Netloc Terms and Definitions
 
 <dl>
 
