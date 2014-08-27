@@ -26,6 +26,9 @@
 # - Remove doc/ and test/ and *.pc files from CONFIG_FILES
 # - Remove AC OUTPUT
 # - Added "netloc/" prefix to the output files
+# - Moved AM_CONDITIONALs to a separate macro that is always invoked
+# - Remove GCC specific AM_CFLAGS definition, the last flag isn't
+#   always supported and we don't want to pollute AM_CFLAGS everywhere
 #
 # Note that there were a few other changes; grep for "NETLOC:" in the
 # jansson tree to find them (e.g., Makefile.am and src/Makefile.am).

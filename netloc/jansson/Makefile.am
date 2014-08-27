@@ -14,9 +14,3 @@ dvi-local:
 # NETLOC: we don't need jansson.pc
 #pkgconfigdir = $(libdir)/pkgconfig
 #pkgconfig_DATA = jansson.pc
-
-if GCC
-# These flags are gcc specific
-# NETLOC: take out -Wdeclaration-after-statement
-export AM_CFLAGS = -Wall -Wextra
-endif
