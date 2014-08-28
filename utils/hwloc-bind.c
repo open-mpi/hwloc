@@ -240,6 +240,16 @@ int main(int argc, char *argv[])
      */
   }
 
+  if (get_last_cpu_location && !working_on_cpubind) {
+    fprintf(stderr, "Options --membind and --get-last-cpu-location cannot be combined.\n");
+    return EXIT_FAILURE;
+  }
+  if ((get_binding || get_last_cpu_location) && (got_cpubind || got_membind)) {
+    /* doesn't work because get_binding/get_last_cpu_location overwrites cpubind_set */
+    fprintf(stderr, "Cannot display and set binding at the same time.\n");
+    return EXIT_FAILURE;
+  }
+
   if (get_binding || get_last_cpu_location) {
     char *s;
     const char *policystr = NULL;
