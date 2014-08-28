@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2013 Inria.  All rights reserved.
+.\" Copyright © 2009-2014 Inria.  All rights reserved.
 .\" Copyright © 2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
@@ -42,18 +42,35 @@ This option is only meaningful when an actual binding is also given
 with \fB\-\-membind\fR.
 If \fB\-\-membind\fR is given without \fB\-\-mempolicy\fR,
 the default policy is bind.
+
 .TP
 \fB\-\-get\fR
 Report the current bindings.
+.TP
+\ 
+When a command is given, the binding is displayed before executing
+the command. When no command is given, the program exits after
+displaying the current binding.
+.TP
+\ 
 When combined with \fB\-\-membind\fR, report the memory binding
 instead of CPU binding.
+
 .TP
 \fB\-e\fR \fB\-\-get-last-cpu-location\fR
 Report the last processors where the process ran.
 Note that the result may already be outdated when reported since
 the operating system may move the process to other processors
 at any time according to the binding.
+.TP
+\ 
+When a command is given, the last processors is displayed before
+executing the command. When no command is given, the program exits
+after displaying the last processors.
+.TP
+\ 
 This option cannot be combined with \fB\-\-membind\fR.
+
 .TP
 \fB\-\-single\fR
 Bind on a single CPU to prevent migration.

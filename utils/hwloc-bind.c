@@ -301,7 +301,6 @@ int main(int argc, char *argv[])
     else
       printf("%s\n", s);
     free(s);
-    return EXIT_SUCCESS;
   }
 
   if (got_membind) {
@@ -381,6 +380,8 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 
   if (0 == argc) {
+    if (get_binding || get_last_cpu_location)
+      return EXIT_SUCCESS;
     fprintf(stderr, "%s: nothing to do!\n", callname);
     return EXIT_FAILURE;
   }

@@ -29,6 +29,10 @@ Version 1.10.0
   + Add hwloc_topology_set/get_userdata() to let the application save
     a private pointer in the topology whenever it needs a way to find
     its own object corresponding to a topology.
+* Tools
+  + hwloc-bind --get <command-line> now execute the command after displaying
+    the binding instead of ignoring the command entirely.
+    Thanks to John Donners for the suggestion.
 * Misc
   + Synthetic topology descriptions may now specify attributes such as
     memory sizes and OS indexes. See the Synthetic topologies section
