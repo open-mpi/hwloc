@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Hardware Locality ls
-Name=Show hardware topology
+comment=Show hardware topology
 Exec=hwloc-ls
 Terminal=false
 Type=Application
