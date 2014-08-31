@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Inria.  All rights reserved.
+ * Copyright © 2013-2014 Inria.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -140,6 +140,8 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 		goto out_too_complex;
 
 	if (obj1->os_index != obj2->os_index)
+		/* we could allow different os_index for non-PU non-NUMAnode objects
+		 * but it's likely useless anyway */
 		goto out_too_complex;
 
 #define _SETS_DIFFERENT(_set1, _set2) \
@@ -155,7 +157,8 @@ hwloc_diff_trees(hwloc_topology_t topo1, hwloc_obj_t obj1,
 	    || SETS_DIFFERENT(allowed_nodeset, obj1, obj2))
 		goto out_too_complex;
 
-	/* no need to check logical_index, sibling_rank, symmetric_subtree */
+	/* no need to check logical_index, sibling_rank, symmetric_subtree,
+	 * the parents did it */
 
 	if ((!obj1->name) != (!obj2->name)
 	    || (obj1->name && strcmp(obj1->name, obj2->name))) {
