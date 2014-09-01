@@ -30,18 +30,19 @@ Version 1.10.0
     a private pointer in the topology whenever it needs a way to find
     its own object corresponding to a topology.
 * Tools
-  + hwloc-bind --get <command-line> now execute the command after displaying
+  + hwloc-bind --get <command-line> now executes the command after displaying
     the binding instead of ignoring the command entirely.
     Thanks to John Donners for the suggestion.
-* Misc
+  + Clarify that memory sizes shown in lstopo are local by default
+    unless specified (total memory added in the root object).
+* Synthetic topologies
   + Synthetic topology descriptions may now specify attributes such as
     memory sizes and OS indexes. See the Synthetic topologies section
     in the documentation.
-    - lstopo now exports in this fully-detailed format by default.
-      The new option --export-synthetic-flags may be used to revert
-      back the old format.
-  + Clarify that memory sizes shown in lstopo are local by default
-    unless specified (total memory added in the root object).
+  + lstopo now exports in this fully-detailed format by default.
+    The new option --export-synthetic-flags may be used to revert
+    back the old format.
+* Misc
   + Add --disable-cpuid configure flag to work around buggy processor
     simulators reporting invalid CPUID information.
     Thanks for Andrew Friedley for reporting the issue.
