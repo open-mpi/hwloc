@@ -10,7 +10,7 @@
  *                 PLEASE GO READ THE DOCUMENTATION!
  *         ------------------------------------------------
  *               $tarball_directory/doc/doxygen-doc/
- *                                or                            
+ *                                or
  *           http://www.open-mpi.org/projects/hwloc/doc/
  *=====================================================================
  *
@@ -1518,7 +1518,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  * whenever possible is as follows:
  *
  * \code
- * hwloc_alloc_membind_policy(topology, size, set, 
+ * hwloc_alloc_membind_policy(topology, size, set,
  *                            HWLOC_MEMBIND_DEFAULT, 0);
  * \endcode
  *
@@ -1542,7 +1542,7 @@ HWLOC_DECLSPEC int hwloc_get_proc_last_cpu_location(hwloc_topology_t topology, h
  * hwloc_cpuset_to_nodeset() or hwloc_cpuset_from_nodeset().
  *
  * \note On some operating systems, memory binding affects the CPU
- * binding; see ::HWLOC_MEMBIND_NOCPUBIND 
+ * binding; see ::HWLOC_MEMBIND_NOCPUBIND
  * @{
  */
 
@@ -1607,7 +1607,7 @@ typedef enum {
    * threads or parts of a memory area have differing memory binding
    * policies.
    * \hideinitializer */
-  HWLOC_MEMBIND_MIXED = -1             
+  HWLOC_MEMBIND_MIXED = -1
 } hwloc_membind_policy_t;
 
 /** \brief Memory binding flags.
@@ -1637,7 +1637,7 @@ typedef enum {
   * the binding can not be guaranteed / completely enforced.
   *
   * This flag has slightly different meanings depending on which
-  * function it is used with.  
+  * function it is used with.
   * \hideinitializer  */
   HWLOC_MEMBIND_STRICT =        (1<<2),
 
