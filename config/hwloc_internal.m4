@@ -242,6 +242,7 @@ EOF
     # Generate some files for the docs
     AC_CONFIG_FILES(
         hwloc_config_prefix[doc/Makefile]
+        hwloc_config_prefix[doc/examples/Makefile]
         hwloc_config_prefix[doc/doxygen-config.cfg])
 ])
 
