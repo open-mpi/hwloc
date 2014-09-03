@@ -112,6 +112,9 @@ HWLOC_DECLSPEC unsigned hwloc_get_api_version(void);
  *
  * It may be consulted and modified with the bitmap API as any
  * ::hwloc_bitmap_t (see hwloc/bitmap.h).
+ *
+ * Each bit may be converted into a PU object using
+ * hwloc_get_pu_obj_by_os_index().
  */
 typedef hwloc_bitmap_t hwloc_cpuset_t;
 /** \brief A non-modifiable ::hwloc_cpuset_t. */
@@ -122,6 +125,8 @@ typedef hwloc_const_bitmap_t hwloc_const_cpuset_t;
  *
  * It may be consulted and modified with the bitmap API as any
  * ::hwloc_bitmap_t (see hwloc/bitmap.h).
+ * Each bit may be converted into a NUMA node object using
+ * hwloc_get_numanode_obj_by_os_index().
  *
  * When binding memory on a system without any NUMA node
  * (when the whole memory is considered as a single memory bank),

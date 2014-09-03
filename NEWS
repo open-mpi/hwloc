@@ -29,6 +29,9 @@ Version 1.10.0
   + Add hwloc_topology_set/get_userdata() to let the application save
     a private pointer in the topology whenever it needs a way to find
     its own object corresponding to a topology.
+  + Add hwloc_get_numanode_obj_by_os_index() and document that this function
+    as well as hwloc_get_pu_obj_by_os_index() are good at converting
+    nodesets and cpusets into objects.
 * Tools
   + hwloc-bind --get <command-line> now executes the command after displaying
     the binding instead of ignoring the command entirely.

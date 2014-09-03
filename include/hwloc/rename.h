@@ -315,6 +315,7 @@ extern "C" {
 #define hwloc_get_next_obj_by_depth HWLOC_NAME(get_next_obj_by_depth)
 #define hwloc_get_next_obj_by_type HWLOC_NAME(get_next_obj_by_type)
 #define hwloc_get_pu_obj_by_os_index HWLOC_NAME(get_pu_obj_by_os_index)
+#define hwloc_get_numanode_obj_by_os_index HWLOC_NAME(get_numanode_obj_by_os_index)
 #define hwloc_get_next_child HWLOC_NAME(get_next_child)
 #define hwloc_get_common_ancestor_obj HWLOC_NAME(get_common_ancestor_obj)
 #define hwloc_obj_is_in_subtree HWLOC_NAME(obj_is_in_subtree)

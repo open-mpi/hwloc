@@ -543,11 +543,12 @@ hwloc_get_shared_cache_covering_obj (hwloc_topology_t topology __hwloc_attribute
 
 /** \brief Returns the object of type ::HWLOC_OBJ_PU with \p os_index.
  *
- * \note The \p os_index field of object should most of the times only be
- * used for pretty-printing purpose. Type ::HWLOC_OBJ_PU is the only case
- * where \p os_index could actually be useful, when manually binding to
- * processors.
- * However, using CPU sets to hide this complexity should often be preferred.
+ * This function is useful for converting a CPU set into the PU
+ * objects it contains.
+ * When retrieving the current binding (e.g. with hwloc_get_cpubind()),
+ * one may iterate over the bits of the resulting CPU set with
+ * hwloc_bitmap_foreach_begin(), and find the corresponding PUs
+ * with this function.
  */
 static __hwloc_inline hwloc_obj_t
 hwloc_get_pu_obj_by_os_index(hwloc_topology_t topology, unsigned os_index) __hwloc_attribute_pure;
@@ -556,6 +557,27 @@ hwloc_get_pu_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
 {
   hwloc_obj_t obj = NULL;
   while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_PU, obj)) != NULL)
+    if (obj->os_index == os_index)
+      return obj;
+  return NULL;
+}
+
+/** \brief Returns the object of type ::HWLOC_OBJ_NODE with \p os_index.
+ *
+ * This function is useful for converting a nodeset into the NUMA node
+ * objects it contains.
+ * When retrieving the current binding (e.g. with hwloc_get_membind_nodeset()),
+ * one may iterate over the bits of the resulting nodeset with
+ * hwloc_bitmap_foreach_begin(), and find the corresponding NUMA nodes
+ * with this function.
+ */
+static __hwloc_inline hwloc_obj_t
+hwloc_get_numanode_obj_by_os_index(hwloc_topology_t topology, unsigned os_index) __hwloc_attribute_pure;
+static __hwloc_inline hwloc_obj_t
+hwloc_get_numanode_obj_by_os_index(hwloc_topology_t topology, unsigned os_index)
+{
+  hwloc_obj_t obj = NULL;
+  while ((obj = hwloc_get_next_obj_by_type(topology, HWLOC_OBJ_NODE, obj)) != NULL)
     if (obj->os_index == os_index)
       return obj;
   return NULL;
