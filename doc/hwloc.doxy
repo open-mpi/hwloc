@@ -119,7 +119,7 @@ smaller!) project and code base.  It just happens to be hosted as part
 of the overall Open MPI project.
 
 Nightly development snapshots are available on the web site.
-Additionally, the code can be directly checked out of Subversion:
+Additionally, the code can be directly cloned from Git:
 
 \verbatim
 shell$ git clone https://github.com/open-mpi/hwloc.git
@@ -128,7 +128,7 @@ shell$ ./autogen.sh
 \endverbatim
 
 Note that GNU Autoconf >=2.63, Automake >=1.10 and Libtool >=2.2.6 are
-required when building from a Subversion checkout.
+required when building from a Git clone.
 
 Installation by itself is the fairly common GNU-based process:
 
@@ -459,7 +459,7 @@ both US letter and A4 formats) in the source tarball in
 doc/doxygen-doc/.  
 
 <strong>NOTE:</strong> If you are building the documentation from a
-Subversion checkout, you will need to have Doxygen and pdflatex
+Git clone, you will need to have Doxygen and pdflatex
 installed -- the documentation will be built during the normal "make"
 process.  The documentation is installed during "make install" to
 $prefix/share/doc/hwloc/ and your systems default man page tree (under
