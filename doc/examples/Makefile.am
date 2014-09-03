@@ -14,7 +14,7 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 DEPENDENCIES = $(LDADD)
 
-TESTS = hwloc-hello
+TESTS = hwloc-hello sharedcaches
 if HWLOC_HAVE_CXX
 TESTS += hwloc-hello-cpp
 endif HWLOC_HAVE_CXX
