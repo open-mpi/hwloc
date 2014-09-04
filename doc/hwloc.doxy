@@ -536,6 +536,8 @@ element may exist between a core and a PU.
 The following small C example (named ``hwloc-hello.c'') prints the
 topology of the machine and bring the process to the first logical processor
 of the second core of the machine.
+More examples are available in the doc/examples/ directory of the source
+tree.
 
 \include examples/hwloc-hello.c
 
@@ -1188,6 +1190,7 @@ binding policy.
 
 See \ref hwlocality_cpubinding and \ref hwlocality_membinding for
 hwloc's API functions regarding CPU and memory binding, respectively.
+There are some examples under doc/examples/ in the source tree.
 
 
 

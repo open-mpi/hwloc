@@ -34,6 +34,9 @@
  *
  * Please, go read the documentation.  :-)
  *
+ * Moreover there are several examples of hwloc use under doc/examples
+ * in the source tree.
+ *
  *=====================================================================*/
 
 /** \file

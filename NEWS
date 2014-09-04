@@ -45,6 +45,10 @@ Version 1.10.0
   + lstopo now exports in this fully-detailed format by default.
     The new option --export-synthetic-flags may be used to revert
     back the old format.
+* Documentation
+  + Add the doc/examples/ subdirectory with several real-life examples,
+    including the already existing hwloc-hello.C for basics.
+    Thanks to Rob Aulwes for the suggestion.
 * Misc
   + Add --disable-cpuid configure flag to work around buggy processor
     simulators reporting invalid CPUID information.
