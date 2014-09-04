@@ -14,12 +14,12 @@ AM_LDFLAGS = $(HWLOC_LDFLAGS)
 LDADD = $(HWLOC_top_builddir)/src/libhwloc.la
 DEPENDENCIES = $(LDADD)
 
-TESTS = hwloc-hello cpuset+bitmap+cpubind nodeset+membind+policy sharedcaches
+TESTS = hwloc-hello
 if HWLOC_HAVE_CXX
 TESTS += hwloc-hello-cpp
 endif HWLOC_HAVE_CXX
 
-check_PROGRAMS = $(TESTS)
+check_PROGRAMS = $(TESTS) cpuset+bitmap+cpubind nodeset+membind+policy sharedcaches
 
 hwloc-hello-cpp.cpp: $(srcdir)/hwloc-hello.c
 	cp -f $(srcdir)/hwloc-hello.c $@
