@@ -1300,31 +1300,42 @@ HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const 
  *
  * It is often useful to call hwloc_bitmap_singlify() first so that a single CPU
  * remains in the set. This way, the process will not even migrate between
- * different CPUs. Some operating systems also only support that kind of binding.
+ * different CPUs inside the given set.
+ * Some operating systems also only support that kind of binding.
  *
- * \note Some operating systems do not provide all hwloc-supported
- * mechanisms to bind processes, threads, etc. and the corresponding
- * binding functions may fail. -1 is returned and errno is set to
- * ENOSYS when it is not possible to bind the requested kind of object
- * processes/threads. errno is set to EXDEV when the requested cpuset
+ * Some operating systems do not provide all hwloc-supported
+ * mechanisms to bind processes, threads, etc.
+ * hwloc_topology_get_support() may be used to query about the actual CPU
+ * binding support in the currently used operating system.
+ *
+ * When the requested binding operation is not available and the
+ * ::HWLOC_CPUBIND_STRICT flag was passed, the function returns -1.
+ * \p errno is set to \c ENOSYS when it is not possible to bind the requested kind of object
+ * processes/threads. errno is set to \c EXDEV when the requested cpuset
  * can not be enforced (e.g. some systems only allow one CPU, and some
  * other systems only allow one NUMA node).
  *
- * The most portable version that should be preferred over the others, whenever
- * possible, is
+ * If ::HWLOC_CPUBIND_STRICT was not passed, the function may fail as well, or
+ * the operating system may use a slightly different operation
+ * (with side-effects, smaller binding set, etc.)
+ * when the requested operation is not exactly supported.
+ *
+ * The most portable version that should be preferred over the others,
+ * whenever possible, is the following one which just binds the current program,
+ * assuming it is single-threaded:
  *
  * \code
  * hwloc_set_cpubind(topology, set, 0),
  * \endcode
  *
- * as it just binds the current program, assuming it is single-threaded, or
+ * If the program may be multithreaded, the following one should be preferred
+ * to only bind the current thread:
  *
  * \code
  * hwloc_set_cpubind(topology, set, HWLOC_CPUBIND_THREAD),
  * \endcode
  *
- * which binds the current thread of the current program (which may be
- * multithreaded).
+ * \sa Some example codes are available under doc/examples/ in the source tree.
  *
  * \note To unbind, just call the binding function with either a full cpuset or
  * a cpuset equal to the system cpuset.
@@ -1332,8 +1343,8 @@ HWLOC_DECLSPEC void hwloc_obj_add_info(hwloc_obj_t obj, const char *name, const 
  * \note On some operating systems, CPU binding may have effects on memory binding, see
  * ::HWLOC_CPUBIND_NOMEMBIND
  *
- * Running lstopo --top can be a very convenient tool to check how binding
- * actually happened.
+ * \note Running lstopo --top or hwloc-ps can be a very convenient tool to check
+ * how binding actually happened.
  * @{
  */
 
