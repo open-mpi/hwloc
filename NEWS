@@ -49,6 +49,7 @@ Version 1.10.0
   + Add the doc/examples/ subdirectory with several real-life examples,
     including the already existing hwloc-hello.C for basics.
     Thanks to Rob Aulwes for the suggestion.
+  + Improve the document of CPU and memory binding in the API.
 * Misc
   + Add --disable-cpuid configure flag to work around buggy processor
     simulators reporting invalid CPUID information.
