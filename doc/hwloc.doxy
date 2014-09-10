@@ -1953,7 +1953,7 @@ Such an export is only possible if the topology is totally symmetric,
 which means the <tt>symmetric_subtree</tt> field of the root object
 is set.
 This usually implies that I/O objects are disabled since attaching I/O
-busses often cause the topology to become assymetric.
+busses often cause the topology to become asymmetric.
 Passing <tt>--no-io</tt> to lstopo is therefore often useful to make
 synthetic export work (as well as not passing any I/O topology flag
 before exporting with ::hwloc_topology_export_synthetic()).
