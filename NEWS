@@ -50,6 +50,8 @@ Version 1.10.0
     including the already existing hwloc-hello.C for basics.
     Thanks to Rob Aulwes for the suggestion.
   + Improve the document of CPU and memory binding in the API.
+  + Add a FAQ entry about operating system errors, especially on AMD
+    platforms with buggy cache information.
 * Misc
   + Add --disable-cpuid configure flag to work around buggy processor
     simulators reporting invalid CPUID information.
