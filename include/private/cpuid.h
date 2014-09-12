@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010-2012 Université Bordeaux 1
+ * Copyright © 2010-2012, 2014 Université Bordeaux 1
  * Copyright © 2010 Cisco Systems, Inc.  All rights reserved.
  * Copyright © 2014 Inria.  All rights reserved.
  *
@@ -16,7 +16,7 @@ static __hwloc_inline int hwloc_have_cpuid(void)
 {
   int ret;
   unsigned tmp, tmp2;
-  asm(
+  __asm__(
       "mov $0,%0\n\t"   /* Not supported a priori */
 
       "pushfl   \n\t"   /* Save flags */
@@ -56,7 +56,7 @@ static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *e
    * use them :/ */
 #ifdef HWLOC_X86_64_ARCH
   hwloc_uint64_t sav_rbx;
-  asm(
+  __asm__(
   "mov %%rbx,%2\n\t"
   "cpuid\n\t"
   "xchg %2,%%rbx\n\t"
@@ -65,7 +65,7 @@ static __hwloc_inline void hwloc_cpuid(unsigned *eax, unsigned *ebx, unsigned *e
     "+c" (*ecx), "=&d" (*edx));
 #elif defined(HWLOC_X86_32_ARCH)
   unsigned long sav_ebx;
-  asm(
+  __asm__(
   "mov %%ebx,%2\n\t"
   "cpuid\n\t"
   "xchg %2,%%ebx\n\t"
