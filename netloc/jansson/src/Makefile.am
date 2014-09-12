@@ -23,7 +23,8 @@ libjansson_la_SOURCES = \
 	utf.c \
 	utf.h \
 	value.c
+# NETLOC: Remove -version-info from LDFLAGS; it's ignored (and warned
+# about) for LT convenience libs
 libjansson_la_LDFLAGS = \
 	-no-undefined \
-	-export-symbols-regex '^json_' \
-	-version-info 10:0:6
+	-export-symbols-regex '^json_'
