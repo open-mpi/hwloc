@@ -2,6 +2,7 @@
  * Copyright © 2009 CNRS
  * Copyright © 2009-2014 Inria.  All rights reserved.
  * Copyright © 2009-2011, 2013 Université Bordeaux 1
+ * Copyright © 2014 Cisco Systems, Inc.  All rights reserved.
  * See COPYING in top-level directory.
  */
 
@@ -21,17 +22,7 @@
 #include <stdarg.h>
 #include <setjmp.h>
 
-#if (defined HWLOC_HAVE_LIBPCIACCESS) && (defined HWLOC_HAVE_PCIUTILS)
-#error Cannot have both LIBPCIACCESS and PCIUTILS enabled simultaneously
-#elif (!defined HWLOC_HAVE_LIBPCIACCESS) && (!defined HWLOC_HAVE_PCIUTILS)
-#error Cannot have neither LIBPCIACCESS nor PCIUTILS enabled simultaneously
-#endif
-
-#ifdef HWLOC_HAVE_LIBPCIACCESS
 #include <pciaccess.h>
-#else /* HWLOC_HAVE_PCIUTILS */
-#include <pci/pci.h>
-#endif
 
 #ifndef PCI_HEADER_TYPE
 #define PCI_HEADER_TYPE 0x0e
@@ -79,40 +70,14 @@
 #define CONFIG_SPACE_CACHESIZE 256
 
 
-#ifdef HWLOC_HAVE_PCIUTILS
-/* Avoid letting libpci call exit(1) when no PCI bus is available. */
-static jmp_buf err_buf;
-static void
-hwloc_pci_error(char *msg, ...)
-{
-  va_list args;
-
-  va_start(args, msg);
-  fprintf(stderr, "pcilib: ");
-  vfprintf(stderr, msg, args);
-  fprintf(stderr, "\n");
-  longjmp(err_buf, 1);
-}
-
-static void
-hwloc_pci_warning(char *msg __hwloc_attribute_unused, ...)
-{
-}
-#endif
-
 static int
 hwloc_look_pci(struct hwloc_backend *backend)
 {
   struct hwloc_topology *topology = backend->topology;
   struct hwloc_obj *first_obj = NULL, *last_obj = NULL;
-#ifdef HWLOC_HAVE_LIBPCIACCESS
   int ret;
   struct pci_device_iterator *iter;
   struct pci_device *pcidev;
-#else /* HWLOC_HAVE_PCIUTILS */
-  struct pci_access *pciaccess;
-  struct pci_dev *pcidev;
-#endif
 
   if (!(hwloc_topology_get_flags(topology) & (HWLOC_TOPOLOGY_FLAG_IO_DEVICES|HWLOC_TOPOLOGY_FLAG_WHOLE_IO)))
     return 0;
@@ -130,7 +95,6 @@ hwloc_look_pci(struct hwloc_backend *backend)
   hwloc_debug("%s", "\nScanning PCI buses...\n");
 
   /* initialize PCI scanning */
-#ifdef HWLOC_HAVE_LIBPCIACCESS
   ret = pci_system_init();
   if (ret) {
     hwloc_debug("%s", "Can not initialize libpciaccess\n");
@@ -138,30 +102,11 @@ hwloc_look_pci(struct hwloc_backend *backend)
   }
 
   iter = pci_slot_match_iterator_create(NULL);
-#else /* HWLOC_HAVE_PCIUTILS */
-  pciaccess = pci_alloc();
-  pciaccess->error = hwloc_pci_error;
-  pciaccess->warning = hwloc_pci_warning;
-
-  if (setjmp(err_buf)) {
-    pci_cleanup(pciaccess);
-    return -1;
-  }
-
-  pci_init(pciaccess);
-  pci_scan_bus(pciaccess);
-#endif
 
   /* iterate over devices */
-#ifdef HWLOC_HAVE_LIBPCIACCESS
   for (pcidev = pci_device_next(iter);
        pcidev;
        pcidev = pci_device_next(iter))
-#else /* HWLOC_HAVE_PCIUTILS */
-  for (pcidev = pciaccess->devices;
-       pcidev;
-       pcidev = pcidev->next)
-#endif
   {
     const char *vendorname, *devicename, *fullname;
     unsigned char config_space_cache[CONFIG_SPACE_CACHESIZE];
@@ -178,12 +123,8 @@ hwloc_look_pci(struct hwloc_backend *backend)
 
     /* initialize the config space in case we fail to read it (missing permissions, etc). */
     memset(config_space_cache, 0xff, CONFIG_SPACE_CACHESIZE);
-#ifdef HWLOC_HAVE_LIBPCIACCESS
     pci_device_probe(pcidev);
     pci_device_cfg_read(pcidev, config_space_cache, 0, CONFIG_SPACE_CACHESIZE, NULL);
-#else /* HWLOC_HAVE_PCIUTILS */
-    pci_read_block(pcidev, 0, config_space_cache, CONFIG_SPACE_CACHESIZE); /* doesn't even tell how much it actually reads */
-#endif
 
     /* try to read the domain */
 #if (defined HWLOC_HAVE_LIBPCIACCESS) || (defined HWLOC_HAVE_PCIDEV_DOMAIN)
@@ -193,15 +134,7 @@ hwloc_look_pci(struct hwloc_backend *backend)
 #endif
 
     /* try to read the device_class */
-#ifdef HWLOC_HAVE_LIBPCIACCESS
     device_class = pcidev->device_class >> 8;
-#else /* HWLOC_HAVE_PCIUTILS */
-#ifdef HWLOC_HAVE_PCIDEV_DEVICE_CLASS
-    device_class = pcidev->device_class;
-#else
-    device_class = config_space_cache[PCI_CLASS_DEVICE] | (config_space_cache[PCI_CLASS_DEVICE+1] << 8);
-#endif
-#endif
 
     /* might be useful for debugging (note that domain might be truncated) */
     os_index = (domain << 20) + (pcidev->bus << 12) + (pcidev->dev << 4) + pcidev->func;
@@ -290,46 +223,17 @@ hwloc_look_pci(struct hwloc_backend *backend)
        */
     }
 
-    /* starting from pciutils 2.2, pci_lookup_name() takes a variable number
-     * of arguments, and supports the PCI_LOOKUP_NO_NUMBERS flag.
-     */
-
     /* get the vendor name */
-#ifdef HWLOC_HAVE_LIBPCIACCESS
     vendorname = pci_device_get_vendor_name(pcidev);
-#else /* HWLOC_HAVE_PCIUTILS */
-    vendorname = pci_lookup_name(pciaccess, name, sizeof(name),
-#if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
-			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_NO_NUMBERS,
-			      pcidev->vendor_id
-#else
-			      PCI_LOOKUP_VENDOR,
-			      pcidev->vendor_id, 0, 0, 0
-#endif
-			      );
-#endif /* HWLOC_HAVE_PCIUTILS */
     if (vendorname && *vendorname)
       hwloc_obj_add_info(obj, "PCIVendor", vendorname);
 
     /* get the device name */
-#ifdef HWLOC_HAVE_LIBPCIACCESS
     devicename = pci_device_get_device_name(pcidev);
-#else /* HWLOC_HAVE_PCIUTILS */
-    devicename = pci_lookup_name(pciaccess, name, sizeof(name),
-#if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
-			      PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
-			      pcidev->vendor_id, pcidev->device_id
-#else
-			      PCI_LOOKUP_DEVICE,
-			      pcidev->vendor_id, pcidev->device_id, 0, 0
-#endif
-			      );
-#endif /* HWLOC_HAVE_PCIUTILS */
     if (devicename && *devicename)
       hwloc_obj_add_info(obj, "PCIDevice", devicename);
 
     /* generate or get the fullname */
-#ifdef HWLOC_HAVE_LIBPCIACCESS
     snprintf(name, sizeof(name), "%s%s%s",
 	     vendorname ? vendorname : "",
 	     vendorname && devicename ? " " : "",
@@ -337,19 +241,6 @@ hwloc_look_pci(struct hwloc_backend *backend)
     fullname = name;
     if (*name)
       obj->name = strdup(name);
-#else /* HWLOC_HAVE_PCIUTILS */
-    fullname = pci_lookup_name(pciaccess, name, sizeof(name),
-#if HAVE_DECL_PCI_LOOKUP_NO_NUMBERS
-			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE|PCI_LOOKUP_NO_NUMBERS,
-			      pcidev->vendor_id, pcidev->device_id
-#else
-			      PCI_LOOKUP_VENDOR|PCI_LOOKUP_DEVICE,
-			      pcidev->vendor_id, pcidev->device_id, 0, 0
-#endif
-			      );
-    if (fullname && *fullname)
-      obj->name = strdup(fullname);
-#endif /* HWLOC_HAVE_PCIUTILS */
     hwloc_debug("  %04x:%02x:%02x.%01x %04x %04x:%04x %s\n",
 		domain, pcidev->bus, pcidev->dev, pcidev->func,
 		device_class, pcidev->vendor_id, pcidev->device_id,
@@ -364,12 +255,8 @@ hwloc_look_pci(struct hwloc_backend *backend)
   }
 
   /* finalize device scanning */
-#ifdef HWLOC_HAVE_LIBPCIACCESS
   pci_iterator_destroy(iter);
   pci_system_cleanup();
-#else /* HWLOC_HAVE_PCIUTILS */
-  pci_cleanup(pciaccess);
-#endif
 
   return hwloc_insert_pci_device_list(backend, first_obj);
 }

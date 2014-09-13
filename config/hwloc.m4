@@ -9,7 +9,7 @@ dnl Copyright (c) 2004-2012 The Regents of the University of California.
 dnl                         All rights reserved.
 dnl Copyright (c) 2004-2008 High Performance Computing Center Stuttgart, 
 dnl                         University of Stuttgart.  All rights reserved.
-dnl Copyright © 2006-2013 Cisco Systems, Inc.  All rights reserved.
+dnl Copyright © 2006-2014 Cisco Systems, Inc.  All rights reserved.
 dnl Copyright © 2012  Blue Brain Project, BBP/EPFL. All rights reserved.
 dnl Copyright © 2012       Oracle and/or its affiliates.  All rights reserved.
 dnl See COPYING in top-level directory.
@@ -672,126 +672,23 @@ EOF])
       LIBS="$tmp_save_LIBS"
     fi
 
-    # PCI support
+    # PCI support via libpciaccess.  NOTE: we do not support
+    # libpci/pciutils because that library is GPL and is incompatible
+    # with our BSD license.
     hwloc_pci_happy=no
-    if test "x$enable_pci" != xno -a "x$enable_libpci" != "xyes"; then
+    if test "x$enable_pci" != xno; then
       hwloc_pci_happy=yes
       HWLOC_PKG_CHECK_MODULES([PCIACCESS], [pciaccess], [pci_slot_match_iterator_create], [:], [hwloc_pci_happy=no])
-      if test x$hwloc_pci_happy = xyes; then hwloc_pci_lib=pciaccess; fi
+      AS_IF([test "$hwloc_pci_happy" = "yes"],
+         [HWLOC_PCIACCESS_REQUIRES=pciaccess
+          hwloc_components="$hwloc_components pci"
+          hwloc_pci_component_maybeplugin=1])
     fi
-    # PCI support with pciutils instead of pciaccess
-    if test "x$enable_pci" != "xno" -a "x$hwloc_pci_lib" != "xpciaccess"; then
-        hwloc_pci_happy=yes
-        HWLOC_PKG_CHECK_MODULES([PCIUTILS], [libpci], [pci_cleanup], [:], [
-          # manually check pciutils in case a old one without .pc is installed
-          AC_CHECK_HEADERS([pci/pci.h], [
-	    # try first without -lz, it's not always needed (RHEL5, Debian Etch)
-	    AC_CHECK_LIB([pci], [pci_init], [
-	      HWLOC_PCIUTILS_LIBS="-lpci"
-	      ], [
-              # try again with -lz because it's needed sometimes (FC7).
-              # don't use AC_CHECK_LIB again because the cache would
-              # return "no" without actually rechecking
-              AC_MSG_CHECKING([for pci_init in -lpci with -lz])
-              tmp_save_LIBS=$LIBS
-              LIBS="-lpci -lz $LIBS"
-              AC_LINK_IFELSE([AC_LANG_CALL([], [pci_init])],
-                             [HWLOC_PCIUTILS_LIBS="-lpci -lz"
-                              HWLOC_PCIUTILS_ADDITIONAL_LIBS="-lz"
-                              AC_MSG_RESULT(yes)],
-                             [hwloc_pci_happy=no
-                              AC_MSG_RESULT(no)])
-              LIBS=$tmp_save_LIBS])
-            # Also check with pci_lookup_name, because that sometimes
-            # requires -lresolv (RHEL5.6). don't use AC_CHECK_LIB twice
-            # because the cache would return "no" without actually rechecking
-	    AC_CHECK_LIB([pci], [pci_lookup_name], [],
-                [AC_CHECK_LIB([resolv], [inet_ntoa], 
-                    [AC_MSG_CHECKING([for pci_lookup_name in -lpci with -lresolv])
-                     tmp_save_LIBS=$LIBS
-                     LIBS="-lpci -lresolv $LIBS $HWLOC_PCIUTILS_ADDITIONAL_LIBS"
-                     AC_LINK_IFELSE([AC_LANG_CALL([], [pci_lookup_name])],
-                                    [HWLOC_PCIUTILS_LIBS="$HWLOC_PCIUTILS_LIBS -lresolv"
-                                     HWLOC_PCIUTILS_ADDITIONAL_LIBS="$HWLOC_PCIUTILS_ADDITIONAL_LIBS -lresolv"
-                                     AC_MSG_RESULT(yes)],
-                                    [hwloc_pci_happy=no
-                                     AC_MSG_RESULT(no)])
-                     LIBS=$tmp_save_LIBS],
-                    [hwloc_pci_happy=no])])
-            ], [hwloc_pci_happy=no])
-        ])
-        if test x$hwloc_pci_happy = xyes; then
-	  # pciutils could be used, but we don't want to force use it since it may GPL-taint hwloc
-	  if test x$enable_libpci = xyes; then
-	    hwloc_pci_lib=pciutils
-	  else
-	    # user didn't explicit request pciutils, disable PCI and warn the user
-	    hwloc_pci_happy=no
-	    hwloc_warn_may_use_libpci=yes
-	  fi
-	else
-	  # pciutils not found, error out if it was requested
-	  if test x$enable_libpci = xyes; then
-	    AC_MSG_WARN([Specified --enable-libpci switch, but could not])
-	    AC_MSG_WARN([find appropriate support])
-	    AC_MSG_ERROR([Cannot continue])
-	  fi
-	fi
-    fi
-    AC_SUBST(HWLOC_PCIUTILS_LIBS)
     # If we asked for pci support but couldn't deliver, fail
-    AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no" -a "$hwloc_warn_may_use_libpci" != "yes"],
+    AS_IF([test "$enable_pci" = "yes" -a "$hwloc_pci_happy" = "no"],
           [AC_MSG_WARN([Specified --enable-pci switch, but could not])
            AC_MSG_WARN([find appropriate support])
            AC_MSG_ERROR([Cannot continue])])
-    # pciaccess specific enabling
-    if test "x$hwloc_pci_lib" = "xpciaccess"; then
-      HWLOC_PCIACCESS_REQUIRES=pciaccess
-      AC_DEFINE([HWLOC_HAVE_LIBPCIACCESS], [1], [Define to 1 if you have the `libpciaccess' library.])
-    fi
-    # pciutils specific checks and enabling
-    if test "x$hwloc_pci_lib" = "xpciutils"; then
-      tmp_save_CFLAGS="$CFLAGS"
-      CFLAGS="$CFLAGS $HWLOC_PCIUTILS_CFLAGS"
-      tmp_save_LIBS="$LIBS"
-      LIBS="$LIBS $HWLOC_PCIUTILS_LIBS"
-
-      AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
-      AC_CHECK_DECLS([PCI_LOOKUP_NO_NUMBERS],,[:],[[#include <pci/pci.h>]])
-      AC_CHECK_LIB([pci], [pci_find_cap], [enable_pci_caps=yes], [enable_pci_caps=no], [$HWLOC_PCIUTILS_ADDITIONAL_LIBS])
-      if test "x$enable_pci_caps" = "xyes"; then
-        AC_DEFINE([HWLOC_HAVE_PCI_FIND_CAP], [1], [Define to 1 if `libpci' has the `pci_find_cap' function.])
-      fi
-
-      AC_MSG_CHECKING(whether struct pci_dev has a device_class field)
-      AC_TRY_COMPILE([#include <pci/pci.h>],
-	[int f(struct pci_dev *dev) { return dev->device_class; }],
-        [pcidev_device_class=yes], [pcidev_device_class=no])
-      AC_MSG_RESULT([$pcidev_device_class])
-      if test x$pcidev_device_class = xyes; then
-        AC_DEFINE([HWLOC_HAVE_PCIDEV_DEVICE_CLASS], [1], [Define to 1 if `libpci' struct pci_dev has a `device_class' field.])
-      fi
-
-      AC_MSG_CHECKING(whether struct pci_dev has a domain field)
-      AC_TRY_COMPILE([#include <pci/pci.h>],
-	[int f(struct pci_dev *dev) { return dev->domain; }],
-        [pcidev_domain=yes], [pcidev_domain=no])
-      AC_MSG_RESULT([$pcidev_domain])
-      if test x$pcidev_domain = xyes; then
-        AC_DEFINE([HWLOC_HAVE_PCIDEV_DOMAIN], [1], [Define to 1 if `libpci' struct pci_dev has a `domain' field.])
-      fi
-
-      CFLAGS="$tmp_save_CFLAGS"
-      LIBS="$tmp_save_LIBS"
-
-      HWLOC_PCIUTILS_REQUIRES=libpci
-      AC_DEFINE([HWLOC_HAVE_PCIUTILS], [1], [Define to 1 if you have the pciutils `libpci' library.])
-    fi
-    # final common PCI enabling
-    if test "x$hwloc_pci_happy" = "xyes"; then
-      hwloc_components="$hwloc_components pci"
-      hwloc_pci_component_maybeplugin=1
-    fi
     # don't add LIBS/CFLAGS/REQUIRES yet, depends on plugins
 
     # OpenCL support
@@ -1124,9 +1021,9 @@ EOF])
     AC_MSG_RESULT([$hwloc_plugin_components])
 
     AS_IF([test "$hwloc_pci_component" = "static"],
-          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCIUTILS_LIBS $HWLOC_PCIACCESS_LIBS"
-           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCIUTILS_CFLAGS $HWLOC_PCIACCESS_CFLAGS"
-           HWLOC_REQUIRES="$HWLOC_PCIUTILS_REQUIRES $HWLOC_PCIACCESS_REQUIRES $HWLOC_REQUIRES"])
+          [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_PCIACCESS_LIBS"
+           HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_PCIACCESS_CFLAGS"
+           HWLOC_REQUIRES="$HWLOC_PCIACCESS_REQUIRES $HWLOC_REQUIRES"])
     AS_IF([test "$hwloc_opencl_component" = "static"],
           [HWLOC_LIBS="$HWLOC_LIBS $HWLOC_OPENCL_LIBS"
            HWLOC_CFLAGS="$HWLOC_CFLAGS $HWLOC_OPENCL_CFLAGS"
