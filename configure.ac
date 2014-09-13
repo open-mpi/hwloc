@@ -3,7 +3,7 @@
 # Copyright © 2009      CNRS
 # Copyright © 2009-2013 Inria.  All rights reserved.
 # Copyright © 2009, 2011-2012      Université Bordeaux 1
-# Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2009-2014 Cisco Systems, Inc.  All rights reserved.
 #
 # See COPYING in top-level directory.
 # 
@@ -179,24 +179,6 @@ append_env() {
           [new_value="[$]2]")
     eval "[$]1=\"$new_value\""
 }
-
-# Warn about PCI support
-if test x$hwloc_warn_may_use_libpci = xyes; then
-  echo
-  echo "***********************************************************************"
-  if test "x$hwloc_linuxpci_happy" = "xyes"; then
-    echo "Full PCI support could not be enabled because libpciaccess is not available."
-  else
-    echo "PCI support could not be enabled because libpciaccess is not available."
-  fi
-  echo "libpci could be used instead but hwloc may be tainted by the GPL"
-  echo "license of pciutils. Add --enable-libpci to enable it."
-  if test "x$hwloc_linuxpci_happy" = "xyes"; then
-    echo "Only the Linux-specific PCI (linuxpci component) is enabled for now."
-    echo "It misses device names."
-  fi
-  echo "***********************************************************************"
-fi
 
 # Show which optional support we'll be building
 hwloc_xml_status=basic
