@@ -22,7 +22,7 @@ int do_test(void)
     if (0 != mytest_hwloc_topology_load(topology)) return 1;
     printf("*** Test 4: topology get depth\n");
     depth = mytest_hwloc_topology_get_depth(topology);
-    if (depth < 0) return 1;
+    if (depth > 10000) return 1;
     printf("    Max depth: %u\n", depth);
     printf("*** Test 5: topology destroy\n");
     mytest_hwloc_topology_destroy(topology);
