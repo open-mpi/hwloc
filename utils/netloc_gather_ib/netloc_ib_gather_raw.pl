@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #
-# Copyright © 2013 Inria.  All rights reserved.
+# Copyright © 2013-2014 Inria.  All rights reserved.
 #
 # See COPYING in top-level directory.
 #
@@ -162,7 +162,7 @@ if ($hwlocdir) {
         if ((hex $2) < 1 or (hex $2) > 49151) {
           $servers{$hostname}->{gids}->{$boardname}->{$1}->{invalid} = 1;
         }
-      } elsif ($line =~ /<info name=\"Port([0-9]+)State\" value=\"[0-9]\"\/>/) {
+      } elsif ($line =~ /<info name=\"Port([0-9]+)State\" value=\"([0-9])\"\/>/) {
         # state must be active = 4
         if ($2 != 4) {
           $servers{$hostname}->{gids}->{$boardname}->{$1}->{invalid} = 1;
