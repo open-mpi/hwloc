@@ -2626,6 +2626,21 @@ interface, and the import/export may also be directed to memory buffer
 See also \ref xml.
 
 
+\section faq_multitopo How many topologies may I use in my program?
+
+hwloc lets you manipulate multiple topologies at the same time.
+However these topologies consume memory and system resources
+(for instance file descriptors) until they are destroyed.
+It is therefore discouraged to open the same topology multiple
+times.
+
+Sharing a single topology between threads is easy (see \ref threadsafety)
+since the vast majority of accesses are read-only.
+
+If multiple topologies of different (but similar) nodes are needed
+in your program, have a look at \ref faq_diff.
+
+
 \section faq_diff How to avoid memory waste when manipulating multiple similar topologies?
 
 hwloc does not share information between topologies.
