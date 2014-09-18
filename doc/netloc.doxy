@@ -576,8 +576,10 @@ InfiniBand network.
 \verbatim
 Normal way to use this:
 * Get some hwloc outputs from some nodes (at least enough nodes to make all subnets available)
-  and store them as <hostname>.xml in a single directory
+  and store them as <hostname>.xml in a single directory.
   shell$ ssh node001 lstopo ~/mycluster-data/hwloc/node001.xml
+  Make sure you have access to the entire machine (no cgroup/cpuset restriction, etc.)
+  or pass --whole-system to lstopo.
 
 * Run netloc-ib-gather-raw.pl --hwloc-dir <hwloc XML directory> --raw-dir <raw IB output directory>
   - If you cannot run the entire script as root, add --sudo to run ib* programs as root.
