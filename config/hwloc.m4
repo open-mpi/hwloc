@@ -1217,8 +1217,8 @@ AC_DEFUN([_HWLOC_CHECK_DECL], [
   AC_REQUIRE([AC_PROG_CC])
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
        [AC_INCLUDES_DEFAULT([$4])
-       $1(int,long,int,long,int,long,int,long,int,long);],
-       [$1(1,2,3,4,5,6,7,8,9,10);])],
+	void * $1;],
+    )],
     [AC_MSG_RESULT([no])
      $3],
     [AC_MSG_RESULT([yes])
