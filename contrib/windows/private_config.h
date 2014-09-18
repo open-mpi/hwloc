@@ -67,10 +67,6 @@
    `nvmlDeviceGetMaxPcieLinkGeneration', and to 0 if you don't. */
 /* #undef HAVE_DECL_NVMLDEVICEGETMAXPCIELINKGENERATION */
 
-/* Define to 1 if you have the declaration of `PCI_LOOKUP_NO_NUMBERS', and to
-   0 if you don't. */
-/* #undef HAVE_DECL_PCI_LOOKUP_NO_NUMBERS */
-
 /* Define to 1 if you have the declaration of `pthread_getaffinity_np', and to
    0 if you don't. */
 #define HAVE_DECL_PTHREAD_GETAFFINITY_NP 0
@@ -169,9 +165,6 @@
 /* Define to 1 if we have -llgrp */
 /* #undef HAVE_LIBLGRP */
 
-/* Define to 1 if you have the `pci' library (-lpci). */
-/* #undef HAVE_LIBPCI */
-
 /* Define to 1 if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
 
@@ -216,9 +209,6 @@
 
 /* Define to 1 if you have the `openat' function. */
 /* #undef HAVE_OPENAT */
-
-/* Define to 1 if you have the <pci/pci.h> header file. */
-/* #undef HAVE_PCI_PCI_H */
 
 /* Define to 1 if you have the <picl.h> header file. */
 /* #undef HAVE_PICL_H */
@@ -474,9 +464,6 @@
 /* Define to 1 if you have the GL module components. */
 /* #undef HWLOC_HAVE_GL */
 
-/* Define to 1 if you have the `libpciaccess' library. */
-/* #undef HWLOC_HAVE_LIBPCIACCESS */
-
 /* Define to 1 if you have a library providing the termcap interface */
 /* #undef HWLOC_HAVE_LIBTERMCAP */
 
@@ -501,18 +488,6 @@
 
 /* Define to 1 if you have the `OpenCL' library. */
 /* #undef HWLOC_HAVE_OPENCL */
-
-/* Define to 1 if `libpci' struct pci_dev has a `device_class' field. */
-/* #undef HWLOC_HAVE_PCIDEV_DEVICE_CLASS */
-
-/* Define to 1 if `libpci' struct pci_dev has a `domain' field. */
-/* #undef HWLOC_HAVE_PCIDEV_DOMAIN */
-
-/* Define to 1 if you have the pciutils `libpci' library. */
-/* #undef HWLOC_HAVE_PCIUTILS */
-
-/* Define to 1 if `libpci' has the `pci_find_cap' function. */
-/* #undef HWLOC_HAVE_PCI_FIND_CAP */
 
 /* Define to 1 if the hwloc library should support dynamically-loaded plugins
    */
