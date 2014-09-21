@@ -54,6 +54,8 @@ Version 1.10.0
     platforms with buggy cache information.
   + Add a FAQ entry about loading many topologies in a single program.
 * Misc
+  + Work around buggy Linux kernels reporting 2 sockets instead
+    1 socket with 2 NUMA nodes for each Xeon E5 v3 (Haswell) processor.
   + pciutils/libpci support is now removed since libpciaccess works
     well and there's also a Linux-specific PCI backend. For the record,
     pciutils was GPL and therefore disabled by default since v1.6.2.
