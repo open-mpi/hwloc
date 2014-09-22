@@ -85,6 +85,8 @@ test-suite.log
 /tests/hwloc_topology_restrict
 /tests/hwloc_obj_infos
 /tests/hwloc_iodevs
+/tests/hwloc_topology_diff
+/tests/hwloc_topology_dup
 /tests/xmlbuffer
 /tests/gl
 /tests/intel-mic
