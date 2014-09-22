@@ -9,7 +9,7 @@
 #
 
 HWLOC_top_builddir="@HWLOC_top_builddir@"
-distrib="$HWLOC_top_builddir/utils/hwloc-distrib"
+distrib="$HWLOC_top_builddir/utils/hwloc/hwloc-distrib"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
@@ -55,5 +55,5 @@ set -e
   echo
   $distrib --if synthetic --input "4 4 4 4" 19
 ) > "$file"
-diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-distrib.output "$file"
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-distrib.output "$file"
 rm -rf "$tmp"

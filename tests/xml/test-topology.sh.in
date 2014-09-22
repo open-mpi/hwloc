@@ -14,7 +14,7 @@
 
 HWLOC_top_builddir="@HWLOC_top_builddir@"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
-lstopo="@HWLOC_top_builddir@/utils/lstopo-no-graphics"
+lstopo="@HWLOC_top_builddir@/utils/lstopo/lstopo-no-graphics"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
 export HWLOC_PLUGINS_PATH

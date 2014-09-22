@@ -7,7 +7,7 @@
 #
 
 HWLOC_top_builddir="@HWLOC_top_builddir@"
-distances="$HWLOC_top_builddir/utils/hwloc-distances"
+distances="$HWLOC_top_builddir/utils/hwloc/hwloc-distances"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
@@ -62,5 +62,5 @@ set -e
   HWLOC_NUMANode_DISTANCES=none
   echo
 ) > "$file"
-diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-distances.output "$file"
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-distances.output "$file"
 rm -rf "$tmp"

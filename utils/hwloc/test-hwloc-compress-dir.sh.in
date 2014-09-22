@@ -7,7 +7,7 @@
 #
 
 HWLOC_top_builddir="@HWLOC_top_builddir@"
-compress="$HWLOC_top_builddir/utils/hwloc-compress-dir"
+compress="$HWLOC_top_builddir/utils/hwloc/hwloc-compress-dir"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
@@ -33,8 +33,8 @@ fi
 
 set -e
 
-(cd "$tmp" && gunzip -c $HWLOC_top_srcdir/utils/test-hwloc-compress-dir.input.tar.gz | tar xf -)
-(cd "$tmp" && gunzip -c $HWLOC_top_srcdir/utils/test-hwloc-compress-dir.output.tar.gz | tar xf -)
+(cd "$tmp" && gunzip -c $HWLOC_top_srcdir/utils/hwloc/test-hwloc-compress-dir.input.tar.gz | tar xf -)
+(cd "$tmp" && gunzip -c $HWLOC_top_srcdir/utils/hwloc/test-hwloc-compress-dir.output.tar.gz | tar xf -)
 (cd "$tmp" && mkdir test-hwloc-compress-dir.newoutput)
 (cd "$tmp" && mkdir test-hwloc-compress-dir.newoutput2)
 

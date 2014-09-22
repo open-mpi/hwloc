@@ -9,7 +9,7 @@
 #
 
 HWLOC_top_builddir="@HWLOC_top_builddir@"
-ls="$HWLOC_top_builddir/utils/lstopo-no-graphics"
+ls="$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
@@ -51,5 +51,5 @@ $ls
   HWLOC_NO_LIBXML_EXPORT=1 $ls $tmp/test.xml
   $ls --input "ma:1 no:2 so:1 ca:2 2" $tmp/test.synthetic
 ) > "$file"
-diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-ls.output "$file"
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/lstopo/test-hwloc-ls.output "$file"
 rm -rf "$tmp"

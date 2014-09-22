@@ -11,8 +11,8 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
 # this will be changed into $bindir/... during make install
-localhwlocdiff="$HWLOC_top_builddir/utils/hwloc-diff"
-localhwlocpatch="$HWLOC_top_builddir/utils/hwloc-patch"
+localhwlocdiff="$HWLOC_top_builddir/utils/hwloc/hwloc-diff"
+localhwlocpatch="$HWLOC_top_builddir/utils/hwloc/hwloc-patch"
 
 verbose=0
 reverse=0

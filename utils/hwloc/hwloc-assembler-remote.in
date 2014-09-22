@@ -11,8 +11,8 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
 # this will be changed into $bindir/lstopo during make install
-locallstopo="$HWLOC_top_builddir/utils/lstopo"
-assembler="$HWLOC_top_builddir/utils/hwloc-assembler"
+locallstopo="$HWLOC_top_builddir/utils/lstopo/lstopo"
+assembler="$HWLOC_top_builddir/utils/hwloc/hwloc-assembler"
 
 force=0
 show=0

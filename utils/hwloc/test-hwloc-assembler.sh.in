@@ -3,11 +3,12 @@
 
 #
 # Copyright © 2009-2013 Inria.  All rights reserved.
+# Copyright © 2009, 2011 Université Bordeaux 1
 # See COPYING in top-level directory.
 #
 
 HWLOC_top_builddir="@HWLOC_top_builddir@"
-annotate="$HWLOC_top_builddir/utils/hwloc-annotate"
+assembler="$HWLOC_top_builddir/utils/hwloc/hwloc-assembler"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
@@ -30,17 +31,13 @@ fi
   tmp=$TMPDIR/foo$$-$RANDOM
   (umask 077 && mkdir "$tmp")
 } || exit $?
-file="$tmp/test-hwloc-annotate.output"
+file="$tmp/test-hwloc-assembler.output"
 
 set -e
 
-$annotate $HWLOC_top_srcdir/utils/test-hwloc-annotate.input $file all info Foo Bar
-$annotate --ci $file $file Core:all info Foo2 Bar2
-$annotate --ci $file $file L2Cache:0 none
-$annotate --ri $file $file socket:all info Foo
-$annotate $file $file socket:0 info Foo2 Bar
-$annotate $file $file socket:0 info Foo2 Bar2
-$annotate --ri $file $file socket:0 info Foo2 Bar3
-
-diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-annotate.output "$file"
+$assembler $file \
+	--name input1 $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.input1 \
+	--name input2 $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.input2 \
+	--name input1again $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.input1
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-assembler.output "$file"
 rm -rf "$tmp"

@@ -9,7 +9,7 @@
 #
 
 HWLOC_top_builddir="@HWLOC_top_builddir@"
-calc="$HWLOC_top_builddir/utils/hwloc-calc"
+calc="$HWLOC_top_builddir/utils/hwloc/hwloc-calc"
 HWLOC_top_srcdir="@HWLOC_top_srcdir@"
 
 HWLOC_PLUGINS_PATH=${HWLOC_top_builddir}/src
@@ -91,5 +91,5 @@ node:0 node:3
 root
 EOF
 ) > "$file"
-diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/test-hwloc-calc.output "$file"
+diff @HWLOC_DIFF_U@ $HWLOC_top_srcdir/utils/hwloc/test-hwloc-calc.output "$file"
 rm -rf "$tmp"

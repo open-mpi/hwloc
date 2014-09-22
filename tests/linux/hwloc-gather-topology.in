@@ -13,7 +13,7 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
 # this will be changed into $bindir/lstopo during make install
-lstopo="$HWLOC_top_builddir/utils/lstopo-no-graphics"
+lstopo="$HWLOC_top_builddir/utils/lstopo/lstopo-no-graphics"
 
 # make sure we use default numeric formats
 LANG=C
