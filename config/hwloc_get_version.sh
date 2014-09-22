@@ -1,14 +1,14 @@
 #!/bin/sh
 #
-# Copyright (c) 2004-2006 The Trustees of Indiana University and Indiana
+# Copyright © 2004-2006 The Trustees of Indiana University and Indiana
 #                         University Research and Technology
 #                         Corporation.  All rights reserved.
-# Copyright (c) 2004-2005 The University of Tennessee and The University
+# Copyright © 2004-2005 The University of Tennessee and The University
 #                         of Tennessee Research Foundation.  All rights
 #                         reserved.
-# Copyright (c) 2004-2005 High Performance Computing Center Stuttgart,
+# Copyright © 2004-2005 High Performance Computing Center Stuttgart,
 #                         University of Stuttgart.  All rights reserved.
-# Copyright (c) 2004-2005 The Regents of the University of California.
+# Copyright © 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
 # Copyright © 2008-2013 Cisco Systems, Inc.  All rights reserved.
 # $COPYRIGHT$

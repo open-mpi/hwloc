@@ -1,18 +1,18 @@
 # This macro set originally copied from Open MPI:
-# Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
+# Copyright © 2004-2005 The Trustees of Indiana University and Indiana
 #                         University Research and Technology
 #                         Corporation.  All rights reserved.
-# Copyright (c) 2004-2005 The University of Tennessee and The University
+# Copyright © 2004-2005 The University of Tennessee and The University
 #                         of Tennessee Research Foundation.  All rights
 #                         reserved.
-# Copyright (c) 2004-2007 High Performance Computing Center Stuttgart,
+# Copyright © 2004-2007 High Performance Computing Center Stuttgart,
 #                         University of Stuttgart.  All rights reserved.
-# Copyright (c) 2004-2005 The Regents of the University of California.
+# Copyright © 2004-2005 The Regents of the University of California.
 #                         All rights reserved.
-# Copyright (c) 2006-2007 Cisco Systems, Inc.  All rights reserved.
+# Copyright © 2006-2007 Cisco Systems, Inc.  All rights reserved.
 # and renamed/modified for hwloc:
-# Copyright (c) 2009 inria.  All rights reserved.
-# Copyright (c) 2009-2010 Université Bordeaux 1
+# Copyright © 2009 Inria.  All rights reserved.
+# Copyright © 2009-2010 Université Bordeaux 1
 # Copyright © 2010-2012 Cisco Systems, Inc.  All rights reserved.
 # See COPYING in top-level directory.
 #

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2009-2010 Oracle and/or its affiliates.  All rights reserved.
- * Copyright (c) 2013 Université Bordeaux 1.  All rights reserved.
+ * Copyright © 2009-2010 Oracle and/or its affiliates.  All rights reserved.
+ * Copyright © 2013 Université Bordeaux 1.  All rights reserved.
  *
  * $COPYRIGHT$
  *
