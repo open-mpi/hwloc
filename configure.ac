@@ -12,6 +12,10 @@
 # $HEADER$
 #
 
+####################################################################
+# Autoconf, Automake, and Libtool bootstrapping
+####################################################################
+
 AC_INIT([hwloc],
         [m4_normalize(esyscmd([config/hwloc_get_version.sh VERSION --version]))],
         [http://www.open-mpi.org/projects/hwloc/], [hwloc])
@@ -44,6 +48,10 @@ LT_PREREQ([2.2.6])
 AC_LANG([C])
 AC_USE_SYSTEM_EXTENSIONS
 
+####################################################################
+# Version information
+####################################################################
+
 # Make configure depend on the VERSION file, since it's used in AC_INIT
 AC_SUBST([CONFIGURE_DEPENDENCIES], ['$(top_srcdir)/VERSION'])
 
@@ -74,7 +82,10 @@ VERSION="${PACKAGE_VERSION}"
 . $srcdir/VERSION
 AC_SUBST([libhwloc_so_version])
 
-# Setup the header file
+####################################################################
+# Setup the configure-results header file
+####################################################################
+
 AH_TOP([/* -*- c -*-
  *
  * Copyright © 2009, 2011, 2012 CNRS, inria., Université Bordeaux 1  All rights reserved.
@@ -96,7 +107,9 @@ AH_BOTTOM([
 #endif /* HWLOC_CONFIGURE_H */
 ])
 
+####################################################################
 # Setup C compiler
+####################################################################
 
 CFLAGS_save="$CFLAGS"
 AC_PROG_CC
@@ -111,6 +124,10 @@ AC_ARG_VAR(CC_FOR_BUILD,[build system C compiler])
 AS_IF([test -z "$CC_FOR_BUILD"],[
     AC_SUBST([CC_FOR_BUILD], [$CC])
 ])
+
+####################################################################
+# CLI arguments
+####################################################################
 
 # Define hwloc's configure arguments
 HWLOC_DEFINE_ARGS
@@ -128,6 +145,10 @@ AS_IF([test "$enable_embedded_mode" != "yes"],
               AC_MSG_WARN([build?  Try using the --enable-embedded-mode switch.])
               AC_MSG_ERROR([Cannot build standalone hwloc])],
              [HWLOC_BUILD_STANDALONE])])
+
+####################################################################
+# Setup for the hwloc API
+####################################################################
 
 # Setup the hwloc core
 HWLOC_SETUP_CORE([], [], [AC_MSG_ERROR([Cannot build hwloc core])], [1])
@@ -148,6 +169,10 @@ EOF
 # Run the AM_CONDITIONALs
 HWLOC_DO_AM_CONDITIONALS
 
+####################################################################
+# Final output
+####################################################################
+
 # Set the final flags
 CFLAGS="$HWLOC_EMBEDDED_CFLAGS $CFLAGS"
 CPPFLAGS="$HWLOC_EMBEDDED_CPPFLAGS $CPPFLAGS"
@@ -160,25 +185,8 @@ AM_DISABLE_STATIC
 AM_PROG_LIBTOOL([dlopen win32-dll])
 LT_LANG([C])
 
-
-
 # Party on
 AC_OUTPUT
-
-# Create a comma-delimited list in an environment variable.
-# $1 = variable name
-# $2 = value to append
-append_env() {
-    # Tricky shell/m4 quoting here -- not for the meek.
-    var=[$]1
-    # Note: quotes *NOT* needed in this assignment
-    eval initial_value=\$$var
-
-    AS_IF([test "$initial_value" != ""],
-          [new_value="$initial_value, [$]2"],
-          [new_value="[$]2]")
-    eval "[$]1=\"$new_value\""
-}
 
 # Show which optional support we'll be building
 hwloc_xml_status=basic
